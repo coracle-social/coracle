@@ -24,10 +24,14 @@
     "@noble/secp256k1": "^1.7.0",
     "buffer": "^6.0.3",
     "classnames": "^2.3.2",
+    "compressorjs": "^1.1.1",
     "dexie": "^3.2.2",
     "fuse.js": "^6.6.2",
     "hurdak": "github:ConsignCloud/hurdak",
+    "nostr-tools": "^0.24.1",
     "ramda": "^0.28.0",
-    "svelte-routing": "^1.6.0"
+    "svelte-routing": "^1.6.0",
+    "throttle-debounce": "^5.0.0",
+    "vite-plugin-node-polyfills": "^0.5.0"
   }
 }

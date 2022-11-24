@@ -5,13 +5,14 @@
   import {onMount} from "svelte"
   import {writable} from "svelte/store"
   import {fly} from "svelte/transition"
-  import {Router, Route, links} from "svelte-routing"
+  import {Router, Route, links, navigate} from "svelte-routing"
   import {store as toast} from "src/state/toast"
+  import {user} from 'src/state/user'
   import Feed from "src/routes/Feed.svelte"
   import Login from "src/routes/Login.svelte"
   import Profile from "src/routes/Profile.svelte"
   import RelayList from "src/routes/RelayList.svelte"
-  import RelayDetail from "src/routes/RelayDetail.svelte"
+  import UserDetail from "src/routes/UserDetail.svelte"
   import Explore from "src/routes/Explore.svelte"
   import Messages from "src/routes/Messages.svelte"
 
@@ -26,12 +27,20 @@
   export let url = ""
 
   onMount(() => {
-    document.querySelector("body").addEventListener("click", e => {
+    document.querySelector("html").addEventListener("click", e => {
       if (e.target !== menuIcon) {
         menuIsOpen.set(false)
       }
     })
   })
+
+  // Give the animation a moment to finish
+  const logout = () => {
+    setTimeout(() => {
+      user.set(null)
+      navigate("/login")
+    }, 200)
+  }
 </script>
 
 <Router {url}>
@@ -39,28 +48,49 @@
     <div class="py-20 p-4 text-white">
       <Route path="/" component={Feed} />
       <Route path="/login" component={Login} />
-      <Route path="/profile" component={Profile} />
       <Route path="/relays" component={RelayList} />
-      <Route path="/relays/:id" component={RelayDetail} />
+      <Route path="/user/:pubkey" component={UserDetail} />
       <Route path="/explore" component={Explore} />
       <Route path="/messages" component={Messages} />
+      <Route path="/settings/profile" component={Profile} />
     </div>
 
     <ul
-      class="py-20 p-4 w-48 bg-dark fixed top-0 bottom-0 left-0 transition-all shadow-xl
+      class="py-20 w-48 bg-dark fixed top-0 bottom-0 left-0 transition-all shadow-xl
              border-r border-light text-white"
       class:-ml-48={!$menuIsOpen}
     >
-      <li class="cursor-pointer py-2">
-        <a href="/profile">
+      {#if $user}
+      <li class="flex gap-2 px-4 py-2 pb-8 items-center">
+        <div
+          class="overflow-hidden w-6 h-6 rounded-full bg-cover bg-center shrink-0"
+          style="background-image: url({$user.picture})" />
+        <span class="text-lg font-bold">{$user.name}</span>
+      </li>
+      <li class="cursor-pointer">
+        <a class="block pl-6 px-4 py-2 hover:bg-accent transition-all" href="/user/{$user.pubkey}">
           <i class="fa-solid fa-user-astronaut mr-2" /> Profile
         </a>
       </li>
-      <li class="cursor-pointer py-2">
-        <a href="/relays">
+      {:else}
+      <li class="cursor-pointer">
+        <a class="block pl-6 px-4 py-2 hover:bg-accent transition-all" href="/login">
+          <i class="fa-solid fa-right-to-bracket mr-2" /> Login
+        </a>
+      </li>
+      {/if}
+      <li class="cursor-pointer">
+        <a class="block pl-6 px-4 py-2 hover:bg-accent transition-all" href="/relays">
           <i class="fa-solid fa-server mr-2" /> Relays
         </a>
       </li>
+      {#if $user}
+      <li class="cursor-pointer">
+        <a class="block pl-6 px-4 py-2 hover:bg-accent transition-all" on:click={logout}>
+          <i class="fa-solid fa-right-from-bracket mr-2" /> Logout
+        </a>
+      </li>
+      {/if}
     </ul>
 
     <div
@@ -68,7 +98,7 @@
                 border-b border-light"
     >
       <i class="fa-solid fa-bars fa-2xl cursor-pointer" bind:this={menuIcon} on:click={toggleMenu} />
-      <h1 class="staatliches text-3xl">Blazepoint</h1>
+      <h1 class="staatliches text-3xl">Coracle</h1>
     </div>
 
     <div

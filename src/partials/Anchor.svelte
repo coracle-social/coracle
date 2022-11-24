@@ -7,9 +7,10 @@
 
   const className = cx(
     $$props.class,
+    "cursor-pointer",
     switcher(type, {
       anchor: "underline",
-      button: "py-2 px-4 rounded bg-white text-accent cursor-pointer",
+      button: "py-2 px-4 rounded bg-white text-accent",
     }),
   )
 </script>

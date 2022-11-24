@@ -2,7 +2,8 @@
   import {liveQuery} from "dexie"
   import {navigate} from "svelte-routing"
   import Anchor from "src/partials/Anchor.svelte"
-  import {db, user} from "src/adapters/mock"
+  import {user} from "src/state/user"
+  import {db} from "src/state/db"
 
   const relays = liveQuery(() => db.relays.toArray())
 
@@ -28,7 +29,7 @@
   </div>
 {:else if $relays}
   <div class="flex w-full justify-center items-center py-16">
-    <div class="text-center max-w-sm">
+    <div class="text-center max-w-2xl">
       You aren't yet connected to any relays. Please click <Anchor href="/relays"
         >here</Anchor
       > to get started.

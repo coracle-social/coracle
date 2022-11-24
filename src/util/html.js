@@ -13,3 +13,34 @@ export const copyToClipboard = text => {
 
   return result
 }
+
+export const stripExifData = async file => {
+  if (window.DataTransferItem && file instanceof DataTransferItem) {
+    file = file.getAsFile()
+  }
+
+  if (!file) {
+    return file
+  }
+
+  const {default: Compressor} = await import("compressorjs")
+
+  /* eslint no-new: 0 */
+
+  return new Promise((resolve, _reject) => {
+    new Compressor(file, {
+      maxWidth: 50,
+      maxHeight: 50,
+      convertSize: 1024,
+      success: resolve,
+      error: e => {
+        // Non-images break compressor
+        if (e.toString().includes("File or Blob")) {
+          return resolve(file)
+        }
+
+        _reject(e)
+      },
+    })
+  })
+}
