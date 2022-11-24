@@ -60,9 +60,17 @@ dispatch.addMethod("room/update", async (topic, {id, ...room}) => {
   return event
 })
 
-dispatch.addMethod("message/create", async (topic, roomId, content, type = "root") => {
+dispatch.addMethod("message/create", async (topic, roomId, content) => {
   const [relay] = get(relays)
   const event = nostr.event(42, content, [["e", roomId, relay, type]])
+
+  await nostr.publish(event)
+
+  return event
+})
+
+dispatch.addMethod("note/create", async (topic, content) => {
+  const event = nostr.event(1, content)
 
   await nostr.publish(event)
 

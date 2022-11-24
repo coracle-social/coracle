@@ -13,8 +13,8 @@
   import Profile from "src/routes/Profile.svelte"
   import RelayList from "src/routes/RelayList.svelte"
   import UserDetail from "src/routes/UserDetail.svelte"
+  import NoteCreate from "src/routes/NoteCreate.svelte"
   import Chat from "src/routes/Chat.svelte"
-  import ChatCreate from "src/routes/ChatCreate.svelte"
   import ChatRoom from "src/routes/ChatRoom.svelte"
   import ChatEdit from "src/routes/ChatEdit.svelte"
 
@@ -49,14 +49,16 @@
   <div use:links class="h-full">
     <div class="pt-16 text-white h-full">
       <Route path="/" component={Feed} />
-      <Route path="/login" component={Login} />
-      <Route path="/relays" component={RelayList} />
+      <Route path="/notes" component={Feed} />
+      <Route path="/notes/new" component={NoteCreate} />
       <Route path="/chat" component={Chat} />
-      <Route path="/chat/new" component={ChatCreate} />
+      <Route path="/chat/new" component={ChatEdit} />
       <Route path="/chat/:room" component={ChatRoom} />
       <Route path="/chat/:room/edit" component={ChatEdit} />
       <Route path="/user/:pubkey" component={UserDetail} />
+      <Route path="/settings/relays" component={RelayList} />
       <Route path="/settings/profile" component={Profile} />
+      <Route path="/login" component={Login} />
     </div>
 
     <ul
@@ -71,20 +73,10 @@
           style="background-image: url({$user.picture})" />
         <span class="text-lg font-bold">{$user.name}</span>
       </li>
-      <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/user/{$user.pubkey}">
-          <i class="fa-solid fa-user-astronaut mr-2" /> Profile
-        </a>
-      </li>
       {/if}
       <li class="cursor-pointer">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/">
-          <i class="fa-solid fa-home mr-2" /> Home
-        </a>
-      </li>
-      <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/relays">
-          <i class="fa-solid fa-server mr-2" /> Relays
+          <i class="fa-solid fa-tag mr-2" /> Notes
         </a>
       </li>
       <li class="cursor-pointer">
@@ -92,7 +84,18 @@
           <i class="fa-solid fa-message mr-2" /> Chat
         </a>
       </li>
+      <li class="h-px mx-3 my-4 bg-medium" />
       {#if $user}
+      <li class="cursor-pointer">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/user/{$user.pubkey}">
+          <i class="fa-solid fa-user-astronaut mr-2" /> Profile
+        </a>
+      </li>
+      <li class="cursor-pointer">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/settings/relays">
+          <i class="fa-solid fa-server mr-2" /> Relays
+        </a>
+      </li>
       <li class="cursor-pointer">
         <a class="block px-4 py-2 hover:bg-accent transition-all" on:click={logout}>
           <i class="fa-solid fa-right-from-bracket mr-2" /> Logout

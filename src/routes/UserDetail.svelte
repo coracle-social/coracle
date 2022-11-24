@@ -5,11 +5,12 @@
   import {uniqBy, prop} from 'ramda'
   import {switcherFn} from 'hurdak/src/core'
   import {nostr} from 'src/state/nostr'
-  import {user} from 'src/state/user'
+  import {user as currentUser} from 'src/state/user'
+  import {accounts} from 'src/state/app'
 
   export let pubkey
 
-  let userData
+  let user
   let notes = []
 
   onMount(() => {
@@ -18,7 +19,11 @@
       cb: e => {
         switcherFn(e.kind, {
           [0]: () => {
-            userData = JSON.parse(e.content)
+            user = JSON.parse(e.content)
+
+            // Take this opportunity to sync account data. TODO this is a hack,
+            // we should by syncing and caching everywhere we grab accounts
+            $accounts[pubkey] = user
           },
           [1]: () => {
             notes = uniqBy(prop('id'), notes.concat(e))
@@ -41,23 +46,23 @@
   }
 </script>
 
-{#if userData}
+{#if user}
 <div class="max-w-2xl m-auto flex flex-col gap-4 py-8 px-4">
   <div class="flex flex-col gap-4" in:fly={{y: 20}}>
     <div class="flex gap-4">
       <div
         class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-        style="background-image: url({userData.picture})" />
+        style="background-image: url({user.picture})" />
       <div class="flex-grow">
         <div class="flex justify-between items-center">
-          <h1 class="text-2xl">{userData.name}</h1>
-          {#if $user?.pubkey === pubkey}
+          <h1 class="text-2xl">{user.name}</h1>
+          {#if $currentUser?.pubkey === pubkey}
             <a href="/settings/profile" class="cursor-pointer text-sm">
               <i class="fa-solid fa-edit" /> Edit
             </a>
           {/if}
         </div>
-        <p>{userData.about || ''}</p>
+        <p>{user.about || ''}</p>
       </div>
     </div>
   </div>
