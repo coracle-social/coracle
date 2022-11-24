@@ -49,7 +49,7 @@
   }
 </script>
 
-<form on:submit={submit} class="flex justify-center py-12" in:fly={{y: 20}}>
+<form on:submit={submit} class="flex justify-center py-8 px-4" in:fly={{y: 20}}>
   <div class="flex flex-col gap-4 max-w-2xl">
     <div class="flex justify-center items-center flex-col mb-4">
       <h1 class="staatliches text-6xl">About You</h1>

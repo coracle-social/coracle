@@ -42,11 +42,11 @@
 </script>
 
 {#if userData}
-<div class="max-w-2xl m-auto flex flex-col gap-4 py-4">
+<div class="max-w-2xl m-auto flex flex-col gap-4 py-8 px-4">
   <div class="flex flex-col gap-4" in:fly={{y: 20}}>
     <div class="flex gap-4">
       <div
-        class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0"
+        class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
         style="background-image: url({userData.picture})" />
       <div class="flex-grow">
         <div class="flex justify-between items-center">
@@ -57,11 +57,11 @@
             </a>
           {/if}
         </div>
-        <p>{userData.about}</p>
+        <p>{userData.about || ''}</p>
       </div>
     </div>
   </div>
-  <div class="h-px bg-light" in:fly={{y: 20, delay: 200}} />
+  <div class="h-px bg-medium" in:fly={{y: 20, delay: 200}} />
   <div class="flex flex-col gap-4" in:fly={{y: 20, delay: 400}}>
     {#each reverse(notes) as note}
     <div>

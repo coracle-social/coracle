@@ -13,8 +13,10 @@
   import Profile from "src/routes/Profile.svelte"
   import RelayList from "src/routes/RelayList.svelte"
   import UserDetail from "src/routes/UserDetail.svelte"
-  import Explore from "src/routes/Explore.svelte"
-  import Messages from "src/routes/Messages.svelte"
+  import Chat from "src/routes/Chat.svelte"
+  import ChatCreate from "src/routes/ChatCreate.svelte"
+  import ChatRoom from "src/routes/ChatRoom.svelte"
+  import ChatEdit from "src/routes/ChatEdit.svelte"
 
   const menuIsOpen = writable(false)
   const toggleMenu = () => menuIsOpen.update(x => !x)
@@ -44,50 +46,62 @@
 </script>
 
 <Router {url}>
-  <div use:links>
-    <div class="py-20 p-4 text-white">
+  <div use:links class="h-full">
+    <div class="pt-16 text-white h-full">
       <Route path="/" component={Feed} />
       <Route path="/login" component={Login} />
       <Route path="/relays" component={RelayList} />
+      <Route path="/chat" component={Chat} />
+      <Route path="/chat/new" component={ChatCreate} />
+      <Route path="/chat/:room" component={ChatRoom} />
+      <Route path="/chat/:room/edit" component={ChatEdit} />
       <Route path="/user/:pubkey" component={UserDetail} />
-      <Route path="/explore" component={Explore} />
-      <Route path="/messages" component={Messages} />
       <Route path="/settings/profile" component={Profile} />
     </div>
 
     <ul
-      class="py-20 w-48 bg-dark fixed top-0 bottom-0 left-0 transition-all shadow-xl
-             border-r border-light text-white"
-      class:-ml-48={!$menuIsOpen}
+      class="py-20 w-56 bg-dark fixed top-0 bottom-0 left-0 transition-all shadow-xl
+             border-r border-medium text-white overflow-hidden"
+      class:-ml-56={!$menuIsOpen}
     >
       {#if $user}
       <li class="flex gap-2 px-4 py-2 pb-8 items-center">
         <div
-          class="overflow-hidden w-6 h-6 rounded-full bg-cover bg-center shrink-0"
+          class="overflow-hidden w-6 h-6 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
           style="background-image: url({$user.picture})" />
         <span class="text-lg font-bold">{$user.name}</span>
       </li>
       <li class="cursor-pointer">
-        <a class="block pl-6 px-4 py-2 hover:bg-accent transition-all" href="/user/{$user.pubkey}">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/user/{$user.pubkey}">
           <i class="fa-solid fa-user-astronaut mr-2" /> Profile
-        </a>
-      </li>
-      {:else}
-      <li class="cursor-pointer">
-        <a class="block pl-6 px-4 py-2 hover:bg-accent transition-all" href="/login">
-          <i class="fa-solid fa-right-to-bracket mr-2" /> Login
         </a>
       </li>
       {/if}
       <li class="cursor-pointer">
-        <a class="block pl-6 px-4 py-2 hover:bg-accent transition-all" href="/relays">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/">
+          <i class="fa-solid fa-home mr-2" /> Home
+        </a>
+      </li>
+      <li class="cursor-pointer">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/relays">
           <i class="fa-solid fa-server mr-2" /> Relays
+        </a>
+      </li>
+      <li class="cursor-pointer">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/chat">
+          <i class="fa-solid fa-message mr-2" /> Chat
         </a>
       </li>
       {#if $user}
       <li class="cursor-pointer">
-        <a class="block pl-6 px-4 py-2 hover:bg-accent transition-all" on:click={logout}>
+        <a class="block px-4 py-2 hover:bg-accent transition-all" on:click={logout}>
           <i class="fa-solid fa-right-from-bracket mr-2" /> Logout
+        </a>
+      </li>
+      {:else}
+      <li class="cursor-pointer">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/login">
+          <i class="fa-solid fa-right-to-bracket mr-2" /> Login
         </a>
       </li>
       {/if}
@@ -95,20 +109,10 @@
 
     <div
       class="fixed top-0 bg-dark flex justify-between items-center text-white w-full p-4
-                border-b border-light"
+                border-b border-medium"
     >
       <i class="fa-solid fa-bars fa-2xl cursor-pointer" bind:this={menuIcon} on:click={toggleMenu} />
       <h1 class="staatliches text-3xl">Coracle</h1>
-    </div>
-
-    <div
-      class="fixed bottom-0 bg-dark flex justify-between items-center text-white w-full
-                border-t border-light px-8 p-6"
-    >
-      <a href="/"><i class="fa-solid fa-home fa-xl" /></a>
-      <i class="cursor-pointer fa-solid fa-search fa-xl" on:click={toggleSearch} />
-      <a href="/explore"><i class="fa-solid fa-compass fa-xl" /></a>
-      <a href="/messages"><i class="fa-solid fa-envelope fa-xl" /></a>
     </div>
 
     {#if $toast}
@@ -117,7 +121,7 @@
         transition:fly={{y: 50, duration: 300}}
       >
         <div
-          class="rounded bg-accent shadow-xl mb-14 m-2 p-4 text-white text-center border border-dark"
+          class="rounded bg-accent shadow-xl m-4 p-4 text-white text-center border border-dark"
         >
           {$toast.message}
         </div>

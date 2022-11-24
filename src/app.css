@@ -41,6 +41,10 @@
 
 :root {
   font-family: Montserrat;
-  background-color: #252422;
+  background-color: #0f0f0e;
   color: white;
+}
+
+html, body, #app, #app > div {
+  height: 100%;
 }

@@ -42,3 +42,29 @@ dispatch.addMethod("relay/join", (topic, url) => {
 dispatch.addMethod("relay/leave", (topic, url) => {
   relays.update(r => without([url], r))
 })
+
+dispatch.addMethod("room/create", async (topic, room) => {
+  const event = nostr.event(40, JSON.stringify(room))
+
+  await nostr.publish(event)
+
+  return event
+})
+
+dispatch.addMethod("room/update", async (topic, {id, ...room}) => {
+  const [relay] = get(relays)
+  const event = nostr.event(41, JSON.stringify(room), [["e", id, relay]])
+
+  await nostr.publish(event)
+
+  return event
+})
+
+dispatch.addMethod("message/create", async (topic, roomId, content, type = "root") => {
+  const [relay] = get(relays)
+  const event = nostr.event(42, content, [["e", roomId, relay, type]])
+
+  await nostr.publish(event)
+
+  return event
+})
