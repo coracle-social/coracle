@@ -146,19 +146,19 @@
         </div>
       </div>
       {/if}
-      <div class="fixed bottom-0 w-full -ml-56 pl-56 flex bg-light border-medium border-t border-solid border-dark">
+      <div class="fixed bottom-0 w-full -ml-56 pl-56 flex bg-medium border-medium border-t border-solid border-dark">
         <textarea
           rows="4"
           autofocus
           placeholder="Type something..."
           bind:this={textarea}
           on:keypress={onKeyPress}
-          class="w-full p-2 text-black bg-light
-                 placeholder:text-medium outline-0 resize-none" />
+          class="w-full p-2 text-white bg-medium
+                 placeholder:text-light outline-0 resize-none" />
         <div
           on:click={sendMessage}
           class="flex flex-col py-8 p-4 justify-center gap-2 border-l border-solid border-dark
-                 hover:bg-accent transition-all cursor-pointer text-black ">
+                 hover:bg-accent transition-all cursor-pointer text-white ">
           <i class="fa-solid fa-paper-plane fa-xl" />
         </div>
       </div>

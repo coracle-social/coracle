@@ -11,6 +11,7 @@
   import Feed from "src/routes/Feed.svelte"
   import Login from "src/routes/Login.svelte"
   import Profile from "src/routes/Profile.svelte"
+  import Keys from "src/routes/Keys.svelte"
   import RelayList from "src/routes/RelayList.svelte"
   import UserDetail from "src/routes/UserDetail.svelte"
   import NoteCreate from "src/routes/NoteCreate.svelte"
@@ -53,9 +54,14 @@
       <Route path="/notes/new" component={NoteCreate} />
       <Route path="/chat" component={Chat} />
       <Route path="/chat/new" component={ChatEdit} />
-      <Route path="/chat/:room" component={ChatRoom} />
+      <Route path="/chat/:room" let:params>
+        {#key params.room}
+        <ChatRoom room={params.room} />
+        {/key}
+      </Route>
       <Route path="/chat/:room/edit" component={ChatEdit} />
       <Route path="/user/:pubkey" component={UserDetail} />
+      <Route path="/settings/keys" component={Keys} />
       <Route path="/settings/relays" component={RelayList} />
       <Route path="/settings/profile" component={Profile} />
       <Route path="/login" component={Login} />
@@ -67,11 +73,13 @@
       class:-ml-56={!$menuIsOpen}
     >
       {#if $user}
-      <li class="flex gap-2 px-4 py-2 pb-8 items-center">
-        <div
-          class="overflow-hidden w-6 h-6 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-          style="background-image: url({$user.picture})" />
-        <span class="text-lg font-bold">{$user.name}</span>
+      <li>
+        <a href={`/user/${$user.pubkey}`} class="flex gap-2 px-4 py-2 pb-6 items-center">
+          <div
+            class="overflow-hidden w-6 h-6 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
+            style="background-image: url({$user.picture})" />
+          <span class="text-lg font-bold">{$user.name}</span>
+        </a>
       </li>
       {/if}
       <li class="cursor-pointer">
@@ -87,8 +95,8 @@
       <li class="h-px mx-3 my-4 bg-medium" />
       {#if $user}
       <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/user/{$user.pubkey}">
-          <i class="fa-solid fa-user-astronaut mr-2" /> Profile
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/settings/keys">
+          <i class="fa-solid fa-key mr-2" /> Keys
         </a>
       </li>
       <li class="cursor-pointer">

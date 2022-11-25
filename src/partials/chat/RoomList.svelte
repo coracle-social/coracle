@@ -14,10 +14,8 @@
 
   const createRoom = () => navigate(`/chat/new`)
 
-  // TODO hack: there should be a way to re-render a route when the url changes
   const setRoom = id => {
-    navigate(`/chat`)
-    setTimeout(() => navigate(`/chat/${id}`))
+    navigate(`/chat/${id}`)
   }
 
   onMount(() => {

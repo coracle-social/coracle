@@ -2,6 +2,7 @@
   import cx from "classnames"
   import {switcher} from "hurdak/lib/hurdak"
 
+  export let external = false
   export let type = "anchor"
   export let href
 
@@ -15,4 +16,6 @@
   )
 </script>
 
-<a on:click {...$$props} {href} class={className}><slot /></a>
+<a on:click {...$$props} {href} class={className} target={external && '_blank noopener'}>
+  <slot />
+</a>

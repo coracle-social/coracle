@@ -62,7 +62,7 @@ dispatch.addMethod("room/update", async (topic, {id, ...room}) => {
 
 dispatch.addMethod("message/create", async (topic, roomId, content) => {
   const [relay] = get(relays)
-  const event = nostr.event(42, content, [["e", roomId, relay, type]])
+  const event = nostr.event(42, content, [["e", roomId, relay, "root"]])
 
   await nostr.publish(event)
 

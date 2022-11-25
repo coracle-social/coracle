@@ -48,6 +48,7 @@
             filter: {kinds: [0], authors: [e.pubkey]},
             cb: e => {
               $accounts[e.pubkey] = {
+                pubkey: e.pubkey,
                 ...$accounts[e.pubkey],
                 ...JSON.parse(e.content),
               }
@@ -67,12 +68,12 @@
   {#each annotatedNotes as n}
     <li in:fly={{y: 20}} class="py-1 chat-message">
       {#if n.showAccount}
-      <div class="flex gap-2 items-center mt-2">
+      <a href={`/user/${n.account.pubkey}`} class="flex gap-2 items-center mt-2">
         <div
           class="overflow-hidden w-4 h-4 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
           style="background-image: url({n.account.picture})" />
         <span class="text-lg font-bold">{n.account.name}</span>
-      </div>
+      </a>
       {/if}
       <div class="ml-6">{n.content}</div>
     </li>
