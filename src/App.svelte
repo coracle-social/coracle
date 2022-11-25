@@ -8,7 +8,8 @@
   import {Router, Route, links, navigate} from "svelte-routing"
   import {store as toast} from "src/state/toast"
   import {user} from 'src/state/user'
-  import Feed from "src/routes/Feed.svelte"
+  import NotFound from "src/routes/NotFound.svelte"
+  import Notes from "src/routes/Notes.svelte"
   import Login from "src/routes/Login.svelte"
   import Profile from "src/routes/Profile.svelte"
   import Keys from "src/routes/Keys.svelte"
@@ -49,8 +50,7 @@
 <Router {url}>
   <div use:links class="h-full">
     <div class="pt-16 text-white h-full">
-      <Route path="/" component={Feed} />
-      <Route path="/notes" component={Feed} />
+      <Route path="/notes" component={Notes} />
       <Route path="/notes/new" component={NoteCreate} />
       <Route path="/chat" component={Chat} />
       <Route path="/chat/new" component={ChatEdit} />
@@ -65,6 +65,7 @@
       <Route path="/settings/relays" component={RelayList} />
       <Route path="/settings/profile" component={Profile} />
       <Route path="/login" component={Login} />
+      <Route path="*" component={NotFound} />
     </div>
 
     <ul
@@ -83,7 +84,7 @@
       </li>
       {/if}
       <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes">
           <i class="fa-solid fa-tag mr-2" /> Notes
         </a>
       </li>

@@ -3,47 +3,32 @@
   import {reverse} from 'ramda'
   import {fly} from 'svelte/transition'
   import {uniqBy, prop} from 'ramda'
-  import {switcherFn} from 'hurdak/src/core'
+  import {ellipsize} from 'hurdak/src/core'
+  import {formatTimestamp} from 'src/util/misc'
+  import Note from "src/partials/Note.svelte"
   import {nostr} from 'src/state/nostr'
   import {user as currentUser} from 'src/state/user'
-  import {accounts} from 'src/state/app'
+  import {accounts, ensureAccount} from "src/state/app"
 
   export let pubkey
 
   let user
   let notes = []
 
-  onMount(() => {
-    const sub = nostr.sub({
-      filter: {authors: [pubkey]},
-      cb: e => {
-        switcherFn(e.kind, {
-          [0]: () => {
-            user = JSON.parse(e.content)
+  $: user = $accounts[pubkey]
 
-            // Take this opportunity to sync account data. TODO this is a hack,
-            // we should by syncing and caching everywhere we grab accounts
-            $accounts[pubkey] = user
-          },
-          [1]: () => {
-            notes = uniqBy(prop('id'), notes.concat(e))
-          },
-          default: () => null,
-        })
+  onMount(async () => {
+    await ensureAccount(pubkey)
+
+    const sub = nostr.sub({
+      filter: {authors: [pubkey], kinds: [1]},
+      cb: e => {
+        notes = uniqBy(prop('id'), notes.concat(e))
       },
     })
 
     return () => sub.unsub()
   })
-
-  const formatTimestamp = ts => {
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    })
-
-    return formatter.format(new Date(ts * 1000))
-  }
 </script>
 
 {#if user}
@@ -69,10 +54,7 @@
   <div class="h-px bg-medium" in:fly={{y: 20, delay: 200}} />
   <div class="flex flex-col gap-4" in:fly={{y: 20, delay: 400}}>
     {#each reverse(notes) as note}
-    <div>
-      <small class="text-light">{formatTimestamp(note.created_at)}</small>
-      <p>{note.content}</p>
-    </div>
+    <Note note={note} />
     {/each}
   </div>
 </div>

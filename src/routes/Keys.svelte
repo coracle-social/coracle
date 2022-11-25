@@ -21,8 +21,8 @@
   }
 
   const logout = () => {
-    user.set(null)
     navigate("/login")
+    user.set(null)
   }
 
   onMount(async () => {

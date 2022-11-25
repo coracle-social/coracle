@@ -4,8 +4,9 @@
   import {navigate} from 'svelte-routing'
   import {prop, last} from 'ramda'
   import {switcherFn} from 'hurdak/src/core'
+  import UserBadge from 'src/partials/UserBadge.svelte'
   import {nostr} from 'src/state/nostr'
-  import {rooms, accounts} from 'src/state/app'
+  import {rooms, accounts, ensureAccount} from 'src/state/app'
   import {dispatch} from 'src/state/dispatch'
   import {user} from 'src/state/user'
   import RoomList from "src/partials/chat/RoomList.svelte"
@@ -50,23 +51,11 @@
       cb: e => {
         switcherFn(e.kind, {
           42: () => {
-            const $prevListItem = last(document.querySelectorAll('.chat-message'))
-
             messages = messages.concat(e)
 
-            if (!$accounts[e.pubkey]) {
-              const accountSub = nostr.sub({
-                filter: {kinds: [0], authors: [e.pubkey]},
-                cb: e => {
-                  $accounts[e.pubkey] = {
-                    ...$accounts[e.pubkey],
-                    ...JSON.parse(e.content),
-                  }
+            ensureAccount(e)
 
-                  accountSub.unsub()
-                },
-              })
-            }
+            const $prevListItem = last(document.querySelectorAll('.chat-message'))
 
             if ($prevListItem && isVisible($prevListItem)) {
               setTimeout(() => {
@@ -116,12 +105,7 @@
           {#each annotatedMessages as m}
             <li in:fly={{y: 20}} class="py-1 chat-message">
               {#if m.showAccount}
-              <div class="flex gap-2 items-center mt-2">
-                <div
-                  class="overflow-hidden w-4 h-4 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-                  style="background-image: url({m.account.picture})" />
-                <span class="text-lg font-bold">{m.account.name}</span>
-              </div>
+              <UserBadge user={m.account} />
               {/if}
               <div class="ml-6">{m.content}</div>
             </li>

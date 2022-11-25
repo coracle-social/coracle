@@ -26,3 +26,24 @@ export const setLocalJson = (k, v) => {
     // pass
   }
 }
+
+export const now = () => new Date().valueOf() / 1000
+
+export const timedelta = (n, unit = 'seconds') => {
+  switch (unit) {
+    case 'seconds': return n
+    case 'minutes': return n * 60
+    case 'hours': return n * 60 * 60
+    case 'days': return n * 60 * 60 * 24
+    default: throw new Error(`Invalid unit ${unit}`)
+  }
+}
+
+export const formatTimestamp = ts => {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  })
+
+  return formatter.format(new Date(ts * 1000))
+}

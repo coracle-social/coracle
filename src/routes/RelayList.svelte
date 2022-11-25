@@ -34,7 +34,7 @@
       <Input bind:value={q} type="text" wrapperClass="flex-grow" placeholder="Type to search">
         <i slot="before" class="fa-solid fa-search" />
       </Input>
-      <Anchor type="button" href="/">Done</Anchor>
+      <Anchor type="button" href="/notes">Done</Anchor>
     </div>
     <div class="flex flex-col gap-6 overflow-auto flex-grow -mx-6 px-6">
       {#each search(q) as relay}

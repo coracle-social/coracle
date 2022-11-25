@@ -16,6 +16,6 @@
   )
 </script>
 
-<a on:click {...$$props} {href} class={className} target={external && '_blank noopener'}>
+<a on:click {...$$props} {href} class={className} target={external ? '_blank noopener' : null}>
   <slot />
 </a>
