@@ -46,8 +46,8 @@ export const stripExifData = async file => {
 }
 
 export const hasParent = (tag, e) => {
-  while (e.parentNode) {
-    if (e.parentNode.tagName === tag.toUpperCase()) {
+  while (e) {
+    if (e.tagName === tag.toUpperCase()) {
       return true
     }
 

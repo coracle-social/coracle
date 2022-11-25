@@ -34,7 +34,7 @@
 
 <ul class="py-8 flex flex-col gap-4 max-w-xl m-auto">
   {#each reverse(notes) as n}
-    <Note note={n} />
+    <Note interactive note={n} />
   {/each}
 </ul>
 

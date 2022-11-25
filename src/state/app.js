@@ -4,6 +4,8 @@ import {getLocalJson, setLocalJson, now, timedelta} from "src/util/misc"
 import {user} from 'src/state/user'
 import {nostr} from 'src/state/nostr'
 
+export const modal = writable(null)
+
 export const rooms = writable(getLocalJson("coracle/rooms") || {})
 
 rooms.subscribe($rooms => {

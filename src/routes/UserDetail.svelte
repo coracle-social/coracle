@@ -54,7 +54,7 @@
   <div class="h-px bg-medium" in:fly={{y: 20, delay: 200}} />
   <div class="flex flex-col gap-4" in:fly={{y: 20, delay: 400}}>
     {#each reverse(notes) as note}
-    <Note note={note} />
+    <Note interactive note={note} />
     {/each}
   </div>
 </div>

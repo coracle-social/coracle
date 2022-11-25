@@ -1,17 +1,19 @@
 <script>
+  import cx from 'classnames'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {ellipsize} from 'hurdak/src/core'
   import {hasParent} from 'src/util/html'
-  import {accounts} from "src/state/app"
+  import {accounts, modal} from "src/state/app"
   import {formatTimestamp} from 'src/util/misc'
   import UserBadge from "src/partials/UserBadge.svelte"
 
   export let note
+  export let interactive = false
 
   const onClick = e => {
     if (!['I'].includes(e.target.tagName) && !hasParent('a', e.target)) {
-      navigate(`/notes/${note.id}`)
+      modal.set({note})
     }
   }
 </script>
@@ -19,7 +21,10 @@
 <li
   in:fly={{y: 20}}
   on:click={onClick}
-  class="py-2 px-3 chat-message flex flex-col gap-2 hover:bg-dark border border-solid border-black hover:border-medium transition-all cursor-pointer">
+  class={cx("py-2 px-3 flex flex-col gap-2 text-white", {
+    "hover:bg-dark transition-all cursor-pointer": interactive,
+    "border border-solid border-black hover:border-medium": interactive,
+  })}>
   <div class="flex gap-4 items-center justify-between">
     <UserBadge user={$accounts[note.pubkey]} />
     <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>

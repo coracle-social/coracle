@@ -4,10 +4,15 @@
 
   import {onMount} from "svelte"
   import {writable} from "svelte/store"
-  import {fly} from "svelte/transition"
+  import {fly, fade} from "svelte/transition"
+  import {cubicInOut} from "svelte/easing"
   import {Router, Route, links, navigate} from "svelte-routing"
+  import {globalHistory} from "svelte-routing/src/history"
+  import {hasParent} from 'src/util/html'
   import {store as toast} from "src/state/toast"
+  import {modal} from "src/state/app"
   import {user} from 'src/state/user'
+  import NoteDetail from "src/partials/NoteDetail.svelte"
   import NotFound from "src/routes/NotFound.svelte"
   import Notes from "src/routes/Notes.svelte"
   import Login from "src/routes/Login.svelte"
@@ -31,10 +36,15 @@
   export let url = ""
 
   onMount(() => {
+    // Close menu on click outside
     document.querySelector("html").addEventListener("click", e => {
       if (e.target !== menuIcon) {
         menuIsOpen.set(false)
       }
+    })
+
+    globalHistory.listen(() => {
+      modal.set(null)
     })
   })
 
@@ -46,6 +56,8 @@
     }, 200)
   }
 </script>
+
+<svelte:body on:keydown={e => e.key === 'Escape' && modal.set(null)} />
 
 <Router {url}>
   <div use:links class="h-full">
@@ -126,6 +138,22 @@
       <i class="fa-solid fa-bars fa-2xl cursor-pointer" bind:this={menuIcon} on:click={toggleMenu} />
       <h1 class="staatliches text-3xl">Coracle</h1>
     </div>
+
+    {#if $modal}
+    <div class="fixed inset-0">
+      <div
+        class="absolute inset-0 opacity-75 bg-black cursor-pointer"
+        transition:fade
+        on:click={e => modal.set(null)} />
+      <div class="absolute inset-0 mt-20 sm:mt-32 modal-content" transition:fly={{y: 1000, opacity: 1}}>
+        <dialog open class="bg-dark border-t border-solid border-medium h-full w-full">
+          {#if $modal.note}
+            <NoteDetail note={$modal.note} />
+          {/if}
+        </dialog>
+      </div>
+    </div>
+    {/if}
 
     {#if $toast}
       <div
