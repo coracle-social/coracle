@@ -1,13 +1,12 @@
 <script>
   import {liveQuery} from "dexie"
-  import {propEq} from "ramda"
   import {fly} from 'svelte/transition'
-  import {fuzzy, hash} from "src/util/misc"
+  import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {db} from "src/state/db"
   import {dispatch} from "src/state/dispatch"
-  import {nostr, relays} from "src/state/nostr"
+  import {relays} from "src/state/nostr"
 
   let q = ""
   let search

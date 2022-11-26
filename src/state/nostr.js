@@ -1,16 +1,80 @@
 import {writable} from 'svelte/store'
+import {debounce} from 'throttle-debounce'
 import {relayPool, getPublicKey} from 'nostr-tools'
-import {noop} from 'hurdak/lib/hurdak'
+import {last} from 'ramda'
+import {first} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson} from "src/util/misc"
 
 export const nostr = relayPool()
 
-// Initialize nostr channels with a noop query
+// Track who is subscribing, so we don't go over our limit
+
+const channel = name => {
+  let active = false
+  let promise = Promise.resolve('init')
+
+  const _chan = {
+    sub: params => {
+      if (active) {
+        throw new Error(`Channel ${name} is already active.`)
+      }
+
+      active = true
+
+      const sub = nostr.sub(params)
+
+      return () => {
+        active = false
+
+        sub.unsub()
+      }
+    },
+    all: filter => {
+      // Wait for any other subscriptions to finish
+      promise = promise.then(() => {
+        return new Promise(resolve => {
+          // Collect results
+          let result = []
+
+          // As long as events are coming in, don't resolve. When
+          // events are no longer streaming, resolve and close the subscription
+          const done = debounce(300, () => {
+            unsub()
+
+            resolve(result)
+          })
+
+          // Create our usbscription, every time we get an event, attempt to complete
+          const unsub = _chan.sub({
+            filter,
+            cb: e => {
+              result.push(e)
+
+              done()
+            },
+          })
+
+          // If our filter doesn't match anything, be sure to resolve the promise
+          setTimeout(done, 1000)
+        })
+      })
+
+      return promise
+    },
+    first: async filter => {
+      return first(await channels.getter.all({...filter, limit: 1}))
+    },
+    last: async filter => {
+      return last(await channels.getter.all({...filter}))
+    },
+  }
+
+  return _chan
+}
 
 export const channels = {
-  main: nostr.sub({filter: {ids: []}, cb: noop}),
-  modal: nostr.sub({filter: {ids: []}, cb: noop}),
-  getter: nostr.sub({filter: {ids: []}, cb: noop}),
+  watcher: channel('main'),
+  getter: channel('getter'),
 }
 
 // Augment nostr with some extra methods
@@ -25,40 +89,6 @@ nostr.event = (kind, content = '', tags = []) => {
   const createdAt = Math.round(new Date().valueOf() / 1000)
 
   return {kind, content, tags, pubkey, created_at: createdAt}
-}
-
-nostr.find = (filter, timeout = 300) => {
-  return new Promise(resolve => {
-    const sub = channels.getter.sub({
-      filter,
-      cb: e => {
-        resolve(e)
-
-        sub.unsub()
-      },
-    })
-
-    setTimeout(() => {
-      resolve(null)
-
-      sub.unsub()
-    }, timeout)
-  })
-}
-
-nostr.findLast = (filter, timeout = 300) => {
-  return new Promise(resolve => {
-    let result = null
-
-    channels.getter.sub({
-      filter,
-      cb: e => {
-        result = e
-      },
-    })
-
-    setTimeout(() => resolve(result), timeout)
-  })
 }
 
 // Create writable store for relays so we can observe changes in the app

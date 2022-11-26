@@ -18,17 +18,17 @@ db
 
 export const registerRelay = async url => {
   let json
-  try {
-    const res = await fetch(url.replace(/^ws/, 'http'), {
-      headers: {
-        Accept: 'application/nostr_json',
-      },
-    })
+  //  try {
+  //    const res = await fetch(url.replace(/^ws/, 'http'), {
+  //      headers: {
+  //        Accept: 'application/nostr_json',
+  //      },
+  //    })
 
-    json = await res.json()
-  } catch (e) {
-    json = {}
-  }
+  //    json = await res.json()
+  //  } catch (e) {
+  //    json = {}
+  //  }
 
   db.relays.put({...json, url})
 }

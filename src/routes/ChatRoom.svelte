@@ -6,7 +6,7 @@
   import {switcherFn} from 'hurdak/src/core'
   import UserBadge from 'src/partials/UserBadge.svelte'
   import {channels} from 'src/state/nostr'
-  import {rooms, accounts, ensureAccount} from 'src/state/app'
+  import {rooms, accounts, ensureAccounts} from 'src/state/app'
   import {dispatch} from 'src/state/dispatch'
   import {user} from 'src/state/user'
   import RoomList from "src/partials/chat/RoomList.svelte"
@@ -46,14 +46,14 @@
       return top + height < bodyRect.height
     }
 
-    channels.main.sub({
+    return channels.watcher.sub({
       filter: {kinds: [42, 43, 44], '#e': [room]},
       cb: e => {
         switcherFn(e.kind, {
           42: () => {
             messages = messages.concat(e)
 
-            ensureAccount(e.pubkey)
+            ensureAccounts([e.pubkey])
 
             const $prevListItem = last(document.querySelectorAll('.chat-message'))
 

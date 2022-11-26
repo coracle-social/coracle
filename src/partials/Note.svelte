@@ -1,14 +1,12 @@
 <script>
   import cx from 'classnames'
-  import {onMount} from 'svelte'
   import {find, last, uniqBy, prop, whereEq} from 'ramda'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {ellipsize} from 'hurdak/src/core'
   import {hasParent} from 'src/util/html'
   import Anchor from 'src/partials/Anchor.svelte'
-  import {nostr} from "src/state/nostr"
-  import {dispatch, t} from "src/state/dispatch"
+  import {dispatch} from "src/state/dispatch"
   import {accounts, modal} from "src/state/app"
   import {user} from "src/state/user"
   import {formatTimestamp} from 'src/util/misc'
@@ -25,8 +23,8 @@
   let parentId
 
   $: {
-    like = find(e => e.pubkey === $user.pubkey && e.content === "+", note.reactions)
-    flag = find(e => e.pubkey === $user.pubkey && e.content === "-", note.reactions)
+    like = find(e => e.pubkey === $user?.pubkey && e.content === "+", note.reactions)
+    flag = find(e => e.pubkey === $user?.pubkey && e.content === "-", note.reactions)
     parentId = prop(1, find(t => last(t) === 'reply' ? t[1] : null, note.tags))
   }
 

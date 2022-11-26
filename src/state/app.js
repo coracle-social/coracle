@@ -1,4 +1,4 @@
-import {prop, sortBy, uniqBy, find, last, groupBy} from 'ramda'
+import {prop, uniq, pluck, sortBy, uniqBy, find, last, groupBy} from 'ramda'
 import {debounce} from 'throttle-debounce'
 import {writable, derived, get} from 'svelte/store'
 import {switcherFn, ensurePlural} from 'hurdak/lib/hurdak'
@@ -28,38 +28,56 @@ user.subscribe($user => {
 
 // Utils
 
-export const ensureAccount = pubkey => {
-  let $account = prop(pubkey, get(accounts))
+export const ensureAccounts = async pubkeys => {
+  const $accounts = get(accounts)
 
-  if (!$account || $account.lastRefreshed < now() - timedelta(10, 'minutes')) {
-    channels.getter.sub({
-      filter: {kinds: [0], authors: [pubkey]},
-      cb: e => {
-        $account = {
-          ...$account,
-          ...JSON.parse(e.content),
-          pubkey,
-          lastRefreshed: now(),
-        }
+  // Don't request accounts we recently updated
+  pubkeys = pubkeys.filter(
+    k => !$accounts[k] || $accounts[k].refreshed < now() - timedelta(10, 'minutes')
+  )
 
-        accounts.update($accounts => ({...$accounts, [pubkey]: $account}))
-      },
-    })
+  if (!pubkeys.length) {
+    return
   }
+
+  const events = await channels.getter.all({kinds: [0], authors: pubkeys})
+
+  accounts.update($accounts => {
+    events.forEach(e => {
+      $accounts[e.pubkey] = {
+        pubkey: e.pubkey,
+        ...$accounts[e.pubkey],
+        ...JSON.parse(e.content),
+        refreshed: now(),
+      }
+    })
+
+    return $accounts
+  })
 }
 
 export const findNotes = (channel, queries, cb) => {
   const notes = writable([])
   const reactions = writable([])
 
-  channel.sub({
+  let pubkeys = []
+
+  const refreshAccounts = debounce(300, () => {
+    ensureAccounts(uniq(pubkeys))
+
+    pubkeys = []
+  })
+
+  const closeRequest = channel.sub({
     filter: ensurePlural(queries).map(q => ({kinds: [1, 5, 7], ...q})),
-    cb: async e => {
+    cb: e => {
+      // Chunk requests to load accounts
+      pubkeys.push(e.pubkey)
+      refreshAccounts()
+
       switcherFn(e.kind, {
         1: () => {
           notes.update($xs => uniqBy(prop('id'), $xs.concat(e)))
-
-          ensureAccount(e.pubkey)
         },
         5: () => {
           const ids = e.tags.map(t => t[1])
@@ -69,12 +87,8 @@ export const findNotes = (channel, queries, cb) => {
         },
         7: () => {
           reactions.update($xs => $xs.concat(e))
-
-          ensureAccount(e.pubkey)
         },
       })
-
-      ensureAccount(e.pubkey)
     },
   })
 
@@ -102,5 +116,12 @@ export const findNotes = (channel, queries, cb) => {
     }
   )
 
-  return annotatedNotes.subscribe(debounce(300, cb))
+  const unsubscribe = annotatedNotes.subscribe(debounce(300, cb))
+
+  return () => {
+    unsubscribe()
+
+    closeRequest()
+  }
 }
+

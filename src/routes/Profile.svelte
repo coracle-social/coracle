@@ -5,7 +5,6 @@
   import pick from "ramda/src/pick"
   import {stripExifData} from "src/util/html"
   import Input from "src/partials/Input.svelte"
-  import Select from "src/partials/Select.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Button from "src/partials/Button.svelte"
@@ -39,7 +38,7 @@
   const submit = async event => {
     event.preventDefault()
 
-    if (!values.name.match(/^\w[\w\-]+\w$/)) {
+    if (!values.name.match(/^\w[\w-]+\w$/)) {
       toast.show("error", "Names must be comprised of letters, numbers, and dashes only.")
     } else {
       await dispatch("account/update", values)

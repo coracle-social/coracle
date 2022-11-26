@@ -1,35 +1,50 @@
 <script>
   import {onMount} from 'svelte'
-  import {get} from 'svelte/store'
-  import {fly} from 'svelte/transition'
   import {navigate} from "svelte-routing"
-  import {reverse, find, propEq} from 'ramda'
-  import {timedelta, now, formatTimestamp} from 'src/util/misc'
+  import {timedelta, now} from 'src/util/misc'
   import Anchor from "src/partials/Anchor.svelte"
   import Note from "src/partials/Note.svelte"
   import {channels, relays} from "src/state/nostr"
-  import {user} from "src/state/user"
-  import {findNotes} from "src/state/app"
-  import {db} from "src/state/db"
+  import {findNotes, modal} from "src/state/app"
 
+  let stop
   let notes
 
   const createNote = () => {
     navigate("/notes/new")
   }
 
-  onMount(() => {
-    return findNotes(channels.main, {
+  const start = () => {
+    stop = findNotes(channels.watcher, {
       since: now() - timedelta(1, 'days'),
       limit: 100,
     }, $notes => {
-      notes = $notes
+      if ($notes.length) {
+        notes = $notes
+      }
     })
+  }
+
+
+  onMount(() => {
+    const unsub = modal.subscribe($modal => {
+      console.log('modal', $modal)
+      if ($modal) {
+        stop && stop()
+      } else {
+        setTimeout(start, 600)
+      }
+    })
+
+    return () => {
+      stop()
+      unsub()
+    }
   })
 </script>
 
 <ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
-  {#each reverse(notes || []) as n (n.id)}
+  {#each (notes || []) as n (n.id)}
     <li class="border-l border-solid border-medium">
       <Note interactive note={n} />
       {#each n.replies as r (r.id)}

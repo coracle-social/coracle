@@ -5,7 +5,6 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import toast from "src/state/toast"
-  import {user} from "src/state/user"
   import {dispatch} from "src/state/dispatch"
 
   let privKey = ''

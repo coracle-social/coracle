@@ -2,15 +2,11 @@
   import {onMount} from "svelte"
   import {fly} from 'svelte/transition'
   import {navigate} from "svelte-routing"
-  import pick from "ramda/src/pick"
   import {stripExifData} from "src/util/html"
   import Input from "src/partials/Input.svelte"
-  import Select from "src/partials/Select.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
   import Button from "src/partials/Button.svelte"
   import RoomList from "src/partials/chat/RoomList.svelte"
-  import {user} from "src/state/user"
   import {rooms} from "src/state/app"
   import {dispatch} from "src/state/dispatch"
   import toast from "src/state/toast"
@@ -37,7 +33,7 @@
   const submit = async e => {
     e.preventDefault()
 
-    if (!values.name.match(/^\w[\w\-]+\w$/)) {
+    if (!values.name.match(/^\w[\w-]+\w$/)) {
       toast.show("error", "Names must be comprised of letters, numbers, and dashes only.")
     } else {
       const event = await dispatch(values.id ? "room/update" : "room/create", values)

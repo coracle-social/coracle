@@ -2,9 +2,8 @@ import {identity, last, without} from 'ramda'
 import {getPublicKey} from 'nostr-tools'
 import {get} from 'svelte/store'
 import {first, defmulti} from "hurdak/lib/hurdak"
-import {db} from "src/state/db"
 import {user} from "src/state/user"
-import {nostr, relays} from 'src/state/nostr'
+import {nostr, channels, relays} from 'src/state/nostr'
 
 // Commands are processed in two layers:
 // - App-oriented commands are created via dispatch
@@ -21,7 +20,7 @@ dispatch.addMethod("account/init", async (topic, privkey) => {
   user.set({name: pubkey.slice(0, 8), privkey, pubkey})
 
   // Attempt to refresh user data from the network
-  const found = Boolean(await user.refresh())
+  const found = Boolean(await channels.getter.first({authors: [$user.pubkey]}))
 
   // Tell the caller whether this user was found
   return {found}

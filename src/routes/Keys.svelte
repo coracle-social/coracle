@@ -4,11 +4,8 @@
   import {navigate} from "svelte-routing"
   import {copyToClipboard} from "src/util/html"
   import Input from "src/partials/Input.svelte"
-  import Select from "src/partials/Select.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Button from "src/partials/Button.svelte"
   import {user} from "src/state/user"
-  import {dispatch} from "src/state/dispatch"
   import toast from "src/state/toast"
 
   const keypairUrl = 'https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/'

@@ -13,7 +13,7 @@
   const submit = async e => {
     e.preventDefault()
 
-    const event = await dispatch("note/create", values.content)
+    await dispatch("note/create", values.content)
 
     toast.show("info", `Your note has been created!`)
 

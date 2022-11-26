@@ -1,9 +1,8 @@
 <script>
   import {onMount} from 'svelte'
-  import {writable} from 'svelte/store'
   import {navigate} from 'svelte-routing'
   import {fuzzy} from "src/util/misc"
-  import {nostr} from 'src/state/nostr'
+  import {channels} from 'src/state/nostr'
   import {rooms} from 'src/state/app'
   import Input from "src/partials/Input.svelte"
 
@@ -18,17 +17,14 @@
     navigate(`/chat/${id}`)
   }
 
-  onMount(() => {
-    const sub = nostr.sub({
-      filter: {kinds: [40, 41]},
-      cb: e => {
-        const id = e.kind === 40 ? e.id : e.tags[0][1]
+  onMount(async () => {
+    const events = await channels.getter.all({kinds: [40, 41]})
 
-        $rooms[id] = {id, pubkey: e.pubkey, ...$rooms[id], ...JSON.parse(e.content)}
-      },
+    events.forEach(e => {
+      const id = e.kind === 40 ? e.id : e.tags[0][1]
+
+      $rooms[id] = {id, pubkey: e.pubkey, ...$rooms[id], ...JSON.parse(e.content)}
     })
-
-    return () => sub.unsub()
   })
 </script>
 

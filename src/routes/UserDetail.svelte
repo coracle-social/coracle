@@ -2,13 +2,11 @@
   import {onMount} from 'svelte'
   import {reverse} from 'ramda'
   import {fly} from 'svelte/transition'
-  import {uniqBy, prop} from 'ramda'
-  import {ellipsize} from 'hurdak/src/core'
-  import {formatTimestamp} from 'src/util/misc'
+  import {now, timedelta} from 'src/util/misc'
   import Note from "src/partials/Note.svelte"
   import {channels} from 'src/state/nostr'
   import {user as currentUser} from 'src/state/user'
-  import {accounts, ensureAccount, findNotes} from "src/state/app"
+  import {accounts, findNotes} from "src/state/app"
 
   export let pubkey
 
@@ -18,9 +16,7 @@
   $: user = $accounts[pubkey]
 
   onMount(async () => {
-    await ensureAccount(pubkey)
-
-    return findNotes(channels.main, {
+    return findNotes(channels.watcher, {
       authors: [pubkey],
       since: now() - timedelta(1, 'days'),
       limit: 100,
