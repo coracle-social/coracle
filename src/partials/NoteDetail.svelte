@@ -1,12 +1,17 @@
 <script>
   import {onMount} from 'svelte'
-  import {ensureAccount} from 'src/state/app'
+  import {findNotes} from "src/state/app"
   import Note from 'src/partials/Note.svelte'
 
   export let note
 
   onMount(() => {
-    ensureAccount(note.account)
+    return findNotes(
+      [{ids: [note.id]}, {'#e': [note.id]}],
+      $notes => {
+        note = $notes[0] || note
+      }
+    )
   })
 </script>
 

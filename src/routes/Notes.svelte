@@ -3,37 +3,36 @@
   import {get} from 'svelte/store'
   import {fly} from 'svelte/transition'
   import {navigate} from "svelte-routing"
-  import {prop, reverse, last} from 'ramda'
+  import {reverse, find, propEq} from 'ramda'
   import {timedelta, now, formatTimestamp} from 'src/util/misc'
   import Anchor from "src/partials/Anchor.svelte"
   import Note from "src/partials/Note.svelte"
   import {nostr, relays} from "src/state/nostr"
   import {user} from "src/state/user"
-  import {accounts, ensureAccount} from "src/state/app"
+  import {findNotes, modal} from "src/state/app"
   import {db} from "src/state/db"
 
-  let notes = []
+  let notes
 
   const createNote = () => {
     navigate("/notes/new")
   }
 
   onMount(() => {
-    const sub = nostr.sub({
-      filter: {kinds: [1], since: new Date().valueOf() / 1000 - 7 * 24 * 60 * 60},
-      cb: e => {
-        notes = notes.concat(e)
+    return findNotes({
+      since: new Date().valueOf() / 1000 - 7 * 24 * 60 * 60,
+    }, $notes => {
+      notes = $notes
 
-        ensureAccount(e.pubkey)
-      },
+      // if ($modal?.note) {
+        // modal.set({note: find(propEq('id', $modal.note.id), $notes)})
+      // }
     })
-
-    return () => sub.unsub()
   })
 </script>
 
 <ul class="py-8 flex flex-col gap-4 max-w-xl m-auto">
-  {#each reverse(notes) as n}
+  {#each reverse(notes || []) as n (n.id)}
     <Note interactive note={n} />
   {/each}
 </ul>

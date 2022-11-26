@@ -53,7 +53,7 @@
           42: () => {
             messages = messages.concat(e)
 
-            ensureAccount(e)
+            ensureAccount(e.pubkey)
 
             const $prevListItem = last(document.querySelectorAll('.chat-message'))
 

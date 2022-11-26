@@ -44,6 +44,8 @@
     } else {
       await dispatch("account/update", values)
 
+      navigate(`/user/${$user.pubkey}`)
+
       toast.show("info", "Your profile has been updated!")
     }
   }

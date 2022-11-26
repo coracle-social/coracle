@@ -1,7 +1,7 @@
 import {identity, without} from 'ramda'
 import {getPublicKey} from 'nostr-tools'
 import {get} from 'svelte/store'
-import {defmulti} from "hurdak/lib/hurdak"
+import {first, defmulti} from "hurdak/lib/hurdak"
 import {db} from "src/state/db"
 import {user} from "src/state/user"
 import {nostr, relays} from 'src/state/nostr'
@@ -52,8 +52,7 @@ dispatch.addMethod("room/create", async (topic, room) => {
 })
 
 dispatch.addMethod("room/update", async (topic, {id, ...room}) => {
-  const [relay] = get(relays)
-  const event = nostr.event(41, JSON.stringify(room), [["e", id, relay]])
+  const event = nostr.event(41, JSON.stringify(room), [t("e", id)])
 
   await nostr.publish(event)
 
@@ -61,8 +60,7 @@ dispatch.addMethod("room/update", async (topic, {id, ...room}) => {
 })
 
 dispatch.addMethod("message/create", async (topic, roomId, content) => {
-  const [relay] = get(relays)
-  const event = nostr.event(42, content, [["e", roomId, relay, "root"]])
+  const event = nostr.event(42, content, [t("e", roomId, "root")])
 
   await nostr.publish(event)
 
@@ -76,3 +74,32 @@ dispatch.addMethod("note/create", async (topic, content) => {
 
   return event
 })
+
+dispatch.addMethod("reaction/create", async (topic, content, e) => {
+  const tags = e.tags.filter(tag => tag[0].includes(["e", "p"])).map(t => t.slice(0, 2))
+  const event = nostr.event(7, content, tags.concat([t("p", e.pubkey), t("e", e.id, 'reply')]))
+
+  await nostr.publish(event)
+
+  return event
+})
+
+dispatch.addMethod("event/delete", async (topic, ids) => {
+  const event = nostr.event(5, '', ids.map(id => t("e", id)))
+
+  await nostr.publish(event)
+
+  return event
+})
+
+// utils
+
+const t = (type, content, marker) => {
+  const tag = [type, content, first(get(relays))]
+
+  if (marker) {
+    tag.push(marker)
+  }
+
+  return tag
+}
