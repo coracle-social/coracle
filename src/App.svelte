@@ -72,7 +72,7 @@
         {/key}
       </Route>
       <Route path="/chat/:room/edit" component={ChatEdit} />
-      <Route path="/user/:pubkey" component={UserDetail} />
+      <Route path="/users/:pubkey" component={UserDetail} />
       <Route path="/settings/keys" component={Keys} />
       <Route path="/settings/relays" component={RelayList} />
       <Route path="/settings/profile" component={Profile} />
@@ -87,7 +87,7 @@
     >
       {#if $user}
       <li>
-        <a href={`/user/${$user.pubkey}`} class="flex gap-2 px-4 py-2 pb-6 items-center">
+        <a href={`/users/${$user.pubkey}`} class="flex gap-2 px-4 py-2 pb-6 items-center">
           <div
             class="overflow-hidden w-6 h-6 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
             style="background-image: url({$user.picture})" />
