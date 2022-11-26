@@ -45,13 +45,17 @@ export const stripExifData = async file => {
   })
 }
 
-export const hasParent = (tag, e) => {
-  while (e) {
-    if (e.tagName === tag.toUpperCase()) {
+export const hasParent = (tagOrClass, $el) => {
+  while ($el) {
+    if (tagOrClass.startsWith('.')) {
+      if ($el.classList?.contains(tagOrClass.slice(1))) {
+        return true
+      }
+    } else if ($el.tagName === tagOrClass.toUpperCase()) {
       return true
     }
 
-    e = e.parentNode
+    $el = $el.parentNode
   }
 
   return false

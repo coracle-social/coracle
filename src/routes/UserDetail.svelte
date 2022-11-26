@@ -26,10 +26,6 @@
       notes = $notes
     })
   })
-
-  $: {
-    console.log(notes)
-  }
 </script>
 
 {#if user}
@@ -53,10 +49,17 @@
     </div>
   </div>
   <div class="h-px bg-medium" in:fly={{y: 20, delay: 200}} />
-  <div class="flex flex-col gap-4" in:fly={{y: 20, delay: 400}}>
+  <ul class="flex flex-col -mt-4" in:fly={{y: 20, delay: 400}}>
     {#each reverse(notes || []) as n (n.id)}
-    <Note interactive note={n} />
+    <li class="border-l border-solid border-medium pb-2">
+      <Note interactive note={n} />
+      {#each n.replies as r (r.id)}
+        <div class="ml-6 border-l border-solid border-medium">
+          <Note interactive isReply note={r} />
+        </div>
+      {/each}
+    </li>
     {/each}
-  </div>
+  </ul>
 </div>
 {/if}

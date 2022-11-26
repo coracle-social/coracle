@@ -27,9 +27,16 @@
   })
 </script>
 
-<ul class="py-8 flex flex-col gap-4 max-w-xl m-auto">
+<ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
   {#each reverse(notes || []) as n (n.id)}
-    <Note interactive note={n} />
+    <li class="border-l border-solid border-medium">
+      <Note interactive note={n} />
+      {#each n.replies as r (r.id)}
+      <div class="ml-6 border-l border-solid border-medium">
+        <Note interactive isReply note={r} />
+      </div>
+      {/each}
+    </li>
   {/each}
 </ul>
 

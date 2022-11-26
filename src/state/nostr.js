@@ -25,6 +25,25 @@ nostr.event = (kind, content = '', tags = []) => {
   return {kind, content, tags, pubkey, created_at: createdAt}
 }
 
+nostr.find = (filter, timeout = 300) => {
+  return new Promise(resolve => {
+    const sub = channels.getter.sub({
+      filter,
+      cb: e => {
+        resolve(e)
+
+        sub.unsub()
+      },
+    })
+
+    setTimeout(() => {
+      resolve(null)
+
+      sub.unsub()
+    }, timeout)
+  })
+}
+
 nostr.findLast = (filter, timeout = 300) => {
   return new Promise(resolve => {
     let result = null

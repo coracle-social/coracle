@@ -1,4 +1,4 @@
-import {prop, uniqBy, find, last, groupBy} from 'ramda'
+import {prop, sortBy, uniqBy, find, last, groupBy} from 'ramda'
 import {writable, derived, get} from 'svelte/store'
 import {switcherFn, ensurePlural} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta} from "src/util/misc"
@@ -97,7 +97,7 @@ export const findNotes = (channel, queries, cb) => {
         reactions: (reactionsById[n.id] || []).map(reaction => annotate(reaction)),
       })
 
-      return $notes.map(annotate)
+      return sortBy(prop('created'), $notes.map(annotate))
     }
   )
 

@@ -1,4 +1,4 @@
-import {identity, without} from 'ramda'
+import {identity, last, without} from 'ramda'
 import {getPublicKey} from 'nostr-tools'
 import {get} from 'svelte/store'
 import {first, defmulti} from "hurdak/lib/hurdak"
@@ -67,8 +67,8 @@ dispatch.addMethod("message/create", async (topic, roomId, content) => {
   return event
 })
 
-dispatch.addMethod("note/create", async (topic, content) => {
-  const event = nostr.event(1, content)
+dispatch.addMethod("note/create", async (topic, content, tags=[]) => {
+  const event = nostr.event(1, content, tags)
 
   await nostr.publish(event)
 
@@ -76,8 +76,17 @@ dispatch.addMethod("note/create", async (topic, content) => {
 })
 
 dispatch.addMethod("reaction/create", async (topic, content, e) => {
-  const tags = e.tags.filter(tag => tag[0].includes(["e", "p"])).map(t => t.slice(0, 2))
-  const event = nostr.event(7, content, tags.concat([t("p", e.pubkey), t("e", e.id, 'reply')]))
+  const tags = copyTags(e).concat([t("p", e.pubkey), t("e", e.id, 'reply')])
+  const event = nostr.event(7, content, tags)
+
+  await nostr.publish(event)
+
+  return event
+})
+
+dispatch.addMethod("reply/create", async (topic, content, e) => {
+  const tags = copyTags(e).concat([t("p", e.pubkey), t("e", e.id, 'reply')])
+  const event = nostr.event(1, content, tags)
 
   await nostr.publish(event)
 
@@ -94,7 +103,12 @@ dispatch.addMethod("event/delete", async (topic, ids) => {
 
 // utils
 
-const t = (type, content, marker) => {
+export const copyTags = e => {
+  // Remove reply type from e tags
+  return e.tags.map(t => last(t) === 'reply' ? t.slice(0, -1) : t)
+}
+
+export const t = (type, content, marker) => {
   const tag = [type, content, first(get(relays))]
 
   if (marker) {

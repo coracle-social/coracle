@@ -148,7 +148,9 @@
       <div class="absolute inset-0 mt-20 sm:mt-32 modal-content" transition:fly={{y: 1000, opacity: 1}}>
         <dialog open class="bg-dark border-t border-solid border-medium h-full w-full">
           {#if $modal.note}
+            {#key $modal.note.id}
             <NoteDetail note={$modal.note} />
+            {/key}
           {/if}
         </dialog>
       </div>
