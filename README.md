@@ -1,5 +1,6 @@
 Bugs
 
+- [ ] Ellipsize and hyperlink links
 - [ ] Be sure to deduplicate all events if needed
 - [ ] Format text with line breaks - pre, or split/br
 - [ ] Remove dexie, or use it instead of localstorage for cached data

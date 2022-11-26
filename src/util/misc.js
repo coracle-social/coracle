@@ -27,7 +27,7 @@ export const setLocalJson = (k, v) => {
   }
 }
 
-export const now = () => new Date().valueOf() / 1000
+export const now = () => Math.round(new Date().valueOf() / 1000)
 
 export const timedelta = (n, unit = 'seconds') => {
   switch (unit) {

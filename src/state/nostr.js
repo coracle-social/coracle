@@ -5,10 +5,12 @@ import {getLocalJson, setLocalJson} from "src/util/misc"
 
 export const nostr = relayPool()
 
+// Initialize nostr channels with a noop query
+
 export const channels = {
-  main: nostr.sub({filter: {}, cb: noop}),
-  modal: nostr.sub({filter: {}, cb: noop}),
-  getter: nostr.sub({filter: {}, cb: noop}),
+  main: nostr.sub({filter: {ids: []}, cb: noop}),
+  modal: nostr.sub({filter: {ids: []}, cb: noop}),
+  getter: nostr.sub({filter: {ids: []}, cb: noop}),
 }
 
 // Augment nostr with some extra methods

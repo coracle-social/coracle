@@ -1,4 +1,5 @@
 import {prop, sortBy, uniqBy, find, last, groupBy} from 'ramda'
+import {debounce} from 'throttle-debounce'
 import {writable, derived, get} from 'svelte/store'
 import {switcherFn, ensurePlural} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta} from "src/util/misc"
@@ -101,5 +102,5 @@ export const findNotes = (channel, queries, cb) => {
     }
   )
 
-  return annotatedNotes.subscribe(cb)
+  return annotatedNotes.subscribe(debounce(300, cb))
 }

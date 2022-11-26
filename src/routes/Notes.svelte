@@ -20,7 +20,8 @@
 
   onMount(() => {
     return findNotes(channels.main, {
-      since: new Date().valueOf() / 1000 - 7 * 24 * 60 * 60,
+      since: now() - timedelta(1, 'days'),
+      limit: 100,
     }, $notes => {
       notes = $notes
     })

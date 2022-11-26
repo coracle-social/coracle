@@ -22,6 +22,8 @@
 
     return findNotes(channels.main, {
       authors: [pubkey],
+      since: now() - timedelta(1, 'days'),
+      limit: 100,
     }, $notes => {
       notes = $notes
     })

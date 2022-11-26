@@ -33,6 +33,7 @@ export const registerRelay = async url => {
   db.relays.put({...json, url})
 }
 
+registerRelay('wss://nostr-relay-dev.wlvs.space')
 registerRelay('wss://nostr-pub.wellorder.net')
 registerRelay('wss://nostr-relay.wlvs.space')
 registerRelay('ws://localhost:7000')
