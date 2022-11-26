@@ -6,29 +6,30 @@
   import {ellipsize} from 'hurdak/src/core'
   import {formatTimestamp} from 'src/util/misc'
   import Note from "src/partials/Note.svelte"
-  import {nostr} from 'src/state/nostr'
+  import {channels} from 'src/state/nostr'
   import {user as currentUser} from 'src/state/user'
-  import {accounts, ensureAccount} from "src/state/app"
+  import {accounts, ensureAccount, findNotes} from "src/state/app"
 
   export let pubkey
 
   let user
-  let notes = []
+  let notes
 
   $: user = $accounts[pubkey]
 
   onMount(async () => {
     await ensureAccount(pubkey)
 
-    const sub = nostr.sub({
-      filter: {authors: [pubkey], kinds: [1]},
-      cb: e => {
-        notes = uniqBy(prop('id'), notes.concat(e))
-      },
+    return findNotes(channels.main, {
+      authors: [pubkey],
+    }, $notes => {
+      notes = $notes
     })
-
-    return () => sub.unsub()
   })
+
+  $: {
+    console.log(notes)
+  }
 </script>
 
 {#if user}
@@ -53,8 +54,8 @@
   </div>
   <div class="h-px bg-medium" in:fly={{y: 20, delay: 200}} />
   <div class="flex flex-col gap-4" in:fly={{y: 20, delay: 400}}>
-    {#each reverse(notes) as note}
-    <Note interactive note={note} />
+    {#each reverse(notes || []) as n (n.id)}
+    <Note interactive note={n} />
     {/each}
   </div>
 </div>

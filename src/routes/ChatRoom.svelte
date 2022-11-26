@@ -5,7 +5,7 @@
   import {prop, last} from 'ramda'
   import {switcherFn} from 'hurdak/src/core'
   import UserBadge from 'src/partials/UserBadge.svelte'
-  import {nostr} from 'src/state/nostr'
+  import {channels} from 'src/state/nostr'
   import {rooms, accounts, ensureAccount} from 'src/state/app'
   import {dispatch} from 'src/state/dispatch'
   import {user} from 'src/state/user'
@@ -46,7 +46,7 @@
       return top + height < bodyRect.height
     }
 
-    const sub = nostr.sub({
+    channels.main.sub({
       filter: {kinds: [42, 43, 44], '#e': [room]},
       cb: e => {
         switcherFn(e.kind, {
@@ -70,8 +70,6 @@
         })
       },
     })
-
-    return () => sub.unsub()
   })
 
   const edit = () => {

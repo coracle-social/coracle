@@ -1,8 +1,15 @@
 import {writable} from 'svelte/store'
 import {relayPool, getPublicKey} from 'nostr-tools'
+import {noop} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson} from "src/util/misc"
 
 export const nostr = relayPool()
+
+export const channels = {
+  main: nostr.sub({filter: {}, cb: noop}),
+  modal: nostr.sub({filter: {}, cb: noop}),
+  getter: nostr.sub({filter: {}, cb: noop}),
+}
 
 // Augment nostr with some extra methods
 
@@ -18,41 +25,18 @@ nostr.event = (kind, content = '', tags = []) => {
   return {kind, content, tags, pubkey, created_at: createdAt}
 }
 
-nostr.find = (filter, timeout = 300) => {
-  return new Promise(resolve => {
-    const sub = nostr.sub({
-      filter,
-      cb: e => {
-        resolve(e)
-
-        sub.unsub()
-      },
-    })
-
-    setTimeout(() => {
-      resolve(null)
-
-      sub.unsub()
-    }, timeout)
-  })
-}
-
 nostr.findLast = (filter, timeout = 300) => {
   return new Promise(resolve => {
     let result = null
 
-    const sub = nostr.sub({
+    channels.getter.sub({
       filter,
       cb: e => {
         result = e
       },
     })
 
-    setTimeout(() => {
-      resolve(result)
-
-      sub.unsub()
-    }, timeout)
+    setTimeout(() => resolve(result), timeout)
   })
 }
 

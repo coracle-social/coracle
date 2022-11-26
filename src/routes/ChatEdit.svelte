@@ -44,7 +44,7 @@
 
       toast.show("info", `Your room has been ${values.id ? 'updated' : 'created'}!`)
 
-      navigate(`/chat/${room}`)
+      navigate(`/chat/${room || event.id}`)
     }
   }
 </script>

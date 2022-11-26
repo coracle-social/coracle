@@ -1,9 +1,9 @@
-import {prop, find, last, groupBy} from 'ramda'
+import {prop, uniqBy, find, last, groupBy} from 'ramda'
 import {writable, derived, get} from 'svelte/store'
 import {switcherFn, ensurePlural} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta} from "src/util/misc"
 import {user} from 'src/state/user'
-import {nostr} from 'src/state/nostr'
+import {channels} from 'src/state/nostr'
 
 export const modal = writable(null)
 
@@ -31,7 +31,7 @@ export const ensureAccount = pubkey => {
   let $account = prop(pubkey, get(accounts))
 
   if (!$account || $account.lastRefreshed < now() - timedelta(10, 'minutes')) {
-    const accountSub = nostr.sub({
+    channels.getter.sub({
       filter: {kinds: [0], authors: [pubkey]},
       cb: e => {
         $account = {
@@ -44,23 +44,19 @@ export const ensureAccount = pubkey => {
         accounts.update($accounts => ({...$accounts, [pubkey]: $account}))
       },
     })
-
-    setTimeout(() => {
-      accountSub.unsub()
-    }, 1000)
   }
 }
 
-export const findNotes = (queries, cb) => {
+export const findNotes = (channel, queries, cb) => {
   const notes = writable([])
   const reactions = writable([])
 
-  const sub = nostr.sub({
+  channel.sub({
     filter: ensurePlural(queries).map(q => ({kinds: [1, 5, 7], ...q})),
     cb: async e => {
       switcherFn(e.kind, {
         1: () => {
-          notes.update($xs => $xs.concat(e))
+          notes.update($xs => uniqBy(prop('id'), $xs.concat(e)))
 
           ensureAccount(e.pubkey)
         },
@@ -105,10 +101,5 @@ export const findNotes = (queries, cb) => {
     }
   )
 
-  const unsubscribe = annotatedNotes.subscribe(cb)
-
-  return () => {
-    sub.unsub()
-    unsubscribe()
-  }
+  return annotatedNotes.subscribe(cb)
 }

@@ -7,9 +7,9 @@
   import {timedelta, now, formatTimestamp} from 'src/util/misc'
   import Anchor from "src/partials/Anchor.svelte"
   import Note from "src/partials/Note.svelte"
-  import {nostr, relays} from "src/state/nostr"
+  import {channels, relays} from "src/state/nostr"
   import {user} from "src/state/user"
-  import {findNotes, modal} from "src/state/app"
+  import {findNotes} from "src/state/app"
   import {db} from "src/state/db"
 
   let notes
@@ -19,14 +19,10 @@
   }
 
   onMount(() => {
-    return findNotes({
+    return findNotes(channels.main, {
       since: new Date().valueOf() / 1000 - 7 * 24 * 60 * 60,
     }, $notes => {
       notes = $notes
-
-      // if ($modal?.note) {
-        // modal.set({note: find(propEq('id', $modal.note.id), $notes)})
-      // }
     })
   })
 </script>
