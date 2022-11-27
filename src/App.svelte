@@ -12,6 +12,7 @@
   import {store as toast} from "src/state/toast"
   import {modal, logout} from "src/state/app"
   import {user} from 'src/state/user'
+  import Anchor from 'src/partials/Anchor.svelte'
   import NoteDetail from "src/partials/NoteDetail.svelte"
   import NotFound from "src/routes/NotFound.svelte"
   import Notes from "src/routes/Notes.svelte"
@@ -129,7 +130,9 @@
                 border-b border-medium"
     >
       <i class="fa-solid fa-bars fa-2xl cursor-pointer" bind:this={menuIcon} on:click={toggleMenu} />
-      <h1 class="staatliches text-3xl">Coracle</h1>
+      <Anchor external type="unstyled" href="https://github.com/staab/coracle">
+        <h1 class="staatliches text-3xl">Coracle</h1>
+      </Anchor>
     </div>
 
     {#if $modal}
@@ -154,11 +157,11 @@
 
     {#if $toast}
       <div
-        class="fixed bottom-0 left-0 right-0 pointer-events-none"
-        transition:fly={{y: 50, duration: 300}}
+        class="fixed top-0 left-0 right-0 pointer-events-none"
+        transition:fly={{y: -50, duration: 300}}
       >
         <div
-          class="rounded bg-accent shadow-xl m-4 p-4 text-white text-center border border-dark"
+          class="rounded bg-accent shadow-xl mx-24 sm:mx-32 mt-2 p-3 text-white text-center border border-dark"
         >
           {$toast.message}
         </div>

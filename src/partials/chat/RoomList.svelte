@@ -3,13 +3,13 @@
   import {navigate} from 'svelte-routing'
   import {fuzzy} from "src/util/misc"
   import {channels} from 'src/state/nostr'
-  import {rooms} from 'src/state/app'
   import Input from "src/partials/Input.svelte"
 
   let q = ""
+  let rooms = []
   let search
 
-  $: search = fuzzy(Object.values($rooms), {keys: ["name", "about"]})
+  $: search = fuzzy(Object.values(rooms), {keys: ["name", "about"]})
 
   const createRoom = () => navigate(`/chat/new`)
 
@@ -23,12 +23,12 @@
     events.forEach(e => {
       const id = e.kind === 40 ? e.id : e.tags[0][1]
 
-      $rooms[id] = {id, pubkey: e.pubkey, ...$rooms[id], ...JSON.parse(e.content)}
+      rooms[id] = {id, pubkey: e.pubkey, ...rooms[id], ...JSON.parse(e.content)}
     })
   })
 </script>
 
-<div class="hidden sm:flex flex-col bg-dark w-56 h-full fixed py-8 border-r border-solid border-r-medium">
+<div class="flex flex-col bg-dark w-full sm:w-56 h-full fixed py-8 border-r border-solid border-r-medium">
   <div class="m-4">
     <Input bind:value={q} type="text" placeholder="Search rooms">
       <i slot="before" class="fa-solid fa-search" />

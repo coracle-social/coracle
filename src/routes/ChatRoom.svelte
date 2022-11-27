@@ -8,7 +8,7 @@
   import {toHtml} from 'src/util/html'
   import UserBadge from 'src/partials/UserBadge.svelte'
   import {channels} from 'src/state/nostr'
-  import {rooms, accounts, ensureAccounts} from 'src/state/app'
+  import {accounts, ensureAccounts} from 'src/state/app'
   import {dispatch} from 'src/state/dispatch'
   import {user} from 'src/state/user'
   import RoomList from "src/partials/chat/RoomList.svelte"
@@ -18,6 +18,7 @@
   let textarea
   let messages = []
   let annotatedMessages = []
+  let roomData = {id: room}
 
   $: {
     // Group messages so we're only showing the account once per chunk
@@ -40,10 +41,16 @@
     )
   }
 
-  onMount(() => {
+  onMount(async () => {
     if (!$user) {
-      navigate('/login')
+      return navigate('/login')
     }
+
+    const events = await channels.getter.all({kinds: [40, 41], ids: [room]})
+
+    events.forEach(({pubkey, content}) => {
+      roomData = {pubkey, ...roomData, ...JSON.parse(content)}
+    })
 
     const isVisible = $el => {
       const bodyRect = document.body.getBoundingClientRect()
@@ -123,25 +130,23 @@
           {/each}
         </ul>
       </div>
-      {#if $rooms[room]}
-      <div class="fixed top-0 pt-20 w-full -ml-56 pl-60 p-4 border-b border-solid border-medium bg-dark flex gap-4">
+      <div class="fixed top-0 pt-20 w-full sm:-ml-56 sm:pl-60 p-4 border-b border-solid border-medium bg-dark flex gap-4">
         <div
           class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-          style="background-image: url({$rooms[room].picture})" />
+          style="background-image: url({roomData.picture})" />
         <div class="w-full">
           <div class="flex items-center justify-between w-full">
-            <div class="text-lg font-bold">{$rooms[room].name}</div>
-            {#if $rooms[room].pubkey === $user?.pubkey}
+            <div class="text-lg font-bold">{roomData.name || ''}</div>
+            {#if roomData.pubkey === $user?.pubkey}
             <small class="cursor-pointer" on:click={edit}>
               <i class="fa-solid fa-edit" /> Edit
             </small>
             {/if}
           </div>
-          <div>{$rooms[room].about || ''}</div>
+          <div>{roomData.about || ''}</div>
         </div>
       </div>
-      {/if}
-      <div class="fixed bottom-0 w-full -ml-56 pl-56 flex bg-medium border-medium border-t border-solid border-dark">
+      <div class="fixed bottom-0 w-full sm:-ml-56 sm:pl-56 flex bg-medium border-medium border-t border-solid border-dark">
         <textarea
           rows="4"
           autofocus
@@ -159,6 +164,8 @@
       </div>
     </div>
   </div>
-  <RoomList />
+  <div class="hidden sm:block">
+    <RoomList />
+  </div>
 </div>
 

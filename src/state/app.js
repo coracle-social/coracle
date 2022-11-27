@@ -9,12 +9,6 @@ import {channels, relays} from 'src/state/nostr'
 
 export const modal = writable(null)
 
-export const rooms = writable(getLocalJson("coracle/rooms") || {})
-
-rooms.subscribe($rooms => {
-  setLocalJson("coracle/rooms", $rooms)
-})
-
 export const accounts = writable(getLocalJson("coracle/accounts") || {})
 
 accounts.subscribe($accounts => {

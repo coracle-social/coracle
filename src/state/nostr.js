@@ -95,6 +95,10 @@ nostr.event = (kind, content = '', tags = []) => {
 
 export const knownRelays = writable(getLocalJson("coracle/knownRelays") || [])
 
+knownRelays.subscribe($knownRelays => {
+  setLocalJson("coracle/knownRelays", $knownRelays)
+})
+
 export const registerRelay = async url => {
   let json
   try {

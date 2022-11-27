@@ -7,15 +7,21 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Button from "src/partials/Button.svelte"
   import RoomList from "src/partials/chat/RoomList.svelte"
-  import {rooms} from "src/state/app"
   import {dispatch} from "src/state/dispatch"
+  import {channels} from "src/state/nostr"
   import toast from "src/state/toast"
 
   export let room
 
-  let values = $rooms[room] || {}
+  let values = {id: room}
 
   onMount(async () => {
+    const events = await channels.getter.all({kinds: [40, 41], ids: [room]})
+
+    events.forEach(({pubkey, content}) => {
+      values = {pubkey, ...values, ...JSON.parse(content)}
+    })
+
     document.querySelector('[name=picture]').addEventListener('change', async e => {
       const [file] = e.target.files
 
