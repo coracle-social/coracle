@@ -25,7 +25,7 @@
 </script>
 
 {#if note.pubkey}
-<Note note={note} />
+<Note showEntire note={note} />
 {#each note.replies as r (r.id)}
   <div class="ml-4 border-l border-solid border-medium">
     <Note interactive invertColors isReply note={r} />

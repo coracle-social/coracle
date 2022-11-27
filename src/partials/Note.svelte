@@ -4,7 +4,7 @@
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {ellipsize} from 'hurdak/src/core'
-  import {hasParent} from 'src/util/html'
+  import {hasParent, toHtml} from 'src/util/html'
   import Anchor from 'src/partials/Anchor.svelte'
   import {dispatch} from "src/state/dispatch"
   import {accounts, modal} from "src/state/app"
@@ -14,6 +14,7 @@
 
   export let note
   export let isReply = false
+  export let showEntire = false
   export let interactive = false
   export let invertColors = false
 
@@ -105,7 +106,13 @@
         Reply to <Anchor on:click={showParent}>{parentId.slice(0, 8)}</Anchor>
       </small>
     {/if}
-    <p>{ellipsize(note.content, 240)}</p>
+    <p>
+      {#if note.content.length > 240 && !showEntire}
+        {ellipsize(note.content, 240)}
+      {:else}
+        {@html toHtml(note.content)}
+      {/if}
+    </p>
     <div class="flex gap-6 text-light">
       <div>
         <i

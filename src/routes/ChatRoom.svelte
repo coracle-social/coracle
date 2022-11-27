@@ -5,6 +5,7 @@
   import {prop, last} from 'ramda'
   import {switcherFn} from 'hurdak/src/core'
   import {formatTimestamp} from 'src/util/misc'
+  import {toHtml} from 'src/util/html'
   import UserBadge from 'src/partials/UserBadge.svelte'
   import {channels} from 'src/state/nostr'
   import {rooms, accounts, ensureAccounts} from 'src/state/app'
@@ -117,7 +118,7 @@
                 <p class="text-sm text-light">{formatTimestamp(m.created_at)}</p>
               </div>
               {/if}
-              <div class="ml-6">{m.content}</div>
+              <div class="ml-6">{@html toHtml(m.content)}</div>
             </li>
           {/each}
         </ul>

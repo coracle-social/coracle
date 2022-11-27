@@ -60,3 +60,19 @@ export const hasParent = (tagOrClass, $el) => {
 
   return false
 }
+
+export const escapeHtml = html => {
+  const div = document.createElement("div")
+
+  div.innerText = html
+
+  return div.innerHTML
+}
+
+export const toHtml = content => {
+  return escapeHtml(content)
+    .replace(/\n/g, '<br />')
+    .replace(/https?:\/\/([\w\.-]+)[^ ]*/g, (url, domain) => {
+      return `<a href="${url}" target="_blank noopener" class="underline">${domain}</a>`
+    })
+}
