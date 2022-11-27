@@ -6,7 +6,7 @@
   import Note from "src/partials/Note.svelte"
   import {channels} from 'src/state/nostr'
   import {user as currentUser} from 'src/state/user'
-  import {accounts, findNotes} from "src/state/app"
+  import {accounts, findNotesAndWatchModal, modal} from "src/state/app"
 
   export let pubkey
 
@@ -15,13 +15,14 @@
 
   $: user = $accounts[pubkey]
 
-  onMount(async () => {
-    return findNotes(channels.watcher, {
+  onMount(() => {
+    return findNotesAndWatchModal({
       authors: [pubkey],
-      since: now() - timedelta(1, 'days'),
       limit: 100,
     }, $notes => {
-      notes = $notes
+      if ($notes.length) {
+        notes = $notes
+      }
     })
   })
 </script>

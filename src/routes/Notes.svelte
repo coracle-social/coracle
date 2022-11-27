@@ -5,41 +5,22 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Note from "src/partials/Note.svelte"
   import {channels, relays} from "src/state/nostr"
-  import {findNotes, modal} from "src/state/app"
+  import {findNotesAndWatchModal, modal} from "src/state/app"
 
-  let stop
   let notes
 
   const createNote = () => {
     navigate("/notes/new")
   }
 
-  const start = () => {
-    stop = findNotes(channels.watcher, {
-      since: now() - timedelta(1, 'days'),
+  onMount(() => {
+    return findNotesAndWatchModal({
       limit: 100,
     }, $notes => {
       if ($notes.length) {
         notes = $notes
       }
     })
-  }
-
-
-  onMount(() => {
-    const unsub = modal.subscribe($modal => {
-      console.log('modal', $modal)
-      if ($modal) {
-        stop && stop()
-      } else {
-        setTimeout(start, 600)
-      }
-    })
-
-    return () => {
-      stop()
-      unsub()
-    }
   })
 </script>
 

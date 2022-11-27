@@ -1,6 +1,6 @@
-import {writable, get} from "svelte/store"
+import {writable} from "svelte/store"
 import {getLocalJson, setLocalJson} from "src/util/misc"
-import {nostr, channels} from 'src/state/nostr'
+import {nostr} from 'src/state/nostr'
 
 export const user = writable(getLocalJson("coracle/user"))
 
@@ -10,3 +10,4 @@ user.subscribe($user => {
   // Keep nostr in sync
   nostr.login($user?.privkey)
 })
+

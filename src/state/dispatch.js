@@ -20,7 +20,7 @@ dispatch.addMethod("account/init", async (topic, privkey) => {
   user.set({name: pubkey.slice(0, 8), privkey, pubkey})
 
   // Attempt to refresh user data from the network
-  const found = Boolean(await channels.getter.first({authors: [$user.pubkey]}))
+  const found = Boolean(await channels.getter.first({authors: [pubkey]}))
 
   // Tell the caller whether this user was found
   return {found}

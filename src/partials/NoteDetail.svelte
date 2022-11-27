@@ -9,8 +9,7 @@
   export let note
 
   onMount(() => {
-    return findNotes(
-      channels.watcher,
+    const start = findNotes(
       [{ids: [note.id]},
        {'#e': [note.id]},
        // We can't target reaction deletes by e tag, so get them
@@ -20,6 +19,8 @@
         note = find(propEq('id', note.id), $notes) || note
       }
     )
+
+    return start()
   })
 </script>
 
