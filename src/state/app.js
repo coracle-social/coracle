@@ -32,32 +32,33 @@ export const logout = () => {
 
 // Utils
 
-export const ensureAccounts = async pubkeys => {
+export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
   const $accounts = get(accounts)
 
   // Don't request accounts we recently updated
   pubkeys = pubkeys.filter(
-    k => !$accounts[k] || $accounts[k].refreshed < now() - timedelta(10, 'minutes')
+    k => force || !$accounts[k] || $accounts[k].refreshed < now() - timedelta(10, 'minutes')
   )
 
-  if (!pubkeys.length) {
-    return
+  if (pubkeys.length) {
+    const events = await channels.getter.all({kinds: [0], authors: pubkeys})
+
+    await accounts.update($accounts => {
+      events.forEach(e => {
+        $accounts[e.pubkey] = {
+          pubkey: e.pubkey,
+          ...$accounts[e.pubkey],
+          ...JSON.parse(e.content),
+          refreshed: now(),
+        }
+      })
+
+      return $accounts
+    })
   }
 
-  const events = await channels.getter.all({kinds: [0], authors: pubkeys})
-
-  accounts.update($accounts => {
-    events.forEach(e => {
-      $accounts[e.pubkey] = {
-        pubkey: e.pubkey,
-        ...$accounts[e.pubkey],
-        ...JSON.parse(e.content),
-        refreshed: now(),
-      }
-    })
-
-    return $accounts
-  })
+  // Keep our user in sync
+  user.update($user => ({...$user, ...get(accounts)[$user.pubkey]}))
 }
 
 export const findNotes = (filters, cb) => {

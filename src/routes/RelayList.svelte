@@ -4,17 +4,17 @@
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {dispatch} from "src/state/dispatch"
-  import {modal} from "src/state/app"
   import {relays, knownRelays} from "src/state/nostr"
+  import {modal} from "src/state/app"
 
   let q = ""
   let search
 
   $: search = fuzzy($knownRelays || [], {keys: ["name", "description", "url"]})
 
-  const toggle = (url, value) => {
-    dispatch(value ? "relay/join" : "relay/leave", url)
-  }
+  const join = url => dispatch("relay/join", url)
+
+  const leave = url => dispatch("relay/leave", url)
 </script>
 
 <div class="flex justify-center py-8 px-4" in:fly={{y: 20}}>
@@ -41,7 +41,7 @@
           </div>
           <a
             class="underline cursor-pointer"
-            on:click={() => toggle(relay.url, !$relays.includes(relay.url))}>
+            on:click={() => $relays.includes(relay.url) ? leave(relay.url) : join(relay.url)}>
             {$relays.includes(relay.url) ? "Leave" : "Join"}
           </a>
         </div>

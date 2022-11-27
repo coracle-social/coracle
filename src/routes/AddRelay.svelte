@@ -2,7 +2,9 @@
   import {fly} from 'svelte/transition'
   import {registerRelay} from 'src/state/nostr'
   import toast from 'src/state/toast'
-  import {modal} from 'src/state/app'
+  import {user} from 'src/state/user'
+  import {modal, ensureAccounts} from 'src/state/app'
+  import {dispatch} from 'src/state/dispatch'
   import Input from 'src/partials/Input.svelte'
   import Button from 'src/partials/Button.svelte'
 
@@ -16,7 +18,12 @@
     }
 
     registerRelay(url)
+    dispatch("relay/join", url)
     modal.set(null)
+
+    if ($user) {
+      ensureAccounts([$user.pubkey], {force: true})
+    }
   }
 </script>
 
@@ -28,7 +35,7 @@
     <div class="flex flex-col gap-8 w-full">
       <div class="flex flex-col gap-1">
         <strong>Relay URL</strong>
-        <Input bind:value={url}>
+        <Input autofocus bind:value={url}>
           <i slot="before" class="fa-solid fa-link" />
         </Input>
         <p class="text-sm text-light">

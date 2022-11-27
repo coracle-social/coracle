@@ -6,14 +6,13 @@
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {user} from "src/state/user"
-  import {logout} from "src/state/app"
   import toast from "src/state/toast"
 
   const keypairUrl = 'https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/'
   const delegationUrl = 'https://github.com/nostr-protocol/nips/blob/b62aa418dee13aac1899ea7c6946a0f55dd7ee84/26.md'
 
   const copyKey = type => {
-    copyToClipboard(type === 'private' ? $user.privKey : $user.pubkey)
+    copyToClipboard(type === 'private' ? $user.privkey : $user.pubkey)
 
     toast.show("info", `Your ${type} key has been copied to the clipboard.`)
   }
@@ -58,7 +57,6 @@
           using <Anchor external href={delegationUrl}>delegation keys</Anchor> instead.
         </p>
       </div>
-      <Anchor class="block text-right" on:click={logout}>Log Out</Anchor>
     </div>
   </div>
 </div>

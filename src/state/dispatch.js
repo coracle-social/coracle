@@ -3,7 +3,8 @@ import {getPublicKey} from 'nostr-tools'
 import {get} from 'svelte/store'
 import {first, defmulti} from "hurdak/lib/hurdak"
 import {user} from "src/state/user"
-import {nostr, channels, relays} from 'src/state/nostr'
+import {nostr, relays} from 'src/state/nostr'
+import {ensureAccounts} from 'src/state/app'
 
 // Commands are processed in two layers:
 // - App-oriented commands are created via dispatch
@@ -19,11 +20,11 @@ dispatch.addMethod("account/init", async (topic, privkey) => {
   // Set what we know about the user to our store
   user.set({name: pubkey.slice(0, 8), privkey, pubkey})
 
-  // Attempt to refresh user data from the network
-  const found = Boolean(await channels.getter.first({authors: [pubkey]}))
+  // Make sure we have data for this user
+  await ensureAccounts([pubkey], {force: true})
 
   // Tell the caller whether this user was found
-  return {found}
+  return {found: Boolean(get(user).name)}
 })
 
 dispatch.addMethod("account/update", async (topic, updates) => {
@@ -34,8 +35,14 @@ dispatch.addMethod("account/update", async (topic, updates) => {
   await nostr.publish(nostr.event(0, JSON.stringify(updates)))
 })
 
-dispatch.addMethod("relay/join", (topic, url) => {
+dispatch.addMethod("relay/join", async (topic, url) => {
+  const $user = get(user)
+
   relays.update(r => r.concat(url))
+
+  if ($user) {
+    await ensureAccounts([$user.pubkey], {force: true})
+  }
 })
 
 dispatch.addMethod("relay/leave", (topic, url) => {
