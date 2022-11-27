@@ -1,10 +1,6 @@
 Bugs
 
-- [ ] Fix scrolling on note detail
-- [ ] Be sure to deduplicate all events if needed
-- [ ] Format text with line breaks - pre, or split/br
 - [ ] Remove dexie, or use it instead of localstorage for cached data
-- [ ] rename /user to /users
 - [ ] Memoize room list, currently every time the user switches chat rooms it pulls the full list
 - [ ] Fix toast, it gets in the way. Make it smaller and dismissable.
 

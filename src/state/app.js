@@ -163,7 +163,7 @@ export const findNotesAndWatchModal = (filters, cb) => {
   })
 
   return () => {
-    stop()
+    stop && stop()
     unsub()
   }
 }

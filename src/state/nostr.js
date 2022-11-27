@@ -16,7 +16,7 @@ const channel = name => {
   const _chan = {
     sub: params => {
       if (active) {
-        throw new Error(`Channel ${name} is already active.`)
+        console.error(`Channel ${name} is already active.`)
       }
 
       active = true

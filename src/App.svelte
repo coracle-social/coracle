@@ -53,7 +53,7 @@
 
 <Router {url}>
   <div use:links class="h-full">
-    <div class="pt-16 text-white h-full">
+    <div class="pt-16 text-white h-full" class:overflow-hidden={$modal}>
       <Route path="/notes" component={Notes} />
       <Route path="/notes/new" component={NoteCreate} />
       <Route path="/chat" component={Chat} />
@@ -138,7 +138,7 @@
         transition:fade
         on:click={e => modal.set(null)} />
       <div class="absolute inset-0 mt-20 sm:mt-32 modal-content" transition:fly={{y: 1000, opacity: 1}}>
-        <dialog open class="bg-dark border-t border-solid border-medium h-full w-full">
+        <dialog open class="bg-dark border-t border-solid border-medium h-full w-full overflow-auto">
           {#if $modal.note}
             {#key $modal.note.id}
             <NoteDetail note={$modal.note} />
