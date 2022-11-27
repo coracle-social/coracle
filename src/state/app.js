@@ -1,10 +1,11 @@
 import {prop, uniq, sortBy, uniqBy, find, last, groupBy} from 'ramda'
 import {debounce} from 'throttle-debounce'
 import {writable, derived, get} from 'svelte/store'
+import {navigate} from "svelte-routing"
 import {switcherFn, noop, ensurePlural} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta} from "src/util/misc"
 import {user} from 'src/state/user'
-import {channels} from 'src/state/nostr'
+import {channels, relays} from 'src/state/nostr'
 
 export const modal = writable(null)
 
@@ -25,6 +26,15 @@ user.subscribe($user => {
     accounts.update($accounts => ({...$accounts, [$user.pubkey]: $user}))
   }
 })
+
+export const logout = () => {
+  // Give any animations a moment to finish
+  setTimeout(() => {
+    user.set(null)
+    relays.set([])
+    navigate("/login")
+  }, 200)
+}
 
 // Utils
 

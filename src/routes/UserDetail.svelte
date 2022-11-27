@@ -58,6 +58,8 @@
         </div>
       {/each}
     </li>
+    {:else}
+    <li class="py-4">This user hasn't posted any notes.</li>
     {/each}
   </ul>
 </div>

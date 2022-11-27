@@ -10,7 +10,7 @@
   import {globalHistory} from "svelte-routing/src/history"
   import {hasParent} from 'src/util/html'
   import {store as toast} from "src/state/toast"
-  import {modal} from "src/state/app"
+  import {modal, logout} from "src/state/app"
   import {user} from 'src/state/user'
   import NoteDetail from "src/partials/NoteDetail.svelte"
   import NotFound from "src/routes/NotFound.svelte"
@@ -47,14 +47,6 @@
       modal.set(null)
     })
   })
-
-  // Give the animation a moment to finish
-  const logout = () => {
-    setTimeout(() => {
-      user.set(null)
-      navigate("/login")
-    }, 200)
-  }
 </script>
 
 <svelte:body on:keydown={e => e.key === 'Escape' && modal.set(null)} />

@@ -4,6 +4,7 @@
   import {navigate} from 'svelte-routing'
   import {prop, last} from 'ramda'
   import {switcherFn} from 'hurdak/src/core'
+  import {formatTimestamp} from 'src/util/misc'
   import UserBadge from 'src/partials/UserBadge.svelte'
   import {channels} from 'src/state/nostr'
   import {rooms, accounts, ensureAccounts} from 'src/state/app'
@@ -39,6 +40,10 @@
   }
 
   onMount(() => {
+    if (!$user) {
+      navigate('/login')
+    }
+
     const isVisible = $el => {
       const bodyRect = document.body.getBoundingClientRect()
       const {top, height} = $el.getBoundingClientRect()
@@ -47,7 +52,11 @@
     }
 
     return channels.watcher.sub({
-      filter: {kinds: [42, 43, 44], '#e': [room]},
+      filter: {
+        limit: 100,
+        kinds: [42, 43, 44],
+        '#e': [room],
+      },
       cb: e => {
         switcherFn(e.kind, {
           42: () => {
@@ -103,7 +112,10 @@
           {#each annotatedMessages as m}
             <li in:fly={{y: 20}} class="py-1 chat-message">
               {#if m.showAccount}
-              <UserBadge user={m.account} />
+              <div class="flex gap-4 items-center justify-between">
+                <UserBadge user={m.account} />
+                <p class="text-sm text-light">{formatTimestamp(m.created_at)}</p>
+              </div>
               {/if}
               <div class="ml-6">{m.content}</div>
             </li>
@@ -118,7 +130,7 @@
         <div class="w-full">
           <div class="flex items-center justify-between w-full">
             <div class="text-lg font-bold">{$rooms[room].name}</div>
-            {#if $rooms[room].pubkey === $user.pubkey}
+            {#if $rooms[room].pubkey === $user?.pubkey}
             <small class="cursor-pointer" on:click={edit}>
               <i class="fa-solid fa-edit" /> Edit
             </small>

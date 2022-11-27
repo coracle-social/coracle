@@ -6,6 +6,7 @@
   import Input from "src/partials/Input.svelte"
   import toast from "src/state/toast"
   import {dispatch} from "src/state/dispatch"
+  import {relays} from "src/state/nostr"
 
   let privKey = ''
 
@@ -25,7 +26,13 @@
     } else {
       const {found} = await dispatch("account/init", privKey)
 
-      await navigate(found ? `/` : '/settings/profile')
+      if ($relays.length === 0) {
+        navigate('/settings/relays')
+      } else if (found) {
+        navigate('/')
+      } else {
+        navigate('/settings/profile')
+      }
     }
   }
 </script>

@@ -6,6 +6,7 @@
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {user} from "src/state/user"
+  import {logout} from "src/state/app"
   import toast from "src/state/toast"
 
   const keypairUrl = 'https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/'
@@ -15,11 +16,6 @@
     copyToClipboard(type === 'private' ? $user.privKey : $user.pubkey)
 
     toast.show("info", `Your ${type} key has been copied to the clipboard.`)
-  }
-
-  const logout = () => {
-    navigate("/login")
-    user.set(null)
   }
 
   onMount(async () => {
