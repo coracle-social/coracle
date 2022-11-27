@@ -1,7 +1,7 @@
 import {writable} from 'svelte/store'
 import {debounce} from 'throttle-debounce'
 import {relayPool, getPublicKey} from 'nostr-tools'
-import {last} from 'ramda'
+import {last, uniqBy, prop} from 'ramda'
 import {first} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson} from "src/util/misc"
 
@@ -89,6 +89,27 @@ nostr.event = (kind, content = '', tags = []) => {
   const createdAt = Math.round(new Date().valueOf() / 1000)
 
   return {kind, content, tags, pubkey, created_at: createdAt}
+}
+
+// Keep track of known relays
+
+export const knownRelays = writable(getLocalJson("coracle/knownRelays") || [])
+
+export const registerRelay = async url => {
+  let json
+  try {
+    const res = await fetch(url.replace(/^ws/, 'http'), {
+      headers: {
+        Accept: 'application/nostr_json',
+      },
+    })
+
+    json = await res.json()
+  } catch (e) {
+    json = {}
+  }
+
+  knownRelays.update($xs => uniqBy(prop('url'), $xs.concat({...json, url})))
 }
 
 // Create writable store for relays so we can observe changes in the app

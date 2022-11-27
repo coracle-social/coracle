@@ -2,7 +2,6 @@
   import {onMount} from 'svelte'
   import {find, propEq} from 'ramda'
   import {findNotes} from "src/state/app"
-  import {channels} from "src/state/nostr"
   import {user} from "src/state/user"
   import Note from 'src/partials/Note.svelte'
 

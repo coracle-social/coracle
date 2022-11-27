@@ -1,17 +1,14 @@
 <script>
-  import {liveQuery} from "dexie"
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {db} from "src/state/db"
   import {dispatch} from "src/state/dispatch"
-  import {relays} from "src/state/nostr"
+  import {modal} from "src/state/app"
+  import {relays, knownRelays} from "src/state/nostr"
 
   let q = ""
   let search
-
-  const knownRelays = liveQuery(() => db.relays.toArray())
 
   $: search = fuzzy($knownRelays || [], {keys: ["name", "description", "url"]})
 
@@ -36,7 +33,7 @@
       <Anchor type="button" href="/notes">Done</Anchor>
     </div>
     <div class="flex flex-col gap-6 overflow-auto flex-grow -mx-6 px-6">
-      {#each search(q) as relay}
+      {#each search(q).slice(0, 10) as relay}
         <div class="flex gap-2 justify-between">
           <div>
             <strong>{relay.name || relay.url}</strong>
@@ -49,6 +46,11 @@
           </a>
         </div>
       {/each}
+      <a
+        class="underline cursor-pointer"
+        on:click={() => modal.set({form: 'relay'})}>
+        <i class="fa-solid fa-plus" /> Add Relay
+      </a>
     </div>
   </div>
 </div>

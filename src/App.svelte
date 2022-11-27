@@ -19,6 +19,7 @@
   import Profile from "src/routes/Profile.svelte"
   import Keys from "src/routes/Keys.svelte"
   import RelayList from "src/routes/RelayList.svelte"
+  import AddRelay from "src/routes/AddRelay.svelte"
   import UserDetail from "src/routes/UserDetail.svelte"
   import NoteCreate from "src/routes/NoteCreate.svelte"
   import Chat from "src/routes/Chat.svelte"
@@ -143,6 +144,8 @@
             {#key $modal.note.id}
             <NoteDetail note={$modal.note} />
             {/key}
+          {:else if $modal.form === 'relay'}
+            <AddRelay />
           {/if}
         </dialog>
       </div>

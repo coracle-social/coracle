@@ -1,11 +1,10 @@
 <script>
   import {onMount} from 'svelte'
   import {navigate} from "svelte-routing"
-  import {timedelta, now} from 'src/util/misc'
   import Anchor from "src/partials/Anchor.svelte"
   import Note from "src/partials/Note.svelte"
-  import {channels, relays} from "src/state/nostr"
-  import {findNotesAndWatchModal, modal} from "src/state/app"
+  import {relays} from "src/state/nostr"
+  import {findNotesAndWatchModal} from "src/state/app"
 
   let notes
 

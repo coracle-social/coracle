@@ -2,11 +2,9 @@
   import {onMount} from 'svelte'
   import {reverse} from 'ramda'
   import {fly} from 'svelte/transition'
-  import {now, timedelta} from 'src/util/misc'
   import Note from "src/partials/Note.svelte"
-  import {channels} from 'src/state/nostr'
   import {user as currentUser} from 'src/state/user'
-  import {accounts, findNotesAndWatchModal, modal} from "src/state/app"
+  import {accounts, findNotesAndWatchModal} from "src/state/app"
 
   export let pubkey
 

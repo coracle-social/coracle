@@ -1,5 +1,14 @@
 <script>
+  import {onMount} from "svelte"
+  import {navigate} from "svelte-routing"
   import RoomList from "src/partials/chat/RoomList.svelte"
+  import {user} from "src/state/user"
+
+  onMount(() => {
+    if (!$user) {
+      return navigate('/login')
+    }
+  })
 </script>
 
 <div class="flex gap-4 h-full">
