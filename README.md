@@ -1,8 +1,7 @@
 Bugs
 
 - [ ] Pagination
-- [ ] Memoize room list, currently every time the user switches chat rooms it pulls the full list
-- [ ] Fix toast, it gets in the way. Make it smaller and dismissable.
+- [ ] Improve data loading. Ditch nostr-tools, or use eose
 
 Features
 
