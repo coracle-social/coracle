@@ -1,5 +1,4 @@
 import {identity, last, without} from 'ramda'
-import {getPublicKey} from 'nostr-tools'
 import {get} from 'svelte/store'
 import {first, defmulti} from "hurdak/lib/hurdak"
 import {user} from "src/state/user"
@@ -13,10 +12,7 @@ import {ensureAccounts} from 'src/state/app'
 
 export const dispatch = defmulti("dispatch", identity)
 
-dispatch.addMethod("account/init", async (topic, privkey) => {
-  // Generate a public key
-  const pubkey = getPublicKey(privkey)
-
+dispatch.addMethod("account/init", async (topic, { privkey, pubkey }) => {
   // Set what we know about the user to our store
   user.set({name: pubkey.slice(0, 8), privkey, pubkey})
 
