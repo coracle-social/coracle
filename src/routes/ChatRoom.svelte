@@ -2,7 +2,7 @@
   import {onMount} from 'svelte'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
-  import {prop, last} from 'ramda'
+  import {prop, uniqBy, sortBy, last} from 'ramda'
   import {switcherFn} from 'hurdak/src/core'
   import {formatTimestamp} from 'src/util/misc'
   import {toHtml} from 'src/util/html'
@@ -22,7 +22,7 @@
 
   $: {
     // Group messages so we're only showing the account once per chunk
-    annotatedMessages = messages.reduce(
+    annotatedMessages = sortBy(prop('created_at'), uniqBy(prop('id'), messages)).reduce(
       (mx, m) => {
         const account = $accounts[m.pubkey]
 
@@ -164,8 +164,6 @@
       </div>
     </div>
   </div>
-  <div class="hidden sm:block">
-    <RoomList />
-  </div>
+  <RoomList className="hidden sm:flex" />
 </div>
 

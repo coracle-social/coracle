@@ -1,12 +1,15 @@
 <script>
+  import cx from 'classnames'
   import {onMount} from 'svelte'
   import {navigate} from 'svelte-routing'
   import {fuzzy} from "src/util/misc"
   import {channels} from 'src/state/nostr'
   import Input from "src/partials/Input.svelte"
 
+  export let className = ''
+
   let q = ""
-  let rooms = []
+  let rooms = {}
   let search
 
   $: search = fuzzy(Object.values(rooms), {keys: ["name", "about"]})
@@ -21,21 +24,26 @@
     const events = await channels.getter.all({kinds: [40, 41]})
 
     events.forEach(e => {
-      const id = e.kind === 40 ? e.id : e.tags[0][1]
+      const id = e.kind === 40 ? e.id : e.tags[0]?.[1]
+      const content = JSON.parse(e.content)
 
-      rooms[id] = {id, pubkey: e.pubkey, ...rooms[id], ...JSON.parse(e.content)}
+      // There are some non-standard rooms out there, ignore them
+      // if they don't have a name
+      if (content.name) {
+        rooms[id] = {id, pubkey: e.pubkey, ...rooms[id], ...content}
+      }
     })
   })
 </script>
 
-<div class="flex flex-col bg-dark w-full sm:w-56 h-full fixed py-8 border-r border-solid border-r-medium">
-  <div class="m-4">
+<div class={cx("flex flex-col bg-dark w-full sm:w-56 h-full fixed py-8 border-r border-solid border-r-medium", className)}>
+  <div class="my-4 mx-3">
     <Input bind:value={q} type="text" placeholder="Search rooms">
       <i slot="before" class="fa-solid fa-search" />
     </Input>
   </div>
   <ul>
-    {#each search(q).slice(0, 10) as r}
+    {#each search(q).slice(0, 8) as r}
     <li
       class="flex flex-col gap-2 px-3 py-2 cursor-pointer hover:bg-accent transition-all"
       on:click={() => setRoom(r.id)}>
@@ -52,6 +60,9 @@
       {/if}
     </li>
     {/each}
+    <li class="px-3">
+      <small>{Math.floor(0, Object.keys(rooms).length - 8)} more rooms found</small>
+    </li>
     <li class="bg-medium m-3 h-px" />
     <li class="cursor-pointer font-bold hover:bg-accent transition-all px-3 py-2" on:click={createRoom}>
       <i class="fa-solid fa-plus" /> Create Room
