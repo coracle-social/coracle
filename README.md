@@ -1,12 +1,15 @@
 Bugs
 
+- [ ] User detail notes are backwards
+- [ ] Improve data loading. Ditch nostr-tools, or use eose. Maybe load one event at a time using timestamps? Relies on ordering.
 - [ ] Pagination
-- [ ] Improve data loading. Ditch nostr-tools, or use eose
+- [ ] Optimistically load events the user publishes (e.g. to reduce reflow for reactions/replies). Essentially, we can pretend to be our own in-memory relay.
 
 Features
 
 - [x] Chat
 - [x] Threads/social
+- [ ] Search
 - [ ] Followers
 - [ ] Server discovery
 - [ ] Favorite chat rooms
