@@ -26,12 +26,9 @@
         interact with the network, but you can join as many as you like.
       </p>
     </div>
-    <div class="flex gap-4">
-      <Input bind:value={q} type="text" wrapperClass="flex-grow" placeholder="Type to search">
-        <i slot="before" class="fa-solid fa-search" />
-      </Input>
-      <Anchor type="button" href="/notes">Done</Anchor>
-    </div>
+    <Input bind:value={q} type="text" wrapperClass="flex-grow" placeholder="Type to search">
+      <i slot="before" class="fa-solid fa-search" />
+    </Input>
     <div class="flex flex-col gap-6 overflow-auto flex-grow -mx-6 px-6">
       {#each search(q).slice(0, 10) as relay}
         <div class="flex gap-2 justify-between">

@@ -35,7 +35,7 @@
     <div class="flex flex-col gap-8 w-full">
       <div class="flex flex-col gap-1">
         <strong>Relay URL</strong>
-        <Input autofocus bind:value={url}>
+        <Input autofocus bind:value={url} placeholder="wss://relay.example.com">
           <i slot="before" class="fa-solid fa-link" />
         </Input>
         <p class="text-sm text-light">
