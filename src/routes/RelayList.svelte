@@ -2,7 +2,6 @@
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
   import {dispatch} from "src/state/dispatch"
   import {relays, knownRelays} from "src/state/nostr"
   import {modal} from "src/state/app"

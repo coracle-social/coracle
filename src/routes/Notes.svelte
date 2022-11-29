@@ -4,27 +4,29 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Note from "src/partials/Note.svelte"
   import {relays} from "src/state/nostr"
-  import {findNotesAndWatchModal} from "src/state/app"
+  import {notesCursor} from "src/state/app"
 
   let notes
+  let onScroll
 
   const createNote = () => {
     navigate("/notes/new")
   }
 
-  onMount(() => {
-    return findNotesAndWatchModal({
-      limit: 100,
-    }, $notes => {
-      if ($notes.length) {
-        notes = $notes
-      }
-    })
+  onMount(async () => {
+    const cursor = await notesCursor({kinds: [1]}, {showParents: true})
+
+    notes = cursor.notes
+    onScroll = cursor.onScroll
+
+    return cursor.unsub
   })
 </script>
 
+<svelte:window on:scroll={onScroll} />
+
 <ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
-  {#each (notes || []) as n (n.id)}
+  {#each (notes ? $notes : []) as n (n.id)}
     <li class="border-l border-solid border-medium">
       <Note interactive note={n} />
       {#each n.replies as r (r.id)}

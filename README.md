@@ -1,8 +1,6 @@
 Bugs
 
-- [ ] User detail notes are backwards
-- [ ] Improve data loading. Ditch nostr-tools, or use eose. Maybe load one event at a time using timestamps? Relies on ordering.
-- [ ] Pagination
+- [ ] Don't lose scroll position when opening modals
 - [ ] Optimistically load events the user publishes (e.g. to reduce reflow for reactions/replies). Essentially, we can pretend to be our own in-memory relay.
 
 Features

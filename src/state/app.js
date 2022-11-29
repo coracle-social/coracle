@@ -1,11 +1,11 @@
-import {prop, uniq, sortBy, uniqBy, find, last, groupBy} from 'ramda'
+import {prop, identity, whereEq, reverse, uniq, sortBy, uniqBy, find, last, pluck, groupBy} from 'ramda'
 import {debounce} from 'throttle-debounce'
-import {writable, derived, get} from 'svelte/store'
+import {writable, get} from 'svelte/store'
 import {navigate} from "svelte-routing"
-import {switcherFn, ensurePlural} from 'hurdak/lib/hurdak'
-import {getLocalJson, setLocalJson, now, timedelta} from "src/util/misc"
+import {switcherFn} from 'hurdak/lib/hurdak'
+import {getLocalJson, setLocalJson, now, timedelta, sleep} from "src/util/misc"
 import {user} from 'src/state/user'
-import {channels, relays} from 'src/state/nostr'
+import {_channels, filterMatches, Cursor, channels, relays, findReply} from 'src/state/nostr'
 
 export const modal = writable(null)
 
@@ -30,7 +30,7 @@ export const logout = () => {
   }, 200)
 }
 
-// Utils
+// Accounts
 
 export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
   const $accounts = get(accounts)
@@ -61,105 +61,168 @@ export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
   user.update($user => ({...$user, ...get(accounts)[$user.pubkey]}))
 }
 
-export const findNotes = (filters, cb) => {
-  const start = () => {
-    const notes = writable([])
-    const reactions = writable([])
+// Notes
 
-    let pubkeys = []
-
-    const refreshAccounts = debounce(300, () => {
-      ensureAccounts(uniq(pubkeys))
-
-      pubkeys = []
+export const annotateNotesChunk = async (chunk, {showParents = false} = {}) => {
+  if (showParents) {
+    // Find parents of replies to provide context
+    const parents = await _channels.getter.all({
+      kinds: [1],
+      ids: chunk.map(findReply).filter(identity),
     })
 
-    const closeRequest = channels.watcher.sub({
-      filter: ensurePlural(filters).map(q => ({kinds: [1, 5, 7], ...q})),
-      cb: e => {
-        // Chunk requests to load accounts
-        pubkeys.push(e.pubkey)
-        refreshAccounts()
+    // Remove replies, show parents instead
+    chunk = parents
+      .concat(chunk.filter(e => !find(whereEq({id: findReply(e)}), parents)))
+  }
 
-        switcherFn(e.kind, {
-          1: () => {
-            notes.update($xs => uniqBy(prop('id'), $xs.concat(e)))
-          },
-          5: () => {
-            const ids = e.tags.map(t => t[1])
+  if (chunk.length === 0) {
+    return chunk
+  }
 
-            notes.update($xs => $xs.filter(({id}) => !id.includes(ids)))
-            reactions.update($xs => $xs.filter(({id}) => !id.includes(ids)))
-          },
-          7: () => {
-            reactions.update($xs => $xs.concat(e))
-          },
-        })
+  const replies = await _channels.getter.all({
+    kinds: [1],
+    '#e': pluck('id', chunk),
+  })
+
+  const reactions = await _channels.getter.all({
+    kinds: [7],
+    '#e': pluck('id', chunk.concat(replies)),
+  })
+
+  const repliesById = groupBy(
+    n => find(t => last(t) === 'reply', n.tags)[1],
+    replies.filter(n => n.tags.map(last).includes('reply'))
+  )
+
+  const reactionsById = groupBy(
+    n => find(t => last(t) === 'reply', n.tags)[1],
+    reactions.filter(n => n.tags.map(last).includes('reply'))
+  )
+
+  await ensureAccounts(uniq(pluck('pubkey', chunk.concat(replies).concat(reactions))))
+
+  const $accounts = get(accounts)
+
+  const annotate = e => ({
+    ...e,
+    user: $accounts[e.pubkey],
+    replies: (repliesById[e.id] || []).map(reply => annotate(reply)),
+    reactions: (reactionsById[e.id] || []).map(reaction => annotate(reaction)),
+  })
+
+  return reverse(sortBy(prop('created'), chunk.map(annotate)))
+}
+
+export const notesCursor = async (
+  filter,
+  {
+    showParents = false,
+    delta = timedelta(1, 'hours'),
+    isInModal = false,
+  } = {}
+) => {
+  const cursor = new Cursor(filter, delta)
+  const notes = writable([])
+
+  const addChunk = chunk => {
+    notes.update($notes => uniqBy(prop('id'), $notes.concat(chunk)))
+  }
+
+  const unsub = await _channels.listener.sub(
+    {kinds: [1, 5, 7], since: now()},
+    e => switcherFn(e.kind, {
+      1: async () => {
+        if (filterMatches(filter, e)) {
+          addChunk(await annotateNotesChunk([e], {showParents}))
+        }
       },
-    })
+      5: () => {
+        const ids = e.tags.map(t => t[1])
 
-    const annotatedNotes = derived(
-      [notes, reactions, accounts],
-      ([$notes, $reactions, $accounts]) => {
-        const repliesById = groupBy(
-          n => find(t => last(t) === 'reply', n.tags)[1],
-          $notes.filter(n => n.tags.map(last).includes('reply'))
+        notes.update($notes =>
+          $notes
+            .filter(e => !ids.includes(e.id))
+            .map(n => ({
+              ...n,
+              replies: n.replies.filter(e => !ids.includes(e.id)),
+              reactions: n.reactions.filter(e => !ids.includes(e.id)),
+            }))
         )
+      },
+      7: () => {
+        const id = findReply(e)
 
-        const reactionsById = groupBy(
-          n => find(t => last(t) === 'reply', n.tags)[1],
-          $reactions.filter(n => n.tags.map(last).includes('reply'))
+        notes.update($notes =>
+          $notes
+            .map(n => {
+              if (n.id === id) {
+                return {...n, reactions: [...n.reactions, e]}
+              }
+
+              return {
+                ...n,
+                replies: n.replies.map(r => {
+                  if (r.id === id) {
+                    return {...r, reactions: [...r.reactions, e]}
+                  }
+
+                  return r
+                }),
+              }
+            })
         )
-
-        const annotate = n => ({
-          ...n,
-          user: $accounts[n.pubkey],
-          replies: (repliesById[n.id] || []).map(reply => annotate(reply)),
-          reactions: (reactionsById[n.id] || []).map(reaction => annotate(reaction)),
-        })
-
-        return sortBy(prop('created'), $notes.map(annotate))
       }
-    )
+    })
+  )
 
-    const unsubscribe = annotatedNotes.subscribe(debounce(100, cb))
+  const loadChunk = async () => {
+    const chunk = await annotateNotesChunk(await cursor.chunk(), {showParents})
 
-    return () => {
-      unsubscribe()
+    addChunk(chunk)
 
-      closeRequest()
+    // If we have an empty chunk, increase our step size so we can get back to where
+    // we might have old events. Once we get a chunk, knock it down to the default again
+    if (chunk.length === 0) {
+      cursor.delta = Math.min(timedelta(30, 'days'), cursor.delta * 2)
+    } else {
+      cursor.delta = delta
     }
   }
 
-  // Allow caller to suspend/restart the subscription
-  return start
-}
+  const onScroll = debounce(1000, async () => {
+    /* eslint no-constant-condition: 0 */
+    while (true) {
+      // If a modal opened up, wait for them to close it
+      if (!isInModal && get(modal)) {
+        await sleep(1000)
 
-export const findNotesAndWatchModal = (filters, cb) => {
-  const start = findNotes(filters, cb)
+        continue
+      }
 
-  let stop = start()
+      // While we have empty space, fill it
+      if (window.scrollY + window.innerHeight * 3 < document.body.scrollHeight) {
+        break
+      }
 
-  // Suspend our subscription while we have note detail open
-  // so we can avoid exceeding our concurrent subscription limit
-  const unsub = modal.subscribe($modal => {
-    if ($modal) {
-      stop && stop()
-      stop = null
-    } else if (!stop) {
-      // Wait for animations to complete
-      setTimeout(
-        () => {
-          stop = start()
-        },
-        600
-      )
+      // If we've gone back to the network's inception we're done
+      if (cursor.since <= 1633046400) {
+        break
+      }
+
+      await loadChunk()
     }
   })
 
-  return () => {
-    stop && stop()
-    unsub()
+  onScroll()
+
+  return {
+    notes,
+    onScroll,
+    unsub: () => {
+      cursor.stop()
+      unsub()
+    },
   }
 }
 

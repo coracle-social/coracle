@@ -1,25 +1,31 @@
 <script>
   import {onMount} from 'svelte'
   import {find, propEq} from 'ramda'
-  import {findNotes} from "src/state/app"
+  import {notesCursor} from "src/state/app"
   import {user} from "src/state/user"
   import Note from 'src/partials/Note.svelte'
 
   export let note
 
-  onMount(() => {
-    const start = findNotes(
+  let onScroll
+
+  onMount(async () => {
+    const cursor = await notesCursor(
       [{ids: [note.id]},
        {'#e': [note.id]},
        // We can't target reaction deletes by e tag, so get them
        // all so we can support toggling like/flags for our user
        {kinds: [5], authors: $user ? [$user.pubkey] : []}],
-      $notes => {
-        note = find(propEq('id', note.id), $notes) || note
-      }
+      {isInModal: true}
     )
 
-    return start()
+    cursor.notes.subscribe($notes => {
+      note = find(propEq('id', note.id), $notes) || note
+    })
+
+    onScroll = cursor.onScroll
+
+    return cursor.unsub
   })
 </script>
 

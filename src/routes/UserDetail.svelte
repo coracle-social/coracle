@@ -1,27 +1,25 @@
 <script>
   import {onMount} from 'svelte'
-  import {reverse} from 'ramda'
   import {fly} from 'svelte/transition'
   import Note from "src/partials/Note.svelte"
   import {user as currentUser} from 'src/state/user'
-  import {accounts, findNotesAndWatchModal} from "src/state/app"
+  import {accounts, notesCursor} from "src/state/app"
 
   export let pubkey
 
   let user
   let notes
+  let onScroll
 
   $: user = $accounts[pubkey]
 
-  onMount(() => {
-    return findNotesAndWatchModal({
-      authors: [pubkey],
-      limit: 100,
-    }, $notes => {
-      if ($notes.length) {
-        notes = $notes
-      }
-    })
+  onMount(async () => {
+    const cursor = await notesCursor({authors: [pubkey]})
+
+    notes = cursor.notes
+    onScroll = cursor.onScroll
+
+    return cursor.unsub
   })
 </script>
 
@@ -47,7 +45,7 @@
   </div>
   <div class="h-px bg-medium" in:fly={{y: 20, delay: 200}} />
   <ul class="flex flex-col -mt-4" in:fly={{y: 20, delay: 400}}>
-    {#each reverse(notes || []) as n (n.id)}
+    {#each (notes ? $notes : []) as n (n.id)}
     <li class="border-l border-solid border-medium pb-2">
       <Note interactive note={n} />
       {#each n.replies as r (r.id)}
@@ -56,8 +54,6 @@
         </div>
       {/each}
     </li>
-    {:else}
-    <li class="py-4">This user hasn't posted any notes.</li>
     {/each}
   </ul>
 </div>
