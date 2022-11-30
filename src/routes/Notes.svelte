@@ -1,12 +1,13 @@
 <script>
   import {onMount} from 'svelte'
+  import {writable} from 'svelte/store'
   import {navigate} from "svelte-routing"
   import Anchor from "src/partials/Anchor.svelte"
   import Note from "src/partials/Note.svelte"
   import {relays} from "src/state/nostr"
-  import {notesCursor} from "src/state/app"
+  import {notesLoader, notesListener} from "src/state/app"
 
-  let notes
+  const notes = writable([])
   let onScroll
 
   const createNote = () => {
@@ -14,12 +15,15 @@
   }
 
   onMount(async () => {
-    const cursor = await notesCursor({kinds: [1]}, {showParents: true})
+    const loader = await notesLoader(notes, {kinds: [1]}, {showParents: true})
+    const listener = await notesListener(notes, {kinds: [1]})
 
-    notes = cursor.notes
-    onScroll = cursor.onScroll
+    onScroll = loader.onScroll
 
-    return cursor.unsub
+    return () => {
+      loader.unsub()
+      listener.unsub()
+    }
   })
 </script>
 

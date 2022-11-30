@@ -1,31 +1,32 @@
 <script>
   import {onMount} from 'svelte'
+  import {writable} from 'svelte/store'
   import {find, propEq} from 'ramda'
-  import {notesCursor} from "src/state/app"
+  import {notesLoader, notesListener} from "src/state/app"
   import {user} from "src/state/user"
   import Note from 'src/partials/Note.svelte'
 
   export let note
 
+  const notes = writable([])
   let onScroll
 
   onMount(async () => {
-    const cursor = await notesCursor(
-      [{ids: [note.id]},
-       {'#e': [note.id]},
-       // We can't target reaction deletes by e tag, so get them
-       // all so we can support toggling like/flags for our user
-       {kinds: [5], authors: $user ? [$user.pubkey] : []}],
-      {isInModal: true}
-    )
+    const loader = await notesLoader(notes, {ids: [note.id]}, {isInModal: true})
+    const listener = await notesListener(notes, [,
+      {'#e': [note.id]},
+      // We can't target reaction deletes by e tag, so get them
+      // all so we can support toggling like/flags for our user
+      {kinds: [5], authors: $user ? [$user.pubkey] : []}
+    ])
 
-    cursor.notes.subscribe($notes => {
+    notes.subscribe($notes => {
       note = find(propEq('id', note.id), $notes) || note
     })
 
-    onScroll = cursor.onScroll
+    onScroll = loader.onScroll
 
-    return cursor.unsub
+    return loader.unsub
   })
 </script>
 

@@ -1,13 +1,24 @@
-import {prop, identity, whereEq, reverse, uniq, sortBy, uniqBy, find, last, pluck, groupBy} from 'ramda'
+import {when, prop, identity, whereEq, reverse, uniq, sortBy, uniqBy, find, last, pluck, groupBy} from 'ramda'
 import {debounce} from 'throttle-debounce'
 import {writable, get} from 'svelte/store'
 import {navigate} from "svelte-routing"
 import {switcherFn} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta, sleep} from "src/util/misc"
 import {user} from 'src/state/user'
-import {_channels, filterMatches, Cursor, channels, relays, findReply} from 'src/state/nostr'
+import {_channels, filterMatches, Cursor, channels, relays, findReplyTo} from 'src/state/nostr'
 
 export const modal = writable(null)
+
+export const logout = () => {
+  // Give any animations a moment to finish
+  setTimeout(() => {
+    user.set(null)
+    relays.set([])
+    navigate("/login")
+  }, 200)
+}
+
+// Accounts
 
 export const accounts = writable(getLocalJson("coracle/accounts") || {})
 
@@ -20,17 +31,6 @@ user.subscribe($user => {
     accounts.update($accounts => ({...$accounts, [$user.pubkey]: $user}))
   }
 })
-
-export const logout = () => {
-  // Give any animations a moment to finish
-  setTimeout(() => {
-    user.set(null)
-    relays.set([])
-    navigate("/login")
-  }, 200)
-}
-
-// Accounts
 
 export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
   const $accounts = get(accounts)
@@ -64,7 +64,7 @@ export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
 // Notes
 
 export const annotateNotesChunk = async (chunk, {showParents = false} = {}) => {
-  const parentIds = chunk.map(findReply).filter(identity)
+  const parentIds = chunk.map(findReplyTo).filter(identity)
 
   if (showParents && parentIds.length) {
     // Find parents of replies to provide context
@@ -75,7 +75,7 @@ export const annotateNotesChunk = async (chunk, {showParents = false} = {}) => {
 
     // Remove replies, show parents instead
     chunk = parents
-      .concat(chunk.filter(e => !find(whereEq({id: findReply(e)}), parents)))
+      .concat(chunk.filter(e => !find(whereEq({id: findReplyTo(e)}), parents)))
   }
 
   if (chunk.length === 0) {
@@ -116,7 +116,8 @@ export const annotateNotesChunk = async (chunk, {showParents = false} = {}) => {
   return reverse(sortBy(prop('created'), chunk.map(annotate)))
 }
 
-export const notesCursor = async (
+export const notesLoader = async (
+  notes,
   filter,
   {
     showParents = false,
@@ -125,97 +126,6 @@ export const notesCursor = async (
   } = {}
 ) => {
   const cursor = new Cursor(filter, delta)
-  const notes = writable([])
-
-  const addChunk = chunk => {
-    notes.update($notes => uniqBy(prop('id'), $notes.concat(chunk)))
-  }
-
-  const unsub = await _channels.listener.sub(
-    {kinds: [1, 5, 7], since: now()},
-    e => switcherFn(e.kind, {
-      1: async () => {
-        const replyId = findReply(e)
-
-        if (replyId) {
-          const [annotated] = await annotateNotesChunk([e])
-
-          notes.update($notes =>
-            $notes
-              .map(n => {
-                if (n.id === replyId) {
-                  return {...n, replies: [...n.replies, annotated]}
-                }
-
-                return {
-                  ...n,
-                  replies: n.replies.map(r => {
-                    if (r.id === replyId) {
-                      return {...r, replies: [...r.replies, annotated]}
-                    }
-
-                    return r
-                  }),
-                }
-              })
-          )
-        } else if (filterMatches(filter, e)) {
-          addChunk(await annotateNotesChunk([e], {showParents}))
-        }
-      },
-      5: () => {
-        const ids = e.tags.map(t => t[1])
-
-        notes.update($notes =>
-          $notes
-            .filter(e => !ids.includes(e.id))
-            .map(n => ({
-              ...n,
-              replies: n.replies.filter(e => !ids.includes(e.id)),
-              reactions: n.reactions.filter(e => !ids.includes(e.id)),
-            }))
-        )
-      },
-      7: () => {
-        const replyId = findReply(e)
-
-        notes.update($notes =>
-          $notes
-            .map(n => {
-              if (n.id === replyId) {
-                return {...n, reactions: [...n.reactions, e]}
-              }
-
-              return {
-                ...n,
-                replies: n.replies.map(r => {
-                  if (r.id === replyId) {
-                    return {...r, reactions: [...r.reactions, e]}
-                  }
-
-                  return r
-                }),
-              }
-            })
-        )
-      }
-    })
-  )
-
-  const loadChunk = async () => {
-    const chunk = await cursor.chunk()
-    const annotatedChunk = await annotateNotesChunk(chunk, {showParents})
-
-    addChunk(annotatedChunk)
-
-    // If we have an empty chunk, increase our step size so we can get back to where
-    // we might have old events. Once we get a chunk, knock it down to the default again
-    if (annotatedChunk.length === 0) {
-      cursor.delta = Math.min(timedelta(30, 'days'), cursor.delta * 2)
-    } else {
-      cursor.delta = delta
-    }
-  }
 
   const onScroll = debounce(1000, async () => {
     /* eslint no-constant-condition: 0 */
@@ -237,19 +147,80 @@ export const notesCursor = async (
         break
       }
 
-      await loadChunk()
+      const chunk = await cursor.chunk()
+      const annotated = await annotateNotesChunk(chunk, {showParents})
+
+      notes.update($notes => uniqBy(prop('id'), $notes.concat(annotated)))
+
+      // If we have an empty chunk, increase our step size so we can get back to where
+      // we might have old events. Once we get a chunk, knock it down to the default again
+      if (annotated.length === 0) {
+        cursor.delta = Math.min(timedelta(30, 'days'), cursor.delta * 2)
+      } else {
+        cursor.delta = delta
+      }
     }
   })
 
   onScroll()
 
   return {
-    notes,
     onScroll,
     unsub: () => {
       cursor.stop()
-      unsub()
     },
   }
 }
 
+export const notesListener = async (notes, filter) => {
+  const updateNote = (id, f) =>
+    notes.update($notes =>
+      $notes
+        .map(n => {
+          if (n.id === id) {
+            return f(n)
+          }
+
+          return {...n, replies: n.replies.map(when(whereEq({id}), f))}
+        })
+    )
+
+  const deleteNotes = ($notes, ids) =>
+    $notes
+      .filter(e => !ids.includes(e.id))
+      .map(n => ({
+        ...n,
+        replies: deleteNotes(n.replies, ids),
+        reactions: n.reactions.filter(e => !ids.includes(e.id)),
+      }))
+
+  return await _channels.listener.sub(
+    {kinds: [1, 5, 7], since: now()},
+    e => switcherFn(e.kind, {
+      1: async () => {
+        const id = findReplyTo(e)
+
+        if (id) {
+          const [reply] = await annotateNotesChunk([e])
+
+          updateNote(id, n => ({...n, replies: n.replies.concat(reply)}))
+        } else if (filterMatches(filter, e)) {
+          const [note] = await annotateNotesChunk([e])
+
+          notes.update($notes => uniqBy(prop('id'), [note].concat($notes)))
+        }
+      },
+      5: () => {
+        const ids = e.tags.map(t => t[1])
+
+        notes.update($notes => deleteNotes($notes, ids))
+      },
+      7: () => {
+        console.log(e)
+        const id = findReplyTo(e)
+
+        updateNote(id, n => ({...n, reactions: n.reactions.concat(e)}))
+      }
+    })
+  )
+}

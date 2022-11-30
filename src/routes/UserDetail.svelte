@@ -1,25 +1,30 @@
 <script>
   import {onMount} from 'svelte'
+  import {writable} from 'svelte/store'
   import {fly} from 'svelte/transition'
   import Note from "src/partials/Note.svelte"
   import {user as currentUser} from 'src/state/user'
-  import {accounts, notesCursor} from "src/state/app"
+  import {accounts, notesLoader, notesListener} from "src/state/app"
 
   export let pubkey
 
   let user
-  let notes
+  const notes = writable([])
   let onScroll
 
   $: user = $accounts[pubkey]
 
   onMount(async () => {
-    const cursor = await notesCursor({authors: [pubkey]})
+    const filter = {kinds: [1], authors: [pubkey]}
+    const loader = await notesLoader(notes, filter, {showParents: true})
+    const listener = await notesListener(notes, filter)
 
-    notes = cursor.notes
-    onScroll = cursor.onScroll
+    onScroll = loader.onScroll
 
-    return cursor.unsub
+    return () => {
+      loader.unsub()
+      listener.unsub()
+    }
   })
 </script>
 

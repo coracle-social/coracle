@@ -26,7 +26,7 @@ export const filterTags = (where, events) =>
 export const findTag = (where, events) => first(filterTags(where, events))
 
 // Support the deprecated version where tags are marked as replies
-export const findReply = e =>
+export const findReplyTo = e =>
   findTag({tag: "e", type: "reply"}, e) || findTag({tag: "e"}, e)
 
 export const filterMatches = (filter, e)  => {
