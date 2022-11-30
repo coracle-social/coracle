@@ -1,46 +1,54 @@
 <script>
   import {onMount, onDestroy} from 'svelte'
   import {writable} from 'svelte/store'
+  import {uniqBy, prop} from 'ramda'
   import {fly} from 'svelte/transition'
   import Note from "src/partials/Note.svelte"
+  import {Cursor} from 'src/state/nostr'
   import {user as currentUser} from 'src/state/user'
-  import {accounts, notesLoader, notesListener, modal} from "src/state/app"
+  import {accounts, scroller, notesListener, modal, annotateNotes} from "src/state/app"
 
   export let pubkey
 
   const notes = writable([])
   let user
-  let loader
+  let cursor
   let listener
+  let scroll
 
   $: user = $accounts[pubkey]
 
   onMount(async () => {
-    loader = await notesLoader(notes, {kinds: [1], authors: [pubkey]}, {showParents: true})
+    cursor = new Cursor({kinds: [1], authors: [pubkey]})
     listener = await notesListener(notes, {kinds: [1, 5, 7], authors: [pubkey]})
+    scroll = scroller(cursor, async chunk => {
+      const annotated = await annotateNotes(chunk, {showParents: true})
+
+      notes.update($notes => uniqBy(prop('id'), $notes.concat(annotated)))
+    })
 
     // Populate our initial empty space
-    loader.onScroll()
+    scroll()
 
     // When a modal opens, suspend our subscriptions
     modal.subscribe(async $modal => {
       if ($modal) {
-        loader.stop()
+        cursor.stop()
         listener.stop()
       } else {
-        loader.start()
+        cursor.start()
         listener.start()
       }
     })
   })
 
   onDestroy(() => {
-    loader?.stop()
+    cursor?.stop()
     listener?.stop()
   })
 </script>
 
-<svelte:window on:scroll={loader?.onScroll} />
+<svelte:window on:scroll={scroll} />
 
 {#if user}
 <div class="max-w-2xl m-auto flex flex-col gap-4 py-8 px-4">

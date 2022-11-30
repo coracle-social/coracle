@@ -8,7 +8,7 @@
   import Anchor from 'src/partials/Anchor.svelte'
   import {dispatch} from "src/state/dispatch"
   import {channels, findReplyTo} from "src/state/nostr"
-  import {accounts, modal, annotateNotesChunk} from "src/state/app"
+  import {accounts, modal, annotateNotes} from "src/state/app"
   import {user} from "src/state/user"
   import {formatTimestamp} from 'src/util/misc'
   import UserBadge from "src/partials/UserBadge.svelte"
@@ -37,7 +37,7 @@
   }
 
   const showParent = async () => {
-    const notes = await annotateNotesChunk(
+    const notes = await annotateNotes(
       await channels.getter.all({kinds: [1, 5, 7], ids: [parentId]})
     )
 

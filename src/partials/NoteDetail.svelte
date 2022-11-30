@@ -2,38 +2,30 @@
   import {onMount} from 'svelte'
   import {writable} from 'svelte/store'
   import {find, propEq} from 'ramda'
-  import {notesLoader, notesListener, modal} from "src/state/app"
+  import {Cursor} from "src/state/nostr"
+  import {notesListener, modal} from "src/state/app"
   import {user} from "src/state/user"
   import Note from 'src/partials/Note.svelte'
 
   export let note
 
   const notes = writable([note])
-  let loader
+  let cursor
   let listener
 
   onMount(() => {
-    const opts = {isInModal: true}
-
-    if (note.created_at) {
-      opts.since = note.created_at
-    }
+    cursor = new Cursor({ids: [note.id]}, note.created_at)
 
     // Can't use async/await since we need to return unsubscribe functions
-    Promise.all([
-      notesLoader(notes, {ids: [note.id]}, opts),
-      notesListener(notes, [
-        {kinds: [1, 5, 7], '#e': [note.id]},
-        // We can't target reaction deletes by e tag, so get them
-        // all so we can support toggling like/flags for our user
-        {kinds: [5], authors: $user ? [$user.pubkey] : []}
-      ]),
-    ]).then(([_loader, _listener]) => {
-      loader = _loader
+    notesListener(notes, [
+      {kinds: [1, 5, 7], '#e': [note.id]},
+      // We can't target reaction deletes by e tag, so get them
+      // all so we can support toggling like/flags for our user
+      {kinds: [5], authors: $user ? [$user.pubkey] : []}
+    ]).then(_listener => {
       listener = _listener
 
       // Populate our initial empty space
-      loader.onScroll()
       listener.start()
     })
 
@@ -43,7 +35,7 @@
 
     // Unsubscribe when modal closes so that others can re-subscribe sooner
     const unsubModal = modal.subscribe($modal => {
-      loader?.stop()
+      cursor?.stop()
       listener?.stop()
     })
 
@@ -53,8 +45,6 @@
     }
   })
 </script>
-
-<svelte:window on:scroll={loader?.onScroll} />
 
 {#if note.pubkey}
 <Note showEntire note={note} />

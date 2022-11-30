@@ -2,45 +2,52 @@
   import {onMount, onDestroy} from 'svelte'
   import {writable} from 'svelte/store'
   import {navigate} from "svelte-routing"
+  import {uniqBy, prop} from 'ramda'
   import Anchor from "src/partials/Anchor.svelte"
   import Note from "src/partials/Note.svelte"
-  import {relays} from "src/state/nostr"
-  import {notesLoader, notesListener, modal} from "src/state/app"
+  import {relays, Cursor} from "src/state/nostr"
+  import {scroller, annotateNotes, notesListener, modal} from "src/state/app"
 
   const notes = writable([])
-  let loader
+  let cursor
   let listener
+  let scroll
 
   const createNote = () => {
     navigate("/notes/new")
   }
 
   onMount(async () => {
-    loader = await notesLoader(notes, {kinds: [1]}, {showParents: true})
+    cursor = new Cursor({kinds: [1]})
     listener = await notesListener(notes, {kinds: [1, 5, 7]})
+    scroll = scroller(cursor, async chunk => {
+      const annotated = await annotateNotes(chunk, {showParents: true})
+
+      notes.update($notes => uniqBy(prop('id'), $notes.concat(annotated)))
+    })
 
     // Populate our initial empty space
-    loader.onScroll()
+    scroll()
 
     // When a modal opens, suspend our subscriptions
     modal.subscribe(async $modal => {
       if ($modal) {
-        loader.stop()
+        cursor.stop()
         listener.stop()
       } else {
-        loader.start()
+        cursor.start()
         listener.start()
       }
     })
   })
 
   onDestroy(() => {
-    loader?.stop()
+    cursor?.stop()
     listener?.stop()
   })
 </script>
 
-<svelte:window on:scroll={loader?.onScroll} />
+<svelte:window on:scroll={scroll} />
 
 <ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
   {#each (notes ? $notes : []) as n (n.id)}

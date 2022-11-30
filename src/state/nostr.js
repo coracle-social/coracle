@@ -108,10 +108,10 @@ export const channels = {
 // older events again for pagination. Since we have to limit channels to 3 per nip 01,
 // this requires us to unsubscribe and re-subscribe frequently
 export class Cursor {
-  constructor(filter, delta = timedelta(1, 'hours')) {
+  constructor(filter, delta) {
     this.filter = ensurePlural(filter)
-    this.delta = delta
-    this.since = now() - delta
+    this.delta = delta || timedelta(1, 'hours')
+    this.since = now() - this.delta
     this.until = now()
     this.sub = null
     this.q = []

@@ -5,7 +5,7 @@ import {navigate} from "svelte-routing"
 import {switcherFn, ensurePlural} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta, sleep} from "src/util/misc"
 import {user} from 'src/state/user'
-import {epoch, filterMatches, Listener, Cursor, channels, relays, findReplyTo} from 'src/state/nostr'
+import {epoch, filterMatches, Listener, channels, relays, findReplyTo} from 'src/state/nostr'
 
 export const modal = writable(null)
 
@@ -63,7 +63,7 @@ export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
 
 // Notes
 
-export const annotateNotesChunk = async (chunk, {showParents = false} = {}) => {
+export const annotateNotes = async (chunk, {showParents = false} = {}) => {
   const parentIds = chunk.map(findReplyTo).filter(identity)
 
   if (showParents && parentIds.length) {
@@ -116,56 +116,6 @@ export const annotateNotesChunk = async (chunk, {showParents = false} = {}) => {
   return reverse(sortBy(prop('created'), chunk.map(annotate)))
 }
 
-export const notesLoader = async (
-  notes,
-  filter,
-  {
-    showParents = false,
-    delta = timedelta(1, 'hours'),
-    isInModal = false,
-    since = epoch,
-  } = {}
-) => {
-  const cursor = new Cursor(filter, delta)
-
-  const onScroll = debounce(1000, async () => {
-    /* eslint no-constant-condition: 0 */
-    while (true) {
-      // If a modal opened up, wait for them to close it
-      if (!isInModal && get(modal)) {
-        await sleep(1000)
-
-        continue
-      }
-
-      // While we have empty space, fill it
-      if (window.scrollY + window.innerHeight * 3 < document.body.scrollHeight) {
-        break
-      }
-
-      // Stop if we've gone back far enough
-      if (cursor.since <= since) {
-        break
-      }
-
-      const chunk = await cursor.chunk()
-      const annotated = await annotateNotesChunk(chunk, {showParents})
-
-      notes.update($notes => uniqBy(prop('id'), $notes.concat(annotated)))
-
-      // If we have an empty chunk, increase our step size so we can get back to where
-      // we might have old events. Once we get a chunk, knock it down to the default again
-      if (annotated.length === 0) {
-        cursor.delta = Math.min(timedelta(30, 'days'), cursor.delta * 2)
-      } else {
-        cursor.delta = delta
-      }
-    }
-  })
-
-  return Object.assign(cursor, {onScroll})
-}
-
 export const notesListener = async (notes, filter) => {
   const updateNote = (id, f) =>
     notes.update($notes =>
@@ -195,11 +145,11 @@ export const notesListener = async (notes, filter) => {
         const id = findReplyTo(e)
 
         if (id) {
-          const [reply] = await annotateNotesChunk([e])
+          const [reply] = await annotateNotes([e])
 
           updateNote(id, n => ({...n, replies: n.replies.concat(reply)}))
         } else if (filterMatches(filter, e)) {
-          const [note] = await annotateNotesChunk([e])
+          const [note] = await annotateNotes([e])
 
           notes.update($notes => uniqBy(prop('id'), [note].concat($notes)))
         }
@@ -216,4 +166,46 @@ export const notesListener = async (notes, filter) => {
       }
     })
   )
+}
+
+// UI
+
+export const scroller = (cursor, cb, {isInModal = false, since = epoch} = {}) => {
+  const startingDelta = cursor.delta
+
+  return debounce(1000, async () => {
+    /* eslint no-constant-condition: 0 */
+    while (true) {
+      // If a modal opened up, wait for them to close it
+      if (!isInModal && get(modal)) {
+        await sleep(1000)
+
+        continue
+      }
+
+      // While we have empty space, fill it
+      if (window.scrollY + window.innerHeight * 3 < document.body.scrollHeight) {
+        break
+      }
+
+      // Stop if we've gone back far enough
+      if (cursor.since <= since) {
+        break
+      }
+
+      // Get our chunk
+      const chunk = await cursor.chunk()
+
+      // Notify the caller
+      await cb(chunk)
+
+      // If we have an empty chunk, increase our step size so we can get back to where
+      // we might have old events. Once we get a chunk, knock it down to the default again
+      if (chunk.length === 0) {
+        cursor.delta = Math.min(timedelta(30, 'days'), cursor.delta * 2)
+      } else {
+        cursor.delta = startingDelta
+      }
+    }
+  })
 }
