@@ -1,11 +1,11 @@
-import {when, prop, identity, whereEq, reverse, uniq, sortBy, uniqBy, find, last, pluck, groupBy} from 'ramda'
+import {when, assoc, prop, identity, whereEq, reverse, uniq, sortBy, uniqBy, find, last, pluck, groupBy} from 'ramda'
 import {debounce} from 'throttle-debounce'
 import {writable, get} from 'svelte/store'
 import {navigate} from "svelte-routing"
-import {switcherFn} from 'hurdak/lib/hurdak'
+import {switcherFn, ensurePlural} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta, sleep} from "src/util/misc"
 import {user} from 'src/state/user'
-import {_channels, filterMatches, Cursor, channels, relays, findReplyTo} from 'src/state/nostr'
+import {filterMatches, Cursor, channels, relays, findReplyTo} from 'src/state/nostr'
 
 export const modal = writable(null)
 
@@ -68,7 +68,7 @@ export const annotateNotesChunk = async (chunk, {showParents = false} = {}) => {
 
   if (showParents && parentIds.length) {
     // Find parents of replies to provide context
-    const parents = await _channels.getter.all({
+    const parents = await channels.getter.all({
       kinds: [1],
       ids: parentIds,
     })
@@ -82,12 +82,12 @@ export const annotateNotesChunk = async (chunk, {showParents = false} = {}) => {
     return chunk
   }
 
-  const replies = await _channels.getter.all({
+  const replies = await channels.getter.all({
     kinds: [1],
     '#e': pluck('id', chunk),
   })
 
-  const reactions = await _channels.getter.all({
+  const reactions = await channels.getter.all({
     kinds: [7],
     '#e': pluck('id', chunk.concat(replies)),
   })
@@ -123,6 +123,7 @@ export const notesLoader = async (
     showParents = false,
     delta = timedelta(1, 'hours'),
     isInModal = false,
+    since = 1633046400, // nostr epoch
   } = {}
 ) => {
   const cursor = new Cursor(filter, delta)
@@ -142,8 +143,8 @@ export const notesLoader = async (
         break
       }
 
-      // If we've gone back to the network's inception we're done
-      if (cursor.since <= 1633046400) {
+      // Stop if we've gone back far enough
+      if (cursor.since <= since) {
         break
       }
 
@@ -165,6 +166,7 @@ export const notesLoader = async (
   onScroll()
 
   return {
+    cursor,
     onScroll,
     unsub: () => {
       cursor.stop()
@@ -194,8 +196,8 @@ export const notesListener = async (notes, filter) => {
         reactions: n.reactions.filter(e => !ids.includes(e.id)),
       }))
 
-  return await _channels.listener.sub(
-    {kinds: [1, 5, 7], since: now()},
+  return await channels.listener.sub(
+    ensurePlural(filter).map(assoc('since', now())),
     e => switcherFn(e.kind, {
       1: async () => {
         const id = findReplyTo(e)
@@ -216,7 +218,6 @@ export const notesListener = async (notes, filter) => {
         notes.update($notes => deleteNotes($notes, ids))
       },
       7: () => {
-        console.log(e)
         const id = findReplyTo(e)
 
         updateNote(id, n => ({...n, reactions: n.reactions.concat(e)}))

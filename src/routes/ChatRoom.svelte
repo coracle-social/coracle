@@ -59,13 +59,9 @@
       return top + height < bodyRect.height
     }
 
-    return channels.watcher.sub({
-      filter: {
-        limit: 100,
-        kinds: [42, 43, 44],
-        '#e': [room],
-      },
-      cb: e => {
+    return await channels.listener.sub(
+      {limit: 100, kinds: [42, 43, 44], '#e': [room]},
+      e => {
         switcherFn(e.kind, {
           42: () => {
             messages = messages.concat(e)
@@ -86,7 +82,7 @@
           44: () => null,
         })
       },
-    })
+    )
   })
 
   const edit = () => {

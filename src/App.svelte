@@ -35,6 +35,7 @@
 
   let menuIcon
   let scrollY
+  let suspendedSubs = []
 
   export let url = ""
 
@@ -47,6 +48,7 @@
     })
 
     modal.subscribe($modal => {
+      // Keep scroll position on body, but don't allow scrolling
       if ($modal) {
         scrollY = window.scrollY
 

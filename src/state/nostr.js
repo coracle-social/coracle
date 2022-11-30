@@ -1,5 +1,4 @@
 import {writable} from 'svelte/store'
-import {debounce} from 'throttle-debounce'
 import {relayPool, getPublicKey} from 'nostr-tools'
 import {last, intersection, uniqBy, prop} from 'ramda'
 import {first, noop, ensurePlural} from 'hurdak/lib/hurdak'
@@ -51,25 +50,34 @@ export class Channel {
     this.name = name
     this.p = Promise.resolve()
   }
-  sub(filter, cb, onEose = noop) {
-    this.p = this.p.then(() => {
-      const sub = nostr.sub({filter, cb}, this.name, onEose)
+  async sub(filter, cb, onEose = noop) {
+    // Make sure callers have to wait for the previous sub to be done
+    // before they can get a new one.
+    await this.p
 
-      return () => sub.unsub()
+    let resolve
+    const sub = nostr.sub({filter, cb}, this.name, r => {
+      onEose(r)
+
+      resolve()
     })
 
-    return this.p
+    this.p = new Promise(r => {
+      resolve = r
+    })
+
+    return sub
   }
   all(filter) {
     /* eslint no-async-promise-executor: 0 */
     return new Promise(async resolve => {
       const result = []
 
-      const unsub = await this.sub(
+      const sub = await this.sub(
         filter,
         e => result.push(e),
         r => {
-          unsub()
+          sub.unsub()
 
           resolve(result)
         },
@@ -78,7 +86,7 @@ export class Channel {
   }
 }
 
-export const _channels = {
+export const channels = {
   listener: new Channel('listener'),
   getter: new Channel('getter'),
 }
@@ -92,13 +100,13 @@ export class Cursor {
     this.delta = delta
     this.since = now() - delta
     this.until = now()
-    this.unsub = null
+    this.sub = null
     this.q = []
     this.p = Promise.resolve()
   }
   async start() {
-    if (!this.unsub) {
-      this.unsub = await _channels.getter.sub(
+    if (!this.sub) {
+      this.sub = await channels.getter.sub(
         this.filter.map(f => ({...f, since: this.since, until: this.until})),
         e => this.onEvent(e),
         r => this.onEose(r)
@@ -106,9 +114,9 @@ export class Cursor {
     }
   }
   stop() {
-    if (this.unsub) {
-      this.unsub()
-      this.unsub = null
+    if (this.sub) {
+      this.sub.unsub()
+      this.sub = null
     }
   }
   restart() {
@@ -133,81 +141,11 @@ export class Cursor {
     while (true) {
       await new Promise(requestAnimationFrame)
 
-      if (!this.unsub) {
+      if (!this.sub) {
         return this.q.splice(0)
       }
     }
   }
-}
-
-// Track who is subscribing, so we don't go over our limit
-
-const channel = name => {
-  let active = false
-  let promise = Promise.resolve('init')
-
-  const _chan = {
-    sub: params => {
-      if (active) {
-        console.error(`Channel ${name} is already active.`)
-      }
-
-      active = true
-
-      const sub = nostr.sub(params)
-
-      return () => {
-        active = false
-
-        sub.unsub()
-      }
-    },
-    all: filter => {
-      // Wait for any other subscriptions to finish
-      promise = promise.then(() => {
-        return new Promise(resolve => {
-          // Collect results
-          let result = []
-
-          // As long as events are coming in, don't resolve. When
-          // events are no longer streaming, resolve and close the subscription
-          const done = debounce(300, () => {
-            unsub()
-
-            resolve(result)
-          })
-
-          // Create our usbscription, every time we get an event, attempt to complete
-          const unsub = _chan.sub({
-            filter,
-            cb: e => {
-              result.push(e)
-
-              done()
-            },
-          })
-
-          // If our filter doesn't match anything, be sure to resolve the promise
-          setTimeout(done, 1000)
-        })
-      })
-
-      return promise
-    },
-    first: async filter => {
-      return first(await channels.getter.all({...filter, limit: 1}))
-    },
-    last: async filter => {
-      return last(await channels.getter.all({...filter}))
-    },
-  }
-
-  return _chan
-}
-
-export const channels = {
-  watcher: channel('main'),
-  getter: channel('getter'),
 }
 
 // Augment nostr with some extra methods

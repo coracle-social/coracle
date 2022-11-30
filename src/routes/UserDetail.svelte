@@ -1,5 +1,5 @@
 <script>
-  import {onMount} from 'svelte'
+  import {onMount, onDestroy} from 'svelte'
   import {writable} from 'svelte/store'
   import {fly} from 'svelte/transition'
   import Note from "src/partials/Note.svelte"
@@ -8,25 +8,25 @@
 
   export let pubkey
 
-  let user
   const notes = writable([])
-  let onScroll
+  let user
+  let loader
+  let listener
 
   $: user = $accounts[pubkey]
 
   onMount(async () => {
-    const filter = {kinds: [1], authors: [pubkey]}
-    const loader = await notesLoader(notes, filter, {showParents: true})
-    const listener = await notesListener(notes, filter)
+    loader = await notesLoader(notes, {kinds: [1], authors: [pubkey]}, {showParents: true})
+    listener = await notesListener(notes, {kinds: [1, 5, 7], authors: [pubkey]})
+  })
 
-    onScroll = loader.onScroll
-
-    return () => {
-      loader.unsub()
-      listener.unsub()
-    }
+  onDestroy(() => {
+    loader.unsub()
+    listener.unsub()
   })
 </script>
+
+<svelte:window on:scroll={loader?.onScroll} />
 
 {#if user}
 <div class="max-w-2xl m-auto flex flex-col gap-4 py-8 px-4">

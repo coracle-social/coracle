@@ -1,33 +1,43 @@
 <script>
-  import {onMount} from 'svelte'
+  import {onMount, onDestroy} from 'svelte'
   import {writable} from 'svelte/store'
   import {navigate} from "svelte-routing"
   import Anchor from "src/partials/Anchor.svelte"
   import Note from "src/partials/Note.svelte"
   import {relays} from "src/state/nostr"
-  import {notesLoader, notesListener} from "src/state/app"
+  import {notesLoader, notesListener, modal} from "src/state/app"
 
   const notes = writable([])
-  let onScroll
+  let loader
+  let listener
 
   const createNote = () => {
     navigate("/notes/new")
   }
 
   onMount(async () => {
-    const loader = await notesLoader(notes, {kinds: [1]}, {showParents: true})
-    const listener = await notesListener(notes, {kinds: [1]})
+    loader = await notesLoader(notes, {kinds: [1]}, {showParents: true})
+    listener = await notesListener(notes, {kinds: [1, 5, 7]})
 
-    onScroll = loader.onScroll
+    // When a modal opens, suspend our subscriptions
+    modal.subscribe(async $modal => {
+      if ($modal) {
+        loader.cursor.stop()
+        listener.unsub()
+      } else {
+        loader.cursor.start()
+        listener = await notesListener(notes, {kinds: [1, 5, 7]})
+      }
+    })
+  })
 
-    return () => {
-      loader.unsub()
-      listener.unsub()
-    }
+  onDestroy(() => {
+    loader?.unsub()
+    listener?.unsub()
   })
 </script>
 
-<svelte:window on:scroll={onScroll} />
+<svelte:window on:scroll={loader?.onScroll} />
 
 <ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
   {#each (notes ? $notes : []) as n (n.id)}
