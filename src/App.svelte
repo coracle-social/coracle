@@ -34,6 +34,7 @@
   const toggleSearch = () => searchIsOpen.update(x => !x)
 
   let menuIcon
+  let scrollY
 
   export let url = ""
 
@@ -42,6 +43,18 @@
     document.querySelector("html").addEventListener("click", e => {
       if (e.target !== menuIcon) {
         menuIsOpen.set(false)
+      }
+    })
+
+    modal.subscribe($modal => {
+      if ($modal) {
+        scrollY = window.scrollY
+
+        document.body.style.top = `-${scrollY}px`
+        document.body.style.position = `fixed`
+      } else {
+        document.body.style = ''
+        window.scrollTo(0, scrollY)
       }
     })
 
@@ -55,7 +68,7 @@
 
 <Router {url}>
   <div use:links class="h-full">
-    <div class="pt-16 text-white h-full" class:overflow-hidden={$modal}>
+    <div class="pt-16 text-white h-full">
       <Route path="/notes" component={Notes} />
       <Route path="/notes/new" component={NoteCreate} />
       <Route path="/chat" component={Chat} />

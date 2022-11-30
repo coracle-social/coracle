@@ -64,11 +64,13 @@ export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
 // Notes
 
 export const annotateNotesChunk = async (chunk, {showParents = false} = {}) => {
-  if (showParents) {
+  const parentIds = chunk.map(findReply).filter(identity)
+
+  if (showParents && parentIds.length) {
     // Find parents of replies to provide context
     const parents = await _channels.getter.all({
       kinds: [1],
-      ids: chunk.map(findReply).filter(identity),
+      ids: parentIds,
     })
 
     // Remove replies, show parents instead
@@ -133,7 +135,31 @@ export const notesCursor = async (
     {kinds: [1, 5, 7], since: now()},
     e => switcherFn(e.kind, {
       1: async () => {
-        if (filterMatches(filter, e)) {
+        const replyId = findReply(e)
+
+        if (replyId) {
+          const [annotated] = await annotateNotesChunk([e])
+
+          notes.update($notes =>
+            $notes
+              .map(n => {
+                if (n.id === replyId) {
+                  return {...n, replies: [...n.replies, annotated]}
+                }
+
+                return {
+                  ...n,
+                  replies: n.replies.map(r => {
+                    if (r.id === replyId) {
+                      return {...r, replies: [...r.replies, annotated]}
+                    }
+
+                    return r
+                  }),
+                }
+              })
+          )
+        } else if (filterMatches(filter, e)) {
           addChunk(await annotateNotesChunk([e], {showParents}))
         }
       },
@@ -151,19 +177,19 @@ export const notesCursor = async (
         )
       },
       7: () => {
-        const id = findReply(e)
+        const replyId = findReply(e)
 
         notes.update($notes =>
           $notes
             .map(n => {
-              if (n.id === id) {
+              if (n.id === replyId) {
                 return {...n, reactions: [...n.reactions, e]}
               }
 
               return {
                 ...n,
                 replies: n.replies.map(r => {
-                  if (r.id === id) {
+                  if (r.id === replyId) {
                     return {...r, reactions: [...r.reactions, e]}
                   }
 
@@ -177,13 +203,14 @@ export const notesCursor = async (
   )
 
   const loadChunk = async () => {
-    const chunk = await annotateNotesChunk(await cursor.chunk(), {showParents})
+    const chunk = await cursor.chunk()
+    const annotatedChunk = await annotateNotesChunk(chunk, {showParents})
 
-    addChunk(chunk)
+    addChunk(annotatedChunk)
 
     // If we have an empty chunk, increase our step size so we can get back to where
     // we might have old events. Once we get a chunk, knock it down to the default again
-    if (chunk.length === 0) {
+    if (annotatedChunk.length === 0) {
       cursor.delta = Math.min(timedelta(30, 'days'), cursor.delta * 2)
     } else {
       cursor.delta = delta
