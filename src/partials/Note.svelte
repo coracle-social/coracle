@@ -1,13 +1,14 @@
 <script>
   import cx from 'classnames'
-  import {find, last, uniqBy, prop, whereEq} from 'ramda'
+  import {find, uniqBy, prop, whereEq} from 'ramda'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {ellipsize} from 'hurdak/src/core'
   import {hasParent, toHtml} from 'src/util/html'
   import Anchor from 'src/partials/Anchor.svelte'
   import {dispatch} from "src/state/dispatch"
-  import {accounts, modal} from "src/state/app"
+  import {channels, findReplyTo} from "src/state/nostr"
+  import {accounts, modal, annotateNotesChunk} from "src/state/app"
   import {user} from "src/state/user"
   import {formatTimestamp} from 'src/util/misc'
   import UserBadge from "src/partials/UserBadge.svelte"
@@ -26,7 +27,7 @@
   $: {
     like = find(e => e.pubkey === $user?.pubkey && e.content === "+", note.reactions)
     flag = find(e => e.pubkey === $user?.pubkey && e.content === "-", note.reactions)
-    parentId = prop(1, find(t => last(t) === 'reply' ? t[1] : null, note.tags))
+    parentId = findReplyTo(note)
   }
 
   const onClick = e => {
@@ -35,8 +36,12 @@
     }
   }
 
-  const showParent = () => {
-    modal.set({note: {id: parentId}})
+  const showParent = async () => {
+    const notes = await annotateNotesChunk(
+      await channels.getter.all({kinds: [1, 5, 7], ids: [parentId]})
+    )
+
+    modal.set({note: notes[0]})
   }
 
   const react = content => {

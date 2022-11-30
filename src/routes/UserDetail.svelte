@@ -4,7 +4,7 @@
   import {fly} from 'svelte/transition'
   import Note from "src/partials/Note.svelte"
   import {user as currentUser} from 'src/state/user'
-  import {accounts, notesLoader, notesListener} from "src/state/app"
+  import {accounts, notesLoader, notesListener, modal} from "src/state/app"
 
   export let pubkey
 
@@ -18,11 +18,25 @@
   onMount(async () => {
     loader = await notesLoader(notes, {kinds: [1], authors: [pubkey]}, {showParents: true})
     listener = await notesListener(notes, {kinds: [1, 5, 7], authors: [pubkey]})
+
+    // Populate our initial empty space
+    loader.onScroll()
+
+    // When a modal opens, suspend our subscriptions
+    modal.subscribe(async $modal => {
+      if ($modal) {
+        loader.stop()
+        listener.stop()
+      } else {
+        loader.start()
+        listener.start()
+      }
+    })
   })
 
   onDestroy(() => {
-    loader.unsub()
-    listener.unsub()
+    loader?.stop()
+    listener?.stop()
   })
 </script>
 

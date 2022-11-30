@@ -2,7 +2,7 @@
   import {onMount, onDestroy} from 'svelte'
   import {writable} from 'svelte/store'
   import {find, propEq} from 'ramda'
-  import {notesLoader, notesListener} from "src/state/app"
+  import {notesLoader, notesListener, modal} from "src/state/app"
   import {user} from "src/state/user"
   import Note from 'src/partials/Note.svelte'
 
@@ -12,29 +12,45 @@
   let loader
   let listener
 
-  onMount(async () => {
+  onMount(() => {
     const opts = {isInModal: true}
 
     if (note.created_at) {
       opts.since = note.created_at
     }
 
-    loader = await notesLoader(notes, {ids: [note.id]}, opts)
-    listener = await notesListener(notes, [
-      {kinds: [1, 5, 7], '#e': [note.id]},
-      // We can't target reaction deletes by e tag, so get them
-      // all so we can support toggling like/flags for our user
-      {kinds: [5], authors: $user ? [$user.pubkey] : []}
-    ])
+    // Can't use async/await since we need to return unsubscribe functions
+    Promise.all([
+      notesLoader(notes, {ids: [note.id]}, opts),
+      notesListener(notes, [
+        {kinds: [1, 5, 7], '#e': [note.id]},
+        // We can't target reaction deletes by e tag, so get them
+        // all so we can support toggling like/flags for our user
+        {kinds: [5], authors: $user ? [$user.pubkey] : []}
+      ]),
+    ]).then(([_loader, _listener]) => {
+      loader = _loader
+      listener = _listener
 
-    notes.subscribe($notes => {
-      note = find(propEq('id', note.id), $notes) || note
+      // Populate our initial empty space
+      loader.onScroll()
+      listener.start()
     })
-  })
 
-  onDestroy(() => {
-    loader?.unsub()
-    listener?.unsub()
+    const unsubNotes = notes.subscribe($notes => {
+      note = find(propEq('id', note.id), $notes)
+    })
+
+    // Unsubscribe when modal closes so that others can re-subscribe sooner
+    const unsubModal = modal.subscribe($modal => {
+      loader?.stop()
+      listener?.stop()
+    })
+
+    return () => {
+      unsubNotes()
+      unsubModal()
+    }
   })
 </script>
 

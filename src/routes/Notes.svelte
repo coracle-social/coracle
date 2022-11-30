@@ -19,21 +19,24 @@
     loader = await notesLoader(notes, {kinds: [1]}, {showParents: true})
     listener = await notesListener(notes, {kinds: [1, 5, 7]})
 
+    // Populate our initial empty space
+    loader.onScroll()
+
     // When a modal opens, suspend our subscriptions
     modal.subscribe(async $modal => {
       if ($modal) {
-        loader.cursor.stop()
-        listener.unsub()
+        loader.stop()
+        listener.stop()
       } else {
-        loader.cursor.start()
-        listener = await notesListener(notes, {kinds: [1, 5, 7]})
+        loader.start()
+        listener.start()
       }
     })
   })
 
   onDestroy(() => {
-    loader?.unsub()
-    listener?.unsub()
+    loader?.stop()
+    listener?.stop()
   })
 </script>
 

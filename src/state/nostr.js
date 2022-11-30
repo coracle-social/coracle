@@ -56,17 +56,19 @@ export class Channel {
     await this.p
 
     let resolve
-    const sub = nostr.sub({filter, cb}, this.name, r => {
-      onEose(r)
-
-      resolve()
-    })
+    const sub = nostr.sub({filter, cb}, this.name, onEose)
 
     this.p = new Promise(r => {
       resolve = r
     })
 
-    return sub
+    return {
+      unsub: () => {
+        sub.unsub()
+
+        resolve()
+      }
+    }
   }
   all(filter) {
     /* eslint no-async-promise-executor: 0 */
@@ -145,6 +147,36 @@ export class Cursor {
         return this.q.splice(0)
       }
     }
+  }
+}
+
+export class Listener {
+  constructor(filter, onEvent) {
+    this.filter = ensurePlural(filter)
+    this.onEvent = onEvent
+    this.since = now()
+    this.sub = null
+    this.q = []
+    this.p = Promise.resolve()
+  }
+  async start() {
+    if (!this.sub) {
+      this.sub = await channels.listener.sub(
+        this.filter.map(f => ({...f, since: this.since})),
+        e => this.onEvent(e)
+      )
+    }
+  }
+  stop() {
+    if (this.sub) {
+      this.sub.unsub()
+      this.sub = null
+      this.since = now()
+    }
+  }
+  restart() {
+    this.stop()
+    this.start()
   }
 }
 

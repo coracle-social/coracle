@@ -5,7 +5,7 @@ import {navigate} from "svelte-routing"
 import {switcherFn, ensurePlural} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta, sleep} from "src/util/misc"
 import {user} from 'src/state/user'
-import {filterMatches, Cursor, channels, relays, findReplyTo} from 'src/state/nostr'
+import {filterMatches, Listener, Cursor, channels, relays, findReplyTo} from 'src/state/nostr'
 
 export const modal = writable(null)
 
@@ -163,15 +163,7 @@ export const notesLoader = async (
     }
   })
 
-  onScroll()
-
-  return {
-    cursor,
-    onScroll,
-    unsub: () => {
-      cursor.stop()
-    },
-  }
+  return Object.assign(cursor, {onScroll})
 }
 
 export const notesListener = async (notes, filter) => {
@@ -196,7 +188,7 @@ export const notesListener = async (notes, filter) => {
         reactions: n.reactions.filter(e => !ids.includes(e.id)),
       }))
 
-  return await channels.listener.sub(
+  return new Listener(
     ensurePlural(filter).map(assoc('since', now())),
     e => switcherFn(e.kind, {
       1: async () => {
