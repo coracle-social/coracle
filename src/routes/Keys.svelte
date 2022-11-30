@@ -37,7 +37,7 @@
     <div class="flex flex-col gap-8 w-full">
       <div class="flex flex-col gap-1">
         <strong>Public Key</strong>
-        <Input disabled value={$user.pubkey}>
+        <Input disabled value={$user?.pubkey}>
           <i slot="after" class="fa-solid fa-copy cursor-pointer" on:click={() => copyKey('public')} />
         </Input>
         <p class="text-sm text-light">
@@ -47,7 +47,7 @@
       </div>
       <div class="flex flex-col gap-1">
         <strong>Private Key</strong>
-        <Input disabled type="password" value={$user.privkey}>
+        <Input disabled type="password" value={$user?.privkey}>
           <i slot="after" class="fa-solid fa-copy cursor-pointer" on:click={() => copyKey('private')} />
         </Input>
         <p class="text-sm text-light">

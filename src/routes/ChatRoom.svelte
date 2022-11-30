@@ -1,5 +1,5 @@
 <script>
-  import {onMount} from 'svelte'
+  import {onMount, onDestroy} from 'svelte'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {prop, uniqBy, sortBy, last} from 'ramda'
@@ -7,7 +7,7 @@
   import {formatTimestamp} from 'src/util/misc'
   import {toHtml} from 'src/util/html'
   import UserBadge from 'src/partials/UserBadge.svelte'
-  import {channels} from 'src/state/nostr'
+  import {Listener, epoch} from 'src/state/nostr'
   import {accounts, ensureAccounts} from 'src/state/app'
   import {dispatch} from 'src/state/dispatch'
   import {user} from 'src/state/user'
@@ -15,6 +15,7 @@
 
   export let room
 
+  let listener
   let textarea
   let messages = []
   let annotatedMessages = []
@@ -46,44 +47,51 @@
       return navigate('/login')
     }
 
-    const events = await channels.getter.all({kinds: [40, 41], ids: [room]})
-
-    events.forEach(({pubkey, content}) => {
-      roomData = {pubkey, ...roomData, ...JSON.parse(content)}
-    })
-
-    const isVisible = $el => {
-      const bodyRect = document.body.getBoundingClientRect()
-      const {top, height} = $el.getBoundingClientRect()
-
-      return top + height < bodyRect.height
-    }
-
-    return await channels.listener.sub(
-      {limit: 100, kinds: [42, 43, 44], '#e': [room]},
+    listener = new Listener(
+      [{kinds: [40, 41], ids: [room], since: epoch},
+       {kinds: [42, 43, 44], '#e': [room], since: epoch}],
       e => {
-        switcherFn(e.kind, {
-          42: () => {
-            messages = messages.concat(e)
+        const {pubkey, kind, content} = e
 
-            ensureAccounts([e.pubkey])
+        if ([40, 41].includes(kind)) {
+          roomData = {pubkey, ...roomData, ...JSON.parse(content)}
+        } else {
+          switcherFn(kind, {
+            42: () => {
+              messages = messages.concat(e)
 
-            const $prevListItem = last(document.querySelectorAll('.chat-message'))
+              ensureAccounts([pubkey])
 
-            if ($prevListItem && isVisible($prevListItem)) {
-              setTimeout(() => {
-                const $li = last(document.querySelectorAll('.chat-message'))
+              const $prevListItem = last(document.querySelectorAll('.chat-message'))
 
-                $li.scrollIntoView({behavior: "smooth"})
-              }, 100)
-            }
-          },
-          43: () => null,
-          44: () => null,
-        })
-      },
+              if ($prevListItem && isVisible($prevListItem)) {
+                setTimeout(() => {
+                  const $li = last(document.querySelectorAll('.chat-message'))
+
+                  $li.scrollIntoView({behavior: "smooth"})
+                }, 100)
+              }
+            },
+            43: () => null,
+            44: () => null,
+          })
+        }
+      }
     )
+
+    listener.start()
   })
+
+  onDestroy(() => {
+    listener?.stop()
+  })
+
+  const isVisible = $el => {
+    const bodyRect = document.body.getBoundingClientRect()
+    const {top, height} = $el.getBoundingClientRect()
+
+    return top + height < bodyRect.height
+  }
 
   const edit = () => {
     navigate(`/chat/${room}/edit`)

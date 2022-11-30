@@ -11,8 +11,12 @@
   let q = ""
   let rooms = {}
   let search
+  let nOtherRooms
 
-  $: search = fuzzy(Object.values(rooms), {keys: ["name", "about"]})
+  $: {
+    search = fuzzy(Object.values(rooms), {keys: ["name", "about"]})
+    nOtherRooms = Math.floor(0, Object.keys(rooms).length - 8)
+  }
 
   const createRoom = () => navigate(`/chat/new`)
 
@@ -60,9 +64,11 @@
       {/if}
     </li>
     {/each}
+    {#if nOtherRooms > 1}
     <li class="px-3">
-      <small>{Math.floor(0, Object.keys(rooms).length - 8)} more rooms found</small>
+      <small>Enter a search term to discover {nOtherRooms} more rooms.</small>
     </li>
+    {/if}
     <li class="bg-medium m-3 h-px" />
     <li class="cursor-pointer font-bold hover:bg-accent transition-all px-3 py-2" on:click={createRoom}>
       <i class="fa-solid fa-plus" /> Create Room

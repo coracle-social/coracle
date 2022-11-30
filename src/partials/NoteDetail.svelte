@@ -1,5 +1,5 @@
 <script>
-  import {onMount, onDestroy} from 'svelte'
+  import {onMount} from 'svelte'
   import {writable} from 'svelte/store'
   import {find, propEq} from 'ramda'
   import {notesLoader, notesListener, modal} from "src/state/app"

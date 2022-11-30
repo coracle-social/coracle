@@ -111,6 +111,12 @@
         Reply to <Anchor on:click={showParent}>{parentId.slice(0, 8)}</Anchor>
       </small>
     {/if}
+    {#if flag}
+    <p class="text-light border-l-2 border-solid border-medium pl-4">
+      You have flagged this content as offensive.
+      <Anchor on:click={() => deleteReaction(flag)}>Unflag</Anchor>
+    </p>
+    {:else}
     <p>
       {#if note.content.length > 240 && !showEntire}
         {ellipsize(note.content, 240)}
@@ -131,13 +137,12 @@
           on:click={() => like ? deleteReaction(like) : react("+")} />
         {uniqBy(prop('pubkey'), note.reactions.filter(whereEq({content: '+'}))).length}
       </div>
-      <div class={cx({'text-accent': flag})}>
-        <i
-          class="fa-solid fa-flag cursor-pointer"
-          on:click={() => flag ? deleteReaction(flag) : react("-")} />
+      <div>
+        <i class="fa-solid fa-flag cursor-pointer" on:click={() => react("-")} />
         {uniqBy(prop('pubkey'), note.reactions.filter(whereEq({content: '-'}))).length}
       </div>
     </div>
+    {/if}
   </div>
 </div>
 

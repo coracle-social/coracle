@@ -1,7 +1,6 @@
 Bugs
 
-- [ ] Make sure to stop loading chunks on component unmount
-- [ ] Don't lose scroll position when opening modals
+- [ ] Load/publish user preferred relays
 - [ ] Optimistically load events the user publishes (e.g. to reduce reflow for reactions/replies). Essentially, we can pretend to be our own in-memory relay.
 
 Features

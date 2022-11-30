@@ -1,10 +1,12 @@
-import {writable} from 'svelte/store'
+import {writable, get} from 'svelte/store'
 import {relayPool, getPublicKey} from 'nostr-tools'
 import {last, intersection, uniqBy, prop} from 'ramda'
 import {first, noop, ensurePlural} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta} from "src/util/misc"
 
 export const nostr = relayPool()
+
+export const epoch = 1633046400
 
 export const filterTags = (where, events) =>
   ensurePlural(events)
@@ -54,6 +56,15 @@ export class Channel {
     // Make sure callers have to wait for the previous sub to be done
     // before they can get a new one.
     await this.p
+
+    // If we don't have any relays, we'll wait forever for an eose, but
+    // we already know we're done. Use a timeout since callers are
+    // expecting this to be async and we run into errors otherwise.
+    if (get(relays).length === 0) {
+      setTimeout(onEose)
+
+      return {unsub: noop}
+    }
 
     let resolve
     const sub = nostr.sub({filter, cb}, this.name, onEose)
@@ -160,10 +171,15 @@ export class Listener {
     this.p = Promise.resolve()
   }
   async start() {
+    const {filter, since} = this
+
     if (!this.sub) {
       this.sub = await channels.listener.sub(
-        this.filter.map(f => ({...f, since: this.since})),
-        e => this.onEvent(e)
+        filter.map(f => ({since, ...f})),
+        e => {
+          this.since = e.created_at
+          this.onEvent(e)
+        }
       )
     }
   }
@@ -171,7 +187,6 @@ export class Listener {
     if (this.sub) {
       this.sub.unsub()
       this.sub = null
-      this.since = now()
     }
   }
   restart() {

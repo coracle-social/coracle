@@ -87,6 +87,8 @@
       </div>
     </form>
   </div>
-  <RoomList />
+  <div class="hidden sm:block">
+    <RoomList />
+  </div>
 </div>
 

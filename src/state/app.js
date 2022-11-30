@@ -5,7 +5,7 @@ import {navigate} from "svelte-routing"
 import {switcherFn, ensurePlural} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta, sleep} from "src/util/misc"
 import {user} from 'src/state/user'
-import {filterMatches, Listener, Cursor, channels, relays, findReplyTo} from 'src/state/nostr'
+import {epoch, filterMatches, Listener, Cursor, channels, relays, findReplyTo} from 'src/state/nostr'
 
 export const modal = writable(null)
 
@@ -123,7 +123,7 @@ export const notesLoader = async (
     showParents = false,
     delta = timedelta(1, 'hours'),
     isInModal = false,
-    since = 1633046400, // nostr epoch
+    since = epoch,
   } = {}
 ) => {
   const cursor = new Cursor(filter, delta)
