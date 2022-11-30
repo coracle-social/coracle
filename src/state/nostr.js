@@ -67,7 +67,14 @@ export class Channel {
     }
 
     let resolve
-    const sub = nostr.sub({filter, cb}, this.name, onEose)
+    const eoseRelays = []
+    const sub = nostr.sub({filter, cb}, this.name, r => {
+      eoseRelays.push(r)
+
+      if (eoseRelays.length === get(relays).length) {
+        onEose()
+      }
+    })
 
     this.p = new Promise(r => {
       resolve = r
@@ -132,13 +139,15 @@ export class Cursor {
       this.sub = null
     }
   }
-  restart() {
+  async restart() {
     this.stop()
-    this.start()
+
+    await this.start()
   }
-  step() {
+  async step() {
     this.since -= this.delta
-    this.restart()
+
+    await this.restart()
   }
   onEvent(e) {
     this.until = e.created_at - 1
@@ -148,7 +157,7 @@ export class Cursor {
     this.stop()
   }
   async chunk() {
-    this.step()
+    await this.step()
 
     /* eslint no-constant-condition: 0 */
     while (true) {

@@ -116,7 +116,7 @@ export const annotateNotes = async (chunk, {showParents = false} = {}) => {
   return reverse(sortBy(prop('created'), chunk.map(annotate)))
 }
 
-export const notesListener = async (notes, filter) => {
+export const notesListener = (notes, filter) => {
   const updateNote = (id, f) =>
     notes.update($notes =>
       $notes
@@ -170,21 +170,29 @@ export const notesListener = async (notes, filter) => {
 
 // UI
 
-export const scroller = (cursor, cb, {isInModal = false, since = epoch} = {}) => {
+export const scroller = (cursor, cb, {isInModal = false, since = epoch, reverse = false} = {}) => {
   const startingDelta = cursor.delta
 
   return debounce(1000, async () => {
     /* eslint no-constant-condition: 0 */
     while (true) {
-      // If a modal opened up, wait for them to close it
+      // If a modal opened up, wait for them to close it. Otherwise, throttle a tad
       if (!isInModal && get(modal)) {
         await sleep(1000)
 
         continue
+      } else {
+        await sleep(100)
       }
 
       // While we have empty space, fill it
-      if (window.scrollY + window.innerHeight * 3 < document.body.scrollHeight) {
+      const {scrollY, innerHeight} = window
+      const {scrollHeight} = document.body
+
+      if (
+        (reverse && scrollY > innerHeight * 3)
+        || (!reverse && scrollY + innerHeight * 3 < scrollHeight)
+      ) {
         break
       }
 
@@ -197,7 +205,9 @@ export const scroller = (cursor, cb, {isInModal = false, since = epoch} = {}) =>
       const chunk = await cursor.chunk()
 
       // Notify the caller
-      await cb(chunk)
+      if (chunk.length > 0) {
+        await cb(chunk)
+      }
 
       // If we have an empty chunk, increase our step size so we can get back to where
       // we might have old events. Once we get a chunk, knock it down to the default again

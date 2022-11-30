@@ -1,6 +1,7 @@
 <script>
   import {onMount, onDestroy} from 'svelte'
   import {writable} from 'svelte/store'
+  import {fly} from 'svelte/transition'
   import {navigate} from "svelte-routing"
   import {uniqBy, prop} from 'ramda'
   import Anchor from "src/partials/Anchor.svelte"
@@ -60,7 +61,11 @@
       {/each}
     </li>
   {/each}
+  <li class="flex justify-center py-12" in:fly={{y: 20}}>
+    <p>Loading notes...</p>
+  </li>
 </ul>
+
 
 {#if $relays.length > 0}
 <div class="fixed bottom-0 right-0 p-8">

@@ -15,19 +15,15 @@
 
   onMount(() => {
     cursor = new Cursor({ids: [note.id]}, note.created_at)
-
-    // Can't use async/await since we need to return unsubscribe functions
-    notesListener(notes, [
+    listener = notesListener(notes, [
       {kinds: [1, 5, 7], '#e': [note.id]},
       // We can't target reaction deletes by e tag, so get them
       // all so we can support toggling like/flags for our user
       {kinds: [5], authors: $user ? [$user.pubkey] : []}
-    ]).then(_listener => {
-      listener = _listener
+    ])
 
-      // Populate our initial empty space
-      listener.start()
-    })
+    // Populate our initial empty space
+    listener.start()
 
     const unsubNotes = notes.subscribe($notes => {
       note = find(propEq('id', note.id), $notes)

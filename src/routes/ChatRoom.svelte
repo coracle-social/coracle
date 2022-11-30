@@ -2,20 +2,21 @@
   import {onMount, onDestroy} from 'svelte'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
-  import {prop, uniqBy, sortBy, last} from 'ramda'
-  import {switcherFn} from 'hurdak/src/core'
+  import {prop, uniq, pluck, reverse, uniqBy, sortBy, last} from 'ramda'
   import {formatTimestamp} from 'src/util/misc'
   import {toHtml} from 'src/util/html'
   import UserBadge from 'src/partials/UserBadge.svelte'
-  import {Listener, epoch} from 'src/state/nostr'
-  import {accounts, ensureAccounts} from 'src/state/app'
+  import {Listener, Cursor, epoch} from 'src/state/nostr'
+  import {accounts, scroller, ensureAccounts} from 'src/state/app'
   import {dispatch} from 'src/state/dispatch'
   import {user} from 'src/state/user'
   import RoomList from "src/partials/chat/RoomList.svelte"
 
   export let room
 
+  let cursor
   let listener
+  let scroll
   let textarea
   let messages = []
   let annotatedMessages = []
@@ -23,7 +24,7 @@
 
   $: {
     // Group messages so we're only showing the account once per chunk
-    annotatedMessages = sortBy(prop('created_at'), uniqBy(prop('id'), messages)).reduce(
+    annotatedMessages = reverse(sortBy(prop('created_at'), uniqBy(prop('id'), messages)).reduce(
       (mx, m) => {
         const account = $accounts[m.pubkey]
 
@@ -39,7 +40,7 @@
         })
       },
       []
-    )
+    ))
   }
 
   onMount(async () => {
@@ -47,51 +48,64 @@
       return navigate('/login')
     }
 
+    // flex-col means the first is the last
+    const getLastListItem = () => document.querySelector('ul[name=messages] li')
+
+    const stickToBottom = async (behavior, cb) => {
+      const shouldStick = window.scrollY + window.innerHeight > document.body.scrollHeight - 200
+      const $li = getLastListItem()
+
+      await cb()
+
+      if ($li && shouldStick) {
+        $li.scrollIntoView({behavior})
+      }
+    }
+
+    cursor = new Cursor({kinds: [42], '#e': [room]})
+    scroll = scroller(
+      cursor,
+      chunk => {
+        stickToBottom('auto', async () => {
+          for (const e of chunk) {
+            messages = messages.concat(e)
+          }
+
+          if (chunk.length > 0) {
+            await ensureAccounts(uniq(pluck('pubkey', chunk)))
+          }
+        })
+      },
+      {reverse: true}
+    )
+
     listener = new Listener(
       [{kinds: [40, 41], ids: [room], since: epoch},
-       {kinds: [42, 43, 44], '#e': [room], since: epoch}],
+       {kinds: [42], '#e': [room]}],
       e => {
         const {pubkey, kind, content} = e
 
         if ([40, 41].includes(kind)) {
           roomData = {pubkey, ...roomData, ...JSON.parse(content)}
         } else {
-          switcherFn(kind, {
-            42: () => {
-              messages = messages.concat(e)
+          stickToBottom('smooth', async () => {
+            messages = messages.concat(e)
 
-              ensureAccounts([pubkey])
-
-              const $prevListItem = last(document.querySelectorAll('.chat-message'))
-
-              if ($prevListItem && isVisible($prevListItem)) {
-                setTimeout(() => {
-                  const $li = last(document.querySelectorAll('.chat-message'))
-
-                  $li.scrollIntoView({behavior: "smooth"})
-                }, 100)
-              }
-            },
-            43: () => null,
-            44: () => null,
+            await ensureAccounts([e.pubkey])
           })
         }
       }
     )
 
+    scroll()
+
     listener.start()
   })
 
   onDestroy(() => {
+    cursor?.stop()
     listener?.stop()
   })
-
-  const isVisible = $el => {
-    const bodyRect = document.body.getBoundingClientRect()
-    const {top, height} = $el.getBoundingClientRect()
-
-    return top + height < bodyRect.height
-  }
 
   const edit = () => {
     navigate(`/chat/${room}/edit`)
@@ -115,14 +129,15 @@
   }
 </script>
 
+<svelte:window on:scroll={scroll} />
 
 <div class="flex gap-4 h-full">
   <div class="sm:ml-56 w-full">
     <div class="relative">
       <div class="flex flex-col pt-20 pb-32">
-        <ul class="p-4 max-h-full flex-grow">
-          {#each annotatedMessages as m}
-            <li in:fly={{y: 20}} class="py-1 chat-message">
+        <ul class="p-4 max-h-full flex-grow flex flex-col-reverse" name="messages">
+          {#each annotatedMessages as m (m.id)}
+            <li in:fly={{y: 20}} class="py-1">
               {#if m.showAccount}
               <div class="flex gap-4 items-center justify-between">
                 <UserBadge user={m.account} />
