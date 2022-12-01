@@ -1,10 +1,8 @@
 <script>
   import {onMount} from 'svelte'
   import {writable} from 'svelte/store'
-  import {fly} from 'svelte/transition'
-  import {find, propEq} from 'ramda'
   import Spinner from 'src/partials/Spinner.svelte'
-  import {Cursor, channels} from "src/state/nostr"
+  import {channels} from "src/state/nostr"
   import {notesListener, annotateNotes, modal} from "src/state/app"
   import {user} from "src/state/user"
   import Note from 'src/partials/Note.svelte'

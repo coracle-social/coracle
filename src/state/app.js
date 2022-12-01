@@ -50,6 +50,7 @@ export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
           ...$accounts[e.pubkey],
           ...JSON.parse(e.content),
           refreshed: now(),
+          isAccount: true,
         }
       })
 

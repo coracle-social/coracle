@@ -7,8 +7,8 @@
   import {hasParent, toHtml} from 'src/util/html'
   import Anchor from 'src/partials/Anchor.svelte'
   import {dispatch} from "src/state/dispatch"
-  import {channels, findReplyTo} from "src/state/nostr"
-  import {accounts, modal, annotateNotes} from "src/state/app"
+  import {findReplyTo} from "src/state/nostr"
+  import {accounts, modal} from "src/state/app"
   import {user} from "src/state/user"
   import {formatTimestamp} from 'src/util/misc'
   import UserBadge from "src/partials/UserBadge.svelte"

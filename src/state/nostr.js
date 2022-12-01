@@ -1,6 +1,6 @@
 import {writable, get} from 'svelte/store'
 import {relayPool, getPublicKey} from 'nostr-tools'
-import {last, intersection, uniqBy, prop} from 'ramda'
+import {last, find, intersection, uniqBy, prop} from 'ramda'
 import {first, noop, ensurePlural} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta} from "src/util/misc"
 

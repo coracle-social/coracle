@@ -1,7 +1,6 @@
 <script>
   import {onMount, onDestroy} from 'svelte'
   import {writable} from 'svelte/store'
-  import {fly} from 'svelte/transition'
   import {navigate} from "svelte-routing"
   import {uniqBy, prop} from 'ramda'
   import Anchor from "src/partials/Anchor.svelte"

@@ -15,6 +15,7 @@
   import Anchor from 'src/partials/Anchor.svelte'
   import NoteDetail from "src/partials/NoteDetail.svelte"
   import NotFound from "src/routes/NotFound.svelte"
+  import Search from "src/routes/Search.svelte"
   import Notes from "src/routes/Notes.svelte"
   import Login from "src/routes/Login.svelte"
   import Profile from "src/routes/Profile.svelte"
@@ -75,6 +76,7 @@
 <Router {url}>
   <div use:links class="h-full">
     <div class="pt-16 text-white h-full">
+      <Route path="/search" component={Search} />
       <Route path="/notes" component={Notes} />
       <Route path="/notes/new" component={NoteCreate} />
       <Route path="/chat" component={Chat} />
@@ -112,6 +114,11 @@
         </a>
       </li>
       {/if}
+      <li class="cursor-pointer">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/search">
+          <i class="fa-solid fa-search mr-2" /> Search
+        </a>
+      </li>
       <li class="cursor-pointer">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes">
           <i class="fa-solid fa-tag mr-2" /> Notes
