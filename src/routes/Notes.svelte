@@ -8,12 +8,13 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/partials/Note.svelte"
   import {relays, Cursor} from "src/state/nostr"
-  import {scroller, annotateNotes, notesListener, modal} from "src/state/app"
+  import {createScroller, annotateNotes, notesListener, modal} from "src/state/app"
 
   const notes = writable([])
   let cursor
   let listener
-  let scroll
+  let scroller
+  let modalUnsub
 
   const createNote = () => {
     navigate("/notes/new")
@@ -22,38 +23,35 @@
   onMount(async () => {
     cursor = new Cursor({kinds: [1]})
     listener = await notesListener(notes, {kinds: [1, 5, 7]})
-    scroll = scroller(cursor, async chunk => {
+    scroller = createScroller(cursor, async chunk => {
       const annotated = await annotateNotes(chunk, {showParents: true})
 
       notes.update($notes => uniqBy(prop('id'), $notes.concat(annotated)))
     })
 
-    // Populate our initial empty space
-    scroll()
-
     // When a modal opens, suspend our subscriptions
-    const modalUnsub = modal.subscribe(async $modal => {
+    modalUnsub = modal.subscribe(async $modal => {
       if ($modal) {
         cursor.stop()
         listener.stop()
+        scroller.stop()
       } else {
         cursor.start()
         listener.start()
+        scroller.start()
       }
     })
-
-    return () => {
-      modalUnsub()
-    }
   })
 
   onDestroy(() => {
     cursor?.stop()
     listener?.stop()
+    scroller?.stop()
+    modalUnsub?.()
   })
 </script>
 
-<svelte:window on:scroll={scroll} />
+<svelte:window on:scroll={scroller?.start} />
 
 <ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
   {#each (notes ? $notes : []) as n (n.id)}

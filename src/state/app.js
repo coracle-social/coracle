@@ -170,10 +170,22 @@ export const notesListener = (notes, filter) => {
 
 // UI
 
-export const scroller = (cursor, cb, {isInModal = false, since = epoch, reverse = false} = {}) => {
+export const createScroller = (
+  cursor,
+  onChunk,
+  {isInModal = false, since = epoch, reverse = false} = {}
+) => {
   const startingDelta = cursor.delta
 
-  return debounce(1000, async () => {
+  let active = false
+
+  const start = debounce(1000, async () => {
+    if (active) {
+      return
+    }
+
+    active = true
+
     /* eslint no-constant-condition: 0 */
     while (true) {
       // If a modal opened up, wait for them to close it. Otherwise, throttle a tad
@@ -206,7 +218,7 @@ export const scroller = (cursor, cb, {isInModal = false, since = epoch, reverse 
 
       // Notify the caller
       if (chunk.length > 0) {
-        await cb(chunk)
+        await onChunk(chunk)
       }
 
       // If we have an empty chunk, increase our step size so we can get back to where
@@ -216,6 +228,18 @@ export const scroller = (cursor, cb, {isInModal = false, since = epoch, reverse 
       } else {
         cursor.delta = startingDelta
       }
+
+      if (!active) {
+        break
+      }
     }
+
+    active = false
   })
+
+  return {
+    start,
+    stop: () => { active = false },
+    isActive: () => Boolean(cursor.sub),
+  }
 }

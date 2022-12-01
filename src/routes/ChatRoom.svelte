@@ -7,7 +7,7 @@
   import {toHtml} from 'src/util/html'
   import UserBadge from 'src/partials/UserBadge.svelte'
   import {Listener, Cursor, epoch} from 'src/state/nostr'
-  import {accounts, scroller, ensureAccounts} from 'src/state/app'
+  import {accounts, createScroller, ensureAccounts} from 'src/state/app'
   import {dispatch} from 'src/state/dispatch'
   import {user} from 'src/state/user'
   import RoomList from "src/partials/chat/RoomList.svelte"
@@ -16,7 +16,7 @@
 
   let cursor
   let listener
-  let scroll
+  let scroller
   let textarea
   let messages = []
   let annotatedMessages = []
@@ -63,7 +63,7 @@
     }
 
     cursor = new Cursor({kinds: [42], '#e': [room]})
-    scroll = scroller(
+    scroller = createScroller(
       cursor,
       chunk => {
         stickToBottom('auto', async () => {
@@ -97,14 +97,14 @@
       }
     )
 
-    scroll()
-
+    scroller.start()
     listener.start()
   })
 
   onDestroy(() => {
     cursor?.stop()
     listener?.stop()
+    scroller?.stop()
   })
 
   const edit = () => {
@@ -129,7 +129,7 @@
   }
 </script>
 
-<svelte:window on:scroll={scroll} />
+<svelte:window on:scroll={scroller?.start} />
 
 <div class="flex gap-4 h-full">
   <div class="sm:ml-56 w-full">

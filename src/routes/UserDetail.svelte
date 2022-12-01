@@ -7,7 +7,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import {Cursor, epoch} from 'src/state/nostr'
   import {user as currentUser} from 'src/state/user'
-  import {accounts, scroller, notesListener, modal, annotateNotes} from "src/state/app"
+  import {accounts, createScroller, notesListener, modal, annotateNotes} from "src/state/app"
 
   export let pubkey
 
@@ -15,7 +15,7 @@
   let user
   let cursor
   let listener
-  let scroll
+  let scroller
   let interval
   let loading = true
   let modalUnsub
@@ -25,14 +25,14 @@
   onMount(async () => {
     cursor = new Cursor({kinds: [1], authors: [pubkey]})
     listener = await notesListener(notes, [{kinds: [1], authors: [pubkey]}, {kinds: [5, 7]}])
-    scroll = scroller(cursor, async chunk => {
+    scroller = createScroller(cursor, async chunk => {
       const annotated = await annotateNotes(chunk, {showParents: true})
 
       notes.update($notes => uniqBy(prop('id'), $notes.concat(annotated)))
     })
 
     // Populate our initial empty space
-    scroll()
+    scroller.start()
 
     // Track loading based on cursor cutoff date
     interval = setInterval(() => {
@@ -54,13 +54,14 @@
   onDestroy(() => {
     cursor?.stop()
     listener?.stop()
-    modalUnsub()
+    scroller?.stop()
+    modalUnsub?.()
     clearInterval(interval)
   })
 
 </script>
 
-<svelte:window on:scroll={scroll} />
+<svelte:window on:scroll={scroller?.start} />
 
 {#if user}
 <div class="max-w-2xl m-auto flex flex-col gap-4 py-8 px-4">
