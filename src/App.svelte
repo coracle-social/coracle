@@ -50,10 +50,14 @@
     modal.subscribe($modal => {
       // Keep scroll position on body, but don't allow scrolling
       if ($modal) {
-        scrollY = window.scrollY
 
-        document.body.style.top = `-${scrollY}px`
-        document.body.style.position = `fixed`
+        // This is not idempotent, so don't duplicate it
+        if (document.body.style.position !== 'fixed') {
+          scrollY = window.scrollY
+
+          document.body.style.top = `-${scrollY}px`
+          document.body.style.position = `fixed`
+        }
       } else {
         document.body.style = ''
         window.scrollTo(0, scrollY)
@@ -77,11 +81,15 @@
       <Route path="/chat/new" component={ChatEdit} />
       <Route path="/chat/:room" let:params>
         {#key params.room}
-        <ChatRoom room={params.room} />
+        <ChatRoom {...params} />
         {/key}
       </Route>
       <Route path="/chat/:room/edit" component={ChatEdit} />
-      <Route path="/users/:pubkey" component={UserDetail} />
+      <Route path="/users/:pubkey" let:params>
+        {#key params.pubkey}
+        <UserDetail {...params} />
+        {/key}
+      </Route>
       <Route path="/settings/keys" component={Keys} />
       <Route path="/settings/relays" component={RelayList} />
       <Route path="/settings/profile" component={Profile} />

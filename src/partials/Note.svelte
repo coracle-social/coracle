@@ -37,11 +37,8 @@
   }
 
   const showParent = async () => {
-    const notes = await annotateNotes(
-      await channels.getter.all({kinds: [1, 5, 7], ids: [parentId]})
-    )
 
-    modal.set({note: notes[0]})
+    modal.set({note: {id: parentId}})
   }
 
   const react = content => {

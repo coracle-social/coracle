@@ -30,6 +30,7 @@
     "hurdak": "github:ConsignCloud/hurdak",
     "nostr-tools": "github:fiatjaf/nostr-tools#1b798b2",
     "ramda": "^0.28.0",
+    "svelte-loading-spinners": "^0.3.4",
     "svelte-routing": "^1.6.0",
     "throttle-debounce": "^5.0.0",
     "vite-plugin-node-polyfills": "^0.5.0"

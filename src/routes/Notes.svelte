@@ -5,6 +5,7 @@
   import {navigate} from "svelte-routing"
   import {uniqBy, prop} from 'ramda'
   import Anchor from "src/partials/Anchor.svelte"
+  import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/partials/Note.svelte"
   import {relays, Cursor} from "src/state/nostr"
   import {scroller, annotateNotes, notesListener, modal} from "src/state/app"
@@ -31,7 +32,7 @@
     scroll()
 
     // When a modal opens, suspend our subscriptions
-    modal.subscribe(async $modal => {
+    const modalUnsub = modal.subscribe(async $modal => {
       if ($modal) {
         cursor.stop()
         listener.stop()
@@ -40,6 +41,10 @@
         listener.start()
       }
     })
+
+    return () => {
+      modalUnsub()
+    }
   })
 
   onDestroy(() => {
@@ -61,11 +66,10 @@
       {/each}
     </li>
   {/each}
-  <li class="flex justify-center py-12" in:fly={{y: 20}}>
-    <p>Loading notes...</p>
-  </li>
 </ul>
 
+<!-- This will always be sitting at the bottom in case infinite scrolling can't keep up -->
+<Spinner />
 
 {#if $relays.length > 0}
 <div class="fixed bottom-0 right-0 p-8">

@@ -4,7 +4,8 @@
   import {uniqBy, prop} from 'ramda'
   import {fly} from 'svelte/transition'
   import Note from "src/partials/Note.svelte"
-  import {Cursor} from 'src/state/nostr'
+  import Spinner from "src/partials/Spinner.svelte"
+  import {Cursor, epoch} from 'src/state/nostr'
   import {user as currentUser} from 'src/state/user'
   import {accounts, scroller, notesListener, modal, annotateNotes} from "src/state/app"
 
@@ -15,12 +16,15 @@
   let cursor
   let listener
   let scroll
+  let interval
+  let loading = true
+  let modalUnsub
 
   $: user = $accounts[pubkey]
 
   onMount(async () => {
     cursor = new Cursor({kinds: [1], authors: [pubkey]})
-    listener = await notesListener(notes, {kinds: [1, 5, 7], authors: [pubkey]})
+    listener = await notesListener(notes, [{kinds: [1], authors: [pubkey]}, {kinds: [5, 7]}])
     scroll = scroller(cursor, async chunk => {
       const annotated = await annotateNotes(chunk, {showParents: true})
 
@@ -30,8 +34,13 @@
     // Populate our initial empty space
     scroll()
 
+    // Track loading based on cursor cutoff date
+    interval = setInterval(() => {
+      loading = cursor.since > epoch
+    }, 1000)
+
     // When a modal opens, suspend our subscriptions
-    modal.subscribe(async $modal => {
+    modalUnsub = modal.subscribe(async $modal => {
       if ($modal) {
         cursor.stop()
         listener.stop()
@@ -45,7 +54,10 @@
   onDestroy(() => {
     cursor?.stop()
     listener?.stop()
+    modalUnsub()
+    clearInterval(interval)
   })
+
 </script>
 
 <svelte:window on:scroll={scroll} />
@@ -81,6 +93,12 @@
         </div>
       {/each}
     </li>
+    {:else}
+    {#if loading}
+    <li><Spinner /></li>
+    {:else}
+    <li class="p-20 text-center" in:fly={{y: 20}}>No notes found.</li>
+    {/if}
     {/each}
   </ul>
 </div>

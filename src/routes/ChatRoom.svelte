@@ -134,7 +134,7 @@
 <div class="flex gap-4 h-full">
   <div class="sm:ml-56 w-full">
     <div class="relative">
-      <div class="flex flex-col pt-20 pb-32">
+      <div class="flex flex-col py-32">
         <ul class="p-4 max-h-full flex-grow flex flex-col-reverse" name="messages">
           {#each annotatedMessages as m (m.id)}
             <li in:fly={{y: 20}} class="py-1">
