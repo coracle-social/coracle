@@ -2,18 +2,19 @@
   import {onMount, onDestroy} from 'svelte'
   import {writable} from 'svelte/store'
   import {fly} from 'svelte/transition'
-  import {uniqBy, identity, uniq, pluck, prop} from 'ramda'
+  import {uniqBy, pluck, prop} from 'ramda'
   import {fuzzy} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/partials/Note.svelte"
   import {relays, Cursor} from "src/state/nostr"
-  import {createScroller, accounts, annotateNotes, modal} from "src/state/app"
+  import {user} from "src/state/user"
+  import {createScroller, ensureAccounts, accounts, annotateNotes, modal} from "src/state/app"
 
-  const notes = writable([])
-  const people = writable([])
-  let type = writable('people')
+  export let type
+
+  const data = writable([])
   let q = ''
   let search
   let results
@@ -21,11 +22,7 @@
   let scroller
   let modalUnsub
 
-  $: search = (
-    $type === 'people'
-      ? fuzzy($people, {keys: ["name", "about"]})
-      : fuzzy($notes, {keys: ["content"]})
-  )
+  $: search = fuzzy($data, {keys: type === 'people' ? ["name", "about", "pubkey"] : ["content"]})
 
   $: {
     scroller?.start()
@@ -33,17 +30,17 @@
   }
 
   onMount(async () => {
-    cursor = new Cursor({kinds: [1]})
+    cursor = new Cursor({kinds: type === 'people' ? [0] : [1]})
     scroller = createScroller(cursor, async chunk => {
-      const annotated = await annotateNotes(chunk)
-      const keys = uniq(pluck('pubkey', chunk))
+      if (type === 'people') {
+        await ensureAccounts(pluck('pubkey', chunk))
 
-      notes.update($notes => uniqBy(prop('id'), $notes.concat(annotated)))
-      people.update($people => {
-        $people = $people.concat(keys.map(k => $accounts[k]).filter(identity))
+        data.set(Object.values($accounts))
+      } else {
+        const annotated = await annotateNotes(chunk)
 
-        return uniqBy(prop('pubkey'), $people)
-      })
+        data.update($data => uniqBy(prop('id'), $data.concat(annotated)))
+      }
     })
 
     // When a modal opens, suspend our subscriptions
@@ -69,49 +66,57 @@
 
 <ul class="border-b border-solid border-dark flex max-w-xl m-auto pt-2" in:fly={{y: 20}}>
   <li
-    class="px-8 py-4 cursor-pointer hover:border-b border-solid border-medium"
-    class:border-b={$type === 'people'}
-    on:click={() => type.set('people')}>
-    People
+    class="cursor-pointer hover:border-b border-solid border-medium"
+    class:border-b={type === 'people'}>
+    <a class="block px-8 py-4 " href="/search/people">People</a>
   </li>
   <li
-    class="px-8 py-4 cursor-pointer hover:border-b border-solid border-medium"
-    class:border-b={$type === 'notes'}
-    on:click={() => type.set('notes')}>
-    Notes
+    class="cursor-pointer hover:border-b border-solid border-medium"
+    class:border-b={type === 'notes'}>
+    <a class="block px-8 py-4 " href="/search/notes">Notes</a>
   </li>
 </ul>
 
 <div class="max-w-xl m-auto mt-4" in:fly={{y: 20}}>
-  <Input bind:value={q} placeholder="Search for {$type}">
+  <Input bind:value={q} placeholder="Search for {type}">
     <i slot="before" class="fa-solid fa-search" />
   </Input>
 </div>
 
+{#if type === 'people'}
 <ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
-  {#each (results || []) as e (e.id || e.pubkey)}
+  {#each (results || []) as e (e.pubkey)}
+    {#if e.pubkey !== $user.pubkey}
     <li in:fly={{y: 20}}>
-      {#if e.isAccount}
       <a href="/users/{e.pubkey}" class="flex gap-4 my-4">
         <div
           class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
           style="background-image: url({e.picture})" />
         <div class="flex-grow">
-          <h1 class="text-2xl">{e.name}</h1>
+          <h1 class="text-2xl">{e.name || e.pubkey.slice(0, 8)}</h1>
           <p>{e.about || ''}</p>
         </div>
       </a>
-      {:else}
+    <li>
+    {/if}
+  {/each}
+</ul>
+{/if}
+
+{#if type === 'notes'}
+<ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
+  {#each (results || []) as e (e.id)}
+    <li in:fly={{y: 20}}>
       <Note interactive note={e} />
       {#each e.replies as r (r.id)}
       <div class="ml-6 border-l border-solid border-medium">
         <Note interactive isReply note={r} />
       </div>
       {/each}
-      {/if}
     </li>
   {/each}
 </ul>
+{/if}
 
 <!-- This will always be sitting at the bottom in case infinite scrolling can't keep up -->
 <Spinner />

@@ -76,7 +76,11 @@
 <Router {url}>
   <div use:links class="h-full">
     <div class="pt-16 text-white h-full">
-      <Route path="/search" component={Search} />
+      <Route path="/search/:type" let:params>
+        {#key params.type}
+        <Search {...params} />
+        {/key}
+      </Route>
       <Route path="/notes" component={Notes} />
       <Route path="/notes/new" component={NoteCreate} />
       <Route path="/chat" component={Chat} />
@@ -115,7 +119,7 @@
       </li>
       {/if}
       <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/search">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/search/people">
           <i class="fa-solid fa-search mr-2" /> Search
         </a>
       </li>

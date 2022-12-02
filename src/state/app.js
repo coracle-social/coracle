@@ -41,7 +41,7 @@ export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
   )
 
   if (pubkeys.length) {
-    const events = await channels.getter.all({kinds: [0], authors: pubkeys})
+    const events = await channels.getter.all({kinds: [0], authors: uniq(pubkeys)})
 
     await accounts.update($accounts => {
       events.forEach(e => {
@@ -50,7 +50,7 @@ export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
           ...$accounts[e.pubkey],
           ...JSON.parse(e.content),
           refreshed: now(),
-          isAccount: true,
+          isUser: true,
         }
       })
 
