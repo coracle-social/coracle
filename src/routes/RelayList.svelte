@@ -1,5 +1,6 @@
 <script>
   import {fly} from 'svelte/transition'
+  import {find, identity, whereEq, reject} from 'ramda'
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import {dispatch} from "src/state/dispatch"
@@ -8,8 +9,10 @@
 
   let q = ""
   let search
+  let data
 
-  $: search = fuzzy($knownRelays || [], {keys: ["name", "description", "url"]})
+  $: data = reject(r => $relays.includes(r.url), $knownRelays || [])
+  $: search = fuzzy(data, {keys: ["name", "description", "url"]})
 
   const join = url => dispatch("relay/join", url)
 
@@ -29,16 +32,28 @@
       <i slot="before" class="fa-solid fa-search" />
     </Input>
     <div class="flex flex-col gap-6 overflow-auto flex-grow -mx-6 px-6">
+      {#each $relays.map(url => find(whereEq({url}), $knownRelays)).filter(identity) as relay}
+        <div class="flex gap-2 justify-between">
+          <div>
+            <strong>{relay.name || relay.url}</strong>
+            <p class="text-light">{relay.description || ''}</p>
+          </div>
+          <a class="underline cursor-pointer" on:click={() => leave(relay.url)}>
+            Leave
+          </a>
+        </div>
+      {/each}
+      {#if $relays.length > 0}
+      <div class="pt-2 mb-2 border-b border-solid border-medium" />
+      {/if}
       {#each search(q).slice(0, 10) as relay}
         <div class="flex gap-2 justify-between">
           <div>
             <strong>{relay.name || relay.url}</strong>
             <p class="text-light">{relay.description || ''}</p>
           </div>
-          <a
-            class="underline cursor-pointer"
-            on:click={() => $relays.includes(relay.url) ? leave(relay.url) : join(relay.url)}>
-            {$relays.includes(relay.url) ? "Leave" : "Join"}
+          <a class="underline cursor-pointer" on:click={() => join(relay.url)}>
+            Join
           </a>
         </div>
       {/each}
