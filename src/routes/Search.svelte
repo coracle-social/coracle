@@ -2,7 +2,7 @@
   import {onMount, onDestroy} from 'svelte'
   import {writable} from 'svelte/store'
   import {fly} from 'svelte/transition'
-  import {uniqBy, uniq, pluck, prop} from 'ramda'
+  import {uniqBy, identity, uniq, pluck, prop} from 'ramda'
   import {fuzzy} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
@@ -16,6 +16,7 @@
   let type = writable('people')
   let q = ''
   let search
+  let results
   let cursor
   let scroller
   let modalUnsub
@@ -26,6 +27,11 @@
       : fuzzy($notes, {keys: ["content"]})
   )
 
+  $: {
+    scroller?.start()
+    results = search(q)
+  }
+
   onMount(async () => {
     cursor = new Cursor({kinds: [1]})
     scroller = createScroller(cursor, async chunk => {
@@ -33,7 +39,11 @@
       const keys = uniq(pluck('pubkey', chunk))
 
       notes.update($notes => uniqBy(prop('id'), $notes.concat(annotated)))
-      people.update($people => uniqBy(prop('id'), $people.concat(keys.map(k => $accounts[k]))))
+      people.update($people => {
+        $people = $people.concat(keys.map(k => $accounts[k]).filter(identity))
+
+        return uniqBy(prop('pubkey'), $people)
+      })
     })
 
     // When a modal opens, suspend our subscriptions
@@ -79,10 +89,10 @@
 </div>
 
 <ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
-  {#each search(q) as e (e.id)}
+  {#each (results || []) as e (e.id || e.pubkey)}
     <li in:fly={{y: 20}}>
       {#if e.isAccount}
-      <a href="/users/{e.pubkey}" class="flex gap-4">
+      <a href="/users/{e.pubkey}" class="flex gap-4 my-4">
         <div
           class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
           style="background-image: url({e.picture})" />

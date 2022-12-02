@@ -174,7 +174,7 @@ export const notesListener = (notes, filter) => {
 export const createScroller = (
   cursor,
   onChunk,
-  {isInModal = false, since = epoch, reverse = false} = {}
+  {since = epoch, reverse = false} = {}
 ) => {
   const startingDelta = cursor.delta
 
@@ -189,15 +189,6 @@ export const createScroller = (
 
     /* eslint no-constant-condition: 0 */
     while (true) {
-      // If a modal opened up, wait for them to close it. Otherwise, throttle a tad
-      if (!isInModal && get(modal)) {
-        await sleep(1000)
-
-        continue
-      } else {
-        await sleep(100)
-      }
-
       // While we have empty space, fill it
       const {scrollY, innerHeight} = window
       const {scrollHeight} = document.body
@@ -233,6 +224,10 @@ export const createScroller = (
       if (!active) {
         break
       }
+
+      // Wait a moment before proceeding to the next chunk for the caller
+      // to load results into the dom
+      await sleep(300)
     }
 
     active = false

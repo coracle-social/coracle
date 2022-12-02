@@ -11,6 +11,8 @@ Features
 - [x] Chat
 - [x] Threads/social
 - [ ] Search
+- [ ] Link previews https://github.com/Dhaiwat10/svelte-link-preview, https://microlink.io/sdk
+- [ ] Images
 - [ ] Followers, blocking
 - [ ] Notifications
 - [ ] Server discovery
