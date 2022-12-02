@@ -1,7 +1,5 @@
 Bugs
 
-- [ ] Scale rather than fly reply box
-- [ ] Listener on notes view not adding notes
 - [ ] Pin joined relays at the top
 - [ ] Load/publish user preferred relays
 - [ ] Optimistically load events the user publishes (e.g. to reduce reflow for reactions/replies). Essentially, we can pretend to be our own in-memory relay.

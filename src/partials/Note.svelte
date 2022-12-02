@@ -1,7 +1,7 @@
 <script>
   import cx from 'classnames'
   import {find, uniqBy, prop, whereEq} from 'ramda'
-  import {fly} from 'svelte/transition'
+  import {fly, slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {ellipsize} from 'hurdak/src/core'
   import {hasParent, toHtml} from 'src/util/html'
@@ -146,7 +146,7 @@
 {#if reply !== null}
 <div
   class="note-reply flex bg-medium border-medium border border-solid"
-  transition:fly={{y: 20}}>
+  transition:slide>
   <textarea
     rows="4"
     autofocus
