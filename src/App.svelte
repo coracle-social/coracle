@@ -19,6 +19,7 @@
   import Notes from "src/routes/Notes.svelte"
   import Login from "src/routes/Login.svelte"
   import Profile from "src/routes/Profile.svelte"
+  import Settings from "src/routes/Settings.svelte"
   import Keys from "src/routes/Keys.svelte"
   import RelayList from "src/routes/RelayList.svelte"
   import AddRelay from "src/routes/AddRelay.svelte"
@@ -96,9 +97,10 @@
         <UserDetail {...params} />
         {/key}
       </Route>
-      <Route path="/settings/keys" component={Keys} />
-      <Route path="/settings/relays" component={RelayList} />
-      <Route path="/settings/profile" component={Profile} />
+      <Route path="/keys" component={Keys} />
+      <Route path="/relays" component={RelayList} />
+      <Route path="/profile" component={Profile} />
+      <Route path="/settings" component={Settings} />
       <Route path="/login" component={Login} />
       <Route path="*" component={NotFound} />
     </div>
@@ -136,13 +138,18 @@
       <li class="h-px mx-3 my-4 bg-medium" />
       {#if $user}
       <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/settings/keys">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/keys">
           <i class="fa-solid fa-key mr-2" /> Keys
         </a>
       </li>
       <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/settings/relays">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/relays">
           <i class="fa-solid fa-server mr-2" /> Relays
+        </a>
+      </li>
+      <li class="cursor-pointer">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/settings">
+          <i class="fa-solid fa-gear mr-2" /> Settings
         </a>
       </li>
       <li class="cursor-pointer">

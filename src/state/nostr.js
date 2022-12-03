@@ -123,6 +123,7 @@ export class Cursor {
     this.sub = null
     this.q = []
     this.p = Promise.resolve()
+    this.seen = new Set()
   }
   async start() {
     if (!this.sub) {
@@ -150,8 +151,15 @@ export class Cursor {
     await this.restart()
   }
   onEvent(e) {
-    this.until = e.created_at - 1
-    this.q.push(e)
+    // Save a little memory
+    const shortId = e.id.slice(-10)
+
+    if (!this.seen.has(shortId)) {
+      this.seen.add(shortId)
+      this.q.push(e)
+    }
+
+    this.until = Math.min(this.until, e.created_at - 1)
   }
   onEose() {
     this.stop()

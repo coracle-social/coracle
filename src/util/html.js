@@ -1,3 +1,6 @@
+import {last} from 'ramda'
+import {first} from 'hurdak/lib/hurdak'
+
 export const copyToClipboard = text => {
   const {activeElement} = document
   const input = document.createElement("textarea")
@@ -69,10 +72,26 @@ export const escapeHtml = html => {
   return div.innerHTML
 }
 
+export const findLink = t => first(t.match(/https?:\/\/([\w.-]+)[^ ]*/))
+
 export const toHtml = content => {
   return escapeHtml(content)
     .replace(/\n/g, '<br />')
     .replace(/https?:\/\/([\w.-]+)[^ ]*/g, (url, domain) => {
       return `<a href="${url}" target="_blank noopener" class="underline">${domain}</a>`
     })
+}
+
+export const getLinkPreview = async url => {
+  const res = await fetch('http://localhost:8000/link/preview', {
+    method: 'POST',
+    body: JSON.stringify({url}),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+
+  const json = await res.json()
+
+  return {...json, hostname: first(last(url.split('//')).split('/')), sitename: null}
 }

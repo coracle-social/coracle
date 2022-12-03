@@ -124,7 +124,7 @@
 {#if $relays.length === 0}
 <div class="flex w-full justify-center items-center py-16">
   <div class="text-center max-w-md">
-    You aren't yet connected to any relays. Please click <Anchor href="/settings/relays"
+    You aren't yet connected to any relays. Please click <Anchor href="/relays"
       >here</Anchor
     > to get started.
   </div>

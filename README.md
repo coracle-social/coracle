@@ -1,20 +1,27 @@
 Bugs
 
-- [ ] Pin joined relays at the top
-- [ ] Load/publish user preferred relays
-- [ ] Optimistically load events the user publishes (e.g. to reduce reflow for reactions/replies). Essentially, we can pretend to be our own in-memory relay.
+- [ ] uniq is sprinkled all over the place, figure out a better solution for de-duplication
+- [ ] Fix replies - notes may only include a "root" in its tags
+- [ ] Reactions in modal are broken
 
 Features
 
 - [x] Chat
 - [x] Threads/social
-- [ ] Search
+- [x] Search
+- [ ] Permalink note detail (share/permalink button?)
+- [ ] Add "view thread" page that recurs more deeply
 - [ ] Link previews https://github.com/Dhaiwat10/svelte-link-preview, https://microlink.io/sdk
-- [ ] Images
-- [ ] Followers, blocking
+  - Make them opt-in
+- [ ] With link/image previews, remove the url from the note body if it's on a separate last line
+- [ ] Followers, blocks, likes on profile
 - [ ] Notifications
-- [ ] Server discovery
+- [ ] Images
+- [ ] Server discovery and relay publishing - https://github.com/nostr-protocol/nips/pull/32/files
 - [ ] Favorite chat rooms
+- [ ] Optimistically load events the user publishes (e.g. to reduce reflow for reactions/replies).
+  - Essentially, we can pretend to be our own in-memory relay.
+  - This allows us to keep a copy of all user data, and possibly user likes/reply parents
 
 Nostr implementation comments
 

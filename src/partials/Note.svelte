@@ -1,16 +1,19 @@
 <script>
   import cx from 'classnames'
   import {find, uniqBy, prop, whereEq} from 'ramda'
+  import {onMount} from 'svelte'
   import {fly, slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
+  import {LinkPreview} from 'svelte-link-preview'
   import {ellipsize} from 'hurdak/src/core'
-  import {hasParent, toHtml} from 'src/util/html'
+  import {hasParent, toHtml, findLink} from 'src/util/html'
   import Anchor from 'src/partials/Anchor.svelte'
   import {dispatch} from "src/state/dispatch"
   import {findReplyTo} from "src/state/nostr"
-  import {accounts, modal} from "src/state/app"
+  import {accounts, settings, modal} from "src/state/app"
   import {user} from "src/state/user"
   import {formatTimestamp} from 'src/util/misc'
+  import {getLinkPreview} from 'src/util/html'
   import UserBadge from "src/partials/UserBadge.svelte"
 
   export let note
@@ -19,6 +22,7 @@
   export let interactive = false
   export let invertColors = false
 
+  let preview = null
   let like = null
   let flag = null
   let reply = null
@@ -29,6 +33,14 @@
     flag = find(e => e.pubkey === $user?.pubkey && e.content === "-", note.reactions)
     parentId = findReplyTo(note)
   }
+
+  onMount(async () => {
+    const link = findLink(note.content)
+
+    if (link && $settings.showLinkPreviews) {
+      preview = await getLinkPreview(link)
+    }
+  })
 
   const onClick = e => {
     if (!['I'].includes(e.target.tagName) && !hasParent('a', e.target)) {
@@ -119,6 +131,11 @@
         {ellipsize(note.content, 240)}
       {:else}
         {@html toHtml(note.content)}
+      {/if}
+      {#if preview}
+      <div class="mt-2" in:slide on:click={e => e.stopPropagation()}>
+        <LinkPreview url={preview.url} fetcher={() => preview} />
+      </div>
       {/if}
     </p>
     <div class="flex gap-6 text-light">

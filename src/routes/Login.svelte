@@ -27,11 +27,11 @@
       const {found} = await dispatch("account/init", privKey)
 
       if ($relays.length === 0) {
-        navigate('/settings/relays')
+        navigate('/relays')
       } else if (found) {
-        navigate('/')
+        navigate('/notes')
       } else {
-        navigate('/settings/profile')
+        navigate('/profile')
       }
     }
   }

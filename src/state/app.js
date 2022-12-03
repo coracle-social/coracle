@@ -9,6 +9,15 @@ import {epoch, filterMatches, Listener, channels, relays, findReplyTo} from 'src
 
 export const modal = writable(null)
 
+export const settings = writable({
+  showLinkPreviews: true,
+  ...getLocalJson("coracle/settings"),
+})
+
+settings.subscribe($settings => {
+  setLocalJson("coracle/settings", $settings)
+})
+
 export const logout = () => {
   // Give any animations a moment to finish
   setTimeout(() => {
@@ -59,7 +68,7 @@ export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
   }
 
   // Keep our user in sync
-  user.update($user => ({...$user, ...get(accounts)[$user.pubkey]}))
+  user.update($user => $user ? {...$user, ...get(accounts)[$user.pubkey]} : null)
 }
 
 // Notes
@@ -78,6 +87,8 @@ export const annotateNotes = async (chunk, {showParents = false} = {}) => {
     chunk = parents
       .concat(chunk.filter(e => !find(whereEq({id: findReplyTo(e)}), parents)))
   }
+
+  chunk = uniqBy(prop('id'), chunk)
 
   if (chunk.length === 0) {
     return chunk
@@ -110,8 +121,8 @@ export const annotateNotes = async (chunk, {showParents = false} = {}) => {
   const annotate = e => ({
     ...e,
     user: $accounts[e.pubkey],
-    replies: (repliesById[e.id] || []).map(reply => annotate(reply)),
-    reactions: (reactionsById[e.id] || []).map(reaction => annotate(reaction)),
+    replies: uniqBy(prop('id'), (repliesById[e.id] || []).map(reply => annotate(reply))),
+    reactions: uniqBy(prop('id'), (reactionsById[e.id] || []).map(reaction => annotate(reaction))),
   })
 
   return reverse(sortBy(prop('created'), chunk.map(annotate)))
