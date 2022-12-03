@@ -3,6 +3,7 @@
   import {fly} from 'svelte/transition'
   import {navigate} from "svelte-routing"
   import Toggle from "src/partials/Toggle.svelte"
+  import Input from "src/partials/Input.svelte"
   import Button from "src/partials/Button.svelte"
   import {user} from "src/state/user"
   import {settings} from "src/state/app"
@@ -42,6 +43,16 @@
         <p class="text-sm text-light">
           If enabled, coracle will automatically retrieve a link preview for the first link
           in any note.
+        </p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <strong>Dufflepud URL</strong>
+        <Input bind:value={values.dufflepudUrl}>
+          <i slot="before" class="fa-solid fa-server" />
+        </Input>
+        <p class="text-sm text-light">
+          Enter a custom url for Coracle's helper application. Dufflepud is used for
+          hosting images and loading link previews.
         </p>
       </div>
       <Button type="submit" class="text-center">Done</Button>

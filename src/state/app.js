@@ -11,6 +11,7 @@ export const modal = writable(null)
 
 export const settings = writable({
   showLinkPreviews: true,
+  dufflepudUrl: import.meta.env.VITE_DUFFLEPUD_URL,
   ...getLocalJson("coracle/settings"),
 })
 

@@ -1,11 +1,11 @@
 <script>
   import cx from 'classnames'
-  import {find, uniqBy, prop, whereEq} from 'ramda'
+  import {find, last, uniqBy, prop, whereEq} from 'ramda'
   import {onMount} from 'svelte'
   import {fly, slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {LinkPreview} from 'svelte-link-preview'
-  import {ellipsize} from 'hurdak/src/core'
+  import {ellipsize, first} from 'hurdak/src/core'
   import {hasParent, toHtml, findLink} from 'src/util/html'
   import Anchor from 'src/partials/Anchor.svelte'
   import {dispatch} from "src/state/dispatch"
@@ -13,7 +13,6 @@
   import {accounts, settings, modal} from "src/state/app"
   import {user} from "src/state/user"
   import {formatTimestamp} from 'src/util/misc'
-  import {getLinkPreview} from 'src/util/html'
   import UserBadge from "src/partials/UserBadge.svelte"
 
   export let note
@@ -41,6 +40,28 @@
       preview = await getLinkPreview(link)
     }
   })
+
+  const getLinkPreview = async url => {
+    const res = await fetch(`${$settings.dufflepudUrl}/link/preview`, {
+      method: 'POST',
+      body: JSON.stringify({url}),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    const json = await res.json()
+
+    if (!json.title) {
+      return null
+    }
+
+    return {
+      ...json,
+      hostname: first(last(url.split('//')).split('/')),
+      sitename: null,
+    }
+  }
 
   const onClick = e => {
     if (!['I'].includes(e.target.tagName) && !hasParent('a', e.target)) {

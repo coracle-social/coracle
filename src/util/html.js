@@ -1,4 +1,3 @@
-import {last} from 'ramda'
 import {first} from 'hurdak/lib/hurdak'
 
 export const copyToClipboard = text => {
@@ -80,18 +79,4 @@ export const toHtml = content => {
     .replace(/https?:\/\/([\w.-]+)[^ ]*/g, (url, domain) => {
       return `<a href="${url}" target="_blank noopener" class="underline">${domain}</a>`
     })
-}
-
-export const getLinkPreview = async url => {
-  const res = await fetch('http://localhost:8000/link/preview', {
-    method: 'POST',
-    body: JSON.stringify({url}),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-
-  const json = await res.json()
-
-  return {...json, hostname: first(last(url.split('//')).split('/')), sitename: null}
 }
