@@ -9,7 +9,7 @@
   import {settings} from "src/state/app"
   import toast from "src/state/toast"
 
-  let values = $settings
+  let values = {...$settings}
 
   onMount(async () => {
     if (!$user) {
@@ -55,7 +55,7 @@
           hosting images and loading link previews.
         </p>
       </div>
-      <Button type="submit" class="text-center">Done</Button>
+      <Button type="submit" class="text-center">Save</Button>
     </div>
   </div>
 </form>
