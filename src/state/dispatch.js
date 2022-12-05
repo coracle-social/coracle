@@ -18,7 +18,13 @@ dispatch.addMethod("account/init", async (topic, privkey) => {
   const pubkey = getPublicKey(privkey)
 
   // Set what we know about the user to our store
-  user.set({name: pubkey.slice(0, 8), privkey, pubkey})
+  user.set({
+    name: pubkey.slice(0, 8),
+    privkey,
+    pubkey,
+    petnames: [],
+    muffle: [],
+  })
 
   // Make sure we have data for this user
   await ensureAccounts([pubkey], {force: true})
@@ -33,6 +39,26 @@ dispatch.addMethod("account/update", async (topic, updates) => {
 
   // Tell the network
   await nostr.publish(nostr.event(0, JSON.stringify(updates)))
+})
+
+dispatch.addMethod("account/petnames", async (topic, petnames) => {
+  const $user = get(user)
+
+  // Update our local copy
+  user.set({...$user, petnames})
+
+  // Tell the network
+  await nostr.publish(nostr.event(3, '', petnames))
+})
+
+dispatch.addMethod("account/muffle", async (topic, muffle) => {
+  const $user = get(user)
+
+  // Update our local copy
+  user.set({...$user, muffle})
+
+  // Tell the network
+  await nostr.publish(nostr.event(12165, '', muffle))
 })
 
 dispatch.addMethod("relay/join", async (topic, url) => {

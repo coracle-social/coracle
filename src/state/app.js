@@ -51,17 +51,30 @@ export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
   )
 
   if (pubkeys.length) {
-    const events = await channels.getter.all({kinds: [0], authors: uniq(pubkeys)})
+    const events = await channels.getter.all({kinds: [0, 3, 12165], authors: uniq(pubkeys)})
 
     await accounts.update($accounts => {
       events.forEach(e => {
-        $accounts[e.pubkey] = {
-          pubkey: e.pubkey,
+        const values = {
+          muffle: [],
+          petnames: [],
           ...$accounts[e.pubkey],
-          ...JSON.parse(e.content),
+          pubkey: e.pubkey,
           refreshed: now(),
           isUser: true,
         }
+
+        switcherFn(e.kind, {
+          0: () => {
+            $accounts[e.pubkey] = {...values, ...JSON.parse(e.content)}
+          },
+          3: () => {
+            $accounts[e.pubkey] = {...values, petnames: e.tags}
+          },
+          12165: () => {
+            $accounts[e.pubkey] = {...values, muffle: e.tags}
+          },
+        })
       })
 
       return $accounts
@@ -70,6 +83,18 @@ export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
 
   // Keep our user in sync
   user.update($user => $user ? {...$user, ...get(accounts)[$user.pubkey]} : null)
+}
+
+export const getFollow = pubkey => {
+  const $user = get(user)
+
+  return $user && find(t => t[1] === pubkey, $user.petnames)
+}
+
+export const getMuffle = pubkey => {
+  const $user = get(user)
+
+  return $user && find(t => t[1] === pubkey, $user.muffle)
 }
 
 // Notes

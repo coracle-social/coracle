@@ -5,9 +5,11 @@
   import {fly} from 'svelte/transition'
   import Note from "src/partials/Note.svelte"
   import Spinner from "src/partials/Spinner.svelte"
+  import Button from "src/partials/Button.svelte"
   import {Cursor, epoch} from 'src/state/nostr'
   import {user as currentUser} from 'src/state/user'
-  import {accounts, createScroller, notesListener, modal, annotateNotes} from "src/state/app"
+  import {t, dispatch} from 'src/state/dispatch'
+  import {accounts, getFollow, createScroller, notesListener, modal, annotateNotes} from "src/state/app"
 
   export let pubkey
 
@@ -19,6 +21,7 @@
   let interval
   let loading = true
   let modalUnsub
+  let following = getFollow(pubkey)
 
   $: user = $accounts[pubkey]
 
@@ -59,6 +62,25 @@
     clearInterval(interval)
   })
 
+  const follow = () => {
+    const petnames = $currentUser.petnames
+      .concat([t("p", user.pubkey, user.name)])
+
+    console.log(petnames)
+
+    dispatch('account/petnames', petnames)
+
+    following = true
+  }
+
+  const unfollow = () => {
+    const petnames = $currentUser.petnames
+      .filter(([_, pubkey]) => pubkey !== user.pubkey)
+
+    dispatch('account/petnames', petnames)
+
+    following = false
+  }
 </script>
 
 <svelte:window on:scroll={scroller?.start} />
@@ -73,13 +95,23 @@
       <div class="flex-grow">
         <div class="flex justify-between items-center">
           <h1 class="text-2xl">{user.name}</h1>
-          {#if $currentUser?.pubkey === pubkey}
-            <a href="/settings/profile" class="cursor-pointer text-sm">
-              <i class="fa-solid fa-edit" /> Edit
-            </a>
-          {/if}
         </div>
         <p>{user.about || ''}</p>
+      </div>
+      <div class="whitespace-nowrap">
+        {#if $currentUser?.pubkey === pubkey}
+        <a href="/settings/profile" class="cursor-pointer text-sm">
+          <i class="fa-solid fa-edit" /> Edit
+        </a>
+        {:else}
+        <div class="flex flex-col gap-2">
+          {#if following}
+          <Button on:click={unfollow}>Unfollow</Button>
+          {:else}
+          <Button on:click={follow}>Follow</Button>
+          {/if}
+        </div>
+        {/if}
       </div>
     </div>
   </div>

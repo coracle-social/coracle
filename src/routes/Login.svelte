@@ -29,7 +29,7 @@
       if ($relays.length === 0) {
         navigate('/relays')
       } else if (found) {
-        navigate('/notes')
+        navigate('/notes/global')
       } else {
         navigate('/profile')
       }

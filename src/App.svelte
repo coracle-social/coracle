@@ -82,7 +82,11 @@
         <Search {...params} />
         {/key}
       </Route>
-      <Route path="/notes" component={Notes} />
+      <Route path="/notes/:type" let:params>
+        {#key params.type}
+        <Notes {...params} />
+        {/key}
+      </Route>
       <Route path="/notes/new" component={NoteCreate} />
       <Route path="/chat" component={Chat} />
       <Route path="/chat/new" component={ChatEdit} />
@@ -126,7 +130,7 @@
         </a>
       </li>
       <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes/global">
           <i class="fa-solid fa-tag mr-2" /> Notes
         </a>
       </li>

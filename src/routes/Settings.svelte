@@ -22,7 +22,7 @@
 
     settings.set(values)
 
-    navigate('/notes')
+    navigate('/notes/global')
 
     toast.show("info", "Your settings have been saved!")
   }
