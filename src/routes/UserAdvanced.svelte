@@ -1,6 +1,6 @@
 <script>
   import {last} from 'ramda'
-  import {first, switcher} from 'hurdak/lib/hurdak'
+  import {switcher} from 'hurdak/lib/hurdak'
   import {fly} from 'svelte/transition'
   import Button from "src/partials/Button.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"

@@ -9,5 +9,10 @@ user.subscribe($user => {
 
   // Keep nostr in sync
   nostr.login($user?.privkey)
+
+  // Migrate data from old formats
+  if (!$user.petnames || !$user.muffle) {
+    user.set({...$user, petnames: [], muffle: []})
+  }
 })
 
