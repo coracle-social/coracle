@@ -3,13 +3,13 @@
   import {fly} from 'svelte/transition'
   import {writable} from 'svelte/store'
   import {navigate} from "svelte-routing"
-  import {uniqBy, prop} from 'ramda'
+  import {uniqBy, reject, prop} from 'ramda'
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/partials/Note.svelte"
   import {relays, Cursor} from "src/state/nostr"
   import {user} from "src/state/user"
-  import {createScroller, annotateNotes, notesListener, modal} from "src/state/app"
+  import {createScroller, getMuffleValue, annotateNotes, notesListener, modal} from "src/state/app"
 
   export let type
 
@@ -28,6 +28,9 @@
     cursor = new Cursor(type === 'global' ? {kinds: [1]} : {kinds: [1], authors})
     listener = await notesListener(notes, {kinds: [1, 5, 7]})
     scroller = createScroller(cursor, async chunk => {
+      // Remove a sampling of content if desired
+      chunk = reject(n => Math.random() > getMuffleValue(n.pubkey), chunk)
+
       const annotated = await annotateNotes(chunk, {showParents: true})
 
       notes.update($notes => uniqBy(prop('id'), $notes.concat(annotated)))

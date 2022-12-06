@@ -81,6 +81,10 @@
 
     following = false
   }
+
+  const openAdvanced = () => {
+    modal.set({form: 'user/advanced', user})
+  }
 </script>
 
 <svelte:window on:scroll={scroller?.start} />
@@ -93,8 +97,11 @@
         class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
         style="background-image: url({user.picture})" />
       <div class="flex-grow">
-        <div class="flex justify-between items-center">
+        <div class="flex items-center gap-2">
           <h1 class="text-2xl">{user.name}</h1>
+          {#if $currentUser && $currentUser.pubkey !== pubkey}
+            <i class="fa-solid fa-sliders cursor-pointer" on:click={openAdvanced} />
+          {/if}
         </div>
         <p>{user.about || ''}</p>
       </div>
@@ -104,7 +111,7 @@
           <i class="fa-solid fa-edit" /> Edit
         </a>
         {:else}
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col items-end gap-2">
           {#if following}
           <Button on:click={unfollow}>Unfollow</Button>
           {:else}

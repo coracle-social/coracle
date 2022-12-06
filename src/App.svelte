@@ -24,6 +24,7 @@
   import RelayList from "src/routes/RelayList.svelte"
   import AddRelay from "src/routes/AddRelay.svelte"
   import UserDetail from "src/routes/UserDetail.svelte"
+  import UserAdvanced from "src/routes/UserAdvanced.svelte"
   import NoteCreate from "src/routes/NoteCreate.svelte"
   import Chat from "src/routes/Chat.svelte"
   import ChatRoom from "src/routes/ChatRoom.svelte"
@@ -194,6 +195,8 @@
             {/key}
           {:else if $modal.form === 'relay'}
             <AddRelay />
+          {:else if $modal.form === 'user/advanced'}
+            <UserAdvanced />
           {/if}
         </dialog>
       </div>

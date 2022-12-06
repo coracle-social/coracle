@@ -1,4 +1,4 @@
-import {identity, uniqBy, last, without} from 'ramda'
+import {identity, isNil, uniqBy, last, without} from 'ramda'
 import {getPublicKey} from 'nostr-tools'
 import {get} from 'svelte/store'
 import {first, defmulti} from "hurdak/lib/hurdak"
@@ -146,7 +146,7 @@ export const copyTags = (e, newTags = []) => {
 export const t = (type, content, marker) => {
   const tag = [type, content, first(get(relays))]
 
-  if (marker) {
+  if (!isNil(marker)) {
     tag.push(marker)
   }
 

@@ -91,10 +91,20 @@ export const getFollow = pubkey => {
   return $user && find(t => t[1] === pubkey, $user.petnames)
 }
 
-export const getMuffle = pubkey => {
+export const getMuffleValue = pubkey => {
   const $user = get(user)
 
-  return $user && find(t => t[1] === pubkey, $user.muffle)
+  if (!$user) {
+    return 1
+  }
+
+  const tag = find(t => t[1] === pubkey, $user.muffle)
+
+  if (!tag) {
+    return 1
+  }
+
+  return parseFloat(last(tag))
 }
 
 // Notes
