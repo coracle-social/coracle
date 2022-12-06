@@ -2,8 +2,7 @@ Bugs
 
 - [ ] Prevent tabs from re-mounting (or at least re- animating)
 - [ ] Go "back" after adding a note
-- [ ] When the back button is clicked while a modal is open, close the modal instead
-- [ ] uniq is sprinkled all over the place, figure out a better solution for de-duplication
+- [ ] uniq and sortBy are sprinkled all over the place, figure out a better solution
 - [ ] With link/image previews, remove the url from the note body if it's on a separate last line
 
 Features
@@ -14,8 +13,7 @@ Features
 - [ ] Permalink note detail (share/permalink button?)
 - [ ] Add "view thread" page that recurs more deeply
 - [ ] Fix replies - notes may only include a "root" in its tags
-- [x] Link previews https://github.com/Dhaiwat10/svelte-link-preview, https://microlink.io/sdk
-  - Make them opt-in
+- [x] Link previews
 - [ ] Add notes, follows, likes tab to profile
 - [ ] Followers, blocks, likes on profile
 - [ ] Notifications
