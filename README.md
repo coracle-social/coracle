@@ -1,5 +1,6 @@
 Bugs
 
+- [ ] Pubkeys expand the width of the page, hiding the plus post button
 - [ ] Permalink note detail (share/permalink button?)
 - [ ] Back button no longer works if a modal is closed normally
 - [ ] Prevent tabs from re-mounting (or at least re- animating)
@@ -17,7 +18,6 @@ Features
 - [ ] Fix replies - notes may only include a "root" in its tags
 - [x] Link previews
 - [ ] Add notes, follows, likes tab to profile
-- [ ] Followers, blocks, likes on profile
 - [ ] Notifications
 - [ ] Images
 - [ ] Server discovery and relay publishing - https://github.com/nostr-protocol/nips/pull/32/files

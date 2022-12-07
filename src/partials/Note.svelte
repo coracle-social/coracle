@@ -106,7 +106,7 @@
     "border border-solid border-dark hover:border-medium hover:bg-medium": interactive && invertColors,
   })}>
   <div class="flex gap-4 items-center justify-between">
-    <UserBadge user={$accounts[note.pubkey]} />
+    <UserBadge user={{...$accounts[note.pubkey], pubkey: note.pubkey}} />
     <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>
   </div>
   <div class="ml-6 flex flex-col gap-2">
