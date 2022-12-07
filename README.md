@@ -1,5 +1,7 @@
 Bugs
 
+- [ ] Permalink note detail (share/permalink button?)
+- [ ] Back button no longer works if a modal is closed normally
 - [ ] Prevent tabs from re-mounting (or at least re- animating)
 - [ ] Go "back" after adding a note
 - [ ] uniq and sortBy are sprinkled all over the place, figure out a better solution
@@ -10,7 +12,7 @@ Features
 - [x] Chat
 - [x] Threads/social
 - [x] Search
-- [ ] Permalink note detail (share/permalink button?)
+- [ ] Mentions
 - [ ] Add "view thread" page that recurs more deeply
 - [ ] Fix replies - notes may only include a "root" in its tags
 - [x] Link previews

@@ -89,9 +89,9 @@
   </div>
 </div>
 {:else}
-<ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
+<ul class="py-4 flex flex-col gap-2 max-w-xl m-auto">
   {#each (notes ? $notes : []) as n (n.id)}
-    <li class="border-l border-solid border-medium">
+    <li>
       <Note interactive note={n} />
       {#each n.replies as r (r.id)}
       <div class="ml-6 border-l border-solid border-medium">

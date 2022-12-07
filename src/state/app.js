@@ -140,15 +140,8 @@ export const annotateNotes = async (chunk, {showParents = false} = {}) => {
     '#e': pluck('id', chunk.concat(replies)),
   })
 
-  const repliesById = groupBy(
-    n => find(t => last(t) === 'reply', n.tags)[1],
-    replies.filter(n => n.tags.map(last).includes('reply'))
-  )
-
-  const reactionsById = groupBy(
-    n => find(t => last(t) === 'reply', n.tags)[1],
-    reactions.filter(n => n.tags.map(last).includes('reply'))
-  )
+  const repliesById = groupBy(findReplyTo, replies)
+  const reactionsById = groupBy(findReplyTo, reactions)
 
   await ensureAccounts(uniq(pluck('pubkey', chunk.concat(replies).concat(reactions))))
 

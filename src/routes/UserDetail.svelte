@@ -123,9 +123,9 @@
     </div>
   </div>
   <div class="h-px bg-medium" in:fly={{y: 20, delay: 200}} />
-  <ul class="flex flex-col -mt-4" in:fly={{y: 20, delay: 400}}>
+  <ul class="flex flex-col" in:fly={{y: 20, delay: 400}}>
     {#each (notes ? $notes : []) as n (n.id)}
-    <li class="border-l border-solid border-medium pb-2">
+    <li>
       <Note interactive note={n} />
       {#each n.replies as r (r.id)}
         <div class="ml-6 border-l border-solid border-medium">

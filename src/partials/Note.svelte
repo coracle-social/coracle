@@ -1,12 +1,12 @@
 <script>
   import cx from 'classnames'
-  import {find, last, uniqBy, prop, whereEq} from 'ramda'
+  import {find, uniqBy, prop, whereEq} from 'ramda'
   import {onMount} from 'svelte'
   import {fly, slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
-  import {LinkPreview} from 'svelte-link-preview'
-  import {ellipsize, first} from 'hurdak/src/core'
+  import {ellipsize} from 'hurdak/src/core'
   import {hasParent, toHtml, findLink} from 'src/util/html'
+  import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import {dispatch} from "src/state/dispatch"
   import {findReplyTo} from "src/state/nostr"
@@ -21,7 +21,7 @@
   export let interactive = false
   export let invertColors = false
 
-  let preview = null
+  let link = null
   let like = null
   let flag = null
   let reply = null
@@ -34,34 +34,8 @@
   }
 
   onMount(async () => {
-    const link = findLink(note.content)
-
-    if (link && $settings.showLinkPreviews) {
-      preview = await getLinkPreview(link)
-    }
+    link = $settings.showLinkPreviews ? findLink(note.content) : null
   })
-
-  const getLinkPreview = async url => {
-    const res = await fetch(`${$settings.dufflepudUrl}/link/preview`, {
-      method: 'POST',
-      body: JSON.stringify({url}),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-
-    const json = await res.json()
-
-    if (!json.title) {
-      return null
-    }
-
-    return {
-      ...json,
-      hostname: first(last(url.split('//')).split('/')),
-      sitename: null,
-    }
-  }
 
   const onClick = e => {
     if (!['I'].includes(e.target.tagName) && !hasParent('a', e.target)) {
@@ -148,14 +122,14 @@
     </p>
     {:else}
     <p>
-      {#if note.content.length > 240 && !showEntire}
-        {ellipsize(note.content, 240)}
+      {#if note.content.length > 500 && !showEntire}
+        {ellipsize(note.content, 500)}
       {:else}
         {@html toHtml(note.content)}
       {/if}
-      {#if preview}
-      <div class="mt-2" in:slide on:click={e => e.stopPropagation()}>
-        <LinkPreview url={preview.url} fetcher={() => preview} />
+      {#if link}
+      <div class="mt-2" on:click={e => e.stopPropagation()}>
+        <Preview endpoint={`${$settings.dufflepudUrl}/link/preview`} url={link} />
       </div>
       {/if}
     </p>
