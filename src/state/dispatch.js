@@ -13,10 +13,7 @@ import {ensureAccounts} from 'src/state/app'
 
 export const dispatch = defmulti("dispatch", identity)
 
-dispatch.addMethod("account/init", async (topic, privkey) => {
-  // Generate a public key
-  const pubkey = getPublicKey(privkey)
-
+dispatch.addMethod("account/init", async (topic, { privkey, pubkey }) => {
   // Set what we know about the user to our store
   user.set({
     name: pubkey.slice(0, 8),

@@ -219,8 +219,16 @@ nostr.login = privkey => {
   nostr._privkey = privkey
 }
 
+nostr.pubkeyLogin = pubkey => {
+  nostr.registerSigningFunction( async (event) => {
+    const {sig} = await window.nostr.signEvent(event)
+    return sig
+  })
+  nostr._pubkey = pubkey
+}
+
 nostr.event = (kind, content = '', tags = []) => {
-  const pubkey = getPublicKey(nostr._privkey)
+  const pubkey = nostr._pubkey || getPublicKey(nostr._privkey)
   const createdAt = Math.round(new Date().valueOf() / 1000)
 
   return {kind, content, tags, pubkey, created_at: createdAt}

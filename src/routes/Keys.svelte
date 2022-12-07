@@ -45,6 +45,7 @@
           trying to find you on nostr.
         </p>
       </div>
+      {#if $user.privkey}
       <div class="flex flex-col gap-1">
         <strong>Private Key</strong>
         <Input disabled type="password" value={$user?.privkey}>
@@ -57,6 +58,7 @@
           using <Anchor external href={delegationUrl}>delegation keys</Anchor> instead.
         </p>
       </div>
+      {/if}
     </div>
   </div>
 </div>

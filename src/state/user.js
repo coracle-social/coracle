@@ -8,7 +8,11 @@ user.subscribe($user => {
   setLocalJson("coracle/user", $user)
 
   // Keep nostr in sync
-  nostr.login($user?.privkey)
+  if ($user?.privkey) {
+    nostr.login($user.privkey)
+  } else if ($user?.pubkey) {
+    nostr.pubkeyLogin($user.pubkey)
+  }
 
   // Migrate data from old formats
   if (!$user.petnames || !$user.muffle) {
