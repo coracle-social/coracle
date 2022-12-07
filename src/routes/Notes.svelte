@@ -26,7 +26,7 @@
 
   onMount(async () => {
     cursor = new Cursor(type === 'global' ? {kinds: [1]} : {kinds: [1], authors})
-    listener = await notesListener(notes, {kinds: [1, 5, 7]})
+    listener = await notesListener(notes, {kinds: [1, 5, 7]}, {shouldMuffle: true})
     scroller = createScroller(cursor, async chunk => {
       // Remove a sampling of content if desired
       chunk = reject(n => Math.random() > getMuffleValue(n.pubkey), chunk)

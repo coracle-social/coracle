@@ -126,6 +126,10 @@ export class Cursor {
     this.seen = new Set()
   }
   async start() {
+    if (!this.since) {
+      throw new Error("Since must not be null")
+    }
+
     if (!this.sub) {
       this.sub = await channels.getter.sub(
         this.filter.map(f => ({...f, since: this.since, until: this.until})),

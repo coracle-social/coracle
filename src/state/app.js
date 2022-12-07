@@ -157,7 +157,7 @@ export const annotateNotes = async (chunk, {showParents = false} = {}) => {
   return reverse(sortBy(prop('created'), chunk.map(annotate)))
 }
 
-export const notesListener = (notes, filter) => {
+export const notesListener = (notes, filter, {shouldMuffle = false} = {}) => {
   const updateNote = (id, f) =>
     notes.update($notes =>
       $notes
@@ -184,6 +184,10 @@ export const notesListener = (notes, filter) => {
     e => switcherFn(e.kind, {
       1: async () => {
         const id = findReplyTo(e)
+
+        if (shouldMuffle && Math.random() > getMuffleValue(e.pubkey)) {
+          return
+        }
 
         if (id) {
           const [reply] = await annotateNotes([e])
