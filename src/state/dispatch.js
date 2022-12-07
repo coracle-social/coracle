@@ -1,5 +1,4 @@
 import {identity, isNil, uniqBy, last, without} from 'ramda'
-import {getPublicKey} from 'nostr-tools'
 import {get} from 'svelte/store'
 import {first, defmulti} from "hurdak/lib/hurdak"
 import {user} from "src/state/user"

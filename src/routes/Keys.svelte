@@ -45,7 +45,7 @@
           trying to find you on nostr.
         </p>
       </div>
-      {#if $user.privkey}
+      {#if $user?.privkey}
       <div class="flex flex-col gap-1">
         <strong>Private Key</strong>
         <Input disabled type="password" value={$user?.privkey}>

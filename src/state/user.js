@@ -15,7 +15,7 @@ user.subscribe($user => {
   }
 
   // Migrate data from old formats
-  if (!$user.petnames || !$user.muffle) {
+  if ($user && (!$user.petnames || !$user.muffle)) {
     user.set({...$user, petnames: [], muffle: []})
   }
 })
