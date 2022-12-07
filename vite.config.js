@@ -4,6 +4,9 @@ import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig({
+  build: {
+    sourcemap: true,
+  },
   resolve: {
     alias: {
       src: path.resolve(__dirname, 'src'),

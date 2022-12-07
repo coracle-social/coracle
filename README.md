@@ -1,15 +1,30 @@
 Bugs
 
-- [ ] Pagination
-- [ ] Improve data loading. Ditch nostr-tools, or use eose
+- [ ] Pubkeys expand the width of the page, hiding the plus post button
+- [ ] Permalink note detail (share/permalink button?)
+- [ ] Back button no longer works if a modal is closed normally
+- [ ] Prevent tabs from re-mounting (or at least re- animating)
+- [ ] Go "back" after adding a note
+- [ ] uniq and sortBy are sprinkled all over the place, figure out a better solution
+- [ ] With link/image previews, remove the url from the note body if it's on a separate last line
 
 Features
 
 - [x] Chat
 - [x] Threads/social
-- [ ] Followers
-- [ ] Server discovery
+- [x] Search
+- [ ] Mentions
+- [ ] Add "view thread" page that recurs more deeply
+- [ ] Fix replies - notes may only include a "root" in its tags
+- [x] Link previews
+- [ ] Add notes, follows, likes tab to profile
+- [ ] Notifications
+- [ ] Images
+- [ ] Server discovery and relay publishing - https://github.com/nostr-protocol/nips/pull/32/files
 - [ ] Favorite chat rooms
+- [ ] Optimistically load events the user publishes (e.g. to reduce reflow for reactions/replies).
+  - Essentially, we can pretend to be our own in-memory relay.
+  - This allows us to keep a copy of all user data, and possibly user likes/reply parents
 
 Nostr implementation comments
 

@@ -47,3 +47,6 @@ export const formatTimestamp = ts => {
 
   return formatter.format(new Date(ts * 1000))
 }
+
+export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+

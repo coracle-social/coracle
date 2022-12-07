@@ -48,11 +48,11 @@
       const {found} = await dispatch("account/init", { privkey, pubkey })
 
       if ($relays.length === 0) {
-        navigate('/settings/relays')
+        navigate('/relays')
       } else if (found) {
-        navigate('/')
+        navigate('/notes/global')
       } else {
-        navigate('/settings/profile')
+        navigate('/profile')
       }
     }
   }

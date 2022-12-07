@@ -1,80 +1,215 @@
-import {writable} from 'svelte/store'
-import {debounce} from 'throttle-debounce'
+import {writable, get} from 'svelte/store'
 import {relayPool, getPublicKey} from 'nostr-tools'
-import {last, uniqBy, prop} from 'ramda'
-import {first} from 'hurdak/lib/hurdak'
-import {getLocalJson, setLocalJson} from "src/util/misc"
+import {last, find, intersection, uniqBy, prop} from 'ramda'
+import {first, noop, ensurePlural} from 'hurdak/lib/hurdak'
+import {getLocalJson, setLocalJson, now, timedelta} from "src/util/misc"
 
 export const nostr = relayPool()
 
-// Track who is subscribing, so we don't go over our limit
+export const epoch = 1633046400
 
-const channel = name => {
-  let active = false
-  let promise = Promise.resolve('init')
+export const filterTags = (where, events) =>
+  ensurePlural(events)
+    .flatMap(
+      e => e.tags.filter(t => {
+        if (where.tag && where.tag !== t[0]) {
+          return false
+        }
 
-  const _chan = {
-    sub: params => {
-      if (active) {
-        console.error(`Channel ${name} is already active.`)
-      }
+        if (where.type && where.type !== last(t)) {
+          return false
+        }
 
-      active = true
+        return true
+      }).map(t => t[1])
+    )
 
-      const sub = nostr.sub(params)
+export const findTag = (where, events) => first(filterTags(where, events))
 
-      return () => {
-        active = false
+// Support the deprecated version where tags are marked as replies
+export const findReplyTo = e =>
+  findTag({tag: "e", type: "reply"}, e) || findTag({tag: "e"}, e)
 
-        sub.unsub()
-      }
+export const filterMatches = (filter, e)  => {
+  return Boolean(find(
+    f => {
+      return (
+           (!f.ids     || f.ids.includes(e.id))
+        && (!f.authors || f.authors.includes(e.pubkey))
+        && (!f.kinds   || f.kinds.includes(e.kind))
+        && (!f['#e']   || intersection(f['#e'], e.tags.filter(t => t[0] === 'e').map(t => t[1])))
+        && (!f['#p']   || intersection(f['#p'], e.tags.filter(t => t[0] === 'p').map(t => t[1])))
+        && (!f.since   || f.since >= e.created_at)
+        && (!f.until   || f.until <= e.created_at)
+      )
     },
-    all: filter => {
-      // Wait for any other subscriptions to finish
-      promise = promise.then(() => {
-        return new Promise(resolve => {
-          // Collect results
-          let result = []
+    ensurePlural(filter)
+  ))
+}
 
-          // As long as events are coming in, don't resolve. When
-          // events are no longer streaming, resolve and close the subscription
-          const done = debounce(300, () => {
-            unsub()
-
-            resolve(result)
-          })
-
-          // Create our usbscription, every time we get an event, attempt to complete
-          const unsub = _chan.sub({
-            filter,
-            cb: e => {
-              result.push(e)
-
-              done()
-            },
-          })
-
-          // If our filter doesn't match anything, be sure to resolve the promise
-          setTimeout(done, 1000)
-        })
-      })
-
-      return promise
-    },
-    first: async filter => {
-      return first(await channels.getter.all({...filter, limit: 1}))
-    },
-    last: async filter => {
-      return last(await channels.getter.all({...filter}))
-    },
+export class Channel {
+  constructor(name) {
+    this.name = name
+    this.p = Promise.resolve()
   }
+  async sub(filter, cb, onEose = noop) {
+    // Make sure callers have to wait for the previous sub to be done
+    // before they can get a new one.
+    await this.p
 
-  return _chan
+    // If we don't have any relays, we'll wait forever for an eose, but
+    // we already know we're done. Use a timeout since callers are
+    // expecting this to be async and we run into errors otherwise.
+    if (get(relays).length === 0) {
+      setTimeout(onEose)
+
+      return {unsub: noop}
+    }
+
+    let resolve
+    const eoseRelays = []
+    const sub = nostr.sub({filter, cb}, this.name, r => {
+      eoseRelays.push(r)
+
+      if (eoseRelays.length === get(relays).length) {
+        onEose()
+      }
+    })
+
+    this.p = new Promise(r => {
+      resolve = r
+    })
+
+    return {
+      unsub: () => {
+        sub.unsub()
+
+        resolve()
+      }
+    }
+  }
+  all(filter) {
+    /* eslint no-async-promise-executor: 0 */
+    return new Promise(async resolve => {
+      const result = []
+
+      const sub = await this.sub(
+        filter,
+        e => result.push(e),
+        r => {
+          sub.unsub()
+
+          resolve(result)
+        },
+      )
+    })
+  }
 }
 
 export const channels = {
-  watcher: channel('main'),
-  getter: channel('getter'),
+  listener: new Channel('listener'),
+  getter: new Channel('getter'),
+}
+
+// We want to get old events, then listen for new events, then potentially retrieve
+// older events again for pagination. Since we have to limit channels to 3 per nip 01,
+// this requires us to unsubscribe and re-subscribe frequently
+export class Cursor {
+  constructor(filter, delta) {
+    this.filter = ensurePlural(filter)
+    this.delta = delta || timedelta(1, 'hours')
+    this.since = now() - this.delta
+    this.until = now()
+    this.sub = null
+    this.q = []
+    this.p = Promise.resolve()
+    this.seen = new Set()
+  }
+  async start() {
+    if (!this.sub) {
+      this.sub = await channels.getter.sub(
+        this.filter.map(f => ({...f, since: this.since, until: this.until})),
+        e => this.onEvent(e),
+        r => this.onEose(r)
+      )
+    }
+  }
+  stop() {
+    if (this.sub) {
+      this.sub.unsub()
+      this.sub = null
+    }
+  }
+  async restart() {
+    this.stop()
+
+    await this.start()
+  }
+  async step() {
+    this.since -= this.delta
+
+    await this.restart()
+  }
+  onEvent(e) {
+    // Save a little memory
+    const shortId = e.id.slice(-10)
+
+    if (!this.seen.has(shortId)) {
+      this.seen.add(shortId)
+      this.q.push(e)
+    }
+
+    this.until = Math.min(this.until, e.created_at - 1)
+  }
+  onEose() {
+    this.stop()
+  }
+  async chunk() {
+    await this.step()
+
+    /* eslint no-constant-condition: 0 */
+    while (true) {
+      await new Promise(requestAnimationFrame)
+
+      if (!this.sub) {
+        return this.q.splice(0)
+      }
+    }
+  }
+}
+
+export class Listener {
+  constructor(filter, onEvent) {
+    this.filter = ensurePlural(filter)
+    this.onEvent = onEvent
+    this.since = now()
+    this.sub = null
+    this.q = []
+    this.p = Promise.resolve()
+  }
+  async start() {
+    const {filter, since} = this
+
+    if (!this.sub) {
+      this.sub = await channels.listener.sub(
+        filter.map(f => ({since, ...f})),
+        e => {
+          this.since = e.created_at
+          this.onEvent(e)
+        }
+      )
+    }
+  }
+  stop() {
+    if (this.sub) {
+      this.sub.unsub()
+      this.sub = null
+    }
+  }
+  restart() {
+    this.stop()
+    this.start()
+  }
 }
 
 // Augment nostr with some extra methods

@@ -13,5 +13,10 @@ user.subscribe($user => {
   } else if ($user?.pubkey) {
     nostr.pubkeyLogin($user.pubkey)
   }
+
+  // Migrate data from old formats
+  if (!$user.petnames || !$user.muffle) {
+    user.set({...$user, petnames: [], muffle: []})
+  }
 })
 

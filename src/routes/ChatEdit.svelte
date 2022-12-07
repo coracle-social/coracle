@@ -6,7 +6,6 @@
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Button from "src/partials/Button.svelte"
-  import RoomList from "src/partials/chat/RoomList.svelte"
   import {dispatch} from "src/state/dispatch"
   import {channels} from "src/state/nostr"
   import toast from "src/state/toast"
@@ -51,42 +50,37 @@
   }
 </script>
 
-<div class="flex gap-4 h-full">
-  <div class="sm:ml-56 w-full">
-    <form on:submit={submit} class="flex justify-center py-8 px-4" in:fly={{y: 20}}>
-      <div class="flex flex-col gap-4 max-w-2xl">
-        <div class="flex justify-center items-center flex-col mb-4">
-          <h1 class="staatliches text-6xl">Name your room</h1>
-        </div>
-        <div class="flex flex-col gap-8 w-full">
-          <div class="flex flex-col gap-1">
-            <strong>Room name</strong>
-            <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.name}>
-              <i slot="before" class="fa-solid fa-tag" />
-            </Input>
-            <p class="text-sm text-light">
-              The room's name can be changed anytime.
-            </p>
-          </div>
-          <div class="flex flex-col gap-1">
-            <strong>Room information</strong>
-            <Textarea name="about" bind:value={values.about} />
-            <p class="text-sm text-light">
-              Give people an idea of what kind of conversations will be happening here.
-            </p>
-          </div>
-          <div class="flex flex-col gap-1">
-            <strong>Picture</strong>
-            <input type="file" name="picture" />
-            <p class="text-sm text-light">
-              A picture to help people remember your room.
-            </p>
-          </div>
-          <Button type="submit" class="text-center">Done</Button>
-        </div>
+<form on:submit={submit} class="flex justify-center py-12" in:fly={{y: 20}}>
+  <div class="flex flex-col gap-4 max-w-2xl">
+    <div class="flex justify-center items-center flex-col mb-4">
+      <h1 class="staatliches text-6xl">Name your room</h1>
+    </div>
+    <div class="flex flex-col gap-8 w-full">
+      <div class="flex flex-col gap-1">
+        <strong>Room name</strong>
+        <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.name}>
+          <i slot="before" class="fa-solid fa-tag" />
+        </Input>
+        <p class="text-sm text-light">
+          The room's name can be changed anytime.
+        </p>
       </div>
-    </form>
+      <div class="flex flex-col gap-1">
+        <strong>Room information</strong>
+        <Textarea name="about" bind:value={values.about} />
+        <p class="text-sm text-light">
+          Give people an idea of what kind of conversations will be happening here.
+        </p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <strong>Picture</strong>
+        <input type="file" name="picture" />
+        <p class="text-sm text-light">
+          A picture to help people remember your room.
+        </p>
+      </div>
+      <Button type="submit" class="text-center">Done</Button>
+    </div>
   </div>
-  <RoomList />
-</div>
+</form>
 

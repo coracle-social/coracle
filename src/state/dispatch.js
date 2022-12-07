@@ -1,4 +1,5 @@
-import {identity, last, without} from 'ramda'
+import {identity, isNil, uniqBy, last, without} from 'ramda'
+import {getPublicKey} from 'nostr-tools'
 import {get} from 'svelte/store'
 import {first, defmulti} from "hurdak/lib/hurdak"
 import {user} from "src/state/user"
@@ -14,7 +15,13 @@ export const dispatch = defmulti("dispatch", identity)
 
 dispatch.addMethod("account/init", async (topic, { privkey, pubkey }) => {
   // Set what we know about the user to our store
-  user.set({name: pubkey.slice(0, 8), privkey, pubkey})
+  user.set({
+    name: pubkey.slice(0, 8),
+    privkey,
+    pubkey,
+    petnames: [],
+    muffle: [],
+  })
 
   // Make sure we have data for this user
   await ensureAccounts([pubkey], {force: true})
@@ -29,6 +36,26 @@ dispatch.addMethod("account/update", async (topic, updates) => {
 
   // Tell the network
   await nostr.publish(nostr.event(0, JSON.stringify(updates)))
+})
+
+dispatch.addMethod("account/petnames", async (topic, petnames) => {
+  const $user = get(user)
+
+  // Update our local copy
+  user.set({...$user, petnames})
+
+  // Tell the network
+  await nostr.publish(nostr.event(3, '', petnames))
+})
+
+dispatch.addMethod("account/muffle", async (topic, muffle) => {
+  const $user = get(user)
+
+  // Update our local copy
+  user.set({...$user, muffle})
+
+  // Tell the network
+  await nostr.publish(nostr.event(12165, '', muffle))
 })
 
 dispatch.addMethod("relay/join", async (topic, url) => {
@@ -78,7 +105,7 @@ dispatch.addMethod("note/create", async (topic, content, tags=[]) => {
 })
 
 dispatch.addMethod("reaction/create", async (topic, content, e) => {
-  const tags = copyTags(e).concat([t("p", e.pubkey), t("e", e.id, 'reply')])
+  const tags = copyTags(e, [t("p", e.pubkey), t("e", e.id, 'reply')])
   const event = nostr.event(7, content, tags)
 
   await nostr.publish(event)
@@ -87,7 +114,7 @@ dispatch.addMethod("reaction/create", async (topic, content, e) => {
 })
 
 dispatch.addMethod("reply/create", async (topic, content, e) => {
-  const tags = copyTags(e).concat([t("p", e.pubkey), t("e", e.id, 'reply')])
+  const tags = copyTags(e, [t("p", e.pubkey), t("e", e.id, 'reply')])
   const event = nostr.event(1, content, tags)
 
   await nostr.publish(event)
@@ -105,15 +132,18 @@ dispatch.addMethod("event/delete", async (topic, ids) => {
 
 // utils
 
-export const copyTags = e => {
+export const copyTags = (e, newTags = []) => {
   // Remove reply type from e tags
-  return e.tags.map(t => last(t) === 'reply' ? t.slice(0, -1) : t)
+  return uniqBy(
+    t => t.join(':'),
+    e.tags.map(t => last(t) === 'reply' ? t.slice(0, -1) : t).concat(newTags)
+  )
 }
 
 export const t = (type, content, marker) => {
   const tag = [type, content, first(get(relays))]
 
-  if (marker) {
+  if (!isNil(marker)) {
     tag.push(marker)
   }
 

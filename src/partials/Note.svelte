@@ -1,13 +1,16 @@
 <script>
   import cx from 'classnames'
-  import {find, last, uniqBy, prop, whereEq} from 'ramda'
-  import {fly} from 'svelte/transition'
+  import {find, uniqBy, prop, whereEq} from 'ramda'
+  import {onMount} from 'svelte'
+  import {fly, slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {ellipsize} from 'hurdak/src/core'
-  import {hasParent, toHtml} from 'src/util/html'
+  import {hasParent, toHtml, findLink} from 'src/util/html'
+  import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import {dispatch} from "src/state/dispatch"
-  import {accounts, modal} from "src/state/app"
+  import {findReplyTo} from "src/state/nostr"
+  import {accounts, settings, modal} from "src/state/app"
   import {user} from "src/state/user"
   import {formatTimestamp} from 'src/util/misc'
   import UserBadge from "src/partials/UserBadge.svelte"
@@ -18,6 +21,7 @@
   export let interactive = false
   export let invertColors = false
 
+  let link = null
   let like = null
   let flag = null
   let reply = null
@@ -26,8 +30,12 @@
   $: {
     like = find(e => e.pubkey === $user?.pubkey && e.content === "+", note.reactions)
     flag = find(e => e.pubkey === $user?.pubkey && e.content === "-", note.reactions)
-    parentId = prop(1, find(t => last(t) === 'reply' ? t[1] : null, note.tags))
+    parentId = findReplyTo(note)
   }
+
+  onMount(async () => {
+    link = $settings.showLinkPreviews ? findLink(note.content) : null
+  })
 
   const onClick = e => {
     if (!['I'].includes(e.target.tagName) && !hasParent('a', e.target)) {
@@ -35,7 +43,8 @@
     }
   }
 
-  const showParent = () => {
+  const showParent = async () => {
+
     modal.set({note: {id: parentId}})
   }
 
@@ -97,7 +106,7 @@
     "border border-solid border-dark hover:border-medium hover:bg-medium": interactive && invertColors,
   })}>
   <div class="flex gap-4 items-center justify-between">
-    <UserBadge user={$accounts[note.pubkey]} />
+    <UserBadge user={{...$accounts[note.pubkey], pubkey: note.pubkey}} />
     <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>
   </div>
   <div class="ml-6 flex flex-col gap-2">
@@ -106,11 +115,22 @@
         Reply to <Anchor on:click={showParent}>{parentId.slice(0, 8)}</Anchor>
       </small>
     {/if}
+    {#if flag}
+    <p class="text-light border-l-2 border-solid border-medium pl-4">
+      You have flagged this content as offensive.
+      <Anchor on:click={() => deleteReaction(flag)}>Unflag</Anchor>
+    </p>
+    {:else}
     <p>
-      {#if note.content.length > 240 && !showEntire}
-        {ellipsize(note.content, 240)}
+      {#if note.content.length > 500 && !showEntire}
+        {ellipsize(note.content, 500)}
       {:else}
         {@html toHtml(note.content)}
+      {/if}
+      {#if link}
+      <div class="mt-2" on:click={e => e.stopPropagation()}>
+        <Preview endpoint={`${$settings.dufflepudUrl}/link/preview`} url={link} />
+      </div>
       {/if}
     </p>
     <div class="flex gap-6 text-light">
@@ -126,20 +146,19 @@
           on:click={() => like ? deleteReaction(like) : react("+")} />
         {uniqBy(prop('pubkey'), note.reactions.filter(whereEq({content: '+'}))).length}
       </div>
-      <div class={cx({'text-accent': flag})}>
-        <i
-          class="fa-solid fa-flag cursor-pointer"
-          on:click={() => flag ? deleteReaction(flag) : react("-")} />
+      <div>
+        <i class="fa-solid fa-flag cursor-pointer" on:click={() => react("-")} />
         {uniqBy(prop('pubkey'), note.reactions.filter(whereEq({content: '-'}))).length}
       </div>
     </div>
+    {/if}
   </div>
 </div>
 
 {#if reply !== null}
 <div
   class="note-reply flex bg-medium border-medium border border-solid"
-  transition:fly={{y: 20}}>
+  transition:slide>
   <textarea
     rows="4"
     autofocus

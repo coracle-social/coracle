@@ -1,3 +1,5 @@
+import {first} from 'hurdak/lib/hurdak'
+
 export const copyToClipboard = text => {
   const {activeElement} = document
   const input = document.createElement("textarea")
@@ -68,6 +70,8 @@ export const escapeHtml = html => {
 
   return div.innerHTML
 }
+
+export const findLink = t => first(t.match(/https?:\/\/([\w.-]+)[^ ]*/))
 
 export const toHtml = content => {
   return escapeHtml(content)

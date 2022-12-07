@@ -2,5 +2,5 @@
   import {onMount} from 'svelte'
   import {navigate} from 'svelte-routing'
 
-  onMount(() => navigate('/notes'))
+  onMount(() => navigate('/notes/global'))
 </script>

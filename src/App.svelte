@@ -15,13 +15,16 @@
   import Anchor from 'src/partials/Anchor.svelte'
   import NoteDetail from "src/partials/NoteDetail.svelte"
   import NotFound from "src/routes/NotFound.svelte"
+  import Search from "src/routes/Search.svelte"
   import Notes from "src/routes/Notes.svelte"
   import Login from "src/routes/Login.svelte"
   import Profile from "src/routes/Profile.svelte"
+  import Settings from "src/routes/Settings.svelte"
   import Keys from "src/routes/Keys.svelte"
   import RelayList from "src/routes/RelayList.svelte"
   import AddRelay from "src/routes/AddRelay.svelte"
   import UserDetail from "src/routes/UserDetail.svelte"
+  import UserAdvanced from "src/routes/UserAdvanced.svelte"
   import NoteCreate from "src/routes/NoteCreate.svelte"
   import Chat from "src/routes/Chat.svelte"
   import ChatRoom from "src/routes/ChatRoom.svelte"
@@ -34,6 +37,8 @@
   const toggleSearch = () => searchIsOpen.update(x => !x)
 
   let menuIcon
+  let scrollY
+  let suspendedSubs = []
 
   export let url = ""
 
@@ -45,8 +50,34 @@
       }
     })
 
-    globalHistory.listen(() => {
-      modal.set(null)
+    modal.subscribe($modal => {
+      // Keep scroll position on body, but don't allow scrolling
+      if ($modal) {
+        // This is not idempotent, so don't duplicate it
+        if (document.body.style.position !== 'fixed') {
+          scrollY = window.scrollY
+
+          document.body.style.top = `-${scrollY}px`
+          document.body.style.position = `fixed`
+        }
+      } else {
+        document.body.style = ''
+        window.scrollTo(0, scrollY)
+      }
+
+      // Push another state so back button only closes the modal
+      if ($modal && !location.hash.startsWith('#modal')) {
+        globalHistory.navigate(location.pathname + '#modal')
+      }
+    })
+
+    globalHistory.listen(({action}) => {
+      // Once we've navigated, close our modal if we don't have m in the hash
+      setTimeout(() => {
+        if ($modal && !location.hash.startsWith('#modal')) {
+          modal.set(null)
+        }
+      }, 50)
     })
   })
 </script>
@@ -55,21 +86,35 @@
 
 <Router {url}>
   <div use:links class="h-full">
-    <div class="pt-16 text-white h-full" class:overflow-hidden={$modal}>
-      <Route path="/notes" component={Notes} />
+    <div class="pt-16 text-white h-full">
+      <Route path="/search/:type" let:params>
+        {#key params.type}
+        <Search {...params} />
+        {/key}
+      </Route>
+      <Route path="/notes/:type" let:params>
+        {#key params.type}
+        <Notes {...params} />
+        {/key}
+      </Route>
       <Route path="/notes/new" component={NoteCreate} />
       <Route path="/chat" component={Chat} />
       <Route path="/chat/new" component={ChatEdit} />
       <Route path="/chat/:room" let:params>
         {#key params.room}
-        <ChatRoom room={params.room} />
+        <ChatRoom {...params} />
         {/key}
       </Route>
       <Route path="/chat/:room/edit" component={ChatEdit} />
-      <Route path="/users/:pubkey" component={UserDetail} />
-      <Route path="/settings/keys" component={Keys} />
-      <Route path="/settings/relays" component={RelayList} />
-      <Route path="/settings/profile" component={Profile} />
+      <Route path="/users/:pubkey" let:params>
+        {#key params.pubkey}
+        <UserDetail {...params} />
+        {/key}
+      </Route>
+      <Route path="/keys" component={Keys} />
+      <Route path="/relays" component={RelayList} />
+      <Route path="/profile" component={Profile} />
+      <Route path="/settings" component={Settings} />
       <Route path="/login" component={Login} />
       <Route path="*" component={NotFound} />
     </div>
@@ -90,7 +135,12 @@
       </li>
       {/if}
       <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/search/people">
+          <i class="fa-solid fa-search mr-2" /> Search
+        </a>
+      </li>
+      <li class="cursor-pointer">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes/global">
           <i class="fa-solid fa-tag mr-2" /> Notes
         </a>
       </li>
@@ -102,13 +152,18 @@
       <li class="h-px mx-3 my-4 bg-medium" />
       {#if $user}
       <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/settings/keys">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/keys">
           <i class="fa-solid fa-key mr-2" /> Keys
         </a>
       </li>
       <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/settings/relays">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/relays">
           <i class="fa-solid fa-server mr-2" /> Relays
+        </a>
+      </li>
+      <li class="cursor-pointer">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/settings">
+          <i class="fa-solid fa-gear mr-2" /> Settings
         </a>
       </li>
       <li class="cursor-pointer">
@@ -149,6 +204,8 @@
             {/key}
           {:else if $modal.form === 'relay'}
             <AddRelay />
+          {:else if $modal.form === 'user/advanced'}
+            <UserAdvanced />
           {/if}
         </dialog>
       </div>

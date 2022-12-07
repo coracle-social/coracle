@@ -1,13 +1,34 @@
-import {prop, uniq, sortBy, uniqBy, find, last, groupBy} from 'ramda'
+import {when, assoc, prop, identity, whereEq, reverse, uniq, sortBy, uniqBy, find, last, pluck, groupBy} from 'ramda'
 import {debounce} from 'throttle-debounce'
-import {writable, derived, get} from 'svelte/store'
+import {writable, get} from 'svelte/store'
 import {navigate} from "svelte-routing"
 import {switcherFn, ensurePlural} from 'hurdak/lib/hurdak'
-import {getLocalJson, setLocalJson, now, timedelta} from "src/util/misc"
+import {getLocalJson, setLocalJson, now, timedelta, sleep} from "src/util/misc"
 import {user} from 'src/state/user'
-import {channels, relays} from 'src/state/nostr'
+import {epoch, filterMatches, Listener, channels, relays, findReplyTo} from 'src/state/nostr'
 
 export const modal = writable(null)
+
+export const settings = writable({
+  showLinkPreviews: true,
+  dufflepudUrl: import.meta.env.VITE_DUFFLEPUD_URL,
+  ...getLocalJson("coracle/settings"),
+})
+
+settings.subscribe($settings => {
+  setLocalJson("coracle/settings", $settings)
+})
+
+export const logout = () => {
+  // Give any animations a moment to finish
+  setTimeout(() => {
+    user.set(null)
+    relays.set([])
+    navigate("/login")
+  }, 200)
+}
+
+// Accounts
 
 export const accounts = writable(getLocalJson("coracle/accounts") || {})
 
@@ -21,17 +42,6 @@ user.subscribe($user => {
   }
 })
 
-export const logout = () => {
-  // Give any animations a moment to finish
-  setTimeout(() => {
-    user.set(null)
-    relays.set([])
-    navigate("/login")
-  }, 200)
-}
-
-// Utils
-
 export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
   const $accounts = get(accounts)
 
@@ -41,16 +51,30 @@ export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
   )
 
   if (pubkeys.length) {
-    const events = await channels.getter.all({kinds: [0], authors: pubkeys})
+    const events = await channels.getter.all({kinds: [0, 3, 12165], authors: uniq(pubkeys)})
 
     await accounts.update($accounts => {
       events.forEach(e => {
-        $accounts[e.pubkey] = {
-          pubkey: e.pubkey,
+        const values = {
+          muffle: [],
+          petnames: [],
           ...$accounts[e.pubkey],
-          ...JSON.parse(e.content),
+          pubkey: e.pubkey,
           refreshed: now(),
+          isUser: true,
         }
+
+        switcherFn(e.kind, {
+          0: () => {
+            $accounts[e.pubkey] = {...values, ...JSON.parse(e.content)}
+          },
+          3: () => {
+            $accounts[e.pubkey] = {...values, petnames: e.tags}
+          },
+          12165: () => {
+            $accounts[e.pubkey] = {...values, muffle: e.tags}
+          },
+        })
       })
 
       return $accounts
@@ -58,108 +82,200 @@ export const ensureAccounts = async (pubkeys, {force = false} = {}) => {
   }
 
   // Keep our user in sync
-  user.update($user => ({...$user, ...get(accounts)[$user.pubkey]}))
+  user.update($user => $user ? {...$user, ...get(accounts)[$user.pubkey]} : null)
 }
 
-export const findNotes = (filters, cb) => {
-  const start = () => {
-    const notes = writable([])
-    const reactions = writable([])
+export const getFollow = pubkey => {
+  const $user = get(user)
 
-    let pubkeys = []
+  return $user && find(t => t[1] === pubkey, $user.petnames)
+}
 
-    const refreshAccounts = debounce(300, () => {
-      ensureAccounts(uniq(pubkeys))
+export const getMuffleValue = pubkey => {
+  const $user = get(user)
 
-      pubkeys = []
-    })
-
-    const closeRequest = channels.watcher.sub({
-      filter: ensurePlural(filters).map(q => ({kinds: [1, 5, 7], ...q})),
-      cb: e => {
-        // Chunk requests to load accounts
-        pubkeys.push(e.pubkey)
-        refreshAccounts()
-
-        switcherFn(e.kind, {
-          1: () => {
-            notes.update($xs => uniqBy(prop('id'), $xs.concat(e)))
-          },
-          5: () => {
-            const ids = e.tags.map(t => t[1])
-
-            notes.update($xs => $xs.filter(({id}) => !id.includes(ids)))
-            reactions.update($xs => $xs.filter(({id}) => !id.includes(ids)))
-          },
-          7: () => {
-            reactions.update($xs => $xs.concat(e))
-          },
-        })
-      },
-    })
-
-    const annotatedNotes = derived(
-      [notes, reactions, accounts],
-      ([$notes, $reactions, $accounts]) => {
-        const repliesById = groupBy(
-          n => find(t => last(t) === 'reply', n.tags)[1],
-          $notes.filter(n => n.tags.map(last).includes('reply'))
-        )
-
-        const reactionsById = groupBy(
-          n => find(t => last(t) === 'reply', n.tags)[1],
-          $reactions.filter(n => n.tags.map(last).includes('reply'))
-        )
-
-        const annotate = n => ({
-          ...n,
-          user: $accounts[n.pubkey],
-          replies: (repliesById[n.id] || []).map(reply => annotate(reply)),
-          reactions: (reactionsById[n.id] || []).map(reaction => annotate(reaction)),
-        })
-
-        return sortBy(prop('created'), $notes.map(annotate))
-      }
-    )
-
-    const unsubscribe = annotatedNotes.subscribe(debounce(100, cb))
-
-    return () => {
-      unsubscribe()
-
-      closeRequest()
-    }
+  if (!$user) {
+    return 1
   }
 
-  // Allow caller to suspend/restart the subscription
-  return start
+  const tag = find(t => t[1] === pubkey, $user.muffle)
+
+  if (!tag) {
+    return 1
+  }
+
+  return parseFloat(last(tag))
 }
 
-export const findNotesAndWatchModal = (filters, cb) => {
-  const start = findNotes(filters, cb)
+// Notes
 
-  let stop = start()
+export const annotateNotes = async (chunk, {showParents = false} = {}) => {
+  const parentIds = chunk.map(findReplyTo).filter(identity)
 
-  // Suspend our subscription while we have note detail open
-  // so we can avoid exceeding our concurrent subscription limit
-  const unsub = modal.subscribe($modal => {
-    if ($modal) {
-      stop && stop()
-      stop = null
-    } else if (!stop) {
-      // Wait for animations to complete
-      setTimeout(
-        () => {
-          stop = start()
-        },
-        600
-      )
-    }
+  if (showParents && parentIds.length) {
+    // Find parents of replies to provide context
+    const parents = await channels.getter.all({
+      kinds: [1],
+      ids: parentIds,
+    })
+
+    // Remove replies, show parents instead
+    chunk = parents
+      .concat(chunk.filter(e => !find(whereEq({id: findReplyTo(e)}), parents)))
+  }
+
+  chunk = uniqBy(prop('id'), chunk)
+
+  if (chunk.length === 0) {
+    return chunk
+  }
+
+  const replies = await channels.getter.all({
+    kinds: [1],
+    '#e': pluck('id', chunk),
   })
 
-  return () => {
-    stop && stop()
-    unsub()
-  }
+  const reactions = await channels.getter.all({
+    kinds: [7],
+    '#e': pluck('id', chunk.concat(replies)),
+  })
+
+  const repliesById = groupBy(findReplyTo, replies)
+  const reactionsById = groupBy(findReplyTo, reactions)
+
+  await ensureAccounts(uniq(pluck('pubkey', chunk.concat(replies).concat(reactions))))
+
+  const $accounts = get(accounts)
+
+  const annotate = e => ({
+    ...e,
+    user: $accounts[e.pubkey],
+    replies: uniqBy(prop('id'), (repliesById[e.id] || []).map(reply => annotate(reply))),
+    reactions: uniqBy(prop('id'), (reactionsById[e.id] || []).map(reaction => annotate(reaction))),
+  })
+
+  return reverse(sortBy(prop('created'), chunk.map(annotate)))
 }
 
+export const notesListener = (notes, filter) => {
+  const updateNote = (id, f) =>
+    notes.update($notes =>
+      $notes
+        .map(n => {
+          if (n.id === id) {
+            return f(n)
+          }
+
+          return {...n, replies: n.replies.map(when(whereEq({id}), f))}
+        })
+    )
+
+  const deleteNotes = ($notes, ids) =>
+    $notes
+      .filter(e => !ids.includes(e.id))
+      .map(n => ({
+        ...n,
+        replies: deleteNotes(n.replies, ids),
+        reactions: n.reactions.filter(e => !ids.includes(e.id)),
+      }))
+
+  return new Listener(
+    ensurePlural(filter).map(assoc('since', now())),
+    e => switcherFn(e.kind, {
+      1: async () => {
+        const id = findReplyTo(e)
+
+        if (id) {
+          const [reply] = await annotateNotes([e])
+
+          updateNote(id, n => ({...n, replies: n.replies.concat(reply)}))
+        } else if (filterMatches(filter, e)) {
+          const [note] = await annotateNotes([e])
+
+          notes.update($notes => uniqBy(prop('id'), [note].concat($notes)))
+        }
+      },
+      5: () => {
+        const ids = e.tags.map(t => t[1])
+
+        notes.update($notes => deleteNotes($notes, ids))
+      },
+      7: () => {
+        const id = findReplyTo(e)
+
+        updateNote(id, n => ({...n, reactions: n.reactions.concat(e)}))
+      }
+    })
+  )
+}
+
+// UI
+
+export const createScroller = (
+  cursor,
+  onChunk,
+  {since = epoch, reverse = false} = {}
+) => {
+  const startingDelta = cursor.delta
+
+  let active = false
+
+  const start = debounce(1000, async () => {
+    if (active) {
+      return
+    }
+
+    active = true
+
+    /* eslint no-constant-condition: 0 */
+    while (true) {
+      // While we have empty space, fill it
+      const {scrollY, innerHeight} = window
+      const {scrollHeight} = document.body
+
+      if (
+        (reverse && scrollY > innerHeight * 3)
+        || (!reverse && scrollY + innerHeight * 3 < scrollHeight)
+      ) {
+        break
+      }
+
+      // Stop if we've gone back far enough
+      if (cursor.since <= since) {
+        break
+      }
+
+      // Get our chunk
+      const chunk = await cursor.chunk()
+
+      // Notify the caller
+      if (chunk.length > 0) {
+        await onChunk(chunk)
+      }
+
+      // If we have an empty chunk, increase our step size so we can get back to where
+      // we might have old events. Once we get a chunk, knock it down to the default again
+      if (chunk.length === 0) {
+        cursor.delta = Math.min(timedelta(30, 'days'), cursor.delta * 2)
+      } else {
+        cursor.delta = startingDelta
+      }
+
+      if (!active) {
+        break
+      }
+
+      // Wait a moment before proceeding to the next chunk for the caller
+      // to load results into the dom
+      await sleep(300)
+    }
+
+    active = false
+  })
+
+  return {
+    start,
+    stop: () => { active = false },
+    isActive: () => Boolean(cursor.sub),
+  }
+}

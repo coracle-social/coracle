@@ -14,6 +14,7 @@ module.exports = {
       light: "#CCC5B9",
       medium: "#403D39",
       dark: "#252422",
+      danger: "#ff0000",
     },
   },
   plugins: [],
