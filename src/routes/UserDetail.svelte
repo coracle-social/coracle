@@ -1,19 +1,27 @@
 <script>
   import {writable} from 'svelte/store'
   import {fly} from 'svelte/transition'
+  import {navigate} from 'svelte-routing'
   import Notes from "src/partials/Notes.svelte"
+  import Likes from "src/partials/Likes.svelte"
+  import Tabs from "src/partials/Tabs.svelte"
   import Button from "src/partials/Button.svelte"
   import {user as currentUser} from 'src/state/user'
   import {t, dispatch} from 'src/state/dispatch'
   import {accounts, getFollow, modal} from "src/state/app"
 
   export let pubkey
+  export let activeTab
 
-  const authorNotes = writable([])
+  const user = $accounts[pubkey]
+  const notes = writable([])
+  const likes = writable([])
+  const network = writable([])
+  const authors = $currentUser ? $currentUser.petnames.map(t => t[1]) : []
+
   let following = getFollow(pubkey)
-  let user
 
-  $: user = $accounts[pubkey]
+  const setActiveTab = tab => navigate(`/users/${pubkey}/${tab}`)
 
   const follow = () => {
     const petnames = $currentUser.petnames
@@ -38,21 +46,20 @@
   }
 </script>
 
-{#if user}
-<div class="max-w-2xl m-auto flex flex-col gap-4 py-8 px-4">
+<div class="max-w-xl m-auto flex flex-col gap-4 py-8 px-4">
   <div class="flex flex-col gap-4" in:fly={{y: 20}}>
     <div class="flex gap-4">
       <div
         class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-        style="background-image: url({user.picture})" />
+        style="background-image: url({user?.picture})" />
       <div class="flex-grow">
         <div class="flex items-center gap-2">
-          <h1 class="text-2xl">{user.name}</h1>
+          <h1 class="text-2xl">{user?.name || pubkey.slice(0, 8)}</h1>
           {#if $currentUser && $currentUser.pubkey !== pubkey}
             <i class="fa-solid fa-sliders cursor-pointer" on:click={openAdvanced} />
           {/if}
         </div>
-        <p>{user.about || ''}</p>
+        <p>{user?.about || ''}</p>
       </div>
       <div class="whitespace-nowrap">
         {#if $currentUser?.pubkey === pubkey}
@@ -71,7 +78,12 @@
       </div>
     </div>
   </div>
-  <div class="h-px bg-medium" in:fly={{y: 20, delay: 200}} />
-  <Notes notes={authorNotes} filter={{kinds: [1], authors: [pubkey]}} />
 </div>
+<Tabs tabs={['notes', 'likes', 'network']} {activeTab} {setActiveTab} />
+{#if activeTab === 'notes'}
+<Notes notes={notes} filter={{kinds: [1], authors: [pubkey]}} />
+{:else if activeTab === 'likes'}
+<Likes notes={likes} filter={{kinds: [7], authors: [pubkey]}} />
+{:else if activeTab === 'network'}
+<Notes notes={network} filter={{kinds: [1], authors}} shouldMuffle />
 {/if}

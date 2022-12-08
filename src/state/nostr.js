@@ -1,6 +1,6 @@
 import {writable, get} from 'svelte/store'
 import {relayPool, getPublicKey} from 'nostr-tools'
-import {last, find, intersection, uniqBy, prop} from 'ramda'
+import {assoc, last, find, intersection, uniqBy, prop} from 'ramda'
 import {first, noop, ensurePlural} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta} from "src/util/misc"
 
@@ -184,7 +184,7 @@ export class Cursor {
 
 export class Listener {
   constructor(filter, onEvent) {
-    this.filter = ensurePlural(filter)
+    this.filter = ensurePlural(filter).map(assoc('since', now()))
     this.onEvent = onEvent
     this.since = now()
     this.sub = null

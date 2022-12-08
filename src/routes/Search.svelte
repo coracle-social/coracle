@@ -88,7 +88,7 @@
   {#each (results || []) as e (e.pubkey)}
     {#if e.pubkey !== $user.pubkey}
     <li in:fly={{y: 20}}>
-      <a href="/users/{e.pubkey}" class="flex gap-4 my-4">
+      <a href="/users/{e.pubkey}/notes" class="flex gap-4 my-4">
         <div
           class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
           style="background-image: url({e.picture})" />

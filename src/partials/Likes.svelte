@@ -1,15 +1,15 @@
 <script>
   import {onMount, onDestroy} from 'svelte'
   import {fly} from 'svelte/transition'
-  import {uniqBy, sortBy, reject, prop} from 'ramda'
+  import {uniqBy, sortBy, prop, identity} from 'ramda'
+  import {switcherFn} from 'hurdak/lib/hurdak'
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/partials/Note.svelte"
-  import {Cursor, epoch} from 'src/state/nostr'
-  import {createScroller, getMuffleValue, annotateNotes, notesListener, modal} from "src/state/app"
+  import {Cursor, Listener, epoch, findReplyTo, channels} from 'src/state/nostr'
+  import {createScroller, annotateNotes, modal} from "src/state/app"
 
   export let filter
   export let notes
-  export let shouldMuffle = false
 
   let cursor
   let listener
@@ -18,19 +18,23 @@
   let interval
   let loading = true
 
+  const addLikes = async likes => {
+    const noteIds = likes.filter(e => e.content === '+').map(findReplyTo).filter(identity)
+
+    if (noteIds.length === 0) {
+      return
+    }
+
+    const chunk = await channels.getter.all({kinds: [1], ids: noteIds})
+    const annotated = await annotateNotes(chunk, {showParents: true})
+
+    notes.update($notes => sortBy(n => -n.created_at, uniqBy(prop('id'), $notes.concat(annotated))))
+  }
+
   onMount(async () => {
     cursor = new Cursor(filter)
-    listener = await notesListener(notes, [filter, {kinds: [5, 7]}], {shouldMuffle})
-    scroller = createScroller(cursor, async chunk => {
-      // Remove a sampling of content if desired
-      if (shouldMuffle) {
-        chunk = reject(n => Math.random() > getMuffleValue(n.pubkey), chunk)
-      }
-
-      const annotated = await annotateNotes(chunk, {showParents: true})
-
-      notes.update($notes => sortBy(n => -n.created_at, uniqBy(prop('id'), $notes.concat(annotated))))
-    })
+    listener = new Listener(filter, e => switcherFn(e.kind, {5: () => addLikes([e])}))
+    scroller = createScroller(cursor, addLikes)
 
     // Track loading based on cursor cutoff date
     interval = setInterval(() => {

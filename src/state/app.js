@@ -1,8 +1,8 @@
-import {when, assoc, prop, identity, whereEq, reverse, uniq, sortBy, uniqBy, find, last, pluck, groupBy} from 'ramda'
+import {when, prop, identity, whereEq, reverse, uniq, sortBy, uniqBy, find, last, pluck, groupBy} from 'ramda'
 import {debounce} from 'throttle-debounce'
 import {writable, get} from 'svelte/store'
 import {navigate} from "svelte-routing"
-import {switcherFn, ensurePlural} from 'hurdak/lib/hurdak'
+import {switcherFn} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta, sleep} from "src/util/misc"
 import {user} from 'src/state/user'
 import {epoch, filterMatches, Listener, channels, relays, findReplyTo} from 'src/state/nostr'
@@ -179,38 +179,35 @@ export const notesListener = (notes, filter, {shouldMuffle = false} = {}) => {
         reactions: n.reactions.filter(e => !ids.includes(e.id)),
       }))
 
-  return new Listener(
-    ensurePlural(filter).map(assoc('since', now())),
-    e => switcherFn(e.kind, {
-      1: async () => {
-        const id = findReplyTo(e)
+  return new Listener(filter, e => switcherFn(e.kind, {
+    1: async () => {
+      const id = findReplyTo(e)
 
-        if (shouldMuffle && Math.random() > getMuffleValue(e.pubkey)) {
-          return
-        }
-
-        if (id) {
-          const [reply] = await annotateNotes([e])
-
-          updateNote(id, n => ({...n, replies: n.replies.concat(reply)}))
-        } else if (filterMatches(filter, e)) {
-          const [note] = await annotateNotes([e])
-
-          notes.update($notes => uniqBy(prop('id'), [note].concat($notes)))
-        }
-      },
-      5: () => {
-        const ids = e.tags.map(t => t[1])
-
-        notes.update($notes => deleteNotes($notes, ids))
-      },
-      7: () => {
-        const id = findReplyTo(e)
-
-        updateNote(id, n => ({...n, reactions: n.reactions.concat(e)}))
+      if (shouldMuffle && Math.random() > getMuffleValue(e.pubkey)) {
+        return
       }
-    })
-  )
+
+      if (id) {
+        const [reply] = await annotateNotes([e])
+
+        updateNote(id, n => ({...n, replies: n.replies.concat(reply)}))
+      } else if (filterMatches(filter, e)) {
+        const [note] = await annotateNotes([e])
+
+        notes.update($notes => uniqBy(prop('id'), [note].concat($notes)))
+      }
+    },
+    5: () => {
+      const ids = e.tags.map(t => t[1])
+
+      notes.update($notes => deleteNotes($notes, ids))
+    },
+    7: () => {
+      const id = findReplyTo(e)
+
+      updateNote(id, n => ({...n, reactions: n.reactions.concat(e)}))
+    }
+  }))
 }
 
 // UI
