@@ -1,8 +1,6 @@
 Bugs
 
-- [ ] Pubkeys expand the width of the page, hiding the plus post button
 - [ ] Permalink note detail (share/permalink button?)
-- [ ] Back button no longer works if a modal is closed normally
 - [ ] Prevent tabs from re-mounting (or at least re- animating)
 - [ ] Go "back" after adding a note
 - [ ] uniq and sortBy are sprinkled all over the place, figure out a better solution

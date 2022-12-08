@@ -92,11 +92,7 @@
         <Search {...params} />
         {/key}
       </Route>
-      <Route path="/notes/:type" let:params>
-        {#key params.type}
-        <Notes {...params} />
-        {/key}
-      </Route>
+      <Route path="/notes/:activeTab" component={Notes} />
       <Route path="/notes/new" component={NoteCreate} />
       <Route path="/chat" component={Chat} />
       <Route path="/chat/new" component={ChatEdit} />

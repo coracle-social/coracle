@@ -121,7 +121,7 @@
       <Anchor on:click={() => deleteReaction(flag)}>Unflag</Anchor>
     </p>
     {:else}
-    <p>
+    <p class="text-ellipsis overflow-hidden">
       {#if note.content.length > 500 && !showEntire}
         {ellipsize(note.content, 500)}
       {:else}
