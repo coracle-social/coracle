@@ -17,7 +17,7 @@
 
     toast.show("info", `Your note has been created!`)
 
-    navigate('/notes/global')
+    history.back()
   }
 
   onMount(() => {

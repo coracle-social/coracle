@@ -1,9 +1,6 @@
 Bugs
 
-- [ ] Back button is pretty broken
 - [ ] Permalink note detail (share/permalink button?). Permalinks don't work
-- [ ] Prevent tabs from re-mounting (or at least re- animating)
-- [ ] Go "back" after adding a note
 - [ ] uniq and sortBy are sprinkled all over the place, figure out a better solution
 - [ ] With link/image previews, remove the url from the note body if it's on a separate last line
 - [ ] Search page is slow and likes don't show up. Probably move this server-side

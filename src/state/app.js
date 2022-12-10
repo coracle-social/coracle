@@ -2,12 +2,34 @@ import {when, prop, identity, whereEq, reverse, uniq, sortBy, uniqBy, find, last
 import {debounce} from 'throttle-debounce'
 import {writable, get} from 'svelte/store'
 import {navigate} from "svelte-routing"
+import {globalHistory} from "svelte-routing/src/history"
 import {switcherFn} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta, sleep} from "src/util/misc"
 import {user} from 'src/state/user'
 import {epoch, filterMatches, Listener, channels, relays, findReplyTo} from 'src/state/nostr'
 
-export const modal = writable(null)
+// ws://localhost:7000
+
+export const modal = {
+  subscribe: cb => {
+    const getModal = () =>
+      location.hash.includes('#modal=')
+        ? JSON.parse(atob(location.hash.replace('#modal=', '')))
+        : null
+
+    cb(getModal())
+
+    return globalHistory.listen(() => cb(getModal()))
+  },
+  set: data => {
+    let path = location.pathname
+    if (data) {
+      path += '#modal=' + btoa(JSON.stringify(data))
+    }
+
+    navigate(path)
+  },
+}
 
 export const settings = writable({
   showLinkPreviews: true,

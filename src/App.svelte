@@ -50,7 +50,7 @@
       }
     })
 
-    modal.subscribe($modal => {
+    return modal.subscribe($modal => {
       // Keep scroll position on body, but don't allow scrolling
       if ($modal) {
         // This is not idempotent, so don't duplicate it
@@ -64,20 +64,6 @@
         document.body.style = ''
         window.scrollTo(0, scrollY)
       }
-
-      // Push another state so back button only closes the modal
-      if ($modal && !location.hash.startsWith('#modal')) {
-        globalHistory.navigate(location.pathname + '#modal')
-      }
-    })
-
-    globalHistory.listen(({action}) => {
-      // Once we've navigated, close our modal if we don't have m in the hash
-      setTimeout(() => {
-        if ($modal && !location.hash.startsWith('#modal')) {
-          modal.set(null)
-        }
-      }, 50)
     })
   })
 </script>
