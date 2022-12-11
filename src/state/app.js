@@ -1,14 +1,12 @@
-import {when, prop, identity, whereEq, reverse, uniq, sortBy, uniqBy, find, last, pluck, groupBy} from 'ramda'
+import {identity, uniq, uniqBy, prop, reject, groupBy, find, last, pluck} from 'ramda'
 import {debounce} from 'throttle-debounce'
 import {writable, get} from 'svelte/store'
 import {navigate} from "svelte-routing"
 import {globalHistory} from "svelte-routing/src/history"
-import {switcherFn} from 'hurdak/lib/hurdak'
+import {switcherFn, createMap} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta, sleep} from "src/util/misc"
 import {user} from 'src/state/user'
-import {epoch, filterMatches, Listener, channels, relays, findReplyTo} from 'src/state/nostr'
-
-// ws://localhost:7000
+import {epoch, filterTags, filterMatches, Listener, channels, relays, findReply} from 'src/state/nostr'
 
 export const modal = {
   subscribe: cb => {
@@ -131,103 +129,132 @@ export const getMuffleValue = pubkey => {
 
 // Notes
 
-export const annotateNotes = async (chunk, {showParents = false} = {}) => {
-  const parentIds = chunk.map(findReplyTo).filter(identity)
-
-  if (showParents && parentIds.length) {
-    // Find parents of replies to provide context
-    const parents = await channels.getter.all({
-      kinds: [1],
-      ids: parentIds,
-    })
-
-    // Remove replies, show parents instead
-    chunk = parents
-      .concat(chunk.filter(e => !find(whereEq({id: findReplyTo(e)}), parents)))
+export const threadify = async notes => {
+  if (notes.length === 0) {
+    return []
   }
 
-  chunk = uniqBy(prop('id'), chunk)
+  const ancestorIds = filterTags({tag: 'e'}, notes)
+  const filters = [{kinds: [1, 7], '#e': pluck('id', notes)}]
 
-  if (chunk.length === 0) {
-    return chunk
+  if (ancestorIds.length > 0) {
+    filters.push({kinds: [1], ids: ancestorIds})
+    filters.push({kinds: [7], '#e': ancestorIds})
   }
 
-  const replies = await channels.getter.all({
-    kinds: [1],
-    '#e': pluck('id', chunk),
-  })
+  const events = uniqBy(prop('id'), await channels.getter.all(filters))
 
-  const reactions = await channels.getter.all({
-    kinds: [7],
-    '#e': pluck('id', chunk.concat(replies)),
-  })
+  await ensureAccounts(uniq(pluck('pubkey', notes.concat(events))))
 
-  const repliesById = groupBy(findReplyTo, replies)
-  const reactionsById = groupBy(findReplyTo, reactions)
+  const $accounts = get(accounts)
+  const eventsById = createMap('id', events)
+  const getChildren = (kind, n) =>
+    events.filter(e => e.kind === kind && findReply(e) === n.id)
 
-  await ensureAccounts(uniq(pluck('pubkey', chunk.concat(replies).concat(reactions))))
+  const annotate = (n, includeParent) => {
+    if (!n) {
+      return null
+    }
+
+    const annotated = {
+      ...n,
+      numberOfAncestors: n.tags.filter(([x]) => x === 'e').length,
+      children: getChildren(1, n).map(child => annotate(child, false)),
+      reactions: getChildren(7, n),
+      user: $accounts[n.pubkey],
+    }
+
+    if (includeParent) {
+      annotated.parent = annotate(eventsById[findReply(n)], true)
+    }
+
+    return annotated
+  }
+
+  // Add parent/children/reactions
+  return notes.map(n => annotate(n, true))
+}
+
+export const combineThreads = notes => {
+  const notesById = createMap('id', notes.concat(pluck('parent', notes)).filter(identity))
+  const parentIds = notes.map(n => n.parent?.id).filter(identity)
+
+  // Group by parent, but filter out notes alredy represented in the parents list to
+  // avoid showing the same note twice. This privileges leaf nodes over root nodes.
+  const notesByParent = groupBy(
+    n => n.parent?.id || n.id,
+    reject(n => parentIds.includes(n.id), notes)
+  )
+
+  return Object.keys(notesByParent).map(id => notesById[id])
+}
+
+export const annotateNewNote = async note => {
+  await ensureAccounts([note.pubkey])
 
   const $accounts = get(accounts)
 
-  const annotate = e => ({
-    ...e,
-    user: $accounts[e.pubkey],
-    replies: uniqBy(prop('id'), (repliesById[e.id] || []).map(reply => annotate(reply))),
-    reactions: uniqBy(prop('id'), (reactionsById[e.id] || []).map(reaction => annotate(reaction))),
-  })
-
-  return reverse(sortBy(prop('created'), chunk.map(annotate)))
+  return {
+    ...note,
+    user: $accounts[note.pubkey],
+    numberOfAncestors: note.tags.filter(([x]) => x === 'e').length,
+    children: [],
+    reactions: [],
+  }
 }
 
 export const notesListener = (notes, filter, {shouldMuffle = false} = {}) => {
-  const updateNote = (id, f) =>
-    notes.update($notes =>
-      $notes
-        .map(n => {
-          if (n.id === id) {
-            return f(n)
-          }
+  const updateNote = (note, id, f) => {
+    if (note.id === id) {
+      return f(note)
+    }
 
-          return {...n, replies: n.replies.map(when(whereEq({id}), f))}
-        })
-    )
+    return {
+      ...note,
+      parent: note.parent ? updateNote(note.parent, id, f) : null,
+      children: note.children.map(n => updateNote(n, id, f)),
+    }
+  }
 
-  const deleteNotes = ($notes, ids) =>
-    $notes
-      .filter(e => !ids.includes(e.id))
-      .map(n => ({
-        ...n,
-        replies: deleteNotes(n.replies, ids),
-        reactions: n.reactions.filter(e => !ids.includes(e.id)),
-      }))
+  const updateNotes = (id, f) =>
+    notes.update($notes => $notes.map(n => updateNote(n, id, f)))
 
-  return new Listener(filter, e => switcherFn(e.kind, {
+  const deleteNote = (note, ids, deleted_at) => {
+    if (ids.includes(note.id)) {
+      return {...note, deleted_at}
+    }
+
+    return {
+      ...note,
+      parent: note.parent ? deleteNote(note.parent, ids, deleted_at) : null,
+      children: note.children.map(n => deleteNote(n, ids, deleted_at)),
+      reactions: note.reactions.filter(e => !ids.includes(e.id)),
+    }
+  }
+
+  const deleteNotes = (ids, t) =>
+    notes.update($notes => $notes.map(n => deleteNote(n, ids, t)))
+
+  return new Listener(filter, e => console.log(e) || switcherFn(e.kind, {
     1: async () => {
-      const id = findReplyTo(e)
-
-      if (shouldMuffle && Math.random() > getMuffleValue(e.pubkey)) {
-        return
-      }
+      const id = findReply(e)
+      const muffle = shouldMuffle && Math.random() > getMuffleValue(e.pubkey)
 
       if (id) {
-        const [reply] = await annotateNotes([e])
+        const note = await annotateNewNote(e)
 
-        updateNote(id, n => ({...n, replies: n.replies.concat(reply)}))
-      } else if (filterMatches(filter, e)) {
-        const [note] = await annotateNotes([e])
+        updateNotes(id, n => ({...n, children: n.children.concat(note)}))
+      } else if (!muffle && filterMatches(filter, e)) {
+        const [note] = await threadify([e])
 
-        notes.update($notes => uniqBy(prop('id'), [note].concat($notes)))
+        notes.update($notes => [note].concat($notes))
       }
     },
     5: () => {
-      const ids = e.tags.map(t => t[1])
-
-      notes.update($notes => deleteNotes($notes, ids))
+      deleteNotes(e.tags.map(t => t[1]), e.created_at)
     },
     7: () => {
-      const id = findReplyTo(e)
-
-      updateNote(id, n => ({...n, reactions: n.reactions.concat(e)}))
+      updateNotes(findReply(e), n => ({...n, reactions: n.reactions.concat(e)}))
     }
   }))
 }

@@ -103,7 +103,7 @@
 
     <ul
       class="py-20 w-56 bg-dark fixed top-0 bottom-0 left-0 transition-all shadow-xl
-             border-r border-medium text-white overflow-hidden"
+             border-r border-medium text-white overflow-hidden z-10"
       class:-ml-56={!$menuIsOpen}
     >
       {#if $user}
@@ -164,7 +164,7 @@
 
     <div
       class="fixed top-0 bg-dark flex justify-between items-center text-white w-full p-4
-                border-b border-medium"
+                border-b border-medium z-10"
     >
       <i class="fa-solid fa-bars fa-2xl cursor-pointer" bind:this={menuIcon} on:click={toggleMenu} />
       <Anchor external type="unstyled" href="https://github.com/staab/coracle">
@@ -173,7 +173,7 @@
     </div>
 
     {#if $modal}
-    <div class="fixed inset-0">
+    <div class="fixed inset-0 z-10">
       <div
         class="absolute inset-0 opacity-75 bg-black cursor-pointer"
         transition:fade

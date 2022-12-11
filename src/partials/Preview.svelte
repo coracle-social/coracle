@@ -26,7 +26,7 @@
 </script>
 
 {#if preview}
-<div in:slide>
+<div in:slide class="max-w-sm">
   <Anchor
     external
     href={url}

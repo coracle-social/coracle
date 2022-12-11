@@ -10,7 +10,7 @@
   import Note from "src/partials/Note.svelte"
   import {relays, Cursor} from "src/state/nostr"
   import {user} from "src/state/user"
-  import {createScroller, ensureAccounts, accounts, annotateNotes, modal} from "src/state/app"
+  import {createScroller, ensureAccounts, accounts, threadify, modal} from "src/state/app"
 
   export let type
 
@@ -37,7 +37,7 @@
 
         data.set(Object.values($accounts))
       } else {
-        const annotated = await annotateNotes(chunk)
+        const annotated = await threadify(chunk)
 
         data.update($data => uniqBy(prop('id'), $data.concat(annotated)))
       }
@@ -108,11 +108,6 @@
   {#each (results || []) as e (e.id)}
     <li in:fly={{y: 20}}>
       <Note interactive note={e} />
-      {#each e.replies as r (r.id)}
-      <div class="ml-6 border-l border-solid border-medium">
-        <Note interactive isReply note={r} />
-      </div>
-      {/each}
     </li>
   {/each}
 </ul>

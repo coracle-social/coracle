@@ -1,22 +1,34 @@
 <script>
   import {onMount} from 'svelte'
   import {writable} from 'svelte/store'
+  import {reverse} from 'ramda'
   import Spinner from 'src/partials/Spinner.svelte'
   import {channels} from "src/state/nostr"
-  import {notesListener, annotateNotes, modal} from "src/state/app"
+  import {notesListener, threadify, modal} from "src/state/app"
   import {user} from "src/state/user"
   import Note from 'src/partials/Note.svelte'
 
   export let note
 
-  const notes = writable([])
+  let notes = writable([])
   let cursor
   let listener
 
+  const getAncestors = n => {
+    const parents = []
+
+    while (n.parent) {
+      parents.push(n.parent)
+      n = n.parent
+    }
+
+    return reverse(parents)
+  }
+
   onMount(() => {
     channels.getter
-      .all({kinds: [1, 5, 7], ids: [note.id]})
-      .then(annotateNotes)
+      .all({kinds: [1], ids: [note.id]})
+      .then(threadify)
       .then($notes => {
         notes.set($notes)
       })
@@ -45,22 +57,15 @@
 
 {#each $notes as note (note.id)}
 <div n:fly={{y: 20}}>
-  <Note showEntire note={note} />
-  {#each note.replies as r (r.id)}
-    <div class="ml-4 border-l border-solid border-medium">
-      <Note interactive invertColors isReply note={r} />
-    {#each r.replies as r2 (r2.id)}
-      <div class="ml-4 border-l border-solid border-medium">
-        <Note interactive invertColors isReply note={r2} />
-      {#each r2.replies as r3 (r3.id)}
-        <div class="ml-4 border-l border-solid border-medium">
-          <Note interactive invertColors isReply note={r3} />
-        </div>
-      {/each}
-      </div>
+  <div class="relative">
+    {#if note.parent}
+      <div class="w-px bg-medium absolute h-full ml-5 -mr-5 mt-5" />
+    {/if}
+    {#each getAncestors(note) as ancestor (ancestor.id)}
+    <Note interactive invertColors note={ancestor} />
     {/each}
-    </div>
-  {/each}
+  </div>
+  <Note showEntire invertColors depth={5} note={note} />
 </div>
 {:else}
 <Spinner />

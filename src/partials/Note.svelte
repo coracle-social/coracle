@@ -9,14 +9,13 @@
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import {dispatch} from "src/state/dispatch"
-  import {findReplyTo} from "src/state/nostr"
   import {accounts, settings, modal} from "src/state/app"
   import {user} from "src/state/user"
   import {formatTimestamp} from 'src/util/misc'
   import UserBadge from "src/partials/UserBadge.svelte"
 
   export let note
-  export let isReply = false
+  export let depth = 0
   export let showEntire = false
   export let interactive = false
   export let invertColors = false
@@ -25,12 +24,10 @@
   let like = null
   let flag = null
   let reply = null
-  let parentId
 
   $: {
     like = find(e => e.pubkey === $user?.pubkey && e.content === "+", note.reactions)
     flag = find(e => e.pubkey === $user?.pubkey && e.content === "-", note.reactions)
-    parentId = findReplyTo(note)
   }
 
   onMount(async () => {
@@ -41,11 +38,6 @@
     if (!['I'].includes(e.target.tagName) && !hasParent('a', e.target)) {
       modal.set({note})
     }
-  }
-
-  const showParent = async () => {
-
-    modal.set({note: {id: parentId}})
   }
 
   const react = content => {
@@ -110,11 +102,6 @@
     <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>
   </div>
   <div class="ml-6 flex flex-col gap-2">
-    {#if parentId && !isReply}
-      <small class="text-light">
-        Reply to <Anchor on:click={showParent}>{parentId.slice(0, 8)}</Anchor>
-      </small>
-    {/if}
     {#if flag}
     <p class="text-light border-l-2 border-solid border-medium pl-4">
       You have flagged this content as offensive.
@@ -138,7 +125,7 @@
         <i
           class="fa-solid fa-reply cursor-pointer"
           on:click={startReply} />
-        {note.replies.length}
+        {note.children.length}
       </div>
       <div class={cx({'text-accent': like})}>
         <i
@@ -174,4 +161,12 @@
     <i class="fa-solid fa-paper-plane fa-xl" />
   </div>
 </div>
+{/if}
+
+{#if depth > 0}
+{#each note.children as child (child.id)}
+<div class="ml-5 border-l border-solid border-medium">
+  <svelte:self note={child} interactive depth={depth - 1} {invertColors} />
+</div>
+{/each}
 {/if}

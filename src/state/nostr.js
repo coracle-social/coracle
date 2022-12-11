@@ -27,8 +27,11 @@ export const filterTags = (where, events) =>
 export const findTag = (where, events) => first(filterTags(where, events))
 
 // Support the deprecated version where tags are marked as replies
-export const findReplyTo = e =>
+export const findReply = e =>
   findTag({tag: "e", type: "reply"}, e) || findTag({tag: "e"}, e)
+
+export const findRoot = e =>
+  findTag({tag: "e", type: "root"}, e) || findTag({tag: "e"}, e)
 
 export const filterMatches = (filter, e)  => {
   return Boolean(find(
@@ -99,7 +102,7 @@ export class Channel {
         r => {
           sub.unsub()
 
-          resolve(result)
+          resolve(uniqBy(prop('id'), result))
         },
       )
     })
@@ -198,8 +201,11 @@ export class Listener {
       this.sub = await channels.listener.sub(
         filter.map(f => ({since, ...f})),
         e => {
-          this.since = e.created_at
-          this.onEvent(e)
+          // Not sure why since filter isn't working here, it's just slightly off
+          if (e.created_at >= since) {
+            this.since = e.created_at + 1
+            this.onEvent(e)
+          }
         }
       )
     }
