@@ -12,6 +12,7 @@
 
   const submit = e => {
     e.preventDefault()
+    url = url.trim()
 
     if (!url.match(/^wss?:\/\/[\w.:-]+$/)) {
       return toast.show("error", 'That isn\'t a valid websocket url - relay urls should start with "wss://"')
