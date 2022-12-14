@@ -12,7 +12,7 @@ export const modal = {
   subscribe: cb => {
     const getModal = () =>
       location.hash.includes('#modal=')
-        ? JSON.parse(atob(location.hash.replace('#modal=', '')))
+        ? JSON.parse(decodeURIComponent(escape(atob(location.hash.replace('#modal=', '')))))
         : null
 
     cb(getModal())
@@ -22,7 +22,7 @@ export const modal = {
   set: data => {
     let path = location.pathname
     if (data) {
-      path += '#modal=' + btoa(JSON.stringify(data))
+      path += '#modal=' + btoa(unescape(encodeURIComponent(JSON.stringify(data))))
     }
 
     navigate(path)
