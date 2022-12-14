@@ -63,7 +63,7 @@
       </div>
       <div class="whitespace-nowrap">
         {#if $currentUser?.pubkey === pubkey}
-        <a href="/settings/profile" class="cursor-pointer text-sm">
+        <a href="/profile" class="cursor-pointer text-sm">
           <i class="fa-solid fa-edit" /> Edit
         </a>
         {:else}
