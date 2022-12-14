@@ -179,7 +179,7 @@
 {/if}
 
 {#if depth > 0}
-{#each note.children as child (child.id)}
+{#each uniqBy(prop('id'), note.children) as child (child.id)}
 <div class="ml-5 border-l border-solid border-medium">
   <svelte:self note={child} depth={depth - 1} {invertColors} {anchorId} />
 </div>

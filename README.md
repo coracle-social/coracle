@@ -1,6 +1,6 @@
 Bugs
 
-- [ ] Support bech32 keys
+- [ ] Support bech32 keys/add guide on how to convert
 - [ ] Loading icon not showing at bottom
 - [ ] uniq and sortBy are sprinkled all over the place, figure out a better solution
 - [ ] With link/image previews, remove the url from the note body if it's on a separate last line
