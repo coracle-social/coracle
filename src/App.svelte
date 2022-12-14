@@ -196,7 +196,7 @@
 
     {#if $toast}
       <div
-        class="fixed top-0 left-0 right-0 pointer-events-none"
+        class="fixed top-0 left-0 right-0 pointer-events-none z-10"
         transition:fly={{y: -50, duration: 300}}
       >
         <div
