@@ -246,7 +246,7 @@ nostr.event = (kind, content = '', tags = []) => {
 
 // Keep track of known relays
 
-export const knownRelays = writable(getLocalJson("coracle/knownRelays") || [
+export const knownRelays = writable((getLocalJson("coracle/knownRelays") || [
   {url: "wss://nostr-pub.wellorder.net"},
   {url: "wss://nostr.rocks"},
   {url: "wss://nostr-pub.semisol.dev"},
@@ -259,7 +259,7 @@ export const knownRelays = writable(getLocalJson("coracle/knownRelays") || [
   {url: "wss://relay.grunch.dev"},
   {url: "wss://nostr.sandwich.farm"},
   {url: "wss://relay.nostr.ch"},
-])
+]).filter(x => x.url))
 
 knownRelays.subscribe($knownRelays => {
   setLocalJson("coracle/knownRelays", $knownRelays)

@@ -1,7 +1,6 @@
 <script>
   import {onMount} from 'svelte'
   import {writable} from 'svelte/store'
-  import {reverse} from 'ramda'
   import Spinner from 'src/partials/Spinner.svelte'
   import {channels} from "src/state/nostr"
   import {notesListener, annotateNotes, modal} from "src/state/app"

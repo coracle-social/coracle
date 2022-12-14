@@ -2,7 +2,6 @@
   import {onMount, onDestroy} from 'svelte'
   import {fly} from 'svelte/transition'
   import {uniqBy, sortBy, prop, identity} from 'ramda'
-  import {switcherFn} from 'hurdak/lib/hurdak'
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/partials/Note.svelte"
   import {Cursor, epoch, findReply, channels} from 'src/state/nostr'
