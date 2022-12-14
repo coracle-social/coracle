@@ -327,8 +327,8 @@ export const createScroller = (
       const {scrollHeight} = document.body
 
       if (
-        (reverse && scrollY > innerHeight * 3)
-        || (!reverse && scrollY + innerHeight * 3 < scrollHeight)
+        (reverse && scrollY > innerHeight * 2)
+        || (!reverse && scrollY + innerHeight * 2 < scrollHeight)
       ) {
         break
       }

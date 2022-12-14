@@ -247,10 +247,19 @@ nostr.event = (kind, content = '', tags = []) => {
 // Keep track of known relays
 
 export const knownRelays = writable(getLocalJson("coracle/knownRelays") || [
-  {url: 'wss://satstacker.cloud'},
-  {url: 'wss://nostr.drss.io'},
-  {url: 'wss://nostr-pub.semisol.dev'},
-  {url: 'wss://nostr-relay.untethr.me'},
+  "wss://nostr-pub.wellorder.net",
+  "wss://nostr.rocks",
+  "wss://nostr-pub.semisol.dev",
+  "wss://nostr.drss.io",
+  "wss://relay.damus.io",
+  "wss://nostr.openchain.fr",
+  "wss://nostr.delo.software",
+  "wss://relay.nostr.info",
+  "wss://nostr.ono.re",
+  "wss://relay.grunch.dev",
+  "wss://nostr.sandwich.farm",
+  "wss://relay.nostr.ch",
+>>>>>>> fbef241 (Add some default relays)
 ])
 
 knownRelays.subscribe($knownRelays => {
