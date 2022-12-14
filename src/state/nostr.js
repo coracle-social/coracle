@@ -259,6 +259,7 @@ export const knownRelays = writable((getLocalJson("coracle/knownRelays") || [
   {url: "wss://relay.grunch.dev"},
   {url: "wss://nostr.sandwich.farm"},
   {url: "wss://relay.nostr.ch"},
+  {url: "wss://nostr-relay.wlvs.space"},
 ]).filter(x => x.url))
 
 knownRelays.subscribe($knownRelays => {

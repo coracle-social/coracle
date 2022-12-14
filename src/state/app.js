@@ -179,7 +179,7 @@ export const threadify = async notes => {
         ...note,
         user: $accounts[note.pubkey],
         reactions: reactionsByParent[note.id] || [],
-        children: _notes.filter(n => findReply(n) === note.id).map(annotate),
+        children: uniqBy(prop('id'), _notes.filter(n => findReply(n) === note.id)).map(annotate),
         numberOfAncestors: note.tags.filter(([x]) => x === 'e').length,
       }
     }
@@ -217,7 +217,7 @@ export const annotateNotes = async (notes, {showParent = false} = {}) => {
     ...note,
     user: $accounts[note.pubkey],
     reactions: reactionsByParent[note.id] || [],
-    children: allNotes.filter(n => findReply(n) === note.id).map(annotate),
+    children: uniqBy(prop('id'), allNotes.filter(n => findReply(n) === note.id)).map(annotate),
   })
 
   return notes.map(note => {
