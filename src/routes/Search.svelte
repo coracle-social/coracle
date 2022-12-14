@@ -10,7 +10,7 @@
   import Note from "src/partials/Note.svelte"
   import {relays, Cursor} from "src/state/nostr"
   import {user} from "src/state/user"
-  import {createScroller, ensureAccounts, accounts, threadify, modal} from "src/state/app"
+  import {createScroller, ensureAccounts, accounts, annotateNotes, modal} from "src/state/app"
 
   export let type
 
@@ -37,7 +37,7 @@
 
         data.set(Object.values($accounts))
       } else {
-        const annotated = await threadify(chunk)
+        const annotated = await annotateNotes(chunk, {showParent: false})
 
         data.update($data => uniqBy(prop('id'), $data.concat(annotated)))
       }
@@ -107,7 +107,7 @@
 <ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
   {#each (results || []) as e (e.id)}
     <li in:fly={{y: 20}}>
-      <Note interactive note={e} />
+      <Note interactive showParent note={e} />
     </li>
   {/each}
 </ul>

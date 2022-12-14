@@ -1,7 +1,5 @@
 Bugs
 
-- [ ] Some threads aren't navigable, click handlers aren't firing. Like isn't working, but un-like is.
-- [ ] Permalink note detail (share/permalink button?). Permalinks don't work
 - [ ] uniq and sortBy are sprinkled all over the place, figure out a better solution
 - [ ] With link/image previews, remove the url from the note body if it's on a separate last line
 - [ ] Search page is slow and likes don't show up. Probably move this server-side

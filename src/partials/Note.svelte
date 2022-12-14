@@ -9,6 +9,7 @@
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import {dispatch} from "src/state/dispatch"
+  import {findReply} from "src/state/nostr"
   import {accounts, settings, modal} from "src/state/app"
   import {user} from "src/state/user"
   import {formatTimestamp} from 'src/util/misc'
@@ -16,18 +17,21 @@
 
   export let note
   export let depth = 0
+  export let anchorId = null
+  export let showParent = false
   export let showEntire = false
-  export let interactive = false
   export let invertColors = false
 
   let link = null
   let like = null
   let flag = null
   let reply = null
+  let interactive = null
 
   $: {
     like = find(e => e.pubkey === $user?.pubkey && e.content === "+", note.reactions)
     flag = find(e => e.pubkey === $user?.pubkey && e.content === "-", note.reactions)
+    interactive = !anchorId || anchorId !== note.id
   }
 
   onMount(async () => {
@@ -38,6 +42,12 @@
     if (!['I'].includes(e.target.tagName) && !hasParent('a', e.target)) {
       modal.set({note})
     }
+  }
+
+  const goToParent = () => {
+    const parentId = findReply(note)
+
+    modal.set({note: {id: parentId}})
   }
 
   const react = content => {
@@ -102,6 +112,11 @@
     <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>
   </div>
   <div class="ml-6 flex flex-col gap-2">
+    {#if findReply(note) && showParent}
+      <small class="text-light">
+        Reply to <Anchor on:click={goToParent}>{findReply(note).slice(0, 8)}</Anchor>
+      </small>
+    {/if}
     {#if flag}
     <p class="text-light border-l-2 border-solid border-medium pl-4">
       You have flagged this content as offensive.
@@ -166,7 +181,7 @@
 {#if depth > 0}
 {#each note.children as child (child.id)}
 <div class="ml-5 border-l border-solid border-medium">
-  <svelte:self note={child} interactive depth={depth - 1} {invertColors} />
+  <svelte:self note={child} depth={depth - 1} {invertColors} {anchorId} />
 </div>
 {/each}
 {/if}

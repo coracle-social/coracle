@@ -2,11 +2,10 @@
   import {onMount, onDestroy} from 'svelte'
   import {fly} from 'svelte/transition'
   import {uniqBy, sortBy, reject, prop} from 'ramda'
-  import {pluralize} from 'hurdak/lib/hurdak'
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/partials/Note.svelte"
   import {Cursor, epoch, filterTags} from 'src/state/nostr'
-  import {createScroller, getMuffleValue, threadify, combineThreads, notesListener, modal} from "src/state/app"
+  import {createScroller, getMuffleValue, threadify, notesListener, modal} from "src/state/app"
 
   export let filter
   export let notes
@@ -18,18 +17,6 @@
   let modalUnsub
   let interval
   let loading = true
-
-  const getRoot = n => {
-    if (!n.parent) {
-      return null
-    }
-
-    while (n.parent) {
-      n = n.parent
-    }
-
-    return n
-  }
 
   onMount(async () => {
     cursor = new Cursor(filter)
@@ -44,7 +31,7 @@
       const seen = $notes.flatMap(n => filterTags({tag: "e"}, n))
 
       // Add chunk context and combine threads
-      chunk = combineThreads(await threadify(reject(n => seen.includes(n.id), chunk)))
+      chunk = await threadify(reject(n => seen.includes(n.id), chunk))
 
       // Sort and deduplicate
       notes.set(sortBy(n => -n.created_at, uniqBy(prop('id'), $notes.concat(chunk))))
@@ -82,30 +69,7 @@
 
 <ul class="py-4 flex flex-col gap-2 max-w-xl m-auto">
   {#each $notes as n (n.id)}
-    {@const root = getRoot(n)}
-    <li>
-      <div class="relative">
-        {#if n.parent}
-          <div class="w-px bg-medium absolute h-full ml-5 -mr-5 mt-5" />
-        {/if}
-        {#if root && root.id !== n.parent?.id}
-        <Note interactive note={root} />
-        {/if}
-        {#if n.numberOfAncestors > 2}
-        <div class="z-10 text-medium bg-black relative py-1 px-2" style="left: 10px" in:fly={{y: 20}}>
-          <i class="fa-solid fa-ellipsis-v" />
-          <span class="pl-2 text-light opacity-75">
-            {n.numberOfAncestors - 2} other {pluralize(n.numberOfAncestors - 2, 'note')}
-            in this conversation
-          </span>
-        </div>
-        {/if}
-        {#if n.parent}
-        <Note interactive depth={0} note={n.parent} />
-        {/if}
-      </div>
-      <Note interactive depth={1} note={n} />
-    </li>
+    <li><Note interactive note={n} depth={2} /></li>
   {:else}
   {#if loading}
   <li><Spinner /></li>

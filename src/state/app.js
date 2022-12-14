@@ -1,4 +1,4 @@
-import {identity, uniq, uniqBy, prop, reject, groupBy, find, last, pluck} from 'ramda'
+import {identity, uniq, concat, propEq, uniqBy, prop, groupBy, find, last, pluck} from 'ramda'
 import {debounce} from 'throttle-debounce'
 import {writable, get} from 'svelte/store'
 import {navigate} from "svelte-routing"
@@ -6,7 +6,7 @@ import {globalHistory} from "svelte-routing/src/history"
 import {switcherFn, createMap} from 'hurdak/lib/hurdak'
 import {getLocalJson, setLocalJson, now, timedelta, sleep} from "src/util/misc"
 import {user} from 'src/state/user'
-import {epoch, filterTags, filterMatches, Listener, channels, relays, findReply} from 'src/state/nostr'
+import {epoch, filterMatches, Listener, channels, relays, findReply, findRoot} from 'src/state/nostr'
 
 export const modal = {
   subscribe: cb => {
@@ -134,62 +134,105 @@ export const threadify = async notes => {
     return []
   }
 
-  const ancestorIds = filterTags({tag: 'e'}, notes)
-  const filters = [{kinds: [1, 7], '#e': pluck('id', notes)}]
+  const noteIds = pluck('id', notes)
+  const rootIds = notes.map(findReply)
+  const parentIds = notes.map(findRoot)
+  const ancestorIds = concat(rootIds, parentIds).filter(identity)
 
-  if (ancestorIds.length > 0) {
-    filters.push({kinds: [1], ids: ancestorIds})
-    filters.push({kinds: [7], '#e': ancestorIds})
-  }
+  // Find all direct parents and thread roots
+  const filters = ancestorIds.length === 0
+    ? [{kinds: [1, 7], '#e': noteIds}]
+    : [{kinds: [1], ids: ancestorIds},
+       {kinds: [1, 7], '#e': noteIds.concat(ancestorIds)}]
 
-  const events = uniqBy(prop('id'), await channels.getter.all(filters))
+  const events = await channels.getter.all(filters)
 
   await ensureAccounts(uniq(pluck('pubkey', notes.concat(events))))
 
   const $accounts = get(accounts)
-  const eventsById = createMap('id', events)
-  const getChildren = (kind, n) =>
-    events.filter(e => e.kind === kind && findReply(e) === n.id)
+  const reactionsByParent = groupBy(findReply, events.filter(propEq('kind', 7)))
+  const allNotes = uniqBy(prop('id'), notes.concat(events.filter(propEq('kind', 1))))
+  const notesById = createMap('id', allNotes)
+  const notesByRoot = groupBy(
+    n => {
+      const rootId = findRoot(n)
+      const parentId = findReply(n)
 
-  const annotate = (n, includeParent) => {
-    if (!n) {
-      return null
-    }
+      // Actually dereference the notes in case we weren't able to retrieve them
+      if (notesById[rootId]) {
+        return rootId
+      }
 
-    const annotated = {
-      ...n,
-      numberOfAncestors: n.tags.filter(([x]) => x === 'e').length,
-      children: getChildren(1, n).map(child => annotate(child, false)),
-      reactions: getChildren(7, n),
-      user: $accounts[n.pubkey],
-    }
+      if (notesById[parentId]) {
+        return parentId
+      }
 
-    if (includeParent) {
-      annotated.parent = annotate(eventsById[findReply(n)], true)
-    }
-
-    return annotated
-  }
-
-  // Add parent/children/reactions
-  return notes.map(n => annotate(n, true))
-}
-
-export const combineThreads = notes => {
-  const notesById = createMap('id', notes.concat(pluck('parent', notes)).filter(identity))
-  const parentIds = notes.map(n => n.parent?.id).filter(identity)
-
-  // Group by parent, but filter out notes alredy represented in the parents list to
-  // avoid showing the same note twice. This privileges leaf nodes over root nodes.
-  const notesByParent = groupBy(
-    n => n.parent?.id || n.id,
-    reject(n => parentIds.includes(n.id), notes)
+      return n.id
+    },
+    allNotes
   )
 
-  return Object.keys(notesByParent).map(id => notesById[id])
+  const threads = []
+  for (const [rootId, _notes] of Object.entries(notesByRoot)) {
+    const annotate = note => {
+      return {
+        ...note,
+        user: $accounts[note.pubkey],
+        reactions: reactionsByParent[note.id] || [],
+        children: _notes.filter(n => findReply(n) === note.id).map(annotate),
+        numberOfAncestors: note.tags.filter(([x]) => x === 'e').length,
+      }
+    }
+
+    threads.push(annotate(notesById[rootId]))
+  }
+
+  return threads
 }
 
-export const annotateNewNote = async note => {
+export const annotateNotes = async (notes, {showParent = false} = {}) => {
+  if (notes.length === 0) {
+    return []
+  }
+
+  const noteIds = pluck('id', notes)
+  const parentIds = notes.map(findReply).filter(identity)
+  const filters = [{kinds: [1, 7], '#e': noteIds}]
+
+  if (showParent && parentIds.length > 0) {
+    filters.push({kinds: [1], ids: parentIds})
+    filters.push({kinds: [7], '#e': parentIds})
+  }
+
+  const events = await channels.getter.all(filters)
+
+  await ensureAccounts(uniq(pluck('pubkey', notes.concat(events))))
+
+  const $accounts = get(accounts)
+  const reactionsByParent = groupBy(findReply, events.filter(propEq('kind', 7)))
+  const allNotes = uniqBy(prop('id'), notes.concat(events.filter(propEq('kind', 1))))
+  const notesById = createMap('id', allNotes)
+
+  const annotate = note => ({
+    ...note,
+    user: $accounts[note.pubkey],
+    reactions: reactionsByParent[note.id] || [],
+    children: allNotes.filter(n => findReply(n) === note.id).map(annotate),
+  })
+
+  return notes.map(note => {
+    const parentId = findReply(note)
+
+    // If we have a parent, return that instead
+    return annotate(
+      showParent && notesById[parentId]
+        ? notesById[parentId]
+        : note
+    )
+  })
+}
+
+export const annotateNewNote = async (note) => {
   await ensureAccounts([note.pubkey])
 
   const $accounts = get(accounts)
@@ -235,7 +278,7 @@ export const notesListener = (notes, filter, {shouldMuffle = false} = {}) => {
   const deleteNotes = (ids, t) =>
     notes.update($notes => $notes.map(n => deleteNote(n, ids, t)))
 
-  return new Listener(filter, e => console.log(e) || switcherFn(e.kind, {
+  return new Listener(filter, e => switcherFn(e.kind, {
     1: async () => {
       const id = findReply(e)
       const muffle = shouldMuffle && Math.random() > getMuffleValue(e.pubkey)

@@ -4,7 +4,7 @@
   import {reverse} from 'ramda'
   import Spinner from 'src/partials/Spinner.svelte'
   import {channels} from "src/state/nostr"
-  import {notesListener, threadify, modal} from "src/state/app"
+  import {notesListener, annotateNotes, modal} from "src/state/app"
   import {user} from "src/state/user"
   import Note from 'src/partials/Note.svelte'
 
@@ -14,23 +14,11 @@
   let cursor
   let listener
 
-  const getAncestors = n => {
-    const parents = []
-
-    while (n.parent) {
-      parents.push(n.parent)
-      n = n.parent
-    }
-
-    return reverse(parents)
-  }
-
   onMount(() => {
     channels.getter
       .all({kinds: [1], ids: [note.id]})
-      .then(threadify)
-      .then($notes => {
-        notes.set($notes)
+      .then(async $notes => {
+        notes.set(await annotateNotes($notes))
       })
 
     listener = notesListener(notes, [
@@ -55,17 +43,9 @@
   })
 </script>
 
-{#each $notes as note (note.id)}
+{#each $notes as n (n.id)}
 <div n:fly={{y: 20}}>
-  <div class="relative">
-    {#if note.parent}
-      <div class="w-px bg-medium absolute h-full ml-5 -mr-5 mt-5" />
-    {/if}
-    {#each getAncestors(note) as ancestor (ancestor.id)}
-    <Note interactive invertColors note={ancestor} />
-    {/each}
-  </div>
-  <Note showEntire invertColors depth={5} note={note} />
+  <Note showEntire showParent invertColors anchorId={note.id} note={n} depth={2} />
 </div>
 {:else}
 <Spinner />

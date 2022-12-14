@@ -5,10 +5,10 @@
   import {switcherFn} from 'hurdak/lib/hurdak'
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/partials/Note.svelte"
-  import {Cursor, Listener, epoch, findReply, channels} from 'src/state/nostr'
-  import {createScroller, threadify, modal} from "src/state/app"
+  import {Cursor, epoch, findReply, channels} from 'src/state/nostr'
+  import {createScroller, notesListener, annotateNotes, modal} from "src/state/app"
 
-  export let filter
+  export let author
   export let notes
 
   let cursor
@@ -26,14 +26,14 @@
     }
 
     const chunk = await channels.getter.all({kinds: [1], ids: noteIds})
-    const annotated = await threadify(chunk)
+    const annotated = await annotateNotes(chunk, {showParent: false})
 
     notes.update($notes => sortBy(n => -n.created_at, uniqBy(prop('id'), $notes.concat(annotated))))
   }
 
   onMount(async () => {
-    cursor = new Cursor(filter)
-    listener = new Listener(filter, e => switcherFn(e.kind, {5: () => addLikes([e])}))
+    cursor = new Cursor({kinds: [7], authors: [author]})
+    listener = notesListener(notes, {kinds: [1, 5, 7], authors: [author]})
     scroller = createScroller(cursor, addLikes)
 
     // Track loading based on cursor cutoff date
@@ -68,7 +68,7 @@
 
 <ul class="py-4 flex flex-col gap-2 max-w-xl m-auto">
   {#each $notes as n (n.id)}
-    <li><Note interactive note={n} /></li>
+    <li><Note interactive noReply note={n} depth={1} /></li>
   {:else}
   {#if loading}
   <li><Spinner /></li>

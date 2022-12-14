@@ -83,7 +83,7 @@
 {#if activeTab === 'notes'}
 <Notes notes={notes} filter={{kinds: [1], authors: [pubkey]}} />
 {:else if activeTab === 'likes'}
-<Likes notes={likes} filter={{kinds: [7], authors: [pubkey]}} />
+<Likes notes={likes} author={pubkey} />
 {:else if activeTab === 'network'}
 <Notes notes={network} filter={{kinds: [1], authors}} shouldMuffle />
 {/if}
