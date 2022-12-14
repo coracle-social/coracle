@@ -89,7 +89,7 @@
       </Route>
       <Route path="/chat/:room/edit" component={ChatEdit} />
       <Route path="/users/:pubkey/:activeTab" let:params>
-        {#key params.pubkey}
+        {#key params.pubkey + params.activeTab}
         <UserDetail {...params} />
         {/key}
       </Route>

@@ -11,10 +11,8 @@ Features
 - [x] Threads/social
 - [x] Search
 - [ ] Mentions
-- [ ] Add "view thread" page that recurs more deeply
-- [ ] Fix replies - notes may only include a "root" in its tags
 - [x] Link previews
-- [ ] Add notes, follows, likes tab to profile
+- [x] Add notes, follows, likes tab to profile
 - [ ] Notifications
 - [ ] Images
 - [ ] Server discovery and relay publishing - https://github.com/nostr-protocol/nips/pull/32/files
