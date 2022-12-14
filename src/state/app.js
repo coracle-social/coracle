@@ -360,7 +360,7 @@ export const createScroller = (
 
       // Wait a moment before proceeding to the next chunk for the caller
       // to load results into the dom
-      await sleep(1000)
+      await sleep(500)
     }
 
     active = false

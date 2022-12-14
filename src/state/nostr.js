@@ -120,7 +120,7 @@ export const channels = {
 export class Cursor {
   constructor(filter, delta) {
     this.filter = ensurePlural(filter)
-    this.delta = delta || timedelta(5, 'minutes')
+    this.delta = delta || timedelta(15, 'minutes')
     this.since = now() - this.delta
     this.until = now()
     this.sub = null
