@@ -39,6 +39,15 @@ settings.subscribe($settings => {
   setLocalJson("coracle/settings", $settings)
 })
 
+export const alerts = writable({
+  since: now() - timedelta(30, 'days'),
+  ...getLocalJson("coracle/alerts"),
+})
+
+alerts.subscribe($alerts => {
+  setLocalJson("coracle/alerts", $alerts)
+})
+
 export const logout = () => {
   // Give any animations a moment to finish
   setTimeout(() => {
