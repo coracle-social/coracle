@@ -25,7 +25,7 @@
 
   const follow = () => {
     const petnames = $currentUser.petnames
-      .concat([t("p", user.pubkey, user.name)])
+      .concat([t("p", pubkey, user?.name)])
 
     dispatch('account/petnames', petnames)
 
@@ -34,7 +34,7 @@
 
   const unfollow = () => {
     const petnames = $currentUser.petnames
-      .filter(([_, pubkey]) => pubkey !== user.pubkey)
+      .filter(([_, pubkey]) => pubkey !== pubkey)
 
     dispatch('account/petnames', petnames)
 
@@ -42,7 +42,7 @@
   }
 
   const openAdvanced = () => {
-    modal.set({form: 'user/advanced', user})
+    modal.set({form: 'user/advanced', user: user || {pubkey}})
   }
 </script>
 

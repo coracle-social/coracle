@@ -10,8 +10,9 @@
   import {Router, Route, links, navigate} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {hasParent} from 'src/util/html'
+  import {timedelta} from 'src/util/misc'
   import {store as toast} from "src/state/toast"
-  import {channels} from "src/state/nostr"
+  import {channels, epoch} from "src/state/nostr"
   import {modal, logout, alerts} from "src/state/app"
   import {user} from 'src/state/user'
   import Anchor from 'src/partials/Anchor.svelte'
@@ -42,36 +43,32 @@
   let menuIcon
   let scrollY
   let suspendedSubs = []
-  let hasAlerts = false
+  let mostRecentAlert = epoch
 
   export let url = ""
 
-  onMount(() => {
-    // Close menu on click outside
-    document.querySelector("html").addEventListener("click", e => {
-      if (e.target !== menuIcon) {
-        menuIsOpen.set(false)
-      }
-    })
+  // Close menu on click outside
+  document.querySelector("html").addEventListener("click", e => {
+    if (e.target !== menuIcon) {
+      menuIsOpen.set(false)
+    }
+  })
 
+  onMount(() => {
     // Poll for new notifications
-    setInterval(throttle(10_000, async () => {
+    (async function pollForNotifications() {
       if ($user) {
         const events = await channels.getter.all({
-          limit: 1000,
           kinds: [1, 7],
-          '#p': $user.id,
+          '#p': $user.pubkey,
+          since: $alerts.since,
         })
 
-        const items = events//.filter(e => e.pubkey !== $user.pubkey)
-
-        alerts.set({...$alerts, items})
-
-        hasAlerts = items.filter(e => e.created_at > $alerts.since).length > 0
-      } else {
-        hasAlerts = false
+        mostRecentAlert = events.reduce((t, e) => Math.max(t, e.created_at), $alerts.since)
       }
-    }), 100)
+
+      setTimeout(pollForNotifications, 60_000)
+    })()
 
     return modal.subscribe($modal => {
       // Keep scroll position on body, but don't allow scrolling
@@ -142,7 +139,7 @@
       <li class="cursor-pointer relative">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/alerts">
           <i class="fa-solid fa-bell mr-2" /> Alerts
-          {#if hasAlerts}
+          {#if mostRecentAlert > $alerts.since}
           <div class="w-2 h-2 rounded bg-accent absolute top-3 left-6" />
           {/if}
         </a>
@@ -202,7 +199,7 @@
       <Anchor external type="unstyled" href="https://github.com/staab/coracle">
         <h1 class="staatliches text-3xl">Coracle</h1>
       </Anchor>
-      {#if hasAlerts}
+      {#if mostRecentAlert > $alerts.since}
       <div class="w-2 h-2 rounded bg-accent absolute top-4 left-12" />
       {/if}
     </div>

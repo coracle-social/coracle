@@ -2,7 +2,7 @@
   import cx from 'classnames'
   import {find, uniqBy, prop, whereEq} from 'ramda'
   import {onMount} from 'svelte'
-  import {fly, slide} from 'svelte/transition'
+  import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {ellipsize} from 'hurdak/src/core'
   import {hasParent, toHtml, findLink} from 'src/util/html'
@@ -14,6 +14,7 @@
   import {user} from "src/state/user"
   import {formatTimestamp} from 'src/util/misc'
   import UserBadge from "src/partials/UserBadge.svelte"
+  import Card from "src/partials/Card.svelte"
 
   export let note
   export let depth = 0
@@ -99,14 +100,7 @@
   }}
 />
 
-<div
-  in:fly={{y: 20}}
-  on:click={onClick}
-  class={cx("py-2 px-3 flex flex-col gap-2 text-white", {
-    "cursor-pointer transition-all": interactive,
-    "border border-solid border-black hover:border-medium hover:bg-dark": interactive && !invertColors,
-    "border border-solid border-dark hover:border-medium hover:bg-medium": interactive && invertColors,
-  })}>
+<Card on:click={onClick} {interactive} {invertColors}>
   <div class="flex gap-4 items-center justify-between">
     <UserBadge user={{...$accounts[note.pubkey], pubkey: note.pubkey}} />
     <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>
@@ -155,7 +149,7 @@
     </div>
     {/if}
   </div>
-</div>
+</Card>
 
 {#if reply !== null}
 <div

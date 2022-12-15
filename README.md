@@ -1,5 +1,6 @@
 Bugs
 
+- [ ] Add alerts for replies to posts the user liked
 - [ ] Support bech32 keys/add guide on how to convert
 - [ ] Loading icon not showing at bottom
 - [ ] uniq and sortBy are sprinkled all over the place, figure out a better solution

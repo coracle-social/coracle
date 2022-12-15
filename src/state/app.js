@@ -189,7 +189,6 @@ export const threadify = async notes => {
         user: $accounts[note.pubkey],
         reactions: reactionsByParent[note.id] || [],
         children: uniqBy(prop('id'), _notes.filter(n => findReply(n) === note.id)).map(annotate),
-        numberOfAncestors: note.tags.filter(([x]) => x === 'e').length,
       }
     }
 
@@ -241,6 +240,42 @@ export const annotateNotes = async (notes, {showParent = false} = {}) => {
   })
 }
 
+export const annotateAlerts = async events => {
+  if (events.length === 0) {
+    return []
+  }
+
+  const eventIds = pluck('id', events)
+  const parentIds = events.map(findReply).filter(identity)
+  const filters = [
+    {kinds: [1], ids: parentIds},
+    {kinds: [7], '#e': parentIds},
+    {kinds: [1, 7], '#e': eventIds},
+  ]
+
+  const relatedEvents = await channels.getter.all(filters)
+
+  await ensureAccounts(uniq(pluck('pubkey', events.concat(relatedEvents))))
+
+  const $accounts = get(accounts)
+  const reactionsByParent = groupBy(findReply, relatedEvents.filter(e => e.kind === 7 && e.content === '+'))
+  const allNotes = uniqBy(prop('id'), events.concat(relatedEvents).filter(propEq('kind', 1)))
+  const notesById = createMap('id', allNotes)
+
+  const annotate = note => ({
+    ...note,
+    user: $accounts[note.pubkey],
+    reactions: reactionsByParent[note.id] || [],
+    children: uniqBy(prop('id'), allNotes.filter(n => findReply(n) === note.id)).map(annotate),
+  })
+
+  return uniqBy(e => e.parent?.id || e.id, events.map(event => {
+    const parentId = findReply(event)
+
+    return {...annotate(event), parent: annotate(notesById[parentId])}
+  }))
+}
+
 export const annotateNewNote = async (note) => {
   await ensureAccounts([note.pubkey])
 
@@ -249,13 +284,12 @@ export const annotateNewNote = async (note) => {
   return {
     ...note,
     user: $accounts[note.pubkey],
-    numberOfAncestors: note.tags.filter(([x]) => x === 'e').length,
     children: [],
     reactions: [],
   }
 }
 
-export const notesListener = (notes, filter, {shouldMuffle = false} = {}) => {
+export const notesListener = (notes, filter, {shouldMuffle = false, repliesOnly = false} = {}) => {
   const updateNote = (note, id, f) => {
     if (note.id === id) {
       return f(note)
@@ -296,7 +330,7 @@ export const notesListener = (notes, filter, {shouldMuffle = false} = {}) => {
         const note = await annotateNewNote(e)
 
         updateNotes(id, n => ({...n, children: n.children.concat(note)}))
-      } else if (!muffle && filterMatches(filter, e)) {
+      } else if (!repliesOnly && !muffle && filterMatches(filter, e)) {
         const [note] = await threadify([e])
 
         notes.update($notes => [note].concat($notes))
