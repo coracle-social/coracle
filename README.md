@@ -1,5 +1,6 @@
 Bugs
 
+- [ ] Add setting to disable previews
 - [ ] Completely redo notes fetching, it's buggy as heck
 - [ ] Add alerts for replies to posts the user liked
 - [ ] Support bech32 keys/add guide on how to convert

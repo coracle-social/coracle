@@ -72,11 +72,3 @@ export const escapeHtml = html => {
 }
 
 export const findLink = t => first(t.match(/https?:\/\/([\w.-]+)[^ ]*/))
-
-export const toHtml = content => {
-  return escapeHtml(content)
-    .replace(/\n/g, '<br />')
-    .replace(/https?:\/\/([\w.-]+)[^ ]*/g, (url, domain) => {
-      return `<a href="${url}" target="_blank noopener" class="underline">${domain}</a>`
-    })
-}

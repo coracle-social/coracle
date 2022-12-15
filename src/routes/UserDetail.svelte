@@ -82,7 +82,7 @@
 </div>
 <Tabs tabs={['notes', 'likes', 'network']} {activeTab} {setActiveTab} />
 {#if activeTab === 'notes'}
-<Notes notes={notes} filter={console.log({kinds: [1], authors: [pubkey]}) || {kinds: [1], authors: [pubkey]}} />
+<Notes notes={notes} filter={{kinds: [1], authors: [pubkey]}} />
 {:else if activeTab === 'likes'}
 <Likes notes={likes} author={pubkey} />
 {:else if activeTab === 'network'}

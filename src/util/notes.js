@@ -1,11 +1,31 @@
 import {identity, uniq, concat, propEq, uniqBy, prop, groupBy, find, last, pluck} from 'ramda'
 import {debounce} from 'throttle-debounce'
 import {get} from 'svelte/store'
-import {switcherFn, createMap} from 'hurdak/lib/hurdak'
+import {switcherFn, ellipsize, createMap} from 'hurdak/lib/hurdak'
 import {timedelta, sleep} from "src/util/misc"
+import {escapeHtml} from 'src/util/html'
 import {user} from 'src/state/user'
 import {epoch, filterMatches, Listener, channels, findReply, findRoot} from 'src/state/nostr'
 import {accounts, ensureAccounts} from 'src/state/app'
+
+export const renderNote = (note, {showEntire = false}) => {
+  const shouldEllipsize = note.content.length > 500 && !showEntire
+  const content = shouldEllipsize ? ellipsize(note.content, 500) : note.content
+  const $accounts = get(accounts)
+
+  return escapeHtml(content)
+    .replace(/\n/g, '<br />')
+    .replace(/https?:\/\/([\w.-]+)[^ ]*/g, (url, domain) => {
+      return `<a href="${url}" target="_blank noopener" class="underline">${domain}</a>`
+    })
+    .replace(/#\[(\d+)\]/g, (tag, i) => {
+      const pubkey = note.tags[parseInt(i)][1]
+      const user = $accounts[pubkey]
+      const name = user?.name || pubkey.slice(0, 8)
+
+      return `@<a href="/users/${pubkey}/notes" class="underline">${name}</a>`
+    })
+}
 
 export const getMuffleValue = pubkey => {
   const $user = get(user)

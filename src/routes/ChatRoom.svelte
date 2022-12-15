@@ -4,8 +4,7 @@
   import {navigate} from 'svelte-routing'
   import {prop, uniq, pluck, reverse, uniqBy, sortBy, last} from 'ramda'
   import {formatTimestamp} from 'src/util/misc'
-  import {toHtml} from 'src/util/html'
-  import {createScroller} from 'src/util/notes'
+  import {createScroller, renderNote} from 'src/util/notes'
   import UserBadge from 'src/partials/UserBadge.svelte'
   import {Listener, Cursor, epoch} from 'src/state/nostr'
   import {accounts, ensureAccounts} from 'src/state/app'
@@ -145,7 +144,7 @@
                 <p class="text-sm text-light">{formatTimestamp(m.created_at)}</p>
               </div>
               {/if}
-              <div class="ml-6">{@html toHtml(m.content)}</div>
+              <div class="ml-6">{@html renderNote(m, {showEntire: true})}</div>
             </li>
           {/each}
         </ul>

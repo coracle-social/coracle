@@ -5,7 +5,8 @@
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {ellipsize} from 'hurdak/src/core'
-  import {hasParent, toHtml, findLink} from 'src/util/html'
+  import {hasParent, findLink} from 'src/util/html'
+  import {renderNote} from 'src/util/notes'
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import {dispatch} from "src/state/dispatch"
@@ -118,11 +119,7 @@
     </p>
     {:else}
     <p class="text-ellipsis overflow-hidden">
-      {#if note.content.length > 500 && !showEntire}
-        {ellipsize(note.content, 500)}
-      {:else}
-        {@html toHtml(note.content)}
-      {/if}
+      {@html renderNote(note, {showEntire})}
       {#if link}
       <div class="mt-2" on:click={e => e.stopPropagation()}>
         <Preview endpoint={`${$settings.dufflepudUrl}/link/preview`} url={link} />
