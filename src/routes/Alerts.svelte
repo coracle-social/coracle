@@ -4,10 +4,11 @@
   import {writable} from 'svelte/store'
   import {sortBy, uniqBy, prop} from 'ramda'
   import {now} from 'src/util/misc'
+  import {annotateAlerts, notesListener, createScroller} from 'src/util/notes'
   import {ellipsize} from 'hurdak/src/core'
   import {user} from 'src/state/user'
   import {Cursor, epoch} from 'src/state/nostr'
-  import {alerts, annotateAlerts, notesListener, createScroller, modal} from 'src/state/app'
+  import {alerts, modal} from 'src/state/app'
   import Spinner from "src/partials/Spinner.svelte"
   import UserBadge from "src/partials/UserBadge.svelte"
   import Note from 'src/partials/Note.svelte'

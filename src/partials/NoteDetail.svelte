@@ -2,8 +2,9 @@
   import {onMount} from 'svelte'
   import {writable} from 'svelte/store'
   import Spinner from 'src/partials/Spinner.svelte'
+  import {notesListener, annotateNotes} from "src/util/notes"
   import {channels} from "src/state/nostr"
-  import {notesListener, annotateNotes, modal} from "src/state/app"
+  import {modal} from "src/state/app"
   import {user} from "src/state/user"
   import Note from 'src/partials/Note.svelte'
 

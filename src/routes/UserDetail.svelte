@@ -1,4 +1,5 @@
 <script>
+  import {find} from 'ramda'
   import {writable} from 'svelte/store'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
@@ -8,7 +9,7 @@
   import Button from "src/partials/Button.svelte"
   import {user as currentUser} from 'src/state/user'
   import {t, dispatch} from 'src/state/dispatch'
-  import {accounts, getFollow, modal} from "src/state/app"
+  import {accounts, modal} from "src/state/app"
 
   export let pubkey
   export let activeTab
@@ -19,7 +20,7 @@
   const network = writable([])
   const authors = $currentUser ? $currentUser.petnames.map(t => t[1]) : []
 
-  let following = getFollow(pubkey)
+  let following = $currentUser && find(t => t[1] === pubkey, $currentUser.petnames)
 
   const setActiveTab = tab => navigate(`/users/${pubkey}/${tab}`)
 
@@ -81,7 +82,7 @@
 </div>
 <Tabs tabs={['notes', 'likes', 'network']} {activeTab} {setActiveTab} />
 {#if activeTab === 'notes'}
-<Notes notes={notes} filter={{kinds: [1], authors: [pubkey]}} />
+<Notes notes={notes} filter={console.log({kinds: [1], authors: [pubkey]}) || {kinds: [1], authors: [pubkey]}} />
 {:else if activeTab === 'likes'}
 <Likes notes={likes} author={pubkey} />
 {:else if activeTab === 'network'}

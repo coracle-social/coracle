@@ -2,11 +2,11 @@
   import {onMount, onDestroy} from 'svelte'
   import {fly} from 'svelte/transition'
   import {uniqBy, sortBy, reject, prop} from 'ramda'
+  import {createScroller, getMuffleValue, threadify, notesListener} from "src/util/notes"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/partials/Note.svelte"
   import {Cursor, epoch, filterTags} from 'src/state/nostr'
-  import {timedelta} from 'src/util/misc'
-  import {createScroller, getMuffleValue, threadify, notesListener, modal} from "src/state/app"
+  import {modal} from "src/state/app"
 
   export let filter
   export let notes

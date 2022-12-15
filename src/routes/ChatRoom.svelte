@@ -5,9 +5,10 @@
   import {prop, uniq, pluck, reverse, uniqBy, sortBy, last} from 'ramda'
   import {formatTimestamp} from 'src/util/misc'
   import {toHtml} from 'src/util/html'
+  import {createScroller} from 'src/util/notes'
   import UserBadge from 'src/partials/UserBadge.svelte'
   import {Listener, Cursor, epoch} from 'src/state/nostr'
-  import {accounts, createScroller, ensureAccounts} from 'src/state/app'
+  import {accounts, ensureAccounts} from 'src/state/app'
   import {dispatch} from 'src/state/dispatch'
   import {user} from 'src/state/user'
   import RoomList from "src/partials/chat/RoomList.svelte"
@@ -149,7 +150,7 @@
           {/each}
         </ul>
       </div>
-      <div class="fixed top-0 pt-20 w-full sm:-ml-56 sm:pl-60 p-4 border-b border-solid border-medium bg-dark flex gap-4">
+      <div class="fixed z-10 top-0 pt-20 w-full sm:-ml-56 sm:pl-60 p-4 border-b border-solid border-medium bg-dark flex gap-4">
         <div
           class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
           style="background-image: url({roomData.picture})" />
@@ -165,7 +166,7 @@
           <div>{roomData.about || ''}</div>
         </div>
       </div>
-      <div class="fixed bottom-0 w-full sm:-ml-56 sm:pl-56 flex bg-medium border-medium border-t border-solid border-dark">
+      <div class="fixed z-10 bottom-0 w-full sm:-ml-56 sm:pl-56 flex bg-medium border-medium border-t border-solid border-dark">
         <textarea
           rows="4"
           autofocus

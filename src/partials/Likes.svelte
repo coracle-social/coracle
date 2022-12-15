@@ -4,8 +4,9 @@
   import {uniqBy, sortBy, prop, identity} from 'ramda'
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/partials/Note.svelte"
+  import {createScroller, notesListener, annotateNotes} from "src/util/notes"
   import {Cursor, epoch, findReply, channels} from 'src/state/nostr'
-  import {createScroller, notesListener, annotateNotes, modal} from "src/state/app"
+  import {modal} from "src/state/app"
 
   export let author
   export let notes

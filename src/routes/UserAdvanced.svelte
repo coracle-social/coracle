@@ -4,9 +4,10 @@
   import {fly} from 'svelte/transition'
   import Button from "src/partials/Button.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
+  import {getMuffleValue} from "src/util/notes"
   import {user} from 'src/state/user'
   import {dispatch, t} from 'src/state/dispatch'
-  import {modal, getMuffleValue} from "src/state/app"
+  import {modal} from "src/state/app"
 
   const muffleOptions = ['Never', 'Sometimes', 'Often', 'Always']
 

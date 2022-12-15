@@ -4,13 +4,14 @@
   import {fly} from 'svelte/transition'
   import {uniqBy, pluck, prop} from 'ramda'
   import {fuzzy} from "src/util/misc"
+  import {createScroller, annotateNotes} from "src/util/notes"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/partials/Note.svelte"
   import {relays, Cursor} from "src/state/nostr"
   import {user} from "src/state/user"
-  import {createScroller, ensureAccounts, accounts, annotateNotes, modal} from "src/state/app"
+  import {ensureAccounts, accounts, modal} from "src/state/app"
 
   export let type
 

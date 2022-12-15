@@ -40,7 +40,7 @@
   })
 </script>
 
-<div class={cx("flex flex-col bg-dark w-full sm:w-56 h-full fixed py-8 border-r border-solid border-r-medium", className)}>
+<div class={cx("flex flex-col bg-dark w-full sm:w-56 h-full fixed z-10 py-8 border-r border-solid border-r-medium", className)}>
   <div class="my-4 mx-3">
     <Input bind:value={q} type="text" placeholder="Search rooms">
       <i slot="before" class="fa-solid fa-search" />
