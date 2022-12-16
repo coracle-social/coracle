@@ -57,7 +57,7 @@
   onMount(() => {
     // Poll for new notifications
     (async function pollForNotifications() {
-      if ($user) {
+      if (false && $user) {
         const events = await channels.getter.all({
           kinds: [1, 7],
           '#p': [$user.pubkey],

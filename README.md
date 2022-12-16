@@ -34,3 +34,7 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 - [ ] With link/image previews, remove the url from the note body if it's on a separate last line
 - [ ] Stack views so scroll position isn't lost on navigation
 - [ ] We're sending client=astral tags, event id 125ff9dc495f65d302e8d95ea6f9385106cc31b81c80e8c582b44be92fa50c44
+
+# Workers
+
+- [ ] Check firefox

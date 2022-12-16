@@ -2,6 +2,7 @@ import {writable, get} from 'svelte/store'
 import {relayPool, getPublicKey} from 'nostr-tools'
 import {assoc, last, find, intersection, uniqBy, prop} from 'ramda'
 import {first, noop, ensurePlural} from 'hurdak/lib/hurdak'
+import relay from 'src/relay'
 import {getLocalJson, setLocalJson, now, timedelta} from "src/util/misc"
 
 export const nostr = relayPool()
@@ -287,16 +288,20 @@ export const registerRelay = async url => {
 
 export const relays = writable(getLocalJson("coracle/relays") || [])
 
+let prevRelays = []
+
 relays.subscribe($relays => {
-  Object.keys(nostr.relays).forEach(url => {
+  prevRelays.forEach(url => {
     if (!$relays.includes(url)) {
       nostr.removeRelay(url)
+      relay.worker.post('pool/removeRelay', url)
     }
   })
 
   $relays.forEach(url => {
-    if (!nostr.relays[url]) {
+    if (!prevRelays.includes(url)) {
       nostr.addRelay(url)
+      relay.worker.post('pool/addRelay', url)
     }
   })
 

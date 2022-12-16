@@ -4,7 +4,6 @@
   import {onMount} from 'svelte'
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
-  import {ellipsize} from 'hurdak/src/core'
   import {hasParent, findLink} from 'src/util/html'
   import {renderNote} from 'src/util/notes'
   import Preview from 'src/partials/Preview.svelte'
