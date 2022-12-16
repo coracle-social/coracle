@@ -60,7 +60,7 @@
       if ($user) {
         const events = await channels.getter.all({
           kinds: [1, 7],
-          '#p': $user.pubkey,
+          '#p': [$user.pubkey],
           since: $alerts.since,
         })
 
