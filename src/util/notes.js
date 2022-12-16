@@ -19,6 +19,10 @@ export const renderNote = (note, {showEntire = false}) => {
       return `<a href="${url}" target="_blank noopener" class="underline">${domain}</a>`
     })
     .replace(/#\[(\d+)\]/g, (tag, i) => {
+      if (!note.tags[parseInt(i)]) {
+        return tag
+      }
+
       const pubkey = note.tags[parseInt(i)][1]
       const user = $accounts[pubkey]
       const name = user?.name || pubkey.slice(0, 8)
