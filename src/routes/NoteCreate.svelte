@@ -5,7 +5,7 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Button from "src/partials/Button.svelte"
   import {dispatch} from "src/state/dispatch"
-  import {user} from "src/state/user"
+  import {user} from "src/state/app"
   import toast from "src/state/toast"
 
   let values = {}

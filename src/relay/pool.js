@@ -1,8 +1,8 @@
 import {uniqBy, prop} from 'ramda'
 import {relayPool, getPublicKey} from 'nostr-tools'
-import {noop, switcherFn, uuid} from 'hurdak/lib/hurdak'
-import {now, randomChoice, timedelta} from "src/util/misc"
-import {filterTags, findReply, findRoot} from "src/util/nostr"
+import {noop} from 'hurdak/lib/hurdak'
+import {now, randomChoice, timedelta, getLocalJson, setLocalJson} from "src/util/misc"
+import {filterTags, getTagValues} from "src/util/nostr"
 import {db} from 'src/relay/db'
 
 // ============================================================================
@@ -81,8 +81,6 @@ export const channels = [
 
 const req = filter => randomChoice(channels).all(filter)
 
-const prepEvent = e => ({...e, root: findRoot(e), reply: findReply(e)})
-
 const getPubkey = () => {
   return pool._pubkey || getPublicKey(pool._privkey)
 }
@@ -113,25 +111,30 @@ const setPublicKey = pubkey => {
 
 const publishEvent = event => {
   pool.publish(event)
-  db.events.put(prepEvent(event))
+  db.events.process(event)
 }
 
 const loadEvents = async filter => {
   const events = await req(filter)
 
-  db.events.bulkPut(events.map(prepEvent))
+  db.events.process(events)
 }
 
-const getUserInfo = async user => {
-  for (const e of await req({kinds: [0, 3, 12165], authors: [user.pubkey]})) {
-    switcherFn(e.kind, {
-      0: () => Object.assign(user, JSON.parse(e.content)),
-      3: () => Object.assign(user, {petnames: e.tags}),
-      12165: () => Object.assign(user, {muffle: e.tags}),
-    })
-  }
+const syncUserInfo = async user => {
+  const [events] = await Promise.all([
+    // Get profile info events
+    req({kinds: [0, 3, 12165], authors: [user.pubkey]}),
+    // Make sure we have something in the database
+    db.users.put({muffle: [], petnames: [], updated_at: 0, ...user}),
+  ])
 
-  return user
+  // Process the events to flesh out the user
+  await db.events.process(events)
+
+  // Return our user for convenience
+  const person = await db.users.where('pubkey').equals(user.pubkey).first()
+
+  return person
 }
 
 const fetchContext = async event => {
@@ -140,39 +143,38 @@ const fetchContext = async event => {
     {kinds: [5], 'ids': filterTags({tag: "e"}, event)},
   ])
 
-  db.events.bulkPut(events.map(prepEvent))
+  db.events.process(events)
 }
 
+let syncSub = null
+
 const sync = async user => {
-  if (!user) throw new Error('No point sycing if we have no user')
+  if (syncSub) {
+    (await syncSub).unsub()
+  }
 
-  const channel = randomChoice(channels)
-  const since = Math.max(now() - interval(1, 'weeks'), getLocalJson('pool/lastSync') || 0)
+  if (!user) return
 
-  channel.sub(
-    [{since, authors: filterTags(user.petnames).concat(user.pubkey)},
-     {since, '#p': [user.pubkey]}],
-    onEvent: async e => {
-      if ([1, 5, 7].includes(e.kind)) {
-        return db.events.put(e)
-      }
+  const {petnames, pubkey} = await syncUserInfo(user)
+  const since = Math.max(
+    now() - timedelta(3, 'days'),
+    Math.min(
+      now() - timedelta(3, 'hours'),
+      getLocalJson('pool/lastSync') || 0
+    )
+  )
 
-      const {pubkey, kind, content, tags} = e
-      const user = await db.users.where('pubkey').equals(pubkey).first()
+  setLocalJson('pool/lastSync', now())
 
-      switcherFn(kind, {
-        0: () => db.users.put({...user, pubkey, ...JSON.parse(content)}),
-        3: () => db.users.put({...user, pubkey, petnames: e.tags}),
-        12165: () => db.users.put({...user, pubkey, muffle: e.tags}),
-        default: e => {
-          console.log(`Received unsupported event type ${e.kind}`)
-        },
-      })
-    }
+  // Populate recent activity in network so the user has something to look at right away
+  syncSub = randomChoice(channels).sub(
+    [{since, authors: getTagValues(petnames).concat(pubkey)},
+     {since, '#p': [pubkey]}],
+    db.events.process
   )
 }
 
 export default {
   getPubkey, addRelay, removeRelay, setPrivateKey, setPublicKey,
-  publishEvent, loadEvents, getUserInfo, fetchContext, sync,
+  publishEvent, loadEvents, syncUserInfo, fetchContext, sync,
 }

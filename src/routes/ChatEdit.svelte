@@ -7,7 +7,6 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Button from "src/partials/Button.svelte"
   import {dispatch} from "src/state/dispatch"
-  import {channels} from "src/state/nostr"
   import toast from "src/state/toast"
 
   export let room

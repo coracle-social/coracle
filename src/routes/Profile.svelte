@@ -8,7 +8,7 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Button from "src/partials/Button.svelte"
-  import {user} from "src/state/user"
+  import {user} from "src/state/app"
   import {dispatch} from "src/state/dispatch"
   import toast from "src/state/toast"
 
@@ -38,15 +38,11 @@
   const submit = async event => {
     event.preventDefault()
 
-    if (!values.name.match(/^\w[\w-]+\w$/)) {
-      toast.show("error", "Names must be comprised of letters, numbers, and dashes only.")
-    } else {
-      await dispatch("account/update", values)
+    await dispatch("account/update", values)
 
-      navigate(`/users/${$user.pubkey}/profile`)
+    navigate(`/users/${$user.pubkey}/profile`)
 
-      toast.show("info", "Your profile has been updated!")
-    }
+    toast.show("info", "Your profile has been updated!")
   }
 </script>
 

@@ -17,21 +17,12 @@ const lq = f => liveQuery(async () => {
 })
 
 const ensureContext = async e => {
-  // We can't return a promise, so use setTimeout instead
-  const user = await db.users.where('pubkey').equals(e.pubkey).first() || {
-    muffle: [],
-    petnames: [],
-    updated_at: 0,
-    pubkey: e.pubkey,
-  }
+  const user = await db.users.where('pubkey').equals(e.pubkey).first()
 
   // Throttle updates for users
-  if (user.updated_at < now() - timedelta(1, 'hours')) {
-    Object.assign(user, await pool.getUserInfo({pubkey: e.pubkey, ...user}))
+  if (!user || user.updated_at < now() - timedelta(1, 'hours')) {
+    await pool.syncUserInfo({pubkey: e.pubkey, ...user})
   }
-
-  // Even if we didn't find a match, save it so we don't keep trying to refresh
-  db.users.put({...user, updated_at: now()})
 
   // TODO optimize this like user above so we're not double-fetching
   await pool.fetchContext(e)
@@ -130,7 +121,15 @@ const renderNote = async (note, {showEntire = false}) => {
     })
 }
 
+const filterAlerts = async (user, filter) => {
+  const tags = db.tags.where('value').equals(user.pubkey)
+  const ids = pluck('event', await tags.toArray())
+  const events = await filterEvents({...filter, kinds: [1, 7], ids})
+
+  return events
+}
+
 export default {
   db, pool, lq, ensureContext, filterEvents, filterReactions, countReactions,
-  findReaction, filterReplies, findNote, renderNote,
+  findReaction, filterReplies, findNote, renderNote, filterAlerts,
 }

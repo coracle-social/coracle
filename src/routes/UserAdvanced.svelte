@@ -4,16 +4,15 @@
   import {fly} from 'svelte/transition'
   import Button from "src/partials/Button.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
-  import {getMuffleValue} from "src/util/notes"
-  import {user} from 'src/state/user'
+  import {getMuffleValue} from "src/util/nostr"
   import {dispatch, t} from 'src/state/dispatch'
-  import {modal} from "src/state/app"
+  import {modal, user} from "src/state/app"
 
   const muffleOptions = ['Never', 'Sometimes', 'Often', 'Always']
 
   const values = {
     // Scale up to integers for each choice we have
-    muffle: switcher(Math.round(getMuffleValue($modal.user.pubkey) * 3), muffleOptions),
+    muffle: switcher(Math.round(getMuffleValue($modal.user) * 3), muffleOptions),
   }
 
   const save = async e => {

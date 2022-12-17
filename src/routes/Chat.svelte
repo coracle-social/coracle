@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {navigate} from "svelte-routing"
   import RoomList from "src/partials/chat/RoomList.svelte"
-  import {user} from "src/state/user"
+  import {user} from "src/state/app"
 
   onMount(() => {
     if (!$user) {

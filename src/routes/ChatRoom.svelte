@@ -6,10 +6,8 @@
   import {formatTimestamp} from 'src/util/misc'
   import {createScroller, renderNote} from 'src/util/notes'
   import UserBadge from 'src/partials/UserBadge.svelte'
-  import {Listener, Cursor, epoch} from 'src/state/nostr'
-  import {accounts, ensureAccounts} from 'src/state/app'
+  import {user} from 'src/state/app'
   import {dispatch} from 'src/state/dispatch'
-  import {user} from 'src/state/user'
   import RoomList from "src/partials/chat/RoomList.svelte"
 
   export let room

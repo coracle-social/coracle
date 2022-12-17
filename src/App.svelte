@@ -12,9 +12,7 @@
   import {hasParent} from 'src/util/html'
   import {timedelta} from 'src/util/misc'
   import {store as toast} from "src/state/toast"
-  import {channels} from "src/state/nostr"
-  import {modal, logout} from "src/state/app"
-  import {user} from 'src/state/user'
+  import {modal, alerts, user} from "src/state/app"
   import relay from 'src/relay'
   import Anchor from 'src/partials/Anchor.svelte'
   import NoteDetail from "src/views/NoteDetail.svelte"
@@ -29,11 +27,13 @@
   import RelayList from "src/routes/RelayList.svelte"
   import AddRelay from "src/routes/AddRelay.svelte"
   import UserDetail from "src/routes/UserDetail.svelte"
-  // import UserAdvanced from "src/routes/UserAdvanced.svelte"
+  import UserAdvanced from "src/routes/UserAdvanced.svelte"
   import NoteCreate from "src/routes/NoteCreate.svelte"
   // import Chat from "src/routes/Chat.svelte"
   // import ChatRoom from "src/routes/ChatRoom.svelte"
   // import ChatEdit from "src/routes/ChatEdit.svelte"
+
+  export let url = ""
 
   const menuIsOpen = writable(false)
   const toggleMenu = () => menuIsOpen.update(x => !x)
@@ -44,9 +44,24 @@
   let menuIcon
   let scrollY
   let suspendedSubs = []
-  let mostRecentAlert = 0
+  let mostRecentAlert = relay.lq(async () => {
+    const [e] = await relay
+      .filterAlerts($user, {since: $alerts.since})
+      .limit(1).reverse().sortBy('created_at')
 
-  export let url = ""
+    return e?.created_at
+  })
+
+  const logout = () => {
+    // Give any animations a moment to finish
+    setTimeout(() => {
+      localStorage.clear()
+      relay.db.delete()
+
+      // Do a hard refresh so everything gets totally cleared
+      window.location = '/login'
+    }, 200)
+  }
 
   // Close menu on click outside
   document.querySelector("html").addEventListener("click", e => {
@@ -56,7 +71,7 @@
   })
 
   onMount(() => {
-    relay.sync()
+    relay.pool.sync($user)
 
     return modal.subscribe($modal => {
       // Keep scroll position on body, but don't allow scrolling
@@ -119,7 +134,7 @@
           <div
             class="overflow-hidden w-6 h-6 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
             style="background-image: url({$user.picture})" />
-          <span class="text-lg font-bold">{$user.name}</span>
+          <span class="text-lg font-bold">{$user.name || $user.pubkey.slice(0, 8)}</span>
         </a>
       </li>
       <li class="cursor-pointer relative">

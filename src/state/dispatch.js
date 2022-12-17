@@ -1,9 +1,8 @@
 import {identity, isNil, uniqBy, last, without} from 'ramda'
 import {get} from 'svelte/store'
 import {first, defmulti} from "hurdak/lib/hurdak"
-import {user} from "src/state/user"
 import relay from 'src/relay'
-import {relays} from 'src/state/nostr'
+import {relays} from 'src/state/app'
 
 // Commands are processed in two layers:
 // - App-oriented commands are created via dispatch
@@ -12,48 +11,19 @@ import {relays} from 'src/state/nostr'
 
 export const dispatch = defmulti("dispatch", identity)
 
-dispatch.addMethod("account/init", async (topic, { privkey, pubkey }) => {
-  // Set what we know about the user to our store
-  user.set({
-    name: pubkey.slice(0, 8),
-    privkey,
-    pubkey,
-    petnames: [],
-    muffle: [],
-  })
-
-  // Make sure we have data for this user
-  const {name} = await relay.pool.updateUser({pubkey})
-
-  // Tell the caller whether this user was found
-  return {found: Boolean(name)}
+dispatch.addMethod("account/init", (topic, pubkey) => {
+  return relay.pool.syncUserInfo({pubkey})
 })
 
 dispatch.addMethod("account/update", async (topic, updates) => {
-  // Update our local copy
-  user.set({...get(user), ...updates})
-
-  // Tell the network
   await relay.pool.publishEvent(makeEvent(0, JSON.stringify(updates)))
 })
 
 dispatch.addMethod("account/petnames", async (topic, petnames) => {
-  const $user = get(user)
-
-  // Update our local copy
-  user.set({...$user, petnames})
-
-  // Tell the network
   await relay.pool.publishEvent(makeEvent(3, '', petnames))
 })
 
 dispatch.addMethod("account/muffle", async (topic, muffle) => {
-  const $user = get(user)
-
-  // Update our local copy
-  user.set({...$user, muffle})
-
-  // Tell the network
   await relay.pool.publishEvent(makeEvent(12165, '', muffle))
 })
 

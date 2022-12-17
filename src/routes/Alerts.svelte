@@ -4,17 +4,13 @@
   import {findReply} from 'src/util/nostr'
   import {ellipsize} from 'hurdak/src/core'
   import relay from 'src/relay'
-  import {user} from 'src/state/user'
-  import {alerts, modal} from 'src/state/app'
+  import {alerts, modal, user} from 'src/state/app'
   import UserBadge from "src/partials/UserBadge.svelte"
   import Note from 'src/views/Note.svelte'
 
   const events = relay.lq(async () => {
-    const events = await relay
-      .filterEvents({kinds: [1, 7], '#p': [$user.pubkey]})
-      .limit(10)
-      .reverse()
-      .sortBy('created_at')
+    const alerts = await relay.filterAlerts($user)
+    const events = await alerts.limit(10).reverse().sortBy('created_at')
 
     return events
       // Add parent in
@@ -24,7 +20,7 @@
   })
 
   // Clear notification badge
-  alerts.set({...$alerts, since: now()})
+  alerts.set({since: now()})
 </script>
 
 <ul class="py-4 flex flex-col gap-2 max-w-xl m-auto">

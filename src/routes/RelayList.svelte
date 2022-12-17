@@ -4,8 +4,7 @@
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import {dispatch} from "src/state/dispatch"
-  import {relays, knownRelays} from "src/state/nostr"
-  import {modal} from "src/state/app"
+  import {modal, relays, knownRelays} from "src/state/app"
 
   let q = ""
   let search
@@ -15,7 +14,6 @@
   $: search = fuzzy(data, {keys: ["name", "description", "url"]})
 
   const join = url => dispatch("relay/join", url)
-
   const leave = url => dispatch("relay/leave", url)
 </script>
 

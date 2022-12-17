@@ -3,7 +3,6 @@
   import {onMount} from 'svelte'
   import {navigate} from 'svelte-routing'
   import {fuzzy} from "src/util/misc"
-  import {channels} from 'src/state/nostr'
   import Input from "src/partials/Input.svelte"
 
   export let className = ''

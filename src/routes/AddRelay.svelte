@@ -1,8 +1,7 @@
 <script>
   import {fly} from 'svelte/transition'
-  import {registerRelay} from 'src/state/nostr'
   import toast from 'src/state/toast'
-  import {modal} from 'src/state/app'
+  import {modal, registerRelay} from 'src/state/app'
   import {dispatch} from 'src/state/dispatch'
   import Input from 'src/partials/Input.svelte'
   import Button from 'src/partials/Button.svelte'

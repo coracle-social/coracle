@@ -6,9 +6,8 @@
   import Button from "src/partials/Button.svelte"
   import Notes from "src/views/Notes.svelte"
   import Likes from "src/views/Likes.svelte"
-  import {user as currentUser} from 'src/state/user'
   import {t, dispatch} from 'src/state/dispatch'
-  import {modal} from "src/state/app"
+  import {modal, user as currentUser} from "src/state/app"
   import relay from 'src/relay'
 
   export let pubkey

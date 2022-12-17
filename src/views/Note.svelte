@@ -9,8 +9,7 @@
   import Anchor from 'src/partials/Anchor.svelte'
   import relay from 'src/relay'
   import {dispatch} from "src/state/dispatch"
-  import {settings, modal} from "src/state/app"
-  import {user} from "src/state/user"
+  import {settings, user, modal} from "src/state/app"
   import {formatTimestamp} from 'src/util/misc'
   import UserBadge from "src/partials/UserBadge.svelte"
   import Card from "src/partials/Card.svelte"

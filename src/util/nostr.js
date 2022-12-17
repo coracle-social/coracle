@@ -1,7 +1,9 @@
-import {last, intersection} from 'ramda'
+import {last, find, intersection} from 'ramda'
 import {ensurePlural, first} from 'hurdak/lib/hurdak'
 
 export const epoch = 1633046400
+
+export const getTagValues = tags => tags.map(t => t[1])
 
 export const filterTags = (where, events) =>
   ensurePlural(events)
@@ -45,14 +47,12 @@ export const filterMatches = (filter, e)  => {
   ))
 }
 
-export const getMuffleValue = pubkey => {
-  const $user = get(user)
-
-  if (!$user) {
+export const getMuffleValue = user => {
+  if (!user) {
     return 1
   }
 
-  const tag = find(t => t[1] === pubkey, $user.muffle)
+  const tag = find(t => t[1] === user.pubkey, user.muffle)
 
   if (!tag) {
     return 1

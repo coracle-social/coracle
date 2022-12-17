@@ -4,8 +4,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Notes from "src/views/Notes.svelte"
-  import {relays} from "src/state/nostr"
-  import {user} from "src/state/user"
+  import {user, relays} from "src/state/app"
 
   export let activeTab
 

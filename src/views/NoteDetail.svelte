@@ -4,7 +4,7 @@
 
   export let note
 
-  const observable = relay.lq(() => relay.findNote(note.id, {showEntire: true}))
+  const observable = relay.lq(() => relay.findNote(note, {showEntire: true}))
 </script>
 
 {#if $observable}

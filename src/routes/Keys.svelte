@@ -5,7 +5,7 @@
   import {copyToClipboard} from "src/util/html"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {user} from "src/state/user"
+  import {user} from "src/state/app"
   import toast from "src/state/toast"
 
   const keypairUrl = 'https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/'
