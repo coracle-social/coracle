@@ -1,5 +1,4 @@
 <script>
-  import {writable} from 'svelte/store'
   import {navigate} from 'svelte-routing'
   import {timedelta} from 'src/util/misc'
   import Anchor from "src/partials/Anchor.svelte"
@@ -10,10 +9,7 @@
 
   export let activeTab
 
-  const globalNotes = writable([])
-  const followNotes = writable([])
   const authors = $user ? $user.petnames.map(t => t[1]) : []
-
   const setActiveTab = tab => navigate(`/notes/${tab}`)
 </script>
 
@@ -34,9 +30,9 @@
   </div>
 </div>
 {:else if activeTab === 'follows'}
-<Notes notes={followNotes} filter={{kinds: [1], authors}} shouldMuffle />
+<Notes filter={{kinds: [1], authors}} shouldMuffle />
 {:else}
-<Notes delta={timedelta(1, 'minutes')} notes={globalNotes} filter={{kinds: [1]}} shouldMuffle />
+<Notes filter={{kinds: [1]}} shouldMuffle />
 {/if}
 <div class="fixed bottom-0 right-0 p-8">
   <a

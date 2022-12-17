@@ -2,6 +2,7 @@ import {identity, isNil, uniqBy, last, without} from 'ramda'
 import {get} from 'svelte/store'
 import {first, defmulti} from "hurdak/lib/hurdak"
 import {user} from "src/state/user"
+import relay from 'src/relay'
 import {nostr, relays} from 'src/state/nostr'
 import {ensureAccounts} from 'src/state/app'
 
@@ -34,7 +35,7 @@ dispatch.addMethod("account/update", async (topic, updates) => {
   user.set({...get(user), ...updates})
 
   // Tell the network
-  await nostr.publish(nostr.event(0, JSON.stringify(updates)))
+  await relay.worker.post('event/publish', nostr.event(0, JSON.stringify(updates)))
 })
 
 dispatch.addMethod("account/petnames", async (topic, petnames) => {
@@ -44,7 +45,7 @@ dispatch.addMethod("account/petnames", async (topic, petnames) => {
   user.set({...$user, petnames})
 
   // Tell the network
-  await nostr.publish(nostr.event(3, '', petnames))
+  await relay.worker.post('event/publish', nostr.event(3, '', petnames))
 })
 
 dispatch.addMethod("account/muffle", async (topic, muffle) => {
@@ -54,7 +55,7 @@ dispatch.addMethod("account/muffle", async (topic, muffle) => {
   user.set({...$user, muffle})
 
   // Tell the network
-  await nostr.publish(nostr.event(12165, '', muffle))
+  await relay.worker.post('event/publish', nostr.event(12165, '', muffle))
 })
 
 dispatch.addMethod("relay/join", async (topic, url) => {
@@ -74,7 +75,7 @@ dispatch.addMethod("relay/leave", (topic, url) => {
 dispatch.addMethod("room/create", async (topic, room) => {
   const event = nostr.event(40, JSON.stringify(room))
 
-  await nostr.publish(event)
+  await relay.worker.post('event/publish', event)
 
   return event
 })
@@ -82,7 +83,7 @@ dispatch.addMethod("room/create", async (topic, room) => {
 dispatch.addMethod("room/update", async (topic, {id, ...room}) => {
   const event = nostr.event(41, JSON.stringify(room), [t("e", id)])
 
-  await nostr.publish(event)
+  await relay.worker.post('event/publish', event)
 
   return event
 })
@@ -90,7 +91,7 @@ dispatch.addMethod("room/update", async (topic, {id, ...room}) => {
 dispatch.addMethod("message/create", async (topic, roomId, content) => {
   const event = nostr.event(42, content, [t("e", roomId, "root")])
 
-  await nostr.publish(event)
+  await relay.worker.post('event/publish', event)
 
   return event
 })
@@ -98,7 +99,7 @@ dispatch.addMethod("message/create", async (topic, roomId, content) => {
 dispatch.addMethod("note/create", async (topic, content, tags=[]) => {
   const event = nostr.event(1, content, tags)
 
-  await nostr.publish(event)
+  await relay.worker.post('event/publish', event)
 
   return event
 })
@@ -107,7 +108,7 @@ dispatch.addMethod("reaction/create", async (topic, content, e) => {
   const tags = copyTags(e, [t("p", e.pubkey), t("e", e.id, 'reply')])
   const event = nostr.event(7, content, tags)
 
-  await nostr.publish(event)
+  await relay.worker.post('event/publish', event)
 
   return event
 })
@@ -116,7 +117,7 @@ dispatch.addMethod("reply/create", async (topic, content, e) => {
   const tags = copyTags(e, [t("p", e.pubkey), t("e", e.id, 'reply')])
   const event = nostr.event(1, content, tags)
 
-  await nostr.publish(event)
+  await relay.worker.post('event/publish', event)
 
   return event
 })
@@ -124,7 +125,7 @@ dispatch.addMethod("reply/create", async (topic, content, e) => {
 dispatch.addMethod("event/delete", async (topic, ids) => {
   const event = nostr.event(5, '', ids.map(id => t("e", id)))
 
-  await nostr.publish(event)
+  await relay.worker.post('event/publish', event)
 
   return event
 })

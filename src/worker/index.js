@@ -1,6 +1,7 @@
 import {relayPool} from 'nostr-tools'
 import {defmulti, noop, uuid} from 'hurdak/lib/hurdak'
 import {now, timedelta} from "src/util/misc"
+import {filterTags} from "src/nostr/tags"
 
 // ============================================================================
 // Utils/config
@@ -66,17 +67,26 @@ onmessage.addMethod('pool/setPrivateKey', withPayload(privkey => {
 }))
 
 onmessage.addMethod('pool/setPublicKey', withPayload(pubkey => {
-  pool._privkey = pubkey
+  // TODO fix this, it ain't gonna work
+  pool.registerSigningFunction(async event => {
+    const {sig} = await window.nostr.signEvent(event)
+
+    return sig
+  })
+
+  pool._pubkey = pubkey
 }))
+
 
 onmessage.addMethod('event/publish', withPayload(event => {
   pool.publish(event)
+  post('events/put', event)
 }))
 
 onmessage.addMethod('user/update', withPayload(async user => {
   if (!user.pubkey) throw new Error("Invalid user")
 
-  req({
+  const sub = req({
     filter: {kinds: [0], authors: [user.pubkey], since: user.updated_at},
     onEvent: e => {
       try {
@@ -86,7 +96,20 @@ onmessage.addMethod('user/update', withPayload(async user => {
       }
     },
     onEose: () => {
+      sub.unsub()
+
       post('users/put', {...user, updated_at: now()})
     },
+  })
+}))
+
+onmessage.addMethod('event/fetchContext', withPayload(async event => {
+  const sub = req({
+    filter: [
+      {kinds: [5, 7], '#e': [event.id]},
+      {kinds: [5], 'ids': filterTags({tag: "e"}, event)},
+    ],
+    onEvent: e => post('events/put', e),
+    onEose: () => sub.unsub(),
   })
 }))

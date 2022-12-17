@@ -1,26 +1,38 @@
 import Dexie from 'dexie'
 import {defmulti} from 'hurdak/lib/hurdak'
-import {now, timedelta} from 'src/util/misc'
+import {filterTags} from 'src/nostr/tags'
 import {worker} from 'src/relay/worker'
 
 export const db = new Dexie('coracle/relay')
 
-db.version(1).stores({
+db.version(2).stores({
   events: '++id, pubkey, created_at, kind, content',
   users: '++pubkey, name, about',
-  tags: 'type, value, event',
+  tags: '++key, event, value',
 })
+
+window.db = db
 
 // Hooks
 
-db.events.hook('creating', (id, {pubkey, tags}, t) => {
-  // We can't return a promise, so use setTimeout instead
-  setTimeout(async () => {
-    const user = await db.users.where('pubkey').equals(pubkey).first()
+db.events.hook('creating', (id, e, t) => {
+  setTimeout(() => {
+    for (const tag of e.tags) {
+      db.tags.put({
+        id: [id, ...tag.slice(0, 2)].join(':'),
+        event: id,
+        type: tag[0],
+        value: tag[1],
+        relay: tag[2],
+        mark: tag[3],
+      })
+    }
 
-    // Throttle updates for users
-    if (!user || user.updated_at < now() - timedelta(1, 'hours')) {
-      worker.post('user/update', user || {pubkey, updated_at: 0})
+    if (e.kind === 5) {
+      const eventIds = filterTags({tag: "e"}, e)
+
+      db.events.where('id').anyOf(eventIds).delete()
+      db.tags.where('event').anyOf(eventIds).delete()
     }
   })
 })

@@ -1,13 +1,13 @@
 <script>
   import cx from 'classnames'
-  import {find, uniqBy, prop, whereEq} from 'ramda'
-  import {onMount} from 'svelte'
+  import {liveQuery} from 'dexie'
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {hasParent, findLink} from 'src/util/html'
   import {renderNote} from 'src/util/notes'
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
+  import relay from 'src/relay'
   import {dispatch} from "src/state/dispatch"
   import {findReply} from "src/state/nostr"
   import {accounts, settings, modal} from "src/state/app"
@@ -23,21 +23,17 @@
   export let showEntire = false
   export let invertColors = false
 
-  let link = null
-  let like = null
-  let flag = null
   let reply = null
-  let interactive = null
 
-  $: {
-    like = find(e => e.pubkey === $user?.pubkey && e.content === "+", note.reactions)
-    flag = find(e => e.pubkey === $user?.pubkey && e.content === "-", note.reactions)
-    interactive = !anchorId || anchorId !== note.id
-  }
+  const link = $settings.showLinkPreviews ? findLink(note.content) : null
+  const interactive = !anchorId || anchorId !== note.id
+  const like = liveQuery(() => relay.findReaction(note.id, {content: "+", pubkey: $user?.pubkey}))
+  const flag = liveQuery(() => relay.findReaction(note.id, {content: "-", pubkey: $user?.pubkey}))
+  const likes = liveQuery(() => relay.countReactions(note.id, {content: "+"}))
+  const flags = liveQuery(() => relay.countReactions(note.id, {content: "-"}))
+  const replies = liveQuery(() => relay.filterReplies(note.id))
 
-  onMount(async () => {
-    link = $settings.showLinkPreviews ? findLink(note.content) : null
-  })
+  relay.ensureContext(note)
 
   const onClick = e => {
     if (!['I'].includes(e.target.tagName) && !hasParent('a', e.target)) {
@@ -111,10 +107,10 @@
         Reply to <Anchor on:click={goToParent}>{findReply(note).slice(0, 8)}</Anchor>
       </small>
     {/if}
-    {#if flag}
+    {#if $flag}
     <p class="text-light border-l-2 border-solid border-medium pl-4">
       You have flagged this content as offensive.
-      <Anchor on:click={() => deleteReaction(flag)}>Unflag</Anchor>
+      <Anchor on:click={() => deleteReaction($flag)}>Unflag</Anchor>
     </p>
     {:else}
     <p class="text-ellipsis overflow-hidden">
@@ -130,17 +126,17 @@
         <i
           class="fa-solid fa-reply cursor-pointer"
           on:click={startReply} />
-        {note.children.length}
+        {$replies?.length}
       </div>
-      <div class={cx({'text-accent': like})}>
+      <div class={cx({'text-accent': $like})}>
         <i
           class="fa-solid fa-heart cursor-pointer"
-          on:click={() => like ? deleteReaction(like) : react("+")} />
-        {uniqBy(prop('pubkey'), note.reactions.filter(whereEq({content: '+'}))).length}
+          on:click={() => $like ? deleteReaction($like) : react("+")} />
+        {$likes}
       </div>
       <div>
         <i class="fa-solid fa-flag cursor-pointer" on:click={() => react("-")} />
-        {uniqBy(prop('pubkey'), note.reactions.filter(whereEq({content: '-'}))).length}
+        {$flags}
       </div>
     </div>
     {/if}
@@ -169,9 +165,9 @@
 {/if}
 
 {#if depth > 0}
-{#each uniqBy(prop('id'), note.children) as child (child.id)}
+{#each ($replies || []) as r (r.id)}
 <div class="ml-5 border-l border-solid border-medium">
-  <svelte:self note={child} depth={depth - 1} {invertColors} {anchorId} />
+  <svelte:self note={r} depth={depth - 1} {invertColors} {anchorId} />
 </div>
 {/each}
 {/if}

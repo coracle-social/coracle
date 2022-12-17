@@ -54,6 +54,8 @@
     }
   })
 
+  window.addEventListener('unhandledrejection', e => console.error(e))
+
   onMount(() => {
     // Poll for new notifications
     (async function pollForNotifications() {
