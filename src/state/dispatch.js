@@ -3,8 +3,7 @@ import {get} from 'svelte/store'
 import {first, defmulti} from "hurdak/lib/hurdak"
 import {user} from "src/state/user"
 import relay from 'src/relay'
-import {nostr, relays} from 'src/state/nostr'
-import {ensureAccounts} from 'src/state/app'
+import {relays} from 'src/state/nostr'
 
 // Commands are processed in two layers:
 // - App-oriented commands are created via dispatch
@@ -35,7 +34,7 @@ dispatch.addMethod("account/update", async (topic, updates) => {
   user.set({...get(user), ...updates})
 
   // Tell the network
-  await relay.worker.post('event/publish', nostr.event(0, JSON.stringify(updates)))
+  await relay.pool.publishEvent(makeEvent(0, JSON.stringify(updates)))
 })
 
 dispatch.addMethod("account/petnames", async (topic, petnames) => {
@@ -45,7 +44,7 @@ dispatch.addMethod("account/petnames", async (topic, petnames) => {
   user.set({...$user, petnames})
 
   // Tell the network
-  await relay.worker.post('event/publish', nostr.event(3, '', petnames))
+  await relay.pool.publishEvent(makeEvent(3, '', petnames))
 })
 
 dispatch.addMethod("account/muffle", async (topic, muffle) => {
@@ -55,17 +54,13 @@ dispatch.addMethod("account/muffle", async (topic, muffle) => {
   user.set({...$user, muffle})
 
   // Tell the network
-  await relay.worker.post('event/publish', nostr.event(12165, '', muffle))
+  await relay.pool.publishEvent(makeEvent(12165, '', muffle))
 })
 
 dispatch.addMethod("relay/join", async (topic, url) => {
   const $user = get(user)
 
   relays.update(r => r.concat(url))
-
-  if ($user) {
-    await ensureAccounts([$user.pubkey], {force: true})
-  }
 })
 
 dispatch.addMethod("relay/leave", (topic, url) => {
@@ -73,59 +68,59 @@ dispatch.addMethod("relay/leave", (topic, url) => {
 })
 
 dispatch.addMethod("room/create", async (topic, room) => {
-  const event = nostr.event(40, JSON.stringify(room))
+  const event = makeEvent(40, JSON.stringify(room))
 
-  await relay.worker.post('event/publish', event)
+  await relay.pool.publishEvent(event)
 
   return event
 })
 
 dispatch.addMethod("room/update", async (topic, {id, ...room}) => {
-  const event = nostr.event(41, JSON.stringify(room), [t("e", id)])
+  const event = makeEvent(41, JSON.stringify(room), [t("e", id)])
 
-  await relay.worker.post('event/publish', event)
+  await relay.pool.publishEvent(event)
 
   return event
 })
 
 dispatch.addMethod("message/create", async (topic, roomId, content) => {
-  const event = nostr.event(42, content, [t("e", roomId, "root")])
+  const event = makeEvent(42, content, [t("e", roomId, "root")])
 
-  await relay.worker.post('event/publish', event)
+  await relay.pool.publishEvent(event)
 
   return event
 })
 
 dispatch.addMethod("note/create", async (topic, content, tags=[]) => {
-  const event = nostr.event(1, content, tags)
+  const event = makeEvent(1, content, tags)
 
-  await relay.worker.post('event/publish', event)
+  await relay.pool.publishEvent(event)
 
   return event
 })
 
 dispatch.addMethod("reaction/create", async (topic, content, e) => {
   const tags = copyTags(e, [t("p", e.pubkey), t("e", e.id, 'reply')])
-  const event = nostr.event(7, content, tags)
+  const event = makeEvent(7, content, tags)
 
-  await relay.worker.post('event/publish', event)
+  await relay.pool.publishEvent(event)
 
   return event
 })
 
 dispatch.addMethod("reply/create", async (topic, content, e) => {
   const tags = copyTags(e, [t("p", e.pubkey), t("e", e.id, 'reply')])
-  const event = nostr.event(1, content, tags)
+  const event = makeEvent(1, content, tags)
 
-  await relay.worker.post('event/publish', event)
+  await relay.pool.publishEvent(event)
 
   return event
 })
 
 dispatch.addMethod("event/delete", async (topic, ids) => {
-  const event = nostr.event(5, '', ids.map(id => t("e", id)))
+  const event = makeEvent(5, '', ids.map(id => t("e", id)))
 
-  await relay.worker.post('event/publish', event)
+  await relay.pool.publishEvent(event)
 
   return event
 })
@@ -148,4 +143,11 @@ export const t = (type, content, marker) => {
   }
 
   return tag
+}
+
+export const makeEvent = (kind, content = '', tags = []) => {
+  const pubkey = relay.pool.getPubkey()
+  const createdAt = Math.round(new Date().valueOf() / 1000)
+
+  return {kind, content, tags, pubkey, created_at: createdAt}
 }

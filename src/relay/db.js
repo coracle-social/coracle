@@ -1,7 +1,5 @@
 import Dexie from 'dexie'
-import {defmulti} from 'hurdak/lib/hurdak'
-import {filterTags} from 'src/nostr/tags'
-import {worker} from 'src/relay/worker'
+import {filterTags} from 'src/util/nostr'
 
 export const db = new Dexie('coracle/relay')
 
@@ -36,13 +34,3 @@ db.events.hook('creating', (id, e, t) => {
     }
   })
 })
-
-// Listen to worker
-
-const withPayload = f => e => f(e.data.payload)
-
-worker.onmessage = defmulti('onmessage', e => e.data.topic)
-
-worker.onmessage.addMethod('events/put', withPayload(e => {
-  db.events.put(e)
-}))

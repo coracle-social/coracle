@@ -12,13 +12,13 @@
   import {hasParent} from 'src/util/html'
   import {timedelta} from 'src/util/misc'
   import {store as toast} from "src/state/toast"
-  import {channels, epoch} from "src/state/nostr"
+  import {channels} from "src/state/nostr"
   import {modal, logout, alerts} from "src/state/app"
   import {user} from 'src/state/user'
   import Anchor from 'src/partials/Anchor.svelte'
   import NoteDetail from "src/partials/NoteDetail.svelte"
   import NotFound from "src/routes/NotFound.svelte"
-  import Search from "src/routes/Search.svelte"
+  // import Search from "src/routes/Search.svelte"
   import Alerts from "src/routes/Alerts.svelte"
   import Notes from "src/routes/Notes.svelte"
   import Login from "src/routes/Login.svelte"
@@ -27,12 +27,12 @@
   import Keys from "src/routes/Keys.svelte"
   import RelayList from "src/routes/RelayList.svelte"
   import AddRelay from "src/routes/AddRelay.svelte"
-  import UserDetail from "src/routes/UserDetail.svelte"
-  import UserAdvanced from "src/routes/UserAdvanced.svelte"
+  // import UserDetail from "src/routes/UserDetail.svelte"
+  // import UserAdvanced from "src/routes/UserAdvanced.svelte"
   import NoteCreate from "src/routes/NoteCreate.svelte"
-  import Chat from "src/routes/Chat.svelte"
-  import ChatRoom from "src/routes/ChatRoom.svelte"
-  import ChatEdit from "src/routes/ChatEdit.svelte"
+  // import Chat from "src/routes/Chat.svelte"
+  // import ChatRoom from "src/routes/ChatRoom.svelte"
+  // import ChatEdit from "src/routes/ChatEdit.svelte"
 
   const menuIsOpen = writable(false)
   const toggleMenu = () => menuIsOpen.update(x => !x)
@@ -43,7 +43,7 @@
   let menuIcon
   let scrollY
   let suspendedSubs = []
-  let mostRecentAlert = epoch
+  let mostRecentAlert = 0
 
   export let url = ""
 
@@ -96,13 +96,16 @@
   <div use:links class="h-full">
     <div class="pt-16 text-white h-full">
       <Route path="/alerts" component={Alerts} />
+      <!--
       <Route path="/search/:type" let:params>
         {#key params.type}
         <Search {...params} />
         {/key}
       </Route>
+      -->
       <Route path="/notes/:activeTab" component={Notes} />
       <Route path="/notes/new" component={NoteCreate} />
+      <!--
       <Route path="/chat" component={Chat} />
       <Route path="/chat/new" component={ChatEdit} />
       <Route path="/chat/:room" let:params>
@@ -116,6 +119,7 @@
         <UserDetail {...params} />
         {/key}
       </Route>
+      -->
       <Route path="/keys" component={Keys} />
       <Route path="/relays" component={RelayList} />
       <Route path="/profile" component={Profile} />

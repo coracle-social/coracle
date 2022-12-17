@@ -1,9 +1,11 @@
 import {liveQuery} from 'dexie'
 import {pluck, isNil} from 'ramda'
-import {ensurePlural, first} from 'hurdak/lib/hurdak'
+import {ensurePlural, createMap, ellipsize, first} from 'hurdak/lib/hurdak'
 import {now, timedelta} from 'src/util/misc'
+import {escapeHtml} from 'src/util/html'
+import {filterTags} from 'src/util/nostr'
 import {db} from 'src/relay/db'
-import {worker} from 'src/relay/worker'
+import pool from 'src/relay/pool'
 
 // Livequery appears to swallow errors
 const lq = f => liveQuery(async () => {
@@ -20,11 +22,11 @@ const ensureContext = async e => {
 
   // Throttle updates for users
   if (!user || user.updated_at < now() - timedelta(1, 'hours')) {
-    worker.post('user/update', user || {pubkey: e.pubkey, updated_at: 0})
+    await pool.updateUser(user || {pubkey: e.pubkey, updated_at: 0})
   }
 
   // TODO optimize this like user above so we're not double-fetching
-  worker.post('event/fetchContext', e)
+  await pool.fetchContext(e)
 }
 
 const prefilterEvents = filter => {
@@ -77,7 +79,31 @@ const findReaction = async (id, filter) =>
 const countReactions = async (id, filter) =>
   (await filterReactions(id, filter)).length
 
+const renderNote = async (note, {showEntire = false}) => {
+  const shouldEllipsize = note.content.length > 500 && !showEntire
+  const content = shouldEllipsize ? ellipsize(note.content, 500) : note.content
+  const accounts = await db.users.where('pubkey').anyOf(filterTags({tag: "p"}, note)).toArray()
+  const accountsByPubkey = createMap('pubkey', accounts)
+
+  return escapeHtml(content)
+    .replace(/\n/g, '<br />')
+    .replace(/https?:\/\/([\w.-]+)[^ ]*/g, (url, domain) => {
+      return `<a href="${url}" target="_blank noopener" class="underline">${domain}</a>`
+    })
+    .replace(/#\[(\d+)\]/g, (tag, i) => {
+      if (!note.tags[parseInt(i)]) {
+        return tag
+      }
+
+      const pubkey = note.tags[parseInt(i)][1]
+      const user = accountsByPubkey[pubkey]
+      const name = user?.name || pubkey.slice(0, 8)
+
+      return `@<a href="/users/${pubkey}/notes" class="underline">${name}</a>`
+    })
+}
+
 export default {
-  db, worker, lq, ensureContext, filterEvents, filterReactions, countReactions,
-  findReaction, filterReplies,
+  db, pool, lq, ensureContext, filterEvents, filterReactions, countReactions,
+  findReaction, filterReplies, renderNote,
 }

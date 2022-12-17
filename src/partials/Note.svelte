@@ -4,13 +4,12 @@
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {hasParent, findLink} from 'src/util/html'
-  import {renderNote} from 'src/util/notes'
+  import {findReply} from "src/util/nostr"
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import relay from 'src/relay'
   import {dispatch} from "src/state/dispatch"
-  import {findReply} from "src/state/nostr"
-  import {accounts, settings, modal} from "src/state/app"
+  import {settings, modal} from "src/state/app"
   import {user} from "src/state/user"
   import {formatTimestamp} from 'src/util/misc'
   import UserBadge from "src/partials/UserBadge.svelte"
@@ -32,6 +31,7 @@
   const likes = liveQuery(() => relay.countReactions(note.id, {content: "+"}))
   const flags = liveQuery(() => relay.countReactions(note.id, {content: "-"}))
   const replies = liveQuery(() => relay.filterReplies(note.id))
+  const account = liveQuery(() => relay.db.users.get(note.pubkey))
 
   relay.ensureContext(note)
 
@@ -98,7 +98,7 @@
 
 <Card on:click={onClick} {interactive} {invertColors}>
   <div class="flex gap-4 items-center justify-between">
-    <UserBadge user={{...$accounts[note.pubkey], pubkey: note.pubkey}} />
+    <UserBadge user={{...$account, pubkey: note.pubkey}} />
     <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>
   </div>
   <div class="ml-6 flex flex-col gap-2">
@@ -114,7 +114,10 @@
     </p>
     {:else}
     <p class="text-ellipsis overflow-hidden">
-      {@html renderNote(note, {showEntire})}
+      {#await relay.renderNote(note, {showEntire})}
+      {:then content}
+      {@html content}
+      {/await}
       {#if link}
       <div class="mt-2" on:click={e => e.stopPropagation()}>
         <Preview endpoint={`${$settings.dufflepudUrl}/link/preview`} url={link} />

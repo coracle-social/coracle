@@ -1,8 +1,7 @@
 <script>
-  import {liveQuery} from 'dexie'
   import {prop, identity, concat, uniqBy, groupBy} from 'ramda'
   import {createMap} from 'hurdak/lib/hurdak'
-  import {findReply, findRoot} from 'src/nostr/tags'
+  import {findReply, findRoot} from 'src/util/nostr'
   import {fly} from 'svelte/transition'
   import Note from "src/partials/Note.svelte"
   import relay from 'src/relay'
@@ -39,22 +38,22 @@
   }
 
   const notes = relay.lq(async () => {
-    let data = relay.filterEvents(filter).limit(10)
-
-    if (shouldMuffle) {
-      data = data
-    }
-
-    return await toThread(await data.reverse().sortBy('created_at'))
+    return await toThread(
+      await relay.filterEvents(filter).limit(10).reverse().sortBy('created_at')
+    )
   })
 </script>
-
-<!-- <svelte:window on:scroll={scroller?.start} /> -->
 
 <ul class="py-4 flex flex-col gap-2 max-w-xl m-auto">
   {#each ($notes || []) as n (n.id)}
     <li><Note interactive note={n} depth={2} /></li>
-  {:else}
-  <li class="p-20 text-center" in:fly={{y: 20}}>No notes found.</li>
   {/each}
 </ul>
+
+{#if $notes?.length === 0}
+<div in:fly={{y: 20}} class="flex w-full justify-center items-center py-16">
+  <div class="text-center max-w-md">
+    No notes found.
+  </div>
+</div>
+{/if}

@@ -1,7 +1,8 @@
-import {relayPool} from 'nostr-tools'
-import {defmulti, noop, uuid} from 'hurdak/lib/hurdak'
+import {relayPool, getPublicKey} from 'nostr-tools'
+import {noop, switcherFn, uuid} from 'hurdak/lib/hurdak'
 import {now, timedelta} from "src/util/misc"
-import {filterTags} from "src/nostr/tags"
+import {filterTags} from "src/util/nostr"
+import {db} from 'src/relay/db'
 
 // ============================================================================
 // Utils/config
@@ -49,24 +50,24 @@ req({
 // ============================================================================
 // Listen to messages posted from the main application
 
-const withPayload = f => e => f(e.data.payload)
+const getPubkey = () => {
+  return pool._pubkey || getPublicKey(pool._privkey)
+}
 
-onmessage = defmulti('self', e => e.data.topic)
-
-onmessage.addMethod('pool/addRelay', withPayload(url => {
+const addRelay = url => {
   pool.addRelay(url)
-}))
+}
 
-onmessage.addMethod('pool/removeRelay', withPayload(url => {
+const removeRelay = url => {
   pool.removeRelay(url)
-}))
+}
 
-onmessage.addMethod('pool/setPrivateKey', withPayload(privkey => {
+const setPrivateKey = privkey => {
   pool.setPrivateKey(privkey)
   pool._privkey = privkey
-}))
+}
 
-onmessage.addMethod('pool/setPublicKey', withPayload(pubkey => {
+const setPublicKey = pubkey => {
   // TODO fix this, it ain't gonna work
   pool.registerSigningFunction(async event => {
     const {sig} = await window.nostr.signEvent(event)
@@ -75,35 +76,41 @@ onmessage.addMethod('pool/setPublicKey', withPayload(pubkey => {
   })
 
   pool._pubkey = pubkey
-}))
+}
 
 
-onmessage.addMethod('event/publish', withPayload(event => {
+const publishEvent = event => {
   pool.publish(event)
-  post('events/put', event)
-}))
+  db.events.put(event)
+}
 
-onmessage.addMethod('user/update', withPayload(async user => {
+const updateUser = async user => {
   if (!user.pubkey) throw new Error("Invalid user")
 
+  user = {muffle: [], petnames: [], ...user}
+
   const sub = req({
-    filter: {kinds: [0], authors: [user.pubkey], since: user.updated_at},
+    filter: {
+      kinds: [0, 3, 12165],
+      authors: [user.pubkey],
+      since: user.updated_at,
+    },
     onEvent: e => {
-      try {
-        Object.assign(user, JSON.parse(e.content))
-      } catch (e) {
-        // pass
-      }
+      switcherFn(e.kind, {
+        0: () => Object.assign(user, JSON.parse(e.content)),
+        3: () => Object.assign(user, {petnames: e.tags}),
+        12165: () => Object.assign(user, {muffle: e.tags}),
+      })
     },
     onEose: () => {
       sub.unsub()
 
-      post('users/put', {...user, updated_at: now()})
+      db.users.put({...user, updated_at: now()})
     },
   })
-}))
+}
 
-onmessage.addMethod('event/fetchContext', withPayload(async event => {
+const fetchContext = async event => {
   const sub = req({
     filter: [
       {kinds: [5, 7], '#e': [event.id]},
@@ -112,4 +119,9 @@ onmessage.addMethod('event/fetchContext', withPayload(async event => {
     onEvent: e => post('events/put', e),
     onEose: () => sub.unsub(),
   })
-}))
+}
+
+export default {
+  getPubkey, addRelay, removeRelay, setPrivateKey, setPublicKey,
+  publishEvent, updateUser, fetchContext,
+}

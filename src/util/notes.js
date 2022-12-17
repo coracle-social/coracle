@@ -1,111 +1,10 @@
-import {identity, uniq, concat, propEq, uniqBy, prop, groupBy, find, last, pluck} from 'ramda'
+import {identity, uniq, propEq, uniqBy, prop, groupBy, pluck} from 'ramda'
 import {debounce} from 'throttle-debounce'
 import {get} from 'svelte/store'
-import {switcherFn, ellipsize, createMap} from 'hurdak/lib/hurdak'
+import {getMuffleValue, epoch, filterMatches, findReply} from 'src/util/nostr'
+import {switcherFn, createMap} from 'hurdak/lib/hurdak'
 import {timedelta, sleep} from "src/util/misc"
-import {escapeHtml} from 'src/util/html'
-import {user} from 'src/state/user'
-import {epoch, filterMatches, Listener, channels, findReply, findRoot} from 'src/state/nostr'
-import {accounts, ensureAccounts} from 'src/state/app'
-
-export const renderNote = (note, {showEntire = false}) => {
-  const shouldEllipsize = note.content.length > 500 && !showEntire
-  const content = shouldEllipsize ? ellipsize(note.content, 500) : note.content
-  const $accounts = get(accounts)
-
-  return escapeHtml(content)
-    .replace(/\n/g, '<br />')
-    .replace(/https?:\/\/([\w.-]+)[^ ]*/g, (url, domain) => {
-      return `<a href="${url}" target="_blank noopener" class="underline">${domain}</a>`
-    })
-    .replace(/#\[(\d+)\]/g, (tag, i) => {
-      if (!note.tags[parseInt(i)]) {
-        return tag
-      }
-
-      const pubkey = note.tags[parseInt(i)][1]
-      const user = $accounts[pubkey]
-      const name = user?.name || pubkey.slice(0, 8)
-
-      return `@<a href="/users/${pubkey}/notes" class="underline">${name}</a>`
-    })
-}
-
-export const getMuffleValue = pubkey => {
-  const $user = get(user)
-
-  if (!$user) {
-    return 1
-  }
-
-  const tag = find(t => t[1] === pubkey, $user.muffle)
-
-  if (!tag) {
-    return 1
-  }
-
-  return parseFloat(last(tag))
-}
-
-export const threadify = async notes => {
-  if (notes.length === 0) {
-    return []
-  }
-
-  const noteIds = pluck('id', notes)
-  const rootIds = notes.map(findReply)
-  const parentIds = notes.map(findRoot)
-  const ancestorIds = concat(rootIds, parentIds).filter(identity)
-
-  // Find all direct parents and thread roots
-  const filters = ancestorIds.length === 0
-    ? [{kinds: [1, 7], '#e': noteIds}]
-    : [{kinds: [1], ids: ancestorIds},
-       {kinds: [1, 7], '#e': noteIds.concat(ancestorIds)}]
-
-  const events = await channels.getter.all(filters)
-
-  await ensureAccounts(uniq(pluck('pubkey', notes.concat(events))))
-
-  const $accounts = get(accounts)
-  const reactionsByParent = groupBy(findReply, events.filter(propEq('kind', 7)))
-  const allNotes = uniqBy(prop('id'), notes.concat(events.filter(propEq('kind', 1))))
-  const notesById = createMap('id', allNotes)
-  const notesByRoot = groupBy(
-    n => {
-      const rootId = findRoot(n)
-      const parentId = findReply(n)
-
-      // Actually dereference the notes in case we weren't able to retrieve them
-      if (notesById[rootId]) {
-        return rootId
-      }
-
-      if (notesById[parentId]) {
-        return parentId
-      }
-
-      return n.id
-    },
-    allNotes
-  )
-
-  const threads = []
-  for (const [rootId, _notes] of Object.entries(notesByRoot)) {
-    const annotate = note => {
-      return {
-        ...note,
-        user: $accounts[note.pubkey],
-        reactions: reactionsByParent[note.id] || [],
-        children: uniqBy(prop('id'), _notes.filter(n => findReply(n) === note.id)).map(annotate),
-      }
-    }
-
-    threads.push(annotate(notesById[rootId]))
-  }
-
-  return threads
-}
+import {Listener, channels} from 'src/state/nostr'
 
 export const annotateNotes = async (notes, {showParent = false} = {}) => {
   if (notes.length === 0) {
@@ -149,41 +48,6 @@ export const annotateNotes = async (notes, {showParent = false} = {}) => {
   })
 }
 
-export const annotateAlerts = async events => {
-  if (events.length === 0) {
-    return []
-  }
-
-  const eventIds = pluck('id', events)
-  const parentIds = events.map(findReply).filter(identity)
-  const filters = [
-    {kinds: [1], ids: parentIds},
-    {kinds: [7], '#e': parentIds},
-    {kinds: [1, 7], '#e': eventIds},
-  ]
-
-  const relatedEvents = await channels.getter.all(filters)
-
-  await ensureAccounts(uniq(pluck('pubkey', events.concat(relatedEvents))))
-
-  const $accounts = get(accounts)
-  const reactionsByParent = groupBy(findReply, relatedEvents.filter(e => e.kind === 7 && e.content === '+'))
-  const allNotes = uniqBy(prop('id'), events.concat(relatedEvents).filter(propEq('kind', 1)))
-  const notesById = createMap('id', allNotes)
-
-  const annotate = note => ({
-    ...note,
-    user: $accounts[note.pubkey],
-    reactions: reactionsByParent[note.id] || [],
-    children: uniqBy(prop('id'), allNotes.filter(n => findReply(n) === note.id)).map(annotate),
-  })
-
-  return uniqBy(e => e.parent?.id || e.id, events.map(event => {
-    const parentId = findReply(event)
-
-    return {...annotate(event), parent: annotate(notesById[parentId])}
-  }))
-}
 
 export const annotateNewNote = async (note) => {
   await ensureAccounts([note.pubkey])

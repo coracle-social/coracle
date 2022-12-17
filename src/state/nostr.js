@@ -1,55 +1,8 @@
 import {writable, get} from 'svelte/store'
-import {relayPool, getPublicKey} from 'nostr-tools'
-import {assoc, last, find, intersection, uniqBy, prop} from 'ramda'
-import {first, noop, ensurePlural} from 'hurdak/lib/hurdak'
+import {assoc, uniqBy, prop} from 'ramda'
+import {noop, ensurePlural} from 'hurdak/lib/hurdak'
 import relay from 'src/relay'
 import {getLocalJson, setLocalJson, now, timedelta} from "src/util/misc"
-
-export const nostr = relayPool()
-
-export const epoch = 1633046400
-
-export const filterTags = (where, events) =>
-  ensurePlural(events)
-    .flatMap(
-      e => e.tags.filter(t => {
-        if (where.tag && where.tag !== t[0]) {
-          return false
-        }
-
-        if (where.type && where.type !== last(t)) {
-          return false
-        }
-
-        return true
-      }).map(t => t[1])
-    )
-
-export const findTag = (where, events) => first(filterTags(where, events))
-
-// Support the deprecated version where tags are not marked as replies
-export const findReply = e =>
-  findTag({tag: "e", type: "reply"}, e) || findTag({tag: "e"}, e)
-
-export const findRoot = e =>
-  findTag({tag: "e", type: "root"}, e)
-
-export const filterMatches = (filter, e)  => {
-  return Boolean(find(
-    f => {
-      return (
-           (!f.ids     || f.ids.includes(e.id))
-        && (!f.authors || f.authors.includes(e.pubkey))
-        && (!f.kinds   || f.kinds.includes(e.kind))
-        && (!f['#e']   || intersection(f['#e'], e.tags.filter(t => t[0] === 'e').map(t => t[1])))
-        && (!f['#p']   || intersection(f['#p'], e.tags.filter(t => t[0] === 'p').map(t => t[1])))
-        && (!f.since   || f.since >= e.created_at)
-        && (!f.until   || f.until <= e.created_at)
-      )
-    },
-    ensurePlural(filter)
-  ))
-}
 
 export class Channel {
   constructor(name) {
@@ -72,7 +25,7 @@ export class Channel {
 
     let resolve
     const eoseRelays = []
-    const sub = nostr.sub({filter, cb}, this.name, r => {
+    const sub = relay.pool.sub({filter, cb}, this.name, r => {
       eoseRelays.push(r)
 
       if (eoseRelays.length === get(relays).length) {
@@ -223,28 +176,6 @@ export class Listener {
   }
 }
 
-// Augment nostr with some extra methods
-
-nostr.login = privkey => {
-  nostr.setPrivateKey(privkey)
-  nostr._privkey = privkey
-}
-
-nostr.pubkeyLogin = pubkey => {
-  nostr.registerSigningFunction( async (event) => {
-    const {sig} = await window.nostr.signEvent(event)
-    return sig
-  })
-  nostr._pubkey = pubkey
-}
-
-nostr.event = (kind, content = '', tags = []) => {
-  const pubkey = nostr._pubkey || getPublicKey(nostr._privkey)
-  const createdAt = Math.round(new Date().valueOf() / 1000)
-
-  return {kind, content, tags, pubkey, created_at: createdAt}
-}
-
 // Keep track of known relays
 
 export const knownRelays = writable((getLocalJson("coracle/knownRelays") || [
@@ -293,15 +224,13 @@ let prevRelays = []
 relays.subscribe($relays => {
   prevRelays.forEach(url => {
     if (!$relays.includes(url)) {
-      nostr.removeRelay(url)
-      relay.worker.post('pool/removeRelay', url)
+      relay.pool.removeRelay(url)
     }
   })
 
   $relays.forEach(url => {
     if (!prevRelays.includes(url)) {
-      nostr.addRelay(url)
-      relay.worker.post('pool/addRelay', url)
+      relay.pool.addRelay(url)
     }
   })
 
