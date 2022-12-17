@@ -36,16 +36,10 @@ class Channel {
     // before they can get a new one.
     await p
 
-    // Start our subscription, wait for all relays to eose before
-    // calling it done
-    const eoseRelays = []
-    const sub = pool.sub({filter, cb: onEvent}, this.name, r => {
-      eoseRelays.push(r)
-
-      if (eoseRelays.length === Object.keys(pool.relays).length) {
-        onEose()
-      }
-    })
+    // Start our subscription, wait for only one relays to eose before
+    // calling it done. We were waiting for all before, but that made
+    // the slowest relay a bottleneck
+    const sub = pool.sub({filter, cb: onEvent}, this.name, onEose)
 
     return {
       unsub: () => {
