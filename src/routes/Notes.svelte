@@ -5,6 +5,7 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Notes from "src/views/Notes.svelte"
   import {user, relays} from "src/state/app"
+  import {timedelta} from 'src/util/misc'
 
   export let activeTab
 
@@ -31,7 +32,7 @@
 {:else if activeTab === 'follows'}
 <Notes filter={{kinds: [1], authors}} shouldMuffle />
 {:else}
-<Notes filter={{kinds: [1]}} shouldMuffle />
+<Notes delta={timedelta(5, 'minutes')} filter={{kinds: [1]}} shouldMuffle />
 {/if}
 <div class="fixed bottom-0 right-0 p-8">
   <a

@@ -35,6 +35,7 @@ userLq.subscribe(person => {
 // Keep track of known relays
 
 export const knownRelays = writable((getLocalJson("coracle/knownRelays") || [
+  {url: "wss://nostr.zebedee.cloud"},
   {url: "wss://nostr-pub.wellorder.net"},
   {url: "wss://nostr.rocks"},
   {url: "wss://nostr-pub.semisol.dev"},

@@ -1,7 +1,7 @@
 import {liveQuery} from 'dexie'
 import {pluck, uniq, objOf, isNil} from 'ramda'
 import {ensurePlural, createMap, ellipsize, first} from 'hurdak/lib/hurdak'
-import {now, timedelta} from 'src/util/misc'
+import {now, timedelta, createScroller} from 'src/util/misc'
 import {escapeHtml} from 'src/util/html'
 import {filterTags} from 'src/util/nostr'
 import {db} from 'src/relay/db'
@@ -76,6 +76,40 @@ const filterEvents = filter => {
 
       return true
     })
+}
+
+const getOrLoadChunk = async (filter, since, until) => {
+  const getChunk = () => {
+    return filterEvents({...filter, since}).reverse().sortBy('created_at')
+  }
+
+  const chunk = getChunk()
+
+  // If we have a chunk, go ahead and use it. This will result in not showing all
+  // data, but it's the best UX I could come up with
+  if (chunk.length > 0) {
+    return chunk
+  }
+
+  // If we didn't have anything, try loading it
+  await ensureContext(await pool.loadEvents({...filter, since, until}))
+
+  // Now return what's in our database
+  return getChunk()
+}
+
+const scroller = (filter, delta, onChunk) => {
+  let since = now() - delta
+  let until = now()
+
+  const unsub = createScroller(async () => {
+    since -= delta
+    until -= delta
+
+    await onChunk(await getOrLoadChunk(filter, since, until))
+  })
+
+  return unsub
 }
 
 const filterReplies = async (id, filter) => {
@@ -169,4 +203,5 @@ const filterAlerts = async (person, filter) => {
 export default {
   db, pool, lq, ensurePerson, ensureContext, filterEvents, filterReactions,
   countReactions, findReaction, filterReplies, findNote, renderNote, filterAlerts,
+  scroller,
 }
