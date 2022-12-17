@@ -1,4 +1,5 @@
-import {uniqBy, prop} from 'ramda'
+import {uniqBy, without, prop} from 'ramda'
+import {writable} from 'svelte/store'
 import {relayPool, getPublicKey} from 'nostr-tools'
 import {noop, range} from 'hurdak/lib/hurdak'
 import {now, randomChoice, timedelta, getLocalJson, setLocalJson} from "src/util/misc"
@@ -9,6 +10,16 @@ import {db} from 'src/relay/db'
 // Utils/config
 
 const pool = relayPool()
+
+const relays = writable([])
+
+const setup = () => {
+  for (const url of getLocalJson('pool/relays') || []) {
+    addRelay(url)
+  }
+
+  relays.subscribe($relays => setLocalJson('pool/relays', $relays))
+}
 
 class Channel {
   constructor(name) {
@@ -77,10 +88,12 @@ const getPubkey = () => {
 
 const addRelay = url => {
   pool.addRelay(url)
+  relays.update($r => $r.concat(url))
 }
 
 const removeRelay = url => {
   pool.removeRelay(url)
+  relays.update($r => without([url], $r))
 }
 
 const setPrivateKey = privkey => {
@@ -127,10 +140,6 @@ const syncPersonInfo = async person => {
   return await db.people.where('pubkey').equals(person.pubkey).first()
 }
 
-const fetchEvents = async filter => {
-  db.events.process(await req(filter))
-}
-
 let syncSub = null
 let syncChan = new Channel('sync')
 
@@ -163,7 +172,9 @@ const sync = async person => {
   )
 }
 
+setup()
+
 export default {
   getPubkey, addRelay, removeRelay, setPrivateKey, setPublicKey,
-  publishEvent, loadEvents, syncPersonInfo, fetchEvents, sync,
+  publishEvent, loadEvents, syncPersonInfo, sync, relays,
 }

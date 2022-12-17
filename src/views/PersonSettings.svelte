@@ -12,7 +12,7 @@
 
   const values = {
     // Scale up to integers for each choice we have
-    muffle: switcher(Math.round(getMuffleValue($modal.user) * 3), muffleOptions),
+    muffle: switcher(Math.round(getMuffleValue($modal.person) * 3), muffleOptions),
   }
 
   const save = async e => {
@@ -21,8 +21,8 @@
     // Scale back down to a decimal based on string value
     const muffleValue = muffleOptions.indexOf(values.muffle) / 3
     const muffle = $user.muffle
-      .filter(x => x[1] !== $modal.user.pubkey)
-      .concat([t("p", $modal.user.pubkey, muffleValue.toString())])
+      .filter(x => x[1] !== $modal.person.pubkey)
+      .concat([t("p", $modal.person.pubkey, muffleValue.toString())])
       .filter(x => last(x) !== "1")
 
     dispatch('user/muffle', muffle)

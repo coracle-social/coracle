@@ -1,4 +1,3 @@
-import {uniqBy, prop} from 'ramda'
 import {writable, get} from 'svelte/store'
 import {navigate} from "svelte-routing"
 import {globalHistory} from "svelte-routing/src/history"
@@ -31,46 +30,6 @@ const userLq = relay.lq(() => {
 userLq.subscribe(person => {
   user.update($user => $user ? ({...$user, ...person}) : null)
 })
-
-// Keep track of known relays
-
-export const knownRelays = writable((getLocalJson("coracle/knownRelays") || [
-  {url: "wss://nostr.zebedee.cloud"},
-  {url: "wss://nostr-pub.wellorder.net"},
-  {url: "wss://nostr.rocks"},
-  {url: "wss://nostr-pub.semisol.dev"},
-  {url: "wss://nostr.drss.io"},
-  {url: "wss://relay.damus.io"},
-  {url: "wss://nostr.openchain.fr"},
-  {url: "wss://nostr.delo.software"},
-  {url: "wss://relay.nostr.info"},
-  {url: "wss://nostr.ono.re"},
-  {url: "wss://relay.grunch.dev"},
-  {url: "wss://nostr.sandwich.farm"},
-  {url: "wss://relay.nostr.ch"},
-  {url: "wss://nostr-relay.wlvs.space"},
-]).filter(x => x.url))
-
-knownRelays.subscribe($knownRelays => {
-  setLocalJson("coracle/knownRelays", $knownRelays)
-})
-
-export const registerRelay = async url => {
-  let json
-  try {
-    const res = await fetch(url.replace(/^ws/, 'http'), {
-      headers: {
-        Accept: 'application/nostr_json',
-      },
-    })
-
-    json = await res.json()
-  } catch (e) {
-    json = {}
-  }
-
-  knownRelays.update($xs => uniqBy(prop('url'), $xs.concat({...json, url})))
-}
 
 // Keep track of which relays we're subscribed to
 
@@ -139,3 +98,40 @@ export const alerts = writable({
 alerts.subscribe($alerts => {
   setLocalJson("coracle/alerts", $alerts)
 })
+
+// Relays
+
+const defaultRelays = [
+  "wss://nostr.zebedee.cloud",
+  "wss://nostr-pub.wellorder.net",
+  "wss://relay.damus.io",
+  "wss://relay.grunch.dev",
+  "wss://nostr.sandwich.farm",
+  "wss://relay.nostr.ch",
+  "wss://nostr-relay.wlvs.space",
+]
+
+export const registerRelay = async url => {
+  const {dufflepudUrl} = get(settings)
+
+  let json
+  try {
+    const res = await fetch(dufflepudUrl + '/relay/info', {
+      method: 'POST',
+      body: JSON.stringify({url}),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    json = await res.json()
+  } catch (e) {
+    json = {}
+  }
+
+  relay.db.relays.put({...json, url})
+}
+
+for (const url of defaultRelays) {
+  registerRelay(url)
+}

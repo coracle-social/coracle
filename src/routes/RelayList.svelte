@@ -1,20 +1,20 @@
 <script>
   import {fly} from 'svelte/transition'
-  import {find, identity, whereEq, reject} from 'ramda'
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
-  import {dispatch} from "src/state/dispatch"
-  import {modal, relays, knownRelays} from "src/state/app"
+  import {modal} from "src/state/app"
+  import relay from 'src/relay'
 
   let q = ""
   let search
-  let data
 
-  $: data = reject(r => $relays.includes(r.url), $knownRelays || [])
-  $: search = fuzzy(data, {keys: ["name", "description", "url"]})
+  const relays = relay.pool.relays
+  const knownRelays = relay.lq(() => relay.db.relays.toArray())
 
-  const join = url => dispatch("relay/join", url)
-  const leave = url => dispatch("relay/leave", url)
+  $: search = fuzzy($knownRelays, {keys: ["name", "description", "url"]})
+
+  const join = url => relay.pool.addRelay(url)
+  const leave = url => relay.pool.removeRelay(url)
 </script>
 
 <div class="flex justify-center py-8 px-4" in:fly={{y: 20}}>
@@ -30,27 +30,29 @@
       <i slot="before" class="fa-solid fa-search" />
     </Input>
     <div class="flex flex-col gap-6 overflow-auto flex-grow -mx-6 px-6">
-      {#each $relays.map(url => find(whereEq({url}), $knownRelays)).filter(identity) as relay}
+      {#each ($knownRelays || []) as r}
+        {#if $relays.includes(r.url)}
         <div class="flex gap-2 justify-between">
           <div>
-            <strong>{relay.name || relay.url}</strong>
-            <p class="text-light">{relay.description || ''}</p>
+            <strong>{r.name || r.url}</strong>
+            <p class="text-light">{r.description || ''}</p>
           </div>
-          <a class="underline cursor-pointer" on:click={() => leave(relay.url)}>
+          <a class="underline cursor-pointer" on:click={() => leave(r.url)}>
             Leave
           </a>
         </div>
+        {/if}
       {/each}
-      {#if $relays.length > 0}
+      {#if ($knownRelays || []).length > 0}
       <div class="pt-2 mb-2 border-b border-solid border-medium" />
       {/if}
-      {#each search(q).slice(0, 10) as relay}
+      {#each (search(q) || []).slice(0, 10) as r}
         <div class="flex gap-2 justify-between">
           <div>
-            <strong>{relay.name || relay.url}</strong>
-            <p class="text-light">{relay.description || ''}</p>
+            <strong>{r.name || r.url}</strong>
+            <p class="text-light">{r.description || ''}</p>
           </div>
-          <a class="underline cursor-pointer" on:click={() => join(relay.url)}>
+          <a class="underline cursor-pointer" on:click={() => join(r.url)}>
             Join
           </a>
         </div>

@@ -14,6 +14,7 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 - [x] Notifications
 - [x] Link previews
 - [x] Add notes, follows, likes tab to profile
+- [ ] Add a coracle relay
 - [ ] Mentions - render done, now reference in compose
 - [ ] Image uploads
 - [ ] An actual readme
@@ -40,11 +41,9 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 
 - [ ] Check firefox - in dev it won't work, but it should in production
 - [ ] Re-implement muffle
-- [ ] Move relays to db
-- [ ] Make user a livequery instead of a store
-- [ ] Figure out if multiple relays congest response times because we wait for all eose
-- [ ] Set default relay when storage is empty
-- [ ] Are connections closed when a relay is removed?
+- [ ] Delete old events
+- [ ] Sync accounts to store to avoid loading jank
+- [ ] Sync account updates to user for e.g. muffle settings
 - https://vitejs.dev/guide/features.html#web-workers
 - https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers
 - https://web.dev/module-workers/

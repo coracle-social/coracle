@@ -27,7 +27,7 @@
 </script>
 
 <ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
-  {#each results as e (e.id)}
+  {#each results.slice(0, 50) as e (e.id)}
     <li in:fly={{y: 20}}>
       <Note interactive note={e} />
     </li>

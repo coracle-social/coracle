@@ -8,7 +8,7 @@
   import Input from "src/partials/Input.svelte"
   import toast from "src/state/toast"
   import {dispatch} from "src/state/dispatch"
-  import {relays, user} from "src/state/app"
+  import {user} from "src/state/app"
 
   let privkey = ''
   let hasExtension = false
@@ -32,19 +32,11 @@
   }
 
   const logIn = async ({privkey, pubkey}) => {
-    console.log(1)
     const person = await dispatch("user/init", pubkey)
-    console.log(person)
 
     user.set({...person, pubkey, privkey})
 
-    if ($relays.length === 0) {
-      navigate('/relays')
-    } else if (user.name) {
-      navigate('/notes/global')
-    } else {
-      navigate('/profile')
-    }
+    navigate('/notes/global')
   }
 
   const logInWithExtension = async () => {

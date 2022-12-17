@@ -4,11 +4,13 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Notes from "src/views/Notes.svelte"
-  import {user, relays} from "src/state/app"
+  import {user} from "src/state/app"
   import {timedelta} from 'src/util/misc'
+  import relay from 'src/relay'
 
   export let activeTab
 
+  const relays = relay.pool.relays
   const authors = $user ? $user.petnames.map(t => t[1]) : []
   const setActiveTab = tab => navigate(`/notes/${tab}`)
 </script>

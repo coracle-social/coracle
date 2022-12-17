@@ -38,7 +38,7 @@ const ensureContext = async events => {
 
   if (ids.length > 0) {
     promises.push(
-      pool.fetchEvents([
+      pool.loadEvents([
         {kinds: [1, 5, 7], '#e': ids},
         {kinds: [1, 5], ids},
       ])
@@ -107,6 +107,11 @@ const scroller = (filter, delta, onChunk) => {
     until -= delta
 
     await onChunk(await getOrLoadChunk(filter, since, until))
+
+    // Set a hard cutoff at 3 weeks back
+    if (since < now() - timedelta(21, 'days')) {
+      unsub()
+    }
   })
 
   return unsub
@@ -142,15 +147,13 @@ const findNote = async (id, giveUp = false) => {
 
   // If we don't have it, try to retrieve it
   if (!note) {
-    console.warning(`Failed to find context for note ${id}`)
+    console.warn(`Failed to find context for note ${id}`)
 
     if (giveUp) {
       return null
     }
 
-    await ensureContext([
-      await pool.fetchEvents({ids: [id]}),
-    ])
+    await ensureContext(await pool.loadEvents({ids: [id]}))
 
     return findNote(id, true)
   }

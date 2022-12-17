@@ -6,7 +6,8 @@ import {filterTags, findReply, findRoot} from 'src/util/nostr'
 
 export const db = new Dexie('coracle/relay')
 
-db.version(3).stores({
+db.version(4).stores({
+  relays: '++url, name',
   events: '++id, pubkey, created_at, kind, content, reply, root',
   people: '++pubkey, name, about',
   tags: '++key, event, value',

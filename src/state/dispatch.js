@@ -1,8 +1,6 @@
-import {identity, isNil, uniqBy, last, without} from 'ramda'
-import {get} from 'svelte/store'
+import {identity, isNil, uniqBy, last} from 'ramda'
 import {first, defmulti} from "hurdak/lib/hurdak"
 import relay from 'src/relay'
-import {relays} from 'src/state/app'
 
 // Commands are processed in two layers:
 // - App-oriented commands are created via dispatch
@@ -12,7 +10,10 @@ import {relays} from 'src/state/app'
 export const dispatch = defmulti("dispatch", identity)
 
 dispatch.addMethod("user/init", (topic, pubkey) => {
-  return relay.pool.syncUserInfo({pubkey})
+  // Hardcode one to get them started
+  relay.pool.addRelay("wss://nostr.zebedee.cloud")
+
+  return relay.pool.syncPersonInfo({pubkey})
 })
 
 dispatch.addMethod("user/update", async (topic, updates) => {
@@ -25,14 +26,6 @@ dispatch.addMethod("user/petnames", async (topic, petnames) => {
 
 dispatch.addMethod("user/muffle", async (topic, muffle) => {
   await relay.pool.publishEvent(makeEvent(12165, '', muffle))
-})
-
-dispatch.addMethod("relay/join", async (topic, url) => {
-  relays.update(r => r.concat(url))
-})
-
-dispatch.addMethod("relay/leave", (topic, url) => {
-  relays.update(r => without([url], r))
 })
 
 dispatch.addMethod("room/create", async (topic, room) => {
@@ -104,7 +97,7 @@ export const copyTags = (e, newTags = []) => {
 }
 
 export const t = (type, content, marker) => {
-  const tag = [type, content, first(get(relays))]
+  const tag = [type, content, first(Object.keys(relay.pool.relays))]
 
   if (!isNil(marker)) {
     tag.push(marker)
