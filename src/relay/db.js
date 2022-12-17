@@ -1,6 +1,7 @@
 import Dexie from 'dexie'
 import {groupBy, prop, flatten, pick} from 'ramda'
 import {ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
+import {now} from 'src/util/misc'
 import {filterTags, findReply, findRoot} from 'src/util/nostr'
 
 export const db = new Dexie('coracle/relay')
@@ -59,11 +60,12 @@ db.events.process = async events => {
   for (const event of profileUpdates) {
     const {pubkey, kind, content, tags} = event
     const user = await db.users.where('pubkey').equals(pubkey).first()
+    const putUser = data => db.users.put({...user, ...data, pubkey, updated_at: now()})
 
     await switcherFn(kind, {
-      0: () => db.users.put({...user, ...JSON.parse(content), pubkey}),
-      3: () => db.users.put({...user, petnames: tags, pubkey}),
-      12165: () => db.users.put({...user, muffle: tags, pubkey}),
+      0: () => putUser(JSON.parse(content)),
+      3: () => putUser({petnames: tags}),
+      12165: () => putUser({muffle: tags}),
       default: () => {
         console.log(`Received unsupported event type ${event.kind}`)
       },

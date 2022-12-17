@@ -7,7 +7,6 @@
   import {findReply} from "src/util/nostr"
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
-  import relay from 'src/relay'
   import {dispatch} from "src/state/dispatch"
   import {settings, user, modal} from "src/state/app"
   import {formatTimestamp} from 'src/util/misc'
@@ -33,8 +32,6 @@
     like = find(whereEq({pubkey: $user?.pubkey}), likes)
     flag = find(whereEq({pubkey: $user?.pubkey}), flags)
   }
-
-  relay.ensureContext(note)
 
   const onClick = e => {
     if (!['I'].includes(e.target.tagName) && !hasParent('a', e.target)) {
@@ -112,14 +109,16 @@
       <Anchor on:click={() => deleteReaction(flag)}>Unflag</Anchor>
     </p>
     {:else}
-    <p class="text-ellipsis overflow-hidden">
-      {@html note.html}
+    <div class="text-ellipsis overflow-hidden flex flex-col gap-2">
+      <p>{@html note.html}</p>
       {#if link}
-      <div class="mt-2" on:click={e => e.stopPropagation()}>
-        <Preview endpoint={`${$settings.dufflepudUrl}/link/preview`} url={link} />
+      <div>
+        <div class="inline-block" on:click={e => e.stopPropagation()}>
+          <Preview endpoint={`${$settings.dufflepudUrl}/link/preview`} url={link} />
+        </div>
       </div>
       {/if}
-    </p>
+    </div>
     <div class="flex gap-6 text-light">
       <div>
         <i

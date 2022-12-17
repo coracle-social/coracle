@@ -1,8 +1,8 @@
 import {uniqBy, prop} from 'ramda'
 import {relayPool, getPublicKey} from 'nostr-tools'
-import {noop} from 'hurdak/lib/hurdak'
+import {noop, range} from 'hurdak/lib/hurdak'
 import {now, randomChoice, timedelta, getLocalJson, setLocalJson} from "src/util/misc"
-import {filterTags, getTagValues} from "src/util/nostr"
+import {getTagValues} from "src/util/nostr"
 import {db} from 'src/relay/db'
 
 // ============================================================================
@@ -73,11 +73,7 @@ class Channel {
   }
 }
 
-export const channels = [
-  new Channel('a'),
-  new Channel('b'),
-  new Channel('c'),
-]
+export const channels = range(0, 10).map(i => new Channel(i.toString()))
 
 const req = filter => randomChoice(channels).all(filter)
 
@@ -117,7 +113,9 @@ const publishEvent = event => {
 const loadEvents = async filter => {
   const events = await req(filter)
 
-  db.events.process(events)
+  await db.events.process(events)
+
+  return events
 }
 
 const syncUserInfo = async user => {
@@ -137,16 +135,12 @@ const syncUserInfo = async user => {
   return person
 }
 
-const fetchContext = async event => {
-  const events = await req([
-    {kinds: [5, 7], '#e': [event.id]},
-    {kinds: [5], 'ids': filterTags({tag: "e"}, event)},
-  ])
-
-  db.events.process(events)
+const fetchEvents = async filter => {
+  db.events.process(await req(filter))
 }
 
 let syncSub = null
+let syncChan = new Channel('sync')
 
 const sync = async user => {
   if (syncSub) {
@@ -155,7 +149,10 @@ const sync = async user => {
 
   if (!user) return
 
+  // Get user info right away
   const {petnames, pubkey} = await syncUserInfo(user)
+
+  // Don't grab nothing, but don't grab everything either
   const since = Math.max(
     now() - timedelta(3, 'days'),
     Math.min(
@@ -167,7 +164,7 @@ const sync = async user => {
   setLocalJson('pool/lastSync', now())
 
   // Populate recent activity in network so the user has something to look at right away
-  syncSub = randomChoice(channels).sub(
+  syncSub = syncChan.sub(
     [{since, authors: getTagValues(petnames).concat(pubkey)},
      {since, '#p': [pubkey]}],
     db.events.process
@@ -176,5 +173,5 @@ const sync = async user => {
 
 export default {
   getPubkey, addRelay, removeRelay, setPrivateKey, setPublicKey,
-  publishEvent, loadEvents, syncUserInfo, fetchContext, sync,
+  publishEvent, loadEvents, syncUserInfo, fetchEvents, sync,
 }

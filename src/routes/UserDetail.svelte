@@ -2,6 +2,7 @@
   import {find} from 'ramda'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
+  import {timedelta} from 'src/util/misc'
   import Tabs from "src/partials/Tabs.svelte"
   import Button from "src/partials/Button.svelte"
   import Notes from "src/views/Notes.svelte"
@@ -12,6 +13,8 @@
 
   export let pubkey
   export let activeTab
+
+  relay.ensurePerson({pubkey})
 
   const user = relay.lq(() => relay.db.users.get(pubkey))
 
@@ -78,7 +81,7 @@
 
 <Tabs tabs={['notes', 'likes', 'network']} {activeTab} {setActiveTab} />
 {#if activeTab === 'notes'}
-<Notes filter={{kinds: [1], authors: [pubkey]}} />
+<Notes showParent delta={timedelta(1, 'days')} filter={{kinds: [1], authors: [pubkey]}} />
 {:else if activeTab === 'likes'}
 <Likes author={pubkey} />
 {:else if activeTab === 'network'}

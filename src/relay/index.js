@@ -1,5 +1,5 @@
 import {liveQuery} from 'dexie'
-import {pluck, isNil} from 'ramda'
+import {pluck, uniq, objOf, isNil} from 'ramda'
 import {ensurePlural, createMap, ellipsize, first} from 'hurdak/lib/hurdak'
 import {now, timedelta} from 'src/util/misc'
 import {escapeHtml} from 'src/util/html'
@@ -16,16 +16,26 @@ const lq = f => liveQuery(async () => {
   }
 })
 
-const ensureContext = async e => {
-  const user = await db.users.where('pubkey').equals(e.pubkey).first()
+const ensurePerson = async ({pubkey}) => {
+  const user = await db.users.where('pubkey').equals(pubkey).first()
 
   // Throttle updates for users
   if (!user || user.updated_at < now() - timedelta(1, 'hours')) {
-    await pool.syncUserInfo({pubkey: e.pubkey, ...user})
+    await pool.syncUserInfo({pubkey, ...user})
   }
+}
 
-  // TODO optimize this like user above so we're not double-fetching
-  await pool.fetchContext(e)
+const ensureContext = async events => {
+  const ids = events.flatMap(e => filterTags({tag: "e"}, e).concat(e.id))
+  const people = uniq(pluck('pubkey', events)).map(objOf('pubkey'))
+
+  await Promise.all([
+    people.map(ensurePerson),
+    pool.fetchEvents([
+      {kinds: [1, 5, 7], '#e': ids},
+      {kinds: [1, 5], ids},
+    ]),
+  ])
 }
 
 const prefilterEvents = filter => {
@@ -50,6 +60,8 @@ const filterEvents = filter => {
       if (filter.ids && !filter.ids.includes(e.id)) return false
       if (filter.authors && !filter.authors.includes(e.pubkey)) return false
       if (filter.kinds && !filter.kinds.includes(e.kind)) return false
+      if (filter.since && filter.since > e.created_at) return false
+      if (filter.until && filter.until < e.created_at) return false
       if (!isNil(filter.content) && filter.content !== e.content) return false
 
       return true
@@ -78,11 +90,26 @@ const findReaction = async (id, filter) =>
 const countReactions = async (id, filter) =>
   (await filterReactions(id, filter)).length
 
-const findNote = async id => {
+const findNote = async (id, giveUp = false) => {
   const [note, children] = await Promise.all([
     db.events.get(id),
     db.events.where('reply').equals(id),
   ])
+
+  // If we don't have it, try to retrieve it
+  if (!note) {
+    console.warning(`Failed to find context for note ${id}`)
+
+    if (giveUp) {
+      return null
+    }
+
+    await ensureContext([
+      await pool.fetchEvents({ids: [id]}),
+    ])
+
+    return findNote(id, true)
+  }
 
   const [replies, reactions, user, html] = await Promise.all([
     children.clone().filter(e => e.kind === 1).toArray(),
@@ -130,6 +157,6 @@ const filterAlerts = async (user, filter) => {
 }
 
 export default {
-  db, pool, lq, ensureContext, filterEvents, filterReactions, countReactions,
-  findReaction, filterReplies, findNote, renderNote, filterAlerts,
+  db, pool, lq, ensurePerson, ensureContext, filterEvents, filterReactions,
+  countReactions, findReaction, filterReplies, findNote, renderNote, filterAlerts,
 }
