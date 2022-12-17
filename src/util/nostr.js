@@ -47,12 +47,12 @@ export const filterMatches = (filter, e)  => {
   ))
 }
 
-export const getMuffleValue = user => {
-  if (!user) {
+export const getMuffleValue = person => {
+  if (!person) {
     return 1
   }
 
-  const tag = find(t => t[1] === user.pubkey, user.muffle)
+  const tag = find(t => t[1] === person.pubkey, person.muffle)
 
   if (!tag) {
     return 1

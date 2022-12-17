@@ -17,25 +17,35 @@ const lq = f => liveQuery(async () => {
 })
 
 const ensurePerson = async ({pubkey}) => {
-  const user = await db.users.where('pubkey').equals(pubkey).first()
+  const person = await db.people.where('pubkey').equals(pubkey).first()
 
-  // Throttle updates for users
-  if (!user || user.updated_at < now() - timedelta(1, 'hours')) {
-    await pool.syncUserInfo({pubkey, ...user})
+  // Throttle updates for people
+  if (!person || person.updated_at < now() - timedelta(1, 'hours')) {
+    await pool.syncPersonInfo({pubkey, ...person})
   }
 }
 
 const ensureContext = async events => {
-  const ids = events.flatMap(e => filterTags({tag: "e"}, e).concat(e.id))
+  const promises = []
   const people = uniq(pluck('pubkey', events)).map(objOf('pubkey'))
+  const ids = events.flatMap(e => filterTags({tag: "e"}, e).concat(e.id))
 
-  await Promise.all([
-    people.map(ensurePerson),
-    pool.fetchEvents([
-      {kinds: [1, 5, 7], '#e': ids},
-      {kinds: [1, 5], ids},
-    ]),
-  ])
+  if (people.length > 0) {
+    for (const p of people.map(ensurePerson)) {
+      promises.push(p)
+    }
+  }
+
+  if (ids.length > 0) {
+    promises.push(
+      pool.fetchEvents([
+        {kinds: [1, 5, 7], '#e': ids},
+        {kinds: [1, 5], ids},
+      ])
+    )
+  }
+
+  await Promise.all(promises)
 }
 
 const prefilterEvents = filter => {
@@ -111,15 +121,15 @@ const findNote = async (id, giveUp = false) => {
     return findNote(id, true)
   }
 
-  const [replies, reactions, user, html] = await Promise.all([
+  const [replies, reactions, person, html] = await Promise.all([
     children.clone().filter(e => e.kind === 1).toArray(),
     children.clone().filter(e => e.kind === 7).toArray(),
-    db.users.get(note.pubkey),
+    db.people.get(note.pubkey),
     renderNote(note, {showEntire: false}),
   ])
 
   return {
-    ...note, reactions, user, html,
+    ...note, reactions, person, html,
     replies: await Promise.all(replies.map(r => findNote(r.id))),
   }
 }
@@ -127,8 +137,8 @@ const findNote = async (id, giveUp = false) => {
 const renderNote = async (note, {showEntire = false}) => {
   const shouldEllipsize = note.content.length > 500 && !showEntire
   const content = shouldEllipsize ? ellipsize(note.content, 500) : note.content
-  const accounts = await db.users.where('pubkey').anyOf(filterTags({tag: "p"}, note)).toArray()
-  const accountsByPubkey = createMap('pubkey', accounts)
+  const people = await db.people.where('pubkey').anyOf(filterTags({tag: "p"}, note)).toArray()
+  const peopleByPubkey = createMap('pubkey', people)
 
   return escapeHtml(content)
     .replace(/\n/g, '<br />')
@@ -141,15 +151,15 @@ const renderNote = async (note, {showEntire = false}) => {
       }
 
       const pubkey = note.tags[parseInt(i)][1]
-      const user = accountsByPubkey[pubkey]
-      const name = user?.name || pubkey.slice(0, 8)
+      const person = peopleByPubkey[pubkey]
+      const name = person?.name || pubkey.slice(0, 8)
 
-      return `@<a href="/users/${pubkey}/notes" class="underline">${name}</a>`
+      return `@<a href="/people/${pubkey}/notes" class="underline">${name}</a>`
     })
 }
 
-const filterAlerts = async (user, filter) => {
-  const tags = db.tags.where('value').equals(user.pubkey)
+const filterAlerts = async (person, filter) => {
+  const tags = db.tags.where('value').equals(person.pubkey)
   const ids = pluck('event', await tags.toArray())
   const events = await filterEvents({...filter, kinds: [1, 7], ids})
 

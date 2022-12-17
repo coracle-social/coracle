@@ -24,7 +24,7 @@ const userLq = relay.lq(() => {
   const $user = get(user)
 
   if ($user) {
-    return relay.db.users.where('pubkey').equals($user?.pubkey).first()
+    return relay.db.people.where('pubkey').equals($user?.pubkey).first()
   }
 })
 

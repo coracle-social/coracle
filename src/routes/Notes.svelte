@@ -25,7 +25,7 @@
 {#if activeTab === 'follows' && authors.length === 0}
 <div class="flex w-full justify-center items-center py-16">
   <div class="text-center max-w-md">
-    You haven't yet followed anyone. Visit a user's profile to follow them.
+    You haven't yet followed anyone. Visit a person's profile to follow them.
   </div>
 </div>
 {:else if activeTab === 'follows'}

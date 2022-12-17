@@ -33,7 +33,7 @@
 
   const logIn = async ({privkey, pubkey}) => {
     console.log(1)
-    const person = await dispatch("account/init", pubkey)
+    const person = await dispatch("user/init", pubkey)
     console.log(person)
 
     user.set({...person, pubkey, privkey})

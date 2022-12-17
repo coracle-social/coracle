@@ -25,7 +25,7 @@
       .concat([t("p", $modal.user.pubkey, muffleValue.toString())])
       .filter(x => last(x) !== "1")
 
-    dispatch('account/muffle', muffle)
+    dispatch('user/muffle', muffle)
 
     modal.set(null)
   }
@@ -35,7 +35,7 @@
   <div class="flex flex-col gap-2">
     <h1 class="text-3xl">Advanced Follow</h1>
     <p>
-      Fine grained controls for interacting with other users.
+      Fine grained controls for interacting with other people.
     </p>
   </div>
   <div class="flex flex-col gap-1">

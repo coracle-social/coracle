@@ -40,7 +40,6 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 
 - [ ] Check firefox - in dev it won't work, but it should in production
 - [ ] Re-implement muffle
-- [ ] Rename users/accounts to people
 - [ ] Move relays to db
 - [ ] Make user a livequery instead of a store
 - [ ] Figure out if multiple relays congest response times because we wait for all eose

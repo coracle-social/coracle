@@ -10,7 +10,7 @@
   import {dispatch} from "src/state/dispatch"
   import {settings, user, modal} from "src/state/app"
   import {formatTimestamp} from 'src/util/misc'
-  import UserBadge from "src/partials/UserBadge.svelte"
+  import Badge from "src/partials/Badge.svelte"
   import Card from "src/partials/Card.svelte"
 
   export let note
@@ -94,7 +94,7 @@
 
 <Card on:click={onClick} {interactive} {invertColors}>
   <div class="flex gap-4 items-center justify-between">
-    <UserBadge user={{...note.user, pubkey: note.pubkey}} />
+    <Badge person={{...note.person, pubkey: note.pubkey}} />
     <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>
   </div>
   <div class="ml-6 flex flex-col gap-2">

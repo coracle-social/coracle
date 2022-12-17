@@ -16,6 +16,7 @@
   import relay from 'src/relay'
   import Anchor from 'src/partials/Anchor.svelte'
   import NoteDetail from "src/views/NoteDetail.svelte"
+  import PersonSettings from "src/views/PersonSettings.svelte"
   import NotFound from "src/routes/NotFound.svelte"
   import Search from "src/routes/Search.svelte"
   import Alerts from "src/routes/Alerts.svelte"
@@ -26,8 +27,7 @@
   import Keys from "src/routes/Keys.svelte"
   import RelayList from "src/routes/RelayList.svelte"
   import AddRelay from "src/routes/AddRelay.svelte"
-  import UserDetail from "src/routes/UserDetail.svelte"
-  import UserAdvanced from "src/routes/UserAdvanced.svelte"
+  import Person from "src/routes/Person.svelte"
   import NoteCreate from "src/routes/NoteCreate.svelte"
 
   export let url = ""
@@ -97,9 +97,9 @@
       <Route path="/search/:type" component={Search} />
       <Route path="/notes/:activeTab" component={Notes} />
       <Route path="/notes/new" component={NoteCreate} />
-      <Route path="/users/:pubkey/:activeTab" let:params>
+      <Route path="/people/:pubkey/:activeTab" let:params>
         {#key params.pubkey}
-        <UserDetail {...params} />
+        <Person {...params} />
         {/key}
       </Route>
       <Route path="/keys" component={Keys} />
@@ -117,7 +117,7 @@
     >
       {#if $user}
       <li>
-        <a href={`/users/${$user.pubkey}/notes`} class="flex gap-2 px-4 py-2 pb-6 items-center">
+        <a href={`/people/${$user.pubkey}/notes`} class="flex gap-2 px-4 py-2 pb-6 items-center">
           <div
             class="overflow-hidden w-6 h-6 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
             style="background-image: url({$user.picture})" />
@@ -201,8 +201,8 @@
             {/key}
           {:else if $modal.form === 'relay'}
             <AddRelay />
-          {:else if $modal.form === 'user/advanced'}
-            <UserAdvanced />
+          {:else if $modal.form === 'person/settings'}
+            <PersonSettings />
           {/if}
         </dialog>
       </div>

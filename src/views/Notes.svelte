@@ -16,49 +16,44 @@
 
   let since = now() - delta, until = now(), notes
 
-  const done = createScroller(async () => {
+  const unsub = createScroller(async () => {
     since -= delta
     until -= delta
 
+    // Load our events, but don't wait for them because we probably have them in dexie
     await relay.ensureContext(
       await relay.pool.loadEvents({...filter, since, until})
     )
 
-    createNotesObservable()
+    const notes = await relay.filterEvents({...filter, since}).reverse().sortBy('created_at')
+    const ancestorIds = concat(notes.map(findRoot), notes.map(findReply)).filter(identity)
+    const ancestors = await relay.filterEvents({kinds: [1], ids: ancestorIds}).toArray()
+
+    const allNotes = uniqBy(prop('id'), notes.concat(ancestors))
+    const notesById = createMap('id', allNotes)
+    const notesByRoot = groupBy(
+      n => {
+        const rootId = findRoot(n)
+        const parentId = findReply(n)
+
+        // Actually dereference the notes in case we weren't able to retrieve them
+        if (notesById[rootId]) {
+          return rootId
+        }
+
+        if (notesById[parentId]) {
+          return parentId
+        }
+
+        return n.id
+      },
+      allNotes
+    )
+
+    return await Promise.all(Object.keys(notesByRoot).map(relay.findNote))
   })
 
-  const createNotesObservable = () => {
-    notes = relay.lq(async () => {
-      const notes = await relay.filterEvents({...filter, since}).reverse().sortBy('created_at')
-      const ancestorIds = concat(notes.map(findRoot), notes.map(findReply)).filter(identity)
-      const ancestors = await relay.filterEvents({kinds: [1], ids: ancestorIds}).toArray()
-
-      const allNotes = uniqBy(prop('id'), notes.concat(ancestors))
-      const notesById = createMap('id', allNotes)
-      const notesByRoot = groupBy(
-        n => {
-          const rootId = findRoot(n)
-          const parentId = findReply(n)
-
-          // Actually dereference the notes in case we weren't able to retrieve them
-          if (notesById[rootId]) {
-            return rootId
-          }
-
-          if (notesById[parentId]) {
-            return parentId
-          }
-
-          return n.id
-        },
-        allNotes
-      )
-
-      return await Promise.all(Object.keys(notesByRoot).map(relay.findNote))
-    })
-  }
-
-  onDestroy(done)
+  onDestroy(unsub)
 </script>
 
 <ul class="py-4 flex flex-col gap-2 max-w-xl m-auto">

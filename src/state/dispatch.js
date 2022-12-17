@@ -11,19 +11,19 @@ import {relays} from 'src/state/app'
 
 export const dispatch = defmulti("dispatch", identity)
 
-dispatch.addMethod("account/init", (topic, pubkey) => {
+dispatch.addMethod("user/init", (topic, pubkey) => {
   return relay.pool.syncUserInfo({pubkey})
 })
 
-dispatch.addMethod("account/update", async (topic, updates) => {
+dispatch.addMethod("user/update", async (topic, updates) => {
   await relay.pool.publishEvent(makeEvent(0, JSON.stringify(updates)))
 })
 
-dispatch.addMethod("account/petnames", async (topic, petnames) => {
+dispatch.addMethod("user/petnames", async (topic, petnames) => {
   await relay.pool.publishEvent(makeEvent(3, '', petnames))
 })
 
-dispatch.addMethod("account/muffle", async (topic, muffle) => {
+dispatch.addMethod("user/muffle", async (topic, muffle) => {
   await relay.pool.publishEvent(makeEvent(12165, '', muffle))
 })
 

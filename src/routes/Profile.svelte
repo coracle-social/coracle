@@ -38,9 +38,9 @@
   const submit = async event => {
     event.preventDefault()
 
-    await dispatch("account/update", values)
+    await dispatch("user/update", values)
 
-    navigate(`/users/${$user.pubkey}/profile`)
+    navigate(`/people/${$user.pubkey}/profile`)
 
     toast.show("info", "Your profile has been updated!")
   }

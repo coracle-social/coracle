@@ -5,7 +5,7 @@
   import {ellipsize} from 'hurdak/src/core'
   import relay from 'src/relay'
   import {alerts, modal, user} from 'src/state/app'
-  import UserBadge from "src/partials/UserBadge.svelte"
+  import Badge from "src/partials/Badge.svelte"
   import Note from 'src/views/Note.svelte'
 
   const events = relay.lq(async () => {
@@ -32,7 +32,7 @@
            border border-solid border-black hover:border-medium hover:bg-dark"
     on:click={() => modal.set({note: e.parent})}>
     <div class="flex gap-2 items-center">
-      <UserBadge user={e.user} />
+      <Badge person={e.person} />
       <span>liked your note.</span>
     </div>
     <div class="ml-6 text-light">

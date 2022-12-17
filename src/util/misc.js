@@ -60,7 +60,7 @@ export const createScroller = loadMore => {
     const {scrollY, innerHeight} = window
     const {scrollHeight} = document.body
 
-    if (scrollY + innerHeight + 600 > scrollHeight) {
+    if (scrollY + innerHeight + 2000 > scrollHeight) {
       await loadMore()
     }
 

@@ -118,21 +118,19 @@ const loadEvents = async filter => {
   return events
 }
 
-const syncUserInfo = async user => {
+const syncPersonInfo = async person => {
   const [events] = await Promise.all([
     // Get profile info events
-    req({kinds: [0, 3, 12165], authors: [user.pubkey]}),
+    req({kinds: [0, 3, 12165], authors: [person.pubkey]}),
     // Make sure we have something in the database
-    db.users.put({muffle: [], petnames: [], updated_at: 0, ...user}),
+    db.people.put({muffle: [], petnames: [], updated_at: 0, ...person}),
   ])
 
-  // Process the events to flesh out the user
+  // Process the events to flesh out the person
   await db.events.process(events)
 
-  // Return our user for convenience
-  const person = await db.users.where('pubkey').equals(user.pubkey).first()
-
-  return person
+  // Return our person for convenience
+  return await db.people.where('pubkey').equals(person.pubkey).first()
 }
 
 const fetchEvents = async filter => {
@@ -142,15 +140,15 @@ const fetchEvents = async filter => {
 let syncSub = null
 let syncChan = new Channel('sync')
 
-const sync = async user => {
+const sync = async person => {
   if (syncSub) {
     (await syncSub).unsub()
   }
 
-  if (!user) return
+  if (!person) return
 
-  // Get user info right away
-  const {petnames, pubkey} = await syncUserInfo(user)
+  // Get person info right away
+  const {petnames, pubkey} = await syncPersonInfo(person)
 
   // Don't grab nothing, but don't grab everything either
   const since = Math.max(
@@ -163,7 +161,7 @@ const sync = async user => {
 
   setLocalJson('pool/lastSync', now())
 
-  // Populate recent activity in network so the user has something to look at right away
+  // Populate recent activity in network so the person has something to look at right away
   syncSub = syncChan.sub(
     [{since, authors: getTagValues(petnames).concat(pubkey)},
      {since, '#p': [pubkey]}],
@@ -173,5 +171,5 @@ const sync = async user => {
 
 export default {
   getPubkey, addRelay, removeRelay, setPrivateKey, setPublicKey,
-  publishEvent, loadEvents, syncUserInfo, fetchEvents, sync,
+  publishEvent, loadEvents, syncPersonInfo, fetchEvents, sync,
 }
