@@ -83,9 +83,6 @@ const req = filter => randomChoice(channels).all(filter)
 
 const prepEvent = e => ({...e, root: findRoot(e), reply: findReply(e)})
 
-// ============================================================================
-// Listen to messages posted from the main application
-
 const getPubkey = () => {
   return pool._pubkey || getPublicKey(pool._privkey)
 }
@@ -113,7 +110,6 @@ const setPublicKey = pubkey => {
 
   pool._pubkey = pubkey
 }
-
 
 const publishEvent = event => {
   pool.publish(event)
@@ -147,7 +143,36 @@ const fetchContext = async event => {
   db.events.bulkPut(events.map(prepEvent))
 }
 
+const sync = async user => {
+  if (!user) throw new Error('No point sycing if we have no user')
+
+  const channel = randomChoice(channels)
+  const since = Math.max(now() - interval(1, 'weeks'), getLocalJson('pool/lastSync') || 0)
+
+  channel.sub(
+    [{since, authors: filterTags(user.petnames).concat(user.pubkey)},
+     {since, '#p': [user.pubkey]}],
+    onEvent: async e => {
+      if ([1, 5, 7].includes(e.kind)) {
+        return db.events.put(e)
+      }
+
+      const {pubkey, kind, content, tags} = e
+      const user = await db.users.where('pubkey').equals(pubkey).first()
+
+      switcherFn(kind, {
+        0: () => db.users.put({...user, pubkey, ...JSON.parse(content)}),
+        3: () => db.users.put({...user, pubkey, petnames: e.tags}),
+        12165: () => db.users.put({...user, pubkey, muffle: e.tags}),
+        default: e => {
+          console.log(`Received unsupported event type ${e.kind}`)
+        },
+      })
+    }
+  )
+}
+
 export default {
   getPubkey, addRelay, removeRelay, setPrivateKey, setPublicKey,
-  publishEvent, loadEvents, getUserInfo, fetchContext,
+  publishEvent, loadEvents, getUserInfo, fetchContext, sync,
 }

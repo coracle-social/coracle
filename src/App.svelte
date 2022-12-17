@@ -13,8 +13,9 @@
   import {timedelta} from 'src/util/misc'
   import {store as toast} from "src/state/toast"
   import {channels} from "src/state/nostr"
-  import {modal, logout, alerts} from "src/state/app"
+  import {modal, logout} from "src/state/app"
   import {user} from 'src/state/user'
+  import relay from 'src/relay'
   import Anchor from 'src/partials/Anchor.svelte'
   import NoteDetail from "src/views/NoteDetail.svelte"
   import NotFound from "src/routes/NotFound.svelte"
@@ -55,20 +56,7 @@
   })
 
   onMount(() => {
-    // Poll for new notifications
-    (async function pollForNotifications() {
-      if (false && $user) {
-        const events = await channels.getter.all({
-          kinds: [1, 7],
-          '#p': [$user.pubkey],
-          since: $alerts.since,
-        })
-
-        mostRecentAlert = events.reduce((t, e) => Math.max(t, e.created_at), $alerts.since)
-      }
-
-      setTimeout(pollForNotifications, 60_000)
-    })()
+    relay.sync()
 
     return modal.subscribe($modal => {
       // Keep scroll position on body, but don't allow scrolling
