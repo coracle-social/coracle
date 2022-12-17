@@ -29,9 +29,6 @@
   import UserDetail from "src/routes/UserDetail.svelte"
   import UserAdvanced from "src/routes/UserAdvanced.svelte"
   import NoteCreate from "src/routes/NoteCreate.svelte"
-  // import Chat from "src/routes/Chat.svelte"
-  // import ChatRoom from "src/routes/ChatRoom.svelte"
-  // import ChatEdit from "src/routes/ChatEdit.svelte"
 
   export let url = ""
 
@@ -100,16 +97,6 @@
       <Route path="/search/:type" component={Search} />
       <Route path="/notes/:activeTab" component={Notes} />
       <Route path="/notes/new" component={NoteCreate} />
-      <!--
-      <Route path="/chat" component={Chat} />
-      <Route path="/chat/new" component={ChatEdit} />
-      <Route path="/chat/:room" let:params>
-        {#key params.room}
-        <ChatRoom {...params} />
-        {/key}
-      </Route>
-      <Route path="/chat/:room/edit" component={ChatEdit} />
-      -->
       <Route path="/users/:pubkey/:activeTab" let:params>
         {#key params.pubkey}
         <UserDetail {...params} />
@@ -154,11 +141,6 @@
       <li class="cursor-pointer">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes/global">
           <i class="fa-solid fa-tag mr-2" /> Notes
-        </a>
-      </li>
-      <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/chat">
-          <i class="fa-solid fa-message mr-2" /> Chat
         </a>
       </li>
       <li class="h-px mx-3 my-4 bg-medium" />
