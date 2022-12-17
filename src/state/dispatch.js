@@ -23,10 +23,10 @@ dispatch.addMethod("account/init", async (topic, { privkey, pubkey }) => {
   })
 
   // Make sure we have data for this user
-  await ensureAccounts([pubkey], {force: true})
+  const {name} = await relay.pool.updateUser({pubkey})
 
   // Tell the caller whether this user was found
-  return {found: Boolean(get(user).name)}
+  return {found: Boolean(name)}
 })
 
 dispatch.addMethod("account/update", async (topic, updates) => {
@@ -58,8 +58,6 @@ dispatch.addMethod("account/muffle", async (topic, muffle) => {
 })
 
 dispatch.addMethod("relay/join", async (topic, url) => {
-  const $user = get(user)
-
   relays.update(r => r.concat(url))
 })
 

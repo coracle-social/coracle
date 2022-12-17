@@ -39,6 +39,7 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 
 - [ ] Check firefox - in dev it won't work, but it should in production
 - [ ] Re-implement muffle
+- [ ] Rename users/accounts to people
 - https://vitejs.dev/guide/features.html#web-workers
 - https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers
 - https://web.dev/module-workers/

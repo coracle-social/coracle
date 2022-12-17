@@ -1,24 +1,20 @@
 <script>
   import {find} from 'ramda'
-  import {writable} from 'svelte/store'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
-  import Notes from "src/partials/Notes.svelte"
-  import Likes from "src/partials/Likes.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Button from "src/partials/Button.svelte"
+  import Notes from "src/views/Notes.svelte"
+  import Likes from "src/views/Likes.svelte"
   import {user as currentUser} from 'src/state/user'
   import {t, dispatch} from 'src/state/dispatch'
-  import {accounts, modal} from "src/state/app"
+  import {modal} from "src/state/app"
+  import relay from 'src/relay'
 
   export let pubkey
   export let activeTab
 
-  const user = $accounts[pubkey]
-  const notes = writable([])
-  const likes = writable([])
-  const network = writable([])
-  const authors = $currentUser ? $currentUser.petnames.map(t => t[1]) : []
+  const user = relay.lq(() => relay.db.users.get(pubkey))
 
   let following = $currentUser && find(t => t[1] === pubkey, $currentUser.petnames)
 
@@ -26,7 +22,7 @@
 
   const follow = () => {
     const petnames = $currentUser.petnames
-      .concat([t("p", pubkey, user?.name)])
+      .concat([t("p", pubkey, $user?.name)])
 
     dispatch('account/petnames', petnames)
 
@@ -43,7 +39,7 @@
   }
 
   const openAdvanced = () => {
-    modal.set({form: 'user/advanced', user: user || {pubkey}})
+    modal.set({form: 'user/advanced', user: $user || {pubkey}})
   }
 </script>
 
@@ -52,15 +48,15 @@
     <div class="flex gap-4">
       <div
         class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-        style="background-image: url({user?.picture})" />
+        style="background-image: url({$user?.picture})" />
       <div class="flex-grow">
         <div class="flex items-center gap-2">
-          <h1 class="text-2xl">{user?.name || pubkey.slice(0, 8)}</h1>
+          <h1 class="text-2xl">{$user?.name || pubkey.slice(0, 8)}</h1>
           {#if $currentUser && $currentUser.pubkey !== pubkey}
             <i class="fa-solid fa-sliders cursor-pointer" on:click={openAdvanced} />
           {/if}
         </div>
-        <p>{user?.about || ''}</p>
+        <p>{$user?.about || ''}</p>
       </div>
       <div class="whitespace-nowrap">
         {#if $currentUser?.pubkey === pubkey}
@@ -80,11 +76,18 @@
     </div>
   </div>
 </div>
+
 <Tabs tabs={['notes', 'likes', 'network']} {activeTab} {setActiveTab} />
 {#if activeTab === 'notes'}
-<Notes notes={notes} filter={{kinds: [1], authors: [pubkey]}} />
+<Notes filter={{kinds: [1], authors: [pubkey]}} />
 {:else if activeTab === 'likes'}
-<Likes notes={likes} author={pubkey} />
+<Likes author={pubkey} />
 {:else if activeTab === 'network'}
-<Notes notes={network} filter={{kinds: [1], authors}} shouldMuffle />
+{#if $user}
+<Notes shouldMuffle filter={{kinds: [1], authors: $user.petnames.map(t => t[1])}} />
+{:else}
+<div class="py-16 max-w-xl m-auto flex justify-center">
+  Unable to show network for this user.
+</div>
+{/if}
 {/if}

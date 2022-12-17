@@ -18,12 +18,20 @@ const lq = f => liveQuery(async () => {
 
 const ensureContext = async e => {
   // We can't return a promise, so use setTimeout instead
-  const user = await db.users.where('pubkey').equals(e.pubkey).first()
+  const user = await db.users.where('pubkey').equals(e.pubkey).first() || {
+    muffle: [],
+    petnames: [],
+    updated_at: 0,
+    pubkey: e.pubkey,
+  }
 
   // Throttle updates for users
-  if (!user || user.updated_at < now() - timedelta(1, 'hours')) {
-    await pool.updateUser(user || {pubkey: e.pubkey, updated_at: 0})
+  if (user.updated_at < now() - timedelta(1, 'hours')) {
+    Object.assign(user, await pool.getUserInfo({pubkey: e.pubkey, ...user}))
   }
+
+  // Even if we didn't find a match, save it so we don't keep trying to refresh
+  db.users.put({...user, updated_at: now()})
 
   // TODO optimize this like user above so we're not double-fetching
   await pool.fetchContext(e)
@@ -79,6 +87,25 @@ const findReaction = async (id, filter) =>
 const countReactions = async (id, filter) =>
   (await filterReactions(id, filter)).length
 
+const findNote = async id => {
+  const [note, children] = await Promise.all([
+    db.events.get(id),
+    db.events.where('reply').equals(id),
+  ])
+
+  const [replies, reactions, user, html] = await Promise.all([
+    children.clone().filter(e => e.kind === 1).toArray(),
+    children.clone().filter(e => e.kind === 7).toArray(),
+    db.users.get(note.pubkey),
+    renderNote(note, {showEntire: false}),
+  ])
+
+  return {
+    ...note, reactions, user, html,
+    replies: await Promise.all(replies.map(r => findNote(r.id))),
+  }
+}
+
 const renderNote = async (note, {showEntire = false}) => {
   const shouldEllipsize = note.content.length > 500 && !showEntire
   const content = shouldEllipsize ? ellipsize(note.content, 500) : note.content
@@ -105,5 +132,5 @@ const renderNote = async (note, {showEntire = false}) => {
 
 export default {
   db, pool, lq, ensureContext, filterEvents, filterReactions, countReactions,
-  findReaction, filterReplies, renderNote,
+  findReaction, filterReplies, findNote, renderNote,
 }

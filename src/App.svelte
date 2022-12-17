@@ -16,9 +16,9 @@
   import {modal, logout, alerts} from "src/state/app"
   import {user} from 'src/state/user'
   import Anchor from 'src/partials/Anchor.svelte'
-  import NoteDetail from "src/partials/NoteDetail.svelte"
+  import NoteDetail from "src/views/NoteDetail.svelte"
   import NotFound from "src/routes/NotFound.svelte"
-  // import Search from "src/routes/Search.svelte"
+  import Search from "src/routes/Search.svelte"
   import Alerts from "src/routes/Alerts.svelte"
   import Notes from "src/routes/Notes.svelte"
   import Login from "src/routes/Login.svelte"
@@ -27,7 +27,7 @@
   import Keys from "src/routes/Keys.svelte"
   import RelayList from "src/routes/RelayList.svelte"
   import AddRelay from "src/routes/AddRelay.svelte"
-  // import UserDetail from "src/routes/UserDetail.svelte"
+  import UserDetail from "src/routes/UserDetail.svelte"
   // import UserAdvanced from "src/routes/UserAdvanced.svelte"
   import NoteCreate from "src/routes/NoteCreate.svelte"
   // import Chat from "src/routes/Chat.svelte"
@@ -53,8 +53,6 @@
       menuIsOpen.set(false)
     }
   })
-
-  window.addEventListener('unhandledrejection', e => console.error(e))
 
   onMount(() => {
     // Poll for new notifications
@@ -96,13 +94,7 @@
   <div use:links class="h-full">
     <div class="pt-16 text-white h-full">
       <Route path="/alerts" component={Alerts} />
-      <!--
-      <Route path="/search/:type" let:params>
-        {#key params.type}
-        <Search {...params} />
-        {/key}
-      </Route>
-      -->
+      <Route path="/search/:type" component={Search} />
       <Route path="/notes/:activeTab" component={Notes} />
       <Route path="/notes/new" component={NoteCreate} />
       <!--
@@ -114,12 +106,12 @@
         {/key}
       </Route>
       <Route path="/chat/:room/edit" component={ChatEdit} />
+      -->
       <Route path="/users/:pubkey/:activeTab" let:params>
-        {#key params.pubkey + params.activeTab}
+        {#key params.pubkey}
         <UserDetail {...params} />
         {/key}
       </Route>
-      -->
       <Route path="/keys" component={Keys} />
       <Route path="/relays" component={RelayList} />
       <Route path="/profile" component={Profile} />

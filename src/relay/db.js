@@ -3,8 +3,8 @@ import {filterTags} from 'src/util/nostr'
 
 export const db = new Dexie('coracle/relay')
 
-db.version(2).stores({
-  events: '++id, pubkey, created_at, kind, content',
+db.version(3).stores({
+  events: '++id, pubkey, created_at, kind, content, reply, root',
   users: '++pubkey, name, about',
   tags: '++key, event, value',
 })

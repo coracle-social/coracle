@@ -7,7 +7,7 @@
   import {user} from 'src/state/user'
   import {alerts, modal} from 'src/state/app'
   import UserBadge from "src/partials/UserBadge.svelte"
-  import Note from 'src/partials/Note.svelte'
+  import Note from 'src/views/Note.svelte'
 
   const events = relay.lq(async () => {
     const events = await relay

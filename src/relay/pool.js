@@ -1,7 +1,8 @@
+import {uniqBy, prop} from 'ramda'
 import {relayPool, getPublicKey} from 'nostr-tools'
 import {noop, switcherFn, uuid} from 'hurdak/lib/hurdak'
-import {now, timedelta} from "src/util/misc"
-import {filterTags} from "src/util/nostr"
+import {now, randomChoice, timedelta} from "src/util/misc"
+import {filterTags, findReply, findRoot} from "src/util/nostr"
 import {db} from 'src/relay/db'
 
 // ============================================================================
@@ -9,43 +10,78 @@ import {db} from 'src/relay/db'
 
 const pool = relayPool()
 
-const post = (topic, payload) => postMessage({topic, payload})
-
-const req = ({filter, onEvent, onEose = noop})  => {
-  // If we don't have any relays, we'll wait forever for an eose, but
-  // we already know we're done. Use a timeout since callers are
-  // expecting this to be async and we run into errors otherwise.
-  if (pool.relays.length === 0) {
-    onEose()
-
-    return {unsub: noop}
+class Channel {
+  constructor(name) {
+    this.name = name
+    this.p = Promise.resolve()
   }
+  async sub(filter, onEvent, onEose = noop) {
+    // If we don't have any relays, we'll wait forever for an eose, but
+    // we already know we're done. Use a timeout since callers are
+    // expecting this to be async and we run into errors otherwise.
+    if (Object.keys(pool.relays).length === 0) {
+      setTimeout(onEose)
 
-  const eoseRelays = []
-  return pool.sub({filter, cb: onEvent}, uuid(), r => {
-    eoseRelays.push(r)
-
-    if (eoseRelays.length === pool.relays.length) {
-      onEose()
+      return {unsub: noop}
     }
-  })
+
+    // Grab our spot in the queue, save resolve for later
+    let resolve
+    let p = this.p
+    this.p = new Promise(r => {
+      resolve = r
+    })
+
+    // Make sure callers have to wait for the previous sub to be done
+    // before they can get a new one.
+    await p
+
+    // Start our subscription, wait for all relays to eose before
+    // calling it done
+    const eoseRelays = []
+    const sub = pool.sub({filter, cb: onEvent}, this.name, r => {
+      eoseRelays.push(r)
+
+      if (eoseRelays.length === Object.keys(pool.relays).length) {
+        onEose()
+      }
+    })
+
+    return {
+      unsub: () => {
+        sub.unsub()
+
+        resolve()
+      }
+    }
+  }
+  all(filter) {
+    /* eslint no-async-promise-executor: 0 */
+    return new Promise(async resolve => {
+      const result = []
+
+      const sub = await this.sub(
+        filter,
+        e => result.push(e),
+        r => {
+          sub.unsub()
+
+          resolve(uniqBy(prop('id'), result))
+        },
+      )
+    })
+  }
 }
 
-// ============================================================================
-// Start up a subscription to get recent data and listen for new stuff
+export const channels = [
+  new Channel('a'),
+  new Channel('b'),
+  new Channel('c'),
+]
 
-const lastSync = now() - timedelta(1, 'days')
+const req = filter => randomChoice(channels).all(filter)
 
-req({
-  filter: {
-    kinds: [1],
-    since: lastSync,
-    limit: 10,
-  },
-  onEvent: e => {
-    post('events/put', e)
-  },
-})
+const prepEvent = e => ({...e, root: findRoot(e), reply: findReply(e)})
 
 // ============================================================================
 // Listen to messages posted from the main application
@@ -81,47 +117,37 @@ const setPublicKey = pubkey => {
 
 const publishEvent = event => {
   pool.publish(event)
-  db.events.put(event)
+  db.events.put(prepEvent(event))
 }
 
-const updateUser = async user => {
-  if (!user.pubkey) throw new Error("Invalid user")
+const loadEvents = async filter => {
+  const events = await req(filter)
 
-  user = {muffle: [], petnames: [], ...user}
+  db.events.bulkPut(events.map(prepEvent))
+}
 
-  const sub = req({
-    filter: {
-      kinds: [0, 3, 12165],
-      authors: [user.pubkey],
-      since: user.updated_at,
-    },
-    onEvent: e => {
-      switcherFn(e.kind, {
-        0: () => Object.assign(user, JSON.parse(e.content)),
-        3: () => Object.assign(user, {petnames: e.tags}),
-        12165: () => Object.assign(user, {muffle: e.tags}),
-      })
-    },
-    onEose: () => {
-      sub.unsub()
+const getUserInfo = async user => {
+  for (const e of await req({kinds: [0, 3, 12165], authors: [user.pubkey]})) {
+    switcherFn(e.kind, {
+      0: () => Object.assign(user, JSON.parse(e.content)),
+      3: () => Object.assign(user, {petnames: e.tags}),
+      12165: () => Object.assign(user, {muffle: e.tags}),
+    })
+  }
 
-      db.users.put({...user, updated_at: now()})
-    },
-  })
+  return user
 }
 
 const fetchContext = async event => {
-  const sub = req({
-    filter: [
-      {kinds: [5, 7], '#e': [event.id]},
-      {kinds: [5], 'ids': filterTags({tag: "e"}, event)},
-    ],
-    onEvent: e => post('events/put', e),
-    onEose: () => sub.unsub(),
-  })
+  const events = await req([
+    {kinds: [5, 7], '#e': [event.id]},
+    {kinds: [5], 'ids': filterTags({tag: "e"}, event)},
+  ])
+
+  db.events.bulkPut(events.map(prepEvent))
 }
 
 export default {
   getPubkey, addRelay, removeRelay, setPrivateKey, setPublicKey,
-  publishEvent, updateUser, fetchContext,
+  publishEvent, loadEvents, getUserInfo, fetchContext,
 }

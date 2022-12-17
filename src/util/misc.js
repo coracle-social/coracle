@@ -1,4 +1,5 @@
-import pluck from "ramda/src/pluck"
+import {pluck} from "ramda"
+import {debounce} from 'throttle-debounce'
 import Fuse from "fuse.js/dist/fuse.min.js"
 
 export const fuzzy = (data, opts = {}) => {
@@ -50,3 +51,28 @@ export const formatTimestamp = ts => {
 
 export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
+export const createScroller = loadMore => {
+  const onScroll = debounce(1000, async () => {
+    /* eslint no-constant-condition: 0 */
+
+    while (true) {
+      // While we have empty space, fill it
+      const {scrollY, innerHeight} = window
+      const {scrollHeight} = document.body
+
+      if (scrollY + innerHeight + 600 < scrollHeight) {
+        break
+      }
+
+      loadMore()
+
+      await sleep(1000)
+    }
+  })
+
+  onScroll()
+
+  return onScroll
+}
+
+export const randomChoice = xs => xs[Math.floor(Math.random() * xs.length)]
