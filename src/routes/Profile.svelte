@@ -8,9 +8,9 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Button from "src/partials/Button.svelte"
-  import {user} from "src/state/app"
   import {dispatch} from "src/state/dispatch"
   import toast from "src/state/toast"
+  import {user} from "src/relay"
 
   let values = {picture: null, about: null, name: null}
 

@@ -1,25 +1,15 @@
-import {uniqBy, without, prop} from 'ramda'
-import {writable} from 'svelte/store'
+import {uniqBy, prop, uniq} from 'ramda'
+import {get} from 'svelte/store'
 import {relayPool, getPublicKey} from 'nostr-tools'
 import {noop, range} from 'hurdak/lib/hurdak'
-import {now, randomChoice, timedelta, getLocalJson, setLocalJson} from "src/util/misc"
-import {getTagValues} from "src/util/nostr"
+import {now, timedelta, randomChoice} from "src/util/misc"
+import {getTagValues, filterTags} from "src/util/nostr"
 import {db} from 'src/relay/db'
 
 // ============================================================================
 // Utils/config
 
 const pool = relayPool()
-
-const relays = writable([])
-
-const setup = () => {
-  for (const url of getLocalJson('pool/relays') || []) {
-    addRelay(url)
-  }
-
-  relays.subscribe($relays => setLocalJson('pool/relays', $relays))
-}
 
 class Channel {
   constructor(name) {
@@ -80,20 +70,23 @@ class Channel {
 
 export const channels = range(0, 10).map(i => new Channel(i.toString()))
 
-const req = filter => randomChoice(channels).all(filter)
+const req = (...args) => randomChoice(channels).all(...args)
+const sub = (...args) => randomChoice(channels).sub(...args)
 
 const getPubkey = () => {
   return pool._pubkey || getPublicKey(pool._privkey)
 }
 
+const getRelays = () => {
+  return Object.keys(pool.relays)
+}
+
 const addRelay = url => {
   pool.addRelay(url)
-  relays.update($r => $r.concat(url))
 }
 
 const removeRelay = url => {
   pool.removeRelay(url)
-  relays.update($r => without([url], $r))
 }
 
 const setPrivateKey = privkey => {
@@ -102,7 +95,6 @@ const setPrivateKey = privkey => {
 }
 
 const setPublicKey = pubkey => {
-  // TODO fix this, it ain't gonna work
   pool.registerSigningFunction(async event => {
     const {sig} = await window.nostr.signEvent(event)
 
@@ -125,56 +117,71 @@ const loadEvents = async filter => {
   return events
 }
 
-const syncPersonInfo = async person => {
-  const [events] = await Promise.all([
-    // Get profile info events
-    req({kinds: [0, 3, 12165], authors: [person.pubkey]}),
-    // Make sure we have something in the database
-    db.people.put({muffle: [], petnames: [], updated_at: 0, ...person}),
-  ])
+const subs = {}
 
-  // Process the events to flesh out the person
-  await db.events.process(events)
-
-  // Return our person for convenience
-  return await db.people.where('pubkey').equals(person.pubkey).first()
-}
-
-let syncSub = null
-let syncChan = new Channel('sync')
-
-const sync = async person => {
-  if (syncSub) {
-    (await syncSub).unsub()
+const listenForEvents = async (key, filter) => {
+  if (subs[key]) {
+    subs[key].unsub()
   }
 
-  if (!person) return
-
-  // Get person info right away
-  const {petnames, pubkey} = await syncPersonInfo(person)
-
-  // Don't grab nothing, but don't grab everything either
-  const since = Math.max(
-    now() - timedelta(3, 'days'),
-    Math.min(
-      now() - timedelta(3, 'hours'),
-      getLocalJson('pool/lastSync') || 0
-    )
-  )
-
-  setLocalJson('pool/lastSync', now())
-
-  // Populate recent activity in network so the person has something to look at right away
-  syncSub = syncChan.sub(
-    [{since, authors: getTagValues(petnames).concat(pubkey)},
-     {since, '#p': [pubkey]}],
-    db.events.process
-  )
+  subs[key] = await sub(filter, db.events.process)
 }
 
-setup()
+const loadPeople = pubkeys => {
+  return pubkeys.length ? loadEvents({kinds: [0, 3, 12165], authors: pubkeys}) : []
+}
+
+const syncNetwork = async () => {
+  const $user = get(db.user)
+
+  let pubkeys = []
+  if ($user) {
+    // Get this user's profile to start with
+    await loadPeople([$user.pubkey])
+
+    // Get our refreshed person
+    const people = get(db.people)
+
+    // Merge the new info into our user
+    Object.assign($user, people[$user.pubkey])
+
+    console.log($user)
+
+    // Update our user store
+    db.user.update(() => $user)
+
+    // Get n degreees of separation using petnames
+    pubkeys = uniq(getTagValues($user.petnames))
+  }
+
+  // Fall back to some pubkeys we like so we can support new users
+  if (pubkeys.length === 0) {
+    pubkeys = [
+      "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322", // hodlbod
+    ]
+  }
+
+  let networkPubkeys = pubkeys
+  for (let depth = 0; depth < 1; depth++) {
+    const events = await loadPeople(pubkeys)
+
+    pubkeys = uniq(filterTags({type: "p"}, events.filter(e => e.kind === 3)))
+
+    networkPubkeys = networkPubkeys.concat(pubkeys)
+  }
+
+  db.network.set(networkPubkeys)
+}
+
+const syncNetworkNotes = () => {
+  const authors = get(db.network)
+  const since = now() - timedelta(30, 'days')
+
+  loadEvents({kinds: [1, 5, 7], authors, since, until: now()})
+  listenForEvents('networkNotes', {kinds: [1, 5, 7], authors, since: now()})
+}
 
 export default {
-  getPubkey, addRelay, removeRelay, setPrivateKey, setPublicKey,
-  publishEvent, loadEvents, syncPersonInfo, sync, relays,
+  getPubkey, getRelays, addRelay, removeRelay, setPrivateKey, setPublicKey,
+  publishEvent, loadEvents, syncNetwork, syncNetworkNotes,
 }

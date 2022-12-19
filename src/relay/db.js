@@ -1,7 +1,8 @@
 import Dexie from 'dexie'
+import {writable} from 'svelte/store'
 import {groupBy, prop, flatten, pick} from 'ramda'
 import {ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
-import {now} from 'src/util/misc'
+import {now, getLocalJson, setLocalJson} from 'src/util/misc'
 import {filterTags, findReply, findRoot} from 'src/util/nostr'
 
 export const db = new Dexie('coracle/relay')
@@ -9,11 +10,22 @@ export const db = new Dexie('coracle/relay')
 db.version(4).stores({
   relays: '++url, name',
   events: '++id, pubkey, created_at, kind, content, reply, root',
-  people: '++pubkey, name, about',
   tags: '++key, event, value',
 })
 
 window.db = db
+
+// Some things work better as observables than database tables
+
+db.user = writable(getLocalJson("db/user"))
+db.people = writable(getLocalJson('db.people') || {})
+db.network = writable(getLocalJson('db/network') || [])
+db.connections = writable(getLocalJson("db/connections") || [])
+
+db.user.subscribe($user => setLocalJson("coracle/user", $user))
+db.people.subscribe($people => setLocalJson("coracle/people", $people))
+db.network.subscribe($network => setLocalJson("coracle/network", $network))
+db.connections.subscribe($connections => setLocalJson("coracle/connections", $connections))
 
 // Hooks
 
@@ -58,18 +70,28 @@ db.events.process = async events => {
   }
 
   // Update our people
-  for (const event of profileUpdates) {
-    const {pubkey, kind, content, tags} = event
-    const person = await db.people.where('pubkey').equals(pubkey).first()
-    const putPerson = data => db.people.put({...person, ...data, pubkey, updated_at: now()})
+  db.people.update($people => {
+    for (const event of profileUpdates) {
+      const {pubkey, kind, content, tags} = event
+      const putPerson = data => {
+        $people[pubkey] = {
+          ...$people[pubkey],
+          ...data,
+          pubkey,
+          updated_at: now(),
+        }
+      }
 
-    await switcherFn(kind, {
-      0: () => putPerson(JSON.parse(content)),
-      3: () => putPerson({petnames: tags}),
-      12165: () => putPerson({muffle: tags}),
-      default: () => {
-        console.log(`Received unsupported event type ${event.kind}`)
-      },
-    })
-  }
+      switcherFn(kind, {
+        0: () => putPerson(JSON.parse(content)),
+        3: () => putPerson({petnames: tags}),
+        12165: () => putPerson({muffle: tags}),
+        default: () => {
+          console.log(`Received unsupported event type ${event.kind}`)
+        },
+      })
+    }
+
+    return $people
+  })
 }

@@ -1,8 +1,7 @@
 <script>
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
-  import {user} from "src/state/app"
-  import relay from 'src/relay'
+  import relay, {user} from 'src/relay'
 
   export let q
 

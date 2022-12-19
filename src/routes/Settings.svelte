@@ -5,8 +5,9 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Input from "src/partials/Input.svelte"
   import Button from "src/partials/Button.svelte"
-  import {settings, user} from "src/state/app"
+  import {settings} from "src/state/app"
   import toast from "src/state/toast"
+  import {user} from "src/relay"
 
   let values = {...$settings}
 

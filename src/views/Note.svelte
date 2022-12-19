@@ -8,10 +8,11 @@
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import {dispatch} from "src/state/dispatch"
-  import {settings, user, modal} from "src/state/app"
+  import {settings, modal} from "src/state/app"
   import {formatTimestamp} from 'src/util/misc'
   import Badge from "src/partials/Badge.svelte"
   import Card from "src/partials/Card.svelte"
+  import {user} from 'src/relay'
 
   export let note
   export let depth = 0

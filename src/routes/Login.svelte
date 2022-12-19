@@ -7,8 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import toast from "src/state/toast"
-  import {dispatch} from "src/state/dispatch"
-  import {user} from "src/state/app"
+  import relay from 'src/relay'
 
   let privkey = ''
   let hasExtension = false
@@ -31,12 +30,10 @@
     toast.show("info", "Your private key has been re-generated.")
   }
 
-  const logIn = async ({privkey, pubkey}) => {
-    const person = await dispatch("user/init", pubkey)
+  const logIn = ({privkey, pubkey}) => {
+    relay.login({privkey, pubkey})
 
-    user.set({...person, pubkey, privkey})
-
-    navigate('/notes/global')
+    navigate('/relays')
   }
 
   const logInWithExtension = async () => {

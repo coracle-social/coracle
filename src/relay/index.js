@@ -1,9 +1,8 @@
 import {liveQuery} from 'dexie'
-import {pluck, uniq, objOf, isNil} from 'ramda'
+import {pluck, without, uniqBy, prop, groupBy, concat, uniq, objOf, isNil, identity} from 'ramda'
 import {ensurePlural, createMap, ellipsize, first} from 'hurdak/lib/hurdak'
-import {now, timedelta, createScroller} from 'src/util/misc'
 import {escapeHtml} from 'src/util/html'
-import {filterTags} from 'src/util/nostr'
+import {filterTags, findRoot, findReply} from 'src/util/nostr'
 import {db} from 'src/relay/db'
 import pool from 'src/relay/pool'
 
@@ -16,13 +15,12 @@ const lq = f => liveQuery(async () => {
   }
 })
 
+// Context getters attempt to retrieve from the db and fall back to the network
+
 const ensurePerson = async ({pubkey}) => {
   const person = await db.people.where('pubkey').equals(pubkey).first()
 
-  // Throttle updates for people
-  if (!person || person.updated_at < now() - timedelta(1, 'hours')) {
-    await pool.syncPersonInfo({pubkey, ...person})
-  }
+  await pool.syncPersonInfo({pubkey, ...person})
 }
 
 const ensureContext = async events => {
@@ -48,6 +46,8 @@ const ensureContext = async events => {
   await Promise.all(promises)
 }
 
+// Utils for qurying dexie
+
 const prefilterEvents = filter => {
   if (filter.ids) {
     return db.events.where('id').anyOf(ensurePlural(filter.ids))
@@ -64,6 +64,8 @@ const prefilterEvents = filter => {
   return db.events
 }
 
+// Utils for filtering db
+
 const filterEvents = filter => {
   return prefilterEvents(filter)
     .filter(e => {
@@ -78,44 +80,34 @@ const filterEvents = filter => {
     })
 }
 
-const getOrLoadChunk = async (filter, since, until) => {
-  const getChunk = () => {
-    return filterEvents({...filter, since}).reverse().sortBy('created_at')
-  }
+const annotateChunk = async chunk => {
+  const ancestorIds = concat(chunk.map(findRoot), chunk.map(findReply)).filter(identity)
+  const ancestors = await filterEvents({kinds: [1], ids: ancestorIds}).toArray()
 
-  const chunk = getChunk()
+  const allNotes = uniqBy(prop('id'), chunk.concat(ancestors))
+  const notesById = createMap('id', allNotes)
+  const notesByRoot = groupBy(
+    n => {
+      const rootId = findRoot(n)
+      const parentId = findReply(n)
 
-  // If we have a chunk, go ahead and use it. This will result in not showing all
-  // data, but it's the best UX I could come up with
-  if (chunk.length > 0) {
-    return chunk
-  }
+      // Actually dereference the notes in case we weren't able to retrieve them
+      if (notesById[rootId]) {
+        return rootId
+      }
 
-  // If we didn't have anything, try loading it
-  await ensureContext(await pool.loadEvents({...filter, since, until}))
+      if (notesById[parentId]) {
+        return parentId
+      }
 
-  // Now return what's in our database
-  return getChunk()
+      return n.id
+    },
+    allNotes
+  )
+
+  return await Promise.all(Object.keys(notesByRoot).map(findNote))
 }
 
-const scroller = (filter, delta, onChunk) => {
-  let since = now() - delta
-  let until = now()
-
-  const unsub = createScroller(async () => {
-    since -= delta
-    until -= delta
-
-    await onChunk(await getOrLoadChunk(filter, since, until))
-
-    // Set a hard cutoff at 3 weeks back
-    if (since < now() - timedelta(21, 'days')) {
-      unsub()
-    }
-  })
-
-  return unsub
-}
 
 const filterReplies = async (id, filter) => {
   const tags = db.tags.where('value').equals(id).filter(t => t.mark === 'reply')
@@ -203,8 +195,67 @@ const filterAlerts = async (person, filter) => {
   return events
 }
 
+// Synchronization
+
+const login = ({privkey, pubkey}) => {
+  db.user.set({relays: [], muffle: [], petnames: [], updated_at: 0, pubkey, privkey})
+}
+
+const addRelay = url => {
+  db.connections.update($connections => $connections.concat(url))
+
+  pool.syncNetwork()
+  pool.syncNetworkNotes()
+}
+
+const removeRelay = url => {
+  db.connections.update($connections => without([url], $connections))
+}
+
+const follow = async pubkey => {
+  db.network.update($network => $network.concat(pubkey))
+
+  pool.syncNetwork()
+  pool.syncNetworkNotes()
+}
+
+const unfollow = async pubkey => {
+  db.network.update($network => $network.concat(pubkey))
+}
+
+// Initialization
+
+db.user.subscribe($user => {
+  if ($user?.privkey) {
+    pool.setPrivateKey($user.privkey)
+  } else if ($user?.pubkey) {
+    pool.setPublicKey($user.pubkey)
+  }
+})
+
+db.connections.subscribe($connections => {
+  const poolRelays = pool.getRelays()
+
+  for (const url of $connections) {
+    if (!poolRelays.includes(url)) {
+      pool.addRelay(url)
+    }
+  }
+
+  for (const url of poolRelays) {
+    if (!$connections.includes(url)) {
+      pool.removeRelay(url)
+    }
+  }
+})
+
+export const user = db.user
+export const people = db.people
+export const network = db.network
+export const connections = db.connections
+
 export default {
   db, pool, lq, ensurePerson, ensureContext, filterEvents, filterReactions,
   countReactions, findReaction, filterReplies, findNote, renderNote, filterAlerts,
-  scroller,
+  annotateChunk, login, addRelay, removeRelay, follow, unfollow,
 }

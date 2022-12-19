@@ -5,8 +5,8 @@
   import {copyToClipboard} from "src/util/html"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {user} from "src/state/app"
   import toast from "src/state/toast"
+  import {user} from "src/relay"
 
   const keypairUrl = 'https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/'
   const delegationUrl = 'https://github.com/nostr-protocol/nips/blob/b62aa418dee13aac1899ea7c6946a0f55dd7ee84/26.md'

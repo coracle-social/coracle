@@ -2,7 +2,7 @@
   import {onDestroy} from 'svelte'
   import {prop, identity, concat, uniqBy, groupBy} from 'ramda'
   import {createMap} from 'hurdak/lib/hurdak'
-  import {timedelta} from 'src/util/misc'
+  import {createScroller} from 'src/util/misc'
   import {findReply, findRoot} from 'src/util/nostr'
   import Spinner from 'src/partials/Spinner.svelte'
   import Note from "src/views/Note.svelte"
@@ -10,13 +10,16 @@
 
   export let filter
   export let showParent = false
-  export let shouldMuffle = false
-  export let delta = timedelta(10, 'minutes')
 
   let notes
+  let limit = 0
 
-  onDestroy(relay.scroller(filter, delta, async chunk => {
+  onDestroy(createScroller(async () => {
+    limit += 20
+
     notes = relay.lq(async () => {
+      const notes = await relay.filterEvents(filter).reverse().sortBy('created_at')
+      const chunk = notes.slice(0, limit)
       const ancestorIds = concat(chunk.map(findRoot), chunk.map(findReply)).filter(identity)
       const ancestors = await relay.filterEvents({kinds: [1], ids: ancestorIds}).toArray()
 

@@ -12,8 +12,8 @@
   import {hasParent} from 'src/util/html'
   import {timedelta} from 'src/util/misc'
   import {store as toast} from "src/state/toast"
-  import {modal, alerts, user} from "src/state/app"
-  import relay from 'src/relay'
+  import {modal, alerts} from "src/state/app"
+  import relay, {user} from 'src/relay'
   import Anchor from 'src/partials/Anchor.svelte'
   import NoteDetail from "src/views/NoteDetail.svelte"
   import PersonSettings from "src/views/PersonSettings.svelte"
@@ -68,8 +68,6 @@
   })
 
   onMount(() => {
-    relay.pool.sync($user)
-
     return modal.subscribe($modal => {
       // Keep scroll position on body, but don't allow scrolling
       if ($modal) {

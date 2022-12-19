@@ -3,8 +3,8 @@
   import {now} from 'src/util/misc'
   import {findReply} from 'src/util/nostr'
   import {ellipsize} from 'hurdak/src/core'
-  import relay from 'src/relay'
-  import {alerts, modal, user} from 'src/state/app'
+  import relay, {user} from 'src/relay'
+  import {alerts, modal} from 'src/state/app'
   import Badge from "src/partials/Badge.svelte"
   import Note from 'src/views/Note.svelte'
 

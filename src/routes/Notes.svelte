@@ -1,21 +1,18 @@
 <script>
   import {navigate} from 'svelte-routing'
-  import {timedelta} from 'src/util/misc'
   import Anchor from "src/partials/Anchor.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Notes from "src/views/Notes.svelte"
-  import {user} from "src/state/app"
   import {timedelta} from 'src/util/misc'
-  import relay from 'src/relay'
+  import relay, {user, connections} from 'src/relay'
 
   export let activeTab
 
-  const relays = relay.pool.relays
   const authors = $user ? $user.petnames.map(t => t[1]) : []
   const setActiveTab = tab => navigate(`/notes/${tab}`)
 </script>
 
-{#if $relays.length === 0}
+{#if $connections.length === 0}
 <div class="flex w-full justify-center items-center py-16">
   <div class="text-center max-w-md">
     You aren't yet connected to any relays. Please click <Anchor href="/relays"

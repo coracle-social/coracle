@@ -8,8 +8,9 @@
   import Notes from "src/views/Notes.svelte"
   import Likes from "src/views/Likes.svelte"
   import {t, dispatch} from 'src/state/dispatch'
-  import {modal, user} from "src/state/app"
+  import {modal} from "src/state/app"
   import relay from 'src/relay'
+  import {user} from "src/relay"
 
   export let pubkey
   export let activeTab

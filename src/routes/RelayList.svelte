@@ -3,18 +3,31 @@
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import {modal} from "src/state/app"
-  import relay from 'src/relay'
+  import relay, {connections} from 'src/relay'
 
   let q = ""
   let search
 
-  const relays = relay.pool.relays
+  const defaultRelays = [
+    "wss://nostr.zebedee.cloud",
+    "wss://nostr-pub.wellorder.net",
+    "wss://relay.damus.io",
+    "wss://relay.grunch.dev",
+    "wss://nostr.sandwich.farm",
+    "wss://relay.nostr.ch",
+    "wss://nostr-relay.wlvs.space",
+  ]
+
+  for (const url of defaultRelays) {
+    relay.db.relays.put({url})
+  }
+
   const knownRelays = relay.lq(() => relay.db.relays.toArray())
 
   $: search = fuzzy($knownRelays, {keys: ["name", "description", "url"]})
 
-  const join = url => relay.pool.addRelay(url)
-  const leave = url => relay.pool.removeRelay(url)
+  const join = url => relay.addRelay(url)
+  const leave = url => relay.removeRelay(url)
 </script>
 
 <div class="flex justify-center py-8 px-4" in:fly={{y: 20}}>
@@ -31,7 +44,7 @@
     </Input>
     <div class="flex flex-col gap-6 overflow-auto flex-grow -mx-6 px-6">
       {#each ($knownRelays || []) as r}
-        {#if $relays.includes(r.url)}
+        {#if $connections.includes(r.url)}
         <div class="flex gap-2 justify-between">
           <div>
             <strong>{r.name || r.url}</strong>

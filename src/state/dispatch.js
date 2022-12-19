@@ -9,13 +9,6 @@ import relay from 'src/relay'
 
 export const dispatch = defmulti("dispatch", identity)
 
-dispatch.addMethod("user/init", (topic, pubkey) => {
-  // Hardcode one to get them started
-  relay.pool.addRelay("wss://nostr.zebedee.cloud")
-
-  return relay.pool.syncPersonInfo({pubkey})
-})
-
 dispatch.addMethod("user/update", async (topic, updates) => {
   await relay.pool.publishEvent(makeEvent(0, JSON.stringify(updates)))
 })

@@ -6,7 +6,8 @@
   import SelectButton from "src/partials/SelectButton.svelte"
   import {getMuffleValue} from "src/util/nostr"
   import {dispatch, t} from 'src/state/dispatch'
-  import {modal, user} from "src/state/app"
+  import {modal} from "src/state/app"
+  import {user} from 'src/relay'
 
   const muffleOptions = ['Never', 'Sometimes', 'Often', 'Always']
 
