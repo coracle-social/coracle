@@ -139,7 +139,7 @@ const findReaction = async (id, filter) =>
 const countReactions = async (id, filter) =>
   (await filterReactions(id, filter)).length
 
-const findNote = async (id, giveUp = false) => {
+const findNote = async (id, {giveUp = false, showEntire = false} = {}) => {
   const [note, children] = await Promise.all([
     db.events.get(id),
     db.events.where('reply').equals(id),
@@ -155,14 +155,14 @@ const findNote = async (id, giveUp = false) => {
 
     await ensureContext(await pool.loadEvents({ids: [id]}))
 
-    return findNote(id, true)
+    return findNote(id, {giveUp: true})
   }
 
   const [replies, reactions, person, html] = await Promise.all([
     children.clone().filter(e => e.kind === 1).toArray(),
     children.clone().filter(e => e.kind === 7).toArray(),
     db.people.get(note.pubkey),
-    renderNote(note, {showEntire: false}),
+    renderNote(note, {showEntire}),
   ])
 
   return {

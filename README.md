@@ -19,10 +19,6 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 - [ ] Image uploads
 - [ ] An actual readme
 - [ ] Server discovery and relay publishing - https://github.com/nostr-protocol/nips/pull/32/files
-- [ ] Favorite chat rooms
-- [ ] Optimistically load events the user publishes (e.g. to reduce reflow for reactions/replies).
-  - Essentially, we can pretend to be our own in-memory relay.
-  - This allows us to keep a copy of all user data, and possibly user likes/reply parents
 - [ ] Support invoices https://twitter.com/jb55/status/1604131336247476224
 
 # Bugs
@@ -47,3 +43,12 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 - https://vitejs.dev/guide/features.html#web-workers
 - https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers
 - https://web.dev/module-workers/
+
+- [ ] Sync user
+- [ ] Based on petnames, sync network to 2 or 3 degrees of separation
+- [ ] Main fetch requests:
+  - Fetch network, including feed
+  - Fetch person, including feed
+  - Fetch note, including context
+  - This is based on detail pages. Each request should check local db and fall back to network, all within an await.
+- [ ] How will newcomers get followed?
