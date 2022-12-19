@@ -5,10 +5,12 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/partials/Note.svelte"
   import {Cursor, epoch, filterTags} from 'src/state/nostr'
+  import {timedelta} from 'src/util/misc'
   import {createScroller, getMuffleValue, threadify, notesListener, modal} from "src/state/app"
 
   export let filter
   export let notes
+  export let delta = timedelta(1, 'hours')
   export let shouldMuffle = false
 
   let cursor
@@ -19,7 +21,7 @@
   let loading = true
 
   onMount(async () => {
-    cursor = new Cursor(filter)
+    cursor = new Cursor(filter, delta)
     listener = await notesListener(notes, [filter, {kinds: [5, 7]}], {shouldMuffle})
     scroller = createScroller(cursor, async chunk => {
       // Remove a sampling of content if desired

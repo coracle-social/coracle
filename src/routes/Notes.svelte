@@ -1,6 +1,7 @@
 <script>
   import {writable} from 'svelte/store'
   import {navigate} from 'svelte-routing'
+  import {timedelta} from 'src/util/misc'
   import Anchor from "src/partials/Anchor.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Notes from "src/partials/Notes.svelte"
@@ -35,7 +36,7 @@
 {:else if activeTab === 'follows'}
 <Notes notes={followNotes} filter={{kinds: [1], authors}} shouldMuffle />
 {:else}
-<Notes notes={globalNotes} filter={{kinds: [1]}} shouldMuffle />
+<Notes delta={timedelta(1, 'minutes')} notes={globalNotes} filter={{kinds: [1]}} shouldMuffle />
 {/if}
 <div class="fixed bottom-0 right-0 p-8">
   <a
