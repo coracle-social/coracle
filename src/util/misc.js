@@ -64,7 +64,10 @@ export const createScroller = loadMore => {
       await loadMore()
     }
 
-    await sleep(1000)
+    // This is a gross hack, basically, keep loading if the user doesn't scroll again,
+    // but wait a long time because otherwise we'll send off multiple concurrent requests
+    // that will clog up our channels and stall the app.
+    await sleep(30000)
 
     if (!done) {
       requestAnimationFrame(check)
@@ -79,3 +82,12 @@ export const createScroller = loadMore => {
 }
 
 export const randomChoice = xs => xs[Math.floor(Math.random() * xs.length)]
+
+export const getLastSync = (keyParts, fallback) => {
+  const key = `${keyParts.join('.')}/lastSync`
+  const lastSync = getLocalJson(key) || fallback
+
+  setLocalJson(key, now())
+
+  return lastSync
+}

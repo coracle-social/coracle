@@ -2,7 +2,7 @@ import {uniqBy, prop, uniq} from 'ramda'
 import {get} from 'svelte/store'
 import {relayPool, getPublicKey} from 'nostr-tools'
 import {noop, range} from 'hurdak/lib/hurdak'
-import {now, timedelta, randomChoice} from "src/util/misc"
+import {now, timedelta, randomChoice, getLocalJson, setLocalJson} from "src/util/misc"
 import {getTagValues, filterTags} from "src/util/nostr"
 import {db} from 'src/relay/db'
 
@@ -16,7 +16,7 @@ class Channel {
     this.name = name
     this.p = Promise.resolve()
   }
-  async sub(filter, onEvent, onEose = noop) {
+  async sub(filter, onEvent, onEose = noop, timeout = 30000) {
     // If we don't have any relays, we'll wait forever for an eose, but
     // we already know we're done. Use a timeout since callers are
     // expecting this to be async and we run into errors otherwise.
@@ -37,18 +37,23 @@ class Channel {
     // before they can get a new one.
     await p
 
-    // Start our subscription, wait for only one relays to eose before
+    // Start our subscription, wait for only one relay to eose before
     // calling it done. We were waiting for all before, but that made
     // the slowest relay a bottleneck
     const sub = pool.sub({filter, cb: onEvent}, this.name, onEose)
 
-    return {
-      unsub: () => {
-        sub.unsub()
+    const done = () => {
+      sub.unsub()
 
-        resolve()
-      }
+      resolve()
     }
+
+    // If the relay takes to long, just give up
+    if (timeout) {
+      setTimeout(done, 1000)
+    }
+
+    return {unsub: done}
   }
   all(filter) {
     /* eslint no-async-promise-executor: 0 */
@@ -119,12 +124,18 @@ const loadEvents = async filter => {
 
 const subs = {}
 
-const listenForEvents = async (key, filter) => {
+const listenForEvents = async (key, filter, onEvent) => {
   if (subs[key]) {
     subs[key].unsub()
   }
 
-  subs[key] = await sub(filter, db.events.process)
+  subs[key] = await sub(filter, e => {
+    db.events.process(e)
+
+    if (onEvent) {
+      onEvent(e)
+    }
+  })
 }
 
 const loadPeople = pubkeys => {
@@ -145,8 +156,6 @@ const syncNetwork = async () => {
     // Merge the new info into our user
     Object.assign($user, people[$user.pubkey])
 
-    console.log($user)
-
     // Update our user store
     db.user.update(() => $user)
 
@@ -161,27 +170,29 @@ const syncNetwork = async () => {
     ]
   }
 
-  let networkPubkeys = pubkeys
+  let authors = pubkeys
   for (let depth = 0; depth < 1; depth++) {
     const events = await loadPeople(pubkeys)
 
     pubkeys = uniq(filterTags({type: "p"}, events.filter(e => e.kind === 3)))
 
-    networkPubkeys = networkPubkeys.concat(pubkeys)
+    authors = authors.concat(pubkeys)
   }
 
-  db.network.set(networkPubkeys)
-}
+  // Save this for next time
+  db.network.set(authors)
 
-const syncNetworkNotes = () => {
-  const authors = get(db.network)
-  const since = now() - timedelta(30, 'days')
+  // Grab everything since our most recent sync
+  const since = getLocalJson('syncNetwork/lastSync') || now() - timedelta(30, 'days')
 
   loadEvents({kinds: [1, 5, 7], authors, since, until: now()})
-  listenForEvents('networkNotes', {kinds: [1, 5, 7], authors, since: now()})
+  listenForEvents('pool/networkNotes', {kinds: [1, 5, 7], authors, since: now()})
+
+  // Save our position to speed up next page load
+  setLocalJson('syncNetwork/lastSync', now() - timedelta(5, 'minutes'))
 }
 
 export default {
   getPubkey, getRelays, addRelay, removeRelay, setPrivateKey, setPublicKey,
-  publishEvent, loadEvents, syncNetwork, syncNetworkNotes,
+  publishEvent, loadEvents, listenForEvents, syncNetwork,
 }

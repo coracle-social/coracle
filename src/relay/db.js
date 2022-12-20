@@ -18,20 +18,19 @@ window.db = db
 // Some things work better as observables than database tables
 
 db.user = writable(getLocalJson("db/user"))
-db.people = writable(getLocalJson('db.people') || {})
+db.people = writable(getLocalJson('db/people') || {})
 db.network = writable(getLocalJson('db/network') || [])
 db.connections = writable(getLocalJson("db/connections") || [])
 
-db.user.subscribe($user => setLocalJson("coracle/user", $user))
-db.people.subscribe($people => setLocalJson("coracle/people", $people))
-db.network.subscribe($network => setLocalJson("coracle/network", $network))
-db.connections.subscribe($connections => setLocalJson("coracle/connections", $connections))
+db.user.subscribe($user => setLocalJson("db/user", $user))
+db.people.subscribe($people => setLocalJson("db/people", $people))
+db.network.subscribe($network => setLocalJson("db/network", $network))
+db.connections.subscribe($connections => setLocalJson("db/connections", $connections))
 
 // Hooks
 
 db.events.process = async events => {
-  // Only persist ones we care about, the rest can be
-  // ephemeral and used to update people etc
+  // Only persist ones we care about, the rest can be ephemeral and used to update people etc
   const eventsByKind = groupBy(prop('kind'), ensurePlural(events))
   const notesAndReactions = flatten(Object.values(pick([1, 7], eventsByKind)))
   const profileUpdates = flatten(Object.values(pick([0, 3, 12165], eventsByKind)))
@@ -40,7 +39,7 @@ db.events.process = async events => {
   // Persist notes and reactions
   if (notesAndReactions.length > 0) {
     const persistentEvents = notesAndReactions
-      .map(e => ({...e, root: findRoot(e), reply: findReply(e)}))
+      .map(e => ({...e, root: findRoot(e), reply: findReply(e), added_at: now()}))
 
     db.events.bulkPut(persistentEvents)
 

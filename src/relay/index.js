@@ -1,8 +1,9 @@
 import {liveQuery} from 'dexie'
-import {pluck, without, uniqBy, prop, groupBy, concat, uniq, objOf, isNil, identity} from 'ramda'
+import {get} from 'svelte/store'
+import {pluck, uniqBy, groupBy, concat, without, prop, uniq, objOf, isNil, identity} from 'ramda'
 import {ensurePlural, createMap, ellipsize, first} from 'hurdak/lib/hurdak'
 import {escapeHtml} from 'src/util/html'
-import {filterTags, findRoot, findReply} from 'src/util/nostr'
+import {filterTags, findReply, findRoot} from 'src/util/nostr'
 import {db} from 'src/relay/db'
 import pool from 'src/relay/pool'
 
@@ -15,12 +16,25 @@ const lq = f => liveQuery(async () => {
   }
 })
 
+// Filter builders
+
+export const buildNoteContextFilter = async (note, extra = {}) => {
+    const replyId = findReply(note)
+    const filter = [
+      {...extra, kinds: [1, 5, 7], '#e': [note.id]},
+      {kinds: [0], authors: [note.pubkey]}]
+
+    if (replyId && !await db.events.get(replyId)) {
+      filter.push({...extra, kinds: [1], ids: [replyId]})
+    }
+
+    return filter
+}
+
 // Context getters attempt to retrieve from the db and fall back to the network
 
 const ensurePerson = async ({pubkey}) => {
-  const person = await db.people.where('pubkey').equals(pubkey).first()
-
-  await pool.syncPersonInfo({pubkey, ...person})
+  await pool.syncPersonInfo({...prop(pubkey, get(db.people)), pubkey})
 }
 
 const ensureContext = async events => {
@@ -80,6 +94,71 @@ const filterEvents = filter => {
     })
 }
 
+const filterReplies = async (id, filter) => {
+  const tags = db.tags.where('value').equals(id).filter(t => t.mark === 'reply')
+  const ids = pluck('event', await tags.toArray())
+  const replies = await filterEvents({...filter, kinds: [1], ids}).toArray()
+
+  return replies
+}
+
+const filterReactions = async (id, filter) => {
+  const tags = db.tags.where('value').equals(id).filter(t => t.mark === 'reply')
+  const ids = pluck('event', await tags.toArray())
+  const reactions = await filterEvents({...filter, kinds: [7], ids}).toArray()
+
+  return reactions
+}
+
+const findReaction = async (id, filter) =>
+  first(await filterReactions(id, filter))
+
+const countReactions = async (id, filter) =>
+  (await filterReactions(id, filter)).length
+
+const getOrLoadNote = async (id, {showEntire = false} = {}) => {
+  const note = await db.events.get(id)
+
+  if (!note) {
+    return first(await pool.loadEvents({kinds: [1], ids: [id]}))
+  }
+
+  return note
+}
+
+const findNote = async (id, {showEntire = false} = {}) => {
+  const note = await db.events.get(id)
+
+  if (!note) {
+    return
+  }
+
+  const reactions = await filterReactions(note.id)
+  const replies = await filterReplies(note.id)
+  const person = prop(note.pubkey, get(db.people))
+  const html = await renderNote(note, {showEntire})
+
+  let parent = null
+  const parentId = findReply(note)
+  if (parentId) {
+    parent = await db.events.get(parentId)
+
+    if (parent) {
+      parent = {
+        ...parent,
+        reactions: await filterReactions(parent.id),
+        person: prop(parent.pubkey, get(db.people)),
+        html: await renderNote(parent, {showEntire}),
+      }
+    }
+  }
+
+  return {
+    ...note, reactions, person, html, parent,
+    replies: await Promise.all(replies.map(r => findNote(r.id))),
+  }
+}
+
 const annotateChunk = async chunk => {
   const ancestorIds = concat(chunk.map(findRoot), chunk.map(findReply)).filter(identity)
   const ancestors = await filterEvents({kinds: [1], ids: ancestorIds}).toArray()
@@ -108,66 +187,15 @@ const annotateChunk = async chunk => {
   return await Promise.all(Object.keys(notesByRoot).map(findNote))
 }
 
-
-const filterReplies = async (id, filter) => {
-  const tags = db.tags.where('value').equals(id).filter(t => t.mark === 'reply')
-  const ids = pluck('event', await tags.toArray())
-  const replies = await filterEvents({...filter, kinds: [1], ids}).toArray()
-
-  return replies
-}
-
-const filterReactions = async (id, filter) => {
-  const tags = db.tags.where('value').equals(id).filter(t => t.mark === 'reply')
-  const ids = pluck('event', await tags.toArray())
-  const reactions = await filterEvents({...filter, kinds: [7], ids}).toArray()
-
-  return reactions
-}
-
-const findReaction = async (id, filter) =>
-  first(await filterReactions(id, filter))
-
-const countReactions = async (id, filter) =>
-  (await filterReactions(id, filter)).length
-
-const findNote = async (id, {giveUp = false, showEntire = false} = {}) => {
-  const [note, children] = await Promise.all([
-    db.events.get(id),
-    db.events.where('reply').equals(id),
-  ])
-
-  // If we don't have it, try to retrieve it
-  if (!note) {
-    console.warn(`Failed to find context for note ${id}`)
-
-    if (giveUp) {
-      return null
-    }
-
-    await ensureContext(await pool.loadEvents({ids: [id]}))
-
-    return findNote(id, {giveUp: true})
-  }
-
-  const [replies, reactions, person, html] = await Promise.all([
-    children.clone().filter(e => e.kind === 1).toArray(),
-    children.clone().filter(e => e.kind === 7).toArray(),
-    db.people.get(note.pubkey),
-    renderNote(note, {showEntire}),
-  ])
-
-  return {
-    ...note, reactions, person, html,
-    replies: await Promise.all(replies.map(r => findNote(r.id))),
-  }
-}
-
 const renderNote = async (note, {showEntire = false}) => {
+  const $people = get(db.people)
+
   const shouldEllipsize = note.content.length > 500 && !showEntire
   const content = shouldEllipsize ? ellipsize(note.content, 500) : note.content
-  const people = await db.people.where('pubkey').anyOf(filterTags({tag: "p"}, note)).toArray()
-  const peopleByPubkey = createMap('pubkey', people)
+  const peopleByPubkey = createMap(
+    'pubkey',
+    filterTags({tag: "p"}, note).map(k => $people[k]).filter(identity)
+  )
 
   return escapeHtml(content)
     .replace(/\n/g, '<br />')
@@ -199,13 +227,14 @@ const filterAlerts = async (person, filter) => {
 
 const login = ({privkey, pubkey}) => {
   db.user.set({relays: [], muffle: [], petnames: [], updated_at: 0, pubkey, privkey})
+
+  pool.syncNetwork()
 }
 
 const addRelay = url => {
   db.connections.update($connections => $connections.concat(url))
 
   pool.syncNetwork()
-  pool.syncNetworkNotes()
 }
 
 const removeRelay = url => {
@@ -216,7 +245,6 @@ const follow = async pubkey => {
   db.network.update($network => $network.concat(pubkey))
 
   pool.syncNetwork()
-  pool.syncNetworkNotes()
 }
 
 const unfollow = async pubkey => {
@@ -255,7 +283,8 @@ export const network = db.network
 export const connections = db.connections
 
 export default {
-  db, pool, lq, ensurePerson, ensureContext, filterEvents, filterReactions,
-  countReactions, findReaction, filterReplies, findNote, renderNote, filterAlerts,
-  annotateChunk, login, addRelay, removeRelay, follow, unfollow,
+  db, pool, lq, buildNoteContextFilter, ensurePerson, ensureContext, filterEvents,
+  filterReactions, getOrLoadNote,
+  countReactions, findReaction, filterReplies, findNote, annotateChunk, renderNote,
+  filterAlerts, login, addRelay, removeRelay, follow, unfollow,
 }

@@ -1,14 +1,11 @@
 <script>
   import {onDestroy} from 'svelte'
-  import {prop, identity, concat, uniqBy, groupBy} from 'ramda'
-  import {createMap} from 'hurdak/lib/hurdak'
   import {createScroller} from 'src/util/misc'
-  import {findReply, findRoot} from 'src/util/nostr'
   import Spinner from 'src/partials/Spinner.svelte'
   import Note from "src/views/Note.svelte"
   import relay from 'src/relay'
 
-  export let filter
+  export let loadNotes
   export let showParent = false
 
   let notes
@@ -17,35 +14,7 @@
   onDestroy(createScroller(async () => {
     limit += 20
 
-    notes = relay.lq(async () => {
-      const notes = await relay.filterEvents(filter).reverse().sortBy('created_at')
-      const chunk = notes.slice(0, limit)
-      const ancestorIds = concat(chunk.map(findRoot), chunk.map(findReply)).filter(identity)
-      const ancestors = await relay.filterEvents({kinds: [1], ids: ancestorIds}).toArray()
-
-      const allNotes = uniqBy(prop('id'), chunk.concat(ancestors))
-      const notesById = createMap('id', allNotes)
-      const notesByRoot = groupBy(
-        n => {
-          const rootId = findRoot(n)
-          const parentId = findReply(n)
-
-          // Actually dereference the notes in case we weren't able to retrieve them
-          if (notesById[rootId]) {
-            return rootId
-          }
-
-          if (notesById[parentId]) {
-            return parentId
-          }
-
-          return n.id
-        },
-        allNotes
-      )
-
-      return await Promise.all(Object.keys(notesByRoot).map(relay.findNote))
-    })
+    notes = relay.lq(() => loadNotes(limit))
   }))
 </script>
 

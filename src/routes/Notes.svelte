@@ -1,15 +1,72 @@
 <script>
+  import {onMount, onDestroy} from 'svelte'
   import {navigate} from 'svelte-routing'
+  import {findReply} from 'src/util/nostr'
   import Anchor from "src/partials/Anchor.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Notes from "src/views/Notes.svelte"
-  import {timedelta} from 'src/util/misc'
-  import relay, {user, connections} from 'src/relay'
+  import {now, timedelta} from 'src/util/misc'
+  import relay, {network, connections} from 'src/relay'
 
   export let activeTab
 
-  const authors = $user ? $user.petnames.map(t => t[1]) : []
+  let sub
+  let delta = timedelta(1, 'minutes')
+  let since = now() - delta
+
+  onMount(async () => {
+    sub = await subscribe(now())
+  })
+
+  onDestroy(() => {
+    if (sub) {
+      sub.unsub()
+    }
+  })
+
   const setActiveTab = tab => navigate(`/notes/${tab}`)
+
+  const subscribe = until =>
+    relay.pool.listenForEvents(
+      'routes/Notes',
+      [{kinds: [1, 5, 7], since, until}],
+      async e => {
+        if (e.kind === 1) {
+          const filter = await relay.buildNoteContextFilter(e, {since})
+
+          await relay.pool.loadEvents(filter)
+        }
+
+        if (e.kind === 7) {
+          const replyId = findReply(e)
+
+          if (replyId && !await relay.db.events.get(replyId)) {
+            await relay.pool.loadEvents({kinds: [1], ids: [replyId]})
+          }
+
+        }
+      }
+    )
+
+  const loadNetworkNotes = async limit => {
+    const filter = {kinds: [1], authors: $network}
+    const notes = await relay.filterEvents(filter).reverse().sortBy('created_at')
+
+    return relay.annotateChunk(notes.slice(0, limit))
+  }
+
+  const loadGlobalNotes = async limit => {
+    const filter = {kinds: [1], since}
+    const notes = await relay.filterEvents(filter).reverse().sortBy('created_at')
+
+    if (notes.length < limit) {
+      since -= delta
+
+      sub = await subscribe(since + delta)
+    }
+
+    return relay.annotateChunk(notes.slice(0, limit))
+  }
 </script>
 
 {#if $connections.length === 0}
@@ -21,17 +78,11 @@
   </div>
 </div>
 {:else}
-<Tabs tabs={['global', 'follows']} {activeTab} {setActiveTab} />
-{#if activeTab === 'follows' && authors.length === 0}
-<div class="flex w-full justify-center items-center py-16">
-  <div class="text-center max-w-md">
-    You haven't yet followed anyone. Visit a person's profile to follow them.
-  </div>
-</div>
-{:else if activeTab === 'follows'}
-<Notes filter={{kinds: [1], authors}} shouldMuffle />
+<Tabs tabs={['network', 'global']} {activeTab} {setActiveTab} />
+{#if activeTab === 'network'}
+<Notes shouldMuffle loadNotes={loadNetworkNotes} />
 {:else}
-<Notes delta={timedelta(5, 'minutes')} filter={{kinds: [1]}} shouldMuffle />
+<Notes shouldMuffle loadNotes={loadGlobalNotes} />
 {/if}
 <div class="fixed bottom-0 right-0 p-8">
   <a

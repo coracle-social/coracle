@@ -28,7 +28,7 @@
   let likes, flags, like, flag
 
   $: {
-    likes = note.reactions.filter(whereEq({content: '+'}))
+    likes = note.reactions.filter(n => ['', '+'].includes(n.content))
     flags = note.reactions.filter(whereEq({content: '-'}))
     like = find(whereEq({pubkey: $user?.pubkey}), likes)
     flag = find(whereEq({pubkey: $user?.pubkey}), flags)

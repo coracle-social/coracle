@@ -85,12 +85,15 @@ export const copyTags = (e, newTags = []) => {
   // Remove reply type from e tags
   return uniqBy(
     t => t.join(':'),
-    e.tags.map(t => last(t) === 'reply' ? t.slice(0, -1) : t).concat(newTags)
+    e.tags
+      .filter(t => ["p", "e"].includes(t[0]))
+      .map(t => last(t) === 'reply' ? t.slice(0, -1) : t)
+      .concat(newTags)
   )
 }
 
 export const t = (type, content, marker) => {
-  const tag = [type, content, first(Object.keys(relay.pool.relays))]
+  const tag = [type, content, first(Object.keys(relay.pool.getRelays()))]
 
   if (!isNil(marker)) {
     tag.push(marker)

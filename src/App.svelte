@@ -3,7 +3,7 @@
   import "@fortawesome/fontawesome-free/css/solid.css"
 
   import {onMount} from "svelte"
-  import {writable} from "svelte/store"
+  import {writable, get} from "svelte/store"
   import {fly, fade} from "svelte/transition"
   import {cubicInOut} from "svelte/easing"
   import {throttle} from 'throttle-debounce'
@@ -13,7 +13,7 @@
   import {timedelta} from 'src/util/misc'
   import {store as toast} from "src/state/toast"
   import {modal, alerts} from "src/state/app"
-  import relay, {user} from 'src/relay'
+  import relay, {user, connections} from 'src/relay'
   import Anchor from 'src/partials/Anchor.svelte'
   import NoteDetail from "src/views/NoteDetail.svelte"
   import PersonSettings from "src/views/PersonSettings.svelte"
@@ -52,22 +52,34 @@
   const logout = () => {
     // Give any animations a moment to finish
     setTimeout(() => {
+      const $connections = get(connections)
+
       localStorage.clear()
-      relay.db.delete()
+
+      // Keep relays around
+      relay.db.events.clear()
+      relay.db.tags.clear()
+
+      // Remember the user's relay selection
+      connections.set($connections)
 
       // Do a hard refresh so everything gets totally cleared
       window.location = '/login'
     }, 200)
   }
 
-  // Close menu on click outside
-  document.querySelector("html").addEventListener("click", e => {
-    if (e.target !== menuIcon) {
-      menuIsOpen.set(false)
-    }
-  })
+  if ($user) {
+    relay.pool.syncNetwork()
+  }
 
   onMount(() => {
+    // Close menu on click outside
+    document.querySelector("html").addEventListener("click", e => {
+      if (e.target !== menuIcon) {
+        menuIsOpen.set(false)
+      }
+    })
+
     return modal.subscribe($modal => {
       // Keep scroll position on body, but don't allow scrolling
       if ($modal) {
@@ -137,7 +149,7 @@
         </a>
       </li>
       <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes/global">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes/network">
           <i class="fa-solid fa-tag mr-2" /> Notes
         </a>
       </li>

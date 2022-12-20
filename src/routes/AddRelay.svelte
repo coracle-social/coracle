@@ -2,7 +2,6 @@
   import {fly} from 'svelte/transition'
   import toast from 'src/state/toast'
   import {modal} from 'src/state/app'
-  import {dispatch} from 'src/state/dispatch'
   import Input from 'src/partials/Input.svelte'
   import Button from 'src/partials/Button.svelte'
   import relay from 'src/relay'
@@ -17,7 +16,7 @@
       return toast.show("error", 'That isn\'t a valid websocket url - relay urls should start with "wss://"')
     }
 
-    relay.db.relays.put(url)
+    relay.db.relays.put({url})
     relay.addRelay(url)
     modal.set(null)
   }
