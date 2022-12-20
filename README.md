@@ -14,13 +14,13 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 - [x] Notifications
 - [x] Link previews
 - [x] Add notes, follows, likes tab to profile
-- [ ] Add a coracle relay
 - [ ] Mentions - render done, now reference in compose
 - [ ] Image uploads
 - [ ] An actual readme
 - [ ] Server discovery and relay publishing - https://github.com/nostr-protocol/nips/pull/32/files
 - [ ] Support invoices https://twitter.com/jb55/status/1604131336247476224
 - [ ] Indexing server
+- [ ] Add a coracle relay
 
 # Bugs
 
@@ -35,8 +35,9 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 - [ ] We're sending client=astral tags, event id 125ff9dc495f65d302e8d95ea6f9385106cc31b81c80e8c582b44be92fa50c44
 - [ ] Add notification for slow relays
 - [ ] Wait for 60% or so of relays to eose to balance completeness with speed
+- [ ] Add a CSP
 
-# Curreent update
+# Current update
 
 - [ ] Re-implement muffle
 - [ ] Delete old events
@@ -62,3 +63,9 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
   - Fetch note, including context
   - This is based on detail pages. Each request should check local db and fall back to network, all within an await.
 - [ ] How will newcomers get followed?
+
+# Quick fixes
+
+- Add default relay and relay list
+- Show relay nav item when no user
+- check security = user.name, image, use https://github.com/cure53/DOMPurify
