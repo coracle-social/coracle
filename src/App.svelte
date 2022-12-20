@@ -132,15 +132,15 @@
         </a>
       </li>
       <li class="h-px mx-3 my-4 bg-medium" />
+      <li class="cursor-pointer">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/relays">
+          <i class="fa-solid fa-server mr-2" /> Relays
+        </a>
+      </li>
       {#if $user}
       <li class="cursor-pointer">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/keys">
           <i class="fa-solid fa-key mr-2" /> Keys
-        </a>
-      </li>
-      <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/relays">
-          <i class="fa-solid fa-server mr-2" /> Relays
         </a>
       </li>
       <li class="cursor-pointer">

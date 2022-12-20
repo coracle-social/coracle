@@ -246,7 +246,12 @@ nostr.event = (kind, content = '', tags = []) => {
 
 // Keep track of known relays
 
-export const knownRelays = writable(getLocalJson("coracle/knownRelays") || [])
+export const knownRelays = writable(getLocalJson("coracle/knownRelays") || [
+  {url: 'wss://satstacker.cloud'},
+  {url: 'wss://nostr.drss.io'},
+  {url: 'wss://nostr-pub.semisol.dev'},
+  {url: 'wss://nostr-relay.untethr.me'},
+])
 
 knownRelays.subscribe($knownRelays => {
   setLocalJson("coracle/knownRelays", $knownRelays)
