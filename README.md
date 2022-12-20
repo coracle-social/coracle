@@ -20,6 +20,7 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 - [ ] An actual readme
 - [ ] Server discovery and relay publishing - https://github.com/nostr-protocol/nips/pull/32/files
 - [ ] Support invoices https://twitter.com/jb55/status/1604131336247476224
+- [ ] Indexing server
 
 # Bugs
 
@@ -33,6 +34,7 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 - [ ] Stack views so scroll position isn't lost on navigation
 - [ ] We're sending client=astral tags, event id 125ff9dc495f65d302e8d95ea6f9385106cc31b81c80e8c582b44be92fa50c44
 - [ ] Add notification for slow relays
+- [ ] Wait for 60% or so of relays to eose to balance completeness with speed
 
 # Curreent update
 
@@ -49,6 +51,11 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 - [x] Sync user
 - [x] Based on petnames, sync network to 2 or 3 degrees of separation
   - When a user is added/removed, sync them and add to or remove from network
+- [ ] Add cursor object to handle since/until/last sync
+- [ ] Separate fetching and loading from the db
+  - Each route should have a fetcher and loader.
+  - The fetcher should keep track of the range of notes it has already gotten
+  - Separate helper functions into loaders and fetchers
 - [ ] Main fetch requests:
   - Fetch feed by name, since last sync
   - Fetch person, including feed

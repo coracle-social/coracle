@@ -174,22 +174,12 @@ const syncNetwork = async () => {
   for (let depth = 0; depth < 1; depth++) {
     const events = await loadPeople(pubkeys)
 
-    pubkeys = uniq(filterTags({type: "p"}, events.filter(e => e.kind === 3)))
-
-    authors = authors.concat(pubkeys)
+    pubkeys = filterTags({type: "p"}, events.filter(e => e.kind === 3))
+    authors = uniq(authors.concat(pubkeys))
   }
 
   // Save this for next time
   db.network.set(authors)
-
-  // Grab everything since our most recent sync
-  const since = getLocalJson('syncNetwork/lastSync') || now() - timedelta(30, 'days')
-
-  loadEvents({kinds: [1, 5, 7], authors, since, until: now()})
-  listenForEvents('pool/networkNotes', {kinds: [1, 5, 7], authors, since: now()})
-
-  // Save our position to speed up next page load
-  setLocalJson('syncNetwork/lastSync', now() - timedelta(5, 'minutes'))
 }
 
 export default {

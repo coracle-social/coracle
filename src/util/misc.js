@@ -83,8 +83,8 @@ export const createScroller = loadMore => {
 
 export const randomChoice = xs => xs[Math.floor(Math.random() * xs.length)]
 
-export const getLastSync = (keyParts, fallback) => {
-  const key = `${keyParts.join('.')}/lastSync`
+export const getLastSync = (k, fallback) => {
+  const key = `${k}/lastSync`
   const lastSync = getLocalJson(key) || fallback
 
   setLocalJson(key, now())

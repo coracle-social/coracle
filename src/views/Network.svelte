@@ -8,11 +8,8 @@
   import {now, timedelta} from 'src/util/misc'
   import relay, {network, connections} from 'src/relay'
 
-  export let activeTab
-
   let sub
-  let delta = timedelta(1, 'minutes')
-  let since = now() - delta
+  let since = getLastSync('views/Network')
 
   onMount(async () => {
     sub = await subscribe(now())
@@ -28,8 +25,8 @@
 
   const subscribe = until =>
     relay.pool.listenForEvents(
-      'routes/Notes',
-      [{kinds: [1, 5, 7], since, until}],
+      'views/Network',
+      [{kinds: [1, 5, 7], authors: $network, since, until}],
       async e => {
         if (e.kind === 1) {
           const filter = await relay.buildNoteContextFilter(e, {since})
@@ -48,49 +45,19 @@
       }
     )
 
-  const loadNetworkNotes = async limit => {
+  const loadNotes = async limit => {
     const filter = {kinds: [1], authors: $network}
     const notes = await relay.filterEvents(filter).reverse().sortBy('created_at')
 
-    return relay.annotateChunk(notes.slice(0, limit))
-  }
-
-  const loadGlobalNotes = async limit => {
-    const filter = {kinds: [1], since}
-    const notes = await relay.filterEvents(filter).reverse().sortBy('created_at')
-
     if (notes.length < limit) {
-      since -= delta
+      until = notes.reduce((t, n) => Math.min(n.created_at), since)
+      since = until - timedelta(1, 'hours')
 
-      sub = await subscribe(since + delta)
+      sub = await subscribe(since)
     }
 
     return relay.annotateChunk(notes.slice(0, limit))
   }
 </script>
 
-{#if $connections.length === 0}
-<div class="flex w-full justify-center items-center py-16">
-  <div class="text-center max-w-md">
-    You aren't yet connected to any relays. Please click <Anchor href="/relays"
-      >here</Anchor
-    > to get started.
-  </div>
-</div>
-{:else}
-<Tabs tabs={['network', 'global']} {activeTab} {setActiveTab} />
-{#if activeTab === 'network'}
-<Network />
-{:else}
-<Notes shouldMuffle loadNotes={loadGlobalNotes} />
-{/if}
-<div class="fixed bottom-0 right-0 p-8">
-  <a
-    href="/notes/new"
-    class="rounded-full bg-accent color-white w-16 h-16 flex justify-center
-            items-center border border-dark shadow-2xl cursor-pointer">
-    <span class="fa-sold fa-plus fa-2xl" />
-  </a>
-</div>
-{/if}
-
+<Notes shouldMuffle loadNotes={loadNotes} />
