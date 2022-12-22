@@ -8,6 +8,7 @@ import {db} from 'src/relay/db'
 import pool from 'src/relay/pool'
 
 // Livequery appears to swallow errors
+
 const lq = f => liveQuery(async () => {
   try {
     return await f()
@@ -31,36 +32,7 @@ export const buildNoteContextFilter = async (note, extra = {}) => {
     return filter
 }
 
-// Context getters attempt to retrieve from the db and fall back to the network
-
-const ensurePerson = async ({pubkey}) => {
-  await pool.syncPersonInfo({...prop(pubkey, get(db.people)), pubkey})
-}
-
-const ensureContext = async events => {
-  const promises = []
-  const people = uniq(pluck('pubkey', events)).map(objOf('pubkey'))
-  const ids = events.flatMap(e => filterTags({tag: "e"}, e).concat(e.id))
-
-  if (people.length > 0) {
-    for (const p of people.map(ensurePerson)) {
-      promises.push(p)
-    }
-  }
-
-  if (ids.length > 0) {
-    promises.push(
-      pool.loadEvents([
-        {kinds: [1, 5, 7], '#e': ids},
-        {kinds: [1, 5], ids},
-      ])
-    )
-  }
-
-  await Promise.all(promises)
-}
-
-// Utils for qurying dexie
+// Utils for querying dexie - these return collections, not arrays
 
 const prefilterEvents = filter => {
   if (filter.ids) {
@@ -78,7 +50,7 @@ const prefilterEvents = filter => {
   return db.events
 }
 
-// Utils for filtering db
+// Utils for filtering db - nothing below should load events from the network
 
 const filterEvents = filter => {
   return prefilterEvents(filter)
@@ -108,22 +80,6 @@ const filterReactions = async (id, filter) => {
   const reactions = await filterEvents({...filter, kinds: [7], ids}).toArray()
 
   return reactions
-}
-
-const findReaction = async (id, filter) =>
-  first(await filterReactions(id, filter))
-
-const countReactions = async (id, filter) =>
-  (await filterReactions(id, filter)).length
-
-const getOrLoadNote = async (id, {showEntire = false} = {}) => {
-  const note = await db.events.get(id)
-
-  if (!note) {
-    return first(await pool.loadEvents({kinds: [1], ids: [id]}))
-  }
-
-  return note
 }
 
 const findNote = async (id, {showEntire = false} = {}) => {
@@ -251,6 +207,19 @@ const unfollow = async pubkey => {
   db.network.update($network => $network.concat(pubkey))
 }
 
+// Methods that wil attempt to load from the database and fall back to the network.
+// This is intended only for bootstrapping listeners
+
+const getOrLoadNote = async (id, {showEntire = false} = {}) => {
+  const note = await db.events.get(id)
+
+  if (!note) {
+    return first(await pool.loadEvents({kinds: [1], ids: [id]}))
+  }
+
+  return note
+}
+
 // Initialization
 
 db.user.subscribe($user => {
@@ -277,14 +246,15 @@ db.connections.subscribe($connections => {
   }
 })
 
+// Export stores on their own for convenience
+
 export const user = db.user
 export const people = db.people
 export const network = db.network
 export const connections = db.connections
 
 export default {
-  db, pool, lq, buildNoteContextFilter, ensurePerson, ensureContext, filterEvents,
-  filterReactions, getOrLoadNote,
-  countReactions, findReaction, filterReplies, findNote, annotateChunk, renderNote,
-  filterAlerts, login, addRelay, removeRelay, follow, unfollow,
+  db, pool, lq, buildNoteContextFilter, filterEvents, getOrLoadNote,
+  filterReplies, findNote, annotateChunk, renderNote, filterAlerts,
+  login, addRelay, removeRelay, follow, unfollow,
 }

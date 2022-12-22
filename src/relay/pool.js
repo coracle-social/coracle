@@ -1,8 +1,7 @@
-import {uniqBy, prop, uniq} from 'ramda'
+import {uniqBy, find, propEq, prop, uniq} from 'ramda'
 import {get} from 'svelte/store'
 import {relayPool, getPublicKey} from 'nostr-tools'
-import {noop, range} from 'hurdak/lib/hurdak'
-import {now, timedelta, randomChoice, getLocalJson, setLocalJson} from "src/util/misc"
+import {noop, range, sleep} from 'hurdak/lib/hurdak'
 import {getTagValues, filterTags} from "src/util/nostr"
 import {db} from 'src/relay/db'
 
@@ -14,9 +13,15 @@ const pool = relayPool()
 class Channel {
   constructor(name) {
     this.name = name
-    this.p = Promise.resolve()
+    this.status = 'idle'
   }
-  async sub(filter, onEvent, onEose = noop, timeout = 30000) {
+  claim() {
+    this.status = 'busy'
+  }
+  release() {
+    this.status = 'idle'
+  }
+  sub(filter, onEvent, onEose = noop, opts = {}) {
     // If we don't have any relays, we'll wait forever for an eose, but
     // we already know we're done. Use a timeout since callers are
     // expecting this to be async and we run into errors otherwise.
@@ -26,17 +31,6 @@ class Channel {
       return {unsub: noop}
     }
 
-    // Grab our spot in the queue, save resolve for later
-    let resolve
-    let p = this.p
-    this.p = new Promise(r => {
-      resolve = r
-    })
-
-    // Make sure callers have to wait for the previous sub to be done
-    // before they can get a new one.
-    await p
-
     // Start our subscription, wait for only one relay to eose before
     // calling it done. We were waiting for all before, but that made
     // the slowest relay a bottleneck
@@ -45,22 +39,22 @@ class Channel {
     const done = () => {
       sub.unsub()
 
-      resolve()
+      this.release()
     }
 
     // If the relay takes to long, just give up
-    if (timeout) {
-      setTimeout(done, 1000)
+    if (opts.timeout) {
+      setTimeout(done, opts.timeout)
     }
 
     return {unsub: done}
   }
-  all(filter) {
+  all(filter, opts = {}) {
     /* eslint no-async-promise-executor: 0 */
     return new Promise(async resolve => {
       const result = []
 
-      const sub = await this.sub(
+      const sub = this.sub(
         filter,
         e => result.push(e),
         r => {
@@ -68,6 +62,7 @@ class Channel {
 
           resolve(uniqBy(prop('id'), result))
         },
+        {timeout: 30000, ...opts},
       )
     })
   }
@@ -75,8 +70,25 @@ class Channel {
 
 export const channels = range(0, 10).map(i => new Channel(i.toString()))
 
-const req = (...args) => randomChoice(channels).all(...args)
-const sub = (...args) => randomChoice(channels).sub(...args)
+const getChannel = async () => {
+  /*eslint no-constant-condition: 0*/
+
+  // Find a channel that isn't busy, or wait for one to become available
+  while (true) {
+    const channel = find(propEq('status', 'idle'), channels)
+
+    if (channel) {
+      channel.claim()
+
+      return channel
+    }
+
+    await sleep(300)
+  }
+}
+
+const req = async (...args) => (await getChannel()).all(...args)
+const sub = async (...args) => (await getChannel()).sub(...args)
 
 const getPubkey = () => {
   return pool._pubkey || getPublicKey(pool._privkey)
@@ -122,14 +134,12 @@ const loadEvents = async filter => {
   return events
 }
 
-const subs = {}
-
 const listenForEvents = async (key, filter, onEvent) => {
-  if (subs[key]) {
-    subs[key].unsub()
+  if (listenForEvents.subs[key]) {
+    listenForEvents.subs[key].unsub()
   }
 
-  subs[key] = await sub(filter, e => {
+  listenForEvents.subs[key] = await sub(filter, e => {
     db.events.process(e)
 
     if (onEvent) {
@@ -138,8 +148,14 @@ const listenForEvents = async (key, filter, onEvent) => {
   })
 }
 
-const loadPeople = pubkeys => {
-  return pubkeys.length ? loadEvents({kinds: [0, 3, 12165], authors: pubkeys}) : []
+listenForEvents.subs = {}
+
+const loadPeople = (pubkeys, opts = {}) => {
+  if (pubkeys.length === 0) {
+    return []
+  }
+
+  return loadEvents({kinds: [0, 3, 12165], authors: pubkeys}, opts)
 }
 
 const syncNetwork = async () => {
@@ -148,7 +164,7 @@ const syncNetwork = async () => {
   let pubkeys = []
   if ($user) {
     // Get this user's profile to start with
-    await loadPeople([$user.pubkey])
+    await loadPeople([$user.pubkey], {timeout: null})
 
     // Get our refreshed person
     const people = get(db.people)

@@ -7,7 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import toast from "src/state/toast"
-  import relay from 'src/relay'
+  import relay, {connections} from 'src/relay'
 
   let privkey = ''
   let hasExtension = false
@@ -30,10 +30,14 @@
     toast.show("info", "Your private key has been re-generated.")
   }
 
-  const logIn = ({privkey, pubkey}) => {
+  const logIn = async ({privkey, pubkey}) => {
     relay.login({privkey, pubkey})
 
-    navigate('/relays')
+    if ($connections.length === 0) {
+      navigate('/relays')
+    } else {
+      navigate('/notes/network')
+    }
   }
 
   const logInWithExtension = async () => {

@@ -4,69 +4,14 @@
   import {findReply} from 'src/util/nostr'
   import Anchor from "src/partials/Anchor.svelte"
   import Tabs from "src/partials/Tabs.svelte"
-  import Notes from "src/views/Notes.svelte"
+  import Network from "src/views/notes/Network.svelte"
+  import Global from "src/views/notes/Global.svelte"
   import {now, timedelta} from 'src/util/misc'
-  import relay, {network, connections} from 'src/relay'
+  import relay, {connections} from 'src/relay'
 
   export let activeTab
 
-  let sub
-  let delta = timedelta(1, 'minutes')
-  let since = now() - delta
-
-  onMount(async () => {
-    sub = await subscribe(now())
-  })
-
-  onDestroy(() => {
-    if (sub) {
-      sub.unsub()
-    }
-  })
-
   const setActiveTab = tab => navigate(`/notes/${tab}`)
-
-  const subscribe = until =>
-    relay.pool.listenForEvents(
-      'routes/Notes',
-      [{kinds: [1, 5, 7], since, until}],
-      async e => {
-        if (e.kind === 1) {
-          const filter = await relay.buildNoteContextFilter(e, {since})
-
-          await relay.pool.loadEvents(filter)
-        }
-
-        if (e.kind === 7) {
-          const replyId = findReply(e)
-
-          if (replyId && !await relay.db.events.get(replyId)) {
-            await relay.pool.loadEvents({kinds: [1], ids: [replyId]})
-          }
-
-        }
-      }
-    )
-
-  const loadNetworkNotes = async limit => {
-    const filter = {kinds: [1], authors: $network}
-    const notes = await relay.filterEvents(filter).reverse().sortBy('created_at')
-
-    return relay.annotateChunk(notes.slice(0, limit))
-  }
-
-  const loadGlobalNotes = async limit => {
-    const filter = {kinds: [1], since}
-    const notes = await relay.filterEvents(filter).reverse().sortBy('created_at')
-
-    if (notes.length < limit) {
-      since -= delta
-
-      sub = await subscribe(since + delta)
-    }
-
-    return relay.annotateChunk(notes.slice(0, limit))
-  }
 </script>
 
 {#if $connections.length === 0}
@@ -82,7 +27,7 @@
 {#if activeTab === 'network'}
 <Network />
 {:else}
-<Notes shouldMuffle loadNotes={loadGlobalNotes} />
+<Global />
 {/if}
 <div class="fixed bottom-0 right-0 p-8">
   <a

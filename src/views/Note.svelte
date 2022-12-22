@@ -50,10 +50,30 @@
     } else {
       navigate('/login')
     }
+
+    if (content === '+') {
+      like = true
+      likes += 1
+    }
+
+    if (content === '-') {
+      flag = true
+      flags += 1
+    }
   }
 
   const deleteReaction = e => {
     dispatch('event/delete', [e.id])
+
+    if (e.content === '+') {
+      like = false
+      likes -= 1
+    }
+
+    if (e.content === '-') {
+      flag = false
+      flags -= 1
+    }
   }
 
   const startReply = () => {

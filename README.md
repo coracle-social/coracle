@@ -40,9 +40,9 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 # Current update
 
 - [ ] Re-implement muffle
+  - Don't store muffled events, when muffle changes delete them
 - [ ] Delete old events
 - [ ] Sync account updates to user for e.g. muffle settings
-- [ ] Test nos2x
 - [ ] Make sure login/out, no user usage works
 - [ ] Add a re-sync/clear cache button
 - https://vitejs.dev/guide/features.html#web-workers

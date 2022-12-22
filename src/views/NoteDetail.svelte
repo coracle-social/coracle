@@ -8,7 +8,6 @@
   export let note
 
   let observable, sub
-  let since = getLastSync(['NoteDetail', note.id])
 
   onMount(async () => {
     note = await relay.getOrLoadNote(note.id)
@@ -16,7 +15,7 @@
     if (note) {
       sub = await relay.pool.listenForEvents(
         'routes/NoteDetail',
-        await relay.buildNoteContextFilter(note, {since})
+        await relay.buildNoteContextFilter(note)
       )
     }
   })

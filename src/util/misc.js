@@ -51,23 +51,23 @@ export const formatTimestamp = ts => {
 export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 export const createScroller = loadMore => {
-  /* eslint no-constant-condition: 0 */
-
   let done = false
-
+  let didLoad = false
   const check = async () => {
     // While we have empty space, fill it
     const {scrollY, innerHeight} = window
     const {scrollHeight} = document.body
+    const shouldLoad = scrollY + innerHeight + 300 > scrollHeight
 
-    if (scrollY + innerHeight + 2000 > scrollHeight) {
+    // Only trigger loading the first time we reach the threshhold
+    if (shouldLoad && !didLoad) {
       await loadMore()
     }
 
-    // This is a gross hack, basically, keep loading if the user doesn't scroll again,
-    // but wait a long time because otherwise we'll send off multiple concurrent requests
-    // that will clog up our channels and stall the app.
-    await sleep(30000)
+    didLoad = shouldLoad
+
+    // No need to check all that often
+    await sleep(300)
 
     if (!done) {
       requestAnimationFrame(check)
@@ -90,4 +90,17 @@ export const getLastSync = (k, fallback) => {
   setLocalJson(key, now())
 
   return lastSync
+}
+
+export class Cursor {
+  constructor(since, delta) {
+    this.since = since || now() - delta,
+    this.delta = delta
+  }
+  step() {
+    const until = this.since
+    this.since -= this.delta
+
+    return [this.since, until]
+  }
 }

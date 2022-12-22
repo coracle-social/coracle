@@ -12,7 +12,7 @@
   import {hasParent} from 'src/util/html'
   import {timedelta} from 'src/util/misc'
   import {store as toast} from "src/state/toast"
-  import {modal, alerts} from "src/state/app"
+  import {modal, alerts, settings} from "src/state/app"
   import relay, {user, connections} from 'src/relay'
   import Anchor from 'src/partials/Anchor.svelte'
   import NoteDetail from "src/views/NoteDetail.svelte"
@@ -53,6 +53,7 @@
     // Give any animations a moment to finish
     setTimeout(() => {
       const $connections = get(connections)
+      const $settings = get(settings)
 
       localStorage.clear()
 
@@ -60,8 +61,9 @@
       relay.db.events.clear()
       relay.db.tags.clear()
 
-      // Remember the user's relay selection
+      // Remember the user's relay selection and settings
       connections.set($connections)
+      settings.set($settings)
 
       // Do a hard refresh so everything gets totally cleared
       window.location = '/login'
