@@ -19,11 +19,13 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 - [ ] An actual readme
 - [ ] Server discovery and relay publishing - https://github.com/nostr-protocol/nips/pull/32/files
 - [ ] Support invoices https://twitter.com/jb55/status/1604131336247476224
-- [ ] Indexing server
-- [ ] Add a coracle relay
+- [ ] Expand/collapse large threads
+- [ ] Don't send note on enter, allow linebreaks
+- [ ] NIP 05
 
 # Bugs
 
+- [ ] Use https://nostr.watch/relays.json to populate relays
 - [ ] Completely redo notes fetching, it's buggy as heck
   - [ ] uniq and sortBy are sprinkled all over the place, figure out a better solution
   - [ ] Search page is slow and likes don't show up. Probably move this server-side
@@ -35,16 +37,22 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 - [ ] We're sending client=astral tags, event id 125ff9dc495f65d302e8d95ea6f9385106cc31b81c80e8c582b44be92fa50c44
 - [ ] Add notification for slow relays
 - [ ] Wait for 60% or so of relays to eose to balance completeness with speed
-- [ ] Add a CSP
+- [ ] Add a CSP, check for XSS in image urls
 
 # Current update
 
+- [ ] Add depth to findNote
+- [ ] Add date to alerts
 - [ ] Re-implement muffle
   - Don't store muffled events, when muffle changes delete them
 - [ ] Delete old events
 - [ ] Sync account updates to user for e.g. muffle settings
 - [ ] Make sure login/out, no user usage works
 - [ ] Add a re-sync/clear cache button
+- [ ] Note detail context not showing when navigating between note details (e.g. to parent)
+- [ ] Show reply to on feed
+- [ ] Write blog post
+- [ ] Get rid of dispatch
 - https://vitejs.dev/guide/features.html#web-workers
 - https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers
 - https://web.dev/module-workers/
@@ -52,20 +60,17 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 - [x] Sync user
 - [x] Based on petnames, sync network to 2 or 3 degrees of separation
   - When a user is added/removed, sync them and add to or remove from network
-- [ ] Add cursor object to handle since/until/last sync
-- [ ] Separate fetching and loading from the db
+- [x] Add cursor object to handle since/until/last sync
+- [x] Separate fetching and loading from the db
   - Each route should have a fetcher and loader.
   - The fetcher should keep track of the range of notes it has already gotten
   - Separate helper functions into loaders and fetchers
-- [ ] Main fetch requests:
+- [x] Main fetch requests:
   - Fetch feed by name, since last sync
   - Fetch person, including feed
   - Fetch note, including context
   - This is based on detail pages. Each request should check local db and fall back to network, all within an await.
+
+# Problems to solve
+
 - [ ] How will newcomers get followed?
-
-# Quick fixes
-
-- Add default relay and relay list
-- Show relay nav item when no user
-- check security = user.name, image, use https://github.com/cure53/DOMPurify

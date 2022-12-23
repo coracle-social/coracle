@@ -1,55 +1,119 @@
 <script>
+  import {propEq, uniqBy, prop, sortBy} from 'ramda'
+  import {onMount, onDestroy} from 'svelte'
   import {fly} from 'svelte/transition'
-  import {now} from 'src/util/misc'
   import {findReply} from 'src/util/nostr'
-  import {ellipsize} from 'hurdak/src/core'
-  import relay, {user} from 'src/relay'
-  import {alerts, modal} from 'src/state/app'
-  import Badge from "src/partials/Badge.svelte"
-  import Note from 'src/views/Note.svelte'
+  import relay, {people, user} from 'src/relay'
+  import {alerts} from 'src/state/app'
+  import {now, timedelta, createScroller, Cursor, getLastSync} from 'src/util/misc'
+  import Spinner from "src/partials/Spinner.svelte"
+  import Note from 'src/partials/Note.svelte'
+  import Like from 'src/partials/Like.svelte'
 
-  const events = relay.lq(async () => {
-    const alerts = await relay.filterAlerts($user)
-    const events = await alerts.limit(10).reverse().sortBy('created_at')
+  let sub
+  let scroller
+  let notes
+  let limit = 0
 
-    return events
-      // Add parent in
-      .map(e => ({...e, parent: relay.filterEvents({ids: [findReply(e)]}).first()}))
-      // Only show stuff if it's a direct reply to my note
-      .filter(e => e.parent?.pubkey === $user.pubkey)
+  const cursor = new Cursor(
+    getLastSync('routes/Alerts'),
+    timedelta(1, 'days')
+  )
+
+  onMount(async () => {
+    sub = await relay.pool.listenForEvents(
+      'routes/Alerts',
+      [{kinds: [1, 7], '#p': [$user.pubkey], since: cursor.since}],
+      onEvent
+    )
+
+    scroller = createScroller(async () => {
+      limit += 20
+
+      notes = relay.lq(() => loadNotes(limit))
+    })
   })
+
+  onDestroy(() => {
+    sub?.unsub()
+    scroller?.stop()
+  })
+
+  const onEvent = e => {
+    if (e.kind === 1) {
+      relay.loadNoteContext(e)
+    }
+
+    if (e.kind === 7) {
+      const replyId = findReply(e)
+
+      if (replyId) {
+        relay.getOrLoadNote(replyId)
+      }
+    }
+  }
+
+  const loadNotes = async limit => {
+    const events = await relay.filterAlerts($user, limit + 1)
+    const notes = await relay.annotateChunk(events.filter(propEq('kind', 1)))
+    const reactions = await Promise.all(
+      events
+        .filter(e => e.kind === 7)
+        .map(async e => ({
+          ...e,
+          person: $people[e.pubkey] || {pubkey: e.pubkey},
+          parent: await relay.findNote(findReply(e)),
+        }))
+    )
+
+    if (events.length <= limit) {
+      const [since, until] = cursor.step()
+
+      relay.pool.loadEvents(
+        [{kinds: [1, 7], '#p': [$user.pubkey], since, until}],
+        onEvent
+      )
+    } else {
+      setTimeout(scroller.check, 300)
+    }
+
+    // Combine likes of a single note
+    const likesById = {}
+    const alerts = notes.filter(e => e.pubkey !== $user.pubkey)
+    for (const reaction of reactions) {
+      if (!likesById[reaction.parent.id]) {
+        likesById[reaction.parent.id] = {...reaction.parent, people: []}
+      }
+
+      likesById[reaction.parent.id].people.push(reaction.person)
+    }
+
+    return sortBy(
+      e => -e.created_at,
+      uniqBy(prop('id'), alerts.concat(Object.values(likesById)))
+    )
+  }
 
   // Clear notification badge
   alerts.set({since: now()})
 </script>
 
 <ul class="py-4 flex flex-col gap-2 max-w-xl m-auto">
-  {#each ($events || []) as e (e.id)}
-  {#if e.kind === 7}
-  <li
-    in:fly={{y: 20}}
-    class="py-2 px-3 flex flex-col gap-2 text-white cursor-pointer transition-all
-           border border-solid border-black hover:border-medium hover:bg-dark"
-    on:click={() => modal.set({note: e.parent})}>
-    <div class="flex gap-2 items-center">
-      <Badge person={e.person} />
-      <span>liked your note.</span>
-    </div>
-    <div class="ml-6 text-light">
-      {ellipsize(e.parent.content, 240)}
-    </div>
-  </li>
+  {#each ($notes || []) as e (e.id)}
+  {#if e.people}
+  <li in:fly={{y: 20}}><Like note={e} /></li>
   {:else}
   <li in:fly={{y: 20}}><Note showParent note={e} /></li>
   {/if}
   {/each}
 </ul>
 
-
-{#if $events?.length === 0}
+{#if $notes?.length === 0}
 <div in:fly={{y: 20}} class="flex w-full justify-center items-center py-16">
   <div class="text-center max-w-md">
     No recent activity found.
   </div>
 </div>
+{:else}
+<Spinner />
 {/if}

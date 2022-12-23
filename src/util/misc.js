@@ -76,8 +76,14 @@ export const createScroller = loadMore => {
 
   requestAnimationFrame(check)
 
-  return () => {
-    done = true
+  return {
+    check: () => {
+      didLoad = false
+      check()
+    },
+    stop: () => {
+      done = true
+    },
   }
 }
 

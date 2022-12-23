@@ -1,8 +1,8 @@
 <script>
+  import {when, propEq} from 'ramda'
   import {onMount, onDestroy} from 'svelte'
   import relay from 'src/relay'
-  import {getLastSync} from 'src/util/misc'
-  import Note from 'src/views/Note.svelte'
+  import Note from 'src/partials/Note.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
 
   export let note
@@ -12,10 +12,14 @@
   onMount(async () => {
     note = await relay.getOrLoadNote(note.id)
 
+    // Log this for debugging purposes
+    console.log('NoteDetail', note)
+
     if (note) {
       sub = await relay.pool.listenForEvents(
         'routes/NoteDetail',
-        await relay.buildNoteContextFilter(note)
+        [{kinds: [1, 5, 7], '#e': [note.id]}],
+        when(propEq('kind', 1), relay.loadNoteContext)
       )
     }
   })
@@ -27,14 +31,7 @@
   })
 
   onMount(() => {
-    observable = relay.lq(async () => {
-      const details = await relay.findNote(note.id, {showEntire: true})
-
-      // Log this for debugging purposes
-      console.log('NoteDetail', details)
-
-      return details
-    })
+    observable = relay.lq(() => relay.findNote(note.id, {showEntire: true}))
 
     return () => {
       if (sub) {

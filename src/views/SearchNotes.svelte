@@ -1,7 +1,8 @@
 <script>
+  import {take} from 'ramda'
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
-  import Note from "src/views/Note.svelte"
+  import Note from "src/partials/Note.svelte"
   import relay from 'src/relay'
 
   export let q
@@ -9,8 +10,7 @@
   let results = []
 
   const search = relay.lq(async () => {
-    const notes = await relay.filterEvents({kinds: [1]})
-      .limit(5000).reverse().sortBy('created_at')
+    const notes = take(5000, await relay.filterEvents({kinds: [1]}))
 
     return fuzzy(notes, {keys: ["content"]})
   })

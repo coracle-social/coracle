@@ -37,7 +37,9 @@ class Channel {
     const sub = pool.sub({filter, cb: onEvent}, this.name, onEose)
 
     const done = () => {
-      sub.unsub()
+      if (this.status === 'busy') {
+        sub.unsub()
+      }
 
       this.release()
     }
@@ -183,6 +185,11 @@ const syncNetwork = async () => {
   if (pubkeys.length === 0) {
     pubkeys = [
       "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322", // hodlbod
+      "472f440f29ef996e92a186b8d320ff180c855903882e59d50de1b8bd5669301e", // Marty Bent
+      "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2", // Jack
+      "85080d3bad70ccdcd7f74c29a44f55bb85cbcd3dd0cbb957da1d215bdb931204", // Preston
+      "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245", // jb55
+      "c4eabae1be3cf657bc1855ee05e69de9f059cb7a059227168b80b89761cbc4e0", // Jack Mallers
     ]
   }
 

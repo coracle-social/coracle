@@ -10,7 +10,7 @@
   import {Router, Route, links, navigate} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {hasParent} from 'src/util/html'
-  import {timedelta} from 'src/util/misc'
+  import {timedelta, now} from 'src/util/misc'
   import {store as toast} from "src/state/toast"
   import {modal, alerts, settings} from "src/state/app"
   import relay, {user, connections} from 'src/relay'
@@ -30,6 +30,8 @@
   import Person from "src/routes/Person.svelte"
   import NoteCreate from "src/routes/NoteCreate.svelte"
 
+  window.relay = relay
+
   export let url = ""
 
   const menuIsOpen = writable(false)
@@ -42,9 +44,7 @@
   let scrollY
   let suspendedSubs = []
   let mostRecentAlert = relay.lq(async () => {
-    const [e] = await relay
-      .filterAlerts($user, {since: $alerts.since})
-      .limit(1).reverse().sortBy('created_at')
+    const [e] = await relay.filterAlerts($user, 1)
 
     return e?.created_at
   })
@@ -70,10 +70,6 @@
     }, 200)
   }
 
-  if ($user) {
-    relay.pool.syncNetwork()
-  }
-
   onMount(() => {
     // Close menu on click outside
     document.querySelector("html").addEventListener("click", e => {
@@ -82,7 +78,18 @@
       }
     })
 
-    return modal.subscribe($modal => {
+    let prevPubkey = null
+
+    const unsubUser = user.subscribe($user => {
+      if ($user && $user.pubkey !== prevPubkey) {
+        relay.pool.syncNetwork()
+        relay.pool.listenForEvents('App/alerts', {'#p': [$user.pubkey], since: now()})
+      }
+
+      prevPubkey = $user?.pubkey
+    })
+
+    const unsubModal = modal.subscribe($modal => {
       // Keep scroll position on body, but don't allow scrolling
       if ($modal) {
         // This is not idempotent, so don't duplicate it
@@ -97,6 +104,11 @@
         window.scrollTo(0, scrollY)
       }
     })
+
+    return () => {
+      unsubUser()
+      unsubModal()
+    }
   })
 </script>
 

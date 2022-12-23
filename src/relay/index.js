@@ -1,7 +1,7 @@
 import {liveQuery} from 'dexie'
 import {get} from 'svelte/store'
-import {pluck, uniqBy, groupBy, concat, without, prop, uniq, objOf, isNil, identity} from 'ramda'
-import {ensurePlural, createMap, ellipsize, first} from 'hurdak/lib/hurdak'
+import {pluck, take, uniqBy, groupBy, concat, without, prop, isNil, identity} from 'ramda'
+import {ensurePlural, createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {escapeHtml} from 'src/util/html'
 import {filterTags, findReply, findRoot} from 'src/util/nostr'
 import {db} from 'src/relay/db'
@@ -16,21 +16,6 @@ const lq = f => liveQuery(async () => {
     console.error(e)
   }
 })
-
-// Filter builders
-
-export const buildNoteContextFilter = async (note, extra = {}) => {
-    const replyId = findReply(note)
-    const filter = [
-      {...extra, kinds: [1, 5, 7], '#e': [note.id]},
-      {kinds: [0], authors: [note.pubkey]}]
-
-    if (replyId && !await db.events.get(replyId)) {
-      filter.push({...extra, kinds: [1], ids: [replyId]})
-    }
-
-    return filter
-}
 
 // Utils for querying dexie - these return collections, not arrays
 
@@ -64,22 +49,20 @@ const filterEvents = filter => {
 
       return true
     })
+    .reverse()
+    .sortBy('created_at')
 }
 
 const filterReplies = async (id, filter) => {
-  const tags = db.tags.where('value').equals(id).filter(t => t.mark === 'reply')
-  const ids = pluck('event', await tags.toArray())
-  const replies = await filterEvents({...filter, kinds: [1], ids}).toArray()
+  const events = await db.events.where('reply').equals(id).toArray()
 
-  return replies
+  return events.filter(e => e.kind === 1)
 }
 
 const filterReactions = async (id, filter) => {
-  const tags = db.tags.where('value').equals(id).filter(t => t.mark === 'reply')
-  const ids = pluck('event', await tags.toArray())
-  const reactions = await filterEvents({...filter, kinds: [7], ids}).toArray()
+  const events = await db.events.where('reply').equals(id).toArray()
 
-  return reactions
+  return events.filter(e => e.kind === 7)
 }
 
 const findNote = async (id, {showEntire = false} = {}) => {
@@ -117,7 +100,7 @@ const findNote = async (id, {showEntire = false} = {}) => {
 
 const annotateChunk = async chunk => {
   const ancestorIds = concat(chunk.map(findRoot), chunk.map(findReply)).filter(identity)
-  const ancestors = await filterEvents({kinds: [1], ids: ancestorIds}).toArray()
+  const ancestors = await filterEvents({kinds: [1], ids: ancestorIds})
 
   const allNotes = uniqBy(prop('id'), chunk.concat(ancestors))
   const notesById = createMap('id', allNotes)
@@ -171,12 +154,24 @@ const renderNote = async (note, {showEntire = false}) => {
     })
 }
 
-const filterAlerts = async (person, filter) => {
+const filterAlerts = async (person, limit) => {
   const tags = db.tags.where('value').equals(person.pubkey)
   const ids = pluck('event', await tags.toArray())
-  const events = await filterEvents({...filter, kinds: [1, 7], ids})
+  const alerts = take(limit + 1, await filterEvents({kinds: [1, 7], ids}))
 
-  return events
+  return alerts.filter(e => {
+    // Don't show people's own stuff
+    if (e.pubkey === person.pubkey) {
+      return false
+    }
+
+    // Only notify users about positive reactions
+    if (e.kind === 7 && !['', '+'].includes(e.content)) {
+      return false
+    }
+
+    return true
+  })
 }
 
 // Synchronization
@@ -210,11 +205,32 @@ const unfollow = async pubkey => {
 // Methods that wil attempt to load from the database and fall back to the network.
 // This is intended only for bootstrapping listeners
 
-const getOrLoadNote = async (id, {showEntire = false} = {}) => {
+const loadNoteContext = async (note, {loadParent = false} = {}) => {
+  // Load note context - this assumes that we are looking at a feed, and so
+  // we already have the note's parent and its likes loaded.
+  const filter = [{kinds: [1, 5, 7], '#e': [note.id]}]
+
+  if (!prop(note.pubkey, get(db.people))) {
+    filter.push({kinds: [0], authors: [note.pubkey]})
+  }
+
+  await pool.loadEvents(filter)
+  const replyId = findReply(note)
+
+  if (loadParent && replyId) {
+    await getOrLoadNote(replyId)
+  }
+}
+
+const getOrLoadNote = async id => {
+  if (!await db.events.get(id)) {
+    await pool.loadEvents({kinds: [1], ids: [id]})
+  }
+
   const note = await db.events.get(id)
 
-  if (!note) {
-    return first(await pool.loadEvents({kinds: [1], ids: [id]}))
+  if (note) {
+    await loadNoteContext(note, {loadParent: true})
   }
 
   return note
@@ -254,7 +270,7 @@ export const network = db.network
 export const connections = db.connections
 
 export default {
-  db, pool, lq, buildNoteContextFilter, filterEvents, getOrLoadNote,
-  filterReplies, findNote, annotateChunk, renderNote, filterAlerts,
-  login, addRelay, removeRelay, follow, unfollow,
+  db, pool, lq, filterEvents, getOrLoadNote, filterReplies, findNote,
+  annotateChunk, renderNote, filterAlerts, login, addRelay, removeRelay,
+  follow, unfollow, loadNoteContext,
 }

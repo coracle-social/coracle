@@ -1,13 +1,13 @@
 <script>
-  import {find} from 'ramda'
+  import {find, take, when, propEq} from 'ramda'
   import {onMount, onDestroy} from 'svelte'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {getLastSync} from 'src/util/misc'
-  import {getTagValues, findReply} from 'src/util/nostr'
+  import {getTagValues} from 'src/util/nostr'
   import Tabs from "src/partials/Tabs.svelte"
   import Button from "src/partials/Button.svelte"
-  import Notes from "src/views/Notes.svelte"
+  import Notes from "src/partials/Notes.svelte"
   import {t, dispatch} from 'src/state/dispatch'
   import {modal} from "src/state/app"
   import relay, {user, people} from 'src/relay'
@@ -23,22 +23,7 @@
     sub = await relay.pool.listenForEvents(
       'routes/Person',
       [{kind: [0, 1, 5, 7], authors: [pubkey], since}],
-      async e => {
-        if (e.kind === 1) {
-          const filter = await relay.buildNoteContextFilter(e, {since})
-
-          await relay.pool.loadEvents(filter)
-        }
-
-        if (e.kind === 7) {
-          const replyId = findReply(e)
-
-          if (replyId && !await relay.db.events.get(replyId)) {
-            await relay.pool.loadEvents({kinds: [1], ids: [replyId]})
-          }
-
-        }
-      }
+      when(propEq('kind', 1), relay.loadNoteContext)
     )
   })
 
@@ -52,23 +37,20 @@
 
   const loadNotes = async limit => {
     const filter = {kinds: [1], authors: [pubkey]}
-    const notes = await relay.filterEvents(filter).reverse().sortBy('created_at')
 
-    return relay.annotateChunk(notes.slice(0, limit))
+    return relay.annotateChunk(take(limit, await relay.filterEvents(filter)))
   }
 
   const loadLikes = async limit => {
     const filter = {kinds: [7], authors: [pubkey]}
-    const notes = await relay.filterEvents(filter).reverse().sortBy('created_at')
 
-    return relay.annotateChunk(notes.slice(0, limit))
+    return relay.annotateChunk(take(limit, await relay.filterEvents(filter)))
   }
 
   const loadNetwork = async limit => {
     const filter = {kinds: [1], authors: getTagValues(getPerson().petnames)}
-    const notes = await relay.filterEvents(filter).reverse().sortBy('created_at')
 
-    return relay.annotateChunk(notes.slice(0, limit))
+    return relay.annotateChunk(take(limit, await relay.filterEvents(filter)))
   }
 
   const setActiveTab = tab => navigate(`/people/${pubkey}/${tab}`)

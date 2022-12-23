@@ -2,7 +2,7 @@
   import {onDestroy} from 'svelte'
   import {createScroller} from 'src/util/misc'
   import Spinner from 'src/partials/Spinner.svelte'
-  import Note from "src/views/Note.svelte"
+  import Note from "src/partials/Note.svelte"
   import relay from 'src/relay'
 
   export let loadNotes
@@ -11,11 +11,15 @@
   let notes
   let limit = 0
 
-  onDestroy(createScroller(async () => {
+  const scroller = createScroller(async () => {
     limit += 20
 
     notes = relay.lq(() => loadNotes(limit))
-  }))
+  })
+
+  onDestroy(() => {
+    scroller.stop()
+  })
 </script>
 
 {#if notes}

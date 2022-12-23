@@ -1,13 +1,10 @@
 <script>
-  import {onMount, onDestroy} from 'svelte'
   import {navigate} from 'svelte-routing'
-  import {findReply} from 'src/util/nostr'
   import Anchor from "src/partials/Anchor.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Network from "src/views/notes/Network.svelte"
   import Global from "src/views/notes/Global.svelte"
-  import {now, timedelta} from 'src/util/misc'
-  import relay, {connections} from 'src/relay'
+  import {connections} from 'src/relay'
 
   export let activeTab
 
