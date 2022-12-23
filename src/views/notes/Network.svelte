@@ -27,8 +27,11 @@
   })
 
   const loadNotes = async limit => {
-    const filter = {kinds: [1], authors: $network.concat($user.pubkey)}
-    const notes = take(limit + 1, await relay.filterEvents(filter))
+    const notes = take(limit + 1, await relay.filterEvents({
+      kinds: [1],
+      authors: $network.concat($user.pubkey),
+      muffle: getTagValues($user?.muffle || []),
+    }))
 
     if (notes.length <= limit) {
       const [since, until] = cursor.step()

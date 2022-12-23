@@ -3,7 +3,7 @@
   import {onMount, onDestroy} from 'svelte'
   import Notes from "src/partials/Notes.svelte"
   import {timedelta, Cursor, getLastSync} from 'src/util/misc'
-  import relay from 'src/relay'
+  import relay, {user} from 'src/relay'
 
   let sub
 
@@ -27,7 +27,10 @@
   })
 
   const loadNotes = async limit => {
-    const notes = take(limit + 1, await relay.filterEvents({kinds: [1]}))
+    const notes = take(limit + 1, await relay.filterEvents({
+      kinds: [1],
+      muffle: getTagValues($user?.muffle || []),
+    }))
 
     if (notes.length <= limit) {
       const [since, until] = cursor.step()

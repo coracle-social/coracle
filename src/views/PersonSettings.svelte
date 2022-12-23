@@ -1,17 +1,19 @@
 <script>
-  import {switcher} from 'hurdak/lib/hurdak'
+  import {last} from 'ramda'
+  import {switcher, first} from 'hurdak/lib/hurdak'
   import {fly} from 'svelte/transition'
   import Button from "src/partials/Button.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
-  import {getMuffleValue} from "src/util/nostr"
+  import {getTagValues} from "src/util/nostr"
   import {modal} from "src/state/app"
   import relay, {user} from 'src/relay'
 
   const muffleOptions = ['Never', 'Sometimes', 'Often', 'Always']
+  const muffleValue = parseFloat(first($user.muffle.filter(t => t[1] === $modal.person.pubkey).map(last)) || 1)
 
   const values = {
     // Scale up to integers for each choice we have
-    muffle: switcher(Math.round(getMuffleValue($modal.person) * 3), muffleOptions),
+    muffle: switcher(Math.round(muffleValue * 3), muffleOptions),
   }
 
   const save = async e => {

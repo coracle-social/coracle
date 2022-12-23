@@ -46,17 +46,3 @@ export const filterMatches = (filter, e)  => {
     ensurePlural(filter)
   ))
 }
-
-export const getMuffleValue = person => {
-  if (!person) {
-    return 1
-  }
-
-  const tag = find(t => t[1] === person.pubkey, person.muffle)
-
-  if (!tag) {
-    return 1
-  }
-
-  return parseFloat(last(tag))
-}

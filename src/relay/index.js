@@ -43,6 +43,7 @@ const filterEvents = filter => {
     .filter(e => {
       if (filter.ids && !filter.ids.includes(e.id)) return false
       if (filter.authors && !filter.authors.includes(e.pubkey)) return false
+      if (filter.muffle && filter.muffle.includes(e.pubkey)) return false
       if (filter.kinds && !filter.kinds.includes(e.kind)) return false
       if (filter.since && filter.since > e.created_at) return false
       if (filter.until && filter.until < e.created_at) return false

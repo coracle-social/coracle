@@ -1,5 +1,5 @@
 import Dexie from 'dexie'
-import {writable} from 'svelte/store'
+import {writable, get} from 'svelte/store'
 import {groupBy, prop, flatten, pick} from 'ramda'
 import {ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
 import {now, getLocalJson, setLocalJson} from 'src/util/misc'
@@ -70,6 +70,8 @@ db.events.process = async events => {
 
   // Update our people
   db.people.update($people => {
+    let $user = get(db.user)
+
     for (const event of profileUpdates) {
       const {pubkey, kind, content, tags} = event
       const putPerson = data => {
@@ -78,6 +80,10 @@ db.events.process = async events => {
           ...data,
           pubkey,
           updated_at: now(),
+        }
+
+        if ($user?.pubkey === pubkey) {
+          $user = {...$user, ...data}
         }
       }
 
@@ -90,6 +96,8 @@ db.events.process = async events => {
         },
       })
     }
+
+    db.user.set($user)
 
     return $people
   })

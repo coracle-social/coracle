@@ -25,7 +25,7 @@
 {#if notes}
 <ul class="py-4 flex flex-col gap-2 max-w-xl m-auto">
   {#each ($notes || []) as n (n.id)}
-    <li><Note interactive note={n} depth={2} {showParent} /></li>
+    <li><Note note={n} depth={2} {showParent} /></li>
   {/each}
 </ul>
 {/if}

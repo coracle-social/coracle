@@ -41,15 +41,19 @@
   }
 
   const loadLikes = async limit => {
-    const filter = {kinds: [7], authors: [pubkey]}
-
-    return relay.annotateChunk(take(limit, await relay.filterEvents(filter)))
+    return relay.annotateChunk(take(limit, await relay.filterEvents({
+      kinds: [7],
+      authors: [pubkey],
+      muffle: getTagValues($user?.muffle || []),
+    })))
   }
 
   const loadNetwork = async limit => {
-    const filter = {kinds: [1], authors: getTagValues(getPerson().petnames)}
-
-    return relay.annotateChunk(take(limit, await relay.filterEvents(filter)))
+    return relay.annotateChunk(take(limit, await relay.filterEvents({
+      kinds: [1],
+      authors: getTagValues(getPerson().petnames),
+      muffle: getTagValues($user?.muffle || []),
+    })))
   }
 
   const setActiveTab = tab => navigate(`/people/${pubkey}/${tab}`)
