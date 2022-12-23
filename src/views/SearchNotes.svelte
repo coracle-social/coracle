@@ -5,6 +5,7 @@
   import {fuzzy} from "src/util/misc"
   import Note from "src/partials/Note.svelte"
   import Spinner from "src/partials/Spinner.svelte"
+  import relay from 'src/relay'
 
   export let q
 

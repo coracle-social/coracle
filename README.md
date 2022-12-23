@@ -20,7 +20,6 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 - [ ] Server discovery and relay publishing - https://github.com/nostr-protocol/nips/pull/32/files
 - [ ] Support invoices https://twitter.com/jb55/status/1604131336247476224
 - [ ] Expand/collapse large threads
-- [ ] Don't send note on enter, allow linebreaks
 - [ ] NIP 05
 
 # Bugs
@@ -29,15 +28,12 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 - [ ] Add alerts for replies to posts the user liked
 - [ ] With link/image previews, remove the url from the note body if it's on a separate last line
 - [ ] Stack views so scroll position isn't lost on navigation
-- [ ] We're sending client=astral tags, event id 125ff9dc495f65d302e8d95ea6f9385106cc31b81c80e8c582b44be92fa50c44
 - [ ] Add notification for slow relays
 - [ ] Wait for 60% or so of relays to eose to balance completeness with speed
 - [ ] Add a CSP, check for XSS in image urls
 
 # Current update
 
-- [ ] Add depth to findNote
-- [ ] Add date to alerts
 - [ ] Re-implement muffle
   - Don't store muffled events, when muffle changes delete them
 - [ ] Delete old events

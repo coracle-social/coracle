@@ -19,7 +19,7 @@
 
     const json = await res.json()
 
-    if (json.title) {
+    if (json.title || json.image) {
       preview = json
     }
   })
@@ -35,10 +35,12 @@
     <img src={preview.image} />
     <div class="h-px bg-medium" />
     {/if}
+    {#if preview.title}
     <div class="px-4 py-2 text-black flex flex-col bg-white">
       <strong class="whitespace-nowrap text-ellipsis overflow-hidden">{preview.title}</strong>
       <small>{preview.description}</small>
     </div>
+    {/if}
   </Anchor>
 </div>
 {/if}

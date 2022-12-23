@@ -31,7 +31,7 @@
   })
 
   onMount(() => {
-    observable = relay.lq(() => relay.findNote(note.id, {showEntire: true}))
+    observable = relay.lq(() => relay.findNote(note.id, {showEntire: true, depth: 5}))
 
     return () => {
       if (sub) {

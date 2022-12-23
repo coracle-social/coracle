@@ -66,7 +66,7 @@ const filterReactions = async (id, filter) => {
   return events.filter(e => e.kind === 7)
 }
 
-const findNote = async (id, {showEntire = false} = {}) => {
+const findNote = async (id, {showEntire = false, depth = 1} = {}) => {
   const note = await db.events.get(id)
 
   if (!note) {
@@ -95,7 +95,7 @@ const findNote = async (id, {showEntire = false} = {}) => {
 
   return {
     ...note, reactions, person, html, parent,
-    replies: await Promise.all(replies.map(r => findNote(r.id))),
+    replies: depth === 0 ? [] : await Promise.all(replies.map(r => findNote(r.id, {depth: depth - 1}))),
   }
 }
 
