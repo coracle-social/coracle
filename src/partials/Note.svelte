@@ -91,8 +91,8 @@
     }
   }
 
-  const onReplyKeyPress = e => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+  const onReplyKeyDown = e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault()
       sendReply()
     }
@@ -170,7 +170,7 @@
     autofocus
     placeholder="Type something..."
     bind:value={reply}
-    on:keypress={onReplyKeyPress}
+    on:keydown={onReplyKeyDown}
     class="w-full p-2 text-white bg-medium
            placeholder:text-light outline-0 resize-none" />
   <div

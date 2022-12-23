@@ -112,7 +112,13 @@
   })
 </script>
 
-<svelte:body on:keydown={e => e.key === 'Escape' && modal.set(null)} />
+<svelte:body
+  on:keydown={e => {
+    if (e.key === 'Escape') {
+      modal.set(null)
+      menuIsOpen.set(false)
+    }
+  }} />
 
 <Router {url}>
   <div use:links class="h-full">
