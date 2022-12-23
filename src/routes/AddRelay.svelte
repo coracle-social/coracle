@@ -6,7 +6,7 @@
   import Button from 'src/partials/Button.svelte'
   import relay from 'src/relay'
 
-  let url = ''
+  let url = $modal.url
 
   const submit = e => {
     e.preventDefault()

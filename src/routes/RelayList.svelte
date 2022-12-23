@@ -2,6 +2,7 @@
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import {modal} from "src/state/app"
   import relay, {connections} from 'src/relay'
 
@@ -26,7 +27,12 @@
 
   $: search = fuzzy($knownRelays, {keys: ["name", "description", "url"]})
 
-  const join = url => relay.addRelay(url)
+  const join = url => {
+    relay.addRelay(url)
+
+    document.querySelector('input').select()
+  }
+
   const leave = url => relay.removeRelay(url)
 </script>
 
@@ -39,10 +45,8 @@
         interact with the network, but you can join as many as you like.
       </p>
     </div>
-    <Input bind:value={q} type="text" wrapperClass="flex-grow" placeholder="Type to search">
-      <i slot="before" class="fa-solid fa-search" />
-    </Input>
     <div class="flex flex-col gap-6 overflow-auto flex-grow -mx-6 px-6">
+      <h2 class="staatliches text-2xl">Your relays</h2>
       {#each ($knownRelays || []) as r}
         {#if $connections.includes(r.url)}
         <div class="flex gap-2 justify-between">
@@ -58,8 +62,18 @@
       {/each}
       {#if ($knownRelays || []).length > 0}
       <div class="pt-2 mb-2 border-b border-solid border-medium" />
+      <h2 class="staatliches text-2xl">Other relays</h2>
+      <div class="flex gap-4 items-center">
+        <Input bind:value={q} type="text" wrapperClass="flex-grow" placeholder="Type to search">
+          <i slot="before" class="fa-solid fa-search" />
+        </Input>
+        <Anchor type="button" on:click={() => modal.set({form: 'relay', url: q})}>
+          <i class="fa-solid fa-plus" /> Add Relay
+        </Anchor>
+      </div>
       {/if}
       {#each (search(q) || []).slice(0, 10) as r}
+        {#if !$connections.includes(r.url)}
         <div class="flex gap-2 justify-between">
           <div>
             <strong>{r.name || r.url}</strong>
@@ -69,12 +83,8 @@
             Join
           </a>
         </div>
+        {/if}
       {/each}
-      <a
-        class="underline cursor-pointer"
-        on:click={() => modal.set({form: 'relay'})}>
-        <i class="fa-solid fa-plus" /> Add Relay
-      </a>
     </div>
   </div>
 </div>

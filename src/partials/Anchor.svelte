@@ -4,7 +4,7 @@
 
   export let external = false
   export let type = "anchor"
-  export let href
+  export let href = null
 
   const className = cx(
     $$props.class,
