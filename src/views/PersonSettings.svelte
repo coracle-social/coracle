@@ -1,13 +1,11 @@
 <script>
-  import {last} from 'ramda'
   import {switcher} from 'hurdak/lib/hurdak'
   import {fly} from 'svelte/transition'
   import Button from "src/partials/Button.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
   import {getMuffleValue} from "src/util/nostr"
-  import {dispatch, t} from 'src/state/dispatch'
   import {modal} from "src/state/app"
-  import {user} from 'src/relay'
+  import relay, {user} from 'src/relay'
 
   const muffleOptions = ['Never', 'Sometimes', 'Often', 'Always']
 
@@ -21,12 +19,8 @@
 
     // Scale back down to a decimal based on string value
     const muffleValue = muffleOptions.indexOf(values.muffle) / 3
-    const muffle = $user.muffle
-      .filter(x => x[1] !== $modal.person.pubkey)
-      .concat([t("p", $modal.person.pubkey, muffleValue.toString())])
-      .filter(x => last(x) !== "1")
 
-    dispatch('user/muffle', muffle)
+    relay.cmd.muffle($user, $modal.person.pubkey, muffleValue)
 
     modal.set(null)
   }

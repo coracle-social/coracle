@@ -6,6 +6,7 @@ import {escapeHtml} from 'src/util/html'
 import {filterTags, findReply, findRoot} from 'src/util/nostr'
 import {db} from 'src/relay/db'
 import pool from 'src/relay/pool'
+import cmd from 'src/relay/cmd'
 
 // Livequery appears to swallow errors
 
@@ -270,7 +271,7 @@ export const network = db.network
 export const connections = db.connections
 
 export default {
-  db, pool, lq, filterEvents, getOrLoadNote, filterReplies, findNote,
+  db, pool, cmd, lq, filterEvents, getOrLoadNote, filterReplies, findNote,
   annotateChunk, renderNote, filterAlerts, login, addRelay, removeRelay,
   follow, unfollow, loadNoteContext,
 }

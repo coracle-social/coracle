@@ -8,7 +8,6 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Button from "src/partials/Button.svelte"
   import Notes from "src/partials/Notes.svelte"
-  import {t, dispatch} from 'src/state/dispatch'
   import {modal} from "src/state/app"
   import relay, {user, people} from 'src/relay'
 
@@ -56,19 +55,13 @@
   const setActiveTab = tab => navigate(`/people/${pubkey}/${tab}`)
 
   const follow = () => {
-    const petnames = $user.petnames
-      .concat([t("p", pubkey, getPerson()?.name)])
-
-    dispatch('user/petnames', petnames)
+    relay.cmd.addPetname($user, pubkey, getPerson()?.name)
 
     following = true
   }
 
   const unfollow = () => {
-    const petnames = $user.petnames
-      .filter(([_, pubkey]) => pubkey !== pubkey)
-
-    dispatch('user/petnames', petnames)
+    relay.cmd.removePetname($user, pubkey)
 
     following = false
   }

@@ -4,16 +4,15 @@
   import {navigate} from "svelte-routing"
   import Textarea from "src/partials/Textarea.svelte"
   import Button from "src/partials/Button.svelte"
-  import {dispatch} from "src/state/dispatch"
   import toast from "src/state/toast"
-  import {user} from "src/relay"
+  import relay, {user} from "src/relay"
 
   let values = {}
 
   const submit = async e => {
     e.preventDefault()
 
-    await dispatch("note/create", values.content)
+    await relay.cmd.createNote(values.content)
 
     toast.show("info", `Your note has been created!`)
 

@@ -7,12 +7,11 @@
   import {findReply} from "src/util/nostr"
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
-  import {dispatch} from "src/state/dispatch"
   import {settings, modal} from "src/state/app"
   import {formatTimestamp} from 'src/util/misc'
   import Badge from "src/partials/Badge.svelte"
   import Card from "src/partials/Card.svelte"
-  import {user} from 'src/relay'
+  import relay, {user} from 'src/relay'
 
   export let note
   export let depth = 0
@@ -46,7 +45,7 @@
 
   const react = content => {
     if ($user) {
-      dispatch('reaction/create', content, note)
+      relay.cmd.createReaction(content, note)
     } else {
       navigate('/login')
     }
@@ -63,7 +62,7 @@
   }
 
   const deleteReaction = e => {
-    dispatch('event/delete', [e.id])
+    relay.cmd.deleteEvent([e.id])
 
     if (e.content === '+') {
       like = false
@@ -86,7 +85,7 @@
 
   const sendReply = () => {
     if (reply) {
-      dispatch("reply/create", reply, note)
+      relay.cmd.createReply(reply, note)
 
       reply = null
     }
