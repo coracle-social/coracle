@@ -4,7 +4,6 @@
   import {fly} from 'svelte/transition'
   import Button from "src/partials/Button.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
-  import {getTagValues} from "src/util/nostr"
   import {modal} from "src/state/app"
   import relay, {user} from 'src/relay'
 

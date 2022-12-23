@@ -103,7 +103,7 @@
   {#if e.people}
   <li in:fly={{y: 20}}><Like note={e} /></li>
   {:else}
-  <li in:fly={{y: 20}}><Note showParent note={e} /></li>
+  <li in:fly={{y: 20}}><Note note={e} /></li>
   {/if}
   {/each}
 </ul>

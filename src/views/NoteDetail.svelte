@@ -47,7 +47,7 @@
 </div>
 {:else if $observable}
 <div n:fly={{y: 20}}>
-  <Note showParent invertColors anchorId={note.id} note={$observable} depth={2} />
+  <Note invertColors anchorId={note.id} note={$observable} depth={2} />
 </div>
 {:else}
 <Spinner />

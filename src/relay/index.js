@@ -1,6 +1,6 @@
 import {liveQuery} from 'dexie'
 import {get} from 'svelte/store'
-import {pluck, take, uniqBy, groupBy, concat, without, prop, isNil, identity} from 'ramda'
+import {pluck, uniq, take, uniqBy, groupBy, concat, without, prop, isNil, identity} from 'ramda'
 import {ensurePlural, createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {escapeHtml} from 'src/util/html'
 import {filterTags, findReply, findRoot} from 'src/util/nostr'
@@ -216,9 +216,17 @@ const loadNoteContext = async (note, {loadParent = false} = {}) => {
     filter.push({kinds: [0], authors: [note.pubkey]})
   }
 
-  await pool.loadEvents(filter)
-  const replyId = findReply(note)
+  // Load  the events
+  const events = await pool.loadEvents(filter)
 
+  // Load any related people we're missing
+  const $people = get(people)
+  await pool.loadPeople(
+    uniq(pluck('pubkey', events)).filter(k => !$people[k])
+  )
+
+  // Load the note's parent
+  const replyId = findReply(note)
   if (loadParent && replyId) {
     await getOrLoadNote(replyId)
   }

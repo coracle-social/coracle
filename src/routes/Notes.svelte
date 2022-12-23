@@ -4,7 +4,7 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Network from "src/views/notes/Network.svelte"
   import Global from "src/views/notes/Global.svelte"
-  import {connections} from 'src/relay'
+  import {connections, user} from 'src/relay'
 
   export let activeTab
 
@@ -19,7 +19,7 @@
     > to get started.
   </div>
 </div>
-{:else}
+{:else if $user}
 <Tabs tabs={['network', 'global']} {activeTab} {setActiveTab} />
 {#if activeTab === 'network'}
 <Network />
@@ -34,5 +34,12 @@
     <span class="fa-sold fa-plus fa-2xl" />
   </a>
 </div>
+{:else}
+<div class="flex w-full justify-center items-center py-16">
+  <div class="text-center max-w-sm">
+    Don't have an account? Click <Anchor href="/login">here</Anchor> to join the nostr network.
+  </div>
+</div>
+<Global />
 {/if}
 

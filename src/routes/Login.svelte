@@ -63,15 +63,17 @@
   <div class="flex flex-col gap-4 max-w-2xl">
     <div class="flex justify-center items-center flex-col mb-4">
       <h1 class="staatliches text-6xl">Welcome!</h1>
-      <i>To the Dogwood Social Network</i>
+      <i>To the Nostr Protocol Network</i>
     </div>
     <div class="flex flex-col gap-4">
-      <small>
-        To log in to existing account, simply enter your private key. To create a new account, just
-        let us generate one for you. You can also use
-        a <Anchor href={nip07} external>compatible browser extension</Anchor> to
-        sign events without having to paste your private key here.
-      </small>
+      <p>
+        To log in to existing account, simply enter your private key below. To create a new account,
+        just let us generate one for you.
+      </p>
+      <p>
+        You can also use a <Anchor href={nip07} external>compatible browser extension</Anchor> to
+        sign events without having to paste your private key here (recommended).
+      </p>
       <div class="flex flex-col gap-1">
         <strong>Private Key</strong>
         <Input type="password" bind:value={privkey} placeholder="Enter your private key">

@@ -16,7 +16,6 @@
   export let note
   export let depth = 0
   export let anchorId = null
-  export let showParent = false
   export let invertColors = false
 
   let reply = null
@@ -118,7 +117,7 @@
     <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>
   </div>
   <div class="ml-6 flex flex-col gap-2">
-    {#if findReply(note) && showParent}
+    {#if findReply(note)}
       <small class="text-light">
         Reply to <Anchor on:click={goToParent}>{findReply(note).slice(0, 8)}</Anchor>
       </small>

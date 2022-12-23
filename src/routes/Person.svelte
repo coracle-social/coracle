@@ -111,7 +111,7 @@
 
 <Tabs tabs={['notes', 'likes', 'network']} {activeTab} {setActiveTab} />
 {#if activeTab === 'notes'}
-<Notes showParent loadNotes={loadNotes} />
+<Notes loadNotes={loadNotes} />
 {:else if activeTab === 'likes'}
 <Notes loadNotes={loadLikes} />
 {:else if activeTab === 'network'}

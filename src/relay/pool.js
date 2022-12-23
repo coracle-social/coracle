@@ -207,5 +207,5 @@ const syncNetwork = async () => {
 
 export default {
   getPubkey, getRelays, addRelay, removeRelay, setPrivateKey, setPublicKey,
-  publishEvent, loadEvents, listenForEvents, syncNetwork,
+  publishEvent, loadEvents, listenForEvents, syncNetwork, loadPeople,
 }

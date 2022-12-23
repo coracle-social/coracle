@@ -2,15 +2,15 @@ import Dexie from 'dexie'
 import {writable, get} from 'svelte/store'
 import {groupBy, prop, flatten, pick} from 'ramda'
 import {ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
-import {now, getLocalJson, setLocalJson} from 'src/util/misc'
+import {now, timedelta, getLocalJson, setLocalJson} from 'src/util/misc'
 import {filterTags, findReply, findRoot} from 'src/util/nostr'
 
 export const db = new Dexie('coracle/relay')
 
-db.version(4).stores({
+db.version(5).stores({
   relays: '++url, name',
   events: '++id, pubkey, created_at, kind, content, reply, root',
-  tags: '++key, event, value',
+  tags: '++key, event, value, created_at',
 })
 
 window.db = db
@@ -39,7 +39,7 @@ db.events.process = async events => {
   // Persist notes and reactions
   if (notesAndReactions.length > 0) {
     const persistentEvents = notesAndReactions
-      .map(e => ({...e, root: findRoot(e), reply: findReply(e), added_at: now()}))
+      .map(e => ({...e, root: findRoot(e), reply: findReply(e), created_at: now()}))
 
     db.events.bulkPut(persistentEvents)
 
@@ -54,6 +54,7 @@ db.events.process = async events => {
               value: tag[1],
               relay: tag[2],
               mark: tag[3],
+              created_at: e.created_at,
             })
           )
         )
@@ -102,3 +103,9 @@ db.events.process = async events => {
     return $people
   })
 }
+
+// On initial load, delete old event data
+const threshold = now() - timedelta(30, 'days')
+
+db.events.where('created_at').below(threshold).delete()
+db.tags.where('created_at').below(threshold).delete()

@@ -34,18 +34,7 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 
 # Current update
 
-- [ ] Re-implement muffle
-  - Don't store muffled events, when muffle changes delete them
-- [ ] Delete old events
-- [ ] Make sure login/out, no user usage works
-- [ ] Add a re-sync/clear cache button
-- [ ] Note detail context not showing when navigating between note details (e.g. to parent)
-- [ ] Show reply to on feed
 - [ ] Write blog post
-- https://vitejs.dev/guide/features.html#web-workers
-- https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers
-- https://web.dev/module-workers/
-
 - [x] Sync user
 - [x] Based on petnames, sync network to 2 or 3 degrees of separation
   - When a user is added/removed, sync them and add to or remove from network

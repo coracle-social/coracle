@@ -3,6 +3,7 @@
   import {onMount, onDestroy} from 'svelte'
   import Notes from "src/partials/Notes.svelte"
   import {timedelta, Cursor, getLastSync} from 'src/util/misc'
+  import {getTagValues} from 'src/util/nostr'
   import relay, {user} from 'src/relay'
 
   let sub

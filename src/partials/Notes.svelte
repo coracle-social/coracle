@@ -6,7 +6,6 @@
   import relay from 'src/relay'
 
   export let loadNotes
-  export let showParent = false
 
   let notes
   let limit = 0
@@ -25,7 +24,7 @@
 {#if notes}
 <ul class="py-4 flex flex-col gap-2 max-w-xl m-auto">
   {#each ($notes || []) as n (n.id)}
-    <li><Note note={n} depth={2} {showParent} /></li>
+    <li><Note note={n} depth={2} /></li>
   {/each}
 </ul>
 {/if}

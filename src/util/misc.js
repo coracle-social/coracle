@@ -100,7 +100,7 @@ export const getLastSync = (k, fallback) => {
 
 export class Cursor {
   constructor(since, delta) {
-    this.since = since || now() - delta,
+    this.since = (since || now()) - delta,
     this.delta = delta
   }
   step() {
