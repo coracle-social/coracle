@@ -1,18 +1,13 @@
 <script>
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
-  import relay, {user} from 'src/relay'
+  import {user, people} from 'src/relay'
 
   export let q
 
-  let search
-
-  const people = relay.lq(() => relay.db.people.toArray())
-
-  $: search = fuzzy($people || [], {keys: ["name", "about", "pubkey"]})
+  let search = fuzzy(Object.values($people), {keys: ["name", "about", "pubkey"]})
 </script>
 
-{#if search}
 <ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
   {#each search(q) as p (p.pubkey)}
     {#if p.pubkey !== $user.pubkey}
@@ -30,4 +25,3 @@
     {/if}
   {/each}
 </ul>
-{/if}

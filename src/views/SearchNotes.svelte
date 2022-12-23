@@ -1,35 +1,35 @@
 <script>
   import {take} from 'ramda'
+  import {onMount} from 'svelte'
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
   import Note from "src/partials/Note.svelte"
-  import relay from 'src/relay'
+  import Spinner from "src/partials/Spinner.svelte"
 
   export let q
 
-  let results = []
+  let search
 
-  const search = relay.lq(async () => {
-    const notes = take(5000, await relay.filterEvents({kinds: [1]}))
-
-    return fuzzy(notes, {keys: ["content"]})
+  onMount(async () => {
+    search = fuzzy(
+      take(5000, await relay.filterEvents({kinds: [1]})),
+      {keys: ["content"]}
+    )
   })
-
-  $: {
-    if ($search) {
-      Promise.all(
-        $search(q).map(n => relay.findNote(n.id))
-      ).then(notes => {
-        results = notes
-      })
-    }
-  }
 </script>
 
+{#if search}
 <ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
-  {#each results.slice(0, 50) as e (e.id)}
+  {#await Promise.all(search(q).slice(0, 30).map(n => relay.findNote(n.id)))}
+  <Spinner />
+  {:then results}
+    {#each results as e (e.id)}
     <li in:fly={{y: 20}}>
       <Note interactive note={e} />
     </li>
-  {/each}
+    {/each}
+  {/await}
 </ul>
+{:else}
+<Spinner />
+{/if}

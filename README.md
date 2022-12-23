@@ -26,12 +26,7 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 # Bugs
 
 - [ ] Use https://nostr.watch/relays.json to populate relays
-- [ ] Completely redo notes fetching, it's buggy as heck
-  - [ ] uniq and sortBy are sprinkled all over the place, figure out a better solution
-  - [ ] Search page is slow and likes don't show up. Probably move this server-side
-  - [ ] User detail is not filtering by author
 - [ ] Add alerts for replies to posts the user liked
-- [ ] Support bech32 keys/add guide on how to convert
 - [ ] With link/image previews, remove the url from the note body if it's on a separate last line
 - [ ] Stack views so scroll position isn't lost on navigation
 - [ ] We're sending client=astral tags, event id 125ff9dc495f65d302e8d95ea6f9385106cc31b81c80e8c582b44be92fa50c44
