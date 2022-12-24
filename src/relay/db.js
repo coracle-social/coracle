@@ -39,7 +39,7 @@ db.events.process = async events => {
   // Persist notes and reactions
   if (notesAndReactions.length > 0) {
     const persistentEvents = notesAndReactions
-      .map(e => ({...e, root: findRoot(e), reply: findReply(e), created_at: now()}))
+      .map(e => ({...e, root: findRoot(e), reply: findReply(e), loaded_at: now()}))
 
     db.events.bulkPut(persistentEvents)
 
@@ -54,7 +54,7 @@ db.events.process = async events => {
               value: tag[1],
               relay: tag[2],
               mark: tag[3],
-              created_at: e.created_at,
+              loaded_at: now(),
             })
           )
         )
@@ -107,5 +107,5 @@ db.events.process = async events => {
 // On initial load, delete old event data
 const threshold = now() - timedelta(30, 'days')
 
-db.events.where('created_at').below(threshold).delete()
-db.tags.where('created_at').below(threshold).delete()
+db.events.where('loaded_at').below(threshold).delete()
+db.tags.where('loaded_at').below(threshold).delete()

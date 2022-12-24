@@ -3,25 +3,17 @@
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {modal} from "src/state/app"
+  import {modal, settings} from "src/state/app"
   import relay, {connections} from 'src/relay'
 
   let q = ""
   let search
 
-  const defaultRelays = [
-    "wss://nostr.zebedee.cloud",
-    "wss://nostr-pub.wellorder.net",
-    "wss://relay.damus.io",
-    "wss://relay.grunch.dev",
-    "wss://nostr.sandwich.farm",
-    "wss://relay.nostr.ch",
-    "wss://nostr-relay.wlvs.space",
-  ]
-
-  for (const url of defaultRelays) {
-    relay.db.relays.put({url})
-  }
+  fetch($settings.dufflepudUrl + '/relay').then(r => r.json()).then(({relays}) => {
+    for (const url of relays) {
+      relay.db.relays.put({url})
+    }
+  })
 
   const knownRelays = relay.lq(() => relay.db.relays.toArray())
 
@@ -72,7 +64,7 @@
         </Anchor>
       </div>
       {/if}
-      {#each (search(q) || []).slice(0, 10) as r}
+      {#each (search(q) || []).slice(0, 50) as r}
         {#if !$connections.includes(r.url)}
         <div class="flex gap-2 justify-between">
           <div>
@@ -85,6 +77,7 @@
         </div>
         {/if}
       {/each}
+      <small class="text-center">Found {($knownRelays || []).length} known relays</small>
     </div>
   </div>
 </div>

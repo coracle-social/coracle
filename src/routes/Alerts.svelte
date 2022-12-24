@@ -2,9 +2,9 @@
   import {propEq, uniqBy, prop, sortBy} from 'ramda'
   import {onMount, onDestroy} from 'svelte'
   import {fly} from 'svelte/transition'
+  import {alerts} from 'src/state/app'
   import {findReply} from 'src/util/nostr'
   import relay, {people, user} from 'src/relay'
-  import {alerts} from 'src/state/app'
   import {now, timedelta, createScroller, Cursor, getLastSync} from 'src/util/misc'
   import Spinner from "src/partials/Spinner.svelte"
   import Note from 'src/partials/Note.svelte'
@@ -23,7 +23,7 @@
   onMount(async () => {
     sub = await relay.pool.listenForEvents(
       'routes/Alerts',
-      [{kinds: [1, 7], '#p': [$user.pubkey], since: cursor.since}],
+      [{kinds: [1, 5, 7], '#p': [$user.pubkey], since: cursor.since}],
       onEvent
     )
 
@@ -51,6 +51,8 @@
         relay.getOrLoadNote(replyId)
       }
     }
+
+    alerts.set({since: now()})
   }
 
   const loadNotes = async limit => {
@@ -94,7 +96,6 @@
     )
   }
 
-  // Clear notification badge
   alerts.set({since: now()})
 </script>
 

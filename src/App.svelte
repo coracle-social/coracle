@@ -10,9 +10,9 @@
   import {Router, Route, links, navigate} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {hasParent} from 'src/util/html'
-  import {timedelta, now} from 'src/util/misc'
+  import {timedelta, getLastSync, now} from 'src/util/misc'
   import {store as toast} from "src/state/toast"
-  import {modal, alerts, settings} from "src/state/app"
+  import {modal, settings, alerts} from "src/state/app"
   import relay, {user, connections} from 'src/relay'
   import Anchor from 'src/partials/Anchor.svelte'
   import NoteDetail from "src/views/NoteDetail.svelte"
@@ -43,31 +43,24 @@
   let menuIcon
   let scrollY
   let suspendedSubs = []
-  let mostRecentAlert = relay.lq(async () => {
-    const [e] = await relay.filterAlerts($user, 1)
+  let mostRecentAlert = $alerts.since
 
-    return e?.created_at
-  })
+  const logout = async () => {
+    const $connections = get(connections)
+    const $settings = get(settings)
 
-  const logout = () => {
-    // Give any animations a moment to finish
-    setTimeout(() => {
-      const $connections = get(connections)
-      const $settings = get(settings)
+    localStorage.clear()
 
-      localStorage.clear()
+    // Keep relays around
+    await relay.db.events.clear()
+    await relay.db.tags.clear()
 
-      // Keep relays around
-      relay.db.events.clear()
-      relay.db.tags.clear()
+    // Remember the user's relay selection and settings
+    connections.set($connections)
+    settings.set($settings)
 
-      // Remember the user's relay selection and settings
-      connections.set($connections)
-      settings.set($settings)
-
-      // Do a hard refresh so everything gets totally cleared
-      window.location = '/login'
-    }, 200)
+    // do a hard refresh so everything gets totally cleared
+    window.location = '/login'
   }
 
   onMount(() => {
@@ -83,7 +76,13 @@
     const unsubUser = user.subscribe($user => {
       if ($user && $user.pubkey !== prevPubkey) {
         relay.pool.syncNetwork()
-        relay.pool.listenForEvents('App/alerts', {'#p': [$user.pubkey], since: now()})
+        relay.pool.listenForEvents(
+          'App/alerts',
+          [{kinds: [1, 7], '#p': [$user.pubkey], since: mostRecentAlert}],
+          e => {
+            mostRecentAlert = Math.max(e.created_at, mostRecentAlert)
+          }
+        )
       }
 
       prevPubkey = $user?.pubkey

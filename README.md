@@ -1,10 +1,12 @@
 # What is this?
 
-Coracle is a web client for the Nostr protocol. While Nostr is useful for many things, Coracle focuses on providing a high-quality user experience. Check it out at [coracle.social](https://coracle.social).
+Coracle is a web client for the Nostr protocol. While Nostr is useful for many things, Coracle focuses on providing a high-quality social media experience. Check it out at [coracle.social](https://coracle.social).
 
 [Dufflepud](https://github.com/staab/dufflepud) is a companion server which you can self-host. It helps Coracle with things like link previews and image uploads.
 
 Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edges.
+
+If you like Coracle and want to support its development, you can donate sats via [Geyser](https://geyser.fund/project/coracle).
 
 # Features
 
@@ -24,7 +26,6 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 
 # Bugs
 
-- [ ] Use https://nostr.watch/relays.json to populate relays
 - [ ] Add alerts for replies to posts the user liked
 - [ ] With link/image previews, remove the url from the note body if it's on a separate last line
 - [ ] Stack views so scroll position isn't lost on navigation
@@ -32,23 +33,9 @@ Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edg
 - [ ] Wait for 60% or so of relays to eose to balance completeness with speed
 - [ ] Add a CSP, check for XSS in image urls
 
-# Current update
+# Changelog
 
-- [ ] Write blog post
-- [x] Sync user
-- [x] Based on petnames, sync network to 2 or 3 degrees of separation
-  - When a user is added/removed, sync them and add to or remove from network
-- [x] Add cursor object to handle since/until/last sync
-- [x] Separate fetching and loading from the db
-  - Each route should have a fetcher and loader.
-  - The fetcher should keep track of the range of notes it has already gotten
-  - Separate helper functions into loaders and fetchers
-- [x] Main fetch requests:
-  - Fetch feed by name, since last sync
-  - Fetch person, including feed
-  - Fetch note, including context
-  - This is based on detail pages. Each request should check local db and fall back to network, all within an await.
+## 0.2.0
 
-# Problems to solve
-
-- [ ] How will newcomers get followed?
+- [x] Completely re-worked data synchronization layer, moving from naive just-in-time requests to background listeners and a local copy stored in dexie. Events and tags, but not people are deleted from the database on logout, and old events are periodically purged.
+- [x] 
