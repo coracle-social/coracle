@@ -30,12 +30,21 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] With link/image previews, remove the url from the note body if it's on a separate last line
 - [ ] Stack views so scroll position isn't lost on navigation
 - [ ] Add notification for slow relays
-- [ ] Wait for 60% or so of relays to eose to balance completeness with speed
-- [ ] Add a CSP, check for XSS in image urls
+- [ ] Parent notes are having a hard time loading
 
 # Changelog
 
 ## 0.2.0
 
-- [x] Completely re-worked data synchronization layer, moving from naive just-in-time requests to background listeners and a local copy stored in dexie. Events and tags, but not people are deleted from the database on logout, and old events are periodically purged.
-- [x] 
+- [x] Completely re-worked data synchronization layer, moving from naive just-in-time requests to background listeners, loaders, and a local copy stored in dexie. Events and tags, but not people are deleted from the database on logout, and old events are periodically purged.
+- [x] Added alert badge and page.
+- [x] Improved relay page. Suggestions are now taken from
+- [x] Removed chat to keep scope of work smaller. Let me know if you'd like to see that come back.
+- [x] Split tabs out into separate components
+- [x] Removed dispatch, added cmd instead
+- [x] Added image previews in addition to link previews
+- [x] Fixed infinite scrolling
+- [x] Removed cursor/listener abstractions
+- [x] Added some default pubkeys
+- [x] Wait for some, not all relays to send eose to keep things fast
+- [x] General refactoring and bugfixing

@@ -60,7 +60,9 @@
     settings.set($settings)
 
     // do a hard refresh so everything gets totally cleared
-    window.location = '/login'
+    setTimeout(() => {
+      window.location = '/login'
+    }, 100)
   }
 
   onMount(() => {

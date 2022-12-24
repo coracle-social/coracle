@@ -22,19 +22,28 @@ class Channel {
     this.status = 'idle'
   }
   sub(filter, onEvent, onEose = noop, opts = {}) {
+    const relays = Object.keys(pool.relays)
+
     // If we don't have any relays, we'll wait forever for an eose, but
     // we already know we're done. Use a timeout since callers are
     // expecting this to be async and we run into errors otherwise.
-    if (Object.keys(pool.relays).length === 0) {
+    if (relays.length === 0) {
       setTimeout(onEose)
 
       return {unsub: noop}
     }
 
-    // Start our subscription, wait for only one relay to eose before
-    // calling it done. We were waiting for all before, but that made
-    // the slowest relay a bottleneck
-    const sub = pool.sub({filter, cb: onEvent}, this.name, onEose)
+    // Start our subscription, wait for only our fastest relays to eose before calling it done.
+    // We were waiting for all before, but that made the slowest relay a bottleneck. Waiting for
+    // only one meant we might be settling for very incomplete data
+    const eoseRelays = []
+    const sub = pool.sub({filter, cb: onEvent}, this.name, r => {
+      eoseRelays.push(r)
+
+      if (eoseRelays.length >= relays.length - 2) {
+        onEose()
+      }
+    })
 
     const done = () => {
       if (this.status === 'busy') {
@@ -184,11 +193,12 @@ const syncNetwork = async () => {
   // Fall back to some pubkeys we like so we can support new users
   if (pubkeys.length === 0) {
     pubkeys = [
+      "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d", // fiatjaf
+      "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245", // jb55
       "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322", // hodlbod
       "472f440f29ef996e92a186b8d320ff180c855903882e59d50de1b8bd5669301e", // Marty Bent
       "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2", // Jack
       "85080d3bad70ccdcd7f74c29a44f55bb85cbcd3dd0cbb957da1d215bdb931204", // Preston
-      "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245", // jb55
       "c4eabae1be3cf657bc1855ee05e69de9f059cb7a059227168b80b89761cbc4e0", // Jack Mallers
     ]
   }

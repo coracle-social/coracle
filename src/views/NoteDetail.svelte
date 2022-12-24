@@ -1,6 +1,8 @@
 <script>
   import {when, propEq} from 'ramda'
+  import {fly} from 'svelte/transition'
   import {onMount, onDestroy} from 'svelte'
+  import {now} from 'src/util/misc'
   import relay from 'src/relay'
   import Note from 'src/partials/Note.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
@@ -18,7 +20,7 @@
     if (note) {
       sub = await relay.pool.listenForEvents(
         'routes/NoteDetail',
-        [{kinds: [1, 5, 7], '#e': [note.id]}],
+        [{kinds: [1, 5, 7], '#e': [note.id], since: now()}],
         when(propEq('kind', 1), relay.loadNoteContext)
       )
     }
@@ -42,11 +44,11 @@
 </script>
 
 {#if !note}
-<div class="text-white">
+<div class="text-white" in:fly={{y: 20}}>
   Sorry, we weren't able to find this note.
 </div>
 {:else if $observable}
-<div n:fly={{y: 20}}>
+<div in:fly={{y: 20}}>
   <Note invertColors anchorId={note.id} note={$observable} depth={2} />
 </div>
 {:else}

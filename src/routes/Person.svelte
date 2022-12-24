@@ -41,11 +41,15 @@
   }
 
   const loadLikes = async limit => {
-    return relay.annotateChunk(take(limit, await relay.filterEvents({
-      kinds: [7],
-      authors: [pubkey],
-      muffle: getTagValues($user?.muffle || []),
-    })))
+    const events = await relay.annotateChunk(
+      take(limit, await relay.filterEvents({
+        kinds: [7],
+        authors: [pubkey],
+        muffle: getTagValues($user?.muffle || []),
+      }))
+    )
+
+    return events.filter(e => e.kind === 1)
   }
 
   const loadNetwork = async limit => {

@@ -35,11 +35,6 @@ const createReply = (content, e) =>
 
 const deleteEvent = ids => publishEvent(5, '', ids.map(id => t("e", id)))
 
-export default {
-  updateUser, addPetname, removePetname, muffle, createRoom, updateRoom, createMessage, createNote,
-  createReaction, createReply, deleteEvent,
-}
-
 // utils
 
 const copyTags = (e, newTags = []) => {
@@ -75,4 +70,9 @@ const publishEvent = async (...args) => {
   await relay.pool.publishEvent(event)
 
   return event
+}
+
+export default {
+  updateUser, addPetname, removePetname, muffle, createRoom, updateRoom, createMessage, createNote,
+  createReaction, createReply, deleteEvent, publishEvent,
 }
