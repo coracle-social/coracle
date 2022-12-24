@@ -70,5 +70,3 @@ export const escapeHtml = html => {
 
   return div.innerHTML
 }
-
-export const findLink = t => first(t.match(/https?:\/\/([\w.-]+)[^ ]*/))

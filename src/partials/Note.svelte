@@ -1,9 +1,11 @@
 <script>
   import cx from 'classnames'
+  import extractUrls from 'extract-urls'
   import {whereEq, find} from 'ramda'
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
-  import {hasParent, findLink} from 'src/util/html'
+  import {quantify} from 'hurdak/lib/hurdak'
+  import {hasParent} from 'src/util/html'
   import {findReply} from "src/util/nostr"
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
@@ -21,7 +23,7 @@
 
   let reply = null
 
-  const link = $settings.showLinkPreviews ? findLink(note.content) : null
+  const links = $settings.showLinkPreviews ? extractUrls(note.content) || [] : null
   const interactive = !anchorId || anchorId !== note.id
 
   let likes, flags, like, flag
@@ -131,20 +133,20 @@
     {:else}
     <div class="text-ellipsis overflow-hidden flex flex-col gap-2">
       <p>{@html note.html}</p>
-      {#if link}
+      {#each links.slice(-2) as link}
       <div>
         <div class="inline-block" on:click={e => e.stopPropagation()}>
           <Preview endpoint={`${$settings.dufflepudUrl}/link/preview`} url={link} />
         </div>
       </div>
-      {/if}
+      {/each}
     </div>
     <div class="flex gap-6 text-light">
       <div>
         <i
           class="fa-solid fa-reply cursor-pointer"
           on:click={startReply} />
-        {note.replies.length}
+        {note.repliesCount}
       </div>
       <div class={cx({'text-accent': like})}>
         <i
@@ -188,4 +190,9 @@
   <svelte:self showParent={false} note={r} depth={depth - 1} {invertColors} {anchorId} />
 </div>
 {/each}
+{#if note.repliesCount > 5 && note.replies.length < note.repliesCount}
+<div class="ml-10 mt-2 text-light cursor-pointer" on:click={onClick}>
+  {quantify(note.repliesCount - note.replies.length, 'more reply', 'more replies')} found.
+</div>
+{/if}
 {/if}

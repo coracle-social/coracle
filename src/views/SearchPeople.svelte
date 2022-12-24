@@ -1,11 +1,15 @@
 <script>
+  import {prop} from 'ramda'
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
   import {user, people} from 'src/relay'
 
   export let q
 
-  let search = fuzzy(Object.values($people), {keys: ["name", "about", "pubkey"]})
+  let search = fuzzy(
+    Object.values($people).filter(prop('name')),
+    {keys: ["name", "about", "pubkey"]}
+  )
 </script>
 
 <ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">

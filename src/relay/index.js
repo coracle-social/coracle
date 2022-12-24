@@ -1,9 +1,10 @@
 import {liveQuery} from 'dexie'
+import extractUrls from 'extract-urls'
 import {get} from 'svelte/store'
-import {pluck, uniq, take, uniqBy, groupBy, concat, without, prop, isNil, identity} from 'ramda'
-import {ensurePlural, createMap, ellipsize} from 'hurdak/lib/hurdak'
+import {intersection, pluck, sortBy, uniq, uniqBy, groupBy, concat, without, prop, isNil, identity} from 'ramda'
+import {ensurePlural, first, createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {escapeHtml} from 'src/util/html'
-import {filterTags, findReply, findRoot} from 'src/util/nostr'
+import {filterTags, getTagValues, findReply, findRoot} from 'src/util/nostr'
 import {db} from 'src/relay/db'
 import pool from 'src/relay/pool'
 import cmd from 'src/relay/cmd'
@@ -18,41 +19,42 @@ const lq = f => liveQuery(async () => {
   }
 })
 
-// Utils for querying dexie - these return collections, not arrays
-
-const prefilterEvents = filter => {
-  if (filter.ids) {
-    return db.events.where('id').anyOf(ensurePlural(filter.ids))
-  }
-
-  if (filter.authors) {
-    return db.events.where('pubkey').anyOf(ensurePlural(filter.authors))
-  }
-
-  if (filter.kinds) {
-    return db.events.where('kind').anyOf(ensurePlural(filter.kinds))
-  }
-
-  return db.events
-}
-
 // Utils for filtering db - nothing below should load events from the network
 
-const filterEvents = filter => {
-  return prefilterEvents(filter)
-    .filter(e => {
-      if (filter.ids && !filter.ids.includes(e.id)) return false
-      if (filter.authors && !filter.authors.includes(e.pubkey)) return false
-      if (filter.muffle && filter.muffle.includes(e.pubkey)) return false
-      if (filter.kinds && !filter.kinds.includes(e.kind)) return false
-      if (filter.since && filter.since > e.created_at) return false
-      if (filter.until && filter.until < e.created_at) return false
-      if (!isNil(filter.content) && filter.content !== e.content) return false
+const filterEvents = async ({limit, ...filter}) => {
+  let events = db.events
 
-      return true
-    })
-    .reverse()
-    .sortBy('created_at')
+  // Sorting is expensive, so prioritize that unless we have a filter that will dramatically
+  // reduce the number of results so we can do ordering in memory
+  if (filter.ids) {
+    events = await db.events.where('id').anyOf(ensurePlural(filter.ids)).reverse().sortBy('created')
+  } else if (filter.authors) {
+    events = await db.events.where('pubkey').anyOf(ensurePlural(filter.authors)).reverse().sortBy('created')
+  } else {
+    events = await events.orderBy('created_at').reverse().toArray()
+  }
+
+  const result = []
+  for (const e of events) {
+    if (filter.ids && !filter.ids.includes(e.id)) continue
+    if (filter.authors && !filter.authors.includes(e.pubkey)) continue
+    if (filter.muffle && filter.muffle.includes(e.pubkey)) continue
+    if (filter.kinds && !filter.kinds.includes(e.kind)) continue
+    if (filter.since && filter.since > e.created_at) continue
+    if (filter.until && filter.until < e.created_at) continue
+    if (filter['#p'] && intersection(filter['#p'], getTagValues(e.tags)).length === 0) continue
+    if (filter['#e'] && intersection(filter['#e'], getTagValues(e.tags)).length === 0) continue
+    if (!isNil(filter.content) && filter.content !== e.content) continue
+    if (filter.customFilter && !filter.customFilter(e)) continue
+
+    result.push(e)
+
+    if (result.length > limit) {
+      break
+    }
+  }
+
+  return result
 }
 
 const filterReplies = async (id, filter) => {
@@ -96,7 +98,14 @@ const findNote = async (id, {showEntire = false, depth = 1} = {}) => {
 
   return {
     ...note, reactions, person, html, parent,
-    replies: depth === 0 ? [] : await Promise.all(replies.map(r => findNote(r.id, {depth: depth - 1}))),
+    repliesCount: replies.length,
+    replies: depth === 0
+      ? []
+      : await Promise.all(
+          sortBy(e => -e.created_at, replies)
+          .slice(0, showEntire ? Infinity : 5)
+          .map(r => findNote(r.id, {depth: depth - 1}))
+      ),
   }
 }
 
@@ -125,24 +134,43 @@ const annotateChunk = async chunk => {
     allNotes
   )
 
-  return await Promise.all(Object.keys(notesByRoot).map(findNote))
+  // Re-sort, since events come in order regardless of level in the hierarchy.
+  // This is really a hack, since a single like can bump an old note back up to the
+  // top of the feed
+  return sortBy(e => -e.created_at, await Promise.all(Object.keys(notesByRoot).map(findNote)))
 }
 
 const renderNote = async (note, {showEntire = false}) => {
-  const $people = get(db.people)
-
   const shouldEllipsize = note.content.length > 500 && !showEntire
-  const content = shouldEllipsize ? ellipsize(note.content, 500) : note.content
+  const $people = get(db.people)
   const peopleByPubkey = createMap(
     'pubkey',
     filterTags({tag: "p"}, note).map(k => $people[k]).filter(identity)
   )
 
-  return escapeHtml(content)
-    .replace(/\n/g, '<br />')
-    .replace(/https?:\/\/([\w.-]+)[^ ]*/g, (url, domain) => {
-      return `<a href="${url}" target="_blank noopener" class="underline">${domain}</a>`
-    })
+  let content
+
+  // Ellipsize
+  content = shouldEllipsize ? ellipsize(note.content, 500) : note.content
+
+  // Escape html
+  content = escapeHtml(content)
+
+  // Extract urls
+  for (const url of extractUrls(content) || []) {
+    const $a = document.createElement('a')
+
+    $a.href = url
+    $a.target = "_blank noopener"
+    $a.className = "underline"
+    $a.innerText = first(url.replace(/https?:\/\/(www\.)?/, '').split(/[\/\?#]/))
+
+    // If the url is on its own line, remove it entirely. Otherwise, replace it with the link
+    content = content.replace(url, $a.outerHTML)
+  }
+
+  // Mentions
+  content = content
     .replace(/#\[(\d+)\]/g, (tag, i) => {
       if (!note.tags[parseInt(i)]) {
         return tag
@@ -154,26 +182,8 @@ const renderNote = async (note, {showEntire = false}) => {
 
       return `@<a href="/people/${pubkey}/notes" class="underline">${name}</a>`
     })
-}
 
-const filterAlerts = async (person, limit) => {
-  const tags = db.tags.where('value').equals(person.pubkey)
-  const ids = pluck('event', await tags.toArray())
-  const alerts = take(limit + 1, await filterEvents({kinds: [1, 7], ids}))
-
-  return alerts.filter(e => {
-    // Don't show people's own stuff
-    if (e.pubkey === person.pubkey) {
-      return false
-    }
-
-    // Only notify users about positive reactions
-    if (e.kind === 7 && !['', '+'].includes(e.content)) {
-      return false
-    }
-
-    return true
-  })
+  return content
 }
 
 // Synchronization
@@ -281,6 +291,6 @@ export const connections = db.connections
 
 export default {
   db, pool, cmd, lq, filterEvents, getOrLoadNote, filterReplies, findNote,
-  annotateChunk, renderNote, filterAlerts, login, addRelay, removeRelay,
+  annotateChunk, renderNote, login, addRelay, removeRelay,
   follow, unfollow, loadNoteContext,
 }

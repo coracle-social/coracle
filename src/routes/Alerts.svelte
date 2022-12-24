@@ -56,7 +56,25 @@
   }
 
   const loadNotes = async limit => {
-    const events = await relay.filterAlerts($user, limit + 1)
+    const events = await relay.filterEvents({
+      limit,
+      kinds: [1, 7],
+      '#p': [$user.pubkey],
+      customFilter: e => {
+        // Don't show people's own stuff
+        if (e.pubkey === $user.pubkey) {
+          return false
+        }
+
+        // Only notify users about positive reactions
+        if (e.kind === 7 && !['', '+'].includes(e.content)) {
+          return false
+        }
+
+        return true
+      }
+    })
+
     const notes = await relay.annotateChunk(events.filter(propEq('kind', 1)))
     const reactions = await Promise.all(
       events

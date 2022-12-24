@@ -1,5 +1,5 @@
 <script>
-  import {when, take, propEq} from 'ramda'
+  import {when, propEq} from 'ramda'
   import {onMount, onDestroy} from 'svelte'
   import Notes from "src/partials/Notes.svelte"
   import {timedelta, Cursor, getLastSync} from 'src/util/misc'
@@ -36,11 +36,12 @@
   })
 
   const loadNotes = async limit => {
-    const notes = take(limit + 1, await relay.filterEvents({
+    const notes = await relay.filterEvents({
+      limit,
       kinds: [1],
       authors: $network.concat($user.pubkey),
       muffle: getTagValues($user?.muffle || []),
-    }))
+    })
 
     if (notes.length <= limit) {
       const [since, until] = cursor.step()

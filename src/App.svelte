@@ -82,6 +82,16 @@
           'App/alerts',
           [{kinds: [1, 7], '#p': [$user.pubkey], since: mostRecentAlert}],
           e => {
+            // Don't alert about people's own stuff
+            if (e.pubkey === $user.pubkey) {
+              return
+            }
+
+            // Only notify users about positive reactions
+            if (e.kind === 7 && !['', '+'].includes(e.content)) {
+              return
+            }
+
             mostRecentAlert = Math.max(e.created_at, mostRecentAlert)
           }
         )

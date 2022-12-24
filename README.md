@@ -16,6 +16,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Notifications
 - [x] Link previews
 - [x] Add notes, follows, likes tab to profile
+- [ ] Show relative dates
 - [ ] Mentions - render done, now reference in compose
 - [ ] Image uploads
 - [ ] An actual readme
@@ -26,14 +27,22 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Bugs
 
-- [ ] lil janky
 - [ ] Add alerts for replies to posts the user liked
-- [ ] With link/image previews, remove the url from the note body if it's on a separate last line
 - [ ] Stack views so scroll position isn't lost on navigation
 - [ ] Add notification for slow relays
-- [ ] Parent notes are having a hard time loading
+- [ ] Separating events table into notes/reactions/etc would effectively give us a second index on kind.
+- [ ] Clicking on a badge in the popover falls through, and might also crash
+- [ ] Add a slider in settings so users can decide whether to go with fast relays, or wait for everyone to complete their queries. Most relevant for NoteDetail
 
 # Changelog
+
+## 0.2.1
+
+- [x] Exclude people from search who have no profile data available
+- [x] Speed up note retrieval by sorting first when the filter isn't restrictive
+- [x] Only show a certain number of replies on popular notes, with a link at the bottom showing total replies
+- [x] Refine algorithm for which relays to drop when they don't send an eose. This helps avoid the "we couldn't find this note" error message on the note detail, since we were giving up too early.
+- [x] Improve url detection and shortening
 
 ## 0.2.0
 

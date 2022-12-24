@@ -40,7 +40,9 @@ class Channel {
     const sub = pool.sub({filter, cb: onEvent}, this.name, r => {
       eoseRelays.push(r)
 
-      if (eoseRelays.length >= relays.length - 2) {
+      // If we have only a few, wait for all of them, otherwise ignore the slowest 1/5
+      const threshold = Math.round(relays.length / 10)
+      if (eoseRelays.length >= relays.length - threshold) {
         onEose()
       }
     })

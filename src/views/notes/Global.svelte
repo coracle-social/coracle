@@ -1,17 +1,14 @@
 <script>
-  import {when, take, propEq} from 'ramda'
+  import {when, propEq} from 'ramda'
   import {onMount, onDestroy} from 'svelte'
   import Notes from "src/partials/Notes.svelte"
-  import {timedelta, Cursor, getLastSync} from 'src/util/misc'
+  import {timedelta, now, Cursor} from 'src/util/misc'
   import {getTagValues} from 'src/util/nostr'
   import relay, {user} from 'src/relay'
 
   let sub
 
-  const cursor = new Cursor(
-    getLastSync('views/notes/Global'),
-    timedelta(1, 'minutes')
-  )
+  const cursor = new Cursor(now(), timedelta(1, 'minutes'))
 
   onMount(async () => {
     sub = await relay.pool.listenForEvents(
@@ -28,10 +25,11 @@
   })
 
   const loadNotes = async limit => {
-    const notes = take(limit + 1, await relay.filterEvents({
+    const notes = await relay.filterEvents({
+      limit,
       kinds: [1],
       muffle: getTagValues($user?.muffle || []),
-    }))
+    })
 
     if (notes.length <= limit) {
       const [since, until] = cursor.step()
