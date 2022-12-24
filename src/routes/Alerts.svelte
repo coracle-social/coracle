@@ -82,7 +82,7 @@
     // Combine likes of a single note
     const likesById = {}
     const alerts = notes.filter(e => e.pubkey !== $user.pubkey)
-    for (const reaction of reactions) {
+    for (const reaction of reactions.filter(prop('parent'))) {
       if (!likesById[reaction.parent.id]) {
         likesById[reaction.parent.id] = {...reaction.parent, people: []}
       }

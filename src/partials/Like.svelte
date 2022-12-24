@@ -34,8 +34,8 @@
     <div transition:fly={{y: 20}} class="fixed inset-0 z-10" on:click={closePopover} />
     <div
       transition:fly={{y: 20}}
-      class="absolute bottom-0 -ml-3 mb-12 py-2 px-4 rounded border border-solid border-medium
-             bg-dark grid grid-cols-3 gap-y-2 gap-x-4 z-10">
+      class="absolute top-0 mt-8 py-2 px-4 rounded border border-solid border-medium
+             bg-dark grid grid-cols-3 gap-y-2 gap-x-4 z-20">
       {#each note.people as person (person.pubkey)}
         <Badge {person} />
       {/each}

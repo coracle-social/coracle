@@ -26,6 +26,7 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Bugs
 
+- [ ] lil janky
 - [ ] Add alerts for replies to posts the user liked
 - [ ] With link/image previews, remove the url from the note body if it's on a separate last line
 - [ ] Stack views so scroll position isn't lost on navigation
