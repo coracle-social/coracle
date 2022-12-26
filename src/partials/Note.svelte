@@ -1,7 +1,7 @@
 <script>
   import cx from 'classnames'
   import extractUrls from 'extract-urls'
-  import {whereEq, find} from 'ramda'
+  import {whereEq, reject, propEq, find} from 'ramda'
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {quantify} from 'hurdak/lib/hurdak'
@@ -31,9 +31,10 @@
   $: {
     likes = note.reactions.filter(n => ['', '+'].includes(n.content))
     flags = note.reactions.filter(whereEq({content: '-'}))
-    like = find(whereEq({pubkey: $user?.pubkey}), likes)
-    flag = find(whereEq({pubkey: $user?.pubkey}), flags)
   }
+
+  $: like = find(whereEq({pubkey: $user?.pubkey}), likes)
+  $: flag = find(whereEq({pubkey: $user?.pubkey}), flags)
 
   const onClick = e => {
     if (!['I'].includes(e.target.tagName) && !hasParent('a', e.target)) {
@@ -45,21 +46,19 @@
     modal.set({note: {id: findReply(note)}})
   }
 
-  const react = content => {
-    if ($user) {
-      relay.cmd.createReaction(content, note)
-    } else {
-      navigate('/login')
+  const react = async content => {
+    if (!$user) {
+      return navigate('/login')
     }
 
+    const event = await relay.cmd.createReaction(content, note)
+
     if (content === '+') {
-      like = true
-      likes += 1
+      likes = likes.concat(event)
     }
 
     if (content === '-') {
-      flag = true
-      flags += 1
+      flags = flags.concat(event)
     }
   }
 
@@ -67,13 +66,11 @@
     relay.cmd.deleteEvent([e.id])
 
     if (e.content === '+') {
-      like = false
-      likes -= 1
+      likes = reject(propEq('pubkey', $user.pubkey), likes)
     }
 
     if (e.content === '-') {
-      flag = false
-      flags -= 1
+      flags = reject(propEq('pubkey', $user.pubkey), flags)
     }
   }
 

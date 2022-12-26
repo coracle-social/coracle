@@ -3,7 +3,7 @@
   import {onMount, onDestroy} from 'svelte'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
-  import {now, timedelta} from 'src/util/misc'
+  import {now} from 'src/util/misc'
   import Tabs from "src/partials/Tabs.svelte"
   import Button from "src/partials/Button.svelte"
   import Notes from "src/views/person/Notes.svelte"
