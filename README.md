@@ -36,6 +36,10 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Changelog
 
+## 0.2.3
+
+- [x] Fix reactions - we'll show new reactions optimistically to avoid complexity in listeners
+
 ## 0.2.2
 
 - [x] Show notification for new notes rather than automatically adding them to the feed
