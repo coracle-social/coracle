@@ -36,6 +36,10 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Changelog
 
+## 0.2.4
+
+- [x] Fix reactions - livequery is required in order to listen for changes
+
 ## 0.2.3
 
 - [x] Fix reactions - we'll show new reactions optimistically to avoid complexity in listeners

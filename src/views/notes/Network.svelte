@@ -6,7 +6,7 @@
   import {getTagValues} from 'src/util/nostr'
   import relay, {user, network} from 'src/relay'
 
-  let notes, sub, networkUnsub
+  let sub, networkUnsub
 
   onMount(() => {
     // We need to re-create the sub when network changes, since this is where
@@ -16,11 +16,7 @@
       sub = await relay.pool.listenForEvents(
         'views/notes/Network',
         [{kinds: [1, 5, 7], authors: $network, since: cursor.since}],
-        when(propEq('kind', 1), async e => {
-          await relay.loadNoteContext(e)
-
-          notes.addNewNotes([e])
-        })
+        when(propEq('kind', 1), relay.loadNoteContext)
       )
     })
   })
@@ -35,23 +31,24 @@
 
   const cursor = new Cursor(timedelta(10, 'minutes'))
 
-  const loadNotes = async () => {
+  const loadNotes = () => {
     const [since, until] = cursor.step()
 
-    await relay.pool.loadEvents(
+    return relay.pool.loadEvents(
       [{kinds: [1, 5, 7], authors: $network, since, until}],
       when(propEq('kind', 1), relay.loadNoteContext)
     )
+  }
 
+  const queryNotes = () => {
     return relay.filterEvents({
-      since,
-      until,
       kinds: [1],
+      since: cursor.since,
       authors: $network.concat($user.pubkey),
       muffle: getTagValues($user?.muffle || []),
     })
   }
 </script>
 
-<Notes bind:this={notes} shouldMuffle {loadNotes} />
+<Notes shouldMuffle {loadNotes} {queryNotes} />
 

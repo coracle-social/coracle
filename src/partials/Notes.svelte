@@ -1,37 +1,36 @@
 <script>
-  import {sortBy, uniqBy, reject, prop} from 'ramda'
-  import {onDestroy} from 'svelte'
+  import {sortBy, reject} from 'ramda'
+  import {onMount} from 'svelte'
   import {slide} from 'svelte/transition'
   import {quantify} from 'hurdak/lib/hurdak'
-  import {createScroller} from 'src/util/misc'
+  import {createScroller, now} from 'src/util/misc'
   import {findReply} from 'src/util/nostr'
   import Spinner from 'src/partials/Spinner.svelte'
   import Note from "src/partials/Note.svelte"
   import relay from 'src/relay'
 
   export let loadNotes
-  export const addNewNotes = xs => {
-    newNotes = newNotes.concat(xs)
-  }
+  export let queryNotes
 
-  let notes = []
+  const notes = relay.lq(async () => {
+    const notes = await queryNotes()
+    const annotated = await relay.annotateChunk(notes)
+
+    return sortBy(e => -e.created_at, annotated)
+  })
+
+  let until = now()
   let newNotes = []
   let newNotesLength = 0
 
+  $: newNotes = ($notes || []).filter(e => e.created_at > until)
   $: newNotesLength = reject(findReply, newNotes).length
+  $: visibleNotes = ($notes || []).filter(e => e.created_at < until)
 
-  const scroller = createScroller(async () => {
-    addNotes(await loadNotes())
-  })
+  onMount(() => {
+    const scroller = createScroller(loadNotes)
 
-  const addNotes = async xs => {
-    const chunk = await relay.annotateChunk(xs)
-
-    notes = sortBy(e => -e.created_at, uniqBy(prop('id'), notes.concat(chunk)))
-  }
-
-  onDestroy(() => {
-    scroller.stop()
+    return scroller.stop
   })
 </script>
 
@@ -40,11 +39,11 @@
   <div
     transition:slide
     class="mb-2 cursor-pointer text-center underline text-light"
-    on:click={() => { addNotes(newNotes); newNotes = [] }}>
+    on:click={() => { until = now() }}>
     Load {quantify(newNotesLength, 'new note')}
   </div>
   {/if}
-  {#each notes as n (n.id)}
+  {#each visibleNotes as n (n.id)}
     <li><Note note={n} depth={2} /></li>
   {/each}
 </ul>

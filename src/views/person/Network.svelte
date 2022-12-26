@@ -10,15 +10,24 @@
 
   const loadNotes = async () => {
     const [since, until] = cursor.step()
-    const authors = getTagValues(person.petnames)
-    const filter = {kinds: [1], authors, since, until}
-    const muffle = getTagValues($user?.muffle || [])
 
-    await relay.pool.loadEvents(filter)
+    return relay.pool.loadEvents({
+      since,
+      until,
+      kinds: [1],
+      authors: getTagValues(person.petnames),
+    })
+  }
 
-    return relay.filterEvents({...filter, muffle})
+  const queryNotes = () => {
+    return relay.filterEvents({
+      kinds: [1],
+      since: cursor.since,
+      authors: getTagValues(person.petnames),
+      muffle: getTagValues($user?.muffle || []),
+    })
   }
 </script>
 
-<Notes shouldMuffle {loadNotes} />
+<Notes shouldMuffle {loadNotes} {queryNotes} />
 

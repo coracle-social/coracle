@@ -1,5 +1,6 @@
 <script>
   import {fly} from 'svelte/transition'
+  import {uniqBy, prop} from 'ramda'
   import {ellipsize, quantify} from 'hurdak/src/core'
   import Badge from "src/partials/Badge.svelte"
   import {formatTimestamp} from 'src/util/misc'
@@ -38,7 +39,7 @@
       transition:fly={{y: 20}}
       class="absolute top-0 mt-8 py-2 px-4 rounded border border-solid border-medium
              bg-dark grid grid-cols-3 gap-y-2 gap-x-4 z-20">
-      {#each note.people as person (person.pubkey)}
+      {#each uniqBy(prop('pubkey'), note.people) as person (person.pubkey)}
         <Badge {person} />
       {/each}
     </div>

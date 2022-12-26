@@ -8,16 +8,21 @@
 
   const cursor = new Cursor(timedelta(1, 'days'))
 
-  const loadNotes = async () => {
+  const loadNotes = () => {
     const [since, until] = cursor.step()
-    const filter = {kinds: [7], authors: [pubkey], since, until}
-    const muffle = getTagValues($user?.muffle || [])
 
-    await relay.pool.loadEvents(filter)
+    return relay.pool.loadEvents({kinds: [7], authors: [pubkey], since, until})
+  }
 
-    return relay.filterEvents({...filter, muffle})
+  const queryNotes = () => {
+    return relay.filterEvents({
+      kinds: [7],
+      since: cursor.since,
+      authors: [pubkey],
+      muffle: getTagValues($user?.muffle || []),
+    })
   }
 </script>
 
-<Notes shouldMuffle {loadNotes} />
+<Notes shouldMuffle {loadNotes} {queryNotes} />
 
