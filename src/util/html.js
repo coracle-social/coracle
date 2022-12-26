@@ -68,3 +68,9 @@ export const escapeHtml = html => {
 
   return div.innerHTML
 }
+
+export const killEvent = e => {
+  e.preventDefault()
+  e.stopPropagation()
+  e.stopImmediatePropagation()
+}

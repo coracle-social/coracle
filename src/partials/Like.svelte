@@ -3,6 +3,7 @@
   import {ellipsize, quantify} from 'hurdak/src/core'
   import Badge from "src/partials/Badge.svelte"
   import {formatTimestamp} from 'src/util/misc'
+  import {killEvent} from 'src/util/html'
   import {modal} from 'src/state/app'
 
   export let note
@@ -10,13 +11,13 @@
   let isOpen = false
 
   const openPopover = e => {
-    e.stopPropagation()
+    killEvent(e)
 
     isOpen = true
   }
 
   const closePopover = e => {
-    e.stopPropagation()
+    killEvent(e)
 
     isOpen = false
   }
@@ -33,6 +34,7 @@
     {#if isOpen}
     <div transition:fly={{y: 20}} class="fixed inset-0 z-10" on:click={closePopover} />
     <div
+      on:click={killEvent}
       transition:fly={{y: 20}}
       class="absolute top-0 mt-8 py-2 px-4 rounded border border-solid border-medium
              bg-dark grid grid-cols-3 gap-y-2 gap-x-4 z-20">
