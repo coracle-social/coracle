@@ -44,6 +44,8 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Slightly improved context fetching to reduce subscriptions
 - [x] Split person feeds out into separate components
 - [x] Add timeout in scroller to keep polling for new results
+- [x] Fix fall-through on user badge click on alerts page
+- [x] Fix deletion of old events, be more aggressive
 
 ## 0.2.1
 
