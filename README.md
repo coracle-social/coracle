@@ -36,6 +36,15 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Changelog
 
+## 0.2.2
+
+- [x] Show notification for new notes rather than automatically adding them to the feed
+- [x] Improve slow relay pruning by using a timeout for each relay
+- [x] Re-work feed loading - go to network first and fall back to cache to ensure results that are as complete as possible
+- [x] Slightly improved context fetching to reduce subscriptions
+- [x] Split person feeds out into separate components
+- [x] Add timeout in scroller to keep polling for new results
+
 ## 0.2.1
 
 - [x] Exclude people from search who have no profile data available

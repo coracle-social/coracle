@@ -53,6 +53,7 @@ export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 export const createScroller = loadMore => {
   let done = false
   let didLoad = false
+  let timeout = null
   const check = async () => {
     // While we have empty space, fill it
     const {scrollY, innerHeight} = window
@@ -61,7 +62,15 @@ export const createScroller = loadMore => {
 
     // Only trigger loading the first time we reach the threshhold
     if (shouldLoad && !didLoad) {
+      clearTimeout(timeout)
+
       await loadMore()
+
+      // If nothing loads, the page doesn't reflow and we get stuck.
+      // Give it a generous timeout from last time something did load
+      timeout = setTimeout(() => {
+        didLoad = false
+      }, 5000)
     }
 
     didLoad = shouldLoad
@@ -72,6 +81,7 @@ export const createScroller = loadMore => {
     if (!done) {
       requestAnimationFrame(check)
     }
+
   }
 
   requestAnimationFrame(check)
@@ -99,14 +109,15 @@ export const getLastSync = (k, fallback = 0) => {
 }
 
 export class Cursor {
-  constructor(since, delta) {
-    this.since = (since || now()) - delta,
+  constructor(delta) {
+    this.since = now()
+    this.until = now()
     this.delta = delta
   }
   step() {
-    const until = this.since
+    this.until = this.since
     this.since -= this.delta
 
-    return [this.since, until]
+    return [this.since, this.until]
   }
 }

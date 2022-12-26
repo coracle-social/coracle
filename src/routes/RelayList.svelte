@@ -77,7 +77,9 @@
         </div>
         {/if}
       {/each}
-      <small class="text-center">Found {($knownRelays || []).length} known relays</small>
+      <small class="text-center">
+        Showing {Math.min(($knownRelays || []).length, 50)} of {($knownRelays || []).length} known relays
+      </small>
     </div>
   </div>
 </div>

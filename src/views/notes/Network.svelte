@@ -2,17 +2,11 @@
   import {when, propEq} from 'ramda'
   import {onMount, onDestroy} from 'svelte'
   import Notes from "src/partials/Notes.svelte"
-  import {timedelta, Cursor, getLastSync} from 'src/util/misc'
+  import {timedelta, Cursor} from 'src/util/misc'
   import {getTagValues} from 'src/util/nostr'
   import relay, {user, network} from 'src/relay'
 
-  let sub
-  let networkUnsub
-
-  const cursor = new Cursor(
-    getLastSync('views/notes/Network'),
-    timedelta(1, 'hours')
-  )
+  let notes, sub, networkUnsub
 
   onMount(() => {
     // We need to re-create the sub when network changes, since this is where
@@ -22,7 +16,11 @@
       sub = await relay.pool.listenForEvents(
         'views/notes/Network',
         [{kinds: [1, 5, 7], authors: $network, since: cursor.since}],
-        when(propEq('kind', 1), relay.loadNoteContext)
+        when(propEq('kind', 1), async e => {
+          await relay.loadNoteContext(e)
+
+          notes.addNewNotes([e])
+        })
       )
     })
   })
@@ -35,28 +33,25 @@
     }
   })
 
-  const loadNotes = async limit => {
-    const notes = await relay.filterEvents({
-      limit,
+  const cursor = new Cursor(timedelta(10, 'minutes'))
+
+  const loadNotes = async () => {
+    const [since, until] = cursor.step()
+
+    await relay.pool.loadEvents(
+      [{kinds: [1, 5, 7], authors: $network, since, until}],
+      when(propEq('kind', 1), relay.loadNoteContext)
+    )
+
+    return relay.filterEvents({
+      since,
+      until,
       kinds: [1],
       authors: $network.concat($user.pubkey),
       muffle: getTagValues($user?.muffle || []),
     })
-
-    if (notes.length <= limit) {
-      const [since, until] = cursor.step()
-
-      relay.pool.loadEvents(
-        [{kinds: [1, 5, 7], authors: $network, since, until}],
-        when(propEq('kind', 1), relay.loadNoteContext)
-      )
-    }
-
-    return relay.annotateChunk(notes.slice(0, limit))
   }
 </script>
 
-<!-- hack to reload notes when our network initiall loads, see onMount -->
-{#key $network.map(n => n[0]).join('')}
-<Notes shouldMuffle loadNotes={loadNotes} />
-{/key}
+<Notes bind:this={notes} shouldMuffle {loadNotes} />
+

@@ -5,7 +5,7 @@
   import {alerts} from 'src/state/app'
   import {findReply} from 'src/util/nostr'
   import relay, {people, user} from 'src/relay'
-  import {now, timedelta, createScroller, Cursor, getLastSync} from 'src/util/misc'
+  import {now, timedelta, createScroller, Cursor} from 'src/util/misc'
   import Spinner from "src/partials/Spinner.svelte"
   import Note from 'src/partials/Note.svelte'
   import Like from 'src/partials/Like.svelte'
@@ -15,10 +15,7 @@
   let notes
   let limit = 0
 
-  const cursor = new Cursor(
-    getLastSync('routes/Alerts'),
-    timedelta(1, 'days')
-  )
+  const cursor = new Cursor(timedelta(1, 'hours'))
 
   onMount(async () => {
     sub = await relay.pool.listenForEvents(

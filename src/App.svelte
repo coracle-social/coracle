@@ -10,7 +10,7 @@
   import {Router, Route, links, navigate} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {hasParent} from 'src/util/html'
-  import {timedelta, getLastSync, now} from 'src/util/misc'
+  import {timedelta, now} from 'src/util/misc'
   import {store as toast} from "src/state/toast"
   import {modal, settings, alerts} from "src/state/app"
   import relay, {user, connections} from 'src/relay'

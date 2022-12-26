@@ -1,7 +1,7 @@
 import {liveQuery} from 'dexie'
 import extractUrls from 'extract-urls'
 import {get} from 'svelte/store'
-import {intersection, pluck, sortBy, uniq, uniqBy, groupBy, concat, without, prop, isNil, identity} from 'ramda'
+import {intersection, find, sortBy, propEq, uniqBy, groupBy, concat, without, prop, isNil, identity} from 'ramda'
 import {ensurePlural, first, createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {escapeHtml} from 'src/util/html'
 import {filterTags, getTagValues, findReply, findRoot} from 'src/util/nostr'
@@ -103,7 +103,7 @@ const findNote = async (id, {showEntire = false, depth = 1} = {}) => {
       ? []
       : await Promise.all(
           sortBy(e => -e.created_at, replies)
-          .slice(0, showEntire ? Infinity : 5)
+          .slice(0, showEntire ? Infinity : 3)
           .map(r => findNote(r.id, {depth: depth - 1}))
       ),
   }
@@ -134,10 +134,12 @@ const annotateChunk = async chunk => {
     allNotes
   )
 
+  const notes = await Promise.all(Object.keys(notesByRoot).map(findNote))
+
   // Re-sort, since events come in order regardless of level in the hierarchy.
   // This is really a hack, since a single like can bump an old note back up to the
-  // top of the feed
-  return sortBy(e => -e.created_at, await Promise.all(Object.keys(notesByRoot).map(findNote)))
+  // top of the feed. Also, discard non-notes (e.g. reactions)
+  return sortBy(e => -e.created_at, notes.filter(propEq('kind', 1)))
 }
 
 const renderNote = async (note, {showEntire = false}) => {
@@ -218,27 +220,27 @@ const unfollow = async pubkey => {
 // This is intended only for bootstrapping listeners
 
 const loadNoteContext = async (note, {loadParent = false} = {}) => {
-  // Load note context - this assumes that we are looking at a feed, and so
-  // we already have the note's parent and its likes loaded.
+  const $people = get(people)
   const filter = [{kinds: [1, 5, 7], '#e': [note.id]}]
 
-  if (!prop(note.pubkey, get(db.people))) {
+  // Load the author if needed
+  if (!$people[note.pubkey]) {
     filter.push({kinds: [0], authors: [note.pubkey]})
   }
 
-  // Load  the events
+  // Load the note's parent
+  const parentId = findReply(note)
+  if (loadParent && parentId) {
+    filter.push({kinds: [1], ids: [parentId]})
+  }
+
+  // Load the events
   const events = await pool.loadEvents(filter)
 
-  // Load any related people we're missing
-  const $people = get(people)
-  await pool.loadPeople(
-    uniq(pluck('pubkey', events)).filter(k => !$people[k])
-  )
-
-  // Load the note's parent
-  const replyId = findReply(note)
-  if (loadParent && replyId) {
-    await getOrLoadNote(replyId)
+  // Load the note's context as well
+  const parent = find(propEq('id', parentId), events)
+  if (loadParent && parent) {
+    await loadNoteContext(parent)
   }
 }
 

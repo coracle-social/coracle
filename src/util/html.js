@@ -1,5 +1,3 @@
-import {first} from 'hurdak/lib/hurdak'
-
 export const copyToClipboard = text => {
   const {activeElement} = document
   const input = document.createElement("textarea")

@@ -1,13 +1,14 @@
 <script>
-  import {find, take, when, propEq} from 'ramda'
+  import {find, when, propEq} from 'ramda'
   import {onMount, onDestroy} from 'svelte'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
-  import {getLastSync} from 'src/util/misc'
-  import {getTagValues} from 'src/util/nostr'
+  import {now, timedelta} from 'src/util/misc'
   import Tabs from "src/partials/Tabs.svelte"
   import Button from "src/partials/Button.svelte"
-  import Notes from "src/partials/Notes.svelte"
+  import Notes from "src/views/person/Notes.svelte"
+  import Likes from "src/views/person/Likes.svelte"
+  import Network from "src/views/person/Network.svelte"
   import {modal} from "src/state/app"
   import relay, {user, people} from 'src/relay'
 
@@ -16,12 +17,11 @@
 
   let sub = null
   let following = $user && find(t => t[1] === pubkey, $user.petnames)
-  let since = getLastSync(['Person', pubkey])
 
   onMount(async () => {
     sub = await relay.pool.listenForEvents(
       'routes/Person',
-      [{kind: [0, 1, 5, 7], authors: [pubkey], since}],
+      [{kinds: [0, 1, 5, 7], authors: [pubkey], since: now()}],
       when(propEq('kind', 1), relay.loadNoteContext)
     )
   })
@@ -33,32 +33,6 @@
   })
 
   const getPerson = () => $people[pubkey]
-
-  const loadNotes = async limit => {
-    const filter = {kinds: [1], authors: [pubkey]}
-
-    return relay.annotateChunk(take(limit, await relay.filterEvents(filter)))
-  }
-
-  const loadLikes = async limit => {
-    const events = await relay.annotateChunk(
-      take(limit, await relay.filterEvents({
-        kinds: [7],
-        authors: [pubkey],
-        muffle: getTagValues($user?.muffle || []),
-      }))
-    )
-
-    return events.filter(e => e.kind === 1)
-  }
-
-  const loadNetwork = async limit => {
-    return relay.annotateChunk(take(limit, await relay.filterEvents({
-      kinds: [1],
-      authors: getTagValues(getPerson().petnames),
-      muffle: getTagValues($user?.muffle || []),
-    })))
-  }
 
   const setActiveTab = tab => navigate(`/people/${pubkey}/${tab}`)
 
@@ -115,12 +89,12 @@
 
 <Tabs tabs={['notes', 'likes', 'network']} {activeTab} {setActiveTab} />
 {#if activeTab === 'notes'}
-<Notes loadNotes={loadNotes} />
+<Notes {pubkey} />
 {:else if activeTab === 'likes'}
-<Notes loadNotes={loadLikes} />
+<Likes {pubkey} />
 {:else if activeTab === 'network'}
 {#if getPerson()}
-<Notes shouldMuffle loadNotes={loadNetwork} />
+<Network person={getPerson()} />
 {:else}
 <div class="py-16 max-w-xl m-auto flex justify-center">
   Unable to show network for this person.

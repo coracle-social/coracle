@@ -44,7 +44,7 @@
 </script>
 
 {#if !note}
-<div class="text-white" in:fly={{y: 20}}>
+<div class="p-4 text-center text-white" in:fly={{y: 20}}>
   Sorry, we weren't able to find this note.
 </div>
 {:else if $observable}

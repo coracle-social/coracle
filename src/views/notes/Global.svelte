@@ -2,19 +2,21 @@
   import {when, propEq} from 'ramda'
   import {onMount, onDestroy} from 'svelte'
   import Notes from "src/partials/Notes.svelte"
-  import {timedelta, now, Cursor} from 'src/util/misc'
+  import {timedelta, Cursor} from 'src/util/misc'
   import {getTagValues} from 'src/util/nostr'
   import relay, {user} from 'src/relay'
 
-  let sub
-
-  const cursor = new Cursor(now(), timedelta(1, 'minutes'))
+  let notes, sub
 
   onMount(async () => {
     sub = await relay.pool.listenForEvents(
       'views/notes/Global',
       [{kinds: [1, 5, 7], since: cursor.since}],
-      when(propEq('kind', 1), relay.loadNoteContext)
+      when(propEq('kind', 1), async e => {
+        await relay.loadNoteContext(e)
+
+        notes.addNewNotes([e])
+      })
     )
   })
 
@@ -24,24 +26,23 @@
     }
   })
 
-  const loadNotes = async limit => {
-    const notes = await relay.filterEvents({
-      limit,
+  const cursor = new Cursor(timedelta(1, 'minutes'))
+
+  const loadNotes = async () => {
+    const [since, until] = cursor.step()
+
+    await relay.pool.loadEvents(
+      [{kinds: [1, 5, 7], since, until}],
+      when(propEq('kind', 1), relay.loadNoteContext)
+    )
+
+    return relay.filterEvents({
+      since,
+      until,
       kinds: [1],
       muffle: getTagValues($user?.muffle || []),
     })
-
-    if (notes.length <= limit) {
-      const [since, until] = cursor.step()
-
-      relay.pool.loadEvents(
-        [{kinds: [1, 5, 7], since, until}],
-        when(propEq('kind', 1), relay.loadNoteContext)
-      )
-    }
-
-    return relay.annotateChunk(notes.slice(0, limit))
   }
 </script>
 
-<Notes shouldMuffle loadNotes={loadNotes} />
+<Notes bind:this={notes} shouldMuffle {loadNotes} />

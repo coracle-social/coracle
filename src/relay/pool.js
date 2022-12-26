@@ -36,8 +36,18 @@ class Channel {
     // Start our subscription, wait for only our fastest relays to eose before calling it done.
     // We were waiting for all before, but that made the slowest relay a bottleneck. Waiting for
     // only one meant we might be settling for very incomplete data
+    const start = new Date().valueOf()
+    const lastEvent = {}
     const eoseRelays = []
-    const sub = pool.sub({filter, cb: onEvent}, this.name, r => {
+
+    // Keep track of when we last heard from each relay, and close unresponsive ones
+    const cb = (e, r) => {
+      lastEvent[r] = new Date().valueOf()
+      onEvent(e)
+    }
+
+    // If we have lots of relays, ignore the slowest ones
+    const onRelayEose = r => {
       eoseRelays.push(r)
 
       // If we have only a few, wait for all of them, otherwise ignore the slowest 1/5
@@ -45,19 +55,28 @@ class Channel {
       if (eoseRelays.length >= relays.length - threshold) {
         onEose()
       }
-    })
+    }
 
+    // Create our subscription
+    const sub = pool.sub({filter, cb}, this.name, onRelayEose)
+
+    // Watch for relays that are slow to respond and give up on them
+    const interval = !opts.timeout ? null : setInterval(() => {
+      for (const r of relays) {
+        if ((lastEvent[r] || start) < new Date().valueOf() - opts.timeout) {
+          onRelayEose(r)
+        }
+      }
+    }, 300)
+
+    // Clean everything up when we're done
     const done = () => {
       if (this.status === 'busy') {
         sub.unsub()
       }
 
+      clearInterval(interval)
       this.release()
-    }
-
-    // If the relay takes to long, just give up
-    if (opts.timeout) {
-      setTimeout(done, opts.timeout)
     }
 
     return {unsub: done}
@@ -75,7 +94,7 @@ class Channel {
 
           resolve(uniqBy(prop('id'), result))
         },
-        {timeout: 30000, ...opts},
+        {timeout: 3000, ...opts},
       )
     })
   }
@@ -159,6 +178,8 @@ const listenForEvents = async (key, filter, onEvent) => {
       onEvent(e)
     }
   })
+
+  return listenForEvents.subs[key]
 }
 
 listenForEvents.subs = {}
@@ -177,7 +198,7 @@ const syncNetwork = async () => {
   let pubkeys = []
   if ($user) {
     // Get this user's profile to start with
-    await loadPeople([$user.pubkey], {timeout: null})
+    await loadPeople([$user.pubkey])
 
     // Get our refreshed person
     const people = get(db.people)
