@@ -7,10 +7,10 @@ import {filterTags, findReply, findRoot} from 'src/util/nostr'
 
 export const db = new Dexie('coracle/relay')
 
-db.version(5).stores({
+db.version(6).stores({
   relays: '++url, name',
-  events: '++id, pubkey, created_at, kind, content, reply, root',
-  tags: '++key, event, value, created_at',
+  events: '++id, pubkey, created_at, loaded_at, kind, content, reply, root',
+  tags: '++key, event, value, created_at, loaded_at',
 })
 
 window.db = db
@@ -105,7 +105,7 @@ db.events.process = async events => {
 }
 
 // On initial load, delete old event data
-const threshold = now() - timedelta(30, 'days')
+const threshold = now() - timedelta(1, 'days')
 
 db.events.where('loaded_at').below(threshold).delete()
 db.tags.where('loaded_at').below(threshold).delete()
