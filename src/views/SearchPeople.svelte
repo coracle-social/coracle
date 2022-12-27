@@ -13,7 +13,7 @@
 </script>
 
 <ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
-  {#each search(q) as p (p.pubkey)}
+  {#each search(q).slice(0, 30) as p (p.pubkey)}
     {#if p.pubkey !== $user.pubkey}
     <li in:fly={{y: 20}}>
       <a href="/people/{p.pubkey}/notes" class="flex gap-4 my-4">
