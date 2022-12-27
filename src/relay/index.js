@@ -102,8 +102,8 @@ const findNote = async (id, {showEntire = false, depth = 1} = {}) => {
     replies: depth === 0
       ? []
       : await Promise.all(
-          sortBy(e => -e.created_at, replies)
-          .slice(0, showEntire ? Infinity : 3)
+          sortBy(e => e.created_at, replies)
+          .slice(showEntire ? 0 : -3)
           .map(r => findNote(r.id, {depth: depth - 1}))
       ),
   }

@@ -182,14 +182,15 @@
 {/if}
 
 {#if depth > 0}
-{#each note.replies as r (r.id)}
 <div class="ml-5 border-l border-solid border-medium">
+  {#if note.repliesCount > 3 && note.replies.length < note.repliesCount}
+  <div class="ml-5 py-2 text-light cursor-pointer" on:click={onClick}>
+    <i class="fa-solid fa-up-down text-sm pr-2" />
+    Show {quantify(note.repliesCount - note.replies.length, 'other reply', 'more replies')}
+  </div>
+  {/if}
+  {#each note.replies as r (r.id)}
   <svelte:self showParent={false} note={r} depth={depth - 1} {invertColors} {anchorId} />
+  {/each}
 </div>
-{/each}
-{#if note.repliesCount > 5 && note.replies.length < note.repliesCount}
-<div class="ml-10 mt-2 text-light cursor-pointer" on:click={onClick}>
-  {quantify(note.repliesCount - note.replies.length, 'more reply', 'more replies')} found.
-</div>
-{/if}
 {/if}
