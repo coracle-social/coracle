@@ -1,8 +1,8 @@
 <script>
-  import {sortBy, reject} from 'ramda'
+  import {sortBy, reject, pluck} from 'ramda'
   import {onMount} from 'svelte'
   import {slide} from 'svelte/transition'
-  import {quantify} from 'hurdak/lib/hurdak'
+  import {quantify, createMap} from 'hurdak/lib/hurdak'
   import {createScroller, now} from 'src/util/misc'
   import {findReply} from 'src/util/nostr'
   import Spinner from 'src/partials/Spinner.svelte'
@@ -12,11 +12,28 @@
   export let loadNotes
   export let queryNotes
 
+  let prevNotes = []
+
   const notes = relay.lq(async () => {
     const notes = await queryNotes()
     const annotated = await relay.annotateChunk(notes)
+    const annotatedById = createMap('id', annotated)
 
-    return sortBy(e => -e.created_at, annotated)
+    // Keep sort order intact, more recent replies can cause parent notes
+    // to show up at the top of a feed, but then an early parent date pushes
+    // it to the bottom if we just filter by created_at
+    const sorted = prevNotes
+      .map(id => annotatedById[id])
+      .concat(
+        sortBy(
+          e => -e.created_at,
+          annotated.filter(e => !prevNotes.includes(e.id))
+        )
+      )
+
+    prevNotes = pluck('id', sorted)
+
+    return sorted
   })
 
   let until = now()

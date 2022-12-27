@@ -58,7 +58,7 @@ export const createScroller = loadMore => {
     // While we have empty space, fill it
     const {scrollY, innerHeight} = window
     const {scrollHeight} = document.body
-    const shouldLoad = scrollY + innerHeight + 300 > scrollHeight
+    const shouldLoad = scrollY + innerHeight + 800 > scrollHeight
 
     // Only trigger loading the first time we reach the threshhold
     if (shouldLoad && !didLoad) {
