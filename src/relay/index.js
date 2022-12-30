@@ -1,7 +1,7 @@
 import {liveQuery} from 'dexie'
 import extractUrls from 'extract-urls'
 import {get} from 'svelte/store'
-import {intersection, find, sortBy, propEq, uniqBy, groupBy, concat, without, prop, isNil, identity} from 'ramda'
+import {uniq, pluck, intersection, sortBy, propEq, uniqBy, groupBy, concat, without, prop, isNil, identity} from 'ramda'
 import {ensurePlural, first, createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {escapeHtml} from 'src/util/html'
 import {filterTags, getTagValues, findReply, findRoot} from 'src/util/nostr'
@@ -221,28 +221,36 @@ const unfollow = async pubkey => {
 // Methods that wil attempt to load from the database and fall back to the network.
 // This is intended only for bootstrapping listeners
 
-const loadNoteContext = async (note, {loadParent = false} = {}) => {
-  const $people = get(people)
-  const filter = [{kinds: [1, 5, 7], '#e': [note.id]}]
+const loadNotesContext = async (notes, {loadParents = false} = {}) => {
+  notes = ensurePlural(notes)
 
-  // Load the author if needed
-  if (!$people[note.pubkey]) {
-    filter.push({kinds: [0], authors: [note.pubkey]})
+  if (notes.length === 0) {
+    return
   }
 
-  // Load the note's parent
-  const parentId = findReply(note)
-  if (loadParent && parentId) {
-    filter.push({kinds: [1], ids: [parentId]})
+  const $people = get(people)
+  const authors = uniq(pluck('pubkey', notes)).filter(k => !$people[k])
+  const parentIds = loadParents ? uniq(notes.map(findReply).filter(identity)) : []
+  const filter = [{kinds: [1, 5, 7], '#e': pluck('id', notes)}]
+
+  // Load authors if needed
+  if (authors.length > 0) {
+    filter.push({kinds: [0], authors})
+  }
+
+  // Load the note parents
+  if (parentIds.length > 0) {
+    filter.push({kinds: [1], ids: parentIds})
   }
 
   // Load the events
   const events = await pool.loadEvents(filter)
+  const eventsById = createMap('id', events)
+  const parents = parentIds.map(id => eventsById[id]).filter(identity)
 
-  // Load the note's context as well
-  const parent = find(propEq('id', parentId), events)
-  if (loadParent && parent) {
-    await loadNoteContext(parent)
+  // Load the parents' context as well
+  if (parents.length > 0) {
+    await loadNotesContext(parents)
   }
 }
 
@@ -254,7 +262,7 @@ const getOrLoadNote = async id => {
   const note = await db.events.get(id)
 
   if (note) {
-    await loadNoteContext(note, {loadParent: true})
+    await loadNotesContext([note], {loadParent: true})
   }
 
   return note
@@ -296,5 +304,5 @@ export const connections = db.connections
 export default {
   db, pool, cmd, lq, filterEvents, getOrLoadNote, filterReplies, findNote,
   annotateChunk, renderNote, login, addRelay, removeRelay,
-  follow, unfollow, loadNoteContext,
+  follow, unfollow, loadNotesContext,
 }

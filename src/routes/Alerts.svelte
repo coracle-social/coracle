@@ -16,7 +16,7 @@
 
   onMount(() => {
     const scroller = createScroller(async () => {
-      notes = notes.concat(await loadNotes())
+      notes = uniqBy(prop('id'), notes.concat(await loadNotes()))
     })
 
     return () => scroller.stop()
@@ -24,25 +24,15 @@
 
   const loadNotes = async () => {
     const [since, until] = cursor.step()
+    const filter = {kinds: [1, 7], '#p': [$user.pubkey], since, until}
 
-    await relay.pool.loadEvents(
-      [{kinds: [1, 7], '#p': [$user.pubkey], since, until}],
-      e => {
-        if (e.kind === 1) {
-          relay.loadNoteContext(e)
-        }
-
-        if (e.kind === 7) {
-          const replyId = findReply(e)
-
-          if (replyId) {
-            relay.getOrLoadNote(replyId)
-          }
-        }
-
-        alerts.set({since: now()})
-      }
+    // Load all our alerts and their context
+    await relay.loadNotesContext(
+      await relay.pool.loadEvents(filter),
+      {loadParents: true}
     )
+
+    alerts.set({since: now()})
 
     const events = await relay.filterEvents({
       since,
@@ -80,7 +70,6 @@
 
     // Combine likes of a single note. Remove grandchild likes
     const likesById = {}
-    const alerts = notes.filter(e => e.pubkey !== $user.pubkey)
     for (const reaction of reactions.filter(e => e.parent?.pubkey === $user.pubkey)) {
       if (!likesById[reaction.parent.id]) {
         likesById[reaction.parent.id] = {...reaction.parent, people: []}
@@ -91,7 +80,9 @@
 
     return sortBy(
       e => -e.created_at,
-      uniqBy(prop('id'), alerts.concat(Object.values(likesById)))
+      notes
+        .filter(e => e.pubkey !== $user.pubkey)
+        .concat(Object.values(likesById))
     )
   }
 

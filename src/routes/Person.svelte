@@ -22,7 +22,7 @@
     sub = await relay.pool.listenForEvents(
       'routes/Person',
       [{kinds: [0, 1, 5, 7], authors: [pubkey], since: now()}],
-      when(propEq('kind', 1), relay.loadNoteContext)
+      when(propEq('kind', 1), relay.loadNotesContext)
     )
   })
 

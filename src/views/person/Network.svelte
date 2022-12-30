@@ -10,13 +10,13 @@
 
   const loadNotes = async () => {
     const [since, until] = cursor.step()
+    const authors = getTagValues(person.petnames)
+    const filter = {since, until, kinds: [1], authors}
 
-    return relay.pool.loadEvents({
-      since,
-      until,
-      kinds: [1],
-      authors: getTagValues(person.petnames),
-    })
+    await relay.loadEventsContext(
+      await relay.pool.loadEvents(filter),
+      {loadParents: true}
+    )
   }
 
   const queryNotes = () => {

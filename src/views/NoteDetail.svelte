@@ -21,7 +21,7 @@
       sub = await relay.pool.listenForEvents(
         'routes/NoteDetail',
         [{kinds: [1, 5, 7], '#e': [note.id], since: now()}],
-        when(propEq('kind', 1), relay.loadNoteContext)
+        when(propEq('kind', 1), relay.loadNotesContext)
       )
     }
   })

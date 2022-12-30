@@ -22,19 +22,25 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] An actual readme
 - [ ] Server discovery and relay publishing - https://github.com/nostr-protocol/nips/pull/32/files
 - [ ] Support invoices https://twitter.com/jb55/status/1604131336247476224
-- [ ] Expand/collapse large threads
 - [ ] NIP 05
+- [ ] Lightning tips
+- [ ] Direct messages
+- [ ] Rooms/groups
 
 # Bugs
 
+- [ ] Follow fiatjaf's vision of clients being smart and connecting to recommended relays to fetch content
 - [ ] Add alerts for replies to posts the user liked
 - [ ] Stack views so scroll position isn't lost on navigation
-- [ ] Add notification for slow relays
+- [ ] Add notification for slow relays, suggest relays based on network
 - [ ] Separating events table into notes/reactions/etc would effectively give us a second index on kind.
 - [ ] Clicking on a badge in the popover falls through, and might also crash
-- [ ] Add a slider in settings so users can decide whether to go with fast relays, or wait for everyone to complete their queries. Most relevant for NoteDetail
 
 # Changelog
+
+## 0.2.5
+
+- [x] Batch load context for feeds
 
 ## 0.2.4
 

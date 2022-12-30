@@ -8,10 +8,14 @@
 
   const cursor = new Cursor(timedelta(1, 'days'))
 
-  const loadNotes = () => {
+  const loadNotes = async () => {
     const [since, until] = cursor.step()
+    const filter = {kinds: [7], authors: [pubkey], since, until}
 
-    return relay.pool.loadEvents({kinds: [7], authors: [pubkey], since, until})
+    await relay.loadEventsContext(
+      await relay.pool.loadEvents(filter),
+      {loadParents: true}
+    )
   }
 
   const queryNotes = () => {

@@ -12,7 +12,7 @@
     sub = await relay.pool.listenForEvents(
       'views/notes/Global',
       [{kinds: [1, 5, 7], since: cursor.since}],
-      when(propEq('kind', 1), relay.loadNoteContext)
+      when(propEq('kind', 1), relay.loadNotesContext)
     )
   })
 
@@ -24,13 +24,11 @@
 
   const cursor = new Cursor(timedelta(1, 'minutes'))
 
-  const loadNotes = () => {
+  const loadNotes = async () => {
     const [since, until] = cursor.step()
-
-    return relay.pool.loadEvents(
-      [{kinds: [1, 5, 7], since, until}],
-      when(propEq('kind', 1), relay.loadNoteContext)
-    )
+    const filter = {kinds: [1], since, until}
+    const notes = await relay.pool.loadEvents(filter)
+    await relay.loadNotesContext(notes, {loadParents: true})
   }
 
   const queryNotes = () => {
