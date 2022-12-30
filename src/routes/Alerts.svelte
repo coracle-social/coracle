@@ -12,7 +12,7 @@
 
   let notes = []
 
-  const cursor = new Cursor(timedelta(1, 'days'))
+  const cursor = new Cursor(timedelta(3, 'days'))
 
   onMount(() => {
     const scroller = createScroller(async () => {

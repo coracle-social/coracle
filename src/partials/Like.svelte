@@ -33,10 +33,10 @@
       {quantify(note.people.length, 'person', 'people')} liked your note.
     </span>
     {#if isOpen}
-    <div transition:fly={{y: 20}} class="fixed inset-0 z-10" on:click={closePopover} />
+    <div in:fly={{y: 20}} class="fixed inset-0 z-10" on:click={closePopover} />
     <div
       on:click={killEvent}
-      transition:fly={{y: 20}}
+      infly={{y: 20}}
       class="absolute top-0 mt-8 py-2 px-4 rounded border border-solid border-medium
              bg-dark grid grid-cols-3 gap-y-2 gap-x-4 z-20">
       {#each uniqBy(prop('pubkey'), note.people) as person (person.pubkey)}
