@@ -31,10 +31,10 @@ export const now = () => Math.round(new Date().valueOf() / 1000)
 
 export const timedelta = (n, unit = 'seconds') => {
   switch (unit) {
-    case 'seconds': return n
-    case 'minutes': return n * 60
-    case 'hours': return n * 60 * 60
-    case 'days': return n * 60 * 60 * 24
+    case 'seconds': case 'second': return n
+    case 'minutes': case 'minute': return n * 60
+    case 'hours': case 'hour': return n * 60 * 60
+    case 'days': case 'day': return n * 60 * 60 * 24
     default: throw new Error(`Invalid unit ${unit}`)
   }
 }
@@ -46,6 +46,29 @@ export const formatTimestamp = ts => {
   })
 
   return formatter.format(new Date(ts * 1000))
+}
+
+export const formatTimestampRelative = ts => {
+  let unit
+  let delta = now() - ts
+  if (delta < timedelta(1, 'minute')) {
+    unit = 'second'
+  } else if (delta < timedelta(1, 'hour')) {
+    unit = 'minute'
+    delta = Math.round(delta / timedelta(1, 'minute'))
+  } else if (delta < timedelta(2, 'day')) {
+    unit = 'hour'
+    delta = Math.round(delta / timedelta(1, 'hour'))
+  } else {
+    unit = 'day'
+    delta = Math.round(delta / timedelta(1, 'day'))
+  }
+
+  const formatter = new Intl.RelativeTimeFormat('en-US', {
+    numeric: 'auto',
+  })
+
+  return formatter.format(-delta, unit)
 }
 
 export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
