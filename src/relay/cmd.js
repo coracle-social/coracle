@@ -25,13 +25,18 @@ const updateRoom = ({id, ...room}) => publishEvent(41, JSON.stringify(room), [t(
 
 const createMessage = (roomId, content) => publishEvent(42, content, [t("e", roomId, "root")])
 
-const createNote = (content, tags=[]) => publishEvent(1, content, tags)
+const createNote = (content, mentions = []) => publishEvent(1, content, mentions.map(p => t("p", p)))
 
 const createReaction = (content, e) =>
   publishEvent(7, content, copyTags(e, [t("p", e.pubkey), t("e", e.id, 'reply')]))
 
-const createReply = (content, e) =>
-  publishEvent(1, content, copyTags(e, [t("p", e.pubkey), t("e", e.id, 'reply')]))
+const createReply = (e, content, mentions = []) => {
+  const tags = mentions.map(p => t("p", p)).concat(
+    copyTags(e, [t("p", e.pubkey), t("e", e.id, 'reply')])
+  )
+
+  return publishEvent(1, content, tags)
+}
 
 const deleteEvent = ids => publishEvent(5, '', ids.map(id => t("e", id)))
 
@@ -48,7 +53,7 @@ const copyTags = (e, newTags = []) => {
 }
 
 export const t = (type, content, marker) => {
-  const tag = [type, content, first(Object.keys(relay.pool.getRelays()))]
+  const tag = [type, content, first(relay.pool.getRelays())]
 
   if (!isNil(marker)) {
     tag.push(marker)

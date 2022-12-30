@@ -1,6 +1,6 @@
 <script>
   import {onMount} from 'svelte'
-  import {fade} from 'svelte/transition'
+  import {fade, fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {generatePrivateKey, getPublicKey} from 'nostr-tools'
   import {copyToClipboard} from "src/util/html"
@@ -59,7 +59,7 @@
   }
 </script>
 
-<div class="flex justify-center p-12">
+<div class="flex justify-center p-12" in:fly={{y: 20}}>
   <div class="flex flex-col gap-4 max-w-2xl">
     <div class="flex justify-center items-center flex-col mb-4">
       <h1 class="staatliches text-6xl">Welcome!</h1>

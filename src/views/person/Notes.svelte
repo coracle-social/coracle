@@ -5,7 +5,7 @@
 
   export let pubkey
 
-  const cursor = new Cursor(timedelta(1, 'days'))
+  const cursor = new Cursor(timedelta(3, 'days'))
 
   const loadNotes = async () => {
     const [since, until] = cursor.step()

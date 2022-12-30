@@ -29,7 +29,7 @@
     }
   })
 
-  const cursor = new Cursor(timedelta(10, 'minutes'))
+  const cursor = new Cursor(timedelta(20, 'minutes'))
 
   const loadNotes = async () => {
     const [since, until] = cursor.step()

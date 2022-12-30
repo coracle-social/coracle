@@ -22,6 +22,7 @@
   import Alerts from "src/routes/Alerts.svelte"
   import Notes from "src/routes/Notes.svelte"
   import Login from "src/routes/Login.svelte"
+  import Logout from "src/routes/Logout.svelte"
   import Profile from "src/routes/Profile.svelte"
   import Settings from "src/routes/Settings.svelte"
   import Keys from "src/routes/Keys.svelte"
@@ -44,26 +45,6 @@
   let scrollY
   let suspendedSubs = []
   let mostRecentAlert = $alerts.since
-
-  const logout = async () => {
-    const $connections = get(connections)
-    const $settings = get(settings)
-
-    localStorage.clear()
-
-    // Keep relays around
-    await relay.db.events.clear()
-    await relay.db.tags.clear()
-
-    // Remember the user's relay selection and settings
-    connections.set($connections)
-    settings.set($settings)
-
-    // do a hard refresh so everything gets totally cleared
-    setTimeout(() => {
-      window.location = '/login'
-    }, 100)
-  }
 
   onMount(() => {
     // Close menu on click outside
@@ -148,6 +129,7 @@
       <Route path="/profile" component={Profile} />
       <Route path="/settings" component={Settings} />
       <Route path="/login" component={Login} />
+      <Route path="/logout" component={Logout} />
       <Route path="*" component={NotFound} />
     </div>
 
@@ -202,7 +184,7 @@
         </a>
       </li>
       <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" on:click={logout}>
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/logout">
           <i class="fa-solid fa-right-from-bracket mr-2" /> Logout
         </a>
       </li>
@@ -227,6 +209,17 @@
       <div class="w-2 h-2 rounded bg-accent absolute top-4 left-12" />
       {/if}
     </div>
+
+    {#if $user}
+    <div class="fixed bottom-0 right-0 m-8">
+      <a
+        href="/notes/new"
+        class="rounded-full bg-accent color-white w-16 h-16 flex justify-center
+                items-center border border-dark shadow-2xl cursor-pointer">
+        <span class="fa-sold fa-plus fa-2xl" />
+      </a>
+    </div>
+    {/if}
 
     {#if $modal}
     <div class="fixed inset-0 z-10">

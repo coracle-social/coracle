@@ -3,7 +3,7 @@
   import {onMount} from 'svelte'
   import {slide} from 'svelte/transition'
   import {quantify} from 'hurdak/lib/hurdak'
-  import {createScroller, now} from 'src/util/misc'
+  import {createScroller, sleep, now} from 'src/util/misc'
   import {findReply} from 'src/util/nostr'
   import Spinner from 'src/partials/Spinner.svelte'
   import Note from "src/partials/Note.svelte"
@@ -13,12 +13,12 @@
   export let queryNotes
 
   const notes = relay.lq(async () => {
-    const notes = await queryNotes()
-    const annotated = await relay.annotateChunk(notes)
+    // Hacky way to wait for the loader to adjust the cursor so we have a nonzero duration
+    await sleep(100)
 
     return sortBy(
       e => -pluck('created_at', e.replies).concat(e.created_at).reduce((a, b) => Math.max(a, b)),
-      annotated
+      await relay.annotateChunk(await queryNotes())
     )
   })
 
@@ -40,7 +40,7 @@
 <ul class="py-4 flex flex-col gap-2 max-w-xl m-auto">
   {#if newNotesLength > 0}
   <div
-    transition:slide
+    in:slide
     class="mb-2 cursor-pointer text-center underline text-light"
     on:click={() => { until = now() }}>
     Load {quantify(newNotesLength, 'new note')}

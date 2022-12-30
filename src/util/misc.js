@@ -93,7 +93,7 @@ export const createScroller = loadMore => {
       // Give it a generous timeout from last time something did load
       timeout = setTimeout(() => {
         didLoad = false
-      }, 5000)
+      }, 2000)
     }
 
     didLoad = shouldLoad

@@ -105,7 +105,9 @@ db.events.process = async events => {
 }
 
 // On initial load, delete old event data
-const threshold = now() - timedelta(1, 'days')
+setTimeout(() => {
+  const threshold = now() - timedelta(1, 'days')
 
-db.events.where('loaded_at').below(threshold).delete()
-db.tags.where('loaded_at').below(threshold).delete()
+  db.events.where('loaded_at').below(threshold).delete()
+  db.tags.where('loaded_at').below(threshold).delete()
+}, timedelta(10, 'seconds'))

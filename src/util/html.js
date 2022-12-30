@@ -74,3 +74,13 @@ export const killEvent = e => {
   e.stopPropagation()
   e.stopImmediatePropagation()
 }
+
+export const fromParentOffset = (element, offset) => {
+  for (const child of element.childNodes) {
+    if (offset <= child.textContent.length) {
+      return [child, offset]
+    }
+
+    offset -= child.textContent.length
+  }
+}

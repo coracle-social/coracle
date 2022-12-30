@@ -16,8 +16,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Notifications
 - [x] Link previews
 - [x] Add notes, follows, likes tab to profile
-- [ ] Show relative dates
-- [ ] Mentions - render done, now reference in compose
+- [x] Mentions
 - [ ] Image uploads
 - [ ] An actual readme
 - [ ] Server discovery and relay publishing - https://github.com/nostr-protocol/nips/pull/32/files
@@ -37,6 +36,13 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Clicking on a badge in the popover falls through, and might also crash
 
 # Changelog
+
+## 0.2.6
+
+- [x] Add support for at-mentions
+- [x] Improve cleanup on logout
+- [x] Move add note button to be available everywhere
+- [x] Fix reporting relay along with tags
 
 ## 0.2.5
 

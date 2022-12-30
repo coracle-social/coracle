@@ -12,6 +12,7 @@
   import {settings, modal} from "src/state/app"
   import {formatTimestamp} from 'src/util/misc'
   import Badge from "src/partials/Badge.svelte"
+  import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
   import relay, {user} from 'src/relay'
 
@@ -76,24 +77,19 @@
 
   const startReply = () => {
     if ($user) {
-      reply = reply || ''
+      reply = reply || true
     } else {
       navigate('/login')
     }
   }
 
   const sendReply = () => {
-    if (reply) {
-      relay.cmd.createReply(reply, note)
+    const {content, mentions} = reply.parse()
+
+    if (content) {
+      relay.cmd.createReply(note, content, mentions)
 
       reply = null
-    }
-  }
-
-  const onReplyKeyDown = e => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault()
-      sendReply()
     }
   }
 </script>
@@ -160,24 +156,19 @@
   </div>
 </Card>
 
-{#if reply !== null}
+{#if reply}
 <div
-  class="note-reply flex bg-medium border-medium border border-solid"
+  class="note-reply bg-medium border-medium border border-solid"
   transition:slide>
-  <textarea
-    rows="4"
-    autofocus
-    placeholder="Type something..."
-    bind:value={reply}
-    on:keydown={onReplyKeyDown}
-    class="w-full p-2 text-white bg-medium
-           placeholder:text-light outline-0 resize-none" />
-  <div
-    on:click={sendReply}
-    class="flex flex-col py-8 p-4 justify-center gap-2 border-l border-solid border-dark
-           hover:bg-accent transition-all cursor-pointer text-white ">
-    <i class="fa-solid fa-paper-plane fa-xl" />
-  </div>
+  <Compose bind:this={reply} onSubmit={sendReply}>
+    <div
+      slot="addon"
+      on:click={sendReply}
+      class="flex flex-col py-8 p-4 justify-center gap-2 border-l border-solid border-dark
+             hover:bg-accent transition-all cursor-pointer text-white ">
+      <i class="fa-solid fa-paper-plane fa-xl" />
+    </div>
+  </Compose>
 </div>
 {/if}
 
