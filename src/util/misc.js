@@ -76,8 +76,11 @@ export const formatTimestampRelative = ts => {
 export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 export const createScroller = loadMore => {
+  // NOTE TO FUTURE SELF
+  // If the scroller is saturating request channels on a slow relay, the
+  // loadMore function is not properly awaiting all the work necessary.
+  // That is the problem, but see commit 8371fde for another strategy
   let done = false
-  let didLoad = false
   let timeout = null
   const check = async () => {
     // While we have empty space, fill it
@@ -86,19 +89,11 @@ export const createScroller = loadMore => {
     const shouldLoad = scrollY + innerHeight + 800 > scrollHeight
 
     // Only trigger loading the first time we reach the threshhold
-    if (shouldLoad && !didLoad) {
+    if (shouldLoad) {
       clearTimeout(timeout)
 
       await loadMore()
-
-      // If nothing loads, the page doesn't reflow and we get stuck.
-      // Give it a generous timeout from last time something did load
-      timeout = setTimeout(() => {
-        didLoad = false
-      }, 2000)
     }
-
-    didLoad = shouldLoad
 
     // No need to check all that often
     await sleep(300)
@@ -112,10 +107,7 @@ export const createScroller = loadMore => {
   requestAnimationFrame(check)
 
   return {
-    check: () => {
-      didLoad = false
-      check()
-    },
+    check,
     stop: () => {
       done = true
     },
