@@ -1,5 +1,6 @@
 import {last, find, intersection} from 'ramda'
 import {ensurePlural, first} from 'hurdak/lib/hurdak'
+import {hexToBech32} from 'src/util/misc'
 
 export const epoch = 1633046400
 
@@ -45,4 +46,12 @@ export const filterMatches = (filter, e)  => {
     },
     ensurePlural(filter)
   ))
+}
+
+export const displayPerson = p => {
+  if (p.name) {
+    return p.name
+  }
+
+  return hexToBech32('npub', p.pubkey).slice(4, 12)
 }

@@ -4,7 +4,7 @@ import {get} from 'svelte/store'
 import {uniq, pluck, intersection, sortBy, propEq, uniqBy, groupBy, concat, without, prop, isNil, identity} from 'ramda'
 import {ensurePlural, first, createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {escapeHtml} from 'src/util/html'
-import {filterTags, getTagValues, findReply, findRoot} from 'src/util/nostr'
+import {filterTags, displayPerson, getTagValues, findReply, findRoot} from 'src/util/nostr'
 import {db} from 'src/relay/db'
 import pool from 'src/relay/pool'
 import cmd from 'src/relay/cmd'
@@ -181,8 +181,8 @@ const renderNote = async (note, {showEntire = false}) => {
       }
 
       const pubkey = note.tags[parseInt(i)][1]
-      const person = peopleByPubkey[pubkey]
-      const name = person?.name || pubkey.slice(0, 8)
+      const person = peopleByPubkey[pubkey] || {pubkey}
+      const name = displayPerson(person)
 
       return `@<a href="/people/${pubkey}/notes" class="underline">${name}</a>`
     })

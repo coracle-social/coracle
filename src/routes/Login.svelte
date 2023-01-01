@@ -3,13 +3,14 @@
   import {fade, fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {generatePrivateKey, getPublicKey} from 'nostr-tools'
+  import {hexToBech32, bech32ToHex} from "src/util/misc"
   import {copyToClipboard} from "src/util/html"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import toast from "src/state/toast"
   import relay, {connections} from 'src/relay'
 
-  let privkey = ''
+  let nsec = ''
   let hasExtension = false
 
   onMount(() => {
@@ -21,12 +22,12 @@
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
 
   const copyKey = () => {
-    copyToClipboard(privkey)
+    copyToClipboard(nsec)
     toast.show("info", "Your private key has been copied to the clipboard.")
   }
 
   const generateKey = () => {
-    privkey = generatePrivateKey()
+    nsec = hexToBech32('nsec', generatePrivateKey())
     toast.show("info", "Your private key has been re-generated.")
   }
 
@@ -51,6 +52,8 @@
   }
 
   const logInWithPrivateKey = async () => {
+    const privkey = nsec.startsWith('nsec') ? bech32ToHex(nsec) : nsec
+
     if (!privkey.match(/[a-z0-9]{64}/)) {
       toast.show("error", "Sorry, but that's an invalid private key.")
     } else {
@@ -76,7 +79,7 @@
       </p>
       <div class="flex flex-col gap-1">
         <strong>Private Key</strong>
-        <Input type="password" bind:value={privkey} placeholder="Enter your private key">
+        <Input type="password" bind:value={nsec} placeholder="Enter your private key">
           <i slot="after" class="fa-solid fa-copy" on:click={copyKey} />
         </Input>
         <div class="flex justify-end gap-2">

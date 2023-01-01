@@ -17,8 +17,8 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Link previews
 - [x] Add notes, follows, likes tab to profile
 - [x] Mentions
+- [ ] Add followers/follows lists on profile page
 - [ ] Image uploads
-- [ ] An actual readme
 - [ ] Server discovery and relay publishing - https://github.com/nostr-protocol/nips/pull/32/files
 - [ ] Support invoices https://twitter.com/jb55/status/1604131336247476224
 - [ ] NIP 05
@@ -28,12 +28,13 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Bugs
 
+- [ ] Reload user details when loading on visiting a user's page for the first time
+- [ ] Fix nuking follow list on multiple devices. Aggressive refresh? Dufflepud caching?
 - [ ] Follow fiatjaf's vision of clients being smart and connecting to recommended relays to fetch content
 - [ ] Add alerts for replies to posts the user liked
 - [ ] Stack views so scroll position isn't lost on navigation
 - [ ] Add notification for slow relays, suggest relays based on network
 - [ ] Separating events table into notes/reactions/etc would effectively give us a second index on kind.
-- [ ] Clicking on a badge in the popover falls through, and might also crash
 
 # Changelog
 
@@ -43,6 +44,8 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Improve cleanup on logout
 - [x] Move add note button to be available everywhere
 - [x] Fix reporting relay along with tags
+- [x] Add support for bech32 keys
+- [ ] Add favicon and social media preview image
 
 ## 0.2.5
 

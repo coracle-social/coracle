@@ -1,3 +1,5 @@
+import {Buffer} from 'buffer'
+import {bech32} from 'bech32'
 import {pluck} from "ramda"
 import Fuse from "fuse.js/dist/fuse.min.js"
 
@@ -144,3 +146,11 @@ export class Cursor {
     return [this.since, this.until]
   }
 }
+
+
+export const hexToBech32 = (prefix, hex) =>
+  bech32.encode(prefix, bech32.toWords(Buffer.from(hex, 'hex')))
+
+export const bech32ToHex = b32 =>
+  Buffer.from(bech32.fromWords(bech32.decode(b32).words)).toString('hex')
+

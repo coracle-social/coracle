@@ -2,6 +2,7 @@
   import {prop} from 'ramda'
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
+  import {displayPerson} from "src/util/nostr"
   import {user, people} from 'src/relay'
 
   export let q
@@ -21,7 +22,7 @@
           class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
           style="background-image: url({p.picture})" />
         <div class="flex-grow">
-          <h1 class="text-2xl">{p.name || p.pubkey.slice(0, 8)}</h1>
+          <h1 class="text-2xl">{displayPerson(p)}</h1>
           <p>{p.about || ''}</p>
         </div>
       </a>

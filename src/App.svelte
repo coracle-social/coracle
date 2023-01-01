@@ -10,6 +10,7 @@
   import {Router, Route, links, navigate} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {hasParent} from 'src/util/html'
+  import {displayPerson} from 'src/util/nostr'
   import {timedelta, now} from 'src/util/misc'
   import {store as toast} from "src/state/toast"
   import {modal, settings, alerts} from "src/state/app"
@@ -144,7 +145,7 @@
           <div
             class="overflow-hidden w-6 h-6 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
             style="background-image: url({$user.picture})" />
-          <span class="text-lg font-bold">{$user.name || $user.pubkey.slice(0, 8)}</span>
+          <span class="text-lg font-bold">{displayPerson($user)}</span>
         </a>
       </li>
       <li class="cursor-pointer relative">

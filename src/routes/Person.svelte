@@ -4,6 +4,7 @@
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {now} from 'src/util/misc'
+  import {displayPerson} from 'src/util/nostr'
   import Tabs from "src/partials/Tabs.svelte"
   import Button from "src/partials/Button.svelte"
   import Notes from "src/views/person/Notes.svelte"
@@ -32,12 +33,12 @@
     }
   })
 
-  const getPerson = () => $people[pubkey]
+  const getPerson = () => $people[pubkey] || {pubkey}
 
   const setActiveTab = tab => navigate(`/people/${pubkey}/${tab}`)
 
   const follow = () => {
-    relay.cmd.addPetname($user, pubkey, getPerson()?.name)
+    relay.cmd.addPetname($user, pubkey, getPerson().name)
 
     following = true
   }
@@ -49,7 +50,7 @@
   }
 
   const openAdvanced = () => {
-    modal.set({form: 'person/settings', person: getPerson() || {pubkey}})
+    modal.set({form: 'person/settings', person: getPerson()})
   }
 </script>
 
@@ -58,15 +59,15 @@
     <div class="flex gap-4">
       <div
         class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-        style="background-image: url({getPerson()?.picture})" />
+        style="background-image: url({getPerson().picture})" />
       <div class="flex-grow">
         <div class="flex items-center gap-2">
-          <h1 class="text-2xl">{getPerson()?.name || pubkey.slice(0, 8)}</h1>
+          <h1 class="text-2xl">{displayPerson(getPerson())}</h1>
           {#if $user && $user.pubkey !== pubkey}
             <i class="fa-solid fa-sliders cursor-pointer" on:click={openAdvanced} />
           {/if}
         </div>
-        <p>{getPerson()?.about || ''}</p>
+        <p>{getPerson().about || ''}</p>
       </div>
       <div class="whitespace-nowrap">
         {#if $user?.pubkey === pubkey}
@@ -93,7 +94,7 @@
 {:else if activeTab === 'likes'}
 <Likes {pubkey} />
 {:else if activeTab === 'network'}
-{#if getPerson()}
+{#if $people[pubkey]}
 <Network person={getPerson()} />
 {:else}
 <div class="py-16 max-w-xl m-auto flex justify-center">

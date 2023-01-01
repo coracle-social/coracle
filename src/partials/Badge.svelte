@@ -1,6 +1,7 @@
 <script>
   import {Link} from 'svelte-routing'
   import {killEvent} from 'src/util/html'
+  import {displayPerson} from 'src/util/nostr'
 
   export let person
   export let inert = false
@@ -11,7 +12,7 @@
   <div
     class="overflow-hidden w-4 h-4 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
     style="background-image: url({person.picture})" />
-  <span class="text-lg font-bold">{person.name || person.pubkey.slice(0, 8)}</span>
+  <span class="text-lg font-bold">{displayPerson(person)}</span>
 </span>
 {:else}
 <Link
@@ -21,6 +22,6 @@
   <div
     class="overflow-hidden w-4 h-4 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
     style="background-image: url({person.picture})" />
-  <span class="text-lg font-bold">{person.name || person.pubkey.slice(0, 8)}</span>
+  <span class="text-lg font-bold">{displayPerson(person)}</span>
 </Link>
 {/if}
