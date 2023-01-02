@@ -1,4 +1,4 @@
-import {uniqBy, find, propEq, prop, uniq} from 'ramda'
+import {uniqBy, sortBy, find, propEq, prop, uniq} from 'ramda'
 import {get} from 'svelte/store'
 import {relayPool, getPublicKey} from 'nostr-tools'
 import {noop, range, sleep} from 'hurdak/lib/hurdak'
@@ -226,13 +226,12 @@ const syncNetwork = async () => {
     ]
   }
 
-  let authors = pubkeys
-  for (let depth = 0; depth < 1; depth++) {
-    const events = await loadPeople(pubkeys)
-
-    pubkeys = filterTags({type: "p"}, events.filter(e => e.kind === 3))
-    authors = uniq(authors.concat(pubkeys))
-  }
+  // Grab second-order follows. Randomize and limit so we're not blasting relays.
+  // This will result in people getting a different list of second-order follows every load
+  const events = await loadPeople(pubkeys)
+  const secondOrderFollows = filterTags({kind: "p"}, events.filter(e => e.kind === 3))
+  const randomSecondOrderFollows = sortBy(() => Math.random(), secondOrderFollows)
+  const authors = uniq(pubkeys.concat(randomSecondOrderFollows.slice(0, 50)))
 
   // Save this for next time
   db.network.set(authors)
