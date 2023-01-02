@@ -11,7 +11,7 @@
   let mentions = []
   let suggestions = []
   let input = null
-  let content = ''
+  let prevContent = ''
   let search = fuzzy(
     Object.values($people).filter(prop('name')),
     {keys: ["name", "pubkey"]}
@@ -95,7 +95,7 @@
       index += 1
     }
 
-    if (input.innerText !== content) {
+    if (input.innerText !== prevContent) {
       const text = getText()
       const word = getWord()
 
@@ -106,8 +106,8 @@
         suggestions = []
       }
 
-      if (input.innerText.length < content.length) {
-        const delta = content.length - input.innerText.length
+      if (input.innerText.length < prevContent.length) {
+        const delta = prevContent.length - input.innerText.length
         const text = getText()
 
         for (const mention of mentions) {
@@ -119,13 +119,14 @@
         }
       }
 
-      content = input.innerText
+      prevContent = input.innerText
     }
   }
 
   export const parse = () => {
     // Interpolate mentions
     let offset = 0
+    let content = input.innerText
     const validMentions = sortBy(prop('end'), reject(prop('invalid'), mentions))
     for (const [i, {end, length}] of validMentions.entries()) {
       const offsetEnd = end - offset
