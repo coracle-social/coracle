@@ -54,16 +54,22 @@
 
   const setActiveTab = tab => navigate(`/people/${pubkey}/${tab}`)
 
-  const follow = () => {
-    relay.cmd.addPetname($user, pubkey, person.name)
-
+  const follow = async () => {
     following = true
+
+    // Make sure our follow list is up to date
+    await relay.pool.loadPeople([$user.pubkey], {kinds: [3]})
+
+    relay.cmd.addPetname($user, pubkey, person.name)
   }
 
-  const unfollow = () => {
-    relay.cmd.removePetname($user, pubkey)
-
+  const unfollow = async () => {
     following = false
+
+    // Make sure our follow list is up to date
+    await relay.pool.loadPeople([$user.pubkey], {kinds: [3]})
+
+    relay.cmd.removePetname($user, pubkey)
   }
 
   const openAdvanced = () => {

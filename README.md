@@ -28,8 +28,6 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Bugs
 
-- [ ] Reload user details when loading on visiting a user's page for the first time
-- [ ] Fix nuking follow list on multiple devices. Aggressive refresh? Dufflepud caching?
 - [ ] Follow fiatjaf's vision of clients being smart and connecting to recommended relays to fetch content
 - [ ] Add alerts for replies to posts the user liked
 - [ ] Stack views so scroll position isn't lost on navigation

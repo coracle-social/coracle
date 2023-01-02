@@ -186,12 +186,12 @@ const listenForEvents = async (key, filter, onEvent, {shouldProcess = true} = {}
 
 listenForEvents.subs = {}
 
-const loadPeople = (pubkeys, opts = {}) => {
+const loadPeople = (pubkeys, {kinds = [0, 3, 12165], ...opts} = {}) => {
   if (pubkeys.length === 0) {
     return []
   }
 
-  return loadEvents({kinds: [0, 3, 12165], authors: pubkeys}, opts)
+  return loadEvents({kinds, authors: pubkeys}, opts)
 }
 
 const syncNetwork = async () => {
