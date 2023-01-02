@@ -109,10 +109,12 @@
       </div>
     </div>
   </div>
+  {#if person?.petnames}
   <div class="flex gap-8 ml-16">
-    <div><strong>{person?.petnames?.length}</strong> following</div>
+    <div><strong>{person.petnames.length}</strong> following</div>
     <div><strong>{followersCount}</strong> followers</div>
   </div>
+  {/if}
 </div>
 
 <Tabs tabs={['notes', 'likes', 'network']} {activeTab} {setActiveTab} />
