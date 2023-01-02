@@ -203,7 +203,8 @@
                 border-b border-medium z-10"
     >
       <i class="fa-solid fa-bars fa-2xl cursor-pointer" bind:this={menuIcon} on:click={toggleMenu} />
-      <Anchor external type="unstyled" href="https://github.com/staab/coracle">
+      <Anchor external type="unstyled" href="https://github.com/staab/coracle" class="flex items-center gap-2">
+        <img src="/images/favicon.png" class="w-8" />
         <h1 class="staatliches text-3xl">Coracle</h1>
       </Anchor>
       {#if mostRecentAlert > $alerts.since}

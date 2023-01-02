@@ -45,7 +45,8 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Move add note button to be available everywhere
 - [x] Fix reporting relay along with tags
 - [x] Add support for bech32 keys
-- [ ] Add favicon and social media preview image
+- [x] Add second order follows to network tab
+- [x] Add favicon and social media preview image
 
 ## 0.2.5
 
