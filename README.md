@@ -40,13 +40,15 @@ If you like Coracle and want to support its development, you can donate sats via
 
 ## 0.2.6
 
-- [x] Add support for at-mentions
+- [x] Add support for at-mentions in note and reply composition
 - [x] Improve cleanup on logout
 - [x] Move add note button to be available everywhere
 - [x] Fix reporting relay along with tags
 - [x] Add support for bech32 keys
 - [x] Add second order follows to network tab
 - [x] Add favicon and social media preview image
+- [x] Extract urls in person bios
+- [x] Add follow/follower counts
 
 ## 0.2.5
 

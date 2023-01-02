@@ -13,7 +13,7 @@
     const authors = getTagValues(person.petnames)
     const filter = {since, until, kinds: [1], authors}
 
-    await relay.loadEventsContext(
+    await relay.loadNotesContext(
       await relay.pool.loadEvents(filter),
       {loadParents: true}
     )

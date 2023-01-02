@@ -166,13 +166,15 @@ const loadEvents = async filter => {
   return events
 }
 
-const listenForEvents = async (key, filter, onEvent) => {
+const listenForEvents = async (key, filter, onEvent, {shouldProcess = true} = {}) => {
   if (listenForEvents.subs[key]) {
     listenForEvents.subs[key].unsub()
   }
 
   listenForEvents.subs[key] = await sub(filter, e => {
-    db.events.process(e)
+    if (shouldProcess) {
+      db.events.process(e)
+    }
 
     if (onEvent) {
       onEvent(e)

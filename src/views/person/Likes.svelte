@@ -12,7 +12,7 @@
     const [since, until] = cursor.step()
     const filter = {kinds: [7], authors: [pubkey], since, until}
 
-    await relay.loadEventsContext(
+    await relay.loadNotesContext(
       await relay.pool.loadEvents(filter),
       {loadParents: true}
     )

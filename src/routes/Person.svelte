@@ -17,29 +17,45 @@
   export let pubkey
   export let activeTab
 
-  let sub = null
+  let subs = []
   let following = $user && find(t => t[1] === pubkey, $user.petnames)
+  let followers = new Set()
+  let followersCount = 0
+  let person
+
+  $: {
+    person = $people[pubkey] || {pubkey}
+  }
 
   onMount(async () => {
-    sub = await relay.pool.listenForEvents(
+    subs.push(await relay.pool.listenForEvents(
       'routes/Person',
-      [{kinds: [0, 1, 5, 7], authors: [pubkey], since: now()}],
-      when(propEq('kind', 1), relay.loadNotesContext)
-    )
+      [{kinds: [1, 5, 7], authors: [pubkey], since: now()},
+       {kinds: [0, 3, 12165], authors: [pubkey]}],
+      when(propEq('kind', 1), relay.loadNoteContext)
+    ))
+
+    subs.push(await relay.pool.listenForEvents(
+      'routes/Person/followers',
+      [{kinds: [3], '#p': [pubkey]}],
+      e => {
+        followers.add(e.pubkey)
+        followersCount = followers.size
+      },
+      {shouldProcess: false},
+    ))
   })
 
   onDestroy(() => {
-    if (sub) {
+    for (const sub of subs) {
       sub.unsub()
     }
   })
 
-  const getPerson = () => $people[pubkey] || {pubkey}
-
   const setActiveTab = tab => navigate(`/people/${pubkey}/${tab}`)
 
   const follow = () => {
-    relay.cmd.addPetname($user, pubkey, getPerson().name)
+    relay.cmd.addPetname($user, pubkey, person.name)
 
     following = true
   }
@@ -51,7 +67,7 @@
   }
 
   const openAdvanced = () => {
-    modal.set({form: 'person/settings', person: getPerson()})
+    modal.set({form: 'person/settings', person})
   }
 </script>
 
@@ -60,15 +76,15 @@
     <div class="flex gap-4">
       <div
         class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-        style="background-image: url({getPerson().picture})" />
+        style="background-image: url({person.picture})" />
       <div class="flex-grow">
         <div class="flex items-center gap-2">
-          <h1 class="text-2xl">{displayPerson(getPerson())}</h1>
+          <h1 class="text-2xl">{displayPerson(person)}</h1>
           {#if $user && $user.pubkey !== pubkey}
             <i class="fa-solid fa-sliders cursor-pointer" on:click={openAdvanced} />
           {/if}
         </div>
-        <p>{@html renderContent(getPerson().about || '')}</p>
+        <p>{@html renderContent(person.about || '')}</p>
       </div>
       <div class="whitespace-nowrap">
         {#if $user?.pubkey === pubkey}
@@ -87,6 +103,10 @@
       </div>
     </div>
   </div>
+  <div class="flex gap-8 ml-16">
+    <div><strong>{person?.petnames?.length}</strong> following</div>
+    <div><strong>{followersCount}</strong> followers</div>
+  </div>
 </div>
 
 <Tabs tabs={['notes', 'likes', 'network']} {activeTab} {setActiveTab} />
@@ -95,8 +115,8 @@
 {:else if activeTab === 'likes'}
 <Likes {pubkey} />
 {:else if activeTab === 'network'}
-{#if $people[pubkey]}
-<Network person={getPerson()} />
+{#if person}
+<Network person={person} />
 {:else}
 <div class="py-16 max-w-xl m-auto flex justify-center">
   Unable to show network for this person.
