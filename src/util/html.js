@@ -1,3 +1,6 @@
+import extractUrls from 'extract-urls'
+import {first} from 'hurdak/lib/hurdak'
+
 export const copyToClipboard = text => {
   const {activeElement} = document
   const input = document.createElement("textarea")
@@ -83,4 +86,26 @@ export const fromParentOffset = (element, offset) => {
 
     offset -= child.textContent.length
   }
+}
+
+export const renderContent = content => {
+  // Escape html
+  content = escapeHtml(content)
+
+  // Extract urls
+  for (const url of extractUrls(content) || []) {
+    const $a = document.createElement('a')
+
+    $a.href = url
+    $a.target = "_blank noopener"
+    $a.className = "underline"
+
+    /* eslint no-useless-escape: 0 */
+    $a.innerText = first(url.replace(/https?:\/\/(www\.)?/, '').split(/[\/\?#]/))
+
+    // If the url is on its own line, remove it entirely. Otherwise, replace it with the link
+    content = content.replace(url, $a.outerHTML)
+  }
+
+  return content
 }

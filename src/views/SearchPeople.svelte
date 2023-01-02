@@ -1,7 +1,9 @@
 <script>
   import {prop} from 'ramda'
   import {fly} from 'svelte/transition'
+  import {ellipsize} from 'hurdak/lib/hurdak'
   import {fuzzy} from "src/util/misc"
+  import {renderContent} from "src/util/html"
   import {displayPerson} from "src/util/nostr"
   import {user, people} from 'src/relay'
 
@@ -23,7 +25,7 @@
           style="background-image: url({p.picture})" />
         <div class="flex-grow">
           <h1 class="text-2xl">{displayPerson(p)}</h1>
-          <p>{p.about || ''}</p>
+          <p>{@html renderContent(ellipsize(p.about || '', 140))}</p>
         </div>
       </a>
     <li>

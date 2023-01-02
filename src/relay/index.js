@@ -1,9 +1,8 @@
 import {liveQuery} from 'dexie'
-import extractUrls from 'extract-urls'
 import {get} from 'svelte/store'
 import {uniq, pluck, intersection, sortBy, propEq, uniqBy, groupBy, concat, without, prop, isNil, identity} from 'ramda'
-import {ensurePlural, first, createMap, ellipsize} from 'hurdak/lib/hurdak'
-import {escapeHtml} from 'src/util/html'
+import {ensurePlural, createMap, ellipsize} from 'hurdak/lib/hurdak'
+import {renderContent} from 'src/util/html'
 import {filterTags, displayPerson, getTagValues, findReply, findRoot} from 'src/util/nostr'
 import {db} from 'src/relay/db'
 import pool from 'src/relay/pool'
@@ -155,23 +154,8 @@ const renderNote = async (note, {showEntire = false}) => {
   // Ellipsize
   content = shouldEllipsize ? ellipsize(note.content, 500) : note.content
 
-  // Escape html
-  content = escapeHtml(content)
-
-  // Extract urls
-  for (const url of extractUrls(content) || []) {
-    const $a = document.createElement('a')
-
-    $a.href = url
-    $a.target = "_blank noopener"
-    $a.className = "underline"
-
-    /* eslint no-useless-escape: 0 */
-    $a.innerText = first(url.replace(/https?:\/\/(www\.)?/, '').split(/[\/\?#]/))
-
-    // If the url is on its own line, remove it entirely. Otherwise, replace it with the link
-    content = content.replace(url, $a.outerHTML)
-  }
+  // Escape html, replace urls
+  content = renderContent(content)
 
   // Mentions
   content = content

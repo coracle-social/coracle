@@ -4,6 +4,7 @@
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {now} from 'src/util/misc'
+  import {renderContent} from 'src/util/html'
   import {displayPerson} from 'src/util/nostr'
   import Tabs from "src/partials/Tabs.svelte"
   import Button from "src/partials/Button.svelte"
@@ -67,7 +68,7 @@
             <i class="fa-solid fa-sliders cursor-pointer" on:click={openAdvanced} />
           {/if}
         </div>
-        <p>{getPerson().about || ''}</p>
+        <p>{@html renderContent(getPerson().about || '')}</p>
       </div>
       <div class="whitespace-nowrap">
         {#if $user?.pubkey === pubkey}
