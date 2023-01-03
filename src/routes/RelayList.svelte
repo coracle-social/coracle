@@ -3,17 +3,11 @@
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {modal, settings} from "src/state/app"
+  import {modal} from "src/state/app"
   import relay, {connections} from 'src/relay'
 
   let q = ""
   let search
-
-  fetch($settings.dufflepudUrl + '/relay').then(r => r.json()).then(({relays}) => {
-    for (const url of relays) {
-      relay.db.relays.put({url})
-    }
-  })
 
   const knownRelays = relay.lq(() => relay.db.relays.toArray())
 

@@ -29,7 +29,7 @@
 
   $: newNotes = ($notes || []).filter(e => e.created_at > until)
   $: newNotesLength = reject(findReply, newNotes).length
-  $: visibleNotes = ($notes || []).filter(e => e.created_at < until)
+  $: visibleNotes = ($notes || []).filter(e => e.created_at <= until)
 
   onMount(() => {
     const scroller = createScroller(loadNotes)

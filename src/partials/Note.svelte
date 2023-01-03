@@ -182,7 +182,7 @@
   </div>
   {/if}
   {#each note.replies as r (r.id)}
-  {#if r.created_at < until}
+  {#if r.created_at <= until}
   <svelte:self showParent={false} note={r} depth={depth - 1} {invertColors} {anchorId} />
   {/if}
   {/each}
