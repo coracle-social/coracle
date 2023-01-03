@@ -17,6 +17,7 @@
   import relay, {user} from 'src/relay'
 
   export let note
+  export let until = Infinity
   export let depth = 0
   export let anchorId = null
   export let showParent = true
@@ -181,7 +182,9 @@
   </div>
   {/if}
   {#each note.replies as r (r.id)}
+  {#if r.created_at < until}
   <svelte:self showParent={false} note={r} depth={depth - 1} {invertColors} {anchorId} />
+  {/if}
   {/each}
 </div>
 {/if}

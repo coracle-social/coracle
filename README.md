@@ -28,6 +28,7 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Bugs
 
+- [ ] Reduce reflow on feeds from new stuff coming in
 - [ ] Follow fiatjaf's vision of clients being smart and connecting to recommended relays to fetch content
 - [ ] Add alerts for replies to posts the user liked
 - [ ] Stack views so scroll position isn't lost on navigation

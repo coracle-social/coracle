@@ -22,6 +22,7 @@
     )
   })
 
+  let depth = 2
   let until = now()
   let newNotes = []
   let newNotesLength = 0
@@ -46,8 +47,8 @@
     Load {quantify(newNotesLength, 'new note')}
   </div>
   {/if}
-  {#each visibleNotes as n (n.id)}
-    <li><Note note={n} depth={2} /></li>
+  {#each visibleNotes as note (note.id)}
+    <li><Note {until} {note} {depth} /></li>
   {/each}
 </ul>
 
