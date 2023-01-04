@@ -17,6 +17,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Link previews
 - [x] Add notes, follows, likes tab to profile
 - [x] Mentions
+- [ ] Persist and load relay list
 - [ ] Add followers/follows lists on profile page
 - [ ] Image uploads
 - [ ] Server discovery and relay publishing - https://github.com/nostr-protocol/nips/pull/32/files
@@ -25,12 +26,12 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Lightning tips
 - [ ] Direct messages
 - [ ] Rooms/groups
+- [ ] Custom feeds
 
 # Bugs
 
 - [ ] Reduce reflow on feeds from new stuff coming in
 - [ ] Follow fiatjaf's vision of clients being smart and connecting to recommended relays to fetch content
-- [ ] Add alerts for replies to posts the user liked
 - [ ] Stack views so scroll position isn't lost on navigation
 - [ ] Add notification for slow relays, suggest relays based on network
 - [ ] Separating events table into notes/reactions/etc would effectively give us a second index on kind.

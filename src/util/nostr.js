@@ -55,3 +55,5 @@ export const displayPerson = p => {
 
   return hexToBech32('npub', p.pubkey).slice(4, 12)
 }
+
+export const isLike = content => ['', '+', '🤙', '👍', '❤️'].includes(content)

@@ -3,7 +3,7 @@
   import {onMount} from 'svelte'
   import {fly} from 'svelte/transition'
   import {alerts} from 'src/state/app'
-  import {findReply} from 'src/util/nostr'
+  import {findReply, isLike} from 'src/util/nostr'
   import relay, {people, user} from 'src/relay'
   import {now, timedelta, createScroller, Cursor} from 'src/util/misc'
   import Spinner from "src/partials/Spinner.svelte"
@@ -46,7 +46,7 @@
         }
 
         // Only notify users about positive reactions
-        if (e.kind === 7 && !['', '+'].includes(e.content)) {
+        if (e.kind === 7 && !isLike(e.content)) {
           return false
         }
 

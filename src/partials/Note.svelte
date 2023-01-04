@@ -6,7 +6,7 @@
   import {navigate} from 'svelte-routing'
   import {quantify} from 'hurdak/lib/hurdak'
   import {hasParent} from 'src/util/html'
-  import {findReply} from "src/util/nostr"
+  import {findReply, isLike} from "src/util/nostr"
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import {settings, modal} from "src/state/app"
@@ -31,7 +31,7 @@
   let likes, flags, like, flag
 
   $: {
-    likes = note.reactions.filter(n => ['', '+'].includes(n.content))
+    likes = note.reactions.filter(n => isLike(n.content))
     flags = note.reactions.filter(whereEq({content: '-'}))
   }
 

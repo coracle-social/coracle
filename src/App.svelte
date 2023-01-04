@@ -10,7 +10,7 @@
   import {Router, Route, links, navigate} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {hasParent} from 'src/util/html'
-  import {displayPerson} from 'src/util/nostr'
+  import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, now} from 'src/util/misc'
   import {store as toast} from "src/state/toast"
   import {modal, settings, alerts} from "src/state/app"
@@ -70,7 +70,7 @@
             }
 
             // Only notify users about positive reactions
-            if (e.kind === 7 && !['', '+'].includes(e.content)) {
+            if (e.kind === 7 && !isLike(e.content)) {
               return
             }
 
