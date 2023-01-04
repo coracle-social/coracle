@@ -74,6 +74,8 @@
               return
             }
 
+            relay.loadNotesContext([e])
+
             mostRecentAlert = Math.max(e.created_at, mostRecentAlert)
           }
         )

@@ -1,42 +1,21 @@
 <script>
-  import {propEq, uniqBy, prop, sortBy} from 'ramda'
+  import {propEq, sortBy} from 'ramda'
   import {onMount} from 'svelte'
   import {fly} from 'svelte/transition'
   import {alerts} from 'src/state/app'
   import {findReply, isLike} from 'src/util/nostr'
   import relay, {people, user} from 'src/relay'
-  import {now, timedelta, createScroller, Cursor} from 'src/util/misc'
+  import {now} from 'src/util/misc'
   import Spinner from "src/partials/Spinner.svelte"
   import Note from 'src/partials/Note.svelte'
   import Like from 'src/partials/Like.svelte'
 
-  let notes = []
+  let annotatedNotes = []
 
-  const cursor = new Cursor(timedelta(3, 'days'))
-
-  onMount(() => {
-    const scroller = createScroller(async () => {
-      notes = uniqBy(prop('id'), notes.concat(await loadNotes()))
-    })
-
-    return () => scroller.stop()
-  })
-
-  const loadNotes = async () => {
-    const [since, until] = cursor.step()
-    const filter = {kinds: [1, 7], '#p': [$user.pubkey], since, until}
-
-    // Load all our alerts and their context
-    await relay.loadNotesContext(
-      await relay.pool.loadEvents(filter),
-      {loadParents: true}
-    )
-
+  onMount(async () => {
     alerts.set({since: now()})
 
     const events = await relay.filterEvents({
-      since,
-      until,
       kinds: [1, 7],
       '#p': [$user.pubkey],
       customFilter: e => {
@@ -78,19 +57,19 @@
       likesById[reaction.parent.id].people.push(reaction.person)
     }
 
-    return sortBy(
+    annotatedNotes = sortBy(
       e => -e.created_at,
       notes
         .filter(e => e.pubkey !== $user.pubkey)
         .concat(Object.values(likesById))
     )
-  }
+  })
 
   alerts.set({since: now()})
 </script>
 
 <ul class="py-4 flex flex-col gap-2 max-w-xl m-auto">
-  {#each notes as e (e.id)}
+  {#each annotatedNotes as e (e.id)}
   {#if e.people}
   <li in:fly={{y: 20}}><Like note={e} /></li>
   {:else}
