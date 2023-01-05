@@ -87,6 +87,7 @@ const defaultRelays = [
   'wss://nostr.orba.ca',
   'wss://sg.qemura.xyz',
   'wss://nostr.hyperlingo.com',
+  'wss://nostr.swiss-enigma.ch',
   'wss://nostr.d11n.net',
   'wss://relay.nostr.express',
 ]
