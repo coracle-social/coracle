@@ -20,13 +20,18 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Persist and load relay list
 - [ ] Add followers/follows lists on profile page
 - [ ] Image uploads
-- [ ] Server discovery and relay publishing - https://github.com/nostr-protocol/nips/pull/32/files
+- [ ] Server discovery and relay publishing https://github.com/nostr-protocol/nips/pull/32/files
 - [ ] Support invoices https://twitter.com/jb55/status/1604131336247476224
 - [ ] NIP 05
 - [ ] Lightning tips
-- [ ] Direct messages
+- [ ] Direct messages https://github.com/nbd-wtf/nostr-tools/blob/master/nip04.ts
 - [ ] Rooms/groups
 - [ ] Custom feeds
+- [ ] Render and auto-link bech32 entities
+  - https://github.com/nostr-protocol/nips/blob/master/19.md
+  - https://github.com/nbd-wtf/nostr-tools/blob/master/nip19.ts
+- [ ] Support key delegation
+  - https://github.com/nbd-wtf/nostr-tools/blob/master/nip26.ts
 
 # Bugs
 
