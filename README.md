@@ -44,6 +44,12 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Changelog
 
+## Current
+
+- [ ] Upgrade nostr-tools
+  - [ ] Close connections that haven't been used in a while
+  - [ ] Move key management stuff
+
 ## 0.2.6
 
 - [x] Add support for at-mentions in note and reply composition

@@ -1,14 +1,12 @@
 import {uniqBy, sortBy, find, propEq, prop, uniq} from 'ramda'
 import {get} from 'svelte/store'
-import {relayPool, getPublicKey} from 'nostr-tools'
 import {noop, range, sleep} from 'hurdak/lib/hurdak'
 import {getTagValues, filterTags} from "src/util/nostr"
+import agent from 'src/agent'
 import {db} from 'src/relay/db'
 
 // ============================================================================
 // Utils/config
-
-const pool = relayPool()
 
 class Channel {
   constructor(name) {
@@ -21,8 +19,8 @@ class Channel {
   release() {
     this.status = 'idle'
   }
-  sub(filter, onEvent, onEose = noop, opts = {}) {
-    const relays = Object.keys(pool.relays)
+  async sub(filter, onEvent, onEose = noop, opts = {}) {
+    const relays = getRelays()
 
     // If we don't have any relays, we'll wait forever for an eose, but
     // we already know we're done. Use a timeout since callers are
@@ -36,18 +34,20 @@ class Channel {
     // Start our subscription, wait for only our fastest relays to eose before calling it done.
     // We were waiting for all before, but that made the slowest relay a bottleneck. Waiting for
     // only one meant we might be settling for very incomplete data
-    const start = new Date().valueOf()
     const lastEvent = {}
     const eoseRelays = []
 
+    // Create our subscription
+    const sub = await agent.pool.sub(relays, filter)
+
     // Keep track of when we last heard from each relay, and close unresponsive ones
-    const cb = (e, r) => {
+    sub.on('event', (r, e) => {
       lastEvent[r] = new Date().valueOf()
       onEvent(e)
-    }
+    })
 
     // If we have lots of relays, ignore the slowest ones
-    const onRelayEose = r => {
+    sub.on('eose', r => {
       eoseRelays.push(r)
 
       // If we have only a few, wait for all of them, otherwise ignore the slowest 1/5
@@ -55,28 +55,14 @@ class Channel {
       if (eoseRelays.length >= relays.length - threshold) {
         onEose()
       }
-    }
-
-    // Create our subscription
-    const sub = pool.sub({filter, cb}, this.name, onRelayEose)
-
-    // Watch for relays that are slow to respond and give up on them
-    const interval = !opts.timeout ? null : setInterval(() => {
-      for (const r of relays) {
-        if ((lastEvent[r] || start) < new Date().valueOf() - opts.timeout) {
-          onRelayEose(r)
-        }
-      }
-    }, 300)
+    })
 
     // Clean everything up when we're done
     const done = () => {
       if (this.status === 'busy') {
         sub.unsub()
+        this.release()
       }
-
-      clearInterval(interval)
-      this.release()
     }
 
     return {unsub: done}
@@ -86,7 +72,7 @@ class Channel {
     return new Promise(async resolve => {
       const result = []
 
-      const sub = this.sub(
+      const sub = await this.sub(
         filter,
         e => result.push(e),
         r => {
@@ -122,39 +108,25 @@ const getChannel = async () => {
 const req = async (...args) => (await getChannel()).all(...args)
 const sub = async (...args) => (await getChannel()).sub(...args)
 
-const getPubkey = () => {
-  return pool._pubkey || getPublicKey(pool._privkey)
-}
-
 const getRelays = () => {
-  return Object.keys(pool.relays)
+  return get(db.connections)
 }
 
 const addRelay = url => {
-  pool.addRelay(url)
+  agent.pool.connect(url)
 }
 
-const removeRelay = url => {
-  pool.removeRelay(url)
-}
+const removeRelay = async url => {
+  const relay = await agent.pool.connect(url)
 
-const setPrivateKey = privkey => {
-  pool.setPrivateKey(privkey)
-  pool._privkey = privkey
-}
-
-const setPublicKey = pubkey => {
-  pool.registerSigningFunction(async event => {
-    const {sig} = await window.nostr.signEvent(event)
-
-    return sig
-  })
-
-  pool._pubkey = pubkey
+  relay.close()
 }
 
 const publishEvent = event => {
-  pool.publish(event)
+  const relays = getRelays()
+
+  event = agent.keys.sign(event)
+  agent.publish(relays, event)
   db.events.process(event)
 }
 
@@ -240,6 +212,6 @@ const syncNetwork = async () => {
 }
 
 export default {
-  getPubkey, getRelays, addRelay, removeRelay, setPrivateKey, setPublicKey,
-  publishEvent, loadEvents, listenForEvents, syncNetwork, loadPeople,
+  getRelays, addRelay, removeRelay, publishEvent, loadEvents, listenForEvents,
+  syncNetwork, loadPeople,
 }
