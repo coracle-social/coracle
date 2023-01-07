@@ -1,7 +1,10 @@
 import {Buffer} from 'buffer'
 import {bech32} from 'bech32'
-import {pluck} from "ramda"
+import {debounce} from 'throttle-debounce'
+import {pluck, sortBy} from "ramda"
 import Fuse from "fuse.js/dist/fuse.min.js"
+import {writable} from 'svelte/store'
+import {isObject} from 'hurdak/lib/hurdak'
 
 export const fuzzy = (data, opts = {}) => {
   const fuse = new Fuse(data, opts)
@@ -17,6 +20,8 @@ export const getLocalJson = k => {
   try {
     return JSON.parse(localStorage.getItem(k))
   } catch (e) {
+    console.warn(`Unable to parse ${k}: ${e}`)
+
     return null
   }
 }
@@ -25,7 +30,7 @@ export const setLocalJson = (k, v) => {
   try {
     localStorage.setItem(k, JSON.stringify(v))
   } catch (e) {
-    // pass
+    console.warn(`Unable to set ${k}: ${e}`)
   }
 }
 
@@ -146,3 +151,28 @@ export const hexToBech32 = (prefix, hex) =>
 export const bech32ToHex = b32 =>
   Buffer.from(bech32.fromWords(bech32.decode(b32).words)).toString('hex')
 
+
+export const synced = (key, defaultValue = null) => {
+  // If it's an object, merge defaults
+  const store = writable(
+    isObject(defaultValue)
+      ? {...defaultValue, ...getLocalJson(key)}
+      : (getLocalJson(key) || defaultValue)
+  )
+
+  store.subscribe($value => setLocalJson(key, $value))
+
+  return store
+}
+
+export const shuffle = sortBy(() => Math.random()  > 0.5)
+
+export const batch = (t, f) => {
+  const xs = []
+  const cb = debounce(t, () => f(xs.splice(0)))
+
+  return x => {
+    xs.push(x)
+    cb()
+  }
+}

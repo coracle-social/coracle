@@ -1,15 +1,15 @@
 import {getPublicKey, getEventHash, signEvent} from 'nostr-tools'
+import {get} from 'svelte/store'
+import {synced} from 'src/util/misc'
 
-let pubkey
-let privkey
 let signingFunction
 
-const getPubkey = () => {
-  return pubkey || getPublicKey(privkey)
-}
+const pubkey = synced('agent/user/pubkey')
+const privkey = synced('agent/user/privkey')
 
 const setPrivateKey = _privkey => {
-  privkey = _privkey
+  privkey.set(_privkey)
+  pubkey.set(getPublicKey(_privkey))
 }
 
 const setPublicKey = _pubkey => {
@@ -19,15 +19,22 @@ const setPublicKey = _pubkey => {
     return sig
   }
 
-  pubkey = _pubkey
+  pubkey.set(_pubkey)
 }
 
 const sign = async event => {
-  event.pubkey = pubkey
+  event.pubkey = get(pubkey)
   event.id = getEventHash(event)
-  event.sig = signingFunction ? await signingFunction(event) : signEvent(event, privkey)
+  event.sig = signingFunction
+    ? await signingFunction(event)
+    : signEvent(event, get(privkey))
 
   return event
 }
 
-export default {getPubkey, setPrivateKey, setPublicKey, sign}
+const clear = () => {
+  pubkey.set(null)
+  privkey.set(null)
+}
+
+export default {pubkey, setPrivateKey, setPublicKey, sign, clear}

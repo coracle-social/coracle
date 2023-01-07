@@ -1,25 +1,33 @@
 <script>
+  import {liveQuery} from 'dexie'
+  import {without} from 'ramda'
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {modal} from "src/state/app"
-  import relay, {connections} from 'src/relay'
+  import {db, user} from "src/agent"
+  import {modal, addRelay, removeRelay} from "src/app"
+  import defaults from "src/app/defaults"
 
   let q = ""
   let search
+  let relays = $user?.relays || []
 
-  const knownRelays = relay.lq(() => relay.db.relays.toArray())
+  const knownRelays = liveQuery(() => db.relays.toArray())
 
   $: search = fuzzy($knownRelays, {keys: ["name", "description", "url"]})
 
   const join = url => {
-    relay.addRelay(url)
+    relays = relays.concat(url)
+    addRelay(url)
 
     document.querySelector('input').select()
   }
 
-  const leave = url => relay.removeRelay(url)
+  const leave = url => {
+    relays = without([url], relays)
+    removeRelay(url)
+  }
 </script>
 
 <div class="flex justify-center py-8 px-4" in:fly={{y: 20}}>
@@ -34,7 +42,7 @@
     <div class="flex flex-col gap-6 overflow-auto flex-grow -mx-6 px-6">
       <h2 class="staatliches text-2xl">Your relays</h2>
       {#each ($knownRelays || []) as r}
-        {#if $connections.includes(r.url)}
+        {#if relays.includes(r.url)}
         <div class="flex gap-2 justify-between">
           <div>
             <strong>{r.name || r.url}</strong>
@@ -59,7 +67,7 @@
       </div>
       {/if}
       {#each (search(q) || []).slice(0, 50) as r}
-        {#if !$connections.includes(r.url)}
+        {#if !relays.includes(r.url)}
         <div class="flex gap-2 justify-between">
           <div>
             <strong>{r.name || r.url}</strong>

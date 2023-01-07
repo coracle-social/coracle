@@ -1,4 +1,5 @@
 <script>
+  import {liveQuery} from 'dexie'
   import {sortBy, pluck, reject} from 'ramda'
   import {onMount} from 'svelte'
   import {slide} from 'svelte/transition'
@@ -7,18 +8,18 @@
   import {findReply} from 'src/util/nostr'
   import Spinner from 'src/partials/Spinner.svelte'
   import Note from "src/partials/Note.svelte"
-  import relay from 'src/relay'
+  import query from 'src/app/query'
 
   export let loadNotes
   export let queryNotes
 
-  const notes = relay.lq(async () => {
+  const notes = liveQuery(async () => {
     // Hacky way to wait for the loader to adjust the cursor so we have a nonzero duration
     await sleep(100)
 
     return sortBy(
       e => -pluck('created_at', e.replies).concat(e.created_at).reduce((a, b) => Math.max(a, b)),
-      await relay.annotateChunk(await queryNotes())
+      await query.annotateChunk(await queryNotes())
     )
   })
 

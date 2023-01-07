@@ -9,13 +9,17 @@
   let preview
 
   onMount(async () => {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      body: JSON.stringify({url}),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        body: JSON.stringify({url}),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    } catch (e) {
+      return
+    }
 
     const json = await res.json()
 

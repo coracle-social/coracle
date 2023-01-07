@@ -1,24 +1,9 @@
-import {liveQuery} from 'dexie'
 import {get} from 'svelte/store'
-import {uniq, pluck, intersection, sortBy, propEq, uniqBy, groupBy, concat, without, prop, isNil, identity} from 'ramda'
+import {intersection, sortBy, propEq, uniqBy, groupBy, concat, prop, isNil, identity} from 'ramda'
 import {ensurePlural, createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {renderContent} from 'src/util/html'
 import {filterTags, displayPerson, getTagValues, findReply, findRoot} from 'src/util/nostr'
-import {db} from 'src/relay/db'
-import pool from 'src/relay/pool'
-import cmd from 'src/relay/cmd'
-
-// Livequery appears to swallow errors
-
-const lq = f => liveQuery(async () => {
-  try {
-    return await f()
-  } catch (e) {
-    console.error(e)
-  }
-})
-
-// Utils for filtering db - nothing below should load events from the network
+import {db, people, getPerson} from 'src/agent'
 
 const filterEvents = async ({limit, ...filter}) => {
   let events = db.events
@@ -77,7 +62,7 @@ const findNote = async (id, {showEntire = false, depth = 1} = {}) => {
 
   const reactions = await filterReactions(note.id)
   const replies = await filterReplies(note.id)
-  const person = prop(note.pubkey, get(db.people))
+  const person = getPerson(note.pubkey)
   const html = await renderNote(note, {showEntire})
 
   let parent = null
@@ -89,7 +74,7 @@ const findNote = async (id, {showEntire = false, depth = 1} = {}) => {
       parent = {
         ...parent,
         reactions: await filterReactions(parent.id),
-        person: prop(parent.pubkey, get(db.people)),
+        person: getPerson(parent.pubkey),
         html: await renderNote(parent, {showEntire}),
       }
     }
@@ -143,7 +128,7 @@ const annotateChunk = async chunk => {
 
 const renderNote = async (note, {showEntire = false}) => {
   const shouldEllipsize = note.content.length > 500 && !showEntire
-  const $people = get(db.people)
+  const $people = get(people)
   const peopleByPubkey = createMap(
     'pubkey',
     filterTags({tag: "p"}, note).map(k => $people[k]).filter(identity)
@@ -174,119 +159,4 @@ const renderNote = async (note, {showEntire = false}) => {
   return content
 }
 
-// Synchronization
-
-const login = ({privkey, pubkey}) => {
-  db.user.set({relays: [], muffle: [], petnames: [], updated_at: 0, pubkey, privkey})
-
-  pool.syncNetwork()
-}
-
-const addRelay = url => {
-  db.connections.update($connections => $connections.concat(url))
-
-  pool.syncNetwork()
-}
-
-const removeRelay = url => {
-  db.connections.update($connections => without([url], $connections))
-}
-
-const follow = async pubkey => {
-  db.network.update($network => $network.concat(pubkey))
-
-  pool.syncNetwork()
-}
-
-const unfollow = async pubkey => {
-  db.network.update($network => $network.concat(pubkey))
-}
-
-// Methods that wil attempt to load from the database and fall back to the network.
-// This is intended only for bootstrapping listeners
-
-const loadNotesContext = async (notes, {loadParents = false} = {}) => {
-  notes = ensurePlural(notes)
-
-  if (notes.length === 0) {
-    return
-  }
-
-  const $people = get(people)
-  const authors = uniq(pluck('pubkey', notes)).filter(k => !$people[k])
-  const parentIds = loadParents ? uniq(notes.map(findReply).filter(identity)) : []
-  const filter = [{kinds: [1, 5, 7], '#e': pluck('id', notes)}]
-
-  // Load authors if needed
-  if (authors.length > 0) {
-    filter.push({kinds: [0], authors})
-  }
-
-  // Load the note parents
-  if (parentIds.length > 0) {
-    filter.push({kinds: [1], ids: parentIds})
-  }
-
-  // Load the events
-  const events = await pool.loadEvents(filter)
-  const eventsById = createMap('id', events)
-  const parents = parentIds.map(id => eventsById[id]).filter(identity)
-
-  // Load the parents' context as well
-  if (parents.length > 0) {
-    await loadNotesContext(parents)
-  }
-}
-
-const getOrLoadNote = async id => {
-  if (!await db.events.get(id)) {
-    await pool.loadEvents({kinds: [1], ids: [id]})
-  }
-
-  const note = await db.events.get(id)
-
-  if (note) {
-    await loadNotesContext([note], {loadParent: true})
-  }
-
-  return note
-}
-
-// Initialization
-
-db.user.subscribe($user => {
-  if ($user?.privkey) {
-    pool.setPrivateKey($user.privkey)
-  } else if ($user?.pubkey) {
-    pool.setPublicKey($user.pubkey)
-  }
-})
-
-db.connections.subscribe($connections => {
-  const poolRelays = pool.getRelays()
-
-  for (const url of $connections) {
-    if (!poolRelays.includes(url)) {
-      pool.addRelay(url)
-    }
-  }
-
-  for (const url of poolRelays) {
-    if (!$connections.includes(url)) {
-      pool.removeRelay(url)
-    }
-  }
-})
-
-// Export stores on their own for convenience
-
-export const user = db.user
-export const people = db.people
-export const network = db.network
-export const connections = db.connections
-
-export default {
-  db, pool, cmd, lq, filterEvents, getOrLoadNote, filterReplies, findNote,
-  annotateChunk, renderNote, login, addRelay, removeRelay,
-  follow, unfollow, loadNotesContext,
-}
+export default {filterEvents, filterReplies, filterReactions, annotateChunk, renderNote, findNote}

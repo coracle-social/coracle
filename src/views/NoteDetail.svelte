@@ -1,9 +1,13 @@
 <script>
+  import {liveQuery} from 'dexie'
   import {when, propEq} from 'ramda'
   import {fly} from 'svelte/transition'
   import {onMount, onDestroy} from 'svelte'
   import {now} from 'src/util/misc'
-  import relay from 'src/relay'
+  import {listen} from 'src/agent'
+  import {getRelays} from 'src/app'
+  import loaders from 'src/app/loaders'
+  import query from 'src/app/query'
   import Note from 'src/partials/Note.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
 
@@ -12,16 +16,18 @@
   let observable, sub
 
   onMount(async () => {
-    note = await relay.getOrLoadNote(note.id)
+    note = await loaders.getOrLoadNote(getRelays(), note.id)
 
     // Log this for debugging purposes
     console.log('NoteDetail', note)
 
     if (note) {
-      sub = await relay.pool.listenForEvents(
-        'routes/NoteDetail',
+      sub = await listen(
+        getRelays(),
         [{kinds: [1, 5, 7], '#e': [note.id], since: now()}],
-        when(propEq('kind', 1), relay.loadNotesContext)
+        when(propEq('kind', 1), e => {
+          loaders.loadNotesContext(getRelays(), e)
+        })
       )
     }
   })
@@ -33,7 +39,7 @@
   })
 
   onMount(() => {
-    observable = relay.lq(() => relay.findNote(note.id, {showEntire: true, depth: 5}))
+    observable = liveQuery(() => query.findNote(note.id, {showEntire: true, depth: 5}))
 
     return () => {
       if (sub) {

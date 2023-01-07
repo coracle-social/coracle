@@ -57,3 +57,17 @@ export const displayPerson = p => {
 }
 
 export const isLike = content => ['', '+', '🤙', '👍', '❤️'].includes(content)
+
+export const isAlert = (e, pubkey) => {
+  // Don't show people's own stuff
+  if (e.pubkey === pubkey) {
+    return false
+  }
+
+  // Only notify users about positive reactions
+  if (e.kind === 7 && !isLike(e.content)) {
+    return false
+  }
+
+  return true
+}

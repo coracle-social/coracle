@@ -3,7 +3,7 @@
   import {fuzzy} from "src/util/misc"
   import {fromParentOffset} from "src/util/html"
   import Badge from "src/partials/Badge.svelte"
-  import {people} from "src/relay"
+  import {people} from "src/agent/data"
 
   export let onSubmit
 

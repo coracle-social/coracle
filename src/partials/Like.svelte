@@ -1,11 +1,11 @@
 <script>
   import {fly} from 'svelte/transition'
   import {uniqBy, prop} from 'ramda'
-  import {ellipsize, quantify} from 'hurdak/src/core'
+  import {ellipsize, quantify} from 'hurdak/lib/hurdak'
   import Badge from "src/partials/Badge.svelte"
   import {formatTimestamp} from 'src/util/misc'
   import {killEvent} from 'src/util/html'
-  import {modal} from 'src/state/app'
+  import {modal} from 'src/app'
 
   export let note
 

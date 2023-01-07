@@ -1,7 +1,10 @@
 <script>
   import Notes from "src/partials/Notes.svelte"
   import {timedelta, Cursor} from 'src/util/misc'
-  import relay from 'src/relay'
+  import {load} from 'src/agent'
+  import {getRelays} from 'src/app'
+  import loaders from 'src/app/loaders'
+  import query from 'src/app/query'
 
   export let pubkey
 
@@ -10,15 +13,13 @@
   const loadNotes = async () => {
     const [since, until] = cursor.step()
     const filter = {kinds: [1], authors: [pubkey], since, until}
+    const notes = await load(getRelays(), filter)
 
-    await relay.loadNotesContext(
-      await relay.pool.loadEvents(filter),
-      {loadParents: true}
-    )
+    await loaders.loadNotesContext(getRelays(), notes, {loadParents: true})
   }
 
   const queryNotes = () => {
-    return relay.filterEvents({
+    return query.filterEvents({
       kinds: [1],
       since: cursor.since,
       authors: [pubkey],

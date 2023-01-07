@@ -4,8 +4,9 @@
   import {navigate} from "svelte-routing"
   import Button from "src/partials/Button.svelte"
   import Compose from "src/partials/Compose.svelte"
-  import toast from "src/state/toast"
-  import relay, {user} from "src/relay"
+  import {user} from "src/agent"
+  import {toast} from "src/app"
+  import cmd from "src/app/cmd"
 
   let input = null
 
@@ -13,7 +14,7 @@
     const {content, mentions} = input.parse()
 
     if (content) {
-      await relay.cmd.createNote(content, mentions)
+      await cmd.createNote(content, mentions)
 
       toast.show("info", `Your note has been created!`)
 

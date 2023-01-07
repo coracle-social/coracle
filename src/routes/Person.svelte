@@ -11,32 +11,34 @@
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
   import Network from "src/views/person/Network.svelte"
-  import {modal} from "src/state/app"
-  import relay, {user, people} from 'src/relay'
+  import {getPerson, listen, user} from "src/agent"
+  import {modal, getRelays} from "src/app"
+  import loaders from "src/app/loaders"
+  import cmd from "src/app/cmd"
 
   export let pubkey
   export let activeTab
 
   let subs = []
-  let following = $user && find(t => t[1] === pubkey, $user.petnames)
+  let following = find(t => t[1] === pubkey, $user?.petnames || [])
   let followers = new Set()
   let followersCount = 0
   let person
 
   $: {
-    person = $people[pubkey] || {pubkey}
+    person = getPerson(pubkey) || {pubkey}
   }
 
   onMount(async () => {
-    subs.push(await relay.pool.listenForEvents(
-      'routes/Person',
+    subs.push(await listen(
+      getRelays(),
       [{kinds: [1, 5, 7], authors: [pubkey], since: now()},
        {kinds: [0, 3, 12165], authors: [pubkey]}],
-      when(propEq('kind', 1), relay.loadNoteContext)
+      when(propEq('kind', 1), loaders.loadNoteContext)
     ))
 
-    subs.push(await relay.pool.listenForEvents(
-      'routes/Person/followers',
+    subs.push(await listen(
+      getRelays(),
       [{kinds: [3], '#p': [pubkey]}],
       e => {
         followers.add(e.pubkey)
@@ -58,18 +60,18 @@
     following = true
 
     // Make sure our follow list is up to date
-    await relay.pool.loadPeople([$user.pubkey], {kinds: [3]})
+    await loaders.loadPeople([$user.pubkey], {kinds: [3]})
 
-    relay.cmd.addPetname($user, pubkey, person.name)
+    cmd.addPetname($user, pubkey, person.name)
   }
 
   const unfollow = async () => {
     following = false
 
     // Make sure our follow list is up to date
-    await relay.pool.loadPeople([$user.pubkey], {kinds: [3]})
+    await loaders.loadPeople([$user.pubkey], {kinds: [3]})
 
-    relay.cmd.removePetname($user, pubkey)
+    cmd.removePetname($user, pubkey)
   }
 
   const openAdvanced = () => {
@@ -97,7 +99,7 @@
         <a href="/profile" class="cursor-pointer text-sm">
           <i class="fa-solid fa-edit" /> Edit
         </a>
-        {:else}
+        {:else if $user.petnames}
         <div class="flex flex-col items-end gap-2">
           {#if following}
           <Button on:click={unfollow}>Unfollow</Button>
@@ -123,7 +125,7 @@
 {:else if activeTab === 'likes'}
 <Likes {pubkey} />
 {:else if activeTab === 'network'}
-{#if person}
+{#if person?.petnames}
 <Network person={person} />
 {:else}
 <div class="py-16 max-w-xl m-auto flex justify-center">

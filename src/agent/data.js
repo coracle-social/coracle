@@ -1,11 +1,11 @@
 import Dexie from 'dexie'
-import {writable, get} from 'svelte/store'
+import {writable} from 'svelte/store'
 import {groupBy, prop, flatten, pick} from 'ramda'
 import {ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
-import {now, timedelta, getLocalJson, setLocalJson} from 'src/util/misc'
+import {now, timedelta} from 'src/util/misc'
 import {filterTags, findReply, findRoot} from 'src/util/nostr'
 
-export const db = new Dexie('coracle/relay')
+export const db = new Dexie('agent/data/db')
 
 db.version(6).stores({
   relays: '++url, name',
@@ -13,23 +13,20 @@ db.version(6).stores({
   tags: '++key, event, value, created_at, loaded_at',
 })
 
-window.db = db
-
 // Some things work better as observables than database tables
 
-db.user = writable(getLocalJson("db/user"))
-db.people = writable(getLocalJson('db/people') || {})
-db.network = writable(getLocalJson('db/network') || [])
-db.connections = writable(getLocalJson("db/connections") || [])
+export const people = writable({})
 
-db.user.subscribe($user => setLocalJson("db/user", $user))
-db.people.subscribe($people => setLocalJson("db/people", $people))
-db.network.subscribe($network => setLocalJson("db/network", $network))
-db.connections.subscribe($connections => setLocalJson("db/connections", $connections))
+let $people = {}
+people.subscribe($p => {
+  $people = $p
+})
+
+export const getPerson = pubkey => $people[pubkey]
 
 // Hooks
 
-db.events.process = async events => {
+export const processEvents = async events => {
   // Only persist ones we care about, the rest can be ephemeral and used to update people etc
   const eventsByKind = groupBy(prop('kind'), ensurePlural(events))
   const notesAndReactions = flatten(Object.values(pick([1, 7], eventsByKind)))
@@ -70,9 +67,7 @@ db.events.process = async events => {
   }
 
   // Update our people
-  db.people.update($people => {
-    let $user = get(db.user)
-
+  people.update($people => {
     for (const event of profileUpdates) {
       const {pubkey, kind, content, tags} = event
       const putPerson = data => {
@@ -81,10 +76,6 @@ db.events.process = async events => {
           ...data,
           pubkey,
           updated_at: now(),
-        }
-
-        if ($user?.pubkey === pubkey) {
-          $user = {...$user, ...data}
         }
       }
 
@@ -97,8 +88,6 @@ db.events.process = async events => {
         },
       })
     }
-
-    db.user.set($user)
 
     return $people
   })

@@ -5,7 +5,7 @@
   import {fuzzy} from "src/util/misc"
   import {renderContent} from "src/util/html"
   import {displayPerson} from "src/util/nostr"
-  import {user, people} from 'src/relay'
+  import {user, people} from 'src/agent'
 
   export let q
 

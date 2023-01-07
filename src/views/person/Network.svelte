@@ -2,7 +2,10 @@
   import Notes from "src/partials/Notes.svelte"
   import {timedelta, Cursor} from 'src/util/misc'
   import {getTagValues} from 'src/util/nostr'
-  import relay, {user} from 'src/relay'
+  import {load, user} from 'src/agent'
+  import {getRelays} from 'src/app'
+  import loaders from 'src/app/loaders'
+  import query from 'src/app/query'
 
   export let person
 
@@ -10,17 +13,16 @@
 
   const loadNotes = async () => {
     const [since, until] = cursor.step()
+    console.log(person)
     const authors = getTagValues(person.petnames)
     const filter = {since, until, kinds: [1], authors}
+    const events = await load(getRelays(), filter)
 
-    await relay.loadNotesContext(
-      await relay.pool.loadEvents(filter),
-      {loadParents: true}
-    )
+    await loaders.loadNotesContext(getRelays(), events, {loadParents: true})
   }
 
   const queryNotes = () => {
-    return relay.filterEvents({
+    return query.filterEvents({
       kinds: [1],
       since: cursor.since,
       authors: getTagValues(person.petnames),

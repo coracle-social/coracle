@@ -1,23 +1,14 @@
 <script>
-  import {get} from 'svelte/store'
   import {fly} from 'svelte/transition'
-  import {settings} from "src/state/app"
-  import relay, {connections} from 'src/relay'
+  import {db} from 'src/agent'
 
   setTimeout(async () => {
-    const $connections = get(connections)
-    const $settings = get(settings)
-
     // Clear localstorage
     localStorage.clear()
 
     // Keep relays around, but delete events/tags
-    await relay.db.events.clear()
-    await relay.db.tags.clear()
-
-    // Remember the user's relay selection and settings
-    connections.set($connections)
-    settings.set($settings)
+    await db.events.clear()
+    await db.tags.clear()
 
     // do a hard refresh so everything gets totally cleared
     window.location = '/login'

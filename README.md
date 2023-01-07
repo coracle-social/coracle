@@ -32,6 +32,8 @@ If you like Coracle and want to support its development, you can donate sats via
   - https://github.com/nbd-wtf/nostr-tools/blob/master/nip19.ts
 - [ ] Support key delegation
   - https://github.com/nbd-wtf/nostr-tools/blob/master/nip26.ts
+- [ ] Add relay selector when publishing a note
+- [ ] Add keyword mutes
 
 # Bugs
 
@@ -46,9 +48,25 @@ If you like Coracle and want to support its development, you can donate sats via
 
 ## Current
 
-- [ ] Upgrade nostr-tools
-  - [ ] Close connections that haven't been used in a while
-  - [ ] Move key management stuff
+- [x] Upgrade nostr-tools
+- [ ] Publish user relays using nip 23
+- [ ] Use user relays for feeds
+- [ ] Publish to user relays + target relays:
+  - If a reply or reaction, publish to the parent event's best relay, which is:
+    - e tag relay
+    - p tag relay
+    - or pubkey's recommended relays
+- [ ] Add recommended relay to tags
+- [ ] Close connections that haven't been used in a while
+- [ ] Support some read/write config on relays page
+- [ ] Get real home relays for default pubkeys
+- [ ] Add settings storage
+- [ ] Use hexToBech32 from nostr-tools
+- [ ] Warn that everything will be cleared on logout
+- [ ] Clear dexie on page load, we don't need any persistence other than people/relays
+- [ ] Clean up login page to prefer extension, make private key entry "advanced"
+- [ ] Do I need to implement re-connecting now?
+- [ ] handle localstorage limits https://stackoverflow.com/questions/2989284/what-is-the-max-size-of-localstorage-values
 
 ## 0.2.6
 

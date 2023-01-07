@@ -6,7 +6,8 @@
   import {getTagValues} from "src/util/nostr"
   import Note from "src/partials/Note.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import relay, {user} from 'src/relay'
+  import {user} from 'src/agent'
+  import query from 'src/app/query'
 
   export let q
 
@@ -15,13 +16,13 @@
   onMount(async () => {
     const filter = {kinds: [1], muffle: getTagValues($user?.muffle || [])}
 
-    search = fuzzy(take(5000, await relay.filterEvents(filter)), {keys: ["content"]})
+    search = fuzzy(take(5000, await query.filterEvents(filter)), {keys: ["content"]})
   })
 </script>
 
 {#if search}
 <ul class="py-8 flex flex-col gap-2 max-w-xl m-auto">
-  {#await Promise.all(search(q).slice(0, 30).map(n => relay.findNote(n.id)))}
+  {#await Promise.all(search(q).slice(0, 30).map(n => query.findNote(n.id)))}
   <Spinner />
   {:then results}
     {#each results as e (e.id)}

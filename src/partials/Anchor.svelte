@@ -3,12 +3,16 @@
   import {switcher} from "hurdak/lib/hurdak"
 
   export let external = false
+  export let loading = false
   export let type = "anchor"
   export let href = null
 
-  const className = cx(
+  let className
+
+  $: className = cx(
     $$props.class,
-    "cursor-pointer",
+    "cursor-pointer transition-all",
+    {"opacity-50": loading},
     switcher(type, {
       anchor: "underline",
       button: "py-2 px-4 rounded bg-white text-accent",

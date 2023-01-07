@@ -9,12 +9,13 @@
   import {findReply, isLike} from "src/util/nostr"
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
-  import {settings, modal} from "src/state/app"
+  import {settings, modal} from "src/app"
   import {formatTimestamp} from 'src/util/misc'
   import Badge from "src/partials/Badge.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
-  import relay, {user} from 'src/relay'
+  import {user} from 'src/agent'
+  import cmd from 'src/app/cmd'
 
   export let note
   export let until = Infinity
@@ -53,7 +54,7 @@
       return navigate('/login')
     }
 
-    const event = await relay.cmd.createReaction(content, note)
+    const event = await cmd.createReaction(content, note)
 
     if (content === '+') {
       likes = likes.concat(event)
@@ -65,7 +66,7 @@
   }
 
   const deleteReaction = e => {
-    relay.cmd.deleteEvent([e.id])
+    cmd.deleteEvent([e.id])
 
     if (e.content === '+') {
       likes = reject(propEq('pubkey', $user.pubkey), likes)
@@ -88,7 +89,7 @@
     const {content, mentions} = reply.parse()
 
     if (content) {
-      relay.cmd.createReply(note, content, mentions)
+      cmd.createReply(note, content, mentions)
 
       reply = null
     }

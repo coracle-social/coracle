@@ -6,15 +6,13 @@
   import {writable, get} from "svelte/store"
   import {fly, fade} from "svelte/transition"
   import {cubicInOut} from "svelte/easing"
-  import {throttle} from 'throttle-debounce'
   import {Router, Route, links, navigate} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {hasParent} from 'src/util/html'
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, now} from 'src/util/misc'
-  import {store as toast} from "src/state/toast"
-  import {modal, settings, alerts} from "src/state/app"
-  import relay, {user, connections} from 'src/relay'
+  import {user} from 'src/agent'
+  import {modal, toast, settings, alerts} from "src/app"
   import Anchor from 'src/partials/Anchor.svelte'
   import NoteDetail from "src/views/NoteDetail.svelte"
   import PersonSettings from "src/views/PersonSettings.svelte"
@@ -32,8 +30,6 @@
   import Person from "src/routes/Person.svelte"
   import NoteCreate from "src/routes/NoteCreate.svelte"
 
-  window.relay = relay
-
   export let url = ""
 
   const menuIsOpen = writable(false)
@@ -45,7 +41,7 @@
   let menuIcon
   let scrollY
   let suspendedSubs = []
-  let mostRecentAlert = $alerts.since
+  let {since, latest} = alerts
 
   onMount(() => {
     // Close menu on click outside
@@ -53,35 +49,6 @@
       if (e.target !== menuIcon) {
         menuIsOpen.set(false)
       }
-    })
-
-    let prevPubkey = null
-
-    const unsubUser = user.subscribe($user => {
-      if ($user && $user.pubkey !== prevPubkey) {
-        relay.pool.syncNetwork()
-        relay.pool.listenForEvents(
-          'App/alerts',
-          [{kinds: [1, 7], '#p': [$user.pubkey], since: mostRecentAlert}],
-          e => {
-            // Don't alert about people's own stuff
-            if (e.pubkey === $user.pubkey) {
-              return
-            }
-
-            // Only notify users about positive reactions
-            if (e.kind === 7 && !isLike(e.content)) {
-              return
-            }
-
-            relay.loadNotesContext([e])
-
-            mostRecentAlert = Math.max(e.created_at, mostRecentAlert)
-          }
-        )
-      }
-
-      prevPubkey = $user?.pubkey
     })
 
     const unsubModal = modal.subscribe($modal => {
@@ -101,7 +68,6 @@
     })
 
     return () => {
-      unsubUser()
       unsubModal()
     }
   })
@@ -153,7 +119,7 @@
       <li class="cursor-pointer relative">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/alerts">
           <i class="fa-solid fa-bell mr-2" /> Alerts
-          {#if mostRecentAlert > $alerts.since}
+          {#if $latest > $since}
           <div class="w-2 h-2 rounded bg-accent absolute top-3 left-6" />
           {/if}
         </a>
@@ -209,7 +175,7 @@
         <img src="/images/favicon.png" class="w-8" />
         <h1 class="staatliches text-3xl">Coracle</h1>
       </Anchor>
-      {#if mostRecentAlert > $alerts.since}
+      {#if $latest > $since}
       <div class="w-2 h-2 rounded bg-accent absolute top-4 left-12" />
       {/if}
     </div>

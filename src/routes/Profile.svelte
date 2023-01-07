@@ -8,8 +8,9 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Button from "src/partials/Button.svelte"
-  import toast from "src/state/toast"
-  import relay, {user} from "src/relay"
+  import {user} from "src/agent"
+  import {toast} from "src/app"
+  import cmd from "src/app/cmd"
 
   let values = {picture: null, about: null, name: null}
 
@@ -37,7 +38,7 @@
   const submit = async event => {
     event.preventDefault()
 
-    await relay.cmd.updateUser(values)
+    await cmd.updateUser(values)
 
     navigate(`/people/${$user.pubkey}/profile`)
 

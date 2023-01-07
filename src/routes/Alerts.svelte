@@ -2,10 +2,11 @@
   import {propEq, sortBy} from 'ramda'
   import {onMount} from 'svelte'
   import {fly} from 'svelte/transition'
-  import {alerts} from 'src/state/app'
-  import {findReply, isLike} from 'src/util/nostr'
-  import relay, {people, user} from 'src/relay'
   import {now} from 'src/util/misc'
+  import {findReply, isLike} from 'src/util/nostr'
+  import {getPerson, user} from 'src/agent'
+  import {alerts} from 'src/app'
+  import query from 'src/app/query'
   import Spinner from "src/partials/Spinner.svelte"
   import Note from 'src/partials/Note.svelte'
   import Like from 'src/partials/Like.svelte'
@@ -13,9 +14,9 @@
   let annotatedNotes = []
 
   onMount(async () => {
-    alerts.set({since: now()})
+    alerts.since.set(now())
 
-    const events = await relay.filterEvents({
+    const events = await query.filterEvents({
       kinds: [1, 7],
       '#p': [$user.pubkey],
       customFilter: e => {
@@ -33,7 +34,7 @@
       }
     })
 
-    const notes = await relay.annotateChunk(
+    const notes = await query.annotateChunk(
       events.filter(propEq('kind', 1))
     )
 
@@ -42,8 +43,8 @@
         .filter(e => e.kind === 7)
         .map(async e => ({
           ...e,
-          person: $people[e.pubkey] || {pubkey: e.pubkey},
-          parent: await relay.findNote(findReply(e)),
+          person: getPerson(e.pubkey),
+          parent: await query.findNote(findReply(e)),
         }))
     )
 
@@ -64,8 +65,6 @@
         .concat(Object.values(likesById))
     )
   })
-
-  alerts.set({since: now()})
 </script>
 
 <ul class="py-4 flex flex-col gap-2 max-w-xl m-auto">

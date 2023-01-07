@@ -1,14 +1,13 @@
 import {isNil, uniqBy, last} from 'ramda'
+import {get} from 'svelte/store'
 import {first} from "hurdak/lib/hurdak"
-import relay from 'src/relay'
+import {keys, publish, user} from 'src/agent'
 
 const updateUser = updates => publishEvent(0, JSON.stringify(updates))
 
-const addPetname = (person, pubkey, name) =>
-  publishEvent(3, '', uniqBy(t => t[1], person.petnames.concat([t("p", pubkey, name)])))
+const setRelays = relays => publishEvent(10001, "", relays.map(url => [url, "", ""]))
 
-const removePetname = (person, pubkey) =>
-  publishEvent(3, '', uniqBy(t => t[1], person.petnames.filter(t => t[1] !== pubkey)))
+const setPetnames = petnames => publishEvent(3, "", petnames)
 
 const muffle = (person, pubkey, value) => {
   const muffle = person.muffle
@@ -53,7 +52,8 @@ const copyTags = (e, newTags = []) => {
 }
 
 export const t = (type, content, marker) => {
-  const tag = [type, content, first(relay.pool.getRelays())]
+  const relays = get(user).relays || []
+  const tag = [type, content, first(relays)]
 
   if (!isNil(marker)) {
     tag.push(marker)
@@ -63,21 +63,23 @@ export const t = (type, content, marker) => {
 }
 
 const makeEvent = (kind, content = '', tags = []) => {
-  const pubkey = relay.pool.getPubkey()
+  const pubkey = get(keys.pubkey)
   const createdAt = Math.round(new Date().valueOf() / 1000)
 
   return {kind, content, tags, pubkey, created_at: createdAt}
 }
 
-const publishEvent = async (...args) => {
-  const event = makeEvent(...args)
+const publishEvent = (...args) => {
+  const relays = get(user).relays || []
 
-  await relay.pool.publishEvent(event)
+  if (relays.length === 0) {
+    throw new Error("Unable to publish, user has no relays")
+  }
 
-  return event
+  publish(relays, makeEvent(...args))
 }
 
 export default {
-  updateUser, addPetname, removePetname, muffle, createRoom, updateRoom, createMessage, createNote,
+  updateUser, setRelays, setPetnames, muffle, createRoom, updateRoom, createMessage, createNote,
   createReaction, createReply, deleteEvent, publishEvent,
 }

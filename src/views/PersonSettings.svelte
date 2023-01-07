@@ -4,8 +4,9 @@
   import {fly} from 'svelte/transition'
   import Button from "src/partials/Button.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
-  import {modal} from "src/state/app"
-  import relay, {user} from 'src/relay'
+  import {user} from 'src/agent'
+  import {modal} from 'src/app'
+  import cmd from 'src/app/cmd'
 
   const muffleOptions = ['Never', 'Sometimes', 'Often', 'Always']
   const muffleValue = parseFloat(first($user.muffle.filter(t => t[1] === $modal.person.pubkey).map(last)) || 1)
@@ -21,7 +22,7 @@
     // Scale back down to a decimal based on string value
     const muffleValue = muffleOptions.indexOf(values.muffle) / 3
 
-    relay.cmd.muffle($user, $modal.person.pubkey, muffleValue)
+    cmd.muffle($user, $modal.person.pubkey, muffleValue)
 
     modal.set(null)
   }

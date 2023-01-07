@@ -7,11 +7,11 @@
   import {copyToClipboard} from "src/util/html"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
-  import toast from "src/state/toast"
-  import relay, {connections} from 'src/relay'
+  import {toast, login} from "src/app"
 
   let nsec = ''
   let hasExtension = false
+  let loading = false
 
   onMount(() => {
     setTimeout(() => {
@@ -32,13 +32,11 @@
   }
 
   const logIn = async ({privkey, pubkey}) => {
-    relay.login({privkey, pubkey})
+    loading = true
 
-    if ($connections.length === 0) {
-      navigate('/relays')
-    } else {
-      navigate('/notes/network')
-    }
+    await login({privkey, pubkey})
+
+    navigate('/notes/network')
   }
 
   const logInWithExtension = async () => {
@@ -47,7 +45,7 @@
     if (!pubkey.match(/[a-z0-9]{64}/)) {
       toast.show("error", "Sorry, but that's an invalid public key.")
     } else {
-      logIn({pubkey})
+      await logIn({pubkey})
     }
   }
 
@@ -57,7 +55,7 @@
     if (!privkey.match(/[a-z0-9]{64}/)) {
       toast.show("error", "Sorry, but that's an invalid private key.")
     } else {
-      logIn({privkey, pubkey: getPublicKey(privkey)})
+      await logIn({privkey, pubkey: getPublicKey(privkey)})
     }
   }
 </script>
@@ -98,6 +96,8 @@
         </small>
       </div>
     </div>
-    <Anchor class="text-center" type="button" on:click={logInWithPrivateKey}>Log In</Anchor>
+    <Anchor class="text-center" type="button" on:click={logInWithPrivateKey} {loading}>
+      Log In
+    </Anchor>
   </div>
 </div>

@@ -1,24 +1,25 @@
 <script>
   import {when, propEq} from 'ramda'
-  import {onMount, onDestroy} from 'svelte'
+  import {onMount} from 'svelte'
   import Notes from "src/partials/Notes.svelte"
   import {timedelta, Cursor} from 'src/util/misc'
   import {getTagValues} from 'src/util/nostr'
-  import relay, {user} from 'src/relay'
+  import {listen, user, load} from 'src/agent'
+  import {getRelays} from 'src/app'
+  import loaders from 'src/app/loaders'
+  import query from 'src/app/query'
 
-  let sub
-
-  onMount(async () => {
-    sub = await relay.pool.listenForEvents(
-      'views/notes/Global',
+  onMount(() => {
+    const sub = listen(
+      getRelays(),
       [{kinds: [1, 5, 7], since: cursor.since}],
-      when(propEq('kind', 1), relay.loadNotesContext)
+      when(propEq('kind', 1), e => {
+        loaders.loadNotesContext(getRelays(), e)
+      })
     )
-  })
 
-  onDestroy(() => {
-    if (sub) {
-      sub.unsub()
+    return () => {
+      sub.then(s => s.unsub())
     }
   })
 
@@ -27,12 +28,13 @@
   const loadNotes = async () => {
     const [since, until] = cursor.step()
     const filter = {kinds: [1], since, until}
-    const notes = await relay.pool.loadEvents(filter)
-    await relay.loadNotesContext(notes, {loadParents: true})
+    const notes = await load(getRelays(), filter)
+
+    await loaders.loadNotesContext(getRelays(), notes, {loadParents: true})
   }
 
   const queryNotes = () => {
-    return relay.filterEvents({
+    return query.filterEvents({
       kinds: [1],
       since: cursor.since,
       muffle: getTagValues($user?.muffle || []),
