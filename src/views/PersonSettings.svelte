@@ -4,7 +4,7 @@
   import {fly} from 'svelte/transition'
   import Button from "src/partials/Button.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
-  import {user} from 'src/agent'
+  import {user, getRelays} from 'src/agent'
   import {modal} from 'src/app'
   import cmd from 'src/app/cmd'
 
@@ -21,8 +21,12 @@
 
     // Scale back down to a decimal based on string value
     const muffleValue = muffleOptions.indexOf(values.muffle) / 3
+    const muffleTags = $user.muffle
+      .filter(t => t[1] !== $modal.person.pubkey)
+      .concat([["p", $modal.person.pubkey, muffleValue.toString()]])
+      .filter(t => last(t) !== "1")
 
-    cmd.muffle($user, $modal.person.pubkey, muffleValue)
+    cmd.muffle(getRelays(), muffleTags)
 
     modal.set(null)
   }

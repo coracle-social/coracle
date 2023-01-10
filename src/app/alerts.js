@@ -3,8 +3,7 @@ import {sortBy, pluck} from 'ramda'
 import {first} from 'hurdak/lib/hurdak'
 import {synced, batch, now, timedelta} from 'src/util/misc'
 import {isAlert} from 'src/util/nostr'
-import {listen as _listen} from 'src/agent'
-import {getRelays} from 'src/app'
+import {listen as _listen, getRelays} from 'src/agent'
 import loaders from 'src/app/loaders'
 
 let listener

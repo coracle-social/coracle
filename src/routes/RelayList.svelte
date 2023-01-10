@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import {db, user} from "src/agent"
   import {modal, addRelay, removeRelay, settings} from "src/app"
-  import defaults from "src/app/defaults"
+  import defaults from "src/agent/defaults"
 
   let q = ""
   let search

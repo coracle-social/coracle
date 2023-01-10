@@ -4,8 +4,7 @@
   import Notes from "src/partials/Notes.svelte"
   import {timedelta, Cursor} from 'src/util/misc'
   import {getTagValues} from 'src/util/nostr'
-  import {listen, user, load} from 'src/agent'
-  import {getRelays} from 'src/app'
+  import {listen, user, load, getRelays} from 'src/agent'
   import loaders from 'src/app/loaders'
   import query from 'src/app/query'
 

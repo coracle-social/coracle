@@ -1,8 +1,7 @@
 <script>
   import Notes from "src/partials/Notes.svelte"
   import {timedelta, Cursor} from 'src/util/misc'
-  import {load} from 'src/agent'
-  import {getRelays} from 'src/app'
+  import {load, getRelays} from 'src/agent'
   import loaders from 'src/app/loaders'
   import query from 'src/app/query'
 

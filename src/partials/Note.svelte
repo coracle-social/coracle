@@ -14,7 +14,7 @@
   import Badge from "src/partials/Badge.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
-  import {user, getPerson} from 'src/agent'
+  import {user, getPerson, getRelays} from 'src/agent'
   import cmd from 'src/app/cmd'
 
   export let note
@@ -54,7 +54,7 @@
       return navigate('/login')
     }
 
-    const event = await cmd.createReaction(content, note)
+    const event = await cmd.createReaction(getRelays(), note, content)
 
     if (content === '+') {
       likes = likes.concat(event)
@@ -66,7 +66,7 @@
   }
 
   const deleteReaction = e => {
-    cmd.deleteEvent([e.id])
+    cmd.deleteEvent(getRelays(), [e.id])
 
     if (e.content === '+') {
       likes = reject(propEq('pubkey', $user.pubkey), likes)
@@ -89,7 +89,7 @@
     const {content, mentions} = reply.parse()
 
     if (content) {
-      cmd.createReply(note, content, mentions)
+      cmd.createReply(getRelays(), note, content, mentions)
 
       reply = null
     }

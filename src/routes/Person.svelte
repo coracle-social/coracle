@@ -1,7 +1,8 @@
 <script>
-  import {find, propEq} from 'ramda'
+  import {find, propEq, reject} from 'ramda'
   import {onMount, onDestroy} from 'svelte'
   import {nip19} from 'nostr-tools'
+  import {first} from 'hurdak/lib/hurdak'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {now, batch} from 'src/util/misc'
@@ -12,8 +13,8 @@
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
   import Network from "src/views/person/Network.svelte"
-  import {getPerson, listen, user} from "src/agent"
-  import {modal, getRelays} from "src/app"
+  import {getPerson, getRelays, listen, user} from "src/agent"
+  import {modal} from "src/app"
   import loaders from "src/app/loaders"
   import {routes} from "src/app/ui"
   import cmd from "src/app/cmd"
@@ -69,19 +70,19 @@
   const follow = async () => {
     following = true
 
-    // Make sure our follow list is up to date
-    await loaders.loadPeople([$user.pubkey], {kinds: [3]})
+    const relay = first(getRelays(pubkey))
+    const tag = ["p", pubkey, relay, person.name || ""]
+    const petnames = reject(t => t[1] === pubkey, $user.petnames).concat(tag)
 
-    cmd.addPetname($user, pubkey, person.name)
+    cmd.setPetnames(getRelays(), petnames)
   }
 
   const unfollow = async () => {
     following = false
 
-    // Make sure our follow list is up to date
-    await loaders.loadPeople([$user.pubkey], {kinds: [3]})
+    const petnames = reject(t => t[1] === pubkey, $user.petnames)
 
-    cmd.removePetname($user, pubkey)
+    cmd.setPetnames(getRelays(), petnames)
   }
 
   const openAdvanced = () => {

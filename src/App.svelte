@@ -11,8 +11,8 @@
   import {hasParent} from 'src/util/html'
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, now} from 'src/util/misc'
-  import {user} from 'src/agent'
-  import {modal, toast, settings, alerts, getRelays} from "src/app"
+  import {user, getRelays} from 'src/agent'
+  import {modal, toast, settings, alerts} from "src/app"
   import {routes} from "src/app/ui"
   import Anchor from 'src/partials/Anchor.svelte'
   import NoteDetail from "src/views/NoteDetail.svelte"

@@ -8,7 +8,7 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Button from "src/partials/Button.svelte"
-  import {user} from "src/agent"
+  import {user, getRelays} from "src/agent"
   import {toast} from "src/app"
   import {routes} from "src/app/ui"
   import cmd from "src/app/cmd"
@@ -39,7 +39,7 @@
   const submit = async event => {
     event.preventDefault()
 
-    await cmd.updateUser(values)
+    await cmd.updateUser(getRelays(), values)
 
     navigate(routes.person($user.pubkey, 'profile'))
 

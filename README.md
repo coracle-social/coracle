@@ -51,27 +51,24 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Upgrade nostr-tools
 - [x] Publish user relays using nip 23
 - [x] Use user relays for feeds
-- [ ] Publish to user relays + target relays:
-  - If a reply or reaction, publish to the parent event's best relay, which is:
-    - e tag relay
-    - p tag relay
-    - or pubkey's recommended relays
-- [ ] Add correct recommended relay to tags
+- [x] Publish to user relays + target relays:
+- [x] Add correct recommended relay to tags
+- [ ] Clean up nostr utils
 - [ ] Close connections that haven't been used in a while
 - [ ] Support some read/write config on relays page
 - [ ] Get real home relays for default pubkeys
-- [ ] Add settings storage
+- [ ] Add settings storage on nostr, maybe use kind 0?
 - [ ] Warn that everything will be cleared on logout
-- [ ] Clear dexie on page load, we don't need any persistence other than people/relays
 - [ ] Clean up login page to prefer extension, make private key entry "advanced"
 - [ ] Do I need to implement re-connecting now?
-- [ ] handle localstorage limits https://stackoverflow.com/questions/2989284/what-is-the-max-size-of-localstorage-values
-- [ ] Clean up nostr utils
+- [ ] handle localstorage limits more robustly (prune accounts) https://stackoverflow.com/questions/2989284/what-is-the-max-size-of-localstorage-values
 - [ ] Improve login UX for bootstrap delay. Nostr facts?
 - [ ] Use bech32 entities
 - [ ] Revisit pagination. Use bigger timedelta + limit, set earliest seen timestamp when paginating? Handle no results on page.
-- [ ] We often get the root as the reply, figure out why that is
+- [ ] We often get the root as the reply, figure out why that is, compared to astral/damus
 - [ ] Alerts still aren't great. Maybe lazy load? We delete old events, so context will disappear and notes will become empty.
+- [ ] Only use dexie for alerts rather than all events
+  - Load feeds by setting a listener since now, paginating using limit (of 2 maybe), and awaiting context for each page. Listener appends to "newNotes", cursor appends to "notes", load more moves new notes into notes. Use the note originally loaded as the anchor, don't re-process the whole list
 
 ## 0.2.6
 

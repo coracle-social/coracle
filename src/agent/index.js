@@ -1,6 +1,7 @@
-import {derived} from 'svelte/store'
+import {derived, get} from 'svelte/store'
 import pool from 'src/agent/pool'
 import keys from 'src/agent/keys'
+import defaults from 'src/agent/defaults'
 import {db, people, getPerson, processEvents} from 'src/agent/data'
 
 Object.assign(window, {pool, db})
@@ -17,6 +18,20 @@ export const user = derived(
     return $people[pubkey] || {pubkey}
   }
 )
+
+export const getRelays = pubkey => {
+  let relays = getPerson(pubkey)?.relays
+
+  if (!relays?.length) {
+    relays = getPerson(get(keys.pubkey))?.relays
+  }
+
+  if (!relays?.length) {
+    relays = defaults.relays
+  }
+
+  return relays
+}
 
 export const publish = async (relays, event) => {
   const signedEvent = await keys.sign(event)

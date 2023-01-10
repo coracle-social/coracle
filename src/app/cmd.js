@@ -1,85 +1,94 @@
-import {isNil, uniqBy, last} from 'ramda'
+import {isNil, join, uniqBy, last} from 'ramda'
 import {get} from 'svelte/store'
 import {first} from "hurdak/lib/hurdak"
-import {keys, publish, user} from 'src/agent'
+import {keys, publish, user, getRelays} from 'src/agent'
 
-const updateUser = updates => publishEvent(0, JSON.stringify(updates))
+const updateUser = (relays, updates) =>
+  publishEvent(relays, 0, {content: JSON.stringify(updates)})
 
-const setRelays = relays => publishEvent(10001, "", relays.map(url => [url, "", ""]))
+const setRelays = relays =>
+  publishEvent(relays, 10001, {tags: relays.map(url => [url, "", ""])})
 
-const setPetnames = petnames => publishEvent(3, "", petnames)
+const setPetnames = (relays, petnames) =>
+  publishEvent(relays, 3, {tags: petnames})
 
-const muffle = (person, pubkey, value) => {
-  const muffle = person.muffle
-    .filter(x => x[1] !== pubkey)
-    .concat([t("p", pubkey, value.toString())])
-    .filter(x => last(x) !== "1")
+const muffle = (relays, muffle) =>
+  publishEvent(relays, 12165, {tags: muffle})
 
-  return publishEvent(12165, '', muffle)
-}
+const createRoom = (relays, room) =>
+  publishEvent(relays, 40, {content: JSON.stringify(room)})
 
-const createRoom = room => publishEvent(40, JSON.stringify(room))
+const updateRoom = (relays, {id, ...room}) =>
+  publishEvent(relays, 41, {content: JSON.stringify(room), tags: [["e", id]]})
 
-const updateRoom = ({id, ...room}) => publishEvent(41, JSON.stringify(room), [t("e", id)])
+const createMessage = (relays, roomId, content) =>
+  publishEvent(relays, 42, {content, tags: [["e", roomId, first(relays), "root"]]})
 
-const createMessage = (roomId, content) => publishEvent(42, content, [t("e", roomId, "root")])
+const createNote = (relays, content, mentions = []) =>
+  publishEvent(relays, 1, {content, tags: mentions.map(p => ["p", p, first(getRelays(p))])})
 
-const createNote = (content, mentions = []) => publishEvent(1, content, mentions.map(p => t("p", p)))
-
-const createReaction = (content, e) =>
-  publishEvent(7, content, copyTags(e, [t("p", e.pubkey), t("e", e.id, 'reply')]))
-
-const createReply = (e, content, mentions = []) => {
-  const tags = mentions.map(p => t("p", p)).concat(
-    copyTags(e, [t("p", e.pubkey), t("e", e.id, 'reply')])
-  )
-
-  return publishEvent(1, content, tags)
-}
-
-const deleteEvent = ids => publishEvent(5, '', ids.map(id => t("e", id)))
-
-// utils
-
-const copyTags = (e, newTags = []) => {
-  return uniqBy(
-    t => t.join(':'),
-    e.tags
+const createReaction = (relays, note, content) => {
+  const relay = getBestRelay(note)
+  const tags = uniqBy(
+    join(':'),
+    note.tags
       .filter(t => ["p", "e"].includes(t[0]))
-      .map(t => last(t) === 'reply' ? t.slice(0, -1) : t)
-      .concat(newTags)
+      .map(t => last(t) === 'root' ? t : t.slice(0, -1))
+      .concat([["p", note.pubkey, relay], ["e", note.id, relay, 'reply']])
   )
+
+  publishEvent(relays, 7, {content, tags})
 }
 
-export const t = (type, content, marker) => {
-  const relays = get(user).relays || []
-  const tag = [type, content, first(relays)]
+const createReply = (relays, note, content, mentions = []) => {
+  const relay = getBestRelay(note)
+  const tags = uniqBy(
+    join(':'),
+    note.tags
+      .filter(t => ["p", "e"].includes(t[0]))
+      .map(t => last(t) === 'root' ? t : t.slice(0, -1))
+      .concat([["p", note.pubkey, relay], ["e", note.id, relay, 'reply']])
+      .concat(mentions.map(p => ["p", p, first(getRelays(p))]))
+  )
 
-  if (!isNil(marker)) {
-    tag.push(marker)
+  return publishEvent(relays, 1, {content, tags})
+}
+
+const deleteEvent = (relays, ids) =>
+  publishEvent(relays, 5, {tags: ids.map(id => ["e", id])})
+
+// Utils
+
+const getBestRelay = event => {
+  // Find the best relay, based on reply, root, or pubkey
+  const reply = findTag({tag: "e", type: "reply"}, e)
+
+  if (reply && reply[2].startsWith('ws')) {
+    return reply[2]
   }
 
-  return tag
+  const root = findTag({tag: "e", type: "root"}, e)
+
+  if (root && root[2].startsWith('ws')) {
+    return root[2]
+  }
+
+  return first(getRelays(note.pubkey))
 }
 
-const makeEvent = (kind, content = '', tags = []) => {
+const publishEvent = (relays, kind, {content = '', tags = []} = {}) => {
+  if (relays.length === 0) {
+    throw new Error("Unable to publish, no relays specified")
+  }
+
   const pubkey = get(keys.pubkey)
   const createdAt = Math.round(new Date().valueOf() / 1000)
+  const event = {kind, content, tags, pubkey, created_at: createdAt}
 
-  return {kind, content, tags, pubkey, created_at: createdAt}
-}
-
-const publishEvent = (...args) => {
-  const relays = get(user).relays || []
-
-  if (relays.length === 0) {
-    throw new Error("Unable to publish, user has no relays")
-  }
-
-  publish(relays, makeEvent(...args))
+  return publish(relays, event)
 }
 
 export default {
   updateUser, setRelays, setPetnames, muffle, createRoom, updateRoom, createMessage, createNote,
-  createReaction, createReply, deleteEvent, publishEvent,
+  createReaction, createReply, deleteEvent,
 }

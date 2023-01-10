@@ -2,7 +2,7 @@ import {uniq, pluck, groupBy, identity} from 'ramda'
 import {ensurePlural, createMap} from 'hurdak/lib/hurdak'
 import {findReply, personKinds} from 'src/util/nostr'
 import {load, db, getPerson} from 'src/agent'
-import defaults from 'src/app/defaults'
+import defaults from 'src/agent/defaults'
 
 const loadPeople = (relays, pubkeys, {kinds = personKinds, ...opts} = {}) =>
   pubkeys.length > 0 ? load(relays, {kinds, authors: pubkeys}, opts) : []
