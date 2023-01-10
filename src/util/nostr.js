@@ -1,6 +1,6 @@
 import {last, find, intersection} from 'ramda'
+import {nip19} from 'nostr-tools'
 import {ensurePlural, first} from 'hurdak/lib/hurdak'
-import {hexToBech32} from 'src/util/misc'
 
 export const epoch = 1633046400
 
@@ -55,7 +55,7 @@ export const displayPerson = p => {
     return p.name
   }
 
-  return hexToBech32('npub', p.pubkey).slice(4, 12)
+  return nip19.npubEncode(p.pubkey).slice(4, 12)
 }
 
 export const isLike = content => ['', '+', '🤙', '👍', '❤️'].includes(content)

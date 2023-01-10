@@ -10,6 +10,7 @@
   import Button from "src/partials/Button.svelte"
   import {user} from "src/agent"
   import {toast} from "src/app"
+  import {routes} from "src/app/ui"
   import cmd from "src/app/cmd"
 
   let values = {picture: null, about: null, name: null}
@@ -40,7 +41,7 @@
 
     await cmd.updateUser(values)
 
-    navigate(`/people/${$user.pubkey}/profile`)
+    navigate(routes.person($user.pubkey, 'profile'))
 
     toast.show("info", "Your profile has been updated!")
   }

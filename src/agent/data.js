@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
 import {matchFilter} from 'nostr-tools'
-import {writable, get} from 'svelte/store'
+import {get} from 'svelte/store'
 import {groupBy, prop, flatten, pick} from 'ramda'
 import {ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
 import {synced, now, timedelta} from 'src/util/misc'
@@ -92,7 +92,7 @@ export const processEvents = async events => {
         2: () => putPerson({relays: ($people[pubkey]?.relays || []).concat(content)}),
         3: () => putPerson({petnames: tags}),
         12165: () => putPerson({muffle: tags}),
-        10001: () => putPerson({relays: tags}),
+        10001: () => putPerson({relays: tags.map(t => t[0])}),
         default: () => {
           console.log(`Received unsupported event type ${event.kind}`)
         },

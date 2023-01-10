@@ -48,8 +48,10 @@ export const login = async ({privkey, pubkey}) => {
 export const logout = async () => {
   keys.clear()
 
-  await db.tags.clear()
-  await db.events.clear()
+  await Promise.all([
+    db.tags.clear(),
+    db.events.clear(),
+  ])
 }
 
 export const addRelay = async url => {

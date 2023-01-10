@@ -13,6 +13,7 @@
   import {timedelta, now} from 'src/util/misc'
   import {user} from 'src/agent'
   import {modal, toast, settings, alerts, getRelays} from "src/app"
+  import {routes} from "src/app/ui"
   import Anchor from 'src/partials/Anchor.svelte'
   import NoteDetail from "src/views/NoteDetail.svelte"
   import PersonSettings from "src/views/PersonSettings.svelte"
@@ -92,8 +93,8 @@
       <Route path="/search/:type" component={Search} />
       <Route path="/notes/:activeTab" component={Notes} />
       <Route path="/notes/new" component={NoteCreate} />
-      <Route path="/people/:pubkey/:activeTab" let:params>
-        {#key params.pubkey}
+      <Route path="/people/:npub/:activeTab" let:params>
+        {#key params.npub}
         <Person {...params} />
         {/key}
       </Route>
@@ -113,7 +114,7 @@
     >
       {#if $user}
       <li>
-        <a href={`/people/${$user.pubkey}/notes`} class="flex gap-2 px-4 py-2 pb-6 items-center">
+        <a href={routes.person($user.pubkey)} class="flex gap-2 px-4 py-2 pb-6 items-center">
           <div
             class="overflow-hidden w-6 h-6 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
             style="background-image: url({$user.picture})" />

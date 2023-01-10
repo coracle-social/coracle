@@ -2,8 +2,8 @@
   import {onMount} from "svelte"
   import {fly} from 'svelte/transition'
   import {navigate} from "svelte-routing"
+  import {nip19} from 'nostr-tools'
   import {copyToClipboard} from "src/util/html"
-  import {hexToBech32} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {user} from "src/agent"
@@ -13,10 +13,11 @@
   const delegationUrl = 'https://github.com/nostr-protocol/nips/blob/b62aa418dee13aac1899ea7c6946a0f55dd7ee84/26.md'
 
   const copyKey = type => {
-    const prefix = type === 'private' ? 'nsec' : 'npub'
-    const hex = type === 'private' ? $user.privkey : $user.pubkey
-
-    copyToClipboard(hexToBech32(prefix, hex))
+    copyToClipboard(
+      type === 'private'
+        ? nip19.nsecEncode($user.privkey)
+        : nip19.npubEncode($user.pubkey)
+    )
 
     toast.show("info", `Your ${type} key has been copied to the clipboard.`)
   }
@@ -41,7 +42,7 @@
     <div class="flex flex-col gap-8 w-full">
       <div class="flex flex-col gap-1">
         <strong>Public Key</strong>
-        <Input disabled value={$user ? hexToBech32('npub', $user.pubkey) : ''}>
+        <Input disabled value={$user ? nip19.npubEncode($user.pubkey) : ''}>
           <i slot="after" class="fa-solid fa-copy cursor-pointer" on:click={() => copyKey('public')} />
         </Input>
         <p class="text-sm text-light">
@@ -52,7 +53,7 @@
       {#if $user?.privkey}
       <div class="flex flex-col gap-1">
         <strong>Private Key</strong>
-        <Input disabled type="password" value={hexToBech32('nsec', $user.privkey)}>
+        <Input disabled type="password" value={nip19.nsecEncode($user.privkey)}>
           <i slot="after" class="fa-solid fa-copy cursor-pointer" on:click={() => copyKey('private')} />
         </Input>
         <p class="text-sm text-light">

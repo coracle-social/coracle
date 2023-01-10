@@ -1,14 +1,12 @@
 <script>
-  import {propEq, identity, uniq, uniqBy, prop, sortBy} from 'ramda'
+  import {propEq, identity, uniq, prop, sortBy} from 'ramda'
   import {onMount} from 'svelte'
   import {fly} from 'svelte/transition'
   import {createMap} from 'hurdak/lib/hurdak'
-  import {now, createScroller, timedelta} from 'src/util/misc'
-  import {findReply, isLike} from 'src/util/nostr'
+  import {now, createScroller} from 'src/util/misc'
   import {getPerson, user, db} from 'src/agent'
   import {alerts} from 'src/app'
   import query from 'src/app/query'
-  import Spinner from "src/partials/Spinner.svelte"
   import Note from 'src/partials/Note.svelte'
   import Like from 'src/partials/Like.svelte'
 
@@ -53,7 +51,7 @@
       annotatedNotes = sortBy(
         e => -e.created_at,
         notes
-          .filter(e => e.pubkey !== $user.pubkey)
+          .filter(e => e && e.pubkey !== $user.pubkey)
           .concat(Object.values(likesById))
       ).slice(0, limit)
     })

@@ -1,9 +1,16 @@
 import {prop} from "ramda"
 import {uuid} from "hurdak/lib/hurdak"
 import {navigate} from "svelte-routing"
+import {nip19} from 'nostr-tools'
 import {writable, get} from "svelte/store"
 import {globalHistory} from "svelte-routing/src/history"
 import {synced} from "src/util/misc"
+
+// Routing
+
+export const routes = {
+  person: (pubkey, tab = 'notes') => `/people/${nip19.npubEncode(pubkey)}/${tab}`,
+}
 
 // Toast
 

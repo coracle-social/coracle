@@ -44,7 +44,9 @@ const publish = async (urls, event) => {
     urls.map(async url => {
       const relay = await connect(url)
 
-      return relay.publish(event)
+      if (relay) {
+        return relay.publish(event)
+      }
     })
   )
 }

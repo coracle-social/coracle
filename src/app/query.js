@@ -4,6 +4,7 @@ import {ensurePlural, createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {renderContent} from 'src/util/html'
 import {filterTags, displayPerson, getTagValues, findReply, findRoot} from 'src/util/nostr'
 import {db, people, getPerson} from 'src/agent'
+import {routes} from "src/app/ui"
 
 const filterEvents = async ({limit, ...filter}) => {
   let events = db.events
@@ -152,8 +153,9 @@ const renderNote = async (note, {showEntire = false}) => {
       const pubkey = note.tags[parseInt(i)][1]
       const person = peopleByPubkey[pubkey] || {pubkey}
       const name = displayPerson(person)
+      const path = routes.person(pubkey)
 
-      return `@<a href="/people/${pubkey}/notes" class="underline">${name}</a>`
+      return `@<a href="${path}" class="underline">${name}</a>`
     })
 
   return content

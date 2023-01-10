@@ -2,6 +2,7 @@
   import {Link} from 'svelte-routing'
   import {killEvent} from 'src/util/html'
   import {displayPerson} from 'src/util/nostr'
+  import {routes} from 'src/app/ui'
 
   export let person
   export let inert = false
@@ -16,7 +17,7 @@
 </span>
 {:else}
 <Link
-  to={`/people/${person.pubkey}/notes`}
+  to={routes.person(person.pubkey)}
   class="flex gap-2 items-center relative z-10"
   on:click={killEvent}>
   <div

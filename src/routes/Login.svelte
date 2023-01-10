@@ -3,7 +3,7 @@
   import {fade, fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {generatePrivateKey, getPublicKey} from 'nostr-tools'
-  import {hexToBech32, bech32ToHex} from "src/util/misc"
+  import {nip19} from 'nostr-tools'
   import {copyToClipboard} from "src/util/html"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
@@ -27,7 +27,7 @@
   }
 
   const generateKey = () => {
-    nsec = hexToBech32('nsec', generatePrivateKey())
+    nsec = nip19.nsecEncode(generatePrivateKey())
     toast.show("info", "Your private key has been re-generated.")
   }
 
@@ -50,7 +50,7 @@
   }
 
   const logInWithPrivateKey = async () => {
-    const privkey = nsec.startsWith('nsec') ? bech32ToHex(nsec) : nsec
+    const privkey = nsec.startsWith('nsec') ? nip19.decode(nsec).data : nsec
 
     if (!privkey.match(/[a-z0-9]{64}/)) {
       toast.show("error", "Sorry, but that's an invalid private key.")

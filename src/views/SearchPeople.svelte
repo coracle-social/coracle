@@ -6,6 +6,7 @@
   import {renderContent} from "src/util/html"
   import {displayPerson} from "src/util/nostr"
   import {user, people} from 'src/agent'
+  import {routes} from "src/app/ui"
 
   export let q
 
@@ -19,7 +20,7 @@
   {#each search(q).slice(0, 30) as p (p.pubkey)}
     {#if p.pubkey !== $user.pubkey}
     <li in:fly={{y: 20}}>
-      <a href="/people/{p.pubkey}/notes" class="flex gap-4 my-4">
+      <a href={routes.person(p.pubkey)} class="flex gap-4 my-4">
         <div
           class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
           style="background-image: url({p.picture})" />

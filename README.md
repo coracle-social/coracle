@@ -49,19 +49,18 @@ If you like Coracle and want to support its development, you can donate sats via
 ## Current
 
 - [x] Upgrade nostr-tools
-- [ ] Publish user relays using nip 23
-- [ ] Use user relays for feeds
+- [x] Publish user relays using nip 23
+- [x] Use user relays for feeds
 - [ ] Publish to user relays + target relays:
   - If a reply or reaction, publish to the parent event's best relay, which is:
     - e tag relay
     - p tag relay
     - or pubkey's recommended relays
-- [ ] Add recommended relay to tags
+- [ ] Add correct recommended relay to tags
 - [ ] Close connections that haven't been used in a while
 - [ ] Support some read/write config on relays page
 - [ ] Get real home relays for default pubkeys
 - [ ] Add settings storage
-- [ ] Use hexToBech32 from nostr-tools
 - [ ] Warn that everything will be cleared on logout
 - [ ] Clear dexie on page load, we don't need any persistence other than people/relays
 - [ ] Clean up login page to prefer extension, make private key entry "advanced"

@@ -1,6 +1,7 @@
 <script>
   import {find, propEq} from 'ramda'
   import {onMount, onDestroy} from 'svelte'
+  import {nip19} from 'nostr-tools'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {now, batch} from 'src/util/misc'
@@ -14,12 +15,14 @@
   import {getPerson, listen, user} from "src/agent"
   import {modal, getRelays} from "src/app"
   import loaders from "src/app/loaders"
+  import {routes} from "src/app/ui"
   import cmd from "src/app/cmd"
 
-  export let pubkey
+  export let npub
   export let activeTab
 
   let subs = []
+  let pubkey = nip19.decode(npub).data
   let following = find(t => t[1] === pubkey, $user?.petnames || [])
   let followers = new Set()
   let followersCount = 0
@@ -61,7 +64,7 @@
     }
   })
 
-  const setActiveTab = tab => navigate(`/people/${pubkey}/${tab}`)
+  const setActiveTab = tab => navigate(routes.person(pubkey, tab))
 
   const follow = async () => {
     following = true
