@@ -14,7 +14,7 @@
   import Badge from "src/partials/Badge.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
-  import {user} from 'src/agent'
+  import {user, getPerson} from 'src/agent'
   import cmd from 'src/app/cmd'
 
   export let note
@@ -111,7 +111,7 @@
 
 <Card on:click={onClick} {interactive} {invertColors}>
   <div class="flex gap-4 items-center justify-between">
-    <Badge person={{...note.person, pubkey: note.pubkey}} />
+    <Badge person={getPerson(note.pubkey, true)} />
     <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>
   </div>
   <div class="ml-6 flex flex-col gap-2">

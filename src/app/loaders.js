@@ -1,10 +1,8 @@
-import {uniq, pluck, groupBy, prop, identity} from 'ramda'
+import {uniq, pluck, groupBy, identity} from 'ramda'
 import {ensurePlural, createMap} from 'hurdak/lib/hurdak'
-import {filterTags, findReply} from 'src/util/nostr'
+import {findReply, personKinds} from 'src/util/nostr'
 import {load, db, getPerson} from 'src/agent'
 import defaults from 'src/app/defaults'
-
-const personKinds = [0, 2, 3, 10001, 12165]
 
 const loadPeople = (relays, pubkeys, {kinds = personKinds, ...opts} = {}) =>
   pubkeys.length > 0 ? load(relays, {kinds, authors: pubkeys}, opts) : []
@@ -74,4 +72,4 @@ const getOrLoadNote = async (relays, id) => {
   return note
 }
 
-export default {getOrLoadNote, loadNotesContext, loadNetwork, loadPeople}
+export default {getOrLoadNote, loadNotesContext, loadNetwork, loadPeople, personKinds}

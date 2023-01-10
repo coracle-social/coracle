@@ -8,9 +8,9 @@ export default {
     ["p", "85080d3bad70ccdcd7f74c29a44f55bb85cbcd3dd0cbb957da1d215bdb931204", "preston",      "wss://relay.damus.io"],
   ],
   relays: [
-    // 'wss://nostr.rocks',
-    // 'wss://astral.ninja',
-    // 'wss://relay.damus.io',
+    'wss://nostr.rocks',
+    'wss://relay.damus.io',
+    'wss://nostr.zebedee.cloud',
     'wss://nostr-pub.wellorder.net',
   ],
 }

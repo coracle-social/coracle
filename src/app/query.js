@@ -57,7 +57,7 @@ const findNote = async (id, {showEntire = false, depth = 1} = {}) => {
   const note = await db.events.get(id)
 
   if (!note) {
-    return
+    return null
   }
 
   const reactions = await filterReactions(note.id)

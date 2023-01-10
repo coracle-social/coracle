@@ -14,9 +14,9 @@
   const loadNotes = async () => {
     const [since, until] = cursor.step()
     const filter = {kinds: [7], authors: [pubkey], since, until}
-    const notes = await load(getRelays(), filter)
+    const notes = await load(getRelays(pubkey), filter)
 
-    await loaders.loadNotesContext(getRelays(), notes, {loadParents: true})
+    await loaders.loadNotesContext(getRelays(pubkey), notes, {loadParents: true})
   }
 
   const queryNotes = () => {

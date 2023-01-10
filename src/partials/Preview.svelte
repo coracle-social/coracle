@@ -17,14 +17,14 @@
           'Content-Type': 'application/json',
         },
       })
+
+      const json = await res.json()
+
+      if (json.title || json.image) {
+        preview = json
+      }
     } catch (e) {
       return
-    }
-
-    const json = await res.json()
-
-    if (json.title || json.image) {
-      preview = json
     }
   })
 </script>

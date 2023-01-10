@@ -30,6 +30,7 @@
     "extract-urls": "^1.3.2",
     "fuse.js": "^6.6.2",
     "hurdak": "github:ConsignCloud/hurdak",
+    "lz-string": "^1.4.4",
     "nostr-tools": "^1.1.1",
     "ramda": "^0.28.0",
     "svelte-link-preview": "^0.3.3",

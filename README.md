@@ -67,6 +67,12 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Clean up login page to prefer extension, make private key entry "advanced"
 - [ ] Do I need to implement re-connecting now?
 - [ ] handle localstorage limits https://stackoverflow.com/questions/2989284/what-is-the-max-size-of-localstorage-values
+- [ ] Clean up nostr utils
+- [ ] Improve login UX for bootstrap delay. Nostr facts?
+- [ ] Use bech32 entities
+- [ ] Revisit pagination. Use bigger timedelta + limit, set earliest seen timestamp when paginating? Handle no results on page.
+- [ ] We often get the root as the reply, figure out why that is
+- [ ] Alerts still aren't great. Maybe lazy load? We delete old events, so context will disappear and notes will become empty.
 
 ## 0.2.6
 

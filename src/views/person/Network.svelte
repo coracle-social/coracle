@@ -13,12 +13,11 @@
 
   const loadNotes = async () => {
     const [since, until] = cursor.step()
-    console.log(person)
     const authors = getTagValues(person.petnames)
     const filter = {since, until, kinds: [1], authors}
-    const events = await load(getRelays(), filter)
+    const events = await load(getRelays(person.pubkey), filter)
 
-    await loaders.loadNotesContext(getRelays(), events, {loadParents: true})
+    await loaders.loadNotesContext(getRelays(person.pubkey), events, {loadParents: true})
   }
 
   const queryNotes = () => {

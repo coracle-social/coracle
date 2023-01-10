@@ -1,5 +1,7 @@
 import {get} from 'svelte/store'
-import {synced, now, timedelta} from 'src/util/misc'
+import {sortBy, pluck} from 'ramda'
+import {first} from 'hurdak/lib/hurdak'
+import {synced, batch, now, timedelta} from 'src/util/misc'
 import {isAlert} from 'src/util/nostr'
 import {listen as _listen} from 'src/agent'
 import {getRelays} from 'src/app'
@@ -9,25 +11,32 @@ let listener
 
 const start = now() - timedelta(30, 'days')
 
-export const since = synced("app/alerts/since", start)
-export const latest = synced("app/alerts/latest", start)
+const since = synced("app/alerts/since", start)
+const latest = synced("app/alerts/latest", start)
 
-export const listen = async (relays, pubkey) => {
+const listen = async (relays, pubkey) => {
   if (listener) {
     listener.unsub()
   }
 
+  console.log(get(since))
+
   listener = await _listen(
     relays,
-    [{kinds: [1, 7], '#p': [pubkey], since: get(since)}],
-    e => {
-      if (isAlert(e, pubkey)) {
-        loaders.loadNotesContext(getRelays(), [e])
+    [{kinds: [1, 7], '#p': [pubkey], since: start}],
+    batch(300, events => {
+      events = events.filter(e => isAlert(e, pubkey))
 
-        latest.set(Math.max(e.created_at, get(latest)))
+      if (events.length > 0) {
+        loaders.loadNotesContext(getRelays(), events)
+
+        latest.update(
+          $latest =>
+            Math.max(first(sortBy(t => -t, pluck('created_at', events))), $latest)
+        )
       }
-    }
+    })
   )
 }
 
-export default {latest, listen}
+export default {listen, since, latest}

@@ -1,47 +1,51 @@
 import Dexie from 'dexie'
-import {writable} from 'svelte/store'
+import {matchFilter} from 'nostr-tools'
+import {writable, get} from 'svelte/store'
 import {groupBy, prop, flatten, pick} from 'ramda'
 import {ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
-import {now, timedelta} from 'src/util/misc'
-import {filterTags, findReply, findRoot} from 'src/util/nostr'
+import {synced, now, timedelta} from 'src/util/misc'
+import {filterTags, personKinds, findReply, findRoot} from 'src/util/nostr'
+import keys from 'src/agent/keys'
 
 export const db = new Dexie('agent/data/db')
 
-db.version(6).stores({
+db.version(7).stores({
   relays: '++url, name',
   events: '++id, pubkey, created_at, loaded_at, kind, content, reply, root',
   tags: '++key, event, value, created_at, loaded_at',
+  alerts: '++id',
 })
 
 // Some things work better as observables than database tables
 
-export const people = writable({})
+export const people = synced('agent/data/people', {})
 
 let $people = {}
 people.subscribe($p => {
   $people = $p
 })
 
-export const getPerson = pubkey => $people[pubkey]
+export const getPerson = (pubkey, fallback = false) =>
+  $people[pubkey] || (fallback ? {pubkey} : null)
 
 // Hooks
 
 export const processEvents = async events => {
   // Only persist ones we care about, the rest can be ephemeral and used to update people etc
+  const pubkey = get(keys.pubkey)
   const eventsByKind = groupBy(prop('kind'), ensurePlural(events))
   const notesAndReactions = flatten(Object.values(pick([1, 7], eventsByKind)))
-  const profileUpdates = flatten(Object.values(pick([0, 3, 12165], eventsByKind)))
+    .map(e => ({...e, root: findRoot(e), reply: findReply(e), loaded_at: now()}))
+  const alerts = notesAndReactions.filter(e => matchFilter({kinds: [1, 7], '#p': [pubkey]}, e))
+  const profileUpdates = flatten(Object.values(pick(personKinds, eventsByKind)))
   const deletions = eventsByKind[5] || []
 
   // Persist notes and reactions
   if (notesAndReactions.length > 0) {
-    const persistentEvents = notesAndReactions
-      .map(e => ({...e, root: findRoot(e), reply: findReply(e), loaded_at: now()}))
-
-    db.events.bulkPut(persistentEvents)
+    db.events.bulkPut(notesAndReactions)
 
     db.tags.bulkPut(
-      persistentEvents
+      notesAndReactions
         .flatMap(e =>
           e.tags.map(
             tag => ({
@@ -56,6 +60,10 @@ export const processEvents = async events => {
           )
         )
     )
+  }
+
+  if (alerts.length > 0) {
+    db.alerts.bulkPut(alerts)
   }
 
   // Delete stuff that needs to be deleted
@@ -81,8 +89,10 @@ export const processEvents = async events => {
 
       switcherFn(kind, {
         0: () => putPerson(JSON.parse(content)),
+        2: () => putPerson({relays: ($people[pubkey]?.relays || []).concat(content)}),
         3: () => putPerson({petnames: tags}),
         12165: () => putPerson({muffle: tags}),
+        10001: () => putPerson({relays: tags}),
         default: () => {
           console.log(`Received unsupported event type ${event.kind}`)
         },

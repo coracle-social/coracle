@@ -1,69 +1,62 @@
 <script>
-  import {propEq, sortBy} from 'ramda'
+  import {propEq, identity, uniq, uniqBy, prop, sortBy} from 'ramda'
   import {onMount} from 'svelte'
   import {fly} from 'svelte/transition'
-  import {now} from 'src/util/misc'
+  import {createMap} from 'hurdak/lib/hurdak'
+  import {now, createScroller, timedelta} from 'src/util/misc'
   import {findReply, isLike} from 'src/util/nostr'
-  import {getPerson, user} from 'src/agent'
+  import {getPerson, user, db} from 'src/agent'
   import {alerts} from 'src/app'
   import query from 'src/app/query'
   import Spinner from "src/partials/Spinner.svelte"
   import Note from 'src/partials/Note.svelte'
   import Like from 'src/partials/Like.svelte'
 
+  let limit = 0
   let annotatedNotes = []
 
   onMount(async () => {
     alerts.since.set(now())
 
-    const events = await query.filterEvents({
-      kinds: [1, 7],
-      '#p': [$user.pubkey],
-      customFilter: e => {
-        // Don't show people's own stuff
-        if (e.pubkey === $user.pubkey) {
-          return false
+    return createScroller(async () => {
+      limit += 10
+
+      const events = await db.alerts.toArray()
+      const parentIds = uniq(events.map(prop('reply')).filter(identity))
+      const parents = await Promise.all(parentIds.map(query.findNote))
+      const parentsById = createMap('id', parents.filter(identity))
+
+      const notes = await Promise.all(
+        events.filter(propEq('kind', 1)).map(n => query.findNote(n.id))
+      )
+
+      const reactions = await Promise.all(
+        events
+          .filter(e => e.kind === 7 && parentsById[e.reply])
+          .map(async e => ({
+            ...e,
+            person: getPerson(e.pubkey, true),
+            parent: parentsById[e.reply],
+          }))
+      )
+
+      // Combine likes of a single note. Remove grandchild likes
+      const likesById = {}
+      for (const reaction of reactions.filter(e => e.parent?.pubkey === $user.pubkey)) {
+        if (!likesById[reaction.parent.id]) {
+          likesById[reaction.parent.id] = {...reaction.parent, people: []}
         }
 
-        // Only notify users about positive reactions
-        if (e.kind === 7 && !isLike(e.content)) {
-          return false
-        }
-
-        return true
+        likesById[reaction.parent.id].people.push(reaction.person)
       }
+
+      annotatedNotes = sortBy(
+        e => -e.created_at,
+        notes
+          .filter(e => e.pubkey !== $user.pubkey)
+          .concat(Object.values(likesById))
+      ).slice(0, limit)
     })
-
-    const notes = await query.annotateChunk(
-      events.filter(propEq('kind', 1))
-    )
-
-    const reactions = await Promise.all(
-      events
-        .filter(e => e.kind === 7)
-        .map(async e => ({
-          ...e,
-          person: getPerson(e.pubkey),
-          parent: await query.findNote(findReply(e)),
-        }))
-    )
-
-    // Combine likes of a single note. Remove grandchild likes
-    const likesById = {}
-    for (const reaction of reactions.filter(e => e.parent?.pubkey === $user.pubkey)) {
-      if (!likesById[reaction.parent.id]) {
-        likesById[reaction.parent.id] = {...reaction.parent, people: []}
-      }
-
-      likesById[reaction.parent.id].people.push(reaction.person)
-    }
-
-    annotatedNotes = sortBy(
-      e => -e.created_at,
-      notes
-        .filter(e => e.pubkey !== $user.pubkey)
-        .concat(Object.values(likesById))
-    )
   })
 </script>
 
@@ -76,5 +69,3 @@
   {/if}
   {/each}
 </ul>
-
-<Spinner />

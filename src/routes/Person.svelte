@@ -1,11 +1,11 @@
 <script>
-  import {find, when, propEq} from 'ramda'
+  import {find, propEq} from 'ramda'
   import {onMount, onDestroy} from 'svelte'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
-  import {now} from 'src/util/misc'
+  import {now, batch} from 'src/util/misc'
   import {renderContent} from 'src/util/html'
-  import {displayPerson} from 'src/util/nostr'
+  import {displayPerson, personKinds} from 'src/util/nostr'
   import Tabs from "src/partials/Tabs.svelte"
   import Button from "src/partials/Button.svelte"
   import Notes from "src/views/person/Notes.svelte"
@@ -23,22 +23,29 @@
   let following = find(t => t[1] === pubkey, $user?.petnames || [])
   let followers = new Set()
   let followersCount = 0
-  let person
-
-  $: {
-    person = getPerson(pubkey) || {pubkey}
-  }
+  let person = getPerson(pubkey, true)
 
   onMount(async () => {
     subs.push(await listen(
-      getRelays(),
+      getRelays(pubkey),
       [{kinds: [1, 5, 7], authors: [pubkey], since: now()},
-       {kinds: [0, 3, 12165], authors: [pubkey]}],
-      when(propEq('kind', 1), loaders.loadNoteContext)
+       {kinds: personKinds, authors: [pubkey]}],
+      batch(300, events => {
+        const profiles = events.filter(propEq('kind', 0))
+        const notes = events.filter(propEq('kind', 1))
+
+        if (profiles.length > 0) {
+          person = getPerson(pubkey, true)
+        }
+
+        if (notes.length > 0) {
+          loaders.loadNoteContext(notes)
+        }
+      })
     ))
 
     subs.push(await listen(
-      getRelays(),
+      getRelays(pubkey),
       [{kinds: [3], '#p': [pubkey]}],
       e => {
         followers.add(e.pubkey)
@@ -99,7 +106,7 @@
         <a href="/profile" class="cursor-pointer text-sm">
           <i class="fa-solid fa-edit" /> Edit
         </a>
-        {:else if $user.petnames}
+        {:else if $user?.petnames}
         <div class="flex flex-col items-end gap-2">
           {#if following}
           <Button on:click={unfollow}>Unfollow</Button>

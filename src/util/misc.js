@@ -1,3 +1,4 @@
+import LZ from 'lz-string'
 import {Buffer} from 'buffer'
 import {bech32} from 'bech32'
 import {debounce} from 'throttle-debounce'
@@ -16,9 +17,9 @@ export const fuzzy = (data, opts = {}) => {
 export const hash = s =>
   Math.abs(s.split("").reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0))
 
-export const getLocalJson = k => {
+export const getLocalJson = (k) => {
   try {
-    return JSON.parse(localStorage.getItem(k))
+    return JSON.parse(LZ.decompress(localStorage.getItem(k)))
   } catch (e) {
     console.warn(`Unable to parse ${k}: ${e}`)
 
@@ -26,9 +27,9 @@ export const getLocalJson = k => {
   }
 }
 
-export const setLocalJson = (k, v) => {
+export const setLocalJson = (k, v, compressed = false) => {
   try {
-    localStorage.setItem(k, JSON.stringify(v))
+    localStorage.setItem(k, LZ.compress(JSON.stringify(v)))
   } catch (e) {
     console.warn(`Unable to set ${k}: ${e}`)
   }
@@ -160,7 +161,7 @@ export const synced = (key, defaultValue = null) => {
       : (getLocalJson(key) || defaultValue)
   )
 
-  store.subscribe($value => setLocalJson(key, $value))
+  store.subscribe(debounce(1000, $value => setLocalJson(key, $value)))
 
   return store
 }

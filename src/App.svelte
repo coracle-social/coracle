@@ -12,7 +12,7 @@
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, now} from 'src/util/misc'
   import {user} from 'src/agent'
-  import {modal, toast, settings, alerts} from "src/app"
+  import {modal, toast, settings, alerts, getRelays} from "src/app"
   import Anchor from 'src/partials/Anchor.svelte'
   import NoteDetail from "src/views/NoteDetail.svelte"
   import PersonSettings from "src/views/PersonSettings.svelte"
@@ -44,6 +44,10 @@
   let {since, latest} = alerts
 
   onMount(() => {
+    if ($user) {
+      alerts.listen(getRelays(), $user.pubkey)
+    }
+
     // Close menu on click outside
     document.querySelector("html").addEventListener("click", e => {
       if (e.target !== menuIcon) {

@@ -1,17 +1,28 @@
 <script>
   import {liveQuery} from 'dexie'
   import {without} from 'ramda'
+  import {get} from 'svelte/store'
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {db, user} from "src/agent"
-  import {modal, addRelay, removeRelay} from "src/app"
+  import {modal, addRelay, removeRelay, settings} from "src/app"
   import defaults from "src/app/defaults"
 
   let q = ""
   let search
-  let relays = $user?.relays || []
+  let relays = $user?.relays || defaults.relays
+
+  fetch(get(settings).dufflepudUrl + '/relay').then(r => r.json()).then(({relays}) => {
+    for (const url of relays) {
+      db.relays.put({url})
+    }
+  })
+
+  for (const url of defaults.relays) {
+     db.relays.put({url})
+  }
 
   const knownRelays = liveQuery(() => db.relays.toArray())
 

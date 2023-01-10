@@ -9,11 +9,17 @@ export {pool, keys, db, people, getPerson}
 
 export const user = derived(
   [keys.pubkey, people],
-  ([pubkey, $people]) => $people[pubkey] || {pubkey}
+  ([pubkey, $people]) => {
+    if (!pubkey) {
+      return null
+    }
+
+    return $people[pubkey] || {pubkey}
+  }
 )
 
 export const publish = async (relays, event) => {
-  const signedEvent = keys.sign(event)
+  const signedEvent = await keys.sign(event)
 
   await Promise.all([
     pool.publish(relays, signedEvent),

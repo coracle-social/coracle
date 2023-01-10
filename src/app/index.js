@@ -1,7 +1,7 @@
 import {without, reject} from 'ramda'
-import {first} from 'hurdak/lib/hurdak'
+import {first, updateIn, mergeRight} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
-import {getPerson, keys, db} from 'src/agent'
+import {getPerson, people, keys, db} from 'src/agent'
 import {toast, modal, settings} from 'src/app/ui'
 import cmd from 'src/app/cmd'
 import alerts from 'src/app/alerts'
@@ -11,9 +11,17 @@ import defaults from 'src/app/defaults'
 export {toast, modal, settings, alerts}
 
 export const getRelays = pubkey => {
-  const person = getPerson(pubkey)
+  let relays = getPerson(pubkey)?.relays
 
-  return person && person.relays.length > 0 ? person.relays : defaults.relays
+  if (!relays?.length) {
+    relays = getPerson(get(keys.pubkey))?.relays
+  }
+
+  if (!relays?.length) {
+    relays = defaults.relays
+  }
+
+  return relays
 }
 
 export const getBestRelay = pubkey => {
@@ -47,9 +55,12 @@ export const logout = async () => {
 export const addRelay = async url => {
   const pubkey = get(keys.pubkey)
   const person = getPerson(pubkey)
-  const relays = person?.relays || []
+  const relays = (person?.relays || []).concat(url)
 
-  await cmd.setRelays(relays.concat(url))
+  // Persist to our local copy immediately so we can publish to the new one
+  people.update(updateIn(pubkey, mergeRight({pubkey, relays})))
+
+  await cmd.setRelays(relays)
   await loaders.loadNetwork(relays, pubkey)
   await alerts.listen(relays, pubkey)
 }

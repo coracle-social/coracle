@@ -4,6 +4,8 @@ import {hexToBech32} from 'src/util/misc'
 
 export const epoch = 1633046400
 
+export const personKinds = [0, 2, 3, 10001, 12165]
+
 export const getTagValues = tags => tags.map(t => t[1])
 
 export const filterTags = (where, events) =>
