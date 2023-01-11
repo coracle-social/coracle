@@ -50,9 +50,15 @@ alerts.subscribe($alerts => {
 
 // Populate relays initially. Hardcode some, load the rest asynchronously
 
-fetch(get(settings).dufflepudUrl + '/relay').then(r => r.json()).then(({relays}) => {
-  for (const url of relays) {
-    relay.db.relays.put({url})
+fetch(get(settings).dufflepudUrl + '/relay').then(async r => {
+  try {
+    const {relays} = await r.json()
+
+    for (const url of relays) {
+      relay.db.relays.put({url})
+    }
+  } catch (e) {
+    return
   }
 })
 
