@@ -1,55 +1,58 @@
 <script>
-  import {liveQuery} from 'dexie'
-  import {sortBy, pluck, reject} from 'ramda'
   import {onMount} from 'svelte'
   import {slide} from 'svelte/transition'
   import {quantify} from 'hurdak/lib/hurdak'
-  import {createScroller, sleep, now} from 'src/util/misc'
-  import {findReply} from 'src/util/nostr'
+  import {createScroller} from 'src/util/misc'
   import Spinner from 'src/partials/Spinner.svelte'
   import Note from "src/partials/Note.svelte"
-  import query from 'src/app/query'
 
   export let loadNotes
-  export let queryNotes
-
-  const notes = liveQuery(async () => {
-    // Hacky way to wait for the loader to adjust the cursor so we have a nonzero duration
-    await sleep(100)
-
-    return sortBy(
-      e => -pluck('created_at', e.replies).concat(e.created_at).reduce((a, b) => Math.max(a, b)),
-      await query.annotateChunk(await queryNotes())
-    )
-  })
+  export let listenForNotes
 
   let depth = 2
-  let until = now()
+  let notes = []
   let newNotes = []
-  let newNotesLength = 0
 
-  $: newNotes = ($notes || []).filter(e => e.created_at > until)
-  $: newNotesLength = reject(findReply, newNotes).length
-  $: visibleNotes = ($notes || []).filter(e => e.created_at <= until)
+  // Make max notes sort of random so people don't know they're missing out
+  let maxNotes = 200 + Math.round(Math.random() * 100)
+
+  const showNewNotes = () => {
+    // Drop notes at the end if there are a lot
+    notes = newNotes.concat(notes).slice(0, maxNotes)
+    newNotes = []
+  }
 
   onMount(() => {
-    const scroller = createScroller(loadNotes)
+    const sub = listenForNotes(events => {
+      // Slice new notes so if someone leaves the tab open for a long time we don't get a bazillion
+      newNotes = events.concat(newNotes).slice(0, maxNotes)
+    })
 
-    return scroller.stop
+    const scroller = createScroller(async () => {
+      // Drop notes at the top if there are a lot
+      notes = notes.concat(await loadNotes()).slice(-maxNotes)
+    })
+
+    return async () => {
+      const {unsub} = await sub
+
+      scroller.stop()
+      unsub()
+    }
   })
 </script>
 
 <ul class="py-4 flex flex-col gap-2 max-w-xl m-auto">
-  {#if newNotesLength > 0}
+  {#if newNotes.length > 0}
   <div
     in:slide
     class="mb-2 cursor-pointer text-center underline text-light"
-    on:click={() => { until = now() }}>
-    Load {quantify(newNotesLength, 'new note')}
+    on:click={showNewNotes}>
+    Load {quantify(newNotes.length, 'new note')}
   </div>
   {/if}
-  {#each visibleNotes as note (note.id)}
-    <li><Note {until} {note} {depth} /></li>
+  {#each notes as note (note.id)}
+    <li><Note {note} {depth} /></li>
   {/each}
 </ul>
 

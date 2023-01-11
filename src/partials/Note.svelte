@@ -18,7 +18,6 @@
   import cmd from 'src/app/cmd'
 
   export let note
-  export let until = Infinity
   export let depth = 0
   export let anchorId = null
   export let showParent = true
@@ -46,7 +45,7 @@
   }
 
   const goToParent = async () => {
-    modal.set({note: {id: findReply(note)}})
+    modal.set({note: {id: findReply(note)[1]}})
   }
 
   const react = async content => {
@@ -117,7 +116,7 @@
   <div class="ml-6 flex flex-col gap-2">
     {#if findReply(note) && showParent}
       <small class="text-light">
-        Reply to <Anchor on:click={goToParent}>{findReply(note).slice(0, 8)}</Anchor>
+        Reply to <Anchor on:click={goToParent}>{findReply(note)[1].slice(0, 8)}</Anchor>
       </small>
     {/if}
     {#if flag}
@@ -183,9 +182,7 @@
   </div>
   {/if}
   {#each note.replies as r (r.id)}
-  {#if r.created_at <= until}
   <svelte:self showParent={false} note={r} depth={depth - 1} {invertColors} {anchorId} />
-  {/if}
   {/each}
 </div>
 {/if}

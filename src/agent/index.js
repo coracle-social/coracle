@@ -1,4 +1,6 @@
+import {last} from 'ramda'
 import {derived, get} from 'svelte/store'
+import {getTagValues} from 'src/util/nostr'
 import pool from 'src/agent/pool'
 import keys from 'src/agent/keys'
 import defaults from 'src/agent/defaults'
@@ -18,6 +20,16 @@ export const user = derived(
     return $people[pubkey] || {pubkey}
   }
 )
+
+export const getMuffle = () => {
+  const $user = get(user)
+
+  if (!$user?.muffle) {
+    return []
+  }
+
+  return getTagValues($user.muffle.filter(t => Math.random() < last(t)))
+}
 
 export const getRelays = pubkey => {
   let relays = getPerson(pubkey)?.relays

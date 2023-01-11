@@ -127,7 +127,7 @@ const annotateChunk = async chunk => {
   return sortBy(e => -e.created_at, notes.filter(propEq('kind', 1)))
 }
 
-const renderNote = async (note, {showEntire = false}) => {
+const renderNote = (note, {showEntire = false}) => {
   const shouldEllipsize = note.content.length > 500 && !showEntire
   const $people = get(people)
   const peopleByPubkey = createMap(
@@ -161,4 +161,45 @@ const renderNote = async (note, {showEntire = false}) => {
   return content
 }
 
-export default {filterEvents, filterReplies, filterReactions, annotateChunk, renderNote, findNote}
+const annotate = (note, context, {showEntire = false, depth = 1} = {}) => {
+  const reactions = context.filter(e => e.kind === 7 && findReply(e) === note.id)
+  const replies = context.filter(e => e.kind === 1 && findReply(e) === note.id)
+
+  return {
+    ...note, reactions,
+    html: renderNote(note, {showEntire}),
+    person: getPerson(note.pubkey),
+    repliesCount: replies.length,
+    replies: depth === 0
+      ? []
+      : sortBy(e => e.created_at, replies)
+          .slice(showEntire ? 0 : -3)
+          .map(r => annotate(r, context, {depth: depth - 1}))
+  }
+}
+
+const threadify = (events, context, {muffle = []} = {}) => {
+  const contextById = createMap('id', context)
+
+  // Show parents when possible. For reactions, if there's no parent,
+  // throw it away. Sort by created date descending
+  const notes = sortBy(
+    e => -e.created_at,
+    events
+      .map(e => contextById[findReply(e)] || (e.kind === 1 ? e : null))
+      .filter(e => e && !muffle.includes(e.pubkey))
+  )
+
+  // Annotate our feed with parents, reactions, replies
+  return notes.map(note => {
+    let parent = contextById[findReply(note)]
+
+    if (parent) {
+      parent = annotate(parent, context)
+    }
+
+    return annotate({...note, parent}, context)
+  })
+}
+
+export default {filterEvents, filterReplies, filterReactions, annotateChunk, renderNote, findNote, threadify, annotate}

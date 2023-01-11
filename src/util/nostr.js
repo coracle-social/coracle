@@ -11,6 +11,9 @@ export class Tags {
   static from(events) {
     return new Tags(ensurePlural(events).flatMap(prop('tags')))
   }
+  static wrap(tags) {
+    return new Tags(tags)
+  }
   all() {
     return this.tags
   }
@@ -19,6 +22,11 @@ export class Tags {
   }
   last() {
     return last(this.tags)
+  }
+  relays() {
+    return this.tags
+      .map(t => t[3])
+      .filter(url => typeof url === 'string' && url.startsWith('ws'))
   }
   values() {
     this.tags = this.tags.map(t => t[0])

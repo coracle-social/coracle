@@ -34,6 +34,9 @@ If you like Coracle and want to support its development, you can donate sats via
   - https://github.com/nbd-wtf/nostr-tools/blob/master/nip26.ts
 - [ ] Add relay selector when publishing a note
 - [ ] Add keyword mutes
+- [ ] Add no-relay gossip
+  - Capture certain events in a local db
+  - File import/export from db, NFC transfer
 
 # Bugs
 
@@ -69,6 +72,7 @@ If you like Coracle and want to support its development, you can donate sats via
   - Load feeds by setting a listener since now, paginating using limit (of 2 maybe), and awaiting context for each page. Listener appends to "newNotes", cursor appends to "notes", load more moves new notes into notes. Use the note originally loaded as the anchor, don't re-process the whole list
 - [ ] Close connections that haven't been used in a while
 - [ ] Load feeds from network rather than user relays? This could make global feed more useful: global for _my_ relays
+- [ ] Release to android with https://svelte-native.technology/docs
 
 ## 0.2.6
 

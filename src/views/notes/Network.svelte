@@ -1,10 +1,8 @@
 <script>
-  import {when, identity, nth, propEq} from 'ramda'
-  import {onMount} from 'svelte'
   import Notes from "src/partials/Notes.svelte"
-  import {timedelta, shuffle, Cursor} from 'src/util/misc'
+  import {now, timedelta, shuffle, batch, Cursor} from 'src/util/misc'
   import {getTagValues} from 'src/util/nostr'
-  import {user, getRelays, getPerson, listen, load} from 'src/agent'
+  import {user, getRelays, getMuffle, getPerson, listen, load} from 'src/agent'
   import defaults from 'src/agent/defaults'
   import loaders from 'src/app/loaders'
   import query from 'src/app/query'
@@ -17,43 +15,28 @@
 
   // Get first- and second-order follows. shuffle and slice network so we're not
   // sending too many pubkeys. This will also result in some variety.
+  const relays = getRelays()
   const follows = getFollows($user?.pubkey)
   const network = shuffle(follows.flatMap(getFollows)).slice(0, 50)
   const authors = follows.concat(network)
-
-  onMount(() => {
-    const sub = listen(
-      getRelays(),
-      [{kinds: [1, 5, 7], authors, since: cursor.since}],
-      when(propEq('kind', 1), e => {
-        loaders.loadNotesContext(getRelays(), e)
-      })
-    )
-
-    return () => {
-      sub.then(s => s.unsub())
-    }
-  })
-
+  const filter = {kinds: [1, 7], authors}
   const cursor = new Cursor(timedelta(20, 'minutes'))
+
+  const listenForNotes = onNotes =>
+    listen(relays, {...filter, since: now()}, batch(300, async notes => {
+      const context = await loaders.loadContext(relays, notes)
+
+      onNotes(query.threadify(notes, context, {muffle: getMuffle()}))
+    }))
 
   const loadNotes = async () => {
     const [since, until] = cursor.step()
-    const filter = {kinds: [1, 7], authors, since, until}
-    const notes = await load(getRelays(), filter)
+    const notes = await load(relays, {...filter, since, until})
+    const context = await loaders.loadContext(relays, notes)
 
-    await loaders.loadNotesContext(getRelays(), notes, {loadParents: true})
-  }
-
-  const queryNotes = () => {
-    return query.filterEvents({
-      kinds: [1],
-      since: cursor.since,
-      authors: authors.concat($user?.pubkey).filter(identity),
-      muffle: getTagValues($user?.muffle || []),
-    })
+    return query.threadify(notes, context, {muffle: getMuffle()})
   }
 </script>
 
-<Notes shouldMuffle {loadNotes} {queryNotes} />
+<Notes {listenForNotes} {loadNotes} />
 

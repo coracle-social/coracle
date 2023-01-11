@@ -1,4 +1,3 @@
-import {get} from 'svelte/store'
 import {sortBy, pluck} from 'ramda'
 import {first} from 'hurdak/lib/hurdak'
 import {synced, batch, now, timedelta} from 'src/util/misc'
@@ -9,7 +8,6 @@ import loaders from 'src/app/loaders'
 let listener
 
 const start = now() - timedelta(30, 'days')
-
 const since = synced("app/alerts/since", start)
 const latest = synced("app/alerts/latest", start)
 
@@ -17,8 +15,6 @@ const listen = async (relays, pubkey) => {
   if (listener) {
     listener.unsub()
   }
-
-  console.log(get(since))
 
   listener = await _listen(
     relays,

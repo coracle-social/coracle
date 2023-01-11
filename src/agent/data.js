@@ -1,11 +1,7 @@
 import Dexie from 'dexie'
-import {matchFilter} from 'nostr-tools'
-import {get} from 'svelte/store'
-import {groupBy, prop, flatten, pick} from 'ramda'
 import {ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
 import {synced, now, timedelta} from 'src/util/misc'
-import {Tags, personKinds, findReply, findRoot} from 'src/util/nostr'
-import keys from 'src/agent/keys'
+import {personKinds} from 'src/util/nostr'
 
 export const db = new Dexie('agent/data/db')
 
@@ -31,50 +27,9 @@ export const getPerson = (pubkey, fallback = false) =>
 // Hooks
 
 export const processEvents = async events => {
-  // Only persist ones we care about, the rest can be ephemeral and used to update people etc
-  const pubkey = get(keys.pubkey)
-  const eventsByKind = groupBy(prop('kind'), ensurePlural(events))
-  const notesAndReactions = flatten(Object.values(pick([1, 7], eventsByKind)))
-    .map(e => ({...e, root: findRoot(e), reply: findReply(e), loaded_at: now()}))
-  const alerts = notesAndReactions.filter(e => matchFilter({kinds: [1, 7], '#p': [pubkey]}, e))
-  const profileUpdates = flatten(Object.values(pick(personKinds, eventsByKind)))
-  const deletions = eventsByKind[5] || []
+  const profileUpdates = ensurePlural(events)
+    .filter(e => personKinds.includes(e.kind))
 
-  // Persist notes and reactions
-  if (notesAndReactions.length > 0) {
-    db.events.bulkPut(notesAndReactions)
-
-    db.tags.bulkPut(
-      notesAndReactions
-        .flatMap(e =>
-          e.tags.map(
-            tag => ({
-              id: [e.id, ...tag.slice(0, 2)].join(':'),
-              event: e.id,
-              type: tag[0],
-              value: tag[1],
-              relay: tag[2],
-              mark: tag[3],
-              loaded_at: now(),
-            })
-          )
-        )
-    )
-  }
-
-  if (alerts.length > 0) {
-    db.alerts.bulkPut(alerts)
-  }
-
-  // Delete stuff that needs to be deleted
-  if (deletions.length > 0) {
-    const eventIds = Tags.from(deletions).type("e").values().all()
-
-    db.events.where('id').anyOf(eventIds).delete()
-    db.tags.where('event').anyOf(eventIds).delete()
-  }
-
-  // Update our people
   people.update($people => {
     for (const event of profileUpdates) {
       const {pubkey, kind, content, tags} = event
