@@ -2,7 +2,7 @@ import {get} from 'svelte/store'
 import {intersection, sortBy, propEq, uniqBy, groupBy, concat, prop, isNil, identity} from 'ramda'
 import {ensurePlural, createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {renderContent} from 'src/util/html'
-import {filterTags, displayPerson, getTagValues, findReply, findRoot} from 'src/util/nostr'
+import {Tags, displayPerson, getTagValues, findReply, findRoot} from 'src/util/nostr'
 import {db, people, getPerson} from 'src/agent'
 import {routes} from "src/app/ui"
 
@@ -132,7 +132,7 @@ const renderNote = async (note, {showEntire = false}) => {
   const $people = get(people)
   const peopleByPubkey = createMap(
     'pubkey',
-    filterTags({tag: "p"}, note).map(k => $people[k]).filter(identity)
+    Tags.from(note).type("p").values().all().map(k => $people[k]).filter(identity)
   )
 
   let content

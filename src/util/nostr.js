@@ -1,54 +1,50 @@
-import {last, find, intersection} from 'ramda'
+import {last, prop} from 'ramda'
 import {nip19} from 'nostr-tools'
 import {ensurePlural, first} from 'hurdak/lib/hurdak'
 
-export const epoch = 1633046400
-
 export const personKinds = [0, 2, 3, 10001, 12165]
+
+export class Tags {
+  constructor(tags) {
+    this.tags = tags
+  }
+  static from(events) {
+    return new Tags(ensurePlural(events).flatMap(prop('tags')))
+  }
+  all() {
+    return this.tags
+  }
+  first() {
+    return first(this.tags)
+  }
+  last() {
+    return last(this.tags)
+  }
+  values() {
+    this.tags = this.tags.map(t => t[0])
+
+    return this
+  }
+  type(type) {
+    this.tags = this.tags.filter(t => t[0] === type)
+
+    return this
+  }
+  mark(mark) {
+    this.tags = this.tags.filter(t => last(t) === mark)
+
+    return this
+  }
+}
 
 export const getTagValues = tags => tags.map(t => t[1])
 
-export const filterTags = (where, events) =>
-  ensurePlural(events)
-    .flatMap(
-      e => e.tags.filter(t => {
-        if (where.tag && where.tag !== t[0]) {
-          return false
-        }
-
-        if (where.type && where.type !== last(t)) {
-          return false
-        }
-
-        return true
-      }).map(t => t[1])
-    )
-
-export const findTag = (where, events) => first(filterTags(where, events))
-
 // Support the deprecated version where tags are not marked as replies
 export const findReply = e =>
-  findTag({tag: "e", type: "reply"}, e) || findTag({tag: "e"}, e)
+  Tags.from(e).type("e").mark("reply").first() || Tags.from(e).type("e").first()
 
 export const findRoot = e =>
-  findTag({tag: "e", type: "root"}, e)
-
-export const filterMatches = (filter, e)  => {
-  return Boolean(find(
-    f => {
-      return (
-           (!f.ids     || f.ids.includes(e.id))
-        && (!f.authors || f.authors.includes(e.pubkey))
-        && (!f.kinds   || f.kinds.includes(e.kind))
-        && (!f['#e']   || intersection(f['#e'], e.tags.filter(t => t[0] === 'e').map(t => t[1])))
-        && (!f['#p']   || intersection(f['#p'], e.tags.filter(t => t[0] === 'p').map(t => t[1])))
-        && (!f.since   || f.since >= e.created_at)
-        && (!f.until   || f.until <= e.created_at)
-      )
-    },
-    ensurePlural(filter)
-  ))
-}
+  Tags.from(e).type("e").mark("root").first()
 
 export const displayPerson = p => {
   if (p.name) {

@@ -1,7 +1,8 @@
-import {isNil, join, uniqBy, last} from 'ramda'
+import {join, uniqBy, last} from 'ramda'
 import {get} from 'svelte/store'
 import {first} from "hurdak/lib/hurdak"
-import {keys, publish, user, getRelays} from 'src/agent'
+import {Tags} from 'src/util/nostr'
+import {keys, publish, getRelays} from 'src/agent'
 
 const updateUser = (relays, updates) =>
   publishEvent(relays, 0, {content: JSON.stringify(updates)})
@@ -61,19 +62,19 @@ const deleteEvent = (relays, ids) =>
 
 const getBestRelay = event => {
   // Find the best relay, based on reply, root, or pubkey
-  const reply = findTag({tag: "e", type: "reply"}, e)
+  const reply = Tags.from(event).type("e").mark("reply").first()
 
   if (reply && reply[2].startsWith('ws')) {
     return reply[2]
   }
 
-  const root = findTag({tag: "e", type: "root"}, e)
+  const root = Tags.from(event).type("e").mark("root").first()
 
   if (root && root[2].startsWith('ws')) {
     return root[2]
   }
 
-  return first(getRelays(note.pubkey))
+  return first(getRelays(event.pubkey))
 }
 
 const publishEvent = (relays, kind, {content = '', tags = []} = {}) => {

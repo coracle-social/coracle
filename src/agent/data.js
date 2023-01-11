@@ -4,7 +4,7 @@ import {get} from 'svelte/store'
 import {groupBy, prop, flatten, pick} from 'ramda'
 import {ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
 import {synced, now, timedelta} from 'src/util/misc'
-import {filterTags, personKinds, findReply, findRoot} from 'src/util/nostr'
+import {Tags, personKinds, findReply, findRoot} from 'src/util/nostr'
 import keys from 'src/agent/keys'
 
 export const db = new Dexie('agent/data/db')
@@ -68,7 +68,7 @@ export const processEvents = async events => {
 
   // Delete stuff that needs to be deleted
   if (deletions.length > 0) {
-    const eventIds = deletions.flatMap(e => filterTags({tag: "e"}, e))
+    const eventIds = Tags.from(deletions).type("e").values().all()
 
     db.events.where('id').anyOf(eventIds).delete()
     db.tags.where('event').anyOf(eventIds).delete()

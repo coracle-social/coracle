@@ -53,8 +53,6 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Use user relays for feeds
 - [x] Publish to user relays + target relays:
 - [x] Add correct recommended relay to tags
-- [ ] Clean up nostr utils
-- [ ] Close connections that haven't been used in a while
 - [ ] Support some read/write config on relays page
 - [ ] Get real home relays for default pubkeys
 - [ ] Add settings storage on nostr, maybe use kind 0?
@@ -69,6 +67,8 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Alerts still aren't great. Maybe lazy load? We delete old events, so context will disappear and notes will become empty.
 - [ ] Only use dexie for alerts rather than all events
   - Load feeds by setting a listener since now, paginating using limit (of 2 maybe), and awaiting context for each page. Listener appends to "newNotes", cursor appends to "notes", load more moves new notes into notes. Use the note originally loaded as the anchor, don't re-process the whole list
+- [ ] Close connections that haven't been used in a while
+- [ ] Load feeds from network rather than user relays? This could make global feed more useful: global for _my_ relays
 
 ## 0.2.6
 

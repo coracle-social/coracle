@@ -11,9 +11,8 @@
 
   const getFollows = pubkey => {
     const person = getPerson(pubkey)
-    const petnames = person?.petnames || defaults.petnames
 
-    return petnames.map(nth(1))
+    return getTagValues(person?.petnames || defaults.petnames)
   }
 
   // Get first- and second-order follows. shuffle and slice network so we're not
