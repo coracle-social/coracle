@@ -73,6 +73,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Close connections that haven't been used in a while
 - [ ] Load feeds from network rather than user relays? This could make global feed more useful: global for _my_ relays
 - [ ] Release to android with https://svelte-native.technology/docs
+- [ ] Compress is taking too long and messing up the ui, maybe use dexie for people?
 
 ## 0.2.6
 

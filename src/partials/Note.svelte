@@ -14,7 +14,7 @@
   import Badge from "src/partials/Badge.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
-  import {user, getPerson, getRelays} from 'src/agent'
+  import {user, getPerson, getRelays, getEventRelays} from 'src/agent'
   import cmd from 'src/app/cmd'
 
   export let note
@@ -40,12 +40,15 @@
 
   const onClick = e => {
     if (!['I'].includes(e.target.tagName) && !hasParent('a', e.target)) {
-      modal.set({note})
+      modal.set({note, relays: getEventRelays(note)})
     }
   }
 
   const goToParent = async () => {
-    modal.set({note: {id: findReply(note)[1]}})
+    modal.set({
+      note: {id: findReply(note)[1]},
+      relays: getEventRelays(note),
+    })
   }
 
   const react = async content => {
@@ -88,7 +91,7 @@
     const {content, mentions} = reply.parse()
 
     if (content) {
-      cmd.createReply(getRelays(), note, content, mentions)
+      cmd.createReply(getEventRelays(note), note, content, mentions)
 
       reply = null
     }

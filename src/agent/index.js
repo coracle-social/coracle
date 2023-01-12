@@ -1,6 +1,6 @@
-import {last} from 'ramda'
+import {last, uniq} from 'ramda'
 import {derived, get} from 'svelte/store'
-import {getTagValues} from 'src/util/nostr'
+import {getTagValues, Tags} from 'src/util/nostr'
 import pool from 'src/agent/pool'
 import keys from 'src/agent/keys'
 import defaults from 'src/agent/defaults'
@@ -43,6 +43,10 @@ export const getRelays = pubkey => {
   }
 
   return relays
+}
+
+export const getEventRelays = event => {
+  return uniq(getRelays(event.pubkey).concat(Tags.from(event).relays()))
 }
 
 export const publish = async (relays, event) => {

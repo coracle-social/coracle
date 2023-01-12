@@ -2,7 +2,7 @@ import {uniq, pluck, groupBy, identity} from 'ramda'
 import {ensurePlural, createMap} from 'hurdak/lib/hurdak'
 import {findReply, personKinds, Tags, getTagValues} from 'src/util/nostr'
 import {now, timedelta} from 'src/util/misc'
-import {load, db, getPerson} from 'src/agent'
+import {load, getPerson} from 'src/agent'
 import defaults from 'src/agent/defaults'
 
 const getStalePubkeys = pubkeys => {
@@ -108,18 +108,4 @@ const loadNotesContext = async (relays, notes, {loadParents = false} = {}) => {
   }
 }
 
-const getOrLoadNote = async (relays, id) => {
-  if (!await db.events.get(id)) {
-    await load(relays, {kinds: [1], ids: [id]})
-  }
-
-  const note = await db.events.get(id)
-
-  if (note) {
-    await loadNotesContext(relays, [note], {loadParent: true})
-  }
-
-  return note
-}
-
-export default {getOrLoadNote, loadNotesContext, loadNetwork, loadPeople, personKinds, loadContext}
+export default {loadNotesContext, loadNetwork, loadPeople, personKinds, loadContext}

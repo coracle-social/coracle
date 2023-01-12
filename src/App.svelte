@@ -206,7 +206,7 @@
         <dialog open class="bg-dark border-t border-solid border-medium h-full w-full overflow-auto">
           {#if $modal.note}
             {#key $modal.note.id}
-            <NoteDetail note={$modal.note} />
+            <NoteDetail {...$modal} />
             {/key}
           {:else if $modal.form === 'relay'}
             <AddRelay />
