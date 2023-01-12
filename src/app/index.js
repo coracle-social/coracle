@@ -1,11 +1,12 @@
 import {without} from 'ramda'
 import {updateIn, mergeRight} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
-import {getPerson, getRelays, people, keys, db} from 'src/agent'
+import {getPerson, getRelays, people, load, keys, db} from 'src/agent'
 import {toast, modal, settings} from 'src/app/ui'
 import cmd from 'src/app/cmd'
 import alerts from 'src/app/alerts'
 import loaders from 'src/app/loaders'
+import query from 'src/app/query'
 
 export {toast, modal, settings, alerts}
 
@@ -48,4 +49,20 @@ export const removeRelay = async url => {
   const relays = person?.relays || []
 
   await cmd.setRelays(without([url], relays))
+}
+
+export const loadNote = async (relays, id) => {
+  const [found] = await load(relays, {ids: [id]})
+
+  if (!found) {
+    return null
+  }
+
+  const context = await loaders.loadContext(relays, found)
+  const note = query.annotate(found, context, {showEntire: true, depth: 3})
+
+  // Log this for debugging purposes
+  console.log('loadNote', note)
+
+  return note
 }

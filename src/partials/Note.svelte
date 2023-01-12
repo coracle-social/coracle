@@ -1,6 +1,7 @@
 <script>
   import cx from 'classnames'
   import extractUrls from 'extract-urls'
+  import {nip19} from 'nostr-tools'
   import {whereEq, reject, propEq, find} from 'ramda'
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
@@ -27,6 +28,7 @@
 
   const links = $settings.showLinkPreviews ? extractUrls(note.content) || [] : null
   const interactive = !anchorId || anchorId !== note.id
+  const relays = getEventRelays(note)
 
   let likes, flags, like, flag
 
@@ -40,15 +42,14 @@
 
   const onClick = e => {
     if (!['I'].includes(e.target.tagName) && !hasParent('a', e.target)) {
-      modal.set({note, relays: getEventRelays(note)})
+      modal.set({note, relays})
     }
   }
 
   const goToParent = async () => {
-    modal.set({
-      note: {id: findReply(note)[1]},
-      relays: getEventRelays(note),
-    })
+    const parent = {id: findReply(note)[1]}
+
+    modal.set({note: parent, relays})
   }
 
   const react = async content => {
@@ -114,7 +115,12 @@
 <Card on:click={onClick} {interactive} {invertColors}>
   <div class="flex gap-4 items-center justify-between">
     <Badge person={getPerson(note.pubkey, true)} />
-    <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>
+    <Anchor
+      href={"/" + nip19.neventEncode({id: note.id, relays})}
+      class="text-sm text-light"
+      type="unstyled">
+      {formatTimestamp(note.created_at)}
+    </Anchor>
   </div>
   <div class="ml-6 flex flex-col gap-2">
     {#if findReply(note) && showParent}

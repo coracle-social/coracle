@@ -46,6 +46,10 @@ export const getRelays = pubkey => {
 }
 
 export const getEventRelays = event => {
+  if (event.seen_on) {
+    return [event.seen_on]
+  }
+
   return uniq(getRelays(event.pubkey).concat(Tags.from(event).relays()))
 }
 

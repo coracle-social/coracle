@@ -74,6 +74,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Load feeds from network rather than user relays? This could make global feed more useful: global for _my_ relays
 - [ ] Release to android with https://svelte-native.technology/docs
 - [ ] Compress is taking too long and messing up the ui, maybe use dexie for people?
+- [ ] Move people to nprofile via bech32 entity (or redirect from there)
 
 ## 0.2.6
 

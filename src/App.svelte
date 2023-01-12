@@ -15,7 +15,8 @@
   import {modal, toast, settings, alerts} from "src/app"
   import {routes} from "src/app/ui"
   import Anchor from 'src/partials/Anchor.svelte'
-  import NoteDetail from "src/views/NoteDetail.svelte"
+  import Modal from 'src/partials/Modal.svelte'
+  import NoteDetailModal from "src/views/NoteDetail.svelte"
   import PersonSettings from "src/views/PersonSettings.svelte"
   import NotFound from "src/routes/NotFound.svelte"
   import Search from "src/routes/Search.svelte"
@@ -30,6 +31,7 @@
   import AddRelay from "src/routes/AddRelay.svelte"
   import Person from "src/routes/Person.svelte"
   import NoteCreate from "src/routes/NoteCreate.svelte"
+  import Bech32Entity from "src/routes/Bech32Entity.svelte"
 
   export let url = ""
 
@@ -38,6 +40,11 @@
 
   const searchIsOpen = writable(false)
   const toggleSearch = () => searchIsOpen.update(x => !x)
+
+  const closeModal = () => {
+    modal.set(null)
+    menuIsOpen.set(false)
+  }
 
   let menuIcon
   let scrollY
@@ -78,14 +85,6 @@
   })
 </script>
 
-<svelte:body
-  on:keydown={e => {
-    if (e.key === 'Escape') {
-      modal.set(null)
-      menuIsOpen.set(false)
-    }
-  }} />
-
 <Router {url}>
   <div use:links class="h-full">
     <div class="pt-16 text-white h-full">
@@ -104,6 +103,11 @@
       <Route path="/settings" component={Settings} />
       <Route path="/login" component={Login} />
       <Route path="/logout" component={Logout} />
+      <Route path="/:entity" let:params>
+        {#key params.entity}
+        <Bech32Entity {...params} />
+        {/key}
+      </Route>
       <Route path="*" component={NotFound} />
     </div>
 
@@ -197,25 +201,17 @@
     {/if}
 
     {#if $modal}
-    <div class="fixed inset-0 z-10">
-      <div
-        class="absolute inset-0 opacity-75 bg-black cursor-pointer"
-        transition:fade
-        on:click={e => modal.set(null)} />
-      <div class="absolute inset-0 mt-20 sm:mt-32 modal-content" transition:fly={{y: 1000, opacity: 1}}>
-        <dialog open class="bg-dark border-t border-solid border-medium h-full w-full overflow-auto">
-          {#if $modal.note}
-            {#key $modal.note.id}
-            <NoteDetail {...$modal} />
-            {/key}
-          {:else if $modal.form === 'relay'}
-            <AddRelay />
-          {:else if $modal.form === 'person/settings'}
-            <PersonSettings />
-          {/if}
-        </dialog>
-      </div>
-    </div>
+    <Modal onEscape={closeModal}>
+      {#if $modal.note}
+        {#key $modal.note.id}
+        <NoteDetailModal {...$modal} />
+        {/key}
+      {:else if $modal.form === 'relay'}
+        <AddRelay />
+      {:else if $modal.form === 'person/settings'}
+        <PersonSettings />
+      {/if}
+    </Modal>
     {/if}
 
     {#if $toast}

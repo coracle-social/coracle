@@ -4,16 +4,16 @@
   import Note from 'src/partials/Note.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
 
-  export let note
+  export let id
   export let relays
 
-  if (!note.pubkey) {
-    loadNote(relays, note.id).then(found => {
-      note = found
-    })
-  } else {
-    console.log('NoteDetail', note)
-  }
+  let note = {id}
+
+  console.log(id, relays)
+
+  loadNote(relays, id).then(found => {
+    note = found
+  })
 </script>
 
 {#if !note}
