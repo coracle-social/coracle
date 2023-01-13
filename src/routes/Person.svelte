@@ -20,6 +20,7 @@
 
   export let npub
   export let activeTab
+  export let relays = null
 
   let subs = []
   let pubkey = nip19.decode(npub).data
@@ -30,13 +31,13 @@
 
   onMount(async () => {
     // Refresh our person if needed
-    loaders.loadPeople(getRelays(pubkey), [pubkey]).then(() => {
+    loaders.loadPeople(relays || getRelays(pubkey), [pubkey]).then(() => {
       person = getPerson(pubkey, true)
     })
 
     // Get our followers count
     subs.push(await listen(
-      getRelays(pubkey),
+      relays || getRelays(pubkey),
       [{kinds: [3], '#p': [pubkey]}],
       e => {
         followers.add(e.pubkey)
@@ -57,7 +58,7 @@
   const follow = async () => {
     following = true
 
-    const relay = first(getRelays(pubkey))
+    const relay = first(relays || getRelays(pubkey))
     const tag = ["p", pubkey, relay, person.name || ""]
     const petnames = reject(t => t[1] === pubkey, $user.petnames).concat(tag)
 
