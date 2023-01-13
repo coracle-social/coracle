@@ -1,6 +1,6 @@
 <script>
   import Notes from "src/partials/Notes.svelte"
-  import {now, timedelta, shuffle, batch, Cursor} from 'src/util/misc'
+  import {now, Cursor, shuffle, batch} from 'src/util/misc'
   import {user, getRelays, getFollows, getMuffle, listen, load} from 'src/agent'
   import loaders from 'src/app/loaders'
   import query from 'src/app/query'
@@ -12,7 +12,7 @@
   const network = shuffle(follows.flatMap(getFollows)).slice(0, 50)
   const authors = follows.concat(network)
   const filter = {kinds: [1, 7], authors}
-  const cursor = new Cursor(timedelta(20, 'minutes'))
+  const cursor = new Cursor()
 
   const listenForNotes = onNotes =>
     listen(relays, {...filter, since: now()}, batch(300, async notes => {
@@ -22,9 +22,11 @@
     }))
 
   const loadNotes = async () => {
-    const [since, until] = cursor.step()
-    const notes = await load(relays, {...filter, since, until})
+    const {limit, until} = cursor
+    const notes = await load(relays, {...filter, limit, until})
     const context = await loaders.loadContext(relays, notes)
+
+    cursor.onChunk(notes)
 
     return query.threadify(notes, context, {muffle: getMuffle()})
   }

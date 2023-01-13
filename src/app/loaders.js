@@ -1,5 +1,5 @@
-import {uniq, pluck, groupBy, identity} from 'ramda'
-import {ensurePlural, createMap} from 'hurdak/lib/hurdak'
+import {uniq, flatten, pluck, groupBy, identity} from 'ramda'
+import {ensurePlural, createMap, chunk} from 'hurdak/lib/hurdak'
 import {findReply, personKinds, Tags, getTagValues} from 'src/util/nostr'
 import {now, timedelta} from 'src/util/misc'
 import {load, getPerson} from 'src/agent'
@@ -47,36 +47,40 @@ const loadNetwork = async (relays, pubkey) => {
 }
 
 const loadContext = async (relays, notes, {loadParents = true} = {}) => {
-  // TODO: remove this and batch context loading, or load less at a time
-  notes = ensurePlural(notes).slice(0, 256)
+  notes = ensurePlural(notes)
 
   if (notes.length === 0) {
     return notes
   }
 
-  const authors = getStalePubkeys(pluck('pubkey', notes))
-  const parentTags = loadParents ? uniq(notes.map(findReply).filter(identity)) : []
-  const filter = [{kinds: [1, 7], '#e': pluck('id', notes)}]
+  return flatten(await Promise.all(
+    chunk(256, notes).map(async chunk => {
+      const authors = getStalePubkeys(pluck('pubkey', notes))
+      const parentTags = loadParents ? uniq(notes.map(findReply).filter(identity)) : []
+      const combinedRelays = uniq(relays.concat(Tags.wrap(parentTags).relays()))
+      const filter = [{kinds: [1, 7], '#e': pluck('id', notes)}]
 
-  if (authors.length > 0) {
-    filter.push({kinds: personKinds, authors})
-  }
+      if (authors.length > 0) {
+        filter.push({kinds: personKinds, authors})
+      }
 
-  if (parentTags.length > 0) {
-    filter.push({kinds: [1], ids: getTagValues(parentTags)})
-    relays = uniq(relays.concat(Tags.wrap(parentTags).relays()))
-  }
+      if (parentTags.length > 0) {
+        filter.push({kinds: [1], ids: getTagValues(parentTags)})
+      }
 
-  const events = await load(relays, filter)
+      const events = await load(combinedRelays, filter)
 
-  if (parentTags.length === 0) {
-    return events
-  }
+      if (parentTags.length === 0) {
+        return events
+      }
 
-  const eventsById = createMap('id', events)
-  const parents = getTagValues(parentTags).map(id => eventsById[id]).filter(identity)
+      const eventsById = createMap('id', events)
+      const parents = getTagValues(parentTags).map(id => eventsById[id]).filter(identity)
+      const parentRelays = Tags.from(parents).relays()
 
-  return events.concat(await loadContext(relays, parents, {loadParents: false}))
+      return events.concat(await loadContext(parentRelays, parents, {loadParents: false}))
+    })
+  ))
 }
 
 export default {loadNetwork, loadPeople, personKinds, loadContext}

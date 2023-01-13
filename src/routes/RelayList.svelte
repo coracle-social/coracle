@@ -12,7 +12,9 @@
 
   let q = ""
   let search
-  let relays = $user?.relays || defaults.relays
+  let relays = []
+
+  $: relays = $user?.relays || defaults.relays
 
   fetch(get(settings).dufflepudUrl + '/relay').then(r => r.json()).then(({relays}) => {
     for (const url of relays) {

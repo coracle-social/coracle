@@ -2,7 +2,7 @@ import {get} from 'svelte/store'
 import {sortBy, identity} from 'ramda'
 import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {renderContent} from 'src/util/html'
-import {Tags, displayPerson, findReply} from 'src/util/nostr'
+import {Tags, displayPerson, findReplyId} from 'src/util/nostr'
 import {people, getPerson} from 'src/agent'
 import {routes} from "src/app/ui"
 
@@ -41,8 +41,8 @@ const renderNote = (note, {showEntire = false}) => {
 }
 
 const annotate = (note, context, {showEntire = false, depth = 1} = {}) => {
-  const reactions = context.filter(e => e.kind === 7 && findReply(e) === note.id)
-  const replies = context.filter(e => e.kind === 1 && findReply(e) === note.id)
+  const reactions = context.filter(e => e.kind === 7 && findReplyId(e) === note.id)
+  const replies = context.filter(e => e.kind === 1 && findReplyId(e) === note.id)
 
   return {
     ...note, reactions,
@@ -65,13 +65,13 @@ const threadify = (events, context, {muffle = []} = {}) => {
   const notes = sortBy(
     e => -e.created_at,
     events
-      .map(e => contextById[findReply(e)] || (e.kind === 1 ? e : null))
+      .map(e => contextById[findReplyId(e)] || (e.kind === 1 ? e : null))
       .filter(e => e && !muffle.includes(e.pubkey))
   )
 
   // Annotate our feed with parents, reactions, replies
   return notes.map(note => {
-    let parent = contextById[findReply(note)]
+    let parent = contextById[findReplyId(note)]
 
     if (parent) {
       parent = annotate(parent, context)

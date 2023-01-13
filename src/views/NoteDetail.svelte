@@ -1,11 +1,12 @@
 <script>
   import {fly} from 'svelte/transition'
   import {loadNote} from 'src/app'
+  import {getRelays} from 'src/agent'
   import Note from 'src/partials/Note.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
 
   export let note
-  export let relays
+  export let relays = getRelays()
 
   if (!note.pubkey) {
     loadNote(relays, note.id).then(found => {

@@ -1,7 +1,6 @@
 import {without} from 'ramda'
-import {updateIn, mergeRight} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
-import {getPerson, getRelays, people, load, keys} from 'src/agent'
+import {getPerson, getRelays, load, keys} from 'src/agent'
 import {toast, modal, settings} from 'src/app/ui'
 import cmd from 'src/app/cmd'
 import alerts from 'src/app/alerts'
@@ -17,8 +16,11 @@ export const login = async ({privkey, pubkey}) => {
     keys.setPublicKey(pubkey)
   }
 
-  await loaders.loadNetwork(getRelays(), pubkey)
-  await alerts.listen(getRelays(), pubkey)
+  await Promise.all([
+    loaders.loadNetwork(getRelays(), pubkey),
+    alerts.load(getRelays(), pubkey),
+    alerts.listen(getRelays(), pubkey),
+  ])
 }
 
 export const addRelay = async url => {
@@ -26,12 +28,13 @@ export const addRelay = async url => {
   const person = getPerson(pubkey)
   const relays = (person?.relays || []).concat(url)
 
-  // Persist to our local copy immediately so we can publish to the new one
-  people.update(updateIn(pubkey, mergeRight({pubkey, relays})))
-
   await cmd.setRelays(relays)
-  await loaders.loadNetwork(relays, pubkey)
-  await alerts.listen(relays, pubkey)
+
+  await Promise.all([
+    loaders.loadNetwork(getRelays(), pubkey),
+    alerts.load(getRelays(), pubkey),
+    alerts.listen(getRelays(), pubkey),
+  ])
 }
 
 export const removeRelay = async url => {

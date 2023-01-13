@@ -1,5 +1,6 @@
 import {relayInit} from 'nostr-tools'
-import {uniqBy, filter, identity, prop} from 'ramda'
+import {uniqBy, is, filter, identity, prop} from 'ramda'
+import {isRelay} from 'src/util/nostr'
 import {ensurePlural} from 'hurdak/lib/hurdak'
 
 const relays = {}
@@ -41,7 +42,7 @@ const connect = url => {
 
 const publish = async (urls, event) => {
   return Promise.all(
-    urls.map(async url => {
+    urls.filter(isRelay).map(async url => {
       const relay = await connect(url)
 
       if (relay) {
@@ -51,9 +52,33 @@ const publish = async (urls, event) => {
   )
 }
 
+const describeFilter = filter => {
+  let parts = []
+
+  for (const [key, value] of Object.entries(filter)) {
+    if (is(Array, value)) {
+      parts.push(`${key}[${value.length}]`)
+    } else {
+      parts.push(key)
+    }
+  }
+
+  return parts.join(',')
+}
+
 const subscribe = async (urls, filters) => {
+  filters = ensurePlural(filters)
+
+  // Create a human readable subscription id for debugging
+  const id = [
+    Math.random().toString().slice(2, 6),
+    filters.map(describeFilter).join(':'),
+  ].join('-')
+
+  console.log(filters, id)
+
   const subs = filter(identity, await Promise.all(
-    urls.map(async url => {
+    urls.filter(isRelay).map(async url => {
       const relay = await connect(url)
 
       // If the relay failed to connect, give up
@@ -61,7 +86,8 @@ const subscribe = async (urls, filters) => {
         return null
       }
 
-      const sub = relay.sub(ensurePlural(filters))
+
+      const sub = relay.sub(filters, {id})
 
       sub.relay = relay
       sub.relay.stats.activeCount += 1
@@ -103,6 +129,8 @@ const subscribe = async (urls, filters) => {
 }
 
 const request = (urls, filters) => {
+  urls = urls.filter(isRelay)
+
   return new Promise(async resolve => {
     const subscription = await subscribe(urls, filters)
     const now = Date.now()

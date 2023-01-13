@@ -1,5 +1,6 @@
 <script>
   import {onMount} from 'svelte'
+  import {uniqBy, prop} from 'ramda'
   import {slide} from 'svelte/transition'
   import {quantify} from 'hurdak/lib/hurdak'
   import {createScroller} from 'src/util/misc'
@@ -18,7 +19,7 @@
 
   const showNewNotes = () => {
     // Drop notes at the end if there are a lot
-    notes = newNotes.concat(notes).slice(0, maxNotes)
+    notes = uniqBy(prop('id'), newNotes.concat(notes).slice(0, maxNotes))
     newNotes = []
   }
 
@@ -30,7 +31,7 @@
 
     const scroller = createScroller(async () => {
       // Drop notes at the top if there are a lot
-      notes = notes.concat(await loadNotes()).slice(-maxNotes)
+      notes = uniqBy(prop('id'), notes.concat(await loadNotes()).slice(-maxNotes))
     })
 
     return async () => {

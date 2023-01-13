@@ -129,16 +129,12 @@ export const getLastSync = (k, fallback = 0) => {
 }
 
 export class Cursor {
-  constructor(delta) {
-    this.since = now()
+  constructor(limit = 10) {
     this.until = now()
-    this.delta = delta
+    this.limit = limit
   }
-  step() {
-    this.until = this.since
-    this.since -= this.delta
-
-    return [this.since, this.until]
+  onChunk(events) {
+    this.until = events.reduce((t, e) => Math.min(t, e.created_at), this.until)
   }
 }
 

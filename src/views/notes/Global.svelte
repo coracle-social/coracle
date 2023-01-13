@@ -1,13 +1,13 @@
 <script>
   import Notes from "src/partials/Notes.svelte"
-  import {timedelta, Cursor, now, batch} from 'src/util/misc'
+  import {Cursor, now, batch} from 'src/util/misc'
   import {getRelays, getMuffle, listen, load} from 'src/agent'
   import loaders from 'src/app/loaders'
   import query from 'src/app/query'
 
   const relays = getRelays()
   const filter = {kinds: [1, 5, 7]}
-  const cursor = new Cursor(timedelta(1, 'minutes'))
+  const cursor = new Cursor()
 
   const listenForNotes = onNotes =>
     listen(relays, {...filter, since: now()}, batch(300, async notes => {
@@ -17,9 +17,13 @@
     }))
 
   const loadNotes = async () => {
-    const [since, until] = cursor.step()
-    const notes = await load(relays, {...filter, since, until})
+    const {limit, until} = cursor
+    const notes = await load(relays, {...filter, limit, until})
     const context = await loaders.loadContext(relays, notes)
+
+    console.log('========')
+    console.log({notes, context})
+    console.log(query.threadify(notes, context, {muffle: getMuffle()}))
 
     return query.threadify(notes, context, {muffle: getMuffle()})
   }

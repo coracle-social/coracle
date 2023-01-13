@@ -38,6 +38,7 @@ If you like Coracle and want to support its development, you can donate sats via
   - Capture certain events in a local db
   - File import/export from db, NFC transfer
 - [ ] Save user notes to db
+- [ ] Release to android with https://svelte-native.technology/docs
 
 # Bugs
 
@@ -62,18 +63,17 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Add settings storage on nostr, maybe use kind 0?
 - [ ] Warn that everything will be cleared on logout
 - [ ] Clean up login page to prefer extension, make private key entry "advanced"
-- [ ] Do I need to implement re-connecting now?
+- [ ] Connection management
+  - [ ] Do I need to implement re-connecting now?
+  - [ ] Handle failed connections
+  - [ ] Close connections that haven't been used in a while
 - [ ] Improve login UX for bootstrap delay. Nostr facts?
-- [ ] Revisit pagination. Use bigger timedelta + limit, set earliest seen timestamp when paginating? Handle no results on page.
 - [ ] We often get the root as the reply, figure out why that is, compared to astral/damus
-- [ ] Alerts still aren't great. Maybe lazy load? We delete old events, so context will disappear and notes will become empty.
-- [ ] Only use dexie for alerts rather than all events
-  - Load feeds by setting a listener since now, paginating using limit (of 2 maybe), and awaiting context for each page. Listener appends to "newNotes", cursor appends to "notes", load more moves new notes into notes. Use the note originally loaded as the anchor, don't re-process the whole list
-- [ ] Close connections that haven't been used in a while
 - [ ] Load feeds from network rather than user relays? This could make global feed more useful: global for _my_ relays
-- [ ] Release to android with https://svelte-native.technology/docs
-- [ ] Compress is taking too long and messing up the ui, maybe use dexie for people?
-- [ ] Move people to nprofile via bech32 entity (or redirect from there)
+
+## 0.2.7
+
+- [x]
 
 ## 0.2.6
 

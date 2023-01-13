@@ -7,7 +7,7 @@
   import {navigate} from 'svelte-routing'
   import {quantify} from 'hurdak/lib/hurdak'
   import {hasParent} from 'src/util/html'
-  import {findReply, isLike} from "src/util/nostr"
+  import {findReply, findReplyId, isLike} from "src/util/nostr"
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import {settings, modal} from "src/app"
@@ -47,9 +47,10 @@
   }
 
   const goToParent = async () => {
-    const parent = {id: findReply(note)[1]}
+    const [id, url] = findReply(note).slice(1)
+    const relays = getEventRelays(note).concat(url)
 
-    modal.set({note: parent, relays})
+    modal.set({note: {id}, relays})
   }
 
   const react = async content => {
@@ -125,7 +126,7 @@
   <div class="ml-6 flex flex-col gap-2">
     {#if findReply(note) && showParent}
       <small class="text-light">
-        Reply to <Anchor on:click={goToParent}>{findReply(note)[1].slice(0, 8)}</Anchor>
+        Reply to <Anchor on:click={goToParent}>{findReplyId(note).slice(0, 8)}</Anchor>
       </small>
     {/if}
     {#if flag}

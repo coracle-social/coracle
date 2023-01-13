@@ -49,10 +49,11 @@
   let menuIcon
   let scrollY
   let suspendedSubs = []
-  let {since, latest} = alerts
+  let {lastCheckedAlerts, mostRecentAlert} = alerts
 
   onMount(() => {
     if ($user) {
+      alerts.load(getRelays(), $user.pubkey)
       alerts.listen(getRelays(), $user.pubkey)
     }
 
@@ -128,7 +129,7 @@
       <li class="cursor-pointer relative">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/alerts">
           <i class="fa-solid fa-bell mr-2" /> Alerts
-          {#if $latest > $since}
+          {#if $mostRecentAlert > $lastCheckedAlerts}
           <div class="w-2 h-2 rounded bg-accent absolute top-3 left-6" />
           {/if}
         </a>
@@ -184,7 +185,7 @@
         <img src="/images/favicon.png" class="w-8" />
         <h1 class="staatliches text-3xl">Coracle</h1>
       </Anchor>
-      {#if $latest > $since}
+      {#if $mostRecentAlert > $lastCheckedAlerts}
       <div class="w-2 h-2 rounded bg-accent absolute top-4 left-12" />
       {/if}
     </div>

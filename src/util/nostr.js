@@ -1,4 +1,4 @@
-import {last, prop} from 'ramda'
+import {last, prop, flatten, uniq} from 'ramda'
 import {nip19} from 'nostr-tools'
 import {ensurePlural, first} from 'hurdak/lib/hurdak'
 
@@ -24,12 +24,10 @@ export class Tags {
     return last(this.tags)
   }
   relays() {
-    return this.tags
-      .map(t => t[3])
-      .filter(url => typeof url === 'string' && url.startsWith('ws'))
+    return uniq(flatten(this.tags).filter(isRelay))
   }
   values() {
-    this.tags = this.tags.map(t => t[0])
+    this.tags = this.tags.map(t => t[1])
 
     return this
   }
@@ -51,8 +49,12 @@ export const getTagValues = tags => tags.map(t => t[1])
 export const findReply = e =>
   Tags.from(e).type("e").mark("reply").first() || Tags.from(e).type("e").first()
 
+export const findReplyId = e => first(Tags.wrap(findReply(e)).values())
+
 export const findRoot = e =>
   Tags.from(e).type("e").mark("root").first()
+
+export const findRootId = e => first(Tags.wrap(findRoot(e)).values())
 
 export const displayPerson = p => {
   if (p.name) {
@@ -77,3 +79,6 @@ export const isAlert = (e, pubkey) => {
 
   return true
 }
+
+export const isRelay = url => typeof url === 'string' && url.match(/^wss?:\/\/.+/)
+
