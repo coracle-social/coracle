@@ -1,33 +1,33 @@
 <script>
   import Notes from "src/partials/Notes.svelte"
-  import {timedelta, Cursor} from 'src/util/misc'
-  import {getTagValues} from 'src/util/nostr'
-  import {load, user, getRelays} from 'src/agent'
+  import {now, timedelta, shuffle, batch, Cursor} from 'src/util/misc'
+  import {getRelays, getFollows, getMuffle, listen, load} from 'src/agent'
   import loaders from 'src/app/loaders'
   import query from 'src/app/query'
 
-  export let person
+  export let pubkey
 
+  const relays = getRelays(pubkey)
+  const follows = getFollows(pubkey)
+  const network = shuffle(follows.flatMap(getFollows)).slice(0, 50)
+  const authors = follows.concat(network)
+  const filter = {kinds: [1, 7], authors}
   const cursor = new Cursor(timedelta(1, 'hours'))
+
+  const listenForNotes = onNotes =>
+    listen(relays, {...filter, since: now()}, batch(300, async notes => {
+      const context = await loaders.loadContext(relays, notes)
+
+      onNotes(query.threadify(notes, context, {muffle: getMuffle()}))
+    }))
 
   const loadNotes = async () => {
     const [since, until] = cursor.step()
-    const authors = getTagValues(person.petnames)
-    const filter = {since, until, kinds: [1], authors}
-    const events = await load(getRelays(person.pubkey), filter)
+    const notes = await load(relays, {...filter, since, until})
+    const context = await loaders.loadContext(relays, notes)
 
-    await loaders.loadNotesContext(getRelays(person.pubkey), events, {loadParents: true})
-  }
-
-  const queryNotes = () => {
-    return query.filterEvents({
-      kinds: [1],
-      since: cursor.since,
-      authors: getTagValues(person.petnames),
-      muffle: getTagValues($user?.muffle || []),
-    })
+    return query.threadify(notes, context, {muffle: getMuffle()})
   }
 </script>
 
-<Notes shouldMuffle {loadNotes} {queryNotes} />
-
+<Notes {listenForNotes} {loadNotes} />

@@ -1,7 +1,7 @@
 import {without} from 'ramda'
 import {updateIn, mergeRight} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
-import {getPerson, getRelays, people, load, keys, db} from 'src/agent'
+import {getPerson, getRelays, people, load, keys} from 'src/agent'
 import {toast, modal, settings} from 'src/app/ui'
 import cmd from 'src/app/cmd'
 import alerts from 'src/app/alerts'
@@ -19,15 +19,6 @@ export const login = async ({privkey, pubkey}) => {
 
   await loaders.loadNetwork(getRelays(), pubkey)
   await alerts.listen(getRelays(), pubkey)
-}
-
-export const logout = async () => {
-  keys.clear()
-
-  await Promise.all([
-    db.tags.clear(),
-    db.events.clear(),
-  ])
 }
 
 export const addRelay = async url => {

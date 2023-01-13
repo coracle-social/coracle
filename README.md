@@ -37,6 +37,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Add no-relay gossip
   - Capture certain events in a local db
   - File import/export from db, NFC transfer
+- [ ] Save user notes to db
 
 # Bugs
 

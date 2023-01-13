@@ -22,7 +22,9 @@ const loadPeople = (relays, pubkeys, {kinds = personKinds, force = false, ...opt
     pubkeys = getStalePubkeys(pubkeys)
   }
 
-  return pubkeys.length > 0 ? load(relays, {kinds, authors: pubkeys}, opts) : []
+  return pubkeys.length > 0
+    ? load(relays, {kinds, authors: pubkeys}, opts)
+    : Promise.resolve([])
 }
 
 const loadNetwork = async (relays, pubkey) => {
@@ -45,7 +47,8 @@ const loadNetwork = async (relays, pubkey) => {
 }
 
 const loadContext = async (relays, notes, {loadParents = true} = {}) => {
-  notes = ensurePlural(notes)
+  // TODO: remove this and batch context loading, or load less at a time
+  notes = ensurePlural(notes).slice(0, 256)
 
   if (notes.length === 0) {
     return notes
@@ -76,36 +79,4 @@ const loadContext = async (relays, notes, {loadParents = true} = {}) => {
   return events.concat(await loadContext(relays, parents, {loadParents: false}))
 }
 
-const loadNotesContext = async (relays, notes, {loadParents = false} = {}) => {
-  notes = ensurePlural(notes)
-
-  if (notes.length === 0) {
-    return
-  }
-
-  const authors = uniq(pluck('pubkey', notes)).filter(k => !getPerson(k))
-  const parentIds = loadParents ? uniq(notes.map(findReply).filter(identity)) : []
-  const filter = [{kinds: [1, 5, 7], '#e': pluck('id', notes)}]
-
-  // Load authors if needed
-  if (authors.length > 0) {
-    filter.push({kinds: personKinds, authors})
-  }
-
-  // Load the note parents
-  if (parentIds.length > 0) {
-    filter.push({kinds: [1], ids: parentIds})
-  }
-
-  // Load the events
-  const events = await load(relays, filter)
-  const eventsById = createMap('id', events)
-  const parents = parentIds.map(id => eventsById[id]).filter(identity)
-
-  // Load the parents' context as well
-  if (parents.length > 0) {
-    await loadNotesContext(relays, parents)
-  }
-}
-
-export default {loadNotesContext, loadNetwork, loadPeople, personKinds, loadContext}
+export default {loadNetwork, loadPeople, personKinds, loadContext}

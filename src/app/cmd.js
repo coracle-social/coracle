@@ -38,7 +38,7 @@ const createReaction = (relays, note, content) => {
       .concat([["p", note.pubkey, relay], ["e", note.id, relay, 'reply']])
   )
 
-  publishEvent(relays, 7, {content, tags})
+  return publishEvent(relays, 7, {content, tags})
 }
 
 const createReply = (relays, note, content, mentions = []) => {

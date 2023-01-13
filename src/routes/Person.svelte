@@ -1,13 +1,12 @@
 <script>
-  import {find, propEq, reject} from 'ramda'
+  import {find, reject} from 'ramda'
   import {onMount, onDestroy} from 'svelte'
   import {nip19} from 'nostr-tools'
   import {first} from 'hurdak/lib/hurdak'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
-  import {now, batch} from 'src/util/misc'
   import {renderContent} from 'src/util/html'
-  import {displayPerson, personKinds} from 'src/util/nostr'
+  import {displayPerson} from 'src/util/nostr'
   import Tabs from "src/partials/Tabs.svelte"
   import Button from "src/partials/Button.svelte"
   import Notes from "src/views/person/Notes.svelte"
@@ -30,24 +29,12 @@
   let person = getPerson(pubkey, true)
 
   onMount(async () => {
-    subs.push(await listen(
-      getRelays(pubkey),
-      [{kinds: [1, 5, 7], authors: [pubkey], since: now()},
-       {kinds: personKinds, authors: [pubkey]}],
-      batch(300, events => {
-        const profiles = events.filter(propEq('kind', 0))
-        const notes = events.filter(propEq('kind', 1))
+    // Refresh our person if needed
+    loaders.loadPeople(getRelays(pubkey), [pubkey]).then(() => {
+      person = getPerson(pubkey, true)
+    })
 
-        if (profiles.length > 0) {
-          person = getPerson(pubkey, true)
-        }
-
-        if (notes.length > 0) {
-          loaders.loadNoteContext(notes)
-        }
-      })
-    ))
-
+    // Get our followers count
     subs.push(await listen(
       getRelays(pubkey),
       [{kinds: [3], '#p': [pubkey]}],

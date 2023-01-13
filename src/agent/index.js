@@ -31,6 +31,12 @@ export const getMuffle = () => {
   return getTagValues($user.muffle.filter(t => Math.random() < last(t)))
 }
 
+export const getFollows = pubkey => {
+  const person = getPerson(pubkey)
+
+  return getTagValues(person?.petnames || defaults.petnames)
+}
+
 export const getRelays = pubkey => {
   let relays = getPerson(pubkey)?.relays
 

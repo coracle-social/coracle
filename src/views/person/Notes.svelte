@@ -1,30 +1,31 @@
 <script>
   import Notes from "src/partials/Notes.svelte"
-  import {timedelta, Cursor} from 'src/util/misc'
-  import {load, getRelays} from 'src/agent'
+  import {timedelta, now, batch, Cursor} from 'src/util/misc'
+  import {load, listen, getRelays, getMuffle} from 'src/agent'
   import loaders from 'src/app/loaders'
   import query from 'src/app/query'
 
   export let pubkey
 
+  const relays = getRelays(pubkey)
+  const filter = {kinds: [1], authors: [pubkey]}
   const cursor = new Cursor(timedelta(1, 'days'))
+
+  const listenForNotes = onNotes =>
+    listen(relays, {...filter, since: now()}, batch(300, async notes => {
+      const context = await loaders.loadContext(relays, notes)
+
+      onNotes(query.threadify(notes, context, {muffle: getMuffle()}))
+    }))
 
   const loadNotes = async () => {
     const [since, until] = cursor.step()
-    const filter = {kinds: [1], authors: [pubkey], since, until}
-    const notes = await load(getRelays(pubkey), filter)
+    const notes = await load(relays, {...filter, since, until})
+    const context = await loaders.loadContext(relays, notes)
 
-    await loaders.loadNotesContext(getRelays(pubkey), notes, {loadParents: true})
-  }
-
-  const queryNotes = () => {
-    return query.filterEvents({
-      kinds: [1],
-      since: cursor.since,
-      authors: [pubkey],
-    })
+    return query.threadify(notes, context, {muffle: getMuffle()})
   }
 </script>
 
-<Notes shouldMuffle {loadNotes} {queryNotes} />
+<Notes {listenForNotes} {loadNotes} />
 

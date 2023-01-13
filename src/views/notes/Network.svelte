@@ -1,17 +1,9 @@
 <script>
   import Notes from "src/partials/Notes.svelte"
   import {now, timedelta, shuffle, batch, Cursor} from 'src/util/misc'
-  import {getTagValues} from 'src/util/nostr'
-  import {user, getRelays, getMuffle, getPerson, listen, load} from 'src/agent'
-  import defaults from 'src/agent/defaults'
+  import {user, getRelays, getFollows, getMuffle, listen, load} from 'src/agent'
   import loaders from 'src/app/loaders'
   import query from 'src/app/query'
-
-  const getFollows = pubkey => {
-    const person = getPerson(pubkey)
-
-    return getTagValues(person?.petnames || defaults.petnames)
-  }
 
   // Get first- and second-order follows. shuffle and slice network so we're not
   // sending too many pubkeys. This will also result in some variety.

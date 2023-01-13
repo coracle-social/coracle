@@ -1,4 +1,3 @@
-import LZ from 'lz-string'
 import {debounce} from 'throttle-debounce'
 import {pluck, sortBy} from "ramda"
 import Fuse from "fuse.js/dist/fuse.min.js"
@@ -17,7 +16,7 @@ export const hash = s =>
 
 export const getLocalJson = (k) => {
   try {
-    return JSON.parse(LZ.decompress(localStorage.getItem(k)))
+    return JSON.parse(localStorage.getItem(k))
   } catch (e) {
     console.warn(`Unable to parse ${k}: ${e}`)
 
@@ -25,9 +24,9 @@ export const getLocalJson = (k) => {
   }
 }
 
-export const setLocalJson = (k, v, compressed = false) => {
+export const setLocalJson = (k, v) => {
   try {
-    localStorage.setItem(k, LZ.compress(JSON.stringify(v)))
+    localStorage.setItem(k, JSON.stringify(v))
   } catch (e) {
     console.warn(`Unable to set ${k}: ${e}`)
   }
