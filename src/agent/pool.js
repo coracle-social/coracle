@@ -1,59 +1,93 @@
 import {relayInit} from 'nostr-tools'
-import {uniqBy, is, filter, identity, prop} from 'ramda'
-import {isRelay} from 'src/util/nostr'
+import {uniqBy, prop, find, whereEq, is, filter, identity} from 'ramda'
 import {ensurePlural} from 'hurdak/lib/hurdak'
+import {isRelay} from 'src/util/nostr'
+import {sleep} from 'src/util/misc'
 
-const relays = {}
+const connections = []
 
-const init = url => {
-  const relay = relayInit(url)
+class Connection {
+  constructor(url) {
+    this.nostr = this.init(url)
+    this.status = 'new'
+    this.url = url
+    this.stats = {
+      count: 0,
+      timer: 0,
+      timeouts: 0,
+      activeCount: 0,
+    }
 
-  relay.url = url
-  relay.stats = {
-    count: 0,
-    timer: 0,
-    timeouts: 0,
-    activeCount: 0,
+    connections.push(this)
   }
+  init(url) {
+    const nostr = relayInit(url)
 
-  relay.on('error', () => {
-    console.log(`failed to connect to ${url}`)
-  })
+    nostr.on('error', () => {
+      console.log(`failed to connect to ${url}`)
+    })
 
-  relay.on('disconnect', () => {
-    delete relays[url]
-  })
+    nostr.on('disconnect', () => {
+      delete connections[url]
+    })
 
-  // Do initialization synchonously and wait on retrieval
-  // so we don't open multiple connections simultaneously
-  return relay.connect().then(
-    () => relay,
-    e => console.log(`Failed to connect to ${url}: ${e}`)
-  )
+    return nostr
+  }
+  async connect() {
+    const shouldConnect = (
+      this.status === 'new'
+      || (
+        this.status === 'error'
+        && Date.now() - this.lastRequest > 30_000
+      )
+    )
+
+    if (shouldConnect) {
+      this.status = 'pending'
+
+      try {
+        await this.nostr.connect()
+        this.status = 'ready'
+      } catch (e) {
+        console.error(`Failed to connect to ${this.url}: ${e}`)
+        this.status = 'error'
+      }
+    }
+
+    this.lastRequest = Date.now()
+
+    return this
+  }
 }
 
-const connect = url => {
-  if (!relays[url]) {
-    relays[url] = init(url)
-  }
+const findConnection = url => find(whereEq({url}), connections)
 
-  return relays[url]
+const connect = async url => {
+  const conn = findConnection(url) || new Connection(url)
+
+  await Promise.race([conn.connect(), sleep(5000)])
+
+  if (conn.status === 'ready') {
+    return conn
+  }
 }
 
-const publish = async (urls, event) => {
+const publish = async (relays, event) => {
   return Promise.all(
-    urls.filter(isRelay).map(async url => {
-      const relay = await connect(url)
+    relays.filter(r => r.read !== '!' & isRelay(r.url)).map(async relay => {
+      const conn = await connect(relay.url)
 
-      if (relay) {
-        return relay.publish(event)
+      if (conn) {
+        return conn.nostr.publish(event)
       }
     })
   )
 }
 
-const describeFilter = filter => {
+const describeFilter = ({kinds = [], ...filter}) => {
   let parts = []
+
+  parts.push(kinds.join(','))
 
   for (const [key, value] of Object.entries(filter)) {
     if (is(Array, value)) {
@@ -63,10 +97,11 @@ const describeFilter = filter => {
     }
   }
 
-  return parts.join(',')
+  return '(' + parts.join(',') + ')'
 }
 
-const subscribe = async (urls, filters) => {
+const subscribe = async (relays, filters) => {
+  relays = uniqBy(prop('url'), relays.filter(r => isRelay(r.url)))
   filters = ensurePlural(filters)
 
   // Create a human readable subscription id for debugging
@@ -75,25 +110,22 @@ const subscribe = async (urls, filters) => {
     filters.map(describeFilter).join(':'),
   ].join('-')
 
-  console.log(filters, id)
-
   const subs = filter(identity, await Promise.all(
-    urls.filter(isRelay).map(async url => {
-      const relay = await connect(url)
+    relays.map(async relay => {
+      const conn = await connect(relay.url)
 
       // If the relay failed to connect, give up
-      if (!relay) {
+      if (!conn) {
         return null
       }
 
+      const sub = conn.nostr.sub(filters, {id})
 
-      const sub = relay.sub(filters, {id})
+      sub.conn = conn
+      sub.conn.stats.activeCount += 1
 
-      sub.relay = relay
-      sub.relay.stats.activeCount += 1
-
-      if (sub.relay.stats.activeCount > 10) {
-        console.warn(`Relay ${url} has >10 active subscriptions`)
+      if (sub.conn.stats.activeCount > 10) {
+        console.warn(`Relay ${sub.url} has >10 active subscriptions`)
       }
 
       return sub
@@ -103,17 +135,18 @@ const subscribe = async (urls, filters) => {
   const seen = new Set()
 
   return {
+    subs,
     unsub: () => {
       subs.forEach(sub => {
         sub.unsub()
-        sub.relay.stats.activeCount -= 1
+        sub.conn.stats.activeCount -= 1
       })
     },
     onEvent: cb => {
       subs.forEach(sub => {
         sub.on('event', e => {
           if (!seen.has(e.id)) {
-            e.seen_on = sub.relay.url
+            e.seen_on = sub.conn.url
             seen.add(e.id)
             cb(e)
           }
@@ -122,60 +155,69 @@ const subscribe = async (urls, filters) => {
     },
     onEose: cb => {
       subs.forEach(sub => {
-        sub.on('eose', () => cb(sub.relay.url))
+        sub.on('eose', () => cb(sub.conn.url))
       })
     },
   }
 }
 
-const request = (urls, filters) => {
-  urls = urls.filter(isRelay)
+const request = (relays, filters) => {
+  relays = uniqBy(prop('url'), relays.filter(r => isRelay(r.url)))
 
   return new Promise(async resolve => {
-    const subscription = await subscribe(urls, filters)
+    const agg = await subscribe(relays, filters)
     const now = Date.now()
     const events = []
     const eose = []
 
-    const done = () => {
-      subscription.unsub()
+    const attemptToComplete = () => {
+      // If we have all relays, most after a short timeout, or all after
+      // a long timeout, go ahead and unsubscribe.
+      const done = (
+        eose.length === agg.subs.length
+        || Date.now() - now >= 5000
+        || (
+          Date.now() - now >= 1000
+          && eose.length > agg.subs.length - Math.round(agg.subs.length / 10)
+        )
+      )
 
-      resolve(uniqBy(prop('id'), events))
+      if (done) {
+        agg.unsub()
+        resolve(events)
 
-      // Keep track of relay timeouts
-      urls.forEach(async url => {
-        if (!eose.includes(url)) {
-          const relay = await connect(url)
+        // Keep track of relay timeouts
+        agg.subs.forEach(async sub => {
+          if (!eose.includes(sub.conn.url)) {
+            const conn = findConnection(sub.conn.url)
 
-          // Relay may be undefined if we failed to connect
-          if (relay) {
-            relay.stats.count += 1
-            relay.stats.timer += Date.now() - now
-            relay.stats.timeouts += 1
+            conn.stats.count += 1
+            conn.stats.timer += Date.now() - now
+            conn.stats.timeouts += 1
           }
-        }
-      })
+        })
+      }
     }
 
-    subscription.onEvent(e => events.push(e))
+    agg.onEvent(e => events.push(e))
 
-    subscription.onEose(async url => {
-      const relay = await relays[url]
+    agg.onEose(async url => {
+      const conn = findConnection(url)
 
-      eose.push(url)
+      if (!eose.includes(url)) {
+        eose.push(url)
 
-      // Keep track of relay timing stats
-      relay.stats.count += 1
-      relay.stats.timer += Date.now() - now
-
-      if (eose.length === urls.length) {
-        done()
+        // Keep track of relay timing stats
+        conn.stats.count += 1
+        conn.stats.timer += Date.now() - now
       }
+
+      attemptToComplete()
     })
 
     // If a relay takes too long, give up
-    setTimeout(done, 5000)
+    setTimeout(attemptToComplete, 5000)
   })
 }
 
-export default {relays, connect, publish, subscribe, request}
+export default {connect, publish, subscribe, request}

@@ -58,18 +58,24 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Use user relays for feeds
 - [x] Publish to user relays + target relays:
 - [x] Add correct recommended relay to tags
-- [ ] Support some read/write config on relays page
-- [ ] Get real home relays for default pubkeys
+- [ ] Relays
+  - [ ] Support some read/write config
+  - [ ] Get real home relays for defaults.petnames
+  - [ ] Add support for astral's relay hack (but don't publish to it)
 - [ ] Add settings storage on nostr, maybe use kind 0?
 - [ ] Warn that everything will be cleared on logout
-- [ ] Clean up login page to prefer extension, make private key entry "advanced"
+- [ ] Login
+  - [ ] Prefer extension, make private key entry "advanced"
+  - [ ] Improve login UX for bootstrap delay. Nostr facts?
 - [ ] Connection management
   - [ ] Do I need to implement re-connecting now?
   - [ ] Handle failed connections
   - [ ] Close connections that haven't been used in a while
-- [ ] Improve login UX for bootstrap delay. Nostr facts?
 - [ ] We often get the root as the reply, figure out why that is, compared to astral/damus
-- [ ] Load feeds from network rather than user relays? This could make global feed more useful: global for _my_ relays
+- [ ] Load feeds from network rather than user relays?
+  - Still use "my" relays for global, this could make global feed more useful
+- [ ] Figure out migrations from previous version
+- [ ] Add relays/mentions to note and reply composition
 
 ## 0.2.7
 

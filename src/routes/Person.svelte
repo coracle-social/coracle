@@ -59,7 +59,7 @@
     following = true
 
     const relay = first(relays || getRelays(pubkey))
-    const tag = ["p", pubkey, relay, person.name || ""]
+    const tag = ["p", pubkey, relay.url, person.name || ""]
     const petnames = reject(t => t[1] === pubkey, $user.petnames).concat(tag)
 
     cmd.setPetnames(getRelays(), petnames)

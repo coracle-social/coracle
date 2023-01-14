@@ -2,7 +2,7 @@
   import cx from 'classnames'
   import extractUrls from 'extract-urls'
   import {nip19} from 'nostr-tools'
-  import {whereEq, reject, propEq, find} from 'ramda'
+  import {whereEq, pluck, reject, propEq, find} from 'ramda'
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {quantify} from 'hurdak/lib/hurdak'
@@ -10,7 +10,7 @@
   import {findReply, findReplyId, isLike} from "src/util/nostr"
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
-  import {settings, modal} from "src/app"
+  import {settings, modal, render} from "src/app"
   import {formatTimestamp} from 'src/util/misc'
   import Badge from "src/partials/Badge.svelte"
   import Compose from "src/partials/Compose.svelte"
@@ -27,7 +27,8 @@
   let reply = null
 
   const links = $settings.showLinkPreviews ? extractUrls(note.content) || [] : null
-  const interactive = !anchorId || anchorId !== note.id
+  const showEntire = anchorId === note.id
+  const interactive = !anchorId || !showEntire
   const relays = getEventRelays(note)
 
   let likes, flags, like, flag
@@ -48,7 +49,7 @@
 
   const goToParent = async () => {
     const [id, url] = findReply(note).slice(1)
-    const relays = getEventRelays(note).concat(url)
+    const relays = getEventRelays(note).concat({url})
 
     modal.set({note: {id}, relays})
   }
@@ -117,7 +118,7 @@
   <div class="flex gap-4 items-center justify-between">
     <Badge person={getPerson(note.pubkey, true)} />
     <Anchor
-      href={"/" + nip19.neventEncode({id: note.id, relays})}
+      href={"/" + nip19.neventEncode({id: note.id, relays: pluck('url', relays)})}
       class="text-sm text-light"
       type="unstyled">
       {formatTimestamp(note.created_at)}
@@ -136,7 +137,7 @@
     </p>
     {:else}
     <div class="text-ellipsis overflow-hidden flex flex-col gap-2">
-      <p>{@html note.html}</p>
+      <p>{@html render(note, {showEntire})}</p>
       {#each links.slice(-2) as link}
       <div>
         <div class="inline-block" on:click={e => e.stopPropagation()}>
@@ -150,7 +151,7 @@
         <i
           class="fa-solid fa-reply cursor-pointer"
           on:click={startReply} />
-        {note.repliesCount}
+        {note.replies.length}
       </div>
       <div class={cx({'text-accent': like})}>
         <i
@@ -185,13 +186,13 @@
 
 {#if depth > 0}
 <div class="ml-5 border-l border-solid border-medium">
-  {#if note.repliesCount > 3 && note.replies.length < note.repliesCount}
+  {#if !showEntire && note.replies.length > 3}
   <div class="ml-5 py-2 text-light cursor-pointer" on:click={onClick}>
     <i class="fa-solid fa-up-down text-sm pr-2" />
-    Show {quantify(note.repliesCount - note.replies.length, 'other reply', 'more replies')}
+    Show {quantify(note.replies.length - 3, 'other reply', 'more replies')}
   </div>
   {/if}
-  {#each note.replies as r (r.id)}
+  {#each note.replies.slice(showEntire ? 0 : -3) as r (r.id)}
   <svelte:self showParent={false} note={r} depth={depth - 1} {invertColors} {anchorId} />
   {/each}
 </div>

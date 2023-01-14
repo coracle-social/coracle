@@ -28,23 +28,35 @@ people.subscribe($p => {
 export const getPerson = (pubkey, fallback = false) =>
   $people[pubkey] || (fallback ? {pubkey} : null)
 
+export const updatePeople = async updates => {
+  // Sync to our in memory copy
+  people.update($people => ({...$people, ...updates}))
+
+  // Sync to our database
+  await db.people.bulkPut(Object.values(updates))
+}
+
 // Hooks
 
 export const processEvents = async events => {
   const profileEvents = ensurePlural(events)
     .filter(e => personKinds.includes(e.kind))
 
-  const profileUpdates = {}
+  const updates = {}
   for (const e of profileEvents) {
-    profileUpdates[e.pubkey] = {
+    updates[e.pubkey] = {
       ...getPerson(e.pubkey, true),
-      ...profileUpdates[e.pubkey],
+      ...updates[e.pubkey],
       ...switcherFn(e.kind, {
         0: () => JSON.parse(e.content),
-        2: () => ({relays: ($people[e.pubkey]?.relays || []).concat(e.content)}),
+        2: () => ({
+          relays: ($people[e.pubkey]?.relays || []).concat({url: e.content}),
+        }),
         3: () => ({petnames: e.tags}),
         12165: () => ({muffle: e.tags}),
-        10001: () => ({relays: e.tags.map(t => t[0])}),
+        10001: () => ({
+          relays: e.tags.map(([url, read, write]) => ({url, read, write})),
+        }),
         default: () => {
           console.log(`Received unsupported event type ${event.kind}`)
         },
@@ -53,9 +65,5 @@ export const processEvents = async events => {
     }
   }
 
-  // Sync to our in memory copy
-  people.update($people => ({...$people, ...profileUpdates}))
-
-  // Sync to our database
-  await db.people.bulkPut(Object.values(profileUpdates))
+  await updatePeople(updates)
 }

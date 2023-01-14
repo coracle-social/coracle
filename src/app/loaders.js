@@ -1,4 +1,4 @@
-import {uniq, flatten, pluck, groupBy, identity} from 'ramda'
+import {uniqBy, prop, uniq, flatten, pluck, groupBy, identity} from 'ramda'
 import {ensurePlural, createMap, chunk} from 'hurdak/lib/hurdak'
 import {findReply, personKinds, Tags, getTagValues} from 'src/util/nostr'
 import {now, timedelta} from 'src/util/misc'
@@ -78,7 +78,13 @@ const loadContext = async (relays, notes, {loadParents = true} = {}) => {
       const parents = getTagValues(parentTags).map(id => eventsById[id]).filter(identity)
       const parentRelays = Tags.from(parents).relays()
 
-      return events.concat(await loadContext(parentRelays, parents, {loadParents: false}))
+      // We're recurring and so may end up with duplicates here
+      return uniqBy(
+        prop('id'),
+        events.concat(
+          await loadContext(parentRelays, parents, {loadParents: false})
+        )
+      )
     })
   ))
 }

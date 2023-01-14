@@ -6,6 +6,7 @@
   import {createScroller} from 'src/util/misc'
   import Spinner from 'src/partials/Spinner.svelte'
   import Note from "src/partials/Note.svelte"
+  import {modal} from "src/app"
 
   export let loadNotes
   export let listenForNotes
@@ -30,6 +31,10 @@
     })
 
     const scroller = createScroller(async () => {
+      if ($modal) {
+        return
+      }
+
       // Drop notes at the top if there are a lot
       notes = uniqBy(prop('id'), notes.concat(await loadNotes()).slice(-maxNotes))
     })

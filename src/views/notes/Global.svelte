@@ -3,7 +3,7 @@
   import {Cursor, now, batch} from 'src/util/misc'
   import {getRelays, getMuffle, listen, load} from 'src/agent'
   import loaders from 'src/app/loaders'
-  import query from 'src/app/query'
+  import {threadify} from 'src/app'
 
   const relays = getRelays()
   const filter = {kinds: [1, 5, 7]}
@@ -13,7 +13,7 @@
     listen(relays, {...filter, since: now()}, batch(300, async notes => {
       const context = await loaders.loadContext(relays, notes)
 
-      onNotes(query.threadify(notes, context, {muffle: getMuffle()}))
+      onNotes(threadify(notes, context, {muffle: getMuffle()}))
     }))
 
   const loadNotes = async () => {
@@ -21,11 +21,7 @@
     const notes = await load(relays, {...filter, limit, until})
     const context = await loaders.loadContext(relays, notes)
 
-    console.log('========')
-    console.log({notes, context})
-    console.log(query.threadify(notes, context, {muffle: getMuffle()}))
-
-    return query.threadify(notes, context, {muffle: getMuffle()})
+    return threadify(notes, context, {muffle: getMuffle()})
   }
 </script>
 

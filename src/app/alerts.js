@@ -3,7 +3,7 @@ import {synced, batch, now} from 'src/util/misc'
 import {isAlert} from 'src/util/nostr'
 import {load as _load, listen as _listen, getMuffle, db} from 'src/agent'
 import loaders from 'src/app/loaders'
-import query from 'src/app/query'
+import {threadify} from 'src/app'
 
 let listener
 
@@ -15,7 +15,7 @@ const onChunk = async (relays, pubkey, events) => {
 
   if (events.length > 0) {
     const context = await loaders.loadContext(relays, events)
-    const notes = query.threadify(events, context, {muffle: getMuffle()})
+    const notes = threadify(events, context, {muffle: getMuffle()})
 
     await db.alerts.bulkPut(notes)
 

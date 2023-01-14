@@ -1,11 +1,14 @@
-import {without} from 'ramda'
+import {whereEq, sortBy, identity, when, assoc, reject} from 'ramda'
+import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
-import {getPerson, getRelays, load, keys} from 'src/agent'
-import {toast, modal, settings} from 'src/app/ui'
+import {renderContent} from 'src/util/html'
+import {Tags, displayPerson, findReplyId} from 'src/util/nostr'
+import {user, people, getPerson, getRelays, load, keys} from 'src/agent'
+import defaults from 'src/agent/defaults'
+import {toast, routes, modal, settings} from 'src/app/ui'
 import cmd from 'src/app/cmd'
 import alerts from 'src/app/alerts'
 import loaders from 'src/app/loaders'
-import query from 'src/app/query'
 
 export {toast, modal, settings, alerts}
 
@@ -23,26 +26,49 @@ export const login = async ({privkey, pubkey}) => {
   ])
 }
 
-export const addRelay = async url => {
-  const pubkey = get(keys.pubkey)
-  const person = getPerson(pubkey)
-  const relays = (person?.relays || []).concat(url)
+export const addRelay = async relay => {
+  const person = get(user)
+  const modify = relays => relays.concat(relay)
 
-  await cmd.setRelays(relays)
+  // Set to defaults to support anonymous usage
+  defaults.relays = modify(defaults.relays)
 
-  await Promise.all([
-    loaders.loadNetwork(getRelays(), pubkey),
-    alerts.load(getRelays(), pubkey),
-    alerts.listen(getRelays(), pubkey),
-  ])
+  if (person) {
+    const relays = modify(person.relays || [])
+
+    // Publish to the new set of relays
+    await cmd.setRelays(relays, relays)
+
+    await Promise.all([
+      loaders.loadNetwork(relays, person.pubkey),
+      alerts.load(relays, person.pubkey),
+      alerts.listen(relays, person.pubkey),
+    ])
+  }
 }
 
 export const removeRelay = async url => {
-  const pubkey = get(keys.pubkey)
-  const person = getPerson(pubkey)
-  const relays = person?.relays || []
+  const person = get(user)
+  const modify = relays => reject(whereEq({url}), relays)
 
-  await cmd.setRelays(without([url], relays))
+  // Set to defaults to support anonymous usage
+  defaults.relays = modify(defaults.relays)
+
+  if (person) {
+    await cmd.setRelays(getRelays(), modify(person.relays || []))
+  }
+}
+
+export const setRelayWriteCondition = async (url, write) => {
+  const person = get(user)
+  const modify = relays => relays.map(when(whereEq({url}), assoc('write', write)))
+
+  // Set to defaults to support anonymous usage
+  defaults.relays = modify(defaults.relays)
+
+  if (person) {
+    await cmd.setRelays(getRelays(), modify(person.relays || []))
+  }
 }
 
 export const loadNote = async (relays, id) => {
@@ -53,10 +79,79 @@ export const loadNote = async (relays, id) => {
   }
 
   const context = await loaders.loadContext(relays, found)
-  const note = query.annotate(found, context, {showEntire: true, depth: 3})
+  const note = annotate(found, context)
 
   // Log this for debugging purposes
   console.log('loadNote', note)
 
   return note
+}
+
+export const render = (note, {showEntire = false}) => {
+  const shouldEllipsize = note.content.length > 500 && !showEntire
+  const $people = get(people)
+  const peopleByPubkey = createMap(
+    'pubkey',
+    Tags.from(note).type("p").values().all().map(k => $people[k]).filter(identity)
+  )
+
+  let content
+
+  // Ellipsize
+  content = shouldEllipsize ? ellipsize(note.content, 500) : note.content
+
+  // Escape html, replace urls
+  content = renderContent(content)
+
+  // Mentions
+  content = content
+    .replace(/#\[(\d+)\]/g, (tag, i) => {
+      if (!note.tags[parseInt(i)]) {
+        return tag
+      }
+
+      const pubkey = note.tags[parseInt(i)][1]
+      const person = peopleByPubkey[pubkey] || {pubkey}
+      const name = displayPerson(person)
+      const path = routes.person(pubkey)
+
+      return `@<a href="${path}" class="underline">${name}</a>`
+    })
+
+  return content
+}
+
+export const annotate = (note, context) => {
+  const reactions = context.filter(e => e.kind === 7 && findReplyId(e) === note.id)
+  const replies = context.filter(e => e.kind === 1 && findReplyId(e) === note.id)
+
+  return {
+    ...note, reactions,
+    person: getPerson(note.pubkey),
+    replies: sortBy(e => e.created_at, replies).map(r => annotate(r, context)),
+  }
+}
+
+export const threadify = (events, context, {muffle = []} = {}) => {
+  const contextById = createMap('id', context)
+
+  // Show parents when possible. For reactions, if there's no parent,
+  // throw it away. Sort by created date descending
+  const notes = sortBy(
+    e => -e.created_at,
+    events
+      .map(e => contextById[findReplyId(e)] || (e.kind === 1 ? e : null))
+      .filter(e => e && !muffle.includes(e.pubkey))
+  )
+
+  // Annotate our feed with parents, reactions, replies
+  return notes.map(note => {
+    let parent = contextById[findReplyId(note)]
+
+    if (parent) {
+      parent = annotate(parent, context)
+    }
+
+    return annotate({...note, parent}, context)
+  })
 }

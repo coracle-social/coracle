@@ -3,7 +3,7 @@
   import {now, Cursor, shuffle, batch} from 'src/util/misc'
   import {user, getRelays, getFollows, getMuffle, listen, load} from 'src/agent'
   import loaders from 'src/app/loaders'
-  import query from 'src/app/query'
+  import {threadify} from 'src/app'
 
   // Get first- and second-order follows. shuffle and slice network so we're not
   // sending too many pubkeys. This will also result in some variety.
@@ -18,7 +18,7 @@
     listen(relays, {...filter, since: now()}, batch(300, async notes => {
       const context = await loaders.loadContext(relays, notes)
 
-      onNotes(query.threadify(notes, context, {muffle: getMuffle()}))
+      onNotes(threadify(notes, context, {muffle: getMuffle()}))
     }))
 
   const loadNotes = async () => {
@@ -28,7 +28,7 @@
 
     cursor.onChunk(notes)
 
-    return query.threadify(notes, context, {muffle: getMuffle()})
+    return threadify(notes, context, {muffle: getMuffle()})
   }
 </script>
 

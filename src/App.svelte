@@ -15,6 +15,7 @@
   import {modal, toast, settings, alerts} from "src/app"
   import {routes} from "src/app/ui"
   import Anchor from 'src/partials/Anchor.svelte'
+  import Spinner from 'src/partials/Spinner.svelte'
   import Modal from 'src/partials/Modal.svelte'
   import NoteDetailModal from "src/views/NoteDetail.svelte"
   import PersonSettings from "src/views/PersonSettings.svelte"
@@ -211,6 +212,9 @@
         <AddRelay />
       {:else if $modal.form === 'person/settings'}
         <PersonSettings />
+      {:else if $modal.message}
+        <p class="text-white text-center p-12">{$modal.message}</p>
+        <Spinner />
       {/if}
     </Modal>
     {/if}

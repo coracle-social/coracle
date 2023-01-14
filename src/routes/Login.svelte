@@ -34,9 +34,9 @@
   const logIn = async ({privkey, pubkey}) => {
     loading = true
 
-    await login({privkey, pubkey})
+    login({privkey, pubkey})
 
-    navigate('/notes/network')
+    navigate('/relays')
   }
 
   const logInWithExtension = async () => {
@@ -64,7 +64,7 @@
   <div class="flex flex-col gap-4 max-w-2xl">
     <div class="flex justify-center items-center flex-col mb-4">
       <h1 class="staatliches text-6xl">Welcome!</h1>
-      <i>To the Nostr Protocol Network</i>
+      <i>To the Nostr Protocol</i>
     </div>
     <div class="flex flex-col gap-4">
       <p>
