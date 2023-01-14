@@ -78,6 +78,22 @@ export const formatTimestampRelative = ts => {
 
 export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
+export const poll = (t, cb) => {
+  let active = true
+
+  ;(async () => {
+    while (active) {
+      cb()
+
+      await sleep(t)
+    }
+  })()
+
+  return () => {
+    active = false
+  }
+}
+
 export const createScroller = loadMore => {
   // NOTE TO FUTURE SELF
   // If the scroller is saturating request channels on a slow relay, the

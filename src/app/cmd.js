@@ -7,8 +7,8 @@ import {keys, publish, getRelays} from 'src/agent'
 const updateUser = (relays, updates) =>
   publishEvent(relays, 0, {content: JSON.stringify(updates)})
 
-const setRelays = (relays, tags) =>
-  publishEvent(relays, 10001, {tags})
+const setRelays = (relays, newRelays) =>
+  publishEvent(relays, 10001, {tags: newRelays.map(r => [r.url, r.read || "", r.write || ""])})
 
 const setPetnames = (relays, petnames) =>
   publishEvent(relays, 3, {tags: petnames})

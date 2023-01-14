@@ -2,6 +2,7 @@
   import "@fortawesome/fontawesome-free/css/fontawesome.css"
   import "@fortawesome/fontawesome-free/css/solid.css"
 
+  import {pluck} from 'ramda'
   import {onMount} from "svelte"
   import {writable, get} from "svelte/store"
   import {fly, fade} from "svelte/transition"
@@ -11,7 +12,7 @@
   import {hasParent} from 'src/util/html'
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, now} from 'src/util/misc'
-  import {user, getRelays} from 'src/agent'
+  import {user, pool, getRelays} from 'src/agent'
   import {modal, toast, settings, alerts} from "src/app"
   import {routes} from "src/app/ui"
   import Anchor from 'src/partials/Anchor.svelte'
@@ -50,6 +51,7 @@
   let menuIcon
   let scrollY
   let suspendedSubs = []
+  let slowConnections = []
   let {lastCheckedAlerts, mostRecentAlert} = alerts
 
   onMount(() => {
@@ -57,6 +59,27 @@
       alerts.load(getRelays(), $user.pubkey)
       alerts.listen(getRelays(), $user.pubkey)
     }
+
+    const interval = setInterval(() => {
+      // Only notify about relays the user is actually subscribed to
+      const relayUrls = pluck('url', getRelays())
+
+      // Prune connections we haven't used in a while
+      pool.getConnections()
+        .filter(conn => conn.lastRequest < Date.now() - 60_000)
+        .forEach(conn => conn.disconnect())
+
+      // Log stats for debugging purposes
+      console.log(
+        'Connection stats',
+        pool.getConnections()
+          .map(({url, stats: s}) => ({url, avgRequest: s.timer / s.count}))
+      )
+
+      // Alert the user to any heinously slow connections
+      slowConnections = pool.getConnections()
+        .filter(({url, stats: s}) => relayUrls.includes(url) && s.timer / s.count > 3000)
+    }, 10_000)
 
     // Close menu on click outside
     document.querySelector("html").addEventListener("click", e => {
@@ -82,6 +105,7 @@
     })
 
     return () => {
+      clearInterval(interval)
       unsubModal()
     }
   })
@@ -89,7 +113,7 @@
 
 <Router {url}>
   <div use:links class="h-full">
-    <div class="pt-16 text-white h-full">
+    <div class="pt-16 text-white h-full lg:ml-56">
       <Route path="/alerts" component={Alerts} />
       <Route path="/search/:type" component={Search} />
       <Route path="/notes/:activeTab" component={Notes} />
@@ -115,7 +139,7 @@
 
     <ul
       class="py-20 w-56 bg-dark fixed top-0 bottom-0 left-0 transition-all shadow-xl
-             border-r border-medium text-white overflow-hidden z-10"
+             border-r border-medium text-white overflow-hidden z-10 lg:ml-0"
       class:-ml-56={!$menuIsOpen}
     >
       {#if $user}
@@ -147,9 +171,12 @@
         </a>
       </li>
       <li class="h-px mx-3 my-4 bg-medium" />
-      <li class="cursor-pointer">
+      <li class="cursor-pointer relative">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/relays">
           <i class="fa-solid fa-server mr-2" /> Relays
+          {#if slowConnections.length > 0}
+          <div class="w-2 h-2 rounded bg-accent absolute top-2 left-8" />
+          {/if}
         </a>
       </li>
       {#if $user}
@@ -181,13 +208,15 @@
       class="fixed top-0 bg-dark flex justify-between items-center text-white w-full p-4
                 border-b border-medium z-10"
     >
-      <i class="fa-solid fa-bars fa-2xl cursor-pointer" bind:this={menuIcon} on:click={toggleMenu} />
+      <div class="lg:hidden">
+        <i class="fa-solid fa-bars fa-2xl cursor-pointer" bind:this={menuIcon} on:click={toggleMenu} />
+      </div>
       <Anchor external type="unstyled" href="https://github.com/staab/coracle" class="flex items-center gap-2">
         <img src="/images/favicon.png" class="w-8" />
         <h1 class="staatliches text-3xl">Coracle</h1>
       </Anchor>
-      {#if $mostRecentAlert > $lastCheckedAlerts}
-      <div class="w-2 h-2 rounded bg-accent absolute top-4 left-12" />
+      {#if $mostRecentAlert > $lastCheckedAlerts || slowConnections.length > 0}
+      <div class="w-2 h-2 rounded bg-accent absolute top-4 left-12 lg:hidden" />
       {/if}
     </div>
 

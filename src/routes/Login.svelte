@@ -34,7 +34,7 @@
   const logIn = async ({privkey, pubkey}) => {
     loading = true
 
-    login({privkey, pubkey})
+    await login({privkey, pubkey})
 
     navigate('/relays')
   }

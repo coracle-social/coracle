@@ -39,15 +39,9 @@ If you like Coracle and want to support its development, you can donate sats via
   - File import/export from db, NFC transfer
 - [ ] Save user notes to db
 - [ ] Release to android with https://svelte-native.technology/docs
-
-# Bugs
-
-- [ ] Add CSP
-- [ ] Reduce reflow on feeds from new stuff coming in
-- [ ] Follow fiatjaf's vision of clients being smart and connecting to recommended relays to fetch content
+- [ ] Add settings storage on nostr, maybe use kind 0?
 - [ ] Stack views so scroll position isn't lost on navigation
-- [ ] Add notification for slow relays, suggest relays based on network
-- [ ] Separating events table into notes/reactions/etc would effectively give us a second index on kind.
+- [ ] Suggest relays based on network
 
 # Changelog
 
@@ -58,24 +52,26 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Use user relays for feeds
 - [x] Publish to user relays + target relays:
 - [x] Add correct recommended relay to tags
-- [ ] Relays
-  - [ ] Support some read/write config
-  - [ ] Get real home relays for defaults.petnames
-  - [ ] Add support for astral's relay hack (but don't publish to it)
-- [ ] Add settings storage on nostr, maybe use kind 0?
-- [ ] Warn that everything will be cleared on logout
+- [x] Relays
+  - [x] Support some read/write config
+  - [x] Get real home relays for defaults.petnames
+  - [x] Add notification for slow relays
+  - [ ] Fix publishing
+  - [ ] Relay list isn't getting refreshed since we're using getRelay everywhere
+- [x] Warn that everything will be cleared on logout
+- [x] Connection management
+  - [x] Do I need to implement re-connecting now?
+  - [x] Handle failed connections
+  - [x] Close connections that haven't been used in a while
 - [ ] Login
   - [ ] Prefer extension, make private key entry "advanced"
   - [ ] Improve login UX for bootstrap delay. Nostr facts?
-- [ ] Connection management
-  - [ ] Do I need to implement re-connecting now?
-  - [ ] Handle failed connections
-  - [ ] Close connections that haven't been used in a while
 - [ ] We often get the root as the reply, figure out why that is, compared to astral/damus
 - [ ] Load feeds from network rather than user relays?
   - Still use "my" relays for global, this could make global feed more useful
 - [ ] Figure out migrations from previous version
 - [ ] Add relays/mentions to note and reply composition
+- [ ] Add layout component with max-w, padding, etc. Test on mobile size
 
 ## 0.2.7
 

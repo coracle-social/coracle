@@ -9,14 +9,20 @@ export const db = new Dexie('agent/data/db')
 db.version(9).stores({
   relays: '++url, name',
   alerts: '++id, created_at',
-  people: '++pubkey, updated_at',
+  people: '++pubkey',
 })
+
+// A flag for hiding things that rely on people being loaded initially
+export const ready = writable(false)
 
 // Some things work better as observables than database tables
 export const people = writable([])
 
 // Bootstrap our people observable
-db.people.toArray().then($p => people.set(createMap('pubkey', $p)))
+db.people.toArray().then($p => {
+  people.set(createMap('pubkey', $p))
+  ready.set(true)
+})
 
 // Sync to a regular object so we have a synchronous interface
 let $people = {}
@@ -44,19 +50,31 @@ export const processEvents = async events => {
 
   const updates = {}
   for (const e of profileEvents) {
+    const person = getPerson(e.pubkey, true)
+
     updates[e.pubkey] = {
-      ...getPerson(e.pubkey, true),
+      ...person,
       ...updates[e.pubkey],
       ...switcherFn(e.kind, {
         0: () => JSON.parse(e.content),
-        2: () => ({
-          relays: ($people[e.pubkey]?.relays || []).concat({url: e.content}),
-        }),
+        2: () => {
+          if (e.created_at > person.updated_at) {
+            return {
+              relays: ($people[e.pubkey]?.relays || []).concat({url: e.content}),
+              relays_updated_at: e.created_at,
+            }
+          }
+        },
         3: () => ({petnames: e.tags}),
         12165: () => ({muffle: e.tags}),
-        10001: () => ({
-          relays: e.tags.map(([url, read, write]) => ({url, read, write})),
-        }),
+        10001: () => {
+          if (e.created_at > person.updated_at) {
+            return {
+              relays: e.tags.map(([url, read, write]) => ({url, read, write})),
+              relays_updated_at: e.created_at,
+            }
+          }
+        },
         default: () => {
           console.log(`Received unsupported event type ${event.kind}`)
         },

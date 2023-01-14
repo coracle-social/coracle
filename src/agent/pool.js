@@ -1,10 +1,11 @@
 import {relayInit} from 'nostr-tools'
-import {uniqBy, prop, find, whereEq, is, filter, identity} from 'ramda'
+import {uniqBy, reject, prop, find, whereEq, is, filter, identity} from 'ramda'
 import {ensurePlural} from 'hurdak/lib/hurdak'
 import {isRelay} from 'src/util/nostr'
 import {sleep} from 'src/util/misc'
+import {db} from 'src/agent/data'
 
-const connections = []
+let connections = []
 
 class Connection {
   constructor(url) {
@@ -28,7 +29,7 @@ class Connection {
     })
 
     nostr.on('disconnect', () => {
-      delete connections[url]
+      connections = reject(whereEq({url}), connections)
     })
 
     return nostr
@@ -58,13 +59,20 @@ class Connection {
 
     return this
   }
+  async disconnect() {
+    this.status = 'closed'
+    await this.nostr.close()
+  }
 }
+
+const getConnections = () => connections
 
 const findConnection = url => find(whereEq({url}), connections)
 
 const connect = async url => {
   const conn = findConnection(url) || new Connection(url)
 
+  await db.relays.put({url})
   await Promise.race([conn.connect(), sleep(5000)])
 
   if (conn.status === 'ready') {
@@ -74,7 +82,7 @@ const connect = async url => {
 
 const publish = async (relays, event) => {
   return Promise.all(
-    relays.filter(r => r.read !== '!' & isRelay(r.url)).map(async relay => {
+    relays.filter(r => r.write !== '!' & isRelay(r.url)).map(async relay => {
       const conn = await connect(relay.url)
 
       if (conn) {
@@ -138,7 +146,10 @@ const subscribe = async (relays, filters) => {
     subs,
     unsub: () => {
       subs.forEach(sub => {
-        sub.unsub()
+        if (sub.conn.status === 'ready') {
+          sub.unsub()
+        }
+
         sub.conn.stats.activeCount -= 1
       })
     },
@@ -191,9 +202,11 @@ const request = (relays, filters) => {
           if (!eose.includes(sub.conn.url)) {
             const conn = findConnection(sub.conn.url)
 
-            conn.stats.count += 1
-            conn.stats.timer += Date.now() - now
-            conn.stats.timeouts += 1
+            if (conn) {
+              conn.stats.count += 1
+              conn.stats.timer += Date.now() - now
+              conn.stats.timeouts += 1
+            }
           }
         })
       }
@@ -202,14 +215,16 @@ const request = (relays, filters) => {
     agg.onEvent(e => events.push(e))
 
     agg.onEose(async url => {
-      const conn = findConnection(url)
-
       if (!eose.includes(url)) {
         eose.push(url)
 
+        const conn = findConnection(url)
+
         // Keep track of relay timing stats
-        conn.stats.count += 1
-        conn.stats.timer += Date.now() - now
+        if (conn) {
+          conn.stats.count += 1
+          conn.stats.timer += Date.now() - now
+        }
       }
 
       attemptToComplete()
@@ -220,4 +235,4 @@ const request = (relays, filters) => {
   })
 }
 
-export default {connect, publish, subscribe, request}
+export default {getConnections, findConnection, connect, publish, subscribe, request}

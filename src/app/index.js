@@ -78,13 +78,7 @@ export const loadNote = async (relays, id) => {
     return null
   }
 
-  const context = await loaders.loadContext(relays, found)
-  const note = annotate(found, context)
-
-  // Log this for debugging purposes
-  console.log('loadNote', note)
-
-  return note
+  return annotate(found, await loaders.loadContext(relays, found))
 }
 
 export const render = (note, {showEntire = false}) => {

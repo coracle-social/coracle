@@ -15,6 +15,8 @@ module.exports = {
       medium: "#403D39",
       dark: "#252422",
       danger: "#ff0000",
+      warning: "#ebd112",
+      success: "#37ab51",
       placeholder: "#a19989",
     },
   },
