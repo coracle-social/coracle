@@ -1,4 +1,5 @@
 import {prop} from "ramda"
+import Bugsnag from "@bugsnag/js"
 import {uuid} from "hurdak/lib/hurdak"
 import {navigate} from "svelte-routing"
 import {nip19} from 'nostr-tools'

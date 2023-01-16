@@ -20,6 +20,7 @@
     "vite": "^3.2.3"
   },
   "dependencies": {
+    "@bugsnag/js": "^7.18.0",
     "@fortawesome/fontawesome-free": "^6.2.1",
     "@noble/secp256k1": "^1.7.0",
     "classnames": "^2.3.2",

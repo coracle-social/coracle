@@ -37,8 +37,10 @@
     </div>
     <div class="flex flex-col gap-8 w-full">
       <div class="flex flex-col gap-1">
-        <strong>Show Link Previews</strong>
-        <Toggle bind:value={values.showLinkPreviews} />
+        <div class="flex gap-2 items-center">
+          <strong>Show Link Previews</strong>
+          <Toggle bind:value={values.showLinkPreviews} />
+        </div>
         <p class="text-sm text-light">
           If enabled, coracle will automatically retrieve a link preview for the first link
           in any note.
