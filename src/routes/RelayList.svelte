@@ -9,6 +9,7 @@
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Toggle from "src/partials/Toggle.svelte"
+  import Content from "src/partials/Content.svelte"
   import {pool, db, user, ready} from "src/agent"
   import {modal, addRelay, removeRelay, setRelayWriteCondition, settings} from "src/app"
   import defaults from "src/agent/defaults"
@@ -66,7 +67,7 @@
   })
 </script>
 
-<div class="flex flex-col gap-6 m-auto max-w-2xl py-12">
+<Content>
   <div class="flex justify-between">
     <div class="flex gap-2 items-center">
       <i class="fa fa-server fa-lg" />
@@ -161,4 +162,4 @@
       of {($knownRelays || []).length - relays.length} known relays
     </small>
   </div>
-</div>
+</Content>

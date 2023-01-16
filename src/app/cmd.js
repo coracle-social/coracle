@@ -1,4 +1,4 @@
-import {join, uniqBy, last} from 'ramda'
+import {prop, join, uniqBy, last} from 'ramda'
 import {get} from 'svelte/store'
 import {first} from "hurdak/lib/hurdak"
 import {Tags} from 'src/util/nostr'
@@ -29,27 +29,27 @@ const createNote = (relays, content, mentions = []) =>
   publishEvent(relays, 1, {content, tags: mentions.map(p => ["p", p, first(getRelays(p))])})
 
 const createReaction = (relays, note, content) => {
-  const relay = getBestRelay(note)
+  const {url} = getBestRelay(note)
   const tags = uniqBy(
     join(':'),
     note.tags
       .filter(t => ["p", "e"].includes(t[0]))
-      .map(t => last(t) === 'root' ? t : t.slice(0, -1))
-      .concat([["p", note.pubkey, relay], ["e", note.id, relay, 'reply']])
+      .map(t => last(t) === 'reply' ? t.slice(0, -1) : t)
+      .concat([["p", note.pubkey, url], ["e", note.id, url, 'reply']])
   )
 
   return publishEvent(relays, 7, {content, tags})
 }
 
 const createReply = (relays, note, content, mentions = []) => {
-  const relay = getBestRelay(note)
+  const {url} = getBestRelay(note)
   const tags = uniqBy(
     join(':'),
     note.tags
       .filter(t => ["p", "e"].includes(t[0]))
-      .map(t => last(t) === 'root' ? t : t.slice(0, -1))
-      .concat([["p", note.pubkey, relay], ["e", note.id, relay, 'reply']])
-      .concat(mentions.map(p => ["p", p, first(getRelays(p))]))
+      .map(t => last(t) === 'reply' ? t.slice(0, -1) : t)
+      .concat([["p", note.pubkey, url], ["e", note.id, url, 'reply']])
+      .concat(mentions.map(p => ["p", p, prop('url', first(getRelays(p)))]))
   )
 
   return publishEvent(relays, 1, {content, tags})
@@ -86,7 +86,7 @@ const publishEvent = (relays, kind, {content = '', tags = []} = {}) => {
   const createdAt = Math.round(new Date().valueOf() / 1000)
   const event = {kind, content, tags, pubkey, created_at: createdAt}
 
-  console.log(`publishing ${JSON.stringify(event)} to ${JSON.stringify(relays)}`)
+  console.log("Publishing", event, relays)
 
   return publish(relays, event)
 }

@@ -3,6 +3,8 @@
   import {copyToClipboard} from "src/util/html"
   import Input from 'src/partials/Input.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
+  import Content from 'src/partials/Content.svelte'
+  import Heading from 'src/partials/Heading.svelte'
   import {toast, login} from "src/app"
 
   const nsec = nip19.nsecEncode(generatePrivateKey())
@@ -19,8 +21,8 @@
 </script>
 
 
-<div class="flex flex-col gap-8 text-white p-12">
-  <h1 class="staatliches text-4xl text-center">Create an Account</h1>
+<Content size="lg" class="text-center">
+  <Heading>Create an Account</Heading>
   <p>
     Don't have a nostr account? We've created a brand new private key for you below.
     Make sure to click to copy and store it somewhere safe - this is your account's password!
@@ -38,5 +40,5 @@
     Note that sharing your private key directly is not recommended, instead you should use
     a <Anchor href={nip07} external>compatible browser extension</Anchor> to securely store your key.
   </p>
-</div>
+</Content>
 

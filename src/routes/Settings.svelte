@@ -5,6 +5,8 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Input from "src/partials/Input.svelte"
   import Button from "src/partials/Button.svelte"
+  import Content from "src/partials/Content.svelte"
+  import Heading from "src/partials/Heading.svelte"
   import {user} from 'src/agent'
   import {toast, settings} from "src/app"
 
@@ -25,10 +27,10 @@
   }
 </script>
 
-<form on:submit={submit} class="flex justify-center py-8 px-4" in:fly={{y: 20}}>
-  <div class="flex flex-col gap-4 max-w-2xl">
+<form on:submit={submit} in:fly={{y: 20}}>
+  <Content>
     <div class="flex justify-center items-center flex-col mb-4">
-      <h1 class="staatliches text-6xl">App Settings</h1>
+      <Heading>App Settings</Heading>
       <p>
         Tweak Coracle to work the way you want it to.
       </p>
@@ -54,5 +56,5 @@
       </div>
       <Button type="submit" class="text-center">Save</Button>
     </div>
-  </div>
+  </Content>
 </form>

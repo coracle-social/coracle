@@ -2,6 +2,8 @@
   import {fly} from 'svelte/transition'
   import {toast, modal, addRelay} from "src/app"
   import Input from 'src/partials/Input.svelte'
+  import Content from 'src/partials/Content.svelte'
+  import Heading from 'src/partials/Heading.svelte'
   import Button from 'src/partials/Button.svelte'
 
   let url = $modal.url
@@ -29,10 +31,10 @@
   }
 </script>
 
-<form on:submit={submit} class="flex justify-center py-8 px-4 text-white" in:fly={{y: 20}}>
-  <div class="flex flex-col gap-4 max-w-2xl flex-grow">
+<form on:submit={submit} in:fly={{y: 20}}>
+  <Content>
     <div class="flex justify-center items-center flex-col mb-4">
-      <h1 class="staatliches text-6xl">Add a relay</h1>
+      <Heading>Add a relay</Heading>
     </div>
     <div class="flex flex-col gap-8 w-full">
       <div class="flex flex-col gap-1">
@@ -46,5 +48,5 @@
       </div>
       <Button type="submit" class="text-center">Done</Button>
     </div>
-  </div>
+  </Content>
 </form>

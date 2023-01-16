@@ -2,6 +2,8 @@
   import {nip19} from 'nostr-tools'
   import Input from 'src/partials/Input.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
+  import Content from 'src/partials/Content.svelte'
+  import Heading from 'src/partials/Heading.svelte'
   import {toast, login} from "src/app"
 
   let nsec = ''
@@ -19,8 +21,8 @@
 </script>
 
 
-<div class="flex flex-col gap-8 text-white p-12">
-  <h1 class="staatliches text-4xl text-center">Login with your Private Key</h1>
+<Content size="lg" class="text-center">
+  <Heading>Login with your Private Key</Heading>
   <p>
     To give Coracle full access to your nostr identity, enter your private key below.
   </p>
@@ -36,5 +38,5 @@
     Note that sharing your private key directly is not recommended, instead you should use
     a <Anchor href={nip07} external>compatible browser extension</Anchor> to securely store your key.
   </p>
-</div>
+</Content>
 

@@ -10,15 +10,13 @@
   const relays = (data.relays || []).map(objOf('url'))
 </script>
 
-<div class="py-4 max-w-xl m-auto">
-  {#if type === "nevent"}
-    <NoteDetail note={{id: data.id}} {relays} />
-  {:else if type === "note"}
-    <NoteDetail note={{id: data}} />
-  {:else if type === "nprofile"}
-    <Person npub={nip19.npubEncode(data.pubkey)} {relays} activeTab="notes" />
-  {:else if type === "npub"}
-    <Person npub={entity} activeTab="notes" />
-  {/if}
-</div>
+{#if type === "nevent"}
+  <NoteDetail note={{id: data.id}} {relays} />
+{:else if type === "note"}
+  <NoteDetail note={{id: data}} />
+{:else if type === "nprofile"}
+  <Person npub={nip19.npubEncode(data.pubkey)} {relays} activeTab="notes" />
+{:else if type === "npub"}
+  <Person npub={entity} activeTab="notes" />
+{/if}
 

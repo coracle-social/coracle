@@ -8,6 +8,7 @@
   import {renderContent} from 'src/util/html'
   import {displayPerson} from 'src/util/nostr'
   import Tabs from "src/partials/Tabs.svelte"
+  import Content from "src/partials/Content.svelte"
   import Button from "src/partials/Button.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Notes from "src/views/person/Notes.svelte"
@@ -23,7 +24,7 @@
   export let activeTab
   export let relays = null
 
-  const {privkey} = keys
+  const {canSign} = keys
 
   let subs = []
   let pubkey = nip19.decode(npub).data
@@ -88,7 +89,8 @@
          background-image:
           linear-gradient(to bottom, rgba(0, 0, 0, 0.3), #0f0f0e),
           url('{person.banner}')" />
-<div class="max-w-xl m-auto flex flex-col gap-4 py-8 px-4">
+
+<Content>
   <div class="flex flex-col gap-4" in:fly={{y: 20}}>
     <div class="flex gap-4">
       <div
@@ -104,11 +106,11 @@
         <p>{@html renderContent(person.about || '')}</p>
       </div>
       <div class="whitespace-nowrap">
-        {#if $user?.pubkey === pubkey && $privkey}
+        {#if $user?.pubkey === pubkey && $canSign}
         <a href="/profile" class="cursor-pointer text-sm">
           <i class="fa-solid fa-edit" /> Edit
         </a>
-        {:else if $user?.petnames && $privkey}
+        {:else if $user?.petnames && $canSign}
         <div class="flex flex-col items-end gap-2">
           {#if following}
           <Button on:click={unfollow}>Unfollow</Button>
@@ -120,27 +122,29 @@
       </div>
     </div>
   </div>
+
   {#if person?.petnames}
   <div class="flex gap-8 ml-16">
     <div><strong>{person.petnames.length}</strong> following</div>
     <div><strong>{followersCount}</strong> followers</div>
   </div>
   {/if}
-</div>
 
-<Tabs tabs={['notes', 'likes', 'network']} {activeTab} {setActiveTab} />
-{#if activeTab === 'notes'}
-<Notes {pubkey} />
-{:else if activeTab === 'likes'}
-<Likes {pubkey} />
-{:else if activeTab === 'network'}
-{#if person?.petnames}
-<Network person={person} />
-{:else if loading}
-<Spinner />
-{:else}
-<div class="py-16 max-w-xl m-auto flex justify-center">
-  Unable to show network for this person.
-</div>
-{/if}
-{/if}
+  <Tabs tabs={['notes', 'likes', 'network']} {activeTab} {setActiveTab} />
+
+  {#if activeTab === 'notes'}
+  <Notes {pubkey} />
+  {:else if activeTab === 'likes'}
+  <Likes {pubkey} />
+  {:else if activeTab === 'network'}
+    {#if person?.petnames}
+    <Network person={person} />
+    {:else if loading}
+    <Spinner />
+    {:else}
+    <Content size="lg" class="text-center">
+      Unable to show network for this person.
+    </Content>
+    {/if}
+  {/if}
+</Content>

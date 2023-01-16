@@ -8,6 +8,8 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Button from "src/partials/Button.svelte"
+  import Content from "src/partials/Content.svelte"
+  import Heading from "src/partials/Heading.svelte"
   import {user, getRelays} from "src/agent"
   import {toast} from "src/app"
   import {routes} from "src/app/ui"
@@ -47,10 +49,10 @@
   }
 </script>
 
-<form on:submit={submit} class="flex justify-center py-8 px-4" in:fly={{y: 20}}>
-  <div class="flex flex-col gap-4 max-w-2xl">
+<form on:submit={submit} in:fly={{y: 20}}>
+  <Content>
     <div class="flex justify-center items-center flex-col mb-4">
-      <h1 class="staatliches text-6xl">About You</h1>
+      <Heading>About You</Heading>
       <p>
         Give people a friendly way to recognize you. We recommend you do not use your real name or
         share your personal information. The future of the internet is
@@ -90,5 +92,5 @@
       </div>
       <Button type="submit" class="text-center">Done</Button>
     </div>
-  </div>
+  </Content>
 </form>

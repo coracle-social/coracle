@@ -6,6 +6,7 @@ let signingFunction
 
 const pubkey = synced('agent/user/pubkey')
 const privkey = synced('agent/user/privkey')
+const canSign = synced('agent/user/canSign')
 
 const setPrivateKey = _privkey => {
   privkey.set(_privkey)
@@ -35,10 +36,11 @@ const sign = async event => {
 const clear = () => {
   pubkey.set(null)
   privkey.set(null)
+  canSign.set(false)
 }
 
 
 // Init signing function by re-setting pubkey
 setPublicKey(get(pubkey))
 
-export default {pubkey, privkey, setPrivateKey, setPublicKey, sign, clear}
+export default {pubkey, privkey, canSign, setPrivateKey, setPublicKey, sign, clear}

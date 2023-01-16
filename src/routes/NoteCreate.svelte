@@ -4,6 +4,8 @@
   import {navigate} from "svelte-routing"
   import Button from "src/partials/Button.svelte"
   import Compose from "src/partials/Compose.svelte"
+  import Content from "src/partials/Content.svelte"
+  import Heading from 'src/partials/Heading.svelte'
   import {user, getRelays} from "src/agent"
   import {toast} from "src/app"
   import cmd from "src/app/cmd"
@@ -29,22 +31,18 @@
   })
 </script>
 
-<div class="m-auto">
-  <form on:submit|preventDefault={onSubmit} class="flex justify-center py-8 px-4" in:fly={{y: 20}}>
-    <div class="flex flex-col gap-4 max-w-lg w-full">
-      <div class="flex justify-center items-center flex-col mb-4">
-        <h1 class="staatliches text-6xl">Create a note</h1>
-      </div>
-      <div class="flex flex-col gap-4 w-full">
-        <div class="flex flex-col gap-2">
-          <strong>What do you want to say?</strong>
-          <div class="border-l-2 border-solid border-medium pl-4">
-            <Compose bind:this={input} {onSubmit} />
-          </div>
+<form on:submit|preventDefault={onSubmit} in:fly={{y: 20}}>
+  <Content size="lg">
+    <Heading class="text-center">Create a note</Heading>
+    <div class="flex flex-col gap-4 w-full">
+      <div class="flex flex-col gap-2">
+        <strong>What do you want to say?</strong>
+        <div class="border-l-2 border-solid border-medium pl-4">
+          <Compose bind:this={input} {onSubmit} />
         </div>
-        <Button type="submit" class="text-center">Send</Button>
       </div>
+      <Button type="submit" class="text-center">Send</Button>
     </div>
-  </form>
-</div>
+  </Content>
+</form>
 

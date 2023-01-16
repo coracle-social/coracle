@@ -7,6 +7,7 @@
   import {user, db} from 'src/agent'
   import {alerts} from 'src/app'
   import Note from 'src/partials/Note.svelte'
+  import Content from 'src/partials/Content.svelte'
   import Like from 'src/partials/Like.svelte'
 
   let limit = 0
@@ -42,12 +43,14 @@
   })
 </script>
 
-<ul class="py-4 flex flex-col gap-2 max-w-xl m-auto">
+<Content>
   {#each annotatedNotes as e (e.id)}
-  {#if e.people}
-  <li in:fly={{y: 20}}><Like note={e} /></li>
-  {:else}
-  <li in:fly={{y: 20}}><Note note={e} /></li>
-  {/if}
+  <div in:fly={{y: 20}}>
+    {#if e.people}
+    <Like note={e} />
+    {:else}
+    <Note note={e} />
+    {/if}
+  </div>
   {/each}
-</ul>
+</Content>

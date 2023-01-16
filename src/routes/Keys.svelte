@@ -6,6 +6,8 @@
   import {copyToClipboard} from "src/util/html"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import Content from "src/partials/Content.svelte"
+  import Heading from 'src/partials/Heading.svelte'
   import {keys} from "src/agent"
   import {toast} from "src/app"
 
@@ -30,10 +32,10 @@
   })
 </script>
 
-<div class="flex justify-center py-8 px-4" in:fly={{y: 20}}>
-  <div class="flex flex-col gap-4 max-w-2xl">
+<div in:fly={{y: 20}}>
+  <Content>
     <div class="flex justify-center items-center flex-col mb-4">
-      <h1 class="staatliches text-6xl">Your Keys</h1>
+      <Heading>Your Keys</Heading>
       <p>
         Your account is identified across the network using
         a public/private <Anchor href={keypairUrl} external>keypair</Anchor>.
@@ -67,5 +69,5 @@
       </div>
       {/if}
     </div>
-  </div>
+  </Content>
 </div>

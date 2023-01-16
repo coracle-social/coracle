@@ -2,6 +2,8 @@
   import {nip19} from 'nostr-tools'
   import Input from 'src/partials/Input.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
+  import Content from 'src/partials/Content.svelte'
+  import Heading from 'src/partials/Heading.svelte'
   import {toast, login} from "src/app"
 
   let npub = ''
@@ -18,8 +20,8 @@
 </script>
 
 
-<div class="flex flex-col gap-8 text-white p-12">
-  <h1 class="staatliches text-4xl text-center">Login with your Public Key</h1>
+<Content size="lg" class="text-center">
+  <Heading>Login with your Public Key</Heading>
   <p>
     For read-only access, enter your public key (or someone else's) below. Your
     key should start with "npub".
@@ -32,5 +34,5 @@
     </div>
     <Anchor type="button" on:click={logIn}>Log In</Anchor>
   </div>
-</div>
+</Content>
 

@@ -1,6 +1,6 @@
-import {uniqBy, prop, uniq, flatten, pluck, identity} from 'ramda'
+import {propEq, uniqBy, prop, uniq, flatten, pluck, identity} from 'ramda'
 import {ensurePlural, createMap, chunk} from 'hurdak/lib/hurdak'
-import {findReply, personKinds, Tags, getTagValues} from 'src/util/nostr'
+import {findReply, personKinds, Tags} from 'src/util/nostr'
 import {now, timedelta} from 'src/util/misc'
 import {load, getPerson} from 'src/agent'
 import defaults from 'src/agent/defaults'
@@ -44,7 +44,7 @@ const loadNetwork = async (relays, pubkey) => {
   await loadPeople(tags.relays(), tags.values().all(), {mode: 'fast'})
 }
 
-const loadContext = async (relays, notes, {loadParents = true, ...opts} = {}) => {
+const loadContext = async (relays, notes, {loadParents = true, loadChildren = false, ...opts} = {}) => {
   notes = ensurePlural(notes)
 
   if (notes.length === 0) {
@@ -54,7 +54,7 @@ const loadContext = async (relays, notes, {loadParents = true, ...opts} = {}) =>
   return flatten(await Promise.all(
     chunk(256, notes).map(async chunk => {
       const authors = getStalePubkeys(pluck('pubkey', notes))
-      const parentTags = loadParents ? uniq(notes.map(findReply).filter(identity)) : []
+      const parentTags = uniq(notes.map(findReply).filter(identity))
       const combinedRelays = uniq(relays.concat(Tags.wrap(parentTags).relays()))
       const filter = [{kinds: [1, 7], '#e': pluck('id', notes)}]
 
@@ -62,27 +62,29 @@ const loadContext = async (relays, notes, {loadParents = true, ...opts} = {}) =>
         filter.push({kinds: personKinds, authors})
       }
 
-      if (parentTags.length > 0) {
-        filter.push({kinds: [1], ids: getTagValues(parentTags)})
+      if (loadParents && parentTags.length > 0) {
+        filter.push({kinds: [1], ids: Tags.wrap(parentTags).values().all()})
       }
 
-      const events = await load(combinedRelays, filter, opts)
+      let events = await load(combinedRelays, filter, opts)
 
-      if (parentTags.length === 0) {
-        return events
+      const children = events.filter(propEq('kind', 1))
+      const childRelays = Tags.from(children).relays()
+
+      if (loadChildren && children.length > 0) {
+        events = events.concat(await loadContext(childRelays, children, {loadParents: false, ...opts}))
       }
 
-      const eventsById = createMap('id', events)
-      const parents = getTagValues(parentTags).map(id => eventsById[id]).filter(identity)
-      const parentRelays = Tags.from(parents).relays()
+      if (loadParents && parentTags.length > 0) {
+        const eventsById = createMap('id', events)
+        const parents = Tags.wrap(parentTags).values().all().map(id => eventsById[id]).filter(identity)
+        const parentRelays = Tags.from(parents).relays()
+
+        events = events.concat(await loadContext(parentRelays, parents, {loadParents: false, ...opts}))
+      }
 
       // We're recurring and so may end up with duplicates here
-      return uniqBy(
-        prop('id'),
-        events.concat(
-          await loadContext(parentRelays, parents, {loadParents: false, ...opts})
-        )
-      )
+      return uniqBy(prop('id'), events)
     })
   ))
 }

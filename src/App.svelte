@@ -51,7 +51,7 @@
     menuIsOpen.set(false)
   }
 
-  const {privkey} = keys
+  const {canSign} = keys
   const {lastCheckedAlerts, mostRecentAlert} = alerts
 
   let menuIcon
@@ -120,7 +120,7 @@
   <div use:links class="h-full">
     <div class="pt-16 text-white h-full lg:ml-56">
       <Route path="/alerts" component={Alerts} />
-      <Route path="/search/:type" component={Search} />
+      <Route path="/search/:activeTab" component={Search} />
       <Route path="/notes/:activeTab" component={Notes} />
       <Route path="/notes/new" component={NoteCreate} />
       <Route path="/people/:npub/:activeTab" let:params>
@@ -225,7 +225,7 @@
       {/if}
     </div>
 
-    {#if $privkey}
+    {#if $canSign}
     <div class="fixed bottom-0 right-0 m-8">
       <a
         href="/notes/new"

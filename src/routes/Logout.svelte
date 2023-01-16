@@ -1,6 +1,7 @@
 <script>
   import {fly} from 'svelte/transition'
   import Anchor from 'src/partials/Anchor.svelte'
+  import Content from "src/partials/Content.svelte"
   import {db} from 'src/agent'
 
   let confirmed = false
@@ -19,7 +20,7 @@
   }
 </script>
 
-<div class="max-w-xl m-auto text-center py-20">
+<Content size="lg" class="text-center">
   {#if confirmed}
   <div in:fly={{y:20}}>Clearing your local database...</div>
   {:else}
@@ -28,4 +29,4 @@
     <Anchor type="button" on:click={confirm}>Log out</Anchor>
   </div>
   {/if}
-</div>
+</Content>

@@ -21,6 +21,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Add followers/follows lists on profile page
 - [ ] Image uploads
   - Use dufflepud. Default will charge via lightning and have a tos, others can self-host and skip that.
+  - Add banner field to profile
 - [ ] Server discovery and relay publishing https://github.com/nostr-protocol/nips/pull/32/files
 - [ ] Support invoices https://twitter.com/jb55/status/1604131336247476224
 - [ ] NIP 05
@@ -68,19 +69,20 @@ If you like Coracle and want to support its development, you can donate sats via
   - [x] Handle failed connections
   - [x] Close connections that haven't been used in a while
   - [x] Add strategy that callers can opt into to accept first eose from a relay that has any events
-- [ ] Login
+- [x] Login
   - [x] Prefer extension, make private key entry "advanced"
   - [x] Buttons should redirect to login modal if using pubkey login
 - [ ] We often get the root as the reply, figure out why that is, compared to astral/damus
 - [x] Load feeds from network rather than user relays?
   - [x] Still use "my" relays for global, this could make global feed more useful
   - [x] If we use my relays for global, we don't have to wait for network to load initially
-  - [ ] Figure out fast vs complete tradeoff. Skipping loadContext speeds things up a ton
-- [ ] Figure out migrations from previous version
+  - [ ] Figure out fast vs complete tradeoff. Skipping loadContext speeds things up a ton.
+  - [ ] Make loadParents false by default. Maybe make fast the default
+  - [ ] Figure out how to make threads fast and complete. Load only the note, then preload entire thread in background?
 - [ ] Add relays/mentions to note and reply composition
 - [ ] Add layout component with max-w, padding, etc. Test on mobile size
-- [ ] Add tips to login spinner
-- [ ] Add banner
+- [ ] Figure out migrations from previous version
+- [ ] Fix search
 
 ## 0.2.7
 

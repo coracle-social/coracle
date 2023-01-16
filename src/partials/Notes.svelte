@@ -5,6 +5,7 @@
   import {quantify} from 'hurdak/lib/hurdak'
   import {createScroller} from 'src/util/misc'
   import Spinner from 'src/partials/Spinner.svelte'
+  import Content from 'src/partials/Content.svelte'
   import Note from "src/partials/Note.svelte"
   import {modal} from "src/app"
 
@@ -48,7 +49,7 @@
   })
 </script>
 
-<ul class="py-4 flex flex-col gap-2 max-w-xl m-auto">
+<Content>
   {#if newNotes.length > 0}
   <div
     in:slide
@@ -58,8 +59,8 @@
   </div>
   {/if}
   {#each notes as note (note.id)}
-    <li><Note {note} {depth} /></li>
+  <Note {note} {depth} />
   {/each}
-</ul>
+</Content>
 
 <Spinner />

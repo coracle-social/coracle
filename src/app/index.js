@@ -13,11 +13,15 @@ import loaders from 'src/app/loaders'
 
 export {toast, modal, settings, alerts}
 
-export const login = async ({privkey, pubkey}) => {
+export const login = async ({privkey, pubkey}, usingExtension = false) => {
   if (privkey) {
     keys.setPrivateKey(privkey)
   } else {
     keys.setPublicKey(pubkey)
+  }
+
+  if (usingExtension || privkey) {
+    keys.canSign.set(true)
   }
 
   // Load network and start listening, but don't wait for it
@@ -80,7 +84,7 @@ export const loadNote = async (relays, id) => {
     return null
   }
 
-  return annotate(found, await loaders.loadContext(relays, found))
+  return annotate(found, await loaders.loadContext(relays, found, {mode: 'fast', loadChildren: true}))
 }
 
 export const render = (note, {showEntire = false}) => {

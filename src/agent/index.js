@@ -1,6 +1,6 @@
-import {last, uniq} from 'ramda'
+import {last, objOf, uniq} from 'ramda'
 import {derived, get} from 'svelte/store'
-import {getTagValues, Tags} from 'src/util/nostr'
+import {Tags} from 'src/util/nostr'
 import pool from 'src/agent/pool'
 import keys from 'src/agent/keys'
 import defaults from 'src/agent/defaults'
@@ -28,13 +28,13 @@ export const getMuffle = () => {
     return []
   }
 
-  return getTagValues($user.muffle.filter(t => Math.random() < last(t)))
+  return Tags.wrap($user.muffle.filter(t => Math.random() < last(t))).values().all()
 }
 
 export const getFollows = pubkey => {
   const person = getPerson(pubkey)
 
-  return getTagValues(person?.petnames || defaults.petnames)
+  return Tags.wrap(person?.petnames || defaults.petnames).values().all()
 }
 
 export const getRelays = pubkey => {
@@ -53,10 +53,10 @@ export const getRelays = pubkey => {
 
 export const getEventRelays = event => {
   if (event.seen_on) {
-    return [event.seen_on]
+    return [{url: event.seen_on}]
   }
 
-  return uniq(getRelays(event.pubkey).concat(Tags.from(event).relays()))
+  return uniq(getRelays(event.pubkey).concat(Tags.from(event).relays())).map(objOf('url'))
 }
 
 export const publish = async (relays, event) => {

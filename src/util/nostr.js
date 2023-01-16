@@ -37,11 +37,9 @@ export class Tags {
   }
 }
 
-export const getTagValues = tags => tags.map(t => t[1])
-
 // Support the deprecated version where tags are not marked as replies
 export const findReply = e =>
-  Tags.from(e).type("e").mark("reply").first() || Tags.from(e).type("e").first()
+  Tags.from(e).type("e").mark("reply").first() || Tags.from(e).type("e").last()
 
 export const findReplyId = e => Tags.wrap([findReply(e)]).values().first()
 
