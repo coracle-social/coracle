@@ -48,22 +48,6 @@ export const stripExifData = async file => {
   })
 }
 
-export const hasParent = (tagOrClass, $el) => {
-  while ($el) {
-    if (tagOrClass.startsWith('.')) {
-      if ($el.classList?.contains(tagOrClass.slice(1))) {
-        return true
-      }
-    } else if ($el.tagName === tagOrClass.toUpperCase()) {
-      return true
-    }
-
-    $el = $el.parentNode
-  }
-
-  return false
-}
-
 export const escapeHtml = html => {
   const div = document.createElement("div")
 

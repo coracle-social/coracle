@@ -37,7 +37,7 @@
   $: search = fuzzy($knownRelays, {keys: ["name", "description", "url"]})
 
   const join = async url => {
-    await addRelay({url, write: "!"})
+    await addRelay({url})
   }
 
   const leave = async url => {

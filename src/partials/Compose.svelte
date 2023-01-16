@@ -1,5 +1,6 @@
 <script>
   import {prop, reject, sortBy, last} from 'ramda'
+  import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
   import {fromParentOffset} from "src/util/html"
   import Badge from "src/partials/Badge.svelte"
@@ -34,12 +35,11 @@
     return last(getText().split(/[\s\u200B]+/))
   }
 
-  const pickSuggestion = ({name, pubkey}) => {
+  const highlightWord = (prefix, chars, content) => {
     const text = getText()
-    const word = getWord()
     const selection = document.getSelection()
     const {focusNode, focusOffset} = selection
-    const at = document.createTextNode("@")
+    const prefixElement = document.createTextNode(prefix)
     const span = document.createElement('span')
 
     // Space includes a zero-width space to avoid having the cursor end up inside
@@ -47,19 +47,23 @@
     const space = document.createTextNode("\u200B\u00a0")
 
     span.classList.add('underline')
-    span.innerText = name
+    span.innerText = content
 
     // Remove our partial mention text
-    selection.setBaseAndExtent(...fromParentOffset(input, text.length - word.length), focusNode, focusOffset)
+    selection.setBaseAndExtent(...fromParentOffset(input, text.length - chars), focusNode, focusOffset)
     selection.deleteFromDocument()
 
-    // Add the at sign, decorated mention text, and a trailing space
-    selection.getRangeAt(0).insertNode(at)
-    selection.collapse(at, 1)
+    // Add the prefix, decorated text, and a trailing space
+    selection.getRangeAt(0).insertNode(prefixElement)
+    selection.collapse(prefixElement, 1)
     selection.getRangeAt(0).insertNode(span)
     selection.collapse(span.nextSibling, 0)
     selection.getRangeAt(0).insertNode(space)
     selection.collapse(space, 2)
+  }
+
+  const pickSuggestion = ({name, pubkey}) => {
+    highlightWord('@', getWord().length, name)
 
     mentions.push({
       name,
@@ -75,6 +79,12 @@
   const onKeyDown = e => {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       return onSubmit()
+    }
+
+    if (e.key === 'Escape' && suggestions[index]) {
+      index = 0
+      suggestions = []
+      e.stopPropagation()
     }
 
     if (['Enter', 'Tab', 'ArrowUp', 'ArrowDown', ' '].includes(e.key) && suggestions[index]) {
@@ -118,9 +128,17 @@
           }
         }
       }
-
-      prevContent = input.innerText
     }
+
+    if (input.innerText.length > prevContent.length) {
+      const topic = getText().match(/#([-\w]+\s)$/)
+
+      if (topic) {
+        highlightWord('#', topic[0].length, topic[1].trim())
+      }
+    }
+
+    prevContent = input.innerText
   }
 
   export const parse = () => {
@@ -140,7 +158,11 @@
     // Remove our zero-length spaces
     content = content.replace(/\u200B/g, '')
 
-    return {content, mentions: validMentions.map(prop('pubkey'))}
+    return {
+      content,
+      topics: content.match(/#[-\w]+/g) || [],
+      mentions: validMentions.map(prop('pubkey')),
+    }
   }
 </script>
 
@@ -154,12 +176,17 @@
     on:keyup={onKeyUp} />
   <slot name="addon" />
 </div>
-{#each suggestions as person, i (person.pubkey)}
-<div
-  class="py-2 px-4 cursor-pointer"
-  class:bg-black={index !== i}
-  class:bg-dark={index === i}
-  on:click={() => pickSuggestion(person)}>
-  <Badge inert {person} />
+
+{#if suggestions.length > 0}
+<div class="rounded border border-solid border-medium mt-2" in:fly={{y: 20}}>
+  {#each suggestions as person, i (person.pubkey)}
+  <div
+    class="py-2 px-4 cursor-pointer"
+    class:bg-black={index !== i}
+    class:bg-dark={index === i}
+    on:click={() => pickSuggestion(person)}>
+    <Badge inert {person} />
+  </div>
+  {/each}
 </div>
-{/each}
+{/if}

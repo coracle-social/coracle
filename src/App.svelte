@@ -9,7 +9,6 @@
   import {cubicInOut} from "svelte/easing"
   import {Router, Route, links, navigate} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
-  import {hasParent} from 'src/util/html'
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, now} from 'src/util/misc'
   import {keys, user, pool, getRelays} from 'src/agent'

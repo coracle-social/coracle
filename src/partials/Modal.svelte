@@ -16,7 +16,7 @@
     class="absolute inset-0 opacity-75 bg-black cursor-pointer"
     transition:fade
     on:click={onEscape} />
-  <div class="absolute inset-0 mt-20 sm:mt-32 modal-content" transition:fly={{y: 1000, opacity: 1}}>
+  <div class="absolute inset-0 mt-20 sm:mt-28 modal-content" transition:fly={{y: 1000, opacity: 1}}>
     <dialog open class="bg-dark border-t border-solid border-medium h-full w-full overflow-auto">
       <slot />
     </dialog>

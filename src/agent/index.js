@@ -1,4 +1,4 @@
-import {last, objOf, uniq} from 'ramda'
+import {last, uniqBy, prop, objOf, uniq} from 'ramda'
 import {derived, get} from 'svelte/store'
 import {Tags} from 'src/util/nostr'
 import pool from 'src/agent/pool'
@@ -52,11 +52,12 @@ export const getRelays = pubkey => {
 }
 
 export const getEventRelays = event => {
-  return uniq(
+  return uniqBy(
+    prop('url'),
     getRelays(event.pubkey)
       .concat(Tags.from(event).relays())
-      .concat(event.seen_on)
-  ).map(objOf('url'))
+      .concat({url: event.seen_on})
+  )
 }
 
 export const publish = async (relays, event) => {

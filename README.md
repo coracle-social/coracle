@@ -77,20 +77,20 @@ If you like Coracle and want to support its development, you can donate sats via
   - [x] Still use "my" relays for global, this could make global feed more useful
   - [x] If we use my relays for global, we don't have to wait for network to load initially
   - [x] Figure out fast vs complete tradeoff. Skipping loadContext speeds things up a ton.
-- [ ] Add relays/mentions to note and reply composition
+- [x] Add relays/mentions to note and reply composition
 - [ ] Figure out migrations from previous version
 - [ ] Fix search
-- [ ] Move add note to modal
 
 ## 0.2.7
 
+- [x] Added error tracking - you can turn this off in settings
 - [x] Add support for profile banner images
 - [x] Re-designed relays page
   - [x] Support connection status/speed indication
   - [x] Add toggle to enable writing to a connected relay
 - [x] Re-designed login page
   - [x] Use private key login only if extension is not enabled
-  - [x] Add pubkey login
+  - [x] Add pubkey login support
 
 ## 0.2.6
 
