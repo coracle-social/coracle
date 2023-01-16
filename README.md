@@ -20,6 +20,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Persist and load relay list
 - [ ] Add followers/follows lists on profile page
 - [ ] Image uploads
+  - Use dufflepud. Default will charge via lightning and have a tos, others can self-host and skip that.
 - [ ] Server discovery and relay publishing https://github.com/nostr-protocol/nips/pull/32/files
 - [ ] Support invoices https://twitter.com/jb55/status/1604131336247476224
 - [ ] NIP 05
@@ -42,6 +43,9 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Add settings storage on nostr, maybe use kind 0?
 - [ ] Stack views so scroll position isn't lost on navigation
 - [ ] Suggest relays based on network
+- [ ] Attachments (a tag w/content type and url)
+- [ ] Add Labs tab with cards for non-standard features
+  - Time travel - see events as of a date/time
 
 # Changelog
 
@@ -56,26 +60,37 @@ If you like Coracle and want to support its development, you can donate sats via
   - [x] Support some read/write config
   - [x] Get real home relays for defaults.petnames
   - [x] Add notification for slow relays
-  - [ ] Fix publishing
-  - [ ] Relay list isn't getting refreshed since we're using getRelay everywhere
+  - [x] Fix publishing
+  - [x] Relay list isn't getting refreshed since we're using getRelay everywhere
 - [x] Warn that everything will be cleared on logout
 - [x] Connection management
   - [x] Do I need to implement re-connecting now?
   - [x] Handle failed connections
   - [x] Close connections that haven't been used in a while
+  - [x] Add strategy that callers can opt into to accept first eose from a relay that has any events
 - [ ] Login
-  - [ ] Prefer extension, make private key entry "advanced"
-  - [ ] Improve login UX for bootstrap delay. Nostr facts?
+  - [x] Prefer extension, make private key entry "advanced"
+  - [x] Buttons should redirect to login modal if using pubkey login
 - [ ] We often get the root as the reply, figure out why that is, compared to astral/damus
-- [ ] Load feeds from network rather than user relays?
-  - Still use "my" relays for global, this could make global feed more useful
+- [x] Load feeds from network rather than user relays?
+  - [x] Still use "my" relays for global, this could make global feed more useful
+  - [x] If we use my relays for global, we don't have to wait for network to load initially
+  - [ ] Figure out fast vs complete tradeoff. Skipping loadContext speeds things up a ton
 - [ ] Figure out migrations from previous version
 - [ ] Add relays/mentions to note and reply composition
 - [ ] Add layout component with max-w, padding, etc. Test on mobile size
+- [ ] Add tips to login spinner
+- [ ] Add banner
 
 ## 0.2.7
 
-- [x]
+- [x] Add support for profile banner images
+- [x] Re-designed relays page
+  - [x] Support connection status/speed indication
+  - [x] Add toggle to enable writing to a connected relay
+- [x] Re-designed login page
+  - [x] Use private key login only if extension is not enabled
+  - [x] Add pubkey login
 
 ## 0.2.6
 

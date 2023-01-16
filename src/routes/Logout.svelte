@@ -19,11 +19,11 @@
   }
 </script>
 
-<div class="max-w-xl m-auto text-center py-20" in:fly={{y:20}}>
+<div class="max-w-xl m-auto text-center py-20">
   {#if confirmed}
-  <div>Clearing your local database...</div>
+  <div in:fly={{y:20}}>Clearing your local database...</div>
   {:else}
-  <div class="flex flex-col gap-8 items-center">
+  <div class="flex flex-col gap-8 items-center" in:fly={{y:20}}>
     <div>Are you sure you want to log out? All data will be cleared.</div>
     <Anchor type="button" on:click={confirm}>Log out</Anchor>
   </div>

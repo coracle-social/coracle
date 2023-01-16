@@ -27,19 +27,13 @@ export class Tags {
     return uniq(flatten(this.tags).filter(isRelay)).map(objOf('url'))
   }
   values() {
-    this.tags = this.tags.map(t => t[1])
-
-    return this
+    return new Tags(this.tags.map(t => t[1]))
   }
   type(type) {
-    this.tags = this.tags.filter(t => t[0] === type)
-
-    return this
+    return new Tags(this.tags.filter(t => t[0] === type))
   }
   mark(mark) {
-    this.tags = this.tags.filter(t => last(t) === mark)
-
-    return this
+    return new Tags(this.tags.filter(t => last(t) === mark))
   }
 }
 

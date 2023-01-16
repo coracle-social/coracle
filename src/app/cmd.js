@@ -86,6 +86,8 @@ const publishEvent = (relays, kind, {content = '', tags = []} = {}) => {
   const createdAt = Math.round(new Date().valueOf() / 1000)
   const event = {kind, content, tags, pubkey, created_at: createdAt}
 
+  console.log(`publishing ${JSON.stringify(event)} to ${JSON.stringify(relays)}`)
+
   return publish(relays, event)
 }
 

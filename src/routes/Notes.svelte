@@ -3,7 +3,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Network from "src/views/notes/Network.svelte"
-  import Global from "src/views/notes/Global.svelte"
+  import Latest from "src/views/notes/Latest.svelte"
   import {user} from 'src/agent'
 
   export let activeTab
@@ -19,10 +19,10 @@
 </div>
 {/if}
 
-<Tabs tabs={['network', 'global']} {activeTab} {setActiveTab} />
+<Tabs tabs={['latest', 'network']} {activeTab} {setActiveTab} />
 
 {#if activeTab === 'network'}
 <Network />
 {:else}
-<Global />
+<Latest />
 {/if}

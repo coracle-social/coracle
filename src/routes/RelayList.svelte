@@ -1,6 +1,6 @@
 <script>
   import {liveQuery} from 'dexie'
-  import {whereEq, find, last, reject} from 'ramda'
+  import {whereEq, find, last} from 'ramda'
   import {noop} from 'hurdak/lib/hurdak'
   import {onMount} from 'svelte'
   import {get} from 'svelte/store'
@@ -9,7 +9,7 @@
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Toggle from "src/partials/Toggle.svelte"
-  import {pool, db, getRelays, ready} from "src/agent"
+  import {pool, db, user, ready} from "src/agent"
   import {modal, addRelay, removeRelay, setRelayWriteCondition, settings} from "src/app"
   import defaults from "src/agent/defaults"
 
@@ -49,7 +49,7 @@
 
     return poll(300, () => {
       if ($ready) {
-        relays = getRelays()
+        relays = $user?.relays || []
       }
 
       status = Object.fromEntries(
@@ -80,6 +80,9 @@
     Relays are hubs for your content and connections. At least one is required to
     interact with the network, but you can join as many as you like.
   </p>
+  {#if relays.length === 0}
+  <div class="text-center">No relays connected</div>
+  {/if}
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     {#each relays as {url, write}, i (url)}
       <div class="rounded border border-solid border-medium bg-dark shadow" in:fly={{y: 20, delay: i * 100}}>

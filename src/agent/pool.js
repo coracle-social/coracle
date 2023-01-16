@@ -24,10 +24,6 @@ class Connection {
   init(url) {
     const nostr = relayInit(url)
 
-    nostr.on('error', () => {
-      console.log(`failed to connect to ${url}`)
-    })
-
     nostr.on('disconnect', () => {
       connections = reject(whereEq({url}), connections)
     })
@@ -50,7 +46,6 @@ class Connection {
         await this.nostr.connect()
         this.status = 'ready'
       } catch (e) {
-        console.error(`Failed to connect to ${this.url}: ${e}`)
         this.status = 'error'
       }
     }
@@ -82,7 +77,7 @@ const connect = async url => {
 
 const publish = async (relays, event) => {
   return Promise.all(
-    relays.filter(r => r.write !== '!' & isRelay(r.url)).map(async relay => {
+    relays.filter(r => r.write !== '!' && isRelay(r.url)).map(async relay => {
       const conn = await connect(relay.url)
 
       if (conn) {
@@ -172,7 +167,7 @@ const subscribe = async (relays, filters) => {
   }
 }
 
-const request = (relays, filters) => {
+const request = (relays, filters, {mode = "most"} = {}) => {
   relays = uniqBy(prop('url'), relays.filter(r => isRelay(r.url)))
 
   return new Promise(async resolve => {
@@ -188,7 +183,12 @@ const request = (relays, filters) => {
         eose.length === agg.subs.length
         || Date.now() - now >= 5000
         || (
-          Date.now() - now >= 1000
+          mode === "fast"
+          && events.length
+        )
+        || (
+          mode === "most"
+          && Date.now() - now >= 1000
           && eose.length > agg.subs.length - Math.round(agg.subs.length / 10)
         )
       )

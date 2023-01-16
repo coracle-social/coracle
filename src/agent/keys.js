@@ -41,4 +41,4 @@ const clear = () => {
 // Init signing function by re-setting pubkey
 setPublicKey(get(pubkey))
 
-export default {pubkey, setPrivateKey, setPublicKey, sign, clear}
+export default {pubkey, privkey, setPrivateKey, setPublicKey, sign, clear}

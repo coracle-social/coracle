@@ -21,8 +21,6 @@
 
     settings.set(values)
 
-    navigate('/notes/network')
-
     toast.show("info", "Your settings have been saved!")
   }
 </script>

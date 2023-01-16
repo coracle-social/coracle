@@ -10,11 +10,21 @@
     e.preventDefault()
     url = url.trim()
 
-    if (!url.match(/^wss?:\/\/[\w.:-]+$/)) {
-      return toast.show("error", 'That isn\'t a valid websocket url - relay urls should start with "wss://"')
+    if (!url.includes('://')) {
+      url = 'wss://' + url
     }
 
-    addRelay(url)
+    try {
+      new URL(url)
+    } catch (e) {
+      return toast.show("error", "That isn't a valid url")
+    }
+
+    if (!url.match('^wss?://')) {
+      return toast.show("error", "That isn't a valid websocket url")
+    }
+
+    addRelay({url, write: '!'})
     modal.set(null)
   }
 </script>

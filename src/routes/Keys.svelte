@@ -6,24 +6,25 @@
   import {copyToClipboard} from "src/util/html"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {user} from "src/agent"
+  import {keys} from "src/agent"
   import {toast} from "src/app"
 
+  const {pubkey, privkey} = keys
+  const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
   const keypairUrl = 'https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/'
-  const delegationUrl = 'https://github.com/nostr-protocol/nips/blob/b62aa418dee13aac1899ea7c6946a0f55dd7ee84/26.md'
 
   const copyKey = type => {
     copyToClipboard(
       type === 'private'
-        ? nip19.nsecEncode($user.privkey)
-        : nip19.npubEncode($user.pubkey)
+        ? nip19.nsecEncode($privkey)
+        : nip19.npubEncode($pubkey)
     )
 
     toast.show("info", `Your ${type} key has been copied to the clipboard.`)
   }
 
   onMount(async () => {
-    if (!$user) {
+    if (!$pubkey) {
       return navigate("/login")
     }
   })
@@ -42,7 +43,7 @@
     <div class="flex flex-col gap-8 w-full">
       <div class="flex flex-col gap-1">
         <strong>Public Key</strong>
-        <Input disabled value={$user ? nip19.npubEncode($user.pubkey) : ''}>
+        <Input disabled value={$pubkey ? nip19.npubEncode($pubkey) : ''}>
           <i slot="after" class="fa-solid fa-copy cursor-pointer" on:click={() => copyKey('public')} />
         </Input>
         <p class="text-sm text-light">
@@ -50,17 +51,18 @@
           trying to find you on nostr.
         </p>
       </div>
-      {#if $user?.privkey}
+      {#if $privkey}
       <div class="flex flex-col gap-1">
         <strong>Private Key</strong>
-        <Input disabled type="password" value={nip19.nsecEncode($user.privkey)}>
+        <Input disabled type="password" value={nip19.nsecEncode($privkey)}>
           <i slot="after" class="fa-solid fa-copy cursor-pointer" on:click={() => copyKey('private')} />
         </Input>
         <p class="text-sm text-light">
           Your private key is used to prove your identity by cryptographically signing
           messages. <strong>Do not share this with anyone.</strong> Be careful about
-          copying this into other apps - instead, consider
-          using <Anchor external href={delegationUrl}>delegation keys</Anchor> instead.
+          copying this into other apps - instead, consider using
+          a <Anchor href={nip07} external>compatible browser extension</Anchor> to securely
+          store your key.
         </p>
       </div>
       {/if}

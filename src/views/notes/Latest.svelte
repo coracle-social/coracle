@@ -18,8 +18,10 @@
 
   const loadNotes = async () => {
     const {limit, until} = cursor
-    const notes = await load(relays, {...filter, limit, until})
+    const notes = await load(relays, {...filter, limit, until}, {mode: 'fast'})
     const context = await loaders.loadContext(relays, notes)
+
+    cursor.onChunk(notes)
 
     return threadify(notes, context, {muffle: getMuffle()})
   }

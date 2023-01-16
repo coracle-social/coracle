@@ -1,4 +1,4 @@
-import {uniqBy, prop, uniq, flatten, pluck, groupBy, identity} from 'ramda'
+import {uniqBy, prop, uniq, flatten, pluck, identity} from 'ramda'
 import {ensurePlural, createMap, chunk} from 'hurdak/lib/hurdak'
 import {findReply, personKinds, Tags, getTagValues} from 'src/util/nostr'
 import {now, timedelta} from 'src/util/misc'
@@ -38,15 +38,13 @@ const loadNetwork = async (relays, pubkey) => {
     petnames = defaults.petnames
   }
 
-  // Get the user's follows, with a fallback if we have no pubkey, then use nip-2 recommended
-  // relays to load our user's second-order follows in order to bootstrap our social graph
-  await Promise.all(
-    Object.entries(groupBy(t => t[2], petnames))
-      .map(([relay, petnames]) => loadPeople([relay], getTagValues(petnames)))
-  )
+  const tags = Tags.wrap(petnames)
+
+  // Use nip-2 recommended relays to load our user's second-order follows
+  await loadPeople(tags.relays(), tags.values().all(), {mode: 'fast'})
 }
 
-const loadContext = async (relays, notes, {loadParents = true} = {}) => {
+const loadContext = async (relays, notes, {loadParents = true, ...opts} = {}) => {
   notes = ensurePlural(notes)
 
   if (notes.length === 0) {
@@ -68,7 +66,7 @@ const loadContext = async (relays, notes, {loadParents = true} = {}) => {
         filter.push({kinds: [1], ids: getTagValues(parentTags)})
       }
 
-      const events = await load(combinedRelays, filter)
+      const events = await load(combinedRelays, filter, opts)
 
       if (parentTags.length === 0) {
         return events
@@ -82,7 +80,7 @@ const loadContext = async (relays, notes, {loadParents = true} = {}) => {
       return uniqBy(
         prop('id'),
         events.concat(
-          await loadContext(parentRelays, parents, {loadParents: false})
+          await loadContext(parentRelays, parents, {loadParents: false, ...opts})
         )
       )
     })

@@ -58,7 +58,7 @@ export const processEvents = async events => {
       ...switcherFn(e.kind, {
         0: () => JSON.parse(e.content),
         2: () => {
-          if (e.created_at > person.updated_at) {
+          if (e.created_at > (person.relays_updated_at || 0)) {
             return {
               relays: ($people[e.pubkey]?.relays || []).concat({url: e.content}),
               relays_updated_at: e.created_at,
@@ -68,7 +68,7 @@ export const processEvents = async events => {
         3: () => ({petnames: e.tags}),
         12165: () => ({muffle: e.tags}),
         10001: () => {
-          if (e.created_at > person.updated_at) {
+          if (e.created_at > (person.relays_updated_at || 0)) {
             return {
               relays: e.tags.map(([url, read, write]) => ({url, read, write})),
               relays_updated_at: e.created_at,

@@ -70,8 +70,8 @@ export const publish = async (relays, event) => {
   return signedEvent
 }
 
-export const load = async (relays, filter) => {
-  const events = await pool.request(relays, filter)
+export const load = async (relays, filter, opts) => {
+  const events = await pool.request(relays, filter, opts)
 
   await processEvents(events)
 

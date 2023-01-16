@@ -9,9 +9,7 @@ export default {
   ],
   relays: [
     {url: 'wss://brb.io'},
-    {url: 'wss://relay.damus.io'},
     {url: 'wss://nostr.zebedee.cloud'},
-    {url: 'wss://nostr-relay.wlvs.space'},
     {url: 'wss://nostr-pub.wellorder.net'},
   ],
 }

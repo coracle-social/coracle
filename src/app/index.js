@@ -1,4 +1,5 @@
 import {whereEq, sortBy, identity, when, assoc, reject} from 'ramda'
+import {navigate} from 'svelte-routing'
 import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
 import {renderContent} from 'src/util/html'
@@ -19,11 +20,12 @@ export const login = async ({privkey, pubkey}) => {
     keys.setPublicKey(pubkey)
   }
 
-  await Promise.all([
-    loaders.loadNetwork(getRelays(), pubkey),
-    alerts.load(getRelays(), pubkey),
-    alerts.listen(getRelays(), pubkey),
-  ])
+  // Load network and start listening, but don't wait for it
+  loaders.loadNetwork(getRelays(), pubkey),
+  alerts.load(getRelays(), pubkey),
+  alerts.listen(getRelays(), pubkey),
+
+  navigate('/notes/latest')
 }
 
 export const addRelay = async relay => {

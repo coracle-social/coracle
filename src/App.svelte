@@ -12,13 +12,16 @@
   import {hasParent} from 'src/util/html'
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, now} from 'src/util/misc'
-  import {user, pool, getRelays} from 'src/agent'
+  import {keys, user, pool, getRelays} from 'src/agent'
   import {modal, toast, settings, alerts} from "src/app"
   import {routes} from "src/app/ui"
   import Anchor from 'src/partials/Anchor.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
   import Modal from 'src/partials/Modal.svelte'
-  import NoteDetailModal from "src/views/NoteDetail.svelte"
+  import SignUp from "src/views/SignUp.svelte"
+  import PrivKeyLogin from "src/views/PrivKeyLogin.svelte"
+  import PubKeyLogin from "src/views/PubKeyLogin.svelte"
+  import NoteDetail from "src/views/NoteDetail.svelte"
   import PersonSettings from "src/views/PersonSettings.svelte"
   import NotFound from "src/routes/NotFound.svelte"
   import Search from "src/routes/Search.svelte"
@@ -48,11 +51,13 @@
     menuIsOpen.set(false)
   }
 
+  const {privkey} = keys
+  const {lastCheckedAlerts, mostRecentAlert} = alerts
+
   let menuIcon
   let scrollY
   let suspendedSubs = []
   let slowConnections = []
-  let {lastCheckedAlerts, mostRecentAlert} = alerts
 
   onMount(() => {
     if ($user) {
@@ -166,10 +171,11 @@
       </li>
       {/if}
       <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes/network">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes/latest">
           <i class="fa-solid fa-tag mr-2" /> Notes
         </a>
       </li>
+      {#if $user}
       <li class="h-px mx-3 my-4 bg-medium" />
       <li class="cursor-pointer relative">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/relays">
@@ -179,7 +185,6 @@
           {/if}
         </a>
       </li>
-      {#if $user}
       <li class="cursor-pointer">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/keys">
           <i class="fa-solid fa-key mr-2" /> Keys
@@ -220,7 +225,7 @@
       {/if}
     </div>
 
-    {#if $user}
+    {#if $privkey}
     <div class="fixed bottom-0 right-0 m-8">
       <a
         href="/notes/new"
@@ -235,14 +240,20 @@
     <Modal onEscape={closeModal}>
       {#if $modal.note}
         {#key $modal.note.id}
-        <NoteDetailModal {...$modal} />
+        <NoteDetail {...$modal} />
         {/key}
       {:else if $modal.form === 'relay'}
         <AddRelay />
+      {:else if $modal.form === 'signUp'}
+        <SignUp />
+      {:else if $modal.form === 'privkeyLogin'}
+        <PrivKeyLogin />
+      {:else if $modal.form === 'pubkeyLogin'}
+        <PubKeyLogin />
       {:else if $modal.form === 'person/settings'}
         <PersonSettings />
       {:else if $modal.message}
-        <p class="text-white text-center p-12">{$modal.message}</p>
+        <p class="text-white text-center py-12 pb-8">{$modal.message}</p>
         <Spinner />
       {/if}
     </Modal>

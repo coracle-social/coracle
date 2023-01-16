@@ -9,10 +9,11 @@
   import {displayPerson} from 'src/util/nostr'
   import Tabs from "src/partials/Tabs.svelte"
   import Button from "src/partials/Button.svelte"
+  import Spinner from "src/partials/Spinner.svelte"
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
   import Network from "src/views/person/Network.svelte"
-  import {getPerson, getRelays, listen, user} from "src/agent"
+  import {getPerson, getRelays, listen, user, keys} from "src/agent"
   import {modal} from "src/app"
   import loaders from "src/app/loaders"
   import {routes} from "src/app/ui"
@@ -22,17 +23,23 @@
   export let activeTab
   export let relays = null
 
+  const {privkey} = keys
+
   let subs = []
   let pubkey = nip19.decode(npub).data
-  let following = find(t => t[1] === pubkey, $user?.petnames || [])
+  let following = false
   let followers = new Set()
   let followersCount = 0
   let person = getPerson(pubkey, true)
+  let loading = true
+
+  $: following = find(t => t[1] === pubkey, $user?.petnames || [])
 
   onMount(async () => {
     // Refresh our person if needed
     loaders.loadPeople(relays || getRelays(pubkey), [pubkey]).then(() => {
       person = getPerson(pubkey, true)
+      loading = false
     })
 
     // Get our followers count
@@ -56,18 +63,14 @@
   const setActiveTab = tab => navigate(routes.person(pubkey, tab))
 
   const follow = async () => {
-    following = true
-
     const relay = first(relays || getRelays(pubkey))
     const tag = ["p", pubkey, relay.url, person.name || ""]
-    const petnames = reject(t => t[1] === pubkey, $user.petnames).concat(tag)
+    const petnames = reject(t => t[1] === pubkey, $user.petnames).concat([tag])
 
     cmd.setPetnames(getRelays(), petnames)
   }
 
   const unfollow = async () => {
-    following = false
-
     const petnames = reject(t => t[1] === pubkey, $user.petnames)
 
     cmd.setPetnames(getRelays(), petnames)
@@ -78,6 +81,13 @@
   }
 </script>
 
+<div
+  class="absolute w-full h-64"
+  style="z-index: -1;
+         background-size: cover;
+         background-image:
+          linear-gradient(to bottom, rgba(0, 0, 0, 0.3), #0f0f0e),
+          url('{person.banner}')" />
 <div class="max-w-xl m-auto flex flex-col gap-4 py-8 px-4">
   <div class="flex flex-col gap-4" in:fly={{y: 20}}>
     <div class="flex gap-4">
@@ -94,11 +104,11 @@
         <p>{@html renderContent(person.about || '')}</p>
       </div>
       <div class="whitespace-nowrap">
-        {#if $user?.pubkey === pubkey}
+        {#if $user?.pubkey === pubkey && $privkey}
         <a href="/profile" class="cursor-pointer text-sm">
           <i class="fa-solid fa-edit" /> Edit
         </a>
-        {:else if $user?.petnames}
+        {:else if $user?.petnames && $privkey}
         <div class="flex flex-col items-end gap-2">
           {#if following}
           <Button on:click={unfollow}>Unfollow</Button>
@@ -126,6 +136,8 @@
 {:else if activeTab === 'network'}
 {#if person?.petnames}
 <Network person={person} />
+{:else if loading}
+<Spinner />
 {:else}
 <div class="py-16 max-w-xl m-auto flex justify-center">
   Unable to show network for this person.
