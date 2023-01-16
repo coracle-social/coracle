@@ -15,9 +15,7 @@
   let depth = 2
   let notes = []
   let newNotes = []
-
-  // Make max notes sort of random so people don't know they're missing out
-  let maxNotes = 200 + Math.round(Math.random() * 100)
+  let maxNotes = 300
 
   const showNewNotes = () => {
     // Drop notes at the end if there are a lot
@@ -36,8 +34,7 @@
         return
       }
 
-      // Drop notes at the top if there are a lot
-      notes = uniqBy(prop('id'), notes.concat(await loadNotes()).slice(-maxNotes))
+      notes = uniqBy(prop('id'), notes.concat(await loadNotes()))
     })
 
     return async () => {

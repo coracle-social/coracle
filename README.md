@@ -17,21 +17,18 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Link previews
 - [x] Add notes, follows, likes tab to profile
 - [x] Mentions
-- [ ] Persist and load relay list
-- [ ] Add followers/follows lists on profile page
+- [x] Persist and load relay list
+- [ ] NIP 05
+- [ ] Direct messages https://github.com/nbd-wtf/nostr-tools/blob/master/nip04.ts
 - [ ] Image uploads
   - Use dufflepud. Default will charge via lightning and have a tos, others can self-host and skip that.
   - Add banner field to profile
-- [ ] Server discovery and relay publishing https://github.com/nostr-protocol/nips/pull/32/files
+- [ ] Release to android with https://svelte-native.technology/docs
 - [ ] Support invoices https://twitter.com/jb55/status/1604131336247476224
-- [ ] NIP 05
 - [ ] Lightning tips
-- [ ] Direct messages https://github.com/nbd-wtf/nostr-tools/blob/master/nip04.ts
+- [ ] Add followers/follows lists on profile page
 - [ ] Rooms/groups
 - [ ] Custom feeds
-- [ ] Render and auto-link bech32 entities
-  - https://github.com/nostr-protocol/nips/blob/master/19.md
-  - https://github.com/nbd-wtf/nostr-tools/blob/master/nip19.ts
 - [ ] Support key delegation
   - https://github.com/nbd-wtf/nostr-tools/blob/master/nip26.ts
 - [ ] Add relay selector when publishing a note
@@ -39,11 +36,9 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Add no-relay gossip
   - Capture certain events in a local db
   - File import/export from db, NFC transfer
-- [ ] Save user notes to db
-- [ ] Release to android with https://svelte-native.technology/docs
+  - Save user notes to db
 - [ ] Add settings storage on nostr, maybe use kind 0?
 - [ ] Stack views so scroll position isn't lost on navigation
-- [ ] Suggest relays based on network
 - [ ] Attachments (a tag w/content type and url)
 - [ ] Add Labs tab with cards for non-standard features
   - Time travel - see events as of a date/time
@@ -52,45 +47,39 @@ If you like Coracle and want to support its development, you can donate sats via
 
 ## Current
 
-- [x] Upgrade nostr-tools
-- [x] Publish user relays using nip 23
-- [x] Use user relays for feeds
-- [x] Publish to user relays + target relays:
-- [x] Add correct recommended relay to tags
-- [x] Relays
-  - [x] Support some read/write config
-  - [x] Get real home relays for defaults.petnames
-  - [x] Add notification for slow relays
-  - [x] Fix publishing
-  - [x] Relay list isn't getting refreshed since we're using getRelay everywhere
-- [x] Warn that everything will be cleared on logout
-- [x] Connection management
-  - [x] Do I need to implement re-connecting now?
-  - [x] Handle failed connections
-  - [x] Close connections that haven't been used in a while
-  - [x] Add strategy that callers can opt into to accept first eose from a relay that has any events
-- [x] Login
-  - [x] Prefer extension, make private key entry "advanced"
-  - [x] Buttons should redirect to login modal if using pubkey login
-- [ ] We often get the root as the reply, figure out why that is, compared to astral/damus
-- [x] Load feeds from network rather than user relays?
-  - [x] Still use "my" relays for global, this could make global feed more useful
-  - [x] If we use my relays for global, we don't have to wait for network to load initially
-  - [x] Figure out fast vs complete tradeoff. Skipping loadContext speeds things up a ton.
-- [x] Add relays/mentions to note and reply composition
 - [ ] Figure out migrations from previous version
 - [ ] Fix search
+- [ ] Deploy coracle relay, set better defaults
 
 ## 0.2.7
 
-- [x] Added error tracking - you can turn this off in settings
-- [x] Add support for profile banner images
-- [x] Re-designed relays page
-  - [x] Support connection status/speed indication
-  - [x] Add toggle to enable writing to a connected relay
-- [x] Re-designed login page
-  - [x] Use private key login only if extension is not enabled
-  - [x] Add pubkey login support
+- [x] Sped up feeds by requesting less context
+- [x] Sped up alerts by storing them in dexie
+- [x] Fixed feeds so they don't jump around
+- [x] Switched from time-based to limit-based cursors
+- [x] Added batching for note context to speed things up
+- [x] Fixed support for old-style reply identification
+- [x] Improved reliability of event retrieval by following relay hints
+- [x] Added default petnames and relays
+- [x] Added support for user banners
+- [x] Added recommended relay to tags
+- [x] Added topics to note composition
+- [x] Added a way to remove mentions from replies
+- [x] Coracle now publishes user relays using kind 10001 per NIP 23
+- [x] Menu now stays open on larger screens
+- [x] Standardized some layout components
+- [x] Added support for profile banner images
+- [x] Support connection status/speed indication on relays
+- [x] Add toggle to enable writing to a connected relay
+- [x] Re-designed login and relay pages
+- [x] Use private key login only if extension is not enabled
+- [x] Add pubkey login support
+- [x] Removed dexie for most things
+- [x] Added support for bech32 entities
+- [x] Auto-disconnect/reconnect to spare relay resources
+- [x] Added automatic relay discovery
+- [x] Added error tracking with bugsnag
+- [x] Upgraded nostr-tools
 
 ## 0.2.6
 
