@@ -1,10 +1,10 @@
-import {whereEq, sortBy, identity, when, assoc, reject} from 'ramda'
+import {pluck, whereEq, sortBy, identity, when, assoc, reject} from 'ramda'
 import {navigate} from 'svelte-routing'
 import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
 import {renderContent} from 'src/util/html'
 import {Tags, displayPerson, findReplyId} from 'src/util/nostr'
-import {user, people, getPerson, getRelays, load, keys} from 'src/agent'
+import {user, people, getPerson, getRelays, keys} from 'src/agent'
 import defaults from 'src/agent/defaults'
 import {toast, routes, modal, settings} from 'src/app/ui'
 import cmd from 'src/app/cmd'
@@ -29,7 +29,7 @@ export const login = async ({privkey, pubkey}, usingExtension = false) => {
   alerts.load(getRelays(), pubkey),
   alerts.listen(getRelays(), pubkey),
 
-  navigate('/notes/latest')
+  navigate('/notes/global')
 }
 
 export const addRelay = async relay => {
@@ -75,16 +75,6 @@ export const setRelayWriteCondition = async (url, write) => {
   if (person) {
     await cmd.setRelays(getRelays(), modify(person.relays || []))
   }
-}
-
-export const loadNote = async (relays, id) => {
-  const [found] = await load(relays, {ids: [id]})
-
-  if (!found) {
-    return null
-  }
-
-  return annotate(found, await loaders.loadContext(relays, found, {mode: 'fast', loadChildren: true}))
 }
 
 export const render = (note, {showEntire = false}) => {
@@ -133,8 +123,7 @@ export const annotate = (note, context) => {
 }
 
 export const threadify = (events, context, {muffle = []} = {}) => {
-  const contextById = createMap('id', context)
-
+  const contextById = createMap('id', events.concat(context))
   // Show parents when possible. For reactions, if there's no parent,
   // throw it away. Sort by created date descending
   const notes = sortBy(
@@ -144,14 +133,19 @@ export const threadify = (events, context, {muffle = []} = {}) => {
       .filter(e => e && !muffle.includes(e.pubkey))
   )
 
-  // Annotate our feed with parents, reactions, replies
-  return notes.map(note => {
-    let parent = contextById[findReplyId(note)]
+  // Don't show notes that will also show up as children
+  const noteIds = new Set(pluck('id', notes))
 
-    if (parent) {
-      parent = annotate(parent, context)
-    }
+  // Annotate our feed with parents, reactions, replies.
+  return notes
+    .filter(note => !noteIds.has(findReplyId(note)))
+    .map(note => {
+      let parent = contextById[findReplyId(note)]
 
-    return annotate({...note, parent}, context)
-  })
+      if (parent) {
+        parent = annotate(parent, context)
+      }
+
+      return annotate({...note, parent}, context)
+    })
 }

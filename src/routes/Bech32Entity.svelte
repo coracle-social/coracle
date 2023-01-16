@@ -1,6 +1,7 @@
 <script>
   import {objOf} from 'ramda'
   import {nip19} from 'nostr-tools'
+  import Content from 'src/partials/Content.svelte'
   import NoteDetail from 'src/views/NoteDetail.svelte'
   import Person from 'src/routes/Person.svelte'
 
@@ -11,9 +12,13 @@
 </script>
 
 {#if type === "nevent"}
-  <NoteDetail note={{id: data.id}} {relays} />
+  <Content>
+    <NoteDetail note={{id: data.id}} {relays} />
+  </Content>
 {:else if type === "note"}
-  <NoteDetail note={{id: data}} />
+  <Content>
+    <NoteDetail note={{id: data}} />
+  </Content>
 {:else if type === "nprofile"}
   <Person npub={nip19.npubEncode(data.pubkey)} {relays} activeTab="notes" />
 {:else if type === "npub"}

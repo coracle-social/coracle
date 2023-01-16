@@ -53,14 +53,17 @@
   {#if newNotes.length > 0}
   <div
     in:slide
-    class="mb-2 cursor-pointer text-center underline text-light"
+    class="cursor-pointer text-center underline text-light"
     on:click={showNewNotes}>
     Load {quantify(newNotes.length, 'new note')}
   </div>
   {/if}
-  {#each notes as note (note.id)}
-  <Note {note} {depth} />
-  {/each}
-</Content>
 
-<Spinner />
+  <div>
+    {#each notes as note (note.id)}
+    <Note {note} {depth} />
+    {/each}
+  </div>
+
+  <Spinner />
+</Content>

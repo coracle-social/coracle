@@ -24,7 +24,7 @@
 
   const loadNotes = async () => {
     const {limit, until} = cursor
-    const notes = await load(relays, {...filter, limit, until}, {mode: 'fast'})
+    const notes = await load(relays, {...filter, limit, until})
     const context = await loaders.loadContext(relays, notes)
 
     cursor.onChunk(notes)

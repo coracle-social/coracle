@@ -76,13 +76,11 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Load feeds from network rather than user relays?
   - [x] Still use "my" relays for global, this could make global feed more useful
   - [x] If we use my relays for global, we don't have to wait for network to load initially
-  - [ ] Figure out fast vs complete tradeoff. Skipping loadContext speeds things up a ton.
-  - [ ] Make loadParents false by default. Maybe make fast the default
-  - [ ] Figure out how to make threads fast and complete. Load only the note, then preload entire thread in background?
+  - [x] Figure out fast vs complete tradeoff. Skipping loadContext speeds things up a ton.
 - [ ] Add relays/mentions to note and reply composition
-- [ ] Add layout component with max-w, padding, etc. Test on mobile size
 - [ ] Figure out migrations from previous version
 - [ ] Fix search
+- [ ] Move add note to modal
 
 ## 0.2.7
 

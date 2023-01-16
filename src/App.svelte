@@ -23,6 +23,7 @@
   import PubKeyLogin from "src/views/PubKeyLogin.svelte"
   import NoteDetail from "src/views/NoteDetail.svelte"
   import PersonSettings from "src/views/PersonSettings.svelte"
+  import NoteCreate from "src/views/NoteCreate.svelte"
   import NotFound from "src/routes/NotFound.svelte"
   import Search from "src/routes/Search.svelte"
   import Alerts from "src/routes/Alerts.svelte"
@@ -35,7 +36,6 @@
   import RelayList from "src/routes/RelayList.svelte"
   import AddRelay from "src/routes/AddRelay.svelte"
   import Person from "src/routes/Person.svelte"
-  import NoteCreate from "src/routes/NoteCreate.svelte"
   import Bech32Entity from "src/routes/Bech32Entity.svelte"
 
   export let url = ""
@@ -122,7 +122,6 @@
       <Route path="/alerts" component={Alerts} />
       <Route path="/search/:activeTab" component={Search} />
       <Route path="/notes/:activeTab" component={Notes} />
-      <Route path="/notes/new" component={NoteCreate} />
       <Route path="/people/:npub/:activeTab" let:params>
         {#key params.npub}
         <Person {...params} />
@@ -171,7 +170,7 @@
       </li>
       {/if}
       <li class="cursor-pointer">
-        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes/latest">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes/global">
           <i class="fa-solid fa-tag mr-2" /> Notes
         </a>
       </li>
@@ -228,9 +227,9 @@
     {#if $canSign}
     <div class="fixed bottom-0 right-0 m-8">
       <a
-        href="/notes/new"
         class="rounded-full bg-accent color-white w-16 h-16 flex justify-center
-                items-center border border-dark shadow-2xl cursor-pointer">
+                items-center border border-dark shadow-2xl cursor-pointer"
+        on:click={() => modal.set({form: 'note/create'})}>
         <span class="fa-sold fa-plus fa-2xl" />
       </a>
     </div>
@@ -242,6 +241,8 @@
         {#key $modal.note.id}
         <NoteDetail {...$modal} />
         {/key}
+      {:else if $modal.form === 'note/create'}
+        <NoteCreate />
       {:else if $modal.form === 'relay'}
         <AddRelay />
       {:else if $modal.form === 'signUp'}

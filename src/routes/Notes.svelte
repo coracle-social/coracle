@@ -4,7 +4,7 @@
   import Content from "src/partials/Content.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Network from "src/views/notes/Network.svelte"
-  import Latest from "src/views/notes/Latest.svelte"
+  import Global from "src/views/notes/Global.svelte"
   import {user} from 'src/agent'
 
   export let activeTab
@@ -12,18 +12,21 @@
   const setActiveTab = tab => navigate(`/notes/${tab}`)
 </script>
 
-{#if !$user}
-<Content size="lg" class="text-center">
-  <p>
-    Don't have an account? Click <Anchor href="/login">here</Anchor> to join the nostr network.
-  </p>
+<Content>
+  {#if !$user}
+  <Content size="lg" class="text-center">
+    <p>
+      Don't have an account? Click <Anchor href="/login">here</Anchor> to join the nostr network.
+    </p>
+  </Content>
+  {/if}
+
+  <div>
+    <Tabs tabs={['global', 'network']} {activeTab} {setActiveTab} />
+    {#if activeTab === 'network'}
+    <Network />
+    {:else}
+    <Global />
+    {/if}
+  </div>
 </Content>
-{/if}
-
-<Tabs tabs={['latest', 'network']} {activeTab} {setActiveTab} />
-
-{#if activeTab === 'network'}
-<Network />
-{:else}
-<Latest />
-{/if}

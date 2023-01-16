@@ -15,7 +15,7 @@
   import Badge from "src/partials/Badge.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
-  import {user, getPerson, getRelays, getEventRelays} from 'src/agent'
+  import {user, people, getRelays, getEventRelays} from 'src/agent'
   import cmd from 'src/app/cmd'
 
   export let note
@@ -31,7 +31,9 @@
   const interactive = !anchorId || !showEntire
   const relays = getEventRelays(note)
 
-  let likes, flags, like, flag
+  let likes, flags, like, flag, person
+
+  $: person = $people[note.pubkey] || {pubkey: note.pubkey}
 
   $: {
     likes = note.reactions.filter(n => isLike(n.content))
@@ -116,7 +118,7 @@
 
 <Card on:click={onClick} {interactive} {invertColors}>
   <div class="flex gap-4 items-center justify-between">
-    <Badge person={getPerson(note.pubkey, true)} />
+    <Badge person={person} />
     <Anchor
       href={"/" + nip19.neventEncode({id: note.id, relays: pluck('url', relays)})}
       class="text-sm text-light"

@@ -49,6 +49,10 @@ export const findRoot = e =>
 export const findRootId = e => Tags.wrap([findRoot(e)]).values().first()
 
 export const displayPerson = p => {
+  if (p.display_name) {
+    return p.display_name
+  }
+
   if (p.name) {
     return p.name
   }

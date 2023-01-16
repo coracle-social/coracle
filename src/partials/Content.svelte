@@ -3,7 +3,7 @@
 
   export let size = "2xl"
 
-  const className = "flex flex-col m-auto text-white gap-8"
+  const className = "flex flex-col m-auto text-white gap-6"
 
   if (!['lg', '2xl'].includes(size)) {
     throw new Error(`Invalid size: ${size}`)

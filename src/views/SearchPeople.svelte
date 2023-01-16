@@ -1,6 +1,5 @@
 <script>
   import {prop} from 'ramda'
-  import {fly} from 'svelte/transition'
   import {ellipsize} from 'hurdak/lib/hurdak'
   import {fuzzy} from "src/util/misc"
   import {renderContent} from "src/util/html"

@@ -52,11 +52,11 @@ export const getRelays = pubkey => {
 }
 
 export const getEventRelays = event => {
-  if (event.seen_on) {
-    return [{url: event.seen_on}]
-  }
-
-  return uniq(getRelays(event.pubkey).concat(Tags.from(event).relays())).map(objOf('url'))
+  return uniq(
+    getRelays(event.pubkey)
+      .concat(Tags.from(event).relays())
+      .concat(event.seen_on)
+  ).map(objOf('url'))
 }
 
 export const publish = async (relays, event) => {

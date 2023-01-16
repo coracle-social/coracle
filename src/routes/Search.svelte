@@ -1,5 +1,5 @@
 <script>
-  import {fly} from 'svelte/transition'
+  import {navigate} from 'svelte-routing'
   import Input from "src/partials/Input.svelte"
   import Content from 'src/partials/Content.svelte'
   import Tabs from 'src/partials/Tabs.svelte'

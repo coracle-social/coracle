@@ -97,7 +97,7 @@ export const renderContent = content => {
     const $a = document.createElement('a')
 
     $a.href = url
-    $a.target = "_blank noopener"
+    $a.target = "_blank"
     $a.className = "underline"
 
     /* eslint no-useless-escape: 0 */
@@ -107,5 +107,5 @@ export const renderContent = content => {
     content = content.replace(url, $a.outerHTML)
   }
 
-  return content
+  return content.trim()
 }

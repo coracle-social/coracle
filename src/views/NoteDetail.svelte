@@ -1,7 +1,10 @@
 <script>
+  import {onMount} from 'svelte'
   import {nip19} from 'nostr-tools'
   import {fly} from 'svelte/transition'
-  import {loadNote} from 'src/app'
+  import {load} from 'src/agent'
+  import {annotate} from 'src/app'
+  import loaders from 'src/app/loaders'
   import Note from 'src/partials/Note.svelte'
   import Content from 'src/partials/Content.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
@@ -11,17 +14,28 @@
 
   let loading = true
 
-  const logNote = () => {
-    if (note) {
+  onMount(async () => {
+    const [found] = await load(relays, {ids: [note.id]})
+
+    if (found) {
+      // Show the main note without waiting for context
+      if (!note.pubkey) {
+        note = annotate(found, [])
+      }
+
+      const context = await loaders.loadContext(relays, found, {
+        depth: 3,
+        loadParents: true,
+      })
+
+      note = annotate(found, context)
+
       console.log('NoteDetail', nip19.noteEncode(note.id), note)
+    } else if (!note.pubkey) {
+      note = null
     }
-  }
 
-  loadNote(relays, note.id).then(found => {
-    note = found
     loading = false
-
-    logNote()
   })
 </script>
 

@@ -167,30 +167,27 @@ const subscribe = async (relays, filters) => {
   }
 }
 
-const request = (relays, filters, {mode = "most"} = {}) => {
+const request = (relays, filters, {threshold = 1} = {}) => {
   relays = uniqBy(prop('url'), relays.filter(r => isRelay(r.url)))
 
   return new Promise(async resolve => {
     const agg = await subscribe(relays, filters)
     const now = Date.now()
+    const relaysWithEvents = new Set()
     const events = []
     const eose = []
 
     const attemptToComplete = () => {
-      // If we have all relays, most after a short timeout, or all after
-      // a long timeout, go ahead and unsubscribe.
+      // If we have all relays, more than `threshold` reporting events, most after
+      // a short timeout, or all after a long timeout, go ahead and unsubscribe.
       const done = (
         eose.length === agg.subs.length
-        || Date.now() - now >= 5000
+        || eose.filter(url => relaysWithEvents.has(url)).length > threshold
         || (
-          mode === "fast"
-          && events.length
-        )
-        || (
-          mode === "most"
-          && Date.now() - now >= 1000
+          Date.now() - now >= 1000
           && eose.length > agg.subs.length - Math.round(agg.subs.length / 10)
         )
+        || Date.now() - now >= 5000
       )
 
       if (done) {
@@ -212,7 +209,10 @@ const request = (relays, filters, {mode = "most"} = {}) => {
       }
     }
 
-    agg.onEvent(e => events.push(e))
+    agg.onEvent(e => {
+      relaysWithEvents.add(e.seen_on)
+      events.push(e)
+    })
 
     agg.onEose(async url => {
       if (!eose.includes(url)) {
