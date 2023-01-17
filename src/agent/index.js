@@ -1,4 +1,4 @@
-import {last, uniqBy, prop, objOf, uniq} from 'ramda'
+import {last, uniqBy, prop} from 'ramda'
 import {derived, get} from 'svelte/store'
 import {Tags} from 'src/util/nostr'
 import pool from 'src/agent/pool'

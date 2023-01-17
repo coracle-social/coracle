@@ -15,7 +15,10 @@
   import {routes} from "src/app/ui"
   import cmd from "src/app/cmd"
 
-  let values = {picture: null, about: null, name: null}
+  let values = {picture: null, about: null, name: null, nip05: null}
+
+  const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
+  const pseudUrl = "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
   onMount(async () => {
     if (!$user) {
@@ -56,13 +59,7 @@
       <p>
         Give people a friendly way to recognize you. We recommend you do not use your real name or
         share your personal information. The future of the internet is
-        <Anchor
-          target="_blank"
-          rel="noopener"
-          href="https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
-        >
-          pseudonymous
-        </Anchor>.
+        <Anchor external href={pseudUrl}>pseudonymous</Anchor>.
       </p>
     </div>
     <div class="flex flex-col gap-8 w-full">
@@ -74,6 +71,16 @@
         <p class="text-sm text-light">
           Your username can be changed at any time. To prevent spoofing, a few characters of your
           public key will also be displayed next to your posts.
+        </p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <strong>NIP-05 Identifier</strong>
+        <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.nip05}>
+          <i slot="before" class="fa-solid fa-user-check" />
+        </Input>
+        <p class="text-sm text-light">
+          Enter a <Anchor external href={nip05Url}>NIP-05</Anchor> identifier in the form
+          "name@domain.com" to verify your public key.
         </p>
       </div>
       <div class="flex flex-col gap-1">

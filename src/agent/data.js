@@ -1,6 +1,7 @@
 import Dexie from 'dexie'
+import {nip05} from 'nostr-tools'
 import {writable} from 'svelte/store'
-import {ensurePlural, createMap, switcherFn} from 'hurdak/lib/hurdak'
+import {noop, ensurePlural, createMap, switcherFn} from 'hurdak/lib/hurdak'
 import {now} from 'src/util/misc'
 import {personKinds} from 'src/util/nostr'
 
@@ -56,7 +57,20 @@ export const processEvents = async events => {
       ...person,
       ...updates[e.pubkey],
       ...switcherFn(e.kind, {
-        0: () => JSON.parse(e.content),
+        0: () => {
+          try {
+            const content = JSON.parse(e.content)
+
+            // Fire off a nip05 verification
+            if (content.nip05) {
+              verifyNip05(e.pubkey, content.nip05)
+            }
+
+            return content
+          } catch (e) {
+            console.error(e)
+          }
+        },
         2: () => {
           if (e.created_at > (person.relays_updated_at || 0)) {
             return {
@@ -85,3 +99,14 @@ export const processEvents = async events => {
 
   await updatePeople(updates)
 }
+
+// Utils
+
+const verifyNip05 = (pubkey, as) =>
+  nip05.queryProfile(as).then(result => {
+    if (result.pubkey === pubkey) {
+      const person = getPerson(pubkey, true)
+
+      updatePeople({[pubkey]: {...person, verified_as: as}})
+    }
+  }, noop)

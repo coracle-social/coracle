@@ -24,7 +24,9 @@
       class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
       style="background-image: url({p.picture})" />
     <div class="flex-grow">
-      <h1 class="text-2xl">{displayPerson(p)}</h1>
+      <div class="flex gap-2 items-center justify-between">
+        <h1 class="text-2xl">{displayPerson(p)}</h1>
+      </div>
       <p>{@html renderContent(ellipsize(p.about || '', 140))}</p>
     </div>
   </a>

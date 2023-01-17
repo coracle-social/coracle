@@ -18,7 +18,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Add notes, follows, likes tab to profile
 - [x] Mentions
 - [x] Persist and load relay list
-- [ ] NIP 05
+- [x] NIP 05
 - [ ] Direct messages https://github.com/nbd-wtf/nostr-tools/blob/master/nip04.ts
 - [ ] Image uploads
   - Use dufflepud. Default will charge via lightning and have a tos, others can self-host and skip that.
@@ -80,6 +80,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Added automatic relay discovery
 - [x] Added error tracking with bugsnag
 - [x] Upgraded nostr-tools
+- [x] Added support for NIP-05 verfication
 
 ## 0.2.6
 

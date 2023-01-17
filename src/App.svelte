@@ -218,7 +218,7 @@
         <img src="/images/favicon.png" class="w-8" />
         <h1 class="staatliches text-3xl">Coracle</h1>
       </Anchor>
-      {#if $mostRecentAlert > $lastCheckedAlerts || slowConnections.length > 0}
+      {#if $mostRecentAlert > $lastCheckedAlerts}
       <div class="w-2 h-2 rounded bg-accent absolute top-4 left-12 lg:hidden" />
       {/if}
     </div>
