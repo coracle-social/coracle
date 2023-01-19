@@ -22,8 +22,12 @@ const createRoom = (relays, room) =>
 const updateRoom = (relays, {id, ...room}) =>
   publishEvent(relays, 41, {content: JSON.stringify(pick(roomAttrs, room)), tags: [["e", id]]})
 
-const createMessage = (relays, roomId, content) =>
+const createChatMessage = (relays, roomId, content) =>
   publishEvent(relays, 42, {content, tags: [["e", roomId, prop('url', first(relays)), "root"]]})
+
+const createDirectMessage = (relays, pubkey, content) =>
+  // todo, encrypt messages
+  publishEvent(relays, 4, {content, tags: [["p", pubkey]]})
 
 const createNote = (relays, content, mentions = [], topics = []) => {
   mentions = mentions.map(p => ["p", p, prop('url', first(getRelays(p)))])
@@ -100,6 +104,7 @@ const publishEvent = (relays, kind, {content = '', tags = []} = {}) => {
 }
 
 export default {
-  updateUser, setRelays, setPetnames, muffle, createRoom, updateRoom, createMessage, createNote,
-  createReaction, createReply, deleteEvent,
+  updateUser, setRelays, setPetnames, muffle, createRoom, updateRoom,
+  createChatMessage, createDirectMessage, createNote, createReaction,
+  createReply, deleteEvent,
 }

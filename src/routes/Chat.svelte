@@ -1,11 +1,13 @@
 <script>
-  import {reject} from 'ramda'
+  import {uniq, pluck} from 'ramda'
   import {onMount} from "svelte"
+  import {nip19} from 'nostr-tools'
   import {navigate} from "svelte-routing"
   import {liveQuery} from 'dexie'
   import {fuzzy} from "src/util/misc"
-  import {getRelays, listen, db} from 'src/agent'
+  import {getRelays, getPerson, listen, db} from 'src/agent'
   import {modal} from 'src/app'
+  import loaders from 'src/app/loaders'
   import Room from "src/partials/Room.svelte"
   import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
@@ -15,20 +17,37 @@
   let q = ""
   let roomsCount = 0
 
-  const joined = liveQuery(() => db.rooms.where('joined').equals(1).toArray())
+  const rooms = liveQuery(async () => {
+    const [rooms, messages] = await Promise.all([
+      db.rooms.where('joined').equals(1).toArray(),
+      db.messages.toArray(),
+    ])
+
+    const pubkeys = uniq(pluck('pubkey', messages))
+    await loaders.loadPeople(getRelays(), pubkeys)
+
+    return pubkeys
+      .map(k => ({type: 'npub', id: k, ...getPerson(k, true)}))
+      .concat(rooms.map(room => ({type: 'note', ...room})))
+  })
 
   const search = liveQuery(async () => {
     const rooms = await db.rooms.where('joined').equals(0).toArray()
-    const nonTestRooms = reject(r => r.name.toLowerCase().includes('test'), rooms)
 
     roomsCount = rooms.length
 
     return fuzzy(rooms, {keys: ["name", "about"]})
   })
 
-  const createRoom = () => navigate(`/chat/new`)
+  const setRoom = ({type, id}) => {
+    if (type === 'npub') {
+      navigate(`/messages/${nip19.npubEncode(id)}`)
+    }
 
-  const setRoom = id => navigate(`/chat/${id}`)
+    if (type === 'note') {
+      navigate(`/chat/${nip19.noteEncode(id)}`)
+    }
+  }
 
   const joinRoom = id => {
     db.rooms.where('id').equals(id).modify({joined: 1})
@@ -49,7 +68,7 @@
   })
 </script>
 
-{#if $search}
+{#if $rooms}
 <Content>
   <div class="flex justify-between">
     <div class="flex gap-2 items-center">
@@ -60,7 +79,7 @@
       <i class="fa-solid fa-plus" /> Create Room
     </Anchor>
   </div>
-  {#each ($joined || []) as room (room.id)}
+  {#each ($rooms || []) as room (room.id)}
   <Room joined {room} {setRoom} {joinRoom} {leaveRoom} />
   {:else}
   <p class="text-center py-8">You haven't yet joined any rooms.</p>

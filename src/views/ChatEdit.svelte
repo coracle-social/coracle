@@ -7,7 +7,7 @@
   import Content from "src/partials/Content.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Button from "src/partials/Button.svelte"
-  import {getRelays, load} from 'src/agent'
+  import {getRelays, db} from 'src/agent'
   import {toast} from "src/app"
   import cmd from "src/app/cmd"
 
@@ -38,7 +38,6 @@
         ? await cmd.updateRoom(getRelays(), room)
         : await cmd.createRoom(getRelays(), room)
 
-      console.log('here')
       await db.rooms.where('id').equals(room.id).modify({joined: 1})
 
       toast.show("info", `Your room has been ${room.id ? 'updated' : 'created'}!`)

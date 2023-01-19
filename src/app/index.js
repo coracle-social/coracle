@@ -9,9 +9,10 @@ import defaults from 'src/agent/defaults'
 import {toast, routes, modal, settings} from 'src/app/ui'
 import cmd from 'src/app/cmd'
 import alerts from 'src/app/alerts'
+import messages from 'src/app/messages'
 import loaders from 'src/app/loaders'
 
-export {toast, modal, settings, alerts}
+export {toast, modal, settings, alerts, messages}
 
 export const login = async ({privkey, pubkey}, usingExtension = false) => {
   if (privkey) {
@@ -20,14 +21,11 @@ export const login = async ({privkey, pubkey}, usingExtension = false) => {
     keys.setPublicKey(pubkey)
   }
 
-  if (usingExtension || privkey) {
-    keys.canSign.set(true)
-  }
-
   // Load network and start listening, but don't wait for it
   loaders.loadNetwork(getRelays(), pubkey),
   alerts.load(getRelays(), pubkey),
   alerts.listen(getRelays(), pubkey),
+  messages.listen(getRelays(), pubkey)
 
   navigate('/notes/global')
 }
@@ -49,6 +47,7 @@ export const addRelay = async relay => {
       loaders.loadNetwork(relays, person.pubkey),
       alerts.load(relays, person.pubkey),
       alerts.listen(relays, person.pubkey),
+      messages.listen(getRelays(), person.pubkey)
     ])
   }
 }

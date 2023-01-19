@@ -24,8 +24,6 @@
   export let activeTab
   export let relays = null
 
-  const {canSign} = keys
-
   let subs = []
   let pubkey = nip19.decode(npub).data
   let following = false
@@ -109,7 +107,7 @@
           {/if}
         </div>
         <div class="whitespace-nowrap flex gap-4 items-center">
-          {#if $user?.pubkey === pubkey && $canSign}
+          {#if $user?.pubkey === pubkey && keys.canSign()}
           <a href="/profile" class="cursor-pointer text-sm">
             <i class="fa-solid fa-edit" /> Edit
           </a>
@@ -117,7 +115,7 @@
           {#if $user && $user.pubkey !== pubkey}
             <i class="fa-solid fa-sliders cursor-pointer" on:click={openAdvanced} />
           {/if}
-          {#if $user?.petnames && $canSign}
+          {#if $user?.petnames && keys.canSign()}
           <div class="flex flex-col items-end gap-2">
             {#if following}
             <Button on:click={unfollow}>Unfollow</Button>

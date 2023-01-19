@@ -17,7 +17,8 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Mentions
 - [x] Persist and load relay list
 - [x] NIP 05
-- [ ] Direct messages https://github.com/nbd-wtf/nostr-tools/blob/master/nip04.ts
+- [ ] Direct messages using NIP 04
+- [ ] Deploy coracle relay, set better defaults
 - [ ] Image uploads
   - Use dufflepud. Default will charge via lightning and have a tos, others can self-host and skip that.
   - Add banner field to profile
@@ -46,11 +47,13 @@ If you like Coracle and want to support its development, you can donate sats via
 ## Current
 
 - [ ] Figure out migrations from previous version
-- [ ] Fix search
-- [ ] Deploy coracle relay, set better defaults
+- [ ] Fix notes search
 - [ ] Chat
   - [ ] Figure out which relays to use
-  - [ ] Add petnames for channels - join/leave from list page?
+  - [ ] Add petnames for channels
+  - [ ] Add back button
+  - [ ] Create Room -> open modal, choose dm or public room
+  - [ ] Add DM button to profile pages
 
 ## 0.2.7
 

@@ -2,7 +2,7 @@
   import "@fortawesome/fontawesome-free/css/fontawesome.css"
   import "@fortawesome/fontawesome-free/css/solid.css"
 
-  import {pluck} from 'ramda'
+  import {find, pluck} from 'ramda'
   import {onMount} from "svelte"
   import {writable, get} from "svelte/store"
   import {fly, fade} from "svelte/transition"
@@ -12,7 +12,7 @@
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, now} from 'src/util/misc'
   import {keys, user, pool, getRelays} from 'src/agent'
-  import {modal, toast, settings, alerts} from "src/app"
+  import {modal, toast, settings, alerts, messages} from "src/app"
   import {routes} from "src/app/ui"
   import Anchor from 'src/partials/Anchor.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
@@ -39,6 +39,7 @@
   import Bech32Entity from "src/routes/Bech32Entity.svelte"
   import Chat from "src/routes/Chat.svelte"
   import ChatRoom from "src/routes/ChatRoom.svelte"
+  import Messages from "src/routes/Messages.svelte"
 
   export let url = ""
 
@@ -53,18 +54,27 @@
     menuIsOpen.set(false)
   }
 
-  const {canSign} = keys
   const {lastCheckedAlerts, mostRecentAlert} = alerts
+  const {lastCheckedByPubkey, mostRecentByPubkey} = messages
 
   let menuIcon
   let scrollY
   let suspendedSubs = []
   let slowConnections = []
+  let hasNewMessages = false
+
+  $: {
+    hasNewMessages = Boolean(find(
+      ([k, t]) => ($lastCheckedByPubkey[k] || 0) < t,
+      Object.entries($mostRecentByPubkey)
+    ))
+  }
 
   onMount(() => {
     if ($user) {
       alerts.load(getRelays(), $user.pubkey)
       alerts.listen(getRelays(), $user.pubkey)
+      messages.listen(getRelays(), $user.pubkey)
     }
 
     const interval = setInterval(() => {
@@ -130,9 +140,14 @@
         {/key}
       </Route>
       <Route path="/chat" component={Chat} />
-      <Route path="/chat/:roomId" let:params>
-        {#key params.roomId}
+      <Route path="/chat/:entity" let:params>
+        {#key params.entity}
         <ChatRoom {...params} />
+        {/key}
+      </Route>
+      <Route path="/messages/:entity" let:params>
+        {#key params.entity}
+        <Messages {...params} />
         {/key}
       </Route>
       <Route path="/keys" component={Keys} />
@@ -186,6 +201,9 @@
       <li class="cursor-pointer">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/chat">
           <i class="fa-solid fa-message mr-2" /> Chat
+          {#if hasNewMessages}
+          <div class="w-2 h-2 rounded bg-accent absolute top-3 left-6" />
+          {/if}
         </a>
       </li>
       <li class="h-px mx-3 my-4 bg-medium" />
@@ -232,12 +250,12 @@
         <img src="/images/favicon.png" class="w-8" />
         <h1 class="staatliches text-3xl">Coracle</h1>
       </Anchor>
-      {#if $mostRecentAlert > $lastCheckedAlerts}
+      {#if $mostRecentAlert > $lastCheckedAlerts || hasNewMessages}
       <div class="w-2 h-2 rounded bg-accent absolute top-4 left-12 lg:hidden" />
       {/if}
     </div>
 
-    {#if $canSign}
+    {#if keys.canSign()}
     <div class="fixed bottom-0 right-0 m-8">
       <a
         class="rounded-full bg-accent color-white w-16 h-16 flex justify-center

@@ -9,6 +9,7 @@ let connections = []
 
 class Connection {
   constructor(url) {
+    this.promise = null
     this.nostr = this.init(url)
     this.status = 'new'
     this.url = url
@@ -41,9 +42,12 @@ class Connection {
 
     if (shouldConnect) {
       this.status = 'pending'
+      this.promise = this.nostr.connect()
+    }
 
+    if (this.status === 'pending') {
       try {
-        await this.nostr.connect()
+        await this.promise
         this.status = 'ready'
       } catch (e) {
         this.status = 'error'
@@ -106,7 +110,6 @@ const describeFilter = ({kinds = [], ...filter}) => {
 const subscribe = async (relays, filters) => {
   relays = uniqBy(prop('url'), relays.filter(r => isRelay(r.url)))
   filters = ensurePlural(filters)
-
 
   // Create a human readable subscription id for debugging
   const id = [
