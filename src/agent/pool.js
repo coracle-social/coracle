@@ -107,6 +107,7 @@ const subscribe = async (relays, filters) => {
   relays = uniqBy(prop('url'), relays.filter(r => isRelay(r.url)))
   filters = ensurePlural(filters)
 
+
   // Create a human readable subscription id for debugging
   const id = [
     Math.random().toString().slice(2, 6),
@@ -128,7 +129,7 @@ const subscribe = async (relays, filters) => {
       sub.conn.stats.activeCount += 1
 
       if (sub.conn.stats.activeCount > 10) {
-        console.warn(`Relay ${sub.url} has >10 active subscriptions`)
+        console.warn(`Relay ${sub.conn.url} has >10 active subscriptions`)
       }
 
       return sub

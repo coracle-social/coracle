@@ -1,7 +1,7 @@
-import {prop, join, uniqBy, last} from 'ramda'
+import {prop, pick, join, uniqBy, last} from 'ramda'
 import {get} from 'svelte/store'
 import {first} from "hurdak/lib/hurdak"
-import {Tags, isRelay} from 'src/util/nostr'
+import {Tags, isRelay, roomAttrs} from 'src/util/nostr'
 import {keys, publish, getRelays} from 'src/agent'
 
 const updateUser = (relays, updates) =>
@@ -17,13 +17,13 @@ const muffle = (relays, muffle) =>
   publishEvent(relays, 12165, {tags: muffle})
 
 const createRoom = (relays, room) =>
-  publishEvent(relays, 40, {content: JSON.stringify(room)})
+  publishEvent(relays, 40, {content: JSON.stringify(pick(roomAttrs, room))})
 
 const updateRoom = (relays, {id, ...room}) =>
-  publishEvent(relays, 41, {content: JSON.stringify(room), tags: [["e", id]]})
+  publishEvent(relays, 41, {content: JSON.stringify(pick(roomAttrs, room)), tags: [["e", id]]})
 
 const createMessage = (relays, roomId, content) =>
-  publishEvent(relays, 42, {content, tags: [["e", roomId, first(relays), "root"]]})
+  publishEvent(relays, 42, {content, tags: [["e", roomId, prop('url', first(relays)), "root"]]})
 
 const createNote = (relays, content, mentions = [], topics = []) => {
   mentions = mentions.map(p => ["p", p, prop('url', first(getRelays(p)))])
@@ -58,8 +58,6 @@ const createReply = (relays, note, content, mentions = [], topics = []) => {
       .concat([["p", note.pubkey, url], ["e", note.id, url, 'reply']])
       .concat(mentions.concat(topics))
   )
-
-  console.log(relays)
 
   return publishEvent(relays, 1, {content, tags})
 }

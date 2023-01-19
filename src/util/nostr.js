@@ -1,6 +1,6 @@
 import {last, identity, objOf, prop, flatten, uniq} from 'ramda'
 import {nip19} from 'nostr-tools'
-import {ensurePlural, first} from 'hurdak/lib/hurdak'
+import {ensurePlural, ellipsize, first} from 'hurdak/lib/hurdak'
 
 export const personKinds = [0, 2, 3, 10001, 12165]
 
@@ -50,11 +50,11 @@ export const findRootId = e => Tags.wrap([findRoot(e)]).values().first()
 
 export const displayPerson = p => {
   if (p.display_name) {
-    return p.display_name
+    return ellipsize(p.display_name, 60)
   }
 
   if (p.name) {
-    return p.name
+    return ellipsize(p.name, 60)
   }
 
   return nip19.npubEncode(p.pubkey).slice(4, 12)
@@ -77,3 +77,5 @@ export const isAlert = (e, pubkey) => {
 }
 
 export const isRelay = url => typeof url === 'string' && url.match(/^wss?:\/\/.+/)
+
+export const roomAttrs = ['name', 'about', 'picture']

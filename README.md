@@ -4,8 +4,6 @@ Coracle is a web client for the Nostr protocol. While Nostr is useful for many t
 
 [Dufflepud](https://github.com/staab/dufflepud) is a companion server which you can self-host. It helps Coracle with things like link previews and image uploads.
 
-Coracle is currently in _alpha_ - expect bugs, slow loading times, and rough edges.
-
 If you like Coracle and want to support its development, you can donate sats via [Geyser](https://geyser.fund/project/coracle).
 
 # Features
@@ -50,6 +48,9 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Figure out migrations from previous version
 - [ ] Fix search
 - [ ] Deploy coracle relay, set better defaults
+- [ ] Chat
+  - [ ] Figure out which relays to use
+  - [ ] Add petnames for channels - join/leave from list page?
 
 ## 0.2.7
 

@@ -94,7 +94,7 @@ export const poll = (t, cb) => {
   }
 }
 
-export const createScroller = loadMore => {
+export const createScroller = (loadMore, {reverse = false} = {}) => {
   // NOTE TO FUTURE SELF
   // If the scroller is saturating request channels on a slow relay, the
   // loadMore function is not properly awaiting all the work necessary.
@@ -105,9 +105,11 @@ export const createScroller = loadMore => {
     // While we have empty space, fill it
     const {scrollY, innerHeight} = window
     const {scrollHeight} = document.body
-    const shouldLoad = scrollY + innerHeight + 800 > scrollHeight
+    const shouldLoad = reverse
+      ? scrollY < 800
+      : scrollY + innerHeight + 800 > scrollHeight
 
-    // Only trigger loading the first time we reach the threshhold
+    // Only trigger loading the first time we reach the threshold
     if (shouldLoad) {
       clearTimeout(timeout)
 

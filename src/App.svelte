@@ -23,6 +23,7 @@
   import NoteDetail from "src/views/NoteDetail.svelte"
   import PersonSettings from "src/views/PersonSettings.svelte"
   import NoteCreate from "src/views/NoteCreate.svelte"
+  import ChatEdit from "src/views/ChatEdit.svelte"
   import NotFound from "src/routes/NotFound.svelte"
   import Search from "src/routes/Search.svelte"
   import Alerts from "src/routes/Alerts.svelte"
@@ -36,6 +37,8 @@
   import AddRelay from "src/routes/AddRelay.svelte"
   import Person from "src/routes/Person.svelte"
   import Bech32Entity from "src/routes/Bech32Entity.svelte"
+  import Chat from "src/routes/Chat.svelte"
+  import ChatRoom from "src/routes/ChatRoom.svelte"
 
   export let url = ""
 
@@ -126,6 +129,12 @@
         <Person {...params} />
         {/key}
       </Route>
+      <Route path="/chat" component={Chat} />
+      <Route path="/chat/:roomId" let:params>
+        {#key params.roomId}
+        <ChatRoom {...params} />
+        {/key}
+      </Route>
       <Route path="/keys" component={Keys} />
       <Route path="/relays" component={RelayList} />
       <Route path="/profile" component={Profile} />
@@ -174,6 +183,11 @@
         </a>
       </li>
       {#if $user}
+      <li class="cursor-pointer">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/chat">
+          <i class="fa-solid fa-message mr-2" /> Chat
+        </a>
+      </li>
       <li class="h-px mx-3 my-4 bg-medium" />
       <li class="cursor-pointer relative">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/relays">
@@ -246,6 +260,8 @@
         <AddRelay />
       {:else if $modal.form === 'signUp'}
         <SignUp />
+      {:else if $modal.form === 'room/edit'}
+        <ChatEdit {...$modal} />
       {:else if $modal.form === 'privkeyLogin'}
         <PrivKeyLogin />
       {:else if $modal.form === 'pubkeyLogin'}

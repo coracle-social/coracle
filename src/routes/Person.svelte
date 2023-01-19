@@ -91,51 +91,52 @@
           url('{person.banner}')" />
 
 <Content>
-  <div class="flex flex-col gap-4" in:fly={{y: 20}}>
-    <div class="flex items-start gap-4">
-      <div
-        class="overflow-hidden w-32 h-32 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-        style="background-image: url({person.picture})" />
-      <div class="flex-grow flex flex-col gap-2">
-        <div class="flex items-center gap-2">
-          <h1 class="text-2xl">{displayPerson(person)}</h1>
-        </div>
-        {#if person.verified_as}
-        <div class="flex gap-1 text-sm">
-          <i class="fa fa-user-check text-accent" />
-          <span class="text-light">{last(person.verified_as.split('@'))}</span>
-        </div>
-        {/if}
-        <p>{@html renderContent(person.about || '')}</p>
-      </div>
-      <div class="whitespace-nowrap flex gap-4 items-center">
-        {#if $user?.pubkey === pubkey && $canSign}
-        <a href="/profile" class="cursor-pointer text-sm">
-          <i class="fa-solid fa-edit" /> Edit
-        </a>
-        {/if}
-        {#if $user && $user.pubkey !== pubkey}
-          <i class="fa-solid fa-sliders cursor-pointer" on:click={openAdvanced} />
-        {/if}
-        {#if $user?.petnames && $canSign}
-        <div class="flex flex-col items-end gap-2">
-          {#if following}
-          <Button on:click={unfollow}>Unfollow</Button>
-          {:else}
-          <Button on:click={follow}>Follow</Button>
+  <div class="flex gap-4" in:fly={{y: 20}}>
+    <div
+      class="overflow-hidden w-32 h-32 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
+      style="background-image: url({person.picture})" />
+    <div class="flex flex-col gap-4">
+      <div class="flex items-start gap-4">
+        <div class="flex-grow flex flex-col gap-2">
+          <div class="flex items-center gap-2">
+            <h1 class="text-2xl">{displayPerson(person)}</h1>
+          </div>
+          {#if person.verified_as}
+          <div class="flex gap-1 text-sm">
+            <i class="fa fa-user-check text-accent" />
+            <span class="text-light">{last(person.verified_as.split('@'))}</span>
+          </div>
           {/if}
         </div>
-        {/if}
+        <div class="whitespace-nowrap flex gap-4 items-center">
+          {#if $user?.pubkey === pubkey && $canSign}
+          <a href="/profile" class="cursor-pointer text-sm">
+            <i class="fa-solid fa-edit" /> Edit
+          </a>
+          {/if}
+          {#if $user && $user.pubkey !== pubkey}
+            <i class="fa-solid fa-sliders cursor-pointer" on:click={openAdvanced} />
+          {/if}
+          {#if $user?.petnames && $canSign}
+          <div class="flex flex-col items-end gap-2">
+            {#if following}
+            <Button on:click={unfollow}>Unfollow</Button>
+            {:else}
+            <Button on:click={follow}>Follow</Button>
+            {/if}
+          </div>
+          {/if}
+        </div>
       </div>
+      <p>{@html renderContent(person.about || '')}</p>
+      {#if person?.petnames}
+      <div class="flex gap-8">
+        <div><strong>{person.petnames.length}</strong> following</div>
+        <div><strong>{followersCount}</strong> followers</div>
+      </div>
+      {/if}
     </div>
   </div>
-
-  {#if person?.petnames}
-  <div class="flex gap-8 ml-16">
-    <div><strong>{person.petnames.length}</strong> following</div>
-    <div><strong>{followersCount}</strong> followers</div>
-  </div>
-  {/if}
 
   <Tabs tabs={['notes', 'likes', 'network']} {activeTab} {setActiveTab} />
 
