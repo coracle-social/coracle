@@ -9,6 +9,7 @@
   import {displayPerson} from 'src/util/nostr'
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import Button from "src/partials/Button.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Notes from "src/views/person/Notes.svelte"
@@ -76,7 +77,7 @@
   }
 
   const openAdvanced = () => {
-    modal.set({form: 'person/settings', person})
+    modal.set({type: 'person/settings', person})
   }
 </script>
 
@@ -93,8 +94,8 @@
     <div
       class="overflow-hidden w-32 h-32 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
       style="background-image: url({person.picture})" />
-    <div class="flex flex-col gap-4">
-      <div class="flex items-start gap-4">
+    <div class="flex flex-col gap-4 flex-grow">
+      <div class="flex justify-between items-center gap-4">
         <div class="flex-grow flex flex-col gap-2">
           <div class="flex items-center gap-2">
             <h1 class="text-2xl">{displayPerson(person)}</h1>
@@ -108,21 +109,21 @@
         </div>
         <div class="whitespace-nowrap flex gap-4 items-center">
           {#if $user?.pubkey === pubkey && keys.canSign()}
-          <a href="/profile" class="cursor-pointer text-sm">
-            <i class="fa-solid fa-edit" /> Edit
-          </a>
-          {/if}
-          {#if $user && $user.pubkey !== pubkey}
-            <i class="fa-solid fa-sliders cursor-pointer" on:click={openAdvanced} />
-          {/if}
-          {#if $user?.petnames && keys.canSign()}
-          <div class="flex flex-col items-end gap-2">
+          <Anchor type="button" href="/profile">
+            <i class="fa-solid fa-edit" /> Edit profile
+          </Anchor>
+          {:else if $user && keys.canSign()}
+            <Anchor type="button" on:click={openAdvanced}>
+              <i class="fa-solid fa-sliders" />
+            </Anchor>
+            <Anchor type="button" href={`/messages/${npub}`}>
+              <i class="fa-solid fa-envelope" />
+            </Anchor>
             {#if following}
             <Button on:click={unfollow}>Unfollow</Button>
             {:else}
             <Button on:click={follow}>Follow</Button>
             {/if}
-          </div>
           {/if}
         </div>
       </div>

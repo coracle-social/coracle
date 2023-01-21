@@ -73,7 +73,7 @@
       <i class="fa fa-server fa-lg" />
       <h2 class="staatliches text-2xl">Your relays</h2>
     </div>
-    <Anchor type="button" on:click={() => modal.set({form: 'relay', url: q})}>
+    <Anchor type="button" on:click={() => modal.set({type: 'relay/add', url: q})}>
       <i class="fa-solid fa-plus" /> Add Relay
     </Anchor>
   </div>

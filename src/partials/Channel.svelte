@@ -1,9 +1,10 @@
 <script>
+  import cx from 'classnames'
   import {onMount} from 'svelte'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {prop, path as getPath, reverse, uniqBy, sortBy, last} from 'ramda'
-  import {formatTimestamp, createScroller, Cursor} from 'src/util/misc'
+  import {formatTimestamp, sleep, createScroller, Cursor} from 'src/util/misc'
   import Badge from 'src/partials/Badge.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
   import {user, getPerson} from 'src/agent'
@@ -16,9 +17,12 @@
   export let listenForMessages
   export let sendMessage
   export let editRoom = null
+  export let type
+  console.log(editRoom)
 
   let textarea
   let messages = []
+  let loading = sleep(10_000)
   let annotatedMessages = []
   let showNewMessages = false
   let cursor = new Cursor()
@@ -62,6 +66,7 @@
 
     const sub = listenForMessages(
       newMessages => stickToBottom('smooth', () => {
+        loading = sleep(10_000)
         messages = messages.concat(newMessages)
       })
     )
@@ -74,6 +79,7 @@
           cursor.onChunk(events)
 
           stickToBottom('auto', () => {
+            loading = sleep(10_000)
             messages = events.concat(messages)
           })
         }
@@ -115,39 +121,47 @@
 
 <div class="flex gap-4 h-full">
   <div class="relative w-full">
-    <div class="flex flex-col py-32">
-      <ul class="p-4 max-h-full flex-grow flex flex-col-reverse" name="messages">
+    <div class="flex flex-col py-32 h-full">
+      <ul class="p-4 h-full flex-grow flex flex-col-reverse justify-start" name="messages">
         {#each annotatedMessages as m (m.id)}
           <li in:fly={{y: 20}} class="py-1 flex flex-col gap-2">
-            {#if m.showPerson}
+            {#if type === 'chat' && m.showPerson}
             <div class="flex gap-4 items-center justify-between">
               <Badge person={m.person} />
               <p class="text-sm text-light">{formatTimestamp(m.created_at)}</p>
             </div>
             {/if}
-            <div class="ml-6 overflow-hidden text-ellipsis">
+            <div class={cx("overflow-hidden text-ellipsis", {
+              'ml-6': type === 'chat',
+              'rounded-2xl py-2 px-4': type === 'dm',
+              'ml-12 bg-light text-black rounded-br-none': type === 'dm' && m.person.pubkey === $user.pubkey,
+              'mr-12 bg-dark rounded-bl-none': type === 'dm' && m.person.pubkey !== $user.pubkey,
+            })}>
               {@html render(m, {showEntire: true})}
             </div>
           </li>
         {/each}
+        {#await loading}
         <Spinner>Looking for messages...</Spinner>
-        <div class="h-48" />
+        {/await}
       </ul>
     </div>
-    <div class="fixed z-10 top-0 pt-20 w-full p-4 border-b border-solid border-medium bg-dark flex gap-4">
-      <div
-        class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-        style="background-image: url({picture})" />
-      <div class="w-full">
-        <div class="flex items-center justify-between w-full">
-          <div class="text-lg font-bold">{name || ''}</div>
-          {#if editRoom}
-          <small class="cursor-pointer" on:click={editRoom}>
-            <i class="fa-solid fa-edit" /> Edit
-          </small>
-          {/if}
+    <div class="fixed z-10 top-16 w-full lg:-ml-56 lg:pl-56 border-b border-solid border-medium bg-dark">
+      <div class="p-4 flex gap-4">
+        <div
+          class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
+          style="background-image: url({picture})" />
+        <div class="w-full">
+          <div class="flex items-center justify-between w-full">
+            <div class="text-lg font-bold">{name || ''}</div>
+            {#if editRoom}
+            <small class="cursor-pointer" on:click={editRoom}>
+              <i class="fa-solid fa-edit" /> Edit
+            </small>
+            {/if}
+          </div>
+          <div>{about || ''}</div>
         </div>
-        <div>{about || ''}</div>
       </div>
     </div>
     <div class="fixed z-10 bottom-0 w-full flex bg-medium border-medium border-t border-solid border-dark">

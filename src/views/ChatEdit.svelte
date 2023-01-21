@@ -1,14 +1,13 @@
 <script>
   import {onMount} from "svelte"
   import {fly} from 'svelte/transition'
-  import {navigate} from "svelte-routing"
   import {stripExifData} from "src/util/html"
   import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Button from "src/partials/Button.svelte"
   import {getRelays, db} from 'src/agent'
-  import {toast} from "src/app"
+  import {toast, modal} from "src/app"
   import cmd from "src/app/cmd"
 
   export let room = {}
@@ -34,7 +33,7 @@
     if (!room.name) {
       toast.show("error", "Please enter a name for your room.")
     } else {
-      const event = room.id
+      room.id
         ? await cmd.updateRoom(getRelays(), room)
         : await cmd.createRoom(getRelays(), room)
 
@@ -42,7 +41,7 @@
 
       toast.show("info", `Your room has been ${room.id ? 'updated' : 'created'}!`)
 
-      navigate(`/chat/${room.id || event.id}`)
+      modal.set(null)
     }
   }
 </script>

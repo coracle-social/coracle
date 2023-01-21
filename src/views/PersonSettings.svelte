@@ -9,8 +9,9 @@
   import {modal} from 'src/app'
   import cmd from 'src/app/cmd'
 
+  const muffle = $user.muffle || []
   const muffleOptions = ['Never', 'Sometimes', 'Often', 'Always']
-  const muffleValue = parseFloat(first($user.muffle.filter(t => t[1] === $modal.person.pubkey).map(last)) || 1)
+  const muffleValue = parseFloat(first(muffle.filter(t => t[1] === $modal.person.pubkey).map(last)) || 1)
 
   const values = {
     // Scale up to integers for each choice we have
@@ -22,7 +23,7 @@
 
     // Scale back down to a decimal based on string value
     const muffleValue = muffleOptions.indexOf(values.muffle) / 3
-    const muffleTags = $user.muffle
+    const muffleTags = muffle
       .filter(t => t[1] !== $modal.person.pubkey)
       .concat([["p", $modal.person.pubkey, muffleValue.toString()]])
       .filter(t => last(t) !== "1")

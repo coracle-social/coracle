@@ -11,16 +11,16 @@
     if (window.nostr) {
       await login({pubkey: await window.nostr.getPublicKey()}, true)
     } else {
-      modal.set({form: 'privkeyLogin'})
+      modal.set({type: 'login/privkey'})
     }
   }
 
   const signUp = () => {
-    modal.set({form: 'signUp'})
+    modal.set({type: 'signUp'})
   }
 
   const pubkeyLogIn = () => {
-    modal.set({form: 'pubkeyLogin'})
+    modal.set({type: 'login/pubkey'})
   }
 </script>
 

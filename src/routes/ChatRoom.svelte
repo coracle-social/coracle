@@ -39,7 +39,7 @@
   }
 
   const editRoom = () => {
-    modal.set({form: 'room/edit', room: $room})
+    modal.set({type: 'room/edit', room: $room})
   }
 
   const sendMessage = content =>
@@ -47,6 +47,7 @@
 </script>
 
 <Channel
+  type="chat"
   name={$room?.name}
   about={$room?.about}
   picture={$room?.picture}

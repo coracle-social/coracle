@@ -1,4 +1,5 @@
-import {prop} from "ramda"
+import Bugsnag from "@bugsnag/js"
+import {prop, nthArg} from "ramda"
 import {uuid} from "hurdak/lib/hurdak"
 import {navigate} from "svelte-routing"
 import {nip19} from 'nostr-tools'
@@ -54,6 +55,32 @@ export const modal = {
 // Settings, alerts, etc
 
 export const settings = synced("coracle/settings", {
+  reportAnalytics: true,
   showLinkPreviews: true,
   dufflepudUrl: import.meta.env.VITE_DUFFLEPUD_URL,
 })
+
+// Wait for bugsnag to be started in main
+setTimeout(() => {
+  Bugsnag.addOnError(event => {
+    if (window.location.host.startswith('localhost')) {
+      return false
+    }
+
+    if (!get(settings).reportAnalytics) {
+      return false
+    }
+
+    return true
+  })
+})
+
+const session = Math.random().toString().slice(2)
+
+export const logUsage = name => {
+  const {dufflepudUrl, reportAnalytics} = get(settings)
+
+  if (reportAnalytics) {
+    fetch(`${dufflepudUrl}/usage/${session}/${name}`, {method: 'post' })
+  }
+}

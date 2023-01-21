@@ -21,7 +21,7 @@
   <div class="flex flex-grow flex-col justify-start gap-2">
     <div class="flex flex-grow items-center justify-between gap-2">
       <div class="flex gap-2 items-center">
-        {#if room.type === 'private'}
+        {#if room.type === 'npub'}
         <i class="fa fa-lock text-light" />
         <h2 class="text-lg">{displayPerson(room)}</h2>
         {:else}
@@ -29,7 +29,7 @@
         <h2 class="text-lg">{room.name}</h2>
         {/if}
       </div>
-      {#if room.type === 'public'}
+      {#if room.type === 'note'}
         {#if joined}
         <Anchor type="button" class="flex items-center gap-2" on:click={e => { e.stopPropagation(); leaveRoom(room.id) }}>
           <i class="fa fa-right-from-bracket" />

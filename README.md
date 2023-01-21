@@ -42,6 +42,11 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Add Labs tab with cards for non-standard features
   - Time travel - see events as of a date/time
 
+
+# Bugs
+
+- [ ] Sync mentions box and in-reply mentions
+
 # Changelog
 
 ## Current
@@ -53,7 +58,14 @@ If you like Coracle and want to support its development, you can donate sats via
   - [ ] Add petnames for channels
   - [ ] Add back button
   - [ ] Create Room -> open modal, choose dm or public room
-  - [ ] Add DM button to profile pages
+  - [x] Add DM button to profile pages
+- [ ] Linkify bech32 entities
+- [ ] linkify dm page header
+- [ ] Add lock/unlock icon to channel header
+- [ ] Add notification for dms
+- [ ] Default to network/following
+- [ ] Add analytics
+- [ ] Allow disabling error reporting/analytics
 
 ## 0.2.7
 

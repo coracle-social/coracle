@@ -6,13 +6,13 @@ import {renderContent} from 'src/util/html'
 import {Tags, displayPerson, findReplyId} from 'src/util/nostr'
 import {user, people, getPerson, getRelays, keys} from 'src/agent'
 import defaults from 'src/agent/defaults'
-import {toast, routes, modal, settings} from 'src/app/ui'
+import {toast, routes, modal, settings, logUsage} from 'src/app/ui'
 import cmd from 'src/app/cmd'
 import alerts from 'src/app/alerts'
 import messages from 'src/app/messages'
 import loaders from 'src/app/loaders'
 
-export {toast, modal, settings, alerts, messages}
+export {toast, modal, settings, alerts, messages, logUsage}
 
 export const login = async ({privkey, pubkey}, usingExtension = false) => {
   if (privkey) {

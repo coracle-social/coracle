@@ -8,10 +8,10 @@ import {personKinds, Tags, roomAttrs} from 'src/util/nostr'
 
 export const db = new Dexie('agent/data/db')
 
-db.version(12).stores({
+db.version(13).stores({
   relays: '++url, name',
   alerts: '++id, created_at',
-  messages: '++id, pubkey',
+  messages: '++id, pubkey, recipient',
   people: '++pubkey',
   rooms: '++id, joined',
 })
@@ -157,7 +157,9 @@ const processRoomEvents = async events => {
 }
 
 const processMessages = async events => {
-  const messages = ensurePlural(events).filter(e => e.kind === 4)
+  const messages = ensurePlural(events)
+    .filter(e => e.kind === 4)
+    .map(e => ({...e, recipient: Tags.from(e).type("p").values().first()}))
 
   if (messages.length > 0) {
     await db.messages.bulkPut(messages)

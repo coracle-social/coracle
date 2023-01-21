@@ -27,7 +27,7 @@
 <div
   class="py-2 px-3 flex flex-col gap-2 text-white cursor-pointer transition-all
          border border-solid border-black hover:border-medium hover:bg-dark"
-  on:click={() => modal.set({note})}>
+  on:click={() => modal.set({type: 'note', note})}>
   <div class="flex gap-2 items-center justify-between relative">
     <span class="cursor-pointer" on:click={openPopover}>
       {quantify(note.people.length, 'person', 'people')} liked your note.

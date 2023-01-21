@@ -2,7 +2,7 @@
   import "@fortawesome/fontawesome-free/css/fontawesome.css"
   import "@fortawesome/fontawesome-free/css/solid.css"
 
-  import {find, pluck} from 'ramda'
+  import {find, nthArg, pluck} from 'ramda'
   import {onMount} from "svelte"
   import {writable, get} from "svelte/store"
   import {fly, fade} from "svelte/transition"
@@ -12,7 +12,7 @@
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, now} from 'src/util/misc'
   import {keys, user, pool, getRelays} from 'src/agent'
-  import {modal, toast, settings, alerts, messages} from "src/app"
+  import {modal, toast, settings, logUsage, alerts, messages} from "src/app"
   import {routes} from "src/app/ui"
   import Anchor from 'src/partials/Anchor.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
@@ -105,9 +105,21 @@
       }
     })
 
+    const unsubHistory = globalHistory.listen(({location}) => {
+      if (!location.hash) {
+        // Remove identifying information, e.g. pubkeys, event ids, etc
+        const name = location.pathname.slice(1)
+          .replace(/(npub|nprofile|note|nevent)[^\/]+/g, (_, m) => `<${m}>`)
+
+        logUsage(btoa(['page', name].join(':')))
+      }
+    })
+
     const unsubModal = modal.subscribe($modal => {
       // Keep scroll position on body, but don't allow scrolling
       if ($modal) {
+        logUsage(btoa(['modal', $modal.type].join(':')))
+
         // This is not idempotent, so don't duplicate it
         if (document.body.style.position !== 'fixed') {
           scrollY = window.scrollY
@@ -123,6 +135,7 @@
 
     return () => {
       clearInterval(interval)
+      unsubHistory()
       unsubModal()
     }
   })
@@ -260,7 +273,7 @@
       <a
         class="rounded-full bg-accent color-white w-16 h-16 flex justify-center
                 items-center border border-dark shadow-2xl cursor-pointer"
-        on:click={() => modal.set({form: 'note/create'})}>
+        on:click={() => modal.set({type: 'note/create'})}>
         <span class="fa-sold fa-plus fa-2xl" />
       </a>
     </div>
@@ -268,27 +281,24 @@
 
     {#if $modal}
     <Modal onEscape={closeModal}>
-      {#if $modal.note}
+      {#if $modal.type === 'note/detail'}
         {#key $modal.note.id}
         <NoteDetail {...$modal} />
         {/key}
-      {:else if $modal.form === 'note/create'}
+      {:else if $modal.type === 'note/create'}
         <NoteCreate />
-      {:else if $modal.form === 'relay'}
+      {:else if $modal.type === 'relay/add'}
         <AddRelay />
-      {:else if $modal.form === 'signUp'}
+      {:else if $modal.type === 'signUp'}
         <SignUp />
-      {:else if $modal.form === 'room/edit'}
+      {:else if $modal.type === 'room/edit'}
         <ChatEdit {...$modal} />
-      {:else if $modal.form === 'privkeyLogin'}
+      {:else if $modal.type === 'login/privkey'}
         <PrivKeyLogin />
-      {:else if $modal.form === 'pubkeyLogin'}
+      {:else if $modal.type === 'login/pubkey'}
         <PubKeyLogin />
-      {:else if $modal.form === 'person/settings'}
+      {:else if $modal.type === 'person/settings'}
         <PersonSettings />
-      {:else if $modal.message}
-        <p class="text-white text-center py-12 pb-8">{$modal.message}</p>
-        <Spinner />
       {/if}
     </Modal>
     {/if}

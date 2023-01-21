@@ -16,10 +16,12 @@ const setPrivateKey = _privkey => {
 }
 
 const setPublicKey = _pubkey => {
-  signingFunction = async event => {
-    const {sig} = await window.nostr.signEvent(event)
+  if (window.nostr) {
+    signingFunction = async event => {
+      const {sig} = await window.nostr.signEvent(event)
 
-    return sig
+      return sig
+    }
   }
 
   pubkey.set(_pubkey)
@@ -59,6 +61,7 @@ const getCrypt = () => {
           ? nip04.decrypt($privkey, pubkey, message)
           : await window.nostr.nip04.decrypt(pubkey, message)
       } catch (e) {
+        console.error(e)
         return `<Failed to decrypt message: ${e}>`
       }
     },

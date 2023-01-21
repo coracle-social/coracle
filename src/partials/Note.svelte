@@ -2,7 +2,7 @@
   import cx from 'classnames'
   import extractUrls from 'extract-urls'
   import {nip19} from 'nostr-tools'
-  import {whereEq, uniq, pluck, reject, propEq, find} from 'ramda'
+  import {whereEq, without, uniq, pluck, reject, propEq, find} from 'ramda'
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {quantify} from 'hurdak/lib/hurdak'
@@ -24,7 +24,7 @@
   export let invertColors = false
 
   let reply = null
-  let replyMentions = Tags.from(note).type("p").values().all()
+  let replyMentions = without([$user.pubkey], Tags.from(note).type("p").values().all())
 
   const links = $settings.showLinkPreviews ? extractUrls(note.content) || [] : null
   const showEntire = anchorId === note.id
@@ -45,7 +45,7 @@
 
   const onClick = e => {
     if (!['I'].includes(e.target.tagName) && !e.target.closest('a')) {
-      modal.set({note, relays})
+      modal.set({type: 'note', note, relays})
     }
   }
 
@@ -53,7 +53,7 @@
     const [id, url] = findReply(note).slice(1)
     const relays = getEventRelays(note).concat({url})
 
-    modal.set({note: {id}, relays})
+    modal.set({type: 'note', note: {id}, relays})
   }
 
   const react = async content => {
@@ -93,7 +93,7 @@
   }
 
   const removeMention = pubkey => {
-    replyMentions = reject(p => p === pubkey, replyMentions)
+    replyMentions = without([pubkey], replyMentions)
   }
 
   const resetReply = () => {
@@ -195,6 +195,9 @@
   </div>
   {#if replyMentions.length > 0}
   <div class="text-white text-sm p-2 rounded-b border-t-0 border border-solid border-medium">
+    <div class="inline-block border-r border-solid border-medium pl-1 pr-3 mr-2">
+      <i class="fa fa-at" />
+    </div>
     {#each replyMentions as p}
       <div class="inline-block py-1 px-2 mr-1 mb-2 rounded-full border border-solid border-light">
         <i class="fa fa-times cursor-pointer" on:click|stopPropagation={() => removeMention(p)} />

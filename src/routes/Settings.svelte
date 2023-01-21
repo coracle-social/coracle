@@ -56,6 +56,16 @@
           hosting images and loading link previews.
         </p>
       </div>
+      <div class="flex flex-col gap-1">
+        <div class="flex gap-2 items-center">
+          <strong>Report Errors and Analytics</strong>
+          <Toggle bind:value={values.reportAnalytics} />
+        </div>
+        <p class="text-sm text-light">
+          Keep this enabled if you would like the Coracle developers to be able to
+          know what features are used, and to diagnose and fix bugs.
+        </p>
+      </div>
       <Button type="submit" class="text-center">Save</Button>
     </div>
   </Content>
