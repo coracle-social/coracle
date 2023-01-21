@@ -51,7 +51,7 @@
         <h2 class="text-lg">{room.name}</h2>
         {/if}
       </div>
-      {#if joined}
+      {#if room.type === 'npub'}
         {#if hasNewMessages}
         <div class="relative">
           <i class="fa fa-bell" />

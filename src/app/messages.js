@@ -1,6 +1,7 @@
-import {pluck} from 'ramda'
+import {pluck, reject} from 'ramda'
+import {get} from 'svelte/store'
 import {synced, now, timedelta, batch} from 'src/util/misc'
-import {listen as _listen} from 'src/agent'
+import {listen as _listen, db, user} from 'src/agent'
 import loaders from 'src/app/loaders'
 
 let listener
@@ -19,12 +20,22 @@ const listen = async (relays, pubkey) => {
     [{kinds: [4], authors: [pubkey], since},
      {kinds: [4], '#p': [pubkey], since}],
     batch(300, async events => {
-      if (events.length > 0) {
-        await loaders.loadPeople(relays, pluck('pubkey', events))
+      const $user = get(user)
+
+      // Reload annotated messages, don't alert about messages to self
+      const messages = reject(
+        e => e.pubkey === e.recipient,
+        await db.messages.toArray()
+      )
+
+      if (messages.length > 0) {
+        await loaders.loadPeople(relays, pluck('pubkey', messages))
 
         mostRecentByPubkey.update(o => {
-          for (const {pubkey, created_at} of events) {
-            o[pubkey] = Math.max(created_at, o[pubkey] || 0)
+          for (const {pubkey, recipient, created_at} of messages) {
+            const k = pubkey === $user.pubkey ? recipient : pubkey
+
+            o[k] = Math.max(created_at, o[k] || 0)
           }
 
           return o

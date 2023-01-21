@@ -45,7 +45,7 @@
 
   const onClick = e => {
     if (!['I'].includes(e.target.tagName) && !e.target.closest('a')) {
-      modal.set({type: 'note', note, relays})
+      modal.set({type: 'note/detail', note, relays})
     }
   }
 
@@ -53,7 +53,7 @@
     const [id, url] = findReply(note).slice(1)
     const relays = getEventRelays(note).concat({url})
 
-    modal.set({type: 'note', note: {id}, relays})
+    modal.set({type: 'note/detail', note: {id}, relays})
   }
 
   const react = async content => {

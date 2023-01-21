@@ -10,7 +10,12 @@
     confirmed = true
 
     localStorage.clear()
-    await db.delete()
+
+    try {
+      await db.delete()
+    } catch (e) {
+      // pass
+    }
 
     // do a hard refresh so everything gets totally cleared.
     // Give them a moment to see the state transition. Dexie

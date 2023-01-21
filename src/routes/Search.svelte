@@ -1,8 +1,6 @@
 <script>
-  import {navigate} from 'svelte-routing'
   import Input from "src/partials/Input.svelte"
   import Content from 'src/partials/Content.svelte'
-  import Tabs from 'src/partials/Tabs.svelte'
   import SearchPeople from 'src/views/SearchPeople.svelte'
   import SearchNotes from 'src/views/SearchNotes.svelte'
 
@@ -10,7 +8,7 @@
 
   let q = ''
 
-  const setActiveTab = tab => navigate(`/search/${tab}`)
+  // const setActiveTab = tab => navigate(`/search/${tab}`)
 </script>
 
 <Content>

@@ -1,9 +1,8 @@
 <script>
-  import {without, uniq, sortBy, pluck} from 'ramda'
+  import {without, assoc, uniq, sortBy, pluck} from 'ramda'
   import {onMount} from "svelte"
   import {nip19} from 'nostr-tools'
   import {navigate} from "svelte-routing"
-  import {liveQuery} from 'dexie'
   import {fuzzy} from "src/util/misc"
   import {getRelays, user, lq, getPerson, listen, db} from 'src/agent'
   import {modal, messages} from 'src/app'
@@ -22,8 +21,7 @@
   const rooms = lq(async () => {
     const rooms = await db.rooms.where('joined').equals(1).toArray()
     const messages = await db.messages.toArray()
-
-    const pubkeys = without([$user.pubkey], uniq(pluck('pubkey', messages)))
+    const pubkeys = without([$user.pubkey], uniq(messages.flatMap(m => [m.pubkey, m.recipient])))
 
     await loaders.loadPeople(getRelays(), pubkeys)
 
@@ -32,12 +30,12 @@
       .concat(rooms.map(room => ({type: 'note', ...room})))
   })
 
-  const search = liveQuery(async () => {
+  const search = lq(async () => {
     const rooms = await db.rooms.where('joined').equals(0).toArray()
 
     roomsCount = rooms.length
 
-    return fuzzy(rooms, {keys: ["name", "about"]})
+    return fuzzy(rooms.map(assoc('type', 'note')), {keys: ["name", "about"]})
   })
 
   const setRoom = ({type, id}) => {
