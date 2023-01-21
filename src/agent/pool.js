@@ -186,7 +186,7 @@ const request = (relays, filters, {threshold = 1} = {}) => {
       // a short timeout, or all after a long timeout, go ahead and unsubscribe.
       const done = (
         eose.length === agg.subs.length
-        || eose.filter(url => relaysWithEvents.has(url)).length > threshold
+        || eose.filter(url => relaysWithEvents.has(url)).length >= threshold
         || (
           Date.now() - now >= 1000
           && eose.length > agg.subs.length - Math.round(agg.subs.length / 10)

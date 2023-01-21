@@ -14,7 +14,7 @@ const onChunk = async (relays, pubkey, events) => {
   events = events.filter(e => isAlert(e, pubkey))
 
   if (events.length > 0) {
-    const context = await loaders.loadContext(relays, events)
+    const context = await loaders.loadContext(relays, events, {threshold: 2})
     const notes = threadify(events, context, {muffle: getMuffle()})
 
     await db.alerts.bulkPut(notes)
@@ -24,8 +24,12 @@ const onChunk = async (relays, pubkey, events) => {
 }
 
 const load = async (relays, pubkey) => {
-  const since = get(lastCheckedAlerts)
-  const events = await _load(relays, {kinds: [1, 7], '#p': [pubkey], since, limit: 100})
+  const since = get(mostRecentAlert)
+  const events = await _load(
+    relays,
+    {kinds: [1, 7], '#p': [pubkey], since, limit: 100},
+    {threshold: 2}
+  )
 
   onChunk(relays, pubkey, events)
 }
@@ -40,7 +44,8 @@ const listen = async (relays, pubkey) => {
     {kinds: [1, 7], '#p': [pubkey], since: now()},
     batch(300, events => {
       onChunk(relays, pubkey, events)
-    })
+    }),
+    {threshold: 2}
   )
 }
 

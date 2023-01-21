@@ -3,7 +3,6 @@
   import {onMount} from 'svelte'
   import {fly} from 'svelte/transition'
   import {now, createScroller} from 'src/util/misc'
-  import {isLike} from 'src/util/nostr'
   import {user, db} from 'src/agent'
   import {alerts} from 'src/app'
   import Note from 'src/partials/Note.svelte'
@@ -21,7 +20,7 @@
 
       const events = await db.alerts.toArray()
       const notes = events.filter(e => e.kind === 1)
-      const likes = events.filter(e => e.kind === 7 && isLike(e.content))
+      const likes = events.filter(e => e.kind === 7)
 
       // Combine likes of a single note. Remove grandchild likes
       const likesById = {}

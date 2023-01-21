@@ -44,7 +44,7 @@
   $: flag = find(whereEq({pubkey: $user?.pubkey}), flags)
 
   const onClick = e => {
-    if (!['I'].includes(e.target.tagName) && !e.target.closest('a')) {
+    if (interactive && !['I'].includes(e.target.tagName) && !e.target.closest('a')) {
       modal.set({type: 'note/detail', note, relays})
     }
   }
