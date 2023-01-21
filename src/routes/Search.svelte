@@ -14,7 +14,9 @@
 </script>
 
 <Content>
+  <!--
   <Tabs tabs={['people', 'notes']} {activeTab} {setActiveTab} />
+  -->
   <Input bind:value={q} placeholder="Search for people">
     <i slot="before" class="fa-solid fa-search" />
   </Input>
