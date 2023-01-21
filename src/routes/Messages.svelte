@@ -3,9 +3,10 @@
   import {nip19} from 'nostr-tools'
   import {sortBy, pluck} from 'ramda'
   import {personKinds} from 'src/util/nostr'
-  import {batch} from 'src/util/misc'
+  import {batch, now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
   import {getRelays, user, db, listen, keys} from 'src/agent'
+  import {messages} from 'src/app'
   import {routes} from 'src/app/ui'
   import cmd from 'src/app/cmd'
 
@@ -14,6 +15,8 @@
   let crypt = keys.getCrypt()
   let {data: pubkey} = nip19.decode(entity)
   let person = liveQuery(() => db.people.get(pubkey))
+
+  messages.lastCheckedByPubkey.update($obj => ({...$obj, [pubkey]: now()}))
 
   const decryptMessages = async events => {
     // Gotta do it in serial because of extension limitations

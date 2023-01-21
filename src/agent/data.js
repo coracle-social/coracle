@@ -1,10 +1,18 @@
-import Dexie from 'dexie'
+import Dexie, {liveQuery} from 'dexie'
 import {pick} from 'ramda'
 import {nip05} from 'nostr-tools'
 import {writable} from 'svelte/store'
 import {noop, ensurePlural, createMap, switcherFn} from 'hurdak/lib/hurdak'
 import {now} from 'src/util/misc'
 import {personKinds, Tags, roomAttrs} from 'src/util/nostr'
+
+export const lq = cb => liveQuery(async () => {
+  try {
+    return await cb()
+  } catch (e) {
+    console.error(e)
+  }
+})
 
 export const db = new Dexie('agent/data/db')
 

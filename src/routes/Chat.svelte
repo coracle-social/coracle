@@ -1,12 +1,12 @@
 <script>
-  import {uniq, pluck} from 'ramda'
+  import {without, uniq, sortBy, pluck} from 'ramda'
   import {onMount} from "svelte"
   import {nip19} from 'nostr-tools'
   import {navigate} from "svelte-routing"
   import {liveQuery} from 'dexie'
   import {fuzzy} from "src/util/misc"
-  import {getRelays, getPerson, listen, db} from 'src/agent'
-  import {modal} from 'src/app'
+  import {getRelays, user, lq, getPerson, listen, db} from 'src/agent'
+  import {modal, messages} from 'src/app'
   import loaders from 'src/app/loaders'
   import Room from "src/partials/Room.svelte"
   import Input from "src/partials/Input.svelte"
@@ -17,16 +17,17 @@
   let q = ""
   let roomsCount = 0
 
-  const rooms = liveQuery(async () => {
-    const [rooms, messages] = await Promise.all([
-      db.rooms.where('joined').equals(1).toArray(),
-      db.messages.toArray(),
-    ])
+  const {mostRecentByPubkey} = messages
 
-    const pubkeys = uniq(pluck('pubkey', messages))
+  const rooms = lq(async () => {
+    const rooms = await db.rooms.where('joined').equals(1).toArray()
+    const messages = await db.messages.toArray()
+
+    const pubkeys = without([$user.pubkey], uniq(pluck('pubkey', messages)))
+
     await loaders.loadPeople(getRelays(), pubkeys)
 
-    return pubkeys
+    return sortBy(k => -(mostRecentByPubkey[k] || 0), pubkeys)
       .map(k => ({type: 'npub', id: k, ...getPerson(k, true)}))
       .concat(rooms.map(room => ({type: 'note', ...room})))
   })
@@ -58,7 +59,7 @@
   }
 
   onMount(() => {
-    const sub = listen(getRelays(), {kinds: [40, 41]})
+    const sub = listen(getRelays(), [{kinds: [40, 41]}])
 
     return () => {
       sub.then(s => {

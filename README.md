@@ -19,6 +19,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] NIP 05
 - [x] Direct messages using NIP 04
 - [ ] Add petnames for channels
+  - [ ] Add notifications for chat messages
 - [ ] Deploy coracle relay, set better defaults
 - [ ] Image uploads
   - Use dufflepud. Default will charge via lightning and have a tos, others can self-host and skip that.
@@ -42,6 +43,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Attachments (a tag w/content type and url)
 - [ ] Add Labs tab with cards for non-standard features
   - Time travel - see events as of a date/time
+- [ ] Linkify bech32 entities
 
 
 # Bugs
@@ -53,10 +55,6 @@ If you like Coracle and want to support its development, you can donate sats via
 ## Current
 
 - [ ] Figure out migrations from previous version
-- [ ] Fix notes search
-- [ ] Linkify bech32 entities
-- [ ] Add notification for dms
-- [ ] Default to network/following
 
 ## 0.2.7
 

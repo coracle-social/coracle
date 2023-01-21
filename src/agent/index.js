@@ -4,11 +4,11 @@ import {Tags} from 'src/util/nostr'
 import pool from 'src/agent/pool'
 import keys from 'src/agent/keys'
 import defaults from 'src/agent/defaults'
-import {db, people, ready, getPerson, processEvents} from 'src/agent/data'
+import {lq, db, people, ready, getPerson, processEvents} from 'src/agent/data'
 
 Object.assign(window, {pool, db})
 
-export {pool, keys, db, ready, people, getPerson}
+export {pool, keys, lq, db, ready, people, getPerson}
 
 export const user = derived(
   [keys.pubkey, people],

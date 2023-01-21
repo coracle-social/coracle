@@ -132,13 +132,18 @@
               <p class="text-sm text-light">{formatTimestamp(m.created_at)}</p>
             </div>
             {/if}
-            <div class={cx("overflow-hidden text-ellipsis", {
-              'ml-6': type === 'chat',
-              'rounded-2xl py-2 px-4': type === 'dm',
-              'ml-12 bg-light text-black rounded-br-none': type === 'dm' && m.person.pubkey === $user.pubkey,
-              'mr-12 bg-dark rounded-bl-none': type === 'dm' && m.person.pubkey !== $user.pubkey,
+            <div class={cx("flex overflow-hidden text-ellipsis", {
+              'ml-12 justify-end': type === 'dm' && m.person.pubkey === $user.pubkey,
+              'mr-12': type === 'dm' && m.person.pubkey !== $user.pubkey,
             })}>
-              {@html render(m, {showEntire: true})}
+              <div class={cx({
+                'ml-6': type === 'chat',
+                'rounded-2xl py-2 px-4 flex max-w-xl': type === 'dm',
+                'bg-light text-black rounded-br-none': type === 'dm' && m.person.pubkey === $user.pubkey,
+                'bg-dark rounded-bl-none': type === 'dm' && m.person.pubkey !== $user.pubkey,
+              })}>
+                {@html render(m, {showEntire: true})}
+              </div>
             </div>
           </li>
         {/each}
@@ -185,7 +190,7 @@
         </div>
       </div>
     </div>
-    <div class="fixed z-10 bottom-0 w-full flex bg-medium border-medium border-t border-solid border-dark">
+    <div class="fixed z-10 bottom-0 w-full flex bg-medium border-medium border-t border-solid border-dark lg:-ml-56 lg:pl-56">
       <textarea
         rows="4"
         autofocus

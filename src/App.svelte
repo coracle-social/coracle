@@ -65,7 +65,9 @@
 
   $: {
     hasNewMessages = Boolean(find(
-      ([k, t]) => ($lastCheckedByPubkey[k] || 0) < t,
+      ([k, t]) => {
+        return t > now() - timedelta(7, 'days') && ($lastCheckedByPubkey[k] || 0) < t
+      },
       Object.entries($mostRecentByPubkey)
     ))
   }
@@ -211,11 +213,11 @@
         </a>
       </li>
       {#if $user}
-      <li class="cursor-pointer">
+      <li class="cursor-pointer relative">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/chat">
           <i class="fa-solid fa-message mr-2" /> Chat
           {#if hasNewMessages}
-          <div class="w-2 h-2 rounded bg-accent absolute top-3 left-6" />
+          <div class="w-2 h-2 rounded bg-accent absolute top-2 left-7" />
           {/if}
         </a>
       </li>
