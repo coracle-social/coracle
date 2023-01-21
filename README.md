@@ -18,8 +18,6 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Persist and load relay list
 - [x] NIP 05
 - [x] Direct messages using NIP 04
-- [ ] Add petnames for channels
-  - [ ] Add notifications for chat messages
 - [ ] Deploy coracle relay, set better defaults
 - [ ] Image uploads
   - Use dufflepud. Default will charge via lightning and have a tos, others can self-host and skip that.
@@ -45,19 +43,17 @@ If you like Coracle and want to support its development, you can donate sats via
   - Time travel - see events as of a date/time
 - [ ] Linkify bech32 entities
 
-
 # Bugs
 
 - [ ] Sync mentions box and in-reply mentions
+- [ ] Add petnames for channels
+  - [ ] Add notifications for chat messages
 
 # Changelog
 
-## Current
-
-- [ ] Figure out migrations from previous version
-
 ## 0.2.7
 
+- [x] Added direct messages and group chat
 - [x] Sped up feeds by requesting less context
 - [x] Sped up alerts by storing them in dexie
 - [x] Fixed feeds so they don't jump around
@@ -87,7 +83,6 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Upgraded nostr-tools
 - [x] Added support for NIP-05 verfication
 - [x] Added analytics and error reporting (opt out supported)
-- [x] Added direct messages and group chat
 
 ## 0.2.6
 
