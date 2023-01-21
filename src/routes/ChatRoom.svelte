@@ -4,7 +4,7 @@
   import {nip19} from 'nostr-tools'
   import {now, batch} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {getRelays, db, listen, load} from 'src/agent'
+  import {getRelays, user, db, listen, load} from 'src/agent'
   import {modal} from 'src/app'
   import loaders from 'src/app/loaders'
   import cmd from 'src/app/cmd'
@@ -14,25 +14,42 @@
   let {data: roomId} = nip19.decode(entity)
   let room = liveQuery(() => db.rooms.where('id').equals(roomId).first())
 
-  const listenForMessages = cb => listen(
-    getRelays(),
-    // Listen for updates to the room in case we didn't get them before
-    [{kinds: [40, 41], ids: [roomId]},
-     {kinds: [42], '#e': [roomId], since: now()}],
-    batch(300, events => {
-      const newMessages = events.filter(e => e.kind === 42)
+  const getRoomRelays = $room => {
+    let relays = getRelays()
 
-      loaders.loadPeople(getRelays(), pluck('pubkey', events))
+    if ($room) {
+      relays = relays.concat(getRelays($room.pubkey))
+    }
 
-      cb(newMessages)
-    })
-  )
+    return relays
+  }
+
+  const listenForMessages = async cb => {
+    // Make sure we have our room so we can calculate relays
+    const $room = await db.rooms.where('id').equals(roomId).first()
+    const relays = getRoomRelays($room)
+
+    return listen(
+      relays,
+      // Listen for updates to the room in case we didn't get them before
+      [{kinds: [40, 41], ids: [roomId]},
+       {kinds: [42], '#e': [roomId], since: now()}],
+      batch(300, events => {
+        const newMessages = events.filter(e => e.kind === 42)
+
+        loaders.loadPeople(relays, pluck('pubkey', events))
+
+        cb(newMessages)
+      })
+    )
+  }
 
   const loadMessages = async ({until, limit}) => {
-    const events = await load(getRelays(), {kinds: [42], '#e': [roomId], until, limit})
+    const relays = getRoomRelays($room)
+    const events = await load(relays, {kinds: [42], '#e': [roomId], until, limit})
 
     if (events.length) {
-      await loaders.loadPeople(getRelays(), pluck('pubkey', events))
+      await loaders.loadPeople(relays, pluck('pubkey', events))
     }
 
     return events
@@ -51,8 +68,8 @@
   name={$room?.name}
   about={$room?.about}
   picture={$room?.picture}
+  editRoom={$room?.pubkey === $user.pubkey && editRoom}
   {loadMessages}
   {listenForMessages}
   {sendMessage}
-  {editRoom}
 />

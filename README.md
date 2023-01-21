@@ -17,7 +17,8 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Mentions
 - [x] Persist and load relay list
 - [x] NIP 05
-- [ ] Direct messages using NIP 04
+- [x] Direct messages using NIP 04
+- [ ] Add petnames for channels
 - [ ] Deploy coracle relay, set better defaults
 - [ ] Image uploads
   - Use dufflepud. Default will charge via lightning and have a tos, others can self-host and skip that.
@@ -53,19 +54,9 @@ If you like Coracle and want to support its development, you can donate sats via
 
 - [ ] Figure out migrations from previous version
 - [ ] Fix notes search
-- [ ] Chat
-  - [ ] Figure out which relays to use
-  - [ ] Add petnames for channels
-  - [ ] Add back button
-  - [ ] Create Room -> open modal, choose dm or public room
-  - [x] Add DM button to profile pages
 - [ ] Linkify bech32 entities
-- [ ] linkify dm page header
-- [ ] Add lock/unlock icon to channel header
 - [ ] Add notification for dms
 - [ ] Default to network/following
-- [ ] Add analytics
-- [ ] Allow disabling error reporting/analytics
 
 ## 0.2.7
 
@@ -97,6 +88,8 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Added error tracking with bugsnag
 - [x] Upgraded nostr-tools
 - [x] Added support for NIP-05 verfication
+- [x] Added analytics and error reporting (opt out supported)
+- [x] Added direct messages and group chat
 
 ## 0.2.6
 

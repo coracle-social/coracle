@@ -6,11 +6,13 @@
   import {prop, path as getPath, reverse, uniqBy, sortBy, last} from 'ramda'
   import {formatTimestamp, sleep, createScroller, Cursor} from 'src/util/misc'
   import Badge from 'src/partials/Badge.svelte'
+  import Anchor from 'src/partials/Anchor.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
   import {user, getPerson} from 'src/agent'
   import {render} from 'src/app'
 
   export let name
+  export let link
   export let about
   export let picture
   export let loadMessages
@@ -18,11 +20,10 @@
   export let sendMessage
   export let editRoom = null
   export let type
-  console.log(editRoom)
 
   let textarea
   let messages = []
-  let loading = sleep(10_000)
+  let loading = sleep(30_000)
   let annotatedMessages = []
   let showNewMessages = false
   let cursor = new Cursor()
@@ -64,14 +65,14 @@
       return navigate('/login')
     }
 
-    const sub = listenForMessages(
+    const sub = await listenForMessages(
       newMessages => stickToBottom('smooth', () => {
-        loading = sleep(10_000)
+        loading = sleep(30_000)
         messages = messages.concat(newMessages)
       })
     )
 
-    const scroller = createScroller(
+    const scroller = await createScroller(
       async () => {
         const events = await loadMessages(cursor)
 
@@ -79,7 +80,7 @@
           cursor.onChunk(events)
 
           stickToBottom('auto', () => {
-            loading = sleep(10_000)
+            loading = sleep(30_000)
             messages = events.concat(messages)
           })
         }
@@ -121,8 +122,8 @@
 
 <div class="flex gap-4 h-full">
   <div class="relative w-full">
-    <div class="flex flex-col py-32 h-full">
-      <ul class="p-4 h-full flex-grow flex flex-col-reverse justify-start" name="messages">
+    <div class="flex flex-col pt-20 pb-28 h-full">
+      <ul class="pb-6 p-4 overflow-auto flex-grow flex flex-col-reverse justify-start" name="messages">
         {#each annotatedMessages as m (m.id)}
           <li in:fly={{y: 20}} class="py-1 flex flex-col gap-2">
             {#if type === 'chat' && m.showPerson}
@@ -143,22 +144,42 @@
         {/each}
         {#await loading}
         <Spinner>Looking for messages...</Spinner>
+        {:then}
+        <div in:fly={{y: 20}} class="text-center py-20">End of message history</div>
         {/await}
       </ul>
     </div>
     <div class="fixed z-10 top-16 w-full lg:-ml-56 lg:pl-56 border-b border-solid border-medium bg-dark">
       <div class="p-4 flex gap-4">
-        <div
-          class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-          style="background-image: url({picture})" />
-        <div class="w-full">
+        <div class="flex items-center gap-4">
+          <i class="fa fa-arrow-left text-2xl cursor-pointer" on:click={() => navigate("/chat")} />
+          <div
+            class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
+            style="background-image: url({picture})" />
+        </div>
+        <div class="w-full flex flex-col gap-2">
           <div class="flex items-center justify-between w-full">
-            <div class="text-lg font-bold">{name || ''}</div>
-            {#if editRoom}
-            <small class="cursor-pointer" on:click={editRoom}>
-              <i class="fa-solid fa-edit" /> Edit
-            </small>
-            {/if}
+            <div class="flex items-center gap-4">
+              {#if link}
+              <Anchor type="unstyled" href={link} class="text-lg font-bold">{name || ''}</Anchor>
+              {:else}
+              <div class="text-lg font-bold">{name || ''}</div>
+              {/if}
+              {#if editRoom}
+              <small class="cursor-pointer" on:click={editRoom}>
+                <i class="fa-solid fa-edit" /> Edit
+              </small>
+              {/if}
+            </div>
+            <div class="flex items-center gap-2">
+              {#if type === 'dm'}
+                <i class="fa fa-lock text-light" />
+                <span class="text-light">Encrypted</span>
+              {:else}
+                <i class="fa fa-lock-open text-light" />
+                <span class="text-light">Public</span>
+              {/if}
+            </div>
           </div>
           <div>{about || ''}</div>
         </div>

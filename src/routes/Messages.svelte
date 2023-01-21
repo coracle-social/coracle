@@ -6,6 +6,7 @@
   import {batch} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
   import {getRelays, user, db, listen, keys} from 'src/agent'
+  import {routes} from 'src/app/ui'
   import cmd from 'src/app/cmd'
 
   export let entity
@@ -26,7 +27,7 @@
   }
 
   const listenForMessages = cb => listen(
-    getRelays(),
+    getRelays().concat(getRelays(pubkey)),
     [{kinds: personKinds, authors: [pubkey]},
      {kinds: [4], authors: [$user.pubkey], '#p': [pubkey]},
      {kinds: [4], authors: [pubkey], '#p': [$user.pubkey]}],
@@ -62,6 +63,7 @@
   name={$person?.name}
   about={$person?.about}
   picture={$person?.picture}
+  link={$person ? routes.person($person.pubkey) : null}
   {loadMessages}
   {listenForMessages}
   {sendMessage}
