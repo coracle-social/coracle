@@ -6,17 +6,18 @@
 
   let confirmed = false
 
-  const confirm = () => {
+  const confirm = async () => {
     confirmed = true
 
-    // Give them a moment to see the state transition
-    setTimeout(async () => {
-      localStorage.clear()
-      await db.delete()
+    localStorage.clear()
+    await db.delete()
 
-      // do a hard refresh so everything gets totally cleared
+    // do a hard refresh so everything gets totally cleared.
+    // Give them a moment to see the state transition. Dexie
+    // also apparently needs some time
+    setTimeout(() => {
       window.location = '/login'
-    }, 300)
+    }, 1000)
   }
 </script>
 

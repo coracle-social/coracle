@@ -22,7 +22,7 @@
   {/if}
 
   <div>
-    <Tabs tabs={['global', 'network']} {activeTab} {setActiveTab} />
+    <Tabs tabs={['network', 'global']} {activeTab} {setActiveTab} />
     {#if activeTab === 'network'}
     <Network />
     {:else}

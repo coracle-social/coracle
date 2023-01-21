@@ -150,7 +150,7 @@
       </ul>
     </div>
     <div class="fixed z-10 top-16 w-full lg:-ml-56 lg:pl-56 border-b border-solid border-medium bg-dark">
-      <div class="p-4 flex gap-4">
+      <div class="p-4 flex items-start gap-4">
         <div class="flex items-center gap-4">
           <i class="fa fa-arrow-left text-2xl cursor-pointer" on:click={() => navigate("/chat")} />
           <div

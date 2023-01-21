@@ -63,7 +63,7 @@ export const settings = synced("coracle/settings", {
 // Wait for bugsnag to be started in main
 setTimeout(() => {
   Bugsnag.addOnError(event => {
-    if (window.location.host.startswith('localhost')) {
+    if (window.location.host.startsWith('localhost')) {
       return false
     }
 

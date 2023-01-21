@@ -27,6 +27,9 @@ export const login = async ({privkey, pubkey}, usingExtension = false) => {
   alerts.listen(getRelays(), pubkey),
   messages.listen(getRelays(), pubkey)
 
+  // Not ideal, but the network tab depends on the user's social network being
+  // loaded, so put them on global when they first log in so we're not slowing
+  // down users' first run experience too much
   navigate('/notes/global')
 }
 

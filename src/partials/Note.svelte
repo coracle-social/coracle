@@ -24,7 +24,7 @@
   export let invertColors = false
 
   let reply = null
-  let replyMentions = without([$user.pubkey], Tags.from(note).type("p").values().all())
+  let replyMentions = without([$user?.pubkey], Tags.from(note).type("p").values().all())
 
   const links = $settings.showLinkPreviews ? extractUrls(note.content) || [] : null
   const showEntire = anchorId === note.id
