@@ -117,6 +117,12 @@ const subscribe = async (relays, filters) => {
     filters.map(describeFilter).join(':'),
   ].join('-')
 
+  const seen = new Set()
+  const eose = []
+  const events = []
+  let onEvent
+  let onEose
+
   const subs = filter(identity, await Promise.all(
     relays.map(async relay => {
       const conn = await connect(relay.url)
@@ -127,6 +133,30 @@ const subscribe = async (relays, filters) => {
       }
 
       const sub = conn.nostr.sub(filters, {id})
+
+      // Subscribe to events immediately so we don't miss any while we
+      // wait for slow relays to connect
+      sub.on('event', e => {
+        if (!seen.has(e.id)) {
+          e.seen_on = sub.conn.url
+          seen.add(e.id)
+
+          if (onEvent) {
+            onEvent(e)
+          } else {
+            events.push(e)
+          }
+        }
+      })
+
+      // Same thing for eose
+      sub.on('eose', () => {
+        if (onEose) {
+          onEose(conn.url)
+        } else {
+          eose.push(conn.url)
+        }
+      })
 
       sub.conn = conn
       sub.conn.stats.activeCount += 1
@@ -139,7 +169,6 @@ const subscribe = async (relays, filters) => {
     })
   ))
 
-  const seen = new Set()
 
   return {
     subs,
@@ -153,20 +182,18 @@ const subscribe = async (relays, filters) => {
       })
     },
     onEvent: cb => {
-      subs.forEach(sub => {
-        sub.on('event', e => {
-          if (!seen.has(e.id)) {
-            e.seen_on = sub.conn.url
-            seen.add(e.id)
-            cb(e)
-          }
-        })
-      })
+      // Report our buffered events
+      events.splice(0).forEach(e => cb(e))
+
+      // Add our listener for future ones
+      onEvent = cb
     },
     onEose: cb => {
-      subs.forEach(sub => {
-        sub.on('eose', () => cb(sub.conn.url))
-      })
+      // Report our buffered eoses
+      eose.splice(0).forEach(e => cb(e))
+
+      // Add our listener for future ones
+      onEose = cb
     },
   }
 }

@@ -45,6 +45,7 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Bugs
 
+- [ ] Alerts are not showing likes, just generally screwy. Maybe because I threadify before adding to the db?
 - [ ] Sync mentions box and in-reply mentions
 - [ ] Add petnames for channels
   - [ ] Add notifications for chat messages

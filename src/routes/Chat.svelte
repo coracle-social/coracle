@@ -1,5 +1,5 @@
 <script>
-  import {without, assoc, uniq, sortBy, pluck} from 'ramda'
+  import {without, assoc, uniq, sortBy} from 'ramda'
   import {onMount} from "svelte"
   import {nip19} from 'nostr-tools'
   import {navigate} from "svelte-routing"
