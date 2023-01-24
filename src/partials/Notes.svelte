@@ -46,21 +46,19 @@
   })
 </script>
 
-<Content>
-  {#if newNotes.length > 0}
-  <div
-    in:slide
-    class="cursor-pointer text-center underline text-light"
-    on:click={showNewNotes}>
-    Load {quantify(newNotes.length, 'new note')}
-  </div>
-  {/if}
+{#if newNotes.length > 0}
+<div
+  in:slide
+  class="cursor-pointer text-center underline text-light"
+  on:click={showNewNotes}>
+  Load {quantify(newNotes.length, 'new note')}
+</div>
+{/if}
 
-  <div>
-    {#each notes as note (note.id)}
-    <Note {note} {depth} />
-    {/each}
-  </div>
+<div>
+  {#each notes as note (note.id)}
+  <Note {note} {depth} />
+  {/each}
+</div>
 
-  <Spinner />
-</Content>
+<Spinner />

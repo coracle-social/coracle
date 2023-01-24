@@ -71,6 +71,8 @@ setTimeout(() => {
       return false
     }
 
+    event.setUser(session)
+
     return true
   })
 })

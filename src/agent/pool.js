@@ -169,7 +169,6 @@ const subscribe = async (relays, filters) => {
     })
   ))
 
-
   return {
     subs,
     unsub: () => {

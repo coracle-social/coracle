@@ -60,7 +60,7 @@
   }
 
   const sendMessage = content =>
-    cmd.createChannelMessage(getRelays(), roomId, content)
+    cmd.createChatMessage(getRelays(), roomId, content)
 </script>
 
 <Channel
