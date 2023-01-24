@@ -79,10 +79,14 @@ setTimeout(() => {
 
 const session = Math.random().toString().slice(2)
 
-export const logUsage = name => {
+export const logUsage = async name => {
   const {dufflepudUrl, reportAnalytics} = get(settings)
 
   if (reportAnalytics) {
-    fetch(`${dufflepudUrl}/usage/${session}/${name}`, {method: 'post' })
+    try {
+      await fetch(`${dufflepudUrl}/usage/${session}/${name}`, {method: 'post' })
+    } catch (e) {
+      console.warn(e)
+    }
   }
 }

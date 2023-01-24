@@ -1,4 +1,4 @@
-import {pluck, whereEq, sortBy, identity, when, assoc, reject} from 'ramda'
+import {whereEq, sortBy, identity, when, assoc, reject} from 'ramda'
 import {navigate} from 'svelte-routing'
 import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
@@ -126,6 +126,7 @@ export const annotate = (note, context) => {
 
 export const threadify = (events, context, {muffle = []} = {}) => {
   const contextById = createMap('id', events.concat(context))
+
   // Show parents when possible. For reactions, if there's no parent,
   // throw it away. Sort by created date descending
   const notes = sortBy(
@@ -135,19 +136,6 @@ export const threadify = (events, context, {muffle = []} = {}) => {
       .filter(e => e && !muffle.includes(e.pubkey))
   )
 
-  // Don't show notes that will also show up as children
-  const noteIds = new Set(pluck('id', notes))
-
   // Annotate our feed with parents, reactions, replies.
-  return notes
-    .filter(note => !noteIds.has(findReplyId(note)))
-    .map(note => {
-      let parent = contextById[findReplyId(note)]
-
-      if (parent) {
-        parent = annotate(parent, context)
-      }
-
-      return annotate({...note, parent}, context)
-    })
+  return notes.filter(note => !findReplyId(note)).map(n => annotate(n, context))
 }
