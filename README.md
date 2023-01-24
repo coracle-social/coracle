@@ -53,6 +53,13 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Changelog
 
+## 0.2.8
+
+- [x] Stop showing replies at top level in feeds to make it more interesting
+- [x] Fix a bug that was preventing people from sending a message
+- [x] Stop sending IP addresses to bugsnag
+- [x] Fix some layout bugs
+
 ## 0.2.7
 
 - [x] Added direct messages and group chat
