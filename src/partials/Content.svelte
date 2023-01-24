@@ -5,10 +5,16 @@
 
   const className = "flex flex-col m-auto text-white gap-6"
 
-  if (!['lg', '2xl'].includes(size)) {
+  if (!['inherit', 'lg', '2xl'].includes(size)) {
     throw new Error(`Invalid size: ${size}`)
   }
 </script>
+
+{#if size === 'inherit'}
+<div {...$$props} class={cx($$props.class, className)}>
+  <slot />
+</div>
+{/if}
 
 {#if size === 'lg'}
 <div {...$$props} class={cx($$props.class, className, "p-2 py-16 max-w-lg")}>
@@ -17,7 +23,7 @@
 {/if}
 
 {#if size === '2xl'}
-<div {...$$props} class={cx($$props.class, className, "p-4 lg:py-8 max-w-2xl")}>
+<div {...$$props} class={cx($$props.class, className, "p-4 max-w-2xl")}>
   <slot />
 </div>
 {/if}
