@@ -19,7 +19,7 @@
     listen(relays, {...filter, since: now()}, batch(300, async notes => {
       const context = await loaders.loadContext(relays, notes)
 
-      onNotes(threadify(notes, context, {muffle: getMuffle()}))
+      onNotes(threadify(notes, context, {muffle: getMuffle(), showReplies: false}))
     }))
 
   const loadNotes = async () => {
@@ -29,7 +29,7 @@
 
     cursor.onChunk(notes)
 
-    return threadify(notes, context, {muffle: getMuffle()})
+    return threadify(notes, context, {muffle: getMuffle(), showReplies: false})
   }
 </script>
 
