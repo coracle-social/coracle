@@ -130,7 +130,7 @@
   <div class="flex gap-4 items-center justify-between">
     <Badge person={person} />
     <Anchor
-      href={"/" + nip19.neventEncode({id: note.id, relays: pluck('url', relays)})}
+      href={"/" + nip19.neventEncode({id: note.id, relays: pluck('url', relays.slice(0, 5))})}
       class="text-sm text-light"
       type="unstyled">
       {formatTimestamp(note.created_at)}

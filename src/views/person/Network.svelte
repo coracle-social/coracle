@@ -1,33 +1,46 @@
 <script>
-  import Notes from "src/partials/Notes.svelte"
-  import {now, shuffle, batch, Cursor} from 'src/util/misc'
-  import {getRelays, getFollows, getMuffle, listen, load} from 'src/agent'
-  import loaders from 'src/app/loaders'
-  import {threadify} from 'src/app'
+  import {last, find, whereEq} from 'ramda'
+  import {fly} from 'svelte/transition'
+  import Content from "src/partials/Content.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
+  import {user} from 'src/agent'
+  import {addRelay, removeRelay} from "src/app"
 
-  export let pubkey
+  export let person
 
-  const relays = getRelays(pubkey)
-  const follows = getFollows(pubkey)
-  const network = shuffle(follows.flatMap(getFollows)).slice(0, 50)
-  const authors = follows.concat(network)
-  const filter = {kinds: [1, 7], authors}
-  const cursor = new Cursor()
+  const join = async url => {
+    await addRelay({url})
+  }
 
-  const listenForNotes = onNotes =>
-    listen(relays, {...filter, since: now()}, batch(300, async notes => {
-      const context = await loaders.loadContext(relays, notes)
-
-      onNotes(threadify(notes, context, {muffle: getMuffle()}))
-    }))
-
-  const loadNotes = async () => {
-    const {limit, until} = cursor
-    const notes = await load(relays, {...filter, limit, until})
-    const context = await loaders.loadContext(relays, notes)
-
-    return threadify(notes, context, {muffle: getMuffle()})
+  const leave = async url => {
+    await removeRelay(url)
   }
 </script>
 
-<Notes {listenForNotes} {loadNotes} />
+<div in:fly={{y: 20}}>
+  <Content>
+    <p>
+      Below are the relays this user publishes to. Join one or more to make sure you never
+      miss their updates.
+    </p>
+    {#if (person.relays || []).length === 0}
+    <div class="pt-8 text-center">No relays found</div>
+    {:else}
+      {#each person.relays as {url, write}, i (url)}
+        <div class="rounded border border-solid border-medium bg-dark shadow p-2 px-3">
+          <div class="flex gap-2 items-center justify-between">
+            <strong class="flex gap-2 items-center">
+              <i class={url.startsWith('wss') ? "fa fa-lock" : "fa fa-unlock"} />
+              {last(url.split('://'))}
+            </strong>
+            {#if find(whereEq({url}), $user.relays)}
+            <Anchor type="button" on:click={() => leave(url)}>Leave</Anchor>
+            {:else}
+            <Anchor type="button" on:click={() => join(url)}>Join</Anchor>
+            {/if}
+          </div>
+        </div>
+      {/each}
+    {/if}
+  </Content>
+</div>

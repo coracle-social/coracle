@@ -41,7 +41,8 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Attachments (a tag w/content type and url)
 - [ ] Add Labs tab with cards for non-standard features
   - Time travel - see events as of a date/time
-- [ ] Linkify bech32 entities
+- [ ] Linkify bech32 entities w/ NIP 21 https://github.com/nostr-protocol/nips/blob/master/21.md
+- [ ] Sign in as user with one click to view things from their pubkey's perspective - do this with multiple accounts
 
 # Bugs
 

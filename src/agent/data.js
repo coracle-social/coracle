@@ -4,7 +4,7 @@ import {nip05} from 'nostr-tools'
 import {writable} from 'svelte/store'
 import {noop, ensurePlural, createMap, switcherFn} from 'hurdak/lib/hurdak'
 import {now} from 'src/util/misc'
-import {personKinds, Tags, roomAttrs} from 'src/util/nostr'
+import {personKinds, Tags, roomAttrs, isRelay} from 'src/util/nostr'
 
 export const lq = cb => liveQuery(async () => {
   try {
@@ -87,7 +87,7 @@ const processProfileEvents = async events => {
 
             return content
           } catch (e) {
-            console.error(e)
+            console.warn(e)
           }
         },
         2: () => {
@@ -98,7 +98,24 @@ const processProfileEvents = async events => {
             }
           }
         },
-        3: () => ({petnames: e.tags}),
+        3: () => {
+          const data = {petnames: e.tags}
+
+          if (e.created_at > (person.relays_updated_at || 0)) {
+            try {
+              Object.assign(data, {
+                relays_updated_at: e.created_at,
+                relays: Object.entries(JSON.parse(e.content))
+                  .map(([url, {write, read}]) => ({url, write: write ? '' : '!', read: read ? '' : '!'}))
+                  .filter(r => isRelay(r.url)),
+              })
+            } catch (e) {
+              console.warn(e)
+            }
+          }
+
+          return data
+        },
         12165: () => ({muffle: e.tags}),
         10001: () => {
           if (e.created_at > (person.relays_updated_at || 0)) {
