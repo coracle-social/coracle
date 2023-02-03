@@ -15,6 +15,7 @@
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
   import {user, people, getPerson, getRelays, getEventRelays} from 'src/agent'
+  import {addRelay, removeRelay} from "src/app"
   import cmd from 'src/app/cmd'
 
   export let note
@@ -161,18 +162,18 @@
     <div class="flex gap-6 text-light">
       <div>
         <i
-          class="fa-solid fa-reply cursor-pointer"
+          class="fa fa-reply cursor-pointer"
           on:click={startReply} />
         {note.replies.length}
       </div>
       <div class={cx({'text-accent': like})}>
         <i
-          class="fa-solid fa-heart cursor-pointer"
+          class="fa fa-heart cursor-pointer"
           on:click={() => like ? deleteReaction(like) : react("+")} />
         {likes.length}
       </div>
       <div>
-        <i class="fa-solid fa-flag cursor-pointer" on:click={() => react("-")} />
+        <i class="fa fa-flag cursor-pointer" on:click={() => react("-")} />
         {flags.length}
       </div>
     </div>
@@ -189,7 +190,7 @@
         on:click={sendReply}
         class="flex flex-col py-8 p-4 justify-center gap-2 border-l border-solid border-dark
                hover:bg-accent transition-all cursor-pointer text-white ">
-        <i class="fa-solid fa-paper-plane fa-xl" />
+        <i class="fa fa-paper-plane fa-xl" />
       </div>
     </Compose>
   </div>
@@ -214,7 +215,7 @@
 <div class="ml-5 border-l border-solid border-medium">
   {#if !showEntire && note.replies.length > 3}
   <div class="ml-5 py-2 text-light cursor-pointer" on:click={onClick}>
-    <i class="fa-solid fa-up-down text-sm pr-2" />
+    <i class="fa fa-up-down text-sm pr-2" />
     Show {quantify(note.replies.length - 3, 'other reply', 'more replies')}
   </div>
   {/if}

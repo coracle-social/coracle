@@ -18,6 +18,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Persist and load relay list
 - [x] NIP 05
 - [x] Direct messages using NIP 04
+- [ ] Separate settings for read, write, and broadcast relays based on NIP 65
 - [ ] Deploy coracle relay, set better defaults
 - [ ] Image uploads
   - Use dufflepud. Default will charge via lightning and have a tos, others can self-host and skip that.

@@ -7,14 +7,6 @@
   import {addRelay, removeRelay} from "src/app"
 
   export let person
-
-  const join = async url => {
-    await addRelay({url})
-  }
-
-  const leave = async url => {
-    await removeRelay(url)
-  }
 </script>
 
 <div in:fly={{y: 20}}>
@@ -34,9 +26,9 @@
               {last(url.split('://'))}
             </strong>
             {#if find(whereEq({url}), $user.relays)}
-            <Anchor type="button" on:click={() => leave(url)}>Leave</Anchor>
+            <Anchor type="button" on:click={() => removeRelay({url})}>Leave</Anchor>
             {:else}
-            <Anchor type="button" on:click={() => join(url)}>Join</Anchor>
+            <Anchor type="button" on:click={() => addRelay({url})}>Join</Anchor>
             {/if}
           </div>
         </div>
