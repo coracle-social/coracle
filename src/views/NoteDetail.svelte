@@ -2,7 +2,7 @@
   import {onMount} from 'svelte'
   import {nip19} from 'nostr-tools'
   import {fly} from 'svelte/transition'
-  import {load} from 'src/agent'
+  import {load, getRelays} from 'src/agent'
   import {annotate} from 'src/app'
   import loaders from 'src/app/loaders'
   import Note from 'src/partials/Note.svelte'
@@ -10,7 +10,7 @@
   import Spinner from 'src/partials/Spinner.svelte'
 
   export let note
-  export let relays
+  export let relays = getRelays()
 
   let loading = true
 

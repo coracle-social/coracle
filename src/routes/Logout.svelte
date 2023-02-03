@@ -21,7 +21,7 @@
     // Give them a moment to see the state transition. Dexie
     // also apparently needs some time
     setTimeout(() => {
-      window.location = '/login'
+      window.location.href = '/login'
     }, 1000)
   }
 </script>

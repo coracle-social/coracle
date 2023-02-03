@@ -73,7 +73,7 @@ export const formatTimestampRelative = ts => {
     numeric: 'auto',
   })
 
-  return formatter.format(-delta, unit)
+  return formatter.format(-delta, unit as Intl.RelativeTimeFormatUnit)
 }
 
 export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
@@ -147,6 +147,8 @@ export const getLastSync = (k, fallback = 0) => {
 }
 
 export class Cursor {
+  until: number
+  limit: number
   constructor(limit = 10) {
     this.until = now()
     this.limit = limit

@@ -7,13 +7,13 @@
   export let setActiveTab
 </script>
 
-<ul class="border-b border-solid border-dark flex pt-2" in:fly={{y: 20}}>
+<div class="border-b border-solid border-dark flex pt-2" in:fly={{y: 20}}>
   {#each tabs as tab}
-  <li
+  <button
     class="cursor-pointer hover:border-b border-solid border-medium px-8 py-4"
     class:border-b={activeTab === tab}
     on:click={() => setActiveTab(tab)}>
     {toTitle(tab)}
-  </li>
+  </button>
   {/each}
-</ul>
+</div>

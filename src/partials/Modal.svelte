@@ -12,7 +12,7 @@
   }} />
 
 <div class="fixed inset-0 z-10">
-  <div
+  <button
     class="absolute inset-0 opacity-75 bg-black cursor-pointer"
     transition:fade
     on:click={onEscape} />

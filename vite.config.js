@@ -1,5 +1,6 @@
 import * as path from 'path'
 import { defineConfig } from 'vite'
+import sveltePreprocess from 'svelte-preprocess'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
@@ -17,8 +18,14 @@ export default defineConfig({
       protocolImports: true,
     }),
     svelte({
+      preprocess: sveltePreprocess(),
       onwarn: (warning, handler) => {
-        if (warning.code.startsWith("a11y-")) return
+        const isA11y = warning.code.startsWith('a11y-')
+
+        if (["a11y-autofocus"].includes(warning.code)) return
+        if (warning.filename.includes("node_modules")) return
+        if (warning.filename.includes("Card.svelte") && isA11y) return
+
         handler(warning)
       },
     }),

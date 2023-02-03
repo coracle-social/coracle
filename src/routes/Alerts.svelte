@@ -18,7 +18,7 @@
     return createScroller(async () => {
       limit += 10
 
-      const events = await db.alerts.toArray()
+      const events = await db.table('alerts').toArray()
       const notes = events.filter(e => e.kind === 1)
       const likes = events.filter(e => e.kind === 7)
 

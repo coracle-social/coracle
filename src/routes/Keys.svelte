@@ -46,7 +46,10 @@
       <div class="flex flex-col gap-1">
         <strong>Public Key</strong>
         <Input disabled value={$pubkey ? nip19.npubEncode($pubkey) : ''}>
-          <i slot="after" class="fa-solid fa-copy cursor-pointer" on:click={() => copyKey('public')} />
+          <button
+            slot="after"
+            class="fa-solid fa-copy cursor-pointer"
+            on:click={() => copyKey('public')} />
         </Input>
         <p class="text-sm text-light">
           Your public key identifies your account. You can share this with people
@@ -57,7 +60,10 @@
       <div class="flex flex-col gap-1">
         <strong>Private Key</strong>
         <Input disabled type="password" value={nip19.nsecEncode($privkey)}>
-          <i slot="after" class="fa-solid fa-copy cursor-pointer" on:click={() => copyKey('private')} />
+          <button
+            slot="after"
+            class="fa-solid fa-copy cursor-pointer"
+            on:click={() => copyKey('private')} />
         </Input>
         <p class="text-sm text-light">
           Your private key is used to prove your identity by cryptographically signing

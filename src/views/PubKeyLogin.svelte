@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {nip19} from 'nostr-tools'
   import Input from 'src/partials/Input.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
@@ -9,7 +9,7 @@
   let npub = ''
 
   const logIn = async () => {
-    const pubkey = npub.startsWith('npub') ? nip19.decode(npub).data : npub
+    const pubkey = (npub.startsWith('npub') ? nip19.decode(npub).data : npub) as string
 
     if (!pubkey.match(/[a-z0-9]{64}/)) {
       toast.show("error", "Sorry, but that's an invalid public key.")

@@ -17,7 +17,7 @@ const onChunk = async (relays, pubkey, events) => {
     const context = await loaders.loadContext(relays, events, {threshold: 2})
     const notes = threadify(events, context, {muffle: getMuffle()})
 
-    await db.alerts.bulkPut(notes)
+    await db.table('alerts').bulkPut(notes)
 
     mostRecentAlert.update($t => events.reduce((t, e) => Math.max(t, e.created_at), $t))
   }

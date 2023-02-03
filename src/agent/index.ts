@@ -37,7 +37,7 @@ export const getFollows = pubkey => {
   return Tags.wrap(person?.petnames || defaults.petnames).values().all()
 }
 
-export const getRelays = pubkey => {
+export const getRelays = (pubkey?: string) => {
   let relays = getPerson(pubkey)?.relays
 
   if (!relays?.length) {
@@ -71,7 +71,7 @@ export const publish = async (relays, event) => {
   return signedEvent
 }
 
-export const load = async (relays, filter, opts) => {
+export const load = async (relays, filter, opts?) => {
   const events = await pool.request(relays, filter, opts)
 
   await processEvents(events)
@@ -79,7 +79,7 @@ export const load = async (relays, filter, opts) => {
   return events
 }
 
-export const listen = async (relays, filter, onEvent, {shouldProcess = true} = {}) => {
+export const listen = async (relays, filter, onEvent, {shouldProcess = true}: any = {}) => {
   const sub = await pool.subscribe(relays, filter)
 
   sub.onEvent(e => {

@@ -25,7 +25,7 @@ const listen = async (relays, pubkey) => {
       // Reload annotated messages, don't alert about messages to self
       const messages = reject(
         e => e.pubkey === e.recipient,
-        await db.messages.toArray()
+        await db.table('messages').toArray()
       )
 
       if (messages.length > 0) {

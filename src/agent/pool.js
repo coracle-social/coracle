@@ -71,7 +71,7 @@ const findConnection = url => find(whereEq({url}), connections)
 const connect = async url => {
   const conn = findConnection(url) || new Connection(url)
 
-  await db.relays.put({url})
+  await db.table('relays').put({url})
   await Promise.race([conn.connect(), sleep(5000)])
 
   if (conn.status === 'ready') {

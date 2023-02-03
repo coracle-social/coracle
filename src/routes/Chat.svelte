@@ -19,8 +19,8 @@
   const {mostRecentByPubkey} = messages
 
   const rooms = lq(async () => {
-    const rooms = await db.rooms.where('joined').equals(1).toArray()
-    const messages = await db.messages.toArray()
+    const rooms = await db.table('rooms').where('joined').equals(1).toArray()
+    const messages = await db.table('messages').toArray()
     const pubkeys = without([$user.pubkey], uniq(messages.flatMap(m => [m.pubkey, m.recipient])))
 
     await loaders.loadPeople(getRelays(), pubkeys)
@@ -31,7 +31,7 @@
   })
 
   const search = lq(async () => {
-    const rooms = await db.rooms.where('joined').equals(0).toArray()
+    const rooms = await db.table('rooms').where('joined').equals(0).toArray()
 
     roomsCount = rooms.length
 
@@ -49,11 +49,11 @@
   }
 
   const joinRoom = id => {
-    db.rooms.where('id').equals(id).modify({joined: 1})
+    db.table('rooms').where('id').equals(id).modify({joined: 1})
   }
 
   const leaveRoom = id => {
-    db.rooms.where('id').equals(id).modify({joined: 0})
+    db.table('rooms').where('id').equals(id).modify({joined: 0})
   }
 
   onMount(() => {

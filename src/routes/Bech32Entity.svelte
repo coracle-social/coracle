@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {objOf} from 'ramda'
   import {nip19} from 'nostr-tools'
   import Content from 'src/partials/Content.svelte'
@@ -7,7 +7,7 @@
 
   export let entity
 
-  const {type, data} = nip19.decode(entity)
+  const {type, data} = nip19.decode(entity) as {type: string, data: any}
   const relays = (data.relays || []).map(objOf('url'))
 </script>
 

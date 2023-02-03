@@ -9,9 +9,6 @@ Bugsnag.start({
 
 import App from 'src/App.svelte'
 
-// Annoying global always fails silently. TODO: figure out an eslint rule instead
-window.find = null
-
 const app = new App({
   target: document.getElementById('app')
 })

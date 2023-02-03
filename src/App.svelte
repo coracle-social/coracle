@@ -130,7 +130,7 @@
           document.body.style.position = `fixed`
         }
       } else {
-        document.body.style = ''
+        document.body.setAttribute('style', '')
         window.scrollTo(0, scrollY)
       }
     })
@@ -151,18 +151,18 @@
       <Route path="/notes/:activeTab" component={Notes} />
       <Route path="/people/:npub/:activeTab" let:params>
         {#key params.npub}
-        <Person {...params} />
+        <Person npub={params.npub} activeTab={params.activeTab} />
         {/key}
       </Route>
       <Route path="/chat" component={Chat} />
       <Route path="/chat/:entity" let:params>
         {#key params.entity}
-        <ChatRoom {...params} />
+        <ChatRoom entity={params.entity} />
         {/key}
       </Route>
       <Route path="/messages/:entity" let:params>
         {#key params.entity}
-        <Messages {...params} />
+        <Messages entity={params.entity} />
         {/key}
       </Route>
       <Route path="/keys" component={Keys} />
@@ -173,7 +173,7 @@
       <Route path="/logout" component={Logout} />
       <Route path="/:entity" let:params>
         {#key params.entity}
-        <Bech32Entity {...params} />
+        <Bech32Entity entity={params.entity} />
         {/key}
       </Route>
       <Route path="*" component={NotFound} />
@@ -259,10 +259,10 @@
                 border-b border-medium z-10"
     >
       <div class="lg:hidden">
-        <i class="fa-solid fa-bars fa-2xl cursor-pointer" bind:this={menuIcon} on:click={toggleMenu} />
+        <button class="fa-solid fa-bars fa-2xl cursor-pointer" bind:this={menuIcon} on:click={toggleMenu} />
       </div>
       <Anchor external type="unstyled" href="https://github.com/staab/coracle" class="flex items-center gap-2">
-        <img src="/images/favicon.png" class="w-8" />
+        <img alt="Coracle Logo" src="/images/favicon.png" class="w-8" />
         <h1 class="staatliches text-3xl">Coracle</h1>
       </Anchor>
       {#if $mostRecentAlert > $lastCheckedAlerts || hasNewMessages}
@@ -272,12 +272,12 @@
 
     {#if keys.canSign()}
     <div class="fixed bottom-0 right-0 m-8">
-      <a
+      <button
         class="rounded-full bg-accent color-white w-16 h-16 flex justify-center
-                items-center border border-dark shadow-2xl cursor-pointer"
+                items-center border border-dark shadow-2xl"
         on:click={() => modal.set({type: 'note/create'})}>
         <span class="fa-sold fa-plus fa-2xl" />
-      </a>
+      </button>
     </div>
     {/if}
 

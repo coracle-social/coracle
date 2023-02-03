@@ -24,29 +24,29 @@
   }
 </script>
 
-<div
+<button
   class="py-2 px-3 flex flex-col gap-2 text-white cursor-pointer transition-all
          border border-solid border-black hover:border-medium hover:bg-dark"
   on:click={() => modal.set({type: 'note/detail', note})}>
   <div class="flex gap-2 items-center justify-between relative">
-    <span class="cursor-pointer" on:click={openPopover}>
+    <button class="cursor-pointer" on:click={openPopover}>
       {quantify(note.people.length, 'person', 'people')} liked your note.
-    </span>
+    </button>
     {#if isOpen}
-    <div in:fly={{y: 20}} class="fixed inset-0 z-10" on:click={closePopover} />
-    <div
+    <button in:fly={{y: 20}} class="fixed inset-0 z-10" on:click={closePopover} />
+    <button
       on:click={killEvent}
-      infly={{y: 20}}
+      in:fly={{y: 20}}
       class="absolute top-0 mt-8 py-2 px-4 rounded border border-solid border-medium
              bg-dark grid grid-cols-3 gap-y-2 gap-x-4 z-20">
       {#each uniqBy(prop('pubkey'), note.people) as person (person.pubkey)}
         <Badge {person} />
       {/each}
-    </div>
+    </button>
     {/if}
     <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>
   </div>
   <div class="ml-6 text-light">
     {ellipsize(note.content, 120)}
   </div>
-</div>
+</button>

@@ -9,10 +9,10 @@
   import Anchor from 'src/partials/Anchor.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
   import {user, getPerson} from 'src/agent'
-  import {render} from 'src/app'
+  import {renderNote} from 'src/app'
 
   export let name
-  export let link
+  export let link = null
   export let about
   export let picture
   export let loadMessages
@@ -42,7 +42,7 @@
   }
 
   // flex-col means the first is the last
-  const getLastListItem = () => document.querySelector('ul[name=messages] li')
+  const getLastListItem = () => document.querySelector('ul[class=channel-messages] li')
 
   const stickToBottom = async (behavior, cb) => {
     const shouldStick = window.scrollY + window.innerHeight > document.body.scrollHeight - 200
@@ -123,7 +123,7 @@
 <div class="flex gap-4 h-full">
   <div class="relative w-full">
     <div class="flex flex-col pt-20 pb-28 h-full">
-      <ul class="pb-6 p-4 overflow-auto flex-grow flex flex-col-reverse justify-start" name="messages">
+      <ul class="pb-6 p-4 overflow-auto flex-grow flex flex-col-reverse justify-start channel-messages">
         {#each annotatedMessages as m (m.id)}
           <li in:fly={{y: 20}} class="py-1 flex flex-col gap-2">
             {#if type === 'chat' && m.showPerson}
@@ -142,7 +142,7 @@
                 'bg-light text-black rounded-br-none': type === 'dm' && m.person.pubkey === $user.pubkey,
                 'bg-dark rounded-bl-none': type === 'dm' && m.person.pubkey !== $user.pubkey,
               })}>
-                {@html render(m, {showEntire: true})}
+                {@html renderNote(m, {showEntire: true})}
               </div>
             </div>
           </li>
@@ -157,7 +157,9 @@
     <div class="fixed z-10 top-16 w-full lg:-ml-56 lg:pl-56 border-b border-solid border-medium bg-dark">
       <div class="p-4 flex items-start gap-4">
         <div class="flex items-center gap-4">
-          <i class="fa fa-arrow-left text-2xl cursor-pointer" on:click={() => navigate("/chat")} />
+          <button
+            class="fa fa-arrow-left text-2xl cursor-pointer"
+            on:click={() => navigate("/chat")} />
           <div
             class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
             style="background-image: url({picture})" />
@@ -171,9 +173,9 @@
               <div class="text-lg font-bold">{name || ''}</div>
               {/if}
               {#if editRoom}
-              <small class="cursor-pointer" on:click={editRoom}>
+              <button class="text-sm cursor-pointer" on:click={editRoom}>
                 <i class="fa-solid fa-edit" /> Edit
-              </small>
+              </button>
               {/if}
             </div>
             <div class="flex items-center gap-2">
@@ -199,12 +201,12 @@
         on:keypress={onKeyPress}
         class="w-full p-2 text-white bg-medium
                placeholder:text-light outline-0 resize-none" />
-      <div
+      <button
         on:click={send}
         class="flex flex-col py-8 p-4 justify-center gap-2 border-l border-solid border-dark
                hover:bg-accent transition-all cursor-pointer text-white ">
         <i class="fa-solid fa-paper-plane fa-xl" />
-      </div>
+      </button>
     </div>
   </div>
   {#if showNewMessages}

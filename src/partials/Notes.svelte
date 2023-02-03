@@ -48,12 +48,12 @@
 
 <Content size="inherit" class="pt-6">
   {#if newNotes.length > 0}
-  <div
+  <button
     in:slide
     class="cursor-pointer text-center underline text-light"
     on:click={showNewNotes}>
     Load {quantify(newNotes.length, 'new note')}
-  </div>
+  </button>
   {/if}
 
   <div>

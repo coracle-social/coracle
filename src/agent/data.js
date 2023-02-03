@@ -31,7 +31,7 @@ export const ready = writable(false)
 export const people = writable([])
 
 // Bootstrap our people observable
-db.people.toArray().then($p => {
+db.table('people').toArray().then($p => {
   people.set(createMap('pubkey', $p))
   ready.set(true)
 })
@@ -51,7 +51,7 @@ export const updatePeople = async updates => {
   people.update($people => ({...$people, ...updates}))
 
   // Sync to our database
-  await db.people.bulkPut(Object.values(updates))
+  await db.table('people').bulkPut(Object.values(updates))
 }
 
 // Hooks
@@ -126,7 +126,7 @@ const processProfileEvents = async events => {
           }
         },
         default: () => {
-          console.log(`Received unsupported event type ${event.kind}`)
+          console.log(`Received unsupported event type ${e.kind}`)
         },
       }),
       updated_at: now(),
@@ -155,7 +155,7 @@ const processRoomEvents = async events => {
       continue
     }
 
-    const room = await db.rooms.get(roomId)
+    const room = await db.table('rooms').get(roomId)
 
     // Merge edits but don't let old ones override new ones
     if (room?.edited_at > e.created_at) {
@@ -178,7 +178,7 @@ const processRoomEvents = async events => {
     }
   }
 
-  await db.rooms.bulkPut(Object.values(updates))
+  await db.table('rooms').bulkPut(Object.values(updates))
 }
 
 const processMessages = async events => {
@@ -187,7 +187,7 @@ const processMessages = async events => {
     .map(e => ({...e, recipient: Tags.from(e).type("p").values().first()}))
 
   if (messages.length > 0) {
-    await db.messages.bulkPut(messages)
+    await db.table('messages').bulkPut(messages)
   }
 }
 

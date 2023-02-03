@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {liveQuery} from 'dexie'
   import {pluck} from 'ramda'
   import {nip19} from 'nostr-tools'
@@ -11,8 +11,8 @@
 
   export let entity
 
-  let {data: roomId} = nip19.decode(entity)
-  let room = liveQuery(() => db.rooms.where('id').equals(roomId).first())
+  let {data: roomId} = nip19.decode(entity) as {data: string}
+  let room = liveQuery(() => db.table('rooms').where('id').equals(roomId).first())
 
   const getRoomRelays = $room => {
     let relays = getRelays()
@@ -26,7 +26,7 @@
 
   const listenForMessages = async cb => {
     // Make sure we have our room so we can calculate relays
-    const $room = await db.rooms.where('id').equals(roomId).first()
+    const $room = await db.table('rooms').where('id').equals(roomId).first()
     const relays = getRoomRelays($room)
 
     return listen(

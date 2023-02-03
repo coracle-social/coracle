@@ -6,7 +6,7 @@
   export let invertColors = false
 </script>
 
-<li
+<div
   on:click
   in:fly={{y: 20}}
   class={cx("py-2 px-3 flex flex-col gap-2 text-white", {
@@ -15,4 +15,4 @@
     "hover:bg-medium": interactive && invertColors,
   })}>
   <slot />
-</li>
+</div>

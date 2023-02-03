@@ -180,13 +180,13 @@
 {#if suggestions.length > 0}
 <div class="rounded border border-solid border-medium mt-2" in:fly={{y: 20}}>
   {#each suggestions as person, i (person.pubkey)}
-  <div
+  <button
     class="py-2 px-4 cursor-pointer"
     class:bg-black={index !== i}
     class:bg-dark={index === i}
     on:click={() => pickSuggestion(person)}>
     <Badge inert {person} />
-  </div>
+  </button>
   {/each}
 </div>
 {/if}

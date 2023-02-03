@@ -3,7 +3,7 @@
   export let setRoom
 </script>
 
-<div
+<button
   class="flex gap-4 px-2 py-4 cursor-pointer hover:bg-dark transition-all"
   on:click={() => setRoom(room.id)}>
   <div
@@ -17,4 +17,4 @@
     </p>
     {/if}
   </div>
-</div>
+</button>

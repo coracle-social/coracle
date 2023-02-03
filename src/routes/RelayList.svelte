@@ -24,15 +24,15 @@
       const {relays} = await res.json()
 
       for (const url of relays) {
-        db.relays.put({url})
+        db.table('relays').put({url})
       }
     }).catch(noop)
 
   for (const relay of defaults.relays) {
-     db.relays.put(relay)
+     db.table('relays').put(relay)
   }
 
-  const knownRelays = liveQuery(() => db.relays.toArray())
+  const knownRelays = liveQuery(() => db.table('relays').toArray())
 
   $: search = fuzzy($knownRelays, {keys: ["name", "description", "url"]})
 
@@ -93,7 +93,7 @@
               <i class={url.startsWith('wss') ? "fa fa-lock" : "fa fa-unlock"} />
               {last(url.split('://'))}
             </strong>
-            <i class="fa fa-times cursor-pointer" on:click={() => leave(url)}/>
+            <button class="fa fa-times cursor-pointer" on:click={() => leave(url)} />
           </div>
           <p class="text-light">
             {#if status[url] === 'error'}
@@ -151,9 +151,9 @@
           <strong>{name || url}</strong>
           <p class="text-light">{description || ''}</p>
         </div>
-        <a class="underline cursor-pointer" on:click={() => join(url)}>
+        <button class="underline cursor-pointer" on:click={() => join(url)}>
           Join
-        </a>
+        </button>
       </div>
       {/if}
     {/each}

@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint src/*/** --quiet"
+    "lint": "eslint src/*/** --quiet",
+    "check": "svelte-check --tsconfig ./tsconfig.json --threshold error"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.1.0",
@@ -23,6 +24,7 @@
     "@bugsnag/js": "^7.18.0",
     "@fortawesome/fontawesome-free": "^6.2.1",
     "@noble/secp256k1": "^1.7.0",
+    "@tsconfig/svelte": "^3.0.0",
     "classnames": "^2.3.2",
     "compressorjs": "^1.1.1",
     "dexie": "^3.2.2",
@@ -31,8 +33,10 @@
     "hurdak": "github:ConsignCloud/hurdak",
     "nostr-tools": "^1.1.1",
     "ramda": "^0.28.0",
+    "svelte-check": "^3.0.3",
     "svelte-link-preview": "^0.3.3",
     "svelte-loading-spinners": "^0.3.4",
+    "svelte-preprocess": "^5.0.1",
     "svelte-routing": "^1.6.0",
     "svelte-switch": "^0.0.5",
     "throttle-debounce": "^5.0.0",

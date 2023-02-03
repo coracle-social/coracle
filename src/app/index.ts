@@ -14,7 +14,7 @@ import loaders from 'src/app/loaders'
 
 export {toast, modal, settings, alerts, messages, logUsage}
 
-export const login = async ({privkey, pubkey}, usingExtension = false) => {
+export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: string}, usingExtension = false) => {
   if (privkey) {
     keys.setPrivateKey(privkey)
   } else {
@@ -79,7 +79,7 @@ export const setRelayWriteCondition = async (url, write) => {
   }
 }
 
-export const render = (note, {showEntire = false}) => {
+export const renderNote = (note, {showEntire = false}) => {
   const shouldEllipsize = note.content.length > 500 && !showEntire
   const $people = get(people)
   const peopleByPubkey = createMap(

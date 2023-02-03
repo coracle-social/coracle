@@ -1,6 +1,7 @@
 import Bugsnag from "@bugsnag/js"
 import {prop} from "ramda"
 import {uuid} from "hurdak/lib/hurdak"
+import type {Writable} from 'svelte/store'
 import {navigate} from "svelte-routing"
 import {nip19} from 'nostr-tools'
 import {writable, get} from "svelte/store"
@@ -15,7 +16,11 @@ export const routes = {
 
 // Toast
 
-export const toast = writable(null)
+export interface Toast<T> extends Writable<T> {
+  show(type: string, message: string, timeout?: number): void
+}
+
+export const toast = writable(null) as Toast<any>
 
 toast.show = (type, message, timeout = 5) => {
   const id = uuid()
@@ -28,6 +33,7 @@ toast.show = (type, message, timeout = 5) => {
     }
   }, timeout * 1000)
 }
+
 
 // Modals
 

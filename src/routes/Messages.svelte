@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {liveQuery} from 'dexie'
   import {nip19} from 'nostr-tools'
   import {sortBy, pluck} from 'ramda'
@@ -13,8 +13,8 @@
   export let entity
 
   let crypt = keys.getCrypt()
-  let {data: pubkey} = nip19.decode(entity)
-  let person = liveQuery(() => db.people.get(pubkey))
+  let {data: pubkey} = nip19.decode(entity) as {data: string}
+  let person = liveQuery(() => db.table('people').get(pubkey))
 
   messages.lastCheckedByPubkey.update($obj => ({...$obj, [pubkey]: now()}))
 
@@ -37,15 +37,20 @@
     batch(300, async events => {
       // Reload from db since we annotate messages there
       const messageIds = pluck('id', events.filter(e => e.kind === 4))
-      const messages = await db.messages.where('id').anyOf(messageIds).toArray()
+      const messages = await db.table('messages').where('id').anyOf(messageIds).toArray()
 
       cb(await decryptMessages(messages))
     })
   )
 
   const loadMessages = async ({until, limit}) => {
-    const fromThem = await db.messages.where('pubkey').equals(pubkey).toArray()
-    const toThem = await db.messages.where('recipient').equals(pubkey).toArray()
+    const a = db.table('messages')
+    const b = a.where('pubkey')
+    const c = b.equals(pubkey)
+    const d = c.toArray()
+    const e = await d
+    const fromThem = await db.table('messages').where('pubkey').equals(pubkey).toArray()
+    const toThem = await db.table('messages').where('recipient').equals(pubkey).toArray()
     const events = fromThem.concat(toThem).filter(e => e.created_at < until)
     const messages = sortBy(e => -e.created_at, events).slice(0, limit)
 

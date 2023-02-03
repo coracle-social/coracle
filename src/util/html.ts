@@ -12,7 +12,7 @@ export const copyToClipboard = text => {
   const result = document.execCommand("copy")
 
   document.body.removeChild(input)
-  activeElement.focus()
+  ;(activeElement as HTMLElement).focus()
 
   return result
 }
@@ -62,7 +62,7 @@ export const killEvent = e => {
   e.stopImmediatePropagation()
 }
 
-export const fromParentOffset = (element, offset) => {
+export const fromParentOffset = (element, offset): [HTMLElement, number] => {
   for (const child of element.childNodes) {
     if (offset <= child.textContent.length) {
       return [child, offset]
@@ -70,6 +70,8 @@ export const fromParentOffset = (element, offset) => {
 
     offset -= child.textContent.length
   }
+
+  throw new Error("Unable to find parent offset")
 }
 
 export const renderContent = content => {

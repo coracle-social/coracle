@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {fly} from 'svelte/transition'
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
@@ -8,8 +8,10 @@
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
 
   const autoLogIn = async () => {
-    if (window.nostr) {
-      await login({pubkey: await window.nostr.getPublicKey()}, true)
+    const {nostr} = window as any
+
+    if (nostr) {
+      await login({pubkey: await nostr.getPublicKey()}, true)
     } else {
       modal.set({type: 'login/privkey'})
     }

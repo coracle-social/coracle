@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import cx from 'classnames'
   import extractUrls from 'extract-urls'
   import {nip19} from 'nostr-tools'
@@ -9,7 +9,7 @@
   import {Tags, findReply, findReplyId, displayPerson, isLike} from "src/util/nostr"
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
-  import {settings, modal, render} from "src/app"
+  import {settings, modal, renderNote} from "src/app"
   import {formatTimestamp} from 'src/util/misc'
   import Badge from "src/partials/Badge.svelte"
   import Compose from "src/partials/Compose.svelte"
@@ -45,7 +45,9 @@
   $: flag = find(whereEq({pubkey: $user?.pubkey}), flags)
 
   const onClick = e => {
-    if (interactive && !['I'].includes(e.target.tagName) && !e.target.closest('a')) {
+    const target = e.target as HTMLElement
+
+    if (interactive && !['I'].includes(target.tagName) && !target.closest('a')) {
       modal.set({type: 'note/detail', note, relays})
     }
   }
@@ -112,14 +114,18 @@
       resetReply()
     }
   }
+
+  const onBodyClick = e => {
+    const target = e.target as HTMLElement
+
+    if (!target.closest('.fa-reply') && !target.closest('.note-reply')) {
+      resetReply()
+    }
+  }
 </script>
 
 <svelte:body
-  on:click={e => {
-    if (!e.target.closest('.fa-reply') && !e.target.closest('.note-reply')) {
-      resetReply()
-    }
-  }}
+  on:click={onBodyClick}
   on:keydown={e => {
     if (e.key === 'Escape') {
       resetReply()
@@ -150,30 +156,28 @@
     </p>
     {:else}
     <div class="text-ellipsis overflow-hidden flex flex-col gap-2">
-      <p>{@html render(note, {showEntire})}</p>
+      <p>{@html renderNote(note, {showEntire})}</p>
       {#each links.slice(-2) as link}
       <div>
-        <div class="inline-block" on:click={e => e.stopPropagation()}>
+        <button class="inline-block" on:click={e => e.stopPropagation()}>
           <Preview endpoint={`${$settings.dufflepudUrl}/link/preview`} url={link} />
-        </div>
+        </button>
       </div>
       {/each}
     </div>
     <div class="flex gap-6 text-light">
       <div>
-        <i
-          class="fa fa-reply cursor-pointer"
-          on:click={startReply} />
+        <button class="fa fa-reply cursor-pointer" on:click|stopPropagation={startReply} />
         {note.replies.length}
       </div>
       <div class={cx({'text-accent': like})}>
-        <i
+        <button
           class="fa fa-heart cursor-pointer"
-          on:click={() => like ? deleteReaction(like) : react("+")} />
+          on:click|stopPropagation={() => like ? deleteReaction(like) : react("+")} />
         {likes.length}
       </div>
       <div>
-        <i class="fa fa-flag cursor-pointer" on:click={() => react("-")} />
+        <button class="fa fa-flag cursor-pointer" on:click|stopPropagation={() => react("-")} />
         {flags.length}
       </div>
     </div>
@@ -185,13 +189,13 @@
 <div transition:slide class="note-reply">
   <div class="bg-medium border-medium border border-solid">
     <Compose bind:this={reply} onSubmit={sendReply}>
-      <div
+      <button
         slot="addon"
         on:click={sendReply}
         class="flex flex-col py-8 p-4 justify-center gap-2 border-l border-solid border-dark
                hover:bg-accent transition-all cursor-pointer text-white ">
         <i class="fa fa-paper-plane fa-xl" />
-      </div>
+      </button>
     </Compose>
   </div>
   {#if replyMentions.length > 0}
@@ -201,7 +205,7 @@
     </div>
     {#each replyMentions as p}
       <div class="inline-block py-1 px-2 mr-1 mb-2 rounded-full border border-solid border-light">
-        <i class="fa fa-times cursor-pointer" on:click|stopPropagation={() => removeMention(p)} />
+        <button class="fa fa-times cursor-pointer" on:click|stopPropagation={() => removeMention(p)} />
         {displayPerson(getPerson(p, true))}
       </div>
     {/each}
@@ -214,10 +218,10 @@
 {#if depth > 0}
 <div class="ml-5 border-l border-solid border-medium">
   {#if !showEntire && note.replies.length > 3}
-  <div class="ml-5 py-2 text-light cursor-pointer" on:click={onClick}>
+  <button class="ml-5 py-2 text-light cursor-pointer" on:click={onClick}>
     <i class="fa fa-up-down text-sm pr-2" />
     Show {quantify(note.replies.length - 3, 'other reply', 'more replies')}
-  </div>
+  </button>
   {/if}
   {#each note.replies.slice(showEntire ? 0 : -3) as r (r.id)}
   <svelte:self showParent={false} note={r} depth={depth - 1} {invertColors} {anchorId} />

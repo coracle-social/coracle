@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {last, find, reject} from 'ramda'
   import {onMount, onDestroy} from 'svelte'
   import {nip19} from 'nostr-tools'
@@ -26,7 +26,7 @@
   export let relays = null
 
   let subs = []
-  let pubkey = nip19.decode(npub).data
+  let pubkey = nip19.decode(npub).data as string
   let following = false
   let followers = new Set()
   let followersCount = 0

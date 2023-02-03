@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {onMount} from "svelte"
   import {fly} from 'svelte/transition'
   import {stripExifData} from "src/util/html"
@@ -10,11 +10,12 @@
   import {toast, modal} from "src/app"
   import cmd from "src/app/cmd"
 
-  export let room = {}
+  export let room = {name: null, id: null, about: null, picture: null}
 
   onMount(async () => {
     document.querySelector('[name=picture]').addEventListener('change', async e => {
-      const [file] = e.target.files
+      const target = e.target as HTMLInputElement
+      const [file] = target.files
 
       if (file) {
         const reader = new FileReader()
@@ -37,7 +38,7 @@
         ? await cmd.updateRoom(getRelays(), room)
         : await cmd.createRoom(getRelays(), room)
 
-      await db.rooms.where('id').equals(room.id).modify({joined: 1})
+      await db.table('rooms').where('id').equals(room.id).modify({joined: 1})
 
       toast.show("info", `Your room has been ${room.id ? 'updated' : 'created'}!`)
 

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {onMount} from "svelte"
   import {fly} from 'svelte/transition'
   import {navigate} from "svelte-routing"
@@ -28,7 +28,8 @@
     values = pick(Object.keys(values), $user)
 
     document.querySelector('[name=picture]').addEventListener('change', async e => {
-      const [file] = e.target.files
+      const target = e.target as HTMLInputElement
+      const [file] = target.files
 
       if (file) {
         const reader = new FileReader()

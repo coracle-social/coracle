@@ -33,7 +33,7 @@
   })
 </script>
 
-<li
+<button
   class="flex gap-4 px-4 py-6 cursor-pointer hover:bg-medium transition-all rounded border border-solid border-medium bg-dark"
   on:click={() => setRoom(room)}
   in:fly={{y: 20}}>
@@ -81,4 +81,4 @@
     </p>
     {/if}
   </div>
-</li>
+</button>

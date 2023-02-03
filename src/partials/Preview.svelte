@@ -36,7 +36,7 @@
     href={url}
     class="rounded border border-solid border-medium flex flex-col bg-white overflow-hidden">
     {#if preview.image}
-    <img src={preview.image} />
+    <img alt="Link preview" src={preview.image} />
     <div class="h-px bg-medium" />
     {/if}
     {#if preview.title}

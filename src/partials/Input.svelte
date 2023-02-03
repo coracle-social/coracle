@@ -2,7 +2,7 @@
   import cx from "classnames"
 
   export let wrapperClass = ""
-  export let value
+  export let value = ""
 
   const className = cx(
     $$props.class,

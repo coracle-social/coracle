@@ -44,7 +44,7 @@ const loadNetwork = async (relays, pubkey) => {
   await loadPeople(tags.relays(), tags.values().all())
 }
 
-const loadContext = async (relays, notes, {loadParents = false, depth = 0, ...opts} = {}) => {
+const loadContext = async (relays, notes, {loadParents = false, depth = 0, ...opts}: any = {}) => {
   notes = ensurePlural(notes)
 
   if (notes.length === 0) {
@@ -58,7 +58,7 @@ const loadContext = async (relays, notes, {loadParents = false, depth = 0, ...op
       const parentTags = uniq(chunk.map(findReply).filter(identity))
       const parentIds = Tags.wrap(parentTags).values().all()
       const combinedRelays = uniq(relays.concat(Tags.wrap(parentTags).relays()))
-      const filter = [{kinds: [1, 7], '#e': chunkIds}]
+      const filter = [{kinds: [1, 7], '#e': chunkIds} as {}]
 
       if (authors.length > 0) {
         filter.push({kinds: personKinds, authors})

@@ -7,8 +7,8 @@ let signingFunction
 
 const pubkey = synced('agent/user/pubkey')
 const privkey = synced('agent/user/privkey')
-const hasExtension = () => Boolean(window.nostr)
-const canSign = () => Boolean(hasExtension() || get(privkey))
+const getExtension = () => (window as {nostr?: any}).nostr
+const canSign = () => Boolean(getExtension() || get(privkey))
 
 const setPrivateKey = _privkey => {
   privkey.set(_privkey)
@@ -16,9 +16,11 @@ const setPrivateKey = _privkey => {
 }
 
 const setPublicKey = _pubkey => {
-  if (window.nostr) {
+  const nostr = getExtension()
+
+  if (nostr) {
     signingFunction = async event => {
-      const {sig} = await window.nostr.signEvent(event)
+      const {sig} = await nostr.signEvent(event)
 
       return sig
     }
@@ -44,8 +46,9 @@ const sign = async event => {
 
 const getCrypt = () => {
   const $privkey = get(privkey)
+  const nostr = getExtension()
 
-  if (!$privkey && !hasExtension()) {
+  if (!$privkey && !nostr) {
     throw new Error('No encryption method available.')
   }
 
@@ -53,13 +56,13 @@ const getCrypt = () => {
     encrypt: (pubkey, message) => {
       return $privkey
         ? nip04.encrypt($privkey, pubkey, message)
-        : window.nostr.nip04.encrypt(pubkey, message)
+        : nostr.nip04.encrypt(pubkey, message)
     },
     decrypt: async (pubkey, message) => {
       try {
         return $privkey
           ? nip04.decrypt($privkey, pubkey, message)
-          : await window.nostr.nip04.decrypt(pubkey, message)
+          : await nostr.nip04.decrypt(pubkey, message)
       } catch (e) {
         console.error(e)
         return `<Failed to decrypt message: ${e}>`
@@ -72,6 +75,6 @@ const getCrypt = () => {
 setPublicKey(get(pubkey))
 
 export default {
-  pubkey, privkey, hasExtension, canSign, setPrivateKey, setPublicKey, clear,
+  pubkey, privkey, canSign, setPrivateKey, setPublicKey, clear,
   sign, getCrypt,
 }
