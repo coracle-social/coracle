@@ -99,7 +99,7 @@ const publish = async (relays, event) => {
 }
 
 const describeFilter = ({kinds = [], ...filter}) => {
-  let parts = []
+  const parts = []
 
   parts.push(kinds.join(','))
 
