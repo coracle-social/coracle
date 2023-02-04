@@ -100,7 +100,6 @@ export const createScroller = (loadMore, {reverse = false} = {}) => {
   // loadMore function is not properly awaiting all the work necessary.
   // That is the problem, but see commit 8371fde for another strategy
   let done = false
-  let timeout = null
   const check = async () => {
     // While we have empty space, fill it
     const {scrollY, innerHeight} = window
@@ -111,8 +110,6 @@ export const createScroller = (loadMore, {reverse = false} = {}) => {
 
     // Only trigger loading the first time we reach the threshold
     if (shouldLoad) {
-      clearTimeout(timeout)
-
       await loadMore()
     }
 

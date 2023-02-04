@@ -30,7 +30,7 @@ const loadPeople = (relays, pubkeys, {kinds = personKinds, force = false, ...opt
 const loadNetwork = async (relays, pubkey) => {
   // Get this user's profile to start with. This may update what relays
   // are available, so don't assign relays to a variable here.
-  let events = pubkey ? await loadPeople(relays, [pubkey], {force: true}) : []
+  const events = pubkey ? await loadPeople(relays, [pubkey], {force: true}) : []
   let petnames = Tags.from(events.filter(e => e.kind === 3)).type("p").all()
 
   // Default to some cool guys we know
@@ -58,7 +58,7 @@ const loadContext = async (relays, notes, {loadParents = false, depth = 0, ...op
       const parentTags = uniq(chunk.map(findReply).filter(identity))
       const parentIds = Tags.wrap(parentTags).values().all()
       const combinedRelays = uniq(relays.concat(Tags.wrap(parentTags).relays()))
-      const filter = [{kinds: [1, 7], '#e': chunkIds} as {}]
+      const filter = [{kinds: [1, 7], '#e': chunkIds} as object]
 
       if (authors.length > 0) {
         filter.push({kinds: personKinds, authors})

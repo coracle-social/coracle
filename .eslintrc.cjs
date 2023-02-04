@@ -1,26 +1,32 @@
 module.exports = {
-  "env": {
-      "browser": true,
-      "es2021": true
+  root: true,
+  env: {
+      browser: true,
+      es2021: true
   },
-  "plugins": [
-    'svelte3'
-  ],
+  plugins: ['svelte3', '@typescript-eslint'],
   overrides: [
     {
       files: ['*.svelte'],
       processor: 'svelte3/svelte3'
     }
   ],
-  "extends": "eslint:recommended",
-  "parserOptions": {
-      "ecmaVersion": "latest",
-      "sourceType": "module"
+  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      tsconfigRootDir: __dirname,
+      project: ['./tsconfig.json'],
+      extraFileExtensions: ['.svelte']
   },
-  "rules": {
+  settings: {
+    'svelte3/typescript': require('typescript'),
+  },
+  rules: {
     "a11y-click-events-have-key-events": "off",
     "no-unused-vars": ["error", {args: "none"}],
     "no-async-promise-executor": "off",
   },
-  "ignorePatterns": ["*.svg"]
+  ignorePatterns: ["*.svg"]
 }

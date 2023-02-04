@@ -15,7 +15,6 @@
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
   import {user, people, getPerson, getRelays, getEventRelays} from 'src/agent'
-  import {addRelay, removeRelay} from "src/app"
   import cmd from 'src/app/cmd'
 
   export let note

@@ -71,7 +71,7 @@ export const publish = async (relays, event) => {
   return signedEvent
 }
 
-export const load = async (relays, filter, opts?) => {
+export const load = async (relays, filter, opts?): Promise<Record<string, unknown>[]> => {
   const events = await pool.request(relays, filter, opts)
 
   await processEvents(events)
@@ -79,18 +79,16 @@ export const load = async (relays, filter, opts?) => {
   return events
 }
 
-export const listen = async (relays, filter, onEvent, {shouldProcess = true}: any = {}) => {
-  const sub = await pool.subscribe(relays, filter)
+export const listen = (relays, filter, onEvent, {shouldProcess = true}: any = {}) => {
+  return pool.subscribe(relays, filter, {
+    onEvent: e => {
+      if (shouldProcess) {
+        processEvents(e)
+      }
 
-  sub.onEvent(e => {
-    if (shouldProcess) {
-      processEvents(e)
-    }
-
-    if (onEvent) {
-      onEvent(e)
-    }
+      if (onEvent) {
+        onEvent(e)
+      }
+    },
   })
-
-  return sub
 }

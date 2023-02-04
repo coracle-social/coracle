@@ -10,7 +10,6 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Button from "src/partials/Button.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
@@ -92,7 +91,7 @@
 <Content>
   <div class="flex gap-4" in:fly={{y: 20}}>
     <div
-      class="overflow-hidden w-32 h-32 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
+      class="overflow-hidden w-16 h-16 sm:w-32 sm:h-32 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
       style="background-image: url({person.picture})" />
     <div class="flex flex-col gap-4 flex-grow">
       <div class="flex justify-between items-center gap-4">
@@ -107,22 +106,24 @@
           </div>
           {/if}
         </div>
-        <div class="whitespace-nowrap flex gap-4 items-center">
+        <div class="whitespace-nowrap flex gap-3 items-center flex-wrap">
           {#if $user?.pubkey === pubkey && keys.canSign()}
-          <Anchor type="button" href="/profile">
-            <i class="fa-solid fa-edit" /> Edit profile
-          </Anchor>
+          <Anchor href="/profile"><i class="fa-solid fa-edit" /> Edit profile</Anchor>
           {:else if $user && keys.canSign()}
-            <Anchor type="button" on:click={openAdvanced}>
-              <i class="fa-solid fa-sliders" />
+            <Anchor type="button-circle" on:click={openAdvanced}>
+              <i class="fa fa-sliders" />
             </Anchor>
-            <Anchor type="button" href={`/messages/${npub}`}>
-              <i class="fa-solid fa-envelope" />
+            <Anchor type="button-circle" href={`/messages/${npub}`}>
+              <i class="fa fa-envelope" />
             </Anchor>
             {#if following}
-            <Button on:click={unfollow}>Unfollow</Button>
+            <Anchor type="button-circle" on:click={unfollow}>
+              <i class="fa fa-user-minus" />
+            </Anchor>
             {:else}
-            <Button on:click={follow}>Follow</Button>
+            <Anchor type="button-circle" on:click={follow}>
+              <i class="fa fa-user-plus" />
+            </Anchor>
             {/if}
           {/if}
         </div>

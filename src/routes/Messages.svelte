@@ -44,11 +44,6 @@
   )
 
   const loadMessages = async ({until, limit}) => {
-    const a = db.table('messages')
-    const b = a.where('pubkey')
-    const c = b.equals(pubkey)
-    const d = c.toArray()
-    const e = await d
     const fromThem = await db.table('messages').where('pubkey').equals(pubkey).toArray()
     const toThem = await db.table('messages').where('recipient').equals(pubkey).toArray()
     const events = fromThem.concat(toThem).filter(e => e.created_at < until)

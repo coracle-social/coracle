@@ -16,6 +16,7 @@
     switcher(type, {
       anchor: "underline",
       button: "py-2 px-4 rounded bg-white text-accent",
+      'button-circle': "w-10 h-10 flex justify-center items-center rounded-full bg-white text-accent",
       'button-accent': "py-2 px-4 rounded bg-accent text-white",
     }),
   )
