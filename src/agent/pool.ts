@@ -189,7 +189,17 @@ const request = (relays, filters, {threshold = 1} = {}): Promise<Record<string, 
     const eose = []
 
     const attemptToComplete = () => {
-      if (eose.length >= threshold || Date.now() - now >= 5000) {
+      const done = (
+        eose.length === relays.length
+        || eose.filter(url => relaysWithEvents.has(url)).length >= threshold
+        || (
+          Date.now() - now >= 1000
+          && eose.length > relays.length - Math.round(relays.length / 10)
+        )
+        || Date.now() - now >= 5000
+      )
+
+      if (done) {
         agg.unsub()
         resolve(events)
       }
