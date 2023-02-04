@@ -40,9 +40,9 @@
   <div
     class="overflow-hidden w-14 h-14 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
     style="background-image: url({room.picture})" />
-  <div class="flex flex-grow flex-col justify-start gap-2">
+  <div class="flex flex-grow flex-col justify-start gap-2 min-w-0">
     <div class="flex flex-grow items-start justify-between gap-2">
-      <div class="flex gap-2 items-center">
+      <div class="flex gap-2 items-center overflow-hidden">
         {#if room.type === 'npub'}
         <i class="fa fa-lock text-light" />
         <h2 class="text-lg">{displayPerson(room)}</h2>
@@ -76,7 +76,7 @@
       {/if}
     </div>
     {#if room.about}
-    <p class="text-light">
+    <p class="text-light text-start">
       {ellipsize(room.about, 300)}
     </p>
     {/if}

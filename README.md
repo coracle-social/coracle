@@ -48,6 +48,7 @@ If you like Coracle and want to support its development, you can donate sats via
 # Bugs
 
 - [ ] Everything waits for even the slowest relay to connect before returning events
+- [ ] Mentions are sorta weird, usually mention self
 - [ ] Alerts are not showing likes, just generally screwy. Maybe because I threadify before adding to the db?
 - [ ] Change network tab to list relays the user is connected to
 - [ ] Sync mentions box and in-reply mentions
