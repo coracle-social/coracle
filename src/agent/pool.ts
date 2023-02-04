@@ -67,7 +67,10 @@ class Connection {
   }
   async disconnect() {
     this.status = 'closed'
-    await this.nostr.close()
+
+    if (this.nostr) {
+      await this.nostr.close()
+    }
   }
 }
 
