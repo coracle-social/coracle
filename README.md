@@ -54,6 +54,8 @@ If you like Coracle and want to support its development, you can donate sats via
   - Stack views?
   - Put user detail in a modal?
   - ReplaceState for settings modals?
+- [ ] Use nip 56 for reporting
+  - https://github.com/nostr-protocol/nips/pull/205#issuecomment-1419234230
 - [ ] Mentions are sorta weird, usually mention self
 - [ ] Change network tab to list relays the user is connected to
 - [ ] Sync mentions box and in-reply mentions

@@ -28,7 +28,9 @@ export const getMuffle = () => {
     return []
   }
 
-  return Tags.wrap($user.muffle.filter(t => Math.random() < last(t))).values().all()
+  const shouldMuffle = t => Math.random() > parseFloat(last(t))
+
+  return Tags.wrap($user.muffle.filter(shouldMuffle)).values().all()
 }
 
 export const getFollows = pubkey => {
