@@ -18,36 +18,42 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Persist and load relay list
 - [x] NIP 05
 - [x] Direct messages using NIP 04
-- [ ] Separate settings for read, write, and broadcast relays based on NIP 65
-- [ ] Deploy coracle relay, set better defaults
+
+# Snacks
+
+- [ ] Add nip05 verification on feed
+- [ ] Linkify follow/followers numbers
+- [ ] Support key delegation
+  - https://github.com/nbd-wtf/nostr-tools/blob/master/nip26.ts
+- [ ] Add keyword mutes
+- [ ] Add encrypted settings storage using nostr events
+- [ ] Attachments (a tag w/content type and url)
+- [ ] Linkify bech32 entities w/ NIP 21 https://github.com/nostr-protocol/nips/blob/master/21.md
+- [ ] Sign in as user with one click to view things from their pubkey's perspective - do this with multiple accounts
+
+# Missions
+
 - [ ] Image uploads
   - Use dufflepud. Default will charge via lightning and have a tos, others can self-host and skip that.
   - Add banner field to profile
-- [ ] Release to android with https://svelte-native.technology/docs
-- [ ] Support invoices https://twitter.com/jb55/status/1604131336247476224
-- [ ] Lightning tips
-- [ ] Add followers/follows lists on profile page
-- [ ] Rooms/groups
-- [ ] Custom feeds
-- [ ] Support key delegation
-  - https://github.com/nbd-wtf/nostr-tools/blob/master/nip26.ts
+- [ ] Allow users to select which relay they're reading from, allow more advanced custom feeds ala tweetdeck
 - [ ] Add relay selector when publishing a note
-- [ ] Add keyword mutes
+- [ ] Support invoices, tips, zaps https://twitter.com/jb55/status/1604131336247476224
+- [ ] Separate settings for read, write, and broadcast relays based on NIP 65
+- [ ] Deploy coracle relay
+- [ ] Release to android with https://svelte-native.technology/docs
 - [ ] Add no-relay gossip
   - Capture certain events in a local db
   - File import/export from db, NFC transfer
   - Save user notes to db
-- [ ] Add settings storage on nostr, maybe use kind 0?
-- [ ] Stack views so scroll position isn't lost on navigation
-- [ ] Attachments (a tag w/content type and url)
-- [ ] Add Labs tab with cards for non-standard features
-  - Time travel - see events as of a date/time
-- [ ] Linkify bech32 entities w/ NIP 21 https://github.com/nostr-protocol/nips/blob/master/21.md
-- [ ] Sign in as user with one click to view things from their pubkey's perspective - do this with multiple accounts
 
-# Bugs
+# Maintenance
 
-- [ ] Everything waits for even the slowest relay to connect before returning events
+- [ ] Fix login flow
+- [ ] Fix navigation
+  - Stack views?
+  - Put user detail in a modal?
+  - ReplaceState for settings modals?
 - [ ] Mentions are sorta weird, usually mention self
 - [ ] Alerts are not showing likes, just generally screwy. Maybe because I threadify before adding to the db?
 - [ ] Change network tab to list relays the user is connected to
@@ -56,6 +62,13 @@ If you like Coracle and want to support its development, you can donate sats via
   - [ ] Add notifications for chat messages
 
 # Changelog
+
+## 0.2.9
+
+- [x] Fix a bug in pool.subscribe which was causing requests to wait for all connections
+- [x] Add typescript with pre-commit hook
+- [x] Fix layout for chat, person pages
+- [x] Parse relays for kind 3
 
 ## 0.2.8
 
