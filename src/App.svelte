@@ -10,7 +10,7 @@
   import {Router, Route, links, navigate} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {displayPerson, isLike} from 'src/util/nostr'
-  import {timedelta, now} from 'src/util/misc'
+  import {timedelta, now, sleep} from 'src/util/misc'
   import {keys, user, pool, getRelays} from 'src/agent'
   import {modal, toast, settings, logUsage, alerts, messages, loadAppData} from "src/app"
   import {routes} from "src/app/ui"
@@ -50,8 +50,12 @@
   const searchIsOpen = writable(false)
   const toggleSearch = () => searchIsOpen.update(x => !x)
 
-  const closeModal = () => {
-    modal.set(null)
+  const closeModal = async () => {
+    while ($modal) {
+      history.back()
+      await sleep(1)
+    }
+
     menuIsOpen.set(false)
   }
 

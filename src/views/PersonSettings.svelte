@@ -30,7 +30,7 @@
 
     cmd.muffle(getRelays(), muffleTags)
 
-    modal.set(null)
+    history.back()
   }
 </script>
 

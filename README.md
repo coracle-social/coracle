@@ -49,14 +49,8 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Maintenance
 
-- [ ] Fix login flow
-- [ ] Fix navigation
-  - Stack views?
-  - Put user detail in a modal?
-  - ReplaceState for settings modals?
 - [ ] Use nip 56 for reporting
   - https://github.com/nostr-protocol/nips/pull/205#issuecomment-1419234230
-- [ ] Mentions are sorta weird, usually mention self
 - [ ] Change network tab to list relays the user is connected to
 - [ ] Sync mentions box and in-reply mentions
 - [ ] Add petnames for channels
@@ -71,6 +65,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Wait for profile info on login, navigate to network by default
 - [x] Fix mention selection, inheritance, and inclusion in notes
 - [x] Parse links without http at the beginning
+- [x] Clean up back button in combination with modals
 
 ## 0.2.9
 

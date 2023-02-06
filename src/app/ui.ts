@@ -1,5 +1,5 @@
 import Bugsnag from "@bugsnag/js"
-import {prop} from "ramda"
+import {prop, last} from "ramda"
 import {uuid} from "hurdak/lib/hurdak"
 import type {Writable} from 'svelte/store'
 import {navigate} from "svelte-routing"
@@ -37,24 +37,29 @@ toast.show = (type, message, timeout = 5) => {
 
 // Modals
 
+
 export const modal = {
-  subscribe: cb => {
-    const getModal = () =>
-      location.hash.includes('#modal=')
-        ? JSON.parse(decodeURIComponent(escape(atob(location.hash.replace('#modal=', '')))))
-        : null
-
-    cb(getModal())
-
-    return globalHistory.listen(() => cb(getModal()))
-  },
+  history: [],
   set: data => {
-    let path = location.pathname
     if (data) {
-      path += '#modal=' + btoa(unescape(encodeURIComponent(JSON.stringify(data))))
+      modal.history.push(data)
+      navigate(location.pathname + `#m=${modal.history.length - 1}`)
+    } else {
+      modal.history = []
+      navigate(location.pathname)
     }
+  },
+  subscribe: cb => {
+    cb(last(modal.history))
 
-    navigate(path)
+    return globalHistory.listen(({action}) => {
+      const match = location.hash.match(/\bm=(\d+)/)
+      const i = match ? parseInt(match[1]) : null
+
+      modal.history.splice(i === null ? -1 : i + 1)
+
+      cb(modal.history[i])
+    })
   },
 }
 
