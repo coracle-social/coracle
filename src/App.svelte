@@ -53,7 +53,7 @@
   const closeModal = async () => {
     while ($modal) {
       history.back()
-      await sleep(1)
+      await sleep(10)
     }
 
     menuIsOpen.set(false)
