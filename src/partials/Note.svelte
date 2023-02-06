@@ -23,8 +23,12 @@
   export let showParent = true
   export let invertColors = false
 
+  const getDefaultReplyMentions = () =>
+    Tags.from(note).type("p").values().all().concat(note.pubkey)
+
   let reply = null
-  let replyMentions = without([$user?.pubkey], Tags.from(note).type("p").values().all())
+  let replyMentions = without([$user?.pubkey], getDefaultReplyMentions())
+  let replyContainer = null
 
   const links = $settings.showLinkPreviews ? extractUrls(note.content) || [] : null
   const showEntire = anchorId === note.id
@@ -100,7 +104,7 @@
 
   const resetReply = () => {
     reply = null
-    replyMentions = Tags.from(note).type("p").values().all()
+    replyMentions = getDefaultReplyMentions()
   }
 
   const sendReply = () => {
@@ -117,7 +121,7 @@
   const onBodyClick = e => {
     const target = e.target as HTMLElement
 
-    if (!target.closest('.fa-reply') && !target.closest('.note-reply')) {
+    if (replyContainer && !replyContainer.contains(target)) {
       resetReply()
     }
   }
@@ -157,26 +161,22 @@
     <div class="text-ellipsis overflow-hidden flex flex-col gap-2">
       <p>{@html renderNote(note, {showEntire})}</p>
       {#each links.slice(-2) as link}
-      <div>
-        <button class="inline-block" on:click={e => e.stopPropagation()}>
-          <Preview endpoint={`${$settings.dufflepudUrl}/link/preview`} url={link} />
-        </button>
-      </div>
+      <button class="inline-block" on:click={e => e.stopPropagation()}>
+        <Preview endpoint={`${$settings.dufflepudUrl}/link/preview`} url={link} />
+      </button>
       {/each}
     </div>
-    <div class="flex gap-6 text-light">
+    <div class="flex gap-6 text-light" on:click={e => e.stopPropagation()}>
       <div>
-        <button class="fa fa-reply cursor-pointer" on:click|stopPropagation={startReply} />
+        <button class="fa fa-reply cursor-pointer" on:click={startReply} />
         {note.replies.length}
       </div>
       <div class={cx({'text-accent': like})}>
-        <button
-          class="fa fa-heart cursor-pointer"
-          on:click|stopPropagation={() => like ? deleteReaction(like) : react("+")} />
+        <button class="fa fa-heart cursor-pointer" on:click={() => like ? deleteReaction(like) : react("+")} />
         {likes.length}
       </div>
       <div>
-        <button class="fa fa-flag cursor-pointer" on:click|stopPropagation={() => react("-")} />
+        <button class="fa fa-flag cursor-pointer" on:click={() => react("-")} />
         {flags.length}
       </div>
     </div>
@@ -185,7 +185,7 @@
 </Card>
 
 {#if reply}
-<div transition:slide class="note-reply">
+<div transition:slide class="note-reply" bind:this={replyContainer}>
   <div class="bg-medium border-medium border border-solid">
     <Compose bind:this={reply} onSubmit={sendReply}>
       <button
