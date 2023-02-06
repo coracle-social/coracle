@@ -1,12 +1,12 @@
 <script lang="ts">
   import cx from 'classnames'
-  import extractUrls from 'extract-urls'
   import {nip19} from 'nostr-tools'
   import {whereEq, without, uniq, pluck, reject, propEq, find} from 'ramda'
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {quantify} from 'hurdak/lib/hurdak'
   import {Tags, findReply, findReplyId, displayPerson, isLike} from "src/util/nostr"
+  import {extractUrls} from "src/util/html"
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import {settings, modal, renderNote} from "src/app"
@@ -192,7 +192,7 @@
         slot="addon"
         on:click={sendReply}
         class="flex flex-col py-8 p-4 justify-center gap-2 border-l border-solid border-dark
-               hover:bg-accent transition-all cursor-pointer text-white ">
+               hover:bg-accent transition-all cursor-pointer text-white">
         <i class="fa fa-paper-plane fa-xl" />
       </button>
     </Compose>

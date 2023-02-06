@@ -1,5 +1,4 @@
-import extractUrls from 'extract-urls'
-import {first} from 'hurdak/lib/hurdak'
+import {ellipsize} from 'hurdak/lib/hurdak'
 
 export const copyToClipboard = text => {
   const {activeElement} = document
@@ -74,6 +73,9 @@ export const fromParentOffset = (element, offset): [HTMLElement, number] => {
   throw new Error("Unable to find parent offset")
 }
 
+export const extractUrls = url =>
+  url.match(/(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?!&//=]*)/gi)
+
 export const renderContent = content => {
   // Escape html
   content = escapeHtml(content)
@@ -87,7 +89,7 @@ export const renderContent = content => {
     $a.className = "underline"
 
     /* eslint no-useless-escape: 0 */
-    $a.innerText = first(url.replace(/https?:\/\/(www\.)?/, '').split(/[\/\?#]/))
+    $a.innerText = ellipsize(url.replace(/https?:\/\/(www\.)?/, ''), 50)
 
     // If the url is on its own line, remove it entirely. Otherwise, replace it with the link
     content = content.replace(url, $a.outerHTML)

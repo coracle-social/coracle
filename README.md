@@ -69,6 +69,8 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Fixed likes not showing up in alerts
 - [x] Raised threshold for pool to 2 so we don't have such a small amount of results
 - [x] Wait for profile info on login, navigate to network by default
+- [x] Fix mention selection, inheritance, and inclusion in notes
+- [x] Parse links without http at the beginning
 
 ## 0.2.9
 

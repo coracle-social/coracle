@@ -2,6 +2,7 @@
   import {prop, reject, sortBy, last} from 'ramda'
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
+  import {displayPerson} from "src/util/nostr"
   import {fromParentOffset} from "src/util/html"
   import Badge from "src/partials/Badge.svelte"
   import {people} from "src/agent/data"
@@ -62,13 +63,14 @@
     selection.collapse(space, 2)
   }
 
-  const pickSuggestion = ({name, pubkey}) => {
-    highlightWord('@', getWord().length, name)
+  const pickSuggestion = person => {
+    const display = displayPerson(person)
+
+    highlightWord('@', getWord().length, display)
 
     mentions.push({
-      name,
-      pubkey,
-      length: name.length + 1,
+      pubkey: person.pubkey,
+      length: display.length + 1,
       end: getText().length - 2,
     })
 
@@ -181,9 +183,10 @@
 <div class="rounded border border-solid border-medium mt-2 flex flex-col" in:fly={{y: 20}}>
   {#each suggestions as person, i (person.pubkey)}
   <button
-    class="py-2 px-4 cursor-pointer"
+    class="py-2 px-4 cursor-pointer border-l-2 border-solid border-black"
     class:bg-black={index !== i}
     class:bg-dark={index === i}
+    class:border-accent={index === i}
     on:click={() => pickSuggestion(person)}>
     <Badge inert {person} />
   </button>

@@ -20,11 +20,9 @@ export default defineConfig({
     svelte({
       preprocess: sveltePreprocess(),
       onwarn: (warning, handler) => {
-        const isA11y = warning.code.startsWith('a11y-')
 
-        if (["a11y-autofocus"].includes(warning.code)) return
+        if (warning.code.startsWith('a11y-')) return
         if (warning.filename.includes("node_modules")) return
-        if (warning.filename.includes("Card.svelte") && isA11y) return
 
         handler(warning)
       },

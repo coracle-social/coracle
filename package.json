@@ -10,7 +10,7 @@
     "qa:lint": "eslint src/*/** --quiet",
     "qa:check": "svelte-check --tsconfig ./tsconfig.json --threshold error",
     "qa:all": "run-p qa:lint qa:check",
-    "watch": "find src -type f | entr -r npm run qa:all"
+    "watch": "find src -type f | entr -r"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.1.0",
@@ -33,7 +33,6 @@
     "classnames": "^2.3.2",
     "compressorjs": "^1.1.1",
     "dexie": "^3.2.2",
-    "extract-urls": "^1.3.2",
     "fuse.js": "^6.6.2",
     "hurdak": "github:ConsignCloud/hurdak",
     "husky": "^8.0.3",
