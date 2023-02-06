@@ -178,7 +178,7 @@
 </div>
 
 {#if suggestions.length > 0}
-<div class="rounded border border-solid border-medium mt-2" in:fly={{y: 20}}>
+<div class="rounded border border-solid border-medium mt-2 flex flex-col" in:fly={{y: 20}}>
   {#each suggestions as person, i (person.pubkey)}
   <button
     class="py-2 px-4 cursor-pointer"

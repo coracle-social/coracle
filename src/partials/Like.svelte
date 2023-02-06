@@ -1,10 +1,11 @@
 <script>
   import {fly} from 'svelte/transition'
-  import {uniqBy, prop} from 'ramda'
+  import {uniq} from 'ramda'
   import {ellipsize, quantify} from 'hurdak/lib/hurdak'
   import Badge from "src/partials/Badge.svelte"
   import {formatTimestamp} from 'src/util/misc'
   import {killEvent} from 'src/util/html'
+  import {getPerson} from 'src/agent'
   import {modal} from 'src/app'
 
   export let note
@@ -26,11 +27,11 @@
 
 <button
   class="py-2 px-3 flex flex-col gap-2 text-white cursor-pointer transition-all
-         border border-solid border-black hover:border-medium hover:bg-dark"
+         border border-solid border-black hover:border-medium hover:bg-dark text-left"
   on:click={() => modal.set({type: 'note/detail', note})}>
   <div class="flex gap-2 items-center justify-between relative">
     <button class="cursor-pointer" on:click={openPopover}>
-      {quantify(note.people.length, 'person', 'people')} liked your note.
+      {quantify(note.likedBy.length, 'person', 'people')} liked your note.
     </button>
     {#if isOpen}
     <button in:fly={{y: 20}} class="fixed inset-0 z-10" on:click={closePopover} />
@@ -39,8 +40,8 @@
       in:fly={{y: 20}}
       class="absolute top-0 mt-8 py-2 px-4 rounded border border-solid border-medium
              bg-dark grid grid-cols-3 gap-y-2 gap-x-4 z-20">
-      {#each uniqBy(prop('pubkey'), note.people) as person (person.pubkey)}
-        <Badge {person} />
+      {#each uniq(note.likedBy) as pubkey}
+      <Badge person={getPerson(pubkey)} />
       {/each}
     </button>
     {/if}

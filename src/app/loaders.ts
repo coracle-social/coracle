@@ -2,8 +2,7 @@ import {uniqBy, prop, uniq, flatten, pluck, identity} from 'ramda'
 import {ensurePlural, createMap, chunk} from 'hurdak/lib/hurdak'
 import {findReply, personKinds, Tags} from 'src/util/nostr'
 import {now, timedelta} from 'src/util/misc'
-import {load, getPerson} from 'src/agent'
-import defaults from 'src/agent/defaults'
+import {load, getPerson, getFollows} from 'src/agent'
 
 const getStalePubkeys = pubkeys => {
   // If we're not reloading, only get pubkeys we don't already know about
@@ -28,17 +27,7 @@ const loadPeople = (relays, pubkeys, {kinds = personKinds, force = false, ...opt
 }
 
 const loadNetwork = async (relays, pubkey) => {
-  // Get this user's profile to start with. This may update what relays
-  // are available, so don't assign relays to a variable here.
-  const events = pubkey ? await loadPeople(relays, [pubkey], {force: true}) : []
-  let petnames = Tags.from(events.filter(e => e.kind === 3)).type("p").all()
-
-  // Default to some cool guys we know
-  if (petnames.length === 0) {
-    petnames = defaults.petnames
-  }
-
-  const tags = Tags.wrap(petnames)
+  const tags = Tags.wrap(getFollows(pubkey))
 
   // Use nip-2 recommended relays to load our user's second-order follows
   await loadPeople(tags.relays(), tags.values().all())

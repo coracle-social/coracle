@@ -7,8 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint src/*/** --quiet",
-    "check": "svelte-check --tsconfig ./tsconfig.json --threshold error"
+    "qa:lint": "eslint src/*/** --quiet",
+    "qa:check": "svelte-check --tsconfig ./tsconfig.json --threshold error",
+    "qa:all": "run-p qa:lint qa:check",
+    "watch": "find src -type f | entr -r npm run qa:all"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.1.0",
@@ -36,6 +38,7 @@
     "hurdak": "github:ConsignCloud/hurdak",
     "husky": "^8.0.3",
     "nostr-tools": "^1.2.1",
+    "npm-run-all": "^4.1.5",
     "ramda": "^0.28.0",
     "svelte-check": "^3.0.3",
     "svelte-link-preview": "^0.3.3",

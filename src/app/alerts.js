@@ -1,9 +1,10 @@
 import {get} from 'svelte/store'
-import {synced, batch, now} from 'src/util/misc'
-import {isAlert} from 'src/util/nostr'
-import {load as _load, listen as _listen, getMuffle, db} from 'src/agent'
+import {groupBy, pluck, partition, propEq} from 'ramda'
+import {synced, timedelta, batch, now} from 'src/util/misc'
+import {isAlert, findReplyId} from 'src/util/nostr'
+import {load as _load, listen as _listen, db} from 'src/agent'
 import loaders from 'src/app/loaders'
-import {threadify} from 'src/app'
+import {annotate} from 'src/app'
 
 let listener
 
@@ -14,21 +15,29 @@ const onChunk = async (relays, pubkey, events) => {
   events = events.filter(e => isAlert(e, pubkey))
 
   if (events.length > 0) {
-    const context = await loaders.loadContext(relays, events, {threshold: 2})
-    const notes = threadify(events, context, {muffle: getMuffle()})
+    const context = await loaders.loadContext(relays, events)
+    const [likes, notes] = partition(propEq('kind', 7), events)
+    const annotatedNotes = notes.map(n => annotate(n, context))
+    const likesByParent = groupBy(findReplyId, likes)
+    const likedNotes = context
+      .filter(e => likesByParent[e.id])
+      .map(e => annotate({...e, likedBy: pluck('pubkey', likesByParent[e.id])}, context))
 
-    await db.table('alerts').bulkPut(notes)
+    await db.table('alerts').bulkPut(annotatedNotes.concat(likedNotes))
 
     mostRecentAlert.update($t => events.reduce((t, e) => Math.max(t, e.created_at), $t))
   }
 }
 
 const load = async (relays, pubkey) => {
-  const since = get(mostRecentAlert)
+  // Include an offset so we don't miss alerts on one relay but not another
+  const since = get(mostRecentAlert) - timedelta(30, 'days')
+
+  // Crank the threshold up since we can afford for this to be slow
   const events = await _load(
     relays,
-    {kinds: [1, 7], '#p': [pubkey], since, limit: 100},
-    {threshold: 2}
+    {kinds: [1, 7], '#p': [pubkey], since, limit: 1000},
+    {threshold: 10}
   )
 
   onChunk(relays, pubkey, events)

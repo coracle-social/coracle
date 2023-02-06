@@ -12,9 +12,10 @@
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, now} from 'src/util/misc'
   import {keys, user, pool, getRelays} from 'src/agent'
-  import {modal, toast, settings, logUsage, alerts, messages} from "src/app"
+  import {modal, toast, settings, logUsage, alerts, messages, loadAppData} from "src/app"
   import {routes} from "src/app/ui"
   import Anchor from 'src/partials/Anchor.svelte'
+  import Content from 'src/partials/Content.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
   import Modal from 'src/partials/Modal.svelte'
   import SignUp from "src/views/SignUp.svelte"
@@ -74,9 +75,7 @@
 
   onMount(() => {
     if ($user) {
-      alerts.load(getRelays(), $user.pubkey)
-      alerts.listen(getRelays(), $user.pubkey)
-      messages.listen(getRelays(), $user.pubkey)
+      loadAppData($user.pubkey)
     }
 
     const interval = setInterval(() => {
@@ -301,6 +300,13 @@
         <PubKeyLogin />
       {:else if $modal.type === 'person/settings'}
         <PersonSettings />
+      {:else if $modal.type === 'message'}
+        <Content size="lg">
+          <div class="text-center">{$modal.message}</div>
+          {#if $modal.spinner}
+          <Spinner delay={0} />
+          {/if}
+        </Content>
       {/if}
     </Modal>
     {/if}

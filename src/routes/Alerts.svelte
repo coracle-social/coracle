@@ -3,14 +3,14 @@
   import {onMount} from 'svelte'
   import {fly} from 'svelte/transition'
   import {now, createScroller} from 'src/util/misc'
-  import {user, db} from 'src/agent'
+  import {db} from 'src/agent'
   import {alerts} from 'src/app'
   import Note from 'src/partials/Note.svelte'
   import Content from 'src/partials/Content.svelte'
   import Like from 'src/partials/Like.svelte'
 
   let limit = 0
-  let annotatedNotes = []
+  let notes = []
 
   onMount(async () => {
     alerts.lastCheckedAlerts.set(now())
@@ -19,37 +19,24 @@
       limit += 10
 
       const events = await db.table('alerts').toArray()
-      const notes = events.filter(e => e.kind === 1)
-      const likes = events.filter(e => e.kind === 7)
 
-      // Combine likes of a single note. Remove grandchild likes
-      const likesById = {}
-      for (const like of likes.filter(e => e.parent?.pubkey === $user.pubkey)) {
-        if (!likesById[like.parent.id]) {
-          likesById[like.parent.id] = {...like.parent, people: []}
-        }
-
-        likesById[like.parent.id].people.push(like.person)
-      }
-
-      annotatedNotes = sortBy(
-        e => -e.created_at,
-        notes
-          .filter(e => e && e.pubkey !== $user.pubkey)
-          .concat(Object.values(likesById))
-      ).slice(0, limit)
+      notes = sortBy(e => -e.created_at, events).slice(0, limit)
     })
   })
 </script>
 
 <Content>
-  {#each annotatedNotes as e (e.id)}
+  {#each notes as e (e.id)}
   <div in:fly={{y: 20}}>
-    {#if e.people}
+    {#if e.likedBy}
     <Like note={e} />
     {:else}
     <Note note={e} />
     {/if}
   </div>
+  {:else}
+  <Content size="lg" class="text-center">
+    No alerts found - check back later!
+  </Content>
   {/each}
 </Content>

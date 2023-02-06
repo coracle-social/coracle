@@ -14,6 +14,15 @@ import loaders from 'src/app/loaders'
 
 export {toast, modal, settings, alerts, messages, logUsage}
 
+export const loadAppData = pubkey => {
+  return Promise.all([
+    loaders.loadNetwork(getRelays(), pubkey),
+    alerts.load(getRelays(), pubkey),
+    alerts.listen(getRelays(), pubkey),
+    messages.listen(getRelays(), pubkey),
+  ])
+}
+
 export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: string}, usingExtension = false) => {
   if (privkey) {
     keys.setPrivateKey(privkey)
@@ -21,16 +30,18 @@ export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: strin
     keys.setPublicKey(pubkey)
   }
 
+  modal.set({type: 'message', message: "Loading your profile data...", spinner: true})
+
   // Load network and start listening, but don't wait for it
-  loaders.loadNetwork(getRelays(), pubkey),
-  alerts.load(getRelays(), pubkey),
-  alerts.listen(getRelays(), pubkey),
-  messages.listen(getRelays(), pubkey)
+  loadAppData(pubkey)
+
+  // Load our user so we can populate network and show profile info
+  await loaders.loadPeople(getRelays(), [pubkey])
 
   // Not ideal, but the network tab depends on the user's social network being
   // loaded, so put them on global when they first log in so we're not slowing
   // down users' first run experience too much
-  navigate('/notes/global')
+  navigate('/notes/network')
 }
 
 export const addRelay = async relay => {
@@ -46,12 +57,8 @@ export const addRelay = async relay => {
     // Publish to the new set of relays
     await cmd.setRelays(relays, relays)
 
-    await Promise.all([
-      loaders.loadNetwork(relays, person.pubkey),
-      alerts.load(relays, person.pubkey),
-      alerts.listen(relays, person.pubkey),
-      messages.listen(getRelays(), person.pubkey)
-    ])
+    // Reload alerts, messages, etc
+    await loadAppData(person.pubkey)
   }
 }
 
@@ -126,6 +133,7 @@ export const annotate = (note, context) => {
 
 export const threadify = (events, context, {muffle = [], showReplies = true} = {}) => {
   const contextById = createMap('id', events.concat(context))
+
   // Show parents when possible. For reactions, if there's no parent,
   // throw it away. Sort by created date descending
   const notes = sortBy(

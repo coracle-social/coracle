@@ -55,7 +55,6 @@ If you like Coracle and want to support its development, you can donate sats via
   - Put user detail in a modal?
   - ReplaceState for settings modals?
 - [ ] Mentions are sorta weird, usually mention self
-- [ ] Alerts are not showing likes, just generally screwy. Maybe because I threadify before adding to the db?
 - [ ] Change network tab to list relays the user is connected to
 - [ ] Sync mentions box and in-reply mentions
 - [ ] Add petnames for channels
@@ -63,11 +62,17 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Changelog
 
+## 0.2.10
+
+- [x] Fixed likes not showing up in alerts
+- [x] Raised threshold for pool to 2 so we don't have such a small amount of results
+- [x] Wait for profile info on login, navigate to network by default
+
 ## 0.2.9
 
-- [x] Fix a bug in pool.subscribe which was causing requests to wait for all connections
-- [x] Add typescript with pre-commit hook
-- [x] Fix layout for chat, person pages
+- [x] Fixed a bug in pool.subscribe which was causing requests to wait for all connections
+- [x] Added typescript with pre-commit hook
+- [x] Fixed layout for chat, person pages
 - [x] Parse relays for kind 3
 
 ## 0.2.8
