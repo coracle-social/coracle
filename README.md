@@ -34,9 +34,12 @@ If you like Coracle and want to support its development, you can donate sats via
 # Missions
 
 - [ ] Image uploads
-  - Use dufflepud. Default will charge via lightning and have a tos, others can self-host and skip that.
+  - Default will charge via lightning and have a tos, others can self-host and skip that.
   - Add banner field to profile
-- [ ] Allow users to select which relay they're reading from, allow more advanced custom feeds ala tweetdeck
+  - Linode/Digital Ocean
+  - https://github.com/brandonsavage/Upload
+  - https://github.com/seaweedfs/seaweedfs
+  - https://github.com/cubefs/cubefs
 - [ ] Add relay selector when publishing a note
 - [ ] Support invoices, tips, zaps https://twitter.com/jb55/status/1604131336247476224
 - [ ] Separate settings for read, write, and broadcast relays based on NIP 65
@@ -53,8 +56,20 @@ If you like Coracle and want to support its development, you can donate sats via
   - https://github.com/nostr-protocol/nips/pull/205#issuecomment-1419234230
 - [ ] Change network tab to list relays the user is connected to
 - [ ] Sync mentions box and in-reply mentions
-- [ ] Add petnames for channels
+- [ ] Channels
+  - [ ] Ability to leave/mute DM conversation
+  - [ ] Add petnames for channels
   - [ ] Add notifications for chat messages
+
+# Current
+
+- [x] Re-design relays page and person relays list with metadata
+- [ ] Add relay selection to new note screen
+- [ ] Add relay selection to reply widget
+- [ ] Make feeds page customizable. This could potentially use the "lists" NIP
+- [ ] Show notification at top of feeds: "Showing notes from 3 relays". Click to customize.
+- [ ] Click through on relays page to view a feed for only that relay.
+- [ ] Custom views: slider between fast/complete with a warning at either extreme
 
 # Changelog
 

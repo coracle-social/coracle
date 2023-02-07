@@ -25,8 +25,10 @@ module.exports = {
   },
   rules: {
     "a11y-click-events-have-key-events": "off",
+    "a11y-autofocus": "off",
     "no-unused-vars": ["error", {args: "none"}],
     "no-async-promise-executor": "off",
+    "@typescript-eslint/no-explicit-any": "off",
   },
-  ignorePatterns: ["*.svg"]
+  ignorePatterns: ["*.svg"],
 }

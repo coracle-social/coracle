@@ -10,8 +10,8 @@
   import {Router, Route, links, navigate} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {displayPerson, isLike} from 'src/util/nostr'
-  import {timedelta, now, sleep} from 'src/util/misc'
-  import {keys, user, pool, getRelays} from 'src/agent'
+  import {timedelta, shuffle, now, sleep} from 'src/util/misc'
+  import {db, keys, user, pool, getRelays} from 'src/agent'
   import {modal, toast, settings, logUsage, alerts, messages, loadAppData} from "src/app"
   import {routes} from "src/app/ui"
   import Anchor from 'src/partials/Anchor.svelte'
@@ -82,7 +82,14 @@
       loadAppData($user.pubkey)
     }
 
+    // Background work
+
     const interval = setInterval(() => {
+      alertSlowConnections()
+      retrieveRelayMeta()
+    }, 2_000)
+
+    const alertSlowConnections = () => {
       // Only notify about relays the user is actually subscribed to
       const relayUrls = pluck('url', getRelays())
 
@@ -101,7 +108,34 @@
       // Alert the user to any heinously slow connections
       slowConnections = pool.getConnections()
         .filter(({url, stats: s}) => relayUrls.includes(url) && s.timer / s.count > 3000)
-    }, 10_000)
+    }
+
+    const retrieveRelayMeta = async () => {
+      const {dufflepudUrl} = $settings
+
+      // Find relays with old/missing metadata and refresh them. Only pick a
+      // few so we're not sending too many concurrent http requests
+      const allRelays = await db.table('relays').toArray()
+      const staleRelays = allRelays
+        .filter(r => (r.refreshed_at || 0) < now() - timedelta(7, 'days'))
+      const staleRelaysSample = shuffle(staleRelays).slice(0, 10)
+
+      const freshRelays = await Promise.all(
+        staleRelaysSample.map(async ({url}) => {
+          const res = await fetch(dufflepudUrl + '/relay/info', {
+            method: 'POST',
+            body: JSON.stringify({url}),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+
+          return {...await res.json(), url, refreshed_at: now()}
+        })
+      )
+
+      db.table('relays').bulkPut(freshRelays)
+    }
 
     // Close menu on click outside
     document.querySelector("html").addEventListener("click", e => {

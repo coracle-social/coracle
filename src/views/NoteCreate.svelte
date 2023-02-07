@@ -12,7 +12,7 @@
 
   let input = null
 
-  const onSubmit = async e => {
+  const onSubmit = async () => {
     const {content, mentions, topics} = input.parse()
 
     if (content) {

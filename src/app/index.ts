@@ -23,7 +23,7 @@ export const loadAppData = pubkey => {
   ])
 }
 
-export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: string}, usingExtension = false) => {
+export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: string}) => {
   if (privkey) {
     keys.setPrivateKey(privkey)
   } else {

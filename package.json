@@ -7,9 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "qa:lint": "eslint src/*/** --quiet",
-    "qa:check": "svelte-check --tsconfig ./tsconfig.json --threshold error",
-    "qa:all": "run-p qa:lint qa:check",
+    "check:es": "eslint src/*/** --quiet",
+    "check:ts": "svelte-check --tsconfig ./tsconfig.json --threshold error",
+    "check": "run-p check:*",
     "watch": "find src -type f | entr -r"
   },
   "devDependencies": {

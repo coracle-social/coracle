@@ -11,7 +11,7 @@
     const {nostr} = window as any
 
     if (nostr) {
-      await login({pubkey: await nostr.getPublicKey()}, true)
+      await login({pubkey: await nostr.getPublicKey()})
     } else {
       modal.set({type: 'login/privkey'})
     }
