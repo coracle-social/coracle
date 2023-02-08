@@ -21,7 +21,7 @@
     const interval = setInterval(() => {
       // TODO notifications for channel messages
       if (room.type === 'npub') {
-        const mostRecent = $mostRecentByPubkey[room.pubkey] || Infinity
+        const mostRecent = $mostRecentByPubkey[room.pubkey] || 0
         const lastChecked = $lastCheckedByPubkey[room.pubkey] || 0
 
         // Include a cut-off since we lose read receipts every log out
