@@ -37,7 +37,7 @@ const load = async (relays, pubkey) => {
   const events = await _load(
     relays,
     {kinds: [1, 7], '#p': [pubkey], since, limit: 1000},
-    {threshold: 10}
+    {threshold: 0.9}
   )
 
   onChunk(relays, pubkey, events)
@@ -53,8 +53,7 @@ const listen = async (relays, pubkey) => {
     {kinds: [1, 7], '#p': [pubkey], since: now()},
     batch(300, events => {
       onChunk(relays, pubkey, events)
-    }),
-    {threshold: 2}
+    })
   )
 }
 

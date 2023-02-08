@@ -181,10 +181,10 @@ const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: 
   }
 }
 
-const request = (relays, filters, {threshold = 2} = {}): Promise<Record<string, unknown>[]> => {
+const request = (relays, filters, {threshold = 0.5} = {}): Promise<Record<string, unknown>[]> => {
   return new Promise(async resolve => {
     relays = uniqBy(prop('url'), relays.filter(r => isRelay(r.url)))
-    threshold = Math.min(relays.length, threshold)
+    threshold = relays.length * threshold
 
     const now = Date.now()
     const relaysWithEvents = new Set()
