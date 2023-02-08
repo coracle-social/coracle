@@ -30,7 +30,7 @@
   let replyMentions = without([$user?.pubkey], getDefaultReplyMentions())
   let replyContainer = null
 
-  const links = $settings.showLinkPreviews ? extractUrls(note.content) || [] : null
+  const links = $settings.showLinkPreviews ? extractUrls(note.content) || [] : []
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
   const relays = getEventRelays(note)

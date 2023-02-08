@@ -68,8 +68,10 @@ class Connection {
   async disconnect() {
     this.status = 'closed'
 
-    if (this.nostr) {
+    try {
       await this.nostr.close()
+    } catch (e) {
+      // For some reason bugsnag is saying this.nostr is undefined, even if we check it
     }
   }
 }
