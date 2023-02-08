@@ -44,9 +44,9 @@ export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: strin
   navigate('/notes/network')
 }
 
-export const addRelay = async relay => {
+export const addRelay = async url => {
   const person = get(user)
-  const modify = relays => relays.concat(relay)
+  const modify = relays => relays.concat({url, write: '!'})
 
   // Set to defaults to support anonymous usage
   defaults.relays = modify(defaults.relays)

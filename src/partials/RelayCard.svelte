@@ -63,7 +63,7 @@
       {/if}
     </div>
     {#if joined}
-    <button class="flex gap-3 items-center text-light" on:click={() => removeRelay(relay.url)}>
+    <button class="flex gap-3 items-center text-light" on:click={() => removeRelay(relay)}>
       <i class="fa fa-right-from-bracket" /> Leave
     </button>
     {:else}

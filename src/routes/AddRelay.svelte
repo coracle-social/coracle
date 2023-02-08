@@ -26,7 +26,7 @@
       return toast.show("error", "That isn't a valid websocket url")
     }
 
-    addRelay({url})
+    addRelay(url)
     modal.set(null)
   }
 </script>
