@@ -1,10 +1,11 @@
+import type {Person} from 'src/util/types'
 import {pluck, whereEq, sortBy, identity, when, assoc, reject} from 'ramda'
 import {navigate} from 'svelte-routing'
 import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
 import {renderContent} from 'src/util/html'
 import {Tags, displayPerson, findReplyId} from 'src/util/nostr'
-import {user, people, getPerson, getRelays, keys} from 'src/agent'
+import {user, database, getRelays, keys} from 'src/agent'
 import defaults from 'src/agent/defaults'
 import {toast, routes, modal, settings, logUsage} from 'src/app/ui'
 import cmd from 'src/app/cmd'
@@ -45,7 +46,7 @@ export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: strin
 }
 
 export const addRelay = async url => {
-  const person = get(user)
+  const person = get(user) as Person
   const modify = relays => relays.concat({url, write: '!'})
 
   // Set to defaults to support anonymous usage
@@ -63,7 +64,7 @@ export const addRelay = async url => {
 }
 
 export const removeRelay = async url => {
-  const person = get(user)
+  const person = get(user) as Person
   const modify = relays => reject(whereEq({url}), relays)
 
   // Set to defaults to support anonymous usage
@@ -75,7 +76,7 @@ export const removeRelay = async url => {
 }
 
 export const setRelayWriteCondition = async (url, write) => {
-  const person = get(user)
+  const person = get(user) as Person
   const modify = relays => relays.map(when(whereEq({url}), assoc('write', write)))
 
   // Set to defaults to support anonymous usage
@@ -88,10 +89,9 @@ export const setRelayWriteCondition = async (url, write) => {
 
 export const renderNote = (note, {showEntire = false}) => {
   const shouldEllipsize = note.content.length > 500 && !showEntire
-  const $people = get(people)
   const peopleByPubkey = createMap(
     'pubkey',
-    Tags.from(note).type("p").values().all().map(k => $people[k]).filter(identity)
+    Tags.from(note).type("p").values().all().map(k => database.people.get(k)).filter(identity)
   )
 
   let content
@@ -126,7 +126,7 @@ export const annotate = (note, context) => {
 
   return {
     ...note, reactions,
-    person: getPerson(note.pubkey),
+    person: database.people.get(note.pubkey),
     replies: sortBy(e => e.created_at, replies).map(r => annotate(r, context)),
   }
 }

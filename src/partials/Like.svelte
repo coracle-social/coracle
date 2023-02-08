@@ -5,7 +5,7 @@
   import Badge from "src/partials/Badge.svelte"
   import {formatTimestamp} from 'src/util/misc'
   import {killEvent} from 'src/util/html'
-  import {getPerson} from 'src/agent'
+  import {database} from 'src/agent'
   import {modal} from 'src/app'
 
   export let note
@@ -41,7 +41,7 @@
       class="absolute top-0 mt-8 py-2 px-4 rounded border border-solid border-medium
              bg-dark grid grid-cols-3 gap-y-2 gap-x-4 z-20">
       {#each uniq(note.likedBy) as pubkey}
-      <Badge person={getPerson(pubkey)} />
+      <Badge person={database.getPersonWithFallback(pubkey)} />
       {/each}
     </button>
     {/if}

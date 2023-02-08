@@ -4,7 +4,7 @@
   import {nip19} from 'nostr-tools'
   import {navigate} from "svelte-routing"
   import {fuzzy} from "src/util/misc"
-  import {getRelays, user, lq, getPerson, listen, db} from 'src/agent'
+  import {getRelays, user, lq, database, listen, db} from 'src/agent'
   import {modal, messages} from 'src/app'
   import loaders from 'src/app/loaders'
   import Room from "src/partials/Room.svelte"
@@ -26,7 +26,7 @@
     await loaders.loadPeople(getRelays(), pubkeys)
 
     return sortBy(k => -(mostRecentByPubkey[k] || 0), pubkeys)
-      .map(k => ({type: 'npub', id: k, ...getPerson(k, true)}))
+      .map(k => ({type: 'npub', id: k, ...database.getPersonWithFallback(k)}))
       .concat(rooms.map(room => ({type: 'note', ...room})))
   })
 

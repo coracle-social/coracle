@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import "@fortawesome/fontawesome-free/css/fontawesome.css"
   import "@fortawesome/fontawesome-free/css/solid.css"
 
@@ -41,6 +41,7 @@
   import Chat from "src/routes/Chat.svelte"
   import ChatRoom from "src/routes/ChatRoom.svelte"
   import Messages from "src/routes/Messages.svelte"
+  import _db from 'src/agent/database'
 
   export let url = ""
 
@@ -133,7 +134,9 @@
 
             return {...await res.json(), url, refreshed_at: now()}
           } catch (e) {
-            console.warn(e)
+            if (!e.toString().includes('Failed to fetch')) {
+              console.warn(e)
+            }
 
             return {url, refreshed_at: now()}
           }

@@ -12,7 +12,7 @@
 </script>
 
 {#if size === 'inherit'}
-<div {...$$props} class={cx($$props.class, className)}>
+<div {...$$props} class={cx($$props.class, className, "w-full")}>
   <slot />
 </div>
 {/if}

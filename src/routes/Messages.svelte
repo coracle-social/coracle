@@ -4,7 +4,7 @@
   import {personKinds} from 'src/util/nostr'
   import {batch, now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {lq, getRelays, user, db, listen, keys} from 'src/agent'
+  import {database, getRelays, user, db, listen, keys} from 'src/agent'
   import {messages} from 'src/app'
   import {routes} from 'src/app/ui'
   import cmd from 'src/app/cmd'
@@ -13,7 +13,7 @@
 
   let crypt = keys.getCrypt()
   let {data: pubkey} = nip19.decode(entity) as {data: string}
-  let person = lq(() => db.table('people').get(pubkey))
+  let person = database.watch('people', p => p.get(pubkey))
 
   messages.lastCheckedByPubkey.update($obj => ({...$obj, [pubkey]: now()}))
 

@@ -2,12 +2,12 @@ import {uniqBy, prop, uniq, flatten, pluck, identity} from 'ramda'
 import {ensurePlural, createMap, chunk} from 'hurdak/lib/hurdak'
 import {findReply, personKinds, Tags} from 'src/util/nostr'
 import {now, timedelta} from 'src/util/misc'
-import {load, getPerson, getFollows} from 'src/agent'
+import {load, database, getFollows} from 'src/agent'
 
 const getStalePubkeys = pubkeys => {
   // If we're not reloading, only get pubkeys we don't already know about
   return uniq(pubkeys).filter(pubkey => {
-    const p = getPerson(pubkey)
+    const p = database.people.get(pubkey)
 
     return !p || p.updated_at < now() - timedelta(1, 'days')
   })

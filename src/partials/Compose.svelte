@@ -5,7 +5,7 @@
   import {displayPerson} from "src/util/nostr"
   import {fromParentOffset} from "src/util/html"
   import Badge from "src/partials/Badge.svelte"
-  import {people} from "src/agent/data"
+  import {database} from "src/agent"
 
   export let onSubmit
 
@@ -14,10 +14,11 @@
   let suggestions = []
   let input = null
   let prevContent = ''
-  let search = fuzzy(
-    Object.values($people).filter(prop('name')),
-    {keys: ["name", "pubkey"]}
-  )
+  let search
+
+  database.people.all({'name:!nil': null}).then(people => {
+    search = fuzzy(people, {keys: ["name", "pubkey"]})
+  })
 
   const getText = () => {
     const selection = document.getSelection()

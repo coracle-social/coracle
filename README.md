@@ -54,6 +54,7 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Maintenance
 
+- [ ] Normalize relay urls (lowercase, strip trailing slash)
 - [ ] Use nip 56 for reporting
   - https://github.com/nostr-protocol/nips/pull/205#issuecomment-1419234230
 - [ ] Change network tab to list relays the user is connected to
@@ -65,7 +66,8 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Current
 
-- [ ] Make threshold it a setting, or maybe avoid `load` altogether
+- [ ] Switch to localforage
+  - Check that firefox private mode works (it won't work in dev)
 - [ ] Add modal for follows/followers
 - [ ] Implement gossip model https://bountsr.org/code/2023/02/03/gossip-model.html
 - [ ] Make feeds page customizable. This could potentially use the "lists" NIP

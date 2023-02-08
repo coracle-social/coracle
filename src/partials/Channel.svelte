@@ -8,7 +8,7 @@
   import Badge from 'src/partials/Badge.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
-  import {user, getPerson} from 'src/agent'
+  import {user, database} from 'src/agent'
   import {renderNote} from 'src/app'
 
   export let name
@@ -32,7 +32,7 @@
     // Group messages so we're only showing the person once per chunk
     annotatedMessages = reverse(sortBy(prop('created_at'), uniqBy(prop('id'), messages)).reduce(
       (mx, m) => {
-        const person = getPerson(m.pubkey, true)
+        const person = database.getPersonWithFallback(m.pubkey)
         const showPerson = person.pubkey !== getPath(['person', 'pubkey'], last(mx))
 
         return mx.concat({...m, person, showPerson})

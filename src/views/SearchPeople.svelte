@@ -1,23 +1,21 @@
 <script>
-  import {prop} from 'ramda'
   import {ellipsize} from 'hurdak/lib/hurdak'
   import {fuzzy} from "src/util/misc"
   import {renderContent} from "src/util/html"
   import {displayPerson} from "src/util/nostr"
-  import {user, people} from 'src/agent'
+  import {user, database} from 'src/agent'
   import {routes} from "src/app/ui"
 
   export let q
 
   let search
 
-  $: search = fuzzy(
-    Object.values($people).filter(prop('name')),
-    {keys: ["name", "about", "pubkey"]}
-  )
+  database.people.all({'name:!nil': null}).then(people => {
+    search = fuzzy(people, {keys: ["name", "about", "pubkey"]})
+  })
 </script>
 
-{#each search(q).slice(0, 30) as p (p.pubkey)}
+{#each (search ? search(q) : []).slice(0, 30) as p (p.pubkey)}
   {#if p.pubkey !== $user.pubkey}
   <a href={routes.person(p.pubkey)} class="flex gap-4">
     <div

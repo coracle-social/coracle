@@ -14,7 +14,7 @@
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
   import Network from "src/views/person/Network.svelte"
-  import {getPerson, getRelays, listen, user, keys} from "src/agent"
+  import {database, getRelays, listen, user, keys} from "src/agent"
   import {modal} from "src/app"
   import loaders from "src/app/loaders"
   import {routes} from "src/app/ui"
@@ -29,7 +29,7 @@
   let following = false
   let followers = new Set()
   let followersCount = 0
-  let person = getPerson(pubkey, true)
+  let person = database.getPersonWithFallback(pubkey)
   let loading = true
 
   $: following = find(t => t[1] === pubkey, $user?.petnames || [])
@@ -37,7 +37,7 @@
   onMount(async () => {
     // Refresh our person if needed
     loaders.loadPeople(relays || getRelays(pubkey), [pubkey]).then(() => {
-      person = getPerson(pubkey, true)
+      person = database.getPersonWithFallback(pubkey)
       loading = false
     })
 

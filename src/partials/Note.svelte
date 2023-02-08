@@ -14,7 +14,7 @@
   import Badge from "src/partials/Badge.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
-  import {user, people, getPerson, getRelays, getEventRelays} from 'src/agent'
+  import {user, database, getRelays, getEventRelays} from 'src/agent'
   import cmd from 'src/app/cmd'
 
   export let note
@@ -34,10 +34,9 @@
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
   const relays = getEventRelays(note)
+  const person = database.watch('people', p => p.get(note.pubkey) || {pubkey: note.pubkey})
 
-  let likes, flags, like, flag, person
-
-  $: person = $people[note.pubkey] || {pubkey: note.pubkey}
+  let likes, flags, like, flag
 
   $: {
     likes = note.reactions.filter(n => isLike(n.content))
@@ -138,7 +137,7 @@
 
 <Card on:click={onClick} {interactive} {invertColors}>
   <div class="flex gap-4 items-center justify-between">
-    <Badge person={person} />
+    <Badge person={$person} />
     <Anchor
       href={"/" + nip19.neventEncode({id: note.id, relays: pluck('url', relays.slice(0, 5))})}
       class="text-sm text-light"
@@ -205,7 +204,7 @@
     {#each replyMentions as p}
       <div class="inline-block py-1 px-2 mr-1 mb-2 rounded-full border border-solid border-light">
         <button class="fa fa-times cursor-pointer" on:click|stopPropagation={() => removeMention(p)} />
-        {displayPerson(getPerson(p, true))}
+        {displayPerson(database.getPersonWithFallback(p))}
       </div>
     {/each}
     <div class="-mt-2" />

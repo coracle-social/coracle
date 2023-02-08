@@ -9,7 +9,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/partials/RelayCard.svelte"
-  import {lq, pool, db, user, ready} from "src/agent"
+  import {lq, pool, db, user} from "src/agent"
   import {modal, settings} from "src/app"
   import defaults from "src/agent/defaults"
 
@@ -41,20 +41,18 @@
   }
 
   onMount(() => {
-    // Attempt to connect so we can show status
-    relays.forEach(relay => pool.connect(relay.url))
+    return poll(1000, async () => {
+      const userRelays = $user?.relays || []
+      const urls = pluck('url', userRelays)
+      const relaysByUrl = createMap(
+        'url',
+        await db.table('relays').where('url').anyOf(urls).toArray()
+      )
 
-    return poll(300, async () => {
-      if ($ready) {
-        const userRelays = $user?.relays || []
-        const urls = pluck('url', userRelays)
-        const relaysByUrl = createMap(
-          'url',
-          await db.table('relays').where('url').anyOf(urls).toArray()
-        )
+      relays = userRelays.map(relay => ({...relaysByUrl[relay.url], ...relay}))
 
-        relays = userRelays.map(relay => ({...relaysByUrl[relay.url], ...relay}))
-      }
+      // Attempt to connect so we can show status
+      relays.forEach(relay => pool.connect(relay.url))
 
       status = Object.fromEntries(
         pool.getConnections().map(({url, status, stats}) => {

@@ -1,10 +1,10 @@
 import Dexie, {liveQuery} from 'dexie'
 import {pick, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
-import {writable} from 'svelte/store'
-import {noop, ensurePlural, createMap, switcherFn} from 'hurdak/lib/hurdak'
+import {noop, ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
 import {now} from 'src/util/misc'
 import {personKinds, Tags, roomAttrs, isRelay} from 'src/util/nostr'
+import database from 'src/agent/database'
 
 export const lq = cb => liveQuery(async () => {
   try {
@@ -20,38 +20,11 @@ db.version(13).stores({
   relays: '++url, name',
   alerts: '++id, created_at',
   messages: '++id, pubkey, recipient',
-  people: '++pubkey',
   rooms: '++id, joined',
 })
 
-// A flag for hiding things that rely on people being loaded initially
-export const ready = writable(false)
-
-// Some things work better as observables than database tables
-export const people = writable([])
-
-// Bootstrap our people observable
-db.table('people').toArray().then($p => {
-  people.set(createMap('pubkey', $p))
-  ready.set(true)
-})
-
-// Sync to a regular object so we have a synchronous interface
-let $people = {}
-people.subscribe($p => {
-  $people = $p
-})
-
-// Our synchronous interface
-export const getPerson = (pubkey, fallback = false) =>
-  $people[pubkey] || (fallback ? {pubkey} : null)
-
 export const updatePeople = async updates => {
-  // Sync to our in memory copy
-  people.update($people => ({...$people, ...updates}))
-
-  // Sync to our database
-  await db.table('people').bulkPut(Object.values(updates))
+  await database.people.bulkPut(updates)
 }
 
 // Hooks
@@ -70,7 +43,7 @@ const processProfileEvents = async events => {
 
   const updates = {}
   for (const e of profileEvents) {
-    const person = getPerson(e.pubkey, true)
+    const person = database.getPersonWithFallback(e.pubkey)
 
     updates[e.pubkey] = {
       ...person,
@@ -92,8 +65,10 @@ const processProfileEvents = async events => {
         },
         2: () => {
           if (e.created_at > (person.relays_updated_at || 0)) {
+            const {relays = []} = database.getPersonWithFallback(e.pubkey)
+
             return {
-              relays: ($people[e.pubkey]?.relays || []).concat({url: e.content}),
+              relays: relays.concat({url: e.content}),
               relays_updated_at: e.created_at,
             }
           }
@@ -200,7 +175,7 @@ const processMessages = async events => {
 const verifyNip05 = (pubkey, as) =>
   nip05.queryProfile(as).then(result => {
     if (result?.pubkey === pubkey) {
-      const person = getPerson(pubkey, true)
+      const person = database.getPersonWithFallback(pubkey)
 
       updatePeople({[pubkey]: {...person, verified_as: as}})
     }

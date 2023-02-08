@@ -2,7 +2,7 @@ import {prop, pick, join, uniqBy, last} from 'ramda'
 import {get} from 'svelte/store'
 import {first} from "hurdak/lib/hurdak"
 import {Tags, isRelay, roomAttrs, displayPerson} from 'src/util/nostr'
-import {keys, publish, getRelays, getPerson} from 'src/agent'
+import {keys, publish, getRelays, database} from 'src/agent'
 
 const updateUser = (relays, updates) =>
   publishEvent(relays, 0, {content: JSON.stringify(updates)})
@@ -32,7 +32,7 @@ const createDirectMessage = (relays, pubkey, content) =>
 const createNote = (relays, content, mentions = [], topics = []) => {
   mentions = mentions.map(p => {
     const {url} = first(getRelays(p))
-    const name = displayPerson(getPerson(p, true))
+    const name = displayPerson(database.getPersonWithFallback(p))
 
     return ["p", p, url, name]
   })

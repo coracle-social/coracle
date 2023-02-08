@@ -1,5 +1,5 @@
 import {debounce} from 'throttle-debounce'
-import {pluck, sortBy} from "ramda"
+import {pluck, identity, sortBy} from "ramda"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from 'svelte/store'
 import {isObject} from 'hurdak/lib/hurdak'
@@ -178,4 +178,23 @@ export const batch = (t, f) => {
     xs.push(x)
     cb()
   }
+}
+
+export const defer = () => {
+  let resolve, reject
+  const p = new Promise((resolve_, reject_) => {
+    resolve = resolve_
+    reject = reject_
+  })
+
+  return Object.assign(p, {resolve, reject})
+}
+
+export const asyncIterableToArray = async (it, f = identity) => {
+  const result = []
+  for await (const x of it) {
+    result.push(f(x))
+  }
+
+  return result
 }
