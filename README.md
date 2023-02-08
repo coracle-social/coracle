@@ -33,6 +33,9 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Missions
 
+- [ ] Support paid relays
+  - atlas.nostr.land
+  - eden.nostr.land
 - [ ] Image uploads
   - Default will charge via lightning and have a tos, others can self-host and skip that.
   - Add banner field to profile
@@ -40,10 +43,9 @@ If you like Coracle and want to support its development, you can donate sats via
   - https://github.com/brandonsavage/Upload
   - https://github.com/seaweedfs/seaweedfs
   - https://github.com/cubefs/cubefs
-- [ ] Add relay selector when publishing a note
+- [ ] Support relay auth
 - [ ] Support invoices, tips, zaps https://twitter.com/jb55/status/1604131336247476224
 - [ ] Separate settings for read, write, and broadcast relays based on NIP 65
-- [ ] Deploy coracle relay
 - [ ] Release to android with https://svelte-native.technology/docs
 - [ ] Add no-relay gossip
   - Capture certain events in a local db
@@ -63,9 +65,10 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Current
 
-- [x] Re-design relays page and person relays list with metadata
-- [ ] Add relay selection to new note screen
-- [ ] Add relay selection to reply widget
+- [ ] Switch from threshold to percentage, make it a setting
+- [ ] Try switching to rxdb https://rxdb.info/
+- [ ] Add modal for follows/followers
+- [ ] Implement gossip model https://bountsr.org/code/2023/02/03/gossip-model.html
 - [ ] Make feeds page customizable. This could potentially use the "lists" NIP
 - [ ] Show notification at top of feeds: "Showing notes from 3 relays". Click to customize.
 - [ ] Click through on relays page to view a feed for only that relay.
@@ -81,6 +84,8 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Fix mention selection, inheritance, and inclusion in notes
 - [x] Parse links without http at the beginning
 - [x] Clean up back button in combination with modals
+- [x] Re-design relays page and person relays list with metadata
+- [x] Add relay selection to new note screen
 
 ## 0.2.9
 

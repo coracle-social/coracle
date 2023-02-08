@@ -6,7 +6,7 @@ import {navigate} from "svelte-routing"
 import {nip19} from 'nostr-tools'
 import {writable, get} from "svelte/store"
 import {globalHistory} from "svelte-routing/src/history"
-import {synced} from "src/util/misc"
+import {synced, sleep} from "src/util/misc"
 
 // Routing
 
@@ -47,6 +47,14 @@ export const modal = {
     } else {
       modal.history = []
       navigate(location.pathname)
+    }
+  },
+  close: () => modal.set(null),
+  clear: async () => {
+    // Reverse history so the back button doesn't bring our modal back up
+    while (get(modal)) {
+      history.back()
+      await sleep(30)
     }
   },
   subscribe: cb => {

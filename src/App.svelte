@@ -2,7 +2,7 @@
   import "@fortawesome/fontawesome-free/css/fontawesome.css"
   import "@fortawesome/fontawesome-free/css/solid.css"
 
-  import {find, nthArg, pluck} from 'ramda'
+  import {find, identity, nthArg, pluck} from 'ramda'
   import {onMount} from "svelte"
   import {writable, get} from "svelte/store"
   import {fly, fade} from "svelte/transition"
@@ -51,11 +51,7 @@
   const toggleSearch = () => searchIsOpen.update(x => !x)
 
   const closeModal = async () => {
-    while ($modal) {
-      history.back()
-      await sleep(10)
-    }
-
+    modal.clear()
     menuIsOpen.set(false)
   }
 
@@ -87,7 +83,7 @@
     const interval = setInterval(() => {
       alertSlowConnections()
       retrieveRelayMeta()
-    }, 2_000)
+    }, 30_000)
 
     const alertSlowConnections = () => {
       // Only notify about relays the user is actually subscribed to
@@ -113,6 +109,10 @@
     const retrieveRelayMeta = async () => {
       const {dufflepudUrl} = $settings
 
+      if (!dufflepudUrl) {
+        return
+      }
+
       // Find relays with old/missing metadata and refresh them. Only pick a
       // few so we're not sending too many concurrent http requests
       const allRelays = await db.table('relays').toArray()
@@ -122,19 +122,25 @@
 
       const freshRelays = await Promise.all(
         staleRelaysSample.map(async ({url}) => {
-          const res = await fetch(dufflepudUrl + '/relay/info', {
-            method: 'POST',
-            body: JSON.stringify({url}),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          })
+          try {
+            const res = await fetch(dufflepudUrl + '/relay/info', {
+              method: 'POST',
+              body: JSON.stringify({url}),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            })
 
-          return {...await res.json(), url, refreshed_at: now()}
+            return {...await res.json(), url, refreshed_at: now()}
+          } catch (e) {
+            console.warn(e)
+
+            return {url, refreshed_at: now()}
+          }
         })
       )
 
-      db.table('relays').bulkPut(freshRelays)
+      db.table('relays').bulkPut(freshRelays.filter(identity))
     }
 
     // Close menu on click outside
