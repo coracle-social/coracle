@@ -65,8 +65,7 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Current
 
-- [ ] Switch from threshold to percentage, make it a setting
-- [ ] Try switching to rxdb https://rxdb.info/
+- [ ] Make threshold it a setting, or maybe avoid `load` altogether
 - [ ] Add modal for follows/followers
 - [ ] Implement gossip model https://bountsr.org/code/2023/02/03/gossip-model.html
 - [ ] Make feeds page customizable. This could potentially use the "lists" NIP
@@ -75,6 +74,11 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Custom views: slider between fast/complete with a warning at either extreme
 
 # Changelog
+
+## 0.2.11
+
+- [x] Converted threshold to percentage
+- [x] Fixed slow leaving/joining chat rooms
 
 ## 0.2.10
 

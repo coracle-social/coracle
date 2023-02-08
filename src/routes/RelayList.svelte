@@ -1,5 +1,4 @@
 <script>
-  import {liveQuery} from 'dexie'
   import {pluck} from 'ramda'
   import {noop, createMap} from 'hurdak/lib/hurdak'
   import {onMount} from 'svelte'
@@ -10,7 +9,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/partials/RelayCard.svelte"
-  import {pool, db, user, ready} from "src/agent"
+  import {lq, pool, db, user, ready} from "src/agent"
   import {modal, settings} from "src/app"
   import defaults from "src/agent/defaults"
 
@@ -32,7 +31,7 @@
      db.table('relays').put(relay)
   }
 
-  const knownRelays = liveQuery(() => db.table('relays').toArray())
+  const knownRelays = lq(() => db.table('relays').toArray())
 
   $: {
     const joined = pluck('url', $user?.relays || [])

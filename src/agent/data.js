@@ -1,5 +1,5 @@
 import Dexie, {liveQuery} from 'dexie'
-import {pick} from 'ramda'
+import {pick, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
 import {writable} from 'svelte/store'
 import {noop, ensurePlural, createMap, switcherFn} from 'hurdak/lib/hurdak'
@@ -133,7 +133,9 @@ const processProfileEvents = async events => {
     }
   }
 
-  await updatePeople(updates)
+  if (!isEmpty(updates)) {
+    await updatePeople(updates)
+  }
 }
 
 const processRoomEvents = async events => {
@@ -158,7 +160,7 @@ const processRoomEvents = async events => {
     const room = await db.table('rooms').get(roomId)
 
     // Merge edits but don't let old ones override new ones
-    if (room?.edited_at > e.created_at) {
+    if (room?.edited_at >= e.created_at) {
       continue
     }
 
@@ -178,7 +180,9 @@ const processRoomEvents = async events => {
     }
   }
 
-  await db.table('rooms').bulkPut(Object.values(updates))
+  if (!isEmpty(updates)) {
+    await db.table('rooms').bulkPut(Object.values(updates))
+  }
 }
 
 const processMessages = async events => {

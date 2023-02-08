@@ -1,5 +1,4 @@
 <script>
-  import {liveQuery} from 'dexie'
   import {onMount} from "svelte"
   import {quantify} from 'hurdak/lib/hurdak'
   import {last, whereEq, find, reject, propEq} from 'ramda'
@@ -13,7 +12,7 @@
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Heading from 'src/partials/Heading.svelte'
-  import {user, db, getRelays} from "src/agent"
+  import {lq, user, db, getRelays} from "src/agent"
   import {toast, modal} from "src/app"
   import cmd from "src/app/cmd"
 
@@ -23,7 +22,7 @@
   let q = ''
   let search
 
-  const knownRelays = liveQuery(() => db.table('relays').toArray())
+  const knownRelays = lq(() => db.table('relays').toArray())
 
   $: {
     const data = reject(({url}) => find(whereEq({url}), relays), $knownRelays || [])

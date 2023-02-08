@@ -1,10 +1,9 @@
 <script lang="ts">
-  import {liveQuery} from 'dexie'
   import {pluck} from 'ramda'
   import {nip19} from 'nostr-tools'
   import {now, batch} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {getRelays, user, db, listen, load} from 'src/agent'
+  import {lq, getRelays, user, db, listen, load} from 'src/agent'
   import {modal} from 'src/app'
   import loaders from 'src/app/loaders'
   import cmd from 'src/app/cmd'
@@ -12,7 +11,7 @@
   export let entity
 
   let {data: roomId} = nip19.decode(entity) as {data: string}
-  let room = liveQuery(() => db.table('rooms').where('id').equals(roomId).first())
+  let room = lq(() => db.table('rooms').where('id').equals(roomId).first())
 
   const getRoomRelays = $room => {
     let relays = getRelays()
