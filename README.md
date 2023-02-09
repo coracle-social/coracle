@@ -30,6 +30,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Attachments (a tag w/content type and url)
 - [ ] Linkify bech32 entities w/ NIP 21 https://github.com/nostr-protocol/nips/blob/master/21.md
 - [ ] Sign in as user with one click to view things from their pubkey's perspective - do this with multiple accounts
+- [ ] QR code generation/scanner to share nprofile https://cdn.jb55.com/s/d966a729777c2021.MP4
 
 # Missions
 
@@ -73,6 +74,7 @@ If you like Coracle and want to support its development, you can donate sats via
 
 - [ ] Implement gossip model https://bountsr.org/code/2023/02/03/gossip-model.html
   - [ ] Add nip 05 to calculation
+  - [ ] Add connection failures to calculation
 - [ ] Make feeds page customizable. This could potentially use the "lists" NIP
 - [ ] Show notification at top of feeds: "Showing notes from 3 relays". Click to customize.
 - [ ] Click through on relays page to view a feed for only that relay.

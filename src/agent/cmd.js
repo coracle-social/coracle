@@ -1,8 +1,8 @@
 import {prop, pick, join, uniqBy, last} from 'ramda'
 import {get} from 'svelte/store'
 import {first} from "hurdak/lib/hurdak"
-import {Tags, isRelay, roomAttrs, displayPerson} from 'src/util/nostr'
-import {getWriteRelays} from 'src/agent/helpers'
+import {roomAttrs, displayPerson} from 'src/util/nostr'
+import {getBestRelay} from 'src/agent/helpers'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
 import keys from 'src/agent/keys'
@@ -29,15 +29,14 @@ const createChatMessage = (relays, roomId, content) =>
   publishEvent(relays, 42, {content, tags: [["e", roomId, prop('url', first(relays)), "root"]]})
 
 const createDirectMessage = (relays, pubkey, content) =>
-  // todo, encrypt messages
   publishEvent(relays, 4, {content, tags: [["p", pubkey]]})
 
 const createNote = (relays, content, mentions = [], topics = []) => {
-  mentions = mentions.map(p => {
-    const {url} = first(getWriteRelays(p))
-    const name = displayPerson(database.getPersonWithFallback(p))
+  mentions = mentions.map(pubkey => {
+    const name = displayPerson(database.getPersonWithFallback(pubkey))
+    const {url} = getBestRelay(pubkey, 'write')
 
-    return ["p", p, url, name]
+    return ["p", pubkey, url, name]
   })
 
   topics = topics.map(t => ["t", t])
@@ -46,7 +45,7 @@ const createNote = (relays, content, mentions = [], topics = []) => {
 }
 
 const createReaction = (relays, note, content) => {
-  const {url} = getBestRelay(relays, note)
+  const {url} = getBestRelay(note.pubkey, 'write')
   const tags = uniqBy(
     join(':'),
     note.tags
@@ -59,10 +58,10 @@ const createReaction = (relays, note, content) => {
 }
 
 const createReply = (relays, note, content, mentions = [], topics = []) => {
-  mentions = mentions.map(p => ["p", p, prop('url', first(getWriteRelays(p)))])
+  mentions = mentions.map(pubkey => ["p", pubkey, prop('url', getBestRelay(pubkey))])
   topics = topics.map(t => ["t", t])
 
-  const {url} = getBestRelay(relays, note)
+  const {url} = getBestRelay(note.pubkey, 'write')
   const tags = uniqBy(
     join(':'),
     note.tags
@@ -79,24 +78,6 @@ const deleteEvent = (relays, ids) =>
   publishEvent(relays, 5, {tags: ids.map(id => ["e", id])})
 
 // Utils
-
-const getBestRelay = (relays, event) => {
-  // Find the best relay, based on reply, root, or pubkey. Fall back to a
-  // relay we're going to send the event to
-  const tags = Tags.from(event).type("e")
-  const reply = tags.mark("reply").values().first()
-  const root = tags.mark("root").values().first()
-
-  if (isRelay(reply)) {
-    return reply
-  }
-
-  if (isRelay(root)) {
-    return root
-  }
-
-  return first(getWriteRelays(event.pubkey).concat(relays))
-}
 
 const publishEvent = (relays, kind, {content = '', tags = []} = {}) => {
   if (relays.length === 0) {

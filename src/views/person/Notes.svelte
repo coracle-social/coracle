@@ -1,13 +1,13 @@
 <script>
   import Notes from "src/partials/Notes.svelte"
   import {now, batch, Cursor} from 'src/util/misc'
-  import {getRelays, getMuffle} from 'src/agent/helpers'
+  import {getPubkeyRelays, getMuffle} from 'src/agent/helpers'
   import network from 'src/agent/network'
   import {threadify} from 'src/app'
 
   export let pubkey
 
-  const relays = getRelays(pubkey)
+  const relays = getPubkeyRelays(pubkey, 'write')
   const filter = {kinds: [1], authors: [pubkey]}
   const cursor = new Cursor()
 

@@ -1,8 +1,8 @@
 import {debounce} from 'throttle-debounce'
-import {is, prop, without} from 'ramda'
-import {writable} from 'svelte/store'
-import {switcherFn, createMap, ensurePlural, first} from 'hurdak/lib/hurdak'
-import {defer, asyncIterableToArray} from 'src/util/misc'
+import {is, prop, find, without, pluck, all, identity} from 'ramda'
+import {writable, derived} from 'svelte/store'
+import {switcherFn, createMap, ensurePlural} from 'hurdak/lib/hurdak'
+import {defer, where, asyncIterableToArray} from 'src/util/misc'
 
 // Types
 
@@ -18,8 +18,9 @@ type Table = {
   patch: (data: object) => void
   bulkPut: (data: object) => void
   bulkPatch: (data: object) => void
-  all: (where?: object) => Promise<any>
-  get: (key: string) => any
+  iter: (spec?: object) => Promise<Array<Record<string, any>>>
+  all: (spec?: object) => Array<Record<string, any>>
+  get: (key: string) => Record<string, any>
 }
 
 // Plumbing
@@ -142,6 +143,8 @@ const defineTable = (name: string, pk: string): Table => {
   let listeners = []
   let data = {}
 
+  const ready = writable(false)
+
   const subscribe = f => {
     listeners.push(f)
 
@@ -196,8 +199,10 @@ const defineTable = (name: string, pk: string): Table => {
   const put = item => bulkPut(createMap(pk, [item]))
   const patch = item => bulkPatch(createMap(pk, [item]))
 
-  const all = (where = {}) => asyncIterableToArray(iterate(name, where), prop('v'))
-  const one = (where = {}) => first(all(where))
+  const toArray = () => Object.values(data)
+  const iter = (spec = {}) => asyncIterableToArray(iterate(name, spec), prop('v'))
+  const all = (spec = {}) => toArray().filter(where(spec))
+  const one = (spec = {}) => find(where(spec), toArray())
   const get = k => data[k]
 
   // Sync from storage initially
@@ -208,9 +213,13 @@ const defineTable = (name: string, pk: string): Table => {
     }
 
     setAndNotify(initialData)
+    ready.set(true)
   })()
 
-  registry[name] = {name, subscribe, bulkPut, bulkPatch, put, patch, all, one, get}
+  registry[name] = {
+    name, subscribe, bulkPut, bulkPatch, put, patch, toArray, iter, all, one, get,
+    ready,
+  }
 
   return registry[name]
 }
@@ -277,8 +286,10 @@ const getPersonWithFallback = pubkey => people.get(pubkey) || {pubkey}
 
 const clearAll = () => Promise.all(Object.keys(registry).map(clear))
 
+const ready = derived(pluck('ready', Object.values(registry)), all(identity))
+
 export default {
   getItem, setItem, removeItem, length, clear, keys, iterate, watch,
   getPersonWithFallback, clearAll, people, rooms, messages, alerts, relays,
-  routes,
+  routes, ready,
 }

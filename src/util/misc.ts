@@ -1,5 +1,5 @@
 import {debounce} from 'throttle-debounce'
-import {pluck, identity, sortBy} from "ramda"
+import {allPass, prop, pipe, isNil, complement, equals, is, pluck, sum, identity, sortBy} from "ramda"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from 'svelte/store'
 import {isObject} from 'hurdak/lib/hurdak'
@@ -145,7 +145,7 @@ export const getLastSync = (k, fallback = 0) => {
 export class Cursor {
   until: number
   limit: number
-  constructor(limit = 10) {
+  constructor(limit = 50) {
     this.until = now()
     this.limit = limit
   }
@@ -197,3 +197,40 @@ export const asyncIterableToArray = async (it, f = identity) => {
 
   return result
 }
+
+export const avg = xs => sum(xs) / xs.length
+
+export const where = filters =>
+  allPass(
+    Object.entries(filters)
+      .map(([key, value]) => {
+        /* eslint prefer-const: 0 */
+        let [field, operator = 'eq'] = key.split(':')
+        let test, modifier = identity
+
+        if (operator.startsWith('!')) {
+          operator = operator.slice(1)
+          modifier = complement
+        }
+
+        if (operator === 'eq' && is(Array, value)) {
+          test = v => (value as Array<any>).includes(v)
+        } else if (operator === 'eq') {
+          test = equals(value)
+        } else if (operator === 'lt') {
+          test = v => (v || 0) < value
+        } else if (operator === 'lte') {
+          test = v => (v || 0) <= value
+        } else if (operator === 'gt') {
+          test = v => (v || 0) > value
+        } else if (operator === 'gte') {
+          test = v => (v || 0) >= value
+        } else if (operator === 'nil') {
+          test = isNil
+        } else {
+          throw new Error(`Invalid operator ${operator}`)
+        }
+
+        return pipe(prop(field), modifier(test))
+      })
+  )

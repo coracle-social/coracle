@@ -6,7 +6,7 @@
   import Content from "src/partials/Content.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Button from "src/partials/Button.svelte"
-  import {getWriteRelays} from 'src/agent/helpers'
+  import {getUserRelays} from 'src/agent/helpers'
   import database from 'src/agent/database'
   import cmd from "src/agent/cmd"
   import {toast, modal} from "src/app"
@@ -36,8 +36,8 @@
       toast.show("error", "Please enter a name for your room.")
     } else {
       const event = room.id
-        ? await cmd.updateRoom(getWriteRelays(), room)
-        : await cmd.createRoom(getWriteRelays(), room)
+        ? await cmd.updateRoom(getUserRelays('write'), room)
+        : await cmd.createRoom(getUserRelays('write'), room)
 
       await database.rooms.patch({id: room.id || event.id, joined: true})
 

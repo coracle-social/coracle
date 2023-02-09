@@ -1,6 +1,7 @@
 import type {Person} from 'src/util/types'
 import type {Readable} from 'svelte/store'
-import {uniq, reject, last, propEq, uniqBy, prop} from 'ramda'
+import {isEmpty, pick, identity, sortBy, uniq, reject, groupBy, last, propEq, uniqBy, prop} from 'ramda'
+import {first} from 'hurdak/lib/hurdak'
 import {derived, get} from 'svelte/store'
 import {Tags} from 'src/util/nostr'
 import {now, timedelta} from 'src/util/misc'
@@ -37,27 +38,33 @@ export const getFollows = pubkey => {
   return Tags.wrap(person.petnames || defaults.petnames).values().all()
 }
 
-export const getRelays = (pubkey?: string) => {
-  let relays = database.getPersonWithFallback(pubkey).relays
+export const getPersonRelays = (person, mode = 'all') => {
+  const relays = isEmpty(person?.relays || []) ? defaults.relays : person.relays
 
-  if (!relays?.length) {
-    relays = database.getPersonWithFallback(get(keys.pubkey)).relays
-  }
-
-  if (!relays?.length) {
-    relays = defaults.relays
-  }
-
-  return relays
+  return reject(propEq(mode, '!'), relays)
 }
 
-export const getWriteRelays = (...args) =>
-  reject(propEq('write', '!'), getRelays(...args))
+export const getUserRelays = (mode = 'all') =>
+  getPersonRelays(get(user), mode)
+
+export const getPubkeyRelays = (pubkey, mode = 'all') =>
+  getPersonRelays(database.people.get(pubkey), mode)
+
+export const getTopRelays = (pubkeys, mode = 'all') => {
+  const routes = database.routes.all({mode, pubkey: pubkeys})
+  const routesByPubkey = groupBy(prop('pubkey'), routes)
+  const selectRoute = k => first(sortBy(prop('score'), routesByPubkey[k] || []))
+
+  return uniqBy(prop('url'), pubkeys.map(selectRoute).filter(identity)).map(pick(['url']))
+}
+
+export const getBestRelay = (pubkey, mode = 'all') =>
+  first(getTopRelays([pubkey], mode).concat(getPubkeyRelays(pubkey, mode)))
 
 export const getEventRelays = event => {
   return uniqBy(
     prop('url'),
-    getRelays(event.pubkey)
+    getPubkeyRelays(event.pubkey, 'write')
       .concat(Tags.from(event).relays())
       .concat({url: event.seen_on})
   )

@@ -1,15 +1,16 @@
 <script type="ts">
   import Content from 'src/partials/Content.svelte'
   import PersonInfo from 'src/partials/PersonInfo.svelte'
-  import {getRelays} from 'src/agent/helpers'
+  import {getUserRelays, getTopRelays} from 'src/agent/helpers'
   import database from 'src/agent/database'
   import network from 'src/agent/network'
 
   export let pubkeys
 
+  const relays = getUserRelays('read').concat(getTopRelays(pubkeys, 'write'))
   const people = database.watch('people', people => people.all({pubkey: pubkeys}))
 
-  network.loadPeople(getRelays(), pubkeys)
+  network.loadPeople(relays, pubkeys)
 </script>
 
 <Content gap={2}>

@@ -3,7 +3,7 @@
   import {nip19} from 'nostr-tools'
   import {now, batch} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {getRelays, user} from 'src/agent/helpers'
+  import {getEventRelays, user} from 'src/agent/helpers'
   import database from 'src/agent/database'
   import network from 'src/agent/network'
   import {modal} from 'src/app'
@@ -11,21 +11,11 @@
 
   export let entity
 
-  let {data: roomId} = nip19.decode(entity) as {data: string}
-  let room = database.watch('rooms', rooms => rooms.get(roomId))
-
-  const getRoomRelays = () => {
-    let relays = getRelays()
-
-    if ($room) {
-      relays = relays.concat(getRelays($room.pubkey))
-    }
-
-    return relays
-  }
+  const {data: roomId} = nip19.decode(entity) as {data: string}
+  const room = database.watch('rooms', rooms => rooms.get(roomId))
 
   const listenForMessages = async cb => {
-    const relays = getRoomRelays()
+    const relays = getEventRelays($room)
 
     return network.listen(
       relays,
@@ -43,7 +33,7 @@
   }
 
   const loadMessages = async ({until, limit}) => {
-    const relays = getRoomRelays()
+    const relays = getEventRelays($room)
     const events = await network.load(relays, {kinds: [42], '#e': [roomId], until, limit})
 
     if (events.length) {
@@ -58,7 +48,7 @@
   }
 
   const sendMessage = content =>
-    cmd.createChatMessage(getRoomRelays(), roomId, content)
+    cmd.createChatMessage(getEventRelays($room), roomId, content)
 </script>
 
 <Channel

@@ -2,7 +2,7 @@
   import {onMount} from 'svelte'
   import {nip19} from 'nostr-tools'
   import {fly} from 'svelte/transition'
-  import {getRelays} from 'src/agent/helpers'
+  import {getEventRelays, getUserRelays} from 'src/agent/helpers'
   import network from 'src/agent/network'
   import {annotate} from 'src/app'
   import Note from 'src/partials/Note.svelte'
@@ -10,7 +10,7 @@
   import Spinner from 'src/partials/Spinner.svelte'
 
   export let note
-  export let relays = getRelays()
+  export let relays = getUserRelays().concat(getEventRelays(note))
 
   let loading = true
 
@@ -21,6 +21,7 @@
       // Show the main note without waiting for context
       if (!note.pubkey) {
         note = annotate(found, [])
+        relays = getEventRelays(note)
       }
 
       const context = await network.loadContext(relays, found, {

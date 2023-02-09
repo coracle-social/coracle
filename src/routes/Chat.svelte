@@ -4,7 +4,7 @@
   import {nip19} from 'nostr-tools'
   import {navigate} from "svelte-routing"
   import {fuzzy} from "src/util/misc"
-  import {getRelays, user} from 'src/agent/helpers'
+  import {getUserRelays, getTopRelays, user} from 'src/agent/helpers'
   import network from 'src/agent/network'
   import database from 'src/agent/database'
   import {modal, messages} from 'src/app'
@@ -24,7 +24,7 @@
     const messages = await database.messages.all()
     const pubkeys = without([$user.pubkey], uniq(messages.flatMap(m => [m.pubkey, m.recipient])))
 
-    await network.loadPeople(getRelays(), pubkeys)
+    await network.loadPeople(getTopRelays(pubkeys, 'write'), pubkeys)
 
     return sortBy(k => -(mostRecentByPubkey[k] || 0), pubkeys)
       .map(k => ({type: 'npub', id: k, ...database.getPersonWithFallback(k)}))
@@ -58,7 +58,7 @@
   }
 
   onMount(() => {
-    const sub = network.listen(getRelays(), [{kinds: [40, 41]}])
+    const sub = network.listen(getUserRelays('read'), [{kinds: [40, 41]}])
 
     return () => {
       sub.then(s => {

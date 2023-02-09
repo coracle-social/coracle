@@ -1,11 +1,11 @@
 <script>
   import Notes from "src/partials/Notes.svelte"
   import {Cursor, now, batch} from 'src/util/misc'
-  import {getRelays, getMuffle} from 'src/agent/helpers'
+  import {getUserRelays, getMuffle} from 'src/agent/helpers'
   import network from 'src/agent/network'
   import {threadify} from 'src/app'
 
-  const relays = getRelays()
+  const relays = getUserRelays('read')
   const filter = {kinds: [1, 5, 7]}
   const cursor = new Cursor()
 

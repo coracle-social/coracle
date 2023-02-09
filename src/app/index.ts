@@ -5,7 +5,7 @@ import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
 import {renderContent} from 'src/util/html'
 import {Tags, displayPerson, findReplyId} from 'src/util/nostr'
-import {user, getRelays, getWriteRelays} from 'src/agent/helpers'
+import {user, getUserRelays} from 'src/agent/helpers'
 import defaults from 'src/agent/defaults'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
@@ -18,11 +18,13 @@ import {toast, routes, modal, settings, logUsage} from 'src/app/ui'
 export {toast, modal, settings, alerts, messages, logUsage}
 
 export const loadAppData = pubkey => {
+  const relays = getUserRelays('read')
+
   return Promise.all([
-    network.loadNetwork(getRelays(), pubkey),
-    alerts.load(getRelays(), pubkey),
-    alerts.listen(getRelays(), pubkey),
-    messages.listen(getRelays(), pubkey),
+    network.loadNetwork(relays, pubkey),
+    alerts.load(relays, pubkey),
+    alerts.listen(relays, pubkey),
+    messages.listen(relays, pubkey),
   ])
 }
 
@@ -39,7 +41,7 @@ export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: strin
   loadAppData(pubkey)
 
   // Load our user so we can populate network and show profile info
-  await network.loadPeople(getRelays(), [pubkey])
+  await network.loadPeople(getUserRelays('read'), [pubkey])
 
   // Not ideal, but the network tab depends on the user's social network being
   // loaded, so put them on global when they first log in so we're not slowing
@@ -73,7 +75,7 @@ export const removeRelay = async url => {
   defaults.relays = modify(defaults.relays)
 
   if (person) {
-    await cmd.setRelays(getWriteRelays(), modify(person.relays || []))
+    await cmd.setRelays(getUserRelays('write'), modify(person.relays || []))
   }
 }
 
@@ -85,7 +87,7 @@ export const setRelayWriteCondition = async (url, write) => {
   defaults.relays = modify(defaults.relays)
 
   if (person) {
-    await cmd.setRelays(getWriteRelays(), modify(person.relays || []))
+    await cmd.setRelays(getUserRelays('write'), modify(person.relays || []))
   }
 }
 

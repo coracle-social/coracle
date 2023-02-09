@@ -8,7 +8,7 @@
 
   let search
 
-  database.people.all({'name:!nil': null}).then(people => {
+  database.people.iter({'name:!nil': null}).then(people => {
     search = fuzzy(people, {keys: ["name", "about", "pubkey"]})
   })
 </script>

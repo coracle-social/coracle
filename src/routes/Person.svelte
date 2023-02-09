@@ -2,7 +2,6 @@
   import {last, find, reject} from 'ramda'
   import {onMount, onDestroy} from 'svelte'
   import {nip19} from 'nostr-tools'
-  import {first} from 'hurdak/lib/hurdak'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {renderContent} from 'src/util/html'
@@ -14,7 +13,7 @@
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
   import Network from "src/views/person/Network.svelte"
-  import {getRelays, getWriteRelays, user} from "src/agent/helpers"
+  import {getPubkeyRelays, getUserRelays, user} from "src/agent/helpers"
   import network from "src/agent/network"
   import keys from "src/agent/keys"
   import database from "src/agent/database"
@@ -24,7 +23,7 @@
 
   export let npub
   export let activeTab
-  export let relays = null
+  export let relays = []
 
   let subs = []
   let pubkey = nip19.decode(npub).data as string
@@ -37,22 +36,27 @@
   $: following = find(t => t[1] === pubkey, $user?.petnames || [])
 
   onMount(async () => {
+    // Add all the relays we know the person uses
+    relays = relays.concat(getPubkeyRelays(pubkey))
+
     // Refresh our person if needed
-    network.loadPeople(relays || getRelays(pubkey), [pubkey]).then(() => {
+    network.loadPeople(relays, [pubkey]).then(() => {
       person = database.getPersonWithFallback(pubkey)
       loading = false
     })
 
     // Get our followers count
-    subs.push(await network.listen(
-      relays || getRelays(pubkey),
-      [{kinds: [3], '#p': [pubkey]}],
-      e => {
-        followers.add(e.pubkey)
-        followersCount = followers.size
-      },
-      {shouldProcess: false},
-    ))
+    subs.push(
+      await network.listen(
+        relays,
+        [{kinds: [3], '#p': [pubkey]}],
+        e => {
+          followers.add(e.pubkey)
+          followersCount = followers.size
+        },
+        {shouldProcess: false},
+      )
+    )
   })
 
   onDestroy(() => {
@@ -74,17 +78,16 @@
    }
 
   const follow = async () => {
-    const relay = first(relays || getRelays(pubkey))
-    const tag = ["p", pubkey, relay.url, person.name || ""]
+    const tag = ["p", pubkey, relays[0].url, person.name || ""]
     const petnames = reject(t => t[1] === pubkey, $user.petnames).concat([tag])
 
-    cmd.setPetnames(getWriteRelays(), petnames)
+    cmd.setPetnames(getUserRelays('write'), petnames)
   }
 
   const unfollow = async () => {
     const petnames = reject(t => t[1] === pubkey, $user.petnames)
 
-    cmd.setPetnames(getWriteRelays(), petnames)
+    cmd.setPetnames(getUserRelays('write'), petnames)
   }
 
   const openAdvanced = () => {

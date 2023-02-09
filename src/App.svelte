@@ -13,7 +13,7 @@
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, shuffle, now, sleep} from 'src/util/misc'
   import cmd from 'src/agent/cmd'
-  import {user, getRelays} from 'src/agent/helpers'
+  import {user, getUserRelays} from 'src/agent/helpers'
   import database from 'src/agent/database'
   import keys from 'src/agent/keys'
   import network from 'src/agent/network'
@@ -65,6 +65,7 @@
     menuIsOpen.set(false)
   }
 
+  const {ready} = database
   const {lastCheckedAlerts, mostRecentAlert} = alerts
   const {lastCheckedByPubkey, mostRecentByPubkey} = messages
 
@@ -97,7 +98,7 @@
 
     const alertSlowConnections = () => {
       // Only notify about relays the user is actually subscribed to
-      const relayUrls = pluck('url', getRelays())
+      const relayUrls = pluck('url', getUserRelays('read'))
 
       // Prune connections we haven't used in a while
       pool.getConnections()
@@ -201,6 +202,7 @@
 
 <Router {url}>
   <div use:links class="h-full">
+    {#if $ready}
     <div class="pt-16 text-white h-full lg:ml-56">
       <Route path="/alerts" component={Alerts} />
       <Route path="/search/:activeTab" component={Search} />
@@ -234,6 +236,7 @@
       </Route>
       <Route path="*" component={NotFound} />
     </div>
+    {/if}
 
     <ul
       class="py-20 w-56 bg-dark fixed top-0 bottom-0 left-0 transition-all shadow-xl

@@ -4,7 +4,7 @@
   import {personKinds} from 'src/util/nostr'
   import {batch, now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {getRelays, getWriteRelays, user} from 'src/agent/helpers'
+  import {getUserRelays, getPubkeyRelays, user} from 'src/agent/helpers'
   import database from 'src/agent/database'
   import network from 'src/agent/network'
   import keys from 'src/agent/keys'
@@ -20,6 +20,8 @@
 
   messages.lastCheckedByPubkey.update($obj => ({...$obj, [pubkey]: now()}))
 
+  const getRelays = () => getUserRelays('write').concat(getPubkeyRelays(pubkey, 'write'))
+
   const decryptMessages = async events => {
     // Gotta do it in serial because of extension limitations
     for (const event of events) {
@@ -32,7 +34,7 @@
   }
 
   const listenForMessages = cb => network.listen(
-    getRelays().concat(getRelays(pubkey)),
+    getRelays(),
     [{kinds: personKinds, authors: [pubkey]},
      {kinds: [4], authors: [$user.pubkey], '#p': [pubkey]},
      {kinds: [4], authors: [pubkey], '#p': [$user.pubkey]}],
@@ -55,9 +57,8 @@
   }
 
   const sendMessage = async content => {
-    const relays = getWriteRelays().concat(getRelays(pubkey))
     const cyphertext = await crypt.encrypt(pubkey, content)
-    const event = await cmd.createDirectMessage(relays, pubkey, cyphertext)
+    const event = await cmd.createDirectMessage(getRelays(), pubkey, cyphertext)
 
     // Return unencrypted content so we can display it immediately
     return {...event, content}
