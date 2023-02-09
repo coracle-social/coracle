@@ -2,7 +2,7 @@ import {get} from 'svelte/store'
 import {groupBy, pluck, partition, propEq} from 'ramda'
 import {synced, timedelta, batch, now} from 'src/util/misc'
 import {isAlert, findReplyId} from 'src/util/nostr'
-import {load as _load, listen as _listen, db} from 'src/agent'
+import {load as _load, listen as _listen, database} from 'src/agent'
 import loaders from 'src/app/loaders'
 import {annotate} from 'src/app'
 
@@ -23,7 +23,7 @@ const onChunk = async (relays, pubkey, events) => {
       .filter(e => likesByParent[e.id])
       .map(e => annotate({...e, likedBy: pluck('pubkey', likesByParent[e.id])}, context))
 
-    await db.table('alerts').bulkPut(annotatedNotes.concat(likedNotes))
+    await database.alerts.bulkPut(annotatedNotes.concat(likedNotes))
 
     mostRecentAlert.update($t => events.reduce((t, e) => Math.max(t, e.created_at), $t))
   }

@@ -7,11 +7,11 @@ import pool from 'src/agent/pool'
 import keys from 'src/agent/keys'
 import defaults from 'src/agent/defaults'
 import database from 'src/agent/database'
-import {lq, db, processEvents} from 'src/agent/data'
+import {processEvents} from 'src/agent/data'
 
-Object.assign(window, {pool, db, database})
+Object.assign(window, {pool, database})
 
-export {pool, keys, lq, db, database}
+export {pool, keys, database}
 
 export const user = derived(
   [keys.pubkey, database.people as Readable<any>],

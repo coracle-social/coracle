@@ -210,6 +210,8 @@ const defineTable = (name: string): Table => {
 const people = defineTable('people')
 const rooms = defineTable('rooms')
 const messages = defineTable('messages')
+const alerts = defineTable('alerts')
+const relays = defineTable('relays')
 
 // Helper to allow us to listen to changes of any given table
 
@@ -267,6 +269,6 @@ const getPersonWithFallback = pubkey => people.get(pubkey) || {pubkey}
 const clearAll = () => Promise.all(Object.keys(registry).map(clear))
 
 export default {
-  getItem, setItem, removeItem, length, clear, keys, iterate,
-  watch, getPersonWithFallback, clearAll, people, rooms, messages,
+  getItem, setItem, removeItem, length, clear, keys, iterate, watch,
+  getPersonWithFallback, clearAll, people, rooms, messages, alerts, relays,
 }

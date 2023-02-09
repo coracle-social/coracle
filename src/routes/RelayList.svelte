@@ -1,5 +1,5 @@
 <script>
-  import {pluck} from 'ramda'
+  import {pluck, objOf} from 'ramda'
   import {noop, createMap} from 'hurdak/lib/hurdak'
   import {onMount} from 'svelte'
   import {get} from 'svelte/store'
@@ -9,7 +9,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/partials/RelayCard.svelte"
-  import {lq, pool, db, user} from "src/agent"
+  import {database, pool, user} from "src/agent"
   import {modal, settings} from "src/app"
   import defaults from "src/agent/defaults"
 
@@ -22,16 +22,12 @@
     .then(async res => {
       const json = await res.json()
 
-      for (const url of json.relays) {
-        db.table('relays').put({url})
-      }
+      database.relays.bulkPatch(createMap('url', json.relays.map(objOf('url'))))
     }).catch(noop)
 
-  for (const relay of defaults.relays) {
-     db.table('relays').put(relay)
-  }
+  database.relays.bulkPatch(createMap('url', defaults.relays))
 
-  const knownRelays = lq(() => db.table('relays').toArray())
+  const knownRelays = database.watch(relays => relays.all())
 
   $: {
     const joined = pluck('url', $user?.relays || [])
@@ -42,14 +38,8 @@
 
   onMount(() => {
     return poll(1000, async () => {
-      const userRelays = $user?.relays || []
-      const urls = pluck('url', userRelays)
-      const relaysByUrl = createMap(
-        'url',
-        await db.table('relays').where('url').anyOf(urls).toArray()
-      )
-
-      relays = userRelays.map(relay => ({...relaysByUrl[relay.url], ...relay}))
+      relays = ($user?.relays || [])
+        .map(relay => ({...database.relays.get(relay.url), ...relay}))
 
       // Attempt to connect so we can show status
       relays.forEach(relay => pool.connect(relay.url))

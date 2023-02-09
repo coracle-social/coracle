@@ -3,7 +3,7 @@
   import {onMount} from 'svelte'
   import {fly} from 'svelte/transition'
   import {now, createScroller} from 'src/util/misc'
-  import {db} from 'src/agent'
+  import {database} from 'src/agent'
   import {alerts} from 'src/app'
   import Note from 'src/partials/Note.svelte'
   import Content from 'src/partials/Content.svelte'
@@ -18,7 +18,7 @@
     return createScroller(async () => {
       limit += 10
 
-      const events = await db.table('alerts').toArray()
+      const events = await database.alerts.all()
 
       notes = sortBy(e => -e.created_at, events).slice(0, limit)
     })

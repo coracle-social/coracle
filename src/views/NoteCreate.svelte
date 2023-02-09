@@ -12,7 +12,7 @@
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Heading from 'src/partials/Heading.svelte'
-  import {lq, user, db, getRelays} from "src/agent"
+  import {database, user, getRelays} from "src/agent"
   import {toast, modal} from "src/app"
   import cmd from "src/app/cmd"
 
@@ -22,7 +22,7 @@
   let q = ''
   let search
 
-  const knownRelays = lq(() => db.table('relays').toArray())
+  const knownRelays = database.watch('relays', relays => relays.all())
 
   $: {
     const data = reject(({url}) => find(whereEq({url}), relays), $knownRelays || [])

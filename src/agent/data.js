@@ -1,25 +1,9 @@
-import Dexie, {liveQuery} from 'dexie'
 import {pick, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
 import {noop, createMap, ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
 import {now} from 'src/util/misc'
 import {personKinds, Tags, roomAttrs, isRelay} from 'src/util/nostr'
 import database from 'src/agent/database'
-
-export const lq = cb => liveQuery(async () => {
-  try {
-    return await cb()
-  } catch (e) {
-    console.error(e)
-  }
-})
-
-export const db = new Dexie('agent/data/db')
-
-db.version(13).stores({
-  relays: '++url, name',
-  alerts: '++id, created_at',
-})
 
 export const updatePeople = async updates => {
   await database.people.bulkPut(updates)

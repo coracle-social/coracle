@@ -2,7 +2,7 @@
   import {fly} from 'svelte/transition'
   import Anchor from 'src/partials/Anchor.svelte'
   import Content from "src/partials/Content.svelte"
-  import {db, database} from 'src/agent'
+  import {database} from 'src/agent'
 
   let confirmed = false
 
@@ -12,12 +12,6 @@
     localStorage.clear()
 
     await database.clearAll()
-
-    try {
-      await db.delete()
-    } catch (e) {
-      // pass
-    }
 
     // do a hard refresh so everything gets totally cleared.
     // Give them a moment to see the state transition. Dexie

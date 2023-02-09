@@ -54,6 +54,7 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Maintenance
 
+- [ ] Throttle connection attempts with bad relays
 - [ ] Stop using until to paginate, we skip a ton of stuff. Or use until per relay?
   - Or just stop doing loading and listen
 - [ ] If the latest message in a dm was the user, don't show notification

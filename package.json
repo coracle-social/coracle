@@ -32,7 +32,6 @@
     "@tsconfig/svelte": "^3.0.0",
     "classnames": "^2.3.2",
     "compressorjs": "^1.1.1",
-    "dexie": "^3.2.2",
     "fuse.js": "^6.6.2",
     "hurdak": "github:ConsignCloud/hurdak",
     "husky": "^8.0.3",

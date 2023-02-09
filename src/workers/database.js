@@ -39,6 +39,14 @@ addEventListener('message', async ({data: {topic, payload, channel}}) => {
               test = v => value.includes(v)
             } else if (operator === 'eq') {
               test = equals(value)
+            } else if (operator === 'lt') {
+              test = v => (v || 0) < value
+            } else if (operator === 'lte') {
+              test = v => (v || 0) <= value
+            } else if (operator === 'gt') {
+              test = v => (v || 0) > value
+            } else if (operator === 'gte') {
+              test = v => (v || 0) >= value
             } else if (operator === 'nil') {
               test = isNil
             } else {

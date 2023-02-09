@@ -4,6 +4,7 @@
 
   import {find, identity, nthArg, pluck} from 'ramda'
   import {onMount} from "svelte"
+  import {createMap} from 'hurdak/lib/hurdak'
   import {writable, get} from "svelte/store"
   import {fly, fade} from "svelte/transition"
   import {cubicInOut} from "svelte/easing"
@@ -11,7 +12,7 @@
   import {globalHistory} from "svelte-routing/src/history"
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, shuffle, now, sleep} from 'src/util/misc'
-  import {db, keys, user, pool, getRelays} from 'src/agent'
+  import {database, keys, user, pool, getRelays} from 'src/agent'
   import {modal, toast, settings, logUsage, alerts, messages, loadAppData} from "src/app"
   import {routes} from "src/app/ui"
   import Anchor from 'src/partials/Anchor.svelte'
@@ -41,7 +42,6 @@
   import Chat from "src/routes/Chat.svelte"
   import ChatRoom from "src/routes/ChatRoom.svelte"
   import Messages from "src/routes/Messages.svelte"
-  import _db from 'src/agent/database'
 
   export let url = ""
 
@@ -116,13 +116,14 @@
 
       // Find relays with old/missing metadata and refresh them. Only pick a
       // few so we're not sending too many concurrent http requests
-      const allRelays = await db.table('relays').toArray()
-      const staleRelays = allRelays
-        .filter(r => (r.refreshed_at || 0) < now() - timedelta(7, 'days'))
-      const staleRelaysSample = shuffle(staleRelays).slice(0, 10)
+      const staleRelays = shuffle(
+        await database.relays.all({
+          'refreshed_at:lt': now() - timedelta(7, 'days'),
+        })
+      ).slice(0, 10)
 
       const freshRelays = await Promise.all(
-        staleRelaysSample.map(async ({url}) => {
+        staleRelays.map(async ({url}) => {
           try {
             const res = await fetch(dufflepudUrl + '/relay/info', {
               method: 'POST',
@@ -143,7 +144,7 @@
         })
       )
 
-      db.table('relays').bulkPut(freshRelays.filter(identity))
+      database.relays.bulkPatch(createMap('url', freshRelays.filter(identity)))
     }
 
     // Close menu on click outside
