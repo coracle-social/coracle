@@ -1,6 +1,11 @@
 import lf from 'localforage'
+import memoryStorageDriver from 'localforage-memoryStorageDriver'
 import {is, complement, equals, isNil, pipe, prop, identity, allPass} from 'ramda'
 import {switcherFn} from 'hurdak/lib/hurdak'
+
+// Firefox private mode doesn't have access to any storage options
+lf.defineDriver(memoryStorageDriver)
+lf.setDriver([lf.INDEXEDDB, lf.WEBSQL, lf.LOCALSTORAGE, 'memoryStorageDriver'])
 
 const stores = {}
 
