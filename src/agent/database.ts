@@ -25,7 +25,7 @@ type Table = {
 // Plumbing
 
 const worker = new Worker(
-  new URL('../workers/database.js', import.meta.url),
+  new URL('./workers/database.js', import.meta.url),
   {type: 'module'}
 )
 
