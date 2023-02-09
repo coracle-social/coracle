@@ -73,15 +73,23 @@ export const fromParentOffset = (element, offset): [HTMLElement, number] => {
   throw new Error("Unable to find parent offset")
 }
 
-export const extractUrls = url =>
-  url.match(/(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?!&//=]*)/gi)
+export const extractUrls = content => {
+  const regex = /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z]{1,6}\b([-a-zA-Z0-9@:%_\+.~#?!&//=;]*)/gi
+  const urls = content.match(regex)
+
+  return (urls || [])
+    // Skip decimals like 3.5 and ellipses which have more than one dot in a row
+    .filter(url => !url.match(/^[\d\.]+$/) && !url.match(/\.{2}/))
+    // Add protocol on to the beginning of the url
+    .map(url => url.startsWith('http') ? url : '//' + url)
+}
 
 export const renderContent = content => {
   // Escape html
   content = escapeHtml(content)
 
   // Extract urls
-  for (const url of extractUrls(content) || []) {
+  for (const url of extractUrls(content)) {
     const $a = document.createElement('a')
 
     $a.href = url

@@ -34,7 +34,7 @@
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
   const relays = getEventRelays(note)
-  const person = database.watch('people', p => p.get(note.pubkey) || {pubkey: note.pubkey})
+  const person = database.watch('people', () => database.getPersonWithFallback(note.pubkey))
 
   let likes, flags, like, flag
 

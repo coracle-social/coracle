@@ -77,6 +77,9 @@ const loadContext = async (relays, notes, {loadParents = false, depth = 0, ...op
         events = events.concat(await loadContext(parentRelays, parents, opts))
       }
 
+      // Load missing people from replies etc
+      await loadPeople(relays, pluck('pubkey', events))
+
       // We're recurring and so may end up with duplicates here
       return uniqBy(prop('id'), events)
     })
