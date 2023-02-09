@@ -87,10 +87,14 @@ export const renderContent = content => {
   content = escapeHtml(content)
 
   // Extract urls
-  for (const url of extractUrls(content)) {
+  for (let url of extractUrls(content)) {
     const $a = document.createElement('a')
 
-    $a.href = 'https://' + url
+    if (!url.includes('://')) {
+      url = 'https://' + url
+    }
+
+    $a.href = url
     $a.target = "_blank"
     $a.className = "underline"
 

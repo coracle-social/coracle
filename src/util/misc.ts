@@ -114,12 +114,11 @@ export const createScroller = (loadMore, {reverse = false} = {}) => {
     }
 
     // No need to check all that often
-    await sleep(300)
+    await sleep(500)
 
     if (!done) {
       requestAnimationFrame(check)
     }
-
   }
 
   requestAnimationFrame(check)

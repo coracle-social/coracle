@@ -1,7 +1,7 @@
 import {pick, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
 import {noop, createMap, ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
-import {now} from 'src/util/misc'
+import {now, timedelta, shuffle, hash} from 'src/util/misc'
 import {personKinds, Tags, roomAttrs, isRelay} from 'src/util/nostr'
 import database from 'src/agent/database'
 
@@ -10,6 +10,7 @@ const processEvents = async events => {
     processProfileEvents(events),
     processRoomEvents(events),
     processMessages(events),
+    processRoutes(events),
   ])
 }
 
@@ -26,7 +27,7 @@ const processProfileEvents = async events => {
       ...updates[e.pubkey],
       ...switcherFn(e.kind, {
         0: () => {
-          try {
+          return tryJson(() => {
             const content = JSON.parse(e.content)
 
             // Fire off a nip05 verification
@@ -35,9 +36,7 @@ const processProfileEvents = async events => {
             }
 
             return content
-          } catch (e) {
-            console.warn(e)
-          }
+          })
         },
         2: () => {
           if (e.created_at > (person.relays_updated_at || 0)) {
@@ -53,16 +52,22 @@ const processProfileEvents = async events => {
           const data = {petnames: e.tags}
 
           if (e.created_at > (person.relays_updated_at || 0)) {
-            try {
+            tryJson(() => {
               Object.assign(data, {
                 relays_updated_at: e.created_at,
                 relays: Object.entries(JSON.parse(e.content))
-                  .map(([url, {write, read}]) => ({url, write: write ? '' : '!', read: read ? '' : '!'}))
+                  .map(([url, conditions]) => {
+                    const {write, read} = conditions as Record<string, boolean|string>
+
+                    return {
+                      url,
+                      write: [false, '!'].includes(write) ? '!' : '',
+                      read: [false, '!'].includes(read) ? '!' : '',
+                    }
+                  })
                   .filter(r => isRelay(r.url)),
               })
-            } catch (e) {
-              console.warn(e)
-            }
+            })
           }
 
           return data
@@ -95,13 +100,7 @@ const processRoomEvents = async events => {
 
   const updates = {}
   for (const e of roomEvents) {
-    let content
-    try {
-      content = pick(roomAttrs, JSON.parse(e.content))
-    } catch (e) {
-      continue
-    }
-
+    const content = tryJson(() => pick(roomAttrs, JSON.parse(e.content))) as Record<string, any>
     const roomId = e.kind === 40 ? e.id : Tags.from(e).type("e").values().first()
 
     if (!roomId) {
@@ -147,7 +146,97 @@ const processMessages = async events => {
   }
 }
 
+const processRoutes = async events => {
+  // Sample events so we're not burning too many resources
+  events = ensurePlural(shuffle(events)).slice(0, 10)
+
+  const updates = {}
+
+  const getWeight = type => {
+    if (type === 'kind:10001') return 1
+    if (type === 'kind:3') return 0.8
+    if (type === 'kind:2') return 0.5
+    if (type === 'seen') return 0.2
+    if (type === 'tag') return 0.1
+  }
+
+  const putRoute = (pubkey, url, type, mode, created_at) => {
+    if (!isRelay(url)) {
+      return
+    }
+
+    const id = hash([pubkey, url, mode].join('')).toString()
+    const score = getWeight(type) * (1 - (now() - created_at) / timedelta(30, 'days'))
+    const route = database.routes.get(id) || {id, pubkey, url, mode, score: 0, count: 0}
+    const newTotalScore = route.score * route.count + score
+    const newCount = route.count + 1
+
+    if (score > 0) {
+      updates[id] = {...route, count: newCount, score: newTotalScore / newCount}
+    }
+  }
+
+  for (const e of events) {
+    switcherFn(e.kind, {
+      2: () => {
+        putRoute(e.pubkey, e.content, 'kind:2', 'read', e.created_at)
+        putRoute(e.pubkey, e.content, 'kind:2', 'write', e.created_at)
+      },
+      3: () => {
+        tryJson(() => {
+          Object.entries(JSON.parse(e.content))
+            .forEach(([url, conditions]) => {
+              const {write, read} = conditions as Record<string, boolean|string>
+
+              if (![false, '!'].includes(write)) {
+                putRoute(e.pubkey, url, 'kind:3', 'write', e.created_at)
+              }
+
+              if (![false, '!'].includes(read)) {
+                putRoute(e.pubkey, url, 'kind:3', 'read', e.created_at)
+              }
+            })
+        })
+      },
+      10001: () => {
+        e.tags
+          .forEach(([url, read, write]) => {
+            if (![false, '!'].includes(write)) {
+              putRoute(e.pubkey, url, 'kind:100001', 'write', e.created_at)
+            }
+
+            if (![false, '!'].includes(read)) {
+              putRoute(e.pubkey, url, 'kind:100001', 'read', e.created_at)
+            }
+          })
+      },
+      default: noop,
+    })
+
+    // Add tag hints
+    events.forEach(e => {
+      Tags.wrap(e.tags).type("p").all().forEach(([_, pubkey, url]) => {
+        putRoute(pubkey, url, 'tag', 'write', e.created_at)
+      })
+    })
+  }
+
+  if (!isEmpty(updates)) {
+    await database.routes.bulkPut(updates)
+  }
+}
+
 // Utils
+
+const tryJson = f => {
+  try {
+    return f()
+  } catch (e) {
+    if (!e.toString().includes('JSON')) {
+      console.warn(e)
+    }
+  }
+}
 
 const verifyNip05 = (pubkey, as) =>
   nip05.queryProfile(as).then(result => {

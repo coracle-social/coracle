@@ -220,6 +220,7 @@ const rooms = defineTable('rooms', 'id')
 const messages = defineTable('messages', 'id')
 const alerts = defineTable('alerts', 'id')
 const relays = defineTable('relays', 'url')
+const routes = defineTable('routes', 'id')
 
 // Helper to allow us to listen to changes of any given table
 
@@ -279,4 +280,5 @@ const clearAll = () => Promise.all(Object.keys(registry).map(clear))
 export default {
   getItem, setItem, removeItem, length, clear, keys, iterate, watch,
   getPersonWithFallback, clearAll, people, rooms, messages, alerts, relays,
+  routes,
 }

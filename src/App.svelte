@@ -12,10 +12,13 @@
   import {globalHistory} from "svelte-routing/src/history"
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, shuffle, now, sleep} from 'src/util/misc'
+  import cmd from 'src/agent/cmd'
   import {user, getRelays} from 'src/agent/helpers'
   import database from 'src/agent/database'
-  import pool from 'src/agent/pool'
   import keys from 'src/agent/keys'
+  import network from 'src/agent/network'
+  import pool from 'src/agent/pool'
+  import sync from 'src/agent/sync'
   import {modal, toast, settings, logUsage, alerts, messages, loadAppData} from "src/app"
   import {routes} from "src/app/ui"
   import Anchor from 'src/partials/Anchor.svelte'
@@ -46,6 +49,8 @@
   import Chat from "src/routes/Chat.svelte"
   import ChatRoom from "src/routes/ChatRoom.svelte"
   import Messages from "src/routes/Messages.svelte"
+
+  Object.assign(window, {cmd, database, keys, network, pool, sync})
 
   export let url = ""
 

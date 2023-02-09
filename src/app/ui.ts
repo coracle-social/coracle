@@ -103,7 +103,9 @@ export const logUsage = async name => {
     try {
       await fetch(`${dufflepudUrl}/usage/${session}/${name}`, {method: 'post' })
     } catch (e) {
-      console.warn(e)
+      if (!e.toString().includes('Failed to fetch')) {
+        console.warn(e)
+      }
     }
   }
 }
