@@ -1,7 +1,8 @@
 <script>
   import {onMount} from "svelte"
+  import {nip19} from 'nostr-tools'
   import {quantify} from 'hurdak/lib/hurdak'
-  import {last, whereEq, find, reject, propEq} from 'ramda'
+  import {last, whereEq, find, reject, pluck, propEq} from 'ramda'
   import {fly} from 'svelte/transition'
   import {navigate} from "svelte-routing"
   import {fuzzy} from "src/util/misc"
@@ -12,12 +13,12 @@
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Heading from 'src/partials/Heading.svelte'
-  import {database, user, getRelays} from "src/agent"
+  import {database, user, getWriteRelays} from "src/agent"
   import {toast, modal} from "src/app"
   import cmd from "src/app/cmd"
 
   let input = null
-  let relays = getRelays()
+  let relays = getWriteRelays()
   let showSettings = false
   let q = ''
   let search
@@ -34,9 +35,18 @@
     const {content, mentions, topics} = input.parse()
 
     if (content) {
-      await cmd.createNote(relays, content, mentions, topics)
+      const event = await cmd.createNote(relays, content, mentions, topics)
 
-      toast.show("info", `Your note has been created!`)
+      toast.show("info", {
+        text: `Your note has been created!`,
+        link: {
+          text: 'View',
+          href: "/" + nip19.neventEncode({
+            id: event.id,
+            relays: pluck('url', relays.slice(0, 5)),
+          }),
+        },
+      })
 
       modal.clear()
     }

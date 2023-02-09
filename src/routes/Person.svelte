@@ -14,7 +14,7 @@
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
   import Network from "src/views/person/Network.svelte"
-  import {database, getRelays, listen, user, keys} from "src/agent"
+  import {database, getRelays, getWriteRelays, listen, user, keys} from "src/agent"
   import {modal} from "src/app"
   import loaders from "src/app/loaders"
   import {routes} from "src/app/ui"
@@ -76,13 +76,13 @@
     const tag = ["p", pubkey, relay.url, person.name || ""]
     const petnames = reject(t => t[1] === pubkey, $user.petnames).concat([tag])
 
-    cmd.setPetnames(getRelays(), petnames)
+    cmd.setPetnames(getWriteRelays(), petnames)
   }
 
   const unfollow = async () => {
     const petnames = reject(t => t[1] === pubkey, $user.petnames)
 
-    cmd.setPetnames(getRelays(), petnames)
+    cmd.setPetnames(getWriteRelays(), petnames)
   }
 
   const openAdvanced = () => {

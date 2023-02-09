@@ -5,7 +5,7 @@ import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
 import {renderContent} from 'src/util/html'
 import {Tags, displayPerson, findReplyId} from 'src/util/nostr'
-import {user, database, getRelays, keys} from 'src/agent'
+import {user, database, getRelays, getWriteRelays, keys} from 'src/agent'
 import defaults from 'src/agent/defaults'
 import {toast, routes, modal, settings, logUsage} from 'src/app/ui'
 import cmd from 'src/app/cmd'
@@ -71,7 +71,7 @@ export const removeRelay = async url => {
   defaults.relays = modify(defaults.relays)
 
   if (person) {
-    await cmd.setRelays(getRelays(), modify(person.relays || []))
+    await cmd.setRelays(getWriteRelays(), modify(person.relays || []))
   }
 }
 
@@ -83,7 +83,7 @@ export const setRelayWriteCondition = async (url, write) => {
   defaults.relays = modify(defaults.relays)
 
   if (person) {
-    await cmd.setRelays(getRelays(), modify(person.relays || []))
+    await cmd.setRelays(getWriteRelays(), modify(person.relays || []))
   }
 }
 

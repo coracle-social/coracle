@@ -4,7 +4,7 @@
   import {personKinds} from 'src/util/nostr'
   import {batch, now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {database, getRelays, user, listen, keys} from 'src/agent'
+  import {database, getRelays, getWriteRelays, user, listen, keys} from 'src/agent'
   import {messages} from 'src/app'
   import {routes} from 'src/app/ui'
   import cmd from 'src/app/cmd'
@@ -52,8 +52,9 @@
   }
 
   const sendMessage = async content => {
+    const relays = getWriteRelays().concat(getRelays(pubkey))
     const cyphertext = await crypt.encrypt(pubkey, content)
-    const event = await cmd.createDirectMessage(getRelays(), pubkey, cyphertext)
+    const event = await cmd.createDirectMessage(relays, pubkey, cyphertext)
 
     // Return unencrypted content so we can display it immediately
     return {...event, content}

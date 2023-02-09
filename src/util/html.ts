@@ -74,14 +74,12 @@ export const fromParentOffset = (element, offset): [HTMLElement, number] => {
 }
 
 export const extractUrls = content => {
-  const regex = /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z]{1,6}\b([-a-zA-Z0-9@:%_\+.~#?!&//=;]*)/gi
+  const regex = /(https?:\/\/)?(www\.)?[-a-z0-9@:%._\+~#=]{1,256}\.[a-z]{1,6}\b([-a-z0-9@:%_\+.~#?!&//=;]*)/gi
   const urls = content.match(regex)
 
   return (urls || [])
     // Skip decimals like 3.5 and ellipses which have more than one dot in a row
     .filter(url => !url.match(/^[\d\.]+$/) && !url.match(/\.{2}/))
-    // Add protocol on to the beginning of the url
-    .map(url => url.startsWith('http') ? url : '//' + url)
 }
 
 export const renderContent = content => {
@@ -92,7 +90,7 @@ export const renderContent = content => {
   for (const url of extractUrls(content)) {
     const $a = document.createElement('a')
 
-    $a.href = url
+    $a.href = 'https://' + url
     $a.target = "_blank"
     $a.className = "underline"
 

@@ -14,7 +14,7 @@
   import Badge from "src/partials/Badge.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
-  import {user, database, getRelays, getEventRelays} from 'src/agent'
+  import {user, database, getEventRelays} from 'src/agent'
   import cmd from 'src/app/cmd'
 
   export let note
@@ -33,7 +33,6 @@
   const links = $settings.showLinkPreviews ? extractUrls(note.content) || [] : []
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
-  const relays = getEventRelays(note)
   const person = database.watch('people', () => database.getPersonWithFallback(note.pubkey))
 
   let likes, flags, like, flag
@@ -50,7 +49,7 @@
     const target = e.target as HTMLElement
 
     if (interactive && !['I'].includes(target.tagName) && !target.closest('a')) {
-      modal.set({type: 'note/detail', note, relays})
+      modal.set({type: 'note/detail', note, relays: getEventRelays(note)})
     }
   }
 
@@ -66,7 +65,7 @@
       return navigate('/login')
     }
 
-    const event = await cmd.createReaction(getRelays(), note, content)
+    const event = await cmd.createReaction(getEventRelays(note), note, content)
 
     if (content === '+') {
       likes = likes.concat(event)
@@ -78,7 +77,7 @@
   }
 
   const deleteReaction = e => {
-    cmd.deleteEvent(getRelays(), [e.id])
+    cmd.deleteEvent(getEventRelays(note), [e.id])
 
     if (e.content === '+') {
       likes = reject(propEq('pubkey', $user.pubkey), likes)
@@ -139,7 +138,10 @@
   <div class="flex gap-4 items-center justify-between">
     <Badge person={$person} />
     <Anchor
-      href={"/" + nip19.neventEncode({id: note.id, relays: pluck('url', relays.slice(0, 5))})}
+      href={"/" + nip19.neventEncode({
+        id: note.id,
+        relays: pluck('url', getEventRelays(note).slice(0, 5)),
+      })}
       class="text-sm text-light"
       type="unstyled">
       {formatTimestamp(note.created_at)}

@@ -2,7 +2,7 @@ import {prop, pick, join, uniqBy, last} from 'ramda'
 import {get} from 'svelte/store'
 import {first} from "hurdak/lib/hurdak"
 import {Tags, isRelay, roomAttrs, displayPerson} from 'src/util/nostr'
-import {keys, publish, getRelays, database} from 'src/agent'
+import {keys, publish, getWriteRelays, database} from 'src/agent'
 
 const updateUser = (relays, updates) =>
   publishEvent(relays, 0, {content: JSON.stringify(updates)})
@@ -31,7 +31,7 @@ const createDirectMessage = (relays, pubkey, content) =>
 
 const createNote = (relays, content, mentions = [], topics = []) => {
   mentions = mentions.map(p => {
-    const {url} = first(getRelays(p))
+    const {url} = first(getWriteRelays(p))
     const name = displayPerson(database.getPersonWithFallback(p))
 
     return ["p", p, url, name]
@@ -39,7 +39,7 @@ const createNote = (relays, content, mentions = [], topics = []) => {
 
   topics = topics.map(t => ["t", t])
 
-  publishEvent(relays, 1, {content, tags: mentions.concat(topics)})
+  return publishEvent(relays, 1, {content, tags: mentions.concat(topics)})
 }
 
 const createReaction = (relays, note, content) => {
@@ -56,7 +56,7 @@ const createReaction = (relays, note, content) => {
 }
 
 const createReply = (relays, note, content, mentions = [], topics = []) => {
-  mentions = mentions.map(p => ["p", p, prop('url', first(getRelays(p)))])
+  mentions = mentions.map(p => ["p", p, prop('url', first(getWriteRelays(p)))])
   topics = topics.map(t => ["t", t])
 
   const {url} = getBestRelay(relays, note)
@@ -92,7 +92,7 @@ const getBestRelay = (relays, event) => {
     return root
   }
 
-  return first(getRelays(event.pubkey).concat(relays))
+  return first(getWriteRelays(event.pubkey).concat(relays))
 }
 
 const publishEvent = (relays, kind, {content = '', tags = []} = {}) => {

@@ -17,7 +17,7 @@ export const routes = {
 // Toast
 
 export interface Toast<T> extends Writable<T> {
-  show(type: string, message: string, timeout?: number): void
+  show(type: string, message: any, timeout?: number): void
 }
 
 export const toast = writable(null) as Toast<any>
@@ -34,9 +34,7 @@ toast.show = (type, message, timeout = 5) => {
   }, timeout * 1000)
 }
 
-
 // Modals
-
 
 export const modal = {
   history: [],

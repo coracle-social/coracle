@@ -13,7 +13,7 @@
   let {data: roomId} = nip19.decode(entity) as {data: string}
   let room = database.watch('rooms', rooms => rooms.get(roomId))
 
-  const getRoomRelays = $room => {
+  const getRoomRelays = () => {
     let relays = getRelays()
 
     if ($room) {
@@ -24,7 +24,7 @@
   }
 
   const listenForMessages = async cb => {
-    const relays = getRoomRelays(database.rooms.get(roomId))
+    const relays = getRoomRelays()
 
     return listen(
       relays,
@@ -42,7 +42,7 @@
   }
 
   const loadMessages = async ({until, limit}) => {
-    const relays = getRoomRelays($room)
+    const relays = getRoomRelays()
     const events = await load(relays, {kinds: [42], '#e': [roomId], until, limit})
 
     if (events.length) {
@@ -57,7 +57,7 @@
   }
 
   const sendMessage = content =>
-    cmd.createChatMessage(getRelays(), roomId, content)
+    cmd.createChatMessage(getRoomRelays(), roomId, content)
 </script>
 
 <Channel

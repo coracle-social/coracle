@@ -1,6 +1,6 @@
 import type {Person} from 'src/util/types'
 import type {Readable} from 'svelte/store'
-import {last, uniqBy, prop} from 'ramda'
+import {reject, last, propEq, uniqBy, prop} from 'ramda'
 import {derived, get} from 'svelte/store'
 import {Tags} from 'src/util/nostr'
 import pool from 'src/agent/pool'
@@ -55,6 +55,9 @@ export const getRelays = (pubkey?: string) => {
 
   return relays
 }
+
+export const getWriteRelays = (...args) =>
+  reject(propEq('write', '!'), getRelays(...args))
 
 export const getEventRelays = event => {
   return uniqBy(

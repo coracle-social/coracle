@@ -10,7 +10,7 @@
   import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {user, getRelays} from "src/agent"
+  import {user, getWriteRelays} from "src/agent"
   import {toast} from "src/app"
   import {routes} from "src/app/ui"
   import cmd from "src/app/cmd"
@@ -45,7 +45,7 @@
   const submit = async event => {
     event.preventDefault()
 
-    await cmd.updateUser(getRelays(), values)
+    await cmd.updateUser(getWriteRelays(), values)
 
     navigate(routes.person($user.pubkey, 'profile'))
 

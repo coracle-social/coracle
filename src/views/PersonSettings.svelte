@@ -5,7 +5,7 @@
   import Button from "src/partials/Button.svelte"
   import Content from 'src/partials/Content.svelte'
   import SelectButton from "src/partials/SelectButton.svelte"
-  import {user, getRelays} from 'src/agent'
+  import {user, getWriteRelays} from 'src/agent'
   import {modal} from 'src/app'
   import cmd from 'src/app/cmd'
 
@@ -28,7 +28,7 @@
       .concat([["p", $modal.person.pubkey, muffleValue.toString()]])
       .filter(t => last(t) !== "1")
 
-    cmd.muffle(getRelays(), muffleTags)
+    cmd.muffle(getWriteRelays(), muffleTags)
 
     history.back()
   }

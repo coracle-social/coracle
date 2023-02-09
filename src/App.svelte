@@ -2,7 +2,7 @@
   import "@fortawesome/fontawesome-free/css/fontawesome.css"
   import "@fortawesome/fontawesome-free/css/solid.css"
 
-  import {find, identity, nthArg, pluck} from 'ramda'
+  import {find, is, identity, nthArg, pluck} from 'ramda'
   import {onMount} from "svelte"
   import {createMap} from 'hurdak/lib/hurdak'
   import {writable, get} from "svelte/store"
@@ -364,13 +364,24 @@
 
     {#if $toast}
       <div
-        class="fixed top-0 left-0 right-0 pointer-events-none z-10"
+        class="fixed top-0 left-0 right-0 z-10"
         transition:fly={{y: -50, duration: 300}}
       >
         <div
           class="rounded bg-accent shadow-xl mx-24 sm:mx-32 mt-2 p-3 text-white text-center border border-dark"
         >
+          {#if is(String, $toast.message)}
           {$toast.message}
+          {:else}
+          <div>
+            {$toast.message.text}
+            {#if $toast.message.link}
+            <a class="ml-1 underline" href={$toast.message.link.href}>
+              {$toast.message.link.text}
+            </a>
+            {/if}
+          </div>
+          {/if}
         </div>
       </div>
     {/if}
