@@ -6,11 +6,12 @@
   import {database} from 'src/agent'
   import {alerts} from 'src/app'
   import Note from 'src/partials/Note.svelte'
+  import Spinner from 'src/partials/Spinner.svelte'
   import Content from 'src/partials/Content.svelte'
   import Like from 'src/partials/Like.svelte'
 
   let limit = 0
-  let notes = []
+  let notes = null
 
   onMount(async () => {
     alerts.lastCheckedAlerts.set(now())
@@ -25,6 +26,7 @@
   })
 </script>
 
+{#if notes}
 <Content>
   {#each notes as e (e.id)}
   <div in:fly={{y: 20}}>
@@ -40,3 +42,6 @@
   </Content>
   {/each}
 </Content>
+{:else}
+<Spinner />
+{/if}

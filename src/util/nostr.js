@@ -26,6 +26,9 @@ export class Tags {
   relays() {
     return uniq(flatten(this.tags).filter(isRelay)).map(objOf('url'))
   }
+  pubkeys() {
+    return this.type("p").values().all()
+  }
   values() {
     return new Tags(this.tags.map(t => t[1]))
   }

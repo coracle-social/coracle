@@ -1,5 +1,5 @@
 <script>
-  import {pluck, objOf} from 'ramda'
+  import {pluck, objOf, fromPairs} from 'ramda'
   import {noop, createMap} from 'hurdak/lib/hurdak'
   import {onMount} from 'svelte'
   import {get} from 'svelte/store'
@@ -44,7 +44,7 @@
       // Attempt to connect so we can show status
       relays.forEach(relay => pool.connect(relay.url))
 
-      status = Object.fromEntries(
+      status = fromPairs(
         pool.getConnections().map(({url, status, stats}) => {
           // Be more strict here than with alerts
           if (status === 'ready' && stats.timer / stats.count > 1000) {

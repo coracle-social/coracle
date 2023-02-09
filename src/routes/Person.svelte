@@ -6,7 +6,7 @@
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {renderContent} from 'src/util/html'
-  import {displayPerson} from 'src/util/nostr'
+  import {displayPerson, Tags} from 'src/util/nostr'
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -60,6 +60,16 @@
   })
 
   const setActiveTab = tab => navigate(routes.person(pubkey, tab))
+
+  const showFollows = () => {
+    const pubkeys = Tags.wrap(person.petnames).pubkeys()
+
+    modal.set({type: 'person/list', pubkeys})
+   }
+
+  const showFollowers = () => {
+    modal.set({type: 'person/list', pubkeys: Array.from(followers)})
+   }
 
   const follow = async () => {
     const relay = first(relays || getRelays(pubkey))
@@ -131,8 +141,12 @@
       <p>{@html renderContent(person.about || '')}</p>
       {#if person?.petnames}
       <div class="flex gap-8">
-        <div><strong>{person.petnames.length}</strong> following</div>
-        <div><strong>{followersCount}</strong> followers</div>
+        <button on:click={showFollows}>
+          <strong>{person.petnames.length}</strong> following
+        </button>
+        <button on:click={showFollowers}>
+          <strong>{followersCount}</strong> followers
+        </button>
       </div>
       {/if}
     </div>

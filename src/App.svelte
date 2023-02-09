@@ -20,6 +20,7 @@
   import Spinner from 'src/partials/Spinner.svelte'
   import Modal from 'src/partials/Modal.svelte'
   import SignUp from "src/views/SignUp.svelte"
+  import PersonList from "src/views/PersonList.svelte"
   import PrivKeyLogin from "src/views/PrivKeyLogin.svelte"
   import PubKeyLogin from "src/views/PubKeyLogin.svelte"
   import NoteDetail from "src/views/NoteDetail.svelte"
@@ -348,6 +349,8 @@
         <PubKeyLogin />
       {:else if $modal.type === 'person/settings'}
         <PersonSettings />
+      {:else if $modal.type === 'person/list'}
+        <PersonList pubkeys={$modal.pubkeys} />
       {:else if $modal.type === 'message'}
         <Content size="lg">
           <div class="text-center">{$modal.message}</div>
