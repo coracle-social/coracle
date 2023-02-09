@@ -22,7 +22,10 @@ type Table = {
 
 // Plumbing
 
-const worker = new Worker('/src/workers/database.js', {type: 'module'})
+const worker = new Worker(
+  new URL('../workers/database.js', import.meta.url),
+  {type: 'module'}
+)
 
 worker.addEventListener('error', e => console.error(e))
 

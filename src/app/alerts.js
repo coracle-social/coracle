@@ -1,5 +1,6 @@
 import {get} from 'svelte/store'
 import {groupBy, pluck, partition, propEq} from 'ramda'
+import {createMap} from 'hurdak/lib/hurdak'
 import {synced, timedelta, batch, now} from 'src/util/misc'
 import {isAlert, findReplyId} from 'src/util/nostr'
 import {load as _load, listen as _listen, database} from 'src/agent'
@@ -23,7 +24,7 @@ const onChunk = async (relays, pubkey, events) => {
       .filter(e => likesByParent[e.id])
       .map(e => annotate({...e, likedBy: pluck('pubkey', likesByParent[e.id])}, context))
 
-    await database.alerts.bulkPut(annotatedNotes.concat(likedNotes))
+    await database.alerts.bulkPut(createMap('id', annotatedNotes.concat(likedNotes)))
 
     mostRecentAlert.update($t => events.reduce((t, e) => Math.max(t, e.created_at), $t))
   }

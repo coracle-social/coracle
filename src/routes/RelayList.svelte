@@ -27,7 +27,7 @@
 
   database.relays.bulkPatch(createMap('url', defaults.relays))
 
-  const knownRelays = database.watch(relays => relays.all())
+  const knownRelays = database.watch('relays', relays => relays.all())
 
   $: {
     const joined = pluck('url', $user?.relays || [])

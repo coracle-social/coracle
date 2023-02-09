@@ -44,8 +44,8 @@
         on:mouseout={() => {showStatus = false}}
         on:mouseover={() => {showStatus = true}}
         class="w-2 h-2 rounded-full bg-medium cursor-pointer"
-        class:bg-danger={status === 'error'}
-        class:bg-warning={['pending', 'slow'].includes(status)}
+        class:bg-danger={['pending', 'error'].includes(status)}
+        class:bg-warning={status === 'slow'}
         class:bg-success={status === 'ready'}>
       </span>
       <p
@@ -63,7 +63,7 @@
       {/if}
     </div>
     {#if joined}
-    <button class="flex gap-3 items-center text-light" on:click={() => removeRelay(relay)}>
+    <button class="flex gap-3 items-center text-light" on:click={() => removeRelay(relay.url)}>
       <i class="fa fa-right-from-bracket" /> Leave
     </button>
     {:else}
