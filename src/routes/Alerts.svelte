@@ -3,12 +3,12 @@
   import {onMount} from 'svelte'
   import {fly} from 'svelte/transition'
   import {now, createScroller} from 'src/util/misc'
-  import {database} from 'src/agent'
-  import {alerts} from 'src/app'
   import Note from 'src/partials/Note.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
   import Content from 'src/partials/Content.svelte'
   import Like from 'src/partials/Like.svelte'
+  import database from 'src/agent/database'
+  import {alerts} from 'src/app'
 
   let limit = 0
   let notes = null

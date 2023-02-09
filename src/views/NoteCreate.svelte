@@ -13,9 +13,10 @@
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Heading from 'src/partials/Heading.svelte'
-  import {database, user, getWriteRelays} from "src/agent"
+  import {user, getWriteRelays} from "src/agent/helpers"
+  import database from 'src/agent/database'
+  import cmd from "src/agent/cmd"
   import {toast, modal} from "src/app"
-  import cmd from "src/app/cmd"
 
   let input = null
   let relays = getWriteRelays()

@@ -14,8 +14,9 @@
   import Badge from "src/partials/Badge.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
-  import {user, database, getEventRelays} from 'src/agent'
-  import cmd from 'src/app/cmd'
+  import {user, getEventRelays} from 'src/agent/helpers'
+  import database from 'src/agent/database'
+  import cmd from 'src/agent/cmd'
 
   export let note
   export let depth = 0
@@ -134,6 +135,7 @@
   }}
 />
 
+{#if $person}
 <Card on:click={onClick} {interactive} {invertColors}>
   <div class="flex gap-4 items-center justify-between">
     <Badge person={$person} />
@@ -227,4 +229,5 @@
   <svelte:self showParent={false} note={r} depth={depth - 1} {invertColors} {anchorId} />
   {/each}
 </div>
+{/if}
 {/if}

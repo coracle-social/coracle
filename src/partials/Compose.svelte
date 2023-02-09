@@ -5,7 +5,7 @@
   import {displayPerson} from "src/util/nostr"
   import {fromParentOffset} from "src/util/html"
   import Badge from "src/partials/Badge.svelte"
-  import {database} from "src/agent"
+  import database from "src/agent/database"
 
   export let onSubmit
 

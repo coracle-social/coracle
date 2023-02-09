@@ -10,10 +10,10 @@
   import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {user, getWriteRelays} from "src/agent"
+  import {user, getWriteRelays} from "src/agent/helpers"
+  import cmd from "src/agent/cmd"
   import {toast} from "src/app"
   import {routes} from "src/app/ui"
-  import cmd from "src/app/cmd"
 
   let values = {picture: null, about: null, name: null, nip05: null}
 

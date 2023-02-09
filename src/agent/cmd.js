@@ -2,7 +2,10 @@ import {prop, pick, join, uniqBy, last} from 'ramda'
 import {get} from 'svelte/store'
 import {first} from "hurdak/lib/hurdak"
 import {Tags, isRelay, roomAttrs, displayPerson} from 'src/util/nostr'
-import {keys, publish, getWriteRelays, database} from 'src/agent'
+import {getWriteRelays} from 'src/agent/helpers'
+import database from 'src/agent/database'
+import network from 'src/agent/network'
+import keys from 'src/agent/keys'
 
 const updateUser = (relays, updates) =>
   publishEvent(relays, 0, {content: JSON.stringify(updates)})
@@ -106,7 +109,7 @@ const publishEvent = (relays, kind, {content = '', tags = []} = {}) => {
 
   console.log("Publishing", event, relays)
 
-  return publish(relays, event)
+  return network.publish(relays, event)
 }
 
 export default {

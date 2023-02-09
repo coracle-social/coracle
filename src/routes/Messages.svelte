@@ -4,10 +4,13 @@
   import {personKinds} from 'src/util/nostr'
   import {batch, now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {database, getRelays, getWriteRelays, user, listen, keys} from 'src/agent'
+  import {getRelays, getWriteRelays, user} from 'src/agent/helpers'
+  import database from 'src/agent/database'
+  import network from 'src/agent/network'
+  import keys from 'src/agent/keys'
   import {messages} from 'src/app'
   import {routes} from 'src/app/ui'
-  import cmd from 'src/app/cmd'
+  import cmd from 'src/agent/cmd'
 
   export let entity
 
@@ -28,7 +31,7 @@
     return events
   }
 
-  const listenForMessages = cb => listen(
+  const listenForMessages = cb => network.listen(
     getRelays().concat(getRelays(pubkey)),
     [{kinds: personKinds, authors: [pubkey]},
      {kinds: [4], authors: [$user.pubkey], '#p': [pubkey]},

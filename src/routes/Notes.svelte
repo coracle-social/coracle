@@ -5,7 +5,7 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Network from "src/views/notes/Network.svelte"
   import Global from "src/views/notes/Global.svelte"
-  import {user} from 'src/agent'
+  import {user} from 'src/agent/helpers'
 
   export let activeTab
 

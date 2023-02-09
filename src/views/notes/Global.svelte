@@ -1,8 +1,8 @@
 <script>
   import Notes from "src/partials/Notes.svelte"
   import {Cursor, now, batch} from 'src/util/misc'
-  import {getRelays, getMuffle, listen, load} from 'src/agent'
-  import loaders from 'src/app/loaders'
+  import {getRelays, getMuffle} from 'src/agent/helpers'
+  import network from 'src/agent/network'
   import {threadify} from 'src/app'
 
   const relays = getRelays()
@@ -10,16 +10,16 @@
   const cursor = new Cursor()
 
   const listenForNotes = onNotes =>
-    listen(relays, {...filter, since: now()}, batch(300, async notes => {
-      const context = await loaders.loadContext(relays, notes)
+    network.listen(relays, {...filter, since: now()}, batch(300, async notes => {
+      const context = await network.loadContext(relays, notes)
 
       onNotes(threadify(notes, context, {muffle: getMuffle(), showReplies: false}))
     }))
 
   const loadNotes = async () => {
     const {limit, until} = cursor
-    const notes = await load(relays, {...filter, limit, until})
-    const context = await loaders.loadContext(relays, notes)
+    const notes = await network.load(relays, {...filter, limit, until})
+    const context = await network.loadContext(relays, notes)
 
     cursor.onChunk(notes)
 

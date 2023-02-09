@@ -1,7 +1,8 @@
 <script>
   import {fuzzy} from "src/util/misc"
   import PersonInfo from 'src/partials/PersonInfo.svelte'
-  import {user, database} from 'src/agent'
+  import {user} from 'src/agent/helpers'
+  import database from 'src/agent/database'
 
   export let q
 

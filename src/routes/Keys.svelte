@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from 'src/partials/Heading.svelte'
-  import {keys} from "src/agent"
+  import keys from "src/agent/keys"
   import {toast} from "src/app"
 
   const {pubkey, privkey} = keys

@@ -1,15 +1,41 @@
 import {uniqBy, prop, uniq, flatten, pluck, identity} from 'ramda'
 import {ensurePlural, createMap, chunk} from 'hurdak/lib/hurdak'
 import {findReply, personKinds, Tags} from 'src/util/nostr'
-import {now, timedelta} from 'src/util/misc'
-import {load, database, getFollows} from 'src/agent'
+import {getFollows, getStalePubkeys} from 'src/agent/helpers'
+import pool from 'src/agent/pool'
+import keys from 'src/agent/keys'
+import sync from 'src/agent/sync'
 
-const getStalePubkeys = pubkeys => {
-  // If we're not reloading, only get pubkeys we don't already know about
-  return uniq(pubkeys).filter(pubkey => {
-    const p = database.people.get(pubkey)
+const publish = async (relays, event) => {
+  const signedEvent = await keys.sign(event)
 
-    return !p || p.updated_at < now() - timedelta(1, 'days')
+  await Promise.all([
+    pool.publish(relays, signedEvent),
+    sync.processEvents(signedEvent),
+  ])
+
+  return signedEvent
+}
+
+const load = async (relays, filter, opts?): Promise<Record<string, unknown>[]> => {
+  const events = await pool.request(relays, filter, opts)
+
+  await sync.processEvents(events)
+
+  return events
+}
+
+const listen = (relays, filter, onEvent, {shouldProcess = true}: any = {}) => {
+  return pool.subscribe(relays, filter, {
+    onEvent: e => {
+      if (shouldProcess) {
+        sync.processEvents(e)
+      }
+
+      if (onEvent) {
+        onEvent(e)
+      }
+    },
   })
 }
 
@@ -86,4 +112,4 @@ const loadContext = async (relays, notes, {loadParents = false, depth = 0, ...op
   ))
 }
 
-export default {loadNetwork, loadPeople, personKinds, loadContext}
+export default {publish, load, listen, loadNetwork, loadPeople, personKinds, loadContext}

@@ -2,7 +2,7 @@
   import {fly} from 'svelte/transition'
   import Anchor from 'src/partials/Anchor.svelte'
   import Content from "src/partials/Content.svelte"
-  import {database} from 'src/agent'
+  import database from 'src/agent/database'
 
   let confirmed = false
 

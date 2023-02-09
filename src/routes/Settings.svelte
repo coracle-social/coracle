@@ -7,7 +7,7 @@
   import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {user} from 'src/agent'
+  import {user} from 'src/agent/helpers'
   import {toast, settings} from "src/app"
 
   let values = {...$settings}

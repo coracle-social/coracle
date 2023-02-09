@@ -12,7 +12,10 @@
   import {globalHistory} from "svelte-routing/src/history"
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, shuffle, now, sleep} from 'src/util/misc'
-  import {database, keys, user, pool, getRelays} from 'src/agent'
+  import {user, getRelays} from 'src/agent/helpers'
+  import database from 'src/agent/database'
+  import pool from 'src/agent/pool'
+  import keys from 'src/agent/keys'
   import {modal, toast, settings, logUsage, alerts, messages, loadAppData} from "src/app"
   import {routes} from "src/app/ui"
   import Anchor from 'src/partials/Anchor.svelte'

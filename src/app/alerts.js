@@ -3,8 +3,8 @@ import {groupBy, pluck, partition, propEq} from 'ramda'
 import {createMap} from 'hurdak/lib/hurdak'
 import {synced, timedelta, batch, now} from 'src/util/misc'
 import {isAlert, findReplyId} from 'src/util/nostr'
-import {load as _load, listen as _listen, database} from 'src/agent'
-import loaders from 'src/app/loaders'
+import database from 'src/agent/database'
+import network from 'src/agent/network'
 import {annotate} from 'src/app'
 
 let listener
@@ -16,7 +16,7 @@ const onChunk = async (relays, pubkey, events) => {
   events = events.filter(e => isAlert(e, pubkey))
 
   if (events.length > 0) {
-    const context = await loaders.loadContext(relays, events)
+    const context = await network.loadContext(relays, events)
     const [likes, notes] = partition(propEq('kind', 7), events)
     const annotatedNotes = notes.map(n => annotate(n, context))
     const likesByParent = groupBy(findReplyId, likes)
@@ -35,7 +35,7 @@ const load = async (relays, pubkey) => {
   const since = get(mostRecentAlert) - timedelta(30, 'days')
 
   // Crank the threshold up since we can afford for this to be slow
-  const events = await _load(
+  const events = await network.load(
     relays,
     {kinds: [1, 7], '#p': [pubkey], since, limit: 1000},
     {threshold: 0.9}
@@ -49,7 +49,7 @@ const listen = async (relays, pubkey) => {
     listener.unsub()
   }
 
-  listener = await _listen(
+  listener = await network.listen(
     relays,
     {kinds: [1, 7], '#p': [pubkey], since: now()},
     batch(300, events => {

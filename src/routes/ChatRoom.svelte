@@ -3,10 +3,11 @@
   import {nip19} from 'nostr-tools'
   import {now, batch} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {getRelays, user, database, listen, load} from 'src/agent'
+  import {getRelays, user} from 'src/agent/helpers'
+  import database from 'src/agent/database'
+  import network from 'src/agent/network'
   import {modal} from 'src/app'
-  import loaders from 'src/app/loaders'
-  import cmd from 'src/app/cmd'
+  import cmd from 'src/agent/cmd'
 
   export let entity
 
@@ -26,7 +27,7 @@
   const listenForMessages = async cb => {
     const relays = getRoomRelays()
 
-    return listen(
+    return network.listen(
       relays,
       // Listen for updates to the room in case we didn't get them before
       [{kinds: [40, 41], ids: [roomId]},
@@ -34,7 +35,7 @@
       batch(300, events => {
         const newMessages = events.filter(e => e.kind === 42)
 
-        loaders.loadPeople(relays, pluck('pubkey', events))
+        network.loadPeople(relays, pluck('pubkey', events))
 
         cb(newMessages)
       })
@@ -43,10 +44,10 @@
 
   const loadMessages = async ({until, limit}) => {
     const relays = getRoomRelays()
-    const events = await load(relays, {kinds: [42], '#e': [roomId], until, limit})
+    const events = await network.load(relays, {kinds: [42], '#e': [roomId], until, limit})
 
     if (events.length) {
-      await loaders.loadPeople(relays, pluck('pubkey', events))
+      await network.loadPeople(relays, pluck('pubkey', events))
     }
 
     return events

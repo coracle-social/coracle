@@ -1,8 +1,9 @@
 import {pluck, reject} from 'ramda'
 import {get} from 'svelte/store'
 import {synced, now, timedelta, batch} from 'src/util/misc'
-import {listen as _listen, database, user} from 'src/agent'
-import loaders from 'src/app/loaders'
+import {user} from 'src/agent/helpers'
+import database from 'src/agent/database'
+import network from 'src/agent/network'
 
 let listener
 
@@ -15,7 +16,7 @@ const listen = async (relays, pubkey) => {
     listener.unsub()
   }
 
-  listener = await _listen(
+  listener = await network.listen(
     relays,
     [{kinds: [4], authors: [pubkey], since},
      {kinds: [4], '#p': [pubkey], since}],
@@ -26,7 +27,7 @@ const listen = async (relays, pubkey) => {
       const messages = reject(e => e.pubkey === e.recipient, await database.messages.all())
 
       if (messages.length > 0) {
-        await loaders.loadPeople(relays, pluck('pubkey', messages))
+        await network.loadPeople(relays, pluck('pubkey', messages))
 
         mostRecentByPubkey.update(o => {
           for (const {pubkey, recipient, created_at} of messages) {

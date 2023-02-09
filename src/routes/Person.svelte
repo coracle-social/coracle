@@ -14,11 +14,13 @@
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
   import Network from "src/views/person/Network.svelte"
-  import {database, getRelays, getWriteRelays, listen, user, keys} from "src/agent"
-  import {modal} from "src/app"
-  import loaders from "src/app/loaders"
+  import {getRelays, getWriteRelays, user} from "src/agent/helpers"
+  import network from "src/agent/network"
+  import keys from "src/agent/keys"
+  import database from "src/agent/database"
   import {routes} from "src/app/ui"
-  import cmd from "src/app/cmd"
+  import {modal} from "src/app"
+  import cmd from "src/agent/cmd"
 
   export let npub
   export let activeTab
@@ -36,13 +38,13 @@
 
   onMount(async () => {
     // Refresh our person if needed
-    loaders.loadPeople(relays || getRelays(pubkey), [pubkey]).then(() => {
+    network.loadPeople(relays || getRelays(pubkey), [pubkey]).then(() => {
       person = database.getPersonWithFallback(pubkey)
       loading = false
     })
 
     // Get our followers count
-    subs.push(await listen(
+    subs.push(await network.listen(
       relays || getRelays(pubkey),
       [{kinds: [3], '#p': [pubkey]}],
       e => {

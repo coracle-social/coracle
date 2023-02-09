@@ -4,7 +4,7 @@ import {uniqBy, reject, prop, find, whereEq, is} from 'ramda'
 import {ensurePlural} from 'hurdak/lib/hurdak'
 import {isRelay} from 'src/util/nostr'
 import {sleep} from 'src/util/misc'
-import {database} from 'src/agent'
+import database from 'src/agent/database'
 
 let connections = []
 

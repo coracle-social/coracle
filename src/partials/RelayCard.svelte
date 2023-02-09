@@ -5,7 +5,8 @@
   import {switcher} from 'hurdak/lib/hurdak'
   import {fly} from 'svelte/transition'
   import Toggle from "src/partials/Toggle.svelte"
-  import {user, pool} from "src/agent"
+  import {user} from "src/agent/helpers"
+  import pool from 'src/agent/pool'
   import {addRelay, removeRelay, setRelayWriteCondition} from "src/app"
 
   export let relay

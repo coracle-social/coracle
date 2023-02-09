@@ -9,7 +9,9 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/partials/RelayCard.svelte"
-  import {database, pool, user} from "src/agent"
+  import {user} from "src/agent/helpers"
+  import database from 'src/agent/database'
+  import pool from 'src/agent/pool'
   import {modal, settings} from "src/app"
   import defaults from "src/agent/defaults"
 

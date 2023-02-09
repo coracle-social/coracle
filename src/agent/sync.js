@@ -5,13 +5,7 @@ import {now} from 'src/util/misc'
 import {personKinds, Tags, roomAttrs, isRelay} from 'src/util/nostr'
 import database from 'src/agent/database'
 
-export const updatePeople = async updates => {
-  await database.people.bulkPut(updates)
-}
-
-// Hooks
-
-export const processEvents = async events => {
+const processEvents = async events => {
   await Promise.all([
     processProfileEvents(events),
     processRoomEvents(events),
@@ -91,7 +85,7 @@ const processProfileEvents = async events => {
   }
 
   if (!isEmpty(updates)) {
-    await updatePeople(updates)
+    await database.people.bulkPatch(updates)
   }
 }
 
@@ -160,6 +154,8 @@ const verifyNip05 = (pubkey, as) =>
     if (result?.pubkey === pubkey) {
       const person = database.getPersonWithFallback(pubkey)
 
-      updatePeople({[pubkey]: {...person, verified_as: as}})
+      database.people.patch({...person, verified_as: as})
     }
   }, noop)
+
+export default {processEvents}

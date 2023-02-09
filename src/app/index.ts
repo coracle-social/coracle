@@ -5,19 +5,21 @@ import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
 import {renderContent} from 'src/util/html'
 import {Tags, displayPerson, findReplyId} from 'src/util/nostr'
-import {user, database, getRelays, getWriteRelays, keys} from 'src/agent'
+import {user, getRelays, getWriteRelays} from 'src/agent/helpers'
 import defaults from 'src/agent/defaults'
-import {toast, routes, modal, settings, logUsage} from 'src/app/ui'
-import cmd from 'src/app/cmd'
+import database from 'src/agent/database'
+import network from 'src/agent/network'
+import keys from 'src/agent/keys'
+import cmd from 'src/agent/cmd'
 import alerts from 'src/app/alerts'
 import messages from 'src/app/messages'
-import loaders from 'src/app/loaders'
+import {toast, routes, modal, settings, logUsage} from 'src/app/ui'
 
 export {toast, modal, settings, alerts, messages, logUsage}
 
 export const loadAppData = pubkey => {
   return Promise.all([
-    loaders.loadNetwork(getRelays(), pubkey),
+    network.loadNetwork(getRelays(), pubkey),
     alerts.load(getRelays(), pubkey),
     alerts.listen(getRelays(), pubkey),
     messages.listen(getRelays(), pubkey),
@@ -37,7 +39,7 @@ export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: strin
   loadAppData(pubkey)
 
   // Load our user so we can populate network and show profile info
-  await loaders.loadPeople(getRelays(), [pubkey])
+  await network.loadPeople(getRelays(), [pubkey])
 
   // Not ideal, but the network tab depends on the user's social network being
   // loaded, so put them on global when they first log in so we're not slowing

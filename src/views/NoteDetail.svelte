@@ -2,9 +2,9 @@
   import {onMount} from 'svelte'
   import {nip19} from 'nostr-tools'
   import {fly} from 'svelte/transition'
-  import {load, getRelays} from 'src/agent'
+  import {getRelays} from 'src/agent/helpers'
+  import network from 'src/agent/network'
   import {annotate} from 'src/app'
-  import loaders from 'src/app/loaders'
   import Note from 'src/partials/Note.svelte'
   import Content from 'src/partials/Content.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
@@ -15,7 +15,7 @@
   let loading = true
 
   onMount(async () => {
-    const [found] = await load(relays, {ids: [note.id]})
+    const [found] = await network.load(relays, {ids: [note.id]})
 
     if (found) {
       // Show the main note without waiting for context
@@ -23,7 +23,7 @@
         note = annotate(found, [])
       }
 
-      const context = await loaders.loadContext(relays, found, {
+      const context = await network.loadContext(relays, found, {
         depth: 3,
         loadParents: true,
       })
