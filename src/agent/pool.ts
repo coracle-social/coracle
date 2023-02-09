@@ -1,7 +1,7 @@
 import type {Relay} from 'nostr-tools'
 import {relayInit} from 'nostr-tools'
 import {uniqBy, reject, prop, find, whereEq, is} from 'ramda'
-import {ensurePlural, createMap} from 'hurdak/lib/hurdak'
+import {ensurePlural} from 'hurdak/lib/hurdak'
 import {isRelay} from 'src/util/nostr'
 import {sleep} from 'src/util/misc'
 import {database} from 'src/agent'
@@ -83,7 +83,7 @@ const findConnection = url => find(whereEq({url}), connections)
 const connect = async url => {
   const conn = findConnection(url) || new Connection(url)
 
-  await database.relays.bulkPatch(createMap('url', [{url}]))
+  await database.relays.patch({url})
   await Promise.race([conn.connect(), sleep(5000)])
 
   if (conn.status === 'ready') {

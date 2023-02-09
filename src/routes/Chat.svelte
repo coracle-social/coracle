@@ -19,7 +19,7 @@
   const {mostRecentByPubkey} = messages
 
   const rooms = database.watch(['rooms', 'messages'], async () => {
-    const rooms = await database.rooms.all({joined: 1})
+    const rooms = await database.rooms.all({joined: true})
     const messages = await database.messages.all()
     const pubkeys = without([$user.pubkey], uniq(messages.flatMap(m => [m.pubkey, m.recipient])))
 
@@ -31,7 +31,7 @@
   })
 
   const search = database.watch('rooms', async () => {
-    const rooms = await database.rooms.all({joined: 0})
+    const rooms = await database.rooms.all({'joined:!eq': true})
 
     roomsCount = rooms.length
 
@@ -49,11 +49,11 @@
   }
 
   const joinRoom = id => {
-    database.rooms.bulkPatch({id, joined: 1})
+    database.rooms.patch({id, joined: true})
   }
 
   const leaveRoom = id => {
-    database.rooms.bulkPatch({id, joined: 0})
+    database.rooms.patch({id, joined: false})
   }
 
   onMount(() => {

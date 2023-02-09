@@ -71,9 +71,6 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Current
 
-- [ ] Switch to localforage
-  - Check that firefox private mode works (it won't work in dev)
-- [ ] Add modal for follows/followers
 - [ ] Implement gossip model https://bountsr.org/code/2023/02/03/gossip-model.html
 - [ ] Make feeds page customizable. This could potentially use the "lists" NIP
 - [ ] Show notification at top of feeds: "Showing notes from 3 relays". Click to customize.
@@ -86,6 +83,10 @@ If you like Coracle and want to support its development, you can donate sats via
 
 - [x] Converted threshold to percentage
 - [x] Fixed slow leaving/joining chat rooms
+- [x] Switch to localforage from dexie, fixing firefox/safari private windows
+- [x] Tweaks to link parsing
+- [x] Use write relays to publish events more intelligently
+- [x] Add followers/follows lists
 
 ## 0.2.10
 

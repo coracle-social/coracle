@@ -38,7 +38,7 @@
         ? await cmd.updateRoom(getWriteRelays(), room)
         : await cmd.createRoom(getWriteRelays(), room)
 
-      await database.rooms.bulkPatch({id: room.id || event.id, joined: 1})
+      await database.rooms.patch({id: room.id || event.id, joined: true})
 
       toast.show("info", `Your room has been ${room.id ? 'updated' : 'created'}!`)
 

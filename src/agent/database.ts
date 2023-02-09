@@ -1,7 +1,7 @@
 import {debounce} from 'throttle-debounce'
 import {is, prop, without} from 'ramda'
 import {writable} from 'svelte/store'
-import {switcherFn, ensurePlural, first} from 'hurdak/lib/hurdak'
+import {switcherFn, createMap, ensurePlural, first} from 'hurdak/lib/hurdak'
 import {defer, asyncIterableToArray} from 'src/util/misc'
 
 // Types
@@ -14,6 +14,8 @@ type Message = {
 type Table = {
   name: string
   subscribe: (subscription: (value: any) => void) => (() => void)
+  put: (data: object) => void
+  patch: (data: object) => void
   bulkPut: (data: object) => void
   bulkPatch: (data: object) => void
   all: (where?: object) => Promise<any>
@@ -135,7 +137,7 @@ const iterate = (storeName, where = {}) => ({
 
 const registry = {}
 
-const defineTable = (name: string): Table => {
+const defineTable = (name: string, pk: string): Table => {
   let p = Promise.resolve()
   let listeners = []
   let data = {}
@@ -191,6 +193,9 @@ const defineTable = (name: string): Table => {
     bulkPut(newData)
   }
 
+  const put = item => bulkPut(createMap(pk, [item]))
+  const patch = item => bulkPatch(createMap(pk, [item]))
+
   const all = (where = {}) => asyncIterableToArray(iterate(name, where), prop('v'))
   const one = (where = {}) => first(all(where))
   const get = k => data[k]
@@ -205,16 +210,16 @@ const defineTable = (name: string): Table => {
     setAndNotify(initialData)
   })()
 
-  registry[name] = {name, subscribe, bulkPut, bulkPatch, all, one, get}
+  registry[name] = {name, subscribe, bulkPut, bulkPatch, put, patch, all, one, get}
 
   return registry[name]
 }
 
-const people = defineTable('people')
-const rooms = defineTable('rooms')
-const messages = defineTable('messages')
-const alerts = defineTable('alerts')
-const relays = defineTable('relays')
+const people = defineTable('people', 'pubkey')
+const rooms = defineTable('rooms', 'id')
+const messages = defineTable('messages', 'id')
+const alerts = defineTable('alerts', 'id')
+const relays = defineTable('relays', 'url')
 
 // Helper to allow us to listen to changes of any given table
 

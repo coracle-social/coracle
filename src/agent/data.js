@@ -125,7 +125,7 @@ const processRoomEvents = async events => {
     // if they don't have a name
     if (content.name) {
       updates[roomId] = {
-        joined: 0,
+        joined: false,
         ...room,
         ...updates[roomId],
         ...content,
