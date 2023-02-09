@@ -1,10 +1,10 @@
 <script>
-  import {without, assoc, uniq, sortBy} from 'ramda'
+  import {without, uniq, assoc, sortBy} from 'ramda'
   import {onMount} from "svelte"
   import {nip19} from 'nostr-tools'
   import {navigate} from "svelte-routing"
   import {fuzzy} from "src/util/misc"
-  import {getRelays, user, lq, database, listen, db} from 'src/agent'
+  import {getRelays, user, database, listen} from 'src/agent'
   import {modal, messages} from 'src/app'
   import loaders from 'src/app/loaders'
   import Room from "src/partials/Room.svelte"
@@ -18,9 +18,9 @@
 
   const {mostRecentByPubkey} = messages
 
-  const rooms = lq(async () => {
-    const rooms = await db.table('rooms').where('joined').equals(1).toArray()
-    const messages = await db.table('messages').toArray()
+  const rooms = database.watch(['rooms', 'messages'], async () => {
+    const rooms = await database.rooms.all({joined: 1})
+    const messages = await database.messages.all()
     const pubkeys = without([$user.pubkey], uniq(messages.flatMap(m => [m.pubkey, m.recipient])))
 
     await loaders.loadPeople(getRelays(), pubkeys)
@@ -30,8 +30,8 @@
       .concat(rooms.map(room => ({type: 'note', ...room})))
   })
 
-  const search = lq(async () => {
-    const rooms = await db.table('rooms').where('joined').equals(0).toArray()
+  const search = database.watch('rooms', async () => {
+    const rooms = await database.rooms.all({joined: 0})
 
     roomsCount = rooms.length
 
@@ -49,11 +49,11 @@
   }
 
   const joinRoom = id => {
-    db.table('rooms').where('id').equals(id).modify({joined: 1})
+    database.rooms.bulkPatch({id, joined: 1})
   }
 
   const leaveRoom = id => {
-    db.table('rooms').where('id').equals(id).modify({joined: 0})
+    database.rooms.bulkPatch({id, joined: 0})
   }
 
   onMount(() => {

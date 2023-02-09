@@ -1,7 +1,7 @@
 import {pluck, reject} from 'ramda'
 import {get} from 'svelte/store'
 import {synced, now, timedelta, batch} from 'src/util/misc'
-import {listen as _listen, db, user} from 'src/agent'
+import {listen as _listen, database, user} from 'src/agent'
 import loaders from 'src/app/loaders'
 
 let listener
@@ -23,10 +23,7 @@ const listen = async (relays, pubkey) => {
       const $user = get(user)
 
       // Reload annotated messages, don't alert about messages to self
-      const messages = reject(
-        e => e.pubkey === e.recipient,
-        await db.table('messages').toArray()
-      )
+      const messages = reject(e => e.pubkey === e.recipient, await database.messages.all())
 
       if (messages.length > 0) {
         await loaders.loadPeople(relays, pluck('pubkey', messages))

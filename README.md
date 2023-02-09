@@ -54,12 +54,16 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Maintenance
 
+- [ ] Stop using until to paginate, we skip a ton of stuff. Or use until per relay?
+  - Or just stop doing loading and listen
+- [ ] If the latest message in a dm was the user, don't show notification
 - [ ] Normalize relay urls (lowercase, strip trailing slash)
 - [ ] Use nip 56 for reporting
   - https://github.com/nostr-protocol/nips/pull/205#issuecomment-1419234230
 - [ ] Change network tab to list relays the user is connected to
 - [ ] Sync mentions box and in-reply mentions
 - [ ] Channels
+  - [ ] Damus has chats divided into DMs and requests
   - [ ] Ability to leave/mute DM conversation
   - [ ] Add petnames for channels
   - [ ] Add notifications for chat messages

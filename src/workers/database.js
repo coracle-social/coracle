@@ -1,5 +1,5 @@
 import lf from 'localforage'
-import {complement, equals, isNil, pipe, prop, identity, allPass} from 'ramda'
+import {is, complement, equals, isNil, pipe, prop, identity, allPass} from 'ramda'
 import {switcherFn} from 'hurdak/lib/hurdak'
 
 const stores = {}
@@ -35,9 +35,11 @@ addEventListener('message', async ({data: {topic, payload, channel}}) => {
               modifier = complement
             }
 
-            if (operator === 'eq') {
+            if (operator === 'eq' && is(Array, value)) {
+              test = v => value.includes(v)
+            } else if (operator === 'eq') {
               test = equals(value)
-            } if (operator === 'nil') {
+            } else if (operator === 'nil') {
               test = isNil
             } else {
               throw new Error(`Invalid operator ${operator}`)

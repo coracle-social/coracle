@@ -2,7 +2,7 @@
   import {fly} from 'svelte/transition'
   import Anchor from 'src/partials/Anchor.svelte'
   import Content from "src/partials/Content.svelte"
-  import {db} from 'src/agent'
+  import {db, database} from 'src/agent'
 
   let confirmed = false
 
@@ -10,6 +10,8 @@
     confirmed = true
 
     localStorage.clear()
+
+    await database.clearAll()
 
     try {
       await db.delete()

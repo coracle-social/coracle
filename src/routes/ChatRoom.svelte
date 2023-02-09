@@ -3,7 +3,7 @@
   import {nip19} from 'nostr-tools'
   import {now, batch} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {lq, getRelays, user, db, listen, load} from 'src/agent'
+  import {getRelays, user, database, listen, load} from 'src/agent'
   import {modal} from 'src/app'
   import loaders from 'src/app/loaders'
   import cmd from 'src/app/cmd'
@@ -11,7 +11,7 @@
   export let entity
 
   let {data: roomId} = nip19.decode(entity) as {data: string}
-  let room = lq(() => db.table('rooms').where('id').equals(roomId).first())
+  let room = database.watch('rooms', rooms => rooms.get(roomId))
 
   const getRoomRelays = $room => {
     let relays = getRelays()
@@ -24,9 +24,7 @@
   }
 
   const listenForMessages = async cb => {
-    // Make sure we have our room so we can calculate relays
-    const $room = await db.table('rooms').where('id').equals(roomId).first()
-    const relays = getRoomRelays($room)
+    const relays = getRoomRelays(database.rooms.get(roomId))
 
     return listen(
       relays,

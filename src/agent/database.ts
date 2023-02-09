@@ -1,3 +1,4 @@
+import {debounce} from 'throttle-debounce'
 import {is, prop, without} from 'ramda'
 import {writable} from 'svelte/store'
 import {switcherFn, ensurePlural, first} from 'hurdak/lib/hurdak'
@@ -14,7 +15,8 @@ type Table = {
   name: string
   subscribe: (subscription: (value: any) => void) => (() => void)
   bulkPut: (data: object) => void
-  all: (where: object) => Promise<any>
+  bulkPatch: (data: object) => void
+  all: (where?: object) => Promise<any>
   get: (key: string) => any
 }
 
@@ -29,7 +31,11 @@ class Channel {
   onMessage: (e: MessageEvent) => void
   constructor({onMessage}) {
     this.id = Math.random().toString().slice(2)
-    this.onMessage = e => onMessage(e.data as Message)
+    this.onMessage = e => {
+      if (e.data.channel === this.id) {
+        onMessage(e.data as Message)
+      }
+    }
 
     worker.addEventListener('message', this.onMessage)
   }
@@ -70,9 +76,10 @@ const callLocalforage = async (storeName, method, ...args) => {
 const getItem = (storeName, ...args) => callLocalforage(storeName, 'getItem', ...args)
 const setItem = (storeName, ...args) => callLocalforage(storeName, 'setItem', ...args)
 const removeItem = (storeName, ...args) => callLocalforage(storeName, 'removeItem', ...args)
-const length = (storeName) => callLocalforage(storeName, 'length')
-const clear = (storeName) => callLocalforage(storeName, 'clear')
-const keys = (storeName) => callLocalforage(storeName, 'keys')
+
+const length = storeName => callLocalforage(storeName, 'length')
+const clear = storeName => callLocalforage(storeName, 'clear')
+const keys = storeName => callLocalforage(storeName, 'keys')
 
 const iterate = (storeName, where = {}) => ({
   [Symbol.asyncIterator]() {
@@ -89,6 +96,9 @@ const iterate = (storeName, where = {}) => ({
           done = true
           promise.resolve()
           channel.close()
+        },
+        default: () => {
+          throw new Error(`Invalid topic ${m.topic}`)
         },
       }),
     })
@@ -147,7 +157,11 @@ const defineTable = (name: string): Table => {
     }
   }
 
-  const bulkPut = newData => {
+  const bulkPut = (newData: Record<string, object>): void => {
+    if (is(Array, newData)) {
+      throw new Error(`Updates must be an object, not an array`)
+    }
+
     setAndNotify({...data, ...newData})
 
     // Sync to storage, keeping updates in order
@@ -159,6 +173,19 @@ const defineTable = (name: string): Table => {
 
       return Promise.all(updates)
     }) as Promise<void>
+  }
+
+  const bulkPatch = (updates: Record<string, object>): void => {
+    if (is(Array, updates)) {
+      throw new Error(`Updates must be an object, not an array`)
+    }
+
+    const newData = {}
+    for (const [k, v] of Object.entries(updates)) {
+      newData[k] = {...data[k], ...v}
+    }
+
+    bulkPut(newData)
   }
 
   const all = (where = {}) => asyncIterableToArray(iterate(name, where), prop('v'))
@@ -175,12 +202,14 @@ const defineTable = (name: string): Table => {
     setAndNotify(initialData)
   })()
 
-  registry[name] = {name, subscribe, bulkPut, all, one, get}
+  registry[name] = {name, subscribe, bulkPut, bulkPatch, all, one, get}
 
   return registry[name]
 }
 
 const people = defineTable('people')
+const rooms = defineTable('rooms')
+const messages = defineTable('messages')
 
 // Helper to allow us to listen to changes of any given table
 
@@ -218,10 +247,13 @@ const watch = (names, f) => {
     store.set(initialValue)
   }
 
+  // Debounce refresh so we don't get UI lag
+  const refresh = debounce(300, async () => store.set(await f(...tables)))
+
   // Listen for changes
-  listener.subscribe(async name => {
+  listener.subscribe(name => {
     if (names.includes(name)) {
-      store.set(await f(...tables))
+      refresh()
     }
   })
 
@@ -232,7 +264,9 @@ const watch = (names, f) => {
 
 const getPersonWithFallback = pubkey => people.get(pubkey) || {pubkey}
 
+const clearAll = () => Promise.all(Object.keys(registry).map(clear))
+
 export default {
   getItem, setItem, removeItem, length, clear, keys, iterate,
-  watch, getPersonWithFallback, people,
+  watch, getPersonWithFallback, clearAll, people, rooms, messages,
 }

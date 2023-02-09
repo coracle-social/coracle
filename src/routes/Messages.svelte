@@ -4,7 +4,7 @@
   import {personKinds} from 'src/util/nostr'
   import {batch, now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {database, getRelays, user, db, listen, keys} from 'src/agent'
+  import {database, getRelays, user, listen, keys} from 'src/agent'
   import {messages} from 'src/app'
   import {routes} from 'src/app/ui'
   import cmd from 'src/app/cmd'
@@ -36,15 +36,15 @@
     batch(300, async events => {
       // Reload from db since we annotate messages there
       const messageIds = pluck('id', events.filter(e => e.kind === 4))
-      const messages = await db.table('messages').where('id').anyOf(messageIds).toArray()
+      const messages = await database.messages.all({id: messageIds})
 
       cb(await decryptMessages(messages))
     })
   )
 
   const loadMessages = async ({until, limit}) => {
-    const fromThem = await db.table('messages').where('pubkey').equals(pubkey).toArray()
-    const toThem = await db.table('messages').where('recipient').equals(pubkey).toArray()
+    const fromThem = await database.messages.all({pubkey})
+    const toThem = await database.messages.all({recipient: pubkey})
     const events = fromThem.concat(toThem).filter(e => e.created_at < until)
     const messages = sortBy(e => -e.created_at, events).slice(0, limit)
 

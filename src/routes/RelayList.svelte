@@ -105,8 +105,8 @@
       <i slot="before" class="fa-solid fa-search" />
     </Input>
     {/if}
-    {#each (search(q) || []).slice(0, 50) as relay, i (relay.url)}
-    <RelayCard {relay} {i} />
+    {#each (search(q) || []).slice(0, 50) as relay (relay.url)}
+    <RelayCard {relay} />
     {/each}
     <small class="text-center">
       Showing {Math.min(($knownRelays || []).length - relays.length, 50)}

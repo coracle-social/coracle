@@ -1,7 +1,7 @@
 import Dexie, {liveQuery} from 'dexie'
 import {pick, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
-import {noop, ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
+import {noop, createMap, ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
 import {now} from 'src/util/misc'
 import {personKinds, Tags, roomAttrs, isRelay} from 'src/util/nostr'
 import database from 'src/agent/database'
@@ -19,8 +19,6 @@ export const db = new Dexie('agent/data/db')
 db.version(13).stores({
   relays: '++url, name',
   alerts: '++id, created_at',
-  messages: '++id, pubkey, recipient',
-  rooms: '++id, joined',
 })
 
 export const updatePeople = async updates => {
@@ -132,7 +130,7 @@ const processRoomEvents = async events => {
       continue
     }
 
-    const room = await db.table('rooms').get(roomId)
+    const room = await database.rooms.get(roomId)
 
     // Merge edits but don't let old ones override new ones
     if (room?.edited_at >= e.created_at) {
@@ -156,7 +154,7 @@ const processRoomEvents = async events => {
   }
 
   if (!isEmpty(updates)) {
-    await db.table('rooms').bulkPut(Object.values(updates))
+    await database.rooms.bulkPut(updates)
   }
 }
 
@@ -165,8 +163,9 @@ const processMessages = async events => {
     .filter(e => e.kind === 4)
     .map(e => ({...e, recipient: Tags.from(e).type("p").values().first()}))
 
+
   if (messages.length > 0) {
-    await db.table('messages').bulkPut(messages)
+    await database.messages.bulkPut(createMap('id', messages))
   }
 }
 
