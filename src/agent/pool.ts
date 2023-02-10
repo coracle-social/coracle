@@ -1,25 +1,23 @@
 import type {Relay} from 'nostr-tools'
 import {relayInit} from 'nostr-tools'
-import {uniqBy, reject, prop, find, whereEq, is} from 'ramda'
+import {uniqBy, prop, find, is} from 'ramda'
 import {ensurePlural} from 'hurdak/lib/hurdak'
 import {isRelay} from 'src/util/nostr'
 import {sleep} from 'src/util/misc'
 import database from 'src/agent/database'
 
-let connections = []
+const connections = []
 
 class Connection {
   promise: Promise<void>
   nostr: Relay
   status: string
-  url: string
   stats: Record<string, number>
-  lastRequest: number
+  lastConnectionAttempt: number
   constructor(url) {
     this.promise = null
-    this.nostr = this.init(url)
+    this.nostr = relayInit(url)
     this.status = 'new'
-    this.url = url
     this.stats = {
       count: 0,
       timer: 0,
@@ -29,21 +27,12 @@ class Connection {
 
     connections.push(this)
   }
-  init(url) {
-    const nostr = relayInit(url)
-
-    nostr.on('disconnect', () => {
-      connections = reject(whereEq({url}), connections)
-    })
-
-    return nostr
-  }
   async connect() {
     const shouldConnect = (
       this.status === 'new'
       || (
         this.status === 'error'
-        && Date.now() - this.lastRequest > 30_000
+        && Date.now() - this.lastConnectionAttempt > 60_000
       )
     )
 
@@ -61,7 +50,7 @@ class Connection {
       }
     }
 
-    this.lastRequest = Date.now()
+    this.lastConnectionAttempt = Date.now()
 
     return this
   }
@@ -78,7 +67,7 @@ class Connection {
 
 const getConnections = () => connections
 
-const findConnection = url => find(whereEq({url}), connections)
+const findConnection = url => find(c => c.nostr.url === url, connections)
 
 const connect = async url => {
   const conn = findConnection(url) || new Connection(url)
@@ -148,19 +137,19 @@ const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: 
         if (!seen.has(e.id)) {
           seen.add(e.id)
 
-          onEvent(Object.assign(e, {seen_on: conn.url}))
+          onEvent(Object.assign(e, {seen_on: conn.nostr.url}))
         }
       })
     }
 
     if (onEose) {
-      sub.on('eose', () => onEose(conn.url))
+      sub.on('eose', () => onEose(conn.nostr.url))
     }
 
     conn.stats.activeCount += 1
 
     if (conn.stats.activeCount > 10) {
-      console.warn(`Relay ${conn.url} has >10 active subscriptions`)
+      console.warn(`Relay ${conn.nostr.url} has >10 active subscriptions`)
     }
 
     return Object.assign(sub, {conn})

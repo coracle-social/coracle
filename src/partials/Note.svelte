@@ -9,7 +9,7 @@
   import {extractUrls} from "src/util/html"
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
-  import {settings, modal, renderNote} from "src/app"
+  import {toast, settings, modal, renderNote} from "src/app"
   import {formatTimestamp} from 'src/util/misc'
   import Badge from "src/partials/Badge.svelte"
   import Compose from "src/partials/Compose.svelte"
@@ -106,12 +106,25 @@
     replyMentions = getDefaultReplyMentions()
   }
 
-  const sendReply = () => {
+  const sendReply = async () => {
     let {content, mentions, topics} = reply.parse()
 
     if (content) {
       mentions = uniq(mentions.concat(replyMentions))
-      cmd.createReply(getEventRelays(note), note, content, mentions, topics)
+
+      const relays = getEventRelays(note)
+      const event = await cmd.createReply(relays, note, content, mentions, topics)
+
+      toast.show("info", {
+        text: `Your note has been created!`,
+        link: {
+          text: 'View',
+          href: "/" + nip19.neventEncode({
+            id: event.id,
+            relays: pluck('url', relays.slice(0, 5)),
+          }),
+        },
+      })
 
       resetReply()
     }

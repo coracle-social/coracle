@@ -73,12 +73,15 @@ If you like Coracle and want to support its development, you can donate sats via
 # Current
 
 - [ ] Implement gossip model https://bountsr.org/code/2023/02/03/gossip-model.html
-  - [ ] Add nip 05 to calculation
-  - [ ] Add connection failures to calculation
+  - [_] Add nip 05 to calculation
 - [ ] Make feeds page customizable. This could potentially use the "lists" NIP
 - [ ] Show notification at top of feeds: "Showing notes from 3 relays". Click to customize.
 - [ ] Click through on relays page to view a feed for only that relay.
 - [ ] Custom views: slider between fast/complete with a warning at either extreme
+- [ ] Deterministically calculate color for relays, show it on notes. User popper?
+- [ ] Likes list
+- [ ] Fix anon/new user experience
+- [ ] Stream likes rather than load, they're probably what is slowing things down. Figure out how to multiplex them, or store them in the database by count
 
 # Changelog
 

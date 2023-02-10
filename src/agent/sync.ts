@@ -1,4 +1,4 @@
-import {pick, isEmpty} from 'ramda'
+import {pick, identity, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
 import {noop, createMap, ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
 import {now, timedelta, shuffle, hash} from 'src/util/misc'
@@ -31,8 +31,10 @@ const processProfileEvents = async events => {
             const content = JSON.parse(e.content)
 
             // Fire off a nip05 verification
-            if (content.nip05) {
+            if (content.nip05 && e.created_at > (person.nip05_updated_at || 0)) {
               verifyNip05(e.pubkey, content.nip05)
+
+              content.nip05_updated_at = e.created_at
             }
 
             return content
@@ -146,41 +148,45 @@ const processMessages = async events => {
   }
 }
 
+// Routes
+
+const getWeight = type => {
+  if (type === 'kind:10001') return 1
+  if (type === 'kind:3') return 0.8
+  if (type === 'kind:2') return 0.5
+  if (type === 'seen') return 0.2
+  if (type === 'tag') return 0.1
+}
+
+const calculateRoute = (pubkey, url, type, mode, created_at) => {
+  if (!isRelay(url)) {
+    return
+  }
+
+  const id = hash([pubkey, url, mode].join('')).toString()
+  const score = getWeight(type) * (1 - (now() - created_at) / timedelta(30, 'days'))
+  const route = database.routes.get(id) || {id, pubkey, url, mode, score: 0, count: 0}
+  const newTotalScore = route.score * route.count + score
+  const newCount = route.count + 1
+
+  if (score > 0) {
+    return {...route, count: newCount, score: newTotalScore / newCount}
+  }
+}
+
 const processRoutes = async events => {
+  const updates = []
+
   // Sample events so we're not burning too many resources
-  events = ensurePlural(shuffle(events)).slice(0, 10)
-
-  const updates = {}
-
-  const getWeight = type => {
-    if (type === 'kind:10001') return 1
-    if (type === 'kind:3') return 0.8
-    if (type === 'kind:2') return 0.5
-    if (type === 'seen') return 0.2
-    if (type === 'tag') return 0.1
-  }
-
-  const putRoute = (pubkey, url, type, mode, created_at) => {
-    if (!isRelay(url)) {
-      return
-    }
-
-    const id = hash([pubkey, url, mode].join('')).toString()
-    const score = getWeight(type) * (1 - (now() - created_at) / timedelta(30, 'days'))
-    const route = database.routes.get(id) || {id, pubkey, url, mode, score: 0, count: 0}
-    const newTotalScore = route.score * route.count + score
-    const newCount = route.count + 1
-
-    if (score > 0) {
-      updates[id] = {...route, count: newCount, score: newTotalScore / newCount}
-    }
-  }
-
-  for (const e of events) {
+  for (const e of ensurePlural(shuffle(events)).slice(0, 10)) {
     switcherFn(e.kind, {
       2: () => {
-        putRoute(e.pubkey, e.content, 'kind:2', 'read', e.created_at)
-        putRoute(e.pubkey, e.content, 'kind:2', 'write', e.created_at)
+        updates.push(
+          calculateRoute(e.pubkey, e.content, 'kind:2', 'read', e.created_at)
+        )
+        updates.push(
+          calculateRoute(e.pubkey, e.content, 'kind:2', 'write', e.created_at)
+        )
       },
       3: () => {
         tryJson(() => {
@@ -189,11 +195,15 @@ const processRoutes = async events => {
               const {write, read} = conditions as Record<string, boolean|string>
 
               if (![false, '!'].includes(write)) {
-                putRoute(e.pubkey, url, 'kind:3', 'write', e.created_at)
+                updates.push(
+                  calculateRoute(e.pubkey, url, 'kind:3', 'write', e.created_at)
+                )
               }
 
               if (![false, '!'].includes(read)) {
-                putRoute(e.pubkey, url, 'kind:3', 'read', e.created_at)
+                updates.push(
+                  calculateRoute(e.pubkey, url, 'kind:3', 'read', e.created_at)
+                )
               }
             })
         })
@@ -202,11 +212,15 @@ const processRoutes = async events => {
         e.tags
           .forEach(([url, read, write]) => {
             if (![false, '!'].includes(write)) {
-              putRoute(e.pubkey, url, 'kind:100001', 'write', e.created_at)
+              updates.push(
+                calculateRoute(e.pubkey, url, 'kind:100001', 'write', e.created_at)
+              )
             }
 
             if (![false, '!'].includes(read)) {
-              putRoute(e.pubkey, url, 'kind:100001', 'read', e.created_at)
+              updates.push(
+                calculateRoute(e.pubkey, url, 'kind:100001', 'read', e.created_at)
+              )
             }
           })
       },
@@ -216,13 +230,15 @@ const processRoutes = async events => {
     // Add tag hints
     events.forEach(e => {
       Tags.wrap(e.tags).type("p").all().forEach(([_, pubkey, url]) => {
-        putRoute(pubkey, url, 'tag', 'write', e.created_at)
+        updates.push(
+          calculateRoute(pubkey, url, 'tag', 'write', e.created_at)
+        )
       })
     })
   }
 
   if (!isEmpty(updates)) {
-    await database.routes.bulkPut(updates)
+    await database.routes.bulkPut(createMap('id', updates.filter(identity)))
   }
 }
 
@@ -244,6 +260,16 @@ const verifyNip05 = (pubkey, as) =>
       const person = database.getPersonWithFallback(pubkey)
 
       database.people.patch({...person, verified_as: as})
+
+      if (result.relays?.length > 0) {
+        console.log('===== NIP05 VERIFICATION RELAYS', result.relays)
+        // database.routes.bulkPut(
+        //   createMap('id', result.relays.flatMap(url =>[
+        //     calculateRoute(pubkey, url, 'nip05', 'write', now()),
+        //     calculateRoute(pubkey, url, 'nip05', 'read', now()),
+        //   ]))
+        // )
+      }
     }
   }, noop)
 
