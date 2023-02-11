@@ -11,12 +11,11 @@
   let mode = 'input', video, ready, value, scanner
 
   const onDecode = result => {
-    console.log(result)
     goToEntity(result.data)
   }
 
   const goToEntity = entity => {
-    navigate(`/${entity}`)
+    navigate("/" + entity.replace('nostr:', ''))
   }
 
   const setMode = async newMode => {

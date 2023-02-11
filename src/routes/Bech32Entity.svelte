@@ -34,7 +34,7 @@
   <Person npub={entity} activeTab="notes" />
 {:else}
   <Content size="lg" class="text-center">
-    <div>Sorry, we weren't able to find {entity}.</div>
+    <div>Sorry, we weren't able to find "{entity}".</div>
   </Content>
 {/if}
 
