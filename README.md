@@ -85,6 +85,10 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Changelog
 
+## 0.2.12
+
+
+
 ## 0.2.11
 
 - [x] Converted threshold to percentage

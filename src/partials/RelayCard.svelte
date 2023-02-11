@@ -50,7 +50,7 @@
         class:bg-success={status === 'ready'}>
       </span>
       <p
-        class="text-light text-sm transition-all"
+        class="text-light text-sm transition-all hidden sm:block"
         class:opacity-0={!showStatus}
         class:opacity-1={showStatus}>
         {switcher(status, {

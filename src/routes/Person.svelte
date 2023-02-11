@@ -12,7 +12,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
-  import Network from "src/views/person/Network.svelte"
+  import Relays from "src/views/person/Relays.svelte"
   import {getPubkeyRelays, getUserRelays, user} from "src/agent/helpers"
   import network from "src/agent/network"
   import keys from "src/agent/keys"
@@ -157,15 +157,15 @@
     </div>
   </div>
 
-  <Tabs tabs={['notes', 'likes', 'network']} {activeTab} {setActiveTab} />
+  <Tabs tabs={['notes', 'likes', 'relays']} {activeTab} {setActiveTab} />
 
   {#if activeTab === 'notes'}
   <Notes {pubkey} />
   {:else if activeTab === 'likes'}
   <Likes {pubkey} />
-  {:else if activeTab === 'network'}
+  {:else if activeTab === 'relays'}
     {#if person?.petnames}
-    <Network person={person} />
+    <Relays person={person} />
     {:else if loading}
     <Spinner />
     {:else}
