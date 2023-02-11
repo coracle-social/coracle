@@ -146,7 +146,7 @@
             {/if}
           {/if}
           <Anchor type="button-circle" on:click={share}>
-            <i class="fa fa-qrcode" />
+            <i class="fa fa-share-nodes" />
           </Anchor>
         </div>
       </div>

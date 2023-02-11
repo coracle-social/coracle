@@ -28,4 +28,7 @@
   <Input value={nprofile}>
     <button slot="after" class="fa fa-copy" on:click={copyKey} />
   </Input>
+  <div class="text-center text-light">
+    Copy or scan from a nostr app to share this profile.
+  </div>
 </Content>

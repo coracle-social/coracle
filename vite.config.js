@@ -1,10 +1,14 @@
 import * as path from 'path'
 import { defineConfig } from 'vite'
+import mkcert from 'vite-plugin-mkcert'
 import sveltePreprocess from 'svelte-preprocess'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig({
+  server: {
+    https: false,
+  },
   build: {
     sourcemap: true,
   },
@@ -14,6 +18,7 @@ export default defineConfig({
     }
   },
   plugins: [
+    mkcert(),
     nodePolyfills({
       protocolImports: true,
     }),

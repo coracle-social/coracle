@@ -1,26 +1,20 @@
 <script>
-  import Input from "src/partials/Input.svelte"
+  import {navigate} from 'svelte-routing'
   import Content from 'src/partials/Content.svelte'
+  import Tabs from 'src/partials/Tabs.svelte'
   import SearchPeople from 'src/views/SearchPeople.svelte'
-  import SearchNotes from 'src/views/SearchNotes.svelte'
+  import Scan from 'src/views/Scan.svelte'
 
   export let activeTab
 
-  let q = ''
-
-  // const setActiveTab = tab => navigate(`/search/${tab}`)
+  const setActiveTab = tab => navigate(`/search/${tab}`)
 </script>
 
 <Content>
-  <!--
-  <Tabs tabs={['people', 'notes']} {activeTab} {setActiveTab} />
-  -->
-  <Input bind:value={q} placeholder="Search for people">
-    <i slot="before" class="fa-solid fa-search" />
-  </Input>
+  <Tabs tabs={['people', 'advanced']} {activeTab} {setActiveTab} />
   {#if activeTab === 'people'}
-  <SearchPeople {q} />
-  {:else if activeTab === 'notes'}
-  <SearchNotes {q} />
+  <SearchPeople />
+  {:else if activeTab === 'advanced'}
+  <Scan />
   {/if}
 </Content>

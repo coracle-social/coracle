@@ -105,7 +105,7 @@ const processRoomEvents = async events => {
     const content = tryJson(() => pick(roomAttrs, JSON.parse(e.content))) as Record<string, any>
     const roomId = e.kind === 40 ? e.id : Tags.from(e).type("e").values().first()
 
-    if (!roomId) {
+    if (!roomId || !content) {
       continue
     }
 
@@ -151,6 +151,7 @@ const processMessages = async events => {
 // Routes
 
 const getWeight = type => {
+  if (type === 'nip05') return 1
   if (type === 'kind:10001') return 1
   if (type === 'kind:3') return 0.8
   if (type === 'kind:2') return 0.5
@@ -262,13 +263,12 @@ const verifyNip05 = (pubkey, as) =>
       database.people.patch({...person, verified_as: as})
 
       if (result.relays?.length > 0) {
-        console.log('===== NIP05 VERIFICATION RELAYS', result.relays)
-        // database.routes.bulkPut(
-        //   createMap('id', result.relays.flatMap(url =>[
-        //     calculateRoute(pubkey, url, 'nip05', 'write', now()),
-        //     calculateRoute(pubkey, url, 'nip05', 'read', now()),
-        //   ]))
-        // )
+        database.routes.bulkPut(
+          createMap('id', result.relays.filter(isRelay).flatMap(url =>[
+            calculateRoute(pubkey, url, 'nip05', 'write', now()),
+            calculateRoute(pubkey, url, 'nip05', 'read', now()),
+          ]))
+        )
       }
     }
   }, noop)
