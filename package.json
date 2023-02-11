@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
     "check:es": "eslint src/*/** --quiet",
@@ -39,6 +39,7 @@
     "localforage-memoryStorageDriver": "^0.9.2",
     "nostr-tools": "^1.2.1",
     "npm-run-all": "^4.1.5",
+    "qrcode": "^1.5.1",
     "ramda": "^0.28.0",
     "svelte-check": "^3.0.3",
     "svelte-link-preview": "^0.3.3",

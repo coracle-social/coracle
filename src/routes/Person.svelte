@@ -93,6 +93,10 @@
   const openAdvanced = () => {
     modal.set({type: 'person/settings', person})
   }
+
+  const share = () => {
+    modal.set({type: 'person/share', person})
+  }
 </script>
 
 <div
@@ -141,6 +145,9 @@
             </Anchor>
             {/if}
           {/if}
+          <Anchor type="button-circle" on:click={share}>
+            <i class="fa fa-qrcode" />
+          </Anchor>
         </div>
       </div>
       <p>{@html renderContent(person.about || '')}</p>

@@ -31,6 +31,7 @@
   import PubKeyLogin from "src/views/PubKeyLogin.svelte"
   import NoteDetail from "src/views/NoteDetail.svelte"
   import PersonSettings from "src/views/PersonSettings.svelte"
+  import PersonShare from "src/views/PersonShare.svelte"
   import NoteCreate from "src/views/NoteCreate.svelte"
   import ChatEdit from "src/views/ChatEdit.svelte"
   import NotFound from "src/routes/NotFound.svelte"
@@ -109,12 +110,12 @@
       console.log(
         'Connection stats',
         pool.getConnections()
-          .map(({url, stats: s}) => ({url, avgRequest: s.timer / s.count}))
+          .map(({nostr: {url}, stats: s}) => ({url, avgRequest: s.timer / s.count}))
       )
 
       // Alert the user to any heinously slow connections
       slowConnections = pool.getConnections()
-        .filter(({url, stats: s}) => relayUrls.includes(url) && s.timer / s.count > 3000)
+        .filter(({nostr: {url}, stats: s}) => relayUrls.includes(url) && s.timer / s.count > 3000)
     }
 
     const retrieveRelayMeta = async () => {
@@ -360,6 +361,8 @@
         <PubKeyLogin />
       {:else if $modal.type === 'person/settings'}
         <PersonSettings />
+      {:else if $modal.type === 'person/share'}
+        <PersonShare />
       {:else if $modal.type === 'person/list'}
         <PersonList pubkeys={$modal.pubkeys} />
       {:else if $modal.type === 'message'}
