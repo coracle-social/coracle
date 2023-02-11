@@ -47,7 +47,9 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Support relay auth
 - [ ] Support invoices, tips, zaps https://twitter.com/jb55/status/1604131336247476224
 - [ ] Separate settings for read, write, and broadcast relays based on NIP 65
-- [ ] Release to android with https://svelte-native.technology/docs
+- [ ] Release to android
+  - https://svelte-native.technology/docs
+  - https://ionic.io/blog/capacitor-everything-youve-ever-wanted-to-know
 - [ ] Add no-relay gossip
   - Capture certain events in a local db
   - File import/export from db, NFC transfer
@@ -82,6 +84,10 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Likes list
 - [ ] Fix anon/new user experience
 - [ ] Stream likes rather than load, they're probably what is slowing things down. Figure out how to multiplex them, or store them in the database by count
+  - Stream likes and replies, only load parent up front
+  - Show full thread on detail view - fetch parent, load all descendants, highlight anchor
+- [ ] Likes are slow
+- [ ] Show loading on replies/notes
 
 # Changelog
 

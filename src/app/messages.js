@@ -1,6 +1,6 @@
 import {pluck, reject} from 'ramda'
 import {get} from 'svelte/store'
-import {synced, now, timedelta, batch} from 'src/util/misc'
+import {synced, now, timedelta} from 'src/util/misc'
 import {user} from 'src/agent/helpers'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
@@ -20,7 +20,7 @@ const listen = async (relays, pubkey) => {
     relays,
     [{kinds: [4], authors: [pubkey], since},
      {kinds: [4], '#p': [pubkey], since}],
-    batch(300, async events => {
+    async events => {
       const $user = get(user)
 
       // Reload annotated messages, don't alert about messages to self
@@ -39,7 +39,7 @@ const listen = async (relays, pubkey) => {
           return o
         })
       }
-    })
+    }
   )
 }
 

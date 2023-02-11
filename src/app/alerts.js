@@ -1,11 +1,11 @@
 import {get} from 'svelte/store'
 import {groupBy, pluck, partition, propEq} from 'ramda'
 import {createMap} from 'hurdak/lib/hurdak'
-import {synced, timedelta, batch, now} from 'src/util/misc'
+import {synced, timedelta, now} from 'src/util/misc'
 import {isAlert, findReplyId} from 'src/util/nostr'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
-import {annotate} from 'src/app'
+import {asDisplayEvent, mergeParents} from 'src/app'
 
 let listener
 
@@ -16,13 +16,13 @@ const onChunk = async (relays, pubkey, events) => {
   events = events.filter(e => isAlert(e, pubkey))
 
   if (events.length > 0) {
-    const context = await network.loadContext(relays, events)
+    const parents = await network.loadParents(relays, events)
     const [likes, notes] = partition(propEq('kind', 7), events)
-    const annotatedNotes = notes.map(n => annotate(n, context))
+    const annotatedNotes = mergeParents(notes.concat(parents).map(asDisplayEvent))
     const likesByParent = groupBy(findReplyId, likes)
-    const likedNotes = context
+    const likedNotes = parents
       .filter(e => likesByParent[e.id])
-      .map(e => annotate({...e, likedBy: pluck('pubkey', likesByParent[e.id])}, context))
+      .map(e => asDisplayEvent({...e, likedBy: pluck('pubkey', likesByParent[e.id])}))
 
     await database.alerts.bulkPut(createMap('id', annotatedNotes.concat(likedNotes)))
 
@@ -52,9 +52,9 @@ const listen = async (relays, pubkey) => {
   listener = await network.listen(
     relays,
     {kinds: [1, 7], '#p': [pubkey], since: now()},
-    batch(300, events => {
+    events => {
       onChunk(relays, pubkey, events)
-    })
+    }
   )
 }
 

@@ -1,5 +1,5 @@
-import type {Person} from 'src/util/types'
-import {pluck, whereEq, sortBy, identity, when, assoc, reject} from 'ramda'
+import type {Person, DisplayEvent} from 'src/util/types'
+import {groupBy, whereEq, identity, when, assoc, reject} from 'ramda'
 import {navigate} from 'svelte-routing'
 import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
@@ -124,46 +124,15 @@ export const renderNote = (note, {showEntire = false}) => {
   return content
 }
 
-export const annotate = (note, context) => {
-  const reactions = context.filter(e => e.kind === 7 && findReplyId(e) === note.id)
-  const replies = context.filter(e => e.kind === 1 && findReplyId(e) === note.id)
+export const asDisplayEvent = event =>
+  ({children: [], replies: [], reactions: [], ...event})
 
-  return {
-    ...note, reactions,
-    person: database.people.get(note.pubkey),
-    replies: sortBy(e => e.created_at, replies).map(r => annotate(r, context)),
-  }
-}
+export const mergeParents = (notes: Array<DisplayEvent>) => {
+  const m = createMap('id', notes)
 
-export const threadify = (events, context, {muffle = [], showReplies = true} = {}) => {
-  const contextById = createMap('id', events.concat(context))
-
-  // Show parents when possible. For reactions, if there's no parent,
-  // throw it away. Sort by created date descending
-  const notes = sortBy(
-    e => -e.created_at,
-    events
-      .map(e => contextById[findReplyId(e)] || (e.kind === 1 ? e : null))
-      .filter(e => e && !muffle.includes(e.pubkey))
-  )
-
-  if (!showReplies) {
-    return notes.filter(note => !findReplyId(note)).map(n => annotate(n, context))
-  }
-
-  // Don't show notes that will also show up as children
-  const noteIds = new Set(pluck('id', notes))
-
-  // Annotate our feed with parents, reactions, replies.
-  return notes
-    .filter(note => !noteIds.has(findReplyId(note)))
-    .map(note => {
-      let parent = contextById[findReplyId(note)]
-
-      if (parent) {
-        parent = annotate(parent, context)
-      }
-
-      return annotate({...note, parent}, context)
-    })
+  return Object.entries(groupBy(findReplyId, notes))
+    // Substiture parent and add notes as children
+    .flatMap(([p, children]) => m[p] ? [{...m[p], children}] : children)
+    // Remove replies where we failed to find a parent
+    .filter((note: DisplayEvent) => !findReplyId(note) || note.children.length > 0)
 }

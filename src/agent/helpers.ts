@@ -1,4 +1,4 @@
-import type {Person} from 'src/util/types'
+import type {Person, MyEvent} from 'src/util/types'
 import type {Readable} from 'svelte/store'
 import {isEmpty, pick, identity, sortBy, uniq, reject, groupBy, last, propEq, uniqBy, prop} from 'ramda'
 import {first} from 'hurdak/lib/hurdak'
@@ -69,6 +69,9 @@ export const getEventRelays = event => {
       .concat({url: event.seen_on})
   )
 }
+
+export const getTopRelaysFromEvents = (events: Array<MyEvent>) =>
+  uniqBy(prop('url'), events.map(e => getBestRelay(e.pubkey) || {url: e.seen_on}))
 
 export const getStalePubkeys = pubkeys => {
   // If we're not reloading, only get pubkeys we don't already know about

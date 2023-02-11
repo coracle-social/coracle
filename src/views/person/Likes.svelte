@@ -1,31 +1,12 @@
 <script>
   import Notes from "src/partials/Notes.svelte"
-  import {now, batch, Cursor} from 'src/util/misc'
-  import {getPubkeyRelays, getMuffle} from 'src/agent/helpers'
-  import network from 'src/agent/network'
-  import {threadify} from 'src/app'
+  import {getPubkeyRelays} from 'src/agent/helpers'
 
   export let pubkey
 
   const relays = getPubkeyRelays(pubkey, 'write')
   const filter = {kinds: [7], authors: [pubkey]}
-  const cursor = new Cursor()
-
-  const listenForNotes = onNotes =>
-    network.listen(relays, {...filter, since: now()}, batch(300, async notes => {
-      const context = await network.loadContext(relays, notes)
-
-      onNotes(threadify(notes, context, {muffle: getMuffle()}))
-    }))
-
-  const loadNotes = async () => {
-    const {limit, until} = cursor
-    const notes = await network.load(relays, {...filter, limit, until})
-    const context = await network.loadContext(relays, notes)
-
-    return threadify(notes, context, {muffle: getMuffle()})
-  }
 </script>
 
-<Notes {listenForNotes} {loadNotes} />
+<Notes {relays} {filter} />
 

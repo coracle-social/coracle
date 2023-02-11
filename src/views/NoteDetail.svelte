@@ -2,38 +2,35 @@
   import {onMount} from 'svelte'
   import {nip19} from 'nostr-tools'
   import {fly} from 'svelte/transition'
+  import {first} from 'hurdak/lib/hurdak'
   import {getEventRelays, getUserRelays} from 'src/agent/helpers'
   import network from 'src/agent/network'
-  import {annotate} from 'src/app'
   import Note from 'src/partials/Note.svelte'
   import Content from 'src/partials/Content.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
+  import {asDisplayEvent} from 'src/app'
 
   export let note
-  export let relays = getUserRelays().concat(getEventRelays(note))
+  export let relays = getEventRelays(note)
 
   let loading = true
 
   onMount(async () => {
-    const [found] = await network.load(relays, {ids: [note.id]})
+    if (!note.pubkey) {
+      note = first(await network.load(relays, {ids: [note.id]}))
+    }
 
-    if (found) {
-      // Show the main note without waiting for context
-      if (!note.pubkey) {
-        note = annotate(found, [])
-        relays = getEventRelays(note)
-      }
-
-      const context = await network.loadContext(relays, found, {
-        depth: 3,
-        loadParents: true,
-      })
-
-      note = annotate(found, context)
-
+    if (note) {
       console.log('NoteDetail', nip19.noteEncode(note.id), note)
-    } else if (!note.pubkey) {
-      note = null
+
+      network.streamContext({
+        depth: 10,
+        notes: [note],
+        relays: getUserRelays().concat(relays),
+        updateNotes: cb => {
+          note = first(cb([note]))
+        },
+      })
     }
 
     loading = false
@@ -48,7 +45,7 @@
 </div>
 {:else if note.pubkey}
 <div in:fly={{y: 20}}>
-  <Note invertColors anchorId={note.id} note={note} depth={2} />
+  <Note invertColors anchorId={note.id} note={asDisplayEvent(note)} />
 </div>
 {/if}
 

@@ -2,7 +2,7 @@
   import {nip19} from 'nostr-tools'
   import {sortBy, pluck} from 'ramda'
   import {personKinds} from 'src/util/nostr'
-  import {batch, now} from 'src/util/misc'
+  import {now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
   import {getUserRelays, getPubkeyRelays, user} from 'src/agent/helpers'
   import database from 'src/agent/database'
@@ -38,13 +38,13 @@
     [{kinds: personKinds, authors: [pubkey]},
      {kinds: [4], authors: [$user.pubkey], '#p': [pubkey]},
      {kinds: [4], authors: [pubkey], '#p': [$user.pubkey]}],
-    batch(300, async events => {
+    async events => {
       // Reload from db since we annotate messages there
       const messageIds = pluck('id', events.filter(e => e.kind === 4))
       const messages = await database.messages.all({id: messageIds})
 
       cb(await decryptMessages(messages))
-    })
+    }
   )
 
   const loadMessages = async ({until, limit}) => {

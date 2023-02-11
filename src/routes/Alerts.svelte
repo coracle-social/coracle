@@ -8,7 +8,7 @@
   import Content from 'src/partials/Content.svelte'
   import Like from 'src/partials/Like.svelte'
   import database from 'src/agent/database'
-  import {alerts} from 'src/app'
+  import {alerts, asDisplayEvent} from 'src/app'
 
   let limit = 0
   let notes = null
@@ -21,7 +21,7 @@
 
       const events = await database.alerts.all()
 
-      notes = sortBy(e => -e.created_at, events).slice(0, limit)
+      notes = sortBy(e => -e.created_at, events).slice(0, limit).map(asDisplayEvent)
     })
   })
 </script>

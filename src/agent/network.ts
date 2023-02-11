@@ -1,7 +1,9 @@
-import {uniqBy, prop, uniq, flatten, pluck, identity} from 'ramda'
-import {ensurePlural, createMap, chunk} from 'hurdak/lib/hurdak'
-import {findReply, personKinds, Tags} from 'src/util/nostr'
-import {getFollows, getStalePubkeys} from 'src/agent/helpers'
+import type {MyEvent} from 'src/util/types'
+import {uniq, uniqBy, prop, map, propEq, indexBy, pluck} from 'ramda'
+import {findReply, personKinds, findReplyId, Tags} from 'src/util/nostr'
+import {chunk} from 'hurdak/lib/hurdak'
+import {batch} from 'src/util/misc'
+import {getFollows, getStalePubkeys, getTopRelaysFromEvents} from 'src/agent/helpers'
 import pool from 'src/agent/pool'
 import keys from 'src/agent/keys'
 import sync from 'src/agent/sync'
@@ -25,18 +27,35 @@ const load = async (relays, filter, opts?): Promise<Record<string, unknown>[]> =
   return events
 }
 
-const listen = (relays, filter, onEvent, {shouldProcess = true}: any = {}) => {
+const listen = (relays, filter, onEvents, {shouldProcess = true}: any = {}) => {
   return pool.subscribe(relays, filter, {
-    onEvent: e => {
+    onEvent: batch(300, events => {
       if (shouldProcess) {
-        sync.processEvents(e)
+        sync.processEvents(events)
       }
 
-      if (onEvent) {
-        onEvent(e)
+      if (onEvents) {
+        onEvents(events)
       }
-    },
+    }),
   })
+}
+
+const listenUntilEose = (relays, filter, onEvents, {shouldProcess = true}: any = {}) => {
+  return new Promise(resolve => {
+    pool.subscribeUntilEose(relays, filter, {
+      onClose: () => resolve(),
+      onEvent: batch(300, events => {
+        if (shouldProcess) {
+          sync.processEvents(events)
+        }
+
+        if (onEvents) {
+          onEvents(events)
+        }
+      }),
+    })
+  }) as Promise<void>
 }
 
 const loadPeople = (relays, pubkeys, {kinds = personKinds, force = false, ...opts} = {}) => {
@@ -59,57 +78,58 @@ const loadNetwork = async (relays, pubkey) => {
   await loadPeople(tags.relays(), tags.values().all())
 }
 
-const loadContext = async (relays, notes, {loadParents = false, depth = 0, ...opts}: any = {}) => {
-  notes = ensurePlural(notes)
+const loadParents = (relays, notes) => {
+  const parentIds = new Set(Tags.wrap(notes.map(findReply)).values().all())
 
-  if (notes.length === 0) {
-    return notes
+  if (parentIds.size === 0) {
+    return []
   }
 
-  return flatten(await Promise.all(
-    chunk(256, notes).map(async chunk => {
-      const chunkIds = pluck('id', chunk)
-      const authors = getStalePubkeys(pluck('pubkey', chunk))
-      const parentTags = uniq(chunk.map(findReply).filter(identity))
-      const parentIds = Tags.wrap(parentTags).values().all()
-      const combinedRelays = uniq(relays.concat(Tags.wrap(parentTags).relays()))
-      const filter = [{kinds: [1, 7], '#e': chunkIds} as object]
-
-      if (authors.length > 0) {
-        filter.push({kinds: personKinds, authors})
-      }
-
-      if (loadParents && parentTags.length > 0) {
-        filter.push({kinds: [1], ids: parentIds})
-      }
-
-      let events = await load(combinedRelays, filter, opts)
-
-      // Find children, but only if we didn't already get them
-      const children = events.filter(e => e.kind === 1)
-      const childRelays = relays.concat(Tags.from(children).relays())
-
-      if (depth > 0 && children.length > 0) {
-        events = events.concat(
-          await loadContext(childRelays, children, {depth: depth - 1, ...opts})
-        )
-      }
-
-      if (loadParents && parentIds.length > 0) {
-        const eventsById = createMap('id', events)
-        const parents = parentIds.map(id => eventsById[id]).filter(identity)
-        const parentRelays = relays.concat(Tags.from(parents).relays())
-
-        events = events.concat(await loadContext(parentRelays, parents, opts))
-      }
-
-      // Load missing people from replies etc
-      await loadPeople(relays, pluck('pubkey', events))
-
-      // We're recurring and so may end up with duplicates here
-      return uniqBy(prop('id'), events)
-    })
-  ))
+  return load(
+    relays.concat(getTopRelaysFromEvents(notes)),
+    {kinds: [1], ids: Array.from(parentIds)}
+  )
 }
 
-export default {publish, load, listen, loadNetwork, loadPeople, personKinds, loadContext}
+const streamContext = ({relays, notes, updateNotes, depth = 0}) => {
+  // Some relays reject very large filters, send multiple
+  chunk(256, notes).forEach(chunk => {
+    const authors = getStalePubkeys(pluck('pubkey', chunk))
+    const filter = [
+      {kinds: [1, 7], '#e': pluck('id', chunk)},
+      {kinds: personKinds, authors},
+    ]
+
+    // Load authors and reactions in one subscription
+    listenUntilEose(relays, filter, events => {
+      const repliesByParentId = indexBy(findReplyId, events.filter(propEq('kind', 1)))
+      const reactionsByParentId = indexBy(findReplyId, events.filter(propEq('kind', 7)))
+
+      // Recur if we need to
+      if (depth > 0) {
+        streamContext({relays, notes: events, updateNotes, depth: depth - 1})
+      }
+
+      const annotate = ({replies = [], reactions = [], children = [], ...note}) => {
+        if (depth > 0) {
+          children = uniqBy(prop('id'), children.concat(replies))
+        }
+
+        return {
+          ...note,
+          replies: uniqBy(prop('id'), replies.concat(repliesByParentId[note.id] || [])),
+          reactions: uniqBy(prop('id'), reactions.concat(reactionsByParentId[note.id] || [])),
+          children: children.map(annotate),
+        }
+      }
+
+      updateNotes(map(annotate))
+    })
+  })
+}
+
+export default {
+  publish, load, listen, listenUntilEose, loadNetwork, loadPeople, personKinds,
+  loadParents, streamContext,
+}
+

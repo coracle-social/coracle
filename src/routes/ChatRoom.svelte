@@ -1,7 +1,7 @@
 <script lang="ts">
   import {pluck} from 'ramda'
   import {nip19} from 'nostr-tools'
-  import {now, batch} from 'src/util/misc'
+  import {now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
   import {getEventRelays, user} from 'src/agent/helpers'
   import database from 'src/agent/database'
@@ -22,13 +22,13 @@
       // Listen for updates to the room in case we didn't get them before
       [{kinds: [40, 41], ids: [roomId]},
        {kinds: [42], '#e': [roomId], since: now()}],
-      batch(300, events => {
+      events => {
         const newMessages = events.filter(e => e.kind === 42)
 
         network.loadPeople(relays, pluck('pubkey', events))
 
         cb(newMessages)
-      })
+      }
     )
   }
 

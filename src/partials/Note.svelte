@@ -2,10 +2,11 @@
   import cx from 'classnames'
   import {nip19} from 'nostr-tools'
   import {whereEq, without, uniq, pluck, reject, propEq, find} from 'ramda'
+  import {tweened} from 'svelte/motion'
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {quantify} from 'hurdak/lib/hurdak'
-  import {Tags, findReply, findReplyId, displayPerson, isLike} from "src/util/nostr"
+  import {Tags, findReply, findRoot, findReplyId, displayPerson, isLike} from "src/util/nostr"
   import {extractUrls} from "src/util/html"
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
@@ -19,7 +20,6 @@
   import cmd from 'src/agent/cmd'
 
   export let note
-  export let depth = 0
   export let anchorId = null
   export let showParent = true
   export let invertColors = false
@@ -38,6 +38,11 @@
 
   let likes, flags, like, flag
 
+  const interpolate = (a, b) => t => a + Math.round((b - a) * t)
+  const likesCount = tweened(0, {interpolate})
+  const flagsCount = tweened(0, {interpolate})
+  const repliesCount = tweened(0, {interpolate})
+
   $: {
     likes = note.reactions.filter(n => isLike(n.content))
     flags = note.reactions.filter(whereEq({content: '-'}))
@@ -45,6 +50,10 @@
 
   $: like = find(whereEq({pubkey: $user?.pubkey}), likes)
   $: flag = find(whereEq({pubkey: $user?.pubkey}), flags)
+
+  $: $likesCount = likes.length
+  $: $flagsCount = flags.length
+  $: $repliesCount = note.replies.length
 
   const onClick = e => {
     const target = e.target as HTMLElement
@@ -56,6 +65,13 @@
 
   const goToParent = async () => {
     const [id, url] = findReply(note).slice(1)
+    const relays = getEventRelays(note).concat({url})
+
+    modal.set({type: 'note/detail', note: {id}, relays})
+  }
+
+  const goToRoot = async () => {
+    const [id, url] = findRoot(note).slice(1)
     const relays = getEventRelays(note).concat({url})
 
     modal.set({type: 'note/detail', note: {id}, relays})
@@ -168,6 +184,11 @@
         Reply to <Anchor on:click={goToParent}>{findReplyId(note).slice(0, 8)}</Anchor>
       </small>
     {/if}
+    {#if findRoot(note) && findRoot(note) !== findReply(note) && showParent}
+      <small class="text-light">
+        Go to <Anchor on:click={goToRoot}>root</Anchor>
+      </small>
+    {/if}
     {#if flag}
     <p class="text-light border-l-2 border-solid border-medium pl-4">
       You have flagged this content as offensive.
@@ -185,15 +206,15 @@
     <div class="flex gap-6 text-light" on:click={e => e.stopPropagation()}>
       <div>
         <button class="fa fa-reply cursor-pointer" on:click={startReply} />
-        {note.replies.length}
+        {$repliesCount}
       </div>
       <div class={cx({'text-accent': like})}>
         <button class="fa fa-heart cursor-pointer" on:click={() => like ? deleteReaction(like) : react("+")} />
-        {likes.length}
+        {$likesCount}
       </div>
       <div>
         <button class="fa fa-flag cursor-pointer" on:click={() => react("-")} />
-        {flags.length}
+        {$flagsCount}
       </div>
     </div>
     {/if}
@@ -230,17 +251,15 @@
 </div>
 {/if}
 
-{#if depth > 0}
 <div class="ml-5 border-l border-solid border-medium">
-  {#if !showEntire && note.replies.length > 3}
+  {#if !showEntire && note.children.length > 3}
   <button class="ml-5 py-2 text-light cursor-pointer" on:click={onClick}>
     <i class="fa fa-up-down text-sm pr-2" />
-    Show {quantify(note.replies.length - 3, 'other reply', 'more replies')}
+    Show {quantify(note.children.length - 3, 'other reply', 'more replies')}
   </button>
   {/if}
-  {#each note.replies.slice(showEntire ? 0 : -3) as r (r.id)}
-  <svelte:self showParent={false} note={r} depth={depth - 1} {invertColors} {anchorId} />
+  {#each note.children.slice(showEntire ? 0 : -3) as r (r.id)}
+  <svelte:self showParent={false} note={r} {invertColors} {anchorId} />
   {/each}
 </div>
-{/if}
 {/if}

@@ -145,7 +145,7 @@ export const getLastSync = (k, fallback = 0) => {
 export class Cursor {
   until: number
   limit: number
-  constructor(limit = 50) {
+  constructor(limit = 10) {
     this.until = now()
     this.limit = limit
   }

@@ -1,4 +1,5 @@
 import type {Relay} from 'nostr-tools'
+import type {MyEvent} from 'src/util/types'
 import {relayInit} from 'nostr-tools'
 import {uniqBy, prop, find, is} from 'ramda'
 import {ensurePlural} from 'hurdak/lib/hurdak'
@@ -108,8 +109,10 @@ const describeFilter = ({kinds = [], ...filter}) => {
   return '(' + parts.join(',') + ')'
 }
 
+const normalizeRelays = relays => uniqBy(prop('url'), relays.filter(r => isRelay(r.url)))
+
 const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: any) => void>) => {
-  relays = uniqBy(prop('url'), relays.filter(r => isRelay(r.url)))
+  relays = normalizeRelays(relays)
   filters = ensurePlural(filters)
 
   // Create a human readable subscription id for debugging
@@ -118,15 +121,17 @@ const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: 
     filters.map(describeFilter).join(':'),
   ].join('-')
 
-  // Deduplicate events
+  // Deduplicate events, track eose stats
+  const now = Date.now()
   const seen = new Set()
+  const eose = new Set()
 
   // Don't await before returning so we're not blocking on slow connects
   const promises = relays.map(async relay => {
     const conn = await connect(relay.url)
 
     // If the relay failed to connect, give up
-    if (!conn) {
+    if (!conn || conn.status === 'closed') {
       return null
     }
 
@@ -137,13 +142,25 @@ const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: 
         if (!seen.has(e.id)) {
           seen.add(e.id)
 
-          onEvent(Object.assign(e, {seen_on: conn.nostr.url}))
+          e.seen_on = conn.nostr.url
+
+          onEvent(e as MyEvent)
         }
       })
     }
 
     if (onEose) {
-      sub.on('eose', () => onEose(conn.nostr.url))
+      sub.on('eose', () => {
+        onEose(conn.nostr.url)
+
+        // Keep track of relay timing stats, but only for the first eose we get
+        if (!eose.has(conn.nostr.url)) {
+          eose.add(conn.nostr.url)
+
+          conn.stats.count += 1
+          conn.stats.timer += Date.now() - now
+        }
+      })
     }
 
     conn.stats.activeCount += 1
@@ -172,23 +189,61 @@ const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: 
   }
 }
 
+const subscribeUntilEose = async (
+  relays,
+  filters,
+  {onEvent, onEose, onClose, timeout = 10_000}: {
+    onEvent: (events: Array<MyEvent>) => void,
+    onEose?: (url: string) => void,
+    onClose?: () => void,
+    timeout?: number
+  }
+) => {
+  relays = normalizeRelays(relays)
+
+  const now = Date.now()
+  const eose = new Set()
+
+  const attemptToComplete = () => {
+    if (eose.size === relays.length || Date.now() - now >= timeout) {
+      onClose?.()
+      agg.unsub()
+    }
+  }
+
+  // If a relay takes too long, give up
+  setTimeout(attemptToComplete, timeout)
+
+  const agg = await subscribe(relays, filters, {
+    onEvent,
+    onEose: url => {
+      onEose?.(url)
+      attemptToComplete()
+    },
+  })
+
+  return agg
+}
+
 const request = (relays, filters, {threshold = 0.5} = {}): Promise<Record<string, unknown>[]> => {
   return new Promise(async resolve => {
-    relays = uniqBy(prop('url'), relays.filter(r => isRelay(r.url)))
+    relays = normalizeRelays(relays)
     threshold = relays.length * threshold
 
     const now = Date.now()
     const relaysWithEvents = new Set()
     const events = []
-    const eose = []
+    const eose = new Set()
 
     const attemptToComplete = () => {
-      const allEose = eose.length === relays.length
-      const atThreshold = eose.filter(url => relaysWithEvents.has(url)).length >= threshold
+      const allEose = eose.size === relays.length
+      const atThreshold = Array.from(eose)
+        .filter(url => relaysWithEvents.has(url)).length >= threshold
+
       const hardTimeout = Date.now() - now >= 5000
       const softTimeout = (
         Date.now() - now >= 1000
-        && eose.length > relays.length - Math.round(relays.length / 10)
+        && eose.size > relays.length - Math.round(relays.length / 10)
       )
 
       if (allEose || atThreshold || hardTimeout || softTimeout) {
@@ -206,22 +261,13 @@ const request = (relays, filters, {threshold = 0.5} = {}): Promise<Record<string
         events.push(e)
       },
       onEose: async url => {
-        if (!eose.includes(url)) {
-          eose.push(url)
-
-          const conn = findConnection(url)
-
-          // Keep track of relay timing stats
-          if (conn) {
-            conn.stats.count += 1
-            conn.stats.timer += Date.now() - now
-          }
-        }
-
+        eose.add(url)
         attemptToComplete()
       },
     })
   })
 }
 
-export default {getConnections, findConnection, connect, publish, subscribe, request}
+export default {
+  getConnections, findConnection, connect, publish, subscribe, subscribeUntilEose, request,
+}
