@@ -3,6 +3,7 @@ import type {MyEvent} from 'src/util/types'
 import {relayInit} from 'nostr-tools'
 import {uniqBy, prop, find, is} from 'ramda'
 import {ensurePlural} from 'hurdak/lib/hurdak'
+import {warn} from 'src/util/logger'
 import {isRelay} from 'src/util/nostr'
 import {sleep} from 'src/util/misc'
 import database from 'src/agent/database'
@@ -166,7 +167,7 @@ const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: 
     conn.stats.activeCount += 1
 
     if (conn.stats.activeCount > 10) {
-      console.warn(`Relay ${conn.nostr.url} has >10 active subscriptions`)
+      warn(`Relay ${conn.nostr.url} has >10 active subscriptions`)
     }
 
     return Object.assign(sub, {conn})

@@ -1,6 +1,7 @@
 import {prop, pick, join, uniqBy, last} from 'ramda'
 import {get} from 'svelte/store'
 import {first} from "hurdak/lib/hurdak"
+import {log} from 'src/util/logger'
 import {roomAttrs, displayPerson} from 'src/util/nostr'
 import {getBestRelay} from 'src/agent/helpers'
 import database from 'src/agent/database'
@@ -88,7 +89,7 @@ const publishEvent = (relays, kind, {content = '', tags = []} = {}) => {
   const createdAt = Math.round(new Date().valueOf() / 1000)
   const event = {kind, content, tags, pubkey, created_at: createdAt}
 
-  console.log("Publishing", event, relays)
+  log("Publishing", event, relays)
 
   return network.publish(relays, event)
 }

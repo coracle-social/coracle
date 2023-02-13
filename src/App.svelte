@@ -10,6 +10,7 @@
   import {cubicInOut} from "svelte/easing"
   import {Router, Route, links, navigate} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
+  import {log, warn} from 'src/util/logger'
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, shuffle, now, sleep} from 'src/util/misc'
   import cmd from 'src/agent/cmd'
@@ -38,6 +39,7 @@
   import Search from "src/routes/Search.svelte"
   import Alerts from "src/routes/Alerts.svelte"
   import Notes from "src/routes/Notes.svelte"
+  import Debug from "src/routes/Debug.svelte"
   import Login from "src/routes/Login.svelte"
   import Logout from "src/routes/Logout.svelte"
   import Profile from "src/routes/Profile.svelte"
@@ -107,10 +109,10 @@
         .forEach(conn => conn.disconnect())
 
       // Log stats for debugging purposes
-      console.log(
+      log(
         'Connection stats',
         pool.getConnections()
-          .map(({nostr: {url}, stats: s}) => ({url, avgRequest: s.timer / s.count}))
+          .map(({nostr: {url}, stats: s}) => `${url} ${s.timer / s.count}`)
       )
 
       // Alert the user to any heinously slow connections
@@ -147,7 +149,7 @@
             return {...await res.json(), url, refreshed_at: now()}
           } catch (e) {
             if (!e.toString().includes('Failed to fetch')) {
-              console.warn(e)
+              warn(e)
             }
 
             return {url, refreshed_at: now()}
@@ -230,6 +232,7 @@
       <Route path="/settings" component={Settings} />
       <Route path="/login" component={Login} />
       <Route path="/logout" component={Logout} />
+      <Route path="/debug" component={Debug} />
       <Route path="/:entity" let:params>
         {#key params.entity}
         <Bech32Entity entity={params.entity} />
@@ -309,6 +312,13 @@
       <li class="cursor-pointer">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/login">
           <i class="fa-solid fa-right-to-bracket mr-2" /> Login
+        </a>
+      </li>
+      {/if}
+      {#if import.meta.env.VITE_SHOW_DEBUG_ROUTE === 'true'}
+      <li class="cursor-pointer">
+        <a class="block px-4 py-2 hover:bg-accent transition-all" href="/debug">
+          <i class="fa-solid fa-bug mr-2" /> Debug
         </a>
       </li>
       {/if}

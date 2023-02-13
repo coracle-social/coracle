@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {fly} from 'svelte/transition'
+  import {error} from "src/util/logger"
   import {stripExifData} from "src/util/html"
   import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
@@ -20,8 +21,8 @@
 
       if (file) {
         const reader = new FileReader()
+        reader.onerror = error
         reader.onload = () => room.picture = reader.result
-        reader.onerror = e => console.error(e)
         reader.readAsDataURL(await stripExifData(file))
       } else {
         room.picture = null

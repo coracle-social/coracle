@@ -3,6 +3,7 @@ import {allPass, prop, pipe, isNil, complement, equals, is, pluck, sum, identity
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from 'svelte/store'
 import {isObject} from 'hurdak/lib/hurdak'
+import {warn} from 'src/util/logger'
 
 export const fuzzy = (data, opts = {}) => {
   const fuse = new Fuse(data, opts)
@@ -18,7 +19,7 @@ export const getLocalJson = (k) => {
   try {
     return JSON.parse(localStorage.getItem(k))
   } catch (e) {
-    console.warn(`Unable to parse ${k}: ${e}`)
+    warn(`Unable to parse ${k}: ${e}`)
 
     return null
   }
@@ -28,7 +29,7 @@ export const setLocalJson = (k, v) => {
   try {
     localStorage.setItem(k, JSON.stringify(v))
   } catch (e) {
-    console.warn(`Unable to set ${k}: ${e}`)
+    warn(`Unable to set ${k}: ${e}`)
   }
 }
 

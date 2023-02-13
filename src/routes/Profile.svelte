@@ -3,6 +3,7 @@
   import {fly} from 'svelte/transition'
   import {navigate} from "svelte-routing"
   import pick from "ramda/src/pick"
+  import {error} from "src/util/logger"
   import {stripExifData} from "src/util/html"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
@@ -33,8 +34,8 @@
 
       if (file) {
         const reader = new FileReader()
+        reader.onerror = error
         reader.onload = () => values.picture = reader.result
-        reader.onerror = e => console.error(e)
         reader.readAsDataURL(await stripExifData(file))
       } else {
         values.picture = null

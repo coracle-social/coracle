@@ -1,6 +1,7 @@
 import {nip04} from 'nostr-tools'
 import {getPublicKey, getEventHash, signEvent} from 'nostr-tools'
 import {get} from 'svelte/store'
+import {error} from 'src/util/logger'
 import {synced} from 'src/util/misc'
 
 let signingFunction
@@ -64,7 +65,8 @@ const getCrypt = () => {
           ? nip04.decrypt($privkey, pubkey, message)
           : await nostr.nip04.decrypt(pubkey, message)
       } catch (e) {
-        console.error(e)
+        error(e)
+
         return `<Failed to decrypt message: ${e}>`
       }
     },

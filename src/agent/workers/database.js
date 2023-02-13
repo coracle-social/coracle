@@ -1,6 +1,7 @@
 import lf from 'localforage'
 import memoryStorageDriver from 'localforage-memoryStorageDriver'
 import {switcherFn} from 'hurdak/lib/hurdak'
+import {error} from 'src/util/logger'
 import {where} from 'src/util/misc'
 
 // Firefox private mode doesn't have access to any storage options
@@ -47,10 +48,5 @@ addEventListener('message', async ({data: {topic, payload, channel}}) => {
   })
 })
 
-addEventListener('error', event => {
-  console.error(event.error)
-})
-
-addEventListener('unhandledrejection', event => {
-  console.error(event)
-})
+addEventListener('error', error)
+addEventListener('unhandledrejection', error)

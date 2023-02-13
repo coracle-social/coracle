@@ -2,6 +2,7 @@ import {debounce} from 'throttle-debounce'
 import {filter, always, is, prop, find, without, pluck, all, identity} from 'ramda'
 import {writable, derived} from 'svelte/store'
 import {switcherFn, createMap, ensurePlural} from 'hurdak/lib/hurdak'
+import {log, error} from 'src/util/logger'
 import {defer, where, now, timedelta, asyncIterableToArray} from 'src/util/misc'
 
 // Types
@@ -30,7 +31,7 @@ const worker = new Worker(
   {type: 'module'}
 )
 
-worker.addEventListener('error', e => console.error(e))
+worker.addEventListener('error', error)
 
 class Channel {
   id: string
@@ -214,6 +215,7 @@ const defineTable = (name: string, pk: string, opts: TableOpts = {}): Table => {
 
   // Sync from storage initially
   ;(async () => {
+    const t = Date.now()
     const initialData = {}
     for await (const {k, v} of iterate(name)) {
       if (isValid(v)) {
@@ -227,6 +229,8 @@ const defineTable = (name: string, pk: string, opts: TableOpts = {}): Table => {
     } else {
       setAndNotify(initialData)
     }
+
+    log(`Table ${name} ready in ${Date.now() - t}ms`)
 
     ready.set(true)
   })()

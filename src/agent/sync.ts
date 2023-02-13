@@ -1,6 +1,7 @@
 import {pick, identity, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
 import {noop, createMap, ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
+import {log, warn} from 'src/util/logger'
 import {now, timedelta, shuffle, hash} from 'src/util/misc'
 import {personKinds, Tags, roomAttrs, isRelay} from 'src/util/nostr'
 import database from 'src/agent/database'
@@ -84,7 +85,7 @@ const processProfileEvents = async events => {
           }
         },
         default: () => {
-          console.log(`Received unsupported event type ${e.kind}`)
+          log(`Received unsupported event type ${e.kind}`)
         },
       }),
       updated_at: now(),
@@ -256,7 +257,7 @@ const tryJson = f => {
     return f()
   } catch (e) {
     if (!e.toString().includes('JSON')) {
-      console.warn(e)
+      warn(e)
     }
   }
 }

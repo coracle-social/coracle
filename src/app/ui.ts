@@ -7,6 +7,7 @@ import {nip19} from 'nostr-tools'
 import {writable, get} from "svelte/store"
 import {globalHistory} from "svelte-routing/src/history"
 import {synced, sleep} from "src/util/misc"
+import {warn} from 'src/util/logger'
 
 // Routing
 
@@ -104,7 +105,7 @@ export const logUsage = async name => {
       await fetch(`${dufflepudUrl}/usage/${session}/${name}`, {method: 'post' })
     } catch (e) {
       if (!e.toString().includes('Failed to fetch')) {
-        console.warn(e)
+        warn(e)
       }
     }
   }

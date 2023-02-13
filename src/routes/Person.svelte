@@ -5,6 +5,7 @@
   import {nip19} from 'nostr-tools'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
+  import {log} from 'src/util/logger'
   import {renderContent} from 'src/util/html'
   import {displayPerson, Tags} from 'src/util/nostr'
   import Tabs from "src/partials/Tabs.svelte"
@@ -38,7 +39,7 @@
   $: following = find(t => t[1] === pubkey, $user?.petnames || [])
 
   onMount(async () => {
-    console.log('Person', npub, person)
+    log('Person', npub, person)
 
     // Add all the relays we know the person uses
     relays = relays.concat(getPubkeyRelays(pubkey))

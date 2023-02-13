@@ -3,6 +3,7 @@
   import {nip19} from 'nostr-tools'
   import {fly} from 'svelte/transition'
   import {first} from 'hurdak/lib/hurdak'
+  import {log} from 'src/util/logger'
   import {getEventRelays, getUserRelays} from 'src/agent/helpers'
   import network from 'src/agent/network'
   import Note from 'src/partials/Note.svelte'
@@ -21,7 +22,7 @@
     }
 
     if (note) {
-      console.log('NoteDetail', nip19.noteEncode(note.id), note)
+      log('NoteDetail', nip19.noteEncode(note.id), note)
 
       network.streamContext({
         depth: 10,
