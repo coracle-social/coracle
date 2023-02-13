@@ -1,4 +1,3 @@
-import type {MyEvent} from 'src/util/types'
 import {uniq, uniqBy, prop, map, propEq, indexBy, pluck} from 'ramda'
 import {findReply, personKinds, findReplyId, Tags} from 'src/util/nostr'
 import {chunk} from 'hurdak/lib/hurdak'
