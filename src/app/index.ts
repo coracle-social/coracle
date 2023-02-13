@@ -131,7 +131,7 @@ export const mergeParents = (notes: Array<DisplayEvent>) => {
   const notesById = createMap('id', notes)
   const childIds = []
 
-  for (const note of notes) {
+  for (const note of Object.values(notesById)) {
     const parentId = findReplyId(note)
 
     if (parentId) {

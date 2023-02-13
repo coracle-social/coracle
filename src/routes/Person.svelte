@@ -38,6 +38,8 @@
   $: following = find(t => t[1] === pubkey, $user?.petnames || [])
 
   onMount(async () => {
+    console.log('Person', npub, person)
+
     // Add all the relays we know the person uses
     relays = relays.concat(getPubkeyRelays(pubkey))
 
