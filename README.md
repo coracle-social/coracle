@@ -83,9 +83,6 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Deterministically calculate color for relays, show it on notes. User popper?
 - [ ] Likes list
 - [ ] Fix anon/new user experience
-- [ ] Stream likes rather than load, they're probably what is slowing things down. Figure out how to multiplex them, or store them in the database by count
-  - Stream likes and replies, only load parent up front
-  - Show full thread on detail view - fetch parent, load all descendants, highlight anchor
 - [ ] Likes are slow
 - [ ] Show loading on replies/notes
 
@@ -93,7 +90,7 @@ If you like Coracle and want to support its development, you can donate sats via
 
 ## 0.2.12
 
-
+- [x] Stream likes and replies in lazily
 
 ## 0.2.11
 

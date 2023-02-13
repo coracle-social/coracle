@@ -4,7 +4,7 @@
   import Content from "src/partials/Content.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Network from "src/views/notes/Network.svelte"
-  import Global from "src/views/notes/Global.svelte"
+  import Popular from "src/views/notes/Popular.svelte"
   import {user} from 'src/agent/helpers'
 
   export let activeTab
@@ -22,11 +22,11 @@
   {/if}
 
   <div>
-    <Tabs tabs={['network', 'global']} {activeTab} {setActiveTab} />
+    <Tabs tabs={['network', 'popular']} {activeTab} {setActiveTab} />
     {#if activeTab === 'network'}
     <Network />
     {:else}
-    <Global />
+    <Popular />
     {/if}
   </div>
 </Content>

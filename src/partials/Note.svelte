@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from 'classnames'
   import {nip19} from 'nostr-tools'
-  import {whereEq, without, uniq, pluck, reject, propEq, find} from 'ramda'
+  import {always, whereEq, without, uniq, pluck, reject, propEq, find} from 'ramda'
   import {tweened} from 'svelte/motion'
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
@@ -23,6 +23,7 @@
   export let anchorId = null
   export let showParent = true
   export let invertColors = false
+  export let shouldDisplay = always(true)
 
   const getDefaultReplyMentions = () =>
     Tags.from(note).type("p").values().all().concat(note.pubkey)
@@ -164,7 +165,7 @@
   }}
 />
 
-{#if $person}
+{#if $person && shouldDisplay(note)}
 <Card on:click={onClick} {interactive} {invertColors}>
   <div class="flex gap-4 items-center justify-between">
     <Badge person={$person} />
@@ -259,7 +260,7 @@
   </button>
   {/if}
   {#each note.children.slice(showEntire ? 0 : -3) as r (r.id)}
-  <svelte:self showParent={false} note={r} {invertColors} {anchorId} />
+  <svelte:self showParent={false} note={r} {invertColors} {anchorId} {shouldDisplay} />
   {/each}
 </div>
 {/if}

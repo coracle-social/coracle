@@ -12,7 +12,7 @@ export class Tags {
     return new Tags(ensurePlural(events).flatMap(prop('tags')))
   }
   static wrap(tags) {
-    return new Tags(tags.filter(identity))
+    return new Tags((tags || []).filter(identity))
   }
   all() {
     return this.tags

@@ -1,8 +1,8 @@
 import {debounce} from 'throttle-debounce'
-import {is, prop, find, without, pluck, all, identity} from 'ramda'
+import {filter, always, is, prop, find, without, pluck, all, identity} from 'ramda'
 import {writable, derived} from 'svelte/store'
 import {switcherFn, createMap, ensurePlural} from 'hurdak/lib/hurdak'
-import {defer, where, asyncIterableToArray} from 'src/util/misc'
+import {defer, where, now, timedelta, asyncIterableToArray} from 'src/util/misc'
 
 // Types
 
@@ -138,7 +138,13 @@ const iterate = (storeName, where = {}) => ({
 
 const registry = {}
 
-const defineTable = (name: string, pk: string): Table => {
+type TableOpts = {
+  isValid?: (x: any) => boolean
+  resetOnInit?: boolean
+}
+
+const defineTable = (name: string, pk: string, opts: TableOpts = {}): Table => {
+  const {isValid = always(true), resetOnInit = false} = opts
   let p = Promise.resolve()
   let listeners = []
   let data = {}
@@ -170,6 +176,7 @@ const defineTable = (name: string, pk: string): Table => {
       throw new Error(`Updates must be an object, not an array`)
     }
 
+    newData = filter(isValid, newData)
     setAndNotify({...data, ...newData})
 
     // Sync to storage, keeping updates in order
@@ -209,10 +216,18 @@ const defineTable = (name: string, pk: string): Table => {
   ;(async () => {
     const initialData = {}
     for await (const {k, v} of iterate(name)) {
-      initialData[k] = v
+      if (isValid(v)) {
+        initialData[k] = v
+      }
     }
 
-    setAndNotify(initialData)
+    if (resetOnInit) {
+      await clear(name)
+      await bulkPut(initialData)
+    } else {
+      setAndNotify(initialData)
+    }
+
     ready.set(true)
   })()
 
@@ -229,7 +244,11 @@ const rooms = defineTable('rooms', 'id')
 const messages = defineTable('messages', 'id')
 const alerts = defineTable('alerts', 'id')
 const relays = defineTable('relays', 'url')
-const routes = defineTable('routes', 'id')
+const routes = defineTable('routes', 'id', {
+  resetOnInit: true,
+  isValid: route =>
+    route.last_seen > now() - timedelta(7, 'days'),
+})
 
 // Helper to allow us to listen to changes of any given table
 

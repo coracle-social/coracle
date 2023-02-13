@@ -1,6 +1,7 @@
 <script lang="ts">
   import {last, find, reject} from 'ramda'
-  import {onMount, onDestroy} from 'svelte'
+  import {onMount} from 'svelte'
+  import {tweened} from 'svelte/motion'
   import {nip19} from 'nostr-tools'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
@@ -25,11 +26,12 @@
   export let activeTab
   export let relays = []
 
-  let subs = []
+  const interpolate = (a, b) => t => a + Math.round((b - a) * t)
+
   let pubkey = nip19.decode(npub).data as string
   let following = false
   let followers = new Set()
-  let followersCount = 0
+  let followersCount = tweened(0, {interpolate, duration: 1000})
   let person = database.getPersonWithFallback(pubkey)
   let loading = true
 
@@ -45,24 +47,27 @@
       loading = false
     })
 
-    // Get our followers count
-    subs.push(
-      await network.listen(
-        relays,
-        [{kinds: [3], '#p': [pubkey]}],
-        e => {
-          followers.add(e.pubkey)
-          followersCount = followers.size
-        },
-        {shouldProcess: false},
-      )
-    )
-  })
+    // Prime our followers count
+    database.people.all().forEach(p => {
+      if (Tags.wrap(p.petnames).type("p").values().all().includes(pubkey)) {
+        followers.add(p.pubkey)
+        followersCount.set(followers.size)
+      }
+    })
 
-  onDestroy(() => {
-    for (const sub of subs) {
-      sub.unsub()
-    }
+    // Round it out
+    await network.listenUntilEose(
+      relays,
+      [{kinds: [3], '#p': [pubkey]}],
+      events => {
+        for (const e of events) {
+          followers.add(e.pubkey)
+        }
+
+        followersCount.set(followers.size)
+      },
+      {shouldProcess: false},
+    )
   })
 
   const setActiveTab = tab => navigate(routes.person(pubkey, tab))
@@ -157,7 +162,7 @@
           <strong>{person.petnames.length}</strong> following
         </button>
         <button on:click={showFollowers}>
-          <strong>{followersCount}</strong> followers
+          <strong>{$followersCount}</strong> followers
         </button>
       </div>
       {/if}

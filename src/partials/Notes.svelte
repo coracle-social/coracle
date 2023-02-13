@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from 'svelte'
-  import {mergeRight, uniqBy, sortBy, prop} from 'ramda'
+  import {propEq, always, mergeRight, uniqBy, sortBy, prop} from 'ramda'
   import {slide} from 'svelte/transition'
   import {quantify} from 'hurdak/lib/hurdak'
   import {createScroller, now, Cursor} from 'src/util/misc'
@@ -13,6 +13,7 @@
 
   export let relays
   export let filter
+  export let shouldDisplay = always(true)
 
   let notes = []
   let notesBuffer = []
@@ -29,6 +30,7 @@
     const combined = uniqBy(
       prop('id'),
       newNotes
+        .filter(propEq('kind', 1))
         .concat(await network.loadParents(relays, newNotes))
         .map(mergeRight({replies: [], reactions: [], children: []}))
     )
@@ -48,7 +50,10 @@
 
   const loadBufferedNotes = () => {
     // Drop notes at the end if there are a lot
-    notes = uniqBy(prop('id'), notesBuffer.splice(0).concat(notes).slice(0, maxNotes))
+    notes = uniqBy(
+      prop('id'),
+      notesBuffer.splice(0).filter(shouldDisplay).concat(notes).slice(0, maxNotes)
+    )
   }
 
   onMount(() => {
@@ -93,18 +98,18 @@
 </script>
 
 <Content size="inherit" class="pt-6">
-  {#if notesBuffer.length > 0}
+  {#if notesBuffer.filter(shouldDisplay).length > 0}
   <button
     in:slide
     class="cursor-pointer text-center underline text-light"
     on:click={loadBufferedNotes}>
-    Load {quantify(notesBuffer.length, 'new note')}
+    Load {quantify(notesBuffer.filter(shouldDisplay).length, 'new note')}
   </button>
   {/if}
 
   <div>
     {#each notes as note (note.id)}
-    <Note {note} />
+    <Note {note} {shouldDisplay} />
     {/each}
   </div>
 

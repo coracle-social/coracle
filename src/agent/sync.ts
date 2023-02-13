@@ -167,11 +167,17 @@ const calculateRoute = (pubkey, url, type, mode, created_at) => {
   const id = hash([pubkey, url, mode].join('')).toString()
   const score = getWeight(type) * (1 - (now() - created_at) / timedelta(30, 'days'))
   const route = database.routes.get(id) || {id, pubkey, url, mode, score: 0, count: 0}
+
   const newTotalScore = route.score * route.count + score
   const newCount = route.count + 1
 
   if (score > 0) {
-    return {...route, count: newCount, score: newTotalScore / newCount}
+    return {
+      ...route,
+      count: newCount,
+      score: newTotalScore / newCount,
+      last_seen: Math.max(created_at, route.last_seen || 0),
+    }
   }
 }
 

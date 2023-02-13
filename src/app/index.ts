@@ -1,5 +1,5 @@
 import type {Person, DisplayEvent} from 'src/util/types'
-import {groupBy, whereEq, identity, when, assoc, reject} from 'ramda'
+import {assoc, omit, sortBy, whereEq, identity, when, reject} from 'ramda'
 import {navigate} from 'svelte-routing'
 import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
@@ -128,11 +128,21 @@ export const asDisplayEvent = event =>
   ({children: [], replies: [], reactions: [], ...event})
 
 export const mergeParents = (notes: Array<DisplayEvent>) => {
-  const m = createMap('id', notes)
+  const notesById = createMap('id', notes)
+  const childIds = []
 
-  return Object.entries(groupBy(findReplyId, notes))
-    // Substiture parent and add notes as children
-    .flatMap(([p, children]) => m[p] ? [{...m[p], children}] : children)
-    // Remove replies where we failed to find a parent
-    .filter((note: DisplayEvent) => !findReplyId(note) || note.children.length > 0)
+  for (const note of notes) {
+    const parentId = findReplyId(note)
+
+    if (parentId) {
+      childIds.push(note.id)
+    }
+
+    // Add the current note to its parents children, but only if we found a parent
+    if (notesById[parentId]) {
+      notesById[parentId].children = notesById[parentId].children.concat(note)
+    }
+  }
+
+  return sortBy(e => -e.created_at, Object.values(omit(childIds, notesById)))
 }
