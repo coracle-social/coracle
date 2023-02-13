@@ -230,7 +230,9 @@ const defineTable = (name: string, pk: string, opts: TableOpts = {}): Table => {
       setAndNotify(initialData)
     }
 
-    log(`Table ${name} ready in ${Date.now() - t}ms`)
+    const recordsCount = Object.keys(initialData).length
+
+    log(`Table ${name} ready in ${Date.now() - t}ms (${recordsCount} records)`)
 
     ready.set(true)
   })()
