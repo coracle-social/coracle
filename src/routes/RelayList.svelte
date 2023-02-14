@@ -78,8 +78,8 @@
   <div class="text-center">No relays connected</div>
   {/if}
   <div class="grid grid-cols-1 gap-4">
-    {#each relays as relay, i (relay.url)}
-      <RelayCard showControls {relay} {i} />
+    {#each relays as relay (relay.url)}
+      <RelayCard showControls {relay} />
     {/each}
   </div>
   <div class="flex flex-col gap-6" in:fly={{y: 20, delay: 1000}}>

@@ -36,7 +36,7 @@
     const {content, mentions, topics} = input.parse()
 
     if (content) {
-      const event = await cmd.createNote(relays, content, mentions, topics)
+      const [event] = cmd.createNote(relays, content, mentions, topics)
 
       toast.show("info", {
         text: `Your note has been created!`,

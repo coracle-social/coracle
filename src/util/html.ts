@@ -107,3 +107,4 @@ export const renderContent = content => {
 
   return content.trim()
 }
+

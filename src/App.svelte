@@ -26,6 +26,7 @@
   import Content from 'src/partials/Content.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
   import Modal from 'src/partials/Modal.svelte'
+  import RelayCard from "src/partials/RelayCard.svelte"
   import SignUp from "src/views/SignUp.svelte"
   import PersonList from "src/views/PersonList.svelte"
   import PrivKeyLogin from "src/views/PrivKeyLogin.svelte"
@@ -361,6 +362,12 @@
         <NoteCreate />
       {:else if $modal.type === 'relay/add'}
         <AddRelay />
+      {:else if $modal.type === 'relay/list'}
+        <Content>
+          {#each $modal.relays as relay}
+          <RelayCard showControls {relay} />
+          {/each}
+        </Content>
       {:else if $modal.type === 'signUp'}
         <SignUp />
       {:else if $modal.type === 'room/edit'}

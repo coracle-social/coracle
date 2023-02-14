@@ -2,7 +2,7 @@ import {uniq, uniqBy, prop, map, propEq, indexBy, pluck} from 'ramda'
 import {findReply, personKinds, findReplyId, Tags} from 'src/util/nostr'
 import {chunk} from 'hurdak/lib/hurdak'
 import {batch} from 'src/util/misc'
-import {getFollows, getStalePubkeys, getTopRelaysFromEvents} from 'src/agent/helpers'
+import {getFollows, getStalePubkeys, getTopEventRelays} from 'src/agent/helpers'
 import pool from 'src/agent/pool'
 import keys from 'src/agent/keys'
 import sync from 'src/agent/sync'
@@ -85,7 +85,7 @@ const loadParents = (relays, notes) => {
   }
 
   return load(
-    relays.concat(getTopRelaysFromEvents(notes)),
+    relays.concat(getTopEventRelays(notes, 'read')),
     {kinds: [1], ids: Array.from(parentIds)}
   )
 }

@@ -1,4 +1,4 @@
-import {debounce} from 'throttle-debounce'
+import {debounce, throttle} from 'throttle-debounce'
 import {allPass, prop, pipe, isNil, complement, equals, is, pluck, sum, identity, sortBy} from "ramda"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from 'svelte/store'
@@ -151,7 +151,16 @@ export class Cursor {
     this.limit = limit
   }
   onChunk(events) {
-    this.until = events.reduce((t, e) => Math.min(t, e.created_at), this.until)
+    if (events.length > 0) {
+      // Don't go straight to the earliest event, since relays often spit
+      // very old stuff at us. Use an overlapping window instead.
+      const sortedEvents = sortBy(prop('created_at'), events)
+      const midpointEvent = sortedEvents[Math.floor(events.length / 2)]
+
+      this.until = Math.min(this.until, midpointEvent.created_at)
+    }
+
+    return this
   }
 }
 
@@ -172,7 +181,7 @@ export const shuffle = sortBy(() => Math.random()  > 0.5)
 
 export const batch = (t, f) => {
   const xs = []
-  const cb = debounce(t, () => f(xs.splice(0)))
+  const cb = throttle(t, () => f(xs.splice(0)))
 
   return x => {
     xs.push(x)

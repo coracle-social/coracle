@@ -1,9 +1,9 @@
 import type {Relay} from 'nostr-tools'
 import type {MyEvent} from 'src/util/types'
 import {relayInit} from 'nostr-tools'
-import {uniqBy, prop, find, is} from 'ramda'
+import {uniqBy, without, prop, find, is} from 'ramda'
 import {ensurePlural} from 'hurdak/lib/hurdak'
-import {warn} from 'src/util/logger'
+import {warn, log} from 'src/util/logger'
 import {isRelay} from 'src/util/nostr'
 import {sleep} from 'src/util/misc'
 import database from 'src/agent/database'
@@ -127,6 +127,8 @@ const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: 
   const seen = new Set()
   const eose = new Set()
 
+  log(`Starting subscription ${id} with ${relays.length} relays`, filters)
+
   // Don't await before returning so we're not blocking on slow connects
   const promises = relays.map(async relay => {
     const conn = await connect(relay.url)
@@ -175,6 +177,8 @@ const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: 
 
   return {
     unsub: () => {
+      log(`Closing subscription ${id}`)
+
       promises.forEach(async promise => {
         const sub = await promise
 
@@ -206,7 +210,16 @@ const subscribeUntilEose = async (
   const eose = new Set()
 
   const attemptToComplete = () => {
-    if (eose.size === relays.length || Date.now() - now >= timeout) {
+    const isComplete = eose.size === relays.length
+    const isTimeout = Date.now() - now >= timeout
+
+    if (isTimeout) {
+      const timedOutRelays = without(Array.from(eose), relays)
+
+      log(`Timing out ${timedOutRelays.length} relays after ${timeout}ms`, timedOutRelays)
+    }
+
+    if (isComplete || isTimeout) {
       onClose?.()
       agg.unsub()
     }

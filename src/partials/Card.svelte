@@ -9,7 +9,7 @@
 <div
   on:click
   in:fly={{y: 20}}
-  class={cx("py-2 px-3 flex flex-col gap-2 text-white", {
+  class={cx($$props.class, "card py-2 px-3 text-white", {
     "cursor-pointer transition-all": interactive,
     "hover:bg-dark": interactive && !invertColors,
     "hover:bg-medium": interactive && invertColors,

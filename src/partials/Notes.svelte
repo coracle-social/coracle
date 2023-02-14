@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from 'svelte'
-  import {propEq, always, mergeRight, uniqBy, sortBy, prop} from 'ramda'
+  import {partition, propEq, always, mergeRight, uniqBy, sortBy, prop} from 'ramda'
   import {slide} from 'svelte/transition'
   import {quantify} from 'hurdak/lib/hurdak'
   import {createScroller, now, Cursor} from 'src/util/misc'
@@ -18,6 +18,7 @@
   let notes = []
   let notesBuffer = []
 
+  const since = now()
   const maxNotes = 300
   const muffle = getMuffle()
   const cursor = new Cursor()
@@ -52,47 +53,40 @@
     // Drop notes at the end if there are a lot
     notes = uniqBy(
       prop('id'),
-      notesBuffer.splice(0).filter(shouldDisplay).concat(notes).slice(0, maxNotes)
+      notesBuffer.filter(shouldDisplay).concat(notes).slice(0, maxNotes)
     )
+
+    notesBuffer = []
+  }
+
+  const onChunk = async newNotes => {
+    const chunk = sortBy(e => -e.created_at, await processNewNotes(newNotes))
+    const [bottom, top] = partition(e => e.created_at < since, chunk)
+
+    // Slice new notes in case someone leaves the tab open for a long time
+    notes = uniqBy(prop('id'), notes.concat(bottom))
+    notesBuffer = top.concat(notesBuffer).slice(0, maxNotes)
+
+    // Check all notes every time to stay very conservative with moving the window
+    cursor.onChunk(notes)
   }
 
   onMount(() => {
-    const sub = network.listen(
-      relays,
-      {...filter, since: now()},
-      async newNotes => {
-        const chunk = await processNewNotes(newNotes)
+    const sub = network.listen(relays, {...filter, since}, onChunk)
 
-        // Slice new notes in case someone leaves the tab open for a long time
-        notesBuffer = chunk.concat(notesBuffer).slice(0, maxNotes)
-      }
-    )
-
-    const scroller = createScroller(async () => {
+    const scroller = createScroller(() => {
       if ($modal) {
         return
       }
 
       const {limit, until} = cursor
 
-      return network.listenUntilEose(
-        relays,
-        {...filter, limit, until},
-        async newNotes => {
-          cursor.onChunk(newNotes)
-
-          const chunk = await processNewNotes(newNotes)
-
-          notes = sortBy(e => -e.created_at, uniqBy(prop('id'), notes.concat(chunk)))
-        }
-      )
+      return network.listenUntilEose(relays, {...filter, until, limit}, onChunk)
     })
 
-    return async () => {
-      const {unsub} = await sub
-
+    return () => {
       scroller.stop()
-      unsub()
+      sub.then(s => s?.unsub())
     }
   })
 </script>

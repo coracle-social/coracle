@@ -1,7 +1,7 @@
 import type {Person, MyEvent} from 'src/util/types'
 import type {Readable} from 'svelte/store'
 import {isEmpty, pick, identity, sortBy, uniq, reject, groupBy, last, propEq, uniqBy, prop} from 'ramda'
-import {first} from 'hurdak/lib/hurdak'
+import {first, ensurePlural} from 'hurdak/lib/hurdak'
 import {derived, get} from 'svelte/store'
 import {Tags} from 'src/util/nostr'
 import {now, timedelta} from 'src/util/misc'
@@ -61,17 +61,25 @@ export const getTopRelays = (pubkeys, mode = 'all') => {
 export const getBestRelay = (pubkey, mode = 'all') =>
   first(getTopRelays([pubkey], mode).concat(getPubkeyRelays(pubkey, mode)))
 
-export const getEventRelays = event => {
+export const getAllEventRelays = events => {
   return uniqBy(
     prop('url'),
-    getPubkeyRelays(event.pubkey, 'write')
-      .concat(Tags.from(event).relays())
-      .concat({url: event.seen_on})
+    ensurePlural(events)
+      .flatMap(event =>
+        getPubkeyRelays(event.pubkey, 'write')
+          .concat(Tags.from(event).relays())
+          .concat({url: event.seen_on})
+      )
   )
 }
 
-export const getTopRelaysFromEvents = (events: Array<MyEvent>) =>
-  uniqBy(prop('url'), events.map(e => getBestRelay(e.pubkey) || {url: e.seen_on}))
+export const getTopEventRelays = (events: Array<MyEvent>, mode = 'all') =>
+  uniqBy(
+    prop('url'),
+    ensurePlural(events)
+      .flatMap(e => [getBestRelay(e.pubkey, mode), {url: e.seen_on}])
+      .filter(identity)
+  )
 
 export const getStalePubkeys = pubkeys => {
   // If we're not reloading, only get pubkeys we don't already know about

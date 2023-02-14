@@ -21,6 +21,7 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Snacks
 
+- [ ] Pinned posts ala snort
 - [ ] Add nip05 verification on feed
 - [ ] Linkify follow/followers numbers
 - [ ] Support key delegation
@@ -30,10 +31,10 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Attachments (a tag w/content type and url)
 - [ ] Linkify bech32 entities w/ NIP 21 https://github.com/nostr-protocol/nips/blob/master/21.md
 - [ ] Sign in as user with one click to view things from their pubkey's perspective - do this with multiple accounts
-- [ ] QR code generation/scanner to share nprofile https://cdn.jb55.com/s/d966a729777c2021.MP4
 
 # Missions
 
+- [ ] Topics/hashtag views
 - [ ] Support paid relays
   - atlas.nostr.land
   - eden.nostr.land
@@ -74,17 +75,16 @@ If you like Coracle and want to support its development, you can donate sats via
 
 # Current
 
-- [ ] Implement gossip model https://bountsr.org/code/2023/02/03/gossip-model.html
-  - [_] Add nip 05 to calculation
 - [ ] Make feeds page customizable. This could potentially use the "lists" NIP
+  - nevent1qqspjcqw2hu5gfcpkrjhs0aqvxuzjgtp50l375mcqjfpmk48cg5hevgpr3mhxue69uhkummnw3ez6un9d3shjtnhd3m8xtnnwpskxegpzamhxue69uhkummnw3ezuendwsh8w6t69e3xj7spramhxue69uhkummnw3ez6un9d3shjtnwdahxxefwv93kzer9d4usz9rhwden5te0wfjkccte9ejxzmt4wvhxjmcpr9mhxue69uhkummnw3ezuer9d3hjuum0ve68wctjv5n8hwfg
 - [ ] Show notification at top of feeds: "Showing notes from 3 relays". Click to customize.
 - [ ] Click through on relays page to view a feed for only that relay.
 - [ ] Custom views: slider between fast/complete with a warning at either extreme
 - [ ] Deterministically calculate color for relays, show it on notes. User popper?
 - [ ] Likes list
 - [ ] Fix anon/new user experience
-- [ ] Likes are slow
-- [ ] Show loading on replies/notes
+- [ ] Show loading on replies/new notes
+- [ ] Initial user load doesn't have any relays, cache user or wait for people db to be loaded
 
 # Changelog
 

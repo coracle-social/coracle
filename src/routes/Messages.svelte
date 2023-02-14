@@ -58,7 +58,7 @@
 
   const sendMessage = async content => {
     const cyphertext = await crypt.encrypt(pubkey, content)
-    const event = await cmd.createDirectMessage(getRelays(), pubkey, cyphertext)
+    const [event] = cmd.createDirectMessage(getRelays(), pubkey, cyphertext)
 
     // Return unencrypted content so we can display it immediately
     return {...event, content}

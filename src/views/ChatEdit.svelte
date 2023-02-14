@@ -36,9 +36,9 @@
     if (!room.name) {
       toast.show("error", "Please enter a name for your room.")
     } else {
-      const event = room.id
-        ? await cmd.updateRoom(getUserRelays('write'), room)
-        : await cmd.createRoom(getUserRelays('write'), room)
+      const [event] = room.id
+        ? cmd.updateRoom(getUserRelays('write'), room)
+        : cmd.createRoom(getUserRelays('write'), room)
 
       await database.rooms.patch({id: room.id || event.id, joined: true})
 

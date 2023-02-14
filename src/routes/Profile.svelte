@@ -46,7 +46,7 @@
   const submit = async event => {
     event.preventDefault()
 
-    await cmd.updateUser(getUserRelays('write'), values)
+    cmd.updateUser(getUserRelays('write'), values)
 
     navigate(routes.person($user.pubkey, 'profile'))
 
