@@ -89,6 +89,7 @@ const removeItems = (storeName, ...args) => callLocalforage(storeName, 'removeIt
 const length = storeName => callLocalforage(storeName, 'length')
 const clear = storeName => callLocalforage(storeName, 'clear')
 const keys = storeName => callLocalforage(storeName, 'keys')
+const dump = storeName => callLocalforage(storeName, 'dump')
 
 const iterate = (storeName, where = {}) => ({
   [Symbol.asyncIterator]() {
@@ -211,12 +212,7 @@ const defineTable = (name: string, pk: string, opts: TableOpts = {}): Table => {
   // Sync from storage initially
   ;(async () => {
     const t = Date.now()
-    const initialData = {}
-    for await (const {k, v} of iterate(name)) {
-      if (isValid(v)) {
-        initialData[k] = v
-      }
-    }
+    const initialData = filter(isValid, await dump(name))
 
     if (resetOnInit) {
       await clear(name)
@@ -310,6 +306,6 @@ const ready = derived(pluck('ready', Object.values(registry)), all(identity))
 
 export default {
   getItem, setItem, setItems, removeItem, removeItems, length, clear, keys,
-  iterate, watch, getPersonWithFallback, clearAll, people, rooms, messages,
+  dump, iterate, watch, getPersonWithFallback, clearAll, people, rooms, messages,
   alerts, relays, routes, ready,
 }

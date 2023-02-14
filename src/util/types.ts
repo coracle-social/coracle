@@ -18,7 +18,7 @@ export type MyEvent = Event & {
 }
 
 export type DisplayEvent = MyEvent & {
-  replies: []
-  reactions: []
-  children: []
+  replies: Array<MyEvent>
+  reactions: Array<MyEvent>
+  children: Array<DisplayEvent>
 }

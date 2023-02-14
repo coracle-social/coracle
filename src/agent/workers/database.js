@@ -27,14 +27,22 @@ addEventListener('message', async ({data: {topic, payload, channel}}) => {
       const instance = getStore(storeName)
 
       const result = await switcherFn(method, {
+        dump: () => new Promise(resolve => {
+          const result = {}
+
+          instance.iterate(
+            (v, k, i) => { result[k] = v },
+            () => resolve(result),
+          )
+        }),
         setItems: () => {
           for (const [k, v] of Object.entries(args[0])) {
             instance.setItem(k, v)
           }
         },
         removeItems: () => {
-          for (const [k, v] of Object.entries(args[0])) {
-            instance.removeItem(k, v)
+          for (const k of args[0]) {
+            instance.removeItem(k)
           }
         },
         default: () => instance[method](...args),

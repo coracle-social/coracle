@@ -125,10 +125,10 @@ export const renderNote = (note, {showEntire = false}) => {
 }
 
 export const asDisplayEvent = event =>
-  ({children: [], replies: [], reactions: [], ...event})
+  ({children: [], replies: [], reactions: [], ...event}) as DisplayEvent
 
 export const mergeParents = (notes: Array<DisplayEvent>) => {
-  const notesById = createMap('id', notes)
+  const notesById = createMap('id', notes) as Record<string, DisplayEvent>
   const childIds = []
 
   for (const note of Object.values(notesById)) {
@@ -140,7 +140,7 @@ export const mergeParents = (notes: Array<DisplayEvent>) => {
 
     // Add the current note to its parents children, but only if we found a parent
     if (notesById[parentId]) {
-      notesById[parentId].children = notesById[parentId].children.concat(note)
+      notesById[parentId].children = notesById[parentId].children.concat([note])
     }
   }
 
