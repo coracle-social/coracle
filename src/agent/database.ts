@@ -82,7 +82,9 @@ const callLocalforage = async (storeName, method, ...args) => {
 
 const getItem = (storeName, ...args) => callLocalforage(storeName, 'getItem', ...args)
 const setItem = (storeName, ...args) => callLocalforage(storeName, 'setItem', ...args)
+const setItems = (storeName, ...args) => callLocalforage(storeName, 'setItems', ...args)
 const removeItem = (storeName, ...args) => callLocalforage(storeName, 'removeItem', ...args)
+const removeItems = (storeName, ...args) => callLocalforage(storeName, 'removeItems', ...args)
 
 const length = storeName => callLocalforage(storeName, 'length')
 const clear = storeName => callLocalforage(storeName, 'clear')
@@ -181,14 +183,7 @@ const defineTable = (name: string, pk: string, opts: TableOpts = {}): Table => {
     setAndNotify({...data, ...newData})
 
     // Sync to storage, keeping updates in order
-    p = p.then(() => {
-      const updates = []
-      for (const [k, v] of Object.entries(newData)) {
-        updates.push(setItem(name, k, v))
-      }
-
-      return Promise.all(updates)
-    }) as Promise<void>
+    p = p.then(() => setItems(name, newData)) as Promise<void>
   }
 
   const bulkPatch = (updates: Record<string, object>): void => {
@@ -314,7 +309,7 @@ const clearAll = () => Promise.all(Object.keys(registry).map(clear))
 const ready = derived(pluck('ready', Object.values(registry)), all(identity))
 
 export default {
-  getItem, setItem, removeItem, length, clear, keys, iterate, watch,
-  getPersonWithFallback, clearAll, people, rooms, messages, alerts, relays,
-  routes, ready,
+  getItem, setItem, setItems, removeItem, removeItems, length, clear, keys,
+  iterate, watch, getPersonWithFallback, clearAll, people, rooms, messages,
+  alerts, relays, routes, ready,
 }

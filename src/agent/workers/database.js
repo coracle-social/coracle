@@ -24,7 +24,21 @@ addEventListener('message', async ({data: {topic, payload, channel}}) => {
   switcherFn(topic, {
     'localforage.call': async () => {
       const {storeName, method, args} = payload
-      const result = await getStore(storeName)[method](...args)
+      const instance = getStore(storeName)
+
+      const result = await switcherFn(method, {
+        setItems: () => {
+          for (const [k, v] of Object.entries(args[0])) {
+            instance.setItem(k, v)
+          }
+        },
+        removeItems: () => {
+          for (const [k, v] of Object.entries(args[0])) {
+            instance.removeItem(k, v)
+          }
+        },
+        default: () => instance[method](...args),
+      })
 
       reply('localforage.return', result)
     },
