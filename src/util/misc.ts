@@ -244,3 +244,15 @@ export const where = filters =>
         return pipe(prop(field), modifier(test))
       })
   )
+
+// https://stackoverflow.com/a/21682946
+//
+export const stringToColor = (value, saturation = 100, lightness = 50) => {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = value.charCodeAt(i) + ((hash << 5) - hash)
+    hash = hash & hash
+  }
+
+  return `hsl(${(hash % 360)}, ${saturation}%, ${lightness}%)`;
+}

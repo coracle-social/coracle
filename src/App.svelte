@@ -365,7 +365,7 @@
       {:else if $modal.type === 'relay/list'}
         <Content>
           {#each $modal.relays as relay}
-          <RelayCard showControls {relay} />
+          <RelayCard theme="black" showControls {relay} />
           {/each}
         </Content>
       {:else if $modal.type === 'signUp'}

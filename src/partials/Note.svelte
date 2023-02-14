@@ -13,7 +13,7 @@
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import {toast, settings, modal, renderNote} from "src/app"
-  import {formatTimestamp} from 'src/util/misc'
+  import {formatTimestamp, stringToColor} from 'src/util/misc'
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
   import {user, getTopEventRelays, getAllEventRelays} from 'src/agent/helpers'
@@ -267,8 +267,12 @@
               {$flagsCount}
             </div>
           </div>
-          <div class="cursor-pointer text-light" on:click={showActiveRelays}>
+          <div
+            class="cursor-pointer flex gap-1 items-center" on:click={showActiveRelays}>
             <i class="fa fa-server" />
+            <div
+              class="h-1 w-1 rounded-full"
+              style={`background: ${stringToColor(note.seen_on)}`} />
           </div>
         </div>
         {/if}

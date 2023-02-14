@@ -1,7 +1,8 @@
 <script lang="ts">
+  import cx from 'classnames'
   import {last, find, propEq} from 'ramda'
   import {onMount} from 'svelte'
-  import {poll} from "src/util/misc"
+  import {poll, stringToColor} from "src/util/misc"
   import {switcher} from 'hurdak/lib/hurdak'
   import {fly} from 'svelte/transition'
   import Toggle from "src/partials/Toggle.svelte"
@@ -10,6 +11,7 @@
   import {addRelay, removeRelay, setRelayWriteCondition} from "src/app"
 
   export let relay
+  export let theme = 'dark'
   export let showControls = false
 
   let status = null
@@ -33,7 +35,11 @@
 </script>
 
 <div
-  class="rounded border border-solid border-medium bg-dark shadow flex flex-col justify-between gap-3 py-3 px-6"
+  class={cx(
+    `bg-${theme}`,
+    "rounded border border-l-2 border-solid border-medium shadow flex flex-col justify-between gap-3 py-3 px-6"
+  )}
+  style={`border-left-color: ${stringToColor(relay.url)}`}
   in:fly={{y: 20}}>
   <div class="flex gap-2 items-center justify-between">
     <div class="flex gap-2 items-center text-xl">

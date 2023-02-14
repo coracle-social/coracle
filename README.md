@@ -31,6 +31,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Attachments (a tag w/content type and url)
 - [ ] Linkify bech32 entities w/ NIP 21 https://github.com/nostr-protocol/nips/blob/master/21.md
 - [ ] Sign in as user with one click to view things from their pubkey's perspective - do this with multiple accounts
+  - nevent1qqsyyxtrhpsqeqaqgucd6uzpyh8eq2hkfgr0yzr7ku7tgyl5cn9jw5qpz3mhxue69uhhyetvv9ujumn0wd68ytnzvuq3gamnwvaz7tmjv4kxz7fwv3sk6atn9e5k7l564wx
 
 # Missions
 
@@ -47,6 +48,7 @@ If you like Coracle and want to support its development, you can donate sats via
   - https://github.com/cubefs/cubefs
 - [ ] Support relay auth
 - [ ] Support invoices, tips, zaps https://twitter.com/jb55/status/1604131336247476224
+  - nevent1qqsd0x0xzfwtppu0n52ngw0zhynlwv0sjsr77aflcpufms2wrl3v8mspr9mhxue69uhhyetvv9ujuumwdae8gtnnda3kjctv9uqs7amnwvaz7tmwdaehgu3wd4hk6d7ewgp
 - [ ] Separate settings for read, write, and broadcast relays based on NIP 65
 - [ ] Release to android
   - https://svelte-native.technology/docs
@@ -77,7 +79,6 @@ If you like Coracle and want to support its development, you can donate sats via
 
 - [ ] Make feeds page customizable. This could potentially use the "lists" NIP
   - nevent1qqspjcqw2hu5gfcpkrjhs0aqvxuzjgtp50l375mcqjfpmk48cg5hevgpr3mhxue69uhkummnw3ez6un9d3shjtnhd3m8xtnnwpskxegpzamhxue69uhkummnw3ezuendwsh8w6t69e3xj7spramhxue69uhkummnw3ez6un9d3shjtnwdahxxefwv93kzer9d4usz9rhwden5te0wfjkccte9ejxzmt4wvhxjmcpr9mhxue69uhkummnw3ezuer9d3hjuum0ve68wctjv5n8hwfg
-- [ ] Show notification at top of feeds: "Showing notes from 3 relays". Click to customize.
 - [ ] Click through on relays page to view a feed for only that relay.
 - [ ] Custom views: slider between fast/complete with a warning at either extreme
 - [ ] Deterministically calculate color for relays, show it on notes. User popper?
@@ -85,12 +86,21 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Fix anon/new user experience
 - [ ] Show loading on replies/new notes
 - [ ] Initial user load doesn't have any relays, cache user or wait for people db to be loaded
+- [ ] Shorten height of chat headers
+- [ ] Custom views should combine pubkeys, relays, and topics
+- [ ] Show relay status based on stats not current connection status
+  - Add a dot below the relay's color code on feeds?
 
 # Changelog
 
 ## 0.2.12
 
 - [x] Stream likes and replies in lazily
+- [x] Add relay symbol to notes which is clickable to view relays
+- [x] Switch to publishing events optimistically
+- [x] Reduce how many relays replies are published to
+- [x] Re-work thread layout
+- [x] Color code relays
 
 ## 0.2.11
 
