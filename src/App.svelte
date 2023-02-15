@@ -341,17 +341,6 @@
       {/if}
     </div>
 
-    {#if keys.canSign()}
-    <div class="fixed bottom-0 right-0 m-8">
-      <button
-        class="rounded-full bg-accent color-white w-16 h-16 flex justify-center
-                items-center border border-dark shadow-2xl"
-        on:click={() => modal.set({type: 'note/create'})}>
-        <span class="fa-sold fa-plus fa-2xl" />
-      </button>
-    </div>
-    {/if}
-
     {#if $modal}
     <Modal onEscape={closeModal}>
       {#if $modal.type === 'note/detail'}
@@ -359,7 +348,7 @@
         <NoteDetail {...$modal} />
         {/key}
       {:else if $modal.type === 'note/create'}
-        <NoteCreate />
+        <NoteCreate pubkey={$modal.pubkey} />
       {:else if $modal.type === 'relay/add'}
         <AddRelay />
       {:else if $modal.type === 'relay/list'}

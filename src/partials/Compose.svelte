@@ -1,5 +1,6 @@
 <script>
   import {prop, reject, sortBy, last} from 'ramda'
+  import {ensurePlural} from 'hurdak/lib/hurdak'
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
   import {displayPerson} from "src/util/nostr"
@@ -14,11 +15,8 @@
   let suggestions = []
   let input = null
   let prevContent = ''
-  let search
 
-  database.people.iter({'name:!nil': null}).then(people => {
-    search = fuzzy(people, {keys: ["name", "pubkey"]})
-  })
+  const search = fuzzy(database.people.all({'name:!nil': null}), {keys: ["name", "pubkey"]})
 
   const getText = () => {
     const selection = document.getSelection()
@@ -142,6 +140,24 @@
     }
 
     prevContent = input.innerText
+  }
+
+  export const trigger = events => {
+    ensurePlural(events).forEach(onKeyUp)
+  }
+
+  export const type = text => {
+    for (const c of Array.from(text)) {
+      input.innerText += c
+
+      const selection = document.getSelection()
+      const extent = fromParentOffset(input, input.innerText.length)
+
+      selection.setBaseAndExtent(...extent, ...extent)
+
+      onKeyUp({key: c})
+    }
+
   }
 
   export const parse = () => {

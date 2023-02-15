@@ -155,7 +155,7 @@
         {/await}
       </ul>
     </div>
-    <div class="fixed z-10 top-16 w-full lg:-ml-56 lg:pl-56 border-b border-solid border-medium bg-dark">
+    <div class="fixed z-20 top-0 w-full lg:-ml-56 lg:pl-56 border-b border-solid border-medium bg-dark">
       <div class="p-4 flex items-start gap-4">
         <div class="flex items-center gap-4">
           <button
@@ -195,7 +195,7 @@
     </div>
     <div class="fixed z-10 bottom-0 w-full flex bg-medium border-medium border-t border-solid border-dark lg:-ml-56 lg:pl-56">
       <textarea
-        rows="4"
+        rows="3"
         autofocus
         placeholder="Type something..."
         bind:this={textarea}

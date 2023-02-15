@@ -28,10 +28,10 @@
   export let shouldDisplay = always(true)
 
   const getDefaultReplyMentions = () =>
-    Tags.from(note).type("p").values().all().concat(note.pubkey)
+    without([$user?.pubkey], uniq(Tags.from(note).type("p").values().all().concat(note.pubkey)))
 
   let reply = null
-  let replyMentions = without([$user?.pubkey], getDefaultReplyMentions())
+  let replyMentions = getDefaultReplyMentions()
   let replyContainer = null
 
   const links = $settings.showLinkPreviews ? extractUrls(note.content) || [] : []

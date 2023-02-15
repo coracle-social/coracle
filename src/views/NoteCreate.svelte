@@ -18,6 +18,8 @@
   import cmd from "src/agent/cmd"
   import {toast, modal} from "src/app"
 
+  export let pubkey = null
+
   let input = null
   let relays = getUserRelays('write')
   let showSettings = false
@@ -70,6 +72,13 @@
   onMount(() => {
     if (!$user) {
       navigate("/login")
+    }
+
+    const person = database.people.get(pubkey)
+
+    if (person?.name) {
+      input.type('@' + person.name)
+      input.trigger({key: 'Enter'})
     }
   })
 </script>

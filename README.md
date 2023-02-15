@@ -79,16 +79,13 @@ If you like Coracle and want to support its development, you can donate sats via
 
 - [ ] Make feeds page customizable. This could potentially use the "lists" NIP
   - nevent1qqspjcqw2hu5gfcpkrjhs0aqvxuzjgtp50l375mcqjfpmk48cg5hevgpr3mhxue69uhkummnw3ez6un9d3shjtnhd3m8xtnnwpskxegpzamhxue69uhkummnw3ezuendwsh8w6t69e3xj7spramhxue69uhkummnw3ez6un9d3shjtnwdahxxefwv93kzer9d4usz9rhwden5te0wfjkccte9ejxzmt4wvhxjmcpr9mhxue69uhkummnw3ezuer9d3hjuum0ve68wctjv5n8hwfg
-- [ ] Click through on relays page to view a feed for only that relay.
-- [ ] Custom views: slider between fast/complete with a warning at either extreme
-- [ ] Deterministically calculate color for relays, show it on notes. User popper?
-- [ ] Likes list
+  - [ ] Click through on relays page to view a feed for only that relay.
+  - [ ] Custom views should combine pubkeys, relays, and topics
+- [ ] Likes list on note detail. Maybe a sidebar or header for note detail page?
 - [ ] Fix anon/new user experience
-- [ ] Show loading on replies/new notes
 - [ ] Initial user load doesn't have any relays, cache user or wait for people db to be loaded
-- [ ] Shorten height of chat headers
-- [ ] Custom views should combine pubkeys, relays, and topics
 - [ ] Are write relays the only ones that matter? User read relays only matter for global feed, or where there's no relay hints available. But if relays are navigable, this is unnecessary.
+- [ ] Fix bugs
 
 # Changelog
 
@@ -101,6 +98,8 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Re-work thread layout
 - [x] Color code relays
 - [x] Show relay status based on stats not current connection status
+- [x] Auto-mention person when creating a note from their profile page
+- [x] Make chat header overlap main header to save space
 
 ## 0.2.11
 

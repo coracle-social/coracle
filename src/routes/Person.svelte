@@ -10,6 +10,7 @@
   import {displayPerson, Tags} from 'src/util/nostr'
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
+  import NewNoteButton from "src/partials/NewNoteButton.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Notes from "src/views/person/Notes.svelte"
@@ -190,3 +191,5 @@
     {/if}
   {/if}
 </Content>
+
+<NewNoteButton {pubkey} />
