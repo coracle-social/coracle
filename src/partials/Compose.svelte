@@ -1,5 +1,6 @@
-<script>
+<script lang="ts">
   import {prop, reject, sortBy, last} from 'ramda'
+  import {onMount} from 'svelte'
   import {ensurePlural} from 'hurdak/lib/hurdak'
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
@@ -183,6 +184,22 @@
       mentions: validMentions.map(prop('pubkey')),
     }
   }
+
+  onMount(() => {
+    input.addEventListener('paste', e => {
+      e.preventDefault()
+
+      const clipboardData = e.clipboardData || (window as any).clipboardData
+      const text = clipboardData.getData('text')
+      const selection = window.getSelection()
+
+      if (selection.rangeCount) {
+        selection.deleteFromDocument()
+        selection.getRangeAt(0).insertNode(document.createTextNode(text))
+      }
+    })
+  })
+
 </script>
 
 <div class="flex">

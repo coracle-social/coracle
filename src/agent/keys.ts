@@ -1,10 +1,8 @@
-import {nip04} from 'nostr-tools'
-import {getPublicKey, getEventHash, signEvent} from 'nostr-tools'
+import {prop} from 'ramda'
+import {nip04, getPublicKey, getEventHash, signEvent} from 'nostr-tools'
 import {get} from 'svelte/store'
 import {error} from 'src/util/logger'
 import {synced} from 'src/util/misc'
-
-let signingFunction
 
 const pubkey = synced('agent/user/pubkey')
 const privkey = synced('agent/user/privkey')
@@ -17,16 +15,6 @@ const setPrivateKey = _privkey => {
 }
 
 const setPublicKey = _pubkey => {
-  const nostr = getExtension()
-
-  if (nostr) {
-    signingFunction = async event => {
-      const {sig} = await nostr.signEvent(event)
-
-      return sig
-    }
-  }
-
   pubkey.set(_pubkey)
 }
 
@@ -36,10 +24,12 @@ const clear = () => {
 }
 
 const sign = async event => {
+  const ext = getExtension()
+
   event.pubkey = get(pubkey)
   event.id = getEventHash(event)
-  event.sig = signingFunction
-    ? await signingFunction(event)
+  event.sig = ext
+    ? prop('sig', await ext.signEvent(event))
     : signEvent(event, get(privkey))
 
   return event
@@ -72,9 +62,6 @@ const getCrypt = () => {
     },
   }
 }
-
-// Init signing function by re-setting pubkey
-setPublicKey(get(pubkey))
 
 export default {
   pubkey, privkey, canSign, setPrivateKey, setPublicKey, clear,
