@@ -3,7 +3,7 @@ import type {MyEvent} from 'src/util/types'
 import {relayInit} from 'nostr-tools'
 import {uniqBy, without, prop, find, is} from 'ramda'
 import {ensurePlural} from 'hurdak/lib/hurdak'
-import {warn, log} from 'src/util/logger'
+import {warn, log, error} from 'src/util/logger'
 import {isRelay} from 'src/util/nostr'
 import {sleep} from 'src/util/misc'
 import database from 'src/agent/database'
@@ -51,6 +51,14 @@ class Connection {
     if (shouldConnect) {
       this.status = CONNECTION_STATUS.PENDING
       this.promise = this.nostr.connect()
+
+      this.nostr.on('connect', () => {
+        this.status = CONNECTION_STATUS.READY
+      })
+
+      this.nostr.on('error', () => {
+        this.status = CONNECTION_STATUS.ERROR
+      })
     }
 
     if (this.status === CONNECTION_STATUS.PENDING) {
@@ -170,7 +178,11 @@ const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: 
   const seen = new Set()
   const eose = new Set()
 
-  log(`Starting subscription ${id} with ${relays.length} relays`, filters)
+  if (relays.length === 0) {
+    error(`Attempted to start subscription ${id} with zero relays`, filters)
+  } else {
+    log(`Starting subscription ${id} with ${relays.length} relays`, filters)
+  }
 
   // Don't await before returning so we're not blocking on slow connects
   const promises = relays.map(async relay => {
@@ -220,7 +232,10 @@ const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: 
     return Object.assign(sub, {conn})
   })
 
+  let active = true
+
   return {
+    isActive: () => active,
     unsub: () => {
       log(`Closing subscription ${id}`)
 
@@ -232,6 +247,7 @@ const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: 
             sub.unsub()
           }
 
+          active = false
           sub.conn.stats.activeSubsCount -= 1
         }
       })
@@ -254,7 +270,14 @@ const subscribeUntilEose = async (
   const now = Date.now()
   const eose = new Set()
 
+  let closed = true
+
   const attemptToComplete = () => {
+    // If we've already unsubscribed we're good
+    if (!agg.isActive()) {
+      return
+    }
+
     const isComplete = eose.size === relays.length
     const isTimeout = Date.now() - now >= timeout
 

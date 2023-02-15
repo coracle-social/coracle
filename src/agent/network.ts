@@ -2,7 +2,7 @@ import {uniq, uniqBy, prop, map, propEq, indexBy, pluck} from 'ramda'
 import {findReply, personKinds, findReplyId, Tags} from 'src/util/nostr'
 import {chunk} from 'hurdak/lib/hurdak'
 import {batch} from 'src/util/misc'
-import {getFollows, getStalePubkeys, getTopEventRelays} from 'src/agent/helpers'
+import {getStalePubkeys, getTopEventRelays} from 'src/agent/helpers'
 import pool from 'src/agent/pool'
 import keys from 'src/agent/keys'
 import sync from 'src/agent/sync'
@@ -70,13 +70,6 @@ const loadPeople = (relays, pubkeys, {kinds = personKinds, force = false, ...opt
     : Promise.resolve([])
 }
 
-const loadNetwork = async (relays, pubkey) => {
-  const tags = Tags.wrap(getFollows(pubkey))
-
-  // Use nip-2 recommended relays to load our user's second-order follows
-  await loadPeople(tags.relays(), tags.values().all())
-}
-
 const loadParents = (relays, notes) => {
   const parentIds = new Set(Tags.wrap(notes.map(findReply)).values().all())
 
@@ -128,7 +121,7 @@ const streamContext = ({relays, notes, updateNotes, depth = 0}) => {
 }
 
 export default {
-  publish, load, listen, listenUntilEose, loadNetwork, loadPeople, personKinds,
+  publish, load, listen, listenUntilEose, loadPeople, personKinds,
   loadParents, streamContext,
 }
 

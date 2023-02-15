@@ -11,6 +11,8 @@
 - [x] Show relay status based on stats not current connection status
 - [x] Auto-mention person when creating a note from their profile page
 - [x] Make chat header overlap main header to save space
+- [x] Strip formatting when pasting into Compose
+- [x] Upgraded nostr-tools to 1.4.1
 
 ## 0.2.11
 

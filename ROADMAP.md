@@ -9,10 +9,10 @@
 - [ ] Fix anon/new user experience
 - [ ] Initial user load doesn't have any relays, cache user or wait for people db to be loaded
 - [ ] Fix bugs on bugsnag
-- [ ] Fix bugs on github
 
 # Snacks
 
+- [ ] Relay recommendations based on follows/followers
 - [ ] Pinned posts ala snort
 - [ ] Likes list on note detail. Maybe a sidebar or header for note detail page?
 - [ ] Support key delegation
@@ -54,7 +54,7 @@
 
 # Maintenance
 
-- [ ] If the latest message in a dm was the user, don't show notification
+- [ ] Don't waste space caching rooms, load those lazily
 - [ ] Normalize relay urls (lowercase, strip trailing slash)
 - [ ] Use nip 56 for reporting
   - https://github.com/nostr-protocol/nips/pull/205#issuecomment-1419234230

@@ -5,7 +5,7 @@ import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
 import {renderContent} from 'src/util/html'
 import {Tags, displayPerson, findReplyId} from 'src/util/nostr'
-import {user, getUserRelays} from 'src/agent/helpers'
+import {user, getUserRelays, getFollows} from 'src/agent/helpers'
 import defaults from 'src/agent/defaults'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
@@ -19,12 +19,13 @@ export {toast, modal, settings, alerts, messages, logUsage}
 
 export const loadAppData = pubkey => {
   const relays = getUserRelays('read')
+  const follows = Tags.wrap(getFollows(pubkey))
 
   return Promise.all([
-    network.loadNetwork(relays, pubkey),
     alerts.load(relays, pubkey),
     alerts.listen(relays, pubkey),
     messages.listen(relays, pubkey),
+    network.loadPeople(follows.relays(), follows.values().all()),
   ])
 }
 

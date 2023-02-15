@@ -304,8 +304,17 @@ const clearAll = () => Promise.all(Object.keys(registry).map(clear))
 
 const ready = derived(pluck('ready', Object.values(registry)), all(identity))
 
+const onReady = cb => {
+  const unsub = ready.subscribe($ready => {
+    if ($ready) {
+      cb()
+      unsub()
+    }
+  })
+}
+
 export default {
   getItem, setItem, setItems, removeItem, removeItems, length, clear, keys,
   dump, iterate, watch, getPersonWithFallback, clearAll, people, rooms, messages,
-  alerts, relays, routes, ready,
+  alerts, relays, routes, ready, onReady,
 }

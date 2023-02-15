@@ -30,10 +30,10 @@ const listen = async (relays, pubkey) => {
         await network.loadPeople(relays, pluck('pubkey', messages))
 
         mostRecentByPubkey.update(o => {
-          for (const {pubkey, recipient, created_at} of messages) {
-            const k = pubkey === $user.pubkey ? recipient : pubkey
-
-            o[k] = Math.max(created_at, o[k] || 0)
+          for (const {pubkey, created_at} of messages) {
+            if (pubkey !== $user.pubkey) {
+              o[pubkey] = Math.max(created_at, o[pubkey] || 0)
+            }
           }
 
           return o

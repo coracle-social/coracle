@@ -31,8 +31,6 @@
         quality = null
         message = "Not connected"
       }
-
-      console.log(quality, message)
     })
   })
 </script>

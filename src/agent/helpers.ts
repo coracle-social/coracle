@@ -32,11 +32,8 @@ export const getMuffle = () => {
   return Tags.wrap($user.muffle.filter(shouldMuffle)).values().all()
 }
 
-export const getFollows = pubkey => {
-  const person = database.getPersonWithFallback(pubkey)
-
-  return Tags.wrap(person.petnames || defaults.petnames).values().all()
-}
+export const getFollows = pubkey =>
+  database.getPersonWithFallback(pubkey).petnames || defaults.petnames
 
 export const getPersonRelays = (person, mode = 'all') => {
   const relays = isEmpty(person?.relays || []) ? defaults.relays : person.relays

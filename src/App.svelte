@@ -3,7 +3,6 @@
   import "@fortawesome/fontawesome-free/css/solid.css"
 
   import {find, is, identity, nthArg, pluck} from 'ramda'
-  import {onMount} from "svelte"
   import {createMap, first} from 'hurdak/lib/hurdak'
   import {writable, get} from "svelte/store"
   import {fly, fade} from "svelte/transition"
@@ -88,13 +87,12 @@
     ))
   }
 
-  onMount(() => {
+  database.onReady(() => {
     if ($user) {
       loadAppData($user.pubkey)
     }
 
     // Background work
-
     const interval = setInterval(() => {
       alertSlowConnections()
       retrieveRelayMeta()
@@ -168,6 +166,7 @@
       }
     })
 
+    // Log usage on navigate
     const unsubHistory = globalHistory.listen(({location}) => {
       if (!location.hash) {
         // Remove identifying information, e.g. pubkeys, event ids, etc
@@ -178,8 +177,8 @@
       }
     })
 
+    // Keep scroll position on body, but don't allow scrolling
     const unsubModal = modal.subscribe($modal => {
-      // Keep scroll position on body, but don't allow scrolling
       if ($modal) {
         logUsage(btoa(['modal', $modal.type].join(':')))
 
