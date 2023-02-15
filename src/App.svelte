@@ -4,7 +4,7 @@
 
   import {find, is, identity, nthArg, pluck} from 'ramda'
   import {onMount} from "svelte"
-  import {createMap} from 'hurdak/lib/hurdak'
+  import {createMap, first} from 'hurdak/lib/hurdak'
   import {writable, get} from "svelte/store"
   import {fly, fade} from "svelte/transition"
   import {cubicInOut} from "svelte/easing"
@@ -113,12 +113,12 @@
       log(
         'Connection stats',
         pool.getConnections()
-          .map(({nostr: {url}, stats: s}) => `${url} ${s.timer / s.count}`)
+          .map(c => `${c.nostr.url} ${c.getQuality().join(' ')}`)
       )
 
       // Alert the user to any heinously slow connections
       slowConnections = pool.getConnections()
-        .filter(({nostr: {url}, stats: s}) => relayUrls.includes(url) && s.timer / s.count > 3000)
+        .filter(c => relayUrls.includes(c.nostr.url) && first(c.getQuality()) < 0.3)
     }
 
     const retrieveRelayMeta = async () => {

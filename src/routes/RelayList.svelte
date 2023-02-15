@@ -1,23 +1,20 @@
 <script>
-  import {pluck, objOf, fromPairs} from 'ramda'
+  import {pluck, objOf} from 'ramda'
   import {noop, createMap} from 'hurdak/lib/hurdak'
-  import {onMount} from 'svelte'
   import {get} from 'svelte/store'
   import {fly} from 'svelte/transition'
-  import {fuzzy, poll} from "src/util/misc"
+  import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/partials/RelayCard.svelte"
   import {user} from "src/agent/helpers"
   import database from 'src/agent/database'
-  import pool from 'src/agent/pool'
   import {modal, settings} from "src/app"
   import defaults from "src/agent/defaults"
 
   let q = ""
   let search
-  let status = {}
   let relays = []
 
   fetch(get(settings).dufflepudUrl + '/relay')
@@ -32,32 +29,13 @@
   const knownRelays = database.watch('relays', relays => relays.all())
 
   $: {
-    const joined = pluck('url', $user?.relays || [])
-    const data = ($knownRelays || []).filter(r => !joined.includes(r.url))
+    relays =  $user?.relays || []
+
+    const joined = new Set(pluck('url', relays))
+    const data = ($knownRelays || []).filter(r => !joined.has(r.url))
 
     search = fuzzy(data, {keys: ["name", "description", "url"]})
   }
-
-  onMount(() => {
-    return poll(1000, async () => {
-      relays = ($user?.relays || [])
-        .map(relay => ({...database.relays.get(relay.url), ...relay}))
-
-      // Attempt to connect so we can show status
-      relays.forEach(relay => pool.connect(relay.url))
-
-      status = fromPairs(
-        pool.getConnections().map(({url, status, stats}) => {
-          // Be more strict here than with alerts
-          if (status === 'ready' && stats.timer / stats.count > 1000) {
-            status = 'slow'
-          }
-
-          return [url, status]
-        })
-      )
-    })
-  })
 </script>
 
 <Content>

@@ -10,6 +10,14 @@ import database from 'src/agent/database'
 
 const connections = []
 
+const CONNECTION_STATUS = {
+  NEW: 'new',
+  ERROR: 'error',
+  PENDING: 'pending',
+  CLOSED: 'closed',
+  READY: 'ready',
+}
+
 class Connection {
   promise: Promise<void>
   nostr: Relay
@@ -21,34 +29,36 @@ class Connection {
     this.nostr = relayInit(url)
     this.status = 'new'
     this.stats = {
-      count: 0,
-      timer: 0,
       timeouts: 0,
-      activeCount: 0,
+      subCount: 0,
+      eoseCount: 0,
+      eoseTimer: 0,
+      eventsCount: 0,
+      activeSubsCount: 0,
     }
 
     connections.push(this)
   }
   async connect() {
     const shouldConnect = (
-      this.status === 'new'
+      this.status === CONNECTION_STATUS.NEW
       || (
-        this.status === 'error'
+        this.status === CONNECTION_STATUS.ERROR
         && Date.now() - this.lastConnectionAttempt > 60_000
       )
     )
 
     if (shouldConnect) {
-      this.status = 'pending'
+      this.status = CONNECTION_STATUS.PENDING
       this.promise = this.nostr.connect()
     }
 
-    if (this.status === 'pending') {
+    if (this.status === CONNECTION_STATUS.PENDING) {
       try {
         await this.promise
-        this.status = 'ready'
+        this.status = CONNECTION_STATUS.READY
       } catch (e) {
-        this.status = 'error'
+        this.status = CONNECTION_STATUS.ERROR
       }
     }
 
@@ -57,12 +67,45 @@ class Connection {
     return this
   }
   async disconnect() {
-    this.status = 'closed'
+    this.status = CONNECTION_STATUS.CLOSED
 
     try {
       await this.nostr.close()
     } catch (e) {
       // For some reason bugsnag is saying this.nostr is undefined, even if we check it
+    }
+  }
+  getQuality() {
+    if (this.status === CONNECTION_STATUS.ERROR) {
+      return [0, "Failed to connect"]
+    }
+
+    const {timeouts, subCount, eoseTimer, eoseCount} = this.stats
+    const timeoutRate = subCount > 10 ? timeouts / subCount : null
+    const eoseQuality = eoseCount > 10 ? Math.max(1, 500 / (eoseTimer / eoseCount)) : null
+
+    if (timeoutRate && timeoutRate > 0.5) {
+      return [1 - timeoutRate, "Slow connection"]
+    }
+
+    if (eoseQuality && eoseQuality < 0.7) {
+      return [eoseQuality, "Slow connection"]
+    }
+
+    if (eoseQuality) {
+      return [eoseQuality, "Connected"]
+    }
+
+    if ([CONNECTION_STATUS.NEW, CONNECTION_STATUS.PENDING].includes(this.status)) {
+      return [0.5, "Trying to connect"]
+    }
+
+    if (this.status === CONNECTION_STATUS.CLOSED) {
+      return [0.5, "Disconnected"]
+    }
+
+    if (this.status === CONNECTION_STATUS.READY) {
+      return [1, "Connected"]
     }
   }
 }
@@ -145,6 +188,7 @@ const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: 
         if (!seen.has(e.id)) {
           seen.add(e.id)
 
+          conn.stats.eventsCount += 1
           e.seen_on = conn.nostr.url
 
           onEvent(e as MyEvent)
@@ -160,15 +204,16 @@ const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: 
         if (!eose.has(conn.nostr.url)) {
           eose.add(conn.nostr.url)
 
-          conn.stats.count += 1
-          conn.stats.timer += Date.now() - now
+          conn.stats.eoseCount += 1
+          conn.stats.eoseTimer += Date.now() - now
         }
       })
     }
 
-    conn.stats.activeCount += 1
+    conn.stats.subsCount += 1
+    conn.stats.activeSubsCount += 1
 
-    if (conn.stats.activeCount > 10) {
+    if (conn.stats.activeSubsCount > 10) {
       warn(`Relay ${conn.nostr.url} has >10 active subscriptions`)
     }
 
@@ -187,7 +232,7 @@ const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: 
             sub.unsub()
           }
 
-          sub.conn.stats.activeCount -= 1
+          sub.conn.stats.activeSubsCount -= 1
         }
       })
     },
@@ -217,6 +262,14 @@ const subscribeUntilEose = async (
       const timedOutRelays = without(Array.from(eose), relays)
 
       log(`Timing out ${timedOutRelays.length} relays after ${timeout}ms`, timedOutRelays)
+
+      timedOutRelays.forEach(url => {
+        const conn = findConnection(url)
+
+        if (conn) {
+          conn.stats.timeouts += 1
+        }
+      })
     }
 
     if (isComplete || isTimeout) {

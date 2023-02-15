@@ -88,8 +88,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Initial user load doesn't have any relays, cache user or wait for people db to be loaded
 - [ ] Shorten height of chat headers
 - [ ] Custom views should combine pubkeys, relays, and topics
-- [ ] Show relay status based on stats not current connection status
-  - Add a dot below the relay's color code on feeds?
+- [ ] Are write relays the only ones that matter? User read relays only matter for global feed, or where there's no relay hints available. But if relays are navigable, this is unnecessary.
 
 # Changelog
 
@@ -101,6 +100,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Reduce how many relays replies are published to
 - [x] Re-work thread layout
 - [x] Color code relays
+- [x] Show relay status based on stats not current connection status
 
 ## 0.2.11
 

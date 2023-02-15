@@ -3,7 +3,7 @@ import {writable} from 'svelte/store'
 export const logs = writable([])
 
 const logAndAppend = (level, ...message) => {
-  logs.update($logs => $logs.concat({created_at: Date.now(), message}))
+  logs.update($logs => $logs.concat({created_at: Date.now(), message}).slice(-100))
   console[level](...message)
 }
 
