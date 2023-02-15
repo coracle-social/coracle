@@ -264,12 +264,12 @@
           {/if}
         </a>
       </li>
+      {/if}
       <li class="cursor-pointer">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/search/people">
           <i class="fa-solid fa-search mr-2" /> Search
         </a>
       </li>
-      {/if}
       <li class="cursor-pointer">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes/network">
           <i class="fa-solid fa-tag mr-2" /> Notes
@@ -284,6 +284,7 @@
           {/if}
         </a>
       </li>
+      {/if}
       <li class="h-px mx-3 my-4 bg-medium" />
       <li class="cursor-pointer relative">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/relays">
@@ -293,6 +294,7 @@
           {/if}
         </a>
       </li>
+      {#if $user}
       <li class="cursor-pointer">
         <a class="block px-4 py-2 hover:bg-accent transition-all" href="/keys">
           <i class="fa-solid fa-key mr-2" /> Keys

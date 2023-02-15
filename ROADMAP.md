@@ -7,6 +7,7 @@
   - [ ] Custom views should combine pubkeys, relays, event ids, and topics
 
 - [ ] Fix anon/new user experience
+  - [ ] Clicking stuff that would publish kicks you to the login page, we should open a modal instead.
 - [ ] Initial user load doesn't have any relays, cache user or wait for people db to be loaded
 - [ ] Fix bugs on bugsnag
 

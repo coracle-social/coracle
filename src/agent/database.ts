@@ -308,7 +308,7 @@ const onReady = cb => {
   const unsub = ready.subscribe($ready => {
     if ($ready) {
       cb()
-      unsub()
+      setTimeout(() => unsub())
     }
   })
 }

@@ -270,8 +270,6 @@ const subscribeUntilEose = async (
   const now = Date.now()
   const eose = new Set()
 
-  let closed = true
-
   const attemptToComplete = () => {
     // If we've already unsubscribed we're good
     if (!agg.isActive()) {
