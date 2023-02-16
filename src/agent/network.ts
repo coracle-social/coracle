@@ -1,8 +1,12 @@
 import {uniq, uniqBy, prop, map, propEq, indexBy, pluck} from 'ramda'
-import {findReply, personKinds, findReplyId, Tags} from 'src/util/nostr'
+import {personKinds, findReplyId} from 'src/util/nostr'
 import {chunk} from 'hurdak/lib/hurdak'
 import {batch} from 'src/util/misc'
-import {getStalePubkeys, getTopEventRelays} from 'src/agent/helpers'
+import {getStalePubkeys} from 'src/agent/helpers'
+import {
+  getRelaysForEventParent, getAllPubkeyWriteRelays, aggregateScores,
+  getUserNetworkWriteRelays,
+} from 'src/agent/relays'
 import pool from 'src/agent/pool'
 import keys from 'src/agent/keys'
 import sync from 'src/agent/sync'
@@ -57,7 +61,7 @@ const listenUntilEose = (relays, filter, onEvents, {shouldProcess = true}: any =
   }) as Promise<void>
 }
 
-const loadPeople = (relays, pubkeys, {kinds = personKinds, force = false, ...opts} = {}) => {
+const loadPeople = (pubkeys, {kinds = personKinds, force = false, ...opts} = {}) => {
   pubkeys = uniq(pubkeys)
 
   // If we're not reloading, only get pubkeys we don't already know about
@@ -65,25 +69,27 @@ const loadPeople = (relays, pubkeys, {kinds = personKinds, force = false, ...opt
     pubkeys = getStalePubkeys(pubkeys)
   }
 
-  return pubkeys.length > 0
-    ? load(relays, {kinds, authors: pubkeys}, opts)
-    : Promise.resolve([])
-}
-
-const loadParents = (relays, notes) => {
-  const parentIds = new Set(Tags.wrap(notes.map(findReply)).values().all())
-
-  if (parentIds.size === 0) {
-    return []
-  }
-
   return load(
-    relays.concat(getTopEventRelays(notes, 'read')),
-    {kinds: [1], ids: Array.from(parentIds)}
+    getAllPubkeyWriteRelays(pubkeys).slice(0, 10),
+    {kinds, authors: pubkeys},
+    opts
   )
 }
 
-const streamContext = ({relays, notes, updateNotes, depth = 0}) => {
+const loadParents = notes => {
+  const notesWithParent = notes.filter(findReplyId)
+  const relays = aggregateScores(notesWithParent.map(getRelaysForEventParent))
+
+  return load(relays, {kinds: [1], ids: notesWithParent.map(findReplyId)})
+}
+
+const streamContext = ({notes, updateNotes, depth = 0}) => {
+  // We could also use getRelaysForEventChildren for a more complete view of replies,
+  // but it's also more likely to include spam. Checking our user's social graph
+  // avoids this problem. TODO: review this, maybe add note authors's graphs to this
+  // as well.
+  const relays = getUserNetworkWriteRelays()
+
   // Some relays reject very large filters, send multiple
   chunk(256, notes).forEach(chunk => {
     const authors = getStalePubkeys(pluck('pubkey', chunk))
@@ -99,7 +105,7 @@ const streamContext = ({relays, notes, updateNotes, depth = 0}) => {
 
       // Recur if we need to
       if (depth > 0) {
-        streamContext({relays, notes: events, updateNotes, depth: depth - 1})
+        streamContext({notes: events, updateNotes, depth: depth - 1})
       }
 
       const annotate = ({replies = [], reactions = [], children = [], ...note}) => {

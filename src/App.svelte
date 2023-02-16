@@ -13,7 +13,8 @@
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, shuffle, now, sleep} from 'src/util/misc'
   import cmd from 'src/agent/cmd'
-  import {user, getUserRelays} from 'src/agent/helpers'
+  import {user} from 'src/agent/helpers'
+  import {getUserRelays} from 'src/agent/relays'
   import database from 'src/agent/database'
   import keys from 'src/agent/keys'
   import network from 'src/agent/network'
@@ -100,7 +101,7 @@
 
     const alertSlowConnections = () => {
       // Only notify about relays the user is actually subscribed to
-      const relayUrls = pluck('url', getUserRelays('read'))
+      const relayUrls = pluck('url', getUserRelays())
 
       // Prune connections we haven't used in a while
       pool.getConnections()

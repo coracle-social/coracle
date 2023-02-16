@@ -3,7 +3,8 @@
   import {nip19} from 'nostr-tools'
   import {now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {getTopEventRelays, user} from 'src/agent/helpers'
+  import {user} from 'src/agent/helpers'
+  import {getRelaysForEventChildren} from 'src/agent/relays'
   import database from 'src/agent/database'
   import network from 'src/agent/network'
   import {modal} from 'src/app'
@@ -15,7 +16,7 @@
   const room = database.watch('rooms', rooms => rooms.get(roomId))
 
   const listenForMessages = async cb => {
-    const relays = getTopEventRelays($room)
+    const relays = getRelaysForEventChildren($room)
 
     return network.listen(
       relays,
@@ -33,7 +34,7 @@
   }
 
   const loadMessages = async ({until, limit}) => {
-    const relays = getTopEventRelays($room)
+    const relays = getRelaysForEventChildren($room)
     const events = await network.load(relays, {kinds: [42], '#e': [roomId], until, limit})
 
     if (events.length) {
@@ -48,7 +49,7 @@
   }
 
   const sendMessage = content =>
-    cmd.createChatMessage(getTopEventRelays($room), roomId, content)
+    cmd.createChatMessage(getRelaysForEventChildren($room), roomId, content)
 </script>
 
 <Channel

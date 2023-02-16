@@ -5,6 +5,7 @@ import {synced, timedelta, now} from 'src/util/misc'
 import {isAlert, findReplyId} from 'src/util/nostr'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
+import {getUserReadRelays} from 'src/agent/relays'
 import {asDisplayEvent, mergeParents} from 'src/app'
 
 let listener
@@ -12,11 +13,11 @@ let listener
 const mostRecentAlert = synced("app/alerts/mostRecentAlert", 0)
 const lastCheckedAlerts = synced("app/alerts/lastCheckedAlerts", 0)
 
-const onChunk = async (relays, pubkey, events) => {
+const onChunk = async (pubkey, events) => {
   events = events.filter(e => isAlert(e, pubkey))
 
   if (events.length > 0) {
-    const parents = await network.loadParents(relays, events)
+    const parents = await network.loadParents(events)
     const [likes, notes] = partition(propEq('kind', 7), events)
     const annotatedNotes = mergeParents(notes.concat(parents).map(asDisplayEvent))
     const likesByParent = groupBy(findReplyId, likes)
@@ -30,31 +31,29 @@ const onChunk = async (relays, pubkey, events) => {
   }
 }
 
-const load = async (relays, pubkey) => {
+const load = async pubkey => {
   // Include an offset so we don't miss alerts on one relay but not another
   const since = get(mostRecentAlert) - timedelta(30, 'days')
 
   // Crank the threshold up since we can afford for this to be slow
   const events = await network.load(
-    relays,
+    getUserReadRelays(),
     {kinds: [1, 7], '#p': [pubkey], since, limit: 1000},
     {threshold: 0.9}
   )
 
-  onChunk(relays, pubkey, events)
+  onChunk(pubkey, events)
 }
 
-const listen = async (relays, pubkey) => {
+const listen = async pubkey => {
   if (listener) {
     listener.unsub()
   }
 
   listener = await network.listen(
-    relays,
+    getUserReadRelays(),
     {kinds: [1, 7], '#p': [pubkey], since: now()},
-    events => {
-      onChunk(relays, pubkey, events)
-    }
+    events => onChunk(pubkey, events)
   )
 }
 

@@ -4,13 +4,14 @@
   import {personKinds} from 'src/util/nostr'
   import {now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {getUserRelays, getPubkeyRelays, user} from 'src/agent/helpers'
+  import {user} from 'src/agent/helpers'
+  import {getAllPubkeyRelays} from 'src/agent/relays'
   import database from 'src/agent/database'
   import network from 'src/agent/network'
   import keys from 'src/agent/keys'
-  import {messages} from 'src/app'
-  import {routes} from 'src/app/ui'
   import cmd from 'src/agent/cmd'
+  import {routes} from 'src/app/ui'
+  import {messages} from 'src/app'
 
   export let entity
 
@@ -20,7 +21,7 @@
 
   messages.lastCheckedByPubkey.update($obj => ({...$obj, [pubkey]: now()}))
 
-  const getRelays = () => getUserRelays('write').concat(getPubkeyRelays(pubkey, 'write'))
+  const getRelays = () => getAllPubkeyRelays([pubkey, $user.pubkey]).slice(0, 3)
 
   const decryptMessages = async events => {
     // Gotta do it in serial because of extension limitations

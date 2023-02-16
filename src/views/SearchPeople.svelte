@@ -3,7 +3,8 @@
   import {personKinds} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import PersonInfo from 'src/partials/PersonInfo.svelte'
-  import {user, getUserRelays} from 'src/agent/helpers'
+  import {user} from 'src/agent/helpers'
+  import {getUserReadRelays} from 'src/agent/relays'
   import database from 'src/agent/database'
   import network from 'src/agent/network'
 
@@ -18,7 +19,7 @@
   })
 
   // Prime our database, in case we don't have any people stored yet
-  network.listenUntilEose(getUserRelays(), {kinds: personKinds, limit: 300})
+  network.listenUntilEose(getUserReadRelays(), {kinds: personKinds, limit: 300})
 </script>
 
 <Input bind:value={q} placeholder="Search for people">

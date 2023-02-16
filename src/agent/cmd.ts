@@ -4,7 +4,7 @@ import {get} from 'svelte/store'
 import {first} from "hurdak/lib/hurdak"
 import {log} from 'src/util/logger'
 import {roomAttrs, displayPerson} from 'src/util/nostr'
-import {getBestRelay} from 'src/agent/helpers'
+import {getPubkeyWriteRelays, getRelayForPersonHint} from 'src/agent/relays'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
 import keys from 'src/agent/keys'
@@ -36,7 +36,7 @@ const createDirectMessage = (relays, pubkey, content) =>
 const createNote = (relays, content, mentions = [], topics = []) => {
   mentions = mentions.map(pubkey => {
     const name = displayPerson(database.getPersonWithFallback(pubkey))
-    const {url} = getBestRelay(pubkey, 'write')
+    const [{url}] = getPubkeyWriteRelays(pubkey)
 
     return ["p", pubkey, url, name]
   })
@@ -47,7 +47,7 @@ const createNote = (relays, content, mentions = [], topics = []) => {
 }
 
 const createReaction = (relays, note, content) => {
-  const {url} = getBestRelay(note.pubkey, 'write')
+  const {url} = getRelayForPersonHint(note.pubkey, note)
   const tags = uniqBy(
     join(':'),
     note.tags
@@ -60,10 +60,14 @@ const createReaction = (relays, note, content) => {
 }
 
 const createReply = (relays, note, content, mentions = [], topics = []) => {
-  mentions = mentions.map(pubkey => ["p", pubkey, prop('url', getBestRelay(pubkey))])
   topics = topics.map(t => ["t", t])
+  mentions = mentions.map(pubkey => {
+    const [{url}] = getRelayForPersonHint(pubkey, note)
 
-  const {url} = getBestRelay(note.pubkey, 'write')
+    return ["p", pubkey, url]
+  })
+
+  const [{url}] = getRelayForPersonHint(note.pubkey, note)
   const tags = uniqBy(
     join(':'),
     note.tags

@@ -32,13 +32,12 @@
       prop('id'),
       newNotes
         .filter(propEq('kind', 1))
-        .concat(await network.loadParents(relays, newNotes))
+        .concat(await network.loadParents(newNotes))
         .map(mergeRight({replies: [], reactions: [], children: []}))
     )
 
     // Stream in additional data
     network.streamContext({
-      relays,
       notes: combined,
       updateNotes: cb => {
         notes = cb(notes)

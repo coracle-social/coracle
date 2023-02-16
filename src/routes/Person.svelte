@@ -16,7 +16,8 @@
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
   import Relays from "src/views/person/Relays.svelte"
-  import {getPubkeyRelays, getUserRelays, user} from "src/agent/helpers"
+  import {user} from "src/agent/helpers"
+  import {getPubkeyWriteRelays, getUserWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import keys from "src/agent/keys"
   import database from "src/agent/database"
@@ -43,10 +44,10 @@
     log('Person', npub, person)
 
     // Add all the relays we know the person uses
-    relays = relays.concat(getPubkeyRelays(pubkey))
+    relays = relays.concat(getPubkeyWriteRelays(pubkey))
 
     // Refresh our person if needed
-    network.loadPeople(relays, [pubkey]).then(() => {
+    network.loadPeople([pubkey]).then(() => {
       person = database.getPersonWithFallback(pubkey)
       loading = false
     })
@@ -90,13 +91,13 @@
     const tag = ["p", pubkey, relays[0].url, person.name || ""]
     const petnames = reject(t => t[1] === pubkey, $user.petnames).concat([tag])
 
-    cmd.setPetnames(getUserRelays('write'), petnames)
+    cmd.setPetnames(getUserWriteRelays(), petnames)
   }
 
   const unfollow = async () => {
     const petnames = reject(t => t[1] === pubkey, $user.petnames)
 
-    cmd.setPetnames(getUserRelays('write'), petnames)
+    cmd.setPetnames(getUserWriteRelays(), petnames)
   }
 
   const openAdvanced = () => {

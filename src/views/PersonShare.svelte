@@ -6,11 +6,11 @@
   import {onMount} from 'svelte'
   import Content from 'src/partials/Content.svelte'
   import Input from 'src/partials/Input.svelte'
-  import {getBestRelay} from 'src/agent/helpers'
+  import {getPubkeyWriteRelays} from 'src/agent/relays'
   import {modal, toast} from 'src/app'
 
   const {pubkey} = $modal.person
-  const relays = [prop('url', getBestRelay(pubkey))]
+  const relays = [prop('url', getPubkeyWriteRelays(pubkey))]
   const nprofile = nip19.nprofileEncode({pubkey, relays})
 
   let canvas

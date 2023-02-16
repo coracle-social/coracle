@@ -7,7 +7,7 @@
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {quantify} from 'hurdak/lib/hurdak'
-  import {Tags, findReply, findRoot, findReplyId, displayPerson, isLike} from "src/util/nostr"
+  import {Tags, findReply, findRoot, findRootId, findReplyId, displayPerson, isLike} from "src/util/nostr"
   import {extractUrls} from "src/util/html"
   import ImageCircle from 'src/partials/ImageCircle.svelte'
   import Preview from 'src/partials/Preview.svelte'
@@ -16,7 +16,8 @@
   import {formatTimestamp, stringToColor} from 'src/util/misc'
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
-  import {user, getTopEventRelays, getAllEventRelays} from 'src/agent/helpers'
+  import {user} from 'src/agent/helpers'
+  import {getEventPublishRelays, getRelaysForEventParent} from 'src/agent/relays'
   import database from 'src/agent/database'
   import cmd from 'src/agent/cmd'
   import {routes} from 'src/app/ui'
@@ -62,22 +63,20 @@
     const target = e.target as HTMLElement
 
     if (interactive && !['I'].includes(target.tagName) && !target.closest('a')) {
-      modal.set({type: 'note/detail', note, relays: getTopEventRelays(note)})
+      modal.set({type: 'note/detail', note})
     }
   }
 
   const goToParent = async () => {
-    const [id, url] = findReply(note).slice(1)
-    const relays = getTopEventRelays(note).concat({url})
+    const relays = getRelaysForEventParent(note)
 
-    modal.set({type: 'note/detail', note: {id}, relays})
+    modal.set({type: 'note/detail', note: {id: findReplyId(note)}, relays})
   }
 
   const goToRoot = async () => {
-    const [id, url] = findRoot(note).slice(1)
-    const relays = getTopEventRelays(note).concat({url})
+    const relays = getRelaysForEventParent(note)
 
-    modal.set({type: 'note/detail', note: {id}, relays})
+    modal.set({type: 'note/detail', note: {id: findRootId(note)}, relays})
   }
 
   const showActiveRelays = () => {
@@ -89,7 +88,7 @@
       return navigate('/login')
     }
 
-    const relays = getTopEventRelays(note)
+    const relays = getEventPublishRelays(note)
     const [event] = cmd.createReaction(relays, note, content)
 
     if (content === '+') {
@@ -102,7 +101,7 @@
   }
 
   const deleteReaction = e => {
-    cmd.deleteEvent(getAllEventRelays(note), [e.id])
+    cmd.deleteEvent(getEventPublishRelays(note), [e.id])
 
     if (e.content === '+') {
       likes = reject(propEq('pubkey', $user.pubkey), likes)
@@ -136,7 +135,7 @@
     if (content) {
       mentions = uniq(mentions.concat(replyMentions))
 
-      const relays = getTopEventRelays(note)
+      const relays = getEventPublishRelays(note)
       const [event] = cmd.createReply(relays, note, content, mentions, topics)
 
       toast.show("info", {
@@ -218,10 +217,7 @@
           {/if}
         </Anchor>
         <Anchor
-          href={"/" + nip19.neventEncode({
-            id: note.id,
-            relays: pluck('url', getTopEventRelays(note).slice(0, 5)),
-          })}
+          href={"/" + nip19.neventEncode({id: note.id, relays: [note.seen_on.url]})}
           class="text-sm text-light"
           type="unstyled">
           {formatTimestamp(note.created_at)}

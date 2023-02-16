@@ -13,7 +13,8 @@
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Heading from 'src/partials/Heading.svelte'
-  import {user, getUserRelays} from "src/agent/helpers"
+  import {user} from "src/agent/helpers"
+  import {getUserWriteRelays} from 'src/agent/relays'
   import database from 'src/agent/database'
   import cmd from "src/agent/cmd"
   import {toast, modal} from "src/app"
@@ -21,7 +22,7 @@
   export let pubkey = null
 
   let input = null
-  let relays = getUserRelays('write')
+  let relays = getUserWriteRelays()
   let showSettings = false
   let q = ''
   let search

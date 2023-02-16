@@ -5,7 +5,8 @@ import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
 import {renderContent} from 'src/util/html'
 import {Tags, displayPerson, findReplyId} from 'src/util/nostr'
-import {user, getUserRelays, getFollows} from 'src/agent/helpers'
+import {user, getNetwork} from 'src/agent/helpers'
+import {getUserWriteRelays} from 'src/agent/relays'
 import defaults from 'src/agent/defaults'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
@@ -17,17 +18,13 @@ import {toast, routes, modal, settings, logUsage} from 'src/app/ui'
 
 export {toast, modal, settings, alerts, messages, logUsage}
 
-export const loadAppData = pubkey => {
-  const relays = getUserRelays('read')
-  const follows = Tags.wrap(getFollows(pubkey))
-
-  return Promise.all([
-    alerts.load(relays, pubkey),
-    alerts.listen(relays, pubkey),
-    messages.listen(relays, pubkey),
-    network.loadPeople(follows.relays(), follows.values().all()),
+export const loadAppData = pubkey =>
+  Promise.all([
+    alerts.load(pubkey),
+    alerts.listen(pubkey),
+    messages.listen(pubkey),
+    network.loadPeople(getNetwork(pubkey)),
   ])
-}
 
 export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: string}) => {
   if (privkey) {
@@ -38,11 +35,11 @@ export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: strin
 
   modal.set({type: 'message', message: "Loading your profile data...", spinner: true})
 
+  // Load our user so we can populate network and show profile info
+  await network.loadPeople([pubkey])
+
   // Load network and start listening, but don't wait for it
   loadAppData(pubkey)
-
-  // Load our user so we can populate network and show profile info
-  await network.loadPeople(getUserRelays('read'), [pubkey])
 
   // Not ideal, but the network tab depends on the user's social network being
   // loaded, so put them on global when they first log in so we're not slowing
@@ -76,7 +73,7 @@ export const removeRelay = async url => {
   defaults.relays = modify(defaults.relays)
 
   if (person) {
-    await cmd.setRelays(getUserRelays('write'), modify(person.relays || []))
+    await cmd.setRelays(getUserWriteRelays(), modify(person.relays || []))
   }
 }
 
@@ -88,7 +85,7 @@ export const setRelayWriteCondition = async (url, write) => {
   defaults.relays = modify(defaults.relays)
 
   if (person) {
-    await cmd.setRelays(getUserRelays('write'), modify(person.relays || []))
+    await cmd.setRelays(getUserWriteRelays(), modify(person.relays || []))
   }
 }
 

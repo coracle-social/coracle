@@ -2,6 +2,7 @@ import {pluck, reject} from 'ramda'
 import {get} from 'svelte/store'
 import {synced, now, timedelta} from 'src/util/misc'
 import {user} from 'src/agent/helpers'
+import {getUserReadRelays} from 'src/agent/relays'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
 
@@ -11,13 +12,13 @@ const since = now() - timedelta(30, 'days')
 const mostRecentByPubkey = synced('app/messages/mostRecentByPubkey', {})
 const lastCheckedByPubkey = synced('app/messages/lastCheckedByPubkey', {})
 
-const listen = async (relays, pubkey) => {
+const listen = async pubkey => {
   if (listener) {
     listener.unsub()
   }
 
   listener = await network.listen(
-    relays,
+    getUserReadRelays(),
     [{kinds: [4], authors: [pubkey], since},
      {kinds: [4], '#p': [pubkey], since}],
     async events => {
@@ -27,7 +28,7 @@ const listen = async (relays, pubkey) => {
       const messages = reject(e => e.pubkey === e.recipient, await database.messages.all())
 
       if (messages.length > 0) {
-        await network.loadPeople(relays, pluck('pubkey', messages))
+        await network.loadPeople(pluck('pubkey', messages))
 
         mostRecentByPubkey.update(o => {
           for (const {pubkey, created_at} of messages) {

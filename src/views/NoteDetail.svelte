@@ -4,7 +4,6 @@
   import {fly} from 'svelte/transition'
   import {first} from 'hurdak/lib/hurdak'
   import {log} from 'src/util/logger'
-  import {getAllEventRelays} from 'src/agent/helpers'
   import network from 'src/agent/network'
   import Note from 'src/partials/Note.svelte'
   import Content from 'src/partials/Content.svelte'
@@ -17,8 +16,6 @@
   let loading = true
 
   onMount(async () => {
-    relays = relays.concat(getAllEventRelays(note))
-
     if (!note.pubkey) {
       note = first(await network.load(relays, {ids: [note.id]}))
     }
@@ -27,7 +24,6 @@
       log('NoteDetail', nip19.noteEncode(note.id), note)
 
       network.streamContext({
-        relays,
         depth: 10,
         notes: [note],
         updateNotes: cb => {

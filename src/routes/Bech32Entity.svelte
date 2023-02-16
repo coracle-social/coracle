@@ -5,7 +5,7 @@
   import Content from 'src/partials/Content.svelte'
   import NoteDetail from 'src/views/NoteDetail.svelte'
   import Person from 'src/routes/Person.svelte'
-  import {getUserRelays} from 'src/agent/helpers'
+  import {getUserReadRelays} from 'src/agent/relays'
 
   export let entity
 
@@ -14,7 +14,7 @@
   onMount(() => {
     try {
       ({type, data} = nip19.decode(entity) as {type: string, data: any})
-      relays = (data.relays || []).map(objOf('url')).concat(getUserRelays())
+      relays = (data.relays || []).map(objOf('url')).concat(getUserReadRelays())
     } catch (e) {
       // pass
     }
