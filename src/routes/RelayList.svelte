@@ -1,7 +1,5 @@
 <script>
-  import {pluck, objOf} from 'ramda'
-  import {noop, createMap} from 'hurdak/lib/hurdak'
-  import {get} from 'svelte/store'
+  import {pluck} from 'ramda'
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
@@ -10,21 +8,11 @@
   import RelayCard from "src/partials/RelayCard.svelte"
   import {relays} from "src/agent/relays"
   import database from 'src/agent/database'
-  import {modal, settings} from "src/app"
-  import defaults from "src/agent/defaults"
+  import {modal} from "src/app"
 
   let q = ""
   let search
   let knownRelays = database.watch('relays', t => t.all())
-
-  fetch(get(settings).dufflepudUrl + '/relay')
-    .then(async res => {
-      const json = await res.json()
-
-      database.relays.bulkPatch(createMap('url', json.relays.map(objOf('url'))))
-    }).catch(noop)
-
-  database.relays.bulkPatch(createMap('url', defaults.relays))
 
   $: {
     const joined = new Set(pluck('url', $relays))
