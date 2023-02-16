@@ -1,15 +1,24 @@
 import {uniq, uniqBy, prop, map, propEq, indexBy, pluck} from 'ramda'
 import {personKinds, findReplyId} from 'src/util/nostr'
 import {chunk} from 'hurdak/lib/hurdak'
-import {batch} from 'src/util/misc'
-import {getStalePubkeys} from 'src/agent/helpers'
+import {batch, timedelta, now} from 'src/util/misc'
 import {
   getRelaysForEventParent, getAllPubkeyWriteRelays, aggregateScores,
   getUserNetworkWriteRelays,
 } from 'src/agent/relays'
+import database from 'src/agent/database'
 import pool from 'src/agent/pool'
 import keys from 'src/agent/keys'
 import sync from 'src/agent/sync'
+
+const getStalePubkeys = pubkeys => {
+  // If we're not reloading, only get pubkeys we don't already know about
+  return uniq(pubkeys).filter(pubkey => {
+    const p = database.people.get(pubkey)
+
+    return !p || p.updated_at < now() - timedelta(1, 'days')
+  })
+}
 
 const publish = async (relays, event) => {
   const signedEvent = await keys.sign(event)

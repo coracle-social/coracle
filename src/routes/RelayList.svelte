@@ -8,14 +8,14 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/partials/RelayCard.svelte"
-  import {user} from "src/agent/helpers"
+  import {relays} from "src/agent/relays"
   import database from 'src/agent/database'
   import {modal, settings} from "src/app"
   import defaults from "src/agent/defaults"
 
   let q = ""
   let search
-  let relays = []
+  let knownRelays = database.watch('relays', t => t.all())
 
   fetch(get(settings).dufflepudUrl + '/relay')
     .then(async res => {
@@ -26,15 +26,13 @@
 
   database.relays.bulkPatch(createMap('url', defaults.relays))
 
-  const knownRelays = database.watch('relays', relays => relays.all())
-
   $: {
-    relays =  $user?.relays || []
+    const joined = new Set(pluck('url', $relays))
 
-    const joined = new Set(pluck('url', relays))
-    const data = ($knownRelays || []).filter(r => !joined.has(r.url))
-
-    search = fuzzy(data, {keys: ["name", "description", "url"]})
+    search = fuzzy(
+      $knownRelays.filter(r => !joined.has(r.url)),
+      {keys: ["name", "description", "url"]}
+    )
   }
 </script>
 
@@ -52,11 +50,11 @@
     Relays are hubs for your content and connections. At least one is required to
     interact with the network, but you can join as many as you like.
   </p>
-  {#if relays.length === 0}
+  {#if $relays.length === 0}
   <div class="text-center">No relays connected</div>
   {/if}
   <div class="grid grid-cols-1 gap-4">
-    {#each relays as relay (relay.url)}
+    {#each $relays as relay (relay.url)}
       <RelayCard showControls {relay} />
     {/each}
   </div>
@@ -79,8 +77,8 @@
     <RelayCard {relay} />
     {/each}
     <small class="text-center">
-      Showing {Math.min(($knownRelays || []).length - relays.length, 50)}
-      of {($knownRelays || []).length - relays.length} known relays
+      Showing {Math.min(($knownRelays || []).length - $relays.length, 50)}
+      of {($knownRelays || []).length - $relays.length} known relays
     </small>
   </div>
 </Content>

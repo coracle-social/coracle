@@ -1,7 +1,7 @@
 import {pluck, reject} from 'ramda'
 import {get} from 'svelte/store'
 import {synced, now, timedelta} from 'src/util/misc'
-import {user} from 'src/agent/helpers'
+import {user} from 'src/agent/user'
 import {getUserReadRelays} from 'src/agent/relays'
 import database from 'src/agent/database'
 import network from 'src/agent/network'

@@ -1,8 +1,9 @@
-import {get} from 'svelte/store'
-import {sortBy, uniq, uniqBy, prop, pluck} from 'ramda'
-import {createMapOf, first} from 'hurdak/lib/hurdak'
+import type {Relay} from 'src/util/types'
+import {writable, get} from 'svelte/store'
+import {pick, map, assoc, sortBy, uniq, uniqBy, prop} from 'ramda'
+import {first} from 'hurdak/lib/hurdak'
 import {Tags} from 'src/util/nostr'
-import {getFollows} from 'src/agent/helpers'
+import {getFollows} from 'src/agent/social'
 import database from 'src/agent/database'
 import keys from 'src/agent/keys'
 
@@ -18,25 +19,24 @@ import keys from 'src/agent/keys'
 //    doesn't need to see.
 // 5) Advertise relays — write and read back your own relay list
 
+export const relays = writable([])
 
 // Pubkey relays
 
-export const getPubkeyRelays = pubkey => {
-  const person = database.getPersonWithFallback(pubkey)
+export const getPubkeyRelays = (pubkey, mode = null) => {
+  const filter = mode ? {pubkey, mode} : {pubkey}
 
-  return scoreRelays(pubkey, person.relays || [])
+  return sortByScore(map(pick(['url', 'score']), database.routes.all(filter)))
 }
 
-export const getPubkeyReadRelays = pubkey =>
-  getPubkeyRelays(pubkey).filter(r => r.read !== '!')
+export const getPubkeyReadRelays = pubkey => getPubkeyRelays(pubkey, 'read')
 
-export const getPubkeyWriteRelays = pubkey =>
-  getPubkeyRelays(pubkey).filter(r => r.write !== '!')
+export const getPubkeyWriteRelays = pubkey => getPubkeyRelays(pubkey, 'write')
 
 // Multiple pubkeys
 
-export const getAllPubkeyRelays = pubkeys =>
-  aggregateScores(pubkeys.map(getPubkeyRelays))
+export const getAllPubkeyRelays = (pubkeys, mode = null) =>
+  aggregateScores(pubkeys.map(pubkey => getPubkeyRelays(pubkey, mode)))
 
 export const getAllPubkeyReadRelays = pubkeys =>
   aggregateScores(pubkeys.map(getPubkeyReadRelays))
@@ -46,9 +46,9 @@ export const getAllPubkeyWriteRelays = pubkeys =>
 
 // Current user
 
-export const getUserRelays = () => getPubkeyRelays(get(keys.pubkey))
-export const getUserReadRelays = () => getPubkeyReadRelays(get(keys.pubkey))
-export const getUserWriteRelays = () => getPubkeyWriteRelays(get(keys.pubkey))
+export const getUserRelays = (): Array<Relay> => get(relays).map(assoc('score', 1))
+export const getUserReadRelays = () => getUserRelays().filter(prop('read'))
+export const getUserWriteRelays = () => getUserRelays().filter(prop('write'))
 
 // Network relays
 
@@ -110,13 +110,6 @@ export const getEventPublishRelays = event => {
 
 const uniqByUrl = uniqBy(prop('url'))
 const sortByScore = sortBy(r => -r.score)
-
-const scoreRelays = (pubkey, relays) => {
-  const routes = database.routes.all({pubkey, url: pluck('url', relays)})
-  const scores = createMapOf('url', 'score', routes)
-
-  return uniqByUrl(sortByScore(relays.map(r => ({...r, score: scores[r.url] || 0}))))
-}
 
 export const aggregateScores = relayGroups => {
   const scores = {} as Record<string, {

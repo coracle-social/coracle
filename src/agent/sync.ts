@@ -41,49 +41,8 @@ const processProfileEvents = async events => {
             return content
           })
         },
-        2: () => {
-          if (e.created_at > (person.relays_updated_at || 0)) {
-            const {relays = []} = database.getPersonWithFallback(e.pubkey)
-
-            return {
-              relays: relays.concat({url: e.content}),
-              relays_updated_at: e.created_at,
-            }
-          }
-        },
-        3: () => {
-          const data = {petnames: e.tags}
-
-          if (e.created_at > (person.relays_updated_at || 0)) {
-            tryJson(() => {
-              Object.assign(data, {
-                relays_updated_at: e.created_at,
-                relays: Object.entries(JSON.parse(e.content))
-                  .map(([url, conditions]) => {
-                    const {write, read} = conditions as Record<string, boolean|string>
-
-                    return {
-                      url,
-                      write: [false, '!'].includes(write) ? '!' : '',
-                      read: [false, '!'].includes(read) ? '!' : '',
-                    }
-                  })
-                  .filter(r => isRelay(r.url)),
-              })
-            })
-          }
-
-          return data
-        },
+        3: () => ({petnames: e.tags}),
         12165: () => ({muffle: e.tags}),
-        10001: () => {
-          if (e.created_at > (person.relays_updated_at || 0)) {
-            return {
-              relays: e.tags.map(([url, read, write]) => ({url, read, write})),
-              relays_updated_at: e.created_at,
-            }
-          }
-        },
         default: () => {
           log(`Received unsupported event type ${e.kind}`)
         },
@@ -153,7 +112,7 @@ const processMessages = async events => {
 
 const getWeight = type => {
   if (type === 'nip05') return 1
-  if (type === 'kind:10001') return 1
+  if (type === 'kind:10002') return 1
   if (type === 'kind:3') return 0.8
   if (type === 'kind:2') return 0.5
   if (type === 'seen') return 0.2
@@ -216,19 +175,14 @@ const processRoutes = async events => {
             })
         })
       },
-      10001: () => {
+      10002: () => {
         e.tags
-          .forEach(([url, read, write]) => {
-            if (![false, '!'].includes(write)) {
-              updates.push(
-                calculateRoute(e.pubkey, url, 'kind:100001', 'write', e.created_at)
-              )
-            }
-
-            if (![false, '!'].includes(read)) {
-              updates.push(
-                calculateRoute(e.pubkey, url, 'kind:100001', 'read', e.created_at)
-              )
+          .forEach(([url, read, mode]) => {
+            if (mode) {
+              calculateRoute(e.pubkey, url, 'kind:10002', mode, e.created_at)
+            } else {
+              calculateRoute(e.pubkey, url, 'kind:10002', 'read', e.created_at)
+              calculateRoute(e.pubkey, url, 'kind:10002', 'write', e.created_at)
             }
           })
       },

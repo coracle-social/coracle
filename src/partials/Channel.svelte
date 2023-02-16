@@ -8,7 +8,7 @@
   import Badge from 'src/partials/Badge.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
-  import {user} from 'src/agent/helpers'
+  import {user} from 'src/agent/user'
   import database from 'src/agent/database'
   import {renderNote} from 'src/app'
 

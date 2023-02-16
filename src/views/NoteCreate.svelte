@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {nip19} from 'nostr-tools'
   import {quantify} from 'hurdak/lib/hurdak'
-  import {last, whereEq, find, reject, pluck, propEq} from 'ramda'
+  import {last, reject, pluck, propEq} from 'ramda'
   import {fly} from 'svelte/transition'
   import {navigate} from "svelte-routing"
   import {fuzzy} from "src/util/misc"
@@ -13,7 +13,7 @@
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Heading from 'src/partials/Heading.svelte'
-  import {user} from "src/agent/helpers"
+  import {user} from "src/agent/user"
   import {getUserWriteRelays} from 'src/agent/relays'
   import database from 'src/agent/database'
   import cmd from "src/agent/cmd"
@@ -27,12 +27,15 @@
   let q = ''
   let search
 
-  const knownRelays = database.watch('relays', relays => relays.all())
+  const knownRelays = database.watch('relays', t => t.all())
 
   $: {
-    const data = reject(({url}) => find(whereEq({url}), relays), $knownRelays || [])
+    const joined = new Set(pluck('url', relays))
 
-    search = fuzzy(data, {keys: ["name", "description", "url"]})
+    search = fuzzy(
+      $knownRelays.filter(r => !joined.has(r.url)),
+      {keys: ["name", "description", "url"]}
+    )
   }
 
   const onSubmit = async () => {

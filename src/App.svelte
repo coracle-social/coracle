@@ -13,7 +13,7 @@
   import {displayPerson, isLike} from 'src/util/nostr'
   import {timedelta, shuffle, now, sleep} from 'src/util/misc'
   import cmd from 'src/agent/cmd'
-  import {user} from 'src/agent/helpers'
+  import {user} from 'src/agent/user'
   import {getUserRelays} from 'src/agent/relays'
   import database from 'src/agent/database'
   import keys from 'src/agent/keys'

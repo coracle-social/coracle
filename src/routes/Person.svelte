@@ -16,7 +16,7 @@
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
   import Relays from "src/views/person/Relays.svelte"
-  import {user} from "src/agent/helpers"
+  import {user} from "src/agent/user"
   import {getPubkeyWriteRelays, getUserWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import keys from "src/agent/keys"

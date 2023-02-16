@@ -13,7 +13,17 @@ const updateUser = (relays, updates) =>
   publishEvent(relays, 0, {content: JSON.stringify(updates)})
 
 const setRelays = (relays, newRelays) =>
-  publishEvent(relays, 10001, {tags: newRelays.map(r => [r.url, r.read || "", r.write || ""])})
+  publishEvent(relays, 10002, {
+    tags: newRelays.map(r => {
+      const t = ["r", r.url]
+
+      if (!r.write) {
+        t.push('read')
+      }
+
+      return t
+    }),
+  })
 
 const setPetnames = (relays, petnames) =>
   publishEvent(relays, 3, {tags: petnames})

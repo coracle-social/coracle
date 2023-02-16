@@ -3,7 +3,7 @@
   import {personKinds} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import PersonInfo from 'src/partials/PersonInfo.svelte'
-  import {user} from 'src/agent/helpers'
+  import {user} from 'src/agent/user'
   import {getUserReadRelays} from 'src/agent/relays'
   import database from 'src/agent/database'
   import network from 'src/agent/network'

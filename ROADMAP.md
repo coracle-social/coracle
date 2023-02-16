@@ -7,10 +7,12 @@
   - [ ] Separate user info and relays so we can still select/figure out relays for anons
   - [ ] Separate petnames out as well so anons can follow people
 - [ ] Initial user load doesn't have any relays, cache user or wait for people db to be loaded
+  - nip07.getRelays, nip05, relay.nostr.band
 - [ ] Fix bugs on bugsnag
 
 # Snacks
 
+- [ ] DM/chat read status in encrypted note
 - [ ] Relay recommendations based on follows/followers
 - [ ] Pinned posts ala snort
 - [ ] Likes list on note detail. Maybe a sidebar or header for note detail page?

@@ -1,13 +1,14 @@
 <script lang="ts">
   import {onMount} from 'svelte'
-  import {partition, propEq, always, mergeRight, uniqBy, sortBy, prop} from 'ramda'
+  import {partition, last, propEq, always, mergeRight, uniqBy, sortBy, prop} from 'ramda'
   import {slide} from 'svelte/transition'
   import {quantify} from 'hurdak/lib/hurdak'
   import {createScroller, now, Cursor} from 'src/util/misc'
+  import {Tags} from 'src/util/nostr'
   import Spinner from 'src/partials/Spinner.svelte'
   import Content from 'src/partials/Content.svelte'
   import Note from "src/partials/Note.svelte"
-  import {getMuffle} from 'src/agent/helpers'
+  import {user} from 'src/agent/user'
   import network from 'src/agent/network'
   import {modal, mergeParents} from "src/app"
 
@@ -20,8 +21,10 @@
 
   const since = now()
   const maxNotes = 300
-  const muffle = getMuffle()
   const cursor = new Cursor()
+  const muffle = Tags
+    .wrap(($user?.muffle || []).filter(t => Math.random() > parseFloat(last(t))))
+    .values().all()
 
   const processNewNotes = async newNotes => {
     // Remove people we're not interested in hearing about, sort by created date

@@ -6,7 +6,7 @@
   import {between} from 'hurdak/lib/hurdak'
   import {fly} from 'svelte/transition'
   import Toggle from "src/partials/Toggle.svelte"
-  import {user} from "src/agent/helpers"
+  import {relays} from "src/agent/relays"
   import pool from 'src/agent/pool'
   import {addRelay, removeRelay, setRelayWriteCondition} from "src/app"
 
@@ -19,7 +19,7 @@
   let showStatus = false
   let joined = false
 
-  $: joined = find(propEq('url', relay.url), $user?.relays || [])
+  $: joined = find(propEq('url', relay.url), $relays)
 
   onMount(() => {
     return poll(10_000, async () => {

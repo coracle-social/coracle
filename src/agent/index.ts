@@ -3,12 +3,12 @@
  *
  * cmd
  *  -> network
- *    -> helpers, pool
+ *    -> user, pool
  *      -> keys
  *      -> sync
  *        -> database
  *
  * In other words, command/network depend on utility functions and the network to
- * do their job. The database sits at the bottom since it's shared between helpers
+ * do their job. The database sits at the bottom since it's shared between user
  * which query the database, and network which both queries and updates it.
  */

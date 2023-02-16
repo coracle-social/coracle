@@ -16,7 +16,7 @@
   import {formatTimestamp, stringToColor} from 'src/util/misc'
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
-  import {user} from 'src/agent/helpers'
+  import {user} from 'src/agent/user'
   import {getEventPublishRelays, getRelaysForEventParent} from 'src/agent/relays'
   import database from 'src/agent/database'
   import cmd from 'src/agent/cmd'
@@ -217,7 +217,7 @@
           {/if}
         </Anchor>
         <Anchor
-          href={"/" + nip19.neventEncode({id: note.id, relays: [note.seen_on.url]})}
+          href={"/" + nip19.neventEncode({id: note.id, relays: [note.seen_on]})}
           class="text-sm text-light"
           type="unstyled">
           {formatTimestamp(note.created_at)}

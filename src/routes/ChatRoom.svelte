@@ -3,7 +3,7 @@
   import {nip19} from 'nostr-tools'
   import {now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {user} from 'src/agent/helpers'
+  import {user} from 'src/agent/user'
   import {getRelaysForEventChildren} from 'src/agent/relays'
   import database from 'src/agent/database'
   import network from 'src/agent/network'

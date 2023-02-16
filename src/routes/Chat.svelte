@@ -4,7 +4,7 @@
   import {nip19} from 'nostr-tools'
   import {navigate} from "svelte-routing"
   import {fuzzy} from "src/util/misc"
-  import {user} from 'src/agent/helpers'
+  import {user} from 'src/agent/user'
   import network from 'src/agent/network'
   import database from 'src/agent/database'
   import {getUserReadRelays} from 'src/agent/relays'

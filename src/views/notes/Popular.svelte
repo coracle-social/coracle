@@ -2,7 +2,8 @@
   import {uniq} from 'ramda'
   import Notes from "src/partials/Notes.svelte"
   import {isLike} from 'src/util/nostr'
-  import {user, getFollows, getNetwork} from 'src/agent/helpers'
+  import {user} from 'src/agent/user'
+  import {getFollows, getNetwork} from 'src/agent/social'
   import {getAllPubkeyWriteRelays} from 'src/agent/relays'
 
   // Get first- and second-order follows. shuffle and slice network so we're not

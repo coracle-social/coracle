@@ -4,7 +4,7 @@
   import {personKinds} from 'src/util/nostr'
   import {now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {user} from 'src/agent/helpers'
+  import {user} from 'src/agent/user'
   import {getAllPubkeyRelays} from 'src/agent/relays'
   import database from 'src/agent/database'
   import network from 'src/agent/network'

@@ -5,9 +5,9 @@ import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {get} from 'svelte/store'
 import {renderContent} from 'src/util/html'
 import {Tags, displayPerson, findReplyId} from 'src/util/nostr'
-import {user, getNetwork} from 'src/agent/helpers'
-import {getUserWriteRelays} from 'src/agent/relays'
-import defaults from 'src/agent/defaults'
+import {user} from 'src/agent/user'
+import {getNetwork} from 'src/agent/social'
+import {relays} from 'src/agent/relays'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
 import keys from 'src/agent/keys'
@@ -49,44 +49,50 @@ export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: strin
 
 export const addRelay = async url => {
   const person = get(user) as Person
-  const modify = relays => relays.concat({url, write: '!'})
 
-  // Set to defaults to support anonymous usage
-  defaults.relays = modify(defaults.relays)
+  relays.update($relays => {
+    $relays.push({url, write: false, read: true})
 
-  if (person) {
-    const relays = modify(person.relays || [])
+    if (person) {
+      (async () => {
+        // Publish to the new set of relays
+        await cmd.setRelays($relays, $relays)
 
-    // Publish to the new set of relays
-    await cmd.setRelays(relays, relays)
+        // Reload alerts, messages, etc
+        await loadAppData(person.pubkey)
+      })()
+    }
 
-    // Reload alerts, messages, etc
-    await loadAppData(person.pubkey)
-  }
+    return $relays
+  })
 }
 
 export const removeRelay = async url => {
   const person = get(user) as Person
-  const modify = relays => reject(whereEq({url}), relays)
 
-  // Set to defaults to support anonymous usage
-  defaults.relays = modify(defaults.relays)
+  relays.update($relays => {
+    $relays = reject(whereEq({url}), $relays)
 
-  if (person) {
-    await cmd.setRelays(getUserWriteRelays(), modify(person.relays || []))
-  }
+    if (person && $relays.length > 0) {
+      cmd.setRelays($relays, $relays)
+    }
+
+    return $relays
+  })
 }
 
 export const setRelayWriteCondition = async (url, write) => {
   const person = get(user) as Person
-  const modify = relays => relays.map(when(whereEq({url}), assoc('write', write)))
 
-  // Set to defaults to support anonymous usage
-  defaults.relays = modify(defaults.relays)
+  relays.update($relays => {
+    $relays = $relays.map(when(whereEq({url}), assoc('write', write)))
 
-  if (person) {
-    await cmd.setRelays(getUserWriteRelays(), modify(person.relays || []))
-  }
+    if (person && $relays.length > 0) {
+      cmd.setRelays($relays, $relays)
+    }
+
+    return $relays
+  })
 }
 
 export const renderNote = (note, {showEntire = false}) => {
