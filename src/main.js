@@ -7,9 +7,9 @@ Bugsnag.start({
   collectUserIp: false,
 })
 
-import App from 'src/App.svelte'
+import Shell from 'src/Shell.svelte'
 
-const app = new App({
+const app = new Shell({
   target: document.getElementById('app')
 })
 

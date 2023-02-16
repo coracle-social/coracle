@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {last, find, reject} from 'ramda'
+  import {last, find} from 'ramda'
   import {onMount} from 'svelte'
   import {tweened} from 'svelte/motion'
   import {nip19} from 'nostr-tools'
@@ -16,14 +16,13 @@
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
   import Relays from "src/views/person/Relays.svelte"
-  import {user} from "src/agent/user"
-  import {getPubkeyWriteRelays, getUserWriteRelays} from "src/agent/relays"
+  import {user, follows} from "src/agent/user"
+  import {getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import keys from "src/agent/keys"
   import database from "src/agent/database"
   import {routes} from "src/app/ui"
   import {modal} from "src/app"
-  import cmd from "src/agent/cmd"
 
   export let npub
   export let activeTab
@@ -88,16 +87,11 @@
    }
 
   const follow = async () => {
-    const tag = ["p", pubkey, relays[0].url, person.name || ""]
-    const petnames = reject(t => t[1] === pubkey, $user.petnames).concat([tag])
-
-    cmd.setPetnames(getUserWriteRelays(), petnames)
+    follows.addFollow(pubkey, relays[0].url, person.name)
   }
 
   const unfollow = async () => {
-    const petnames = reject(t => t[1] === pubkey, $user.petnames)
-
-    cmd.setPetnames(getUserWriteRelays(), petnames)
+    follows.removeFollow(pubkey)
   }
 
   const openAdvanced = () => {

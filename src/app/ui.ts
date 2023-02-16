@@ -110,3 +110,5 @@ export const logUsage = async name => {
     }
   }
 }
+
+export const showOnboarding = writable(false)
