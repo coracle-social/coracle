@@ -1,7 +1,5 @@
 # Current
 
-- [ ] Review 10002 usage https://github.com/nostr-protocol/nips/blob/master/65.md
-- [ ] Remove relays from people, pull from routes only
 - [ ] Fix anon/new user experience
   - [ ] Clicking stuff that would publish kicks you to the login page, we should open a modal instead.
   - [ ] Separate user info and relays so we can still select/figure out relays for anons

@@ -8,7 +8,7 @@
   import {user} from 'src/agent/user'
   import {getUserWriteRelays} from 'src/agent/relays'
   import cmd from 'src/agent/cmd'
-  import {modal} from 'src/app'
+  import {modal} from 'src/app/ui'
 
   const muffle = $user.muffle || []
   const muffleOptions = ['Never', 'Sometimes', 'Often', 'Always']

@@ -6,6 +6,7 @@
   import {fly} from 'svelte/transition'
   import {navigate} from "svelte-routing"
   import {fuzzy} from "src/util/misc"
+  import {isRelay} from "src/util/nostr"
   import Button from "src/partials/Button.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Input from "src/partials/Input.svelte"
@@ -17,7 +18,7 @@
   import {getUserWriteRelays} from 'src/agent/relays'
   import database from 'src/agent/database'
   import cmd from "src/agent/cmd"
-  import {toast, modal} from "src/app"
+  import {toast, modal} from "src/app/ui"
 
   export let pubkey = null
 
@@ -33,7 +34,7 @@
     const joined = new Set(pluck('url', relays))
 
     search = fuzzy(
-      $knownRelays.filter(r => !joined.has(r.url)),
+      $knownRelays.filter(r => isRelay(r.url) && !joined.has(r.url)),
       {keys: ["name", "description", "url"]}
     )
   }

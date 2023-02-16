@@ -35,6 +35,10 @@ toast.show = (type, message, timeout = 5) => {
   }, timeout * 1000)
 }
 
+// Menu
+
+export const menuIsOpen = writable(false)
+
 // Modals
 
 export const modal = {
@@ -110,5 +114,3 @@ export const logUsage = async name => {
     }
   }
 }
-
-export const showOnboarding = writable(false)

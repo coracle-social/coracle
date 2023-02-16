@@ -21,8 +21,7 @@
   import network from "src/agent/network"
   import keys from "src/agent/keys"
   import database from "src/agent/database"
-  import {routes} from "src/app/ui"
-  import {modal} from "src/app"
+  import {routes, modal} from "src/app/ui"
 
   export let npub
   export let activeTab

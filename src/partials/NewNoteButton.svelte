@@ -1,6 +1,6 @@
 <script lang="ts">
   import keys from 'src/agent/keys'
-  import {modal} from "src/app"
+  import {modal} from "src/app/ui"
 
   export let pubkey = null
 </script>

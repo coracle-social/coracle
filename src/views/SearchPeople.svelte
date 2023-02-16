@@ -1,4 +1,5 @@
 <script>
+  import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
   import {personKinds} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
@@ -28,6 +29,8 @@
 
 {#each (search ? search(q) : []).slice(0, 30) as person (person.pubkey)}
   {#if person.pubkey !== $user?.pubkey}
-  <PersonInfo {person} />
+  <div in:fly={{y: 20}}>
+    <PersonInfo {person} />
+  </div>
   {/if}
 {/each}

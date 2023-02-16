@@ -50,7 +50,8 @@
         on:mouseout={() => {showStatus = false}}
         on:mouseover={() => {showStatus = true}}
         class="w-2 h-2 rounded-full bg-medium cursor-pointer"
-        class:bg-danger={quality <= 0.3}
+        class:bg-medium={message === 'Not connected'}
+        class:bg-danger={quality <= 0.3 && message !== 'Not connected'}
         class:bg-warning={between(0.3, 0.7, quality)}
         class:bg-success={quality > 0.7}>
       </span>
@@ -79,8 +80,8 @@
   <div class="flex justify-between gap-2">
     <span>Publish to this relay?</span>
     <Toggle
-      value={relay.write !== "!"}
-      on:change={() => setRelayWriteCondition(relay.url, relay.write === "!" ? "" : "!")} />
+      value={relay.write}
+      on:change={() => setRelayWriteCondition(relay.url, !relay.write)} />
   </div>
   {/if}
 </div>

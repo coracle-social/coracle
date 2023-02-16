@@ -7,7 +7,7 @@
   import {getRelaysForEventChildren} from 'src/agent/relays'
   import database from 'src/agent/database'
   import network from 'src/agent/network'
-  import {modal} from 'src/app'
+  import {modal} from 'src/app/ui'
   import cmd from 'src/agent/cmd'
 
   export let entity

@@ -12,7 +12,8 @@
   import ImageCircle from 'src/partials/ImageCircle.svelte'
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
-  import {toast, settings, modal, renderNote} from "src/app"
+  import {toast, settings, modal} from "src/app/ui"
+  import {renderNote} from "src/app"
   import {formatTimestamp, stringToColor} from 'src/util/misc'
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"

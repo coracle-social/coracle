@@ -8,7 +8,8 @@
   import Content from 'src/partials/Content.svelte'
   import Like from 'src/partials/Like.svelte'
   import database from 'src/agent/database'
-  import {alerts, asDisplayEvent} from 'src/app'
+  import alerts from 'src/app/alerts'
+  import {asDisplayEvent} from 'src/app'
 
   let limit = 0
   let notes = null

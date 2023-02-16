@@ -242,9 +242,9 @@ const relays = new Table('relays', 'url', {
       {url: 'wss://nostr.zebedee.cloud'},
       {url: 'wss://nostr-pub.wellorder.net'},
       {url: 'wss://relay.nostr.band'},
-      {url: 'nostr.pleb.network'},
-      {url: 'relay.nostrich.de'},
-      {url: 'relay.damus.io'},
+      {url: 'wss://nostr.pleb.network'},
+      {url: 'wss://relay.nostrich.de'},
+      {url: 'wss://relay.damus.io'},
     ])
 
     return Object.assign(data, defaults)

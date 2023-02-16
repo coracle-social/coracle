@@ -13,7 +13,7 @@
 - [x] Make chat header overlap main header to save space
 - [x] Strip formatting when pasting into Compose
 - [x] Upgraded nostr-tools to 1.4.1
-
+)
 ## 0.2.11
 
 - [x] Converted threshold to percentage

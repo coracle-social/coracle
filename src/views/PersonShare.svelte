@@ -7,7 +7,7 @@
   import Content from 'src/partials/Content.svelte'
   import Input from 'src/partials/Input.svelte'
   import {getPubkeyWriteRelays} from 'src/agent/relays'
-  import {modal, toast} from 'src/app'
+  import {modal, toast} from 'src/app/ui'
 
   const {pubkey} = $modal.person
   const relays = [prop('url', getPubkeyWriteRelays(pubkey))]

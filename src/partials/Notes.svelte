@@ -9,11 +9,13 @@
   import Content from 'src/partials/Content.svelte'
   import Note from "src/partials/Note.svelte"
   import {user} from 'src/agent/user'
+  import {getUserReadRelays} from 'src/agent/relays'
   import network from 'src/agent/network'
-  import {modal, mergeParents} from "src/app"
+  import {modal} from "src/app/ui"
+  import {mergeParents} from "src/app"
 
-  export let relays
   export let filter
+  export let relays = []
   export let shouldDisplay = always(true)
 
   let notes = []
@@ -74,6 +76,10 @@
   }
 
   onMount(() => {
+    if (relays.length === 0) {
+      relays = getUserReadRelays()
+    }
+
     const sub = network.listen(relays, {...filter, since}, onChunk)
 
     const scroller = createScroller(() => {

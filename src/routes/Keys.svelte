@@ -9,7 +9,7 @@
   import Content from "src/partials/Content.svelte"
   import Heading from 'src/partials/Heading.svelte'
   import keys from "src/agent/keys"
-  import {toast} from "src/app"
+  import {toast} from "src/app/ui"
 
   const {pubkey, privkey} = keys
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"

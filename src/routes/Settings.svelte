@@ -8,7 +8,7 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {user} from 'src/agent/user'
-  import {toast, settings} from "src/app"
+  import {toast, settings} from "src/app/ui"
 
   let values = {...$settings}
 

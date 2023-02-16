@@ -14,8 +14,7 @@
   import {user} from "src/agent/user"
   import {getUserWriteRelays} from 'src/agent/relays'
   import cmd from "src/agent/cmd"
-  import {toast} from "src/app"
-  import {routes} from "src/app/ui"
+  import {routes, toast} from "src/app/ui"
 
   let values = {picture: null, about: null, name: null, nip05: null}
 

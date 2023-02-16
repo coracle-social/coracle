@@ -1,8 +1,9 @@
 import type {Relay} from 'src/util/types'
-import {writable, get} from 'svelte/store'
+import {get} from 'svelte/store'
 import {pick, map, assoc, sortBy, uniq, uniqBy, prop} from 'ramda'
 import {first} from 'hurdak/lib/hurdak'
 import {Tags} from 'src/util/nostr'
+import {synced} from 'src/util/misc'
 import {getFollows} from 'src/agent/social'
 import database from 'src/agent/database'
 import keys from 'src/agent/keys'
@@ -19,7 +20,7 @@ import keys from 'src/agent/keys'
 //    doesn't need to see.
 // 5) Advertise relays — write and read back your own relay list
 
-export const relays = writable([])
+export const relays = synced('agent/relays', [])
 
 // Pubkey relays
 

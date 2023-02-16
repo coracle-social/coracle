@@ -5,7 +5,8 @@
   import Anchor from 'src/partials/Anchor.svelte'
   import Content from 'src/partials/Content.svelte'
   import Heading from 'src/partials/Heading.svelte'
-  import {toast, login} from "src/app"
+  import {toast} from "src/app/ui"
+  import {login} from "src/app"
 
   const nsec = nip19.nsecEncode(generatePrivateKey())
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"

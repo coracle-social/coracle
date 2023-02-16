@@ -1,7 +1,7 @@
 <script>
   import {fly, fade} from "svelte/transition"
 
-  export let onEscape
+  export let onEscape = null
   export let nested = false
 
   let root
@@ -14,9 +14,10 @@
     }
   }} />
 
-<div class="fixed inset-0 z-10 modal" bind:this={root}>
-  <button
-    class="absolute inset-0 bg-black cursor-pointer"
+<div class="fixed inset-0 z-20 modal" bind:this={root}>
+  <div
+    class="absolute inset-0 bg-black"
+    class:cursor-pointer={onEscape}
     class:opacity-75={!nested}
     class:opacity-25={nested}
     transition:fade

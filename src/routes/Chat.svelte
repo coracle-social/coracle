@@ -8,7 +8,8 @@
   import network from 'src/agent/network'
   import database from 'src/agent/database'
   import {getUserReadRelays} from 'src/agent/relays'
-  import {modal, messages} from 'src/app'
+  import {modal} from 'src/app/ui'
+  import messages from 'src/app/messages'
   import Room from "src/partials/Room.svelte"
   import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"

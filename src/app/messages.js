@@ -1,5 +1,5 @@
-import {pluck, reject} from 'ramda'
-import {get} from 'svelte/store'
+import {pluck, find, reject} from 'ramda'
+import {get, derived} from 'svelte/store'
 import {synced, now, timedelta} from 'src/util/misc'
 import {user} from 'src/agent/user'
 import {getUserReadRelays} from 'src/agent/relays'
@@ -11,6 +11,18 @@ let listener
 const since = now() - timedelta(30, 'days')
 const mostRecentByPubkey = synced('app/messages/mostRecentByPubkey', {})
 const lastCheckedByPubkey = synced('app/messages/lastCheckedByPubkey', {})
+
+const hasNewMessages = derived(
+  [lastCheckedByPubkey, mostRecentByPubkey],
+  ([$lastCheckedByPubkey, $mostRecentByPubkey]) => {
+    return Boolean(find(
+      ([k, t]) => {
+        return t > now() - timedelta(7, 'days') && ($lastCheckedByPubkey[k] || 0) < t
+      },
+      Object.entries($mostRecentByPubkey)
+    ))
+  }
+)
 
 const listen = async pubkey => {
   if (listener) {
@@ -44,4 +56,4 @@ const listen = async pubkey => {
   )
 }
 
-export default {listen, mostRecentByPubkey, lastCheckedByPubkey}
+export default {listen, mostRecentByPubkey, lastCheckedByPubkey, hasNewMessages}

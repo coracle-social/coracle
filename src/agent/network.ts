@@ -4,7 +4,7 @@ import {chunk} from 'hurdak/lib/hurdak'
 import {batch, timedelta, now} from 'src/util/misc'
 import {
   getRelaysForEventParent, getAllPubkeyWriteRelays, aggregateScores,
-  getUserNetworkWriteRelays,
+  getUserNetworkWriteRelays, getUserReadRelays,
 } from 'src/agent/relays'
 import database from 'src/agent/database'
 import pool from 'src/agent/pool'
@@ -79,7 +79,7 @@ const loadPeople = (pubkeys, {kinds = personKinds, force = false, ...opts} = {})
   }
 
   return load(
-    getAllPubkeyWriteRelays(pubkeys).slice(0, 10),
+    getUserReadRelays().concat(getAllPubkeyWriteRelays(pubkeys)).slice(0, 10),
     {kinds, authors: pubkeys},
     opts
   )

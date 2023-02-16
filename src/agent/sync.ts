@@ -1,4 +1,4 @@
-import {pick, identity, isEmpty} from 'ramda'
+import {pick, objOf, identity, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
 import {noop, createMap, ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
 import {log, warn} from 'src/util/logger'
@@ -142,7 +142,7 @@ const calculateRoute = (pubkey, url, type, mode, created_at) => {
 }
 
 const processRoutes = async events => {
-  const updates = []
+  let updates = []
 
   // Sample events so we're not burning too many resources
   for (const e of ensurePlural(shuffle(events)).slice(0, 10)) {
@@ -199,7 +199,10 @@ const processRoutes = async events => {
     })
   }
 
+  updates = updates.filter(identity)
+
   if (!isEmpty(updates)) {
+    await database.relays.bulkPatch(createMap('url', updates.map(pick(['url']))))
     await database.routes.bulkPut(createMap('id', updates.filter(identity)))
   }
 }
@@ -224,8 +227,12 @@ const verifyNip05 = (pubkey, as) =>
       database.people.patch({...person, verified_as: as})
 
       if (result.relays?.length > 0) {
+        const urls = result.relays.filter(isRelay)
+
+        database.relays.bulkPatch(createMap('url', urls.map(objOf('url'))))
+
         database.routes.bulkPut(
-          createMap('id', result.relays.filter(isRelay).flatMap(url =>[
+          createMap('id', urls.flatMap(url =>[
             calculateRoute(pubkey, url, 'nip05', 'write', now()),
             calculateRoute(pubkey, url, 'nip05', 'read', now()),
           ]))

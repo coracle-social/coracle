@@ -10,7 +10,7 @@
   import {getUserWriteRelays} from 'src/agent/relays'
   import database from 'src/agent/database'
   import cmd from "src/agent/cmd"
-  import {toast, modal} from "src/app"
+  import {toast, modal} from "src/app/ui"
 
   export let room = {name: null, id: null, about: null, picture: null}
 

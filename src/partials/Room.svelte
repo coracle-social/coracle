@@ -5,7 +5,7 @@
   import Anchor from 'src/partials/Anchor.svelte'
   import {displayPerson} from 'src/util/nostr'
   import {now, timedelta} from 'src/util/misc'
-  import {messages} from 'src/app'
+  import messages from 'src/app/messages'
 
   export let joined = false
   export let room

@@ -6,7 +6,7 @@
   import {formatTimestamp} from 'src/util/misc'
   import {killEvent} from 'src/util/html'
   import database from 'src/agent/database'
-  import {modal} from 'src/app'
+  import {modal} from 'src/app/ui'
 
   export let note
 

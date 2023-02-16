@@ -1,6 +1,7 @@
 <script>
   import {fly} from 'svelte/transition'
-  import {toast, modal, addRelay} from "src/app"
+  import {toast, modal} from "src/app/ui"
+  import {addRelay} from 'src/app'
   import Input from 'src/partials/Input.svelte'
   import Content from 'src/partials/Content.svelte'
   import Heading from 'src/partials/Heading.svelte'

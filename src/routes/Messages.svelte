@@ -11,7 +11,7 @@
   import keys from 'src/agent/keys'
   import cmd from 'src/agent/cmd'
   import {routes} from 'src/app/ui'
-  import {messages} from 'src/app'
+  import messages from 'src/app/messages'
 
   export let entity
 
