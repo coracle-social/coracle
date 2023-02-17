@@ -316,7 +316,13 @@ const watch = (names, f) => {
 
 const getPersonWithFallback = pubkey => people.get(pubkey) || {pubkey}
 
-const dropAll = () => Promise.all(Object.values(registry).map(t => t.drop()))
+const dropAll = async () => {
+  for (const table of Object.values(registry)) {
+    await table.drop()
+
+    log(`Successfully dropped table ${table.name}`)
+  }
+}
 
 const ready = derived(pluck('ready', Object.values(registry)), all(identity))
 

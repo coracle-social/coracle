@@ -82,7 +82,7 @@ const listenUntilEose = (relays, filter, onEvents, {shouldProcess = true}: any =
   }) as Promise<void>
 }
 
-const loadPeople = async (pubkeys, {kinds = personKinds, force = false, ...opts} = {}) => {
+const loadPeople = async (pubkeys, {relays = null, kinds = personKinds, force = false, ...opts} = {}) => {
   pubkeys = uniq(pubkeys)
 
   // If we're not reloading, only get pubkeys we don't already know about
@@ -90,19 +90,23 @@ const loadPeople = async (pubkeys, {kinds = personKinds, force = false, ...opts}
     pubkeys = getStalePubkeys(pubkeys)
   }
 
-  // Use the best relays we have, but fall back to user relays
-  const relays = getAllPubkeyWriteRelays(pubkeys)
-    .concat(getUserReadRelays())
-    .slice(0, 3)
+  await Promise.all(
+    chunk(256, pubkeys).map(async chunk => {
+      // Use the best relays we have, but fall back to user relays
+      const chunkRelays = relays || (
+        getAllPubkeyWriteRelays(chunk)
+          .concat(getUserReadRelays())
+          .slice(0, 3)
+      )
 
-  if (pubkeys.length > 0) {
-    await load(relays, {kinds, authors: pubkeys}, opts)
-  }
+      await load(chunkRelays, {kinds, authors: chunk}, opts)
+    })
+  )
 }
 
 const loadParents = notes => {
   const notesWithParent = notes.filter(findReplyId)
-  const relays = aggregateScores(notesWithParent.map(getRelaysForEventParent))
+  const relays = aggregateScores(notesWithParent.map(getRelaysForEventParent)).slice(0, 3)
 
   return load(relays, {kinds: [1], ids: notesWithParent.map(findReplyId)})
 }

@@ -2,9 +2,7 @@
   import {onMount} from "svelte"
   import {fly} from 'svelte/transition'
   import {navigate} from "svelte-routing"
-  import pick from "ramda/src/pick"
-  import {error} from "src/util/logger"
-  import {stripExifData} from "src/util/html"
+  // import {stripExifData} from "src/util/html"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -16,7 +14,7 @@
   import cmd from "src/agent/cmd"
   import {routes, toast} from "src/app/ui"
 
-  let values = {picture: null, about: null, name: null, nip05: null}
+  let values = user.getProfile().kind0 || {}
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
   const pseudUrl = "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
@@ -26,8 +24,7 @@
       return navigate("/login")
     }
 
-    values = pick(Object.keys(values), user.getProfile())
-
+    /*
     document.querySelector('[name=picture]').addEventListener('change', async e => {
       const target = e.target as HTMLInputElement
       const [file] = target.files
@@ -41,6 +38,7 @@
         values.picture = null
       }
     })
+    */
   })
 
   const submit = async event => {
@@ -93,10 +91,26 @@
         </p>
       </div>
       <div class="flex flex-col gap-1">
-        <strong>Profile Image</strong>
-        <input type="file" name="picture" />
+        <strong>Profile Picture</strong>
+        <!-- <input type="file" name="picture" />
         <p class="text-sm text-light">
           Your profile image will have all metadata removed before being published.
+        </p> -->
+        <Input type="text" name="picture" wrapperClass="flex-grow" bind:value={values.picture}>
+          <i slot="before" class="fa fa-image-portrait" />
+        </Input>
+        <p class="text-sm text-light">
+          Enter a url to your profile image - please be mindful of others and
+          only use small images.
+        </p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <strong>Profile Banner</strong>
+        <Input type="text" name="banner" wrapperClass="flex-grow" bind:value={values.banner}>
+          <i slot="before" class="fa fa-panorama" />
+        </Input>
+        <p class="text-sm text-light">
+          Enter a url to your profile's banner image.
         </p>
       </div>
       <Button type="submit" class="text-center">Done</Button>

@@ -55,15 +55,15 @@ export const findRoot = e =>
 export const findRootId = e => Tags.wrap([findRoot(e)]).values().first()
 
 export const displayPerson = p => {
-  if (p.display_name) {
-    return ellipsize(p.display_name, 60)
+  if (p.kind0?.display_name) {
+    return ellipsize(p.kind0?.display_name, 60)
   }
 
-  if (p.name) {
-    return ellipsize(p.name, 60)
+  if (p.kind0?.name) {
+    return ellipsize(p.kind0?.name, 60)
   }
 
-  return nip19.npubEncode(p.pubkey).slice(4, 12)
+  return nip19.npubEncode(p.pubkey).slice(-8)
 }
 
 export const isLike = content => ['', '+', '🤙', '👍', '❤️'].includes(content)
@@ -82,7 +82,17 @@ export const isAlert = (e, pubkey) => {
   return true
 }
 
-export const isRelay = url => typeof url === 'string' && url.match(/^wss?:\/\/.+/)
+export const isRelay = url => (
+  typeof url === 'string'
+  // It should have the protocol included
+  && url.match(/^wss?:\/\/.+/)
+  // Don't match stuff with a port number
+  && !url.slice(6).match(/:\d+/)
+  // Don't match raw ip addresses
+  && !url.slice(6).match(/\d+\.\d+\.\d+\.\d+/)
+  // Skip nostr.wine's virtual relays
+  && !url.slice(6).match(/\/npub/)
+)
 
 export const normalizeRelayUrl = url => url.replace(/\/+$/, '')
 

@@ -9,10 +9,15 @@ export type Relay = {
 
 export type Person = {
   pubkey: string
-  picture?: string
   relays?: Array<Relay>
   muffle?: Array<Array<string>>
   petnames?: Array<Array<string>>
+  kind0?: {
+    name?: string
+    about?: string
+    nip05?: string
+    picture?: string
+  },
 }
 
 

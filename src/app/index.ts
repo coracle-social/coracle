@@ -1,8 +1,10 @@
 import type {DisplayEvent} from 'src/util/types'
-import {omit, sortBy, identity} from 'ramda'
+import {objOf, omit, sortBy, identity} from 'ramda'
+import {get} from 'svelte/store'
 import {navigate} from 'svelte-routing'
 import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {renderContent} from 'src/util/html'
+import {shuffle} from 'src/util/misc'
 import {Tags, displayPerson, findReplyId} from 'src/util/nostr'
 import {getNetwork} from 'src/agent/social'
 import {getUserReadRelays} from 'src/agent/relays'
@@ -11,7 +13,7 @@ import network from 'src/agent/network'
 import keys from 'src/agent/keys'
 import alerts from 'src/app/alerts'
 import messages from 'src/app/messages'
-import {routes, modal} from 'src/app/ui'
+import {routes, settings, modal} from 'src/app/ui'
 
 export const loadAppData = async pubkey => {
   if (getUserReadRelays().length > 0) {
@@ -31,14 +33,32 @@ export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: strin
     keys.setPublicKey(pubkey)
   }
 
-  modal.set({type: 'message', message: "Loading your profile data...", spinner: true})
+  modal.set({
+    type: 'message',
+    message: "Loading your profile data...",
+    spinner: true,
+    noEscape: true,
+  })
+
+  // Get a reasonably sized sample of relays and ask them all for relay information
+  // for our user so we can bootstrap. This could be improved.
+  let relays = []
+  try {
+    relays = (
+      await fetch(get(settings).dufflepudUrl + '/relay').then(r => r.json())
+    ).relays.map(objOf('url'))
+  } catch (e) {
+    relays = database.relays.all()
+  }
+
+  // Load our user so we can populate network and show profile info
+  await network.loadPeople([pubkey], {
+    relays: shuffle(relays).slice(0, 50),
+  })
 
   if (getUserReadRelays().length === 0) {
     navigate('/relays')
   } else {
-    // Load our user so we can populate network and show profile info
-    await network.loadPeople([pubkey])
-
     // Load network and start listening, but don't wait for it
     loadAppData(pubkey)
 

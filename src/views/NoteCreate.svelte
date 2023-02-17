@@ -5,7 +5,7 @@
   import {last, reject, pluck, propEq} from 'ramda'
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
-  import {isRelay} from "src/util/nostr"
+  import {isRelay, displayPerson} from "src/util/nostr"
   import Button from "src/partials/Button.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Input from "src/partials/Input.svelte"
@@ -75,10 +75,8 @@
   onMount(() => {
     const person = database.people.get(pubkey)
 
-    if (person?.name) {
-      input.type('@' + person.name)
-      input.trigger({key: 'Enter'})
-    }
+    input.type('@' + displayPerson(person))
+    input.trigger({key: 'Enter'})
   })
 </script>
 

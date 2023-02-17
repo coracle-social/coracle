@@ -1,10 +1,9 @@
-import {get} from 'svelte/store'
+import type {Relay} from 'src/util/types'
 import {pick, map, assoc, sortBy, uniqBy, prop} from 'ramda'
 import {first} from 'hurdak/lib/hurdak'
 import {Tags, findReplyId} from 'src/util/nostr'
 import database from 'src/agent/database'
 import user from 'src/agent/user'
-import keys from 'src/agent/keys'
 
 // From Mike Dilger:
 // 1) Other people's write relays — pull events from people you follow,
@@ -49,7 +48,7 @@ export const getUserRelays = () =>
 export const getUserReadRelays = () =>
   getUserRelays().filter(prop('read')).map(pick(['url', 'score']))
 
-export const getUserWriteRelays = () =>
+export const getUserWriteRelays = (): Array<Relay> =>
   getUserRelays().filter(prop('write')).map(pick(['url', 'score']))
 
 // Event-related special cases
@@ -85,14 +84,9 @@ export const getRelayForPersonHint = (pubkey, event) =>
 // our followers, so write to our write relays as well.
 export const getEventPublishRelays = event => {
   const tags = Tags.from(event)
-  const pubkeys = tags.type("p").values().all()
+  const pubkeys = tags.type("p").values().all().concat(event.pubkey)
 
-  return uniqByUrl(
-    pubkeys
-      .concat(event.pubkey)
-      .concat(get(keys.pubkey))
-      .flatMap(getPubkeyReadRelays)
-  )
+  return getAllPubkeyReadRelays(pubkeys).concat(getUserWriteRelays())
 }
 
 

@@ -2,7 +2,7 @@ import type {Person} from 'src/util/types'
 import type {Readable} from 'svelte/store'
 import {pipe, assoc, whereEq, when, concat, reject, nth, map} from 'ramda'
 import {synced} from 'src/util/misc'
-import {derived, get} from 'svelte/store'
+import {derived} from 'svelte/store'
 import database from 'src/agent/database'
 import keys from 'src/agent/keys'
 import cmd from 'src/agent/cmd'
@@ -28,28 +28,35 @@ const profile = derived(
       return null
     }
 
-    return profileCopy = ($people[pubkey] || {pubkey})
+    return $people[pubkey] || {pubkey}
   }
 ) as Readable<Person>
 
 const petnames = derived(
   [profile, anonPetnames],
-  ([$profile, $anonPetnames]) => {
-    return petnamesCopy = $profile?.petnames || $anonPetnames
-  }
+  ([$profile, $anonPetnames]) =>
+    $profile?.petnames || $anonPetnames
 )
 
 const relays = derived(
   [profile, anonRelays],
-  ([$profile, $anonRelays]) => {
-    return relaysCopy = $profile?.relays || $anonRelays
-  }
+  ([$profile, $anonRelays]) =>
+    $profile?.relays || $anonRelays
 )
 
-// Prime our copies
-get(profile)
-get(petnames)
-get(relays)
+// Keep our copies up to date
+
+profile.subscribe($profile => {
+  profileCopy = $profile
+})
+
+petnames.subscribe($petnames => {
+  petnamesCopy = $petnames
+})
+
+relays.subscribe($relays => {
+  relaysCopy = $relays
+})
 
 const user = {
   // Profile

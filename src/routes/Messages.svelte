@@ -1,7 +1,7 @@
 <script lang="ts">
   import {nip19} from 'nostr-tools'
   import {sortBy, pluck} from 'ramda'
-  import {personKinds} from 'src/util/nostr'
+  import {personKinds, displayPerson} from 'src/util/nostr'
   import {now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
   import user from 'src/agent/user'
@@ -68,9 +68,9 @@
 
 <Channel
   type="dm"
-  name={$person?.name}
-  about={$person?.about}
-  picture={$person?.picture}
+  name={displayPerson($person)}
+  about={$person?.kind0?.about}
+  picture={$person?.kind0?.picture}
   link={$person ? routes.person($person.pubkey) : null}
   {loadMessages}
   {listenForMessages}

@@ -92,7 +92,7 @@
    }
 
   const follow = async () => {
-    user.addPetname(pubkey, prop('url', first(relays)), person.name)
+    user.addPetname(pubkey, prop('url', first(relays)), displayPerson(person))
   }
 
   const unfollow = async () => {
@@ -114,13 +114,13 @@
          background-size: cover;
          background-image:
           linear-gradient(to bottom, rgba(0, 0, 0, 0.3), #0f0f0e),
-          url('{person.banner}')" />
+          url('{person.kind0?.banner}')" />
 
 <Content>
   <div class="flex gap-4" in:fly={{y: 20}}>
     <div
       class="overflow-hidden w-16 h-16 sm:w-32 sm:h-32 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-      style="background-image: url({person.picture})" />
+      style="background-image: url({person.kind0?.picture})" />
     <div class="flex flex-col gap-4 flex-grow">
       <div class="flex justify-between items-center gap-4">
         <div class="flex-grow flex flex-col gap-2">
@@ -159,7 +159,7 @@
           </Anchor>
         </div>
       </div>
-      <p>{@html renderContent(person.about || '')}</p>
+      <p>{@html renderContent(person?.kind0?.about || '')}</p>
       {#if person?.petnames}
       <div class="flex gap-8" in:fly={{y: 20}}>
         <button on:click={showFollows}>
@@ -176,7 +176,7 @@
   <Tabs tabs={['notes', 'likes', 'relays']} {activeTab} {setActiveTab} />
 
   {#if activeTab === 'notes'}
-  <Notes {pubkey} {relays} />
+  <Notes {pubkey} />
   {:else if activeTab === 'likes'}
   <Likes {pubkey} />
   {:else if activeTab === 'relays'}

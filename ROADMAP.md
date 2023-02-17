@@ -1,18 +1,17 @@
 # Current
 
-- [ ] Fix anon/new user experience
-  - [ ] Clicking stuff that would publish kicks you to the login page, we should open a modal instead.
-  - [ ] Separate user info and relays so we can still select/figure out relays for anons
-  - [ ] Separate petnames out as well so anons can follow people
-- [ ] Initial user load doesn't have any relays, cache user or wait for people db to be loaded
-  - nip07.getRelays, nip05, relay.nostr.band
-- [ ] Fix bugs on bugsnag
 - [ ] Fix profile merging, put kind0 on its own property so we're not messing other people's profile data up.
+- [ ] Fix anon/new user experience
+  - [ ] When logging in rather than generating a new keypair, ask for a relay to bootstrap from
+  - [ ] Preload/wait for our big list of relays so we can offer suggestions. Search in the background and let them know if we found their profile.
+  - [ ] Clicking stuff that would publish kicks you to the login page, we should open a modal instead.
 - [ ] Test publishing events with zero relays
 - [ ] Try lumping tables into a single key each to reduce load/save contention and time
+- [ ] Fix turning off link previews, or make sure it applies to images/videos too
 
 # Snacks
 
+- [ ] open web+nostr links like snort
 - [ ] DM/chat read status in encrypted note
 - [ ] Relay recommendations based on follows/followers
 - [ ] Pinned posts ala snort
@@ -76,3 +75,4 @@
   - [ ] Add notifications for chat messages
 - [ ] Compress events
   - https://github.com/nostr-protocol/nips/issues/265#issuecomment-1434250263
+- [ ] If you hide something, but the event doesn't get retrived, it gets un-hidden

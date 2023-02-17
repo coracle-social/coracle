@@ -1,7 +1,6 @@
 <script>
   import {pluck} from 'ramda'
   import {fuzzy} from "src/util/misc"
-  import {isRelay} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/partials/RelayCard.svelte"
   import database from 'src/agent/database'
@@ -17,7 +16,7 @@
     const joined = new Set(pluck('url', $relays))
 
     search = fuzzy(
-      $knownRelays.filter(r => isRelay(r.url) && !joined.has(r.url)),
+      $knownRelays.filter(r => !joined.has(r.url)),
       {keys: ["name", "description", "url"]}
     )
   }

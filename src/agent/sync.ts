@@ -3,7 +3,7 @@ import {nip05} from 'nostr-tools'
 import {noop, createMap, ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
 import {warn, log} from 'src/util/logger'
 import {now, timedelta, shuffle, hash} from 'src/util/misc'
-import {Tags, roomAttrs, isRelay, normalizeRelayUrl} from 'src/util/nostr'
+import {Tags, personKinds, roomAttrs, isRelay, normalizeRelayUrl} from 'src/util/nostr'
 import database from 'src/agent/database'
 
 const processEvents = async events => {
@@ -17,7 +17,7 @@ const processEvents = async events => {
 
 const processProfileEvents = async events => {
   const profileEvents = ensurePlural(events)
-    .filter(e => [0, 3, 12165].includes(e.kind))
+    .filter(e => personKinds.includes(e.kind))
 
   const updates = {}
   for (const e of profileEvents) {
@@ -29,19 +29,22 @@ const processProfileEvents = async events => {
       ...switcherFn(e.kind, {
         0: () => {
           return tryJson(() => {
-            const content = JSON.parse(e.content)
+            const kind0 = JSON.parse(e.content)
 
-            // Fire off a nip05 verification
-            if (content.nip05 && e.created_at > (person.nip05_updated_at || 0)) {
-              verifyNip05(e.pubkey, content.nip05)
+            if (e.created_at > (person.kind0_updated_at || 0)) {
+              if (kind0.nip05) {
+                verifyNip05(e.pubkey, kind0.nip05)
 
-              content.nip05_updated_at = e.created_at
-            }
+                kind0.nip05_updated_at = e.created_at
+              }
 
-            if (e.created_at > (person.profile_updated_at || 0)) {
               return {
-                ...content,
-                profile_updated_at: e.created_at,
+                kind0: {
+                  ...person?.kind0,
+                  ...updates[e.pubkey]?.kind0,
+                  ...kind0,
+                },
+                kind0_updated_at: e.created_at,
               }
             }
           })
@@ -271,6 +274,10 @@ const processRoutes = async events => {
         updates.push(
           calculateRoute(pubkey, url, 'tag', 'write', e.created_at)
         )
+
+        updates.push(
+          calculateRoute(pubkey, url, 'tag', 'read', e.created_at)
+        )
       })
     })
   }
@@ -279,7 +286,7 @@ const processRoutes = async events => {
 
   if (!isEmpty(updates)) {
     await database.relays.bulkPatch(createMap('url', updates.map(pick(['url']))))
-    await database.routes.bulkPut(createMap('id', updates.filter(identity)))
+    await database.routes.bulkPut(createMap('id', updates))
   }
 }
 

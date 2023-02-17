@@ -21,7 +21,7 @@
     <a href={routes.person($profile.pubkey)} class="flex gap-2 px-4 py-2 pb-6 items-center">
       <div
         class="overflow-hidden w-6 h-6 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-        style="background-image: url({$profile.picture})" />
+        style="background-image: url({$profile.kind0?.picture})" />
       <span class="text-lg font-bold">{displayPerson($profile)}</span>
     </a>
   </li>

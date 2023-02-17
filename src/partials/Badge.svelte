@@ -11,7 +11,7 @@
 
 {#if inert}
 <span class="flex gap-2 items-center relative z-10">
-  <ImageCircle src={person.picture} />
+  <ImageCircle src={person.kind0?.picture} />
   <span class="text-lg font-bold">{displayPerson(person)}</span>
 </span>
 {:else}
@@ -19,7 +19,7 @@
   to={routes.person(person.pubkey)}
   class="flex gap-2 items-center relative z-10"
   on:click={killEvent}>
-  <ImageCircle src={person.picture} />
+  <ImageCircle src={person.kind0?.picture} />
   <span class="text-lg font-bold">{displayPerson(person)}</span>
 </Link>
 {/if}

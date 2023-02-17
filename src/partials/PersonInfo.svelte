@@ -16,7 +16,7 @@
   const addPetname = pubkey => {
     const [{url}] = getPubkeyWriteRelays(pubkey)
 
-    user.addPetname(pubkey, url, person.name)
+    user.addPetname(pubkey, url, displayPerson(person))
   }
 </script>
 
@@ -26,7 +26,7 @@
   class="flex gap-4 border-l-2 border-solid border-dark hover:bg-black hover:border-accent transition-all py-3 px-6 overflow-hidden">
   <div
     class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-    style="background-image: url({person.picture})" />
+    style="background-image: url({person.kind0?.picture})" />
   <div class="flex-grow flex flex-col gap-4 min-w-0">
     <div class="flex gap-2 items-start justify-between">
       <div class="flex flex-col gap-2">
@@ -49,7 +49,7 @@
       {/if}
     </div>
     <p class="overflow-hidden text-ellipsis">
-      {@html renderContent(ellipsize(person.about || '', 140))}
+      {@html renderContent(ellipsize(person.kind0?.about || '', 140))}
     </p>
   </div>
 </a>

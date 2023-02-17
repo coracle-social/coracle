@@ -60,7 +60,7 @@
   import Search from "src/routes/Search.svelte"
   import Settings from "src/routes/Settings.svelte"
 
-  Object.assign(window, {cmd, database, keys, network, pool, sync})
+  Object.assign(window, {cmd, database, user, keys, network, pool, sync})
 
   export let url = ""
 
@@ -214,7 +214,7 @@
     <TopNav />
 
     {#if $modal}
-    <Modal onEscape={closeModal}>
+    <Modal onEscape={$modal.noEscape ? null : closeModal}>
       {#if $modal.type === 'note/detail'}
         {#key $modal.note.id}
         <NoteDetail {...$modal} />
@@ -256,12 +256,11 @@
 
     {#if $toast}
       <div
-        class="fixed top-0 left-0 right-0 z-10"
-        transition:fly={{y: -50, duration: 300}}
-      >
+        class="fixed top-0 left-0 right-0 z-10 click-events-none"
+        transition:fly={{y: -50, duration: 300}}>
         <div
-          class="rounded bg-accent shadow-xl mx-24 sm:mx-32 mt-2 p-3 text-white text-center border border-dark"
-        >
+          class="rounded bg-accent shadow-xl mx-24 sm:mx-32 mt-2 p-3 text-white text-center
+                 border border-dark click-events-all">
           {#if is(String, $toast.message)}
           {$toast.message}
           {:else}

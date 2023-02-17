@@ -24,11 +24,9 @@
       [{kinds: [40, 41], ids: [roomId]},
        {kinds: [42], '#e': [roomId], since: now()}],
       events => {
-        const newMessages = events.filter(e => e.kind === 42)
+        network.loadPeople(pluck('pubkey', events))
 
-        network.loadPeople(relays, pluck('pubkey', events))
-
-        cb(newMessages)
+        cb(events.filter(e => e.kind === 42))
       }
     )
   }
@@ -37,9 +35,7 @@
     const relays = getRelaysForEventChildren($room)
     const events = await network.load(relays, {kinds: [42], '#e': [roomId], until, limit})
 
-    if (events.length) {
-      await network.loadPeople(relays, pluck('pubkey', events))
-    }
+    network.loadPeople(pluck('pubkey', events))
 
     return events
   }
