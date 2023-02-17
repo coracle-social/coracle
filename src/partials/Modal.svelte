@@ -26,7 +26,7 @@
     class="absolute inset-0 mt-20 sm:mt-28 modal-content"
     transition:fly={{y: 1000, opacity: 1}}
     style={nested && `padding-top: 1rem`}>
-    <div class="bg-dark border-t border-solid border-medium h-full w-full overflow-auto">
+    <div class="bg-dark border-t border-solid border-medium h-full w-full overflow-auto pb-10">
       <slot />
     </div>
   </div>

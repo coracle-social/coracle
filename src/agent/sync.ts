@@ -1,9 +1,9 @@
-import {pick, objOf, identity, isEmpty} from 'ramda'
+import {pick, identity, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
 import {noop, createMap, ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
-import {log, warn} from 'src/util/logger'
+import {warn} from 'src/util/logger'
 import {now, timedelta, shuffle, hash} from 'src/util/misc'
-import {personKinds, Tags, roomAttrs, isRelay} from 'src/util/nostr'
+import {Tags, roomAttrs, isRelay, normalizeRelayUrl} from 'src/util/nostr'
 import database from 'src/agent/database'
 
 const processEvents = async events => {
@@ -17,7 +17,7 @@ const processEvents = async events => {
 
 const processProfileEvents = async events => {
   const profileEvents = ensurePlural(events)
-    .filter(e => personKinds.includes(e.kind))
+    .filter(e => [0, 3, 12165].includes(e.kind))
 
   const updates = {}
   for (const e of profileEvents) {
@@ -43,9 +43,6 @@ const processProfileEvents = async events => {
         },
         3: () => ({petnames: e.tags}),
         12165: () => ({muffle: e.tags}),
-        default: () => {
-          log(`Received unsupported event type ${e.kind}`)
-        },
       }),
       updated_at: now(),
     }
@@ -119,11 +116,12 @@ const getWeight = type => {
   if (type === 'tag') return 0.1
 }
 
-const calculateRoute = (pubkey, url, type, mode, created_at) => {
-  if (!isRelay(url)) {
+const calculateRoute = (pubkey, rawUrl, type, mode, created_at) => {
+  if (!isRelay(rawUrl)) {
     return
   }
 
+  const url = normalizeRelayUrl(rawUrl)
   const id = hash([pubkey, url, mode].join('')).toString()
   const score = getWeight(type) * (1 - (now() - created_at) / timedelta(30, 'days'))
   const route = database.routes.get(id) || {id, pubkey, url, mode, score: 0, count: 0}
@@ -229,7 +227,9 @@ const verifyNip05 = (pubkey, as) =>
       if (result.relays?.length > 0) {
         const urls = result.relays.filter(isRelay)
 
-        database.relays.bulkPatch(createMap('url', urls.map(objOf('url'))))
+        database.relays.bulkPatch(
+          createMap('url', urls.map(url => ({url: normalizeRelayUrl(url)})))
+        )
 
         database.routes.bulkPut(
           createMap('id', urls.flatMap(url =>[

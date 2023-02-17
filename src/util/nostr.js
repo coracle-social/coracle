@@ -81,4 +81,6 @@ export const isAlert = (e, pubkey) => {
 
 export const isRelay = url => typeof url === 'string' && url.match(/^wss?:\/\/.+/)
 
+export const normalizeRelayUrl = url => url.replace(/\/+$/, '')
+
 export const roomAttrs = ['name', 'about', 'picture']

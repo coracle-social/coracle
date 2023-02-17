@@ -9,7 +9,6 @@
   import Content from 'src/partials/Content.svelte'
   import Note from "src/partials/Note.svelte"
   import {user} from 'src/agent/user'
-  import {getUserReadRelays} from 'src/agent/relays'
   import network from 'src/agent/network'
   import {modal} from "src/app/ui"
   import {mergeParents} from "src/app"
@@ -76,10 +75,6 @@
   }
 
   onMount(() => {
-    if (relays.length === 0) {
-      relays = getUserReadRelays()
-    }
-
     const sub = network.listen(relays, {...filter, since}, onChunk)
 
     const scroller = createScroller(() => {
@@ -88,6 +83,8 @@
       }
 
       const {limit, until} = cursor
+
+      console.log('here')
 
       return network.listenUntilEose(relays, {...filter, until, limit}, onChunk)
     })

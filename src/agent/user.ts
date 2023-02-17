@@ -1,7 +1,8 @@
-import {pipe, concat, reject, nth, map} from 'ramda'
 import type {Person} from 'src/util/types'
 import type {Readable} from 'svelte/store'
-import {derived, get, writable} from 'svelte/store'
+import {pipe, concat, reject, nth, map} from 'ramda'
+import {synced} from 'src/util/misc'
+import {derived, get} from 'svelte/store'
 import database from 'src/agent/database'
 import {getUserWriteRelays} from 'src/agent/relays'
 import keys from 'src/agent/keys'
@@ -22,7 +23,7 @@ export const user = derived(
 // the user is logged in or not
 
 export const follows = (() => {
-  const anonPetnames = writable([])
+  const anonPetnames = synced('agent/user/anonPetnames', [])
 
   const petnames = derived(
     [user, anonPetnames],
@@ -32,7 +33,7 @@ export const follows = (() => {
 
   return {
     petnames,
-    pubkeys: derived(petnames, pipe(nth(0), map(nth(1)))),
+    pubkeys: derived(petnames, map(nth(1))) as Readable<Array<string>>,
     update(f) {
       const $petnames = f(get(petnames))
 

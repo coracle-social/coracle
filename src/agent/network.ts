@@ -1,11 +1,12 @@
 import {uniq, uniqBy, prop, map, propEq, indexBy, pluck} from 'ramda'
 import {personKinds, findReplyId} from 'src/util/nostr'
 import {chunk} from 'hurdak/lib/hurdak'
-import {batch, timedelta, now} from 'src/util/misc'
+import {batch, shuffle, timedelta, now} from 'src/util/misc'
 import {
   getRelaysForEventParent, getAllPubkeyWriteRelays, aggregateScores,
-  getUserNetworkWriteRelays, getUserReadRelays,
+  getUserReadRelays,
 } from 'src/agent/relays'
+import {getUserNetwork} from 'src/agent/social'
 import database from 'src/agent/database'
 import pool from 'src/agent/pool'
 import keys from 'src/agent/keys'
@@ -32,6 +33,10 @@ const publish = async (relays, event) => {
 }
 
 const load = async (relays, filter, opts?): Promise<Record<string, unknown>[]> => {
+  if (relays.length === 0) {
+    relays = getUserReadRelays()
+  }
+
   const events = await pool.request(relays, filter, opts)
 
   await sync.processEvents(events)
@@ -40,6 +45,10 @@ const load = async (relays, filter, opts?): Promise<Record<string, unknown>[]> =
 }
 
 const listen = (relays, filter, onEvents, {shouldProcess = true}: any = {}) => {
+  if (relays.length === 0) {
+    relays = getUserReadRelays()
+  }
+
   return pool.subscribe(relays, filter, {
     onEvent: batch(300, events => {
       if (shouldProcess) {
@@ -54,6 +63,10 @@ const listen = (relays, filter, onEvents, {shouldProcess = true}: any = {}) => {
 }
 
 const listenUntilEose = (relays, filter, onEvents, {shouldProcess = true}: any = {}) => {
+  if (relays.length === 0) {
+    relays = getUserReadRelays()
+  }
+
   return new Promise(resolve => {
     pool.subscribeUntilEose(relays, filter, {
       onClose: () => resolve(),
@@ -79,7 +92,7 @@ const loadPeople = (pubkeys, {kinds = personKinds, force = false, ...opts} = {})
   }
 
   return load(
-    getUserReadRelays().concat(getAllPubkeyWriteRelays(pubkeys)).slice(0, 10),
+    shuffle(getUserReadRelays().concat(getAllPubkeyWriteRelays(pubkeys))).slice(0, 3),
     {kinds, authors: pubkeys},
     opts
   )
@@ -97,15 +110,16 @@ const streamContext = ({notes, updateNotes, depth = 0}) => {
   // but it's also more likely to include spam. Checking our user's social graph
   // avoids this problem. TODO: review this, maybe add note authors's graphs to this
   // as well.
-  const relays = getUserNetworkWriteRelays()
+  const relays = getAllPubkeyWriteRelays(getUserNetwork()).slice(0, 3)
 
   // Some relays reject very large filters, send multiple
   chunk(256, notes).forEach(chunk => {
     const authors = getStalePubkeys(pluck('pubkey', chunk))
-    const filter = [
-      {kinds: [1, 7], '#e': pluck('id', chunk)},
-      {kinds: personKinds, authors},
-    ]
+    const filter = [{kinds: [1, 7], '#e': pluck('id', chunk)}] as Array<object>
+
+    if (authors.length > 0) {
+      filter.push({kinds: personKinds, authors})
+    }
 
     // Load authors and reactions in one subscription
     listenUntilEose(relays, filter, events => {

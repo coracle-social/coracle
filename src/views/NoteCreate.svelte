@@ -51,7 +51,7 @@
           text: 'View',
           href: "/" + nip19.neventEncode({
             id: event.id,
-            relays: pluck('url', relays.slice(0, 5)),
+            relays: pluck('url', relays.slice(0, 3)),
           }),
         },
       })

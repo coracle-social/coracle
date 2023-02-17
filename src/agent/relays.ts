@@ -1,10 +1,9 @@
 import type {Relay} from 'src/util/types'
 import {get} from 'svelte/store'
-import {pick, map, assoc, sortBy, uniq, uniqBy, prop} from 'ramda'
+import {pick, map, assoc, sortBy, uniqBy, prop} from 'ramda'
 import {first} from 'hurdak/lib/hurdak'
 import {Tags} from 'src/util/nostr'
 import {synced} from 'src/util/misc'
-import {getFollows} from 'src/agent/social'
 import database from 'src/agent/database'
 import keys from 'src/agent/keys'
 
@@ -51,19 +50,6 @@ export const getUserRelays = (): Array<Relay> => get(relays).map(assoc('score', 
 export const getUserReadRelays = () => getUserRelays().filter(prop('read'))
 export const getUserWriteRelays = () => getUserRelays().filter(prop('write'))
 
-// Network relays
-
-export const getNetworkWriteRelays = pubkey => {
-  const follows = Tags.wrap(getFollows(pubkey)).values().all()
-  const others = Tags.wrap(follows.flatMap(getFollows)).values().all()
-
-  return getAllPubkeyWriteRelays(uniq(follows.concat(others)))
-}
-
-// User's network relays
-
-export const getUserNetworkWriteRelays = () => getNetworkWriteRelays(get(keys.pubkey))
-
 // Event-related special cases
 
 // If we're looking for an event's parent, tags are the most reliable hint,
@@ -74,7 +60,7 @@ export const getRelaysForEventParent = event => {
   const pubkeys = tags.type("p").values().all()
   const pubkeyRelays = pubkeys.flatMap(getPubkeyWriteRelays)
 
-  return uniqByUrl(relays.concat(pubkeyRelays).concat(event.seen_on))
+  return uniqByUrl(relays.concat(pubkeyRelays).concat({url: event.seen_on}))
 }
 
 // If we're looking for an event's children, the read relays the author has
@@ -82,10 +68,10 @@ export const getRelaysForEventParent = event => {
 // will write replies there. However, this may include spam, so we may want
 // to read from the current user's network's read relays instead.
 export const getRelaysForEventChildren = event => {
-  return uniqByUrl(getPubkeyReadRelays(event.pubkey).concat(event.seen_on))
+  return uniqByUrl(getPubkeyReadRelays(event.pubkey).concat({url: event.seen_on}))
 }
 
-export const getRelayForEventHint = event => event.seen_on
+export const getRelayForEventHint = event => ({url: event.seen_on})
 
 export const getRelayForPersonHint = (pubkey, event) =>
   first(getPubkeyWriteRelays(pubkey)) || getRelayForEventHint(event)

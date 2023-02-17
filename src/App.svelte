@@ -27,6 +27,22 @@
   import messages from "src/app/messages"
   import {modal, toast, settings, routes, menuIsOpen, logUsage} from "src/app/ui"
   import RelayCard from "src/partials/RelayCard.svelte"
+  import Anchor from 'src/partials/Anchor.svelte'
+  import Content from 'src/partials/Content.svelte'
+  import EnsureData from 'src/partials/EnsureData.svelte'
+  import Modal from 'src/partials/Modal.svelte'
+  import SideNav from 'src/partials/SideNav.svelte'
+  import Spinner from 'src/partials/Spinner.svelte'
+  import TopNav from 'src/partials/TopNav.svelte'
+  import ChatEdit from "src/views/ChatEdit.svelte"
+  import NoteCreate from "src/views/NoteCreate.svelte"
+  import NoteDetail from "src/views/NoteDetail.svelte"
+  import PersonList from "src/views/PersonList.svelte"
+  import PersonSettings from "src/views/PersonSettings.svelte"
+  import PersonShare from "src/views/PersonShare.svelte"
+  import PrivKeyLogin from "src/views/PrivKeyLogin.svelte"
+  import PubKeyLogin from "src/views/PubKeyLogin.svelte"
+  import SignUp from "src/views/SignUp.svelte"
   import AddRelay from "src/routes/AddRelay.svelte"
   import Alerts from "src/routes/Alerts.svelte"
   import Bech32Entity from "src/routes/Bech32Entity.svelte"
@@ -44,21 +60,6 @@
   import RelayList from "src/routes/RelayList.svelte"
   import Search from "src/routes/Search.svelte"
   import Settings from "src/routes/Settings.svelte"
-  import ChatEdit from "src/views/ChatEdit.svelte"
-  import NoteCreate from "src/views/NoteCreate.svelte"
-  import NoteDetail from "src/views/NoteDetail.svelte"
-  import PersonList from "src/views/PersonList.svelte"
-  import PersonSettings from "src/views/PersonSettings.svelte"
-  import PersonShare from "src/views/PersonShare.svelte"
-  import PrivKeyLogin from "src/views/PrivKeyLogin.svelte"
-  import PubKeyLogin from "src/views/PubKeyLogin.svelte"
-  import SignUp from "src/views/SignUp.svelte"
-  import Anchor from 'src/partials/Anchor.svelte'
-  import Content from 'src/partials/Content.svelte'
-  import Modal from 'src/partials/Modal.svelte'
-  import SideNav from 'src/partials/SideNav.svelte'
-  import Spinner from 'src/partials/Spinner.svelte'
-  import TopNav from 'src/partials/TopNav.svelte'
 
   Object.assign(window, {cmd, database, keys, network, pool, sync})
 
@@ -167,8 +168,16 @@
   <div use:links class="h-full">
     <div class="pt-16 text-white h-full lg:ml-56">
       <Route path="/alerts" component={Alerts} />
-      <Route path="/search/:activeTab" component={Search} />
-      <Route path="/notes/:activeTab" component={Notes} />
+      <Route path="/search/:activeTab" let:params>
+        <EnsureData enforcePeople={false}>
+          <Search activeTab={params.activeTab} />
+        </EnsureData>
+      </Route>
+      <Route path="/notes/:activeTab" let:params>
+        <EnsureData>
+          <Notes activeTab={params.activeTab} />
+        </EnsureData>
+      </Route>
       <Route path="/people/:npub/:activeTab" let:params>
         {#key params.npub}
         <Person npub={params.npub} activeTab={params.activeTab} />

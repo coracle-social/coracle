@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {last, find} from 'ramda'
+  import {last} from 'ramda'
   import {onMount} from 'svelte'
   import {tweened} from 'svelte/motion'
   import {nip19} from 'nostr-tools'
@@ -17,7 +17,7 @@
   import Likes from "src/views/person/Likes.svelte"
   import Relays from "src/views/person/Relays.svelte"
   import {user, follows} from "src/agent/user"
-  import {getPubkeyWriteRelays} from "src/agent/relays"
+  import {getUserReadRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import keys from "src/agent/keys"
   import database from "src/agent/database"
@@ -28,6 +28,7 @@
   export let relays = []
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
+  const {pubkeys: userFollows} = follows
 
   let pubkey = nip19.decode(npub).data as string
   let following = false
@@ -36,7 +37,7 @@
   let person = database.getPersonWithFallback(pubkey)
   let loading = true
 
-  $: following = find(t => t[1] === pubkey, $user?.petnames || [])
+  $: following = $userFollows.includes(pubkey)
 
   onMount(async () => {
     log('Person', npub, person)
@@ -86,7 +87,9 @@
    }
 
   const follow = async () => {
-    follows.addFollow(pubkey, relays[0].url, person.name)
+    const [{url}] = relays.concat(getUserReadRelays())
+
+    follows.addFollow(pubkey, url, person.name)
   }
 
   const unfollow = async () => {
@@ -138,15 +141,15 @@
             <Anchor type="button-circle" href={`/messages/${npub}`}>
               <i class="fa fa-envelope" />
             </Anchor>
-            {#if following}
-            <Anchor type="button-circle" on:click={unfollow}>
-              <i class="fa fa-user-minus" />
-            </Anchor>
-            {:else if $user}
-            <Anchor type="button-circle" on:click={follow}>
-              <i class="fa fa-user-plus" />
-            </Anchor>
-            {/if}
+          {/if}
+          {#if following}
+          <Anchor type="button-circle" on:click={unfollow}>
+            <i class="fa fa-user-minus" />
+          </Anchor>
+          {:else}
+          <Anchor type="button-circle" on:click={follow}>
+            <i class="fa fa-user-plus" />
+          </Anchor>
           {/if}
           <Anchor type="button-circle" on:click={share}>
             <i class="fa fa-share-nodes" />
