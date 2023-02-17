@@ -1,7 +1,8 @@
 import type {Relay} from 'src/util/types'
-import {pick, map, assoc, sortBy, uniqBy, prop} from 'ramda'
-import {first} from 'hurdak/lib/hurdak'
-import {Tags, findReplyId} from 'src/util/nostr'
+import {warn} from 'src/util/logger'
+import {pick, objOf, map, assoc, sortBy, uniqBy, prop} from 'ramda'
+import {first, createMap} from 'hurdak/lib/hurdak'
+import {Tags, isRelay, findReplyId} from 'src/util/nostr'
 import database from 'src/agent/database'
 import user from 'src/agent/user'
 
@@ -16,6 +17,33 @@ import user from 'src/agent/user'
 //    client-private data like client configuration events or anything that the world
 //    doesn't need to see.
 // 5) Advertise relays — write and read back your own relay list
+
+// Initialize our database
+
+export const initializeRelayList = async () => {
+  // Throw some hardcoded defaults in there
+  await database.relays.bulkPatch(
+    createMap('url', [
+      {url: 'wss://brb.io'},
+      {url: 'wss://nostr.zebedee.cloud'},
+      {url: 'wss://nostr-pub.wellorder.net'},
+      {url: 'wss://relay.nostr.band'},
+      {url: 'wss://nostr.pleb.network'},
+      {url: 'wss://relay.nostrich.de'},
+      {url: 'wss://relay.damus.io'},
+    ])
+  )
+
+  // Load relays from nostr.watch via dufflepud
+  try {
+    const url = import.meta.env.VITE_DUFFLEPUD_URL + '/relay'
+    const relays = prop('relays', await fetch(url).then(r => r.json())).filter(isRelay)
+
+    await database.relays.bulkPatch(createMap('url', map(objOf('url'), relays)))
+  } catch (e) {
+    warn("Failed to fetch relays list", e)
+  }
+}
 
 // Pubkey relays
 

@@ -18,7 +18,7 @@
   import keys from 'src/agent/keys'
   import network from 'src/agent/network'
   import pool from 'src/agent/pool'
-  import {getUserRelays} from 'src/agent/relays'
+  import {getUserRelays, initializeRelayList} from 'src/agent/relays'
   import sync from 'src/agent/sync'
   import user from 'src/agent/user'
   import {loadAppData} from "src/app"
@@ -41,6 +41,7 @@
   import PersonShare from "src/views/PersonShare.svelte"
   import PrivKeyLogin from "src/views/PrivKeyLogin.svelte"
   import PubKeyLogin from "src/views/PubKeyLogin.svelte"
+  import ConnectUser from "src/views/ConnectUser.svelte"
   import SignUp from "src/views/SignUp.svelte"
   import AddRelay from "src/routes/AddRelay.svelte"
   import Alerts from "src/routes/Alerts.svelte"
@@ -110,6 +111,8 @@
   })
 
   database.onReady(() => {
+    initializeRelayList()
+
     if (user.getProfile()) {
       loadAppData(user.getPubkey())
     }
@@ -126,7 +129,7 @@
         // few so we're not sending too many concurrent http requests
         const staleRelays = shuffle(
           await database.relays.all({
-            'refreshed_at:lt': now() - timedelta(7, 'days'),
+           'refreshed_at:lt': now() - timedelta(7, 'days'),
           })
         ).slice(0, 10)
 
@@ -237,6 +240,8 @@
         <PrivKeyLogin />
       {:else if $modal.type === 'login/pubkey'}
         <PubKeyLogin />
+      {:else if $modal.type === 'login/connect'}
+        <ConnectUser />
       {:else if $modal.type === 'person/settings'}
         <PersonSettings />
       {:else if $modal.type === 'person/share'}

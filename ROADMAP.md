@@ -1,9 +1,7 @@
 # Current
 
-- [ ] Fix profile merging, put kind0 on its own property so we're not messing other people's profile data up.
 - [ ] Fix anon/new user experience
   - [ ] When logging in rather than generating a new keypair, ask for a relay to bootstrap from
-  - [ ] Preload/wait for our big list of relays so we can offer suggestions. Search in the background and let them know if we found their profile.
   - [ ] Clicking stuff that would publish kicks you to the login page, we should open a modal instead.
 - [ ] Test publishing events with zero relays
 - [ ] Try lumping tables into a single key each to reduce load/save contention and time

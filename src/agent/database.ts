@@ -233,23 +233,7 @@ const people = new Table('people', 'pubkey')
 const rooms = new Table('rooms', 'id')
 const messages = new Table('messages', 'id')
 const alerts = new Table('alerts', 'id')
-
-const relays = new Table('relays', 'url', {
-  initialize: async table => {
-    const data = await table.dump()
-    const defaults = createMap('url', [
-      {url: 'wss://brb.io'},
-      {url: 'wss://nostr.zebedee.cloud'},
-      {url: 'wss://nostr-pub.wellorder.net'},
-      {url: 'wss://relay.nostr.band'},
-      {url: 'wss://nostr.pleb.network'},
-      {url: 'wss://relay.nostrich.de'},
-      {url: 'wss://relay.damus.io'},
-    ])
-
-    return Object.assign(data, defaults)
-  },
-})
+const relays = new Table('relays', 'url')
 
 const routes = new Table('routes', 'id', {
   initialize: async table => {

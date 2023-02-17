@@ -13,7 +13,10 @@
 - [x] Make chat header overlap main header to save space
 - [x] Strip formatting when pasting into Compose
 - [x] Upgraded nostr-tools to 1.4.1
-)
+- [x] Improve anonymous and new user experience by prompting for relays and follows
+- [x] Fixed kind0 merging to avoid dropping properties coracle doesn't support
+- [x] Implement NIP-65 properly
+
 ## 0.2.11
 
 - [x] Converted threshold to percentage

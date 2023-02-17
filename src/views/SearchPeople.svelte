@@ -24,6 +24,7 @@
   })
 
   // Prime our database, in case we don't have any people stored yet
+  console.log(getUserReadRelays())
   network.listenUntilEose(getUserReadRelays(), {kinds: personKinds, limit: 300})
 </script>
 
