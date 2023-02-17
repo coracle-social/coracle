@@ -4,7 +4,7 @@
   import {personKinds} from 'src/util/nostr'
   import {now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {user} from 'src/agent/user'
+  import user from 'src/agent/user'
   import {getAllPubkeyRelays} from 'src/agent/relays'
   import database from 'src/agent/database'
   import network from 'src/agent/network'
@@ -21,7 +21,7 @@
 
   messages.lastCheckedByPubkey.update($obj => ({...$obj, [pubkey]: now()}))
 
-  const getRelays = () => getAllPubkeyRelays([pubkey, $user.pubkey]).slice(0, 3)
+  const getRelays = () => getAllPubkeyRelays([pubkey, user.getPubkey()]).slice(0, 3)
 
   const decryptMessages = async events => {
     // Gotta do it in serial because of extension limitations
@@ -37,8 +37,8 @@
   const listenForMessages = cb => network.listen(
     getRelays(),
     [{kinds: personKinds, authors: [pubkey]},
-     {kinds: [4], authors: [$user.pubkey], '#p': [pubkey]},
-     {kinds: [4], authors: [pubkey], '#p': [$user.pubkey]}],
+     {kinds: [4], authors: [user.getPubkey()], '#p': [pubkey]},
+     {kinds: [4], authors: [pubkey], '#p': [user.getPubkey()]}],
     async events => {
       // Reload from db since we annotate messages there
       const messageIds = pluck('id', events.filter(e => e.kind === 4))

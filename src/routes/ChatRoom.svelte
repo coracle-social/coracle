@@ -3,7 +3,7 @@
   import {nip19} from 'nostr-tools'
   import {now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
-  import {user} from 'src/agent/user'
+  import user from 'src/agent/user'
   import {getRelaysForEventChildren} from 'src/agent/relays'
   import database from 'src/agent/database'
   import network from 'src/agent/network'
@@ -57,7 +57,7 @@
   name={$room?.name}
   about={$room?.about}
   picture={$room?.picture}
-  editRoom={$room?.pubkey === $user.pubkey && editRoom}
+  editRoom={$room?.pubkey === user.getPubkey() && editRoom}
   {loadMessages}
   {listenForMessages}
   {sendMessage}

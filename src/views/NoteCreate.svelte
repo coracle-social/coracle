@@ -4,7 +4,6 @@
   import {quantify} from 'hurdak/lib/hurdak'
   import {last, reject, pluck, propEq} from 'ramda'
   import {fly} from 'svelte/transition'
-  import {navigate} from "svelte-routing"
   import {fuzzy} from "src/util/misc"
   import {isRelay} from "src/util/nostr"
   import Button from "src/partials/Button.svelte"
@@ -14,7 +13,6 @@
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Heading from 'src/partials/Heading.svelte'
-  import {user} from "src/agent/user"
   import {getUserWriteRelays} from 'src/agent/relays'
   import database from 'src/agent/database'
   import cmd from "src/agent/cmd"
@@ -75,10 +73,6 @@
   }
 
   onMount(() => {
-    if (!$user) {
-      navigate("/login")
-    }
-
     const person = database.people.get(pubkey)
 
     if (person?.name) {

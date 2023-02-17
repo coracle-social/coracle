@@ -7,13 +7,13 @@
   import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {user} from 'src/agent/user'
+  import user from 'src/agent/user'
   import {toast, settings} from "src/app/ui"
 
   let values = {...$settings}
 
   onMount(async () => {
-    if (!$user) {
+    if (!user.getProfile()) {
       return navigate("/login")
     }
   })

@@ -1,16 +1,20 @@
 <script>
-  import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
   import {personKinds} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
+  import Spinner from "src/partials/Spinner.svelte"
   import PersonInfo from 'src/partials/PersonInfo.svelte'
-  import {user} from 'src/agent/user'
   import {getUserReadRelays} from 'src/agent/relays'
   import database from 'src/agent/database'
   import network from 'src/agent/network'
+  import user from 'src/agent/user'
+
+  export let hideFollowing = false
 
   let q
   let search
+
+  const {petnamePubkeys} = user
 
   database.watch('people', people => {
     search = fuzzy(
@@ -28,9 +32,9 @@
 </Input>
 
 {#each (search ? search(q) : []).slice(0, 30) as person (person.pubkey)}
-  {#if person.pubkey !== $user?.pubkey}
-  <div in:fly={{y: 20}}>
-    <PersonInfo {person} />
-  </div>
+  {#if person.pubkey !== user.getPubkey() && !(hideFollowing && $petnamePubkeys.includes(person.pubkey))}
+  <PersonInfo {person} />
   {/if}
+{:else}
+<Spinner />
 {/each}

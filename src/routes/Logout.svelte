@@ -9,9 +9,9 @@
   const confirm = async () => {
     confirmed = true
 
-    localStorage.clear()
+    await database.dropAll()
 
-    await database.clearAll()
+    localStorage.clear()
 
     // do a hard refresh so everything gets totally cleared.
     // Give them a moment to see the state transition. Dexie

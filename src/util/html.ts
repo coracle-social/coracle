@@ -61,6 +61,14 @@ export const killEvent = e => {
   e.stopImmediatePropagation()
 }
 
+export const noEvent = f => e => {
+  e.preventDefault()
+  e.stopPropagation()
+  e.stopImmediatePropagation()
+
+  f()
+}
+
 export const fromParentOffset = (element, offset): [HTMLElement, number] => {
   for (const child of element.childNodes) {
     if (offset <= child.textContent.length) {

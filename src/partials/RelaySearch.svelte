@@ -5,11 +5,13 @@
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/partials/RelayCard.svelte"
   import database from 'src/agent/database'
-  import {relays} from "src/agent/relays"
+  import user from "src/agent/user"
 
   let q = ""
   let search
   let knownRelays = database.watch('relays', t => t.all())
+
+  const {relays} = user
 
   $: {
     const joined = new Set(pluck('url', $relays))

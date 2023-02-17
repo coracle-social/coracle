@@ -29,5 +29,12 @@
     <div class="bg-dark border-t border-solid border-medium h-full w-full overflow-auto pb-10">
       <slot />
     </div>
+    {#if onEscape}
+    <div class="absolute top-0 flex w-full justify-end pr-2 -mt-8">
+      <div class="w-10 h-10 flex justify-center items-center bg-accent rounded-full cursor-pointer border border-solid border-medium border-b-0">
+        <i class="fa fa-times fa-lg cursor-pointer" on:click={onEscape} />
+      </div>
+    </div>
+    {/if}
   </div>
 </div>

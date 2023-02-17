@@ -2,82 +2,96 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
+  import RelayCard from "src/partials/RelayCard.svelte"
+  import PersonInfo from "src/partials/PersonInfo.svelte"
   import RelaySearch from "src/partials/RelaySearch.svelte"
   import SearchPeople from "src/views/SearchPeople.svelte"
-  import {relays} from 'src/agent/relays'
-  import {follows} from 'src/agent/user'
+  import database from 'src/agent/database'
+  import user from 'src/agent/user'
 
   export let enforceRelays = true
   export let enforcePeople = true
 
-  const {petnames} = follows
+  const {petnamePubkeys, relays} = user
+  const needsRelays = () => $relays.length === 0 && enforceRelays
+  const needsPeople = () => $petnamePubkeys.length === 0 && enforcePeople
 
-  let modalIsOpen = true
+  let modal = needsRelays() ? 'relays' : (needsPeople() ? 'people' : null)
 
   const closeModal = () => {
-    modalIsOpen = false
+    modal = null
   }
 </script>
 
-{#if $relays.length === 0 && enforceRelays}
-  {#if modalIsOpen}
-  <Modal onEscape={closeModal}>
-    <Content>
-      <div class="flex flex-col items-center gap-4 my-8">
-        <div class="text-xl flex gap-2 items-center">
-          <i class="fa fa-triangle-exclamation fa-light" />
-          You aren't yet connected to any relays.
-        </div>
-        <div>
-         Search below to find one to join.
-        </div>
-      </div>
-      <RelaySearch />
-    </Content>
-  </Modal>
-  {:else}
-  <Content size="lg">
-    <div class="flex flex-col items-center gap-4 mt-12">
+{#if modal === 'relays'}
+<Modal onEscape={closeModal}>
+  <Content>
+    {#if $relays.length > 0}
+    <h1 class="text-2xl">Your Relays</h1>
+    {/if}
+    {#each $relays as relay (relay.url)}
+    <RelayCard showControls {relay} />
+    {:else}
+    <div class="flex flex-col items-center gap-4 my-8">
       <div class="text-xl flex gap-2 items-center">
         <i class="fa fa-triangle-exclamation fa-light" />
         You aren't yet connected to any relays.
       </div>
       <div>
-       Click <Anchor href="/relays">here</Anchor> to find one to join.
+       Search below to find one to join.
       </div>
     </div>
+    {/each}
+    <RelaySearch />
   </Content>
-  {/if}
-{:else if $petnames.length === 0 && enforcePeople}
-  {#if modalIsOpen}
-  <Modal onEscape={closeModal}>
-    <Content>
-      <div class="flex flex-col items-center gap-4 my-8">
-        <div class="text-xl flex gap-2 items-center">
-          <i class="fa fa-triangle-exclamation fa-light" />
-          You aren't yet following anyone.
-        </div>
-        <div>
-         Search below to find some interesting people.
-        </div>
-      </div>
-      <SearchPeople />
-    </Content>
-  </Modal>
-  {:else}
-  <Content size="lg">
-    <div class="flex flex-col items-center gap-4 mt-12">
+</Modal>
+{:else if needsRelays()}
+<Content size="lg">
+  <div class="flex flex-col items-center gap-4 mt-12">
+    <div class="text-xl flex gap-2 items-center">
+      <i class="fa fa-triangle-exclamation fa-light" />
+      You aren't yet connected to any relays.
+    </div>
+    <div>
+     Click <Anchor href="/relays">here</Anchor> to find one to join.
+    </div>
+  </div>
+</Content>
+{:else if modal === 'people'}
+<Modal onEscape={closeModal}>
+  <Content>
+    {#if $petnamePubkeys.length > 0}
+    <h1 class="text-2xl">Your Follows</h1>
+    {/if}
+    {#each $petnamePubkeys as pubkey (pubkey)}
+    <PersonInfo person={database.people.get(pubkey)} />
+    {:else}
+    <div class="flex flex-col items-center gap-4 my-8">
       <div class="text-xl flex gap-2 items-center">
         <i class="fa fa-triangle-exclamation fa-light" />
         You aren't yet following anyone.
       </div>
       <div>
-       Click <Anchor href="/search/people">here</Anchor> to find some
-       interesting people.
+       Search below to find some interesting people.
       </div>
     </div>
+    {/each}
+    <SearchPeople hideFollowing />
   </Content>
-  {/if}
+</Modal>
+{:else if needsPeople()}
+<Content size="lg">
+  <div class="flex flex-col items-center gap-4 mt-12">
+    <div class="text-xl flex gap-2 items-center">
+      <i class="fa fa-triangle-exclamation fa-light" />
+      You aren't yet following anyone.
+    </div>
+    <div>
+     Click <Anchor href="/search/people">here</Anchor> to find some
+     interesting people.
+    </div>
+  </div>
+</Content>
 {:else}
 <slot />
 {/if}

@@ -1,17 +1,14 @@
-import type {Person, DisplayEvent} from 'src/util/types'
-import {assoc, omit, sortBy, whereEq, identity, when, reject} from 'ramda'
+import type {DisplayEvent} from 'src/util/types'
+import {omit, sortBy, identity} from 'ramda'
 import {navigate} from 'svelte-routing'
 import {createMap, ellipsize} from 'hurdak/lib/hurdak'
-import {get} from 'svelte/store'
 import {renderContent} from 'src/util/html'
 import {Tags, displayPerson, findReplyId} from 'src/util/nostr'
-import {user} from 'src/agent/user'
 import {getNetwork} from 'src/agent/social'
-import {relays, getUserReadRelays} from 'src/agent/relays'
+import {getUserReadRelays} from 'src/agent/relays'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
 import keys from 'src/agent/keys'
-import cmd from 'src/agent/cmd'
 import alerts from 'src/app/alerts'
 import messages from 'src/app/messages'
 import {routes, modal} from 'src/app/ui'
@@ -50,54 +47,6 @@ export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: strin
     // down users' first run experience too much
     navigate('/notes/network')
   }
-}
-
-export const addRelay = async url => {
-  const $user = get(user) as Person
-
-  relays.update($relays => {
-    $relays.push({url, write: false, read: true})
-
-    if ($user) {
-      (async () => {
-        // Publish to the new set of relays
-        await cmd.setRelays($relays, $relays)
-
-        // Reload alerts, messages, etc
-        await loadAppData($user.pubkey)
-      })()
-    }
-
-    return $relays
-  })
-}
-
-export const removeRelay = async url => {
-  const $user = get(user) as Person
-
-  relays.update($relays => {
-    $relays = reject(whereEq({url}), $relays)
-
-    if ($user && $relays.length > 0) {
-      cmd.setRelays($relays, $relays)
-    }
-
-    return $relays
-  })
-}
-
-export const setRelayWriteCondition = async (url, write) => {
-  const $user = get(user) as Person
-
-  relays.update($relays => {
-    $relays = $relays.map(when(whereEq({url}), assoc('write', write)))
-
-    if ($user && $relays.length > 0) {
-      cmd.setRelays($relays, $relays)
-    }
-
-    return $relays
-  })
 }
 
 export const renderNote = (note, {showEntire = false}) => {

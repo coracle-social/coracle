@@ -8,8 +8,9 @@
   import Spinner from 'src/partials/Spinner.svelte'
   import Content from 'src/partials/Content.svelte'
   import Note from "src/partials/Note.svelte"
-  import {user} from 'src/agent/user'
+  import user from 'src/agent/user'
   import network from 'src/agent/network'
+  import {getUserReadRelays} from 'src/agent/relays'
   import {modal} from "src/app/ui"
   import {mergeParents} from "src/app"
 
@@ -23,8 +24,9 @@
   const since = now()
   const maxNotes = 300
   const cursor = new Cursor()
+  const {profile} = user
   const muffle = Tags
-    .wrap(($user?.muffle || []).filter(t => Math.random() > parseFloat(last(t))))
+    .wrap(($profile?.muffle || []).filter(t => Math.random() > parseFloat(last(t))))
     .values().all()
 
   const processNewNotes = async newNotes => {
@@ -75,6 +77,9 @@
   }
 
   onMount(() => {
+    // Add in our user relays in case they weren't specified above
+    relays = relays.concat(getUserReadRelays()).slice(0, 3)
+
     const sub = network.listen(relays, {...filter, since}, onChunk)
 
     const scroller = createScroller(() => {

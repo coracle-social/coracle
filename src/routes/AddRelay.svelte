@@ -1,11 +1,11 @@
 <script>
   import {fly} from 'svelte/transition'
-  import {toast, modal} from "src/app/ui"
-  import {addRelay} from 'src/app'
   import Input from 'src/partials/Input.svelte'
   import Content from 'src/partials/Content.svelte'
   import Heading from 'src/partials/Heading.svelte'
   import Button from 'src/partials/Button.svelte'
+  import user from 'src/agent/user'
+  import {toast, modal} from "src/app/ui"
 
   let url = $modal.url
 
@@ -27,7 +27,7 @@
       return toast.show("error", "That isn't a valid websocket url")
     }
 
-    addRelay(url)
+    user.addRelay(url)
     modal.set(null)
   }
 </script>

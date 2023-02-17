@@ -1,7 +1,7 @@
-import {pick, identity, isEmpty} from 'ramda'
+import {uniq, pick, identity, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
 import {noop, createMap, ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
-import {warn} from 'src/util/logger'
+import {warn, log} from 'src/util/logger'
 import {now, timedelta, shuffle, hash} from 'src/util/misc'
 import {Tags, roomAttrs, isRelay, normalizeRelayUrl} from 'src/util/nostr'
 import database from 'src/agent/database'
@@ -46,8 +46,66 @@ const processProfileEvents = async events => {
             }
           })
         },
-        3: () => ({petnames: e.tags}),
+        2: () => {
+          if (e.created_at > (person.relays_updated_at || 0)) {
+            const {relays = []} = database.getPersonWithFallback(e.pubkey)
+
+            return {
+              relays: relays.concat({url: e.content}),
+              relays_updated_at: e.created_at,
+            }
+          }
+        },
+        3: () => {
+          const data = {petnames: e.tags}
+
+          if (e.created_at > (person.relays_updated_at || 0)) {
+            tryJson(() => {
+              Object.assign(data, {
+                relays_updated_at: e.created_at,
+                relays: Object.entries(JSON.parse(e.content))
+                  .map(([url, conditions]) => {
+                    const {write, read} = conditions as Record<string, boolean|string>
+
+                    return {
+                      url,
+                      write: [false, '!'].includes(write) ? '!' : '',
+                      read: [false, '!'].includes(read) ? '!' : '',
+                    }
+                  })
+                  .filter(r => isRelay(r.url)),
+              })
+            })
+          }
+
+          return data
+        },
         12165: () => ({muffle: e.tags}),
+        // DEPRECATED
+        10001: () => {
+          if (e.created_at > (person.relays_updated_at || 0)) {
+            return {
+              relays_updated_at: e.created_at,
+              relays: e.tags.map(([url, read, write]) => ({url, read, write})),
+            }
+          }
+        },
+        10002: () => {
+          if (e.created_at > (person.relays_updated_at || 0)) {
+            return {
+              relays_updated_at: e.created_at,
+              relays: e.tags.map(([_, url, mode]) => {
+                const read = (mode || 'read') === 'read'
+                const write = (mode || 'write') === 'write'
+
+                return {url, read, write}
+              }),
+            }
+          }
+        },
+        default: () => {
+          log(`Received unsupported event type ${e.kind}`)
+        },
       }),
       updated_at: now(),
     }
@@ -129,7 +187,8 @@ const calculateRoute = (pubkey, rawUrl, type, mode, created_at) => {
   const url = normalizeRelayUrl(rawUrl)
   const id = hash([pubkey, url, mode].join('')).toString()
   const score = getWeight(type) * (1 - (now() - created_at) / timedelta(30, 'days'))
-  const route = database.routes.get(id) || {id, pubkey, url, mode, score: 0, count: 0}
+  const defaults = {id, pubkey, url, mode, score: 0, count: 0, types: []}
+  const route = database.routes.get(id) || defaults
 
   const newTotalScore = route.score * route.count + score
   const newCount = route.count + 1
@@ -139,6 +198,7 @@ const calculateRoute = (pubkey, rawUrl, type, mode, created_at) => {
       ...route,
       count: newCount,
       score: newTotalScore / newCount,
+      types: uniq(route.types.concat(type)),
       last_seen: Math.max(created_at, route.last_seen || 0),
     }
   }
@@ -193,7 +253,7 @@ const processRoutes = async events => {
       },
       10002: () => {
         e.tags
-          .forEach(([url, read, mode]) => {
+          .forEach(([_, url, mode]) => {
             if (mode) {
               calculateRoute(e.pubkey, url, 'kind:10002', mode, e.created_at)
             } else {

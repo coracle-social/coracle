@@ -1,10 +1,11 @@
 <script lang="ts">
-  import {last} from 'ramda'
+  import {last, prop} from 'ramda'
   import {onMount} from 'svelte'
   import {tweened} from 'svelte/motion'
   import {nip19} from 'nostr-tools'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
+  import {first} from 'hurdak/lib/hurdak'
   import {log} from 'src/util/logger'
   import {renderContent} from 'src/util/html'
   import {displayPerson, Tags} from 'src/util/nostr'
@@ -16,7 +17,7 @@
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
   import Relays from "src/views/person/Relays.svelte"
-  import {user, follows} from "src/agent/user"
+  import user from "src/agent/user"
   import {getUserReadRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import keys from "src/agent/keys"
@@ -28,7 +29,7 @@
   export let relays = []
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
-  const {pubkeys: userFollows} = follows
+  const {petnamePubkeys} = user
 
   let pubkey = nip19.decode(npub).data as string
   let following = false
@@ -37,13 +38,17 @@
   let person = database.getPersonWithFallback(pubkey)
   let loading = true
 
-  $: following = $userFollows.includes(pubkey)
+  $: following = $petnamePubkeys.includes(pubkey)
 
   onMount(async () => {
     log('Person', npub, person)
 
-    // Add all the relays we know the person uses
-    relays = relays.concat(getPubkeyWriteRelays(pubkey))
+    // Add all the relays we know the person uses, as well as our own
+    // in case we don't have much information
+    relays = relays
+      .concat(getPubkeyWriteRelays(pubkey))
+      .concat(getUserReadRelays())
+      .slice(0, 3)
 
     // Refresh our person if needed
     network.loadPeople([pubkey]).then(() => {
@@ -59,7 +64,7 @@
       }
     })
 
-    // Round it out
+    // Round out our followers count
     await network.listenUntilEose(
       relays,
       [{kinds: [3], '#p': [pubkey]}],
@@ -87,13 +92,11 @@
    }
 
   const follow = async () => {
-    const [{url}] = relays.concat(getUserReadRelays())
-
-    follows.addFollow(pubkey, url, person.name)
+    user.addPetname(pubkey, prop('url', first(relays)), person.name)
   }
 
   const unfollow = async () => {
-    follows.removeFollow(pubkey)
+    user.removePetname(pubkey)
   }
 
   const openAdvanced = () => {
@@ -132,9 +135,9 @@
           {/if}
         </div>
         <div class="whitespace-nowrap flex gap-3 items-center flex-wrap">
-          {#if $user?.pubkey === pubkey && keys.canSign()}
+          {#if user.getPubkey() === pubkey && keys.canSign()}
           <Anchor href="/profile"><i class="fa-solid fa-edit" /> Edit profile</Anchor>
-          {:else if $user && keys.canSign()}
+          {:else if user.getProfile() && keys.canSign()}
             <Anchor type="button-circle" on:click={openAdvanced}>
               <i class="fa fa-sliders" />
             </Anchor>
@@ -146,7 +149,7 @@
           <Anchor type="button-circle" on:click={unfollow}>
             <i class="fa fa-user-minus" />
           </Anchor>
-          {:else if $user?.pubkey !== pubkey}
+          {:else if user.getPubkey() !== pubkey}
           <Anchor type="button-circle" on:click={follow}>
             <i class="fa fa-user-plus" />
           </Anchor>
@@ -158,7 +161,7 @@
       </div>
       <p>{@html renderContent(person.about || '')}</p>
       {#if person?.petnames}
-      <div class="flex gap-8">
+      <div class="flex gap-8" in:fly={{y: 20}}>
         <button on:click={showFollows}>
           <strong>{person.petnames.length}</strong> following
         </button>
@@ -173,7 +176,7 @@
   <Tabs tabs={['notes', 'likes', 'relays']} {activeTab} {setActiveTab} />
 
   {#if activeTab === 'notes'}
-  <Notes {pubkey} />
+  <Notes {pubkey} {relays} />
   {:else if activeTab === 'likes'}
   <Likes {pubkey} />
   {:else if activeTab === 'relays'}

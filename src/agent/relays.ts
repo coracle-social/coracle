@@ -1,10 +1,9 @@
-import type {Relay} from 'src/util/types'
 import {get} from 'svelte/store'
 import {pick, map, assoc, sortBy, uniqBy, prop} from 'ramda'
 import {first} from 'hurdak/lib/hurdak'
 import {Tags, findReplyId} from 'src/util/nostr'
-import {synced} from 'src/util/misc'
 import database from 'src/agent/database'
+import user from 'src/agent/user'
 import keys from 'src/agent/keys'
 
 // From Mike Dilger:
@@ -18,8 +17,6 @@ import keys from 'src/agent/keys'
 //    client-private data like client configuration events or anything that the world
 //    doesn't need to see.
 // 5) Advertise relays — write and read back your own relay list
-
-export const relays = synced('agent/relays', [])
 
 // Pubkey relays
 
@@ -46,9 +43,14 @@ export const getAllPubkeyWriteRelays = pubkeys =>
 
 // Current user
 
-export const getUserRelays = (): Array<Relay> => get(relays).map(assoc('score', 1))
-export const getUserReadRelays = () => getUserRelays().filter(prop('read'))
-export const getUserWriteRelays = () => getUserRelays().filter(prop('write'))
+export const getUserRelays = () =>
+  user.getRelays().map(assoc('score', 1))
+
+export const getUserReadRelays = () =>
+  getUserRelays().filter(prop('read')).map(pick(['url', 'score']))
+
+export const getUserWriteRelays = () =>
+  getUserRelays().filter(prop('write')).map(pick(['url', 'score']))
 
 // Event-related special cases
 

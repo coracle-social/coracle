@@ -4,8 +4,10 @@
   import RelaySearch from "src/partials/RelaySearch.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/partials/RelayCard.svelte"
-  import {relays} from "src/agent/relays"
+  import user from "src/agent/user"
   import {modal} from "src/app/ui"
+
+  const {relays} = user
 </script>
 
 <div in:fly={{y: 20}}>

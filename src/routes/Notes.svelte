@@ -6,7 +6,7 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Network from "src/views/notes/Network.svelte"
   import Popular from "src/views/notes/Popular.svelte"
-  import {user} from 'src/agent/user'
+  import user from 'src/agent/user'
 
   export let activeTab
 
@@ -14,7 +14,7 @@
 </script>
 
 <Content>
-  {#if !$user}
+  {#if !user.getProfile()}
   <Content size="lg" class="text-center">
     <p class="text-xl">Don't have an account?</p>
     <p>Click <Anchor href="/login">here</Anchor> to join the nostr network.</p>

@@ -1,7 +1,7 @@
 import {uniq, uniqBy, prop, map, propEq, indexBy, pluck} from 'ramda'
 import {personKinds, findReplyId} from 'src/util/nostr'
 import {chunk} from 'hurdak/lib/hurdak'
-import {batch, shuffle, timedelta, now} from 'src/util/misc'
+import {batch, timedelta, now} from 'src/util/misc'
 import {
   getRelaysForEventParent, getAllPubkeyWriteRelays, aggregateScores,
   getUserReadRelays, getRelaysForEventChildren,
@@ -82,7 +82,7 @@ const listenUntilEose = (relays, filter, onEvents, {shouldProcess = true}: any =
   }) as Promise<void>
 }
 
-const loadPeople = (pubkeys, {kinds = personKinds, force = false, ...opts} = {}) => {
+const loadPeople = async (pubkeys, {kinds = personKinds, force = false, ...opts} = {}) => {
   pubkeys = uniq(pubkeys)
 
   // If we're not reloading, only get pubkeys we don't already know about
@@ -90,11 +90,14 @@ const loadPeople = (pubkeys, {kinds = personKinds, force = false, ...opts} = {})
     pubkeys = getStalePubkeys(pubkeys)
   }
 
-  return load(
-    shuffle(getUserReadRelays().concat(getAllPubkeyWriteRelays(pubkeys))).slice(0, 3),
-    {kinds, authors: pubkeys},
-    opts
-  )
+  // Use the best relays we have, but fall back to user relays
+  const relays = getAllPubkeyWriteRelays(pubkeys)
+    .concat(getUserReadRelays())
+    .slice(0, 3)
+
+  if (pubkeys.length > 0) {
+    await load(relays, {kinds, authors: pubkeys}, opts)
+  }
 }
 
 const loadParents = notes => {

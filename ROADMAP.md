@@ -7,6 +7,9 @@
 - [ ] Initial user load doesn't have any relays, cache user or wait for people db to be loaded
   - nip07.getRelays, nip05, relay.nostr.band
 - [ ] Fix bugs on bugsnag
+- [ ] Fix profile merging, put kind0 on its own property so we're not messing other people's profile data up.
+- [ ] Test publishing events with zero relays
+- [ ] Try lumping tables into a single key each to reduce load/save contention and time
 
 # Snacks
 
@@ -71,3 +74,5 @@
   - [ ] Ability to leave/mute DM conversation
   - [ ] Add petnames for channels
   - [ ] Add notifications for chat messages
+- [ ] Compress events
+  - https://github.com/nostr-protocol/nips/issues/265#issuecomment-1434250263

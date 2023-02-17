@@ -6,9 +6,8 @@
   import {between} from 'hurdak/lib/hurdak'
   import {fly} from 'svelte/transition'
   import Toggle from "src/partials/Toggle.svelte"
-  import {relays} from "src/agent/relays"
   import pool from 'src/agent/pool'
-  import {addRelay, removeRelay, setRelayWriteCondition} from "src/app"
+  import user from "src/agent/user"
 
   export let relay
   export let theme = 'dark'
@@ -18,6 +17,8 @@
   let message = null
   let showStatus = false
   let joined = false
+
+  const {relays} = user
 
   $: joined = find(propEq('url', relay.url), $relays)
 
@@ -63,11 +64,15 @@
       </p>
     </div>
     {#if joined}
-    <button class="flex gap-3 items-center text-light" on:click={() => removeRelay(relay.url)}>
+    <button
+      class="flex gap-3 items-center text-light"
+      on:click={() => user.removeRelay(relay.url)}>
       <i class="fa fa-right-from-bracket" /> Leave
     </button>
     {:else}
-    <button class="flex gap-3 items-center text-light" on:click={() => addRelay(relay.url)}>
+    <button
+      class="flex gap-3 items-center text-light"
+      on:click={() => user.addRelay(relay.url)}>
       <i class="fa fa-right-to-bracket" /> Join
     </button>
     {/if}
@@ -81,7 +86,7 @@
     <span>Publish to this relay?</span>
     <Toggle
       value={relay.write}
-      on:change={() => setRelayWriteCondition(relay.url, !relay.write)} />
+      on:change={() => user.setRelayWriteCondition(relay.url, !relay.write)} />
   </div>
   {/if}
 </div>

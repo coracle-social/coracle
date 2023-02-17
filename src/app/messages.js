@@ -1,7 +1,7 @@
 import {pluck, find, reject} from 'ramda'
-import {get, derived} from 'svelte/store'
+import {derived} from 'svelte/store'
 import {synced, now, timedelta} from 'src/util/misc'
-import {user} from 'src/agent/user'
+import user from 'src/agent/user'
 import {getUserReadRelays} from 'src/agent/relays'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
@@ -34,8 +34,6 @@ const listen = async pubkey => {
     [{kinds: [4], authors: [pubkey], since},
      {kinds: [4], '#p': [pubkey], since}],
     async events => {
-      const $user = get(user)
-
       // Reload annotated messages, don't alert about messages to self
       const messages = reject(e => e.pubkey === e.recipient, await database.messages.all())
 
@@ -44,7 +42,7 @@ const listen = async pubkey => {
 
         mostRecentByPubkey.update(o => {
           for (const {pubkey, created_at} of messages) {
-            if (pubkey !== $user.pubkey) {
+            if (pubkey !== user.getPubkey()) {
               o[pubkey] = Math.max(created_at, o[pubkey] || 0)
             }
           }

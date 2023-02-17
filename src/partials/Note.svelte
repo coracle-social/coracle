@@ -17,7 +17,7 @@
   import {formatTimestamp, stringToColor} from 'src/util/misc'
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
-  import {user} from 'src/agent/user'
+  import user from 'src/agent/user'
   import {getEventPublishRelays, getRelaysForEventParent} from 'src/agent/relays'
   import database from 'src/agent/database'
   import cmd from 'src/agent/cmd'
@@ -30,12 +30,13 @@
   export let shouldDisplay = always(true)
 
   const getDefaultReplyMentions = () =>
-    without([$user?.pubkey], uniq(Tags.from(note).type("p").values().all().concat(note.pubkey)))
+    without([$profile?.pubkey], uniq(Tags.from(note).type("p").values().all().concat(note.pubkey)))
 
   let reply = null
   let replyMentions = getDefaultReplyMentions()
   let replyContainer = null
 
+  const {profile} = user
   const links = $settings.showLinkPreviews ? extractUrls(note.content) || [] : []
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
@@ -53,8 +54,8 @@
     flags = note.reactions.filter(whereEq({content: '-'}))
   }
 
-  $: like = find(whereEq({pubkey: $user?.pubkey}), likes)
-  $: flag = find(whereEq({pubkey: $user?.pubkey}), flags)
+  $: like = find(whereEq({pubkey: $profile?.pubkey}), likes)
+  $: flag = find(whereEq({pubkey: $profile?.pubkey}), flags)
 
   $: $likesCount = likes.length
   $: $flagsCount = flags.length
@@ -85,7 +86,7 @@
   }
 
   const react = async content => {
-    if (!$user) {
+    if (!$profile) {
       return navigate('/login')
     }
 
@@ -105,16 +106,16 @@
     cmd.deleteEvent(getEventPublishRelays(note), [e.id])
 
     if (e.content === '+') {
-      likes = reject(propEq('pubkey', $user.pubkey), likes)
+      likes = reject(propEq('pubkey', $profile.pubkey), likes)
     }
 
     if (e.content === '-') {
-      flags = reject(propEq('pubkey', $user.pubkey), flags)
+      flags = reject(propEq('pubkey', $profile.pubkey), flags)
     }
   }
 
   const startReply = () => {
-    if ($user) {
+    if ($profile) {
       reply = reply || true
     } else {
       navigate('/login')

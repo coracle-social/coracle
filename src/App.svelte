@@ -19,9 +19,8 @@
   import network from 'src/agent/network'
   import pool from 'src/agent/pool'
   import {getUserRelays} from 'src/agent/relays'
-  import {relays} from 'src/agent/relays'
   import sync from 'src/agent/sync'
-  import {user} from 'src/agent/user'
+  import user from 'src/agent/user'
   import {loadAppData} from "src/app"
   import alerts from "src/app/alerts"
   import messages from "src/app/messages"
@@ -111,8 +110,8 @@
   })
 
   database.onReady(() => {
-    if ($user) {
-      loadAppData($user.pubkey)
+    if (user.getProfile()) {
+      loadAppData(user.getPubkey())
     }
 
     const interval = setInterval(

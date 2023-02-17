@@ -206,8 +206,8 @@ class Table {
   remove(k) {
     return this.bulkRemove([k])
   }
-  clear() {
-    return callLocalforage(this.name, 'clear')
+  drop() {
+    return callLocalforage(this.name, 'dropInstance')
   }
   dump() {
     return callLocalforage(this.name, 'dump')
@@ -316,7 +316,7 @@ const watch = (names, f) => {
 
 const getPersonWithFallback = pubkey => people.get(pubkey) || {pubkey}
 
-const clearAll = () => Promise.all(Object.values(registry).map(t => t.clear()))
+const dropAll = () => Promise.all(Object.values(registry).map(t => t.drop()))
 
 const ready = derived(pluck('ready', Object.values(registry)), all(identity))
 
@@ -330,6 +330,6 @@ const onReady = cb => {
 }
 
 export default {
-  watch, getPersonWithFallback, clearAll, people, rooms, messages,
+  watch, getPersonWithFallback, dropAll, people, rooms, messages,
   alerts, relays, routes, ready, onReady,
 }

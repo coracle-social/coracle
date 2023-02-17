@@ -4,8 +4,8 @@ import {get} from 'svelte/store'
 import {error} from 'src/util/logger'
 import {synced} from 'src/util/misc'
 
-const pubkey = synced('agent/user/pubkey')
-const privkey = synced('agent/user/privkey')
+const pubkey = synced('agent/keys/pubkey')
+const privkey = synced('agent/keys/privkey')
 const getExtension = () => (window as {nostr?: any}).nostr
 const canSign = () => Boolean(getExtension() || get(privkey))
 

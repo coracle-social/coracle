@@ -4,7 +4,7 @@
   import {nip19} from 'nostr-tools'
   import {navigate} from "svelte-routing"
   import {fuzzy} from "src/util/misc"
-  import {user} from 'src/agent/user'
+  import user from 'src/agent/user'
   import network from 'src/agent/network'
   import database from 'src/agent/database'
   import {getUserReadRelays} from 'src/agent/relays'
@@ -24,7 +24,7 @@
   const rooms = database.watch(['rooms', 'messages'], async () => {
     const rooms = await database.rooms.all({joined: true})
     const messages = await database.messages.all()
-    const pubkeys = without([$user.pubkey], uniq(messages.flatMap(m => [m.pubkey, m.recipient])))
+    const pubkeys = without([user.getPubkey()], uniq(messages.flatMap(m => [m.pubkey, m.recipient])))
 
     await network.loadPeople(pubkeys)
 

@@ -8,7 +8,7 @@
   import Badge from 'src/partials/Badge.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
-  import {user} from 'src/agent/user'
+  import user from 'src/agent/user'
   import database from 'src/agent/database'
   import {renderNote} from 'src/app'
 
@@ -28,6 +28,8 @@
   let annotatedMessages = []
   let showNewMessages = false
   let cursor = new Cursor()
+
+  const {profile} = user
 
   $: {
     // Group messages so we're only showing the person once per chunk
@@ -62,7 +64,7 @@
   }
 
   onMount(async () => {
-    if (!$user) {
+    if (!$profile) {
       return navigate('/login')
     }
 
@@ -134,14 +136,14 @@
             </div>
             {/if}
             <div class={cx("flex overflow-hidden text-ellipsis", {
-              'ml-12 justify-end': type === 'dm' && m.person.pubkey === $user.pubkey,
-              'mr-12': type === 'dm' && m.person.pubkey !== $user.pubkey,
+              'ml-12 justify-end': type === 'dm' && m.person.pubkey === $profile.pubkey,
+              'mr-12': type === 'dm' && m.person.pubkey !== $profile.pubkey,
             })}>
               <div class={cx({
                 'ml-6': type === 'chat',
                 'rounded-2xl py-2 px-4 flex max-w-xl': type === 'dm',
-                'bg-light text-black rounded-br-none': type === 'dm' && m.person.pubkey === $user.pubkey,
-                'bg-dark rounded-bl-none': type === 'dm' && m.person.pubkey !== $user.pubkey,
+                'bg-light text-black rounded-br-none': type === 'dm' && m.person.pubkey === $profile.pubkey,
+                'bg-dark rounded-bl-none': type === 'dm' && m.person.pubkey !== $profile.pubkey,
               })}>
                 {@html renderNote(m, {showEntire: true})}
               </div>

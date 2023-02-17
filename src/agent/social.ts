@@ -1,8 +1,7 @@
 import {uniq} from 'ramda'
-import {get} from 'svelte/store'
 import {Tags} from 'src/util/nostr'
 import database from 'src/agent/database'
-import {follows} from 'src/agent/user'
+import user from 'src/agent/user'
 
 export const getFollows = pubkey =>
   Tags.wrap(database.getPersonWithFallback(pubkey).petnames).type("p").values().all()
@@ -13,7 +12,8 @@ export const getNetwork = pubkey => {
   return uniq(follows.concat(follows.flatMap(getFollows)))
 }
 
-export const getUserFollows = (): Array<string> => get(follows.pubkeys)
+export const getUserFollows = (): Array<string> =>
+  Tags.wrap(user.getPetnames()).values().all()
 
 export const getUserNetwork = () => {
   const follows = getUserFollows()

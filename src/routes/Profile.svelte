@@ -11,7 +11,7 @@
   import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {user} from "src/agent/user"
+  import user from "src/agent/user"
   import {getUserWriteRelays} from 'src/agent/relays'
   import cmd from "src/agent/cmd"
   import {routes, toast} from "src/app/ui"
@@ -22,11 +22,11 @@
   const pseudUrl = "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
   onMount(async () => {
-    if (!$user) {
+    if (!user.getProfile()) {
       return navigate("/login")
     }
 
-    values = pick(Object.keys(values), $user)
+    values = pick(Object.keys(values), user.getProfile())
 
     document.querySelector('[name=picture]').addEventListener('change', async e => {
       const target = e.target as HTMLInputElement
@@ -48,7 +48,7 @@
 
     cmd.updateUser(getUserWriteRelays(), values)
 
-    navigate(routes.person($user.pubkey, 'profile'))
+    navigate(routes.person(user.getPubkey(), 'profile'))
 
     toast.show("info", "Your profile has been updated!")
   }
