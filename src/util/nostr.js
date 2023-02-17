@@ -35,6 +35,9 @@ export class Tags {
   type(type) {
     return new Tags(this.tags.filter(t => t[0] === type))
   }
+  equals(value) {
+    return new Tags(this.tags.filter(t => t[1] === value))
+  }
   mark(mark) {
     return new Tags(this.tags.filter(t => last(t) === mark))
   }

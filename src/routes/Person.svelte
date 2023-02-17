@@ -146,7 +146,7 @@
           <Anchor type="button-circle" on:click={unfollow}>
             <i class="fa fa-user-minus" />
           </Anchor>
-          {:else}
+          {:else if $user?.pubkey !== pubkey}
           <Anchor type="button-circle" on:click={follow}>
             <i class="fa fa-user-plus" />
           </Anchor>

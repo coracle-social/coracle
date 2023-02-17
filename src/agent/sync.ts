@@ -38,7 +38,12 @@ const processProfileEvents = async events => {
               content.nip05_updated_at = e.created_at
             }
 
-            return content
+            if (e.created_at > (person.profile_updated_at || 0)) {
+              return {
+                ...content,
+                profile_updated_at: e.created_at,
+              }
+            }
           })
         },
         3: () => ({petnames: e.tags}),
@@ -172,6 +177,19 @@ const processRoutes = async events => {
               }
             })
         })
+      },
+      // DEPRECATED
+      10001: () => {
+        e.tags
+          .forEach(([url, read, write]) => {
+            if (write !== '!') {
+              calculateRoute(e.pubkey, url, 'kind:10002', 'write', e.created_at)
+            }
+
+            if (read !== '!') {
+              calculateRoute(e.pubkey, url, 'kind:10002', 'read', e.created_at)
+            }
+          })
       },
       10002: () => {
         e.tags

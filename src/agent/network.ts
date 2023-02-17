@@ -4,9 +4,8 @@ import {chunk} from 'hurdak/lib/hurdak'
 import {batch, shuffle, timedelta, now} from 'src/util/misc'
 import {
   getRelaysForEventParent, getAllPubkeyWriteRelays, aggregateScores,
-  getUserReadRelays,
+  getUserReadRelays, getRelaysForEventChildren,
 } from 'src/agent/relays'
-import {getUserNetwork} from 'src/agent/social'
 import database from 'src/agent/database'
 import pool from 'src/agent/pool'
 import keys from 'src/agent/keys'
@@ -106,14 +105,9 @@ const loadParents = notes => {
 }
 
 const streamContext = ({notes, updateNotes, depth = 0}) => {
-  // We could also use getRelaysForEventChildren for a more complete view of replies,
-  // but it's also more likely to include spam. Checking our user's social graph
-  // avoids this problem. TODO: review this, maybe add note authors's graphs to this
-  // as well.
-  const relays = getAllPubkeyWriteRelays(getUserNetwork()).slice(0, 3)
-
-  // Some relays reject very large filters, send multiple
+  // Some relays reject very large filters, send multiple subscriptions
   chunk(256, notes).forEach(chunk => {
+    const relays = aggregateScores(chunk.map(getRelaysForEventChildren)).slice(0, 3)
     const authors = getStalePubkeys(pluck('pubkey', chunk))
     const filter = [{kinds: [1, 7], '#e': pluck('id', chunk)}] as Array<object>
 

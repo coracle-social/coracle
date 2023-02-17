@@ -2,7 +2,7 @@ import type {Relay} from 'src/util/types'
 import {get} from 'svelte/store'
 import {pick, map, assoc, sortBy, uniqBy, prop} from 'ramda'
 import {first} from 'hurdak/lib/hurdak'
-import {Tags} from 'src/util/nostr'
+import {Tags, findReplyId} from 'src/util/nostr'
 import {synced} from 'src/util/misc'
 import database from 'src/agent/database'
 import keys from 'src/agent/keys'
@@ -53,14 +53,13 @@ export const getUserWriteRelays = () => getUserRelays().filter(prop('write'))
 // Event-related special cases
 
 // If we're looking for an event's parent, tags are the most reliable hint,
-// but we can also look at where other people in the thread write to.
+// but we can also look at where the author of the note reads from
 export const getRelaysForEventParent = event => {
-  const tags = Tags.from(event)
-  const relays = tags.relays()
-  const pubkeys = tags.type("p").values().all()
-  const pubkeyRelays = pubkeys.flatMap(getPubkeyWriteRelays)
+  const parentId = findReplyId(event)
+  const relayHints = Tags.from(event).equals(parentId).relays()
+  const pubkeyRelays = getPubkeyReadRelays(event.pubkey)
 
-  return uniqByUrl(relays.concat(pubkeyRelays).concat({url: event.seen_on}))
+  return uniqByUrl(relayHints.concat({url: event.seen_on}).concat(pubkeyRelays))
 }
 
 // If we're looking for an event's children, the read relays the author has
@@ -68,10 +67,12 @@ export const getRelaysForEventParent = event => {
 // will write replies there. However, this may include spam, so we may want
 // to read from the current user's network's read relays instead.
 export const getRelaysForEventChildren = event => {
-  return uniqByUrl(getPubkeyReadRelays(event.pubkey).concat({url: event.seen_on}))
+  return uniqByUrl(getPubkeyReadRelays(event.pubkey)
+    .concat({url: event.seen_on, score: 1}))
 }
 
-export const getRelayForEventHint = event => ({url: event.seen_on})
+export const getRelayForEventHint = event =>
+  ({url: event.seen_on, score: 1})
 
 export const getRelayForPersonHint = (pubkey, event) =>
   first(getPubkeyWriteRelays(pubkey)) || getRelayForEventHint(event)

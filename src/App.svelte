@@ -166,6 +166,7 @@
 
 <Router {url}>
   <div use:links class="h-full">
+    {#if $ready}
     <div class="pt-16 text-white h-full lg:ml-56">
       <Route path="/alerts" component={Alerts} />
       <Route path="/search/:activeTab" let:params>
@@ -208,6 +209,7 @@
       </Route>
       <Route path="*" component={NotFound} />
     </div>
+    {/if}
 
     <SideNav />
     <TopNav />

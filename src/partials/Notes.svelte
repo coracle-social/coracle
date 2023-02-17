@@ -84,8 +84,6 @@
 
       const {limit, until} = cursor
 
-      console.log('here')
-
       return network.listenUntilEose(relays, {...filter, until, limit}, onChunk)
     })
 

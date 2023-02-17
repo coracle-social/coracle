@@ -201,7 +201,7 @@
 
 {#if $person && shouldDisplay(note)}
 <div bind:this={noteContainer} class="note relative">
-  <div class="absolute w-px bg-light z-10 ml-8 mt-12 transition-all h-0" bind:this={border} />
+  <div class="absolute w-px bg-light z-10 ml-8 mt-12 h-0" bind:this={border} />
   <Card class="flex gap-4 relative" on:click={onClick} {interactive} {invertColors}>
     {#if !showParent}
     <div class="absolute h-px w-3 bg-light z-10" style="left: 0px; top: 27px;" />

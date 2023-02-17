@@ -181,7 +181,7 @@ const subscribe = async (relays, filters, {onEvent, onEose}: Record<string, (e: 
   if (relays.length === 0) {
     error(`Attempted to start subscription ${id} with zero relays`, filters)
   } else {
-    log(`Starting subscription ${id} with ${relays.length} relays`, filters)
+    log(`Starting subscription ${id} with ${relays.length} relays`, filters, relays)
   }
 
   // Don't await before returning so we're not blocking on slow connects
