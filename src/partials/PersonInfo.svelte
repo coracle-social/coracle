@@ -5,7 +5,7 @@
   import {renderContent, noEvent} from "src/util/html"
   import {displayPerson} from "src/util/nostr"
   import Anchor from 'src/partials/Anchor.svelte'
-  import {getPubkeyWriteRelays} from 'src/agent/relays'
+  import {getPubkeyWriteRelays, sampleRelays} from 'src/agent/relays'
   import user from 'src/agent/user'
   import {routes} from "src/app/ui"
 
@@ -14,7 +14,7 @@
   const {petnamePubkeys} = user
 
   const addPetname = pubkey => {
-    const [{url}] = getPubkeyWriteRelays(pubkey)
+    const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
 
     user.addPetname(pubkey, url, displayPerson(person))
   }

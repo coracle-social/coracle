@@ -3,17 +3,13 @@
   import Anchor from 'src/partials/Anchor.svelte'
   import Content from "src/partials/Content.svelte"
   import database from 'src/agent/database'
-  import pool from 'src/agent/pool'
 
   let confirmed = false
 
   const confirm = async () => {
     confirmed = true
 
-    await Promise.all([
-      ...pool.getConnections().map(c => c.disconnect()),
-      database.dropAll(),
-    ])
+    await database.dropAll()
 
     localStorage.clear()
 

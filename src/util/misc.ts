@@ -201,15 +201,6 @@ export const defer = () => {
   return Object.assign(p, {resolve, reject})
 }
 
-export const asyncIterableToArray = async (it, f = identity) => {
-  const result = []
-  for await (const x of it) {
-    result.push(f(x))
-  }
-
-  return result
-}
-
 export const avg = xs => sum(xs) / xs.length
 
 export const where = filters =>

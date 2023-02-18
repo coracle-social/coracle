@@ -1,10 +1,10 @@
 import type {Writable} from 'svelte/store'
 import {debounce} from 'throttle-debounce'
-import {partition, is, prop, find, without, pluck, all, identity} from 'ramda'
+import {omit, partition, is, find, without, pluck, all, identity} from 'ramda'
 import {writable, derived} from 'svelte/store'
-import {switcherFn, createMap, ensurePlural} from 'hurdak/lib/hurdak'
+import {createMap, ensurePlural} from 'hurdak/lib/hurdak'
 import {log, error} from 'src/util/logger'
-import {defer, where, now, timedelta, asyncIterableToArray} from 'src/util/misc'
+import {where, now, timedelta} from 'src/util/misc'
 
 // Types
 
@@ -56,8 +56,8 @@ const call = (topic, payload): Promise<Message> => {
   })
 }
 
-const callLocalforage = async (storeName, method, ...args) => {
-  const message = await call('localforage.call', {storeName, method, args})
+const callLocalforage = async (method, ...args) => {
+  const message = await call('localforage.call', {method, args})
 
   if (message.topic !== 'localforage.return') {
     throw new Error(`callLocalforage received invalid response: ${message}`)
@@ -65,55 +65,6 @@ const callLocalforage = async (storeName, method, ...args) => {
 
   return message.payload
 }
-
-
-// Methods that proxy localforage
-
-const iterate = (storeName, where = {}) => ({
-  [Symbol.asyncIterator]() {
-    let done = false
-    let promise = defer()
-    const messages = []
-    const channel = new Channel({
-      onMessage: m => switcherFn(m.topic, {
-        'localforage.item': () => {
-          promise.resolve()
-          messages.push(m.payload)
-        },
-        'localforage.iterationComplete': () => {
-          done = true
-          promise.resolve()
-          channel.close()
-        },
-        default: () => {
-          throw new Error(`Invalid topic ${m.topic}`)
-        },
-      }),
-    })
-
-    channel.send('localforage.iterate', {storeName, where})
-
-    const next = async () => {
-      if (done) {
-        return {done}
-      }
-
-      const [value] = messages.splice(0, 1)
-
-      if (value) {
-        return {done, value}
-      } else {
-        promise = defer()
-
-        await promise
-
-        return next()
-      }
-    }
-
-    return {next}
-  }
-})
 
 // Local copy of data so we can provide a sync observable interface. The worker
 // is just for storing data and processing expensive queries
@@ -145,7 +96,7 @@ class Table {
     ;(async () => {
       const t = Date.now()
 
-      this._setAndNotify(await this.opts.initialize(this))
+      this._setAndNotify(await this.opts.initialize(this) || {})
 
       const {length: recordsCount} = Object.keys(this.data)
       const timeElapsed = Date.now() - t
@@ -155,6 +106,9 @@ class Table {
       this.ready.set(true)
     })()
   }
+  _persist = debounce(10_000, () => {
+    callLocalforage('setItem', this.name, this.data)
+  })
   _setAndNotify(newData) {
     // Update our local copy
     this.data = newData
@@ -163,6 +117,9 @@ class Table {
     for (const cb of this.listeners) {
       cb(this.data)
     }
+
+    // Save to localstorage
+    this._persist()
   }
   subscribe(cb) {
     this.listeners.push(cb)
@@ -179,8 +136,6 @@ class Table {
     }
 
     this._setAndNotify({...this.data, ...newData})
-
-    callLocalforage(this.name, 'setItems', newData)
   }
   async bulkPatch(updates: Record<string, object>): Promise<void> {
     if (is(Array, updates)) {
@@ -195,7 +150,7 @@ class Table {
     this.bulkPut({...this.data, ...newData})
   }
   async bulkRemove(keys) {
-    await callLocalforage(this.name, 'removeItems', keys)
+    this._setAndNotify(omit(keys, this.data))
   }
   put(item) {
     return this.bulkPut(createMap(this.pk, [item]))
@@ -206,17 +161,14 @@ class Table {
   remove(k) {
     return this.bulkRemove([k])
   }
-  drop() {
-    return callLocalforage(this.name, 'dropInstance')
+  async drop() {
+    return callLocalforage('removeItem', this.name)
   }
-  dump() {
-    return callLocalforage(this.name, 'dump')
+  async dump() {
+    return callLocalforage('getItem', this.name)
   }
   toArray() {
     return Object.values(this.data)
-  }
-  iter(spec = {}) {
-    return asyncIterableToArray(iterate(name, spec), prop('v'))
   }
   all(spec = {}) {
     return this.toArray().filter(where(spec))
@@ -238,7 +190,7 @@ const relays = new Table('relays', 'url')
 const routes = new Table('routes', 'id', {
   initialize: async table => {
     const isValid = r => r.last_seen > now() - timedelta(7, 'days')
-    const [valid, invalid] = partition(isValid, Object.values(await table.dump()))
+    const [valid, invalid] = partition(isValid, Object.values(await table.dump() || {}))
 
     // Delete stale routes asynchronously
     table.bulkRemove(pluck('id', invalid))
