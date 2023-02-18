@@ -265,7 +265,7 @@
         transition:fly={{y: -50, duration: 300}}>
         <div
           class="rounded bg-accent shadow-xl mx-24 sm:mx-32 mt-2 p-3 text-white text-center
-                 border border-dark pointer-events-all">
+                 border border-dark pointer-events-auto">
           {#if is(String, $toast.message)}
           {$toast.message}
           {:else}
