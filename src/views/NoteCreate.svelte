@@ -73,7 +73,7 @@
   }
 
   onMount(() => {
-    const person = database.people.get(pubkey)
+    const person = database.getPersonWithFallback(pubkey)
 
     input.type('@' + displayPerson(person))
     input.trigger({key: 'Enter'})
