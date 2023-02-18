@@ -24,7 +24,7 @@
   import {loadAppData} from "src/app"
   import alerts from "src/app/alerts"
   import messages from "src/app/messages"
-  import {modal, toast, settings, routes, menuIsOpen, logUsage} from "src/app/ui"
+  import {modal, toast, routes, menuIsOpen, logUsage} from "src/app/ui"
   import RelayCard from "src/partials/RelayCard.svelte"
   import Anchor from 'src/partials/Anchor.svelte'
   import Content from 'src/partials/Content.svelte'
@@ -119,7 +119,7 @@
 
     const interval = setInterval(
       async () => {
-        const {dufflepudUrl} = $settings
+        const {dufflepudUrl} = user.getSettings()
 
         if (!dufflepudUrl) {
           return

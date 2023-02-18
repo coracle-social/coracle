@@ -180,7 +180,6 @@ const getWeight = type => {
   if (type === 'kind:3') return 0.8
   if (type === 'kind:2') return 0.5
   if (type === 'seen') return 0.2
-  if (type === 'tag') return 0.1
 }
 
 const calculateRoute = (pubkey, rawUrl, type, mode, created_at) => {
@@ -267,19 +266,6 @@ const processRoutes = async events => {
           })
       },
       default: noop,
-    })
-
-    // Add tag hints
-    events.forEach(e => {
-      Tags.wrap(e.tags).type("p").all().forEach(([_, pubkey, url]) => {
-        updates.push(
-          calculateRoute(pubkey, url, 'tag', 'write', e.created_at)
-        )
-
-        updates.push(
-          calculateRoute(pubkey, url, 'tag', 'read', e.created_at)
-        )
-      })
     })
   }
 

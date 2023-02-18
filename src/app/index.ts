@@ -1,4 +1,5 @@
 import type {DisplayEvent} from 'src/util/types'
+import {navigate} from 'svelte-routing'
 import {omit, sortBy, identity} from 'ramda'
 import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {renderContent} from 'src/util/html'
@@ -23,7 +24,7 @@ export const loadAppData = async pubkey => {
   }
 }
 
-export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: string}) => {
+export const login = ({privkey, pubkey}: {privkey?: string, pubkey?: string}) => {
   if (privkey) {
     keys.setPrivateKey(privkey)
   } else {
@@ -31,6 +32,12 @@ export const login = async ({privkey, pubkey}: {privkey?: string, pubkey?: strin
   }
 
   modal.set({type: 'login/connect', noEscape: true})
+}
+
+export const signup = privkey => {
+  keys.setPrivateKey(privkey)
+
+  navigate('/notes/network')
 }
 
 export const renderNote = (note, {showEntire = false}) => {

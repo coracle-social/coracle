@@ -6,13 +6,13 @@
   import Content from 'src/partials/Content.svelte'
   import Heading from 'src/partials/Heading.svelte'
   import {toast} from "src/app/ui"
-  import {login} from "src/app"
+  import {signup} from "src/app"
 
   const nsec = nip19.nsecEncode(generatePrivateKey())
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
 
-  const logIn = async () => {
-    await login({privkey: nip19.decode(nsec).data as string})
+  const logIn = () => {
+    signup(nip19.decode(nsec).data as string)
   }
 
   const copyKey = () => {

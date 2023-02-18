@@ -1,15 +1,10 @@
 # Current
 
-- [ ] Fix anon/new user experience
-  - [ ] When logging in rather than generating a new keypair, ask for a relay to bootstrap from
-  - [ ] Clicking stuff that would publish kicks you to the login page, we should open a modal instead.
-- [ ] Test publishing events with zero relays
 - [ ] Try lumping tables into a single key each to reduce load/save contention and time
-- [ ] Fix turning off link previews, or make sure it applies to images/videos too
-- [ ] Allow user to set sample size to manage bandwidth/performance tradeoff
 
 # Snacks
 
+- [ ] If a user has no write relays (or is not logged in), open a modal
 - [ ] open web+nostr links like snort
 - [ ] DM/chat read status in encrypted note
 - [ ] Relay recommendations based on follows/followers

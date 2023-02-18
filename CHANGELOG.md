@@ -16,6 +16,7 @@
 - [x] Improve anonymous and new user experience by prompting for relays and follows
 - [x] Fixed kind0 merging to avoid dropping properties coracle doesn't support
 - [x] Implement NIP-65 properly
+- [x] Allow users to set max number of concurrent relays
 
 ## 0.2.11
 

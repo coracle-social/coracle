@@ -6,8 +6,9 @@ import {navigate} from "svelte-routing"
 import {nip19} from 'nostr-tools'
 import {writable, get} from "svelte/store"
 import {globalHistory} from "svelte-routing/src/history"
-import {synced, sleep} from "src/util/misc"
+import {sleep} from "src/util/misc"
 import {warn} from 'src/util/logger'
+import user from 'src/agent/user'
 
 // Routing
 
@@ -74,15 +75,6 @@ export const modal = {
   },
 }
 
-// Settings, alerts, etc
-
-export const settings = synced("coracle/settings", {
-  reportAnalytics: true,
-  showLinkPreviews: true,
-  relayLimit: 30,
-  dufflepudUrl: import.meta.env.VITE_DUFFLEPUD_URL,
-})
-
 // Wait for bugsnag to be started in main
 setTimeout(() => {
   Bugsnag.addOnError(event => {
@@ -90,7 +82,7 @@ setTimeout(() => {
       return false
     }
 
-    if (!get(settings).reportAnalytics) {
+    if (!user.getSetting('reportAnalytics')) {
       return false
     }
 
@@ -103,7 +95,7 @@ setTimeout(() => {
 const session = Math.random().toString().slice(2)
 
 export const logUsage = async name => {
-  const {dufflepudUrl, reportAnalytics} = get(settings)
+  const {dufflepudUrl, reportAnalytics} = user.getSettings()
 
   if (reportAnalytics) {
     try {

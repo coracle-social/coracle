@@ -12,7 +12,7 @@
   import ImageCircle from 'src/partials/ImageCircle.svelte'
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
-  import {toast, settings, modal} from "src/app/ui"
+  import {toast, modal} from "src/app/ui"
   import {renderNote} from "src/app"
   import {formatTimestamp, stringToColor} from 'src/util/misc'
   import Compose from "src/partials/Compose.svelte"
@@ -37,7 +37,7 @@
   let replyContainer = null
 
   const {profile} = user
-  const links = $settings.showLinkPreviews ? extractUrls(note.content) || [] : []
+  const links = extractUrls(note.content)
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
   const person = database.watch('people', () => database.getPersonWithFallback(note.pubkey))
@@ -247,11 +247,11 @@
         {:else}
         <div class="text-ellipsis overflow-hidden flex flex-col gap-2">
           <p>{@html renderNote(note, {showEntire})}</p>
-          {#each links.slice(-2) as link}
+          {#if user.getSetting('showMedia') && links.length > 0}
           <button class="inline-block" on:click={e => e.stopPropagation()}>
-            <Preview endpoint={`${$settings.dufflepudUrl}/link/preview`} url={link} />
+            <Preview url={last(links)} />
           </button>
-          {/each}
+          {/if}
         </div>
         <div class="flex justify-between text-light" on:click={e => e.stopPropagation()}>
           <div class="flex gap-6">

@@ -14,12 +14,20 @@ import cmd from 'src/agent/cmd'
 // sync this stuff to regular private variables so we don't have to constantly call
 // `get` on our stores.
 
+let settingsCopy = null
 let profileCopy = null
 let petnamesCopy = []
 let relaysCopy = []
 
 const anonPetnames = synced('agent/user/anonPetnames', [])
 const anonRelays = synced('agent/user/anonRelays', [])
+
+const settings = synced("agent/user/settings", {
+  relayLimit: 20,
+  showMedia: true,
+  reportAnalytics: true,
+  dufflepudUrl: import.meta.env.VITE_DUFFLEPUD_URL,
+})
 
 const profile = derived(
   [keys.pubkey, database.people as Readable<any>],
@@ -46,6 +54,10 @@ const relays = derived(
 
 // Keep our copies up to date
 
+settings.subscribe($settings => {
+  settingsCopy = $settings
+})
+
 profile.subscribe($profile => {
   profileCopy = $profile
 })
@@ -59,6 +71,13 @@ relays.subscribe($relays => {
 })
 
 const user = {
+  // Settings
+
+  settings,
+  getSettings: () => settingsCopy,
+  getSetting: k => settingsCopy[k],
+  dufflepud: path => `${settingsCopy.dufflepudUrl}${path}`,
+
   // Profile
 
   profile,
@@ -102,7 +121,7 @@ const user = {
     }
   },
   async addRelay(url) {
-    this.updateRelays($relays => $relays.concat({url, write: false, read: true}))
+    this.updateRelays($relays => $relays.concat({url, write: true, read: true}))
   },
   async removeRelay(url) {
     this.updateRelays(reject(whereEq({url})))

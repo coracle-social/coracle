@@ -9,13 +9,13 @@
 
   let npub = ''
 
-  const logIn = async () => {
+  const logIn = () => {
     const pubkey = (npub.startsWith('npub') ? nip19.decode(npub).data : npub) as string
 
     if (!pubkey.match(/[a-z0-9]{64}/)) {
       toast.show("error", "Sorry, but that's an invalid public key.")
     } else {
-      await login({pubkey})
+      login({pubkey})
     }
   }
 </script>

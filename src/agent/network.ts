@@ -4,7 +4,7 @@ import {chunk} from 'hurdak/lib/hurdak'
 import {batch, timedelta, now} from 'src/util/misc'
 import {
   getRelaysForEventParent, getAllPubkeyWriteRelays, aggregateScores,
-  getUserReadRelays, getRelaysForEventChildren, getUserRelays
+  getRelaysForEventChildren, sampleRelays,
 } from 'src/agent/relays'
 import database from 'src/agent/database'
 import pool from 'src/agent/pool'
@@ -32,11 +32,7 @@ const publish = async (relays, event) => {
 }
 
 const load = async (relays, filter, opts?): Promise<Record<string, unknown>[]> => {
-  if (relays.length === 0) {
-    relays = getUserReadRelays()
-  }
-
-  const events = await pool.request(relays, filter, opts)
+  const events = await pool.request(sampleRelays(relays), filter, opts)
 
   await sync.processEvents(events)
 
@@ -44,11 +40,7 @@ const load = async (relays, filter, opts?): Promise<Record<string, unknown>[]> =
 }
 
 const listen = (relays, filter, onEvents, {shouldProcess = true}: any = {}) => {
-  if (relays.length === 0) {
-    relays = getUserReadRelays()
-  }
-
-  return pool.subscribe(relays, filter, {
+  return pool.subscribe(sampleRelays(relays), filter, {
     onEvent: batch(300, events => {
       if (shouldProcess) {
         sync.processEvents(events)
@@ -62,12 +54,8 @@ const listen = (relays, filter, onEvents, {shouldProcess = true}: any = {}) => {
 }
 
 const listenUntilEose = (relays, filter, onEvents, {shouldProcess = true}: any = {}) => {
-  if (relays.length === 0) {
-    relays = getUserReadRelays()
-  }
-
   return new Promise(resolve => {
-    pool.subscribeUntilEose(relays, filter, {
+    pool.subscribeUntilEose(sampleRelays(relays), filter, {
       onClose: () => resolve(),
       onEvent: batch(300, events => {
         if (shouldProcess) {
@@ -92,25 +80,22 @@ const loadPeople = async (pubkeys, {relays = null, kinds = personKinds, force = 
 
   await Promise.all(
     chunk(256, pubkeys).map(async chunk => {
-      // Use the best relays we have, but fall back to user relays
-      const chunkRelays = relays || (
-        getAllPubkeyWriteRelays(chunk)
-          .concat(getUserReadRelays())
-          .slice(0, 10)
+      await load(
+        sampleRelays(relays || getAllPubkeyWriteRelays(chunk), 0.5),
+        {kinds, authors: chunk},
+        opts
       )
-
-      await load(chunkRelays, {kinds, authors: chunk}, opts)
     })
   )
 }
 
 const loadParents = notes => {
   const notesWithParent = notes.filter(findReplyId)
-  const relays = aggregateScores(notesWithParent.map(getRelaysForEventParent))
-    .concat(getUserRelays())
-    .slice(0, 10)
 
-  return load(relays, {kinds: [1], ids: notesWithParent.map(findReplyId)})
+  return load(
+    sampleRelays(aggregateScores(notesWithParent.map(getRelaysForEventParent)), 0.3),
+    {kinds: [1], ids: notesWithParent.map(findReplyId)}
+  )
 }
 
 const streamContext = ({notes, updateNotes, depth = 0}) => {
@@ -118,9 +103,7 @@ const streamContext = ({notes, updateNotes, depth = 0}) => {
   chunk(256, notes).forEach(chunk => {
     const authors = getStalePubkeys(pluck('pubkey', chunk))
     const filter = [{kinds: [1, 7], '#e': pluck('id', chunk)}] as Array<object>
-    const relays = aggregateScores(chunk.map(getRelaysForEventChildren))
-      .concat(getUserRelays())
-      .slice(0, 10)
+    const relays = sampleRelays(aggregateScores(chunk.map(getRelaysForEventChildren)))
 
     if (authors.length > 0) {
       filter.push({kinds: personKinds, authors})

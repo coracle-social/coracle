@@ -2,9 +2,9 @@
   import {onMount} from 'svelte'
   import {slide} from 'svelte/transition'
   import Anchor from 'src/partials/Anchor.svelte'
+  import user from 'src/agent/user'
 
   export let url
-  export let endpoint
 
   let preview
 
@@ -15,7 +15,7 @@
       preview = {video: url}
     } else {
       try {
-        const res = await fetch(endpoint, {
+        const res = await fetch(user.dufflepud('/link/preview'), {
           method: 'POST',
           body: JSON.stringify({url}),
           headers: {

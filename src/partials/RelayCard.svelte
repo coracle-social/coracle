@@ -64,11 +64,13 @@
       </p>
     </div>
     {#if joined}
+    {#if $relays.length > 1}
     <button
       class="flex gap-3 items-center text-light"
       on:click={() => user.removeRelay(relay.url)}>
       <i class="fa fa-right-from-bracket" /> Leave
     </button>
+    {/if}
     {:else}
     <button
       class="flex gap-3 items-center text-light"

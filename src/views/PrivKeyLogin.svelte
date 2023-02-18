@@ -10,13 +10,13 @@
   let nsec = ''
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
 
-  const logIn = async () => {
+  const logIn = () => {
     const privkey = (nsec.startsWith('nsec') ? nip19.decode(nsec).data : nsec) as string
 
     if (!privkey.match(/[a-z0-9]{64}/)) {
       toast.show("error", "Sorry, but that's an invalid private key.")
     } else {
-      await login({privkey})
+      login({privkey})
     }
   }
 </script>

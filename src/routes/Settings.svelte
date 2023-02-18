@@ -8,9 +8,9 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import user from 'src/agent/user'
-  import {toast, settings} from "src/app/ui"
+  import {toast} from "src/app/ui"
 
-  let values = {...$settings}
+  let values = {...user.getSettings()}
 
   onMount(async () => {
     if (!user.getProfile()) {
@@ -21,7 +21,7 @@
   const submit = async event => {
     event.preventDefault()
 
-    settings.set(values)
+    user.settings.set(values)
 
     toast.show("info", "Your settings have been saved!")
   }
@@ -38,11 +38,11 @@
     <div class="flex flex-col gap-8 w-full">
       <div class="flex flex-col gap-1">
         <div class="flex gap-2 items-center">
-          <strong>Show link and image previews</strong>
-          <Toggle bind:value={values.showLinkPreviews} />
+          <strong>Show images and link previews</strong>
+          <Toggle bind:value={values.showMedia} />
         </div>
         <p class="text-sm text-light">
-          If enabled, coracle will automatically retrieve a link preview for the first link
+          If enabled, coracle will automatically retrieve a link preview for the last link
           in any note.
         </p>
       </div>

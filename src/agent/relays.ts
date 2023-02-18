@@ -125,7 +125,27 @@ export const uniqByUrl = uniqBy(prop('url'))
 
 export const sortByScore = sortBy(r => -r.score)
 
-export const sampleRelays = relays => shuffle(relays).slice(0, 30)
+export const sampleRelays = (relays, scale = 1) => {
+  let limit = user.getSetting('relayLimit')
+
+  // Allow the caller to scale down how many relays we're bothering depending on
+  // the use case, but only if we have enough relays to handle it
+  if (limit > 10) {
+    limit *= scale
+  }
+
+  // Shuffle and limit target relays
+  relays = shuffle(relays).slice(0, limit)
+
+  // If we're still under the limit, add user relays for good measure
+  if (relays.length < limit) {
+    relays = relays.concat(
+      shuffle(getUserReadRelays()).slice(0, limit - relays.length)
+    )
+  }
+
+  return relays
+}
 
 export const aggregateScores = relayGroups => {
   const scores = {} as Record<string, {
