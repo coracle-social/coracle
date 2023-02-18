@@ -5,6 +5,10 @@
 
 # Snacks
 
+- [ ] Following indicator on person info
+- [ ] Change feed tabs to follows/network
+- [ ] Don't lose feeds when navigating, persist modals
+- [ ] Share button for notes, shows qr code and nevent
 - [ ] If a user has no write relays (or is not logged in), open a modal
 - [ ] open web+nostr links like snort
 - [ ] DM/chat read status in encrypted note

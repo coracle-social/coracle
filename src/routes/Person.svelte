@@ -179,7 +179,7 @@
   {:else if activeTab === 'likes'}
   <Likes {pubkey} />
   {:else if activeTab === 'relays'}
-    {#if person?.petnames}
+    {#if person?.relays}
     <Relays person={person} />
     {:else if loading}
     <Spinner />
