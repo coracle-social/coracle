@@ -4,7 +4,7 @@ import {chunk} from 'hurdak/lib/hurdak'
 import {batch, timedelta, now} from 'src/util/misc'
 import {
   getRelaysForEventParent, getAllPubkeyWriteRelays, aggregateScores,
-  getUserReadRelays, getRelaysForEventChildren,
+  getUserReadRelays, getRelaysForEventChildren, getUserRelays
 } from 'src/agent/relays'
 import database from 'src/agent/database'
 import pool from 'src/agent/pool'
@@ -106,7 +106,9 @@ const loadPeople = async (pubkeys, {relays = null, kinds = personKinds, force = 
 
 const loadParents = notes => {
   const notesWithParent = notes.filter(findReplyId)
-  const relays = aggregateScores(notesWithParent.map(getRelaysForEventParent)).slice(0, 3)
+  const relays = aggregateScores(notesWithParent.map(getRelaysForEventParent))
+    .concat(getUserRelays())
+    .slice(0, 10)
 
   return load(relays, {kinds: [1], ids: notesWithParent.map(findReplyId)})
 }
@@ -114,9 +116,11 @@ const loadParents = notes => {
 const streamContext = ({notes, updateNotes, depth = 0}) => {
   // Some relays reject very large filters, send multiple subscriptions
   chunk(256, notes).forEach(chunk => {
-    const relays = aggregateScores(chunk.map(getRelaysForEventChildren)).slice(0, 3)
     const authors = getStalePubkeys(pluck('pubkey', chunk))
     const filter = [{kinds: [1, 7], '#e': pluck('id', chunk)}] as Array<object>
+    const relays = aggregateScores(chunk.map(getRelaysForEventChildren))
+      .concat(getUserRelays())
+      .slice(0, 10)
 
     if (authors.length > 0) {
       filter.push({kinds: personKinds, authors})

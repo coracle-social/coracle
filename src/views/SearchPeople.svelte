@@ -24,7 +24,6 @@
   })
 
   // Prime our database, in case we don't have any people stored yet
-  console.log(getUserReadRelays())
   network.listenUntilEose(getUserReadRelays(), {kinds: personKinds, limit: 300})
 </script>
 
@@ -32,7 +31,7 @@
   <i slot="before" class="fa-solid fa-search" />
 </Input>
 
-{#each (search ? search(q) : []).slice(0, 30) as person (person.pubkey)}
+{#each (search ? search(q) : []).slice(0, 50) as person (person.pubkey)}
   {#if person.pubkey !== user.getPubkey() && !(hideFollowing && $petnamePubkeys.includes(person.pubkey))}
   <PersonInfo {person} />
   {/if}

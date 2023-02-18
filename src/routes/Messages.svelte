@@ -21,7 +21,7 @@
 
   messages.lastCheckedByPubkey.update($obj => ({...$obj, [pubkey]: now()}))
 
-  const getRelays = () => getAllPubkeyRelays([pubkey, user.getPubkey()]).slice(0, 3)
+  const getRelays = () => getAllPubkeyRelays([pubkey, user.getPubkey()])
 
   const decryptMessages = async events => {
     // Gotta do it in serial because of extension limitations

@@ -46,9 +46,8 @@
     // Add all the relays we know the person uses, as well as our own
     // in case we don't have much information
     relays = relays
-      .concat(getPubkeyWriteRelays(pubkey))
-      .concat(getUserReadRelays())
-      .slice(0, 3)
+      .concat(getPubkeyWriteRelays(pubkey).slice(0, 3))
+      .concat(getUserReadRelays().slice(0, 3))
 
     // Refresh our person if needed
     network.loadPeople([pubkey]).then(() => {

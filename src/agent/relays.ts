@@ -120,8 +120,9 @@ export const getEventPublishRelays = event => {
 
 // Utils
 
-const uniqByUrl = uniqBy(prop('url'))
-const sortByScore = sortBy(r => -r.score)
+export const uniqByUrl = uniqBy(prop('url'))
+
+export const sortByScore = sortBy(r => -r.score)
 
 export const aggregateScores = relayGroups => {
   const scores = {} as Record<string, {

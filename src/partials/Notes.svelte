@@ -10,7 +10,7 @@
   import Note from "src/partials/Note.svelte"
   import user from 'src/agent/user'
   import network from 'src/agent/network'
-  import {getUserReadRelays} from 'src/agent/relays'
+  import {getUserReadRelays, uniqByUrl} from 'src/agent/relays'
   import {modal} from "src/app/ui"
   import {mergeParents} from "src/app"
 
@@ -28,6 +28,11 @@
   const muffle = Tags
     .wrap(($profile?.muffle || []).filter(t => Math.random() > parseFloat(last(t))))
     .values().all()
+
+  // Sample relays in case we have a whole ton of them. Add in user relays in
+  // case we don't have any
+  const sampleRelays = () =>
+    uniqByUrl(relays.concat(getUserReadRelays())).slice(0, 30)
 
   const processNewNotes = async newNotes => {
     // Remove people we're not interested in hearing about, sort by created date
@@ -77,10 +82,7 @@
   }
 
   onMount(() => {
-    // Add in our user relays in case they weren't specified above
-    relays = relays.concat(getUserReadRelays()).slice(0, 3)
-
-    const sub = network.listen(relays, {...filter, since}, onChunk)
+    const sub = network.listen(sampleRelays(), {...filter, since}, onChunk)
 
     const scroller = createScroller(() => {
       if ($modal) {
@@ -89,7 +91,7 @@
 
       const {limit, until} = cursor
 
-      return network.listenUntilEose(relays, {...filter, until, limit}, onChunk)
+      return network.listenUntilEose(sampleRelays(), {...filter, until, limit}, onChunk)
     })
 
     return () => {

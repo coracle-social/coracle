@@ -89,7 +89,8 @@ const processProfileEvents = async events => {
           if (e.created_at > (person.relays_updated_at || 0)) {
             return {
               relays_updated_at: e.created_at,
-              relays: e.tags.map(([url, read, write]) => ({url, read, write})),
+              relays: e.tags.map(([url, read, write]) =>
+                ({url, read: read !== '!', write: write !== '!'})),
             }
           }
         },

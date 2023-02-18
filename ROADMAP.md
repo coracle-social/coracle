@@ -6,6 +6,7 @@
 - [ ] Test publishing events with zero relays
 - [ ] Try lumping tables into a single key each to reduce load/save contention and time
 - [ ] Fix turning off link previews, or make sure it applies to images/videos too
+- [ ] Allow user to set sample size to manage bandwidth/performance tradeoff
 
 # Snacks
 
