@@ -213,6 +213,11 @@ const processRoutes = async events => {
   // Sample events so we're not burning too many resources
   for (const e of ensurePlural(shuffle(events)).slice(0, 10)) {
     switcherFn(e.kind, {
+      0: () => {
+        updates.push(
+          calculateRoute(e.pubkey, e.content, 'seen', 'write', e.created_at)
+        )
+      },
       2: () => {
         updates.push(
           calculateRoute(e.pubkey, e.content, 'kind:2', 'read', e.created_at)

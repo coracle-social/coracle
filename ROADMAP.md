@@ -1,6 +1,7 @@
 # Current
 
 - [ ] Try lumping tables into a single key each to reduce load/save contention and time
+- [ ] Keep track of relays that fail to connect and don't use them
 
 # Snacks
 
