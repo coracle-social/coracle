@@ -16,15 +16,15 @@
 
   const {petnamePubkeys} = user
 
-  database.watch('people', people => {
+  database.watch('people', table => {
     search = fuzzy(
-      people.all({'name:!nil': null}),
-      {keys: ["name", "about", "pubkey"]}
+      table.all({'kind0.name:!nil': null}),
+      {keys: ["kind0.name", "kind0.about", "pubkey"]}
     )
   })
 
   // Prime our database, in case we don't have any people stored yet
-  network.listenUntilEose(getUserReadRelays(), {kinds: personKinds, limit: 300})
+  network.listenUntilEose(getUserReadRelays(), {kinds: personKinds, limit: 50})
 </script>
 
 <Input bind:value={q} placeholder="Search for people">

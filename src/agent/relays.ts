@@ -3,6 +3,7 @@ import {warn} from 'src/util/logger'
 import {pick, objOf, map, assoc, sortBy, uniqBy, prop} from 'ramda'
 import {first, createMap} from 'hurdak/lib/hurdak'
 import {Tags, isRelay, findReplyId} from 'src/util/nostr'
+import {shuffle} from 'src/util/misc'
 import database from 'src/agent/database'
 import user from 'src/agent/user'
 
@@ -123,6 +124,8 @@ export const getEventPublishRelays = event => {
 export const uniqByUrl = uniqBy(prop('url'))
 
 export const sortByScore = sortBy(r => -r.score)
+
+export const sampleRelays = relays => shuffle(relays).slice(0, 30)
 
 export const aggregateScores = relayGroups => {
   const scores = {} as Record<string, {

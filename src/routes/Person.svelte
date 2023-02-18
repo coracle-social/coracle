@@ -49,8 +49,8 @@
       .concat(getPubkeyWriteRelays(pubkey).slice(0, 3))
       .concat(getUserReadRelays().slice(0, 3))
 
-    // Refresh our person if needed
-    network.loadPeople([pubkey]).then(() => {
+    // Refresh our person
+    network.loadPeople([pubkey], {force: true}).then(() => {
       person = database.getPersonWithFallback(pubkey)
       loading = false
     })

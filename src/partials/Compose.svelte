@@ -17,7 +17,10 @@
   let input = null
   let prevContent = ''
 
-  const search = fuzzy(database.people.all(), {keys: ["kind0.name", "pubkey"]})
+  const search = fuzzy(
+    database.people.all({'kind0.name:!nil': null}),
+    {keys: ["kind0.name", "pubkey"]}
+  )
 
   const getText = () => {
     const selection = document.getSelection()

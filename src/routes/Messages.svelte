@@ -1,6 +1,7 @@
 <script lang="ts">
   import {nip19} from 'nostr-tools'
   import {sortBy, pluck} from 'ramda'
+  import {renameProp} from 'hurdak/lib/hurdak'
   import {personKinds, displayPerson} from 'src/util/nostr'
   import {now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
@@ -28,10 +29,10 @@
     for (const event of events) {
       const key = event.pubkey === pubkey ? pubkey : event.recipient
 
-      event.content = await crypt.decrypt(key, event.content)
+      event.decryptedContent = await crypt.decrypt(key, event.content)
     }
 
-    return events
+    return events.map(renameProp('decryptedContent', 'content'))
   }
 
   const listenForMessages = cb => network.listen(

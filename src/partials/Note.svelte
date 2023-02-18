@@ -208,9 +208,11 @@
     {#if !showParent}
     <div class="absolute h-px w-3 bg-light z-10" style="left: 0px; top: 27px;" />
     {/if}
-    <Anchor class="text-lg font-bold" href={routes.person($person.pubkey)}>
-      <ImageCircle size={10} src={$person.kind0?.picture} />
-    </Anchor>
+    <div>
+      <Anchor class="text-lg font-bold" href={routes.person($person.pubkey)}>
+        <ImageCircle size={10} src={$person.kind0?.picture} />
+      </Anchor>
+    </div>
     <div class="flex flex-col gap-2 flex-grow min-w-0">
       <div class="flex items-center justify-between">
         <Anchor type="unstyled" class="text-lg font-bold flex gap-2 items-center" href={routes.person($person.pubkey)}>

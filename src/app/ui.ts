@@ -79,6 +79,7 @@ export const modal = {
 export const settings = synced("coracle/settings", {
   reportAnalytics: true,
   showLinkPreviews: true,
+  relayLimit: 30,
   dufflepudUrl: import.meta.env.VITE_DUFFLEPUD_URL,
 })
 

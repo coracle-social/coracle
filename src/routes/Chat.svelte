@@ -26,10 +26,14 @@
     const messages = await database.messages.all()
     const pubkeys = without([user.getPubkey()], uniq(messages.flatMap(m => [m.pubkey, m.recipient])))
 
-    await network.loadPeople(pubkeys)
+    network.loadPeople(pubkeys)
 
     return sortBy(k => -(mostRecentByPubkey[k] || 0), pubkeys)
-      .map(k => ({type: 'npub', id: k, ...database.getPersonWithFallback(k)}))
+      .map(k => {
+        const person = database.getPersonWithFallback(k)
+
+        return {type: 'npub', id: k, ...person, ...person.kind0}
+      })
       .concat(rooms.map(room => ({type: 'note', ...room})))
   })
 
@@ -72,7 +76,7 @@
 
 {#if $rooms}
 <Content>
-  <div class="flex justify-between">
+  <div class="flex justify-between mt-10">
     <div class="flex gap-2 items-center">
       <i class="fa fa-server fa-lg" />
       <h2 class="staatliches text-2xl">Your rooms</h2>

@@ -96,7 +96,7 @@ const loadPeople = async (pubkeys, {relays = null, kinds = personKinds, force = 
       const chunkRelays = relays || (
         getAllPubkeyWriteRelays(chunk)
           .concat(getUserReadRelays())
-          .slice(0, 3)
+          .slice(0, 10)
       )
 
       await load(chunkRelays, {kinds, authors: chunk}, opts)

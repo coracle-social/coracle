@@ -38,12 +38,23 @@
     <div class="flex flex-col gap-8 w-full">
       <div class="flex flex-col gap-1">
         <div class="flex gap-2 items-center">
-          <strong>Show Link Previews</strong>
+          <strong>Show link and image previews</strong>
           <Toggle bind:value={values.showLinkPreviews} />
         </div>
         <p class="text-sm text-light">
           If enabled, coracle will automatically retrieve a link preview for the first link
           in any note.
+        </p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <div class="flex justify-between">
+          <strong>Max relays per request</strong>
+          <div>{values.relayLimit} relays</div>
+        </div>
+        <Input type="range" bind:value={values.relayLimit} min={1} max={50} />
+        <p class="text-sm text-light mt-2">
+          This controls how many relays to max out at when loading feeds and event context.
+          More is faster, but will require more bandwidth and processing power.
         </p>
       </div>
       <div class="flex flex-col gap-1">
@@ -58,7 +69,7 @@
       </div>
       <div class="flex flex-col gap-1">
         <div class="flex gap-2 items-center">
-          <strong>Report Errors and Analytics</strong>
+          <strong>Report errors and analytics</strong>
           <Toggle bind:value={values.reportAnalytics} />
         </div>
         <p class="text-sm text-light">

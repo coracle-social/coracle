@@ -1,5 +1,5 @@
 import {debounce, throttle} from 'throttle-debounce'
-import {allPass, prop, pipe, isNil, complement, equals, is, pluck, sum, identity, sortBy} from "ramda"
+import {path as getPath, allPass, prop, pipe, isNil, complement, equals, is, pluck, sum, identity, sortBy} from "ramda"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from 'svelte/store'
 import {isObject} from 'hurdak/lib/hurdak'
@@ -218,7 +218,7 @@ export const where = filters =>
       .map(([key, value]) => {
         /* eslint prefer-const: 0 */
         let [field, operator = 'eq'] = key.split(':')
-        let test, modifier = identity
+        let test, modifier = identity, parts = field.split('.')
 
         if (operator.startsWith('!')) {
           operator = operator.slice(1)
@@ -243,7 +243,7 @@ export const where = filters =>
           throw new Error(`Invalid operator ${operator}`)
         }
 
-        return pipe(prop(field), modifier(test))
+        return pipe(getPath(parts), modifier(test))
       })
   )
 
