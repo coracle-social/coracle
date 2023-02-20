@@ -262,7 +262,7 @@
               {$repliesCount}
             </div>
             <div class={cx({'text-accent': like})}>
-              <button class="fa fa-heart cursor-pointer" on:click={() => like ? deleteReaction(like) : react("+")} />
+              <button class={cx('fa fa-heart cursor-pointer', {'fa-beat fa-beat-custom': like})} on:click={() => like ? deleteReaction(like) : react("+")} />
               {$likesCount}
             </div>
             <div>
