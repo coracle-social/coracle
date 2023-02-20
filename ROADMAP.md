@@ -2,12 +2,17 @@
 
 - [ ] Try lumping tables into a single key each to reduce load/save contention and time
 - [ ] Keep track of relays that fail to connect and don't use them
+- [ ] Do round robin of user read relays batched by 10 on global feed
+  - Try paginating again, keep track of last time the feed was visited to ensure fresh content
+- [ ] Put feed state and scroll positionn outside component so you can go back to it.
+- [ ] Trim feeds once the user scrolls way down to save on memory
+- [ ] Make main page for notes a list of editable custom view cards
 
 # Snacks
 
 - [ ] Following indicator on person info
 - [ ] Change feed tabs to follows/network
-- [ ] Don't lose feeds when navigating, persist modals
+- [ ] Don't lose feeds when navigating, persist modals. Remember scroll state
 - [ ] Share button for notes, shows qr code and nevent
 - [ ] If a user has no write relays (or is not logged in), open a modal
 - [ ] open web+nostr links like snort

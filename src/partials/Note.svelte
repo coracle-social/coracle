@@ -173,15 +173,17 @@
           .filter(e => e.matches('.note'))
       )
 
-      const height = (
-        getHeight(noteContainer)
-        + getHeight(replyContainer)
-        + getHeight(childrenContainer)
-        - getHeight(lastChild)
-        - getHeight(lastChild.nextElementSibling)
-      )
+      if (lastChild) {
+        const height = (
+          getHeight(noteContainer)
+          + getHeight(replyContainer)
+          + getHeight(childrenContainer)
+          - getHeight(lastChild)
+          - getHeight(lastChild.nextElementSibling)
+        )
 
-      border.style = `height: ${height - 21}px`
+        border.style = `height: ${height - 21}px`
+      }
     }
   }
 

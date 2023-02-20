@@ -4,7 +4,7 @@ import {get} from 'svelte/store'
 import {first} from "hurdak/lib/hurdak"
 import {log} from 'src/util/logger'
 import {roomAttrs, displayPerson} from 'src/util/nostr'
-import {getPubkeyWriteRelays, getRelayForPersonHint} from 'src/agent/relays'
+import {getPubkeyWriteRelays, getRelayForPersonHint, getUserReadRelays} from 'src/agent/relays'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
 import keys from 'src/agent/keys'
@@ -46,7 +46,7 @@ const createDirectMessage = (relays, pubkey, content) =>
 const createNote = (relays, content, mentions = [], topics = []) => {
   mentions = mentions.map(pubkey => {
     const name = displayPerson(database.getPersonWithFallback(pubkey))
-    const [{url}] = getPubkeyWriteRelays(pubkey)
+    const [{url}] = getPubkeyWriteRelays(pubkey) || getUserReadRelays()
 
     return ["p", pubkey, url, name]
   })
@@ -72,12 +72,12 @@ const createReaction = (relays, note, content) => {
 const createReply = (relays, note, content, mentions = [], topics = []) => {
   topics = topics.map(t => ["t", t])
   mentions = mentions.map(pubkey => {
-    const [{url}] = getRelayForPersonHint(pubkey, note)
+    const {url} = getRelayForPersonHint(pubkey, note)
 
     return ["p", pubkey, url]
   })
 
-  const [{url}] = getRelayForPersonHint(note.pubkey, note)
+  const {url} = getRelayForPersonHint(note.pubkey, note)
   const tags = uniqBy(
     join(':'),
     note.tags

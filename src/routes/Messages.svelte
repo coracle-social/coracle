@@ -18,7 +18,7 @@
 
   let crypt = keys.getCrypt()
   let {data: pubkey} = nip19.decode(entity) as {data: string}
-  let person = database.watch('people', p => p.get(pubkey))
+  let person = database.watch('people', () => database.getPersonWithFallback(pubkey))
 
   messages.lastCheckedByPubkey.update($obj => ({...$obj, [pubkey]: now()}))
 
@@ -55,7 +55,7 @@
     const events = fromThem.concat(toThem).filter(e => e.created_at < until)
     const messages = sortBy(e => -e.created_at, events).slice(0, limit)
 
-    return await decryptMessages(messages)
+   return await decryptMessages(messages)
   }
 
   const sendMessage = async content => {
