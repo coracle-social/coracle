@@ -37,7 +37,7 @@ export const login = ({privkey, pubkey}: {privkey?: string, pubkey?: string}) =>
 export const signup = privkey => {
   keys.setPrivateKey(privkey)
 
-  navigate('/notes/network')
+  navigate('/notes/follows')
 }
 
 export const renderNote = (note, {showEntire = false}) => {

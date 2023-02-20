@@ -107,15 +107,16 @@ export const getRelayForEventHint = event =>
 export const getRelayForPersonHint = (pubkey, event) =>
   first(getPubkeyWriteRelays(pubkey)) || getRelayForEventHint(event)
 
-// If we're replying or reacting to an event, we want the author to know,
-// as well as anyone else who is tagged in the original event or the reply.
-// Get everyone's read relays. We also want to advertise our content to
-// our followers, so write to our write relays as well.
+// If we're replying or reacting to an event, we want the author to know, as well as
+// anyone else who is tagged in the original event or the reply. Get everyone's read
+// relays. Limit how many per pubkey we publish to though. We also want to advertise
+// our content to our followers, so write to our write relays as well.
 export const getEventPublishRelays = event => {
   const tags = Tags.from(event)
   const pubkeys = tags.type("p").values().all().concat(event.pubkey)
+  const relayChunks = pubkeys.map(pubkey => getPubkeyReadRelays(pubkey).slice(0, 3))
 
-  return getAllPubkeyReadRelays(pubkeys).concat(getUserWriteRelays())
+  return aggregateScores(relayChunks).concat(getUserWriteRelays())
 }
 
 

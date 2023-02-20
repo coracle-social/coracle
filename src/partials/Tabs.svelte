@@ -7,7 +7,7 @@
   export let setActiveTab
 </script>
 
-<div class="border-b border-solid border-dark flex pt-2" in:fly={{y: 20}}>
+<div class="border-b border-solid border-dark flex pt-2 overflow-auto" in:fly={{y: 20}}>
   {#each tabs as tab}
   <button
     class="cursor-pointer hover:border-b border-solid border-medium px-8 py-4"

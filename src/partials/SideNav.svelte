@@ -40,7 +40,7 @@
     </a>
   </li>
   <li class="cursor-pointer">
-    <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes/network">
+    <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes/follows">
       <i class="fa-solid fa-tag mr-2" /> Notes
     </a>
   </li>

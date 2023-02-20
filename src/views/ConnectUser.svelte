@@ -47,7 +47,7 @@
           sleep(3000),
         ])
 
-        navigate('/notes/network')
+        navigate('/notes/follows')
       } else {
         await sleep(1000)
 
@@ -57,7 +57,7 @@
   }
 
   const skip = () => {
-    navigate('/notes/network')
+    navigate('/notes/follows')
   }
 
   searchSample()

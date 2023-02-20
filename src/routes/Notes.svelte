@@ -4,6 +4,7 @@
   import Content from "src/partials/Content.svelte"
   import NewNoteButton from "src/partials/NewNoteButton.svelte"
   import Tabs from "src/partials/Tabs.svelte"
+  import Follows from "src/views/notes/Follows.svelte"
   import Network from "src/views/notes/Network.svelte"
   import Popular from "src/views/notes/Popular.svelte"
   import user from 'src/agent/user'
@@ -21,8 +22,10 @@
   </Content>
   {/if}
   <div>
-    <Tabs tabs={['network', 'popular']} {activeTab} {setActiveTab} />
-    {#if activeTab === 'network'}
+    <Tabs tabs={['follows', 'network', 'popular']} {activeTab} {setActiveTab} />
+    {#if activeTab === 'follows'}
+    <Follows />
+    {:else if activeTab === 'network'}
     <Network />
     {:else}
     <Popular />
