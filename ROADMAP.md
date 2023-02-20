@@ -7,6 +7,9 @@
 - [ ] Put feed state and scroll positionn outside component so you can go back to it.
 - [ ] Trim feeds once the user scrolls way down to save on memory
 - [ ] Make main page for notes a list of editable custom view cards
+- [ ] Fix loading routes speed, index by pubkey to avoid filtering
+- [ ] Include everyone in person lists, re-fetch missing people
+- [ ] Fix initial relay loading, don't nuke people's relay lists
 
 # Snacks
 
