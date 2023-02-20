@@ -11,7 +11,12 @@
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
 
   const logIn = () => {
-    const privkey = (nsec.startsWith('nsec') ? nip19.decode(nsec).data : nsec) as string
+    let privkey = ''
+    try {
+      privkey = (nsec.startsWith('nsec') ? nip19.decode(nsec).data : nsec) as string
+    } catch (e) {
+      // pass
+    }
 
     if (!privkey.match(/[a-z0-9]{64}/)) {
       toast.show("error", "Sorry, but that's an invalid private key.")

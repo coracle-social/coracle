@@ -10,7 +10,12 @@
   let npub = ''
 
   const logIn = () => {
-    const pubkey = (npub.startsWith('npub') ? nip19.decode(npub).data : npub) as string
+    let pubkey = ''
+    try {
+      pubkey = (npub.startsWith('npub') ? nip19.decode(npub).data : npub) as string
+    } catch (e) {
+      // pass
+    }
 
     if (!pubkey.match(/[a-z0-9]{64}/)) {
       toast.show("error", "Sorry, but that's an invalid public key.")

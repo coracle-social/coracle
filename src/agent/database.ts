@@ -189,7 +189,7 @@ const relays = new Table('relays', 'url')
 
 const routes = new Table('routes', 'id', {
   initialize: async table => {
-    const isValid = r => r.last_seen > now() - timedelta(7, 'days')
+    const isValid = r => r.last_seen > now() - timedelta(1, 'days')
     const [valid, invalid] = partition(isValid, Object.values(await table.dump() || {}))
 
     // Delete stale routes asynchronously
