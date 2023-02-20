@@ -64,6 +64,7 @@
     notesBuffer = []
   }
 
+
   const onChunk = async newNotes => {
     const chunk = sortBy(e => -e.created_at, await processNewNotes(newNotes))
     const [bottom, top] = partition(e => e.created_at < since, chunk)

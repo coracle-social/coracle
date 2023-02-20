@@ -1,38 +1,26 @@
 <script lang="ts">
-  import cx from 'classnames'
   import {last, find, propEq} from 'ramda'
   import {onMount} from 'svelte'
-  import {poll, stringToColor} from "src/util/misc"
+  import {poll} from "src/util/misc"
   import {between} from 'hurdak/lib/hurdak'
-  import {fly} from 'svelte/transition'
-  import Toggle from "src/partials/Toggle.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Content from "src/partials/Content.svelte"
+  import Feed from "src/views/notes/Feed.svelte"
+  import database from 'src/agent/database'
   import pool from 'src/agent/pool'
   import user from "src/agent/user"
-  import {loadAppData} from 'src/app'
 
-  export let relay
-  export let theme = 'dark'
-  export let showControls = false
+  export let url
+
+  const relay = database.relays.get(url) || {url}
 
   let quality = null
   let message = null
   let showStatus = false
   let joined = false
 
-  const {relays, canPublish} = user
+  const {relays} = user
 
   $: joined = find(propEq('url', relay.url), $relays)
-
-  const removeRelay = () => user.removeRelay(relay.url)
-
-  const addRelay = async () => {
-    await user.addRelay(relay.url)
-
-    if (!user.getProfile()?.kind0) {
-      loadAppData(user.getPubkey())
-    }
-  }
 
   onMount(() => {
     return poll(10_000, async () => {
@@ -48,19 +36,11 @@
   })
 </script>
 
-<div
-  class={cx(
-    `bg-${theme}`,
-    "rounded border border-l-2 border-solid border-medium shadow flex flex-col justify-between gap-3 py-3 px-6"
-  )}
-  style={`border-left-color: ${stringToColor(relay.url)}`}
-  in:fly={{y: 20}}>
+<Content>
   <div class="flex gap-2 items-center justify-between">
     <div class="flex gap-2 items-center text-xl">
       <i class={relay.url.startsWith('wss') ? "fa fa-lock" : "fa fa-unlock"} />
-      <Anchor type="unstyled" href={`/relays/${btoa(relay.url)}`}>
-        {last(relay.url.split('://'))}
-      </Anchor>
+      <span>{last(relay.url.split('://'))}</span>
       <span
         on:mouseout={() => {showStatus = false}}
         on:mouseover={() => {showStatus = true}}
@@ -81,14 +61,14 @@
     {#if $relays.length > 1}
     <button
       class="flex gap-3 items-center text-light"
-      on:click={removeRelay}>
+      on:click={() => user.removeRelay(relay.url)}>
       <i class="fa fa-right-from-bracket" /> Leave
     </button>
     {/if}
     {:else}
     <button
       class="flex gap-3 items-center text-light"
-      on:click={addRelay}>
+      on:click={() => user.addRelay(relay.url)}>
       <i class="fa fa-right-to-bracket" /> Join
     </button>
     {/if}
@@ -96,13 +76,6 @@
   {#if relay.description}
   <p>{relay.description}</p>
   {/if}
-  {#if joined && showControls && $canPublish}
   <div class="border-b border-solid border-medium -mx-6" />
-  <div class="flex justify-between gap-2">
-    <span>Publish to this relay?</span>
-    <Toggle
-      value={relay.write}
-      on:change={() => user.setRelayWriteCondition(relay.url, !relay.write)} />
-  </div>
-  {/if}
-</div>
+  <Feed relays={[relay]} filter={{kinds: [1]}} />
+</Content>

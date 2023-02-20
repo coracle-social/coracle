@@ -62,8 +62,8 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 6
           timedOutRelays
         )
 
-        timedOutRelays.forEach(url => {
-          const conn = pool.getConnection(url)
+        timedOutRelays.forEach(relay => {
+          const conn = pool.getConnection(relay.url)
 
           if (conn) {
             conn.stats.timeouts += 1

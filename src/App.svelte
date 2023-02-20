@@ -53,6 +53,7 @@
   import Profile from "src/views/Profile.svelte"
   import PubKeyLogin from "src/views/login/PubKeyLogin.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
+  import RelayDetail from "src/views/relays/RelayDetail.svelte"
   import RelayList from "src/views/relays/RelayList.svelte"
   import Search from "src/views/search/Search.svelte"
   import Settings from "src/views/Settings.svelte"
@@ -201,6 +202,11 @@
       </Route>
       <Route path="/keys" component={Keys} />
       <Route path="/relays" component={RelayList} />
+      <Route path="/relays/:b64url" let:params>
+        {#key params.b64url}
+        <RelayDetail url={atob(params.b64url)} />
+        {/key}
+      </Route>
       <Route path="/profile" component={Profile} />
       <Route path="/settings" component={Settings} />
       <Route path="/login" component={Login} />

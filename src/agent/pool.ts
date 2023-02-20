@@ -88,8 +88,8 @@ class Connection {
     }
 
     const {timeouts, subCount, eoseTimer, eoseCount} = this.stats
-    const timeoutRate = subCount > 10 ? timeouts / subCount : null
-    const eoseQuality = eoseCount > 10 ? Math.max(1, 500 / (eoseTimer / eoseCount)) : null
+    const timeoutRate = timeouts > 0 ? timeouts / subCount : null
+    const eoseQuality = eoseCount > 0 ? Math.max(1, 500 / (eoseTimer / eoseCount)) : null
 
     if (timeoutRate && timeoutRate > 0.5) {
       return [1 - timeoutRate, "Slow connection"]
@@ -299,6 +299,12 @@ const subscribe = async (
   return {
     isActive: () => active,
     unsub: () => {
+      if (!active) {
+        return
+      }
+
+      active = false
+
       log(`Closing subscription ${id}`)
 
       promises.forEach(async promise => {
@@ -306,7 +312,6 @@ const subscribe = async (
 
         if (sub) {
           sub.unsub()
-          active = false
           sub.conn.stats.activeSubsCount -= 1
         }
       })
