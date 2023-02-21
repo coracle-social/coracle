@@ -8,6 +8,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import pool from 'src/agent/pool'
   import user from "src/agent/user"
+  import {loadAppData} from 'src/app'
 
   export let relay
   export let theme = 'dark'
@@ -21,6 +22,16 @@
   const {relays} = user
 
   $: joined = find(propEq('url', relay.url), $relays)
+
+  const removeRelay = () => user.removeRelay(relay.url)
+
+  const addRelay = async () => {
+    await user.addRelay(relay.url)
+
+    if (!user.getProfile()?.kind0) {
+      loadAppData(user.getPubkey())
+    }
+  }
 
   onMount(() => {
     return poll(10_000, async () => {
@@ -67,14 +78,14 @@
     {#if $relays.length > 1}
     <button
       class="flex gap-3 items-center text-light"
-      on:click={() => user.removeRelay(relay.url)}>
+      on:click={removeRelay}>
       <i class="fa fa-right-from-bracket" /> Leave
     </button>
     {/if}
     {:else}
     <button
       class="flex gap-3 items-center text-light"
-      on:click={() => user.addRelay(relay.url)}>
+      on:click={addRelay}>
       <i class="fa fa-right-to-bracket" /> Join
     </button>
     {/if}

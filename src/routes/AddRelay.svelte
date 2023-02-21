@@ -6,10 +6,11 @@
   import Button from 'src/partials/Button.svelte'
   import user from 'src/agent/user'
   import {toast, modal} from "src/app/ui"
+  import {loadAppData} from 'src/app'
 
   let url = $modal.url
 
-  const submit = e => {
+  const submit = async e => {
     e.preventDefault()
     url = url.trim()
 
@@ -27,8 +28,13 @@
       return toast.show("error", "That isn't a valid websocket url")
     }
 
-    user.addRelay(url)
     modal.set(null)
+
+    await user.addRelay(url)
+
+    if (!user.getProfile()?.kind0) {
+      loadAppData(user.getPubkey())
+    }
   }
 </script>
 

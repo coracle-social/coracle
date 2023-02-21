@@ -34,7 +34,7 @@
     if (note) {
       log('NoteDetail', nip19.noteEncode(note.id), note)
 
-      await network.streamContext({
+      network.streamContext({
         depth: 6,
         notes: [note],
         onChunk: context => {

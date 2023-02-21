@@ -32,12 +32,13 @@
     // Remove people we're not interested in hearing about, sort by created date
     newNotes = newNotes.filter(e => !muffle.includes(e.pubkey))
 
-    // Load parents before showing the notes so we have hierarchy
+    // Load parents before showing the notes so we have hierarchy. Give it a short
+    // timeout, since this is really just a nice-to-have
     const combined = uniqBy(
       prop('id'),
       newNotes
         .filter(propEq('kind', 1))
-        .concat(await network.loadParents(newNotes))
+        .concat(await network.loadParents(newNotes, {timeout: 500}))
         .map(asDisplayEvent)
     )
 

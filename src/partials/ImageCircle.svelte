@@ -6,5 +6,9 @@
 </script>
 
 <div
-  class={cx($$props.class, `overflow-hidden w-${size} h-${size} rounded-full bg-cover bg-center shrink-0 border border-solid border-white`)}
+  class={cx(
+    $$props.class,
+    `overflow-hidden w-${size} h-${size} rounded-full bg-cover bg-center shrink-0 border
+     border-solid border-white inline-block`
+   )}
   style="background-image: url({src})" />

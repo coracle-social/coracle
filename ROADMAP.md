@@ -1,10 +1,7 @@
 # Current
 
-- [ ] Fix loading routes speed, index by pubkey to avoid filtering
-- [ ] Include everyone in person list modal, re-fetch missing people
 - [ ] Fix initial relay loading, don't nuke people's relay lists
   - [ ] Add a nuclear bypass with a warning, after we fail to find anything
-- [ ] Don't waste space caching rooms, load those lazily
 
 # Next
 
@@ -33,6 +30,7 @@
 - [ ] open web+nostr links like snort
 - [ ] Channels
   - [ ] Separate chat and DMs
+  - [ ] Don't waste space caching rooms, load those lazily
   - [ ] Damus has chats divided into DMs and requests
   - [ ] Ability to leave/mute DM conversation
   - [ ] Add petnames for channels

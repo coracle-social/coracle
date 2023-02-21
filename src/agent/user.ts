@@ -1,6 +1,6 @@
 import type {Person} from 'src/util/types'
 import type {Readable} from 'svelte/store'
-import {pipe, assoc, whereEq, when, concat, reject, nth, map} from 'ramda'
+import {last, pipe, assoc, whereEq, when, concat, reject, nth, map} from 'ramda'
 import {synced} from 'src/util/misc'
 import {derived} from 'svelte/store'
 import database from 'src/agent/database'
@@ -111,23 +111,23 @@ const user = {
 
   relays,
   getRelays: () => relaysCopy,
-  updateRelays(f) {
+  async updateRelays(f) {
     const $relays = f(relaysCopy)
 
     anonRelays.set($relays)
 
     if (profileCopy) {
-      cmd.setRelays($relays, $relays)
+      await last(cmd.setRelays($relays, $relays))
     }
   },
   async addRelay(url) {
-    this.updateRelays($relays => $relays.concat({url, write: true, read: true}))
+    await this.updateRelays($relays => $relays.concat({url, write: true, read: true}))
   },
   async removeRelay(url) {
-    this.updateRelays(reject(whereEq({url})))
+    await this.updateRelays(reject(whereEq({url})))
   },
   async setRelayWriteCondition(url, write) {
-    this.updateRelays(map(when(whereEq({url}), assoc('write', write))))
+    await this.updateRelays(map(when(whereEq({url}), assoc('write', write))))
   },
 }
 

@@ -6,7 +6,7 @@
 
   export let pubkeys
 
-  const people = database.watch('people', people => people.all({pubkey: pubkeys}))
+  const people = database.watch('people', t => pubkeys.map(database.getPersonWithFallback))
 
   network.loadPeople(pubkeys)
 </script>

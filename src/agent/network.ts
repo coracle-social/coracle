@@ -142,7 +142,7 @@ const loadPeople = async (pubkeys, {relays = null, kinds = personKinds, force = 
   )
 }
 
-const loadParents = notes => {
+const loadParents = (notes, opts = {}) => {
   const notesWithParent = notes.filter(findReplyId)
 
   if (notesWithParent.length === 0) {
@@ -151,7 +151,8 @@ const loadParents = notes => {
 
   return load({
     relays: sampleRelays(aggregateScores(notesWithParent.map(getRelaysForEventParent)), 0.3),
-    filter: {kinds: [1], ids: notesWithParent.map(findReplyId)}
+    filter: {kinds: [1], ids: notesWithParent.map(findReplyId)},
+    ...opts,
   })
 }
 
