@@ -1,8 +1,8 @@
 import type {Relay} from 'src/util/types'
 import {warn} from 'src/util/logger'
 import {pick, objOf, map, assoc, sortBy, uniqBy, prop} from 'ramda'
-import {first, createMap} from 'hurdak/lib/hurdak'
-import {Tags, isRelay, findReplyId} from 'src/util/nostr'
+import {first, createMap, updateIn} from 'hurdak/lib/hurdak'
+import {Tags, normalizeRelayUrl, isRelay, findReplyId} from 'src/util/nostr'
 import {shuffle} from 'src/util/misc'
 import database from 'src/agent/database'
 import user from 'src/agent/user'
@@ -125,6 +125,14 @@ export const getEventPublishRelays = event => {
 export const uniqByUrl = uniqBy(prop('url'))
 
 export const sortByScore = sortBy(r => -r.score)
+
+export const normalizeRelays = (relays: Relay[]): Relay[] =>
+  uniqBy(
+    prop('url'),
+    relays
+      .filter(r => isRelay(r.url))
+      .map(updateIn('url', normalizeRelayUrl))
+  )
 
 export const sampleRelays = (relays, scale = 1) => {
   let limit = user.getSetting('relayLimit')

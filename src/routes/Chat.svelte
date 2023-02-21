@@ -1,6 +1,5 @@
 <script>
   import {without, uniq, assoc, sortBy} from 'ramda'
-  import {onMount} from "svelte"
   import {nip19} from 'nostr-tools'
   import {navigate} from "svelte-routing"
   import {fuzzy} from "src/util/misc"
@@ -63,14 +62,10 @@
     database.rooms.patch({id, joined: false})
   }
 
-  onMount(() => {
-    const sub = network.listen(getUserReadRelays(), [{kinds: [40, 41]}])
-
-    return () => {
-      sub.then(s => {
-        s.unsub()
-      })
-    }
+  // Listen and process events, we don't have to do anything with the data
+  network.load({
+    relays: getUserReadRelays(),
+    filter: [{kinds: [40, 41]}],
   })
 </script>
 

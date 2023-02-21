@@ -54,8 +54,8 @@ const processProfileEvents = async events => {
             const {relays = []} = database.getPersonWithFallback(e.pubkey)
 
             return {
-              relays: relays.concat({url: e.content}),
               relays_updated_at: e.created_at,
+              relays: relays.concat({url: e.content}),
             }
           }
         },

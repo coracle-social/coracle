@@ -16,28 +16,31 @@
   const room = database.watch('rooms', rooms => rooms.get(roomId))
 
   const listenForMessages = async cb => {
-    const relays = getRelaysForEventChildren($room)
-
-    return network.listen(
-      relays,
-      // Listen for updates to the room in case we didn't get them before
-      [{kinds: [40, 41], ids: [roomId]},
-       {kinds: [42], '#e': [roomId], since: now()}],
-      events => {
+    // Listen for updates to the room in case we didn't get them before
+    return network.listen({
+      relays: getRelaysForEventChildren($room),
+      filter: [
+        {kinds: [40, 41], ids: [roomId]},
+        {kinds: [42], '#e': [roomId], since: now()},
+      ],
+      onChunk: events => {
         network.loadPeople(pluck('pubkey', events))
 
         cb(events.filter(e => e.kind === 42))
-      }
-    )
+      },
+    })
   }
 
-  const loadMessages = async ({until, limit}) => {
-    const relays = getRelaysForEventChildren($room)
-    const events = await network.load(relays, {kinds: [42], '#e': [roomId], until, limit})
+  const loadMessages = ({until, limit}, onChunk) => {
+    network.load({
+      relays: getRelaysForEventChildren($room),
+      filter: {kinds: [42], '#e': [roomId], until, limit},
+      onChunk: events => {
+        network.loadPeople(pluck('pubkey', events))
 
-    network.loadPeople(pluck('pubkey', events))
-
-    return events
+        onChunk(events)
+      },
+    })
   }
 
   const editRoom = () => {

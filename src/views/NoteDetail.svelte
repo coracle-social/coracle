@@ -17,7 +17,13 @@
 
   onMount(async () => {
     if (!note.pubkey) {
-      note = first(await network.load(relays, {ids: [note.id]}))
+      await network.load({
+        relays,
+        filter: {kinds: [1], ids: [note.id]},
+        onChunk: events => {
+          note = first(events)
+        },
+      })
     }
 
     if (note) {

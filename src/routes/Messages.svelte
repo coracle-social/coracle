@@ -35,19 +35,21 @@
     return events.map(renameProp('decryptedContent', 'content'))
   }
 
-  const listenForMessages = cb => network.listen(
-    getRelays(),
-    [{kinds: personKinds, authors: [pubkey]},
-     {kinds: [4], authors: [user.getPubkey()], '#p': [pubkey]},
-     {kinds: [4], authors: [pubkey], '#p': [user.getPubkey()]}],
-    async events => {
+  const listenForMessages = cb => network.listen({
+    relays: getRelays(),
+    filter: [
+      {kinds: personKinds, authors: [pubkey]},
+      {kinds: [4], authors: [user.getPubkey()], '#p': [pubkey]},
+      {kinds: [4], authors: [pubkey], '#p': [user.getPubkey()]},
+    ],
+    onChunk: async events => {
       // Reload from db since we annotate messages there
       const messageIds = pluck('id', events.filter(e => e.kind === 4))
       const messages = await database.messages.all({id: messageIds})
 
       cb(await decryptMessages(messages))
-    }
-  )
+    },
+  })
 
   const loadMessages = async ({until, limit}) => {
     const fromThem = await database.messages.all({pubkey})
@@ -55,7 +57,7 @@
     const events = fromThem.concat(toThem).filter(e => e.created_at < until)
     const messages = sortBy(e => -e.created_at, events).slice(0, limit)
 
-   return await decryptMessages(messages)
+    return await decryptMessages(messages)
   }
 
   const sendMessage = async content => {

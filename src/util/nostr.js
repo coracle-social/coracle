@@ -94,6 +94,6 @@ export const isRelay = url => (
   && !url.slice(6).match(/\/npub/)
 )
 
-export const normalizeRelayUrl = url => url.replace(/\/+$/, '')
+export const normalizeRelayUrl = url => url.replace(/\/+$/, '').toLowerCase()
 
 export const roomAttrs = ['name', 'about', 'picture']

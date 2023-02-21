@@ -24,7 +24,10 @@
   })
 
   // Prime our database, in case we don't have any people stored yet
-  network.listenUntilEose(getUserReadRelays(), {kinds: personKinds, limit: 50})
+  network.load({
+    relays: getUserReadRelays(),
+    filter: {kinds: personKinds, limit: 10},
+  })
 </script>
 
 <Input bind:value={q} placeholder="Search for people">

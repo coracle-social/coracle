@@ -24,7 +24,7 @@
 
   onMount(() => {
     return poll(10_000, async () => {
-      const conn = await pool.findConnection(relay.url)
+      const conn = await pool.getConnection(relay.url)
 
       if (conn) {
         [quality, message] = conn.getQuality()

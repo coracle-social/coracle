@@ -26,7 +26,7 @@
       interact with the network, but you can join as many as you like.
     </p>
     {#if $relays.length === 0}
-    <div class="text-center mt-10 flex gap-2 justify-center items-center">
+    <div class="text-center mt-8 flex gap-2 justify-center items-center">
       <i class="fa fa-triangle-exclamation" />
       No relays connected
     </div>

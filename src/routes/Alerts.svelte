@@ -2,14 +2,16 @@
   import {sortBy} from 'ramda'
   import {onMount} from 'svelte'
   import {fly} from 'svelte/transition'
-  import {now, createScroller} from 'src/util/misc'
-  import Note from 'src/partials/Note.svelte'
+  import {ellipsize} from 'hurdak/lib/hurdak'
+  import {now, formatTimestamp, createScroller} from 'src/util/misc'
   import Spinner from 'src/partials/Spinner.svelte'
   import Content from 'src/partials/Content.svelte'
-  import Like from 'src/partials/Like.svelte'
+  import Badge from "src/partials/Badge.svelte"
+  import Alert from 'src/partials/Alert.svelte'
   import database from 'src/agent/database'
   import alerts from 'src/app/alerts'
   import {asDisplayEvent} from 'src/app'
+  import {modal} from 'src/app/ui'
 
   let limit = 0
   let notes = null
@@ -29,12 +31,28 @@
 
 {#if notes}
 <Content>
-  {#each notes as e (e.id)}
+  {#each notes as note (note.id)}
   <div in:fly={{y: 20}}>
-    {#if e.likedBy}
-    <Like note={e} />
+    {#if note.replies.length > 0}
+    <Alert type="replies" {note} />
+    {:else if note.likedBy.length > 0}
+    <Alert type="likes" {note} />
     {:else}
-    <Note note={e} />
+    <button
+      class="py-2 px-3 flex flex-col gap-2 text-white cursor-pointer transition-all
+             border border-solid border-black hover:border-medium hover:bg-dark text-left"
+      on:click={() => modal.set({type: 'note/detail', note})}>
+      <div class="flex gap-2 items-center justify-between relative">
+        <p>
+          <Badge person={database.getPersonWithFallback(note.pubkey)} />
+          mentioned you in their note.
+        </p>
+        <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>
+      </div>
+      <div class="ml-6 text-light">
+        {ellipsize(note.content, 120)}
+      </div>
+    </button>
     {/if}
   </div>
   {:else}

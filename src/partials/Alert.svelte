@@ -1,7 +1,6 @@
 <script>
   import {fly} from 'svelte/transition'
-  import {uniq} from 'ramda'
-  import {ellipsize, quantify} from 'hurdak/lib/hurdak'
+  import {ellipsize, quantify, switcher} from 'hurdak/lib/hurdak'
   import Badge from "src/partials/Badge.svelte"
   import {formatTimestamp} from 'src/util/misc'
   import {killEvent} from 'src/util/html'
@@ -9,6 +8,17 @@
   import {modal} from 'src/app/ui'
 
   export let note
+  export let type
+
+  const pubkeys = switcher(type, {
+    replies: note.replies,
+    likes: note.likedBy,
+  })
+
+  const actionText = switcher(type, {
+    replies: 'replied to your note',
+    likes: 'liked your note',
+  })
 
   let isOpen = false
 
@@ -31,7 +41,7 @@
   on:click={() => modal.set({type: 'note/detail', note})}>
   <div class="flex gap-2 items-center justify-between relative">
     <button class="cursor-pointer" on:click={openPopover}>
-      {quantify(note.likedBy.length, 'person', 'people')} liked your note.
+      {quantify(note.likedBy.length, 'person', 'people')} {actionText}.
     </button>
     {#if isOpen}
     <button in:fly={{y: 20}} class="fixed inset-0 z-10" on:click={closePopover} />
@@ -40,7 +50,7 @@
       in:fly={{y: 20}}
       class="absolute top-0 mt-8 py-2 px-4 rounded border border-solid border-medium
              bg-dark grid grid-cols-3 gap-y-2 gap-x-4 z-20">
-      {#each uniq(note.likedBy) as pubkey}
+      {#each pubkeys as pubkey}
       <Badge person={database.getPersonWithFallback(pubkey)} />
       {/each}
     </button>

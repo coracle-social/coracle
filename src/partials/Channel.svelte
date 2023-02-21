@@ -77,16 +77,14 @@
 
     const scroller = await createScroller(
       async () => {
-        const events = await loadMessages(cursor)
-
-        if (events.length) {
+        await loadMessages(cursor, events => {
           cursor.onChunk(events)
 
           stickToBottom('auto', () => {
             loading = sleep(30_000)
             messages = events.concat(messages)
           })
-        }
+        })
       },
       {reverse: true}
     )

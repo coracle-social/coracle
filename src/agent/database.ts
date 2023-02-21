@@ -184,7 +184,21 @@ class Table {
 const people = new Table('people', 'pubkey')
 const rooms = new Table('rooms', 'id')
 const messages = new Table('messages', 'id')
-const alerts = new Table('alerts', 'id')
+
+const alerts = new Table('alerts', 'id', {
+  initialize: async table => {
+    // We changed our alerts format, clear out the old version
+    const isValid = alert => typeof alert.isMention === 'boolean'
+    const [valid, invalid] = partition(isValid, Object.values(await table.dump() || {}))
+
+    console.log(valid, invalid)
+
+    table.bulkRemove(pluck('id', invalid))
+
+    return valid
+  },
+})
+
 const relays = new Table('relays', 'url')
 
 const routes = new Table('routes', 'id', {

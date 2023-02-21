@@ -29,11 +29,13 @@ const listen = async pubkey => {
     listener.unsub()
   }
 
-  listener = await network.listen(
-    getUserReadRelays(),
-    [{kinds: [4], authors: [pubkey], since},
-     {kinds: [4], '#p': [pubkey], since}],
-    async events => {
+  listener = await network.listen({
+    relays: getUserReadRelays(),
+    filter: [
+      {kinds: [4], authors: [pubkey], since},
+      {kinds: [4], '#p': [pubkey], since},
+    ],
+    onChunk: async events => {
       // Reload annotated messages, don't alert about messages to self
       const messages = reject(e => e.pubkey === e.recipient, await database.messages.all())
 
@@ -50,8 +52,8 @@ const listen = async pubkey => {
           return o
         })
       }
-    }
-  )
+    },
+  })
 }
 
 export default {listen, mostRecentByPubkey, lastCheckedByPubkey, hasNewMessages}

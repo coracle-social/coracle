@@ -18,7 +18,7 @@
   import Likes from "src/views/person/Likes.svelte"
   import Relays from "src/views/person/Relays.svelte"
   import user from "src/agent/user"
-  import {getUserReadRelays, getPubkeyWriteRelays} from "src/agent/relays"
+  import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import keys from "src/agent/keys"
   import database from "src/agent/database"
@@ -43,12 +43,6 @@
   onMount(async () => {
     log('Person', npub, person)
 
-    // Add all the relays we know the person uses, as well as our own
-    // in case we don't have much information
-    relays = relays
-      .concat(getPubkeyWriteRelays(pubkey).slice(0, 3))
-      .concat(getUserReadRelays().slice(0, 3))
-
     // Refresh our person
     network.loadPeople([pubkey], {force: true}).then(() => {
       person = database.getPersonWithFallback(pubkey)
@@ -64,18 +58,18 @@
     })
 
     // Round out our followers count
-    await network.listenUntilEose(
-      relays,
-      [{kinds: [3], '#p': [pubkey]}],
-      events => {
+    await network.load({
+      shouldProcess: false,
+      relays: sampleRelays(getPubkeyWriteRelays(pubkey)),
+      filter: [{kinds: [3], '#p': [pubkey]}],
+      onChunk: events => {
         for (const e of events) {
           followers.add(e.pubkey)
         }
 
         followersCount.set(followers.size)
       },
-      {shouldProcess: false},
-    )
+    })
   })
 
   const setActiveTab = tab => navigate(routes.person(pubkey, tab))

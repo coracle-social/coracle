@@ -76,7 +76,7 @@
   }
 
   onMount(() => {
-    const sub = network.listen(relays, {...filter, since}, onChunk)
+    const sub = network.listen({relays, filter: {...filter, since}, onChunk})
 
     const scroller = createScroller(() => {
       if ($modal) {
@@ -85,7 +85,7 @@
 
       const {limit, until} = cursor
 
-      return network.listenUntilEose(relays, {...filter, until, limit}, onChunk)
+      return network.load({relays, filter: {...filter, until, limit}, onChunk})
     })
 
     return () => {
