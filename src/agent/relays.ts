@@ -1,6 +1,6 @@
 import type {Relay} from 'src/util/types'
 import {warn} from 'src/util/logger'
-import {pick, objOf, map, assoc, sortBy, uniqBy, prop} from 'ramda'
+import {pick, groupBy, objOf, map, assoc, sortBy, uniqBy, prop} from 'ramda'
 import {first, createMap, updateIn} from 'hurdak/lib/hurdak'
 import {Tags, normalizeRelayUrl, isRelay, findReplyId} from 'src/util/nostr'
 import {shuffle} from 'src/util/misc'
@@ -49,10 +49,11 @@ export const initializeRelayList = async () => {
 
 // Pubkey relays
 
-export const getPubkeyRelays = (pubkey, mode = null) => {
+export const getPubkeyRelays = (pubkey, mode = null, routes = null) => {
   const filter = mode ? {pubkey, mode} : {pubkey}
+  const filteredRoutes = routes || database.routes.all(filter)
 
-  return sortByScore(map(pick(['url', 'score']), database.routes.all(filter)))
+  return sortByScore(map(pick(['url', 'score']), filteredRoutes))
 }
 
 export const getPubkeyReadRelays = pubkey => getPubkeyRelays(pubkey, 'read')
@@ -61,14 +62,21 @@ export const getPubkeyWriteRelays = pubkey => getPubkeyRelays(pubkey, 'write')
 
 // Multiple pubkeys
 
-export const getAllPubkeyRelays = (pubkeys, mode = null) =>
-  aggregateScores(pubkeys.map(pubkey => getPubkeyRelays(pubkey, mode)))
+export const getAllPubkeyRelays = (pubkeys, mode = null) => {
+  // As an optimization, filter the database once and group by pubkey
+  const filter = mode ? {pubkey: pubkeys, mode} : {pubkey: pubkeys}
+  const routesByPubkey = groupBy(prop('pubkey'), database.routes.all(filter))
 
-export const getAllPubkeyReadRelays = pubkeys =>
-  aggregateScores(pubkeys.map(getPubkeyReadRelays))
+  return aggregateScores(
+    pubkeys.map(
+      pubkey => getPubkeyRelays(pubkey, mode, routesByPubkey[pubkey] || [])
+    )
+  )
+}
 
-export const getAllPubkeyWriteRelays = pubkeys =>
-  aggregateScores(pubkeys.map(getPubkeyWriteRelays))
+export const getAllPubkeyReadRelays = pubkeys => getAllPubkeyRelays(pubkeys, 'read')
+
+export const getAllPubkeyWriteRelays = pubkeys => getAllPubkeyRelays(pubkeys, 'write')
 
 // Current user
 
@@ -145,7 +153,7 @@ export const sampleRelays = (relays, scale = 1) => {
   }
 
   // Remove relays that are currently in an error state
-  relays => relays.filter(r => getConnection(r.url)?.hasRecentError())
+  relays => relays.filter(r => pool.getConnection(r.url)?.hasRecentError())
 
   // Shuffle and limit target relays
   relays = shuffle(relays).slice(0, limit)

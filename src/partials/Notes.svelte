@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from 'svelte'
-  import {partition, last, propEq, always, mergeRight, uniqBy, sortBy, prop} from 'ramda'
+  import {partition, last, propEq, always, uniqBy, sortBy, prop} from 'ramda'
   import {slide} from 'svelte/transition'
   import {quantify} from 'hurdak/lib/hurdak'
   import {createScroller, now, Cursor} from 'src/util/misc'
