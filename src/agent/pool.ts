@@ -39,6 +39,12 @@ class Connection {
 
     connections[url] = this
   }
+  hasRecentError() {
+    return (
+      this.status === CONNECTION_STATUS.ERROR
+      && Date.now() - this.lastConnectionAttempt < 60_000
+    )
+  }
   async connect() {
     const shouldConnect = (
       this.status === CONNECTION_STATUS.NEW

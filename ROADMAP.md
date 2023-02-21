@@ -1,9 +1,9 @@
 # Current
 
-- [ ] Keep track of relays that fail to connect and don't use them
 - [ ] Fix loading routes speed, index by pubkey to avoid filtering
-- [ ] Include everyone in person lists, re-fetch missing people
+- [ ] Include everyone in person list modal, re-fetch missing people
 - [ ] Fix initial relay loading, don't nuke people's relay lists
+  - [ ] Add a nuclear bypass with a warning, after we fail to find anything
 - [ ] Don't waste space caching rooms, load those lazily
 
 # Next

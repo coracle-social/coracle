@@ -123,7 +123,7 @@
 
 <div class="flex gap-4 h-full">
   <div class="relative w-full">
-    <div class="flex flex-col pt-20 pb-28 h-full">
+    <div class="flex flex-col py-20 h-full">
       <ul class="pb-6 p-4 overflow-auto flex-grow flex flex-col-reverse justify-start channel-messages">
         {#each annotatedMessages as m (m.id)}
           <li in:fly={{y: 20}} class="py-1 flex flex-col gap-2">

@@ -10,7 +10,6 @@
   import Alert from 'src/partials/Alert.svelte'
   import database from 'src/agent/database'
   import alerts from 'src/app/alerts'
-  import {asDisplayEvent} from 'src/app'
   import {modal} from 'src/app/ui'
 
   let limit = 0
@@ -24,7 +23,7 @@
 
       const events = await database.alerts.all()
 
-      notes = sortBy(e => -e.created_at, events).slice(0, limit).map(asDisplayEvent)
+      notes = sortBy(e => -e.created_at, events).slice(0, limit)
     })
   })
 </script>
@@ -39,14 +38,14 @@
     <Alert type="likes" {note} />
     {:else}
     <button
-      class="py-2 px-3 flex flex-col gap-2 text-white cursor-pointer transition-all
+      class="py-2 px-3 flex flex-col gap-2 text-white cursor-pointer transition-all w-full
              border border-solid border-black hover:border-medium hover:bg-dark text-left"
       on:click={() => modal.set({type: 'note/detail', note})}>
       <div class="flex gap-2 items-center justify-between relative">
-        <p>
+        <div class="flex gap-2 items-center">
           <Badge person={database.getPersonWithFallback(note.pubkey)} />
-          mentioned you in their note.
-        </p>
+          <span>mentioned you in their note.</span>
+        </div>
         <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>
       </div>
       <div class="ml-6 text-light">

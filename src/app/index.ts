@@ -16,7 +16,6 @@ import {routes, modal} from 'src/app/ui'
 export const loadAppData = async pubkey => {
   if (getUserReadRelays().length > 0) {
     await Promise.all([
-      alerts.load(pubkey),
       alerts.listen(pubkey),
       messages.listen(pubkey),
       network.loadPeople(getUserFollows()),
@@ -73,9 +72,6 @@ export const renderNote = (note, {showEntire = false}) => {
   return content
 }
 
-export const asDisplayEvent = event =>
-  ({children: [], replies: [], reactions: [], ...event}) as DisplayEvent
-
 export const mergeParents = (notes: Array<DisplayEvent>) => {
   const notesById = createMap('id', notes) as Record<string, DisplayEvent>
   const childIds = []
@@ -87,9 +83,9 @@ export const mergeParents = (notes: Array<DisplayEvent>) => {
       childIds.push(note.id)
     }
 
-    // Add the current note to its parents children, but only if we found a parent
+    // Add the current note to its parents replies, but only if we found a parent
     if (notesById[parentId]) {
-      notesById[parentId].children = notesById[parentId].children.concat([note])
+      notesById[parentId].replies = notesById[parentId].replies.concat([note])
     }
   }
 

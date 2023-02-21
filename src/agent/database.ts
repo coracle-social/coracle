@@ -2,7 +2,7 @@ import type {Writable} from 'svelte/store'
 import {debounce} from 'throttle-debounce'
 import {omit, partition, is, find, without, pluck, all, identity} from 'ramda'
 import {writable, derived} from 'svelte/store'
-import {createMap, ensurePlural} from 'hurdak/lib/hurdak'
+import {createMap, isObject, ensurePlural} from 'hurdak/lib/hurdak'
 import {log, error} from 'src/util/logger'
 import {where, now, timedelta} from 'src/util/misc'
 
@@ -110,6 +110,10 @@ class Table {
     callLocalforage('setItem', this.name, this.data)
   })
   _setAndNotify(newData) {
+    if (!isObject(newData)) {
+      throw new Error(`Invalid data persisted`)
+    }
+
     // Update our local copy
     this.data = newData
 
@@ -191,11 +195,9 @@ const alerts = new Table('alerts', 'id', {
     const isValid = alert => typeof alert.isMention === 'boolean'
     const [valid, invalid] = partition(isValid, Object.values(await table.dump() || {}))
 
-    console.log(valid, invalid)
-
     table.bulkRemove(pluck('id', invalid))
 
-    return valid
+    return createMap('id', valid)
   },
 })
 
@@ -209,7 +211,7 @@ const routes = new Table('routes', 'id', {
     // Delete stale routes asynchronously
     table.bulkRemove(pluck('id', invalid))
 
-    return valid
+    return createMap('id', valid)
   },
 })
 

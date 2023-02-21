@@ -24,13 +24,14 @@
   import {routes} from 'src/app/ui'
 
   export let note
+  export let depth = 0
   export let anchorId = null
   export let showParent = true
   export let invertColors = false
   export let shouldDisplay = always(true)
 
   const getDefaultReplyMentions = () =>
-    without([$profile?.pubkey], uniq(Tags.from(note).type("p").values().all().concat(note.pubkey)))
+    without([user.getPubkey()], uniq(Tags.from(note).type("p").values().all().concat(note.pubkey)))
 
   let reply = null
   let replyMentions = getDefaultReplyMentions()
@@ -314,16 +315,22 @@
 </div>
 {/if}
 
-{#if note.children.length > 0}
+{#if note.replies.length > 0 && depth > 0}
 <div class="ml-8 note-children" bind:this={childrenContainer}>
-  {#if !showEntire && note.children.length > 3}
+  {#if !showEntire && note.replies.length > 3}
   <button class="ml-5 py-2 text-light cursor-pointer" on:click={onClick}>
     <i class="fa fa-up-down text-sm pr-2" />
-    Show {quantify(note.children.length - 3, 'other reply', 'more replies')}
+    Show {quantify(note.replies.length - 3, 'other reply', 'more replies')}
   </button>
   {/if}
-  {#each note.children.slice(showEntire ? 0 : -3) as r (r.id)}
-  <svelte:self showParent={false} note={r} {invertColors} {anchorId} {shouldDisplay} />
+  {#each note.replies.slice(showEntire ? 0 : -3) as r (r.id)}
+  <svelte:self
+    showParent={false}
+    note={r}
+    depth={depth - 1}
+    {invertColors}
+    {anchorId}
+    {shouldDisplay} />
   {/each}
 </div>
 {/if}

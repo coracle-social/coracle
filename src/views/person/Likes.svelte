@@ -1,10 +1,10 @@
-<script>
+<script lang="ts">
   import Notes from "src/partials/Notes.svelte"
-  import {getPubkeyWriteRelays} from 'src/agent/relays'
+  import {sampleRelays, getPubkeyWriteRelays} from 'src/agent/relays'
 
   export let pubkey
 
-  const relays = getPubkeyWriteRelays(pubkey)
+  const relays = sampleRelays(getPubkeyWriteRelays(pubkey))
   const filter = {kinds: [7], authors: [pubkey]}
 </script>
 

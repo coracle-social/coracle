@@ -2,7 +2,6 @@ import type {MyEvent} from 'src/util/types'
 import {prop, pick, join, uniqBy, last} from 'ramda'
 import {get} from 'svelte/store'
 import {first} from "hurdak/lib/hurdak"
-import {log} from 'src/util/logger'
 import {roomAttrs, displayPerson} from 'src/util/nostr'
 import {getPubkeyWriteRelays, getRelayForPersonHint, getUserReadRelays} from 'src/agent/relays'
 import database from 'src/agent/database'
@@ -96,15 +95,9 @@ const deleteEvent = (relays, ids) =>
 // Utils
 
 const publishEvent = (relays, kind, {content = '', tags = []} = {}): [MyEvent, Promise<MyEvent>] => {
-  if (relays.length === 0) {
-    throw new Error("Unable to publish, no relays specified")
-  }
-
   const pubkey = get(keys.pubkey)
   const createdAt = Math.round(new Date().valueOf() / 1000)
   const event = {kind, content, tags, pubkey, created_at: createdAt} as MyEvent
-
-  log("Publishing", event, relays)
 
   // Return the event synchronously, separate from the promise
   return [event, network.publish(relays, event)]

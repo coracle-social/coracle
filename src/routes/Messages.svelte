@@ -6,7 +6,7 @@
   import {now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
   import user from 'src/agent/user'
-  import {getAllPubkeyRelays} from 'src/agent/relays'
+  import {getAllPubkeyRelays, sampleRelays} from 'src/agent/relays'
   import database from 'src/agent/database'
   import network from 'src/agent/network'
   import keys from 'src/agent/keys'
@@ -22,7 +22,7 @@
 
   messages.lastCheckedByPubkey.update($obj => ({...$obj, [pubkey]: now()}))
 
-  const getRelays = () => getAllPubkeyRelays([pubkey, user.getPubkey()])
+  const getRelays = () => sampleRelays(getAllPubkeyRelays([pubkey, user.getPubkey()]))
 
   const decryptMessages = async events => {
     // Gotta do it in serial because of extension limitations

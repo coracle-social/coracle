@@ -5,6 +5,7 @@ import {first, createMap, updateIn} from 'hurdak/lib/hurdak'
 import {Tags, normalizeRelayUrl, isRelay, findReplyId} from 'src/util/nostr'
 import {shuffle} from 'src/util/misc'
 import database from 'src/agent/database'
+import pool from 'src/agent/pool'
 import user from 'src/agent/user'
 
 // From Mike Dilger:
@@ -142,6 +143,9 @@ export const sampleRelays = (relays, scale = 1) => {
   if (limit > 10) {
     limit *= scale
   }
+
+  // Remove relays that are currently in an error state
+  relays => relays.filter(r => getConnection(r.url)?.hasRecentError())
 
   // Shuffle and limit target relays
   relays = shuffle(relays).slice(0, limit)

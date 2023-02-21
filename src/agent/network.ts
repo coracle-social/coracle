@@ -1,5 +1,5 @@
 import type {MyEvent} from 'src/util/types'
-import {uniq, uniqBy, prop, map, propEq, without, indexBy, pluck} from 'ramda'
+import {partition, uniq, uniqBy, prop, map, propEq, reject, groupBy, pluck} from 'ramda'
 import {personKinds, findReplyId} from 'src/util/nostr'
 import {log} from 'src/util/logger'
 import {chunk} from 'hurdak/lib/hurdak'
@@ -39,25 +39,25 @@ const listen = ({relays, filter, onChunk, shouldProcess = true}) => {
   return pool.subscribe({
     filter,
     relays,
-    onEvent: batch(300, events => {
+    onEvent: batch(300, chunk => {
       if (shouldProcess) {
-        sync.processEvents(events)
+        sync.processEvents(chunk)
       }
 
       if (onChunk) {
-        onChunk(events)
+        onChunk(chunk)
       }
     }),
   })
 }
 
-const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 10_000}) => {
+const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 6000}) => {
   return new Promise(resolve => {
     relays = normalizeRelays(relays)
 
     const now = Date.now()
     const done = new Set()
-    const events = []
+    const allEvents = []
 
     const attemptToComplete = async () => {
       const sub = await subPromise
@@ -71,9 +71,12 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 1
       const isTimeout = Date.now() - now >= timeout
 
       if (isTimeout) {
-        const timedOutRelays = without(Array.from(done), relays)
+        const timedOutRelays = reject(r => done.has(r.url), relays)
 
-        log(`Timing out ${timedOutRelays.length} relays after ${timeout}ms`, timedOutRelays)
+        log(
+          `Timing out ${timedOutRelays.length}/${relays.length} relays after ${timeout}ms`,
+          timedOutRelays
+        )
 
         timedOutRelays.forEach(url => {
           const conn = pool.getConnection(url)
@@ -86,7 +89,7 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 1
 
       if (isDone || isTimeout) {
         sub.unsub()
-        resolve(events)
+        resolve(allEvents)
       }
     }
 
@@ -96,16 +99,18 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 1
     const subPromise = pool.subscribe({
       relays,
       filter,
-      onEvent: batch(300, event => {
+      onEvent: batch(300, chunk => {
         if (shouldProcess) {
-          sync.processEvents(events)
+          sync.processEvents(chunk)
         }
 
         if (onChunk) {
-          onChunk(events)
+          onChunk(chunk)
         }
 
-        events.push(event)
+        for (const event of chunk) {
+          allEvents.push(event)
+        }
       }),
       onEose: url => {
         done.add(url)
@@ -140,56 +145,53 @@ const loadPeople = async (pubkeys, {relays = null, kinds = personKinds, force = 
 const loadParents = notes => {
   const notesWithParent = notes.filter(findReplyId)
 
+  if (notesWithParent.length === 0) {
+    return []
+  }
+
   return load({
     relays: sampleRelays(aggregateScores(notesWithParent.map(getRelaysForEventParent)), 0.3),
     filter: {kinds: [1], ids: notesWithParent.map(findReplyId)}
   })
 }
 
-const streamContext = ({notes, updateNotes, depth = 0}) => {
+const streamContext = ({notes, onChunk, depth = 0}) =>
   // Some relays reject very large filters, send multiple subscriptions
-  chunk(256, notes).forEach(chunk => {
-    const authors = getStalePubkeys(pluck('pubkey', chunk))
-    const filter = [{kinds: [1, 7], '#e': pluck('id', chunk)}] as Array<object>
-    const relays = sampleRelays(aggregateScores(chunk.map(getRelaysForEventChildren)))
+  Promise.all(
+    chunk(256, notes).map(async events => {
+      // Instead of recurring to depth, trampoline so we can batch requests
+      while (events.length > 0 && depth > 0) {
+        const chunk = events.splice(0)
+        const authors = getStalePubkeys(pluck('pubkey', chunk))
+        const filter = [{kinds: [1, 7], '#e': pluck('id', chunk)}] as Array<object>
+        const relays = sampleRelays(aggregateScores(chunk.map(getRelaysForEventChildren)))
 
-    if (authors.length > 0) {
-      filter.push({kinds: personKinds, authors})
-    }
-
-    // Load authors and reactions in one subscription
-    load({
-      relays,
-      filter,
-      onChunk: events => {
-        const repliesByParentId = indexBy(findReplyId, events.filter(propEq('kind', 1)))
-        const reactionsByParentId = indexBy(findReplyId, events.filter(propEq('kind', 7)))
-
-        // Recur if we need to
-        if (depth > 0) {
-          streamContext({notes: events, updateNotes, depth: depth - 1})
+        // Load authors and reactions in one subscription
+        if (authors.length > 0) {
+          filter.push({kinds: personKinds, authors})
         }
 
-        const annotate = ({replies = [], reactions = [], children = [], ...note}) => {
-          if (depth > 0) {
-            children = uniqBy(prop('id'), children.concat(replies))
-          }
-
-          return {
-            ...note,
-            replies: uniqBy(prop('id'), replies.concat(repliesByParentId[note.id] || [])),
-            reactions: uniqBy(prop('id'), reactions.concat(reactionsByParentId[note.id] || [])),
-            children: children.map(annotate),
-          }
-        }
-
-        updateNotes(map(annotate))
-      },
+        depth -= 1
+        events = await load({relays, filter, onChunk})
+      }
     })
+  )
+
+const applyContext = (notes, context) => {
+  const [replies, reactions] = partition(propEq('kind', 1), context)
+  const repliesByParentId = groupBy(findReplyId, replies)
+  const reactionsByParentId = groupBy(findReplyId, reactions)
+
+  const annotate = ({replies = [], reactions = [], ...note}) => ({
+    ...note,
+    replies: uniqBy(prop('id'), replies.concat(repliesByParentId[note.id] || [])).map(annotate),
+    reactions: uniqBy(prop('id'), reactions.concat(reactionsByParentId[note.id] || [])),
   })
+
+  return notes.map(annotate)
 }
 
 export default {
-  publish, listen, load, loadPeople, personKinds, loadParents, streamContext,
+  publish, listen, load, loadPeople, personKinds, loadParents, streamContext, applyContext,
 }
 

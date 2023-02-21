@@ -4,7 +4,7 @@
   import {slide} from 'svelte/transition'
   import {quantify} from 'hurdak/lib/hurdak'
   import {createScroller, now, Cursor} from 'src/util/misc'
-  import {Tags} from 'src/util/nostr'
+  import {asDisplayEvent, Tags} from 'src/util/nostr'
   import Spinner from 'src/partials/Spinner.svelte'
   import Content from 'src/partials/Content.svelte'
   import Note from "src/partials/Note.svelte"
@@ -38,14 +38,15 @@
       newNotes
         .filter(propEq('kind', 1))
         .concat(await network.loadParents(newNotes))
-        .map(mergeRight({replies: [], reactions: [], children: []}))
+        .map(asDisplayEvent)
     )
 
     // Stream in additional data
     network.streamContext({
+      depth: 2,
       notes: combined,
-      updateNotes: cb => {
-        notes = cb(notes)
+      onChunk: context => {
+        notes = network.applyContext(notes, context)
       },
     })
 
@@ -107,7 +108,7 @@
 
   <div>
     {#each notes as note (note.id)}
-    <Note {note} {shouldDisplay} />
+    <Note depth={2} {note} {shouldDisplay} />
     {/each}
   </div>
 

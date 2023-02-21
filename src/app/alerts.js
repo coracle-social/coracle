@@ -1,8 +1,8 @@
 import {get} from 'svelte/store'
 import {uniq, partition, propEq} from 'ramda'
 import {createMap} from 'hurdak/lib/hurdak'
-import {synced, timedelta, now} from 'src/util/misc'
-import {isAlert, findReplyId} from 'src/util/nostr'
+import {synced, timedelta} from 'src/util/misc'
+import {isAlert, asDisplayEvent, findReplyId} from 'src/util/nostr'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
 import {getUserReadRelays} from 'src/agent/relays'
@@ -12,7 +12,7 @@ let listener
 const mostRecentAlert = synced("app/alerts/mostRecentAlert", 0)
 const lastCheckedAlerts = synced("app/alerts/lastCheckedAlerts", 0)
 
-const asAlert = e => ({...e, replies: [], likedBy: [], isMention: false})
+const asAlert = e => asDisplayEvent({...e, repliesFrom: [], likedBy: [], isMention: false})
 
 const onChunk = async (pubkey, events) => {
   events = events.filter(e => isAlert(e, pubkey))
@@ -39,7 +39,7 @@ const onChunk = async (pubkey, events) => {
     const parent = parents[findReplyId(e)]
     const note = database.alerts.get(parent.id) || asAlert(parent)
 
-    database.alerts.put({...note, replies: uniq(note.replies.concat(e.pubkey))})
+    database.alerts.put({...note, repliesFrom: uniq(note.repliesFrom.concat(e.pubkey))})
   })
 
   mentions.forEach(e => {
@@ -51,28 +51,19 @@ const onChunk = async (pubkey, events) => {
   mostRecentAlert.update($t => events.reduce((t, e) => Math.max(t, e.created_at), $t))
 }
 
-const load = pubkey => {
-  // Include an offset so we don't miss alerts on one relay but not another
-  const since = get(mostRecentAlert) - timedelta(30, 'days')
-
-  // Crank the threshold up since we can afford for this to be slow
-  network.load({
-    relays: getUserReadRelays(),
-    filter: {kinds: [1, 7], '#p': [pubkey], since, limit: 1000},
-    onChunk: events => onChunk(pubkey, events)
-  })
-}
-
 const listen = async pubkey => {
+  // Include an offset so we don't miss alerts on one relay but not another
+  const since = get(mostRecentAlert) - timedelta(7, 'days')
+
   if (listener) {
     listener.unsub()
   }
 
   listener = await network.listen({
     relays: getUserReadRelays(),
-    filter: {kinds: [1, 7], '#p': [pubkey], since: now()},
+    filter: {kinds: [1, 7], '#p': [pubkey], since},
     onChunk: events => onChunk(pubkey, events)
   })
 }
 
-export default {load, listen, mostRecentAlert, lastCheckedAlerts}
+export default {listen, mostRecentAlert, lastCheckedAlerts}

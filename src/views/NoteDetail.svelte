@@ -4,23 +4,28 @@
   import {fly} from 'svelte/transition'
   import {first} from 'hurdak/lib/hurdak'
   import {log} from 'src/util/logger'
-  import network from 'src/agent/network'
+  import {asDisplayEvent} from 'src/util/nostr'
   import Note from 'src/partials/Note.svelte'
   import Content from 'src/partials/Content.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
-  import {asDisplayEvent} from 'src/app'
+  import network from 'src/agent/network'
+  import {sampleRelays} from 'src/agent/relays'
 
   export let note
   export let relays = []
 
+  let found = false
   let loading = true
 
   onMount(async () => {
-    if (!note.pubkey) {
+    if (note.pubkey) {
+      found = true
+    } else {
       await network.load({
-        relays,
+        relays: sampleRelays(relays),
         filter: {kinds: [1], ids: [note.id]},
         onChunk: events => {
+          found = true
           note = first(events)
         },
       })
@@ -29,11 +34,11 @@
     if (note) {
       log('NoteDetail', nip19.noteEncode(note.id), note)
 
-      network.streamContext({
-        depth: 10,
+      await network.streamContext({
+        depth: 6,
         notes: [note],
-        updateNotes: cb => {
-          note = first(cb([note]))
+        onChunk: context => {
+          note = first(network.applyContext([note], context))
         },
       })
     }
@@ -42,7 +47,7 @@
   })
 </script>
 
-{#if !note}
+{#if !loading && !found}
 <div in:fly={{y: 20}}>
   <Content size="lg" class="text-center">
     Sorry, we weren't able to find this note.
@@ -50,7 +55,7 @@
 </div>
 {:else if note.pubkey}
 <div in:fly={{y: 20}}>
-  <Note invertColors anchorId={note.id} note={asDisplayEvent(note)} />
+  <Note invertColors depth={6} anchorId={note.id} note={asDisplayEvent(note)} />
 </div>
 {/if}
 

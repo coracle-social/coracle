@@ -11,7 +11,7 @@
   export let type
 
   const pubkeys = switcher(type, {
-    replies: note.replies,
+    replies: note.repliesFrom,
     likes: note.likedBy,
   })
 
@@ -41,7 +41,7 @@
   on:click={() => modal.set({type: 'note/detail', note})}>
   <div class="flex gap-2 items-center justify-between relative">
     <button class="cursor-pointer" on:click={openPopover}>
-      {quantify(note.likedBy.length, 'person', 'people')} {actionText}.
+      {quantify(pubkeys.length, 'person', 'people')} {actionText}.
     </button>
     {#if isOpen}
     <button in:fly={{y: 20}} class="fixed inset-0 z-10" on:click={closePopover} />
