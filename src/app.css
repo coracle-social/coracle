@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .fa-beat-custom {
+    --fa-animation-duration: 0.4s;
+    --fa-fade-opacity: 0.6;
+    --fa-animation-iteration-count: 1;
+    --fa-beat-scale: 1.4;
+  }
+}
+
 @font-face {
   font-family: "Montserrat";
   font-style: normal;
