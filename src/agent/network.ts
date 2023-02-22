@@ -1,5 +1,5 @@
 import type {MyEvent} from 'src/util/types'
-import {partition, uniq, uniqBy, prop, propEq, reject, groupBy, pluck} from 'ramda'
+import {assoc, partition, uniq, uniqBy, prop, propEq, reject, groupBy, pluck} from 'ramda'
 import {personKinds, findReplyId} from 'src/util/nostr'
 import {log} from 'src/util/logger'
 import {chunk} from 'hurdak/lib/hurdak'
@@ -187,15 +187,24 @@ const streamContext = ({notes, onChunk, depth = 0}) =>
   )
 
 const applyContext = (notes, context) => {
-  const [replies, reactions] = partition(propEq('kind', 1), context)
+  const [replies, reactions] = partition(
+    propEq('kind', 1),
+    context.map(assoc('isContext', true))
+  )
+
   const repliesByParentId = groupBy(findReplyId, replies)
   const reactionsByParentId = groupBy(findReplyId, reactions)
 
-  const annotate = ({replies = [], reactions = [], ...note}) => ({
-    ...note,
-    replies: uniqBy(prop('id'), replies.concat(repliesByParentId[note.id] || [])).map(annotate),
-    reactions: uniqBy(prop('id'), reactions.concat(reactionsByParentId[note.id] || [])),
-  })
+  const annotate = ({replies = [], reactions = [], ...note}) => {
+    const combinedReplies = replies.concat(repliesByParentId[note.id] || [])
+    const combinedReactions = reactions.concat(reactionsByParentId[note.id] || [])
+
+    return {
+      ...note,
+      replies: uniqBy(prop('id'), combinedReplies).map(annotate),
+      reactions: uniqBy(prop('id'), combinedReactions),
+    }
+  }
 
   return notes.map(annotate)
 }

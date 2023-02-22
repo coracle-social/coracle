@@ -18,7 +18,6 @@
 
   let notes = []
   let notesBuffer = []
-  let showReplies = false
 
   const since = now()
   const maxNotes = 100
@@ -49,8 +48,6 @@
       onChunk: context => {
         notes = network.applyContext(notes, context)
       },
-    }).then(() => {
-      showReplies = true
     })
 
     // Show replies grouped by parent whenever possible
@@ -111,7 +108,7 @@
 
   <div>
     {#each notes as note (note.id)}
-    <Note depth={showReplies ? 2 : 0} {note} />
+    <Note depth={2} {note} />
     {/each}
   </div>
 
