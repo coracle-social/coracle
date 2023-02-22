@@ -4,7 +4,7 @@ import {omit, partition, is, find, without, pluck, all, identity} from 'ramda'
 import {writable, derived} from 'svelte/store'
 import {createMap, isObject, ensurePlural} from 'hurdak/lib/hurdak'
 import {log, error} from 'src/util/logger'
-import {where, now, timedelta} from 'src/util/misc'
+import {where, setLocalJson, now, timedelta} from 'src/util/misc'
 
 // Types
 
@@ -191,11 +191,15 @@ const messages = new Table('messages', 'id')
 
 const alerts = new Table('alerts', 'id', {
   initialize: async table => {
-    // We changed our alerts format, clear out the old version
+    // TEMPORARY: we changed our alerts format, clear out the old version
     const isValid = alert => typeof alert.isMention === 'boolean'
     const [valid, invalid] = partition(isValid, Object.values(await table.dump() || {}))
 
-    table.bulkRemove(pluck('id', invalid))
+    if (invalid.length > 0) {
+      table.bulkRemove(pluck('id', invalid))
+      setLocalJson("app/alerts/mostRecentAlert", 0)
+      setLocalJson("app/alerts/lastCheckedAlerts", 0)
+    }
 
     return createMap('id', valid)
   },
