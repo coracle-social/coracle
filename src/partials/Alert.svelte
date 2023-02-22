@@ -39,7 +39,7 @@
   class="py-2 px-3 flex flex-col gap-2 text-white cursor-pointer transition-all
          border border-solid border-black hover:border-medium hover:bg-dark text-left"
   on:click={() => modal.set({type: 'note/detail', note})}>
-  <div class="flex gap-2 items-center justify-between relative">
+  <div class="flex gap-2 items-center justify-between relative w-full">
     <button class="cursor-pointer" on:click={openPopover}>
       {quantify(pubkeys.length, 'person', 'people')} {actionText}.
     </button>

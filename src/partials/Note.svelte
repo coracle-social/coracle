@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from 'classnames'
   import {nip19} from 'nostr-tools'
-  import {last, always, whereEq, without, uniq, pluck, reject, propEq, find} from 'ramda'
+  import {last, whereEq, without, uniq, pluck, reject, propEq, find} from 'ramda'
   import {onMount} from 'svelte'
   import {tweened} from 'svelte/motion'
   import {slide} from 'svelte/transition'
@@ -28,7 +28,6 @@
   export let anchorId = null
   export let showParent = true
   export let invertColors = false
-  export let shouldDisplay = always(true)
 
   const getDefaultReplyMentions = () =>
     without([user.getPubkey()], uniq(Tags.from(note).type("p").values().all().concat(note.pubkey)))
@@ -204,7 +203,7 @@
   }}
 />
 
-{#if $person && shouldDisplay(note)}
+{#if $person}
 <div bind:this={noteContainer} class="note relative">
   <div class="absolute w-px bg-light z-10 ml-8 mt-12 h-0" bind:this={border} />
   <Card class="flex gap-4 relative" on:click={onClick} {interactive} {invertColors}>
@@ -324,13 +323,7 @@
   </button>
   {/if}
   {#each note.replies.slice(showEntire ? 0 : -3) as r (r.id)}
-  <svelte:self
-    showParent={false}
-    note={r}
-    depth={depth - 1}
-    {invertColors}
-    {anchorId}
-    {shouldDisplay} />
+  <svelte:self showParent={false} note={r} depth={depth - 1} {invertColors} {anchorId} />
   {/each}
 </div>
 {/if}

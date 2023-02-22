@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from 'svelte'
-  import {partition, last, propEq, always, uniqBy, sortBy, prop} from 'ramda'
+  import {partition, last, propEq, uniqBy, sortBy, prop} from 'ramda'
   import {slide} from 'svelte/transition'
   import {quantify} from 'hurdak/lib/hurdak'
   import {createScroller, now, Cursor} from 'src/util/misc'
@@ -15,7 +15,6 @@
 
   export let filter
   export let relays = []
-  export let shouldDisplay = always(true)
 
   let notes = []
   let notesBuffer = []
@@ -59,7 +58,7 @@
     // Drop notes at the end if there are a lot
     notes = uniqBy(
       prop('id'),
-      notesBuffer.filter(shouldDisplay).concat(notes).slice(0, maxNotes)
+      notesBuffer.concat(notes).slice(0, maxNotes)
     )
 
     notesBuffer = []
@@ -98,18 +97,18 @@
 </script>
 
 <Content size="inherit" class="pt-6">
-  {#if notesBuffer.filter(shouldDisplay).length > 0}
+  {#if notesBuffer.length > 0}
   <button
     in:slide
     class="cursor-pointer text-center underline text-light"
     on:click={loadBufferedNotes}>
-    Load {quantify(notesBuffer.filter(shouldDisplay).length, 'new note')}
+    Load {quantify(notesBuffer.length, 'new note')}
   </button>
   {/if}
 
   <div>
     {#each notes as note (note.id)}
-    <Note depth={2} {note} {shouldDisplay} />
+    <Note depth={2} {note} />
     {/each}
   </div>
 

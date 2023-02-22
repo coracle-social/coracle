@@ -6,7 +6,6 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Follows from "src/views/notes/Follows.svelte"
   import Network from "src/views/notes/Network.svelte"
-  import Popular from "src/views/notes/Popular.svelte"
   import user from 'src/agent/user'
 
   export let activeTab
@@ -22,13 +21,11 @@
   </Content>
   {/if}
   <div>
-    <Tabs tabs={['follows', 'network', 'popular']} {activeTab} {setActiveTab} />
+    <Tabs tabs={['follows', 'network']} {activeTab} {setActiveTab} />
     {#if activeTab === 'follows'}
     <Follows />
-    {:else if activeTab === 'network'}
-    <Network />
     {:else}
-    <Popular />
+    <Network />
     {/if}
   </div>
 </Content>
