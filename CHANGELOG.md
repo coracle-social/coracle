@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.13
+
+- [x] Remove popular tab, add follows feed back in
+- [x] Fix a bunch of bugs
+- [x] Improve error redaction
+- [x] Improve performance by timing out parents check
+- [x] Speed up query for routes to avoid ui freeze
+- [x] Re-write alerts to improve reliability and completeness
+- [x] Fix clickability of toast
+- [x] Speed up database restore/drop by lumping tables into a single key
+- [x] Fix user display in mentions
+- [x] Improve login when profile isn't found to avoid stomping user relay settings
+
 ## 0.2.12
 
 - [x] Stream likes and replies in lazily
