@@ -22,6 +22,7 @@
 
 # More
 
+- [ ] Clean up person detail actions, maybe click one circle and show the rest
 - [ ] Hover badge to view profile like twitter
 - [ ] Show created date as bitcoin block height (add a setting?)
 - [ ] Support relay auth

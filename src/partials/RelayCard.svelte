@@ -19,7 +19,7 @@
   let showStatus = false
   let joined = false
 
-  const {relays} = user
+  const {relays, canPublish} = user
 
   $: joined = find(propEq('url', relay.url), $relays)
 
@@ -93,7 +93,7 @@
   {#if relay.description}
   <p>{relay.description}</p>
   {/if}
-  {#if joined && showControls}
+  {#if joined && showControls && $canPublish}
   <div class="border-b border-solid border-medium -mx-6" />
   <div class="flex justify-between gap-2">
     <span>Publish to this relay?</span>

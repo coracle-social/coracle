@@ -1,6 +1,6 @@
 import type {Person} from 'src/util/types'
 import type {Readable} from 'svelte/store'
-import {last, pipe, assoc, whereEq, when, concat, reject, nth, map} from 'ramda'
+import {last, prop, find, pipe, assoc, whereEq, when, concat, reject, nth, map} from 'ramda'
 import {synced} from 'src/util/misc'
 import {derived} from 'svelte/store'
 import database from 'src/agent/database'
@@ -52,6 +52,12 @@ const relays = derived(
     $profile?.relays || $anonRelays
 )
 
+const canPublish = derived(
+  [keys.pubkey, relays],
+  ([$pubkey, $relays]) =>
+    keys.canSign() && find(prop('write'), relays)
+)
+
 // Keep our copies up to date
 
 settings.subscribe($settings => {
@@ -81,6 +87,7 @@ const user = {
   // Profile
 
   profile,
+  canPublish,
   getProfile: () => profileCopy,
   getPubkey: () => profileCopy?.pubkey,
 

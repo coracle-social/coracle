@@ -29,7 +29,7 @@
   </p>
   <div class="flex gap-2">
     <div class="flex-grow">
-      <Input bind:value={nsec} placeholder="nsec...">
+      <Input type="password" bind:value={nsec} placeholder="nsec...">
         <i slot="before" class="fa fa-key" />
       </Input>
     </div>

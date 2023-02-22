@@ -19,7 +19,6 @@
   import user from "src/agent/user"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
-  import keys from "src/agent/keys"
   import database from "src/agent/database"
   import {routes, modal} from "src/app/ui"
 
@@ -28,7 +27,7 @@
   export let relays = []
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
-  const {petnamePubkeys} = user
+  const {petnamePubkeys, canPublish} = user
 
   let pubkey = toHex(npub)
   let following = false
@@ -127,9 +126,9 @@
           {/if}
         </div>
         <div class="whitespace-nowrap flex gap-3 items-center flex-wrap">
-          {#if user.getPubkey() === pubkey && keys.canSign()}
+          {#if user.getPubkey() === pubkey && $canPublish}
           <Anchor href="/profile"><i class="fa-solid fa-edit" /> Edit profile</Anchor>
-          {:else if user.getProfile() && keys.canSign()}
+          {:else if $canPublish}
             <Anchor type="button-circle" on:click={openAdvanced}>
               <i class="fa fa-sliders" />
             </Anchor>
