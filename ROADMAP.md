@@ -1,8 +1,6 @@
 # Current
 
 - [ ] Await publish, show error if it fails or times out
-- [ ] Fix initial relay loading, don't nuke people's relay lists
-  - [ ] Add a nuclear bypass with a warning, after we fail to find anything
 
 # Next
 
@@ -24,6 +22,8 @@
 
 # More
 
+- [ ] Hover badge to view profile like twitter
+- [ ] Show created date as bitcoin block height (add a setting?)
 - [ ] Support relay auth
 - [ ] Following indicator on person info
 - [ ] Share button for notes, shows qr code and nevent

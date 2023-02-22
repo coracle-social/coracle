@@ -1,7 +1,7 @@
 <script lang="ts">
   import {pluck} from 'ramda'
-  import {nip19} from 'nostr-tools'
   import {now} from 'src/util/misc'
+  import {toHex} from 'src/util/nostr'
   import Channel from 'src/partials/Channel.svelte'
   import user from 'src/agent/user'
   import {getRelaysForEventChildren} from 'src/agent/relays'
@@ -12,7 +12,7 @@
 
   export let entity
 
-  const {data: roomId} = nip19.decode(entity) as {data: string}
+  const roomId = toHex(entity)
   const room = database.watch('rooms', rooms => rooms.get(roomId))
 
   const listenForMessages = async cb => {

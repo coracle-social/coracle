@@ -2,13 +2,12 @@
   import {last, prop} from 'ramda'
   import {onMount} from 'svelte'
   import {tweened} from 'svelte/motion'
-  import {nip19} from 'nostr-tools'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {first} from 'hurdak/lib/hurdak'
   import {log} from 'src/util/logger'
   import {renderContent} from 'src/util/html'
-  import {displayPerson, Tags} from 'src/util/nostr'
+  import {displayPerson, Tags, toHex} from 'src/util/nostr'
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import NewNoteButton from "src/partials/NewNoteButton.svelte"
@@ -31,7 +30,7 @@
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const {petnamePubkeys} = user
 
-  let pubkey = nip19.decode(npub).data as string
+  let pubkey = toHex(npub)
   let following = false
   let followers = new Set()
   let followersCount = tweened(0, {interpolate, duration: 1000})

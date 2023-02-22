@@ -1,8 +1,7 @@
 <script lang="ts">
-  import {nip19} from 'nostr-tools'
   import {sortBy, pluck} from 'ramda'
   import {renameProp} from 'hurdak/lib/hurdak'
-  import {personKinds, displayPerson} from 'src/util/nostr'
+  import {personKinds, toHex, displayPerson} from 'src/util/nostr'
   import {now} from 'src/util/misc'
   import Channel from 'src/partials/Channel.svelte'
   import user from 'src/agent/user'
@@ -17,7 +16,7 @@
   export let entity
 
   let crypt = keys.getCrypt()
-  let {data: pubkey} = nip19.decode(entity) as {data: string}
+  let pubkey = toHex(entity)
   let person = database.watch('people', () => database.getPersonWithFallback(pubkey))
 
   messages.lastCheckedByPubkey.update($obj => ({...$obj, [pubkey]: now()}))

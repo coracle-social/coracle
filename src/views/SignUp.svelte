@@ -1,6 +1,7 @@
 <script lang="ts">
   import {nip19, generatePrivateKey} from 'nostr-tools'
   import {copyToClipboard} from "src/util/html"
+  import {toHex} from "src/util/nostr"
   import Input from 'src/partials/Input.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import Content from 'src/partials/Content.svelte'
@@ -11,9 +12,7 @@
   const nsec = nip19.nsecEncode(generatePrivateKey())
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
 
-  const logIn = () => {
-    signup(nip19.decode(nsec).data as string)
-  }
+  const logIn = () => signup(toHex(nsec))
 
   const copyKey = () => {
     copyToClipboard(nsec)

@@ -199,7 +199,8 @@ const subscribe = async (
       if (!seen.has(e.id)) {
         seen.add(e.id)
 
-        onEvent({...e, seen_on: relay.url})
+        // Normalize events here, annotate with relay url
+        onEvent({...e, seen_on: relay.url, content: e.content || ''})
       }
     })
 

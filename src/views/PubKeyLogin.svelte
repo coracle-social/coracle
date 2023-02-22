@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {nip19} from 'nostr-tools'
+  import {toHex} from 'src/util/nostr'
   import Input from 'src/partials/Input.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import Content from 'src/partials/Content.svelte'
@@ -10,14 +10,9 @@
   let npub = ''
 
   const logIn = () => {
-    let pubkey = ''
-    try {
-      pubkey = (npub.startsWith('npub') ? nip19.decode(npub).data : npub) as string
-    } catch (e) {
-      // pass
-    }
+    const pubkey = npub.startsWith('npub') ? toHex(npub) : npub
 
-    if (!pubkey.match(/[a-z0-9]{64}/)) {
+    if (!pubkey?.match(/[a-z0-9]{64}/)) {
       toast.show("error", "Sorry, but that's an invalid public key.")
     } else {
       login({pubkey})

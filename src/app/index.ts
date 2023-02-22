@@ -1,9 +1,9 @@
 import type {DisplayEvent} from 'src/util/types'
 import {navigate} from 'svelte-routing'
-import {omit, sortBy, identity} from 'ramda'
+import {omit, sortBy} from 'ramda'
 import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {renderContent} from 'src/util/html'
-import {Tags, displayPerson, findReplyId} from 'src/util/nostr'
+import {displayPerson, findReplyId} from 'src/util/nostr'
 import {getUserFollows} from 'src/agent/social'
 import {getUserReadRelays} from 'src/agent/relays'
 import database from 'src/agent/database'
@@ -40,16 +40,12 @@ export const signup = privkey => {
 }
 
 export const renderNote = (note, {showEntire = false}) => {
-  const shouldEllipsize = note.content.length > 500 && !showEntire
-  const peopleByPubkey = createMap(
-    'pubkey',
-    Tags.from(note).type("p").values().all().map(k => database.people.get(k)).filter(identity)
-  )
-
   let content
 
   // Ellipsize
-  content = shouldEllipsize ? ellipsize(note.content, 500) : note.content
+  content = note.content.length > 500 && !showEntire
+    ? ellipsize(note.content, 500)
+    : note.content
 
   // Escape html, replace urls
   content = renderContent(content)
@@ -62,7 +58,7 @@ export const renderNote = (note, {showEntire = false}) => {
       }
 
       const pubkey = note.tags[parseInt(i)][1]
-      const person = peopleByPubkey[pubkey] || {pubkey}
+      const person = database.getPersonWithFallback(pubkey)
       const name = displayPerson(person)
       const path = routes.person(pubkey)
 

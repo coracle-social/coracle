@@ -64,7 +64,7 @@
     <h1 class="text-2xl">Your Follows</h1>
     {/if}
     {#each $petnamePubkeys as pubkey (pubkey)}
-    <PersonInfo person={database.people.get(pubkey)} />
+    <PersonInfo person={database.getPersonWithFallback(pubkey)} />
     {:else}
     <div class="flex flex-col items-center gap-4 my-8">
       <div class="text-xl flex gap-2 items-center">

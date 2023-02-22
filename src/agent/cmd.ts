@@ -3,7 +3,7 @@ import {prop, pick, join, uniqBy, last} from 'ramda'
 import {get} from 'svelte/store'
 import {first} from "hurdak/lib/hurdak"
 import {roomAttrs, displayPerson} from 'src/util/nostr'
-import {getPubkeyWriteRelays, getRelayForPersonHint, getUserReadRelays} from 'src/agent/relays'
+import {getPubkeyWriteRelays, getRelayForPersonHint, sampleRelays} from 'src/agent/relays'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
 import keys from 'src/agent/keys'
@@ -45,7 +45,7 @@ const createDirectMessage = (relays, pubkey, content) =>
 const createNote = (relays, content, mentions = [], topics = []) => {
   mentions = mentions.map(pubkey => {
     const name = displayPerson(database.getPersonWithFallback(pubkey))
-    const [{url}] = getPubkeyWriteRelays(pubkey) || getUserReadRelays()
+    const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
 
     return ["p", pubkey, url, name]
   })

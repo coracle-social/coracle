@@ -102,3 +102,11 @@ export const roomAttrs = ['name', 'about', 'picture']
 
 export const asDisplayEvent = event =>
   ({replies: [], reactions: [], ...event}) as DisplayEvent
+
+export const toHex = (data: string): string | null => {
+  try {
+    return nip19.decode(data).data as string
+  } catch (e) {
+    return null
+  }
+}

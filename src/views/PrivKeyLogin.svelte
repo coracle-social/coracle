@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {nip19} from 'nostr-tools'
+  import {toHex} from 'src/util/nostr'
   import Input from 'src/partials/Input.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import Content from 'src/partials/Content.svelte'
@@ -11,14 +11,9 @@
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
 
   const logIn = () => {
-    let privkey = ''
-    try {
-      privkey = (nsec.startsWith('nsec') ? nip19.decode(nsec).data : nsec) as string
-    } catch (e) {
-      // pass
-    }
+    const privkey = nsec.startsWith('nsec') ? toHex(nsec) : nsec
 
-    if (!privkey.match(/[a-z0-9]{64}/)) {
+    if (!privkey?.match(/[a-z0-9]{64}/)) {
       toast.show("error", "Sorry, but that's an invalid private key.")
     } else {
       login({privkey})
