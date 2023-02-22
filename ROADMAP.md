@@ -1,5 +1,6 @@
 # Current
 
+- [ ] Await publish, show error if it fails or times out
 - [ ] Fix initial relay loading, don't nuke people's relay lists
   - [ ] Add a nuclear bypass with a warning, after we fail to find anything
 

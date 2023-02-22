@@ -75,9 +75,15 @@ export const modal = {
   },
 }
 
+// Redact long strings, especially hex and bech32 keys which are 64 and 63
+// characters long, respectively. Put the threshold a little lower in case
+// someone accidentally enters a key with the last few digits missing
+const redactErrorInfo = info =>
+  JSON.parse(JSON.stringify(info) .replace(/\w{60}\w+/g, '[REDACTED]'))
+
 // Wait for bugsnag to be started in main
 setTimeout(() => {
-  Bugsnag.addOnError(event => {
+  Bugsnag.addOnError((event: any) => {
     if (window.location.host.startsWith('localhost')) {
       return false
     }
@@ -85,6 +91,13 @@ setTimeout(() => {
     if (!user.getSetting('reportAnalytics')) {
       return false
     }
+
+    // Redact individual properties since the event needs to be
+    // mutated, and we don't want to lose the prototype
+    event.context = redactErrorInfo(event.context)
+    event.request = redactErrorInfo(event.request)
+    event.exceptions = redactErrorInfo(event.exceptions)
+    event.breadcrumbs = redactErrorInfo(event.breadcrumbs)
 
     event.setUser(session)
 
@@ -107,3 +120,4 @@ export const logUsage = async name => {
     }
   }
 }
+
