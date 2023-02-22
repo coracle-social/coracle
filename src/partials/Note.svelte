@@ -135,6 +135,13 @@
     replyMentions = getDefaultReplyMentions()
   }
 
+  const onReplyKeydown = e => {
+    if (e.key === 'Escape') {
+      e.stopPropagation()
+      resetReply()
+    }
+  }
+
   const sendReply = () => {
     let {content, mentions, topics} = reply.parse()
 
@@ -197,14 +204,7 @@
   })
 </script>
 
-<svelte:body
-  on:click={onBodyClick}
-  on:keydown={e => {
-    if (e.key === 'Escape') {
-      resetReply()
-    }
-  }}
-/>
+<svelte:body on:click={onBodyClick} />
 
 {#if $person}
 <div bind:this={noteContainer} class="note relative">
@@ -289,7 +289,7 @@
 
 {#if reply}
 <div transition:slide class="note-reply relative z-10" bind:this={replyContainer}>
-  <div class="bg-medium border-medium border border-solid">
+  <div class="bg-medium border-light border border-solid" on:keydown={onReplyKeydown}>
     <Compose bind:this={reply} onSubmit={sendReply}>
       <button
         slot="addon"
@@ -301,7 +301,7 @@
     </Compose>
   </div>
   {#if replyMentions.length > 0}
-  <div class="text-white text-sm p-2 rounded-b border-t-0 border border-solid border-medium bg-black">
+  <div class="text-white text-sm p-2 rounded-b border-t-0 border border-solid border-light bg-black">
     <div class="inline-block border-r border-solid border-medium pl-1 pr-3 mr-2">
       <i class="fa fa-at" />
     </div>
