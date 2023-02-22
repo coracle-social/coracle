@@ -23,7 +23,10 @@
     return createScroller(async () => {
       limit += 10
 
-      const events = await database.alerts.all()
+      // Filter out alerts for which we failed to find the required context. The bug
+      // is really upstream of this, but it's an easy fix
+      const events = database.alerts.all()
+        .filter(e => e.replies.length > 0 || e.likedBy.length > 0 || e.isMention)
 
       notes = sortBy(e => -e.created_at, events).slice(0, limit)
     })

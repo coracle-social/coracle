@@ -173,7 +173,15 @@ const streamContext = ({notes, onChunk, depth = 0}) =>
         }
 
         depth -= 1
-        events = await load({relays, filter, onChunk})
+
+        const promise = load({relays, filter, onChunk})
+
+        // Don't await the promise when we're on the last level, since we won't be
+        // displaying those replies, and we await `load` before showing children
+        // to reduce reflow
+        if (depth > 0) {
+          events = await promise
+        }
       }
     })
   )
