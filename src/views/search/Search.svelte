@@ -2,8 +2,8 @@
   import {navigate} from 'svelte-routing'
   import Content from 'src/partials/Content.svelte'
   import Tabs from 'src/partials/Tabs.svelte'
-  import SearchPeople from 'src/views/SearchPeople.svelte'
-  import Scan from 'src/views/Scan.svelte'
+  import SearchPeople from 'src/views/search/SearchPeople.svelte'
+  import Scan from 'src/views/search/Scan.svelte'
 
   export let activeTab
 

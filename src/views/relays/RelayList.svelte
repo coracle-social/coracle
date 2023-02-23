@@ -1,9 +1,9 @@
 <script>
   import {fly} from 'svelte/transition'
   import Anchor from "src/partials/Anchor.svelte"
-  import RelaySearch from "src/partials/RelaySearch.svelte"
   import Content from "src/partials/Content.svelte"
-  import RelayCard from "src/partials/RelayCard.svelte"
+  import RelaySearch from "src/views/relays/RelaySearch.svelte"
+  import RelayCard from "src/views/relays/RelayCard.svelte"
   import user from "src/agent/user"
   import {modal} from "src/app/ui"
 

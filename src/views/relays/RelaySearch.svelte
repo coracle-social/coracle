@@ -2,7 +2,7 @@
   import {pluck} from 'ramda'
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
-  import RelayCard from "src/partials/RelayCard.svelte"
+  import RelayCard from "src/views/relays/RelayCard.svelte"
   import database from 'src/agent/database'
   import user from "src/agent/user"
 

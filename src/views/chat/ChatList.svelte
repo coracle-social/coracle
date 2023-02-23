@@ -1,10 +1,10 @@
 <script>
   import {onMount} from 'svelte'
   import {fuzzy} from "src/util/misc"
-  import ChatListItem from "src/partials/ChatListItem.svelte"
   import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import ChatListItem from "src/views/chat/ChatListItem.svelte"
   import database from 'src/agent/database'
   import network from 'src/agent/network'
   import {getUserReadRelays} from 'src/agent/relays'

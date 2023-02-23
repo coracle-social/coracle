@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Notes from "src/partials/Notes.svelte"
+  import Notes from "src/views/notes/Feed.svelte"
   import {sampleRelays, getPubkeyWriteRelays} from 'src/agent/relays'
 
   export let pubkey

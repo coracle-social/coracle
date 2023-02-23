@@ -1,7 +1,7 @@
 <script>
   import {fly} from 'svelte/transition'
   import Content from "src/partials/Content.svelte"
-  import RelayCard from "src/partials/RelayCard.svelte"
+  import RelayCard from "src/views/relays/RelayCard.svelte"
 
   export let person
 </script>

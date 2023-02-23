@@ -1,6 +1,6 @@
 <script>
   import {shuffle} from 'src/util/misc'
-  import Notes from "src/partials/Notes.svelte"
+  import Notes from "src/views/notes/Feed.svelte"
   import {getUserNetwork} from 'src/agent/social'
   import {sampleRelays, getAllPubkeyWriteRelays} from 'src/agent/relays'
 

@@ -3,8 +3,8 @@
   import {onMount} from 'svelte'
   import {nip19} from 'nostr-tools'
   import Content from 'src/partials/Content.svelte'
-  import NoteDetail from 'src/views/NoteDetail.svelte'
-  import Person from 'src/routes/Person.svelte'
+  import NoteDetail from 'src/views/notes/NoteDetail.svelte'
+  import Person from 'src/views/person/PersonDetail.svelte'
   import {getUserReadRelays} from 'src/agent/relays'
 
   export let entity

@@ -1,9 +1,9 @@
 <script>
   import {sortBy} from 'ramda'
   import {toTitle} from 'hurdak/lib/hurdak'
-  import Content from "src/partials/Content.svelte"
-  import MessagesListItem from "src/partials/MessagesListItem.svelte"
   import Tabs from "src/partials/Tabs.svelte"
+  import Content from "src/partials/Content.svelte"
+  import MessagesListItem from "src/views/messages/MessagesListItem.svelte"
   import database from 'src/agent/database'
 
   let activeTab = 'messages'

@@ -9,7 +9,7 @@
   import Content from 'src/partials/Content.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import ImageCircle from "src/partials/ImageCircle.svelte"
-  import Alert from 'src/partials/Alert.svelte'
+  import Alert from 'src/views/alerts/Alert.svelte'
   import database from 'src/agent/database'
   import {lastChecked} from 'src/app/alerts'
   import {modal, routes} from 'src/app/ui'

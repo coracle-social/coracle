@@ -5,9 +5,9 @@
   import {first} from 'hurdak/lib/hurdak'
   import {log} from 'src/util/logger'
   import {asDisplayEvent} from 'src/util/nostr'
-  import Note from 'src/partials/Note.svelte'
   import Content from 'src/partials/Content.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
+  import Note from 'src/views/notes/Note.svelte'
   import network from 'src/agent/network'
   import {sampleRelays} from 'src/agent/relays'
 

@@ -24,43 +24,43 @@
   import {loadAppData} from "src/app"
   import alerts from "src/app/alerts"
   import {modal, routes, menuIsOpen, logUsage} from "src/app/ui"
-  import RelayCard from "src/partials/RelayCard.svelte"
+  import AddRelay from "src/views/relays/AddRelay.svelte"
+  import Alerts from "src/views/alerts/Alerts.svelte"
   import Anchor from 'src/partials/Anchor.svelte'
+  import Bech32Entity from "src/views/Bech32Entity.svelte"
+  import ChatDetail from "src/views/chat/ChatDetail.svelte"
+  import ChatEdit from "src/views/chat/ChatEdit.svelte"
+  import ChatList from "src/views/chat/ChatList.svelte"
+  import ConnectUser from "src/views/login/ConnectUser.svelte"
   import Content from 'src/partials/Content.svelte'
+  import Debug from "src/views/Debug.svelte"
   import EnsureData from 'src/partials/EnsureData.svelte'
+  import Keys from "src/views/Keys.svelte"
+  import Login from "src/views/login/Login.svelte"
+  import Logout from "src/views/login/Logout.svelte"
+  import MessagesDetail from "src/views/messages/MessagesDetail.svelte"
+  import MessagesList from "src/views/messages/MessagesList.svelte"
   import Modal from 'src/partials/Modal.svelte'
-  import SideNav from 'src/partials/SideNav.svelte'
+  import NotFound from "src/views/NotFound.svelte"
+  import NoteCreate from "src/views/notes/NoteCreate.svelte"
+  import NoteDetail from "src/views/notes/NoteDetail.svelte"
+  import NotesList from "src/views/notes/NotesList.svelte"
+  import PersonDetail from "src/views/person/PersonDetail.svelte"
+  import PersonList from "src/views/person/PersonList.svelte"
+  import PersonSettings from "src/views/person/PersonSettings.svelte"
+  import PersonShare from "src/views/person/PersonShare.svelte"
+  import PrivKeyLogin from "src/views/login/PrivKeyLogin.svelte"
+  import Profile from "src/views/Profile.svelte"
+  import PubKeyLogin from "src/views/login/PubKeyLogin.svelte"
+  import RelayCard from "src/views/relays/RelayCard.svelte"
+  import RelayList from "src/views/relays/RelayList.svelte"
+  import Search from "src/views/search/Search.svelte"
+  import Settings from "src/views/Settings.svelte"
+  import SideNav from 'src/views/SideNav.svelte'
+  import SignUp from "src/views/login/SignUp.svelte"
   import Spinner from 'src/partials/Spinner.svelte'
-  import Toast from 'src/partials/Toast.svelte'
-  import TopNav from 'src/partials/TopNav.svelte'
-  import ChatEdit from "src/views/ChatEdit.svelte"
-  import NoteCreate from "src/views/NoteCreate.svelte"
-  import NoteDetail from "src/views/NoteDetail.svelte"
-  import PersonList from "src/views/PersonList.svelte"
-  import PersonSettings from "src/views/PersonSettings.svelte"
-  import PersonShare from "src/views/PersonShare.svelte"
-  import PrivKeyLogin from "src/views/PrivKeyLogin.svelte"
-  import PubKeyLogin from "src/views/PubKeyLogin.svelte"
-  import ConnectUser from "src/views/ConnectUser.svelte"
-  import SignUp from "src/views/SignUp.svelte"
-  import AddRelay from "src/routes/AddRelay.svelte"
-  import Alerts from "src/routes/Alerts.svelte"
-  import Bech32Entity from "src/routes/Bech32Entity.svelte"
-  import ChatList from "src/routes/ChatList.svelte"
-  import ChatDetail from "src/routes/ChatDetail.svelte"
-  import MessagesList from "src/routes/MessagesList.svelte"
-  import MessagesDetail from "src/routes/MessagesDetail.svelte"
-  import Debug from "src/routes/Debug.svelte"
-  import Keys from "src/routes/Keys.svelte"
-  import Login from "src/routes/Login.svelte"
-  import Logout from "src/routes/Logout.svelte"
-  import NotFound from "src/routes/NotFound.svelte"
-  import Notes from "src/routes/Notes.svelte"
-  import Person from "src/routes/Person.svelte"
-  import Profile from "src/routes/Profile.svelte"
-  import RelayList from "src/routes/RelayList.svelte"
-  import Search from "src/routes/Search.svelte"
-  import Settings from "src/routes/Settings.svelte"
+  import Toast from 'src/views/Toast.svelte'
+  import TopNav from 'src/views/TopNav.svelte'
 
   Object.assign(window, {cmd, database, user, keys, network, pool, sync})
 
@@ -179,12 +179,12 @@
       </Route>
       <Route path="/notes/:activeTab" let:params>
         <EnsureData>
-          <Notes activeTab={params.activeTab} />
+          <NotesList activeTab={params.activeTab} />
         </EnsureData>
       </Route>
       <Route path="/people/:npub/:activeTab" let:params>
         {#key params.npub}
-        <Person npub={params.npub} activeTab={params.activeTab} />
+        <PersonDetail npub={params.npub} activeTab={params.activeTab} />
         {/key}
       </Route>
       <Route path="/chat" component={ChatList} />

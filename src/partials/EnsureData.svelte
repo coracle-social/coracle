@@ -2,10 +2,10 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
-  import RelayCard from "src/partials/RelayCard.svelte"
-  import PersonInfo from "src/partials/PersonInfo.svelte"
-  import RelaySearch from "src/partials/RelaySearch.svelte"
-  import SearchPeople from "src/views/SearchPeople.svelte"
+  import PersonInfo from "src/views/person/PersonInfo.svelte"
+  import RelaySearch from "src/views/relays/RelaySearch.svelte"
+  import RelayCard from "src/views/relays/RelayCard.svelte"
+  import SearchPeople from "src/views/search/SearchPeople.svelte"
   import database from 'src/agent/database'
   import user from 'src/agent/user'
 

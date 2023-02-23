@@ -9,7 +9,7 @@
   import Button from "src/partials/Button.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Input from "src/partials/Input.svelte"
-  import RelayCardSimple from "src/partials/RelayCardSimple.svelte"
+  import RelayCardSimple from "src/views/relays/RelayCardSimple.svelte"
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Heading from 'src/partials/Heading.svelte'

@@ -2,8 +2,8 @@
   import {navigate} from 'svelte-routing'
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
-  import NewNoteButton from "src/partials/NewNoteButton.svelte"
   import Tabs from "src/partials/Tabs.svelte"
+  import NewNoteButton from "src/views/notes/NewNoteButton.svelte"
   import Follows from "src/views/notes/Follows.svelte"
   import Network from "src/views/notes/Network.svelte"
   import user from 'src/agent/user'

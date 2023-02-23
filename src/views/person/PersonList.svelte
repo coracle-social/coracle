@@ -1,6 +1,6 @@
 <script type="ts">
   import Content from 'src/partials/Content.svelte'
-  import PersonInfo from 'src/partials/PersonInfo.svelte'
+  import PersonInfo from 'src/views/person/PersonInfo.svelte'
   import database from 'src/agent/database'
   import network from 'src/agent/network'
 

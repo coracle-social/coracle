@@ -7,7 +7,7 @@
   import {asDisplayEvent, Tags} from 'src/util/nostr'
   import Spinner from 'src/partials/Spinner.svelte'
   import Content from 'src/partials/Content.svelte'
-  import Note from "src/partials/Note.svelte"
+  import Note from "src/views/notes/Note.svelte"
   import user from 'src/agent/user'
   import network from 'src/agent/network'
   import {modal} from "src/app/ui"

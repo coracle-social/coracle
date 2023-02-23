@@ -9,7 +9,6 @@
 
   export let contact
 
-  console.log(contact, $lastChecked[contact.pubkey])
   const newMessages = contact.lastMessage > $lastChecked[contact.pubkey]
   const person = database.getPersonWithFallback(contact.pubkey)
   const enter = () => navigate(`/messages/${nip19.npubEncode(contact.pubkey)}`)

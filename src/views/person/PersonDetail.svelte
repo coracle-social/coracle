@@ -9,9 +9,9 @@
   import {displayPerson, Tags, toHex} from 'src/util/nostr'
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
-  import NewNoteButton from "src/partials/NewNoteButton.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
+  import NewNoteButton from "src/views/notes/NewNoteButton.svelte"
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
   import Relays from "src/views/person/Relays.svelte"
