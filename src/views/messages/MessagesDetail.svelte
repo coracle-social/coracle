@@ -42,22 +42,22 @@
     return events.map(renameProp('decryptedContent', 'content'))
   }
 
-  const getFilters = () => [
-    {kinds: [4], authors: [user.getPubkey()], '#p': [pubkey]},
-    {kinds: [4], authors: [pubkey], '#p': [user.getPubkey()]},
+  const getFilters = extra => [
+    {kinds: [4], authors: [user.getPubkey()], '#p': [pubkey], ...extra},
+    {kinds: [4], authors: [pubkey], '#p': [user.getPubkey()], ...extra},
   ]
 
   const listenForMessages = onChunk =>
     network.listen({
       relays: getRelays(),
-      filter: getFilters(),
+      filter: getFilters({since: now()}),
       onChunk: async events => onChunk(await decryptMessages(events)),
     })
 
   const loadMessages = ({until, limit}, onChunk) =>
     network.load({
       relays: getRelays(),
-      filter: getFilters(),
+      filter: getFilters({until, limit}),
       onChunk: async events => onChunk(await decryptMessages(events)),
     })
 
