@@ -1,5 +1,5 @@
 import {debounce, throttle} from 'throttle-debounce'
-import {path as getPath, allPass, prop, pipe, isNil, complement, equals, is, pluck, sum, identity, sortBy} from "ramda"
+import {path as getPath, allPass, pipe, isNil, complement, equals, is, pluck, sum, identity, sortBy} from "ramda"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from 'svelte/store'
 import {isObject} from 'hurdak/lib/hurdak'
@@ -117,7 +117,7 @@ export const createScroller = (loadMore, {reverse = false} = {}) => {
     }
 
     // No need to check all that often
-    await sleep(500)
+    await sleep(1000)
 
     if (!done) {
       requestAnimationFrame(check)
@@ -153,16 +153,13 @@ export class Cursor {
     this.limit = limit
   }
   onChunk(events) {
-    if (events.length > 0) {
-      // Don't go straight to the earliest event, since relays often spit
-      // very old stuff at us. Use an overlapping window instead.
-      const sortedEvents = sortBy(prop('created_at'), events)
-      const midpointEvent = sortedEvents[Math.floor(events.length / 2)]
+    const minDelta = timedelta(1, 'minutes')
+    const maxDelta = timedelta(1, 'hours')
+    const delta = pluck('created_at', events).reduce(Math.min, 0) || 0
 
-      this.until = Math.min(this.until, midpointEvent.created_at)
-    }
-
-    return this
+    // If the delta is very large, size it down. Relays with sparse data
+    // can slide the window very quickly, skipping a lot of events on more dense relays
+    this.until -= Math.max(minDelta, Math.min(maxDelta, delta))
   }
 }
 
