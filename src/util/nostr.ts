@@ -26,7 +26,7 @@ export class Tags {
     return last(this.tags)
   }
   relays() {
-    return uniq(flatten(this.tags).filter(isRelay)).map(objOf('url'))
+    return uniq(flatten(this.tags).filter(isShareableRelay)).map(objOf('url'))
   }
   pubkeys() {
     return this.type("p").values().all()
@@ -71,6 +71,10 @@ export const displayPerson = p => {
 export const isLike = content => ['', '+', '🤙', '👍', '❤️'].includes(content)
 
 export const isAlert = (e, pubkey) => {
+  if (![1, 7].includes(e.kind)) {
+    return false
+  }
+
   // Don't show people's own stuff
   if (e.pubkey === pubkey) {
     return false
@@ -88,6 +92,10 @@ export const isRelay = url => (
   typeof url === 'string'
   // It should have the protocol included
   && url.match(/^wss?:\/\/.+/)
+)
+
+export const isShareableRelay = url => (
+  isRelay(url)
   // Don't match stuff with a port number
   && !url.slice(6).match(/:\d+/)
   // Don't match raw ip addresses

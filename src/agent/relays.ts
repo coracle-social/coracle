@@ -1,8 +1,8 @@
 import type {Relay} from 'src/util/types'
 import {warn} from 'src/util/logger'
-import {pick, groupBy, objOf, map, assoc, sortBy, uniqBy, prop} from 'ramda'
-import {first, createMap, updateIn} from 'hurdak/lib/hurdak'
-import {Tags, normalizeRelayUrl, isRelay, findReplyId} from 'src/util/nostr'
+import {filter, pipe, pick, groupBy, objOf, map, assoc, sortBy, uniqBy, prop} from 'ramda'
+import {first, createMap} from 'hurdak/lib/hurdak'
+import {Tags, isRelay, findReplyId} from 'src/util/nostr'
 import {shuffle} from 'src/util/misc'
 import database from 'src/agent/database'
 import pool from 'src/agent/pool'
@@ -125,23 +125,15 @@ export const getEventPublishRelays = event => {
   const pubkeys = tags.type("p").values().all().concat(event.pubkey)
   const relayChunks = pubkeys.map(pubkey => getPubkeyReadRelays(pubkey).slice(0, 3))
 
-  return aggregateScores(relayChunks).concat(getUserWriteRelays())
+  return uniqByUrl(aggregateScores(relayChunks).concat(getUserWriteRelays()))
 }
 
 
 // Utils
 
-export const uniqByUrl = uniqBy(prop('url'))
+export const uniqByUrl = pipe(uniqBy(prop('url')), filter(prop('url')))
 
 export const sortByScore = sortBy(r => -r.score)
-
-export const normalizeRelays = (relays: Relay[]): Relay[] =>
-  uniqBy(
-    prop('url'),
-    relays
-      .filter(r => isRelay(r.url))
-      .map(updateIn('url', normalizeRelayUrl))
-  )
 
 export const sampleRelays = (relays, scale = 1) => {
   let limit = user.getSetting('relayLimit')

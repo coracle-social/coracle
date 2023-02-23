@@ -1,6 +1,6 @@
 import type {Person} from 'src/util/types'
 import type {Readable} from 'svelte/store'
-import {last, prop, find, pipe, assoc, whereEq, when, concat, reject, nth, map} from 'ramda'
+import {prop, find, pipe, assoc, whereEq, when, concat, reject, nth, map} from 'ramda'
 import {synced} from 'src/util/misc'
 import {derived} from 'svelte/store'
 import database from 'src/agent/database'
@@ -55,7 +55,7 @@ const relays = derived(
 const canPublish = derived(
   [keys.pubkey, relays],
   ([$pubkey, $relays]) =>
-    keys.canSign() && find(prop('write'), relays)
+    keys.canSign() && find(prop('write'), $relays)
 )
 
 // Keep our copies up to date
@@ -102,39 +102,39 @@ const user = {
     anonPetnames.set($petnames)
 
     if (profileCopy) {
-      cmd.setPetnames(relaysCopy, $petnames)
+      return cmd.setPetnames($petnames).publish(relaysCopy)
     }
   },
   addPetname(pubkey, url, name) {
     const tag = ["p", pubkey, url, name || ""]
 
-    this.updatePetnames(pipe(reject(t => t[1] === pubkey), concat([tag])))
+    return this.updatePetnames(pipe(reject(t => t[1] === pubkey), concat([tag])))
   },
   removePetname(pubkey) {
-    this.updatePetnames(reject(t => t[1] === pubkey))
+    return this.updatePetnames(reject(t => t[1] === pubkey))
   },
 
   // Relays
 
   relays,
   getRelays: () => relaysCopy,
-  async updateRelays(f) {
+  updateRelays(f) {
     const $relays = f(relaysCopy)
 
     anonRelays.set($relays)
 
     if (profileCopy) {
-      await last(cmd.setRelays($relays, $relays))
+      return cmd.setRelays($relays).publish($relays)
     }
   },
-  async addRelay(url) {
-    await this.updateRelays($relays => $relays.concat({url, write: true, read: true}))
+  addRelay(url) {
+    return this.updateRelays($relays => $relays.concat({url, write: true, read: true}))
   },
-  async removeRelay(url) {
-    await this.updateRelays(reject(whereEq({url})))
+  removeRelay(url) {
+    return this.updateRelays(reject(whereEq({url})))
   },
-  async setRelayWriteCondition(url, write) {
-    await this.updateRelays(map(when(whereEq({url}), assoc('write', write))))
+  setRelayWriteCondition(url, write) {
+    return this.updateRelays(map(when(whereEq({url}), assoc('write', write))))
   },
 }
 

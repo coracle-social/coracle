@@ -1,26 +1,17 @@
 <script>
-  import cx from 'classnames'
   import {onMount} from 'svelte'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
-  import {prop, path as getPath, reverse, uniqBy, sortBy, last} from 'ramda'
-  import {formatTimestamp, sleep, createScroller, Cursor} from 'src/util/misc'
-  import Badge from 'src/partials/Badge.svelte'
-  import Anchor from 'src/partials/Anchor.svelte'
+  import {prop, path as getPath, reverse, pluck, uniqBy, sortBy, last} from 'ramda'
+  import {sleep, createScroller, Cursor} from 'src/util/misc'
   import Spinner from 'src/partials/Spinner.svelte'
   import user from 'src/agent/user'
   import database from 'src/agent/database'
-  import {renderNote} from 'src/app'
+  import network from 'src/agent/network'
 
-  export let name
-  export let link = null
-  export let about
-  export let picture
   export let loadMessages
   export let listenForMessages
   export let sendMessage
-  export let editRoom = null
-  export let type
 
   let textarea
   let messages = []
@@ -33,15 +24,17 @@
 
   $: {
     // Group messages so we're only showing the person once per chunk
-    annotatedMessages = reverse(sortBy(prop('created_at'), uniqBy(prop('id'), messages)).reduce(
-      (mx, m) => {
-        const person = database.getPersonWithFallback(m.pubkey)
-        const showPerson = person.pubkey !== getPath(['person', 'pubkey'], last(mx))
+    annotatedMessages = reverse(
+      sortBy(prop('created_at'), uniqBy(prop('id'), messages)).reduce(
+        (mx, m) => {
+          const person = database.getPersonWithFallback(m.pubkey)
+          const showPerson = person.pubkey !== getPath(['person', 'pubkey'], last(mx))
 
-        return mx.concat({...m, person, showPerson})
-      },
-      []
-    ))
+          return mx.concat({...m, person, showPerson})
+        },
+        []
+      )
+    )
   }
 
   // flex-col means the first is the last
@@ -63,37 +56,37 @@
     }
   }
 
-  onMount(async () => {
+  onMount(() => {
     if (!$profile) {
       return navigate('/login')
     }
 
-    const sub = await listenForMessages(
+    const sub = listenForMessages(
       newMessages => stickToBottom('smooth', () => {
         loading = sleep(30_000)
         messages = messages.concat(newMessages)
+        network.loadPeople(pluck('pubkey', newMessages))
       })
     )
 
-    const scroller = await createScroller(
+    const scroller = createScroller(
       async () => {
-        await loadMessages(cursor, events => {
-          cursor.onChunk(events)
+        await loadMessages(cursor, newMessages => {
+          cursor.onChunk(newMessages)
 
           stickToBottom('auto', () => {
             loading = sleep(30_000)
-            messages = events.concat(messages)
+            messages = sortBy(e => -e.created_at, newMessages.concat(messages))
+            network.loadPeople(pluck('pubkey', newMessages))
           })
         })
       },
       {reverse: true}
     )
 
-    return async () => {
-      const {unsub} = await sub
-
+    return () => {
       scroller.stop()
-      unsub()
+      sub.then(s => s?.unsub())
     }
   })
 
@@ -106,7 +99,7 @@
       const event = await sendMessage(content)
 
       stickToBottom('smooth', () => {
-        messages = [event].concat(messages)
+        messages = sortBy(e => -e.created_at, [event].concat(messages))
       })
     }
   }
@@ -123,29 +116,11 @@
 
 <div class="flex gap-4 h-full">
   <div class="relative w-full">
-    <div class="flex flex-col py-20 h-full">
+    <div class="flex flex-col py-18 pb-20 h-full">
       <ul class="pb-6 p-4 overflow-auto flex-grow flex flex-col-reverse justify-start channel-messages">
         {#each annotatedMessages as m (m.id)}
           <li in:fly={{y: 20}} class="py-1 flex flex-col gap-2">
-            {#if type === 'chat' && m.showPerson}
-            <div class="flex gap-4 items-center justify-between">
-              <Badge person={m.person} />
-              <p class="text-sm text-light">{formatTimestamp(m.created_at)}</p>
-            </div>
-            {/if}
-            <div class={cx("flex overflow-hidden text-ellipsis", {
-              'ml-12 justify-end': type === 'dm' && m.person.pubkey === $profile.pubkey,
-              'mr-12': type === 'dm' && m.person.pubkey !== $profile.pubkey,
-            })}>
-              <div class={cx({
-                'ml-6': type === 'chat',
-                'rounded-2xl py-2 px-4 flex max-w-xl': type === 'dm',
-                'bg-light text-black rounded-br-none': type === 'dm' && m.person.pubkey === $profile.pubkey,
-                'bg-dark rounded-bl-none': type === 'dm' && m.person.pubkey !== $profile.pubkey,
-              })}>
-                {@html renderNote(m, {showEntire: true})}
-              </div>
-            </div>
+            <slot name="message" message={m} />
           </li>
         {/each}
         {#await loading}
@@ -155,43 +130,9 @@
         {/await}
       </ul>
     </div>
-    <div class="fixed z-20 top-0 w-full lg:-ml-56 lg:pl-56 border-b border-solid border-medium bg-dark">
-      <div class="p-4 flex items-start gap-4">
-        <div class="flex items-center gap-4">
-          <button
-            class="fa fa-arrow-left text-2xl cursor-pointer"
-            on:click={() => navigate("/chat")} />
-          <div
-            class="overflow-hidden w-12 h-12 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-            style="background-image: url({picture})" />
-        </div>
-        <div class="w-full flex flex-col gap-2">
-          <div class="flex items-center justify-between w-full">
-            <div class="flex items-center gap-4">
-              {#if link}
-              <Anchor type="unstyled" href={link} class="text-lg font-bold">{name || ''}</Anchor>
-              {:else}
-              <div class="text-lg font-bold">{name || ''}</div>
-              {/if}
-              {#if editRoom}
-              <button class="text-sm cursor-pointer" on:click={editRoom}>
-                <i class="fa-solid fa-edit" /> Edit
-              </button>
-              {/if}
-            </div>
-            <div class="flex items-center gap-2">
-              {#if type === 'dm'}
-                <i class="fa fa-lock text-light" />
-                <span class="text-light">Encrypted</span>
-              {:else}
-                <i class="fa fa-lock-open text-light" />
-                <span class="text-light">Public</span>
-              {/if}
-            </div>
-          </div>
-          <div>{about || ''}</div>
-        </div>
-      </div>
+    <div class="fixed z-20 top-0 w-full lg:-ml-56 lg:pl-56 border-b border-solid
+                border-medium bg-dark p-4">
+      <slot name="header" />
     </div>
     <div class="fixed z-10 bottom-0 w-full flex bg-medium border-medium border-t border-solid border-dark lg:-ml-56 lg:pl-56">
       <textarea

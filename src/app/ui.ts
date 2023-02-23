@@ -29,11 +29,13 @@ toast.show = (type, message, timeout = 5) => {
 
   toast.set({id, type, message})
 
-  setTimeout(() => {
-    if (prop("id", get(toast)) === id) {
-      toast.set(null)
-    }
-  }, timeout * 1000)
+  if (timeout) {
+    setTimeout(() => {
+      if (prop("id", get(toast)) === id) {
+        toast.set(null)
+      }
+    }, timeout * 1000)
+  }
 }
 
 // Menu

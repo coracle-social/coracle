@@ -6,11 +6,10 @@ import {chunk} from 'hurdak/lib/hurdak'
 import {batch, timedelta, now} from 'src/util/misc'
 import {
   getRelaysForEventParent, getAllPubkeyWriteRelays, aggregateScores,
-  getRelaysForEventChildren, sampleRelays, normalizeRelays,
+  getRelaysForEventChildren, sampleRelays,
 } from 'src/agent/relays'
 import database from 'src/agent/database'
 import pool from 'src/agent/pool'
-import keys from 'src/agent/keys'
 import sync from 'src/agent/sync'
 
 const getStalePubkeys = pubkeys => {
@@ -22,20 +21,7 @@ const getStalePubkeys = pubkeys => {
   })
 }
 
-const publish = async (relays, event) => {
-  const signedEvent = await keys.sign(event)
-
-  await Promise.all([
-    pool.publish(relays, signedEvent),
-    sync.processEvents(signedEvent),
-  ])
-
-  return signedEvent
-}
-
-const listen = ({relays, filter, onChunk, shouldProcess = true}) => {
-  relays = normalizeRelays(relays)
-
+const listen = ({relays, filter, onChunk = null, shouldProcess = true}) => {
   return pool.subscribe({
     filter,
     relays,
@@ -53,8 +39,6 @@ const listen = ({relays, filter, onChunk, shouldProcess = true}) => {
 
 const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 6000}) => {
   return new Promise(resolve => {
-    relays = normalizeRelays(relays)
-
     const now = Date.now()
     const done = new Set()
     const allEvents = []
@@ -210,6 +194,6 @@ const applyContext = (notes, context) => {
 }
 
 export default {
-  publish, listen, load, loadPeople, personKinds, loadParents, streamContext, applyContext,
+  listen, load, loadPeople, personKinds, loadParents, streamContext, applyContext,
 }
 

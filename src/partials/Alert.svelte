@@ -49,7 +49,7 @@
       on:click={killEvent}
       in:fly={{y: 20}}
       class="absolute top-0 mt-8 py-2 px-4 rounded border border-solid border-medium
-             bg-dark grid grid-cols-3 gap-y-2 gap-x-4 z-20">
+             bg-dark grid grid-cols-2 gap-y-2 gap-x-4 z-20">
       {#each pubkeys as pubkey}
       <Badge person={database.getPersonWithFallback(pubkey)} />
       {/each}

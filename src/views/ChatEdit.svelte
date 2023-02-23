@@ -11,6 +11,7 @@
   import database from 'src/agent/database'
   import cmd from "src/agent/cmd"
   import {toast, modal} from "src/app/ui"
+  import {publishWithToast} from 'src/app'
 
   export let room = {name: null, id: null, about: null, picture: null}
 
@@ -36,13 +37,16 @@
     if (!room.name) {
       toast.show("error", "Please enter a name for your room.")
     } else {
-      const [event] = room.id
-        ? cmd.updateRoom(getUserWriteRelays(), room)
-        : cmd.createRoom(getUserWriteRelays(), room)
+      const relays = getUserWriteRelays()
 
-      await database.rooms.patch({id: room.id || event.id, joined: true})
+      if (room.id) {
+        publishWithToast(relays, cmd.updateRoom(room))
+      } else {
+        const [event] = await publishWithToast(relays, cmd.createRoom(room))
 
-      toast.show("info", `Your room has been ${room.id ? 'updated' : 'created'}!`)
+        // Auto join the room the user just created
+        database.rooms.patch({id: event.id, joined: true})
+      }
 
       modal.set(null)
     }

@@ -1,10 +1,9 @@
 <script lang="ts">
-  import {last, prop} from 'ramda'
+  import {last} from 'ramda'
   import {onMount} from 'svelte'
   import {tweened} from 'svelte/motion'
   import {fly} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
-  import {first} from 'hurdak/lib/hurdak'
   import {log} from 'src/util/logger'
   import {renderContent} from 'src/util/html'
   import {displayPerson, Tags, toHex} from 'src/util/nostr'
@@ -28,6 +27,7 @@
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const {petnamePubkeys, canPublish} = user
+  const getRelays = () => sampleRelays(relays.concat(getPubkeyWriteRelays(pubkey)))
 
   let pubkey = toHex(npub)
   let following = false
@@ -58,7 +58,7 @@
     // Round out our followers count
     await network.load({
       shouldProcess: false,
-      relays: sampleRelays(getPubkeyWriteRelays(pubkey)),
+      relays: getRelays(),
       filter: [{kinds: [3], '#p': [pubkey]}],
       onChunk: events => {
         for (const e of events) {
@@ -83,7 +83,9 @@
    }
 
   const follow = async () => {
-    user.addPetname(pubkey, prop('url', first(relays)), displayPerson(person))
+    const [{url}] = getRelays()
+
+    user.addPetname(pubkey, url, displayPerson(person))
   }
 
   const unfollow = async () => {

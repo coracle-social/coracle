@@ -29,3 +29,11 @@ export type DisplayEvent = MyEvent & {
   replies: Array<MyEvent>
   reactions: Array<MyEvent>
 }
+
+export type Room = {
+  id: string,
+  pubkey: string
+  name?: string
+  about?: string
+  picture?: string
+}

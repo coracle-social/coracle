@@ -2,12 +2,9 @@
   import {displayPerson} from 'src/util/nostr'
   import user from 'src/agent/user'
   import {menuIsOpen, routes} from 'src/app/ui'
-  import alerts from 'src/app/alerts'
-  import messages from 'src/app/messages'
+  import {newAlerts, newDirectMessages, newChatMessages} from 'src/app/alerts'
   import {slowConnections} from 'src/app/connection'
 
-  const {mostRecentAlert, lastCheckedAlerts} = alerts
-  const {hasNewMessages} = messages
   const {profile} = user
 </script>
 
@@ -28,7 +25,7 @@
   <li class="cursor-pointer relative">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/alerts">
       <i class="fa-solid fa-bell mr-2" /> Alerts
-      {#if $mostRecentAlert > $lastCheckedAlerts}
+      {#if $newAlerts}
       <div class="w-2 h-2 rounded bg-accent absolute top-3 left-6" />
       {/if}
     </a>
@@ -46,9 +43,17 @@
   </li>
   {#if $profile}
   <li class="cursor-pointer relative">
+    <a class="block px-4 py-2 hover:bg-accent transition-all" href="/messages">
+      <i class="fa-solid fa-envelope mr-2" /> Messages
+      {#if $newDirectMessages}
+      <div class="w-2 h-2 rounded bg-accent absolute top-2 left-7" />
+      {/if}
+    </a>
+  </li>
+  <li class="cursor-pointer relative">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/chat">
-      <i class="fa-solid fa-message mr-2" /> Chat
-      {#if $hasNewMessages}
+      <i class="fa-solid fa-comment mr-2" /> Chat
+      {#if $newChatMessages}
       <div class="w-2 h-2 rounded bg-accent absolute top-2 left-7" />
       {/if}
     </a>

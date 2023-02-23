@@ -10,14 +10,12 @@ import database from 'src/agent/database'
 import network from 'src/agent/network'
 import keys from 'src/agent/keys'
 import alerts from 'src/app/alerts'
-import messages from 'src/app/messages'
-import {routes, modal} from 'src/app/ui'
+import {routes, modal, toast} from 'src/app/ui'
 
 export const loadAppData = async pubkey => {
   if (getUserReadRelays().length > 0) {
     await Promise.all([
       alerts.listen(pubkey),
-      messages.listen(pubkey),
       network.loadPeople(getUserFollows()),
     ])
   }
@@ -87,3 +85,23 @@ export const mergeParents = (notes: Array<DisplayEvent>) => {
 
   return sortBy(e => -e.created_at, Object.values(omit(childIds, notesById)))
 }
+
+export const publishWithToast = (relays, thunk) =>
+  thunk.publish(relays, ({completed, succeeded, failed, timeouts, pending}) => {
+    let message = `Published to ${succeeded.size}/${relays.length} relays`
+
+    const extra = []
+    if (failed.size > 0) {
+      extra.push(`${failed.size} failed`)
+    }
+
+    if (timeouts.size > 0) {
+      extra.push(`${timeouts.size} timed out`)
+    }
+
+    if (extra.length > 0) {
+      message += ` (${extra.join(', ')})`
+    }
+
+    toast.show('info', message, pending.size ? null : 5)
+  })

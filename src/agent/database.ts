@@ -1,10 +1,10 @@
 import type {Writable} from 'svelte/store'
-import {debounce} from 'throttle-debounce'
-import {omit, partition, is, find, without, pluck, all, identity} from 'ramda'
+import {debounce, throttle} from 'throttle-debounce'
+import {omit, prop, partition, is, find, without, pluck, all, identity} from 'ramda'
 import {writable, derived} from 'svelte/store'
 import {createMap, isObject, ensurePlural} from 'hurdak/lib/hurdak'
 import {log, error} from 'src/util/logger'
-import {where, setLocalJson, now, timedelta} from 'src/util/misc'
+import {where, now, timedelta} from 'src/util/misc'
 
 // Types
 
@@ -186,19 +186,30 @@ class Table {
 }
 
 const people = new Table('people', 'pubkey')
-const rooms = new Table('rooms', 'id')
-const messages = new Table('messages', 'id')
+const contacts = new Table('contacts', 'pubkey')
+
+const rooms = new Table('rooms', 'id', {
+  initialize: async table => {
+    // Remove rooms that our user hasn't joined
+    const rooms = Object.values(await table.dump() || {})
+    const [valid, invalid] = partition(prop('joined'), rooms)
+
+    if (invalid.length > 0) {
+      table.bulkRemove(pluck('id', invalid))
+    }
+
+    return createMap('id', valid)
+  },
+})
 
 const alerts = new Table('alerts', 'id', {
   initialize: async table => {
     // TEMPORARY: we changed our alerts format, clear out the old version
-    const isValid = alert => typeof alert.isMention === 'boolean'
-    const [valid, invalid] = partition(isValid, Object.values(await table.dump() || {}))
+    const alerts = Object.values(await table.dump() || {})
+    const [valid, invalid] = partition(alert => typeof alert.isMention === 'boolean', alerts)
 
     if (invalid.length > 0) {
       table.bulkRemove(pluck('id', invalid))
-      setLocalJson("app/alerts/mostRecentAlert", 0)
-      setLocalJson("app/alerts/lastCheckedAlerts", 0)
     }
 
     return createMap('id', valid)
@@ -256,7 +267,7 @@ const watch = (names, f) => {
   }
 
   // Debounce refresh so we don't get UI lag
-  const refresh = debounce(300, async () => store.set(await f(...tables)))
+  const refresh = throttle(300, async () => store.set(await f(...tables)))
 
   // Listen for changes
   listener.subscribe(name => {
@@ -292,6 +303,6 @@ const onReady = cb => {
 }
 
 export default {
-  watch, getPersonWithFallback, dropAll, people, rooms, messages,
+  watch, getPersonWithFallback, dropAll, people, contacts, rooms,
   alerts, relays, routes, ready, onReady,
 }

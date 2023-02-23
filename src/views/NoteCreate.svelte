@@ -5,7 +5,7 @@
   import {last, reject, pluck, propEq} from 'ramda'
   import {fly} from 'svelte/transition'
   import {fuzzy} from "src/util/misc"
-  import {isRelay, displayPerson} from "src/util/nostr"
+  import {displayPerson} from "src/util/nostr"
   import Button from "src/partials/Button.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Input from "src/partials/Input.svelte"
@@ -17,6 +17,7 @@
   import database from 'src/agent/database'
   import cmd from "src/agent/cmd"
   import {toast, modal} from "src/app/ui"
+  import {publishWithToast} from 'src/app'
 
   export let pubkey = null
 
@@ -32,7 +33,7 @@
     const joined = new Set(pluck('url', relays))
 
     search = fuzzy(
-      $knownRelays.filter(r => isRelay(r.url) && !joined.has(r.url)),
+      $knownRelays.filter(r => !joined.has(r.url)),
       {keys: ["name", "description", "url"]}
     )
   }
@@ -41,17 +42,20 @@
     const {content, mentions, topics} = input.parse()
 
     if (content) {
-      const [event] = cmd.createNote(relays, content, mentions, topics)
+      const thunk = cmd.createNote(content, mentions, topics)
+      const [event, promise] = await publishWithToast(relays, thunk)
 
-      toast.show("info", {
-        text: `Your note has been created!`,
-        link: {
-          text: 'View',
-          href: "/" + nip19.neventEncode({
-            id: event.id,
-            relays: pluck('url', relays.slice(0, 3)),
-          }),
-        },
+      promise.then(() => {
+        toast.show("info", {
+          text: `Your note has been created!`,
+          link: {
+            text: 'View',
+            href: "/" + nip19.neventEncode({
+              id: event.id,
+              relays: pluck('url', relays.slice(0, 3)),
+            }),
+          },
+        })
       })
 
       modal.clear()

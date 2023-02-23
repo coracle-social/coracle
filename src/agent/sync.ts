@@ -1,23 +1,34 @@
 import {uniq, pick, identity, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
-import {noop, createMap, ensurePlural, switcherFn} from 'hurdak/lib/hurdak'
-import {warn, log} from 'src/util/logger'
-import {now, timedelta, shuffle, hash} from 'src/util/misc'
-import {Tags, personKinds, roomAttrs, isRelay, normalizeRelayUrl} from 'src/util/nostr'
+import {noop, createMap, ensurePlural, chunk, switcherFn} from 'hurdak/lib/hurdak'
+import {log} from 'src/util/logger'
+import {now, sleep, tryJson, timedelta, shuffle, hash} from 'src/util/misc'
+import {Tags, roomAttrs, personKinds, isRelay, isShareableRelay, normalizeRelayUrl} from 'src/util/nostr'
 import database from 'src/agent/database'
 
 const processEvents = async events => {
   await Promise.all([
-    processProfileEvents(events),
-    processRoomEvents(events),
-    processMessages(events),
-    processRoutes(events),
+    batchProcess(processProfileEvents, events),
+    batchProcess(processRoomEvents, events),
+    batchProcess(processRoutes, events),
   ])
 }
 
+const batchProcess = async (processChunk, events) => {
+  const chunks = chunk(100, ensurePlural(events))
+
+  // Don't lock everything up when processing a lot of events
+  for (let i = 0; i < chunks.length; i++) {
+    processChunk(chunks[i])
+
+    if (i < chunks.length - 1) {
+      await sleep(30)
+    }
+  }
+}
+
 const processProfileEvents = async events => {
-  const profileEvents = ensurePlural(events)
-    .filter(e => personKinds.includes(e.kind))
+  const profileEvents = events.filter(e => personKinds.includes(e.kind))
 
   const updates = {}
   for (const e of profileEvents) {
@@ -120,55 +131,40 @@ const processProfileEvents = async events => {
   }
 }
 
+// Chat rooms
+
 const processRoomEvents = async events => {
-  const roomEvents = ensurePlural(events)
-    .filter(e => [40, 41].includes(e.kind))
+  const roomEvents = events.filter(e => [40, 41].includes(e.kind))
 
   const updates = {}
   for (const e of roomEvents) {
-    const content = tryJson(() => pick(roomAttrs, JSON.parse(e.content))) as Record<string, any>
+    const content = tryJson(() => pick(roomAttrs, JSON.parse(e.content)))
     const roomId = e.kind === 40 ? e.id : Tags.from(e).type("e").values().first()
 
-    if (!roomId || !content) {
+    // Ignore non-standard rooms that don't have a name
+    if (!roomId || !content?.name) {
       continue
     }
 
-    const room = await database.rooms.get(roomId)
+    const room = database.rooms.get(roomId)
 
-    // Merge edits but don't let old ones override new ones
-    if (room?.edited_at >= e.created_at) {
+    // Don't let old edits override new ones
+    if (room?.updated_at >= e.created_at) {
       continue
     }
 
-    // There are some non-standard rooms out there, ignore them
-    // if they don't have a name
-    if (content.name) {
-      updates[roomId] = {
-        joined: false,
-        ...room,
-        ...updates[roomId],
-        ...content,
-        id: roomId,
-        pubkey: e.pubkey,
-        edited_at: e.created_at,
-        updated_at: now(),
-      }
+    updates[roomId] = {
+      ...room,
+      ...updates,
+      ...content,
+      id: roomId,
+      pubkey: e.pubkey,
+      updated_at: e.created_at,
     }
   }
 
   if (!isEmpty(updates)) {
-    await database.rooms.bulkPut(updates)
-  }
-}
-
-const processMessages = async events => {
-  const messages = ensurePlural(events)
-    .filter(e => e.kind === 4)
-    .map(e => ({...e, recipient: Tags.from(e).type("p").values().first()}))
-
-
-  if (messages.length > 0) {
-    await database.messages.bulkPut(createMap('id', messages))
+    await database.rooms.bulkPatch(updates)
   }
 }
 
@@ -183,7 +179,7 @@ const getWeight = type => {
 }
 
 const calculateRoute = (pubkey, rawUrl, type, mode, created_at) => {
-  if (!isRelay(rawUrl)) {
+  if (!isShareableRelay(rawUrl)) {
     return
   }
 
@@ -211,7 +207,7 @@ const processRoutes = async events => {
   let updates = []
 
   // Sample events so we're not burning too many resources
-  for (const e of ensurePlural(shuffle(events)).slice(0, 10)) {
+  for (const e of shuffle(events).slice(0, 10)) {
     switcherFn(e.kind, {
       0: () => {
         updates.push(
@@ -283,16 +279,6 @@ const processRoutes = async events => {
 }
 
 // Utils
-
-const tryJson = f => {
-  try {
-    return f()
-  } catch (e) {
-    if (!e.toString().includes('JSON')) {
-      warn(e)
-    }
-  }
-}
 
 const verifyNip05 = (pubkey, as) =>
   nip05.queryProfile(as).then(result => {

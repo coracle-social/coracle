@@ -1,18 +1,17 @@
-import type {MyEvent} from 'src/util/types'
-import {prop, pick, join, uniqBy, last} from 'ramda'
+import {pick, join, uniqBy, last} from 'ramda'
 import {get} from 'svelte/store'
-import {first} from "hurdak/lib/hurdak"
-import {roomAttrs, displayPerson} from 'src/util/nostr'
+import {roomAttrs, displayPerson, findReplyId, findRootId} from 'src/util/nostr'
 import {getPubkeyWriteRelays, getRelayForPersonHint, sampleRelays} from 'src/agent/relays'
 import database from 'src/agent/database'
-import network from 'src/agent/network'
+import pool from 'src/agent/pool'
+import sync from 'src/agent/sync'
 import keys from 'src/agent/keys'
 
-const updateUser = (relays, updates) =>
-  publishEvent(relays, 0, {content: JSON.stringify(updates)})
+const updateUser = updates =>
+  new PublishableEvent(0, {content: JSON.stringify(updates)})
 
-const setRelays = (relays, newRelays) =>
-  publishEvent(relays, 10002, {
+const setRelays = newRelays =>
+  new PublishableEvent(10002, {
     tags: newRelays.map(r => {
       const t = ["r", r.url]
 
@@ -24,25 +23,25 @@ const setRelays = (relays, newRelays) =>
     }),
   })
 
-const setPetnames = (relays, petnames) =>
-  publishEvent(relays, 3, {tags: petnames})
+const setPetnames = petnames =>
+  new PublishableEvent(3, {tags: petnames})
 
-const muffle = (relays, muffle) =>
-  publishEvent(relays, 12165, {tags: muffle})
+const muffle = muffle =>
+  new PublishableEvent(12165, {tags: muffle})
 
-const createRoom = (relays, room) =>
-  publishEvent(relays, 40, {content: JSON.stringify(pick(roomAttrs, room))})
+const createRoom = room =>
+  new PublishableEvent(40, {content: JSON.stringify(pick(roomAttrs, room))})
 
-const updateRoom = (relays, {id, ...room}) =>
-  publishEvent(relays, 41, {content: JSON.stringify(pick(roomAttrs, room)), tags: [["e", id]]})
+const updateRoom = ({id, ...room}) =>
+  new PublishableEvent(41, {content: JSON.stringify(pick(roomAttrs, room)), tags: [["e", id]]})
 
-const createChatMessage = (relays, roomId, content) =>
-  publishEvent(relays, 42, {content, tags: [["e", roomId, prop('url', first(relays)), "root"]]})
+const createChatMessage = (roomId, content, url) =>
+  new PublishableEvent(42, {content, tags: [["e", roomId, url, "root"]]})
 
-const createDirectMessage = (relays, pubkey, content) =>
-  publishEvent(relays, 4, {content, tags: [["p", pubkey]]})
+const createDirectMessage = (pubkey, content) =>
+  new PublishableEvent(4, {content, tags: [["p", pubkey]]})
 
-const createNote = (relays, content, mentions = [], topics = []) => {
+const createNote = (content, mentions = [], topics = []) => {
   mentions = mentions.map(pubkey => {
     const name = displayPerson(database.getPersonWithFallback(pubkey))
     const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
@@ -52,10 +51,10 @@ const createNote = (relays, content, mentions = [], topics = []) => {
 
   topics = topics.map(t => ["t", t])
 
-  return publishEvent(relays, 1, {content, tags: mentions.concat(topics)})
+  return new PublishableEvent(1, {content, tags: mentions.concat(topics)})
 }
 
-const createReaction = (relays, note, content) => {
+const createReaction = (note, content) => {
   const {url} = getRelayForPersonHint(note.pubkey, note)
   const tags = uniqBy(
     join(':'),
@@ -65,10 +64,10 @@ const createReaction = (relays, note, content) => {
       .concat([["p", note.pubkey, url], ["e", note.id, url, 'reply']])
   )
 
-  return publishEvent(relays, 7, {content, tags})
+  return new PublishableEvent(7, {content, tags})
 }
 
-const createReply = (relays, note, content, mentions = [], topics = []) => {
+const createReply = (note, content, mentions = [], topics = []) => {
   topics = topics.map(t => ["t", t])
   mentions = mentions.map(pubkey => {
     const {url} = getRelayForPersonHint(pubkey, note)
@@ -77,30 +76,44 @@ const createReply = (relays, note, content, mentions = [], topics = []) => {
   })
 
   const {url} = getRelayForPersonHint(note.pubkey, note)
+  const rootId = findRootId(note) || findReplyId(note) || note.id
   const tags = uniqBy(
     join(':'),
     note.tags
       .filter(t => ["e"].includes(t[0]))
       .map(t => last(t) === 'reply' ? t.slice(0, -1) : t)
-      .concat([["p", note.pubkey, url], ["e", note.id, url, 'reply']])
       .concat(mentions.concat(topics))
+      .concat([
+        ["p", note.pubkey, url],
+        ["e", note.id, url, 'reply'],
+        ["e", rootId, url, 'root'],
+      ])
   )
 
-  return publishEvent(relays, 1, {content, tags})
+  return new PublishableEvent(1, {content, tags})
 }
 
-const deleteEvent = (relays, ids) =>
-  publishEvent(relays, 5, {tags: ids.map(id => ["e", id])})
+const deleteEvent = ids =>
+  new PublishableEvent(5, {tags: ids.map(id => ["e", id])})
 
 // Utils
 
-const publishEvent = (relays, kind, {content = '', tags = []} = {}): [MyEvent, Promise<MyEvent>] => {
-  const pubkey = get(keys.pubkey)
-  const createdAt = Math.round(new Date().valueOf() / 1000)
-  const event = {kind, content, tags, pubkey, created_at: createdAt} as MyEvent
+class PublishableEvent {
+  event: Record<string, any>
+  constructor(kind, {content = '', tags = []}) {
+    const pubkey = get(keys.pubkey)
+    const createdAt = Math.round(new Date().valueOf() / 1000)
 
-  // Return the event synchronously, separate from the promise
-  return [event, network.publish(relays, event)]
+    this.event = {kind, content, tags, pubkey, created_at: createdAt}
+  }
+  async publish(relays, onProgress = null) {
+    const event = await keys.sign(this.event)
+    const promise = pool.publish({relays, event, onProgress})
+
+    sync.processEvents(event)
+
+    return [event, promise]
+  }
 }
 
 export default {

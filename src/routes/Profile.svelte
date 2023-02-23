@@ -12,7 +12,8 @@
   import user from "src/agent/user"
   import {getUserWriteRelays} from 'src/agent/relays'
   import cmd from "src/agent/cmd"
-  import {routes, toast} from "src/app/ui"
+  import {routes} from "src/app/ui"
+  import {publishWithToast} from 'src/app'
 
   let values = user.getProfile().kind0 || {}
 
@@ -44,11 +45,9 @@
   const submit = async event => {
     event.preventDefault()
 
-    cmd.updateUser(getUserWriteRelays(), values)
+    publishWithToast(getUserWriteRelays(), cmd.updateUser(values))
 
     navigate(routes.person(user.getPubkey(), 'profile'))
-
-    toast.show("info", "Your profile has been updated!")
   }
 </script>
 

@@ -1,9 +1,10 @@
 import type {Relay, Filter} from 'nostr-tools'
 import type {MyEvent} from 'src/util/types'
 import {relayInit} from 'nostr-tools'
-import {is} from 'ramda'
+import {pluck, is} from 'ramda'
 import {ensurePlural} from 'hurdak/lib/hurdak'
 import {warn, log, error} from 'src/util/logger'
+import {union, difference} from 'src/util/misc'
 import {isRelay, normalizeRelayUrl} from 'src/util/nostr'
 
 // Connection management
@@ -122,10 +123,12 @@ const getConnection = url => connections[url]
 
 const connect = url => {
   if (!isRelay(url)) {
-    throw new Error(`Invalid relay url ${url}`)
+    warn(`Invalid relay url ${url}`)
   }
 
-  url = normalizeRelayUrl(url)
+  if (url !== normalizeRelayUrl(url)) {
+    warn(`Received non-normalized relay url ${url}`)
+  }
 
   if (!connections[url]) {
     connections[url] = new Connection(url)
@@ -136,22 +139,87 @@ const connect = url => {
 
 // Public api - publish/subscribe
 
-const publish = async (relays, event) => {
+const publish = async ({relays, event, onProgress, timeout = 10_000}) => {
   if (relays.length === 0) {
     error(`Attempted to publish to zero relays`, event)
   } else {
     log(`Publishing to ${relays.length} relays`, event, relays)
   }
 
-  return Promise.all(
+  const urls = new Set(pluck('url', relays))
+
+  if (urls.size !== relays.length) {
+    warn(`Attempted to publish to non-unique relays`)
+  }
+
+  return new Promise(resolve => {
+    let resolved = false
+    const timeouts = new Set()
+    const succeeded = new Set()
+    const failed = new Set()
+
+    const getProgress = () => {
+      const completed = union(timeouts, succeeded, failed)
+      const pending = difference(urls, completed)
+
+      return {succeeded, failed, timeouts, completed, pending}
+    }
+
+    const attemptToResolve = () => {
+      // Don't report progress once we're done, even if more errors/ok come through
+      if (resolved) {
+        return
+      }
+
+      const progress = getProgress()
+
+      if (onProgress) {
+        onProgress(progress)
+      }
+
+      if (progress.pending.size === 0) {
+        log(`Finished publishing to ${urls.size} relays`, event, progress)
+        resolve(progress)
+        resolved = true
+      }
+    }
+
+    setTimeout(() => {
+      for (const {url} of relays) {
+        if (!succeeded.has(url) && !failed.has(url)) {
+          timeouts.add(url)
+        }
+      }
+
+      attemptToResolve()
+    }, timeout)
+
     relays.map(async relay => {
       const conn = await connect(relay.url)
 
       if (conn.status === CONNECTION_STATUS.READY) {
-        return conn.nostr.publish(event)
+        const pub = conn.nostr.publish(event)
+
+        pub.on('ok', () => {
+          succeeded.add(relay.url)
+          timeouts.delete(relay.url)
+          failed.delete(relay.url)
+          attemptToResolve()
+        })
+
+        pub.on('failed', reason => {
+          failed.add(relay.url)
+          timeouts.delete(relay.url)
+          attemptToResolve()
+        })
+      } else {
+        failed.add(relay.url)
+        attemptToResolve()
       }
     })
-  )
+
+    attemptToResolve()
+  })
 }
 
 type SubscribeOpts = {

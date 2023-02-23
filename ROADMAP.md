@@ -1,6 +1,10 @@
 # Current
 
+- [ ] Add messages to database after visiting a chat/dm detail *shrugs shoulders*
+- [ ] Move non-partials to pod file structure
 - [ ] Await publish, show error if it fails or times out
+  - Show loading
+- [ ] Test chat/dms
 
 # Next
 
@@ -22,6 +26,8 @@
 
 # More
 
+- [ ] Add suggested relays based on follows or topics
+- [ ] Combine alerts/messages and any other top-level subscriptions to avoid sub limit
 - [ ] Clean up person detail actions, maybe click one circle and show the rest
 - [ ] Hover badge to view profile like twitter
 - [ ] Show created date as bitcoin block height (add a setting?)
@@ -66,8 +72,12 @@
 - [ ] Release to android
   - https://svelte-native.technology/docs
   - https://ionic.io/blog/capacitor-everything-youve-ever-wanted-to-know
+- [ ] When publishing fails, enqueue and retry
+  - Track which relays the events should be published to, and which ones have succeeded
+  - Maybe notify and ask user which events to re-publish.
 - [ ] Add no-relay gossip
-  - Capture certain events in a local db
+  - Capture user events in a local db
+  - Possibly release "local relay" as a library
   - File import/export from db, NFC transfer
   - Save user notes to db
   - Fixes when you hide something, but the event doesn't get retrived, and it gets un-hidden

@@ -249,3 +249,19 @@ export const stringToColor = (value, saturation = 100, lightness = 50) => {
 
   return `hsl(${(hash % 360)}, ${saturation}%, ${lightness}%)`;
 }
+
+export const tryJson = f => {
+  try {
+    return f()
+  } catch (e) {
+    if (!e.toString().includes('JSON')) {
+      warn(e)
+    }
+  }
+}
+
+export const union = (...sets) =>
+  new Set(sets.flatMap(s => Array.from(s)))
+
+export const difference = (a, b) =>
+  new Set(Array.from(a).filter(x => !b.has(x)))

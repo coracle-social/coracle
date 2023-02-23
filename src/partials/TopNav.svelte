@@ -2,11 +2,7 @@
   import {onMount} from 'svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import {menuIsOpen} from 'src/app/ui'
-  import alerts from "src/app/alerts"
-  import messages from "src/app/messages"
-
-  const {lastCheckedAlerts, mostRecentAlert} = alerts
-  const {hasNewMessages} = messages
+  import {newAlerts} from "src/app/alerts"
 
   const toggleMenu = () => menuIsOpen.update(x => !x)
 
@@ -28,7 +24,7 @@
     <img alt="Coracle Logo" src="/images/favicon.png" class="w-8" />
     <h1 class="staatliches text-3xl">Coracle</h1>
   </Anchor>
-  {#if $mostRecentAlert > $lastCheckedAlerts || $hasNewMessages}
+  {#if $newAlerts}
   <div class="w-2 h-2 rounded bg-accent absolute top-4 left-12 lg:hidden" />
   {/if}
 </div>

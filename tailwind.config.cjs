@@ -4,6 +4,10 @@ module.exports = {
     "./index.html",
     "./src/**/*.{js,svelte}",
   ],
+  safelist: [
+    "w-4",
+    "h-4",
+  ],
   theme: {
     extend: {},
     colors: {

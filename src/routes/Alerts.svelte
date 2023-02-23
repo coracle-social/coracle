@@ -1,5 +1,5 @@
 <script>
-  import {sortBy} from 'ramda'
+  import {sortBy, assoc} from 'ramda'
   import {onMount} from 'svelte'
   import {fly} from 'svelte/transition'
   import {ellipsize} from 'hurdak/lib/hurdak'
@@ -11,14 +11,14 @@
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import Alert from 'src/partials/Alert.svelte'
   import database from 'src/agent/database'
-  import alerts from 'src/app/alerts'
+  import {lastChecked} from 'src/app/alerts'
   import {modal, routes} from 'src/app/ui'
 
   let limit = 0
   let notes = null
 
-  onMount(async () => {
-    alerts.lastCheckedAlerts.set(now())
+  onMount(() => {
+    lastChecked.update(assoc('alerts', now()))
 
     return createScroller(async () => {
       limit += 10

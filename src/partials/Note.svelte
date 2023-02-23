@@ -1,13 +1,13 @@
 <script lang="ts">
   import cx from 'classnames'
   import {nip19} from 'nostr-tools'
-  import {last, whereEq, without, uniq, pluck, reject, propEq, find} from 'ramda'
+  import {find, last, whereEq, without, uniq, pluck, reject, propEq} from 'ramda'
   import {onMount} from 'svelte'
   import {tweened} from 'svelte/motion'
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {quantify} from 'hurdak/lib/hurdak'
-  import {Tags, findReply, findRoot, findRootId, findReplyId, displayPerson, isLike} from "src/util/nostr"
+  import {Tags, findRootId, findReplyId, displayPerson, isLike} from "src/util/nostr"
   import {extractUrls} from "src/util/html"
   import ImageCircle from 'src/partials/ImageCircle.svelte'
   import Preview from 'src/partials/Preview.svelte'
@@ -22,6 +22,7 @@
   import database from 'src/agent/database'
   import cmd from 'src/agent/cmd'
   import {routes} from 'src/app/ui'
+  import {publishWithToast} from 'src/app'
 
   export let note
   export let depth = 0
@@ -94,7 +95,7 @@
     }
 
     const relays = getEventPublishRelays(note)
-    const [event] = cmd.createReaction(relays, note, content)
+    const [event] = await cmd.createReaction(note, content).publish(relays)
 
     if (content === '+') {
       likes = likes.concat(event)
@@ -106,8 +107,7 @@
   }
 
   const deleteReaction = e => {
-    const relays = getEventPublishRelays(note)
-    cmd.deleteEvent(relays, [e.id])
+    cmd.deleteEvent([e.id]).publish(getEventPublishRelays(note))
 
     if (e.content === '+') {
       likes = reject(propEq('pubkey', $profile.pubkey), likes)
@@ -142,24 +142,29 @@
     }
   }
 
-  const sendReply = () => {
+  const sendReply = async () => {
     let {content, mentions, topics} = reply.parse()
 
     if (content) {
       mentions = uniq(mentions.concat(replyMentions))
 
       const relays = getEventPublishRelays(note)
-      const [event] = cmd.createReply(relays, note, content, mentions, topics)
+      const thunk = cmd.createReply(note, content, mentions, topics)
+      const [event, promise] = await publishWithToast(relays, thunk)
 
-      toast.show("info", {
-        text: `Your note has been created!`,
-        link: {
-          text: 'View',
-          href: "/" + nip19.neventEncode({
-            id: event.id,
-            relays: pluck('url', relays.slice(0, 3)),
-          }),
-        },
+      promise.then(({succeeded}) => {
+        if (succeeded.size > 0) {
+          toast.show("info", {
+            text: `Your note has been created!`,
+            link: {
+              text: 'View',
+              href: "/" + nip19.neventEncode({
+                id: event.id,
+                relays: pluck('url', relays.slice(0, 3)),
+              }),
+            },
+          })
+        }
       })
 
       resetReply()
@@ -234,16 +239,20 @@
         </Anchor>
       </div>
       <div class="flex flex-col gap-2">
-        {#if findReply(note) && showParent}
-          <small class="text-light">
-            Reply to <Anchor on:click={goToParent}>{findReplyId(note).slice(0, 8)}</Anchor>
-          </small>
-        {/if}
-        {#if findRoot(note) && findRoot(note) !== findReply(note) && showParent}
-          <small class="text-light">
-            Go to <Anchor on:click={goToRoot}>root</Anchor>
-          </small>
-        {/if}
+        <div class="flex gap-2">
+          {#if findReplyId(note) && showParent}
+            <small class="text-light">
+              <i class="fa fa-code-merge" />
+              <Anchor on:click={goToParent}>View Parent</Anchor>
+            </small>
+          {/if}
+          {#if findRootId(note) && findRootId(note) !== findReplyId(note) && showParent}
+            <small class="text-light">
+              <i class="fa fa-code-pull-request" />
+              <Anchor on:click={goToRoot}>View Thread</Anchor>
+            </small>
+          {/if}
+        </div>
         {#if flag}
         <p class="text-light border-l-2 border-solid border-medium pl-4">
           You have flagged this content as offensive.
@@ -259,16 +268,18 @@
           {/if}
         </div>
         <div class="flex justify-between text-light" on:click={e => e.stopPropagation()}>
-          <div class="flex gap-6">
-            <div>
+          <div class="flex">
+            <div class="w-16">
               <button class="fa fa-reply cursor-pointer" on:click={startReply} />
               {$repliesCount}
             </div>
-            <div class={cx({'text-accent': like})}>
-              <button class={cx('fa fa-heart cursor-pointer', {'fa-beat fa-beat-custom': like})} on:click={() => like ? deleteReaction(like) : react("+")} />
+            <div class={cx('w-16', {'text-accent': like})}>
+              <button
+                class={cx('fa fa-heart cursor-pointer', {'fa-beat fa-beat-custom': like})}
+                on:click={() => like ? deleteReaction(like) : react("+")} />
               {$likesCount}
             </div>
-            <div>
+            <div class="w-16">
               <button class="fa fa-flag cursor-pointer" on:click={() => react("-")} />
               {$flagsCount}
             </div>

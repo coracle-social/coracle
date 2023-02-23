@@ -91,6 +91,8 @@ export const extractUrls = content => {
 }
 
 export const renderContent = content => {
+  /* eslint no-useless-escape: 0 */
+
   // Escape html
   content = escapeHtml(content)
 
@@ -98,18 +100,19 @@ export const renderContent = content => {
   for (let url of extractUrls(content)) {
     const $a = document.createElement('a')
 
-    if (!url.includes('://')) {
-      url = 'https://' + url
+    // It's common for a period to end a url, trim it off
+    if (url.endsWith('.')) {
+      url = url.slice(0, -1)
     }
 
-    $a.href = url
+    const href = url.includes('://') ? url : 'https://' + url
+    const display = url.replace(/https?:\/\/(www\.)?/, '')
+
+    $a.href = href
     $a.target = "_blank"
     $a.className = "underline"
+    $a.innerText = ellipsize(display, 50)
 
-    /* eslint no-useless-escape: 0 */
-    $a.innerText = ellipsize(url.replace(/https?:\/\/(www\.)?/, ''), 50)
-
-    // If the url is on its own line, remove it entirely. Otherwise, replace it with the link
     content = content.replace(url, $a.outerHTML)
   }
 

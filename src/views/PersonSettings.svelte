@@ -9,6 +9,7 @@
   import {getUserWriteRelays} from 'src/agent/relays'
   import cmd from 'src/agent/cmd'
   import {modal} from 'src/app/ui'
+  import {publishWithToast} from 'src/app'
 
   const muffle = user.getProfile().muffle || []
   const muffleOptions = ['Never', 'Sometimes', 'Often', 'Always']
@@ -29,7 +30,7 @@
       .concat([["p", $modal.person.pubkey, muffleValue.toString()]])
       .filter(t => last(t) !== "1")
 
-    cmd.muffle(getUserWriteRelays(), muffleTags)
+    publishWithToast(getUserWriteRelays(), cmd.muffle(muffleTags))
 
     history.back()
   }

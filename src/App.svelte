@@ -23,8 +23,7 @@
   import user from 'src/agent/user'
   import {loadAppData} from "src/app"
   import alerts from "src/app/alerts"
-  import messages from "src/app/messages"
-  import {modal, toast, routes, menuIsOpen, logUsage} from "src/app/ui"
+  import {modal, routes, menuIsOpen, logUsage} from "src/app/ui"
   import RelayCard from "src/partials/RelayCard.svelte"
   import Anchor from 'src/partials/Anchor.svelte'
   import Content from 'src/partials/Content.svelte'
@@ -32,6 +31,7 @@
   import Modal from 'src/partials/Modal.svelte'
   import SideNav from 'src/partials/SideNav.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
+  import Toast from 'src/partials/Toast.svelte'
   import TopNav from 'src/partials/TopNav.svelte'
   import ChatEdit from "src/views/ChatEdit.svelte"
   import NoteCreate from "src/views/NoteCreate.svelte"
@@ -46,13 +46,14 @@
   import AddRelay from "src/routes/AddRelay.svelte"
   import Alerts from "src/routes/Alerts.svelte"
   import Bech32Entity from "src/routes/Bech32Entity.svelte"
-  import Chat from "src/routes/Chat.svelte"
-  import ChatRoom from "src/routes/ChatRoom.svelte"
+  import ChatList from "src/routes/ChatList.svelte"
+  import ChatDetail from "src/routes/ChatDetail.svelte"
+  import MessagesList from "src/routes/MessagesList.svelte"
+  import MessagesDetail from "src/routes/MessagesDetail.svelte"
   import Debug from "src/routes/Debug.svelte"
   import Keys from "src/routes/Keys.svelte"
   import Login from "src/routes/Login.svelte"
   import Logout from "src/routes/Logout.svelte"
-  import Messages from "src/routes/Messages.svelte"
   import NotFound from "src/routes/NotFound.svelte"
   import Notes from "src/routes/Notes.svelte"
   import Person from "src/routes/Person.svelte"
@@ -186,15 +187,16 @@
         <Person npub={params.npub} activeTab={params.activeTab} />
         {/key}
       </Route>
-      <Route path="/chat" component={Chat} />
+      <Route path="/chat" component={ChatList} />
       <Route path="/chat/:entity" let:params>
         {#key params.entity}
-        <ChatRoom entity={params.entity} />
+        <ChatDetail entity={params.entity} />
         {/key}
       </Route>
+      <Route path="/messages" component={MessagesList} />
       <Route path="/messages/:entity" let:params>
         {#key params.entity}
-        <Messages entity={params.entity} />
+        <MessagesDetail entity={params.entity} />
         {/key}
       </Route>
       <Route path="/keys" component={Keys} />
@@ -259,28 +261,7 @@
     </Modal>
     {/if}
 
-    {#if $toast}
-      <div
-        class="fixed top-0 left-0 right-0 z-20 pointer-events-none"
-        transition:fly={{y: -50, duration: 300}}>
-        <div
-          class="rounded bg-accent shadow-xl mx-24 sm:mx-32 mt-2 p-3 text-white text-center
-                 border border-dark pointer-events-auto">
-          {#if is(String, $toast.message)}
-          {$toast.message}
-          {:else}
-          <div>
-            {$toast.message.text}
-            {#if $toast.message.link}
-            <a class="ml-1 underline" href={$toast.message.link.href}>
-              {$toast.message.link.text}
-            </a>
-            {/if}
-          </div>
-          {/if}
-        </div>
-      </div>
-    {/if}
+    <Toast />
   </div>
 </Router>
 
