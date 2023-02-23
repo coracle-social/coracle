@@ -295,10 +295,10 @@ const verifyNip05 = (pubkey, as) =>
         )
 
         database.routes.bulkPut(
-          createMap('id', urls.flatMap(url =>[
+          createMap('id', urls.flatMap(url => [
             calculateRoute(pubkey, url, 'nip05', 'write', now()),
             calculateRoute(pubkey, url, 'nip05', 'read', now()),
-          ]))
+          ]).filter(identity))
         )
       }
     }

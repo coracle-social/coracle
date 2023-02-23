@@ -4,6 +4,7 @@
   import {poll} from "src/util/misc"
   import {between} from 'hurdak/lib/hurdak'
   import Content from "src/partials/Content.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/views/notes/Feed.svelte"
   import database from 'src/agent/database'
   import pool from 'src/agent/pool'
@@ -57,21 +58,30 @@
         {message}
       </p>
     </div>
-    {#if joined}
-    {#if $relays.length > 1}
-    <button
-      class="flex gap-3 items-center text-light"
-      on:click={() => user.removeRelay(relay.url)}>
-      <i class="fa fa-right-from-bracket" /> Leave
-    </button>
-    {/if}
-    {:else}
-    <button
-      class="flex gap-3 items-center text-light"
-      on:click={() => user.addRelay(relay.url)}>
-      <i class="fa fa-right-to-bracket" /> Join
-    </button>
-    {/if}
+    <div class="whitespace-nowrap flex gap-3 items-center flex-wrap">
+      {#if relay.contact}
+      <Anchor type="button-circle" href={`mailto:${relay.contact}`}>
+        <i class="fa fa-envelope" />
+      </Anchor>
+      {/if}
+      {#if joined}
+      {#if $relays.length > 1}
+      <Anchor
+        type="button"
+        class="flex gap-2 items-center rounded-full"
+        on:click={() => user.removeRelay(relay.url)}>
+        <i class="fa fa-right-from-bracket" /> Leave
+      </Anchor>
+      {/if}
+      {:else}
+      <Anchor
+        type="button"
+        class="flex gap-2 items-center rounded-full"
+        on:click={() => user.addRelay(relay.url)}>
+        <i class="fa fa-right-to-bracket" /> Join
+      </Anchor>
+      {/if}
+    </div>
   </div>
   {#if relay.description}
   <p>{relay.description}</p>

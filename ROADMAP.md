@@ -1,10 +1,7 @@
 # Current
 
-- [ ] Add messages to database after visiting a chat/dm detail *shrugs shoulders*
-- [ ] Move non-partials to pod file structure
-- [ ] Await publish, show error if it fails or times out
-  - Show loading
-- [ ] Test chat/dms
+- [ ] Fix pagination
+- [ ] Relays get marked as slow too easily now
 
 # Next
 
