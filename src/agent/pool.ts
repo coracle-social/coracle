@@ -31,7 +31,7 @@ class Connection {
     this.status = 'new'
     this.stats = {
       timeouts: 0,
-      subCount: 0,
+      subsCount: 0,
       eoseCount: 0,
       eoseTimer: 0,
       eventsCount: 0,
@@ -87,8 +87,8 @@ class Connection {
       return [0, "Failed to connect"]
     }
 
-    const {timeouts, subCount, eoseTimer, eoseCount} = this.stats
-    const timeoutRate = timeouts > 0 ? timeouts / subCount : null
+    const {timeouts, subsCount, eoseTimer, eoseCount} = this.stats
+    const timeoutRate = timeouts > 0 ? timeouts / subsCount : null
     const eoseQuality = eoseCount > 0 ? Math.max(1, 500 / (eoseTimer / eoseCount)) : null
 
     if (timeoutRate && timeoutRate > 0.5) {

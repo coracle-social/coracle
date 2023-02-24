@@ -1,10 +1,10 @@
 <script lang="ts">
   import {onMount} from 'svelte'
-  import {partition, last, propEq, uniqBy, sortBy, prop} from 'ramda'
+  import {partition, propEq, uniqBy, sortBy, prop} from 'ramda'
   import {slide} from 'svelte/transition'
   import {quantify} from 'hurdak/lib/hurdak'
   import {createScroller, now, Cursor} from 'src/util/misc'
-  import {asDisplayEvent, Tags} from 'src/util/nostr'
+  import {asDisplayEvent} from 'src/util/nostr'
   import Spinner from 'src/partials/Spinner.svelte'
   import Content from 'src/partials/Content.svelte'
   import Note from "src/views/notes/Note.svelte"
@@ -22,14 +22,9 @@
   const since = now()
   const maxNotes = 100
   const cursor = new Cursor()
-  const {profile} = user
-  const muffle = Tags
-    .wrap(($profile?.muffle || []).filter(t => Math.random() > parseFloat(last(t))))
-    .values().all()
 
   const processNewNotes = async newNotes => {
-    // Remove people we're not interested in hearing about, sort by created date
-    newNotes = newNotes.filter(e => !muffle.includes(e.pubkey))
+    newNotes = user.muffle(newNotes)
 
     // Load parents before showing the notes so we have hierarchy. Give it a short
     // timeout, since this is really just a nice-to-have
@@ -46,7 +41,7 @@
       depth: 2,
       notes: combined,
       onChunk: context => {
-        notes = network.applyContext(notes, context)
+        notes = network.applyContext(notes, user.muffle(context))
       },
     })
 

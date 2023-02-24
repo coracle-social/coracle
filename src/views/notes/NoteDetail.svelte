@@ -8,6 +8,7 @@
   import Content from 'src/partials/Content.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
   import Note from 'src/views/notes/Note.svelte'
+  import user from 'src/agent/user'
   import network from 'src/agent/network'
   import {sampleRelays} from 'src/agent/relays'
 
@@ -38,7 +39,7 @@
         depth: 6,
         notes: [note],
         onChunk: context => {
-          note = first(network.applyContext([note], context))
+          note = first(network.applyContext([note], user.muffle(context)))
         },
       })
     }

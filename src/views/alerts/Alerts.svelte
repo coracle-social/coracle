@@ -11,6 +11,7 @@
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import Alert from 'src/views/alerts/Alert.svelte'
   import database from 'src/agent/database'
+  import user from 'src/agent/user'
   import {lastChecked} from 'src/app/alerts'
   import {modal, routes} from 'src/app/ui'
 
@@ -25,7 +26,7 @@
 
       // Filter out alerts for which we failed to find the required context. The bug
       // is really upstream of this, but it's an easy fix
-      const events = database.alerts.all()
+      const events = user.mute(database.alerts.all())
         .filter(e => e.replies.length > 0 || e.likedBy.length > 0 || e.isMention)
 
       notes = sortBy(e => -e.created_at, events).slice(0, limit)

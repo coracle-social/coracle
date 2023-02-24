@@ -1,7 +1,6 @@
 # Current
 
 - [ ] Fix pagination
-- [ ] Relays get marked as slow too easily now
 
 # Next
 
@@ -23,6 +22,7 @@
 
 # More
 
+- [ ] Add new DM button to dms list
 - [ ] Add suggested relays based on follows or topics
 - [ ] Combine alerts/messages and any other top-level subscriptions to avoid sub limit
 - [ ] Clean up person detail actions, maybe click one circle and show the rest

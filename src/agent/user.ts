@@ -1,7 +1,8 @@
 import type {Person} from 'src/util/types'
 import type {Readable} from 'svelte/store'
-import {prop, find, pipe, assoc, whereEq, when, concat, reject, nth, map} from 'ramda'
+import {last, prop, find, pipe, assoc, whereEq, when, concat, reject, nth, map} from 'ramda'
 import {synced} from 'src/util/misc'
+import {Tags} from 'src/util/nostr'
 import {derived} from 'svelte/store'
 import database from 'src/agent/database'
 import keys from 'src/agent/keys'
@@ -90,6 +91,34 @@ const user = {
   canPublish,
   getProfile: () => profileCopy,
   getPubkey: () => profileCopy?.pubkey,
+  muffle: events => {
+    const muffle = user.getMuffle()
+
+    return events.filter(e => !muffle.has(e.pubkey))
+  },
+  getMuffle: () => {
+    return new Set(
+      Tags
+        .wrap((profileCopy?.muffle || []))
+        .filter(t => Math.random() > parseFloat(last(t)))
+        .values()
+        .all()
+    )
+  },
+  mute: events => {
+    const mutes = user.getMutes()
+
+    return events.filter(e => !mutes.has(e.pubkey))
+  },
+  getMutes: () => {
+    return new Set(
+      Tags
+        .wrap((profileCopy?.muffle || []))
+        .filter(t => parseFloat(last(t)) === 0)
+        .values()
+        .all()
+    )
+  },
 
   // Petnames
 

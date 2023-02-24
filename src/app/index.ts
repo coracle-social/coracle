@@ -99,6 +99,10 @@ export const publishWithToast = (relays, thunk) =>
       extra.push(`${timeouts.size} timed out`)
     }
 
+    if (pending.size > 0) {
+      extra.push(`${pending.size} pending`)
+    }
+
     if (extra.length > 0) {
       message += ` (${extra.join(', ')})`
     }

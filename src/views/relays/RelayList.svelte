@@ -12,7 +12,7 @@
 
 <div in:fly={{y: 20}}>
   <Content>
-    <div class="flex justify-between mt-10">
+    <div class="flex justify-between">
       <div class="flex gap-2 items-center">
         <i class="fa fa-server fa-lg" />
         <h2 class="staatliches text-2xl">Your relays</h2>

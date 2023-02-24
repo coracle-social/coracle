@@ -34,6 +34,9 @@ export class Tags {
   values() {
     return new Tags(this.tags.map(t => t[1]))
   }
+  filter(f) {
+    return new Tags(this.tags.filter(f))
+  }
   type(type) {
     return new Tags(this.tags.filter(t => t[0] === type))
   }
