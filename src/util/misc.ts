@@ -1,5 +1,5 @@
 import {debounce, throttle} from 'throttle-debounce'
-import {path as getPath, allPass, pipe, isNil, complement, equals, is, pluck, sum, identity, sortBy} from "ramda"
+import {aperture, path as getPath, allPass, pipe, isNil, complement, equals, is, pluck, sum, identity, sortBy} from "ramda"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from 'svelte/store'
 import {isObject} from 'hurdak/lib/hurdak'
@@ -152,14 +152,19 @@ export class Cursor {
     this.until = now()
     this.limit = limit
   }
-  onChunk(events) {
-    const minDelta = timedelta(1, 'minutes')
-    const maxDelta = timedelta(1, 'hours')
-    const delta = pluck('created_at', events).reduce(Math.min, 0) || 0
+  update(events) {
+    // update takes all events in a feed and figures out the best place to set `until`
+    // in order to find older events without re-fetching events that we've already seen.
+    // There are various edge cases:
+    // - When we have zero events, there's nothing we can do, presumably we have everything.
+    // - Sometimes relays send us extremely old events. Use median to avoid too-large gaps
+    if (events.length > 1) {
+      const timestamps = sortBy(identity, pluck('created_at', events))
+      const gaps = aperture(2, timestamps).map(([a, b]) => b - a)
+      const gap = quantile(gaps, 0.5)
 
-    // If the delta is very large, size it down. Relays with sparse data
-    // can slide the window very quickly, skipping a lot of events on more dense relays
-    this.until -= Math.max(minDelta, Math.min(maxDelta, delta))
+      this.until -= Math.round(gap * events.length)
+    }
   }
 }
 
@@ -262,3 +267,14 @@ export const union = (...sets) =>
 
 export const difference = (a, b) =>
   new Set(Array.from(a).filter(x => !b.has(x)))
+
+export const quantile = (a, q) => {
+    const sorted = sortBy(identity, a)
+    const pos = (sorted.length - 1) * q
+    const base = Math.floor(pos)
+    const rest = pos - base
+
+    return isNil(sorted[base + 1])
+      ? sorted[base]
+      : sorted[base] + rest * (sorted[base + 1] - sorted[base])
+}

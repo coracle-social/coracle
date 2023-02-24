@@ -12,7 +12,7 @@
   transition:fly={{y: -50, duration: 300}}>
   <div
     class={cx(
-      "rounded shadow-xl mx-24 sm:mx-32 mt-2 p-3 text-center border pointer-events-auto",
+      "rounded shadow-xl m-2 ml-16 sm:ml-2 p-3 text-center border pointer-events-auto",
       "max-w-xl flex-grow transition-all",
       {
         'bg-dark border-medium text-white': $toast.type === 'info',

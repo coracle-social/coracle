@@ -68,8 +68,7 @@
     notes = uniqBy(prop('id'), notes.concat(bottom))
     notesBuffer = top.concat(notesBuffer).slice(0, maxNotes)
 
-    // Check all notes every time to stay very conservative with moving the window
-    cursor.onChunk(notes)
+    cursor.update(notes)
   }
 
   onMount(() => {

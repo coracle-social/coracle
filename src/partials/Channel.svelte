@@ -72,12 +72,11 @@
     const scroller = createScroller(
       async () => {
         await loadMessages(cursor, newMessages => {
-          cursor.onChunk(newMessages)
-
           stickToBottom('auto', () => {
             loading = sleep(30_000)
             messages = sortBy(e => -e.created_at, newMessages.concat(messages))
             network.loadPeople(pluck('pubkey', newMessages))
+            cursor.update(messages)
           })
         })
       },
