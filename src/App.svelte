@@ -234,12 +234,6 @@
         <NoteCreate pubkey={$modal.pubkey} />
       {:else if $modal.type === 'relay/add'}
         <AddRelay />
-      {:else if $modal.type === 'relay/list'}
-        <Content>
-          {#each $modal.relays as relay}
-          <RelayCard theme="black" showControls {relay} />
-          {/each}
-        </Content>
       {:else if $modal.type === 'signUp'}
         <SignUp />
       {:else if $modal.type === 'room/edit'}

@@ -10,6 +10,9 @@
   import {Tags, findRootId, findReplyId, displayPerson, isLike} from "src/util/nostr"
   import {extractUrls} from "src/util/html"
   import ImageCircle from 'src/partials/ImageCircle.svelte'
+  import Content from 'src/partials/Content.svelte'
+  import RelayCard from 'src/views/relays/RelayCard.svelte'
+  import Modal from 'src/partials/Modal.svelte'
   import Preview from 'src/partials/Preview.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import {toast, modal} from "src/app/ui"
@@ -38,6 +41,7 @@
   let replyMentions = getDefaultReplyMentions()
   let replyContainer = null
   let visibleNotes = []
+  let showRelays = false
 
   const {profile} = user
   const links = extractUrls(note.content)
@@ -83,10 +87,6 @@
     const relays = getRelaysForEventParent(note)
 
     modal.set({type: 'note/detail', note: {id: findRootId(note)}, relays})
-  }
-
-  const showActiveRelays = () => {
-    modal.set({type: 'relay/list', relays: [{url: note.seen_on}]})
   }
 
   const react = async content => {
@@ -285,7 +285,7 @@
             </div>
           </div>
           <div
-            class="cursor-pointer flex gap-1 items-center" on:click={showActiveRelays}>
+            class="cursor-pointer flex gap-1 items-center" on:click={() => { showRelays = true }}>
             <i class="fa fa-server" />
             <div
               class="h-1 w-1 rounded-full"
@@ -340,6 +340,14 @@
   <svelte:self showParent={false} note={r} depth={depth - 1} {invertColors} {anchorId} {showContext} />
   {/each}
 </div>
+{/if}
+
+{#if showRelays}
+<Modal nested onEscape={() => { showRelays = false }}>
+  <Content>
+    <RelayCard theme="black" showControls relay={{url: note.seen_on}} />
+  </Content>
+</Modal>
 {/if}
 
 {/if}
