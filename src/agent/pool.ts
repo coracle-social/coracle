@@ -248,6 +248,10 @@ const subscribe = async (
     log(`Starting subscription ${id} with ${relays.length} relays`, filter, relays)
   }
 
+  if (relays.length !== new Set(pluck('url', relays)).size) {
+    error(`Subscribed to non-unique relays`, relays)
+  }
+
   const promises = relays.map(async relay => {
     const conn = await connect(relay.url)
 

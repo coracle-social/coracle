@@ -1,6 +1,5 @@
 # Current
 
-- [ ] Relay detail page, with more information about the relay + tabbed feeds (notes, more?)
 - [ ] Add customize icon and route with editable custom view cards using "lists" nip
   - nevent1qqspjcqw2hu5gfcpkrjhs0aqvxuzjgtp50l375mcqjfpmk48cg5hevgpr3mhxue69uhkummnw3ez6un9d3shjtnhd3m8xtnnwpskxegpzamhxue69uhkummnw3ezuendwsh8w6t69e3xj7spramhxue69uhkummnw3ez6un9d3shjtnwdahxxefwv93kzer9d4usz9rhwden5te0wfjkccte9ejxzmt4wvhxjmcpr9mhxue69uhkummnw3ezuer9d3hjuum0ve68wctjv5n8hwfg
   - [ ] Custom views should combine pubkeys, relays, event ids, and topics
@@ -18,6 +17,7 @@
 
 # More
 
+- [ ] Support https://github.com/nostr-protocol/nips/pull/211 as a bech32 entity
 - [ ] Add new DM button to dms list
 - [ ] Add suggested relays based on follows or topics
 - [ ] Combine alerts/messages and any other top-level subscriptions to avoid sub limit

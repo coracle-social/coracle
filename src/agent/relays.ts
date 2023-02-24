@@ -157,7 +157,7 @@ export const sampleRelays = (relays, scale = 1) => {
     )
   }
 
-  return relays
+  return uniqByUrl(relays)
 }
 
 export const aggregateScores = relayGroups => {

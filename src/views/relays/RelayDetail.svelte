@@ -1,7 +1,7 @@
 <script lang="ts">
   import {last, find, propEq} from 'ramda'
   import {onMount} from 'svelte'
-  import {poll} from "src/util/misc"
+  import {poll, stringToColor} from "src/util/misc"
   import {between} from 'hurdak/lib/hurdak'
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -41,7 +41,11 @@
   <div class="flex gap-2 items-center justify-between">
     <div class="flex gap-2 items-center text-xl">
       <i class={relay.url.startsWith('wss') ? "fa fa-lock" : "fa fa-unlock"} />
-      <span>{last(relay.url.split('://'))}</span>
+      <span
+        class="border-b border-solid"
+        style={`border-color: ${stringToColor(relay.url)}`}>
+        {last(relay.url.split('://'))}
+      </span>
       <span
         on:mouseout={() => {showStatus = false}}
         on:mouseover={() => {showStatus = true}}
@@ -86,6 +90,8 @@
   {#if relay.description}
   <p>{relay.description}</p>
   {/if}
-  <div class="border-b border-solid border-medium -mx-6" />
+</Content>
+<div class="border-b border-solid border-medium" />
+<Content>
   <Feed relays={[relay]} filter={{kinds: [1]}} />
 </Content>

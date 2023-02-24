@@ -242,14 +242,14 @@ export const where = filters =>
 
 // https://stackoverflow.com/a/21682946
 //
-export const stringToColor = (value, saturation = 100, lightness = 50) => {
+export const stringToColor = (value, {saturation = 100, lightness = 50, opacity = 1} = {}) => {
   let hash = 0;
   for (let i = 0; i < value.length; i++) {
     hash = value.charCodeAt(i) + ((hash << 5) - hash)
     hash = hash & hash
   }
 
-  return `hsl(${(hash % 360)}, ${saturation}%, ${lightness}%)`;
+  return `hsl(${(hash % 360)}, ${saturation}%, ${lightness}%, ${opacity})`;
 }
 
 export const tryJson = f => {
