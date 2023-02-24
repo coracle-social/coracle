@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.14
+
+- [x] Improve paste support
+
 ## 0.2.13
 
 - [x] Remove popular tab, add follows feed back in

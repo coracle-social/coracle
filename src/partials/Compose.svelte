@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {prop, reject, sortBy, last} from 'ramda'
+  import {prop, repeat, reject, sortBy, last} from 'ramda'
   import {onMount} from 'svelte'
   import {ensurePlural} from 'hurdak/lib/hurdak'
   import {fly} from 'svelte/transition'
@@ -115,7 +115,7 @@
       const word = getWord()
 
       if (!text.match(/\s$/) && word.startsWith('@')) {
-        suggestions = search(word.slice(1)).slice(0, 3)
+        suggestions = search(word.slice(1)).slice(0, 5)
       } else {
         index = 0
         suggestions = []
@@ -151,23 +151,26 @@
   }
 
   export const type = text => {
+    input.innerText += text
+
     for (const c of Array.from(text)) {
-      input.innerText += c
-
-      const selection = document.getSelection()
-      const extent = fromParentOffset(input, input.innerText.length)
-
-      selection.setBaseAndExtent(...extent, ...extent)
-
       onKeyUp({key: c})
     }
 
+    const selection = document.getSelection()
+    const extent = fromParentOffset(input, input.textContent.length)
+
+    selection.setBaseAndExtent(...extent, ...extent)
   }
 
   export const parse = () => {
     // Interpolate mentions
     let offset = 0
+
+    // For whatever reason the textarea gives us 2x - 1 line breaks
     let content = input.innerText
+      .replace(/(\n+)/g, x => repeat('\n', Math.ceil(x.length / 2)).join(''))
+
     const validMentions = sortBy(prop('end'), reject(prop('invalid'), mentions))
     for (const [i, {end, length}] of validMentions.entries()) {
       const offsetEnd = end - offset
@@ -192,14 +195,13 @@
     input.addEventListener('paste', e => {
       e.preventDefault()
 
-      const clipboardData = e.clipboardData || (window as any).clipboardData
-      const text = clipboardData.getData('text')
       const selection = window.getSelection()
 
       if (selection.rangeCount) {
         selection.deleteFromDocument()
-        selection.getRangeAt(0).insertNode(document.createTextNode(text))
       }
+
+      type((e.clipboardData || (window as any).clipboardData).getData('text'))
     })
   })
 
@@ -207,7 +209,7 @@
 
 <div class="flex">
   <div
-    class="text-white w-full outline-0 p-2"
+    class="text-white w-full outline-0 p-2 min-w-0"
     autofocus
     contenteditable
     bind:this={input}
