@@ -12,6 +12,12 @@
 - [x] Speed up database restore/drop by lumping tables into a single key
 - [x] Fix user display in mentions
 - [x] Improve login when profile isn't found to avoid stomping user relay settings
+- [x] Improve pagination using a reactive offset
+- [x] Hide replies based on muffle
+- [x] Add relay detail page with contact info, and global feed
+- [x] Split chat and DMs into two separate sections
+- [x] Add DM requests as a separate tab
+- [x] Add mentions to alerts
 
 ## 0.2.12
 
