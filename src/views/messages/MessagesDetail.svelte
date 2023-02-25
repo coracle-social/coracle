@@ -3,7 +3,7 @@
   import {assoc} from 'ramda'
   import {renameProp} from 'hurdak/lib/hurdak'
   import {toHex, displayPerson} from 'src/util/nostr'
-  import {now} from 'src/util/misc'
+  import {now, formatTimestamp} from 'src/util/misc'
   import {Tags} from 'src/util/nostr'
   import Channel from 'src/partials/Channel.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
@@ -97,11 +97,17 @@
     'ml-12 justify-end': message.person.pubkey === user.getPubkey(),
     'mr-12': message.person.pubkey !== user.getPubkey(),
   })}>
-    <div class={cx('rounded-2xl py-2 px-4 flex max-w-xl', {
-      'bg-light text-black rounded-br-none': message.person.pubkey === user.getPubkey(),
+    <div class={cx('rounded-2xl py-2 px-4 max-w-xl inline-block', {
+      'bg-light text-black rounded-br-none text-end': message.person.pubkey === user.getPubkey(),
       'bg-dark rounded-bl-none': message.person.pubkey !== user.getPubkey(),
     })}>
-      {@html renderNote(message, {showEntire: true})}
+      <div>{@html renderNote(message, {showEntire: true})}</div>
+      <small
+        class="mt-1"
+        class:text-dark={message.person.pubkey === user.getPubkey()}
+        class:text-light={message.person.pubkey !== user.getPubkey()}>
+        {formatTimestamp(message.created_at)}
+      </small>
     </div>
   </div>
 </Channel>
