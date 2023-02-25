@@ -28,11 +28,13 @@ const sign = async event => {
 
   event.pubkey = get(pubkey)
   event.id = getEventHash(event)
-  event.sig = ext
-    ? prop('sig', await ext.signEvent(event))
-    : signEvent(event, get(privkey))
 
-  return event
+  if (ext) {
+    return await ext.signEvent(event)
+  } else {
+    event.sign = signEvent(event, get(privkey))
+    return event
+  }
 }
 
 const getCrypt = () => {
