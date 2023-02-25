@@ -15,6 +15,7 @@
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
   import Relays from "src/views/person/Relays.svelte"
+  import Details from 'src/views/person/Details.svelte'
   import user from "src/agent/user"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
@@ -166,7 +167,7 @@
     </div>
   </div>
 
-  <Tabs tabs={['notes', 'likes', 'relays']} {activeTab} {setActiveTab} />
+  <Tabs tabs={['notes', 'likes', 'relays', 'details']} {activeTab} {setActiveTab} />
 
   {#if activeTab === 'notes'}
   <Notes {pubkey} />
@@ -182,6 +183,8 @@
       Unable to show network for this person.
     </Content>
     {/if}
+  {:else if activeTab === "details"}
+    <Details nip05identifier={person?.verified_as} {person} />
   {/if}
 </Content>
 
