@@ -3,6 +3,7 @@
 ## 0.2.14
 
 - [x] Improve paste support
+- [x] Add timestamps to messages
 
 ## 0.2.13
 
