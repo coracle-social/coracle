@@ -15,6 +15,7 @@
 
   export let filter
   export let relays = []
+  export let shouldDisplay = null
 
   let notes = []
   let notesBuffer = []
@@ -25,6 +26,10 @@
 
   const processNewNotes = async newNotes => {
     newNotes = user.muffle(newNotes)
+
+    if (shouldDisplay) {
+      newNotes = newNotes.filter(shouldDisplay)
+    }
 
     // Load parents before showing the notes so we have hierarchy. Give it a short
     // timeout, since this is really just a nice-to-have
