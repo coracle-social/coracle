@@ -32,8 +32,9 @@ const sign = async event => {
   if (ext) {
     return await ext.signEvent(event)
   } else {
-    event.sign = signEvent(event, get(privkey))
-    return event
+    return Object.assign(event, {
+      sig: signEvent(event, get(privkey)),
+    })
   }
 }
 
