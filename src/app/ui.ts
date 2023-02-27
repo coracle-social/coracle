@@ -16,6 +16,10 @@ export const routes = {
   person: (pubkey, tab = 'notes') => `/people/${nip19.npubEncode(pubkey)}/${tab}`,
 }
 
+// Install prompt
+
+export const installPrompt = writable(null)
+
 // Toast
 
 export interface Toast<T> extends Writable<T> {

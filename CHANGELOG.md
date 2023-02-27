@@ -4,6 +4,7 @@
 
 - [x] Improve paste support
 - [x] Add timestamps to messages
+- [x] Support installation as a PWA
 
 ## 0.2.13
 

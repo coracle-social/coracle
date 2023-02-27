@@ -1,11 +1,25 @@
 <script lang="ts">
   import {displayPerson} from 'src/util/nostr'
   import user from 'src/agent/user'
-  import {menuIsOpen, routes} from 'src/app/ui'
+  import {menuIsOpen, installPrompt, routes} from 'src/app/ui'
   import {newAlerts, newDirectMessages, newChatMessages} from 'src/app/alerts'
   import {slowConnections} from 'src/app/connection'
 
   const {profile} = user
+
+  const install = () => {
+    $installPrompt.prompt()
+
+    $installPrompt.userChoice.then(result => {
+      if (result.outcome === "accepted") {
+        console.log("User accepted the A2HS prompt")
+      } else {
+        console.log("User dismissed the A2HS prompt")
+      }
+
+      installPrompt.set(null)
+    })
+  }
 </script>
 
 <ul
@@ -96,6 +110,13 @@
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/debug">
       <i class="fa-solid fa-bug mr-2" /> Debug
     </a>
+  </li>
+  {/if}
+  {#if $installPrompt}
+  <li
+    class="cursor-pointer px-4 py-2 hover:bg-accent transition-all"
+    on:click={install}>
+    <i class="fa-solid fa-rocket mr-2" /> Install
   </li>
   {/if}
 </ul>

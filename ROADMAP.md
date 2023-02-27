@@ -1,13 +1,7 @@
 # Current
 
 - [ ] Fix iOS
-- [ ] Fix likes, very few come up. Could be the parent timeout
 - [ ] Make the note relays button modal make sense, one relay with no explanation is not good
-- [ ] Likes feed includes flag events, durr
-- [ ] PWA
-- [ ] Polls
-  - Find the best implementation https://github.com/nostr-protocol/nips/search?q=poll&type=issues
-  - Comment on all three nip drafts which one I implemented
 
 # Lightning
 
@@ -24,6 +18,9 @@
 
 # More
 
+- [ ] Polls
+  - Find the best implementation https://github.com/nostr-protocol/nips/search?q=poll&type=issues
+  - Comment on all three nip drafts which one I implemented
 - [ ] Micro app DSL
 - [ ] Fix social share image, add description
 - [ ] Sort feeds by created date on profile page?

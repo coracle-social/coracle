@@ -21,7 +21,7 @@
 >
   <button class="lg:hidden fa fa-bars fa-2xl cursor-pointer" on:click={toggleMenu} />
   <Anchor external type="unstyled" href="https://github.com/staab/coracle" class="flex items-center gap-2">
-    <img alt="Coracle Logo" src="/images/favicon.png" class="w-8" />
+    <img alt="Coracle Logo" src="/images/logo.png" class="w-8" />
     <h1 class="staatliches text-3xl">Coracle</h1>
   </Anchor>
   {#if $newAlerts}

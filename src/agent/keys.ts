@@ -1,4 +1,3 @@
-import {prop} from 'ramda'
 import {nip04, getPublicKey, getEventHash, signEvent} from 'nostr-tools'
 import {get} from 'svelte/store'
 import {error} from 'src/util/logger'
