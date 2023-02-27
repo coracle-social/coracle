@@ -129,7 +129,7 @@
         {/await}
       </ul>
     </div>
-    <div class="fixed z-20 top-0 w-full lg:-ml-56 lg:pl-56 border-b border-solid
+    <div class="fixed z-20 top-0 w-full border-b border-solid
                 border-medium bg-dark p-4">
       <slot name="header" />
     </div>

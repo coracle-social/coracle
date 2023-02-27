@@ -45,18 +45,21 @@
       const thunk = cmd.createNote(content, mentions, topics)
       const [event, promise] = await publishWithToast(relays, thunk)
 
-      promise.then(() => {
-        toast.show("info", {
-          text: `Your note has been created!`,
-          link: {
-            text: 'View',
-            href: "/" + nip19.neventEncode({
-              id: event.id,
-              relays: pluck('url', relays.slice(0, 3)),
-            }),
-          },
-        })
-      })
+      promise.then(() =>
+        setTimeout(() =>
+          toast.show("info", {
+            text: `Your note has been created!`,
+            link: {
+              text: 'View',
+              href: "/" + nip19.neventEncode({
+                id: event.id,
+                relays: pluck('url', relays.slice(0, 3)),
+              }),
+            },
+          }),
+          3000
+        )
+      )
 
       modal.clear()
     }

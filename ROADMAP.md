@@ -1,8 +1,13 @@
 # Current
 
-- [ ] Add customize icon and route with editable custom view cards using "lists" nip
-  - nevent1qqspjcqw2hu5gfcpkrjhs0aqvxuzjgtp50l375mcqjfpmk48cg5hevgpr3mhxue69uhkummnw3ez6un9d3shjtnhd3m8xtnnwpskxegpzamhxue69uhkummnw3ezuendwsh8w6t69e3xj7spramhxue69uhkummnw3ez6un9d3shjtnwdahxxefwv93kzer9d4usz9rhwden5te0wfjkccte9ejxzmt4wvhxjmcpr9mhxue69uhkummnw3ezuer9d3hjuum0ve68wctjv5n8hwfg
-  - [ ] Custom views should combine pubkeys, relays, event ids, and topics
+- [ ] Fix iOS
+- [ ] Fix likes, very few come up. Could be the parent timeout
+- [ ] Make the note relays button modal make sense, one relay with no explanation is not good
+- [ ] Likes feed includes flag events, durr
+- [ ] PWA
+- [ ] Polls
+  - Find the best implementation https://github.com/nostr-protocol/nips/search?q=poll&type=issues
+  - Comment on all three nip drafts which one I implemented
 
 # Lightning
 
@@ -11,12 +16,20 @@
 - [ ] Support invoices, tips, zaps https://twitter.com/jb55/status/1604131336247476224
   - nevent1qqsd0x0xzfwtppu0n52ngw0zhynlwv0sjsr77aflcpufms2wrl3v8mspr9mhxue69uhhyetvv9ujuumwdae8gtnnda3kjctv9uqs7amnwvaz7tmwdaehgu3wd4hk6d7ewgp
 
-# Groups
+# Custom views
 
-- [ ] Groups - may need a new NIP, or maybe use topics
+- [ ] Add customize icon and route with editable custom view cards using "lists" nip
+  - nevent1qqspjcqw2hu5gfcpkrjhs0aqvxuzjgtp50l375mcqjfpmk48cg5hevgpr3mhxue69uhkummnw3ez6un9d3shjtnhd3m8xtnnwpskxegpzamhxue69uhkummnw3ezuendwsh8w6t69e3xj7spramhxue69uhkummnw3ez6un9d3shjtnwdahxxefwv93kzer9d4usz9rhwden5te0wfjkccte9ejxzmt4wvhxjmcpr9mhxue69uhkummnw3ezuer9d3hjuum0ve68wctjv5n8hwfg
+  - [ ] Custom views should combine pubkeys, relays, event ids, and topics
 
 # More
 
+- [ ] Micro app DSL
+- [ ] Fix social share image, add description
+- [ ] Sort feeds by created date on profile page?
+- [ ] Implement https://media.nostr.band/
+- [ ] Cache follower numbers to avoid re-fetching so much
+- [ ] Groups - may need a new NIP, or maybe use topics
 - [ ] Support https://github.com/nostr-protocol/nips/pull/211 as a bech32 entity
 - [ ] Add new DM button to dms list
 - [ ] Add suggested relays based on follows or topics

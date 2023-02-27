@@ -68,7 +68,13 @@ export const displayPerson = p => {
     return ellipsize(p.kind0?.name, 60)
   }
 
-  return nip19.npubEncode(p.pubkey).slice(-8)
+  try {
+    return nip19.npubEncode(p.pubkey).slice(-8)
+  } catch (e) {
+    console.error(e)
+
+    return ''
+  }
 }
 
 export const isLike = content => ['', '+', '🤙', '👍', '❤️'].includes(content)
