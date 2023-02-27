@@ -16,6 +16,7 @@
   export let filter
   export let relays = []
   export let shouldDisplay = null
+  export let parentsTimeout = 500
 
   let notes = []
   let notesBuffer = []
@@ -37,7 +38,7 @@
       prop('id'),
       newNotes
         .filter(propEq('kind', 1))
-        .concat(await network.loadParents(newNotes, {timeout: 500}))
+        .concat(await network.loadParents(newNotes, {timeout: parentsTimeout}))
         .map(asDisplayEvent)
     )
 
