@@ -38,7 +38,7 @@
   </li>
   <li class="cursor-pointer relative">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/alerts">
-      <i class="fa fa-inbox mr-2" /> Inbox
+      <i class="fa fa-bell mr-2" /> Notifications
       {#if $newAlerts}
       <div class="w-2 h-2 rounded bg-accent absolute top-3 left-6" />
       {/if}

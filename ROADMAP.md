@@ -1,8 +1,6 @@
 # Current
 
 - [ ] Fix iOS
-- [ ] Hover badge to view profile like twitter
-  - [ ] Cache follower numbers to avoid re-fetching so much
 - [ ] Make the note relays button modal make sense, one relay with no explanation is not good
 
 # Lightning
@@ -20,7 +18,9 @@
 
 # More
 
+- [ ] Cache follower numbers to avoid re-fetching so much
 - [ ] Allow the user to disable likes/zaps
+- [ ] NIP for group membership
 - [ ] Polls
   - Find the best implementation https://github.com/nostr-protocol/nips/search?q=poll&type=issues
   - Comment on all three nip drafts which one I implemented
