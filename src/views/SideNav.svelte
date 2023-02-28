@@ -38,7 +38,7 @@
   </li>
   <li class="cursor-pointer relative">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/alerts">
-      <i class="fa-solid fa-bell mr-2" /> Alerts
+      <i class="fa fa-inbox mr-2" /> Inbox
       {#if $newAlerts}
       <div class="w-2 h-2 rounded bg-accent absolute top-3 left-6" />
       {/if}
@@ -47,18 +47,18 @@
   {/if}
   <li class="cursor-pointer">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/search/people">
-      <i class="fa-solid fa-search mr-2" /> Search
+      <i class="fa fa-search mr-2" /> Search
     </a>
   </li>
   <li class="cursor-pointer">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes/follows">
-      <i class="fa-solid fa-tag mr-2" /> Notes
+      <i class="fa fa-rss mr-2" /> Feed
     </a>
   </li>
   {#if $profile}
   <li class="cursor-pointer relative">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/messages">
-      <i class="fa-solid fa-envelope mr-2" /> Messages
+      <i class="fa fa-envelope mr-2" /> Messages
       {#if $newDirectMessages}
       <div class="w-2 h-2 rounded bg-accent absolute top-2 left-7" />
       {/if}
@@ -66,7 +66,7 @@
   </li>
   <li class="cursor-pointer relative">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/chat">
-      <i class="fa-solid fa-comment mr-2" /> Chat
+      <i class="fa fa-comment mr-2" /> Chat
       {#if $newChatMessages}
       <div class="w-2 h-2 rounded bg-accent absolute top-2 left-7" />
       {/if}
@@ -76,7 +76,7 @@
   <li class="h-px mx-3 my-4 bg-medium" />
   <li class="cursor-pointer relative">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/relays">
-      <i class="fa-solid fa-server mr-2" /> Relays
+      <i class="fa fa-server mr-2" /> Relays
       {#if $slowConnections.length > 0}
       <div class="w-2 h-2 rounded bg-accent absolute top-2 left-8" />
       {/if}
@@ -85,30 +85,30 @@
   {#if $profile}
   <li class="cursor-pointer">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/keys">
-      <i class="fa-solid fa-key mr-2" /> Keys
+      <i class="fa fa-key mr-2" /> Keys
     </a>
   </li>
   <li class="cursor-pointer">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/settings">
-      <i class="fa-solid fa-gear mr-2" /> Settings
+      <i class="fa fa-gear mr-2" /> Settings
     </a>
   </li>
   <li class="cursor-pointer">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/logout">
-      <i class="fa-solid fa-right-from-bracket mr-2" /> Logout
+      <i class="fa fa-right-from-bracket mr-2" /> Logout
     </a>
   </li>
   {:else}
   <li class="cursor-pointer">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/login">
-      <i class="fa-solid fa-right-to-bracket mr-2" /> Login
+      <i class="fa fa-right-to-bracket mr-2" /> Login
     </a>
   </li>
   {/if}
   {#if import.meta.env.VITE_SHOW_DEBUG_ROUTE === 'true'}
   <li class="cursor-pointer">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/debug">
-      <i class="fa-solid fa-bug mr-2" /> Debug
+      <i class="fa fa-bug mr-2" /> Debug
     </a>
   </li>
   {/if}
@@ -116,7 +116,7 @@
   <li
     class="cursor-pointer px-4 py-2 hover:bg-accent transition-all"
     on:click={install}>
-    <i class="fa-solid fa-rocket mr-2" /> Install
+    <i class="fa fa-rocket mr-2" /> Install
   </li>
   {/if}
 </ul>

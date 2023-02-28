@@ -2,7 +2,7 @@
   import {last} from 'ramda'
   import {onMount} from 'svelte'
   import {tweened} from 'svelte/motion'
-  import {fly} from 'svelte/transition'
+  import {fly, fade} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {log} from 'src/util/logger'
   import {renderContent} from 'src/util/html'
@@ -35,6 +35,7 @@
   let followersCount = tweened(0, {interpolate, duration: 1000})
   let person = database.getPersonWithFallback(pubkey)
   let loading = true
+  let showActions = false
 
   $: following = $petnamePubkeys.includes(pubkey)
 
@@ -70,6 +71,16 @@
     })
   })
 
+  const toggleActions = () => {
+    showActions = !showActions
+  }
+
+  const makeGetTransition = () => {
+    let i = 0
+
+    return () => ({y: 20, delay: i++ * 30})
+  }
+
   const setActiveTab = tab => navigate(routes.person(pubkey, tab))
 
   const showFollows = () => {
@@ -101,6 +112,8 @@
   }
 </script>
 
+<svelte:window on:click={() => { showActions = false }} />
+
 <div
   class="absolute w-full h-64"
   style="z-index: -1;
@@ -110,12 +123,12 @@
           url('{person.kind0?.banner}')" />
 
 <Content>
-  <div class="flex gap-4" in:fly={{y: 20}}>
+  <div class="flex gap-4">
     <div
       class="overflow-hidden w-16 h-16 sm:w-32 sm:h-32 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
       style="background-image: url({person.kind0?.picture})" />
     <div class="flex flex-col gap-4 flex-grow">
-      <div class="flex justify-between items-center gap-4">
+      <div class="flex justify-between items-start gap-4">
         <div class="flex-grow flex flex-col gap-2">
           <div class="flex items-center gap-2">
             <h1 class="text-2xl">{displayPerson(person)}</h1>
@@ -127,29 +140,80 @@
           </div>
           {/if}
         </div>
-        <div class="whitespace-nowrap flex gap-3 items-center flex-wrap">
-          {#if user.getPubkey() === pubkey && $canPublish}
-          <Anchor href="/profile"><i class="fa-solid fa-edit" /> Edit profile</Anchor>
-          {:else if $canPublish}
-            <Anchor type="button-circle" on:click={openAdvanced}>
-              <i class="fa fa-sliders" />
-            </Anchor>
-            <Anchor type="button-circle" href={`/messages/${npub}`}>
-              <i class="fa fa-envelope" />
-            </Anchor>
+        <div class="whitespace-nowrap flex gap-3 flex-wrap relative">
+          <div on:click|stopPropagation={toggleActions} class="px-5 py-2 cursor-pointer">
+            <i class="fa fa-ellipsis-vertical" />
+          </div>
+          {#if showActions}
+          {@const getTransition = makeGetTransition()}
+          <div class="absolute top-0 right-0 mt-12 flex flex-col gap-2 opacity-90">
+            <div
+              class="absolute inset-0 bg-black rounded-full"
+              style="filter: blur(15px)"
+              transition:fade />
+            <div
+              class="flex gap-2 justify-end items-center z-10 cursor-pointer"
+              transition:fly={getTransition()}
+              on:click={share}>
+              <div class="text-light">Share</div>
+              <Anchor type="button-circle">
+                <i class="fa fa-share-nodes" />
+              </Anchor>
+            </div>
+            {#if following}
+            <div
+              class="flex gap-2 justify-end items-center z-10 cursor-pointer"
+              transition:fly={getTransition()}
+              on:click={unfollow}>
+              <div class="text-light">Unfollow</div>
+              <Anchor type="button-circle">
+                <i class="fa fa-user-minus" />
+              </Anchor>
+            </div>
+            {:else if user.getPubkey() !== pubkey}
+            <div
+              class="flex gap-2 justify-end items-center z-10 cursor-pointer"
+              transition:fly={getTransition()}
+              on:click={follow}>
+              <div class="text-light">Follow</div>
+              <Anchor type="button-circle">
+                <i class="fa fa-user-plus" />
+              </Anchor>
+            </div>
+            {/if}
+            {#if $canPublish}
+            <div
+              class="flex gap-2 justify-end items-center z-10 cursor-pointer"
+              transition:fly={getTransition()}
+              on:click={() => navigate(`/messages/${npub}`)}>
+              <div class="text-light">Message</div>
+              <Anchor type="button-circle">
+                <i class="fa fa-envelope" />
+              </Anchor>
+            </div>
+            <div
+              class="flex gap-2 justify-end items-center z-10 cursor-pointer"
+              transition:fly={getTransition()}
+              on:click={openAdvanced}>
+              <div class="text-light">Advanced</div>
+              <Anchor type="button-circle">
+                <i class="fa fa-sliders" />
+              </Anchor>
+            </div>
+            {/if}
+            {#if user.getPubkey() === pubkey}
+            <div
+              class="flex gap-2 justify-end items-center z-10 cursor-pointer"
+              transition:fly={getTransition()}
+              on:click={() => navigate("/profile")}>
+              <div class="text-light">Edit</div>
+              <Anchor type="button-circle">
+                <i class="fa fa-edit" />
+              </Anchor>
+            </div>
+            {/if}
+          </div>
           {/if}
-          {#if following}
-          <Anchor type="button-circle" on:click={unfollow}>
-            <i class="fa fa-user-minus" />
-          </Anchor>
-          {:else if user.getPubkey() !== pubkey}
-          <Anchor type="button-circle" on:click={follow}>
-            <i class="fa fa-user-plus" />
-          </Anchor>
-          {/if}
-          <Anchor type="button-circle" on:click={share}>
-            <i class="fa fa-share-nodes" />
-          </Anchor>
         </div>
       </div>
       <p>{@html renderContent(person?.kind0?.about || '')}</p>
