@@ -93,6 +93,16 @@ const createReply = (note, content, mentions = [], topics = []) => {
   return new PublishableEvent(1, {content, tags})
 }
 
+const requestZap = (relays, content, pubkey, eventId, amount, lnurl) => {
+  const tags = [["relays", ...relays], ["amount", amount], ["lnurl", lnurl], ["p", pubkey]]
+
+  if (eventId) {
+    tags.push(["e", eventId])
+  }
+
+  return new PublishableEvent(9734, {content, tags})
+}
+
 const deleteEvent = ids =>
   new PublishableEvent(5, {tags: ids.map(id => ["e", id])})
 
@@ -119,5 +129,5 @@ class PublishableEvent {
 export default {
   updateUser, setRelays, setPetnames, muffle, createRoom, updateRoom,
   createChatMessage, createDirectMessage, createNote, createReaction,
-  createReply, deleteEvent,
+  createReply, requestZap, deleteEvent, PublishableEvent,
 }

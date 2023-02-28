@@ -1,15 +1,20 @@
 <script lang="ts">
   import cx from 'classnames'
+  import bolt11 from 'bolt11'
+  import QRCode from 'qrcode'
   import {nip19} from 'nostr-tools'
-  import {find, last, whereEq, without, uniq, pluck, reject, propEq} from 'ramda'
+  import {find, sum, last, whereEq, without, uniq, pluck, reject, propEq} from 'ramda'
   import {onMount} from 'svelte'
   import {tweened} from 'svelte/motion'
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {quantify} from 'hurdak/lib/hurdak'
   import {Tags, findRootId, findReplyId, displayPerson, isLike} from "src/util/nostr"
-  import {extractUrls} from "src/util/html"
+  import {formatTimestamp, now, tryJson, stringToColor, formatSats, fetchJson} from 'src/util/misc'
+  import {extractUrls, copyToClipboard} from "src/util/html"
   import ImageCircle from 'src/partials/ImageCircle.svelte'
+  import Input from 'src/partials/Input.svelte'
+  import Textarea from 'src/partials/Textarea.svelte'
   import Content from 'src/partials/Content.svelte'
   import PersonSummary from 'src/views/person/PersonSummary.svelte'
   import Popover from 'src/partials/Popover.svelte'
@@ -19,10 +24,11 @@
   import Anchor from 'src/partials/Anchor.svelte'
   import {toast, modal} from "src/app/ui"
   import {renderNote} from "src/app"
-  import {formatTimestamp, stringToColor} from 'src/util/misc'
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
   import user from 'src/agent/user'
+  import keys from 'src/agent/keys'
+  import network from 'src/agent/network'
   import {getEventPublishRelays, getRelaysForEventParent} from 'src/agent/relays'
   import database from 'src/agent/database'
   import cmd from 'src/agent/cmd'
@@ -39,6 +45,7 @@
   const getDefaultReplyMentions = () =>
     without([user.getPubkey()], uniq(Tags.from(note).type("p").values().all().concat(note.pubkey)))
 
+  let zap = null
   let reply = null
   let replyMentions = getDefaultReplyMentions()
   let replyContainer = null
@@ -51,25 +58,67 @@
   const interactive = !anchorId || !showEntire
   const person = database.watch('people', () => database.getPersonWithFallback(note.pubkey))
 
-  let likes, flags, like, flag, border, childrenContainer, noteContainer
+  let likes, flags, zaps, like, flag, border, childrenContainer, noteContainer, canZap, zapCanvas
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const likesCount = tweened(0, {interpolate})
   const flagsCount = tweened(0, {interpolate})
+  const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
 
-  $: {
-    likes = note.reactions.filter(n => isLike(n.content))
-    flags = note.reactions.filter(whereEq({content: '-'}))
-  }
+  $: likes = note.reactions.filter(n => isLike(n.content))
+  $: flags = note.reactions.filter(whereEq({content: '-'}))
+  $: zaps = note.zaps
+    .map(zap => {
+      const zapMeta = Tags.from(zap).asMeta()
+
+      return tryJson(() => ({
+        ...zap,
+        invoice: bolt11.decode(zapMeta.bolt11),
+        request: JSON.parse(zapMeta.description),
+      }))
+    })
+    .filter(zap => {
+        if (!zap) {
+          return false
+        }
+
+        // Don't count zaps that the user sent himself
+        if (zap.request.pubkey === $person.pubkey) {
+          return false
+        }
+
+        const {invoice, request} = zap
+        const reqMeta = Tags.from(request).asMeta()
+
+        // Verify that the zapper actually sent the requested amount (if it was supplied)
+        if (reqMeta.amount && reqMeta.amount !== parseInt(invoice.millisatoshis)) {
+          return false
+        }
+
+        // If the sending client provided an lnurl tag, verify that too
+        if (reqMeta.lnurl && reqMeta.lnurl !== $person?.lnurl) {
+          return false
+        }
+
+        // Verify that the zap note actually came from the recipient's zapper
+        if ($person.zapper?.nostrPubkey !== zap.pubkey) {
+          return false
+        }
+
+        return true
+      })
 
   $: like = find(whereEq({pubkey: $profile?.pubkey}), likes)
   $: flag = find(whereEq({pubkey: $profile?.pubkey}), flags)
-
+  $: zapped = find(z => z.request.pubkey === $profile?.pubkey, zaps)
   $: $likesCount = likes.length
   $: $flagsCount = flags.length
+  $: $zapsTotal = sum(zaps.map(zap => zap.invoice.satoshis))
   $: $repliesCount = note.replies.length
   $: visibleNotes = note.replies.filter(r => showContext ? true : !r.isContext)
+  $: canZap = $person?.zapper && user.canZap()
+  $: zapCanvas && zap && QRCode.toCanvas(zapCanvas, zap.invoice)
 
   const onClick = e => {
     const target = e.target as HTMLElement
@@ -173,6 +222,67 @@
     }
   }
 
+  const startZap = async () => {
+    zap = {
+      amount: user.getSetting('defaultZap'),
+      message: '',
+      invoice: null,
+      loading: false,
+      startedAt: now(),
+    }
+  }
+
+  const loadZapInvoice = async () => {
+    zap.loading = true
+
+    const {zapper, lnurl} = $person
+    const amount = zap.amount * 1000
+    const relays = getEventPublishRelays(note)
+    const urls = pluck('url', relays)
+    const publishable = cmd.requestZap(urls, zap.message, note.pubkey, note.id, amount, lnurl)
+    const event = encodeURI(JSON.stringify(await keys.sign(publishable.event)))
+    const res = await fetchJson(
+      `${zapper.callback}?amount=${amount}&nostr=${event}&lnurl=${lnurl}`
+    )
+
+    zap.invoice = res.pr
+    zap.loading = false
+
+    // Open up alby or whatever
+    const {webln} = (window as {webln?: any})
+    if (webln) {
+      await webln.enable()
+
+      webln.sendPayment(zap.invoice)
+    }
+
+    // Listen for the zap confirmation
+    zap.sub = network.listen({
+      relays,
+      filter: {
+        kinds: [9735],
+        authors: [zapper.nostrPubkey],
+        '#p': [$person.pubkey],
+        since: zap.startedAt,
+      },
+      onChunk: chunk => {
+        note.zaps = note.zaps.concat(chunk)
+        cleanupZap()
+      },
+    })
+  }
+
+  const copyZapInvoice = () => {
+    copyToClipboard(zap.invoice)
+  }
+
+  const cleanupZap = () => {
+    if (zap) {
+      zap.sub?.then(s => s.unsub())
+      zap = null
+    }
+  }
+
   const onBodyClick = e => {
     const target = e.target as HTMLElement
 
@@ -207,7 +317,10 @@
   onMount(() => {
     const interval = setInterval(setBorderHeight, 300)
 
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+      cleanupZap()
+    }
   })
 </script>
 
@@ -282,11 +395,19 @@
               <button class="fa fa-reply cursor-pointer" on:click={startReply} />
               {$repliesCount}
             </div>
-            <div class={cx('w-16', {'text-accent': like})}>
+            <div class="w-16" class:text-accent={like}>
               <button
                 class={cx('fa fa-heart cursor-pointer', {'fa-beat fa-beat-custom': like})}
                 on:click={() => like ? deleteReaction(like) : react("+")} />
               {$likesCount}
+            </div>
+            <div class="w-20" class:text-accent={zapped}>
+              <button
+                class={cx("fa fa-bolt cursor-pointer", {
+                  'pointer-events-none opacity-50': !canZap,
+                })}
+                on:click={startZap} />
+              {formatSats($zapsTotal)}
             </div>
             <div class="w-16">
               <button class="fa fa-flag cursor-pointer" on:click={() => react("-")} />
@@ -355,6 +476,38 @@
 <Modal onEscape={() => { showRelays = false }}>
   <Content>
     <RelayCard theme="black" showControls relay={{url: note.seen_on}} />
+  </Content>
+</Modal>
+{/if}
+
+{#if zap}
+<Modal onEscape={cleanupZap}>
+  <Content size="lg">
+    <div class="text-center">
+      <h1 class="staatliches text-2xl">Send a zap</h1>
+      <p>to {displayPerson($person)}</p>
+    </div>
+    {#if zap.invoice}
+      <canvas class="m-auto" bind:this={zapCanvas} />
+      <Input value={zap.invoice}>
+        <button slot="after" class="fa fa-copy" on:click={copyZapInvoice} />
+      </Input>
+      <div class="text-center text-light">
+        Copy or scan using a lightning wallet to pay your zap.
+      </div>
+    {:else}
+    <Textarea bind:value={zap.message} placeholder="Add an optional message" />
+    <div class="flex items-center gap-2">
+      <label class="flex-grow">Custom amount:</label>
+      <Input bind:value={zap.amount}>
+        <i slot="before" class="fa fa-bolt" />
+        <span slot="after" class="-mt-1">sats</span>
+      </Input>
+      <Anchor loading={zap.loading} type="button-accent" on:click={loadZapInvoice}>
+        Zap!
+      </Anchor>
+    </div>
+    {/if}
   </Content>
 </Modal>
 {/if}

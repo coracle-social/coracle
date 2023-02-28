@@ -1,8 +1,10 @@
+import {bech32} from 'bech32'
+import {Buffer} from 'buffer'
 import {debounce, throttle} from 'throttle-debounce'
 import {aperture, path as getPath, allPass, pipe, isNil, complement, equals, is, pluck, sum, identity, sortBy} from "ramda"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from 'svelte/store'
-import {isObject} from 'hurdak/lib/hurdak'
+import {isObject, round} from 'hurdak/lib/hurdak'
 import {warn} from 'src/util/logger'
 
 export const fuzzy = (data, opts = {}) => {
@@ -326,4 +328,19 @@ export const uploadFile = (url, fileObj) => {
   body.append("file", fileObj)
 
   return fetchJson(url, {method: 'POST', body})
+}
+
+export const hexToBech32 = (prefix, hex) =>
+  bech32.encode(prefix, bech32.toWords(Buffer.from(hex, 'hex')))
+
+export const bech32ToHex = b32 =>
+  Buffer.from(bech32.fromWords(bech32.decode(b32).words)).toString('hex')
+
+export const formatSats = sats => {
+  const formatter = new Intl.NumberFormat()
+
+  if (sats < 1_000) return formatter.format(sats)
+  if (sats < 1_000_000) return formatter.format(round(1, sats / 1000)) + 'K'
+  if (sats < 100_000_000) return formatter.format(round(1, sats / 1_000_000)) + 'MM'
+  return formatter.format(round(2, sats / 100_000_000)) + 'BTC'
 }

@@ -1,5 +1,5 @@
 import type {DisplayEvent} from 'src/util/types'
-import {last, identity, objOf, prop, flatten, uniq} from 'ramda'
+import {fromPairs, last, identity, objOf, prop, flatten, uniq} from 'ramda'
 import {nip19} from 'nostr-tools'
 import {ensurePlural, ellipsize, first} from 'hurdak/lib/hurdak'
 
@@ -30,6 +30,9 @@ export class Tags {
   }
   pubkeys() {
     return this.type("p").values().all()
+  }
+  asMeta() {
+    return fromPairs(this.tags)
   }
   values() {
     return new Tags(this.tags.map(t => t[1]))
@@ -118,7 +121,7 @@ export const normalizeRelayUrl = url => url.replace(/\/+$/, '').toLowerCase().tr
 export const roomAttrs = ['name', 'about', 'picture']
 
 export const asDisplayEvent = event =>
-  ({replies: [], reactions: [], ...event}) as DisplayEvent
+  ({replies: [], reactions: [], zaps: [], ...event}) as DisplayEvent
 
 export const toHex = (data: string): string | null => {
   try {

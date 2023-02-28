@@ -1,8 +1,9 @@
 import {uniq, pick, identity, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
+import {getParams} from 'js-lnurl'
 import {noop, createMap, ensurePlural, chunk, switcherFn} from 'hurdak/lib/hurdak'
 import {log} from 'src/util/logger'
-import {now, sleep, tryJson, timedelta, shuffle, hash} from 'src/util/misc'
+import {hexToBech32, now, sleep, tryJson, timedelta, shuffle, hash} from 'src/util/misc'
 import {Tags, roomAttrs, personKinds, isRelay, isShareableRelay, normalizeRelayUrl} from 'src/util/nostr'
 import database from 'src/agent/database'
 
@@ -45,8 +46,10 @@ const processProfileEvents = async events => {
             if (e.created_at > (person.kind0_updated_at || 0)) {
               if (kind0.nip05) {
                 verifyNip05(e.pubkey, kind0.nip05)
+              }
 
-                kind0.nip05_updated_at = e.created_at
+              if (kind0.lud16 || kind0.lud06) {
+                verifyZapper(e.pubkey, kind0.lud16 || kind0.lud06)
               }
 
               return {
@@ -303,5 +306,30 @@ const verifyNip05 = (pubkey, as) =>
       }
     }
   }, noop)
+
+const verifyZapper = async (pubkey, address) => {
+  // Try to parse it as a lud06 LNURL
+  let zapper = await getParams(address) as any
+  let lnurl = address
+
+  // If that failed, try to parse it as a lud16 address
+  if (zapper.status === 'ERROR' && address.includes('@')) {
+    const [name, domain] = address.split('@')
+
+    if (!domain || !name) {
+      return
+    }
+
+    const url = `https://${domain}/.well-known/lnurlp/${name}`
+    const res = await fetch(url)
+
+    zapper = await res.json()
+    lnurl = hexToBech32('lnurl', url)
+  }
+
+  if (zapper?.allowsNostr && zapper?.nostrPubkey) {
+    database.people.patch({pubkey, zapper, lnurl})
+  }
+}
 
 export default {processEvents}

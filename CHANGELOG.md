@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.15
+
+- [x] Add zaps
+
 ## 0.2.14
 
 - [x] Improve paste support

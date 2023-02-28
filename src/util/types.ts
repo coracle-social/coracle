@@ -28,6 +28,7 @@ export type MyEvent = Event & {
 export type DisplayEvent = MyEvent & {
   replies: Array<MyEvent>
   reactions: Array<MyEvent>
+  zaps: Array<MyEvent>
 }
 
 export type Room = {

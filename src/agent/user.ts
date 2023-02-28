@@ -25,6 +25,7 @@ const anonRelays = synced('agent/user/anonRelays', [])
 
 const settings = synced("agent/user/settings", {
   relayLimit: 20,
+  defaultZap: 21,
   showMedia: true,
   reportAnalytics: true,
   dufflepudUrl: import.meta.env.VITE_DUFFLEPUD_URL,
@@ -91,6 +92,7 @@ const user = {
   canPublish,
   getProfile: () => profileCopy,
   getPubkey: () => profileCopy?.pubkey,
+  canZap: () => profileCopy?.zapper,
   muffle: events => {
     const muffle = user.getMuffle()
 

@@ -1,5 +1,6 @@
 # Current
 
+- [ ] Try adding boxes/separation on feeds based on user feedback
 - [ ] Strip zero width spaces from compose
 - [ ] Fix iOS/safari/firefox
 - [ ] Make the note relays button modal make sense, one relay with no explanation is not good
@@ -13,13 +14,6 @@
 - https://github.com/seaweedfs/seaweedfs
 - https://github.com/cubefs/cubefs
 
-# Lightning
-
-- [ ] Linkify invoices
-- [ ] Linkify bech32 entities w/ NIP 21 https://github.com/nostr-protocol/nips/blob/master/21.md
-- [ ] Support invoices, tips, zaps https://twitter.com/jb55/status/1604131336247476224
-  - nevent1qqsd0x0xzfwtppu0n52ngw0zhynlwv0sjsr77aflcpufms2wrl3v8mspr9mhxue69uhhyetvv9ujuumwdae8gtnnda3kjctv9uqs7amnwvaz7tmwdaehgu3wd4hk6d7ewgp
-
 # Custom views
 
 - [ ] Add customize icon and route with editable custom view cards using "lists" nip
@@ -28,6 +22,15 @@
 
 # More
 
+- [ ] Linkify invoices
+- [ ] Linkify bech32 entities w/ NIP 21 https://github.com/nostr-protocol/nips/blob/master/21.md
+- [ ] Person zaps
+- [ ] Add dynamic title tag
+- [ ] Collapsible thread view
+- [ ] Split inbox into replies + everything else
+- [ ] Show more link on long notes
+- [ ] Show popover on delayed hover rather than click (on mobile, keep it click)
+- [ ] Light mode
 - [ ] Mute threads http://localhost:5173/nevent1qqsyz8x6r0cu7l6vwlcjhf8qhxyjtdykvuervkc3t3mfggse4qtwt0gpyfmhxue69uhkummnw3ezumrfvfjhyarpwdc8y6tddaexg6t4d5hxxmmdnhxvea
 - [ ] Add webtorrent support
   - https://coracle.social/nevent1qqsxgxcsq5vevy4wdty5z5v88nhwp2fc5qgl0ws5rmamn6z72hwv3qcpyfmhxue69uhkummnw3ez6an9wf5kv6t9vsh8wetvd3hhyer9wghxuet5qk6c9q

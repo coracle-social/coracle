@@ -47,6 +47,15 @@
         </p>
       </div>
       <div class="flex flex-col gap-1">
+        <div class="flex gap-2 items-center">
+          <strong>Default zap amount</strong>
+          <Input bind:value={values.defaultZap} />
+        </div>
+        <p class="text-sm text-light">
+          The default amount of sats to use when sending a lightning tip.
+        </p>
+      </div>
+      <div class="flex flex-col gap-1">
         <div class="flex justify-between">
           <strong>Max relays per request</strong>
           <div>{values.relayLimit} relays</div>

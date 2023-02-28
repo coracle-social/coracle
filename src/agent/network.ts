@@ -1,5 +1,5 @@
 import type {MyEvent} from 'src/util/types'
-import {partition, assoc, uniq, uniqBy, prop, propEq, reject, groupBy, pluck} from 'ramda'
+import {assoc, uniq, uniqBy, prop, propEq, reject, groupBy, pluck} from 'ramda'
 import {personKinds, findReplyId} from 'src/util/nostr'
 import {log} from 'src/util/logger'
 import {chunk} from 'hurdak/lib/hurdak'
@@ -148,7 +148,7 @@ const streamContext = ({notes, onChunk, depth = 0}) =>
       while (events.length > 0 && depth > 0) {
         const chunk = events.splice(0)
         const authors = getStalePubkeys(pluck('pubkey', chunk))
-        const filter = [{kinds: [1, 7], '#e': pluck('id', chunk)}] as Array<object>
+        const filter = [{kinds: [1, 7, 9735], '#e': pluck('id', chunk)}] as Array<object>
         const relays = sampleRelays(aggregateScores(chunk.map(getRelaysForEventChildren)))
 
         // Load authors and reactions in one subscription
@@ -171,22 +171,26 @@ const streamContext = ({notes, onChunk, depth = 0}) =>
   )
 
 const applyContext = (notes, context) => {
-  const [replies, reactions] = partition(
-    propEq('kind', 1),
-    context.map(assoc('isContext', true))
-  )
+  context = context.map(assoc('isContext', true))
+
+  const replies = context.filter(propEq('kind', 1))
+  const reactions = context.filter(propEq('kind', 7))
+  const zaps = context.filter(propEq('kind', 9735))
 
   const repliesByParentId = groupBy(findReplyId, replies)
   const reactionsByParentId = groupBy(findReplyId, reactions)
+  const zapsByParentId = groupBy(findReplyId, zaps)
 
-  const annotate = ({replies = [], reactions = [], ...note}) => {
+  const annotate = ({replies = [], reactions = [], zaps = [], ...note}) => {
     const combinedReplies = replies.concat(repliesByParentId[note.id] || [])
     const combinedReactions = reactions.concat(reactionsByParentId[note.id] || [])
+    const combinedZaps = zaps.concat(zapsByParentId[note.id] || [])
 
     return {
       ...note,
       replies: uniqBy(prop('id'), combinedReplies).map(annotate),
       reactions: uniqBy(prop('id'), combinedReactions),
+      zaps: uniqBy(prop('id'), combinedZaps),
     }
   }
 
