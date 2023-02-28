@@ -23,7 +23,7 @@
 </script>
 
 <ul
-  class="mt-16 pt-4 pb-20 lg:mt-4 w-56 bg-dark fixed top-0 bottom-0 left-0 transition-all shadow-xl
+  class="mt-16 pt-4 pb-20 lg:mt-0 w-56 bg-dark fixed top-0 bottom-0 left-0 transition-all shadow-xl
          border-r border-medium text-white overflow-hidden z-20 lg:ml-0"
   class:-ml-56={!$menuIsOpen}
 >

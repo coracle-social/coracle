@@ -1,6 +1,8 @@
 # Current
 
 - [ ] Fix iOS
+- [ ] Hover badge to view profile like twitter
+  - [ ] Cache follower numbers to avoid re-fetching so much
 - [ ] Make the note relays button modal make sense, one relay with no explanation is not good
 
 # Lightning
@@ -18,22 +20,17 @@
 
 # More
 
+- [ ] Allow the user to disable likes/zaps
 - [ ] Polls
   - Find the best implementation https://github.com/nostr-protocol/nips/search?q=poll&type=issues
   - Comment on all three nip drafts which one I implemented
 - [ ] Micro app DSL
-- [ ] Fix social share image, add description
 - [ ] Sort feeds by created date on profile page?
 - [ ] Implement https://media.nostr.band/
-- [ ] Cache follower numbers to avoid re-fetching so much
 - [ ] Groups - may need a new NIP, or maybe use topics
 - [ ] Support https://github.com/nostr-protocol/nips/pull/211 as a bech32 entity
 - [ ] Add new DM button to dms list
 - [ ] Add suggested relays based on follows or topics
-- [ ] Combine alerts/messages and any other top-level subscriptions to avoid sub limit
-- [ ] Clean up person detail actions, maybe click one circle and show the rest
-- [ ] Hover badge to view profile like twitter
-- [ ] Show created date as bitcoin block height (add a setting?)
 - [ ] Support relay auth
 - [ ] Following indicator on person info
 - [ ] Share button for notes, shows qr code and nevent
@@ -75,6 +72,7 @@
 - [ ] Release to android
   - https://svelte-native.technology/docs
   - https://ionic.io/blog/capacitor-everything-youve-ever-wanted-to-know
+  - Or just wrap it
 - [ ] When publishing fails, enqueue and retry
   - Track which relays the events should be published to, and which ones have succeeded
   - Maybe notify and ask user which events to re-publish.

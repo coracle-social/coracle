@@ -5,6 +5,9 @@
 - [x] Improve paste support
 - [x] Add timestamps to messages
 - [x] Support installation as a PWA
+- [x] Fix social share image, add description
+- [x] Clean up person detail actions, maybe click one circle and show the rest
+- [x] Add person popover to notes/alerts
 
 ## 0.2.13
 

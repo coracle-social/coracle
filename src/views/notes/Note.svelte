@@ -11,6 +11,8 @@
   import {extractUrls} from "src/util/html"
   import ImageCircle from 'src/partials/ImageCircle.svelte'
   import Content from 'src/partials/Content.svelte'
+  import PersonSummary from 'src/views/person/PersonSummary.svelte'
+  import Popover from 'src/partials/Popover.svelte'
   import RelayCard from 'src/views/relays/RelayCard.svelte'
   import Modal from 'src/partials/Modal.svelte'
   import Preview from 'src/partials/Preview.svelte'
@@ -225,12 +227,19 @@
     </div>
     <div class="flex flex-col gap-2 flex-grow min-w-0">
       <div class="flex items-center justify-between">
-        <Anchor type="unstyled" class="text-lg font-bold flex gap-2 items-center" href={routes.person($person.pubkey)}>
-          <span>{displayPerson($person)}</span>
-          {#if $person.verified_as}
-          <i class="fa fa-circle-check text-accent text-sm" />
-          {/if}
-        </Anchor>
+        <Popover>
+          <div slot="trigger">
+            <Anchor type="unstyled" class="text-lg font-bold flex gap-2 items-center">
+              <span>{displayPerson($person)}</span>
+              {#if $person.verified_as}
+              <i class="fa fa-circle-check text-accent text-sm" />
+              {/if}
+            </Anchor>
+          </div>
+          <div slot="tooltip">
+            <PersonSummary pubkey={$person.pubkey} />
+          </div>
+        </Popover>
         <Anchor
           href={"/" + nip19.neventEncode({id: note.id, relays: [note.seen_on]})}
           class="text-sm text-light"
