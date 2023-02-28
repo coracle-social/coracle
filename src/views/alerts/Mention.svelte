@@ -2,7 +2,6 @@
   import {ellipsize} from 'hurdak/lib/hurdak'
   import {formatTimestamp} from 'src/util/misc'
   import {displayPerson} from 'src/util/nostr'
-  import Anchor from 'src/partials/Anchor.svelte'
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import Popover from "src/partials/Popover.svelte"
   import PersonSummary from "src/views/person/PersonSummary.svelte"
@@ -19,19 +18,19 @@
          border border-solid border-black hover:border-medium hover:bg-dark text-left"
   on:click={() => modal.set({type: 'note/detail', note})}>
   <div class="flex gap-2 items-center justify-between relative w-full">
-    <div class="flex gap-1 items-center" on:click|stopPropagation>
-      <Popover>
-        <div slot="trigger">
-          <Anchor type="unstyled" class="text-lg font-bold flex gap-2 items-center">
-            <ImageCircle src={person.kind0?.picture} />
-            <span class="text-lg font-bold ml-1">{displayPerson(person)}</span>
-          </Anchor>
-        </div>
-        <div slot="tooltip">
-          <PersonSummary pubkey={note.pubkey} />
-        </div>
-      </Popover>
-      <span>mentioned you.</span>
+    <div class="flex gap-2 items-center">
+      <ImageCircle src={person.kind0?.picture} />
+      <div on:click|stopPropagation>
+        <Popover class="inline-block">
+          <div slot="trigger" class="font-bold">
+            {displayPerson(person)}
+          </div>
+          <div slot="tooltip">
+            <PersonSummary pubkey={note.pubkey} />
+          </div>
+        </Popover>
+        <div class="inline-block">mentioned you.</div>
+      </div>
     </div>
     <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>
   </div>

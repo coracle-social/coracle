@@ -44,7 +44,7 @@
         type="unstyled"
         class="flex items-center gap-2"
         on:click={() => navigate(routes.person(pubkey))}>
-        <h1 class="text-2xl">{displayPerson(person)}</h1>
+        <h2 class="text-lg">{displayPerson(person)}</h2>
       </Anchor>
       {#if person.verified_as}
       <div class="flex gap-1 text-sm">

@@ -51,7 +51,7 @@
     }
   }} />
 
-<div bind:this={trigger}>
+<div bind:this={trigger} class={$$props.class}>
   <slot name="trigger" />
 </div>
 

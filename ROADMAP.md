@@ -18,6 +18,7 @@
 
 # More
 
+- [ ] Invite link, nprofile + path that prompts someone to sign in or create an account and auto-follow the inviter
 - [ ] Cache follower numbers to avoid re-fetching so much
 - [ ] Allow the user to disable likes/zaps
 - [ ] NIP for group membership
