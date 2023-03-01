@@ -155,7 +155,7 @@ export class Cursor {
   getFilter() {
     return {
       until: this.until,
-      since: this.until - timedelta(8, 'hours'),
+      // since: this.until - timedelta(8, 'hours'),
       limit: this.limit,
     }
   }
