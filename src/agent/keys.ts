@@ -24,16 +24,19 @@ const clear = () => {
 
 const sign = async event => {
   const ext = getExtension()
+  const key = get(privkey)
 
   event.pubkey = get(pubkey)
   event.id = getEventHash(event)
 
-  if (ext) {
-    return await ext.signEvent(event)
-  } else {
+  if (key) {
     return Object.assign(event, {
       sig: signEvent(event, get(privkey)),
     })
+  } else if (ext) {
+    return await ext.signEvent(event)
+  } else {
+    throw new Error('Unable to sign event')
   }
 }
 

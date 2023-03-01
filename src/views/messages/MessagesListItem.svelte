@@ -26,7 +26,7 @@
   <div class="flex flex-grow flex-col justify-start gap-2 min-w-0">
     <div class="flex flex-grow items-start justify-between gap-2">
       <div class="flex gap-2 items-center overflow-hidden">
-        <i class="fa fa-lock-open text-light" />
+        <i class="fa fa-lock text-light" />
         <h2 class="text-lg">{displayPerson(person)}</h2>
       </div>
       <div class="relative">
