@@ -7,11 +7,11 @@
   import user from "src/agent/user"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import database from "src/agent/database"
-  import {routes, modal} from "src/app/ui"
+  import {routes} from "src/app/ui"
 
   export let pubkey
 
-  const {petnamePubkeys} = user
+  const {petnamePubkeys, canPublish} = user
   const getRelays = () => sampleRelays(getPubkeyWriteRelays(pubkey))
 
   let following = false
@@ -27,10 +27,6 @@
 
   const unfollow = async () => {
     user.removePetname(pubkey)
-  }
-
-  const share = () => {
-    modal.set({type: 'person/share', person})
   }
 </script>
 
@@ -54,9 +50,7 @@
       {/if}
     </div>
     <div class="flex gap-2">
-      <Anchor class="tippy-close" type="button-circle" on:click={share}>
-        <i class="fa fa-share-nodes" />
-      </Anchor>
+      {#if $canPublish}
       {#if following}
       <Anchor type="button-circle" on:click={unfollow}>
         <i class="fa fa-user-minus" />
@@ -65,6 +59,7 @@
       <Anchor type="button-circle" on:click={follow}>
         <i class="fa fa-user-plus" />
       </Anchor>
+      {/if}
       {/if}
     </div>
   </div>

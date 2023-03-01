@@ -8,6 +8,7 @@
   import {displayPerson} from "src/util/nostr"
   import Button from "src/partials/Button.svelte"
   import Compose from "src/partials/Compose.svelte"
+  import ImageInput from "src/partials/ImageInput.svelte"
   import Input from "src/partials/Input.svelte"
   import RelayCardSimple from "src/views/relays/RelayCardSimple.svelte"
   import Content from "src/partials/Content.svelte"
@@ -21,6 +22,7 @@
 
   export let pubkey = null
 
+  let image = null
   let input = null
   let relays = getUserWriteRelays()
   let showSettings = false
@@ -36,6 +38,12 @@
       $knownRelays.filter(r => !joined.has(r.url)),
       {keys: ["name", "description", "url"]}
     )
+  }
+
+  $: {
+    if (image) {
+      input.type('\n' + image)
+    }
   }
 
   const onSubmit = async () => {
@@ -99,7 +107,10 @@
           <Compose bind:this={input} {onSubmit} />
         </div>
       </div>
-      <Button type="submit" class="text-center">Send</Button>
+      <div class="flex gap-2">
+        <Button type="submit" class="text-center flex-grow">Send</Button>
+        <ImageInput bind:value={image} icon="image" hideInput />
+      </div>
       <small
         class="flex justify-end items-center gap-1 cursor-pointer"
         on:click={() => { showSettings = true }}>

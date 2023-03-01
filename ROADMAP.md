@@ -1,7 +1,7 @@
 # Current
 
 - [ ] Strip zero width spaces from compose
-- [ ] Fix iOS
+- [ ] Fix iOS/safari/firefox
 - [ ] Make the note relays button modal make sense, one relay with no explanation is not good
 
 # Image uploads
@@ -28,6 +28,7 @@
 
 # More
 
+- [ ] Mute threads http://localhost:5173/nevent1qqsyz8x6r0cu7l6vwlcjhf8qhxyjtdykvuervkc3t3mfggse4qtwt0gpyfmhxue69uhkummnw3ezumrfvfjhyarpwdc8y6tddaexg6t4d5hxxmmdnhxvea
 - [ ] Add webtorrent support
   - https://coracle.social/nevent1qqsxgxcsq5vevy4wdty5z5v88nhwp2fc5qgl0ws5rmamn6z72hwv3qcpyfmhxue69uhkummnw3ez6an9wf5kv6t9vsh8wetvd3hhyer9wghxuet5qk6c9q
 - [ ] Add coracle relay

@@ -24,7 +24,7 @@
 {/if}
 
 {#if size === '2xl'}
-<div {...$$props} class={cx($$props.class, className, "p-4 pt-10 max-w-2xl")}>
+<div {...$$props} class={cx($$props.class, className, "p-4 max-w-2xl")}>
   <slot />
 </div>
 {/if}

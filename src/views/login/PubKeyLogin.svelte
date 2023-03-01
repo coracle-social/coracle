@@ -15,7 +15,7 @@
     if (!pubkey?.match(/[a-z0-9]{64}/)) {
       toast.show("error", "Sorry, but that's an invalid public key.")
     } else {
-      login({pubkey})
+      login('pubkey', pubkey)
     }
   }
 </script>

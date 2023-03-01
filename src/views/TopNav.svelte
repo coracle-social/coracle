@@ -17,7 +17,7 @@
 
 <div
   class="fixed top-0 bg-dark flex justify-between items-center text-white w-full p-4
-            border-b border-medium z-10"
+            border-b border-medium z-10 h-16"
 >
   <button class="lg:hidden fa fa-bars fa-2xl cursor-pointer" on:click={toggleMenu} />
   <Anchor external type="unstyled" href="https://github.com/staab/coracle" class="flex items-center gap-2">

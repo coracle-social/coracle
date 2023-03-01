@@ -12,7 +12,7 @@
     const {nostr} = window as any
 
     if (nostr) {
-      login({pubkey: await nostr.getPublicKey()})
+      login('extension', await nostr.getPublicKey())
     } else {
       modal.set({type: 'login/privkey'})
     }

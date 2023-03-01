@@ -16,7 +16,7 @@
     if (!privkey?.match(/[a-z0-9]{64}/)) {
       toast.show("error", "Sorry, but that's an invalid private key.")
     } else {
-      login({privkey})
+      login('privkey', privkey)
     }
   }
 </script>

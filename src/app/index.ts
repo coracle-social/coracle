@@ -21,18 +21,14 @@ export const loadAppData = async pubkey => {
   }
 }
 
-export const login = ({privkey, pubkey}: {privkey?: string, pubkey?: string}) => {
-  if (privkey) {
-    keys.setPrivateKey(privkey)
-  } else {
-    keys.setPublicKey(pubkey)
-  }
+export const login = (method, key) => {
+  keys.login(method, key)
 
   modal.set({type: 'login/connect', noEscape: true})
 }
 
 export const signup = privkey => {
-  keys.setPrivateKey(privkey)
+  keys.login('privkey', privkey)
 
   navigate('/notes/follows')
 }

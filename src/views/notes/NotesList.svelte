@@ -29,4 +29,5 @@
     {/if}
   </div>
 </Content>
+
 <NewNoteButton />

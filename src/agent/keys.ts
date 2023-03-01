@@ -3,72 +3,106 @@ import {get} from 'svelte/store'
 import {error} from 'src/util/logger'
 import {synced} from 'src/util/misc'
 
+const method = synced('agent/keys/method')
 const pubkey = synced('agent/keys/pubkey')
 const privkey = synced('agent/keys/privkey')
 const getExtension = () => (window as {nostr?: any}).nostr
-const canSign = () => Boolean(getExtension() || get(privkey))
+const canSign = () => ['privkey', 'extension'].includes(get(method))
 
-const setPrivateKey = _privkey => {
-  privkey.set(_privkey)
-  pubkey.set(getPublicKey(_privkey))
-}
+// For backwards compatibility, if method isn't set but we're logged in, set it
+setTimeout(() => {
+  method.update($method => {
+    if ($method) {
+      return $method
+    }
 
-const setPublicKey = _pubkey => {
-  pubkey.set(_pubkey)
+    if (get(privkey)) {
+      return 'privkey'
+    }
+
+    if (get(pubkey)) {
+      return getExtension() ? 'extension' : 'pubkey'
+    }
+
+    return null
+  })
+}, 100)
+
+const login = ($method, key) => {
+  method.set($method)
+
+  if ($method === 'privkey') {
+    privkey.set(key)
+    pubkey.set(getPublicKey(key))
+  } else {
+    privkey.set(null)
+    pubkey.set(key)
+  }
 }
 
 const clear = () => {
+  method.set(null)
   pubkey.set(null)
   privkey.set(null)
 }
 
-const sign = async event => {
-  const ext = getExtension()
-  const key = get(privkey)
+const sign = event => {
+  const $method = get(method)
 
   event.pubkey = get(pubkey)
   event.id = getEventHash(event)
 
-  if (key) {
+  if ($method === 'privkey') {
     return Object.assign(event, {
       sig: signEvent(event, get(privkey)),
     })
-  } else if (ext) {
-    return await ext.signEvent(event)
-  } else {
-    throw new Error('Unable to sign event')
   }
+
+  if ($method === 'extension') {
+    return getExtension().signEvent(event)
+  }
+
+  throw new Error(`Unable to sign event, method is ${$method}`)
 }
 
 const getCrypt = () => {
-  const $privkey = get(privkey)
-  const nostr = getExtension()
+  const $method = get(method)
 
-  if (!$privkey && !nostr) {
-    throw new Error('No encryption method available.')
+  if ($method === 'privkey') {
+    const $privkey = get(privkey)
+
+    return {
+      encrypt: (pubkey, message) => nip04.encrypt($privkey, pubkey, message),
+      decrypt: async (pubkey, message) => {
+        try {
+          return nip04.decrypt($privkey, pubkey, message)
+        } catch (e) {
+          error(e)
+
+          return `<Failed to decrypt message: ${e}>`
+        }
+      },
+    }
   }
 
-  return {
-    encrypt: (pubkey, message) => {
-      return $privkey
-        ? nip04.encrypt($privkey, pubkey, message)
-        : nostr.nip04.encrypt(pubkey, message)
-    },
-    decrypt: async (pubkey, message) => {
-      try {
-        return $privkey
-          ? nip04.decrypt($privkey, pubkey, message)
-          : await nostr.nip04.decrypt(pubkey, message)
-      } catch (e) {
-        error(e)
+  if ($method === 'extension') {
+    return {
+      encrypt: (pubkey, message) => getExtension().nip04.encrypt(pubkey, message),
+      decrypt: async (pubkey, message) => {
+        try {
+          return await getExtension().nip04.decrypt(pubkey, message)
+        } catch (e) {
+          error(e)
 
-        return `<Failed to decrypt message: ${e}>`
-      }
-    },
+          return `<Failed to decrypt message: ${e}>`
+        }
+      },
+    }
   }
+
+  throw new Error('No encryption method available.')
 }
 
 export default {
-  pubkey, privkey, canSign, setPrivateKey, setPublicKey, clear,
-  sign, getCrypt,
+  pubkey, privkey, canSign, login, clear, sign, getCrypt,
 }

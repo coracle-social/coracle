@@ -12,6 +12,7 @@
   export let icon
   export let maxWidth = null
   export let maxHeight = null
+  export let hideInput = false
 
   let input, file, listener, quote
   let loading = false
@@ -55,9 +56,11 @@
 </script>
 
 <div class="flex gap-2">
+  {#if !hideInput}
   <Input type="text" wrapperClass="flex-grow" bind:value={value} placeholder="https://">
     <i slot="before" class={`fa fa-${icon}`} />
   </Input>
+  {/if}
   <Anchor type="button" on:click={() => { isOpen = true }}>
     <i class="fa fa-upload" />
   </Anchor>
