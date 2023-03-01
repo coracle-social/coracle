@@ -18,6 +18,7 @@
 
 # More
 
+- [ ] Apply person popover to mentions in notes as well
 - [ ] Invite link, nprofile + path that prompts someone to sign in or create an account and auto-follow the inviter
 - [ ] Cache follower numbers to avoid re-fetching so much
 - [ ] Allow the user to disable likes/zaps

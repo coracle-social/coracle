@@ -98,10 +98,10 @@
     'mr-12': message.person.pubkey !== user.getPubkey(),
   })}>
     <div class={cx('rounded-2xl py-2 px-4 max-w-xl inline-block', {
-      'bg-light text-black rounded-br-none text-end': message.person.pubkey === user.getPubkey(),
+      'bg-white text-black rounded-br-none text-end': message.person.pubkey === user.getPubkey(),
       'bg-dark rounded-bl-none': message.person.pubkey !== user.getPubkey(),
     })}>
-      <div>{@html renderNote(message, {showEntire: true})}</div>
+      <div class="break-words">{@html renderNote(message, {showEntire: true})}</div>
       <small
         class="mt-1"
         class:text-dark={message.person.pubkey === user.getPubkey()}

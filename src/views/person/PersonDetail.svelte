@@ -53,12 +53,12 @@
       }
 
       if ($canPublish) {
-        actions.push({href: `/messages/${npub}`, label: 'Message', icon: 'envelope'})
+        actions.push({onClick: () => navigate(`/messages/${npub}`), label: 'Message', icon: 'envelope'})
         actions.push({onClick: openAdvanced, label: 'Advanced', icon: 'sliders'})
       }
 
       if (user.getPubkey() === pubkey) {
-        actions.push({href: '/profile', label: 'Edit', icon: 'edit'})
+        actions.push({onClick: () => navigate('/profile'), label: 'Edit', icon: 'edit'})
       }
     }
   }
