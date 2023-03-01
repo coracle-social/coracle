@@ -48,6 +48,7 @@
   import PersonDetail from "src/views/person/PersonDetail.svelte"
   import PersonList from "src/views/person/PersonList.svelte"
   import PersonSettings from "src/views/person/PersonSettings.svelte"
+  import PersonProfileInfo from "src/views/person/PersonProfileInfo.svelte"
   import PersonShare from "src/views/person/PersonShare.svelte"
   import PrivKeyLogin from "src/views/login/PrivKeyLogin.svelte"
   import Profile from "src/views/Profile.svelte"
@@ -246,6 +247,8 @@
         <ConnectUser />
       {:else if $modal.type === 'person/settings'}
         <PersonSettings />
+        {:else if $modal.type === 'person/info'}
+        <PersonProfileInfo />
       {:else if $modal.type === 'person/share'}
         <PersonShare />
       {:else if $modal.type === 'person/list'}
