@@ -14,7 +14,7 @@
     }
   }} />
 
-<div class="fixed inset-0 z-20 modal" bind:this={root}>
+<div class="fixed inset-0 z-30 modal" bind:this={root}>
   <div
     class="absolute inset-0 bg-black"
     class:cursor-pointer={onEscape}
