@@ -57,6 +57,8 @@
         actions.push({onClick: openAdvanced, label: 'Advanced', icon: 'sliders'})
       }
 
+      actions.push({onClick: openProfileInfo, label: 'Profile', icon: 'info'})
+
       if (user.getPubkey() === pubkey && $canPublish) {
         actions.push({onClick: () => navigate('/profile'), label: 'Edit', icon: 'edit'})
       }
@@ -124,6 +126,10 @@
 
   const openAdvanced = () => {
     modal.set({type: 'person/settings', person})
+  }
+
+  const openProfileInfo = () => {
+    modal.set({type: 'person/info', person})
   }
 
   const share = () => {
