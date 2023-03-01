@@ -8,6 +8,11 @@
 - [x] Fix social share image, add description
 - [x] Clean up person detail actions, maybe click one circle and show the rest
 - [x] Add person popover to notes/alerts
+- [x] Optimize deduplication (@fiatjaf)
+- [x] Add image uploads to profile and new post
+- [x] Fix parsing kind 3 relays
+- [x] Fix some display bugs
+- [x] Rename inbox to notifications
 
 ## 0.2.13
 
