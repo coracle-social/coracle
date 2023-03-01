@@ -1,5 +1,5 @@
 import type {MyEvent} from 'src/util/types'
-import {assoc, partition, uniq, uniqBy, prop, propEq, reject, groupBy, pluck} from 'ramda'
+import {partition, assoc, uniq, uniqBy, prop, propEq, reject, groupBy, pluck} from 'ramda'
 import {personKinds, findReplyId} from 'src/util/nostr'
 import {log} from 'src/util/logger'
 import {chunk} from 'hurdak/lib/hurdak'

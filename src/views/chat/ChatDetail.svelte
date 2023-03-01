@@ -28,10 +28,10 @@
       onChunk,
     })
 
-  const loadMessages = ({until, limit}, onChunk) =>
+  const loadMessages = (cursor, onChunk) =>
     network.load({
       relays: getRelays(),
-      filter: {kinds: [42], '#e': [id], until, limit},
+      filter: {kinds: [42], '#e': [id], ...cursor.getFilter()},
       onChunk,
     })
 

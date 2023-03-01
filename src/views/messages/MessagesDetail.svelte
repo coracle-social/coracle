@@ -54,10 +54,10 @@
       onChunk: async events => onChunk(await decryptMessages(events)),
     })
 
-  const loadMessages = ({until, limit}, onChunk) =>
+  const loadMessages = (cursor, onChunk) =>
     network.load({
       relays: getRelays(),
-      filter: getFilters({until, limit}),
+      filter: getFilters(cursor.getFilter()),
       onChunk: async events => onChunk(await decryptMessages(events)),
     })
 

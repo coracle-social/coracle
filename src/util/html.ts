@@ -1,4 +1,4 @@
-import {ellipsize} from 'hurdak/lib/hurdak'
+import {ellipsize, bytes} from 'hurdak/lib/hurdak'
 
 export const copyToClipboard = text => {
   const {activeElement} = document
@@ -16,7 +16,7 @@ export const copyToClipboard = text => {
   return result
 }
 
-export const stripExifData = async file => {
+export const stripExifData = async (file, opts = {}) => {
   if (window.DataTransferItem && file instanceof DataTransferItem) {
     file = file.getAsFile()
   }
@@ -31,9 +31,10 @@ export const stripExifData = async file => {
 
   return new Promise((resolve, _reject) => {
     new Compressor(file, {
-      maxWidth: 50,
-      maxHeight: 50,
-      convertSize: 1024,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      convertSize: bytes(1, 'mb'),
+      ...opts,
       success: resolve,
       error: e => {
         // Non-images break compressor
@@ -46,6 +47,31 @@ export const stripExifData = async file => {
     })
   })
 }
+
+export const listenForFile = (input, onChange) => {
+  input.addEventListener('change', async e => {
+    const target = e.target as HTMLInputElement
+    const [file] = target.files
+
+    if (file) {
+      onChange(file)
+    } else {
+      onChange(null)
+    }
+  })
+}
+
+export const blobToString = async blob =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader()
+
+    reader.onerror = reject
+    reader.onload = () => resolve(reader.result)
+    reader.readAsDataURL(blob)
+  })
+
+export const blobToFile = blob =>
+    new File([blob], blob.name, {type: blob.type})
 
 export const escapeHtml = html => {
   const div = document.createElement("div")

@@ -152,6 +152,13 @@ export class Cursor {
     this.until = now()
     this.limit = limit
   }
+  getFilter() {
+    return {
+      until: this.until,
+      since: this.until - timedelta(8, 'hours'),
+      limit: this.limit,
+    }
+  }
   update(events) {
     // update takes all events in a feed and figures out the best place to set `until`
     // in order to find older events without re-fetching events that we've already seen.
@@ -269,12 +276,54 @@ export const difference = (a, b) =>
   new Set(Array.from(a).filter(x => !b.has(x)))
 
 export const quantile = (a, q) => {
-    const sorted = sortBy(identity, a)
-    const pos = (sorted.length - 1) * q
-    const base = Math.floor(pos)
-    const rest = pos - base
+  const sorted = sortBy(identity, a)
+  const pos = (sorted.length - 1) * q
+  const base = Math.floor(pos)
+  const rest = pos - base
 
-    return isNil(sorted[base + 1])
-      ? sorted[base]
-      : sorted[base] + rest * (sorted[base + 1] - sorted[base])
+  return isNil(sorted[base + 1])
+    ? sorted[base]
+    : sorted[base] + rest * (sorted[base + 1] - sorted[base])
+}
+
+type FetchOpts = {
+  method?: string
+  headers?: Record<string, string | boolean>
+  body?: string | FormData
+}
+
+export const fetchJson = async (url, opts: FetchOpts = {}) => {
+  if (!opts.headers) {
+    opts.headers = {}
+  }
+
+  opts.headers['Accept'] = 'application/json'
+
+  const res = await fetch(url, opts as RequestInit)
+  const json = await res.json()
+
+  return json
+}
+
+export const postJson = async (url, data, opts: FetchOpts = {}) => {
+  if (!opts.method) {
+    opts.method = 'POST'
+  }
+
+  if (!opts.headers) {
+    opts.headers = {}
+  }
+
+  opts.headers['Content-Type'] = 'application/json'
+  opts.body = JSON.stringify(data)
+
+  return fetchJson(url, opts)
+}
+
+export const uploadFile = (url, fileObj) => {
+  const body = new FormData()
+
+  body.append("file", fileObj)
+
+  return fetchJson(url, {method: 'POST', body})
 }

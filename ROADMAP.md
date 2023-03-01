@@ -1,7 +1,17 @@
 # Current
 
+- [ ] Strip zero width spaces from compose
 - [ ] Fix iOS
 - [ ] Make the note relays button modal make sense, one relay with no explanation is not good
+
+# Image uploads
+
+- Default will charge via lightning and have a tos, others can self-host and skip that.
+- https://github.com/ElementsProject/lightning-charge
+- https://github.com/nostr-protocol/nips/pull/250
+- https://github.com/brandonsavage/Upload
+- https://github.com/seaweedfs/seaweedfs
+- https://github.com/cubefs/cubefs
 
 # Lightning
 
@@ -18,6 +28,11 @@
 
 # More
 
+- [ ] Add webtorrent support
+  - https://coracle.social/nevent1qqsxgxcsq5vevy4wdty5z5v88nhwp2fc5qgl0ws5rmamn6z72hwv3qcpyfmhxue69uhkummnw3ez6an9wf5kv6t9vsh8wetvd3hhyer9wghxuet5qk6c9q
+- [ ] Add coracle relay
+  - Authenticated write, public read
+  - Only accepts events from people with a @coracle.social nip05
 - [ ] Apply person popover to mentions in notes as well
 - [ ] Invite link, nprofile + path that prompts someone to sign in or create an account and auto-follow the inviter
 - [ ] Cache follower numbers to avoid re-fetching so much
@@ -63,13 +78,6 @@
   - All replies from author's + user's read relays, including spam
 - [ ] Topics/hashtag views
 - [ ] Re-license using https://polyformproject.org/
-- [ ] Image uploads
-  - Default will charge via lightning and have a tos, others can self-host and skip that.
-  - Add banner field to profile
-  - Linode/Digital Ocean
-  - https://github.com/brandonsavage/Upload
-  - https://github.com/seaweedfs/seaweedfs
-  - https://github.com/cubefs/cubefs
 - [ ] Separate settings for read, write, and broadcast relays based on NIP 65
 - [ ] Release to android
   - https://svelte-native.technology/docs

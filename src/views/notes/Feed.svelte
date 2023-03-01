@@ -85,9 +85,7 @@
         return
       }
 
-      const {limit, until} = cursor
-
-      return network.load({relays, filter: {...filter, until, limit}, onChunk})
+      return network.load({relays, filter: {...filter, ...cursor.getFilter()}, onChunk})
     })
 
     return () => {

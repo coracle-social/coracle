@@ -2,8 +2,8 @@
   import {onMount} from "svelte"
   import {fly} from 'svelte/transition'
   import {navigate} from "svelte-routing"
-  // import {stripExifData} from "src/util/html"
   import Input from "src/partials/Input.svelte"
+  import ImageInput from "src/partials/ImageInput.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Button from "src/partials/Button.svelte"
@@ -24,29 +24,11 @@
     if (!user.getProfile()) {
       return navigate("/login")
     }
-
-    /*
-    document.querySelector('[name=picture]').addEventListener('change', async e => {
-      const target = e.target as HTMLInputElement
-      const [file] = target.files
-
-      if (file) {
-        const reader = new FileReader()
-        reader.onerror = error
-        reader.onload = () => values.picture = reader.result
-        reader.readAsDataURL(await stripExifData(file))
-      } else {
-        values.picture = null
-      }
-    })
-    */
   })
 
   const submit = async event => {
-    event.preventDefault()
-
+    event?.preventDefault()
     publishWithToast(getUserWriteRelays(), cmd.updateUser(values))
-
     navigate(routes.person(user.getPubkey(), 'profile'))
   }
 </script>
@@ -91,28 +73,19 @@
       </div>
       <div class="flex flex-col gap-1">
         <strong>Profile Picture</strong>
-        <!-- <input type="file" name="picture" />
+        <ImageInput bind:value={values.picture} icon="image-portrait" maxWidth={480} maxHeight={480} />
         <p class="text-sm text-light">
-          Your profile image will have all metadata removed before being published.
-        </p> -->
-        <Input type="text" name="picture" wrapperClass="flex-grow" bind:value={values.picture}>
-          <i slot="before" class="fa fa-image-portrait" />
-        </Input>
-        <p class="text-sm text-light">
-          Enter a url to your profile image - please be mindful of others and
-          only use small images.
+          Please be mindful of others and only use small images.
         </p>
       </div>
       <div class="flex flex-col gap-1">
         <strong>Profile Banner</strong>
-        <Input type="text" name="banner" wrapperClass="flex-grow" bind:value={values.banner}>
-          <i slot="before" class="fa fa-panorama" />
-        </Input>
+        <ImageInput bind:value={values.banner} icon="panorama" />
         <p class="text-sm text-light">
-          Enter a url to your profile's banner image.
+          In most clients, this image will be shown on your profile page.
         </p>
       </div>
-      <Button type="submit" class="text-center">Done</Button>
+      <Button type="submit" class="text-center">Save</Button>
     </div>
   </Content>
 </form>
