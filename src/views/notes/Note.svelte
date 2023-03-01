@@ -352,7 +352,7 @@
 {/if}
 
 {#if showRelays}
-<Modal nested onEscape={() => { showRelays = false }}>
+<Modal onEscape={() => { showRelays = false }}>
   <Content>
     <RelayCard theme="black" showControls relay={{url: note.seen_on}} />
   </Content>

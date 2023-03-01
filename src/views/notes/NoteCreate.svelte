@@ -122,7 +122,7 @@
 </form>
 
 {#if showSettings}
-<Modal nested onEscape={closeSettings}>
+<Modal onEscape={closeSettings}>
   <form on:submit|preventDefault={closeSettings}>
     <Content>
       <div class="flex justify-center items-center mb-4">

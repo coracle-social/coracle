@@ -121,7 +121,7 @@
 </Content>
 
 {#if modal}
-<Modal nested onEscape={modal === 'success' ? null : () => { modal = null }}>
+<Modal onEscape={modal === 'success' ? null : () => { modal = null }}>
   <Content>
     {#if modal === 'success'}
     <div class="text-center my-12">Success! Just a moment while we get things set up.</div>
