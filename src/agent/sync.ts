@@ -83,8 +83,8 @@ const processProfileEvents = async events => {
 
                     return {
                       url,
-                      write: [false, '!'].includes(write) ? '!' : '',
-                      read: [false, '!'].includes(read) ? '!' : '',
+                      write: [false, '!'].includes(write) ? false : true,
+                      read: [false, '!'].includes(read) ? false : true,
                     }
                   })
                   .filter(r => isRelay(r.url)),
