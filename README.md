@@ -34,3 +34,11 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Profile and content search
 
 You can find a more complete changelog [here](./ROADMAP.md).
+
+
+# Run  Coracle locally:
+
+- Clone the project repository: `git clone https://github.com/staab/coracle.git`
+- Navitage to the project directory: `cd coracle`
+- Install dependencies: `npm install`
+- Start the development server: `npm run dev`
