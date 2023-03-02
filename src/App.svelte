@@ -247,7 +247,7 @@
         <ConnectUser />
       {:else if $modal.type === 'person/settings'}
         <PersonSettings />
-        {:else if $modal.type === 'person/info'}
+      {:else if $modal.type === 'person/info'}
         <PersonProfileInfo />
       {:else if $modal.type === 'person/share'}
         <PersonShare />
