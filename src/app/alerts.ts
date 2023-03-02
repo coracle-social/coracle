@@ -1,3 +1,4 @@
+import type {DisplayEvent} from 'src/util/types'
 import {max, find, pluck, propEq, partition, uniq} from 'ramda'
 import {derived} from 'svelte/store'
 import {createMap} from 'hurdak/lib/hurdak'
@@ -8,6 +9,13 @@ import database from 'src/agent/database'
 import network from 'src/agent/network'
 
 let listener
+
+type AlertEvent = DisplayEvent & {
+  zappedBy?: Array<string>
+  likedBy: Array<string>
+  repliesFrom: Array<string>
+  isMention: boolean
+}
 
 // State
 
@@ -52,8 +60,8 @@ const processAlerts = async (pubkey, events) => {
 
   const parents = createMap('id', await network.loadParents(events))
 
-  const asAlert = e =>
-    asDisplayEvent({...e, repliesFrom: [], likedBy: [], isMention: false})
+  const asAlert = (e): AlertEvent =>
+    ({repliesFrom: [], likedBy: [], zappedBy: [], isMention: false, ...asDisplayEvent(e)})
 
   const isPubkeyChild = e => {
     const parentId = findReplyId(e)
@@ -61,19 +69,27 @@ const processAlerts = async (pubkey, events) => {
     return parents[parentId]?.pubkey === pubkey
   }
 
-  const [likes, notes] = partition(propEq('kind', 7), events)
-  const [replies, mentions] = partition(isPubkeyChild, notes)
+  const [replies, mentions] = partition(isPubkeyChild, events.filter(propEq('kind', 1)))
+  const likes = events.filter(propEq('kind', 7))
+  const zaps = events.filter(propEq('kind', 9735))
+
+  zaps.filter(isPubkeyChild).forEach(e => {
+    const parent = parents[findReplyId(e)]
+    const note = asAlert(database.alerts.get(parent.id) || parent)
+
+    database.alerts.put({...note, zappedBy: uniq(note.zappedBy.concat(e.pubkey))})
+  })
 
   likes.filter(isPubkeyChild).forEach(e => {
     const parent = parents[findReplyId(e)]
-    const note = database.alerts.get(parent.id) || asAlert(parent)
+    const note = asAlert(database.alerts.get(parent.id) || parent)
 
     database.alerts.put({...note, likedBy: uniq(note.likedBy.concat(e.pubkey))})
   })
 
   replies.forEach(e => {
     const parent = parents[findReplyId(e)]
-    const note = database.alerts.get(parent.id) || asAlert(parent)
+    const note = asAlert(database.alerts.get(parent.id) || parent)
 
     database.alerts.put({...note, repliesFrom: uniq(note.repliesFrom.concat(e.pubkey))})
   })
@@ -150,7 +166,7 @@ const listen = async pubkey => {
     filter: [
       {kinds: personKinds, authors: [pubkey], since},
       {kinds: [4], authors: [pubkey], since},
-      {kinds: [1, 7, 4], '#p': [pubkey], since},
+      {kinds: [1, 7, 4, 9735], '#p': [pubkey], since},
       {kinds: [42], '#e': roomIds, since},
     ],
     onChunk: async events => {

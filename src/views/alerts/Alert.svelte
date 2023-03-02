@@ -13,11 +13,13 @@
   const pubkeys = switcher(type, {
     replies: note.repliesFrom,
     likes: note.likedBy,
+    zaps: note.zappedBy,
   })
 
   const actionText = switcher(type, {
     replies: 'replied to your note',
     likes: 'liked your note',
+    zaps: 'zapped your note',
   })
 
   let isOpen = false

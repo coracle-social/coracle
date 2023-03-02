@@ -56,7 +56,9 @@
 </div>
 {:else if note.pubkey}
 <div in:fly={{y: 20}}>
-  <Note showContext invertColors depth={6} anchorId={note.id} note={asDisplayEvent(note)} />
+  <Content>
+    <Note showContext invertColors depth={6} anchorId={note.id} note={asDisplayEvent(note)} />
+  </Content>
 </div>
 {/if}
 

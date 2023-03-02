@@ -83,7 +83,7 @@ export const displayPerson = p => {
 export const isLike = content => ['', '+', '🤙', '👍', '❤️'].includes(content)
 
 export const isAlert = (e, pubkey) => {
-  if (![1, 7].includes(e.kind)) {
+  if (![1, 7, 9735].includes(e.kind)) {
     return false
   }
 

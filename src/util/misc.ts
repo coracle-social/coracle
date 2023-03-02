@@ -271,6 +271,16 @@ export const tryJson = f => {
   }
 }
 
+export const tryFetch = async f => {
+  try {
+    return await f()
+  } catch (e) {
+    if (!e.toString().includes('fetch')) {
+      warn(e)
+    }
+  }
+}
+
 export const union = (...sets) =>
   new Set(sets.flatMap(s => Array.from(s)))
 

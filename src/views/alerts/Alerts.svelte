@@ -23,7 +23,12 @@
       // Filter out alerts for which we failed to find the required context. The bug
       // is really upstream of this, but it's an easy fix
       const events = user.mute(database.alerts.all())
-        .filter(e => e.replies.length > 0 || e.likedBy.length > 0 || e.isMention)
+        .filter(e => (
+          e.replies.length > 0
+          || e.likedBy.length > 0
+          || e.zappedBy?.length > 0
+          || e.isMention
+        ))
 
       notes = sortBy(e => -e.created_at, events).slice(0, limit)
     })
@@ -36,6 +41,8 @@
   <div in:fly={{y: 20}}>
     {#if note.replies.length > 0}
     <Alert type="replies" {note} />
+    {:else if note.zappedBy?.length > 0}
+    <Alert type="zaps" {note} />
     {:else if note.likedBy.length > 0}
     <Alert type="likes" {note} />
     {:else}

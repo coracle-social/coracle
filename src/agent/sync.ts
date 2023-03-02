@@ -3,7 +3,7 @@ import {nip05} from 'nostr-tools'
 import {getParams} from 'js-lnurl'
 import {noop, createMap, ensurePlural, chunk, switcherFn} from 'hurdak/lib/hurdak'
 import {log} from 'src/util/logger'
-import {hexToBech32, now, sleep, tryJson, timedelta, shuffle, hash} from 'src/util/misc'
+import {hexToBech32, tryFetch, now, sleep, tryJson, timedelta, shuffle, hash} from 'src/util/misc'
 import {Tags, roomAttrs, personKinds, isRelay, isShareableRelay, normalizeRelayUrl} from 'src/util/nostr'
 import database from 'src/agent/database'
 
@@ -321,10 +321,12 @@ const verifyZapper = async (pubkey, address) => {
     }
 
     const url = `https://${domain}/.well-known/lnurlp/${name}`
-    const res = await fetch(url)
+    const res = await tryFetch(() => fetch(url))
 
-    zapper = await res.json()
-    lnurl = hexToBech32('lnurl', url)
+    if (res) {
+      zapper = await res.json()
+      lnurl = hexToBech32('lnurl', url)
+    }
   }
 
   if (zapper?.allowsNostr && zapper?.nostrPubkey) {
