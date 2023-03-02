@@ -2,7 +2,7 @@ import {max, find, pluck, propEq, partition, uniq} from 'ramda'
 import {derived} from 'svelte/store'
 import {createMap} from 'hurdak/lib/hurdak'
 import {synced, now, timedelta} from 'src/util/misc'
-import {Tags, isAlert, asDisplayEvent, findReplyId} from 'src/util/nostr'
+import {Tags, personKinds, isAlert, asDisplayEvent, findReplyId} from 'src/util/nostr'
 import {getUserReadRelays} from 'src/agent/relays'
 import database from 'src/agent/database'
 import network from 'src/agent/network'
@@ -148,6 +148,7 @@ const listen = async pubkey => {
   listener = await network.listen({
     relays: getUserReadRelays(),
     filter: [
+      {kinds: personKinds, authors: [pubkey], since},
       {kinds: [4], authors: [pubkey], since},
       {kinds: [1, 7, 4], '#p': [pubkey], since},
       {kinds: [42], '#e': roomIds, since},
