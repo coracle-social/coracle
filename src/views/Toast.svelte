@@ -8,7 +8,7 @@
 {#if $toast}
 {#key 'key'}
 <div
-  class="fixed top-0 left-0 right-0 z-20 pointer-events-none flex justify-center"
+  class="fixed top-0 left-0 right-0 z-30 pointer-events-none flex justify-center"
   transition:fly={{y: -50, duration: 300}}>
   <div
     class={cx(

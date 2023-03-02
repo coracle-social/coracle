@@ -246,11 +246,11 @@
       {:else if $modal.type === 'login/connect'}
         <ConnectUser />
       {:else if $modal.type === 'person/settings'}
-        <PersonSettings />
+        <PersonSettings person={$modal.person} />
       {:else if $modal.type === 'person/info'}
-        <PersonProfileInfo />
+        <PersonProfileInfo person={$modal.person} />
       {:else if $modal.type === 'person/share'}
-        <PersonShare />
+        <PersonShare person={$modal.person} />
       {:else if $modal.type === 'person/list'}
         <PersonList pubkeys={$modal.pubkeys} />
       {:else if $modal.type === 'message'}

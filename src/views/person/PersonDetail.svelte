@@ -169,7 +169,7 @@
           <div on:click|stopPropagation={toggleActions} class="px-5 py-2 cursor-pointer">
             <i class="fa fa-xl fa-ellipsis-vertical" />
           </div>
-          <div class="absolute top-0 right-0 mt-12 flex flex-col gap-2 opacity-90">
+          <div class="absolute top-0 right-0 mt-12 flex flex-col gap-2 opacity-90 z-10">
             <div
               class="absolute inset-0 bg-black rounded-full"
               class:hidden={!showActions}

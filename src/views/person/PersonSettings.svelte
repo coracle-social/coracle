@@ -8,12 +8,13 @@
   import user from 'src/agent/user'
   import {getUserWriteRelays} from 'src/agent/relays'
   import cmd from 'src/agent/cmd'
-  import {modal} from 'src/app/ui'
   import {publishWithToast} from 'src/app'
+
+  export let person
 
   const muffle = user.getProfile().muffle || []
   const muffleOptions = ['Never', 'Sometimes', 'Often', 'Always']
-  const muffleValue = parseFloat(first(muffle.filter(t => t[1] === $modal.person.pubkey).map(last)) || 1)
+  const muffleValue = parseFloat(first(muffle.filter(t => t[1] === person.pubkey).map(last)) || 1)
 
   const values = {
     // Scale up to integers for each choice we have
@@ -26,8 +27,8 @@
     // Scale back down to a decimal based on string value
     const muffleValue = muffleOptions.indexOf(values.muffle) / 3
     const muffleTags = muffle
-      .filter(t => t[1] !== $modal.person.pubkey)
-      .concat([["p", $modal.person.pubkey, muffleValue.toString()]])
+      .filter(t => t[1] !== person.pubkey)
+      .concat([["p", person.pubkey, muffleValue.toString()]])
       .filter(t => last(t) !== "1")
 
     publishWithToast(getUserWriteRelays(), cmd.muffle(muffleTags))
