@@ -224,7 +224,7 @@
     {:else}
       <p class="text-sm mb-4 text-light">
         <i class="fa-solid fa-info-circle" />
-        NIP05 identifier available.
+        NIP05 identifier not available.
       </p>
     {/if}
 
