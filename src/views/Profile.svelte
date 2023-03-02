@@ -18,6 +18,7 @@
   let values = user.getProfile().kind0 || {}
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
+  const lud16Url = "https://blog.getalby.com/create-your-lightning-address/"
   const pseudUrl = "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
   onMount(async () => {
@@ -60,8 +61,18 @@
           <i slot="before" class="fa-solid fa-user-check" />
         </Input>
         <p class="text-sm text-light">
-          Enter a <Anchor external href={nip05Url}>NIP-05</Anchor> identifier in the form
-          "name@domain.com" to verify your public key.
+          Enter a <Anchor external href={nip05Url}>NIP-05</Anchor> address to verify
+          your public key.
+        </p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <strong>Lightning address</strong>
+        <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.lud16}>
+          <i slot="before" class="fa-solid fa-bolt" />
+        </Input>
+        <p class="text-sm text-light">
+          Enter a <Anchor external href={lud16Url}>LUD-16</Anchor> address to enable
+          sending and receiving lightning tips (LUD-06 will also work).
         </p>
       </div>
       <div class="flex flex-col gap-1">

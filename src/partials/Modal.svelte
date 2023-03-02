@@ -9,7 +9,7 @@
 <svelte:body
   on:keydown={e => {
     if (e.key === 'Escape' && !root.querySelector('.modal')) {
-      onEscape()
+      onEscape?.()
     }
   }} />
 

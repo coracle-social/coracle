@@ -1,5 +1,6 @@
 # Current
 
+- [ ] Add zaps to notifications
 - [ ] Try adding boxes/separation on feeds based on user feedback
 - [ ] Strip zero width spaces from compose
 - [ ] Fix iOS/safari/firefox

@@ -139,7 +139,7 @@ const connect = url => {
 
 // Public api - publish/subscribe
 
-const publish = async ({relays, event, onProgress, timeout = 10_000}) => {
+const publish = async ({relays, event, onProgress, timeout = 5000}) => {
   if (relays.length === 0) {
     error(`Attempted to publish to zero relays`, event)
   } else {
