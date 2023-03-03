@@ -1,9 +1,8 @@
 import {uniq, pick, identity, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
-import {getParams} from 'js-lnurl'
 import {noop, createMap, ensurePlural, chunk, switcherFn} from 'hurdak/lib/hurdak'
 import {log} from 'src/util/logger'
-import {hexToBech32, tryFetch, now, sleep, tryJson, timedelta, shuffle, hash} from 'src/util/misc'
+import {lnurlEncode, lnurlDecode, tryFetch, now, sleep, tryJson, timedelta, shuffle, hash} from 'src/util/misc'
 import {Tags, roomAttrs, personKinds, isRelay, isShareableRelay, normalizeRelayUrl} from 'src/util/nostr'
 import database from 'src/agent/database'
 
@@ -308,25 +307,31 @@ const verifyNip05 = (pubkey, as) =>
   }, noop)
 
 const verifyZapper = async (pubkey, address) => {
-  // Try to parse it as a lud06 LNURL
-  let zapper = await getParams(address) as any
-  let lnurl = address
-
-  // If that failed, try to parse it as a lud16 address
-  if (zapper.status === 'ERROR' && address.includes('@')) {
+  let url
+  if (address.startsWith('lnurl1')) {
+    // Try to parse it as a lud06 LNURL
+    url = lnurlDecode(address)
+    const lnurl = address
+  } else if (address.includes('@')) {
+    // Otherwise try to parse it as a lud16 address
     const [name, domain] = address.split('@')
 
     if (!domain || !name) {
       return
     }
 
-    const url = `https://${domain}/.well-known/lnurlp/${name}`
-    const res = await tryFetch(() => fetch(url))
+    url = `https://${domain}/.well-known/lnurlp/${name}`
+  } else {
+    // Otherwise this is not valid
+    return
+  }
 
-    if (res) {
-      zapper = await res.json()
-      lnurl = hexToBech32('lnurl', url)
-    }
+  const res = await tryFetch(() => fetch(url))
+
+  let zapper
+  if (res) {
+    zapper = await res.json()
+    lnurl = lnurlEncode('lnurl', url)
   }
 
   if (zapper?.allowsNostr && zapper?.nostrPubkey) {

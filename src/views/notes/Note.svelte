@@ -1,6 +1,5 @@
 <script lang="ts">
   import cx from 'classnames'
-  import bolt11 from 'bolt11'
   import QRCode from 'qrcode'
   import {nip19} from 'nostr-tools'
   import {find, sum, last, whereEq, without, uniq, pluck, reject, propEq} from 'ramda'
@@ -9,9 +8,10 @@
   import {slide} from 'svelte/transition'
   import {navigate} from 'svelte-routing'
   import {quantify} from 'hurdak/lib/hurdak'
-  import {Tags, findRootId, findReplyId, displayPerson, isLike} from "src/util/nostr"
+  import {Tags, findRootId, findReplyId, displayPerson, isLike} from 'src/util/nostr'
   import {formatTimestamp, now, tryJson, stringToColor, formatSats, fetchJson} from 'src/util/misc'
   import {extractUrls, copyToClipboard} from "src/util/html"
+  import {invoiceAmount} from 'src/util/lightning'
   import ImageCircle from 'src/partials/ImageCircle.svelte'
   import Input from 'src/partials/Input.svelte'
   import Textarea from 'src/partials/Textarea.svelte'
@@ -74,7 +74,7 @@
 
       return tryJson(() => ({
         ...zap,
-        invoice: bolt11.decode(zapMeta.bolt11),
+        invoiceAmount: invoiceAmount(zapMeta.bolt11),
         request: JSON.parse(zapMeta.description),
       }))
     })
@@ -88,11 +88,11 @@
           return false
         }
 
-        const {invoice, request} = zap
+        const {invoiceAmount, request} = zap
         const reqMeta = Tags.from(request).asMeta()
 
         // Verify that the zapper actually sent the requested amount (if it was supplied)
-        if (reqMeta.amount && reqMeta.amount !== parseInt(invoice.millisatoshis)) {
+        if (reqMeta.amount && parseInt(reqMeta.amount) !== invoiceAmount) {
           return false
         }
 
@@ -114,7 +114,7 @@
   $: zapped = find(z => z.request.pubkey === $profile?.pubkey, zaps)
   $: $likesCount = likes.length
   $: $flagsCount = flags.length
-  $: $zapsTotal = sum(zaps.map(zap => zap.invoice.satoshis))
+  $: $zapsTotal = sum(zaps.map(zap => zap.invoiceAmount)) / 1000
   $: $repliesCount = note.replies.length
   $: visibleNotes = note.replies.filter(r => showContext ? true : !r.isContext)
   $: canZap = $person?.zapper && user.canZap()
