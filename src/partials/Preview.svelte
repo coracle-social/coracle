@@ -46,7 +46,8 @@
   <Anchor
     external
     href={url}
-    class="relative rounded border border-solid border-medium flex flex-col bg-medium overflow-hidden">
+    style="background-color: rgba(15, 15, 14, 0.5)"
+    class="relative rounded border border-solid border-medium flex flex-col overflow-hidden">
     {#if preview.image}
     <img alt="Link preview" src={preview.image} class="object-center max-h-96 object-contain" />
     {/if}

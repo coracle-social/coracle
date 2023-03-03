@@ -14,6 +14,7 @@
 
   export let note
   export let relays = []
+  export let invertColors = false
 
   let found = false
   let loading = true
@@ -56,7 +57,7 @@
 </div>
 {:else if note.pubkey}
 <div in:fly={{y: 20}} class="flex flex-col gap-4 p-4">
-  <Note showContext depth={6} anchorId={note.id} note={asDisplayEvent(note)} />
+  <Note showContext depth={6} anchorId={note.id} note={asDisplayEvent(note)} {invertColors} />
 </div>
 {/if}
 

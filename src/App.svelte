@@ -232,7 +232,7 @@
     <Modal onEscape={$modal.noEscape ? null : closeModal}>
       {#if $modal.type === 'note/detail'}
         {#key $modal.note.id}
-        <NoteDetail {...$modal} />
+        <NoteDetail {...$modal} invertColors />
         {/key}
       {:else if $modal.type === 'note/create'}
         <NoteCreate pubkey={$modal.pubkey} />
