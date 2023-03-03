@@ -1,5 +1,6 @@
 # Current
 
+- [ ] Hash pubkey so we can track usage by unique user
 - [ ] Try adding boxes/separation on feeds based on user feedback
 - [ ] Strip zero width spaces from compose
 - [ ] Fix iOS/safari/firefox

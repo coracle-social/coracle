@@ -94,7 +94,12 @@ const createReply = (note, content, mentions = [], topics = []) => {
 }
 
 const requestZap = (relays, content, pubkey, eventId, amount, lnurl) => {
-  const tags = [["relays", ...relays], ["amount", amount], ["lnurl", lnurl], ["p", pubkey]]
+  const tags = [
+    ["relays", ...relays],
+    ["amount", amount.toString()],
+    ["lnurl", lnurl],
+    ["p", pubkey],
+  ]
 
   if (eventId) {
     tags.push(["e", eventId])
