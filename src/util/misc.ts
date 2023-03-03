@@ -340,10 +340,10 @@ export const uploadFile = (url, fileObj) => {
 }
 
 export const lnurlEncode = (prefix, url) =>
-  bech32.encode(prefix, bech32.toWords(utf8.decode(url)))
+  bech32.encode(prefix, bech32.toWords(utf8.decode(url)), false)
 
 export const lnurlDecode = b32 =>
-  utf8.encode(bech32.fromWords(bech32.decode(b32).words))
+  utf8.encode(bech32.fromWords(bech32.decode(b32, false).words))
 
 export const formatSats = sats => {
   const formatter = new Intl.NumberFormat()
