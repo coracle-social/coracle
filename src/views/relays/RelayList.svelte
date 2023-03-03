@@ -8,6 +8,8 @@
   import {modal} from "src/app/ui"
 
   const {relays} = user
+
+  document.title = 'Relays'
 </script>
 
 <div in:fly={{y: 20}}>

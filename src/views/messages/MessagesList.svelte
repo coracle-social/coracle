@@ -20,6 +20,8 @@
 
   const getDisplay = tab =>
     ({title: toTitle(tab), badge: getContacts(tab).length})
+
+  document.title = 'Direct Messages'
 </script>
 
 <Content>

@@ -68,6 +68,8 @@
     // Return unencrypted content so we can display it immediately
     return {...event, content}
   }
+
+  document.title = `DMs with ${displayPerson($person)}`
 </script>
 
 <Channel {loadMessages} {listenForMessages} {sendMessage}>

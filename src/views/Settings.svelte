@@ -25,6 +25,8 @@
 
     toast.show("info", "Your settings have been saved!")
   }
+
+  document.title = "Settings"
 </script>
 
 <form on:submit={submit} in:fly={{y: 20}}>

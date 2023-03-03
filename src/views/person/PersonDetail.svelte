@@ -69,6 +69,8 @@
   onMount(async () => {
     log('Person', npub, person)
 
+    document.title = displayPerson(person)
+
     // Refresh our person
     network.loadPeople([pubkey], {force: true}).then(() => {
       person = database.getPersonWithFallback(pubkey)

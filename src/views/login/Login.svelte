@@ -25,6 +25,8 @@
   const pubkeyLogIn = () => {
     modal.set({type: 'login/pubkey'})
   }
+
+  document.title = "Log In"
 </script>
 
 <div in:fly={{y: 20}}>

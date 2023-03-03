@@ -1,5 +1,6 @@
 <script>
   import {navigate} from 'svelte-routing'
+  import {toTitle} from 'hurdak/lib/hurdak'
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -11,6 +12,8 @@
   export let activeTab
 
   const setActiveTab = tab => navigate(`/notes/${tab}`)
+
+  document.title = toTitle(activeTab)
 </script>
 
 <Content>

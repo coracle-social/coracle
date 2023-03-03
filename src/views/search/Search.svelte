@@ -8,6 +8,8 @@
   export let activeTab
 
   const setActiveTab = tab => navigate(`/search/${tab}`)
+
+  document.title = "Search"
 </script>
 
 <Content>

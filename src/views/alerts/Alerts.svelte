@@ -15,6 +15,8 @@
   let notes = null
 
   onMount(() => {
+    document.title = "Notifications"
+
     lastChecked.update(assoc('alerts', now()))
 
     return createScroller(async () => {

@@ -20,6 +20,8 @@
       window.location.href = '/login'
     }, 1000)
   }
+
+  document.title = "Log Out"
 </script>
 
 <Content size="lg" class="text-center">

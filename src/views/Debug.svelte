@@ -4,6 +4,8 @@
   import {logs} from 'src/util/logger.js'
   import {formatTimestamp} from 'src/util/misc'
   import Content from 'src/partials/Content.svelte'
+
+  document.title = "Debug"
 </script>
 
 <Content>

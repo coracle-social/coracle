@@ -1,7 +1,8 @@
 <script lang="ts">
-  import {last, find, propEq} from 'ramda'
+  import {find, propEq} from 'ramda'
   import {onMount} from 'svelte'
   import {poll, stringToColor} from "src/util/misc"
+  import {displayRelay} from "src/util/nostr"
   import {between} from 'hurdak/lib/hurdak'
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -35,6 +36,8 @@
       }
     })
   })
+
+  document.title = displayRelay(relay)
 </script>
 
 <Content>
@@ -44,7 +47,7 @@
       <span
         class="border-b border-solid"
         style={`border-color: ${stringToColor(relay.url)}`}>
-        {last(relay.url.split('://'))}
+        {displayRelay(relay)}
       </span>
       <span
         on:mouseout={() => {showStatus = false}}

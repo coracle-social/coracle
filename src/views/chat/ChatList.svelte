@@ -20,6 +20,7 @@
   $: search = fuzzy($otherRooms, {keys: ['name', 'about']})
   $: results = search(q).slice(0, 50)
 
+  document.title = 'Chat'
 
   onMount(() => {
     const sub = network.listen({

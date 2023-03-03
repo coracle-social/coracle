@@ -30,6 +30,8 @@
       return navigate("/login")
     }
   })
+
+  document.title = 'Keys'
 </script>
 
 <div in:fly={{y: 20}}>

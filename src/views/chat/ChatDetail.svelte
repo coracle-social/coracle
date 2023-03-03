@@ -46,6 +46,8 @@
     return event
   }
 
+  document.title = $room.name
+
   lastChecked.update(updateIn(assoc(id, now())))
 </script>
 

@@ -80,6 +80,8 @@ export const displayPerson = p => {
   }
 }
 
+export const displayRelay = ({url}) => last(url.split('://'))
+
 export const isLike = content => ['', '+', '🤙', '👍', '❤️', '😎', '🏅'].includes(content)
 
 export const isAlert = (e, pubkey) => {

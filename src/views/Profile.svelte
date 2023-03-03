@@ -32,6 +32,8 @@
     publishWithToast(getUserWriteRelays(), cmd.updateUser(values))
     navigate(routes.person(user.getPubkey(), 'profile'))
   }
+
+  document.title = "Profile"
 </script>
 
 <form on:submit={submit} in:fly={{y: 20}}>
