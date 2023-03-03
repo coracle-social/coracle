@@ -53,6 +53,7 @@
   let showRelays = false
 
   const {profile} = user
+  const borderColor = invertColors ? "medium" : "dark"
   const links = extractUrls(note.content)
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
@@ -302,11 +303,11 @@
 
       if (lastChild) {
         const height = (
-          getHeight(noteContainer)
-          + getHeight(replyContainer)
+          64
           + getHeight(childrenContainer)
           - getHeight(lastChild)
           - getHeight(lastChild.nextElementSibling)
+          - (lastChild.nextElementSibling ? 16 : 0)
         )
 
         border.style = `height: ${height - 21}px`
@@ -328,10 +329,9 @@
 
 {#if $person}
 <div bind:this={noteContainer} class="note relative">
-  <div class="absolute w-px bg-light z-10 ml-8 mt-12 h-0" bind:this={border} />
   <Card class="flex gap-4 relative" on:click={onClick} {interactive} {invertColors}>
     {#if !showParent}
-    <div class="absolute h-px w-3 bg-light z-10" style="left: 0px; top: 27px;" />
+    <div class={`absolute h-px -ml-4 w-4 bg-${borderColor} z-10`} style="left: 0px; top: 27px;" />
     {/if}
     <div>
       <Anchor class="text-lg font-bold" href={routes.person($person.pubkey)}>
@@ -430,7 +430,7 @@
 
 {#if reply}
 <div transition:slide class="note-reply relative z-10" bind:this={replyContainer}>
-  <div class="bg-medium border-light border border-solid" on:keydown={onReplyKeydown}>
+  <div class={`border border-${borderColor} border-solid rounded-t bg-dark`} on:keydown={onReplyKeydown}>
     <Compose bind:this={reply} onSubmit={sendReply}>
       <button
         slot="addon"
@@ -442,7 +442,7 @@
     </Compose>
   </div>
   {#if replyMentions.length > 0}
-  <div class="text-white text-sm p-2 rounded-b border-t-0 border border-solid border-light bg-black">
+  <div class={`text-white text-sm p-2 rounded-b border-t-0 border border-solid border-${borderColor} bg-black`}>
     <div class="inline-block border-r border-solid border-medium pl-1 pr-3 mr-2">
       <i class="fa fa-at" />
     </div>
@@ -458,17 +458,21 @@
 </div>
 {/if}
 
+
 {#if visibleNotes.length > 0 && depth > 0}
-<div class="ml-8 note-children" bind:this={childrenContainer}>
-  {#if !showEntire && note.replies.length > visibleNotes.length}
-  <button class="ml-5 py-2 text-light cursor-pointer" on:click={onClick}>
-    <i class="fa fa-up-down text-sm pr-2" />
-    Show {quantify(note.replies.length - visibleNotes.length, 'other reply', 'more replies')}
-  </button>
-  {/if}
-  {#each visibleNotes as r (r.id)}
-  <svelte:self showParent={false} note={r} depth={depth - 1} {invertColors} {anchorId} {showContext} />
-  {/each}
+<div class="relative">
+  <div class={`absolute w-px bg-${borderColor} z-10 -mt-4 ml-4 h-0`} bind:this={border} />
+  <div class="ml-8 note-children relative flex flex-col gap-4" bind:this={childrenContainer}>
+    {#if !showEntire && note.replies.length > visibleNotes.length}
+    <button class="ml-5 py-2 text-light cursor-pointer" on:click={onClick}>
+      <i class="fa fa-up-down text-sm pr-2" />
+      Show {quantify(note.replies.length - visibleNotes.length, 'other reply', 'more replies')}
+    </button>
+    {/if}
+    {#each visibleNotes as r (r.id)}
+    <svelte:self showParent={false} note={r} depth={depth - 1} {invertColors} {anchorId} {showContext} />
+    {/each}
+  </div>
 </div>
 {/if}
 

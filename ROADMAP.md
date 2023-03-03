@@ -1,6 +1,5 @@
 # Current
 
-- [ ] Try adding boxes/separation on feeds based on user feedback
 - [ ] Strip zero width spaces from compose
 - [ ] Fix iOS/safari/firefox
 - [ ] Add dynamic title tag

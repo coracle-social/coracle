@@ -105,7 +105,7 @@
   </button>
   {/if}
 
-  <div>
+  <div class="flex flex-col gap-4">
     {#each notes as note (note.id)}
     <Note depth={2} {note} />
     {/each}
