@@ -9,6 +9,7 @@
   import Button from "src/partials/Button.svelte"
   import Compose from "src/partials/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
+  import Preview from "src/partials/Preview.svelte"
   import Input from "src/partials/Input.svelte"
   import RelayCardSimple from "src/views/relays/RelayCardSimple.svelte"
   import Content from "src/partials/Content.svelte"
@@ -40,14 +41,12 @@
     )
   }
 
-  $: {
-    if (image) {
-      input.type('\n' + image)
-    }
-  }
-
   const onSubmit = async () => {
-    const {content, mentions, topics} = input.parse()
+    let {content, mentions, topics} = input.parse()
+
+    if (image) {
+      content += '\n' + image
+    }
 
     if (content) {
       const thunk = cmd.createNote(content, mentions, topics)
@@ -107,6 +106,9 @@
           <Compose bind:this={input} {onSubmit} />
         </div>
       </div>
+      {#if image}
+      <Preview url={image} onClose={() => { image = null }} />
+      {/if}
       <div class="flex gap-2">
         <Button type="submit" class="text-center flex-grow">Send</Button>
         <ImageInput bind:value={image} icon="image" hideInput />

@@ -5,8 +5,14 @@
   import user from 'src/agent/user'
 
   export let url
+  export let onClose = null
 
   let preview
+
+  const close = () => {
+    onClose?.()
+    preview = null
+  }
 
   onMount(async () => {
     if (url.match('\.(jpg|jpeg|png|gif)')) {
@@ -40,7 +46,7 @@
   <Anchor
     external
     href={url}
-    class="rounded border border-solid border-medium flex flex-col bg-medium overflow-hidden">
+    class="relative rounded border border-solid border-medium flex flex-col bg-medium overflow-hidden">
     {#if preview.image}
     <img alt="Link preview" src={preview.image} class="object-center max-h-96 object-contain" />
     {/if}
@@ -54,6 +60,12 @@
       <small>{preview.description}</small>
     </div>
     {/if}
+    <div
+      on:click|preventDefault={close}
+      class="w-6 h-6 rounded-full bg-white border border-solid border-medium shadow absolute
+             top-0 right-0 m-1 text-black flex justify-center items-center opacity-50">
+      <i class="fa fa-times" />
+    </div>
   </Anchor>
 </div>
 {/if}
