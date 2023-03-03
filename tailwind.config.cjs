@@ -16,6 +16,7 @@ module.exports = {
       white: "#FFFCF2",
       accent: "#EB5E28",
       light: "#CCC5B9",
+      shimmer: "#544e46",
       medium: "#403D39",
       dark: "#252422",
       danger: "#ff0000",

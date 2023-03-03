@@ -121,3 +121,5 @@
   - [ ] Trim feeds once the user scrolls way down to save on memory
   - [ ] Don't lose feeds when navigating, persist modals. Remember scroll state
 - [ ] Offline-first
+- [ ] Add support for nests https://nostrnests.com/
+  - nevent1qqs2jm46m9tg9z33av4fp8hhapsx96234htz75wrvpvrax5jjl8m5usprfmhxue69uhhyetvv9ujumn0wd68yurvv438xtnrdaksy4d92m

@@ -309,7 +309,7 @@
 
       if (lastChild) {
         const height = (
-          64
+          66
           + getHeight(childrenContainer)
           - getHeight(lastChild)
           - getHeight(lastChild.nextElementSibling)
