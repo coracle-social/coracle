@@ -1,15 +1,13 @@
 <script lang="ts">
-  import type {ProfilePointer} from 'nostr-tools/nip19'
   import QrScanner from 'qr-scanner'
   import {onDestroy} from 'svelte'
   import {navigate} from 'svelte-routing'
   import {waitFor} from 'hurdak/lib/hurdak'
-  import {pluck, find} from 'ramda'
+  import {find} from 'ramda'
   import {nip05, nip19} from 'nostr-tools'
   import Input from 'src/partials/Input.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import Spinner from 'src/partials/Spinner.svelte'
-  import {getUserReadRelays} from 'src/agent/relays'
   import {toast} from "src/app/ui"
 
   let mode = 'input', video, ready, value, scanner
@@ -31,12 +29,8 @@
       return
     }
 
-    let profile = await nip05.queryProfile(input) as ProfilePointer
+    let profile = await nip05.queryProfile(input)
     if (profile) {
-      if (profile.relays.length === 0) {
-        profile.relays = pluck('url', getUserReadRelays())
-      }
-
       navigate("/" + nip19.nprofileEncode(profile))
       return
     }

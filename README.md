@@ -41,4 +41,5 @@ You can find a more complete changelog [here](./ROADMAP.md).
 - Clone the project repository: `git clone https://github.com/staab/coracle.git`
 - Navitage to the project directory: `cd coracle`
 - Install dependencies: `npm install`
+- Add an env file from the template: `cp env.template env.local`
 - Start the development server: `npm run dev`
