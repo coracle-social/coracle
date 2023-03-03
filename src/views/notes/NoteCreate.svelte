@@ -45,7 +45,7 @@
     let {content, mentions, topics} = input.parse()
 
     if (image) {
-      content += '\n' + image
+      content = (content + '\n' + image).trim()
     }
 
     if (content) {

@@ -13,6 +13,7 @@
   import {formatTimestamp, now, tryJson, stringToColor, formatSats, fetchJson} from 'src/util/misc'
   import {extractUrls, copyToClipboard} from "src/util/html"
   import ImageCircle from 'src/partials/ImageCircle.svelte'
+  import ImageInput from 'src/partials/ImageInput.svelte'
   import Input from 'src/partials/Input.svelte'
   import Textarea from 'src/partials/Textarea.svelte'
   import Content from 'src/partials/Content.svelte'
@@ -46,6 +47,7 @@
     without([user.getPubkey()], uniq(Tags.from(note).type("p").values().all().concat(note.pubkey)))
 
   let zap = null
+  let image = null
   let reply = null
   let replyMentions = getDefaultReplyMentions()
   let replyContainer = null
@@ -196,6 +198,10 @@
 
   const sendReply = async () => {
     let {content, mentions, topics} = reply.parse()
+
+    if (image) {
+      content = (content + '\n' + image).trim()
+    }
 
     if (content) {
       mentions = uniq(mentions.concat(replyMentions))
@@ -389,16 +395,16 @@
           </button>
           {/if}
         </div>
-        <div class="flex justify-between text-light" on:click={e => e.stopPropagation()}>
+        <div class="flex justify-between text-light">
           <div class="flex">
             <div class="w-16">
-              <button class="fa fa-reply cursor-pointer" on:click={startReply} />
+              <button class="fa fa-reply cursor-pointer" on:click|stopPropagation={startReply} />
               {$repliesCount}
             </div>
             <div class="w-16" class:text-accent={like}>
               <button
                 class={cx('fa fa-heart cursor-pointer', {'fa-beat fa-beat-custom': like})}
-                on:click={() => like ? deleteReaction(like) : react("+")} />
+                on:click|stopPropagation={() => like ? deleteReaction(like) : react("+")} />
               {$likesCount}
             </div>
             <div class="w-20" class:text-accent={zapped}>
@@ -406,16 +412,17 @@
                 class={cx("fa fa-bolt cursor-pointer", {
                   'pointer-events-none opacity-50': !canZap,
                 })}
-                on:click={startZap} />
+                on:click|stopPropagation={startZap} />
               {formatSats($zapsTotal)}
             </div>
             <div class="w-16">
-              <button class="fa fa-flag cursor-pointer" on:click={() => react("-")} />
+              <button class="fa fa-flag cursor-pointer" on:click|stopPropagation={() => react("-")} />
               {$flagsCount}
             </div>
           </div>
           <div
-            class="cursor-pointer flex gap-1 items-center" on:click={() => { showRelays = true }}>
+            class="cursor-pointer flex gap-1 items-center"
+            on:click|stopPropagation={() => { showRelays = true }}>
             <i class="fa fa-server" />
             <div
               class="h-1 w-1 rounded-full"
@@ -429,8 +436,13 @@
 </div>
 
 {#if reply}
-<div transition:slide class="note-reply relative z-10" bind:this={replyContainer}>
-  <div class={`border border-${borderColor} border-solid rounded-t bg-dark`} on:keydown={onReplyKeydown}>
+<div transition:slide
+  class={`note-reply relative z-10 border border-${borderColor} border-solid rounded`}
+  bind:this={replyContainer}>
+  <div
+    class="bg-dark"
+    class:rounded-b={replyMentions.length === 0}
+    on:keydown={onReplyKeydown}>
     <Compose bind:this={reply} onSubmit={sendReply}>
       <button
         slot="addon"
@@ -441,20 +453,31 @@
       </button>
     </Compose>
   </div>
-  {#if replyMentions.length > 0}
-  <div class={`text-white text-sm p-2 rounded-b border-t-0 border border-solid border-${borderColor} bg-black`}>
-    <div class="inline-block border-r border-solid border-medium pl-1 pr-3 mr-2">
-      <i class="fa fa-at" />
+  {#if image}
+  <div class="p-2 bg-dark">
+    <Preview url={image} onClose={() => { image = null }} />
+  </div>
+  {/if}
+  <div class={`h-px bg-${borderColor}`} />
+  <div class="text-white text-sm p-2 rounded-b bg-black h-12">
+    <div class="inline-block py-2 pl-1 pr-3 mr-2 border-r border-solid border-medium">
+      <div class="flex gap-3 items-center cursor-pointer">
+        <ImageInput bind:value={image} icon="image" hideInput>
+          <i slot="button" class="fa fa-paperclip" />
+        </ImageInput>
+        <i class="fa fa-at" />
+      </div>
     </div>
     {#each replyMentions as p}
-      <div class="inline-block py-1 px-2 mr-1 mb-2 rounded-full border border-solid border-light">
+      <div class="inline-block py-1 px-2 mr-1 rounded-full border border-solid border-light">
         <button class="fa fa-times cursor-pointer" on:click|stopPropagation={() => removeMention(p)} />
         {displayPerson(database.getPersonWithFallback(p))}
       </div>
+    {:else}
+    <div class="text-light inline-block">No mentions</div>
     {/each}
     <div class="-mt-2" />
   </div>
-  {/if}
 </div>
 {/if}
 

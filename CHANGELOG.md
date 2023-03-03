@@ -4,6 +4,8 @@
 
 - [x] Add search by nip05
 - [x] Fix feed to show more variety
+- [x] Beautify notes
+- [x] Add uploads to replies
 
 ## 0.2.15
 

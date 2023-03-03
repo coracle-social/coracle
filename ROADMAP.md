@@ -1,6 +1,5 @@
 # Current
 
-- [ ] Strip zero width spaces from compose
 - [ ] Fix iOS/safari/firefox
 - [ ] Add dynamic title tag
 - [ ] Show more link on long notes (rather than just an ellipsis)

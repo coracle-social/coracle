@@ -20,7 +20,7 @@
     transition:fade
     on:click={onEscape} />
   <div
-    class="absolute inset-0 mt-20 sm:mt-28 modal-content"
+    class="absolute inset-0 mt-24 sm:mt-28 modal-content"
     transition:fly={{y: 1000, opacity: 1}}>
     <div class="bg-dark border-t border-solid border-medium h-full w-full overflow-auto pb-10">
       <slot />
