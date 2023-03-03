@@ -2,11 +2,7 @@
 
 - [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
-- [ ] Add dynamic title tag
 - [ ] Show more link on long notes (rather than just an ellipsis)
-- [ ] Show popover on delayed hover rather than click (on mobile, keep it click)
-- [ ] QR code component that sizes input to qr code width to make it tidy
-- [ ] Auto-follow hodlbod and fiatjaf, auto join relay when creating new account
 
 # Image uploads
 
@@ -48,6 +44,10 @@
 
 # More
 
+- [ ] Onboarding
+  - [ ] Auto-follow hodlbod
+  - [ ] Add a friendly tour
+  - [ ] Send a note to @coracle for help
 - [ ] https://media.nostr.band/
 - [ ] Make the note relays button modal make sense, one relay with no explanation is not good
 - [ ] Linkify invoices

@@ -4,6 +4,8 @@
   import tippy from 'tippy.js'
   import {onMount} from 'svelte'
 
+  export let triggerType = 'click'
+
   let trigger
   let tooltip
   let instance
@@ -13,18 +15,21 @@
       appendTo: () => document.body,
       allowHTML: true,
       interactive: true,
-      trigger: 'click',
+      trigger: triggerType,
       animation: 'shift-away',
       onShow: () => {
         const [tooltipContents] = tooltip.children
 
-        instance.popper.querySelector('.tippy-content').appendChild(tooltipContents)
-        instance.popper.addEventListener('mouseleave', e => instance.hide())
-        instance.popper.addEventListener('click', e => {
-          if (e.target.closest('.tippy-close')) {
-            instance.hide()
-          }
-        })
+        // If we've already triggered it, tooltipContents will be empty
+        if (tooltipContents) {
+          instance.popper.querySelector('.tippy-content').appendChild(tooltipContents)
+          instance.popper.addEventListener('mouseleave', e => instance.hide())
+          instance.popper.addEventListener('click', e => {
+            if (e.target.closest('.tippy-close')) {
+              instance.hide()
+            }
+          })
+        }
       },
       onHidden: () => {
         const [tooltipContents] = instance.popper.querySelector('.tippy-content').children

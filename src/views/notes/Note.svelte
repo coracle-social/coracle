@@ -9,7 +9,7 @@
   import {quantify} from 'hurdak/lib/hurdak'
   import {Tags, findRootId, findReplyId, displayPerson, isLike} from 'src/util/nostr'
   import {formatTimestamp, now, tryJson, stringToColor, formatSats, fetchJson} from 'src/util/misc'
-  import {extractUrls} from "src/util/html"
+  import {extractUrls, isMobile} from "src/util/html"
   import {invoiceAmount} from 'src/util/lightning'
   import ImageCircle from 'src/partials/ImageCircle.svelte'
   import QRCode from 'src/partials/QRCode.svelte'
@@ -341,7 +341,7 @@
     </div>
     <div class="flex flex-col gap-2 flex-grow min-w-0">
       <div class="flex items-center justify-between">
-        <Popover>
+        <Popover triggerType={isMobile ? 'click' : 'mouseenter'}>
           <div slot="trigger">
             <Anchor type="unstyled" class="text-lg font-bold flex gap-2 items-center">
               <span>{displayPerson($person)}</span>

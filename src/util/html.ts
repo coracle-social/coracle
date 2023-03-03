@@ -145,3 +145,4 @@ export const renderContent = content => {
   return content.trim()
 }
 
+export const isMobile = localStorage.mobile || window.navigator.maxTouchPoints > 1
