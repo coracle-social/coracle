@@ -1,5 +1,4 @@
-import {bech32} from 'bech32'
-import {Buffer} from 'buffer'
+import {bech32, utf8} from '@scure/base'
 import {debounce, throttle} from 'throttle-debounce'
 import {aperture, path as getPath, allPass, pipe, isNil, complement, equals, is, pluck, sum, identity, sortBy} from "ramda"
 import Fuse from "fuse.js/dist/fuse.min.js"
@@ -340,11 +339,11 @@ export const uploadFile = (url, fileObj) => {
   return fetchJson(url, {method: 'POST', body})
 }
 
-export const hexToBech32 = (prefix, hex) =>
-  bech32.encode(prefix, bech32.toWords(Buffer.from(hex, 'hex')))
+export const lnurlEncode = (prefix, url) =>
+  bech32.encode(prefix, bech32.toWords(utf8.decode(url)), false)
 
-export const bech32ToHex = b32 =>
-  Buffer.from(bech32.fromWords(bech32.decode(b32).words)).toString('hex')
+export const lnurlDecode = b32 =>
+  utf8.encode(bech32.fromWords(bech32.decode(b32, false).words))
 
 export const formatSats = sats => {
   const formatter = new Intl.NumberFormat()
