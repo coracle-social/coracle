@@ -1,6 +1,5 @@
 <script lang="ts">
   import cx from 'classnames'
-  import QRCode from 'qrcode'
   import {nip19} from 'nostr-tools'
   import {find, sum, last, whereEq, without, uniq, pluck, reject, propEq} from 'ramda'
   import {onMount} from 'svelte'
@@ -10,9 +9,10 @@
   import {quantify} from 'hurdak/lib/hurdak'
   import {Tags, findRootId, findReplyId, displayPerson, isLike} from 'src/util/nostr'
   import {formatTimestamp, now, tryJson, stringToColor, formatSats, fetchJson} from 'src/util/misc'
-  import {extractUrls, copyToClipboard} from "src/util/html"
+  import {extractUrls} from "src/util/html"
   import {invoiceAmount} from 'src/util/lightning'
   import ImageCircle from 'src/partials/ImageCircle.svelte'
+  import QRCode from 'src/partials/QRCode.svelte'
   import ImageInput from 'src/partials/ImageInput.svelte'
   import Input from 'src/partials/Input.svelte'
   import Textarea from 'src/partials/Textarea.svelte'
@@ -61,7 +61,7 @@
   const interactive = !anchorId || !showEntire
   const person = database.watch('people', () => database.getPersonWithFallback(note.pubkey))
 
-  let likes, flags, zaps, like, flag, border, childrenContainer, noteContainer, canZap, zapCanvas
+  let likes, flags, zaps, like, flag, border, childrenContainer, noteContainer, canZap
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const likesCount = tweened(0, {interpolate})
@@ -121,7 +121,6 @@
   $: $repliesCount = note.replies.length
   $: visibleNotes = note.replies.filter(r => showContext ? true : !r.isContext)
   $: canZap = $person?.zapper && user.canZap()
-  $: zapCanvas && zap && QRCode.toCanvas(zapCanvas, zap.invoice)
 
   const onClick = e => {
     const target = e.target as HTMLElement
@@ -277,10 +276,6 @@
         cleanupZap()
       },
     })
-  }
-
-  const copyZapInvoice = () => {
-    copyToClipboard(zap.invoice)
   }
 
   const cleanupZap = () => {
@@ -515,10 +510,7 @@
       <p>to {displayPerson($person)}</p>
     </div>
     {#if zap.invoice}
-      <canvas class="m-auto" bind:this={zapCanvas} />
-      <Input value={zap.invoice}>
-        <button slot="after" class="fa fa-copy" on:click={copyZapInvoice} />
-      </Input>
+      <QRCode code={zap.invoice} />
       <div class="text-center text-light">
         Copy or scan using a lightning wallet to pay your zap.
       </div>

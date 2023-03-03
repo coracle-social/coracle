@@ -6,6 +6,7 @@
 - [ ] Show more link on long notes (rather than just an ellipsis)
 - [ ] Show popover on delayed hover rather than click (on mobile, keep it click)
 - [ ] QR code component that sizes input to qr code width to make it tidy
+- [ ] Auto-follow hodlbod and fiatjaf, auto join relay when creating new account
 
 # Image uploads
 

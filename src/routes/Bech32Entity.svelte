@@ -5,7 +5,7 @@
   import {warn} from 'src/util/logger'
   import Content from 'src/partials/Content.svelte'
   import NoteDetail from 'src/views/notes/NoteDetail.svelte'
-  import Person from 'src/views/person/PersonDetail.svelte'
+  import Person from 'src/routes/PersonDetail.svelte'
   import {sampleRelays} from 'src/agent/relays'
 
   export let entity
