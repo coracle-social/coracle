@@ -22,11 +22,11 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Persistent color-coded relay list
 - [x] Smart relay selection and display
 - [x] Connection quality information
-- [ ] Invoice, bech32 entity, mention, link, image, and video rendering
-- [ ] Installable as a progressive web app
+- [x] Invoice, bech32 entity, mention, link, image, and video rendering
+- [x] Installable as a progressive web app
+- [x] Media uploads
+- [x] Lightning zaps
 - [ ] Feeds customizable by person, relay, and topic
-- [ ] Media uploads
-- [ ] Lightning tips and zaps
 - [ ] Keyword mutes
 - [ ] Exportable copy of all user events
 - [ ] Reporting and basic distributed moderation

@@ -6,7 +6,7 @@ import {navigate} from "svelte-routing"
 import {nip19} from 'nostr-tools'
 import {writable, get} from "svelte/store"
 import {globalHistory} from "svelte-routing/src/history"
-import {sleep} from "src/util/misc"
+import {sleep, hash} from "src/util/misc"
 import {warn} from 'src/util/logger'
 import user from 'src/agent/user'
 
@@ -114,11 +114,14 @@ setTimeout(() => {
 const session = Math.random().toString().slice(2)
 
 export const logUsage = async name => {
+  // Hash the user's pubkey so we can identify unique users without knowing
+  // anything about them
+  const ident = hash(user.getPubkey())
   const {dufflepudUrl, reportAnalytics} = user.getSettings()
 
   if (reportAnalytics) {
     try {
-      await fetch(`${dufflepudUrl}/usage/${session}/${name}`, {method: 'post' })
+      await fetch(`${dufflepudUrl}/usage/${ident}/${session}/${name}`, {method: 'post'})
     } catch (e) {
       if (!e.toString().includes('Failed to fetch')) {
         warn(e)

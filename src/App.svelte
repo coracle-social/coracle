@@ -96,16 +96,19 @@
       }
     })
 
+    // Remove identifying information, e.g. pubkeys, event ids, etc
+    const getPageName = () =>
+        location.pathname.slice(1)
+          .replace(/(npub|nprofile|note|nevent)[^\/]+/g, (_, m) => `<${m}>`)
+
     // Log usage on navigate
     const unsubHistory = globalHistory.listen(({location}) => {
       if (!location.hash) {
-        // Remove identifying information, e.g. pubkeys, event ids, etc
-        const name = location.pathname.slice(1)
-          .replace(/(npub|nprofile|note|nevent)[^\/]+/g, (_, m) => `<${m}>`)
-
-        logUsage(btoa(['page', name].join(':')))
+        logUsage(btoa(['page', getPageName()].join(':')))
       }
     })
+
+      logUsage(btoa(['page', getPageName()].join(':')))
 
     return () => {
       unsubHistory()
