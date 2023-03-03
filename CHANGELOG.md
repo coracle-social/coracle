@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.16
+
+- [x] Add search by nip05
+- [x] Fix feed to show more variety
+
 ## 0.2.15
 
 - [x] Add zaps

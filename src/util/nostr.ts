@@ -1,5 +1,5 @@
 import type {DisplayEvent} from 'src/util/types'
-import {fromPairs, last, identity, objOf, prop, flatten, uniq} from 'ramda'
+import {is, fromPairs, mergeLeft, last, identity, objOf, prop, flatten, uniq} from 'ramda'
 import {nip19} from 'nostr-tools'
 import {ensurePlural, ellipsize, first} from 'hurdak/lib/hurdak'
 
@@ -80,7 +80,7 @@ export const displayPerson = p => {
   }
 }
 
-export const isLike = content => ['', '+', '🤙', '👍', '❤️'].includes(content)
+export const isLike = content => ['', '+', '🤙', '👍', '❤️', '😎', '🏅'].includes(content)
 
 export const isAlert = (e, pubkey) => {
   if (![1, 7, 9735].includes(e.kind)) {
@@ -130,3 +130,6 @@ export const toHex = (data: string): string | null => {
     return null
   }
 }
+
+export const mergeFilter = (filter, extra) =>
+  is(Array, filter) ? filter.map(mergeLeft(extra)) : {...filter, ...extra}

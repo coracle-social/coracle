@@ -150,7 +150,7 @@ export const getLastSync = (k, fallback = 0) => {
 export class Cursor {
   until: number
   limit: number
-  constructor(limit = 10) {
+  constructor(limit = 50) {
     this.until = now()
     this.limit = limit
   }
@@ -170,7 +170,7 @@ export class Cursor {
     if (events.length > 1) {
       const timestamps = sortBy(identity, pluck('created_at', events))
       const gaps = aperture(2, timestamps).map(([a, b]) => b - a)
-      const gap = quantile(gaps, 0.5)
+      const gap = quantile(gaps, 0.1)
 
       this.until -= Math.round(gap * events.length)
     }

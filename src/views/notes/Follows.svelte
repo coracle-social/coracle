@@ -6,7 +6,10 @@
 
   const authors = shuffle(getUserFollows()).slice(0, 256)
   const relays = sampleRelays(getAllPubkeyWriteRelays(authors))
-  const filter = {kinds: [1, 7], authors}
+
+  // Separate notes and reactions into two queries since otherwise reactions dominate,
+  // we never find their parents (or reactions are mostly to a few posts), and the feed sucks
+  const filter = [{kinds: [1], authors}, {kinds: [7], authors}]
 </script>
 
 <Notes {relays} {filter} />

@@ -1,8 +1,6 @@
 # Current
 
-- [ ] Search by nip05 alias
-  - nevent1qqsdt4ux9c0zvd6hzpwnzznjsmd7a337mpxdspu9wd4fq8drvqejdmqpz3mhxue69uhhyetvv9ujuerpd46hxtnfduqs6amnwvaz7tmwdaejumr0dsffemjp
-- [ ] Fix feeds
+- [ ] Show image upload rather than plop url in
 - [ ] Hash pubkey so we can track usage by unique user
 - [ ] Try adding boxes/separation on feeds based on user feedback
 - [ ] Strip zero width spaces from compose

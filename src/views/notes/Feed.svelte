@@ -4,7 +4,7 @@
   import {slide} from 'svelte/transition'
   import {quantify} from 'hurdak/lib/hurdak'
   import {createScroller, now, Cursor} from 'src/util/misc'
-  import {asDisplayEvent} from 'src/util/nostr'
+  import {asDisplayEvent, mergeFilter} from 'src/util/nostr'
   import Spinner from 'src/partials/Spinner.svelte'
   import Content from 'src/partials/Content.svelte'
   import Note from "src/views/notes/Note.svelte"
@@ -78,14 +78,14 @@
   }
 
   onMount(() => {
-    const sub = network.listen({relays, filter: {...filter, since}, onChunk})
+    const sub = network.listen({relays, filter: mergeFilter(filter, {since}), onChunk})
 
     const scroller = createScroller(() => {
       if ($modal) {
         return
       }
 
-      return network.load({relays, filter: {...filter, ...cursor.getFilter()}, onChunk})
+      return network.load({relays, filter: mergeFilter(filter, cursor.getFilter()), onChunk})
     })
 
     return () => {
