@@ -85,7 +85,7 @@ export const modal = {
 // characters long, respectively. Put the threshold a little lower in case
 // someone accidentally enters a key with the last few digits missing
 const redactErrorInfo = info =>
-  JSON.parse(JSON.stringify(info) .replace(/\w{60}\w+/g, '[REDACTED]'))
+  JSON.parse(JSON.stringify(info || null).replace(/\w{60}\w+/g, '[REDACTED]'))
 
 // Wait for bugsnag to be started in main
 setTimeout(() => {
@@ -116,7 +116,8 @@ const session = Math.random().toString().slice(2)
 export const logUsage = async name => {
   // Hash the user's pubkey so we can identify unique users without knowing
   // anything about them
-  const ident = hash(user.getPubkey())
+  const pubkey = user.getPubkey()
+  const ident = pubkey ? hash(pubkey) : 'unknown'
   const {dufflepudUrl, reportAnalytics} = user.getSettings()
 
   if (reportAnalytics) {

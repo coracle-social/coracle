@@ -49,7 +49,9 @@
 - [ ] https://media.nostr.band/
 - [ ] Make the note relays button modal make sense, one relay with no explanation is not good
 - [ ] Linkify invoices
-- [ ] Linkify bech32 entities w/ NIP 21 https://github.com/nostr-protocol/nips/blob/master/21.md
+- [ ] Linkify bech32 entities w/ NIP 21
+  - https://github.com/nostr-protocol/nips/blob/master/21.md
+  - https://github.com/nostr-protocol/nips/issues/319
 - [ ] Person zaps
 - [ ] Collapsible thread view
 - [ ] Split notifications into replies + everything else, or add filters
