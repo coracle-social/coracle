@@ -307,28 +307,25 @@ const verifyNip05 = (pubkey, as) =>
   }, noop)
 
 const verifyZapper = async (pubkey, address) => {
-  let url
+  let url, zapper, lnurl
+
+  // Try to parse it as a lud06 LNURL or as a lud16 address
   if (address.startsWith('lnurl1')) {
-    // Try to parse it as a lud06 LNURL
     url = lnurlDecode(address)
-    const lnurl = address
   } else if (address.includes('@')) {
-    // Otherwise try to parse it as a lud16 address
     const [name, domain] = address.split('@')
 
-    if (!domain || !name) {
-      return
+    if (domain && name) {
+      url = `https://${domain}/.well-known/lnurlp/${name}`
     }
+  }
 
-    url = `https://${domain}/.well-known/lnurlp/${name}`
-  } else {
-    // Otherwise this is not valid
+  if (!url) {
     return
   }
 
   const res = await tryFetch(() => fetch(url))
 
-  let zapper
   if (res) {
     zapper = await res.json()
     lnurl = lnurlEncode('lnurl', url)

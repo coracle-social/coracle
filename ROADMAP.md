@@ -1,5 +1,6 @@
 # Current
 
+- [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
 - [ ] Add dynamic title tag
 - [ ] Show more link on long notes (rather than just an ellipsis)
