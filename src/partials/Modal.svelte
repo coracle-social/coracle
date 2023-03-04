@@ -3,7 +3,7 @@
 
   export let onEscape = null
 
-  let root
+  let root, content
 </script>
 
 <svelte:body
@@ -13,27 +13,29 @@
     }
   }} />
 
-<div class="fixed inset-0 z-30 modal" bind:this={root}>
+<div class="fixed inset-0 z-30 modal bg-black/75" bind:this={root} transition:fade>
   <div
-    class="absolute inset-0 bg-black opacity-75"
+    class="modal-content overflow-auto h-full"
+    bind:this={content}
+    transition:fly={{y: 1000}}
     class:cursor-pointer={onEscape}
-    transition:fade
-    on:click={onEscape} />
-  <div
-    class="absolute inset-0 mt-24 sm:mt-28 modal-content"
-    transition:fly={{y: 1000, opacity: 1}}>
-    <div class="bg-dark border-t border-solid border-medium h-full w-full overflow-auto pb-10">
-      <slot />
-    </div>
-    {#if onEscape}
-    <div class="absolute top-0 flex w-full justify-end pr-2 -mt-8 pointer-events-none">
+    on:click={onEscape}>
+    <div class="mt-12 min-h-full">
+      <div class="absolute w-full h-full bg-dark mt-12" />
+      {#if onEscape}
+      <div class="flex w-full justify-end p-2 sticky top-0 z-10 pointer-events-none">
+        <div
+          class="w-10 h-10 flex justify-center items-center bg-accent pointer-events-auto
+                 rounded-full cursor-pointer border border-solid border-medium">
+          <i class="fa fa-times fa-lg" />
+        </div>
+      </div>
+      {/if}
       <div
-        class="pointer-events-auto w-10 h-10 flex justify-center items-center bg-accent
-               rounded-full cursor-pointer border border-solid border-medium border-b-0"
-        on:click={onEscape}>
-        <i class="fa fa-times fa-lg" />
+        class="bg-dark border-t border-solid border-medium h-full w-full pb-10 cursor-auto"
+        on:click|stopPropagation>
+        <slot />
       </div>
     </div>
-    {/if}
   </div>
 </div>
