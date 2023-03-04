@@ -142,7 +142,7 @@
 <svelte:window on:click={() => { showActions = false }} />
 
 <div
-  class="absolute w-full h-64"
+  class="absolute w-full h-64 left-0"
   style="z-index: -1;
          background-size: cover;
          background-image:
