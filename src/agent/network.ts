@@ -37,7 +37,7 @@ const listen = ({relays, filter, onChunk = null, shouldProcess = true}) => {
   })
 }
 
-const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 6000}) => {
+const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 10_000}) => {
   return new Promise(resolve => {
     const now = Date.now()
     const done = new Set()

@@ -10,5 +10,5 @@
   const shouldDisplay = e => isLike(e.content)
 </script>
 
-<Feed {relays} {filter} {shouldDisplay} parentsTimeout={3000} />
+<Feed {relays} {filter} {shouldDisplay} parentsTimeout={10_000} />
 

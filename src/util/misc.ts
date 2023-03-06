@@ -149,13 +149,15 @@ export const getLastSync = (k, fallback = 0) => {
 export class Cursor {
   until: number
   limit: number
-  constructor(limit = 50) {
+  constructor(limit = 10) {
     this.until = now()
     this.limit = limit
   }
   getFilter() {
     return {
-      until: this.until,
+      // Add a buffer so we can avoid blowing past the most relevant time interval
+      // (just now) until after a few paginations.
+      until: this.until + timedelta(3, 'hours'),
       // since: this.until - timedelta(8, 'hours'),
       limit: this.limit,
     }
@@ -166,12 +168,13 @@ export class Cursor {
     // There are various edge cases:
     // - When we have zero events, there's nothing we can do, presumably we have everything.
     // - Sometimes relays send us extremely old events. Use median to avoid too-large gaps
-    if (events.length > 1) {
+    if (events.length > this.limit) {
       const timestamps = sortBy(identity, pluck('created_at', events))
       const gaps = aperture(2, timestamps).map(([a, b]) => b - a)
-      const gap = quantile(gaps, 0.1)
+      const gap = quantile(gaps, 0.2)
 
-      this.until -= Math.round(gap * events.length)
+      // Only paginate part of the way so we can avoid missing stuff
+      this.until -= Math.round(gap * events.length * 0.5)
     }
   }
 }

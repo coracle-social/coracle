@@ -52,7 +52,10 @@
     })
 
     // Show replies grouped by parent whenever possible
-    return mergeParents(combined)
+    const merged = mergeParents(combined)
+
+    // Drop the oldest 20% of notes since we often get pretty old stuff
+    return merged.slice(0, Math.ceil(merged.length * 0.8))
   }
 
   const loadBufferedNotes = () => {
