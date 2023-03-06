@@ -1,6 +1,5 @@
 # Current
 
-- [ ] formatTimestamp is expensive, cache it by assigning to events
 - [ ] Fix hover on notes in modal
 - [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
@@ -36,6 +35,8 @@
 
 # More
 
+- [ ] Performance
+  - same deal as with formatTimestamp, don't use functions inline since svelte can't cache them
 - [ ] Image Uploads
   - [ ] Add LN invoices
   - [ ] Contact other client authors, self-hostable, or just use my instance

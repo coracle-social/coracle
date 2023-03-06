@@ -55,6 +55,7 @@
   let showRelays = false
 
   const {profile} = user
+  const timestamp = formatTimestamp(note.created_at)
   const borderColor = invertColors ? "medium" : "dark"
   const links = extractUrls(note.content)
   const showEntire = anchorId === note.id
@@ -358,7 +359,7 @@
           href={"/" + nip19.neventEncode({id: note.id, relays: [note.seen_on]})}
           class="text-sm text-light"
           type="unstyled">
-          {formatTimestamp(note.created_at)}
+          {timestamp}
         </Anchor>
       </div>
       <div class="flex flex-col gap-2">
