@@ -4,16 +4,6 @@
 - [ ] Fix iOS/safari/firefox
 - [ ] Show more link on long notes (rather than just an ellipsis)
 
-# Image uploads
-
-- [ ] Add LN invoices
-- [ ] Build UI
-  - Put sql stuff in a library, use it in dufflepud and image service
-- [ ] Post announcement on SN, TG
-- [ ] Contact other client authors, self-hostable, or just use my instance
-- https://github.com/ElementsProject/lightning-charge
-- https://github.com/nostr-protocol/nips/pull/250
-
 # Coracle website
 
 - [ ] Simple intro to coracle
@@ -29,7 +19,7 @@
   - Add suggested relays based on follows or topics
 - Recommendations
 - Indexer/multiplexer
-- relay.coracle.social
+- relay.coracle.social for people nip-05 verified via coracle
 - Improve overall design
 - Stripped down easy version of coracle
   - Extract library?
@@ -44,6 +34,11 @@
 
 # More
 
+- [ ] Image Uploads
+  - [ ] Add LN invoices
+  - [ ] Contact other client authors, self-hostable, or just use my instance
+  - https://github.com/ElementsProject/lightning-charge
+  - https://github.com/nostr-protocol/nips/pull/250
 - [ ] Onboarding
   - [ ] Auto-follow hodlbod
   - [ ] Add a friendly tour

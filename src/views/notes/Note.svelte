@@ -392,26 +392,23 @@
         </div>
         <div class="flex justify-between text-light">
           <div class="flex">
-            <div class="w-16" on:click|stopPropagation={startReply}>
-              <button class="fa fa-reply cursor-pointer" />
+            <button class="w-16" on:click|stopPropagation={startReply}>
+              <i class="fa fa-reply cursor-pointer" />
               {$repliesCount}
-            </div>
-            <div class="w-16" class:text-accent={like}
+            </button>
+            <button class="w-16" class:text-accent={like}
               on:click|stopPropagation={() => like ? deleteReaction(like) : react("+")}>
-              <button class={cx('fa fa-heart cursor-pointer', {'fa-beat fa-beat-custom': like})} />
+              <i class={cx('fa fa-heart cursor-pointer', {'fa-beat fa-beat-custom': like})} />
               {$likesCount}
-            </div>
-            <div class="w-20" class:text-accent={zapped} on:click|stopPropagation={startZap}>
-              <button
-                class={cx("fa fa-bolt cursor-pointer", {
-                  'pointer-events-none opacity-50': !canZap,
-                })} />
+            </button>
+            <button class="w-20" class:text-accent={zapped} on:click|stopPropagation={startZap}>
+              <i class={cx("fa fa-bolt cursor-pointer", {'pointer-events-none opacity-50': !canZap})} />
               {formatSats($zapsTotal)}
-            </div>
-            <div class="w-16"  on:click|stopPropagation={() => react("-")}>
-              <button class="fa fa-flag cursor-pointer" />
+            </button>
+            <button class="w-16"  on:click|stopPropagation={() => react("-")}>
+              <i class="fa fa-flag cursor-pointer" />
               {$flagsCount}
-            </div>
+            </button>
           </div>
           <div
             class="cursor-pointer flex gap-1 items-center"
