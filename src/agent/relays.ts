@@ -1,4 +1,5 @@
 import type {Relay} from 'src/util/types'
+import LRUCache from 'lru-cache'
 import {warn} from 'src/util/logger'
 import {filter, pipe, pick, groupBy, objOf, map, assoc, sortBy, uniqBy, prop} from 'ramda'
 import {first, createMap} from 'hurdak/lib/hurdak'
@@ -49,11 +50,19 @@ export const initializeRelayList = async () => {
 
 // Pubkey relays
 
+const _getPubkeyRelaysCache = new LRUCache({max: 1000})
+
 export const getPubkeyRelays = (pubkey, mode = null, routes = null) => {
   const filter = mode ? {pubkey, mode} : {pubkey}
-  const filteredRoutes = routes || database.routes.all(filter)
+  const key = [mode, pubkey].join(':')
 
-  return sortByScore(map(pick(['url', 'score']), filteredRoutes))
+  let result = routes || _getPubkeyRelaysCache.get(key)
+  if (!result) {
+     result = database.routes.all(filter)
+     _getPubkeyRelaysCache.set(key, result)
+  }
+
+  return sortByScore(map(pick(['url', 'score']), result))
 }
 
 export const getPubkeyReadRelays = pubkey => getPubkeyRelays(pubkey, 'read')

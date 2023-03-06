@@ -9,25 +9,6 @@ const privkey = synced('agent/keys/privkey')
 const getExtension = () => (window as {nostr?: any}).nostr
 const canSign = () => ['privkey', 'extension'].includes(get(method))
 
-// For backwards compatibility, if method isn't set but we're logged in, set it
-setTimeout(() => {
-  method.update($method => {
-    if ($method) {
-      return $method
-    }
-
-    if (get(privkey)) {
-      return 'privkey'
-    }
-
-    if (get(pubkey)) {
-      return getExtension() ? 'extension' : 'pubkey'
-    }
-
-    return null
-  })
-}, 100)
-
 const login = ($method, key) => {
   method.set($method)
 

@@ -392,26 +392,26 @@
         </div>
         <div class="flex justify-between text-light">
           <div class="flex">
-            <button class="w-16" on:click|stopPropagation={startReply}>
+            <button class="w-16 text-left" on:click|stopPropagation={startReply}>
               <i class="fa fa-reply cursor-pointer" />
               {$repliesCount}
             </button>
-            <button class="w-16" class:text-accent={like}
+            <button class="w-16 text-left" class:text-accent={like}
               on:click|stopPropagation={() => like ? deleteReaction(like) : react("+")}>
               <i class={cx('fa fa-heart cursor-pointer', {'fa-beat fa-beat-custom': like})} />
               {$likesCount}
             </button>
-            <button class="w-20" class:text-accent={zapped} on:click|stopPropagation={startZap}>
+            <button class="w-20 text-left" class:text-accent={zapped} on:click|stopPropagation={startZap}>
               <i class={cx("fa fa-bolt cursor-pointer", {'pointer-events-none opacity-50': !canZap})} />
               {formatSats($zapsTotal)}
             </button>
-            <button class="w-16"  on:click|stopPropagation={() => react("-")}>
+            <button class="w-16 text-left"  on:click|stopPropagation={() => react("-")}>
               <i class="fa fa-flag cursor-pointer" />
               {$flagsCount}
             </button>
           </div>
           <div
-            class="cursor-pointer flex gap-1 items-center"
+            class="cursor-pointer gap-1 items-center hidden sm:flex"
             on:click|stopPropagation={() => { showRelays = true }}>
             <i class="fa fa-server" />
             <div

@@ -1,5 +1,7 @@
 # Current
 
+- [ ] formatTimestamp is expensive, cache it by assigning to events
+- [ ] Fix hover on notes in modal
 - [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
 - [ ] Show more link on long notes (rather than just an ellipsis)
