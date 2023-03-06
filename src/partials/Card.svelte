@@ -14,6 +14,7 @@
     'bg-medium border border-solid border-shimmer': invertColors,
     "cursor-pointer transition-all": interactive,
     "hover:bg-medium": interactive && !invertColors,
+    "hover:bg-dark": interactive && invertColors,
   })}>
   <slot />
 </div>
