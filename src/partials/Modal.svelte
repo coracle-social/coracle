@@ -21,7 +21,6 @@
     class:cursor-pointer={onEscape}
     on:click={onEscape}>
     <div class="mt-12 min-h-full">
-      <div class="absolute w-full h-full bg-dark mt-12" />
       {#if onEscape}
       <div class="flex w-full justify-end p-2 sticky top-0 z-10 pointer-events-none">
         <div
@@ -31,8 +30,9 @@
         </div>
       </div>
       {/if}
+      <div class="absolute w-full h-full bg-dark mt-12" />
       <div
-        class="bg-dark border-t border-solid border-medium h-full w-full pb-10 cursor-auto"
+        class="relative bg-dark border-t border-solid border-medium h-full w-full pt-2 pb-10 cursor-auto"
         on:click|stopPropagation>
         <slot />
       </div>
