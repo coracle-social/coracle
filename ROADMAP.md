@@ -38,6 +38,7 @@
 
 # More
 
+- [ ] Separate mentions from other notifications
 - [ ] Performance
   - same deal as with formatTimestamp, don't use functions inline since svelte can't cache them
 - [ ] Image Uploads

@@ -1,7 +1,7 @@
 import {uniq, pick, identity, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
 import {noop, createMap, ensurePlural, chunk, switcherFn} from 'hurdak/lib/hurdak'
-import {log, warn} from 'src/util/logger'
+import {log} from 'src/util/logger'
 import {lnurlEncode, lnurlDecode, tryFetch, now, sleep, tryJson, timedelta, shuffle, hash} from 'src/util/misc'
 import {Tags, roomAttrs, personKinds, isRelay, isShareableRelay, normalizeRelayUrl} from 'src/util/nostr'
 import database from 'src/agent/database'
@@ -307,7 +307,7 @@ const verifyNip05 = (pubkey, as) =>
   }, noop)
 
 const verifyZapper = async (pubkey, address) => {
-  let url, zapper, lnurl
+  let url
 
   // Try to parse it as a lud06 LNURL or as a lud16 address
   if (address.startsWith('lnurl1')) {
@@ -325,13 +325,8 @@ const verifyZapper = async (pubkey, address) => {
   }
 
   const res = await tryFetch(() => fetch(url))
-
-  try {
-    zapper = await res.json()
-    lnurl = lnurlEncode('lnurl', url)
-  } catch (e) {
-    warn(e)
-  }
+  const zapper = await tryJson(() => res.json())
+  const lnurl = lnurlEncode('lnurl', url)
 
   if (zapper?.allowsNostr && zapper?.nostrPubkey) {
     database.people.patch({pubkey, zapper, lnurl})

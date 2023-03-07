@@ -43,6 +43,7 @@
   import NotFound from "src/routes/NotFound.svelte"
   import PersonDetail from "src/routes/PersonDetail.svelte"
   import Search from "src/routes/Search.svelte"
+  import Scan from "src/routes/Scan.svelte"
   import RelayDetail from "src/routes/RelayDetail.svelte"
   import RelayList from "src/routes/RelayList.svelte"
   import Profile from "src/views/Profile.svelte"
@@ -177,9 +178,14 @@
     {#if $ready}
     <div class="pt-16 text-white h-full lg:ml-56">
       <Route path="/alerts" component={Alerts} />
-      <Route path="/search/:activeTab" let:params>
+      <Route path="/search">
         <EnsureData enforcePeople={false}>
-          <Search activeTab={params.activeTab} />
+          <Search />
+        </EnsureData>
+      </Route>
+      <Route path="/scan">
+        <EnsureData enforcePeople={false}>
+          <Scan />
         </EnsureData>
       </Route>
       <Route path="/notes/:activeTab" let:params>

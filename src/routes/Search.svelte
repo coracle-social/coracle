@@ -1,22 +1,47 @@
 <script>
-  import {navigate} from 'svelte-routing'
-  import Content from 'src/partials/Content.svelte'
-  import Tabs from 'src/partials/Tabs.svelte'
-  import SearchPeople from 'src/views/search/SearchPeople.svelte'
-  import Scan from 'src/views/search/Scan.svelte'
+  import {fuzzy} from "src/util/misc"
+  import {personKinds} from "src/util/nostr"
+  import Input from "src/partials/Input.svelte"
+  import Spinner from "src/partials/Spinner.svelte"
+  import Content from "src/partials/Content.svelte"
+  import PersonInfo from 'src/views/person/PersonInfo.svelte'
+  import {getUserReadRelays} from 'src/agent/relays'
+  import database from 'src/agent/database'
+  import network from 'src/agent/network'
+  import user from 'src/agent/user'
 
-  export let activeTab
+  export let hideFollowing = false
 
-  const setActiveTab = tab => navigate(`/search/${tab}`)
+  let q
+  let search
+
+  const {petnamePubkeys} = user
+
+  database.watch('people', table => {
+    search = fuzzy(
+      table.all({'kind0.name:!nil': null}),
+      {keys: ["kind0.name", "kind0.about", "pubkey"]}
+    )
+  })
+
+  // Prime our database, in case we don't have any people stored yet
+  network.load({
+    relays: getUserReadRelays(),
+    filter: {kinds: personKinds, limit: 10},
+  })
 
   document.title = "Search"
 </script>
 
 <Content>
-  <Tabs tabs={['people', 'advanced']} {activeTab} {setActiveTab} />
-  {#if activeTab === 'people'}
-  <SearchPeople />
-  {:else if activeTab === 'advanced'}
-  <Scan />
-  {/if}
+  <Input bind:value={q} placeholder="Search for people">
+    <i slot="before" class="fa-solid fa-search" />
+  </Input>
+  {#each (search ? search(q) : []).slice(0, 50) as person (person.pubkey)}
+    {#if person.pubkey !== user.getPubkey() && !(hideFollowing && $petnamePubkeys.includes(person.pubkey))}
+    <PersonInfo {person} />
+    {/if}
+  {:else}
+  <Spinner />
+  {/each}
 </Content>
