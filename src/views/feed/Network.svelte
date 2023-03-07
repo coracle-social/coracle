@@ -1,6 +1,6 @@
 <script>
   import {shuffle} from 'src/util/misc'
-  import Notes from "src/views/notes/Feed.svelte"
+  import Feed from "src/views/feed/Feed.svelte"
   import {getUserNetwork} from 'src/agent/social'
   import {sampleRelays, getAllPubkeyWriteRelays} from 'src/agent/relays'
 
@@ -14,4 +14,4 @@
   const filter = [{kinds: [1], authors}, {kinds: [7], authors}]
 </script>
 
-<Notes {relays} {filter} />
+<Feed {relays} {filter} />

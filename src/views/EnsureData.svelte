@@ -5,7 +5,7 @@
   import PersonInfo from "src/views/person/PersonInfo.svelte"
   import RelaySearch from "src/views/relays/RelaySearch.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
-  import Search from "src/routes/Search.svelte"
+  import PersonSearch from "src/views/person/PersonSearch.svelte"
   import database from 'src/agent/database'
   import user from 'src/agent/user'
 
@@ -76,8 +76,8 @@
       </div>
     </div>
     {/each}
+    <PersonSearch hideFollowing />
   </Content>
-  <Search hideFollowing />
 </Modal>
 {:else if needsPeople()}
 <Content size="lg">

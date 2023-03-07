@@ -6,7 +6,7 @@
   import {between} from 'hurdak/lib/hurdak'
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Feed from "src/views/notes/Feed.svelte"
+  import Feed from "src/views/feed/Feed.svelte"
   import database from 'src/agent/database'
   import pool from 'src/agent/pool'
   import user from "src/agent/user"

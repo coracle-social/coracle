@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Feed from "src/views/notes/Feed.svelte"
+  import Feed from "src/views/feed/Feed.svelte"
   import {isLike} from 'src/util/nostr'
   import {sampleRelays, getPubkeyWriteRelays} from 'src/agent/relays'
 
