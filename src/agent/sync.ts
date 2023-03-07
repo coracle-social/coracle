@@ -1,7 +1,7 @@
 import {uniq, pick, identity, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
 import {noop, createMap, ensurePlural, chunk, switcherFn} from 'hurdak/lib/hurdak'
-import {log} from 'src/util/logger'
+import {log, warn} from 'src/util/logger'
 import {lnurlEncode, lnurlDecode, tryFetch, now, sleep, tryJson, timedelta, shuffle, hash} from 'src/util/misc'
 import {Tags, roomAttrs, personKinds, isRelay, isShareableRelay, normalizeRelayUrl} from 'src/util/nostr'
 import database from 'src/agent/database'
@@ -326,9 +326,11 @@ const verifyZapper = async (pubkey, address) => {
 
   const res = await tryFetch(() => fetch(url))
 
-  if (res) {
+  try {
     zapper = await res.json()
     lnurl = lnurlEncode('lnurl', url)
+  } catch (e) {
+    warn(e)
   }
 
   if (zapper?.allowsNostr && zapper?.nostrPubkey) {

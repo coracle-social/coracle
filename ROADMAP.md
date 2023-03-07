@@ -1,5 +1,6 @@
 # Current
 
+- [ ] Use submit buttons where relevant
 - [ ] Go over onboarding process, suggest some good relays for newcomers
 - [ ] Submit blog post with new onboarding process built in
 - [ ] Fix hover on notes in modal

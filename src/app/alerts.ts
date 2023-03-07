@@ -2,7 +2,7 @@ import type {DisplayEvent} from 'src/util/types'
 import {max, find, pluck, propEq, partition, uniq} from 'ramda'
 import {derived} from 'svelte/store'
 import {createMap} from 'hurdak/lib/hurdak'
-import {synced, now, timedelta} from 'src/util/misc'
+import {synced, tryJson, now, timedelta} from 'src/util/misc'
 import {Tags, personKinds, isAlert, asDisplayEvent, findReplyId} from 'src/util/nostr'
 import {getUserReadRelays} from 'src/agent/relays'
 import database from 'src/agent/database'
@@ -76,8 +76,12 @@ const processAlerts = async (pubkey, events) => {
   zaps.filter(isPubkeyChild).forEach(e => {
     const parent = parents[findReplyId(e)]
     const note = asAlert(database.alerts.get(parent.id) || parent)
+    const meta = Tags.from(e).asMeta()
+    const request = tryJson(() => JSON.parse(meta.description))
 
-    database.alerts.put({...note, zappedBy: uniq(note.zappedBy.concat(e.pubkey))})
+    if (request) {
+      database.alerts.put({...note, zappedBy: uniq(note.zappedBy.concat(request.pubkey))})
+    }
   })
 
   likes.filter(isPubkeyChild).forEach(e => {
