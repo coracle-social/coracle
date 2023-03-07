@@ -1,8 +1,8 @@
 import type {DisplayEvent} from 'src/util/types'
-import {navigate} from 'svelte-routing'
 import {omit, sortBy} from 'ramda'
 import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {renderContent} from 'src/util/html'
+import {sleep} from 'src/util/misc'
 import {displayPerson, findReplyId} from 'src/util/nostr'
 import {getUserFollows} from 'src/agent/social'
 import {getUserReadRelays} from 'src/agent/relays'
@@ -14,6 +14,9 @@ import {routes, modal, toast} from 'src/app/ui'
 
 export const loadAppData = async pubkey => {
   if (getUserReadRelays().length > 0) {
+    // Delay since this gets in the way of quickly loading feeds very often
+    await sleep(5000)
+
     await Promise.all([
       alerts.listen(pubkey),
       network.loadPeople(getUserFollows()),
@@ -25,12 +28,6 @@ export const login = (method, key) => {
   keys.login(method, key)
 
   modal.set({type: 'login/connect', noEscape: true})
-}
-
-export const signup = privkey => {
-  keys.login('privkey', privkey)
-
-  navigate('/notes/follows')
 }
 
 export const renderNote = (note, {showEntire = false}) => {

@@ -1,8 +1,10 @@
 <script lang="ts">
   import {fly} from 'svelte/transition'
+  import {navigate} from 'svelte-routing'
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from 'src/partials/Heading.svelte'
+  import user from 'src/agent/user'
   import {modal} from "src/app/ui"
   import {login} from "src/app"
 
@@ -19,11 +21,15 @@
   }
 
   const signUp = () => {
-    modal.set({type: 'signUp'})
+    modal.set({type: 'onboarding', stage: 'intro'})
   }
 
   const pubkeyLogIn = () => {
     modal.set({type: 'login/pubkey'})
+  }
+
+  if (user.getPubkey()) {
+    navigate('/')
   }
 
   document.title = "Log In"

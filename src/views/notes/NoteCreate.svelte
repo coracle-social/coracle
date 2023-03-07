@@ -11,7 +11,7 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import Preview from "src/partials/Preview.svelte"
   import Input from "src/partials/Input.svelte"
-  import RelayCardSimple from "src/views/relays/RelayCardSimple.svelte"
+  import RelayCardSimple from "src/partials/RelayCardSimple.svelte"
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Heading from 'src/partials/Heading.svelte'

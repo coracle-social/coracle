@@ -9,7 +9,7 @@
   import Spinner from 'src/partials/Spinner.svelte'
   import Input from 'src/partials/Input.svelte'
   import Heading from 'src/partials/Heading.svelte'
-  import RelayCardSimple from 'src/views/relays/RelayCardSimple.svelte'
+  import RelayCardSimple from 'src/partials/RelayCardSimple.svelte'
   import Anchor from 'src/partials/Anchor.svelte'
   import Modal from 'src/partials/Modal.svelte'
   import {getUserReadRelays} from 'src/agent/relays'

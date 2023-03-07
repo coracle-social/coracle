@@ -55,7 +55,7 @@
   import ConnectUser from "src/views/login/ConnectUser.svelte"
   import PrivKeyLogin from "src/views/login/PrivKeyLogin.svelte"
   import PubKeyLogin from "src/views/login/PubKeyLogin.svelte"
-  import SignUp from "src/views/login/SignUp.svelte"
+  import Onboarding from "src/views/onboarding/Onboarding.svelte"
   import NoteCreate from "src/views/notes/NoteCreate.svelte"
   import NoteDetail from "src/views/notes/NoteDetail.svelte"
   import PersonList from "src/views/person/PersonList.svelte"
@@ -244,8 +244,8 @@
         <NoteCreate pubkey={$modal.pubkey} />
       {:else if $modal.type === 'relay/add'}
         <AddRelay />
-      {:else if $modal.type === 'signUp'}
-        <SignUp />
+      {:else if $modal.type === 'onboarding'}
+        <Onboarding stage={$modal.stage} />
       {:else if $modal.type === 'room/edit'}
         <ChatEdit {...$modal} />
       {:else if $modal.type === 'login/privkey'}
