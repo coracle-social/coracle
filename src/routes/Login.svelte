@@ -34,10 +34,10 @@
     <div class="flex flex-col gap-8 max-w-2xl">
       <div class="flex justify-center items-center flex-col mb-4">
         <Heading>Welcome!</Heading>
-        <i>To the Nostr Protocol</i>
+        <i>To the Nostr Network</i>
       </div>
       <p class="text-center">
-        To log in to existing account, simply click below. If you have
+        Click below to log in or create an account. If you have
         a <Anchor href={nip07} external>compatible browser extension</Anchor> installed,
         we will use that.
       </p>

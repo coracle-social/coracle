@@ -1,6 +1,5 @@
 # Current
 
-- [ ] Use submit buttons where relevant
 - [ ] Go over onboarding process, suggest some good relays for newcomers
 - [ ] Submit blog post with new onboarding process built in
 - [ ] Fix hover on notes in modal
@@ -38,6 +37,7 @@
 
 # More
 
+- [ ] Abort all context subs when navigating
 - [ ] Separate mentions from other notifications
 - [ ] Performance
   - same deal as with formatTimestamp, don't use functions inline since svelte can't cache them
