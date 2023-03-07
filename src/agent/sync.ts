@@ -41,13 +41,15 @@ const processProfileEvents = async events => {
         0: () => tryJson(() => {
           const kind0 = JSON.parse(e.content)
 
-          if (e.created_at > (person.kind0_updated_at || 0)) {
+          if (e.created_at >= (person.kind0_updated_at || 0)) {
             if (kind0.nip05) {
               verifyNip05(e.pubkey, kind0.nip05)
             }
 
-            if (kind0.lud16 || kind0.lud06) {
-              verifyZapper(e.pubkey, kind0.lud16 || kind0.lud06)
+            const address = kind0.lud16 || kind0.lud06
+
+            if (address) {
+              verifyZapper(e.pubkey, address)
             }
 
             return {
@@ -310,7 +312,7 @@ const verifyZapper = async (pubkey, address) => {
   let url
 
   // Try to parse it as a lud06 LNURL or as a lud16 address
-  if (address.startsWith('lnurl1')) {
+  if (address.toLowerCase().startsWith('lnurl1')) {
     url = lnurlDecode(address)
   } else if (address.includes('@')) {
     const [name, domain] = address.split('@')

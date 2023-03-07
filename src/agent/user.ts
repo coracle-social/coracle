@@ -92,7 +92,6 @@ const user = {
   canPublish,
   getProfile: () => profileCopy,
   getPubkey: () => profileCopy?.pubkey,
-  canZap: () => profileCopy?.zapper,
   muffle: events => {
     const muffle = user.getMuffle()
 

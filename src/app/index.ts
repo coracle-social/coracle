@@ -2,7 +2,6 @@ import type {DisplayEvent} from 'src/util/types'
 import {omit, sortBy} from 'ramda'
 import {createMap, ellipsize} from 'hurdak/lib/hurdak'
 import {renderContent} from 'src/util/html'
-import {sleep} from 'src/util/misc'
 import {displayPerson, findReplyId} from 'src/util/nostr'
 import {getUserFollows} from 'src/agent/social'
 import {getUserReadRelays} from 'src/agent/relays'
@@ -14,13 +13,11 @@ import {routes, modal, toast} from 'src/app/ui'
 
 export const loadAppData = async pubkey => {
   if (getUserReadRelays().length > 0) {
-    // Delay since this gets in the way of quickly loading feeds very often
-    await sleep(5000)
+    // Start our listener, but don't wait for it
+    alerts.listen(pubkey)
 
-    await Promise.all([
-      alerts.listen(pubkey),
-      network.loadPeople(getUserFollows()),
-    ])
+    // Make sure the user's network is loaded
+    await network.loadPeople(getUserFollows())
   }
 }
 

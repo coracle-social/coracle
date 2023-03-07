@@ -121,7 +121,7 @@
   $: $zapsTotal = sum(zaps.map(zap => zap.invoiceAmount)) / 1000
   $: $repliesCount = note.replies.length
   $: visibleNotes = note.replies.filter(r => showContext ? true : !r.isContext)
-  $: canZap = $person?.zapper && user.canZap()
+  $: canZap = $person?.zapper
 
   const onClick = e => {
     const target = e.target as HTMLElement
@@ -405,8 +405,11 @@
               <i class={cx('fa fa-heart cursor-pointer', {'fa-beat fa-beat-custom': like})} />
               {$likesCount}
             </button>
-            <button class="w-20 text-left" class:text-accent={zapped} on:click|stopPropagation={startZap}>
-              <i class={cx("fa fa-bolt cursor-pointer", {'pointer-events-none opacity-50': !canZap})} />
+            <button
+              class={cx("w-20 text-left", {'pointer-events-none opacity-50': !canZap})}
+              class:text-accent={zapped}
+              on:click|stopPropagation={startZap}>
+              <i class="fa fa-bolt cursor-pointer" />
               {formatSats($zapsTotal)}
             </button>
             <button class="w-16 text-left"  on:click|stopPropagation={() => react("-")}>

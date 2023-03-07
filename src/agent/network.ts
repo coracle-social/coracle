@@ -21,11 +21,11 @@ const getStalePubkeys = pubkeys => {
   })
 }
 
-const listen = ({relays, filter, onChunk = null, shouldProcess = true}) => {
+const listen = ({relays, filter, onChunk = null, shouldProcess = true, delay = 500}) => {
   return pool.subscribe({
     filter,
     relays,
-    onEvent: batch(300, chunk => {
+    onEvent: batch(delay, chunk => {
       if (shouldProcess) {
         sync.processEvents(chunk)
       }
