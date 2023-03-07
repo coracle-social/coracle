@@ -344,7 +344,10 @@
       <div class="flex items-center justify-between">
         <Popover triggerType={isMobile ? 'click' : 'mouseenter'}>
           <div slot="trigger">
-            <Anchor type="unstyled" class="text-lg font-bold flex gap-2 items-center">
+            <Anchor
+              type="unstyled"
+              class="text-lg font-bold flex gap-2 items-center"
+              href={!isMobile && routes.person($person.pubkey)}>
               <span>{displayPerson($person)}</span>
               {#if $person.verified_as}
               <i class="fa fa-circle-check text-accent text-sm" />

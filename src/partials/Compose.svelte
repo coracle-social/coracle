@@ -182,7 +182,7 @@
     }
 
     // Remove our zero-length spaces
-    content = content.replace(/\u200B/g, '')
+    content = content.replace(/\u200B/g, '').trim()
 
     return {
       content,

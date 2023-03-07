@@ -46,6 +46,11 @@
   </li>
   {/if}
   <li class="cursor-pointer">
+    <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes/follows">
+      <i class="fa fa-rss mr-2" /> Feed
+    </a>
+  </li>
+  <li class="cursor-pointer">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/search">
       <i class="fa fa-search mr-2" /> Search
     </a>
@@ -53,11 +58,6 @@
   <li class="cursor-pointer">
     <a class="block px-4 py-2 hover:bg-accent transition-all" href="/scan">
       <i class="fa fa-qrcode mr-2" /> Scan
-    </a>
-  </li>
-  <li class="cursor-pointer">
-    <a class="block px-4 py-2 hover:bg-accent transition-all" href="/notes/follows">
-      <i class="fa fa-rss mr-2" /> Feed
     </a>
   </li>
   {#if $profile}

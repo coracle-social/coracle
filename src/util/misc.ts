@@ -263,25 +263,28 @@ export const stringToColor = (value, {saturation = 100, lightness = 50, opacity 
   return `hsl(${(hash % 360)}, ${saturation}%, ${lightness}%, ${opacity})`;
 }
 
-export const tryJson = f => {
+export const tryFunc = (f, ignore) => {
   try {
-    return f()
+    const r = f()
+
+    if (is(Promise, r)) {
+      return r.catch(e => {
+        if (!e.toString().includes(ignore)) {
+          warn(e)
+        }
+      })
+    } else {
+      return r
+    }
   } catch (e) {
-    if (!e.toString().includes('JSON')) {
+    if (!e.toString().includes(ignore)) {
       warn(e)
     }
   }
 }
 
-export const tryFetch = async f => {
-  try {
-    return await f()
-  } catch (e) {
-    if (!e.toString().includes('fetch')) {
-      warn(e)
-    }
-  }
-}
+export const tryJson = f => tryFunc(f, 'JSON')
+export const tryFetch = f => tryFunc(f, 'fetch')
 
 export const union = (...sets) =>
   new Set(sets.flatMap(s => Array.from(s)))

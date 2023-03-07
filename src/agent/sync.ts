@@ -38,30 +38,28 @@ const processProfileEvents = async events => {
       ...person,
       ...updates[e.pubkey],
       ...switcherFn(e.kind, {
-        0: () => {
-          return tryJson(() => {
-            const kind0 = JSON.parse(e.content)
+        0: () => tryJson(() => {
+          const kind0 = JSON.parse(e.content)
 
-            if (e.created_at > (person.kind0_updated_at || 0)) {
-              if (kind0.nip05) {
-                verifyNip05(e.pubkey, kind0.nip05)
-              }
-
-              if (kind0.lud16 || kind0.lud06) {
-                verifyZapper(e.pubkey, kind0.lud16 || kind0.lud06)
-              }
-
-              return {
-                kind0: {
-                  ...person?.kind0,
-                  ...updates[e.pubkey]?.kind0,
-                  ...kind0,
-                },
-                kind0_updated_at: e.created_at,
-              }
+          if (e.created_at > (person.kind0_updated_at || 0)) {
+            if (kind0.nip05) {
+              verifyNip05(e.pubkey, kind0.nip05)
             }
-          })
-        },
+
+            if (kind0.lud16 || kind0.lud06) {
+              verifyZapper(e.pubkey, kind0.lud16 || kind0.lud06)
+            }
+
+            return {
+              kind0: {
+                ...person?.kind0,
+                ...updates[e.pubkey]?.kind0,
+                ...kind0,
+              },
+              kind0_updated_at: e.created_at,
+            }
+          }
+        }),
         2: () => {
           if (e.created_at > (person.relays_updated_at || 0)) {
             const {relays = []} = database.getPersonWithFallback(e.pubkey)
@@ -75,7 +73,7 @@ const processProfileEvents = async events => {
         3: () => {
           const data = {petnames: e.tags}
 
-          if (e.created_at > (person.relays_updated_at || 0)) {
+          if (e.content && e.created_at > (person.relays_updated_at || 0)) {
             tryJson(() => {
               Object.assign(data, {
                 relays_updated_at: e.created_at,
@@ -225,24 +223,26 @@ const processRoutes = async events => {
         )
       },
       3: () => {
-        tryJson(() => {
-          Object.entries(JSON.parse(e.content))
-            .forEach(([url, conditions]) => {
-              const {write, read} = conditions as Record<string, boolean|string>
+        if (e.content) {
+          tryJson(() => {
+            Object.entries(JSON.parse(e.content))
+              .forEach(([url, conditions]) => {
+                const {write, read} = conditions as Record<string, boolean|string>
 
-              if (![false, '!'].includes(write)) {
-                updates.push(
-                  calculateRoute(e.pubkey, url, 'kind:3', 'write', e.created_at)
-                )
-              }
+                if (![false, '!'].includes(write)) {
+                  updates.push(
+                    calculateRoute(e.pubkey, url, 'kind:3', 'write', e.created_at)
+                  )
+                }
 
-              if (![false, '!'].includes(read)) {
-                updates.push(
-                  calculateRoute(e.pubkey, url, 'kind:3', 'read', e.created_at)
-                )
-              }
-            })
-        })
+                if (![false, '!'].includes(read)) {
+                  updates.push(
+                    calculateRoute(e.pubkey, url, 'kind:3', 'read', e.created_at)
+                  )
+                }
+              })
+          })
+        }
       },
       // DEPRECATED
       10001: () => {
@@ -325,7 +325,7 @@ const verifyZapper = async (pubkey, address) => {
   }
 
   const res = await tryFetch(() => fetch(url))
-  const zapper = await tryJson(() => res.json())
+  const zapper = await tryJson(() => res?.json())
   const lnurl = lnurlEncode('lnurl', url)
 
   if (zapper?.allowsNostr && zapper?.nostrPubkey) {

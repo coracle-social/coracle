@@ -13,16 +13,18 @@
   export let hideFollowing = false
 
   let q
-  let search
+  let results = []
 
   const {petnamePubkeys} = user
-
-  database.watch('people', table => {
-    search = fuzzy(
-      table.all({'kind0.name:!nil': null}),
+  const search = database.watch('people', t =>
+     console.log(t.all({'kind0.name:!nil': null}))||
+    fuzzy(
+      t.all({'kind0.name:!nil': null}),
       {keys: ["kind0.name", "kind0.about", "pubkey"]}
     )
-  })
+  )
+
+  $: results = $search(q).slice(0, 50)
 
   // Prime our database, in case we don't have any people stored yet
   network.load({
@@ -37,7 +39,7 @@
   <Input bind:value={q} placeholder="Search for people">
     <i slot="before" class="fa-solid fa-search" />
   </Input>
-  {#each (search ? search(q) : []).slice(0, 50) as person (person.pubkey)}
+  {#each results as person (person.pubkey)}
     {#if person.pubkey !== user.getPubkey() && !(hideFollowing && $petnamePubkeys.includes(person.pubkey))}
     <PersonInfo {person} />
     {/if}
