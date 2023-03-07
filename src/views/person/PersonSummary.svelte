@@ -13,16 +13,16 @@
 
   const {petnamePubkeys, canPublish} = user
   const getRelays = () => sampleRelays(getPubkeyWriteRelays(pubkey))
+  const person = database.watch('people', () => database.getPersonWithFallback(pubkey))
 
   let following = false
-  let person = database.getPersonWithFallback(pubkey)
 
   $: following = $petnamePubkeys.includes(pubkey)
 
   const follow = async () => {
     const [{url}] = getRelays()
 
-    user.addPetname(pubkey, url, displayPerson(person))
+    user.addPetname(pubkey, url, displayPerson($person))
   }
 
   const unfollow = async () => {
@@ -34,18 +34,18 @@
   <div class="flex gap-4">
     <div
       class="overflow-hidden w-14 h-14 rounded-full bg-cover bg-center shrink-0 border border-solid border-white"
-      style="background-image: url({person.kind0?.picture})" />
+      style="background-image: url({$person.kind0?.picture})" />
     <div class="flex-grow flex flex-col gap-2">
       <Anchor
         type="unstyled"
         class="flex items-center gap-2"
         on:click={() => navigate(routes.person(pubkey))}>
-        <h2 class="text-lg">{displayPerson(person)}</h2>
+        <h2 class="text-lg">{displayPerson($person)}</h2>
       </Anchor>
-      {#if person.verified_as}
+      {#if $person.verified_as}
       <div class="flex gap-1 text-sm">
         <i class="fa fa-user-check text-accent" />
-        <span class="text-light">{last(person.verified_as.split('@'))}</span>
+        <span class="text-light">{last($person.verified_as.split('@'))}</span>
       </div>
       {/if}
     </div>
@@ -63,5 +63,5 @@
       {/if}
     </div>
   </div>
-  <p>{@html renderContent(person?.kind0?.about || '')}</p>
+  <p>{@html renderContent($person?.kind0?.about || '')}</p>
 </div>
