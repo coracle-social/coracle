@@ -155,10 +155,10 @@ export const sampleRelays = (relays, scale = 1) => {
   }
 
   // Remove relays that are currently in an error state
-  relays => relays.filter(r => pool.getConnection(r.url)?.hasRecentError())
+  relays = relays.filter(r => pool.getConnection(r.url)?.hasRecentError())
 
-  // Shuffle and limit target relays
-  relays = shuffle(relays).slice(0, limit)
+  // Limit target relays
+  relays = relays.slice(0, limit)
 
   // If we're still under the limit, add user relays for good measure
   if (relays.length < limit) {
@@ -180,7 +180,7 @@ export const aggregateScores = relayGroups => {
 
   for (const relays of relayGroups) {
     for (const relay of relays) {
-      const {url, score} = relay
+      const {url, score = 0.5} = relay
 
       if (!scores[url]) {
         scores[url] = {score: 0, count: 0}
