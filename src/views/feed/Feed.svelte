@@ -21,12 +21,13 @@
   let notes = []
   let notesBuffer = []
 
+  const seen = new Set()
   const since = now()
   const maxNotes = 100
   const cursor = new Cursor()
 
   const processNewNotes = async newNotes => {
-    newNotes = user.muffle(newNotes)
+    newNotes = user.muffle(newNotes).filter(n => !seen.has(n.id))
 
     if (shouldDisplay) {
       newNotes = newNotes.filter(shouldDisplay)
@@ -72,6 +73,10 @@
   const onChunk = async newNotes => {
     const chunk = sortBy(e => -e.created_at, await processNewNotes(newNotes))
     const [bottom, top] = partition(e => e.created_at < since, chunk)
+
+    for (const note of chunk) {
+      seen.add(note.id)
+    }
 
     // Slice new notes in case someone leaves the tab open for a long time
     notes = uniqBy(prop('id'), notes.concat(bottom))
