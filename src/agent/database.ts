@@ -1,5 +1,5 @@
 import type {Writable} from 'svelte/store'
-import {debounce, throttle} from 'throttle-debounce'
+import {throttle} from 'throttle-debounce'
 import {omit, prop, partition, is, find, without, pluck, all, identity} from 'ramda'
 import {writable, derived} from 'svelte/store'
 import {createMap, isObject, ensurePlural} from 'hurdak/lib/hurdak'
@@ -106,7 +106,7 @@ class Table {
       this.ready.set(true)
     })()
   }
-  _persist = debounce(10_000, () => {
+  _persist = throttle(1_000, () => {
     callLocalforage('setItem', this.name, this.data)
   })
   _setAndNotify(newData) {
