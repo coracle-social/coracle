@@ -25,7 +25,7 @@ export const lastChecked = synced('app/alerts/lastChecked', {})
 
 export const newAlerts = derived(
   [database.watch('alerts', t => pluck('created_at', t.all()).reduce(max, 0)), lastChecked],
-  ([$lastAlert, $lastChecked]) => $lastAlert > $lastChecked.alerts
+  ([$lastAlert, $lastChecked]) => $lastAlert > ($lastChecked.alerts || 0)
 )
 
 export const newDirectMessages = derived(
