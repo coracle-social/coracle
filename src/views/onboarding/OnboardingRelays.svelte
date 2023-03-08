@@ -30,7 +30,7 @@
   }
 
   const addRelay = relay => {
-    relays = relays.concat(relay)
+    relays = relays.concat({...relay, write: true})
   }
 </script>
 

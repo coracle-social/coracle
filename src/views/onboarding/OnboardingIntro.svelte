@@ -5,6 +5,7 @@
   import {modal} from "src/app/ui"
 
   const tutorialUrl = "https://nostr.how/"
+  const videoUrl = "https://dufflepud.us-southeast-1.linodeobjects.com/coracle_intro.mp4"
 </script>
 
 <Content size="lg" class="text-center">
@@ -13,7 +14,7 @@
     New to Nostr? Click <Anchor external href={tutorialUrl}>here</Anchor> or watch the video below for
     a crash course on what it is, and how to use it.
   </p>
-  <video controls src="" class="object-contain object-center" />
+  <video controls src={videoUrl} class="object-contain object-center" />
   <p>
     When you’re ready to dive in, click below and we’ll guide you through the process of creating an
     account.

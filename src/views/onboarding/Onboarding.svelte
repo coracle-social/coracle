@@ -23,10 +23,10 @@
   export let stage
 
   let relays = [
-    {url: "wss://nostr-pub.wellorder.net"},
-    {url: "wss://nostr.zebedee.cloud"},
-    {url: "wss://nos.lol"},
-    {url: "wss://brb.io"},
+    {url: "wss://nostr-pub.wellorder.net", write: true},
+    {url: "wss://nostr.zebedee.cloud", write: true},
+    {url: "wss://nos.lol", write: true},
+    {url: "wss://brb.io", write: true},
   ]
 
   let follows = [
