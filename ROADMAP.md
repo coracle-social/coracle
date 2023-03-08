@@ -1,6 +1,5 @@
 # Current
 
-- [ ] Log in as user button
 - [ ] Gray out messages tab when using pubkey login
 - [ ] Collapse relaycard and relaycardsimple?
 - [ ] Create my own version of nostr.how and extension explanation
@@ -48,6 +47,7 @@
 
 # More
 
+- [ ] Log in as user button
 - [ ] Abort all context subs when navigating
 - [ ] Separate mentions from other notifications
 - [ ] Performance

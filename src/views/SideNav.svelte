@@ -1,11 +1,12 @@
 <script lang="ts">
+  import cx from "classnames"
   import {displayPerson} from "src/util/nostr"
   import user from "src/agent/user"
   import {menuIsOpen, installPrompt, routes} from "src/app/ui"
   import {newAlerts, newDirectMessages, newChatMessages} from "src/app/alerts"
   import {slowConnections} from "src/app/connection"
 
-  const {profile} = user
+  const {profile, canPublish} = user
 
   const install = () => {
     $installPrompt.prompt()
@@ -60,7 +61,11 @@
     </a>
   </li>
   {#if $profile}
-    <li class="relative cursor-pointer">
+    <li
+      class={cx("relative", {
+        "cursor-pointer": $canPublish,
+        "pointer-events-none opacity-75": !$canPublish,
+      })}>
       <a class="block px-4 py-2 transition-all hover:bg-accent" href="/messages">
         <i class="fa fa-envelope mr-2" /> Messages
         {#if $newDirectMessages}

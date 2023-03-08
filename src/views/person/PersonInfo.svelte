@@ -21,5 +21,5 @@
 
 <PersonInfo
   {person}
-  addPetname={$petnamePubkeys.includes(person.pubkey) ? addPetname : null}
-  removePetname={$petnamePubkeys.includes(person.pubkey) ? null : removePetname} />
+  addPetname={$petnamePubkeys.includes(person.pubkey) ? null : addPetname}
+  removePetname={$petnamePubkeys.includes(person.pubkey) ? removePetname : null} />
