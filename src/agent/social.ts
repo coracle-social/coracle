@@ -1,4 +1,4 @@
-import {uniq} from 'ramda'
+import {uniq, without} from 'ramda'
 import {Tags} from 'src/util/nostr'
 import database from 'src/agent/database'
 import user from 'src/agent/user'
@@ -9,7 +9,7 @@ export const getFollows = pubkey =>
 export const getNetwork = pubkey => {
   const follows = getFollows(pubkey)
 
-  return uniq(follows.concat(follows.flatMap(getFollows)))
+  return uniq(without(follows, follows.flatMap(getFollows)))
 }
 
 export const getUserFollows = (): Array<string> =>
@@ -18,5 +18,5 @@ export const getUserFollows = (): Array<string> =>
 export const getUserNetwork = () => {
   const follows = getUserFollows()
 
-  return uniq(follows.concat(follows.flatMap(getFollows)))
+  return uniq(without(follows, follows.flatMap(getFollows)))
 }

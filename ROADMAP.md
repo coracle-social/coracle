@@ -1,6 +1,13 @@
 # Current
 
 - [ ] Collapse relaycard and relaycardsimple?
+- [ ] Onboarding
+  - [ ] Create my own version of nostr.how and extension explanation
+  - [ ] Move extension suggestion to later in the app, maybe a notification if they don't have one installed
+  - [ ] Reassure user that if they don't copy the key now they can get it later in settings
+  - [ ] Design empty state for messages
+  - [ ] Add copy to explain that chat is public, dms are encrypted
+  - [ ] Add QR code that pre-fills follows and relays for a new user
 
 - [ ] Review sampleRelays, seems like we shouldn't be shuffling
 - [ ] Go over onboarding process, suggest some good relays for newcomers
