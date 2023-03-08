@@ -4,7 +4,7 @@ import {warn} from 'src/util/logger'
 import {filter, pipe, pick, groupBy, objOf, map, assoc, sortBy, uniqBy, prop} from 'ramda'
 import {first, createMap} from 'hurdak/lib/hurdak'
 import {Tags, isRelay, findReplyId} from 'src/util/nostr'
-import {shuffle} from 'src/util/misc'
+import {shuffle, fetchJson} from 'src/util/misc'
 import database from 'src/agent/database'
 import pool from 'src/agent/pool'
 import user from 'src/agent/user'
@@ -40,7 +40,8 @@ export const initializeRelayList = async () => {
   // Load relays from nostr.watch via dufflepud
   try {
     const url = import.meta.env.VITE_DUFFLEPUD_URL + '/relay'
-    const relays = prop('relays', await fetch(url).then(r => r.json())).filter(isRelay)
+    const json = await fetchJson(url)
+    const relays = json.relays.filter(isRelay)
 
     await database.relays.bulkPatch(createMap('url', map(objOf('url'), relays)))
   } catch (e) {

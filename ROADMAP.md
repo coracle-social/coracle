@@ -2,6 +2,7 @@
 
 - [ ] Collapse relaycard and relaycardsimple?
 - [ ] Create my own version of nostr.how and extension explanation
+- [ ] Make new notes thing fixed position
 
 - [ ] Review sampleRelays, seems like we shouldn't be shuffling
 - [ ] Go over onboarding process, suggest some good relays for newcomers

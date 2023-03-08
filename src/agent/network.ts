@@ -37,7 +37,7 @@ const listen = ({relays, filter, onChunk = null, shouldProcess = true, delay = 5
   })
 }
 
-const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 10_000}) => {
+const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5000}) => {
   return new Promise(resolve => {
     const now = Date.now()
     const done = new Set()
@@ -83,7 +83,7 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 1
     const subPromise = pool.subscribe({
       relays,
       filter,
-      onEvent: batch(300, chunk => {
+      onEvent: batch(500, chunk => {
         if (shouldProcess) {
           sync.processEvents(chunk)
         }

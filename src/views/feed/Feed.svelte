@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {partition, propEq, uniqBy, sortBy, prop} from "ramda"
+  import {partition, always, propEq, uniqBy, sortBy, prop} from "ramda"
   import {slide} from "svelte/transition"
   import {quantify} from "hurdak/lib/hurdak"
   import {createScroller, now, Cursor} from "src/util/misc"
@@ -15,49 +15,17 @@
 
   export let filter
   export let relays = []
-  export let shouldDisplay = null
+  export let shouldDisplay = always(true)
   export let parentsTimeout = 500
 
   let notes = []
   let notesBuffer = []
 
-  const seen = new Set()
+  // Add a short buffer so we can get the most possible results for recent notes
   const since = now()
   const maxNotes = 100
   const cursor = new Cursor()
-
-  const processNewNotes = async newNotes => {
-    newNotes = user.muffle(newNotes).filter(n => !seen.has(n.id))
-
-    if (shouldDisplay) {
-      newNotes = newNotes.filter(shouldDisplay)
-    }
-
-    // Load parents before showing the notes so we have hierarchy. Give it a short
-    // timeout, since this is really just a nice-to-have
-    const combined = uniqBy(
-      prop("id"),
-      newNotes
-        .filter(propEq("kind", 1))
-        .concat(await network.loadParents(newNotes, {timeout: parentsTimeout}))
-        .map(asDisplayEvent)
-    )
-
-    // Stream in additional data
-    network.streamContext({
-      depth: 2,
-      notes: combined,
-      onChunk: context => {
-        notes = network.applyContext(notes, user.muffle(context))
-      },
-    })
-
-    // Show replies grouped by parent whenever possible
-    const merged = mergeParents(combined)
-
-    // Drop the oldest 20% of notes since we often get pretty old stuff
-    return merged.slice(0, Math.ceil(merged.length * 0.8))
-  }
+  const seen = new Set()
 
   const loadBufferedNotes = () => {
     // Drop notes at the end if there are a lot
@@ -67,18 +35,54 @@
   }
 
   const onChunk = async newNotes => {
-    const chunk = sortBy(e => -e.created_at, await processNewNotes(newNotes))
-    const [bottom, top] = partition(e => e.created_at < since, chunk)
+    // Deduplicate and filter out stuff we don't want, apply user preferences
+    const filtered = user.muffle(newNotes.filter(n => !seen.has(n.id) && shouldDisplay(n)))
 
-    for (const note of chunk) {
+    // Drop the oldest 20% of notes. We sometimes get pretty old stuff since we don't
+    // use a since on our filter
+    const pruned = cursor.prune(filtered)
+
+    // Keep track of what we've seen
+    for (const note of pruned) {
       seen.add(note.id)
     }
 
-    // Slice new notes in case someone leaves the tab open for a long time
-    notes = uniqBy(prop("id"), notes.concat(bottom))
-    notesBuffer = top.concat(notesBuffer).slice(0, maxNotes)
+    // Load parents before showing the notes so we have hierarchy. Give it a short
+    // timeout, since this is really just a nice-to-have
+    const parents = await network.loadParents(filtered, {timeout: parentsTimeout})
 
-    cursor.update(notes)
+    // Keep track of parents too
+    for (const note of parents) {
+      seen.add(note.id)
+    }
+
+    // Combine notes and parents into a single collection
+    const combined = uniqBy(
+      prop("id"),
+      filtered.filter(propEq("kind", 1)).concat(parents).map(asDisplayEvent)
+    )
+
+    // Stream in additional data and merge it in
+    network.streamContext({
+      depth: 2,
+      notes: combined,
+      onChunk: context => {
+        context = user.muffle(context)
+
+        notesBuffer = network.applyContext(notesBuffer, context)
+        notes = network.applyContext(notes, context)
+      },
+    })
+
+    // Show replies grouped by parent whenever possible
+    const merged = sortBy(e => -e.created_at, mergeParents(combined))
+
+    // Split into notes before and after we started loading
+    const [bottom, top] = partition(e => e.created_at < since, merged)
+
+    // Slice new notes in case someone leaves the tab open for a long time
+    notesBuffer = top.concat(notesBuffer).slice(0, maxNotes)
+    notes = uniqBy(prop("id"), notes.concat(bottom))
   }
 
   onMount(() => {
@@ -88,16 +92,20 @@
       onChunk,
     })
 
-    const scroller = createScroller(() => {
+    const scroller = createScroller(async () => {
       if ($modal) {
         return
       }
 
-      return network.load({
+      // Wait for this page to load before trying again
+      await network.load({
         relays,
         filter: mergeFilter(filter, cursor.getFilter()),
         onChunk,
       })
+
+      // Update our cursor
+      cursor.update(notes)
     })
 
     return () => {

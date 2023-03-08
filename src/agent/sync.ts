@@ -2,7 +2,7 @@ import {uniq, pick, identity, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
 import {noop, createMap, ensurePlural, chunk, switcherFn} from 'hurdak/lib/hurdak'
 import {log} from 'src/util/logger'
-import {lnurlEncode, lnurlDecode, tryFetch, now, sleep, tryJson, timedelta, shuffle, hash} from 'src/util/misc'
+import {lnurlEncode, tryFunc, lnurlDecode, tryFetch, now, sleep, tryJson, timedelta, shuffle, hash} from 'src/util/misc'
 import {Tags, roomAttrs, personKinds, isRelay, isShareableRelay, normalizeRelayUrl} from 'src/util/nostr'
 import database from 'src/agent/database'
 
@@ -313,7 +313,7 @@ const verifyZapper = async (pubkey, address) => {
 
   // Try to parse it as a lud06 LNURL or as a lud16 address
   if (address.toLowerCase().startsWith('lnurl1')) {
-    url = lnurlDecode(address)
+    url = tryFunc(() => lnurlDecode(address))
   } else if (address.includes('@')) {
     const [name, domain] = address.split('@')
 

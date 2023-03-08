@@ -1,6 +1,6 @@
 import {bech32, utf8} from '@scure/base'
 import {debounce, throttle} from 'throttle-debounce'
-import {aperture, path as getPath, allPass, pipe, isNil, complement, equals, is, pluck, sum, identity, sortBy} from "ramda"
+import {gt, aperture, path as getPath, allPass, pipe, isNil, complement, equals, is, pluck, sum, identity, sortBy} from "ramda"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from 'svelte/store'
 import {isObject, round} from 'hurdak/lib/hurdak'
@@ -149,32 +149,50 @@ export const getLastSync = (k, fallback = 0) => {
 export class Cursor {
   until: number
   limit: number
-  constructor(limit = 10) {
+  count: number
+  constructor(limit = 20) {
     this.until = now()
     this.limit = limit
+    this.count = 0
   }
   getFilter() {
     return {
-      // Add a buffer so we can avoid blowing past the most relevant time interval
-      // (just now) until after a few paginations.
-      until: this.until + timedelta(3, 'hours'),
-      // since: this.until - timedelta(8, 'hours'),
+      until: this.until,
       limit: this.limit,
     }
   }
+  // Remove events that are significantly older than the average
+  prune(events) {
+    const maxDiff = avg(events.map(e => this.until - e.created_at)) * 4
+
+    return events.filter(e => this.until - e.created_at < maxDiff)
+  }
+  // Calculate a reasonable amount to move our window to avoid fetching too much of the
+  // same stuff we already got without missing certain time periods due to a mismatch
+  // in event density between various relays
   update(events) {
-    // update takes all events in a feed and figures out the best place to set `until`
-    // in order to find older events without re-fetching events that we've already seen.
-    // There are various edge cases:
-    // - When we have zero events, there's nothing we can do, presumably we have everything.
-    // - Sometimes relays send us extremely old events. Use median to avoid too-large gaps
-    if (events.length > this.limit) {
+    if (events.length > 2) {
+      // Keep track of how many requests we've made
+      this.count += 1
+
+      // Find the average gap between events to figure out how regularly people post to this
+      // feed. Multiply it by the number of events we have but scale down to avoid
+      // blowing past big gaps due to misbehaving relays skewing the results. Trim off
+      // outliers and scale based on results/requests to help with that
       const timestamps = sortBy(identity, pluck('created_at', events))
       const gaps = aperture(2, timestamps).map(([a, b]) => b - a)
-      const gap = quantile(gaps, 0.2)
+      const high = quantile(gaps, 0.5)
+      const gap = avg(gaps.filter(gt(high)))
+
+      // If we're just warming up, scale the window down even further to avoid
+      // blowing past the most relevant time period
+      const scale = (
+        Math.min(1, Math.log10(events.length))
+        * Math.min(1, Math.log10(this.count + 1))
+      )
 
       // Only paginate part of the way so we can avoid missing stuff
-      this.until -= Math.round(gap * events.length * 0.5)
+      this.until -= Math.round(gap * scale * this.limit)
     }
   }
 }
@@ -263,13 +281,13 @@ export const stringToColor = (value, {saturation = 100, lightness = 50, opacity 
   return `hsl(${(hash % 360)}, ${saturation}%, ${lightness}%, ${opacity})`;
 }
 
-export const tryFunc = (f, ignore) => {
+export const tryFunc = (f, ignore = null) => {
   try {
     const r = f()
 
     if (is(Promise, r)) {
       return r.catch(e => {
-        if (!e.toString().includes(ignore)) {
+        if (!ignore || !e.toString().includes(ignore)) {
           warn(e)
         }
       })
@@ -277,7 +295,7 @@ export const tryFunc = (f, ignore) => {
       return r
     }
   } catch (e) {
-    if (!e.toString().includes(ignore)) {
+    if (!ignore || !e.toString().includes(ignore)) {
       warn(e)
     }
   }
