@@ -360,7 +360,7 @@
           </Popover>
           <Anchor
             href={"/" + nip19.neventEncode({id: note.id, relays: [note.seen_on]})}
-            class="text-sm text-light"
+            class="hidden text-sm text-light sm:block"
             type="unstyled">
             {timestamp}
           </Anchor>
@@ -419,7 +419,9 @@
                   <i class="fa fa-bolt cursor-pointer" />
                   {formatSats($zapsTotal)}
                 </button>
-                <button class="w-16 text-left" on:click|stopPropagation={() => react("-")}>
+                <button
+                  class="hidden w-16 text-left sm:block"
+                  on:click|stopPropagation={() => react("-")}>
                   <i class="fa fa-flag cursor-pointer" />
                   {$flagsCount}
                 </button>

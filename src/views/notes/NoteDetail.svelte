@@ -54,7 +54,7 @@
     <Content size="lg" class="text-center">Sorry, we weren't able to find this note.</Content>
   </div>
 {:else if note.pubkey}
-  <div in:fly={{y: 20}} class="flex flex-col gap-4 p-4">
+  <div in:fly={{y: 20}} class="m-auto flex max-w-2xl flex-col gap-4 p-4">
     <Note showContext depth={6} anchorId={note.id} note={asDisplayEvent(note)} {invertColors} />
   </div>
 {/if}
