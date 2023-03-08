@@ -46,13 +46,13 @@
     if (showActions) {
       actions.push({onClick: share, label: "Share", icon: "share-nodes"})
 
-      if (following) {
-        actions.push({onClick: unfollow, label: "Unfollow", icon: "user-minus"})
-      } else if (user.getPubkey() !== pubkey) {
-        actions.push({onClick: follow, label: "Follow", icon: "user-plus"})
-      }
-
       if ($canPublish) {
+        if (following) {
+          actions.push({onClick: unfollow, label: "Unfollow", icon: "user-minus"})
+        } else if (user.getPubkey() !== pubkey) {
+          actions.push({onClick: follow, label: "Follow", icon: "user-plus"})
+        }
+
         actions.push({
           onClick: () => navigate(`/messages/${npub}`),
           label: "Message",

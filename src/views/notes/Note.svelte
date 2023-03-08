@@ -54,7 +54,7 @@
   let visibleNotes = []
   let showRelays = false
 
-  const {profile} = user
+  const {profile, canPublish} = user
   const timestamp = formatTimestamp(note.created_at)
   const borderColor = invertColors ? "medium" : "dark"
   const links = extractUrls(note.content)
@@ -395,7 +395,10 @@
               {/if}
             </div>
             <div class="flex justify-between text-light">
-              <div class="flex">
+              <div
+                class={cx("flex", {
+                  "pointer-events-none opacity-75": !$canPublish,
+                })}>
                 <button class="w-16 text-left" on:click|stopPropagation={startReply}>
                   <i class="fa fa-reply cursor-pointer" />
                   {$repliesCount}

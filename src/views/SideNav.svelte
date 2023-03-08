@@ -73,7 +73,11 @@
         {/if}
       </a>
     </li>
-    <li class="relative cursor-pointer">
+    <li
+      class={cx("relative", {
+        "cursor-pointer": $canPublish,
+        "pointer-events-none opacity-75": !$canPublish,
+      })}>
       <a class="block px-4 py-2 transition-all hover:bg-accent" href="/chat">
         <i class="fa fa-comment mr-2" /> Chat
         {#if $newChatMessages}

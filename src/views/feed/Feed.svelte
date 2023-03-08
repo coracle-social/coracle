@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {partition, always, propEq, uniqBy, sortBy, prop} from "ramda"
-  import {slide} from "svelte/transition"
+  import {fly} from "svelte/transition"
   import {quantify} from "hurdak/lib/hurdak"
   import {createScroller, now, Cursor} from "src/util/misc"
   import {asDisplayEvent, mergeFilter} from "src/util/nostr"
@@ -30,8 +30,9 @@
   const loadBufferedNotes = () => {
     // Drop notes at the end if there are a lot
     notes = uniqBy(prop("id"), notesBuffer.concat(notes).slice(0, maxNotes))
-
     notesBuffer = []
+
+    document.body.scrollIntoView({behavior: "smooth"})
   }
 
   const onChunk = async newNotes => {
@@ -117,12 +118,14 @@
 
 <Content size="inherit" class="pt-6">
   {#if notesBuffer.length > 0}
-    <button
-      in:slide
-      class="cursor-pointer text-center text-light underline"
-      on:click={loadBufferedNotes}>
-      Load {quantify(notesBuffer.length, "new note")}
-    </button>
+    <div class="fixed left-0 top-0 z-10 mt-20 flex w-full justify-center">
+      <button
+        in:fly={{y: 20}}
+        class="cursor-pointer rounded-full border border-solid border-accentl bg-accent py-2 px-4 text-center shadow-lg transition-colors hover:bg-accentl"
+        on:click={loadBufferedNotes}>
+        Load {quantify(notesBuffer.length, "new note")}
+      </button>
+    </div>
   {/if}
 
   <div class="flex flex-col gap-4">

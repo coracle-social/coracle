@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.17
+
+- [x] Make "show new notes" button fixed position
+- [x] Gray out buttons that don't work when logged in with pubkey
+
 ## 0.2.16
 
 - [x] Add search by nip05 (@fiatjaf)
