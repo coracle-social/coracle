@@ -49,7 +49,7 @@ const processProfileEvents = async events => {
             const address = kind0.lud16 || kind0.lud06
 
             if (address) {
-              verifyZapper(e.pubkey, address)
+              verifyZapper(e.pubkey, address.toLowerCase())
             }
 
             return {
@@ -312,7 +312,7 @@ const verifyZapper = async (pubkey, address) => {
   let url
 
   // Try to parse it as a lud06 LNURL or as a lud16 address
-  if (address.toLowerCase().startsWith('lnurl1')) {
+  if (address.startsWith('lnurl1')) {
     url = tryFunc(() => lnurlDecode(address))
   } else if (address.includes('@')) {
     const [name, domain] = address.split('@')
