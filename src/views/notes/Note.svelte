@@ -11,7 +11,6 @@
   import {formatTimestamp, now, tryJson, stringToColor, formatSats, fetchJson} from "src/util/misc"
   import {extractUrls, isMobile} from "src/util/html"
   import {invoiceAmount} from "src/util/lightning"
-  import ImageCircle from "src/partials/ImageCircle.svelte"
   import QRCode from "src/partials/QRCode.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Input from "src/partials/Input.svelte"
@@ -35,6 +34,7 @@
   import cmd from "src/agent/cmd"
   import {routes} from "src/app/ui"
   import {publishWithToast} from "src/app"
+  import PersonCircle from "src/partials/PersonCircle.svelte";
 
   export let note
   export let depth = 0
@@ -337,7 +337,7 @@
       {/if}
       <div>
         <Anchor class="text-lg font-bold" href={routes.person($person.pubkey)}>
-          <ImageCircle size={10} src={$person.kind0?.picture} />
+          <PersonCircle size={10} src={$person.kind0?.picture} />
         </Anchor>
       </div>
       <div class="flex min-w-0 flex-grow flex-col gap-2">

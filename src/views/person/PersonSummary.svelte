@@ -8,6 +8,7 @@
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import database from "src/agent/database"
   import {routes} from "src/app/ui"
+  import PersonCircle from "src/partials/PersonCircle.svelte";
 
   export let pubkey
 
@@ -32,9 +33,7 @@
 
 <div class="relative flex flex-col gap-4 py-2 px-3">
   <div class="flex gap-4">
-    <div
-      class="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-solid border-white bg-cover bg-center"
-      style="background-image: url({$person.kind0?.picture})" />
+    <PersonCircle size={14} src={$person.kind0?.picture} />
     <div class="flex flex-grow flex-col gap-2">
       <Anchor
         type="unstyled"

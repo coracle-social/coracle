@@ -6,6 +6,7 @@
   import {displayPerson} from "src/util/nostr"
   import database from "src/agent/database"
   import {lastChecked} from "src/app/alerts"
+  import PersonCircle from "src/partials/PersonCircle.svelte";
 
   export let contact
 
@@ -19,10 +20,7 @@
          px-4 py-6 transition-all hover:bg-medium"
   on:click={enter}
   in:fly={{y: 20}}>
-  <div
-    class="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-solid border-white
-           bg-cover bg-center"
-    style="background-image: url({person.kind0?.picture})" />
+  <PersonCircle size={14} src={person.kind0?.picture} />
   <div class="flex min-w-0 flex-grow flex-col justify-start gap-2">
     <div class="flex flex-grow items-start justify-between gap-2">
       <div class="flex items-center gap-2 overflow-hidden">

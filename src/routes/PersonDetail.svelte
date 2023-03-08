@@ -20,6 +20,7 @@
   import network from "src/agent/network"
   import database from "src/agent/database"
   import {routes, modal} from "src/app/ui"
+  import PersonCircle from "src/partials/PersonCircle.svelte";
 
   export let npub
   export let activeTab
@@ -161,9 +162,7 @@
 
 <Content>
   <div class="flex gap-4">
-    <div
-      class="h-16 w-16 shrink-0 overflow-hidden rounded-full border border-solid border-white bg-cover bg-center sm:h-32 sm:w-32"
-      style="background-image: url({person.kind0?.picture})" />
+    <PersonCircle src={person.kind0?.picture} size={16} class="sm:h-32 sm:w-32" />
     <div class="flex flex-grow flex-col gap-4">
       <div class="flex items-start justify-between gap-4">
         <div class="flex flex-grow flex-col gap-2">
