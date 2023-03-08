@@ -32,7 +32,5 @@
       Log in
     </Anchor>
   </div>
-  <p>
-    If you don't want to save your keys now, you can find them later in Coracle's settings.
-  </p>
+  <p>If you don't want to save your keys now, you can find them later in Coracle's settings.</p>
 </Content>

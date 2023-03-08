@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "check:es": "eslint src/*/** --quiet",
     "check:ts": "svelte-check --tsconfig ./tsconfig.json --threshold error",
+    "check:fmt": "prettier --check '{public,src}/**/*.{css,html,js,svelte}'",
     "check": "run-p check:*",
     "format": "prettier --write '{public,src}/**/*.{css,html,js,svelte}'",
     "watch": "find src -type f | entr -r"

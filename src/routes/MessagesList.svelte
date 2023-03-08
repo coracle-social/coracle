@@ -31,8 +31,7 @@
     <MessagesListItem {contact} />
   {:else}
     <Content size="lg" class="text-center">
-      No messages found - start a conversation by clicking the envelope button on someone's
-      profile.
+      No messages found - start a conversation by clicking the envelope button on someone's profile.
     </Content>
   {/each}
 </Content>
