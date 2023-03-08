@@ -1,5 +1,5 @@
 import type {MyEvent} from 'src/util/types'
-import {assoc, uniq, uniqBy, prop, propEq, reject, groupBy, pluck} from 'ramda'
+import {sortBy, assoc, uniq, uniqBy, prop, propEq, reject, groupBy, pluck} from 'ramda'
 import {personKinds, findReplyId} from 'src/util/nostr'
 import {log} from 'src/util/logger'
 import {chunk} from 'hurdak/lib/hurdak'
@@ -188,7 +188,7 @@ const applyContext = (notes, context) => {
 
     return {
       ...note,
-      replies: uniqBy(prop('id'), combinedReplies).map(annotate),
+      replies: sortBy(e => -e.created_at, uniqBy(prop('id'), combinedReplies).map(annotate)),
       reactions: uniqBy(prop('id'), combinedReactions),
       zaps: uniqBy(prop('id'), combinedZaps),
     }
