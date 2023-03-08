@@ -16,6 +16,7 @@
   import {routes} from "src/app/ui"
   import {lastChecked} from "src/app/alerts"
   import {renderNote} from "src/app"
+  import PersonCircle from "src/partials/PersonCircle.svelte";
 
   export let entity
 
@@ -74,9 +75,7 @@
   <div slot="header" class="flex items-start gap-4">
     <div class="flex items-center gap-4">
       <Anchor type="unstyled" class="fa fa-arrow-left cursor-pointer text-2xl" href="/messages" />
-      <div
-        class="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-solid border-white bg-cover bg-center"
-        style="background-image: url({$person.kind0?.picture})" />
+      <PersonCircle src={$person.kind0?.picture} size={12} />
     </div>
     <div class="flex w-full flex-col gap-2">
       <div class="flex w-full items-center justify-between">

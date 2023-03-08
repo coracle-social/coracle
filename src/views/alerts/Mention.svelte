@@ -2,11 +2,11 @@
   import {ellipsize} from "hurdak/lib/hurdak"
   import {formatTimestamp} from "src/util/misc"
   import {displayPerson} from "src/util/nostr"
-  import ImageCircle from "src/partials/ImageCircle.svelte"
   import Popover from "src/partials/Popover.svelte"
   import PersonSummary from "src/views/person/PersonSummary.svelte"
   import database from "src/agent/database"
   import {modal} from "src/app/ui"
+  import PersonCircle from "src/partials/PersonCircle.svelte";
 
   export let note
 
@@ -19,7 +19,7 @@
   on:click={() => modal.set({type: "note/detail", note})}>
   <div class="relative flex w-full items-center justify-between gap-2">
     <div class="flex items-center gap-2">
-      <ImageCircle src={person.kind0?.picture} />
+      <PersonCircle src={person.kind0?.picture} />
       <div on:click|stopPropagation>
         <Popover class="inline-block">
           <div slot="trigger" class="font-bold">

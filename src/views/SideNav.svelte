@@ -5,6 +5,7 @@
   import {menuIsOpen, installPrompt, routes} from "src/app/ui"
   import {newAlerts, newDirectMessages, newChatMessages} from "src/app/alerts"
   import {slowConnections} from "src/app/connection"
+  import PersonCircle from "src/partials/PersonCircle.svelte";
 
   const {profile, canPublish} = user
 
@@ -30,9 +31,7 @@
   {#if $profile}
     <li>
       <a href={routes.person($profile.pubkey)} class="flex items-center gap-2 px-4 py-2 pb-6">
-        <div
-          class="h-6 w-6 shrink-0 overflow-hidden rounded-full border border-solid border-white bg-cover bg-center"
-          style="background-image: url({$profile.kind0?.picture})" />
+        <PersonCircle size={6} src={$profile.kind0?.picture} />
         <span class="text-lg font-bold">{displayPerson($profile)}</span>
       </a>
     </li>
