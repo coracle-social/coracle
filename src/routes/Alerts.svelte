@@ -50,7 +50,7 @@
         {/if}
       </div>
     {:else}
-      <Content size="lg" class="text-center">No alerts found - check back later!</Content>
+      <Content size="lg" class="text-center">No notifications found - check back later!</Content>
     {/each}
   </Content>
 {:else}

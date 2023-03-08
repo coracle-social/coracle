@@ -29,5 +29,10 @@
   <Tabs tabs={["messages", "requests"]} {activeTab} {setActiveTab} {getDisplay} />
   {#each getContacts(activeTab) as contact (contact.pubkey)}
     <MessagesListItem {contact} />
+  {:else}
+    <Content size="lg" class="text-center">
+      No messages found - start a conversation by clicking the envelope button on someone's
+      profile.
+    </Content>
   {/each}
 </Content>

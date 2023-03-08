@@ -10,7 +10,6 @@
   export let privkey
 
   const nsec = nip19.nsecEncode(privkey)
-  const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
 
   const copyKey = () => {
     copyToClipboard(nsec)
@@ -34,8 +33,6 @@
     </Anchor>
   </div>
   <p>
-    Avoid pasting your key into too many apps and websites. Instead, use a <Anchor
-      href={nip07}
-      external>compatible browser extension</Anchor> to securely store your key.
+    If you don't want to save your keys now, you can find them later in Coracle's settings.
   </p>
 </Content>
