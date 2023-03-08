@@ -2,10 +2,23 @@
 
 ## 0.2.16
 
-- [x] Add search by nip05
+- [x] Add search by nip05 (@fiatjaf)
 - [x] Fix feed to show more variety
-- [x] Beautify notes
+- [x] Beautify notes, modals, reaction buttons
 - [x] Add uploads to replies
+- [x] Sort replies descending
+- [x] Add prettier for formatting
+- [x] Refine feed loading to prevent hanging or missing content
+- [x] Add new onboarding workflow
+- [x] Fix various bugs related to zaps (@fiatjaf)
+- [x] Fix horizontal scrolling on profile page (@morkowski)
+- [x] Update README with instructions for running manually (@gourcetools)
+- [x] Add profile info modal to profile view (@igmaat)
+- [x] Optimize event deduplication (@fiatjaf)
+- [x] Clean up QR codes
+- [x] Give cards a slight border
+- [x] Tweak background for image mat
+- [x] Set route name to document title
 
 ## 0.2.15
 
