@@ -1,13 +1,13 @@
 <script>
-  import {navigate} from 'svelte-routing'
-  import {toTitle} from 'hurdak/lib/hurdak'
+  import {navigate} from "svelte-routing"
+  import {toTitle} from "hurdak/lib/hurdak"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import NewNoteButton from "src/views/notes/NewNoteButton.svelte"
   import Follows from "src/views/feed/Follows.svelte"
   import Network from "src/views/feed/Network.svelte"
-  import user from 'src/agent/user'
+  import user from "src/agent/user"
 
   export let activeTab
 
@@ -18,17 +18,19 @@
 
 <Content>
   {#if !user.getProfile()}
-  <Content size="lg" class="text-center">
-    <p class="text-xl">Don't have an account?</p>
-    <p>Click <Anchor href="/login">here</Anchor> to join the nostr network.</p>
-  </Content>
+    <Content size="lg" class="text-center">
+      <p class="text-xl">Don't have an account?</p>
+      <p>
+        Click <Anchor href="/login">here</Anchor> to join the nostr network.
+      </p>
+    </Content>
   {/if}
   <div>
-    <Tabs tabs={['follows', 'network']} {activeTab} {setActiveTab} />
-    {#if activeTab === 'follows'}
-    <Follows />
+    <Tabs tabs={["follows", "network"]} {activeTab} {setActiveTab} />
+    {#if activeTab === "follows"}
+      <Follows />
     {:else}
-    <Network />
+      <Network />
     {/if}
   </div>
 </Content>

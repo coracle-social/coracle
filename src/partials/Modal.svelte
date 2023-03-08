@@ -8,31 +8,31 @@
 
 <svelte:body
   on:keydown={e => {
-    if (e.key === 'Escape' && !root.querySelector('.modal')) {
+    if (e.key === "Escape" && !root.querySelector(".modal")) {
       onEscape?.()
     }
   }} />
 
-<div class="fixed inset-0 z-30 modal bg-black/75" bind:this={root} transition:fade>
+<div class="modal fixed inset-0 z-30 bg-black/75" bind:this={root} transition:fade>
   <div
-    class="modal-content overflow-auto h-full"
+    class="modal-content h-full overflow-auto"
     bind:this={content}
     transition:fly={{y: 1000}}
     class:cursor-pointer={onEscape}
     on:click={onEscape}>
     <div class="mt-12 min-h-full">
       {#if onEscape}
-      <div class="flex w-full justify-end p-2 sticky top-0 z-10 pointer-events-none">
-        <div
-          class="w-10 h-10 flex justify-center items-center bg-accent pointer-events-auto
-                 rounded-full cursor-pointer border border-solid border-medium">
-          <i class="fa fa-times fa-lg" />
+        <div class="pointer-events-none sticky top-0 z-10 flex w-full justify-end p-2">
+          <div
+            class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center
+                 rounded-full border border-solid border-medium bg-accent">
+            <i class="fa fa-times fa-lg" />
+          </div>
         </div>
-      </div>
       {/if}
-      <div class="absolute w-full h-full bg-dark mt-12" />
+      <div class="absolute mt-12 h-full w-full bg-dark" />
       <div
-        class="relative bg-dark border-t border-solid border-medium h-full w-full pt-2 pb-10 cursor-auto"
+        class="relative h-full w-full cursor-auto border-t border-solid border-medium bg-dark pt-2 pb-10"
         on:click|stopPropagation>
         <slot />
       </div>

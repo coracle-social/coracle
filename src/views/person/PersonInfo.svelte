@@ -1,8 +1,8 @@
 <script lang="ts">
   import {displayPerson} from "src/util/nostr"
-  import PersonInfo from 'src/partials/PersonInfo.svelte'
-  import {getPubkeyWriteRelays, sampleRelays} from 'src/agent/relays'
-  import user from 'src/agent/user'
+  import PersonInfo from "src/partials/PersonInfo.svelte"
+  import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
+  import user from "src/agent/user"
 
   export let person
 

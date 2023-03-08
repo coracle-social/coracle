@@ -1,9 +1,9 @@
 <script lang="ts">
-  import QRCode from 'qrcode'
-  import {onMount} from 'svelte'
-  import Input from 'src/partials/Input.svelte'
+  import QRCode from "qrcode"
+  import {onMount} from "svelte"
+  import Input from "src/partials/Input.svelte"
   import {copyToClipboard} from "src/util/html"
-  import {toast} from 'src/app/ui'
+  import {toast} from "src/app/ui"
 
   export let code
 
@@ -19,7 +19,8 @@
   })
 </script>
 
-<div class="rounded bg-black border border-solid border-medium p-4 flex flex-col gap-4 max-w-sm m-auto">
+<div
+  class="m-auto flex max-w-sm flex-col gap-4 rounded border border-solid border-medium bg-black p-4">
   <canvas class="m-auto rounded" bind:this={canvas} />
   <Input value={code}>
     <button slot="after" class="fa fa-copy" on:click={copy} />

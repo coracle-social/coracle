@@ -1,14 +1,14 @@
 <script>
   import Switch from "svelte-switch"
-  import {createEventDispatcher} from 'svelte'
+  import {createEventDispatcher} from "svelte"
 
   export let value
 
-	const dispatch = createEventDispatcher()
+  const dispatch = createEventDispatcher()
 
   const onChange = e => {
     value = e.detail.checked
-    dispatch('change', value)
+    dispatch("change", value)
   }
 </script>
 

@@ -1,12 +1,12 @@
 <script lang="ts">
-  import {objOf} from 'ramda'
-  import {onMount} from 'svelte'
-  import {nip19} from 'nostr-tools'
-  import {warn} from 'src/util/logger'
-  import Content from 'src/partials/Content.svelte'
-  import NoteDetail from 'src/views/notes/NoteDetail.svelte'
-  import Person from 'src/routes/PersonDetail.svelte'
-  import {sampleRelays} from 'src/agent/relays'
+  import {objOf} from "ramda"
+  import {onMount} from "svelte"
+  import {nip19} from "nostr-tools"
+  import {warn} from "src/util/logger"
+  import Content from "src/partials/Content.svelte"
+  import NoteDetail from "src/views/notes/NoteDetail.svelte"
+  import Person from "src/routes/PersonDetail.svelte"
+  import {sampleRelays} from "src/agent/relays"
 
   export let entity
 
@@ -14,8 +14,8 @@
 
   onMount(() => {
     try {
-      ({type, data} = nip19.decode(entity) as {type: string, data: any})
-      relays = sampleRelays((data.relays || []).map(objOf('url')))
+      ;({type, data} = nip19.decode(entity) as {type: string; data: any})
+      relays = sampleRelays((data.relays || []).map(objOf("url")))
     } catch (e) {
       warn(e)
     }
@@ -39,4 +39,3 @@
     <div>Sorry, we weren't able to find "{entity}".</div>
   </Content>
 {/if}
-

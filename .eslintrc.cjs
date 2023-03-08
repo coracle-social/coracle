@@ -29,6 +29,7 @@ module.exports = {
     "no-unused-vars": ["error", {args: "none"}],
     "no-async-promise-executor": "off",
     "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-extra-semi": "off",
     "no-useless-escape": "off",
   },
   ignorePatterns: ["*.svg"],

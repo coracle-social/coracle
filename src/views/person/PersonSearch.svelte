@@ -3,11 +3,11 @@
   import {personKinds} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import PersonInfo from 'src/views/person/PersonInfo.svelte'
-  import {getUserReadRelays} from 'src/agent/relays'
-  import database from 'src/agent/database'
-  import network from 'src/agent/network'
-  import user from 'src/agent/user'
+  import PersonInfo from "src/views/person/PersonInfo.svelte"
+  import {getUserReadRelays} from "src/agent/relays"
+  import database from "src/agent/database"
+  import network from "src/agent/network"
+  import user from "src/agent/user"
 
   export let hideFollowing = false
 
@@ -15,11 +15,10 @@
   let results = []
 
   const {petnamePubkeys} = user
-  const search = database.watch('people', t =>
-    fuzzy(
-      t.all({'kind0.name:!nil': null}),
-      {keys: ["kind0.name", "kind0.about", "pubkey"]}
-    )
+  const search = database.watch("people", t =>
+    fuzzy(t.all({"kind0.name:!nil": null}), {
+      keys: ["kind0.name", "kind0.about", "pubkey"],
+    })
   )
 
   $: results = $search(q).slice(0, 50)
@@ -38,8 +37,8 @@
 </Input>
 {#each results as person (person.pubkey)}
   {#if person.pubkey !== user.getPubkey() && !(hideFollowing && $petnamePubkeys.includes(person.pubkey))}
-  <PersonInfo {person} />
+    <PersonInfo {person} />
   {/if}
 {:else}
-<Spinner />
+  <Spinner />
 {/each}

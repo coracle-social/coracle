@@ -1,7 +1,7 @@
 <script lang="ts">
   import Feed from "src/views/feed/Feed.svelte"
-  import {isLike} from 'src/util/nostr'
-  import {sampleRelays, getPubkeyWriteRelays} from 'src/agent/relays'
+  import {isLike} from "src/util/nostr"
+  import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
 
   export let pubkey
 
@@ -11,4 +11,3 @@
 </script>
 
 <Feed {relays} {filter} {shouldDisplay} parentsTimeout={10_000} />
-

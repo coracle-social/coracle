@@ -1,12 +1,12 @@
 <script lang="ts">
-  import {ellipsize} from 'hurdak/lib/hurdak'
-  import {formatTimestamp} from 'src/util/misc'
-  import {displayPerson} from 'src/util/nostr'
+  import {ellipsize} from "hurdak/lib/hurdak"
+  import {formatTimestamp} from "src/util/misc"
+  import {displayPerson} from "src/util/nostr"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import Popover from "src/partials/Popover.svelte"
   import PersonSummary from "src/views/person/PersonSummary.svelte"
-  import database from 'src/agent/database'
-  import {modal} from 'src/app/ui'
+  import database from "src/agent/database"
+  import {modal} from "src/app/ui"
 
   export let note
 
@@ -14,11 +14,11 @@
 </script>
 
 <button
-  class="py-2 px-3 flex flex-col gap-2 text-white cursor-pointer transition-all w-full
-         border border-solid border-black hover:border-medium hover:bg-dark text-left"
-  on:click={() => modal.set({type: 'note/detail', note})}>
-  <div class="flex gap-2 items-center justify-between relative w-full">
-    <div class="flex gap-2 items-center">
+  class="flex w-full cursor-pointer flex-col gap-2 border border-solid border-black py-2
+         px-3 text-left text-white transition-all hover:border-medium hover:bg-dark"
+  on:click={() => modal.set({type: "note/detail", note})}>
+  <div class="relative flex w-full items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
       <ImageCircle src={person.kind0?.picture} />
       <div on:click|stopPropagation>
         <Popover class="inline-block">

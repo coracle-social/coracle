@@ -1,11 +1,11 @@
 <script>
-  import {fly} from 'svelte/transition'
-  import {ellipsize, quantify, switcher} from 'hurdak/lib/hurdak'
+  import {fly} from "svelte/transition"
+  import {ellipsize, quantify, switcher} from "hurdak/lib/hurdak"
   import Badge from "src/partials/Badge.svelte"
-  import {formatTimestamp} from 'src/util/misc'
-  import {killEvent} from 'src/util/html'
-  import database from 'src/agent/database'
-  import {modal} from 'src/app/ui'
+  import {formatTimestamp} from "src/util/misc"
+  import {killEvent} from "src/util/html"
+  import database from "src/agent/database"
+  import {modal} from "src/app/ui"
 
   export let note
   export let type
@@ -17,9 +17,9 @@
   })
 
   const actionText = switcher(type, {
-    replies: 'replied to your note',
-    likes: 'liked your note',
-    zaps: 'zapped your note',
+    replies: "replied to your note",
+    likes: "liked your note",
+    zaps: "zapped your note",
   })
 
   let isOpen = false
@@ -38,24 +38,25 @@
 </script>
 
 <button
-  class="py-2 px-3 flex flex-col gap-2 text-white cursor-pointer transition-all w-full
-         border border-solid border-black hover:border-medium hover:bg-dark text-left"
-  on:click={() => modal.set({type: 'note/detail', note})}>
-  <div class="flex gap-2 items-center justify-between relative w-full">
+  class="flex w-full cursor-pointer flex-col gap-2 border border-solid border-black py-2
+         px-3 text-left text-white transition-all hover:border-medium hover:bg-dark"
+  on:click={() => modal.set({type: "note/detail", note})}>
+  <div class="relative flex w-full items-center justify-between gap-2">
     <button class="cursor-pointer" on:click={openPopover}>
-      {quantify(pubkeys.length, 'person', 'people')} {actionText}.
+      {quantify(pubkeys.length, "person", "people")}
+      {actionText}.
     </button>
     {#if isOpen}
-    <button in:fly={{y: 20}} class="fixed inset-0 z-10" on:click={closePopover} />
-    <button
-      on:click={killEvent}
-      in:fly={{y: 20}}
-      class="absolute top-0 mt-8 py-2 px-4 rounded border border-solid border-medium
-             bg-dark grid grid-cols-2 gap-y-2 gap-x-4 z-20">
-      {#each pubkeys as pubkey}
-      <Badge person={database.getPersonWithFallback(pubkey)} />
-      {/each}
-    </button>
+      <button in:fly={{y: 20}} class="fixed inset-0 z-10" on:click={closePopover} />
+      <button
+        on:click={killEvent}
+        in:fly={{y: 20}}
+        class="absolute top-0 z-20 mt-8 grid grid-cols-2 gap-y-2 gap-x-4 rounded
+             border border-solid border-medium bg-dark py-2 px-4">
+        {#each pubkeys as pubkey}
+          <Badge person={database.getPersonWithFallback(pubkey)} />
+        {/each}
+      </button>
     {/if}
     <p class="text-sm text-light">{formatTimestamp(note.created_at)}</p>
   </div>

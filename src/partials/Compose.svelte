@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {prop, repeat, reject, sortBy, last} from 'ramda'
-  import {onMount} from 'svelte'
-  import {ensurePlural} from 'hurdak/lib/hurdak'
-  import {fly} from 'svelte/transition'
+  import {prop, repeat, reject, sortBy, last} from "ramda"
+  import {onMount} from "svelte"
+  import {ensurePlural} from "hurdak/lib/hurdak"
+  import {fly} from "svelte/transition"
   import {fuzzy} from "src/util/misc"
   import {displayPerson} from "src/util/nostr"
   import {fromParentOffset} from "src/util/html"
@@ -15,12 +15,11 @@
   let mentions = []
   let suggestions = []
   let input = null
-  let prevContent = ''
+  let prevContent = ""
 
-  const search = fuzzy(
-    database.people.all({'kind0.name:!nil': null}),
-    {keys: ["kind0.name", "pubkey"]}
-  )
+  const search = fuzzy(database.people.all({"kind0.name:!nil": null}), {
+    keys: ["kind0.name", "pubkey"],
+  })
 
   const getText = () => {
     const selection = document.getSelection()
@@ -44,17 +43,21 @@
     const selection = document.getSelection()
     const {focusNode, focusOffset} = selection
     const prefixElement = document.createTextNode(prefix)
-    const span = document.createElement('span')
+    const span = document.createElement("span")
 
     // Space includes a zero-width space to avoid having the cursor end up inside
     // mention span on backspace, and a space for convenience in composition.
     const space = document.createTextNode("\u200B\u00a0")
 
-    span.classList.add('underline')
+    span.classList.add("underline")
     span.innerText = content
 
     // Remove our partial mention text
-    selection.setBaseAndExtent(...fromParentOffset(input, text.length - chars), focusNode, focusOffset)
+    selection.setBaseAndExtent(
+      ...fromParentOffset(input, text.length - chars),
+      focusNode,
+      focusOffset
+    )
     selection.deleteFromDocument()
 
     // Add the prefix, decorated text, and a trailing space
@@ -69,7 +72,7 @@
   const pickSuggestion = person => {
     const display = displayPerson(person)
 
-    highlightWord('@', getWord().length, display)
+    highlightWord("@", getWord().length, display)
 
     mentions.push({
       pubkey: person.pubkey,
@@ -82,31 +85,31 @@
   }
 
   const onKeyDown = e => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       return onSubmit()
     }
 
-    if (e.key === 'Escape' && suggestions[index]) {
+    if (e.key === "Escape" && suggestions[index]) {
       index = 0
       suggestions = []
       e.stopPropagation()
     }
 
-    if (['Enter', 'Tab', 'ArrowUp', 'ArrowDown', ' '].includes(e.key) && suggestions[index]) {
+    if (["Enter", "Tab", "ArrowUp", "ArrowDown", " "].includes(e.key) && suggestions[index]) {
       e.preventDefault()
     }
   }
 
   const onKeyUp = e => {
-    if (['Enter', 'Tab', ' '].includes(e.key) && suggestions[index]) {
+    if (["Enter", "Tab", " "].includes(e.key) && suggestions[index]) {
       pickSuggestion(suggestions[index])
     }
 
-    if (e.key === 'ArrowUp' && suggestions[index - 1]) {
+    if (e.key === "ArrowUp" && suggestions[index - 1]) {
       index -= 1
     }
 
-    if (e.key === 'ArrowDown' && suggestions[index + 1]) {
+    if (e.key === "ArrowDown" && suggestions[index + 1]) {
       index += 1
     }
 
@@ -114,7 +117,7 @@
       const text = getText()
       const word = getWord()
 
-      if (!text.match(/\s$/) && word.startsWith('@')) {
+      if (!text.match(/\s$/) && word.startsWith("@")) {
         suggestions = search(word.slice(1)).slice(0, 5)
       } else {
         index = 0
@@ -139,7 +142,7 @@
       const topic = getText().match(/#([-\w]+\s)$/)
 
       if (topic) {
-        highlightWord('#', topic[0].length, topic[1].trim())
+        highlightWord("#", topic[0].length, topic[1].trim())
       }
     }
 
@@ -168,10 +171,11 @@
     let offset = 0
 
     // For whatever reason the textarea gives us 2x - 1 line breaks
-    let content = input.innerText
-      .replace(/(\n+)/g, x => repeat('\n', Math.ceil(x.length / 2)).join(''))
+    let content = input.innerText.replace(/(\n+)/g, x =>
+      repeat("\n", Math.ceil(x.length / 2)).join("")
+    )
 
-    const validMentions = sortBy(prop('end'), reject(prop('invalid'), mentions))
+    const validMentions = sortBy(prop("end"), reject(prop("invalid"), mentions))
     for (const [i, {end, length}] of validMentions.entries()) {
       const offsetEnd = end - offset
       const start = offsetEnd - length
@@ -182,17 +186,17 @@
     }
 
     // Remove our zero-length spaces
-    content = content.replace(/\u200B/g, '').trim()
+    content = content.replace(/\u200B/g, "").trim()
 
     return {
       content,
       topics: content.match(/#[-\w]+/g) || [],
-      mentions: validMentions.map(prop('pubkey')),
+      mentions: validMentions.map(prop("pubkey")),
     }
   }
 
   onMount(() => {
-    input.addEventListener('paste', e => {
+    input.addEventListener("paste", e => {
       e.preventDefault()
 
       const selection = window.getSelection()
@@ -201,15 +205,14 @@
         selection.deleteFromDocument()
       }
 
-      type((e.clipboardData || (window as any).clipboardData).getData('text'))
+      type((e.clipboardData || (window as any).clipboardData).getData("text"))
     })
   })
-
 </script>
 
 <div class="flex">
   <div
-    class="text-white w-full outline-0 p-2 min-w-0"
+    class="w-full min-w-0 p-2 text-white outline-0"
     autofocus
     contenteditable
     bind:this={input}
@@ -219,16 +222,16 @@
 </div>
 
 {#if suggestions.length > 0}
-<div class="rounded border border-solid border-medium mt-2 flex flex-col" in:fly={{y: 20}}>
-  {#each suggestions as person, i (person.pubkey)}
-  <button
-    class="py-2 px-4 cursor-pointer border-l-2 border-solid border-black"
-    class:bg-black={index !== i}
-    class:bg-dark={index === i}
-    class:border-accent={index === i}
-    on:click={() => pickSuggestion(person)}>
-    <Badge inert {person} />
-  </button>
-  {/each}
-</div>
+  <div class="mt-2 flex flex-col rounded border border-solid border-medium" in:fly={{y: 20}}>
+    {#each suggestions as person, i (person.pubkey)}
+      <button
+        class="cursor-pointer border-l-2 border-solid border-black py-2 px-4"
+        class:bg-black={index !== i}
+        class:bg-dark={index === i}
+        class:border-accent={index === i}
+        on:click={() => pickSuggestion(person)}>
+        <Badge inert {person} />
+      </button>
+    {/each}
+  </div>
 {/if}

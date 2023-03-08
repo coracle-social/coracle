@@ -54,7 +54,10 @@
   color: white;
 }
 
-html, body, #app, #app > div {
+html,
+body,
+#app,
+#app > div {
   height: 100%;
 }
 
@@ -62,17 +65,15 @@ html, body, #app, #app > div {
 
 .tippy-box {
   background-color: #0f0f0e !important;
-  border: 1px solid #403D39;
-  box-shadow: 3px 3px 20px #0f0f0e,
-              3px -3px 20px #0f0f0e,
-              -3px 3px 20px #0f0f0e,
-              -3px -3px 20px #0f0f0e;
+  border: 1px solid #403d39;
+  box-shadow: 3px 3px 20px #0f0f0e, 3px -3px 20px #0f0f0e, -3px 3px 20px #0f0f0e,
+    -3px -3px 20px #0f0f0e;
 }
 
-.tippy-box[data-placement^=top]>.tippy-arrow:before {
-  border-top-color: #403D39 !important;
+.tippy-box[data-placement^="top"] > .tippy-arrow:before {
+  border-top-color: #403d39 !important;
 }
 
-.tippy-box[data-placement^=top]>.tippy-arrow {
-    bottom: -1px !important;
+.tippy-box[data-placement^="top"] > .tippy-arrow {
+  bottom: -1px !important;
 }

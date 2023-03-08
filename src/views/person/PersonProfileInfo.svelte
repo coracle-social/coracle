@@ -33,7 +33,7 @@
       // fetch data
       nip05
         .queryProfile(person.verified_as)
-        .then((data) => {
+        .then(data => {
           nip05ProfileData = data
 
           // recalculate nprofile using NIP05 relay data, if specified.
@@ -45,7 +45,7 @@
             })
           }
         })
-        .catch((err) => {
+        .catch(err => {
           warn("NIP05 profile retrieval failed")
         })
         .finally(() => {
@@ -63,12 +63,12 @@
     let name, domain
 
     if (identifier.match(/^.*@.*$/)) {
-      [name, domain] = identifier.split("@")
+      ;[name, domain] = identifier.split("@")
     } else {
       // In case of no name (domain-only), mimick the reasonable
       // (but somewhat questionable) behaviour of nostr-tools/nip05,
       // which defaults the name value
-      [name, domain] = ["_", identifier]
+      ;[name, domain] = ["_", identifier]
     }
     return `https://${domain}/.well-known/nostr.json?name=${name}`
   }
@@ -84,62 +84,51 @@
   <Content>
     <h1 class="staatliches text-2xl">Profile Details</h1>
     <div>
-      <div class="text-lg mb-1">Public Key (Hex)</div>
-      <div class="text-sm font-mono">
-        <button
-          class="fa-solid fa-copy cursor-pointer"
-          on:click={() => copy(person.pubkey)}
-        />
+      <div class="mb-1 text-lg">Public Key (Hex)</div>
+      <div class="font-mono text-sm">
+        <button class="fa-solid fa-copy cursor-pointer" on:click={() => copy(person.pubkey)} />
         {person.pubkey}
       </div>
     </div>
     <div>
-      <div class="text-lg mb-1">Public Key (npub)</div>
-      <div class="text-sm font-mono">
+      <div class="mb-1 text-lg">Public Key (npub)</div>
+      <div class="font-mono text-sm">
         {#if npub}
-          <button
-            class="fa-solid fa-copy cursor-pointer"
-            on:click={() => copy(npub)}
-          />
+          <button class="fa-solid fa-copy cursor-pointer" on:click={() => copy(npub)} />
         {/if}
         {npub}
       </div>
     </div>
     {#if nProfile}
-    <div>
-      <div class="text-lg mb-1">nprofile</div>
-      <div class="text-sm font-mono break-all">
-          <button
-            class="fa-solid fa-copy cursor-pointer inline"
-            on:click={() => copy(nProfile)}
-          />
-        {nProfile}
+      <div>
+        <div class="mb-1 text-lg">nprofile</div>
+        <div class="break-all font-mono text-sm">
+          <button class="fa-solid fa-copy inline cursor-pointer" on:click={() => copy(nProfile)} />
+          {nProfile}
+        </div>
       </div>
-    </div>
     {/if}
-    <h1 class="staatliches text-2xl mt-4">NIP05</h1>
+    <h1 class="staatliches mt-4 text-2xl">NIP05</h1>
     {#if loaded && person.verified_as}
       <div>
-        <div class="text-lg mb-1">NIP05 Identifier</div>
-        <div class="text-sm font-mono">
+        <div class="mb-1 text-lg">NIP05 Identifier</div>
+        <div class="font-mono text-sm">
           {#if person.verified_as}
             <button
-              class="fa-solid fa-copy cursor-pointer inline"
-              on:click={() => copy(person.verified_as)}
-            />
+              class="fa-solid fa-copy inline cursor-pointer"
+              on:click={() => copy(person.verified_as)} />
           {/if}
           {person.verified_as || "?"}
         </div>
       </div>
 
       <div>
-        <div class="text-lg mb-1">NIP05 Validation Endpoint</div>
-        <div class="text-sm font-mono">
+        <div class="mb-1 text-lg">NIP05 Validation Endpoint</div>
+        <div class="font-mono text-sm">
           {#if nip05QueryEndpoint}
             <button
-              class="fa-solid fa-copy cursor-pointer inline"
-              on:click={() => copy(nip05QueryEndpoint)}
-            />
+              class="fa-solid fa-copy inline cursor-pointer"
+              on:click={() => copy(nip05QueryEndpoint)} />
           {/if}
 
           {nip05QueryEndpoint || "?"}
@@ -148,19 +137,19 @@
 
       {#if nip05ProfileData}
         <div>
-          <div class="text-lg mb-2">NIP05 Relay Configuration</div>
+          <div class="mb-2 text-lg">NIP05 Relay Configuration</div>
           {#if nip05ProfileData?.relays?.length}
-            <p class="text-sm mb-4 text-light">
+            <p class="mb-4 text-sm text-light">
               These relays are advertised by the NIP05 identifier's validation endpoint.
             </p>
 
             <div class="grid grid-cols-1 gap-4">
               {#each nip05ProfileData?.relays as url}
-              <RelayCard relay={{url}} />
+                <RelayCard relay={{url}} />
               {/each}
             </div>
           {:else}
-            <p class="text-sm mb-4 text-light">
+            <p class="mb-4 text-sm text-light">
               <i class="fa-solid fa-info-circle" />
               No relays are advertised by the NIP05 identifier's validation endpoint.
             </p>
@@ -168,12 +157,12 @@
         </div>
       {:else}
         <p>
-          <i class="fa-solid fa-warning text-warning mr-2" />
+          <i class="fa-solid fa-warning mr-2 text-warning" />
           Could not fetch NIP05 data.
         </p>
       {/if}
     {:else}
-      <p class="text-sm mb-4 text-light">
+      <p class="mb-4 text-sm text-light">
         <i class="fa-solid fa-info-circle" />
         NIP05 identifier not available.
       </p>

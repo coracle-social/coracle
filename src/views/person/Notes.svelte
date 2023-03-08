@@ -1,6 +1,6 @@
 <script lang="ts">
   import Feed from "src/views/feed/Feed.svelte"
-  import {sampleRelays, getPubkeyWriteRelays} from 'src/agent/relays'
+  import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
 
   export let pubkey
 

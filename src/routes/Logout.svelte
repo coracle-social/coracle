@@ -1,8 +1,8 @@
 <script>
-  import {fly} from 'svelte/transition'
-  import Anchor from 'src/partials/Anchor.svelte'
+  import {fly} from "svelte/transition"
+  import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
-  import database from 'src/agent/database'
+  import database from "src/agent/database"
 
   let confirmed = false
 
@@ -17,7 +17,7 @@
     // Give them a moment to see the state transition. Dexie
     // also apparently needs some time
     setTimeout(() => {
-      window.location.href = '/login'
+      window.location.href = "/login"
     }, 1000)
   }
 
@@ -26,11 +26,11 @@
 
 <Content size="lg" class="text-center">
   {#if confirmed}
-  <div in:fly={{y:20}}>Clearing your local database...</div>
+    <div in:fly={{y: 20}}>Clearing your local database...</div>
   {:else}
-  <div class="flex flex-col gap-8 items-center" in:fly={{y:20}}>
-    <div>Are you sure you want to log out? All data will be cleared.</div>
-    <Anchor type="button" on:click={confirm}>Log out</Anchor>
-  </div>
+    <div class="flex flex-col items-center gap-8" in:fly={{y: 20}}>
+      <div>Are you sure you want to log out? All data will be cleared.</div>
+      <Anchor type="button" on:click={confirm}>Log out</Anchor>
+    </div>
   {/if}
 </Content>

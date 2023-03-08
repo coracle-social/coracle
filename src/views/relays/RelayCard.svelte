@@ -1,15 +1,15 @@
 <script lang="ts">
-  import {find, propEq} from 'ramda'
-  import {onMount} from 'svelte'
+  import {find, propEq} from "ramda"
+  import {onMount} from "svelte"
   import {poll} from "src/util/misc"
   import Toggle from "src/partials/Toggle.svelte"
   import RelayCard from "src/partials/RelayCard.svelte"
-  import pool from 'src/agent/pool'
+  import pool from "src/agent/pool"
   import user from "src/agent/user"
-  import {loadAppData} from 'src/app'
+  import {loadAppData} from "src/app"
 
   export let relay
-  export let theme = 'dark'
+  export let theme = "dark"
   export let showControls = false
 
   let quality = null
@@ -18,7 +18,7 @@
 
   const {relays, canPublish} = user
 
-  $: joined = find(propEq('url', relay.url), $relays)
+  $: joined = find(propEq("url", relay.url), $relays)
 
   const removeRelay = ({url}) => user.removeRelay(url)
 
@@ -35,7 +35,7 @@
       const conn = await pool.getConnection(relay.url)
 
       if (conn) {
-        [quality, message] = conn.getQuality()
+        ;[quality, message] = conn.getQuality()
       } else {
         quality = null
         message = "Not connected"
@@ -45,15 +45,16 @@
 </script>
 
 <RelayCard
-  {relay} {theme}
+  {relay}
+  {theme}
   addRelay={!joined && $canPublish ? addRelay : null}
   removeRelay={joined && $relays.length > 1 && canPublish ? removeRelay : null}>
   <div slot="controls" class="flex justify-between gap-2">
     {#if showControls && $canPublish}
-    <span>Publish to this relay?</span>
-    <Toggle
-      value={relay.write}
-      on:change={() => user.setRelayWriteCondition(relay.url, !relay.write)} />
+      <span>Publish to this relay?</span>
+      <Toggle
+        value={relay.write}
+        on:change={() => user.setRelayWriteCondition(relay.url, !relay.write)} />
     {/if}
   </div>
 </RelayCard>

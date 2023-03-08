@@ -5,7 +5,7 @@
   - [ ] Create my own version of nostr.how and extension explanation
   - [ ] Move extension suggestion to later in the app, maybe a notification if they don't have one installed
   - [ ] Reassure user that if they don't copy the key now they can get it later in settings
-  - [ ] Design empty state for messages
+  - [ ] Design empty state for messages page
   - [ ] Add copy to explain that chat is public, dms are encrypted
   - [ ] Add QR code that pre-fills follows and relays for a new user
 

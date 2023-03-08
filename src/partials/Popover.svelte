@@ -1,10 +1,10 @@
 <script lang="ts">
-  import 'tippy.js/dist/tippy.css'
-  import 'tippy.js/animations/shift-away.css'
-  import tippy from 'tippy.js'
-  import {onMount} from 'svelte'
+  import "tippy.js/dist/tippy.css"
+  import "tippy.js/animations/shift-away.css"
+  import tippy from "tippy.js"
+  import {onMount} from "svelte"
 
-  export let triggerType = 'click'
+  export let triggerType = "click"
 
   let trigger
   let tooltip
@@ -16,23 +16,23 @@
       allowHTML: true,
       interactive: true,
       trigger: triggerType,
-      animation: 'shift-away',
+      animation: "shift-away",
       onShow: () => {
         const [tooltipContents] = tooltip.children
 
         // If we've already triggered it, tooltipContents will be empty
         if (tooltipContents) {
-          instance.popper.querySelector('.tippy-content').appendChild(tooltipContents)
-          instance.popper.addEventListener('mouseleave', e => instance.hide())
-          instance.popper.addEventListener('click', e => {
-            if (e.target.closest('.tippy-close')) {
+          instance.popper.querySelector(".tippy-content").appendChild(tooltipContents)
+          instance.popper.addEventListener("mouseleave", e => instance.hide())
+          instance.popper.addEventListener("click", e => {
+            if (e.target.closest(".tippy-close")) {
               instance.hide()
             }
           })
         }
       },
       onHidden: () => {
-        const [tooltipContents] = instance.popper.querySelector('.tippy-content').children
+        const [tooltipContents] = instance.popper.querySelector(".tippy-content").children
 
         tooltip.appendChild(tooltipContents)
       },
@@ -51,7 +51,7 @@
 
 <svelte:body
   on:keydown={e => {
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       instance.hide()
     }
   }} />
