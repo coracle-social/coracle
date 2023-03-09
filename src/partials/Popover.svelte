@@ -4,6 +4,7 @@
   import tippy from "tippy.js"
   import {onMount} from "svelte"
 
+  export let theme = "dark"
   export let triggerType = "click"
 
   let trigger
@@ -12,6 +13,7 @@
 
   onMount(() => {
     instance = tippy(trigger, {
+      theme,
       appendTo: () => document.body,
       allowHTML: true,
       interactive: true,
@@ -62,6 +64,6 @@
 
 <div bind:this={tooltip} class="hidden">
   <div>
-    <slot name="tooltip" />
+    <slot name="tooltip" {instance} />
   </div>
 </div>

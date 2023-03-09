@@ -8,7 +8,7 @@
   import {navigate} from "svelte-routing"
   import {quantify} from "hurdak/lib/hurdak"
   import {Tags, findRootId, findReplyId, displayPerson, isLike} from "src/util/nostr"
-  import {formatTimestamp, now, tryJson, stringToColor, formatSats, fetchJson} from "src/util/misc"
+  import {formatTimestamp, now, tryJson, formatSats, fetchJson} from "src/util/misc"
   import {extractUrls, isMobile} from "src/util/html"
   import {invoiceAmount} from "src/util/lightning"
   import ImageCircle from "src/partials/ImageCircle.svelte"
@@ -341,7 +341,7 @@
         </Anchor>
       </div>
       <div class="flex min-w-0 flex-grow flex-col gap-2">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col items-start justify-between sm:flex-row sm:items-center">
           <Popover triggerType={isMobile ? "click" : "mouseenter"}>
             <div slot="trigger">
               <Anchor
@@ -360,7 +360,7 @@
           </Popover>
           <Anchor
             href={"/" + nip19.neventEncode({id: note.id, relays: [note.seen_on]})}
-            class="hidden text-sm text-light sm:block"
+            class="text-sm text-light"
             type="unstyled">
             {timestamp}
           </Anchor>
@@ -422,22 +422,29 @@
                   <i class="fa fa-bolt cursor-pointer" />
                   {formatSats($zapsTotal)}
                 </button>
-                <button
-                  class="hidden w-16 text-left sm:block"
-                  on:click|stopPropagation={() => react("-")}>
-                  <i class="fa fa-flag cursor-pointer" />
-                  {$flagsCount}
-                </button>
               </div>
-              <div
-                class="hidden cursor-pointer items-center gap-1 sm:flex"
-                on:click|stopPropagation={() => {
-                  showRelays = true
-                }}>
-                <i class="fa fa-server" />
-                <div
-                  class="h-1 w-1 rounded-full"
-                  style={`background: ${stringToColor(note.seen_on)}`} />
+              <div on:click|stopPropagation>
+                <Popover theme="transparent">
+                  <div slot="trigger" class="cursor-pointer px-2">
+                    <i class="fa fa-ellipsis-v" />
+                  </div>
+                  <div
+                    slot="tooltip"
+                    let:instance
+                    class="flex flex-col gap-2"
+                    on:click={() => instance.hide()}>
+                    <Anchor
+                      type="button-circle"
+                      on:click={() => {
+                        showRelays = true
+                      }}>
+                      <i class="fa fa-server" />
+                    </Anchor>
+                    <Anchor type="button-circle" on:click={() => react("-")}>
+                      <i class="fa fa-flag" />
+                    </Anchor>
+                  </div>
+                </Popover>
               </div>
             </div>
           {/if}
@@ -529,6 +536,7 @@
         showRelays = false
       }}>
       <Content>
+        <p class="text-center">This note was found on the relay below.</p>
         <RelayCard theme="black" showControls relay={{url: note.seen_on}} />
       </Content>
     </Modal>

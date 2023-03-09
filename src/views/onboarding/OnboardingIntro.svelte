@@ -4,7 +4,7 @@
   import Content from "src/partials/Content.svelte"
   import {modal} from "src/app/ui"
 
-  const tutorialUrl = "https://nostr.how/"
+  const tutorialUrl = "https://nostr.com/"
   const videoUrl = "https://dufflepud.us-southeast-1.linodeobjects.com/coracle_intro.mp4"
 </script>
 

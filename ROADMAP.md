@@ -1,12 +1,8 @@
 # Current
 
-- [ ] Create my own version of nostr.how and extension explanation
-- [ ] Go over onboarding process, suggest some good relays for newcomers
-- [ ] Submit blog post with new onboarding process built in
-- [ ] Fix hover on notes in modal
 - [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
-- [ ] Show more link on long notes (rather than just an ellipsis)
+- [ ] Update https://nostr.com/clients/coracle
 
 # Coracle website
 
@@ -42,6 +38,8 @@
 
 # More
 
+- [ ] Show an error when something fails to load with a constructive suggestion
+- [ ] Show more link on long notes (rather than just an ellipsis)
 - [ ] Log in as user button
 - [ ] Abort all context subs when navigating
 - [ ] Separate mentions from other notifications
@@ -132,3 +130,4 @@
 - [ ] Offline-first
 - [ ] Add support for nests https://nostrnests.com/
   - nevent1qqs2jm46m9tg9z33av4fp8hhapsx96234htz75wrvpvrax5jjl8m5usprfmhxue69uhhyetvv9ujumn0wd68yurvv438xtnrdaksy4d92m
+- [ ] NIP 39 Support https://github.com/nostr-protocol/nips/pull/201/files

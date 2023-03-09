@@ -61,19 +61,53 @@ body,
   height: 100%;
 }
 
-/* Tippy */
+/* Tippy dark */
 
-.tippy-box {
-  background-color: #0f0f0e !important;
+.tippy-box[data-theme~="dark"] {
+  background-color: #0f0f0e;
   border: 1px solid #403d39;
   box-shadow: 3px 3px 20px #0f0f0e, 3px -3px 20px #0f0f0e, -3px 3px 20px #0f0f0e,
     -3px -3px 20px #0f0f0e;
 }
 
-.tippy-box[data-placement^="top"] > .tippy-arrow:before {
-  border-top-color: #403d39 !important;
+.tippy-box[data-theme~="dark"][data-placement^="top"] > .tippy-arrow {
+  bottom: -1px !important;
 }
 
-.tippy-box[data-placement^="top"] > .tippy-arrow {
-  bottom: -1px !important;
+.tippy-box[data-theme~="dark"][data-placement^="top"] > .tippy-arrow:before {
+  border-top-color: #403d39;
+}
+
+.tippy-box[data-theme~="dark"][data-placement^="bottom"] > .tippy-arrow:before {
+  border-bottom-color: #403d39;
+}
+
+.tippy-box[data-theme~="dark"][data-placement^="left"] > .tippy-arrow:before {
+  border-left-color: #403d39;
+}
+
+.tippy-box[data-theme~="dark"][data-placement^="right"] > .tippy-arrow:before {
+  border-right-color: #403d39;
+}
+
+.tippy-box[data-theme~="dark"] > .tippy-backdrop {
+  background-color: #403d39;
+}
+
+.tippy-box[data-theme~="dark"] > .tippy-svg-arrow {
+  fill: #0f0f0e;
+}
+
+/* Tippy transparent */
+
+.tippy-box[data-theme~="transparent"] {
+  background-color: transparent;
+}
+
+.tippy-box[data-theme~="transparent"][data-placement^="top"] > .tippy-arrow:before {
+  border-color: transparent;
+}
+
+.tippy-box[data-theme~="transparent"] > .tippy-svg-arrow {
+  fill: transparent;
 }
