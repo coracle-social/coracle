@@ -1,4 +1,4 @@
-import {pick, prop, join, uniqBy, last} from 'ramda'
+import {pick, last, prop, uniqBy} from 'ramda'
 import {get} from 'svelte/store'
 import {roomAttrs, displayPerson, findReplyId, findRootId} from 'src/util/nostr'
 import {getPubkeyWriteRelays, getRelayForPersonHint, sampleRelays} from 'src/agent/relays'
@@ -54,34 +54,47 @@ const createNote = (content, mentions = [], topics = []) => {
   return new PublishableEvent(1, {content, tags: mentions.concat(topics)})
 }
 
-const createReaction = (note, content) => {
-  const {url} = getRelayForPersonHint(note.pubkey, note)
-  const tags = uniqBy(
-    join(':'),
-    note.tags
-      .filter(t => ["p", "e"].includes(t[0]))
-      .map(t => last(t) === 'reply' ? t.slice(0, -1) : t)
-      .concat([["p", note.pubkey, url], ["e", note.id, url, 'reply']])
-  )
+const getReplyTags = n => {
+  const {url} = getRelayForPersonHint(n.pubkey, n)
+  const rootId = findRootId(n) || findReplyId(n) || n.id
 
-  return new PublishableEvent(7, {content, tags})
+  return [["p", n.pubkey, url], ["e", n.id, url, 'reply'], ["e", rootId, url, 'root']]
 }
 
-const createReply = (note, content, mentions = [], topics = []) => {
-  const {url} = getRelayForPersonHint(note.pubkey, note)
-  const rootId = findRootId(note) || findReplyId(note) || note.id
+const tagsFromParent = (n, newTags = []) => {
+  const pubkey = get(keys.pubkey)
 
+  return uniqBy(
+    // Remove duplicates due to inheritance. Keep earlier ones
+    t => t.slice(0, 2).join(':'),
+    // Mentions have to come first for interpolation to work
+    newTags
+      // Add standard reply tags
+      .concat(getReplyTags(n))
+      // Inherit p and e tags, but remove marks and self-mentions
+      .concat(
+        n.tags
+          .filter(t => {
+            if (t[1] === pubkey) return false
+            if (!["p", "e"].includes(t[0])) return false
+            if (['reply', 'root'].includes(last(t))) return false
+
+            return true
+          })
+      )
+  )
+}
+
+const createReaction = (note, content) =>
+  new PublishableEvent(7, {content, tags: getReplyTags(note)})
+
+const createReply = (note, content, mentions = [], topics = []) => {
   // Mentions have to come first so interpolation works
-  const tags = uniqBy(
-    join(':'),
+  const tags = tagsFromParent(
+    note,
     mentions
       .map(pk => ["p", pk, prop('url', getRelayForPersonHint(pk, note))])
       .concat(topics.map(t => ["t", t]))
-      .concat([
-        ["p", note.pubkey, url],
-        ["e", note.id, url, 'reply'],
-        ["e", rootId, url, 'root'],
-      ])
   )
 
   return new PublishableEvent(1, {content, tags})

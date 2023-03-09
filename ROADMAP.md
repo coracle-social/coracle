@@ -38,6 +38,8 @@
 
 # More
 
+- [ ] Add delete button to notes. This will require tracking what relays a note was published to
+- [ ] Add image proxy to avoid leaking user ips to hosts
 - [ ] Show an error when something fails to load with a constructive suggestion
 - [ ] Show more link on long notes (rather than just an ellipsis)
 - [ ] Log in as user button
