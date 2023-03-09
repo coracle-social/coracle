@@ -132,7 +132,7 @@ export const renderContent = content => {
 
     const href = url.includes('://') ? url : 'https://' + url
     const display = url.replace(/https?:\/\/(www\.)?/, '')
-    const regex = new RegExp(url, 'g')
+    const regex = new RegExp(`([^"^])(${url})([^"$])`, 'g')
 
     const $a = document.createElement('a')
 
@@ -141,7 +141,7 @@ export const renderContent = content => {
     $a.className = "underline"
     $a.innerText = ellipsize(display, 50)
 
-    content = content.replace(regex, $a.outerHTML)
+    content = content.replace(regex, `$1${$a.outerHTML}$3`)
   }
 
   return content.trim()
