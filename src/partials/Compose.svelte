@@ -172,7 +172,7 @@
 
     // For whatever reason the textarea gives us 2x - 1 line breaks
     let content = input.innerText.replace(/(\n+)/g, x =>
-      repeat("\n", Math.ceil(x.length / 2)).join("")
+      repeat("\n", Math.round(x.length / 2)).join("")
     )
 
     const validMentions = sortBy(prop("end"), reject(prop("invalid"), mentions))
