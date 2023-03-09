@@ -162,7 +162,7 @@
 
 <Content>
   <div class="flex gap-4">
-    <PersonCircle src={person.kind0?.picture} size={16} class="sm:h-32 sm:w-32" />
+    <PersonCircle person={person} size={16} class="sm:h-32 sm:w-32" />
     <div class="flex flex-grow flex-col gap-4">
       <div class="flex items-start justify-between gap-4">
         <div class="flex flex-grow flex-col gap-2">

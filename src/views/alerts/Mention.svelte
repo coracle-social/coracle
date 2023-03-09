@@ -19,7 +19,7 @@
   on:click={() => modal.set({type: "note/detail", note})}>
   <div class="relative flex w-full items-center justify-between gap-2">
     <div class="flex items-center gap-2">
-      <PersonCircle src={person.kind0?.picture} />
+      <PersonCircle person={person} />
       <div on:click|stopPropagation>
         <Popover class="inline-block">
           <div slot="trigger" class="font-bold">
