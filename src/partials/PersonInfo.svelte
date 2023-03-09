@@ -17,7 +17,7 @@
   in:fly={{y: 20}}
   href={routes.person(person.pubkey)}
   class="flex gap-4 overflow-hidden border-l-2 border-solid border-dark py-3 px-4 transition-all hover:border-accent hover:bg-black">
-  <PersonCircle src={person.kind0?.picture} size={12} />
+  <PersonCircle person={person} size={12} />
   <div class="flex min-w-0 flex-grow flex-col gap-4">
     <div class="flex items-start justify-between gap-2">
       <div class="flex flex-col gap-2">

@@ -75,7 +75,7 @@
   <div slot="header" class="flex items-start gap-4">
     <div class="flex items-center gap-4">
       <Anchor type="unstyled" class="fa fa-arrow-left cursor-pointer text-2xl" href="/messages" />
-      <PersonCircle src={$person.kind0?.picture} size={12} />
+      <PersonCircle person={$person} size={12} />
     </div>
     <div class="flex w-full flex-col gap-2">
       <div class="flex w-full items-center justify-between">

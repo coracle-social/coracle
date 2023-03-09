@@ -33,7 +33,7 @@
 
 <div class="relative flex flex-col gap-4 py-2 px-3">
   <div class="flex gap-4">
-    <PersonCircle size={14} src={$person.kind0?.picture} />
+    <PersonCircle size={14} person={$person} />
     <div class="flex flex-grow flex-col gap-2">
       <Anchor
         type="unstyled"

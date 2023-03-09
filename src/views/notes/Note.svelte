@@ -338,7 +338,7 @@
       {/if}
       <div>
         <Anchor class="text-lg font-bold" href={routes.person($person.pubkey)}>
-          <PersonCircle size={10} src={$person.kind0?.picture} />
+          <PersonCircle size={10} person={$person} />
         </Anchor>
       </div>
       <div class="flex min-w-0 flex-grow flex-col gap-2">
