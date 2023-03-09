@@ -1,6 +1,5 @@
 # Current
 
-- [ ] Check mention interpolation indexes nevent1qqsx27cspgfcj93kryt2zpzzt5ua60rtucckvcmsrqc949e6t83jaxspzemhxue69uhhyetvv9ujumn0wd68ytnzv9hxg46e8sv
 - [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
 - [ ] Update https://nostr.com/clients/coracle

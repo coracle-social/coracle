@@ -1,3 +1,4 @@
+import {uniq} from 'ramda'
 import {ellipsize, bytes} from 'hurdak/lib/hurdak'
 
 export const copyToClipboard = text => {
@@ -123,9 +124,7 @@ export const renderContent = content => {
   content = escapeHtml(content)
 
   // Extract urls
-  for (let url of extractUrls(content)) {
-    const $a = document.createElement('a')
-
+  for (let url of uniq(extractUrls(content))) {
     // It's common for a period to end a url, trim it off
     if (url.endsWith('.')) {
       url = url.slice(0, -1)
@@ -133,13 +132,16 @@ export const renderContent = content => {
 
     const href = url.includes('://') ? url : 'https://' + url
     const display = url.replace(/https?:\/\/(www\.)?/, '')
+    const regex = new RegExp(url, 'g')
+
+    const $a = document.createElement('a')
 
     $a.href = href
     $a.target = "_blank"
     $a.className = "underline"
     $a.innerText = ellipsize(display, 50)
 
-    content = content.replace(url, $a.outerHTML)
+    content = content.replace(regex, $a.outerHTML)
   }
 
   return content.trim()
