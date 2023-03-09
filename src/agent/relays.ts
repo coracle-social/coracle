@@ -155,7 +155,7 @@ export const sampleRelays = (relays, scale = 1) => {
   }
 
   // Remove relays that are currently in an error state
-  relays = relays.filter(r => pool.getConnection(r.url)?.hasRecentError())
+  relays = relays.filter(r => !pool.getConnection(r.url)?.hasRecentError())
 
   // Limit target relays
   relays = relays.slice(0, limit)
