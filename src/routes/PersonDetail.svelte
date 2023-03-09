@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {last} from "ramda"
+  import {last, find} from "ramda"
   import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
   import {fly, fade} from "svelte/transition"
@@ -26,11 +26,12 @@
   export let relays = []
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
-  const {petnamePubkeys, canPublish} = user
+  const {petnamePubkeys, canPublish, mutes} = user
   const getRelays = () => sampleRelays(relays.concat(getPubkeyWriteRelays(pubkey)))
 
   let pubkey = toHex(npub)
   let following = false
+  let muted = false
   let followers = new Set()
   let followersCount = tweened(0, {interpolate, duration: 1000})
   let person = database.getPersonWithFallback(pubkey)
@@ -39,6 +40,7 @@
   let actions = []
 
   $: following = $petnamePubkeys.includes(pubkey)
+  $: muted = find(m => m[1] === pubkey, $mutes)
 
   $: {
     actions = []
@@ -53,12 +55,17 @@
           actions.push({onClick: follow, label: "Follow", icon: "user-plus"})
         }
 
+        if (muted) {
+          actions.push({onClick: unmute, label: "Muted", icon: "microphone-slash"})
+        } else if (user.getPubkey() !== pubkey) {
+          actions.push({onClick: mute, label: "Mute", icon: "microphone"})
+        }
+
         actions.push({
           onClick: () => navigate(`/messages/${npub}`),
           label: "Message",
           icon: "envelope",
         })
-        actions.push({onClick: openAdvanced, label: "Advanced", icon: "sliders"})
       }
 
       actions.push({onClick: openProfileInfo, label: "Profile", icon: "info"})
@@ -133,8 +140,12 @@
     user.removePetname(pubkey)
   }
 
-  const openAdvanced = () => {
-    modal.set({type: "person/settings", person})
+  const mute = async () => {
+    user.addMute("p", pubkey)
+  }
+
+  const unmute = async () => {
+    user.removeMute(pubkey)
   }
 
   const openProfileInfo = () => {

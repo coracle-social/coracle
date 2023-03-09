@@ -37,7 +37,7 @@
 
   const onChunk = async newNotes => {
     // Deduplicate and filter out stuff we don't want, apply user preferences
-    const filtered = user.muffle(newNotes.filter(n => !seen.has(n.id) && shouldDisplay(n)))
+    const filtered = user.applyMutes(newNotes.filter(n => !seen.has(n.id) && shouldDisplay(n)))
 
     // Drop the oldest 20% of notes. We sometimes get pretty old stuff since we don't
     // use a since on our filter
@@ -68,7 +68,7 @@
       depth: 2,
       notes: combined,
       onChunk: context => {
-        context = user.muffle(context)
+        context = user.applyMutes(context)
 
         notesBuffer = network.applyContext(notesBuffer, context)
         notes = network.applyContext(notes, context)
@@ -118,10 +118,11 @@
 
 <Content size="inherit" class="pt-6">
   {#if notesBuffer.length > 0}
-    <div class="fixed left-0 top-0 z-10 mt-20 flex w-full justify-center">
+    <div class="pointer-events-none fixed left-0 top-0 z-10 mt-20 flex w-full justify-center">
       <button
         in:fly={{y: 20}}
-        class="cursor-pointer rounded-full border border-solid border-accentl bg-accent py-2 px-4 text-center shadow-lg transition-colors hover:bg-accentl"
+        class="pointer-events-auto cursor-pointer rounded-full border border-solid border-accentl
+               bg-accent py-2 px-4 text-center shadow-lg transition-colors hover:bg-accentl"
         on:click={loadBufferedNotes}>
         Load {quantify(notesBuffer.length, "new note")}
       </button>

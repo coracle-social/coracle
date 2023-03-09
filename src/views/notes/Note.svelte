@@ -5,7 +5,6 @@
   import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
   import {slide} from "svelte/transition"
-  import {navigate} from "svelte-routing"
   import {quantify} from "hurdak/lib/hurdak"
   import {Tags, findRootId, findReplyId, displayPerson, isLike} from "src/util/nostr"
   import {formatTimestamp, now, tryJson, formatSats, fetchJson} from "src/util/misc"
@@ -54,7 +53,7 @@
   let visibleNotes = []
   let showRelays = false
 
-  const {profile, canPublish} = user
+  const {profile, canPublish, mutes} = user
   const timestamp = formatTimestamp(note.created_at)
   const borderColor = invertColors ? "medium" : "dark"
   const links = extractUrls(note.content)
@@ -63,6 +62,7 @@
   const person = database.watch("people", () => database.getPersonWithFallback(note.pubkey))
 
   let likes, flags, zaps, like, flag, border, childrenContainer, noteContainer, canZap
+  let muted = false
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const likesCount = tweened(0, {interpolate})
@@ -70,6 +70,7 @@
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
 
+  $: muted = find(m => m[1] === note.id, $mutes)
   $: likes = note.reactions.filter(n => isLike(n.content))
   $: flags = note.reactions.filter(whereEq({content: "-"}))
   $: zaps = note.zaps
@@ -143,11 +144,15 @@
     modal.set({type: "note/detail", note: {id: findRootId(note)}, relays})
   }
 
-  const react = async content => {
-    if (!$profile) {
-      return navigate("/login")
-    }
+  const mute = async () => {
+    user.addMute("e", note.id)
+  }
 
+  const unmute = async () => {
+    user.removeMute(note.id)
+  }
+
+  const react = async content => {
     const relays = getEventPublishRelays(note)
     const [event] = await cmd.createReaction(note, content).publish(relays)
 
@@ -173,11 +178,7 @@
   }
 
   const startReply = () => {
-    if ($profile) {
-      reply = reply || true
-    } else {
-      navigate("/login")
-    }
+    reply = reply || true
   }
 
   const removeMention = pubkey => {
@@ -385,6 +386,10 @@
               You have flagged this content as offensive.
               <Anchor on:click={() => deleteReaction(flag)}>Unflag</Anchor>
             </p>
+          {:else if muted}
+            <p class="border-l-2 border-solid border-medium pl-4 text-light">
+              You have muted this note.
+            </p>
           {:else}
             <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
               <p>{@html renderNote(note, {showEntire})}</p>
@@ -394,60 +399,69 @@
                 </button>
               {/if}
             </div>
-            <div class="flex justify-between text-light">
-              <div
-                class={cx("flex", {
-                  "pointer-events-none opacity-75": !$canPublish,
-                })}>
-                <button class="w-16 text-left" on:click|stopPropagation={startReply}>
-                  <i class="fa fa-reply cursor-pointer" />
-                  {$repliesCount}
-                </button>
-                <button
-                  class="w-16 text-left"
-                  class:text-accent={like}
-                  on:click|stopPropagation={() => (like ? deleteReaction(like) : react("+"))}>
-                  <i
-                    class={cx("fa fa-heart cursor-pointer", {
-                      "fa-beat fa-beat-custom": like,
-                    })} />
-                  {$likesCount}
-                </button>
-                <button
-                  class={cx("w-20 text-left", {
-                    "pointer-events-none opacity-50": !canZap,
-                  })}
-                  class:text-accent={zapped}
-                  on:click|stopPropagation={startZap}>
-                  <i class="fa fa-bolt cursor-pointer" />
-                  {formatSats($zapsTotal)}
-                </button>
-              </div>
-              <div on:click|stopPropagation>
-                <Popover theme="transparent">
-                  <div slot="trigger" class="cursor-pointer px-2">
-                    <i class="fa fa-ellipsis-v" />
-                  </div>
-                  <div
-                    slot="tooltip"
-                    let:instance
-                    class="flex flex-col gap-2"
-                    on:click={() => instance.hide()}>
-                    <Anchor
-                      type="button-circle"
-                      on:click={() => {
-                        showRelays = true
-                      }}>
-                      <i class="fa fa-server" />
-                    </Anchor>
-                    <Anchor type="button-circle" on:click={() => react("-")}>
-                      <i class="fa fa-flag" />
-                    </Anchor>
-                  </div>
-                </Popover>
-              </div>
-            </div>
           {/if}
+          <div class="flex justify-between text-light">
+            <div
+              class={cx("flex", {
+                "pointer-events-none opacity-75": !$canPublish || flag || muted,
+              })}>
+              <button class="w-16 text-left" on:click|stopPropagation={startReply}>
+                <i class="fa fa-reply cursor-pointer" />
+                {$repliesCount}
+              </button>
+              <button
+                class="w-16 text-left"
+                class:text-accent={like}
+                on:click|stopPropagation={() => (like ? deleteReaction(like) : react("+"))}>
+                <i
+                  class={cx("fa fa-heart cursor-pointer", {
+                    "fa-beat fa-beat-custom": like,
+                  })} />
+                {$likesCount}
+              </button>
+              <button
+                class={cx("w-20 text-left", {
+                  "pointer-events-none opacity-50": !canZap,
+                })}
+                class:text-accent={zapped}
+                on:click|stopPropagation={startZap}>
+                <i class="fa fa-bolt cursor-pointer" />
+                {formatSats($zapsTotal)}
+              </button>
+            </div>
+            <div on:click|stopPropagation>
+              <Popover theme="transparent">
+                <div slot="trigger" class="cursor-pointer px-2">
+                  <i class="fa fa-ellipsis-v" />
+                </div>
+                <div
+                  slot="tooltip"
+                  let:instance
+                  class="flex flex-col gap-2"
+                  on:click={() => instance.hide()}>
+                  <Anchor
+                    type="button-circle"
+                    on:click={() => {
+                      showRelays = true
+                    }}>
+                    <i class="fa fa-server" />
+                  </Anchor>
+                  {#if muted}
+                    <Anchor type="button-circle" on:click={unmute}>
+                      <i class="fa fa-microphone" />
+                    </Anchor>
+                  {:else}
+                    <Anchor type="button-circle" on:click={mute}>
+                      <i class="fa fa-microphone-slash" />
+                    </Anchor>
+                  {/if}
+                  <Anchor type="button-circle" on:click={() => react("-")}>
+                    <i class="fa fa-flag" />
+                  </Anchor>
+                </div>
+              </Popover>
+            </div>
+          </div>
         </div>
       </div>
     </Card>
@@ -503,7 +517,7 @@
     </div>
   {/if}
 
-  {#if visibleNotes.length > 0 && depth > 0}
+  {#if visibleNotes.length > 0 && depth > 0 && !muted}
     <div class="relative">
       <div class={`absolute w-px bg-${borderColor} z-10 -mt-4 ml-4 h-0`} bind:this={border} />
       <div class="note-children relative ml-8 flex flex-col gap-4" bind:this={childrenContainer}>

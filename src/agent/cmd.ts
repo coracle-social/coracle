@@ -26,8 +26,8 @@ const setRelays = newRelays =>
 const setPetnames = petnames =>
   new PublishableEvent(3, {tags: petnames})
 
-const muffle = muffle =>
-  new PublishableEvent(12165, {tags: muffle})
+const setMutes = mutes =>
+  new PublishableEvent(10000, {tags: mutes})
 
 const createRoom = room =>
   new PublishableEvent(40, {content: JSON.stringify(pick(roomAttrs, room))})
@@ -132,7 +132,7 @@ class PublishableEvent {
 }
 
 export default {
-  updateUser, setRelays, setPetnames, muffle, createRoom, updateRoom,
+  updateUser, setRelays, setPetnames, setMutes, createRoom, updateRoom,
   createChatMessage, createDirectMessage, createNote, createReaction,
   createReply, requestZap, deleteEvent, PublishableEvent,
 }

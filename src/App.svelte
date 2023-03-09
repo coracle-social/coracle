@@ -60,7 +60,6 @@
   import NoteDetail from "src/views/notes/NoteDetail.svelte"
   import PersonList from "src/views/person/PersonList.svelte"
   import PersonProfileInfo from "src/views/person/PersonProfileInfo.svelte"
-  import PersonSettings from "src/views/person/PersonSettings.svelte"
   import PersonShare from "src/views/person/PersonShare.svelte"
   import AddRelay from "src/views/relays/AddRelay.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
@@ -250,8 +249,6 @@
           <PubKeyLogin />
         {:else if $modal.type === "login/connect"}
           <ConnectUser />
-        {:else if $modal.type === "person/settings"}
-          <PersonSettings person={$modal.person} />
         {:else if $modal.type === "person/info"}
           <PersonProfileInfo person={$modal.person} />
         {:else if $modal.type === "person/share"}

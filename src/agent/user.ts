@@ -1,8 +1,8 @@
 import type {Person} from 'src/util/types'
 import type {Readable} from 'svelte/store'
-import {last, prop, find, pipe, assoc, whereEq, when, concat, reject, nth, map} from 'ramda'
+import {slice, identity, prop, find, pipe, assoc, whereEq, when, concat, reject, nth, map} from 'ramda'
+import {findReplyId, findRootId} from 'src/util/nostr'
 import {synced} from 'src/util/misc'
-import {Tags} from 'src/util/nostr'
 import {derived} from 'svelte/store'
 import database from 'src/agent/database'
 import keys from 'src/agent/keys'
@@ -19,9 +19,11 @@ let settingsCopy = null
 let profileCopy = null
 let petnamesCopy = []
 let relaysCopy = []
+let mutesCopy = []
 
 const anonPetnames = synced('agent/user/anonPetnames', [])
 const anonRelays = synced('agent/user/anonRelays', [])
+const anonMutes = synced('agent/user/anonMutes', [])
 
 const settings = synced("agent/user/settings", {
   relayLimit: 20,
@@ -42,17 +44,17 @@ const profile = derived(
   }
 ) as Readable<Person>
 
-const petnames = derived(
-  [profile, anonPetnames],
-  ([$profile, $anonPetnames]) =>
-    $profile?.petnames || $anonPetnames
+const profileKeyWithDefault = (key, stores) => derived(
+  [profile, ...stores],
+  ([$profile, ...values]) =>
+    $profile?.[key] || find(identity, values)
 )
 
-const relays = derived(
-  [profile, anonRelays],
-  ([$profile, $anonRelays]) =>
-    $profile?.relays || $anonRelays
-)
+const petnames = profileKeyWithDefault('petnames', [anonPetnames])
+const relays = profileKeyWithDefault('relays', [anonRelays])
+
+// Backwards compat, migrate muffle to mute temporarily
+const mutes = profileKeyWithDefault('mutes', [anonMutes, derived(profile, prop('muffle'))])
 
 const canPublish = derived(
   [keys.pubkey, relays],
@@ -74,6 +76,10 @@ petnames.subscribe($petnames => {
   petnamesCopy = $petnames
 })
 
+mutes.subscribe($mutes => {
+  mutesCopy = $mutes
+})
+
 relays.subscribe($relays => {
   relaysCopy = $relays
 })
@@ -92,34 +98,6 @@ const user = {
   canPublish,
   getProfile: () => profileCopy,
   getPubkey: () => profileCopy?.pubkey,
-  muffle: events => {
-    const muffle = user.getMuffle()
-
-    return events.filter(e => !muffle.has(e.pubkey))
-  },
-  getMuffle: () => {
-    return new Set(
-      Tags
-        .wrap((profileCopy?.muffle || []))
-        .filter(t => Math.random() > parseFloat(last(t)))
-        .values()
-        .all()
-    )
-  },
-  mute: events => {
-    const mutes = user.getMutes()
-
-    return events.filter(e => !mutes.has(e.pubkey))
-  },
-  getMutes: () => {
-    return new Set(
-      Tags
-        .wrap((profileCopy?.muffle || []))
-        .filter(t => parseFloat(last(t)) === 0)
-        .values()
-        .all()
-    )
-  },
 
   // Petnames
 
@@ -165,6 +143,39 @@ const user = {
   },
   setRelayWriteCondition(url, write) {
     return this.updateRelays(map(when(whereEq({url}), assoc('write', write))))
+  },
+
+  // Mutes
+
+  mutes,
+  getMutes: () => mutesCopy,
+  applyMutes: events => {
+    const m = new Set(mutesCopy.map(m => m[1]))
+
+    return events.filter(e =>
+      !(m.has(e.id) || m.has(e.pubkey) || m.has(findReplyId(e)) || m.has(findRootId(e)))
+    )
+  },
+  updateMutes(f) {
+    const $mutes = f(mutesCopy)
+    console.log(mutesCopy, $mutes)
+
+    anonMutes.set($mutes)
+
+    if (profileCopy) {
+      return cmd.setMutes($mutes.map(slice(0, 2))).publish(relaysCopy)
+    }
+  },
+  addMute(type, value) {
+    return this.updateMutes(
+      pipe(
+        reject(t => t[1] === value),
+        concat([[type, value]])
+      )
+    )
+  },
+  removeMute(pubkey) {
+    return this.updateMutes(reject(t => t[1] === pubkey))
   },
 }
 

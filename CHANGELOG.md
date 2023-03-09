@@ -4,6 +4,8 @@
 
 - [x] Make "show new notes" button fixed position
 - [x] Gray out buttons that don't work when logged in with pubkey
+- [x] Clean up popovers, re-design notes on small screens
+- [x] Migrate muffle to mute, add thread muting
 
 ## 0.2.16
 

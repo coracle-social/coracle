@@ -96,7 +96,23 @@ const processProfileEvents = async events => {
 
           return data
         },
-        12165: () => ({muffle: e.tags}),
+        10000: () => {
+          if (e.created_at > (person.mutes_updated_at || 0)) {
+            return {
+              mutes_updated_at: e.created_at,
+              mutes: e.tags,
+            }
+          }
+        },
+        // DEPRECATED
+        12165: () => {
+          if (e.created_at > (person.mutes_updated_at || 0)) {
+            return {
+              mutes_updated_at: e.created_at,
+              mutes: e.tags,
+            }
+          }
+        },
         // DEPRECATED
         10001: () => {
           if (e.created_at > (person.relays_updated_at || 0)) {

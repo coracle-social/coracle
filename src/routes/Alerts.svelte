@@ -1,5 +1,5 @@
 <script>
-  import {sortBy, assoc} from "ramda"
+  import {sortBy, any, assoc} from "ramda"
   import {onMount} from "svelte"
   import {fly} from "svelte/transition"
   import {now, createScroller} from "src/util/misc"
@@ -22,13 +22,11 @@
     return createScroller(async () => {
       limit += 10
 
-      // Filter out alerts for which we failed to find the required context. The bug
+      // Filter out mutes, and alerts for which we failed to find the required context. The bug
       // is really upstream of this, but it's an easy fix
       const events = user
-        .mute(database.alerts.all())
-        .filter(
-          e => e.replies.length > 0 || e.likedBy.length > 0 || e.zappedBy?.length > 0 || e.isMention
-        )
+        .applyMutes(database.alerts.all())
+        .filter(e => any(k => e[k].length > 0, ["replies", "likedBy", "zappedBy"]) || e.isMention)
 
       notes = sortBy(e => -e.created_at, events).slice(0, limit)
     })

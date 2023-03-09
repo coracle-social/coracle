@@ -3,7 +3,7 @@ import {is, fromPairs, mergeLeft, last, identity, objOf, prop, flatten, uniq} fr
 import {nip19} from 'nostr-tools'
 import {ensurePlural, ellipsize, first} from 'hurdak/lib/hurdak'
 
-export const personKinds = [0, 2, 3, 10001, 10002, 12165]
+export const personKinds = [0, 2, 3, 10000, 10001, 10002, 12165]
 
 export class Tags {
   tags: Array<any>
