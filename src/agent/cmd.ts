@@ -1,4 +1,4 @@
-import {pick, join, uniqBy, last} from 'ramda'
+import {pick, prop, join, uniqBy, last} from 'ramda'
 import {get} from 'svelte/store'
 import {roomAttrs, displayPerson, findReplyId, findRootId} from 'src/util/nostr'
 import {getPubkeyWriteRelays, getRelayForPersonHint, sampleRelays} from 'src/agent/relays'
@@ -68,21 +68,15 @@ const createReaction = (note, content) => {
 }
 
 const createReply = (note, content, mentions = [], topics = []) => {
-  topics = topics.map(t => ["t", t])
-  mentions = mentions.map(pubkey => {
-    const {url} = getRelayForPersonHint(pubkey, note)
-
-    return ["p", pubkey, url]
-  })
-
   const {url} = getRelayForPersonHint(note.pubkey, note)
   const rootId = findRootId(note) || findReplyId(note) || note.id
+
+  // Mentions have to come first so interpolation works
   const tags = uniqBy(
     join(':'),
-    note.tags
-      .filter(t => ["e"].includes(t[0]))
-      .map(t => last(t) === 'reply' ? t.slice(0, -1) : t)
-      .concat(mentions.concat(topics))
+    mentions
+      .map(pk => ["p", pk, prop('url', getRelayForPersonHint(pk, note))])
+      .concat(topics.map(t => ["t", t]))
       .concat([
         ["p", note.pubkey, url],
         ["e", note.id, url, 'reply'],
