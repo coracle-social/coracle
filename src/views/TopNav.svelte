@@ -19,6 +19,10 @@
   class="fixed top-0 z-10 flex h-16 w-full items-center justify-between border-b
             border-medium bg-dark p-4 text-white">
   <div class="fa fa-bars fa-2xl cursor-pointer lg:hidden" on:click={toggleMenu} />
+  <p>
+    <strong>Under Maintenance</strong>: Coracle is moving to <Anchor
+      href="https://app.coracle.social">app.coracle.social</Anchor>
+  </p>
   <Anchor
     external
     type="unstyled"

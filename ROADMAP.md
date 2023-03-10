@@ -1,5 +1,7 @@
 # Current
 
+- [ ] Add warning for petnames not synced (or maybe check that in connect?)
+- [ ] Add cryptic symbol somewhere showing how many hours I've put in vs sats received with a link to a dev fund page somewhere
 - [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
 - [ ] Update https://nostr.com/clients/coracle
