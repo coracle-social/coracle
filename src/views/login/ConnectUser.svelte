@@ -12,7 +12,6 @@
   import RelayCardSimple from "src/partials/RelayCardSimple.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
-  import {getUserReadRelays} from "src/agent/relays"
   import database from "src/agent/database"
   import network from "src/agent/network"
   import user from "src/agent/user"
@@ -55,7 +54,9 @@
 
         currentRelays[i] = null
 
-        if (searching && getUserReadRelays().length > 0) {
+        // Make sure we have relays and follows before calling it good. This helps us avoid
+        // nuking follow lists later on
+        if (searching && user.getRelays().length > 0 && user.getPetnames().length > 0) {
           searching = false
           modal = "success"
 
