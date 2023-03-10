@@ -109,7 +109,7 @@ export const fromParentOffset = (element, offset): [HTMLElement, number] => {
 }
 
 export const extractUrls = content => {
-  const regex = /(https?:\/\/)?(www\.)?[-a-z0-9@:%._\+~#=]{1,256}\.[a-z]{1,6}\b([-a-z0-9@:%_\+.~#?!&//=;]*)/gi
+  const regex = /(https?:\/\/)?[-a-z0-9@:%._\+~#=\.]+\.[a-z]{1,6}[-a-z0-9@:%_\+.~#?!&//=;]*/gi
   const urls = content.match(regex)
 
   return (urls || [])
@@ -132,7 +132,8 @@ export const renderContent = content => {
 
     const href = url.includes('://') ? url : 'https://' + url
     const display = url.replace(/https?:\/\/(www\.)?/, '')
-    const regex = new RegExp(`([^"^])(${url})([^"$])`, 'g')
+    const escaped = url.replace(/([.*+?^${}()|[\]\\])/g, '\\$1')
+    const regex = new RegExp(`([^"]*)(${escaped})([^"]*)`, 'g')
 
     const $a = document.createElement('a')
 
