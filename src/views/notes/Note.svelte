@@ -348,7 +348,7 @@
               <Anchor
                 type="unstyled"
                 class="flex items-center gap-2 text-lg font-bold"
-                href={!isMobile && routes.person($person.pubkey)}>
+                href={isMobile ? null : routes.person($person.pubkey)}>
                 <span>{displayPerson($person)}</span>
                 {#if $person.verified_as}
                   <i class="fa fa-circle-check text-sm text-accent" />

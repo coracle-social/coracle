@@ -21,12 +21,17 @@
   $: {
     if (input) {
       listener = listenForFile(input, async inputFile => {
-        const opts = filter(identity, {maxWidth, maxHeight})
+        if (inputFile) {
+          const opts = filter(identity, {maxWidth, maxHeight})
 
-        file = blobToFile(await stripExifData(inputFile, opts))
-        quote = await postJson(user.dufflepud("/upload/quote"), {
-          uploads: [{size: file.size}],
-        })
+          file = blobToFile(await stripExifData(inputFile, opts))
+          quote = await postJson(user.dufflepud("/upload/quote"), {
+            uploads: [{size: file.size}],
+          })
+        } else {
+          file = null
+          quote = null
+        }
       })
     }
   }
