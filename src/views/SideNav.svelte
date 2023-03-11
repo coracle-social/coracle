@@ -30,7 +30,7 @@
   {#if $profile}
     <li>
       <a href={routes.person($profile.pubkey)} class="flex items-center gap-2 px-4 py-2 pb-6">
-        <PersonCircle size={6} src={$profile.kind0?.picture} />
+        <PersonCircle size={6} person={$profile} />
         <span class="text-lg font-bold">{displayPerson($profile)}</span>
       </a>
     </li>
