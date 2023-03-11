@@ -11,6 +11,6 @@
     `overflow-hidden w-${size} h-${size} inline-block shrink-0 rounded-full border border-solid
      border-white bg-cover bg-center`
   )}
-  style="background-image: url({src}); {$$props.style}">
+  style="background-image: url({src}); {$$props.style || ''}">
   <slot></slot>
 </div>

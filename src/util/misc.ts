@@ -5,6 +5,7 @@ import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from 'svelte/store'
 import {isObject, round} from 'hurdak/lib/hurdak'
 import {warn} from 'src/util/logger'
+import {memoizeWith} from 'ramda';
 
 export const fuzzy = (data, opts = {}) => {
   const fuse = new Fuse(data, opts)
@@ -282,7 +283,7 @@ export const stringToColor = (value, {saturation = 100, lightness = 50, opacity 
 }
 
 // https://stackoverflow.com/a/75255491
-export const stringToHex = function(str: string) {
+const stringToHex = function(str: string) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -302,7 +303,7 @@ function padZero(str: string, len?: number) {
 }
 
 // https://stackoverflow.com/a/35970186
-export function invertColor(hex: string) {
+function invertColor(hex: string) {
   if (hex.indexOf('#') === 0) {
       hex = hex.slice(1);
   }
@@ -320,6 +321,15 @@ export function invertColor(hex: string) {
   // pad each with zeros and return
   return '#' + padZero(r) + padZero(g) + padZero(b);
 }
+
+export const generateAvatarColors = memoizeWith(identity, (pubkey: string) => {
+  const primary = stringToHex(pubkey);
+
+  return {
+    primary,
+    bg: invertColor(primary),
+  }
+});
 
 export const tryFunc = (f, ignore = null) => {
   try {
