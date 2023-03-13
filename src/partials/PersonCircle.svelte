@@ -12,7 +12,7 @@
   const secondary = hsl(hue, {saturation: 30, lightness: 30})
 </script>
 
-{#if false && person.kind0?.picture}
+{#if person.kind0?.picture}
   <ImageCircle {size} src={person.kind0.picture} class={$$props.class} />
 {:else}
   <div
