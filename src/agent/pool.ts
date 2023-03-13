@@ -38,7 +38,7 @@ class Connection {
   url: string
   promise?: Deferred<void>
   queue: string[]
-  error: {code: string; occurredAt: number}
+  error: {code: string; message: string, occurredAt: number}
   status: {code: string; message: string}
   timeout?: number
   stats: Record<string, number>
@@ -72,8 +72,8 @@ class Connection {
   setStatus(code, message) {
     this.status = {code, message}
   }
-  setError(code) {
-    this.error = {code, occurredAt: Date.now()}
+  setError(code, message) {
+    this.error = {code, message, occurredAt: Date.now()}
   }
   connect() {
     if (this.ws) {
@@ -100,11 +100,11 @@ class Connection {
     })
 
     this.ws.addEventListener("error", e => {
-      log(`Error on connection to ${this.url}`, e)
+      log(`Error on connection to ${this.url}`)
 
       this.disconnect()
       this.promise.reject()
-      this.setError(ERROR.CONNECTION)
+      this.setError(ERROR.CONNECTION, "Disconnected")
       this.setStatus(STATUS.CLOSED, "Closed")
     })
 
@@ -172,7 +172,7 @@ class Connection {
       conn: this,
       unsub: () => {
         if (this.status.code === STATUS.READY) {
-          this.send("CLOSE", id, ...filters)
+          this.send("CLOSE", id)
         }
 
         this.bus.off("EVENT", eventChannel)
@@ -196,12 +196,23 @@ class Connection {
 
     this.send("EVENT", event)
   }
+  count(filter, id, {onCount}) {
+    const channel = this.bus.on("COUNT", (subid, ...payload) => {
+      if (subid === id) {
+        onCount(...payload)
+
+        this.bus.off("COUNT", channel)
+      }
+    })
+
+    this.send("COUNT", id, ...filter)
+  }
   listenForAuth() {
     // Propagate auth to global handler
     this.bus.on("AUTH", challenge => {
       if (!this.error) {
         this.setStatus(STATUS.ERROR, "Logging in")
-        this.setError(ERROR.UNAUTHORIZED)
+        this.setError(ERROR.UNAUTHORIZED, "Logging in")
 
         eventBus.handle("AUTH", challenge, this)
       }
@@ -214,7 +225,7 @@ class Connection {
           this.setStatus(STATUS.READY, "Connected")
         } else {
           this.disconnect()
-          this.setError(ERROR.FORBIDDEN)
+          this.setError(ERROR.FORBIDDEN, "Access restricted")
         }
 
         this.bus.off("OK", channel)
@@ -225,8 +236,8 @@ class Connection {
     return this.error && Date.now() - 30_000 < this.error.occurredAt
   }
   getQuality() {
-    if (this.status.code === STATUS.ERROR) {
-      return [0, this.status.message]
+    if (this.error) {
+      return [0, this.error.message]
     }
 
     const {timeouts, subsCount, eoseTimer, eoseCount} = this.stats
@@ -474,6 +485,22 @@ const subscribe = async ({relays, filter, onEvent, onEose, onError}: SubscribeOp
   }
 }
 
+const count = async filter => {
+  const conn = await connect("wss://rbr.bio")
+
+  if (!conn || conn.status.code !== STATUS.READY) {
+    return null
+  }
+
+  filter = ensurePlural(filter)
+
+  return new Promise(resolve => {
+    conn.count(filter, createFilterId(filter), {
+      onCount: res => resolve(res?.count),
+    })
+  })
+}
+
 // Utils
 
 const createFilterId = filters =>
@@ -504,4 +531,5 @@ export default {
   disconnect,
   publish,
   subscribe,
+  count,
 }

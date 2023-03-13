@@ -6,6 +6,7 @@
   import {navigate} from "svelte-routing"
   import {log} from "src/util/logger"
   import {renderContent, parseHex} from "src/util/html"
+  import {numberFmt} from "src/util/misc"
   import {displayPerson, Tags, toHex} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
@@ -19,7 +20,7 @@
   import pool from "src/agent/pool"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
-  import {getPersonWithFallback, people} from "src/agent/tables"
+  import {getPersonWithFallback} from "src/agent/tables"
   import {routes, modal, theme, getThemeColor} from "src/app/ui"
   import PersonCircle from "src/partials/PersonCircle.svelte"
 
@@ -104,27 +105,25 @@
       loading = false
     })
 
-    // Prime our followers count
-    people.all().forEach(p => {
-      if (Tags.wrap(p.petnames).type("p").values().all().includes(pubkey)) {
-        followers.add(p.pubkey)
-        followersCount.set(followers.size)
-      }
-    })
+    // Get our followers count
+    const count = await pool.count({kinds: [3], "#p": [pubkey]})
 
-    // Round out our followers count
-    await network.load({
-      shouldProcess: false,
-      relays: getRelays(),
-      filter: [{kinds: [3], "#p": [pubkey]}],
-      onChunk: events => {
-        for (const e of events) {
-          followers.add(e.pubkey)
-        }
+    if (count) {
+      followersCount.set(count)
+    } else {
+      await network.load({
+        shouldProcess: false,
+        relays: getRelays(),
+        filter: [{kinds: [3], "#p": [pubkey]}],
+        onChunk: events => {
+          for (const e of events) {
+            followers.add(e.pubkey)
+          }
 
-        followersCount.set(followers.size)
-      },
-    })
+          followersCount.set(followers.size)
+        },
+      })
+    }
   })
 
   const toggleActions = () => {
@@ -231,7 +230,7 @@
             <strong>{person.petnames.length}</strong> following
           </button>
           <button on:click={showFollowers}>
-            <strong>{$followersCount}</strong> followers
+            <strong>{numberFmt.format($followersCount)}</strong> followers
           </button>
         </div>
       {/if}

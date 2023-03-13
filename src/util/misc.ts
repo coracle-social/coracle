@@ -388,13 +388,13 @@ export const hexToBech32 = (prefix, url) =>
 
 export const bech32ToHex = b32 => utf8.encode(bech32.fromWords(bech32.decode(b32, false).words))
 
-export const formatSats = sats => {
-  const formatter = new Intl.NumberFormat()
+export const numberFmt = new Intl.NumberFormat
 
-  if (sats < 1_000) return formatter.format(sats)
-  if (sats < 1_000_000) return formatter.format(round(1, sats / 1000)) + "K"
-  if (sats < 100_000_000) return formatter.format(round(1, sats / 1_000_000)) + "MM"
-  return formatter.format(round(2, sats / 100_000_000)) + "BTC"
+export const formatSats = sats => {
+  if (sats < 1_000) return numberFmt.format(sats)
+  if (sats < 1_000_000) return numberFmt.format(round(1, sats / 1000)) + "K"
+  if (sats < 100_000_000) return numberFmt.format(round(1, sats / 1_000_000)) + "MM"
+  return numberFmt.format(round(2, sats / 100_000_000)) + "BTC"
 }
 
 type EventBusListener = {
