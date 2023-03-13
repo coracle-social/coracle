@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {last} from "ramda"
   import {onMount} from "svelte"
-  import {poll, stringToColor} from "src/util/misc"
+  import {poll, stringToHue, hsl} from "src/util/misc"
   import {between} from "hurdak/lib/hurdak"
   import {fly} from "svelte/transition"
   import Anchor from "src/partials/Anchor.svelte"
@@ -36,7 +36,7 @@
     `bg-${theme}`,
     "flex flex-col justify-between gap-3 rounded border border-l-2 border-solid border-medium py-3 px-6 shadow"
   )}
-  style={`border-left-color: ${stringToColor(relay.url)}`}
+  style={`border-left-color: ${hsl(stringToHue(relay.url))}`}
   in:fly={{y: 20}}>
   <div class="flex items-center justify-between gap-2">
     <div class="flex items-center gap-2 text-xl">

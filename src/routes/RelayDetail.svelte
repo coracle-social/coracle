@@ -1,7 +1,7 @@
 <script lang="ts">
   import {find, propEq} from "ramda"
   import {onMount} from "svelte"
-  import {poll, stringToColor} from "src/util/misc"
+  import {poll, stringToHue, hsl} from "src/util/misc"
   import {displayRelay} from "src/util/nostr"
   import {between} from "hurdak/lib/hurdak"
   import Content from "src/partials/Content.svelte"
@@ -44,7 +44,7 @@
   <div class="flex items-center justify-between gap-2">
     <div class="flex items-center gap-2 text-xl">
       <i class={relay.url.startsWith("wss") ? "fa fa-lock" : "fa fa-unlock"} />
-      <span class="border-b border-solid" style={`border-color: ${stringToColor(relay.url)}`}>
+      <span class="border-b border-solid" style={`border-color: ${hsl(stringToHue(relay.url))}`}>
         {displayRelay(relay)}
       </span>
       <span
