@@ -1,3 +1,4 @@
 --ignore-dir=node_modules
 --ignore-dir=dist
 --ignore-file=match:package-lock.json
+--ignore-file=match:.svg
