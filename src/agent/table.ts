@@ -6,7 +6,7 @@ import {writable} from 'svelte/store'
 import {isObject, mapValues, ensurePlural} from 'hurdak/lib/hurdak'
 import {log} from 'src/util/logger'
 import {where} from 'src/util/misc'
-import {lf} from 'src/agent/database'
+import {lf} from 'src/agent/storage'
 
 // Local copy of data so we can provide a sync observable interface. The worker
 // is just for storing data and processing expensive queries

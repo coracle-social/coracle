@@ -22,4 +22,4 @@ export const onReady = cb => {
   })
 }
 
-window.state = {people, contacts, rooms, alerts, relays, routes}
+(window as any).t = {people, contacts, rooms, alerts, relays, routes}
