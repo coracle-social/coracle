@@ -12,7 +12,7 @@ export const routes = new Table("routes", "id")
 
 export const getPersonWithFallback = pubkey => people.get(pubkey) || {pubkey}
 
-export const ready = derived(pluck("ready", Object.values(registry)), all(identity))
+const ready = derived(pluck("ready", Object.values(registry)), all(identity))
 
 export const onReady = cb => {
   const unsub = ready.subscribe($ready => {

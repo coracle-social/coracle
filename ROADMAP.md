@@ -2,9 +2,7 @@
 
 - [ ] Fix memory usage
   - [x] Add table of user events, derive profile from this using `watch`.
-  - [ ] Remove petnames from users, retrieve lazily. Then, increase people table size
-  - [ ] Make zapper info more compact
-  - [ ] Move settings storage to an encrypted event https://github.com/nostr-protocol/nips/blob/master/78.md
+  - [x] Make zapper info more compact
   - [ ] Migrate
   - [ ] Test
     - [ ] Test that relays/follows made as anon don't stomp user settings on login
@@ -100,6 +98,7 @@
 - [ ] Ability to leave/mute DM conversation
 - [ ] Add notifications for chat messages
 - [ ] Add encrypted settings storage using nostr events
+  - [ ] github.com/nostr-protocol/nips/blob/master/78.md
   - [ ] Save DM/chat read status in encrypted note
 - [ ] Relay recommendations based on follows/followers
 - [ ] Pinned posts ala snort

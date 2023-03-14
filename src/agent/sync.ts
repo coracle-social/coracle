@@ -102,7 +102,11 @@ const verifyZapper = async (pubkey, address) => {
   const lnurl = lnurlEncode("lnurl", url)
 
   if (zapper?.allowsNostr && zapper?.nostrPubkey) {
-    updatePerson(pubkey, {zapper, lnurl})
+    updatePerson(pubkey, {
+      lnurl,
+      // Trim zapper so we don't have so much metadata filling up memory
+      zapper: pick(["callback", "maxSendable", "minSendable", "nostrPubkey"], zapper),
+    })
   }
 }
 

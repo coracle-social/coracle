@@ -14,7 +14,7 @@
   import {timedelta, shuffle, now, sleep} from "src/util/misc"
   import {displayPerson, isLike} from "src/util/nostr"
   import cmd from "src/agent/cmd"
-  import {ready, onReady, relays} from "src/agent/tables"
+  import {onReady, relays} from "src/agent/tables"
   import keys from "src/agent/keys"
   import network from "src/agent/network"
   import pool from "src/agent/pool"
@@ -69,6 +69,7 @@
 
   export let url = ""
 
+  let ready = false
   let scrollY
 
   const closeModal = async () => {
@@ -115,7 +116,9 @@
   })
 
   onReady(() => {
-    initializeRelayList()
+    initializeRelayList().then(() => {
+      ready = true
+    })
 
     if (user.getProfile()) {
       loadAppData(user.getPubkey())
@@ -169,7 +172,7 @@
 
 <Router {url}>
   <div use:links class="h-full">
-    {#if $ready}
+    {#if ready}
       <div class="h-full pt-16 text-white lg:ml-56">
         <Route path="/alerts" component={Alerts} />
         <Route path="/search">
