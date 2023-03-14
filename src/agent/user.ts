@@ -75,7 +75,7 @@ export default {
 
     profile.update(assoc("petnames", $petnames))
 
-    if (profileCopy) {
+    if (keys.canSign()) {
       return cmd.setPetnames($petnames).publish(profileCopy.relays)
     }
   },
@@ -102,7 +102,7 @@ export default {
 
     profile.update(assoc("relays", $relays))
 
-    if (profileCopy) {
+    if (keys.canSign()) {
       return cmd.setRelays($relays).publish($relays)
     }
   },
@@ -132,7 +132,7 @@ export default {
 
     profile.update(assoc("mutes", $mutes))
 
-    if (profileCopy) {
+    if (keys.canSign()) {
       return cmd.setMutes($mutes.map(slice(0, 2))).publish(profileCopy.relays)
     }
   },

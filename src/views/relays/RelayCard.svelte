@@ -6,6 +6,7 @@
   import RelayCard from "src/partials/RelayCard.svelte"
   import pool from "src/agent/pool"
   import user from "src/agent/user"
+  import keys from "src/agent/keys"
   import {loadAppData} from "src/app"
 
   export let relay
@@ -17,6 +18,8 @@
   let joined = false
 
   const {relays, canPublish} = user
+  const {method} = keys
+  const isPubkeyLogin = $method === "pubkey"
 
   $: joined = find(propEq("url", relay.url), $relays)
 
@@ -47,8 +50,8 @@
 <RelayCard
   {relay}
   {theme}
-  addRelay={!joined && $canPublish ? addRelay : null}
-  removeRelay={joined && $relays.length > 1 && canPublish ? removeRelay : null}>
+  addRelay={!joined && !isPubkeyLogin ? addRelay : null}
+  removeRelay={joined && $relays.length > 1 && !isPubkeyLogin ? removeRelay : null}>
   <div slot="controls" class="flex justify-between gap-2">
     {#if showControls && $canPublish}
       <span>Publish to this relay?</span>

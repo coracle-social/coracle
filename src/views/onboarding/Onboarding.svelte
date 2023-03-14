@@ -22,19 +22,27 @@
 
   export let stage
 
-  let relays = [
-    {url: "wss://nostr-pub.wellorder.net", write: true},
-    {url: "wss://nostr.zebedee.cloud", write: true},
-    {url: "wss://nos.lol", write: true},
-    {url: "wss://brb.io", write: true},
-  ]
+  const {relays: userRelays, petnamePubkeys} = user
 
-  let follows = [
-    "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322", // hodlbod
-    "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d", // fiatjaf
-    "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2", // jack
-    "6e468422dfb74a5738702a8823b9b28168abab8655faacb6853cd0ee15deee93", // Gigi
-  ]
+  let relays =
+    $userRelays.length > 0
+      ? $userRelays
+      : [
+          {url: "wss://nostr-pub.wellorder.net", write: true},
+          {url: "wss://nostr.zebedee.cloud", write: true},
+          {url: "wss://nos.lol", write: true},
+          {url: "wss://brb.io", write: true},
+        ]
+
+  let follows =
+    $petnamePubkeys.length > 0
+      ? $petnamePubkeys
+      : [
+          "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322", // hodlbod
+          "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d", // fiatjaf
+          "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2", // jack
+          "6e468422dfb74a5738702a8823b9b28168abab8655faacb6853cd0ee15deee93", // Gigi
+        ]
 
   const privkey = generatePrivateKey()
 

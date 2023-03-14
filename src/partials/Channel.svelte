@@ -20,8 +20,6 @@
   let showNewMessages = false
   let cursor = new Cursor()
 
-  const {profile} = user
-
   $: {
     // Group messages so we're only showing the person once per chunk
     annotatedMessages = reverse(
@@ -54,7 +52,7 @@
   }
 
   onMount(() => {
-    if (!$profile) {
+    if (!user.getPubkey()) {
       return navigate("/login")
     }
 

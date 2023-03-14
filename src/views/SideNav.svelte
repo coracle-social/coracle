@@ -59,32 +59,30 @@
       <i class="fa fa-qrcode mr-2" /> Scan
     </a>
   </li>
-  {#if $profile}
-    <li
-      class={cx("relative", {
-        "cursor-pointer": $canPublish,
-        "pointer-events-none opacity-75": !$canPublish,
-      })}>
-      <a class="block px-4 py-2 transition-all hover:bg-accent" href="/messages">
-        <i class="fa fa-envelope mr-2" /> Messages
-        {#if $newDirectMessages}
-          <div class="absolute top-2 left-7 h-2 w-2 rounded bg-accent" />
-        {/if}
-      </a>
-    </li>
-    <li
-      class={cx("relative", {
-        "cursor-pointer": $canPublish,
-        "pointer-events-none opacity-75": !$canPublish,
-      })}>
-      <a class="block px-4 py-2 transition-all hover:bg-accent" href="/chat">
-        <i class="fa fa-comment mr-2" /> Chat
-        {#if $newChatMessages}
-          <div class="absolute top-2 left-7 h-2 w-2 rounded bg-accent" />
-        {/if}
-      </a>
-    </li>
-  {/if}
+  <li
+    class={cx("relative", {
+      "cursor-pointer": $canPublish,
+      "pointer-events-none opacity-75": !$canPublish,
+    })}>
+    <a class="block px-4 py-2 transition-all hover:bg-accent" href="/messages">
+      <i class="fa fa-envelope mr-2" /> Messages
+      {#if $newDirectMessages}
+        <div class="absolute top-2 left-7 h-2 w-2 rounded bg-accent" />
+      {/if}
+    </a>
+  </li>
+  <li
+    class={cx("relative", {
+      "cursor-pointer": $canPublish,
+      "pointer-events-none opacity-75": !$canPublish,
+    })}>
+    <a class="block px-4 py-2 transition-all hover:bg-accent" href="/chat">
+      <i class="fa fa-comment mr-2" /> Chat
+      {#if $newChatMessages}
+        <div class="absolute top-2 left-7 h-2 w-2 rounded bg-accent" />
+      {/if}
+    </a>
+  </li>
   <li class="mx-3 my-4 h-px bg-medium" />
   <li class="relative cursor-pointer">
     <a class="block px-4 py-2 transition-all hover:bg-accent" href="/relays">
@@ -94,7 +92,7 @@
       {/if}
     </a>
   </li>
-  {#if $profile}
+  {#if $profile.pubkey}
     <li class="cursor-pointer">
       <a class="block px-4 py-2 transition-all hover:bg-accent" href="/keys">
         <i class="fa fa-key mr-2" /> Keys
