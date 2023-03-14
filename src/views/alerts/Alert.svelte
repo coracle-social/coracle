@@ -3,7 +3,7 @@
   import Badge from "src/partials/Badge.svelte"
   import Popover from "src/partials/Popover.svelte"
   import {formatTimestamp} from "src/util/misc"
-  import {getPersonWithFallback} from "src/agent/state"
+  import {getPersonWithFallback} from "src/agent/tables"
   import {modal} from "src/app/ui"
 
   export let note

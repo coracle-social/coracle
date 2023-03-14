@@ -1,8 +1,8 @@
 <script type="ts">
   import Content from "src/partials/Content.svelte"
   import PersonInfo from "src/views/person/PersonInfo.svelte"
-  import {getPersonWithFallback} from "src/agent/state"
-  import {watch} from "src/agent/table"
+  import {getPersonWithFallback} from "src/agent/tables"
+  import {watch} from "src/agent/storage"
   import network from "src/agent/network"
 
   export let pubkeys

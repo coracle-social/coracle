@@ -1,91 +1,56 @@
-import type {Person} from 'src/util/types'
-import type {Readable} from 'svelte/store'
-import {slice, identity, prop, find, pipe, assoc, whereEq, when, concat, reject, nth, map} from 'ramda'
-import {findReplyId, findRootId} from 'src/util/nostr'
-import {synced} from 'src/util/misc'
-import {derived} from 'svelte/store'
-import {people} from 'src/agent/state'
-import keys from 'src/agent/keys'
-import cmd from 'src/agent/cmd'
+import type {Relay} from "src/util/types"
+import type {Readable} from "svelte/store"
+import {slice, prop, find, pipe, assoc, whereEq, when, concat, reject, nth, map} from "ramda"
+import {findReplyId, findRootId} from "src/util/nostr"
+import {synced} from "src/util/misc"
+import {derived} from "svelte/store"
+import keys from "src/agent/keys"
+import cmd from "src/agent/cmd"
 
-// Create a special wrapper to manage profile data, follows, and relays in the same
-// way whether the user is logged in or not. This involves creating a store that we
-// allow an anonymous user to write to, then once the user logs in we use that until
-// we have actual event data for them, which we then prefer. For extra fun, we also
-// sync this stuff to regular private variables so we don't have to constantly call
-// `get` on our stores.
-
-let settingsCopy = null
-let profileCopy = null
-let petnamesCopy = []
-let relaysCopy = []
-let mutesCopy = []
-
-const anonPetnames = synced('agent/user/anonPetnames', [])
-const anonRelays = synced('agent/user/anonRelays', [])
-const anonMutes = synced('agent/user/anonMutes', [])
-
-const settings = synced("agent/user/settings", {
-  relayLimit: 20,
-  defaultZap: 21,
-  showMedia: true,
-  reportAnalytics: true,
-  dufflepudUrl: import.meta.env.VITE_DUFFLEPUD_URL,
+const profile = synced("agent/user/profile", {
+  pubkey: null,
+  kind0: null,
+  lnurl: null,
+  zapper: null,
+  settings: {
+    relayLimit: 20,
+    defaultZap: 21,
+    showMedia: true,
+    reportAnalytics: true,
+    dufflepudUrl: import.meta.env.VITE_DUFFLEPUD_URL,
+  },
+  petnames: [],
+  relays: [],
+  mutes: [],
 })
 
-const profile = derived(
-  [keys.pubkey, people as Readable<any>],
-  ([pubkey, t]) => pubkey ? (t.get(pubkey) || {pubkey}) : null
-) as Readable<Person>
-
-const profileKeyWithDefault = (key, stores) => derived(
-  [profile, ...stores],
-  ([$profile, ...values]) =>
-    $profile?.[key] || find(identity, values)
-)
-
-const petnames = profileKeyWithDefault('petnames', [anonPetnames])
-const relays = profileKeyWithDefault('relays', [anonRelays])
-
-// Backwards compat, migrate muffle to mute temporarily
-const mutes = profileKeyWithDefault('mutes', [anonMutes, derived(profile, prop('muffle'))])
+const settings = derived(profile, prop("settings"))
+const petnames = derived(profile, prop("petnames"))
+const relays = derived(profile, prop("relays")) as Readable<Array<Relay>>
+const mutes = derived(profile, prop("mutes"))
 
 const canPublish = derived(
   [keys.pubkey, relays],
-  ([$pubkey, $relays]) =>
-    keys.canSign() && find(prop('write'), $relays)
+  ([$pubkey, $relays]) => keys.canSign() && find(prop("write"), $relays)
 )
 
-// Keep our copies up to date
+// Keep a copy so we can avoid calling `get` all the time
 
-settings.subscribe($settings => {
-  settingsCopy = $settings
-})
+let profileCopy = null
 
 profile.subscribe($profile => {
   profileCopy = $profile
 })
 
-petnames.subscribe($petnames => {
-  petnamesCopy = $petnames
+// Watch pubkey and add to profile
+
+keys.pubkey.subscribe($pubkey => {
+  if ($pubkey) {
+    profile.update($p => ({...$p, pubkey: $pubkey}))
+  }
 })
 
-mutes.subscribe($mutes => {
-  mutesCopy = $mutes
-})
-
-relays.subscribe($relays => {
-  relaysCopy = $relays
-})
-
-const user = {
-  // Settings
-
-  settings,
-  getSettings: () => settingsCopy,
-  getSetting: k => settingsCopy[k],
-  dufflepud: path => `${settingsCopy.dufflepudUrl}${path}`,
-
+export default {
   // Profile
 
   profile,
@@ -93,24 +58,36 @@ const user = {
   getProfile: () => profileCopy,
   getPubkey: () => profileCopy?.pubkey,
 
+  // Settings
+
+  settings,
+  getSettings: () => profileCopy.settings,
+  getSetting: k => profileCopy.settings[k],
+  dufflepud: path => `${profileCopy.settings.dufflepudUrl}${path}`,
+
   // Petnames
 
   petnames,
-  getPetnames: () => petnamesCopy,
+  getPetnames: () => profileCopy.petnames,
   petnamePubkeys: derived(petnames, map(nth(1))) as Readable<Array<string>>,
   updatePetnames(f) {
-    const $petnames = f(petnamesCopy)
+    const $petnames = f(profileCopy.petnames)
 
-    anonPetnames.set($petnames)
+    profile.update(assoc("petnames", $petnames))
 
     if (profileCopy) {
-      return cmd.setPetnames($petnames).publish(relaysCopy)
+      return cmd.setPetnames($petnames).publish(profileCopy.relays)
     }
   },
   addPetname(pubkey, url, name) {
     const tag = ["p", pubkey, url, name || ""]
 
-    return this.updatePetnames(pipe(reject(t => t[1] === pubkey), concat([tag])))
+    return this.updatePetnames(
+      pipe(
+        reject(t => t[1] === pubkey),
+        concat([tag])
+      )
+    )
   },
   removePetname(pubkey) {
     return this.updatePetnames(reject(t => t[1] === pubkey))
@@ -119,11 +96,11 @@ const user = {
   // Relays
 
   relays,
-  getRelays: () => relaysCopy,
+  getRelays: () => profileCopy.relays,
   updateRelays(f) {
-    const $relays = f(relaysCopy)
+    const $relays = f(profileCopy.relays)
 
-    anonRelays.set($relays)
+    profile.update(assoc("relays", $relays))
 
     if (profileCopy) {
       return cmd.setRelays($relays).publish($relays)
@@ -136,28 +113,27 @@ const user = {
     return this.updateRelays(reject(whereEq({url})))
   },
   setRelayWriteCondition(url, write) {
-    return this.updateRelays(map(when(whereEq({url}), assoc('write', write))))
+    return this.updateRelays(map(when(whereEq({url}), assoc("write", write))))
   },
 
   // Mutes
 
   mutes,
-  getMutes: () => mutesCopy,
+  getMutes: () => profileCopy.mutes,
   applyMutes: events => {
-    const m = new Set(mutesCopy.map(m => m[1]))
+    const m = new Set(profileCopy.mutes.map(m => m[1]))
 
-    return events.filter(e =>
-      !(m.has(e.id) || m.has(e.pubkey) || m.has(findReplyId(e)) || m.has(findRootId(e)))
+    return events.filter(
+      e => !(m.has(e.id) || m.has(e.pubkey) || m.has(findReplyId(e)) || m.has(findRootId(e)))
     )
   },
   updateMutes(f) {
-    const $mutes = f(mutesCopy)
-    console.log(mutesCopy, $mutes)
+    const $mutes = f(profileCopy.mutes)
 
-    anonMutes.set($mutes)
+    profile.update(assoc("mutes", $mutes))
 
     if (profileCopy) {
-      return cmd.setMutes($mutes.map(slice(0, 2))).publish(relaysCopy)
+      return cmd.setMutes($mutes.map(slice(0, 2))).publish(profileCopy.relays)
     }
   },
   addMute(type, value) {
@@ -172,5 +148,3 @@ const user = {
     return this.updateMutes(reject(t => t[1] === pubkey))
   },
 }
-
-export default user

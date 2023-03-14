@@ -7,7 +7,7 @@
   import Content from "src/partials/Content.svelte"
   import Alert from "src/views/alerts/Alert.svelte"
   import Mention from "src/views/alerts/Mention.svelte"
-  import {alerts} from "src/agent/state"
+  import {alerts} from "src/agent/tables"
   import user from "src/agent/user"
   import {lastChecked} from "src/app/alerts"
 

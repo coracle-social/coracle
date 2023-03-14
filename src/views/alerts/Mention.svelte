@@ -4,7 +4,7 @@
   import {displayPerson} from "src/util/nostr"
   import Popover from "src/partials/Popover.svelte"
   import PersonSummary from "src/views/person/PersonSummary.svelte"
-  import {getPersonWithFallback} from "src/agent/state"
+  import {getPersonWithFallback} from "src/agent/tables"
   import {modal} from "src/app/ui"
   import PersonCircle from "src/partials/PersonCircle.svelte"
 

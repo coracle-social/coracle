@@ -4,7 +4,7 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import MessagesListItem from "src/views/messages/MessagesListItem.svelte"
-  import {watch} from "src/agent/table"
+  import {watch} from "src/agent/storage"
 
   let activeTab = "messages"
 

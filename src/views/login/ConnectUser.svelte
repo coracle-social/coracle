@@ -4,7 +4,7 @@
   import {onDestroy, onMount} from "svelte"
   import {navigate} from "svelte-routing"
   import {sleep, shuffle} from "src/util/misc"
-  import {isRelay} from "src/util/nostr"
+  import {isRelay, userKinds} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Input from "src/partials/Input.svelte"
@@ -12,7 +12,7 @@
   import RelayCardSimple from "src/partials/RelayCardSimple.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
-  import {watch} from "src/agent/table"
+  import {watch} from "src/agent/storage"
   import network from "src/agent/network"
   import user from "src/agent/user"
   import {loadAppData} from "src/app"
@@ -48,23 +48,25 @@
       attemptedRelays.add(relay.url)
       currentRelays[i] = relay
 
-      network.loadPeople([user.getPubkey()], {relays: [relay], force: true}).then(async () => {
-        // Wait a bit before removing the relay to smooth out the ui
-        await sleep(1000)
+      network
+        .loadPeople([user.getPubkey()], {relays: [relay], force: true, kinds: userKinds})
+        .then(async () => {
+          // Wait a bit before removing the relay to smooth out the ui
+          await sleep(1000)
 
-        currentRelays[i] = null
+          currentRelays[i] = null
 
-        // Make sure we have relays and follows before calling it good. This helps us avoid
-        // nuking follow lists later on
-        if (searching && user.getRelays().length > 0 && user.getPetnames().length > 0) {
-          searching = false
-          modal = "success"
+          // Make sure we have relays and follows before calling it good. This helps us avoid
+          // nuking follow lists later on
+          if (searching && user.getRelays().length > 0 && user.getPetnames().length > 0) {
+            searching = false
+            modal = "success"
 
-          await Promise.all([loadAppData(user.getPubkey()), sleep(3000)])
+            await Promise.all([loadAppData(user.getPubkey()), sleep(3000)])
 
-          navigate("/notes/follows")
-        }
-      })
+            navigate("/notes/follows")
+          }
+        })
     }
 
     if (all(isNil, Object.values(currentRelays)) && isNil(customRelayUrl)) {

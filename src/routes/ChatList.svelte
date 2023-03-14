@@ -5,7 +5,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/views/chat/ChatListItem.svelte"
-  import {watch} from "src/agent/table"
+  import {watch} from "src/agent/storage"
   import network from "src/agent/network"
   import {getUserReadRelays} from "src/agent/relays"
   import {modal} from "src/app/ui"

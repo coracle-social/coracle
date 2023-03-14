@@ -6,7 +6,7 @@
   import RelaySearch from "src/views/relays/RelaySearch.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
   import PersonSearch from "src/views/person/PersonSearch.svelte"
-  import {getPersonWithFallback} from "src/agent/state"
+  import {getPersonWithFallback} from "src/agent/tables"
   import user from "src/agent/user"
 
   export let enforceRelays = true

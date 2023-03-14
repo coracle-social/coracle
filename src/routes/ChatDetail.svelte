@@ -9,7 +9,7 @@
   import user from "src/agent/user"
   import {getRelaysForEventChildren, sampleRelays} from "src/agent/relays"
   import network from "src/agent/network"
-  import {watch} from "src/agent/table"
+  import {watch} from "src/agent/storage"
   import cmd from "src/agent/cmd"
   import {modal} from "src/app/ui"
   import {lastChecked} from "src/app/alerts"

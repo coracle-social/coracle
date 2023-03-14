@@ -4,7 +4,7 @@
   import {fly} from "svelte/transition"
   import {ellipsize} from "hurdak/lib/hurdak"
   import {displayPerson} from "src/util/nostr"
-  import {getPersonWithFallback} from "src/agent/state"
+  import {getPersonWithFallback} from "src/agent/tables"
   import {lastChecked} from "src/app/alerts"
   import PersonCircle from "src/partials/PersonCircle.svelte"
 

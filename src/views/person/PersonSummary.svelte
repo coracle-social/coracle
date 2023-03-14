@@ -6,8 +6,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import user from "src/agent/user"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
-  import {getPersonWithFallback} from "src/agent/state"
-  import {watch} from "src/agent/table"
+  import {getPersonWithFallback} from "src/agent/tables"
+  import {watch} from "src/agent/storage"
   import {routes} from "src/app/ui"
   import PersonCircle from "src/partials/PersonCircle.svelte"
 

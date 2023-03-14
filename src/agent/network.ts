@@ -1,23 +1,26 @@
-import type {MyEvent} from 'src/util/types'
-import {sortBy, assoc, uniq, uniqBy, prop, propEq, reject, groupBy, pluck} from 'ramda'
-import {personKinds, findReplyId} from 'src/util/nostr'
-import {log} from 'src/util/logger'
-import {chunk} from 'hurdak/lib/hurdak'
-import {batch, now, timedelta} from 'src/util/misc'
+import type {MyEvent} from "src/util/types"
+import {sortBy, assoc, uniq, uniqBy, prop, propEq, reject, groupBy, pluck} from "ramda"
+import {personKinds, findReplyId} from "src/util/nostr"
+import {log} from "src/util/logger"
+import {chunk} from "hurdak/lib/hurdak"
+import {batch, now, timedelta} from "src/util/misc"
 import {
-  getRelaysForEventParent, getAllPubkeyWriteRelays, aggregateScores,
-  getRelaysForEventChildren, sampleRelays,
-} from 'src/agent/relays'
-import {people} from 'src/agent/state'
-import pool from 'src/agent/pool'
-import sync from 'src/agent/sync'
+  getRelaysForEventParent,
+  getAllPubkeyWriteRelays,
+  aggregateScores,
+  getRelaysForEventChildren,
+  sampleRelays,
+} from "src/agent/relays"
+import {people} from "src/agent/tables"
+import pool from "src/agent/pool"
+import sync from "src/agent/sync"
 
 const getStalePubkeys = pubkeys => {
   // If we're not reloading, only get pubkeys we don't already know about
   return uniq(pubkeys).filter(pubkey => {
     const p = people.get(pubkey)
 
-    return !p || p.updated_at < now() - timedelta(1, 'days')
+    return !p || p.updated_at < now() - timedelta(1, "days")
   })
 }
 
@@ -145,8 +148,8 @@ const streamContext = ({notes, onChunk, depth = 0}) =>
       // Instead of recurring to depth, trampoline so we can batch requests
       while (events.length > 0 && depth > 0) {
         const chunk = events.splice(0)
-        const authors = getStalePubkeys(pluck('pubkey', chunk))
-        const filter = [{kinds: [1, 7, 9735], '#e': pluck('id', chunk)}] as Array<object>
+        const authors = getStalePubkeys(pluck("pubkey", chunk))
+        const filter = [{kinds: [1, 7, 9735], "#e": pluck("id", chunk)}] as Array<object>
         const relays = sampleRelays(aggregateScores(chunk.map(getRelaysForEventChildren)))
 
         // Load authors and reactions in one subscription
@@ -169,11 +172,11 @@ const streamContext = ({notes, onChunk, depth = 0}) =>
   )
 
 const applyContext = (notes, context) => {
-  context = context.map(assoc('isContext', true))
+  context = context.map(assoc("isContext", true))
 
-  const replies = context.filter(propEq('kind', 1))
-  const reactions = context.filter(propEq('kind', 7))
-  const zaps = context.filter(propEq('kind', 9735))
+  const replies = context.filter(propEq("kind", 1))
+  const reactions = context.filter(propEq("kind", 7))
+  const zaps = context.filter(propEq("kind", 9735))
 
   const repliesByParentId = groupBy(findReplyId, replies)
   const reactionsByParentId = groupBy(findReplyId, reactions)
@@ -186,9 +189,9 @@ const applyContext = (notes, context) => {
 
     return {
       ...note,
-      replies: sortBy(e => -e.created_at, uniqBy(prop('id'), combinedReplies).map(annotate)),
-      reactions: uniqBy(prop('id'), combinedReactions),
-      zaps: uniqBy(prop('id'), combinedZaps),
+      replies: sortBy(e => -e.created_at, uniqBy(prop("id"), combinedReplies).map(annotate)),
+      reactions: uniqBy(prop("id"), combinedReactions),
+      zaps: uniqBy(prop("id"), combinedZaps),
     }
   }
 
@@ -196,5 +199,10 @@ const applyContext = (notes, context) => {
 }
 
 export default {
-  listen, load, loadPeople, personKinds, loadParents, streamContext, applyContext,
+  listen,
+  load,
+  loadPeople,
+  loadParents,
+  streamContext,
+  applyContext,
 }

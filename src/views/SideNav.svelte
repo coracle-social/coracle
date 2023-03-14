@@ -5,7 +5,7 @@
   import {menuIsOpen, installPrompt, routes} from "src/app/ui"
   import {newAlerts, newDirectMessages, newChatMessages} from "src/app/alerts"
   import {slowConnections} from "src/app/connection"
-  import PersonCircle from "src/partials/PersonCircle.svelte";
+  import PersonCircle from "src/partials/PersonCircle.svelte"
 
   const {profile, canPublish} = user
 
@@ -28,7 +28,7 @@
   class="fixed top-0 bottom-0 left-0 z-20 mt-16 w-56 overflow-hidden border-r border-medium bg-dark pt-4
          pb-20 text-white shadow-xl transition-all lg:mt-0 lg:ml-0"
   class:-ml-56={!$menuIsOpen}>
-  {#if $profile}
+  {#if $profile.pubkey}
     <li>
       <a href={routes.person($profile.pubkey)} class="flex items-center gap-2 px-4 py-2 pb-6">
         <PersonCircle size={6} person={$profile} />

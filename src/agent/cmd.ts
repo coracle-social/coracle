@@ -1,14 +1,13 @@
-import {pick, last, prop, uniqBy} from 'ramda'
-import {get} from 'svelte/store'
-import {roomAttrs, displayPerson, findReplyId, findRootId} from 'src/util/nostr'
-import {getPubkeyWriteRelays, getRelayForPersonHint, sampleRelays} from 'src/agent/relays'
-import {getPersonWithFallback} from 'src/agent/state'
-import pool from 'src/agent/pool'
-import sync from 'src/agent/sync'
-import keys from 'src/agent/keys'
+import {pick, last, prop, uniqBy} from "ramda"
+import {get} from "svelte/store"
+import {roomAttrs, displayPerson, findReplyId, findRootId} from "src/util/nostr"
+import {getPubkeyWriteRelays, getRelayForPersonHint, sampleRelays} from "src/agent/relays"
+import {getPersonWithFallback} from "src/agent/tables"
+import pool from "src/agent/pool"
+import sync from "src/agent/sync"
+import keys from "src/agent/keys"
 
-const updateUser = updates =>
-  new PublishableEvent(0, {content: JSON.stringify(updates)})
+const updateUser = updates => new PublishableEvent(0, {content: JSON.stringify(updates)})
 
 const setRelays = newRelays =>
   new PublishableEvent(10002, {
@@ -16,18 +15,16 @@ const setRelays = newRelays =>
       const t = ["r", r.url]
 
       if (!r.write) {
-        t.push('read')
+        t.push("read")
       }
 
       return t
     }),
   })
 
-const setPetnames = petnames =>
-  new PublishableEvent(3, {tags: petnames})
+const setPetnames = petnames => new PublishableEvent(3, {tags: petnames})
 
-const setMutes = mutes =>
-  new PublishableEvent(10000, {tags: mutes})
+const setMutes = mutes => new PublishableEvent(10000, {tags: mutes})
 
 const createRoom = room =>
   new PublishableEvent(40, {content: JSON.stringify(pick(roomAttrs, room))})
@@ -58,7 +55,11 @@ const getReplyTags = n => {
   const {url} = getRelayForPersonHint(n.pubkey, n)
   const rootId = findRootId(n) || findReplyId(n) || n.id
 
-  return [["p", n.pubkey, url], ["e", n.id, url, 'reply'], ["e", rootId, url, 'root']]
+  return [
+    ["p", n.pubkey, url],
+    ["e", n.id, url, "reply"],
+    ["e", rootId, url, "root"],
+  ]
 }
 
 const tagsFromParent = (n, newTags = []) => {
@@ -66,21 +67,20 @@ const tagsFromParent = (n, newTags = []) => {
 
   return uniqBy(
     // Remove duplicates due to inheritance. Keep earlier ones
-    t => t.slice(0, 2).join(':'),
+    t => t.slice(0, 2).join(":"),
     // Mentions have to come first for interpolation to work
     newTags
       // Add standard reply tags
       .concat(getReplyTags(n))
       // Inherit p and e tags, but remove marks and self-mentions
       .concat(
-        n.tags
-          .filter(t => {
-            if (t[1] === pubkey) return false
-            if (!["p", "e"].includes(t[0])) return false
-            if (['reply', 'root'].includes(last(t))) return false
+        n.tags.filter(t => {
+          if (t[1] === pubkey) return false
+          if (!["p", "e"].includes(t[0])) return false
+          if (["reply", "root"].includes(last(t))) return false
 
-            return true
-          })
+          return true
+        })
       )
   )
 }
@@ -93,7 +93,7 @@ const createReply = (note, content, mentions = [], topics = []) => {
   const tags = tagsFromParent(
     note,
     mentions
-      .map(pk => ["p", pk, prop('url', getRelayForPersonHint(pk, note))])
+      .map(pk => ["p", pk, prop("url", getRelayForPersonHint(pk, note))])
       .concat(topics.map(t => ["t", t]))
   )
 
@@ -115,14 +115,13 @@ const requestZap = (relays, content, pubkey, eventId, amount, lnurl) => {
   return new PublishableEvent(9734, {content, tags})
 }
 
-const deleteEvent = ids =>
-  new PublishableEvent(5, {tags: ids.map(id => ["e", id])})
+const deleteEvent = ids => new PublishableEvent(5, {tags: ids.map(id => ["e", id])})
 
 // Utils
 
 class PublishableEvent {
   event: Record<string, any>
-  constructor(kind, {content = '', tags = []}) {
+  constructor(kind, {content = "", tags = []}) {
     const pubkey = get(keys.pubkey)
     const createdAt = Math.round(new Date().valueOf() / 1000)
 
@@ -139,7 +138,18 @@ class PublishableEvent {
 }
 
 export default {
-  updateUser, setRelays, setPetnames, setMutes, createRoom, updateRoom,
-  createChatMessage, createDirectMessage, createNote, createReaction,
-  createReply, requestZap, deleteEvent, PublishableEvent,
+  updateUser,
+  setRelays,
+  setPetnames,
+  setMutes,
+  createRoom,
+  updateRoom,
+  createChatMessage,
+  createDirectMessage,
+  createNote,
+  createReaction,
+  createReply,
+  requestZap,
+  deleteEvent,
+  PublishableEvent,
 }

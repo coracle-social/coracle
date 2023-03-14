@@ -1,20 +1,15 @@
 # Current
 
-- [ ] Fix re-connects
 - [ ] Fix memory usage
-  - Re-write database
-    - Use LRU cache and persist that instead. Use purgeStale/dump/load
-    - Split state persistence elsewhere
-    - Keep it focused to abstract interface, split actual tables out elsewhere
-    - Put all other state in same place
-    - Re-write to use arrays with an index of id to index
-    - Fix compatibility, or clear data on first load of new version
-  - Add table of user events, derive profile from this using `watch`.
-  - Refine sync, set up some kind of system where we register tables with events coming in
-  - People.petnames is massive. Split people caches up
-    - Display/picture/about
-    - Minimal zapper info
-    - Drop petnames
+  - [x] Add table of user events, derive profile from this using `watch`.
+  - [ ] Remove petnames from users, retrieve lazily. Then, increase people table size
+  - [ ] Make zapper info more compact
+  - [ ] Move settings storage to an encrypted event https://github.com/nostr-protocol/nips/blob/master/78.md
+  - [ ] Migrate
+  - [ ] Test
+    - [ ] Test that relays/follows made as anon don't stomp user settings on login
+    - [ ] Test anonymous usage, public key only usage
+- [ ] Fix re-connects
 - [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
 - [ ] Update https://nostr.com/clients/coracle

@@ -18,7 +18,7 @@
   import user from "src/agent/user"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
-  import {getPersonWithFallback, people} from "src/agent/state"
+  import {getPersonWithFallback, people} from "src/agent/tables"
   import {routes, modal} from "src/app/ui"
   import PersonCircle from "src/partials/PersonCircle.svelte"
 

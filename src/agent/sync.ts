@@ -12,25 +12,28 @@ import {
   timedelta,
   hash,
 } from "src/util/misc"
-import {
-  Tags,
-  roomAttrs,
-  isRelay,
-  isShareableRelay,
-  normalizeRelayUrl,
-} from "src/util/nostr"
-import {getPersonWithFallback, people, relays, rooms, routes} from "src/agent/state"
+import {Tags, roomAttrs, isRelay, isShareableRelay, normalizeRelayUrl} from "src/util/nostr"
+import {people, userEvents, relays, rooms, routes} from "src/agent/tables"
 import {uniqByUrl} from "src/agent/relays"
+import user from "src/agent/user"
 
 const handlers = {}
 
-const addHandler = (kind, f) => (handlers[kind] || []).push(f)
+const addHandler = (kind, f) => {
+  handlers[kind] = handlers[kind] || []
+  handlers[kind].push(f)
+}
 
 const processEvents = async events => {
+  const userPubkey = user.getPubkey()
   const chunks = chunk(100, ensurePlural(events))
 
   for (let i = 0; i < chunks.length; i++) {
     for (const event of chunks[i]) {
+      if (event.pubkey === userPubkey) {
+        userEvents.put(event)
+      }
+
       for (const handler of handlers[event.kind] || []) {
         handler(event)
       }
@@ -45,12 +48,19 @@ const processEvents = async events => {
 
 // People
 
+const updatePerson = (pubkey, data) => {
+  people.patch({pubkey, updated_at: now(), ...data})
+
+  // If our pubkey matches, copy to our user's profile as well
+  if (pubkey === user.getPubkey()) {
+    user.profile.update($p => ({...$p, ...data}))
+  }
+}
+
 const verifyNip05 = (pubkey, as) =>
   nip05.queryProfile(as).then(result => {
     if (result?.pubkey === pubkey) {
-      const person = getPersonWithFallback(pubkey)
-
-      people.patch({...person, verified_as: as})
+      updatePerson(pubkey, {verified_as: as})
 
       if (result.relays?.length > 0) {
         const urls = result.relays.filter(isRelay)
@@ -92,7 +102,7 @@ const verifyZapper = async (pubkey, address) => {
   const lnurl = lnurlEncode("lnurl", url)
 
   if (zapper?.allowsNostr && zapper?.nostrPubkey) {
-    people.patch({pubkey, zapper, lnurl})
+    updatePerson(pubkey, {zapper, lnurl})
   }
 }
 
@@ -116,48 +126,59 @@ addHandler(0, e => {
       verifyZapper(e.pubkey, address.toLowerCase())
     }
 
-    people.patch({
-      pubkey: e.pubkey,
-      updated_at: now(),
+    updatePerson(e.pubkey, {
       kind0: {...person?.kind0, ...kind0},
       kind0_updated_at: e.created_at,
     })
   })
 })
 
-addHandler(2, e => {
-  const person = people.get(e.pubkey)
-
-  if (e.created_at < person?.relays_updated_at) {
-    return
-  }
-
-  people.patch({
-    pubkey: e.pubkey,
-    updated_at: now(),
-    relays_updated_at: e.created_at,
-    relays: uniqByUrl((person?.relays || []).concat({url: e.content})),
-  })
-})
-
 addHandler(3, e => {
   const person = people.get(e.pubkey)
 
-  if (e.created_at > (person?.petnames_updated_at || 0)) {
-    people.patch({
-      pubkey: e.pubkey,
-      updated_at: now(),
-      petnames_updated_at: e.created_at,
-      petnames: e.tags.filter(t => t[0] === "p"),
-    })
+  if (e.created_at < person?.petnames_updated_at) {
+    return
   }
 
-  if (e.created_at > (person.relays_updated_at || 0)) {
-    tryJson(() => {
-      people.patch({
-        pubkey: e.pubkey,
-        relays_updated_at: e.created_at,
-        relays: Object.entries(JSON.parse(e.content))
+  updatePerson(e.pubkey, {
+    petnames_updated_at: e.created_at,
+    petnames: e.tags.filter(t => t[0] === "p"),
+  })
+})
+
+// User profile, except for events also handled for other users
+
+const profileHandler = (key, getValue) => e => {
+  const profile = user.getProfile()
+
+  if (e.pubkey !== profile.pubkey) {
+    return
+  }
+
+  const updated_at_key = `${key}_updated_at`
+
+  if (e.created_at < profile?.[updated_at_key]) {
+    return
+  }
+
+  user.profile.update($p => ({
+    ...$p,
+    [key]: getValue(e, $p),
+    [updated_at_key]: e.created_at,
+  }))
+}
+
+addHandler(
+  2,
+  profileHandler("relays", (e, p) => uniqByUrl(p.relays.concat({url: e.content})))
+)
+
+addHandler(
+  3,
+  profileHandler("relays", (e, p) => {
+    return (
+      tryJson(() => {
+        return Object.entries(JSON.parse(e.content))
           .map(([url, conditions]) => {
             const {write, read} = conditions as Record<string, boolean | string>
 
@@ -167,62 +188,36 @@ addHandler(3, e => {
               read: [false, "!"].includes(read) ? false : true,
             }
           })
-          .filter(r => isRelay(r.url)),
-      })
-    })
-  }
-})
-
-addHandler(10000, e => {
-  const person = people.get(e.pubkey)
-
-  if (e.created_at < person?.mutes_updated_at) {
-    return
-  }
-
-  people.patch({
-    pubkey: e.pubkey,
-    updated_at: now(),
-    mutes_updated_at: e.created_at,
-    mutes: e.tags,
+          .filter(r => isRelay(r.url))
+      }) || p.relays
+    )
   })
-})
+)
+
+addHandler(
+  10000,
+  profileHandler("mutes", (e, p) => e.tags)
+)
 
 // DEPRECATED
-addHandler(12165, e => {
-  const person = people.get(e.pubkey)
-
-  if (e.created_at < person?.mutes_updated_at) {
-    return
-  }
-
-  people.patch({
-    pubkey: e.pubkey,
-    updated_at: now(),
-    mutes_updated_at: e.created_at,
-    mutes: e.tags,
+addHandler(
+  10001,
+  profileHandler("relays", (e, p) => {
+    return e.tags.map(([url, read, write]) => ({url, read: read !== "!", write: write !== "!"}))
   })
-})
+)
 
-addHandler(10002, e => {
-  const person = people.get(e.pubkey)
-
-  if (e.created_at < person?.relays_updated_at) {
-    return
-  }
-
-  people.patch({
-    pubkey: e.pubkey,
-    updated_at: now(),
-    relays_updated_at: e.created_at,
-    relays: e.tags.map(([_, url, mode]) => {
+addHandler(
+  10002,
+  profileHandler("relays", (e, p) => {
+    return e.tags.map(([_, url, mode]) => {
       const read = (mode || "read") === "read"
       const write = (mode || "write") === "write"
 
       return {url, read, write}
-    }),
+    })
   })
-})
+)
 
 // Rooms
 

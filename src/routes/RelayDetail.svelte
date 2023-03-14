@@ -7,7 +7,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/views/feed/Feed.svelte"
-  import {relays} from "src/agent/state"
+  import {relays} from "src/agent/tables"
   import pool from "src/agent/pool"
   import user from "src/agent/user"
 

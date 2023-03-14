@@ -1,7 +1,8 @@
 import {pluck, all, identity} from "ramda"
 import {derived} from "svelte/store"
-import {Table, registry} from "src/agent/table"
+import {Table, registry} from "src/agent/storage"
 
+export const userEvents = new Table("userEvents", "id")
 export const people = new Table("people", "pubkey")
 export const contacts = new Table("contacts", "pubkey")
 export const rooms = new Table("rooms", "id")
@@ -21,5 +22,3 @@ export const onReady = cb => {
     }
   })
 }
-
-(window as any).t = {people, contacts, rooms, alerts, relays, routes}

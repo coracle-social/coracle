@@ -5,7 +5,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import PersonInfo from "src/views/person/PersonInfo.svelte"
   import {getUserReadRelays} from "src/agent/relays"
-  import {watch} from "src/agent/table"
+  import {watch} from "src/agent/storage"
   import network from "src/agent/network"
   import user from "src/agent/user"
 

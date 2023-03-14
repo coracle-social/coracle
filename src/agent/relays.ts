@@ -1,13 +1,13 @@
-import type {Relay} from 'src/util/types'
-import LRUCache from 'lru-cache'
-import {warn} from 'src/util/logger'
-import {filter, pipe, pick, groupBy, objOf, map, assoc, sortBy, uniqBy, prop} from 'ramda'
-import {first} from 'hurdak/lib/hurdak'
-import {Tags, isRelay, findReplyId} from 'src/util/nostr'
-import {shuffle, fetchJson} from 'src/util/misc'
-import {relays, routes} from 'src/agent/state'
-import pool from 'src/agent/pool'
-import user from 'src/agent/user'
+import type {Relay} from "src/util/types"
+import LRUCache from "lru-cache"
+import {warn} from "src/util/logger"
+import {filter, pipe, pick, groupBy, objOf, map, assoc, sortBy, uniqBy, prop} from "ramda"
+import {first} from "hurdak/lib/hurdak"
+import {Tags, isRelay, findReplyId} from "src/util/nostr"
+import {shuffle, fetchJson} from "src/util/misc"
+import {relays, routes} from "src/agent/tables"
+import pool from "src/agent/pool"
+import user from "src/agent/user"
 
 // From Mike Dilger:
 // 1) Other people's write relays — pull events from people you follow,
@@ -26,21 +26,21 @@ import user from 'src/agent/user'
 export const initializeRelayList = async () => {
   // Throw some hardcoded defaults in there
   await relays.bulkPatch([
-    {url: 'wss://brb.io'},
-    {url: 'wss://nostr.zebedee.cloud'},
-    {url: 'wss://nostr-pub.wellorder.net'},
-    {url: 'wss://relay.nostr.band'},
-    {url: 'wss://nostr.pleb.network'},
-    {url: 'wss://relay.nostrich.de'},
-    {url: 'wss://relay.damus.io'},
+    {url: "wss://brb.io"},
+    {url: "wss://nostr.zebedee.cloud"},
+    {url: "wss://nostr-pub.wellorder.net"},
+    {url: "wss://relay.nostr.band"},
+    {url: "wss://nostr.pleb.network"},
+    {url: "wss://relay.nostrich.de"},
+    {url: "wss://relay.damus.io"},
   ])
 
   // Load relays from nostr.watch via dufflepud
   try {
-    const url = import.meta.env.VITE_DUFFLEPUD_URL + '/relay'
+    const url = import.meta.env.VITE_DUFFLEPUD_URL + "/relay"
     const json = await fetchJson(url)
 
-    await relays.bulkPatch(map(objOf('url'), json.relays.filter(isRelay)))
+    await relays.bulkPatch(map(objOf("url"), json.relays.filter(isRelay)))
   } catch (e) {
     warn("Failed to fetch relays list", e)
   }
@@ -52,49 +52,50 @@ const _getPubkeyRelaysCache = new LRUCache({max: 1000})
 
 export const getPubkeyRelays = (pubkey, mode = null, routesOverride = null) => {
   const filter = mode ? {pubkey, mode} : {pubkey}
-  const key = [mode, pubkey].join(':')
+  const key = [mode, pubkey].join(":")
 
   let result = routesOverride || _getPubkeyRelaysCache.get(key)
   if (!result) {
-     result = routes.all(filter)
-     _getPubkeyRelaysCache.set(key, result)
+    result = routes.all(filter)
+    _getPubkeyRelaysCache.set(key, result)
   }
 
-  return sortByScore(map(pick(['url', 'score']), result))
+  return sortByScore(map(pick(["url", "score"]), result))
 }
 
-export const getPubkeyReadRelays = pubkey => getPubkeyRelays(pubkey, 'read')
+export const getPubkeyReadRelays = pubkey => getPubkeyRelays(pubkey, "read")
 
-export const getPubkeyWriteRelays = pubkey => getPubkeyRelays(pubkey, 'write')
+export const getPubkeyWriteRelays = pubkey => getPubkeyRelays(pubkey, "write")
 
 // Multiple pubkeys
 
 export const getAllPubkeyRelays = (pubkeys, mode = null) => {
   // As an optimization, filter the database once and group by pubkey
   const filter = mode ? {pubkey: pubkeys, mode} : {pubkey: pubkeys}
-  const routesByPubkey = groupBy(prop('pubkey'), routes.all(filter))
+  const routesByPubkey = groupBy(prop("pubkey"), routes.all(filter))
 
   return aggregateScores(
-    pubkeys.map(
-      pubkey => getPubkeyRelays(pubkey, mode, routesByPubkey[pubkey] || [])
-    )
+    pubkeys.map(pubkey => getPubkeyRelays(pubkey, mode, routesByPubkey[pubkey] || []))
   )
 }
 
-export const getAllPubkeyReadRelays = pubkeys => getAllPubkeyRelays(pubkeys, 'read')
+export const getAllPubkeyReadRelays = pubkeys => getAllPubkeyRelays(pubkeys, "read")
 
-export const getAllPubkeyWriteRelays = pubkeys => getAllPubkeyRelays(pubkeys, 'write')
+export const getAllPubkeyWriteRelays = pubkeys => getAllPubkeyRelays(pubkeys, "write")
 
 // Current user
 
-export const getUserRelays = () =>
-  user.getRelays().map(assoc('score', 1))
+export const getUserRelays = () => user.getRelays().map(assoc("score", 1))
 
 export const getUserReadRelays = () =>
-  getUserRelays().filter(prop('read')).map(pick(['url', 'score']))
+  getUserRelays()
+    .filter(prop("read"))
+    .map(pick(["url", "score"]))
 
 export const getUserWriteRelays = (): Array<Relay> =>
-  getUserRelays().filter(prop('write')).map(pick(['url', 'score']))
+  getUserRelays()
+    .filter(prop("write"))
+    .map(pick(["url", "score"]))
 
 // Event-related special cases
 
@@ -113,12 +114,10 @@ export const getRelaysForEventParent = event => {
 // will write replies there. However, this may include spam, so we may want
 // to read from the current user's network's read relays instead.
 export const getRelaysForEventChildren = event => {
-  return uniqByUrl(getPubkeyReadRelays(event.pubkey)
-    .concat({url: event.seen_on, score: 1}))
+  return uniqByUrl(getPubkeyReadRelays(event.pubkey).concat({url: event.seen_on, score: 1}))
 }
 
-export const getRelayForEventHint = event =>
-  ({url: event.seen_on, score: 1})
+export const getRelayForEventHint = event => ({url: event.seen_on, score: 1})
 
 export const getRelayForPersonHint = (pubkey, event) =>
   first(getPubkeyWriteRelays(pubkey)) || getRelayForEventHint(event)
@@ -135,15 +134,14 @@ export const getEventPublishRelays = event => {
   return uniqByUrl(aggregateScores(relayChunks).concat(getUserWriteRelays()))
 }
 
-
 // Utils
 
-export const uniqByUrl = pipe(uniqBy(prop('url')), filter(prop('url')))
+export const uniqByUrl = pipe(uniqBy(prop("url")), filter(prop("url")))
 
 export const sortByScore = sortBy(r => -r.score)
 
 export const sampleRelays = (relays, scale = 1) => {
-  let limit = user.getSetting('relayLimit')
+  let limit = user.getSetting("relayLimit")
 
   // Allow the caller to scale down how many relays we're bothering depending on
   // the use case, but only if we have enough relays to handle it
@@ -159,21 +157,22 @@ export const sampleRelays = (relays, scale = 1) => {
 
   // If we're still under the limit, add user relays for good measure
   if (relays.length < limit) {
-    relays = relays.concat(
-      shuffle(getUserReadRelays()).slice(0, limit - relays.length)
-    )
+    relays = relays.concat(shuffle(getUserReadRelays()).slice(0, limit - relays.length))
   }
 
   return uniqByUrl(relays)
 }
 
 export const aggregateScores = relayGroups => {
-  const scores = {} as Record<string, {
-    score: number,
-    count: number,
-    weight?: number,
-    weightedScore?: number
-  }>
+  const scores = {} as Record<
+    string,
+    {
+      score: number
+      count: number
+      weight?: number
+      weightedScore?: number
+    }
+  >
 
   for (const relays of relayGroups) {
     for (const relay of relays) {
@@ -195,7 +194,6 @@ export const aggregateScores = relayGroups => {
   }
 
   return sortByScore(
-    Object.entries(scores)
-      .map(([url, {weightedScore}]) => ({url, score: weightedScore}))
+    Object.entries(scores).map(([url, {weightedScore}]) => ({url, score: weightedScore}))
   )
 }

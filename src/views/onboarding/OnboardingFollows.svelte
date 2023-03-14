@@ -6,8 +6,8 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import PersonInfo from "src/partials/PersonInfo.svelte"
-  import {getPersonWithFallback} from "src/agent/state"
-  import {watch} from "src/agent/table"
+  import {getPersonWithFallback} from "src/agent/tables"
+  import {watch} from "src/agent/storage"
   import {modal} from "src/app/ui"
 
   export let follows

@@ -3,7 +3,7 @@
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
-  import {watch} from "src/agent/table"
+  import {watch} from "src/agent/storage"
   import user from "src/agent/user"
 
   let q = ""

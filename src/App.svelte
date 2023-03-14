@@ -14,12 +14,13 @@
   import {timedelta, shuffle, now, sleep} from "src/util/misc"
   import {displayPerson, isLike} from "src/util/nostr"
   import cmd from "src/agent/cmd"
-  import {ready, onReady, relays} from "src/agent/state"
+  import {ready, onReady, relays} from "src/agent/tables"
   import keys from "src/agent/keys"
   import network from "src/agent/network"
   import pool from "src/agent/pool"
   import {getUserRelays, initializeRelayList} from "src/agent/relays"
   import sync from "src/agent/sync"
+  import * as tables from "src/agent/tables"
   import user from "src/agent/user"
   import {loadAppData} from "src/app"
   import alerts from "src/app/alerts"
@@ -64,7 +65,7 @@
   import AddRelay from "src/views/relays/AddRelay.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
 
-  Object.assign(window, {cmd, user, keys, network, pool, sync})
+  Object.assign(window, {cmd, user, keys, network, pool, sync, tables})
 
   export let url = ""
 

@@ -7,7 +7,7 @@
   import {displayPerson} from "src/util/nostr"
   import {fromParentOffset} from "src/util/html"
   import Badge from "src/partials/Badge.svelte"
-  import {people} from "src/agent/state"
+  import {people} from "src/agent/tables"
 
   export let onSubmit
 

@@ -6,7 +6,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/partials/RelayCard.svelte"
-  import {watch} from "src/agent/table"
+  import {watch} from "src/agent/storage"
   import {modal} from "src/app/ui"
 
   export let relays

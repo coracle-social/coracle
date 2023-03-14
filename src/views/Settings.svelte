@@ -21,7 +21,7 @@
   const submit = async event => {
     event.preventDefault()
 
-    user.settings.set(values)
+    user.profile.update($p => ({...$p, settings: values}))
 
     toast.show("info", "Your settings have been saved!")
   }

@@ -8,7 +8,7 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Button from "src/partials/Button.svelte"
   import {getUserWriteRelays} from "src/agent/relays"
-  import {rooms} from "src/agent/state"
+  import {rooms} from "src/agent/tables"
   import cmd from "src/agent/cmd"
   import {toast, modal} from "src/app/ui"
   import {publishWithToast} from "src/app"
