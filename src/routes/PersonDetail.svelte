@@ -18,9 +18,9 @@
   import user from "src/agent/user"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
-  import database from "src/agent/database"
+  import {getPersonWithFallback, people} from "src/agent/state"
   import {routes, modal} from "src/app/ui"
-  import PersonCircle from "src/partials/PersonCircle.svelte";
+  import PersonCircle from "src/partials/PersonCircle.svelte"
 
   export let npub
   export let activeTab
@@ -35,7 +35,7 @@
   let muted = false
   let followers = new Set()
   let followersCount = tweened(0, {interpolate, duration: 1000})
-  let person = database.getPersonWithFallback(pubkey)
+  let person = getPersonWithFallback(pubkey)
   let loading = true
   let showActions = false
   let actions = []
@@ -88,12 +88,12 @@
 
     // Refresh our person
     network.loadPeople([pubkey], {force: true}).then(() => {
-      person = database.getPersonWithFallback(pubkey)
+      person = getPersonWithFallback(pubkey)
       loading = false
     })
 
     // Prime our followers count
-    database.people.all().forEach(p => {
+    people.all().forEach(p => {
       if (Tags.wrap(p.petnames).type("p").values().all().includes(pubkey)) {
         followers.add(p.pubkey)
         followersCount.set(followers.size)
@@ -173,7 +173,7 @@
 
 <Content>
   <div class="flex gap-4">
-    <PersonCircle person={person} size={16} class="sm:h-32 sm:w-32" />
+    <PersonCircle {person} size={16} class="sm:h-32 sm:w-32" />
     <div class="flex flex-grow flex-col gap-4">
       <div class="flex items-start justify-between gap-4">
         <div class="flex flex-grow flex-col gap-2">

@@ -5,7 +5,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import PersonInfo from "src/views/person/PersonInfo.svelte"
   import {getUserReadRelays} from "src/agent/relays"
-  import database from "src/agent/database"
+  import {watch} from "src/agent/table"
   import network from "src/agent/network"
   import user from "src/agent/user"
 
@@ -15,7 +15,7 @@
   let results = []
 
   const {petnamePubkeys} = user
-  const search = database.watch("people", t =>
+  const search = watch("people", t =>
     fuzzy(t.all({"kind0.name:!nil": null}), {
       keys: ["kind0.name", "kind0.about", "pubkey"],
     })

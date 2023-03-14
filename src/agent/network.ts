@@ -3,19 +3,19 @@ import {sortBy, assoc, uniq, uniqBy, prop, propEq, reject, groupBy, pluck} from 
 import {personKinds, findReplyId} from 'src/util/nostr'
 import {log} from 'src/util/logger'
 import {chunk} from 'hurdak/lib/hurdak'
-import {batch, timedelta, now} from 'src/util/misc'
+import {batch, now, timedelta} from 'src/util/misc'
 import {
   getRelaysForEventParent, getAllPubkeyWriteRelays, aggregateScores,
   getRelaysForEventChildren, sampleRelays,
 } from 'src/agent/relays'
-import database from 'src/agent/database'
+import {people} from 'src/agent/state'
 import pool from 'src/agent/pool'
 import sync from 'src/agent/sync'
 
 const getStalePubkeys = pubkeys => {
   // If we're not reloading, only get pubkeys we don't already know about
   return uniq(pubkeys).filter(pubkey => {
-    const p = database.people.get(pubkey)
+    const p = people.get(pubkey)
 
     return !p || p.updated_at < now() - timedelta(1, 'days')
   })
@@ -39,11 +39,10 @@ const listen = ({relays, filter, onChunk = null, shouldProcess = true, delay = 5
 
 const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5000}) => {
   return new Promise(resolve => {
-    const now = Date.now()
     const done = new Set()
     const allEvents = []
 
-    const attemptToComplete = async () => {
+    const attemptToComplete = async isTimeout => {
       const sub = await subPromise
 
       // If we've already unsubscribed we're good
@@ -52,7 +51,6 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5
       }
 
       const isDone = done.size === relays.length
-      const isTimeout = Date.now() - now >= timeout
 
       if (isTimeout) {
         const timedOutRelays = reject(r => done.has(r.url), relays)
@@ -78,7 +76,7 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5
     }
 
     // If a relay takes too long, give up
-    setTimeout(attemptToComplete, timeout)
+    setTimeout(() => attemptToComplete(true), timeout)
 
     const subPromise = pool.subscribe({
       relays,
@@ -98,11 +96,11 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5
       }),
       onEose: url => {
         done.add(url)
-        attemptToComplete()
+        attemptToComplete(false)
       },
       onError: url => {
         done.add(url)
-        attemptToComplete()
+        attemptToComplete(false)
       },
     })
   }) as Promise<MyEvent[]>

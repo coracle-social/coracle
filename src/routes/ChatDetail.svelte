@@ -9,7 +9,7 @@
   import user from "src/agent/user"
   import {getRelaysForEventChildren, sampleRelays} from "src/agent/relays"
   import network from "src/agent/network"
-  import database from "src/agent/database"
+  import {watch} from "src/agent/table"
   import cmd from "src/agent/cmd"
   import {modal} from "src/app/ui"
   import {lastChecked} from "src/app/alerts"
@@ -18,7 +18,7 @@
   export let entity
 
   const id = toHex(entity)
-  const room = database.watch("rooms", t => t.get(id) || {id})
+  const room = watch("rooms", t => t.get(id) || {id})
   const getRelays = () => sampleRelays($room ? getRelaysForEventChildren($room) : [])
 
   const listenForMessages = onChunk =>

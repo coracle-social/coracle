@@ -5,7 +5,8 @@ import {createMap} from 'hurdak/lib/hurdak'
 import {synced, tryJson, now, timedelta} from 'src/util/misc'
 import {Tags, personKinds, isAlert, asDisplayEvent, findReplyId} from 'src/util/nostr'
 import {getUserReadRelays} from 'src/agent/relays'
-import database from 'src/agent/database'
+import {alerts, contacts, rooms} from 'src/agent/state'
+import {watch} from 'src/agent/table'
 import network from 'src/agent/network'
 
 let listener
@@ -24,18 +25,18 @@ const seenAlertIds = synced('app/alerts/seenAlertIds', [])
 export const lastChecked = synced('app/alerts/lastChecked', {})
 
 export const newAlerts = derived(
-  [database.watch('alerts', t => pluck('created_at', t.all()).reduce(max, 0)), lastChecked],
+  [watch('alerts', t => pluck('created_at', t.all()).reduce(max, 0)), lastChecked],
   ([$lastAlert, $lastChecked]) => $lastAlert > ($lastChecked.alerts || 0)
 )
 
 export const newDirectMessages = derived(
-  [database.watch('contacts', t => t.all()), lastChecked],
+  [watch('contacts', t => t.all()), lastChecked],
   ([contacts, $lastChecked]) =>
     Boolean(find(c => c.lastMessage > $lastChecked[c.pubkey], contacts))
 )
 
 export const newChatMessages = derived(
-  [database.watch('rooms', t => t.all()), lastChecked],
+  [watch('rooms', t => t.all()), lastChecked],
   ([rooms, $lastChecked]) =>
     Boolean(find(c => c.lastMessage > $lastChecked[c.pubkey], rooms))
 )
@@ -75,33 +76,33 @@ const processAlerts = async (pubkey, events) => {
 
   zaps.filter(isPubkeyChild).forEach(e => {
     const parent = parents[findReplyId(e)]
-    const note = asAlert(database.alerts.get(parent.id) || parent)
+    const note = asAlert(alerts.get(parent.id) || parent)
     const meta = Tags.from(e).asMeta()
     const request = tryJson(() => JSON.parse(meta.description))
 
     if (request) {
-      database.alerts.put({...note, zappedBy: uniq(note.zappedBy.concat(request.pubkey))})
+      alerts.put({...note, zappedBy: uniq(note.zappedBy.concat(request.pubkey))})
     }
   })
 
   likes.filter(isPubkeyChild).forEach(e => {
     const parent = parents[findReplyId(e)]
-    const note = asAlert(database.alerts.get(parent.id) || parent)
+    const note = asAlert(alerts.get(parent.id) || parent)
 
-    database.alerts.put({...note, likedBy: uniq(note.likedBy.concat(e.pubkey))})
+    alerts.put({...note, likedBy: uniq(note.likedBy.concat(e.pubkey))})
   })
 
   replies.forEach(e => {
     const parent = parents[findReplyId(e)]
-    const note = asAlert(database.alerts.get(parent.id) || parent)
+    const note = asAlert(alerts.get(parent.id) || parent)
 
-    database.alerts.put({...note, repliesFrom: uniq(note.repliesFrom.concat(e.pubkey))})
+    alerts.put({...note, repliesFrom: uniq(note.repliesFrom.concat(e.pubkey))})
   })
 
   mentions.forEach(e => {
-    const note = database.alerts.get(e.id) || asAlert(e)
+    const note = alerts.get(e.id) || asAlert(e)
 
-    database.alerts.put({...note, isMention: true})
+    alerts.put({...note, isMention: true})
   })
 }
 
@@ -118,12 +119,12 @@ const processMessages = async (pubkey, events) => {
         const recipient = Tags.from(message).type("p").values().first()
 
         $lastChecked[recipient] = Math.max($lastChecked[recipient] || 0, message.created_at)
-        database.contacts.patch({pubkey: recipient, accepted: true})
+        contacts.patch({pubkey: recipient, accepted: true})
       } else {
-        const contact = database.contacts.get(message.pubkey)
+        const contact = contacts.get(message.pubkey)
         const lastMessage = Math.max(contact?.lastMessage || 0, message.created_at)
 
-        database.contacts.patch({pubkey: message.pubkey, lastMessage})
+        contacts.patch({pubkey: message.pubkey, lastMessage})
       }
     }
 
@@ -145,10 +146,10 @@ const processChats = async (pubkey, events) => {
       if (message.pubkey === pubkey) {
         $lastChecked[id] = Math.max($lastChecked[id] || 0, message.created_at)
       } else {
-        const room = database.rooms.get(id)
+        const room = rooms.get(id)
         const lastMessage = Math.max(room?.lastMessage || 0, message.created_at)
 
-        database.rooms.patch({id, lastMessage})
+        rooms.patch({id, lastMessage})
       }
     }
 
@@ -159,7 +160,7 @@ const processChats = async (pubkey, events) => {
 const listen = async pubkey => {
   // Include an offset so we don't miss alerts on one relay but not another
   const since = now() - timedelta(7, 'days')
-  const roomIds = pluck('id', database.rooms.all({joined: true}))
+  const roomIds = pluck('id', rooms.all({joined: true}))
 
   if (listener) {
     listener.unsub()

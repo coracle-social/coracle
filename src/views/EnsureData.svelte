@@ -6,7 +6,7 @@
   import RelaySearch from "src/views/relays/RelaySearch.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
   import PersonSearch from "src/views/person/PersonSearch.svelte"
-  import database from "src/agent/database"
+  import {getPersonWithFallback} from "src/agent/state"
   import user from "src/agent/user"
 
   export let enforceRelays = true
@@ -62,7 +62,7 @@
         <h1 class="text-2xl">Your Follows</h1>
       {/if}
       {#each $petnamePubkeys as pubkey (pubkey)}
-        <PersonInfo person={database.getPersonWithFallback(pubkey)} />
+        <PersonInfo person={getPersonWithFallback(pubkey)} />
       {:else}
         <div class="flex flex-col items-center gap-4 my-8">
           <div class="text-xl flex gap-2 items-center">

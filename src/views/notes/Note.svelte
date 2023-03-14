@@ -29,11 +29,12 @@
   import keys from "src/agent/keys"
   import network from "src/agent/network"
   import {getEventPublishRelays, getRelaysForEventParent} from "src/agent/relays"
-  import database from "src/agent/database"
+  import {getPersonWithFallback} from "src/agent/state"
+  import {watch} from "src/agent/table"
   import cmd from "src/agent/cmd"
   import {routes} from "src/app/ui"
   import {publishWithToast} from "src/app"
-  import PersonCircle from "src/partials/PersonCircle.svelte";
+  import PersonCircle from "src/partials/PersonCircle.svelte"
 
   export let note
   export let depth = 0
@@ -59,7 +60,7 @@
   const links = extractUrls(note.content)
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
-  const person = database.watch("people", () => database.getPersonWithFallback(note.pubkey))
+  const person = watch("people", () => getPersonWithFallback(note.pubkey))
 
   let likes, flags, zaps, like, flag, border, childrenContainer, noteContainer, canZap
   let muted = false
@@ -507,7 +508,7 @@
             <button
               class="fa fa-times cursor-pointer"
               on:click|stopPropagation={() => removeMention(p)} />
-            {displayPerson(database.getPersonWithFallback(p))}
+            {displayPerson(getPersonWithFallback(p))}
           </div>
         {:else}
           <div class="text-light inline-block">No mentions</div>

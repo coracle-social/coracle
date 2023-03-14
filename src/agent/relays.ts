@@ -2,10 +2,10 @@ import type {Relay} from 'src/util/types'
 import LRUCache from 'lru-cache'
 import {warn} from 'src/util/logger'
 import {filter, pipe, pick, groupBy, objOf, map, assoc, sortBy, uniqBy, prop} from 'ramda'
-import {first, createMap} from 'hurdak/lib/hurdak'
+import {first} from 'hurdak/lib/hurdak'
 import {Tags, isRelay, findReplyId} from 'src/util/nostr'
 import {shuffle, fetchJson} from 'src/util/misc'
-import database from 'src/agent/database'
+import {relays, routes} from 'src/agent/state'
 import pool from 'src/agent/pool'
 import user from 'src/agent/user'
 
@@ -25,25 +25,22 @@ import user from 'src/agent/user'
 
 export const initializeRelayList = async () => {
   // Throw some hardcoded defaults in there
-  await database.relays.bulkPatch(
-    createMap('url', [
-      {url: 'wss://brb.io'},
-      {url: 'wss://nostr.zebedee.cloud'},
-      {url: 'wss://nostr-pub.wellorder.net'},
-      {url: 'wss://relay.nostr.band'},
-      {url: 'wss://nostr.pleb.network'},
-      {url: 'wss://relay.nostrich.de'},
-      {url: 'wss://relay.damus.io'},
-    ])
-  )
+  await relays.bulkPatch([
+    {url: 'wss://brb.io'},
+    {url: 'wss://nostr.zebedee.cloud'},
+    {url: 'wss://nostr-pub.wellorder.net'},
+    {url: 'wss://relay.nostr.band'},
+    {url: 'wss://nostr.pleb.network'},
+    {url: 'wss://relay.nostrich.de'},
+    {url: 'wss://relay.damus.io'},
+  ])
 
   // Load relays from nostr.watch via dufflepud
   try {
     const url = import.meta.env.VITE_DUFFLEPUD_URL + '/relay'
     const json = await fetchJson(url)
-    const relays = json.relays.filter(isRelay)
 
-    await database.relays.bulkPatch(createMap('url', map(objOf('url'), relays)))
+    await relays.bulkPatch(map(objOf('url'), json.relays.filter(isRelay)))
   } catch (e) {
     warn("Failed to fetch relays list", e)
   }
@@ -53,13 +50,13 @@ export const initializeRelayList = async () => {
 
 const _getPubkeyRelaysCache = new LRUCache({max: 1000})
 
-export const getPubkeyRelays = (pubkey, mode = null, routes = null) => {
+export const getPubkeyRelays = (pubkey, mode = null, routesOverride = null) => {
   const filter = mode ? {pubkey, mode} : {pubkey}
   const key = [mode, pubkey].join(':')
 
-  let result = routes || _getPubkeyRelaysCache.get(key)
+  let result = routesOverride || _getPubkeyRelaysCache.get(key)
   if (!result) {
-     result = database.routes.all(filter)
+     result = routes.all(filter)
      _getPubkeyRelaysCache.set(key, result)
   }
 
@@ -75,7 +72,7 @@ export const getPubkeyWriteRelays = pubkey => getPubkeyRelays(pubkey, 'write')
 export const getAllPubkeyRelays = (pubkeys, mode = null) => {
   // As an optimization, filter the database once and group by pubkey
   const filter = mode ? {pubkey: pubkeys, mode} : {pubkey: pubkeys}
-  const routesByPubkey = groupBy(prop('pubkey'), database.routes.all(filter))
+  const routesByPubkey = groupBy(prop('pubkey'), routes.all(filter))
 
   return aggregateScores(
     pubkeys.map(

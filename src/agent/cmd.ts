@@ -2,7 +2,7 @@ import {pick, last, prop, uniqBy} from 'ramda'
 import {get} from 'svelte/store'
 import {roomAttrs, displayPerson, findReplyId, findRootId} from 'src/util/nostr'
 import {getPubkeyWriteRelays, getRelayForPersonHint, sampleRelays} from 'src/agent/relays'
-import database from 'src/agent/database'
+import {getPersonWithFallback} from 'src/agent/state'
 import pool from 'src/agent/pool'
 import sync from 'src/agent/sync'
 import keys from 'src/agent/keys'
@@ -43,7 +43,7 @@ const createDirectMessage = (pubkey, content) =>
 
 const createNote = (content, mentions = [], topics = []) => {
   mentions = mentions.map(pubkey => {
-    const name = displayPerson(database.getPersonWithFallback(pubkey))
+    const name = displayPerson(getPersonWithFallback(pubkey))
     const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
 
     return ["p", pubkey, url, name]

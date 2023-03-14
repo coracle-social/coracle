@@ -1,10 +1,10 @@
 import {uniq, without} from 'ramda'
 import {Tags} from 'src/util/nostr'
-import database from 'src/agent/database'
+import {getPersonWithFallback} from 'src/agent/state'
 import user from 'src/agent/user'
 
 export const getFollows = pubkey =>
-  Tags.wrap(database.getPersonWithFallback(pubkey).petnames).type("p").values().all()
+  Tags.wrap(getPersonWithFallback(pubkey).petnames).type("p").values().all()
 
 export const getNetwork = pubkey => {
   const follows = getFollows(pubkey)

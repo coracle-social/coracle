@@ -4,13 +4,13 @@
   import {fly} from "svelte/transition"
   import {ellipsize} from "hurdak/lib/hurdak"
   import Anchor from "src/partials/Anchor.svelte"
-  import database from "src/agent/database"
+  import {rooms} from "src/agent/state"
 
   export let room
 
   const enter = () => navigate(`/chat/${nip19.noteEncode(room.id)}`)
-  const join = () => database.rooms.patch({id: room.id, joined: true})
-  const leave = () => database.rooms.patch({id: room.id, joined: false})
+  const join = () => rooms.patch({id: room.id, joined: true})
+  const leave = () => rooms.patch({id: room.id, joined: false})
 </script>
 
 <button

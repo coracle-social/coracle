@@ -4,14 +4,14 @@
   import {fly} from "svelte/transition"
   import {ellipsize} from "hurdak/lib/hurdak"
   import {displayPerson} from "src/util/nostr"
-  import database from "src/agent/database"
+  import {getPersonWithFallback} from "src/agent/state"
   import {lastChecked} from "src/app/alerts"
-  import PersonCircle from "src/partials/PersonCircle.svelte";
+  import PersonCircle from "src/partials/PersonCircle.svelte"
 
   export let contact
 
   const newMessages = contact.lastMessage > $lastChecked[contact.pubkey]
-  const person = database.getPersonWithFallback(contact.pubkey)
+  const person = getPersonWithFallback(contact.pubkey)
   const enter = () => navigate(`/messages/${nip19.npubEncode(contact.pubkey)}`)
 </script>
 
@@ -20,7 +20,7 @@
          px-4 py-6 transition-all hover:bg-medium"
   on:click={enter}
   in:fly={{y: 20}}>
-  <PersonCircle size={14} person={person} />
+  <PersonCircle size={14} {person} />
   <div class="flex min-w-0 flex-grow flex-col justify-start gap-2">
     <div class="flex flex-grow items-start justify-between gap-2">
       <div class="flex items-center gap-2 overflow-hidden">

@@ -2,14 +2,14 @@
   import {fly} from "svelte/transition"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
-  import database from "src/agent/database"
+  import {dropAll} from "src/agent/table"
 
   let confirmed = false
 
   const confirm = async () => {
     confirmed = true
 
-    await database.dropAll()
+    await dropAll()
 
     localStorage.clear()
 

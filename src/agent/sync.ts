@@ -1,10 +1,10 @@
 import {uniq, pick, identity, isEmpty} from 'ramda'
 import {nip05} from 'nostr-tools'
-import {noop, createMap, ensurePlural, chunk, switcherFn} from 'hurdak/lib/hurdak'
+import {noop, ensurePlural, chunk, switcherFn} from 'hurdak/lib/hurdak'
 import {log} from 'src/util/logger'
 import {lnurlEncode, tryFunc, lnurlDecode, tryFetch, now, sleep, tryJson, timedelta, shuffle, hash} from 'src/util/misc'
 import {Tags, roomAttrs, personKinds, isRelay, isShareableRelay, normalizeRelayUrl} from 'src/util/nostr'
-import database from 'src/agent/database'
+import {getPersonWithFallback, people, relays, rooms, routes} from 'src/agent/state'
 
 const processEvents = async events => {
   await Promise.all([
@@ -30,13 +30,12 @@ const batchProcess = async (processChunk, events) => {
 const processProfileEvents = async events => {
   const profileEvents = events.filter(e => personKinds.includes(e.kind))
 
-  const updates = {}
   for (const e of profileEvents) {
-    const person = database.getPersonWithFallback(e.pubkey)
+    const person = getPersonWithFallback(e.pubkey)
 
-    updates[e.pubkey] = {
+    people.put({
       ...person,
-      ...updates[e.pubkey],
+      pubkey: e.pubkey,
       ...switcherFn(e.kind, {
         0: () => tryJson(() => {
           const kind0 = JSON.parse(e.content)
@@ -53,18 +52,14 @@ const processProfileEvents = async events => {
             }
 
             return {
-              kind0: {
-                ...person?.kind0,
-                ...updates[e.pubkey]?.kind0,
-                ...kind0,
-              },
+              kind0: {...person?.kind0, ...kind0},
               kind0_updated_at: e.created_at,
             }
           }
         }),
         2: () => {
           if (e.created_at > (person.relays_updated_at || 0)) {
-            const {relays = []} = database.getPersonWithFallback(e.pubkey)
+            const {relays = []} = getPersonWithFallback(e.pubkey)
 
             return {
               relays_updated_at: e.created_at,
@@ -141,20 +136,15 @@ const processProfileEvents = async events => {
         },
       }),
       updated_at: now(),
-    }
-  }
-
-  if (!isEmpty(updates)) {
-    await database.people.bulkPatch(updates)
+    })
   }
 }
 
 // Chat rooms
 
-const processRoomEvents = async events => {
+const processRoomEvents = events => {
   const roomEvents = events.filter(e => [40, 41].includes(e.kind))
 
-  const updates = {}
   for (const e of roomEvents) {
     const content = tryJson(() => pick(roomAttrs, JSON.parse(e.content)))
     const roomId = e.kind === 40 ? e.id : Tags.from(e).type("e").values().first()
@@ -164,25 +154,20 @@ const processRoomEvents = async events => {
       continue
     }
 
-    const room = database.rooms.get(roomId)
+    const room = rooms.get(roomId)
 
     // Don't let old edits override new ones
     if (room?.updated_at >= e.created_at) {
       continue
     }
 
-    updates[roomId] = {
+    rooms.put({
       ...room,
-      ...updates,
       ...content,
       id: roomId,
       pubkey: e.pubkey,
       updated_at: e.created_at,
-    }
-  }
-
-  if (!isEmpty(updates)) {
-    await database.rooms.bulkPatch(updates)
+    })
   }
 }
 
@@ -205,7 +190,7 @@ const calculateRoute = (pubkey, rawUrl, type, mode, created_at) => {
   const id = hash([pubkey, url, mode].join('')).toString()
   const score = getWeight(type) * (1 - (now() - created_at) / timedelta(30, 'days'))
   const defaults = {id, pubkey, url, mode, score: 0, count: 0, types: []}
-  const route = database.routes.get(id) || defaults
+  const route = routes.get(id) || defaults
 
   const newTotalScore = route.score * route.count + score
   const newCount = route.count + 1
@@ -293,8 +278,8 @@ const processRoutes = async events => {
   updates = updates.filter(identity)
 
   if (!isEmpty(updates)) {
-    await database.relays.bulkPatch(createMap('url', updates.map(pick(['url']))))
-    await database.routes.bulkPut(createMap('id', updates))
+    await relays.bulkPatch(updates.map(pick(['url'])))
+    await routes.bulkPut(updates)
   }
 }
 
@@ -303,22 +288,20 @@ const processRoutes = async events => {
 const verifyNip05 = (pubkey, as) =>
   nip05.queryProfile(as).then(result => {
     if (result?.pubkey === pubkey) {
-      const person = database.getPersonWithFallback(pubkey)
+      const person = getPersonWithFallback(pubkey)
 
-      database.people.patch({...person, verified_as: as})
+      people.patch({...person, verified_as: as})
 
       if (result.relays?.length > 0) {
         const urls = result.relays.filter(isRelay)
 
-        database.relays.bulkPatch(
-          createMap('url', urls.map(url => ({url: normalizeRelayUrl(url)})))
-        )
+        relays.bulkPatch(urls.map(url => ({url: normalizeRelayUrl(url)})))
 
-        database.routes.bulkPut(
-          createMap('id', urls.flatMap(url => [
+        routes.bulkPut(
+          urls.flatMap(url => [
             calculateRoute(pubkey, url, 'nip05', 'write', now()),
             calculateRoute(pubkey, url, 'nip05', 'read', now()),
-          ]).filter(identity))
+          ]).filter(identity)
         )
       }
     }
@@ -347,7 +330,7 @@ const verifyZapper = async (pubkey, address) => {
   const lnurl = lnurlEncode('lnurl', url)
 
   if (zapper?.allowsNostr && zapper?.nostrPubkey) {
-    database.people.patch({pubkey, zapper, lnurl})
+    people.patch({pubkey, zapper, lnurl})
   }
 }
 

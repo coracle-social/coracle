@@ -6,7 +6,7 @@
   import {sleep, createScroller, Cursor} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import user from "src/agent/user"
-  import database from "src/agent/database"
+  import {getPersonWithFallback} from "src/agent/state"
   import network from "src/agent/network"
 
   export let loadMessages
@@ -26,7 +26,7 @@
     // Group messages so we're only showing the person once per chunk
     annotatedMessages = reverse(
       sortBy(prop("created_at"), uniqBy(prop("id"), messages)).reduce((mx, m) => {
-        const person = database.getPersonWithFallback(m.pubkey)
+        const person = getPersonWithFallback(m.pubkey)
         const showPerson = person.pubkey !== getPath(["person", "pubkey"], last(mx))
 
         return mx.concat({...m, person, showPerson})

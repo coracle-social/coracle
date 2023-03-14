@@ -6,7 +6,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/partials/RelayCard.svelte"
-  import database from "src/agent/database"
+  import {watch} from "src/agent/table"
   import {modal} from "src/app/ui"
 
   export let relays
@@ -14,7 +14,7 @@
   let q = ""
   let search
 
-  const knownRelays = database.watch("relays", t => t.all())
+  const knownRelays = watch("relays", t => t.all())
 
   $: {
     const joined = new Set(pluck("url", relays))

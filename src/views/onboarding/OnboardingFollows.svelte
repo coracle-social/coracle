@@ -6,7 +6,8 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import PersonInfo from "src/partials/PersonInfo.svelte"
-  import database from "src/agent/database"
+  import {getPersonWithFallback} from "src/agent/state"
+  import {watch} from "src/agent/table"
   import {modal} from "src/app/ui"
 
   export let follows
@@ -14,7 +15,7 @@
   let q = ""
   let search
 
-  const knownPeople = database.watch("people", t => t.all({"kind0.name:!nil": null}))
+  const knownPeople = watch("people", t => t.all({"kind0.name:!nil": null}))
 
   $: search = fuzzy(
     $knownPeople.filter(p => !follows.includes(p.pubkey)),
@@ -54,7 +55,7 @@
     </div>
   {:else}
     {#each follows as pubkey}
-      <PersonInfo person={database.getPersonWithFallback(pubkey)} {removePetname} />
+      <PersonInfo person={getPersonWithFallback(pubkey)} {removePetname} />
     {/each}
   {/if}
   <div class="flex items-center gap-2">

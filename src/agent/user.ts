@@ -4,7 +4,7 @@ import {slice, identity, prop, find, pipe, assoc, whereEq, when, concat, reject,
 import {findReplyId, findRootId} from 'src/util/nostr'
 import {synced} from 'src/util/misc'
 import {derived} from 'svelte/store'
-import database from 'src/agent/database'
+import {people} from 'src/agent/state'
 import keys from 'src/agent/keys'
 import cmd from 'src/agent/cmd'
 
@@ -34,14 +34,8 @@ const settings = synced("agent/user/settings", {
 })
 
 const profile = derived(
-  [keys.pubkey, database.people as Readable<any>],
-  ([pubkey, $people]) => {
-    if (!pubkey) {
-      return null
-    }
-
-    return $people[pubkey] || {pubkey}
-  }
+  [keys.pubkey, people as Readable<any>],
+  ([pubkey, t]) => pubkey ? (t.get(pubkey) || {pubkey}) : null
 ) as Readable<Person>
 
 const profileKeyWithDefault = (key, stores) => derived(

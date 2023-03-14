@@ -13,7 +13,7 @@
   import OnboardingComplete from "src/views/onboarding/OnboardingComplete.svelte"
   import {getFollows} from "src/agent/social"
   import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
-  import database from "src/agent/database"
+  import {getPersonWithFallback} from "src/agent/state"
   import network from "src/agent/network"
   import user from "src/agent/user"
   import keys from "src/agent/keys"
@@ -44,7 +44,7 @@
     await user.updatePetnames(() =>
       follows.map(pubkey => {
         const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
-        const name = displayPerson(database.getPersonWithFallback(pubkey))
+        const name = displayPerson(getPersonWithFallback(pubkey))
 
         return ["p", pubkey, url, name]
       })

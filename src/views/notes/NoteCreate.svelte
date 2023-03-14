@@ -16,7 +16,8 @@
   import Modal from "src/partials/Modal.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {getUserWriteRelays} from "src/agent/relays"
-  import database from "src/agent/database"
+  import {getPersonWithFallback} from "src/agent/state"
+  import {watch} from "src/agent/table"
   import cmd from "src/agent/cmd"
   import {toast, modal} from "src/app/ui"
   import {publishWithToast} from "src/app"
@@ -30,7 +31,7 @@
   let q = ""
   let search
 
-  const knownRelays = database.watch("relays", t => t.all())
+  const knownRelays = watch("relays", t => t.all())
 
   $: {
     const joined = new Set(pluck("url", relays))
@@ -91,7 +92,7 @@
 
   onMount(() => {
     if (pubkey) {
-      const person = database.getPersonWithFallback(pubkey)
+      const person = getPersonWithFallback(pubkey)
 
       input.type("@" + displayPerson(person))
       input.trigger({key: "Enter"})

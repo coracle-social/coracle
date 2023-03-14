@@ -6,15 +6,16 @@
   import Anchor from "src/partials/Anchor.svelte"
   import user from "src/agent/user"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
-  import database from "src/agent/database"
+  import {getPersonWithFallback} from "src/agent/state"
+  import {watch} from "src/agent/table"
   import {routes} from "src/app/ui"
-  import PersonCircle from "src/partials/PersonCircle.svelte";
+  import PersonCircle from "src/partials/PersonCircle.svelte"
 
   export let pubkey
 
   const {petnamePubkeys, canPublish} = user
   const getRelays = () => sampleRelays(getPubkeyWriteRelays(pubkey))
-  const person = database.watch("people", () => database.getPersonWithFallback(pubkey))
+  const person = watch("people", () => getPersonWithFallback(pubkey))
 
   let following = false
 

@@ -7,7 +7,7 @@
   import {displayPerson} from "src/util/nostr"
   import {fromParentOffset} from "src/util/html"
   import Badge from "src/partials/Badge.svelte"
-  import database from "src/agent/database"
+  import {people} from "src/agent/state"
 
   export let onSubmit
 
@@ -17,7 +17,7 @@
   let input = null
   let prevContent = ""
 
-  const search = fuzzy(database.people.all({"kind0.name:!nil": null}), {
+  const search = fuzzy(people.all({"kind0.name:!nil": null}), {
     keys: ["kind0.name", "pubkey"],
   })
 

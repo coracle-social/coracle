@@ -3,7 +3,7 @@
   import Badge from "src/partials/Badge.svelte"
   import Popover from "src/partials/Popover.svelte"
   import {formatTimestamp} from "src/util/misc"
-  import database from "src/agent/database"
+  import {getPersonWithFallback} from "src/agent/state"
   import {modal} from "src/app/ui"
 
   export let note
@@ -35,7 +35,7 @@
       <div slot="tooltip">
         <div class="grid grid-cols-2 gap-y-2 gap-x-4">
           {#each pubkeys as pubkey}
-            <Badge person={database.getPersonWithFallback(pubkey)} />
+            <Badge person={getPersonWithFallback(pubkey)} />
           {/each}
         </div>
       </div>

@@ -7,7 +7,7 @@
   import Content from "src/partials/Content.svelte"
   import Alert from "src/views/alerts/Alert.svelte"
   import Mention from "src/views/alerts/Mention.svelte"
-  import database from "src/agent/database"
+  import {alerts} from "src/agent/state"
   import user from "src/agent/user"
   import {lastChecked} from "src/app/alerts"
 
@@ -25,7 +25,7 @@
       // Filter out mutes, and alerts for which we failed to find the required context. The bug
       // is really upstream of this, but it's an easy fix
       const events = user
-        .applyMutes(database.alerts.all())
+        .applyMutes(alerts.all())
         .filter(e => any(k => e[k]?.length > 0, ["replies", "likedBy", "zappedBy"]) || e.isMention)
 
       notes = sortBy(e => -e.created_at, events).slice(0, limit)

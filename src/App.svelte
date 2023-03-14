@@ -14,7 +14,7 @@
   import {timedelta, shuffle, now, sleep} from "src/util/misc"
   import {displayPerson, isLike} from "src/util/nostr"
   import cmd from "src/agent/cmd"
-  import database from "src/agent/database"
+  import {ready, onReady, relays} from "src/agent/state"
   import keys from "src/agent/keys"
   import network from "src/agent/network"
   import pool from "src/agent/pool"
@@ -64,13 +64,11 @@
   import AddRelay from "src/views/relays/AddRelay.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
 
-  Object.assign(window, {cmd, database, user, keys, network, pool, sync})
+  Object.assign(window, {cmd, user, keys, network, pool, sync})
 
   export let url = ""
 
   let scrollY
-
-  const {ready} = database
 
   const closeModal = async () => {
     modal.clear()
@@ -115,7 +113,7 @@
     }
   })
 
-  database.onReady(() => {
+  onReady(() => {
     initializeRelayList()
 
     if (user.getProfile()) {
@@ -132,7 +130,7 @@
       // Find relays with old/missing metadata and refresh them. Only pick a
       // few so we're not sending too many concurrent http requests
       const staleRelays = shuffle(
-        await database.relays.all({
+        await relays.all({
           "refreshed_at:lt": now() - timedelta(7, "days"),
         })
       ).slice(0, 10)
@@ -159,7 +157,7 @@
         })
       )
 
-      database.relays.bulkPatch(createMap("url", freshRelays.filter(identity)))
+      relays.bulkPatch(freshRelays.filter(identity))
     }, 30_000)
 
     return () => {

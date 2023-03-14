@@ -12,7 +12,7 @@
   import RelayCardSimple from "src/partials/RelayCardSimple.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
-  import database from "src/agent/database"
+  import {watch} from "src/agent/table"
   import network from "src/agent/network"
   import user from "src/agent/user"
   import {loadAppData} from "src/app"
@@ -24,7 +24,7 @@
   let currentRelays = {} as Record<number, Relay>
   let attemptedRelays = new Set()
   let customRelays = []
-  let knownRelays = database.watch("relays", table => shuffle(table.all()))
+  let knownRelays = watch("relays", table => shuffle(table.all()))
   let allRelays = []
 
   $: allRelays = $knownRelays.concat(customRelays)

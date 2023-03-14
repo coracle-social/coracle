@@ -3,12 +3,12 @@
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
-  import database from "src/agent/database"
+  import {watch} from "src/agent/table"
   import user from "src/agent/user"
 
   let q = ""
   let search
-  let knownRelays = database.watch("relays", t => t.all())
+  let knownRelays = watch("relays", t => t.all())
 
   const {relays} = user
 

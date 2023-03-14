@@ -1,5 +1,20 @@
 # Current
 
+- [ ] Fix re-connects
+- [ ] Fix memory usage
+  - Re-write database
+    - Use LRU cache and persist that instead. Use purgeStale/dump/load
+    - Split state persistence elsewhere
+    - Keep it focused to abstract interface, split actual tables out elsewhere
+    - Put all other state in same place
+    - Re-write to use arrays with an index of id to index
+    - Fix compatibility, or clear data on first load of new version
+  - Add table of user events, derive profile from this using `watch`.
+  - Refine sync, set up some kind of system where we register tables with events coming in
+  - People.petnames is massive. Split people caches up
+    - Display/picture/about
+    - Minimal zapper info
+    - Drop petnames
 - [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
 - [ ] Update https://nostr.com/clients/coracle

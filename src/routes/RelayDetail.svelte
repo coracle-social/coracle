@@ -7,22 +7,22 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/views/feed/Feed.svelte"
-  import database from "src/agent/database"
+  import {relays} from "src/agent/state"
   import pool from "src/agent/pool"
   import user from "src/agent/user"
 
   export let url
 
-  const relay = database.relays.get(url) || {url}
+  const relay = relays.get(url) || {url}
 
   let quality = null
   let message = null
   let showStatus = false
   let joined = false
 
-  const {relays} = user
+  const {relays: userRelays} = user
 
-  $: joined = find(propEq("url", relay.url), $relays)
+  $: joined = find(propEq("url", relay.url), $userRelays)
 
   onMount(() => {
     return poll(10_000, async () => {
@@ -73,7 +73,7 @@
         </Anchor>
       {/if}
       {#if joined}
-        {#if $relays.length > 1}
+        {#if $userRelays.length > 1}
           <Anchor
             type="button"
             class="flex items-center gap-2 rounded-full"

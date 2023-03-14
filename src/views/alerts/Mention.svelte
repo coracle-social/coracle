@@ -4,13 +4,13 @@
   import {displayPerson} from "src/util/nostr"
   import Popover from "src/partials/Popover.svelte"
   import PersonSummary from "src/views/person/PersonSummary.svelte"
-  import database from "src/agent/database"
+  import {getPersonWithFallback} from "src/agent/state"
   import {modal} from "src/app/ui"
-  import PersonCircle from "src/partials/PersonCircle.svelte";
+  import PersonCircle from "src/partials/PersonCircle.svelte"
 
   export let note
 
-  const person = database.getPersonWithFallback(note.pubkey)
+  const person = getPersonWithFallback(note.pubkey)
 </script>
 
 <button
@@ -19,7 +19,7 @@
   on:click={() => modal.set({type: "note/detail", note})}>
   <div class="relative flex w-full items-center justify-between gap-2">
     <div class="flex items-center gap-2">
-      <PersonCircle person={person} />
+      <PersonCircle {person} />
       <div on:click|stopPropagation>
         <Popover class="inline-block">
           <div slot="trigger" class="font-bold">

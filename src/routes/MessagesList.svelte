@@ -4,7 +4,7 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import MessagesListItem from "src/views/messages/MessagesListItem.svelte"
-  import database from "src/agent/database"
+  import {watch} from "src/agent/table"
 
   let activeTab = "messages"
 
@@ -12,8 +12,8 @@
     activeTab = tab
   }
 
-  const accepted = database.watch("contacts", t => t.all({accepted: true}))
-  const requests = database.watch("contacts", t => t.all({"accepted:!eq": true}))
+  const accepted = watch("contacts", t => t.all({accepted: true}))
+  const requests = watch("contacts", t => t.all({"accepted:!eq": true}))
 
   const getContacts = tab => sortBy(c => -c.lastMessage, tab === "messages" ? $accepted : $requests)
 

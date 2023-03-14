@@ -5,7 +5,7 @@ import {renderContent} from 'src/util/html'
 import {displayPerson, findReplyId} from 'src/util/nostr'
 import {getUserFollows} from 'src/agent/social'
 import {getUserReadRelays} from 'src/agent/relays'
-import database from 'src/agent/database'
+import {getPersonWithFallback} from 'src/agent/state'
 import network from 'src/agent/network'
 import keys from 'src/agent/keys'
 import alerts from 'src/app/alerts'
@@ -46,7 +46,7 @@ export const renderNote = (note, {showEntire = false}) => {
       }
 
       const pubkey = note.tags[parseInt(i)][1]
-      const person = database.getPersonWithFallback(pubkey)
+      const person = getPersonWithFallback(pubkey)
       const name = displayPerson(person)
       const path = routes.person(pubkey)
 

@@ -5,7 +5,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/views/chat/ChatListItem.svelte"
-  import database from "src/agent/database"
+  import {watch} from "src/agent/table"
   import network from "src/agent/network"
   import {getUserReadRelays} from "src/agent/relays"
   import {modal} from "src/app/ui"
@@ -14,8 +14,8 @@
   let search
   let results = []
 
-  const userRooms = database.watch("rooms", t => t.all({joined: true}))
-  const otherRooms = database.watch("rooms", t => t.all({"joined:!eq": true}))
+  const userRooms = watch("rooms", t => t.all({joined: true}))
+  const otherRooms = watch("rooms", t => t.all({"joined:!eq": true}))
 
   $: search = fuzzy($otherRooms, {keys: ["name", "about"]})
   $: results = search(q).slice(0, 50)

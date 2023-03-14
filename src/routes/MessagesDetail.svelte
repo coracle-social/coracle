@@ -8,7 +8,8 @@
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {getAllPubkeyRelays, sampleRelays} from "src/agent/relays"
-  import database from "src/agent/database"
+  import {getPersonWithFallback} from "src/agent/state"
+  import {watch} from "src/agent/table"
   import network from "src/agent/network"
   import keys from "src/agent/keys"
   import user from "src/agent/user"
@@ -16,13 +17,13 @@
   import {routes} from "src/app/ui"
   import {lastChecked} from "src/app/alerts"
   import {renderNote} from "src/app"
-  import PersonCircle from "src/partials/PersonCircle.svelte";
+  import PersonCircle from "src/partials/PersonCircle.svelte"
 
   export let entity
 
   let crypt = keys.getCrypt()
   let pubkey = toHex(entity)
-  let person = database.watch("people", () => database.getPersonWithFallback(pubkey))
+  let person = watch("people", () => getPersonWithFallback(pubkey))
 
   lastChecked.update(assoc(pubkey, now()))
 

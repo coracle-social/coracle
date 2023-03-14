@@ -8,7 +8,7 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Button from "src/partials/Button.svelte"
   import {getUserWriteRelays} from "src/agent/relays"
-  import database from "src/agent/database"
+  import {rooms} from "src/agent/state"
   import cmd from "src/agent/cmd"
   import {toast, modal} from "src/app/ui"
   import {publishWithToast} from "src/app"
@@ -45,7 +45,7 @@
         const [event] = await publishWithToast(relays, cmd.createRoom(room))
 
         // Auto join the room the user just created
-        database.rooms.patch({id: event.id, joined: true})
+        rooms.patch({id: event.id, joined: true})
       }
 
       modal.set(null)
