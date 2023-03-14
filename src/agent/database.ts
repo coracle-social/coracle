@@ -106,7 +106,7 @@ class Table {
       this.ready.set(true)
     })()
   }
-  _persist = throttle(1_000, () => {
+  _persist = throttle(4_000, () => {
     callLocalforage('setItem', this.name, this.data)
   })
   _setAndNotify(newData) {
