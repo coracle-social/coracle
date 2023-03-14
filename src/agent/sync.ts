@@ -165,11 +165,12 @@ const profileHandler = (key, getValue) => e => {
     return
   }
 
-  user.profile.update($p => ({
-    ...$p,
-    [key]: getValue(e, $p),
-    [updated_at_key]: e.created_at,
-  }))
+  user.profile.update($p => {
+    const value = getValue(e, $p)
+
+    // If we didn't get a value, don't update the key
+    return value ? {...$p, [key]: value, [updated_at_key]: e.created_at} : $p
+  })
 }
 
 addHandler(
@@ -180,21 +181,19 @@ addHandler(
 addHandler(
   3,
   profileHandler("relays", (e, p) => {
-    return (
-      tryJson(() => {
-        return Object.entries(JSON.parse(e.content))
-          .map(([url, conditions]) => {
-            const {write, read} = conditions as Record<string, boolean | string>
+    return tryJson(() => {
+      return Object.entries(JSON.parse(e.content))
+        .map(([url, conditions]) => {
+          const {write, read} = conditions as Record<string, boolean | string>
 
-            return {
-              url: normalizeRelayUrl(url),
-              write: [false, "!"].includes(write) ? false : true,
-              read: [false, "!"].includes(read) ? false : true,
-            }
-          })
-          .filter(r => isRelay(r.url))
-      }) || p.relays
-    )
+          return {
+            url: normalizeRelayUrl(url),
+            write: [false, "!"].includes(write) ? false : true,
+            read: [false, "!"].includes(read) ? false : true,
+          }
+        })
+        .filter(r => isRelay(r.url))
+    })
   })
 )
 

@@ -15,6 +15,7 @@
   import {watch} from "src/agent/storage"
   import network from "src/agent/network"
   import user from "src/agent/user"
+  import pool from "src/agent/pool"
   import {loadAppData} from "src/app"
   import {toast} from "src/app/ui"
 
@@ -65,6 +66,8 @@
             await Promise.all([loadAppData(user.getPubkey()), sleep(3000)])
 
             navigate("/notes/follows")
+          } else {
+            pool.getConnection(relay.url).disconnect()
           }
         })
     }

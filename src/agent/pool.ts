@@ -1,22 +1,22 @@
-import type {Relay, Filter} from 'nostr-tools'
-import type {MyEvent} from 'src/util/types'
-import {relayInit} from 'nostr-tools'
-import {pluck, is} from 'ramda'
-import {ensurePlural} from 'hurdak/lib/hurdak'
-import {warn, log, error} from 'src/util/logger'
-import {union, difference} from 'src/util/misc'
-import {isRelay, normalizeRelayUrl} from 'src/util/nostr'
+import type {Relay, Filter} from "nostr-tools"
+import type {MyEvent} from "src/util/types"
+import {relayInit} from "nostr-tools"
+import {pluck, is} from "ramda"
+import {ensurePlural} from "hurdak/lib/hurdak"
+import {warn, log, error} from "src/util/logger"
+import {union, difference} from "src/util/misc"
+import {isRelay, normalizeRelayUrl} from "src/util/nostr"
 
 // Connection management
 
 const connections = {}
 
 const CONNECTION_STATUS = {
-  NEW: 'new',
-  ERROR: 'error',
-  PENDING: 'pending',
-  CLOSED: 'closed',
-  READY: 'ready',
+  NEW: "new",
+  ERROR: "error",
+  PENDING: "pending",
+  CLOSED: "closed",
+  READY: "ready",
 }
 
 class Connection {
@@ -28,7 +28,7 @@ class Connection {
   constructor(url) {
     this.promise = null
     this.nostr = relayInit(url)
-    this.status = 'new'
+    this.status = "new"
     this.stats = {
       timeouts: 0,
       subsCount: 0,
@@ -42,32 +42,27 @@ class Connection {
   }
   hasRecentError() {
     return (
-      this.status === CONNECTION_STATUS.ERROR
-      && Date.now() - this.lastConnectionAttempt < 60_000
+      this.status === CONNECTION_STATUS.ERROR && Date.now() - this.lastConnectionAttempt < 10_000
     )
   }
   async connect() {
-    const shouldConnect = (
-      this.status === CONNECTION_STATUS.NEW
-      || (
-        this.status === CONNECTION_STATUS.ERROR
-        && Date.now() - this.lastConnectionAttempt > 60_000
-      )
-    )
+    const shouldConnect =
+      this.status === CONNECTION_STATUS.NEW ||
+      (this.status === CONNECTION_STATUS.ERROR && Date.now() - this.lastConnectionAttempt > 10_000)
 
     if (shouldConnect) {
       this.status = CONNECTION_STATUS.PENDING
       this.promise = this.nostr.connect()
 
-      this.nostr.on('connect', () => {
+      this.nostr.on("connect", () => {
         this.status = CONNECTION_STATUS.READY
       })
 
-      this.nostr.on('error', () => {
+      this.nostr.on("error", () => {
         this.status = CONNECTION_STATUS.ERROR
       })
 
-      this.nostr.on('disconnect', () => {
+      this.nostr.on("disconnect", () => {
         this.status = CONNECTION_STATUS.CLOSED
       })
     }
@@ -81,6 +76,11 @@ class Connection {
     }
 
     return this
+  }
+  disconnect() {
+    this.nostr.close()
+
+    delete connections[this.nostr.url]
   }
   getQuality() {
     if (this.status === CONNECTION_STATUS.ERROR) {
@@ -146,7 +146,7 @@ const publish = async ({relays, event, onProgress, timeout = 5000}) => {
     log(`Publishing to ${relays.length} relays`, event, relays)
   }
 
-  const urls = new Set(pluck('url', relays))
+  const urls = new Set(pluck("url", relays))
 
   if (urls.size !== relays.length) {
     warn(`Attempted to publish to non-unique relays`)
@@ -200,14 +200,14 @@ const publish = async ({relays, event, onProgress, timeout = 5000}) => {
       if (conn.status === CONNECTION_STATUS.READY) {
         const pub = conn.nostr.publish(event)
 
-        pub.on('ok', () => {
+        pub.on("ok", () => {
           succeeded.add(relay.url)
           timeouts.delete(relay.url)
           failed.delete(relay.url)
           attemptToResolve()
         })
 
-        pub.on('failed', reason => {
+        pub.on("failed", reason => {
           failed.add(relay.url)
           timeouts.delete(relay.url)
           attemptToResolve()
@@ -230,9 +230,7 @@ type SubscribeOpts = {
   onEose?: (url: string) => void
 }
 
-const subscribe = async (
-  {relays, filter, onEvent, onEose, onError}: SubscribeOpts
-) => {
+const subscribe = async ({relays, filter, onEvent, onEose, onError}: SubscribeOpts) => {
   filter = ensurePlural(filter)
 
   const id = createFilterId(filter)
@@ -248,14 +246,14 @@ const subscribe = async (
     log(`Starting subscription ${id} with ${relays.length} relays`, filter, relays)
   }
 
-  if (relays.length !== new Set(pluck('url', relays)).size) {
+  if (relays.length !== new Set(pluck("url", relays)).size) {
     error(`Subscribed to non-unique relays`, relays)
   }
 
   const promises = relays.map(async relay => {
     const conn = await connect(relay.url)
 
-    if (conn.status !== 'ready') {
+    if (conn.status !== "ready") {
       if (onError) {
         onError(relay.url)
       }
@@ -265,21 +263,21 @@ const subscribe = async (
 
     const sub = conn.nostr.sub(filter, {
       id,
-      alreadyHaveEvent: (id) => {
+      alreadyHaveEvent: id => {
         conn.stats.eventsCount += 1
         let has = false
         if (seen.has(id)) has = true
         seen.add(id)
         return has
-      }
+      },
     })
 
-    sub.on('event', e => {
-        // Normalize events here, annotate with relay url
-        onEvent({...e, seen_on: relay.url, content: e.content || ''})
+    sub.on("event", e => {
+      // Normalize events here, annotate with relay url
+      onEvent({...e, seen_on: relay.url, content: e.content || ""})
     })
 
-    sub.on('eose', () => {
+    sub.on("eose", () => {
       if (onEose) {
         onEose(conn.nostr.url)
       }
@@ -329,12 +327,12 @@ const subscribe = async (
 // Utils
 
 const createFilterId = filters =>
-  [Math.random().toString().slice(2, 6), filters.map(describeFilter).join(':')].join('-')
+  [Math.random().toString().slice(2, 6), filters.map(describeFilter).join(":")].join("-")
 
 const describeFilter = ({kinds = [], ...filter}) => {
   const parts = []
 
-  parts.push(kinds.join(','))
+  parts.push(kinds.join(","))
 
   for (const [key, value] of Object.entries(filter)) {
     if (is(Array, value)) {
@@ -344,9 +342,13 @@ const describeFilter = ({kinds = [], ...filter}) => {
     }
   }
 
-  return '(' + parts.join(',') + ')'
+  return "(" + parts.join(",") + ")"
 }
 
 export default {
-  getConnections, getConnection, connect, publish, subscribe,
+  getConnections,
+  getConnection,
+  connect,
+  publish,
+  subscribe,
 }

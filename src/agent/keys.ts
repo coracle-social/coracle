@@ -1,18 +1,18 @@
-import {nip04, getPublicKey, getEventHash, signEvent} from 'nostr-tools'
-import {get} from 'svelte/store'
-import {error} from 'src/util/logger'
-import {synced} from 'src/util/misc'
+import {nip04, getPublicKey, getEventHash, signEvent} from "nostr-tools"
+import {get} from "svelte/store"
+import {error} from "src/util/logger"
+import {synced} from "src/util/misc"
 
-const method = synced('agent/keys/method')
-const pubkey = synced('agent/keys/pubkey')
-const privkey = synced('agent/keys/privkey')
+const method = synced("agent/keys/method")
+const pubkey = synced("agent/keys/pubkey")
+const privkey = synced("agent/keys/privkey")
 const getExtension = () => (window as {nostr?: any}).nostr
-const canSign = () => ['privkey', 'extension'].includes(get(method))
+const canSign = () => ["privkey", "extension"].includes(get(method))
 
 const login = ($method, key) => {
   method.set($method)
 
-  if ($method === 'privkey') {
+  if ($method === "privkey") {
     privkey.set(key)
     pubkey.set(getPublicKey(key))
   } else {
@@ -33,13 +33,13 @@ const sign = event => {
   event.pubkey = get(pubkey)
   event.id = getEventHash(event)
 
-  if ($method === 'privkey') {
+  if ($method === "privkey") {
     return Object.assign(event, {
       sig: signEvent(event, get(privkey)),
     })
   }
 
-  if ($method === 'extension') {
+  if ($method === "extension") {
     return getExtension().signEvent(event)
   }
 
@@ -49,7 +49,7 @@ const sign = event => {
 const getCrypt = () => {
   const $method = get(method)
 
-  if ($method === 'privkey') {
+  if ($method === "privkey") {
     const $privkey = get(privkey)
 
     return {
@@ -66,7 +66,7 @@ const getCrypt = () => {
     }
   }
 
-  if ($method === 'extension') {
+  if ($method === "extension") {
     return {
       encrypt: (pubkey, message) => getExtension().nip04.encrypt(pubkey, message),
       decrypt: async (pubkey, message) => {
@@ -81,9 +81,16 @@ const getCrypt = () => {
     }
   }
 
-  throw new Error('No encryption method available.')
+  throw new Error("No encryption method available.")
 }
 
 export default {
-  pubkey, privkey, canSign, login, clear, sign, getCrypt,
+  method,
+  pubkey,
+  privkey,
+  canSign,
+  login,
+  clear,
+  sign,
+  getCrypt,
 }
