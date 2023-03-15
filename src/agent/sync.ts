@@ -13,7 +13,7 @@ import {
   hash,
 } from "src/util/misc"
 import {Tags, roomAttrs, isRelay, isShareableRelay, normalizeRelayUrl} from "src/util/nostr"
-import {people, userEvents, relays, rooms, routes} from "src/agent/tables"
+import {people, relays, rooms, routes} from "src/agent/tables"
 import {uniqByUrl} from "src/agent/relays"
 import user from "src/agent/user"
 
@@ -25,15 +25,10 @@ const addHandler = (kind, f) => {
 }
 
 const processEvents = async events => {
-  const userPubkey = user.getPubkey()
   const chunks = chunk(100, ensurePlural(events).filter(identity))
 
   for (let i = 0; i < chunks.length; i++) {
     for (const event of chunks[i]) {
-      if (event.pubkey === userPubkey) {
-        userEvents.put(event)
-      }
-
       for (const handler of handlers[event.kind] || []) {
         handler(event)
       }

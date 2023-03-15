@@ -14,7 +14,7 @@
   import {timedelta, shuffle, now, sleep} from "src/util/misc"
   import {displayPerson, isLike} from "src/util/nostr"
   import cmd from "src/agent/cmd"
-  import {onReady, relays} from "src/agent/tables"
+  import {onReady, relays, people} from "src/agent/tables"
   import keys from "src/agent/keys"
   import network from "src/agent/network"
   import pool from "src/agent/pool"
@@ -120,8 +120,19 @@
 
     initializeRelayList()
 
-    if (user.getProfile()) {
-      loadAppData(user.getPubkey())
+    const pubkey = user.getPubkey()
+
+    if (pubkey) {
+      loadAppData(pubkey)
+
+      const person = people.get(pubkey)
+
+      // Temporary migration for version 0.2.18. We changed where user profile
+      // is stored, so if they appear to have an incomplete profile on page load,
+      // go ahead and copy the person record over.
+      if (person && user.getRelays().length === 0) {
+        user.profile.update($p => ({...$p, ...person}))
+      }
     }
 
     const interval = setInterval(async () => {

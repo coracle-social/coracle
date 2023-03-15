@@ -16,7 +16,8 @@ export const loadAppData = async pubkey => {
     // Start our listener, but don't wait for it
     alerts.listen(pubkey)
 
-    // Make sure the user's network is loaded
+    // Make sure the user and their network is loaded
+    await network.loadPeople([pubkey], {force: true})
     await network.loadPeople(getUserFollows())
   }
 }
