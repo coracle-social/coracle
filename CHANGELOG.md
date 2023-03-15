@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.18
+
+- [x] Re-write data storage layer to conserve memory using LRU cache
+- [x] Fix bugs with handling invalid keys
+- [x] Improve pubkey/anonymous login
+- [x] Generate placeholder profile images (@morkowski)
+
 ## 0.2.17
 
 - [x] Make "show new notes" button fixed position

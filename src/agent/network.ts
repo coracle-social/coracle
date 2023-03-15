@@ -45,7 +45,7 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5
     const done = new Set()
     const allEvents = []
 
-    const attemptToComplete = async isTimeout => {
+    const attemptToComplete = async force => {
       const sub = await subPromise
 
       // If we've already unsubscribed we're good
@@ -55,7 +55,7 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5
 
       const isDone = done.size === relays.length
 
-      if (isTimeout) {
+      if (force) {
         const timedOutRelays = reject(r => done.has(r.url), relays)
 
         log(
@@ -72,7 +72,7 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5
         })
       }
 
-      if (isDone || isTimeout) {
+      if (isDone || force) {
         sub.unsub()
         resolve(allEvents)
       }

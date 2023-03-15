@@ -67,14 +67,10 @@ const verifyNip05 = (pubkey, as) =>
 
         relays.bulkPatch(urls.map(url => ({url: normalizeRelayUrl(url)})))
 
-        routes.bulkPut(
-          urls
-            .flatMap(url => [
-              addRoute(pubkey, url, "nip05", "write", now()),
-              addRoute(pubkey, url, "nip05", "read", now()),
-            ])
-            .filter(identity)
-        )
+        urls.forEach(url => {
+          addRoute(pubkey, url, "nip05", "write", now())
+          addRoute(pubkey, url, "nip05", "read", now())
+        })
       }
     }
   }, noop)

@@ -1,8 +1,10 @@
 # Current
 
+- [ ] Test migration
+- [ ] Fix notifications
+- [ ] Add quotes to notifications
 - [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
-- [ ] Add quotes to notifications
 
 # Coracle website
 
