@@ -1,4 +1,4 @@
-import {nip04, getPublicKey, getEventHash, signEvent} from "nostr-tools"
+import {nip19, nip04, getPublicKey, getEventHash, signEvent} from "nostr-tools"
 import {get} from "svelte/store"
 import {error} from "src/util/logger"
 import {synced} from "src/util/misc"
@@ -8,6 +8,10 @@ const pubkey = synced("agent/keys/pubkey")
 const privkey = synced("agent/keys/privkey")
 const getExtension = () => (window as {nostr?: any}).nostr
 const canSign = () => ["privkey", "extension"].includes(get(method))
+
+// Validate the key before setting it to state by encoding it using bech32.
+// This will error if invalid (this works whether it's a public or a private key)
+const validate = key => nip19.npubEncode(key)
 
 const login = ($method, key) => {
   method.set($method)
@@ -89,6 +93,7 @@ export default {
   pubkey,
   privkey,
   canSign,
+  validate,
   login,
   clear,
   sign,

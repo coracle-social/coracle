@@ -26,7 +26,7 @@ const addHandler = (kind, f) => {
 
 const processEvents = async events => {
   const userPubkey = user.getPubkey()
-  const chunks = chunk(100, ensurePlural(events))
+  const chunks = chunk(100, ensurePlural(events).filter(identity))
 
   for (let i = 0; i < chunks.length; i++) {
     for (const event of chunks[i]) {

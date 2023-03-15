@@ -254,6 +254,11 @@
     const event = encodeURI(JSON.stringify(await keys.sign(publishable.event)))
     const res = await fetchJson(`${zapper.callback}?amount=${amount}&nostr=${event}&lnurl=${lnurl}`)
 
+    // If they closed the dialog before fetch resolved, we're done
+    if (!zap) {
+      return
+    }
+
     zap.invoice = res.pr
     zap.loading = false
 

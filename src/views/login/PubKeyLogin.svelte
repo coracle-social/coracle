@@ -4,6 +4,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import keys from "src/agent/keys"
   import {toast} from "src/app/ui"
   import {login} from "src/app"
 
@@ -12,11 +13,15 @@
   const logIn = () => {
     const pubkey = npub.startsWith("npub") ? toHex(npub) : npub
 
-    if (!pubkey?.match(/[a-z0-9]{64}/)) {
+    try {
+      keys.validate(pubkey)
+    } catch (e) {
       toast.show("error", "Sorry, but that's an invalid public key.")
-    } else {
-      login("pubkey", pubkey)
+
+      return
     }
+
+    login("pubkey", pubkey)
   }
 </script>
 

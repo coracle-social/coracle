@@ -4,7 +4,7 @@ import {relayInit} from "nostr-tools"
 import {pluck, is} from "ramda"
 import {ensurePlural} from "hurdak/lib/hurdak"
 import {warn, log, error} from "src/util/logger"
-import {union, difference} from "src/util/misc"
+import {union, now, difference} from "src/util/misc"
 import {isRelay, normalizeRelayUrl} from "src/util/nostr"
 
 // Connection management
@@ -41,14 +41,12 @@ class Connection {
     connections[url] = this
   }
   hasRecentError() {
-    return (
-      this.status === CONNECTION_STATUS.ERROR && Date.now() - this.lastConnectionAttempt < 10_000
-    )
+    return this.status === CONNECTION_STATUS.ERROR && now() - this.lastConnectionAttempt < 10
   }
   async connect() {
     const shouldConnect =
       this.status === CONNECTION_STATUS.NEW ||
-      (this.status === CONNECTION_STATUS.ERROR && Date.now() - this.lastConnectionAttempt > 10_000)
+      (this.status === CONNECTION_STATUS.ERROR && now() - this.lastConnectionAttempt > 10)
 
     if (shouldConnect) {
       this.status = CONNECTION_STATUS.PENDING
@@ -67,7 +65,7 @@ class Connection {
       })
     }
 
-    this.lastConnectionAttempt = Date.now()
+    this.lastConnectionAttempt = now()
 
     try {
       await this.promise

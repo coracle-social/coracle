@@ -2,7 +2,7 @@
 
 - [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
-- [ ] Update https://nostr.com/clients/coracle
+- [ ] Add quotes to notifications
 
 # Coracle website
 

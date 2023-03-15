@@ -4,6 +4,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import keys from "src/agent/keys"
   import {toast} from "src/app/ui"
   import {login} from "src/app"
 
@@ -13,11 +14,15 @@
   const logIn = () => {
     const privkey = nsec.startsWith("nsec") ? toHex(nsec) : nsec
 
-    if (!privkey?.match(/[a-z0-9]{64}/)) {
+    try {
+      keys.validate(privkey)
+    } catch (e) {
       toast.show("error", "Sorry, but that's an invalid private key.")
-    } else {
-      login("privkey", privkey)
+
+      return
     }
+
+    login("privkey", privkey)
   }
 </script>
 
