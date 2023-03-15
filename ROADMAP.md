@@ -5,20 +5,11 @@
 - [ ] Add quotes to notifications
 - [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
-
-# Coracle website
-
-- [ ] Simple intro to coracle
-- [ ] Add nip05 to coracle
-  - [ ] After ~10 sessions prompt them to verify and update their nip05
-  - [ ] Maybe only if they don't have a nip05 yet
+- [ ] Light theme
+- [ ] Env vars to white label
 
 # Others
 
-- Tool for finding relays with light usage so people can spread out
-  - Graph view? Query db with COUNT? Hardware specs on relay info endpoint?
-  - "adoptarelay.com"
-  - Add suggested relays based on follows or topics
 - Recommendations
 - Indexer/multiplexer
 - relay.coracle.social for people nip-05 verified via coracle
@@ -136,3 +127,7 @@
 - [ ] Add support for nests https://nostrnests.com/
   - nevent1qqs2jm46m9tg9z33av4fp8hhapsx96234htz75wrvpvrax5jjl8m5usprfmhxue69uhhyetvv9ujumn0wd68yurvv438xtnrdaksy4d92m
 - [ ] NIP 39 Support https://github.com/nostr-protocol/nips/pull/201/files
+- [ ] Tool for finding relays with light usage so people can spread out
+  - Graph view? Query db with COUNT? Hardware specs on relay info endpoint?
+  - "adoptarelay.com"
+  - Add suggested relays based on follows or topics
