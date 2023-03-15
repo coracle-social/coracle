@@ -1,6 +1,6 @@
 import {pluck, all, identity} from "ramda"
 import {derived} from "svelte/store"
-import {Table, registry} from "src/agent/storage"
+import {Table, listener, registry} from "src/agent/storage"
 
 export const userEvents = new Table("userEvents", "id")
 export const people = new Table("people", "pubkey")
@@ -9,6 +9,8 @@ export const rooms = new Table("rooms", "id")
 export const alerts = new Table("alerts", "id")
 export const relays = new Table("relays", "url")
 export const routes = new Table("routes", "id")
+
+listener.connect()
 
 export const getPersonWithFallback = pubkey => people.get(pubkey) || {pubkey}
 

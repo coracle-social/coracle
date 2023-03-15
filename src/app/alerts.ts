@@ -162,7 +162,7 @@ const processChats = async (pubkey, events) => {
 
 const listen = async pubkey => {
   // Include an offset so we don't miss alerts on one relay but not another
-  const since = now() - timedelta(7, "days")
+  const since = now() - timedelta(30, "days")
   const roomIds = pluck("id", rooms.all({joined: true}))
 
   if (listener) {

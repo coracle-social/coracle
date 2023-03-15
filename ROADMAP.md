@@ -1,10 +1,5 @@
 # Current
 
-- [ ] Fix memory usage
-  - [x] Add table of user events, derive profile from this using `watch`.
-  - [x] Make zapper info more compact
-  - [ ] Person search doesn't find people on first load
-- [ ] Fix re-connects
 - [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
 - [ ] Update https://nostr.com/clients/coracle

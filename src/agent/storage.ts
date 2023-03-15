@@ -121,8 +121,6 @@ export class Table {
     this._persist()
   }
   subscribe(cb) {
-    cb = throttle(100, cb)
-
     this.listeners.push(cb)
 
     cb(this)
@@ -142,7 +140,7 @@ export class Table {
       this.cache.set(k, item)
     }
 
-    this._persist()
+    this._notify()
   }
   put(item) {
     this.bulkPut([item])
@@ -158,7 +156,7 @@ export class Table {
       this.cache.set(k, {...this.cache.get(k), ...item})
     }
 
-    this._persist()
+    this._notify()
   }
   patch(item) {
     this.bulkPatch([item])
@@ -168,7 +166,7 @@ export class Table {
       this.cache.delete(k)
     }
 
-    this._persist()
+    this._notify()
   }
   remove(k) {
     this.bulkRemove([k])
@@ -207,14 +205,15 @@ export class Table {
   }
 }
 
-const listener = (() => {
+export const listener = (() => {
   let listeners = []
 
-  for (const table of Object.values(registry) as Array<Table>) {
-    table.subscribe(() => listeners.forEach(f => f(table.name)))
-  }
-
   return {
+    connect: () => {
+      for (const table of Object.values(registry) as Array<Table>) {
+        table.subscribe(() => listeners.forEach(f => f(table.name)))
+      }
+    },
     subscribe: f => {
       listeners.push(f)
 

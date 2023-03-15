@@ -7,6 +7,11 @@
   import {watch} from "src/agent/storage"
 
   let activeTab = "messages"
+  let contacts = []
+
+  const getContacts = tab => sortBy(c => -c.lastMessage, tab === "messages" ? $accepted : $requests)
+
+  $: contacts = getContacts(activeTab)
 
   const setActiveTab = tab => {
     activeTab = tab
@@ -14,8 +19,6 @@
 
   const accepted = watch("contacts", t => t.all({accepted: true}))
   const requests = watch("contacts", t => t.all({"accepted:!eq": true}))
-
-  const getContacts = tab => sortBy(c => -c.lastMessage, tab === "messages" ? $accepted : $requests)
 
   const getDisplay = tab => ({
     title: toTitle(tab),
