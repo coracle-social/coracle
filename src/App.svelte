@@ -116,9 +116,9 @@
   })
 
   onReady(() => {
-    initializeRelayList().then(() => {
-      ready = true
-    })
+    ready = true
+
+    initializeRelayList()
 
     if (user.getProfile()) {
       loadAppData(user.getPubkey())

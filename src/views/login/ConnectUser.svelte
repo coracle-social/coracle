@@ -72,7 +72,8 @@
         })
     }
 
-    if (all(isNil, Object.values(currentRelays)) && isNil(customRelayUrl)) {
+    // Wait for our relay list to load initially, then terminate when we've tried everything
+    if (allRelays.length > 0 && all(isNil, Object.values(currentRelays)) && isNil(customRelayUrl)) {
       modal = "failure"
       customRelayUrl = ""
     }
