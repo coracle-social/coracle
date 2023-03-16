@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {prop} from "ramda"
+  import {pluck} from "ramda"
   import {nip19} from "nostr-tools"
   import Content from "src/partials/Content.svelte"
   import QRCode from "src/partials/QRCode.svelte"
@@ -8,7 +8,7 @@
   export let person
 
   const {pubkey} = person
-  const relays = [prop("url", getPubkeyWriteRelays(pubkey))]
+  const relays = [pluck("url", getPubkeyWriteRelays(pubkey))]
   const nprofile = nip19.nprofileEncode({pubkey, relays})
 </script>
 

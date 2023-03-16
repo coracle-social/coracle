@@ -3,7 +3,7 @@
 - [ ] https://github.com/staab/coracle/issues/42
 - [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
-- [ ] Env vars to white label
+- [ ] Add AUTH
 
 # Others
 

@@ -5,8 +5,8 @@
   import {renderContent, noEvent} from "src/util/html"
   import {displayPerson} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
+  import PersonCircle from "src/partials/PersonCircle.svelte"
   import {routes} from "src/app/ui"
-  import PersonCircle from "./PersonCircle.svelte"
 
   export let person
   export let addPetname = null
