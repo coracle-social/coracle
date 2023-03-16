@@ -1,9 +1,9 @@
 import type {Writable} from "svelte/store"
-import LRUCache from "lru-cache"
 import {throttle} from "throttle-debounce"
 import {objOf, is, without} from "ramda"
 import {writable} from "svelte/store"
 import {isObject, mapValues, ensurePlural} from "hurdak/lib/hurdak"
+import Cache from "src/util/cache"
 import {log, error} from "src/util/logger"
 import {where} from "src/util/misc"
 
@@ -70,10 +70,10 @@ export const getItem = k => lf("getItem", k)
 // ----------------------------------------------------------------------------
 // Database table abstraction, synced to worker storage
 
-type CacheEntry = [string, {value: any}]
+type CacheEntry = [string, {value: any; lru: number}]
 
 type TableOpts = {
-  maxEntries?: number
+  cache?: Cache
   initialize?: (table: Table) => Promise<Array<CacheEntry>>
 }
 
@@ -83,14 +83,15 @@ export class Table {
   name: string
   pk: string
   opts: TableOpts
-  cache: LRUCache<string, any>
+  cache: Cache
   listeners: Array<(Table) => void>
   ready: Writable<boolean>
+  interval: number
   constructor(name, pk, opts: TableOpts = {}) {
     this.name = name
     this.pk = pk
-    this.opts = {maxEntries: 1000, initialize: t => this.dump(), ...opts}
-    this.cache = new LRUCache({max: this.opts.maxEntries})
+    this.opts = opts
+    this.cache = this.opts.cache || new Cache()
     this.listeners = []
     this.ready = writable(false)
 
@@ -100,13 +101,27 @@ export class Table {
     ;(async () => {
       const t = Date.now()
 
-      this.cache.load((await this.opts.initialize(this)) || [])
+      let data = (await getItem(this.name)) || []
+
+      // Backwards compat - we used to store objects rather than cache dump arrays
+      if (isObject(data)) {
+        data = Object.entries(mapValues(objOf("value"), data))
+      }
+
+      // Initialize our cache and notify listeners
+      this.cache.load(data)
       this._notify()
 
-      log(`Table ${name} ready in ${Date.now() - t}ms (${this.cache.size} records)`)
+      log(`Table ${name} ready in ${Date.now() - t}ms (${this.cache.size()} records)`)
 
       this.ready.set(true)
     })()
+
+    // Prune the cache periodically, with jitter to avoid doing all caches at once
+    this.interval = window.setInterval(() => {
+      this.cache.prune()
+      this._persist()
+    }, 30_000 + 10_000 * Math.random())
   }
   _persist = throttle(4_000, () => {
     setItem(this.name, this.cache.dump())
@@ -174,25 +189,10 @@ export class Table {
   async drop() {
     this.cache.clear()
 
-    return removeItem(this.name)
-  }
-  async dump() {
-    let data = (await getItem(this.name)) || []
-
-    // Backwards compat - we used to store objects rather than cache dump arrays
-    if (isObject(data)) {
-      data = Object.entries(mapValues(objOf("value"), data))
-    }
-
-    return data as Array<CacheEntry>
+    await removeItem(this.name)
   }
   toArray() {
-    const result = []
-    for (const item of this.cache.values()) {
-      result.push(item)
-    }
-
-    return result
+    return Array.from(this.cache.values())
   }
   all(spec = {}) {
     return this.toArray().filter(where(spec))

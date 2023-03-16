@@ -68,7 +68,7 @@
       {/if}
       <p class="text-sm text-light">{formatTimestamp(timestamp)}</p>
     </div>
-    <div class="ml-6 text-light">
+    <div class="ml-6 break-all text-light">
       {ellipsize(note.content, 120)}
     </div>
   </button>

@@ -2,10 +2,12 @@
 
 ## 0.2.18
 
-- [x] Re-write data storage layer to conserve memory using LRU cache
+- [x] Re-write data storage layer to conserve memory using a custom LRU cache
 - [x] Fix bugs with handling invalid keys
 - [x] Improve pubkey/anonymous login
 - [x] Generate placeholder profile images (@morkowski)
+- [x] Fix notifications to more complete and reliable
+- [x] Update license back to MIT. Enjoy!
 
 ## 0.2.17
 

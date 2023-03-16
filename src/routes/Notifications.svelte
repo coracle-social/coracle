@@ -15,7 +15,11 @@
   let events = null
 
   const prevChecked = $lastChecked.notifications || 0
-  const notifications = watch("notifications", t => sortBy(e => -e.created_at, t.all()))
+  const notifications = watch("notifications", t => {
+    lastChecked.update(assoc("notifications", now()))
+
+    return sortBy(e => -e.created_at, t.all())
+  })
 
   // Group notifications so we're only showing the parent once per chunk
   $: events = $notifications
@@ -42,8 +46,6 @@
 
   onMount(() => {
     document.title = "Notifications"
-
-    lastChecked.update(assoc("notifications", now()))
 
     return createScroller(async () => {
       limit += 50

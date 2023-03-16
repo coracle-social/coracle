@@ -1,6 +1,5 @@
 # Current
 
-- [ ] Update license
 - [ ] Test migration
 - [ ] Fix notifications
 - [ ] Add quotes to notifications

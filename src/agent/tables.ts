@@ -1,13 +1,23 @@
-import {pluck, all, identity} from "ramda"
+import {sortBy, pluck, all, identity} from "ramda"
 import {derived} from "svelte/store"
+import Cache from "src/util/cache"
 import {Table, listener, registry} from "src/agent/storage"
 
+const sortByCreatedAt = sortBy(([k, x]) => -x.value.created_at)
+
 // Temporarily put no upper bound on people for 0.2.18 migration
-export const people = new Table("people", "pubkey", {maxEntries: 100000})
-export const userEvents = new Table("userEvents", "id", {maxEntries: 100000})
+export const people = new Table("people", "pubkey", {
+  // cache: new Cache({max: 5000}),
+  // cache: new Cache({max: 20_000}),
+})
+
+export const userEvents = new Table("userEvents", "id", {
+  cache: new Cache({max: 5000, sort: sortByCreatedAt}),
+})
+
+export const notifications = new Table("notifications", "id")
 export const contacts = new Table("contacts", "pubkey")
 export const rooms = new Table("rooms", "id")
-export const notifications = new Table("notifications", "id", {maxEntries: 100000})
 export const relays = new Table("relays", "url")
 export const routes = new Table("routes", "id")
 
