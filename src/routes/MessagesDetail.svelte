@@ -15,7 +15,7 @@
   import user from "src/agent/user"
   import cmd from "src/agent/cmd"
   import {routes} from "src/app/ui"
-  import {lastChecked} from "src/app/alerts"
+  import {lastChecked} from "src/app/listener"
   import {renderNote} from "src/app"
   import PersonCircle from "src/partials/PersonCircle.svelte"
 

@@ -125,6 +125,8 @@ class PublishableEvent {
     const pubkey = get(keys.pubkey)
     const createdAt = Math.round(new Date().valueOf() / 1000)
 
+    tags.push(["client", "coracle"])
+
     this.event = {kind, content, tags, pubkey, created_at: createdAt}
   }
   async publish(relays, onProgress = null) {

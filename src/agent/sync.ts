@@ -2,9 +2,9 @@ import {uniq, pick, identity} from "ramda"
 import {nip05} from "nostr-tools"
 import {noop, ensurePlural, chunk} from "hurdak/lib/hurdak"
 import {
-  lnurlEncode,
+  hexToBech32,
   tryFunc,
-  lnurlDecode,
+  bech32ToHex,
   tryFetch,
   now,
   sleep,
@@ -13,7 +13,7 @@ import {
   hash,
 } from "src/util/misc"
 import {Tags, roomAttrs, isRelay, isShareableRelay, normalizeRelayUrl} from "src/util/nostr"
-import {people, relays, rooms, routes} from "src/agent/tables"
+import {people, userEvents, relays, rooms, routes} from "src/agent/tables"
 import {uniqByUrl} from "src/agent/relays"
 import user from "src/agent/user"
 
@@ -25,10 +25,15 @@ const addHandler = (kind, f) => {
 }
 
 const processEvents = async events => {
+  const userPubkey = user.getPubkey()
   const chunks = chunk(100, ensurePlural(events).filter(identity))
 
   for (let i = 0; i < chunks.length; i++) {
     for (const event of chunks[i]) {
+      if (event.pubkey === userPubkey) {
+        userEvents.put(event)
+      }
+
       for (const handler of handlers[event.kind] || []) {
         handler(event)
       }
@@ -75,7 +80,7 @@ const verifyZapper = async (pubkey, address) => {
 
   // Try to parse it as a lud06 LNURL or as a lud16 address
   if (address.startsWith("lnurl1")) {
-    url = tryFunc(() => lnurlDecode(address))
+    url = tryFunc(() => bech32ToHex(address))
   } else if (address.includes("@")) {
     const [name, domain] = address.split("@")
 
@@ -90,7 +95,7 @@ const verifyZapper = async (pubkey, address) => {
 
   const res = await tryFetch(() => fetch(url))
   const zapper = await tryJson(() => res?.json())
-  const lnurl = lnurlEncode("lnurl", url)
+  const lnurl = hexToBech32("lnurl", url)
 
   if (zapper?.allowsNostr && zapper?.nostrPubkey) {
     updatePerson(pubkey, {

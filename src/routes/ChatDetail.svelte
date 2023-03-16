@@ -12,7 +12,7 @@
   import {watch} from "src/agent/storage"
   import cmd from "src/agent/cmd"
   import {modal} from "src/app/ui"
-  import {lastChecked} from "src/app/alerts"
+  import {lastChecked} from "src/app/listener"
   import {renderNote} from "src/app"
 
   export let entity

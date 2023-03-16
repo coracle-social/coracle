@@ -11,7 +11,7 @@
   import {createMap, first} from "hurdak/lib/hurdak"
   import {find, is, identity, nthArg, pluck} from "ramda"
   import {log, warn} from "src/util/logger"
-  import {timedelta, shuffle, now, sleep} from "src/util/misc"
+  import {timedelta, hexToBech32, bech32ToHex, shuffle, now, sleep} from "src/util/misc"
   import {displayPerson, isLike} from "src/util/nostr"
   import cmd from "src/agent/cmd"
   import {onReady, relays, people} from "src/agent/tables"
@@ -23,13 +23,12 @@
   import * as tables from "src/agent/tables"
   import user from "src/agent/user"
   import {loadAppData} from "src/app"
-  import alerts from "src/app/alerts"
   import {modal, routes, menuIsOpen, logUsage} from "src/app/ui"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import Alerts from "src/routes/Alerts.svelte"
+  import Notifications from "src/routes/Notifications.svelte"
   import Bech32Entity from "src/routes/Bech32Entity.svelte"
   import ChatDetail from "src/routes/ChatDetail.svelte"
   import ChatList from "src/routes/ChatList.svelte"
@@ -65,7 +64,7 @@
   import AddRelay from "src/views/relays/AddRelay.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
 
-  Object.assign(window, {cmd, user, keys, network, pool, sync, tables})
+  Object.assign(window, {cmd, user, keys, network, pool, sync, tables, bech32ToHex, hexToBech32})
 
   export let url = ""
 
@@ -185,7 +184,7 @@
   <div use:links class="h-full">
     {#if ready}
       <div class="h-full pt-16 text-white lg:ml-56">
-        <Route path="/alerts" component={Alerts} />
+        <Route path="/notifications" component={Notifications} />
         <Route path="/search">
           <EnsureData enforcePeople={false}>
             <Search />

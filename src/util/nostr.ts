@@ -90,7 +90,7 @@ export const displayRelay = ({url}) => last(url.split("://"))
 
 export const isLike = content => ["", "+", "🤙", "👍", "❤️", "😎", "🏅"].includes(content)
 
-export const isAlert = (e, pubkey) => {
+export const isNotification = (e, pubkey) => {
   if (![1, 7, 9735].includes(e.kind)) {
     return false
   }

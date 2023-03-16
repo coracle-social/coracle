@@ -3,7 +3,7 @@
   import {displayPerson} from "src/util/nostr"
   import user from "src/agent/user"
   import {menuIsOpen, installPrompt, routes} from "src/app/ui"
-  import {newAlerts, newDirectMessages, newChatMessages} from "src/app/alerts"
+  import {newNotifications, newDirectMessages, newChatMessages} from "src/app/listener"
   import {slowConnections} from "src/app/connection"
   import PersonCircle from "src/partials/PersonCircle.svelte"
 
@@ -36,9 +36,9 @@
       </a>
     </li>
     <li class="relative cursor-pointer">
-      <a class="block px-4 py-2 transition-all hover:bg-accent" href="/alerts">
+      <a class="block px-4 py-2 transition-all hover:bg-accent" href="/notifications">
         <i class="fa fa-bell mr-2" /> Notifications
-        {#if $newAlerts}
+        {#if $newNotifications}
           <div class="absolute top-3 left-6 h-2 w-2 rounded bg-accent" />
         {/if}
       </a>

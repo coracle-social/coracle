@@ -5,7 +5,7 @@
   import {ellipsize} from "hurdak/lib/hurdak"
   import {displayPerson} from "src/util/nostr"
   import {getPersonWithFallback} from "src/agent/tables"
-  import {lastChecked} from "src/app/alerts"
+  import {lastChecked} from "src/app/listener"
   import PersonCircle from "src/partials/PersonCircle.svelte"
 
   export let contact

@@ -376,10 +376,10 @@ export const uploadFile = (url, fileObj) => {
   return fetchJson(url, {method: "POST", body})
 }
 
-export const lnurlEncode = (prefix, url) =>
+export const hexToBech32 = (prefix, url) =>
   bech32.encode(prefix, bech32.toWords(utf8.decode(url)), false)
 
-export const lnurlDecode = b32 => utf8.encode(bech32.fromWords(bech32.decode(b32, false).words))
+export const bech32ToHex = b32 => utf8.encode(bech32.fromWords(bech32.decode(b32, false).words))
 
 export const formatSats = sats => {
   const formatter = new Intl.NumberFormat()

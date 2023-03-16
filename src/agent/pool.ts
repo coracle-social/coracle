@@ -261,18 +261,27 @@ const subscribe = async ({relays, filter, onEvent, onEose, onError}: SubscribeOp
 
     const sub = conn.nostr.sub(filter, {
       id,
-      alreadyHaveEvent: id => {
-        conn.stats.eventsCount += 1
-        let has = false
-        if (seen.has(id)) has = true
-        seen.add(id)
-        return has
-      },
+      // This isn't currently working for some reason
+      // alreadyHaveEvent: (id, url) => {
+      //   conn.stats.eventsCount += 1
+
+      //   if (seen.has(id)) {
+      //     return true
+      //   }
+
+      //   seen.add(id)
+
+      //   return false
+      // },
     })
 
     sub.on("event", e => {
-      // Normalize events here, annotate with relay url
-      onEvent({...e, seen_on: relay.url, content: e.content || ""})
+      if (!seen.has(e.id)) {
+        seen.add(e.id)
+
+        // Normalize events here, annotate with relay url
+        onEvent({...e, seen_on: relay.url, content: e.content || ""})
+      }
     })
 
     sub.on("eose", () => {

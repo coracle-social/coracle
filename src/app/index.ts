@@ -8,13 +8,13 @@ import {getUserReadRelays} from "src/agent/relays"
 import {getPersonWithFallback} from "src/agent/tables"
 import network from "src/agent/network"
 import keys from "src/agent/keys"
-import alerts from "src/app/alerts"
+import listener from "src/app/listener"
 import {routes, modal, toast} from "src/app/ui"
 
 export const loadAppData = async pubkey => {
   if (getUserReadRelays().length > 0) {
     // Start our listener, but don't wait for it
-    alerts.listen(pubkey)
+    listener.listen(pubkey)
 
     // Make sure the user and their network is loaded
     await network.loadPeople([pubkey], {force: true})

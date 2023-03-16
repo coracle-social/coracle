@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {menuIsOpen} from "src/app/ui"
-  import {newAlerts} from "src/app/alerts"
+  import {newNotifications} from "src/app/listener"
 
   const toggleMenu = () => menuIsOpen.update(x => !x)
 
@@ -27,7 +27,7 @@
     <img alt="Coracle Logo" src="/images/logo.png" class="w-8" />
     <h1 class="staatliches text-3xl">Coracle</h1>
   </Anchor>
-  {#if $newAlerts}
+  {#if $newNotifications}
     <div class="absolute top-4 left-12 h-2 w-2 rounded bg-accent lg:hidden" />
   {/if}
 </div>
