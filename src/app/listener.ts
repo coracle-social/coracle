@@ -7,6 +7,7 @@ import {getUserReadRelays} from "src/agent/relays"
 import {notifications, userEvents, contacts, rooms} from "src/agent/tables"
 import {watch} from "src/agent/storage"
 import network from "src/agent/network"
+import user from "src/agent/user"
 
 let listener
 
@@ -110,6 +111,8 @@ const listen = async pubkey => {
       {kinds: [42], "#e": roomIds, since},
     ],
     onChunk: async events => {
+      events = user.applyMutes(events)
+
       await network.loadPeople(pluck("pubkey", events))
       await processNotifications(pubkey, events)
       await processMessages(pubkey, events)

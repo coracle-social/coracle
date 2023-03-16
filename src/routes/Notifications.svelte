@@ -8,6 +8,7 @@
   import Content from "src/partials/Content.svelte"
   import Notification from "src/views/notifications/Notification.svelte"
   import {watch} from "src/agent/storage"
+  import user from "src/agent/user"
   import {userEvents} from "src/agent/tables"
   import {lastChecked} from "src/app/listener"
 
@@ -18,7 +19,7 @@
   const notifications = watch("notifications", t => {
     lastChecked.update(assoc("notifications", now()))
 
-    return sortBy(e => -e.created_at, t.all())
+    return sortBy(e => -e.created_at, user.applyMutes(t.all()))
   })
 
   // Group notifications so we're only showing the parent once per chunk
