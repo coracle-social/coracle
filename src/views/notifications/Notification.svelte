@@ -69,7 +69,7 @@
       {/if}
       <p class="text-sm text-gray-1">{formatTimestamp(timestamp)}</p>
     </div>
-    <div class="ml-6 break-all text-gray-1">
+    <div class="break-word ml-6 overflow-hidden text-gray-1">
       {ellipsize(note.content, 120)}
     </div>
   </Card>

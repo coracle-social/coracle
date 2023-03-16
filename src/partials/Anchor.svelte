@@ -15,10 +15,11 @@
     {"opacity-50": loading},
     switcher(type, {
       anchor: "underline",
-      button: "py-2 px-4 rounded bg-gray-3 text-accent whitespace-nowrap",
+      button: "py-2 px-4 rounded bg-input text-accent whitespace-nowrap",
       "button-circle":
-        "w-10 h-10 flex justify-center items-center rounded-full bg-gray-3 text-accent whitespace-nowrap",
-      "button-accent": "py-2 px-4 rounded bg-accent text-white whitespace-nowrap",
+        "w-10 h-10 flex justify-center items-center rounded-full bg-input text-accent whitespace-nowrap border border-solid border-gray-5",
+      "button-accent":
+        "py-2 px-4 rounded bg-accent text-white whitespace-nowrap border border-solid border-gray-5",
     })
   )
 </script>

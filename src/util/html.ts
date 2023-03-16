@@ -1,5 +1,5 @@
-import {uniq} from 'ramda'
-import {ellipsize, bytes} from 'hurdak/lib/hurdak'
+import {uniq} from "ramda"
+import {ellipsize, bytes} from "hurdak/lib/hurdak"
 
 export const copyToClipboard = text => {
   const {activeElement} = document
@@ -34,7 +34,7 @@ export const stripExifData = async (file, opts = {}) => {
     new Compressor(file, {
       maxWidth: 1024,
       maxHeight: 1024,
-      convertSize: bytes(1, 'mb'),
+      convertSize: bytes(1, "mb"),
       ...opts,
       success: resolve,
       error: e => {
@@ -50,7 +50,7 @@ export const stripExifData = async (file, opts = {}) => {
 }
 
 export const listenForFile = (input, onChange) => {
-  input.addEventListener('change', async e => {
+  input.addEventListener("change", async e => {
     const target = e.target as HTMLInputElement
     const [file] = target.files
 
@@ -71,8 +71,7 @@ export const blobToString = async blob =>
     reader.readAsDataURL(blob)
   })
 
-export const blobToFile = blob =>
-    new File([blob], blob.name, {type: blob.type})
+export const blobToFile = blob => new File([blob], blob.name, {type: blob.type})
 
 export const escapeHtml = html => {
   const div = document.createElement("div")
@@ -112,9 +111,11 @@ export const extractUrls = content => {
   const regex = /(https?:\/\/)?[-a-z0-9@:%._\+~#=\.]+\.[a-z]{1,6}[-a-z0-9@:%_\+.~#?!&//=;]*/gi
   const urls = content.match(regex)
 
-  return (urls || [])
-    // Skip decimals like 3.5 and ellipses which have more than one dot in a row
-    .filter(url => !url.match(/^[\d\.]+$/) && !url.match(/\.{2}/))
+  return (
+    (urls || [])
+      // Skip decimals like 3.5 and ellipses which have more than one dot in a row
+      .filter(url => !url.match(/^[\d\.]+$/) && !url.match(/\.{2}/))
+  )
 }
 
 export const renderContent = content => {
@@ -126,16 +127,16 @@ export const renderContent = content => {
   // Extract urls
   for (let url of uniq(extractUrls(content))) {
     // It's common for a period to end a url, trim it off
-    if (url.endsWith('.')) {
+    if (url.endsWith(".")) {
       url = url.slice(0, -1)
     }
 
-    const href = url.includes('://') ? url : 'https://' + url
-    const display = url.replace(/https?:\/\/(www\.)?/, '')
-    const escaped = url.replace(/([.*+?^${}()|[\]\\])/g, '\\$1')
-    const regex = new RegExp(`([^"]*)(${escaped})([^"]*)`, 'g')
+    const href = url.includes("://") ? url : "https://" + url
+    const display = url.replace(/https?:\/\/(www\.)?/, "")
+    const escaped = url.replace(/([.*+?^${}()|[\]\\])/g, "\\$1")
+    const regex = new RegExp(`([^"]*)(${escaped})([^"]*)`, "g")
 
-    const $a = document.createElement('a')
+    const $a = document.createElement("a")
 
     $a.href = href
     $a.target = "_blank"
@@ -149,3 +150,9 @@ export const renderContent = content => {
 }
 
 export const isMobile = localStorage.mobile || window.navigator.maxTouchPoints > 1
+
+export const parseHex = hex => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+
+  return [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
+}

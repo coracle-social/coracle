@@ -140,13 +140,11 @@ const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
 
 export const theme = synced("ui/theme", prefersDark ? "dark" : "light")
 
-export const getThemeVariables = $theme => {
-  const colors = switcher($theme, {
-    light: THEME_LIGHT,
-    dark: THEME_DARK,
-  })
+export const getThemeColors = $theme => switcher($theme, {light: THEME_LIGHT, dark: THEME_DARK})
 
-  return Object.entries(colors)
+export const getThemeColor = ($theme, k) => prop(k, getThemeColors($theme))
+
+export const getThemeVariables = $theme =>
+  Object.entries(getThemeColors($theme))
     .map(([k, v]) => `--${k}: ${v};`)
     .join("\n")
-}

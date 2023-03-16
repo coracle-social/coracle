@@ -5,7 +5,7 @@
   import {fly, fade} from "svelte/transition"
   import {navigate} from "svelte-routing"
   import {log} from "src/util/logger"
-  import {renderContent} from "src/util/html"
+  import {renderContent, parseHex} from "src/util/html"
   import {displayPerson, Tags, toHex} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
@@ -19,7 +19,7 @@
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import {getPersonWithFallback, people} from "src/agent/tables"
-  import {routes, modal} from "src/app/ui"
+  import {routes, modal, theme, getThemeColor} from "src/app/ui"
   import PersonCircle from "src/partials/PersonCircle.svelte"
 
   export let npub
@@ -39,6 +39,14 @@
   let loading = true
   let showActions = false
   let actions = []
+  let rgb, rgba
+
+  $: {
+    const color = parseHex(getThemeColor($theme, "gray-8"))
+
+    rgba = `rgba(${color.join(", ")}, 0.4)`
+    rgb = `rgba(${color.join(", ")})`
+  }
 
   $: following = $petnamePubkeys.includes(pubkey)
   $: muted = find(m => m[1] === pubkey, $mutes)
@@ -168,11 +176,11 @@
   style="z-index: -1;
          background-size: cover;
          background-image:
-          linear-gradient(to bottom, rgba(0, 0, 0, 0.3), #0f0f0e),
+          linear-gradient(to bottom, {rgba}, {rgb}),
           url('{person.kind0?.banner}')" />
 
 <Content>
-  <div class="flex gap-4">
+  <div class="flex gap-4 text-gray-1">
     <PersonCircle {person} size={16} class="sm:h-32 sm:w-32" />
     <div class="flex flex-grow flex-col gap-4">
       <div class="flex items-start justify-between gap-4">
