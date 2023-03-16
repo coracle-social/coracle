@@ -121,8 +121,9 @@
     <div class="pointer-events-none fixed left-0 top-0 z-10 mt-20 flex w-full justify-center">
       <button
         in:fly={{y: 20}}
-        class="pointer-events-auto cursor-pointer rounded-full border border-solid border-accentl
-               bg-accent py-2 px-4 text-center shadow-lg transition-colors hover:bg-accentl"
+        class="pointer-events-auto cursor-pointer rounded-full border border-solid
+               border-accent-light bg-accent py-2 px-4 text-center text-white
+               shadow-lg transition-colors hover:bg-accent-light"
         on:click={loadBufferedNotes}>
         Load {quantify(notesBuffer.length, "new note")}
       </button>

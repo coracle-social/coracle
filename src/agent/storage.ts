@@ -149,7 +149,7 @@ export class Table {
       const k = item[this.pk]
 
       if (!k) {
-        throw new Error(`Missing primary key on ${this.name}`)
+        throw new Error(`Missing gray-6 key on ${this.name}`)
       }
 
       this.cache.set(k, item)
@@ -165,7 +165,7 @@ export class Table {
       const k = item[this.pk]
 
       if (!k) {
-        throw new Error(`Missing primary key on ${this.name}`)
+        throw new Error(`Missing gray-6 key on ${this.name}`)
       }
 
       this.cache.set(k, {...this.cache.get(k), ...item})

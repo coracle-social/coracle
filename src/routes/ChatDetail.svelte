@@ -70,8 +70,8 @@
           {/if}
         </div>
         <div class="flex items-center gap-2">
-          <i class="fa fa-lock-open text-light" />
-          <span class="text-light">Public</span>
+          <i class="fa fa-lock-open text-gray-1" />
+          <span class="text-gray-1">Public</span>
         </div>
       </div>
       <div>{$room.about || ""}</div>
@@ -81,7 +81,7 @@
     {#if message.showPerson}
       <div class="flex items-center justify-between gap-4">
         <Badge person={message.person} />
-        <p class="text-sm text-light">{formatTimestamp(message.created_at)}</p>
+        <p class="text-sm text-gray-1">{formatTimestamp(message.created_at)}</p>
       </div>
     {/if}
     <div class="my-1 ml-6 overflow-hidden text-ellipsis">

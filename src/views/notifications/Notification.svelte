@@ -4,6 +4,7 @@
   import {formatTimestamp, tryJson} from "src/util/misc"
   import {Tags} from "src/util/nostr"
   import Badge from "src/partials/Badge.svelte"
+  import Card from "src/partials/Card.svelte"
   import Popover from "src/partials/Popover.svelte"
   import NotificationSection from "src/views/notifications/NotificationSection.svelte"
   import {getPersonWithFallback, userEvents} from "src/agent/tables"
@@ -38,9 +39,9 @@
 </script>
 
 {#if note}
-  <button
-    class="flex w-full cursor-pointer flex-col gap-2 border border-solid border-black py-2
-         px-3 text-left text-white transition-all hover:border-medium hover:bg-dark"
+  <Card
+    interactive
+    class="flex flex-col gap-2 text-left"
     on:click={() => modal.set({type: "note/detail", note})}>
     <div class="relative flex w-full items-center justify-between gap-2" on:click|stopPropagation>
       {#if !event.ref}
@@ -66,10 +67,10 @@
           </div>
         </Popover>
       {/if}
-      <p class="text-sm text-light">{formatTimestamp(timestamp)}</p>
+      <p class="text-sm text-gray-1">{formatTimestamp(timestamp)}</p>
     </div>
-    <div class="ml-6 break-all text-light">
+    <div class="ml-6 break-all text-gray-1">
       {ellipsize(note.content, 120)}
     </div>
-  </button>
+  </Card>
 {/if}

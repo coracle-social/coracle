@@ -1,11 +1,8 @@
 # Current
 
-- [ ] Test migration
-- [ ] Fix notifications
-- [ ] Add quotes to notifications
+- [ ] https://github.com/staab/coracle/issues/42
 - [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
-- [ ] Light theme
 - [ ] Env vars to white label
 
 # Others
@@ -31,6 +28,8 @@
 
 # More
 
+- [ ] Copy/share note id button
+- [ ] Reposts
 - [ ] Add delete button to notes. This will require tracking what relays a note was published to
 - [ ] Add image proxy to avoid leaking user ips to hosts
 - [ ] Show an error when something fails to load with a constructive suggestion

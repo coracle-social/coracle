@@ -50,7 +50,7 @@
             class="fa-solid fa-copy cursor-pointer"
             on:click={() => copyKey("public")} />
         </Input>
-        <p class="text-sm text-light">
+        <p class="text-sm text-gray-1">
           Your public key identifies your account. You can share this with people trying to find you
           on nostr.
         </p>
@@ -64,7 +64,7 @@
               class="fa-solid fa-copy cursor-pointer"
               on:click={() => copyKey("private")} />
           </Input>
-          <p class="text-sm text-light">
+          <p class="text-sm text-gray-1">
             Your private key is used to prove your identity by cryptographically signing messages. <strong
               >Do not share this with anyone.</strong>
             Be careful about copying this into other apps - instead, consider using a <Anchor

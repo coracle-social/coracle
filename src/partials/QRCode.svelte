@@ -20,7 +20,7 @@
 </script>
 
 <div
-  class="m-auto flex max-w-sm flex-col gap-4 rounded border border-solid border-medium bg-black p-4">
+  class="m-auto flex max-w-sm flex-col gap-4 rounded border border-solid border-gray-6 bg-gray-7 p-4">
   <canvas class="m-auto rounded" bind:this={canvas} />
   <Input value={code}>
     <button slot="after" class="fa fa-copy" on:click={copy} />

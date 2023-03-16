@@ -139,7 +139,7 @@
         <div>
           <div class="mb-2 text-lg">NIP05 Relay Configuration</div>
           {#if nip05ProfileData?.relays?.length}
-            <p class="mb-4 text-sm text-light">
+            <p class="mb-4 text-sm text-gray-1">
               These relays are advertised by the NIP05 identifier's validation endpoint.
             </p>
 
@@ -149,7 +149,7 @@
               {/each}
             </div>
           {:else}
-            <p class="mb-4 text-sm text-light">
+            <p class="mb-4 text-sm text-gray-1">
               <i class="fa-solid fa-info-circle" />
               No relays are advertised by the NIP05 identifier's validation endpoint.
             </p>
@@ -162,7 +162,7 @@
         </p>
       {/if}
     {:else}
-      <p class="mb-4 text-sm text-light">
+      <p class="mb-4 text-sm text-gray-1">
         <i class="fa-solid fa-info-circle" />
         NIP05 identifier not available.
       </p>

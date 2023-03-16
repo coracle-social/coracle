@@ -212,7 +212,7 @@
 
 <div class="flex">
   <div
-    class="w-full min-w-0 p-2 text-white outline-0"
+    class="w-full min-w-0 p-2 text-gray-3 outline-0"
     autofocus
     contenteditable
     bind:this={input}
@@ -222,12 +222,12 @@
 </div>
 
 {#if suggestions.length > 0}
-  <div class="mt-2 flex flex-col rounded border border-solid border-medium" in:fly={{y: 20}}>
+  <div class="mt-2 flex flex-col rounded border border-solid border-gray-6" in:fly={{y: 20}}>
     {#each suggestions as person, i (person.pubkey)}
       <button
         class="cursor-pointer border-l-2 border-solid border-black py-2 px-4"
-        class:bg-black={index !== i}
-        class:bg-dark={index === i}
+        class:bg-gray-8={index !== i}
+        class:bg-gray-7={index === i}
         class:border-accent={index === i}
         on:click={() => pickSuggestion(person)}>
         <Badge inert {person} />

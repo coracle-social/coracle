@@ -14,5 +14,5 @@
 
 <Content size="lg">
   <QRCode code={nprofile} />
-  <div class="text-center text-light">Copy or scan from a nostr app to share this profile.</div>
+  <div class="text-center text-gray-1">Copy or scan from a nostr app to share this profile.</div>
 </Content>

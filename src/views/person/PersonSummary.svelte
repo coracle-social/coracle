@@ -45,7 +45,7 @@
       {#if $person.verified_as}
         <div class="flex gap-1 text-sm">
           <i class="fa fa-user-check text-accent" />
-          <span class="text-light">{last($person.verified_as.split("@"))}</span>
+          <span class="text-gray-1">{last($person.verified_as.split("@"))}</span>
         </div>
       {/if}
     </div>

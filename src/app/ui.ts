@@ -1,19 +1,19 @@
 import Bugsnag from "@bugsnag/js"
-import {prop, last} from "ramda"
-import {uuid} from "hurdak/lib/hurdak"
-import type {Writable} from 'svelte/store'
+import {prop, fromPairs, last} from "ramda"
+import {uuid, switcher} from "hurdak/lib/hurdak"
+import type {Writable} from "svelte/store"
 import {navigate} from "svelte-routing"
-import {nip19} from 'nostr-tools'
+import {nip19} from "nostr-tools"
 import {writable, get} from "svelte/store"
 import {globalHistory} from "svelte-routing/src/history"
-import {sleep, hash} from "src/util/misc"
-import {warn} from 'src/util/logger'
-import user from 'src/agent/user'
+import {sleep, synced, hash} from "src/util/misc"
+import {warn} from "src/util/logger"
+import user from "src/agent/user"
 
 // Routing
 
 export const routes = {
-  person: (pubkey, tab = 'notes') => `/people/${nip19.npubEncode(pubkey)}/${tab}`,
+  person: (pubkey, tab = "notes") => `/people/${nip19.npubEncode(pubkey)}/${tab}`,
 }
 
 // Install prompt
@@ -85,16 +85,16 @@ export const modal = {
 // characters long, respectively. Put the threshold a little lower in case
 // someone accidentally enters a key with the last few digits missing
 const redactErrorInfo = info =>
-  JSON.parse(JSON.stringify(info || null).replace(/\w{60}\w+/g, '[REDACTED]'))
+  JSON.parse(JSON.stringify(info || null).replace(/\w{60}\w+/g, "[REDACTED]"))
 
 // Wait for bugsnag to be started in main
 setTimeout(() => {
   Bugsnag.addOnError((event: any) => {
-    if (window.location.host.startsWith('localhost')) {
+    if (window.location.host.startsWith("localhost")) {
       return false
     }
 
-    if (!user.getSetting('reportAnalytics')) {
+    if (!user.getSetting("reportAnalytics")) {
       return false
     }
 
@@ -117,17 +117,36 @@ export const logUsage = async name => {
   // Hash the user's pubkey so we can identify unique users without knowing
   // anything about them
   const pubkey = user.getPubkey()
-  const ident = pubkey ? hash(pubkey) : 'unknown'
+  const ident = pubkey ? hash(pubkey) : "unknown"
   const {dufflepudUrl, reportAnalytics} = user.getSettings()
 
   if (reportAnalytics) {
     try {
-      await fetch(`${dufflepudUrl}/usage/${ident}/${session}/${name}`, {method: 'post'})
+      await fetch(`${dufflepudUrl}/usage/${ident}/${session}/${name}`, {method: "post"})
     } catch (e) {
-      if (!e.toString().includes('Failed to fetch')) {
+      if (!e.toString().includes("Failed to fetch")) {
         warn(e)
       }
     }
   }
 }
 
+// Themes
+
+const parseTheme = s => fromPairs(s.split(",").map(x => x.split(":")))
+const THEME_LIGHT = parseTheme(import.meta.env.VITE_THEME_LIGHT)
+const THEME_DARK = parseTheme(import.meta.env.VITE_THEME_DARK)
+const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+
+export const theme = synced("ui/theme", prefersDark ? "dark" : "light")
+
+export const getThemeVariables = $theme => {
+  const colors = switcher($theme, {
+    light: THEME_LIGHT,
+    dark: THEME_DARK,
+  })
+
+  return Object.entries(colors)
+    .map(([k, v]) => `--${k}: ${v};`)
+    .join("\n")
+}

@@ -56,7 +56,7 @@
 
   const {profile, canPublish, mutes} = user
   const timestamp = formatTimestamp(note.created_at)
-  const borderColor = invertColors ? "medium" : "dark"
+  const borderColor = invertColors ? "gray-6" : "gray-7"
   const links = extractUrls(note.content)
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
@@ -367,7 +367,7 @@
           </Popover>
           <Anchor
             href={"/" + nip19.neventEncode({id: note.id, relays: [note.seen_on]})}
-            class="text-sm text-light"
+            class="text-sm text-gray-1"
             type="unstyled">
             {timestamp}
           </Anchor>
@@ -375,25 +375,25 @@
         <div class="flex flex-col gap-2">
           <div class="flex gap-2">
             {#if findReplyId(note) && showParent}
-              <small class="text-light">
+              <small class="text-gray-1">
                 <i class="fa fa-code-merge" />
                 <Anchor on:click={goToParent}>View Parent</Anchor>
               </small>
             {/if}
             {#if findRootId(note) && findRootId(note) !== findReplyId(note) && showParent}
-              <small class="text-light">
+              <small class="text-gray-1">
                 <i class="fa fa-code-pull-request" />
                 <Anchor on:click={goToRoot}>View Thread</Anchor>
               </small>
             {/if}
           </div>
           {#if flag}
-            <p class="border-l-2 border-solid border-medium pl-4 text-light">
+            <p class="border-l-2 border-solid border-gray-6 pl-4 text-gray-1">
               You have flagged this content as offensive.
               <Anchor on:click={() => deleteReaction(flag)}>Unflag</Anchor>
             </p>
           {:else if muted}
-            <p class="border-l-2 border-solid border-medium pl-4 text-light">
+            <p class="border-l-2 border-solid border-gray-6 pl-4 text-gray-1">
               You have muted this note.
             </p>
           {:else}
@@ -406,7 +406,7 @@
               {/if}
             </div>
           {/if}
-          <div class="flex justify-between text-light">
+          <div class="flex justify-between text-gray-1">
             <div
               class={cx("flex", {
                 "pointer-events-none opacity-75": !$canPublish || flag || muted,
@@ -478,19 +478,22 @@
       transition:slide
       class={`note-reply relative z-10 border border-${borderColor} rounded border-solid`}
       bind:this={replyContainer}>
-      <div class="bg-dark" class:rounded-b={replyMentions.length === 0} on:keydown={onReplyKeydown}>
+      <div
+        class="bg-gray-7"
+        class:rounded-b={replyMentions.length === 0}
+        on:keydown={onReplyKeydown}>
         <Compose bind:this={reply} onSubmit={sendReply}>
           <button
             slot="addon"
             on:click={sendReply}
-            class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-dark p-4
-               py-8 text-white transition-all hover:bg-accent">
+            class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-gray-7 p-4
+               py-8 text-gray-3 transition-all hover:bg-accent">
             <i class="fa fa-paper-plane fa-xl" />
           </button>
         </Compose>
       </div>
       {#if image}
-        <div class="bg-dark p-2">
+        <div class="bg-gray-7 p-2">
           <Preview
             url={image}
             onClose={() => {
@@ -499,8 +502,8 @@
         </div>
       {/if}
       <div class={`h-px bg-${borderColor}`} />
-      <div class="h-12 rounded-b bg-black p-2 text-sm text-white">
-        <div class="mr-2 inline-block border-r border-solid border-medium py-2 pl-1 pr-3">
+      <div class="h-12 rounded-b bg-gray-7 p-2 text-sm text-gray-3">
+        <div class="mr-2 inline-block border-r border-solid border-gray-6 py-2 pl-1 pr-3">
           <div class="flex cursor-pointer items-center gap-3">
             <ImageInput bind:value={image} icon="image" hideInput>
               <i slot="button" class="fa fa-paperclip" />
@@ -509,14 +512,14 @@
           </div>
         </div>
         {#each replyMentions as p}
-          <div class="mr-1 inline-block rounded-full border border-solid border-light py-1 px-2">
+          <div class="mr-1 inline-block rounded-full border border-solid border-gray-1 py-1 px-2">
             <button
               class="fa fa-times cursor-pointer"
               on:click|stopPropagation={() => removeMention(p)} />
             {displayPerson(getPersonWithFallback(p))}
           </div>
         {:else}
-          <div class="text-light inline-block">No mentions</div>
+          <div class="text-gray-1 inline-block">No mentions</div>
         {/each}
         <div class="-mt-2" />
       </div>
@@ -528,7 +531,7 @@
       <div class={`absolute w-px bg-${borderColor} z-10 -mt-4 ml-4 h-0`} bind:this={border} />
       <div class="note-children relative ml-8 flex flex-col gap-4" bind:this={childrenContainer}>
         {#if !showEntire && note.replies.length > visibleNotes.length}
-          <button class="ml-5 cursor-pointer py-2 text-light" on:click={onClick}>
+          <button class="ml-5 cursor-pointer py-2 text-gray-1" on:click={onClick}>
             <i class="fa fa-up-down pr-2 text-sm" />
             Show {quantify(
               note.replies.length - visibleNotes.length,
@@ -571,7 +574,7 @@
         </div>
         {#if zap.invoice}
           <QRCode code={zap.invoice} />
-          <div class="text-center text-light">
+          <div class="text-center text-gray-1">
             Copy or scan using a lightning wallet to pay your zap.
           </div>
         {:else}

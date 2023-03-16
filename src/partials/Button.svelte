@@ -7,11 +7,11 @@
 
   const className = cx(
     $$props.class,
-    "py-2 px-4 rounded cursor-pointer",
-    {"text-light": disabled},
+    "py-2 px-4 rounded cursor-pointer border border-solid transition-all",
+    {"text-gray-5": disabled},
     switcher(theme, {
-      default: "bg-white text-accent",
-      accent: "text-white bg-accent",
+      default: "bg-input text-accent border-gray-5 hover:bg-input-hover",
+      accent: "text-white bg-accent border-accent-light hover:bg-accent-light",
     })
   )
 </script>

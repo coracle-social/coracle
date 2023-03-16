@@ -64,19 +64,19 @@
         <Input type="text" name="name" wrapperClass="flex-grow" bind:value={room.name}>
           <i slot="before" class="fa-solid fa-tag" />
         </Input>
-        <p class="text-sm text-light">The room's name can be changed anytime.</p>
+        <p class="text-sm text-gray-1">The room's name can be changed anytime.</p>
       </div>
       <div class="flex flex-col gap-1">
         <strong>Room information</strong>
         <Textarea name="about" bind:value={room.about} />
-        <p class="text-sm text-light">
+        <p class="text-sm text-gray-1">
           Give people an idea of what kind of conversations will be happening here.
         </p>
       </div>
       <div class="flex flex-col gap-1">
         <strong>Picture</strong>
         <input type="file" name="picture" />
-        <p class="text-sm text-light">A picture to help people remember your room.</p>
+        <p class="text-sm text-gray-1">A picture to help people remember your room.</p>
       </div>
       <Button type="submit" class="text-center">Done</Button>
     </div>

@@ -10,7 +10,7 @@
   import {loadAppData} from "src/app"
 
   export let relay
-  export let theme = "dark"
+  export let theme = "gray-8"
   export let showControls = false
 
   let quality = null
@@ -52,12 +52,13 @@
   {theme}
   addRelay={!joined && !isPubkeyLogin ? addRelay : null}
   removeRelay={joined && $relays.length > 1 && !isPubkeyLogin ? removeRelay : null}>
-  <div slot="controls" class="flex justify-between gap-2">
-    {#if showControls && $canPublish}
-      <span>Publish to this relay?</span>
-      <Toggle
-        value={relay.write}
-        on:change={() => user.setRelayWriteCondition(relay.url, !relay.write)} />
-    {/if}
+  <div
+    slot="controls"
+    class="flex justify-between gap-2"
+    class:hidden={!showControls || !$canPublish}>
+    <span>Publish to this relay?</span>
+    <Toggle
+      value={relay.write}
+      on:change={() => user.setRelayWriteCondition(relay.url, !relay.write)} />
   </div>
 </RelayCard>

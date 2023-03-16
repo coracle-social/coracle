@@ -38,8 +38,8 @@
         <RelayCard showControls {relay} />
       {/each}
     </div>
-    <div class="flex flex-col gap-6" in:fly={{y: 20, delay: 1000}}>
-      <div class="mb-2 border-b border-solid border-medium pt-2" />
+    <div class="flex flex-col gap-6" in:fly={{y: 20}}>
+      <div class="mb-2 border-b border-solid border-gray-6 pt-2" />
       <div class="flex items-center gap-2">
         <i class="fa fa-earth-asia fa-lg" />
         <h2 class="staatliches text-2xl">Other relays</h2>

@@ -106,7 +106,7 @@
     <div class="flex w-full flex-col gap-4">
       <div class="flex flex-col gap-2">
         <strong>What do you want to say?</strong>
-        <div class="border-l-2 border-solid border-medium pl-4">
+        <div class="border-l-2 border-solid border-gray-6 pl-4">
           <Compose bind:this={input} {onSubmit} />
         </div>
       </div>
@@ -144,7 +144,7 @@
         <div>
           {#each relays as relay}
             <div
-              class="mr-1 mb-2 inline-block rounded-full border border-solid border-light py-1 px-2">
+              class="mr-1 mb-2 inline-block rounded-full border border-solid border-gray-1 py-1 px-2">
               <button
                 type="button"
                 class="fa fa-times cursor-pointer"

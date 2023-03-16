@@ -54,13 +54,13 @@
         on:mouseover={() => {
           showStatus = true
         }}
-        class="h-2 w-2 cursor-pointer rounded-full bg-medium"
-        class:bg-medium={message === "Not connected"}
+        class="h-2 w-2 cursor-pointer rounded-full bg-gray-6"
+        class:bg-gray-6={message === "Not connected"}
         class:bg-danger={quality <= 0.3 && message !== "Not connected"}
         class:bg-warning={between(0.3, 0.7, quality)}
         class:bg-success={quality > 0.7} />
       <p
-        class="hidden text-sm text-light transition-all sm:block"
+        class="hidden text-sm text-gray-1 transition-all sm:block"
         class:opacity-0={!showStatus}
         class:opacity-1={showStatus}>
         {message}
@@ -95,7 +95,7 @@
     <p>{relay.description}</p>
   {/if}
 </Content>
-<div class="border-b border-solid border-medium" />
+<div class="border-b border-solid border-gray-6" />
 <Content>
   <Feed relays={[relay]} filter={{kinds: [1]}} />
 </Content>

@@ -23,6 +23,7 @@
   import * as tables from "src/agent/tables"
   import user from "src/agent/user"
   import {loadAppData} from "src/app"
+  import {theme, getThemeVariables} from "src/app/ui"
   import {modal, routes, menuIsOpen, logUsage} from "src/app/ui"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
@@ -75,6 +76,12 @@
     modal.clear()
     menuIsOpen.set(false)
   }
+
+  const style = document.createElement("style")
+
+  document.head.append(style)
+
+  $: style.textContent = `:root { ${getThemeVariables($theme)}; background: var(--gray-8); }`
 
   onMount(() => {
     // Keep scroll position on body, but don't allow scrolling
@@ -183,7 +190,7 @@
 <Router {url}>
   <div use:links class="h-full">
     {#if ready}
-      <div class="h-full pt-16 text-white lg:ml-56">
+      <div class="h-full pt-16 text-gray-3 lg:ml-56">
         <Route path="/notifications" component={Notifications} />
         <Route path="/search">
           <EnsureData enforcePeople={false}>

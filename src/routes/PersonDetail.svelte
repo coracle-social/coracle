@@ -183,7 +183,7 @@
           {#if person.verified_as}
             <div class="flex gap-1 text-sm">
               <i class="fa fa-user-check text-accent" />
-              <span class="text-light">{last(person.verified_as.split("@"))}</span>
+              <span class="text-gray-1">{last(person.verified_as.split("@"))}</span>
             </div>
           {/if}
         </div>
@@ -193,7 +193,7 @@
           </div>
           <div class="absolute top-0 right-0 z-10 mt-12 flex flex-col gap-2 opacity-90">
             <div
-              class="absolute inset-0 rounded-full bg-black"
+              class="absolute inset-0 rounded-full bg-gray-8"
               class:hidden={!showActions}
               style="filter: blur(15px)"
               transition:fade|local />
@@ -203,7 +203,7 @@
                 in:fly|local={{y: 20, delay: i * 30}}
                 out:fly|local={{y: 20, delay: (actions.length - i - 1) * 30}}
                 on:click={onClick}>
-                <div class="text-light">{label}</div>
+                <div class="text-gray-1">{label}</div>
                 <Anchor type="button-circle">
                   <i class={`fa fa-${icon}`} />
                 </Anchor>

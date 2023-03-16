@@ -8,7 +8,7 @@
 
 <div
   class="flex flex-col justify-between gap-3 rounded border border-l-2 border-solid
-         border-medium py-3 px-6 shadow"
+         border-gray-6 py-3 px-6 shadow"
   style={`border-left-color: ${hsl(stringToHue(relay.url))}`}
   in:fly={{y: 20}}>
   <div class="flex items-center justify-between gap-2">

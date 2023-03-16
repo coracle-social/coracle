@@ -86,8 +86,8 @@
           </Anchor>
         </div>
         <div class="flex items-center gap-2">
-          <i class="fa fa-lock text-light" />
-          <span class="text-light">Encrypted</span>
+          <i class="fa fa-lock text-gray-1" />
+          <span class="text-gray-1">Encrypted</span>
         </div>
       </div>
       <div>{$person.kind0?.about || ""}</div>
@@ -103,15 +103,15 @@
     <div
       class={cx("inline-block max-w-xl rounded-2xl py-2 px-4", {
         "rounded-br-none bg-white text-end text-black": message.person.pubkey === user.getPubkey(),
-        "rounded-bl-none bg-dark": message.person.pubkey !== user.getPubkey(),
+        "rounded-bl-none bg-gray-7": message.person.pubkey !== user.getPubkey(),
       })}>
       <div class="break-words">
         {@html renderNote(message, {showEntire: true})}
       </div>
       <small
         class="mt-1"
-        class:text-dark={message.person.pubkey === user.getPubkey()}
-        class:text-light={message.person.pubkey !== user.getPubkey()}>
+        class:text-gray-7={message.person.pubkey === user.getPubkey()}
+        class:text-gray-1={message.person.pubkey !== user.getPubkey()}>
         {formatTimestamp(message.created_at)}
       </small>
     </div>

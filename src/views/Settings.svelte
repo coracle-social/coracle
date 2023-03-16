@@ -41,7 +41,7 @@
           <strong>Show images and link previews</strong>
           <Toggle bind:value={values.showMedia} />
         </div>
-        <p class="text-sm text-light">
+        <p class="text-sm text-gray-1">
           If enabled, coracle will automatically retrieve a link preview for the last link in any
           note.
         </p>
@@ -51,7 +51,7 @@
           <strong>Default zap amount</strong>
           <Input bind:value={values.defaultZap} />
         </div>
-        <p class="text-sm text-light">
+        <p class="text-sm text-gray-1">
           The default amount of sats to use when sending a lightning tip.
         </p>
       </div>
@@ -61,7 +61,7 @@
           <div>{values.relayLimit} relays</div>
         </div>
         <Input type="range" bind:value={values.relayLimit} min={1} max={50} />
-        <p class="mt-2 text-sm text-light">
+        <p class="mt-2 text-sm text-gray-1">
           This controls how many relays to max out at when loading feeds and event context. More is
           faster, but will require more bandwidth and processing power.
         </p>
@@ -71,7 +71,7 @@
         <Input bind:value={values.dufflepudUrl}>
           <i slot="before" class="fa-solid fa-server" />
         </Input>
-        <p class="text-sm text-light">
+        <p class="text-sm text-gray-1">
           Enter a custom url for Coracle's helper application. Dufflepud is used for hosting images
           and loading link previews.
         </p>
@@ -81,7 +81,7 @@
           <strong>Report errors and analytics</strong>
           <Toggle bind:value={values.reportAnalytics} />
         </div>
-        <p class="text-sm text-light">
+        <p class="text-sm text-gray-1">
           Keep this enabled if you would like the Coracle developers to be able to know what
           features are used, and to diagnose and fix bugs.
         </p>

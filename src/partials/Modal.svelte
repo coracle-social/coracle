@@ -13,7 +13,8 @@
     }
   }} />
 
-<div class="modal fixed inset-0 z-30 bg-black/75" bind:this={root} transition:fade>
+<div class="modal fixed inset-0 z-30" bind:this={root} transition:fade>
+  <div class="fixed inset-0 cursor-pointer bg-black opacity-75" on:click={onEscape} />
   <div
     class="modal-content h-full overflow-auto"
     bind:this={content}
@@ -25,14 +26,14 @@
         <div class="pointer-events-none sticky top-0 z-10 flex w-full justify-end p-2">
           <div
             class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center
-                 rounded-full border border-solid border-medium bg-accent">
+                 rounded-full border border-solid border-accent-light bg-accent text-white">
             <i class="fa fa-times fa-lg" />
           </div>
         </div>
       {/if}
-      <div class="absolute mt-12 h-full w-full bg-dark" />
+      <div class="absolute mt-12 h-full w-full bg-gray-7" />
       <div
-        class="relative h-full w-full cursor-auto border-t border-solid border-medium bg-dark pt-2 pb-10"
+        class="relative h-full w-full cursor-auto border-t border-solid border-gray-6 bg-gray-7 pt-2 pb-10"
         on:click|stopPropagation>
         <slot />
       </div>

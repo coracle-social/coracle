@@ -50,8 +50,6 @@
 
 :root {
   font-family: Montserrat;
-  background-color: #0f0f0e;
-  color: white;
 }
 
 html,
@@ -66,8 +64,11 @@ body,
 .tippy-box[data-theme~="dark"] {
   background-color: #0f0f0e;
   border: 1px solid #403d39;
-  box-shadow: 3px 3px 20px #0f0f0e, 3px -3px 20px #0f0f0e, -3px 3px 20px #0f0f0e,
-    -3px -3px 20px #0f0f0e;
+  box-shadow:
+    3px 3px 20px rgba(0, 0, 0, 0.1),
+    3px -3px 20px rgba(0, 0, 0, 0.1),
+    -3px 3px 20px rgba(0, 0, 0, 0.1),
+    -3px -3px 20px rgba(0, 0, 0, 0.1);
 }
 
 .tippy-box[data-theme~="dark"][data-placement^="top"] > .tippy-arrow {

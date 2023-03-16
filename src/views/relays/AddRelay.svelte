@@ -49,7 +49,7 @@
         <Input autofocus bind:value={url} placeholder="wss://relay.example.com">
           <i slot="before" class="fa-solid fa-link" />
         </Input>
-        <p class="text-sm text-light">The url where the relay is hosted.</p>
+        <p class="text-sm text-gray-1">The url where the relay is hosted.</p>
       </div>
       <Button type="submit" class="text-center">Done</Button>
     </div>

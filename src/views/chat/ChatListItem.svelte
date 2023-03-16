@@ -14,7 +14,7 @@
 </script>
 
 <button
-  class="flex cursor-pointer gap-4 rounded border border-solid border-medium bg-dark px-4 py-6 transition-all hover:bg-medium"
+  class="flex cursor-pointer gap-4 rounded border border-solid border-gray-6 bg-gray-7 px-4 py-6 transition-all hover:bg-gray-6"
   on:click={enter}
   in:fly={{y: 20}}>
   <div
@@ -23,7 +23,7 @@
   <div class="flex min-w-0 flex-grow flex-col justify-start gap-2">
     <div class="flex flex-grow items-start justify-between gap-2">
       <div class="flex items-center gap-2 overflow-hidden">
-        <i class="fa fa-lock-open text-light" />
+        <i class="fa fa-lock-open text-gray-1" />
         <h2 class="text-lg">{room.name || ""}</h2>
       </div>
       {#if room.joined}
@@ -51,7 +51,7 @@
       {/if}
     </div>
     {#if room.about}
-      <p class="text-start text-light">
+      <p class="text-start text-gray-1">
         {ellipsize(room.about, 300)}
       </p>
     {/if}

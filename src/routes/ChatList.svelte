@@ -35,7 +35,7 @@
 </script>
 
 <Content>
-  <div class="mt-10 flex justify-between">
+  <div class="flex justify-between">
     <div class="flex items-center gap-2">
       <i class="fa fa-server fa-lg" />
       <h2 class="staatliches text-2xl">Your rooms</h2>
@@ -49,7 +49,7 @@
   {:else}
     <p class="text-center py-8">You haven't yet joined any rooms.</p>
   {/each}
-  <div class="mb-2 border-b border-solid border-medium pt-2" />
+  <div class="mb-2 border-b border-solid border-gray-6 pt-2" />
   <div class="flex items-center gap-2">
     <i class="fa fa-earth-asia fa-lg" />
     <h2 class="staatliches text-2xl">Other rooms</h2>

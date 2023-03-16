@@ -130,30 +130,30 @@
     </div>
     <div
       class="fixed top-0 z-20 w-full border-b border-solid
-                border-medium bg-dark p-4">
+                border-gray-6 bg-gray-7 p-4">
       <slot name="header" />
     </div>
     <div
-      class="fixed bottom-0 z-10 flex w-full border-t border-solid border-medium border-dark bg-medium lg:-ml-56 lg:pl-56">
+      class="fixed bottom-0 z-10 flex w-full border-t border-solid border-gray-6 border-gray-7 bg-gray-6 lg:-ml-56 lg:pl-56">
       <textarea
         rows="3"
         autofocus
         placeholder="Type something..."
         bind:this={textarea}
         on:keypress={onKeyPress}
-        class="w-full resize-none bg-medium p-2
-               text-white outline-0 placeholder:text-light" />
+        class="w-full resize-none bg-gray-6 p-2
+               text-gray-3 outline-0 placeholder:text-gray-1" />
       <button
         on:click={send}
-        class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-dark p-4
-               py-8 text-white transition-all hover:bg-accent ">
+        class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-gray-7 p-4
+               py-8 text-gray-3 transition-all hover:bg-accent ">
         <i class="fa-solid fa-paper-plane fa-xl" />
       </button>
     </div>
   </div>
   {#if showNewMessages}
     <div class="fixed bottom-32 flex w-full justify-center" transition:fly|local={{y: 20}}>
-      <div class="rounded-full bg-accent py-2 px-4 text-white">New messages found</div>
+      <div class="rounded-full bg-accent py-2 px-4 text-gray-3">New messages found</div>
     </div>
   {/if}
 </div>

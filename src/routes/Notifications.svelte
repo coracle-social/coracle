@@ -62,8 +62,8 @@
       </div>
       {#if event.showLine}
         <div class="flex items-center gap-4">
-          <small class="whitespace-nowrap text-light">Older notifications</small>
-          <div class="h-px w-full bg-medium" />
+          <small class="whitespace-nowrap text-gray-1">Older notifications</small>
+          <div class="h-px w-full bg-gray-6" />
         </div>
       {/if}
     {:else}

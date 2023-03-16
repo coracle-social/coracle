@@ -8,8 +8,8 @@
 
   const className = cx(
     $$props.class,
-    "rounded bg-light shadow-inset py-2 px-4 pr-10 text-black w-full text-dark",
-    "placeholder:text-dark placeholder:opacity-75"
+    "rounded shadow-inset py-2 px-4 pr-10 w-full bg-gray-3 text-gray-8",
+    "placeholder:text-gray-7 placeholder:opacity-75"
   )
 </script>
 

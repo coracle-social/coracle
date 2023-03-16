@@ -47,14 +47,14 @@
       external
       href={url}
       style="background-color: rgba(15, 15, 14, 0.5)"
-      class="relative flex flex-col overflow-hidden rounded border border-solid border-medium">
+      class="relative flex flex-col overflow-hidden rounded border border-solid border-gray-6">
       {#if preview.image}
         <img alt="Link preview" src={preview.image} class="max-h-96 object-contain object-center" />
       {/if}
       {#if preview.video}
         <video controls src={preview.video} class="max-h-96 object-contain object-center" />
       {/if}
-      <div class="h-px bg-medium" />
+      <div class="h-px bg-gray-6" />
       {#if preview.title}
         <div class="flex flex-col bg-white px-4 py-2 text-black">
           <strong class="overflow-hidden text-ellipsis whitespace-nowrap">{preview.title}</strong>
@@ -64,7 +64,7 @@
       <div
         on:click|preventDefault={close}
         class="absolute top-0 right-0 m-1 flex h-6 w-6 items-center justify-center
-             rounded-full border border-solid border-medium bg-white text-black opacity-50 shadow">
+             rounded-full border border-solid border-gray-6 bg-white text-black opacity-50 shadow">
         <i class="fa fa-times" />
       </div>
     </Anchor>

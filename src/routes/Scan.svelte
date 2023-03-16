@@ -71,7 +71,7 @@
       <i class="fa fa-camera" />
     </Anchor>
   </form>
-  <div class="text-center text-light">
+  <div class="text-center text-gray-1">
     Enter any nostr identifier (npub, nevent, nprofile, note or user@domain.tld), or click on the
     camera icon to scan with your device's camera instead.
   </div>
