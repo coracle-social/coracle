@@ -241,6 +241,7 @@
       invoice: null,
       loading: false,
       startedAt: now(),
+      confirmed: false,
     }
   }
 
@@ -282,7 +283,10 @@
       },
       onChunk: chunk => {
         note.zaps = note.zaps.concat(chunk)
-        cleanupZap()
+
+        zap.confirmed = true
+
+        setTimeout(cleanupZap, 1000)
       },
     })
   }
@@ -575,10 +579,19 @@
           <h1 class="staatliches text-2xl">Send a zap</h1>
           <p>to {displayPerson($person)}</p>
         </div>
-        {#if zap.invoice}
+        {#if zap.confirmed}
+          <div class="flex items-center justify-center gap-2 text-gray-1">
+            <i class="fa fa-champagne-glasses" />
+            <p>Success! Zap confirmed.</p>
+          </div>
+        {:else if zap.invoice}
           <QRCode code={zap.invoice} />
-          <div class="text-center text-gray-1">
+          <p class="text-center text-gray-1">
             Copy or scan using a lightning wallet to pay your zap.
+          </p>
+          <div class="flex items-center justify-center gap-2 text-gray-1">
+            <i class="fa fa-circle-notch fa-spin" />
+            Waiting for confirmation...
           </div>
         {:else}
           <Textarea bind:value={zap.message} placeholder="Add an optional message" />

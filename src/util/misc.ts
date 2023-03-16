@@ -226,7 +226,7 @@ export const shuffle = sortBy(() => Math.random() > 0.5)
 
 export const batch = (t, f) => {
   const xs = []
-  const cb = throttle(t, () => f(xs.splice(0)))
+  const cb = throttle(t, () => xs.length > 0 && f(xs.splice(0)))
 
   return x => {
     xs.push(x)
