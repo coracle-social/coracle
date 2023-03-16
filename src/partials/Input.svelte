@@ -7,7 +7,7 @@
 
   const className = cx(
     $$props.class,
-    "rounded shadow-inset py-2 px-4 pr-10 w-full placeholder:text-gray-5",
+    "rounded shadow-inset py-2 px-4 pr-10 w-full placeholder:text-gray-4",
     "bg-input border border-solid border-gray-3 text-black",
     {"pl-10": $$slots.before, "pr-10": $$slots.after}
   )
