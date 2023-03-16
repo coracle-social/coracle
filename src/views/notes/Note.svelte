@@ -26,6 +26,7 @@
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
   import user from "src/agent/user"
+  import pool from "src/agent/pool"
   import keys from "src/agent/keys"
   import network from "src/agent/network"
   import {getEventPublishRelays, getRelaysForEventParent} from "src/agent/relays"
@@ -445,13 +446,15 @@
                   let:instance
                   class="flex flex-col gap-2"
                   on:click={() => instance.hide()}>
-                  <Anchor
-                    type="button-circle"
-                    on:click={() => {
-                      showRelays = true
-                    }}>
-                    <i class="fa fa-server" />
-                  </Anchor>
+                  {#if pool.forceRelays.length === 0}
+                    <Anchor
+                      type="button-circle"
+                      on:click={() => {
+                        showRelays = true
+                      }}>
+                      <i class="fa fa-server" />
+                    </Anchor>
+                  {/if}
                   {#if muted}
                     <Anchor type="button-circle" on:click={unmute}>
                       <i class="fa fa-microphone" />

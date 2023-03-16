@@ -1,11 +1,16 @@
 import type {Relay, Filter} from "nostr-tools"
 import type {MyEvent} from "src/util/types"
 import {relayInit} from "nostr-tools"
-import {pluck, is} from "ramda"
+import {pluck, objOf, identity, is} from "ramda"
 import {ensurePlural} from "hurdak/lib/hurdak"
 import {warn, log, error} from "src/util/logger"
 import {union, now, difference} from "src/util/misc"
 import {isRelay, normalizeRelayUrl} from "src/util/nostr"
+
+const forceRelays = (import.meta.env.VITE_FORCE_RELAYS || "")
+  .split(",")
+  .filter(identity)
+  .map(objOf("url"))
 
 // Connection management
 
@@ -138,6 +143,10 @@ const connect = url => {
 // Public api - publish/subscribe
 
 const publish = async ({relays, event, onProgress, timeout = 5000}) => {
+  if (forceRelays.length > 0) {
+    relays = forceRelays
+  }
+
   if (relays.length === 0) {
     error(`Attempted to publish to zero relays`, event)
   } else {
@@ -230,6 +239,10 @@ type SubscribeOpts = {
 
 const subscribe = async ({relays, filter, onEvent, onEose, onError}: SubscribeOpts) => {
   filter = ensurePlural(filter)
+
+  if (forceRelays.length > 0) {
+    relays = forceRelays
+  }
 
   const id = createFilterId(filter)
   const now = Date.now()
@@ -353,6 +366,7 @@ const describeFilter = ({kinds = [], ...filter}) => {
 }
 
 export default {
+  forceRelays,
   getConnections,
   getConnection,
   connect,

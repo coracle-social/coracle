@@ -108,7 +108,9 @@
         </div>
       </div>
     {/if}
+
     <h1 class="staatliches mt-4 text-2xl">NIP05</h1>
+
     {#if loaded && person.verified_as}
       <div>
         <div class="mb-1 text-lg">NIP05 Identifier</div>
@@ -121,7 +123,6 @@
           {person.verified_as || "?"}
         </div>
       </div>
-
       <div>
         <div class="mb-1 text-lg">NIP05 Validation Endpoint</div>
         <div class="font-mono text-sm">
@@ -134,7 +135,6 @@
           {nip05QueryEndpoint || "?"}
         </div>
       </div>
-
       {#if nip05ProfileData}
         <div>
           <div class="mb-2 text-lg">NIP05 Relay Configuration</div>

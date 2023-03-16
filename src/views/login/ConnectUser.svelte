@@ -115,7 +115,9 @@
       }}>here</Anchor
     >.
   </p>
-  {#if Object.values(currentRelays).length > 0}
+  {#if pool.forceRelays.length > 0}
+    <Spinner />
+  {:else if Object.values(currentRelays).length > 0}
     <p>Currently searching:</p>
     {#each Object.values(currentRelays) as relay}
       <div class="h-12">

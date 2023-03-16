@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {last, find} from "ramda"
+  import {last, identity, find} from "ramda"
   import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
   import {fly, fade} from "svelte/transition"
@@ -16,6 +16,7 @@
   import Likes from "src/views/person/Likes.svelte"
   import Relays from "src/views/person/Relays.svelte"
   import user from "src/agent/user"
+  import pool from "src/agent/pool"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import {getPersonWithFallback, people} from "src/agent/tables"
@@ -29,6 +30,7 @@
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const {petnamePubkeys, canPublish, mutes} = user
   const getRelays = () => sampleRelays(relays.concat(getPubkeyWriteRelays(pubkey)))
+  const tabs = ["notes", "likes", pool.forceRelays.length === 0 && "relays"].filter(identity)
 
   let pubkey = toHex(npub)
   let following = false
@@ -77,7 +79,9 @@
         })
       }
 
-      actions.push({onClick: openProfileInfo, label: "Profile", icon: "info"})
+      if (pool.forceRelays.length === 0) {
+        actions.push({onClick: openProfileInfo, label: "Profile", icon: "info"})
+      }
 
       if (user.getPubkey() === pubkey && $canPublish) {
         actions.push({
@@ -234,7 +238,7 @@
     </div>
   </div>
 
-  <Tabs tabs={["notes", "likes", "relays"]} {activeTab} {setActiveTab} />
+  <Tabs {tabs} {activeTab} {setActiveTab} />
 
   {#if activeTab === "notes"}
     <Notes {pubkey} />
