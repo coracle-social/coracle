@@ -411,13 +411,14 @@
               class={cx("flex", {
                 "pointer-events-none opacity-75": !$canPublish || flag || muted,
               })}>
-              <button class="w-16 text-left" on:click|stopPropagation={startReply}>
+              <button class="w-16 text-left" on:click|stopPropagation={startReply} title="Reply">
                 <i class="fa fa-reply cursor-pointer" />
                 {$repliesCount}
               </button>
               <button
                 class="w-16 text-left"
                 class:text-accent={like}
+                title="Like a note"
                 on:click|stopPropagation={() => (like ? deleteReaction(like) : react("+"))}>
                 <i
                   class={cx("fa fa-heart cursor-pointer", {
@@ -426,6 +427,7 @@
                 {$likesCount}
               </button>
               <button
+                title="Send a zap"
                 class={cx("w-20 text-left", {
                   "pointer-events-none opacity-50": !canZap,
                 })}
@@ -438,7 +440,7 @@
             <div on:click|stopPropagation>
               <Popover theme="transparent">
                 <div slot="trigger" class="cursor-pointer px-2">
-                  <i class="fa fa-ellipsis-v" />
+                  <i class="fa fa-ellipsis-v" title="More options" />
                 </div>
                 <div
                   slot="tooltip"
@@ -447,21 +449,22 @@
                   on:click={() => instance.hide()}>
                   <Anchor
                     type="button-circle"
+                    title="Show note relays"
                     on:click={() => {
                       showRelays = true
                     }}>
                     <i class="fa fa-server" />
                   </Anchor>
                   {#if muted}
-                    <Anchor type="button-circle" on:click={unmute}>
+                    <Anchor type="button-circle"  title="Unmute this note" on:click={unmute}>
                       <i class="fa fa-microphone" />
                     </Anchor>
                   {:else}
-                    <Anchor type="button-circle" on:click={mute}>
+                    <Anchor type="button-circle" title="Mute this note" on:click={mute}>
                       <i class="fa fa-microphone-slash" />
                     </Anchor>
                   {/if}
-                  <Anchor type="button-circle" on:click={() => react("-")}>
+                  <Anchor title="Flag content as offensive" type="button-circle" on:click={() => react("-")}>
                     <i class="fa fa-flag" />
                   </Anchor>
                 </div>

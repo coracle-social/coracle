@@ -64,10 +64,10 @@
 <Content>
   <form class="flex gap-2" on:submit|preventDefault={() => handleInput(value)}>
     <Input placeholder="nprofile..." bind:value wrapperClass="flex-grow" />
-    <Anchor type="button" on:click={() => handleInput(value)}>
+    <Anchor type="button" on:click={() => handleInput(value)} title="Go to the profile">
       <i class="fa fa-arrow-right" />
     </Anchor>
-    <Anchor type="button" on:click={showVideo}>
+    <Anchor type="button" on:click={showVideo} title="Scan QR code">
       <i class="fa fa-camera" />
     </Anchor>
   </form>

@@ -144,6 +144,7 @@
         class="w-full resize-none bg-gray-6 p-2
                text-gray-3 outline-0 placeholder:text-gray-1" />
       <button
+        title="Send a message"
         on:click={send}
         class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-gray-7 p-4
                py-8 text-gray-3 transition-all hover:bg-accent ">

@@ -26,7 +26,7 @@
       <img alt="Coracle Logo" src="/images/logo.png" class="w-8" />
       <h1 class="staatliches text-3xl">Coracle</h1>
     </Anchor>
-    <i class="fa fa-lightbulb cursor-pointer text-lg" on:click={toggleTheme} />
+    <i class="fa fa-lightbulb cursor-pointer text-lg" on:click={toggleTheme} title="Toggle dark mode" />
   </div>
   {#if $newNotifications}
     <div class="absolute top-4 left-12 h-2 w-2 rounded bg-accent lg:hidden" />

@@ -62,6 +62,7 @@
         </div>
       {/if}
       <div
+        title="Close"
         on:click|preventDefault={close}
         class="absolute top-0 right-0 m-1 flex h-6 w-6 items-center justify-center
              rounded-full border border-solid border-gray-6 bg-white text-black opacity-50 shadow">
