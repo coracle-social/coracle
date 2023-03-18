@@ -102,7 +102,6 @@ const listen = async pubkey => {
   }
 
   listener = await network.listen({
-    delay: 10000,
     relays: getUserReadRelays(),
     filter: [
       {kinds: [1, 4], authors: [pubkey], since},

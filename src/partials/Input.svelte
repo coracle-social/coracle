@@ -21,8 +21,7 @@
     </div>
   {/if}
   {#if $$slots.after}
-    <div
-      class="absolute top-0 right-0 m-px flex gap-2 rounded px-3 pt-3 text-gray-1 text-black opacity-75">
+    <div class="absolute top-0 right-0 m-px flex gap-2 rounded px-3 pt-3 text-black opacity-75">
       <slot name="after" />
     </div>
   {/if}

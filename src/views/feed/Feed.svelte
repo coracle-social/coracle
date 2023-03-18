@@ -66,7 +66,7 @@
     // Stream in additional data and merge it in
     network.streamContext({
       depth: 2,
-      notes: combined,
+      notes: combined.filter(propEq("kind", 1)),
       onChunk: context => {
         context = user.applyMutes(context)
 

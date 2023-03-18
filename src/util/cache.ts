@@ -9,7 +9,7 @@ type CacheOptions = {
   sort?: SortFn
 }
 
-const sortByLru = sortBy(([k, x]) => -x.lru)
+const sortByLru = sortBy(([k, x]) => x.lru)
 
 export default class Cache {
   max: number
