@@ -67,7 +67,7 @@
 
             navigate("/notes/follows")
           } else {
-            pool.getConnection(relay.url).disconnect()
+            pool.disconnect(relay.url)
           }
         })
     }

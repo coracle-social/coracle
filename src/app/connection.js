@@ -18,7 +18,7 @@ setInterval(() => {
   // Alert the user to any heinously slow connections
   slowConnections.set(
     Object.values(pool.getConnections()).filter(
-      c => relayUrls.has(c.nostr.url) && first(c.getQuality()) < 0.3
+      c => relayUrls.has(c.url) && first(c.getQuality()) < 0.3
     )
   )
 }, 30_000)
