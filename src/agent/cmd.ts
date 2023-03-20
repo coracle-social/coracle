@@ -7,6 +7,14 @@ import pool from "src/agent/pool"
 import sync from "src/agent/sync"
 import keys from "src/agent/keys"
 
+const authenticate = (challenge, relay) =>
+  new PublishableEvent(22242, {
+    tags: [
+      ["challenge", challenge],
+      ["relay", relay],
+    ],
+  })
+
 const updateUser = updates => new PublishableEvent(0, {content: JSON.stringify(updates)})
 
 const setRelays = newRelays =>
@@ -140,6 +148,7 @@ class PublishableEvent {
 }
 
 export default {
+  authenticate,
   updateUser,
   setRelays,
   setPetnames,

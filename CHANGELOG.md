@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.19
+
+- [x] Add confirmation to zap dialog
+- [x] Avoid pruning profiles we know we'll use more often
+- [x] Re-write pool to remove dependency on nostr-tools.relay
+- [x] Add support for AUTH
+
 ## 0.2.18
 
 - [x] Re-write data storage layer to conserve memory using a custom LRU cache

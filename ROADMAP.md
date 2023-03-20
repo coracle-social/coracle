@@ -1,9 +1,10 @@
 # Current
 
 - [ ] https://github.com/staab/coracle/issues/42
-- [ ] Show loading/success on zap invoice screen
 - [ ] Fix iOS/safari/firefox
-- [ ] Add AUTH
+- [ ] Multiplex, charge past a certain usage level based on bandwidth
+- [ ] Fix compose, topics
+- [ ] Fix onboarding workflow w/forced relays
 
 # Others
 

@@ -2,6 +2,8 @@ import {bech32, utf8} from "@scure/base"
 import {debounce, throttle} from "throttle-debounce"
 import {
   gt,
+  whereEq,
+  reject,
   mergeDeepRight,
   aperture,
   path as getPath,
@@ -18,7 +20,7 @@ import {
 } from "ramda"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from "svelte/store"
-import {isObject, round} from "hurdak/lib/hurdak"
+import {isObject, randomId, round} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
 
 export const fuzzy = (data, opts = {}) => {
@@ -393,4 +395,29 @@ export const formatSats = sats => {
   if (sats < 1_000_000) return formatter.format(round(1, sats / 1000)) + "K"
   if (sats < 100_000_000) return formatter.format(round(1, sats / 1_000_000)) + "MM"
   return formatter.format(round(2, sats / 100_000_000)) + "BTC"
+}
+
+type EventBusListener = {
+  id: string
+  handler: (...args: any[]) => void
+}
+
+export class EventBus {
+  listeners: Record<string, Array<EventBusListener>> = {}
+  on(name, handler) {
+    const id = randomId()
+
+    this.listeners[name] = this.listeners[name] || ([] as Array<EventBusListener>)
+    this.listeners[name].push({id, handler})
+
+    return id
+  }
+  off(name, id) {
+    this.listeners[name] = reject(whereEq({id}), this.listeners[name])
+  }
+  handle(k, ...payload) {
+    for (const {handler} of this.listeners[k] || []) {
+      handler(...payload)
+    }
+  }
 }

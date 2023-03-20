@@ -1,11 +1,12 @@
 import type {Relay, Filter} from "nostr-tools"
 import type {Deferred} from "src/util/misc"
 import type {MyEvent} from "src/util/types"
+import {throttle} from 'throttle-debounce'
 import {verifySignature} from "nostr-tools"
 import {pluck, objOf, identity, is} from "ramda"
 import {ensurePlural, noop} from "hurdak/lib/hurdak"
 import {warn, log, error} from "src/util/logger"
-import {union, defer, tryJson, now, difference} from "src/util/misc"
+import {union, EventBus, defer, tryJson, difference} from "src/util/misc"
 import {isRelay, normalizeRelayUrl} from "src/util/nostr"
 
 const forceRelays = (import.meta.env.VITE_FORCE_RELAYS || "")
@@ -15,14 +16,20 @@ const forceRelays = (import.meta.env.VITE_FORCE_RELAYS || "")
 
 // Connection management
 
+const eventBus = new EventBus()
+
 const connections = {}
 
 const CONNECTION_STATUS = {
   NEW: "new",
-  ERROR: "error",
   PENDING: "pending",
   CLOSED: "closed",
   READY: "ready",
+  AUTH: "auth",
+  ERROR: {
+    CONNECTION: "error/connection",
+    AUTH: "error/auth",
+  },
 }
 
 class Connection {
@@ -30,27 +37,17 @@ class Connection {
   url: string
   promise?: Deferred<void>
   queue: string[]
-  status: string
-  closed?: number
+  status: {code: string; message: string; occurredAt: number}
   timeout?: number
-  listeners: Record<string, Record<string, (...args: any[]) => void>>
   stats: Record<string, number>
+  bus: EventBus
   constructor(url) {
     this.ws = null
     this.url = url
     this.promise = null
     this.queue = []
-    this.status = CONNECTION_STATUS.NEW
-    this.closed = null
     this.timeout = null
-
-    this.listeners = {
-      OK: {},
-      ERROR: {},
-      EVENT: {},
-      EOSE: {},
-    }
-
+    this.bus = new EventBus()
     this.stats = {
       timeouts: 0,
       subsCount: 0,
@@ -60,20 +57,24 @@ class Connection {
       activeSubsCount: 0,
     }
 
+    this.setStatus(CONNECTION_STATUS.NEW, "Waiting to connect")
+
     connections[url] = this
+  }
+  setStatus(code, message, extra = {}) {
+    this.status = {code, message, ...extra, occurredAt: Date.now()}
   }
   connect() {
     if (this.ws) {
       throw new Error("Attempted to connect when already connected")
     }
 
-    this.status = CONNECTION_STATUS.PENDING
-    this.ws = new WebSocket(this.url)
     this.promise = defer()
-    this.closed = null
+    this.ws = new WebSocket(this.url)
+    this.setStatus(CONNECTION_STATUS.PENDING, "Trying to connect")
 
     this.ws.addEventListener("open", () => {
-      this.status = CONNECTION_STATUS.READY
+      this.setStatus(CONNECTION_STATUS.READY, "Connected")
       this.promise.resolve()
     })
 
@@ -85,30 +86,48 @@ class Connection {
       }
     })
 
-    this.ws.addEventListener("error", () => {
-      this.status = CONNECTION_STATUS.ERROR
+    this.ws.addEventListener("error", e => {
+      this.disconnect(CONNECTION_STATUS.ERROR.CONNECTION, "Failed to connect")
       this.promise.reject()
-      this.closed = now()
     })
 
     this.ws.addEventListener("close", () => {
-      this.status = CONNECTION_STATUS.CLOSED
+      this.disconnect()
       this.promise.reject()
-      this.closed = now()
     })
+
+    // Propagate auth to global handler
+    this.bus.on("AUTH", throttle(3000, challenge => {
+      this.setStatus(CONNECTION_STATUS.AUTH, "Logging in")
+
+      eventBus.handle("AUTH", challenge, this)
+    }))
   }
-  disconnect() {
+  disconnect(error = null) {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.close()
+    }
+
+    if (error) {
+      this.setStatus(...error)
+    } else {
+      this.setStatus(CONNECTION_STATUS.CLOSED, "Closed")
     }
 
     this.ws = null
   }
   async autoConnect() {
-    if (this.status === CONNECTION_STATUS.NEW) {
+    const {code, occurredAt} = this.status
+    const {NEW, CLOSED} = CONNECTION_STATUS
+
+
+    // If the connection has not been opened, or was closed, open 'er up
+    if ([NEW, CLOSED].includes(code)) {
       this.connect()
-    } else if (this.closed && now() - 10 > this.closed) {
-      // If the connection was closed, try to re-open, but throttle it
+    }
+
+    // If the connection failed, try to re-open after a while
+    if (code.startsWith("error") && Date.now() - 30_000 > occurredAt) {
       this.disconnect()
       this.connect()
     }
@@ -117,22 +136,14 @@ class Connection {
 
     return this
   }
-  on(name, id, cb) {
-    this.listeners[name][id] = cb
-  }
-  off(name, id) {
-    delete this.listeners[name][id]
-  }
   handleMessages() {
     for (const json of this.queue.splice(0, 10)) {
       const message = tryJson(() => JSON.parse(json))
 
       if (message) {
-        const [verb, ...payload] = message
+        const [k, ...payload] = message
 
-        for (const listener of Object.values(this.listeners[verb] || {})) {
-          listener(...payload)
-        }
+        this.bus.handle(k, ...payload)
       }
     }
 
@@ -142,8 +153,10 @@ class Connection {
     this.ws.send(JSON.stringify(payload))
   }
   subscribe(filters, id, {onEvent, onEose}) {
-    this.on("EVENT", id, (subid, e) => subid === id && onEvent(e))
-    this.on("EOSE", id, subid => subid === id && onEose())
+    const [eventChannel, eoseChannel] = [
+      this.bus.on("EVENT", (subid, e) => subid === id && onEvent(e)),
+      this.bus.on("EOSE", subid => subid === id && onEose()),
+    ]
 
     this.send("REQ", id, ...filters)
 
@@ -152,31 +165,46 @@ class Connection {
       unsub: () => {
         this.send("CLOSE", id, ...filters)
 
-        this.off("EVENT", id)
-        this.off("EOSE", id)
+        this.bus.off("EVENT", eventChannel)
+        this.bus.off("EOSE", eoseChannel)
       },
     }
   }
   publish(event, {onOk, onError}) {
-    const withCleanup = f => eid => {
-      if (eid === event.id) {
-        f()
-        this.off("OK", event.id)
-        this.off("ERROR", event.id)
+    const withCleanup = cb => k => {
+      if (k === event.id) {
+        cb()
+        this.bus.off("OK", okChannel)
+        this.bus.off("ERROR", errorChannel)
       }
     }
 
-    this.on("OK", event.id, withCleanup(onOk))
-    this.on("ERROR", event.id, withCleanup(onError))
+    const [okChannel, errorChannel] = [
+      this.bus.on("OK", withCleanup(onOk)),
+      this.bus.on("ERROR", withCleanup(onError)),
+    ]
 
     this.send("EVENT", event)
   }
+  checkAuth(eid) {
+    const channel = this.bus.on("OK", (id, ok, message) => {
+      if (id === eid) {
+        if (ok) {
+          this.setStatus(CONNECTION_STATUS.READY, "Connected")
+        } else {
+          this.disconnect(CONNECTION_STATUS.ERROR.AUTH, message)
+        }
+
+        this.bus.off("OK", channel)
+      }
+    })
+  }
   hasRecentError() {
-    return this.status === CONNECTION_STATUS.ERROR && now() - this.closed < 10
+    return this.status.code.startsWith("error") && Date.now() - this.status.occurredAt < 30_000
   }
   getQuality() {
-    if (this.status === CONNECTION_STATUS.ERROR) {
-      return [0, "Failed to connect"]
+    if (this.status.code.startsWith("error")) {
+      return [0, this.status.message]
     }
 
     const {timeouts, subsCount, eoseTimer, eoseCount} = this.stats
@@ -195,15 +223,13 @@ class Connection {
       return [eoseQuality, "Connected"]
     }
 
-    if ([CONNECTION_STATUS.NEW, CONNECTION_STATUS.PENDING].includes(this.status)) {
-      return [0.5, "Trying to connect"]
+    const {NEW, PENDING, AUTH, CLOSED, READY} = CONNECTION_STATUS
+
+    if ([NEW, PENDING, AUTH, CLOSED].includes(this.status.code)) {
+      return [0.5, this.status.message]
     }
 
-    if (this.status === CONNECTION_STATUS.CLOSED) {
-      return [0.5, "Disconnected"]
-    }
-
-    if (this.status === CONNECTION_STATUS.READY) {
+    if (this.status.code === READY) {
       return [1, "Connected"]
     }
   }
@@ -300,8 +326,10 @@ const publish = async ({relays, event, onProgress, timeout = 5000}) => {
 
     relays.map(async relay => {
       const conn = await connect(relay.url)
+      const {READY, AUTH} = CONNECTION_STATUS
+      const canPublish = [READY, AUTH].includes(conn.status.code)
 
-      if (conn.status === CONNECTION_STATUS.READY) {
+      if (canPublish) {
         conn.publish(event, {
           onOk: () => {
             succeeded.add(relay.url)
@@ -360,7 +388,7 @@ const subscribe = async ({relays, filter, onEvent, onEose, onError}: SubscribeOp
   const promises = relays.map(async relay => {
     const conn = await connect(relay.url)
 
-    if (conn.status !== "ready") {
+    if (conn.status.code !== CONNECTION_STATUS.READY) {
       if (onError) {
         onError(relay.url)
       }
@@ -452,6 +480,7 @@ const describeFilter = ({kinds = [], ...filter}) => {
 }
 
 export default {
+  eventBus,
   forceRelays,
   getConnections,
   getConnection,
