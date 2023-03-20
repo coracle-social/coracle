@@ -1,7 +1,7 @@
 import type {Relay, Filter} from "nostr-tools"
 import type {Deferred} from "src/util/misc"
 import type {MyEvent} from "src/util/types"
-import {throttle} from 'throttle-debounce'
+import {debounce} from "throttle-debounce"
 import {verifySignature} from "nostr-tools"
 import {pluck, objOf, identity, is} from "ramda"
 import {ensurePlural, noop} from "hurdak/lib/hurdak"
@@ -59,6 +59,10 @@ class Connection {
 
     this.setStatus(CONNECTION_STATUS.NEW, "Waiting to connect")
 
+    if (connections[url]) {
+      error(`Connection to ${url} already exists`)
+    }
+
     connections[url] = this
   }
   setStatus(code, message, extra = {}) {
@@ -97,19 +101,28 @@ class Connection {
     })
 
     // Propagate auth to global handler
-    this.bus.on("AUTH", throttle(3000, challenge => {
-      this.setStatus(CONNECTION_STATUS.AUTH, "Logging in")
+    this.bus.on(
+      "AUTH",
+      debounce(
+        10_000,
+        challenge => {
+          this.setStatus(CONNECTION_STATUS.AUTH, "Logging in")
 
-      eventBus.handle("AUTH", challenge, this)
-    }))
+          eventBus.handle("AUTH", challenge, this)
+        },
+        {
+          atBegin: true,
+        }
+      )
+    )
   }
-  disconnect(error = null) {
+  disconnect(code = null, message = null) {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.close()
     }
 
-    if (error) {
-      this.setStatus(...error)
+    if (code) {
+      this.setStatus(code, message)
     } else {
       this.setStatus(CONNECTION_STATUS.CLOSED, "Closed")
     }
@@ -119,7 +132,6 @@ class Connection {
   async autoConnect() {
     const {code, occurredAt} = this.status
     const {NEW, CLOSED} = CONNECTION_STATUS
-
 
     // If the connection has not been opened, or was closed, open 'er up
     if ([NEW, CLOSED].includes(code)) {
@@ -150,6 +162,10 @@ class Connection {
     this.timeout = this.queue.length > 0 ? window.setTimeout(() => this.handleMessages(), 10) : null
   }
   send(...payload) {
+    if (this.ws?.readyState !== 1) {
+      warn("Send attempted before socket was ready", this)
+    }
+
     this.ws.send(JSON.stringify(payload))
   }
   subscribe(filters, id, {onEvent, onEose}) {
@@ -163,7 +179,9 @@ class Connection {
     return {
       conn: this,
       unsub: () => {
-        this.send("CLOSE", id, ...filters)
+        if (this.status.code === CONNECTION_STATUS.READY) {
+          this.send("CLOSE", id, ...filters)
+        }
 
         this.bus.off("EVENT", eventChannel)
         this.bus.off("EOSE", eoseChannel)
