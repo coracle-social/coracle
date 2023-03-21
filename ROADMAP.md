@@ -1,10 +1,11 @@
 # Current
 
-- [ ] https://github.com/staab/coracle/issues/42
-- [ ] Fix iOS/safari/firefox
+- [ ] Merge COUNT
 - [ ] Multiplex, charge past a certain usage level based on bandwidth
 - [ ] Fix compose, topics
 - [ ] Fix onboarding workflow w/forced relays
+- [ ] https://github.com/staab/coracle/issues/42
+- [ ] Fix iOS/safari/firefox
 
 # Others
 
