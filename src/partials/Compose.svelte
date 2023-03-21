@@ -225,7 +225,7 @@
   <div class="mt-2 flex flex-col rounded border border-solid border-gray-6" in:fly={{y: 20}}>
     {#each suggestions as person, i (person.pubkey)}
       <button
-        class="cursor-pointer border-l-2 border-solid border-black py-2 px-4"
+        class="cursor-pointer border-l-2 border-solid border-black py-2 px-4 text-white"
         class:bg-gray-8={index !== i}
         class:bg-gray-7={index === i}
         class:border-accent={index === i}
