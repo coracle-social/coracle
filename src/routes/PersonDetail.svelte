@@ -244,8 +244,8 @@
   {:else if activeTab === "likes"}
     <Likes {pubkey} />
   {:else if activeTab === "relays"}
-    {#if person?.relays}
-      <Relays {person} />
+    {#if getRelays().length > 0}
+      <Relays relays={getRelays()} />
     {:else if loading}
       <Spinner />
     {:else}

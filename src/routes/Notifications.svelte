@@ -26,7 +26,7 @@
   $: events = $notifications
     .slice(0, limit)
     .map(e => [e, findReplyId(e)])
-    .filter(([e, ref]) => userEvents.get(ref))
+    .filter(([e, ref]) => userEvents.get(ref)?.kind === 1)
     .reduce((r, [e, ref]) => {
       const prev = last(r)
       const prevTimestamp = pluck("created_at", prev?.notifications || []).reduce(max, 0)

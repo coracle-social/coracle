@@ -6,6 +6,7 @@ import {Table, listener, registry} from "src/agent/storage"
 import user from "src/agent/user"
 
 const sortByCreatedAt = sortBy(([k, x]) => x.value.created_at)
+const sortByLastSeen = sortBy(([k, x]) => x.value.last_seen)
 
 export const people = new Table("people", "pubkey", {
   cache: new Cache({
@@ -28,7 +29,9 @@ export const notifications = new Table("notifications", "id")
 export const contacts = new Table("contacts", "pubkey")
 export const rooms = new Table("rooms", "id")
 export const relays = new Table("relays", "url")
-export const routes = new Table("routes", "id")
+export const routes = new Table("routes", "id", {
+  cache: new Cache({max: 5000, sort: sortByLastSeen}),
+})
 
 listener.connect()
 

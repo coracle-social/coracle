@@ -17,8 +17,10 @@
     activeTab = tab
   }
 
-  const accepted = watch("contacts", t => t.all({accepted: true}))
-  const requests = watch("contacts", t => t.all({"accepted:!eq": true}))
+  const accepted = watch("contacts", t => sortBy(e => -e.lastMessage, t.all({accepted: true})))
+  const requests = watch("contacts", t =>
+    sortBy(e => -e.lastMessage, t.all({"accepted:!eq": true}))
+  )
 
   const getDisplay = tab => ({
     title: toTitle(tab),
