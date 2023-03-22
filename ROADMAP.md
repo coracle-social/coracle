@@ -1,11 +1,13 @@
 # Current
 
-- [ ] Merge COUNT
-- [ ] Multiplex, charge past a certain usage level based on bandwidth
+- [ ] Fix follows list modal
 - [ ] Fix compose, topics
-- [ ] Fix onboarding workflow w/forced relays
-- [ ] https://github.com/staab/coracle/issues/42
+- [ ] Fix onboarding workflow w/forced relays (skip relays step)
+
 - [ ] Fix iOS/safari/firefox
+- [ ] https://github.com/staab/coracle/issues/42
+- [ ] Multiplex, charge past a certain usage level based on bandwidth
+- [ ] Move blog to https://twitter.com/fiatjaf/status/1638514052014940162
 
 # Others
 
@@ -20,6 +22,7 @@
 
 # Custom views
 
+- [ ] Link/embed good chat/DM micro-apps
 - [ ] Add QR code that pre-fills follows and relays for a new user
   - If logged in, open a detail page that shows the relays and people
   - If not logged in, pre-populate follows/relays in onboarding flow

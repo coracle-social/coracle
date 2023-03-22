@@ -7,7 +7,7 @@
   import {log} from "src/util/logger"
   import {renderContent, parseHex} from "src/util/html"
   import {numberFmt} from "src/util/misc"
-  import {displayPerson, Tags, toHex} from "src/util/nostr"
+  import {displayPerson, toHex} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -36,7 +36,6 @@
   let pubkey = toHex(npub)
   let following = false
   let muted = false
-  let followers = new Set()
   let followersCount = tweened(0, {interpolate, duration: 1000})
   let person = getPersonWithFallback(pubkey)
   let loading = true
@@ -111,6 +110,8 @@
     if (count) {
       followersCount.set(count)
     } else {
+      const followers = new Set()
+
       await network.load({
         shouldProcess: false,
         relays: getRelays(),
@@ -133,13 +134,11 @@
   const setActiveTab = tab => navigate(routes.person(pubkey, tab))
 
   const showFollows = () => {
-    const pubkeys = Tags.wrap(person.petnames).pubkeys()
-
-    modal.set({type: "person/list", pubkeys})
+    modal.set({type: "person/follows", pubkey})
   }
 
   const showFollowers = () => {
-    modal.set({type: "person/list", pubkeys: Array.from(followers)})
+    modal.set({type: "person/followers", pubkey})
   }
 
   const follow = async () => {

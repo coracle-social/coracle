@@ -239,12 +239,12 @@ export const watch = (names, f) => {
   }
 
   // Debounce refresh so we don't get UI lag
-  const refresh = throttle(300, async () => store.set(await f(...tables)))
+  store.refresh = throttle(300, async () => store.set(await f(...tables)))
 
   // Listen for changes
   listener.subscribe(name => {
     if (names.includes(name)) {
-      refresh()
+      store.refresh()
     }
   })
 

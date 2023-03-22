@@ -6,6 +6,7 @@
 - [x] Avoid pruning profiles we know we'll use more often
 - [x] Re-write pool to remove dependency on nostr-tools.relay
 - [x] Add support for AUTH
+- [x] Use COUNT for counting follows
 
 ## 0.2.18
 

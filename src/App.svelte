@@ -280,8 +280,10 @@
           <PersonProfileInfo person={$modal.person} />
         {:else if $modal.type === "person/share"}
           <PersonShare person={$modal.person} />
-        {:else if $modal.type === "person/list"}
-          <PersonList pubkeys={$modal.pubkeys} />
+        {:else if $modal.type === "person/follows"}
+          <PersonList type="follows" pubkey={$modal.pubkey} />
+        {:else if $modal.type === "person/followers"}
+          <PersonList type="followers" pubkey={$modal.pubkey} />
         {:else if $modal.type === "message"}
           <Content size="lg">
             <div class="text-center">{$modal.message}</div>
