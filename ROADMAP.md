@@ -22,6 +22,7 @@
 
 # Custom views
 
+- [ ] Badges link to https://badges.page/p/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322
 - [ ] Link/embed good chat/DM micro-apps
 - [ ] Add QR code that pre-fills follows and relays for a new user
   - If logged in, open a detail page that shows the relays and people

@@ -15,6 +15,7 @@
   import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/tables"
   import network from "src/agent/network"
+  import pool from "src/agent/pool"
   import user from "src/agent/user"
   import keys from "src/agent/keys"
   import {loadAppData} from "src/app"
@@ -24,15 +25,19 @@
 
   const {relays: userRelays, petnamePubkeys} = user
 
-  let relays =
-    $userRelays.length > 0
-      ? $userRelays
-      : [
-          {url: "wss://nostr-pub.wellorder.net", write: true},
-          {url: "wss://nostr.zebedee.cloud", write: true},
-          {url: "wss://nos.lol", write: true},
-          {url: "wss://brb.io", write: true},
-        ]
+  let relays = []
+  if ($userRelays.length > 0) {
+    relays = $userRelays
+  } else if (pool.forceRelays.length > 0) {
+    relays = pool.forceRelays
+  } else {
+    relays = [
+      {url: "wss://nostr-pub.wellorder.net", write: true},
+      {url: "wss://nostr.zebedee.cloud", write: true},
+      {url: "wss://nos.lol", write: true},
+      {url: "wss://brb.io", write: true},
+    ]
+  }
 
   let follows =
     $petnamePubkeys.length > 0
