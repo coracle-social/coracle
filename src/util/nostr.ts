@@ -130,6 +130,10 @@ export const asDisplayEvent = event =>
   ({replies: [], reactions: [], zaps: [], ...event} as DisplayEvent)
 
 export const toHex = (data: string): string | null => {
+  if (data.match(/[a-zA-Z0-9]{64}/)) {
+    return data
+  }
+
   try {
     return nip19.decode(data).data as string
   } catch (e) {
