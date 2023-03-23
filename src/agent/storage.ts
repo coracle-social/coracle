@@ -224,10 +224,14 @@ export const listener = (() => {
   }
 })()
 
+type WatchStore<T> = Writable<T> & {
+  refresh: () => void
+}
+
 export const watch = (names, f) => {
   names = ensurePlural(names)
 
-  const store = writable(null)
+  const store = writable(null) as WatchStore<any>
   const tables = names.map(name => registry[name])
 
   // Initialize synchronously if possible

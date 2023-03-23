@@ -1,7 +1,7 @@
-import {pick, last, prop, uniqBy} from "ramda"
+import {map, pick, last, uniqBy} from "ramda"
 import {get} from "svelte/store"
 import {roomAttrs, displayPerson, findReplyId, findRootId} from "src/util/nostr"
-import {getPubkeyWriteRelays, getRelayForPersonHint, sampleRelays} from "src/agent/relays"
+import {getRelayForPersonHint} from "src/agent/relays"
 import {getPersonWithFallback} from "src/agent/tables"
 import pool from "src/agent/pool"
 import sync from "src/agent/sync"
@@ -47,17 +47,46 @@ const createDirectMessage = (pubkey, content) =>
   new PublishableEvent(4, {content, tags: [["p", pubkey]]})
 
 const createNote = (content, mentions = [], topics = []) => {
-  mentions = mentions.map(pubkey => {
-    const name = displayPerson(getPersonWithFallback(pubkey))
-    const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
+  const tags = processMentions(mentions).concat(topics.map(t => ["t", t]))
 
-    return ["p", pubkey, url, name]
-  })
-
-  topics = topics.map(t => ["t", t])
-
-  return new PublishableEvent(1, {content, tags: mentions.concat(topics)})
+  return new PublishableEvent(1, {content, tags})
 }
+
+const createReaction = (note, content) =>
+  new PublishableEvent(7, {content, tags: getReplyTags(note)})
+
+const createReply = (note, content, mentions = [], topics = []) => {
+  // Mentions have to come first so interpolation works
+  const tags = tagsFromParent(note, processMentions(mentions).concat(topics.map(t => ["t", t])))
+
+  return new PublishableEvent(1, {content, tags})
+}
+
+const requestZap = (relays, content, pubkey, eventId, amount, lnurl) => {
+  const tags = [
+    ["relays", ...relays],
+    ["amount", amount.toString()],
+    ["lnurl", lnurl],
+    ["p", pubkey],
+  ]
+
+  if (eventId) {
+    tags.push(["e", eventId])
+  }
+
+  return new PublishableEvent(9734, {content, tags})
+}
+
+const deleteEvent = ids => new PublishableEvent(5, {tags: ids.map(id => ["e", id])})
+
+// Utils
+
+const processMentions = map(pubkey => {
+  const name = displayPerson(getPersonWithFallback(pubkey))
+  const relay = getRelayForPersonHint(pubkey)
+
+  return ["p", pubkey, relay?.url || '', name]
+})
 
 const getReplyTags = n => {
   const {url} = getRelayForPersonHint(n.pubkey, n)
@@ -92,40 +121,6 @@ const tagsFromParent = (n, newTags = []) => {
       )
   )
 }
-
-const createReaction = (note, content) =>
-  new PublishableEvent(7, {content, tags: getReplyTags(note)})
-
-const createReply = (note, content, mentions = [], topics = []) => {
-  // Mentions have to come first so interpolation works
-  const tags = tagsFromParent(
-    note,
-    mentions
-      .map(pk => ["p", pk, prop("url", getRelayForPersonHint(pk, note))])
-      .concat(topics.map(t => ["t", t]))
-  )
-
-  return new PublishableEvent(1, {content, tags})
-}
-
-const requestZap = (relays, content, pubkey, eventId, amount, lnurl) => {
-  const tags = [
-    ["relays", ...relays],
-    ["amount", amount.toString()],
-    ["lnurl", lnurl],
-    ["p", pubkey],
-  ]
-
-  if (eventId) {
-    tags.push(["e", eventId])
-  }
-
-  return new PublishableEvent(9734, {content, tags})
-}
-
-const deleteEvent = ids => new PublishableEvent(5, {tags: ids.map(id => ["e", id])})
-
-// Utils
 
 class PublishableEvent {
   event: Record<string, any>

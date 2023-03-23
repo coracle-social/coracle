@@ -1,9 +1,5 @@
 # Current
 
-- [ ] Fix follows list modal
-- [ ] Fix compose, topics
-- [ ] Fix onboarding workflow w/forced relays (skip relays step)
-
 - [ ] Fix iOS/safari/firefox
 - [ ] https://github.com/staab/coracle/issues/42
 - [ ] Multiplex, charge past a certain usage level based on bandwidth
@@ -22,6 +18,7 @@
 
 # Custom views
 
+- [ ] Add suggestion list for topics on compose so people know there are suggestions
 - [ ] Badges link to https://badges.page/p/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322
 - [ ] Link/embed good chat/DM micro-apps
 - [ ] Add QR code that pre-fills follows and relays for a new user

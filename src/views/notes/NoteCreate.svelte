@@ -5,7 +5,6 @@
   import {last, reject, pluck, propEq} from "ramda"
   import {fly} from "svelte/transition"
   import {fuzzy} from "src/util/misc"
-  import {displayPerson} from "src/util/nostr"
   import Button from "src/partials/Button.svelte"
   import Compose from "src/partials/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
@@ -19,13 +18,14 @@
   import {getPersonWithFallback} from "src/agent/tables"
   import {watch} from "src/agent/storage"
   import cmd from "src/agent/cmd"
+  import user from "src/agent/user"
   import {toast, modal} from "src/app/ui"
   import {publishWithToast} from "src/app"
 
   export let pubkey = null
 
   let image = null
-  let input = null
+  let compose = null
   let relays = getUserWriteRelays()
   let showSettings = false
   let q = ""
@@ -43,14 +43,14 @@
   }
 
   const onSubmit = async () => {
-    let {content, mentions, topics} = input.parse()
+    let {content, mentions, topics} = compose.parse()
 
     if (image) {
-      content = (content + "\n" + image).trim()
+      content = content + "\n" + image
     }
 
     if (content) {
-      const thunk = cmd.createNote(content, mentions, topics)
+      const thunk = cmd.createNote(content.trim(), mentions, topics)
       const [event, promise] = await publishWithToast(relays, thunk)
 
       promise.then(() =>
@@ -91,11 +91,8 @@
   }
 
   onMount(() => {
-    if (pubkey) {
-      const person = getPersonWithFallback(pubkey)
-
-      input.type("@" + displayPerson(person))
-      input.trigger({key: "Enter"})
+    if (pubkey && pubkey !== user.getPubkey()) {
+      compose.mention(getPersonWithFallback(pubkey))
     }
   })
 </script>
@@ -107,7 +104,7 @@
       <div class="flex flex-col gap-2">
         <strong>What do you want to say?</strong>
         <div class="border-l-2 border-solid border-gray-6 pl-4">
-          <Compose bind:this={input} {onSubmit} />
+          <Compose bind:this={compose} {onSubmit} />
         </div>
       </div>
       {#if image}

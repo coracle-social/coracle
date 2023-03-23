@@ -1,237 +1,172 @@
 <script lang="ts">
-  import {prop, repeat, reject, sortBy, last} from "ramda"
-  import {onMount} from "svelte"
-  import {ensurePlural} from "hurdak/lib/hurdak"
-  import {fly} from "svelte/transition"
+  import {nip19} from "nostr-tools"
+  import {last, pluck, propEq} from "ramda"
   import {fuzzy} from "src/util/misc"
   import {displayPerson} from "src/util/nostr"
-  import {fromParentOffset} from "src/util/html"
   import Badge from "src/partials/Badge.svelte"
-  import {people} from "src/agent/tables"
+  import ContentEditable from "src/partials/ContentEditable.svelte"
+  import Suggestions from "src/partials/Suggestions.svelte"
+  import {watch} from "src/agent/storage"
+  import {getPubkeyWriteRelays} from "src/agent/relays"
 
   export let onSubmit
 
-  let index = 0
-  let mentions = []
-  let suggestions = []
-  let input = null
-  let prevContent = ""
+  let contenteditable, suggestions
 
-  const search = fuzzy(people.all({"kind0.name:!nil": null}), {
-    keys: ["kind0.name", "pubkey"],
+  const pubkeyEncoder = {
+    encode: pubkey => {
+      const relays = pluck("url", getPubkeyWriteRelays(pubkey))
+      const nprofile = nip19.nprofileEncode({pubkey, relays})
+
+      return "nostr:" + nprofile
+    },
+    decode: link => {
+      return nip19.decode(last(link.split(":"))).data.pubkey
+    },
+  }
+
+  const searchPeople = watch("people", t => {
+    return fuzzy(t.all({"kind0.name:!nil": null}), {keys: ["kind0.name", "pubkey"]})
   })
 
-  const getText = () => {
-    const selection = document.getSelection()
-    const range = selection.getRangeAt(0)
-
-    range.setStartBefore(input)
-
-    const text = range.cloneContents().textContent
-
-    range.collapse()
-
-    return text
+  const applySearch = word => {
+    suggestions.setData(word.startsWith("@") ? $searchPeople(word.slice(1)).slice(0, 5) : [])
   }
 
-  const getWord = () => {
-    return last(getText().split(/[\s\u200B]+/))
+  const getInfo = () => {
+    const selection = window.getSelection()
+    const {focusNode: node, focusOffset: offset} = selection
+    const textBeforeCursor = node.textContent.slice(0, offset)
+    const word = last(textBeforeCursor.trim().split(/\s+/))
+
+    return {selection, node, offset, word}
   }
 
-  const highlightWord = (prefix, chars, content) => {
-    const text = getText()
-    const selection = document.getSelection()
-    const {focusNode, focusOffset} = selection
-    const prefixElement = document.createTextNode(prefix)
-    const span = document.createElement("span")
+  const autocomplete = ({person}) => {
+    const {selection, node, offset, word} = getInfo()
 
-    // Space includes a zero-width space to avoid having the cursor end up inside
-    // mention span on backspace, and a space for convenience in composition.
-    const space = document.createTextNode("\u200B\u00a0")
+    const annotate = (prefix, text, value) => {
+      const adjustedOffset = offset - word.length + prefix.length
 
-    span.classList.add("underline")
-    span.innerText = content
+      // Space includes a zero-width space to avoid having the cursor end up inside
+      // mention span on backspace, and a space for convenience in composition.
+      const space = document.createTextNode("\u200B\u00A0")
+      const span = document.createElement("span")
 
-    // Remove our partial mention text
-    selection.setBaseAndExtent(
-      ...fromParentOffset(input, text.length - chars),
-      focusNode,
-      focusOffset
-    )
-    selection.deleteFromDocument()
+      span.classList.add("underline")
+      span.dataset.coracle = JSON.stringify({prefix, value})
+      span.innerText = text
 
-    // Add the prefix, decorated text, and a trailing space
-    selection.getRangeAt(0).insertNode(prefixElement)
-    selection.collapse(prefixElement, 1)
-    selection.getRangeAt(0).insertNode(span)
-    selection.collapse(span.nextSibling, 0)
-    selection.getRangeAt(0).insertNode(space)
-    selection.collapse(space, 2)
-  }
+      // Remove our partial mention text
+      selection.setBaseAndExtent(node, adjustedOffset, node, offset)
+      selection.deleteFromDocument()
 
-  const pickSuggestion = person => {
-    const display = displayPerson(person)
+      // Add the span and space
+      selection.getRangeAt(0).insertNode(span)
+      selection.collapse(span.nextSibling, 0)
+      selection.getRangeAt(0).insertNode(space)
+      selection.collapse(space, 2)
+    }
 
-    highlightWord("@", getWord().length, display)
+    // Mentions
+    if (word.length > 1 && word.startsWith("@")) {
+      annotate("@", displayPerson(person).trim(), pubkeyEncoder.encode(person.pubkey))
+    }
 
-    mentions.push({
-      pubkey: person.pubkey,
-      length: display.length + 1,
-      end: getText().length - 2,
-    })
+    // Topics
+    if (word.length > 1 && word.startsWith("#")) {
+      annotate("#", word.slice(1), word.slice(1))
+    }
 
-    index = 0
-    suggestions = []
+    suggestions.setData([])
   }
 
   const onKeyDown = e => {
-    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+    if (e.code === "Enter" && (e.ctrlKey || e.metaKey)) {
       return onSubmit()
     }
 
-    if (e.key === "Escape" && suggestions[index]) {
-      index = 0
-      suggestions = []
+    // Don't close a modal, submit the form, or lose focus
+    if (["Escape", "Tab"].includes(e.code)) {
+      e.preventDefault()
       e.stopPropagation()
     }
 
-    if (["Enter", "Tab", "ArrowUp", "ArrowDown", " "].includes(e.key) && suggestions[index]) {
+    // If we have suggestions, re-route keyboard commands
+    if (suggestions.get() && ["Enter", "ArrowUp", "ArrowDown"].includes(e.code)) {
       e.preventDefault()
+    }
+
+    // Enter adds a newline, so do it on key down
+    if (["Enter"].includes(e.code)) {
+      autocomplete({person: suggestions.get()})
     }
   }
 
   const onKeyUp = e => {
-    if (["Enter", "Tab", " "].includes(e.key) && suggestions[index]) {
-      pickSuggestion(suggestions[index])
+    const {word, trailingSpaces} = getInfo()
+
+    // Populate search data
+    applySearch(word)
+
+    if (["Tab"].includes(e.code)) {
+      autocomplete({person: suggestions.get()})
     }
 
-    if (e.key === "ArrowUp" && suggestions[index - 1]) {
-      index -= 1
+    if (["Escape", "Space"].includes(e.code)) {
+      suggestions.clear()
     }
 
-    if (e.key === "ArrowDown" && suggestions[index + 1]) {
-      index += 1
+    if (e.code === "ArrowUp") {
+      suggestions.prev()
     }
 
-    if (input.innerText !== prevContent) {
-      const text = getText()
-      const word = getWord()
-
-      if (!text.match(/\s$/) && word.startsWith("@")) {
-        suggestions = search(word.slice(1)).slice(0, 5)
-      } else {
-        index = 0
-        suggestions = []
-      }
-
-      if (input.innerText.length < prevContent.length) {
-        const delta = prevContent.length - input.innerText.length
-        const text = getText()
-
-        for (const mention of mentions) {
-          if (mention.end - mention.length > text.length) {
-            mention.end -= delta
-          } else if (mention.end > text.length) {
-            mention.invalid = true
-          }
-        }
-      }
+    if (e.code === "ArrowDown") {
+      suggestions.next()
     }
-
-    if (input.innerText.length > prevContent.length) {
-      const topic = getText().match(/#([-\w]+\s)$/)
-
-      if (topic) {
-        highlightWord("#", topic[0].length, topic[1].trim())
-      }
-    }
-
-    prevContent = input.innerText
   }
 
-  export const trigger = events => {
-    ensurePlural(events).forEach(onKeyUp)
-  }
+  export const mention = person => {
+    const input = contenteditable.getInput()
+    const selection = window.getSelection()
+    const textNode = document.createTextNode("@")
+    const spaceNode = document.createTextNode(" ")
 
-  export const type = text => {
-    input.innerText += text
+    // Insert the text node, then an extra node so we don't break stuff in annotate
+    selection.getRangeAt(0).insertNode(textNode)
+    selection.collapse(input, 1)
+    selection.getRangeAt(0).insertNode(spaceNode)
+    selection.collapse(input, 1)
 
-    for (const c of Array.from(text)) {
-      onKeyUp({key: c})
-    }
-
-    const selection = document.getSelection()
-    const extent = fromParentOffset(input, input.textContent.length)
-
-    selection.setBaseAndExtent(...extent, ...extent)
+    autocomplete({person})
   }
 
   export const parse = () => {
-    // Interpolate mentions
-    let offset = 0
+    let {content, annotations} = contenteditable.parse()
+    const topics = pluck("value", annotations.filter(propEq("prefix", "#")))
 
-    // For whatever reason the textarea gives us 2x - 1 line breaks
-    let content = input.innerText.replace(/(\n+)/g, x =>
-      repeat("\n", Math.round(x.length / 2)).join("")
-    )
+    // Remove zero-width and non-breaking spaces
+    content = content.replace(/[\u200B\u00A0]/g, ' ').trim()
 
-    const validMentions = sortBy(prop("end"), reject(prop("invalid"), mentions))
-    for (const [i, {end, length}] of validMentions.entries()) {
-      const offsetEnd = end - offset
-      const start = offsetEnd - length
-      const tag = `#[${i}]`
+    // We're still using old style mention interpolation until NIP-27
+    // gets merged https://github.com/nostr-protocol/nips/pull/381/files
+    const mentions = annotations.filter(propEq("prefix", "@")).map(({value}, index) => {
+      content = content.replace("@" + value, `#[${index}]`)
 
-      content = content.slice(0, start) + tag + content.slice(offsetEnd)
-      offset += length - tag.length
-    }
-
-    // Remove our zero-length spaces
-    content = content.replace(/\u200B/g, "").trim()
-
-    return {
-      content,
-      topics: content.match(/#[-\w]+/g) || [],
-      mentions: validMentions.map(prop("pubkey")),
-    }
-  }
-
-  onMount(() => {
-    input.addEventListener("paste", e => {
-      e.preventDefault()
-
-      const selection = window.getSelection()
-
-      if (selection.rangeCount) {
-        selection.deleteFromDocument()
-      }
-
-      type((e.clipboardData || (window as any).clipboardData).getData("text"))
+      return pubkeyEncoder.decode(value)
     })
-  })
+
+    return {content, topics, mentions}
+  }
 </script>
 
 <div class="flex">
-  <div
-    class="w-full min-w-0 p-2 text-gray-3 outline-0"
-    autofocus
-    contenteditable
-    bind:this={input}
-    on:keydown={onKeyDown}
-    on:keyup={onKeyUp} />
+  <ContentEditable bind:this={contenteditable} on:keydown={onKeyDown} on:keyup={onKeyUp} />
   <slot name="addon" />
 </div>
 
-{#if suggestions.length > 0}
-  <div class="mt-2 flex flex-col rounded border border-solid border-gray-6" in:fly={{y: 20}}>
-    {#each suggestions as person, i (person.pubkey)}
-      <button
-        class="cursor-pointer border-l-2 border-solid border-black py-2 px-4 text-white"
-        class:bg-gray-8={index !== i}
-        class:bg-gray-7={index === i}
-        class:border-accent={index === i}
-        on:click={() => pickSuggestion(person)}>
-        <Badge inert {person} />
-      </button>
-    {/each}
+<Suggestions bind:this={suggestions} select={person => autocomplete({person})}>
+  <div slot="item" let:item>
+    <Badge inert person={item} />
   </div>
-{/if}
+</Suggestions>

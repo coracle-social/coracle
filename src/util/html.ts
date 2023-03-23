@@ -73,6 +73,12 @@ export const blobToString = async blob =>
 
 export const blobToFile = blob => new File([blob], blob.name, {type: blob.type})
 
+export const stripHtml = html => {
+  const doc = new DOMParser().parseFromString(html, "text/html")
+
+  return doc.body.textContent || ""
+}
+
 export const escapeHtml = html => {
   const div = document.createElement("div")
 
@@ -155,4 +161,59 @@ export const parseHex = hex => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
 
   return [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
+}
+
+export const getTextOffset = (root, element, elementOffset) => {
+  let textOffset = 0
+  for (const child of root.childNodes) {
+    if (child === element) {
+      return textOffset + elementOffset
+    }
+
+    if (child instanceof Text) {
+      textOffset += child.textContent.length
+    }
+
+    if (child instanceof Element) {
+      textOffset += getTextOffset(child, element, elementOffset)
+
+      if (child.contains(element)) {
+        return textOffset
+      }
+    }
+  }
+
+  return textOffset
+}
+
+export const getElementOffset = (root, offset) => {
+  if (offset === 0) {
+    return [root, offset]
+  }
+
+  for (const child of root.childNodes) {
+    let newOffset = offset
+
+    if (child instanceof Text) {
+      newOffset = offset - child.textContent.length
+    }
+
+    if (child instanceof Element) {
+      const [match, childOffset] = getElementOffset(child, offset)
+
+      if (match) {
+        return [match, childOffset]
+      }
+
+      newOffset = childOffset
+    }
+
+    if (newOffset <= 0) {
+      return [child, offset]
+    }
+
+    offset = newOffset
+  }
+
+  return [null, offset]
 }
