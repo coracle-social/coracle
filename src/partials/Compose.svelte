@@ -21,6 +21,7 @@
       return "nostr:" + nprofile
     },
     decode: link => {
+      // @ts-ignore
       return nip19.decode(last(link.split(":"))).data.pubkey
     },
   }
@@ -104,7 +105,7 @@
   }
 
   const onKeyUp = e => {
-    const {word, trailingSpaces} = getInfo()
+    const {word} = getInfo()
 
     // Populate search data
     applySearch(word)
@@ -146,7 +147,7 @@
     const topics = pluck("value", annotations.filter(propEq("prefix", "#")))
 
     // Remove zero-width and non-breaking spaces
-    content = content.replace(/[\u200B\u00A0]/g, ' ').trim()
+    content = content.replace(/[\u200B\u00A0]/g, " ").trim()
 
     // We're still using old style mention interpolation until NIP-27
     // gets merged https://github.com/nostr-protocol/nips/pull/381/files

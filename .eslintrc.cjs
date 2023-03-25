@@ -1,27 +1,27 @@
 module.exports = {
   root: true,
   env: {
-      browser: true,
-      es2021: true
+    browser: true,
+    es2021: true,
   },
-  plugins: ['svelte3', '@typescript-eslint'],
+  plugins: ["svelte3", "@typescript-eslint"],
   overrides: [
     {
-      files: ['*.svelte'],
-      processor: 'svelte3/svelte3'
-    }
+      files: ["*.svelte"],
+      processor: "svelte3/svelte3",
+    },
   ],
-  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
-  parser: '@typescript-eslint/parser',
+  extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+  parser: "@typescript-eslint/parser",
   parserOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-      tsconfigRootDir: __dirname,
-      project: ['./tsconfig.json'],
-      extraFileExtensions: ['.svelte']
+    ecmaVersion: "latest",
+    sourceType: "module",
+    tsconfigRootDir: __dirname,
+    project: ["./tsconfig.json"],
+    extraFileExtensions: [".svelte"],
   },
   settings: {
-    'svelte3/typescript': require('typescript'),
+    "svelte3/typescript": require("typescript"),
   },
   rules: {
     "a11y-click-events-have-key-events": "off",
@@ -30,6 +30,7 @@ module.exports = {
     "no-async-promise-executor": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-extra-semi": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
     "no-useless-escape": "off",
   },
   ignorePatterns: ["*.svg"],
