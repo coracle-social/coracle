@@ -1,6 +1,19 @@
 import type {Relay} from "src/util/types"
 import type {Readable} from "svelte/store"
-import {slice, uniqBy, prop, find, pipe, assoc, whereEq, when, concat, reject, nth, map} from "ramda"
+import {
+  slice,
+  uniqBy,
+  prop,
+  find,
+  pipe,
+  assoc,
+  whereEq,
+  when,
+  concat,
+  reject,
+  nth,
+  map,
+} from "ramda"
 import {findReplyId, findRootId} from "src/util/nostr"
 import {synced} from "src/util/misc"
 import {derived} from "svelte/store"
@@ -18,6 +31,7 @@ const profile = synced("agent/user/profile", {
     showMedia: true,
     reportAnalytics: true,
     dufflepudUrl: import.meta.env.VITE_DUFFLEPUD_URL,
+    multiplextrUrl: import.meta.env.VITE_MULTIPLEXTR_URL,
   },
   petnames: [],
   relays: [],
@@ -98,7 +112,7 @@ export default {
   relays,
   getRelays: () => profileCopy.relays,
   updateRelays(f) {
-    const $relays = uniqBy(prop('url'), f(profileCopy.relays))
+    const $relays = uniqBy(prop("url"), f(profileCopy.relays))
 
     profile.update(assoc("relays", $relays))
 

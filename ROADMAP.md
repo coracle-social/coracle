@@ -1,5 +1,8 @@
 # Current
 
+- [ ] Multiplexer
+  - [ ] Explore the idea of separating everything into different components and wiring it all up into a system in a single file.
+  - [ ] Write NIP to support proxies. Update COUNT NIP to mention how proxies are a good use case for COUNT
 - [ ] Fix iOS/safari/firefox
 - [ ] https://github.com/staab/coracle/issues/42
 - [ ] Multiplex, charge past a certain usage level based on bandwidth

@@ -3,6 +3,7 @@
   import {fly} from "svelte/transition"
   import {navigate} from "svelte-routing"
   import Toggle from "src/partials/Toggle.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
@@ -73,7 +74,22 @@
         </Input>
         <p class="text-sm text-gray-1">
           Enter a custom url for Coracle's helper application. Dufflepud is used for hosting images
-          and loading link previews.
+          and loading link previews. You can find the source code <Anchor
+            href="https://github.com/staab/dufflepud">here</Anchor
+          >.
+        </p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <strong>Multiplextr URL</strong>
+        <Input bind:value={values.multiplextrUrl}>
+          <i slot="before" class="fa-solid fa-server" />
+        </Input>
+        <p class="text-sm text-gray-1">
+          Enter a custom proxy server for multiplexing relay connections. This can drastically
+          improve resource usage, but has some privacy trade-offs. Leave blank to connect to relays
+          directly. You can find the source code <Anchor href="https://github.com/staab/multiplextr"
+            >here</Anchor
+          >.
         </p>
       </div>
       <div class="flex flex-col gap-1">
