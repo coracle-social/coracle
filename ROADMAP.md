@@ -18,6 +18,12 @@
 
 # Custom views
 
+- [ ] Add customize icon and route with editable custom view cards using "lists" nip
+  - nevent1qqspjcqw2hu5gfcpkrjhs0aqvxuzjgtp50l375mcqjfpmk48cg5hevgpr3mhxue69uhkummnw3ez6un9d3shjtnhd3m8xtnnwpskxegpzamhxue69uhkummnw3ezuendwsh8w6t69e3xj7spramhxue69uhkummnw3ez6un9d3shjtnwdahxxefwv93kzer9d4usz9rhwden5te0wfjkccte9ejxzmt4wvhxjmcpr9mhxue69uhkummnw3ezuer9d3hjuum0ve68wctjv5n8hwfg
+  - [ ] Custom views should combine pubkeys, relays, event ids, and topics
+
+# More
+
 - [ ] Add suggestion list for topics on compose so people know there are suggestions
 - [ ] Badges link to https://badges.page/p/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322
 - [ ] Link/embed good chat/DM micro-apps
@@ -25,12 +31,6 @@
   - If logged in, open a detail page that shows the relays and people
   - If not logged in, pre-populate follows/relays in onboarding flow
 - [ ] If someone logs in with their private key, create a notification to install an extension
-- [ ] Add customize icon and route with editable custom view cards using "lists" nip
-  - nevent1qqspjcqw2hu5gfcpkrjhs0aqvxuzjgtp50l375mcqjfpmk48cg5hevgpr3mhxue69uhkummnw3ez6un9d3shjtnhd3m8xtnnwpskxegpzamhxue69uhkummnw3ezuendwsh8w6t69e3xj7spramhxue69uhkummnw3ez6un9d3shjtnwdahxxefwv93kzer9d4usz9rhwden5te0wfjkccte9ejxzmt4wvhxjmcpr9mhxue69uhkummnw3ezuer9d3hjuum0ve68wctjv5n8hwfg
-  - [ ] Custom views should combine pubkeys, relays, event ids, and topics
-
-# More
-
 - [ ] Copy/share note id button
 - [ ] Reposts
 - [ ] Add delete button to notes. This will require tracking what relays a note was published to
