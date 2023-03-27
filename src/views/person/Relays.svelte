@@ -3,7 +3,7 @@
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
 
-  export let person
+  export let relays
 </script>
 
 <div in:fly={{y: 20}}>
@@ -12,10 +12,10 @@
       Below are the relays this user publishes to. Join one or more to make sure you never miss
       their updates.
     </p>
-    {#if (person.relays || []).length === 0}
+    {#if relays.length === 0}
       <div class="pt-8 text-center">No relays found</div>
     {:else}
-      {#each person.relays as relay (relay.url)}
+      {#each relays as relay (relay.url)}
         {#if relay.write !== "!"}
           <RelayCard {relay} />
         {/if}

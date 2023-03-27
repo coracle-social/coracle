@@ -209,12 +209,15 @@ addHandler(
 addHandler(
   10002,
   profileHandler("relays", (e, p) => {
-    return e.tags.map(([_, url, mode]) => {
-      const read = (mode || "read") === "read"
-      const write = (mode || "write") === "write"
+    return Tags.from(e)
+      .type("r")
+      .all()
+      .map(([_, url, mode]) => {
+        const read = (mode || "read") === "read"
+        const write = (mode || "write") === "write"
 
-      return {url, read, write}
-    })
+        return {url, read, write}
+      })
   })
 )
 

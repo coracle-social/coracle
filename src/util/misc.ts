@@ -2,6 +2,8 @@ import {bech32, utf8} from "@scure/base"
 import {debounce, throttle} from "throttle-debounce"
 import {
   gt,
+  whereEq,
+  reject,
   mergeDeepRight,
   aperture,
   path as getPath,
@@ -18,7 +20,7 @@ import {
 } from "ramda"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from "svelte/store"
-import {isObject, round} from "hurdak/lib/hurdak"
+import {isObject, randomId, round} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
 
 export const fuzzy = (data, opts = {}) => {
@@ -121,7 +123,7 @@ export const poll = (t, cb) => {
 }
 
 export const createScroller = (loadMore, {reverse = false} = {}) => {
-  const THRESHOLD = 1200
+  const THRESHOLD = 2000
 
   // NOTE TO FUTURE SELF
   // If the scroller is saturating request channels on a slow relay, the
@@ -142,7 +144,7 @@ export const createScroller = (loadMore, {reverse = false} = {}) => {
     }
 
     // No need to check all that often
-    await sleep(1000)
+    await sleep(500)
 
     if (!done) {
       requestAnimationFrame(check)
@@ -162,16 +164,21 @@ export const createScroller = (loadMore, {reverse = false} = {}) => {
 export const randomChoice = xs => xs[Math.floor(Math.random() * xs.length)]
 
 export class Cursor {
+  delta: number
+  since: number
   until: number
   limit: number
   count: number
-  constructor(limit = 20) {
+  constructor({limit = 50, delta = timedelta(6, "hours")}) {
+    this.delta = delta
+    this.since = now() - delta
     this.until = now()
     this.limit = limit
     this.count = 0
   }
   getFilter() {
     return {
+      since: this.since,
       until: this.until,
       limit: this.limit,
     }
@@ -206,6 +213,8 @@ export class Cursor {
       // Only paginate part of the way so we can avoid missing stuff
       this.until -= Math.round(gap * scale * this.limit)
     }
+
+    this.since = Math.min(this.since, this.until) - this.delta
   }
 }
 
@@ -226,7 +235,7 @@ export const shuffle = sortBy(() => Math.random() > 0.5)
 
 export const batch = (t, f) => {
   const xs = []
-  const cb = throttle(t, () => f(xs.splice(0)))
+  const cb = throttle(t, () => xs.length > 0 && f(xs.splice(0)))
 
   return x => {
     xs.push(x)
@@ -234,7 +243,12 @@ export const batch = (t, f) => {
   }
 }
 
-export const defer = () => {
+export type Deferred<T> = Promise<T> & {
+  resolve: (arg: T) => void
+  reject: (arg: T) => void
+}
+
+export const defer = (): Deferred<any> => {
   let resolve, reject
   const p = new Promise((resolve_, reject_) => {
     resolve = resolve_
@@ -381,11 +395,36 @@ export const hexToBech32 = (prefix, url) =>
 
 export const bech32ToHex = b32 => utf8.encode(bech32.fromWords(bech32.decode(b32, false).words))
 
-export const formatSats = sats => {
-  const formatter = new Intl.NumberFormat()
+export const numberFmt = new Intl.NumberFormat()
 
-  if (sats < 1_000) return formatter.format(sats)
-  if (sats < 1_000_000) return formatter.format(round(1, sats / 1000)) + "K"
-  if (sats < 100_000_000) return formatter.format(round(1, sats / 1_000_000)) + "MM"
-  return formatter.format(round(2, sats / 100_000_000)) + "BTC"
+export const formatSats = sats => {
+  if (sats < 1_000) return numberFmt.format(sats)
+  if (sats < 1_000_000) return numberFmt.format(round(1, sats / 1000)) + "K"
+  if (sats < 100_000_000) return numberFmt.format(round(1, sats / 1_000_000)) + "MM"
+  return numberFmt.format(round(2, sats / 100_000_000)) + "BTC"
+}
+
+type EventBusListener = {
+  id: string
+  handler: (...args: any[]) => void
+}
+
+export class EventBus {
+  listeners: Record<string, Array<EventBusListener>> = {}
+  on(name, handler) {
+    const id = randomId()
+
+    this.listeners[name] = this.listeners[name] || ([] as Array<EventBusListener>)
+    this.listeners[name].push({id, handler})
+
+    return id
+  }
+  off(name, id) {
+    this.listeners[name] = reject(whereEq({id}), this.listeners[name])
+  }
+  handle(k, ...payload) {
+    for (const {handler} of this.listeners[k] || []) {
+      handler(...payload)
+    }
+  }
 }

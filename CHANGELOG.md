@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.19
+
+Maintenance release - bugfixes, style fixes, and refactoring. High points are AUTH support, and much improved note composition/mention interpolation.
+
+- [x] Add confirmation to zap dialog
+- [x] Avoid pruning profiles we know we'll use more often
+- [x] Re-write pool to remove dependency on nostr-tools.relay
+- [x] Add support for AUTH
+- [x] Use COUNT for counting follows
+- [x] Re-write nost composition input
+- [x] Add since to feeds to improve time relevance
+- [x] Fix a few styling things
+
 ## 0.2.18
 
 - [x] Re-write data storage layer to conserve memory using a custom LRU cache

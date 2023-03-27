@@ -3,7 +3,7 @@
   import {partition, always, propEq, uniqBy, sortBy, prop} from "ramda"
   import {fly} from "svelte/transition"
   import {quantify} from "hurdak/lib/hurdak"
-  import {createScroller, now, Cursor} from "src/util/misc"
+  import {createScroller, now, timedelta, Cursor} from "src/util/misc"
   import {asDisplayEvent, mergeFilter} from "src/util/nostr"
   import Spinner from "src/partials/Spinner.svelte"
   import Content from "src/partials/Content.svelte"
@@ -15,6 +15,7 @@
 
   export let filter
   export let relays = []
+  export let delta = timedelta(6, "hours")
   export let shouldDisplay = always(true)
   export let parentsTimeout = 500
 
@@ -24,7 +25,7 @@
   // Add a short buffer so we can get the most possible results for recent notes
   const since = now()
   const maxNotes = 100
-  const cursor = new Cursor()
+  const cursor = new Cursor({delta})
   const seen = new Set()
 
   const loadBufferedNotes = () => {
@@ -66,7 +67,7 @@
     // Stream in additional data and merge it in
     network.streamContext({
       depth: 2,
-      notes: combined,
+      notes: combined.filter(propEq("kind", 1)),
       onChunk: context => {
         context = user.applyMutes(context)
 

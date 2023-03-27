@@ -199,8 +199,8 @@ const applyContext = (notes, context) => {
 }
 
 export default {
-  listen,
   load,
+  listen,
   loadPeople,
   loadParents,
   streamContext,

@@ -73,6 +73,12 @@ export const blobToString = async blob =>
 
 export const blobToFile = blob => new File([blob], blob.name, {type: blob.type})
 
+export const stripHtml = html => {
+  const doc = new DOMParser().parseFromString(html, "text/html")
+
+  return doc.body.textContent || ""
+}
+
 export const escapeHtml = html => {
   const div = document.createElement("div")
 

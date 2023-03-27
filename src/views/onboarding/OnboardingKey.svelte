@@ -5,11 +5,13 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
+  import pool from "src/agent/pool"
   import {modal, toast} from "src/app/ui"
 
   export let privkey
 
   const nsec = nip19.nsecEncode(privkey)
+  const nextStage = pool.forceRelays.length > 0 ? "follows" : "relays"
 
   const copyKey = () => {
     copyToClipboard(nsec)
@@ -28,7 +30,7 @@
       <i slot="before" class="fa fa-lock" />
       <button slot="after" class="fa fa-copy cursor-pointer" on:click={copyKey} />
     </Input>
-    <Anchor type="button-accent" on:click={() => modal.set({type: "onboarding", stage: "relays"})}>
+    <Anchor type="button-accent" on:click={() => modal.set({type: "onboarding", stage: nextStage})}>
       Log in
     </Anchor>
   </div>

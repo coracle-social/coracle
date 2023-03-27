@@ -1,12 +1,13 @@
 <script lang="ts">
-  import {last, find} from "ramda"
+  import {last, identity, find} from "ramda"
   import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
   import {fly, fade} from "svelte/transition"
   import {navigate} from "svelte-routing"
   import {log} from "src/util/logger"
   import {renderContent, parseHex} from "src/util/html"
-  import {displayPerson, Tags, toHex} from "src/util/nostr"
+  import {numberFmt} from "src/util/misc"
+  import {displayPerson, toHex} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -16,9 +17,10 @@
   import Likes from "src/views/person/Likes.svelte"
   import Relays from "src/views/person/Relays.svelte"
   import user from "src/agent/user"
+  import pool from "src/agent/pool"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
-  import {getPersonWithFallback, people} from "src/agent/tables"
+  import {getPersonWithFallback} from "src/agent/tables"
   import {routes, modal, theme, getThemeColor} from "src/app/ui"
   import PersonCircle from "src/partials/PersonCircle.svelte"
 
@@ -29,11 +31,11 @@
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const {petnamePubkeys, canPublish, mutes} = user
   const getRelays = () => sampleRelays(relays.concat(getPubkeyWriteRelays(pubkey)))
+  const tabs = ["notes", "likes", pool.forceRelays.length === 0 && "relays"].filter(identity)
 
   let pubkey = toHex(npub)
   let following = false
   let muted = false
-  let followers = new Set()
   let followersCount = tweened(0, {interpolate, duration: 1000})
   let person = getPersonWithFallback(pubkey)
   let loading = true
@@ -77,7 +79,9 @@
         })
       }
 
-      actions.push({onClick: openProfileInfo, label: "Profile", icon: "info"})
+      if (pool.forceRelays.length === 0) {
+        actions.push({onClick: openProfileInfo, label: "Profile", icon: "info"})
+      }
 
       if (user.getPubkey() === pubkey && $canPublish) {
         actions.push({
@@ -100,27 +104,27 @@
       loading = false
     })
 
-    // Prime our followers count
-    people.all().forEach(p => {
-      if (Tags.wrap(p.petnames).type("p").values().all().includes(pubkey)) {
-        followers.add(p.pubkey)
-        followersCount.set(followers.size)
-      }
-    })
+    // Get our followers count
+    const count = await pool.count({kinds: [3], "#p": [pubkey]})
 
-    // Round out our followers count
-    await network.load({
-      shouldProcess: false,
-      relays: getRelays(),
-      filter: [{kinds: [3], "#p": [pubkey]}],
-      onChunk: events => {
-        for (const e of events) {
-          followers.add(e.pubkey)
-        }
+    if (count) {
+      followersCount.set(count)
+    } else {
+      const followers = new Set()
 
-        followersCount.set(followers.size)
-      },
-    })
+      await network.load({
+        shouldProcess: false,
+        relays: getRelays(),
+        filter: [{kinds: [3], "#p": [pubkey]}],
+        onChunk: events => {
+          for (const e of events) {
+            followers.add(e.pubkey)
+          }
+
+          followersCount.set(followers.size)
+        },
+      })
+    }
   })
 
   const toggleActions = () => {
@@ -130,13 +134,11 @@
   const setActiveTab = tab => navigate(routes.person(pubkey, tab))
 
   const showFollows = () => {
-    const pubkeys = Tags.wrap(person.petnames).pubkeys()
-
-    modal.set({type: "person/list", pubkeys})
+    modal.set({type: "person/follows", pubkey})
   }
 
   const showFollowers = () => {
-    modal.set({type: "person/list", pubkeys: Array.from(followers)})
+    modal.set({type: "person/followers", pubkey})
   }
 
   const follow = async () => {
@@ -227,22 +229,22 @@
             <strong>{person.petnames.length}</strong> following
           </button>
           <button on:click={showFollowers}>
-            <strong>{$followersCount}</strong> followers
+            <strong>{numberFmt.format($followersCount)}</strong> followers
           </button>
         </div>
       {/if}
     </div>
   </div>
 
-  <Tabs tabs={["notes", "likes", "relays"]} {activeTab} {setActiveTab} />
+  <Tabs {tabs} {activeTab} {setActiveTab} />
 
   {#if activeTab === "notes"}
     <Notes {pubkey} />
   {:else if activeTab === "likes"}
     <Likes {pubkey} />
   {:else if activeTab === "relays"}
-    {#if person?.relays}
-      <Relays {person} />
+    {#if getRelays().length > 0}
+      <Relays relays={getRelays()} />
     {:else if loading}
       <Spinner />
     {:else}

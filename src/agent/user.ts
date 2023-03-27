@@ -1,6 +1,6 @@
 import type {Relay} from "src/util/types"
 import type {Readable} from "svelte/store"
-import {slice, prop, find, pipe, assoc, whereEq, when, concat, reject, nth, map} from "ramda"
+import {slice, uniqBy, prop, find, pipe, assoc, whereEq, when, concat, reject, nth, map} from "ramda"
 import {findReplyId, findRootId} from "src/util/nostr"
 import {synced} from "src/util/misc"
 import {derived} from "svelte/store"
@@ -98,7 +98,7 @@ export default {
   relays,
   getRelays: () => profileCopy.relays,
   updateRelays(f) {
-    const $relays = f(profileCopy.relays)
+    const $relays = uniqBy(prop('url'), f(profileCopy.relays))
 
     profile.update(assoc("relays", $relays))
 

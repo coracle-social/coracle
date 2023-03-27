@@ -12,7 +12,7 @@
   import {find, is, identity, nthArg, pluck} from "ramda"
   import {log, warn} from "src/util/logger"
   import {timedelta, hexToBech32, bech32ToHex, shuffle, now, sleep} from "src/util/misc"
-  import {displayPerson, isLike} from "src/util/nostr"
+  import {displayPerson, Tags, isLike} from "src/util/nostr"
   import cmd from "src/agent/cmd"
   import {onReady, relays, people} from "src/agent/tables"
   import keys from "src/agent/keys"
@@ -82,6 +82,14 @@
   document.head.append(style)
 
   $: style.textContent = `:root { ${getThemeVariables($theme)}; background: var(--gray-8); }`
+
+  // When we get an AUTH challenge from our pool, attempt to authenticate
+  pool.eventBus.on("AUTH", async (challenge, connection) => {
+    const publishable = cmd.authenticate(challenge, url)
+    const [event] = await publishable.publish([{url: connection.url}])
+
+    connection.checkAuth(event.id)
+  })
 
   onMount(() => {
     // Keep scroll position on body, but don't allow scrolling
@@ -272,8 +280,10 @@
           <PersonProfileInfo person={$modal.person} />
         {:else if $modal.type === "person/share"}
           <PersonShare person={$modal.person} />
-        {:else if $modal.type === "person/list"}
-          <PersonList pubkeys={$modal.pubkeys} />
+        {:else if $modal.type === "person/follows"}
+          <PersonList type="follows" pubkey={$modal.pubkey} />
+        {:else if $modal.type === "person/followers"}
+          <PersonList type="followers" pubkey={$modal.pubkey} />
         {:else if $modal.type === "message"}
           <Content size="lg">
             <div class="text-center">{$modal.message}</div>

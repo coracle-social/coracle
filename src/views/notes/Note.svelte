@@ -26,6 +26,7 @@
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
   import user from "src/agent/user"
+  import pool from "src/agent/pool"
   import keys from "src/agent/keys"
   import network from "src/agent/network"
   import {getEventPublishRelays, getRelaysForEventParent} from "src/agent/relays"
@@ -240,6 +241,7 @@
       invoice: null,
       loading: false,
       startedAt: now(),
+      confirmed: false,
     }
   }
 
@@ -281,7 +283,10 @@
       },
       onChunk: chunk => {
         note.zaps = note.zaps.concat(chunk)
-        cleanupZap()
+
+        zap.confirmed = true
+
+        setTimeout(cleanupZap, 1000)
       },
     })
   }
@@ -445,13 +450,15 @@
                   let:instance
                   class="flex flex-col gap-2"
                   on:click={() => instance.hide()}>
-                  <Anchor
-                    type="button-circle"
-                    on:click={() => {
-                      showRelays = true
-                    }}>
-                    <i class="fa fa-server" />
-                  </Anchor>
+                  {#if pool.forceRelays.length === 0}
+                    <Anchor
+                      type="button-circle"
+                      on:click={() => {
+                        showRelays = true
+                      }}>
+                      <i class="fa fa-server" />
+                    </Anchor>
+                  {/if}
                   {#if muted}
                     <Anchor type="button-circle" on:click={unmute}>
                       <i class="fa fa-microphone" />
@@ -572,10 +579,19 @@
           <h1 class="staatliches text-2xl">Send a zap</h1>
           <p>to {displayPerson($person)}</p>
         </div>
-        {#if zap.invoice}
+        {#if zap.confirmed}
+          <div class="flex items-center justify-center gap-2 text-gray-1">
+            <i class="fa fa-champagne-glasses" />
+            <p>Success! Zap confirmed.</p>
+          </div>
+        {:else if zap.invoice}
           <QRCode code={zap.invoice} />
-          <div class="text-center text-gray-1">
+          <p class="text-center text-gray-1">
             Copy or scan using a lightning wallet to pay your zap.
+          </p>
+          <div class="flex items-center justify-center gap-2 text-gray-1">
+            <i class="fa fa-circle-notch fa-spin" />
+            Waiting for confirmation...
           </div>
         {:else}
           <Textarea bind:value={zap.message} placeholder="Add an optional message" />

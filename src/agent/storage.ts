@@ -224,10 +224,14 @@ export const listener = (() => {
   }
 })()
 
+type WatchStore<T> = Writable<T> & {
+  refresh: () => void
+}
+
 export const watch = (names, f) => {
   names = ensurePlural(names)
 
-  const store = writable(null)
+  const store = writable(null) as WatchStore<any>
   const tables = names.map(name => registry[name])
 
   // Initialize synchronously if possible
@@ -239,12 +243,12 @@ export const watch = (names, f) => {
   }
 
   // Debounce refresh so we don't get UI lag
-  const refresh = throttle(300, async () => store.set(await f(...tables)))
+  store.refresh = throttle(300, async () => store.set(await f(...tables)))
 
   // Listen for changes
   listener.subscribe(name => {
     if (names.includes(name)) {
-      refresh()
+      store.refresh()
     }
   })
 

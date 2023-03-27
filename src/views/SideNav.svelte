@@ -2,6 +2,7 @@
   import cx from "classnames"
   import {displayPerson} from "src/util/nostr"
   import user from "src/agent/user"
+  import pool from "src/agent/pool"
   import {menuIsOpen, installPrompt, routes} from "src/app/ui"
   import {newNotifications, newDirectMessages, newChatMessages} from "src/app/listener"
   import {slowConnections} from "src/app/connection"
@@ -88,14 +89,16 @@
     </a>
   </li>
   <li class="mx-3 my-4 h-px bg-gray-6" />
-  <li class="relative cursor-pointer">
-    <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/relays">
-      <i class="fa fa-server mr-2" /> Relays
-      {#if $slowConnections.length > 0}
-        <div class="absolute top-2 left-8 h-2 w-2 rounded bg-accent" />
-      {/if}
-    </a>
-  </li>
+  {#if pool.forceRelays.length === 0}
+    <li class="relative cursor-pointer">
+      <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/relays">
+        <i class="fa fa-server mr-2" /> Relays
+        {#if $slowConnections.length > 0}
+          <div class="absolute top-2 left-8 h-2 w-2 rounded bg-accent" />
+        {/if}
+      </a>
+    </li>
+  {/if}
   {#if $profile.pubkey}
     <li class="cursor-pointer">
       <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/keys">
