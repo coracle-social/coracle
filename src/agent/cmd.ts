@@ -7,11 +7,11 @@ import pool from "src/agent/pool"
 import sync from "src/agent/sync"
 import keys from "src/agent/keys"
 
-const authenticate = (challenge, relay) =>
+const authenticate = (url, challenge) =>
   new PublishableEvent(22242, {
     tags: [
       ["challenge", challenge],
-      ["relay", relay],
+      ["relay", url],
     ],
   })
 
@@ -85,7 +85,7 @@ const processMentions = map(pubkey => {
   const name = displayPerson(getPersonWithFallback(pubkey))
   const relay = getRelayForPersonHint(pubkey)
 
-  return ["p", pubkey, relay?.url || '', name]
+  return ["p", pubkey, relay?.url || "", name]
 })
 
 const getReplyTags = n => {
@@ -132,8 +132,11 @@ class PublishableEvent {
 
     this.event = {kind, content, tags, pubkey, created_at: createdAt}
   }
+  getSignedEvent() {
+    return keys.sign(this.event)
+  }
   async publish(relays, onProgress = null) {
-    const event = await keys.sign(this.event)
+    const event = await this.getSignedEvent()
     const promise = pool.publish({relays, event, onProgress})
 
     sync.processEvents(event)

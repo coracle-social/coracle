@@ -115,7 +115,7 @@
       }}>here</Anchor
     >.
   </p>
-  {#if pool.forceRelays.length > 0}
+  {#if pool.forceUrls.length > 0}
     <Spinner />
   {:else if Object.values(currentRelays).length > 0}
     <p>Currently searching:</p>

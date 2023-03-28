@@ -31,7 +31,7 @@
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const {petnamePubkeys, canPublish, mutes} = user
   const getRelays = () => sampleRelays(relays.concat(getPubkeyWriteRelays(pubkey)))
-  const tabs = ["notes", "likes", pool.forceRelays.length === 0 && "relays"].filter(identity)
+  const tabs = ["notes", "likes", pool.forceUrls.length === 0 && "relays"].filter(identity)
 
   let pubkey = toHex(npub)
   let following = false
@@ -79,7 +79,7 @@
         })
       }
 
-      if (pool.forceRelays.length === 0) {
+      if (pool.forceUrls.length === 0) {
         actions.push({onClick: openProfileInfo, label: "Profile", icon: "info"})
       }
 

@@ -1,7 +1,6 @@
 import type {MyEvent} from "src/util/types"
-import {sortBy, assoc, uniq, uniqBy, prop, propEq, reject, groupBy, pluck} from "ramda"
+import {sortBy, assoc, uniq, uniqBy, prop, propEq, groupBy, pluck} from "ramda"
 import {personKinds, findReplyId} from "src/util/nostr"
-import {log} from "src/util/logger"
 import {chunk} from "hurdak/lib/hurdak"
 import {batch, now, timedelta} from "src/util/misc"
 import {
@@ -42,6 +41,7 @@ const listen = ({relays, filter, onChunk = null, shouldProcess = true, delay = 5
 
 const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5000}) => {
   return new Promise(resolve => {
+    let completed = false
     const done = new Set()
     const allEvents = []
 
@@ -49,25 +49,16 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5
       const sub = await subPromise
 
       // If we've already unsubscribed we're good
-      if (!sub.isActive()) {
+      if (completed) {
         return
       }
 
       const isDone = done.size === relays.length
 
       if (force) {
-        const timedOutRelays = reject(r => done.has(r.url), relays)
-
-        log(
-          `Timing out ${timedOutRelays.length}/${relays.length} relays after ${timeout}ms`,
-          timedOutRelays
-        )
-
-        timedOutRelays.forEach(relay => {
-          const conn = pool.getConnection(relay.url)
-
-          if (conn) {
-            conn.stats.timeouts += 1
+        relays.forEach(relay => {
+          if (!done.has(relay.url)) {
+            pool.Meta.onTimeout(relay.url)
           }
         })
       }
@@ -75,6 +66,7 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5
       if (isDone || force) {
         sub.unsub()
         resolve(allEvents)
+        completed = true
       }
     }
 
@@ -98,10 +90,6 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5
         }
       }),
       onEose: url => {
-        done.add(url)
-        attemptToComplete(false)
-      },
-      onError: url => {
         done.add(url)
         attemptToComplete(false)
       },

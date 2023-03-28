@@ -83,13 +83,16 @@
 
   $: style.textContent = `:root { ${getThemeVariables($theme)}; background: var(--gray-8); }`
 
-  // When we get an AUTH challenge from our pool, attempt to authenticate
-  pool.eventBus.on("AUTH", async (challenge, connection) => {
-    const publishable = cmd.authenticate(challenge, url)
-    const [event] = await publishable.publish([{url: connection.url}])
+  const seenChallenges = new Set()
 
-    connection.checkAuth(event.id)
-  })
+  // When we get an AUTH challenge from our pool, attempt to authenticate
+  pool.Config.authHandler = async (url, challenge) => {
+    if (!seenChallenges.has(challenge)) {
+      seenChallenges.add(challenge)
+
+      return first(await cmd.authenticate(url, challenge).publish([{url}]))
+    }
+  }
 
   onMount(() => {
     // Keep scroll position on body, but don't allow scrolling

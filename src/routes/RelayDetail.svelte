@@ -26,14 +26,7 @@
 
   onMount(() => {
     return poll(10_000, async () => {
-      const conn = await pool.getConnection(relay.url)
-
-      if (conn) {
-        ;[quality, message] = conn.getQuality()
-      } else {
-        quality = null
-        message = "Not connected"
-      }
+      ;[quality, message] = pool.getQuality(relay.url)
     })
   })
 

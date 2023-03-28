@@ -89,7 +89,7 @@
     </a>
   </li>
   <li class="mx-3 my-4 h-px bg-gray-6" />
-  {#if pool.forceRelays.length === 0}
+  {#if pool.forceUrls.length === 0}
     <li class="relative cursor-pointer">
       <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/relays">
         <i class="fa fa-server mr-2" /> Relays

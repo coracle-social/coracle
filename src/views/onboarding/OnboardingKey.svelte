@@ -11,7 +11,7 @@
   export let privkey
 
   const nsec = nip19.nsecEncode(privkey)
-  const nextStage = pool.forceRelays.length > 0 ? "follows" : "relays"
+  const nextStage = pool.forceUrls.length > 0 ? "follows" : "relays"
 
   const copyKey = () => {
     copyToClipboard(nsec)

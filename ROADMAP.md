@@ -1,7 +1,7 @@
 # Current
 
+- [ ] Fix reactions and replies
 - [ ] Multiplexer
-  - [ ] Explore the idea of separating everything into different components and wiring it all up into a system in a single file.
   - [ ] Write NIP to support proxies. Update COUNT NIP to mention how proxies are a good use case for COUNT
 - [ ] Fix iOS/safari/firefox
 - [ ] https://github.com/staab/coracle/issues/42
@@ -136,3 +136,4 @@
   - Graph view? Query db with COUNT? Hardware specs on relay info endpoint?
   - "adoptarelay.com"
   - Add suggested relays based on follows or topics
+- [ ] Integrate plephy https://plebhy.com/

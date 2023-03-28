@@ -18,6 +18,7 @@ import {findReplyId, findRootId} from "src/util/nostr"
 import {synced} from "src/util/misc"
 import {derived} from "svelte/store"
 import keys from "src/agent/keys"
+import pool from "src/agent/pool"
 import cmd from "src/agent/cmd"
 
 const profile = synced("agent/user/profile", {
@@ -54,6 +55,7 @@ let profileCopy = null
 
 profile.subscribe($profile => {
   profileCopy = $profile
+  pool.Config.multiplextrUrl = $profile.settings.multiplextrUrl
 })
 
 // Watch pubkey and add to profile

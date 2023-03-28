@@ -11,14 +11,14 @@ setInterval(() => {
   const relayUrls = new Set(pluck("url", getUserRelays()))
 
   // Prune connections we haven't used in a while
-  Object.values(pool.getConnections())
-    .filter(conn => conn.lastRequest < Date.now() - 60_000)
-    .forEach(conn => conn.nostr.close())
+  Object.entries(pool.Meta.stats)
+    .filter(([url, stats]) => stats.lastRequest < Date.now() - 60_000)
+    .forEach(([url, stats]) => pool.disconnect(url))
 
   // Alert the user to any heinously slow connections
   slowConnections.set(
-    Object.values(pool.getConnections()).filter(
-      c => relayUrls.has(c.url) && first(c.getQuality()) < 0.3
+    Object.keys(pool.Meta.stats).filter(
+      url => relayUrls.has(url) && first(pool.getQuality(url)) < 0.3
     )
   )
 }, 30_000)

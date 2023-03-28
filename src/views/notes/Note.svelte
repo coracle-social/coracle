@@ -450,7 +450,7 @@
                   let:instance
                   class="flex flex-col gap-2"
                   on:click={() => instance.hide()}>
-                  {#if pool.forceRelays.length === 0}
+                  {#if pool.forceUrls.length === 0}
                     <Anchor
                       type="button-circle"
                       on:click={() => {

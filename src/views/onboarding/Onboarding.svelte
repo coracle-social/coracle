@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {uniq} from "ramda"
+  import {uniq, objOf} from "ramda"
   import {onMount} from "svelte"
   import {generatePrivateKey} from "nostr-tools"
   import {fly} from "svelte/transition"
@@ -28,8 +28,8 @@
   let relays = []
   if ($userRelays.length > 0) {
     relays = $userRelays
-  } else if (pool.forceRelays.length > 0) {
-    relays = pool.forceRelays
+  } else if (pool.forceUrls.length > 0) {
+    relays = pool.forceUrls.map(objOf("url"))
   } else {
     relays = [
       {url: "wss://nostr-pub.wellorder.net", write: true},
