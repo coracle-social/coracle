@@ -2,11 +2,13 @@
 
 - [ ] Fix reactions and replies
 - [ ] Multiplexer
+  - [ ] Announce multiplextr, paravel, coracle update w/url
   - [ ] Write NIP to support proxies. Update COUNT NIP to mention how proxies are a good use case for COUNT
 - [ ] Fix iOS/safari/firefox
-- [ ] https://github.com/staab/coracle/issues/42
+- [ ] https://github.com/coracle-social/coracle/issues/42
 - [ ] Multiplex, charge past a certain usage level based on bandwidth
 - [ ] Move blog to https://twitter.com/fiatjaf/status/1638514052014940162
+- [ ] Improve not rendering, nip 27
 
 # Others
 

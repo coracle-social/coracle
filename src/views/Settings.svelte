@@ -75,7 +75,7 @@
         <p class="text-sm text-gray-1">
           Enter a custom url for Coracle's helper application. Dufflepud is used for hosting images
           and loading link previews. You can find the source code <Anchor
-            href="https://github.com/staab/dufflepud">here</Anchor
+            href="https://github.com/coracle-social/dufflepud">here</Anchor
           >.
         </p>
       </div>
@@ -87,8 +87,8 @@
         <p class="text-sm text-gray-1">
           Enter a custom proxy server for multiplexing relay connections. This can drastically
           improve resource usage, but has some privacy trade-offs. Leave blank to connect to relays
-          directly. You can find the source code <Anchor href="https://github.com/staab/multiplextr"
-            >here</Anchor
+          directly. You can find the source code <Anchor
+            href="https://github.com/coracle-social/multiplextr">here</Anchor
           >.
         </p>
       </div>

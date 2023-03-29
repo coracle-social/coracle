@@ -2,7 +2,7 @@
 
 Coracle is a web client for the Nostr protocol. While Nostr is useful for many things, Coracle focuses on providing a high-quality social media experience. Check it out at [coracle.social](https://coracle.social).
 
-[Dufflepud](https://github.com/staab/dufflepud) is a companion server which you can self-host. It helps Coracle with things like link previews and image uploads.
+[Dufflepud](https://github.com/coracle-social/dufflepud) is a companion server which you can self-host. It helps Coracle with things like link previews and image uploads.
 
 If you like Coracle and want to support its development, you can donate sats via [Geyser](https://geyser.fund/project/coracle).
 
@@ -38,7 +38,7 @@ You can find a more complete changelog [here](./ROADMAP.md).
 
 # Run  Coracle locally:
 
-- Clone the project repository: `git clone https://github.com/staab/coracle.git`
+- Clone the project repository: `git clone https://github.com/coracle-social/coracle.git`
 - Navitage to the project directory: `cd coracle`
 - Install dependencies: `npm install`
 - Add an env file from the template: `cp env.template env.local`
