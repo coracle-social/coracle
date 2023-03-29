@@ -159,11 +159,22 @@ function getExecutor(urls) {
     urls = forceUrls
   }
 
-  const executor = new Executor(
-    Config.multiplextrUrl
-      ? new Plex(urls, pool.get(Config.multiplextrUrl))
-      : new Relays(urls.map(url => pool.get(url)))
-  )
+  let target
+
+  // Try to use our multiplexer, but if it fails to connect fall back to relays
+  if (Config.multiplextrUrl) {
+    const socket = pool.get(Config.multiplextrUrl)
+
+    if (!socket.error) {
+      target = new Plex(urls, pool.get(Config.multiplextrUrl))
+    }
+  }
+
+  if (!target) {
+    target = new Relays(urls.map(url => pool.get(url)))
+  }
+
+  const executor = new Executor(target)
 
   executor.handleAuth({
     onAuth(url, challenge) {
