@@ -31,7 +31,7 @@
   const submit = async event => {
     event?.preventDefault()
     publishWithToast(getUserWriteRelays(), cmd.updateUser(values))
-    navigate(routes.person(user.getPubkey(), "profile"))
+    navigate(routes.person(user.getPubkey(), "notes"))
   }
 
   document.title = "Profile"

@@ -1,6 +1,13 @@
 # Current
 
-- [ ] Fix reactions and replies
+- [ ] Fix relays notification when multiplexing
+- [ ] Disable self-zap
+- [ ] Move blog to nostr
+- [ ] Improve note rendering
+  - [ ] Fix reactions and replies showing up
+  - [ ] Show all images in preview as slideshow or something
+  - [ ] Extract nostr: links and bech32 entities, hover
+  - [ ] Linkify topics
 - [ ] Multiplexer
   - [ ] Announce multiplextr, paravel, coracle update w/url
   - [ ] Write NIP to support proxies. Update COUNT NIP to mention how proxies are a good use case for COUNT

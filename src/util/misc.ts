@@ -6,6 +6,7 @@ import {
   reject,
   mergeDeepRight,
   aperture,
+  filter,
   path as getPath,
   allPass,
   pipe,
@@ -164,24 +165,24 @@ export const createScroller = (loadMore, {reverse = false} = {}) => {
 export const randomChoice = xs => xs[Math.floor(Math.random() * xs.length)]
 
 export class Cursor {
-  delta: number
-  since: number
+  delta?: number
+  since?: number
   until: number
   limit: number
   count: number
-  constructor({limit = 50, delta = timedelta(6, "hours")}) {
+  constructor({limit = 50, delta = undefined} = {}) {
     this.delta = delta
-    this.since = now() - delta
+    this.since = delta ? now() - delta : undefined
     this.until = now()
     this.limit = limit
     this.count = 0
   }
   getFilter() {
-    return {
+    return filter(identity, {
       since: this.since,
       until: this.until,
       limit: this.limit,
-    }
+    })
   }
   // Remove events that are significantly older than the average
   prune(events) {
@@ -214,7 +215,9 @@ export class Cursor {
       this.until -= Math.round(gap * scale * this.limit)
     }
 
-    this.since = Math.min(this.since, this.until) - this.delta
+    if (this.since) {
+      this.since = Math.min(this.since, this.until) - this.delta
+    }
   }
 }
 

@@ -1,8 +1,8 @@
 <script>
-  import {pluck, max, last, sortBy, assoc} from "ramda"
+  import {pluck, reverse, max, last, sortBy, assoc} from "ramda"
   import {onMount} from "svelte"
   import {fly} from "svelte/transition"
-  import {now, createScroller} from "src/util/misc"
+  import {now, timedelta, createScroller} from "src/util/misc"
   import {findReplyId} from "src/util/nostr"
   import Spinner from "src/partials/Spinner.svelte"
   import Content from "src/partials/Content.svelte"
@@ -19,7 +19,13 @@
   const notifications = watch("notifications", t => {
     lastChecked.update(assoc("notifications", now()))
 
-    return sortBy(e => -e.created_at, user.applyMutes(t.all()))
+    // Sort by rounded timestamp so we can group reactions to the same parent
+    return reverse(
+      sortBy(
+        e => Math.round(e.created_at / timedelta(1, "hour")).toString() + findReplyId(e),
+        user.applyMutes(t.all())
+      )
+    )
   })
 
   // Group notifications so we're only showing the parent once per chunk
