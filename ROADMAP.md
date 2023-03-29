@@ -1,6 +1,5 @@
 # Current
 
-- [ ] Fix relays notification when multiplexing
 - [ ] Disable self-zap
 - [ ] Move blog to nostr
 - [ ] Improve note rendering

@@ -124,7 +124,7 @@
   $: $zapsTotal = sum(zaps.map(zap => zap.invoiceAmount)) / 1000
   $: $repliesCount = note.replies.length
   $: visibleNotes = note.replies.filter(r => (showContext ? true : !r.isContext))
-  $: canZap = $person?.zapper
+  $: canZap = $person?.zapper && $person?.pubkey !== user.getPubkey()
 
   const onClick = e => {
     const target = e.target as HTMLElement

@@ -161,8 +161,9 @@ function getExecutor(urls) {
 
   let target
 
-  // Try to use our multiplexer, but if it fails to connect fall back to relays
-  if (Config.multiplextrUrl) {
+  // Try to use our multiplexer, but if it fails to connect fall back to relays. If
+  // we're only connecting to a single relay, just do it directly
+  if (Config.multiplextrUrl && urls.length > 1) {
     const socket = pool.get(Config.multiplextrUrl)
 
     if (!socket.error) {
@@ -321,7 +322,7 @@ async function count(filter) {
 
   return new Promise(resolve => {
     const sub = executor.count(filters, {
-      onCount: res => resolve(res?.count),
+      onCount: (url, {count}) => resolve(count),
     })
 
     setTimeout(() => {
