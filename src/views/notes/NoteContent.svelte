@@ -40,6 +40,8 @@
         entities.push({type, value})
       }
 
+      // If the link is surrounded by line breaks (or content start/end), remove
+      // the link along with trailing whitespace
       if ((!prev || prev.type === "br") && (!next || next.type === "br")) {
         let n = 0
 
@@ -56,12 +58,17 @@
       }
     }
 
-    l += value.length
+    // Keep track of total characters, if we're not dealing with a string just guess
+    if (value instanceof String) {
+      l += value.length
 
-    if (shouldTruncate && l > 400 && type !== "br") {
-      content[i].value = value.trim()
-      content.splice(i + 1, content.length, {type: "text", value: "..."})
-      break
+      if (shouldTruncate && l > 400 && type !== "br") {
+        content[i].value = value.trim()
+        content.splice(i + 1, content.length, {type: "text", value: "..."})
+        break
+      }
+    } else {
+      l += 30
     }
   }
 
@@ -104,11 +111,9 @@
           {value.replace(/https?:\/\/(www\.)?/, "")}
         </Anchor>
       {:else if type.startsWith("nostr:")}
-        <Anchor external href={"/" + value.entity}>
+        <Anchor href={"/" + value.entity}>
           {#if value.pubkey}
             {displayPerson(getPersonWithFallback(value.pubkey))}
-          {:else if value.id}
-            event {value.id}
           {:else}
             {value.entity.slice(0, 10) + "..."}
           {/if}
