@@ -114,14 +114,11 @@ export const fromParentOffset = (element, offset): [HTMLElement, number] => {
 }
 
 export const extractUrls = content => {
-  const regex = /(https?:\/\/)?[-a-z0-9@:%._\+~#=\.]+\.[a-z]{1,6}[-a-z0-9@:%_\+.~#?!&//=;]*/gi
-  const urls = content.match(regex)
+  const regex = /((http|ws)s?:\/\/)?[-a-z0-9@:%_\+~#=\.]+\.[a-z]{1,6}[-a-z0-9:%_\+~#\?!&\/=;\.]*/gi
+  const urls = content.match(regex) || []
 
-  return (
-    (urls || [])
-      // Skip decimals like 3.5 and ellipses which have more than one dot in a row
-      .filter(url => !url.match(/^[\d\.]+$/) && !url.match(/\.{2}/))
-  )
+  // Skip stuff like 3.5 or U.S. and ellipses which have more than one dot in a row
+  return urls.filter(url => !url.match(/^[.\.]+$/) && !url.match(/\.{2}/))
 }
 
 export const renderContent = content => {

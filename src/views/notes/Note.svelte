@@ -8,7 +8,7 @@
   import {quantify} from "hurdak/lib/hurdak"
   import {Tags, findRootId, findReplyId, displayPerson, isLike} from "src/util/nostr"
   import {formatTimestamp, now, tryJson, formatSats, fetchJson} from "src/util/misc"
-  import {extractUrls, isMobile} from "src/util/html"
+  import {isMobile} from "src/util/html"
   import {invoiceAmount} from "src/util/lightning"
   import QRCode from "src/partials/QRCode.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
@@ -17,12 +17,12 @@
   import Content from "src/partials/Content.svelte"
   import PersonSummary from "src/views/person/PersonSummary.svelte"
   import Popover from "src/partials/Popover.svelte"
+  import PersonCircle from "src/partials/PersonCircle.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Preview from "src/partials/Preview.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {toast, modal} from "src/app/ui"
-  import {renderNote} from "src/app"
   import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
   import user from "src/agent/user"
@@ -35,7 +35,7 @@
   import cmd from "src/agent/cmd"
   import {routes} from "src/app/ui"
   import {publishWithToast} from "src/app"
-  import PersonCircle from "src/partials/PersonCircle.svelte"
+  import NoteContent from "src/views/notes/NoteContent.svelte"
 
   export let note
   export let depth = 0
@@ -58,7 +58,6 @@
   const {profile, canPublish, mutes} = user
   const timestamp = formatTimestamp(note.created_at)
   const borderColor = invertColors ? "gray-6" : "gray-7"
-  const links = extractUrls(note.content)
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
   const person = watch("people", () => getPersonWithFallback(note.pubkey))
@@ -402,14 +401,7 @@
               You have muted this note.
             </p>
           {:else}
-            <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
-              <p>{@html renderNote(note, {showEntire})}</p>
-              {#if user.getSetting("showMedia") && links.length > 0}
-                <button class="inline-block" on:click={e => e.stopPropagation()}>
-                  <Preview url={last(links)} />
-                </button>
-              {/if}
-            </div>
+            <NoteContent {note} {showEntire} />
           {/if}
           <div class="flex justify-between text-gray-1">
             <div
