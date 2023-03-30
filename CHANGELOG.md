@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.20
+
+- [x] Re-write pool to use paravel
+- [x] Add support for multiplextr
+- [x] Fix retrieving old chat/DM messages
+- [x] Disable self-zap
+
 ## 0.2.19
 
 Maintenance release - bugfixes, style fixes, and refactoring. High points are AUTH support, and much improved note composition/mention interpolation.

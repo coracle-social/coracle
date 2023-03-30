@@ -1,8 +1,8 @@
 # Current
 
-- [ ] Disable self-zap
 - [ ] Move blog to nostr
 - [ ] Improve note rendering
+  - [ ] NIP 27
   - [ ] Fix reactions and replies showing up
   - [ ] Show all images in preview as slideshow or something
   - [ ] Extract nostr: links and bech32 entities, hover
@@ -14,7 +14,7 @@
 - [ ] https://github.com/coracle-social/coracle/issues/42
 - [ ] Multiplex, charge past a certain usage level based on bandwidth
 - [ ] Move blog to https://twitter.com/fiatjaf/status/1638514052014940162
-- [ ] Improve not rendering, nip 27
+- [ ] Add onError handler to subscriptions for when sockets fail to connect?
 
 # Others
 
@@ -43,7 +43,7 @@
   - If not logged in, pre-populate follows/relays in onboarding flow
 - [ ] If someone logs in with their private key, create a notification to install an extension
 - [ ] Copy/share note id button
-- [ ] Reposts
+- [ ] Reposts/quote notes
 - [ ] Add delete button to notes. This will require tracking what relays a note was published to
 - [ ] Add image proxy to avoid leaking user ips to hosts
 - [ ] Show an error when something fails to load with a constructive suggestion
