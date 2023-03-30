@@ -8,7 +8,7 @@
 </script>
 
 {#if $canPublish}
-  <div class="fixed bottom-0 right-0 m-8">
+  <div class="fixed bottom-0 right-0 z-10 m-8">
     <button
       class="color-white flex h-16 w-16 items-center justify-center rounded-full
             border border-accent-light bg-accent text-white shadow-2xl

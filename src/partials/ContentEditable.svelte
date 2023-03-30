@@ -58,6 +58,10 @@
     for (const child of node.childNodes) {
       const lineBreaks = child.querySelectorAll?.("br") || []
 
+      if (child.tagName === "BR") {
+        continue
+      }
+
       // Line breaks may be bare brs or divs wrapping brs
       if (lineBreaks.length > 0) {
         content += "\n".repeat(lineBreaks.length)

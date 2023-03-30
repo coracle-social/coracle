@@ -4,10 +4,9 @@
 - [ ] Improve note rendering
   - [ ] Fix reactions and replies showing up
   - [x] Show all images in preview as slideshow or something
-  - [ ] Extract nostr: links and bech32 entities, hover
-  - [ ] Add nostr: links and bech32 entities in compose to tags
-  - [ ] Linkify topics
-  - [ ] Fix extra newlines when composing
+  - [x] Extract nostr: links and bech32 entities, hover
+  - [x] Add nostr: links and bech32 entities in compose to tags
+  - [x] Fix extra newlines when composing
 - [ ] Multiplexer
   - [ ] Announce multiplextr, paravel, coracle update w/url
   - [ ] Write NIP to support proxies. Update COUNT NIP to mention how proxies are a good use case for COUNT
@@ -37,6 +36,7 @@
 
 # More
 
+- [ ] Linkify topics
 - [ ] Add suggestion list for topics on compose so people know there are suggestions
 - [ ] Badges link to https://badges.page/p/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322
 - [ ] Link/embed good chat/DM micro-apps

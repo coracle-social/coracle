@@ -1,6 +1,8 @@
 import {map, pick, last, uniqBy} from "ramda"
 import {get} from "svelte/store"
-import {roomAttrs, displayPerson, findReplyId, findRootId} from "src/util/nostr"
+import {doPipe} from "hurdak/lib/hurdak"
+import {parseContent} from "src/util/html"
+import {Tags, roomAttrs, displayPerson, findReplyId, findRootId} from "src/util/nostr"
 import {getRelayForPersonHint} from "src/agent/relays"
 import {getPersonWithFallback} from "src/agent/tables"
 import pool from "src/agent/pool"
@@ -47,7 +49,16 @@ const createDirectMessage = (pubkey, content) =>
   new PublishableEvent(4, {content, tags: [["p", pubkey]]})
 
 const createNote = (content, mentions = [], topics = []) => {
-  const tags = processMentions(mentions).concat(topics.map(t => ["t", t]))
+  // Mentions have to come first so interpolation works
+  const tags = doPipe(
+    [],
+    [
+      tags => tags.concat(processMentions(mentions)),
+      tags => tags.concat(topics.map(t => ["t", t])),
+      tags => tagsFromContent(content, tags),
+      uniqTags,
+    ]
+  )
 
   return new PublishableEvent(1, {content, tags})
 }
@@ -57,7 +68,18 @@ const createReaction = (note, content) =>
 
 const createReply = (note, content, mentions = [], topics = []) => {
   // Mentions have to come first so interpolation works
-  const tags = tagsFromParent(note, processMentions(mentions).concat(topics.map(t => ["t", t])))
+  const tags = doPipe(
+    [],
+    [
+      tags => tags.concat(processMentions(mentions)),
+      tags => tags.concat(topics.map(t => ["t", t])),
+      tags => tagsFromParent(note, tags),
+      tags => tagsFromContent(content, tags),
+      uniqTags,
+    ]
+  )
+
+  console.log(tags)
 
   return new PublishableEvent(1, {content, tags})
 }
@@ -88,6 +110,27 @@ const processMentions = map(pubkey => {
   return ["p", pubkey, relay?.url || "", name]
 })
 
+const tagsFromContent = (content, tags) => {
+  const seen = new Set(Tags.wrap(tags).values().all())
+
+  for (const {type, value} of parseContent(content)) {
+    if (type.match(/nostr:(note|nevent)/) && !seen.has(value.id)) {
+      tags = tags.concat([["e", value.id]])
+      seen.add(value.id)
+    }
+
+    if (type.match(/nostr:(nprofile|npub)/) && !seen.has(value.pubkey)) {
+      const name = displayPerson(getPersonWithFallback(value.pubkey))
+      const relay = getRelayForPersonHint(value.pubkey)
+
+      tags = tags.concat([["p", value.pubkey, relay?.url || "", name]])
+      seen.add(value.pubkey)
+    }
+  }
+
+  return tags
+}
+
 const getReplyTags = n => {
   const {url} = getRelayForPersonHint(n.pubkey, n)
   const rootId = findRootId(n) || findReplyId(n) || n.id
@@ -102,10 +145,8 @@ const getReplyTags = n => {
 const tagsFromParent = (n, newTags = []) => {
   const pubkey = get(keys.pubkey)
 
-  return uniqBy(
-    // Remove duplicates due to inheritance. Keep earlier ones
-    t => t.slice(0, 2).join(":"),
-    // Mentions have to come first for interpolation to work
+  // Mentions have to come first for interpolation to work
+  return (
     newTags
       // Add standard reply tags
       .concat(getReplyTags(n))
@@ -121,6 +162,8 @@ const tagsFromParent = (n, newTags = []) => {
       )
   )
 }
+
+const uniqTags = uniqBy(t => t.slice(0, 2).join(":"))
 
 class PublishableEvent {
   event: Record<string, any>
