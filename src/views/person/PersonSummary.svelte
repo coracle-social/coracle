@@ -1,7 +1,6 @@
 <script lang="ts">
   import {last} from "ramda"
   import {navigate} from "svelte-routing"
-  import {renderContent} from "src/util/html"
   import {displayPerson} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import user from "src/agent/user"
@@ -10,6 +9,7 @@
   import {watch} from "src/agent/storage"
   import {routes} from "src/app/ui"
   import PersonCircle from "src/partials/PersonCircle.svelte"
+  import PersonAbout from "src/partials/PersonAbout.svelte"
 
   export let pubkey
 
@@ -63,5 +63,5 @@
       {/if}
     </div>
   </div>
-  <p>{@html renderContent($person?.kind0?.about || "")}</p>
+  <PersonAbout person={$person} />
 </div>

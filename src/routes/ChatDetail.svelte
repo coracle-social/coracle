@@ -6,6 +6,7 @@
   import Channel from "src/partials/Channel.svelte"
   import Badge from "src/partials/Badge.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import NoteContent from "src/views/notes/NoteContent.svelte"
   import user from "src/agent/user"
   import {getRelaysForEventChildren, sampleRelays} from "src/agent/relays"
   import network from "src/agent/network"
@@ -13,7 +14,6 @@
   import cmd from "src/agent/cmd"
   import {modal} from "src/app/ui"
   import {lastChecked} from "src/app/listener"
-  import {renderNote} from "src/app"
 
   export let entity
 
@@ -85,7 +85,7 @@
       </div>
     {/if}
     <div class="my-1 ml-6 overflow-hidden text-ellipsis">
-      {@html renderNote(message, {showEntire: true})}
+      <NoteContent showEntire note={message} />
     </div>
   </div>
 </Channel>

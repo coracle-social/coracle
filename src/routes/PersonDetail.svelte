@@ -5,7 +5,7 @@
   import {fly, fade} from "svelte/transition"
   import {navigate} from "svelte-routing"
   import {log} from "src/util/logger"
-  import {renderContent, parseHex} from "src/util/html"
+  import {parseHex} from "src/util/html"
   import {numberFmt} from "src/util/misc"
   import {displayPerson, toHex} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
@@ -23,6 +23,7 @@
   import {getPersonWithFallback} from "src/agent/tables"
   import {routes, modal, theme, getThemeColor} from "src/app/ui"
   import PersonCircle from "src/partials/PersonCircle.svelte"
+  import PersonAbout from "src/partials/PersonAbout.svelte"
 
   export let npub
   export let activeTab
@@ -222,7 +223,7 @@
           </div>
         </div>
       </div>
-      <p>{@html renderContent(person?.kind0?.about || "")}</p>
+      <PersonAbout {person} />
       {#if person?.petnames}
         <div class="flex gap-8" in:fly={{y: 20}}>
           <button on:click={showFollows}>

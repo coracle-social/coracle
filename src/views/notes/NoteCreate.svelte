@@ -23,6 +23,7 @@
   import {publishWithToast} from "src/app"
 
   export let pubkey = null
+  export let nevent = null
 
   let image = null
   let compose = null
@@ -93,6 +94,10 @@
   onMount(() => {
     if (pubkey && pubkey !== user.getPubkey()) {
       compose.mention(getPersonWithFallback(pubkey))
+    }
+
+    if (nevent) {
+      compose.nevent("nostr:" + nevent)
     }
   })
 </script>

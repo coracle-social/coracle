@@ -142,6 +142,26 @@
     autocomplete({person})
   }
 
+  const createNewLines = (n = 1) => {
+    const div = document.createElement("div")
+
+    div.innerHTML = "<br>".repeat(n)
+
+    return div
+  }
+
+  export const nevent = text => {
+    const input = contenteditable.getInput()
+    const selection = window.getSelection()
+    const textNode = document.createTextNode(text)
+    const newLines = createNewLines(2)
+
+    selection.getRangeAt(0).insertNode(textNode)
+    selection.collapse(input, 1)
+    selection.getRangeAt(0).insertNode(newLines)
+    selection.collapse(input, 2)
+  }
+
   export const parse = () => {
     let {content, annotations} = contenteditable.parse()
     const topics = pluck("value", annotations.filter(propEq("prefix", "#")))

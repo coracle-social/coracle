@@ -1,15 +1,13 @@
 import type {DisplayEvent} from "src/util/types"
 import {omit, sortBy} from "ramda"
-import {createMap, ellipsize} from "hurdak/lib/hurdak"
-import {renderContent} from "src/util/html"
-import {displayPerson, findReplyId} from "src/util/nostr"
+import {createMap} from "hurdak/lib/hurdak"
+import {findReplyId} from "src/util/nostr"
 import {getUserFollows} from "src/agent/social"
 import {getUserReadRelays} from "src/agent/relays"
-import {getPersonWithFallback} from "src/agent/tables"
 import network from "src/agent/network"
 import keys from "src/agent/keys"
 import listener from "src/app/listener"
-import {routes, modal, toast} from "src/app/ui"
+import {modal, toast} from "src/app/ui"
 
 export const loadAppData = async pubkey => {
   if (getUserReadRelays().length > 0) {
@@ -26,32 +24,6 @@ export const login = (method, key) => {
   keys.login(method, key)
 
   modal.set({type: "login/connect", noEscape: true})
-}
-
-export const renderNote = (note, {showEntire = false}) => {
-  let content
-
-  // Ellipsize
-  content = note.content.length > 500 && !showEntire ? ellipsize(note.content, 500) : note.content
-
-  // Escape html, replace urls
-  content = renderContent(content)
-
-  // Mentions
-  content = content.replace(/#\[(\d+)\]/g, (tag, i) => {
-    if (!note.tags[parseInt(i)]) {
-      return tag
-    }
-
-    const pubkey = note.tags[parseInt(i)][1]
-    const person = getPersonWithFallback(pubkey)
-    const name = displayPerson(person)
-    const path = routes.person(pubkey)
-
-    return `@<a href="${path}" class="underline">${name}</a>`
-  })
-
-  return content
 }
 
 export const mergeParents = (notes: Array<DisplayEvent>) => {

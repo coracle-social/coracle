@@ -7,6 +7,7 @@
   import {Tags} from "src/util/nostr"
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import NoteContent from "src/views/notes/NoteContent.svelte"
   import {getAllPubkeyRelays, sampleRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/tables"
   import {watch} from "src/agent/storage"
@@ -16,7 +17,6 @@
   import cmd from "src/agent/cmd"
   import {routes} from "src/app/ui"
   import {lastChecked} from "src/app/listener"
-  import {renderNote} from "src/app"
   import PersonCircle from "src/partials/PersonCircle.svelte"
 
   export let entity
@@ -106,7 +106,7 @@
         "rounded-bl-none bg-gray-7": message.person.pubkey !== user.getPubkey(),
       })}>
       <div class="break-words">
-        {@html renderNote(message, {showEntire: true})}
+        <NoteContent showEntire note={message} />
       </div>
       <small
         class="mt-1"

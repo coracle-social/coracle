@@ -8,7 +8,7 @@
   import {quantify} from "hurdak/lib/hurdak"
   import {Tags, findRootId, findReplyId, displayPerson, isLike} from "src/util/nostr"
   import {formatTimestamp, now, tryJson, formatSats, fetchJson} from "src/util/misc"
-  import {isMobile} from "src/util/html"
+  import {isMobile, copyToClipboard} from "src/util/html"
   import {invoiceAmount} from "src/util/lightning"
   import QRCode from "src/partials/QRCode.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
@@ -297,6 +297,19 @@
     }
   }
 
+  const copyLink = () => {
+    const nevent = nip19.neventEncode({id: note.id, relays: [note.seen_on]})
+
+    copyToClipboard("nostr:" + nevent)
+    toast.show("info", "Copied to clipboard!")
+  }
+
+  const quote = () => {
+    const nevent = nip19.neventEncode({id: note.id, relays: [note.seen_on]})
+
+    modal.set({type: "note/create", nevent})
+  }
+
   const onBodyClick = e => {
     const target = e.target as HTMLElement
 
@@ -451,6 +464,12 @@
                       <i class="fa fa-server" />
                     </Anchor>
                   {/if}
+                  <Anchor type="button-circle" on:click={copyLink}>
+                    <i class="fa fa-link" />
+                  </Anchor>
+                  <Anchor type="button-circle" on:click={quote}>
+                    <i class="fa fa-quote-left" />
+                  </Anchor>
                   {#if muted}
                     <Anchor type="button-circle" on:click={unmute}>
                       <i class="fa fa-microphone" />

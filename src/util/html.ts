@@ -1,5 +1,6 @@
-import {uniq, last} from "ramda"
-import {ellipsize, bytes} from "hurdak/lib/hurdak"
+import {nip19} from "nostr-tools"
+import {last} from "ramda"
+import {bytes} from "hurdak/lib/hurdak"
 
 export const copyToClipboard = text => {
   const {activeElement} = document
@@ -101,38 +102,20 @@ export const noEvent = f => e => {
   f()
 }
 
-export const fromParentOffset = (element, offset): [HTMLElement, number] => {
-  for (const child of element.childNodes) {
-    if (offset <= child.textContent.length) {
-      return [child, offset]
-    }
-
-    offset -= child.textContent.length
-  }
-
-  throw new Error("Unable to find parent offset")
-}
-
-const urlRegex = /((http|ws)s?:\/\/)?[-a-z0-9@:%_\+~#=\.]+\.[a-z]{1,6}[-a-z0-9:%_\+~#\?!&\/=;\.]*/gi
-
-export const extractUrls = content =>
-  // Skip stuff like 3.5 or U.S. and ellipses which have more than one dot in a row
-  (content.match(urlRegex) || []).filter(url => !url.match(/^[.\.]+$/) && !url.match(/\.{2}/))
-
 export const parseContent = content => {
   const text = escapeHtml(content.trim())
   const result = []
   let buffer = "",
     i = 0
 
-  const push = (type, value) => {
+  const push = (type, text, value = null) => {
     if (buffer) {
       result.push({type: "text", value: buffer})
       buffer = ""
     }
 
-    result.push({type, value})
-    i += value.length
+    result.push({type, value: value || text})
+    i += text.length
   }
 
   for (; i < text.length; ) {
@@ -159,6 +142,21 @@ export const parseContent = content => {
       continue
     }
 
+    const bech32Match = tail.match(/^(nostr:)?n(event|ote|profile|pub)1[\d\w]+/i)
+
+    if (bech32Match) {
+      try {
+        const entity = bech32Match[0].replace("nostr:", "")
+        const {type, data} = nip19.decode(entity) as {type: string; data: object}
+
+        push(`nostr:${type}`, bech32Match[0], {...data, entity})
+        continue
+      } catch (e) {
+        console.log(e)
+        // pass
+      }
+    }
+
     const urlMatch = tail.match(
       /^((http|ws)s?:\/\/)?[-a-z0-9@:%_\+~#=\.]+\.[a-z]{1,6}[-a-z0-9:%_\+~#\?!&\/=;\.]*/gi
     )
@@ -167,13 +165,16 @@ export const parseContent = content => {
     if (urlMatch && !last(result)?.value.endsWith("/")) {
       let url = urlMatch[0]
 
-      // It's common for punctuation to end a url, trim it off
-      if (url.match(/[\.\?,:]$/)) {
-        url = url.slice(0, -1)
-      }
+      // Skip ellipses
+      if (!url.match(/\.\./)) {
+        // It's common for punctuation to end a url, trim it off
+        if (url.match(/[\.\?,:]$/)) {
+          url = url.slice(0, -1)
+        }
 
-      push("link", url)
-      continue
+        push("link", urlMatch[0], url)
+        continue
+      }
     }
 
     // Instead of going character by character and re-running all the above regular expressions
@@ -194,37 +195,6 @@ export const parseContent = content => {
   }
 
   return result
-}
-
-export const renderContent = content => {
-  /* eslint no-useless-escape: 0 */
-
-  // Escape html
-  content = escapeHtml(content)
-
-  // Extract urls
-  for (let url of uniq(extractUrls(content))) {
-    // It's common for a period to end a url, trim it off
-    if (url.endsWith(".")) {
-      url = url.slice(0, -1)
-    }
-
-    const href = url.includes("://") ? url : "https://" + url
-    const display = url.replace(/https?:\/\/(www\.)?/, "")
-    const escaped = url.replace(/([.*+?^${}()|[\]\\])/g, "\\$1")
-    const regex = new RegExp(`([^"]*)(${escaped})([^"]*)`, "g")
-
-    const $a = document.createElement("a")
-
-    $a.href = href
-    $a.target = "_blank"
-    $a.className = "underline"
-    $a.innerText = ellipsize(display, 50)
-
-    content = content.replace(regex, `$1${$a.outerHTML}$3`)
-  }
-
-  return content.trim()
 }
 
 export const isMobile = localStorage.mobile || window.navigator.maxTouchPoints > 1

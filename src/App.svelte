@@ -266,7 +266,7 @@
             <NoteDetail {...$modal} invertColors />
           {/key}
         {:else if $modal.type === "note/create"}
-          <NoteCreate pubkey={$modal.pubkey} />
+          <NoteCreate pubkey={$modal.pubkey} nevent={$modal.nevent} />
         {:else if $modal.type === "relay/add"}
           <AddRelay />
         {:else if $modal.type === "onboarding"}

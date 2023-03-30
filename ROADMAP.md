@@ -2,10 +2,10 @@
 
 - [ ] Move blog to nostr
 - [ ] Improve note rendering
-  - [ ] NIP 27
   - [ ] Fix reactions and replies showing up
-  - [ ] Show all images in preview as slideshow or something
+  - [x] Show all images in preview as slideshow or something
   - [ ] Extract nostr: links and bech32 entities, hover
+  - [ ] Add nostr: links and bech32 entities in compose to tags
   - [ ] Linkify topics
   - [ ] Fix extra newlines when composing
 - [ ] Multiplexer

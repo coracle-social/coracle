@@ -1,11 +1,11 @@
 <script lang="ts">
   import {last} from "ramda"
   import {fly} from "svelte/transition"
-  import {ellipsize} from "hurdak/lib/hurdak"
-  import {renderContent, noEvent} from "src/util/html"
+  import {noEvent} from "src/util/html"
   import {displayPerson} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/partials/PersonCircle.svelte"
+  import PersonAbout from "src/partials/PersonAbout.svelte"
   import {routes} from "src/app/ui"
 
   export let person
@@ -40,7 +40,7 @@
       {/if}
     </div>
     <p class="overflow-hidden text-ellipsis">
-      {@html renderContent(ellipsize(person.kind0?.about || "", 140))}
+      <PersonAbout truncate {person} />
     </p>
   </div>
 </a>
