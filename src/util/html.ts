@@ -1,4 +1,4 @@
-import {uniq} from "ramda"
+import {uniq, last} from "ramda"
 import {ellipsize, bytes} from "hurdak/lib/hurdak"
 
 export const copyToClipboard = text => {
@@ -113,12 +113,87 @@ export const fromParentOffset = (element, offset): [HTMLElement, number] => {
   throw new Error("Unable to find parent offset")
 }
 
-export const extractUrls = content => {
-  const regex = /((http|ws)s?:\/\/)?[-a-z0-9@:%_\+~#=\.]+\.[a-z]{1,6}[-a-z0-9:%_\+~#\?!&\/=;\.]*/gi
-  const urls = content.match(regex) || []
+const urlRegex = /((http|ws)s?:\/\/)?[-a-z0-9@:%_\+~#=\.]+\.[a-z]{1,6}[-a-z0-9:%_\+~#\?!&\/=;\.]*/gi
 
+export const extractUrls = content =>
   // Skip stuff like 3.5 or U.S. and ellipses which have more than one dot in a row
-  return urls.filter(url => !url.match(/^[.\.]+$/) && !url.match(/\.{2}/))
+  (content.match(urlRegex) || []).filter(url => !url.match(/^[.\.]+$/) && !url.match(/\.{2}/))
+
+export const parseContent = content => {
+  const text = escapeHtml(content.trim())
+  const result = []
+  let buffer = "",
+    i = 0
+
+  const push = (type, value) => {
+    if (buffer) {
+      result.push({type: "text", value: buffer})
+      buffer = ""
+    }
+
+    result.push({type, value})
+    i += value.length
+  }
+
+  for (; i < text.length; ) {
+    const tail = text.slice(i)
+
+    const brMatch = tail.match(/^(<br>)+/)
+
+    if (brMatch) {
+      push("br", brMatch[0])
+      continue
+    }
+
+    const mentionMatch = tail.match(/^#\[\d+\]/i)
+
+    if (mentionMatch) {
+      push("mention", mentionMatch[0])
+      continue
+    }
+
+    const topicMatch = tail.match(/^#\w+/i)
+
+    if (topicMatch) {
+      push("topic", topicMatch[0])
+      continue
+    }
+
+    const urlMatch = tail.match(
+      /^((http|ws)s?:\/\/)?[-a-z0-9@:%_\+~#=\.]+\.[a-z]{1,6}[-a-z0-9:%_\+~#\?!&\/=;\.]*/gi
+    )
+
+    // Skip url if it's just the end of a filepath
+    if (urlMatch && !last(result)?.value.endsWith("/")) {
+      let url = urlMatch[0]
+
+      // It's common for punctuation to end a url, trim it off
+      if (url.match(/[\.\?,:]$/)) {
+        url = url.slice(0, -1)
+      }
+
+      push("link", url)
+      continue
+    }
+
+    // Instead of going character by character and re-running all the above regular expressions
+    // a million times, try to match the next word and add it to the buffer
+    const wordMatch = tail.match(/^[\w\d]+ ?/i)
+
+    if (wordMatch) {
+      buffer += wordMatch[0]
+      i += wordMatch[0].length
+    } else {
+      buffer += text[i]
+      i += 1
+    }
+  }
+
+  if (buffer) {
+    result.push({type: "text", value: buffer})
+  }
+
+  return result
 }
 
 export const renderContent = content => {

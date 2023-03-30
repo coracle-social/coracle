@@ -1,87 +1,94 @@
 <script lang="ts">
-  import {last, uniq, trim} from "ramda"
-  import {doPipe, ellipsize} from "hurdak/lib/hurdak"
-  import {extractUrls, escapeHtml} from "src/util/html"
-  import {displayPerson} from "src/util/nostr"
-  import Preview from "src/partials/Preview.svelte"
+  import {first} from "hurdak/lib/hurdak"
+  import {parseContent} from "src/util/html"
+  import {displayPerson, Tags} from "src/util/nostr"
+  import Carousel from "src/partials/Carousel.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import user from "src/agent/user"
   import {getPersonWithFallback} from "src/agent/tables"
   import {routes} from "src/app/ui"
 
-  const canPreview = url => url.match("\.(jpg|jpeg|png|gif|mov|mp4)")
-
   export let note
   export let showEntire
 
-  const links = uniq(extractUrls(note.content))
-  const content = doPipe(note.content, [
-    trim,
-    escapeHtml,
-    c => (showEntire || c.length < 800 ? c : ellipsize(c, 400)),
-    c => {
-      // Pad content with whitespace to simplify our regular expressions
-      c = `<br>${c}<br>`
+  const links = []
+  const shouldTruncate = !showEntire && note.content.length > 800
+  const content = parseContent(note.content)
 
-      for (let url of links) {
-        // It's common for punctuation to end a url, trim it off
-        if (url.match(/[\.\?,:]$/)) {
-          url = url.slice(0, -1)
+  let l = 0
+  for (let i = 0; i < content.length; i++) {
+    const {type, value} = content[i]
+
+    // Find links on their own line and remove them from content
+    if (type === "link") {
+      const prev = content[i - 1]
+      const next = content[i + 1]
+
+      links.push(value)
+
+      if ((!prev || prev.type === "br") && (!next || next.type === "br")) {
+        let n = 1
+
+        for (let j = i + 1; j < content.length; j++) {
+          if (content[j].type !== "br") {
+            break
+          }
+
+          n++
         }
 
-        const href = url.includes("://") ? url : "https://" + url
-        const display = url.replace(/(http|ws)s?:\/\/(www\.)?/, "").replace(/[\.\/?;,:]$/, "")
-        const escaped = url.replace(/([.*+?^${}()|[\]\\])/g, "\\$1")
-        const wsRegex = new RegExp(`<br>${escaped}<br>`, "g")
-        const slashRegex = new RegExp(`\/${escaped}`, "g")
-
-        // Skip stuff that's just at the end of a filepath
-        if (c.match(slashRegex)) {
-          continue
-        }
-
-        // If the url is on its own line, remove it entirely
-        if (c.match(wsRegex) && canPreview(url)) {
-          c = c.replace(wsRegex, '')
-          continue
-        }
-
-        // Avoid matching urls inside quotes to avoid double-replacing
-        const quoteRegex = new RegExp(`([^"]*)(${escaped})([^"]*)`, "g")
-
-        const $a = document.createElement("a")
-
-        $a.href = href
-        $a.target = "_blank"
-        $a.className = "underline"
-        $a.innerText = ellipsize(display, 50)
-
-        c = c.replace(quoteRegex, `$1${$a.outerHTML}$3`)
+        content.splice(i, n)
       }
+    }
 
-      return c.trim()
-    },
-    // Mentions
-    c =>
-      c.replace(/#\[(\d+)\]/g, (tag, i) => {
-        if (!note.tags[parseInt(i)]) {
-          return tag
-        }
+    l += value.length
 
-        const pubkey = note.tags[parseInt(i)][1]
-        const person = getPersonWithFallback(pubkey)
-        const name = displayPerson(person)
-        const path = routes.person(pubkey)
+    if (shouldTruncate && l > 400 && type !== "br") {
+      content[i].value = value.trim()
+      content.splice(i + 1, content.length, {type: "text", value: "..."})
+      break
+    }
+  }
 
-        return `@<a href="${path}" class="underline">${name}</a>`
-      }),
-  ])
+  const getMentionPubkey = text => {
+    const i = parseInt(first(text.match(/\d+/)))
+
+    console.log(note.tags, i)
+    // Some implementations count only p tags when calculating index
+    if (note.tags[i]?.[0] === "p") {
+      return note.tags[i][1]
+    } else {
+      return Tags.from(note).type("p").values().nth(i)
+    }
+  }
 </script>
 
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
-  <p>{@html content}</p>
+  <p>
+    {#each content as { type, value }}
+      {#if type === "br"}
+        {@html value}
+      {:else if type === "link"}
+        <Anchor external href={value}>
+          {value.replace(/https?:\/\/(www\.)?/, "")}
+        </Anchor>
+      {:else if type === "mention"}
+        {@const pubkey = getMentionPubkey(value)}
+        {#if pubkey}
+          @<Anchor href={routes.person(pubkey)}>
+            {displayPerson(getPersonWithFallback(pubkey))}
+          </Anchor>
+        {:else}
+          {value}
+        {/if}
+      {:else}
+        {value}
+      {/if}
+    {/each}
+  </p>
   {#if user.getSetting("showMedia") && links.length > 0}
     <button class="inline-block" on:click={e => e.stopPropagation()}>
-      <Preview url={last(links)} />
+      <Carousel {links} />
     </button>
   {/if}
 </div>

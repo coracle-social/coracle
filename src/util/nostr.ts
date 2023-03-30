@@ -23,6 +23,9 @@ export class Tags {
   first() {
     return first(this.tags)
   }
+  nth(i) {
+    return this.tags[i]
+  }
   last() {
     return last(this.tags)
   }

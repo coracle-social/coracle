@@ -7,6 +7,7 @@
   - [ ] Show all images in preview as slideshow or something
   - [ ] Extract nostr: links and bech32 entities, hover
   - [ ] Linkify topics
+  - [ ] Fix extra newlines when composing
 - [ ] Multiplexer
   - [ ] Announce multiplextr, paravel, coracle update w/url
   - [ ] Write NIP to support proxies. Update COUNT NIP to mention how proxies are a good use case for COUNT
@@ -15,6 +16,7 @@
 - [ ] Multiplex, charge past a certain usage level based on bandwidth
 - [ ] Move blog to https://twitter.com/fiatjaf/status/1638514052014940162
 - [ ] Add onError handler to subscriptions for when sockets fail to connect?
+- [ ] Add bugsnag to multiplexr
 
 # Others
 
@@ -145,3 +147,4 @@
   - "adoptarelay.com"
   - Add suggested relays based on follows or topics
 - [ ] Integrate plephy https://plebhy.com/
+- [ ] Switch to https://github.com/techfort/LokiJS for persistence
