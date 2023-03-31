@@ -1,19 +1,13 @@
 # Current
 
-- [ ] Move blog to nostr
-- [ ] Improve note rendering
-  - [ ] Fix reactions and replies showing up
-  - [x] Show all images in preview as slideshow or something
-  - [x] Extract nostr: links and bech32 entities, hover
-  - [x] Add nostr: links and bech32 entities in compose to tags
-  - [x] Fix extra newlines when composing
-- [ ] Multiplexer
-  - [ ] Announce multiplextr, paravel, coracle update w/url
-  - [ ] Write NIP to support proxies. Update COUNT NIP to mention how proxies are a good use case for COUNT
+- [ ] Look into AUTH not working for mazin
+- [ ] Write NIP to support proxies. Update COUNT NIP to mention how proxies are a good use case for COUNT
+- [ ] Write blog post on multiplexer
+- [ ] Fix performance issues
+- [ ] Fix reactions and replies showing up
 - [ ] Fix iOS/safari/firefox
 - [ ] https://github.com/coracle-social/coracle/issues/42
 - [ ] Multiplex, charge past a certain usage level based on bandwidth
-- [ ] Move blog to https://twitter.com/fiatjaf/status/1638514052014940162
 - [ ] Add onError handler to subscriptions for when sockets fail to connect?
 - [ ] Add bugsnag to multiplexr
 

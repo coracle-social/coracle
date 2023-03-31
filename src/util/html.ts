@@ -172,6 +172,10 @@ export const parseContent = content => {
           url = url.slice(0, -1)
         }
 
+        if (!url.match("://")) {
+          url = "https://" + url
+        }
+
         push("link", urlMatch[0], url)
         continue
       }

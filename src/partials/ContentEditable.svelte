@@ -56,16 +56,11 @@
     let annotations = []
 
     for (const child of node.childNodes) {
-      const lineBreaks = child.querySelectorAll?.("br") || []
-
       if (child.tagName === "BR") {
-        continue
+        content += "\n"
       }
 
-      // Line breaks may be bare brs or divs wrapping brs
-      if (lineBreaks.length > 0) {
-        content += "\n".repeat(lineBreaks.length)
-      } else if (isLineBreak(child)) {
+      if (child.tagName === "DIV" && !child.querySelector("br")) {
         content += "\n"
       }
 

@@ -9,6 +9,7 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import user from "src/agent/user"
+  import pool from "src/agent/pool"
   import {toast} from "src/app/ui"
 
   let values = {...user.getSettings()}
@@ -79,19 +80,21 @@
           >.
         </p>
       </div>
-      <div class="flex flex-col gap-1">
-        <strong>Multiplextr URL</strong>
-        <Input bind:value={values.multiplextrUrl}>
-          <i slot="before" class="fa-solid fa-server" />
-        </Input>
-        <p class="text-sm text-gray-1">
-          Enter a custom proxy server for multiplexing relay connections. This can drastically
-          improve resource usage, but has some privacy trade-offs. Leave blank to connect to relays
-          directly. You can find the source code <Anchor
-            href="https://github.com/coracle-social/multiplextr">here</Anchor
-          >.
-        </p>
-      </div>
+      {#if pool.forceUrls.length === 0}
+        <div class="flex flex-col gap-1">
+          <strong>Multiplextr URL</strong>
+          <Input bind:value={values.multiplextrUrl}>
+            <i slot="before" class="fa-solid fa-server" />
+          </Input>
+          <p class="text-sm text-gray-1">
+            Enter a custom proxy server for multiplexing relay connections. This can drastically
+            improve resource usage, but has some privacy trade-offs. Leave blank to connect to
+            relays directly. You can find the source code <Anchor
+              href="https://github.com/coracle-social/multiplextr">here</Anchor
+            >.
+          </p>
+        </div>
+      {/if}
       <div class="flex flex-col gap-1">
         <div class="flex items-center gap-2">
           <strong>Report errors and analytics</strong>

@@ -57,10 +57,13 @@ export const getPubkeyRelays = (pubkey, mode = null, routesOverride = null) => {
   let result = routesOverride || _getPubkeyRelaysCache.get(key)
   if (!result) {
     result = routes.all(filter)
-    _getPubkeyRelaysCache.set(key, result)
+
+    if (result.length > 0) {
+      _getPubkeyRelaysCache.set(key, result)
+    }
   }
 
-  return sortByScore(map(pick(["url", "score"]), result))
+  return sortByScore(map(pick(["url", "score"]), uniqByUrl(result)))
 }
 
 export const getPubkeyReadRelays = pubkey => getPubkeyRelays(pubkey, "read")

@@ -180,6 +180,7 @@ class PublishableEvent {
   }
   async publish(relays, onProgress = null) {
     const event = await this.getSignedEvent()
+    //console.log(event); return
     const promise = pool.publish({relays, event, onProgress})
 
     sync.processEvents(event)

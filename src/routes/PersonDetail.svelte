@@ -31,7 +31,6 @@
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const {petnamePubkeys, canPublish, mutes} = user
-  const getRelays = () => sampleRelays(relays.concat(getPubkeyWriteRelays(pubkey)))
   const tabs = ["notes", "likes", pool.forceUrls.length === 0 && "relays"].filter(identity)
 
   let pubkey = toHex(npub)
@@ -43,6 +42,9 @@
   let showActions = false
   let actions = []
   let rgb, rgba
+
+  $: ownRelays = getPubkeyWriteRelays(pubkey)
+  $: relays = sampleRelays(relays.concat(ownRelays))
 
   $: {
     const color = parseHex(getThemeColor($theme, "gray-8"))
@@ -101,6 +103,7 @@
 
     // Refresh our person
     network.loadPeople([pubkey], {force: true}).then(() => {
+      ownRelays = getPubkeyWriteRelays(pubkey)
       person = getPersonWithFallback(pubkey)
       loading = false
     })
@@ -114,8 +117,8 @@
       const followers = new Set()
 
       await network.load({
+        relays,
         shouldProcess: false,
-        relays: getRelays(),
         filter: [{kinds: [3], "#p": [pubkey]}],
         onChunk: events => {
           for (const e of events) {
@@ -143,7 +146,7 @@
   }
 
   const follow = async () => {
-    const [{url}] = getRelays()
+    const [{url}] = relays
 
     user.addPetname(pubkey, url, displayPerson(person))
   }
@@ -244,8 +247,8 @@
   {:else if activeTab === "likes"}
     <Likes {pubkey} />
   {:else if activeTab === "relays"}
-    {#if getRelays().length > 0}
-      <Relays relays={getRelays()} />
+    {#if ownRelays.length > 0}
+      <Relays relays={ownRelays} />
     {:else if loading}
       <Spinner />
     {:else}

@@ -22,7 +22,7 @@
 
   const links = []
   const entities = []
-  const shouldTruncate = !showEntire && note.content.length > 800
+  const shouldTruncate = !showEntire && note.content.length > 500
   const content = parseContent(note.content)
 
   let l = 0
@@ -62,7 +62,7 @@
     if (value instanceof String) {
       l += value.length
 
-      if (shouldTruncate && l > 400 && type !== "br") {
+      if (shouldTruncate && l > 350 && type !== "br") {
         content[i].value = value.trim()
         content.splice(i + 1, content.length, {type: "text", value: "..."})
         break
