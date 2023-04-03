@@ -165,8 +165,8 @@ export const parseContent = content => {
     if (urlMatch && !last(result)?.value.endsWith("/")) {
       let url = urlMatch[0]
 
-      // Skip ellipses
-      if (!url.match(/\.\./)) {
+      // Skip ellipses and very short non-urls
+      if (!url.match(/\.\./) && url.length > 4) {
         // It's common for punctuation to end a url, trim it off
         if (url.match(/[\.\?,:]$/)) {
           url = url.slice(0, -1)

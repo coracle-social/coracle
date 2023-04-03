@@ -191,7 +191,7 @@ function getExecutor(urls) {
   return executor
 }
 
-async function publish({relays, event, onProgress, timeout = 3000}) {
+async function publish({relays, event, onProgress, timeout = 3000, verb = "EVENT"}) {
   const urls = getUrls(relays)
   const executor = getExecutor(urls)
 
@@ -235,6 +235,7 @@ async function publish({relays, event, onProgress, timeout = 3000}) {
     }, timeout)
 
     const sub = executor.publish(event, {
+      verb,
       onOk: url => {
         succeeded.add(url)
         timeouts.delete(url)

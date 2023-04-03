@@ -1,8 +1,6 @@
 # Current
 
 - [ ] Fix issues
-- [ ] Don't escape html in parseContent
-- [ ] Look into AUTH not working for mazin
 - [ ] Write NIP to support proxies. Update COUNT NIP to mention how proxies are a good use case for COUNT
 - [ ] Write blog post on multiplexer
 - [ ] Fix performance issues
@@ -21,6 +19,7 @@
 
 # More
 
+- [ ] Nostr Wallet Connect https://nwc.getalby.com/
 - [ ] Build per-relay pagination, put it in paravel https://github.com/nostr-protocol/nips/pull/408
 - [ ] Linkify topics
 - [ ] Add suggestion list for topics on compose so people know there are suggestions

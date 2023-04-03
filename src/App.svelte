@@ -90,7 +90,9 @@
     if (!seenChallenges.has(challenge)) {
       seenChallenges.add(challenge)
 
-      return first(await cmd.authenticate(url, challenge).publish([{url}]))
+      const publishable = await cmd.authenticate(url, challenge)
+
+      return first(publishable.publish([{url}], null, "AUTH"))
     }
   }
 
