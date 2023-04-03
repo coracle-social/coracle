@@ -42,7 +42,7 @@
 
 {#if !hidden}
   <div in:slide class="relative">
-    <CarouselItem link={annotated[0]} showLoading={false} onClose={close} />
+    <CarouselItem link={annotated[0]} onClose={close} />
     {#if annotated.length > 1}
       <p class="text-gray-500 py-4 text-center underline" on:click={openModal}>
         <i class="fa fa-plus" /> Show {annotated.length} link previews

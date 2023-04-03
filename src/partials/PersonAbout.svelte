@@ -14,8 +14,10 @@
 
 <p class="overflow-hidden text-ellipsis">
   {#each content as { type, value }}
-    {#if type === "br"}
-      {@html value}
+    {#if type === "newline"}
+      {#each value as _}
+        <br />
+      {/each}
     {:else if type === "link"}
       <Anchor external href={value}>
         {value.replace(/https?:\/\/(www\.)?/, "")}

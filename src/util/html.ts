@@ -103,7 +103,7 @@ export const noEvent = f => e => {
 }
 
 export const parseContent = content => {
-  const text = escapeHtml(content.trim())
+  const text = content.trim()
   const result = []
   let buffer = "",
     i = 0
@@ -121,10 +121,10 @@ export const parseContent = content => {
   for (; i < text.length; ) {
     const tail = text.slice(i)
 
-    const brMatch = tail.match(/^(<br>)+/)
+    const newLine = tail.match(/^\n+/)
 
-    if (brMatch) {
-      push("br", brMatch[0])
+    if (newLine) {
+      push("newline", newLine[0])
       continue
     }
 

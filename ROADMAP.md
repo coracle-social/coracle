@@ -1,5 +1,7 @@
 # Current
 
+- [ ] Fix issues
+- [ ] Don't escape html in parseContent
 - [ ] Look into AUTH not working for mazin
 - [ ] Write NIP to support proxies. Update COUNT NIP to mention how proxies are a good use case for COUNT
 - [ ] Write blog post on multiplexer
@@ -11,17 +13,6 @@
 - [ ] Add onError handler to subscriptions for when sockets fail to connect?
 - [ ] Add bugsnag to multiplexr
 
-# Others
-
-- Recommendations
-- Indexer/multiplexer
-- relay.coracle.social for people nip-05 verified via coracle
-- Improve overall design
-- Stripped down easy version of coracle
-  - Extract library?
-  - Parameterize color scheme
-  - Deploy to special domains with relays built in
-
 # Custom views
 
 - [ ] Add customize icon and route with editable custom view cards using "lists" nip
@@ -30,6 +21,7 @@
 
 # More
 
+- [ ] Build per-relay pagination, put it in paravel https://github.com/nostr-protocol/nips/pull/408
 - [ ] Linkify topics
 - [ ] Add suggestion list for topics on compose so people know there are suggestions
 - [ ] Badges link to https://badges.page/p/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322

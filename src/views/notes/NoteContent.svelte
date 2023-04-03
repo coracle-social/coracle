@@ -24,6 +24,7 @@
   const entities = []
   const shouldTruncate = !showEntire && note.content.length > 500
   const content = parseContent(note.content)
+  const showMedia = user.getSetting("showMedia")
 
   let l = 0
   for (let i = 0; i < content.length; i++) {
@@ -42,11 +43,11 @@
 
       // If the link is surrounded by line breaks (or content start/end), remove
       // the link along with trailing whitespace
-      if ((!prev || prev.type === "br") && (!next || next.type === "br")) {
+      if (showMedia && (!prev || prev.type === "newline") && (!next || next.type === "newline")) {
         let n = 0
 
         for (let j = i + 1; j < content.length; j++) {
-          if (content[j].type !== "br") {
+          if (content[j].type !== "newline") {
             break
           }
 
@@ -59,10 +60,10 @@
     }
 
     // Keep track of total characters, if we're not dealing with a string just guess
-    if (value instanceof String) {
+    if (typeof value === 'string') {
       l += value.length
 
-      if (shouldTruncate && l > 350 && type !== "br") {
+      if (shouldTruncate && l > 350 && type !== "newline") {
         content[i].value = value.trim()
         content.splice(i + 1, content.length, {type: "text", value: "..."})
         break
@@ -75,9 +76,12 @@
   const getMentionPubkey = text => {
     const i = parseInt(first(text.match(/\d+/)))
 
-    // Some implementations count only p tags when calculating index
+    // Some implementations count only p tags when calculating index, and some
+    // implementations are 1-indexed
     if (note.tags[i]?.[0] === "p") {
       return note.tags[i][1]
+    } else if (note.tags[i-1]?.[0] === "p") {
+      return note.tags[i-1][1]
     } else {
       return Tags.from(note).type("p").values().nth(i)
     }
@@ -104,8 +108,10 @@
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
   <p>
     {#each content as { type, value }}
-      {#if type === "br"}
-        {@html value}
+      {#if type === "newline"}
+        {#each value as _}
+          <br />
+        {/each}
       {:else if type === "link"}
         <Anchor external href={value}>
           {value.replace(/https?:\/\/(www\.)?/, "")}
@@ -132,7 +138,7 @@
       {/if}
     {/each}
   </p>
-  {#if user.getSetting("showMedia") && links.length > 0}
+  {#if showMedia && links.length > 0}
     <div on:click={e => e.stopPropagation()}>
       <Carousel {links} />
     </div>

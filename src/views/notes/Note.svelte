@@ -20,7 +20,7 @@
   import PersonCircle from "src/partials/PersonCircle.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
   import Modal from "src/partials/Modal.svelte"
-  import Preview from "src/partials/Preview.svelte"
+  import CarouselItem from "src/partials/CarouselItem.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {toast, modal} from "src/app/ui"
   import Compose from "src/partials/Compose.svelte"
@@ -512,8 +512,8 @@
       </div>
       {#if image}
         <div class="bg-gray-7 p-2">
-          <Preview
-            url={image}
+          <CarouselItem
+            link={{type: 'image', url: image}}
             onClose={() => {
               image = null
             }} />
