@@ -6,7 +6,7 @@
   import {warn} from "src/util/logger"
   import {parseContent} from "src/util/html"
   import {displayPerson, Tags} from "src/util/nostr"
-  import Carousel from "src/partials/Carousel.svelte"
+  import MediaSet from "src/partials/MediaSet.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -60,7 +60,7 @@
     }
 
     // Keep track of total characters, if we're not dealing with a string just guess
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       l += value.length
 
       if (shouldTruncate && l > 350 && type !== "newline") {
@@ -80,8 +80,8 @@
     // implementations are 1-indexed
     if (note.tags[i]?.[0] === "p") {
       return note.tags[i][1]
-    } else if (note.tags[i-1]?.[0] === "p") {
-      return note.tags[i-1][1]
+    } else if (note.tags[i - 1]?.[0] === "p") {
+      return note.tags[i - 1][1]
     } else {
       return Tags.from(note).type("p").values().nth(i)
     }
@@ -140,7 +140,7 @@
   </p>
   {#if showMedia && links.length > 0}
     <div on:click={e => e.stopPropagation()}>
-      <Carousel {links} />
+      <MediaSet {links} />
     </div>
   {/if}
   {#if entities.length > 0}

@@ -53,18 +53,18 @@
           <small>{ellipsize(description, 140)}</small>
         </div>
       {/if}
-      {#if onClose}
-        <div
-          on:click|preventDefault={onClose}
-          class="absolute top-0 right-0 m-1 flex h-6 w-6 cursor-pointer items-center justify-center
-           rounded-full border border-solid border-gray-6 bg-white text-black opacity-50 shadow">
-          <i class="fa fa-times" />
-        </div>
-      {/if}
     {:catch}
       <p class="mb-1 py-24 px-12 text-center text-gray-5">
         Unable to load a preview for {link.url}
       </p>
     {/await}
+  {/if}
+  {#if onClose}
+    <div
+      on:click|preventDefault={onClose}
+      class="absolute top-0 right-0 m-1 flex h-6 w-6 cursor-pointer items-center justify-center
+       rounded-full border border-solid border-gray-6 bg-white text-black opacity-50 shadow">
+      <i class="fa fa-times" />
+    </div>
   {/if}
 </Anchor>

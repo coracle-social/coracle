@@ -8,7 +8,7 @@
   import Button from "src/partials/Button.svelte"
   import Compose from "src/partials/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import CarouselItem from "src/partials/CarouselItem.svelte"
+  import Media from "src/partials/Media.svelte"
   import Input from "src/partials/Input.svelte"
   import RelayCardSimple from "src/partials/RelayCardSimple.svelte"
   import Content from "src/partials/Content.svelte"
@@ -113,8 +113,8 @@
         </div>
       </div>
       {#if image}
-        <CarouselItem
-          link={{type: 'image', url: image}}
+        <Media
+          link={{type: "image", url: image}}
           onClose={() => {
             image = null
           }} />

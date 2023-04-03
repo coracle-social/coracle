@@ -1,13 +1,10 @@
 # Current
 
 - [ ] Fix issues
-- [ ] Write NIP to support proxies. Update COUNT NIP to mention how proxies are a good use case for COUNT
-- [ ] Write blog post on multiplexer
 - [ ] Fix performance issues
 - [ ] Fix reactions and replies showing up
 - [ ] Fix iOS/safari/firefox
 - [ ] https://github.com/coracle-social/coracle/issues/42
-- [ ] Multiplex, charge past a certain usage level based on bandwidth
 - [ ] Add onError handler to subscriptions for when sockets fail to connect?
 - [ ] Add bugsnag to multiplexr
 
@@ -19,6 +16,7 @@
 
 # More
 
+- [ ] Monetize multiplexing
 - [ ] Nostr Wallet Connect https://nwc.getalby.com/
 - [ ] Build per-relay pagination, put it in paravel https://github.com/nostr-protocol/nips/pull/408
 - [ ] Linkify topics

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {sortBy} from "ramda"
   import {slide} from "svelte/transition"
-  import CarouselItem from "src/partials/CarouselItem.svelte"
+  import Media from "src/partials/Media.svelte"
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
 
@@ -42,7 +42,7 @@
 
 {#if !hidden}
   <div in:slide class="relative">
-    <CarouselItem link={annotated[0]} onClose={close} />
+    <Media link={annotated[0]} onClose={close} />
     {#if annotated.length > 1}
       <p class="text-gray-500 py-4 text-center underline" on:click={openModal}>
         <i class="fa fa-plus" /> Show {annotated.length} link previews
@@ -55,7 +55,7 @@
   <Modal onEscape={closeModal}>
     <Content>
       {#each annotated as link}
-        <CarouselItem {link} />
+        <Media {link} />
       {/each}
     </Content>
   </Modal>
