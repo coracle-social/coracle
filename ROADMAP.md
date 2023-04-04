@@ -1,15 +1,14 @@
 # Current
 
+- [ ] Instead of doing streamContext, listen, at least on note detail page
+- [ ] Support https://github.com/nostr-protocol/nips/pull/211 as a bech32 entity
+
 - [ ] Fix performance issues
   - [ ] https://github.com/techfort/LokiJS
     - Use indexed adapter github.com/techfort/LokiJS/blob/master/tutorials/Persistence%20Adapters.md and partitioning adapter
     - Call close onbeforeunload to save pending changes
 - [ ] Fix iOS/safari/firefox
-- [ ] Add onError handler to subscriptions for when sockets fail to connect?
-- [ ] Show more link on long notes (rather than just an ellipsis)
 - [ ] Revisit profile page and info, include similar access to hex keys etc on notes, keys page
-- [ ] Support https://github.com/nostr-protocol/nips/pull/211 as a bech32 entity
-- [ ] Collapsible thread view
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
   - Requires updating my OS -_-

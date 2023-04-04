@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.22
+
+- [x] Add ability to collapse threads
+- [x] Add titles to overflow menu on note detail
+
 ## 0.2.21
 
 - [x] Fix AUTH support

@@ -207,9 +207,9 @@
           </div>
           <div class="absolute top-0 right-0 z-10 mt-12 flex flex-col gap-2 opacity-90">
             <div
+              style="filter: blur(15px) opacity(0.7)"
               class="absolute inset-0 rounded-full bg-gray-8"
               class:hidden={!showActions}
-              style="filter: blur(15px)"
               transition:fade|local />
             {#each actions as { onClick, href, label, icon }, i}
               <div

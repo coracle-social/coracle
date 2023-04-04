@@ -11,6 +11,7 @@
   import {isMobile, copyToClipboard} from "src/util/html"
   import {invoiceAmount} from "src/util/lightning"
   import QRCode from "src/partials/QRCode.svelte"
+  import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
@@ -54,6 +55,7 @@
   let replyContainer = null
   let visibleNotes = []
   let showRelays = false
+  let collapsed = false
 
   const {profile, canPublish, mutes} = user
   const timestamp = formatTimestamp(note.created_at)
@@ -62,7 +64,7 @@
   const interactive = !anchorId || !showEntire
   const person = watch("people", () => getPersonWithFallback(note.pubkey))
 
-  let likes, flags, zaps, like, flag, border, childrenContainer, noteContainer, canZap
+  let likes, flags, zaps, like, flag, border, childrenContainer, noteContainer, canZap, actions
   let muted = false
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
@@ -124,6 +126,30 @@
   $: $repliesCount = note.replies.length
   $: visibleNotes = note.replies.filter(r => (showContext ? true : !r.isContext))
   $: canZap = $person?.zapper && $person?.pubkey !== user.getPubkey()
+  $: {
+    actions = []
+
+    if (pool.forceUrls.length === 0) {
+      actions.push({
+        label: "Relays",
+        icon: "server",
+        onClick: () => {
+          showRelays = true
+        },
+      })
+    }
+
+    actions.push({label: "Permalink", icon: "link", onClick: copyLink})
+    actions.push({label: "Quote", icon: "quote-left", onClick: quote})
+
+    if (muted) {
+      actions.push({label: "Unmute", icon: "microphone", onClick: unmute})
+    } else {
+      actions.push({label: "Mute", icon: "microphone-slash", onClick: mute})
+    }
+
+    actions.push({label: "Flag", icon: "flag", onClick: () => react("-")})
+  }
 
   const onClick = e => {
     const target = e.target as HTMLElement
@@ -448,33 +474,7 @@
                   let:instance
                   class="flex flex-col gap-2"
                   on:click={() => instance.hide()}>
-                  {#if pool.forceUrls.length === 0}
-                    <Anchor
-                      type="button-circle"
-                      on:click={() => {
-                        showRelays = true
-                      }}>
-                      <i class="fa fa-server" />
-                    </Anchor>
-                  {/if}
-                  <Anchor type="button-circle" on:click={copyLink}>
-                    <i class="fa fa-link" />
-                  </Anchor>
-                  <Anchor type="button-circle" on:click={quote}>
-                    <i class="fa fa-quote-left" />
-                  </Anchor>
-                  {#if muted}
-                    <Anchor type="button-circle" on:click={unmute}>
-                      <i class="fa fa-microphone" />
-                    </Anchor>
-                  {:else}
-                    <Anchor type="button-circle" on:click={mute}>
-                      <i class="fa fa-microphone-slash" />
-                    </Anchor>
-                  {/if}
-                  <Anchor type="button-circle" on:click={() => react("-")}>
-                    <i class="fa fa-flag" />
-                  </Anchor>
+                  <OverflowMenu {actions} />
                 </div>
               </Popover>
             </div>
@@ -544,7 +544,31 @@
     </div>
   {/if}
 
-  {#if visibleNotes.length > 0 && depth > 0 && !muted}
+  {#if visibleNotes.length > 0 && !showEntire && depth > 0 && !muted}
+    <div class="relative -mt-4">
+      <div
+        class="absolute top-0 right-0 z-10 -mt-4 -mr-2 flex h-6 w-6 cursor-pointer
+                 items-center justify-center rounded-full border border-solid border-gray-7 bg-gray-8"
+        on:click={() => {
+          collapsed = !collapsed
+        }}>
+        <Popover triggerType="mouseenter">
+          <div slot="trigger">
+            {#if collapsed}
+              <i class="fa fa-xs fa-up-right-and-down-left-from-center" />
+            {:else}
+              <i class="fa fa-xs fa-down-left-and-up-right-to-center" />
+            {/if}
+          </div>
+          <div slot="tooltip">
+            {collapsed ? "Show replies" : "Hide replies"}
+          </div>
+        </Popover>
+      </div>
+    </div>
+  {/if}
+
+  {#if !collapsed && visibleNotes.length > 0 && depth > 0 && !muted}
     <div class="relative">
       <div class={`absolute w-px bg-${borderColor} z-10 -mt-4 ml-4 h-0`} bind:this={border} />
       <div class="note-children relative ml-8 flex flex-col gap-4" bind:this={childrenContainer}>
