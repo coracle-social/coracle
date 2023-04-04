@@ -191,13 +191,6 @@
     replyMentions = getDefaultReplyMentions()
   }
 
-  const onReplyKeydown = e => {
-    if (e.key === "Escape") {
-      e.stopPropagation()
-      resetReply()
-    }
-  }
-
   const sendReply = async () => {
     let {content, mentions, topics} = reply.parse()
 
@@ -494,52 +487,59 @@
   {#if reply}
     <div
       transition:slide
-      class={`note-reply relative z-10 border border-${borderColor} rounded border-solid`}
+      class="note-reply relative z-10 flex flex-col gap-1"
       bind:this={replyContainer}>
-      <div
-        class="bg-gray-7"
-        class:rounded-b={replyMentions.length === 0}
-        on:keydown={onReplyKeydown}>
-        <Compose bind:this={reply} onSubmit={sendReply}>
-          <button
-            slot="addon"
-            on:click={sendReply}
-            class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-gray-7 p-4
-               py-8 text-gray-3 transition-all hover:bg-accent">
-            <i class="fa fa-paper-plane fa-xl" />
-          </button>
-        </Compose>
-      </div>
-      {#if image}
-        <div class="bg-gray-7 p-2">
-          <Media
-            link={{type: "image", url: image}}
-            onClose={() => {
-              image = null
-            }} />
-        </div>
-      {/if}
-      <div class={`h-px bg-${borderColor}`} />
-      <div class="h-12 rounded-b bg-gray-7 p-2 text-sm text-gray-3">
-        <div class="mr-2 inline-block border-r border-solid border-gray-6 py-2 pl-1 pr-3">
-          <div class="flex cursor-pointer items-center gap-3">
-            <ImageInput bind:value={image} icon="image" hideInput>
-              <i slot="button" class="fa fa-paperclip" />
-            </ImageInput>
-            <i class="fa fa-at" />
-          </div>
-        </div>
-        {#each replyMentions as p}
-          <div class="mr-1 inline-block rounded-full border border-solid border-gray-1 py-1 px-2">
+      <div class={`border border-${borderColor} rounded border-solid`}>
+        <div class="bg-gray-7" class:rounded-b={replyMentions.length === 0}>
+          <Compose bind:this={reply} onSubmit={sendReply}>
             <button
-              class="fa fa-times cursor-pointer"
-              on:click|stopPropagation={() => removeMention(p)} />
-            {displayPerson(getPersonWithFallback(p))}
+              slot="addon"
+              on:click={sendReply}
+              class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-gray-7 p-4
+                 py-8 text-gray-3 transition-all hover:bg-accent">
+              <i class="fa fa-paper-plane fa-xl" />
+            </button>
+          </Compose>
+        </div>
+        {#if image}
+          <div class="bg-gray-7 p-2">
+            <Media
+              link={{type: "image", url: image}}
+              onClose={() => {
+                image = null
+              }} />
           </div>
-        {:else}
-          <div class="text-gray-1 inline-block">No mentions</div>
-        {/each}
-        <div class="-mt-2" />
+        {/if}
+        <div class={`h-px bg-${borderColor}`} />
+        <div class="flex gap-2 rounded-b bg-gray-7 p-2 text-sm text-gray-3">
+          <div class="inline-block border-r border-solid border-gray-6 py-2 pl-1 pr-3">
+            <div class="flex cursor-pointer items-center gap-3">
+              <ImageInput bind:value={image} icon="image" hideInput>
+                <i slot="button" class="fa fa-paperclip" />
+              </ImageInput>
+              <i class="fa fa-at" />
+            </div>
+          </div>
+          <div>
+            {#each replyMentions as p}
+              <div
+                class="mr-1 mb-1 inline-block rounded-full border border-solid border-gray-1 py-1 px-2">
+                <button
+                  class="fa fa-times cursor-pointer"
+                  on:click|stopPropagation={() => removeMention(p)} />
+                {displayPerson(getPersonWithFallback(p))}
+              </div>
+            {:else}
+              <div class="text-gray-1 inline-block">No mentions</div>
+            {/each}
+            <div class="-mb-2" />
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 text-sm text-gray-5">
+        <span>
+          Posting as @{displayPerson(getPersonWithFallback(user.getPubkey()))}
+        </span>
       </div>
     </div>
   {/if}

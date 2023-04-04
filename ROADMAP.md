@@ -16,6 +16,8 @@
 
 # More
 
+- [ ] Write multi-relay pagination into paravel and open source it
+  - nevent1qqszpjf3307ccam3cl957yc7k3h5c7vpt7gz2vdzgwkqszsyvdj6e0cpzfmhxue69uhk7enxvd5xz6tw9ec82csgdxq30
 - [ ] Monetize multiplexing
 - [ ] Nostr Wallet Connect https://nwc.getalby.com/
 - [ ] Build per-relay pagination, put it in paravel https://github.com/nostr-protocol/nips/pull/408

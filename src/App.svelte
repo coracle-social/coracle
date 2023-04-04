@@ -201,9 +201,9 @@
 </script>
 
 <Router {url}>
-  <div use:links class="h-full">
+  <div use:links>
     {#if ready}
-      <div class="h-full pt-16 text-gray-3 lg:ml-56">
+      <div class="pt-16 text-gray-3 lg:ml-56">
         <Route path="/notifications" component={Notifications} />
         <Route path="/search">
           <EnsureData enforcePeople={false}>

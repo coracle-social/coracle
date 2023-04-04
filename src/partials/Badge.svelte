@@ -3,7 +3,7 @@
   import {killEvent} from "src/util/html"
   import {displayPerson} from "src/util/nostr"
   import {routes} from "src/app/ui"
-  import PersonCircle from "./PersonCircle.svelte";
+  import PersonCircle from "src/partials/PersonCircle.svelte"
 
   export let person
   export let inert = false
@@ -11,7 +11,7 @@
 
 {#if inert}
   <span class="relative z-10 flex items-center gap-2">
-    <PersonCircle person={person} />
+    <PersonCircle {person} />
     <span class="text-lg font-bold">{displayPerson(person)}</span>
   </span>
 {:else}
@@ -19,7 +19,7 @@
     to={routes.person(person.pubkey)}
     class="relative z-10 flex items-center gap-2"
     on:click={killEvent}>
-    <PersonCircle person={person} />
+    <PersonCircle {person} />
     <span class="text-lg font-bold">{displayPerson(person)}</span>
   </Link>
 {/if}

@@ -5,6 +5,7 @@
   import {last, reject, pluck, propEq} from "ramda"
   import {fly} from "svelte/transition"
   import {fuzzy} from "src/util/misc"
+  import {displayPerson} from "src/util/nostr"
   import Button from "src/partials/Button.svelte"
   import Compose from "src/partials/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
@@ -110,6 +111,11 @@
         <strong>What do you want to say?</strong>
         <div class="border-l-2 border-solid border-gray-6 pl-4">
           <Compose bind:this={compose} {onSubmit} />
+          <div class="flex justify-end">
+            <small class="text-gray-5">
+              Posting as @{displayPerson(getPersonWithFallback(user.getPubkey()))}
+            </small>
+          </div>
         </div>
       </div>
       {#if image}
