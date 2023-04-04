@@ -544,11 +544,11 @@
     </div>
   {/if}
 
-  {#if visibleNotes.length > 0 && !showEntire && depth > 0 && !muted}
+  {#if !reply && visibleNotes.length > 0 && !showEntire && depth > 0 && !muted}
     <div class="relative -mt-4">
       <div
-        class="absolute top-0 right-0 z-10 -mt-4 -mr-2 flex h-6 w-6 cursor-pointer
-                 items-center justify-center rounded-full border border-solid border-gray-7 bg-gray-8"
+        class="absolute top-0 right-0 z-10 -mt-4 -mr-2 flex h-6 w-6 cursor-pointer items-center
+                 justify-center rounded-full border border-solid border-gray-7 bg-gray-8 text-gray-3"
         on:click={() => {
           collapsed = !collapsed
         }}>

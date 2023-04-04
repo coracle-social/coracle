@@ -1,14 +1,12 @@
 <script>
   import {onMount} from "svelte"
-  import {nip19} from "nostr-tools"
+  import {pluck, propEq} from "ramda"
   import {fly} from "svelte/transition"
   import {first} from "hurdak/lib/hurdak"
-  import {log} from "src/util/logger"
   import {asDisplayEvent} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/views/notes/Note.svelte"
-  import user from "src/agent/user"
   import network from "src/agent/network"
   import {sampleRelays} from "src/agent/relays"
 
@@ -18,34 +16,52 @@
 
   let found = false
   let loading = true
+  let seen = new Set()
 
-  onMount(async () => {
-    if (note.pubkey) {
-      found = true
-    } else {
-      await network.load({
-        relays: sampleRelays(relays),
-        filter: {kinds: [1], ids: [note.id]},
-        onChunk: events => {
-          found = true
-          note = first(events)
-        },
-      })
-    }
+  onMount(() => {
+    const sub = network.listen({
+      relays: sampleRelays(relays),
+      filter: [
+        {kinds: [1], ids: [note.id]},
+        {kinds: [1, 7, 9735], "#e": [note.id]},
+      ],
+      onChunk: chunk => {
+        const children = chunk.filter(propEq("kind", 1))
 
-    if (note) {
-      log("NoteDetail", nip19.noteEncode(note.id), note)
+        // Recursively bring in context for children, since reactions etc don't
+        // contain the full chain of ancestors
+        network.streamContext({
+          depth: 5,
+          notes: children.filter(e => !seen.has(e.id)),
+          onChunk: childChunk => {
+            note = first(network.applyContext([note], childChunk))
+          },
+        })
 
-      network.streamContext({
-        depth: 6,
-        notes: [note],
-        onChunk: context => {
-          note = first(network.applyContext([note], user.applyMutes(context)))
-        },
-      })
-    }
+        // Keep track of the children we've seen, update latest version of our note
+        children.forEach(event => {
+          if (event.id === note.id) {
+            found = true
+            loading = false
+            note = {...note, ...event}
+          }
 
-    loading = false
+          seen.add(event.id)
+        })
+
+        // Load authors
+        network.loadPeople(pluck("pubkey", children))
+
+        // Apply context
+        note = first(network.applyContext([note], chunk))
+      },
+    })
+
+    setTimeout(() => {
+      loading = false
+    }, 3000)
+
+    return () => sub.then(s => s.unsub())
   })
 </script>
 
