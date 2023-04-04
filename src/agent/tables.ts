@@ -10,7 +10,7 @@ const sortByLastSeen = sortBy(([k, x]) => x.value.last_seen)
 
 export const people = new Table("people", "pubkey", {
   cache: new Cache({
-    max: 10000,
+    max: 5000,
     // Don't delete the user's own profile or those of direct follows
     sort: xs => {
       const follows = Tags.wrap(user.getPetnames()).values().all()
@@ -22,7 +22,7 @@ export const people = new Table("people", "pubkey", {
 })
 
 export const userEvents = new Table("userEvents", "id", {
-  cache: new Cache({max: 5000, sort: sortByCreatedAt}),
+  cache: new Cache({max: 2000, sort: sortByCreatedAt}),
 })
 
 export const notifications = new Table("notifications", "id")
@@ -30,7 +30,7 @@ export const contacts = new Table("contacts", "pubkey")
 export const rooms = new Table("rooms", "id")
 export const relays = new Table("relays", "url")
 export const routes = new Table("routes", "id", {
-  cache: new Cache({max: 5000, sort: sortByLastSeen}),
+  cache: new Cache({max: 3000, sort: sortByLastSeen}),
 })
 
 listener.connect()
