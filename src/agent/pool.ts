@@ -162,8 +162,10 @@ function getExecutor(urls) {
   let target
 
   // Try to use our multiplexer, but if it fails to connect fall back to relays. If
-  // we're only connecting to a single relay, just do it directly
-  if (Config.multiplextrUrl && urls.length > 1) {
+  // we're only connecting to a single relay, just do it directly, unless we already
+  // have a connection to the multiplexer open, in which case we're probably doing
+  // AUTH with a single relay.
+  if (Config.multiplextrUrl && (urls.length > 1 || pool.has(Config.multiplextrUrl))) {
     const socket = pool.get(Config.multiplextrUrl)
 
     if (!socket.error) {
@@ -277,7 +279,7 @@ async function subscribe({relays, filter, onEvent, onEose}: SubscribeOpts) {
 
   Meta.onSubscriptionStart(urls)
 
-  const sub = executor.subscribe(filters, {
+  executor.subscribe(filters, {
     onEvent: (url, e) => {
       if (seen.has(e.id)) {
         return
@@ -309,7 +311,6 @@ async function subscribe({relays, filter, onEvent, onEose}: SubscribeOpts) {
     unsub: () => {
       log(`Closing subscription`, filters)
 
-      sub.unsubscribe()
       executor.target.cleanup()
 
       Meta.onSubscriptionEnd(urls)

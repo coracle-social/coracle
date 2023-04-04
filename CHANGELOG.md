@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.21
+
+- [x] Fix AUTH support
+- [x] Add note quotes
+- [x] Add support for bech32 entity rendering and parsing
+- [x] Show all images/links in modal dialog
+- [x] Fix newline handling in note composition
+- [x] Render links in person.about content
+- [x] Fix person detail relays list
+- [x] Show username when creating a note
+
 ## 0.2.20
 
 - [x] Re-write pool to use paravel

@@ -79,8 +79,6 @@ const createReply = (note, content, mentions = [], topics = []) => {
     ]
   )
 
-  console.log(tags)
-
   return new PublishableEvent(1, {content, tags})
 }
 
