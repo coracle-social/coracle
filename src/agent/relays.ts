@@ -167,6 +167,8 @@ export const sampleRelays = (relays, scale = 1) => {
   relays = relays.filter(r => {
     if (pool.Meta.errors[r.url]) return false
     if (pool.Meta.getStats(r.url).closed > Date.now() - 30_000) return false
+
+    return true
   })
 
   // Limit target relays
