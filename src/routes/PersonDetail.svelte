@@ -2,7 +2,7 @@
   import {last, identity, find} from "ramda"
   import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
-  import {fly, fade} from "svelte/transition"
+  import {fly} from "svelte/transition"
   import {navigate} from "svelte-routing"
   import {log} from "src/util/logger"
   import {parseHex} from "src/util/html"
@@ -10,7 +10,8 @@
   import {displayPerson, toHex} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Popover from "src/partials/Popover.svelte"
+  import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import NewNoteButton from "src/views/notes/NewNoteButton.svelte"
   import Notes from "src/views/person/Notes.svelte"
@@ -39,7 +40,6 @@
   let followersCount = tweened(0, {interpolate, duration: 1000})
   let person = getPersonWithFallback(pubkey)
   let loading = true
-  let showActions = false
   let actions = []
   let rgb, rgba
 
@@ -57,42 +57,38 @@
   $: muted = find(m => m[1] === pubkey, $mutes)
 
   $: {
-    actions = []
+    actions = [{onClick: share, label: "Share", icon: "share-nodes"}]
 
-    if (showActions) {
-      actions.push({onClick: share, label: "Share", icon: "share-nodes"})
-
-      if ($canPublish) {
-        if (following) {
-          actions.push({onClick: unfollow, label: "Unfollow", icon: "user-minus"})
-        } else if (user.getPubkey() !== pubkey) {
-          actions.push({onClick: follow, label: "Follow", icon: "user-plus"})
-        }
-
-        if (muted) {
-          actions.push({onClick: unmute, label: "Muted", icon: "microphone-slash"})
-        } else if (user.getPubkey() !== pubkey) {
-          actions.push({onClick: mute, label: "Mute", icon: "microphone"})
-        }
-
-        actions.push({
-          onClick: () => navigate(`/messages/${npub}`),
-          label: "Message",
-          icon: "envelope",
-        })
+    if ($canPublish) {
+      if (following) {
+        actions.push({onClick: unfollow, label: "Unfollow", icon: "user-minus"})
+      } else if (user.getPubkey() !== pubkey) {
+        actions.push({onClick: follow, label: "Follow", icon: "user-plus"})
       }
 
-      if (pool.forceUrls.length === 0) {
-        actions.push({onClick: openProfileInfo, label: "Profile", icon: "info"})
+      if (muted) {
+        actions.push({onClick: unmute, label: "Muted", icon: "microphone-slash"})
+      } else if (user.getPubkey() !== pubkey) {
+        actions.push({onClick: mute, label: "Mute", icon: "microphone"})
       }
 
-      if (user.getPubkey() === pubkey && $canPublish) {
-        actions.push({
-          onClick: () => navigate("/profile"),
-          label: "Edit",
-          icon: "edit",
-        })
-      }
+      actions.push({
+        onClick: () => navigate(`/messages/${npub}`),
+        label: "Message",
+        icon: "envelope",
+      })
+    }
+
+    if (pool.forceUrls.length === 0) {
+      actions.push({onClick: openProfileInfo, label: "Profile", icon: "info"})
+    }
+
+    if (user.getPubkey() === pubkey && $canPublish) {
+      actions.push({
+        onClick: () => navigate("/profile"),
+        label: "Edit",
+        icon: "edit",
+      })
     }
   }
 
@@ -131,10 +127,6 @@
     }
   })
 
-  const toggleActions = () => {
-    showActions = !showActions
-  }
-
   const setActiveTab = tab => navigate(routes.person(pubkey, tab))
 
   const showFollows = () => {
@@ -172,11 +164,6 @@
   }
 </script>
 
-<svelte:window
-  on:click={() => {
-    showActions = false
-  }} />
-
 <div
   class="absolute left-0 h-64 w-full"
   style="z-index: -1;
@@ -201,30 +188,7 @@
             </div>
           {/if}
         </div>
-        <div class="relative flex flex-wrap gap-3 whitespace-nowrap">
-          <div on:click|stopPropagation={toggleActions} class="cursor-pointer px-5 py-2">
-            <i class="fa fa-xl fa-ellipsis-vertical" />
-          </div>
-          <div class="absolute top-0 right-0 z-10 mt-12 flex flex-col gap-2 opacity-90">
-            <div
-              style="filter: blur(15px) opacity(0.7)"
-              class="absolute inset-0 rounded-full bg-gray-8"
-              class:hidden={!showActions}
-              transition:fade|local />
-            {#each actions as { onClick, href, label, icon }, i}
-              <div
-                class="z-10 flex cursor-pointer items-center justify-end gap-2"
-                in:fly|local={{y: 20, delay: i * 30}}
-                out:fly|local={{y: 20, delay: (actions.length - i - 1) * 30}}
-                on:click={onClick}>
-                <div class="text-gray-1">{label}</div>
-                <Anchor type="button-circle">
-                  <i class={`fa fa-${icon}`} />
-                </Anchor>
-              </div>
-            {/each}
-          </div>
-        </div>
+        <OverflowMenu size="xl" {actions} />
       </div>
       <PersonAbout {person} />
       {#if person?.petnames}

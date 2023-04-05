@@ -465,18 +465,7 @@
               </button>
             </div>
             <div on:click|stopPropagation>
-              <Popover theme="transparent">
-                <div slot="trigger" class="cursor-pointer px-2">
-                  <i class="fa fa-ellipsis-v" />
-                </div>
-                <div
-                  slot="tooltip"
-                  let:instance
-                  class="flex flex-col gap-2"
-                  on:click={() => instance.hide()}>
-                  <OverflowMenu {actions} />
-                </div>
-              </Popover>
+              <OverflowMenu {actions} />
             </div>
           </div>
         </div>
