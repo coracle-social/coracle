@@ -89,9 +89,12 @@
   }
 
   const loadQuote = async ({id, relays}) => {
+    // Follow relay hints
+    relays = (relays || []).map(objOf("url")).concat(Tags.from(note).equals(id).relays())
+
     try {
       const [event] = await network.load({
-        relays: sampleRelays((relays || []).map(objOf("url"))),
+        relays: sampleRelays(relays),
         filter: [{ids: [id]}],
       })
 
