@@ -4,7 +4,7 @@
   import {quantify} from "hurdak/lib/hurdak"
   import {last, reject, pluck, propEq} from "ramda"
   import {fly} from "svelte/transition"
-  import {fuzzy} from "src/util/misc"
+  import {fuzzy, annotateMedia} from "src/util/misc"
   import {displayPerson} from "src/util/nostr"
   import Button from "src/partials/Button.svelte"
   import Compose from "src/partials/Compose.svelte"
@@ -120,7 +120,7 @@
       </div>
       {#if image}
         <Media
-          link={{type: "image", url: image}}
+          link={annotateMedia(image)}
           onClose={() => {
             image = null
           }} />

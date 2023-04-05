@@ -1,11 +1,12 @@
 <script>
   import {max, pipe, filter, map, when, identity, pluck, propEq, uniq} from "ramda"
-  import {ellipsize, closure, quantify} from "hurdak/lib/hurdak"
+  import {closure, quantify} from "hurdak/lib/hurdak"
   import {formatTimestamp, tryJson} from "src/util/misc"
   import {Tags} from "src/util/nostr"
   import Badge from "src/partials/Badge.svelte"
   import Card from "src/partials/Card.svelte"
   import Popover from "src/partials/Popover.svelte"
+  import NoteContent from "src/views/notes/NoteContent.svelte"
   import NotificationSection from "src/views/notifications/NotificationSection.svelte"
   import {getPersonWithFallback, userEvents} from "src/agent/tables"
   import {modal} from "src/app/ui"
@@ -70,7 +71,7 @@
       <p class="text-sm text-gray-1">{formatTimestamp(timestamp)}</p>
     </div>
     <div class="break-word ml-6 overflow-hidden text-gray-1">
-      {ellipsize(note.content, 120)}
+      <NoteContent maxLength={80} showMedia={false} {note} />
     </div>
   </Card>
 {/if}

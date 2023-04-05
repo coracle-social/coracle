@@ -431,3 +431,13 @@ export class EventBus {
     }
   }
 }
+
+export const annotateMedia = url => {
+  if (url.match(".(jpg|jpeg|png|gif)")) {
+    return {type: "image", url}
+  } else if (url.match(".(mov|mp4)")) {
+    return {type: "video", url}
+  } else {
+    return {type: "preview", url}
+  }
+}

@@ -18,13 +18,14 @@
   import {routes, modal} from "src/app/ui"
 
   export let note
-  export let showEntire
+  export let maxLength = 700
+  export let showEntire = false
+  export let showMedia = user.getSetting("showMedia")
 
   const links = []
   const entities = []
-  const shouldTruncate = !showEntire && note.content.length > 500
+  const shouldTruncate = !showEntire && note.content.length > maxLength * 0.6
   const content = parseContent(note.content)
-  const showMedia = user.getSetting("showMedia")
 
   let l = 0
   for (let i = 0; i < content.length; i++) {
@@ -63,7 +64,7 @@
     if (typeof value === "string") {
       l += value.length
 
-      if (shouldTruncate && l > 350 && type !== "newline") {
+      if (shouldTruncate && l > maxLength && type !== "newline") {
         content[i].value = value.trim()
         content.splice(i + 1, content.length, {type: "text", value: "..."})
         break
@@ -121,7 +122,7 @@
           {#if value.pubkey}
             {displayPerson(getPersonWithFallback(value.pubkey))}
           {:else}
-            {value.entity.slice(0, 10) + "..."}
+            {value.entity.slice(0, 16) + "..."}
           {/if}
         </Anchor>
       {:else if type === "mention"}
@@ -143,7 +144,7 @@
       <MediaSet {links} />
     </div>
   {/if}
-  {#if entities.length > 0}
+  {#if showMedia && entities.length > 0}
     <div class="py-2" on:click={e => e.stopPropagation()}>
       {#each entities as { value }}
         <Card interactive invertColors on:click={() => openQuote(value.id)}>

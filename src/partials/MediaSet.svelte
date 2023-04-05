@@ -1,6 +1,7 @@
 <script lang="ts">
   import {sortBy} from "ramda"
   import {slide} from "svelte/transition"
+  import {annotateMedia} from "src/util/misc"
   import Media from "src/partials/Media.svelte"
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -14,17 +15,7 @@
   // Put previews last since we need to load them asynchronously
   const annotated = sortBy(
     ({type}) => (type === "preview" ? 1 : 0),
-    links
-      .filter(url => !url.startsWith("ws"))
-      .map(url => {
-        if (url.match(".(jpg|jpeg|png|gif)")) {
-          return {type: "image", url}
-        } else if (url.match(".(mov|mp4)")) {
-          return {type: "video", url}
-        } else {
-          return {type: "preview", url}
-        }
-      })
+    links.filter(url => !url.startsWith("ws")).map(annotateMedia)
   )
 
   const close = () => {
