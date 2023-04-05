@@ -287,7 +287,13 @@ async function subscribe({relays, filter, onEvent, onEose}: SubscribeOpts) {
 
       seen.add(e.id)
 
-      if (!verifySignature(e)) {
+      try {
+        if (!verifySignature(e)) {
+          return
+        }
+      } catch (e) {
+        console.error(e)
+
         return
       }
 

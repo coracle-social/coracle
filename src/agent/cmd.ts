@@ -174,7 +174,12 @@ class PublishableEvent {
     this.event = {kind, content, tags, pubkey, created_at: createdAt}
   }
   getSignedEvent() {
-    return keys.sign(this.event)
+    try {
+      return keys.sign(this.event)
+    } catch (e) {
+      console.log(this.event)
+      throw e
+    }
   }
   async publish(relays, onProgress = null, verb = "EVENT") {
     const event = await this.getSignedEvent()
