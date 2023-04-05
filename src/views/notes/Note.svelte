@@ -64,18 +64,16 @@
   const interactive = !anchorId || !showEntire
   const person = watch("people", () => getPersonWithFallback(note.pubkey))
 
-  let likes, flags, zaps, like, flag, border, childrenContainer, noteContainer, canZap, actions
+  let likes, zaps, like, border, childrenContainer, noteContainer, canZap, actions
   let muted = false
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const likesCount = tweened(0, {interpolate})
-  const flagsCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
 
   $: muted = find(m => m[1] === note.id, $mutes)
   $: likes = note.reactions.filter(n => isLike(n.content))
-  $: flags = note.reactions.filter(whereEq({content: "-"}))
   $: zaps = note.zaps
     .map(zap => {
       const zapMeta = Tags.from(zap).asMeta()
@@ -118,10 +116,8 @@
     })
 
   $: like = find(whereEq({pubkey: $profile?.pubkey}), likes)
-  $: flag = find(whereEq({pubkey: $profile?.pubkey}), flags)
   $: zapped = find(z => z.request.pubkey === $profile?.pubkey, zaps)
   $: $likesCount = likes.length
-  $: $flagsCount = flags.length
   $: $zapsTotal = sum(zaps.map(zap => zap.invoiceAmount)) / 1000
   $: $repliesCount = note.replies.length
   $: visibleNotes = note.replies.filter(r => (showContext ? true : !r.isContext))
@@ -147,8 +143,6 @@
     } else {
       actions.push({label: "Mute", icon: "microphone-slash", onClick: mute})
     }
-
-    actions.push({label: "Flag", icon: "flag", onClick: () => react("-")})
   }
 
   const onClick = e => {
@@ -183,25 +177,13 @@
     const relays = getEventPublishRelays(note)
     const [event] = await cmd.createReaction(note, content).publish(relays)
 
-    if (content === "+") {
-      likes = likes.concat(event)
-    }
-
-    if (content === "-") {
-      flags = flags.concat(event)
-    }
+    likes = likes.concat(event)
   }
 
   const deleteReaction = e => {
     cmd.deleteEvent([e.id]).publish(getEventPublishRelays(note))
 
-    if (e.content === "+") {
-      likes = reject(propEq("pubkey", $profile.pubkey), likes)
-    }
-
-    if (e.content === "-") {
-      flags = reject(propEq("pubkey", $profile.pubkey), flags)
-    }
+    likes = reject(propEq("pubkey", $profile.pubkey), likes)
   }
 
   const startReply = () => {
@@ -423,12 +405,7 @@
               </small>
             {/if}
           </div>
-          {#if flag}
-            <p class="border-l-2 border-solid border-gray-6 pl-4 text-gray-1">
-              You have flagged this content as offensive.
-              <Anchor on:click={() => deleteReaction(flag)}>Unflag</Anchor>
-            </p>
-          {:else if muted}
+          {#if muted}
             <p class="border-l-2 border-solid border-gray-6 pl-4 text-gray-1">
               You have muted this note.
             </p>
@@ -438,7 +415,7 @@
           <div class="flex justify-between text-gray-1">
             <div
               class={cx("flex", {
-                "pointer-events-none opacity-75": !$canPublish || flag || muted,
+                "pointer-events-none opacity-75": !$canPublish || muted,
               })}>
               <button class="w-16 text-left" on:click|stopPropagation={startReply}>
                 <i class="fa fa-reply cursor-pointer" />

@@ -10,7 +10,6 @@
   import {displayPerson, toHex} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
-  import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import NewNoteButton from "src/views/notes/NewNoteButton.svelte"
