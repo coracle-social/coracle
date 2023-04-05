@@ -268,7 +268,7 @@ async function subscribe({relays, filter, onEvent, onEose}: SubscribeOpts) {
   const executor = getExecutor(urls)
   const filters = ensurePlural(filter)
   const now = Date.now()
-  const seen = new Set()
+  const seen = new Map()
   const eose = new Set()
 
   log(`Starting subscription with ${relays.length} relays`, filters, relays)
@@ -280,15 +280,26 @@ async function subscribe({relays, filter, onEvent, onEose}: SubscribeOpts) {
   Meta.onSubscriptionStart(urls)
 
   executor.subscribe(filters, {
-    onEvent: (url, e) => {
-      if (seen.has(e.id)) {
+    onEvent: (url, event) => {
+      const seen_on = seen.get(event.id)
+
+      if (seen_on) {
+        if (!seen_on.includes(url)) {
+          seen_on.push(url)
+        }
+
         return
       }
 
-      seen.add(e.id)
+      Object.assign(event, {
+        seen_on: [url],
+        content: event.content || "",
+      })
+
+      seen.set(event.id, event.seen_on)
 
       try {
-        if (!verifySignature(e)) {
+        if (!verifySignature(event)) {
           return
         }
       } catch (e) {
@@ -299,7 +310,7 @@ async function subscribe({relays, filter, onEvent, onEose}: SubscribeOpts) {
 
       Meta.onEvent(url)
 
-      onEvent({...e, seen_on: url, content: e.content || ""})
+      onEvent(event)
     },
     onEose: url => {
       onEose?.(url)

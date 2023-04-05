@@ -109,7 +109,7 @@ export const getRelaysForEventParent = event => {
   const relayHints = Tags.from(event).equals(parentId).relays()
   const pubkeyRelays = getPubkeyReadRelays(event.pubkey)
 
-  return uniqByUrl(relayHints.concat({url: event.seen_on}).concat(pubkeyRelays))
+  return uniqByUrl(relayHints.concat(event.seen_on.map(objOf("url"))).concat(pubkeyRelays))
 }
 
 // If we're looking for an event's children, the read relays the author has
@@ -117,10 +117,12 @@ export const getRelaysForEventParent = event => {
 // will write replies there. However, this may include spam, so we may want
 // to read from the current user's network's read relays instead.
 export const getRelaysForEventChildren = event => {
-  return uniqByUrl(getPubkeyReadRelays(event.pubkey).concat({url: event.seen_on, score: 1}))
+  return uniqByUrl(
+    getPubkeyReadRelays(event.pubkey).concat(event.seen_on.map(url => ({url, score: 1})))
+  )
 }
 
-export const getRelayForEventHint = event => ({url: event.seen_on, score: 1})
+export const getRelayForEventHint = event => ({url: event.seen_on[0], score: 1})
 
 export const getRelayForPersonHint = (pubkey, event = null) => {
   let relays = getPubkeyWriteRelays(pubkey)

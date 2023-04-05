@@ -303,14 +303,14 @@
   }
 
   const copyLink = () => {
-    const nevent = nip19.neventEncode({id: note.id, relays: [note.seen_on]})
+    const nevent = nip19.neventEncode({id: note.id, relays: note.seen_on})
 
     copyToClipboard("nostr:" + nevent)
     toast.show("info", "Note link copied to clipboard!")
   }
 
   const quote = () => {
-    const nevent = nip19.neventEncode({id: note.id, relays: [note.seen_on]})
+    const nevent = nip19.neventEncode({id: note.id, relays: note.seen_on})
 
     modal.set({type: "note/create", nevent})
   }
@@ -388,7 +388,7 @@
             </div>
           </Popover>
           <Anchor
-            href={"/" + nip19.neventEncode({id: note.id, relays: [note.seen_on]})}
+            href={"/" + nip19.neventEncode({id: note.id, relays: note.seen_on})}
             class="text-sm text-gray-1"
             type="unstyled">
             {timestamp}
@@ -592,8 +592,10 @@
           </div>
         {/if}
         <h1 class="staatliches text-2xl">Relays</h1>
-        <p>This note was found on the relay below.</p>
-        <RelayCard theme="black" showControls relay={{url: note.seen_on}} />
+        <p>This note was found on the {quantify(note.seen_on.length, "relay")} below.</p>
+        {#each note.seen_on as url}
+          <RelayCard theme="black" showControls relay={{url}} />
+        {/each}
         <h1 class="staatliches text-2xl">Details</h1>
         <CopyValue label="Identifier" value={nevent} />
         <CopyValue label="Event ID (note)" value={bech32Note} />

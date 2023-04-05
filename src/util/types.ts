@@ -1,4 +1,4 @@
-import type {Event} from 'nostr-tools'
+import type {Event} from "nostr-tools"
 
 export type Relay = {
   url: string
@@ -17,12 +17,11 @@ export type Person = {
     about?: string
     nip05?: string
     picture?: string
-  },
+  }
 }
 
-
 export type MyEvent = Event & {
-  seen_on: string
+  seen_on: string[]
 }
 
 export type DisplayEvent = MyEvent & {
@@ -32,7 +31,7 @@ export type DisplayEvent = MyEvent & {
 }
 
 export type Room = {
-  id: string,
+  id: string
   pubkey: string
   name?: string
   about?: string

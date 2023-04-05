@@ -9,6 +9,7 @@
 - [x] Remove flag reactions, since they're somewhat redundant with mutes
 - [x] Generally improve UI consistency and feel
 - [x] Add event id, likers, and zappers to note info popover
+- [x] Mutate seen_on to show all relays a given note was found on
 
 ## 0.2.21
 
