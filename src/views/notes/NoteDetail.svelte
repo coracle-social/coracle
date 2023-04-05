@@ -1,12 +1,14 @@
 <script>
-  import {onMount} from "svelte"
-  import {pluck, propEq} from "ramda"
+  import {onMount, onDestroy} from "svelte"
+  import {nip19} from "nostr-tools"
   import {fly} from "svelte/transition"
   import {first} from "hurdak/lib/hurdak"
+  import {log} from "src/util/logger"
   import {asDisplayEvent} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/views/notes/Note.svelte"
+  import user from "src/agent/user"
   import network from "src/agent/network"
   import {sampleRelays} from "src/agent/relays"
 
@@ -14,58 +16,41 @@
   export let relays = []
   export let invertColors = false
 
-  let found = false
+  let sub = null
   let loading = true
-  let seen = new Set()
 
-  onMount(() => {
-    const sub = network.listen({
-      relays: sampleRelays(relays),
-      filter: [
-        {kinds: [1], ids: [note.id]},
-        {kinds: [1, 7, 9735], "#e": [note.id]},
-      ],
-      onChunk: chunk => {
-        const children = chunk.filter(propEq("kind", 1))
+  onMount(async () => {
+    if (!note.pubkey) {
+      await network.load({
+        relays: sampleRelays(relays),
+        filter: {kinds: [1], ids: [note.id]},
+        onChunk: events => {
+          note = first(events)
+        },
+      })
+    }
 
-        // Recursively bring in context for children, since reactions etc don't
-        // contain the full chain of ancestors
-        network.streamContext({
-          depth: 5,
-          notes: children.filter(e => !seen.has(e.id)),
-          onChunk: childChunk => {
-            note = first(network.applyContext([note], childChunk))
-          },
-        })
+    if (note) {
+      log("NoteDetail", nip19.noteEncode(note.id), note)
 
-        // Keep track of the children we've seen, update latest version of our note
-        children.forEach(event => {
-          if (event.id === note.id) {
-            found = true
-            loading = false
-            note = {...note, ...event}
-          }
+      sub = network.streamContext({
+        maxDepth: 6,
+        notes: [note],
+        onChunk: context => {
+          note = first(network.applyContext([note], user.applyMutes(context)))
+        },
+      })
+    }
 
-          seen.add(event.id)
-        })
+    loading = false
+  })
 
-        // Load authors
-        network.loadPeople(pluck("pubkey", children))
-
-        // Apply context
-        note = first(network.applyContext([note], chunk))
-      },
-    })
-
-    setTimeout(() => {
-      loading = false
-    }, 3000)
-
-    return () => sub.then(s => s.unsub())
+  onDestroy(() => {
+    sub?.unsub()
   })
 </script>
 
-{#if !loading && !found}
+{#if !loading && !note.content}
   <div in:fly={{y: 20}}>
     <Content size="lg" class="text-center">Sorry, we weren't able to find this note.</Content>
   </div>

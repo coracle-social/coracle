@@ -129,35 +129,74 @@ const loadParents = (notes, opts = {}) => {
   })
 }
 
-const streamContext = ({notes, onChunk, depth = 0}) =>
-  // Some relays reject very large filters, send multiple subscriptions
-  Promise.all(
-    chunk(256, notes).map(async events => {
-      // Instead of recurring to depth, trampoline so we can batch requests
-      while (events.length > 0 && depth > 0) {
-        const chunk = events.splice(0)
-        const authors = getStalePubkeys(pluck("pubkey", chunk))
-        const filter = [{kinds: [1, 7, 9735], "#e": pluck("id", chunk)}] as Array<object>
-        const relays = sampleRelays(aggregateScores(chunk.map(getRelaysForEventChildren)))
+const streamContext = ({notes, onChunk, maxDepth = 2}) => {
+  const subs = []
+  const seen = new Set()
+  const relays = sampleRelays(aggregateScores(notes.map(getRelaysForEventChildren)))
 
-        // Load authors and reactions in one subscription
-        if (authors.length > 0) {
-          filter.push({kinds: personKinds, authors})
-        }
+  const loadChunk = (events, depth) => {
+    // Remove anything from the chunk we've already seen
+    events = events.filter(e => e.kind === 1 && !seen.has(e.id))
 
-        depth -= 1
+    // If we have no new information, no need to re-subscribe
+    if (events.length === 0) {
+      return
+    }
 
-        const promise = load({relays, filter, onChunk})
+    // Add our new events to the list of stuff we've seen
+    events.forEach(e => seen.add(e.id))
 
-        // Don't await the promise when we're on the last level, since we won't be
-        // displaying those replies, and we await `load` before showing children
-        // to reduce reflow
-        if (depth > 0) {
-          events = await promise
-        }
-      }
+    // Unsubscribe our current listeners since we're about to replace them
+    subs.map(sub => sub.then(s => s.unsub()))
+
+    // Add a subscription for each chunk to listen for new likes/replies/zaps
+    chunk(256, Array.from(seen)).forEach(ids => {
+      subs.push(
+        listen({
+          relays,
+          filter: [{kinds: [1, 7, 9735], "#e": ids, since: now()}],
+          onChunk: newEvents => {
+            onChunk(newEvents)
+
+            if (depth < maxDepth) {
+              loadChunk(newEvents, depth + 1)
+            }
+          },
+        })
+      )
     })
-  )
+
+    const newIds = pluck("id", events)
+    const pubkeys = pluck("pubkey", events)
+
+    // Load any people we should know about
+    loadPeople(pubkeys)
+
+    // Load data prior to now for our new ids
+    chunk(256, newIds).forEach(ids => {
+      load({
+        relays,
+        filter: [{kinds: [1, 7, 9735], "#e": ids}],
+        onChunk: newEvents => {
+          onChunk(newEvents)
+
+          if (depth < maxDepth) {
+            loadChunk(newEvents, depth + 1)
+          }
+        },
+      })
+    })
+  }
+
+  // Kick things off by loading our first chunk
+  loadChunk(notes, 1)
+
+  return {
+    unsub: () => {
+      subs.map(sub => sub.then(s => s.unsub()))
+    },
+  }
+}
 
 const applyContext = (notes, context) => {
   context = context.map(assoc("isContext", true))
