@@ -6,6 +6,11 @@
     - Call close onbeforeunload to save pending changes
 - [ ] Fix iOS/safari/firefox
 - [ ] Revisit profile page and info, include similar access to hex keys etc on notes, keys page
+  - [ ] Add full profile details to key page
+  - [ ] Make profile edit more obvious
+  - [ ] Maybe consolidate settings pages into several sections, each with a modal
+  - [ ] Add zaps to likes tab
+  - [ ] Add like and zap details to note details
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
   - Requires updating my OS -_-

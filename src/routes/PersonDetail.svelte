@@ -56,7 +56,7 @@
   $: muted = find(m => m[1] === pubkey, $mutes)
 
   $: {
-    actions = [{onClick: share, label: "Share", icon: "share-nodes"}]
+    actions = []
 
     if ($canPublish) {
       if (following) {
@@ -64,22 +64,26 @@
       } else if (user.getPubkey() !== pubkey) {
         actions.push({onClick: follow, label: "Follow", icon: "user-plus"})
       }
+    }
 
-      if (muted) {
-        actions.push({onClick: unmute, label: "Muted", icon: "microphone-slash"})
-      } else if (user.getPubkey() !== pubkey) {
-        actions.push({onClick: mute, label: "Mute", icon: "microphone"})
-      }
+    actions.push({onClick: share, label: "Share", icon: "share-nodes"})
 
+    if (user.getPubkey() !== pubkey && $canPublish) {
       actions.push({
         onClick: () => navigate(`/messages/${npub}`),
         label: "Message",
         icon: "envelope",
       })
+
+      if (muted) {
+        actions.push({onClick: unmute, label: "Unmute", icon: "microphone"})
+      } else if (user.getPubkey() !== pubkey) {
+        actions.push({onClick: mute, label: "Mute", icon: "microphone-slash"})
+      }
     }
 
     if (pool.forceUrls.length === 0) {
-      actions.push({onClick: openProfileInfo, label: "Profile", icon: "info"})
+      actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
     }
 
     if (user.getPubkey() === pubkey && $canPublish) {

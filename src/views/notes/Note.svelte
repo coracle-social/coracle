@@ -125,23 +125,23 @@
   $: {
     actions = []
 
-    if (pool.forceUrls.length === 0) {
-      actions.push({
-        label: "Relays",
-        icon: "server",
-        onClick: () => {
-          showRelays = true
-        },
-      })
-    }
-
-    actions.push({label: "Permalink", icon: "link", onClick: copyLink})
+    actions.push({label: "Share", icon: "share-nodes", onClick: copyLink})
     actions.push({label: "Quote", icon: "quote-left", onClick: quote})
 
     if (muted) {
       actions.push({label: "Unmute", icon: "microphone", onClick: unmute})
     } else {
       actions.push({label: "Mute", icon: "microphone-slash", onClick: mute})
+    }
+
+    if (pool.forceUrls.length === 0) {
+      actions.push({
+        label: "Details",
+        icon: "info",
+        onClick: () => {
+          showRelays = true
+        },
+      })
     }
   }
 
@@ -302,7 +302,7 @@
     const nevent = nip19.neventEncode({id: note.id, relays: [note.seen_on]})
 
     copyToClipboard("nostr:" + nevent)
-    toast.show("info", "Copied to clipboard!")
+    toast.show("info", "Note link copied to clipboard!")
   }
 
   const quote = () => {
