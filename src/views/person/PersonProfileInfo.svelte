@@ -1,9 +1,8 @@
 <script lang="ts">
   import {nip05, nip19} from "nostr-tools"
-  import {toast} from "src/app/ui"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
-  import {copyToClipboard} from "src/util/html"
+  import CopyValue from "src/partials/CopyValue.svelte"
   import {onMount} from "svelte"
   import {fly} from "svelte/transition"
 
@@ -39,62 +38,21 @@
 
     loaded = true
   })
-
-  const copy = (label, text) => {
-    copyToClipboard(text)
-    toast.show("info", `${label} copied to clipboard!`)
-  }
 </script>
 
 <div in:fly={{y: 20}}>
   <Content>
     <h1 class="staatliches text-2xl">Profile Details</h1>
-    <div>
-      <div class="mb-1 text-lg">Public Key (Hex)</div>
-      <div class="font-mono text-sm">
-        <button
-          class="fa-solid fa-copy cursor-pointer"
-          on:click={() => copy("Public key", person.pubkey)} />
-        {person.pubkey}
-      </div>
-    </div>
-    <div>
-      <div class="mb-1 text-lg">Public Key (npub)</div>
-      <div class="font-mono text-sm">
-        {#if npub}
-          <button
-            class="fa-solid fa-copy cursor-pointer"
-            on:click={() => copy("Public key", npub)} />
-        {/if}
-        {npub}
-      </div>
-    </div>
+    <CopyValue label="Public Key (Hex)" value={person.pubkey} />
+    <CopyValue label="Public Key (npub)" value={npub} />
     {#if nprofile}
-      <div class="flex flex-col gap-2">
-        <div class="text-lg">Profile Link</div>
-        <div class="break-all font-mono text-sm">
-          <button
-            class="fa-solid fa-copy inline cursor-pointer"
-            on:click={() => copy("Profile", nprofile)} />
-          {nprofile}
-        </div>
-      </div>
+      <CopyValue label="Profile Link" value={nprofile} />
     {/if}
 
     <h1 class="staatliches mt-4 text-2xl">NIP05</h1>
 
     {#if loaded && person.verified_as}
-      <div>
-        <div class="mb-1 text-lg">NIP05 Identifier</div>
-        <div class="font-mono text-sm">
-          {#if person.verified_as}
-            <button
-              class="fa-solid fa-copy inline cursor-pointer"
-              on:click={() => copy("NIP05 Identifier", person.verified_as)} />
-          {/if}
-          {person.verified_as || "?"}
-        </div>
-      </div>
+      <CopyValue label="NIP 05 Identifier" value={person.verified_as} />
       {#if nip05ProfileData}
         <div>
           <div class="mb-2 text-lg">NIP05 Relay Configuration</div>

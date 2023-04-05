@@ -7,9 +7,7 @@
   - Fix force relays on login: http://localhost:5173/messages/npub1l66wvfm7dxhd6wmvpukpjpyhvwtlxzu0qqajqxjfpr4rlfa8hl5qlkfr3q
 - [ ] Fix iOS/safari/firefox
 - [ ] Revisit profile page and info
-  - [ ] include similar access to hex keys etc on notes
   - [ ] Add zaps to likes tab
-  - [ ] Add hex key, like and zap info to note details
 - [ ] Sort DMs, remember message status
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2

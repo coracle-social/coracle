@@ -15,10 +15,12 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
+  import CopyValue from "src/partials/CopyValue.svelte"
   import Content from "src/partials/Content.svelte"
-  import PersonSummary from "src/views/person/PersonSummary.svelte"
+  import Badge from "src/partials/Badge.svelte"
   import Popover from "src/partials/Popover.svelte"
   import PersonCircle from "src/partials/PersonCircle.svelte"
+  import PersonSummary from "src/views/person/PersonSummary.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Media from "src/partials/Media.svelte"
@@ -54,7 +56,7 @@
   let replyMentions = getDefaultReplyMentions()
   let replyContainer = null
   let visibleNotes = []
-  let showRelays = false
+  let showDetails = false
   let collapsed = false
 
   const {profile, canPublish, mutes} = user
@@ -63,6 +65,8 @@
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
   const person = watch("people", () => getPersonWithFallback(note.pubkey))
+  const nevent = nip19.neventEncode({id: note.id, relays: [note.seen_on]})
+  const bech32Note = nip19.noteEncode(note.id)
 
   let likes, zaps, like, border, childrenContainer, noteContainer, canZap, actions
   let muted = false
@@ -139,7 +143,7 @@
         label: "Details",
         icon: "info",
         onClick: () => {
-          showRelays = true
+          showDetails = true
         },
       })
     }
@@ -561,14 +565,39 @@
     </div>
   {/if}
 
-  {#if showRelays}
+  {#if showDetails}
     <Modal
       onEscape={() => {
-        showRelays = false
+        showDetails = false
       }}>
       <Content>
-        <p class="text-center">This note was found on the relay below.</p>
+        {#if zaps.length > 0}
+          <h1 class="staatliches text-2xl">Zapped By</h1>
+          <div class="grid grid-cols-2 gap-2">
+            {#each zaps as zap}
+              <div class="flex flex-col gap-1">
+                <Badge person={getPersonWithFallback(zap.request.pubkey)} />
+                <span class="ml-6 text-sm text-gray-5"
+                  >{formatSats(zap.invoiceAmount / 1000)} sats</span>
+              </div>
+            {/each}
+          </div>
+        {/if}
+        {#if likes.length > 0}
+          <h1 class="staatliches text-2xl">Liked By</h1>
+          <div class="grid grid-cols-2 gap-2">
+            {#each likes as like}
+              <Badge person={getPersonWithFallback(like.pubkey)} />
+            {/each}
+          </div>
+        {/if}
+        <h1 class="staatliches text-2xl">Relays</h1>
+        <p>This note was found on the relay below.</p>
         <RelayCard theme="black" showControls relay={{url: note.seen_on}} />
+        <h1 class="staatliches text-2xl">Details</h1>
+        <CopyValue label="Identifier" value={nevent} />
+        <CopyValue label="Event ID (note)" value={bech32Note} />
+        <CopyValue label="Event ID (hex)" value={note.id} />
       </Content>
     </Modal>
   {/if}

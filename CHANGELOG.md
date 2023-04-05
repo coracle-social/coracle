@@ -4,6 +4,11 @@
 
 - [x] Add ability to collapse threads
 - [x] Add titles to overflow menu on note detail
+- [x] Re-work streamContext to keep listening for updates
+- [x] Render notes within notifications properly
+- [x] Remove flag reactions, since they're somewhat redundant with mutes
+- [x] Generally improve UI consistency and feel
+- [x] Add event id, likers, and zappers to note info popover
 
 ## 0.2.21
 
