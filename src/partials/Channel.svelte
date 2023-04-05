@@ -32,8 +32,8 @@
     )
   }
 
-  // flex-col means the first is the last
-  const getLastListItem = () => document.querySelector("ul[class=channel-messages] li")
+  // flex-reverse-col means the first is the last
+  const getLastListItem = () => document.querySelector("ul.channel-messages li")
 
   const stickToBottom = async (behavior, cb) => {
     const shouldStick = window.scrollY + window.innerHeight > document.body.scrollHeight - 200
@@ -113,7 +113,7 @@
 
 <div class="flex h-full gap-4">
   <div class="relative w-full">
-    <div class="py-18 flex h-full flex-col pb-20">
+    <div class="py-18 flex h-screen flex-col pb-20">
       <ul
         class="channel-messages flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
         {#each annotatedMessages as m (m.id)}
@@ -128,9 +128,7 @@
         {/await}
       </ul>
     </div>
-    <div
-      class="fixed top-0 z-20 w-full border-b border-solid
-                border-gray-6 bg-gray-7 p-4">
+    <div class="fixed top-0 z-20 w-full border-b border-solid border-gray-6 bg-gray-7">
       <slot name="header" />
     </div>
     <div

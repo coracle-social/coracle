@@ -1,8 +1,5 @@
 # Current
 
-- [ ] Instead of doing streamContext, listen, at least on note detail page
-- [ ] Support https://github.com/nostr-protocol/nips/pull/211 as a bech32 entity
-
 - [ ] Fix performance issues
   - [ ] https://github.com/techfort/LokiJS
     - Use indexed adapter github.com/techfort/LokiJS/blob/master/tutorials/Persistence%20Adapters.md and partitioning adapter

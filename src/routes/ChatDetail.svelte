@@ -52,7 +52,7 @@
 </script>
 
 <Channel {loadMessages} {listenForMessages} {sendMessage}>
-  <div slot="header" class="flex items-start gap-4">
+  <div slot="header" class="flex items-start gap-4 p-4">
     <div class="flex items-center gap-4">
       <Anchor type="unstyled" class="fa fa-arrow-left cursor-pointer text-2xl" href="/chat" />
       <div

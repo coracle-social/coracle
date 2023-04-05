@@ -18,6 +18,7 @@
   import {routes} from "src/app/ui"
   import {lastChecked} from "src/app/listener"
   import PersonCircle from "src/partials/PersonCircle.svelte"
+  import PersonAbout from "src/partials/PersonAbout.svelte"
 
   export let entity
 
@@ -73,7 +74,7 @@
 </script>
 
 <Channel {loadMessages} {listenForMessages} {sendMessage}>
-  <div slot="header" class="flex items-start gap-4">
+  <div slot="header" class="mb-2 flex h-20 items-start gap-4 overflow-hidden p-4">
     <div class="flex items-center gap-4">
       <Anchor type="unstyled" class="fa fa-arrow-left cursor-pointer text-2xl" href="/messages" />
       <PersonCircle person={$person} size={12} />
@@ -90,7 +91,7 @@
           <span class="text-gray-1">Encrypted</span>
         </div>
       </div>
-      <div>{$person.kind0?.about || ""}</div>
+      <PersonAbout truncate person={$person} />
     </div>
   </div>
   <div
