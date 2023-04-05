@@ -4,79 +4,45 @@
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/views/relays/RelayCard.svelte"
   import {copyToClipboard} from "src/util/html"
-  import {warn} from "src/util/logger"
   import {onMount} from "svelte"
   import {fly} from "svelte/transition"
 
   export let person
 
-  // local items
   let nip05ProfileData = null
-  let nip05QueryEndpoint = null
-  let nProfile = null
+  let nprofile = null
   let npub = nip19.npubEncode(person.pubkey)
-
-  // local state
   let loaded = false
 
-  onMount(() => {
-    if (person && person.verified_as) {
-      // get target URI
-      nip05QueryEndpoint = getNip05QueryEndpoint(person.verified_as)
-
-      // calculate nProfile from NIP05 data, if available
-      nProfile = nip19.nprofileEncode({
+  onMount(async () => {
+    if (person.verified_as) {
+      nprofile = nip19.nprofileEncode({
         pubkey: person.pubkey,
         relays: person.relays,
       })
 
-      // fetch data
-      nip05
-        .queryProfile(person.verified_as)
-        .then(data => {
-          nip05ProfileData = data
+      try {
+        nip05ProfileData = await nip05.queryProfile(person.verified_as)
+      } catch (e) {
+        // Pass
+      }
 
-          // recalculate nprofile using NIP05 relay data, if specified.
-          // In theory, those *should* be the user's prefered relay set.
-          if (nip05ProfileData?.relays?.length) {
-            nProfile = nip19.nprofileEncode({
-              pubkey: person.pubkey,
-              relays: nip05ProfileData.relays,
-            })
-          }
+      // recalculate nprofile using NIP05 relay data, if specified.
+      // In theory, those *should* be the user's prefered relay set.
+      if (nip05ProfileData?.relays?.length) {
+        nprofile = nip19.nprofileEncode({
+          pubkey: person.pubkey,
+          relays: nip05ProfileData.relays,
         })
-        .catch(err => {
-          warn("NIP05 profile retrieval failed")
-        })
-        .finally(() => {
-          loaded = true
-        })
-    } else {
-      loaded = true
+      }
     }
+
+    loaded = true
   })
 
-  // Construct NIP05 URL from identifier.
-  function getNip05QueryEndpoint(identifier) {
-    if (!identifier) return null
-
-    let name, domain
-
-    if (identifier.match(/^.*@.*$/)) {
-      ;[name, domain] = identifier.split("@")
-    } else {
-      // In case of no name (domain-only), mimick the reasonable
-      // (but somewhat questionable) behaviour of nostr-tools/nip05,
-      // which defaults the name value
-      ;[name, domain] = ["_", identifier]
-    }
-    return `https://${domain}/.well-known/nostr.json?name=${name}`
-  }
-
-  // helper: clipboard & toast
-  function copy(text) {
+  const copy = (label, text) => {
     copyToClipboard(text)
-    toast.show("info", `Copied.`)
+    toast.show("info", `${label} copied to clipboard!`)
   }
 </script>
 
@@ -86,7 +52,9 @@
     <div>
       <div class="mb-1 text-lg">Public Key (Hex)</div>
       <div class="font-mono text-sm">
-        <button class="fa-solid fa-copy cursor-pointer" on:click={() => copy(person.pubkey)} />
+        <button
+          class="fa-solid fa-copy cursor-pointer"
+          on:click={() => copy("Public key", person.pubkey)} />
         {person.pubkey}
       </div>
     </div>
@@ -94,17 +62,21 @@
       <div class="mb-1 text-lg">Public Key (npub)</div>
       <div class="font-mono text-sm">
         {#if npub}
-          <button class="fa-solid fa-copy cursor-pointer" on:click={() => copy(npub)} />
+          <button
+            class="fa-solid fa-copy cursor-pointer"
+            on:click={() => copy("Public key", npub)} />
         {/if}
         {npub}
       </div>
     </div>
-    {#if nProfile}
-      <div>
-        <div class="mb-1 text-lg">nprofile</div>
+    {#if nprofile}
+      <div class="flex flex-col gap-2">
+        <div class="text-lg">Profile Link</div>
         <div class="break-all font-mono text-sm">
-          <button class="fa-solid fa-copy inline cursor-pointer" on:click={() => copy(nProfile)} />
-          {nProfile}
+          <button
+            class="fa-solid fa-copy inline cursor-pointer"
+            on:click={() => copy("Profile", nprofile)} />
+          {nprofile}
         </div>
       </div>
     {/if}
@@ -118,21 +90,9 @@
           {#if person.verified_as}
             <button
               class="fa-solid fa-copy inline cursor-pointer"
-              on:click={() => copy(person.verified_as)} />
+              on:click={() => copy("NIP05 Identifier", person.verified_as)} />
           {/if}
           {person.verified_as || "?"}
-        </div>
-      </div>
-      <div>
-        <div class="mb-1 text-lg">NIP05 Validation Endpoint</div>
-        <div class="font-mono text-sm">
-          {#if nip05QueryEndpoint}
-            <button
-              class="fa-solid fa-copy inline cursor-pointer"
-              on:click={() => copy(nip05QueryEndpoint)} />
-          {/if}
-
-          {nip05QueryEndpoint || "?"}
         </div>
       </div>
       {#if nip05ProfileData}
@@ -142,14 +102,13 @@
             <p class="mb-4 text-sm text-gray-1">
               These relays are advertised by the NIP05 identifier's validation endpoint.
             </p>
-
             <div class="grid grid-cols-1 gap-4">
               {#each nip05ProfileData?.relays as url}
                 <RelayCard relay={{url}} />
               {/each}
             </div>
           {:else}
-            <p class="mb-4 text-sm text-gray-1">
+            <p class="mb-4 text-sm">
               <i class="fa-solid fa-info-circle" />
               No relays are advertised by the NIP05 identifier's validation endpoint.
             </p>

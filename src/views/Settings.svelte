@@ -35,7 +35,7 @@
   <Content>
     <div class="mb-4 flex flex-col items-center justify-center">
       <Heading>App Settings</Heading>
-      <p>Tweak Coracle to work the way you want it to.</p>
+      <p>Make Coracle work the way you want it to.</p>
     </div>
     <div class="flex w-full flex-col gap-8">
       <div class="flex flex-col gap-1">

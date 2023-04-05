@@ -7,6 +7,7 @@
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
+  import Toggle from "src/partials/Toggle.svelte"
   import Heading from "src/partials/Heading.svelte"
   import keys from "src/agent/keys"
   import {toast} from "src/app/ui"
@@ -15,9 +16,13 @@
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
   const keypairUrl = "https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/"
 
-  const copyKey = type => {
-    copyToClipboard(type === "private" ? nip19.nsecEncode($privkey) : nip19.npubEncode($pubkey))
+  let asHex = false
 
+  $: pubkeyDisplay = asHex ? $pubkey : nip19.npubEncode($pubkey)
+  $: privkeyDisplay = asHex || !$privkey ? $privkey : nip19.nsecEncode($privkey)
+
+  const copyKey = (type, value) => {
+    copyToClipboard(value)
     toast.show("info", `Your ${type} key has been copied to the clipboard.`)
   }
 
@@ -32,7 +37,7 @@
 
 <div in:fly={{y: 20}}>
   <Content>
-    <div class="mb-4 flex flex-col items-center justify-center">
+    <div class="flex flex-col items-center justify-center">
       <Heading>Your Keys</Heading>
       <p>
         Your account is identified across the network using a public/private <Anchor
@@ -43,12 +48,21 @@
     </div>
     <div class="flex w-full flex-col gap-8">
       <div class="flex flex-col gap-1">
+        <div class="flex items-center gap-2">
+          <strong>Show keys in hex format</strong>
+          <Toggle bind:value={asHex} />
+        </div>
+        <p class="text-sm text-gray-1">
+          Under the hood, Nostr uses a different encoding to represent keys.
+        </p>
+      </div>
+      <div class="flex flex-col gap-1">
         <strong>Public Key</strong>
-        <Input disabled value={$pubkey ? nip19.npubEncode($pubkey) : ""}>
+        <Input disabled value={pubkeyDisplay}>
           <button
             slot="after"
             class="fa-solid fa-copy cursor-pointer"
-            on:click={() => copyKey("public")} />
+            on:click={() => copyKey("public", pubkeyDisplay)} />
         </Input>
         <p class="text-sm text-gray-1">
           Your public key identifies your account. You can share this with people trying to find you
@@ -58,11 +72,11 @@
       {#if $privkey}
         <div class="flex flex-col gap-1">
           <strong>Private Key</strong>
-          <Input disabled type="password" value={nip19.nsecEncode($privkey)}>
+          <Input disabled type="password" value={privkeyDisplay}>
             <button
               slot="after"
               class="fa-solid fa-copy cursor-pointer"
-              on:click={() => copyKey("private")} />
+              on:click={() => copyKey("private", privkeyDisplay)} />
           </Input>
           <p class="text-sm text-gray-1">
             Your private key is used to prove your identity by cryptographically signing messages. <strong

@@ -4,6 +4,7 @@
   import {navigate} from "svelte-routing"
   import {find} from "ramda"
   import {nip05, nip19} from "nostr-tools"
+  import Heading from "src/partials/Heading.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -62,8 +63,15 @@
 </script>
 
 <Content>
+  <div class="flex flex-col items-center justify-center">
+    <Heading>Find Something</Heading>
+    <p>
+      Enter any nostr identifier (npub, nevent, nprofile, note or user@domain.tld), or click on the
+      camera icon to scan with your device's camera instead.
+    </p>
+  </div>
   <form class="flex gap-2" on:submit|preventDefault={() => handleInput(value)}>
-    <Input placeholder="nprofile..." bind:value wrapperClass="flex-grow" />
+    <Input placeholder="nprofile1..." bind:value wrapperClass="flex-grow" />
     <Anchor type="button" on:click={() => handleInput(value)}>
       <i class="fa fa-arrow-right" />
     </Anchor>
@@ -71,10 +79,6 @@
       <i class="fa fa-camera" />
     </Anchor>
   </form>
-  <div class="text-center text-gray-1">
-    Enter any nostr identifier (npub, nevent, nprofile, note or user@domain.tld), or click on the
-    camera icon to scan with your device's camera instead.
-  </div>
   {#if status === "loading"}
     <Spinner>Loading your camera...</Spinner>
   {/if}

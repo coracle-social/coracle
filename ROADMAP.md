@@ -4,13 +4,13 @@
   - [ ] https://github.com/techfort/LokiJS
     - Use indexed adapter github.com/techfort/LokiJS/blob/master/tutorials/Persistence%20Adapters.md and partitioning adapter
     - Call close onbeforeunload to save pending changes
+  - Fix force relays on login: http://localhost:5173/messages/npub1l66wvfm7dxhd6wmvpukpjpyhvwtlxzu0qqajqxjfpr4rlfa8hl5qlkfr3q
 - [ ] Fix iOS/safari/firefox
-- [ ] Revisit profile page and info, include similar access to hex keys etc on notes, keys page
-  - [ ] Add full profile details to key page
-  - [ ] Make profile edit more obvious
-  - [ ] Maybe consolidate settings pages into several sections, each with a modal
+- [ ] Revisit profile page and info
+  - [ ] include similar access to hex keys etc on notes
   - [ ] Add zaps to likes tab
-  - [ ] Add like and zap details to note details
+  - [ ] Add hex key, like and zap info to note details
+- [ ] Sort DMs, remember message status
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
   - Requires updating my OS -_-

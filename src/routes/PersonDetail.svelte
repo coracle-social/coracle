@@ -191,7 +191,7 @@
             </div>
           {/if}
         </div>
-        <OverflowMenu size="xl" {actions} />
+        <OverflowMenu {actions} />
       </div>
       <PersonAbout {person} />
       {#if person?.petnames}
