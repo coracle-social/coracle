@@ -10,7 +10,7 @@
   import Note from "src/views/notes/Note.svelte"
   import user from "src/agent/user"
   import network from "src/agent/network"
-  import {modal} from "src/app/ui"
+  import {modal, globalRelay} from "src/app/ui"
   import {mergeParents} from "src/app"
 
   export let filter
@@ -101,7 +101,7 @@
 
       // Wait for this page to load before trying again
       await network.load({
-        relays,
+        relays: $globalRelay ? [{url: $globalRelay}] : relays,
         filter: mergeFilter(filter, cursor.getFilter()),
         onChunk,
       })
@@ -133,7 +133,9 @@
 
   <div class="flex flex-col gap-4">
     {#each notes as note (note.id)}
-      <Note depth={2} {note} />
+      {#if !$globalRelay || note.seen_on.includes($globalRelay)}
+        <Note depth={2} {note} />
+      {/if}
     {/each}
   </div>
 

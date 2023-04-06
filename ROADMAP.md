@@ -1,5 +1,9 @@
 # Current
 
+- [ ] Relays bounty
+  - [x] Ability to click into a relay's global feed
+  - [x] Ability to filter feeds by relay
+  - [ ] Ability to create custom feeds
 - [ ] Fix tag-style event mentions. Probably transform all mentions into entities in parse
 - [ ] Fix performance issues
   - [ ] https://github.com/techfort/LokiJS

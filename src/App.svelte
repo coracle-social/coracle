@@ -57,6 +57,7 @@
   import PrivKeyLogin from "src/views/login/PrivKeyLogin.svelte"
   import PubKeyLogin from "src/views/login/PubKeyLogin.svelte"
   import Onboarding from "src/views/onboarding/Onboarding.svelte"
+  import ForegroundButtons from "src/views/notes/ForegroundButtons.svelte"
   import NoteCreate from "src/views/notes/NoteCreate.svelte"
   import NoteDetail from "src/views/notes/NoteDetail.svelte"
   import PersonList from "src/views/person/PersonList.svelte"
@@ -67,7 +68,7 @@
 
   Object.assign(window, {cmd, user, keys, network, pool, sync, tables, bech32ToHex, hexToBech32})
 
-  export let url = ""
+  export let url = location.pathname
 
   let ready = false
   let scrollY
@@ -121,6 +122,8 @@
 
     // Log usage on navigate
     const unsubHistory = globalHistory.listen(({location}) => {
+      url = location.pathname
+
       if (!location.hash) {
         logUsage(btoa(["page", getPageName()].join(":")))
       }
@@ -256,6 +259,10 @@
         </Route>
         <Route path="*" component={NotFound} />
       </div>
+    {/if}
+
+    {#if !url.match(/messages|chat|relays$|keys|settings|logout$/)}
+      <ForegroundButtons />
     {/if}
 
     <SideNav />

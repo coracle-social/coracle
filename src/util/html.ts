@@ -158,7 +158,7 @@ export const parseContent = content => {
     }
 
     const urlMatch = tail.match(
-      /^((http|ws)s?:\/\/)?[-a-z0-9@:%_\+~#=\.]+\.[a-z]{1,6}[-a-z0-9:%_\+~#\?!&\/=;\.]*/gi
+      /^((http|ws)s?:\/\/)?[-a-z0-9@:%_\+~#=\.]+\.[a-z]{1,6}[-a-z0-9:%_\+~#\?&\/=;\.]*/gi
     )
 
     // Skip url if it's just the end of a filepath

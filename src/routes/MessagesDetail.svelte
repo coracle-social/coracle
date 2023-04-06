@@ -1,7 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
   import {assoc} from "ramda"
-  import {renameProp} from "hurdak/lib/hurdak"
   import {toHex, displayPerson} from "src/util/nostr"
   import {now, formatTimestamp} from "src/util/misc"
   import {Tags} from "src/util/nostr"
@@ -33,14 +32,15 @@
   }
 
   const decryptMessages = async events => {
+    const results = []
     // Gotta do it in serial because of extension limitations
     for (const event of events) {
       const key = event.pubkey === pubkey ? pubkey : Tags.from(event).type("p").values().first()
 
-      event.decryptedContent = await crypt.decrypt(key, event.content)
+      results.push({...event, content: await crypt.decrypt(key, event.content)})
     }
 
-    return events.map(renameProp("decryptedContent", "content"))
+    return results
   }
 
   const getFilters = extra => [
@@ -107,7 +107,9 @@
         "rounded-bl-none bg-gray-7": message.person.pubkey !== user.getPubkey(),
       })}>
       <div class="break-words">
-        <NoteContent showEntire note={message} />
+        {#if typeof message.content === "string"}
+          <NoteContent showEntire note={message} />
+        {/if}
       </div>
       <small
         class="mt-1"

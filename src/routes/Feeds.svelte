@@ -4,7 +4,6 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Tabs from "src/partials/Tabs.svelte"
-  import NewNoteButton from "src/views/notes/NewNoteButton.svelte"
   import Follows from "src/views/feed/Follows.svelte"
   import Network from "src/views/feed/Network.svelte"
   import user from "src/agent/user"
@@ -34,5 +33,3 @@
     {/if}
   </div>
 </Content>
-
-<NewNoteButton />

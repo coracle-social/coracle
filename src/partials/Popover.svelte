@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type {Placement} from "tippy.js"
   import "tippy.js/dist/tippy.css"
   import "tippy.js/animations/shift-away.css"
   import tippy from "tippy.js"
@@ -6,6 +7,7 @@
 
   export let theme = "dark"
   export let triggerType = "click"
+  export let placement = "top"
 
   let trigger
   let tooltip
@@ -14,6 +16,7 @@
   onMount(() => {
     instance = tippy(trigger, {
       theme,
+      placement: placement as Placement,
       appendTo: () => document.body,
       allowHTML: true,
       interactive: true,

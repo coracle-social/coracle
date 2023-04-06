@@ -6,8 +6,16 @@
   import {tweened} from "svelte/motion"
   import {slide} from "svelte/transition"
   import {quantify} from "hurdak/lib/hurdak"
-  import {Tags, findRootId, findReplyId, displayPerson, isLike} from "src/util/nostr"
-  import {formatTimestamp, now, tryJson, formatSats, fetchJson} from "src/util/misc"
+  import {Tags, displayRelay, findRootId, findReplyId, displayPerson, isLike} from "src/util/nostr"
+  import {
+    stringToHue,
+    hsl,
+    formatTimestamp,
+    now,
+    tryJson,
+    formatSats,
+    fetchJson,
+  } from "src/util/misc"
   import {isMobile, copyToClipboard} from "src/util/html"
   import {invoiceAmount} from "src/util/lightning"
   import QRCode from "src/partials/QRCode.svelte"
@@ -36,7 +44,7 @@
   import {getPersonWithFallback} from "src/agent/tables"
   import {watch} from "src/agent/storage"
   import cmd from "src/agent/cmd"
-  import {routes} from "src/app/ui"
+  import {routes, globalRelay} from "src/app/ui"
   import {publishWithToast} from "src/app"
   import NoteContent from "src/views/notes/NoteContent.svelte"
 
@@ -357,7 +365,7 @@
 <svelte:body on:click={onBodyClick} />
 
 {#if $person}
-  <div bind:this={noteContainer} class="note relative">
+  <div bind:this={noteContainer} class="note group relative">
     <Card class="relative flex gap-4" on:click={onClick} {interactive} {invertColors}>
       {#if !showParent}
         <div
@@ -445,8 +453,27 @@
                 {formatSats($zapsTotal)}
               </button>
             </div>
-            <div on:click|stopPropagation>
-              <OverflowMenu {actions} />
+            <div on:click|stopPropagation class="flex items-center">
+              {#if pool.forceUrls.length === 0}
+                <div class="hidden group-hover:flex">
+                  {#each note.seen_on as url}
+                    <Popover triggerType="mouseenter">
+                      <div slot="trigger" class="p-1">
+                        <div
+                          class="h-3 w-3 rounded-full border border-solid border-gray-6"
+                          style={`background: ${hsl(stringToHue(url))}`}
+                          on:click={() => globalRelay.set(url)} />
+                      </div>
+                      <div slot="tooltip">
+                        {displayRelay({url})}
+                      </div>
+                    </Popover>
+                  {/each}
+                </div>
+              {/if}
+              <div class="ml-2">
+                <OverflowMenu {actions} />
+              </div>
             </div>
           </div>
         </div>

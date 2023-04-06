@@ -12,7 +12,6 @@
   import Content from "src/partials/Content.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import NewNoteButton from "src/views/notes/NewNoteButton.svelte"
   import Notes from "src/views/person/Notes.svelte"
   import Likes from "src/views/person/Likes.svelte"
   import Relays from "src/views/person/Relays.svelte"
@@ -223,5 +222,3 @@
     {/if}
   {/if}
 </Content>
-
-<NewNoteButton {pubkey} />

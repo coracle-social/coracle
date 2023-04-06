@@ -279,7 +279,7 @@ async function subscribe({relays, filter, onEvent, onEose}: SubscribeOpts) {
 
   Meta.onSubscriptionStart(urls)
 
-  executor.subscribe(filters, {
+  const sub = executor.subscribe(filters, {
     onEvent: (url, event) => {
       const seen_on = seen.get(event.id)
 
@@ -328,6 +328,7 @@ async function subscribe({relays, filter, onEvent, onEose}: SubscribeOpts) {
     unsub: () => {
       log(`Closing subscription`, filters)
 
+      sub.unsubscribe()
       executor.target.cleanup()
 
       Meta.onSubscriptionEnd(urls)

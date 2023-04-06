@@ -64,7 +64,8 @@
     if (typeof value === "string") {
       l += value.length
 
-      if (shouldTruncate && l > maxLength && type !== "newline") {
+      // Content[i] may be undefined if we're on a linebreak that was spliced out
+      if (content[i] && shouldTruncate && l > maxLength && type !== "newline") {
         content[i].value = value.trim()
         content.splice(i + 1, content.length, {type: "text", value: "..."})
         break
