@@ -50,7 +50,8 @@
   import NoteContent from "src/views/notes/NoteContent.svelte"
 
   export let note
-  export let setFeedRelay
+  export let feedRelay
+  export let setFeedRelay = null
   export let depth = 0
   export let anchorId = null
   export let showParent = true
@@ -134,8 +135,15 @@
   $: $likesCount = likes.length
   $: $zapsTotal = sum(zaps.map(zap => zap.invoiceAmount)) / 1000
   $: $repliesCount = note.replies.length
-  $: visibleNotes = note.replies.filter(r => (showContext ? true : !r.isContext))
   $: canZap = $person?.zapper && $person?.pubkey !== user.getPubkey()
+  $: visibleNotes = note.replies.filter(r => {
+    if (feedRelay && !r.seen_on.includes(feedRelay.url)) {
+      return false
+    }
+
+    return showContext ? true : !r.isContext
+  })
+
   $: {
     actions = []
 
@@ -393,7 +401,7 @@
             <div slot="trigger">
               <Anchor
                 type="unstyled"
-                class="flex items-center gap-2 text-lg font-bold"
+                class="flex items-center gap-2 pr-16 text-lg font-bold sm:pr-0"
                 href={isMobile ? null : routes.person($person.pubkey)}>
                 <span>{displayPerson($person)}</span>
                 {#if $person.verified_as}
@@ -465,18 +473,31 @@
             </div>
             <div on:click|stopPropagation class="flex items-center">
               {#if pool.forceUrls.length === 0}
+                <!-- Mobile version -->
                 <div
-                  class={cx("absolute top-0 right-0 m-3 sm:relative sm:m-0", {
-                    "hidden group-hover:flex": !showEntire,
-                    flex: showEntire,
+                  style="transform: scale(-1, 1)"
+                  class="absolute top-0 right-0 m-3 grid grid-cols-3 gap-2 sm:hidden">
+                  {#each note.seen_on as url, i}
+                    <div class={`cursor-pointer order-${3 - (i % 3)}`}>
+                      <div
+                        class="h-3 w-3 rounded-full border border-solid border-gray-6"
+                        style={`background: ${hsl(stringToHue(url))}`}
+                        on:click={() => setFeedRelay?.({url})} />
+                    </div>
+                  {/each}
+                </div>
+                <!-- Desktop version -->
+                <div
+                  class={cx("hidden sm:flex transition-opacity", {
+                    "opacity-0 group-hover:opacity-100": !showEntire,
                   })}>
-                  {#each note.seen_on as url}
+                  {#each note.seen_on as url, i}
                     <Popover triggerType="mouseenter" interactive={false}>
                       <div slot="trigger" class="cursor-pointer p-1">
                         <div
                           class="h-3 w-3 rounded-full border border-solid border-gray-6"
                           style={`background: ${hsl(stringToHue(url))}`}
-                          on:click={() => setFeedRelay({url})} />
+                          on:click={() => setFeedRelay?.({url})} />
                       </div>
                       <div slot="tooltip">{displayRelay({url})}</div>
                     </Popover>
@@ -596,6 +617,8 @@
             showParent={false}
             note={r}
             depth={depth - 1}
+            {feedRelay}
+            {setFeedRelay}
             {invertColors}
             {anchorId}
             {showContext} />

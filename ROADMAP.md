@@ -1,13 +1,14 @@
 # Current
 
-- [ ] Fix scrolling with embedded modals by registering open modals in the component
 - [ ] Relays bounty
   - [x] Ability to click into a relay's global feed
-  - [ ] Ability to filter feeds by relay
-    - Global Mutes? Global Whitelist?
-    - Open in modal with "here's what this feed would look like with only this relay"
+  - [x] Ability to filter feeds by relay
+    - [-] Global Mutes? Global Whitelist?
+    - [x] Open in modal with "here's what this feed would look like with only this relay"
+  - [ ] Fix scrolling with embedded modals by registering open modals in the component
   - [ ] Ability to create custom feeds
 - [ ] Fix tag-style event mentions. Probably transform all mentions into entities in parse
+- [ ] Some lnurls aren't working npub1y3k2nheva29y9ej8a22e07epuxrn04rvgy28wvs54y57j7vsxxuq0gvp4j
 - [ ] Fix performance issues
   - [ ] https://github.com/techfort/LokiJS
     - Use indexed adapter github.com/techfort/LokiJS/blob/master/tutorials/Persistence%20Adapters.md and partitioning adapter

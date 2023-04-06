@@ -24,7 +24,7 @@
   import user from "src/agent/user"
   import {loadAppData} from "src/app"
   import {theme, getThemeVariables} from "src/app/ui"
-  import {modal, routes, menuIsOpen, logUsage} from "src/app/ui"
+  import {modal, openModals, routes, menuIsOpen, logUsage} from "src/app/ui"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -97,11 +97,16 @@
   }
 
   onMount(() => {
-    // Keep scroll position on body, but don't allow scrolling
+    // Log modals
     const unsubModal = modal.subscribe($modal => {
       if ($modal) {
         logUsage(btoa(["modal", $modal.type].join(":")))
+      }
+    })
 
+    // Keep scroll position on body, but don't allow scrolling
+    const unsubOpenModals = openModals.subscribe(n => {
+      if (n > 0) {
         // This is not idempotent, so don't duplicate it
         if (document.body.style.position !== "fixed") {
           scrollY = window.scrollY
@@ -133,6 +138,7 @@
     return () => {
       unsubHistory()
       unsubModal()
+      unsubOpenModals()
     }
   })
 

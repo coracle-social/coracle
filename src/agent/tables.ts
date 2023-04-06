@@ -36,6 +36,7 @@ export const routes = new Table("routes", "id", {
 listener.connect()
 
 export const getPersonWithFallback = pubkey => people.get(pubkey) || {pubkey}
+export const getRelayWithFallback = url => relays.get(url) || {url}
 
 const ready = derived(pluck("ready", Object.values(registry)), all(identity))
 

@@ -125,7 +125,7 @@ export const poll = (t, cb) => {
   }
 }
 
-export const createScroller = (loadMore, {reverse = false} = {}) => {
+export const createScroller = (loadMore, {reverse = false, element = document.body} = {}) => {
   const THRESHOLD = 2000
 
   // NOTE TO FUTURE SELF
@@ -136,10 +136,11 @@ export const createScroller = (loadMore, {reverse = false} = {}) => {
   const check = async () => {
     // While we have empty space, fill it
     const {scrollY, innerHeight} = window
-    const {scrollHeight} = document.body
+    const {scrollHeight, scrollTop} = element
+    const offset = scrollTop || scrollY
     const shouldLoad = reverse
-      ? scrollY < THRESHOLD
-      : scrollY + innerHeight + THRESHOLD > scrollHeight
+      ? offset < THRESHOLD
+      : offset + innerHeight + THRESHOLD > scrollHeight
 
     // Only trigger loading the first time we reach the threshold
     if (shouldLoad) {

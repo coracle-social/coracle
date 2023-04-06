@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {fly} from "svelte/transition"
   import user from "src/agent/user"
   import {modal} from "src/app/ui"
 

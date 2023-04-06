@@ -6,6 +6,8 @@
   import {log} from "src/util/logger"
   import {asDisplayEvent} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
+  import RelayFeed from "src/views/feed/RelayFeed.svelte"
+  import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/views/notes/Note.svelte"
   import user from "src/agent/user"
@@ -18,6 +20,11 @@
 
   let sub = null
   let loading = true
+  let feedRelay = null
+
+  const setFeedRelay = relay => {
+    feedRelay = relay
+  }
 
   onMount(async () => {
     if (!note.pubkey) {
@@ -56,10 +63,23 @@
   </div>
 {:else if note.pubkey}
   <div in:fly={{y: 20}} class="m-auto flex w-full max-w-2xl flex-col gap-4 p-4">
-    <Note showContext depth={6} anchorId={note.id} note={asDisplayEvent(note)} {invertColors} />
+    <Note
+      showContext
+      depth={6}
+      anchorId={note.id}
+      note={asDisplayEvent(note)}
+      {invertColors}
+      {feedRelay}
+      {setFeedRelay} />
   </div>
 {/if}
 
 {#if loading}
   <Spinner />
+{/if}
+
+{#if feedRelay}
+  <Modal onEscape={() => setFeedRelay(null)}>
+    <RelayFeed {feedRelay} notes={[note]} depth={6} showContext />
+  </Modal>
 {/if}

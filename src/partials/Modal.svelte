@@ -1,9 +1,19 @@
 <script>
+  import {onMount, onDestroy} from "svelte"
   import {fly, fade} from "svelte/transition"
+  import {openModals} from "src/app/ui"
 
   export let onEscape = null
 
   let root, content
+
+  onMount(() => {
+    openModals.update(n => n + 1)
+  })
+
+  onDestroy(() => {
+    openModals.update(n => n - 1)
+  })
 </script>
 
 <svelte:body

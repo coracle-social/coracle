@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {objOf} from "ramda"
+  import {objOf, last} from "ramda"
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {warn} from "src/util/logger"
@@ -9,6 +9,8 @@
   import {sampleRelays} from "src/agent/relays"
 
   export let entity
+
+  entity = last(entity.split(":"))
 
   let type, data, relays
 

@@ -118,7 +118,7 @@ export const getRelaysForEventParent = event => {
 // to read from the current user's network's read relays instead.
 export const getRelaysForEventChildren = event => {
   return uniqByUrl(
-    getPubkeyReadRelays(event.pubkey).concat(event.seen_on.map(url => ({url, score: 1})))
+    getPubkeyReadRelays(event.pubkey).concat((event.seen_on || []).map(url => ({url, score: 1})))
   )
 }
 

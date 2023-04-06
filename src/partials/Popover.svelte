@@ -9,6 +9,7 @@
   export let triggerType = "click"
   export let placement = "top"
   export let interactive = true
+  export let arrow = false
 
   let trigger
   let tooltip
@@ -17,6 +18,7 @@
   onMount(() => {
     instance = tippy(trigger, {
       theme,
+      arrow,
       placement: placement as Placement,
       appendTo: () => document.body,
       allowHTML: true,

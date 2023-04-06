@@ -6,7 +6,7 @@ import {navigate} from "svelte-routing"
 import {nip19} from "nostr-tools"
 import {writable, get} from "svelte/store"
 import {globalHistory} from "svelte-routing/src/history"
-import {sleep, WritableList, synced, hash} from "src/util/misc"
+import {sleep, synced, hash} from "src/util/misc"
 import {warn} from "src/util/logger"
 import user from "src/agent/user"
 
@@ -47,6 +47,8 @@ toast.show = (type, message, timeout = 5) => {
 export const menuIsOpen = writable(false)
 
 // Modals
+
+export const openModals = writable(0)
 
 export const modal = {
   history: [],

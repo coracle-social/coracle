@@ -3,7 +3,8 @@
   import {between} from "hurdak/lib/hurdak"
   import {displayRelay} from "src/util/nostr"
   import {poll, stringToHue, hsl} from "src/util/misc"
-  import pool from 'src/agent/pool'
+  import Anchor from "src/partials/Anchor.svelte"
+  import pool from "src/agent/pool"
 
   export let relay
 
@@ -20,9 +21,13 @@
 
 <div class="flex items-center gap-2 text-xl">
   <i class={relay.url.startsWith("wss") ? "fa fa-lock" : "fa fa-unlock"} />
-  <span class="border-b border-solid" style={`border-color: ${hsl(stringToHue(relay.url))}`}>
+  <Anchor
+    type="unstyled"
+    href={`/relays/${btoa(relay.url)}`}
+    class="border-b border-solid"
+    style={`border-color: ${hsl(stringToHue(relay.url))}`}>
     {displayRelay(relay)}
-  </span>
+  </Anchor>
   <span
     on:mouseout={() => {
       showStatus = false
