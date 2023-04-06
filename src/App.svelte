@@ -64,8 +64,8 @@
   import PersonProfileInfo from "src/views/person/PersonProfileInfo.svelte"
   import PersonShare from "src/views/person/PersonShare.svelte"
   import AddRelay from "src/views/relays/AddRelay.svelte"
-  import RelayCard from "src/views/relays/RelayCard.svelte"
-  import GlobalRelays from "src/views/relays/GlobalRelays.svelte"
+  import RelayModal from "src/views/relays/RelayModal.svelte"
+  import MuteRelays from "src/views/relays/MuteRelays.svelte"
 
   Object.assign(window, {cmd, user, keys, network, pool, sync, tables, bech32ToHex, hexToBech32})
 
@@ -279,8 +279,10 @@
           <NoteCreate pubkey={$modal.pubkey} nevent={$modal.nevent} />
         {:else if $modal.type === "relay/add"}
           <AddRelay />
-        {:else if $modal.type === "relays/global"}
-          <GlobalRelays />
+        {:else if $modal.type === "relays/mute"}
+          <MuteRelays />
+        {:else if $modal.type === "relays/modal"}
+          <RelayModal url={$modal.url} />
         {:else if $modal.type === "onboarding"}
           <Onboarding stage={$modal.stage} />
         {:else if $modal.type === "room/edit"}

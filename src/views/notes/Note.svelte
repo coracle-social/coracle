@@ -464,17 +464,20 @@
             </div>
             <div on:click|stopPropagation class="flex items-center">
               {#if pool.forceUrls.length === 0}
-                <div class="hidden group-hover:flex">
+                <div
+                  class={cx("absolute top-0 right-0 m-3 sm:relative sm:m-0", {
+                    "hidden group-hover:flex": !showEntire,
+                    flex: showEntire,
+                  })}>
                   {#each note.seen_on as url}
-                    <Popover triggerType="mouseenter">
-                      <div slot="trigger" class="p-1">
+                    <Popover triggerType="mouseenter" interactive={false}>
+                      <div slot="trigger" class="cursor-pointer p-1">
                         <div
                           class="h-3 w-3 rounded-full border border-solid border-gray-6"
-                          style={`background: ${hsl(stringToHue(url))}`} />
+                          style={`background: ${hsl(stringToHue(url))}`}
+                          on:click={() => modal.set({type: "relays/modal", url})} />
                       </div>
-                      <div slot="tooltip">
-                        {displayRelay({url})}
-                      </div>
+                      <div slot="tooltip">{displayRelay({url})}</div>
                     </Popover>
                   {/each}
                 </div>
@@ -628,9 +631,11 @@
         {/if}
         <h1 class="staatliches text-2xl">Relays</h1>
         <p>This note was found on the {quantify(note.seen_on.length, "relay")} below.</p>
-        {#each note.seen_on as url}
-          <RelayCard theme="black" showControls relay={{url}} />
-        {/each}
+        <div class="flex flex-col gap-2">
+          {#each note.seen_on as url}
+            <RelayCard theme="black" relay={{url}} />
+          {/each}
+        </div>
         <h1 class="staatliches text-2xl">Details</h1>
         <CopyValue label="Identifier" value={nevent} />
         <CopyValue label="Event ID (note)" value={bech32Note} />

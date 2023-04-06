@@ -32,7 +32,10 @@
     const {type, value} = content[i]
 
     // Find links on their own line and remove them from content
-    if (type === "link" || ["nostr:note", "nostr:nevent"].includes(type)) {
+    if (
+      (type === "link" && !value.startsWith("ws")) ||
+      ["nostr:note", "nostr:nevent"].includes(type)
+    ) {
       const prev = content[i - 1]
       const next = content[i + 1]
 

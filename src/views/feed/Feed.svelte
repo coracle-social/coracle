@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {objOf, partition, intersection, always, propEq, uniqBy, sortBy, prop} from "ramda"
+  import {find, partition, always, propEq, uniqBy, sortBy, prop} from "ramda"
   import {fly} from "svelte/transition"
   import {quantify} from "hurdak/lib/hurdak"
   import {createScroller, now, timedelta, Cursor} from "src/util/misc"
@@ -10,7 +10,7 @@
   import Note from "src/views/notes/Note.svelte"
   import user from "src/agent/user"
   import network from "src/agent/network"
-  import {modal, globalRelays} from "src/app/ui"
+  import {modal, muteRelays} from "src/app/ui"
   import {mergeParents} from "src/app"
 
   export let filter
@@ -89,7 +89,7 @@
 
   onMount(() => {
     const sub = network.listen({
-      relays,
+      relays: relays.filter(url => !$muteRelays.includes(url)),
       filter: mergeFilter(filter, {since}),
       onChunk,
     })
@@ -101,7 +101,7 @@
 
       // Wait for this page to load before trying again
       await network.load({
-        relays: $globalRelays.length > 0 ? $globalRelays.map(objOf("url")) : relays,
+        relays: relays.filter(url => !$muteRelays.includes(url)),
         filter: mergeFilter(filter, cursor.getFilter()),
         onChunk,
       })
@@ -133,7 +133,7 @@
 
   <div class="flex flex-col gap-4">
     {#each notes as note (note.id)}
-      {#if $globalRelays.length === 0 || intersection(note.seen_on, $globalRelays)}
+      {#if find(url => !$muteRelays.includes(url), note.seen_on)}
         <Note depth={2} {note} />
       {/if}
     {/each}

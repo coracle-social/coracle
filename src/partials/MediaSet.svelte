@@ -13,10 +13,7 @@
   let showModal = false
 
   // Put previews last since we need to load them asynchronously
-  const annotated = sortBy(
-    ({type}) => (type === "preview" ? 1 : 0),
-    links.filter(url => !url.startsWith("ws")).map(annotateMedia)
-  )
+  const annotated = sortBy(l => (l.type === "preview" ? 1 : 0), links.map(annotateMedia))
 
   const close = () => {
     onClose?.()

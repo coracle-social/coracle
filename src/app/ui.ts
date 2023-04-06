@@ -151,4 +151,4 @@ export const getThemeVariables = $theme =>
 
 // Global relay setting
 
-export const globalRelays = new WritableList([])
+export const muteRelays = new WritableList([])

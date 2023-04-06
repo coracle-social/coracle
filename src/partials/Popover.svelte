@@ -8,6 +8,7 @@
   export let theme = "dark"
   export let triggerType = "click"
   export let placement = "top"
+  export let interactive = true
 
   let trigger
   let tooltip
@@ -19,7 +20,7 @@
       placement: placement as Placement,
       appendTo: () => document.body,
       allowHTML: true,
-      interactive: true,
+      interactive,
       trigger: triggerType,
       animation: "shift-away",
       onShow: () => {
