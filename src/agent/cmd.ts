@@ -94,7 +94,7 @@ const requestZap = (relays, content, pubkey, eventId, amount, lnurl) => {
     tags.push(["e", eventId])
   }
 
-  return new PublishableEvent(9734, {content, tags})
+  return new PublishableEvent(9734, {content, tags, tagClient: false})
 }
 
 const deleteEvent = ids => new PublishableEvent(5, {tags: ids.map(id => ["e", id])})
@@ -165,11 +165,13 @@ const uniqTags = uniqBy(t => t.slice(0, 2).join(":"))
 
 class PublishableEvent {
   event: Record<string, any>
-  constructor(kind, {content = "", tags = []}) {
+  constructor(kind, {content = "", tags = [], tagClient = true}) {
     const pubkey = get(keys.pubkey)
     const createdAt = Math.round(new Date().valueOf() / 1000)
 
-    tags.push(["client", "coracle"])
+    if (tagClient) {
+      tags.push(["client", "coracle"])
+    }
 
     this.event = {kind, content, tags, pubkey, created_at: createdAt}
   }

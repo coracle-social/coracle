@@ -6,6 +6,7 @@
   import {tweened} from "svelte/motion"
   import {slide} from "svelte/transition"
   import {quantify} from "hurdak/lib/hurdak"
+  import {warn} from "src/util/logger"
   import {Tags, displayRelay, findRootId, findReplyId, displayPerson, isLike} from "src/util/nostr"
   import {
     stringToHue,
@@ -273,6 +274,10 @@
       return
     }
 
+    if (!res.pr) {
+      throw new Error(JSON.stringify(res))
+    }
+
     zap.invoice = res.pr
     zap.loading = false
 
@@ -281,7 +286,11 @@
     if (webln) {
       await webln.enable()
 
-      webln.sendPayment(zap.invoice)
+      try {
+        webln.sendPayment(zap.invoice)
+      } catch (e) {
+        warn(e)
+      }
     }
 
     // Listen for the zap confirmation
