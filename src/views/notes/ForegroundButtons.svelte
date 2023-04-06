@@ -1,32 +1,33 @@
 <script lang="ts">
   import {fly} from "svelte/transition"
-  import {displayRelay} from "src/util/nostr"
+  import {quantify} from "hurdak/lib/hurdak"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import user from "src/agent/user"
-  import {modal, globalRelay} from "src/app/ui"
+  import {modal, globalRelays} from "src/app/ui"
 
   export let pubkey = null
 
   const {canPublish} = user
+
+  const openModal = () => {
+    modal.set({type: "relays/global"})
+  }
 </script>
 
 <div class="fixed bottom-0 right-0 z-10 m-8 flex flex-col items-center gap-3">
-  {#if $globalRelay}
-    <Popover triggerType="mouseenter" placement="left">
-      <div
-        slot="trigger"
-        transition:fly|local={{y: 20}}
-        class="transition-transform hover:scale-105">
-        <Anchor type="button-circle" on:click={() => globalRelay.set(null)}>
-          <i class="fa fa-filter-circle-xmark mt-1" />
-        </Anchor>
-      </div>
-      <div slot="tooltip">
-        Limiting results to {displayRelay({url: $globalRelay})}
-      </div>
-    </Popover>
-  {/if}
+  <div
+    transition:fly|local={{y: 20}}
+    class="transition-transform hover:scale-105 relative">
+    <Anchor type="button-circle" on:click={openModal}>
+      <i class="fa fa-filter mt-1" />
+      <span class="rounded-full absolute w-5 h-5 text-xs bottom-0 right-0 bg-gray-1
+                   border border-solid border-gray-3 flex justify-center items-center
+                   -mr-1">
+        {$globalRelays.length}
+      </span>
+    </Anchor>
+  </div>
 
   {#if $canPublish}
     <button

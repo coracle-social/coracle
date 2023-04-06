@@ -6,7 +6,7 @@ import {navigate} from "svelte-routing"
 import {nip19} from "nostr-tools"
 import {writable, get} from "svelte/store"
 import {globalHistory} from "svelte-routing/src/history"
-import {sleep, synced, hash} from "src/util/misc"
+import {sleep, WritableList, synced, hash} from "src/util/misc"
 import {warn} from "src/util/logger"
 import user from "src/agent/user"
 
@@ -151,4 +151,4 @@ export const getThemeVariables = $theme =>
 
 // Global relay setting
 
-export const globalRelay = writable(null)
+export const globalRelays = new WritableList([])

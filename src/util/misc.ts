@@ -1,7 +1,9 @@
+import type {Writable} from "svelte/store"
 import {bech32, utf8} from "@scure/base"
 import {debounce, throttle} from "throttle-debounce"
 import {
   gt,
+  without,
   whereEq,
   reject,
   mergeDeepRight,
@@ -439,5 +441,30 @@ export const annotateMedia = url => {
     return {type: "video", url}
   } else {
     return {type: "preview", url}
+  }
+}
+
+export class WritableList {
+  _store: Writable<Array<any>>
+  constructor(init) {
+    this._store = writable(init)
+  }
+  subscribe(f) {
+    return this._store.subscribe(f)
+  }
+  set(xs) {
+    this._store.set(xs)
+  }
+  update(f) {
+    this._store.update(f)
+  }
+  add(x) {
+    this._store.update(xs => xs.concat(x))
+  }
+  remove(x) {
+    this._store.update(xs => without([x], xs))
+  }
+  toggle(x) {
+    this._store.update(xs => (xs.includes(x) ? without([x], xs) : xs.concat(x)))
   }
 }
