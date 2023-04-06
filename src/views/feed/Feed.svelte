@@ -4,13 +4,16 @@
   import {fly} from "svelte/transition"
   import {quantify} from "hurdak/lib/hurdak"
   import {createScroller, now, timedelta, Cursor} from "src/util/misc"
-  import {asDisplayEvent, mergeFilter} from "src/util/nostr"
+  import {asDisplayEvent, mergeFilter, displayRelay} from "src/util/nostr"
   import Spinner from "src/partials/Spinner.svelte"
+  import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
+  import RelayTitle from "src/views/relays/RelayTitle.svelte"
+  import RelayJoin from "src/views/relays/RelayJoin.svelte"
   import Note from "src/views/notes/Note.svelte"
   import user from "src/agent/user"
   import network from "src/agent/network"
-  import {modal, muteRelays} from "src/app/ui"
+  import {modal} from "src/app/ui"
   import {mergeParents} from "src/app"
 
   export let filter
@@ -21,12 +24,17 @@
 
   let notes = []
   let notesBuffer = []
+  let feedRelay = null
 
   // Add a short buffer so we can get the most possible results for recent notes
   const since = now()
   const maxNotes = 100
   const cursor = new Cursor({delta})
   const seen = new Set()
+
+  const setFeedRelay = relay => {
+    feedRelay = relay
+  }
 
   const loadBufferedNotes = () => {
     // Drop notes at the end if there are a lot
@@ -89,7 +97,7 @@
 
   onMount(() => {
     const sub = network.listen({
-      relays: relays.filter(url => !$muteRelays.includes(url)),
+      relays,
       filter: mergeFilter(filter, {since}),
       onChunk,
     })
@@ -101,7 +109,7 @@
 
       // Wait for this page to load before trying again
       await network.load({
-        relays: relays.filter(url => !$muteRelays.includes(url)),
+        relays: feedRelay ? [feedRelay] : relays,
         filter: mergeFilter(filter, cursor.getFilter()),
         onChunk,
       })
@@ -133,11 +141,34 @@
 
   <div class="flex flex-col gap-4">
     {#each notes as note (note.id)}
-      {#if find(url => !$muteRelays.includes(url), note.seen_on)}
-        <Note depth={2} {note} />
-      {/if}
+      <Note depth={2} {note} setFeedRelay={setFeedRelay} />
     {/each}
   </div>
 
   <Spinner />
 </Content>
+
+{#if feedRelay}
+<Modal onEscape={() => setFeedRelay(null)}>
+  <Content>
+    <div class="flex items-center justify-between gap-2">
+      <RelayTitle relay={feedRelay} />
+      <RelayJoin relay={feedRelay} />
+    </div>
+    {#if feedRelay.description}
+      <p>{feedRelay.description}</p>
+    {/if}
+    <p class="text-gray-4">
+      <i class="fa fa-info-circle" />
+      Below is your current feed including only notes seen on {displayRelay(feedRelay)}
+    </p>
+    <div class="flex flex-col gap-4">
+      {#each notes as note (note.id)}
+        {#if note.seen_on.includes(feedRelay.url)}
+          <Note depth={2} {note} />
+        {/if}
+      {/each}
+    </div>
+  </Content>
+</Modal>
+{/if}

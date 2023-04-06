@@ -50,6 +50,7 @@
   import NoteContent from "src/views/notes/NoteContent.svelte"
 
   export let note
+  export let setFeedRelay
   export let depth = 0
   export let anchorId = null
   export let showParent = true
@@ -475,7 +476,7 @@
                         <div
                           class="h-3 w-3 rounded-full border border-solid border-gray-6"
                           style={`background: ${hsl(stringToHue(url))}`}
-                          on:click={() => modal.set({type: "relays/modal", url})} />
+                          on:click={() => setFeedRelay({url})} />
                       </div>
                       <div slot="tooltip">{displayRelay({url})}</div>
                     </Popover>

@@ -1,8 +1,11 @@
 # Current
 
+- [ ] Fix scrolling with embedded modals by registering open modals in the component
 - [ ] Relays bounty
   - [x] Ability to click into a relay's global feed
-  - [x] Ability to filter feeds by relay
+  - [ ] Ability to filter feeds by relay
+    - Global Mutes? Global Whitelist?
+    - Open in modal with "here's what this feed would look like with only this relay"
   - [ ] Ability to create custom feeds
 - [ ] Fix tag-style event mentions. Probably transform all mentions into entities in parse
 - [ ] Fix performance issues

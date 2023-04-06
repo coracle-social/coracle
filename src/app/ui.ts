@@ -148,7 +148,3 @@ export const getThemeVariables = $theme =>
   Object.entries(getThemeColors($theme))
     .map(([k, v]) => `--${k}: ${v};`)
     .join("\n")
-
-// Global relay setting
-
-export const muteRelays = new WritableList([])
