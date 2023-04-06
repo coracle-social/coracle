@@ -101,7 +101,7 @@
     document.title = displayPerson(person)
 
     // Refresh our person
-    network.loadPeople([pubkey], {force: true}).then(() => {
+    network.loadPeople([pubkey], {relays, force: true}).then(() => {
       ownRelays = getPubkeyWriteRelays(pubkey)
       person = getPersonWithFallback(pubkey)
       loading = false
@@ -210,9 +210,9 @@
   <Tabs {tabs} {activeTab} {setActiveTab} />
 
   {#if activeTab === "notes"}
-    <Notes {pubkey} />
+    <Notes {pubkey} {relays} />
   {:else if activeTab === "likes"}
-    <Likes {pubkey} />
+    <Likes {pubkey} {relays} />
   {:else if activeTab === "relays"}
     {#if ownRelays.length > 0}
       <Relays relays={ownRelays} />

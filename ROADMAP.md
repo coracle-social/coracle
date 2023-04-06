@@ -1,5 +1,6 @@
 # Current
 
+- [ ] Fix tag-style event mentions. Probably transform all mentions into entities in parse
 - [ ] Fix performance issues
   - [ ] https://github.com/techfort/LokiJS
     - Use indexed adapter github.com/techfort/LokiJS/blob/master/tutorials/Persistence%20Adapters.md and partitioning adapter

@@ -87,7 +87,7 @@
 
   // When we get an AUTH challenge from our pool, attempt to authenticate
   pool.Config.authHandler = async (url, challenge) => {
-    if (!seenChallenges.has(challenge)) {
+    if (keys.canSign() && !seenChallenges.has(challenge)) {
       seenChallenges.add(challenge)
 
       const publishable = await cmd.authenticate(url, challenge)

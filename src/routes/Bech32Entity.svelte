@@ -5,7 +5,7 @@
   import {warn} from "src/util/logger"
   import Content from "src/partials/Content.svelte"
   import NoteDetail from "src/views/notes/NoteDetail.svelte"
-  import Person from "src/routes/PersonDetail.svelte"
+  import PersonDetail from "src/routes/PersonDetail.svelte"
   import {sampleRelays} from "src/agent/relays"
 
   export let entity
@@ -31,9 +31,9 @@
     <NoteDetail note={{id: data}} />
   </Content>
 {:else if type === "nprofile"}
-  <Person npub={nip19.npubEncode(data.pubkey)} {relays} activeTab="notes" />
+  <PersonDetail npub={nip19.npubEncode(data.pubkey)} {relays} activeTab="notes" />
 {:else if type === "npub"}
-  <Person npub={entity} activeTab="notes" />
+  <PersonDetail npub={entity} activeTab="notes" />
 {:else}
   <Content size="lg" class="text-center">
     <div>Sorry, we weren't able to find "{entity}".</div>
