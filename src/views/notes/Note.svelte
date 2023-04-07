@@ -45,7 +45,7 @@
   import {getPersonWithFallback} from "src/agent/tables"
   import {watch} from "src/agent/storage"
   import cmd from "src/agent/cmd"
-  import {routes, globalRelay} from "src/app/ui"
+  import {routes} from "src/app/ui"
   import {publishWithToast} from "src/app"
   import NoteContent from "src/views/notes/NoteContent.svelte"
 
@@ -470,8 +470,7 @@
                       <div slot="trigger" class="p-1">
                         <div
                           class="h-3 w-3 rounded-full border border-solid border-gray-6"
-                          style={`background: ${hsl(stringToHue(url))}`}
-                          on:click={() => globalRelay.set(url)} />
+                          style={`background: ${hsl(stringToHue(url))}`} />
                       </div>
                       <div slot="tooltip">
                         {displayRelay({url})}
