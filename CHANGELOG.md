@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.23
+
+- [x] Fix modal scroll position for nested modals
+- [x] Fix memory leak in pool.subscribe
+- [x] Use relays specified in bech32 entities
+- [x] Add colored relay indicator to notes
+- [x] Add relay-filtered overlay dialog to feeds
+- [x] Improve relay detail header
+
 ## 0.2.22
 
 - [x] Add ability to collapse threads
