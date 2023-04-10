@@ -6,11 +6,14 @@
   import {watch} from "src/agent/storage"
   import user from "src/agent/user"
 
-  let q = ""
+  export let q = ""
+  export let limit = 50
+  export let relays = user.relays
+  export let placeholder = "Search known relays"
+  export let hideIfEmpty = false
+
   let search
   let knownRelays = watch("relays", t => t.all())
-
-  const {relays} = user
 
   $: {
     const joined = new Set(pluck("url", $relays))
@@ -22,13 +25,19 @@
   }
 </script>
 
-<Input bind:value={q} type="text" wrapperClass="flex-grow" placeholder="Type to search">
-  <i slot="before" class="fa-solid fa-search" />
-</Input>
-{#each (search(q) || []).slice(0, 50) as relay (relay.url)}
-  <RelayCard {relay} />
-{/each}
-<small class="text-center">
-  Showing {Math.min(($knownRelays || []).length - $relays.length, 50)}
-  of {($knownRelays || []).length - $relays.length} known relays
-</small>
+<div class="flex flex-col gap-2">
+  <Input bind:value={q} type="text" wrapperClass="flex-grow" {placeholder}>
+    <i slot="before" class="fa-solid fa-search" />
+  </Input>
+  {#each !q && hideIfEmpty ? [] : search(q).slice(0, limit) as relay (relay.url)}
+    <slot name="item" {relay}>
+      <RelayCard {relay} />
+    </slot>
+  {/each}
+  <slot name="footer">
+    <small class="text-center">
+      Showing {Math.min(($knownRelays || []).length - $relays.length, 50)}
+      of {($knownRelays || []).length - $relays.length} known relays
+    </small>
+  </slot>
+</div>

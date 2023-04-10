@@ -7,6 +7,7 @@
 
 - [ ] Relays bounty
   - [ ] Ability to create custom feeds
+  - [ ] Add global/following/network tabs to relay detail
 - [ ] Fix tag-style event mentions. Probably transform all mentions into entities in parse
 - [ ] Some lnurls aren't working npub1y3k2nheva29y9ej8a22e07epuxrn04rvgy28wvs54y57j7vsxxuq0gvp4j
 - [ ] Fix performance issues

@@ -4,20 +4,20 @@
   import {quantify} from "hurdak/lib/hurdak"
   import {last, reject, pluck, propEq} from "ramda"
   import {fly} from "svelte/transition"
-  import {fuzzy, annotateMedia} from "src/util/misc"
+  import {writable} from "svelte/store"
+  import {annotateMedia} from "src/util/misc"
   import {displayPerson} from "src/util/nostr"
   import Button from "src/partials/Button.svelte"
   import Compose from "src/partials/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Media from "src/partials/Media.svelte"
-  import Input from "src/partials/Input.svelte"
-  import RelayCardSimple from "src/partials/RelayCardSimple.svelte"
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import RelayCard from "src/app2/shared/RelayCard.svelte"
+  import RelaySearch from "src/app2/shared/RelaySearch.svelte"
   import {getUserWriteRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/tables"
-  import {watch} from "src/agent/storage"
   import cmd from "src/agent/cmd"
   import user from "src/agent/user"
   import {toast, modal} from "src/app/ui"
@@ -26,23 +26,11 @@
   export let pubkey = null
   export let nevent = null
 
+  let q = ""
   let image = null
   let compose = null
-  let relays = getUserWriteRelays()
   let showSettings = false
-  let q = ""
-  let search
-
-  const knownRelays = watch("relays", t => t.all())
-
-  $: {
-    const joined = new Set(pluck("url", relays))
-
-    search = fuzzy(
-      $knownRelays.filter(r => !joined.has(r.url)),
-      {keys: ["name", "description", "url"]}
-    )
-  }
+  let relays = writable(getUserWriteRelays())
 
   const onSubmit = async () => {
     let {content, mentions, topics} = compose.parse()
@@ -53,7 +41,7 @@
 
     if (content) {
       const thunk = cmd.createNote(content.trim(), mentions, topics)
-      const [event, promise] = await publishWithToast(relays, thunk)
+      const [event, promise] = await publishWithToast($relays, thunk)
 
       promise.then(() =>
         setTimeout(
@@ -66,7 +54,7 @@
                   "/" +
                   nip19.neventEncode({
                     id: event.id,
-                    relays: pluck("url", relays.slice(0, 3)),
+                    relays: pluck("url", $relays.slice(0, 3)),
                   }),
               },
             }),
@@ -85,11 +73,11 @@
 
   const addRelay = relay => {
     q = ""
-    relays = relays.concat(relay)
+    relays.update($r => $r.concat(relay))
   }
 
   const removeRelay = relay => {
-    relays = reject(propEq("url", relay.url), relays)
+    relays.update(reject(propEq("url", relay.url)))
   }
 
   onMount(() => {
@@ -134,7 +122,7 @@
         on:click={() => {
           showSettings = true
         }}>
-        <span>Publishing to {quantify(relays.length, "relay")}</span>
+        <span>Publishing to {quantify($relays.length, "relay")}</span>
         <i class="fa fa-edit" />
       </small>
     </div>
@@ -150,7 +138,7 @@
         </div>
         <div>Select which relays to publish to:</div>
         <div>
-          {#each relays as relay}
+          {#each $relays as relay}
             <div
               class="mr-1 mb-2 inline-block rounded-full border border-solid border-gray-1 py-1 px-2">
               <button
@@ -161,17 +149,21 @@
             </div>
           {/each}
         </div>
-        <Input bind:value={q} placeholder="Search for other relays">
-          <i slot="before" class="fa fa-search" />
-        </Input>
-        {#each (q ? search(q) : []).slice(0, 3) as relay (relay.url)}
-          <RelayCardSimple {relay}>
-            <button slot="actions" class="underline" on:click={() => addRelay(relay)}>
-              Add relay
-            </button>
-          </RelayCardSimple>
-        {/each}
-        <Button type="submit" class="text-center">Done</Button>
+        <RelaySearch bind:q limit={3} hideIfEmpty>
+          <div slot="item" let:relay>
+            <RelayCard {relay} showActions>
+              <button
+                slot="actions"
+                class="underline"
+                on:click|preventDefault={() => addRelay(relay)}>
+                Add relay
+              </button>
+            </RelayCard>
+          </div>
+          <div slot="footer">
+            <Button type="submit" class="w-full text-center">Done</Button>
+          </div>
+        </RelaySearch>
       </Content>
     </form>
   </Modal>

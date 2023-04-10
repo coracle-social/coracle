@@ -1,11 +1,11 @@
 <script lang="ts">
-  import {reject, pluck, whereEq} from "ramda"
+  import {reject, always, pluck, propEq} from "ramda"
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
-  import RelayCard from "src/partials/RelayCard.svelte"
+  import RelayCard from "src/app2/shared/RelayCard.svelte"
   import {watch} from "src/agent/storage"
   import {modal} from "src/app/ui"
 
@@ -16,22 +16,19 @@
 
   const knownRelays = watch("relays", t => t.all())
 
-  $: {
-    const joined = new Set(pluck("url", relays))
-
-    search = fuzzy(
-      $knownRelays.filter(r => !joined.has(r.url)),
-      {keys: ["name", "description", "url"]}
-    )
+  const removeRelay = r => {
+    relays = reject(propEq("url", r.url), relays)
   }
 
-  const removeRelay = ({url}) => {
-    relays = reject(whereEq({url}), relays)
+  const addRelay = r => {
+    relays = relays.concat({...r, write: true})
   }
 
-  const addRelay = relay => {
-    relays = relays.concat({...relay, write: true})
-  }
+  $: joined = new Set(pluck("url", relays))
+  $: search = fuzzy(
+    $knownRelays.filter(r => !joined.has(r.url)),
+    {keys: ["name", "description", "url"]}
+  )
 </script>
 
 <Content>
@@ -58,7 +55,7 @@
   {:else}
     <div class="grid grid-cols-1 gap-4">
       {#each relays as relay (relay.url)}
-        <RelayCard {relay} {removeRelay} />
+        <RelayCard {relay} hasRelay={always(true)} {removeRelay} />
       {/each}
     </div>
   {/if}
@@ -70,7 +67,7 @@
     <i slot="before" class="fa-solid fa-search" />
   </Input>
   {#each (search(q) || []).slice(0, 50) as relay (relay.url)}
-    <RelayCard {relay} {addRelay} />
+    <RelayCard {relay} hasRelay={always(false)} {addRelay} />
   {/each}
   <small class="text-center">
     Showing {Math.min($knownRelays.length - relays.length, 50)}

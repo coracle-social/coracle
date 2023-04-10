@@ -1,57 +1,108 @@
 <script lang="ts">
-  import {find, propEq} from "ramda"
+  import cx from "classnames"
+  import {find, last, propEq} from "ramda"
+  import {between} from "hurdak/lib/hurdak"
   import {onMount} from "svelte"
-  import {poll} from "src/util/misc"
+  import {fly} from "svelte/transition"
+  import {poll, stringToHue, hsl} from "src/util/misc"
   import Toggle from "src/partials/Toggle.svelte"
-  import RelayCard from "src/partials/RelayCard.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import pool from "src/agent/pool"
   import user from "src/agent/user"
-  import keys from "src/agent/keys"
   import {loadAppData} from "src/app"
 
   export let relay
   export let theme = "gray-8"
+  export let showStatus = false
+  export let showActions = false
   export let showControls = false
 
+  const {relays, canPublish} = user
+
+  let statusHover = false
   let quality = null
   let message = null
-  let joined = false
 
-  const {relays, canPublish} = user
-  const {method} = keys
-  const isPubkeyLogin = $method === "pubkey"
+  export let hasRelay = r => Boolean(find(propEq("url", r.url), $relays))
 
-  $: joined = find(propEq("url", relay.url), $relays)
+  export let removeRelay = r => user.removeRelay(r.url)
 
-  const removeRelay = ({url}) => user.removeRelay(url)
+  export let addRelay = r => {
+    user.addRelay(r.url).then(() => {
+      const pubkey = user.getPubkey()
+      const profile = user.getProfile()
 
-  const addRelay = async ({url}) => {
-    await user.addRelay(url)
-
-    if (!user.getProfile()?.kind0) {
-      loadAppData(user.getPubkey())
-    }
+      if (pubkey && !profile?.kind0) {
+        loadAppData(pubkey)
+      }
+    })
   }
 
   onMount(() => {
-    return poll(10_000, async () => {
-      ;[quality, message] = await pool.getQuality(relay.url)
+    return poll(10_000, () => {
+      ;[quality, message] = pool.getQuality(relay.url)
     })
   })
 </script>
 
-<RelayCard
-  {relay}
-  {theme}
-  addRelay={!joined && !isPubkeyLogin ? addRelay : null}
-  removeRelay={joined && $relays.length > 1 && !isPubkeyLogin ? removeRelay : null}>
-  <div
-    slot="controls"
-    class="flex justify-between gap-2"
-    class:hidden={!showControls || !$canPublish}>
-    <span>Publish to this relay?</span>
-    <Toggle
-      value={relay.write}
-      on:change={() => user.setRelayWriteCondition(relay.url, !relay.write)} />
+<div
+  class={cx(
+    `bg-${theme}`,
+    "flex flex-col justify-between gap-3 rounded border border-l-2 border-solid border-gray-6 py-3 px-6 shadow"
+  )}
+  style={`border-left-color: ${hsl(stringToHue(relay.url))}`}
+  in:fly={{y: 20}}>
+  <div class="flex items-center justify-between gap-2">
+    <div class="flex items-center gap-2 text-xl">
+      <i class={relay.url.startsWith("wss") ? "fa fa-lock" : "fa fa-unlock"} />
+      <Anchor type="unstyled" href={`/relays/${btoa(relay.url)}`}>
+        {last(relay.url.split("://"))}
+      </Anchor>
+      {#if showStatus}
+        <span
+          on:mouseout={() => {
+            statusHover = false
+          }}
+          on:mouseover={() => {
+            statusHover = true
+          }}
+          class="h-2 w-2 cursor-pointer rounded-full bg-gray-6"
+          class:bg-gray-6={message === "Not connected"}
+          class:bg-danger={quality <= 0.3 && message !== "Not connected"}
+          class:bg-warning={between(0.3, 0.7, quality)}
+          class:bg-success={quality > 0.7} />
+        <p
+          class="hidden text-sm text-gray-1 transition-all sm:block"
+          class:opacity-0={!statusHover}
+          class:opacity-1={statusHover}>
+          {message}
+        </p>
+      {/if}
+    </div>
+    {#if $canPublish && showActions}
+      <slot name="actions">
+        {#if hasRelay(relay) && $relays.length > 1}
+          <button class="flex items-center gap-3 text-gray-1" on:click={() => removeRelay(relay)}>
+            <i class="fa fa-right-from-bracket" /> Leave
+          </button>
+        {/if}
+        {#if !hasRelay(relay)}
+          <button class="flex items-center gap-3 text-gray-1" on:click={() => addRelay(relay)}>
+            <i class="fa fa-right-to-bracket" /> Join
+          </button>
+        {/if}
+      </slot>
+    {/if}
   </div>
-</RelayCard>
+  {#if relay.description}
+    <p>{relay.description}</p>
+  {/if}
+  {#if hasRelay(relay) && showControls && $canPublish}
+    <div class="flex justify-between gap-2">
+      <span>Publish to this relay?</span>
+      <Toggle
+        value={relay.write}
+        on:change={() => user.setRelayWriteCondition(relay.url, !relay.write)} />
+    </div>
+  {/if}
+</div>

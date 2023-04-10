@@ -9,9 +9,9 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Input from "src/partials/Input.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import RelayCardSimple from "src/partials/RelayCardSimple.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
+  import RelayCard from "src/app2/shared/RelayCard.svelte"
   import {watch} from "src/agent/storage"
   import network from "src/agent/network"
   import user from "src/agent/user"
@@ -122,7 +122,7 @@
     {#each Object.values(currentRelays) as relay}
       <div class="h-12">
         {#if relay}
-          <RelayCardSimple relay={{...relay, description: null}} />
+          <RelayCard relay={{...relay, description: null}} />
         {/if}
       </div>
     {/each}
