@@ -6,8 +6,8 @@
   import Spinner from "src/partials/Spinner.svelte"
   import PersonInfo from "src/app2/shared/PersonInfo.svelte"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
-  import {getPersonWithFallback} from "src/agent/tables"
-  import {watch} from "src/agent/storage"
+  import {getPersonWithFallback} from "src/agent/db"
+  import {watch} from "src/agent/db"
   import network from "src/agent/network"
 
   export let type

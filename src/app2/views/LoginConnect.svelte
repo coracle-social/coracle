@@ -12,7 +12,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app2/shared/RelayCard.svelte"
-  import {watch} from "src/agent/storage"
+  import {watch} from "src/agent/db"
   import network from "src/agent/network"
   import user from "src/agent/user"
   import pool from "src/agent/pool"

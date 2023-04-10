@@ -6,7 +6,7 @@
   import Badge from "src/partials/Badge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {watch} from "src/agent/storage"
+  import {watch} from "src/agent/db"
   import {getPubkeyWriteRelays} from "src/agent/relays"
 
   export let onSubmit
@@ -27,7 +27,7 @@
   }
 
   const searchPeople = watch("people", t => {
-    return fuzzy(t.all({"kind0.name:!nil": null}), {keys: ["kind0.name", "pubkey"]})
+    return fuzzy(t.all({"kind0.name": {$type: "string"}}), {keys: ["kind0.name", "pubkey"]})
   })
 
   const applySearch = word => {

@@ -17,7 +17,7 @@
   import RelayCard from "src/app2/shared/RelayCard.svelte"
   import RelaySearch from "src/app2/shared/RelaySearch.svelte"
   import {getUserWriteRelays} from "src/agent/relays"
-  import {getPersonWithFallback} from "src/agent/tables"
+  import {getPersonWithFallback} from "src/agent/db"
   import cmd from "src/agent/cmd"
   import user from "src/agent/user"
   import {toast, modal} from "src/app/ui"

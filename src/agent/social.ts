@@ -1,6 +1,6 @@
 import {uniq, without} from "ramda"
 import {Tags} from "src/util/nostr"
-import {getPersonWithFallback} from "src/agent/tables"
+import {getPersonWithFallback} from "src/agent/db"
 import user from "src/agent/user"
 
 export const getFollows = pubkey =>

@@ -4,7 +4,7 @@
   import {fly} from "svelte/transition"
   import {ellipsize} from "hurdak/lib/hurdak"
   import Anchor from "src/partials/Anchor.svelte"
-  import {rooms} from "src/agent/tables"
+  import {rooms} from "src/agent/db"
 
   export let room
 

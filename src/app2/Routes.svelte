@@ -1,6 +1,6 @@
 <script lang="ts">
   import {Route} from "svelte-routing"
-  import {onReady} from "src/agent/tables"
+  import {onReady} from "src/agent/db"
   import EnsureData from "src/app2/EnsureData.svelte"
   import Notifications from "src/app2/views/Notifications.svelte"
   import Bech32Entity from "src/app2/views/Bech32Entity.svelte"

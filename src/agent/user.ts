@@ -42,7 +42,7 @@ const profile = synced("agent/user/profile", {
 const settings = derived(profile, prop("settings"))
 const petnames = derived(profile, prop("petnames"))
 const relays = derived(profile, prop("relays")) as Readable<Array<Relay>>
-const mutes = derived(profile, prop("mutes"))
+const mutes = derived(profile, prop("mutes")) as Readable<Array<[string, string]>>
 
 const canPublish = derived(
   [keys.pubkey, relays],

@@ -6,8 +6,8 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import PersonInfo from "src/app2/shared/PersonInfo.svelte"
-  import {getPersonWithFallback} from "src/agent/tables"
-  import {watch} from "src/agent/storage"
+  import {getPersonWithFallback} from "src/agent/db"
+  import {watch} from "src/agent/db"
   import {modal} from "src/app/ui"
 
   export let follows
@@ -15,7 +15,7 @@
   let q = ""
   let search
 
-  const knownPeople = watch("people", t => t.all({"kind0.name:!nil": null}))
+  const knownPeople = watch("people", t => t.all({"kind0.name": {$type: "string"}}))
 
   $: search = fuzzy(
     $knownPeople.filter(p => !follows.includes(p.pubkey)),

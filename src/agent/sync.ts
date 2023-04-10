@@ -13,7 +13,7 @@ import {
   hash,
 } from "src/util/misc"
 import {Tags, roomAttrs, isRelay, isShareableRelay, normalizeRelayUrl} from "src/util/nostr"
-import {people, userEvents, relays, rooms, routes} from "src/agent/tables"
+import {people, userEvents, relays, rooms, routes} from "src/agent/db"
 import {uniqByUrl} from "src/agent/relays"
 import user from "src/agent/user"
 
@@ -31,7 +31,7 @@ const processEvents = async events => {
   for (let i = 0; i < chunks.length; i++) {
     for (const event of chunks[i]) {
       if (event.pubkey === userPubkey) {
-        userEvents.put(event)
+        userEvents.patch(event)
       }
 
       for (const handler of handlers[event.kind] || []) {
@@ -57,15 +57,15 @@ const updatePerson = (pubkey, data) => {
   }
 }
 
-const verifyNip05 = (pubkey, as) =>
-  nip05.queryProfile(as).then(result => {
+const verifyNip05 = (pubkey, alias) =>
+  nip05.queryProfile(alias).then(result => {
     if (result?.pubkey === pubkey) {
-      updatePerson(pubkey, {verified_as: as})
+      updatePerson(pubkey, {verified_as: alias})
 
       if (result.relays?.length > 0) {
         const urls = result.relays.filter(isRelay)
 
-        relays.bulkPatch(urls.map(url => ({url: normalizeRelayUrl(url)})))
+        relays.patch(urls.map(url => ({url: normalizeRelayUrl(url)})))
 
         urls.forEach(url => {
           addRoute(pubkey, url, "nip05", "write", now())
@@ -299,7 +299,7 @@ const addRoute = (pubkey, rawUrl, type, mode, created_at) => {
       url: route.url,
     })
 
-    routes.put({
+    routes.patch({
       ...route,
       count: newCount,
       score: newTotalScore / newCount,

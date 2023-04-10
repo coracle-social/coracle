@@ -7,9 +7,9 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app2/views/Notification.svelte"
-  import {watch} from "src/agent/storage"
+  import {watch} from "src/agent/db"
   import user from "src/agent/user"
-  import {userEvents} from "src/agent/tables"
+  import {userEvents} from "src/agent/db"
   import {lastChecked} from "src/app/listener"
 
   let limit = 0

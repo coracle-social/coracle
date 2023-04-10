@@ -5,7 +5,7 @@ import {filter, pipe, pick, groupBy, objOf, map, assoc, sortBy, uniqBy, prop} fr
 import {first} from "hurdak/lib/hurdak"
 import {Tags, isRelay, findReplyId} from "src/util/nostr"
 import {shuffle, fetchJson} from "src/util/misc"
-import {relays, routes} from "src/agent/tables"
+import {relays, routes} from "src/agent/db"
 import pool from "src/agent/pool"
 import user from "src/agent/user"
 
@@ -25,7 +25,7 @@ import user from "src/agent/user"
 
 export const initializeRelayList = async () => {
   // Throw some hardcoded defaults in there
-  await relays.bulkPatch([
+  await relays.patch([
     {url: "wss://brb.io"},
     {url: "wss://nostr.zebedee.cloud"},
     {url: "wss://nostr-pub.wellorder.net"},
@@ -40,7 +40,7 @@ export const initializeRelayList = async () => {
     const url = import.meta.env.VITE_DUFFLEPUD_URL + "/relay"
     const json = await fetchJson(url)
 
-    await relays.bulkPatch(json.relays.filter(isRelay).map(objOf("url")))
+    await relays.patch(json.relays.filter(isRelay).map(objOf("url")))
   } catch (e) {
     warn("Failed to fetch relays list", e)
   }
@@ -74,7 +74,7 @@ export const getPubkeyWriteRelays = pubkey => getPubkeyRelays(pubkey, "write")
 
 export const getAllPubkeyRelays = (pubkeys, mode = null) => {
   // As an optimization, filter the database once and group by pubkey
-  const filter = mode ? {pubkey: pubkeys, mode} : {pubkey: pubkeys}
+  const filter = mode ? {pubkey: {$in: pubkeys}, mode} : {pubkey: {$in: pubkeys}}
   const routesByPubkey = groupBy(prop("pubkey"), routes.all(filter))
 
   return aggregateScores(

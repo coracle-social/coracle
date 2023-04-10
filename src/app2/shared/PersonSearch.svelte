@@ -5,7 +5,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import PersonInfo from "src/app2/shared/PersonInfo.svelte"
   import {getUserReadRelays} from "src/agent/relays"
-  import {watch} from "src/agent/storage"
+  import {watch} from "src/agent/db"
   import network from "src/agent/network"
   import user from "src/agent/user"
 
@@ -16,7 +16,7 @@
 
   const {petnamePubkeys} = user
   const search = watch("people", t =>
-    fuzzy(t.all({"kind0.name:!nil": null}), {
+    fuzzy(t.all({"kind0.name": {$type: "string"}}), {
       keys: ["kind0.name", "kind0.about", "pubkey"],
     })
   )

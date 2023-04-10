@@ -13,7 +13,7 @@
   import OnboardingComplete from "src/app2/views/OnboardingComplete.svelte"
   import {getFollows} from "src/agent/social"
   import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
-  import {getPersonWithFallback} from "src/agent/tables"
+  import {getPersonWithFallback} from "src/agent/db"
   import network from "src/agent/network"
   import pool from "src/agent/pool"
   import user from "src/agent/user"

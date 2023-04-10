@@ -8,7 +8,7 @@
   import Popover from "src/partials/Popover.svelte"
   import NoteContent from "src/app2/shared/NoteContent.svelte"
   import NotificationSection from "src/app2/views/NotificationSection.svelte"
-  import {getPersonWithFallback, userEvents} from "src/agent/tables"
+  import {getPersonWithFallback, userEvents} from "src/agent/db"
   import {modal} from "src/app/ui"
 
   export let event

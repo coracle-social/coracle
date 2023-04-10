@@ -3,7 +3,7 @@
   import {parseContent} from "src/util/html"
   import {displayPerson} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
-  import {getPersonWithFallback} from "src/agent/tables"
+  import {getPersonWithFallback} from "src/agent/db"
 
   export let person
   export let truncate = false

@@ -1,6 +1,6 @@
 <script lang="ts">
   import Badge from "src/partials/Badge.svelte"
-  import {getPersonWithFallback} from "src/agent/tables"
+  import {getPersonWithFallback} from "src/agent/db"
 
   export let pubkeys
 </script>

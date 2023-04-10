@@ -4,8 +4,8 @@ import {doPipe} from "hurdak/lib/hurdak"
 import {synced, now, timedelta} from "src/util/misc"
 import {Tags, isNotification} from "src/util/nostr"
 import {getUserReadRelays} from "src/agent/relays"
-import {notifications, userEvents, contacts, rooms} from "src/agent/tables"
-import {watch} from "src/agent/storage"
+import {notifications, userEvents, contacts, rooms} from "src/agent/db"
+import {watch} from "src/agent/db"
 import network from "src/agent/network"
 import user from "src/agent/user"
 
@@ -33,7 +33,7 @@ export const newChatMessages = derived(
 // Synchronization from events to state
 
 const processNotifications = async (pubkey, events) => {
-  notifications.bulkPut(events.filter(e => isNotification(e, pubkey)))
+  notifications.patch(events.filter(e => isNotification(e, pubkey)))
 }
 
 const processMessages = async (pubkey, events) => {
@@ -91,7 +91,7 @@ const listen = async pubkey => {
   // Include an offset so we don't miss notifications on one relay but not another
   const since = now() - timedelta(30, "days")
   const roomIds = pluck("id", rooms.all({joined: true}))
-  const eventIds = doPipe(userEvents.all({"created_at:gt": since, kind: 1}), [
+  const eventIds = doPipe(userEvents.all({kind: 1, created_at: {$gt: since}}), [
     sortBy(e => -e.created_at),
     slice(0, 256),
     pluck("id"),

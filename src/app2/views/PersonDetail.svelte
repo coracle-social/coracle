@@ -19,7 +19,7 @@
   import pool from "src/agent/pool"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
-  import {getPersonWithFallback} from "src/agent/tables"
+  import {getPersonWithFallback, watch} from "src/agent/db"
   import {routes, modal, theme, getThemeColor} from "src/app/ui"
   import PersonCircle from "src/app2/shared/PersonCircle.svelte"
   import PersonAbout from "src/app2/shared/PersonAbout.svelte"
@@ -31,12 +31,12 @@
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const {petnamePubkeys, canPublish, mutes} = user
   const tabs = ["notes", "likes", pool.forceUrls.length === 0 && "relays"].filter(identity)
+  const pubkey = toHex(npub)
+  const person = watch("people", () => getPersonWithFallback(pubkey))
 
-  let pubkey = toHex(npub)
   let following = false
   let muted = false
   let followersCount = tweened(0, {interpolate, duration: 1000})
-  let person = getPersonWithFallback(pubkey)
   let loading = true
   let actions = []
   let rgb, rgba
@@ -95,14 +95,13 @@
   }
 
   onMount(async () => {
-    log("Person", npub, person)
+    log("Person", npub, $person)
 
-    document.title = displayPerson(person)
+    document.title = displayPerson($person)
 
     // Refresh our person
     network.loadPeople([pubkey], {relays, force: true}).then(() => {
       ownRelays = getPubkeyWriteRelays(pubkey)
-      person = getPersonWithFallback(pubkey)
       loading = false
     })
 
@@ -142,7 +141,7 @@
   const follow = async () => {
     const [{url}] = relays
 
-    user.addPetname(pubkey, url, displayPerson(person))
+    user.addPetname(pubkey, url, displayPerson($person))
   }
 
   const unfollow = async () => {
@@ -158,11 +157,11 @@
   }
 
   const openProfileInfo = () => {
-    modal.set({type: "person/info", person})
+    modal.set({type: "person/info", $person})
   }
 
   const share = () => {
-    modal.set({type: "person/share", person})
+    modal.set({type: "person/share", $person})
   }
 </script>
 
@@ -172,31 +171,31 @@
          background-size: cover;
          background-image:
           linear-gradient(to bottom, {rgba}, {rgb}),
-          url('{person.kind0?.banner}')" />
+          url('{$person.kind0?.banner}')" />
 
 <Content>
   <div class="flex gap-4 text-gray-1">
-    <PersonCircle {person} size={16} class="sm:h-32 sm:w-32" />
+    <PersonCircle person={$person} size={16} class="sm:h-32 sm:w-32" />
     <div class="flex flex-grow flex-col gap-4">
       <div class="flex items-start justify-between gap-4">
         <div class="flex flex-grow flex-col gap-2">
           <div class="flex items-center gap-2">
-            <h1 class="text-2xl">{displayPerson(person)}</h1>
+            <h1 class="text-2xl">{displayPerson($person)}</h1>
           </div>
-          {#if person.verified_as}
+          {#if $person.verified_as}
             <div class="flex gap-1 text-sm">
               <i class="fa fa-user-check text-accent" />
-              <span class="text-gray-1">{last(person.verified_as.split("@"))}</span>
+              <span class="text-gray-1">{last($person.verified_as.split("@"))}</span>
             </div>
           {/if}
         </div>
         <OverflowMenu {actions} />
       </div>
-      <PersonAbout {person} />
-      {#if person?.petnames}
+      <PersonAbout person={$person} />
+      {#if $person?.petnames}
         <div class="flex gap-8" in:fly={{y: 20}}>
           <button on:click={showFollows}>
-            <strong>{person.petnames.length}</strong> following
+            <strong>{$person.petnames.length}</strong> following
           </button>
           <button on:click={showFollowers}>
             <strong>{numberFmt.format($followersCount)}</strong> followers

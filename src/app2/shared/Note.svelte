@@ -54,8 +54,8 @@
   import keys from "src/agent/keys"
   import network from "src/agent/network"
   import {getEventPublishRelays, getRelaysForEventParent} from "src/agent/relays"
-  import {getPersonWithFallback} from "src/agent/tables"
-  import {watch} from "src/agent/storage"
+  import {getPersonWithFallback} from "src/agent/db"
+  import {watch} from "src/agent/db"
   import cmd from "src/agent/cmd"
   import {routes} from "src/app/ui"
   import {publishWithToast} from "src/app"
@@ -666,7 +666,7 @@
           </div>
         {/if}
         <h1 class="staatliches text-2xl">Relays</h1>
-        <p>This note was found on the {quantify(note.seen_on.length, "relay")} below.</p>
+        <p>This note was found on {quantify(note.seen_on.length, "relay")} below.</p>
         <div class="flex flex-col gap-2">
           {#each note.seen_on as url}
             <RelayCard theme="black" relay={{url}} />

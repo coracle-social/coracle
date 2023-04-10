@@ -3,7 +3,7 @@
   import {navigate} from "svelte-routing"
   import {ellipsize} from "hurdak/lib/hurdak"
   import {displayPerson} from "src/util/nostr"
-  import {getPersonWithFallback} from "src/agent/tables"
+  import {getPersonWithFallback} from "src/agent/db"
   import {lastChecked} from "src/app/listener"
   import PersonCircle from "src/app2/shared/PersonCircle.svelte"
   import Card from "src/partials/Card.svelte"

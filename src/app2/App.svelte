@@ -10,13 +10,13 @@
   import {warn} from "src/util/logger"
   import {timedelta, hexToBech32, bech32ToHex, shuffle, now} from "src/util/misc"
   import cmd from "src/agent/cmd"
-  import {onReady, relays} from "src/agent/tables"
+  import {onReady, relays} from "src/agent/db"
   import keys from "src/agent/keys"
   import network from "src/agent/network"
   import pool from "src/agent/pool"
   import {initializeRelayList} from "src/agent/relays"
   import sync from "src/agent/sync"
-  import * as tables from "src/agent/tables"
+  import * as db from "src/agent/db"
   import user from "src/agent/user"
   import {loadAppData} from "src/app"
   import {theme, getThemeVariables} from "src/app/ui"
@@ -28,7 +28,7 @@
   import Modal from "src/app2/Modal.svelte"
   import ForegroundButtons from "src/app2/ForegroundButtons.svelte"
 
-  Object.assign(window, {cmd, user, keys, network, pool, sync, tables, bech32ToHex, hexToBech32})
+  Object.assign(window, {cmd, user, keys, network, pool, sync, db, bech32ToHex, hexToBech32})
 
   export let pathname = location.pathname
 
@@ -117,11 +117,8 @@
 
       // Find relays with old/missing metadata and refresh them. Only pick a
       // few so we're not sending too many concurrent http requests
-      const staleRelays = shuffle(
-        await relays.all({
-          "refreshed_at:lt": now() - timedelta(7, "days"),
-        })
-      ).slice(0, 10)
+      const query = {refreshed_at: {$lt: now() - timedelta(7, "days")}}
+      const staleRelays = shuffle(relays.all(query)).slice(0, 10)
 
       const freshRelays = await Promise.all(
         staleRelays.map(async ({url}) => {
@@ -145,7 +142,7 @@
         })
       )
 
-      relays.bulkPatch(freshRelays.filter(identity))
+      relays.patch(freshRelays.filter(identity))
     }, 30_000)
 
     return () => {

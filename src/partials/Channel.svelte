@@ -6,7 +6,7 @@
   import {sleep, createScroller, Cursor} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import user from "src/agent/user"
-  import {getPersonWithFallback} from "src/agent/tables"
+  import {getPersonWithFallback} from "src/agent/db"
   import network from "src/agent/network"
 
   export let loadMessages

@@ -14,7 +14,7 @@
   import {sampleRelays} from "src/agent/relays"
   import user from "src/agent/user"
   import network from "src/agent/network"
-  import {getPersonWithFallback} from "src/agent/tables"
+  import {getPersonWithFallback} from "src/agent/db"
   import {routes, modal} from "src/app/ui"
 
   export let note

@@ -4,7 +4,7 @@
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import user from "src/agent/user"
-  import {getRelayWithFallback} from "src/agent/tables"
+  import {getRelayWithFallback} from "src/agent/db"
 
   export let relay
 

@@ -1,9 +1,8 @@
 # Current
 
 - [ ] Refactor
+  - Split out Note pieces
   - Move global modals to child components?
-  - Consolidate person search/list, other person components
-  - Consolidate relay components
 
 - [ ] Relays bounty
   - [ ] Ability to create custom feeds

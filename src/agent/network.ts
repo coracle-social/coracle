@@ -10,7 +10,7 @@ import {
   getRelaysForEventChildren,
   sampleRelays,
 } from "src/agent/relays"
-import {people} from "src/agent/tables"
+import {people} from "src/agent/db"
 import pool from "src/agent/pool"
 import sync from "src/agent/sync"
 

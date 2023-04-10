@@ -4,7 +4,7 @@
   import Feed from "src/app2/shared/Feed.svelte"
   import RelayTitle from "src/app2/shared/RelayTitle.svelte"
   import RelayActions from "src/app2/shared/RelayActions.svelte"
-  import {relays} from "src/agent/tables"
+  import {relays} from "src/agent/db"
 
   export let url
 

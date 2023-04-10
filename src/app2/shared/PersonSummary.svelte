@@ -1,35 +1,36 @@
 <script lang="ts">
-  import {last} from "ramda"
+  import {last, nth} from "ramda"
   import {navigate} from "svelte-routing"
   import {displayPerson} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import user from "src/agent/user"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
-  import {getPersonWithFallback} from "src/agent/tables"
-  import {watch} from "src/agent/storage"
+  import {getPersonWithFallback} from "src/agent/db"
+  import {watch} from "src/agent/db"
   import {routes} from "src/app/ui"
   import PersonCircle from "src/app2/shared/PersonCircle.svelte"
   import PersonAbout from "src/app2/shared/PersonAbout.svelte"
 
   export let pubkey
 
-  const {petnamePubkeys, canPublish} = user
+  const {petnamePubkeys, mutes, canPublish} = user
   const getRelays = () => sampleRelays(getPubkeyWriteRelays(pubkey))
   const person = watch("people", () => getPersonWithFallback(pubkey))
 
-  let following = false
-
   $: following = $petnamePubkeys.includes(pubkey)
+  $: muted = $mutes.map(nth(1)).includes(pubkey)
 
-  const follow = async () => {
+  const follow = () => {
     const [{url}] = getRelays()
 
     user.addPetname(pubkey, url, displayPerson($person))
   }
 
-  const unfollow = async () => {
-    user.removePetname(pubkey)
-  }
+  const unfollow = () => user.removePetname(pubkey)
+
+  const unmute = () => user.removeMute(pubkey)
+
+  const mute = () => user.addMute("p", pubkey)
 </script>
 
 <div class="relative flex flex-col gap-4 py-2 px-3">
@@ -49,16 +50,26 @@
         </div>
       {/if}
     </div>
-    <div class="flex gap-2">
+    <div class="flex gap-4 py-2 text-lg">
       {#if $canPublish}
-        {#if following}
-          <Anchor type="button-circle" on:click={unfollow}>
-            <i class="fa fa-user-minus" />
-          </Anchor>
+        {#if muted}
+          <i
+            title="Unmute"
+            class="fa fa-microphone-slash w-6 cursor-pointer text-center"
+            on:click={unmute} />
         {:else}
-          <Anchor type="button-circle" on:click={follow}>
-            <i class="fa fa-user-plus" />
-          </Anchor>
+          <i title="Mute" class="fa fa-microphone w-6 cursor-pointer text-center" on:click={mute} />
+        {/if}
+        {#if following}
+          <i
+            title="Unfollow"
+            class="fa fa-user-minus w-6 cursor-pointer text-center"
+            on:click={unfollow} />
+        {:else}
+          <i
+            title="Follow"
+            class="fa fa-user-plus w-6 cursor-pointer text-center"
+            on:click={follow} />
         {/if}
       {/if}
     </div>
