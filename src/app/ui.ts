@@ -16,6 +16,14 @@ export const routes = {
   person: (pubkey, tab = "notes") => `/people/${nip19.npubEncode(pubkey)}/${tab}`,
 }
 
+export const location = (() => {
+  const store = writable(window.location)
+
+  globalHistory.listen(({location}) => store.set(location))
+
+  return store
+})()
+
 // Install prompt
 
 export const installPrompt = writable(null)
@@ -55,10 +63,10 @@ export const modal = {
   set: data => {
     if (data) {
       modal.history.push(data)
-      navigate(location.pathname + `#m=${modal.history.length - 1}`)
+      navigate(window.location.pathname + `#m=${modal.history.length - 1}`)
     } else {
       modal.history = []
-      navigate(location.pathname)
+      navigate(window.location.pathname)
     }
   },
   close: () => modal.set(null),
@@ -72,8 +80,8 @@ export const modal = {
   subscribe: cb => {
     cb(last(modal.history))
 
-    return globalHistory.listen(({action}) => {
-      const match = location.hash.match(/\bm=(\d+)/)
+    return location.subscribe($location => {
+      const match = $location.hash.match(/\bm=(\d+)/)
       const i = match ? parseInt(match[1]) : null
 
       modal.history.splice(i === null ? -1 : i + 1)

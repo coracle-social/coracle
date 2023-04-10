@@ -1,5 +1,8 @@
 # Current
 
+- [ ] Refactor
+  - Move global modals to child components?
+
 - [ ] Relays bounty
   - [ ] Ability to create custom feeds
 - [ ] Fix tag-style event mentions. Probably transform all mentions into entities in parse
