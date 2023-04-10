@@ -1,0 +1,38 @@
+<script lang="ts">
+  import {nip19} from "nostr-tools"
+  import {copyToClipboard} from "src/util/html"
+  import Input from "src/partials/Input.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
+  import Heading from "src/partials/Heading.svelte"
+  import Content from "src/partials/Content.svelte"
+  import pool from "src/agent/pool"
+  import {modal, toast} from "src/app/ui"
+
+  export let privkey
+
+  const nsec = nip19.nsecEncode(privkey)
+  const nextStage = pool.forceUrls.length > 0 ? "follows" : "relays"
+
+  const copyKey = () => {
+    copyToClipboard(nsec)
+    toast.show("info", "Your private key has been copied to the clipboard. Keep it secret!")
+  }
+</script>
+
+<Content size="lg" class="text-center">
+  <Heading>Generate a Key</Heading>
+  <p>
+    Your private key is your password, and gives you total control over your Nostr account. We've
+    generated a fresh one for you below – store it somewhere safe!
+  </p>
+  <div class="flex gap-2">
+    <Input disabled placeholder={"•".repeat(53)} wrapperClass="flex-grow">
+      <i slot="before" class="fa fa-lock" />
+      <button slot="after" class="fa fa-copy cursor-pointer" on:click={copyKey} />
+    </Input>
+    <Anchor type="button-accent" on:click={() => modal.set({type: "onboarding", stage: nextStage})}>
+      Log in
+    </Anchor>
+  </div>
+  <p>If you don't want to save your keys now, you can find them later in Coracle's settings.</p>
+</Content>

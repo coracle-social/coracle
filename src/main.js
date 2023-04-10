@@ -1,7 +1,7 @@
 import "src/app.css"
 
 import Bugsnag from "@bugsnag/js"
-import App from "src/ui/App.svelte"
+import App from "src/app2/App.svelte"
 import {installPrompt} from "src/app/ui"
 
 Bugsnag.start({
