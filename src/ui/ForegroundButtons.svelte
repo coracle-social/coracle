@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {nip19} from "nostr-tools"
   import user from "src/agent/user"
   import {modal, location} from "src/app/ui"
 
@@ -7,7 +8,8 @@
   const {canPublish} = user
 
   const createNote = () => {
-    const pubkey = null // TODO use $location.pathname
+    const matches = $location.pathname.match(/people\/(npub1[0-9a-z]+)/)
+    const pubkey = matches ? nip19.decode(matches[1]).data : null
 
     modal.set({type: "note/create", pubkey})
   }

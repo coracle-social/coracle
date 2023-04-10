@@ -43,7 +43,7 @@
     return {selection, node, offset, word}
   }
 
-  const autocomplete = ({person}) => {
+  const autocomplete = ({person, force = false}) => {
     const {selection, node, offset, word} = getInfo()
 
     const annotate = (prefix, text, value) => {
@@ -70,12 +70,12 @@
     }
 
     // Mentions
-    if (word.length > 1 && word.startsWith("@")) {
+    if ((force || word.length > 1) && word.startsWith("@")) {
       annotate("@", displayPerson(person).trim(), pubkeyEncoder.encode(person.pubkey))
     }
 
     // Topics
-    if (word.length > 1 && word.startsWith("#")) {
+    if ((force || word.length > 1) && word.startsWith("#")) {
       annotate("#", word.slice(1), word.slice(1))
     }
 
@@ -139,7 +139,7 @@
     selection.getRangeAt(0).insertNode(spaceNode)
     selection.collapse(input, 1)
 
-    autocomplete({person})
+    autocomplete({person, force: true})
   }
 
   const createNewLines = (n = 1) => {
