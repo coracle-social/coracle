@@ -22,7 +22,11 @@
             border-gray-6 bg-gray-7 p-4 text-gray-3">
   <div class="fa fa-bars fa-2xl cursor-pointer lg:hidden" on:click={toggleMenu} />
   <div class="flex items-center gap-4">
-    <Anchor external type="unstyled" href="https://coracle.social" class="flex items-center gap-2">
+    <Anchor
+      external
+      type="unstyled"
+      href="https://info.coracle.social"
+      class="flex items-center gap-2">
       <img alt="Coracle Logo" src="/images/logo.png" class="w-8" />
       <h1 class="staatliches text-3xl">Coracle</h1>
     </Anchor>
