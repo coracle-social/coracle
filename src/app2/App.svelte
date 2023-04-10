@@ -10,7 +10,7 @@
   import {warn} from "src/util/logger"
   import {timedelta, hexToBech32, bech32ToHex, shuffle, now} from "src/util/misc"
   import cmd from "src/agent/cmd"
-  import {onReady, relays, people} from "src/agent/tables"
+  import {onReady, relays} from "src/agent/tables"
   import keys from "src/agent/keys"
   import network from "src/agent/network"
   import pool from "src/agent/pool"

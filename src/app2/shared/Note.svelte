@@ -40,7 +40,7 @@
   import Content from "src/partials/Content.svelte"
   import Badge from "src/partials/Badge.svelte"
   import Popover from "src/partials/Popover.svelte"
-  import PersonCircle from "src/partials/PersonCircle.svelte"
+  import PersonCircle from "src/app2/shared/PersonCircle.svelte"
   import PersonSummary from "src/app2/shared/PersonSummary.svelte"
   import RelayCard from "src/app2/shared/RelayCard.svelte"
   import Modal from "src/partials/Modal.svelte"

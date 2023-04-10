@@ -5,7 +5,7 @@
   import {displayPerson} from "src/util/nostr"
   import {getPersonWithFallback} from "src/agent/tables"
   import {lastChecked} from "src/app/listener"
-  import PersonCircle from "src/partials/PersonCircle.svelte"
+  import PersonCircle from "src/app2/shared/PersonCircle.svelte"
   import Card from "src/partials/Card.svelte"
 
   export let contact

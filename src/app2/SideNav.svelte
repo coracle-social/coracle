@@ -6,7 +6,7 @@
   import {menuIsOpen, installPrompt, routes} from "src/app/ui"
   import {newNotifications, newDirectMessages, newChatMessages} from "src/app/listener"
   import {slowConnections} from "src/app/connection"
-  import PersonCircle from "src/partials/PersonCircle.svelte"
+  import PersonCircle from "src/app2/shared/PersonCircle.svelte"
 
   const {profile, canPublish} = user
 

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import {without} from "ramda"
+  import {without, always} from "ramda"
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
-  import PersonInfo from "src/partials/PersonInfo.svelte"
+  import PersonInfo from "src/app2/shared/PersonInfo.svelte"
   import {getPersonWithFallback} from "src/agent/tables"
   import {watch} from "src/agent/storage"
   import {modal} from "src/app/ui"
@@ -55,7 +55,10 @@
     </div>
   {:else}
     {#each follows as pubkey}
-      <PersonInfo person={getPersonWithFallback(pubkey)} {removePetname} />
+      <PersonInfo
+        person={getPersonWithFallback(pubkey)}
+        hasPetname={always(true)}
+        {removePetname} />
     {/each}
   {/if}
   <div class="flex items-center gap-2">
@@ -66,6 +69,6 @@
     <i slot="before" class="fa-solid fa-search" />
   </Input>
   {#each search(q).slice(0, 50) as person (person.pubkey)}
-    <PersonInfo {person} {addPetname} />
+    <PersonInfo {person} hasPetname={always(false)} {addPetname} />
   {/each}
 </Content>

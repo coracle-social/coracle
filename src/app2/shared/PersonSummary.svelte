@@ -8,8 +8,8 @@
   import {getPersonWithFallback} from "src/agent/tables"
   import {watch} from "src/agent/storage"
   import {routes} from "src/app/ui"
-  import PersonCircle from "src/partials/PersonCircle.svelte"
-  import PersonAbout from "src/partials/PersonAbout.svelte"
+  import PersonCircle from "src/app2/shared/PersonCircle.svelte"
+  import PersonAbout from "src/app2/shared/PersonAbout.svelte"
 
   export let pubkey
 

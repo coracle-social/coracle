@@ -21,8 +21,8 @@
   import network from "src/agent/network"
   import {getPersonWithFallback} from "src/agent/tables"
   import {routes, modal, theme, getThemeColor} from "src/app/ui"
-  import PersonCircle from "src/partials/PersonCircle.svelte"
-  import PersonAbout from "src/partials/PersonAbout.svelte"
+  import PersonCircle from "src/app2/shared/PersonCircle.svelte"
+  import PersonAbout from "src/app2/shared/PersonAbout.svelte"
 
   export let npub
   export let activeTab

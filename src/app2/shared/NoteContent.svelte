@@ -10,7 +10,7 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import PersonCircle from "src/partials/PersonCircle.svelte"
+  import PersonCircle from "src/app2/shared/PersonCircle.svelte"
   import {sampleRelays} from "src/agent/relays"
   import user from "src/agent/user"
   import network from "src/agent/network"
