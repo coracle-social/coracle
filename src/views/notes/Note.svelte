@@ -1,7 +1,19 @@
 <script lang="ts">
   import cx from "classnames"
   import {nip19} from "nostr-tools"
-  import {find, sum, last, whereEq, without, uniq, pluck, reject, propEq} from "ramda"
+  import {
+    sortBy,
+    identity,
+    find,
+    sum,
+    last,
+    whereEq,
+    without,
+    uniq,
+    pluck,
+    reject,
+    propEq,
+  } from "ramda"
   import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
   import {slide} from "svelte/transition"
@@ -477,7 +489,7 @@
                 <div
                   style="transform: scale(-1, 1)"
                   class="absolute top-0 right-0 m-3 grid grid-cols-3 gap-2 sm:hidden">
-                  {#each note.seen_on as url, i}
+                  {#each sortBy(identity, note.seen_on) as url, i}
                     <div class={`cursor-pointer order-${3 - (i % 3)}`}>
                       <div
                         class="h-3 w-3 rounded-full border border-solid border-gray-6"
@@ -488,10 +500,10 @@
                 </div>
                 <!-- Desktop version -->
                 <div
-                  class={cx("hidden sm:flex transition-opacity", {
+                  class={cx("hidden transition-opacity sm:flex", {
                     "opacity-0 group-hover:opacity-100": !showEntire,
                   })}>
-                  {#each note.seen_on as url, i}
+                  {#each sortBy(identity, note.seen_on) as url, i}
                     <Popover triggerType="mouseenter" interactive={false}>
                       <div slot="trigger" class="cursor-pointer p-1">
                         <div

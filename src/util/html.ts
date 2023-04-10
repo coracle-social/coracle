@@ -119,6 +119,7 @@ export const parseContent = content => {
   }
 
   for (; i < text.length; ) {
+    const prev = last(result)
     const tail = text.slice(i)
 
     const newLine = tail.match(/^\n+/)
@@ -162,7 +163,7 @@ export const parseContent = content => {
     )
 
     // Skip url if it's just the end of a filepath
-    if (urlMatch && !last(result)?.value.endsWith("/")) {
+    if (urlMatch && (prev?.type !== "text" || !prev.value.endsWith("/"))) {
       let url = urlMatch[0]
 
       // Skip ellipses and very short non-urls

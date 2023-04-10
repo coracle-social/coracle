@@ -40,7 +40,7 @@ export const initializeRelayList = async () => {
     const url = import.meta.env.VITE_DUFFLEPUD_URL + "/relay"
     const json = await fetchJson(url)
 
-    await relays.bulkPatch(map(objOf("url"), json.relays.filter(isRelay)))
+    await relays.bulkPatch(json.relays.filter(isRelay).map(objOf("url")))
   } catch (e) {
     warn("Failed to fetch relays list", e)
   }
@@ -88,7 +88,11 @@ export const getAllPubkeyWriteRelays = pubkeys => getAllPubkeyRelays(pubkeys, "w
 
 // Current user
 
-export const getUserRelays = () => user.getRelays().map(assoc("score", 1))
+export const getUserRelays = () =>
+  user
+    .getRelays()
+    .filter(({url}) => isRelay(url))
+    .map(assoc("score", 1))
 
 export const getUserReadRelays = () =>
   getUserRelays()

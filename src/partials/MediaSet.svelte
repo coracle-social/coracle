@@ -32,7 +32,7 @@
   <div in:slide class="relative">
     <Media link={annotated[0]} onClose={close} />
     {#if annotated.length > 1}
-      <p class="text-gray-500 py-4 text-center underline" on:click={openModal}>
+      <p class="text-gray-500 cursor-pointer py-4 text-center underline" on:click={openModal}>
         <i class="fa fa-plus" /> Show {annotated.length} link previews
       </p>
     {/if}

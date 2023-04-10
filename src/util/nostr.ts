@@ -114,7 +114,7 @@ export const isNotification = (e, pubkey) => {
 export const isRelay = url =>
   typeof url === "string" &&
   // It should have the protocol included
-  url.match(/^wss?:\/\/.+/)
+  url.match(/^wss:\/\/.+/)
 
 export const isShareableRelay = url =>
   isRelay(url) &&
