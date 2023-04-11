@@ -1,8 +1,7 @@
 import {map, pick, last, uniqBy} from "ramda"
 import {get} from "svelte/store"
 import {doPipe} from "hurdak/lib/hurdak"
-import {parseContent} from "src/util/html"
-import {Tags, roomAttrs, displayPerson, findReplyId, findRootId} from "src/util/nostr"
+import {parseContent, Tags, roomAttrs, displayPerson, findReplyId, findRootId} from "src/util/nostr"
 import {getRelayForPersonHint} from "src/agent/relays"
 import {getPersonWithFallback} from "src/agent/db"
 import pool from "src/agent/pool"
@@ -111,7 +110,7 @@ const processMentions = map(pubkey => {
 const tagsFromContent = (content, tags) => {
   const seen = new Set(Tags.wrap(tags).values().all())
 
-  for (const {type, value} of parseContent(content)) {
+  for (const {type, value} of parseContent({content})) {
     if (type.match(/nostr:(note|nevent)/) && !seen.has(value.id)) {
       tags = tags.concat([["e", value.id]])
       seen.add(value.id)

@@ -1,7 +1,6 @@
 <script lang="ts">
   import {ellipsize} from "hurdak/lib/hurdak"
-  import {parseContent} from "src/util/html"
-  import {displayPerson} from "src/util/nostr"
+  import {displayPerson, parseContent} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import {getPersonWithFallback} from "src/agent/db"
 
@@ -9,7 +8,7 @@
   export let truncate = false
 
   const about = person?.kind0?.about || ""
-  const content = parseContent(truncate ? ellipsize(about, 140) : about)
+  const content = parseContent({content: truncate ? ellipsize(about, 140) : about})
 </script>
 
 <p class="overflow-hidden text-ellipsis">

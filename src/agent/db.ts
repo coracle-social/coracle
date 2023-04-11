@@ -1,20 +1,46 @@
 import type {Writable} from "svelte/store"
 import Loki from "lokijs"
-import IncrementalIndexedAdapter from "lokijs/src/incremental-indexeddb-adapter"
-import {partition, sortBy, prop, pluck, without, is} from "ramda"
+import IncrementalIndexedDBAdapter from "lokijs/src/incremental-indexeddb-adapter"
+import {partition, sortBy, prop, always, pluck, without, is} from "ramda"
 import {throttle} from "throttle-debounce"
 import {writable} from "svelte/store"
-import {ensurePlural, createMap} from "hurdak/lib/hurdak"
+import {ensurePlural, noop, createMap} from "hurdak/lib/hurdak"
 import {log} from "src/util/logger"
 import {Tags} from "src/util/nostr"
 import user from "src/agent/user"
 
-const loki = new Loki("agent.db", {
+const Adapter = window.indexedDB ? IncrementalIndexedDBAdapter : Loki.LokiMemoryAdapter
+
+export const loki = new Loki("agent.db", {
   autoload: true,
   autosave: true,
-  adapter: window.indexedDB ? new IncrementalIndexedAdapter() : new Loki.LokiMemoryAdapter(),
-  autoloadCallback: () => ready.set(true),
+  autosaveInterval: 4000,
+  adapter: new Adapter(),
+  autoloadCallback: () => {
+    for (const table of Object.values(registry)) {
+      table.initialize()
+    }
+
+    listener.connect()
+
+    ready.set(true)
+  },
 })
+
+window.addEventListener("beforeunload", () => loki.close())
+
+const stubCollection = {
+  insert: noop,
+  updateWhere: noop,
+  removeWhere: noop,
+  findAndRemove: noop,
+  clear: noop,
+  find: always([]),
+  findOne: always(null),
+  by: always(null),
+  count: always(0),
+  chain: () => stubCollection,
+}
 
 // ----------------------------------------------------------------------------
 // Database table abstraction around loki
@@ -26,24 +52,32 @@ class Table {
   pk: string
   _max: number
   _sort: (xs: Array<Record<string, any>>) => Array<Record<string, any>>
-  _coll: Loki
+  _coll?: Loki
+  _subs: Array<(t: Table) => void>
   constructor(name, pk, {max = 500, sort = null} = {}) {
     this.name = name
     this.pk = pk
     this._max = max
     this._sort = sort
-    this._coll = loki.addCollection(name, {unique: [pk]})
+    this._coll = stubCollection
+    this._subs = []
 
     registry[name] = this
   }
+  initialize() {
+    this._coll = loki.addCollection(this.name, {unique: [this.pk]})
+    this._coll.addListener(["insert", "update"], () => {
+      for (const cb of this._subs) {
+        cb(this)
+      }
+    })
+  }
   subscribe(cb) {
-    const keys = ["insert", "update"]
+    this._subs.push(cb)
 
-    this._coll.addListener(keys, cb)
-
-    cb(this)
-
-    return () => this._coll.removeListener(keys, cb)
+    return () => {
+      this._subs = without([cb], this._subs)
+    }
   }
   patch(items) {
     const [updates, creates] = partition(item => this.get(item[this.pk]), ensurePlural(items))
@@ -182,8 +216,6 @@ export const contacts = new Table("contacts", "pubkey")
 export const rooms = new Table("rooms", "id")
 export const relays = new Table("relays", "url")
 export const routes = new Table("routes", "id", {max: 3000, sort: sortByLastSeen})
-
-listener.connect()
 
 export const getPersonWithFallback = pubkey => people.get(pubkey) || {pubkey}
 export const getRelayWithFallback = url => relays.get(url) || {url}
