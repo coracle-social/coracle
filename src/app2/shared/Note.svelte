@@ -375,6 +375,7 @@
           getHeight(childrenContainer) -
           getHeight(lastChild) -
           getHeight(lastChild.nextElementSibling) -
+          getHeight(lastChild.nextElementSibling?.nextElementSibling) -
           (lastChild.nextElementSibling ? 16 : 0)
 
         border.style = `height: ${height - 21}px`

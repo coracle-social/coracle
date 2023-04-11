@@ -3,21 +3,14 @@
 - [ ] Refactor
   - Split out Note pieces
   - Move global modals to child components?
-
 - [ ] Relays bounty
   - [ ] Ability to create custom feeds
   - [ ] Add global/following/network tabs to relay detail
 - [ ] Some lnurls aren't working npub1y3k2nheva29y9ej8a22e07epuxrn04rvgy28wvs54y57j7vsxxuq0gvp4j
-- [ ] Fix performance issues
-    - Call close onbeforeunload to save pending changes
-  - Fix force relays on login: http://localhost:5173/messages/npub1l66wvfm7dxhd6wmvpukpjpyhvwtlxzu0qqajqxjfpr4rlfa8hl5qlkfr3q
-- [ ] Fix iOS/safari/firefox
-- [ ] Revisit profile page and info
-  - [ ] Add zaps to likes tab
+- [ ] Fix force relays on login: http://localhost:5173/messages/npub1l66wvfm7dxhd6wmvpukpjpyhvwtlxzu0qqajqxjfpr4rlfa8hl5qlkfr3q
 - [ ] Sort DMs, remember message status
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
-  - Requires updating my OS -_-
 
 # Custom views
 
