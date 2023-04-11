@@ -3,6 +3,7 @@
 - [ ] Refactor
   - Split out Note pieces
   - Move global modals to child components?
+  - Combine app/agent, rename app2
 - [ ] Relays bounty
   - [ ] Ability to create custom feeds
   - [ ] Add global/following/network tabs to relay detail

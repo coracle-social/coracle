@@ -1,22 +1,9 @@
 <script lang="ts">
   import cx from "classnames"
   import {nip19} from "nostr-tools"
-  import {
-    sortBy,
-    identity,
-    find,
-    sum,
-    last,
-    whereEq,
-    without,
-    uniq,
-    pluck,
-    reject,
-    propEq,
-  } from "ramda"
+  import {sortBy, identity, find, sum, last, whereEq, pluck, reject, propEq} from "ramda"
   import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
-  import {slide} from "svelte/transition"
   import {quantify} from "hurdak/lib/hurdak"
   import {warn} from "src/util/logger"
   import {Tags, displayRelay, findRootId, findReplyId, displayPerson, isLike} from "src/util/nostr"
@@ -33,21 +20,19 @@
   import {invoiceAmount} from "src/util/lightning"
   import QRCode from "src/partials/QRCode.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import ImageInput from "src/partials/ImageInput.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import Content from "src/partials/Content.svelte"
   import Badge from "src/partials/Badge.svelte"
   import Popover from "src/partials/Popover.svelte"
+  import Modal from "src/partials/Modal.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app2/shared/PersonCircle.svelte"
   import PersonSummary from "src/app2/shared/PersonSummary.svelte"
   import RelayCard from "src/app2/shared/RelayCard.svelte"
-  import Modal from "src/partials/Modal.svelte"
-  import Media from "src/partials/Media.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import NoteReply from "src/app2/shared/NoteReply.svelte"
   import {toast, modal} from "src/app/ui"
-  import Compose from "src/partials/Compose.svelte"
   import Card from "src/partials/Card.svelte"
   import user from "src/agent/user"
   import pool from "src/agent/pool"
@@ -58,7 +43,6 @@
   import {watch} from "src/agent/db"
   import cmd from "src/agent/cmd"
   import {routes} from "src/app/ui"
-  import {publishWithToast} from "src/app"
   import NoteContent from "src/app2/shared/NoteContent.svelte"
 
   export let note
@@ -70,14 +54,8 @@
   export let showContext = false
   export let invertColors = false
 
-  const getDefaultReplyMentions = () =>
-    without([user.getPubkey()], uniq(Tags.from(note).type("p").values().all().concat(note.pubkey)))
-
   let zap = null
-  let image = null
   let reply = null
-  let replyMentions = getDefaultReplyMentions()
-  let replyContainer = null
   let visibleNotes = []
   let showDetails = false
   let collapsed = false
@@ -220,54 +198,6 @@
     likes = reject(propEq("pubkey", $profile.pubkey), likes)
   }
 
-  const startReply = () => {
-    reply = reply || true
-  }
-
-  const removeMention = pubkey => {
-    replyMentions = without([pubkey], replyMentions)
-  }
-
-  const resetReply = () => {
-    reply = null
-    replyMentions = getDefaultReplyMentions()
-  }
-
-  const sendReply = async () => {
-    let {content, mentions, topics} = reply.parse()
-
-    if (image) {
-      content = (content + "\n" + image).trim()
-    }
-
-    if (content) {
-      mentions = uniq(mentions.concat(replyMentions))
-
-      const relays = getEventPublishRelays(note)
-      const thunk = cmd.createReply(note, content, mentions, topics)
-      const [event, promise] = await publishWithToast(relays, thunk)
-
-      promise.then(({succeeded}) => {
-        if (succeeded.size > 0) {
-          toast.show("info", {
-            text: `Your note has been created!`,
-            link: {
-              text: "View",
-              href:
-                "/" +
-                nip19.neventEncode({
-                  id: event.id,
-                  relays: pluck("url", relays.slice(0, 3)),
-                }),
-            },
-          })
-        }
-      })
-
-      resetReply()
-    }
-  }
-
   const startZap = async () => {
     zap = {
       amount: user.getSetting("defaultZap"),
@@ -353,14 +283,6 @@
     modal.set({type: "note/create", nevent})
   }
 
-  const onBodyClick = e => {
-    const target = e.target as HTMLElement
-
-    if (replyContainer && !replyContainer.contains(target)) {
-      resetReply()
-    }
-  }
-
   const setBorderHeight = () => {
     const getHeight = e => e?.getBoundingClientRect().height || 0
 
@@ -392,8 +314,6 @@
     }
   })
 </script>
-
-<svelte:body on:click={onBodyClick} />
 
 {#if $person}
   <div bind:this={noteContainer} class="note group relative">
@@ -460,7 +380,7 @@
               class={cx("flex", {
                 "pointer-events-none opacity-75": !$canPublish || muted,
               })}>
-              <button class="w-16 text-left" on:click|stopPropagation={startReply}>
+              <button class="w-16 text-left" on:click|stopPropagation={reply.start}>
                 <i class="fa fa-reply cursor-pointer" />
                 {$repliesCount}
               </button>
@@ -527,67 +447,9 @@
     </Card>
   </div>
 
-  {#if reply}
-    <div
-      transition:slide
-      class="note-reply relative z-10 flex flex-col gap-1"
-      bind:this={replyContainer}>
-      <div class={`border border-${borderColor} rounded border-solid`}>
-        <div class="bg-gray-7" class:rounded-b={replyMentions.length === 0}>
-          <Compose bind:this={reply} onSubmit={sendReply}>
-            <button
-              slot="addon"
-              on:click={sendReply}
-              class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-gray-7 p-4
-                 py-8 text-gray-3 transition-all hover:bg-accent">
-              <i class="fa fa-paper-plane fa-xl" />
-            </button>
-          </Compose>
-        </div>
-        {#if image}
-          <div class="bg-gray-7 p-2">
-            <Media
-              link={{type: "image", url: image}}
-              onClose={() => {
-                image = null
-              }} />
-          </div>
-        {/if}
-        <div class={`h-px bg-${borderColor}`} />
-        <div class="flex gap-2 rounded-b bg-gray-7 p-2 text-sm text-gray-3">
-          <div class="inline-block border-r border-solid border-gray-6 py-2 pl-1 pr-3">
-            <div class="flex cursor-pointer items-center gap-3">
-              <ImageInput bind:value={image} icon="image" hideInput>
-                <i slot="button" class="fa fa-paperclip" />
-              </ImageInput>
-              <i class="fa fa-at" />
-            </div>
-          </div>
-          <div>
-            {#each replyMentions as p}
-              <div
-                class="mr-1 mb-1 inline-block rounded-full border border-solid border-gray-1 py-1 px-2">
-                <button
-                  class="fa fa-times cursor-pointer"
-                  on:click|stopPropagation={() => removeMention(p)} />
-                {displayPerson(getPersonWithFallback(p))}
-              </div>
-            {:else}
-              <div class="text-gray-1 inline-block">No mentions</div>
-            {/each}
-            <div class="-mb-2" />
-          </div>
-        </div>
-      </div>
-      <div class="flex justify-end gap-2 text-sm text-gray-5">
-        <span>
-          Posting as @{displayPerson(getPersonWithFallback(user.getPubkey()))}
-        </span>
-      </div>
-    </div>
-  {/if}
+  <NoteReply bind:this={reply} {note} {borderColor} />
 
-  {#if !reply && visibleNotes.length > 0 && !showEntire && depth > 0 && !muted}
+  {#if !reply?.isActive() && visibleNotes.length > 0 && !showEntire && depth > 0 && !muted}
     <div class="relative -mt-4">
       <div
         class="absolute top-0 right-0 z-10 -mt-4 -mr-2 flex h-6 w-6 cursor-pointer items-center
