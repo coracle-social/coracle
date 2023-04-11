@@ -5,7 +5,6 @@ import {partition, sortBy, prop, always, pluck, without, is} from "ramda"
 import {throttle} from "throttle-debounce"
 import {writable} from "svelte/store"
 import {ensurePlural, noop, createMap} from "hurdak/lib/hurdak"
-import {log} from "src/util/logger"
 import {Tags} from "src/util/nostr"
 import user from "src/agent/user"
 
@@ -185,13 +184,7 @@ export const watch = (names, f) => {
   return store
 }
 
-export const dropAll = async () => {
-  for (const table of Object.values(registry)) {
-    await table.drop()
-
-    log(`Successfully dropped table ${table.name}`)
-  }
-}
+export const dropAll = () => new Promise(resolve => loki.deleteDatabase(resolve))
 
 // ----------------------------------------------------------------------------
 // Domain-specific collections

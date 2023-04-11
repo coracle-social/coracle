@@ -2,6 +2,8 @@ import type {DisplayEvent} from "src/util/types"
 import {is, fromPairs, mergeLeft, last, identity, objOf, prop, flatten, uniq} from "ramda"
 import {nip19} from "nostr-tools"
 import {ensurePlural, ellipsize, first} from "hurdak/lib/hurdak"
+import {tryJson} from "src/util/misc"
+import {invoiceAmount} from "src/util/lightning"
 
 export const personKinds = [0, 2, 3, 10001, 10002]
 export const userKinds = personKinds.concat([10000])
@@ -213,8 +215,9 @@ export const parseContent = ({content, tags = []}) => {
       try {
         const entity = bech32Match[0].replace("nostr:", "")
         const {type, data} = nip19.decode(entity) as {type: string; data: object}
+        const value = type === "note" ? {id: data} : data
 
-        push(`nostr:${type}`, bech32Match[0], {...data, entity})
+        push(`nostr:${type}`, bech32Match[0], {...value, entity})
         continue
       } catch (e) {
         console.log(e)
@@ -265,3 +268,45 @@ export const parseContent = ({content, tags = []}) => {
 
   return result
 }
+
+export const processZaps = (zaps, author) =>
+  zaps
+    .map(zap => {
+      const zapMeta = Tags.from(zap).asMeta()
+
+      return tryJson(() => ({
+        ...zap,
+        invoiceAmount: invoiceAmount(zapMeta.bolt11),
+        request: JSON.parse(zapMeta.description),
+      }))
+    })
+    .filter(zap => {
+      if (!zap) {
+        return false
+      }
+
+      // Don't count zaps that the user sent himself
+      if (zap.request.pubkey === author.pubkey) {
+        return false
+      }
+
+      const {invoiceAmount, request} = zap
+      const reqMeta = Tags.from(request).asMeta()
+
+      // Verify that the zapper actually sent the requested amount (if it was supplied)
+      if (reqMeta.amount && parseInt(reqMeta.amount) !== invoiceAmount) {
+        return false
+      }
+
+      // If the sending client provided an lnurl tag, verify that too
+      if (reqMeta.lnurl && reqMeta.lnurl !== author.lnurl) {
+        return false
+      }
+
+      // Verify that the zap note actually came from the recipient's zapper
+      if (author.zapper?.nostrPubkey !== zap.pubkey) {
+        return false
+      }
+
+      return true
+    })

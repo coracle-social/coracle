@@ -79,7 +79,7 @@
   const onBodyClick = e => {
     const target = e.target as HTMLElement
 
-    if (container?.contains(target)) {
+    if (container && !container.contains(target)) {
       reset()
     }
   }
@@ -88,13 +88,17 @@
 <svelte:body on:click={onBodyClick} />
 
 {#if data}
-  <div transition:slide class="note-reply relative z-10 flex flex-col gap-1" bind:this={container}>
+  <div
+    transition:slide
+    class="note-reply relative z-10 flex flex-col gap-1"
+    bind:this={container}
+    on:click|stopPropagation>
     <div class={`border border-${borderColor} rounded border-solid`}>
       <div class="bg-gray-7" class:rounded-b={data.mentions.length === 0}>
         <Compose bind:this={reply} onSubmit={send}>
           <button
             slot="addon"
-            type="submit"
+            on:click={send}
             class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid
                  border-gray-7 p-4 py-8 text-gray-3 transition-all hover:bg-accent">
             <i class="fa fa-paper-plane fa-xl" />
@@ -130,7 +134,7 @@
               {displayPerson(getPersonWithFallback(p))}
             </div>
           {:else}
-            <div class="text-gray-1 inline-block">No mentions</div>
+            <div class="text-gray-3 inline-block py-2">No mentions</div>
           {/each}
           <div class="-mb-2" />
         </div>

@@ -4,6 +4,8 @@
   - Split out Note pieces
   - Move global modals to child components?
   - Combine app/agent, rename app2
+- [ ] Improve topic suggestions and rendering
+- [ ] Add topic search
 - [ ] Relays bounty
   - [ ] Ability to create custom feeds
   - [ ] Add global/following/network tabs to relay detail
