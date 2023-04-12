@@ -18,7 +18,7 @@
   import pool from "src/agent/pool"
   import user from "src/agent/user"
   import keys from "src/agent/keys"
-  import {loadAppData} from "src/app"
+  import {loadAppData} from "src/app2/state"
   import {modal} from "src/partials/state"
 
   export let stage

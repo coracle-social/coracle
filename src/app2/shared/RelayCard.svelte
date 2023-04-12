@@ -9,7 +9,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import pool from "src/agent/pool"
   import user from "src/agent/user"
-  import {loadAppData} from "src/app"
+  import {loadAppData} from "src/app2/state"
 
   export let relay
   export let theme = "gray-8"

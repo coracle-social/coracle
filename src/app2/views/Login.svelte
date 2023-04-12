@@ -6,7 +6,7 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import user from "src/agent/user"
-  import {login} from "src/app"
+  import {login} from "src/app2/state"
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
 

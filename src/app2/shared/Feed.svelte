@@ -13,7 +13,7 @@
   import Note from "src/app2/shared/Note.svelte"
   import user from "src/agent/user"
   import network from "src/agent/network"
-  import {mergeParents} from "src/app"
+  import {mergeParents} from "src/app2/state"
 
   export let filter
   export let relays = []

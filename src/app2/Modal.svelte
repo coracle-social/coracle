@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {menuIsOpen} from "src/app/ui"
+  import {menuIsOpen} from "src/app2/state"
   import {modal} from "src/partials/state"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"

@@ -6,7 +6,7 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import keys from "src/agent/keys"
-  import {login} from "src/app"
+  import {login} from "src/app2/state"
 
   let nsec = ""
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"

@@ -6,7 +6,7 @@
   import Button from "src/partials/Button.svelte"
   import user from "src/agent/user"
   import {toast, modal} from "src/partials/state"
-  import {loadAppData} from "src/app"
+  import {loadAppData} from "src/app2/state"
 
   let url = $modal.url
 

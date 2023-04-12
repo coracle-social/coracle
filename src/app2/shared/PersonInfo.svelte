@@ -8,7 +8,7 @@
   import PersonAbout from "src/app2/shared/PersonAbout.svelte"
   import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
   import user from "src/agent/user"
-  import {routes} from "src/app/ui"
+  import {routes} from "src/app2/state"
 
   export let person
 

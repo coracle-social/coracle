@@ -2,8 +2,8 @@
   import {onMount} from "svelte"
   import {theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
-  import {menuIsOpen} from "src/app/ui"
-  import {newNotifications} from "src/app/listener"
+  import {menuIsOpen} from "src/app2/state"
+  import {newNotifications} from "src/app2/state"
 
   const toggleMenu = () => menuIsOpen.update(x => !x)
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))

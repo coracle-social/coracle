@@ -10,7 +10,7 @@
   import {watch} from "src/agent/db"
   import user from "src/agent/user"
   import {userEvents} from "src/agent/db"
-  import {lastChecked} from "src/app/listener"
+  import {lastChecked} from "src/app2/state"
 
   let limit = 0
   let events = null

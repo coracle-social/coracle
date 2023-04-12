@@ -12,8 +12,8 @@
   import user from "src/agent/user"
   import {getUserWriteRelays} from "src/agent/relays"
   import cmd from "src/agent/cmd"
-  import {routes} from "src/app/ui"
-  import {publishWithToast} from "src/app"
+  import {routes} from "src/app2/state"
+  import {publishWithToast} from "src/app2/state"
 
   let values = user.getProfile().kind0 || {}
 

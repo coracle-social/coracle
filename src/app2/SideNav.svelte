@@ -4,9 +4,9 @@
   import {installPrompt} from "src/partials/state"
   import user from "src/agent/user"
   import pool from "src/agent/pool"
-  import {routes, menuIsOpen} from "src/app/ui"
-  import {newNotifications, newDirectMessages, newChatMessages} from "src/app/listener"
-  import {slowConnections} from "src/app/connection"
+  import {routes, menuIsOpen} from "src/app2/state"
+  import {newNotifications, newDirectMessages, newChatMessages} from "src/app2/state"
+  import {slowConnections} from "src/app2/state"
   import PersonCircle from "src/app2/shared/PersonCircle.svelte"
 
   const {profile, canPublish} = user

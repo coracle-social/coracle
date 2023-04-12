@@ -17,7 +17,7 @@
   import network from "src/agent/network"
   import user from "src/agent/user"
   import pool from "src/agent/pool"
-  import {loadAppData} from "src/app"
+  import {loadAppData} from "src/app2/state"
 
   let modal = null
   let customRelayUrl = null

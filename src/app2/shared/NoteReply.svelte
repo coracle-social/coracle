@@ -12,7 +12,7 @@
   import {getEventPublishRelays} from "src/agent/relays"
   import user from "src/agent/user"
   import cmd from "src/agent/cmd"
-  import {publishWithToast} from "src/app"
+  import {publishWithToast} from "src/app2/state"
 
   export let note
   export let borderColor

@@ -2,7 +2,7 @@
   import {Link} from "svelte-routing"
   import {killEvent} from "src/util/html"
   import {displayPerson} from "src/util/nostr"
-  import {routes} from "src/app/ui"
+  import {routes} from "src/app2/state"
   import PersonCircle from "src/app2/shared/PersonCircle.svelte"
 
   export let person

@@ -4,7 +4,7 @@
   import {ellipsize} from "hurdak/lib/hurdak"
   import {displayPerson} from "src/util/nostr"
   import {getPersonWithFallback} from "src/agent/db"
-  import {lastChecked} from "src/app/listener"
+  import {lastChecked} from "src/app2/state"
   import PersonCircle from "src/app2/shared/PersonCircle.svelte"
   import Card from "src/partials/Card.svelte"
 

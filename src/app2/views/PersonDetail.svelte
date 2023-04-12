@@ -21,7 +21,7 @@
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import {getPersonWithFallback, watch} from "src/agent/db"
-  import {routes} from "src/app/ui"
+  import {routes} from "src/app2/state"
   import PersonCircle from "src/app2/shared/PersonCircle.svelte"
   import PersonAbout from "src/app2/shared/PersonAbout.svelte"
 

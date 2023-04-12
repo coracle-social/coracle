@@ -14,8 +14,8 @@
   import keys from "src/agent/keys"
   import user from "src/agent/user"
   import cmd from "src/agent/cmd"
-  import {routes} from "src/app/ui"
-  import {lastChecked} from "src/app/listener"
+  import {routes} from "src/app2/state"
+  import {lastChecked} from "src/app2/state"
   import PersonCircle from "src/app2/shared/PersonCircle.svelte"
   import PersonAbout from "src/app2/shared/PersonAbout.svelte"
 

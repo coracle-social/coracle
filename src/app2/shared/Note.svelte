@@ -18,7 +18,7 @@
   import {getRelaysForEventParent} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
   import {watch} from "src/agent/db"
-  import {routes} from "src/app/ui"
+  import {routes} from "src/app2/state"
   import NoteContent from "src/app2/shared/NoteContent.svelte"
 
   export let note

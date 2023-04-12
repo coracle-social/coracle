@@ -11,7 +11,7 @@
   import {getUserWriteRelays} from "src/agent/relays"
   import {rooms} from "src/agent/db"
   import cmd from "src/agent/cmd"
-  import {publishWithToast} from "src/app"
+  import {publishWithToast} from "src/app2/state"
 
   export let room = {name: null, id: null, about: null, picture: null}
 

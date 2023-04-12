@@ -15,7 +15,7 @@
   import user from "src/agent/user"
   import network from "src/agent/network"
   import {getPersonWithFallback} from "src/agent/db"
-  import {routes} from "src/app/ui"
+  import {routes} from "src/app2/state"
 
   export let note
   export let maxLength = 700

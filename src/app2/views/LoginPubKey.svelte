@@ -6,7 +6,7 @@
   import Heading from "src/partials/Heading.svelte"
   import keys from "src/agent/keys"
   import {toast} from "src/partials/state"
-  import {login} from "src/app"
+  import {login} from "src/app2/state"
 
   let npub = ""
 

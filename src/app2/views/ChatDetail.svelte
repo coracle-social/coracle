@@ -13,7 +13,7 @@
   import network from "src/agent/network"
   import {watch} from "src/agent/db"
   import cmd from "src/agent/cmd"
-  import {lastChecked} from "src/app/listener"
+  import {lastChecked} from "src/app2/state"
 
   export let entity
 

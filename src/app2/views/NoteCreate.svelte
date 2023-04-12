@@ -21,7 +21,7 @@
   import cmd from "src/agent/cmd"
   import user from "src/agent/user"
   import {toast, modal} from "src/partials/state"
-  import {publishWithToast} from "src/app"
+  import {publishWithToast} from "src/app2/state"
 
   export let pubkey = null
   export let nevent = null
