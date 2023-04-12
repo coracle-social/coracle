@@ -209,6 +209,7 @@ export const contacts = new Table("contacts", "pubkey")
 export const rooms = new Table("rooms", "id")
 export const relays = new Table("relays", "url")
 export const routes = new Table("routes", "id", {max: 3000, sort: sortByLastSeen})
+export const topics = new Table("topics", "name")
 
 export const getPersonWithFallback = pubkey => people.get(pubkey) || {pubkey}
 export const getRelayWithFallback = url => relays.get(url) || {url}

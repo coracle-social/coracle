@@ -1,4 +1,4 @@
-import {uniq, pick, identity} from "ramda"
+import {uniq, nth, objOf, pick, identity} from "ramda"
 import {nip05} from "nostr-tools"
 import {noop, ensurePlural, chunk} from "hurdak/lib/hurdak"
 import {
@@ -13,7 +13,7 @@ import {
   hash,
 } from "src/util/misc"
 import {Tags, roomAttrs, isRelay, isShareableRelay, normalizeRelayUrl} from "src/util/nostr"
-import {people, userEvents, relays, rooms, routes} from "src/agent/db"
+import {topics, people, userEvents, relays, rooms, routes} from "src/agent/db"
 import {uniqByUrl} from "src/agent/relays"
 import user from "src/agent/user"
 
@@ -340,5 +340,18 @@ addHandler(10002, e => {
     }
   })
 })
+
+// Topics
+
+const processTopics = e => {
+  const matches = Array.from(e.content.matchAll(/#(\w{2,100})/g))
+
+  if (matches.length > 0) {
+    topics.patch(matches.map(nth(1)).map(objOf("name")))
+  }
+}
+
+addHandler(1, processTopics)
+addHandler(42, processTopics)
 
 export default {processEvents}
