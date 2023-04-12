@@ -122,7 +122,7 @@
           <br />
         {/each}
       {:else if type === "topic"}
-        <Anchor on:click={() => openTopic(value)}>{value}</Anchor>
+        <Anchor on:click={() => openTopic(value)}>#{value}</Anchor>
       {:else if type === "link"}
         <Anchor external href={value}>
           {value.replace(/https?:\/\/(www\.)?/, "")}

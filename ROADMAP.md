@@ -1,8 +1,10 @@
 # Current
 
+- [ ] Buttons on profile detail is broken
 - [ ] Topics
-  - [ ] Improve topic suggestions and rendering
-  - [ ] Add topic search, keep cache of topics
+  - [x] Improve topic suggestions and rendering
+  - [x] Add topic search, keep cache of topics
+  - [ ] Add ability to follow topics
 - [ ] Relays bounty
   - [ ] Ability to create custom feeds
   - [ ] Add global/following/network tabs to relay detail
@@ -69,7 +71,7 @@
 - [ ] Review QR codes, search, basic affordances for link navigation
 - [ ] Add delete button to notes
 - [ ] Log in as user button
-- [ ] Separate notifications out by type, mute certain kinds
+- [ ] Separate notifications out by type, mute certain kinds. Likes are extraneous
 - [ ] Relay recommendations based on follows/followers
 - [ ] Make the note relays button modal make sense, one relay with no explanation is not good
 - [ ] Linkify invoices

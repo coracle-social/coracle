@@ -6,6 +6,7 @@ import {throttle} from "throttle-debounce"
 import {writable} from "svelte/store"
 import {ensurePlural, noop, createMap} from "hurdak/lib/hurdak"
 import {Tags} from "src/util/nostr"
+import {fuzzy} from "src/util/misc"
 import user from "src/agent/user"
 
 const Adapter = window.indexedDB ? IncrementalIndexedDBAdapter : Loki.LokiMemoryAdapter
@@ -224,3 +225,9 @@ export const onReady = cb => {
     }
   })
 }
+
+export const searchPeople = watch("people", t =>
+  fuzzy(t.all({"kind0.name": {$type: "string"}}), {
+    keys: ["kind0.name", "kind0.about", "pubkey"],
+  })
+)

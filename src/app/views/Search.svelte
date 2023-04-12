@@ -1,16 +1,62 @@
 <script>
+  import {identity, sortBy, prop} from "ramda"
+  import {fuzzy} from "src/util/misc"
+  import {modal} from "src/partials/state"
+  import Input from "src/partials/Input.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
-  import PersonSearch from "src/app/shared/PersonSearch.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
+  import PersonInfo from "src/app/shared/PersonInfo.svelte"
+  import {watch} from "src/agent/db"
+  import user from "src/agent/user"
+
+  let q
+
+  $: search = watch(["people", "topics"], (p, t) => {
+    const topics = t
+      .all()
+      .map(topic => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
+    const people = p
+      .all({"kind0.name": {$type: "string"}, pubkey: {$ne: user.getPubkey()}})
+      .map(person => ({
+        person,
+        type: "person",
+        id: person.pubkey,
+        text: "@" + [person.kind0.name, person.kind0.about].filter(identity).join(" "),
+      }))
+
+    return fuzzy(sortBy(prop("id"), topics.concat(people)), {keys: ["text"]})
+  })
+
+  const openTopic = topic => {
+    modal.push({type: "topic/feed", topic})
+  }
+
+  document.title = "Search"
 </script>
 
 <Content>
   <div class="flex flex-col items-center justify-center">
-    <Heading>Profile Search</Heading>
+    <Heading>Search</Heading>
     <p>
-      Search for people on Nostr. For now, only profiles that have already been loaded will appear
-      in search results.
+      Search for people and topics on Nostr. For now, only results that have already been loaded
+      will appear in search results.
     </p>
   </div>
-  <PersonSearch />
+  <Input bind:value={q} placeholder="Search for people or topics">
+    <i slot="before" class="fa-solid fa-search" />
+  </Input>
+  {#each $search(q).slice(0, 50) as result (result.type + result.id)}
+    {#if result.type === "topic"}
+      <Anchor
+        type="unstyled"
+        class="flex gap-4 border-l-2 border-solid border-gray-7 py-2 px-4 transition-all
+               hover:border-accent hover:bg-gray-8"
+        on:click={() => openTopic(result.topic.name)}>
+        #{result.topic.name}
+      </Anchor>
+    {:else if result.type === "person"}
+      <PersonInfo person={result.person} />
+    {/if}
+  {/each}
 </Content>

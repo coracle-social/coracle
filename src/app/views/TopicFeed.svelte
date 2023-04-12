@@ -6,10 +6,10 @@
 
   export let topic
   const relays = sampleRelays(getUserReadRelays())
-  const filter = [{kinds: [1], "#t": [topic.replace("#", "")]}]
+  const filter = [{kinds: [1], "#t": [topic]}]
 </script>
 
 <Content>
-  <Heading class="text-center">{topic}</Heading>
+  <Heading class="text-center">#{topic}</Heading>
   <Feed {relays} {filter} />
 </Content>

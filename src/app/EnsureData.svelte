@@ -72,7 +72,7 @@
           <div>Search below to find some interesting people.</div>
         </div>
       {/each}
-      <PersonSearch hideFollowing />
+      <PersonSearch />
     </Content>
   </Modal>
 {:else if needsPeople()}

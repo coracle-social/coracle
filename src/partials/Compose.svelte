@@ -44,6 +44,8 @@
   }
 
   const autocomplete = ({person = null, force = false} = {}) => {
+    let completed = false
+
     const {selection, node, offset, word} = getInfo()
 
     const annotate = (prefix, text, value) => {
@@ -67,10 +69,12 @@
       selection.collapse(span.nextSibling, 0)
       selection.getRangeAt(0).insertNode(space)
       selection.collapse(space, 2)
+
+      completed = true
     }
 
     // Mentions
-    if ((force || word.length > 1) && word.startsWith("@") && person) {
+    if ((force || word.length > 1) && word.startsWith("@")) {
       annotate("@", displayPerson(person).trim(), pubkeyEncoder.encode(person.pubkey))
     }
 
@@ -80,6 +84,8 @@
     }
 
     suggestions.setData([])
+
+    return completed
   }
 
   const onKeyDown = e => {
@@ -105,7 +111,9 @@
 
     // Only autocomplete topics on space
     if (["Space"].includes(e.code)) {
-      autocomplete()
+      if (autocomplete()) {
+        e.preventDefault()
+      }
     }
   }
 

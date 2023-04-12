@@ -193,7 +193,7 @@ export const parseContent = ({content, tags = []}) => {
     const topic = first(text.match(/^#\w+/i))
 
     if (topic) {
-      return ["topic", topic, topic]
+      return ["topic", topic, topic.slice(1)]
     }
   }
 

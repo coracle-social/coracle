@@ -344,7 +344,7 @@ addHandler(10002, e => {
 // Topics
 
 const processTopics = e => {
-  const matches = Array.from(e.content.matchAll(/#(\w{2,100})/g))
+  const matches = Array.from(e.content.toLowerCase().matchAll(/#(\w{2,100})/g))
 
   if (matches.length > 0) {
     topics.patch(matches.map(nth(1)).map(objOf("name")))
