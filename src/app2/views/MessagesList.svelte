@@ -9,7 +9,8 @@
   let activeTab = "messages"
   let contacts = []
 
-  const getContacts = tab => sortBy(c => -c.lastMessage, tab === "messages" ? $accepted : $requests)
+  const getContacts = tab =>
+    sortBy(c => -c.lastMessage || 0, tab === "messages" ? $accepted : $requests)
 
   $: contacts = getContacts(activeTab)
 
@@ -17,10 +18,8 @@
     activeTab = tab
   }
 
-  const accepted = watch("contacts", t => sortBy(e => -e.lastMessage, t.all({accepted: true})))
-  const requests = watch("contacts", t =>
-    sortBy(e => -e.lastMessage, t.all({accepted: {$ne: true}}))
-  )
+  const accepted = watch("contacts", t => t.all({accepted: true}))
+  const requests = watch("contacts", t => t.all({accepted: {$ne: true}}))
 
   const getDisplay = tab => ({
     title: toTitle(tab),
