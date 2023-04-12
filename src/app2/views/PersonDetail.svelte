@@ -8,6 +8,7 @@
   import {parseHex} from "src/util/html"
   import {numberFmt} from "src/util/misc"
   import {displayPerson, toHex} from "src/util/nostr"
+  import {modal, theme, getThemeColor} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
@@ -20,7 +21,7 @@
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import {getPersonWithFallback, watch} from "src/agent/db"
-  import {routes, modal, theme, getThemeColor} from "src/app/ui"
+  import {routes} from "src/app/ui"
   import PersonCircle from "src/app2/shared/PersonCircle.svelte"
   import PersonAbout from "src/app2/shared/PersonAbout.svelte"
 

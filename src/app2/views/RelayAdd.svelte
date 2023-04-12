@@ -5,7 +5,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Button from "src/partials/Button.svelte"
   import user from "src/agent/user"
-  import {toast, modal} from "src/app/ui"
+  import {toast, modal} from "src/partials/state"
   import {loadAppData} from "src/app"
 
   let url = $modal.url

@@ -7,10 +7,10 @@
   import Content from "src/partials/Content.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Button from "src/partials/Button.svelte"
+  import {toast, modal} from "src/partials/state"
   import {getUserWriteRelays} from "src/agent/relays"
   import {rooms} from "src/agent/db"
   import cmd from "src/agent/cmd"
-  import {toast, modal} from "src/app/ui"
   import {publishWithToast} from "src/app"
 
   export let room = {name: null, id: null, about: null, picture: null}

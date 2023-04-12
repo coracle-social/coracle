@@ -19,7 +19,7 @@
   import user from "src/agent/user"
   import keys from "src/agent/keys"
   import {loadAppData} from "src/app"
-  import {modal} from "src/app/ui"
+  import {modal} from "src/partials/state"
 
   export let stage
 

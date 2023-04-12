@@ -3,7 +3,7 @@
   import {onMount} from "svelte"
   import Input from "src/partials/Input.svelte"
   import {copyToClipboard} from "src/util/html"
-  import {toast} from "src/app/ui"
+  import {toast} from "src/partials/state"
 
   export let code
 

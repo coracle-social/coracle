@@ -3,16 +3,16 @@
   import {updateIn} from "hurdak/lib/hurdak"
   import {now, formatTimestamp} from "src/util/misc"
   import {toHex} from "src/util/nostr"
+  import {modal} from "src/partials/state"
   import Channel from "src/partials/Channel.svelte"
-  import PersonBadge from "src/app2/shared/PersonBadge.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import PersonBadge from "src/app2/shared/PersonBadge.svelte"
   import NoteContent from "src/app2/shared/NoteContent.svelte"
   import user from "src/agent/user"
   import {getRelaysForEventChildren, sampleRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import {watch} from "src/agent/db"
   import cmd from "src/agent/cmd"
-  import {modal} from "src/app/ui"
   import {lastChecked} from "src/app/listener"
 
   export let entity

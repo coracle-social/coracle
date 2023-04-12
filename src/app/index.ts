@@ -7,7 +7,7 @@ import {getUserReadRelays} from "src/agent/relays"
 import network from "src/agent/network"
 import keys from "src/agent/keys"
 import listener from "src/app/listener"
-import {modal, toast} from "src/app/ui"
+import {modal, toast} from "src/partials/state"
 
 export const loadAppData = async pubkey => {
   if (getUserReadRelays().length > 0) {

@@ -4,12 +4,12 @@
   import {navigate} from "svelte-routing"
   import {find} from "ramda"
   import {nip05, nip19} from "nostr-tools"
+  import {toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Content from "src/partials/Content.svelte"
-  import {toast} from "src/app/ui"
 
   let video,
     value,

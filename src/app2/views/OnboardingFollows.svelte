@@ -8,7 +8,7 @@
   import PersonInfo from "src/app2/shared/PersonInfo.svelte"
   import {getPersonWithFallback} from "src/agent/db"
   import {watch} from "src/agent/db"
-  import {modal} from "src/app/ui"
+  import {modal} from "src/partials/state"
 
   export let follows
 

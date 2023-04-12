@@ -2,7 +2,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
-  import {modal} from "src/app/ui"
+  import {modal} from "src/partials/state"
 
   const tutorialUrl = "https://nostr.com/"
   const videoUrl = "https://dufflepud.us-southeast-1.linodeobjects.com/coracle_intro.mp4"

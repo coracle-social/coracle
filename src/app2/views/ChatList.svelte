@@ -8,7 +8,7 @@
   import {watch} from "src/agent/db"
   import network from "src/agent/network"
   import {getUserReadRelays} from "src/agent/relays"
-  import {modal} from "src/app/ui"
+  import {modal} from "src/partials/state"
 
   let q = ""
   let search

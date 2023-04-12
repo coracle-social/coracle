@@ -1,7 +1,7 @@
 <script>
   import {onMount, onDestroy} from "svelte"
   import {fly, fade} from "svelte/transition"
-  import {openModals} from "src/app/ui"
+  import {openModals} from "src/partials/state"
 
   export let onEscape = null
 

@@ -8,6 +8,7 @@
   import {stringToHue, fetchJson, now, formatSats, hsl} from "src/util/misc"
   import {displayRelay, isLike, displayPerson, processZaps} from "src/util/nostr"
   import {quantify, first} from "hurdak/lib/hurdak"
+  import {toast, modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import QRCode from "src/partials/QRCode.svelte"
   import Content from "src/partials/Content.svelte"
@@ -26,7 +27,6 @@
   import user from "src/agent/user"
   import keys from "src/agent/keys"
   import cmd from "src/agent/cmd"
-  import {toast, modal} from "src/app/ui"
 
   export let note
   export let author

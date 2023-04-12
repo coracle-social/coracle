@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {is} from "ramda"
   import {fly} from "svelte/transition"
-  import {toast} from "src/app/ui"
+  import {toast} from "src/partials/state"
 </script>
 
 {#if $toast}

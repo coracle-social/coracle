@@ -5,6 +5,7 @@
   import {splice} from "hurdak/lib/hurdak"
   import {warn} from "src/util/logger"
   import {displayPerson, parseContent, Tags} from "src/util/nostr"
+  import {modal} from "src/partials/state"
   import MediaSet from "src/partials/MediaSet.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -14,7 +15,7 @@
   import user from "src/agent/user"
   import network from "src/agent/network"
   import {getPersonWithFallback} from "src/agent/db"
-  import {routes, modal} from "src/app/ui"
+  import {routes} from "src/app/ui"
 
   export let note
   export let maxLength = 700

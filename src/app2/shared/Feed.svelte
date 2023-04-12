@@ -5,6 +5,7 @@
   import {quantify} from "hurdak/lib/hurdak"
   import {createScroller, now, timedelta, Cursor} from "src/util/misc"
   import {asDisplayEvent, mergeFilter} from "src/util/nostr"
+  import {modal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
@@ -12,7 +13,6 @@
   import Note from "src/app2/shared/Note.svelte"
   import user from "src/agent/user"
   import network from "src/agent/network"
-  import {modal} from "src/app/ui"
   import {mergeParents} from "src/app"
 
   export let filter

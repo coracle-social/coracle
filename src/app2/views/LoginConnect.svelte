@@ -5,6 +5,7 @@
   import {navigate} from "svelte-routing"
   import {sleep, shuffle} from "src/util/misc"
   import {isRelay, userKinds} from "src/util/nostr"
+  import {toast} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Input from "src/partials/Input.svelte"
@@ -17,7 +18,6 @@
   import user from "src/agent/user"
   import pool from "src/agent/pool"
   import {loadAppData} from "src/app"
-  import {toast} from "src/app/ui"
 
   let modal = null
   let customRelayUrl = null

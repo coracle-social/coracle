@@ -20,7 +20,7 @@
   import {getPersonWithFallback} from "src/agent/db"
   import cmd from "src/agent/cmd"
   import user from "src/agent/user"
-  import {toast, modal} from "src/app/ui"
+  import {toast, modal} from "src/partials/state"
   import {publishWithToast} from "src/app"
 
   export let pubkey = null

@@ -1,13 +1,13 @@
 <script lang="ts">
   import {reject, always, pluck, propEq} from "ramda"
   import {fuzzy} from "src/util/misc"
+  import {modal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app2/shared/RelayCard.svelte"
   import {watch} from "src/agent/db"
-  import {modal} from "src/app/ui"
 
   export let relays
 

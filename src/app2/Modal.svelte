@@ -1,5 +1,6 @@
 <script lang="ts">
-  import {modal, menuIsOpen} from "src/app/ui"
+  import {menuIsOpen} from "src/app/ui"
+  import {modal} from "src/partials/state"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"

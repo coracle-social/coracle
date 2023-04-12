@@ -2,6 +2,7 @@
   import {onMount} from "svelte"
   import {fly} from "svelte/transition"
   import {navigate} from "svelte-routing"
+  import {toast} from "src/partials/state"
   import Toggle from "src/partials/Toggle.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
@@ -10,7 +11,6 @@
   import Heading from "src/partials/Heading.svelte"
   import user from "src/agent/user"
   import pool from "src/agent/pool"
-  import {toast} from "src/app/ui"
 
   let values = {...user.getSettings()}
 

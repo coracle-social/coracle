@@ -5,7 +5,7 @@
   import RelaySearch from "src/app2/shared/RelaySearch.svelte"
   import RelayCard from "src/app2/shared/RelayCard.svelte"
   import user from "src/agent/user"
-  import {modal} from "src/app/ui"
+  import {modal} from "src/partials/state"
 
   const {relays} = user
 

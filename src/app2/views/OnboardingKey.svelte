@@ -1,12 +1,12 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
   import {copyToClipboard} from "src/util/html"
+  import {modal, toast} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import pool from "src/agent/pool"
-  import {modal, toast} from "src/app/ui"
 
   export let privkey
 

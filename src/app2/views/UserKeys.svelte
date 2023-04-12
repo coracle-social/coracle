@@ -10,7 +10,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Heading from "src/partials/Heading.svelte"
   import keys from "src/agent/keys"
-  import {toast} from "src/app/ui"
+  import {toast} from "src/partials/state"
 
   const {pubkey, privkey} = keys
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {copyToClipboard} from "src/util/html"
-  import {toast} from "src/app/ui"
+  import {toast} from "src/partials/state"
 
   export let label
   export let value

@@ -1,9 +1,10 @@
 <script lang="ts">
   import cx from "classnames"
   import {displayPerson} from "src/util/nostr"
+  import {installPrompt} from "src/partials/state"
   import user from "src/agent/user"
   import pool from "src/agent/pool"
-  import {menuIsOpen, installPrompt, routes} from "src/app/ui"
+  import {routes, menuIsOpen} from "src/app/ui"
   import {newNotifications, newDirectMessages, newChatMessages} from "src/app/listener"
   import {slowConnections} from "src/app/connection"
   import PersonCircle from "src/app2/shared/PersonCircle.svelte"

@@ -4,6 +4,7 @@
   import {without, pluck, uniq} from "ramda"
   import {slide} from "svelte/transition"
   import {Tags, displayPerson} from "src/util/nostr"
+  import {toast} from "src/partials/state"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/partials/Compose.svelte"
@@ -11,7 +12,6 @@
   import {getEventPublishRelays} from "src/agent/relays"
   import user from "src/agent/user"
   import cmd from "src/agent/cmd"
-  import {toast} from "src/app/ui"
   import {publishWithToast} from "src/app"
 
   export let note

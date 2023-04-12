@@ -1,7 +1,7 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
   import user from "src/agent/user"
-  import {modal, location} from "src/app/ui"
+  import {modal, location} from "src/partials/state"
 
   $: showCreateNote = $location.pathname.match(/messages|chat|relays$|keys|settings|logout$/)
 
