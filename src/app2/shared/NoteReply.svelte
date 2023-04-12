@@ -1,5 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
+  import {createEventDispatcher} from "svelte"
   import {without, pluck, uniq} from "ramda"
   import {slide} from "svelte/transition"
   import {Tags, displayPerson} from "src/util/nostr"
@@ -16,13 +17,15 @@
   export let note
   export let borderColor
 
+  const dispatch = createEventDispatcher()
+
   let data = null
   let reply = null
   let container = null
 
-  export const isActive = () => Boolean(reply)
-
   export const start = () => {
+    dispatch("start")
+
     data = {
       image: null,
       mentions: without(
@@ -33,6 +36,8 @@
   }
 
   const reset = () => {
+    dispatch("reset")
+
     data = null
     reply = null
   }
@@ -90,7 +95,7 @@
 {#if data}
   <div
     transition:slide
-    class="note-reply relative z-10 flex flex-col gap-1"
+    class="note-reply relative z-10 my-2 flex flex-col gap-1"
     bind:this={container}
     on:click|stopPropagation>
     <div class={`border border-${borderColor} rounded border-solid`}>

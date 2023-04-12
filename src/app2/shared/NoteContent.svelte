@@ -2,7 +2,7 @@
   import {objOf, reverse} from "ramda"
   import {navigate} from "svelte-routing"
   import {fly} from "svelte/transition"
-  import {splice} from 'hurdak/lib/hurdak'
+  import {splice} from "hurdak/lib/hurdak"
   import {warn} from "src/util/logger"
   import {displayPerson, parseContent, Tags} from "src/util/nostr"
   import MediaSet from "src/partials/MediaSet.svelte"
@@ -38,7 +38,7 @@
       (type === "link" && !value.startsWith("ws")) ||
       ["nostr:note", "nostr:nevent"].includes(type)
     ) {
-      if (type === 'link') {
+      if (type === "link") {
         links.push(value)
       } else {
         entities.push({type, value})
@@ -72,11 +72,11 @@
   // Truncate content if needed
   let l = 0
   if (shouldTruncate) {
-    for (const i in content) {
+    for (let i = 0; i < content.length; i++) {
       const prev = content[i - 1]
 
       // Avoid adding an ellipsis right after a newline
-      if (l > truncateAt && prev?.type != 'newline') {
+      if (l > truncateAt && prev?.type != "newline") {
         content = content.slice(0, i).concat({type: "text", value: "..."})
 
         break
