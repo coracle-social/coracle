@@ -3,7 +3,7 @@
   import {closure, quantify} from "hurdak/lib/hurdak"
   import {formatTimestamp, tryJson} from "src/util/misc"
   import {Tags} from "src/util/nostr"
-  import Badge from "src/partials/Badge.svelte"
+  import PersonBadge from "src/app2/shared/PersonBadge.svelte"
   import Card from "src/partials/Card.svelte"
   import Popover from "src/partials/Popover.svelte"
   import NoteContent from "src/app2/shared/NoteContent.svelte"
@@ -47,7 +47,7 @@
     <div class="relative flex w-full items-center justify-between gap-2" on:click|stopPropagation>
       {#if !event.ref}
         <div class="flex items-center gap-2">
-          <Badge person={author} /> mentioned you.
+          <PersonBadge person={author} /> mentioned you.
         </div>
       {:else}
         <Popover>

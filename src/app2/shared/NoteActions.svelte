@@ -15,7 +15,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
-  import Badge from "src/partials/Badge.svelte"
+  import PersonBadge from "src/app2/shared/PersonBadge.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import RelayCard from "src/app2/shared/RelayCard.svelte"
@@ -293,7 +293,7 @@
         <div class="grid grid-cols-2 gap-2">
           {#each zaps as zap}
             <div class="flex flex-col gap-1">
-              <Badge person={getPersonWithFallback(zap.request.pubkey)} />
+              <PersonBadge person={getPersonWithFallback(zap.request.pubkey)} />
               <span class="ml-6 text-sm text-gray-5"
                 >{formatSats(zap.invoiceAmount / 1000)} sats</span>
             </div>
@@ -304,7 +304,7 @@
         <h1 class="staatliches text-2xl">Liked By</h1>
         <div class="grid grid-cols-2 gap-2">
           {#each likes as like}
-            <Badge person={getPersonWithFallback(like.pubkey)} />
+            <PersonBadge person={getPersonWithFallback(like.pubkey)} />
           {/each}
         </div>
       {/if}

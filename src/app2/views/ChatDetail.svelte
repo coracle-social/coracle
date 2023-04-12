@@ -4,7 +4,7 @@
   import {now, formatTimestamp} from "src/util/misc"
   import {toHex} from "src/util/nostr"
   import Channel from "src/partials/Channel.svelte"
-  import Badge from "src/partials/Badge.svelte"
+  import PersonBadge from "src/app2/shared/PersonBadge.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app2/shared/NoteContent.svelte"
   import user from "src/agent/user"
@@ -80,7 +80,7 @@
   <div slot="message" let:message>
     {#if message.showPerson}
       <div class="flex items-center justify-between gap-4">
-        <Badge person={message.person} />
+        <PersonBadge person={message.person} />
         <p class="text-sm text-gray-1">{formatTimestamp(message.created_at)}</p>
       </div>
     {/if}

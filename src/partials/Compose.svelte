@@ -3,7 +3,7 @@
   import {last, pluck, propEq} from "ramda"
   import {fuzzy} from "src/util/misc"
   import {displayPerson} from "src/util/nostr"
-  import Badge from "src/partials/Badge.svelte"
+  import PersonBadge from "src/app2/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
   import {watch} from "src/agent/db"
@@ -188,6 +188,6 @@
 
 <Suggestions bind:this={suggestions} select={person => autocomplete({person})}>
   <div slot="item" let:item>
-    <Badge inert person={item} />
+    <PersonBadge inert person={item} />
   </div>
 </Suggestions>

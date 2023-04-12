@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Badge from "src/partials/Badge.svelte"
+  import PersonBadge from "src/app2/shared/PersonBadge.svelte"
   import {getPersonWithFallback} from "src/agent/db"
 
   export let pubkeys
@@ -9,7 +9,7 @@
   <slot />
   <div class="flex flex-col gap-1">
     {#each pubkeys as pubkey}
-      <Badge person={getPersonWithFallback(pubkey)} />
+      <PersonBadge person={getPersonWithFallback(pubkey)} />
     {/each}
   </div>
 </div>
