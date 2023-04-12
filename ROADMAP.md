@@ -2,7 +2,7 @@
 
 - [ ] Refactor
   - Move global modals to child components?
-  - Combine app/agent, rename app2
+  - Combine app/agent, rename app
 - [ ] Improve topic suggestions and rendering
 - [ ] Add topic search
 - [ ] Relays bounty
