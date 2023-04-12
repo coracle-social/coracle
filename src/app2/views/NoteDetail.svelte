@@ -26,6 +26,8 @@
     feedRelay = relay
   }
 
+  $: displayNote = asDisplayEvent(note)
+
   onMount(async () => {
     if (!note.pubkey) {
       await network.load({
@@ -57,17 +59,17 @@
   })
 </script>
 
-{#if !loading && !note.content}
+{#if !loading && !displayNote.pubkey}
   <div in:fly={{y: 20}}>
     <Content size="lg" class="text-center">Sorry, we weren't able to find this note.</Content>
   </div>
-{:else if note.pubkey}
+{:else if displayNote.pubkey}
   <div in:fly={{y: 20}} class="m-auto flex w-full max-w-2xl flex-col gap-4 p-4">
     <Note
       showContext
       depth={6}
-      anchorId={note.id}
-      note={asDisplayEvent(note)}
+      anchorId={displayNote.id}
+      note={displayNote}
       {invertColors}
       {feedRelay}
       {setFeedRelay} />
@@ -80,6 +82,6 @@
 
 {#if feedRelay}
   <Modal onEscape={() => setFeedRelay(null)}>
-    <RelayFeed {feedRelay} notes={[note]} depth={6} showContext />
+    <RelayFeed {feedRelay} notes={[displayNote]} depth={6} showContext />
   </Modal>
 {/if}

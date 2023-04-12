@@ -1,7 +1,8 @@
 <script lang="ts">
-  import {objOf, is} from "ramda"
+  import {objOf, reverse} from "ramda"
   import {navigate} from "svelte-routing"
   import {fly} from "svelte/transition"
+  import {splice} from 'hurdak/lib/hurdak'
   import {warn} from "src/util/logger"
   import {displayPerson, parseContent, Tags} from "src/util/nostr"
   import MediaSet from "src/partials/MediaSet.svelte"
@@ -20,59 +21,70 @@
   export let showEntire = false
   export let showMedia = user.getSetting("showMedia")
 
+  const truncateAt = maxLength * 0.6
+  const shouldTruncate = !showEntire && note.content.length > maxLength
+
+  let content = parseContent(note)
+
   const links = []
   const entities = []
-  const shouldTruncate = !showEntire && note.content.length > maxLength * 0.6
-  const content = parseContent(note)
+  const ranges = []
 
-  let l = 0
+  // Find links and preceding whitespace
   for (let i = 0; i < content.length; i++) {
     const {type, value} = content[i]
 
-    // Find links on their own line and remove them from content
     if (
       (type === "link" && !value.startsWith("ws")) ||
       ["nostr:note", "nostr:nevent"].includes(type)
     ) {
-      const prev = content[i - 1]
-      const next = content[i + 1]
-
-      if (type === "link") {
+      if (type === 'link') {
         links.push(value)
       } else {
         entities.push({type, value})
       }
 
-      // If the link is surrounded by line breaks (or content start/end), remove
-      // the link along with trailing whitespace
-      if (showMedia && (!prev || prev.type === "newline") && (!next || next.type === "newline")) {
-        let n = 0
+      const prev = content[i - 1]
+      const next = content[i + 1]
 
-        for (let j = i + 1; j < content.length; j++) {
-          if (content[j].type !== "newline") {
+      if ((!prev || prev.type === "newline") && (!next || next.type === "newline")) {
+        let n = 0
+        for (let j = i - 1; ; j--) {
+          if (content[j]?.type === "newline") {
+            n += 1
+          } else {
             break
           }
-
-          n++
         }
 
-        content.splice(i, n + 1)
-        i = i - n
+        ranges.push({i, n})
       }
     }
+  }
 
-    // Keep track of total characters, if we're not dealing with a string just guess
-    if (typeof value === "string") {
-      l += value.length
+  // Remove links and preceding line breaks if they're on their own line
+  if (showMedia) {
+    for (const {i, n} of reverse(ranges)) {
+      content = splice(i - n, n, content)
+    }
+  }
 
-      // Content[i] may be undefined if we're on a linebreak that was spliced out
-      if (is(String, content[i]?.value) && shouldTruncate && l > maxLength && type !== "newline") {
-        content[i].value = value.trim()
-        content.splice(i + 1, content.length, {type: "text", value: "..."})
+  // Truncate content if needed
+  let l = 0
+  if (shouldTruncate) {
+    for (const i in content) {
+      const prev = content[i - 1]
+
+      // Avoid adding an ellipsis right after a newline
+      if (l > truncateAt && prev?.type != 'newline') {
+        content = content.slice(0, i).concat({type: "text", value: "..."})
+
         break
       }
-    } else {
-      l += 30
+
+      if (typeof content[i].value === "string") {
+        l += content[i].value.length
+      }
     }
   }
 
@@ -105,11 +117,11 @@
           <br />
         {/each}
       {:else if type === "link"}
-        <Anchor external href={value}>
+        <Anchor external href={value} class="ml-1">
           {value.replace(/https?:\/\/(www\.)?/, "")}
         </Anchor>
       {:else if type.startsWith("nostr:")}
-        <Anchor href={"/" + value.entity}>
+        <Anchor href={"/" + value.entity} class="ml-1">
           {#if value.pubkey}
             {displayPerson(getPersonWithFallback(value.pubkey))}
           {:else}

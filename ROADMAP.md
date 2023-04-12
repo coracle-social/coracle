@@ -4,6 +4,9 @@
   - Split out Note pieces
   - Move global modals to child components?
   - Combine app/agent, rename app2
+  - Some elements bleed through reply image modal
+  - DM view pushes user back to the bottom
+  - note.replies might be empty in note detail pre-load
 - [ ] Improve topic suggestions and rendering
 - [ ] Add topic search
 - [ ] Relays bounty

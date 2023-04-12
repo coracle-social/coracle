@@ -150,34 +150,21 @@ export const mergeFilter = (filter, extra) =>
   is(Array, filter) ? filter.map(mergeLeft(extra)) : {...filter, ...extra}
 
 export const parseContent = ({content, tags = []}) => {
-  const text = content.trim()
   const result = []
-  let buffer = "",
-    i = 0
+  let text = content.trim()
+  let buffer = ""
 
-  const push = (type, text, value = null) => {
-    if (buffer) {
-      result.push({type: "text", value: buffer})
-      buffer = ""
+  const parseNewline = () => {
+    const newline = first(text.match(/^\n+/))
+
+    if (newline) {
+      return ["newline", newline, newline]
     }
-
-    result.push({type, value: value || text})
-    i += text.length
   }
 
-  for (; i < text.length; ) {
-    const prev = last(result)
-    const tail = text.slice(i)
-
-    const newLine = tail.match(/^\n+/)
-
-    if (newLine) {
-      push("newline", newLine[0])
-      continue
-    }
-
+  const parseMention = () => {
     // Convert legacy mentions to bech32 entities
-    const mentionMatch = tail.match(/^#\[(\d+)\]/i)
+    const mentionMatch = text.match(/^#\[(\d+)\]/i)
 
     if (mentionMatch) {
       const i = parseInt(mentionMatch[1])
@@ -197,41 +184,50 @@ export const parseContent = ({content, tags = []}) => {
           entity = nip19.neventEncode(data)
         }
 
-        push(`nostr:${type}`, mentionMatch[0], {...data, entity})
-        continue
+        return [`nostr:${type}`, mentionMatch[0], {...data, entity}]
       }
     }
+  }
 
-    const topicMatch = tail.match(/^#\w+/i)
+  const parseTopic = () => {
+    const topic = first(text.match(/^#\w+/i))
 
-    if (topicMatch) {
-      push("topic", topicMatch[0])
-      continue
+    if (topic) {
+      return ["topic", topic, topic]
     }
+  }
 
-    const bech32Match = tail.match(/^(nostr:)?n(event|ote|profile|pub)1[\d\w]+/i)
+  const parseBech32 = () => {
+    const bech32 = first(text.match(/^(nostr:)?n(event|ote|profile|pub)1[\d\w]+/i))
 
-    if (bech32Match) {
+    if (bech32) {
       try {
-        const entity = bech32Match[0].replace("nostr:", "")
+        const entity = bech32[0].replace("nostr:", "")
         const {type, data} = nip19.decode(entity) as {type: string; data: object}
         const value = type === "note" ? {id: data} : data
 
-        push(`nostr:${type}`, bech32Match[0], {...value, entity})
-        continue
+        return [`nostr:${type}`, bech32[0], {...value, entity}]
       } catch (e) {
         console.log(e)
         // pass
       }
     }
+  }
 
-    const urlMatch = tail.match(
-      /^((http|ws)s?:\/\/)?[-a-z0-9:%_\+~#=\.]+\.[a-z]{1,6}[-a-z0-9:%_\+~#\?&\/=;\.]*/gi
+  const parseUrl = () => {
+    const raw = first(
+      text.match(/^((http|ws)s?:\/\/)?[-a-z0-9:%_\+~#=\.]+\.[a-z]{1,6}[-a-z0-9:%_\+~#\?&\/=;\.]*/gi)
     )
 
     // Skip url if it's just the end of a filepath
-    if (urlMatch && (prev?.type !== "text" || !prev.value.endsWith("/"))) {
-      let url = urlMatch[0]
+    if (raw) {
+      const prev = last(result)
+
+      if (prev?.type === "text" && prev.value.endsWith("/")) {
+        return
+      }
+
+      let url = raw
 
       // Skip ellipses and very short non-urls
       if (!url.match(/\.\./) && url.length > 4) {
@@ -244,26 +240,36 @@ export const parseContent = ({content, tags = []}) => {
           url = "https://" + url
         }
 
-        push("link", urlMatch[0], url)
-        continue
+        return ["link", raw, url]
       }
     }
+  }
 
-    // Instead of going character by character and re-running all the above regular expressions
-    // a million times, try to match the next word and add it to the buffer
-    const wordMatch = tail.match(/^[\w\d]+ ?/i)
+  while (text) {
+    const part = parseNewline() || parseMention() || parseTopic() || parseBech32() || parseUrl()
 
-    if (wordMatch) {
-      buffer += wordMatch[0]
-      i += wordMatch[0].length
+    if (part) {
+      if (buffer) {
+        result.push({type: "text", value: buffer})
+        buffer = ""
+      }
+
+      const [type, raw, value] = part
+
+      result.push({type, value})
+      text = text.slice(raw.length)
     } else {
-      buffer += text[i]
-      i += 1
+      // Instead of going character by character and re-running all the above regular expressions
+      // a million times, try to match the next word and add it to the buffer
+      const match = first(text.match(/^[\w\d]+ ?/i)) || text[0]
+
+      buffer += match
+      text = text.slice(match.length)
     }
   }
 
   if (buffer) {
-    result.push({type: "text", value: buffer})
+    result.push({type: 'text', value: buffer})
   }
 
   return result
