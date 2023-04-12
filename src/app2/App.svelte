@@ -79,7 +79,7 @@
 
     // Remove identifying information, e.g. pubkeys, event ids, etc
     const getPageName = () =>
-      location.pathname.slice(1).replace(/(npub|nprofile|note|nevent)[^\/]+/g, (_, m) => `<${m}>`)
+      location.pathname.slice(1).replace(/(npub|nprofile|note|nevent)1[^\/]+/g, (_, m) => `<${m}>`)
 
     // Log usage on navigate
     const unsubHistory = globalHistory.listen(({location}) => {
