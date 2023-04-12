@@ -11,7 +11,7 @@
     const matches = $location.pathname.match(/people\/(npub1[0-9a-z]+)/)
     const pubkey = matches ? nip19.decode(matches[1]).data : null
 
-    modal.set({type: "note/create", pubkey})
+    modal.push({type: "note/create", pubkey})
   }
 </script>
 

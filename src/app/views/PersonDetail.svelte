@@ -132,11 +132,11 @@
   const setActiveTab = tab => navigate(routes.person(pubkey, tab))
 
   const showFollows = () => {
-    modal.set({type: "person/follows", pubkey})
+    modal.push({type: "person/follows", pubkey})
   }
 
   const showFollowers = () => {
-    modal.set({type: "person/followers", pubkey})
+    modal.push({type: "person/followers", pubkey})
   }
 
   const follow = async () => {
@@ -158,11 +158,11 @@
   }
 
   const openProfileInfo = () => {
-    modal.set({type: "person/info", $person})
+    modal.push({type: "person/info", $person})
   }
 
   const share = () => {
-    modal.set({type: "person/share", $person})
+    modal.push({type: "person/share", $person})
   }
 </script>
 

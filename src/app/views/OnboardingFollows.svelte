@@ -40,7 +40,7 @@
     </p>
     <Anchor
       type="button-accent"
-      on:click={() => modal.set({type: "onboarding", stage: "complete"})}>
+      on:click={() => modal.push({type: "onboarding", stage: "complete"})}>
       Continue
     </Anchor>
   </Content>

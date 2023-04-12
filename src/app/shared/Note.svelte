@@ -59,20 +59,20 @@
     const target = e.target as HTMLElement
 
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
-      modal.set({type: "note/detail", note})
+      modal.push({type: "note/detail", note})
     }
   }
 
   const goToParent = async () => {
     const relays = getRelaysForEventParent(note)
 
-    modal.set({type: "note/detail", note: {id: findReplyId(note)}, relays})
+    modal.push({type: "note/detail", note: {id: findReplyId(note)}, relays})
   }
 
   const goToRoot = async () => {
     const relays = getRelaysForEventParent(note)
 
-    modal.set({type: "note/detail", note: {id: findRootId(note)}, relays})
+    modal.push({type: "note/detail", note: {id: findRootId(note)}, relays})
   }
 
   const setBorderHeight = () => {

@@ -11,5 +11,5 @@
 
 <Content>
   <Heading class="text-center">{topic}</Heading>
-  <Feed inModal {relays} {filter} />
+  <Feed {relays} {filter} />
 </Content>

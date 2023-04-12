@@ -43,7 +43,7 @@
   <Card
     interactive
     class="flex flex-col gap-2 text-left"
-    on:click={() => modal.set({type: "note/detail", note})}>
+    on:click={() => modal.push({type: "note/detail", note})}>
     <div class="relative flex w-full items-center justify-between gap-2" on:click|stopPropagation>
       {#if !event.ref}
         <div class="flex items-center gap-2">

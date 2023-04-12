@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {last} from "ramda"
   import {menuIsOpen} from "src/app/state"
   import {modal} from "src/partials/state"
   import Modal from "src/partials/Modal.svelte"
@@ -15,53 +16,55 @@
   import PersonProfileInfo from "src/app/views/PersonProfileInfo.svelte"
   import PersonShare from "src/app/views/PersonShare.svelte"
   import TopicFeed from "src/app/views/TopicFeed.svelte"
-  import AddRelay from "src/app/views/RelayAdd.svelte"
+  import RelayAdd from "src/app/views/RelayAdd.svelte"
+
+  const {stack} = modal
 
   const closeModal = async () => {
-    modal.clear()
+    modal.pop()
     menuIsOpen.set(false)
   }
 </script>
 
-{#if $modal}
-  <Modal onEscape={$modal.noEscape ? null : closeModal}>
-    {#if $modal.type === "note/detail"}
-      {#key $modal.note.id}
-        <NoteDetail {...$modal} invertColors />
+{#each $stack as m}
+  <Modal onEscape={m.noEscape || m !== last($stack) ? null : closeModal}>
+    {#if m.type === "note/detail"}
+      {#key m.note.id}
+        <NoteDetail {...m} invertColors />
       {/key}
-    {:else if $modal.type === "note/create"}
-      <NoteCreate pubkey={$modal.pubkey} nevent={$modal.nevent} />
-    {:else if $modal.type === "relay/add"}
-      <AddRelay />
-    {:else if $modal.type === "onboarding"}
-      <Onboarding stage={$modal.stage} />
-    {:else if $modal.type === "room/edit"}
-      <ChatEdit {...$modal} />
-    {:else if $modal.type === "login/privkey"}
+    {:else if m.type === "note/create"}
+      <NoteCreate pubkey={m.pubkey} nevent={m.nevent} />
+    {:else if m.type === "relay/add"}
+      <RelayAdd url={m.url} />
+    {:else if m.type === "onboarding"}
+      <Onboarding stage={m.stage} />
+    {:else if m.type === "room/edit"}
+      <ChatEdit {...m} />
+    {:else if m.type === "login/privkey"}
       <LoginPrivKey />
-    {:else if $modal.type === "login/pubkey"}
+    {:else if m.type === "login/pubkey"}
       <LoginPubKey />
-    {:else if $modal.type === "login/connect"}
+    {:else if m.type === "login/connect"}
       <LoginConnect />
-    {:else if $modal.type === "person/info"}
-      <PersonProfileInfo person={$modal.person} />
-    {:else if $modal.type === "person/share"}
-      <PersonShare person={$modal.person} />
-    {:else if $modal.type === "person/follows"}
-      <PersonList type="follows" pubkey={$modal.pubkey} />
-    {:else if $modal.type === "person/followers"}
-      <PersonList type="followers" pubkey={$modal.pubkey} />
-    {:else if $modal.type === "topic/feed"}
-      {#key $modal.topic}
-        <TopicFeed topic={$modal.topic} />
+    {:else if m.type === "person/info"}
+      <PersonProfileInfo person={m.person} />
+    {:else if m.type === "person/share"}
+      <PersonShare person={m.person} />
+    {:else if m.type === "person/follows"}
+      <PersonList type="follows" pubkey={m.pubkey} />
+    {:else if m.type === "person/followers"}
+      <PersonList type="followers" pubkey={m.pubkey} />
+    {:else if m.type === "topic/feed"}
+      {#key m.topic}
+        <TopicFeed topic={m.topic} />
       {/key}
-    {:else if $modal.type === "message"}
+    {:else if m.type === "message"}
       <Content size="lg">
-        <div class="text-center">{$modal.message}</div>
-        {#if $modal.spinner}
+        <div class="text-center">{m.message}</div>
+        {#if m.spinner}
           <Spinner delay={0} />
         {/if}
       </Content>
     {/if}
   </Modal>
-{/if}
+{/each}

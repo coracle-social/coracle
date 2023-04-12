@@ -16,16 +16,16 @@
     if (nostr) {
       login("extension", await nostr.getPublicKey())
     } else {
-      modal.set({type: "login/privkey"})
+      modal.push({type: "login/privkey"})
     }
   }
 
   const signUp = () => {
-    modal.set({type: "onboarding", stage: "intro"})
+    modal.push({type: "onboarding", stage: "intro"})
   }
 
   const pubkeyLogIn = () => {
-    modal.set({type: "login/pubkey"})
+    modal.push({type: "login/pubkey"})
   }
 
   if (user.getPubkey()) {

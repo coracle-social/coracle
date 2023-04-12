@@ -39,7 +39,9 @@
       Select your preferred storage relays below, or click "continue" to use some reasonable defaults.
       You can change your selection any time.
     </p>
-    <Anchor type="button-accent" on:click={() => modal.set({type: "onboarding", stage: "follows"})}>
+    <Anchor
+      type="button-accent"
+      on:click={() => modal.push({type: "onboarding", stage: "follows"})}>
       Continue
     </Anchor>
   </Content>

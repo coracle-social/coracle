@@ -1,11 +1,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {partition, always, propEq, uniqBy, sortBy, prop} from "ramda"
+  import {last, partition, always, propEq, uniqBy, sortBy, prop} from "ramda"
   import {fly} from "svelte/transition"
   import {quantify} from "hurdak/lib/hurdak"
   import {createScroller, now, timedelta, Cursor} from "src/util/misc"
   import {asDisplayEvent, mergeFilter} from "src/util/nostr"
-  import {modal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
@@ -17,7 +16,6 @@
 
   export let filter
   export let relays = []
-  export let inModal = false
   export let delta = timedelta(6, "hours")
   export let shouldDisplay = always(true)
   export let parentsTimeout = 500
@@ -32,17 +30,14 @@
   const maxNotes = 100
   const cursor = new Cursor({delta})
   const seen = new Set()
+  const getModal = () => last(document.querySelectorAll(".modal-content"))
 
   const setFeedRelay = relay => {
     feedRelay = relay
 
     setTimeout(() => {
       feedScroller?.stop()
-      feedScroller = !relay
-        ? null
-        : createScroller(loadMore, {
-            element: document.querySelector(".modal-content"),
-          })
+      feedScroller = !relay ? null : createScroller(loadMore, {element: getModal()})
     }, 300)
   }
 
@@ -106,11 +101,6 @@
   }
 
   const loadMore = async () => {
-    console.log("here")
-    if ($modal && !inModal) {
-      return
-    }
-
     // Wait for this page to load before trying again
     await network.load({
       relays: feedRelay ? [feedRelay] : relays,
@@ -129,9 +119,7 @@
       onChunk,
     })
 
-    const scroller = createScroller(loadMore, {
-      element: inModal ? document.querySelector(".modal-content") : null,
-    })
+    const scroller = createScroller(loadMore, {element: getModal()})
 
     return () => {
       scroller.stop()

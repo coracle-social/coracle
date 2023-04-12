@@ -48,7 +48,7 @@
         rooms.patch({id: event.id, joined: true})
       }
 
-      modal.set(null)
+      modal.pop()
     }
   }
 </script>

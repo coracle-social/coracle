@@ -5,8 +5,8 @@
   import {onMount} from "svelte"
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
+  import {identity, last} from "ramda"
   import {first} from "hurdak/lib/hurdak"
-  import {identity} from "ramda"
   import {warn} from "src/util/logger"
   import {timedelta, hexToBech32, bech32ToHex, shuffle, now} from "src/util/misc"
   import cmd from "src/agent/cmd"
@@ -55,9 +55,9 @@
     let scrollY
 
     // Log modals
-    const unsubModal = modal.subscribe($modal => {
-      if ($modal) {
-        logUsage(btoa(["modal", $modal.type].join(":")))
+    const unsubModal = modal.stack.subscribe($stack => {
+      if ($stack.length > 0) {
+        logUsage(btoa(["modal", last($stack).type].join(":")))
       }
     })
 

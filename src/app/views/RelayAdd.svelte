@@ -8,7 +8,7 @@
   import {toast, modal} from "src/partials/state"
   import {loadAppData} from "src/app/state"
 
-  let url = $modal.url
+  export let url
 
   const submit = async e => {
     e.preventDefault()
@@ -28,7 +28,7 @@
       return toast.show("error", "That isn't a valid websocket url")
     }
 
-    modal.set(null)
+    modal.pop()
 
     await user.addRelay(url)
 

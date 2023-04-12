@@ -106,11 +106,11 @@
   }
 
   const openQuote = id => {
-    modal.set({type: "note/detail", note: {id}})
+    modal.push({type: "note/detail", note: {id}})
   }
 
   const openTopic = topic => {
-    modal.set({type: "topic/feed", topic})
+    modal.push({type: "topic/feed", topic})
   }
 </script>
 

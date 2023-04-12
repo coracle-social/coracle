@@ -65,7 +65,7 @@
 
     loadAppData(user.getPubkey())
 
-    modal.set(null)
+    modal.pop()
     navigate("/notes/follows")
   }
 

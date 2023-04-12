@@ -19,7 +19,7 @@
     When you’re ready to dive in, click below and we’ll guide you through the process of creating an
     account.
   </p>
-  <Anchor type="button-accent" on:click={() => modal.set({type: "onboarding", stage: "key"})}>
+  <Anchor type="button-accent" on:click={() => modal.push({type: "onboarding", stage: "key"})}>
     Let's go!
   </Anchor>
 </Content>

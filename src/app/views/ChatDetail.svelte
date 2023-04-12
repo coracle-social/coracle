@@ -36,7 +36,7 @@
     })
 
   const edit = () => {
-    modal.set({type: "room/edit", room: $room})
+    modal.push({type: "room/edit", room: $room})
   }
 
   const sendMessage = async content => {

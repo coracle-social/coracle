@@ -219,7 +219,7 @@ export const loadAppData = async pubkey => {
 export const login = (method, key) => {
   keys.login(method, key)
 
-  modal.set({type: "login/connect", noEscape: true})
+  modal.push({type: "login/connect", noEscape: true})
 }
 
 export const mergeParents = (notes: Array<DisplayEvent>) => {

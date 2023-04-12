@@ -30,7 +30,9 @@
       <i slot="before" class="fa fa-lock" />
       <button slot="after" class="fa fa-copy cursor-pointer" on:click={copyKey} />
     </Input>
-    <Anchor type="button-accent" on:click={() => modal.set({type: "onboarding", stage: nextStage})}>
+    <Anchor
+      type="button-accent"
+      on:click={() => modal.push({type: "onboarding", stage: nextStage})}>
       Log in
     </Anchor>
   </div>

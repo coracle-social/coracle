@@ -50,7 +50,7 @@
     toast.show("info", "Note link copied to clipboard!")
   }
 
-  const quote = () => modal.set({type: "note/create", nevent})
+  const quote = () => modal.push({type: "note/create", nevent})
   const mute = () => user.addMute("e", note.id)
   const unmute = () => user.removeMute(note.id)
 

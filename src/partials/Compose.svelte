@@ -43,7 +43,7 @@
     return {selection, node, offset, word}
   }
 
-  const autocomplete = ({person, force = false}) => {
+  const autocomplete = ({person = null, force = false} = {}) => {
     const {selection, node, offset, word} = getInfo()
 
     const annotate = (prefix, text, value) => {
@@ -70,7 +70,7 @@
     }
 
     // Mentions
-    if ((force || word.length > 1) && word.startsWith("@")) {
+    if ((force || word.length > 1) && word.startsWith("@") && person) {
       annotate("@", displayPerson(person).trim(), pubkeyEncoder.encode(person.pubkey))
     }
 
@@ -101,6 +101,11 @@
     // Enter adds a newline, so do it on key down
     if (["Enter"].includes(e.code)) {
       autocomplete({person: suggestions.get()})
+    }
+
+    // Only autocomplete topics on space
+    if (["Space"].includes(e.code)) {
+      autocomplete()
     }
   }
 

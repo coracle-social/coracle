@@ -1,10 +1,10 @@
-import {prop, fromPairs, last} from "ramda"
+import {prop, fromPairs} from "ramda"
 import {uuid, switcher} from "hurdak/lib/hurdak"
 import type {Writable} from "svelte/store"
 import {navigate} from "svelte-routing"
 import {writable, get} from "svelte/store"
 import {globalHistory} from "svelte-routing/src/history"
-import {sleep, synced} from "src/util/misc"
+import {sleep, synced, WritableList} from "src/util/misc"
 
 // Location
 
@@ -47,37 +47,31 @@ toast.show = (type, message, timeout = 5) => {
 export const openModals = writable(0)
 
 export const modal = {
-  history: [],
-  set: data => {
-    if (data) {
-      modal.history.push(data)
-      navigate(window.location.pathname + `#m=${modal.history.length - 1}`)
-    } else {
-      modal.history = []
-      navigate(window.location.pathname)
-    }
+  stack: new WritableList([]),
+  sync: $stack => {
+    const hash = $stack.length > 0 ? `#m=${$stack.length}` : ""
+
+    navigate(window.location.pathname + hash)
+
+    return $stack
   },
-  close: () => modal.set(null),
+  push: data => modal.stack.update($stack => modal.sync($stack.concat(data))),
+  pop: () => modal.stack.update($stack => modal.sync($stack.slice(0, -1))),
   clear: async () => {
     // Reverse history so the back button doesn't bring our modal back up
-    while (get(modal)) {
+    while (get(modal.stack)) {
       history.back()
-      await sleep(30)
+      await sleep(100)
     }
   },
-  subscribe: cb => {
-    cb(last(modal.history))
-
-    return location.subscribe($location => {
-      const match = $location.hash.match(/\bm=(\d+)/)
-      const i = match ? parseInt(match[1]) : null
-
-      modal.history.splice(i === null ? -1 : i + 1)
-
-      cb(modal.history[i])
-    })
-  },
 }
+
+location.subscribe($location => {
+  const match = $location.hash.match(/\bm=(\d+)/)
+  const i = match ? parseInt(match[1]) : 0
+
+  modal.stack.update($stack => (i < $stack.length ? $stack.slice(0, i) : $stack))
+})
 
 // Themes
 
