@@ -202,11 +202,11 @@ export const parseContent = ({content, tags = []}) => {
 
     if (bech32) {
       try {
-        const entity = bech32[0].replace("nostr:", "")
+        const entity = bech32.replace("nostr:", "")
         const {type, data} = nip19.decode(entity) as {type: string; data: object}
         const value = type === "note" ? {id: data} : data
 
-        return [`nostr:${type}`, bech32[0], {...value, entity}]
+        return [`nostr:${type}`, bech32, {...value, entity}]
       } catch (e) {
         console.log(e)
         // pass
@@ -216,7 +216,9 @@ export const parseContent = ({content, tags = []}) => {
 
   const parseUrl = () => {
     const raw = first(
-      text.match(/^((http|ws)s?:\/\/)?[-a-z0-9:%_\+~#=\.]+\.[a-z]{1,6}[-a-z0-9:%_\+~#\?&\/=;\.]*/gi)
+      text.match(
+        /^((http|ws)s?:\/\/)?[-a-z0-9:%_\+~#=\.\*]+\.[a-z]{1,6}[-a-z0-9:%_\+~#\?&\/=;\.\*]*/gi
+      )
     )
 
     // Skip url if it's just the end of a filepath
@@ -269,7 +271,7 @@ export const parseContent = ({content, tags = []}) => {
   }
 
   if (buffer) {
-    result.push({type: 'text', value: buffer})
+    result.push({type: "text", value: buffer})
   }
 
   return result

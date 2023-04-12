@@ -118,11 +118,11 @@
           <br />
         {/each}
       {:else if type === "link"}
-        <Anchor external href={value} class="ml-1">
+        <Anchor external href={value}>
           {value.replace(/https?:\/\/(www\.)?/, "")}
         </Anchor>
       {:else if type.startsWith("nostr:")}
-        <Anchor href={"/" + value.entity} class="ml-1">
+        <Anchor href={"/" + value.entity}>
           {#if value.pubkey}
             {displayPerson(getPersonWithFallback(value.pubkey))}
           {:else}
@@ -132,6 +132,7 @@
       {:else}
         {value}
       {/if}
+      {' '}
     {/each}
   </p>
   {#if showMedia && links.length > 0}
