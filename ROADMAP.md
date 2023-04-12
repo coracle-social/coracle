@@ -3,7 +3,7 @@
 - [ ] Refactor
   - Move global modals to child components?
   - Combine app/agent, rename app2
-  - DM view pushes user back to the bottom
+  - Sort DMs
 - [ ] Improve topic suggestions and rendering
 - [ ] Add topic search
 - [ ] Relays bounty
@@ -11,7 +11,6 @@
   - [ ] Add global/following/network tabs to relay detail
 - [ ] Some lnurls aren't working npub1y3k2nheva29y9ej8a22e07epuxrn04rvgy28wvs54y57j7vsxxuq0gvp4j
 - [ ] Fix force relays on login: http://localhost:5173/messages/npub1l66wvfm7dxhd6wmvpukpjpyhvwtlxzu0qqajqxjfpr4rlfa8hl5qlkfr3q
-- [ ] Sort DMs, remember message status
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
 
@@ -61,6 +60,7 @@
 
 # UI/Features
 
+- [ ] Remember message/chat status
 - [ ] Linkify topics
 - [ ] Add suggestion list for topics on compose
 - [ ] Badges link to https://badges.page/p/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322

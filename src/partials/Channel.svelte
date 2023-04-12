@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {fly} from "svelte/transition"
   import {navigate} from "svelte-routing"
-  import {prop, path as getPath, reverse, pluck, uniqBy, sortBy, last} from "ramda"
+  import {prop, max, path as getPath, reverse, pluck, uniqBy, sortBy, last} from "ramda"
   import {sleep, createScroller, Cursor} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import user from "src/agent/user"
@@ -23,7 +23,7 @@
   $: {
     // Group messages so we're only showing the person once per chunk
     annotatedMessages = reverse(
-      sortBy(prop("created_at"), uniqBy(prop("id"), messages)).reduce((mx, m) => {
+      sortBy(prop("created_at"), messages).reduce((mx, m) => {
         const person = getPersonWithFallback(m.pubkey)
         const showPerson = person.pubkey !== getPath(["person", "pubkey"], last(mx))
 
@@ -35,18 +35,20 @@
   // flex-reverse-col means the first is the last
   const getLastListItem = () => document.querySelector("ul.channel-messages li")
 
-  const stickToBottom = async (behavior, cb) => {
-    const shouldStick = window.scrollY + window.innerHeight > document.body.scrollHeight - 200
+  const scrollToBottom = () => {
+    getLastListItem()?.scrollIntoView({behavior: "smooth"})
+  }
+
+  const stickToBottom = async cb => {
+    const lastMessage = pluck("created_at", annotatedMessages).reduce(max, 0)
+    const {scrollTop} = document.querySelector(".channel-messages")
+    const shouldStick = scrollTop > -200
 
     await cb()
 
     if (shouldStick) {
-      const $li = getLastListItem()
-
-      if ($li) {
-        $li.scrollIntoView({behavior})
-      }
-    } else {
+      scrollToBottom()
+    } else if (lastMessage < pluck("created_at", annotatedMessages).reduce(max, 0)) {
       showNewMessages = true
     }
   }
@@ -57,9 +59,9 @@
     }
 
     const sub = listenForMessages(newMessages =>
-      stickToBottom("smooth", () => {
+      stickToBottom(() => {
         loading = sleep(30_000)
-        messages = messages.concat(newMessages)
+        messages = uniqBy(prop("id"), messages.concat(newMessages))
         network.loadPeople(pluck("pubkey", newMessages))
       })
     )
@@ -67,9 +69,9 @@
     const scroller = createScroller(
       async () => {
         await loadMessages(cursor, newMessages => {
-          stickToBottom("auto", () => {
+          stickToBottom(() => {
             loading = sleep(30_000)
-            messages = sortBy(e => -e.created_at, newMessages.concat(messages))
+            messages = sortBy(e => -e.created_at, uniqBy(prop("id"), newMessages.concat(messages)))
             network.loadPeople(pluck("pubkey", newMessages))
             cursor.update(messages)
           })
@@ -92,7 +94,7 @@
 
       const event = await sendMessage(content)
 
-      stickToBottom("smooth", () => {
+      stickToBottom(() => {
         messages = sortBy(e => -e.created_at, [event].concat(messages))
       })
     }
@@ -150,7 +152,10 @@
     </div>
   </div>
   {#if showNewMessages}
-    <div class="fixed bottom-32 flex w-full justify-center" transition:fly|local={{y: 20}}>
+    <div
+      class="fixed bottom-32 flex w-full cursor-pointer justify-center"
+      transition:fly|local={{y: 20}}
+      on:click={scrollToBottom}>
       <div class="rounded-full bg-accent py-2 px-4 text-gray-3">New messages found</div>
     </div>
   {/if}
