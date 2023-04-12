@@ -14,6 +14,7 @@
   import PersonList from "src/app/shared/PersonList.svelte"
   import PersonProfileInfo from "src/app/views/PersonProfileInfo.svelte"
   import PersonShare from "src/app/views/PersonShare.svelte"
+  import TopicFeed from "src/app/views/TopicFeed.svelte"
   import AddRelay from "src/app/views/RelayAdd.svelte"
 
   const closeModal = async () => {
@@ -50,6 +51,10 @@
       <PersonList type="follows" pubkey={$modal.pubkey} />
     {:else if $modal.type === "person/followers"}
       <PersonList type="followers" pubkey={$modal.pubkey} />
+    {:else if $modal.type === "topic/feed"}
+      {#key $modal.topic}
+        <TopicFeed topic={$modal.topic} />
+      {/key}
     {:else if $modal.type === "message"}
       <Content size="lg">
         <div class="text-center">{$modal.message}</div>

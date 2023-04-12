@@ -17,6 +17,7 @@
 
   export let filter
   export let relays = []
+  export let inModal = false
   export let delta = timedelta(6, "hours")
   export let shouldDisplay = always(true)
   export let parentsTimeout = 500
@@ -105,7 +106,8 @@
   }
 
   const loadMore = async () => {
-    if ($modal) {
+    console.log("here")
+    if ($modal && !inModal) {
       return
     }
 
@@ -127,7 +129,9 @@
       onChunk,
     })
 
-    const scroller = createScroller(loadMore)
+    const scroller = createScroller(loadMore, {
+      element: inModal ? document.querySelector(".modal-content") : null,
+    })
 
     return () => {
       scroller.stop()

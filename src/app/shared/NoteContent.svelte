@@ -49,7 +49,7 @@
       const next = content[i + 1]
 
       if ((!prev || prev.type === "newline") && (!next || next.type === "newline")) {
-        let n = 0
+        let n = 1
         for (let j = i - 1; ; j--) {
           if (content[j]?.type === "newline") {
             n += 1
@@ -58,7 +58,7 @@
           }
         }
 
-        ranges.push({i, n})
+        ranges.push({i: i + 1, n})
       }
     }
   }
@@ -108,6 +108,10 @@
   const openQuote = id => {
     modal.set({type: "note/detail", note: {id}})
   }
+
+  const openTopic = topic => {
+    modal.set({type: "topic/feed", topic})
+  }
 </script>
 
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
@@ -117,6 +121,8 @@
         {#each value as _}
           <br />
         {/each}
+      {:else if type === "topic"}
+        <Anchor on:click={() => openTopic(value)}>{value}</Anchor>
       {:else if type === "link"}
         <Anchor external href={value}>
           {value.replace(/https?:\/\/(www\.)?/, "")}

@@ -1,10 +1,8 @@
 # Current
 
-- [ ] Refactor
-  - Move global modals to child components?
-  - Combine app/agent, rename app
-- [ ] Improve topic suggestions and rendering
-- [ ] Add topic search
+- [ ] Topics
+  - [ ] Improve topic suggestions and rendering
+  - [ ] Add topic search, keep cache of topics
 - [ ] Relays bounty
   - [ ] Ability to create custom feeds
   - [ ] Add global/following/network tabs to relay detail

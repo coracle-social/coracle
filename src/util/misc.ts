@@ -120,8 +120,10 @@ export const poll = (t, cb) => {
   }
 }
 
-export const createScroller = (loadMore, {reverse = false, element = document.body} = {}) => {
+export const createScroller = (loadMore, {reverse = false, element = null} = {}) => {
   const THRESHOLD = 2000
+
+  element = element || document.body
 
   // NOTE TO FUTURE SELF
   // If the scroller is saturating request channels on a slow relay, the
