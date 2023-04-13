@@ -2,7 +2,6 @@
   import {nip19} from "nostr-tools"
   import {find, last} from "ramda"
   import {onMount} from "svelte"
-  import {navigate} from "svelte-routing"
   import {quantify} from "hurdak/lib/hurdak"
   import {findRootId, findReplyId, displayPerson} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
@@ -19,7 +18,7 @@
   import {getRelaysForEventParent} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
   import {watch} from "src/agent/db"
-  import {routes} from "src/app/state"
+  import {routes, goToPerson} from "src/app/state"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
   export let note
@@ -61,14 +60,6 @@
 
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
       modal.push({type: "note/detail", note})
-    }
-  }
-
-  const goToAuthor = () => {
-    if (document.querySelector(".modal-content")) {
-      navigate(routes.person(note.pubkey))
-    } else {
-      modal.push({type: "person/feed", pubkey: note.pubkey})
     }
   }
 
@@ -135,7 +126,7 @@
             <Anchor
               type="unstyled"
               class="flex items-center gap-2 pr-16 text-lg font-bold"
-              on:click={goToAuthor}>
+              on:click={() => goToPerson($author.pubkey)}>
               <span>{displayPerson($author)}</span>
               {#if $author.verified_as}
                 <i class="fa fa-circle-check text-sm text-accent" />
@@ -147,7 +138,7 @@
                 <Anchor
                   type="unstyled"
                   class="flex items-center gap-2 pr-16 text-lg font-bold"
-                  on:click={goToAuthor}>
+                  on:click={() => goToPerson($author.pubkey)}>
                   <span>{displayPerson($author)}</span>
                   {#if $author.verified_as}
                     <i class="fa fa-circle-check text-sm text-accent" />

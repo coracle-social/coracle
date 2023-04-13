@@ -1,6 +1,5 @@
 <script lang="ts">
   import {objOf, reverse} from "ramda"
-  import {navigate} from "svelte-routing"
   import {fly} from "svelte/transition"
   import {splice} from "hurdak/lib/hurdak"
   import {warn} from "src/util/logger"
@@ -15,7 +14,7 @@
   import user from "src/agent/user"
   import network from "src/agent/network"
   import {getPersonWithFallback} from "src/agent/db"
-  import {routes} from "src/app/state"
+  import {goToPerson} from "src/app/state"
 
   export let note
   export let anchorId = null
@@ -123,18 +122,18 @@
           <br />
         {/each}
       {:else if type === "topic"}
-        <Anchor on:click={e => { e.stopPropagation(); openTopic(value) }}>#{value}</Anchor>
+        <Anchor stopPropagation on:click={() => openTopic(value)}>#{value}</Anchor>
       {:else if type === "link"}
         <Anchor external href={value}>
           {value.replace(/https?:\/\/(www\.)?/, "")}
         </Anchor>
       {:else if type.startsWith("nostr:")}
         {#if value.pubkey}
-          @<Anchor href={"/" + value.entity}>
+          @<Anchor stopPropagation on:click={() => goToPerson(value.pubkey)}>
             {displayPerson(getPersonWithFallback(value.pubkey))}
           </Anchor>
         {:else}
-          <Anchor href={"/" + value.entity}>
+          <Anchor stopPropagation href={"/" + value.entity}>
             {value.entity.slice(0, 16) + "..."}
           </Anchor>
         {/if}
@@ -145,7 +144,7 @@
     {/each}
   </p>
   {#if showMedia && links.length > 0}
-    <div on:click={e => e.stopPropagation()}>
+    <div on:click|stopPropagation>
       <MediaSet {links} />
     </div>
   {/if}
@@ -160,9 +159,10 @@
             <div class="mb-4 flex items-center gap-4">
               <PersonCircle size={6} {person} />
               <Anchor
+                stopPropagation
                 type="unstyled"
                 class="flex items-center gap-2"
-                on:click={() => navigate(routes.person(quote.pubkey))}>
+                on:click={() => goToPerson(quote.pubkey)}>
                 <h2 class="text-lg">{displayPerson(person)}</h2>
               </Anchor>
             </div>

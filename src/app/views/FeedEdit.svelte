@@ -1,13 +1,13 @@
 <script>
-  import {when, find, objOf, pluck, always, propEq} from "ramda"
+  import {when, find, pluck, always, propEq} from "ramda"
   import {randomId} from "hurdak/lib/hurdak"
+  import {displayPerson} from "src/util/nostr"
   import {modal, toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import Button from "src/partials/Button.svelte"
   import Input from "src/partials/Input.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import {searchTopics, searchPeople, searchRelays, getPersonWithFallback} from "src/agent/db"
   import user from "src/agent/user"
 
@@ -16,12 +16,26 @@
   let values = {
     id: feed.id,
     name: feed.name,
-    authors: (feed.authors || []).map(objOf("pubkey")),
-    topics: (feed.topics || []).map(objOf("name")),
-    relays: (feed.relays || []).map(objOf("url")),
+    params: (feed.authors || [])
+      .map(pubkey => ({pubkey}))
+      .concat((feed.topics || []).map(name => ({name})))
+      .concat((feed.relays || []).map(url => ({url}))),
   }
 
   const {feeds} = user
+
+  const search = q => {
+    if (q.startsWith("~")) {
+      console.log($searchRelays(q))
+      return $searchRelays(q)
+    }
+
+    if (q.startsWith("#")) {
+      return $searchTopics(q)
+    }
+
+    return $searchPeople(q)
+  }
 
   const submit = () => {
     if (!values.name) {
@@ -55,56 +69,28 @@
     <Heading class="text-center">{values.id ? "Edit" : "Add"} custom feed</Heading>
     <div class="flex w-full flex-col gap-8">
       <div class="flex flex-col gap-1">
-        <strong>Feed name</strong>
+        <strong>Name</strong>
         <Input bind:value={values.name} placeholder="My custom feed" />
         <p class="text-sm text-gray-4">
           Custom feeds are identified by their name, so this has to be unique.
         </p>
       </div>
       <div class="flex flex-col gap-1">
-        <strong>Limit by author</strong>
-        <MultiSelect
-          search={$searchPeople}
-          bind:value={values.authors}
-          placeholder="A list of authors">
+        <strong>Filters</strong>
+        <MultiSelect {search} bind:value={values.params}>
           <div slot="item" let:item>
-            <PersonBadge inert person={getPersonWithFallback(item.pubkey)} />
+            {#if item.pubkey}
+              {displayPerson(getPersonWithFallback(item.pubkey))}
+            {:else if item.name}
+              #{item.name}
+            {:else if item.url}
+              {item.url}
+            {/if}
           </div>
         </MultiSelect>
         <p class="text-sm text-gray-4">
-          Only notes by the given authors will be shown in the feed.
-        </p>
-      </div>
-      <div class="flex flex-col gap-1">
-        <strong>Limit by topic</strong>
-        <MultiSelect
-          search={$searchTopics}
-          bind:value={values.topics}
-          delimiters={[",", " "]}
-          termToItem={objOf("name")}
-          placeholder="A list of topics">
-          <div slot="item" let:item>
-            #{item.name}
-          </div>
-        </MultiSelect>
-        <p class="text-sm text-gray-4">
-          Only notes with the given topics will be shown in the feed.
-        </p>
-      </div>
-      <div class="flex flex-col gap-1">
-        <strong>Limit by relay</strong>
-        <MultiSelect
-          search={$searchRelays}
-          bind:value={values.relays}
-          delimiters={[",", " "]}
-          termToItem={objOf("url")}
-          placeholder="A list of relays">
-          <div slot="item" let:item>
-            {item.url}
-          </div>
-        </MultiSelect>
-        <p class="text-sm text-gray-4">
-          Only notes found on the given relays will be shown in the feed.
+          Type "@" to look for people, "#" to look for topics, and "~" to look for relays. Custom
+          feeds will search for notes that match any item within each filter.
         </p>
       </div>
       <Button type="submit" class="text-center">Save</Button>

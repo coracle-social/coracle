@@ -1,6 +1,7 @@
 import type {DisplayEvent} from "src/util/types"
 import Bugsnag from "@bugsnag/js"
 import {nip19} from "nostr-tools"
+import {navigate} from "svelte-routing"
 import {derived} from "svelte/store"
 import {writable} from "svelte/store"
 import {omit, pluck, sortBy, max, find, slice, propEq} from "ramda"
@@ -24,6 +25,16 @@ import user from "src/agent/user"
 export const routes = {
   person: (pubkey, tab = "notes") => `/people/${nip19.npubEncode(pubkey)}/${tab}`,
 }
+
+export const goToPerson = pubkey => {
+  if (document.querySelector(".modal-content")) {
+    navigate(routes.person(pubkey))
+  } else {
+    modal.push({type: "person/feed", pubkey})
+  }
+}
+
+export const addToFeed = (key, value) => modal.push({type: "feed/select", key, value})
 
 // Menu
 

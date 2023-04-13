@@ -17,6 +17,8 @@
   import PersonProfileInfo from "src/app/views/PersonProfileInfo.svelte"
   import PersonShare from "src/app/views/PersonShare.svelte"
   import TopicFeed from "src/app/views/TopicFeed.svelte"
+  import FeedList from "src/app/views/FeedList.svelte"
+  import FeedSelect from "src/app/views/FeedSelect.svelte"
   import FeedEdit from "src/app/views/FeedEdit.svelte"
   import RelayAdd from "src/app/views/RelayAdd.svelte"
 
@@ -62,6 +64,10 @@
       {#key m.topic}
         <TopicFeed topic={m.topic} />
       {/key}
+    {:else if m.type === "feed/list"}
+      <FeedList />
+    {:else if m.type === "feed/select"}
+      <FeedSelect key={m.key} value={m.value} />
     {:else if m.type === "feed/edit"}
       <FeedEdit feed={m.feed} />
     {:else if m.type === "message"}

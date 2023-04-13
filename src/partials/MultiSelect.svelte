@@ -61,24 +61,24 @@
   }
 </script>
 
-<div
-  class="shadow-inset cursor-text rounded border border-solid border-gray-3 bg-input py-2 px-4 text-black"
-  on:click={() => input.focus()}>
+<div class="text-sm">
   {#each value as item}
-    <Chip class="mr-1 mb-1" theme="light" on:click={() => remove(item)}>
+    <Chip class="mr-1 mb-1" theme="dark" on:click={() => remove(item)}>
       <slot name="item" {item}>
         {item}
       </slot>
     </Chip>
   {/each}
-  <input
-    type="text"
-    class="w-full bg-input py-2 outline-0 placeholder:text-gray-5"
-    {placeholder}
-    bind:value={term}
-    bind:this={input}
-    on:keydown={onKeyDown} />
 </div>
+
+<input
+  type="text"
+  class="shadow-inset w-full cursor-text rounded border border-solid border-gray-3 bg-input bg-input py-2
+         py-2 px-4 text-black outline-0 placeholder:text-gray-5"
+  {placeholder}
+  bind:value={term}
+  bind:this={input}
+  on:keydown={onKeyDown} />
 
 {#if search}
   <div class="relative w-full">

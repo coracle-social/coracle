@@ -3,6 +3,7 @@
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import user from "src/agent/user"
   import {getRelayWithFallback} from "src/agent/db"
+  import {addToFeed} from "src/app/state"
 
   export let relay
 
@@ -29,6 +30,12 @@
         icon: "right-from-bracket",
       })
     }
+
+    actions.push({
+      onClick: () => addToFeed("relays", relay.url),
+      label: "Add to feed",
+      icon: "scroll",
+    })
 
     if (relay.contact) {
       actions.push({

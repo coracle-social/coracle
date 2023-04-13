@@ -1,11 +1,15 @@
 <script>
   import cx from "classnames"
   import {switcher} from "hurdak/lib/hurdak"
+  import {createEventDispatcher} from "svelte"
 
+  export let stopPropagation = false
   export let external = false
   export let loading = false
   export let type = "anchor"
   export let href = null
+
+  const dispatch = createEventDispatcher()
 
   let className
 
@@ -25,8 +29,16 @@
         "py-2 px-4 rounded bg-accent text-white whitespace-nowrap border border-solid border-accent-light hover:bg-accent-light",
     })
   )
+
+  const onClick = e => {
+    if (stopPropagation) {
+      e.stopPropagation()
+    }
+
+    dispatch("click", e)
+  }
 </script>
 
-<a on:click {...$$props} {href} class={className} target={external ? "_blank" : null}>
+<a on:click={onClick} {...$$props} {href} class={className} target={external ? "_blank" : null}>
   <slot />
 </a>

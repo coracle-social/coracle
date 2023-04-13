@@ -4,10 +4,12 @@
   - [x] Improve topic suggestions and rendering
   - [x] Add topic search, keep cache of topics
   - [x] Ability to create custom feeds
-    - [ ] Bookmark icon opens "create feed" dialog with form pre-filled
-    - [ ] Add ability to follow topics - bookmark icon?
-    - [ ] Claim relays bounty
+    - [x] Bookmark icon opens "create feed" dialog with form pre-filled
+    - [ ] Use lists instead of custom app data
+    - [ ] Public/private toggle
     - [ ] Add person to feed button (maybe lists make more sense for this?)
+    - [ ] Add 30078 to personKinds (except we'll have to get more involved)
+    - [ ] Claim relays bounty
 - [ ] Some lnurls aren't working npub1y3k2nheva29y9ej8a22e07epuxrn04rvgy28wvs54y57j7vsxxuq0gvp4j
 - [ ] Global search modal that searches within current feed
 - [ ] Fix force relays on login: http://localhost:5173/messages/npub1l66wvfm7dxhd6wmvpukpjpyhvwtlxzu0qqajqxjfpr4rlfa8hl5qlkfr3q

@@ -9,6 +9,7 @@
   import {getPubkeyWriteRelays} from "src/agent/relays"
   import user from "src/agent/user"
   import pool from "src/agent/pool"
+  import {addToFeed} from "src/app/state"
 
   export let person
 
@@ -21,6 +22,12 @@
   $: following = $petnamePubkeys.includes(person.pubkey)
   $: {
     actions = []
+
+    actions.push({
+      onClick: () => addToFeed("authors", person.pubkey),
+      label: "Add to feed",
+      icon: "scroll",
+    })
 
     actions.push({onClick: share, label: "Share", icon: "share-nodes"})
 

@@ -1,13 +1,10 @@
 <script lang="ts">
   import type {CustomFeed} from "src/util/types"
   import {prop, objOf, find, propEq} from "ramda"
-  import {quantify} from "hurdak/lib/hurdak"
   import {shuffle, synced} from "src/util/misc"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
-  import Modal from "src/partials/Modal.svelte"
-  import Heading from "src/partials/Heading.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
@@ -21,9 +18,7 @@
     {id: "network", name: "Network", authors: "network"},
   ] as Array<CustomFeed>
 
-  let modalIsOpen = false
   let activeTab = synced("views/Feeds/activeTab", "Follows")
-  let actions = []
   let relays, filter, tabs, feed
 
   $: allFeeds = defaultFeeds.concat($feeds)
@@ -79,34 +74,12 @@
     })
   }
 
-  $: {
-    actions = []
-
-    actions.push({
-      onClick: toggleModal,
-      label: "Customize",
-      icon: "cog",
-    })
-  }
-
   const setActiveTab = tab => {
     $activeTab = tab
   }
 
-  const toggleModal = () => {
-    modalIsOpen = !modalIsOpen
-  }
-
-  const createFeed = () => {
-    modal.push({type: "feed/edit"})
-  }
-
-  const editFeed = feed => {
-    modal.push({type: "feed/edit", feed})
-  }
-
-  const removeFeed = feed => {
-    user.removeFeed(feed.id)
+  const showFeedsList = () => {
+    modal.push({type: "feed/list"})
   }
 
   document.title = $activeTab
@@ -139,13 +112,13 @@
                 {feed.name}
               </button>
             {/each}
-            <button on:click={toggleModal} class="w-full py-2 px-3 text-left hover:bg-gray-7">
+            <button on:click={showFeedsList} class="w-full py-2 px-3 text-left hover:bg-gray-7">
               <i class="fa fa-cog fa-sm mr-1" /> Customize
             </button>
           </div>
         </Popover>
       {:else}
-        <i class="fa fa-ellipsis-v cursor-pointer p-1" on:click={toggleModal} />
+        <i class="fa fa-ellipsis-v cursor-pointer p-1" on:click={showFeedsList} />
       {/if}
     </Tabs>
     {#key $activeTab}
@@ -153,41 +126,3 @@
     {/key}
   </div>
 </Content>
-
-{#if modalIsOpen}
-  <Modal onEscape={toggleModal}>
-    <Content>
-      <div class="flex items-center justify-between">
-        <Heading>Custom Feeds</Heading>
-        <Anchor type="button-accent" on:click={createFeed}>
-          <i class="fa fa-plus" /> Feed
-        </Anchor>
-      </div>
-      <p>
-        You custom feeds are listed below. You can create new custom feeds by handing using the "add
-        feed" button, or by clicking the <i class="fa fa-scroll px-1" /> icon that appears throughout
-        Coracle.
-      </p>
-      {#each $feeds as feed (feed.name)}
-        <div class="flex justify-start gap-3">
-          <i
-            class="fa fa-sm fa-trash cursor-pointer py-3"
-            on:click|stopPropagation={() => removeFeed(feed)} />
-          <div class="flex w-full justify-between">
-            <div>
-              <strong>{feed.name}</strong>
-              <p>
-                {feed.topics ? quantify(feed.topics.length, "topic") : ""}
-                {feed.authors ? quantify(feed.authors.length, "author") : ""}
-                {feed.relays ? quantify(feed.relays.length, "relay") : ""}
-              </p>
-            </div>
-            <Anchor on:click={() => editFeed(feed)}>Edit</Anchor>
-          </div>
-        </div>
-      {:else}
-        <p class="text-center py-12">You don't have any custom feeds yet.</p>
-      {/each}
-    </Content>
-  </Modal>
-{/if}

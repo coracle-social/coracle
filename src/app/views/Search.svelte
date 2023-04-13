@@ -5,7 +5,7 @@
   import Input from "src/partials/Input.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import BorderLeft from "src/partials/BorderLeft.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
   import {watch} from "src/agent/db"
   import user from "src/agent/user"
@@ -48,13 +48,9 @@
   </Input>
   {#each $search(q).slice(0, 50) as result (result.type + result.id)}
     {#if result.type === "topic"}
-      <Anchor
-        type="unstyled"
-        class="flex gap-4 border-l-2 border-solid border-gray-7 py-2 px-4 transition-all
-               hover:border-accent hover:bg-gray-8"
-        on:click={() => openTopic(result.topic.name)}>
+      <BorderLeft on:click={() => openTopic(result.topic.name)}>
         #{result.topic.name}
-      </Anchor>
+      </BorderLeft>
     {:else if result.type === "person"}
       <PersonInfo person={result.person} />
     {/if}

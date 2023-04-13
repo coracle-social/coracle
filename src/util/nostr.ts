@@ -6,7 +6,7 @@ import {tryJson} from "src/util/misc"
 import {invoiceAmount} from "src/util/lightning"
 
 export const personKinds = [0, 2, 3, 10001, 10002]
-export const userKinds = personKinds.concat([10000])
+export const userKinds = personKinds.concat([10000, 30001])
 
 export class Tags {
   tags: Array<any>
@@ -192,7 +192,8 @@ export const parseContent = ({content, tags = []}) => {
   const parseTopic = () => {
     const topic = first(text.match(/^#\w+/i))
 
-    if (topic) {
+    // Skip numeric topics
+    if (topic && !topic.match(/^#\d+$/)) {
       return ["topic", topic, topic.slice(1)]
     }
   }
