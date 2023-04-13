@@ -165,7 +165,7 @@
               You have muted this note.
             </p>
           {:else}
-            <NoteContent {note} {showEntire} />
+            <NoteContent {anchorId} {note} {showEntire} />
           {/if}
           <NoteActions
             bind:this={actions}

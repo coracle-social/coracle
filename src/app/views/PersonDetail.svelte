@@ -158,11 +158,11 @@
   }
 
   const openProfileInfo = () => {
-    modal.push({type: "person/info", $person})
+    modal.push({type: "person/info", person: $person})
   }
 
   const share = () => {
-    modal.push({type: "person/share", $person})
+    modal.push({type: "person/share", person: $person})
   }
 </script>
 

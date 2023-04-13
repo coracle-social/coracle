@@ -18,6 +18,7 @@
   import {routes} from "src/app/state"
 
   export let note
+  export let anchorId = null
   export let maxLength = 700
   export let showEntire = false
   export let showMedia = user.getSetting("showMedia")
@@ -41,7 +42,7 @@
     ) {
       if (type === "link") {
         links.push(value)
-      } else {
+      } else if (value.id !== anchorId) {
         entities.push({type, value})
       }
 
@@ -128,13 +129,15 @@
           {value.replace(/https?:\/\/(www\.)?/, "")}
         </Anchor>
       {:else if type.startsWith("nostr:")}
-        <Anchor href={"/" + value.entity}>
-          {#if value.pubkey}
+        {#if value.pubkey}
+          @<Anchor href={"/" + value.entity}>
             {displayPerson(getPersonWithFallback(value.pubkey))}
-          {:else}
+          </Anchor>
+        {:else}
+          <Anchor href={"/" + value.entity}>
             {value.entity.slice(0, 16) + "..."}
-          {/if}
-        </Anchor>
+          </Anchor>
+        {/if}
       {:else}
         {value}
       {/if}
