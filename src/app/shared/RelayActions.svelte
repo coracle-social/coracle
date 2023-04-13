@@ -1,7 +1,5 @@
 <script lang="ts">
   import {find, last, propEq} from "ramda"
-  import Anchor from "src/partials/Anchor.svelte"
-  import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import user from "src/agent/user"
   import {getRelayWithFallback} from "src/agent/db"
@@ -42,15 +40,4 @@
   }
 </script>
 
-{#if actions.length > 0}
-  {#if actions.length === 1}
-    <Popover triggerType="mouseenter">
-      <Anchor slot="trigger" type="button-circle" on:click={actions[0].onClick}>
-        <i class={`fa fa-${actions[0].icon}`} />
-      </Anchor>
-      <p slot="tooltip">{actions[0].label}</p>
-    </Popover>
-  {:else}
-    <OverflowMenu {actions} />
-  {/if}
-{/if}
+<OverflowMenu {actions} />

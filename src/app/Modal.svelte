@@ -12,6 +12,7 @@
   import Onboarding from "src/app/views/Onboarding.svelte"
   import NoteCreate from "src/app/views/NoteCreate.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
+  import PersonFeed from "src/app/views/PersonFeed.svelte"
   import PersonList from "src/app/shared/PersonList.svelte"
   import PersonProfileInfo from "src/app/views/PersonProfileInfo.svelte"
   import PersonShare from "src/app/views/PersonShare.svelte"
@@ -47,6 +48,8 @@
       <LoginPubKey />
     {:else if m.type === "login/connect"}
       <LoginConnect />
+    {:else if m.type === "person/feed"}
+      <PersonFeed pubkey={m.pubkey} />
     {:else if m.type === "person/info"}
       <PersonProfileInfo person={m.person} />
     {:else if m.type === "person/share"}

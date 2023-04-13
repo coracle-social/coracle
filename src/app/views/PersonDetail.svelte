@@ -1,45 +1,34 @@
 <script lang="ts">
-  import {last, identity, find} from "ramda"
-  import {onMount} from "svelte"
-  import {tweened} from "svelte/motion"
-  import {fly} from "svelte/transition"
+  import {last, identity} from "ramda"
   import {navigate} from "svelte-routing"
   import {log} from "src/util/logger"
   import {parseHex} from "src/util/html"
-  import {numberFmt} from "src/util/misc"
   import {displayPerson, toHex} from "src/util/nostr"
-  import {modal, theme, getThemeColor} from "src/partials/state"
+  import {theme, getThemeColor} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
-  import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import Notes from "src/app/views/PersonNotes.svelte"
-  import Likes from "src/app/views/PersonLikes.svelte"
-  import Relays from "src/app/views/PersonRelays.svelte"
-  import user from "src/agent/user"
+  import PersonActions from "src/app/shared/PersonActions.svelte"
+  import PersonNotes from "src/app/shared/PersonNotes.svelte"
+  import PersonLikes from "src/app/shared/PersonLikes.svelte"
+  import PersonRelays from "src/app/shared/PersonRelays.svelte"
   import pool from "src/agent/pool"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
-  import network from "src/agent/network"
   import {getPersonWithFallback, watch} from "src/agent/db"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
+  import PersonStats from "src/app/shared/PersonStats.svelte"
 
   export let npub
   export let activeTab
   export let relays = []
 
-  const interpolate = (a, b) => t => a + Math.round((b - a) * t)
-  const {petnamePubkeys, canPublish, mutes} = user
   const tabs = ["notes", "likes", pool.forceUrls.length === 0 && "relays"].filter(identity)
   const pubkey = toHex(npub)
   const person = watch("people", () => getPersonWithFallback(pubkey))
 
-  let following = false
-  let muted = false
-  let followersCount = tweened(0, {interpolate, duration: 1000})
   let loading = true
-  let actions = []
   let rgb, rgba
 
   $: ownRelays = getPubkeyWriteRelays(pubkey)
@@ -52,118 +41,11 @@
     rgb = `rgba(${color.join(", ")})`
   }
 
-  $: following = $petnamePubkeys.includes(pubkey)
-  $: muted = find(m => m[1] === pubkey, $mutes)
+  log("Person", npub, $person)
 
-  $: {
-    actions = []
-
-    if ($canPublish) {
-      if (following) {
-        actions.push({onClick: unfollow, label: "Unfollow", icon: "user-minus"})
-      } else if (user.getPubkey() !== pubkey) {
-        actions.push({onClick: follow, label: "Follow", icon: "user-plus"})
-      }
-    }
-
-    actions.push({onClick: share, label: "Share", icon: "share-nodes"})
-
-    if (user.getPubkey() !== pubkey && $canPublish) {
-      actions.push({
-        onClick: () => navigate(`/messages/${npub}`),
-        label: "Message",
-        icon: "envelope",
-      })
-
-      if (muted) {
-        actions.push({onClick: unmute, label: "Unmute", icon: "microphone"})
-      } else if (user.getPubkey() !== pubkey) {
-        actions.push({onClick: mute, label: "Mute", icon: "microphone-slash"})
-      }
-    }
-
-    if (pool.forceUrls.length === 0) {
-      actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
-    }
-
-    if (user.getPubkey() === pubkey && $canPublish) {
-      actions.push({
-        onClick: () => navigate("/profile"),
-        label: "Edit",
-        icon: "edit",
-      })
-    }
-  }
-
-  onMount(async () => {
-    log("Person", npub, $person)
-
-    document.title = displayPerson($person)
-
-    // Refresh our person
-    network.loadPeople([pubkey], {relays, force: true}).then(() => {
-      ownRelays = getPubkeyWriteRelays(pubkey)
-      loading = false
-    })
-
-    // Get our followers count
-    const count = await pool.count({kinds: [3], "#p": [pubkey]})
-
-    if (count) {
-      followersCount.set(count)
-    } else {
-      const followers = new Set()
-
-      await network.load({
-        relays,
-        shouldProcess: false,
-        filter: [{kinds: [3], "#p": [pubkey]}],
-        onChunk: events => {
-          for (const e of events) {
-            followers.add(e.pubkey)
-          }
-
-          followersCount.set(followers.size)
-        },
-      })
-    }
-  })
+  document.title = displayPerson($person)
 
   const setActiveTab = tab => navigate(routes.person(pubkey, tab))
-
-  const showFollows = () => {
-    modal.push({type: "person/follows", pubkey})
-  }
-
-  const showFollowers = () => {
-    modal.push({type: "person/followers", pubkey})
-  }
-
-  const follow = async () => {
-    const [{url}] = relays
-
-    user.addPetname(pubkey, url, displayPerson($person))
-  }
-
-  const unfollow = async () => {
-    user.removePetname(pubkey)
-  }
-
-  const mute = async () => {
-    user.addMute("p", pubkey)
-  }
-
-  const unmute = async () => {
-    user.removeMute(pubkey)
-  }
-
-  const openProfileInfo = () => {
-    modal.push({type: "person/info", person: $person})
-  }
-
-  const share = () => {
-    modal.push({type: "person/share", person: $person})
-  }
 </script>
 
 <div
@@ -190,31 +72,22 @@
             </div>
           {/if}
         </div>
-        <OverflowMenu {actions} />
+        <PersonActions person={$person} />
       </div>
       <PersonAbout person={$person} />
-      {#if $person?.petnames}
-        <div class="flex gap-8" in:fly={{y: 20}}>
-          <button on:click={showFollows}>
-            <strong>{$person.petnames.length}</strong> following
-          </button>
-          <button on:click={showFollowers}>
-            <strong>{numberFmt.format($followersCount)}</strong> followers
-          </button>
-        </div>
-      {/if}
+      <PersonStats person={$person} />
     </div>
   </div>
 
   <Tabs {tabs} {activeTab} {setActiveTab} />
 
   {#if activeTab === "notes"}
-    <Notes {pubkey} {relays} />
+    <PersonNotes {pubkey} {relays} />
   {:else if activeTab === "likes"}
-    <Likes {pubkey} {relays} />
+    <PersonLikes {pubkey} {relays} />
   {:else if activeTab === "relays"}
     {#if ownRelays.length > 0}
-      <Relays relays={ownRelays} />
+      <PersonRelays relays={ownRelays} />
     {:else if loading}
       <Spinner />
     {:else}

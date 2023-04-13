@@ -4,8 +4,9 @@
 
   export let pubkey
   export let relays
+  export let invertColors = false
 
   const filter = {kinds: [1], authors: [pubkey]}
 </script>
 
-<Feed {relays} {filter} parentsTimeout={3000} delta={timedelta(1, "days")} />
+<Feed {relays} {filter} {invertColors} parentsTimeout={3000} delta={timedelta(1, "days")} />

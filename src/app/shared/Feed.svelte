@@ -19,6 +19,7 @@
   export let delta = timedelta(6, "hours")
   export let shouldDisplay = always(true)
   export let parentsTimeout = 500
+  export let invertColors = false
 
   let notes = []
   let notesBuffer = []
@@ -145,7 +146,7 @@
 
   <div class="flex flex-col gap-4">
     {#each notes as note (note.id)}
-      <Note depth={2} {note} {feedRelay} {setFeedRelay} />
+      <Note depth={2} {note} {feedRelay} {setFeedRelay} {invertColors} />
     {/each}
   </div>
 

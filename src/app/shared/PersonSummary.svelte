@@ -1,13 +1,10 @@
 <script lang="ts">
   import {last, nth} from "ramda"
-  import {navigate} from "svelte-routing"
   import {displayPerson} from "src/util/nostr"
-  import Anchor from "src/partials/Anchor.svelte"
   import user from "src/agent/user"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
   import {watch} from "src/agent/db"
-  import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
 
@@ -37,12 +34,7 @@
   <div class="flex gap-4">
     <PersonCircle size={14} person={$person} />
     <div class="flex flex-grow flex-col gap-2">
-      <Anchor
-        type="unstyled"
-        class="flex items-center gap-2"
-        on:click={() => navigate(routes.person(pubkey))}>
-        <h2 class="text-lg">{displayPerson($person)}</h2>
-      </Anchor>
+      <h2 class="text-lg">{displayPerson($person)}</h2>
       {#if $person.verified_as}
         <div class="flex gap-1 text-sm">
           <i class="fa fa-user-check text-accent" />

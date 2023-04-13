@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {displayRelay} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
@@ -22,9 +21,8 @@
   {#if feedRelay.description}
     <p>{feedRelay.description}</p>
   {/if}
-  <p class="text-gray-4">
-    <i class="fa fa-info-circle" />
-    Below is your current feed including only notes seen on {displayRelay(feedRelay)}
+  <p class="border-l-2 border-gray-6 pl-4 text-gray-4">
+    Below is your current feed including only notes seen on this relay.
   </p>
 
   <div class="flex flex-col gap-4">
