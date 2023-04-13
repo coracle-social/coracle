@@ -1,13 +1,13 @@
 # Current
 
-- [ ] Buttons on profile detail is broken
 - [ ] Topics
   - [x] Improve topic suggestions and rendering
   - [x] Add topic search, keep cache of topics
-  - [ ] Add ability to follow topics
-- [ ] Relays bounty
-  - [ ] Ability to create custom feeds
-  - [ ] Add global/following/network tabs to relay detail
+  - [x] Ability to create custom feeds
+    - [ ] Bookmark icon opens "create feed" dialog with form pre-filled
+    - [ ] Add ability to follow topics - bookmark icon?
+    - [ ] Claim relays bounty
+    - [ ] Add person to feed button (maybe lists make more sense for this?)
 - [ ] Some lnurls aren't working npub1y3k2nheva29y9ej8a22e07epuxrn04rvgy28wvs54y57j7vsxxuq0gvp4j
 - [ ] Global search modal that searches within current feed
 - [ ] Fix force relays on login: http://localhost:5173/messages/npub1l66wvfm7dxhd6wmvpukpjpyhvwtlxzu0qqajqxjfpr4rlfa8hl5qlkfr3q
@@ -22,6 +22,7 @@
 
 # Core
 
+- [ ] Make mutes private
 - [ ] Write multi-relay pagination into paravel and open source it
   - https://github.com/nostr-protocol/nips/pull/408
   - nevent1qqszpjf3307ccam3cl957yc7k3h5c7vpt7gz2vdzgwkqszsyvdj6e0cpzfmhxue69uhk7enxvd5xz6tw9ec82csgdxq30

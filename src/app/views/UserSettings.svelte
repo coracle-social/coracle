@@ -20,9 +20,7 @@
     }
   })
 
-  const submit = async event => {
-    event.preventDefault()
-
+  const submit = () => {
     user.profile.update($p => ({...$p, settings: values}))
 
     toast.show("info", "Your settings have been saved!")
@@ -31,7 +29,7 @@
   document.title = "Settings"
 </script>
 
-<form on:submit={submit} in:fly={{y: 20}}>
+<form on:submit|preventDefault={submit} in:fly={{y: 20}}>
   <Content>
     <div class="mb-4 flex flex-col items-center justify-center">
       <Heading>App Settings</Heading>
@@ -43,7 +41,7 @@
           <strong>Show images and link previews</strong>
           <Toggle bind:value={values.showMedia} />
         </div>
-        <p class="text-sm text-gray-1">
+        <p class="text-sm text-gray-4">
           If enabled, coracle will automatically retrieve a link preview for the last link in any
           note.
         </p>
@@ -53,7 +51,7 @@
           <strong>Default zap amount</strong>
           <Input bind:value={values.defaultZap} />
         </div>
-        <p class="text-sm text-gray-1">
+        <p class="text-sm text-gray-4">
           The default amount of sats to use when sending a lightning tip.
         </p>
       </div>
@@ -73,7 +71,7 @@
         <Input bind:value={values.dufflepudUrl}>
           <i slot="before" class="fa-solid fa-server" />
         </Input>
-        <p class="text-sm text-gray-1">
+        <p class="text-sm text-gray-4">
           Enter a custom url for Coracle's helper application. Dufflepud is used for hosting images
           and loading link previews. You can find the source code <Anchor
             href="https://github.com/coracle-social/dufflepud">here</Anchor
@@ -86,7 +84,7 @@
           <Input bind:value={values.multiplextrUrl}>
             <i slot="before" class="fa-solid fa-server" />
           </Input>
-          <p class="text-sm text-gray-1">
+          <p class="text-sm text-gray-4">
             Enter a custom proxy server for multiplexing relay connections. This can drastically
             improve resource usage, but has some privacy trade-offs. Leave blank to connect to
             relays directly. You can find the source code <Anchor
@@ -100,7 +98,7 @@
           <strong>Report errors and analytics</strong>
           <Toggle bind:value={values.reportAnalytics} />
         </div>
-        <p class="text-sm text-gray-1">
+        <p class="text-sm text-gray-4">
           Keep this enabled if you would like the Coracle developers to be able to know what
           features are used, and to diagnose and fix bugs.
         </p>

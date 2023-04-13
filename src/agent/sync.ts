@@ -221,6 +221,15 @@ addHandler(
   })
 )
 
+addHandler(
+  30078,
+  profileHandler("feeds", (e, p) => {
+    if (Tags.from(e).type("d").values().first() === "coracle/feeds") {
+      return tryJson(() => JSON.parse(e.content))
+    }
+  })
+)
+
 // Rooms
 
 addHandler(40, e => {

@@ -65,7 +65,7 @@
 
             await Promise.all([loadAppData(user.getPubkey()), sleep(3000)])
 
-            navigate("/notes/follows")
+            navigate("/notes")
           } else {
             pool.disconnect(relay.url)
           }

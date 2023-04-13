@@ -16,6 +16,7 @@
   import PersonProfileInfo from "src/app/views/PersonProfileInfo.svelte"
   import PersonShare from "src/app/views/PersonShare.svelte"
   import TopicFeed from "src/app/views/TopicFeed.svelte"
+  import FeedEdit from "src/app/views/FeedEdit.svelte"
   import RelayAdd from "src/app/views/RelayAdd.svelte"
 
   const {stack} = modal
@@ -58,6 +59,8 @@
       {#key m.topic}
         <TopicFeed topic={m.topic} />
       {/key}
+    {:else if m.type === "feed/edit"}
+      <FeedEdit feed={m.feed} />
     {:else if m.type === "message"}
       <Content size="lg">
         <div class="text-center">{m.message}</div>

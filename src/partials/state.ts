@@ -47,7 +47,7 @@ toast.show = (type, message, timeout = 5) => {
 export const openModals = writable(0)
 
 export const modal = {
-  stack: new WritableList([]),
+  stack: new WritableList([]) as WritableList<any>,
   sync: $stack => {
     const hash = $stack.length > 0 ? `#m=${$stack.length}` : ""
 
@@ -58,8 +58,10 @@ export const modal = {
   push: data => modal.stack.update($stack => modal.sync($stack.concat(data))),
   pop: () => modal.stack.update($stack => modal.sync($stack.slice(0, -1))),
   clear: async () => {
+    const stackSize = (get(modal.stack) as any).length
+
     // Reverse history so the back button doesn't bring our modal back up
-    while (get(modal.stack)) {
+    for (let i = 0; i < stackSize; i++) {
       history.back()
       await sleep(100)
     }

@@ -6,6 +6,7 @@
   import {Tags, displayPerson} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import ImageInput from "src/partials/ImageInput.svelte"
+  import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/partials/Compose.svelte"
   import {getPersonWithFallback} from "src/agent/db"
@@ -129,15 +130,11 @@
             <i class="fa fa-at" />
           </div>
         </div>
-        <div>
+        <div on:click|stopPropagation>
           {#each data.mentions as p}
-            <div
-              class="mr-1 mb-1 inline-block rounded-full border border-solid border-gray-1 py-1 px-2">
-              <button
-                class="fa fa-times cursor-pointer"
-                on:click|stopPropagation={() => removeMention(p)} />
+            <Chip class="mr-1 mb-1" theme="dark" on:click={() => removeMention(p)}>
               {displayPerson(getPersonWithFallback(p))}
-            </div>
+            </Chip>
           {:else}
             <div class="text-gray-3 inline-block py-2">No mentions</div>
           {/each}

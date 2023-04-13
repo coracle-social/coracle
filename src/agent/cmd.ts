@@ -35,6 +35,9 @@ const setPetnames = petnames => new PublishableEvent(3, {tags: petnames})
 
 const setMutes = mutes => new PublishableEvent(10000, {tags: mutes})
 
+const setFeeds = feeds =>
+  new PublishableEvent(30078, {content: JSON.stringify(feeds), tags: [["d", "coracle/feeds"]]})
+
 const createRoom = room =>
   new PublishableEvent(40, {content: JSON.stringify(pick(roomAttrs, room))})
 
@@ -169,7 +172,7 @@ class PublishableEvent {
     const createdAt = Math.round(new Date().valueOf() / 1000)
 
     if (tagClient) {
-      tags = tags.filter(t => t[0] !== 'client').concat([["client", "coracle"]])
+      tags = tags.filter(t => t[0] !== "client").concat([["client", "coracle"]])
     }
 
     this.event = {kind, content, tags, pubkey, created_at: createdAt}
@@ -199,6 +202,7 @@ export default {
   setRelays,
   setPetnames,
   setMutes,
+  setFeeds,
   createRoom,
   updateRoom,
   createChatMessage,

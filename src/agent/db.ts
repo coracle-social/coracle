@@ -1,7 +1,7 @@
 import type {Writable} from "svelte/store"
 import Loki from "lokijs"
 import IncrementalIndexedDBAdapter from "lokijs/src/incremental-indexeddb-adapter"
-import {partition, sortBy, prop, always, pluck, without, is} from "ramda"
+import {partition, uniqBy, sortBy, prop, always, pluck, without, is} from "ramda"
 import {throttle} from "throttle-debounce"
 import {writable} from "svelte/store"
 import {ensurePlural, noop, createMap} from "hurdak/lib/hurdak"
@@ -80,9 +80,14 @@ class Table {
     }
   }
   patch(items) {
-    const [updates, creates] = partition(item => this.get(item[this.pk]), ensurePlural(items))
+    const [updates, creates] = partition(
+      item => this.get(item[this.pk]),
+      uniqBy(prop(this.pk), ensurePlural(items))
+    )
 
     if (creates.length > 0) {
+      // Something internal to loki is broken
+      this._coll.changes = this._coll.changes || []
       this._coll.insert(creates)
     }
 
@@ -230,4 +235,10 @@ export const searchPeople = watch("people", t =>
   fuzzy(t.all({"kind0.name": {$type: "string"}}), {
     keys: ["kind0.name", "kind0.about", "pubkey"],
   })
+)
+
+export const searchTopics = watch("topics", t => fuzzy(t.all(), {keys: ["name"]}))
+
+export const searchRelays = watch("relays", t =>
+  fuzzy(t.all(), {keys: ["name", "description", "url"]})
 )

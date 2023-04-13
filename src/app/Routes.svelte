@@ -41,9 +41,9 @@
         <Scan />
       </EnsureData>
     </Route>
-    <Route path="/notes/:activeTab" let:params>
+    <Route path="/notes" let:params>
       <EnsureData>
-        <Feeds activeTab={params.activeTab} />
+        <Feeds />
       </EnsureData>
     </Route>
     <Route path="/people/:npub/:activeTab" let:params>

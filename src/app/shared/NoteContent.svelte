@@ -123,7 +123,7 @@
           <br />
         {/each}
       {:else if type === "topic"}
-        <Anchor on:click={() => openTopic(value)}>#{value}</Anchor>
+        <Anchor on:click={e => { e.stopPropagation(); openTopic(value) }}>#{value}</Anchor>
       {:else if type === "link"}
         <Anchor external href={value}>
           {value.replace(/https?:\/\/(www\.)?/, "")}
@@ -150,7 +150,7 @@
     </div>
   {/if}
   {#if showMedia && entities.length > 0}
-    <div class="py-2" on:click={e => e.stopPropagation()}>
+    <div class="flex flex-col gap-2 py-2" on:click={e => e.stopPropagation()}>
       {#each entities as { value }}
         <Card interactive invertColors on:click={() => openQuote(value.id)}>
           {#await loadQuote(value)}

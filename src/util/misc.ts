@@ -406,8 +406,8 @@ export const annotateMedia = url => {
   }
 }
 
-export class WritableList {
-  _store: Writable<Array<any>>
+export class WritableList<T> {
+  _store: Writable<Array<T>>
   constructor(init) {
     this._store = writable(init)
   }
