@@ -8,7 +8,7 @@
   export let person
 
   const {pubkey} = person
-  const relays = [pluck("url", getPubkeyWriteRelays(pubkey))]
+  const relays = pluck("url", getPubkeyWriteRelays(pubkey))
   const nprofile = nip19.nprofileEncode({pubkey, relays})
 </script>
 
