@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.24
+
+- [x] Replace localforage with loki.js for storage
+- [x] Fix a bunch of bugs in content parsing
+- [x] Add lists/custom feeds
+- [x] Refactor component hiararchy
+- [x] Re-work how modals stack
+
 ## 0.2.23
 
 - [x] Fix modal scroll position for nested modals

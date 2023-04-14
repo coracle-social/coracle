@@ -20,7 +20,7 @@
   }
 
   const select = item => {
-    value = value.concat(item)
+    value = value.concat([item])
     term = ""
   }
 
@@ -43,10 +43,6 @@
         event.preventDefault()
         select(termToItem(term))
       }
-    }
-
-    if (!term && event.key === "Backspace") {
-      value = value.slice(0, -1)
     }
 
     if (suggestions?.get() && event.code === "ArrowUp") {

@@ -40,6 +40,9 @@ export class Tags {
   asMeta() {
     return fromPairs(this.tags)
   }
+  getMeta(k) {
+    return this.type(k).values().first()
+  }
   values() {
     return new Tags(this.tags.map(t => t[1]))
   }
@@ -47,7 +50,9 @@ export class Tags {
     return new Tags(this.tags.filter(f))
   }
   type(type) {
-    return new Tags(this.tags.filter(t => t[0] === type))
+    const types = ensurePlural(type)
+
+    return new Tags(this.tags.filter(t => types.includes(t[0])))
   }
   equals(value) {
     return new Tags(this.tags.filter(t => t[1] === value))

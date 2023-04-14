@@ -9,7 +9,7 @@
   import {getPubkeyWriteRelays} from "src/agent/relays"
   import user from "src/agent/user"
   import pool from "src/agent/pool"
-  import {addToFeed} from "src/app/state"
+  import {addToList} from "src/app/state"
 
   export let person
 
@@ -24,8 +24,8 @@
     actions = []
 
     actions.push({
-      onClick: () => addToFeed("authors", person.pubkey),
-      label: "Add to feed",
+      onClick: () => addToList("p", person.pubkey),
+      label: "Add to list",
       icon: "scroll",
     })
 

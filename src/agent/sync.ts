@@ -1,4 +1,4 @@
-import {uniq, nth, objOf, pick, identity} from "ramda"
+import {uniq, prop, reject, nth, uniqBy, objOf, pick, identity} from "ramda"
 import {nip05} from "nostr-tools"
 import {noop, ensurePlural, chunk} from "hurdak/lib/hurdak"
 import {
@@ -222,11 +222,16 @@ addHandler(
 )
 
 addHandler(
-  30078,
-  profileHandler("feeds", (e, p) => {
-    if (Tags.from(e).type("d").values().first() === "coracle/feeds") {
-      return tryJson(() => JSON.parse(e.content))
-    }
+  30001,
+  profileHandler("lists", (e, p) => uniqBy(prop("id"), p.lists.concat(e)))
+)
+
+addHandler(
+  5,
+  profileHandler("lists", (e, p) => {
+    const ids = new Set(Tags.from(e).type("e").values().all())
+
+    return reject(e => ids.has(e.id), p.lists)
   })
 )
 

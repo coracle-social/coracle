@@ -99,7 +99,7 @@
     class="note-reply relative z-10 my-2 flex flex-col gap-1"
     bind:this={container}
     on:click|stopPropagation>
-    <div class={`border border-${borderColor} rounded border-solid`}>
+    <div class={`border border-${borderColor} border-solid rounded-2xl overflow-hidden`}>
       <div class="bg-gray-7" class:rounded-b={data.mentions.length === 0}>
         <Compose bind:this={reply} onSubmit={send}>
           <button

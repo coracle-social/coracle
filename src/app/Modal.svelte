@@ -17,9 +17,9 @@
   import PersonProfileInfo from "src/app/views/PersonProfileInfo.svelte"
   import PersonShare from "src/app/views/PersonShare.svelte"
   import TopicFeed from "src/app/views/TopicFeed.svelte"
-  import FeedList from "src/app/views/FeedList.svelte"
-  import FeedSelect from "src/app/views/FeedSelect.svelte"
-  import FeedEdit from "src/app/views/FeedEdit.svelte"
+  import ListList from "src/app/views/ListList.svelte"
+  import ListSelect from "src/app/views/ListSelect.svelte"
+  import ListEdit from "src/app/views/ListEdit.svelte"
   import RelayAdd from "src/app/views/RelayAdd.svelte"
 
   const {stack} = modal
@@ -64,12 +64,12 @@
       {#key m.topic}
         <TopicFeed topic={m.topic} />
       {/key}
-    {:else if m.type === "feed/list"}
-      <FeedList />
-    {:else if m.type === "feed/select"}
-      <FeedSelect key={m.key} value={m.value} />
-    {:else if m.type === "feed/edit"}
-      <FeedEdit feed={m.feed} />
+    {:else if m.type === "list/list"}
+      <ListList />
+    {:else if m.type === "list/select"}
+      <ListSelect item={m.item} />
+    {:else if m.type === "list/edit"}
+      <ListEdit list={m.list} />
     {:else if m.type === "message"}
       <Content size="lg">
         <div class="text-center">{m.message}</div>

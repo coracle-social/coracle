@@ -9,7 +9,7 @@ import {createMap, doPipe, first} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
 import {hash} from "src/util/misc"
 import {synced, now, timedelta} from "src/util/misc"
-import {Tags, isNotification} from "src/util/nostr"
+import {Tags, isNotification, userKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import {notifications, watch, userEvents, contacts, rooms} from "src/agent/db"
@@ -34,7 +34,7 @@ export const goToPerson = pubkey => {
   }
 }
 
-export const addToFeed = (key, value) => modal.push({type: "feed/select", key, value})
+export const addToList = (type, value) => modal.push({type: "list/select", item: {type, value}})
 
 // Menu
 
@@ -222,7 +222,7 @@ export const loadAppData = async pubkey => {
     listen(pubkey)
 
     // Make sure the user and their network is loaded
-    await network.loadPeople([pubkey], {force: true})
+    await network.loadPeople([pubkey], {force: true, kinds: userKinds})
     await network.loadPeople(getUserFollows())
   }
 }

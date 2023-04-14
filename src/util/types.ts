@@ -37,11 +37,3 @@ export type Room = {
   about?: string
   picture?: string
 }
-
-export type CustomFeed = {
-  id: string
-  name: string
-  authors?: "follows" | "network" | Array<string>
-  topics?: Array<string>
-  relays?: Array<string>
-}

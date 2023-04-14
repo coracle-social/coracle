@@ -210,7 +210,7 @@ export const people = new Table("people", "pubkey", {
 })
 
 export const userEvents = new Table("userEvents", "id", {max: 2000, sort: sortByCreatedAt})
-export const notifications = new Table("notifications", "id")
+export const notifications = new Table("notifications", "id", {sort: sortByCreatedAt})
 export const contacts = new Table("contacts", "pubkey")
 export const rooms = new Table("rooms", "id")
 export const relays = new Table("relays", "url")

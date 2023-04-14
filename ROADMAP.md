@@ -5,11 +5,14 @@
   - [x] Add topic search, keep cache of topics
   - [x] Ability to create custom feeds
     - [x] Bookmark icon opens "create feed" dialog with form pre-filled
-    - [ ] Use lists instead of custom app data
-    - [ ] Public/private toggle
-    - [ ] Add person to feed button (maybe lists make more sense for this?)
-    - [ ] Add 30078 to personKinds (except we'll have to get more involved)
+    - [ ] Replace some modals instead of pushing
+    - [ ] Test anonymous with lists
+    - [ ] Test hardcoded relay, currently you get asked to pick a relay if not logged in
     - [ ] Claim relays bounty
+- [ ] Fix notifications
+- [ ] Queue context requests to avoid having too many concurrent subscriptions
+- [ ] Advanced search
+  - Select timeframe, authors, p tags, t tags
 - [ ] Some lnurls aren't working npub1y3k2nheva29y9ej8a22e07epuxrn04rvgy28wvs54y57j7vsxxuq0gvp4j
 - [ ] Global search modal that searches within current feed
 - [ ] Fix force relays on login: http://localhost:5173/messages/npub1l66wvfm7dxhd6wmvpukpjpyhvwtlxzu0qqajqxjfpr4rlfa8hl5qlkfr3q
@@ -64,7 +67,7 @@
 # UI/Features
 
 - [ ] Remember message/chat status
-- [ ] Linkify topics
+- [ ] Allow sharing of lists/following other people's lists
 - [ ] Add suggestion list for topics on compose
 - [ ] Badges link to https://badges.page/p/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322
 - [ ] Add QR code that pre-fills follows and relays for a new user

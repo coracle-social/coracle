@@ -1,6 +1,8 @@
 <script lang="ts">
   import {last} from "ramda"
   import {displayPerson} from "src/util/nostr"
+  import {parseHex} from "src/util/html"
+  import {theme, getThemeColor} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonActions from "src/app/shared/PersonActions.svelte"
@@ -16,13 +18,29 @@
 
   const person = watch("people", () => getPersonWithFallback(pubkey))
 
+  let rgb, rgba
+
   $: relays = sampleRelays(getPubkeyWriteRelays(pubkey))
+
+  $: {
+    const color = parseHex(getThemeColor($theme, "gray-7"))
+
+    rgba = `rgba(${color.join(", ")}, 0.4)`
+    rgb = `rgba(${color.join(", ")})`
+  }
 
   document.title = displayPerson($person)
 </script>
 
+<div
+  class="absolute left-0 h-64 w-full -mt-2"
+  style="background-size: cover;
+         background-image:
+          linear-gradient(to bottom, {rgba}, {rgb}),
+          url('{$person.kind0?.banner}')" />
+
 <Content>
-  <div class="flex gap-4 text-gray-1">
+  <div class="flex gap-4 text-gray-1 z-10">
     <PersonCircle person={$person} size={16} class="sm:h-32 sm:w-32" />
     <div class="flex flex-grow flex-col gap-4">
       <div class="flex items-start justify-between gap-4">

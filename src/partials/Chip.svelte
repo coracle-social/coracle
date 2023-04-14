@@ -11,7 +11,7 @@
 
 <div class={className}>
   <div class="flex items-center gap-2">
-    <button class="fa fa-times cursor-pointer" on:click|preventDefault />
+    <i class="fa fa-times cursor-pointer" on:click|preventDefault />
     <slot />
   </div>
 </div>

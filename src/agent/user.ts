@@ -1,4 +1,4 @@
-import type {CustomFeed, Relay} from "src/util/types"
+import type {Relay, MyEvent} from "src/util/types"
 import type {Readable} from "svelte/store"
 import {
   slice,
@@ -37,14 +37,14 @@ const profile = synced("agent/user/profile", {
   petnames: [],
   relays: [],
   mutes: [],
-  feeds: [],
+  lists: [],
 })
 
 const settings = derived(profile, prop("settings"))
 const petnames = derived(profile, prop("petnames"))
 const relays = derived(profile, prop("relays")) as Readable<Array<Relay>>
 const mutes = derived(profile, prop("mutes")) as Readable<Array<[string, string]>>
-const feeds = derived(profile, prop("feeds")) as Readable<Array<CustomFeed>>
+const lists = derived(profile, prop("lists")) as Readable<Array<MyEvent>>
 
 const canPublish = derived(
   [keys.pubkey, relays],
@@ -166,23 +166,20 @@ export default {
     return this.updateMutes(reject(t => t[1] === pubkey))
   },
 
-  // Feeds
+  // Lists
 
-  feeds,
-  getFeeds: () => profileCopy.feeds,
-  updateFeeds(f) {
-    const $feeds = f(profileCopy.feeds)
+  lists,
+  getLists: () => profileCopy.lists,
+  async putList(id, name, params, relays) {
+    const tags = [["d", name]].concat(params).concat(relays)
 
-    profile.update(assoc("feeds", $feeds))
-
-    if (keys.canSign()) {
-      return cmd.setFeeds($feeds).publish(profileCopy.relays)
+    if (id) {
+      await cmd.deleteEvent([id]).publish(profileCopy.relays)
     }
+
+    await cmd.createList(tags).publish(profileCopy.relays)
   },
-  addFeed(feed) {
-    return this.updateFeeds($feeds => $feeds.concat(feed))
-  },
-  removeFeed(id) {
-    return this.updateFeeds($feeds => reject(whereEq({id}), $feeds))
+  removeList(id) {
+    return cmd.deleteEvent([id]).publish(profileCopy.relays)
   },
 }

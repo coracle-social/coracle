@@ -48,22 +48,30 @@ export const openModals = writable(0)
 
 export const modal = {
   stack: new WritableList([]) as WritableList<any>,
-  sync: $stack => {
+  sync: ($stack, opts) => {
     const hash = $stack.length > 0 ? `#m=${$stack.length}` : ""
 
-    navigate(window.location.pathname + hash)
+    navigate(window.location.pathname + hash, opts)
 
     return $stack
   },
-  push: data => modal.stack.update($stack => modal.sync($stack.concat(data))),
-  pop: () => modal.stack.update($stack => modal.sync($stack.slice(0, -1))),
-  clear: async () => {
+  push(data) {
+    modal.stack.update($stack => modal.sync($stack.concat(data)))
+  },
+  async pop() {
+    modal.stack.update($stack => modal.sync($stack.slice(0, -1)))
+    await sleep(100)
+  },
+  async replace(data) {
+    await modal.pop()
+    modal.push(data)
+  },
+  async clear() {
     const stackSize = (get(modal.stack) as any).length
 
     // Reverse history so the back button doesn't bring our modal back up
     for (let i = 0; i < stackSize; i++) {
-      history.back()
-      await sleep(100)
+      await modal.pop()
     }
   },
 }

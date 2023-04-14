@@ -35,8 +35,7 @@ const setPetnames = petnames => new PublishableEvent(3, {tags: petnames})
 
 const setMutes = mutes => new PublishableEvent(10000, {tags: mutes})
 
-const setFeeds = feeds =>
-  new PublishableEvent(30078, {content: JSON.stringify(feeds), tags: [["d", "coracle/feeds"]]})
+const createList = list => new PublishableEvent(30001, {tags: list})
 
 const createRoom = room =>
   new PublishableEvent(40, {content: JSON.stringify(pick(roomAttrs, room))})
@@ -202,7 +201,7 @@ export default {
   setRelays,
   setPetnames,
   setMutes,
-  setFeeds,
+  createList,
   createRoom,
   updateRoom,
   createChatMessage,

@@ -1,6 +1,6 @@
 <script lang="ts">
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {addToFeed} from "src/app/state"
+  import {addToList} from "src/app/state"
 
   export let topic
 
@@ -8,8 +8,8 @@
 
   $: {
     actions.push({
-      onClick: () => addToFeed("topics", topic),
-      label: "Add to feed",
+      onClick: () => addToList("t", topic),
+      label: "Add to list",
       icon: "scroll",
     })
   }
