@@ -41,7 +41,7 @@ const profile = synced("agent/user/profile", {
 })
 
 const settings = derived(profile, prop("settings"))
-const petnames = derived(profile, prop("petnames"))
+const petnames = derived(profile, prop("petnames")) as Readable<Array<Array<string>>>
 const relays = derived(profile, prop("relays")) as Readable<Array<Relay>>
 const mutes = derived(profile, prop("mutes")) as Readable<Array<[string, string]>>
 const lists = derived(profile, prop("lists")) as Readable<Array<MyEvent>>

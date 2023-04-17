@@ -28,14 +28,14 @@
   export let removeRelay = r => user.removeRelay(r.url)
 
   export let addRelay = r => {
-    user.addRelay(r.url).then(() => {
-      const pubkey = user.getPubkey()
-      const profile = user.getProfile()
+    user.addRelay(r.url)
 
-      if (pubkey && !profile?.kind0) {
-        loadAppData(pubkey)
-      }
-    })
+    const pubkey = user.getPubkey()
+    const profile = user.getProfile()
+
+    if (pubkey && !profile?.kind0) {
+      loadAppData(pubkey)
+    }
   }
 
   onMount(() => {
@@ -79,7 +79,7 @@
         </p>
       {/if}
     </div>
-    {#if $canPublish && showActions}
+    {#if showActions}
       <slot name="actions">
         {#if hasRelay(relay) && $relays.length > 1}
           <button class="flex items-center gap-3 text-gray-1" on:click={() => removeRelay(relay)}>

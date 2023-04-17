@@ -23,11 +23,13 @@
   $: {
     actions = []
 
-    actions.push({
-      onClick: () => addToList("p", person.pubkey),
-      label: "Add to list",
-      icon: "scroll",
-    })
+    if ($canPublish) {
+      actions.push({
+        onClick: () => addToList("p", person.pubkey),
+        label: "Add to list",
+        icon: "scroll",
+      })
+    }
 
     actions.push({onClick: share, label: "Share", icon: "share-nodes"})
 

@@ -1,8 +1,9 @@
 <script lang="ts">
+  import cx from "classnames"
   import {prop, uniq, indexBy, objOf, filter as _filter} from "ramda"
   import {shuffle, synced} from "src/util/misc"
   import {Tags} from "src/util/nostr"
-  import {modal} from "src/partials/state"
+  import {modal, theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -12,7 +13,7 @@
   import {sampleRelays, getAllPubkeyWriteRelays, getUserReadRelays} from "src/agent/relays"
   import user from "src/agent/user"
 
-  const {lists} = user
+  const {lists, canPublish} = user
   const activeTab = synced("views/Feeds/activeTab", "Follows")
 
   let relays, filter, tabs
@@ -79,32 +80,42 @@
   {/if}
   <div>
     <Tabs {tabs} activeTab={$activeTab} {setActiveTab}>
-      {#if $lists.length > 1}
-        <Popover placement="bottom" opts={{hideOnClick: true}} theme="transparent">
-          <i slot="trigger" class="fa fa-ellipsis-v cursor-pointer p-2" />
-          <div
-            slot="tooltip"
-            class="flex flex-col items-start rounded border border-solid border-gray-8 bg-black">
-            {#each $lists as e (e.id)}
-              {@const meta = Tags.from(e).asMeta()}
-              {#if meta.d !== $activeTab}
-                <button
-                  class="w-full py-2 px-3 text-left hover:bg-gray-7"
-                  on:click={() => {
-                    $activeTab = meta.d
-                  }}>
-                  <i class="fa fa-scroll fa-sm mr-1" />
-                  {meta.d}
-                </button>
-              {/if}
-            {/each}
-            <button on:click={showLists} class="w-full py-2 px-3 text-left hover:bg-gray-7">
-              <i class="fa fa-cog fa-sm mr-1" /> Customize
-            </button>
-          </div>
-        </Popover>
-      {:else}
-        <i class="fa fa-ellipsis-v cursor-pointer p-1" on:click={showLists} />
+      {#if $canPublish}
+        {#if $lists.length > 1}
+          <Popover placement="bottom" opts={{hideOnClick: true}} theme="transparent">
+            <i slot="trigger" class="fa fa-ellipsis-v cursor-pointer p-2" />
+            <div
+              slot="tooltip"
+              class="flex flex-col items-start overflow-hidden rounded border border-solid border-gray-8 bg-black">
+              {#each $lists as e (e.id)}
+                {@const meta = Tags.from(e).asMeta()}
+                {#if meta.d !== $activeTab}
+                  <button
+                    class={cx("w-full py-2 px-3 text-left transition-colors", {
+                      "hover:bg-gray-7": $theme === "dark",
+                      "hover:bg-gray-1": $theme === "light",
+                    })}
+                    on:click={() => {
+                      $activeTab = meta.d
+                    }}>
+                    <i class="fa fa-scroll fa-sm mr-1" />
+                    {meta.d}
+                  </button>
+                {/if}
+              {/each}
+              <button
+                on:click={showLists}
+                class={cx("w-full py-2 px-3 text-left transition-colors", {
+                  "hover:bg-gray-7": $theme === "dark",
+                  "hover:bg-gray-1": $theme === "light",
+                })}>
+                <i class="fa fa-cog fa-sm mr-1" /> Customize
+              </button>
+            </div>
+          </Popover>
+        {:else}
+          <i class="fa fa-ellipsis-v cursor-pointer p-1" on:click={showLists} />
+        {/if}
       {/if}
     </Tabs>
     {#key $activeTab}

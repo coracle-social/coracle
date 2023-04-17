@@ -9,7 +9,7 @@
 
   relay = getRelayWithFallback(relay.url)
 
-  const {relays: userRelays} = user
+  const {relays: userRelays, canPublish} = user
 
   let actions = []
 
@@ -31,11 +31,13 @@
       })
     }
 
-    actions.push({
-      onClick: () => addToList("r", relay.url),
-      label: "Add to list",
-      icon: "scroll",
-    })
+    if ($canPublish) {
+      actions.push({
+        onClick: () => addToList("r", relay.url),
+        label: "Add to list",
+        icon: "scroll",
+      })
+    }
 
     if (relay.contact) {
       actions.push({

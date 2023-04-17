@@ -121,13 +121,6 @@
       </a>
     </li>
   {/if}
-  {#if import.meta.env.VITE_SHOW_DEBUG_ROUTE === "true"}
-    <li class="cursor-pointer">
-      <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/debug">
-        <i class="fa fa-bug mr-2" /> Debug
-      </a>
-    </li>
-  {/if}
   {#if $installPrompt}
     <li
       class="cursor-pointer px-4 py-2 transition-all hover:bg-accent hover:text-white"

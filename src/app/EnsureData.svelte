@@ -8,8 +8,9 @@
   import PersonSearch from "src/app/shared/PersonSearch.svelte"
   import {getPersonWithFallback} from "src/agent/db"
   import user from "src/agent/user"
+  import pool from "src/agent/pool"
 
-  export let enforceRelays = true
+  export let enforceRelays = pool.forceUrls.length === 0
   export let enforcePeople = true
 
   const {petnamePubkeys, relays} = user
@@ -29,18 +30,24 @@
       {#if $relays.length > 0}
         <h1 class="text-2xl">Your Relays</h1>
       {/if}
-      {#each $relays as relay (relay.url)}
-        <RelayCard showControls {relay} />
-      {:else}
-        <div class="flex flex-col items-center gap-4 my-8">
-          <div class="text-xl flex gap-2 items-center">
-            <i class="fa fa-triangle-exclamation fa-light" />
-            You aren't yet connected to any relays.
+      <div class="flex flex-col gap-2">
+        {#each $relays as relay (relay.url)}
+          <RelayCard showActions {relay} />
+        {:else}
+          <div class="flex flex-col items-center gap-4 my-8">
+            <div class="text-xl flex gap-2 items-center">
+              <i class="fa fa-triangle-exclamation fa-light" />
+              You aren't yet connected to any relays.
+            </div>
+            <div>Search below to find one to join.</div>
           </div>
-          <div>Search below to find one to join.</div>
+        {/each}
+      </div>
+      <RelaySearch>
+        <div slot="item" let:relay>
+          <RelayCard showActions {relay} />
         </div>
-      {/each}
-      <RelaySearch />
+      </RelaySearch>
     </Content>
   </Modal>
 {:else if needsRelays()}
@@ -72,7 +79,7 @@
           <div>Search below to find some interesting people.</div>
         </div>
       {/each}
-      <PersonSearch />
+      <PersonSearch hideFollows />
     </Content>
   </Modal>
 {:else if needsPeople()}
@@ -83,7 +90,7 @@
         You aren't yet following anyone.
       </div>
       <div>
-        Click <Anchor href="/search/people">here</Anchor> to find some interesting people.
+        Click <Anchor href="/search">here</Anchor> to find some interesting people.
       </div>
     </div>
   </Content>

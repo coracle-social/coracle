@@ -1,14 +1,7 @@
 # Current
 
-- [ ] Topics
-  - [x] Improve topic suggestions and rendering
-  - [x] Add topic search, keep cache of topics
-  - [x] Ability to create custom feeds
-    - [x] Bookmark icon opens "create feed" dialog with form pre-filled
-    - [ ] Replace some modals instead of pushing
-    - [ ] Test anonymous with lists
-    - [ ] Test hardcoded relay, currently you get asked to pick a relay if not logged in
-    - [ ] Claim relays bounty
+- [ ] Claim relays bounty
+- [ ] Add real search, it's a big hurdle for first-timers/anons
 - [ ] Fix notifications
 - [ ] Queue context requests to avoid having too many concurrent subscriptions
 - [ ] Advanced search

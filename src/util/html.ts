@@ -92,14 +92,6 @@ export const killEvent = e => {
   e.stopImmediatePropagation()
 }
 
-export const noEvent = f => e => {
-  e.preventDefault()
-  e.stopPropagation()
-  e.stopImmediatePropagation()
-
-  f()
-}
-
 export const isMobile = localStorage.mobile || window.navigator.maxTouchPoints > 1
 
 export const parseHex = hex => {

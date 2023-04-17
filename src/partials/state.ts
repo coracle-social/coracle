@@ -48,7 +48,7 @@ export const openModals = writable(0)
 
 export const modal = {
   stack: new WritableList([]) as WritableList<any>,
-  sync: ($stack, opts) => {
+  sync: ($stack, opts = null) => {
     const hash = $stack.length > 0 ? `#m=${$stack.length}` : ""
 
     navigate(window.location.pathname + hash, opts)
