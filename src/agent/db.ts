@@ -195,8 +195,8 @@ export const dropAll = () => new Promise(resolve => loki.deleteDatabase(resolve)
 // ----------------------------------------------------------------------------
 // Domain-specific collections
 
-const sortByCreatedAt = sortBy(prop("created_at"))
-const sortByLastSeen = sortBy(prop("last_seen"))
+const sortByCreatedAt = sortBy(e => -e.created_at)
+const sortByLastSeen = sortBy(e => -e.last_seen)
 
 export const people = new Table("people", "pubkey", {
   max: 5000,

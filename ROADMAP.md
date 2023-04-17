@@ -2,21 +2,9 @@
 
 - [ ] Claim relays bounty
 - [ ] Add real search, it's a big hurdle for first-timers/anons
-- [ ] Fix notifications
-- [ ] Queue context requests to avoid having too many concurrent subscriptions
-- [ ] Advanced search
-  - Select timeframe, authors, p tags, t tags
-- [ ] Some lnurls aren't working npub1y3k2nheva29y9ej8a22e07epuxrn04rvgy28wvs54y57j7vsxxuq0gvp4j
-- [ ] Global search modal that searches within current feed
-- [ ] Fix force relays on login: http://localhost:5173/messages/npub1l66wvfm7dxhd6wmvpukpjpyhvwtlxzu0qqajqxjfpr4rlfa8hl5qlkfr3q
+- [ ] Remember message/chat status
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
-
-# Custom views
-
-- [ ] Add customize icon and route with editable custom view cards using "lists" nip
-  - nevent1qqspjcqw2hu5gfcpkrjhs0aqvxuzjgtp50l375mcqjfpmk48cg5hevgpr3mhxue69uhkummnw3ez6un9d3shjtnhd3m8xtnnwpskxegpzamhxue69uhkummnw3ezuendwsh8w6t69e3xj7spramhxue69uhkummnw3ez6un9d3shjtnwdahxxefwv93kzer9d4usz9rhwden5te0wfjkccte9ejxzmt4wvhxjmcpr9mhxue69uhkummnw3ezuer9d3hjuum0ve68wctjv5n8hwfg
-  - [ ] Custom views should combine pubkeys, relays, event ids, and topics
 
 # Core
 
@@ -59,11 +47,11 @@
 
 # UI/Features
 
-- [ ] Remember message/chat status
 - [ ] Allow sharing of lists/following other people's lists
 - [ ] Add suggestion list for topics on compose
 - [ ] Badges link to https://badges.page/p/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322
 - [ ] Add QR code that pre-fills follows and relays for a new user
+- [ ] Advanced search: select timeframe, authors, p tags, t tags
   - If logged in, open a detail page that shows the relays and people
   - If not logged in, pre-populate follows/relays in onboarding flow
 - [ ] If someone logs in with their private key, create a notification to install an extension

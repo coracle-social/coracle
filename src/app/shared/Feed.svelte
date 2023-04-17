@@ -101,12 +101,16 @@
     notes = uniqBy(prop("id"), notes.concat(bottom))
   }
 
+  let p = Promise.resolve()
+
   const loadMore = async () => {
     // Wait for this page to load before trying again
     await network.load({
       relays: feedRelay ? [feedRelay] : relays,
       filter: mergeFilter(filter, cursor.getFilter()),
-      onChunk,
+      onChunk: chunk => {
+        p = p.then(() => onChunk(chunk))
+      },
     })
 
     // Update our cursor
@@ -117,7 +121,9 @@
     const sub = network.listen({
       relays,
       filter: mergeFilter(filter, {since}),
-      onChunk,
+      onChunk: chunk => {
+        p = p.then(() => onChunk(chunk))
+      },
     })
 
     const scroller = createScroller(loadMore, {element: getModal()})

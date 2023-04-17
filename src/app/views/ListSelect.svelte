@@ -14,7 +14,7 @@
   const {lists} = user
   const label = item.type === "p" ? "person" : "topic"
 
-  const modifyList = updateIn("tags", tags => tags.concat([[item.type, item.value]]))
+  const modifyList = updateIn("tags", tags => (tags || []).concat([[item.type, item.value]]))
 
   const selectlist = list => {
     modal.replace({type: "list/edit", list: modifyList(list)})
