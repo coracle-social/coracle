@@ -1,8 +1,8 @@
 # Current
 
 - [ ] Add real search, it's a big hurdle for first-timers/anons
+- [ ] Check on RelayCard, it should automatically do the right thing for anon/pubkey
 - [ ] Remember message/chat status
-- [ ] Fix note nesting
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
 - [ ] Claim relays bounty

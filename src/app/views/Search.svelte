@@ -1,4 +1,5 @@
 <script>
+  import {debounce} from "throttle-debounce"
   import {identity, sortBy, prop} from "ramda"
   import {fuzzy} from "src/util/misc"
   import {modal} from "src/partials/state"
@@ -7,11 +8,14 @@
   import Content from "src/partials/Content.svelte"
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
+  import {getUserReadRelays} from "src/agent/relays"
+  import network from "src/agent/network"
   import {watch} from "src/agent/db"
   import user from "src/agent/user"
 
   let q
 
+  $: searchPeople(q)
   $: search = watch(["people", "topics"], (p, t) => {
     const topics = t
       .all()
@@ -32,6 +36,15 @@
   const openTopic = topic => {
     modal.push({type: "topic/feed", topic})
   }
+
+  const searchPeople = debounce(500, search => {
+    if (q.length > 2) {
+      network.load({
+        relays: getUserReadRelays(),
+        filter: [{kinds: [0], search, limit: 10}],
+      })
+    }
+  })
 
   document.title = "Search"
 </script>
