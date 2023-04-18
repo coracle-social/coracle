@@ -32,7 +32,7 @@
       {/if}
       <div class="flex flex-col gap-2">
         {#each $relays as relay (relay.url)}
-          <RelayCard showActions {relay} />
+          <RelayCard {relay} />
         {:else}
           <div class="flex flex-col items-center gap-4 my-8">
             <div class="text-xl flex gap-2 items-center">
@@ -45,7 +45,7 @@
       </div>
       <RelaySearch>
         <div slot="item" let:relay>
-          <RelayCard showActions {relay} />
+          <RelayCard {relay} />
         </div>
       </RelaySearch>
     </Content>

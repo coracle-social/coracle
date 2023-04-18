@@ -94,6 +94,13 @@ const Meta = {
 
 const forceUrls = (import.meta.env.VITE_FORCE_RELAYS || "").split(",").filter(identity)
 
+const defaultUrls = [
+  "wss://nostr-pub.wellorder.net",
+  "wss://nostr.zebedee.cloud",
+  "wss://nos.lol",
+  "wss://brb.io",
+]
+
 const getUrls = relays => {
   if (relays.length === 0) {
     error(`Attempted to connect to zero urls`)
@@ -370,6 +377,7 @@ export default {
   Config,
   Meta,
   forceUrls,
+  defaultUrls,
   disconnect,
   getQuality,
   publish,

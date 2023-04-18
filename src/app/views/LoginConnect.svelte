@@ -122,7 +122,7 @@
     {#each Object.values(currentRelays) as relay}
       <div class="h-12">
         {#if relay}
-          <RelayCard relay={{...relay, description: null}} />
+          <RelayCard hideActions relay={{...relay, description: null}} />
         {/if}
       </div>
     {/each}

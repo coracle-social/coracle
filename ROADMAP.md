@@ -1,6 +1,6 @@
 # Current
 
-- [ ] Check on RelayCard, it should automatically do the right thing for anon/pubkey
+- [ ] Details on note in modal is broken
 - [ ] Remember message/chat status
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2

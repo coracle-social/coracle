@@ -88,6 +88,7 @@ export default {
   petnames,
   getPetnames: () => profileCopy.petnames,
   petnamePubkeys: derived(petnames, map(nth(1))) as Readable<Array<string>>,
+  getPetnamePubkeys: () => profileCopy.petnames.map(nth(1)),
   updatePetnames(f) {
     const $petnames = f(profileCopy.petnames)
 

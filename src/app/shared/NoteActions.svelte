@@ -312,7 +312,7 @@
       <p>This note was found on {quantify(note.seen_on.length, "relay")} below.</p>
       <div class="flex flex-col gap-2">
         {#each note.seen_on as url}
-          <RelayCard theme="black" relay={{url}} />
+          <RelayCard relay={{url}} />
         {/each}
       </div>
       <h1 class="staatliches text-2xl">Details</h1>

@@ -151,7 +151,7 @@
         </div>
         <RelaySearch bind:q limit={3} hideIfEmpty>
           <div slot="item" let:relay>
-            <RelayCard {relay} showActions>
+            <RelayCard {relay}>
               <button
                 slot="actions"
                 class="underline"

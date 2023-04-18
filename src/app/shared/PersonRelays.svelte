@@ -16,9 +16,7 @@
       <div class="pt-8 text-center">No relays found</div>
     {:else}
       {#each relays as relay (relay.url)}
-        {#if relay.write !== "!"}
-          <RelayCard {relay} />
-        {/if}
+        <RelayCard {relay} />
       {/each}
     {/if}
   </Content>

@@ -14,7 +14,7 @@
   export let relay
   export let theme = "gray-8"
   export let showStatus = false
-  export let showActions = false
+  export let hideActions = false
   export let showControls = false
 
   const {relays, canPublish} = user
@@ -23,11 +23,11 @@
   let quality = null
   let message = null
 
-  export let hasRelay = r => Boolean(find(propEq("url", r.url), $relays))
+  $: hasRelay = Boolean(find(propEq("url", relay.url), $relays))
 
-  export let removeRelay = r => user.removeRelay(r.url)
+  const removeRelay = r => user.removeRelay(r.url)
 
-  export let addRelay = r => {
+  const addRelay = r => {
     user.addRelay(r.url)
 
     const pubkey = user.getPubkey()
@@ -79,16 +79,15 @@
         </p>
       {/if}
     </div>
-    {#if showActions}
+    {#if !hideActions}
       <slot name="actions">
-        {#if hasRelay(relay) && $relays.length > 1}
-          <button class="flex items-center gap-3 text-gray-1" on:click={() => removeRelay(relay)}>
-            <i class="fa fa-right-from-bracket" /> Leave
-          </button>
-        {/if}
-        {#if !hasRelay(relay)}
+        {#if !hasRelay}
           <button class="flex items-center gap-3 text-gray-1" on:click={() => addRelay(relay)}>
             <i class="fa fa-right-to-bracket" /> Join
+          </button>
+        {:else if $relays.length > 1}
+          <button class="flex items-center gap-3 text-gray-1" on:click={() => removeRelay(relay)}>
+            <i class="fa fa-right-from-bracket" /> Leave
           </button>
         {/if}
       </slot>
@@ -97,7 +96,8 @@
   {#if relay.description}
     <p>{relay.description}</p>
   {/if}
-  {#if hasRelay(relay) && showControls && $canPublish}
+  {#if hasRelay && showControls && $canPublish}
+    <div class="-mx-6 my-1 h-px bg-gray-7" />
     <div class="flex justify-between gap-2">
       <span>Publish to this relay?</span>
       <Toggle

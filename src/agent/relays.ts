@@ -185,6 +185,11 @@ export const sampleRelays = (relays, scale = 1) => {
     relays = relays.concat(shuffle(getUserReadRelays()).slice(0, limit - relays.length))
   }
 
+  // And if we still have nothing, add a default
+  if (relays.length === 0) {
+    relays = [{url: pool.forceUrls[0] || pool.defaultUrls[0]}]
+  }
+
   return uniqByUrl(relays)
 }
 

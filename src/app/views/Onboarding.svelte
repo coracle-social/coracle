@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {uniq, objOf} from "ramda"
+  import {uniq} from "ramda"
   import {onMount} from "svelte"
   import {generatePrivateKey} from "nostr-tools"
   import {fly} from "svelte/transition"
@@ -11,11 +11,10 @@
   import OnboardingRelays from "src/app/views/OnboardingRelays.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingComplete from "src/app/views/OnboardingComplete.svelte"
-  import {getFollows} from "src/agent/social"
+  import {getFollows, defaultFollows} from "src/agent/social"
   import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
   import network from "src/agent/network"
-  import pool from "src/agent/pool"
   import user from "src/agent/user"
   import keys from "src/agent/keys"
   import {loadAppData} from "src/app/state"
@@ -23,39 +22,15 @@
 
   export let stage
 
-  const {relays: userRelays, petnamePubkeys} = user
-
-  let relays = []
-  if ($userRelays.length > 0) {
-    relays = $userRelays
-  } else if (pool.forceUrls.length > 0) {
-    relays = pool.forceUrls.map(objOf("url"))
-  } else {
-    relays = [
-      {url: "wss://nostr-pub.wellorder.net", write: true},
-      {url: "wss://nostr.zebedee.cloud", write: true},
-      {url: "wss://nos.lol", write: true},
-      {url: "wss://brb.io", write: true},
-    ]
-  }
-
-  let follows =
-    $petnamePubkeys.length > 0
-      ? $petnamePubkeys
-      : [
-          "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322", // hodlbod
-          "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d", // fiatjaf
-          "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2", // jack
-          "6e468422dfb74a5738702a8823b9b28168abab8655faacb6853cd0ee15deee93", // Gigi
-        ]
-
   const privkey = generatePrivateKey()
 
   const signup = async () => {
     await keys.login("privkey", privkey)
-    await user.updateRelays(() => relays)
+
+    // Re-save preferences now that we have a key
+    await user.updateRelays(() => user.getRelays())
     await user.updatePetnames(() =>
-      follows.map(pubkey => {
+      user.getPetnamePubkeys().map(pubkey => {
         const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
         const name = displayPerson(getPersonWithFallback(pubkey))
 
@@ -65,12 +40,15 @@
 
     loadAppData(user.getPubkey())
 
-    modal.pop()
+    modal.clear()
     navigate("/notes")
   }
 
   // Prime our people cache for hardcoded follows and a sample of people they follow
   onMount(async () => {
+    const relays = sampleRelays(user.getRelays())
+    const follows = user.getPetnamePubkeys().concat(defaultFollows)
+
     await network.loadPeople(follows, {relays})
 
     const others = shuffle(uniq(follows.flatMap(getFollows))).slice(0, 256)
@@ -86,9 +64,9 @@
     {:else if stage === "key"}
       <OnboardingKey {privkey} />
     {:else if stage === "relays"}
-      <OnboardingRelays bind:relays />
+      <OnboardingRelays />
     {:else if stage === "follows"}
-      <OnboardingFollows bind:follows />
+      <OnboardingFollows />
     {:else}
       <OnboardingComplete {signup} />
     {/if}

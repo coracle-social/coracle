@@ -14,9 +14,9 @@
   export let person
   export let hasPetname = null
 
-  export let removePetname = ({pubkey}) => user.removePetname(pubkey)
+  const removePetname = ({pubkey}) => user.removePetname(pubkey)
 
-  export let addPetname = ({pubkey}) => {
+  const addPetname = ({pubkey}) => {
     const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
 
     user.addPetname(pubkey, url, displayPerson(person))
