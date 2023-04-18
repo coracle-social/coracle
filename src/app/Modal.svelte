@@ -31,52 +31,54 @@
 </script>
 
 {#each $stack as m}
-  <Modal onEscape={m.noEscape || m !== last($stack) ? null : closeModal}>
-    {#if m.type === "note/detail"}
-      {#key m.note.id}
-        <NoteDetail {...m} invertColors />
-      {/key}
-    {:else if m.type === "note/create"}
-      <NoteCreate pubkey={m.pubkey} nevent={m.nevent} />
-    {:else if m.type === "relay/add"}
-      <RelayAdd url={m.url} />
-    {:else if m.type === "onboarding"}
-      <Onboarding stage={m.stage} />
-    {:else if m.type === "room/edit"}
-      <ChatEdit {...m} />
-    {:else if m.type === "login/privkey"}
-      <LoginPrivKey />
-    {:else if m.type === "login/pubkey"}
-      <LoginPubKey />
-    {:else if m.type === "login/connect"}
-      <LoginConnect />
-    {:else if m.type === "person/feed"}
-      <PersonFeed pubkey={m.pubkey} />
-    {:else if m.type === "person/info"}
-      <PersonProfileInfo person={m.person} />
-    {:else if m.type === "person/share"}
-      <PersonShare person={m.person} />
-    {:else if m.type === "person/follows"}
-      <PersonList type="follows" pubkey={m.pubkey} />
-    {:else if m.type === "person/followers"}
-      <PersonList type="followers" pubkey={m.pubkey} />
-    {:else if m.type === "topic/feed"}
-      {#key m.topic}
-        <TopicFeed topic={m.topic} />
-      {/key}
-    {:else if m.type === "list/list"}
-      <ListList />
-    {:else if m.type === "list/select"}
-      <ListSelect item={m.item} />
-    {:else if m.type === "list/edit"}
-      <ListEdit list={m.list} />
-    {:else if m.type === "message"}
-      <Content size="lg">
-        <div class="text-center">{m.message}</div>
-        {#if m.spinner}
-          <Spinner delay={0} />
-        {/if}
-      </Content>
-    {/if}
-  </Modal>
+  {#if !m.virtual}
+    <Modal virtual={false} onEscape={m.noEscape || m !== last($stack) ? null : closeModal}>
+      {#if m.type === "note/detail"}
+        {#key m.note.id}
+          <NoteDetail {...m} invertColors />
+        {/key}
+      {:else if m.type === "note/create"}
+        <NoteCreate pubkey={m.pubkey} nevent={m.nevent} />
+      {:else if m.type === "relay/add"}
+        <RelayAdd url={m.url} />
+      {:else if m.type === "onboarding"}
+        <Onboarding stage={m.stage} />
+      {:else if m.type === "room/edit"}
+        <ChatEdit {...m} />
+      {:else if m.type === "login/privkey"}
+        <LoginPrivKey />
+      {:else if m.type === "login/pubkey"}
+        <LoginPubKey />
+      {:else if m.type === "login/connect"}
+        <LoginConnect />
+      {:else if m.type === "person/feed"}
+        <PersonFeed pubkey={m.pubkey} />
+      {:else if m.type === "person/info"}
+        <PersonProfileInfo person={m.person} />
+      {:else if m.type === "person/share"}
+        <PersonShare person={m.person} />
+      {:else if m.type === "person/follows"}
+        <PersonList type="follows" pubkey={m.pubkey} />
+      {:else if m.type === "person/followers"}
+        <PersonList type="followers" pubkey={m.pubkey} />
+      {:else if m.type === "topic/feed"}
+        {#key m.topic}
+          <TopicFeed topic={m.topic} />
+        {/key}
+      {:else if m.type === "list/list"}
+        <ListList />
+      {:else if m.type === "list/select"}
+        <ListSelect item={m.item} />
+      {:else if m.type === "list/edit"}
+        <ListEdit list={m.list} />
+      {:else if m.type === "message"}
+        <Content size="lg">
+          <div class="text-center">{m.message}</div>
+          {#if m.spinner}
+            <Spinner delay={0} />
+          {/if}
+        </Content>
+      {/if}
+    </Modal>
+  {/if}
 {/each}

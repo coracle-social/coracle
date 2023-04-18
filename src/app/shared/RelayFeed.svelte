@@ -10,7 +10,7 @@
   export let feedRelay
   export let notes
 
-  $: filteredNotes = notes.filter(n => n.seen_on.includes(feedRelay.url))
+  $: filteredNotes = notes.filter(n => n.seen_on?.includes(feedRelay.url))
 </script>
 
 <Content>

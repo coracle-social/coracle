@@ -1,4 +1,4 @@
-import {prop, fromPairs} from "ramda"
+import {prop, whereEq, reject, last, fromPairs} from "ramda"
 import {uuid, switcher} from "hurdak/lib/hurdak"
 import type {Writable} from "svelte/store"
 import {navigate} from "svelte-routing"
@@ -44,15 +44,10 @@ toast.show = (type, message, timeout = 5) => {
 
 // Modals
 
-export const openModals = writable(0)
-
 export const modal = {
   stack: new WritableList([]) as WritableList<any>,
   getCurrent() {
-    const $stack = get(modal.stack)
-    const $openModals = get(openModals)
-
-    return $stack[$openModals - 1]
+    return last(get(modal.stack))
   },
   sync($stack, opts = {}) {
     const hash = $stack.length > 0 ? `#m=${$stack.length}` : ""
@@ -62,6 +57,9 @@ export const modal = {
     }
 
     return $stack
+  },
+  remove(id) {
+    modal.stack.update($stack => modal.sync(reject(whereEq({id}), $stack)))
   },
   push(data) {
     modal.stack.update($stack => modal.sync($stack.concat(data)))

@@ -19,7 +19,7 @@
   import * as db from "src/agent/db"
   import user from "src/agent/user"
   import {loadAppData} from "src/app/state"
-  import {theme, getThemeVariables, modal, openModals} from "src/partials/state"
+  import {theme, getThemeVariables, modal} from "src/partials/state"
   import {logUsage} from "src/app/state"
   import SideNav from "src/app/SideNav.svelte"
   import Routes from "src/app/Routes.svelte"
@@ -54,16 +54,11 @@
   onMount(() => {
     let scrollY
 
-    // Log modals
+    // Log modals, keep scroll position on body, but don't allow scrolling
     const unsubModal = modal.stack.subscribe($stack => {
       if ($stack.length > 0) {
         logUsage(btoa(["modal", last($stack).type].join(":")))
-      }
-    })
 
-    // Keep scroll position on body, but don't allow scrolling
-    const unsubOpenModals = openModals.subscribe(n => {
-      if (n > 0) {
         // This is not idempotent, so don't duplicate it
         if (document.body.style.position !== "fixed") {
           scrollY = window.scrollY
@@ -71,9 +66,11 @@
           document.body.style.top = `-${scrollY}px`
           document.body.style.position = `fixed`
         }
-      } else {
+      } else if (scrollY) {
         document.body.setAttribute("style", "")
         window.scrollTo(0, scrollY)
+
+        scrollY = null
       }
     })
 
@@ -94,7 +91,6 @@
 
     return () => {
       unsubModal()
-      unsubOpenModals()
       unsubHistory()
     }
   })

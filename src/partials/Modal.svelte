@@ -1,18 +1,26 @@
 <script>
+  import {randomId} from "hurdak/lib/hurdak"
   import {onMount, onDestroy} from "svelte"
   import {fly, fade} from "svelte/transition"
-  import {openModals} from "src/partials/state"
+  import {modal} from "src/partials/state"
 
+  export let virtual = true
   export let onEscape = null
 
   let root, content
 
+  const id = randomId()
+
   onMount(() => {
-    openModals.update(n => n + 1)
+    if (virtual) {
+      modal.push({id, virtual: true})
+    }
   })
 
   onDestroy(() => {
-    openModals.update(n => n - 1)
+    if (virtual) {
+      modal.remove(id)
+    }
   })
 </script>
 

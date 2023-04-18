@@ -2,7 +2,6 @@
   import {nip19} from "nostr-tools"
   import {find, last} from "ramda"
   import {onMount} from "svelte"
-  import {get} from "svelte/store"
   import {quantify} from "hurdak/lib/hurdak"
   import {findRootId, findReplyId, displayPerson} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"

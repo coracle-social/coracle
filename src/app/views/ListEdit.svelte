@@ -1,8 +1,9 @@
 <script>
   import {pluck, find} from "ramda"
-  import {Tags, displayPerson, displayRelay} from "src/util/nostr"
+  import {Tags, displayRelay} from "src/util/nostr"
   import {modal, toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
+  import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import Content from "src/partials/Content.svelte"
   import Button from "src/partials/Button.svelte"
   import Input from "src/partials/Input.svelte"
@@ -22,10 +23,14 @@
 
   const search = q => {
     if (q.startsWith("#")) {
-      return $searchTopics(q).map(({name}) => ["t", name])
+      return $searchTopics(q)
+        .slice(0, 5)
+        .map(({name}) => ["t", name])
     }
 
-    return $searchPeople(q).map(({pubkey}) => ["p", pubkey])
+    return $searchPeople(q)
+      .slice(0, 5)
+      .map(({pubkey}) => ["p", pubkey])
   }
 
   const _searchRelays = q => pluck("url", $searchRelays(q)).map(url => ["r", url])
@@ -63,9 +68,11 @@
         <MultiSelect {search} bind:value={values.params}>
           <div slot="item" let:item>
             {#if item[0] === "p"}
-              {displayPerson(getPersonWithFallback(item[1]))}
+              <div class="-my-1">
+                <PersonBadge inert person={getPersonWithFallback(item[1])} />
+              </div>
             {:else}
-              #{item[1]}
+              <strong>#{item[1]}</strong>
             {/if}
           </div>
         </MultiSelect>
