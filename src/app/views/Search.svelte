@@ -15,7 +15,21 @@
 
   let q
 
-  $: searchPeople(q)
+  const openTopic = topic => {
+    modal.push({type: "topic/feed", topic})
+  }
+
+  const loadPeople = debounce(500, search => {
+    if (q.length > 2) {
+      network.load({
+        relays: getUserReadRelays(),
+        filter: [{kinds: [0], search, limit: 10}],
+      })
+    }
+  })
+
+  $: loadPeople(q)
+
   $: search = watch(["people", "topics"], (p, t) => {
     const topics = t
       .all()
@@ -31,19 +45,6 @@
       }))
 
     return fuzzy(sortBy(prop("id"), topics.concat(people)), {keys: ["text"]})
-  })
-
-  const openTopic = topic => {
-    modal.push({type: "topic/feed", topic})
-  }
-
-  const searchPeople = debounce(500, search => {
-    if (q.length > 2) {
-      network.load({
-        relays: getUserReadRelays(),
-        filter: [{kinds: [0], search, limit: 10}],
-      })
-    }
   })
 
   document.title = "Search"

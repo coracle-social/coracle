@@ -1,5 +1,6 @@
 <script>
   import {nth} from "ramda"
+  import {debounce} from "throttle-debounce"
   import Input from "src/partials/Input.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
@@ -11,6 +12,19 @@
   export let hideFollows = false
 
   let q
+
+  const {petnames} = user
+
+  const loadPeople = debounce(500, search => {
+    if (q.length > 2) {
+      network.load({
+        relays: getUserReadRelays(),
+        filter: [{kinds: [0], search, limit: 10}],
+      })
+    }
+  })
+
+  $: loadPeople(q)
 
   $: results = $searchPeople(q)
     .filter(person => {
@@ -25,14 +39,6 @@
       return true
     })
     .slice(0, 50)
-
-  const {petnames} = user
-
-  // Prime our database, in case we don't have any people stored yet
-  network.load({
-    relays: getUserReadRelays(),
-    filter: {kinds: [0], limit: 10},
-  })
 </script>
 
 <Input bind:value={q} placeholder="Search for people">
