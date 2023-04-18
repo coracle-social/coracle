@@ -5,7 +5,7 @@
   import {onMount} from "svelte"
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
-  import {identity, last} from "ramda"
+  import {identity, isNil, last} from "ramda"
   import {first} from "hurdak/lib/hurdak"
   import {warn} from "src/util/logger"
   import {timedelta, hexToBech32, bech32ToHex, shuffle, now} from "src/util/misc"
@@ -66,7 +66,7 @@
           document.body.style.top = `-${scrollY}px`
           document.body.style.position = `fixed`
         }
-      } else if (scrollY) {
+      } else if (!isNil(scrollY)) {
         document.body.setAttribute("style", "")
         window.scrollTo(0, scrollY)
 

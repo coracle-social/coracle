@@ -4,7 +4,7 @@
   import Input from "src/partials/Input.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {getUserReadRelays} from "src/agent/relays"
+  import {sampleRelays} from "src/agent/relays"
   import {searchPeople} from "src/agent/db"
   import network from "src/agent/network"
   import user from "src/agent/user"
@@ -18,7 +18,7 @@
   const loadPeople = debounce(500, search => {
     if (q.length > 2) {
       network.load({
-        relays: getUserReadRelays(),
+        relays: sampleRelays([{url: "wss://relay.nostr.band"}]),
         filter: [{kinds: [0], search, limit: 10}],
       })
     }

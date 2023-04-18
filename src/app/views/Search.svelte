@@ -8,7 +8,7 @@
   import Content from "src/partials/Content.svelte"
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {getUserReadRelays} from "src/agent/relays"
+  import {sampleRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import {watch} from "src/agent/db"
   import user from "src/agent/user"
@@ -22,7 +22,7 @@
   const loadPeople = debounce(500, search => {
     if (q.length > 2) {
       network.load({
-        relays: getUserReadRelays(),
+        relays: sampleRelays([{url: "wss://relay.nostr.band"}]),
         filter: [{kinds: [0], search, limit: 10}],
       })
     }

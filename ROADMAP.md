@@ -1,6 +1,5 @@
 # Current
 
-- [ ] Add real search, it's a big hurdle for first-timers/anons
 - [ ] Check on RelayCard, it should automatically do the right thing for anon/pubkey
 - [ ] Remember message/chat status
 - [ ] Image classification
