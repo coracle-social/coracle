@@ -6,7 +6,7 @@ import {tryJson} from "src/util/misc"
 import {invoiceAmount} from "src/util/lightning"
 
 export const personKinds = [0, 2, 3, 10001, 10002]
-export const userKinds = personKinds.concat([10000, 30001])
+export const userKinds = personKinds.concat([10000, 30001, 30078])
 
 export class Tags {
   tags: Array<any>

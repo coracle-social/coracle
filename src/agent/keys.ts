@@ -88,6 +88,18 @@ const getCrypt = () => {
   throw new Error("No encryption method available.")
 }
 
+const encryptJson = data => getCrypt().encrypt(get(pubkey), JSON.stringify(data))
+
+const decryptJson = async data => {
+  try {
+    return JSON.parse(await getCrypt().decrypt(get(pubkey), data))
+  } catch (e) {
+    console.warn(e)
+
+    return null
+  }
+}
+
 export default {
   method,
   pubkey,
@@ -98,4 +110,6 @@ export default {
   clear,
   sign,
   getCrypt,
+  encryptJson,
+  decryptJson,
 }

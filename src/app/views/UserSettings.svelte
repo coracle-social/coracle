@@ -21,7 +21,7 @@
   })
 
   const submit = () => {
-    user.profile.update($p => ({...$p, settings: values}))
+    user.setSettings(values)
 
     toast.show("info", "Your settings have been saved!")
   }

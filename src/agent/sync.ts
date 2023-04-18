@@ -15,6 +15,7 @@ import {
 import {Tags, roomAttrs, isRelay, isShareableRelay, normalizeRelayUrl} from "src/util/nostr"
 import {topics, people, userEvents, relays, rooms, routes} from "src/agent/db"
 import {uniqByUrl} from "src/agent/relays"
+import keys from "src/agent/keys"
 import user from "src/agent/user"
 
 const handlers = {}
@@ -35,7 +36,7 @@ const processEvents = async events => {
       }
 
       for (const handler of handlers[event.kind] || []) {
-        handler(event)
+        await handler(event)
       }
     }
 
@@ -148,7 +149,7 @@ addHandler(3, e => {
 
 // User profile, except for events also handled for other users
 
-const profileHandler = (key, getValue) => e => {
+const profileHandler = (key, getValue) => async e => {
   const profile = user.getProfile()
 
   if (e.pubkey !== profile.pubkey) {
@@ -161,12 +162,12 @@ const profileHandler = (key, getValue) => e => {
     return
   }
 
-  user.profile.update($p => {
-    const value = getValue(e, $p)
+  const value = await getValue(e, profile)
 
-    // If we didn't get a value, don't update the key
-    return value ? {...$p, [key]: value, [updated_at_key]: e.created_at} : $p
-  })
+  // If we didn't get a value, don't update the key
+  if (value) {
+    user.profile.set({...profile, [key]: value, [updated_at_key]: e.created_at})
+  }
 }
 
 addHandler(
@@ -232,6 +233,15 @@ addHandler(
     const ids = new Set(Tags.from(e).type("e").values().all())
 
     return reject(e => ids.has(e.id), p.lists)
+  })
+)
+
+addHandler(
+  30078,
+  profileHandler("settings", async (e, p) => {
+    if (Tags.from(e).getMeta("d") === "coracle/settings/v1") {
+      return keys.decryptJson(e.content)
+    }
   })
 )
 

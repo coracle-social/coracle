@@ -1,6 +1,6 @@
 # Current
 
-- [ ] Details on note in modal is broken
+- [ ] Fix iOS https://css-tricks.com/the-trick-to-viewport-units-on-mobile/
 - [ ] Remember message/chat status
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2

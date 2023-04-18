@@ -82,6 +82,15 @@ export default {
   getSettings: () => profileCopy.settings,
   getSetting: k => profileCopy.settings[k],
   dufflepud: path => `${profileCopy.settings.dufflepudUrl}${path}`,
+  async setSettings(settings) {
+    profile.update($p => ({...$p, settings}))
+
+    if (keys.canSign()) {
+      const content = await keys.encryptJson(settings)
+
+      return cmd.setSettings(content).publish(profileCopy.relays)
+    }
+  },
 
   // Petnames
 
