@@ -1,6 +1,5 @@
 # Current
 
-- [ ] Fix iOS https://css-tricks.com/the-trick-to-viewport-units-on-mobile/
 - [ ] Remember message/chat status
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
@@ -14,9 +13,6 @@
   - nevent1qqszpjf3307ccam3cl957yc7k3h5c7vpt7gz2vdzgwkqszsyvdj6e0cpzfmhxue69uhk7enxvd5xz6tw9ec82csgdxq30
 - [ ] Nostr Wallet Connect https://nwc.getalby.com/
 - [ ] Abort all context subs when navigating
-- [ ] Add encrypted settings storage using nostr events
-  - [ ] github.com/nostr-protocol/nips/blob/master/78.md
-  - [ ] Save DM/chat read status in encrypted note
 - [ ] integrate media.nostr.band
 - [ ] Add webtorrent support
   - https://coracle.social/nevent1qqsxgxcsq5vevy4wdty5z5v88nhwp2fc5qgl0ws5rmamn6z72hwv3qcpyfmhxue69uhkummnw3ez6an9wf5kv6t9vsh8wetvd3hhyer9wghxuet5qk6c9q

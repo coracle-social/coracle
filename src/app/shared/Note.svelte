@@ -5,7 +5,6 @@
   import {quantify} from "hurdak/lib/hurdak"
   import {findRootId, findReplyId, displayPerson} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
-  import {isMobile} from "src/util/html"
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -132,34 +131,22 @@
       </div>
       <div class="flex min-w-0 flex-grow flex-col gap-2">
         <div class="flex flex-col items-start justify-between sm:flex-row sm:items-center">
-          {#if isMobile}
-            <Anchor
-              type="unstyled"
-              class="flex items-center gap-2 pr-16 text-lg font-bold"
-              on:click={() => goToPerson($author.pubkey)}>
-              <span>{displayPerson($author)}</span>
-              {#if $author.verified_as}
-                <i class="fa fa-circle-check text-sm text-accent" />
-              {/if}
-            </Anchor>
-          {:else}
-            <Popover triggerType="mouseenter">
-              <div slot="trigger">
-                <Anchor
-                  type="unstyled"
-                  class="flex items-center gap-2 pr-16 text-lg font-bold"
-                  on:click={() => goToPerson($author.pubkey)}>
-                  <span>{displayPerson($author)}</span>
-                  {#if $author.verified_as}
-                    <i class="fa fa-circle-check text-sm text-accent" />
-                  {/if}
-                </Anchor>
-              </div>
-              <div slot="tooltip">
-                <PersonSummary pubkey={$author.pubkey} />
-              </div>
-            </Popover>
-          {/if}
+          <Popover triggerType="mouseenter">
+            <div slot="trigger">
+              <Anchor
+                type="unstyled"
+                class="flex items-center gap-2 pr-16 text-lg font-bold"
+                on:click={() => goToPerson($author.pubkey)}>
+                <span>{displayPerson($author)}</span>
+                {#if $author.verified_as}
+                  <i class="fa fa-circle-check text-sm text-accent" />
+                {/if}
+              </Anchor>
+            </div>
+            <div slot="tooltip">
+              <PersonSummary pubkey={$author.pubkey} />
+            </div>
+          </Popover>
           <Anchor
             href={"/" + nip19.neventEncode({id: note.id, relays: note.seen_on})}
             class="text-sm text-gray-1"

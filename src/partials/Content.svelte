@@ -4,7 +4,7 @@
   export let gap = 6
   export let size = "2xl"
 
-  const className = `flex flex-col m-auto text-gray-3 gap-${gap}`
+  const className = `flex flex-col m-auto text-gray-3 gap-${gap} overflow-hidden`
 
   if (!["inherit", "lg", "2xl"].includes(size)) {
     throw new Error(`Invalid size: ${size}`)

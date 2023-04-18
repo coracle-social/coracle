@@ -4,6 +4,7 @@
   import {fly} from "svelte/transition"
   import {first} from "hurdak/lib/hurdak"
   import {log} from "src/util/logger"
+  import {isMobile} from "src/util/html"
   import {asDisplayEvent} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
@@ -43,7 +44,7 @@
       log("NoteDetail", nip19.noteEncode(note.id), note)
 
       sub = network.streamContext({
-        maxDepth: 6,
+        maxDepth: isMobile ? 3 : 6,
         notes: [note],
         onChunk: context => {
           note = first(network.applyContext([note], user.applyMutes(context)))

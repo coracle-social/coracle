@@ -7,6 +7,9 @@
 - [x] Add lists/custom feeds
 - [x] Refactor component hiararchy
 - [x] Re-work how modals stack
+- [x] Enqueue context requests to reduce number of concurrent subscriptions
+- [x] Use NIP-50 search to populate search results
+- [x] Persist settings to nostr using NIP-78
 
 ## 0.2.23
 

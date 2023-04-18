@@ -4,6 +4,7 @@
   import "tippy.js/animations/shift-away.css"
   import tippy from "tippy.js"
   import {onMount} from "svelte"
+  import {isMobile} from "src/util/html"
 
   export let theme = "dark"
   export let triggerType = "click"
@@ -19,6 +20,10 @@
   let instance
 
   onMount(() => {
+    if (!trigger) {
+      return
+    }
+
     instance = tippy(trigger, {
       ...opts,
       theme,
@@ -72,8 +77,12 @@
   <slot name="trigger" />
 </div>
 
-<div bind:this={tooltip} class="hidden">
-  <div>
-    <slot name="tooltip" {instance} />
+{#if isMobile && triggerType === "mouseenter"}
+  <!-- iOS interprets a tap as a mouse enter -->
+{:else}
+  <div bind:this={tooltip} class="hidden">
+    <div>
+      <slot name="tooltip" {instance} />
+    </div>
   </div>
-</div>
+{/if}

@@ -1,6 +1,5 @@
 <script>
   import cx from "classnames"
-  import {omit} from "ramda"
   import {navigate} from "svelte-routing"
   import {switcher} from "hurdak/lib/hurdak"
   import {createEventDispatcher} from "svelte"
@@ -12,6 +11,9 @@
   export let href = null
 
   const dispatch = createEventDispatcher()
+
+  $: _href = external ? href : null
+  $: target = external ? "_blank" : null
 
   let className
 
@@ -45,11 +47,6 @@
   }
 </script>
 
-<a
-  on:click={onClick}
-  {...omit(["href"], $$props)}
-  href={external ? $$props.href : null}
-  class={className}
-  target={external ? "_blank" : null}>
+<a class={className} on:click={onClick} href={_href} {target}>
   <slot />
 </a>

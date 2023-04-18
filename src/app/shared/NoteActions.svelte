@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {tweened} from "svelte/motion"
-  import {find, identity, propEq, pathEq, sum, pluck, sortBy} from "ramda"
+  import {find, reject, identity, propEq, pathEq, sum, pluck, sortBy} from "ramda"
   import {warn} from "src/util/logger"
   import {copyToClipboard} from "src/util/html"
   import {stringToHue, fetchJson, now, formatSats, hsl} from "src/util/misc"
@@ -62,6 +62,7 @@
     cmd.deleteEvent([e.id]).publish(getEventPublishRelays(note))
 
     like = null
+    likes = reject(propEq("id", e.id), likes)
   }
 
   const startZap = async () => {
@@ -139,6 +140,7 @@
   let draftZap = null
   let showDetails = false
 
+  $: disableActions = !$canPublish || muted
   $: likes = note.reactions.filter(n => isLike(n.content))
   $: like = like || find(propEq("pubkey", user.getPubkey()), likes)
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
@@ -177,17 +179,20 @@
 </script>
 
 <div class="flex justify-between text-gray-1" on:click|stopPropagation>
-  <div
-    class={cx("flex", {
-      "pointer-events-none opacity-75": !$canPublish || muted,
-    })}>
-    <button class="w-16 text-left" on:click={reply.start}>
+  <div class="flex">
+    <button
+      class={cx("w-14 text-left", {
+        "pointer-events-none opacity-50": disableActions,
+      })}
+      on:click={reply.start}>
       <i class="fa fa-reply cursor-pointer" />
       {$repliesCount}
     </button>
     <button
-      class="w-16 text-left"
-      class:text-accent={like}
+      class={cx("w-14 text-left", {
+        "pointer-events-none opacity-50": disableActions,
+        "text-accent": like,
+      })}
       on:click={() => (like ? deleteReaction(like) : react("+"))}>
       <i
         class={cx("fa fa-heart cursor-pointer", {
@@ -196,10 +201,10 @@
       {$likesCount}
     </button>
     <button
-      class={cx("w-20 text-left", {
-        "pointer-events-none opacity-50": !canZap,
+      class={cx("w-16 text-left", {
+        "pointer-events-none opacity-50": disableActions,
+        "text-accent": zap,
       })}
-      class:text-accent={zap}
       on:click={startZap}>
       <i class="fa fa-bolt cursor-pointer" />
       {formatSats($zapsTotal)}
