@@ -2,6 +2,7 @@
   import {nip19} from "nostr-tools"
   import {find, last} from "ramda"
   import {onMount} from "svelte"
+  import {get} from "svelte/store"
   import {quantify} from "hurdak/lib/hurdak"
   import {findRootId, findReplyId, displayPerson} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
@@ -55,24 +56,34 @@
     return showContext ? true : !r.isContext
   })
 
+  // If we're already in a note detail modal, don't infinitely nest. But if we're in
+  // some other modal, make it possible to go back.
+  const goToNote = data => {
+    if (modal.getCurrent()?.type === "note/detail") {
+      modal.replace({type: "note/detail", ...data})
+    } else {
+      modal.push({type: "note/detail", ...data})
+    }
+  }
+
   const onClick = e => {
     const target = e.target as HTMLElement
 
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
-      modal.push({type: "note/detail", note})
+      goToNote({note})
     }
   }
 
   const goToParent = async () => {
     const relays = getRelaysForEventParent(note)
 
-    modal.push({type: "note/detail", note: {id: findReplyId(note)}, relays})
+    goToNote({note: {id: findReplyId(note)}, relays})
   }
 
   const goToRoot = async () => {
     const relays = getRelaysForEventParent(note)
 
-    modal.push({type: "note/detail", note: {id: findRootId(note)}, relays})
+    goToNote({note: {id: findRootId(note)}, relays})
   }
 
   const setBorderHeight = () => {

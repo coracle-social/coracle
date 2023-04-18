@@ -176,19 +176,19 @@
   }
 </script>
 
-<div class="flex justify-between text-gray-1">
+<div class="flex justify-between text-gray-1" on:click|stopPropagation>
   <div
     class={cx("flex", {
       "pointer-events-none opacity-75": !$canPublish || muted,
     })}>
-    <button class="w-16 text-left" on:click|stopPropagation={reply.start}>
+    <button class="w-16 text-left" on:click={reply.start}>
       <i class="fa fa-reply cursor-pointer" />
       {$repliesCount}
     </button>
     <button
       class="w-16 text-left"
       class:text-accent={like}
-      on:click|stopPropagation={() => (like ? deleteReaction(like) : react("+"))}>
+      on:click={() => (like ? deleteReaction(like) : react("+"))}>
       <i
         class={cx("fa fa-heart cursor-pointer", {
           "fa-beat fa-beat-custom": like,
@@ -200,12 +200,12 @@
         "pointer-events-none opacity-50": !canZap,
       })}
       class:text-accent={zap}
-      on:click|stopPropagation={startZap}>
+      on:click={startZap}>
       <i class="fa fa-bolt cursor-pointer" />
       {formatSats($zapsTotal)}
     </button>
   </div>
-  <div on:click|stopPropagation class="flex items-center">
+  <div class="flex items-center">
     {#if pool.forceUrls.length === 0}
       <!-- Mobile version -->
       <div

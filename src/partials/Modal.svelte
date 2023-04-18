@@ -24,7 +24,9 @@
   }} />
 
 <div class="modal fixed inset-0 z-30" bind:this={root} transition:fade>
-  <div class="fixed inset-0 cursor-pointer bg-black opacity-50" on:click={onEscape} />
+  <div
+    class="fixed inset-0 cursor-pointer bg-black opacity-50"
+    on:click|stopPropagation={onEscape} />
   <div
     class="modal-content h-full overflow-auto"
     bind:this={content}

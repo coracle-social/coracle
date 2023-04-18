@@ -6,7 +6,7 @@
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {getPubkeyWriteRelays} from "src/agent/relays"
+  import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import user from "src/agent/user"
   import pool from "src/agent/pool"
   import {addToList} from "src/app/state"
@@ -61,7 +61,7 @@
   }
 
   const follow = async () => {
-    const [{url}] = getPubkeyWriteRelays(person.pubkey)
+    const [{url}] = sampleRelays(getPubkeyWriteRelays(person.pubkey))
 
     user.addPetname(person.pubkey, url, displayPerson(person))
   }

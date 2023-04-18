@@ -1,10 +1,11 @@
 # Current
 
-- [ ] Claim relays bounty
 - [ ] Add real search, it's a big hurdle for first-timers/anons
 - [ ] Remember message/chat status
+- [ ] Fix note nesting
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
+- [ ] Claim relays bounty
 
 # Core
 
@@ -71,6 +72,7 @@
 - [ ] Share button for notes, shows qr code and nevent
 - [ ] open web+nostr links like snort
 - [ ] Pinned posts ala snort
+- [ ] Scroll to top button that appears after scrolling a bit
 - [ ] Likes list on note detail. Maybe a sidebar or header for note detail page?
 - [ ] Add keyword mutes
 - [ ] Show options on note detail for retrieving replies

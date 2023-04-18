@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
-  import {prop, uniq, indexBy, objOf, filter as _filter} from "ramda"
-  import {shuffle, synced} from "src/util/misc"
+  import {prop, indexBy, objOf, filter as _filter} from "ramda"
+  import {shuffle} from "src/util/misc"
   import {Tags} from "src/util/nostr"
   import {modal, theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
@@ -12,38 +12,31 @@
   import {getUserFollows, getUserNetwork} from "src/agent/social"
   import {sampleRelays, getAllPubkeyWriteRelays, getUserReadRelays} from "src/agent/relays"
   import user from "src/agent/user"
+  import {feedsTab} from "src/app/state"
 
   const {lists, canPublish} = user
-  const activeTab = synced("views/Feeds/activeTab", "Follows")
+  const defaultTabs = ["Follows", "Network"]
 
-  let relays, filter, tabs
+  let relays, filter
 
   $: listsByName = indexBy(l => Tags.from(l).getMeta("d"), $lists)
-  $: {
-    const defaultTabs = ["Follows", "Network"]
-    const customTabs = Object.keys(listsByName)
-    const validTabs = defaultTabs.concat(customTabs)
-
-    if (!validTabs.includes($activeTab)) {
-      $activeTab = validTabs[0]
-    }
-
-    tabs = uniq(defaultTabs.concat($activeTab).concat(customTabs)).slice(0, 3)
-  }
+  $: allTabs = defaultTabs.concat(Object.keys(listsByName))
+  $: $feedsTab = allTabs.includes($feedsTab) ? $feedsTab : defaultTabs[0]
+  $: visibleTabs = defaultTabs.includes($feedsTab) ? defaultTabs : [defaultTabs[0], $feedsTab]
 
   $: {
-    if ($activeTab === "Follows") {
+    if ($feedsTab === "Follows") {
       const authors = shuffle(getUserFollows()).slice(0, 256)
 
       filter = {authors}
       relays = sampleRelays(getAllPubkeyWriteRelays(authors))
-    } else if ($activeTab === "Network") {
+    } else if ($feedsTab === "Network") {
       const authors = shuffle(getUserNetwork()).slice(0, 256)
 
       filter = {authors}
       relays = sampleRelays(getAllPubkeyWriteRelays(authors))
     } else {
-      const list = listsByName[$activeTab]
+      const list = listsByName[$feedsTab]
       const tags = Tags.from(list)
       const authors = tags.type("p").values().all()
       const topics = tags.type("t").values().all()
@@ -59,14 +52,14 @@
   }
 
   const setActiveTab = tab => {
-    $activeTab = tab
+    $feedsTab = tab
   }
 
   const showLists = () => {
     modal.push({type: "list/list"})
   }
 
-  document.title = $activeTab
+  document.title = $feedsTab
 </script>
 
 <Content>
@@ -79,7 +72,7 @@
     </Content>
   {/if}
   <div>
-    <Tabs {tabs} activeTab={$activeTab} {setActiveTab}>
+    <Tabs tabs={visibleTabs} activeTab={$feedsTab} {setActiveTab}>
       {#if $canPublish}
         {#if $lists.length > 1}
           <Popover placement="bottom" opts={{hideOnClick: true}} theme="transparent">
@@ -89,19 +82,17 @@
               class="flex flex-col items-start overflow-hidden rounded border border-solid border-gray-8 bg-black">
               {#each $lists as e (e.id)}
                 {@const meta = Tags.from(e).asMeta()}
-                {#if meta.d !== $activeTab}
-                  <button
-                    class={cx("w-full py-2 px-3 text-left transition-colors", {
-                      "hover:bg-gray-7": $theme === "dark",
-                      "hover:bg-gray-1": $theme === "light",
-                    })}
-                    on:click={() => {
-                      $activeTab = meta.d
-                    }}>
-                    <i class="fa fa-scroll fa-sm mr-1" />
-                    {meta.d}
-                  </button>
-                {/if}
+                <button
+                  class={cx("w-full py-2 px-3 text-left transition-colors", {
+                    "hover:bg-gray-7": $theme === "dark",
+                    "hover:bg-gray-1": $theme === "light",
+                  })}
+                  on:click={() => {
+                    $feedsTab = meta.d
+                  }}>
+                  <i class="fa fa-scroll fa-sm mr-1" />
+                  {meta.d}
+                </button>
               {/each}
               <button
                 on:click={showLists}
@@ -118,7 +109,7 @@
         {/if}
       {/if}
     </Tabs>
-    {#key $activeTab}
+    {#key $feedsTab}
       <Feed {relays} {filter} />
     {/key}
   </div>

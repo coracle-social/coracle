@@ -1,12 +1,14 @@
 <script lang="ts">
   import {last, nth} from "ramda"
   import {displayPerson} from "src/util/nostr"
+  import Anchor from "src/partials/Anchor.svelte"
   import user from "src/agent/user"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
   import {watch} from "src/agent/db"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
+  import {routes} from "src/app/state"
 
   export let pubkey
 
@@ -32,16 +34,18 @@
 
 <div class="relative flex flex-col gap-4 py-2 px-3">
   <div class="flex gap-4">
-    <PersonCircle size={14} person={$person} />
-    <div class="flex flex-grow flex-col gap-2">
-      <h2 class="text-lg">{displayPerson($person)}</h2>
-      {#if $person.verified_as}
-        <div class="flex gap-1 text-sm">
-          <i class="fa fa-user-check text-accent" />
-          <span class="text-gray-1">{last($person.verified_as.split("@"))}</span>
-        </div>
-      {/if}
-    </div>
+    <Anchor type="unstyled" href={routes.person($person.pubkey)} class="flex gap-4">
+      <PersonCircle size={14} person={$person} />
+      <div class="flex flex-grow flex-col gap-2">
+        <h2 class="text-lg">{displayPerson($person)}</h2>
+        {#if $person.verified_as}
+          <div class="flex gap-1 text-sm">
+            <i class="fa fa-user-check text-accent" />
+            <span class="opacity-75">{last($person.verified_as.split("@"))}</span>
+          </div>
+        {/if}
+      </div>
+    </Anchor>
     <div class="flex gap-4 py-2 text-lg">
       {#if $canPublish}
         {#if muted}

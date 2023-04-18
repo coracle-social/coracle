@@ -90,6 +90,10 @@ export const logUsage = async name => {
   }
 }
 
+// Feed
+
+export const feedsTab = writable("Follows")
+
 // State
 
 export const lastChecked = synced("app/alerts/lastChecked", {})
@@ -150,7 +154,7 @@ const processChats = async (pubkey, events) => {
 
   lastChecked.update($lastChecked => {
     for (const message of messages) {
-      const id = Tags.from(message).type("e").values().first()
+      const id = Tags.from(message).getMeta("e")
 
       if (message.pubkey === pubkey) {
         $lastChecked[id] = Math.max($lastChecked[id] || 0, message.created_at)

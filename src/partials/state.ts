@@ -48,10 +48,18 @@ export const openModals = writable(0)
 
 export const modal = {
   stack: new WritableList([]) as WritableList<any>,
-  sync: ($stack, opts = {}) => {
+  getCurrent() {
+    const $stack = get(modal.stack)
+    const $openModals = get(openModals)
+
+    return $stack[$openModals - 1]
+  },
+  sync($stack, opts = {}) {
     const hash = $stack.length > 0 ? `#m=${$stack.length}` : ""
 
-    navigate(window.location.pathname + hash, opts)
+    if (hash !== window.location.hash) {
+      navigate(window.location.pathname + hash, opts)
+    }
 
     return $stack
   },
@@ -63,8 +71,7 @@ export const modal = {
     await sleep(100)
   },
   async replace(data) {
-    await modal.pop()
-    modal.push(data)
+    modal.stack.update($stack => $stack.slice(0, -1).concat(data))
   },
   async clear() {
     const stackSize = (get(modal.stack) as any).length

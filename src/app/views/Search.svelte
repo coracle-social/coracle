@@ -16,6 +16,7 @@
     const topics = t
       .all()
       .map(topic => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
+
     const people = p
       .all({"kind0.name": {$type: "string"}, pubkey: {$ne: user.getPubkey()}})
       .map(person => ({
