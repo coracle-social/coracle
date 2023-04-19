@@ -40,7 +40,9 @@
       return toast.show("error", "A name is required for your list")
     }
 
-    if (find(e => e.id !== list.id && Tags.from(e).getMeta("d") === values.name, user.getLists())) {
+    if (
+      find(e => e.id !== list?.id && Tags.from(e).getMeta("d") === values.name, user.getLists())
+    ) {
       return toast.show("error", "That name is already in use")
     }
 

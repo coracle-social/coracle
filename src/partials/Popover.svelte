@@ -35,7 +35,7 @@
       trigger: triggerType,
       animation: "shift-away",
       onShow: () => {
-        const [tooltipContents] = tooltip.children
+        const [tooltipContents] = tooltip?.children || []
 
         // If we've already triggered it, tooltipContents will be empty
         if (tooltipContents) {

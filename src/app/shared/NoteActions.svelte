@@ -181,7 +181,7 @@
 <div class="flex justify-between text-gray-1" on:click|stopPropagation>
   <div class="flex">
     <button
-      class={cx("w-14 text-left", {
+      class={cx("w-16 text-left", {
         "pointer-events-none opacity-50": disableActions,
       })}
       on:click={reply.start}>
@@ -189,7 +189,7 @@
       {$repliesCount}
     </button>
     <button
-      class={cx("w-14 text-left", {
+      class={cx("w-16 text-left", {
         "pointer-events-none opacity-50": disableActions,
         "text-accent": like,
       })}
@@ -201,7 +201,7 @@
       {$likesCount}
     </button>
     <button
-      class={cx("w-16 text-left", {
+      class={cx("w-20 text-left", {
         "pointer-events-none opacity-50": disableActions,
         "text-accent": zap,
       })}
