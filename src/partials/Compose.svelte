@@ -1,12 +1,11 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
   import {last, pluck, propEq} from "ramda"
-  import {fuzzy} from "src/util/misc"
   import {displayPerson} from "src/util/nostr"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {watch} from "src/agent/db"
+  import {searchPeople} from "src/agent/db"
   import {getPubkeyWriteRelays} from "src/agent/relays"
 
   export let onSubmit
@@ -25,10 +24,6 @@
       return nip19.decode(last(link.split(":"))).data.pubkey
     },
   }
-
-  const searchPeople = watch("people", t => {
-    return fuzzy(t.all({"kind0.name": {$type: "string"}}), {keys: ["kind0.name", "pubkey"]})
-  })
 
   const applySearch = word => {
     suggestions.setData(word.startsWith("@") ? $searchPeople(word.slice(1)).slice(0, 5) : [])

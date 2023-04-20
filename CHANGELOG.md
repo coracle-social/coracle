@@ -58,7 +58,7 @@ Maintenance release - bugfixes, style fixes, and refactoring. High points are AU
 - [x] Re-write pool to remove dependency on nostr-tools.relay
 - [x] Add support for AUTH
 - [x] Use COUNT for counting follows
-- [x] Re-write nost composition input
+- [x] Re-write note composition input
 - [x] Add since to feeds to improve time relevance
 - [x] Fix a few styling things
 

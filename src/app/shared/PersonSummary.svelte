@@ -33,7 +33,7 @@
 </script>
 
 <div class="relative flex flex-col gap-4 py-2 px-3">
-  <div class="flex gap-4">
+  <div class="flex justify-between gap-2">
     <Anchor type="unstyled" href={routes.person($person.pubkey)} class="flex gap-4">
       <PersonCircle size={14} person={$person} />
       <div class="flex flex-grow flex-col gap-2">

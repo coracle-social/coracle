@@ -231,11 +231,13 @@ export const onReady = cb => {
   })
 }
 
-export const searchPeople = watch("people", t =>
-  fuzzy(t.all({"kind0.name": {$type: "string"}}), {
-    keys: ["kind0.name", "kind0.about", "pubkey"],
+export const searchPeople = watch("people", t => {
+  const people = t.all({
+    $or: [{"kind0.name": {$type: "string"}}, {"kind0.display_name": {$type: "string"}}],
   })
-)
+
+  return fuzzy(people, {keys: ["kind0.name", "kind0.display_name", "kind0.about", "pubkey"]})
+})
 
 export const searchTopics = watch("topics", t => fuzzy(t.all(), {keys: ["name"]}))
 

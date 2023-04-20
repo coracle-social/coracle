@@ -9,7 +9,7 @@ If you like Coracle and want to support its development, you can donate sats via
 # Features
 
 - [x] Threads/social
-- [x] Profile search
+- [x] Profile search using NIP-50
 - [x] Login via extension
 - [x] Profile sharing via QR codes
 - [x] NIP 05 verification
@@ -17,24 +17,22 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Notifications
 - [x] Chat and direct messages
 - [x] Note composition with mentions and topics
-- [x] Follow and follower lists
-- [x] Profile pages, follow/unfollow, mute
-- [x] Persistent color-coded relay list
+- [x] Profile pages, follow/unfollow
+- [x] Thread and person muting, collapse thread
 - [x] Smart relay selection and display
-- [x] Connection quality information
-- [x] Invoice, bech32 entity, mention, link, image, and video rendering
+- [x] Invoice, quote, mention, link, image, and video rendering
 - [x] Installable as a progressive web app
-- [x] Media uploads
+- [x] Integrated media uploads
 - [x] Lightning zaps
-- [ ] Feeds customizable by person, relay, and topic
-- [ ] Keyword mutes
+- [x] Feeds customizable by person, relay, and topic using NIP-51
+- [x] AUTH (NIP-42) support for paid relays
+- [x] Multiplextr support for reducing bandwidth
+- [x] Profile and note metadata
 - [ ] Exportable copy of all user events
 - [ ] Reporting and basic distributed moderation
 - [ ] Content and person recommendations
-- [ ] Profile and content search
 
 You can find a more complete changelog [here](./ROADMAP.md).
-
 
 # Run  Coracle locally:
 
