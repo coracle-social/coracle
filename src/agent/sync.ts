@@ -1,4 +1,4 @@
-import {uniq, prop, reject, nth, uniqBy, objOf, pick, identity} from "ramda"
+import {is, uniq, prop, reject, nth, uniqBy, objOf, pick, identity} from "ramda"
 import {nip05} from "nostr-tools"
 import {noop, ensurePlural, chunk} from "hurdak/lib/hurdak"
 import {
@@ -242,16 +242,30 @@ addHandler(
   30078,
   profileHandler("settings", async (e, p) => {
     if (Tags.from(e).getMeta("d") === "coracle/settings/v1") {
-      return keys.decryptJson(e.content)
+      return {...p.settings, ...(await keys.decryptJson(e.content))}
     }
   })
 )
 
 addHandler(
   30078,
-  profileHandler("lastChecked", async (e, p) => {
+  profileHandler("last_checked", async (e, p) => {
     if (Tags.from(e).getMeta("d") === "coracle/last_checked/v1") {
-      return {...p.lastChecked, ...(await keys.decryptJson(e.content))}
+      return {...p.last_checked, ...(await keys.decryptJson(e.content))}
+    }
+  })
+)
+
+addHandler(
+  30078,
+  profileHandler("rooms_joined", async (e, p) => {
+    if (Tags.from(e).getMeta("d") === "coracle/rooms_joined/v1") {
+      const roomsJoined = await keys.decryptJson(e.content)
+
+      // Just a bug from when I was building the feature, remove someday
+      if (is(Array, roomsJoined)) {
+        return roomsJoined
+      }
     }
   })
 )

@@ -102,7 +102,7 @@ export const newNotifications = derived(
 )
 
 export const hasNewMessages = ({lastReceived, lastSent}, lastChecked) =>
-  lastReceived > Math.max(lastSent, lastChecked || 0)
+  lastReceived > Math.max(lastSent || lastReceived, lastChecked || 0)
 
 export const newDirectMessages = derived(
   [watch("contacts", t => t.all()), user.lastChecked],
@@ -111,9 +111,14 @@ export const newDirectMessages = derived(
 )
 
 export const newChatMessages = derived(
-  [watch("rooms", t => t.all()), user.lastChecked],
-  ([rooms, $lastChecked]) =>
-    Boolean(find(r => hasNewMessages(r, $lastChecked[`chat/${r.id}`]), rooms))
+  [watch("rooms", t => t.all()), user.lastChecked, user.roomsJoined],
+  ([rooms, $lastChecked, $roomsJoined]) =>
+    Boolean(
+      find(
+        r => $roomsJoined.includes(r.id) && hasNewMessages(r, $lastChecked[`chat/${r.id}`]),
+        rooms
+      )
+    )
 )
 
 // Synchronization from events to state
@@ -159,10 +164,10 @@ const processChats = async (pubkey, events) => {
   }
 }
 
-export const listen = async pubkey => {
-  // Include an offset so we don't miss notifications on one relay but not another
+export const listen = async () => {
+  const pubkey = user.getPubkey()
+  const {roomsJoined} = user.getProfile()
   const since = now() - timedelta(30, "days")
-  const roomIds = pluck("id", rooms.all({joined: true}))
   const eventIds = doPipe(userEvents.all({kind: 1, created_at: {$gt: since}}), [
     sortBy(e => -e.created_at),
     slice(0, 256),
@@ -177,7 +182,7 @@ export const listen = async pubkey => {
       {kinds: [1, 4], authors: [pubkey], since},
       {kinds: [1, 7, 4, 9735], "#p": [pubkey], since},
       {kinds: [1, 7, 4, 9735], "#e": eventIds, since},
-      {kinds: [42], "#e": roomIds, since},
+      {kinds: [42], "#e": roomsJoined, since},
     ],
     onChunk: async events => {
       events = user.applyMutes(events)
@@ -212,7 +217,7 @@ setInterval(() => {
 export const loadAppData = async pubkey => {
   if (getUserReadRelays().length > 0) {
     // Start our listener, but don't wait for it
-    listen(pubkey)
+    listen()
 
     // Make sure the user and their network is loaded
     await network.loadPeople([pubkey], {force: true, kinds: userKinds})

@@ -15,6 +15,7 @@ export const loki = new Loki("agent.db", {
   autoload: true,
   autosave: true,
   autosaveInterval: 4000,
+  throttledSaves: true,
   adapter: new Adapter(),
   autoloadCallback: () => {
     for (const table of Object.values(registry)) {

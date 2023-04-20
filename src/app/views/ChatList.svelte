@@ -1,11 +1,14 @@
 <script>
   import {onMount} from "svelte"
+  import {derived} from "svelte/store"
+  import {partition} from "ramda"
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
   import {watch} from "src/agent/db"
+  import user from "src/agent/user"
   import network from "src/agent/network"
   import {getUserReadRelays} from "src/agent/relays"
   import {modal} from "src/partials/state"
@@ -14,10 +17,15 @@
   let search
   let results = []
 
-  const userRooms = watch("rooms", t => t.all({joined: true}))
-  const otherRooms = watch("rooms", t => t.all({joined: {$ne: true}}))
+  const {roomsJoined} = user
+  const rooms = derived([watch("rooms", t => t.all()), roomsJoined], ([_rooms, _joined]) => {
+    const ids = new Set(_joined)
+    const [joined, other] = partition(r => ids.has(r.id), _rooms)
 
-  $: search = fuzzy($otherRooms, {keys: ["name", "about"]})
+    return {joined, other}
+  })
+
+  $: search = fuzzy($rooms.other, {keys: ["name", "about"]})
   $: results = search(q).slice(0, 50)
 
   document.title = "Chat"
@@ -44,7 +52,7 @@
       <i class="fa-solid fa-plus" /> Create Room
     </Anchor>
   </div>
-  {#each $userRooms as room (room.id)}
+  {#each $rooms.joined as room (room.id)}
     <ChatListItem {room} />
   {:else}
     <p class="text-center py-8">You haven't yet joined any rooms.</p>
@@ -64,7 +72,7 @@
       <ChatListItem {room} />
     {/each}
     <small class="text-center">
-      Showing {Math.min(50, $otherRooms.length)} of {$otherRooms.length} known rooms
+      Showing {Math.min(50, $rooms.other.length)} of {$rooms.other.length} known rooms
     </small>
   {:else}
     <small class="text-center"> No matching rooms found </small>

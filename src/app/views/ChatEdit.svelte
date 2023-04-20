@@ -9,7 +9,7 @@
   import Button from "src/partials/Button.svelte"
   import {toast, modal} from "src/partials/state"
   import {getUserWriteRelays} from "src/agent/relays"
-  import {rooms} from "src/agent/db"
+  import user from "src/agent/user"
   import cmd from "src/agent/cmd"
   import {publishWithToast} from "src/app/state"
 
@@ -45,7 +45,7 @@
         const [event] = await publishWithToast(relays, cmd.createRoom(room))
 
         // Auto join the room the user just created
-        rooms.patch({id: event.id, joined: true})
+        user.joinRoom(event.id)
       }
 
       modal.pop()

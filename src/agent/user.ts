@@ -3,6 +3,7 @@ import type {Readable} from "svelte/store"
 import {
   slice,
   uniqBy,
+  without,
   reject,
   prop,
   find,
@@ -34,7 +35,8 @@ const profile = synced("agent/user/profile", {
     dufflepudUrl: import.meta.env.VITE_DUFFLEPUD_URL,
     multiplextrUrl: import.meta.env.VITE_MULTIPLEXTR_URL,
   },
-  lastChecked: {},
+  rooms_joined: [],
+  last_checked: {},
   petnames: [],
   relays: [],
   mutes: [],
@@ -42,7 +44,8 @@ const profile = synced("agent/user/profile", {
 })
 
 const settings = derived(profile, prop("settings"))
-const lastChecked = derived(profile, prop("lastChecked")) as Readable<Record<string, number>>
+const roomsJoined = derived(profile, prop("rooms_joined")) as Readable<string>
+const lastChecked = derived(profile, prop("last_checked")) as Readable<Record<string, number>>
 const petnames = derived(profile, prop("petnames")) as Readable<Array<Array<string>>>
 const relays = derived(profile, prop("relays")) as Readable<Array<Relay>>
 const mutes = derived(profile, prop("mutes")) as Readable<Array<[string, string]>>
@@ -93,6 +96,7 @@ export default {
   // App data
 
   lastChecked,
+  roomsJoined,
   async setAppData(key, content) {
     if (keys.canSign()) {
       const d = `coracle/${key}`
@@ -103,11 +107,29 @@ export default {
   },
   setLastChecked(k, v) {
     profile.update($profile => {
-      const lastChecked = {...$profile.lastChecked, [k]: v}
+      const lastChecked = {...$profile.last_checked, [k]: v}
 
       this.setAppData("last_checked/v1", lastChecked)
 
-      return {...$profile, lastChecked}
+      return {...$profile, last_checked: lastChecked}
+    })
+  },
+  joinRoom(id) {
+    profile.update($profile => {
+      const roomsJoined = $profile.rooms_joined.concat(id)
+
+      this.setAppData("rooms_joined/v1", roomsJoined)
+
+      return {...$profile, rooms_joined: roomsJoined}
+    })
+  },
+  leaveRoom(id) {
+    profile.update($profile => {
+      const roomsJoined = without([id], $profile.rooms_joined)
+
+      this.setAppData("rooms_joined/v1", roomsJoined)
+
+      return {...$profile, rooms_joined: roomsJoined}
     })
   },
 

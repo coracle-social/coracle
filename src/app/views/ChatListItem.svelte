@@ -4,13 +4,16 @@
   import {fly} from "svelte/transition"
   import {ellipsize} from "hurdak/lib/hurdak"
   import Anchor from "src/partials/Anchor.svelte"
-  import {rooms} from "src/agent/db"
+  import user from "src/agent/user"
 
   export let room
 
+  const {roomsJoined} = user
   const enter = () => navigate(`/chat/${nip19.noteEncode(room.id)}`)
-  const join = () => rooms.patch({id: room.id, joined: true})
-  const leave = () => rooms.patch({id: room.id, joined: false})
+  const join = () => user.joinRoom(room.id)
+  const leave = () => user.leaveRoom(room.id)
+
+  $: joined = $roomsJoined.includes(room.id)
 </script>
 
 <button
@@ -26,7 +29,7 @@
         <i class="fa fa-lock-open text-gray-1" />
         <h2 class="text-lg">{room.name || ""}</h2>
       </div>
-      {#if room.joined}
+      {#if joined}
         <Anchor type="button" preventDefault class="flex items-center gap-2" on:click={leave}>
           <i class="fa fa-right-from-bracket" />
           <span>Leave</span>
