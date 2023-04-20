@@ -4,6 +4,7 @@
 
 - [x] Add purplepag.es to sign in flow
 - [x] Include people with only a display_name in search
+- [x] Fix AUTH over multiplextr
 
 ## 0.2.24
 

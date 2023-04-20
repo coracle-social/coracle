@@ -35,7 +35,7 @@
     {/if}
     <div class="grid grid-cols-1 gap-4">
       {#each $relays as relay (relay.url)}
-        <RelayCard showControls {relay} />
+        <RelayCard showStatus showControls {relay} />
       {/each}
     </div>
     <div class="flex flex-col gap-6" in:fly={{y: 20}}>
