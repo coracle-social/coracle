@@ -1,6 +1,6 @@
 <script lang="ts">
   import type {Relay} from "src/util/types"
-  import {isNil, find, all, last} from "ramda"
+  import {isNil, prop, uniqBy, objOf, find, all, last} from "ramda"
   import {onDestroy, onMount} from "svelte"
   import {navigate} from "svelte-routing"
   import {sleep, shuffle} from "src/util/misc"
@@ -25,8 +25,14 @@
   let currentRelays = {} as Record<number, Relay>
   let attemptedRelays = new Set()
   let customRelays = []
-  let knownRelays = watch("relays", table => shuffle(table.all()))
   let allRelays = []
+  let knownRelays = watch("relays", table =>
+    uniqBy(
+      prop("url"),
+      // Make sure our hardcoded urls are first, since they're more likely to find a match
+      pool.defaultUrls.map(objOf("url")).concat(shuffle(table.all()))
+    )
+  )
 
   $: allRelays = $knownRelays.concat(customRelays)
 
@@ -57,13 +63,13 @@
 
           currentRelays[i] = null
 
-          // Make sure we have relays and follows before calling it good. This helps us avoid
-          // nuking follow lists later on
-          if (searching && user.getRelays().length > 0 && user.getPetnames().length > 0) {
+          if (searching && user.getRelays().length > 0) {
             searching = false
             modal = "success"
 
-            await Promise.all([loadAppData(user.getPubkey()), sleep(3000)])
+            // Reload everything, it's possible we didn't get their petnames if we got a match
+            // from something like purplepag.es. This helps us avoid nuking follow lists later
+            await Promise.all([loadAppData(user.getPubkey()), sleep(1500)])
 
             navigate("/notes")
           } else {

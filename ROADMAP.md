@@ -1,7 +1,6 @@
 # Current
 
 - [ ] Remember message/chat status
-- [ ] Add purplepag.es to sign in flow
 - [ ] Add way to turn off likes/zaps
 - [ ] Improve AUTH status display
 - [ ] Image classification

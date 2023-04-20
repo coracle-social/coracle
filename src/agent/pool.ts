@@ -95,10 +95,10 @@ const Meta = {
 const forceUrls = (import.meta.env.VITE_FORCE_RELAYS || "").split(",").filter(identity)
 
 const defaultUrls = [
+  "wss://purplepag.es",
+  "wss://relay.damus.io",
+  "wss://relay.nostr.band",
   "wss://nostr-pub.wellorder.net",
-  "wss://nostr.zebedee.cloud",
-  "wss://nos.lol",
-  "wss://brb.io",
 ]
 
 const getUrls = relays => {

@@ -25,15 +25,7 @@ import user from "src/agent/user"
 
 export const initializeRelayList = async () => {
   // Throw some hardcoded defaults in there
-  await relays.patch([
-    {url: "wss://brb.io"},
-    {url: "wss://nostr.zebedee.cloud"},
-    {url: "wss://nostr-pub.wellorder.net"},
-    {url: "wss://relay.nostr.band"},
-    {url: "wss://nostr.pleb.network"},
-    {url: "wss://relay.nostrich.de"},
-    {url: "wss://relay.damus.io"},
-  ])
+  await relays.patch(pool.defaultUrls.map(objOf("url")))
 
   // Load relays from nostr.watch via dufflepud
   try {

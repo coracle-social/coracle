@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.2.25
+
+- [x] Add purplepag.es to sign in flow
+- [x] Include people with only a display_name in search
+
 ## 0.2.24
 
 - [x] Replace localforage with loki.js for storage
