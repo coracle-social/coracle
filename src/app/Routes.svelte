@@ -57,7 +57,12 @@
         <ChatDetail entity={params.entity} />
       {/key}
     </Route>
-    <Route path="/messages" component={MessagesList} />
+    <Route path="/messages">
+      <MessagesList activeTab="messages" />
+    </Route>
+    <Route path="/requests">
+      <MessagesList activeTab="requests" />
+    </Route>
     <Route path="/messages/:entity" let:params>
       {#key params.entity}
         <MessagesDetail entity={params.entity} />

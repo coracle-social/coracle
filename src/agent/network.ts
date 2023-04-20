@@ -1,6 +1,6 @@
 import type {MyEvent} from "src/util/types"
-import {sortBy, assoc, uniq, uniqBy, prop, propEq, groupBy, pluck} from "ramda"
-import {personKinds, findReplyId} from "src/util/nostr"
+import {without, sortBy, assoc, uniq, uniqBy, prop, propEq, groupBy, pluck} from "ramda"
+import {personKinds, appDataKeys, findReplyId} from "src/util/nostr"
 import {chunk} from "hurdak/lib/hurdak"
 import {batch, now, timedelta} from "src/util/misc"
 import {
@@ -107,10 +107,18 @@ const loadPeople = async (pubkeys, {relays = null, kinds = personKinds, force = 
 
   await Promise.all(
     chunk(256, pubkeys).map(async chunk => {
-      await load({
-        relays: sampleRelays(relays || getAllPubkeyWriteRelays(chunk), 0.5),
-        filter: {kinds, authors: chunk},
-      })
+      const chunkRelays = sampleRelays(relays || getAllPubkeyWriteRelays(chunk), 0.5)
+      const chunkFilter = [] as Array<Record<string, any>>
+
+      chunkFilter.push({kinds: without([30078], kinds), authors: chunk})
+
+      // Add a separate filter for app data so we're not pulling down other people's stuff,
+      // or obsolete events of our own.
+      if (kinds.includes(30078)) {
+        chunkFilter.push({kinds: [30078], authors: chunk, "#d": appDataKeys})
+      }
+
+      await load({relays: chunkRelays, filter: chunkFilter})
     })
   )
 }

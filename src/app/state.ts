@@ -4,11 +4,11 @@ import {nip19} from "nostr-tools"
 import {navigate} from "svelte-routing"
 import {derived} from "svelte/store"
 import {writable} from "svelte/store"
-import {omit, pluck, sortBy, max, find, slice, propEq} from "ramda"
+import {max, omit, pluck, sortBy, find, slice, propEq} from "ramda"
 import {createMap, doPipe, first} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
 import {hash} from "src/util/misc"
-import {synced, now, timedelta} from "src/util/misc"
+import {now, timedelta} from "src/util/misc"
 import {Tags, isNotification, userKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
@@ -96,21 +96,24 @@ export const feedsTab = writable("Follows")
 
 // State
 
-export const lastChecked = synced("app/alerts/lastChecked", {})
-
 export const newNotifications = derived(
-  [watch("notifications", t => pluck("created_at", t.all()).reduce(max, 0)), lastChecked],
+  [watch("notifications", t => pluck("created_at", t.all()).reduce(max, 0)), user.lastChecked],
   ([$lastNotification, $lastChecked]) => $lastNotification > ($lastChecked.notifications || 0)
 )
 
+export const hasNewMessages = ({lastReceived, lastSent}, lastChecked) =>
+  lastReceived > Math.max(lastSent, lastChecked || 0)
+
 export const newDirectMessages = derived(
-  [watch("contacts", t => t.all()), lastChecked],
-  ([contacts, $lastChecked]) => Boolean(find(c => c.lastMessage > $lastChecked[c.pubkey], contacts))
+  [watch("contacts", t => t.all()), user.lastChecked],
+  ([contacts, $lastChecked]) =>
+    Boolean(find(c => hasNewMessages(c, $lastChecked[`dm/${c.pubkey}`]), contacts))
 )
 
 export const newChatMessages = derived(
-  [watch("rooms", t => t.all()), lastChecked],
-  ([rooms, $lastChecked]) => Boolean(find(c => c.lastMessage > $lastChecked[c.pubkey], rooms))
+  [watch("rooms", t => t.all()), user.lastChecked],
+  ([rooms, $lastChecked]) =>
+    Boolean(find(r => hasNewMessages(r, $lastChecked[`chat/${r.id}`]), rooms))
 )
 
 // Synchronization from events to state
@@ -126,23 +129,17 @@ const processMessages = async (pubkey, events) => {
     return
   }
 
-  lastChecked.update($lastChecked => {
-    for (const message of messages) {
-      if (message.pubkey === pubkey) {
-        const recipient = Tags.from(message).type("p").values().first()
+  for (const message of messages) {
+    const fromSelf = message.pubkey === pubkey
+    const contactPubkey = fromSelf ? Tags.from(message).getMeta("p") : message.pubkey
+    const contact = contacts.get(contactPubkey)
+    const key = fromSelf ? "lastSent" : "lastReceived"
 
-        $lastChecked[recipient] = Math.max($lastChecked[recipient] || 0, message.created_at)
-        contacts.patch({pubkey: recipient, accepted: true})
-      } else {
-        const contact = contacts.get(message.pubkey)
-        const lastMessage = Math.max(contact?.lastMessage || 0, message.created_at)
-
-        contacts.patch({pubkey: message.pubkey, lastMessage})
-      }
-    }
-
-    return $lastChecked
-  })
+    contacts.patch({
+      pubkey: contactPubkey,
+      [key]: Math.max(contact?.[key] || 0, message.created_at),
+    })
+  }
 }
 
 const processChats = async (pubkey, events) => {
@@ -152,22 +149,14 @@ const processChats = async (pubkey, events) => {
     return
   }
 
-  lastChecked.update($lastChecked => {
-    for (const message of messages) {
-      const id = Tags.from(message).getMeta("e")
+  for (const message of messages) {
+    const fromSelf = message.pubkey === pubkey
+    const id = Tags.from(message).getMeta("e")
+    const room = rooms.get(id)
+    const key = fromSelf ? "lastSent" : "lastReceived"
 
-      if (message.pubkey === pubkey) {
-        $lastChecked[id] = Math.max($lastChecked[id] || 0, message.created_at)
-      } else {
-        const room = rooms.get(id)
-        const lastMessage = Math.max(room?.lastMessage || 0, message.created_at)
-
-        rooms.patch({id, lastMessage})
-      }
-    }
-
-    return $lastChecked
-  })
+    rooms.patch({id, [key]: Math.max(room?.[key] || 0, message.created_at)})
+  }
 }
 
 export const listen = async pubkey => {

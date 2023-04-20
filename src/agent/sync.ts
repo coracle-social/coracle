@@ -149,26 +149,28 @@ addHandler(3, e => {
 
 // User profile, except for events also handled for other users
 
-const profileHandler = (key, getValue) => async e => {
-  const profile = user.getProfile()
-
-  if (e.pubkey !== profile.pubkey) {
-    return
-  }
-
-  const updated_at_key = `${key}_updated_at`
-
-  if (e.created_at < profile?.[updated_at_key]) {
-    return
-  }
-
-  const value = await getValue(e, profile)
-
-  // If we didn't get a value, don't update the key
-  if (value) {
-    user.profile.set({...profile, [key]: value, [updated_at_key]: e.created_at})
+const userHandler = cb => e => {
+  if (e.pubkey === user.getPubkey()) {
+    cb(e)
   }
 }
+
+const profileHandler = (key, getValue) =>
+  userHandler(async e => {
+    const profile = user.getProfile()
+    const updated_at_key = `${key}_updated_at`
+
+    if (e.created_at < profile?.[updated_at_key]) {
+      return
+    }
+
+    const value = await getValue(e, profile)
+
+    // If we didn't get a value, don't update the key
+    if (value) {
+      user.profile.set({...profile, [key]: value, [updated_at_key]: e.created_at})
+    }
+  })
 
 addHandler(
   2,
@@ -245,6 +247,15 @@ addHandler(
   })
 )
 
+addHandler(
+  30078,
+  profileHandler("lastChecked", async (e, p) => {
+    if (Tags.from(e).getMeta("d") === "coracle/last_checked/v1") {
+      return {...p.lastChecked, ...(await keys.decryptJson(e.content))}
+    }
+  })
+)
+
 // Rooms
 
 addHandler(40, e => {
@@ -269,7 +280,7 @@ addHandler(40, e => {
 })
 
 addHandler(41, e => {
-  const roomId = Tags.from(e).type("e").values().first()
+  const roomId = Tags.from(e).getMeta("e")
 
   if (!roomId) {
     return

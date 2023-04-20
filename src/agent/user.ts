@@ -34,6 +34,7 @@ const profile = synced("agent/user/profile", {
     dufflepudUrl: import.meta.env.VITE_DUFFLEPUD_URL,
     multiplextrUrl: import.meta.env.VITE_MULTIPLEXTR_URL,
   },
+  lastChecked: {},
   petnames: [],
   relays: [],
   mutes: [],
@@ -41,6 +42,7 @@ const profile = synced("agent/user/profile", {
 })
 
 const settings = derived(profile, prop("settings"))
+const lastChecked = derived(profile, prop("lastChecked")) as Readable<Record<string, number>>
 const petnames = derived(profile, prop("petnames")) as Readable<Array<Array<string>>>
 const relays = derived(profile, prop("relays")) as Readable<Array<Relay>>
 const mutes = derived(profile, prop("mutes")) as Readable<Array<[string, string]>>
@@ -85,11 +87,28 @@ export default {
   async setSettings(settings) {
     profile.update($p => ({...$p, settings}))
 
-    if (keys.canSign()) {
-      const content = await keys.encryptJson(settings)
+    return this.setAppData("settings/v1", settings)
+  },
 
-      return cmd.setSettings(content).publish(profileCopy.relays)
+  // App data
+
+  lastChecked,
+  async setAppData(key, content) {
+    if (keys.canSign()) {
+      const d = `coracle/${key}`
+      const v = await keys.encryptJson(content)
+
+      return cmd.setAppData(d, v).publish(profileCopy.relays)
     }
+  },
+  setLastChecked(k, v) {
+    profile.update($profile => {
+      const lastChecked = {...$profile.lastChecked, [k]: v}
+
+      this.setAppData("last_checked/v1", lastChecked)
+
+      return {...$profile, lastChecked}
+    })
   },
 
   // Petnames

@@ -1,5 +1,6 @@
 <script>
-  import {pluck, reverse, max, last, sortBy, assoc} from "ramda"
+  import {throttle} from "throttle-debounce"
+  import {pluck, reverse, max, last, sortBy} from "ramda"
   import {onMount} from "svelte"
   import {fly} from "svelte/transition"
   import {now, timedelta, createScroller} from "src/util/misc"
@@ -10,14 +11,16 @@
   import {watch} from "src/agent/db"
   import user from "src/agent/user"
   import {userEvents} from "src/agent/db"
-  import {lastChecked} from "src/app/state"
 
   let limit = 0
   let events = null
 
+  const {lastChecked} = user
+
   const prevChecked = $lastChecked.notifications || 0
+  const updateLastChecked = throttle(30_000, () => user.setLastChecked("notifications", now() + 30))
   const notifications = watch("notifications", t => {
-    lastChecked.update(assoc("notifications", now()))
+    updateLastChecked()
 
     // Sort by rounded timestamp so we can group reactions to the same parent
     return reverse(

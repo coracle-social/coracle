@@ -27,24 +27,12 @@
         <h2 class="text-lg">{room.name || ""}</h2>
       </div>
       {#if room.joined}
-        <Anchor
-          type="button"
-          class="flex items-center gap-2"
-          on:click={e => {
-            e.stopPropagation()
-            leave()
-          }}>
+        <Anchor type="button" preventDefault class="flex items-center gap-2" on:click={leave}>
           <i class="fa fa-right-from-bracket" />
           <span>Leave</span>
         </Anchor>
       {:else}
-        <Anchor
-          type="button"
-          class="flex items-center gap-2"
-          on:click={e => {
-            e.stopPropagation()
-            join()
-          }}>
+        <Anchor type="button" preventDefault class="flex items-center gap-2" on:click={join}>
           <i class="fa fa-right-to-bracket" />
           <span>Join</span>
         </Anchor>

@@ -41,8 +41,8 @@
 
   const stickToBottom = async cb => {
     const lastMessage = pluck("created_at", annotatedMessages).reduce(max, 0)
-    const {scrollTop} = document.querySelector(".channel-messages")
-    const shouldStick = scrollTop > -200
+    const $channelMessages = document.querySelector(".channel-messages")
+    const shouldStick = $channelMessages?.scrollTop > -200
 
     await cb()
 

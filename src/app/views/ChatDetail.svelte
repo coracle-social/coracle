@@ -1,6 +1,4 @@
 <script lang="ts">
-  import {assoc} from "ramda"
-  import {updateIn} from "hurdak/lib/hurdak"
   import {now, formatTimestamp} from "src/util/misc"
   import {toHex} from "src/util/nostr"
   import {modal} from "src/partials/state"
@@ -13,13 +11,14 @@
   import network from "src/agent/network"
   import {watch} from "src/agent/db"
   import cmd from "src/agent/cmd"
-  import {lastChecked} from "src/app/state"
 
   export let entity
 
   const id = toHex(entity)
   const room = watch("rooms", t => t.get(id) || {id})
   const getRelays = () => sampleRelays($room ? getRelaysForEventChildren($room) : [])
+
+  user.setLastChecked(`chat/${id}`, now())
 
   const listenForMessages = onChunk =>
     network.listen({
@@ -47,8 +46,6 @@
   }
 
   document.title = $room.name
-
-  lastChecked.update(updateIn(assoc(id, now())))
 </script>
 
 <Channel {loadMessages} {listenForMessages} {sendMessage}>

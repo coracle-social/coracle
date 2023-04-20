@@ -1,25 +1,19 @@
 <script>
   import {sortBy} from "ramda"
   import {toTitle} from "hurdak/lib/hurdak"
+  import {navigate} from "svelte-routing"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import MessagesListItem from "src/app/views/MessagesListItem.svelte"
   import {watch} from "src/agent/db"
 
-  let activeTab = "messages"
-  let contacts = []
+  export let activeTab = "messages"
+
+  const accepted = watch("contacts", t => t.all({lastSent: {$exists: true}}))
+  const requests = watch("contacts", t => t.all({lastSent: {$exists: false}}))
 
   const getContacts = tab =>
-    sortBy(c => -c.lastMessage || 0, tab === "messages" ? $accepted : $requests)
-
-  $: contacts = getContacts(activeTab)
-
-  const setActiveTab = tab => {
-    activeTab = tab
-  }
-
-  const accepted = watch("contacts", t => t.all({accepted: true}))
-  const requests = watch("contacts", t => t.all({accepted: {$ne: true}}))
+    sortBy(c => -(c.lastSent || c.lastReceived || 0), tab === "messages" ? $accepted : $requests)
 
   const getDisplay = tab => ({
     title: toTitle(tab),
@@ -30,7 +24,7 @@
 </script>
 
 <Content>
-  <Tabs tabs={["messages", "requests"]} {activeTab} {setActiveTab} {getDisplay} />
+  <Tabs tabs={["messages", "requests"]} {activeTab} setActiveTab={navigate} {getDisplay} />
   {#each getContacts(activeTab) as contact (contact.pubkey)}
     <MessagesListItem {contact} />
   {:else}

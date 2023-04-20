@@ -1,6 +1,5 @@
 <script lang="ts">
   import cx from "classnames"
-  import {assoc} from "ramda"
   import {toHex, displayPerson} from "src/util/nostr"
   import {now, formatTimestamp} from "src/util/misc"
   import {Tags} from "src/util/nostr"
@@ -15,7 +14,6 @@
   import user from "src/agent/user"
   import cmd from "src/agent/cmd"
   import {routes} from "src/app/state"
-  import {lastChecked} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
 
@@ -25,17 +23,16 @@
   let pubkey = toHex(entity)
   let person = watch("people", () => getPersonWithFallback(pubkey))
 
-  lastChecked.update(assoc(pubkey, now()))
+  user.setLastChecked(`dm/${pubkey}`, now())
 
-  const getRelays = () => {
-    return sampleRelays(getAllPubkeyRelays([pubkey, user.getPubkey()]))
-  }
+  const getRelays = () => sampleRelays(getAllPubkeyRelays([pubkey, user.getPubkey()]))
 
   const decryptMessages = async events => {
     const results = []
+
     // Gotta do it in serial because of extension limitations
     for (const event of events) {
-      const key = event.pubkey === pubkey ? pubkey : Tags.from(event).type("p").values().first()
+      const key = event.pubkey === pubkey ? pubkey : Tags.from(event).getMeta("p")
 
       results.push({...event, content: await crypt.decrypt(key, event.content)})
     }
@@ -76,7 +73,10 @@
 <Channel {loadMessages} {listenForMessages} {sendMessage}>
   <div slot="header" class="mb-2 flex h-20 items-start gap-4 overflow-hidden p-4">
     <div class="flex items-center gap-4">
-      <Anchor type="unstyled" class="fa fa-arrow-left cursor-pointer text-2xl" href="/messages" />
+      <Anchor
+        type="unstyled"
+        class="fa fa-arrow-left cursor-pointer text-2xl"
+        on:click={() => history.back()} />
       <PersonCircle person={$person} size={12} />
     </div>
     <div class="flex w-full flex-col gap-2">
@@ -103,7 +103,8 @@
     })}>
     <div
       class={cx("inline-block max-w-xl rounded-2xl py-2 px-4", {
-        "rounded-br-none bg-white text-end text-black": message.person.pubkey === user.getPubkey(),
+        "rounded-br-none bg-gray-2 text-end text-gray-8":
+          message.person.pubkey === user.getPubkey(),
         "rounded-bl-none bg-gray-7": message.person.pubkey !== user.getPubkey(),
       })}>
       <div class="break-words">

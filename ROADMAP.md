@@ -1,7 +1,7 @@
 # Current
 
-- [ ] Remember message/chat status
 - [ ] Add way to turn off likes/zaps
+- [ ] Remember joined rooms
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
 - [ ] Claim relays bounty
@@ -44,6 +44,7 @@
 
 # UI/Features
 
+- [ ] Use real links so cmd+click or right click work
 - [ ] Allow sharing of lists/following other people's lists
 - [ ] Add suggestion list for topics on compose
 - [ ] Badges link to https://badges.page/p/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322

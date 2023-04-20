@@ -4,15 +4,17 @@
   import {ellipsize} from "hurdak/lib/hurdak"
   import {displayPerson} from "src/util/nostr"
   import {getPersonWithFallback} from "src/agent/db"
-  import {lastChecked} from "src/app/state"
+  import user from "src/agent/user"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import Card from "src/partials/Card.svelte"
+  import {hasNewMessages} from "src/app/state"
 
   export let contact
 
-  const newMessages = contact.lastMessage > $lastChecked[contact.pubkey]
+  const {lastChecked} = user
   const person = getPersonWithFallback(contact.pubkey)
   const enter = () => navigate(`/messages/${nip19.npubEncode(contact.pubkey)}`)
+  const newMessages = hasNewMessages(contact, $lastChecked[`dm/${contact.pubkey}`])
 </script>
 
 <Card interactive on:click={enter}>

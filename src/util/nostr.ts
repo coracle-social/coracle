@@ -7,6 +7,7 @@ import {invoiceAmount} from "src/util/lightning"
 
 export const personKinds = [0, 2, 3, 10001, 10002]
 export const userKinds = personKinds.concat([10000, 30001, 30078])
+export const appDataKeys = ["coracle/settings/v1", "coracle/last_checked/v1"]
 
 export class Tags {
   tags: Array<any>

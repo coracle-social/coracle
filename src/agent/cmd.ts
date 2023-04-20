@@ -31,8 +31,7 @@ const setRelays = newRelays =>
     }),
   })
 
-const setSettings = content =>
-  new PublishableEvent(30078, {content, tags: [["d", "coracle/settings/v1"]]})
+const setAppData = (d, content) => new PublishableEvent(30078, {content, tags: [["d", d]]})
 
 const setPetnames = petnames => new PublishableEvent(3, {tags: petnames})
 
@@ -203,7 +202,7 @@ export default {
   authenticate,
   updateUser,
   setRelays,
-  setSettings,
+  setAppData,
   setPetnames,
   setMutes,
   createList,
