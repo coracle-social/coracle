@@ -22,32 +22,31 @@
   let sub = null
   let loading = true
   let feedRelay = null
+  let displayNote = asDisplayEvent(note)
 
   const setFeedRelay = relay => {
     feedRelay = relay
   }
 
-  $: displayNote = asDisplayEvent(note)
-
   onMount(async () => {
-    if (!note.pubkey) {
+    if (!displayNote.pubkey) {
       await network.load({
         relays: sampleRelays(relays),
-        filter: {kinds: [1], ids: [note.id]},
+        filter: {kinds: [1], ids: [displayNote.id]},
         onChunk: events => {
-          note = first(events)
+          displayNote = first(events)
         },
       })
     }
 
-    if (note) {
-      log("NoteDetail", nip19.noteEncode(note.id), note)
+    if (displayNote) {
+      log("NoteDetail", nip19.noteEncode(displayNote.id), displayNote)
 
       sub = network.streamContext({
         maxDepth: isMobile ? 3 : 6,
-        notes: [note],
+        notes: [displayNote],
         onChunk: context => {
-          note = first(network.applyContext([note], user.applyMutes(context)))
+          displayNote = first(network.applyContext([displayNote], user.applyMutes(context)))
         },
       })
     }
