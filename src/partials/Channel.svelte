@@ -3,7 +3,7 @@
   import {fly} from "svelte/transition"
   import {navigate} from "svelte-routing"
   import {prop, max, path as getPath, reverse, pluck, uniqBy, sortBy, last} from "ramda"
-  import {sleep, createScroller, Cursor} from "src/util/misc"
+  import {sleep, createScroller} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import user from "src/agent/user"
   import {getPersonWithFallback} from "src/agent/db"
@@ -18,7 +18,6 @@
   let loading = sleep(30_000)
   let annotatedMessages = []
   let showNewMessages = false
-  let cursor = new Cursor()
 
   $: {
     // Group messages so we're only showing the person once per chunk
@@ -68,12 +67,11 @@
 
     const scroller = createScroller(
       async () => {
-        await loadMessages(cursor, newMessages => {
+        await loadMessages(newMessages => {
           stickToBottom(() => {
             loading = sleep(30_000)
             messages = sortBy(e => -e.created_at, uniqBy(prop("id"), newMessages.concat(messages)))
             network.loadPeople(pluck("pubkey", newMessages))
-            cursor.update(messages)
           })
         })
       },

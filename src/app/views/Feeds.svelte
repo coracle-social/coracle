@@ -46,9 +46,7 @@
       relays = urls.length > 0 ? urls.map(objOf("url")) : sampleRelays(getUserReadRelays())
     }
 
-    // Separate notes and reactions into two queries since otherwise reactions dominate,
-    // we never find their parents (or reactions are mostly to a few posts), and the feed sucks
-    filter = [1, 7].map(kind => ({...filter, kinds: [kind]}))
+    filter = [{...filter, kinds: [1]}]
   }
 
   const setActiveTab = tab => {

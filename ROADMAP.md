@@ -1,10 +1,12 @@
 # Current
 
-- [ ] Add way to turn off likes/zaps
-- [ ] Remember joined rooms
+- [ ] Fix notifications, separate into mentions/replies and other
+- [ ] Render npubs properly http://localhost:5173/nevent1qqsqqr7r9w95lvj79zpsykup2d995jqhyxdntq98tu6tsvmjuh5ak9spz3mhxue69uhhyetvv9ujuerpd46hxtnfduyyc40u
+- [ ] Links/topics/mentions open modals
+- [ ] Render link previews inline rather than at bottom, check NostrReport for this
+- [ ] Wait for an auth challenge based on relay document to avoid missing first few REQs
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
-- [ ] Claim relays bounty
 
 # Core
 

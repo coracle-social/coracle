@@ -2,10 +2,12 @@
 
 # 0.2.25
 
-- [x] Add purplepag.es to sign in flow
+- [x] Add purplepag.es to sign in flow to speed things up
 - [x] Include people with only a display_name in search
 - [x] Fix AUTH over multiplextr
 - [x] Remember whether messages/notifications have been read
+- [x] Remember chat membership
+- [x] Add new cursor implementation to paginate relays independently
 
 ## 0.2.24
 

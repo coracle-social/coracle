@@ -17,6 +17,7 @@
   const id = toHex(entity)
   const room = watch("rooms", t => t.get(id) || {id})
   const getRelays = () => sampleRelays($room ? getRelaysForEventChildren($room) : [])
+  const cursor = new network.Cursor({relays: getRelays()})
 
   user.setLastChecked(`chat/${id}`, now())
 
@@ -27,12 +28,8 @@
       onChunk,
     })
 
-  const loadMessages = (cursor, onChunk) =>
-    network.load({
-      relays: getRelays(),
-      filter: {kinds: [42], "#e": [id], ...cursor.getFilter()},
-      onChunk,
-    })
+  const loadMessages = onChunk =>
+    cursor.loadPage({filter: {kinds: [42], "#e": [id]}, onChunk})
 
   const edit = () => {
     modal.push({type: "room/edit", room: $room})

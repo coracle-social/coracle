@@ -3,7 +3,7 @@
   import {last, partition, always, propEq, uniqBy, sortBy, prop} from "ramda"
   import {fly} from "svelte/transition"
   import {quantify} from "hurdak/lib/hurdak"
-  import {createScroller, now, timedelta, Cursor} from "src/util/misc"
+  import {createScroller, now, timedelta} from "src/util/misc"
   import {asDisplayEvent, mergeFilter} from "src/util/nostr"
   import Spinner from "src/partials/Spinner.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -29,8 +29,8 @@
   // Add a short buffer so we can get the most possible results for recent notes
   const since = now()
   const maxNotes = 100
-  const cursor = new Cursor({delta})
   const seen = new Set()
+  const cursor = new network.Cursor({relays, delta})
   const getModal = () => last(document.querySelectorAll(".modal-content"))
 
   const setFeedRelay = relay => {
@@ -54,12 +54,8 @@
     // Deduplicate and filter out stuff we don't want, apply user preferences
     const filtered = user.applyMutes(newNotes.filter(n => !seen.has(n.id) && shouldDisplay(n)))
 
-    // Drop the oldest 20% of notes. We sometimes get pretty old stuff since we don't
-    // use a since on our filter
-    const pruned = cursor.prune(filtered)
-
     // Keep track of what we've seen
-    for (const note of pruned) {
+    for (const note of filtered) {
       seen.add(note.id)
     }
 
@@ -105,16 +101,13 @@
 
   const loadMore = async () => {
     // Wait for this page to load before trying again
-    await network.load({
-      relays: feedRelay ? [feedRelay] : relays,
-      filter: mergeFilter(filter, cursor.getFilter()),
+    await cursor.loadPage({
+      filter,
       onChunk: chunk => {
+        // Stack promises to avoid too many concurrent subscriptions
         p = p.then(() => onChunk(chunk))
       },
     })
-
-    // Update our cursor
-    cursor.update(notes)
   }
 
   onMount(() => {

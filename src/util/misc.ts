@@ -2,13 +2,10 @@ import type {Writable} from "svelte/store"
 import {bech32, utf8} from "@scure/base"
 import {debounce, throttle} from "throttle-debounce"
 import {
-  gt,
   without,
   whereEq,
   reject,
   mergeDeepRight,
-  aperture,
-  filter,
   isNil,
   is,
   pluck,
@@ -163,63 +160,6 @@ export const createScroller = (loadMore, {reverse = false, element = null} = {})
 }
 
 export const randomChoice = xs => xs[Math.floor(Math.random() * xs.length)]
-
-export class Cursor {
-  delta?: number
-  since?: number
-  until: number
-  limit: number
-  count: number
-  constructor({limit = 20, delta = undefined} = {}) {
-    this.delta = delta
-    this.since = delta ? now() - delta : undefined
-    this.until = now()
-    this.limit = limit
-    this.count = 0
-  }
-  getFilter() {
-    return filter(identity, {
-      since: this.since,
-      until: this.until,
-      limit: this.limit,
-    })
-  }
-  // Remove events that are significantly older than the average
-  prune(events) {
-    const maxDiff = avg(events.map(e => this.until - e.created_at)) * 4
-
-    return events.filter(e => this.until - e.created_at < maxDiff)
-  }
-  // Calculate a reasonable amount to move our window to avoid fetching too much of the
-  // same stuff we already got without missing certain time periods due to a mismatch
-  // in event density between various relays
-  update(events) {
-    if (events.length > 2) {
-      // Keep track of how many requests we've made
-      this.count += 1
-
-      // Find the average gap between events to figure out how regularly people post to this
-      // feed. Multiply it by the number of events we have but scale down to avoid
-      // blowing past big gaps due to misbehaving relays skewing the results. Trim off
-      // outliers and scale based on results/requests to help with that
-      const timestamps = sortBy(identity, pluck("created_at", events))
-      const gaps = aperture(2, timestamps).map(([a, b]) => b - a)
-      const high = quantile(gaps, 0.5)
-      const gap = avg(gaps.filter(gt(high)))
-
-      // If we're just warming up, scale the window down even further to avoid
-      // blowing past the most relevant time period
-      const scale = Math.min(1, Math.log10(events.length)) * Math.min(1, Math.log10(this.count + 1))
-
-      // Only paginate part of the way so we can avoid missing stuff
-      this.until -= Math.round(gap * scale * this.limit)
-    }
-
-    if (this.since) {
-      this.since = Math.min(this.since, this.until) - this.delta
-    }
-  }
-}
 
 export const synced = (key, defaultValue = null) => {
   // If it's an object, merge defaults

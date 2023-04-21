@@ -26,6 +26,7 @@
   user.setLastChecked(`dm/${pubkey}`, now())
 
   const getRelays = () => sampleRelays(getAllPubkeyRelays([pubkey, user.getPubkey()]))
+  const cursor = new network.Cursor({relays: getRelays()})
 
   const decryptMessages = async events => {
     const results = []
@@ -40,7 +41,7 @@
     return results
   }
 
-  const getFilters = extra => [
+  const getFilters = (extra = {}) => [
     {kinds: [4], authors: [user.getPubkey()], "#p": [pubkey], ...extra},
     {kinds: [4], authors: [pubkey], "#p": [user.getPubkey()], ...extra},
   ]
@@ -52,10 +53,9 @@
       onChunk: async events => onChunk(await decryptMessages(events)),
     })
 
-  const loadMessages = (cursor, onChunk) =>
-    network.load({
-      relays: getRelays(),
-      filter: getFilters(cursor.getFilter()),
+  const loadMessages = onChunk =>
+    cursor.loadPage({
+      filter: getFilters(),
       onChunk: async events => onChunk(await decryptMessages(events)),
     })
 

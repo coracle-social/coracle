@@ -106,31 +106,13 @@ export default {
     }
   },
   setLastChecked(k, v) {
-    profile.update($profile => {
-      const lastChecked = {...$profile.last_checked, [k]: v}
-
-      this.setAppData("last_checked/v1", lastChecked)
-
-      return {...$profile, last_checked: lastChecked}
-    })
+    this.setAppData("last_checked/v1", {...profileCopy.last_checked, [k]: v})
   },
   joinRoom(id) {
-    profile.update($profile => {
-      const roomsJoined = $profile.rooms_joined.concat(id)
-
-      this.setAppData("rooms_joined/v1", roomsJoined)
-
-      return {...$profile, rooms_joined: roomsJoined}
-    })
+    this.setAppData("rooms_joined/v1", profileCopy.rooms_joined.concat(id))
   },
   leaveRoom(id) {
-    profile.update($profile => {
-      const roomsJoined = without([id], $profile.rooms_joined)
-
-      this.setAppData("rooms_joined/v1", roomsJoined)
-
-      return {...$profile, rooms_joined: roomsJoined}
-    })
+    this.setAppData("rooms_joined/v1", without([id], profileCopy.rooms_joined))
   },
 
   // Petnames

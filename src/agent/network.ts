@@ -1,7 +1,19 @@
-import type {MyEvent} from "src/util/types"
-import {without, sortBy, assoc, uniq, uniqBy, prop, propEq, groupBy, pluck} from "ramda"
+import type {MyEvent, Relay} from "src/util/types"
+import {
+  without,
+  mergeLeft,
+  fromPairs,
+  sortBy,
+  assoc,
+  uniq,
+  uniqBy,
+  prop,
+  propEq,
+  groupBy,
+  pluck,
+} from "ramda"
 import {personKinds, appDataKeys, findReplyId} from "src/util/nostr"
-import {chunk} from "hurdak/lib/hurdak"
+import {chunk, ensurePlural} from "hurdak/lib/hurdak"
 import {batch, now, timedelta} from "src/util/misc"
 import {
   getRelaysForEventParent,
@@ -95,6 +107,116 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5
       },
     })
   }) as Promise<MyEvent[]>
+}
+
+class Cursor {
+  relays: Array<Relay>
+  limit: number
+  delta?: number
+  until: Record<string, number>
+  buffer: Array<MyEvent>
+  seen: Set<string>
+  constructor({relays, limit = 20, delta = undefined}) {
+    this.relays = relays
+    this.limit = limit
+    this.delta = delta
+    this.until = fromPairs(relays.map(({url}) => [url, now()]))
+    this.buffer = []
+    this.seen = new Set()
+  }
+  async loadPage({filter, onChunk}) {
+    // Undo and redo batching so it works across multiple calls to load
+    const onEvent = batch(500, onChunk)
+    const untilCopy = {...this.until}
+
+    await Promise.all(
+      this.getGroupedRelays().map(([until, relays]) => {
+        const since = this.delta ? until - this.delta : 0
+
+        // If the relay gave us a bunch of stuff outside our window, hold on to
+        // it until it's needed, and don't request it again
+        this.buffer = this.buffer.filter(event => {
+          if (event.created_at > since) {
+            onEvent(event)
+
+            return false
+          }
+
+          return true
+        })
+
+        return load({
+          relays: relays,
+          filter: ensurePlural(filter).map(mergeLeft({until, since, limit: this.limit})),
+          onChunk: events => {
+            for (const event of events) {
+              if (event.created_at < this.until[event.seen_on]) {
+                this.until[event.seen_on] = event.created_at
+              }
+
+              if (this.seen.has(event.id)) {
+                continue
+              }
+
+              this.seen.add(event.id)
+
+              if (event.created_at < since) {
+                this.buffer.push(event)
+              } else {
+                onEvent(event)
+              }
+            }
+          },
+        })
+      })
+    )
+
+    // If we got zero results for any relays, they have nothing for the given window,
+    // back until up to since for next time
+    if (this.delta) {
+      this.relays.forEach(r => {
+        if (untilCopy[r.url] === this.until[r.url]) {
+          this.until[r.url] -= this.delta
+        }
+      })
+    }
+  }
+  getGroupedRelays() {
+    // Group relays by rounded clusters to get some benefit out of
+    // multiplextr despite paginating per-relay
+    const threshold = timedelta(5, "minutes")
+    const untils = this.relays.map(({url}) => this.until[url])
+
+    for (let i = 0; i < untils.length; i++) {
+      for (let j = i + 1; j < untils.length; j++) {
+        if (Math.abs(untils[j] - untils[i]) > threshold) {
+          continue
+        }
+
+        // Take the later timestamp so we don't miss anything
+        if (untils[i] > untils[j]) {
+          untils[j] = untils[i]
+        } else {
+          untils[i] = untils[j]
+        }
+      }
+    }
+
+    const relaysByUntil = new Map()
+
+    for (let i = 0; i < untils.length; i++) {
+      const until = untils[i]
+      const relay = this.relays[i]
+
+      if (!relaysByUntil.has(until)) {
+        relaysByUntil.set(until, [])
+      }
+
+      relaysByUntil.get(until).push(relay)
+    }
+
+    return Array.from(relaysByUntil.entries())
+  }
 }
 
 const loadPeople = async (pubkeys, {relays = null, kinds = personKinds, force = false} = {}) => {
@@ -236,6 +358,7 @@ const applyContext = (notes, context) => {
 export default {
   load,
   listen,
+  Cursor,
   loadPeople,
   loadParents,
   streamContext,
