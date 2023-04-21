@@ -34,7 +34,7 @@
         relays: sampleRelays(relays),
         filter: {kinds: [1], ids: [displayNote.id]},
         onChunk: events => {
-          displayNote = first(events)
+          displayNote = asDisplayEvent(first(events))
         },
       })
     }
