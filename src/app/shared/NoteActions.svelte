@@ -65,7 +65,7 @@
     likes = reject(propEq("id", e.id), likes)
   }
 
-  const startZap = async () => {
+  const startZap = () => {
     draftZap = {
       amount: user.getSetting("defaultZap"),
       message: "",
@@ -190,7 +190,7 @@
     </button>
     <button
       class={cx("w-16 text-left", {
-        "pointer-events-none opacity-50": disableActions,
+        "pointer-events-none opacity-50": disableActions || $author.pubkey === user.getPubkey(),
         "text-accent": like,
       })}
       on:click={() => (like ? deleteReaction(like) : react("+"))}>
@@ -202,7 +202,8 @@
     </button>
     <button
       class={cx("w-20 text-left", {
-        "pointer-events-none opacity-50": disableActions,
+        "pointer-events-none opacity-50":
+          disableActions || $author.pubkey === user.getPubkey() || !$author.zapper,
         "text-accent": zap,
       })}
       on:click={startZap}>
