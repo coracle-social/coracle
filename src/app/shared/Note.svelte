@@ -111,7 +111,6 @@
 
     return () => {
       clearInterval(interval)
-      actions.cleanupZap()
     }
   })
 </script>

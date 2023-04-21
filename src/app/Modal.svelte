@@ -11,6 +11,7 @@
   import LoginPubKey from "src/app/views/LoginPubKey.svelte"
   import Onboarding from "src/app/views/Onboarding.svelte"
   import NoteCreate from "src/app/views/NoteCreate.svelte"
+  import NoteZap from "src/app/views/NoteZap.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import PersonFeed from "src/app/views/PersonFeed.svelte"
   import PersonList from "src/app/shared/PersonList.svelte"
@@ -39,6 +40,8 @@
         {/key}
       {:else if m.type === "note/create"}
         <NoteCreate pubkey={m.pubkey} nevent={m.nevent} />
+      {:else if m.type === "note/zap"}
+        <NoteZap note={m.note} />
       {:else if m.type === "relay/add"}
         <RelayAdd url={m.url} />
       {:else if m.type === "onboarding"}
