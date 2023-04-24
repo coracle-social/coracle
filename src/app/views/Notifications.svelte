@@ -3,19 +3,24 @@
   import {pluck, reverse, max, last, sortBy} from "ramda"
   import {onMount} from "svelte"
   import {fly} from "svelte/transition"
+  import {navigate} from "svelte-routing"
   import {now, timedelta, createScroller} from "src/util/misc"
   import {findReplyId} from "src/util/nostr"
   import Spinner from "src/partials/Spinner.svelte"
+  import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app/views/Notification.svelte"
   import {watch} from "src/agent/db"
   import user from "src/agent/user"
   import {userEvents} from "src/agent/db"
 
+  const {lastChecked} = user
+  const tabs = ["Mentions & Replies", "Reactions"]
+
+  export let activeTab = tabs[0]
+
   let limit = 0
   let events = null
-
-  const {lastChecked} = user
 
   const prevChecked = $lastChecked.notifications || 0
   const updateLastChecked = throttle(30_000, () => user.setLastChecked("notifications", now() + 30))
@@ -35,7 +40,17 @@
   $: events = $notifications
     .slice(0, limit)
     .map(e => [e, findReplyId(e)])
-    .filter(([e, ref]) => userEvents.get(ref)?.kind === 1)
+    .filter(([e, ref]) => {
+      if (userEvents.get(ref)?.kind !== 1) {
+        return false
+      }
+
+      if (activeTab === tabs[0]) {
+        return [1].includes(e.kind)
+      } else {
+        return [7, 9735].includes(e.kind)
+      }
+    })
     .reduce((r, [e, ref]) => {
       const prev = last(r)
       const prevTimestamp = pluck("created_at", prev?.notifications || []).reduce(max, 0)
@@ -54,6 +69,8 @@
       return r
     }, [])
 
+  const setActiveTab = tab => navigate(`/notifications/${tab}`)
+
   onMount(() => {
     document.title = "Notifications"
 
@@ -65,6 +82,7 @@
 
 {#if events}
   <Content>
+    <Tabs {tabs} {activeTab} {setActiveTab} />
     {#each events as event (event.key)}
       <div in:fly={{y: 20}}>
         <Notification {event} />

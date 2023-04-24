@@ -35,7 +35,7 @@
     if (likes.length === notifications.length) return "liked"
     if (zaps.length === notifications.length) return "zapped"
 
-    return "interacted with"
+    return "reacted to"
   })
 </script>
 

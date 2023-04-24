@@ -31,6 +31,7 @@
 {#if ready}
   <div class="pt-16 text-gray-3 lg:ml-56">
     <Route path="/notifications" component={Notifications} />
+    <Route path="/notifications/:activeTab" component={Notifications} />
     <Route path="/search">
       <EnsureData enforcePeople={false}>
         <Search />

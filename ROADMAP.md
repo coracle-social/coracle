@@ -1,7 +1,5 @@
 # Current
 
-- [ ] Fix notifications, separate into mentions/replies and other
-- [ ] Wait for an auth challenge based on relay document to avoid missing first few REQs
 - [ ] Extract libraries
   - Cursor
   - parseContent
