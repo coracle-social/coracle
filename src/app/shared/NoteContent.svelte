@@ -28,22 +28,14 @@
   let content = parseContent(note)
 
   const links = []
-  const entities = []
   const ranges = []
 
   // Find links and preceding whitespace
   for (let i = 0; i < content.length; i++) {
     const {type, value} = content[i]
 
-    if (
-      (type === "link" && !value.startsWith("ws")) ||
-      ["nostr:note", "nostr:nevent"].includes(type)
-    ) {
-      if (type === "link") {
-        links.push(value)
-      } else if (value.id !== anchorId) {
-        entities.push({type, value})
-      }
+    if (type === "link" && !value.startsWith("ws")) {
+      links.push(value)
 
       const prev = content[i - 1]
       const next = content[i + 1]
@@ -89,6 +81,13 @@
     }
   }
 
+  const isStandalone = i => {
+    return (
+      (!content[i - 1] || content[i - 1].type === "newline") &&
+      (!content[i + 1] || content[i + 1].type === "newline")
+    )
+  }
+
   const loadQuote = async ({id, relays}) => {
     // Follow relay hints
     relays = (relays || []).map(objOf("url")).concat(Tags.from(note).equals(id).relays())
@@ -116,7 +115,7 @@
 
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
   <p>
-    {#each content as { type, value }}
+    {#each content as { type, value }, i}
       {#if type === "newline"}
         {#each value as _}
           <br />
@@ -128,7 +127,30 @@
           {value.replace(/https?:\/\/(www\.)?/, "")}
         </Anchor>
       {:else if type.startsWith("nostr:")}
-        {#if value.pubkey}
+        {#if showMedia && value.id && isStandalone(i) && value.id !== anchorId}
+          <Card interactive invertColors on:click={() => openQuote(value.id)}>
+            {#await loadQuote(value)}
+              <Spinner />
+            {:then quote}
+              {@const person = getPersonWithFallback(quote.pubkey)}
+              <div class="mb-4 flex items-center gap-4">
+                <PersonCircle size={6} {person} />
+                <Anchor
+                  stopPropagation
+                  type="unstyled"
+                  class="flex items-center gap-2"
+                  on:click={() => goToPerson(quote.pubkey)}>
+                  <h2 class="text-lg">{displayPerson(person)}</h2>
+                </Anchor>
+              </div>
+              <svelte:self note={quote} />
+            {:catch}
+              <p class="mb-1 py-24 text-center text-gray-5" in:fly={{y: 20}}>
+                Unable to load a preview for quoted event
+              </p>
+            {/await}
+          </Card>
+        {:else if value.pubkey}
           @<Anchor killEvent on:click={() => goToPerson(value.pubkey)}>
             {displayPerson(getPersonWithFallback(value.pubkey))}
           </Anchor>
@@ -146,34 +168,6 @@
   {#if showMedia && links.length > 0}
     <div on:click|stopPropagation>
       <MediaSet {links} />
-    </div>
-  {/if}
-  {#if showMedia && entities.length > 0}
-    <div class="flex flex-col gap-2 py-2" on:click={e => e.stopPropagation()}>
-      {#each entities as { value }}
-        <Card interactive invertColors on:click={() => openQuote(value.id)}>
-          {#await loadQuote(value)}
-            <Spinner />
-          {:then quote}
-            {@const person = getPersonWithFallback(quote.pubkey)}
-            <div class="mb-4 flex items-center gap-4">
-              <PersonCircle size={6} {person} />
-              <Anchor
-                stopPropagation
-                type="unstyled"
-                class="flex items-center gap-2"
-                on:click={() => goToPerson(quote.pubkey)}>
-                <h2 class="text-lg">{displayPerson(person)}</h2>
-              </Anchor>
-            </div>
-            <svelte:self note={quote} />
-          {:catch}
-            <p class="mb-1 py-24 text-center text-gray-5" in:fly={{y: 20}}>
-              Unable to load a preview for quoted event
-            </p>
-          {/await}
-        </Card>
-      {/each}
     </div>
   {/if}
 </div>

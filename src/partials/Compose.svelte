@@ -164,10 +164,10 @@
     const textNode = document.createTextNode(text)
     const newLines = createNewLines(2)
 
-    selection.getRangeAt(0).insertNode(textNode)
-    selection.collapse(input, 1)
     selection.getRangeAt(0).insertNode(newLines)
-    selection.collapse(input, 2)
+    selection.collapse(input, 1)
+    selection.getRangeAt(0).insertNode(textNode)
+    selection.collapse(input, 0)
   }
 
   export const parse = () => {

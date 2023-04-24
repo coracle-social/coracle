@@ -1,8 +1,6 @@
 # Current
 
 - [ ] Fix notifications, separate into mentions/replies and other
-- [ ] Links/topics/mentions open modals
-- [ ] Render link previews inline rather than at bottom, check NostrReport for this
 - [ ] Wait for an auth challenge based on relay document to avoid missing first few REQs
 - [ ] Extract libraries
   - Cursor
