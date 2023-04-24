@@ -5,8 +5,9 @@ import {verifySignature} from "nostr-tools"
 import {pluck, identity} from "ramda"
 import {ensurePlural, switcher} from "hurdak/lib/hurdak"
 import {warn, log, error} from "src/util/logger"
-import {union, difference} from "src/util/misc"
+import {union, sleep, difference} from "src/util/misc"
 import {normalizeRelayUrl} from "src/util/nostr"
+import {relays} from "src/agent/db"
 
 const Config = {
   multiplextrUrl: null,
@@ -174,7 +175,7 @@ function getQuality(url) {
   return [0.5, "Not Connected"]
 }
 
-function getExecutor(urls) {
+async function getExecutor(urls, {bypassBoot = false} = {}) {
   if (forceUrls.length > 0) {
     urls = forceUrls
   }
@@ -210,12 +211,31 @@ function getExecutor(urls) {
     },
   })
 
+  // Eagerly connect and handle AUTH
+  await Promise.all(
+    ensurePlural(executor.target.sockets).map(async socket => {
+      const relay = relays.get(socket.url)
+      const waitForBoot = relay?.limitation?.payment_required || relay?.limitation?.auth_required
+
+      if (socket.status === Socket.STATUS.NEW) {
+        socket.booted = sleep(2000)
+
+        await socket.connect()
+      }
+
+      // Delay REQ/EVENT until AUTH flow happens
+      if (!bypassBoot && waitForBoot) {
+        await socket.booted
+      }
+    })
+  )
+
   return executor
 }
 
 async function publish({relays, event, onProgress, timeout = 3000, verb = "EVENT"}) {
   const urls = getUrls(relays)
-  const executor = getExecutor(urls)
+  const executor = await getExecutor(urls, {bypassBoot: verb === "AUTH"})
 
   Meta.onPublish(urls)
 
@@ -285,7 +305,7 @@ type SubscribeOpts = {
 
 async function subscribe({relays, filter, onEvent, onEose}: SubscribeOpts) {
   const urls = getUrls(relays)
-  const executor = getExecutor(urls)
+  const executor = await getExecutor(urls)
   const filters = ensurePlural(filter)
   const now = Date.now()
   const seen = new Map()
@@ -358,7 +378,7 @@ async function subscribe({relays, filter, onEvent, onEose}: SubscribeOpts) {
 
 async function count(filter) {
   const filters = ensurePlural(filter)
-  const executor = getExecutor(["wss://rbr.bio"])
+  const executor = await getExecutor(["wss://rbr.bio"])
 
   return new Promise(resolve => {
     const sub = executor.count(filters, {

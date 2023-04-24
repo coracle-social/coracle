@@ -30,12 +30,12 @@
         <h2 class="text-lg">{room.name || ""}</h2>
       </div>
       {#if joined}
-        <Anchor type="button" preventDefault class="flex items-center gap-2" on:click={leave}>
+        <Anchor type="button" killEvent class="flex items-center gap-2" on:click={leave}>
           <i class="fa fa-right-from-bracket" />
           <span>Leave</span>
         </Anchor>
       {:else}
-        <Anchor type="button" preventDefault class="flex items-center gap-2" on:click={join}>
+        <Anchor type="button" killEvent class="flex items-center gap-2" on:click={join}>
           <i class="fa fa-right-to-bracket" />
           <span>Join</span>
         </Anchor>
