@@ -122,18 +122,18 @@
           <br />
         {/each}
       {:else if type === "topic"}
-        <Anchor stopPropagation on:click={() => openTopic(value)}>#{value}</Anchor>
+        <Anchor killEvent on:click={() => openTopic(value)}>#{value}</Anchor>
       {:else if type === "link"}
         <Anchor external href={value}>
           {value.replace(/https?:\/\/(www\.)?/, "")}
         </Anchor>
       {:else if type.startsWith("nostr:")}
         {#if value.pubkey}
-          @<Anchor stopPropagation on:click={() => goToPerson(value.pubkey)}>
+          @<Anchor killEvent on:click={() => goToPerson(value.pubkey)}>
             {displayPerson(getPersonWithFallback(value.pubkey))}
           </Anchor>
         {:else}
-          <Anchor stopPropagation href={"/" + value.entity}>
+          <Anchor killEvent href={"/" + value.entity}>
             {value.entity.slice(0, 16) + "..."}
           </Anchor>
         {/if}

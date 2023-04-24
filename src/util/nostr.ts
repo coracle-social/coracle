@@ -215,7 +215,13 @@ export const parseContent = ({content, tags = []}) => {
       try {
         const entity = bech32.replace("nostr:", "")
         const {type, data} = nip19.decode(entity) as {type: string; data: object}
-        const value = type === "note" ? {id: data} : data
+
+        let value = data
+        if (type === "note") {
+          value = {id: data}
+        } else if (type === "npub") {
+          value = {pubkey: data}
+        }
 
         return [`nostr:${type}`, bech32, {...value, entity}]
       } catch (e) {

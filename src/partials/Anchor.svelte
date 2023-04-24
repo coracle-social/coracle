@@ -2,9 +2,11 @@
   import cx from "classnames"
   import {navigate} from "svelte-routing"
   import {switcher} from "hurdak/lib/hurdak"
+  import {killEvent as _killEvent} from "src/util/html"
   import {createEventDispatcher} from "svelte"
 
   export let stopPropagation = false
+  export let killEvent = false
   export let external = false
   export let loading = false
   export let type = "anchor"
@@ -35,6 +37,10 @@
   )
 
   const onClick = e => {
+    if (killEvent) {
+      _killEvent(e)
+    }
+
     if (stopPropagation) {
       e.stopPropagation()
     }
