@@ -54,15 +54,7 @@
     return showContext ? true : !r.isContext
   })
 
-  // If we're already in a note detail modal, don't infinitely nest. But if we're in
-  // some other modal, make it possible to go back.
-  const goToNote = data => {
-    if (modal.getCurrent()?.type === "note/detail") {
-      modal.replace({type: "note/detail", ...data})
-    } else {
-      modal.push({type: "note/detail", ...data})
-    }
-  }
+  const goToNote = data => modal.push({type: "note/detail", ...data})
 
   const onClick = e => {
     const target = e.target as HTMLElement
