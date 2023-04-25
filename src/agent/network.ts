@@ -114,6 +114,7 @@ class Cursor {
   limit: number
   delta?: number
   until: Record<string, number>
+  since: number
   buffer: Array<MyEvent>
   seen: Set<string>
   constructor({relays, limit = 20, delta = undefined}) {
@@ -121,6 +122,7 @@ class Cursor {
     this.limit = limit
     this.delta = delta
     this.until = fromPairs(relays.map(({url}) => [url, now()]))
+    this.since = delta ? now() : 0
     this.buffer = []
     this.seen = new Set()
   }
@@ -129,46 +131,51 @@ class Cursor {
     const onEvent = batch(500, onChunk)
     const untilCopy = {...this.until}
 
+    if (this.delta) {
+      this.since -= this.delta
+    }
+
     await Promise.all(
-      this.getGroupedRelays().map(([until, relays]) => {
-        const since = this.delta ? until - this.delta : 0
+      this.getGroupedRelays()
+        .filter(([until]) => until > this.since)
+        .map(([until, relays]) => {
+          // If the relay gave us a bunch of stuff outside our window, hold on to
+          // it until it's needed, and don't request it again. Don't add since to
+          // our filter so we can paginate without stalling.
+          this.buffer = this.buffer.filter(event => {
+            if (event.created_at > this.since) {
+              onEvent(event)
 
-        // If the relay gave us a bunch of stuff outside our window, hold on to
-        // it until it's needed, and don't request it again
-        this.buffer = this.buffer.filter(event => {
-          if (event.created_at > since) {
-            onEvent(event)
-
-            return false
-          }
-
-          return true
-        })
-
-        return load({
-          relays: relays,
-          filter: ensurePlural(filter).map(mergeLeft({until, since, limit: this.limit})),
-          onChunk: events => {
-            for (const event of events) {
-              if (event.created_at < this.until[event.seen_on]) {
-                this.until[event.seen_on] = event.created_at
-              }
-
-              if (this.seen.has(event.id)) {
-                continue
-              }
-
-              this.seen.add(event.id)
-
-              if (event.created_at < since) {
-                this.buffer.push(event)
-              } else {
-                onEvent(event)
-              }
+              return false
             }
-          },
+
+            return true
+          })
+
+          return load({
+            relays: relays,
+            filter: ensurePlural(filter).map(mergeLeft({until, limit: this.limit})),
+            onChunk: events => {
+              for (const event of events) {
+                if (event.created_at < this.until[event.seen_on]) {
+                  this.until[event.seen_on] = event.created_at
+                }
+
+                if (this.seen.has(event.id)) {
+                  continue
+                }
+
+                this.seen.add(event.id)
+
+                if (event.created_at < this.since) {
+                  this.buffer.push(event)
+                } else {
+                  onEvent(event)
+                }
+              }
+            },
+          })
         })
-      })
     )
 
     // If we got zero results for any relays, they have nothing for the given window,

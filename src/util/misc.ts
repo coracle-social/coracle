@@ -118,7 +118,7 @@ export const poll = (t, cb) => {
 }
 
 export const createScroller = (loadMore, {reverse = false, element = null} = {}) => {
-  const THRESHOLD = 2000
+  const THRESHOLD = 3000
 
   element = element || document.body
 
