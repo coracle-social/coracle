@@ -1,5 +1,6 @@
 # Current
 
+- [ ] Fix multiplexing
 - [ ] Extract libraries
   - Cursor
   - parseContent

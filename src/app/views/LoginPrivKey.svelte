@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {Capacitor} from "@capacitor/core"
   import {toHex} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
@@ -37,9 +38,11 @@
     </div>
     <Anchor type="button" on:click={logIn}>Log In</Anchor>
   </div>
-  <p class="rounded border-2 border-solid border-warning bg-gray-8 py-3 px-6">
-    Note that sharing your private key directly is not recommended, instead you should use a <Anchor
-      href={nip07}
-      external>compatible browser extension</Anchor> to securely store your key.
-  </p>
+  {#if !Capacitor.isNativePlatform()}
+    <p class="rounded border-2 border-solid border-warning bg-gray-8 py-3 px-6">
+      Note that sharing your private key directly is not recommended, instead you should use a <Anchor
+        href={nip07}
+        external>compatible browser extension</Anchor> to securely store your key.
+    </p>
+  {/if}
 </Content>

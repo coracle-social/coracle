@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {Capacitor} from "@capacitor/core"
   import {fly} from "svelte/transition"
   import {navigate} from "svelte-routing"
   import {modal} from "src/partials/state"
@@ -43,8 +44,11 @@
         <i>To the Nostr Network</i>
       </div>
       <p class="text-center">
-        Click below to log in or create an account. If you have a <Anchor href={nip07} external
-          >compatible browser extension</Anchor> installed, we will use that.
+        Click below to log in or create an account.
+        {#if !Capacitor.isNativePlatform()}
+          If you have a <Anchor href={nip07} external>compatible browser extension</Anchor> installed,
+          we will use that.
+        {/if}
       </p>
       <div class="flex flex-col items-center gap-4">
         <div class="flex gap-4">
