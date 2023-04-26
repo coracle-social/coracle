@@ -13,6 +13,7 @@ import {Tags, isNotification, userKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import {notifications, watch, userEvents, contacts, rooms} from "src/agent/db"
+import {enableZaps} from "src/agent/settings"
 import keys from "src/agent/keys"
 import network from "src/agent/network"
 import pool from "src/agent/pool"
@@ -168,6 +169,7 @@ export const listen = async () => {
   const pubkey = user.getPubkey()
   const {roomsJoined} = user.getProfile()
   const since = now() - timedelta(30, "days")
+  const kinds = enableZaps ? [1, 4, 7, 9735] : [1, 4, 7]
   const eventIds = doPipe(userEvents.all({kind: 1, created_at: {$gt: since}}), [
     sortBy(e => -e.created_at),
     slice(0, 256),
@@ -180,8 +182,8 @@ export const listen = async () => {
     relays: getUserReadRelays(),
     filter: [
       {kinds: [1, 4], authors: [pubkey], since},
-      {kinds: [1, 7, 4, 9735], "#p": [pubkey], since},
-      {kinds: [1, 7, 4, 9735], "#e": eventIds, since},
+      {kinds, "#p": [pubkey], since},
+      {kinds, "#e": eventIds, since},
       {kinds: [42], "#e": roomsJoined, since},
     ],
     onChunk: async events => {

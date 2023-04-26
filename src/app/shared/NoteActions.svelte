@@ -15,6 +15,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
+  import {enableZaps} from "src/agent/settings"
   import {getEventPublishRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
   import pool from "src/agent/pool"
@@ -126,16 +127,18 @@
         })} />
       {$likesCount}
     </button>
-    <button
-      class={cx("w-20 text-left", {
-        "pointer-events-none opacity-50":
-          disableActions || $author.pubkey === user.getPubkey() || !$author.zapper,
-        "text-accent": zap,
-      })}
-      on:click={startZap}>
-      <i class="fa fa-bolt cursor-pointer" />
-      {formatSats($zapsTotal)}
-    </button>
+    {#if enableZaps}
+      <button
+        class={cx("w-20 text-left", {
+          "pointer-events-none opacity-50":
+            disableActions || $author.pubkey === user.getPubkey() || !$author.zapper,
+          "text-accent": zap,
+        })}
+        on:click={startZap}>
+        <i class="fa fa-bolt cursor-pointer" />
+        {formatSats($zapsTotal)}
+      </button>
+    {/if}
   </div>
   <div class="flex items-center">
     {#if pool.forceUrls.length === 0}

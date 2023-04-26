@@ -15,6 +15,7 @@ import {
 import {personKinds, appDataKeys, findReplyId} from "src/util/nostr"
 import {chunk, ensurePlural} from "hurdak/lib/hurdak"
 import {batch, now, timedelta} from "src/util/misc"
+import {enableZaps} from "src/agent/settings"
 import {
   getRelaysForEventParent,
   getAllPubkeyWriteRelays,
@@ -252,6 +253,7 @@ const loadParents = (notes, opts = {}) => {
 const streamContext = ({notes, onChunk, maxDepth = 2}) => {
   const subs = []
   const seen = new Set()
+  const kinds = enableZaps ? [1, 7, 9735] : [1, 7]
   const relays = sampleRelays(aggregateScores(notes.map(getRelaysForEventChildren)))
 
   const loadChunk = (events, depth) => {
@@ -274,7 +276,7 @@ const streamContext = ({notes, onChunk, maxDepth = 2}) => {
       subs.push(
         listen({
           relays,
-          filter: [{kinds: [1, 7, 9735], "#e": ids, since: now()}],
+          filter: [{kinds, "#e": ids, since: now()}],
           onChunk: newEvents => {
             onChunk(newEvents)
 
@@ -296,7 +298,7 @@ const streamContext = ({notes, onChunk, maxDepth = 2}) => {
     chunk(256, newIds).forEach(ids => {
       load({
         relays,
-        filter: [{kinds: [1, 7, 9735], "#e": ids}],
+        filter: [{kinds, "#e": ids}],
         onChunk: newEvents => {
           onChunk(newEvents)
 
