@@ -1,10 +1,11 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {theme} from "src/partials/state"
+  import {theme, appName} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import {menuIsOpen} from "src/app/state"
   import {newNotifications} from "src/app/state"
 
+  const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
   const toggleMenu = () => menuIsOpen.update(x => !x)
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 
@@ -27,8 +28,8 @@
       type="unstyled"
       href="https://info.coracle.social"
       class="flex items-center gap-2">
-      <img alt="Coracle Logo" src="/images/logo.png" class="w-8" />
-      <h1 class="staatliches text-3xl">Coracle</h1>
+      <img alt="Coracle Logo" src={logoUrl} class="w-8" />
+      <h1 class="staatliches text-3xl">{appName}</h1>
     </Anchor>
     <i class="fa fa-lightbulb -m-4 cursor-pointer p-4 text-lg" on:click={toggleTheme} />
   </div>

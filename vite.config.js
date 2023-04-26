@@ -6,6 +6,8 @@ import sveltePreprocess from "svelte-preprocess"
 import {svelte} from "@sveltejs/vite-plugin-svelte"
 import {nodePolyfills} from "vite-plugin-node-polyfills"
 
+console.log(process.env.VITE_APP_NAME)
+
 export default defineConfig({
   server: {
     https: false,
@@ -27,8 +29,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       injectRegister: "auto",
       manifest: {
-        name: "Coracle",
-        short_name: "Coracle",
+        name: process.env.VITE_APP_NAME,
+        short_name: process.env.VITE_APP_NAME,
         description: "Nostr, your way.",
         theme_color: "#EB5E28",
         icons: [

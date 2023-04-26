@@ -6,6 +6,10 @@ import {writable, get} from "svelte/store"
 import {globalHistory} from "svelte-routing/src/history"
 import {sleep, synced, WritableList} from "src/util/misc"
 
+// Settings
+
+export const appName = import.meta.env.VITE_APP_NAME
+
 // Location
 
 export const location = (() => {

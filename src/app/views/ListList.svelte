@@ -1,7 +1,7 @@
 <script type="ts">
   import {indexBy} from "ramda"
   import {Tags} from "src/util/nostr"
-  import {modal} from "src/partials/state"
+  import {modal, appName} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
@@ -35,7 +35,7 @@
   <p>
     Lists allow you to group people and topics to create custom feeds. You can create new lists by
     handing using the "<i class="fa fa-plus" /> List" button above, or by clicking the
-    <i class="fa fa-scroll px-1" /> icon that appears throughout Coracle.
+    <i class="fa fa-scroll px-1" /> icon that appears throughout {appName}.
   </p>
   {#each $lists as e (e.id)}
     {@const meta = Tags.from(e).asMeta()}

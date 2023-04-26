@@ -1,7 +1,7 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
   import {copyToClipboard} from "src/util/html"
-  import {modal, toast} from "src/partials/state"
+  import {modal, appName, toast} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -36,5 +36,5 @@
       Log in
     </Anchor>
   </div>
-  <p>If you don't want to save your keys now, you can find them later in Coracle's settings.</p>
+  <p>If you don't want to save your keys now, you can find them later in {appName}'s settings.</p>
 </Content>

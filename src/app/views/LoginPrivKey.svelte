@@ -1,7 +1,7 @@
 <script lang="ts">
   import {Capacitor} from "@capacitor/core"
   import {toHex} from "src/util/nostr"
-  import {toast} from "src/partials/state"
+  import {toast, appName} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
@@ -29,7 +29,7 @@
 
 <Content size="lg" class="text-center">
   <Heading>Login with your Private Key</Heading>
-  <p>To give Coracle full access to your nostr identity, enter your private key below.</p>
+  <p>To give {appName} full access to your nostr identity, enter your private key below.</p>
   <div class="flex gap-2">
     <div class="flex-grow">
       <Input type="password" bind:value={nsec} placeholder="nsec...">

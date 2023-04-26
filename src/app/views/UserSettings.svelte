@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {fly} from "svelte/transition"
   import {navigate} from "svelte-routing"
-  import {toast} from "src/partials/state"
+  import {toast, appName} from "src/partials/state"
   import Toggle from "src/partials/Toggle.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
@@ -33,7 +33,7 @@
   <Content>
     <div class="mb-4 flex flex-col items-center justify-center">
       <Heading>App Settings</Heading>
-      <p>Make Coracle work the way you want it to.</p>
+      <p>Make {appName} work the way you want it to.</p>
     </div>
     <div class="flex w-full flex-col gap-8">
       <div class="flex flex-col gap-1">
@@ -42,8 +42,7 @@
           <Toggle bind:value={values.showMedia} />
         </div>
         <p class="text-sm text-gray-4">
-          If enabled, coracle will automatically retrieve a link preview for the last link in any
-          note.
+          If enabled, {appName} will automatically retrieve a link preview for the last link in any note.
         </p>
       </div>
       <div class="flex flex-col gap-1">
@@ -72,8 +71,8 @@
           <i slot="before" class="fa-solid fa-server" />
         </Input>
         <p class="text-sm text-gray-4">
-          Enter a custom url for Coracle's helper application. Dufflepud is used for hosting images
-          and loading link previews. You can find the source code <Anchor
+          Enter a custom url for {appName}'s helper application. Dufflepud is used for hosting
+          images and loading link previews. You can find the source code <Anchor
             href="https://github.com/coracle-social/dufflepud">here</Anchor
           >.
         </p>
@@ -99,8 +98,8 @@
           <Toggle bind:value={values.reportAnalytics} />
         </div>
         <p class="text-sm text-gray-4">
-          Keep this enabled if you would like the Coracle developers to be able to know what
-          features are used, and to diagnose and fix bugs.
+          Keep this enabled if you would like developers to be able to know what features are used,
+          and to diagnose and fix bugs.
         </p>
       </div>
       <Button type="submit" class="text-center">Save</Button>
