@@ -1,12 +1,10 @@
 # Current
 
-- [ ] Fix cursor
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
 
 # Core
 
-- [ ] Key login should accept bech32 and hex
 - [ ] Make mutes private
 - [ ] Write multi-relay pagination into paravel and open source it
   - https://github.com/nostr-protocol/nips/pull/408

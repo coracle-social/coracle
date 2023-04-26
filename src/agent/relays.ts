@@ -28,13 +28,15 @@ export const initializeRelayList = async () => {
   await relays.patch(pool.defaultUrls.map(objOf("url")))
 
   // Load relays from nostr.watch via dufflepud
-  try {
-    const url = import.meta.env.VITE_DUFFLEPUD_URL + "/relay"
-    const json = await fetchJson(url)
+  if (pool.forceUrls.length === 0) {
+    try {
+      const url = import.meta.env.VITE_DUFFLEPUD_URL + "/relay"
+      const json = await fetchJson(url)
 
-    await relays.patch(json.relays.filter(isRelay).map(objOf("url")))
-  } catch (e) {
-    warn("Failed to fetch relays list", e)
+      await relays.patch(json.relays.filter(isRelay).map(objOf("url")))
+    } catch (e) {
+      warn("Failed to fetch relays list", e)
+    }
   }
 }
 

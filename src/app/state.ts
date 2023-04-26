@@ -7,7 +7,7 @@ import {writable} from "svelte/store"
 import {max, omit, pluck, sortBy, find, slice, propEq} from "ramda"
 import {createMap, doPipe, first} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
-import {hash} from "src/util/misc"
+import {hash, sleep} from "src/util/misc"
 import {now, timedelta} from "src/util/misc"
 import {Tags, isNotification, userKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
@@ -227,10 +227,26 @@ export const loadAppData = async pubkey => {
   }
 }
 
-export const login = (method, key) => {
+export const login = async (method, key) => {
   keys.login(method, key)
 
-  modal.push({type: "login/connect", noEscape: true})
+  if (pool.forceUrls.length > 0) {
+    modal.replace({
+      type: "message",
+      message: "Logging you in...",
+      spinner: true,
+      noEscape: true,
+    })
+
+    await Promise.all([
+      sleep(1500),
+      network.loadPeople([user.getPubkey()], {force: true, kinds: userKinds}),
+    ])
+
+    navigate("/notes")
+  } else {
+    modal.push({type: "login/connect", noEscape: true})
+  }
 }
 
 export const mergeParents = (notes: Array<DisplayEvent>) => {

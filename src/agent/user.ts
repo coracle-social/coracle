@@ -47,7 +47,9 @@ const settings = derived(profile, prop("settings"))
 const roomsJoined = derived(profile, prop("rooms_joined")) as Readable<string>
 const lastChecked = derived(profile, prop("last_checked")) as Readable<Record<string, number>>
 const petnames = derived(profile, prop("petnames")) as Readable<Array<Array<string>>>
-const relays = derived(profile, prop("relays")) as Readable<Array<Relay>>
+const relays = derived(profile, p =>
+  pool.forceRelays.length > 0 ? pool.forceRelays : p.relays
+) as Readable<Array<Relay>>
 const mutes = derived(profile, prop("mutes")) as Readable<Array<[string, string]>>
 const lists = derived(profile, prop("lists")) as Readable<Array<MyEvent>>
 

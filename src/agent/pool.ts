@@ -94,6 +94,7 @@ const Meta = {
 }
 
 const forceUrls = (import.meta.env.VITE_FORCE_RELAYS || "").split(",").filter(identity)
+const forceRelays = forceUrls.map(url => ({url, write: true}))
 
 const countRelay = forceUrls[0] || "wss://rbr.bio"
 
@@ -402,6 +403,7 @@ export default {
   Config,
   Meta,
   forceUrls,
+  forceRelays,
   defaultUrls,
   disconnect,
   getQuality,
