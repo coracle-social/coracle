@@ -16,6 +16,7 @@
   import {getPersonWithFallback} from "src/agent/db"
   import network from "src/agent/network"
   import user from "src/agent/user"
+  import pool from "src/agent/pool"
   import keys from "src/agent/keys"
   import {loadAppData} from "src/app/state"
   import {modal} from "src/partials/state"
@@ -23,6 +24,17 @@
   export let stage
 
   const privkey = generatePrivateKey()
+
+  const {relays} = user
+
+  if ($relays.length === 0) {
+    user.updateRelays(() =>
+      (pool.forceUrls.length > 0 ? pool.forceUrls : pool.defaultUrls).map(url => ({
+        url,
+        write: true,
+      }))
+    )
+  }
 
   const signup = async () => {
     await keys.login("privkey", privkey)

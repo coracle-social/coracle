@@ -8,19 +8,9 @@
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {watch} from "src/agent/db"
-  import pool from "src/agent/pool"
   import user from "src/agent/user"
 
   const {relays} = user
-
-  if ($relays.length === 0) {
-    user.updateRelays(() =>
-      (pool.forceUrls.length > 0 ? pool.forceUrls : pool.defaultUrls).map(url => ({
-        url,
-        write: true,
-      }))
-    )
-  }
 
   let q = ""
   let search

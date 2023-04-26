@@ -95,12 +95,17 @@ const Meta = {
 
 const forceUrls = (import.meta.env.VITE_FORCE_RELAYS || "").split(",").filter(identity)
 
-const defaultUrls = [
-  "wss://purplepag.es",
-  "wss://relay.damus.io",
-  "wss://relay.nostr.band",
-  "wss://nostr-pub.wellorder.net",
-]
+const countRelay = forceUrls[0] || "wss://rbr.bio"
+
+const defaultUrls =
+  forceUrls.length > 0
+    ? forceUrls
+    : [
+        "wss://purplepag.es",
+        "wss://relay.damus.io",
+        "wss://relay.nostr.band",
+        "wss://nostr-pub.wellorder.net",
+      ]
 
 const getUrls = relays => {
   if (relays.length === 0) {
@@ -378,7 +383,7 @@ async function subscribe({relays, filter, onEvent, onEose}: SubscribeOpts) {
 
 async function count(filter) {
   const filters = ensurePlural(filter)
-  const executor = await getExecutor(["wss://rbr.bio"])
+  const executor = await getExecutor([countRelay])
 
   return new Promise(resolve => {
     const sub = executor.count(filters, {

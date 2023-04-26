@@ -154,7 +154,9 @@ class Cursor {
 
           return load({
             relays: relays,
-            filter: ensurePlural(filter).map(mergeLeft({until, limit: this.limit})),
+            filter: ensurePlural(filter).map(
+              mergeLeft({until, limit: this.limit, since: this.since})
+            ),
             onChunk: events => {
               for (const event of events) {
                 if (event.created_at < this.until[event.seen_on]) {
