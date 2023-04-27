@@ -1,10 +1,10 @@
 import {prop, whereEq, reject, last, fromPairs} from "ramda"
-import {uuid, switcher} from "hurdak/lib/hurdak"
+import {uuid, range} from "hurdak/lib/hurdak"
 import type {Writable} from "svelte/store"
 import {navigate} from "svelte-routing"
 import {writable, get} from "svelte/store"
 import {globalHistory} from "svelte-routing/src/history"
-import {sleep, synced, WritableList} from "src/util/misc"
+import {sleep, shadeColor, synced, WritableList} from "src/util/misc"
 
 // Settings
 
@@ -94,14 +94,23 @@ location.subscribe($location => {
 
 // Themes
 
-const parseTheme = s => fromPairs(s.split(",").map(x => x.split(":")))
-const THEME_LIGHT = parseTheme(import.meta.env.VITE_THEME_LIGHT)
-const THEME_DARK = parseTheme(import.meta.env.VITE_THEME_DARK)
+const THEME = fromPairs(import.meta.env.VITE_THEME.split(",").map(x => x.split(":")))
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
 
 export const theme = synced("ui/theme", prefersDark ? "dark" : "light")
 
-export const getThemeColors = $theme => switcher($theme, {light: THEME_LIGHT, dark: THEME_DARK})
+export const getThemeColors = $theme => {
+  for (const x of range(1, 10)) {
+    // const lum = $theme === 'dark' ? (x - 5) * 30 : (4 - x) * 30
+    const lum = $theme === "dark" ? (5 - x) * 25 : (x - 5) * 25
+
+    console.log(lum, shadeColor(THEME[`gray-${$theme}`], lum))
+
+    THEME[`gray-${x}`] = shadeColor(THEME[`gray-${$theme}`], lum)
+  }
+
+  return THEME
+}
 
 export const getThemeColor = ($theme, k) => prop(k, getThemeColors($theme))
 

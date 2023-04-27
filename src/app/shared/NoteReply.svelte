@@ -99,14 +99,14 @@
     class="note-reply relative z-10 my-2 flex flex-col gap-1"
     bind:this={container}
     on:click|stopPropagation>
-    <div class={`border border-${borderColor} border-solid rounded-2xl overflow-hidden`}>
+    <div class={`border border-${borderColor} overflow-hidden rounded-2xl border-solid`}>
       <div class="bg-gray-7" class:rounded-b={data.mentions.length === 0}>
         <Compose bind:this={reply} onSubmit={send}>
           <button
             slot="addon"
             on:click={send}
             class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid
-                 border-gray-7 p-4 py-8 text-gray-3 transition-all hover:bg-accent">
+                 border-gray-7 p-4 py-8 text-gray-2 transition-all hover:bg-accent">
             <i class="fa fa-paper-plane fa-xl" />
           </button>
         </Compose>
@@ -121,7 +121,7 @@
         </div>
       {/if}
       <div class={`h-px bg-${borderColor}`} />
-      <div class="flex gap-2 rounded-b bg-gray-7 p-2 text-sm text-gray-3">
+      <div class="flex gap-2 rounded-b bg-gray-7 p-2 text-sm text-gray-2">
         <div class="inline-block border-r border-solid border-gray-6 py-2 pl-1 pr-3">
           <div class="flex cursor-pointer items-center gap-3">
             <ImageInput bind:value={data.image} icon="image" hideInput>
@@ -136,7 +136,7 @@
               {displayPerson(getPersonWithFallback(p))}
             </Chip>
           {:else}
-            <div class="text-gray-3 inline-block py-2">No mentions</div>
+            <div class="text-gray-2 inline-block py-2">No mentions</div>
           {/each}
           <div class="-mb-2" />
         </div>

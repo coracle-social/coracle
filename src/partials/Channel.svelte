@@ -140,11 +140,11 @@
         bind:this={textarea}
         on:keypress={onKeyPress}
         class="w-full resize-none bg-gray-6 p-2
-               text-gray-3 outline-0 placeholder:text-gray-1" />
+               text-gray-2 outline-0 placeholder:text-gray-1" />
       <button
         on:click={send}
         class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-gray-7 p-4
-               py-8 text-gray-3 transition-all hover:bg-accent ">
+               py-8 text-gray-2 transition-all hover:bg-accent ">
         <i class="fa-solid fa-paper-plane fa-xl" />
       </button>
     </div>
@@ -154,7 +154,7 @@
       class="fixed bottom-32 flex w-full cursor-pointer justify-center"
       transition:fly|local={{y: 20}}
       on:click={scrollToBottom}>
-      <div class="rounded-full bg-accent py-2 px-4 text-gray-3">New messages found</div>
+      <div class="rounded-full bg-accent py-2 px-4 text-gray-2">New messages found</div>
     </div>
   {/if}
 </div>

@@ -20,7 +20,7 @@
 
 <div
   class="fixed top-0 z-10 flex h-16 w-full items-center justify-between border-b
-            border-gray-6 bg-gray-7 p-4 text-gray-3">
+            border-gray-6 bg-gray-7 p-4 text-gray-2">
   <div class="fa fa-bars fa-2xl -m-6 cursor-pointer p-6 lg:hidden" on:click={toggleMenu} />
   <div class="flex items-center gap-4">
     <Anchor

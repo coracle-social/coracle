@@ -86,7 +86,7 @@
 </script>
 
 <div
-  class="w-full min-w-0 p-2 text-gray-3 outline-0"
+  class="w-full min-w-0 p-2 text-gray-2 outline-0"
   autofocus
   contenteditable
   bind:this={input}

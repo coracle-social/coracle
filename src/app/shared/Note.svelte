@@ -184,7 +184,7 @@
     <div class="relative">
       <div
         class="absolute top-0 right-0 z-10 -mt-4 -mr-2 flex h-6 w-6 cursor-pointer items-center
-                 justify-center rounded-full border border-solid border-gray-7 bg-gray-8 text-gray-3"
+                 justify-center rounded-full border border-solid border-gray-7 bg-gray-8 text-gray-2"
         on:click={() => {
           collapsed = !collapsed
         }}>
