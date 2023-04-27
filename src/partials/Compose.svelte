@@ -170,6 +170,24 @@
     selection.collapse(input, 0)
   }
 
+  export const write = text => {
+    const selection = window.getSelection()
+    const textNode = document.createTextNode(text)
+
+    selection.getRangeAt(0).insertNode(textNode)
+    selection.collapse(textNode, text.length)
+
+    autocomplete()
+  }
+
+  export const newlines = n => {
+    const selection = window.getSelection()
+    const newLines = createNewLines(2)
+
+    selection.getRangeAt(0).insertNode(newLines)
+    selection.collapse(newLines, 2)
+  }
+
   export const parse = () => {
     let {content, annotations} = contenteditable.parse()
     const topics = pluck("value", annotations.filter(propEq("prefix", "#")))

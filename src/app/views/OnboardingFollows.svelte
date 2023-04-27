@@ -39,7 +39,7 @@
     </p>
     <Anchor
       type="button-accent"
-      on:click={() => modal.replace({type: "onboarding", stage: "complete"})}>
+      on:click={() => modal.replace({type: "onboarding", stage: "note"})}>
       Continue
     </Anchor>
   </Content>

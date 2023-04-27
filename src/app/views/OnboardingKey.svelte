@@ -33,7 +33,7 @@
     <Anchor
       type="button-accent"
       on:click={() => modal.replace({type: "onboarding", stage: nextStage})}>
-      Log in
+      Got it
     </Anchor>
   </div>
   <p>If you don't want to save your keys now, you can find them later in {appName}'s settings.</p>

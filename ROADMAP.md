@@ -1,5 +1,7 @@
 # Current
 
+- [ ] Enable global view via env var
+- [ ] Ask for name/image, first post on signup
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
 
