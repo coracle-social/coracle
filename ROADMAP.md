@@ -1,7 +1,7 @@
 # Current
 
-- [ ] Enable global view via env var
-- [ ] Ask for name/image, first post on signup
+- [ ] Fix cursor
+- [ ] Add coupon code registration for relay
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
 

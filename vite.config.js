@@ -6,8 +6,6 @@ import sveltePreprocess from "svelte-preprocess"
 import {svelte} from "@sveltejs/vite-plugin-svelte"
 import {nodePolyfills} from "vite-plugin-node-polyfills"
 
-console.log(process.env.VITE_APP_NAME)
-
 export default defineConfig({
   server: {
     https: false,

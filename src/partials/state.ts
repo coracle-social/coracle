@@ -101,10 +101,7 @@ export const theme = synced("ui/theme", prefersDark ? "dark" : "light")
 
 export const getThemeColors = $theme => {
   for (const x of range(1, 10)) {
-    // const lum = $theme === 'dark' ? (x - 5) * 30 : (4 - x) * 30
     const lum = $theme === "dark" ? (5 - x) * 25 : (x - 5) * 25
-
-    console.log(lum, shadeColor(THEME[`gray-${$theme}`], lum))
 
     THEME[`gray-${x}`] = shadeColor(THEME[`gray-${$theme}`], lum)
   }

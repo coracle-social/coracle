@@ -8,7 +8,7 @@
   import Content from "src/partials/Content.svelte"
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {sampleRelays} from "src/agent/relays"
+  import {sampleRelays, getUserReadRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import {watch} from "src/agent/db"
   import user from "src/agent/user"
@@ -20,10 +20,17 @@
   }
 
   const loadPeople = debounce(500, search => {
+    // If we have a query, search using nostr.band. If not, ask for random profiles.
+    // This allows us to populate results even if search isn't supported by forced urls
     if (q.length > 2) {
       network.load({
         relays: sampleRelays([{url: "wss://relay.nostr.band"}]),
         filter: [{kinds: [0], search, limit: 10}],
+      })
+    } else {
+      network.load({
+        relays: getUserReadRelays(),
+        filter: [{kinds: [0], limit: 50}],
       })
     }
   })

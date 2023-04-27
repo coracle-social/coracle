@@ -7,8 +7,6 @@ export const defaultFollows = (import.meta.env.VITE_DEFAULT_FOLLOWS || "")
   .split(",")
   .filter(identity)
 
-console.log(defaultFollows)
-
 export const getFollows = pubkey =>
   Tags.wrap(getPersonWithFallback(pubkey).petnames).type("p").values().all()
 
