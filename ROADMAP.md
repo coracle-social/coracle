@@ -2,6 +2,8 @@
 
 - [ ] Fix cursor
 - [ ] Add coupon code registration for relay
+- [ ] Repurpose chat as groups
+- [ ] Avoid leaking events from private relays
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
 

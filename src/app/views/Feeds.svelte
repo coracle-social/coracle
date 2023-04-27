@@ -72,7 +72,7 @@
   <div>
     <Tabs tabs={visibleTabs} activeTab={$feedsTab} {setActiveTab}>
       {#if $canPublish}
-        {#if $lists.length > 1}
+        {#if $lists.length > 0}
           <Popover placement="bottom" opts={{hideOnClick: true}} theme="transparent">
             <i slot="trigger" class="fa fa-ellipsis-v cursor-pointer p-2" />
             <div

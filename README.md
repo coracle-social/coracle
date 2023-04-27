@@ -28,6 +28,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] AUTH (NIP-42) support for paid relays
 - [x] Multiplextr support for reducing bandwidth
 - [x] Profile and note metadata
+- [x] White-labeling support
 - [ ] Exportable copy of all user events
 - [ ] Reporting and basic distributed moderation
 - [ ] Content and person recommendations
