@@ -7,7 +7,7 @@
 </script>
 
 <div
-  on:click
+  on:click|stopPropagation
   in:fly={{y: 20}}
   class={cx($$props.class, "card rounded-2xl p-3 text-gray-2", {
     "border border-solid border-gray-6 bg-gray-7": !invertColors,

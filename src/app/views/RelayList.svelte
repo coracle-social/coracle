@@ -46,8 +46,8 @@
         <h2 class="staatliches text-2xl">Other relays</h2>
       </div>
       <p>
-        {appName} automatically discovers relays as you browse the network. Adding more relays will generally
-        make things quicker to load, at the expense of higher data usage.
+        {appName} automatically discovers relays as you browse the network. Adding more
+        relays will generally make things quicker to load, at the expense of higher data usage.
       </p>
       <RelaySearch />
     </div>

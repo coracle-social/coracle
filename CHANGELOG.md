@@ -8,6 +8,15 @@
 - [x] Remember whether messages/notifications have been read
 - [x] Remember chat membership
 - [x] Add new cursor implementation to paginate relays independently
+- [x] Fix lists selector
+- [x] Simplify theme configuration
+- [x] Add profile info and first note to onboarding
+- [x] Make app name configurable
+- [x] Improve forced-relay experience
+- [x] Add env var for disabling zaps
+- [x] Split notifications into multiple tabs
+- [x] Improve modal stacking
+- [x] Render quotes inline rather than at the bottom of the note
 
 ## 0.2.24
 
