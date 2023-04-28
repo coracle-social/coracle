@@ -1,5 +1,6 @@
 import type {MyEvent, Relay} from "src/util/types"
 import {
+  max,
   without,
   mergeLeft,
   fromPairs,
@@ -131,7 +132,7 @@ class Cursor {
     const untilCopy = {...this.until}
 
     if (this.delta) {
-      this.since -= this.delta
+      this.since = Object.values(this.until).reduce(max, 0) - this.delta
     }
 
     await Promise.all(
@@ -145,8 +146,10 @@ class Cursor {
             ),
             onChunk: events => {
               for (const event of events) {
-                if (event.created_at < this.until[event.seen_on]) {
-                  this.until[event.seen_on] = event.created_at
+                for (const url of event.seen_on) {
+                  if (event.created_at < this.until[url]) {
+                    this.until[url] = event.created_at
+                  }
                 }
 
                 if (this.seen.has(event.id)) {

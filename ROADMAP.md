@@ -1,6 +1,5 @@
 # Current
 
-- [ ] Fix cursor
 - [ ] Add coupon code registration for relay
 - [ ] Repurpose chat as groups
 - [ ] Avoid leaking events from private relays
