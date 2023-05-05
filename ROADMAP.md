@@ -1,7 +1,7 @@
 # Current
 
-- [ ] Add search for topics
 - [ ] Fix relay recommendations
+- [ ] Preview note1
 - [ ] Pagination is slow. Maybe load with no window first, then add since?
 - [ ] Add coupon code registration for relay
 - [ ] Repurpose chat as groups
@@ -47,6 +47,9 @@
 
 # UI/Features
 
+- [ ] Combine search and scan
+  - [ ] Search for topics using nostr.band
+  - [ ] Include notes in search results
 - [ ] Use real links so cmd+click or right click work
 - [ ] Allow sharing of lists/following other people's lists
 - [ ] Add suggestion list for topics on compose

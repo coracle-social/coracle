@@ -210,7 +210,7 @@ async function getExecutor(urls, {bypassBoot = false} = {}) {
     onAuth(url, challenge) {
       Meta.errors[url] = "unauthorized"
 
-      return Config.authHandler(url, challenge)
+      return Config.authHandler?.(url, challenge)
     },
     onOk(url, id, ok, message) {
       Meta.errors[url] = ok ? null : "forbidden"

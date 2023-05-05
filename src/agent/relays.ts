@@ -120,14 +120,8 @@ export const getRelaysForEventChildren = event => {
   )
 }
 
-export const getRelayForEventHint = event => ({url: event.seen_on[0], score: 1})
-
-export const getRelayForPersonHint = (pubkey, event = null) => {
+export const getRelayForPersonHint = pubkey => {
   let relays = getPubkeyWriteRelays(pubkey)
-
-  if (relays.length === 0 && event) {
-    relays = [getRelayForEventHint(event)]
-  }
 
   if (relays.length === 0) {
     relays = getPubkeyReadRelays(pubkey)
@@ -135,6 +129,9 @@ export const getRelayForPersonHint = (pubkey, event = null) => {
 
   return first(relays)
 }
+
+export const getRelayForEventHint = ({pubkey, seen_on: [url]}) =>
+  getRelayForPersonHint(pubkey) || {url, score: 1}
 
 // If we're replying or reacting to an event, we want the author to know, as well as
 // anyone else who is tagged in the original event or the reply. Get everyone's read

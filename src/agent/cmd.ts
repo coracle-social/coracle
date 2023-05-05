@@ -1,8 +1,8 @@
 import {map, pick, last, uniqBy} from "ramda"
 import {get} from "svelte/store"
 import {doPipe} from "hurdak/lib/hurdak"
-import {parseContent, Tags, roomAttrs, displayPerson, findReplyId, findRootId} from "src/util/nostr"
-import {getRelayForPersonHint} from "src/agent/relays"
+import {parseContent, Tags, roomAttrs, displayPerson, findRoot, findReply} from "src/util/nostr"
+import {getRelayForPersonHint, getRelayForEventHint} from "src/agent/relays"
 import {getPersonWithFallback} from "src/agent/db"
 import pool from "src/agent/pool"
 import sync from "src/agent/sync"
@@ -106,9 +106,9 @@ const deleteEvent = ids => new PublishableEvent(5, {tags: ids.map(id => ["e", id
 
 const processMentions = map(pubkey => {
   const name = displayPerson(getPersonWithFallback(pubkey))
-  const relay = getRelayForPersonHint(pubkey)
+  const pHint = getRelayForPersonHint(pubkey)
 
-  return ["p", pubkey, relay?.url || "", name]
+  return ["p", pubkey, pHint?.url || "", name]
 })
 
 const tagsFromContent = (content, tags) => {
@@ -122,9 +122,9 @@ const tagsFromContent = (content, tags) => {
 
     if (type.match(/nostr:(nprofile|npub)/) && !seen.has(value.pubkey)) {
       const name = displayPerson(getPersonWithFallback(value.pubkey))
-      const relay = getRelayForPersonHint(value.pubkey)
+      const pHint = getRelayForPersonHint(value.pubkey)
 
-      tags = tags.concat([["p", value.pubkey, relay?.url || "", name]])
+      tags = tags.concat([["p", value.pubkey, pHint?.url || "", name]])
       seen.add(value.pubkey)
     }
   }
@@ -133,14 +133,15 @@ const tagsFromContent = (content, tags) => {
 }
 
 const getReplyTags = n => {
-  const {url} = getRelayForPersonHint(n.pubkey, n)
-  const rootId = findRootId(n) || findReplyId(n) || n.id
+  const pHint = getRelayForPersonHint(n.pubkey)
+  const eHint = getRelayForEventHint(n) || pHint
+  const reply = ["e", n.id, eHint?.url || "", "reply"]
+  const root = doPipe(findRoot(n) || findReply(n) || reply, [
+    t => (t.length < 3 ? t.concat(eHint?.url || "") : t),
+    t => t.slice(0, 3).concat("root"),
+  ])
 
-  return [
-    ["p", n.pubkey, url],
-    ["e", n.id, url, "reply"],
-    ["e", rootId, url, "root"],
-  ]
+  return [["p", n.pubkey, pHint?.url || ""], root, reply]
 }
 
 const tagsFromParent = (n, newTags = []) => {
@@ -188,7 +189,7 @@ class PublishableEvent {
   }
   async publish(relays, onProgress = null, verb = "EVENT") {
     const event = await this.getSignedEvent()
-    //console.log(event); return
+    // console.log(event); return
     const promise = pool.publish({relays, event, onProgress, verb})
 
     // Copy the event since loki mutates it to add metadata
