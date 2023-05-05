@@ -1,4 +1,4 @@
-import {filter, is, uniq, prop, reject, nth, uniqBy, objOf, pick, identity} from "ramda"
+import {is, uniq, prop, reject, nth, uniqBy, objOf, pick, identity} from "ramda"
 import {nip05} from "nostr-tools"
 import {noop, ensurePlural, chunk} from "hurdak/lib/hurdak"
 import {
@@ -251,12 +251,20 @@ addHandler(
   30078,
   profileHandler("last_checked", async (e, p) => {
     if (Tags.from(e).getMeta("d") === "coracle/last_checked/v1") {
-      const updates = filter(
-        ([k, v]) => p.last_checked[k] || 0 < v,
-        Object.entries(await keys.decryptJson(e.content))
-      )
+      const payload = await keys.decryptJson(e.content)
+      const updates = {}
+      for (const k of Object.keys(payload).concat(p.last_checked)) {
+        const v = Math.max(payload[k] || 0, p.last_checked[k] || 0)
 
-      return {...p.last_checked, ...updates}
+        // A bunch of junk got added to this setting. Integer keys, settings, etc
+        if (isNaN(v) || v < 1577836800) {
+          continue
+        }
+
+        updates[k] = v
+      }
+
+      return updates
     }
   })
 )

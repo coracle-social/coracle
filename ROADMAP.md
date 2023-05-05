@@ -1,5 +1,8 @@
 # Current
 
+- [ ] Add search for topics
+- [ ] Fix relay recommendations
+- [ ] Pagination is slow. Maybe load with no window first, then add since?
 - [ ] Add coupon code registration for relay
 - [ ] Repurpose chat as groups
 - [ ] Avoid leaking events from private relays
