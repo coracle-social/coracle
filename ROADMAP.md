@@ -1,5 +1,6 @@
 # Current
 
+- [ ] Mentions don't show up in notifications
 - [ ] Fix relay recommendations
 - [ ] Preview note1
 - [ ] Pagination is slow. Maybe load with no window first, then add since?

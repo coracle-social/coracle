@@ -8,11 +8,11 @@
   export let person
 
   const {pubkey} = person
-  const relays = pluck("url", getPubkeyWriteRelays(pubkey))
+  const relays = pluck("url", getPubkeyWriteRelays(pubkey).slice(0, 5))
   const nprofile = nip19.nprofileEncode({pubkey, relays})
 </script>
 
 <Content size="lg">
-  <QRCode code={nprofile} />
+  <QRCode code={`https://coracle.social/${nprofile}`} />
   <div class="text-center text-gray-1">Copy or scan from a nostr app to share this profile.</div>
 </Content>

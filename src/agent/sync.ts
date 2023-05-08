@@ -251,20 +251,24 @@ addHandler(
   30078,
   profileHandler("last_checked", async (e, p) => {
     if (Tags.from(e).getMeta("d") === "coracle/last_checked/v1") {
-      const payload = await keys.decryptJson(e.content)
-      const updates = {}
-      for (const k of Object.keys(payload).concat(p.last_checked)) {
-        const v = Math.max(payload[k] || 0, p.last_checked[k] || 0)
+      try {
+        const payload = await keys.decryptJson(e.content)
+        const updates = {}
+        for (const k of Object.keys(payload).concat(p.last_checked)) {
+          const v = Math.max(payload[k] || 0, p.last_checked[k] || 0)
 
-        // A bunch of junk got added to this setting. Integer keys, settings, etc
-        if (isNaN(v) || v < 1577836800) {
-          continue
+          // A bunch of junk got added to this setting. Integer keys, settings, etc
+          if (isNaN(v) || v < 1577836800) {
+            continue
+          }
+
+          updates[k] = v
         }
 
-        updates[k] = v
+        return updates
+      } catch (e) {
+        // pass
       }
-
-      return updates
     }
   })
 )
