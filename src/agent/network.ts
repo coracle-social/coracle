@@ -166,10 +166,10 @@ class Cursor {
     )
 
     // If we got zero results for any relays, they have nothing for the given window,
-    // back until up to since for next time
+    // back until up to since for next time, but only for relays currently in the window
     if (this.delta) {
       this.relays.forEach(r => {
-        if (untilCopy[r.url] === this.until[r.url]) {
+        if (this.until[r.url] > this.since && untilCopy[r.url] === this.until[r.url]) {
           this.until[r.url] -= this.delta
         }
       })
