@@ -60,8 +60,6 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5
     const allEvents = []
 
     const attemptToComplete = async force => {
-      const sub = await subPromise
-
       // If we've already unsubscribed we're good
       if (completed) {
         return
@@ -78,7 +76,7 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5
       }
 
       if (isDone || force) {
-        sub.unsub()
+        subPromise.then(sub => sub.unsub())
         resolve(allEvents)
         completed = true
       }
