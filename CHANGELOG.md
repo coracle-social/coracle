@@ -1,5 +1,12 @@
 # Changelog
 
+# 0.2.26
+
+- [x] Fix hanging feeds after a few pages
+- [x] Fix huge QR codes for profile sharing
+- [x] Improve relay hints
+- [x] Fix last_checked corruption
+
 # 0.2.25
 
 - [x] Add purplepag.es to sign in flow to speed things up
