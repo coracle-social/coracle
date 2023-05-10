@@ -24,6 +24,8 @@
   let feedRelay = null
   let displayNote = asDisplayEvent(note)
 
+  const depth = isMobile ? 3 : 6
+
   const setFeedRelay = relay => {
     feedRelay = relay
   }
@@ -43,7 +45,7 @@
       log("NoteDetail", nip19.noteEncode(displayNote.id), displayNote)
 
       sub = network.streamContext({
-        maxDepth: isMobile ? 3 : 6,
+        maxDepth: depth,
         notes: [displayNote],
         onChunk: context => {
           displayNote = first(network.applyContext([displayNote], user.applyMutes(context)))
@@ -67,9 +69,9 @@
   <div in:fly={{y: 20}} class="m-auto flex w-full max-w-2xl flex-col gap-4 p-4">
     <Note
       showContext
-      depth={6}
       anchorId={displayNote.id}
       note={displayNote}
+      {depth}
       {invertColors}
       {feedRelay}
       {setFeedRelay} />
