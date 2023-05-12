@@ -1,7 +1,6 @@
 <script>
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
-  import {quantify} from "hurdak/lib/hurdak"
   import {last, reject, pluck, propEq} from "ramda"
   import {fly} from "svelte/transition"
   import {writable} from "svelte/store"
@@ -25,12 +24,13 @@
 
   export let pubkey = null
   export let nevent = null
+  export let writeTo = null
 
   let q = ""
   let image = null
   let compose = null
   let showSettings = false
-  let relays = writable(getUserWriteRelays())
+  let relays = writable(writeTo ? writeTo.map(url => ({url, score: 1})) : getUserWriteRelays())
 
   const onSubmit = async () => {
     let {content, mentions, topics} = compose.parse()
@@ -122,7 +122,13 @@
         on:click={() => {
           showSettings = true
         }}>
-        <span>Publishing to {quantify($relays.length, "relay")}</span>
+        <span>
+          Publishing to {#if $relays?.length === 1}
+            {last($relays[0].url.split("//"))}
+          {:else}
+            {$relays.length} relays
+          {/if}
+        </span>
         <i class="fa fa-edit" />
       </small>
     </div>
