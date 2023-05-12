@@ -8,10 +8,13 @@
   const {canPublish} = user
 
   const createNote = () => {
-    const matches = $location.pathname.match(/people\/(npub1[0-9a-z]+)/)
-    const pubkey = matches ? nip19.decode(matches[1]).data : null
+    const pubkeyMatch = $location.pathname.match(/people\/(npub1[0-9a-z]+)/)
+    const pubkey = pubkeyMatch ? nip19.decode(pubkeyMatch[1]).data : null
+    const relayMatch = $location.pathname.match(/relays\/(.+)/)
+    const relay = relayMatch ? relayMatch[1] : null
+    const relays = relay ? [relay] : null
 
-    modal.push({type: "note/create", pubkey})
+    modal.push({type: "note/create", pubkey, relays})
   }
 </script>
 
