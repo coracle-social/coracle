@@ -30,7 +30,12 @@
   let image = null
   let compose = null
   let showSettings = false
-  let relays = writable(getUserWriteRelays())
+  let relays = writable(
+    (writeTo ? writeTo.map(url => ({url, score: 1})) : getUserWriteRelays()) as Array<{
+      url: string
+      score: number
+    }>
+  )
 
   const onSubmit = async () => {
     let {content, mentions, topics} = compose.parse()

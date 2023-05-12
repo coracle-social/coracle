@@ -1,5 +1,6 @@
 # Current
 
+- [ ] Add preview proxy thing
 - [ ] Open embedded pubkeys and stuff in modals
 - [ ] Handle embedded naddrs http://localhost:5173/nevent1qqs0sp3dvtvd9t8glg8l4t4lhamvk4092mnqqtcklylwn50l0fxh75qpzemhxue69uhhyetvv9ujumn0wd68ytnzv9hxgcv4y0g
 - [ ] Add curated relay list, and an easy way to view content on the relays
