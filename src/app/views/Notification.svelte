@@ -8,7 +8,7 @@
   import Popover from "src/partials/Popover.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NotificationSection from "src/app/views/NotificationSection.svelte"
-  import {getPersonWithFallback, userEvents} from "src/agent/db"
+  import {getPersonWithFallback} from "src/agent/db"
   import {modal} from "src/partials/state"
 
   export let event
@@ -22,7 +22,7 @@
   )
 
   const notifications = modifyZaps(event.notifications)
-  const note = event.ref ? userEvents.get(event.ref) : notifications[0]
+  const note = event.ref || notifications[0]
   const timestamp = pluck("created_at", notifications).reduce(max, 0)
   const replies = notifications.filter(propEq("kind", 1))
   const likes = notifications.filter(propEq("kind", 7))

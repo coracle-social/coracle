@@ -83,8 +83,10 @@
 
   const isStandalone = i => {
     return (
-      (!content[i - 1] || content[i - 1].type === "newline") &&
-      (!content[i + 1] || content[i + 1].type === "newline")
+      !content[i - 1] ||
+      content[i - 1].type === "newline" ||
+      !content[i + 1] ||
+      content[i + 1].type === "newline"
     )
   }
 

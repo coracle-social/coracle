@@ -39,16 +39,16 @@
   // Group notifications so we're only showing the parent once per chunk
   $: events = $notifications
     .slice(0, limit)
-    .map(e => [e, findReplyId(e)])
+    .map(e => [e, userEvents.get(findReplyId(e))])
     .filter(([e, ref]) => {
-      if (userEvents.get(ref)?.kind !== 1) {
+      if (ref && ref.kind !== 1) {
         return false
       }
 
       if (activeTab === tabs[0]) {
         return [1].includes(e.kind)
       } else {
-        return [7, 9735].includes(e.kind)
+        return [7, 9735].includes(e.kind) && ref
       }
     })
     .reduce((r, [e, ref]) => {

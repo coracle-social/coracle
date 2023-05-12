@@ -1,8 +1,8 @@
 # Current
 
-- [ ] Mentions don't show up in notifications
-- [ ] Fix relay recommendations
-- [ ] Preview note1
+- [ ] Open embedded pubkeys and stuff in modals
+- [ ] Handle embedded naddrs http://localhost:5173/nevent1qqs0sp3dvtvd9t8glg8l4t4lhamvk4092mnqqtcklylwn50l0fxh75qpzemhxue69uhhyetvv9ujumn0wd68ytnzv9hxgcv4y0g
+- [ ] Add curated relay list, and an easy way to view content on the relays
 - [ ] Pagination is slow. Maybe load with no window first, then add since?
 - [ ] Add coupon code registration for relay
 - [ ] Repurpose chat as groups
@@ -13,6 +13,8 @@
 # Core
 
 - [ ] Make mutes private
+- [ ] Add welcome.nostr.wine relay to onboarding
+  - http://localhost:5173/nevent1qqsp9vf7agqyl7swhwepjw0r9s8ny55vsxkljh62pn0uh6f2g9z7a2qpr3mhxue69uhkummnw3ezuarjw43kketwvf6kx6mn9e3k7mgpyfmhxue69uhkummnw3ez6an9wf5kv6t9vsh8wetvd3hhyer9wghxuet5nds9yj
 - [ ] Write multi-relay pagination into paravel and open source it
   - https://github.com/nostr-protocol/nips/pull/408
   - nevent1qqszpjf3307ccam3cl957yc7k3h5c7vpt7gz2vdzgwkqszsyvdj6e0cpzfmhxue69uhk7enxvd5xz6tw9ec82csgdxq30
