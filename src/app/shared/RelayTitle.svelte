@@ -2,6 +2,7 @@
   import {onMount} from "svelte"
   import {between} from "hurdak/lib/hurdak"
   import {displayRelay} from "src/util/nostr"
+  import {webSocketURLToPlainOrBase64} from "src/util/misc"
   import {poll, stringToHue, hsl} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import pool from "src/agent/pool"
@@ -23,7 +24,7 @@
   <i class={relay.url.startsWith("wss") ? "fa fa-lock" : "fa fa-unlock"} />
   <Anchor
     type="unstyled"
-    href={`/relays/${btoa(relay.url)}`}
+    href={`/relays/${webSocketURLToPlainOrBase64(relay.url)}`}
     class="border-b border-solid"
     style={`border-color: ${hsl(stringToHue(relay.url))}`}>
     {displayRelay(relay)}

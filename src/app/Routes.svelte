@@ -1,6 +1,7 @@
 <script lang="ts">
   import {Route} from "svelte-routing"
   import {onReady} from "src/agent/db"
+  import {base64DecodeOrPlainWebSocketURL} from "src/util/misc"
   import EnsureData from "src/app/EnsureData.svelte"
   import Notifications from "src/app/views/Notifications.svelte"
   import Bech32Entity from "src/app/views/Bech32Entity.svelte"
@@ -71,9 +72,9 @@
     </Route>
     <Route path="/keys" component={UserKeys} />
     <Route path="/relays" component={RelayList} />
-    <Route path="/relays/:b64url" let:params>
+    <Route path="/relays/:b64OrUrl" let:params>
       {#key params.b64url}
-        <RelayDetail url={atob(params.b64url)} />
+        <RelayDetail url={base64DecodeOrPlainWebSocketURL(params.b64OrUrl)} />
       {/key}
     </Route>
     <Route path="/profile" component={UserProfile} />
