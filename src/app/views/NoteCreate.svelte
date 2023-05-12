@@ -25,12 +25,13 @@
 
   export let pubkey = null
   export let nevent = null
+  export let writeTo = null
 
   let q = ""
   let image = null
   let compose = null
   let showSettings = false
-  let relays = writable(getUserWriteRelays())
+  let relays = writable(writeTo ? writeTo.map(url => ({url, score: 1})) : getUserWriteRelays())
 
   const onSubmit = async () => {
     let {content, mentions, topics} = compose.parse()

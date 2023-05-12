@@ -27,7 +27,7 @@
     <NoteDetail {...m} invertColors />
   {/key}
 {:else if m.type === "note/create"}
-  <NoteCreate pubkey={m.pubkey} nevent={m.nevent} />
+  <NoteCreate pubkey={m.pubkey} nevent={m.nevent} writeTo={m.relays} />
 {:else if m.type === "note/zap"}
   <NoteZap note={m.note} />
 {:else if m.type === "relay/add"}
