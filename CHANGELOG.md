@@ -1,5 +1,13 @@
 # Changelog
 
+# 0.2.27
+
+- [x] Fix mention notifications
+- [x] Make relay urls readable on relay browsing page (@fiatjaf)
+- [x] When publishing to a single relay, display its name (@fiatjaf)
+- [x] Default new notes to a single relay when viewing a relay's feed (@fiatjaf)
+- [x] Use smaller max depth on note detail
+
 # 0.2.26
 
 - [x] Fix hanging feeds after a few pages

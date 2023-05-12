@@ -13,6 +13,7 @@
 # Core
 
 - [ ] Make mutes private
+- [ ] Show trending on search page http://localhost:5173/nevent1qqs8m3f52uelvpan4nn9hmc99a4qde0gjq9mlxc2khu057nryk3879gpr4mhxue69uhkummnw3ez6ur4vgh8wetvd3hhyer9wghxuet5qyv8wumn8ghj7un9d3shjtnndehhyapwwdhkx6tpdstjvu0y
 - [ ] Add welcome.nostr.wine relay to onboarding
   - http://localhost:5173/nevent1qqsp9vf7agqyl7swhwepjw0r9s8ny55vsxkljh62pn0uh6f2g9z7a2qpr3mhxue69uhkummnw3ezuarjw43kketwvf6kx6mn9e3k7mgpyfmhxue69uhkummnw3ez6an9wf5kv6t9vsh8wetvd3hhyer9wghxuet5nds9yj
 - [ ] Write multi-relay pagination into paravel and open source it

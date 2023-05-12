@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {last, reject, pluck, propEq} from "ramda"
@@ -24,13 +24,13 @@
 
   export let pubkey = null
   export let nevent = null
-  export let writeTo = null
+  export let writeTo: string[] | null = null
 
   let q = ""
   let image = null
   let compose = null
   let showSettings = false
-  let relays = writable(writeTo ? writeTo.map(url => ({url, score: 1})) : getUserWriteRelays())
+  let relays = writable(getUserWriteRelays())
 
   const onSubmit = async () => {
     let {content, mentions, topics} = compose.parse()
