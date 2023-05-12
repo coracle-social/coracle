@@ -1,11 +1,16 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
+  import {fade} from "svelte/transition"
   import user from "src/agent/user"
   import {modal, location} from "src/partials/state"
+
+  let scrollY = 0
 
   $: showCreateNote = $location.pathname.match(/messages|chat|relays$|keys|settings|logout$/)
 
   const {canPublish} = user
+
+  const scrollToTop = () => document.body.scrollIntoView({behavior: "smooth"})
 
   const createNote = () => {
     const pubkeyMatch = $location.pathname.match(/people\/(npub1[0-9a-z]+)/)
@@ -18,14 +23,26 @@
   }
 </script>
 
+<svelte:window bind:scrollY />
+
 <div class="fixed bottom-0 right-0 z-10 m-8 flex flex-col items-center gap-3">
+  {#if scrollY > 1000}
+    <button
+      transition:fade|local={{delay: 200, duration: 200}}
+      class="flex h-12 w-12 items-center justify-center rounded-full
+          border border-gray-8 bg-gray-7 text-gray-1 shadow-2xl
+          transition-all hover:scale-105 hover:bg-gray-6"
+      on:click={scrollToTop}>
+      <span class="fa fa-arrow-up" />
+    </button>
+  {/if}
   {#if $canPublish && !showCreateNote}
     <button
       class="color-white flex h-16 w-16 items-center justify-center rounded-full
             border border-accent-light bg-accent text-white shadow-2xl
             transition-all hover:scale-105 hover:bg-accent-light"
       on:click={createNote}>
-      <span class="fa-sold fa-plus fa-2xl" />
+      <span class="fa-plus fa-2xl" />
     </button>
   {/if}
 </div>

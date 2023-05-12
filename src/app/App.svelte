@@ -31,6 +31,7 @@
   Object.assign(window, {cmd, user, keys, network, pool, sync, db, bech32ToHex, hexToBech32})
 
   export let pathname = location.pathname
+  export let hash = location.hash
 
   const style = document.createElement("style")
 
@@ -80,11 +81,18 @@
 
     // Log usage on navigate
     const unsubHistory = globalHistory.listen(({location}) => {
-      pathname = location.pathname
-
       if (!location.hash) {
         logUsage(btoa(["page", getPageName()].join(":")))
+
+        if (!hash) {
+          document.body.scrollIntoView({
+            behavior: location.pathname === pathname ? "smooth" : "auto",
+          })
+        }
       }
+
+      pathname = location.pathname
+      hash = location.hash
     })
 
     logUsage(btoa(["page", getPageName()].join(":")))
