@@ -27,14 +27,6 @@ export const routes = {
   person: (pubkey, tab = "notes") => `/people/${nip19.npubEncode(pubkey)}/${tab}`,
 }
 
-export const goToPerson = pubkey => {
-  if (document.querySelector(".modal-content")) {
-    navigate(routes.person(pubkey))
-  } else {
-    modal.push({type: "person/feed", pubkey})
-  }
-}
-
 export const addToList = (type, value) => modal.push({type: "list/select", item: {type, value}})
 
 // Menu

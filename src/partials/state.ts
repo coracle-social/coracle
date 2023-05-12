@@ -4,7 +4,7 @@ import type {Writable} from "svelte/store"
 import {navigate} from "svelte-routing"
 import {writable, get} from "svelte/store"
 import {globalHistory} from "svelte-routing/src/history"
-import {sleep, shadeColor, synced, WritableList} from "src/util/misc"
+import {shadeColor, synced, WritableList} from "src/util/misc"
 
 // Settings
 
@@ -68,19 +68,18 @@ export const modal = {
   push(data) {
     modal.stack.update($stack => modal.sync($stack.concat(data)))
   },
-  async pop() {
+  pop() {
     modal.stack.update($stack => modal.sync($stack.slice(0, -1)))
-    await sleep(100)
   },
-  async replace(data) {
+  replace(data) {
     modal.stack.update($stack => $stack.slice(0, -1).concat(data))
   },
-  async clear() {
+  clear() {
     const stackSize = (get(modal.stack) as any).length
 
     // Reverse history so the back button doesn't bring our modal back up
     for (let i = 0; i < stackSize; i++) {
-      await modal.pop()
+      modal.pop()
     }
   },
 }

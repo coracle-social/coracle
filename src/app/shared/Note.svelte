@@ -17,7 +17,7 @@
   import {getRelaysForEventParent} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
   import {watch} from "src/agent/db"
-  import {routes, goToPerson} from "src/app/state"
+  import {routes} from "src/app/state"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
   export let note
@@ -127,7 +127,7 @@
               <Anchor
                 type="unstyled"
                 class="flex items-center gap-2 pr-16 text-lg font-bold"
-                on:click={() => goToPerson($author.pubkey)}>
+                on:click={() => modal.push({type: "person/feed", pubkey: $author.pubkey})}>
                 <span>{displayPerson($author)}</span>
                 {#if $author.verified_as}
                   <i class="fa fa-circle-check text-sm text-accent" />

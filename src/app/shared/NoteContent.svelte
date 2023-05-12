@@ -14,7 +14,6 @@
   import user from "src/agent/user"
   import network from "src/agent/network"
   import {getPersonWithFallback} from "src/agent/db"
-  import {goToPerson} from "src/app/state"
 
   export let note
   export let anchorId = null
@@ -106,6 +105,8 @@
     }
   }
 
+  const openPerson = pubkey => modal.push({type: "person/feed", pubkey})
+
   const openQuote = id => {
     modal.push({type: "note/detail", note: {id}})
   }
@@ -130,7 +131,7 @@
         </Anchor>
       {:else if type.startsWith("nostr:")}
         {#if showMedia && value.id && isStandalone(i) && value.id !== anchorId}
-          <Card interactive invertColors on:click={() => openQuote(value.id)}>
+          <Card interactive invertColors class="my-2" on:click={() => openQuote(value.id)}>
             {#await loadQuote(value)}
               <Spinner />
             {:then quote}
@@ -141,7 +142,7 @@
                   stopPropagation
                   type="unstyled"
                   class="flex items-center gap-2"
-                  on:click={() => goToPerson(quote.pubkey)}>
+                  on:click={() => openPerson(quote.pubkey)}>
                   <h2 class="text-lg">{displayPerson(person)}</h2>
                 </Anchor>
               </div>
@@ -152,8 +153,8 @@
               </p>
             {/await}
           </Card>
-        {:else if value.pubkey}
-          @<Anchor killEvent on:click={() => goToPerson(value.pubkey)}>
+        {:else if type.match(/np(rofile|ub)$/)}
+          @<Anchor killEvent on:click={() => openPerson(value.pubkey)}>
             {displayPerson(getPersonWithFallback(value.pubkey))}
           </Anchor>
         {:else}

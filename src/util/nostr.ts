@@ -209,7 +209,7 @@ export const parseContent = ({content, tags = []}) => {
   }
 
   const parseBech32 = () => {
-    const bech32 = first(text.match(/^(nostr:)?n(event|ote|profile|pub)1[\d\w]+/i))
+    const bech32 = first(text.match(/^(nostr:)?n(event|ote|profile|pub|addr)1[\d\w]+/i))
 
     if (bech32) {
       try {

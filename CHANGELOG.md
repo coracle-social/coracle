@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.2.28
+
+- [x] Add basic naddr support
+- [x] Add scroll to top button, and scroll to top on navigate
+- [x] Add close all button to modal, open person in modal more often
+
 # 0.2.27
 
 - [x] Fix mention notifications
