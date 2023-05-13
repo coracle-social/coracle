@@ -3,10 +3,14 @@
 - [ ] Relay reviews
   - New kind, d as url? Combine with labeling?
   - Show reviews in relay detail rather than events. Warn about events tab
+  - Add curated relay list, and an easy way to view content on the relays
 - [ ] Add preview proxy thing
-- [ ] Add curated relay list, and an easy way to view content on the relays
 - [ ] White-labeled
-  - [ ] Add coupon code registration for relay
+  - [ ] Add invite code registration for relay
+    - [ ] Add endpoint to nostream that updates whitelist
+    - [ ] Show invite code somewhere so users can share it.
+    - [ ] Use a signed string so it's based on pubkey?
+    - [ ] Nostream is public-read, apply registration to reads as well
   - [ ] Avoid leaking events from private relays
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
@@ -14,6 +18,7 @@
 # Core
 
 - [ ] Make mutes private
+- [ ] Support nip 94
 - [ ] Show trending on search page http://localhost:5173/nevent1qqs8m3f52uelvpan4nn9hmc99a4qde0gjq9mlxc2khu057nryk3879gpr4mhxue69uhkummnw3ez6ur4vgh8wetvd3hhyer9wghxuet5qyv8wumn8ghj7un9d3shjtnndehhyapwwdhkx6tpdstjvu0y
 - [ ] Add welcome.nostr.wine relay to onboarding
   - http://localhost:5173/nevent1qqsp9vf7agqyl7swhwepjw0r9s8ny55vsxkljh62pn0uh6f2g9z7a2qpr3mhxue69uhkummnw3ezuarjw43kketwvf6kx6mn9e3k7mgpyfmhxue69uhkummnw3ez6an9wf5kv6t9vsh8wetvd3hhyer9wghxuet5nds9yj
