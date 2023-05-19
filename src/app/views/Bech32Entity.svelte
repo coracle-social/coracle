@@ -18,7 +18,6 @@
   onMount(() => {
     try {
       ;({type, data} = nip19.decode(entity) as {type: string; data: any})
-      console.log(data)
       relays = sampleRelays((data.relays || []).map(objOf("url")))
     } catch (e) {
       warn(e)
