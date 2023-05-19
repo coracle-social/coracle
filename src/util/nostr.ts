@@ -27,6 +27,12 @@ export class Tags {
   all() {
     return this.tags
   }
+  count() {
+    return this.tags.length
+  }
+  exists() {
+    return this.tags.length > 0
+  }
   first() {
     return first(this.tags)
   }
@@ -54,6 +60,9 @@ export class Tags {
   filter(f) {
     return new Tags(this.tags.filter(f))
   }
+  any(f) {
+    return this.filter(f).exists()
+  }
   type(type) {
     const types = ensurePlural(type)
 
@@ -67,21 +76,31 @@ export class Tags {
   }
 }
 
-// Support the deprecated version where tags are not marked as replies
-export const findReply = e =>
-  Tags.from(e).type("e").mark("reply").first() || Tags.from(e).type("e").last()
+export const findReplyAndRoot = e => {
+  const tags = Tags.from(e).type("e")
+  const legacy = tags.any(t => !["reply", "root"].includes(last(t)))
 
-export const findReplyId = e =>
-  Tags.wrap([findReply(e)])
-    .values()
-    .first()
+  // Support the deprecated version where tags are not marked as replies
+  if (legacy) {
+    const reply = tags.last()
+    const root = tags.count() > 1 ? tags.first() : null
 
-export const findRoot = e => Tags.from(e).type("e").mark("root").first()
+    return {reply, root}
+  }
 
-export const findRootId = e =>
-  Tags.wrap([findRoot(e)])
-    .values()
-    .first()
+  return {
+    reply: tags.mark("reply").first(),
+    root: tags.mark("root").first(),
+  }
+}
+
+export const findReply = e => prop("reply", findReplyAndRoot(e))
+
+export const findReplyId = e => findReply(e)?.[1]
+
+export const findRoot = e => prop("root", findReplyAndRoot(e))
+
+export const findRootId = e => findRoot(e)?.[1]
 
 export const displayPerson = p => {
   if (p.kind0?.display_name) {

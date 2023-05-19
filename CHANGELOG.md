@@ -5,6 +5,7 @@
 - [x] Add basic naddr support
 - [x] Add scroll to top button, and scroll to top on navigate
 - [x] Add close all button to modal, open person in modal more often
+- [x] Fix legacy e tag parsing
 
 # 0.2.27
 

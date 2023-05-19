@@ -1,4 +1,4 @@
-import {map, pick, last, uniqBy} from "ramda"
+import {map, pick, uniqBy} from "ramda"
 import {get} from "svelte/store"
 import {doPipe} from "hurdak/lib/hurdak"
 import {parseContent, Tags, roomAttrs, displayPerson, findRoot, findReply} from "src/util/nostr"
@@ -76,7 +76,7 @@ const createReply = (note, content, mentions = [], topics = []) => {
     [
       tags => tags.concat(processMentions(mentions)),
       tags => tags.concat(topics.map(t => ["t", t])),
-      tags => tagsFromParent(note, tags),
+      tags => tags.concat(getReplyTags(note)),
       tags => tagsFromContent(content, tags),
       uniqTags,
     ]
@@ -142,27 +142,6 @@ const getReplyTags = n => {
   ])
 
   return [["p", n.pubkey, pHint?.url || ""], root, reply]
-}
-
-const tagsFromParent = (n, newTags = []) => {
-  const pubkey = get(keys.pubkey)
-
-  // Mentions have to come first for interpolation to work
-  return (
-    newTags
-      // Add standard reply tags
-      .concat(getReplyTags(n))
-      // Inherit p and e tags, but remove marks and self-mentions
-      .concat(
-        n.tags.filter(t => {
-          if (t[1] === pubkey) return false
-          if (!["p", "e"].includes(t[0])) return false
-          if (["reply", "root"].includes(last(t))) return false
-
-          return true
-        })
-      )
-  )
 }
 
 const uniqTags = uniqBy(t => t.slice(0, 2).join(":"))

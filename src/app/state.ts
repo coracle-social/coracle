@@ -170,7 +170,6 @@ export const listen = async () => {
 
   ;(listen as any)._listener?.unsub()
   ;(listen as any)._listener = await network.listen({
-    delay: 3000,
     relays: getUserReadRelays(),
     filter: [
       {kinds: [1, 4], authors: [pubkey], since},
