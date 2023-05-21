@@ -31,6 +31,7 @@ export default defineConfig({
         short_name: process.env.VITE_APP_NAME,
         description: "Nostr, your way.",
         theme_color: "#EB5E28",
+        protocol_handlers: [{protocol: "web+nostr", url: "/%s"}],
         icons: [
           {type: "image/png", sizes: "192x192", src: "/images/favicon/android-icon-192x192.png"},
           {type: "image/png", sizes: "512x512", src: "/images/favicon/android-icon-512x512.png"},

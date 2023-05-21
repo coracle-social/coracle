@@ -13,6 +13,6 @@
 </script>
 
 <Content size="lg">
-  <QRCode code={`nostr:${nprofile}`} />
+  <QRCode code={`web+nostr://${nprofile}`} />
   <div class="text-center text-gray-1">Copy or scan from a nostr app to share this profile.</div>
 </Content>
