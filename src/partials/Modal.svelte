@@ -4,13 +4,18 @@
   import {fly, fade} from "svelte/transition"
   import {modal} from "src/partials/state"
 
+  export let index = null
   export let virtual = true
+  export let isOnTop = true
   export let onEscape = null
 
   let root, content
 
   const id = randomId()
   const {stack} = modal
+
+  $: _isOnTop = virtual || isOnTop
+  $: _onEscape = _isOnTop ? onEscape : null
 
   onMount(() => {
     if (virtual) {
@@ -28,20 +33,20 @@
 <svelte:body
   on:keydown={e => {
     if (e.key === "Escape" && !root.querySelector(".modal")) {
-      onEscape?.()
+      _onEscape?.()
     }
   }} />
 
 <div class="modal fixed inset-0 z-30" bind:this={root} transition:fade>
   <div
     class="fixed inset-0 cursor-pointer bg-black opacity-50"
-    on:click|stopPropagation={onEscape} />
+    on:click|stopPropagation={_onEscape} />
   <div
     class="modal-content h-full overflow-auto"
     bind:this={content}
     transition:fly={{y: 1000}}
-    class:cursor-pointer={onEscape}
-    on:click={onEscape}>
+    class:cursor-pointer={_onEscape}
+    on:click={_onEscape}>
     <div class="mt-12 min-h-full">
       {#if onEscape}
         <div class="pointer-events-none sticky top-0 z-10 flex w-full flex-col items-end gap-2 p-2">
@@ -50,7 +55,7 @@
                  border border-solid border-accent-light bg-accent text-white transition-colors hover:bg-accent-light">
             <i class="fa fa-times fa-lg" />
           </div>
-          {#if $stack.length > 1}
+          {#if $stack.length > 1 && index > 0}
             <div
               on:click|stopPropagation={() => modal.clear()}
               class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full

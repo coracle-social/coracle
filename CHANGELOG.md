@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.2.29
+
+- [x] Register url handler for web+nostr and use that for sharing
+
 # 0.2.28
 
 - [x] Add basic naddr support

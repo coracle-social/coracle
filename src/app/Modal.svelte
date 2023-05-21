@@ -15,8 +15,12 @@
   }
 </script>
 
-{#each nonVirtual as m}
-  <Modal virtual={false} onEscape={!m.noEscape && m === last($stack) ? closeModal : null}>
+{#each nonVirtual as m, i}
+  <Modal
+    index={i}
+    virtual={false}
+    isOnTop={m === last($stack)}
+    onEscape={m.noEscape ? null : closeModal}>
     <ModalRoutes {m} />
   </Modal>
 {/each}

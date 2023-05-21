@@ -3,11 +3,10 @@
   import {nip19} from "nostr-tools"
   import {tweened} from "svelte/motion"
   import {find, reject, identity, propEq, pathEq, sum, pluck, sortBy} from "ramda"
-  import {copyToClipboard} from "src/util/html"
   import {stringToHue, formatSats, hsl} from "src/util/misc"
   import {displayRelay, isLike, processZaps} from "src/util/nostr"
   import {quantify, first} from "hurdak/lib/hurdak"
-  import {toast, modal} from "src/partials/state"
+  import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -37,11 +36,8 @@
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
 
-  const copyLink = () => {
-    const nevent = nip19.neventEncode({id: note.id, relays: note.seen_on})
-
-    copyToClipboard("nostr:" + nevent)
-    toast.show("info", "Note link copied to clipboard!")
+  const share = () => {
+    modal.push({type: "note/share", note})
   }
 
   const quote = () => modal.push({type: "note/create", nevent})
@@ -84,7 +80,7 @@
   $: {
     actions = []
 
-    actions.push({label: "Share", icon: "share-nodes", onClick: copyLink})
+    actions.push({label: "Share", icon: "share-nodes", onClick: share})
     actions.push({label: "Quote", icon: "quote-left", onClick: quote})
 
     if (muted) {

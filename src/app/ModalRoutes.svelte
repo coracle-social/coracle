@@ -8,6 +8,7 @@
   import Onboarding from "src/app/views/Onboarding.svelte"
   import NoteCreate from "src/app/views/NoteCreate.svelte"
   import NoteZap from "src/app/views/NoteZap.svelte"
+  import NoteShare from "src/app/views/NoteShare.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import PersonFeed from "src/app/views/PersonFeed.svelte"
   import PersonList from "src/app/shared/PersonList.svelte"
@@ -30,6 +31,8 @@
   <NoteCreate pubkey={m.pubkey} nevent={m.nevent} writeTo={m.relays} />
 {:else if m.type === "note/zap"}
   <NoteZap note={m.note} />
+{:else if m.type === "note/share"}
+  <NoteShare note={m.note} />
 {:else if m.type === "relay/add"}
   <RelayAdd url={m.url} />
 {:else if m.type === "onboarding"}

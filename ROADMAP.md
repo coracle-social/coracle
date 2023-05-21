@@ -1,5 +1,7 @@
 # Current
 
+- [ ] Combine search and scan
+- [ ] Fix white screen on cold scan
 - [ ] Relay reviews
   - New kind, d as url? Combine with labeling?
   - Show reviews in relay detail rather than events. Warn about events tab

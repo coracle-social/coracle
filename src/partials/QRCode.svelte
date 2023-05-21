@@ -11,7 +11,7 @@
 
   const copy = () => {
     copyToClipboard(code)
-    toast.show("info", "The QR Code has been copied to your clipboard.")
+    toast.show("info", "Copied to clipboard!")
   }
 
   onMount(() => {
