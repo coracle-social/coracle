@@ -19,7 +19,7 @@
   import * as db from "src/agent/db"
   import user from "src/agent/user"
   import {loadAppData} from "src/app/state"
-  import {theme, getThemeVariables, modal} from "src/partials/state"
+  import {theme, getThemeVariables, appName, modal} from "src/partials/state"
   import {logUsage} from "src/app/state"
   import SideNav from "src/app/SideNav.svelte"
   import Routes from "src/app/Routes.svelte"
@@ -39,7 +39,13 @@
 
   $: style.textContent = `:root { ${getThemeVariables($theme)}; background: var(--gray-8); }`
 
-  tryFunc(() => navigator.registerProtocolHandler("web+nostr", `${location.origin}/%s`))
+  tryFunc(() =>
+    (navigator.registerProtocolHandler as (scheme: string, handler: string, name: string) => void)(
+      "web+nostr",
+      `${location.origin}/%s`,
+      appName
+    )
+  )
 
   const seenChallenges = new Set()
 
