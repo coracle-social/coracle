@@ -76,6 +76,16 @@ export const formatTimestamp = ts => {
   return formatter.format(new Date(ts * 1000))
 }
 
+export const formatTimestampAsDate = ts => {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
+
+  return formatter.format(new Date(ts * 1000))
+}
+
 export const formatTimestampRelative = ts => {
   let unit
   let delta = now() - ts

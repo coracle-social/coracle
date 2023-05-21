@@ -4,7 +4,7 @@
   import {onMount} from "svelte"
   import {fly} from "svelte/transition"
   import {navigate} from "svelte-routing"
-  import {now, timedelta, createScroller} from "src/util/misc"
+  import {now, timedelta, formatTimestampAsDate, createScroller} from "src/util/misc"
   import {findReplyId} from "src/util/nostr"
   import Spinner from "src/partials/Spinner.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -62,6 +62,7 @@
           ref,
           key: e.id,
           notifications: [e],
+          dateDisplay: formatTimestampAsDate(e.created_at),
           showLine: e.created_at < prevChecked && prevTimestamp >= prevChecked,
         })
       }
@@ -70,6 +71,15 @@
     }, [])
 
   const setActiveTab = tab => navigate(`/notifications/${tab}`)
+
+  const getLineText = i => {
+    const event = events[i]
+    const prev = events[i - 1]
+
+    if (prev?.dateDisplay !== event.dateDisplay) {
+      return event.dateDisplay
+    }
+  }
 
   onMount(() => {
     document.title = "Notifications"
@@ -83,16 +93,17 @@
 {#if events}
   <Content>
     <Tabs {tabs} {activeTab} {setActiveTab} />
-    {#each events as event (event.key)}
-      <div in:fly={{y: 20}}>
-        <Notification {event} />
-      </div>
-      {#if event.showLine}
+    {#each events as event, i (event.key)}
+      {@const lineText = getLineText(i)}
+      {#if lineText}
         <div class="flex items-center gap-4">
-          <small class="whitespace-nowrap text-gray-1">Older notifications</small>
+          <small class="whitespace-nowrap text-gray-1">{lineText}</small>
           <div class="h-px w-full bg-gray-6" />
         </div>
       {/if}
+      <div in:fly={{y: 20}}>
+        <Notification {event} />
+      </div>
     {:else}
       <Content size="lg" class="text-center">No notifications found - check back later!</Content>
     {/each}

@@ -1,7 +1,7 @@
 <script>
-  import {max, pipe, filter, map, when, identity, pluck, propEq, uniq} from "ramda"
+  import {pipe, filter, map, when, identity, pluck, propEq, uniq} from "ramda"
   import {closure, quantify} from "hurdak/lib/hurdak"
-  import {formatTimestamp, tryJson} from "src/util/misc"
+  import {tryJson} from "src/util/misc"
   import {Tags} from "src/util/nostr"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import Card from "src/partials/Card.svelte"
@@ -23,7 +23,6 @@
 
   const notifications = modifyZaps(event.notifications)
   const note = event.ref || notifications[0]
-  const timestamp = pluck("created_at", notifications).reduce(max, 0)
   const replies = notifications.filter(propEq("kind", 1))
   const likes = notifications.filter(propEq("kind", 7))
   const zaps = notifications.filter(propEq("kind", 9734))
@@ -40,38 +39,41 @@
 </script>
 
 {#if note}
-  <Card
-    interactive
-    class="flex flex-col gap-2 text-left"
-    on:click={() => modal.push({type: "note/detail", note})}>
-    <div class="relative flex w-full items-center justify-between gap-2" on:click|stopPropagation>
-      {#if !event.ref}
-        <div class="flex items-center gap-2">
-          <PersonBadge person={author} /> mentioned you.
-        </div>
-      {:else}
-        <Popover>
-          <div slot="trigger">
-            {quantify(pubkeys.length, "person", "people")}
-            {actionText} your note.
+  <div class="flex flex-col items-end gap-1">
+    <Card
+      interactive
+      class="flex w-full flex-col gap-2 text-left"
+      on:click={() => modal.push({type: "note/detail", note})}>
+      <div on:click|stopPropagation>
+        {#if !event.ref}
+          <div>
+            <PersonBadge class="float-left" person={author} />
+            <span class="relative top-px pl-1">mentioned you.</span>
           </div>
-          <div slot="tooltip" class="flex flex-col gap-4">
-            {#if zaps.length > 0}
-              <NotificationSection pubkeys={pluck("pubkey", zaps)}>Zapped by</NotificationSection>
-            {/if}
-            {#if likes.length > 0}
-              <NotificationSection pubkeys={pluck("pubkey", likes)}>Liked by</NotificationSection>
-            {/if}
-            {#if replies.length > 0}
-              <NotificationSection pubkeys={pluck("pubkey", replies)}>Replies</NotificationSection>
-            {/if}
-          </div>
-        </Popover>
-      {/if}
-      <p class="text-sm text-gray-1">{formatTimestamp(timestamp)}</p>
-    </div>
-    <div class="break-word ml-6 overflow-hidden text-gray-1">
-      <NoteContent maxLength={80} showMedia={false} {note} />
-    </div>
-  </Card>
+        {:else}
+          <Popover>
+            <div slot="trigger">
+              {quantify(pubkeys.length, "person", "people")}
+              {actionText} your note.
+            </div>
+            <div slot="tooltip" class="flex flex-col gap-4">
+              {#if zaps.length > 0}
+                <NotificationSection pubkeys={pluck("pubkey", zaps)}>Zapped by</NotificationSection>
+              {/if}
+              {#if likes.length > 0}
+                <NotificationSection pubkeys={pluck("pubkey", likes)}>Liked by</NotificationSection>
+              {/if}
+              {#if replies.length > 0}
+                <NotificationSection pubkeys={pluck("pubkey", replies)}
+                  >Replies</NotificationSection>
+              {/if}
+            </div>
+          </Popover>
+        {/if}
+      </div>
+      <div class="break-word overflow-hidden text-gray-1">
+        <NoteContent maxLength={80} showMedia={false} {note} />
+      </div>
+    </Card>
+  </div>
 {/if}
