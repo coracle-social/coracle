@@ -19,8 +19,10 @@
   let tooltip
   let instance
 
+  $: isNoOp = (isMobile && triggerType === "mouseenter") || !triggerType
+
   onMount(() => {
-    if (!trigger) {
+    if (isNoOp) {
       return
     }
 
@@ -77,9 +79,7 @@
   <slot name="trigger" />
 </div>
 
-{#if isMobile && triggerType === "mouseenter"}
-  <!-- iOS interprets a tap as a mouse enter -->
-{:else}
+{#if !isNoOp}
   <div bind:this={tooltip} class="hidden">
     <div>
       <slot name="tooltip" {instance} />
