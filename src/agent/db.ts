@@ -200,7 +200,7 @@ const sortByCreatedAt = sortBy(e => -e.created_at)
 const sortByLastSeen = sortBy(e => -e.last_seen)
 
 export const people = new Table("people", "pubkey", {
-  max: 5000,
+  max: 3000,
   // Don't delete the user's own profile or those of direct follows
   sort: xs => {
     const follows = Tags.wrap(user.getPetnames()).values().all()

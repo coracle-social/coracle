@@ -28,9 +28,18 @@ import {people} from "src/agent/db"
 import pool from "src/agent/pool"
 import sync from "src/agent/sync"
 
+// If we ask for a pubkey and get nothing back, don't ask again this page load
+const attemptedPubkeys = new Set()
+
 const getStalePubkeys = pubkeys => {
   // If we're not reloading, only get pubkeys we don't already know about
   return uniq(pubkeys).filter(pubkey => {
+    if (attemptedPubkeys.has(pubkey)) {
+      return false
+    }
+
+    attemptedPubkeys.add(pubkey)
+
     const p = people.get(pubkey)
 
     return !p || p.updated_at < now() - timedelta(1, "days")

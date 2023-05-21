@@ -3,6 +3,7 @@
 # 0.2.29
 
 - [x] Register url handler for web+nostr and use that for sharing
+- [x] Combine search and scan pages
 
 # 0.2.28
 

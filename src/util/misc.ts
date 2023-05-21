@@ -418,3 +418,5 @@ export const webSocketURLToPlainOrBase64 = (url: string): string => {
   }
   return url
 }
+
+export const clamp = ([min, max], n) => Math.min(max, Math.max(min, n))

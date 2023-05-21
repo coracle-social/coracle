@@ -16,7 +16,6 @@
   import NotFound from "src/app/views/NotFound.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
   import Search from "src/app/views/Search.svelte"
-  import Scan from "src/app/views/Scan.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
   import RelayList from "src/app/views/RelayList.svelte"
   import UserProfile from "src/app/views/UserProfile.svelte"
@@ -36,11 +35,6 @@
     <Route path="/search">
       <EnsureData enforcePeople={false}>
         <Search />
-      </EnsureData>
-    </Route>
-    <Route path="/scan">
-      <EnsureData enforcePeople={false}>
-        <Scan />
       </EnsureData>
     </Route>
     <Route path="/notes" let:params>

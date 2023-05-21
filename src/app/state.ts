@@ -7,7 +7,7 @@ import {writable} from "svelte/store"
 import {max, omit, pluck, sortBy, find, slice, propEq} from "ramda"
 import {createMap, doPipe, first} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
-import {hash, sleep} from "src/util/misc"
+import {hash, sleep, clamp} from "src/util/misc"
 import {now, timedelta} from "src/util/misc"
 import {Tags, isNotification, userKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
@@ -160,9 +160,15 @@ const processChats = async (pubkey, events) => {
 export const listen = async () => {
   const pubkey = user.getPubkey()
   const {roomsJoined} = user.getProfile()
-  const since = now() - timedelta(30, "days")
   const kinds = enableZaps ? [1, 4, 7, 9735] : [1, 4, 7]
-  const eventIds = doPipe(userEvents.all({kind: 1, created_at: {$gt: since}}), [
+
+  // Only grab notifications since we last checked, with some wiggle room
+  const since =
+    clamp([now() - timedelta(30, "days"), now()], notifications._coll.max("created_at")) -
+    timedelta(1, "hours")
+
+  const eventIds = doPipe(userEvents, [
+    t => t.all({kind: 1, created_at: {$gt: now() - timedelta(30, "days")}}),
     sortBy(e => -e.created_at),
     slice(0, 256),
     pluck("id"),

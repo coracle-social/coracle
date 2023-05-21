@@ -1,19 +1,24 @@
 <script>
   import {debounce} from "throttle-debounce"
-  import {identity, sortBy, prop} from "ramda"
-  import {fuzzy} from "src/util/misc"
+  import {navigate} from "svelte-routing"
+  import {nip05, nip19} from "nostr-tools"
+  import {identity} from "ramda"
+  import {fuzzy, tryFunc} from "src/util/misc"
   import {modal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import BorderLeft from "src/partials/BorderLeft.svelte"
+  import Scan from "src/app/shared/Scan.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
   import {sampleRelays, getUserReadRelays} from "src/agent/relays"
   import network from "src/agent/network"
-  import {watch} from "src/agent/db"
+  import {watch, people} from "src/agent/db"
   import user from "src/agent/user"
 
-  let q
+  let q = ""
+  let options = []
+  let scanner
 
   const openTopic = topic => {
     modal.push({type: "topic/feed", topic})
@@ -27,7 +32,7 @@
         relays: sampleRelays([{url: "wss://relay.nostr.band"}]),
         filter: [{kinds: [0], search, limit: 10}],
       })
-    } else {
+    } else if (people._coll.count() < 50) {
       network.load({
         relays: getUserReadRelays(),
         filter: [{kinds: [0], limit: 50}],
@@ -35,24 +40,69 @@
     }
   })
 
-  $: loadPeople(q)
+  const tryParseEntity = debounce(500, async entity => {
+    entity = entity.replace("nostr:", "")
 
-  $: search = watch(["people", "topics"], (p, t) => {
-    const topics = t
-      .all()
-      .map(topic => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
+    if (entity.length < 5) {
+      return
+    }
 
-    const people = p
-      .all({"kind0.name": {$type: "string"}, pubkey: {$ne: user.getPubkey()}})
-      .map(person => ({
-        person,
-        type: "person",
-        id: person.pubkey,
-        text: "@" + [person.kind0.name, person.kind0.about].filter(identity).join(" "),
-      }))
+    if (entity.match(/^[a-f0-9]{64}$/)) {
+      navigate("/" + nip19.npubEncode(entity))
+    } else if (entity.includes("@")) {
+      let profile = await nip05.queryProfile(entity)
 
-    return fuzzy(sortBy(prop("id"), topics.concat(people)), {keys: ["text"]})
+      if (profile) {
+        navigate("/" + nip19.nprofileEncode(profile))
+      }
+    } else {
+      tryFunc(() => {
+        nip19.decode(entity)
+        navigate("/" + entity)
+      }, "TypeError")
+    }
   })
+
+  const topicOptions = watch(["topics"], t =>
+    t.all().map(topic => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
+  )
+
+  const personOptions = watch(["people"], t =>
+    t
+      .all({
+        pubkey: {$ne: user.getPubkey()},
+        $or: [{"kind0.name": {$type: "string"}}, {"kind0.display_name": {$type: "string"}}],
+      })
+      .map(person => {
+        const {name, about, display_name} = person.kind0
+
+        return {
+          person,
+          type: "person",
+          id: person.pubkey,
+          text: "@" + [name, about, display_name].filter(identity).join(" "),
+        }
+      })
+  )
+
+  $: {
+    loadPeople(q)
+    tryParseEntity(q)
+  }
+
+  $: firstChar = q.slice(0, 1)
+
+  $: {
+    if (firstChar === "@") {
+      options = $personOptions
+    } else if (firstChar === "#") {
+      options = $topicOptions
+    } else {
+      options = $personOptions.concat($topicOptions)
+    }
+  }
+
+  $: search = fuzzy(options, {keys: ["text"]})
 
   document.title = "Search"
 </script>
@@ -61,14 +111,19 @@
   <div class="flex flex-col items-center justify-center">
     <Heading>Search</Heading>
     <p>
-      Search for people and topics on Nostr. For now, only results that have already been loaded
-      will appear in search results.
+      Enter any nostr identifier or search term to find people and topics. You can also click on the
+      camera icon to scan with your device's camera instead.
     </p>
   </div>
   <Input bind:value={q} placeholder="Search for people or topics">
     <i slot="before" class="fa-solid fa-search" />
+    <i
+      slot="after"
+      class="fa-solid fa-camera cursor-pointer text-accent"
+      on:click={() => scanner.start()} />
   </Input>
-  {#each $search(q).slice(0, 50) as result (result.type + result.id)}
+
+  {#each search(q).slice(0, 50) as result (result.type + result.id)}
     {#if result.type === "topic"}
       <BorderLeft on:click={() => openTopic(result.topic.name)}>
         #{result.topic.name}
@@ -78,3 +133,5 @@
     {/if}
   {/each}
 </Content>
+
+<Scan bind:this={scanner} onScan={tryParseEntity} />
