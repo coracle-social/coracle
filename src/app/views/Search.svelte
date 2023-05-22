@@ -4,6 +4,7 @@
   import {nip05, nip19} from "nostr-tools"
   import {identity} from "ramda"
   import {fuzzy, tryFunc} from "src/util/misc"
+  import {fromNostrURI} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -41,7 +42,7 @@
   })
 
   const tryParseEntity = debounce(500, async entity => {
-    entity = entity.replace("nostr:", "")
+    entity = fromNostrURI(entity)
 
     if (entity.length < 5) {
       return

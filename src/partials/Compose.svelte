@@ -69,7 +69,7 @@
     }
 
     // Mentions
-    if ((force || word.length > 1) && word.startsWith("@")) {
+    if ((force || word.length > 1) && word.startsWith("@") && person) {
       annotate("@", displayPerson(person).trim(), pubkeyEncoder.encode(person.pubkey))
     }
 

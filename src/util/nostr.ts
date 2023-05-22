@@ -228,11 +228,13 @@ export const parseContent = ({content, tags = []}) => {
   }
 
   const parseBech32 = () => {
-    const bech32 = first(text.match(/^(nostr:)?n(event|ote|profile|pub|addr)1[\d\w]+/i))
+    const bech32 = first(
+      text.match(/^(web\+)?(nostr:)?\/?\/?n(event|ote|profile|pub|addr)1[\d\w]+/i)
+    )
 
     if (bech32) {
       try {
-        const entity = bech32.replace("nostr:", "")
+        const entity = fromNostrURI(bech32)
         const {type, data} = nip19.decode(entity) as {type: string; data: object}
 
         let value = data
@@ -354,3 +356,7 @@ export const processZaps = (zaps, author) =>
 
       return true
     })
+
+export const fromNostrURI = s => s.replace(/^[\w\+]+:\/?\/?/, "")
+
+export const toNostrURI = s => `web+nostr://${s}`

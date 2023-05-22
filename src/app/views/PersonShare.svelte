@@ -1,6 +1,7 @@
 <script lang="ts">
   import {pluck} from "ramda"
   import {nip19} from "nostr-tools"
+  import {toNostrURI} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import QRCode from "src/partials/QRCode.svelte"
   import {getPubkeyWriteRelays} from "src/agent/relays"
@@ -13,6 +14,6 @@
 </script>
 
 <Content size="lg">
-  <QRCode code={`web+nostr://${nprofile}`} />
+  <QRCode code={toNostrURI(nprofile)} />
   <div class="text-center text-gray-1">Copy or scan from a nostr app to share this profile.</div>
 </Content>

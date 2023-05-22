@@ -1,8 +1,9 @@
 <script lang="ts">
-  import {objOf, last} from "ramda"
+  import {objOf} from "ramda"
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {warn} from "src/util/logger"
+  import {fromNostrURI} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import NaddrDetail from "src/app/views/NaddrDetail.svelte"
@@ -11,7 +12,7 @@
 
   export let entity
 
-  entity = last(entity.split(":"))
+  entity = fromNostrURI(entity)
 
   let type, data, relays
 
