@@ -76,7 +76,7 @@ const createReply = (note, content, mentions = [], topics = []) => {
     [
       tags => tags.concat(processMentions(mentions)),
       tags => tags.concat(topics.map(t => ["t", t])),
-      tags => tags.concat(getReplyTags(note)),
+      tags => tags.concat(getReplyTags(note, true)),
       tags => tagsFromContent(content, tags),
       uniqTags,
     ]
@@ -132,7 +132,13 @@ const tagsFromContent = (content, tags) => {
   return tags
 }
 
-const getReplyTags = n => {
+const getReplyTags = (n, inherit = false) => {
+  const extra = inherit
+    ? Tags.from(n)
+        .type("e")
+        .all()
+        .map(t => t.slice(0, 3))
+    : []
   const pHint = getRelayForPersonHint(n.pubkey)
   const eHint = getRelayForEventHint(n) || pHint
   const reply = ["e", n.id, eHint?.url || "", "reply"]
@@ -141,7 +147,7 @@ const getReplyTags = n => {
     t => t.slice(0, 3).concat("root"),
   ])
 
-  return [["p", n.pubkey, pHint?.url || ""], root, reply]
+  return [["p", n.pubkey, pHint?.url || ""], root, ...extra, reply]
 }
 
 const uniqTags = uniqBy(t => t.slice(0, 2).join(":"))

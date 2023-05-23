@@ -88,10 +88,10 @@ export const findReplyAndRoot = e => {
     return {reply, root}
   }
 
-  return {
-    reply: tags.mark("reply").first(),
-    root: tags.mark("root").first(),
-  }
+  const reply = tags.mark("reply").first()
+  const root = tags.mark("root").first()
+
+  return {reply: reply || root, root}
 }
 
 export const findReply = e => prop("reply", findReplyAndRoot(e))

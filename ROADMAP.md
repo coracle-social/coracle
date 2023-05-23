@@ -1,6 +1,7 @@
 # Current
 
 - [ ] Add threads - replies by self get shown at the top of replies?
+- [ ] Fix rich text -> plain text using library
 - [ ] Highlights
   - Allow highlighting text in notes
   - When something is highlighted, show fixed-position elements for adding highlights
