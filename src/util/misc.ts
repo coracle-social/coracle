@@ -109,6 +109,14 @@ export const formatTimestampRelative = ts => {
   return formatter.format(-delta, unit as Intl.RelativeTimeFormatUnit)
 }
 
+export const formatTimestampAsLocalISODate = ts => {
+  const date = new Date(ts * 1000)
+  const offset = date.getTimezoneOffset() * 60000
+  const datetime = new Date(date.getTime() - offset).toISOString()
+
+  return datetime.slice(0, 10)
+}
+
 export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 export const poll = (t, cb) => {

@@ -8,6 +8,10 @@
 
   export let url
 
+  if (!url.startsWith("ws")) {
+    url = "wss://" + url
+  }
+
   const relay = relays.get(url) || {url}
 
   document.title = displayRelay(relay)

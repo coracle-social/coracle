@@ -1,5 +1,8 @@
 # Current
 
+- [ ] Fix connection management stuff. Have GPT help
+- [ ] Add zap splits https://github.com/nostr-protocol/nips/pull/552
+- [ ] Integrate simplex sharing? https://simplex.chat/docs/guide/readme.html
 - [ ] Add threads - replies by self get shown at the top of replies?
 - [ ] Fix rich text -> plain text using library
 - [ ] Highlights

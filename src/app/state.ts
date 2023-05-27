@@ -165,7 +165,7 @@ export const listen = async () => {
   // Only grab notifications since we last checked, with some wiggle room
   const since =
     clamp([now() - timedelta(30, "days"), now()], notifications._coll.max("created_at")) -
-    timedelta(1, "hours")
+    timedelta(1, "days")
 
   const eventIds = doPipe(userEvents, [
     t => t.all({kind: 1, created_at: {$gt: now() - timedelta(30, "days")}}),
