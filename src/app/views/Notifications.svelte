@@ -32,48 +32,51 @@
   const notifications = watch("notifications", t => {
     updateLastChecked()
 
-    // Sort by rounded timestamp so we can group reactions to the same parent
+    // Sort by hour so we can group clustered reactions to the same parent
     return reverse(
       sortBy(
-        e => formatTimestampAsLocalISODate(e.created_at) + findReplyId(e),
+        e => formatTimestampAsLocalISODate(e.created_at).slice(0, 13) + findReplyId(e),
         user.applyMutes(t.all())
       )
     )
   })
 
   // Group notifications so we're only showing the parent once per chunk
-  $: events = $notifications
-    .slice(0, limit)
-    .map(e => [e, userEvents.get(findReplyId(e))])
-    .filter(([e, ref]) => {
-      if (ref && ref.kind !== 1) {
-        return false
-      }
+  $: events = sortBy(
+    ({notifications}) => -notifications.reduce((a, b) => Math.max(a, b.created_at), 0),
+    $notifications
+      .slice(0, limit)
+      .map(e => [e, userEvents.get(findReplyId(e))])
+      .filter(([e, ref]) => {
+        if (ref && ref.kind !== 1) {
+          return false
+        }
 
-      if (activeTab === tabs[0]) {
-        return [1].includes(e.kind)
-      } else {
-        return [7, 9735].includes(e.kind) && ref
-      }
-    })
-    .reduce((r, [e, ref]) => {
-      const prev = last(r)
-      const prevTimestamp = pluck("created_at", prev?.notifications || []).reduce(max, 0)
+        if (activeTab === tabs[0]) {
+          return [1].includes(e.kind)
+        } else {
+          return [7, 9735].includes(e.kind) && ref
+        }
+      })
+      .reduce((r, [e, ref]) => {
+        const prev = last(r)
+        const prevTimestamp = pluck("created_at", prev?.notifications || []).reduce(max, 0)
 
-      if (ref && prev?.ref === ref) {
-        prev.notifications.push(e)
-      } else {
-        r = r.concat({
-          ref,
-          key: e.id,
-          notifications: [e],
-          dateDisplay: formatTimestampAsDate(e.created_at),
-          showLine: e.created_at < prevChecked && prevTimestamp >= prevChecked,
-        })
-      }
+        if (ref && prev?.ref === ref) {
+          prev.notifications.push(e)
+        } else {
+          r = r.concat({
+            ref,
+            key: e.id,
+            notifications: [e],
+            dateDisplay: formatTimestampAsDate(e.created_at),
+            showLine: e.created_at < prevChecked && prevTimestamp >= prevChecked,
+          })
+        }
 
-      return r
-    }, [])
+        return r
+      }, [])
+  )
 
   const setActiveTab = tab => navigate(`/notifications/${tab}`)
 

@@ -114,7 +114,7 @@ export const formatTimestampAsLocalISODate = ts => {
   const offset = date.getTimezoneOffset() * 60000
   const datetime = new Date(date.getTime() - offset).toISOString()
 
-  return datetime.slice(0, 10)
+  return datetime
 }
 
 export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))

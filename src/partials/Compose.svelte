@@ -1,16 +1,19 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {last, pluck, propEq} from "ramda"
+  import {last, partition, pluck, propEq} from "ramda"
   import {displayPerson} from "src/util/nostr"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
   import {searchPeople} from "src/agent/db"
+  import user from "src/agent/user"
   import {getPubkeyWriteRelays} from "src/agent/relays"
 
   export let onSubmit
 
   let contenteditable, suggestions
+
+  const {petnamePubkeys} = user
 
   const pubkeyEncoder = {
     encode: pubkey => {
@@ -26,7 +29,17 @@
   }
 
   const applySearch = word => {
-    suggestions.setData(word.startsWith("@") ? $searchPeople(word.slice(1)).slice(0, 5) : [])
+    let results = []
+    if (word.startsWith("@")) {
+      const [followed, notFollowed] = partition(
+        p => $petnamePubkeys.includes(p.pubkey),
+        $searchPeople(word.slice(1))
+      )
+
+      results = followed.concat(notFollowed)
+    }
+
+    suggestions.setData(results.slice(0, 5))
   }
 
   const getInfo = () => {

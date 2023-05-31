@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.2.30
+
+- [x] Prefer followed users when mentioning people
+
 # 0.2.29
 
 - [x] Register url handler for web+nostr and use that for sharing
