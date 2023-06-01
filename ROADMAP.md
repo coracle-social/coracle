@@ -1,5 +1,8 @@
 # Current
 
+- [ ] Use vida to stream development
+- [ ] Add root/reply to notifications, group by parent too maybe?
+- [ ] Private groups using nsec bunker
 - [ ] Fix connection management stuff. Have GPT help
 - [ ] Add zap splits https://github.com/nostr-protocol/nips/pull/552
 - [ ] Integrate simplex sharing? https://simplex.chat/docs/guide/readme.html
