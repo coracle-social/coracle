@@ -9,6 +9,7 @@
   import ChatList from "src/app/views/ChatList.svelte"
   import Feeds from "src/app/views/Feeds.svelte"
   import UserKeys from "src/app/views/UserKeys.svelte"
+  import Apps from "src/app/views/Apps.svelte"
   import Login from "src/app/views/Login.svelte"
   import Logout from "src/app/views/Logout.svelte"
   import MessagesDetail from "src/app/views/MessagesDetail.svelte"
@@ -64,6 +65,7 @@
         <MessagesDetail entity={params.entity} />
       {/key}
     </Route>
+    <Route path="/apps" component={Apps} />
     <Route path="/keys" component={UserKeys} />
     <Route path="/relays" component={RelayList} />
     <Route path="/relays/:b64OrUrl" let:params>
