@@ -40,7 +40,7 @@
   })
 </script>
 
-<Content gap={2}>
+<Content gap="gap-2">
   {#each $people || [] as person}
     <PersonInfo {person} />
   {:else}

@@ -1,10 +1,10 @@
 <script>
   import cx from "classnames"
 
-  export let gap = 6
+  export let gap = "gap-6"
   export let size = "2xl"
 
-  const className = `flex flex-col m-auto text-gray-2 gap-${gap} overflow-hidden`
+  const className = `flex flex-col m-auto text-gray-2 ${gap} overflow-hidden`
 
   if (!["inherit", "lg", "2xl"].includes(size)) {
     throw new Error(`Invalid size: ${size}`)
