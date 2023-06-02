@@ -1,6 +1,7 @@
 <script>
   import {pluck} from "ramda"
   import {fuzzy} from "src/util/misc"
+  import {normalizeRelayUrl} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {watch} from "src/agent/db"
@@ -9,7 +10,7 @@
   export let q = ""
   export let limit = 50
   export let relays = user.relays
-  export let placeholder = "Search known relays"
+  export let placeholder = "Search relays or add a custom url"
   export let hideIfEmpty = false
 
   let search
@@ -29,6 +30,9 @@
   <Input bind:value={q} type="text" wrapperClass="flex-grow" {placeholder}>
     <i slot="before" class="fa-solid fa-search" />
   </Input>
+  {#if q.match("^.+\\..+$")}
+    <RelayCard relay={{url: normalizeRelayUrl(q)}} />
+  {/if}
   {#each !q && hideIfEmpty ? [] : search(q).slice(0, limit) as relay (relay.url)}
     <slot name="item" {relay}>
       <RelayCard {relay} />

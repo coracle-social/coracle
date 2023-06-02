@@ -65,13 +65,13 @@
 
 <svelte:window
   on:scroll={e => {
-    instance.hide()
+    instance?.hide()
   }} />
 
 <svelte:body
   on:keydown={e => {
     if (e.key === "Escape") {
-      instance.hide()
+      instance?.hide()
     }
   }} />
 

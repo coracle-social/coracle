@@ -1,9 +1,7 @@
 <script>
   import {fly} from "svelte/transition"
-  import {appName} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
-  import RelaySearch from "src/app/shared/RelaySearch.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import user from "src/agent/user"
   import {modal} from "src/partials/state"
@@ -38,18 +36,6 @@
       {#each $relays as relay (relay.url)}
         <RelayCard showStatus showControls {relay} />
       {/each}
-    </div>
-    <div class="flex flex-col gap-6" in:fly={{y: 20}}>
-      <div class="mb-2 border-b border-solid border-gray-6 pt-2" />
-      <div class="flex items-center gap-2">
-        <i class="fa fa-earth-asia fa-lg" />
-        <h2 class="staatliches text-2xl">Other relays</h2>
-      </div>
-      <p>
-        {appName} automatically discovers relays as you browse the network. Adding more
-        relays will generally make things quicker to load, at the expense of higher data usage.
-      </p>
-      <RelaySearch />
     </div>
   </Content>
 </div>

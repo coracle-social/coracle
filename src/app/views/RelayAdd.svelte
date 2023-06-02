@@ -1,11 +1,10 @@
 <script>
   import {fly} from "svelte/transition"
-  import Input from "src/partials/Input.svelte"
+  import {toast, modal, appName} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import Button from "src/partials/Button.svelte"
+  import RelaySearch from "src/app/shared/RelaySearch.svelte"
   import user from "src/agent/user"
-  import {toast, modal} from "src/partials/state"
   import {loadAppData} from "src/app/state"
 
   export let url
@@ -42,16 +41,11 @@
   <Content>
     <div class="mb-4 flex flex-col items-center justify-center">
       <Heading>Add a relay</Heading>
+      <p>
+        {appName} automatically discovers relays as you browse the network. Adding more relays will generally
+        make things quicker to load, at the expense of higher data usage.
+      </p>
     </div>
-    <div class="flex w-full flex-col gap-8">
-      <div class="flex flex-col gap-1">
-        <strong>Relay URL</strong>
-        <Input autofocus bind:value={url} placeholder="wss://relay.example.com">
-          <i slot="before" class="fa-solid fa-link" />
-        </Input>
-        <p class="text-sm text-gray-1">The url where the relay is hosted.</p>
-      </div>
-      <Button type="submit" class="text-center">Done</Button>
-    </div>
+    <RelaySearch />
   </Content>
 </form>

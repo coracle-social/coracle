@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {displayRelay} from "src/util/nostr"
+  import {displayRelay, normalizeRelayUrl} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
@@ -8,9 +8,7 @@
 
   export let url
 
-  if (!url.startsWith("ws")) {
-    url = "wss://" + url
-  }
+  url = normalizeRelayUrl(url)
 
   const relay = relays.get(url) || {url}
 

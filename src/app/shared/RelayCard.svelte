@@ -1,10 +1,12 @@
 <script lang="ts">
   import cx from "classnames"
-  import {find, last, propEq} from "ramda"
+  import {find, propEq} from "ramda"
   import {between} from "hurdak/lib/hurdak"
   import {onMount} from "svelte"
   import {fly} from "svelte/transition"
-  import {poll, stringToHue, hsl, webSocketURLToPlainOrBase64} from "src/util/misc"
+  import {poll, stringToHue, hsl} from "src/util/misc"
+  import {displayRelay} from "src/util/nostr"
+  import {modal} from "src/partials/state"
   import Toggle from "src/partials/Toggle.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import pool from "src/agent/pool"
@@ -38,6 +40,10 @@
     }
   }
 
+  const openModal = () => {
+    modal.push({type: "relay/detail", url: relay.url})
+  }
+
   onMount(() => {
     return poll(10_000, () => {
       ;[quality, message] = pool.getQuality(relay.url)
@@ -54,10 +60,8 @@
   in:fly={{y: 20}}>
   <div class="flex items-center justify-between gap-2">
     <div class="flex items-center gap-2 text-xl">
-      <i class={relay.url.startsWith("wss") ? "fa fa-lock" : "fa fa-unlock"} />
-      <Anchor type="unstyled" href={`/relays/${webSocketURLToPlainOrBase64(relay.url)}`}>
-        {last(relay.url.split("://"))}
-      </Anchor>
+      <i class={relay.url.startsWith("ws://") ? "fa fa-unlock" : "fa fa-lock"} />
+      <Anchor type="unstyled" on:click={openModal}>{displayRelay(relay)}</Anchor>
       {#if showStatus}
         <span
           on:mouseout={() => {

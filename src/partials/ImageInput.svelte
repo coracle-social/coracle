@@ -66,15 +66,16 @@
       <i slot="before" class={`fa fa-${icon}`} />
     </Input>
   {/if}
-  <slot name="button">
-    <Anchor
-      type="button"
-      on:click={() => {
-        isOpen = true
-      }}>
-      <i class="fa fa-upload" />
-    </Anchor>
-  </slot>
+  <div
+    on:click={() => {
+      isOpen = true
+    }}>
+    <slot name="button">
+      <Anchor type="button">
+        <i class="fa fa-upload" />
+      </Anchor>
+    </slot>
+  </div>
 </div>
 
 {#if quote}

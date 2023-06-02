@@ -156,7 +156,15 @@ export const isShareableRelay = url =>
   // Skip nostr.wine's virtual relays
   !url.slice(6).match(/\/npub/)
 
-export const normalizeRelayUrl = url => url.replace(/\/+$/, "").toLowerCase().trim()
+export const normalizeRelayUrl = url => {
+  url = url.replace(/\/+$/, "").toLowerCase().trim()
+
+  if (!url.startsWith("ws")) {
+    url = "wss://" + url
+  }
+
+  return url
+}
 
 export const roomAttrs = ["name", "about", "picture"]
 

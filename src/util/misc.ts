@@ -420,6 +420,7 @@ export const base64DecodeOrPlainWebSocketURL = (data: string): string => {
     if (data.startsWith("ws://") || data.startsWith("wss://")) {
       return data
     }
+
     return "wss://" + data
   }
 }
@@ -428,12 +429,15 @@ export const webSocketURLToPlainOrBase64 = (url: string): string => {
   if (url.startsWith("ws://")) {
     return btoa(url)
   }
+
   if (url.startsWith("wss://")) {
     url = url.slice(6)
   }
+
   if (url.includes("/")) {
     return btoa(url)
   }
+
   return url
 }
 

@@ -19,6 +19,7 @@
   import ListSelect from "src/app/views/ListSelect.svelte"
   import ListEdit from "src/app/views/ListEdit.svelte"
   import RelayAdd from "src/app/views/RelayAdd.svelte"
+  import RelayDetail from "src/app/views/RelayDetail.svelte"
 
   export let m
 </script>
@@ -35,6 +36,8 @@
   <NoteShare note={m.note} />
 {:else if m.type === "relay/add"}
   <RelayAdd url={m.url} />
+{:else if m.type === "relay/detail"}
+  <RelayDetail url={m.url} />
 {:else if m.type === "onboarding"}
   <Onboarding stage={m.stage} />
 {:else if m.type === "room/edit"}
