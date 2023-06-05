@@ -60,7 +60,7 @@
         content += "\n"
       }
 
-      if (child.tagName === "DIV" && !child.querySelector("br")) {
+      if (child.tagName === "DIV" && child.children[0]?.tagName === "BR") {
         content += "\n"
       }
 
