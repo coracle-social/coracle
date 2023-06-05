@@ -22,6 +22,7 @@
 # Core
 
 - [ ] Make mutes private
+- [ ] Add nostrscript nevent1qqsvetmqsk8025jadyn82cpmkgxcesjffqajssd2qaq0k8arw9v79tsppadk7cn2v43hggz0vf4x2cm5t5yt4dnl
 - [ ] Highlights
   - Allow highlighting text in notes
   - When something is highlighted, show fixed-position elements for adding highlights

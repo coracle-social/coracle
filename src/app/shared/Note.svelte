@@ -17,7 +17,6 @@
   import {getRelaysForEventParent} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
   import {watch} from "src/agent/db"
-  import {routes} from "src/app/state"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
   export let note
@@ -116,7 +115,9 @@
           style="left: 0px; top: 27px;" />
       {/if}
       <div>
-        <Anchor class="text-lg font-bold" href={routes.person($author.pubkey)}>
+        <Anchor
+          class="text-lg font-bold"
+          on:click={() => modal.push({type: "person/feed", pubkey: $author.pubkey})}>
           <PersonCircle size={10} person={$author} />
         </Anchor>
       </div>

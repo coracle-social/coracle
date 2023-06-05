@@ -2,12 +2,12 @@
   import {last, nth} from "ramda"
   import {fly} from "svelte/transition"
   import {displayPerson} from "src/util/nostr"
+  import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
   import user from "src/agent/user"
-  import {routes} from "src/app/state"
 
   const {petnames} = user
 
@@ -30,7 +30,7 @@
 <div in:fly={{y: 20}}>
   <Anchor
     type="unstyled"
-    href={routes.person(person.pubkey)}
+    on:click={() => modal.push({type: "person/feed", pubkey: person.pubkey})}
     class="flex gap-4 overflow-hidden border-l-2 border-solid border-gray-7 py-3 px-4
            transition-all hover:border-accent hover:bg-gray-8">
     <PersonCircle {person} size={12} />
