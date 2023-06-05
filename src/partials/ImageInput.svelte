@@ -71,9 +71,11 @@
       isOpen = true
     }}>
     <slot name="button">
-      <Anchor type="button">
-        <i class="fa fa-upload" />
-      </Anchor>
+      <div class="flex">
+        <Anchor type="button">
+          <i class="fa fa-upload" />
+        </Anchor>
+      </div>
     </slot>
   </div>
 </div>
