@@ -23,6 +23,8 @@
     } catch (e) {
       warn(e)
     }
+
+    console.log(type, data)
   })
 </script>
 

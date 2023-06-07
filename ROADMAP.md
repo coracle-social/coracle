@@ -1,5 +1,6 @@
 # Current
 
+- [ ] List detail pages with follow all and add all to list
 - [ ] Use vida to stream development
 - [ ] Fix connection management stuff. Have GPT help
 - [ ] Add threads - replies by self get shown at the top of replies?
@@ -21,6 +22,8 @@
 
 # Core
 
+- [ ] Show link previews when posting
+- [ ] Embedded music players for Spotify, youtube, etc
 - [ ] Make mutes private
 - [ ] Add nostrscript nevent1qqsvetmqsk8025jadyn82cpmkgxcesjffqajssd2qaq0k8arw9v79tsppadk7cn2v43hggz0vf4x2cm5t5yt4dnl
 - [ ] Highlights

@@ -22,6 +22,7 @@
     ["https://getalby.com", "Alby", "Sign in to nostr apps without sharing your private key."],
     ["https://nak.nostr.com", "NAK", "A Nostr Army Knife, for advanced users."],
     ["https://nostrplebs.com", "NostrPlebs", "Get verified at nostrplebs.com."],
+    ["https://nadar.tigerville.no", "Nadar", "Find out what relays know about your post."],
   ]
 
   document.title = "Apps"

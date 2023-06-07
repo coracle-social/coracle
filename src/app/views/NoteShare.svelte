@@ -7,7 +7,8 @@
 
   export let note
 
-  const nevent = nip19.neventEncode({id: note.id, relays: [getRelayForEventHint(note)]})
+  const {url} = getRelayForEventHint(note)
+  const nevent = nip19.neventEncode({id: note.id, relays: [url]})
 </script>
 
 <Content size="lg">
