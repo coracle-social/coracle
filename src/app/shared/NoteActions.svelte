@@ -40,9 +40,10 @@
     modal.push({type: "note/share", note})
   }
 
-  const quote = () => modal.push({type: "note/create", nevent})
+  const quote = () => modal.push({type: "note/create", quote: note})
   const mute = () => user.addMute("e", note.id)
   const unmute = () => user.removeMute(note.id)
+  const deleteSelf = () => modal.push({type: "note/delete", note})
 
   const react = async content => {
     like = first(await cmd.createReaction(note, content).publish(getEventPublishRelays(note)))
@@ -82,6 +83,10 @@
 
     actions.push({label: "Share", icon: "share-nodes", onClick: share})
     actions.push({label: "Quote", icon: "quote-left", onClick: quote})
+
+    if (note.pubkey === user.getPubkey()) {
+      actions.push({label: "Delete", icon: "trash", onClick: deleteSelf})
+    }
 
     if (muted) {
       actions.push({label: "Unmute", icon: "microphone", onClick: unmute})

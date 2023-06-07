@@ -3,6 +3,15 @@
 # 0.2.30
 
 - [x] Prefer followed users when mentioning people
+- [x] Open people in a modal when it makes sense
+- [x] Fix regex for urls
+- [x] Fix note sharing bug
+- [x] Add mention mark to e tags embedded in notes
+- [x] Add tags to notes by parsing content
+- [x] Add note delete button
+- [x] Add mentions to quotes
+- [x] Increase routes table size and change sort order to hopefully get better relay hints
+- [x] Upgrade mentions from square bracket notation to bech32 embeds
 
 # 0.2.29
 

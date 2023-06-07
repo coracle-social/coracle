@@ -15,15 +15,15 @@
   import Heading from "src/partials/Heading.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {getUserWriteRelays} from "src/agent/relays"
+  import {getUserWriteRelays, getRelayForPersonHint} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
   import cmd from "src/agent/cmd"
   import user from "src/agent/user"
   import {toast, modal} from "src/partials/state"
   import {publishWithToast} from "src/app/state"
 
+  export let quote = null
   export let pubkey = null
-  export let nevent = null
   export let writeTo: string[] | null = null
 
   let q = ""
@@ -38,14 +38,23 @@
   )
 
   const onSubmit = async () => {
-    let {content, mentions, topics} = compose.parse()
+    let content = compose.parse()
+    const tags = []
 
     if (image) {
       content = content + "\n" + image
     }
 
+    if (quote) {
+      const {pubkey} = quote
+      const person = getPersonWithFallback(pubkey)
+      const pHint = getRelayForPersonHint(pubkey)
+
+      tags.push(["p", pubkey, pHint?.url || "", displayPerson(person)])
+    }
+
     if (content) {
-      const thunk = cmd.createNote(content.trim(), mentions, topics)
+      const thunk = cmd.createNote(content.trim(), tags)
       const [event, promise] = await publishWithToast($relays, thunk)
 
       promise.then(() =>
@@ -90,7 +99,9 @@
       compose.mention(getPersonWithFallback(pubkey))
     }
 
-    if (nevent) {
+    if (quote) {
+      const nevent = nip19.neventEncode({id: quote.id, relays: [quote.seen_on]})
+
       compose.nevent("nostr:" + nevent)
     }
   })

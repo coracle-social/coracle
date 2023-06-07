@@ -197,7 +197,7 @@ export const dropAll = () => new Promise(resolve => loki.deleteDatabase(resolve)
 // Domain-specific collections
 
 const sortByCreatedAt = sortBy(e => -e.created_at)
-const sortByLastSeen = sortBy(e => -e.last_seen)
+const sortByScore = sortBy(e => -e.score)
 
 export const people = new Table("people", "pubkey", {
   max: 3000,
@@ -215,7 +215,7 @@ export const notifications = new Table("notifications", "id", {sort: sortByCreat
 export const contacts = new Table("contacts", "pubkey")
 export const rooms = new Table("rooms", "id")
 export const relays = new Table("relays", "url")
-export const routes = new Table("routes", "id", {max: 3000, sort: sortByLastSeen})
+export const routes = new Table("routes", "id", {max: 10000, sort: sortByScore})
 export const topics = new Table("topics", "name")
 
 export const getPersonWithFallback = pubkey => people.get(pubkey) || {pubkey}

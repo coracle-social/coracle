@@ -77,7 +77,9 @@ export class Tags {
 }
 
 export const findReplyAndRoot = e => {
-  const tags = Tags.from(e).type("e")
+  const tags = Tags.from(e)
+    .type("e")
+    .filter(t => last(t) !== "mention")
   const legacy = tags.any(t => !["reply", "root"].includes(last(t)))
 
   // Support the deprecated version where tags are not marked as replies

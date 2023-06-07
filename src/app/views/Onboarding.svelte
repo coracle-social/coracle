@@ -45,7 +45,7 @@
     await Promise.all([
       user.updateRelays(() => user.getRelays()),
       cmd.updateUser(profile).publish(user.getRelays()),
-      note && cmd.createNote(note.content, note.mentions, note.topics).publish(user.getRelays()),
+      note && cmd.createNote(note).publish(user.getRelays()),
       user.updatePetnames(() =>
         user.getPetnamePubkeys().map(pubkey => {
           const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))

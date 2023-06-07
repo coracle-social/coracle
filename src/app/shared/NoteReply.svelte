@@ -48,17 +48,15 @@
   }
 
   const send = async () => {
-    let {content, mentions, topics} = reply.parse()
+    let content = reply.parse()
 
     if (data.image) {
       content = (content + "\n" + data.image).trim()
     }
 
     if (content) {
-      mentions = uniq(mentions.concat(data.mentions))
-
       const relays = getEventPublishRelays(note)
-      const thunk = cmd.createReply(note, content, mentions, topics)
+      const thunk = cmd.createReply(note, content, data.mentions.map(cmd.mention))
       const [event, promise] = await publishWithToast(relays, thunk)
 
       promise.then(({succeeded}) => {

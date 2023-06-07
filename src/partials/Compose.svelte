@@ -203,20 +203,16 @@
 
   export const parse = () => {
     let {content, annotations} = contenteditable.parse()
-    const topics = pluck("value", annotations.filter(propEq("prefix", "#")))
 
     // Remove zero-width and non-breaking spaces
     content = content.replace(/[\u200B\u00A0]/g, " ").trim()
 
-    // We're still using old style mention interpolation until NIP-27
-    // gets merged https://github.com/nostr-protocol/nips/pull/381/files
-    const mentions = annotations.filter(propEq("prefix", "@")).map(({value}, index) => {
-      content = content.replace("@" + value, `#[${index}]`)
-
-      return pubkeyEncoder.decode(value)
+    // Strip the @ sign in mentions
+    annotations.filter(propEq("prefix", "@")).forEach(({value}, index) => {
+      content = content.replace("@" + value, value)
     })
 
-    return {content, topics, mentions}
+    return content
   }
 </script>
 
