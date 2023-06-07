@@ -116,7 +116,7 @@ const tagsFromContent = (content, tags) => {
 
   for (const {type, value} of parseContent({content})) {
     if (type.match(/nostr:(note|nevent)/) && !seen.has(value.id)) {
-      tags = tags.concat([["e", value.id]])
+      tags = tags.concat([["e", value.id, "mention"]])
       seen.add(value.id)
     }
 
