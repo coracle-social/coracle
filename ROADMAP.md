@@ -3,7 +3,6 @@
 - [ ] List detail pages with follow all and add all to list
 - [ ] Use vida to stream development
 - [ ] Fix connection management stuff. Have GPT help
-- [ ] Add threads - replies by self get shown at the top of replies?
 - [ ] Relay reviews
   - New kind, d as url? Combine with labeling?
   - Show reviews in relay detail rather than events. Warn about events tab
@@ -19,9 +18,11 @@
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
 - [ ] Private groups using nsec bunker
+- [ ] Fix unauthenticated experience. Going to an npub just spins
 
 # Core
 
+- [ ] Add threads - replies by self get shown at the top of replies?
 - [ ] Show link previews when posting
 - [ ] Embedded music players for Spotify, youtube, etc
 - [ ] Make mutes private
@@ -69,6 +70,7 @@
   - nevent1qqs2jm46m9tg9z33av4fp8hhapsx96234htz75wrvpvrax5jjl8m5usprfmhxue69uhhyetvv9ujumn0wd68yurvv438xtnrdaksy4d92m
 - [ ] NIP 39 Support https://github.com/nostr-protocol/nips/pull/201/files
 - [ ] Integrate plephy https://plebhy.com/
+- [ ] Add support for website kind0
 
 # UI/Features
 

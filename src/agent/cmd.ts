@@ -96,7 +96,7 @@ const tagsFromContent = (content, tags) => {
     }
 
     if (type.match(/nostr:(note|nevent)/) && !seen.has(value.id)) {
-      tags = tags.concat([["e", value.id, "mention"]])
+      tags = tags.concat([["e", value.id, value.relays?.[0] || "", "mention"]])
       seen.add(value.id)
     }
 
