@@ -263,11 +263,7 @@ export const parseContent = ({content, tags = []}) => {
   }
 
   const parseUrl = () => {
-    const raw = first(
-      text.match(
-        /^((http|ws)s?:\/\/)?[-a-z0-9:%_\+~#@,=\.\*\(\)]+\.[a-z]{1,6}[-a-z0-9:%_\+~#\?&\/=;#@,\.\(\)]*/gi
-      )
-    )
+    const raw = first(text.match(/^([a-z\+:]{2,30}:\/\/)?[^\s]+\.[a-z]{2,6}[^\s]*[^\.!?,:\s]/gi))
 
     // Skip url if it's just the end of a filepath
     if (raw) {
@@ -280,18 +276,15 @@ export const parseContent = ({content, tags = []}) => {
       let url = raw
 
       // Skip ellipses and very short non-urls
-      if (!url.match(/\.\./) && url.length > 4) {
-        // It's common for punctuation to end a url, trim it off
-        if (url.match(/[\.\?,:]$/)) {
-          url = url.slice(0, -1)
-        }
-
-        if (!url.match("://")) {
-          url = "https://" + url
-        }
-
-        return ["link", raw, url]
+      if (url.match(/\.\./)) {
+        return
       }
+
+      if (!url.match("://")) {
+        url = "https://" + url
+      }
+
+      return ["link", raw, url]
     }
   }
 
