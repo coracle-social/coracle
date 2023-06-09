@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {last, partition, always, propEq, uniqBy, sortBy, prop} from "ramda"
+  import {last, partition, always, uniqBy, sortBy, prop} from "ramda"
   import {fly} from "svelte/transition"
   import {quantify} from "hurdak/lib/hurdak"
   import {createScroller, now, timedelta} from "src/util/misc"
@@ -12,10 +12,11 @@
   import Note from "src/app/shared/Note.svelte"
   import user from "src/agent/user"
   import network from "src/agent/network"
+  import {getUserReadRelays} from "src/agent/relays"
   import {mergeParents} from "src/app/state"
 
   export let filter
-  export let relays = []
+  export let relays = getUserReadRelays()
   export let delta = timedelta(6, "hours")
   export let shouldDisplay = always(true)
   export let parentsTimeout = 500
@@ -26,12 +27,12 @@
   let feedRelay = null
   let feedScroller = null
 
-  // Add a short buffer so we can get the most possible results for recent notes
   const since = now()
   const maxNotes = 100
   const seen = new Set()
   const cursor = new network.Cursor({relays, delta})
   const getModal = () => last(document.querySelectorAll(".modal-content"))
+  const canDisplay = e => [1, 1985].includes(e.kind)
 
   const setFeedRelay = relay => {
     feedRelay = relay
@@ -71,13 +72,13 @@
     // Combine notes and parents into a single collection
     const combined = uniqBy(
       prop("id"),
-      filtered.filter(propEq("kind", 1)).concat(parents).map(asDisplayEvent)
+      filtered.filter(canDisplay).concat(parents).map(asDisplayEvent)
     )
 
     // Stream in additional data and merge it in
     network.streamContext({
       maxDepth: 2,
-      notes: combined.filter(propEq("kind", 1)),
+      notes: combined.filter(canDisplay),
       onChunk: context => {
         context = user.applyMutes(context)
 
@@ -129,7 +130,7 @@
   })
 </script>
 
-<Content size="inherit" class="pt-6">
+<Content size="inherit">
   {#if notesBuffer.length > 0}
     <div class="pointer-events-none fixed left-0 top-0 z-10 mt-20 flex w-full justify-center">
       <button

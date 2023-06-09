@@ -6,10 +6,11 @@
   export let activeTab
   export let setActiveTab
   export let getDisplay = tab => ({title: toTitle(tab), badge: null})
+  export let borderClass = "border-gray-7"
 </script>
 
 <div
-  class="flex items-center justify-between overflow-auto border-b border-solid border-gray-7 pt-2"
+  class={`flex items-center justify-between overflow-auto border-b border-solid pt-2 ${borderClass}`}
   in:fly={{y: 20}}>
   <div class="flex">
     {#each tabs as tab}

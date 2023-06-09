@@ -69,46 +69,44 @@
       </p>
     </Content>
   {/if}
-  <div>
-    <Tabs tabs={visibleTabs} activeTab={$feedsTab} {setActiveTab}>
-      {#if $canPublish}
-        {#if $lists.length > 0}
-          <Popover placement="bottom" opts={{hideOnClick: true}} theme="transparent">
-            <i slot="trigger" class="fa fa-ellipsis-v cursor-pointer p-2" />
-            <div
-              slot="tooltip"
-              class="flex flex-col items-start overflow-hidden rounded border border-solid border-gray-8 bg-black">
-              {#each $lists as e (e.id)}
-                {@const meta = Tags.from(e).asMeta()}
-                <button
-                  class={cx("w-full py-2 px-3 text-left transition-colors", {
-                    "hover:bg-gray-7": $theme === "dark",
-                    "hover:bg-gray-1": $theme === "light",
-                  })}
-                  on:click={() => {
-                    $feedsTab = meta.d
-                  }}>
-                  <i class="fa fa-scroll fa-sm mr-1" />
-                  {meta.d}
-                </button>
-              {/each}
+  <Tabs tabs={visibleTabs} activeTab={$feedsTab} {setActiveTab}>
+    {#if $canPublish}
+      {#if $lists.length > 0}
+        <Popover placement="bottom" opts={{hideOnClick: true}} theme="transparent">
+          <i slot="trigger" class="fa fa-ellipsis-v cursor-pointer p-2" />
+          <div
+            slot="tooltip"
+            class="flex flex-col items-start overflow-hidden rounded border border-solid border-gray-8 bg-black">
+            {#each $lists as e (e.id)}
+              {@const meta = Tags.from(e).asMeta()}
               <button
-                on:click={showLists}
                 class={cx("w-full py-2 px-3 text-left transition-colors", {
                   "hover:bg-gray-7": $theme === "dark",
                   "hover:bg-gray-1": $theme === "light",
-                })}>
-                <i class="fa fa-cog fa-sm mr-1" /> Customize
+                })}
+                on:click={() => {
+                  $feedsTab = meta.d
+                }}>
+                <i class="fa fa-scroll fa-sm mr-1" />
+                {meta.d}
               </button>
-            </div>
-          </Popover>
-        {:else}
-          <i class="fa fa-ellipsis-v cursor-pointer p-1" on:click={showLists} />
-        {/if}
+            {/each}
+            <button
+              on:click={showLists}
+              class={cx("w-full py-2 px-3 text-left transition-colors", {
+                "hover:bg-gray-7": $theme === "dark",
+                "hover:bg-gray-1": $theme === "light",
+              })}>
+              <i class="fa fa-cog fa-sm mr-1" /> Customize
+            </button>
+          </div>
+        </Popover>
+      {:else}
+        <i class="fa fa-ellipsis-v cursor-pointer p-1" on:click={showLists} />
       {/if}
-    </Tabs>
-    {#key $feedsTab}
-      <Feed {relays} {filter} />
-    {/key}
-  </div>
+    {/if}
+  </Tabs>
+  {#key $feedsTab}
+    <Feed {relays} {filter} />
+  {/key}
 </Content>

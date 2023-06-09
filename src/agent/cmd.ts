@@ -84,6 +84,8 @@ const requestZap = (relays, content, pubkey, eventId, amount, lnurl) => {
 
 const deleteEvent = ids => new PublishableEvent(5, {tags: ids.map(id => ["e", id])})
 
+const createLabel = payload => new PublishableEvent(1985, payload)
+
 // Utils
 
 const tagsFromContent = (content, tags) => {
@@ -158,7 +160,6 @@ class PublishableEvent {
   }
   async publish(relays, onProgress = null, verb = "EVENT") {
     const event = await this.getSignedEvent()
-    // console.log(event); return
     const promise = pool.publish({relays, event, onProgress, verb})
 
     // Copy the event since loki mutates it to add metadata
@@ -186,5 +187,6 @@ export default {
   createReply,
   requestZap,
   deleteEvent,
+  createLabel,
   PublishableEvent,
 }

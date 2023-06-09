@@ -1,5 +1,6 @@
 <script lang="ts">
   import {find, last, propEq} from "ramda"
+  import {modal} from "src/partials/state"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import user from "src/agent/user"
   import {getRelayWithFallback} from "src/agent/db"
@@ -36,6 +37,12 @@
         onClick: () => addToList("r", relay.url),
         label: "Add to list",
         icon: "scroll",
+      })
+
+      actions.push({
+        onClick: () => modal.push({type: "relay/review", url: relay.url}),
+        label: "Review",
+        icon: "feather",
       })
     }
 

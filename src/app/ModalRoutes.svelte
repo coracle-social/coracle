@@ -21,6 +21,7 @@
   import ListEdit from "src/app/views/ListEdit.svelte"
   import RelayAdd from "src/app/views/RelayAdd.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
+  import RelayReview from "src/app/views/RelayReview.svelte"
 
   export let m
 </script>
@@ -41,6 +42,8 @@
   <RelayAdd url={m.url} />
 {:else if m.type === "relay/detail"}
   <RelayDetail url={m.url} />
+{:else if m.type === "relay/review"}
+  <RelayReview url={m.url} />
 {:else if m.type === "onboarding"}
   <Onboarding stage={m.stage} />
 {:else if m.type === "room/edit"}

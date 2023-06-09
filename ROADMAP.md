@@ -4,9 +4,8 @@
 - [ ] Use vida to stream development
 - [ ] Fix connection management stuff. Have GPT help
 - [ ] Relay reviews
-  - New kind, d as url? Combine with labeling?
-  - Show reviews in relay detail rather than events. Warn about events tab
   - Add curated relay list, and an easy way to view content on the relays
+  - Deploy ontology.coracle.social
 - [ ] Add preview proxy thing
 - [ ] White-labeled
   - [ ] Add invite code registration for relay
@@ -71,6 +70,10 @@
 - [ ] NIP 39 Support https://github.com/nostr-protocol/nips/pull/201/files
 - [ ] Integrate plephy https://plebhy.com/
 - [ ] Add support for website kind0
+- [ ] Schedule notes for x seconds in the future with a queue
+  - In the queue, add send now and cancel buttons
+  - maybe put all user events here too - keep track of what relays they were published to
+  - Add un-delete using event log
 
 # UI/Features
 
