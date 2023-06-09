@@ -160,7 +160,7 @@ const processChats = async (pubkey, events) => {
 export const listen = async () => {
   const pubkey = user.getPubkey()
   const {roomsJoined} = user.getProfile()
-  const kinds = enableZaps ? [1, 4, 7, 9735] : [1, 4, 7]
+  const kinds = enableZaps ? [1, 4, 7, 1985, 9735] : [1, 4, 7, 1985]
 
   // Only grab notifications since we last checked, with some wiggle room
   const since =
