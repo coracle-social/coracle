@@ -265,7 +265,7 @@ export const parseContent = ({content, tags = []}) => {
   const parseUrl = () => {
     const raw = first(
       text.match(
-        /^((http|ws)s?:\/\/)?[-a-z0-9:%_\+~#@,=\.\*]+\.[a-z]{1,6}[-a-z0-9:%_\+~#\?&\/=;#@,\.]*/gi
+        /^((http|ws)s?:\/\/)?[-a-z0-9:%_\+~#@,=\.\*\(\)]+\.[a-z]{1,6}[-a-z0-9:%_\+~#\?&\/=;#@,\.\(\)]*/gi
       )
     )
 
