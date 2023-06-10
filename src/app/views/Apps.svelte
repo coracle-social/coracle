@@ -6,11 +6,7 @@
 
   const apps = [
     ["https://zapstr.live", "Zapstr", "Stream music, zap artists"],
-    [
-      "https://highlighter.com",
-      "Highlighter",
-      "Highlight anything on the web - add notes and share with friends.",
-    ],
+    ["https://highlighter.com", "Highlighter", "Highlight anything and share it with friends."],
     ["https://www.wavman.app", "Wavman", "A nostalgic music player built on nostr."],
     ["https://feeds.nostr.band", "Feeds", "Find custom curated feeds - and create your own."],
     ["https://blowater.deno.dev", "Blowater", "The best nostr micro-client for managing DMs."],
@@ -35,11 +31,11 @@
       <Heading>Recommended micro-apps</Heading>
       <p>Hand-picked recommendations to enhance your nostr experience.</p>
     </div>
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
       {#each apps as [url, title, description]}
         <Card class="flex flex-col gap-2">
           <h1 class="text-2xl">{title}</h1>
-          <p>{description}</p>
+          <p class="h-16">{description}</p>
           <Media link={{url}} />
         </Card>
       {/each}
