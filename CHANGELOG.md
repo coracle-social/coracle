@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.2.31
+
+- [x] Added the ability to view and write reviews on relays, with ratings
+
 # 0.2.30
 
 - [x] Prefer followed users when mentioning people

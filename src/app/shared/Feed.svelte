@@ -21,6 +21,7 @@
   export let shouldDisplay = always(true)
   export let parentsTimeout = 500
   export let invertColors = false
+  export let onEvent = null
 
   let notes = []
   let notesBuffer = []
@@ -89,6 +90,11 @@
 
     // Show replies grouped by parent whenever possible
     const merged = sortBy(e => -e.created_at, mergeParents(combined))
+
+    // Notify caller if they asked for it
+    for (const e of merged) {
+      onEvent?.(e)
+    }
 
     // Split into notes before and after we started loading
     const [bottom, top] = partition(e => e.created_at < since, merged)

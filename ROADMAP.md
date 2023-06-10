@@ -3,9 +3,6 @@
 - [ ] List detail pages with follow all and add all to list
 - [ ] Use vida to stream development
 - [ ] Fix connection management stuff. Have GPT help
-- [ ] Relay reviews
-  - Add curated relay list, and an easy way to view content on the relays
-  - Deploy ontology.coracle.social
 - [ ] Add preview proxy thing
 - [ ] White-labeled
   - [ ] Add invite code registration for relay
@@ -21,6 +18,7 @@
 
 # Core
 
+- [ ] Deploy ontology.coracle.social
 - [ ] Add threads - replies by self get shown at the top of replies?
 - [ ] Show link previews when posting
 - [ ] Embedded music players for Spotify, youtube, etc

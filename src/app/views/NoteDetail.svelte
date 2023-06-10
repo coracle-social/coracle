@@ -34,7 +34,7 @@
     if (!displayNote.pubkey) {
       await network.load({
         relays: sampleRelays(relays),
-        filter: {kinds: [1], ids: [displayNote.id]},
+        filter: {ids: [displayNote.id]},
         onChunk: events => {
           displayNote = asDisplayEvent(first(events))
         },

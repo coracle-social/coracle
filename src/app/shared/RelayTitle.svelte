@@ -4,10 +4,12 @@
   import {displayRelay} from "src/util/nostr"
   import {webSocketURLToPlainOrBase64} from "src/util/misc"
   import {poll, stringToHue, hsl} from "src/util/misc"
+  import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import pool from "src/agent/pool"
 
   export let relay
+  export let rating = null
 
   let quality = null
   let message = null
@@ -47,4 +49,9 @@
     class:opacity-1={showStatus}>
     {message}
   </p>
+  {#if rating}
+    <div class="px-4 text-sm">
+      <Rating inert value={rating} />
+    </div>
+  {/if}
 </div>

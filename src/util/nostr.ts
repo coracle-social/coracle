@@ -2,7 +2,7 @@ import type {DisplayEvent} from "src/util/types"
 import {is, fromPairs, mergeLeft, last, identity, objOf, prop, flatten, uniq} from "ramda"
 import {nip19} from "nostr-tools"
 import {ensurePlural, ellipsize, first} from "hurdak/lib/hurdak"
-import {tryJson} from "src/util/misc"
+import {tryJson, avg} from "src/util/misc"
 import {invoiceAmount} from "src/util/lightning"
 
 export const personKinds = [0, 2, 3, 10001, 10002]
@@ -59,6 +59,9 @@ export class Tags {
   }
   filter(f) {
     return new Tags(this.tags.filter(f))
+  }
+  reject(f) {
+    return new Tags(this.tags.filter(t => !f(t)))
   }
   any(f) {
     return this.filter(f).exists()
@@ -363,3 +366,9 @@ export const processZaps = (zaps, author) =>
 export const fromNostrURI = s => s.replace(/^[\w\+]+:\/?\/?/, "")
 
 export const toNostrURI = s => `web+nostr://${s}`
+
+export const getLabelQuality = (label, event) =>
+  tryJson(() => JSON.parse(last(Tags.from(event).type("l").equals(label).first())).quality)
+
+export const getAvgQuality = (label, events) =>
+  avg(events.map(e => getLabelQuality(label, e)).filter(identity))

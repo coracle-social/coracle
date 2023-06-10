@@ -217,7 +217,12 @@
 </script>
 
 <div class="flex">
-  <ContentEditable bind:this={contenteditable} on:keydown={onKeyDown} on:keyup={onKeyUp} />
+  <ContentEditable
+    style={$$props.style}
+    class={$$props.class}
+    bind:this={contenteditable}
+    on:keydown={onKeyDown}
+    on:keyup={onKeyUp} />
   <slot name="addon" />
 </div>
 

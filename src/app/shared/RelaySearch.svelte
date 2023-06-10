@@ -1,9 +1,13 @@
 <script>
-  import {pluck} from "ramda"
+  import {onMount} from "svelte"
+  import {pluck, groupBy} from "ramda"
+  import {mapValues} from "hurdak/lib/hurdak"
   import {fuzzy} from "src/util/misc"
-  import {normalizeRelayUrl} from "src/util/nostr"
+  import {normalizeRelayUrl, Tags, getAvgQuality} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
+  import {getUserReadRelays} from "src/agent/relays"
+  import network from "src/agent/network"
   import {watch} from "src/agent/db"
   import user from "src/agent/user"
 
@@ -14,7 +18,13 @@
   export let hideIfEmpty = false
 
   let search
+  let reviews = []
   let knownRelays = watch("relays", t => t.all())
+
+  $: ratings = mapValues(
+    events => getAvgQuality("review/relay", events),
+    groupBy(e => Tags.from(e).getMeta("r"), reviews)
+  )
 
   $: {
     const joined = new Set(pluck("url", $relays))
@@ -24,6 +34,18 @@
       {keys: ["name", "description", "url"]}
     )
   }
+
+  onMount(async () => {
+    reviews = await network.load({
+      relays: getUserReadRelays(),
+      filter: {
+        limit: 1000,
+        kinds: [1985],
+        "#l": ["review/relay"],
+        "#L": ["social.coracle.ontology"],
+      },
+    })
+  })
 </script>
 
 <div class="flex flex-col gap-2">
@@ -35,7 +57,7 @@
   {/if}
   {#each !q && hideIfEmpty ? [] : search(q).slice(0, limit) as relay (relay.url)}
     <slot name="item" {relay}>
-      <RelayCard {relay} />
+      <RelayCard rating={ratings[relay.url]} {relay} />
     </slot>
   {/each}
   <slot name="footer">

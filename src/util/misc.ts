@@ -219,7 +219,7 @@ export const defer = (): Deferred<any> => {
   return Object.assign(p, {resolve, reject})
 }
 
-export const avg = xs => sum(xs) / xs.length
+export const avg = xs => (xs.length > 0 ? sum(xs) / xs.length : 0)
 
 // https://stackoverflow.com/a/21682946
 export const stringToHue = value => {

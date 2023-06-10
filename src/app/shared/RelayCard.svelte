@@ -8,12 +8,14 @@
   import {displayRelay} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Toggle from "src/partials/Toggle.svelte"
+  import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import pool from "src/agent/pool"
   import user from "src/agent/user"
   import {loadAppData} from "src/app/state"
 
   export let relay
+  export let rating = null
   export let theme = "gray-8"
   export let showStatus = false
   export let hideActions = false
@@ -81,6 +83,11 @@
           class:opacity-1={statusHover}>
           {message}
         </p>
+      {/if}
+      {#if rating}
+        <div class="px-4 text-sm" in:fly={{y: 20}}>
+          <Rating inert value={rating} />
+        </div>
       {/if}
     </div>
     {#if !hideActions}

@@ -1,23 +1,32 @@
 <script lang="ts">
-  import {displayRelay, normalizeRelayUrl} from "src/util/nostr"
+  import {batch} from "src/util/misc"
+  import {displayRelay, normalizeRelayUrl, getAvgQuality} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import Tabs from "src/partials/Tabs.svelte"
+  import Rating from "src/partials/Rating.svelte"
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
   import RelayActions from "src/app/shared/RelayActions.svelte"
   import {relays} from "src/agent/db"
 
   export let url
 
+  let reviews = []
   let activeTab = "reviews"
 
   url = normalizeRelayUrl(url)
+
+  $: rating = getAvgQuality("review/relay", reviews)
 
   const relay = relays.get(url) || {url}
   const tabs = ["reviews", "notes"]
   const setActiveTab = tab => {
     activeTab = tab
   }
+
+  const onReview = batch(1000, chunk => {
+    reviews = reviews.concat(chunk)
+  })
 
   document.title = displayRelay(relay)
 </script>
@@ -27,6 +36,11 @@
     <RelayTitle {relay} />
     <RelayActions {relay} />
   </div>
+  {#if rating}
+    <div class="text-sm">
+      <Rating inert value={rating} />
+    </div>
+  {/if}
   {#if relay.description}
     <p>{relay.description}</p>
   {/if}
@@ -34,9 +48,10 @@
   {#if activeTab === "reviews"}
     <Feed
       invertColors
+      onEvent={onReview}
       filter={{
         kinds: [1985],
-        "#l": ["review"],
+        "#l": ["review/relay"],
         "#L": ["social.coracle.ontology"],
         "#r": [relay.url],
       }} />

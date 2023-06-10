@@ -1,14 +1,18 @@
 <script lang="ts">
+  import cx from "classnames"
   import {range} from "hurdak/lib/hurdak"
 
+  export let inert = false
   export let value = 1
 </script>
 
 <div class="flex gap-1">
   {#each range(0, 5) as x}
     <i
-      class="fa fa-star cursor-pointer text-gray-5 hover:text-warning hover:opacity-75"
-      class:text-warning={value >= x / 5}
+      class={cx("fa fa-star text-gray-5", {
+        "cursor-pointer hover:text-warning hover:opacity-75": !inert,
+        "text-warning": value >= x / 5,
+      })}
       on:click={() => {
         value = x / 5
       }} />

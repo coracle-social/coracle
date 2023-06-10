@@ -1,4 +1,6 @@
 <script lang="ts">
+  import cx from "classnames"
+
   let input = null
 
   // Line breaks are wrapped in divs sometimes
@@ -86,7 +88,8 @@
 </script>
 
 <div
-  class="w-full min-w-0 p-2 text-gray-2 outline-0"
+  style={$$props.style}
+  class={cx($$props.class, "w-full min-w-0 p-2 text-gray-2 outline-0")}
   autofocus
   contenteditable
   bind:this={input}

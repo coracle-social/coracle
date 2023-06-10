@@ -255,7 +255,7 @@ const loadParents = (notes, opts = {}) => {
 
   return load({
     relays: sampleRelays(aggregateScores(notesWithParent.map(getRelaysForEventParent)), 0.3),
-    filter: {kinds: [1], ids: notesWithParent.map(findReplyId)},
+    filter: {ids: notesWithParent.map(findReplyId)},
     ...opts,
   })
 }
@@ -268,7 +268,7 @@ const streamContext = ({notes, onChunk, maxDepth = 2}) => {
 
   const loadChunk = (events, depth) => {
     // Remove anything from the chunk we've already seen
-    events = events.filter(e => e.kind === 1 && !seen.has(e.id))
+    events = events.filter(e => ![7, 9735].includes(e.kind) && !seen.has(e.id))
 
     // If we have no new information, no need to re-subscribe
     if (events.length === 0) {
@@ -333,7 +333,7 @@ const streamContext = ({notes, onChunk, maxDepth = 2}) => {
 const applyContext = (notes, context) => {
   context = context.map(assoc("isContext", true))
 
-  const replies = context.filter(propEq("kind", 1))
+  const replies = context.filter(e => ![7, 9735].includes(e.kind))
   const reactions = context.filter(propEq("kind", 7))
   const zaps = context.filter(propEq("kind", 9735))
 

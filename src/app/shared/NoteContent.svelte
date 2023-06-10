@@ -1,14 +1,16 @@
 <script lang="ts">
   import {objOf, reverse} from "ramda"
+  import {nip19} from 'nostr-tools'
   import {fly} from "svelte/transition"
-  import {splice} from "hurdak/lib/hurdak"
+  import {splice, switcher, switcherFn} from "hurdak/lib/hurdak"
   import {warn} from "src/util/logger"
-  import {displayPerson, parseContent, Tags} from "src/util/nostr"
+  import {displayPerson, parseContent, getLabelQuality, displayRelay, Tags} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import MediaSet from "src/partials/MediaSet.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import Rating from "src/partials/Rating.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {sampleRelays} from "src/agent/relays"
   import user from "src/agent/user"
@@ -25,6 +27,7 @@
   const shouldTruncate = !showEntire && note.content.length > maxLength
 
   let content = parseContent(note)
+  let rating = note.kind === 1985 ? getLabelQuality("review/relay", note) : null
 
   const links = []
   const ranges = []
@@ -118,6 +121,31 @@
 
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
   <p>
+    {#if rating}
+      {@const [type, value] = Tags.from(note).reject(t => ['l', 'L'].includes(t[0])).first()}
+      {@const action = switcher(type, {
+        r: () => modal.push({type: 'relay/detail', url: value}),
+        p: () => modal.push({type: 'person/feed', pubkey: value}),
+        e: () => modal.push({type: 'note/detail', note: {id: value}}),
+      })}
+      {@const display = switcherFn(type, {
+        r: () => displayRelay({url: value}),
+        p: () => displayPerson(getPersonWithFallback(value)),
+        e: () => "a note",
+        default: "something"
+      })}
+      <div class="flex items-center gap-2 pl-2 mb-4 border-l-2 border-solid border-gray-5">
+        Rated
+        {#if action}
+          <Anchor on:click={action}>{display}</Anchor>
+        {:else}
+          {display}
+        {/if}
+        <div class="text-sm">
+          <Rating inert value={rating} />
+        </div>
+      </div>
+    {/if}
     {#each content as { type, value }, i}
       {#if type === "newline"}
         {#each value as _}

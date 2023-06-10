@@ -4,24 +4,26 @@
   import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import Textarea from "src/partials/Textarea.svelte"
+  import Compose from "src/partials/Compose.svelte"
   import Rating from "src/partials/Rating.svelte"
   import user from "src/agent/user"
   import cmd from "src/agent/cmd"
 
   export let url
 
-  let review
+  let compose
   let rating
 
   const onSubmit = () => {
+    const review = compose.parse()
+
     cmd
       .createLabel({
         content: review,
         tagClient: false,
         tags: [
           ["L", "social.coracle.ontology"],
-          ["l", "review", "social.coracle.ontology"],
+          ["l", "review/relay", "social.coracle.ontology", JSON.stringify({quality: rating})],
           ["r", url],
         ],
       })
@@ -41,7 +43,11 @@
           <Rating bind:value={rating} />
         </div>
       </div>
-      <Textarea bind:value={review} placeholder="Share your thoughts..." />
+      <Compose
+        {onSubmit}
+        class="shadow-inset rounded bg-input text-black"
+        style="min-height: 6rem"
+        bind:this={compose} />
       <Button type="submit" class="flex-grow text-center">Send</Button>
     </div>
   </Content>
