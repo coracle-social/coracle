@@ -19,7 +19,6 @@
     ["https://nostrplebs.com", "NostrPlebs", "Get verified at nostrplebs.com."],
     ["https://nadar.tigerville.no", "Nadar", "Find out what relays know about your post."],
     ["https://pinstr.app", "Pinstr", "Create and manage collections of notes."],
-    ["https://advancednostrsearch.vercel.app", "Advanced Search", "Find what you're looking for."],
   ]
 
   document.title = "Apps"

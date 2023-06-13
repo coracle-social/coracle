@@ -130,7 +130,7 @@
         </div>
         <div on:click|stopPropagation>
           {#each data.mentions as p}
-            <Chip class="mr-1 mb-1" theme="dark" on:click={() => removeMention(p)}>
+            <Chip class="mr-1 mb-1" theme="dark" onClick={() => removeMention(p)}>
               {displayPerson(getPersonWithFallback(p))}
             </Chip>
           {:else}

@@ -55,7 +55,7 @@
   }
 </script>
 
-<div class="flex justify-end gap-2" in:fly={{y: 20}}>
+<div class="flex justify-end gap-2 p-2" in:fly={{y: 20}}>
   <i
     class="fa fa-search cursor-pointer"
     on:click={() => {

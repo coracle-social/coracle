@@ -160,6 +160,7 @@ class PublishableEvent {
   }
   async publish(relays, onProgress = null, verb = "EVENT") {
     const event = await this.getSignedEvent()
+    // console.log(event); return
     const promise = pool.publish({relays, event, onProgress, verb})
 
     // Copy the event since loki mutates it to add metadata

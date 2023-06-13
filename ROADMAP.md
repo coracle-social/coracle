@@ -17,7 +17,6 @@
 - [ ] Fix unauthenticated experience. Going to an npub just spins
 - [ ] Convert app store to nip 89
 - [ ] Put search icon in header or hover button, open in modal
-- [ ] Advanced search
 
 # Core
 

@@ -10,6 +10,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
+  import FilterSummary from "src/app/shared/FilterSummary.svelte"
   import FeedAdvanced from "src/app/shared/FeedAdvanced.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
@@ -36,6 +37,7 @@
 
   $: searchNotes = debounce(300, fuzzy(notes, {keys: ["content"]}))
   $: filteredNotes = search ? searchNotes(search) : notes
+  $: mergedFilter = mergeFilter(filter, overrides)
 
   const since = now()
   const maxNotes = 100
@@ -121,14 +123,12 @@
   // If we have a search term we need to use only relays that support search
   const getRelays = () => (overrides?.search ? [{url: "wss://relay.nostr.band"}] : relays)
 
-  const getFilter = () => mergeFilter(filter, {since, ...overrides})
-
   const loadMore = async () => {
     const _key = key
 
     // Wait for this page to load before trying again
     await cursor.loadPage({
-      filter: getFilter(),
+      filter: mergedFilter,
       onChunk: chunk => {
         // Stack promises to avoid too many concurrent subscriptions
         p = p.then(() => key === _key && onChunk(chunk))
@@ -157,7 +157,7 @@
       if (!filter.until) {
         sub = network.listen({
           relays: getRelays(),
-          filter: getFilter(),
+          filter: mergeFilter(mergedFilter, {since}),
           onChunk: chunk => {
             p = p.then(() => _key === key && onChunk(chunk))
           },
@@ -192,7 +192,10 @@
     </div>
   {/if}
 
-  <FeedAdvanced onChange={start} hide={Object.keys(filter)} />
+  <div class="flex justify-between gap-4">
+    <FilterSummary filter={mergedFilter} />
+    <FeedAdvanced onChange={start} hide={Object.keys(filter)} />
+  </div>
 
   <div class="flex flex-col gap-4">
     {#each filteredNotes as note (note.id)}

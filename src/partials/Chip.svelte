@@ -1,7 +1,8 @@
 <script lang="ts">
   import cx from "classnames"
 
-  export let theme
+  export let theme = "dark"
+  export let onClick = null
 
   const className = cx($$props.class, "inline-block rounded-full border border-solid py-1 px-2", {
     "border-gray-1": theme === "dark",
@@ -11,7 +12,9 @@
 
 <div class={className}>
   <div class="flex items-center gap-2">
-    <i class="fa fa-times cursor-pointer" on:click|preventDefault />
+    {#if onClick}
+      <i class="fa fa-times cursor-pointer" on:click|preventDefault={onClick} />
+    {/if}
     <slot />
   </div>
 </div>

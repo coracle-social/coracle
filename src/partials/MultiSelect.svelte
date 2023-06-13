@@ -59,7 +59,7 @@
 
 <div class="text-sm">
   {#each value as item}
-    <Chip class="mr-1 mb-1" theme="dark" on:click={() => remove(item)}>
+    <Chip class="mr-1 mb-1" theme="dark" onClick={() => remove(item)}>
       <slot name="item" {item}>
         {item}
       </slot>

@@ -2,7 +2,10 @@
 
 # 0.2.31
 
-- [x] Added the ability to view and write reviews on relays, with ratings
+- [x] Add the ability to view and write reviews on relays, with ratings
+- [x] Add support for parsing and displaying lnurl invoices
+- [x] Add advanced search to feeds with a summary of the filter applied
+- [x] Improve url parsing
 
 # 0.2.30
 

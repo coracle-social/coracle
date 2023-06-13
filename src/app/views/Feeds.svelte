@@ -46,7 +46,7 @@
       relays = urls.length > 0 ? urls.map(objOf("url")) : sampleRelays(getUserReadRelays())
     }
 
-    filter = [{...filter, kinds: [1]}]
+    filter = {...filter, kinds: [1, 1985]}
   }
 
   const setActiveTab = tab => {
