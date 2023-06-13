@@ -1,7 +1,6 @@
 <script lang="ts">
   import type {Filter} from "nostr-tools"
   import {pluck} from "ramda"
-  import {fly} from "svelte/transition"
   import {debounce} from "throttle-debounce"
   import {createLocalDate} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
@@ -55,7 +54,7 @@
   }
 </script>
 
-<div class="flex justify-end gap-2 p-2" in:fly={{y: 20}}>
+<div class="flex justify-end gap-2 p-2">
   <i
     class="fa fa-search cursor-pointer"
     on:click={() => {

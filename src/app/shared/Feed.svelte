@@ -192,7 +192,7 @@
     </div>
   {/if}
 
-  <div class="flex justify-between gap-4">
+  <div class="flex justify-between gap-4" in:fly={{y: 20}}>
     <FilterSummary filter={mergedFilter} />
     <FeedAdvanced onChange={start} hide={Object.keys(filter)} />
   </div>
