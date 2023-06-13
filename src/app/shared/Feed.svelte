@@ -1,6 +1,6 @@
 <script lang="ts">
+  import type {Filter} from "nostr-tools"
   import {onMount, onDestroy} from "svelte"
-  import {Filter} from "nostr-tools"
   import {debounce} from "throttle-debounce"
   import {last, equals, partition, always, uniqBy, sortBy, prop} from "ramda"
   import {fly} from "svelte/transition"

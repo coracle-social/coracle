@@ -265,6 +265,14 @@ export const parseContent = ({content, tags = []}) => {
     }
   }
 
+  const parseLNUrl = () => {
+    const lnurl = first(text.match(/^lnbc[\d\w]+/i))
+
+    if (lnurl) {
+      return ["lnurl", lnurl, lnurl]
+    }
+  }
+
   const parseUrl = () => {
     const raw = first(text.match(/^([a-z\+:]{2,30}:\/\/)?[^\s]+\.[a-z]{2,6}[^\s]*[^\.!?,:\s]/gi))
 
@@ -292,7 +300,13 @@ export const parseContent = ({content, tags = []}) => {
   }
 
   while (text) {
-    const part = parseNewline() || parseMention() || parseTopic() || parseBech32() || parseUrl()
+    const part =
+      parseNewline() ||
+      parseMention() ||
+      parseTopic() ||
+      parseBech32() ||
+      parseUrl() ||
+      parseLNUrl()
 
     if (part) {
       if (buffer) {

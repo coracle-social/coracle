@@ -6,6 +6,7 @@
   import {displayPerson, parseContent, getLabelQuality, displayRelay, Tags} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import MediaSet from "src/partials/MediaSet.svelte"
+  import QRCode from "src/partials/QRCode.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -29,15 +30,22 @@
   let rating = note.kind === 1985 ? getLabelQuality("review/relay", note) : null
 
   const links = []
+  const invoices = []
   const ranges = []
 
   // Find links and preceding whitespace
   for (let i = 0; i < content.length; i++) {
     const {type, value} = content[i]
 
-    if (type === "link" && !value.startsWith("ws")) {
+    if (type === "link") {
       links.push(value)
+    }
 
+    if (type === "lnurl") {
+      invoices.push(value)
+    }
+
+    if (["link", "lnurl"].includes(type) && !value.startsWith("ws")) {
       const prev = content[i - 1]
       const next = content[i + 1]
 
@@ -197,6 +205,11 @@
       {" "}
     {/each}
   </p>
+  {#if invoices.length > 0}
+    <div on:click|stopPropagation>
+      <QRCode fullWidth onClick="copy" code={invoices[0]} />
+    </div>
+  {/if}
   {#if showMedia && links.length > 0}
     <div on:click|stopPropagation>
       <MediaSet {links} />

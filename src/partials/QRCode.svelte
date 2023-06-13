@@ -1,4 +1,5 @@
 <script lang="ts">
+  import cx from "classnames"
   import QRCode from "qrcode"
   import {onMount} from "svelte"
   import Input from "src/partials/Input.svelte"
@@ -7,6 +8,8 @@
   import {toast} from "src/partials/state"
 
   export let code
+  export let onClick = "navigate"
+  export let fullWidth = false
 
   let canvas
 
@@ -21,11 +24,20 @@
 </script>
 
 <div
-  class="m-auto flex max-w-sm flex-col gap-4 rounded border border-solid border-gray-6 bg-gray-8 p-4">
-  <Anchor external href={code}>
-    <canvas class="m-auto rounded" bind:this={canvas} />
-  </Anchor>
-  <Input value={code}>
-    <button slot="after" class="fa fa-copy" on:click={copy} />
-  </Input>
+  class={cx("rounded-xl border border-solid border-gray-6 bg-gray-8 p-4", {
+    "m-auto max-w-sm": !fullWidth,
+  })}>
+  <div class="m-auto flex max-w-sm flex-col gap-4">
+    <Anchor
+      external
+      href={onClick === "navigate" ? code : null}
+      on:click={onClick === "copy" ? copy : null}>
+      <canvas class="m-auto rounded-xl" bind:this={canvas} />
+    </Anchor>
+    {#if onClick === "navigate"}
+      <Input value={code}>
+        <button slot="after" class="fa fa-copy" on:click={copy} />
+      </Input>
+    {/if}
+  </div>
 </div>
