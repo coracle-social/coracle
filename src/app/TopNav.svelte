@@ -1,13 +1,12 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {theme, appName} from "src/partials/state"
+  import {appName} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import {menuIsOpen} from "src/app/state"
   import {newNotifications} from "src/app/state"
 
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
   const toggleMenu = () => menuIsOpen.update(x => !x)
-  const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 
   onMount(() => {
     document.querySelector("html").addEventListener("click", e => {
@@ -31,7 +30,6 @@
       <img alt="Coracle Logo" src={logoUrl} class="w-8" />
       <h1 class="staatliches text-3xl">{appName}</h1>
     </Anchor>
-    <i class="fa fa-lightbulb -m-4 cursor-pointer p-4 text-lg" on:click={toggleTheme} />
   </div>
   {#if $newNotifications}
     <div class="absolute top-4 left-12 h-2 w-2 rounded bg-accent lg:hidden" />

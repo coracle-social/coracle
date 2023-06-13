@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {displayPerson} from "src/util/nostr"
-  import {installPrompt} from "src/partials/state"
+  import {theme, installPrompt} from "src/partials/state"
   import user from "src/agent/user"
   import pool from "src/agent/pool"
   import {routes, menuIsOpen} from "src/app/state"
@@ -10,6 +10,8 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
 
   const {profile, canPublish} = user
+
+  const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 
   const install = () => {
     $installPrompt.prompt()
@@ -108,6 +110,11 @@
       <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/settings">
         <i class="fa fa-gear mr-2" /> Settings
       </a>
+    </li>
+    <li
+      class="block cursor-pointer px-4 py-2 transition-all hover:bg-accent hover:text-white"
+      on:click={toggleTheme}>
+      <i class="fa fa-lightbulb mr-2" /> Theme
     </li>
     <li class="cursor-pointer">
       <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/logout">

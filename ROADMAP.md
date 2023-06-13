@@ -1,5 +1,6 @@
 # Current
 
+- [ ] Fix content spacing
 - [ ] List detail pages with follow all and add all to list
 - [ ] Use vida to stream development
 - [ ] Fix connection management stuff. Have GPT help
