@@ -50,6 +50,9 @@
 </script>
 
 <div>
+  {#if parts.length > 0}
+    <span class="mr-2 mb-2"> Showing notes: </span>
+  {/if}
   {#each parts as part}
     <Chip class="mr-2 mb-2">{part}</Chip>
   {/each}

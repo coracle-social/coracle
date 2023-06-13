@@ -27,7 +27,7 @@
   export let invertColors = false
   export let onEvent = null
 
-  let sub, scroller, cursor, overrides
+  let sub, scroller, cursor
   let key = Math.random()
   let search = ""
   let notes = []
@@ -37,7 +37,6 @@
 
   $: searchNotes = debounce(300, fuzzy(notes, {keys: ["content"]}))
   $: filteredNotes = search ? searchNotes(search) : notes
-  $: mergedFilter = mergeFilter(filter, overrides)
 
   const since = now()
   const maxNotes = 100
@@ -121,14 +120,14 @@
   let p = Promise.resolve()
 
   // If we have a search term we need to use only relays that support search
-  const getRelays = () => (overrides?.search ? [{url: "wss://relay.nostr.band"}] : relays)
+  const getRelays = () => (filter.search ? [{url: "wss://relay.nostr.band"}] : relays)
 
   const loadMore = async () => {
     const _key = key
 
     // Wait for this page to load before trying again
     await cursor.loadPage({
-      filter: mergedFilter,
+      filter,
       onChunk: chunk => {
         // Stack promises to avoid too many concurrent subscriptions
         p = p.then(() => key === _key && onChunk(chunk))
@@ -145,19 +144,19 @@
     key = Math.random()
   }
 
-  const start = (_overrides = {}) => {
-    if (!equals(_overrides, overrides)) {
+  const start = (newFilter = {}) => {
+    if (!equals(newFilter, filter)) {
       stop()
 
       const _key = key
 
-      overrides = _overrides
+      filter = {...filter, ...newFilter}
 
       // No point in subscribing if we have an end date
       if (!filter.until) {
         sub = network.listen({
           relays: getRelays(),
-          filter: mergeFilter(mergedFilter, {since}),
+          filter: mergeFilter(filter, {since}),
           onChunk: chunk => {
             p = p.then(() => _key === key && onChunk(chunk))
           },
@@ -166,7 +165,7 @@
 
       cursor = new network.Cursor({
         relays: getRelays(),
-        until: overrides.until || now(),
+        until: filter.until || now(),
         delta,
       })
 
@@ -193,8 +192,8 @@
   {/if}
 
   <div class="flex justify-between gap-4" in:fly={{y: 20}}>
-    <FilterSummary filter={mergedFilter} />
-    <FeedAdvanced onChange={start} hide={Object.keys(filter)} />
+    <FilterSummary {filter} />
+    <FeedAdvanced {filter} onChange={start} />
   </div>
 
   <div class="flex flex-col gap-4">

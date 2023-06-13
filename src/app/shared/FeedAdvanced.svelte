@@ -1,6 +1,6 @@
 <script lang="ts">
   import type {Filter} from "nostr-tools"
-  import {pluck} from "ramda"
+  import {pluck, objOf} from "ramda"
   import {debounce} from "throttle-debounce"
   import {createLocalDate} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
@@ -11,32 +11,34 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import {searchTopics, searchPeople, getPersonWithFallback} from "src/agent/db"
 
-  export let hide = []
   export let onChange
+  export let filter = {} as Filter
 
-  let filter = {
-    since: null,
-    until: null,
-    authors: [],
-    search: "",
-    "#t": [],
-    "#p": [],
+  let _filter = {
+    since: filter.since,
+    until: filter.since,
+    search: filter.search || "",
+    authors: (filter.authors || []).map(getPersonWithFallback),
+    "#t": (filter["#t"] || []).map(objOf("name")),
+    "#p": (filter["#p"] || []).map(getPersonWithFallback),
   }
 
   let modal = null
 
   const applyFilter = debounce(300, () => {
     if (modal !== "maxi") {
-      const _filter = {} as Filter
+      const newFilter = {} as Filter
 
-      if (filter.since) _filter.since = createLocalDate(filter.since).setHours(23, 59, 59, 0) / 1000
-      if (filter.until) _filter.until = createLocalDate(filter.until).setHours(23, 59, 59, 0) / 1000
-      if (filter.authors.length > 0) _filter.authors = pluck("pubkey", filter.authors)
-      if (filter.search) _filter.search = filter.search
-      if (filter["#t"].length > 0) _filter["#t"] = pluck("name", filter["#t"])
-      if (filter["#p"].length > 0) _filter["#p"] = pluck("pubkey", filter["#p"])
+      if (_filter.since)
+        newFilter.since = createLocalDate(_filter.since).setHours(23, 59, 59, 0) / 1000
+      if (_filter.until)
+        newFilter.until = createLocalDate(_filter.until).setHours(23, 59, 59, 0) / 1000
+      if (_filter.authors.length > 0) newFilter.authors = pluck("pubkey", _filter.authors)
+      if (_filter.search) newFilter.search = _filter.search
+      if (_filter["#t"].length > 0) newFilter["#t"] = pluck("name", _filter["#t"])
+      if (_filter["#p"].length > 0) newFilter["#p"] = pluck("pubkey", _filter["#p"])
 
-      onChange(_filter)
+      onChange(newFilter)
     }
   })
 
@@ -68,7 +70,7 @@
     <Content size="lg">
       <div class="flex flex-col gap-1">
         <strong>Search</strong>
-        <Input bind:value={filter.search} on:input={applyFilter}>
+        <Input bind:value={_filter.search} on:input={applyFilter}>
           <i slot="before" class="fa fa-search" />
         </Input>
       </div>
@@ -76,49 +78,43 @@
         <div class="grid grid-cols-2 gap-2">
           <div class="flex flex-col gap-1">
             <strong>Since</strong>
-            <Input type="date" bind:value={filter.since} />
+            <Input type="date" bind:value={_filter.since} />
           </div>
           <div class="flex flex-col gap-1">
             <strong>Until</strong>
-            <Input type="date" bind:value={filter.until} />
+            <Input type="date" bind:value={_filter.until} />
           </div>
         </div>
-        {#if !hide.includes("authors")}
-          <div class="flex flex-col gap-1">
-            <strong>Authors</strong>
-            <MultiSelect search={$searchPeople} bind:value={filter.authors}>
-              <div slot="item" let:item>
-                <div class="-my-1">
-                  <PersonBadge inert person={getPersonWithFallback(item.pubkey)} />
-                </div>
+        <div class="flex flex-col gap-1">
+          <strong>Authors</strong>
+          <MultiSelect search={$searchPeople} bind:value={_filter.authors}>
+            <div slot="item" let:item>
+              <div class="-my-1">
+                <PersonBadge inert person={getPersonWithFallback(item.pubkey)} />
               </div>
-            </MultiSelect>
-          </div>
-        {/if}
-        {#if !hide.includes("#t")}
-          <div class="flex flex-col gap-1">
-            <strong>Topics</strong>
-            <MultiSelect search={$searchTopics} bind:value={filter["#t"]}>
-              <div slot="item" let:item>
-                <div class="-my-1">
-                  #{item.name}
-                </div>
+            </div>
+          </MultiSelect>
+        </div>
+        <div class="flex flex-col gap-1">
+          <strong>Topics</strong>
+          <MultiSelect search={$searchTopics} bind:value={_filter["#t"]}>
+            <div slot="item" let:item>
+              <div class="-my-1">
+                #{item.name}
               </div>
-            </MultiSelect>
-          </div>
-        {/if}
-        {#if !hide.includes("#p")}
-          <div class="flex flex-col gap-1">
-            <strong>Mentions</strong>
-            <MultiSelect search={$searchPeople} bind:value={filter["#p"]}>
-              <div slot="item" let:item>
-                <div class="-my-1">
-                  <PersonBadge inert person={getPersonWithFallback(item.pubkey)} />
-                </div>
+            </div>
+          </MultiSelect>
+        </div>
+        <div class="flex flex-col gap-1">
+          <strong>Mentions</strong>
+          <MultiSelect search={$searchPeople} bind:value={_filter["#p"]}>
+            <div slot="item" let:item>
+              <div class="-my-1">
+                <PersonBadge inert person={getPersonWithFallback(item.pubkey)} />
               </div>
-            </MultiSelect>
-          </div>
-        {/if}
+            </div>
+          </MultiSelect>
+        </div>
         <div class="flex justify-end">
           <Anchor type="button-accent" on:click={submit}>Apply Filters</Anchor>
         </div>
