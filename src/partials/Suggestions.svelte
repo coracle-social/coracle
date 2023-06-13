@@ -33,7 +33,7 @@
 </script>
 
 {#if data.length > 0}
-  <div class="mt-2 flex flex-col rounded border border-solid border-gray-6" in:fly={{y: 20}}>
+  <div class="z-10 mt-2 flex flex-col rounded border border-solid border-gray-6" in:fly={{y: 20}}>
     {#each data as item, i}
       <button
         class="cursor-pointer border-l-2 border-solid border-black py-2 px-4 text-left text-gray-1 hover:border-accent hover:bg-gray-7"

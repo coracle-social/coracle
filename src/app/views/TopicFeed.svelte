@@ -8,7 +8,7 @@
   export let topic
 
   const relays = sampleRelays(getUserReadRelays())
-  const filter = [{kinds: [1], "#t": [topic]}]
+  const filter = {kinds: [1], "#t": [topic]}
 </script>
 
 <Content>

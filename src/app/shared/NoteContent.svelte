@@ -1,6 +1,5 @@
 <script lang="ts">
   import {objOf, reverse} from "ramda"
-  import {nip19} from 'nostr-tools'
   import {fly} from "svelte/transition"
   import {splice, switcher, switcherFn} from "hurdak/lib/hurdak"
   import {warn} from "src/util/logger"
@@ -122,19 +121,21 @@
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
   <p>
     {#if rating}
-      {@const [type, value] = Tags.from(note).reject(t => ['l', 'L'].includes(t[0])).first()}
+      {@const [type, value] = Tags.from(note)
+        .reject(t => ["l", "L"].includes(t[0]))
+        .first()}
       {@const action = switcher(type, {
-        r: () => modal.push({type: 'relay/detail', url: value}),
-        p: () => modal.push({type: 'person/feed', pubkey: value}),
-        e: () => modal.push({type: 'note/detail', note: {id: value}}),
+        r: () => modal.push({type: "relay/detail", url: value}),
+        p: () => modal.push({type: "person/feed", pubkey: value}),
+        e: () => modal.push({type: "note/detail", note: {id: value}}),
       })}
       {@const display = switcherFn(type, {
         r: () => displayRelay({url: value}),
         p: () => displayPerson(getPersonWithFallback(value)),
         e: () => "a note",
-        default: "something"
+        default: "something",
       })}
-      <div class="flex items-center gap-2 pl-2 mb-4 border-l-2 border-solid border-gray-5">
+      <div class="mb-4 flex items-center gap-2 border-l-2 border-solid border-gray-5 pl-2">
         Rated
         {#if action}
           <Anchor on:click={action}>{display}</Anchor>

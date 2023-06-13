@@ -125,12 +125,12 @@ class Cursor {
   until: Record<string, number>
   since: number
   seen: Set<string>
-  constructor({relays, limit = 20, delta = undefined}) {
+  constructor({relays, limit = 20, delta = undefined, until = now()}) {
     this.relays = relays
     this.limit = limit
     this.delta = delta
-    this.until = fromPairs(relays.map(({url}) => [url, now()]))
-    this.since = delta ? now() : 0
+    this.until = fromPairs(relays.map(({url}) => [url, until]))
+    this.since = 0
     this.seen = new Set()
   }
   async loadPage({filter, onChunk}) {

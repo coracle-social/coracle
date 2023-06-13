@@ -4,6 +4,7 @@
   import {fly, fade} from "svelte/transition"
   import {modal} from "src/partials/state"
 
+  export let mini = false
   export let index = null
   export let virtual = true
   export let isOnTop = true
@@ -19,7 +20,7 @@
 
   onMount(() => {
     if (virtual) {
-      modal.push({id, virtual: true})
+      modal.push({id, mini, virtual: true})
     }
   })
 
@@ -37,17 +38,27 @@
     }
   }} />
 
-<div class="modal fixed inset-0 z-30" bind:this={root} transition:fade>
-  <div
-    class="fixed inset-0 cursor-pointer bg-black opacity-50"
-    on:click|stopPropagation={_onEscape} />
+<div
+  bind:this={root}
+  transition:fade
+  class="modal fixed inset-0 z-30"
+  class:pointer-events-none={mini}>
+  {#if !mini}
+    <div
+      class="fixed inset-0 cursor-pointer bg-black opacity-50"
+      on:click|stopPropagation={_onEscape} />
+  {/if}
   <div
     class="modal-content h-full overflow-auto"
-    bind:this={content}
-    transition:fly={{y: 1000}}
+    class:overflow-hidden={mini}
+    class:pointer-events-none={mini}
     class:cursor-pointer={_onEscape}
+    transition:fly={{y: 1000}}
+    bind:this={content}
     on:click={_onEscape}>
-    <div class="mt-12 min-h-full">
+    <div
+      class="pointer-events-auto mt-12 min-h-full transition transition-all duration-500"
+      style={mini ? "margin-top: 55vh" : ""}>
       {#if onEscape}
         <div class="pointer-events-none sticky top-0 z-10 flex w-full flex-col items-end gap-2 p-2">
           <div

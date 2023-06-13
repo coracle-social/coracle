@@ -1,13 +1,16 @@
 <script lang="ts">
-  import {onMount} from "svelte"
-  import {last, partition, always, uniqBy, sortBy, prop} from "ramda"
+  import {onMount, onDestroy} from "svelte"
+  import {Filter} from "nostr-tools"
+  import {debounce} from "throttle-debounce"
+  import {last, equals, partition, always, uniqBy, sortBy, prop} from "ramda"
   import {fly} from "svelte/transition"
   import {quantify} from "hurdak/lib/hurdak"
-  import {createScroller, now, timedelta} from "src/util/misc"
+  import {fuzzy, createScroller, now, timedelta} from "src/util/misc"
   import {asDisplayEvent, mergeFilter} from "src/util/nostr"
   import Spinner from "src/partials/Spinner.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
+  import FeedAdvanced from "src/app/shared/FeedAdvanced.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
   import user from "src/agent/user"
@@ -15,7 +18,7 @@
   import {getUserReadRelays} from "src/agent/relays"
   import {mergeParents} from "src/app/state"
 
-  export let filter
+  export let filter = {} as Filter
   export let relays = getUserReadRelays()
   export let delta = timedelta(6, "hours")
   export let shouldDisplay = always(true)
@@ -23,15 +26,20 @@
   export let invertColors = false
   export let onEvent = null
 
+  let sub, scroller, cursor, overrides
+  let key = Math.random()
+  let search = ""
   let notes = []
   let notesBuffer = []
   let feedRelay = null
   let feedScroller = null
 
+  $: searchNotes = debounce(300, fuzzy(notes, {keys: ["content"]}))
+  $: filteredNotes = search ? searchNotes(search) : notes
+
   const since = now()
   const maxNotes = 100
   const seen = new Set()
-  const cursor = new network.Cursor({relays, delta})
   const getModal = () => last(document.querySelectorAll(".modal-content"))
   const canDisplay = e => [1, 1985].includes(e.kind)
 
@@ -53,6 +61,8 @@
   }
 
   const onChunk = async newNotes => {
+    const _key = key
+
     // Deduplicate and filter out stuff we don't want, apply user preferences
     const filtered = user.applyMutes(newNotes.filter(n => !seen.has(n.id) && shouldDisplay(n)))
 
@@ -100,40 +110,72 @@
     const [bottom, top] = partition(e => e.created_at < since, merged)
 
     // Slice new notes in case someone leaves the tab open for a long time
-    notesBuffer = top.concat(notesBuffer).slice(0, maxNotes)
-    notes = uniqBy(prop("id"), notes.concat(bottom))
+    if (_key === key) {
+      notesBuffer = top.concat(notesBuffer).slice(0, maxNotes)
+      notes = uniqBy(prop("id"), notes.concat(bottom))
+    }
   }
 
   let p = Promise.resolve()
 
+  // If we have a search term we need to use only relays that support search
+  const getRelays = () => (overrides?.search ? [{url: "wss://relay.nostr.band"}] : relays)
+
+  const getFilter = () => mergeFilter(filter, {since, ...overrides})
+
   const loadMore = async () => {
+    const _key = key
+
     // Wait for this page to load before trying again
     await cursor.loadPage({
-      filter,
+      filter: getFilter(),
       onChunk: chunk => {
         // Stack promises to avoid too many concurrent subscriptions
-        p = p.then(() => onChunk(chunk))
+        p = p.then(() => key === _key && onChunk(chunk))
       },
     })
   }
 
-  onMount(() => {
-    const sub = network.listen({
-      relays,
-      filter: mergeFilter(filter, {since}),
-      onChunk: chunk => {
-        p = p.then(() => onChunk(chunk))
-      },
-    })
+  const stop = () => {
+    notes = []
+    notesBuffer = []
+    scroller?.stop()
+    feedScroller?.stop()
+    sub?.then(s => s?.unsub())
+    key = Math.random()
+  }
 
-    const scroller = createScroller(loadMore, {element: getModal()})
+  const start = (_overrides = {}) => {
+    if (!equals(_overrides, overrides)) {
+      stop()
 
-    return () => {
-      scroller.stop()
-      feedScroller?.stop()
-      sub.then(s => s?.unsub())
+      const _key = key
+
+      overrides = _overrides
+
+      // No point in subscribing if we have an end date
+      if (!filter.until) {
+        sub = network.listen({
+          relays: getRelays(),
+          filter: getFilter(),
+          onChunk: chunk => {
+            p = p.then(() => _key === key && onChunk(chunk))
+          },
+        })
+      }
+
+      cursor = new network.Cursor({
+        relays: getRelays(),
+        until: overrides.until || now(),
+        delta,
+      })
+
+      scroller = createScroller(loadMore, {element: getModal()})
     }
-  })
+  }
+
+  onMount(start)
+  onDestroy(stop)
 </script>
 
 <Content size="inherit">
@@ -150,8 +192,10 @@
     </div>
   {/if}
 
+  <FeedAdvanced onChange={start} hide={Object.keys(filter)} />
+
   <div class="flex flex-col gap-4">
-    {#each notes as note (note.id)}
+    {#each filteredNotes as note (note.id)}
       <Note depth={2} {note} {feedRelay} {setFeedRelay} {invertColors} />
     {/each}
   </div>

@@ -48,6 +48,10 @@ export const setLocalJson = (k, v) => {
 
 export const now = () => Math.round(new Date().valueOf() / 1000)
 
+export const getTimeZone = () => new Date().toString().match(/GMT[^\s]+/)
+
+export const createLocalDate = dateString => new Date(`${dateString} ${getTimeZone()}`)
+
 export const timedelta = (n, unit = "seconds") => {
   switch (unit) {
     case "seconds":

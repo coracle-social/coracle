@@ -65,7 +65,7 @@
 
     // Log modals, keep scroll position on body, but don't allow scrolling
     const unsubModal = modal.stack.subscribe($stack => {
-      if ($stack.length > 0) {
+      if ($stack.filter(x => !x.mini).length > 0) {
         logUsage(btoa(["modal", last($stack).type].join(":")))
 
         // This is not idempotent, so don't duplicate it
