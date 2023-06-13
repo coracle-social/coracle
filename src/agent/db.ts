@@ -237,10 +237,13 @@ export const searchPeople = watch("people", t => {
     $or: [{"kind0.name": {$type: "string"}}, {"kind0.display_name": {$type: "string"}}],
   })
 
-  return fuzzy(people, {keys: ["kind0.name", "kind0.display_name", "kind0.about", "pubkey"]})
+  return fuzzy(people, {
+    keys: ["kind0.name", "kind0.display_name", "kind0.about", "pubkey"],
+    threshold: 0.3,
+  })
 })
 
-export const searchTopics = watch("topics", t => fuzzy(t.all(), {keys: ["name"]}))
+export const searchTopics = watch("topics", t => fuzzy(t.all(), {keys: ["name"], threshold: 0.2}))
 
 export const searchRelays = watch("relays", t =>
   fuzzy(t.all(), {keys: ["name", "description", "url"]})

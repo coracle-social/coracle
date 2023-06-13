@@ -6,6 +6,7 @@
 - [x] Add support for parsing and displaying lnurl invoices
 - [x] Add advanced search to feeds with a summary of the filter applied
 - [x] Improve url parsing
+- [x] Reduce threshold for fuzzy search
 
 # 0.2.30
 
