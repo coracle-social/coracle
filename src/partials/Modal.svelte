@@ -60,7 +60,7 @@
       class="pointer-events-auto mt-12 min-h-full transition transition-all duration-500"
       style={mini ? "margin-top: 55vh" : ""}>
       {#if onEscape}
-        <div class="pointer-events-none sticky top-0 z-10 flex w-full flex-col items-end gap-2 p-2">
+        <div class="pointer-events-none sticky top-0 z-20 flex w-full flex-col items-end gap-2 p-2">
           <div
             class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
                  border border-solid border-accent-light bg-accent text-white transition-colors hover:bg-accent-light">

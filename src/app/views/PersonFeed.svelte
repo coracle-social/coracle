@@ -33,14 +33,14 @@
 </script>
 
 <div
-  class="absolute left-0 h-64 w-full -mt-2"
+  class="absolute left-0 -mt-2 h-64 w-full"
   style="background-size: cover;
          background-image:
           linear-gradient(to bottom, {rgba}, {rgb}),
           url('{$person.kind0?.banner}')" />
 
 <Content>
-  <div class="flex gap-4 text-gray-1 z-10">
+  <div class="z-10 flex gap-4 text-gray-1">
     <PersonCircle person={$person} size={16} class="sm:h-32 sm:w-32" />
     <div class="flex flex-grow flex-col gap-4">
       <div class="flex items-start justify-between gap-4">
@@ -65,5 +65,7 @@
       <PersonStats person={$person} />
     </div>
   </div>
-  <PersonNotes invertColors {pubkey} {relays} />
+  <div class="relative z-10">
+    <PersonNotes invertColors {pubkey} {relays} />
+  </div>
 </Content>

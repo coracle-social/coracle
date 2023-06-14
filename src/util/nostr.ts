@@ -266,7 +266,7 @@ export const parseContent = ({content, tags = []}) => {
   }
 
   const parseLNUrl = () => {
-    const lnurl = first(text.match(/^lnbc[\d\w]+/i))
+    const lnurl = first(text.match(/^ln(bc|url)[\d\w]{50,1000}/i))
 
     if (lnurl) {
       return ["lnurl", lnurl, lnurl]

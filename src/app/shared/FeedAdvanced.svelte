@@ -56,7 +56,7 @@
   }
 </script>
 
-<div class="flex justify-end gap-2 p-2">
+<div class="flex justify-end gap-3 p-2">
   <i
     class="fa fa-search cursor-pointer"
     on:click={() => {
@@ -70,7 +70,7 @@
     <Content size="lg">
       <div class="flex flex-col gap-1">
         <strong>Search</strong>
-        <Input bind:value={_filter.search} on:input={applyFilter}>
+        <Input autofocus bind:value={_filter.search} on:input={applyFilter}>
           <i slot="before" class="fa fa-search" />
         </Input>
       </div>
