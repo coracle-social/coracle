@@ -1,4 +1,4 @@
-import {pick, uniqBy} from "ramda"
+import {last, pick, uniqBy} from "ramda"
 import {get} from "svelte/store"
 import {doPipe} from "hurdak/lib/hurdak"
 import {parseContent, Tags, roomAttrs, displayPerson, findRoot, findReply} from "src/util/nostr"
@@ -122,6 +122,7 @@ const getReplyTags = (n, inherit = false) => {
   const extra = inherit
     ? Tags.from(n)
         .type("e")
+        .reject(t => last(t) === "mention")
         .all()
         .map(t => t.slice(0, 3))
     : []
@@ -160,7 +161,7 @@ class PublishableEvent {
   }
   async publish(relays, onProgress = null, verb = "EVENT") {
     const event = await this.getSignedEvent()
-    // console.log(event); return
+    // return console.log(event)
     const promise = pool.publish({relays, event, onProgress, verb})
 
     // Copy the event since loki mutates it to add metadata
