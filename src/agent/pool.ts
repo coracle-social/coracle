@@ -2,7 +2,7 @@ import type {Relay, Filter} from "nostr-tools"
 import type {MyEvent} from "src/util/types"
 import {Socket, Pool, Plex, Relays, Executor} from "paravel"
 import {verifySignature} from "nostr-tools"
-import {pluck, identity} from "ramda"
+import {pluck, objOf, identity} from "ramda"
 import {ensurePlural, switcher} from "hurdak/lib/hurdak"
 import {warn, log, error} from "src/util/logger"
 import {union, sleep, difference} from "src/util/misc"
@@ -107,6 +107,8 @@ const defaultUrls =
         "wss://relay.nostr.band",
         "wss://nostr-pub.wellorder.net",
       ]
+
+const defaultRelays = defaultUrls.map(objOf("url"))
 
 const getUrls = relays => {
   if (relays.length === 0) {
@@ -405,6 +407,7 @@ export default {
   forceUrls,
   forceRelays,
   defaultUrls,
+  defaultRelays,
   disconnect,
   getQuality,
   publish,

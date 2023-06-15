@@ -38,7 +38,7 @@ const profile = synced("agent/user/profile", {
   rooms_joined: [],
   last_checked: {},
   petnames: [],
-  relays: [],
+  relays: pool.defaultRelays,
   mutes: [],
   lists: [],
 })

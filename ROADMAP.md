@@ -1,7 +1,6 @@
 # Current
 
-- [ ] Fix content spacing
-- [ ] List detail pages with follow all and add all to list
+- [ ] Clean up lists/advanced search
 - [ ] Use vida to stream development
 - [ ] Fix connection management stuff. Have GPT help
 - [ ] Add preview proxy thing
@@ -14,7 +13,7 @@
   - [ ] Avoid leaking events from private relays
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
-- [ ] Private groups using nsec bunker
+- [ ] Private groups
 - [ ] Fix unauthenticated experience. Going to an npub just spins
 - [ ] Convert app store to nip 89
 - [ ] Put search icon in header or hover button, open in modal
@@ -29,6 +28,7 @@
 # Core
 
 - [ ] Deploy ontology.coracle.social
+- [ ] List detail pages with follow all and add all to list
 - [ ] Add threads - replies by self get shown at the top of replies?
 - [ ] Embedded music players for Spotify, youtube, etc
 - [ ] Make mutes private

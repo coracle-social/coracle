@@ -25,7 +25,7 @@ import user from "src/agent/user"
 
 export const initializeRelayList = async () => {
   // Throw some hardcoded defaults in there
-  await relays.patch(pool.defaultUrls.map(objOf("url")))
+  await relays.patch(pool.defaultRelays)
 
   // Load relays from nostr.watch via dufflepud
   if (pool.forceUrls.length === 0) {
@@ -176,9 +176,9 @@ export const sampleRelays = (relays, scale = 1) => {
     relays = relays.concat(shuffle(getUserReadRelays()).slice(0, limit - relays.length))
   }
 
-  // And if we still have nothing, add a default
+  // And if we still have nothing, add our defaults
   if (relays.length === 0) {
-    relays = [{url: pool.forceUrls[0] || pool.defaultUrls[0]}]
+    relays = pool.defaultRelays
   }
 
   return uniqByUrl(relays)
