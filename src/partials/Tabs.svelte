@@ -18,7 +18,7 @@
       <button
         class="flex cursor-pointer gap-2 border-solid border-gray-6 px-8 py-4 hover:border-b"
         class:border-b={activeTab === tab}
-        on:click={() => setActiveTab(tab)}>
+        on:click|preventDefault={() => setActiveTab(tab)}>
         <div>{title}</div>
         {#if badge}
           <div class="h-6 rounded-full bg-gray-6 px-2">{badge}</div>

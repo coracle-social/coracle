@@ -18,12 +18,18 @@
 - [ ] Fix unauthenticated experience. Going to an npub just spins
 - [ ] Convert app store to nip 89
 - [ ] Put search icon in header or hover button, open in modal
+- [ ] Hide muted quoted events
+- [ ] Centralize relays
+  - This is ok, relays are the source of decentralization
+  - clients can help with discoverability
+  - Add agent to dufflepud database that scrapes relays and reviews
+  - Serve relays from dufflepud
+  - Or maybe set up a special purpose relay for relay recs?
 
 # Core
 
 - [ ] Deploy ontology.coracle.social
 - [ ] Add threads - replies by self get shown at the top of replies?
-- [ ] Show link previews when posting
 - [ ] Embedded music players for Spotify, youtube, etc
 - [ ] Make mutes private
 - [ ] Add nostrscript nevent1qqsvetmqsk8025jadyn82cpmkgxcesjffqajssd2qaq0k8arw9v79tsppadk7cn2v43hggz0vf4x2cm5t5yt4dnl

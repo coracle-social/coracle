@@ -88,8 +88,8 @@
 </script>
 
 <div
-  style={$$props.style}
-  class={cx($$props.class, "w-full min-w-0 p-2 text-gray-2 outline-0")}
+  style={$$props.style || "min-height: 6rem"}
+  class={cx($$props.class, "w-full min-w-0 text-gray-2 outline-0")}
   autofocus
   contenteditable
   bind:this={input}

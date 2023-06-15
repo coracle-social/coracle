@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.2.32
+
+- [x] Add note preview
+
 # 0.2.31
 
 - [x] Add the ability to view and write reviews on relays, with ratings
