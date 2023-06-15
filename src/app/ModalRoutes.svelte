@@ -19,7 +19,7 @@
   import ListList from "src/app/views/ListList.svelte"
   import ListSelect from "src/app/views/ListSelect.svelte"
   import ListEdit from "src/app/views/ListEdit.svelte"
-  import RelayAdd from "src/app/views/RelayAdd.svelte"
+  import RelayBrowse from "src/app/views/RelayBrowse.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
   import RelayReview from "src/app/views/RelayReview.svelte"
 
@@ -38,8 +38,8 @@
   <NoteZap note={m.note} />
 {:else if m.type === "note/share"}
   <NoteShare note={m.note} />
-{:else if m.type === "relay/add"}
-  <RelayAdd url={m.url} />
+{:else if m.type === "relay/browse"}
+  <RelayBrowse />
 {:else if m.type === "relay/detail"}
   <RelayDetail url={m.url} />
 {:else if m.type === "relay/review"}

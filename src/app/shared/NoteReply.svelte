@@ -98,15 +98,15 @@
     bind:this={container}
     on:click|stopPropagation>
     <div class={`border border-${borderColor} overflow-hidden rounded-2xl border-solid`}>
-      <div class="bg-gray-7 p-3" class:rounded-b={data.mentions.length === 0}>
+      <div class="bg-gray-7 p-3 text-gray-2" class:rounded-b={data.mentions.length === 0}>
         <Compose bind:this={reply} onSubmit={send} style="min-height: 4rem">
-          <button
-            slot="addon"
-            on:click={send}
-            class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid
-                 border-gray-7 p-4 py-8 text-gray-2 transition-all hover:bg-accent">
-            <i class="fa fa-paper-plane fa-xl" />
-          </button>
+          <div class="flex flex-col justify-start" slot="addon">
+            <button
+              on:click={send}
+              class="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full transition-all hover:bg-accent">
+              <i class="fa fa-paper-plane" />
+            </button>
+          </div>
         </Compose>
       </div>
       {#if data.image}

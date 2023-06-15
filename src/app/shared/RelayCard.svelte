@@ -56,7 +56,7 @@
 <div
   class={cx(
     `bg-${theme}`,
-    "flex flex-col justify-between gap-3 rounded border border-l-2 border-solid border-gray-6 py-3 px-6 shadow"
+    "flex flex-col justify-between gap-3 rounded-xl border border-l-2 border-solid border-gray-6 py-3 px-6 shadow"
   )}
   style={`border-left-color: ${hsl(stringToHue(relay.url))}`}
   in:fly={{y: 20}}>

@@ -18,8 +18,8 @@
         <i class="fa fa-server fa-lg" />
         <h2 class="staatliches text-2xl">Your relays</h2>
       </div>
-      <Anchor type="button-accent" on:click={() => modal.push({type: "relay/add"})}>
-        <i class="fa-solid fa-plus" /> Add Relay
+      <Anchor type="button-accent" on:click={() => modal.push({type: "relay/browse"})}>
+        <i class="fa-solid fa-compass" /> Browse Relays
       </Anchor>
     </div>
     <p>

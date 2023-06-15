@@ -9,4 +9,4 @@
   const filter = {kinds: [1, 1985], authors: [pubkey]}
 </script>
 
-<Feed {relays} {filter} {invertColors} parentsTimeout={3000} delta={timedelta(1, "days")} />
+<Feed {relays} {filter} {invertColors} parentsTimeout={3000} delta={timedelta(3, "days")} />

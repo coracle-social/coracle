@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {batch} from "src/util/misc"
+  import {batch, timedelta} from "src/util/misc"
   import {displayRelay, normalizeRelayUrl, getAvgQuality} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import Feed from "src/app/shared/Feed.svelte"
@@ -49,6 +49,7 @@
     <Feed
       invertColors
       onEvent={onReview}
+      delta={timedelta(365, "days")}
       filter={{
         kinds: [1985],
         "#l": ["review/relay"],

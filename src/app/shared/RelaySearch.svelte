@@ -48,22 +48,24 @@
   })
 </script>
 
-<div class="flex flex-col gap-2">
+<div class="flex flex-col gap-4">
   <Input bind:value={q} type="text" wrapperClass="flex-grow" {placeholder}>
     <i slot="before" class="fa-solid fa-search" />
   </Input>
-  {#if q.match("^.+\\..+$")}
-    <RelayCard relay={{url: normalizeRelayUrl(q)}} />
-  {/if}
-  {#each !q && hideIfEmpty ? [] : search(q).slice(0, limit) as relay (relay.url)}
-    <slot name="item" {relay}>
-      <RelayCard rating={ratings[relay.url]} {relay} />
+  <div class="flex flex-col gap-2">
+    {#if q.match("^.+\\..+$")}
+      <RelayCard relay={{url: normalizeRelayUrl(q)}} />
+    {/if}
+    {#each !q && hideIfEmpty ? [] : search(q).slice(0, limit) as relay (relay.url)}
+      <slot name="item" {relay}>
+        <RelayCard rating={ratings[relay.url]} {relay} />
+      </slot>
+    {/each}
+    <slot name="footer">
+      <small class="text-center">
+        Showing {Math.min(($knownRelays || []).length - $relays.length, 50)}
+        of {($knownRelays || []).length - $relays.length} known relays
+      </small>
     </slot>
-  {/each}
-  <slot name="footer">
-    <small class="text-center">
-      Showing {Math.min(($knownRelays || []).length - $relays.length, 50)}
-      of {($knownRelays || []).length - $relays.length} known relays
-    </small>
-  </slot>
+  </div>
 </div>

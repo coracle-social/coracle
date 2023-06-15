@@ -25,6 +25,7 @@
   export let shouldDisplay = always(true)
   export let parentsTimeout = 500
   export let invertColors = false
+  export let hideControls = false
   export let onEvent = null
 
   let sub, scroller, cursor
@@ -191,10 +192,12 @@
     </div>
   {/if}
 
-  <div class="flex justify-between gap-4" in:fly={{y: 20}}>
-    <FilterSummary {filter} />
-    <FeedAdvanced {filter} onChange={start} />
-  </div>
+  {#if !hideControls}
+    <div class="flex justify-between gap-4" in:fly={{y: 20}}>
+      <FilterSummary {filter} />
+      <FeedAdvanced {filter} onChange={start} />
+    </div>
+  {/if}
 
   <div class="flex flex-col gap-4">
     {#each filteredNotes as note (note.id)}

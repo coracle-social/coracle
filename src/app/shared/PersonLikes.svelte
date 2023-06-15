@@ -10,4 +10,10 @@
   const shouldDisplay = e => isLike(e.content)
 </script>
 
-<Feed {relays} {filter} {shouldDisplay} parentsTimeout={10_000} delta={timedelta(1, "days")} />
+<Feed
+  hideControls
+  {relays}
+  {filter}
+  {shouldDisplay}
+  parentsTimeout={10_000}
+  delta={timedelta(3, "days")} />
