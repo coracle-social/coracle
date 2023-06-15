@@ -62,7 +62,7 @@
         content += "\n"
       }
 
-      if (child.tagName === "DIV" && !child.querySelector("br")) {
+      if (child.tagName === "DIV" && !child.querySelector("br") && child.childNodes) {
         content += "\n"
       }
 
@@ -89,7 +89,7 @@
 
 <div
   style={$$props.style || "min-height: 6rem"}
-  class={cx($$props.class, "w-full min-w-0 text-gray-2 outline-0")}
+  class={cx($$props.class, "w-full min-w-0 outline-0")}
   autofocus
   contenteditable
   bind:this={input}

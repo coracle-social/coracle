@@ -119,7 +119,11 @@
     <div class="flex w-full flex-col gap-4">
       <div class="flex flex-col gap-2">
         <strong>What do you want to say?</strong>
-        <div class="ml-2 mt-4 border-l-2 border-solid border-gray-6 pl-3">
+        <div
+          class="mt-4 rounded-xl border border-solid border-gray-6 p-3"
+          class:bg-input={!showPreview}
+          class:text-black={!showPreview}
+          class:bg-gray-7={showPreview}>
           {#if showPreview}
             <NoteContent note={{content: compose.parse(), tags: []}} />
           {/if}

@@ -98,8 +98,8 @@
     bind:this={container}
     on:click|stopPropagation>
     <div class={`border border-${borderColor} overflow-hidden rounded-2xl border-solid`}>
-      <div class="bg-gray-7" class:rounded-b={data.mentions.length === 0}>
-        <Compose bind:this={reply} onSubmit={send}>
+      <div class="bg-gray-7 p-3" class:rounded-b={data.mentions.length === 0}>
+        <Compose bind:this={reply} onSubmit={send} style="min-height: 4rem">
           <button
             slot="addon"
             on:click={send}
