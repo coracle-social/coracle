@@ -3,81 +3,70 @@
 
   let input = null
 
-  // Line breaks are wrapped in divs sometimes
-  const isLineBreak = node => {
-    if (node.tagName === "BR") {
-      return true
-    }
-
-    if (node.tagName === "DIV" && !node.getAttribute?.("style")) {
-      return true
-    }
-
-    return false
-  }
-
-  const isFancy = node => node instanceof HTMLElement && !isLineBreak(node)
-
-  const onInput = e => {
-    const selection = window.getSelection()
-    const {focusNode: node, focusOffset: offset} = selection
-
-    for (const node of input.childNodes) {
-      if (isLineBreak(node)) {
-        continue
+  const stripStyle = node => {
+    if (node instanceof HTMLElement) {
+      if (!node.dataset?.coracle) {
+        node.removeAttribute("class")
+        node.removeAttribute("style")
+        node.removeAttribute("color")
+        node.removeAttribute("size")
+        node.removeAttribute("face")
       }
 
-      // Remove gunk that gets copy/pasted, or bold/italic tags that can be added with hotkeys
-      if (node instanceof HTMLElement && !node.dataset.coracle) {
-        const text = document.createTextNode(node.textContent)
-
-        if (node.tagName === "DIV") {
-          const div = document.createElement("div")
-
-          div.appendChild(text)
-          node.replaceWith(div)
-        } else {
-          node.replaceWith(text)
+      for (const child of node.childNodes) {
+        // @ts-ignore
+        if (!child.dataset?.coracle) {
+          stripStyle(child)
         }
       }
     }
+  }
+
+  const onInput = e => {
+    const selection = window.getSelection()
+    const {focusNode, focusOffset} = selection
+
+    // Remove gunk that gets copy/pasted, or bold/italic tags that can be added with hotkeys
+    for (const child of input.childNodes) {
+      stripStyle(child)
+    }
 
     // If we're editing something we've already linked, un-link it
-    if (node !== input && node.parentNode !== input && isFancy(node.parentNode)) {
+    // @ts-ignore
+    if (focusNode.parentNode.dataset?.coracle) {
       // @ts-ignore
-      node.parentNode.replaceWith(node)
-      selection.collapse(node, offset)
+      focusNode.parentNode.replaceWith(focusNode)
+      selection.collapse(focusNode, focusOffset)
       input.normalize()
     }
   }
 
   export const getInput = () => input
 
-  const parseNode = node => {
-    let content = ""
-    let annotations = []
-
+  const parseNode = (node, content = "", annotations = []) => {
     for (const child of node.childNodes) {
       if (child.tagName === "BR") {
         content += "\n"
       }
 
-      if (child.tagName === "DIV" && !child.querySelector("br") && child.childNodes) {
+      if (child.tagName === "DIV" && !content.match(/\n\s*$/)) {
         content += "\n"
       }
 
+      // @ts-ignore
       if (child.dataset?.coracle) {
         const {prefix, value} = JSON.parse(child.dataset.coracle)
 
         content += value
-        annotations = annotations.concat({prefix, value})
+        annotations.push({prefix, value})
       } else if (child instanceof Text) {
         content += child.textContent
       } else {
-        const info = parseNode(child)
+        ;({content, annotations} = parseNode(child, content, annotations))
+      }
 
-        content += info.content
-        annotations = annotations.concat(info.annotations)
+      if (child.tagName === "DIV" && !content.match(/\n\s*$/)) {
+        content += "\n"
       }
     }
 

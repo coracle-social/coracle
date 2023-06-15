@@ -156,7 +156,7 @@
       </div>
     {/if}
     {#each content as { type, value }, i}
-      {#if type === "newline"}
+      {#if type === "newline" && i > 0}
         {#each value as _}
           <br />
         {/each}
