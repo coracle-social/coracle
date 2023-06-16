@@ -185,7 +185,7 @@
 
 <Content size="inherit" gap="gap-6">
   {#if notesBuffer.length > 0}
-    <div class="pointer-events-none fixed left-0 top-0 z-10 mt-20 flex w-full justify-center">
+    <div class="pointer-events-none fixed left-0 bottom-0 z-10 mb-8 flex w-full justify-center">
       <button
         in:fly={{y: 20}}
         class="pointer-events-auto cursor-pointer rounded-full border border-solid
@@ -199,7 +199,7 @@
 
   {#if !hideControls}
     <div class="flex justify-between gap-4" in:fly={{y: 20}}>
-      <FilterSummary {filter} />
+      <FilterSummary {filter} onChange={start} />
       <FeedAdvanced {filter} onChange={start}>
         <slot name="controls" slot="controls" />
       </FeedAdvanced>

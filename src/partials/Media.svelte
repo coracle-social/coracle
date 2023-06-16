@@ -34,7 +34,7 @@
   href={onClick ? null : link.url}
   on:click={onClick}
   style="background-color: rgba(15, 15, 14, 0.5)"
-  class={cx("relative flex flex-col overflow-hidden rounded border border-solid border-gray-6")}>
+  class={cx("relative flex flex-col overflow-hidden rounded-xl border border-solid border-gray-6")}>
   {#if link.type === "image"}
     <img alt="Link preview" src={link.url} class="max-h-96 object-contain object-center" />
   {:else if link.type === "video"}

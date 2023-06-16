@@ -29,6 +29,8 @@
   let content = parseContent(note)
   let rating = note.kind === 1985 ? getLabelQuality("review/relay", note) : null
 
+  console.log(content)
+
   const links = []
   const invoices = []
   const ranges = []
