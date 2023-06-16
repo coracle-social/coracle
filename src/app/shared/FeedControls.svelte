@@ -1,8 +1,11 @@
 <script lang="ts">
   import type {DynamicFilter} from "src/util/types"
-  import {pluck, objOf} from "ramda"
+  import {fly} from "svelte/transition"
+  import {pluck, omit, objOf} from "ramda"
   import {debounce} from "throttle-debounce"
-  import {createLocalDate} from "src/util/misc"
+  import {createLocalDate, formatTimestampAsDate} from "src/util/misc"
+  import {displayPerson} from "src/util/nostr"
+  import Chip from "src/partials/Chip.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -15,6 +18,52 @@
 
   export let filter
   export let onChange
+
+  const displayPeople = pubkeys =>
+    pubkeys.length === 1
+      ? displayPerson(getPersonWithFallback(pubkeys[0]))
+      : `${pubkeys.length} people`
+
+  const displayTopics = topics => (topics.length === 1 ? topics[0] : `${topics.length} topics`)
+
+  const getFilterParts = f => {
+    const parts = []
+
+    if (typeof filter.authors === "string") {
+      parts.push({keys: null, label: `From ${filter.authors}`})
+    } else if (filter.authors?.length > 0) {
+      parts.push({keys: null, label: `By ${displayPeople(filter.authors)}`})
+    }
+
+    if (filter["#p"]?.length > 0) {
+      parts.push({keys: ["#p"], label: `Mentioning ${displayPeople(filter["#p"])}`})
+    }
+
+    if (filter["#t"]?.length > 0) {
+      parts.push({keys: ["#t"], label: `Related to ${displayTopics(filter["#t"])}`})
+    }
+
+    if (filter.search) {
+      parts.push({keys: ["search"], label: `Matching ${filter.search}`})
+    }
+
+    if (filter.since && filter.until) {
+      const since = formatTimestampAsDate(filter.since)
+      const until = formatTimestampAsDate(filter.until)
+
+      parts.push({keys: ["since", "until"], label: `Between ${since} and ${until}`})
+    } else if (filter.since) {
+      parts.push({keys: ["since"], label: `After ${formatTimestampAsDate(filter.since)}`})
+    } else if (filter.until) {
+      parts.push({keys: ["until"], label: `Before ${formatTimestampAsDate(filter.until)}`})
+    }
+
+    return parts
+  }
+
+  const removePart = keys => {
+    onChange(omit(keys, filter))
+  }
 
   const applyFilter = () => {
     const newFilter = {} as DynamicFilter
@@ -68,7 +117,6 @@
   }
 
   const submit = () => {
-    console.log("====")
     onEscape()
     applyFilter()
   }
@@ -86,6 +134,8 @@
     "#p": (filter["#p"] || []).map(getPersonWithFallback),
   }
 
+  $: parts = getFilterParts(filter)
+
   $: {
     scopeOptions =
       getUserFollows().length > 0
@@ -94,14 +144,23 @@
   }
 </script>
 
-<div class="flex justify-end gap-1">
-  <i
-    class="fa fa-search cursor-pointer p-2"
-    on:click={() => {
-      modal = modal ? null : "mini"
-    }} />
-  <i class="fa fa-sliders cursor-pointer p-2" on:click={open} />
-  <slot name="controls" />
+<div in:fly={{y: 20}}>
+  <div class="float-right flex justify-end gap-1">
+    <i
+      class="fa fa-search cursor-pointer p-2"
+      on:click={() => {
+        modal = modal ? null : "mini"
+      }} />
+    <i class="fa fa-sliders cursor-pointer p-2" on:click={open} />
+    <slot name="controls" />
+  </div>
+  {#if parts.length > 0}
+    <div class="mr-2 mb-2 inline-block py-1">Showing notes:</div>
+  {/if}
+  {#each parts as { keys, label }}
+    <Chip class="mr-2 mb-2 inline-block" onClick={keys ? () => removePart(keys) : null}
+      >{label}</Chip>
+  {/each}
 </div>
 
 {#if modal}

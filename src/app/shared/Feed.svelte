@@ -10,8 +10,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
-  import FilterSummary from "src/app/shared/FilterSummary.svelte"
-  import FeedAdvanced from "src/app/shared/FeedAdvanced.svelte"
+  import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
   import user from "src/agent/user"
@@ -198,12 +197,9 @@
   {/if}
 
   {#if !hideControls}
-    <div class="flex justify-between gap-4" in:fly={{y: 20}}>
-      <FilterSummary {filter} onChange={start} />
-      <FeedAdvanced {filter} onChange={start}>
-        <slot name="controls" slot="controls" />
-      </FeedAdvanced>
-    </div>
+    <FeedControls {filter} onChange={start}>
+      <slot name="controls" slot="controls" />
+    </FeedControls>
   {/if}
 
   <div class="flex flex-col gap-4">
