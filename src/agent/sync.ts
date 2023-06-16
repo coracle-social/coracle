@@ -1,4 +1,4 @@
-import {is, uniq, prop, reject, nth, uniqBy, objOf, pick, identity} from "ramda"
+import {partition, is, uniq, reject, nth, objOf, pick, identity} from "ramda"
 import {nip05} from "nostr-tools"
 import {noop, ensurePlural, chunk} from "hurdak/lib/hurdak"
 import {
@@ -226,7 +226,20 @@ addHandler(
 
 addHandler(
   30001,
-  profileHandler("lists", (e, p) => uniqBy(prop("id"), p.lists.concat(e)))
+  userHandler(e => {
+    const profile = user.getProfile()
+    const listName = Tags.from(e).getMeta("d")
+    const [duplicates, lists] = partition(
+      l => Tags.from(l).getMeta("d") === listName,
+      profile.lists
+    )
+
+    if (e.created_at < duplicates[0]?.created_at) {
+      return
+    }
+
+    user.profile.set({...profile, lists: lists.concat(e)})
+  })
 )
 
 addHandler(

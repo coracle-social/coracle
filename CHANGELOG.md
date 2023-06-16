@@ -4,6 +4,7 @@
 
 - [x] Add note preview when composing
 - [x] Merge advanced search, feed options, and lists
+- [x] Fix loading lists on login
 
 # 0.2.31
 

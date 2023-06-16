@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import type {DynamicFilter} from "src/util/types"
-  import {prop, indexBy, objOf} from "ramda"
+  import {indexBy, objOf} from "ramda"
   import {Tags} from "src/util/nostr"
   import {modal, theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
@@ -32,14 +32,14 @@
       relays = urls.map(objOf("url"))
     }
 
-    filter = {kinds: [1, 1985], authors: 'global'}
+    filter = {kinds: [1, 1985], authors: "global"} as DynamicFilter
 
     if (authors.length > 0) {
       filter = {...filter, authors}
     }
 
     if (topics.length > 0) {
-      filter = {...filter, '#t': topics}
+      filter = {...filter, "#t": topics}
     }
 
     key = Math.random()
