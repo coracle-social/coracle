@@ -1,12 +1,12 @@
 <script lang="ts">
-  import type {Filter} from "nostr-tools"
+  import type {DynamicFilter} from "src/util/types"
   import {onMount, onDestroy} from "svelte"
   import {debounce} from "throttle-debounce"
   import {last, equals, partition, always, uniqBy, sortBy, prop} from "ramda"
   import {fly} from "svelte/transition"
   import {quantify} from "hurdak/lib/hurdak"
   import {fuzzy, createScroller, now, timedelta} from "src/util/misc"
-  import {asDisplayEvent, mergeFilter} from "src/util/nostr"
+  import {asDisplayEvent} from "src/util/nostr"
   import Spinner from "src/partials/Spinner.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
@@ -16,11 +16,11 @@
   import Note from "src/app/shared/Note.svelte"
   import user from "src/agent/user"
   import network from "src/agent/network"
-  import {getUserReadRelays} from "src/agent/relays"
-  import {mergeParents} from "src/app/state"
+  import {sampleRelays, getAllPubkeyWriteRelays} from "src/agent/relays"
+  import {mergeParents, compileFilter} from "src/app/state"
 
-  export let filter = {} as Filter
-  export let relays = getUserReadRelays()
+  export let relays = null
+  export let filter = {} as DynamicFilter
   export let delta = timedelta(6, "hours")
   export let shouldDisplay = always(true)
   export let parentsTimeout = 500
@@ -121,14 +121,17 @@
   let p = Promise.resolve()
 
   // If we have a search term we need to use only relays that support search
-  const getRelays = () => (filter.search ? [{url: "wss://relay.nostr.band"}] : relays)
+  const getRelays = () =>
+    filter.search
+      ? [{url: "wss://relay.nostr.band"}]
+      : sampleRelays(relays || getAllPubkeyWriteRelays(compileFilter(filter).authors || []))
 
   const loadMore = async () => {
     const _key = key
 
     // Wait for this page to load before trying again
     await cursor.loadPage({
-      filter,
+      filter: compileFilter(filter),
       onChunk: chunk => {
         // Stack promises to avoid too many concurrent subscriptions
         p = p.then(() => key === _key && onChunk(chunk))
@@ -136,7 +139,7 @@
     })
   }
 
-  const stop = () => {
+  export const stop = () => {
     notes = []
     notesBuffer = []
     scroller?.stop()
@@ -145,19 +148,21 @@
     key = Math.random()
   }
 
-  const start = (newFilter = {}) => {
+  export const start = (newFilter = null) => {
     if (!equals(newFilter, filter)) {
       stop()
 
       const _key = key
 
-      filter = {...filter, ...newFilter}
+      if (newFilter) {
+        filter = newFilter
+      }
 
       // No point in subscribing if we have an end date
       if (!filter.until) {
         sub = network.listen({
           relays: getRelays(),
-          filter: mergeFilter(filter, {since}),
+          filter: compileFilter({...filter, since}),
           onChunk: chunk => {
             p = p.then(() => _key === key && onChunk(chunk))
           },
@@ -178,7 +183,7 @@
   onDestroy(stop)
 </script>
 
-<Content size="inherit">
+<Content size="inherit" gap="gap-6">
   {#if notesBuffer.length > 0}
     <div class="pointer-events-none fixed left-0 top-0 z-10 mt-20 flex w-full justify-center">
       <button
@@ -195,7 +200,9 @@
   {#if !hideControls}
     <div class="flex justify-between gap-4" in:fly={{y: 20}}>
       <FilterSummary {filter} />
-      <FeedAdvanced {filter} onChange={start} />
+      <FeedAdvanced {filter} onChange={start}>
+        <slot name="controls" slot="controls" />
+      </FeedAdvanced>
     </div>
   {/if}
 

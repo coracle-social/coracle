@@ -16,18 +16,9 @@
   const getFilterParts = f => {
     const parts = []
 
-    if (filter.since && filter.until) {
-      const since = formatTimestampAsDate(filter.since)
-      const until = formatTimestampAsDate(filter.until)
-
-      parts.push(`Between ${since} and ${until}`)
-    } else if (filter.since) {
-      parts.push(`After ${formatTimestampAsDate(filter.since)}`)
-    } else if (filter.until) {
-      parts.push(`Before ${formatTimestampAsDate(filter.until)}`)
-    }
-
-    if (filter.authors?.length > 0) {
+    if (typeof filter.authors === "string") {
+      parts.push(`From ${filter.authors}`)
+    } else if (filter.authors?.length > 0) {
       parts.push(`By ${displayPeople(filter.authors)}`)
     }
 
@@ -41,6 +32,17 @@
 
     if (filter.search) {
       parts.push(`Matching ${filter.search}`)
+    }
+
+    if (filter.since && filter.until) {
+      const since = formatTimestampAsDate(filter.since)
+      const until = formatTimestampAsDate(filter.until)
+
+      parts.push(`Between ${since} and ${until}`)
+    } else if (filter.since) {
+      parts.push(`After ${formatTimestampAsDate(filter.since)}`)
+    } else if (filter.until) {
+      parts.push(`Before ${formatTimestampAsDate(filter.until)}`)
     }
 
     return parts

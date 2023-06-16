@@ -1,4 +1,4 @@
-import type {Event} from "nostr-tools"
+import type {Event, Filter} from "nostr-tools"
 
 export type Relay = {
   url: string
@@ -37,3 +37,7 @@ export type Room = {
   about?: string
   picture?: string
 }
+
+export type DynamicFilter = Filter & {
+  authors?: string | string[]
+} & Record<string, any>

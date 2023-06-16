@@ -1,4 +1,5 @@
-import type {DisplayEvent} from "src/util/types"
+import type {Filter} from "nostr-tools"
+import type {DisplayEvent, DynamicFilter} from "src/util/types"
 import Bugsnag from "@bugsnag/js"
 import {nip19} from "nostr-tools"
 import {navigate} from "svelte-routing"
@@ -7,7 +8,7 @@ import {writable} from "svelte/store"
 import {max, omit, pluck, sortBy, find, slice, propEq} from "ramda"
 import {createMap, doPipe, first} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
-import {hash, sleep, clamp} from "src/util/misc"
+import {hash, shuffle, sleep, clamp} from "src/util/misc"
 import {now, timedelta} from "src/util/misc"
 import {Tags, isNotification, userKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
@@ -18,7 +19,7 @@ import keys from "src/agent/keys"
 import network from "src/agent/network"
 import pool from "src/agent/pool"
 import {getUserReadRelays, getUserRelays} from "src/agent/relays"
-import {getUserFollows} from "src/agent/social"
+import {getUserFollows, getUserNetwork} from "src/agent/social"
 import user from "src/agent/user"
 
 // Routing
@@ -82,10 +83,6 @@ export const logUsage = async name => {
     }
   }
 }
-
-// Feed
-
-export const feedsTab = writable("Follows")
 
 // State
 
@@ -289,3 +286,17 @@ export const publishWithToast = (relays, thunk) =>
 
     toast.show("info", message, pending.size ? null : 5)
   })
+
+// Feeds
+
+export const compileFilter = (filter: DynamicFilter): Filter => {
+  if (filter.authors === "global") {
+    filter = omit(["authors"], filter)
+  } else if (filter.authors === "follows") {
+    filter = {...filter, authors: shuffle(getUserFollows()).slice(0, 256)}
+  } else if (filter.authors === "network") {
+    filter = {...filter, authors: shuffle(getUserNetwork()).slice(0, 256)}
+  }
+
+  return filter
+}

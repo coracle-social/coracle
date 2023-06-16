@@ -2,7 +2,8 @@
 
 # 0.2.32
 
-- [x] Add note preview
+- [x] Add note preview when composing
+- [x] Merge advanced search, feed options, and lists
 
 # 0.2.31
 

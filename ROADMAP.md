@@ -1,6 +1,6 @@
 # Current
 
-- [ ] Clean up lists/advanced search
+- [ ] Support other list types
 - [ ] Use vida to stream development
 - [ ] Fix connection management stuff. Have GPT help
 - [ ] Add preview proxy thing
