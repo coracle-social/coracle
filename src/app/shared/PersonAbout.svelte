@@ -1,6 +1,7 @@
 <script lang="ts">
   import {ellipsize} from "hurdak/lib/hurdak"
-  import {displayPerson, parseContent} from "src/util/nostr"
+  import {displayPerson} from "src/util/nostr"
+  import {parseContent} from "src/util/notes"
   import Anchor from "src/partials/Anchor.svelte"
   import {getPersonWithFallback} from "src/agent/db"
 

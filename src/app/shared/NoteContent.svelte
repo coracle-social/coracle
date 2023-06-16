@@ -3,7 +3,8 @@
   import {fly} from "svelte/transition"
   import {splice, switcher, switcherFn} from "hurdak/lib/hurdak"
   import {warn} from "src/util/logger"
-  import {displayPerson, parseContent, getLabelQuality, displayRelay, Tags} from "src/util/nostr"
+  import {displayPerson, getLabelQuality, displayRelay, Tags} from "src/util/nostr"
+  import {parseContent} from "src/util/notes"
   import {modal} from "src/partials/state"
   import MediaSet from "src/partials/MediaSet.svelte"
   import QRCode from "src/partials/QRCode.svelte"
@@ -28,8 +29,6 @@
 
   let content = parseContent(note)
   let rating = note.kind === 1985 ? getLabelQuality("review/relay", note) : null
-
-  console.log(content)
 
   const links = []
   const invoices = []

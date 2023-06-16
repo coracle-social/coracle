@@ -6,7 +6,7 @@
   import {fly} from "svelte/transition"
   import {quantify} from "hurdak/lib/hurdak"
   import {fuzzy, createScroller, now, timedelta} from "src/util/misc"
-  import {asDisplayEvent} from "src/util/nostr"
+  import {asDisplayEvent, noteKinds} from "src/util/nostr"
   import Spinner from "src/partials/Spinner.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
@@ -42,7 +42,7 @@
   const maxNotes = 100
   const seen = new Set()
   const getModal = () => last(document.querySelectorAll(".modal-content"))
-  const canDisplay = e => [1, 1985].includes(e.kind)
+  const canDisplay = e => noteKinds.includes(e.kind)
 
   const setFeedRelay = relay => {
     feedRelay = relay

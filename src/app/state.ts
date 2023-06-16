@@ -10,7 +10,7 @@ import {createMap, doPipe, first} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
 import {hash, shuffle, sleep, clamp} from "src/util/misc"
 import {now, timedelta} from "src/util/misc"
-import {Tags, isNotification, userKinds} from "src/util/nostr"
+import {Tags, isNotification, userKinds, noteKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import {notifications, watch, userEvents, contacts, rooms} from "src/agent/db"
@@ -157,7 +157,11 @@ const processChats = async (pubkey, events) => {
 export const listen = async () => {
   const pubkey = user.getPubkey()
   const {roomsJoined} = user.getProfile()
-  const kinds = enableZaps ? [1, 4, 7, 1985, 9735] : [1, 4, 7, 1985]
+  const kinds = noteKinds.concat([4, 7])
+
+  if (enableZaps) {
+    kinds.push(9735)
+  }
 
   // Only grab notifications since we last checked, with some wiggle room
   const since =
@@ -175,7 +179,7 @@ export const listen = async () => {
   ;(listen as any)._listener = await network.listen({
     relays: getUserReadRelays(),
     filter: [
-      {kinds: [1, 4], authors: [pubkey], since},
+      {kinds: [4], authors: [pubkey], since},
       {kinds, "#p": [pubkey], since},
       {kinds, "#e": eventIds, since},
       {kinds: [42], "#e": roomsJoined, since},

@@ -2,7 +2,7 @@
   import cx from "classnames"
   import type {DynamicFilter} from "src/util/types"
   import {indexBy, objOf} from "ramda"
-  import {Tags} from "src/util/nostr"
+  import {Tags, noteKinds} from "src/util/nostr"
   import {modal, theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
@@ -16,7 +16,7 @@
   let relays = null
   let key = Math.random()
   let filter = {
-    kinds: [1, 1985],
+    kinds: noteKinds,
     authors: getUserFollows().length > 0 ? "follows" : "network",
   } as DynamicFilter
 

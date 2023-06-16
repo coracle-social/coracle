@@ -1,8 +1,7 @@
 # Current
 
 - [ ] Feeds load forever if a modal is open
-- [ ] Support other list types
-- [ ] Use vida to stream development
+- [ ] Support other list types than 30001
 - [ ] Fix connection management stuff. Have GPT help
 - [ ] Add preview proxy thing
 - [ ] White-labeled
