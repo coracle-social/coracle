@@ -2,7 +2,6 @@
   import {Route} from "svelte-routing"
   import {onReady} from "src/agent/db"
   import {base64DecodeOrPlainWebSocketURL} from "src/util/misc"
-  import EnsureData from "src/app/EnsureData.svelte"
   import Notifications from "src/app/views/Notifications.svelte"
   import Bech32Entity from "src/app/views/Bech32Entity.svelte"
   import ChatDetail from "src/app/views/ChatDetail.svelte"
@@ -34,14 +33,10 @@
     <Route path="/notifications" component={Notifications} />
     <Route path="/notifications/:activeTab" component={Notifications} />
     <Route path="/search">
-      <EnsureData enforcePeople={false}>
-        <Search />
-      </EnsureData>
+      <Search />
     </Route>
     <Route path="/notes" let:params>
-      <EnsureData>
-        <Feeds />
-      </EnsureData>
+      <Feeds />
     </Route>
     <Route path="/people/:npub/:activeTab" let:params>
       {#key params.npub}

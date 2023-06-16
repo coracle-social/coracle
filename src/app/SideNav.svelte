@@ -107,11 +107,13 @@
         <i class="fa fa-gear mr-2" /> Settings
       </a>
     </li>
-    <li
-      class="block cursor-pointer px-4 py-2 transition-all hover:bg-accent hover:text-white"
-      on:click={toggleTheme}>
-      <i class="fa fa-lightbulb mr-2" /> Theme
-    </li>
+  {/if}
+  <li
+    class="block cursor-pointer px-4 py-2 transition-all hover:bg-accent hover:text-white"
+    on:click={toggleTheme}>
+    <i class="fa fa-lightbulb mr-2" /> Theme
+  </li>
+  {#if $profile.pubkey}
     <li class="cursor-pointer">
       <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/logout">
         <i class="fa fa-right-from-bracket mr-2" /> Logout

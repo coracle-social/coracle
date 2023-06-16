@@ -1,5 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
+  import {navigate} from "svelte-routing"
   import {fade} from "svelte/transition"
   import user from "src/agent/user"
   import {modal, location} from "src/partials/state"
@@ -7,6 +8,7 @@
   let scrollY = 0
 
   $: showCreateNote = $location.pathname.match(/messages|chat|relays$|keys|settings|logout$/)
+  $: showLogin = !$location.pathname.match(/login$/)
 
   const {canPublish} = user
 
@@ -33,7 +35,7 @@
           border border-gray-8 bg-gray-7 text-gray-1 shadow-2xl
           transition-all hover:scale-105 hover:bg-gray-6"
       on:click={scrollToTop}>
-      <span class="fa fa-arrow-up" />
+      <i class="fa fa-arrow-up" />
     </button>
   {/if}
   {#if $canPublish && !showCreateNote}
@@ -42,7 +44,16 @@
             border border-accent-light bg-accent text-white shadow-2xl
             transition-all hover:scale-105 hover:bg-accent-light"
       on:click={createNote}>
-      <span class="fa-plus fa-2xl" />
+      <i class="fa fa-plus" />
+    </button>
+  {/if}
+  {#if !$canPublish && showLogin}
+    <button
+      class="color-white flex h-16 w-16 items-center justify-center rounded-full
+            border border-accent-light bg-accent text-white shadow-2xl
+            transition-all hover:scale-105 hover:bg-accent-light"
+      on:click={() => navigate("/login")}>
+      <i class="fa fa-right-to-bracket" />
     </button>
   {/if}
 </div>

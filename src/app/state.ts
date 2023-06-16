@@ -19,7 +19,7 @@ import keys from "src/agent/keys"
 import network from "src/agent/network"
 import pool from "src/agent/pool"
 import {getUserReadRelays, getUserRelays} from "src/agent/relays"
-import {getUserFollows, getUserNetwork} from "src/agent/social"
+import {getUserFollows, getUserNetwork, defaultFollows} from "src/agent/social"
 import user from "src/agent/user"
 
 // Routing
@@ -290,12 +290,14 @@ export const publishWithToast = (relays, thunk) =>
 // Feeds
 
 export const compileFilter = (filter: DynamicFilter): Filter => {
+  const getAuthors = pubkeys => shuffle(pubkeys.length > 0 ? pubkeys : defaultFollows).slice(0, 256)
+
   if (filter.authors === "global") {
     filter = omit(["authors"], filter)
   } else if (filter.authors === "follows") {
-    filter = {...filter, authors: shuffle(getUserFollows()).slice(0, 256)}
+    filter = {...filter, authors: getAuthors(getUserFollows())}
   } else if (filter.authors === "network") {
-    filter = {...filter, authors: shuffle(getUserNetwork()).slice(0, 256)}
+    filter = {...filter, authors: getAuthors(getUserNetwork())}
   }
 
   return filter

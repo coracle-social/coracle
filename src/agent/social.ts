@@ -3,9 +3,9 @@ import {Tags} from "src/util/nostr"
 import {getPersonWithFallback} from "src/agent/db"
 import user from "src/agent/user"
 
-export const defaultFollows = (import.meta.env.VITE_DEFAULT_FOLLOWS || "")
-  .split(",")
-  .filter(identity)
+const {VITE_DEFAULT_FOLLOWS} = import.meta.env
+
+export const defaultFollows = (VITE_DEFAULT_FOLLOWS || "").split(",").filter(identity)
 
 export const getFollows = pubkey =>
   Tags.wrap(getPersonWithFallback(pubkey).petnames).type("p").values().all()

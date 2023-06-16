@@ -11,6 +11,7 @@
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import {searchTopics, searchPeople, getPersonWithFallback} from "src/agent/db"
+  import {getUserFollows} from "src/agent/social"
 
   export let filter
   export let onChange
@@ -73,6 +74,7 @@
   }
 
   let modal = null
+  let scopeOptions = []
   let _filter = {
     since: filter.since,
     until: filter.since,
@@ -82,6 +84,13 @@
       : filter.authors || "network",
     "#t": (filter["#t"] || []).map(objOf("name")),
     "#p": (filter["#p"] || []).map(getPersonWithFallback),
+  }
+
+  $: {
+    scopeOptions =
+      getUserFollows().length > 0
+        ? ["follows", "network", "global", "custom"]
+        : ["network", "global", "custom"]
   }
 </script>
 
@@ -122,7 +131,7 @@
             <SelectButton
               onChange={onScopeChange}
               value={typeof _filter.authors === "string" ? _filter.authors : "custom"}
-              options={["follows", "network", "global", "custom"]} />
+              options={scopeOptions} />
             {#if Array.isArray(_filter.authors)}
               <MultiSelect search={$searchPeople} bind:value={_filter.authors}>
                 <div slot="item" let:item>

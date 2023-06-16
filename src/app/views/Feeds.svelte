@@ -9,12 +9,16 @@
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import user from "src/agent/user"
+  import {getUserFollows} from "src/agent/social"
 
-  const {lists} = user
+  const {lists, canPublish} = user
 
   let relays = null
-  let filter = {kinds: [1, 1985], authors: "follows"} as DynamicFilter
   let key = Math.random()
+  let filter = {
+    kinds: [1, 1985],
+    authors: getUserFollows().length > 0 ? "follows" : "network",
+  } as DynamicFilter
 
   $: listsByName = indexBy(l => Tags.from(l).getMeta("d"), $lists)
 
@@ -60,36 +64,38 @@
   {#key key}
     <Feed {filter} {relays}>
       <div slot="controls">
-        {#if $lists.length > 0}
-          <Popover placement="bottom" opts={{hideOnClick: true}} theme="transparent">
-            <i slot="trigger" class="fa fa-ellipsis-v cursor-pointer p-2" />
-            <div
-              slot="tooltip"
-              class="flex flex-col items-start overflow-hidden rounded border border-solid border-gray-8 bg-black">
-              {#each $lists as e (e.id)}
-                {@const meta = Tags.from(e).asMeta()}
+        {#if $canPublish}
+          {#if $lists.length > 0}
+            <Popover placement="bottom" opts={{hideOnClick: true}} theme="transparent">
+              <i slot="trigger" class="fa fa-ellipsis-v cursor-pointer p-2" />
+              <div
+                slot="tooltip"
+                class="flex flex-col items-start overflow-hidden rounded border border-solid border-gray-8 bg-black">
+                {#each $lists as e (e.id)}
+                  {@const meta = Tags.from(e).asMeta()}
+                  <button
+                    class={cx("w-full py-2 px-3 text-left transition-colors", {
+                      "hover:bg-gray-7": $theme === "dark",
+                      "hover:bg-gray-1": $theme === "light",
+                    })}
+                    on:click={() => loadListFeed(meta.d)}>
+                    <i class="fa fa-scroll fa-sm mr-1" />
+                    {meta.d}
+                  </button>
+                {/each}
                 <button
+                  on:click={showLists}
                   class={cx("w-full py-2 px-3 text-left transition-colors", {
                     "hover:bg-gray-7": $theme === "dark",
                     "hover:bg-gray-1": $theme === "light",
-                  })}
-                  on:click={() => loadListFeed(meta.d)}>
-                  <i class="fa fa-scroll fa-sm mr-1" />
-                  {meta.d}
+                  })}>
+                  <i class="fa fa-cog fa-sm mr-1" /> Customize
                 </button>
-              {/each}
-              <button
-                on:click={showLists}
-                class={cx("w-full py-2 px-3 text-left transition-colors", {
-                  "hover:bg-gray-7": $theme === "dark",
-                  "hover:bg-gray-1": $theme === "light",
-                })}>
-                <i class="fa fa-cog fa-sm mr-1" /> Customize
-              </button>
-            </div>
-          </Popover>
-        {:else}
-          <i class="fa fa-ellipsis-v cursor-pointer p-1" on:click={showLists} />
+              </div>
+            </Popover>
+          {:else}
+            <i class="fa fa-ellipsis-v cursor-pointer p-2" on:click={showLists} />
+          {/if}
         {/if}
       </div>
     </Feed>

@@ -1,5 +1,6 @@
 # Current
 
+- [ ] Feeds load forever if a modal is open
 - [ ] Support other list types
 - [ ] Use vida to stream development
 - [ ] Fix connection management stuff. Have GPT help
@@ -14,7 +15,6 @@
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
 - [ ] Private groups
-- [ ] Fix unauthenticated experience. Going to an npub just spins
 - [ ] Convert app store to nip 89
 - [ ] Put search icon in header or hover button, open in modal
 - [ ] Hide muted quoted events

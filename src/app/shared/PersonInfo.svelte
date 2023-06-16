@@ -31,7 +31,7 @@
   <Anchor
     type="unstyled"
     on:click={() => modal.push({type: "person/feed", pubkey: person.pubkey})}
-    class="flex gap-4 overflow-hidden border-l-2 border-solid border-gray-7 py-3 px-4
+    class="flex gap-4 overflow-hidden border-l-2 border-solid border-gray-7 py-3 pl-4
            transition-all hover:border-accent hover:bg-gray-8">
     <PersonCircle {person} size={12} />
     <div class="flex min-w-0 flex-grow flex-col gap-4">

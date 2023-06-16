@@ -1,7 +1,5 @@
 <script>
-  import {onMount} from "svelte"
   import {fly} from "svelte/transition"
-  import {navigate} from "svelte-routing"
   import {toast, appName} from "src/partials/state"
   import Toggle from "src/partials/Toggle.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -13,12 +11,6 @@
   import pool from "src/agent/pool"
 
   let values = {...user.getSettings()}
-
-  onMount(async () => {
-    if (!user.getProfile()) {
-      return navigate("/login")
-    }
-  })
 
   const submit = () => {
     user.setSettings(values)

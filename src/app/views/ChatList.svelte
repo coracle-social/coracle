@@ -10,14 +10,14 @@
   import {watch} from "src/agent/db"
   import user from "src/agent/user"
   import network from "src/agent/network"
-  import {getUserReadRelays} from "src/agent/relays"
+  import {getUserReadRelays, sampleRelays} from "src/agent/relays"
   import {modal} from "src/partials/state"
 
   let q = ""
   let search
   let results = []
 
-  const {roomsJoined} = user
+  const {roomsJoined, canPublish} = user
   const rooms = derived([watch("rooms", t => t.all()), roomsJoined], ([_rooms, _joined]) => {
     const ids = new Set(_joined)
     const [joined, other] = partition(r => ids.has(r.id), _rooms)
@@ -32,7 +32,7 @@
 
   onMount(() => {
     const sub = network.listen({
-      relays: getUserReadRelays(),
+      relays: sampleRelays(getUserReadRelays()),
       filter: [{kinds: [40, 41]}],
     })
 
@@ -43,25 +43,27 @@
 </script>
 
 <Content>
-  <div class="flex justify-between">
-    <div class="flex items-center gap-2">
-      <i class="fa fa-server fa-lg" />
-      <h2 class="staatliches text-2xl">Your rooms</h2>
+  {#if $canPublish}
+    <div class="flex justify-between">
+      <div class="flex items-center gap-2">
+        <i class="fa fa-server fa-lg" />
+        <h2 class="staatliches text-2xl">Your rooms</h2>
+      </div>
+      <Anchor type="button-accent" on:click={() => modal.push({type: "room/edit"})}>
+        <i class="fa-solid fa-plus" /> Create Room
+      </Anchor>
     </div>
-    <Anchor type="button-accent" on:click={() => modal.push({type: "room/edit"})}>
-      <i class="fa-solid fa-plus" /> Create Room
-    </Anchor>
-  </div>
-  {#each $rooms.joined as room (room.id)}
-    <ChatListItem {room} />
-  {:else}
-    <p class="text-center py-8">You haven't yet joined any rooms.</p>
-  {/each}
-  <div class="mb-2 border-b border-solid border-gray-6 pt-2" />
-  <div class="flex items-center gap-2">
-    <i class="fa fa-earth-asia fa-lg" />
-    <h2 class="staatliches text-2xl">Other rooms</h2>
-  </div>
+    {#each $rooms.joined as room (room.id)}
+      <ChatListItem {room} />
+    {:else}
+      <p class="text-center py-8">You haven't yet joined any rooms.</p>
+    {/each}
+    <div class="mb-2 border-b border-solid border-gray-6 pt-2" />
+    <div class="flex items-center gap-2">
+      <i class="fa fa-earth-asia fa-lg" />
+      <h2 class="staatliches text-2xl">Other rooms</h2>
+    </div>
+  {/if}
   <div class="flex-grow">
     <Input bind:value={q} type="text" placeholder="Search rooms">
       <i slot="before" class="fa-solid fa-search" />

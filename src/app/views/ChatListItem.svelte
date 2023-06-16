@@ -8,7 +8,7 @@
 
   export let room
 
-  const {roomsJoined} = user
+  const {roomsJoined, canPublish} = user
   const enter = () => navigate(`/chat/${nip19.noteEncode(room.id)}`)
   const join = () => user.joinRoom(room.id)
   const leave = () => user.leaveRoom(room.id)
@@ -34,7 +34,7 @@
           <i class="fa fa-right-from-bracket" />
           <span>Leave</span>
         </Anchor>
-      {:else}
+      {:else if $canPublish}
         <Anchor type="button" killEvent class="flex items-center gap-2" on:click={join}>
           <i class="fa fa-right-to-bracket" />
           <span>Join</span>
