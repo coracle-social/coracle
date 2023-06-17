@@ -10,8 +10,6 @@
     hidden = true
   }
 
-  console.log(value)
-
   let hidden = false
 </script>
 

@@ -1,7 +1,10 @@
 # Current
 
+- [ ] Spam
+  - Add configurable POW req for replies
+  - Add event queue and undo, use the delay to calculate POW
 - [ ] Support other kinds
-  - Fix note truncation
+  - Fix note truncation, sometimes an ellipsis ends up after the last one
 - [ ] Feeds load forever if a modal is open
 - [ ] Support other list types than 30001
 - [ ] Fix connection management stuff. Have GPT help

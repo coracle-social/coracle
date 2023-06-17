@@ -1,4 +1,4 @@
-import {last, identity} from "ramda"
+import {last, pluck, identity} from "ramda"
 import {nip19} from "nostr-tools"
 import {first} from "hurdak/lib/hurdak"
 import {fromNostrURI} from "src/util/nostr"
@@ -14,7 +14,7 @@ export const NOSTR_NPUB = "nostr:npub"
 export const NOSTR_NPROFILE = "nostr:nprofile"
 export const NOSTR_NADDR = "nostr:naddr"
 
-const canDisplayUrl = url => !url.match(/\.(apk|docx|xlsx|csv|dmg)/)
+export const canDisplayUrl = url => !url.match(/\.(apk|docx|xlsx|csv|dmg)/)
 
 export const parseContent = ({content, tags = []}) => {
   const result = []
@@ -160,7 +160,7 @@ export const parseContent = ({content, tags = []}) => {
   return result
 }
 
-export const truncateContent = (content, {showEntire, maxLength, showMedia}) => {
+export const truncateContent = (content, {showEntire, maxLength, showMedia = false}) => {
   if (showEntire) {
     return content
   }
@@ -194,3 +194,15 @@ export const truncateContent = (content, {showEntire, maxLength, showMedia}) => 
 
   return result
 }
+
+export const getLinks = parts =>
+  pluck(
+    "value",
+    parts.filter(x => x.type === LINK && x.canDisplay)
+  )
+
+export const isStandalone = (content, i) =>
+  !content[i - 1] ||
+  content[i - 1].type === NEWLINE ||
+  !content[i + 1] ||
+  content[i + 1].type === NEWLINE
