@@ -19,8 +19,8 @@
         <br />
       {/each}
     {:else if type === "link"}
-      <Anchor external href={value}>
-        {value.replace(/https?:\/\/(www\.)?/, "")}
+      <Anchor external href={value.url}>
+        {value.url.replace(/https?:\/\/(www\.)?/, "")}
       </Anchor>
     {:else if type.startsWith("nostr:")}
       <Anchor external href={"/" + value.entity}>

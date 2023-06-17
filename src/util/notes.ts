@@ -3,6 +3,19 @@ import {nip19} from "nostr-tools"
 import {first} from "hurdak/lib/hurdak"
 import {fromNostrURI} from "src/util/nostr"
 
+export const NEWLINE = "newline"
+export const TEXT = "text"
+export const TOPIC = "topic"
+export const LINK = "link"
+export const INVOICE = "invoice"
+export const NOSTR_NOTE = "nostr:note"
+export const NOSTR_NEVENT = "nostr:nevent"
+export const NOSTR_NPUB = "nostr:npub"
+export const NOSTR_NPROFILE = "nostr:nprofile"
+export const NOSTR_NADDR = "nostr:naddr"
+
+const canDisplayUrl = url => !url.match(/\.(apk|docx|xlsx|csv|dmg)/)
+
 export const parseContent = ({content, tags = []}) => {
   const result = []
   let text = content.trim()
@@ -12,7 +25,7 @@ export const parseContent = ({content, tags = []}) => {
     const newline = first(text.match(/^\n+/))
 
     if (newline) {
-      return ["newline", newline, newline]
+      return [NEWLINE, newline, newline]
     }
   }
 
@@ -48,7 +61,7 @@ export const parseContent = ({content, tags = []}) => {
 
     // Skip numeric topics
     if (topic && !topic.match(/^#\d+$/)) {
-      return ["topic", topic, topic.slice(1)]
+      return [TOPIC, topic, topic.slice(1)]
     }
   }
 
@@ -77,11 +90,11 @@ export const parseContent = ({content, tags = []}) => {
     }
   }
 
-  const parseLNUrl = () => {
-    const lnurl = first(text.match(/^ln(bc|url)[\d\w]{50,1000}/i))
+  const parseInvoice = () => {
+    const invoice = first(text.match(/^ln(bc|url)[\d\w]{50,1000}/i))
 
-    if (lnurl) {
-      return ["lnurl", lnurl, lnurl]
+    if (invoice) {
+      return [INVOICE, invoice, invoice]
     }
   }
 
@@ -107,7 +120,7 @@ export const parseContent = ({content, tags = []}) => {
         url = "https://" + url
       }
 
-      return ["link", raw, url]
+      return [LINK, raw, {url, canDisplay: canDisplayUrl(url)}]
     }
   }
 
@@ -118,7 +131,7 @@ export const parseContent = ({content, tags = []}) => {
       parseTopic() ||
       parseBech32() ||
       parseUrl() ||
-      parseLNUrl()
+      parseInvoice()
 
     if (part) {
       if (buffer) {
@@ -141,7 +154,42 @@ export const parseContent = ({content, tags = []}) => {
   }
 
   if (buffer) {
-    result.push({type: "text", value: buffer})
+    result.push({type: TEXT, value: buffer})
+  }
+
+  return result
+}
+
+export const truncateContent = (content, {showEntire, maxLength, showMedia}) => {
+  if (showEntire) {
+    return content
+  }
+
+  let length = 0
+  const result = []
+  const truncateAt = maxLength * 0.6
+
+  for (const part of content) {
+    const isText = [TOPIC, TEXT].includes(part.type)
+    const isMedia = [LINK, INVOICE].includes(part.type) || part.type.startsWith("nostr:")
+
+    if (isText) {
+      length += part.value.length
+    }
+
+    if (isMedia) {
+      length += showMedia ? maxLength / 3 : part.value.length
+    }
+
+    result.push(part)
+
+    if (length > truncateAt) {
+      if (isText || (isMedia && !showMedia)) {
+        result.push({type: TEXT, value: "..."})
+      }
+
+      break
+    }
   }
 
   return result

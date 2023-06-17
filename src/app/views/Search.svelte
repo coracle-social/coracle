@@ -75,13 +75,13 @@
         $or: [{"kind0.name": {$type: "string"}}, {"kind0.display_name": {$type: "string"}}],
       })
       .map(person => {
-        const {name, about, display_name} = person.kind0
+        const {name, nip05, about, display_name} = person.kind0
 
         return {
           person,
           type: "person",
           id: person.pubkey,
-          text: "@" + [name, about, display_name].filter(identity).join(" "),
+          text: "@" + [name, about, nip05, display_name].filter(identity).join(" "),
         }
       })
   )
@@ -116,7 +116,7 @@
       camera icon to scan with your device's camera instead.
     </p>
   </div>
-  <Input bind:value={q} placeholder="Search for people or topics">
+  <Input autofocus bind:value={q} placeholder="Search for people or topics">
     <i slot="before" class="fa-solid fa-search" />
     <i
       slot="after"

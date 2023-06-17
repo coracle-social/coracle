@@ -1,5 +1,7 @@
 # Current
 
+- [ ] Support other kinds
+  - Fix note truncation
 - [ ] Feeds load forever if a modal is open
 - [ ] Support other list types than 30001
 - [ ] Fix connection management stuff. Have GPT help

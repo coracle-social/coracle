@@ -97,7 +97,7 @@
     onChange(newFilter)
   }
 
-  const applySearch = debounce(200, applyFilter)
+  const applySearch = debounce(400, applyFilter)
 
   const clearSearch = () => {
     _filter.search = ""
