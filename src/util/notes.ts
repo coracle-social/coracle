@@ -169,7 +169,7 @@ export const truncateContent = (content, {showEntire, maxLength, showMedia = fal
   const result = []
   const truncateAt = maxLength * 0.6
 
-  for (const part of content) {
+  content.every((part, i) => {
     const isText = [TOPIC, TEXT].includes(part.type)
     const isMedia = [LINK, INVOICE].includes(part.type) || part.type.startsWith("nostr:")
 
@@ -183,14 +183,16 @@ export const truncateContent = (content, {showEntire, maxLength, showMedia = fal
 
     result.push(part)
 
-    if (length > truncateAt) {
+    if (length > truncateAt && i < content.length - 1) {
       if (isText || (isMedia && !showMedia)) {
         result.push({type: TEXT, value: "..."})
       }
 
-      break
+      return false
     }
-  }
+
+    return true
+  })
 
   return result
 }
