@@ -1,5 +1,12 @@
 # Changelog
 
+# 0.2.33
+
+- [x] Add rendering support for kind 1985 (labels and reviews)
+- [x] Add rendering support for kind 9802 (highlights)
+- [x] Add rendering support for kind 1063 (image header)
+- [x] Add rendering support for kind 30023 (long form content)
+
 # 0.2.32
 
 - [x] Add note preview when composing

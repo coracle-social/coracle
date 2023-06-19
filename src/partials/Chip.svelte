@@ -10,7 +10,7 @@
   })
 </script>
 
-<div class={className}>
+<div class={className} on:click>
   <div class="flex items-center gap-2 whitespace-nowrap">
     {#if onClick}
       <i class="fa fa-times cursor-pointer" on:click|preventDefault={onClick} />

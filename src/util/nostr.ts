@@ -5,8 +5,7 @@ import {ensurePlural, ellipsize, first} from "hurdak/lib/hurdak"
 import {tryJson, avg} from "src/util/misc"
 import {invoiceAmount} from "src/util/lightning"
 
-export const noteKinds = [1, 1985, 30023, 30018, 10001, 1063, 9802]
-// export const noteKinds = [1063]
+export const noteKinds = [1, 1985, 30023, 1063, 9802]
 export const personKinds = [0, 2, 3, 10001, 10002]
 export const userKinds = personKinds.concat([10000, 30001, 30078])
 export const appDataKeys = [
@@ -46,6 +45,12 @@ export class Tags {
   }
   relays() {
     return uniq(flatten(this.tags).filter(isShareableRelay)).map(objOf("url"))
+  }
+  topics() {
+    return this.type("t")
+      .values()
+      .all()
+      .map(t => t.replace(/^#/, ""))
   }
   pubkeys() {
     return this.type("p").values().all()

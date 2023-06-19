@@ -4,7 +4,7 @@
   import {pluck, omit, objOf} from "ramda"
   import {debounce} from "throttle-debounce"
   import {createLocalDate, formatTimestampAsDate} from "src/util/misc"
-  import {displayPerson} from "src/util/nostr"
+  import {displayPerson, noteKinds} from "src/util/nostr"
   import Chip from "src/partials/Chip.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -66,7 +66,7 @@
   }
 
   const applyFilter = () => {
-    const newFilter = {} as DynamicFilter
+    const newFilter = {kinds: noteKinds} as DynamicFilter
 
     if (_filter.since) {
       newFilter.since = createLocalDate(_filter.since).setHours(23, 59, 59, 0) / 1000
@@ -155,10 +155,10 @@
     <slot name="controls" />
   </div>
   {#if parts.length > 0}
-    <div class="mr-2 mb-2 inline-block py-1">Showing notes:</div>
+    <div class="mb-2 mr-2 inline-block py-1">Showing notes:</div>
   {/if}
   {#each parts as { keys, label }}
-    <Chip class="mr-2 mb-2 inline-block" onClick={keys ? () => removePart(keys) : null}
+    <Chip class="mb-2 mr-2 inline-block" onClick={keys ? () => removePart(keys) : null}
       >{label}</Chip>
   {/each}
 </div>
