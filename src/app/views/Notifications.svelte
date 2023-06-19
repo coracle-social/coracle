@@ -10,7 +10,7 @@
     formatTimestampAsLocalISODate,
     createScroller,
   } from "src/util/misc"
-  import {findReplyId} from "src/util/nostr"
+  import {findReplyId, noteKinds} from "src/util/nostr"
   import Spinner from "src/partials/Spinner.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
@@ -48,12 +48,12 @@
       .slice(0, limit)
       .map(e => [e, userEvents.get(findReplyId(e))])
       .filter(([e, ref]) => {
-        if (ref && ref.kind !== 1) {
+        if (ref && !noteKinds.includes(ref.kind)) {
           return false
         }
 
         if (activeTab === tabs[0]) {
-          return [1].includes(e.kind)
+          return noteKinds.includes(e.kind)
         } else {
           return [7, 9735].includes(e.kind) && ref
         }
