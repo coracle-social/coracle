@@ -144,10 +144,6 @@ export const createScroller = (loadMore, {reverse = false, element = null} = {})
 
   element = element || document.body
 
-  // NOTE TO FUTURE SELF
-  // If the scroller is saturating request channels on a slow relay, the
-  // loadMore function is not properly awaiting all the work necessary.
-  // That is the problem, but see commit 8371fde for another strategy
   let done = false
   const check = async () => {
     // While we have empty space, fill it

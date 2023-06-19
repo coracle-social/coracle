@@ -1,5 +1,29 @@
 # Current
 
+- [ ] White-labeled
+  - [ ] Add invite code registration for relay
+    - [ ] Add endpoint to nostream that updates whitelist
+    - [ ] Show invite code somewhere so users can share it.
+    - [ ] Use a signed string so it's based on pubkey?
+    - [ ] Nostream is public-read, apply registration to reads as well
+  - [ ] Avoid leaking events from private relays
+- [ ] Image classification
+  - https://github.com/bhky/opennsfw2
+- [ ] Convert app store to nip 89
+- [ ] Put search icon in header or hover button, open in modal
+- [ ] Centralize relays
+  - This is ok, relays are the source of decentralization
+  - clients can help with discoverability
+  - Add agent to dufflepud database that scrapes relays and reviews
+  - Serve relays from dufflepud
+  - Or maybe set up a special purpose relay for relay recs?
+
+# Core
+
+- [ ] Private groups
+- [ ] Support server-rendered link previews
+- [ ] Feeds load forever if a modal is open
+- [ ] Support other list types than 30001
 - [ ] Spam
   - Add configurable POW req for replies
   - Add event queue and undo, use the delay to calculate POW

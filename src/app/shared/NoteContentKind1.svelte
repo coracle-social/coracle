@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {without} from "ramda"
+  import {without, last} from "ramda"
   import {
     parseContent,
     getLinks,
@@ -18,7 +18,9 @@
   import NoteContentQuote from "src/app/shared/NoteContentQuote.svelte"
   import NoteContentEntity from "src/app/shared/NoteContentEntity.svelte"
 
-  export let note, anchorId, maxLength, showEntire
+  export let note, maxLength
+  export let anchorId = false
+  export let showEntire = false
   export let showMedia = false
 
   const fullContent = parseContent(note)
@@ -44,13 +46,13 @@
           <QRCode fullWidth onClick="copy" code={value} />
         </div>
       {:else if type === LINK}
-        <NoteContentLink {value} showMedia={showMedia && isStartOrEnd(i) && value.url.includes('/')} />
+        <NoteContentLink {value} showMedia={showMedia && isStartOrEnd(i) && last(value.url.split('://')).includes('/')} />
       {:else if type.match(/^nostr:np(rofile|ub)$/)}
         <NoteContentPerson {value} />
       {:else if type.startsWith("nostr:") && showMedia && isStartOrEnd(i) && value.id !== anchorId}
         <NoteContentQuote {note} {value}>
           <div slot="note-content" let:quote>
-            <svelte:self note={quote} />
+            <svelte:self note={quote} {anchorId} {maxLength} {showMedia} showEntire={false} />
           </div>
         </NoteContentQuote>
       {:else if type.startsWith("nostr:")}

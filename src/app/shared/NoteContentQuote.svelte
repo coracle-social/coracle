@@ -11,9 +11,12 @@
   import {getPersonWithFallback} from "src/agent/db"
   import {sampleRelays} from "src/agent/relays"
   import network from "src/agent/network"
+  import user from "src/agent/user"
 
   export let note
   export let value
+
+  let muted = false
 
   const openPerson = pubkey => modal.push({type: "person/feed", pubkey})
 
@@ -28,14 +31,23 @@
         filter: [{ids: [id]}],
       })
 
+      muted = user.applyMutes([event]).length === 0
+
       return event || Promise.reject()
     } catch (e) {
       warn(e)
     }
   }
 
-  const openQuote = () => {
-    modal.push({type: "note/detail", note: {id: value.id}})
+  const openQuote = e => {
+    // stopPropagation wasn't working for some reason
+    if (e.target.textContent !== "Show") {
+      modal.push({type: "note/detail", note: {id: value.id}})
+    }
+  }
+
+  const unmute = e => {
+    muted = false
   }
 </script>
 
@@ -44,18 +56,25 @@
     {#await loadQuote()}
       <Spinner />
     {:then quote}
-      {@const person = getPersonWithFallback(quote.pubkey)}
-      <div class="mb-4 flex items-center gap-4">
-        <PersonCircle size={6} {person} />
-        <Anchor
-          stopPropagation
-          type="unstyled"
-          class="flex items-center gap-2"
-          on:click={() => openPerson(quote.pubkey)}>
-          <h2 class="text-lg">{displayPerson(person)}</h2>
-        </Anchor>
-      </div>
-      <slot name="note-content" {quote} />
+      {#if muted}
+        <p class="mb-1 py-24 text-center text-gray-5" in:fly={{y: 20}}>
+          You have muted this note.
+          <Anchor on:click={unmute}>Show</Anchor>
+        </p>
+      {:else}
+        {@const person = getPersonWithFallback(quote.pubkey)}
+        <div class="mb-4 flex items-center gap-4">
+          <PersonCircle size={6} {person} />
+          <Anchor
+            stopPropagation
+            type="unstyled"
+            class="flex items-center gap-2"
+            on:click={() => openPerson(quote.pubkey)}>
+            <h2 class="text-lg">{displayPerson(person)}</h2>
+          </Anchor>
+        </div>
+        <slot name="note-content" {quote} />
+      {/if}
     {:catch}
       <p class="mb-1 py-24 text-center text-gray-5" in:fly={{y: 20}}>
         Unable to load a preview for quoted event
