@@ -24,16 +24,16 @@
     const {id, relays} = value
 
     try {
-      const [event] = await network.load({
+      const events = await network.load({
         relays: sampleRelays(
           (relays || []).map(objOf("url")).concat(Tags.from(note).equals(id).relays())
         ),
         filter: [{ids: [id]}],
       })
 
-      muted = user.applyMutes([event]).length === 0
+      muted = user.applyMutes(events).length === 0
 
-      return event || Promise.reject()
+      return events[0] || Promise.reject()
     } catch (e) {
       warn(e)
     }
