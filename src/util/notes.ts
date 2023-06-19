@@ -200,9 +200,3 @@ export const getLinks = parts =>
     "value",
     parts.filter(x => x.type === LINK && x.canDisplay)
   )
-
-export const isStandalone = (content, i) =>
-  !content[i - 1] ||
-  content[i - 1].type === NEWLINE ||
-  !content[i + 1] ||
-  content[i + 1].type === NEWLINE
