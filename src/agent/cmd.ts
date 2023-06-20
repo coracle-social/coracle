@@ -166,7 +166,7 @@ class PublishableEvent {
     const promise = pool.publish({relays, event, onProgress, verb})
 
     // Copy the event since loki mutates it to add metadata
-    sync.processEvents({...event})
+    sync.processEvents({...event, seen_on: []})
 
     return [event, promise]
   }
