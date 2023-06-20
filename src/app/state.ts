@@ -179,7 +179,7 @@ export const listen = async () => {
   ;(listen as any)._listener = await network.listen({
     relays: getUserReadRelays(),
     filter: [
-      {kinds: [4], authors: [pubkey], since},
+      {kinds: noteKinds.concat(4), authors: [pubkey], since},
       {kinds, "#p": [pubkey], since},
       {kinds, "#e": eventIds, since},
       {kinds: [42], "#e": roomsJoined, since},
