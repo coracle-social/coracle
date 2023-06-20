@@ -14,7 +14,8 @@ export const NOSTR_NPUB = "nostr:npub"
 export const NOSTR_NPROFILE = "nostr:nprofile"
 export const NOSTR_NADDR = "nostr:naddr"
 
-export const canDisplayUrl = url => !url.match(/\.(apk|docx|xlsx|csv|dmg)/)
+export const urlIsMedia = url =>
+  !url.match(/\.(apk|docx|xlsx|csv|dmg)/) && last(url.split("://")).includes("/")
 
 export const parseContent = ({content, tags = []}) => {
   const result = []
@@ -120,7 +121,7 @@ export const parseContent = ({content, tags = []}) => {
         url = "https://" + url
       }
 
-      return [LINK, raw, {url, canDisplay: canDisplayUrl(url)}]
+      return [LINK, raw, {url, isMedia: urlIsMedia(url)}]
     }
   }
 
@@ -170,8 +171,8 @@ export const truncateContent = (content, {showEntire, maxLength, showMedia = fal
   const truncateAt = maxLength * 0.6
 
   content.every((part, i) => {
-    const isText = [TOPIC, TEXT].includes(part.type)
-    const isMedia = [LINK, INVOICE].includes(part.type) || part.type.startsWith("nostr:")
+    const isText = [TOPIC, TEXT].includes(part.type) || (part.type === LINK && !part.value.isMedia)
+    const isMedia = part.type === INVOICE || part.type.startsWith("nostr:") || part.value.isMedia
 
     if (isText) {
       length += part.value.length
@@ -200,5 +201,5 @@ export const truncateContent = (content, {showEntire, maxLength, showMedia = fal
 export const getLinks = parts =>
   pluck(
     "value",
-    parts.filter(x => x.type === LINK && x.canDisplay)
+    parts.filter(x => x.type === LINK && x.isMedia)
   )

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {Tags} from "src/util/nostr"
-  import {canDisplayUrl} from "src/util/notes"
+  import {urlIsMedia} from "src/util/notes"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
 
   export let note, showMedia
@@ -9,5 +9,5 @@
 </script>
 
 {#if url}
-  <NoteContentLink value={{url, canDisplay: canDisplayUrl(url)}} {showMedia} />
+  <NoteContentLink value={{url, isMedia: urlIsMedia(url)}} {showMedia} />
 {/if}

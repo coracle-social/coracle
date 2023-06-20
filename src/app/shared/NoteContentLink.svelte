@@ -13,7 +13,7 @@
   let hidden = false
 </script>
 
-{#if showMedia && value.canDisplay}
+{#if showMedia && value.isMedia}
   <div class="py-2">
     <Media link={annotateMedia(value.url)} onClose={close} />
   </div>

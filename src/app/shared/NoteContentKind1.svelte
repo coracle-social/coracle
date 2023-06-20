@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {without, last} from "ramda"
+  import {without} from "ramda"
   import {
     parseContent,
     getLinks,
@@ -28,8 +28,7 @@
   const links = getLinks(shortContent)
   const extraLinks = without(links, getLinks(fullContent))
 
-  export const isNewline = i =>
-    !shortContent[i] || shortContent[i].type === NEWLINE
+  export const isNewline = i => !shortContent[i] || shortContent[i].type === NEWLINE
 
   export const isStartOrEnd = i => isNewline(i - 1) || isNewline(i + 1)
 </script>
@@ -46,7 +45,7 @@
           <QRCode fullWidth onClick="copy" code={value} />
         </div>
       {:else if type === LINK}
-        <NoteContentLink {value} showMedia={showMedia && isStartOrEnd(i) && last(value.url.split('://')).includes('/')} />
+        <NoteContentLink {value} showMedia={showMedia && isStartOrEnd(i)} />
       {:else if type.match(/^nostr:np(rofile|ub)$/)}
         <NoteContentPerson {value} />
       {:else if type.startsWith("nostr:") && showMedia && isStartOrEnd(i) && value.id !== anchorId}

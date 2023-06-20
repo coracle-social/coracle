@@ -1,10 +1,10 @@
 <script lang="ts">
-  import {marked} from 'marked'
-  import insane from 'insane'
-  import {Tags} from 'src/util/nostr'
-  import {canDisplayUrl} from 'src/util/notes'
+  import {marked} from "marked"
+  import insane from "insane"
+  import {Tags} from "src/util/nostr"
+  import {urlIsMedia} from "src/util/notes"
   import {modal} from "src/partials/state"
-  import Chip from 'src/partials/Chip.svelte'
+  import Chip from "src/partials/Chip.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
 
   export let note, showEntire
@@ -19,18 +19,16 @@
 </script>
 
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
-  <h3 class="text-2xl staatliches">{title}</h3>
+  <h3 class="staatliches text-2xl">{title}</h3>
   {#if summary && !showEntire}
     <p>{summary}</p>
   {/if}
-  {#if showMedia && image && canDisplayUrl(image)}
+  {#if showMedia && image && urlIsMedia(image)}
     <NoteContentLink value={{url: image, canDisplay: true}} showMedia />
   {/if}
   <div>
     {#each tags.topics() as topic}
-      <Chip
-        class="mr-2 mb-2 inline-block cursor-pointer"
-        on:click={() => openTopic(topic)}>
+      <Chip class="mr-2 mb-2 inline-block cursor-pointer" on:click={() => openTopic(topic)}>
         #{topic}
       </Chip>
     {/each}
