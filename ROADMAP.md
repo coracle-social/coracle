@@ -1,5 +1,7 @@
 # Current
 
+- [ ] Make notifications beautiful and usable
+- [ ] Render threads in a way that makes them easy to use
 - [ ] White-labeled
   - [ ] Add invite code registration for relay
     - [ ] Add endpoint to nostream that updates whitelist
@@ -10,6 +12,8 @@
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
 - [ ] Convert app store to nip 89
+- [ ] Add imgproxy https://github.com/imgproxy/imgproxy
+  - Protects metadata, saves bandwidth, fixes void.cat?
 - [ ] Put search icon in header or hover button, open in modal
 - [ ] Centralize relays
   - This is ok, relays are the source of decentralization
