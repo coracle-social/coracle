@@ -1,9 +1,5 @@
 # Current
 
-- [ ] Fix @ mention on safari
-- [ ] Get rid of Button
-- [ ] Make notifications beautiful and usable
-- [ ] Render threads in a way that makes them easy to use
 - [ ] White-labeled
   - [ ] Add invite code registration for relay
     - [ ] Add endpoint to nostream that updates whitelist

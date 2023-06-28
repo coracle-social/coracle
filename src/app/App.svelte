@@ -3,6 +3,7 @@
   import "@fortawesome/fontawesome-free/css/solid.css"
 
   import {onMount} from "svelte"
+  import {nip19} from "nostr-tools"
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {identity, isNil, last} from "ramda"
@@ -28,7 +29,7 @@
   import Modal from "src/app/Modal.svelte"
   import ForegroundButtons from "src/app/ForegroundButtons.svelte"
 
-  Object.assign(window, {cmd, user, keys, network, pool, sync, db, bech32ToHex, hexToBech32})
+  Object.assign(window, {nip19, cmd, user, keys, network, pool, sync, db, bech32ToHex, hexToBech32})
 
   export let pathname = location.pathname
   export let hash = location.hash

@@ -30,7 +30,7 @@
 
   const applySearch = word => {
     let results = []
-    if (word.startsWith("@")) {
+    if (word.length > 1 && word.startsWith("@")) {
       const [followed, notFollowed] = partition(
         p => $petnamePubkeys.includes(p.pubkey),
         $searchPeople(word.slice(1))
@@ -62,7 +62,10 @@
       // Space includes a zero-width space to avoid having the cursor end up inside
       // mention span on backspace, and a space for convenience in composition.
       const space = document.createTextNode("\u200B\u00A0")
+      const spaceSpan = document.createElement("span")
       const span = document.createElement("span")
+
+      spaceSpan.append(space)
 
       span.classList.add("underline")
       span.dataset.coracle = JSON.stringify({prefix, value})
@@ -74,9 +77,9 @@
 
       // Add the span and space
       selection.getRangeAt(0).insertNode(span)
-      selection.collapse(span.parentNode, word.length + prefix.length)
-      selection.getRangeAt(0).insertNode(space)
-      selection.collapse(space, 2)
+      selection.collapse(span.nextSibling, 0)
+      span.insertAdjacentElement("afterend", spaceSpan)
+      selection.collapse(spaceSpan.nextSibling, 0)
 
       completed = true
     }
