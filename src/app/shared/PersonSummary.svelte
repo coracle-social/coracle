@@ -2,7 +2,7 @@
   import {last, nth} from "ramda"
   import {displayPerson} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
-  import {keys} from "src/system"
+  import {keys, social} from "src/system"
   import user from "src/agent/user"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
@@ -24,10 +24,10 @@
   const follow = () => {
     const [{url}] = getRelays()
 
-    user.addPetname(pubkey, url, displayPerson($person))
+    social.follow(pubkey, url, displayPerson($person))
   }
 
-  const unfollow = () => user.removePetname(pubkey)
+  const unfollow = () => social.unfollow(pubkey)
 
   const unmute = () => user.removeMute(pubkey)
 

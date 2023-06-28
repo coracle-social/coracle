@@ -116,28 +116,6 @@ export default {
   getPetnames: () => profileCopy.petnames,
   petnamePubkeys: derived(petnames, map(nth(1))) as Readable<Array<string>>,
   getPetnamePubkeys: () => profileCopy.petnames.map(nth(1)),
-  updatePetnames(f) {
-    const $petnames = f(profileCopy.petnames)
-
-    profile.update(assoc("petnames", $petnames))
-
-    if (get(keys.canSign)) {
-      return cmd.setPetnames($petnames).publish(profileCopy.relays)
-    }
-  },
-  addPetname(pubkey, url, name) {
-    const tag = ["p", pubkey, url, name || ""]
-
-    return this.updatePetnames(
-      pipe(
-        reject(t => t[1] === pubkey),
-        concat([tag])
-      )
-    )
-  },
-  removePetname(pubkey) {
-    return this.updatePetnames(reject(t => t[1] === pubkey))
-  },
 
   // Relays
 

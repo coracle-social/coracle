@@ -6,7 +6,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {DEFAULT_FOLLOWS} from "src/system"
+  import {DEFAULT_FOLLOWS, social} from "src/system"
   import {getPersonWithFallback, searchPeople} from "src/agent/db"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import {modal} from "src/partials/state"
@@ -15,7 +15,7 @@
   const {petnamePubkeys} = user
 
   if ($petnamePubkeys.length === 0) {
-    user.updatePetnames(() =>
+    social.updatePetnames(
       DEFAULT_FOLLOWS.map(pubkey => {
         const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
         const name = displayPerson(getPersonWithFallback(pubkey))

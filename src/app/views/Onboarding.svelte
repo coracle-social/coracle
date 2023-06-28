@@ -45,7 +45,7 @@
       user.updateRelays(() => user.getRelays()),
       cmd.updateUser(profile).publish(user.getRelays()),
       note && cmd.createNote(note).publish(user.getRelays()),
-      user.updatePetnames(() =>
+      social.updatePetnames(
         user.getPetnamePubkeys().map(pubkey => {
           const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
           const name = displayPerson(getPersonWithFallback(pubkey))

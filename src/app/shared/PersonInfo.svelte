@@ -1,32 +1,31 @@
 <script lang="ts">
-  import {last, nth} from "ramda"
+  import {last} from "ramda"
   import {fly} from "src/util/transition"
   import {displayPerson} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
-  import {keys} from "src/system"
+  import {keys, social} from "src/system"
+  import {watch} from "src/agent/db"
   import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
-  import user from "src/agent/user"
 
   const {canSign} = keys
-  const {petnames} = user
 
   export let person
   export let hasPetname = null
 
-  const removePetname = ({pubkey}) => user.removePetname(pubkey)
+  const unfollow = ({pubkey}) => social.unfollow(pubkey)
 
-  const addPetname = ({pubkey}) => {
+  const follow = ({pubkey}) => {
     const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
 
-    user.addPetname(pubkey, url, displayPerson(person))
+    social.follow(pubkey, url, displayPerson(person))
   }
 
-  $: isFollowing = hasPetname
-    ? hasPetname(person.pubkey)
-    : $petnames.map(nth(1)).includes(person.pubkey)
+  const isFollowing = watch(social.graph, () =>
+    hasPetname ? hasPetname(person.pubkey) : social.isUserFollowing(person.pubkey)
+  )
 </script>
 
 <div in:fly={{y: 20}}>
@@ -49,12 +48,11 @@
         </div>
         {#if $canSign}
           {#if isFollowing}
-            <Anchor theme="button-accent" stopPropagation on:click={() => removePetname(person)}>
+            <Anchor theme="button-accent" stopPropagation on:click={() => unfollow(person)}>
               Following
             </Anchor>
           {:else}
-            <Anchor theme="button" stopPropagation on:click={() => addPetname(person)}
-              >Follow</Anchor>
+            <Anchor theme="button" stopPropagation on:click={() => follow(person)}>Follow</Anchor>
           {/if}
         {/if}
       </div>

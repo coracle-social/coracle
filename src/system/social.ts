@@ -72,7 +72,6 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
 
   const getUserKey = () => keys.getPubkey() || "anonymous"
   const getUserPetnames = () => getPetnames(getUserKey())
-  const getUserPetnamePubkeys = () => getPetnamePubkeys(getUserKey())
   const getUserFollows = () => getFollows(getUserKey())
   const getUserNetwork = () => getNetwork(getUserKey())
   const isUserFollowing = pubkey => isFollowing(getUserKey(), pubkey)
@@ -106,10 +105,10 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
     getNetwork,
     isFollowing,
     getUserPetnames,
-    getUserPetnamePubkeys,
     getUserFollows,
     getUserNetwork,
     isUserFollowing,
+    updatePetnames,
     follow,
     unfollow,
     sortByGraph,

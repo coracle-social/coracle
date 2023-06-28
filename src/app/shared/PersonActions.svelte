@@ -6,7 +6,7 @@
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {keys} from "src/system"
+  import {keys, social} from "src/system"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import user from "src/agent/user"
   import pool from "src/agent/pool"
@@ -65,12 +65,10 @@
   const follow = async () => {
     const [{url}] = sampleRelays(getPubkeyWriteRelays(person.pubkey))
 
-    user.addPetname(person.pubkey, url, displayPerson(person))
+    social.follow(person.pubkey, url, displayPerson(person))
   }
 
-  const unfollow = async () => {
-    user.removePetname(person.pubkey)
-  }
+  const unfollow = () => social.unfollow(person.pubkey)
 
   const mute = async () => {
     user.addMute("p", person.pubkey)
