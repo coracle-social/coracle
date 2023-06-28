@@ -1,6 +1,6 @@
 <script lang="ts">
   import {Capacitor} from "@capacitor/core"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"

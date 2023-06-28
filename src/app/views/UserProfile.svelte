@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
   import Input from "src/partials/Input.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"

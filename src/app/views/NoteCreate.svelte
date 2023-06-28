@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {last, reject, pluck, propEq} from "ramda"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {writable} from "svelte/store"
   import {annotateMedia} from "src/util/misc"
   import {displayPerson} from "src/util/nostr"

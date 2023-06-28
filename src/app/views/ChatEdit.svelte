@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {error} from "src/util/logger"
   import {stripExifData} from "src/util/html"
   import Input from "src/partials/Input.svelte"

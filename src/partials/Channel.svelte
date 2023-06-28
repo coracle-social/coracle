@@ -1,6 +1,6 @@
 <script>
   import {onMount} from "svelte"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {prop, max, path as getPath, reverse, pluck, uniqBy, sortBy, last} from "ramda"
   import {sleep, createScroller} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"

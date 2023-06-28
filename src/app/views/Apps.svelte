@@ -1,5 +1,5 @@
 <script>
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import Media from "src/partials/Media.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"

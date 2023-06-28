@@ -1,7 +1,7 @@
 <script>
   import {randomId} from "hurdak/lib/hurdak"
   import {onMount, onDestroy} from "svelte"
-  import {fly, fade} from "svelte/transition"
+  import {fly, fade} from "src/util/transition"
   import {modal} from "src/partials/state"
 
   export let mini = false

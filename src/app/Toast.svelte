@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {is} from "ramda"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {toast} from "src/partials/state"
 </script>
 

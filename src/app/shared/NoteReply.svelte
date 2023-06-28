@@ -2,7 +2,7 @@
   import {nip19} from "nostr-tools"
   import {createEventDispatcher} from "svelte"
   import {without, pluck, uniq} from "ramda"
-  import {slide} from "svelte/transition"
+  import {slide} from "src/util/transition"
   import {Tags, displayPerson} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import ImageInput from "src/partials/ImageInput.svelte"

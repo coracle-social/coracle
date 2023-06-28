@@ -1,6 +1,6 @@
 <script lang="ts">
   import {last, nth} from "ramda"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {displayPerson} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"

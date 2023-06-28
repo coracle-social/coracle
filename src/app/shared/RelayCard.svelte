@@ -3,7 +3,7 @@
   import {find, propEq} from "ramda"
   import {between} from "hurdak/lib/hurdak"
   import {onMount} from "svelte"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {poll, stringToHue, hsl} from "src/util/misc"
   import {displayRelay} from "src/util/nostr"
   import {modal} from "src/partials/state"

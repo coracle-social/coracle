@@ -1,6 +1,6 @@
 <script lang="ts">
   import {objOf} from "ramda"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {warn} from "src/util/logger"
   import {displayPerson, Tags} from "src/util/nostr"
   import {modal} from "src/partials/state"

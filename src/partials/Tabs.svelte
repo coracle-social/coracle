@@ -1,5 +1,5 @@
 <script>
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {toTitle} from "hurdak/lib/hurdak"
 
   export let tabs

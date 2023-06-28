@@ -1,6 +1,6 @@
 <script lang="ts">
   import type {DynamicFilter} from "src/util/types"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {pluck, omit, objOf} from "ramda"
   import {debounce} from "throttle-debounce"
   import {createLocalDate, formatTimestampAsDate} from "src/util/misc"

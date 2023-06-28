@@ -40,11 +40,9 @@
   $: style.textContent = `:root { ${getThemeVariables($theme)}; background: var(--gray-8); }`
 
   tryFunc(() =>
-    (navigator.registerProtocolHandler as (scheme: string, handler: string, name: string) => void)(
-      "web+nostr",
-      `${location.origin}/%s`,
-      appName
-    )
+    (
+      navigator.registerProtocolHandler as (scheme: string, handler: string, name: string) => void
+    )?.("web+nostr", `${location.origin}/%s`, appName)
   )
 
   const seenChallenges = new Set()

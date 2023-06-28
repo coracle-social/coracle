@@ -3,7 +3,7 @@
   import {onMount, onDestroy} from "svelte"
   import {debounce} from "throttle-debounce"
   import {last, equals, partition, always, uniqBy, sortBy, prop} from "ramda"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {quantify} from "hurdak/lib/hurdak"
   import {fuzzy, createScroller, now, timedelta} from "src/util/misc"
   import {asDisplayEvent, noteKinds} from "src/util/nostr"

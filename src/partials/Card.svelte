@@ -1,6 +1,6 @@
 <script>
   import cx from "classnames"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
 
   export let interactive = false
   export let invertColors = false

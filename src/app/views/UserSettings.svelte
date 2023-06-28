@@ -1,5 +1,5 @@
 <script>
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {toast, appName} from "src/partials/state"
   import Toggle from "src/partials/Toggle.svelte"
   import Anchor from "src/partials/Anchor.svelte"

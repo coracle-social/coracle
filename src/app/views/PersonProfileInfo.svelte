@@ -4,7 +4,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import {onMount} from "svelte"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
 
   export let person
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {modal} from "src/partials/state"
   import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"

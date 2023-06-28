@@ -1,5 +1,5 @@
 <script>
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"

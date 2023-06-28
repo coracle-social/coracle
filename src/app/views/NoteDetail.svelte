@@ -1,7 +1,7 @@
 <script>
   import {onMount, onDestroy} from "svelte"
   import {nip19} from "nostr-tools"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {first} from "hurdak/lib/hurdak"
   import {log} from "src/util/logger"
   import {isMobile} from "src/util/html"

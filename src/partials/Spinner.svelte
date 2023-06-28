@@ -1,5 +1,5 @@
 <script>
-  import {fade} from "svelte/transition"
+  import {fade} from "src/util/transition"
   import {Circle2} from "svelte-loading-spinners"
 
   export let delay = 1000

@@ -2,7 +2,7 @@
   import {uniq} from "ramda"
   import {onMount} from "svelte"
   import {generatePrivateKey} from "nostr-tools"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
   import {shuffle} from "src/util/misc"
   import {displayPerson} from "src/util/nostr"

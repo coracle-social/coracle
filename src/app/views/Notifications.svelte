@@ -2,7 +2,7 @@
   import {throttle} from "throttle-debounce"
   import {pluck, reverse, max, last, sortBy} from "ramda"
   import {onMount} from "svelte"
-  import {fly} from "svelte/transition"
+  import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
   import {
     now,
