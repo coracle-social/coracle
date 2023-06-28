@@ -4,7 +4,6 @@
 
   import type {ComponentType, SvelteComponentTyped} from "svelte"
   import {onMount} from "svelte"
-  import {nip19} from "nostr-tools"
   import {get} from "svelte/store"
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
@@ -14,12 +13,9 @@
   import {timedelta, hexToBech32, bech32ToHex, shuffle, now, tryFunc} from "src/util/misc"
   import cmd from "src/agent/cmd"
   import {onReady, relays} from "src/agent/db"
-  import {keys} from "src/system"
-  import network from "src/agent/network"
+  import * as system from "src/system"
   import pool from "src/agent/pool"
   import {initializeRelayList} from "src/agent/relays"
-  import sync from "src/agent/sync"
-  import * as db from "src/agent/db"
   import user from "src/agent/user"
   import {loadAppData} from "src/app/state"
   import {theme, getThemeVariables, appName, modal} from "src/partials/state"
@@ -33,7 +29,7 @@
 
   const TypedRouter = Router as ComponentType<SvelteComponentTyped>
 
-  Object.assign(window, {nip19, cmd, user, keys, network, pool, sync, db, bech32ToHex, hexToBech32})
+  Object.assign(window, {system, bech32ToHex, hexToBech32})
 
   export let pathname = location.pathname
   export let hash = location.hash
@@ -54,7 +50,7 @@
 
   // When we get an AUTH challenge from our pool, attempt to authenticate
   pool.Config.authHandler = async (url, challenge) => {
-    if (get(keys.canSign) && !seenChallenges.has(challenge)) {
+    if (get(system.keys.canSign) && !seenChallenges.has(challenge)) {
       seenChallenges.add(challenge)
 
       const publishable = await cmd.authenticate(url, challenge)

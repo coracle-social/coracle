@@ -1,8 +1,8 @@
 import {sortBy, reject, prop} from "ramda"
 import {get} from "svelte/store"
-import {now} from "src/util/misc"
+import {now, gettable} from "src/util/misc"
 import {Tags} from "src/util/nostr"
-import {Table} from "src/agent/db"
+import {Table, watch} from "src/agent/db"
 
 export default ({keys, sync, cmd, getUserWriteRelays}) => {
   // Don't delete the user's own info or those of direct follows
@@ -66,10 +66,10 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
   const isFollowing = (a, b) => getFollows(a).has(b)
 
   const getUserKey = () => keys.getPubkey() || "anonymous"
-  const getUserPetnames = () => getPetnames(getUserKey())
-  const getUserPetnamePubkeys = () => getPetnamePubkeys(getUserKey())
-  const getUserFollows = () => getFollows([getUserKey()])
-  const getUserNetwork = () => getNetwork([getUserKey()])
+  const userPetnames = gettable(watch(graph, () => getPetnames(getUserKey())))
+  const userPetnamePubkeys = gettable(watch(graph, () => getPetnamePubkeys(getUserKey())))
+  const userFollows = gettable(watch(graph, () => getFollows(getUserKey())))
+  const userNetwork = gettable(watch(graph, () => getNetwork(getUserKey())))
   const isUserFollowing = pubkey => isFollowing(getUserKey(), pubkey)
 
   const updatePetnames = async $petnames => {
@@ -86,12 +86,13 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
 
   const follow = (pubkey, url, name) =>
     updatePetnames(
-      getUserPetnames()
+      userPetnames
+        .get()
         .filter(t => t[1] !== pubkey)
         .concat([["p", pubkey, url, name || ""]])
     )
 
-  const unfollow = pubkey => updatePetnames(reject(t => t[1] === pubkey, getUserPetnames()))
+  const unfollow = pubkey => updatePetnames(reject(t => t[1] === pubkey, userPetnames.get()))
 
   return {
     graph,
@@ -100,10 +101,10 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
     getFollows,
     getNetwork,
     isFollowing,
-    getUserPetnames,
-    getUserPetnamePubkeys,
-    getUserFollows,
-    getUserNetwork,
+    userPetnames,
+    userPetnamePubkeys,
+    userFollows,
+    userNetwork,
     isUserFollowing,
     follow,
     unfollow,

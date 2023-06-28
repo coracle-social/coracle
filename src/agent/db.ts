@@ -168,7 +168,7 @@ export const watch = (names, f) => {
   names = ensurePlural(names)
 
   const store = writable(null) as WatchStore<any>
-  const tables = names.map(name => registry[name])
+  const tables = names.map(name => (is(Table, name) ? name : registry[name]))
 
   // Initialize synchronously if possible
   const initialValue = f(...tables)

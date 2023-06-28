@@ -193,6 +193,8 @@ export const synced = (key, defaultValue = null) => {
   return store
 }
 
+// DANGER: don't use this if it's disposable, it does not clean up subscriptions,
+// and will cause a memory leak
 export const getter = store => {
   let value
 
@@ -202,6 +204,10 @@ export const getter = store => {
 
   return () => value
 }
+
+// DANGER: don't use this if it's disposable, it does not clean up subscriptions,
+// and will cause a memory leak
+export const gettable = store => Object.assign(store, {get: getter(store)})
 
 export const shuffle = sortBy(() => Math.random() > 0.5)
 
