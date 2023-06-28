@@ -4,6 +4,7 @@ import {first} from "hurdak/lib/hurdak"
 import {fromNostrURI} from "src/util/nostr"
 
 export const NEWLINE = "newline"
+export const ELLIPSIS = "ellipsis"
 export const TEXT = "text"
 export const TOPIC = "topic"
 export const LINK = "link"
@@ -173,20 +174,21 @@ export const truncateContent = (content, {showEntire, maxLength, showMedia = fal
   content.every((part, i) => {
     const isText = [TOPIC, TEXT].includes(part.type) || (part.type === LINK && !part.value.isMedia)
     const isMedia = part.type === INVOICE || part.type.startsWith("nostr:") || part.value.isMedia
+    const textLength = part.value.url?.length || part.value.length
 
     if (isText) {
-      length += part.value.length
+      length += textLength
     }
 
     if (isMedia) {
-      length += showMedia ? maxLength / 3 : part.value.length
+      length += showMedia ? maxLength / 3 : textLength
     }
 
     result.push(part)
 
     if (length > truncateAt && i < content.length - 1) {
       if (isText || (isMedia && !showMedia)) {
-        result.push({type: TEXT, value: "..."})
+        result.push({type: ELLIPSIS})
       }
 
       return false

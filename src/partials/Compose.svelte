@@ -74,7 +74,7 @@
 
       // Add the span and space
       selection.getRangeAt(0).insertNode(span)
-      selection.collapse(span.nextSibling, 0)
+      selection.collapse(span.parentNode, word.length + prefix.length)
       selection.getRangeAt(0).insertNode(space)
       selection.collapse(space, 2)
 

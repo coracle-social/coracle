@@ -1,7 +1,7 @@
 <script>
   import {pipe, filter, map, when, identity, pluck, propEq, uniq} from "ramda"
   import {closure, quantify} from "hurdak/lib/hurdak"
-  import {tryJson} from "src/util/misc"
+  import {tryJson, formatTimestamp} from "src/util/misc"
   import {Tags} from "src/util/nostr"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import Card from "src/partials/Card.svelte"
@@ -44,9 +44,9 @@
       interactive
       class="flex w-full flex-col gap-2 text-left"
       on:click={() => modal.push({type: "note/detail", note})}>
-      <div on:click|stopPropagation>
+      <div on:click|stopPropagation class="flex justify-between">
         {#if !event.ref}
-          <div>
+          <div class="flex items-center">
             <PersonBadge class="float-left" person={author} />
             <span class="relative top-px pl-1">mentioned you.</span>
           </div>
@@ -70,9 +70,12 @@
             </div>
           </Popover>
         {/if}
+        <small>
+          {formatTimestamp(event.created_at)}
+        </small>
       </div>
       <div class="break-word overflow-hidden text-gray-1">
-        <NoteContent maxLength={80} showMedia={false} {note} />
+        <NoteContent maxLength={80} hideShowMore showMedia={false} {note} />
       </div>
     </Card>
   </div>

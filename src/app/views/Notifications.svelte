@@ -69,6 +69,7 @@
             ref,
             key: e.id,
             notifications: [e],
+            created_at: e.created_at,
             dateDisplay: formatTimestampAsDate(e.created_at),
             showLine: e.created_at < prevChecked && prevTimestamp >= prevChecked,
           })
