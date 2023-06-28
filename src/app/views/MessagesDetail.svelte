@@ -10,7 +10,7 @@
   import {getPersonWithFallback} from "src/agent/db"
   import {watch} from "src/agent/db"
   import network from "src/agent/network"
-  import keys from "src/agent/keys"
+  import {keys} from "src/system"
   import user from "src/agent/user"
   import cmd from "src/agent/cmd"
   import {routes} from "src/app/state"
@@ -102,7 +102,7 @@
       "mr-12": message.person.pubkey !== user.getPubkey(),
     })}>
     <div
-      class={cx("inline-block max-w-xl rounded-2xl py-2 px-4", {
+      class={cx("inline-block max-w-xl rounded-2xl px-4 py-2", {
         "rounded-br-none bg-gray-1 text-end text-gray-8":
           message.person.pubkey === user.getPubkey(),
         "rounded-bl-none bg-gray-7": message.person.pubkey !== user.getPubkey(),

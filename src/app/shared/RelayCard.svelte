@@ -10,6 +10,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import {keys} from "src/system"
   import pool from "src/agent/pool"
   import user from "src/agent/user"
   import {loadAppData} from "src/app/state"
@@ -21,7 +22,8 @@
   export let hideActions = false
   export let showControls = false
 
-  const {relays, canPublish} = user
+  const {canSign} = keys
+  const {relays} = user
 
   let statusHover = false
   let quality = null
@@ -56,7 +58,7 @@
 <div
   class={cx(
     `bg-${theme}`,
-    "flex flex-col justify-between gap-3 rounded-xl border border-l-2 border-solid border-gray-6 py-3 px-6 shadow"
+    "flex flex-col justify-between gap-3 rounded-xl border border-l-2 border-solid border-gray-6 px-6 py-3 shadow"
   )}
   style={`border-left-color: ${hsl(stringToHue(relay.url))}`}
   in:fly={{y: 20}}>
@@ -107,7 +109,7 @@
   {#if relay.description}
     <p>{relay.description}</p>
   {/if}
-  {#if hasRelay && showControls && $canPublish}
+  {#if hasRelay && showControls && $canSign}
     <div class="-mx-6 my-1 h-px bg-gray-7" />
     <div class="flex justify-between gap-2">
       <span>Publish to this relay?</span>

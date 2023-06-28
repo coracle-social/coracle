@@ -14,6 +14,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
+  import {keys} from "src/system"
   import {enableZaps} from "src/agent/settings"
   import {getEventPublishRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
@@ -28,7 +29,7 @@
   export let showEntire
   export let setFeedRelay
 
-  const {canPublish} = user
+  const {canSign} = keys
   const bech32Note = nip19.noteEncode(note.id)
   const nevent = nip19.neventEncode({id: note.id, relays: [note.seen_on]})
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
@@ -64,7 +65,7 @@
   let actions = []
   let showDetails = false
 
-  $: disableActions = !$canPublish || muted
+  $: disableActions = !$canSign || muted
   $: likes = note.reactions.filter(n => isLike(n.content))
   $: like = like || find(propEq("pubkey", user.getPubkey()), likes)
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
@@ -146,7 +147,7 @@
       <!-- Mobile version -->
       <div
         style="transform: scale(-1, 1)"
-        class="absolute top-0 right-0 m-3 grid grid-cols-3 gap-2 sm:hidden">
+        class="absolute right-0 top-0 m-3 grid grid-cols-3 gap-2 sm:hidden">
         {#each sortBy(identity, note.seen_on) as url, i}
           <div class={`cursor-pointer order-${3 - (i % 3)}`}>
             <div

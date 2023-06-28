@@ -2,6 +2,7 @@
   import {find, last, propEq} from "ramda"
   import {modal} from "src/partials/state"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
+  import {keys} from "src/system"
   import user from "src/agent/user"
   import {getRelayWithFallback} from "src/agent/db"
   import {addToList} from "src/app/state"
@@ -10,7 +11,8 @@
 
   relay = getRelayWithFallback(relay.url)
 
-  const {relays: userRelays, canPublish} = user
+  const {canSign} = keys
+  const {relays: userRelays} = user
 
   let actions = []
 
@@ -32,7 +34,7 @@
       })
     }
 
-    if ($canPublish) {
+    if ($canSign) {
       actions.push({
         onClick: () => addToList("r", relay.url),
         label: "Add to list",

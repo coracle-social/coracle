@@ -4,11 +4,13 @@
   import {fly} from "src/util/transition"
   import {ellipsize} from "hurdak/lib/hurdak"
   import Anchor from "src/partials/Anchor.svelte"
+  import {keys} from "src/system"
   import user from "src/agent/user"
 
   export let room
 
-  const {roomsJoined, canPublish} = user
+  const {canSign} = keys
+  const {roomsJoined} = user
   const enter = () => navigate(`/chat/${nip19.noteEncode(room.id)}`)
   const join = () => user.joinRoom(room.id)
   const leave = () => user.leaveRoom(room.id)
@@ -34,7 +36,7 @@
           <i class="fa fa-right-from-bracket" />
           <span>Leave</span>
         </Anchor>
-      {:else if $canPublish}
+      {:else if $canSign}
         <Anchor theme="button" killEvent class="flex items-center gap-2" on:click={join}>
           <i class="fa fa-right-to-bracket" />
           <span>Join</span>

@@ -3,21 +3,23 @@
   import {derived} from "svelte/store"
   import {partition} from "ramda"
   import {fuzzy} from "src/util/misc"
+  import {modal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
+  import {keys} from "src/system"
   import {watch} from "src/agent/db"
   import user from "src/agent/user"
   import network from "src/agent/network"
   import {getUserReadRelays, sampleRelays} from "src/agent/relays"
-  import {modal} from "src/partials/state"
 
   let q = ""
   let search
   let results = []
 
-  const {roomsJoined, canPublish} = user
+  const {canSign} = keys
+  const {roomsJoined} = user
   const rooms = derived([watch("rooms", t => t.all()), roomsJoined], ([_rooms, _joined]) => {
     const ids = new Set(_joined)
     const [joined, other] = partition(r => ids.has(r.id), _rooms)
@@ -43,7 +45,7 @@
 </script>
 
 <Content>
-  {#if $canPublish}
+  {#if $canSign}
     <div class="flex justify-between">
       <div class="flex items-center gap-2">
         <i class="fa fa-server fa-lg" />

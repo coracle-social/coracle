@@ -6,6 +6,7 @@
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
+  import {keys} from "src/system"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import user from "src/agent/user"
   import pool from "src/agent/pool"
@@ -14,7 +15,8 @@
   export let person
 
   const npub = nip19.npubEncode(person.pubkey)
-  const {petnamePubkeys, canPublish, mutes} = user
+  const {canSign} = keys
+  const {petnamePubkeys, mutes} = user
 
   let actions = []
 
@@ -23,7 +25,7 @@
   $: {
     actions = []
 
-    if ($canPublish) {
+    if ($canSign) {
       actions.push({
         onClick: () => addToList("p", person.pubkey),
         label: "Add to list",
@@ -33,7 +35,7 @@
 
     actions.push({onClick: share, label: "Share", icon: "share-nodes"})
 
-    if (user.getPubkey() !== person.pubkey && $canPublish) {
+    if (user.getPubkey() !== person.pubkey && $canSign) {
       actions.push({
         onClick: () => navigate(`/messages/${npub}`),
         label: "Message",
@@ -51,7 +53,7 @@
       actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
     }
 
-    if (user.getPubkey() === person.pubkey && $canPublish) {
+    if (user.getPubkey() === person.pubkey && $canSign) {
       actions.push({
         onClick: () => navigate("/profile"),
         label: "Edit",
@@ -88,7 +90,7 @@
 </script>
 
 <div class="flex items-center gap-3">
-  {#if $canPublish}
+  {#if $canSign}
     <Popover triggerType="mouseenter">
       <div slot="trigger">
         {#if following}

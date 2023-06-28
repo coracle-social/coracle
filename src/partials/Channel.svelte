@@ -4,15 +4,15 @@
   import {prop, max, path as getPath, reverse, pluck, uniqBy, sortBy, last} from "ramda"
   import {sleep, createScroller} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
+  import {keys} from "src/system"
   import {getPersonWithFallback} from "src/agent/db"
   import network from "src/agent/network"
-  import user from "src/agent/user"
 
   export let loadMessages
   export let listenForMessages
   export let sendMessage
 
-  const {canPublish} = user
+  const {canSign} = keys
 
   let textarea
   let messages = []
@@ -110,7 +110,7 @@
 
 <div class="flex h-full gap-4">
   <div class="relative w-full">
-    <div class="py-18 flex h-screen flex-col" class:pb-20={$canPublish}>
+    <div class="py-18 flex h-screen flex-col" class:pb-20={$canSign}>
       <ul
         class="channel-messages flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
         {#each annotatedMessages as m (m.id)}
@@ -128,7 +128,7 @@
     <div class="fixed top-0 z-20 w-full border-b border-solid border-gray-6 bg-gray-7">
       <slot name="header" />
     </div>
-    {#if $canPublish}
+    {#if $canSign}
       <div
         class="fixed bottom-0 z-10 flex w-full border-t border-solid border-gray-6 border-gray-7 bg-gray-6 lg:-ml-56 lg:pl-56">
         <textarea
@@ -142,7 +142,7 @@
         <button
           on:click={send}
           class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-gray-7 p-4
-               py-8 text-gray-2 transition-all hover:bg-accent ">
+               py-8 text-gray-2 transition-all hover:bg-accent">
           <i class="fa-solid fa-paper-plane fa-xl" />
         </button>
       </div>
@@ -153,7 +153,7 @@
       class="fixed bottom-32 flex w-full cursor-pointer justify-center"
       transition:fly|local={{y: 20}}
       on:click={scrollToBottom}>
-      <div class="rounded-full bg-accent py-2 px-4 text-gray-2">New messages found</div>
+      <div class="rounded-full bg-accent px-4 py-2 text-gray-2">New messages found</div>
     </div>
   {/if}
 </div>

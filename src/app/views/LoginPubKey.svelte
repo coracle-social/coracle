@@ -4,7 +4,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import keys from "src/agent/keys"
+  import {keys} from "src/system"
   import {toast} from "src/partials/state"
   import {login} from "src/app/state"
 

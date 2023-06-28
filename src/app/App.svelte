@@ -5,6 +5,7 @@
   import type {ComponentType, SvelteComponentTyped} from "svelte"
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
+  import {get} from "svelte/store"
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {identity, isNil, last} from "ramda"
@@ -13,7 +14,7 @@
   import {timedelta, hexToBech32, bech32ToHex, shuffle, now, tryFunc} from "src/util/misc"
   import cmd from "src/agent/cmd"
   import {onReady, relays} from "src/agent/db"
-  import keys from "src/agent/keys"
+  import {keys} from "src/system"
   import network from "src/agent/network"
   import pool from "src/agent/pool"
   import {initializeRelayList} from "src/agent/relays"
@@ -53,7 +54,7 @@
 
   // When we get an AUTH challenge from our pool, attempt to authenticate
   pool.Config.authHandler = async (url, challenge) => {
-    if (keys.canSign() && !seenChallenges.has(challenge)) {
+    if (get(keys.canSign) && !seenChallenges.has(challenge)) {
       seenChallenges.add(challenge)
 
       const publishable = await cmd.authenticate(url, challenge)

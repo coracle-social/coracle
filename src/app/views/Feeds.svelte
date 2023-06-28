@@ -8,10 +8,12 @@
   import Content from "src/partials/Content.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
+  import {keys} from "src/system"
   import user from "src/agent/user"
   import {getUserFollows} from "src/agent/social"
 
-  const {lists, canPublish} = user
+  const {canSign} = keys
+  const {lists} = user
 
   let relays = null
   let key = Math.random()
@@ -64,7 +66,7 @@
   {#key key}
     <Feed {filter} {relays}>
       <div slot="controls">
-        {#if $canPublish}
+        {#if $canSign}
           {#if $lists.length > 0}
             <Popover placement="bottom" opts={{hideOnClick: true}} theme="transparent">
               <i slot="trigger" class="fa fa-ellipsis-v cursor-pointer p-2" />
@@ -74,7 +76,7 @@
                 {#each $lists as e (e.id)}
                   {@const meta = Tags.from(e).asMeta()}
                   <button
-                    class={cx("w-full py-2 px-3 text-left transition-colors", {
+                    class={cx("w-full px-3 py-2 text-left transition-colors", {
                       "hover:bg-gray-7": $theme === "dark",
                       "hover:bg-gray-1": $theme === "light",
                     })}
@@ -85,7 +87,7 @@
                 {/each}
                 <button
                   on:click={showLists}
-                  class={cx("w-full py-2 px-3 text-left transition-colors", {
+                  class={cx("w-full px-3 py-2 text-left transition-colors", {
                     "hover:bg-gray-7": $theme === "dark",
                     "hover:bg-gray-1": $theme === "light",
                   })}>

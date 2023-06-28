@@ -15,7 +15,7 @@ import {
 import {Tags, roomAttrs, isRelay, isShareableRelay, normalizeRelayUrl} from "src/util/nostr"
 import {topics, people, userEvents, relays, rooms, routes} from "src/agent/db"
 import {uniqByUrl} from "src/agent/relays"
-import keys from "src/agent/keys"
+import keys from "src/system/keys"
 import user from "src/agent/user"
 
 const handlers = {} as Record<any, any[]>

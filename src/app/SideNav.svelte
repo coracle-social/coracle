@@ -2,14 +2,21 @@
   import cx from "classnames"
   import {displayPerson} from "src/util/nostr"
   import {theme, installPrompt} from "src/partials/state"
+  import PersonCircle from "src/app/shared/PersonCircle.svelte"
+  import {keys} from "src/system"
   import user from "src/agent/user"
   import pool from "src/agent/pool"
-  import {routes, menuIsOpen} from "src/app/state"
-  import {newNotifications, newDirectMessages, newChatMessages} from "src/app/state"
-  import {slowConnections} from "src/app/state"
-  import PersonCircle from "src/app/shared/PersonCircle.svelte"
+  import {
+    routes,
+    slowConnections,
+    menuIsOpen,
+    newNotifications,
+    newDirectMessages,
+    newChatMessages,
+  } from "src/app/state"
 
-  const {profile, canPublish} = user
+  const {canSign} = keys
+  const {profile} = user
 
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 
@@ -29,8 +36,8 @@
 </script>
 
 <ul
-  class="fixed top-0 bottom-0 left-0 z-20 mt-16 w-56 overflow-hidden border-r border-gray-6 bg-gray-7 pt-4
-         pb-20 text-gray-2 shadow-xl transition-all lg:mt-0 lg:ml-0"
+  class="fixed bottom-0 left-0 top-0 z-20 mt-16 w-56 overflow-hidden border-r border-gray-6 bg-gray-7 pb-20
+         pt-4 text-gray-2 shadow-xl transition-all lg:ml-0 lg:mt-0"
   class:-ml-56={!$menuIsOpen}>
   {#if $profile.pubkey}
     <li>
@@ -45,7 +52,7 @@
         href="/notifications">
         <i class="fa fa-bell mr-2" /> Notifications
         {#if $newNotifications}
-          <div class="absolute top-3 left-6 h-2 w-2 rounded bg-accent" />
+          <div class="absolute left-6 top-3 h-2 w-2 rounded bg-accent" />
         {/if}
       </a>
     </li>
@@ -62,13 +69,13 @@
   </li>
   <li
     class={cx("relative", {
-      "cursor-pointer": $canPublish,
-      "pointer-events-none opacity-75": !$canPublish,
+      "cursor-pointer": $canSign,
+      "pointer-events-none opacity-75": !$canSign,
     })}>
     <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/messages">
       <i class="fa fa-envelope mr-2" /> Messages
       {#if $newDirectMessages}
-        <div class="absolute top-2 left-7 h-2 w-2 rounded bg-accent" />
+        <div class="absolute left-7 top-2 h-2 w-2 rounded bg-accent" />
       {/if}
     </a>
   </li>
@@ -76,7 +83,7 @@
     <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/chat">
       <i class="fa fa-comment mr-2" /> Chat
       {#if $newChatMessages}
-        <div class="absolute top-2 left-7 h-2 w-2 rounded bg-accent" />
+        <div class="absolute left-7 top-2 h-2 w-2 rounded bg-accent" />
       {/if}
     </a>
   </li>
@@ -91,7 +98,7 @@
       <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/relays">
         <i class="fa fa-server mr-2" /> Relays
         {#if $slowConnections.length > 0}
-          <div class="absolute top-2 left-8 h-2 w-2 rounded bg-accent" />
+          <div class="absolute left-8 top-2 h-2 w-2 rounded bg-accent" />
         {/if}
       </a>
     </li>

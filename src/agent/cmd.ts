@@ -7,7 +7,7 @@ import {getRelayForPersonHint, getRelayForEventHint} from "src/agent/relays"
 import {getPersonWithFallback} from "src/agent/db"
 import pool from "src/agent/pool"
 import sync from "src/agent/sync"
-import keys from "src/agent/keys"
+import keys from "src/system/keys"
 
 const authenticate = (url, challenge) =>
   new PublishableEvent(22242, {

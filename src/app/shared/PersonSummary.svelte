@@ -2,6 +2,7 @@
   import {last, nth} from "ramda"
   import {displayPerson} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
+  import {keys} from "src/system"
   import user from "src/agent/user"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
@@ -12,7 +13,8 @@
 
   export let pubkey
 
-  const {petnamePubkeys, mutes, canPublish} = user
+  const {canSign} = keys
+  const {petnamePubkeys, mutes} = user
   const getRelays = () => sampleRelays(getPubkeyWriteRelays(pubkey))
   const person = watch("people", () => getPersonWithFallback(pubkey))
 
@@ -32,7 +34,7 @@
   const mute = () => user.addMute("p", pubkey)
 </script>
 
-<div class="relative flex flex-col gap-4 py-2 px-3">
+<div class="relative flex flex-col gap-4 px-3 py-2">
   <div class="flex justify-between gap-2">
     <Anchor href={routes.person($person.pubkey)} class="flex gap-4">
       <PersonCircle size={14} person={$person} />
@@ -47,7 +49,7 @@
       </div>
     </Anchor>
     <div class="flex gap-4 py-2 text-lg">
-      {#if $canPublish}
+      {#if $canSign}
         {#if muted}
           <i
             title="Unmute"

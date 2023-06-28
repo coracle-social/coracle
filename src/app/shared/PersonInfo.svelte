@@ -6,10 +6,12 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
+  import {keys} from "src/system"
   import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
   import user from "src/agent/user"
 
-  const {petnames, canPublish} = user
+  const {canSign} = keys
+  const {petnames} = user
 
   export let person
   export let hasPetname = null
@@ -45,7 +47,7 @@
             </div>
           {/if}
         </div>
-        {#if $canPublish}
+        {#if $canSign}
           {#if isFollowing}
             <Anchor theme="button-accent" stopPropagation on:click={() => removePetname(person)}>
               Following

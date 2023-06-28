@@ -2,7 +2,7 @@
   import {nip19} from "nostr-tools"
   import {navigate} from "svelte-routing"
   import {fade} from "src/util/transition"
-  import user from "src/agent/user"
+  import {keys} from "src/system"
   import {modal, location} from "src/partials/state"
 
   let scrollY = 0
@@ -10,7 +10,7 @@
   $: showCreateNote = $location.pathname.match(/messages|chat|relays$|keys|settings|logout$/)
   $: showLogin = !$location.pathname.match(/login$/)
 
-  const {canPublish} = user
+  const {canSign} = keys
 
   const scrollToTop = () => document.body.scrollIntoView({behavior: "smooth"})
 
@@ -38,7 +38,7 @@
       <i class="fa fa-arrow-up" />
     </button>
   {/if}
-  {#if $canPublish && !showCreateNote}
+  {#if $canSign && !showCreateNote}
     <button
       class="color-white flex h-16 w-16 items-center justify-center rounded-full
             border border-accent-light bg-accent text-white shadow-2xl
@@ -47,7 +47,7 @@
       <i class="fa fa-plus" />
     </button>
   {/if}
-  {#if !$canPublish && showLogin}
+  {#if !$canSign && showLogin}
     <button
       class="color-white flex h-16 w-16 items-center justify-center rounded-full
             border border-accent-light bg-accent text-white shadow-2xl

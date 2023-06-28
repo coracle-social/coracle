@@ -16,8 +16,8 @@ import {
 } from "ramda"
 import {findReplyId, findRootId} from "src/util/nostr"
 import {synced} from "src/util/misc"
-import {derived} from "svelte/store"
-import keys from "src/agent/keys"
+import {derived, get} from "svelte/store"
+import keys from "src/system/keys"
 import pool from "src/agent/pool"
 import cmd from "src/agent/cmd"
 
@@ -52,8 +52,6 @@ const relays = derived(profile, p =>
 const mutes = derived(profile, prop("mutes")) as Readable<Array<[string, string]>>
 const lists = derived(profile, prop("lists")) as Readable<Array<MyEvent>>
 
-const canPublish = derived([keys.pubkey], ([$pubkey]) => keys.canSign())
-
 // Keep a copy so we can avoid calling `get` all the time
 
 let profileCopy = null
@@ -75,7 +73,6 @@ export default {
   // Profile
 
   profile,
-  canPublish,
   getProfile: () => profileCopy,
   getPubkey: () => profileCopy?.pubkey,
 
@@ -96,7 +93,7 @@ export default {
   lastChecked,
   roomsJoined,
   async setAppData(key, content) {
-    if (keys.canSign()) {
+    if (get(keys.canSign)) {
       const d = `coracle/${key}`
       const v = await keys.encryptJson(content)
 
@@ -124,7 +121,7 @@ export default {
 
     profile.update(assoc("petnames", $petnames))
 
-    if (keys.canSign()) {
+    if (get(keys.canSign)) {
       return cmd.setPetnames($petnames).publish(profileCopy.relays)
     }
   },
@@ -151,7 +148,7 @@ export default {
 
     profile.update(assoc("relays", $relays))
 
-    if (keys.canSign()) {
+    if (get(keys.canSign)) {
       return cmd.setRelays($relays).publish($relays)
     }
   },
@@ -181,7 +178,7 @@ export default {
 
     profile.update(assoc("mutes", $mutes))
 
-    if (keys.canSign()) {
+    if (get(keys.canSign)) {
       return cmd.setMutes($mutes.map(slice(0, 2))).publish(profileCopy.relays)
     }
   },

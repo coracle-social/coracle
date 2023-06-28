@@ -14,7 +14,7 @@
   import {getPersonWithFallback} from "src/agent/db"
   import network from "src/agent/network"
   import user from "src/agent/user"
-  import keys from "src/agent/keys"
+  import {keys} from "src/system"
   import cmd from "src/agent/cmd"
 
   export let note
