@@ -14,8 +14,7 @@ import {Tags, isNotification, userKinds, noteKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import {notifications, watch, userEvents, contacts, rooms} from "src/agent/db"
-import {enableZaps} from "src/agent/settings"
-import {DEFAULT_FOLLOWS, keys, social} from "src/system"
+import {DEFAULT_FOLLOWS, ENABLE_ZAPS, keys, social} from "src/system"
 import network from "src/agent/network"
 import pool from "src/agent/pool"
 import {getUserReadRelays, getUserRelays} from "src/agent/relays"
@@ -158,7 +157,7 @@ export const listen = async () => {
   const {roomsJoined} = user.getProfile()
   const kinds = noteKinds.concat([4, 7])
 
-  if (enableZaps) {
+  if (ENABLE_ZAPS) {
     kinds.push(9735)
   }
 

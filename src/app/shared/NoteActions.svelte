@@ -14,8 +14,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {keys} from "src/system"
-  import {enableZaps} from "src/agent/settings"
+  import {ENABLE_ZAPS, keys} from "src/system"
   import {getEventPublishRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
   import pool from "src/agent/pool"
@@ -129,7 +128,7 @@
         })} />
       {$likesCount}
     </button>
-    {#if enableZaps}
+    {#if ENABLE_ZAPS}
       <button
         class={cx("w-20 text-left", {
           "pointer-events-none opacity-50":
