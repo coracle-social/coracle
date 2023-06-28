@@ -139,9 +139,10 @@ export const poll = (t, cb) => {
   }
 }
 
-export const createScroller = (loadMore, {reverse = false, element = null} = {}) => {
-  const THRESHOLD = 3000
-
+export const createScroller = (
+  loadMore,
+  {threshold = 3000, reverse = false, element = null} = {}
+) => {
   element = element || document.body
 
   let done = false
@@ -151,8 +152,8 @@ export const createScroller = (loadMore, {reverse = false, element = null} = {})
     const {scrollHeight, scrollTop} = element
     const offset = scrollTop || scrollY
     const shouldLoad = reverse
-      ? offset < THRESHOLD
-      : offset + innerHeight + THRESHOLD > scrollHeight
+      ? offset < threshold
+      : offset + innerHeight + threshold > scrollHeight
 
     // Only trigger loading the first time we reach the threshold
     if (shouldLoad) {
@@ -192,6 +193,16 @@ export const synced = (key, defaultValue = null) => {
   return store
 }
 
+export const getter = store => {
+  let value
+
+  store.subscribe(_value => {
+    value = _value
+  })
+
+  return () => value
+}
+
 export const shuffle = sortBy(() => Math.random() > 0.5)
 
 export const batch = (t, f) => {
@@ -205,8 +216,8 @@ export const batch = (t, f) => {
 }
 
 export type Deferred<T> = Promise<T> & {
-  resolve: (arg: T) => void
-  reject: (arg: T) => void
+  resolve: (arg?: T) => void
+  reject: (arg?: T) => void
 }
 
 export const defer = (): Deferred<any> => {

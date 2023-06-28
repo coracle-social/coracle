@@ -18,7 +18,7 @@ import {uniqByUrl} from "src/agent/relays"
 import keys from "src/agent/keys"
 import user from "src/agent/user"
 
-const handlers = {}
+const handlers = {} as Record<any, any[]>
 
 const addHandler = (kind, f) => {
   handlers[kind] = handlers[kind] || []
@@ -36,6 +36,10 @@ const processEvents = async events => {
       }
 
       for (const handler of handlers[event.kind] || []) {
+        await handler(event)
+      }
+
+      for (const handler of handlers.ALL_KINDS || []) {
         await handler(event)
       }
     }
@@ -433,4 +437,4 @@ const processTopics = e => {
 addHandler(1, processTopics)
 addHandler(42, processTopics)
 
-export default {processEvents}
+export default {processEvents, addHandler}

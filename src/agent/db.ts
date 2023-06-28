@@ -48,7 +48,7 @@ const stubCollection = {
 
 const registry = {} as Record<string, Table>
 
-class Table {
+export class Table {
   name: string
   pk: string
   _max: number
