@@ -5,15 +5,13 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
+  import {social} from "src/system"
   import {searchPeople} from "src/agent/db"
-  import user from "src/agent/user"
   import {getPubkeyWriteRelays} from "src/agent/relays"
 
   export let onSubmit
 
   let contenteditable, suggestions
-
-  const {petnamePubkeys} = user
 
   const pubkeyEncoder = {
     encode: pubkey => {
@@ -32,7 +30,7 @@
     let results = []
     if (word.length > 1 && word.startsWith("@")) {
       const [followed, notFollowed] = partition(
-        p => $petnamePubkeys.includes(p.pubkey),
+        p => social.isUserFollowing(p.pubkey),
         $searchPeople(word.slice(1))
       )
 

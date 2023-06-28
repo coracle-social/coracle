@@ -6,26 +6,31 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
-  import {keys, social} from "src/system"
-  import {watch} from "src/agent/db"
+  import {social} from "src/system"
   import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
-
-  const {canSign} = keys
 
   export let person
   export let hasPetname = null
 
-  const unfollow = ({pubkey}) => social.unfollow(pubkey)
+  const unfollow = async ({pubkey}) => {
+    await social.unfollow(pubkey)
 
-  const follow = ({pubkey}) => {
-    const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
-
-    social.follow(pubkey, url, displayPerson(person))
+    isFollowing = getIsFollowing()
   }
 
-  const isFollowing = watch(social.graph, () =>
+  const follow = async ({pubkey}) => {
+    const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
+
+    await social.follow(pubkey, url, displayPerson(person))
+
+    isFollowing = getIsFollowing()
+  }
+
+  const getIsFollowing = () =>
     hasPetname ? hasPetname(person.pubkey) : social.isUserFollowing(person.pubkey)
-  )
+
+  // Set this manually to avoid a million listeners
+  let isFollowing = getIsFollowing()
 </script>
 
 <div in:fly={{y: 20}}>
@@ -46,14 +51,12 @@
             </div>
           {/if}
         </div>
-        {#if $canSign}
-          {#if isFollowing}
-            <Anchor theme="button-accent" stopPropagation on:click={() => unfollow(person)}>
-              Following
-            </Anchor>
-          {:else}
-            <Anchor theme="button" stopPropagation on:click={() => follow(person)}>Follow</Anchor>
-          {/if}
+        {#if isFollowing}
+          <Anchor theme="button-accent" stopPropagation on:click={() => unfollow(person)}>
+            Following
+          </Anchor>
+        {:else}
+          <Anchor theme="button" stopPropagation on:click={() => follow(person)}>Follow</Anchor>
         {/if}
       </div>
       <p class="overflow-hidden text-ellipsis">

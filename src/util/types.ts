@@ -9,7 +9,6 @@ export type Relay = {
 
 export type Person = {
   pubkey: string
-  petnames?: Array<Array<string>>
   relays?: Array<Relay>
   mutes?: Array<Array<string>>
   kind0?: {

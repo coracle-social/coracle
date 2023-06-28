@@ -3,7 +3,6 @@
   import {generatePrivateKey} from "nostr-tools"
   import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
-  import {shuffle} from "src/util/misc"
   import {displayPerson} from "src/util/nostr"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
@@ -46,7 +45,7 @@
       cmd.updateUser(profile).publish(user.getRelays()),
       note && cmd.createNote(note).publish(user.getRelays()),
       social.updatePetnames(
-        user.getPetnamePubkeys().map(pubkey => {
+        social.getUserFollows().map(pubkey => {
           const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
           const name = displayPerson(getPersonWithFallback(pubkey))
 
@@ -61,16 +60,11 @@
     navigate("/notes")
   }
 
-  // Prime our people cache for hardcoded follows and a sample of people they follow
-  onMount(async () => {
-    const relays = sampleRelays(user.getRelays())
-    const follows = user.getPetnamePubkeys().concat(DEFAULT_FOLLOWS)
-
-    await network.loadPeople(follows, {relays})
-
-    const others = shuffle(social.getNetwork(follows)).slice(0, 256)
-
-    await network.loadPeople(others, {relays})
+  onMount(() => {
+    // Prime our database with some defaults
+    network.loadPeople(DEFAULT_FOLLOWS, {
+      relays: sampleRelays(user.getRelays()),
+    })
   })
 </script>
 

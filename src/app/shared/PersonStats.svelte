@@ -4,12 +4,15 @@
   import {tweened} from "svelte/motion"
   import {numberFmt} from "src/util/misc"
   import {modal} from "src/partials/state"
+  import {social} from "src/system"
+  import {watch} from "src/agent/db"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import pool from "src/agent/pool"
 
   export let person
 
+  const followsCount = watch(social.graph, () => social.getFollowsSet(person.pubkey).size)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
 
   let followersCount = tweened(0, {interpolate, duration: 1000})
@@ -47,13 +50,11 @@
   })
 </script>
 
-{#if person?.petnames}
-  <div class="flex gap-8" in:fly={{y: 20}}>
-    <button on:click={showFollows}>
-      <strong>{person.petnames.length}</strong> following
-    </button>
-    <button on:click={showFollowers}>
-      <strong>{numberFmt.format($followersCount)}</strong> followers
-    </button>
-  </div>
-{/if}
+<div class="flex gap-8" in:fly={{y: 20}}>
+  <button on:click={showFollows}>
+    <strong>{$followsCount}</strong> following
+  </button>
+  <button on:click={showFollowers}>
+    <strong>{numberFmt.format($followersCount)}</strong> followers
+  </button>
+</div>

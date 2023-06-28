@@ -9,19 +9,20 @@
   import {keys, social} from "src/system"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import user from "src/agent/user"
+  import {watch} from "src/agent/db"
   import pool from "src/agent/pool"
   import {addToList} from "src/app/state"
 
   export let person
 
   const npub = nip19.npubEncode(person.pubkey)
+  const {mutes} = user
   const {canSign} = keys
-  const {petnamePubkeys, mutes} = user
+  const following = watch(social.graph, () => social.isUserFollowing(person.pubkey))
 
   let actions = []
 
   $: muted = find(m => m[1] === person.pubkey, $mutes)
-  $: following = $petnamePubkeys.includes(person.pubkey)
   $: {
     actions = []
 
@@ -91,13 +92,13 @@
   {#if $canSign}
     <Popover triggerType="mouseenter">
       <div slot="trigger">
-        {#if following}
+        {#if $following}
           <i class="fa fa-user-minus cursor-pointer" on:click={unfollow} />
         {:else if user.getPubkey() !== person.pubkey}
           <i class="fa fa-user-plus cursor-pointer" on:click={follow} />
         {/if}
       </div>
-      <div slot="tooltip">{following ? "Unfollow" : "Follow"}</div>
+      <div slot="tooltip">{$following ? "Unfollow" : "Follow"}</div>
     </Popover>
   {/if}
   <OverflowMenu {actions} />

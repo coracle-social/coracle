@@ -7,14 +7,13 @@
   import Content from "src/partials/Content.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
   import {DEFAULT_FOLLOWS, social} from "src/system"
-  import {getPersonWithFallback, searchPeople} from "src/agent/db"
+  import {watch, getPersonWithFallback, searchPeople} from "src/agent/db"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import {modal} from "src/partials/state"
-  import user from "src/agent/user"
 
-  const {petnamePubkeys} = user
+  const follows = watch(social.graph, social.getUserFollowsSet)
 
-  if ($petnamePubkeys.length === 0) {
+  if ($follows.size === 0) {
     social.updatePetnames(
       DEFAULT_FOLLOWS.map(pubkey => {
         const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
@@ -27,7 +26,7 @@
 
   let q = ""
 
-  $: results = reject(p => $petnamePubkeys.includes(p.pubkey), $searchPeople(q))
+  $: results = reject(p => $follows.has(p.pubkey), $searchPeople(q))
 </script>
 
 <Content>
@@ -47,13 +46,13 @@
     <i class="fa fa-user-astronaut fa-lg" />
     <h2 class="staatliches text-2xl">Your follows</h2>
   </div>
-  {#if $petnamePubkeys.length === 0}
+  {#if $follows.size === 0}
     <div class="mt-8 flex items-center justify-center gap-2 text-center">
       <i class="fa fa-triangle-exclamation" />
       <span>No follows selected</span>
     </div>
   {:else}
-    {#each $petnamePubkeys as pubkey}
+    {#each Array.from($follows) as pubkey}
       <PersonInfo person={getPersonWithFallback(pubkey)} />
     {/each}
   {/if}

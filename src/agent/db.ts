@@ -5,9 +5,7 @@ import {partition, uniqBy, sortBy, prop, always, pluck, without, is} from "ramda
 import {throttle} from "throttle-debounce"
 import {writable} from "svelte/store"
 import {ensurePlural, noop, createMap} from "hurdak/lib/hurdak"
-import {Tags} from "src/util/nostr"
 import {fuzzy} from "src/util/misc"
-import user from "src/agent/user"
 
 const Adapter = window.indexedDB ? IncrementalIndexedDBAdapter : Loki.LokiMemoryAdapter
 
@@ -164,11 +162,12 @@ type WatchStore<T> = Writable<T> & {
   refresh: () => void
 }
 
-export const watch = (names, f) => {
-  names = ensurePlural(names)
+export const watch = (namesOrTables, f) => {
+  namesOrTables = ensurePlural(namesOrTables)
 
   const store = writable(null) as WatchStore<any>
-  const tables = names.map(name => (is(Table, name) ? name : registry[name]))
+  const tables = namesOrTables.map(name => (is(Table, name) ? name : registry[name]))
+  const names = pluck("name", tables)
 
   // Initialize synchronously if possible
   const initialValue = f(...tables)
@@ -199,17 +198,7 @@ export const dropAll = () => new Promise(resolve => loki.deleteDatabase(resolve)
 const sortByCreatedAt = sortBy(e => -e.created_at)
 const sortByScore = sortBy(e => -e.score)
 
-export const people = new Table("people", "pubkey", {
-  max: 3000,
-  // Don't delete the user's own profile or those of direct follows
-  sort: xs => {
-    const follows = Tags.wrap(user.getPetnames()).values().all()
-    const whitelist = new Set(follows.concat(user.getPubkey()))
-
-    return sortBy(x => (whitelist.has(x.pubkey) ? 0 : x.created_at), xs)
-  },
-})
-
+export const people = new Table("people", "pubkey", {max: 3000})
 export const userEvents = new Table("userEvents", "id", {max: 2000, sort: sortByCreatedAt})
 export const notifications = new Table("notifications", "id", {sort: sortByCreatedAt})
 export const contacts = new Table("contacts", "pubkey")

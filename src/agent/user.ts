@@ -1,19 +1,6 @@
 import type {Relay, MyEvent} from "src/util/types"
 import type {Readable} from "svelte/store"
-import {
-  slice,
-  uniqBy,
-  without,
-  reject,
-  prop,
-  pipe,
-  assoc,
-  whereEq,
-  when,
-  concat,
-  nth,
-  map,
-} from "ramda"
+import {slice, uniqBy, without, reject, prop, pipe, assoc, whereEq, when, concat, map} from "ramda"
 import {findReplyId, findRootId} from "src/util/nostr"
 import {synced} from "src/util/misc"
 import {derived, get} from "svelte/store"
@@ -36,7 +23,6 @@ const profile = synced("agent/user/profile", {
   },
   rooms_joined: [],
   last_checked: {},
-  petnames: [],
   relays: pool.defaultRelays,
   mutes: [],
   lists: [],
@@ -45,7 +31,6 @@ const profile = synced("agent/user/profile", {
 const settings = derived(profile, prop("settings"))
 const roomsJoined = derived(profile, prop("rooms_joined")) as Readable<string>
 const lastChecked = derived(profile, prop("last_checked")) as Readable<Record<string, number>>
-const petnames = derived(profile, prop("petnames")) as Readable<Array<Array<string>>>
 const relays = derived(profile, p =>
   pool.forceRelays.length > 0 ? pool.forceRelays : p.relays
 ) as Readable<Array<Relay>>
@@ -109,13 +94,6 @@ export default {
   leaveRoom(id) {
     this.setAppData("rooms_joined/v1", without([id], profileCopy.rooms_joined))
   },
-
-  // Petnames
-
-  petnames,
-  getPetnames: () => profileCopy.petnames,
-  petnamePubkeys: derived(petnames, map(nth(1))) as Readable<Array<string>>,
-  getPetnamePubkeys: () => profileCopy.petnames.map(nth(1)),
 
   // Relays
 

@@ -138,19 +138,6 @@ addHandler(0, e => {
   })
 })
 
-addHandler(3, e => {
-  const person = people.get(e.pubkey)
-
-  if (e.created_at < person?.petnames_updated_at) {
-    return
-  }
-
-  updatePerson(e.pubkey, {
-    petnames_updated_at: e.created_at,
-    petnames: e.tags.filter(t => t[0] === "p"),
-  })
-})
-
 // User profile, except for events also handled for other users
 
 const userHandler = cb => e => {

@@ -14,11 +14,11 @@
   export let pubkey
 
   const {canSign} = keys
-  const {petnamePubkeys, mutes} = user
+  const following = watch(social.graph, () => social.isUserFollowing(pubkey))
+  const {mutes} = user
   const getRelays = () => sampleRelays(getPubkeyWriteRelays(pubkey))
   const person = watch("people", () => getPersonWithFallback(pubkey))
 
-  $: following = $petnamePubkeys.includes(pubkey)
   $: muted = $mutes.map(nth(1)).includes(pubkey)
 
   const follow = () => {
@@ -58,7 +58,7 @@
         {:else}
           <i title="Mute" class="fa fa-microphone w-6 cursor-pointer text-center" on:click={mute} />
         {/if}
-        {#if following}
+        {#if $following}
           <i
             title="Unfollow"
             class="fa fa-user-minus w-6 cursor-pointer text-center"

@@ -37,14 +37,12 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
 
   const getPetnames = pubkey => graph.get(pubkey)?.petnames || []
 
-  const getPetnamePubkeys = pubkey => getPetnames(pubkey).map(t => t[1])
-
   const getFollowsSet = pubkeys => {
     const follows = new Set()
 
     for (const pubkey of ensurePlural(pubkeys)) {
-      for (const follow of getPetnamePubkeys(pubkey)) {
-        follows.add(follow)
+      for (const tag of getPetnames(pubkey)) {
+        follows.add(tag[1])
       }
     }
 
@@ -72,7 +70,9 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
 
   const getUserKey = () => keys.getPubkey() || "anonymous"
   const getUserPetnames = () => getPetnames(getUserKey())
+  const getUserFollowsSet = () => getFollowsSet(getUserKey())
   const getUserFollows = () => getFollows(getUserKey())
+  const getUserNetworkSet = () => getNetworkSet(getUserKey())
   const getUserNetwork = () => getNetwork(getUserKey())
   const isUserFollowing = pubkey => isFollowing(getUserKey(), pubkey)
 
@@ -100,12 +100,15 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
   return {
     graph,
     getPetnames,
-    getPetnamePubkeys,
+    getFollowsSet,
     getFollows,
+    getNetworkSet,
     getNetwork,
     isFollowing,
     getUserPetnames,
+    getUserFollowsSet,
     getUserFollows,
+    getUserNetworkSet,
     getUserNetwork,
     isUserFollowing,
     updatePetnames,
