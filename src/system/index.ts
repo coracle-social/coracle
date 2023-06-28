@@ -1,3 +1,4 @@
+export * from "src/system/env"
 import keys from "src/system/keys"
 import initSync from "src/system/sync"
 import initSocial from "src/system/social"

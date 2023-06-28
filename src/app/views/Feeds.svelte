@@ -8,9 +8,8 @@
   import Content from "src/partials/Content.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
-  import {keys} from "src/system"
+  import {keys, social} from "src/system"
   import user from "src/agent/user"
-  import {getUserFollows} from "src/agent/social"
 
   const {canSign} = keys
   const {lists} = user
@@ -19,7 +18,7 @@
   let key = Math.random()
   let filter = {
     kinds: noteKinds,
-    authors: getUserFollows().length > 0 ? "follows" : "network",
+    authors: social.getUserFollows().length > 0 ? "follows" : "network",
   } as DynamicFilter
 
   $: listsByName = indexBy(l => Tags.from(l).getMeta("d"), $lists)

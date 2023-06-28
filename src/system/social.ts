@@ -1,8 +1,9 @@
 import {sortBy, reject, prop} from "ramda"
 import {get} from "svelte/store"
-import {now, gettable} from "src/util/misc"
+import {ensurePlural} from "hurdak/lib/hurdak"
+import {now} from "src/util/misc"
 import {Tags} from "src/util/nostr"
-import {Table, watch} from "src/agent/db"
+import {Table} from "src/agent/db"
 
 export default ({keys, sync, cmd, getUserWriteRelays}) => {
   // Don't delete the user's own info or those of direct follows
@@ -18,7 +19,7 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
     }
   }
 
-  const graph = new Table("system.social/graph", "pubkey", {max: 5000, sort: sortByGraph})
+  const graph = new Table("social/graph", "pubkey", {max: 5000, sort: sortByGraph})
 
   sync.addHandler(3, e => {
     const entry = graph.get(e.pubkey)
@@ -38,10 +39,10 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
 
   const getPetnamePubkeys = pubkey => getPetnames(pubkey).map(t => t[1])
 
-  const getFollows = pubkeys => {
+  const getFollowsSet = pubkeys => {
     const follows = new Set()
 
-    for (const pubkey of pubkeys) {
+    for (const pubkey of ensurePlural(pubkeys)) {
       for (const follow of getPetnamePubkeys(pubkey)) {
         follows.add(follow)
       }
@@ -50,8 +51,10 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
     return follows
   }
 
-  const getNetwork = (pubkeys, includeFollows = false) => {
-    const follows = getFollows(pubkeys)
+  const getFollows = pubkeys => Array.from(getFollowsSet(pubkeys))
+
+  const getNetworkSet = (pubkeys, includeFollows = false) => {
+    const follows = getFollowsSet(pubkeys)
     const network = includeFollows ? follows : new Set()
 
     for (const pubkey of getFollows(follows)) {
@@ -63,13 +66,15 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
     return network
   }
 
-  const isFollowing = (a, b) => getFollows(a).has(b)
+  const getNetwork = pubkeys => Array.from(getNetworkSet(pubkeys))
+
+  const isFollowing = (a, b) => getFollowsSet(a).has(b)
 
   const getUserKey = () => keys.getPubkey() || "anonymous"
-  const userPetnames = gettable(watch(graph, () => getPetnames(getUserKey())))
-  const userPetnamePubkeys = gettable(watch(graph, () => getPetnamePubkeys(getUserKey())))
-  const userFollows = gettable(watch(graph, () => getFollows(getUserKey())))
-  const userNetwork = gettable(watch(graph, () => getNetwork(getUserKey())))
+  const getUserPetnames = () => getPetnames(getUserKey())
+  const getUserPetnamePubkeys = () => getPetnamePubkeys(getUserKey())
+  const getUserFollows = () => getFollows(getUserKey())
+  const getUserNetwork = () => getNetwork(getUserKey())
   const isUserFollowing = pubkey => isFollowing(getUserKey(), pubkey)
 
   const updatePetnames = async $petnames => {
@@ -86,13 +91,12 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
 
   const follow = (pubkey, url, name) =>
     updatePetnames(
-      userPetnames
-        .get()
+      getUserPetnames()
         .filter(t => t[1] !== pubkey)
         .concat([["p", pubkey, url, name || ""]])
     )
 
-  const unfollow = pubkey => updatePetnames(reject(t => t[1] === pubkey, userPetnames.get()))
+  const unfollow = pubkey => updatePetnames(reject(t => t[1] === pubkey, getUserPetnames()))
 
   return {
     graph,
@@ -101,10 +105,10 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
     getFollows,
     getNetwork,
     isFollowing,
-    userPetnames,
-    userPetnamePubkeys,
-    userFollows,
-    userNetwork,
+    getUserPetnames,
+    getUserPetnamePubkeys,
+    getUserFollows,
+    getUserNetwork,
     isUserFollowing,
     follow,
     unfollow,

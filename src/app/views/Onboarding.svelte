@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {uniq} from "ramda"
   import {onMount} from "svelte"
   import {generatePrivateKey} from "nostr-tools"
   import {fly} from "src/util/transition"
@@ -12,7 +11,7 @@
   import OnboardingRelays from "src/app/views/OnboardingRelays.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
-  import {getFollows, defaultFollows} from "src/agent/social"
+  import {DEFAULT_FOLLOWS, social} from "src/system"
   import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
   import network from "src/agent/network"
@@ -65,11 +64,11 @@
   // Prime our people cache for hardcoded follows and a sample of people they follow
   onMount(async () => {
     const relays = sampleRelays(user.getRelays())
-    const follows = user.getPetnamePubkeys().concat(defaultFollows)
+    const follows = user.getPetnamePubkeys().concat(DEFAULT_FOLLOWS)
 
     await network.loadPeople(follows, {relays})
 
-    const others = shuffle(uniq(follows.flatMap(getFollows))).slice(0, 256)
+    const others = shuffle(social.getNetwork(follows)).slice(0, 256)
 
     await network.loadPeople(others, {relays})
   })

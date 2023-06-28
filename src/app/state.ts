@@ -15,11 +15,10 @@ import {findReplyId} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import {notifications, watch, userEvents, contacts, rooms} from "src/agent/db"
 import {enableZaps} from "src/agent/settings"
-import {keys} from "src/system"
+import {DEFAULT_FOLLOWS, keys, social} from "src/system"
 import network from "src/agent/network"
 import pool from "src/agent/pool"
 import {getUserReadRelays, getUserRelays} from "src/agent/relays"
-import {getUserFollows, getUserNetwork, defaultFollows} from "src/agent/social"
 import user from "src/agent/user"
 
 // Routing
@@ -221,7 +220,7 @@ export const loadAppData = async pubkey => {
 
     // Make sure the user and their network is loaded
     await network.loadPeople([pubkey], {force: true, kinds: userKinds})
-    await network.loadPeople(getUserFollows())
+    await network.loadPeople(social.getUserFollows())
   }
 }
 
@@ -294,14 +293,15 @@ export const publishWithToast = (relays, thunk) =>
 // Feeds
 
 export const compileFilter = (filter: DynamicFilter): Filter => {
-  const getAuthors = pubkeys => shuffle(pubkeys.length > 0 ? pubkeys : defaultFollows).slice(0, 256)
+  const getAuthors = pubkeys =>
+    shuffle(pubkeys.length > 0 ? pubkeys : DEFAULT_FOLLOWS).slice(0, 256)
 
   if (filter.authors === "global") {
     filter = omit(["authors"], filter)
   } else if (filter.authors === "follows") {
-    filter = {...filter, authors: getAuthors(getUserFollows())}
+    filter = {...filter, authors: getAuthors(social.getUserFollows())}
   } else if (filter.authors === "network") {
-    filter = {...filter, authors: getAuthors(getUserNetwork())}
+    filter = {...filter, authors: getAuthors(social.getUserNetwork())}
   }
 
   return filter
