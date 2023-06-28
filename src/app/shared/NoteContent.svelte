@@ -26,5 +26,9 @@
 {:else if note.kind === 30023}
   <NoteContentKind30023 {note} {showEntire} {showMedia} />
 {:else}
-  <NoteContentKind1 {note} {anchorId} {maxLength} {showEntire} {showMedia} {hideShowMore} />
+  <NoteContentKind1 {note} {anchorId} {maxLength} {showEntire} {showMedia} {hideShowMore}>
+    <div slot="note-content" let:quote>
+      <svelte:self note={quote} {anchorId} {maxLength} />
+    </div>
+  </NoteContentKind1>
 {/if}

@@ -62,7 +62,7 @@
       {:else if type.startsWith("nostr:") && showMedia && isStartOrEnd(i) && value.id !== anchorId}
         <NoteContentQuote {note} {value}>
           <div slot="note-content" let:quote>
-            <svelte:self note={quote} {anchorId} {maxLength} {showMedia} showEntire={false} />
+            <slot name="note-content" {quote} />
           </div>
         </NoteContentQuote>
       {:else if type.startsWith("nostr:")}

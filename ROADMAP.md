@@ -1,7 +1,6 @@
 # Current
 
 - [ ] Fix @ mention on safari
-- [ ] Fix http://localhost:5173/nevent1qqspulrcsx0ceunrnk88vvdta4lw70ch32e03rl8elughxpwsdy0kkgpzfmhxue69uhk7enxvd5xz6tw9ec82cs56smhk
 - [ ] Get rid of Button
 - [ ] Make notifications beautiful and usable
 - [ ] Render threads in a way that makes them easy to use
