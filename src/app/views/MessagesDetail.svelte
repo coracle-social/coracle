@@ -82,7 +82,7 @@
     <div class="flex w-full flex-col gap-2">
       <div class="flex w-full items-center justify-between">
         <div class="flex items-center gap-4">
-          <Anchor type="unstyled" href={routes.person(pubkey)} class="text-lg font-bold">
+          <Anchor theme="unstyled" href={routes.person(pubkey)} class="text-lg font-bold">
             {displayPerson($person)}
           </Anchor>
         </div>

@@ -72,7 +72,7 @@
     }}>
     <slot name="button">
       <div class="flex">
-        <Anchor type="button">
+        <Anchor theme="button">
           <i class="fa fa-upload" />
         </Anchor>
       </div>
@@ -87,8 +87,8 @@
       <p>Please accept the following terms:</p>
       <p>{quote.terms}</p>
       <div class="flex gap-2">
-        <Anchor type="button" on:click={decline} {loading}>Decline</Anchor>
-        <Anchor type="button-accent" on:click={accept} {loading}>Accept</Anchor>
+        <Anchor theme="button" on:click={decline} {loading}>Decline</Anchor>
+        <Anchor theme="button-accent" on:click={accept} {loading}>Accept</Anchor>
       </div>
     </Content>
   </Modal>

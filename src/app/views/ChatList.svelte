@@ -49,7 +49,7 @@
         <i class="fa fa-server fa-lg" />
         <h2 class="staatliches text-2xl">Your rooms</h2>
       </div>
-      <Anchor type="button-accent" on:click={() => modal.push({type: "room/edit"})}>
+      <Anchor theme="button-accent" on:click={() => modal.push({type: "room/edit"})}>
         <i class="fa-solid fa-plus" /> Create Room
       </Anchor>
     </div>

@@ -6,7 +6,7 @@
   import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import Button from "src/partials/Button.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import {toast, modal} from "src/partials/state"
   import {getUserWriteRelays} from "src/agent/relays"
   import user from "src/agent/user"
@@ -78,7 +78,7 @@
         <input type="file" name="picture" />
         <p class="text-sm text-gray-1">A picture to help people remember your room.</p>
       </div>
-      <Button type="submit" class="text-center">Done</Button>
+      <Anchor tag="button" theme="button" type="submit" class="text-center">Done</Anchor>
     </div>
   </Content>
 </form>

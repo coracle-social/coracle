@@ -2,9 +2,8 @@
   import {fly} from "src/util/transition"
   import {toast, appName} from "src/partials/state"
   import Toggle from "src/partials/Toggle.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
-  import Button from "src/partials/Button.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import user from "src/agent/user"
@@ -94,7 +93,7 @@
           and to diagnose and fix bugs.
         </p>
       </div>
-      <Button type="submit" class="text-center">Save</Button>
+      <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>
     </div>
   </Content>
 </form>

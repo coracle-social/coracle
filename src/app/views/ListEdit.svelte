@@ -5,7 +5,7 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import Content from "src/partials/Content.svelte"
-  import Button from "src/partials/Button.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import {searchTopics, searchPeople, searchRelays, getPersonWithFallback} from "src/agent/db"
@@ -92,7 +92,7 @@
           will be used.
         </p>
       </div>
-      <Button type="submit" class="text-center">Save</Button>
+      <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>
     </div>
   </Content>
 </form>

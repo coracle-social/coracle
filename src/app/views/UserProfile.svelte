@@ -6,7 +6,6 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import user from "src/agent/user"
@@ -100,7 +99,7 @@
           In most clients, this image will be shown on your profile page.
         </p>
       </div>
-      <Button type="submit" class="text-center">Save</Button>
+      <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>
     </div>
   </Content>
 </form>

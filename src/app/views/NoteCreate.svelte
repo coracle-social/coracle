@@ -6,7 +6,7 @@
   import {writable} from "svelte/store"
   import {annotateMedia} from "src/util/misc"
   import {displayPerson} from "src/util/nostr"
-  import Button from "src/partials/Button.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import Compose from "src/partials/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Media from "src/partials/Media.svelte"
@@ -149,7 +149,8 @@
           }} />
       {/if}
       <div class="flex gap-2">
-        <Button type="submit" class="flex-grow text-center">Send</Button>
+        <Anchor tag="button" theme="button" type="submit" class="flex-grow text-center"
+          >Send</Anchor>
         <ImageInput bind:value={image} icon="image" hideInput />
       </div>
       <small
@@ -202,7 +203,8 @@
             </RelayCard>
           </div>
           <div slot="footer">
-            <Button type="submit" class="w-full text-center">Done</Button>
+            <Anchor tag="button" theme="button" type="submit" class="w-full text-center"
+              >Done</Anchor>
           </div>
         </RelaySearch>
       </Content>

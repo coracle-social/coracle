@@ -222,7 +222,7 @@
             </MultiSelect>
           </div>
           <div class="flex justify-end">
-            <Anchor type="button-accent" on:click={submit}>Apply Filters</Anchor>
+            <Anchor theme="button-accent" on:click={submit}>Apply Filters</Anchor>
           </div>
         {/if}
       </Content>

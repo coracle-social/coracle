@@ -37,6 +37,6 @@
         <i slot="before" class="fa fa-key" />
       </Input>
     </div>
-    <Anchor type="button" on:click={logIn}>Log In</Anchor>
+    <Anchor theme="button" on:click={logIn}>Log In</Anchor>
   </div>
 </Content>

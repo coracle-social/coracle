@@ -28,8 +28,7 @@
       onChunk,
     })
 
-  const loadMessages = onChunk =>
-    cursor.loadPage({filter: {kinds: [42], "#e": [id]}, onChunk})
+  const loadMessages = onChunk => cursor.loadPage({filter: {kinds: [42], "#e": [id]}, onChunk})
 
   const edit = () => {
     modal.push({type: "room/edit", room: $room})
@@ -48,7 +47,7 @@
 <Channel {loadMessages} {listenForMessages} {sendMessage}>
   <div slot="header" class="flex items-start gap-4 p-4">
     <div class="flex items-center gap-4">
-      <Anchor type="unstyled" class="fa fa-arrow-left cursor-pointer text-2xl" href="/chat" />
+      <Anchor theme="unstyled" class="fa fa-arrow-left cursor-pointer text-2xl" href="/chat" />
       <div
         class="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-solid border-white bg-cover bg-center"
         style="background-image: url({$room.picture})" />

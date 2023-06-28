@@ -55,7 +55,7 @@
           <Anchor class="w-32 text-center" type="button-accent" on:click={autoLogIn}>Log In</Anchor>
           <Anchor class="w-32 text-center" type="button" on:click={signUp}>Sign Up</Anchor>
         </div>
-        <Anchor type="unstyled" on:click={pubkeyLogIn}>
+        <Anchor theme="unstyled" on:click={pubkeyLogIn}>
           <i class="fa fa-cogs" /> Advanced Login
         </Anchor>
       </div>

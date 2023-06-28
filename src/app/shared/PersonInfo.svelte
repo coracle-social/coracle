@@ -46,11 +46,11 @@
           {/if}
         </div>
         {#if isFollowing}
-          <Anchor type="button-accent" stopPropagation on:click={() => removePetname(person)}>
+          <Anchor theme="button-accent" stopPropagation on:click={() => removePetname(person)}>
             Following
           </Anchor>
         {:else}
-          <Anchor type="button" stopPropagation on:click={() => addPetname(person)}>Follow</Anchor>
+          <Anchor theme="button" stopPropagation on:click={() => addPetname(person)}>Follow</Anchor>
         {/if}
       </div>
       <p class="overflow-hidden text-ellipsis">

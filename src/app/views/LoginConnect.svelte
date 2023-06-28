@@ -165,7 +165,7 @@
           <Input bind:value={customRelayUrl} wrapperClass="flex-grow">
             <i slot="before" class="fa fa-search" />
           </Input>
-          <Anchor type="button" on:click={addCustomRelay}>Search relay</Anchor>
+          <Anchor theme="button" on:click={addCustomRelay}>Search relay</Anchor>
         </form>
       {/if}
     </Content>

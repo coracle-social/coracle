@@ -30,7 +30,7 @@
   {:else}
     <div class="flex flex-col items-center gap-8" in:fly={{y: 20}}>
       <div>Are you sure you want to log out? All data will be cleared.</div>
-      <Anchor type="button" on:click={confirm}>Log out</Anchor>
+      <Anchor theme="button" on:click={confirm}>Log out</Anchor>
     </div>
   {/if}
 </Content>

@@ -9,8 +9,10 @@
   export let killEvent = false
   export let external = false
   export let loading = false
-  export let type = "anchor"
+  export let theme = "anchor"
+  export let type = null
   export let href = null
+  export let tag = "a"
 
   const dispatch = createEventDispatcher()
 
@@ -23,7 +25,7 @@
     $$props.class,
     "cursor-pointer transition-all",
     {"opacity-50": loading},
-    switcher(type, {
+    switcher(theme, {
       anchor: "underline",
       button:
         "py-2 px-4 rounded-full bg-input text-accent whitespace-nowrap border border-solid border-gray-6 hover:bg-input-hover",
@@ -55,6 +57,16 @@
   }
 </script>
 
-<a class={className} on:click={onClick} href={_href} {target}>
-  <slot />
-</a>
+{#if tag === "a"}
+  <a class={className} on:click={onClick} href={_href} {target}>
+    <slot />
+  </a>
+{:else if tag === "button"}
+  <button class={className} on:click={onClick} {type}>
+    <slot />
+  </button>
+{:else}
+  <svelte:element this={tag} class={className} on:click={onClick}>
+    <slot />
+  </svelte:element>
+{/if}

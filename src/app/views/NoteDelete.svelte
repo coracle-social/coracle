@@ -19,6 +19,6 @@
     note?
   </div>
   <div class="flex justify-center">
-    <Anchor type="button" on:click={confirm}>Confirm</Anchor>
+    <Anchor theme="button" on:click={confirm}>Confirm</Anchor>
   </div>
 </Content>

@@ -24,7 +24,7 @@
 <Content size="lg">
   <div class="flex items-center justify-between">
     <Heading>Select a List</Heading>
-    <Anchor type="button-accent" on:click={() => selectlist({})}>
+    <Anchor theme="button-accent" on:click={() => selectlist({})}>
       <i class="fa fa-plus" /> List
     </Anchor>
   </div>

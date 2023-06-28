@@ -1,7 +1,7 @@
 <script lang="ts">
   import {fly} from "src/util/transition"
   import {modal} from "src/partials/state"
-  import Button from "src/partials/Button.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Compose from "src/partials/Compose.svelte"
@@ -48,7 +48,7 @@
         class="shadow-inset rounded bg-input text-black"
         style="min-height: 6rem"
         bind:this={compose} />
-      <Button type="submit" class="flex-grow text-center">Send</Button>
+      <Anchor tag="button" theme="button" type="submit" class="flex-grow text-center">Send</Anchor>
     </div>
   </Content>
 </form>
