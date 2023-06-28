@@ -59,7 +59,7 @@
       {#if muted}
         <p class="mb-1 py-24 text-center text-gray-5" in:fly={{y: 20}}>
           You have muted this note.
-          <Anchor on:click={unmute}>Show</Anchor>
+          <Anchor class="underline" on:click={unmute}>Show</Anchor>
         </p>
       {:else}
         {@const person = getPersonWithFallback(quote.pubkey)}

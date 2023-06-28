@@ -38,7 +38,7 @@
       your follows list at any time.
     </p>
     <Anchor
-      type="button-accent"
+      theme="button-accent"
       on:click={() => modal.replace({type: "onboarding", stage: "note"})}>
       Continue
     </Anchor>

@@ -112,7 +112,7 @@
         <i slot="before" class="fa fa-bolt" />
         <span slot="after" class="-mt-1">sats</span>
       </Input>
-      <Anchor loading={zap.loading} type="button-accent" on:click={loadZapInvoice}>Zap!</Anchor>
+      <Anchor loading={zap.loading} theme="button-accent" on:click={loadZapInvoice}>Zap!</Anchor>
     </div>
   {/if}
 </Content>

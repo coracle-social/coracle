@@ -9,7 +9,7 @@
   export let killEvent = false
   export let external = false
   export let loading = false
-  export let theme = "anchor"
+  export let theme = "unstyled"
   export let type = null
   export let href = null
   export let tag = "a"

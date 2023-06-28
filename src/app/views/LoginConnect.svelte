@@ -150,8 +150,8 @@
         <div class="my-12 text-center">
           We didn't have any luck finding your profile data - you'll need to select your relays
           manually to continue. You can skip this step by clicking
-          <Anchor href="/relays">here</Anchor>, but be aware that any new relay selections will
-          replace your old ones.
+          <Anchor class="underline" href="/relays">here</Anchor>, but be aware that any new relay
+          selections will replace your old ones.
         </div>
       {:else if modal === "custom"}
         <div class="my-12 text-center">

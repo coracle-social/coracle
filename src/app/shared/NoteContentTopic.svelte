@@ -9,4 +9,4 @@
   }
 </script>
 
-<Anchor killEvent on:click={() => openTopic(value)}>#{value}</Anchor>
+<Anchor class="underline" killEvent on:click={() => openTopic(value)}>#{value}</Anchor>

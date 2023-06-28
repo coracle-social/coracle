@@ -46,16 +46,17 @@
       <p class="text-center">
         Click below to log in or create an account.
         {#if !Capacitor.isNativePlatform()}
-          If you have a <Anchor href={nip07} external>compatible browser extension</Anchor> installed,
-          we will use that.
+          If you have a <Anchor class="underline" href={nip07} external
+            >compatible browser extension</Anchor> installed, we will use that.
         {/if}
       </p>
       <div class="flex flex-col items-center gap-4">
         <div class="flex gap-4">
-          <Anchor class="w-32 text-center" type="button-accent" on:click={autoLogIn}>Log In</Anchor>
-          <Anchor class="w-32 text-center" type="button" on:click={signUp}>Sign Up</Anchor>
+          <Anchor class="w-32 text-center" theme="button-accent" on:click={autoLogIn}
+            >Log In</Anchor>
+          <Anchor class="w-32 text-center" theme="button" on:click={signUp}>Sign Up</Anchor>
         </div>
-        <Anchor theme="unstyled" on:click={pubkeyLogIn}>
+        <Anchor on:click={pubkeyLogIn}>
           <i class="fa fa-cogs" /> Advanced Login
         </Anchor>
       </div>

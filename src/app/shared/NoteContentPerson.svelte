@@ -9,6 +9,6 @@
   const openPerson = () => modal.push({type: "person/feed", pubkey: value.pubkey})
 </script>
 
-@<Anchor killEvent on:click={openPerson}>
+@<Anchor class="underline" killEvent on:click={openPerson}>
   {displayPerson(getPersonWithFallback(value.pubkey))}
 </Anchor>

@@ -38,7 +38,7 @@
     </div>
   </div>
   <Anchor
-    type="button-accent"
+    theme="button-accent"
     class="text-center"
     on:click={() => modal.replace({type: "onboarding", stage: "key"})}>
     Continue

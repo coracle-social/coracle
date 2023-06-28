@@ -31,7 +31,7 @@
   </div>
   <Anchor theme="button-accent" class="flex-grow text-center" on:click={onSubmit}
     >Say Hello!</Anchor>
-  <Anchor theme="unstyled" class="text-center" on:click={skip}>
+  <Anchor class="text-center" on:click={skip}>
     Skip and see your feed <i class="fa fa-arrow-right" />
   </Anchor>
 </Content>

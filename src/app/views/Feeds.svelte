@@ -57,7 +57,7 @@
     <Content size="lg" class="text-center">
       <p class="text-xl">Don't have an account?</p>
       <p>
-        Click <Anchor href="/login">here</Anchor> to join the nostr network.
+        Click <Anchor class="underline" href="/login">here</Anchor> to join the nostr network.
       </p>
     </Content>
   {/if}

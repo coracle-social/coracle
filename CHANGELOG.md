@@ -1,5 +1,13 @@
 # Changelog
 
+# 0.2.34
+
+- [x] Fix mentions on Safari
+- [x] Fix quoted 30023 events
+- [x] Fix Safari performance issues
+- [x] Small note display bugfixes
+- [x] Fix inability to publish on first signup
+
 # 0.2.33
 
 - [x] Add rendering support for kind 1985 (labels and reviews)

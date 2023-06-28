@@ -46,7 +46,7 @@
       <div class="flex items-start justify-between gap-4">
         <div class="flex flex-grow flex-col gap-2">
           <div class="flex items-center gap-2">
-            <Anchor theme="unstyled" href={routes.person(pubkey)}>
+            <Anchor href={routes.person(pubkey)}>
               <h1 class="text-2xl">
                 {displayPerson($person)}
               </h1>

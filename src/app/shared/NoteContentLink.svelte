@@ -18,7 +18,7 @@
     <Media link={annotateMedia(value.url)} onClose={close} />
   </div>
 {:else}
-  <Anchor external href={value.url}>
+  <Anchor class="underline" external href={value.url}>
     {value.url.replace(/https?:\/\/(www\.)?/, "")}
   </Anchor>
 {/if}

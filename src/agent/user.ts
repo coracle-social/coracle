@@ -6,7 +6,6 @@ import {
   without,
   reject,
   prop,
-  find,
   pipe,
   assoc,
   whereEq,
@@ -53,10 +52,7 @@ const relays = derived(profile, p =>
 const mutes = derived(profile, prop("mutes")) as Readable<Array<[string, string]>>
 const lists = derived(profile, prop("lists")) as Readable<Array<MyEvent>>
 
-const canPublish = derived(
-  [keys.pubkey, relays],
-  ([$pubkey, $relays]) => keys.canSign() && find(prop("write"), $relays)
-)
+const canPublish = derived([keys.pubkey], ([$pubkey]) => keys.canSign())
 
 // Keep a copy so we can avoid calling `get` all the time
 

@@ -63,7 +63,7 @@
   <div class="flex items-center justify-between gap-2">
     <div class="flex items-center gap-2 text-xl">
       <i class={relay.url.startsWith("ws://") ? "fa fa-unlock" : "fa fa-lock"} />
-      <Anchor theme="unstyled" on:click={openModal}>{displayRelay(relay)}</Anchor>
+      <Anchor on:click={openModal}>{displayRelay(relay)}</Anchor>
       {#if showStatus}
         <span
           on:mouseout={() => {

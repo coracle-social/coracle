@@ -47,7 +47,7 @@
 <Channel {loadMessages} {listenForMessages} {sendMessage}>
   <div slot="header" class="flex items-start gap-4 p-4">
     <div class="flex items-center gap-4">
-      <Anchor theme="unstyled" class="fa fa-arrow-left cursor-pointer text-2xl" href="/chat" />
+      <Anchor class="fa fa-arrow-left cursor-pointer text-2xl" href="/chat" />
       <div
         class="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-solid border-white bg-cover bg-center"
         style="background-image: url({$room.picture})" />

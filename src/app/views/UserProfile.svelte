@@ -43,7 +43,7 @@
       <p>
         Give people a friendly way to recognize you. We recommend you do not use your real name or
         share your personal information. The future of the internet is
-        <Anchor external href={pseudUrl}>pseudonymous</Anchor>.
+        <Anchor class="underline" external href={pseudUrl}>pseudonymous</Anchor>.
       </p>
     </div>
     <div class="flex w-full flex-col gap-8">
@@ -63,7 +63,8 @@
           <i slot="before" class="fa-solid fa-user-check" />
         </Input>
         <p class="text-sm text-gray-1">
-          Enter a <Anchor external href={nip05Url}>NIP-05</Anchor> address to verify your public key.
+          Enter a <Anchor class="underline" external href={nip05Url}>NIP-05</Anchor> address to verify
+          your public key.
         </p>
       </div>
       <div class="flex flex-col gap-1">
@@ -72,8 +73,8 @@
           <i slot="before" class="fa-solid fa-bolt" />
         </Input>
         <p class="text-sm text-gray-1">
-          Enter a <Anchor external href={lud16Url}>LUD-16</Anchor> address to enable sending and receiving
-          lightning tips (LUD-06 will also work).
+          Enter a <Anchor class="underline" external href={lud16Url}>LUD-16</Anchor> address to enable
+          sending and receiving lightning tips (LUD-06 will also work).
         </p>
       </div>
       <div class="flex flex-col gap-1">

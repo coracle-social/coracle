@@ -29,7 +29,7 @@
 <div class="mb-4 flex items-center gap-2 border-l-2 border-solid border-gray-5 pl-2">
   Rated
   {#if action}
-    <Anchor on:click={action}>{display}</Anchor>
+    <Anchor class="underline" on:click={action}>{display}</Anchor>
   {:else}
     {display}
   {/if}

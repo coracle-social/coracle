@@ -31,7 +31,7 @@
       <button slot="after" class="fa fa-copy cursor-pointer" on:click={copyKey} />
     </Input>
     <Anchor
-      type="button-accent"
+      theme="button-accent"
       on:click={() => modal.replace({type: "onboarding", stage: nextStage})}>
       Got it
     </Anchor>

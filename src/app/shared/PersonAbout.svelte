@@ -19,11 +19,11 @@
         <br />
       {/each}
     {:else if type === "link"}
-      <Anchor external href={value.url}>
+      <Anchor class="underline" external href={value.url}>
         {value.url.replace(/https?:\/\/(www\.)?/, "")}
       </Anchor>
     {:else if type.startsWith("nostr:")}
-      <Anchor external href={"/" + value.entity}>
+      <Anchor class="underline" external href={"/" + value.entity}>
         {#if value.pubkey}
           {displayPerson(getPersonWithFallback(value.pubkey))}
         {:else if value.id}

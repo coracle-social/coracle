@@ -151,13 +151,13 @@
             {#if findReplyId(note) && showParent}
               <small class="text-gray-1">
                 <i class="fa fa-code-merge" />
-                <Anchor on:click={goToParent}>View Parent</Anchor>
+                <Anchor class="underline" on:click={goToParent}>View Parent</Anchor>
               </small>
             {/if}
             {#if findRootId(note) && findRootId(note) !== findReplyId(note) && showParent}
               <small class="text-gray-1">
                 <i class="fa fa-code-pull-request" />
-                <Anchor on:click={goToRoot}>View Thread</Anchor>
+                <Anchor class="underline" on:click={goToRoot}>View Thread</Anchor>
               </small>
             {/if}
           </div>

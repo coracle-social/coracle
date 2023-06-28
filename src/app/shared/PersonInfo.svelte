@@ -9,7 +9,7 @@
   import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
   import user from "src/agent/user"
 
-  const {petnames} = user
+  const {petnames, canPublish} = user
 
   export let person
   export let hasPetname = null
@@ -45,12 +45,15 @@
             </div>
           {/if}
         </div>
-        {#if isFollowing}
-          <Anchor theme="button-accent" stopPropagation on:click={() => removePetname(person)}>
-            Following
-          </Anchor>
-        {:else}
-          <Anchor theme="button" stopPropagation on:click={() => addPetname(person)}>Follow</Anchor>
+        {#if $canPublish}
+          {#if isFollowing}
+            <Anchor theme="button-accent" stopPropagation on:click={() => removePetname(person)}>
+              Following
+            </Anchor>
+          {:else}
+            <Anchor theme="button" stopPropagation on:click={() => addPetname(person)}
+              >Follow</Anchor>
+          {/if}
         {/if}
       </div>
       <p class="overflow-hidden text-ellipsis">

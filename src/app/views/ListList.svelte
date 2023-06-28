@@ -48,7 +48,7 @@
           <strong>{meta.d}</strong>
           <ListSummary list={e} />
         </div>
-        <Anchor on:click={() => editList(e)}>Edit</Anchor>
+        <Anchor class="underline" on:click={() => editList(e)}>Edit</Anchor>
       </div>
     </div>
   {:else}
