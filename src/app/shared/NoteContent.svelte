@@ -11,7 +11,7 @@
   export let anchorId = null
   export let maxLength = 700
   export let showEntire = false
-  export let hideShowMore = true
+  export let expandable = true
   export let showMedia = user.getSetting("showMedia")
 </script>
 
@@ -26,7 +26,7 @@
 {:else if note.kind === 30023}
   <NoteContentKind30023 {note} {showEntire} {showMedia} />
 {:else}
-  <NoteContentKind1 {note} {anchorId} {maxLength} {showEntire} {showMedia} {hideShowMore}>
+  <NoteContentKind1 {note} {anchorId} {maxLength} {showEntire} {showMedia} {expandable}>
     <div slot="note-content" let:quote>
       <svelte:self note={quote} {anchorId} {maxLength} />
     </div>

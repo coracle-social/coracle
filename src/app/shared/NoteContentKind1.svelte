@@ -25,12 +25,14 @@
   export let anchorId = false
   export let showEntire = false
   export let showMedia = false
-  export let hideShowMore = false
+  export let expandable = true
 
   const fullContent = parseContent(note)
   const shortContent = truncateContent(fullContent, {maxLength, showEntire, showMedia})
   const links = getLinks(shortContent)
   const extraLinks = without(links, getLinks(fullContent))
+
+  console.log(fullContent, shortContent)
 
   export const isNewline = i =>
     !shortContent[i] ||
@@ -46,7 +48,7 @@
       {#if type === NEWLINE}
         <NoteContentNewline {value} />
       {:else if type === ELLIPSIS}
-        {#if !hideShowMore}
+        {#if expandable}
           <NoteContentEllipsis />
         {/if}
       {:else if type === TOPIC}

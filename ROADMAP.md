@@ -1,5 +1,7 @@
 # Current
 
+- [ ] nsec bunker support
+- [ ] Add relayset support with kind 30022
 - [ ] White-labeled
   - [ ] Add invite code registration for relay
     - [ ] Add endpoint to nostream that updates whitelist
