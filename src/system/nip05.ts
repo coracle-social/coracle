@@ -1,3 +1,4 @@
+import {last} from "ramda"
 import {nip05} from "nostr-tools"
 import {tryFunc, tryJson} from "src/util/misc"
 import {Table} from "src/agent/db"
@@ -23,13 +24,20 @@ export default ({sync, sortByGraph}) => {
       handles.patch({
         profile: profile,
         pubkey: e.pubkey,
-        handle: kind0.nip05,
+        address: kind0.nip05,
         created_at: e.created_at,
       })
     })
   })
 
+  const getHandle = pubkey => handles.get(pubkey)
+
+  const displayHandle = handle =>
+    handle.address.startsWith("_@") ? last(handle.address.split("@")) : handle.address
+
   return {
     handles,
+    getHandle,
+    displayHandle,
   }
 }

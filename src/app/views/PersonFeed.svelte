@@ -1,11 +1,11 @@
 <script lang="ts">
-  import {last} from "ramda"
   import {displayPerson} from "src/util/nostr"
   import {parseHex} from "src/util/html"
   import {theme, getThemeColor} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonActions from "src/app/shared/PersonActions.svelte"
+  import {nip05} from "src/system"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import {getPersonWithFallback, watch} from "src/agent/db"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
@@ -17,6 +17,7 @@
   export let pubkey
 
   const person = watch("people", () => getPersonWithFallback(pubkey))
+  const handle = watch(nip05.handles, () => nip05.getHandle(pubkey))
 
   let rgb, rgba
 
@@ -52,10 +53,10 @@
               </h1>
             </Anchor>
           </div>
-          {#if $person.verified_as}
+          {#if $handle}
             <div class="flex gap-1 text-sm">
               <i class="fa fa-user-check text-accent" />
-              <span class="text-gray-1">{last($person.verified_as.split("@"))}</span>
+              <span class="text-gray-1">{nip05.displayHandle($handle)}</span>
             </div>
           {/if}
         </div>

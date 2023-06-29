@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {last, identity} from "ramda"
+  import {identity} from "ramda"
   import {navigate} from "svelte-routing"
   import {log} from "src/util/logger"
   import {parseHex} from "src/util/html"
@@ -12,6 +12,7 @@
   import PersonNotes from "src/app/shared/PersonNotes.svelte"
   import PersonLikes from "src/app/shared/PersonLikes.svelte"
   import PersonRelays from "src/app/shared/PersonRelays.svelte"
+  import {nip05} from "src/system"
   import pool from "src/agent/pool"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import {getPersonWithFallback, watch} from "src/agent/db"
@@ -27,6 +28,7 @@
   const tabs = ["notes", "likes", pool.forceUrls.length === 0 && "relays"].filter(identity)
   const pubkey = toHex(npub)
   const person = watch("people", () => getPersonWithFallback(pubkey))
+  const handle = watch(nip05.handles, () => nip05.getHandle(pubkey))
 
   let loading = true
   let rgb, rgba
@@ -65,10 +67,10 @@
           <div class="flex items-center gap-2">
             <h1 class="text-2xl">{displayPerson($person)}</h1>
           </div>
-          {#if $person.verified_as}
+          {#if $handle}
             <div class="flex gap-1 text-sm">
               <i class="fa fa-user-check text-accent" />
-              <span class="text-gray-1">{last($person.verified_as.split("@"))}</span>
+              <span class="text-gray-1">{nip05.displayHandle($handle)}</span>
             </div>
           {/if}
         </div>

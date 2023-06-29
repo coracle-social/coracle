@@ -1,6 +1,5 @@
 import {partition, is, uniq, reject, nth, objOf, pick, identity} from "ramda"
-import {nip05} from "nostr-tools"
-import {noop, ensurePlural, chunk} from "hurdak/lib/hurdak"
+import {ensurePlural, chunk} from "hurdak/lib/hurdak"
 import {now, sleep, tryJson, timedelta, hash} from "src/util/misc"
 import {Tags, roomAttrs, isRelay, isShareableRelay, normalizeRelayUrl} from "src/util/nostr"
 import {topics, people, userEvents, relays, rooms, routes} from "src/agent/db"
@@ -52,24 +51,6 @@ const updatePerson = (pubkey, data) => {
   }
 }
 
-const verifyNip05 = (pubkey, alias) =>
-  nip05.queryProfile(alias).then(result => {
-    if (result?.pubkey === pubkey) {
-      updatePerson(pubkey, {verified_as: alias})
-
-      if (result.relays?.length > 0) {
-        const urls = result.relays.filter(isRelay)
-
-        relays.patch(urls.map(url => ({url: normalizeRelayUrl(url)})))
-
-        urls.forEach(url => {
-          addRoute(pubkey, url, "nip05", "write", now())
-          addRoute(pubkey, url, "nip05", "read", now())
-        })
-      }
-    }
-  }, noop)
-
 addHandler(0, e => {
   tryJson(() => {
     const kind0 = JSON.parse(e.content)
@@ -78,10 +59,6 @@ addHandler(0, e => {
 
     if (e.created_at < person?.kind0_updated_at) {
       return
-    }
-
-    if (kind0.nip05) {
-      verifyNip05(e.pubkey, kind0.nip05)
     }
 
     updatePerson(e.pubkey, {

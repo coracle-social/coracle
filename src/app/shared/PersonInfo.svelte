@@ -1,16 +1,17 @@
 <script lang="ts">
-  import {last} from "ramda"
   import {fly} from "src/util/transition"
   import {displayPerson} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
-  import {social} from "src/system"
+  import {social, nip05} from "src/system"
   import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
 
   export let person
   export let hasPetname = null
+
+  const handle = nip05.getHandle(person.pubkey)
 
   const unfollow = async ({pubkey}) => {
     await social.unfollow(pubkey)
@@ -44,10 +45,10 @@
       <div class="flex items-start justify-between gap-2">
         <div class="flex flex-col gap-2">
           <h1 class="text-xl">{displayPerson(person)}</h1>
-          {#if person.verified_as}
+          {#if handle}
             <div class="flex gap-1 text-sm">
               <i class="fa fa-user-check text-accent" />
-              <span class="text-gray-1">{last(person.verified_as.split("@"))}</span>
+              <span class="text-gray-1">{nip05.displayHandle(handle)}</span>
             </div>
           {/if}
         </div>

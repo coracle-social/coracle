@@ -13,6 +13,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
+  import {nip05} from "src/system"
   import user from "src/agent/user"
   import {getRelaysForEventParent} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
@@ -40,6 +41,7 @@
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
   const author = watch("people", () => getPersonWithFallback(note.pubkey))
+  const handle = watch(nip05.handles, () => nip05.getHandle(note.pubkey))
 
   let border, childrenContainer, noteContainer
 
@@ -130,7 +132,7 @@
                 class="flex items-center gap-2 pr-16 text-lg font-bold"
                 on:click={() => modal.push({type: "person/feed", pubkey: $author.pubkey})}>
                 <span>{displayPerson($author)}</span>
-                {#if $author.verified_as}
+                {#if $handle}
                   <i class="fa fa-circle-check text-sm text-accent" />
                 {/if}
               </Anchor>

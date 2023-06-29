@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {last, nth} from "ramda"
+  import {nth} from "ramda"
   import {displayPerson} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
-  import {keys, social} from "src/system"
+  import {keys, social, nip05} from "src/system"
   import user from "src/agent/user"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
@@ -18,6 +18,7 @@
   const {mutes} = user
   const getRelays = () => sampleRelays(getPubkeyWriteRelays(pubkey))
   const person = watch("people", () => getPersonWithFallback(pubkey))
+  const handle = watch(nip05.handles, () => nip05.getHandle(pubkey))
 
   $: muted = $mutes.map(nth(1)).includes(pubkey)
 
@@ -40,10 +41,10 @@
       <PersonCircle size={14} person={$person} />
       <div class="flex flex-grow flex-col gap-2">
         <h2 class="text-lg">{displayPerson($person)}</h2>
-        {#if $person.verified_as}
+        {#if $handle}
           <div class="flex gap-1 text-sm">
             <i class="fa fa-user-check text-accent" />
-            <span class="opacity-75">{last($person.verified_as.split("@"))}</span>
+            <span class="opacity-75">{nip05.displayHandle($handle)}</span>
           </div>
         {/if}
       </div>
