@@ -12,7 +12,6 @@ const profile = synced("agent/user/profile", {
   pubkey: null,
   kind0: null,
   lnurl: null,
-  zapper: null,
   rooms_joined: [],
   last_checked: {},
   relays: pool.defaultRelays,

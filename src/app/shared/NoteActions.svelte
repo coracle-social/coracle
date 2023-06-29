@@ -4,7 +4,7 @@
   import {tweened} from "svelte/motion"
   import {find, reject, identity, propEq, pathEq, sum, pluck, sortBy} from "ramda"
   import {stringToHue, formatSats, hsl} from "src/util/misc"
-  import {displayRelay, isLike, processZaps} from "src/util/nostr"
+  import {displayRelay, isLike} from "src/util/nostr"
   import {quantify, first} from "hurdak/lib/hurdak"
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
@@ -14,7 +14,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {ENABLE_ZAPS, keys} from "src/system"
+  import {ENABLE_ZAPS, keys, nip57} from "src/system"
   import {getEventPublishRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
   import pool from "src/agent/pool"
@@ -29,6 +29,7 @@
   export let setFeedRelay
 
   const {canSign} = keys
+  const zapper = nip57.zappers.get(note.pubkey)
   const bech32Note = nip19.noteEncode(note.id)
   const nevent = nip19.neventEncode({id: note.id, relays: [note.seen_on]})
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
@@ -70,12 +71,14 @@
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
   $: $likesCount = allLikes.length
 
-  $: zaps = processZaps(note.zaps, $author)
+  $: zaps = nip57.processZaps(note.zaps, note.pubkey)
   $: zap = zap || find(pathEq(["request", "pubkey"], user.getPubkey()), zaps)
-  $: allZaps = zap ? zaps.filter(n => n.id !== zap?.id).concat(processZaps([zap], $author)) : zaps
+  $: allZaps = zap
+    ? zaps.filter(n => n.id !== zap?.id).concat(nip57.processZaps([zap], note.pubkey))
+    : zaps
   $: $zapsTotal = sum(pluck("invoiceAmount", allZaps)) / 1000
 
-  $: canZap = $author?.zapper && $author?.pubkey !== user.getPubkey()
+  $: canZap = zapper && $author?.pubkey !== user.getPubkey()
   $: $repliesCount = note.replies.length
 
   $: {
@@ -131,8 +134,7 @@
     {#if ENABLE_ZAPS}
       <button
         class={cx("w-20 text-left", {
-          "pointer-events-none opacity-50":
-            disableActions || $author.pubkey === user.getPubkey() || !$author.zapper,
+          "pointer-events-none opacity-50": disableActions || !canZap,
           "text-accent": zap,
         })}
         on:click={startZap}>

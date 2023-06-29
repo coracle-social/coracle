@@ -62,10 +62,6 @@ const Meta = {
       stats.subsCount += 1
       stats.activeSubsCount += 1
       stats.lastRequest = Date.now()
-
-      if (stats.activeSubsCount > 10) {
-        warn(`Relay ${url} has ${stats.activeSubsCount} active subscriptions`)
-      }
     })
   },
   onSubscriptionEnd(urls) {

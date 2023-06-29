@@ -1,4 +1,6 @@
 import {fetchJson, tryFunc, tryJson, hexToBech32, bech32ToHex} from "src/util/misc"
+import {invoiceAmount} from "src/util/lightning"
+import {Tags} from "src/util/nostr"
 import {Table} from "src/agent/db"
 
 const getLnUrl = address => {
@@ -18,7 +20,7 @@ const getLnUrl = address => {
 }
 
 export default ({sync, sortByGraph}) => {
-  const zappers = new Table("nip57/zappers", "pubkey", {max: 5000, sort: sortByGraph})
+  const zappers = new Table("zappers", "pubkey", {max: 5000, sort: sortByGraph})
 
   sync.addHandler(0, e => {
     tryJson(async () => {
@@ -54,7 +56,57 @@ export default ({sync, sortByGraph}) => {
     })
   })
 
+  const processZaps = (zaps, pubkey) => {
+    const zapper = zappers.get(pubkey)
+
+    if (!zapper) {
+      return []
+    }
+
+    return zaps
+      .map(zap => {
+        const zapMeta = Tags.from(zap).asMeta()
+
+        return tryJson(() => ({
+          ...zap,
+          invoiceAmount: invoiceAmount(zapMeta.bolt11),
+          request: JSON.parse(zapMeta.description),
+        }))
+      })
+      .filter(zap => {
+        if (!zap) {
+          return false
+        }
+
+        // Don't count zaps that the user sent himself
+        if (zap.request.pubkey === pubkey) {
+          return false
+        }
+
+        const {invoiceAmount, request} = zap
+        const reqMeta = Tags.from(request).asMeta()
+
+        // Verify that the zapper actually sent the requested amount (if it was supplied)
+        if (reqMeta.amount && parseInt(reqMeta.amount) !== invoiceAmount) {
+          return false
+        }
+
+        // If the sending client provided an lnurl tag, verify that too
+        if (reqMeta.lnurl && reqMeta.lnurl !== zapper.lnurl) {
+          return false
+        }
+
+        // Verify that the zap note actually came from the recipient's zapper
+        if (zapper.nostrPubkey !== zap.pubkey) {
+          return false
+        }
+
+        return true
+      })
+  }
+
   return {
     zappers,
+    processZaps,
   }
 }

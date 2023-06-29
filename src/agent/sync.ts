@@ -1,17 +1,7 @@
 import {partition, is, uniq, reject, nth, objOf, pick, identity} from "ramda"
 import {nip05} from "nostr-tools"
 import {noop, ensurePlural, chunk} from "hurdak/lib/hurdak"
-import {
-  hexToBech32,
-  tryFunc,
-  bech32ToHex,
-  tryFetch,
-  now,
-  sleep,
-  tryJson,
-  timedelta,
-  hash,
-} from "src/util/misc"
+import {now, sleep, tryJson, timedelta, hash} from "src/util/misc"
 import {Tags, roomAttrs, isRelay, isShareableRelay, normalizeRelayUrl} from "src/util/nostr"
 import {topics, people, userEvents, relays, rooms, routes} from "src/agent/db"
 import {uniqByUrl} from "src/agent/relays"
@@ -80,37 +70,6 @@ const verifyNip05 = (pubkey, alias) =>
     }
   }, noop)
 
-const verifyZapper = async (pubkey, address) => {
-  let url
-
-  // Try to parse it as a lud06 LNURL or as a lud16 address
-  if (address.startsWith("lnurl1")) {
-    url = tryFunc(() => bech32ToHex(address))
-  } else if (address.includes("@")) {
-    const [name, domain] = address.split("@")
-
-    if (domain && name) {
-      url = `https://${domain}/.well-known/lnurlp/${name}`
-    }
-  }
-
-  if (!url) {
-    return
-  }
-
-  const res = await tryFetch(() => fetch(url))
-  const zapper = await tryJson(() => res?.json())
-  const lnurl = hexToBech32("lnurl", url)
-
-  if (zapper?.allowsNostr && zapper?.nostrPubkey) {
-    updatePerson(pubkey, {
-      lnurl,
-      // Trim zapper so we don't have so much metadata filling up memory
-      zapper: pick(["callback", "maxSendable", "minSendable", "nostrPubkey"], zapper),
-    })
-  }
-}
-
 addHandler(0, e => {
   tryJson(() => {
     const kind0 = JSON.parse(e.content)
@@ -123,12 +82,6 @@ addHandler(0, e => {
 
     if (kind0.nip05) {
       verifyNip05(e.pubkey, kind0.nip05)
-    }
-
-    const address = kind0.lud16 || kind0.lud06
-
-    if (address) {
-      verifyZapper(e.pubkey, address.toLowerCase())
     }
 
     updatePerson(e.pubkey, {

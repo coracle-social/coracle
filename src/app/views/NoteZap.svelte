@@ -13,7 +13,7 @@
   import {getEventPublishRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
   import network from "src/agent/network"
-  import {keys, settings} from "src/system"
+  import {keys, settings, nip57} from "src/system"
   import cmd from "src/agent/cmd"
 
   export let note
@@ -33,13 +33,22 @@
   const loadZapInvoice = async () => {
     zap.loading = true
 
-    const {zapper, lnurl} = author
     const amount = zap.amount * 1000
+    const zapper = nip57.zappers.get(note.pubkey)
     const relays = getEventPublishRelays(note)
     const urls = pluck("url", relays)
-    const publishable = cmd.requestZap(urls, zap.message, note.pubkey, note.id, amount, lnurl)
+    const publishable = cmd.requestZap(
+      urls,
+      zap.message,
+      note.pubkey,
+      note.id,
+      amount,
+      zapper.lnurl
+    )
     const event = encodeURI(JSON.stringify(await keys.sign(publishable.event)))
-    const res = await fetchJson(`${zapper.callback}?amount=${amount}&nostr=${event}&lnurl=${lnurl}`)
+    const res = await fetchJson(
+      `${zapper.callback}?amount=${amount}&nostr=${event}&lnurl=${zapper.lnurl}`
+    )
 
     // If they closed the dialog before fetch resolved, we're done
     if (!zap) {
