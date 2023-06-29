@@ -152,7 +152,9 @@ export const uniqByUrl = pipe(uniqBy(prop("url")), filter(prop("url")))
 export const sortByScore = sortBy(r => -r.score)
 
 export const sampleRelays = (relays, scale = 1) => {
-  let limit = user.getSetting("relayLimit")
+  // TODO
+  // let limit = settings.getSetting("relayLimit")
+  let limit = 10
 
   // Allow the caller to scale down how many relays we're bothering depending on
   // the use case, but only if we have enough relays to handle it

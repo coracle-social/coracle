@@ -14,7 +14,7 @@ import {Tags, isNotification, userKinds, noteKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import {notifications, watch, userEvents, contacts, rooms} from "src/agent/db"
-import {DEFAULT_FOLLOWS, ENABLE_ZAPS, keys, social} from "src/system"
+import {DEFAULT_FOLLOWS, ENABLE_ZAPS, keys, social, settings} from "src/system"
 import network from "src/agent/network"
 import pool from "src/agent/pool"
 import {getUserReadRelays, getUserRelays} from "src/agent/relays"
@@ -45,7 +45,7 @@ setTimeout(() => {
       return false
     }
 
-    if (!user.getSetting("reportAnalytics")) {
+    if (!settings.getSetting("reportAnalytics")) {
       return false
     }
 
@@ -69,7 +69,7 @@ export const logUsage = async name => {
   // anything about them
   const pubkey = user.getPubkey()
   const ident = pubkey ? hash(pubkey) : "unknown"
-  const {dufflepudUrl, reportAnalytics} = user.getSettings()
+  const {dufflepudUrl, reportAnalytics} = settings.getSettings()
 
   if (reportAnalytics) {
     try {

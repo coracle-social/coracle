@@ -13,15 +13,14 @@
   import {getEventPublishRelays} from "src/agent/relays"
   import {getPersonWithFallback} from "src/agent/db"
   import network from "src/agent/network"
-  import user from "src/agent/user"
-  import {keys} from "src/system"
+  import {keys, settings} from "src/system"
   import cmd from "src/agent/cmd"
 
   export let note
 
   let sub
   let zap = {
-    amount: user.getSetting("defaultZap"),
+    amount: settings.getSetting("defaultZap"),
     message: "",
     invoice: null,
     loading: false,

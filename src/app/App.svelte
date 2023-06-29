@@ -125,7 +125,7 @@
     }
 
     const interval = setInterval(async () => {
-      const {dufflepudUrl} = user.getSettings()
+      const {dufflepudUrl} = system.settings.getSettings()
 
       if (!dufflepudUrl) {
         return

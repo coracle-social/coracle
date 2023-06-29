@@ -13,14 +13,6 @@ const profile = synced("agent/user/profile", {
   kind0: null,
   lnurl: null,
   zapper: null,
-  settings: {
-    relayLimit: 20,
-    defaultZap: 21,
-    showMedia: true,
-    reportAnalytics: true,
-    dufflepudUrl: import.meta.env.VITE_DUFFLEPUD_URL,
-    multiplextrUrl: import.meta.env.VITE_MULTIPLEXTR_URL,
-  },
   rooms_joined: [],
   last_checked: {},
   relays: pool.defaultRelays,
@@ -28,7 +20,6 @@ const profile = synced("agent/user/profile", {
   lists: [],
 })
 
-const settings = derived(profile, prop("settings"))
 const roomsJoined = derived(profile, prop("rooms_joined")) as Readable<string>
 const lastChecked = derived(profile, prop("last_checked")) as Readable<Record<string, number>>
 const relays = derived(profile, p =>
@@ -43,7 +34,6 @@ let profileCopy = null
 
 profile.subscribe($profile => {
   profileCopy = $profile
-  pool.Config.multiplextrUrl = $profile.settings.multiplextrUrl
 })
 
 // Watch pubkey and add to profile
@@ -60,18 +50,6 @@ export default {
   profile,
   getProfile: () => profileCopy,
   getPubkey: () => profileCopy?.pubkey,
-
-  // Settings
-
-  settings,
-  getSettings: () => profileCopy.settings,
-  getSetting: k => profileCopy.settings[k],
-  dufflepud: path => `${profileCopy.settings.dufflepudUrl}${path}`,
-  async setSettings(settings) {
-    profile.update($p => ({...$p, settings}))
-
-    return this.setAppData("settings/v1", settings)
-  },
 
   // App data
 

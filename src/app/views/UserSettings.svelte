@@ -6,13 +6,13 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import user from "src/agent/user"
+  import {settings} from "src/system"
   import pool from "src/agent/pool"
 
-  let values = {...user.getSettings()}
+  let values = {...settings.getSettings()}
 
   const submit = () => {
-    user.setSettings(values)
+    settings.setSettings(values)
 
     toast.show("info", "Your settings have been saved!")
   }

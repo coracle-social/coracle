@@ -244,15 +244,6 @@ addHandler(
 
 addHandler(
   30078,
-  profileHandler("settings", async (e, p) => {
-    if (Tags.from(e).getMeta("d") === "coracle/settings/v1") {
-      return {...p.settings, ...(await keys.decryptJson(e.content))}
-    }
-  })
-)
-
-addHandler(
-  30078,
   profileHandler("last_checked", async (e, p) => {
     if (Tags.from(e).getMeta("d") === "coracle/last_checked/v1") {
       try {
