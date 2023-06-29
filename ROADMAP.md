@@ -1,5 +1,9 @@
 # Current
 
+- [ ] Refactor
+  - [ ] Convert watch to take the table object instead of its name
+  - [ ] Test migration
+- [ ] Show full nip05 unless it starts with an underscore
 - [ ] nsec bunker support
 - [ ] Add relayset support with kind 30022
 - [ ] White-labeled

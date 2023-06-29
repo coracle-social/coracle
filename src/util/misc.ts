@@ -205,10 +205,6 @@ export const getter = store => {
   return () => value
 }
 
-// DANGER: don't use this if it's disposable, it does not clean up subscriptions,
-// and will cause a memory leak
-export const gettable = store => Object.assign(store, {get: getter(store)})
-
 export const shuffle = sortBy(() => Math.random() > 0.5)
 
 export const batch = (t, f) => {
@@ -266,9 +262,15 @@ export const tryFunc = (f, ignore = null) => {
       return r
     }
   } catch (e) {
-    if (!ignore || !e.toString().includes(ignore)) {
-      warn(e)
+    if (ignore === false) {
+      return
     }
+
+    if (ignore && e.toString().includes(ignore)) {
+      return
+    }
+
+    warn(e)
   }
 }
 

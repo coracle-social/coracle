@@ -19,10 +19,11 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
       Tags.from(e).getMeta("d") === "coracle/settings/v1" &&
       e.created_at > getSetting("lastUpdated")
     ) {
-      store.set({
-        ...(await keys.decryptJson(e.content)),
-        lastUpdated: e.created_at,
-      })
+      const updates = await keys.decryptJson(e.content)
+
+      if (updates) {
+        store.set({...getSettings(), ...updates, lastUpdated: e.created_at})
+      }
     }
   })
 
