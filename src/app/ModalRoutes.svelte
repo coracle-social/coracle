@@ -9,7 +9,6 @@
   import LoginBunker from "src/app/views/LoginBunker.svelte"
   import Onboarding from "src/app/views/Onboarding.svelte"
   import NoteCreate from "src/app/views/NoteCreate.svelte"
-  import NoteDelete from "src/app/views/NoteDelete.svelte"
   import NoteZap from "src/app/views/NoteZap.svelte"
   import NoteShare from "src/app/views/NoteShare.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
@@ -34,8 +33,6 @@
   {/key}
 {:else if m.type === "note/create"}
   <NoteCreate pubkey={m.pubkey} quote={m.quote} writeTo={m.relays} />
-{:else if m.type === "note/delete"}
-  <NoteDelete note={m.note} />
 {:else if m.type === "note/zap"}
   <NoteZap note={m.note} />
 {:else if m.type === "note/share"}
