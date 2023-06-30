@@ -28,7 +28,7 @@ const directory = initDirectory({sync, sortByGraph: social.sortByGraph})
 const nip05 = initNip05({sync, sortByGraph: social.sortByGraph})
 const nip57 = initNip57({sync, sortByGraph: social.sortByGraph})
 const routing = initRouting({sync, sortByGraph: social.sortByGraph})
-const content = initContent({sync})
+const content = initContent({keys, sync, getCmd, getUserWriteRelays})
 const cmd = initCmd({keys, sync, pool, displayPubkey: directory.displayPubkey})
 
 // Glue stuff together

@@ -1,5 +1,5 @@
 <script>
-  import {pluck, find} from "ramda"
+  import {pluck} from "ramda"
   import {Tags} from "src/util/nostr"
   import {modal, toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
@@ -9,7 +9,6 @@
   import Input from "src/partials/Input.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import {directory, content, routing} from "src/system"
-  import user from "src/agent/user"
 
   export let list
 
@@ -43,15 +42,18 @@
       return toast.show("error", "A name is required for your list")
     }
 
-    if (
-      find(e => e.id !== list?.id && Tags.from(e).getMeta("d") === values.name, user.getLists())
-    ) {
+    const duplicates = content.getUserLists({
+      name: values.name,
+      naddr: {$ne: list?.naddr},
+    })
+
+    if (duplicates.length > 0) {
       return toast.show("error", "That name is already in use")
     }
 
     const {name, params, relays} = values
 
-    user.putList(list?.id, name, params, relays)
+    content.putList(name, params, relays)
     toast.show("info", "Your list has been saved!")
     modal.pop()
   }

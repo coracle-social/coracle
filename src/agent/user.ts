@@ -1,4 +1,4 @@
-import type {Relay, MyEvent} from "src/util/types"
+import type {Relay} from "src/util/types"
 import type {Readable} from "svelte/store"
 import {slice, uniqBy, without, reject, prop, pipe, assoc, whereEq, when, concat, map} from "ramda"
 import {findReplyId, findRootId} from "src/util/nostr"
@@ -26,7 +26,6 @@ const relays = derived(profile, p =>
   pool.forceRelays.length > 0 ? pool.forceRelays : p.relays
 ) as Readable<Array<Relay>>
 const mutes = derived(profile, prop("mutes")) as Readable<Array<[string, string]>>
-const lists = derived(profile, prop("lists")) as Readable<Array<MyEvent>>
 
 // Keep a copy so we can avoid calling `get` all the time
 
@@ -128,22 +127,5 @@ export default {
   },
   removeMute(pubkey) {
     return this.updateMutes(reject(t => t[1] === pubkey))
-  },
-
-  // Lists
-
-  lists,
-  getLists: () => profileCopy.lists,
-  async putList(id, name, params, relays) {
-    const tags = [["d", name]].concat(params).concat(relays)
-
-    if (id) {
-      await ext.cmd.deleteEvent([id]).publish(profileCopy.relays)
-    }
-
-    await ext.cmd.createList(tags).publish(profileCopy.relays)
-  },
-  removeList(id) {
-    return ext.cmd.deleteEvent([id]).publish(profileCopy.relays)
   },
 }

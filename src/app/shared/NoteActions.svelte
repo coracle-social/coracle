@@ -47,7 +47,7 @@
   }
 
   const deleteReaction = e => {
-    cmd.deleteEvent([e.id]).publish(getEventPublishRelays(note))
+    cmd.deleteEvents([e.id]).publish(getEventPublishRelays(note))
 
     like = null
     likes = reject(propEq("id", e.id), likes)

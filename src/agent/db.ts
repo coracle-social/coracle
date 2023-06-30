@@ -21,7 +21,7 @@ export const loki = new Loki("agent.db", {
 
     listener.connect()
 
-    ready.set(true)
+    setTimeout(() => ready.set(true), 100)
   },
 })
 
@@ -103,7 +103,7 @@ export class Table {
     }
   }
   remove(ks) {
-    this._coll.chain().removeWhere({[this.pk]: {$in: ks}})
+    this._coll.removeWhere({[this.pk]: {$in: ks}})
   }
   prune() {
     if (this._coll.count() < this._max * 1.1) {

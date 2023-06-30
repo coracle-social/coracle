@@ -80,7 +80,9 @@ export default ({keys, sync, pool, displayPubkey}) => {
     return new PublishableEvent(9734, {content, tags, tagClient: false})
   }
 
-  const deleteEvent = ids => new PublishableEvent(5, {tags: ids.map(id => ["e", id])})
+  const deleteEvents = ids => new PublishableEvent(5, {tags: ids.map(id => ["e", id])})
+
+  const deleteNaddrs = naddrs => new PublishableEvent(5, {tags: naddrs.map(naddr => ["a", naddr])})
 
   const createLabel = payload => new PublishableEvent(1985, payload)
 
@@ -186,7 +188,8 @@ export default ({keys, sync, pool, displayPubkey}) => {
     createReaction,
     createReply,
     requestZap,
-    deleteEvent,
+    deleteEvents,
+    deleteNaddrs,
     createLabel,
     PublishableEvent,
   }

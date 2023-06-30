@@ -119,11 +119,16 @@
 
   let p = Promise.resolve()
 
-  // If we have a search term we need to use only relays that support search
-  const getRelays = () =>
-    filter.search
+  const getRelays = () => {
+    if (relays) {
+      return relays
+    }
+
+    // If we have a search term we need to use only relays that support search
+    return filter.search
       ? [{url: "wss://relay.nostr.band"}]
-      : sampleRelays(relays || getAllPubkeyWriteRelays(compileFilter(filter).authors || []))
+      : sampleRelays(getAllPubkeyWriteRelays(compileFilter(filter).authors || []))
+  }
 
   const loadMore = async () => {
     const _key = key

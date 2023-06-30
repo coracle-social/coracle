@@ -1,4 +1,4 @@
-import {partition, is, reject, pick, identity} from "ramda"
+import {is, pick, identity} from "ramda"
 import {ensurePlural, chunk} from "hurdak/lib/hurdak"
 import {sleep, tryJson} from "src/util/misc"
 import {Tags, roomAttrs, isRelay, normalizeRelayUrl} from "src/util/nostr"
@@ -114,33 +114,6 @@ addHandler(
 
         return {url, read, write}
       })
-  })
-)
-
-addHandler(
-  30001,
-  userHandler(e => {
-    const profile = user.getProfile()
-    const listName = Tags.from(e).getMeta("d")
-    const [duplicates, lists] = partition(
-      l => Tags.from(l).getMeta("d") === listName,
-      profile.lists
-    )
-
-    if (e.created_at < duplicates[0]?.created_at) {
-      return
-    }
-
-    user.profile.set({...profile, lists: lists.concat(e)})
-  })
-)
-
-addHandler(
-  5,
-  profileHandler("lists", (e, p) => {
-    const ids = new Set(Tags.from(e).type("e").values().all())
-
-    return reject(e => ids.has(e.id), p.lists)
   })
 )
 

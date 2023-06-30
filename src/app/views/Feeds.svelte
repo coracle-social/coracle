@@ -1,18 +1,18 @@
 <script lang="ts">
   import cx from "classnames"
   import type {DynamicFilter} from "src/util/types"
-  import {indexBy, objOf} from "ramda"
+  import {objOf} from "ramda"
   import {Tags, noteKinds} from "src/util/nostr"
   import {modal, theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
-  import {keys, social} from "src/system"
-  import user from "src/agent/user"
+  import {keys, content, social} from "src/system"
+  import {watch} from "src/agent/db"
 
   const {canSign} = keys
-  const {lists} = user
+  const lists = watch(content.lists, () => content.getUserLists())
 
   let relays = null
   let key = Math.random()
@@ -21,14 +21,12 @@
     authors: social.getUserFollows().length > 0 ? "follows" : "network",
   } as DynamicFilter
 
-  $: listsByName = indexBy(l => Tags.from(l).getMeta("d"), $lists)
-
   const showLists = () => {
     modal.push({type: "list/list"})
   }
 
-  const loadListFeed = name => {
-    const list = $lists.find(l => Tags.from(l).getMeta("d") === name)
+  const loadListFeed = naddr => {
+    const list = content.lists.get(naddr)
     const authors = Tags.from(list).pubkeys()
     const topics = Tags.from(list).topics()
     const urls = Tags.from(list).urls()
@@ -54,7 +52,7 @@
 </script>
 
 <Content>
-  {#if !user.getProfile()}
+  {#if !keys.getPubkey()}
     <Content size="lg" class="text-center">
       <p class="text-xl">Don't have an account?</p>
       <p>
@@ -72,16 +70,15 @@
               <div
                 slot="tooltip"
                 class="flex flex-col items-start overflow-hidden rounded border border-solid border-gray-8 bg-black">
-                {#each $lists as e (e.id)}
-                  {@const meta = Tags.from(e).asMeta()}
+                {#each $lists as list (list.naddr)}
                   <button
                     class={cx("w-full px-3 py-2 text-left transition-colors", {
                       "hover:bg-gray-7": $theme === "dark",
                       "hover:bg-gray-1": $theme === "light",
                     })}
-                    on:click={() => loadListFeed(meta.d)}>
+                    on:click={() => loadListFeed(list.naddr)}>
                     <i class="fa fa-scroll fa-sm mr-1" />
-                    {meta.d}
+                    {list.name}
                   </button>
                 {/each}
                 <button

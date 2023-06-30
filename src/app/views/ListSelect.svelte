@@ -7,11 +7,12 @@
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
-  import user from "src/agent/user"
+  import {content} from "src/system"
+  import {watch} from "src/agent/db"
 
   export let item
 
-  const {lists} = user
+  const lists = watch(content.lists, content.getUserLists)
   const label = item.type === "p" ? "person" : "topic"
 
   const modifyList = updateIn("tags", tags => (tags || []).concat([[item.type, item.value]]))

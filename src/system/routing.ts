@@ -62,7 +62,7 @@ export default ({sync, sortByGraph}) => {
   sync.addHandler(10002, e => {
     addPolicies(
       e,
-      e.tags.map(([_, url, mode]) => {
+      e.tags.map(([_, url, mode = "read"]) => {
         const write = mode === "write"
         const read = mode === "read"
 

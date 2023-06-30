@@ -1,23 +1,16 @@
 <script type="ts">
-  import {indexBy} from "ramda"
-  import {Tags} from "src/util/nostr"
   import {modal, appName} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
-  import user from "src/agent/user"
+  import {content} from "src/system"
+  import {watch} from "src/agent/db"
 
-  const {lists} = user
-
-  $: listsByName = indexBy(l => Tags.from(l).getMeta("d"), $lists)
+  const lists = watch(content.lists, () => content.getUserLists())
 
   const createFeed = () => {
     modal.push({type: "list/edit"})
-  }
-
-  const removeList = e => {
-    user.removeList(e.id)
   }
 
   const editList = list => {
@@ -37,18 +30,17 @@
     handing using the "<i class="fa fa-plus" /> List" button above, or by clicking the
     <i class="fa fa-scroll px-1" /> icon that appears throughout {appName}.
   </p>
-  {#each $lists as e (e.id)}
-    {@const meta = Tags.from(e).asMeta()}
+  {#each $lists as list (list.naddr)}
     <div class="flex justify-start gap-3">
       <i
         class="fa fa-sm fa-trash cursor-pointer py-3"
-        on:click|stopPropagation={() => removeList(e)} />
+        on:click|stopPropagation={() => content.removeList(list.naddr)} />
       <div class="flex w-full justify-between">
         <div>
-          <strong>{meta.d}</strong>
-          <ListSummary list={e} />
+          <strong>{list.name}</strong>
+          <ListSummary {list} />
         </div>
-        <Anchor class="underline" on:click={() => editList(e)}>Edit</Anchor>
+        <Anchor class="underline" on:click={() => editList(list)}>Edit</Anchor>
       </div>
     </div>
   {:else}
