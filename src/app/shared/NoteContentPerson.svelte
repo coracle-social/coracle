@@ -1,8 +1,7 @@
 <script lang="ts">
-  import {displayPerson} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
-  import {getPersonWithFallback} from "src/agent/db"
+  import {directory} from "src/system"
 
   export let value
 
@@ -10,5 +9,5 @@
 </script>
 
 @<Anchor class="underline" killEvent on:click={openPerson}>
-  {displayPerson(getPersonWithFallback(value.pubkey))}
+  {directory.displayPubkey(value.pubkey)}
 </Anchor>

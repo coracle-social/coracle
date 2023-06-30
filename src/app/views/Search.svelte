@@ -12,10 +12,10 @@
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Scan from "src/app/shared/Scan.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
+  import {keys, directory} from "src/system"
   import {sampleRelays, getUserReadRelays} from "src/agent/relays"
   import network from "src/agent/network"
-  import {watch, people} from "src/agent/db"
-  import user from "src/agent/user"
+  import {watch} from "src/agent/db"
 
   let q = ""
   let options = []
@@ -25,7 +25,7 @@
     modal.push({type: "topic/feed", topic})
   }
 
-  const loadPeople = debounce(500, search => {
+  const loadProfiles = debounce(500, search => {
     // If we have a query, search using nostr.band. If not, ask for random profiles.
     // This allows us to populate results even if search isn't supported by forced urls
     if (q.length > 2) {
@@ -33,7 +33,7 @@
         relays: sampleRelays([{url: "wss://relay.nostr.band"}]),
         filter: [{kinds: [0], search, limit: 10}],
       })
-    } else if (people._coll.count() < 50) {
+    } else if (directory.profiles._coll.count() < 50) {
       network.load({
         relays: getUserReadRelays(),
         filter: [{kinds: [0], limit: 50}],
@@ -68,26 +68,24 @@
     t.all().map(topic => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
   )
 
-  const personOptions = watch(["people"], t =>
-    t
-      .all({
-        pubkey: {$ne: user.getPubkey()},
-        $or: [{"kind0.name": {$type: "string"}}, {"kind0.display_name": {$type: "string"}}],
-      })
-      .map(person => {
-        const {name, nip05, about, display_name} = person.kind0
+  const profileOptions = watch(directory.profiles, () =>
+    directory
+      .getNamedProfiles()
+      .filter(profile => profile.pubkey !== keys.getPubkey())
+      .map(profile => {
+        const {pubkey, name, nip05, display_name} = profile
 
         return {
-          person,
-          type: "person",
-          id: person.pubkey,
-          text: "@" + [name, about, nip05, display_name].filter(identity).join(" "),
+          profile,
+          id: pubkey,
+          type: "profile",
+          text: "@" + [name, nip05, display_name].filter(identity).join(" "),
         }
       })
   )
 
   $: {
-    loadPeople(q)
+    loadProfiles(q)
     tryParseEntity(q)
   }
 
@@ -95,15 +93,15 @@
 
   $: {
     if (firstChar === "@") {
-      options = $personOptions
+      options = $profileOptions
     } else if (firstChar === "#") {
       options = $topicOptions
     } else {
-      options = $personOptions.concat($topicOptions)
+      options = $profileOptions.concat($topicOptions)
     }
   }
 
-  $: search = fuzzy(options, {keys: ["text"]})
+  $: search = fuzzy(options, {keys: ["text"], threshold: 0.3})
 
   document.title = "Search"
 </script>
@@ -129,8 +127,8 @@
       <BorderLeft on:click={() => openTopic(result.topic.name)}>
         #{result.topic.name}
       </BorderLeft>
-    {:else if result.type === "person"}
-      <PersonInfo person={result.person} />
+    {:else if result.type === "profile"}
+      <PersonInfo pubkey={result.id} />
     {/if}
   {/each}
 </Content>

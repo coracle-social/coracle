@@ -1,7 +1,7 @@
 import type {DisplayEvent} from "src/util/types"
 import {is, fromPairs, mergeLeft, last, identity, objOf, prop, flatten, uniq} from "ramda"
 import {nip19} from "nostr-tools"
-import {ensurePlural, ellipsize, first} from "hurdak/lib/hurdak"
+import {ensurePlural, first} from "hurdak/lib/hurdak"
 import {tryJson, avg} from "src/util/misc"
 
 export const noteKinds = [1, 1985, 30023, 1063, 9802]
@@ -112,24 +112,6 @@ export const findReplyId = e => findReply(e)?.[1]
 export const findRoot = e => prop("root", findReplyAndRoot(e))
 
 export const findRootId = e => findRoot(e)?.[1]
-
-export const displayPerson = p => {
-  if (p.kind0?.display_name) {
-    return ellipsize(p.kind0?.display_name, 60)
-  }
-
-  if (p.kind0?.name) {
-    return ellipsize(p.kind0?.name, 60)
-  }
-
-  try {
-    return nip19.npubEncode(p.pubkey).slice(-8)
-  } catch (e) {
-    console.error(e)
-
-    return ""
-  }
-}
 
 export const displayRelay = ({url}) => last(url.split("://"))
 

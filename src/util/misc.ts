@@ -374,9 +374,9 @@ export class EventBus {
 }
 
 export const annotateMedia = url => {
-  if (url.match(/\.(jpg|jpeg|png|gif)/)) {
+  if (url.match(/\.(jpg|jpeg|png|gif|webp)/)) {
     return {type: "image", url}
-  } else if (url.match(/\.(mov|mp4)/)) {
+  } else if (url.match(/\.(mov|webm|mp4)/)) {
     return {type: "video", url}
   } else {
     return {type: "preview", url}

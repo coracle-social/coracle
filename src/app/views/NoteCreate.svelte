@@ -5,7 +5,6 @@
   import {fly} from "src/util/transition"
   import {writable} from "svelte/store"
   import {annotateMedia} from "src/util/misc"
-  import {displayPerson} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import Compose from "src/partials/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
@@ -16,8 +15,8 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
+  import {directory} from "src/system"
   import {getUserWriteRelays, getRelayForPersonHint} from "src/agent/relays"
-  import {getPersonWithFallback} from "src/agent/db"
   import cmd from "src/agent/cmd"
   import user from "src/agent/user"
   import {toast, modal} from "src/partials/state"
@@ -49,10 +48,10 @@
 
     if (quote) {
       const {pubkey} = quote
-      const person = getPersonWithFallback(pubkey)
+      const profile = directory.getProfile(pubkey)
       const pHint = getRelayForPersonHint(pubkey)
 
-      tags.push(["p", pubkey, pHint?.url || "", displayPerson(person)])
+      tags.push(["p", pubkey, pHint?.url || "", directory.displayProfile(profile)])
     }
 
     if (content) {
@@ -102,7 +101,7 @@
 
   onMount(() => {
     if (pubkey && pubkey !== user.getPubkey()) {
-      compose.mention(getPersonWithFallback(pubkey))
+      compose.mention(directory.getProfile(pubkey))
     }
 
     if (quote) {
@@ -133,7 +132,7 @@
         </div>
         <div class="flex items-center justify-end gap-2 text-gray-5">
           <small>
-            Posting as @{displayPerson(getPersonWithFallback(user.getPubkey()))}
+            Posting as @{directory.displayPubkey(user.getPubkey())}
           </small>
           <span>•</span>
           <small on:click={togglePreview} class="cursor-pointer underline">

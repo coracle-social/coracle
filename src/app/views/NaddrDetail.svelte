@@ -1,15 +1,14 @@
 <script>
   import {onMount} from "svelte"
   import {first, quantify} from "hurdak/lib/hurdak"
-  import {displayPerson} from "src/util/nostr"
   import {routes} from "src/app/state"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import Spinner from "src/partials/Spinner.svelte"
+  import {directory} from "src/system"
   import network from "src/agent/network"
   import {sampleRelays} from "src/agent/relays"
-  import {getPersonWithFallback} from "src/agent/db"
 
   export let identifier
   export let kind
@@ -18,6 +17,8 @@
 
   let note
   let loading = true
+
+  const display = directory.displayPubkey(pubkey)
 
   onMount(async () => {
     note = first(
@@ -34,9 +35,7 @@
 <Content size="lg">
   <p>
     This is a kind {kind} event called "{identifier}", published by
-    <Anchor class="underline" href={routes.person(pubkey)}
-      >@{displayPerson(getPersonWithFallback(pubkey))}</Anchor
-    >.
+    <Anchor class="underline" href={routes.person(pubkey)}>@{display}</Anchor>.
   </p>
   {#if note?.content}
     <NoteContent showEntire {note} />
@@ -48,8 +47,7 @@
         {#if type !== "d"}
           <li>
             {#if type === "p"}
-              <Anchor class="underline" href={routes.person(value)}
-                >@{displayPerson(getPersonWithFallback(value))}</Anchor>
+              <Anchor class="underline" href={routes.person(value)}>@{display}</Anchor>
             {:else if type === "e"}
               <Anchor class="underline" href={value}>Event {value}</Anchor>
             {:else}

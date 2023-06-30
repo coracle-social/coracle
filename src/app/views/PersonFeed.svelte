@@ -1,13 +1,12 @@
 <script lang="ts">
-  import {displayPerson} from "src/util/nostr"
   import {parseHex} from "src/util/html"
   import {theme, getThemeColor} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonActions from "src/app/shared/PersonActions.svelte"
-  import {nip05} from "src/system"
+  import {nip05, directory} from "src/system"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
-  import {getPersonWithFallback, watch} from "src/agent/db"
+  import {watch} from "src/agent/db"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import PersonNotes from "src/app/shared/PersonNotes.svelte"
@@ -16,7 +15,7 @@
 
   export let pubkey
 
-  const person = watch("people", () => getPersonWithFallback(pubkey))
+  const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
   const handle = watch(nip05.handles, () => nip05.getHandle(pubkey))
 
   let rgb, rgba
@@ -30,7 +29,7 @@
     rgb = `rgba(${color.join(", ")})`
   }
 
-  document.title = displayPerson($person)
+  document.title = directory.displayProfile($profile)
 </script>
 
 <div
@@ -38,18 +37,18 @@
   style="background-size: cover;
          background-image:
           linear-gradient(to bottom, {rgba}, {rgb}),
-          url('{$person.kind0?.banner}')" />
+          url('{$profile.banner}')" />
 
 <Content>
   <div class="z-10 flex gap-4 text-gray-1">
-    <PersonCircle person={$person} size={16} class="sm:h-32 sm:w-32" />
+    <PersonCircle pubkey={$profile.pubkey} size={16} class="sm:h-32 sm:w-32" />
     <div class="flex flex-grow flex-col gap-4">
       <div class="flex items-start justify-between gap-4">
         <div class="flex flex-grow flex-col gap-2">
           <div class="flex items-center gap-2">
             <Anchor href={routes.person(pubkey)}>
               <h1 class="text-2xl">
-                {displayPerson($person)}
+                {directory.displayProfile($profile)}
               </h1>
             </Anchor>
           </div>
@@ -60,10 +59,10 @@
             </div>
           {/if}
         </div>
-        <PersonActions person={$person} />
+        <PersonActions {pubkey} />
       </div>
-      <PersonAbout person={$person} />
-      <PersonStats person={$person} />
+      <PersonAbout {pubkey} />
+      <PersonStats {pubkey} />
     </div>
   </div>
   <div class="relative z-10">

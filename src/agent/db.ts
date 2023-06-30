@@ -79,6 +79,10 @@ export class Table {
     }
   }
   patch(items) {
+    if (loki.dead) {
+      return
+    }
+
     const [updates, creates] = partition(
       item => this.get(item[this.pk]),
       uniqBy(prop(this.pk), ensurePlural(items))
@@ -190,7 +194,11 @@ export const watch = (namesOrTables, f) => {
   return store
 }
 
-export const dropAll = () => new Promise(resolve => loki.deleteDatabase(resolve))
+export const dropAll = () => {
+  loki.dead = true
+
+  new Promise(resolve => loki.deleteDatabase(resolve))
+}
 
 // ----------------------------------------------------------------------------
 // Domain-specific collections
@@ -198,7 +206,6 @@ export const dropAll = () => new Promise(resolve => loki.deleteDatabase(resolve)
 const sortByCreatedAt = sortBy(e => -e.created_at)
 const sortByScore = sortBy(e => -e.score)
 
-export const people = new Table("people", "pubkey", {max: 3000})
 export const userEvents = new Table("userEvents", "id", {max: 2000, sort: sortByCreatedAt})
 export const notifications = new Table("notifications", "id", {sort: sortByCreatedAt})
 export const contacts = new Table("contacts", "pubkey")
@@ -207,7 +214,6 @@ export const relays = new Table("relays", "url")
 export const routes = new Table("routes", "id", {max: 10000, sort: sortByScore})
 export const topics = new Table("topics", "name")
 
-export const getPersonWithFallback = pubkey => people.get(pubkey) || {pubkey}
 export const getRelayWithFallback = url => relays.get(url) || {url}
 
 const ready = writable(false)
@@ -220,17 +226,6 @@ export const onReady = cb => {
     }
   })
 }
-
-export const searchPeople = watch("people", t => {
-  const people = t.all({
-    $or: [{"kind0.name": {$type: "string"}}, {"kind0.display_name": {$type: "string"}}],
-  })
-
-  return fuzzy(people, {
-    keys: ["kind0.name", "kind0.display_name", "kind0.about", "pubkey"],
-    threshold: 0.3,
-  })
-})
 
 export const searchTopics = watch("topics", t => fuzzy(t.all(), {keys: ["name"], threshold: 0.2}))
 

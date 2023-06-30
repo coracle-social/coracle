@@ -2,7 +2,7 @@ import {partition, is, uniq, reject, nth, objOf, pick, identity} from "ramda"
 import {ensurePlural, chunk} from "hurdak/lib/hurdak"
 import {now, sleep, tryJson, timedelta, hash} from "src/util/misc"
 import {Tags, roomAttrs, isRelay, isShareableRelay, normalizeRelayUrl} from "src/util/nostr"
-import {topics, people, userEvents, relays, rooms, routes} from "src/agent/db"
+import {topics, userEvents, relays, rooms, routes} from "src/agent/db"
 import {uniqByUrl} from "src/agent/relays"
 import keys from "src/system/keys"
 import user from "src/agent/user"
@@ -39,34 +39,6 @@ const processEvents = async events => {
     }
   }
 }
-
-// People
-
-const updatePerson = (pubkey, data) => {
-  people.patch({pubkey, updated_at: now(), ...data})
-
-  // If our pubkey matches, copy to our user's profile as well
-  if (pubkey === user.getPubkey()) {
-    user.profile.update($p => ({...$p, ...data}))
-  }
-}
-
-addHandler(0, e => {
-  tryJson(() => {
-    const kind0 = JSON.parse(e.content)
-
-    const person = people.get(e.pubkey)
-
-    if (e.created_at < person?.kind0_updated_at) {
-      return
-    }
-
-    updatePerson(e.pubkey, {
-      kind0: {...person?.kind0, ...kind0},
-      kind0_updated_at: e.created_at,
-    })
-  })
-})
 
 // User profile, except for events also handled for other users
 

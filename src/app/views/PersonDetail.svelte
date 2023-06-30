@@ -3,7 +3,7 @@
   import {navigate} from "svelte-routing"
   import {log} from "src/util/logger"
   import {parseHex} from "src/util/html"
-  import {displayPerson, toHex} from "src/util/nostr"
+  import {toHex} from "src/util/nostr"
   import {theme, getThemeColor} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
@@ -12,10 +12,10 @@
   import PersonNotes from "src/app/shared/PersonNotes.svelte"
   import PersonLikes from "src/app/shared/PersonLikes.svelte"
   import PersonRelays from "src/app/shared/PersonRelays.svelte"
-  import {nip05} from "src/system"
+  import {nip05, directory} from "src/system"
   import pool from "src/agent/pool"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
-  import {getPersonWithFallback, watch} from "src/agent/db"
+  import {watch} from "src/agent/db"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -27,7 +27,7 @@
 
   const tabs = ["notes", "likes", pool.forceUrls.length === 0 && "relays"].filter(identity)
   const pubkey = toHex(npub)
-  const person = watch("people", () => getPersonWithFallback(pubkey))
+  const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
   const handle = watch(nip05.handles, () => nip05.getHandle(pubkey))
 
   let loading = true
@@ -43,9 +43,9 @@
     rgb = `rgba(${color.join(", ")})`
   }
 
-  log("Person", npub, $person)
+  log("Person", npub, $profile)
 
-  document.title = displayPerson($person)
+  document.title = directory.displayProfile($profile)
 
   const setActiveTab = tab => navigate(routes.person(pubkey, tab))
 </script>
@@ -56,16 +56,16 @@
          background-size: cover;
          background-image:
           linear-gradient(to bottom, {rgba}, {rgb}),
-          url('{$person.kind0?.banner}')" />
+          url('{$profile.banner}')" />
 
 <Content>
   <div class="flex gap-4 text-gray-1">
-    <PersonCircle person={$person} size={16} class="sm:h-32 sm:w-32" />
+    <PersonCircle {pubkey} size={16} class="sm:h-32 sm:w-32" />
     <div class="flex flex-grow flex-col gap-4">
       <div class="flex items-start justify-between gap-4">
         <div class="flex flex-grow flex-col gap-2">
           <div class="flex items-center gap-2">
-            <h1 class="text-2xl">{displayPerson($person)}</h1>
+            <h1 class="text-2xl">{directory.displayProfile($profile)}</h1>
           </div>
           {#if $handle}
             <div class="flex gap-1 text-sm">
@@ -74,10 +74,10 @@
             </div>
           {/if}
         </div>
-        <PersonActions person={$person} />
+        <PersonActions {pubkey} />
       </div>
-      <PersonAbout person={$person} />
-      <PersonStats person={$person} />
+      <PersonAbout {pubkey} />
+      <PersonStats {pubkey} />
     </div>
   </div>
 

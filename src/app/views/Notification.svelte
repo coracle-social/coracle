@@ -8,7 +8,6 @@
   import Popover from "src/partials/Popover.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NotificationSection from "src/app/views/NotificationSection.svelte"
-  import {getPersonWithFallback} from "src/agent/db"
   import {modal} from "src/partials/state"
 
   export let event
@@ -26,7 +25,6 @@
   const replies = notifications.filter(propEq("kind", 1))
   const likes = notifications.filter(propEq("kind", 7))
   const zaps = notifications.filter(propEq("kind", 9734))
-  const author = getPersonWithFallback(note?.pubkey)
   const pubkeys = uniq(pluck("pubkey", notifications))
 
   const actionText = closure(() => {
@@ -47,7 +45,7 @@
       <div on:click|stopPropagation class="flex justify-between">
         {#if !event.ref}
           <div class="flex items-center">
-            <PersonBadge class="float-left" person={author} />
+            <PersonBadge class="float-left" pubkey={note?.pubkey} />
             <span class="relative top-px pl-1">mentioned you.</span>
           </div>
         {:else}

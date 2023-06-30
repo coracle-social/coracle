@@ -63,9 +63,9 @@
 {:else if m.type === "person/feed"}
   <PersonFeed pubkey={m.pubkey} />
 {:else if m.type === "person/info"}
-  <PersonProfileInfo person={m.person} />
+  <PersonProfileInfo pubkey={m.pubkey} />
 {:else if m.type === "person/share"}
-  <PersonShare person={m.person} />
+  <PersonShare pubkey={m.pubkey} />
 {:else if m.type === "person/follows"}
   <PersonList type="follows" pubkey={m.pubkey} />
 {:else if m.type === "person/followers"}

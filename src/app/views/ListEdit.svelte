@@ -8,11 +8,13 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import {searchTopics, searchPeople, searchRelays, getPersonWithFallback} from "src/agent/db"
+  import {directory} from "src/system"
+  import {searchTopics, searchRelays} from "src/agent/db"
   import user from "src/agent/user"
 
   export let list
 
+  const {searchProfiles} = directory
   const tags = Tags.wrap(list?.tags || [])
 
   let values = {
@@ -28,7 +30,7 @@
         .map(({name}) => ["t", name])
     }
 
-    return $searchPeople(q)
+    return $searchProfiles(q)
       .slice(0, 5)
       .map(({pubkey}) => ["p", pubkey])
   }
@@ -71,7 +73,7 @@
           <div slot="item" let:item>
             {#if item[0] === "p"}
               <div class="-my-1">
-                <PersonBadge inert person={getPersonWithFallback(item[1])} />
+                <PersonBadge inert pubkey={item[1]} />
               </div>
             {:else}
               <strong>#{item[1]}</strong>

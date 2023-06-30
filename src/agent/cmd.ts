@@ -1,13 +1,14 @@
-import {last, pick, uniqBy} from "ramda"
+import {identity, last, pick, uniqBy} from "ramda"
 import {get} from "svelte/store"
 import {doPipe} from "hurdak/lib/hurdak"
-import {Tags, roomAttrs, displayPerson, findRoot, findReply} from "src/util/nostr"
+import {Tags, roomAttrs, findRoot, findReply} from "src/util/nostr"
 import {parseContent} from "src/util/notes"
 import {getRelayForPersonHint, getRelayForEventHint} from "src/agent/relays"
-import {getPersonWithFallback} from "src/agent/db"
 import pool from "src/agent/pool"
 import sync from "src/agent/sync"
 import keys from "src/system/keys"
+
+const ext = {displayPubkey: identity}
 
 const authenticate = (url, challenge) =>
   new PublishableEvent(22242, {
@@ -113,7 +114,7 @@ const tagsFromContent = (content, tags) => {
 }
 
 const mention = pubkey => {
-  const name = displayPerson(getPersonWithFallback(pubkey))
+  const name = ext.displayPubkey(pubkey)
   const hint = getRelayForPersonHint(pubkey)
 
   return ["p", pubkey, hint?.url || "", name]
@@ -173,6 +174,7 @@ class PublishableEvent {
 }
 
 export default {
+  ext,
   mention,
   authenticate,
   updateUser,

@@ -1,10 +1,9 @@
 <script lang="ts">
   import cx from "classnames"
-  import {displayPerson} from "src/util/nostr"
   import {theme, installPrompt} from "src/partials/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {keys} from "src/system"
-  import user from "src/agent/user"
+  import {keys, directory} from "src/system"
+  import {watch} from "src/agent/db"
   import pool from "src/agent/pool"
   import {
     routes,
@@ -15,8 +14,8 @@
     newChatMessages,
   } from "src/app/state"
 
-  const {canSign} = keys
-  const {profile} = user
+  const {canSign, pubkey} = keys
+  const profile = watch(directory.profiles, () => directory.getProfile($pubkey))
 
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 
@@ -39,11 +38,11 @@
   class="fixed bottom-0 left-0 top-0 z-20 mt-16 w-56 overflow-hidden border-r border-gray-6 bg-gray-7 pb-20
          pt-4 text-gray-2 shadow-xl transition-all lg:ml-0 lg:mt-0"
   class:-ml-56={!$menuIsOpen}>
-  {#if $profile.pubkey}
+  {#if $pubkey}
     <li>
-      <a href={routes.person($profile.pubkey)} class="flex items-center gap-2 px-4 py-2 pb-6">
-        <PersonCircle size={6} person={$profile} />
-        <span class="text-lg font-bold">{displayPerson($profile)}</span>
+      <a href={routes.person($pubkey)} class="flex items-center gap-2 px-4 py-2 pb-6">
+        <PersonCircle size={6} pubkey={$pubkey} />
+        <span class="text-lg font-bold">{directory.displayProfile($profile)}</span>
       </a>
     </li>
     <li class="relative cursor-pointer">
@@ -103,7 +102,7 @@
       </a>
     </li>
   {/if}
-  {#if $profile.pubkey}
+  {#if $pubkey}
     <li class="cursor-pointer">
       <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/keys">
         <i class="fa fa-key mr-2" /> Keys
@@ -120,7 +119,7 @@
     on:click={toggleTheme}>
     <i class="fa fa-lightbulb mr-2" /> Theme
   </li>
-  {#if $profile.pubkey}
+  {#if $pubkey}
     <li class="cursor-pointer">
       <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/logout">
         <i class="fa fa-right-from-bracket mr-2" /> Logout

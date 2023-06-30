@@ -8,20 +8,18 @@
   import {nip05} from "src/system"
   import {getPubkeyWriteRelays} from "src/agent/relays"
 
-  export let person
+  export let pubkey
 
-  const handle = nip05.getHandle(person.pubkey)
-  const npub = nip19.npubEncode(person.pubkey)
-  const nprofile = nip19.nprofileEncode({
-    pubkey: person.pubkey,
-    relays: pluck("url", getPubkeyWriteRelays(person.pubkey)),
-  })
+  const handle = nip05.getHandle(pubkey)
+  const npub = nip19.npubEncode(pubkey)
+  const relays = pluck("url", getPubkeyWriteRelays(pubkey))
+  const nprofile = nip19.nprofileEncode({pubkey, relays})
 </script>
 
 <div in:fly={{y: 20}}>
   <Content>
     <h1 class="staatliches text-2xl">Profile Details</h1>
-    <CopyValue label="Public Key (Hex)" value={person.pubkey} />
+    <CopyValue label="Public Key (Hex)" value={pubkey} />
     <CopyValue label="Public Key (npub)" value={npub} />
     {#if nprofile}
       <CopyValue label="Profile Link" value={nprofile} />

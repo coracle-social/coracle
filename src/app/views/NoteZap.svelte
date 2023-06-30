@@ -3,15 +3,14 @@
   import {pluck} from "ramda"
   import {warn} from "src/util/logger"
   import {fetchJson, now} from "src/util/misc"
-  import {displayPerson} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import QRCode from "src/partials/QRCode.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
+  import {directory} from "src/system"
   import {getEventPublishRelays} from "src/agent/relays"
-  import {getPersonWithFallback} from "src/agent/db"
   import network from "src/agent/network"
   import {keys, settings, nip57} from "src/system"
   import cmd from "src/agent/cmd"
@@ -28,7 +27,7 @@
     confirmed: false,
   }
 
-  const author = getPersonWithFallback(note.pubkey)
+  const author = directory.getProfile(note.pubkey)
 
   const loadZapInvoice = async () => {
     zap.loading = true
@@ -98,7 +97,7 @@
 <Content size="lg">
   <div class="text-center">
     <h1 class="staatliches text-2xl">Send a zap</h1>
-    <p>to {displayPerson(author)}</p>
+    <p>to {directory.displayProfile(author)}</p>
   </div>
   {#if zap.confirmed}
     <div class="flex items-center justify-center gap-2 text-gray-1">

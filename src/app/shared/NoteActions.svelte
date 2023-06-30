@@ -16,13 +16,11 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {ENABLE_ZAPS, keys, nip57} from "src/system"
   import {getEventPublishRelays} from "src/agent/relays"
-  import {getPersonWithFallback} from "src/agent/db"
   import pool from "src/agent/pool"
   import user from "src/agent/user"
   import cmd from "src/agent/cmd"
 
   export let note
-  export let author
   export let reply
   export let muted
   export let showEntire
@@ -78,7 +76,7 @@
     : zaps
   $: $zapsTotal = sum(pluck("invoiceAmount", allZaps)) / 1000
 
-  $: canZap = zapper && $author?.pubkey !== user.getPubkey()
+  $: canZap = zapper && note.pubkey !== user.getPubkey()
   $: $repliesCount = note.replies.length
 
   $: {
@@ -121,7 +119,7 @@
     </button>
     <button
       class={cx("w-16 text-left", {
-        "pointer-events-none opacity-50": disableActions || $author.pubkey === user.getPubkey(),
+        "pointer-events-none opacity-50": disableActions || note.pubkey === user.getPubkey(),
         "text-accent": like,
       })}
       on:click={() => (like ? deleteReaction(like) : react("+"))}>
@@ -193,7 +191,7 @@
         <div class="grid grid-cols-2 gap-2">
           {#each zaps as zap}
             <div class="flex flex-col gap-1">
-              <PersonBadge person={getPersonWithFallback(zap.request.pubkey)} />
+              <PersonBadge pubkey={zap.request.pubkey} />
               <span class="ml-6 text-sm text-gray-5"
                 >{formatSats(zap.invoiceAmount / 1000)} sats</span>
             </div>
@@ -204,7 +202,7 @@
         <h1 class="staatliches text-2xl">Liked By</h1>
         <div class="grid grid-cols-2 gap-2">
           {#each likes as like}
-            <PersonBadge person={getPersonWithFallback(like.pubkey)} />
+            <PersonBadge pubkey={like.pubkey} />
           {/each}
         </div>
       {/if}

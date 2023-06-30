@@ -2,33 +2,32 @@
   import {find} from "ramda"
   import {nip19} from "nostr-tools"
   import {navigate} from "svelte-routing"
-  import {displayPerson} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {keys, social} from "src/system"
+  import {keys, social, directory} from "src/system"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import user from "src/agent/user"
   import {watch} from "src/agent/db"
   import pool from "src/agent/pool"
   import {addToList} from "src/app/state"
 
-  export let person
+  export let pubkey
 
-  const npub = nip19.npubEncode(person.pubkey)
+  const npub = nip19.npubEncode(pubkey)
   const {mutes} = user
   const {canSign} = keys
-  const following = watch(social.graph, () => social.isUserFollowing(person.pubkey))
+  const following = watch(social.graph, () => social.isUserFollowing(pubkey))
 
   let actions = []
 
-  $: muted = find(m => m[1] === person.pubkey, $mutes)
+  $: muted = find(m => m[1] === pubkey, $mutes)
   $: {
     actions = []
 
     if ($canSign) {
       actions.push({
-        onClick: () => addToList("p", person.pubkey),
+        onClick: () => addToList("p", pubkey),
         label: "Add to list",
         icon: "scroll",
       })
@@ -36,7 +35,7 @@
 
     actions.push({onClick: share, label: "Share", icon: "share-nodes"})
 
-    if (user.getPubkey() !== person.pubkey && $canSign) {
+    if (user.getPubkey() !== pubkey && $canSign) {
       actions.push({
         onClick: () => navigate(`/messages/${npub}`),
         label: "Message",
@@ -45,7 +44,7 @@
 
       if (muted) {
         actions.push({onClick: unmute, label: "Unmute", icon: "microphone"})
-      } else if (user.getPubkey() !== person.pubkey) {
+      } else if (user.getPubkey() !== pubkey) {
         actions.push({onClick: mute, label: "Mute", icon: "microphone-slash"})
       }
     }
@@ -54,7 +53,7 @@
       actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
     }
 
-    if (user.getPubkey() === person.pubkey && $canSign) {
+    if (user.getPubkey() === pubkey && $canSign) {
       actions.push({
         onClick: () => navigate("/profile"),
         label: "Edit",
@@ -64,27 +63,27 @@
   }
 
   const follow = async () => {
-    const [{url}] = sampleRelays(getPubkeyWriteRelays(person.pubkey))
+    const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
 
-    social.follow(person.pubkey, url, displayPerson(person))
+    social.follow(pubkey, url, directory.displayPubkey(pubkey))
   }
 
-  const unfollow = () => social.unfollow(person.pubkey)
+  const unfollow = () => social.unfollow(pubkey)
 
   const mute = async () => {
-    user.addMute("p", person.pubkey)
+    user.addMute("p", pubkey)
   }
 
   const unmute = async () => {
-    user.removeMute(person.pubkey)
+    user.removeMute(pubkey)
   }
 
   const openProfileInfo = () => {
-    modal.push({type: "person/info", person})
+    modal.push({type: "person/info", pubkey})
   }
 
   const share = () => {
-    modal.push({type: "person/share", person})
+    modal.push({type: "person/share", pubkey})
   }
 </script>
 
@@ -94,7 +93,7 @@
       <div slot="trigger">
         {#if $following}
           <i class="fa fa-user-minus cursor-pointer" on:click={unfollow} />
-        {:else if user.getPubkey() !== person.pubkey}
+        {:else if user.getPubkey() !== pubkey}
           <i class="fa fa-user-plus cursor-pointer" on:click={follow} />
         {/if}
       </div>

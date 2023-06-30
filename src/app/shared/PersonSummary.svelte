@@ -1,11 +1,9 @@
 <script lang="ts">
   import {nth} from "ramda"
-  import {displayPerson} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
-  import {keys, social, nip05} from "src/system"
+  import {keys, directory, social, nip05} from "src/system"
   import user from "src/agent/user"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
-  import {getPersonWithFallback} from "src/agent/db"
   import {watch} from "src/agent/db"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -17,7 +15,7 @@
   const following = watch(social.graph, () => social.isUserFollowing(pubkey))
   const {mutes} = user
   const getRelays = () => sampleRelays(getPubkeyWriteRelays(pubkey))
-  const person = watch("people", () => getPersonWithFallback(pubkey))
+  const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
   const handle = watch(nip05.handles, () => nip05.getHandle(pubkey))
 
   $: muted = $mutes.map(nth(1)).includes(pubkey)
@@ -25,7 +23,7 @@
   const follow = () => {
     const [{url}] = getRelays()
 
-    social.follow(pubkey, url, displayPerson($person))
+    social.follow(pubkey, url, directory.displayPubkey(pubkey))
   }
 
   const unfollow = () => social.unfollow(pubkey)
@@ -37,10 +35,10 @@
 
 <div class="relative flex flex-col gap-4 px-3 py-2">
   <div class="flex justify-between gap-2">
-    <Anchor href={routes.person($person.pubkey)} class="flex gap-4">
-      <PersonCircle size={14} person={$person} />
+    <Anchor href={routes.person(pubkey)} class="flex gap-4">
+      <PersonCircle size={14} {pubkey} />
       <div class="flex flex-grow flex-col gap-2">
-        <h2 class="text-lg">{displayPerson($person)}</h2>
+        <h2 class="text-lg">{directory.displayProfile($profile)}</h2>
         {#if $handle}
           <div class="flex gap-1 text-sm">
             <i class="fa fa-user-check text-accent" />
@@ -73,5 +71,5 @@
       {/if}
     </div>
   </div>
-  <PersonAbout person={$person} />
+  <PersonAbout {pubkey} />
 </div>

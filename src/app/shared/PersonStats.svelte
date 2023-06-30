@@ -10,24 +10,24 @@
   import network from "src/agent/network"
   import pool from "src/agent/pool"
 
-  export let person
+  export let pubkey
 
-  const followsCount = watch(social.graph, () => social.getFollowsSet(person.pubkey).size)
+  const followsCount = watch(social.graph, () => social.getFollowsSet(pubkey).size)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
 
   let followersCount = tweened(0, {interpolate, duration: 1000})
 
   const showFollows = () => {
-    modal.push({type: "person/follows", pubkey: person.pubkey})
+    modal.push({type: "person/follows", pubkey})
   }
 
   const showFollowers = () => {
-    modal.push({type: "person/followers", pubkey: person.pubkey})
+    modal.push({type: "person/followers", pubkey})
   }
 
   onMount(async () => {
     // Get our followers count
-    const count = await pool.count({kinds: [3], "#p": [person.pubkey]})
+    const count = await pool.count({kinds: [3], "#p": [pubkey]})
 
     if (count) {
       followersCount.set(count)
@@ -35,9 +35,9 @@
       const followers = new Set()
 
       await network.load({
-        relays: sampleRelays(getPubkeyWriteRelays(person.pubkey)),
+        relays: sampleRelays(getPubkeyWriteRelays(pubkey)),
         shouldProcess: false,
-        filter: [{kinds: [3], "#p": [person.pubkey]}],
+        filter: [{kinds: [3], "#p": [pubkey]}],
         onChunk: events => {
           for (const e of events) {
             followers.add(e.pubkey)

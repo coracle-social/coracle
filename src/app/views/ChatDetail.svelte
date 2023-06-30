@@ -71,9 +71,9 @@
     </div>
   </div>
   <div slot="message" let:message>
-    {#if message.showPerson}
+    {#if message.showProfile}
       <div class="flex items-center justify-between gap-4">
-        <PersonBadge person={message.person} />
+        <PersonBadge pubkey={message.person.pubkey} />
         <p class="text-sm text-gray-1">{formatTimestamp(message.created_at)}</p>
       </div>
     {/if}

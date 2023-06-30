@@ -1,10 +1,10 @@
 <script lang="ts">
   import type {DynamicFilter} from "src/util/types"
   import {fly} from "src/util/transition"
-  import {pluck, omit, objOf} from "ramda"
+  import {pluck, prop, omit, objOf} from "ramda"
   import {debounce} from "throttle-debounce"
   import {createLocalDate, formatTimestampAsDate} from "src/util/misc"
-  import {displayPerson, noteKinds} from "src/util/nostr"
+  import {noteKinds} from "src/util/nostr"
   import Chip from "src/partials/Chip.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -13,16 +13,16 @@
   import SelectButton from "src/partials/SelectButton.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import {social} from "src/system"
-  import {searchTopics, searchPeople, getPersonWithFallback} from "src/agent/db"
+  import {social, directory} from "src/system"
+  import {searchTopics} from "src/agent/db"
 
   export let filter
   export let onChange
 
+  const {searchProfiles} = directory
+
   const displayPeople = pubkeys =>
-    pubkeys.length === 1
-      ? displayPerson(getPersonWithFallback(pubkeys[0]))
-      : `${pubkeys.length} people`
+    pubkeys.length === 1 ? directory.displayPubkey(pubkeys[0]) : `${pubkeys.length} people`
 
   const displayTopics = topics => (topics.length === 1 ? topics[0] : `${topics.length} topics`)
 
@@ -128,10 +128,10 @@
     until: filter.since,
     search: filter.search || "",
     authors: Array.isArray(filter.authors)
-      ? filter.authors.map(getPersonWithFallback)
+      ? filter.authors.map(directory.getProfile)
       : filter.authors || "network",
     "#t": (filter["#t"] || []).map(objOf("name")),
-    "#p": (filter["#p"] || []).map(getPersonWithFallback),
+    "#p": (filter["#p"] || []).map(directory.getProfile),
   }
 
   $: parts = getFilterParts(filter)
@@ -192,10 +192,13 @@
               value={typeof _filter.authors === "string" ? _filter.authors : "custom"}
               options={scopeOptions} />
             {#if Array.isArray(_filter.authors)}
-              <MultiSelect search={$searchPeople} bind:value={_filter.authors}>
+              <MultiSelect
+                search={$searchProfiles}
+                bind:value={_filter.authors}
+                getKey={prop("pubkey")}>
                 <div slot="item" let:item>
                   <div class="-my-1">
-                    <PersonBadge inert person={getPersonWithFallback(item.pubkey)} />
+                    <PersonBadge inert pubkey={item.pubkey} />
                   </div>
                 </div>
               </MultiSelect>
@@ -213,10 +216,10 @@
           </div>
           <div class="flex flex-col gap-1">
             <strong>Mentions</strong>
-            <MultiSelect search={$searchPeople} bind:value={_filter["#p"]}>
+            <MultiSelect search={$searchProfiles} bind:value={_filter["#p"]}>
               <div slot="item" let:item>
                 <div class="-my-1">
-                  <PersonBadge inert person={getPersonWithFallback(item.pubkey)} />
+                  <PersonBadge inert pubkey={item.pubkey} />
                 </div>
               </div>
             </MultiSelect>

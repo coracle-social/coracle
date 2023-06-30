@@ -1,19 +1,22 @@
 <script lang="ts">
+  import cx from "classnames"
   import {stringToHue, hsl} from "src/util/misc"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import LogoSvg from "src/partials/LogoSvg.svelte"
-  import cx from "classnames"
+  import {directory} from "src/system"
+  import {watch} from "src/agent/db"
 
-  export let person
+  export let pubkey
   export let size = 4
 
-  const hue = stringToHue(person.pubkey)
+  const hue = stringToHue(pubkey)
   const primary = hsl(hue, {lightness: 80})
   const secondary = hsl(hue, {saturation: 30, lightness: 30})
+  const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
 </script>
 
-{#if person.kind0?.picture}
-  <ImageCircle {size} src={person.kind0.picture} class={$$props.class} />
+{#if $profile.picture}
+  <ImageCircle {size} src={$profile.picture} class={$$props.class} />
 {:else}
   <div
     class={cx(

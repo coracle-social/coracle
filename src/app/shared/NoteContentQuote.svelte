@@ -2,13 +2,13 @@
   import {objOf} from "ramda"
   import {fly} from "src/util/transition"
   import {warn} from "src/util/logger"
-  import {displayPerson, Tags} from "src/util/nostr"
+  import {Tags} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {getPersonWithFallback} from "src/agent/db"
+  import {directory} from "src/system"
   import {sampleRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import user from "src/agent/user"
@@ -62,15 +62,14 @@
           <Anchor class="underline" on:click={unmute}>Show</Anchor>
         </p>
       {:else}
-        {@const person = getPersonWithFallback(quote.pubkey)}
         <div class="mb-4 flex items-center gap-4">
-          <PersonCircle size={6} {person} />
+          <PersonCircle size={6} pubkey={quote.pubkey} />
           <Anchor
             stopPropagation
             type="unstyled"
             class="flex items-center gap-2"
             on:click={() => openPerson(quote.pubkey)}>
-            <h2 class="text-lg">{displayPerson(person)}</h2>
+            <h2 class="text-lg">{directory.displayPubkey(quote.pubkey)}</h2>
           </Anchor>
         </div>
         <slot name="note-content" {quote} />

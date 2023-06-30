@@ -4,8 +4,7 @@
   import {prop, max, path as getPath, reverse, pluck, uniqBy, sortBy, last} from "ramda"
   import {sleep, createScroller} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
-  import {keys} from "src/system"
-  import {getPersonWithFallback} from "src/agent/db"
+  import {keys, directory} from "src/system"
   import network from "src/agent/network"
 
   export let loadMessages
@@ -24,10 +23,10 @@
     // Group messages so we're only showing the person once per chunk
     annotatedMessages = reverse(
       sortBy(prop("created_at"), messages).reduce((mx, m) => {
-        const person = getPersonWithFallback(m.pubkey)
-        const showPerson = person.pubkey !== getPath(["person", "pubkey"], last(mx))
+        const profile = directory.getProfile(m.pubkey)
+        const showProfile = profile.pubkey !== getPath(["profile", "pubkey"], last(mx))
 
-        return mx.concat({...m, person, showPerson})
+        return mx.concat({...m, profile, showProfile})
       }, [])
     )
   }

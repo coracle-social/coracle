@@ -1,12 +1,10 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
   import {last, partition, pluck, propEq} from "ramda"
-  import {displayPerson} from "src/util/nostr"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {social} from "src/system"
-  import {searchPeople} from "src/agent/db"
+  import {social, directory} from "src/system"
   import {getPubkeyWriteRelays} from "src/agent/relays"
 
   export let onSubmit
@@ -26,12 +24,14 @@
     },
   }
 
+  const {searchProfiles} = directory
+
   const applySearch = word => {
     let results = []
     if (word.length > 1 && word.startsWith("@")) {
       const [followed, notFollowed] = partition(
         p => social.isUserFollowing(p.pubkey),
-        $searchPeople(word.slice(1))
+        $searchProfiles(word.slice(1))
       )
 
       results = followed.concat(notFollowed)
@@ -49,7 +49,7 @@
     return {selection, node, offset, word}
   }
 
-  const autocomplete = ({person = null, force = false} = {}) => {
+  const autocomplete = ({profile = null, force = false} = {}) => {
     let completed = false
 
     const {selection, node, offset, word} = getInfo()
@@ -83,8 +83,8 @@
     }
 
     // Mentions
-    if ((force || word.length > 1) && word.startsWith("@") && person) {
-      annotate("@", displayPerson(person).trim(), pubkeyEncoder.encode(person.pubkey))
+    if ((force || word.length > 1) && word.startsWith("@") && profile) {
+      annotate("@", directory.displayProfile(profile).trim(), pubkeyEncoder.encode(profile.pubkey))
     }
 
     // Topics
@@ -115,7 +115,7 @@
 
     // Enter adds a newline, so do it on key down
     if (["Enter"].includes(e.code)) {
-      autocomplete({person: suggestions.get()})
+      autocomplete({profile: suggestions.get()})
     }
 
     // Only autocomplete topics on space
@@ -133,7 +133,7 @@
     applySearch(word)
 
     if (["Tab"].includes(e.code)) {
-      autocomplete({person: suggestions.get()})
+      autocomplete({profile: suggestions.get()})
     }
 
     if (["Escape", "Space"].includes(e.code)) {
@@ -149,7 +149,7 @@
     }
   }
 
-  export const mention = person => {
+  export const mention = profile => {
     const input = contenteditable.getInput()
     const selection = window.getSelection()
     const textNode = document.createTextNode("@")
@@ -161,7 +161,7 @@
     selection.getRangeAt(0).insertNode(spaceNode)
     selection.collapse(input, 1)
 
-    autocomplete({person, force: true})
+    autocomplete({profile, force: true})
   }
 
   const createNewLines = (n = 1) => {
@@ -227,8 +227,8 @@
   <slot name="addon" />
 </div>
 
-<Suggestions bind:this={suggestions} select={person => autocomplete({person})}>
+<Suggestions bind:this={suggestions} select={profile => autocomplete({profile})}>
   <div slot="item" let:item>
-    <PersonBadge inert person={item} />
+    <PersonBadge inert pubkey={item.pubkey} />
   </div>
 </Suggestions>

@@ -16,7 +16,7 @@ import {
 import {personKinds, appDataKeys, findReplyId} from "src/util/nostr"
 import {chunk, ensurePlural} from "hurdak/lib/hurdak"
 import {batch, now, timedelta} from "src/util/misc"
-import {ENABLE_ZAPS} from "src/system"
+import {ENABLE_ZAPS, directory} from "src/system"
 import {
   getRelaysForEventParent,
   getAllPubkeyWriteRelays,
@@ -24,7 +24,6 @@ import {
   getRelaysForEventChildren,
   sampleRelays,
 } from "src/agent/relays"
-import {people} from "src/agent/db"
 import pool from "src/agent/pool"
 import sync from "src/agent/sync"
 
@@ -40,9 +39,9 @@ const getStalePubkeys = pubkeys => {
 
     attemptedPubkeys.add(pubkey)
 
-    const p = people.get(pubkey)
+    const profile = directory.getProfile(pubkey)
 
-    return !p || p.updated_at < now() - timedelta(1, "days")
+    return !profile || profile.created_at < now() - timedelta(1, "days")
   })
 }
 

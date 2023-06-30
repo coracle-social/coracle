@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {reject, equals} from "ramda"
+  import {reject, equals, identity} from "ramda"
   import Chip from "src/partials/Chip.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
 
@@ -8,6 +8,7 @@
   export let delimiters = []
   export let search = null
   export let termToItem = null
+  export let getKey = identity
 
   let term = ""
   let input

@@ -1,14 +1,14 @@
 <script lang="ts">
   import {ellipsize} from "hurdak/lib/hurdak"
-  import {displayPerson} from "src/util/nostr"
   import {parseContent} from "src/util/notes"
   import Anchor from "src/partials/Anchor.svelte"
-  import {getPersonWithFallback} from "src/agent/db"
+  import {directory} from "src/system"
 
-  export let person
+  export let pubkey
   export let truncate = false
 
-  const about = person?.kind0?.about || ""
+  const profile = directory.getProfile(pubkey)
+  const about = profile.about || ""
   const content = parseContent({content: truncate ? ellipsize(about, 140) : about})
 </script>
 
@@ -25,7 +25,7 @@
     {:else if type.startsWith("nostr:")}
       <Anchor class="underline" external href={"/" + value.entity}>
         {#if value.pubkey}
-          {displayPerson(getPersonWithFallback(value.pubkey))}
+          {directory.displayProfile(profile)}
         {:else if value.id}
           event {value.id}
         {:else}

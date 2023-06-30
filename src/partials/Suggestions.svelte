@@ -1,7 +1,9 @@
 <script lang="ts">
+  import {identity} from "ramda"
   import {fly} from "src/util/transition"
 
   export let select
+  export let getKey = identity
 
   let data = []
   let index = 0
@@ -34,7 +36,7 @@
 
 {#if data.length > 0}
   <div class="z-10 mt-2 flex flex-col rounded border border-solid border-gray-6" in:fly={{y: 20}}>
-    {#each data as item, i}
+    {#each data as item, i (getKey(item))}
       <button
         class="cursor-pointer border-l-2 border-solid border-black py-2 px-4 text-left text-gray-1 hover:border-accent hover:bg-gray-7"
         class:bg-gray-8={index !== i}

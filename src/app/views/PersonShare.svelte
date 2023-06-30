@@ -6,9 +6,8 @@
   import QRCode from "src/partials/QRCode.svelte"
   import {getPubkeyWriteRelays} from "src/agent/relays"
 
-  export let person
+  export let pubkey
 
-  const {pubkey} = person
   const relays = pluck("url", getPubkeyWriteRelays(pubkey).slice(0, 5))
   const nprofile = nip19.nprofileEncode({pubkey, relays})
 </script>

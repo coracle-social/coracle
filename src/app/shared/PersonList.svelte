@@ -1,13 +1,11 @@
 <script type="ts">
   import {onMount} from "svelte"
-  import {uniq, sortBy, pluck} from "ramda"
+  import {uniq, pluck} from "ramda"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
   import {social} from "src/system"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
-  import {getPersonWithFallback} from "src/agent/db"
-  import {watch} from "src/agent/db"
   import network from "src/agent/network"
 
   export let type
@@ -15,14 +13,9 @@
 
   let pubkeys = []
 
-  const people = watch("people", t => {
-    return sortBy(p => (p.kind0 ? 0 : 1), pubkeys.map(getPersonWithFallback))
-  })
-
   onMount(async () => {
     if (type === "follows") {
       pubkeys = social.getFollows(pubkey)
-      people.refresh()
     } else {
       await network.load({
         shouldProcess: false,
@@ -30,7 +23,6 @@
         filter: [{kinds: [3], "#p": [pubkey]}],
         onChunk: events => {
           pubkeys = uniq(pubkeys.concat(pluck("pubkey", events)))
-          people.refresh()
         },
       })
     }
@@ -40,8 +32,8 @@
 </script>
 
 <Content gap="gap-2">
-  {#each $people || [] as person}
-    <PersonInfo {person} />
+  {#each pubkeys as pubkey}
+    <PersonInfo {pubkey} />
   {:else}
     <Spinner />
   {/each}

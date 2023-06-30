@@ -3,7 +3,7 @@
   import {find, last} from "ramda"
   import {onMount} from "svelte"
   import {quantify} from "hurdak/lib/hurdak"
-  import {findRootId, findReplyId, displayPerson} from "src/util/nostr"
+  import {findRootId, findReplyId} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
@@ -13,10 +13,9 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
-  import {nip05} from "src/system"
+  import {nip05, directory} from "src/system"
   import user from "src/agent/user"
   import {getRelaysForEventParent} from "src/agent/relays"
-  import {getPersonWithFallback} from "src/agent/db"
   import {watch} from "src/agent/db"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
@@ -40,7 +39,7 @@
   const borderColor = invertColors ? "gray-6" : "gray-7"
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
-  const author = watch("people", () => getPersonWithFallback(note.pubkey))
+  const author = watch(directory.profiles, () => directory.getProfile(note.pubkey))
   const handle = watch(nip05.handles, () => nip05.getHandle(note.pubkey))
 
   let border, childrenContainer, noteContainer
@@ -119,8 +118,8 @@
       <div>
         <Anchor
           class="text-lg font-bold"
-          on:click={() => modal.push({type: "person/feed", pubkey: $author.pubkey})}>
-          <PersonCircle size={10} person={$author} />
+          on:click={() => modal.push({type: "person/feed", pubkey: note.pubkey})}>
+          <PersonCircle size={10} pubkey={note.pubkey} />
         </Anchor>
       </div>
       <div class="flex min-w-0 flex-grow flex-col gap-2">
@@ -130,15 +129,15 @@
               <Anchor
                 type="unstyled"
                 class="flex items-center gap-2 pr-16 text-lg font-bold"
-                on:click={() => modal.push({type: "person/feed", pubkey: $author.pubkey})}>
-                <span>{displayPerson($author)}</span>
+                on:click={() => modal.push({type: "person/feed", pubkey: note.pubkey})}>
+                <span>{directory.displayProfile($author)}</span>
                 {#if $handle}
                   <i class="fa fa-circle-check text-sm text-accent" />
                 {/if}
               </Anchor>
             </div>
             <div slot="tooltip">
-              <PersonSummary pubkey={$author.pubkey} />
+              <PersonSummary pubkey={note.pubkey} />
             </div>
           </Popover>
           <Anchor
@@ -170,14 +169,7 @@
           {:else}
             <NoteContent {anchorId} {note} {showEntire} />
           {/if}
-          <NoteActions
-            bind:this={actions}
-            {note}
-            {reply}
-            {author}
-            {muted}
-            {setFeedRelay}
-            {showEntire} />
+          <NoteActions bind:this={actions} {note} {reply} {muted} {setFeedRelay} {showEntire} />
         </div>
       </div>
     </Card>

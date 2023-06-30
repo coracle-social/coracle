@@ -3,7 +3,6 @@
   import {generatePrivateKey} from "nostr-tools"
   import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
-  import {displayPerson} from "src/util/nostr"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
   import OnboardingKey from "src/app/views/OnboardingKey.svelte"
@@ -12,11 +11,10 @@
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
   import {DEFAULT_FOLLOWS, social} from "src/system"
   import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
-  import {getPersonWithFallback} from "src/agent/db"
   import network from "src/agent/network"
   import user from "src/agent/user"
   import pool from "src/agent/pool"
-  import {keys} from "src/system"
+  import {keys, directory} from "src/system"
   import cmd from "src/agent/cmd"
   import {loadAppData} from "src/app/state"
   import {modal} from "src/partials/state"
@@ -47,7 +45,7 @@
       social.updatePetnames(
         social.getUserFollows().map(pubkey => {
           const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
-          const name = displayPerson(getPersonWithFallback(pubkey))
+          const name = directory.displayPubkey(pubkey)
 
           return ["p", pubkey, url, name]
         })

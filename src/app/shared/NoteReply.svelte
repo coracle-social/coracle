@@ -3,13 +3,13 @@
   import {createEventDispatcher} from "svelte"
   import {without, pluck, uniq} from "ramda"
   import {slide} from "src/util/transition"
-  import {Tags, displayPerson} from "src/util/nostr"
+  import {Tags} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/partials/Compose.svelte"
-  import {getPersonWithFallback} from "src/agent/db"
+  import {directory} from "src/system"
   import {getEventPublishRelays} from "src/agent/relays"
   import user from "src/agent/user"
   import cmd from "src/agent/cmd"
@@ -129,9 +129,9 @@
           </div>
         </div>
         <div on:click|stopPropagation>
-          {#each data.mentions as p}
-            <Chip class="mr-1 mb-1" theme="dark" onClick={() => removeMention(p)}>
-              {displayPerson(getPersonWithFallback(p))}
+          {#each data.mentions as pubkey}
+            <Chip class="mr-1 mb-1" theme="dark" onClick={() => removeMention(pubkey)}>
+              {directory.displayPubkey(pubkey)}
             </Chip>
           {:else}
             <div class="text-gray-2 inline-block py-2">No mentions</div>
@@ -142,7 +142,7 @@
     </div>
     <div class="flex justify-end gap-2 text-sm text-gray-5">
       <span>
-        Posting as @{displayPerson(getPersonWithFallback(user.getPubkey()))}
+        Posting as @{directory.displayPubkey(user.getPubkey())}
       </span>
     </div>
   </div>
