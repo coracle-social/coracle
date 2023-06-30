@@ -212,9 +212,6 @@ export const contacts = new Table("contacts", "pubkey")
 export const rooms = new Table("rooms", "id")
 export const relays = new Table("relays", "url")
 export const routes = new Table("routes", "id", {max: 10000, sort: sortByScore})
-export const topics = new Table("topics", "name")
-
-export const getRelayWithFallback = url => relays.get(url) || {url}
 
 const ready = writable(false)
 
@@ -226,9 +223,3 @@ export const onReady = cb => {
     }
   })
 }
-
-export const searchTopics = watch("topics", t => fuzzy(t.all(), {keys: ["name"], threshold: 0.2}))
-
-export const searchRelays = watch("relays", t =>
-  fuzzy(t.all(), {keys: ["name", "description", "url"]})
-)

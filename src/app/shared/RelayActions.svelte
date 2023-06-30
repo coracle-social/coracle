@@ -2,14 +2,13 @@
   import {find, last, propEq} from "ramda"
   import {modal} from "src/partials/state"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {keys} from "src/system"
+  import {keys, routing} from "src/system"
   import user from "src/agent/user"
-  import {getRelayWithFallback} from "src/agent/db"
   import {addToList} from "src/app/state"
 
   export let relay
 
-  relay = getRelayWithFallback(relay.url)
+  relay = routing.getRelay(relay.url)
 
   const {canSign} = keys
   const {relays: userRelays} = user

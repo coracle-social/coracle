@@ -39,7 +39,7 @@ const getStalePubkeys = pubkeys => {
 
     attemptedPubkeys.add(pubkey)
 
-    const profile = directory.getProfile(pubkey)
+    const profile = directory.profiles.get(pubkey)
 
     return !profile || profile.created_at < now() - timedelta(1, "days")
   })

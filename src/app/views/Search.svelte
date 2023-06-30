@@ -12,7 +12,7 @@
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Scan from "src/app/shared/Scan.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {keys, directory} from "src/system"
+  import {keys, directory, content} from "src/system"
   import {sampleRelays, getUserReadRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import {watch} from "src/agent/db"
@@ -64,8 +64,10 @@
     }
   })
 
-  const topicOptions = watch(["topics"], t =>
-    t.all().map(topic => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
+  const topicOptions = watch(content.topics, () =>
+    content.topics
+      .all()
+      .map(topic => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
   )
 
   const profileOptions = watch(directory.profiles, () =>

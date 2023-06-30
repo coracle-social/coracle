@@ -8,13 +8,14 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import {directory} from "src/system"
-  import {searchTopics, searchRelays} from "src/agent/db"
+  import {directory, content, routing} from "src/system"
   import user from "src/agent/user"
 
   export let list
 
   const {searchProfiles} = directory
+  const {searchTopics} = content
+  const {searchRelays} = routing
   const tags = Tags.wrap(list?.tags || [])
 
   let values = {

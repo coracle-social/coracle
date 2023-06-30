@@ -29,9 +29,9 @@
 
   const loadListFeed = name => {
     const list = $lists.find(l => Tags.from(l).getMeta("d") === name)
-    const authors = Tags.from(list).type("p").values().all()
-    const topics = Tags.from(list).type("t").values().all()
-    const urls = Tags.from(list).type("r").values().all()
+    const authors = Tags.from(list).pubkeys()
+    const topics = Tags.from(list).topics()
+    const urls = Tags.from(list).urls()
 
     if (urls.length > 0) {
       relays = urls.map(objOf("url"))

@@ -15,7 +15,7 @@
   } from "src/app/state"
 
   const {canSign, pubkey} = keys
-  const profile = watch(directory.profiles, () => directory.getProfile($pubkey))
+  const profile = watch(directory.profiles, () => ($pubkey ? directory.getProfile($pubkey) : null))
 
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 
@@ -38,7 +38,7 @@
   class="fixed bottom-0 left-0 top-0 z-20 mt-16 w-56 overflow-hidden border-r border-gray-6 bg-gray-7 pb-20
          pt-4 text-gray-2 shadow-xl transition-all lg:ml-0 lg:mt-0"
   class:-ml-56={!$menuIsOpen}>
-  {#if $pubkey}
+  {#if $profile}
     <li>
       <a href={routes.person($pubkey)} class="flex items-center gap-2 px-4 py-2 pb-6">
         <PersonCircle size={6} pubkey={$pubkey} />
@@ -102,7 +102,7 @@
       </a>
     </li>
   {/if}
-  {#if $pubkey}
+  {#if $profile}
     <li class="cursor-pointer">
       <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/keys">
         <i class="fa fa-key mr-2" /> Keys
@@ -119,7 +119,7 @@
     on:click={toggleTheme}>
     <i class="fa fa-lightbulb mr-2" /> Theme
   </li>
-  {#if $pubkey}
+  {#if $profile}
     <li class="cursor-pointer">
       <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/logout">
         <i class="fa fa-right-from-bracket mr-2" /> Logout

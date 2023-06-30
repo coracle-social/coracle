@@ -54,6 +54,9 @@ export class Tags {
   pubkeys() {
     return this.type("p").values().all()
   }
+  urls() {
+    return this.type("r").values().all()
+  }
   asMeta() {
     return fromPairs(this.tags)
   }

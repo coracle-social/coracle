@@ -13,13 +13,13 @@
   import SelectButton from "src/partials/SelectButton.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import {social, directory} from "src/system"
-  import {searchTopics} from "src/agent/db"
+  import {social, directory, content} from "src/system"
 
   export let filter
   export let onChange
 
   const {searchProfiles} = directory
+  const {searchTopics} = content
 
   const displayPeople = pubkeys =>
     pubkeys.length === 1 ? directory.displayPubkey(pubkeys[0]) : `${pubkeys.length} people`
