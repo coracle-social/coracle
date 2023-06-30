@@ -6,11 +6,11 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
+  import {cmd} from "src/system"
   import user from "src/agent/user"
   import {getRelaysForEventChildren, sampleRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import {watch} from "src/agent/db"
-  import cmd from "src/agent/cmd"
 
   export let entity
 

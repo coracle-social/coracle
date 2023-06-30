@@ -1,11 +1,10 @@
 import type {Relay} from "src/util/types"
 import LRUCache from "lru-cache"
-import {warn} from "src/util/logger"
 import {filter, pipe, pick, groupBy, objOf, map, assoc, sortBy, uniqBy, prop} from "ramda"
 import {first} from "hurdak/lib/hurdak"
 import {Tags, isRelay, findReplyId} from "src/util/nostr"
-import {shuffle, fetchJson} from "src/util/misc"
-import {relays, routes} from "src/agent/db"
+import {shuffle} from "src/util/misc"
+import {routes} from "src/agent/db"
 import pool from "src/agent/pool"
 import user from "src/agent/user"
 
@@ -20,25 +19,6 @@ import user from "src/agent/user"
 //    client-private data like client configuration events or anything that the world
 //    doesn't need to see.
 // 5) Advertise relays — write and read back your own relay list
-
-// Initialize our database
-
-export const initializeRelayList = async () => {
-  // Throw some hardcoded defaults in there
-  await relays.patch(pool.defaultRelays)
-
-  // Load relays from nostr.watch via dufflepud
-  if (pool.forceUrls.length === 0) {
-    try {
-      const url = import.meta.env.VITE_DUFFLEPUD_URL + "/relay"
-      const json = await fetchJson(url)
-
-      await relays.patch(json.relays.filter(isRelay).map(objOf("url")))
-    } catch (e) {
-      warn("Failed to fetch relays list", e)
-    }
-  }
-}
 
 // Pubkey relays
 

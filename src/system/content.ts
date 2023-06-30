@@ -1,4 +1,4 @@
-import {sortBy, nth, prop, inc} from 'ramda'
+import {sortBy, nth, inc} from "ramda"
 import {fuzzy} from "src/util/misc"
 import {Tags} from "src/util/nostr"
 import {Table, watch} from "src/agent/db"

@@ -6,8 +6,8 @@
   import Heading from "src/partials/Heading.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Rating from "src/partials/Rating.svelte"
+  import {cmd} from "src/system"
   import user from "src/agent/user"
-  import cmd from "src/agent/cmd"
 
   export let url
 

@@ -5,7 +5,7 @@ import {now} from "src/util/misc"
 import {Tags} from "src/util/nostr"
 import {Table} from "src/agent/db"
 
-export default ({keys, sync, cmd, getUserWriteRelays}) => {
+export default ({keys, sync, getCmd, getUserWriteRelays}) => {
   // Don't delete the user's own info or those of direct follows
   const sortByGraph = xs => {
     const pubkey = keys.getPubkey()
@@ -78,7 +78,7 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
 
   const updatePetnames = async $petnames => {
     if (get(keys.canSign)) {
-      await cmd.setPetnames($petnames).publish(getUserWriteRelays())
+      await getCmd().setPetnames($petnames).publish(getUserWriteRelays())
     } else {
       graph.patch({
         pubkey: getUserKey(),

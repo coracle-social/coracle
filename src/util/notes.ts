@@ -172,9 +172,11 @@ export const truncateContent = (content, {showEntire, maxLength, showMedia = fal
   const truncateAt = maxLength * 0.6
 
   content.every((part, i) => {
-    const isText = [TOPIC, TEXT].includes(part.type) || (part.type === LINK && !part.value.isMedia)
     const isMedia = part.type === INVOICE || part.type.startsWith("nostr:") || part.value.isMedia
     const textLength = part.value.url?.length || part.value.length
+    const isText =
+      [NOSTR_NPUB, NOSTR_NPROFILE, NOSTR_NADDR, TOPIC, TEXT].includes(part.type) ||
+      (part.type === LINK && !part.value.isMedia)
 
     if (isText) {
       length += textLength

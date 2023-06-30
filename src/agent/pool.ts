@@ -7,7 +7,10 @@ import {ensurePlural, switcher} from "hurdak/lib/hurdak"
 import {warn, log, error} from "src/util/logger"
 import {union, sleep, difference} from "src/util/misc"
 import {normalizeRelayUrl} from "src/util/nostr"
-import {relays} from "src/agent/db"
+
+const ext = {
+  routing: null,
+}
 
 const Config = {
   multiplextrUrl: null,
@@ -218,8 +221,8 @@ async function getExecutor(urls, {bypassBoot = false} = {}) {
   // Eagerly connect and handle AUTH
   await Promise.all(
     ensurePlural(executor.target.sockets).map(async socket => {
-      const relay = relays.get(socket.url)
-      const waitForBoot = relay?.limitation?.payment_required || relay?.limitation?.auth_required
+      const {limitation} = ext.routing.getRelayMeta(socket.url)
+      const waitForBoot = limitation?.payment_required || limitation?.auth_required
 
       if (socket.status === Socket.STATUS.NEW) {
         socket.booted = sleep(2000)
@@ -398,6 +401,7 @@ async function count(filter) {
 }
 
 export default {
+  ext,
   Config,
   Meta,
   forceUrls,

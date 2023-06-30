@@ -6,7 +6,8 @@ import {synced} from "src/util/misc"
 import {derived, get} from "svelte/store"
 import keys from "src/system/keys"
 import pool from "src/agent/pool"
-import cmd from "src/agent/cmd"
+
+const ext = {cmd: null}
 
 const profile = synced("agent/user/profile", {
   pubkey: null,
@@ -44,6 +45,8 @@ keys.pubkey.subscribe($pubkey => {
 })
 
 export default {
+  ext,
+
   // Profile
 
   profile,
@@ -59,7 +62,7 @@ export default {
       const d = `coracle/${key}`
       const v = await keys.encryptJson(content)
 
-      return cmd.setAppData(d, v).publish(profileCopy.relays)
+      return ext.cmd.setAppData(d, v).publish(profileCopy.relays)
     }
   },
   setLastChecked(k, v) {
@@ -82,7 +85,7 @@ export default {
     profile.update(assoc("relays", $relays))
 
     if (get(keys.canSign)) {
-      return cmd.setRelays($relays).publish($relays)
+      return ext.cmd.setRelays($relays).publish($relays)
     }
   },
   addRelay(url) {
@@ -112,7 +115,7 @@ export default {
     profile.update(assoc("mutes", $mutes))
 
     if (get(keys.canSign)) {
-      return cmd.setMutes($mutes.map(slice(0, 2))).publish(profileCopy.relays)
+      return ext.cmd.setMutes($mutes.map(slice(0, 2))).publish(profileCopy.relays)
     }
   },
   addMute(type, value) {
@@ -135,12 +138,12 @@ export default {
     const tags = [["d", name]].concat(params).concat(relays)
 
     if (id) {
-      await cmd.deleteEvent([id]).publish(profileCopy.relays)
+      await ext.cmd.deleteEvent([id]).publish(profileCopy.relays)
     }
 
-    await cmd.createList(tags).publish(profileCopy.relays)
+    await ext.cmd.createList(tags).publish(profileCopy.relays)
   },
   removeList(id) {
-    return cmd.deleteEvent([id]).publish(profileCopy.relays)
+    return ext.cmd.deleteEvent([id]).publish(profileCopy.relays)
   },
 }

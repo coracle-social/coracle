@@ -1,27 +1,25 @@
-import {sortBy, nth, prop, inc} from 'ramda'
-import {fuzzy} from "src/util/misc"
-import {Tags} from "src/util/nostr"
+import {sortBy, last, inc} from "ramda"
+import {fuzzy, tryJson, now, fetchJson} from "src/util/misc"
+import {warn} from "src/util/logger"
+import {normalizeRelayUrl, isShareableRelay} from "src/util/nostr"
+import {DUFFLEPUD_URL, DEFAULT_RELAYS, FORCE_RELAYS} from "src/system/env"
 import {Table, watch} from "src/agent/db"
 
-export default ({sync, sortByGraph) => {
+export default ({sync, sortByGraph}) => {
   const relays = new Table("routing/relays", "url", {sort: sortBy(e => -e.count)})
   const relaySelections = new Table("routing/relaySelections", "pubkey", {sort: sortByGraph})
-
-  const processTopics = e => {
-    const tagTopics = Tags.from(e).topics()
-    const contentTopics = Array.from(e.content.toLowerCase().matchAll(/#(\w{2,100})/g)).map(nth(1))
-
-    for (const name of tagTopics.concat(contentTopics)) {
-      const topic = topics.get(name)
-
-      topics.patch({name, count: inc(topic?.count || 0)})
-    }
-  }
 
   const addRelay = url => {
     const relay = relays.get(url)
 
-    relays.patch({url, count: inc(relay?.count || 0)})
+    relays.patch({
+      url,
+      count: inc(relay?.count || 0),
+      first_seen: relay?.first_seen || now(),
+      meta: {
+        last_checked: 0,
+      },
+    })
   }
 
   const addPolicies = ({pubkey, created_at}, policies) => {
@@ -44,40 +42,70 @@ export default ({sync, sortByGraph) => {
   })
 
   sync.addHandler(3, e => {
-    addPolicies(e, tryJson(() => {
-      Object.entries(JSON.parse(e.content || ""))
-        .filter(([url]) => isShareableRelay(url))
-        .map(([url, conditions]) => {
-          const write = ![false, '!'].includes(conditions.write)
-          const read = ![false, '!'].includes(conditions.read)
+    addPolicies(
+      e,
+      tryJson(() => {
+        Object.entries(JSON.parse(e.content || ""))
+          .filter(([url]) => isShareableRelay(url))
+          .map(([url, conditions]) => {
+            // @ts-ignore
+            const write = ![false, "!"].includes(conditions.write)
+            // @ts-ignore
+            const read = ![false, "!"].includes(conditions.read)
 
-          return {url: normalizeRelayUrl(url), write, read}
-        })
-    }))
+            return {url: normalizeRelayUrl(url), write, read}
+          })
+      })
+    )
   })
 
   sync.addHandler(10002, e => {
-    addPolicies(e, e.tags.map(([_, url, mode]) => {
-      const write = mode === 'write'
-      const read = mode === 'read'
+    addPolicies(
+      e,
+      e.tags.map(([_, url, mode]) => {
+        const write = mode === "write"
+        const read = mode === "read"
 
-      if (!write && !read) {
-        warn(`Encountered unknown relay mode: ${mode}`)
-      }
+        if (!write && !read) {
+          warn(`Encountered unknown relay mode: ${mode}`)
+        }
 
-      return {url: normalizeRelayUrl(url), write, read}
-    }))
+        return {url: normalizeRelayUrl(url), write, read}
+      })
+    )
   })
 
   const getRelay = url => relays.get(url) || {url}
 
+  const getRelayMeta = url => relays.get(url)?.meta || {}
+
   const searchRelays = watch(relays, () => fuzzy(relays.all(), {keys: ["url"]}))
 
+  const displayRelay = ({url}) => last(url.split("://"))
+
+  const initialize = async () => {
+    // Throw some hardcoded defaults in there
+    DEFAULT_RELAYS.forEach(addRelay)
+
+    // Load relays from nostr.watch via dufflepud
+    if (FORCE_RELAYS.length === 0) {
+      try {
+        const json = await fetchJson(DUFFLEPUD_URL + "/relay")
+
+        json.relays.filter(isShareableRelay).forEach(addRelay)
+      } catch (e) {
+        warn("Failed to fetch relays list", e)
+      }
+    }
+  }
 
   return {
     relays,
     relaySelections,
     getRelay,
+    getRelayMeta,
     searchRelays,
+    displayRelay,
+    initialize,
   }
 }

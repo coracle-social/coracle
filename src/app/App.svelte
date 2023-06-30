@@ -7,15 +7,21 @@
   import {get} from "svelte/store"
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
-  import {identity, isNil, last} from "ramda"
+  import {isNil, last} from "ramda"
   import {first} from "hurdak/lib/hurdak"
-  import {warn} from "src/util/logger"
-  import {timedelta, hexToBech32, bech32ToHex, shuffle, now, tryFunc} from "src/util/misc"
-  import cmd from "src/agent/cmd"
-  import {onReady, relays} from "src/agent/db"
+  import {
+    timedelta,
+    hexToBech32,
+    bech32ToHex,
+    shuffle,
+    now,
+    tryFunc,
+    fetchJson,
+    tryFetch,
+  } from "src/util/misc"
+  import {onReady} from "src/agent/db"
   import * as system from "src/system"
   import pool from "src/agent/pool"
-  import {initializeRelayList} from "src/agent/relays"
   import user from "src/agent/user"
   import {loadAppData} from "src/app/state"
   import {theme, getThemeVariables, appName, modal} from "src/partials/state"
@@ -53,7 +59,7 @@
     if (get(system.keys.canSign) && !seenChallenges.has(challenge)) {
       seenChallenges.add(challenge)
 
-      const publishable = await cmd.authenticate(url, challenge)
+      const publishable = await system.cmd.authenticate(url, challenge)
 
       return first(publishable.publish([{url}], null, "AUTH"))
     }
@@ -116,7 +122,7 @@
   })
 
   onReady(() => {
-    initializeRelayList()
+    system.initialize()
 
     const pubkey = user.getPubkey()
 
@@ -133,32 +139,28 @@
 
       // Find relays with old/missing metadata and refresh them. Only pick a
       // few so we're not sending too many concurrent http requests
-      const query = {refreshed_at: {$lt: now() - timedelta(7, "days")}}
-      const staleRelays = shuffle(relays.all(query)).slice(0, 10)
+      const query = {"meta.last_checked": {$lt: now() - timedelta(7, "days")}}
+      const staleRelays = shuffle(system.routing.relays.all(query)).slice(0, 10)
 
-      const freshRelays = await Promise.all(
-        staleRelays.map(async ({url}) => {
-          try {
-            const res = await fetch(dufflepudUrl + "/relay/info", {
-              method: "POST",
-              body: JSON.stringify({url}),
-              headers: {
-                "Content-Type": "application/json",
-              },
+      system.routing.relays.patch(
+        await Promise.all(
+          staleRelays.map(relay =>
+            tryFetch(async () => {
+              const meta = await fetchJson(dufflepudUrl + "/relay/info", {
+                method: "POST",
+                body: JSON.stringify({url: relay.url}),
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              })
+
+              meta.last_checked = now()
+
+              return {...relay, meta}
             })
-
-            return {...(await res.json()), url, refreshed_at: now()}
-          } catch (e) {
-            if (!e.toString().includes("Failed to fetch")) {
-              warn(e)
-            }
-
-            return {url, refreshed_at: now()}
-          }
-        })
+          )
+        )
       )
-
-      relays.patch(freshRelays.filter(identity))
     }, 30_000)
 
     return () => {

@@ -1,13 +1,13 @@
 <script lang="ts">
   import {batch, timedelta} from "src/util/misc"
-  import {displayRelay, normalizeRelayUrl, getAvgQuality} from "src/util/nostr"
+  import {normalizeRelayUrl, getAvgQuality} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Rating from "src/partials/Rating.svelte"
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
   import RelayActions from "src/app/shared/RelayActions.svelte"
-  import {relays} from "src/agent/db"
+  import {routing} from "src/system"
 
   export let url
 
@@ -18,7 +18,7 @@
 
   $: rating = getAvgQuality("review/relay", reviews)
 
-  const relay = relays.get(url) || {url}
+  const relay = routing.getRelay(url)
   const tabs = ["reviews", "notes"]
   const setActiveTab = tab => {
     activeTab = tab
@@ -28,7 +28,7 @@
     reviews = reviews.concat(chunk)
   })
 
-  document.title = displayRelay(relay)
+  document.title = routing.displayRelay(relay)
 </script>
 
 <Content>
@@ -41,8 +41,8 @@
       <Rating inert value={rating} />
     </div>
   {/if}
-  {#if relay.description}
-    <p>{relay.description}</p>
+  {#if relay.meta.description}
+    <p>{relay.meta.description}</p>
   {/if}
   <Tabs borderClass="border-gray-6" {tabs} {activeTab} {setActiveTab} />
   {#if activeTab === "reviews"}

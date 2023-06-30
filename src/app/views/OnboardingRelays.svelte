@@ -7,6 +7,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
+  import {routing} from "src/system"
   import {watch} from "src/agent/db"
   import user from "src/agent/user"
 
@@ -15,7 +16,7 @@
   let q = ""
   let search
 
-  const knownRelays = watch("relays", t => t.all())
+  const knownRelays = watch(routing.relays, () => routing.relays.all())
 
   $: joined = new Set(pluck("url", $relays))
   $: search = fuzzy(

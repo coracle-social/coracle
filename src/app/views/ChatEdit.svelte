@@ -9,8 +9,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import {toast, modal} from "src/partials/state"
   import {getUserWriteRelays} from "src/agent/relays"
+  import {cmd} from "src/system"
   import user from "src/agent/user"
-  import cmd from "src/agent/cmd"
   import {publishWithToast} from "src/app/state"
 
   export let room = {name: null, id: null, about: null, picture: null}

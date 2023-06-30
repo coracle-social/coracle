@@ -4,7 +4,7 @@
   import {tweened} from "svelte/motion"
   import {find, reject, identity, propEq, pathEq, sum, pluck, sortBy} from "ramda"
   import {stringToHue, formatSats, hsl} from "src/util/misc"
-  import {displayRelay, isLike} from "src/util/nostr"
+  import {isLike} from "src/util/nostr"
   import {quantify, first} from "hurdak/lib/hurdak"
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
@@ -14,11 +14,10 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {ENABLE_ZAPS, keys, nip57} from "src/system"
+  import {ENABLE_ZAPS, keys, nip57, cmd, routing} from "src/system"
   import {getEventPublishRelays} from "src/agent/relays"
   import pool from "src/agent/pool"
   import user from "src/agent/user"
-  import cmd from "src/agent/cmd"
 
   export let note
   export let reply
@@ -164,7 +163,7 @@
                 style={`background: ${hsl(stringToHue(url))}`}
                 on:click={() => setFeedRelay?.({url})} />
             </div>
-            <div slot="tooltip">{displayRelay({url})}</div>
+            <div slot="tooltip">{routing.displayRelay({url})}</div>
           </Popover>
         {/each}
       </div>

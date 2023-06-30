@@ -1,11 +1,11 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {between} from "hurdak/lib/hurdak"
-  import {displayRelay} from "src/util/nostr"
   import {webSocketURLToPlainOrBase64} from "src/util/misc"
   import {poll, stringToHue, hsl} from "src/util/misc"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import {routing} from "src/system"
   import pool from "src/agent/pool"
 
   export let relay
@@ -29,7 +29,7 @@
     href={`/relays/${webSocketURLToPlainOrBase64(relay.url)}`}
     class="border-b border-solid"
     style={`border-color: ${hsl(stringToHue(relay.url))}`}>
-    {displayRelay(relay)}
+    {routing.displayRelay(relay)}
   </Anchor>
   <span
     on:mouseout={() => {

@@ -5,12 +5,11 @@
   import {onMount} from "svelte"
   import {fly} from "src/util/transition"
   import {poll, stringToHue, hsl} from "src/util/misc"
-  import {displayRelay} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {keys} from "src/system"
+  import {keys, routing} from "src/system"
   import pool from "src/agent/pool"
   import user from "src/agent/user"
   import {loadAppData} from "src/app/state"
@@ -65,7 +64,7 @@
   <div class="flex items-center justify-between gap-2">
     <div class="flex items-center gap-2 text-xl">
       <i class={relay.url.startsWith("ws://") ? "fa fa-unlock" : "fa fa-lock"} />
-      <Anchor on:click={openModal}>{displayRelay(relay)}</Anchor>
+      <Anchor on:click={openModal}>{routing.displayRelay(relay)}</Anchor>
       {#if showStatus}
         <span
           on:mouseout={() => {

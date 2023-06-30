@@ -12,8 +12,7 @@
   import {directory} from "src/system"
   import {getEventPublishRelays} from "src/agent/relays"
   import network from "src/agent/network"
-  import {keys, settings, nip57} from "src/system"
-  import cmd from "src/agent/cmd"
+  import {keys, cmd, settings, nip57} from "src/system"
 
   export let note
 

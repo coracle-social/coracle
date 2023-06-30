@@ -6,6 +6,7 @@
   import {normalizeRelayUrl, Tags, getAvgQuality} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
+  import {routing} from "src/system"
   import {getUserReadRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import {watch} from "src/agent/db"
@@ -19,7 +20,8 @@
 
   let search
   let reviews = []
-  let knownRelays = watch("relays", t => t.all())
+
+  const knownRelays = watch(routing.relays, () => routing.relays.all())
 
   $: ratings = mapValues(
     events => getAvgQuality("review/relay", events),

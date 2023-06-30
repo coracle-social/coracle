@@ -13,6 +13,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
+  import {DEFAULT_RELAYS, routing} from "src/system"
   import {watch} from "src/agent/db"
   import network from "src/agent/network"
   import user from "src/agent/user"
@@ -26,11 +27,11 @@
   let attemptedRelays = new Set()
   let customRelays = []
   let allRelays = []
-  let knownRelays = watch("relays", table =>
+  let knownRelays = watch(routing.relays, () =>
     uniqBy(
       prop("url"),
       // Make sure our hardcoded urls are first, since they're more likely to find a match
-      pool.defaultUrls.map(objOf("url")).concat(shuffle(table.all()))
+      DEFAULT_RELAYS.map(objOf("url")).concat(shuffle(routing.relays.all()))
     )
   )
 

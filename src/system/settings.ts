@@ -3,7 +3,7 @@ import {synced, getter} from "src/util/misc"
 import {Tags} from "src/util/nostr"
 import {DUFFLEPUD_URL, MULTIPLEXTR_URL} from "src/system/env"
 
-export default ({keys, sync, cmd, getUserWriteRelays}) => {
+export default ({keys, sync, getCmd, getUserWriteRelays}) => {
   const store = synced("settings/store", {
     lastUpdated: 0,
     relayLimit: 20,
@@ -38,7 +38,7 @@ export default ({keys, sync, cmd, getUserWriteRelays}) => {
       const d = "coracle/settings/v1"
       const v = await keys.encryptJson(settings)
 
-      return cmd.setAppData(d, v).publish(getUserWriteRelays())
+      return getCmd().setAppData(d, v).publish(getUserWriteRelays())
     }
   }
 

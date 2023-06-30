@@ -1,10 +1,10 @@
 <script lang="ts">
   import {switcher, switcherFn} from "hurdak/lib/hurdak"
-  import {displayRelay, Tags} from "src/util/nostr"
+  import {Tags} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {directory} from "src/system"
+  import {directory, routing} from "src/system"
 
   export let note, rating
 
@@ -19,7 +19,7 @@
   })
 
   const display = switcherFn(type, {
-    r: () => displayRelay({url: value}),
+    r: () => routing.displayRelay({url: value}),
     p: () => directory.displayProfile(value),
     e: () => "a note",
     default: "something",

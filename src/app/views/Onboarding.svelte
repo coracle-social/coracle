@@ -14,8 +14,7 @@
   import network from "src/agent/network"
   import user from "src/agent/user"
   import pool from "src/agent/pool"
-  import {keys, directory} from "src/system"
-  import cmd from "src/agent/cmd"
+  import {keys, directory, cmd} from "src/system"
   import {loadAppData} from "src/app/state"
   import {modal} from "src/partials/state"
 

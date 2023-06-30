@@ -8,9 +8,9 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import {cmd} from "src/system"
   import user from "src/agent/user"
   import {getUserWriteRelays} from "src/agent/relays"
-  import cmd from "src/agent/cmd"
   import {routes} from "src/app/state"
   import {publishWithToast} from "src/app/state"
 

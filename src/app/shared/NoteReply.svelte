@@ -9,10 +9,9 @@
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/partials/Compose.svelte"
-  import {directory} from "src/system"
+  import {directory, cmd} from "src/system"
   import {getEventPublishRelays} from "src/agent/relays"
   import user from "src/agent/user"
-  import cmd from "src/agent/cmd"
   import {publishWithToast} from "src/app/state"
 
   export let note

@@ -116,8 +116,6 @@ export const findRoot = e => prop("root", findReplyAndRoot(e))
 
 export const findRootId = e => findRoot(e)?.[1]
 
-export const displayRelay = ({url}) => last(url.split("://"))
-
 export const isLike = content => ["", "+", "🤙", "👍", "❤️", "😎", "🏅"].includes(content)
 
 export const isNotification = (e, pubkey) => {

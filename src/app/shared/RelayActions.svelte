@@ -47,9 +47,9 @@
       })
     }
 
-    if (relay.contact) {
+    if (relay.meta.contact) {
       actions.push({
-        onClick: () => window.open("mailto:" + last(relay.contact.split(":"))),
+        onClick: () => window.open("mailto:" + last(relay.meta.contact.split(":"))),
         label: "Contact",
         icon: "envelope",
       })

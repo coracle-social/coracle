@@ -5,7 +5,6 @@ import {partition, uniqBy, sortBy, prop, always, pluck, without, is} from "ramda
 import {throttle} from "throttle-debounce"
 import {writable} from "svelte/store"
 import {ensurePlural, noop, createMap} from "hurdak/lib/hurdak"
-import {fuzzy} from "src/util/misc"
 
 const Adapter = window.indexedDB ? IncrementalIndexedDBAdapter : Loki.LokiMemoryAdapter
 
@@ -210,7 +209,6 @@ export const userEvents = new Table("userEvents", "id", {max: 2000, sort: sortBy
 export const notifications = new Table("notifications", "id", {sort: sortByCreatedAt})
 export const contacts = new Table("contacts", "pubkey")
 export const rooms = new Table("rooms", "id")
-export const relays = new Table("relays", "url")
 export const routes = new Table("routes", "id", {max: 10000, sort: sortByScore})
 
 const ready = writable(false)

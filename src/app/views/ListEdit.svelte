@@ -1,6 +1,6 @@
 <script>
   import {pluck, find} from "ramda"
-  import {Tags, displayRelay} from "src/util/nostr"
+  import {Tags} from "src/util/nostr"
   import {modal, toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
@@ -87,7 +87,7 @@
         <strong>Relays</strong>
         <MultiSelect search={_searchRelays} bind:value={values.relays}>
           <div slot="item" let:item>
-            {displayRelay({url: item[1]})}
+            {routing.displayRelay({url: item[1]})}
           </div>
         </MultiSelect>
         <p class="text-sm text-gray-4">
