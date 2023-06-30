@@ -15,6 +15,7 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app/views/Notification.svelte"
+  import {social} from "src/system"
   import {watch} from "src/agent/db"
   import user from "src/agent/user"
   import {userEvents} from "src/agent/db"
@@ -36,7 +37,7 @@
     return reverse(
       sortBy(
         e => formatTimestampAsLocalISODate(e.created_at).slice(0, 13) + findReplyId(e),
-        user.applyMutes(t.all())
+        social.applyMutes(t.all())
       )
     )
   })

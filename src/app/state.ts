@@ -67,7 +67,7 @@ const session = Math.random().toString().slice(2)
 export const logUsage = async name => {
   // Hash the user's pubkey so we can identify unique users without knowing
   // anything about them
-  const pubkey = user.getPubkey()
+  const pubkey = keys.getPubkey()
   const ident = pubkey ? hash(pubkey) : "unknown"
   const {dufflepudUrl, reportAnalytics} = settings.getSettings()
 
@@ -153,7 +153,7 @@ const processChats = async (pubkey, events) => {
 }
 
 export const listen = async () => {
-  const pubkey = user.getPubkey()
+  const pubkey = keys.getPubkey()
   const {roomsJoined} = user.getProfile()
   const kinds = noteKinds.concat([4, 7])
 
@@ -183,7 +183,7 @@ export const listen = async () => {
       {kinds: [42], "#e": roomsJoined, since},
     ],
     onChunk: async events => {
-      events = user.applyMutes(events)
+      events = social.applyMutes(events)
 
       await network.loadPeople(pluck("pubkey", events))
       await processNotifications(pubkey, events)
@@ -236,7 +236,7 @@ export const login = async (method, key) => {
 
     await Promise.all([
       sleep(1500),
-      network.loadPeople([user.getPubkey()], {force: true, kinds: userKinds}),
+      network.loadPeople([keys.getPubkey()], {force: true, kinds: userKinds}),
     ])
 
     navigate("/notes")

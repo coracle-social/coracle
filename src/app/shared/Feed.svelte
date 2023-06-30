@@ -13,7 +13,7 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import user from "src/agent/user"
+  import {social} from "src/system"
   import network from "src/agent/network"
   import {sampleRelays, getAllPubkeyWriteRelays} from "src/agent/relays"
   import {mergeParents, compileFilter} from "src/app/state"
@@ -65,7 +65,7 @@
     const _key = key
 
     // Deduplicate and filter out stuff we don't want, apply user preferences
-    const filtered = user.applyMutes(newNotes.filter(n => !seen.has(n.id) && shouldDisplay(n)))
+    const filtered = social.applyMutes(newNotes.filter(n => !seen.has(n.id) && shouldDisplay(n)))
 
     // Keep track of what we've seen
     for (const note of filtered) {
@@ -92,7 +92,7 @@
       maxDepth: 2,
       notes: combined.filter(canDisplay),
       onChunk: context => {
-        context = user.applyMutes(context)
+        context = social.applyMutes(context)
 
         notesBuffer = network.applyContext(notesBuffer, context)
         notes = network.applyContext(notes, context)

@@ -51,7 +51,7 @@
       ),
     ])
 
-    loadAppData(user.getPubkey())
+    loadAppData(keys.getPubkey())
 
     modal.clear()
     navigate("/notes")

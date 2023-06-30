@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {cmd} from "src/system"
+  import {keys, cmd} from "src/system"
   import user from "src/agent/user"
   import {getUserWriteRelays} from "src/agent/relays"
   import {routes} from "src/app/state"
@@ -30,7 +30,7 @@
   const submit = async event => {
     event?.preventDefault()
     publishWithToast(getUserWriteRelays(), cmd.updateUser(values))
-    navigate(routes.person(user.getPubkey(), "notes"))
+    navigate(routes.person(keys.getPubkey(), "notes"))
   }
 
   document.title = "Profile"

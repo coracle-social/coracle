@@ -13,7 +13,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {DEFAULT_RELAYS, routing} from "src/system"
+  import {DEFAULT_RELAYS, routing, keys} from "src/system"
   import {watch} from "src/agent/db"
   import network from "src/agent/network"
   import user from "src/agent/user"
@@ -57,7 +57,7 @@
       currentRelays[i] = relay
 
       network
-        .loadPeople([user.getPubkey()], {relays: [relay], force: true, kinds: userKinds})
+        .loadPeople([keys.getPubkey()], {relays: [relay], force: true, kinds: userKinds})
         .then(async () => {
           // Wait a bit before removing the relay to smooth out the ui
           await sleep(1000)
@@ -70,7 +70,7 @@
 
             // Reload everything, it's possible we didn't get their petnames if we got a match
             // from something like purplepag.es. This helps us avoid nuking follow lists later
-            await Promise.all([loadAppData(user.getPubkey()), sleep(1500)])
+            await Promise.all([loadAppData(keys.getPubkey()), sleep(1500)])
 
             navigate("/notes")
           } else {

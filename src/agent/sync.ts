@@ -15,7 +15,7 @@ const addHandler = (kind, f) => {
 }
 
 const processEvents = async events => {
-  const userPubkey = user.getPubkey()
+  const userPubkey = keys.getPubkey()
   const chunks = chunk(100, ensurePlural(events).filter(identity))
 
   for (let i = 0; i < chunks.length; i++) {
@@ -43,7 +43,7 @@ const processEvents = async events => {
 // User profile, except for events also handled for other users
 
 const userHandler = cb => e => {
-  if (e.pubkey === user.getPubkey()) {
+  if (e.pubkey === keys.getPubkey()) {
     cb(e)
   }
 }

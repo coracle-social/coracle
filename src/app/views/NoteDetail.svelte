@@ -10,8 +10,8 @@
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
+  import {social} from "src/system"
   import Note from "src/app/shared/Note.svelte"
-  import user from "src/agent/user"
   import network from "src/agent/network"
   import {sampleRelays} from "src/agent/relays"
 
@@ -48,7 +48,7 @@
         maxDepth: depth,
         notes: [displayNote],
         onChunk: context => {
-          displayNote = first(network.applyContext([displayNote], user.applyMutes(context)))
+          displayNote = first(network.applyContext([displayNote], social.applyMutes(context)))
         },
       })
     }

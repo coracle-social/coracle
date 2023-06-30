@@ -35,7 +35,7 @@
   const addRelay = r => {
     user.addRelay(r.url)
 
-    const pubkey = user.getPubkey()
+    const pubkey = keys.getPubkey()
     const profile = user.getProfile()
 
     if (pubkey && !profile?.kind0) {

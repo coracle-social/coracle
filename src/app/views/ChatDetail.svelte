@@ -6,7 +6,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {cmd} from "src/system"
+  import {keys, cmd} from "src/system"
   import user from "src/agent/user"
   import {getRelaysForEventChildren, sampleRelays} from "src/agent/relays"
   import network from "src/agent/network"
@@ -56,7 +56,7 @@
       <div class="flex w-full items-center justify-between">
         <div class="flex items-center gap-4">
           <div class="text-lg font-bold">{$room.name || ""}</div>
-          {#if $room?.pubkey === user.getPubkey()}
+          {#if $room?.pubkey === keys.getPubkey()}
             <button class="cursor-pointer text-sm" on:click={edit}>
               <i class="fa-solid fa-edit" /> Edit
             </button>

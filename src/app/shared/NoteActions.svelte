@@ -14,10 +14,9 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {ENABLE_ZAPS, keys, nip57, cmd, routing} from "src/system"
+  import {ENABLE_ZAPS, keys, nip57, cmd, routing, social} from "src/system"
   import {getEventPublishRelays} from "src/agent/relays"
   import pool from "src/agent/pool"
-  import user from "src/agent/user"
 
   export let note
   export let reply
@@ -39,8 +38,8 @@
   }
 
   const quote = () => modal.push({type: "note/create", quote: note})
-  const mute = () => user.addMute("e", note.id)
-  const unmute = () => user.removeMute(note.id)
+  const mute = () => social.mute("e", note.id)
+  const unmute = () => social.unmute(note.id)
 
   const react = async content => {
     like = first(await cmd.createReaction(note, content).publish(getEventPublishRelays(note)))
@@ -63,18 +62,18 @@
 
   $: disableActions = !$canSign || muted
   $: likes = note.reactions.filter(n => isLike(n.content))
-  $: like = like || find(propEq("pubkey", user.getPubkey()), likes)
+  $: like = like || find(propEq("pubkey", keys.getPubkey()), likes)
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
   $: $likesCount = allLikes.length
 
   $: zaps = nip57.processZaps(note.zaps, note.pubkey)
-  $: zap = zap || find(pathEq(["request", "pubkey"], user.getPubkey()), zaps)
+  $: zap = zap || find(pathEq(["request", "pubkey"], keys.getPubkey()), zaps)
   $: allZaps = zap
     ? zaps.filter(n => n.id !== zap?.id).concat(nip57.processZaps([zap], note.pubkey))
     : zaps
   $: $zapsTotal = sum(pluck("invoiceAmount", allZaps)) / 1000
 
-  $: canZap = zapper && note.pubkey !== user.getPubkey()
+  $: canZap = zapper && note.pubkey !== keys.getPubkey()
   $: $repliesCount = note.replies.length
 
   $: {
@@ -113,7 +112,7 @@
     </button>
     <button
       class={cx("w-16 text-left", {
-        "pointer-events-none opacity-50": disableActions || note.pubkey === user.getPubkey(),
+        "pointer-events-none opacity-50": disableActions || note.pubkey === keys.getPubkey(),
         "text-accent": like,
       })}
       on:click={() => (like ? deleteReaction(like) : react("+"))}>

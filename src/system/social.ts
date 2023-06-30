@@ -1,8 +1,8 @@
-import {sortBy, reject, prop} from "ramda"
+import {sortBy, slice, reject, prop} from "ramda"
 import {get} from "svelte/store"
 import {ensurePlural} from "hurdak/lib/hurdak"
 import {now} from "src/util/misc"
-import {Tags} from "src/util/nostr"
+import {Tags, findReplyId, findRootId} from "src/util/nostr"
 import {Table} from "src/agent/db"
 
 export default ({keys, sync, getCmd, getUserWriteRelays}) => {
@@ -13,9 +13,9 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
     if (pubkey) {
       const whitelist = new Set(graph.all({pubkey}).follows.concat(pubkey))
 
-      return sortBy(x => (whitelist.has(x.pubkey) ? 0 : x.created_at), xs)
+      return sortBy(x => (whitelist.has(x.pubkey) ? 0 : x.updated_at), xs)
     } else {
-      return sortBy(prop("created_at"))
+      return sortBy(prop("updated_at"))
     }
   }
 
@@ -24,18 +24,34 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
   sync.addHandler(3, e => {
     const entry = graph.get(e.pubkey)
 
-    if (e.created_at < entry?.created_at) {
+    if (e.created_at < entry?.petnames_updated_at) {
       return
     }
 
     graph.patch({
       pubkey: e.pubkey,
-      created_at: e.created_at,
+      petnames_updated_at: e.created_at,
       petnames: Tags.from(e).type("p").all(),
     })
   })
 
+  sync.addHandler(10000, e => {
+    const entry = graph.get(e.pubkey)
+
+    if (e.created_at < entry?.mutes_updated_at) {
+      return
+    }
+
+    graph.patch({
+      pubkey: e.pubkey,
+      mutes_updated_at: e.created_at,
+      mutes: Tags.from(e).type("p").all(),
+    })
+  })
+
   const getPetnames = pubkey => graph.get(pubkey)?.petnames || []
+
+  const getMutedTags = pubkey => graph.get(pubkey)?.mutes || []
 
   const getFollowsSet = pubkeys => {
     const follows = new Set()
@@ -49,7 +65,21 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
     return follows
   }
 
+  const getMutesSet = pubkeys => {
+    const mutes = new Set()
+
+    for (const pubkey of ensurePlural(pubkeys)) {
+      for (const tag of getMutedTags(pubkey)) {
+        mutes.add(tag[1])
+      }
+    }
+
+    return mutes
+  }
+
   const getFollows = pubkeys => Array.from(getFollowsSet(pubkeys))
+
+  const getMutes = pubkeys => Array.from(getMutesSet(pubkeys))
 
   const getNetworkSet = (pubkeys, includeFollows = false) => {
     const follows = getFollowsSet(pubkeys)
@@ -67,14 +97,19 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
   const getNetwork = pubkeys => Array.from(getNetworkSet(pubkeys))
 
   const isFollowing = (a, b) => getFollowsSet(a).has(b)
+  const isIgnoring = (a, b) => getMutesSet(a).has(b)
 
   const getUserKey = () => keys.getPubkey() || "anonymous"
   const getUserPetnames = () => getPetnames(getUserKey())
+  const getUserMutedTags = () => getMutedTags(getUserKey())
   const getUserFollowsSet = () => getFollowsSet(getUserKey())
+  const getUserMutesSet = () => getMutesSet(getUserKey())
   const getUserFollows = () => getFollows(getUserKey())
+  const getUserMutes = () => getMutes(getUserKey())
   const getUserNetworkSet = () => getNetworkSet(getUserKey())
   const getUserNetwork = () => getNetwork(getUserKey())
   const isUserFollowing = pubkey => isFollowing(getUserKey(), pubkey)
+  const isUserIgnoring = pubkeyOrEventId => isIgnoring(getUserKey(), pubkeyOrEventId)
 
   const updatePetnames = async $petnames => {
     if (get(keys.canSign)) {
@@ -82,7 +117,7 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
     } else {
       graph.patch({
         pubkey: getUserKey(),
-        created_at: now(),
+        petnames_updated_at: now(),
         petnames: $petnames,
       })
     }
@@ -97,23 +132,61 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
 
   const unfollow = pubkey => updatePetnames(reject(t => t[1] === pubkey, getUserPetnames()))
 
+  const applyMutes = events => {
+    const m = new Set(getUserMutes().map(m => m[1]))
+
+    return events.filter(
+      e => !(m.has(e.id) || m.has(e.pubkey) || m.has(findReplyId(e)) || m.has(findRootId(e)))
+    )
+  }
+
+  const updateMutes = async $mutes => {
+    if (get(keys.canSign)) {
+      await getCmd()
+        .setMutes($mutes.map(slice(0, 2)))
+        .publish(getUserWriteRelays())
+    } else {
+      graph.patch({
+        pubkey: getUserKey(),
+        mutes_updated_at: now(),
+        mutes: $mutes,
+      })
+    }
+  }
+
+  const mute = (type, value) =>
+    updateMutes(reject(t => t[1] === value, getUserMutes()).concat([[type, value]]))
+
+  const unmute = pubkey => updateMutes(reject(t => t[1] === pubkey, getUserMutes()))
+
   return {
     graph,
     getPetnames,
+    getMutedTags,
     getFollowsSet,
+    getMutesSet,
     getFollows,
+    getMutes,
     getNetworkSet,
     getNetwork,
     isFollowing,
+    isIgnoring,
     getUserPetnames,
+    getUserMutedTags,
     getUserFollowsSet,
+    getUserMutesSet,
     getUserFollows,
     getUserNetworkSet,
     getUserNetwork,
     isUserFollowing,
+    isUserIgnoring,
     updatePetnames,
     follow,
     unfollow,
+    applyMutes,
+    updateMutes,
+    mute,
+    unmute,
     sortByGraph,
   }
 }

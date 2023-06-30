@@ -15,9 +15,8 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {directory, cmd} from "src/system"
+  import {keys, directory, cmd} from "src/system"
   import {getUserWriteRelays, getRelayForPersonHint} from "src/agent/relays"
-  import user from "src/agent/user"
   import {toast, modal} from "src/partials/state"
   import {publishWithToast} from "src/app/state"
 
@@ -99,7 +98,7 @@
   }
 
   onMount(() => {
-    if (pubkey && pubkey !== user.getPubkey()) {
+    if (pubkey && pubkey !== keys.getPubkey()) {
       compose.mention(directory.getProfile(pubkey))
     }
 
@@ -131,7 +130,7 @@
         </div>
         <div class="flex items-center justify-end gap-2 text-gray-5">
           <small>
-            Posting as @{directory.displayPubkey(user.getPubkey())}
+            Posting as @{directory.displayPubkey(keys.getPubkey())}
           </small>
           <span>•</span>
           <small on:click={togglePreview} class="cursor-pointer underline">

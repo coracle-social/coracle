@@ -1,8 +1,6 @@
 <script lang="ts">
-  import {nth} from "ramda"
   import Anchor from "src/partials/Anchor.svelte"
   import {keys, directory, social, nip05} from "src/system"
-  import user from "src/agent/user"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import {watch} from "src/agent/db"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
@@ -13,12 +11,10 @@
 
   const {canSign} = keys
   const following = watch(social.graph, () => social.isUserFollowing(pubkey))
-  const {mutes} = user
+  const muted = watch(social.graph, () => social.isUserIgnoring(pubkey))
   const getRelays = () => sampleRelays(getPubkeyWriteRelays(pubkey))
   const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
   const handle = watch(nip05.handles, () => nip05.getHandle(pubkey))
-
-  $: muted = $mutes.map(nth(1)).includes(pubkey)
 
   const follow = () => {
     const [{url}] = getRelays()
@@ -28,9 +24,9 @@
 
   const unfollow = () => social.unfollow(pubkey)
 
-  const unmute = () => user.removeMute(pubkey)
+  const unmute = () => social.unmute(pubkey)
 
-  const mute = () => user.addMute("p", pubkey)
+  const mute = () => social.mute("p", pubkey)
 </script>
 
 <div class="relative flex flex-col gap-4 px-3 py-2">
@@ -49,7 +45,7 @@
     </Anchor>
     <div class="flex gap-4 py-2 text-lg">
       {#if $canSign}
-        {#if muted}
+        {#if $muted}
           <i
             title="Unmute"
             class="fa fa-microphone-slash w-6 cursor-pointer text-center"

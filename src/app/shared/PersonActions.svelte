@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {find} from "ramda"
   import {nip19} from "nostr-tools"
   import {navigate} from "svelte-routing"
   import {modal} from "src/partials/state"
@@ -7,21 +6,19 @@
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {keys, social, directory} from "src/system"
   import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
-  import user from "src/agent/user"
   import {watch} from "src/agent/db"
   import pool from "src/agent/pool"
   import {addToList} from "src/app/state"
 
   export let pubkey
 
-  const npub = nip19.npubEncode(pubkey)
-  const {mutes} = user
   const {canSign} = keys
+  const npub = nip19.npubEncode(pubkey)
   const following = watch(social.graph, () => social.isUserFollowing(pubkey))
+  const muted = watch(social.graph, () => social.isUserIgnoring(pubkey))
 
   let actions = []
 
-  $: muted = find(m => m[1] === pubkey, $mutes)
   $: {
     actions = []
 
@@ -35,16 +32,16 @@
 
     actions.push({onClick: share, label: "Share", icon: "share-nodes"})
 
-    if (user.getPubkey() !== pubkey && $canSign) {
+    if (keys.getPubkey() !== pubkey && $canSign) {
       actions.push({
         onClick: () => navigate(`/messages/${npub}`),
         label: "Message",
         icon: "envelope",
       })
 
-      if (muted) {
+      if ($muted) {
         actions.push({onClick: unmute, label: "Unmute", icon: "microphone"})
-      } else if (user.getPubkey() !== pubkey) {
+      } else if (keys.getPubkey() !== pubkey) {
         actions.push({onClick: mute, label: "Mute", icon: "microphone-slash"})
       }
     }
@@ -53,7 +50,7 @@
       actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
     }
 
-    if (user.getPubkey() === pubkey && $canSign) {
+    if (keys.getPubkey() === pubkey && $canSign) {
       actions.push({
         onClick: () => navigate("/profile"),
         label: "Edit",
@@ -70,13 +67,9 @@
 
   const unfollow = () => social.unfollow(pubkey)
 
-  const mute = async () => {
-    user.addMute("p", pubkey)
-  }
+  const mute = async () => social.mute("p", pubkey)
 
-  const unmute = async () => {
-    user.removeMute(pubkey)
-  }
+  const unmute = () => social.unmute(pubkey)
 
   const openProfileInfo = () => {
     modal.push({type: "person/info", pubkey})
@@ -93,7 +86,7 @@
       <div slot="trigger">
         {#if $following}
           <i class="fa fa-user-minus cursor-pointer" on:click={unfollow} />
-        {:else if user.getPubkey() !== pubkey}
+        {:else if keys.getPubkey() !== pubkey}
           <i class="fa fa-user-plus cursor-pointer" on:click={follow} />
         {/if}
       </div>

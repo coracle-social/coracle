@@ -8,10 +8,9 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {directory} from "src/system"
+  import {directory, social} from "src/system"
   import {sampleRelays} from "src/agent/relays"
   import network from "src/agent/network"
-  import user from "src/agent/user"
 
   export let note
   export let value
@@ -31,7 +30,7 @@
         filter: [{ids: [id]}],
       })
 
-      muted = user.applyMutes(events).length === 0
+      muted = social.applyMutes(events).length === 0
 
       return events[0] || Promise.reject()
     } catch (e) {

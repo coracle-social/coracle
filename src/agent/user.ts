@@ -1,7 +1,6 @@
 import type {Relay} from "src/util/types"
 import type {Readable} from "svelte/store"
-import {slice, uniqBy, without, reject, prop, pipe, assoc, whereEq, when, concat, map} from "ramda"
-import {findReplyId, findRootId} from "src/util/nostr"
+import {uniqBy, without, reject, prop, assoc, whereEq, when, map} from "ramda"
 import {synced} from "src/util/misc"
 import {derived, get} from "svelte/store"
 import keys from "src/system/keys"
@@ -16,8 +15,6 @@ const profile = synced("agent/user/profile", {
   rooms_joined: [],
   last_checked: {},
   relays: pool.defaultRelays,
-  mutes: [],
-  lists: [],
 })
 
 const roomsJoined = derived(profile, prop("rooms_joined")) as Readable<string>
@@ -25,7 +22,6 @@ const lastChecked = derived(profile, prop("last_checked")) as Readable<Record<st
 const relays = derived(profile, p =>
   pool.forceRelays.length > 0 ? pool.forceRelays : p.relays
 ) as Readable<Array<Relay>>
-const mutes = derived(profile, prop("mutes")) as Readable<Array<[string, string]>>
 
 // Keep a copy so we can avoid calling `get` all the time
 
@@ -50,7 +46,6 @@ export default {
 
   profile,
   getProfile: () => profileCopy,
-  getPubkey: () => profileCopy?.pubkey,
 
   // App data
 
@@ -95,37 +90,5 @@ export default {
   },
   setRelayWriteCondition(url, write) {
     return this.updateRelays(map(when(whereEq({url}), assoc("write", write))))
-  },
-
-  // Mutes
-
-  mutes,
-  getMutes: () => profileCopy.mutes,
-  applyMutes: events => {
-    const m = new Set(profileCopy.mutes.map(m => m[1]))
-
-    return events.filter(
-      e => !(m.has(e.id) || m.has(e.pubkey) || m.has(findReplyId(e)) || m.has(findRootId(e)))
-    )
-  },
-  updateMutes(f) {
-    const $mutes = f(profileCopy.mutes)
-
-    profile.update(assoc("mutes", $mutes))
-
-    if (get(keys.canSign)) {
-      return ext.cmd.setMutes($mutes.map(slice(0, 2))).publish(profileCopy.relays)
-    }
-  },
-  addMute(type, value) {
-    return this.updateMutes(
-      pipe(
-        reject(t => t[1] === value),
-        concat([[type, value]])
-      )
-    )
-  },
-  removeMute(pubkey) {
-    return this.updateMutes(reject(t => t[1] === pubkey))
   },
 }

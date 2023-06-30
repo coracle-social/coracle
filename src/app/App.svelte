@@ -22,7 +22,6 @@
   import {onReady} from "src/agent/db"
   import * as system from "src/system"
   import pool from "src/agent/pool"
-  import user from "src/agent/user"
   import {loadAppData} from "src/app/state"
   import {theme, getThemeVariables, appName, modal} from "src/partials/state"
   import {logUsage} from "src/app/state"
@@ -124,7 +123,7 @@
   onReady(() => {
     system.initialize()
 
-    const pubkey = user.getPubkey()
+    const pubkey = system.keys.getPubkey()
 
     if (pubkey) {
       loadAppData(pubkey)

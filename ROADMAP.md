@@ -4,6 +4,7 @@
   - [ ] Convert watch to take the table object instead of its name
   - [ ] Test migration
 - [ ] Add custom emoji support
+- [ ] Fork and white label blowater
 - [ ] Show full nip05 unless it starts with an underscore
 - [ ] nsec bunker support
 - [ ] Add relayset support with kind 30022

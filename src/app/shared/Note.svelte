@@ -1,6 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {find, last} from "ramda"
+  import {last} from "ramda"
   import {onMount} from "svelte"
   import {quantify} from "hurdak/lib/hurdak"
   import {findRootId, findReplyId} from "src/util/nostr"
@@ -13,8 +13,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
-  import {nip05, directory} from "src/system"
-  import user from "src/agent/user"
+  import {nip05, directory, social} from "src/system"
   import {getRelaysForEventParent} from "src/agent/relays"
   import {watch} from "src/agent/db"
   import NoteContent from "src/app/shared/NoteContent.svelte"
@@ -34,17 +33,15 @@
   let visibleNotes = []
   let collapsed = false
 
-  const {mutes} = user
   const timestamp = formatTimestamp(note.created_at)
   const borderColor = invertColors ? "gray-6" : "gray-7"
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
   const author = watch(directory.profiles, () => directory.getProfile(note.pubkey))
   const handle = watch(nip05.handles, () => nip05.getHandle(note.pubkey))
+  const muted = watch(social.graph, () => social.isUserIgnoring(note.id))
 
   let border, childrenContainer, noteContainer
-
-  $: muted = find(m => m[1] === note.id, $mutes)
 
   $: visibleNotes = note.replies.filter(r => {
     if (feedRelay && !r.seen_on.includes(feedRelay.url)) {
@@ -162,20 +159,26 @@
               </small>
             {/if}
           </div>
-          {#if muted}
+          {#if $muted}
             <p class="border-l-2 border-solid border-gray-6 pl-4 text-gray-1">
               You have muted this note.
             </p>
           {:else}
             <NoteContent {anchorId} {note} {showEntire} />
           {/if}
-          <NoteActions bind:this={actions} {note} {reply} {muted} {setFeedRelay} {showEntire} />
+          <NoteActions
+            bind:this={actions}
+            {note}
+            {reply}
+            muted={$muted}
+            {setFeedRelay}
+            {showEntire} />
         </div>
       </div>
     </Card>
   </div>
 
-  {#if !replyIsActive && visibleNotes.length > 0 && !showEntire && depth > 0 && !muted}
+  {#if !replyIsActive && visibleNotes.length > 0 && !showEntire && depth > 0 && !$muted}
     <div class="relative">
       <div
         class="absolute top-0 right-0 z-10 -mt-4 -mr-2 flex h-6 w-6 cursor-pointer items-center
@@ -210,7 +213,7 @@
     {note}
     {borderColor} />
 
-  {#if !collapsed && visibleNotes.length > 0 && depth > 0 && !muted}
+  {#if !collapsed && visibleNotes.length > 0 && depth > 0 && !$muted}
     <div class="relative mt-4">
       <div class={`absolute w-px bg-${borderColor} z-10 -mt-4 ml-4 h-0`} bind:this={border} />
       <div class="note-children relative ml-8 flex flex-col gap-4" bind:this={childrenContainer}>
