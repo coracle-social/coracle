@@ -32,8 +32,6 @@
   const links = getLinks(shortContent)
   const extraLinks = without(links, getLinks(fullContent))
 
-  console.log(fullContent, shortContent)
-
   export const isNewline = i =>
     !shortContent[i] ||
     shortContent[i].type === NEWLINE ||

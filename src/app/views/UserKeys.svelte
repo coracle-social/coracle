@@ -12,7 +12,7 @@
   import keys from "src/agent/keys"
   import {toast} from "src/partials/state"
 
-  const {pubkey, privkey} = keys
+  const {pubkey, privkey, bunkerKey} = keys
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
   const keypairUrl = "https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/"
 
@@ -84,6 +84,21 @@
             Be careful about copying this into other apps - instead, consider using a <Anchor
               href={nip07}
               external>compatible browser extension</Anchor> to securely store your key.
+          </p>
+        </div>
+      {/if}
+      {#if $bunkerKey}
+        <div class="flex flex-col gap-1">
+          <strong>Bunker Key</strong>
+          <Input disabled type="password" value={$bunkerKey}>
+            <button
+              slot="after"
+              class="fa-solid fa-copy cursor-pointer"
+              on:click={() => copyKey("bunker", $bunkerKey)} />
+          </Input>
+          <p class="text-sm text-gray-1">
+            Your bunker key is used to authorize Coracle with your nsec bunker to sign events on
+            your behalf. Save this if you would like to log in elsewhere without re-authorizing.
           </p>
         </div>
       {/if}

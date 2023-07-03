@@ -1,4 +1,5 @@
-import {nip19, nip04, getPublicKey, getEventHash, signEvent} from "nostr-tools"
+import {nip19, nip04, getPublicKey, getEventHash, signEvent, generatePrivateKey} from "nostr-tools"
+import NDK, {NDKEvent, NDKNip46Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk"
 import {get} from "svelte/store"
 import {error} from "src/util/logger"
 import {synced} from "src/util/misc"
@@ -6,22 +7,56 @@ import {synced} from "src/util/misc"
 const method = synced("agent/keys/method")
 const pubkey = synced("agent/keys/pubkey")
 const privkey = synced("agent/keys/privkey")
+const bunkerKey = synced("agent/keys/bunkerKey")
 const getExtension = () => (window as {nostr?: any}).nostr
-const canSign = () => ["privkey", "extension"].includes(get(method))
+const canSign = () => ["bunker", "privkey", "extension"].includes(get(method))
 
 // Validate the key before setting it to state by encoding it using bech32.
 // This will error if invalid (this works whether it's a public or a private key)
 const validate = key => nip19.npubEncode(key)
 
+let ndk, remoteSigner
+
+const prepareNdk = async (token?: string) => {
+  const localSigner = new NDKPrivateKeySigner(get(bunkerKey))
+
+  ndk = new NDK({
+    explicitRelayUrls: ["wss://relay.f7z.io", "wss://relay.damus.io", "wss://relay.nsecbunker.com"],
+  })
+
+  remoteSigner = new NDKNip46Signer(ndk, get(pubkey), localSigner)
+  remoteSigner.token = token
+
+  ndk.signer = remoteSigner
+
+  await ndk.connect(5000)
+  await remoteSigner.blockUntilReady()
+}
+
+const getNDK = async () => {
+  if (!ndk) {
+    await prepareNdk()
+  }
+
+  return ndk
+}
+
 const login = ($method, key) => {
   method.set($method)
+
+  pubkey.set(null)
+  privkey.set(null)
+  bunkerKey.set(null)
 
   if ($method === "privkey") {
     privkey.set(key)
     pubkey.set(getPublicKey(key))
-  } else {
-    privkey.set(null)
+  } else if (["pubkey", "extension"].includes($method)) {
     pubkey.set(key)
+  } else if ($method === "bunker") {
+    pubkey.set(key.pubkey)
+    bunkerKey.set(generatePrivateKey())
+    prepareNdk(key.token)
   }
 }
 
@@ -31,11 +66,19 @@ const clear = () => {
   privkey.set(null)
 }
 
-const sign = event => {
+const sign = async event => {
   const $method = get(method)
 
   event.pubkey = get(pubkey)
   event.id = getEventHash(event)
+
+  if ($method === "bunker") {
+    const ndkEvent = new NDKEvent(await getNDK(), event)
+
+    await ndkEvent.sign(remoteSigner)
+
+    return ndkEvent.rawEvent()
+  }
 
   if ($method === "privkey") {
     return Object.assign(event, {
@@ -52,6 +95,23 @@ const sign = event => {
 
 const getCrypt = () => {
   const $method = get(method)
+
+  if ($method === "bunker") {
+    return {
+      encrypt: async (pubkey, message) => {
+        const ndk = await getNDK()
+        const user = ndk.getUser({hexpubkey: pubkey})
+
+        return ndk.signer.encrypt(user, message)
+      },
+      decrypt: async (pubkey, message) => {
+        const ndk = await getNDK()
+        const user = ndk.getUser({hexpubkey: pubkey})
+
+        return ndk.signer.decrypt(user, message)
+      },
+    }
+  }
 
   if ($method === "privkey") {
     const $privkey = get(privkey)
@@ -104,6 +164,7 @@ export default {
   method,
   pubkey,
   privkey,
+  bunkerKey,
   canSign,
   validate,
   login,

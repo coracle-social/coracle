@@ -25,8 +25,8 @@
     modal.push({type: "onboarding", stage: "intro"})
   }
 
-  const pubkeyLogIn = () => {
-    modal.push({type: "login/pubkey"})
+  const advancedLogIn = () => {
+    modal.push({type: "login/advanced"})
   }
 
   if (user.getPubkey()) {
@@ -56,7 +56,7 @@
             >Log In</Anchor>
           <Anchor class="w-32 text-center" theme="button" on:click={signUp}>Sign Up</Anchor>
         </div>
-        <Anchor on:click={pubkeyLogIn}>
+        <Anchor on:click={advancedLogIn}>
           <i class="fa fa-cogs" /> Advanced Login
         </Anchor>
       </div>

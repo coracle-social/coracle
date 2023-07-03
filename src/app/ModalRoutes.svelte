@@ -4,7 +4,9 @@
   import ChatEdit from "src/app/views/ChatEdit.svelte"
   import LoginConnect from "src/app/views/LoginConnect.svelte"
   import LoginPrivKey from "src/app/views/LoginPrivKey.svelte"
+  import LoginAdvanced from "src/app/views/LoginAdvanced.svelte"
   import LoginPubKey from "src/app/views/LoginPubKey.svelte"
+  import LoginBunker from "src/app/views/LoginBunker.svelte"
   import Onboarding from "src/app/views/Onboarding.svelte"
   import NoteCreate from "src/app/views/NoteCreate.svelte"
   import NoteDelete from "src/app/views/NoteDelete.svelte"
@@ -50,8 +52,12 @@
   <ChatEdit {...m} />
 {:else if m.type === "login/privkey"}
   <LoginPrivKey />
+{:else if m.type === "login/advanced"}
+  <LoginAdvanced />
 {:else if m.type === "login/pubkey"}
   <LoginPubKey />
+{:else if m.type === "login/bunker"}
+  <LoginBunker />
 {:else if m.type === "login/connect"}
   <LoginConnect />
 {:else if m.type === "person/feed"}
