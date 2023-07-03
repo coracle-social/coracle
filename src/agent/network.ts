@@ -25,7 +25,8 @@ import {
   sampleRelays,
 } from "src/agent/relays"
 import pool from "src/agent/pool"
-import sync from "src/agent/sync"
+
+const ext = {sync: null}
 
 // If we ask for a pubkey and get nothing back, don't ask again this page load
 const attemptedPubkeys = new Set()
@@ -51,7 +52,7 @@ const listen = ({relays, filter, onChunk = null, shouldProcess = true, delay = 5
     relays,
     onEvent: batch(delay, chunk => {
       if (shouldProcess) {
-        sync.processEvents(chunk)
+        ext.sync.processEvents(chunk)
       }
 
       if (onChunk) {
@@ -98,7 +99,7 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5
       filter,
       onEvent: batch(500, chunk => {
         if (shouldProcess) {
-          sync.processEvents(chunk)
+          ext.sync.processEvents(chunk)
         }
 
         if (onChunk) {
@@ -357,6 +358,7 @@ const applyContext = (notes, context) => {
 }
 
 export default {
+  ext,
   load,
   listen,
   Cursor,

@@ -1,33 +1,28 @@
 <script>
   import {onMount} from "svelte"
-  import {derived} from "svelte/store"
-  import {partition} from "ramda"
+  import {partition, prop} from "ramda"
   import {fuzzy} from "src/util/misc"
   import {modal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
-  import {keys} from "src/system"
+  import {keys, chat} from "src/system"
   import {watch} from "src/agent/db"
-  import user from "src/agent/user"
   import network from "src/agent/network"
   import {getUserReadRelays, sampleRelays} from "src/agent/relays"
 
   let q = ""
   let search
   let results = []
+  let joinedChannels = []
+  let otherChannels = []
 
   const {canSign} = keys
-  const {roomsJoined} = user
-  const rooms = derived([watch("rooms", t => t.all()), roomsJoined], ([_rooms, _joined]) => {
-    const ids = new Set(_joined)
-    const [joined, other] = partition(r => ids.has(r.id), _rooms)
+  const channels = watch(chat.channels, () => chat.channels.all({type: "public"}))
 
-    return {joined, other}
-  })
-
-  $: search = fuzzy($rooms.other, {keys: ["name", "about"]})
+  $: [joinedChannels, otherChannels] = partition(prop("joined"), $channels)
+  $: search = fuzzy(otherChannels, {keys: ["name", "about"]})
   $: results = search(q).slice(0, 50)
 
   document.title = "Chat"
@@ -55,8 +50,8 @@
         <i class="fa-solid fa-plus" /> Create Room
       </Anchor>
     </div>
-    {#each $rooms.joined as room (room.id)}
-      <ChatListItem {room} />
+    {#each joinedChannels as channel (channel.id)}
+      <ChatListItem {channel} />
     {:else}
       <p class="text-center py-8">You haven't yet joined any rooms.</p>
     {/each}
@@ -72,11 +67,11 @@
     </Input>
   </div>
   {#if results.length > 0}
-    {#each results as room (room.id)}
-      <ChatListItem {room} />
+    {#each results as channel (channel.id)}
+      <ChatListItem {channel} />
     {/each}
     <small class="text-center">
-      Showing {Math.min(50, $rooms.other.length)} of {$rooms.other.length} known rooms
+      Showing {Math.min(50, otherChannels.length)} of {otherChannels.length} known rooms
     </small>
   {:else}
     <small class="text-center"> No matching rooms found </small>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import {get} from "svelte/store"
   import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
   import Input from "src/partials/Input.svelte"
@@ -8,13 +9,12 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {keys, cmd} from "src/system"
-  import user from "src/agent/user"
+  import {keys, cmd, directory} from "src/system"
   import {getUserWriteRelays} from "src/agent/relays"
   import {routes} from "src/app/state"
   import {publishWithToast} from "src/app/state"
 
-  let values = user.getProfile().kind0 || {}
+  let values = directory.getUserProfile()
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
   const lud16Url = "https://blog.getalby.com/create-your-lightning-address/"
@@ -22,7 +22,7 @@
     "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
   onMount(async () => {
-    if (!user.getProfile()) {
+    if (!get(keys.canSign)) {
       return navigate("/login")
     }
   })

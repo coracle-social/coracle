@@ -9,11 +9,10 @@
   import Anchor from "src/partials/Anchor.svelte"
   import {toast, modal} from "src/partials/state"
   import {getUserWriteRelays} from "src/agent/relays"
-  import {cmd} from "src/system"
-  import user from "src/agent/user"
+  import {cmd, chat} from "src/system"
   import {publishWithToast} from "src/app/state"
 
-  export let room = {name: null, id: null, about: null, picture: null}
+  export let channel = {name: null, id: null, about: null, picture: null}
 
   onMount(async () => {
     document.querySelector("[name=picture]").addEventListener("change", async e => {
@@ -23,10 +22,10 @@
       if (file) {
         const reader = new FileReader()
         reader.onerror = error
-        reader.onload = () => (room.picture = reader.result)
+        reader.onload = () => (channel.picture = reader.result)
         reader.readAsDataURL(await stripExifData(file))
       } else {
-        room.picture = null
+        channel.picture = null
       }
     })
   })
@@ -34,18 +33,18 @@
   const submit = async e => {
     e.preventDefault()
 
-    if (!room.name) {
+    if (!channel.name) {
       toast.show("error", "Please enter a name for your room.")
     } else {
       const relays = getUserWriteRelays()
 
-      if (room.id) {
-        publishWithToast(relays, cmd.updateRoom(room))
+      if (channel.id) {
+        publishWithToast(relays, cmd.updateChannel(channel))
       } else {
-        const [event] = await publishWithToast(relays, cmd.createRoom(room))
+        const [event] = await publishWithToast(relays, cmd.createChannel(channel))
 
         // Auto join the room the user just created
-        user.joinRoom(event.id)
+        await chat.joinChannel(event.id)
       }
 
       modal.pop()
@@ -61,14 +60,14 @@
     <div class="flex w-full flex-col gap-8">
       <div class="flex flex-col gap-1">
         <strong>Room name</strong>
-        <Input type="text" name="name" wrapperClass="flex-grow" bind:value={room.name}>
+        <Input type="text" name="name" wrapperClass="flex-grow" bind:value={channel.name}>
           <i slot="before" class="fa-solid fa-tag" />
         </Input>
         <p class="text-sm text-gray-1">The room's name can be changed anytime.</p>
       </div>
       <div class="flex flex-col gap-1">
         <strong>Room information</strong>
-        <Textarea name="about" bind:value={room.about} />
+        <Textarea name="about" bind:value={channel.about} />
         <p class="text-sm text-gray-1">
           Give people an idea of what kind of conversations will be happening here.
         </p>

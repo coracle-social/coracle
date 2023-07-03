@@ -9,10 +9,9 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {keys, routing} from "src/system"
+  import {keys, routing, directory} from "src/system"
   import {watch} from "src/agent/db"
   import pool from "src/agent/pool"
-  import user from "src/agent/user"
   import {loadAppData} from "src/app/state"
 
   export let relay
@@ -36,9 +35,8 @@
     routing.addUserRelay(r.url)
 
     const pubkey = keys.getPubkey()
-    const profile = user.getProfile()
 
-    if (pubkey && !profile?.kind0) {
+    if (pubkey && !directory.getUserProfile().created_at) {
       loadAppData(pubkey)
     }
   }

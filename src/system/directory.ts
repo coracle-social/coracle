@@ -3,7 +3,7 @@ import {ellipsize} from "hurdak/lib/hurdak"
 import {tryJson, fuzzy} from "src/util/misc"
 import {Table, watch} from "src/agent/db"
 
-export default ({sync, sortByGraph}) => {
+export default ({keys, sync, sortByGraph}) => {
   const profiles = new Table("directory/profiles", "pubkey", {max: 5000, sort: sortByGraph})
 
   sync.addHandler(0, e => {
@@ -24,6 +24,8 @@ export default ({sync, sortByGraph}) => {
   })
 
   const getProfile = pubkey => profiles.get(pubkey) || {pubkey}
+
+  const getUserProfile = () => getProfile(keys.getPubkey())
 
   const getNamedProfiles = () =>
     profiles.all({
@@ -64,6 +66,7 @@ export default ({sync, sortByGraph}) => {
   return {
     profiles,
     getProfile,
+    getUserProfile,
     getNamedProfiles,
     searchProfiles,
     displayProfile,

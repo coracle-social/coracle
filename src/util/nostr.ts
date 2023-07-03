@@ -5,7 +5,7 @@ import {ensurePlural, first} from "hurdak/lib/hurdak"
 import {tryJson, avg} from "src/util/misc"
 
 export const noteKinds = [1, 1985, 30023, 1063, 9802]
-export const personKinds = [0, 2, 3, 10001, 10002]
+export const personKinds = [0, 2, 3, 10002]
 export const userKinds = personKinds.concat([10000, 30001, 30078])
 export const appDataKeys = [
   "coracle/settings/v1",
@@ -118,24 +118,6 @@ export const findRootId = e => findRoot(e)?.[1]
 
 export const isLike = content => ["", "+", "🤙", "👍", "❤️", "😎", "🏅"].includes(content)
 
-export const isNotification = (e, pubkey) => {
-  if (![1, 7, 9735].includes(e.kind)) {
-    return false
-  }
-
-  // Don't show people's own stuff
-  if (e.pubkey === pubkey) {
-    return false
-  }
-
-  // Only notify users about positive reactions
-  if (e.kind === 7 && !isLike(e.content)) {
-    return false
-  }
-
-  return true
-}
-
 export const isRelay = url =>
   typeof url === "string" &&
   // It should have the protocol included
@@ -160,7 +142,7 @@ export const normalizeRelayUrl = url => {
   return url
 }
 
-export const roomAttrs = ["name", "about", "picture"]
+export const channelAttrs = ["name", "about", "picture"]
 
 export const asDisplayEvent = event =>
   ({replies: [], reactions: [], zaps: [], ...event} as DisplayEvent)

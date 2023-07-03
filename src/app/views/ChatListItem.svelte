@@ -4,18 +4,14 @@
   import {fly} from "src/util/transition"
   import {ellipsize} from "hurdak/lib/hurdak"
   import Anchor from "src/partials/Anchor.svelte"
-  import {keys} from "src/system"
-  import user from "src/agent/user"
+  import {keys, chat} from "src/system"
 
-  export let room
+  export let channel
 
   const {canSign} = keys
-  const {roomsJoined} = user
-  const enter = () => navigate(`/chat/${nip19.noteEncode(room.id)}`)
-  const join = () => user.joinRoom(room.id)
-  const leave = () => user.leaveRoom(room.id)
-
-  $: joined = $roomsJoined.includes(room.id)
+  const enter = () => navigate(`/chat/${nip19.noteEncode(channel.id)}`)
+  const join = () => chat.joinRoom(channel.id)
+  const leave = () => chat.leaveRoom(channel.id)
 </script>
 
 <button
@@ -24,14 +20,14 @@
   in:fly={{y: 20}}>
   <div
     class="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-solid border-white bg-cover bg-center"
-    style="background-image: url({room.picture})" />
+    style="background-image: url({channel.picture})" />
   <div class="flex min-w-0 flex-grow flex-col justify-start gap-2">
     <div class="flex flex-grow items-start justify-between gap-2">
       <div class="flex items-center gap-2 overflow-hidden">
         <i class="fa fa-lock-open text-gray-1" />
-        <h2 class="text-lg">{room.name || ""}</h2>
+        <h2 class="text-lg">{channel.name || ""}</h2>
       </div>
-      {#if joined}
+      {#if channel.joined}
         <Anchor theme="button" killEvent class="flex items-center gap-2" on:click={leave}>
           <i class="fa fa-right-from-bracket" />
           <span>Leave</span>
@@ -43,9 +39,9 @@
         </Anchor>
       {/if}
     </div>
-    {#if room.about}
+    {#if channel.about}
       <p class="text-start text-gray-1">
-        {ellipsize(room.about, 300)}
+        {ellipsize(channel.about, 300)}
       </p>
     {/if}
   </div>

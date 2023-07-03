@@ -80,7 +80,7 @@
 {#if search}
   <div class="relative w-full">
     <div class="absolute w-full">
-      <Suggestions bind:this={suggestions} {select}>
+      <Suggestions bind:this={suggestions} {select} {getKey}>
         <div slot="item" let:item>
           <slot name="item" {item}>
             {item}

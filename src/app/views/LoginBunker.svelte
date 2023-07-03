@@ -1,11 +1,11 @@
 <script lang="ts">
   import {toHex} from "src/util/nostr"
+  import {toast} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import keys from "src/agent/keys"
-  import {toast} from "src/partials/state"
+  import {keys} from "src/system"
   import {login} from "src/app/state"
 
   let input = ""

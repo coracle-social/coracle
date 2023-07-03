@@ -3,22 +3,20 @@ import type {DisplayEvent, DynamicFilter} from "src/util/types"
 import Bugsnag from "@bugsnag/js"
 import {nip19} from "nostr-tools"
 import {navigate} from "svelte-routing"
-import {derived} from "svelte/store"
-import {writable} from "svelte/store"
-import {max, omit, pluck, sortBy, find, slice, propEq} from "ramda"
+import {writable, get} from "svelte/store"
+import {omit, pluck, sortBy, slice} from "ramda"
 import {createMap, doPipe, first} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
 import {hash, shuffle, sleep, clamp} from "src/util/misc"
 import {now, timedelta} from "src/util/misc"
-import {Tags, isNotification, userKinds, noteKinds} from "src/util/nostr"
+import {userKinds, noteKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
-import {notifications, watch, userEvents, contacts, rooms} from "src/agent/db"
-import {DEFAULT_FOLLOWS, ENABLE_ZAPS, keys, social, settings} from "src/system"
+import {userEvents} from "src/agent/db"
+import {DEFAULT_FOLLOWS, ENABLE_ZAPS, keys, social, alerts, settings, chat} from "src/system"
 import network from "src/agent/network"
 import pool from "src/agent/pool"
 import {getUserReadRelays, getUserRelays} from "src/agent/relays"
-import user from "src/agent/user"
 
 // Routing
 
@@ -82,79 +80,10 @@ export const logUsage = async name => {
   }
 }
 
-// State
-
-export const newNotifications = derived(
-  [watch("notifications", t => pluck("created_at", t.all()).reduce(max, 0)), user.lastChecked],
-  ([$lastNotification, $lastChecked]) => $lastNotification > ($lastChecked.notifications || 0)
-)
-
-export const hasNewMessages = ({lastReceived, lastSent}, lastChecked) =>
-  lastReceived > Math.max(lastSent || lastReceived, lastChecked || 0)
-
-export const newDirectMessages = derived(
-  [watch("contacts", t => t.all()), user.lastChecked],
-  ([contacts, $lastChecked]) =>
-    Boolean(find(c => hasNewMessages(c, $lastChecked[`dm/${c.pubkey}`]), contacts))
-)
-
-export const newChatMessages = derived(
-  [watch("rooms", t => t.all()), user.lastChecked, user.roomsJoined],
-  ([rooms, $lastChecked, $roomsJoined]) =>
-    Boolean(
-      find(
-        r => $roomsJoined.includes(r.id) && hasNewMessages(r, $lastChecked[`chat/${r.id}`]),
-        rooms
-      )
-    )
-)
-
 // Synchronization from events to state
-
-const processNotifications = async (pubkey, events) => {
-  notifications.patch(events.filter(e => isNotification(e, pubkey)))
-}
-
-const processMessages = async (pubkey, events) => {
-  const messages = events.filter(propEq("kind", 4))
-
-  if (messages.length === 0) {
-    return
-  }
-
-  for (const message of messages) {
-    const fromSelf = message.pubkey === pubkey
-    const contactPubkey = fromSelf ? Tags.from(message).getMeta("p") : message.pubkey
-    const contact = contacts.get(contactPubkey)
-    const key = fromSelf ? "lastSent" : "lastReceived"
-
-    contacts.patch({
-      pubkey: contactPubkey,
-      [key]: Math.max(contact?.[key] || 0, message.created_at),
-    })
-  }
-}
-
-const processChats = async (pubkey, events) => {
-  const messages = events.filter(propEq("kind", 42))
-
-  if (messages.length === 0) {
-    return
-  }
-
-  for (const message of messages) {
-    const fromSelf = message.pubkey === pubkey
-    const id = Tags.from(message).getMeta("e")
-    const room = rooms.get(id)
-    const key = fromSelf ? "lastSent" : "lastReceived"
-
-    rooms.patch({id, [key]: Math.max(room?.[key] || 0, message.created_at)})
-  }
-}
 
 export const listen = async () => {
   const pubkey = keys.getPubkey()
-  const {roomsJoined} = user.getProfile()
   const kinds = noteKinds.concat([4, 7])
 
   if (ENABLE_ZAPS) {
@@ -163,8 +92,10 @@ export const listen = async () => {
 
   // Only grab notifications since we last checked, with some wiggle room
   const since =
-    clamp([now() - timedelta(30, "days"), now()], notifications._coll.max("created_at")) -
+    clamp([now() - timedelta(30, "days"), now()], get(alerts.latestNotification)) -
     timedelta(1, "days")
+
+  const channelIds = pluck("id", chat.channels.all({joined: true}))
 
   const eventIds = doPipe(userEvents, [
     t => t.all({kind: 1, created_at: {$gt: now() - timedelta(30, "days")}}),
@@ -180,15 +111,10 @@ export const listen = async () => {
       {kinds: noteKinds.concat(4), authors: [pubkey], since},
       {kinds, "#p": [pubkey], since},
       {kinds, "#e": eventIds, since},
-      {kinds: [42], "#e": roomsJoined, since},
+      {kinds: [42], "#e": channelIds, since},
     ],
     onChunk: async events => {
-      events = social.applyMutes(events)
-
       await network.loadPeople(pluck("pubkey", events))
-      await processNotifications(pubkey, events)
-      await processMessages(pubkey, events)
-      await processChats(pubkey, events)
     },
   })
 }

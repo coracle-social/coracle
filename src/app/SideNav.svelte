@@ -2,19 +2,13 @@
   import cx from "classnames"
   import {theme, installPrompt} from "src/partials/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {keys, directory} from "src/system"
+  import {keys, directory, alerts} from "src/system"
   import {watch} from "src/agent/db"
   import pool from "src/agent/pool"
-  import {
-    routes,
-    slowConnections,
-    menuIsOpen,
-    newNotifications,
-    newDirectMessages,
-    newChatMessages,
-  } from "src/app/state"
+  import {routes, slowConnections, menuIsOpen} from "src/app/state"
 
   const {canSign, pubkey} = keys
+  const {hasNewNotfications, hasNewChatMessages, hasNewDirectMessages} = alerts
   const profile = watch(directory.profiles, () => ($pubkey ? directory.getProfile($pubkey) : null))
 
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
@@ -50,7 +44,7 @@
         class="block px-4 py-2 transition-all hover:bg-accent hover:text-white"
         href="/notifications">
         <i class="fa fa-bell mr-2" /> Notifications
-        {#if $newNotifications}
+        {#if $hasNewNotfications}
           <div class="absolute left-6 top-3 h-2 w-2 rounded bg-accent" />
         {/if}
       </a>
@@ -73,7 +67,7 @@
     })}>
     <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/messages">
       <i class="fa fa-envelope mr-2" /> Messages
-      {#if $newDirectMessages}
+      {#if $hasNewDirectMessages}
         <div class="absolute left-7 top-2 h-2 w-2 rounded bg-accent" />
       {/if}
     </a>
@@ -81,7 +75,7 @@
   <li class="relative">
     <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/chat">
       <i class="fa fa-comment mr-2" /> Chat
-      {#if $newChatMessages}
+      {#if $hasNewChatMessages}
         <div class="absolute left-7 top-2 h-2 w-2 rounded bg-accent" />
       {/if}
     </a>

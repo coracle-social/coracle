@@ -1,35 +1,19 @@
 <script>
-  import {onMount} from "svelte"
   import {fly} from "src/util/transition"
-  import {prop, max, path as getPath, reverse, pluck, uniqBy, sortBy, last} from "ramda"
-  import {sleep, createScroller} from "src/util/misc"
+  import {prop, max, path as getPath, reverse, pluck, sortBy, last} from "ramda"
+  import {sleep} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
-  import {keys, directory} from "src/system"
-  import network from "src/agent/network"
+  import {keys, directory, chat} from "src/system"
+  import {watch} from "src/agent/db"
 
-  export let loadMessages
-  export let listenForMessages
+  export let id
   export let sendMessage
 
   const {canSign} = keys
 
   let textarea
-  let messages = []
   let loading = sleep(30_000)
-  let annotatedMessages = []
   let showNewMessages = false
-
-  $: {
-    // Group messages so we're only showing the person once per chunk
-    annotatedMessages = reverse(
-      sortBy(prop("created_at"), messages).reduce((mx, m) => {
-        const profile = directory.getProfile(m.pubkey)
-        const showProfile = profile.pubkey !== getPath(["profile", "pubkey"], last(mx))
-
-        return mx.concat({...m, profile, showProfile})
-      }, [])
-    )
-  }
 
   // flex-reverse-col means the first is the last
   const getLastListItem = () => document.querySelector("ul.channel-messages li")
@@ -39,46 +23,18 @@
   }
 
   const stickToBottom = async cb => {
-    const lastMessage = pluck("created_at", annotatedMessages).reduce(max, 0)
+    const lastMessage = pluck("created_at", $messages).reduce(max, 0)
     const $channelMessages = document.querySelector(".channel-messages")
     const shouldStick = $channelMessages?.scrollTop > -200
 
-    await cb()
+    await cb?.()
 
     if (shouldStick) {
       scrollToBottom()
-    } else if (lastMessage < pluck("created_at", annotatedMessages).reduce(max, 0)) {
+    } else if (lastMessage < pluck("created_at", $messages).reduce(max, 0)) {
       showNewMessages = true
     }
   }
-
-  onMount(() => {
-    const sub = listenForMessages(newMessages =>
-      stickToBottom(() => {
-        loading = sleep(30_000)
-        messages = uniqBy(prop("id"), messages.concat(newMessages))
-        network.loadPeople(pluck("pubkey", newMessages))
-      })
-    )
-
-    const scroller = createScroller(
-      async () => {
-        await loadMessages(newMessages => {
-          stickToBottom(() => {
-            loading = sleep(30_000)
-            messages = sortBy(e => -e.created_at, uniqBy(prop("id"), newMessages.concat(messages)))
-            network.loadPeople(pluck("pubkey", newMessages))
-          })
-        })
-      },
-      {reverse: true}
-    )
-
-    return () => {
-      scroller.stop()
-      sub.then(s => s?.unsub())
-    }
-  })
 
   const send = async () => {
     const content = textarea.value.trim()
@@ -86,11 +42,9 @@
     if (content) {
       textarea.value = ""
 
-      const event = await sendMessage(content)
+      await sendMessage(content)
 
-      stickToBottom(() => {
-        messages = sortBy(e => -e.created_at, [event].concat(messages))
-      })
+      stickToBottom()
     }
   }
 
@@ -100,6 +54,22 @@
       send()
     }
   }
+
+  // Group messages so we're only showing the person once per chunk
+  const messages = watch(chat.messages, () => {
+    const result = reverse(
+      sortBy(prop("created_at"), chat.messages.all({channel: id})).reduce((mx, m) => {
+        const profile = directory.getProfile(m.pubkey)
+        const showProfile = profile.pubkey !== getPath(["profile", "pubkey"], last(mx))
+
+        return mx.concat({...m, profile, showProfile})
+      }, [])
+    )
+
+    setTimeout(stickToBottom, 100)
+
+    return result
+  })
 </script>
 
 <svelte:window
@@ -112,7 +82,7 @@
     <div class="py-18 flex h-screen flex-col" class:pb-20={$canSign}>
       <ul
         class="channel-messages flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
-        {#each annotatedMessages as m (m.id)}
+        {#each $messages as m (m.id)}
           <li in:fly={{y: 20}} class="flex flex-col gap-2 py-1">
             <slot name="message" message={m} />
           </li>

@@ -132,6 +132,9 @@ export class Table {
   get(k) {
     return this._coll.by(this.pk, k)
   }
+  max(k) {
+    return this._coll.max(k)
+  }
 }
 
 const listener = (() => {
@@ -206,9 +209,6 @@ const sortByCreatedAt = sortBy(e => -e.created_at)
 const sortByScore = sortBy(e => -e.score)
 
 export const userEvents = new Table("userEvents", "id", {max: 2000, sort: sortByCreatedAt})
-export const notifications = new Table("notifications", "id", {sort: sortByCreatedAt})
-export const contacts = new Table("contacts", "pubkey")
-export const rooms = new Table("rooms", "id")
 export const routes = new Table("routes", "id", {max: 10000, sort: sortByScore})
 
 const ready = writable(false)

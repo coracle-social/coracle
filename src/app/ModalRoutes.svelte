@@ -45,7 +45,7 @@
   <RelayReview url={m.url} />
 {:else if m.type === "onboarding"}
   <Onboarding stage={m.stage} />
-{:else if m.type === "room/edit"}
+{:else if m.type === "channel/edit"}
   <ChatEdit {...m} />
 {:else if m.type === "login/privkey"}
   <LoginPrivKey />

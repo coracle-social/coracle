@@ -2,9 +2,10 @@
   import {onMount} from "svelte"
   import {appName} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
+  import {alerts} from "src/system"
   import {menuIsOpen} from "src/app/state"
-  import {newNotifications} from "src/app/state"
 
+  const {hasNewNotfications, hasNewChatMessages, hasNewDirectMessages} = alerts
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
   const toggleMenu = () => menuIsOpen.update(x => !x)
 
@@ -31,7 +32,7 @@
       <h1 class="staatliches text-3xl">{appName}</h1>
     </Anchor>
   </div>
-  {#if $newNotifications}
-    <div class="absolute top-4 left-12 h-2 w-2 rounded bg-accent lg:hidden" />
+  {#if $hasNewNotfications || $hasNewChatMessages || $hasNewDirectMessages}
+    <div class="absolute left-12 top-4 h-2 w-2 rounded bg-accent lg:hidden" />
   {/if}
 </div>

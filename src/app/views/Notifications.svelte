@@ -1,7 +1,6 @@
 <script>
-  import {throttle} from "throttle-debounce"
   import {pluck, reverse, max, last, sortBy} from "ramda"
-  import {onMount} from "svelte"
+  import {onMount, onDestroy} from "svelte"
   import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
   import {
@@ -15,12 +14,11 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app/views/Notification.svelte"
-  import {social} from "src/system"
+  import {social, alerts} from "src/system"
   import {watch} from "src/agent/db"
-  import user from "src/agent/user"
   import {userEvents} from "src/agent/db"
 
-  const {lastChecked} = user
+  const {lastChecked} = alerts
   const tabs = ["Mentions & Replies", "Reactions"]
 
   export let activeTab = tabs[0]
@@ -28,16 +26,12 @@
   let limit = 0
   let events = null
 
-  const prevChecked = $lastChecked.notifications || 0
-  const updateLastChecked = throttle(30_000, () => user.setLastChecked("notifications", now() + 30))
-  const notifications = watch("notifications", t => {
-    updateLastChecked()
-
+  const notifications = watch(alerts.events, () => {
     // Sort by hour so we can group clustered reactions to the same parent
     return reverse(
       sortBy(
         e => formatTimestampAsLocalISODate(e.created_at).slice(0, 13) + findReplyId(e),
-        social.applyMutes(t.all())
+        social.applyMutes(alerts.events.all())
       )
     )
   })
@@ -72,7 +66,7 @@
             notifications: [e],
             created_at: e.created_at,
             dateDisplay: formatTimestampAsDate(e.created_at),
-            showLine: e.created_at < prevChecked && prevTimestamp >= prevChecked,
+            showLine: e.created_at < $lastChecked && prevTimestamp >= $lastChecked,
           })
         }
 
@@ -97,6 +91,10 @@
     return createScroller(async () => {
       limit += 50
     })
+  })
+
+  onDestroy(() => {
+    lastChecked.set(now())
   })
 </script>
 

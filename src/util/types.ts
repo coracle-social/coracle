@@ -7,18 +7,6 @@ export type Relay = {
   read?: boolean
 }
 
-export type Person = {
-  pubkey: string
-  relays?: Array<Relay>
-  mutes?: Array<Array<string>>
-  kind0?: {
-    name?: string
-    about?: string
-    nip05?: string
-    picture?: string
-  }
-}
-
 export type MyEvent = Event & {
   seen_on: string[]
 }

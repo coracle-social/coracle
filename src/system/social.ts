@@ -132,13 +132,14 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
 
   const unfollow = pubkey => updatePetnames(reject(t => t[1] === pubkey, getUserPetnames()))
 
-  const applyMutes = events => {
-    const m = new Set(getUserMutes().map(m => m[1]))
+  const isMuted = e => {
+    const m = getUserMutesSet()
+    const muted = m.has(e.id) || m.has(e.pubkey) || m.has(findReplyId(e)) || m.has(findRootId(e))
 
-    return events.filter(
-      e => !(m.has(e.id) || m.has(e.pubkey) || m.has(findReplyId(e)) || m.has(findRootId(e)))
-    )
+    return !muted
   }
+
+  const applyMutes = events => events.filter(isMuted)
 
   const updateMutes = async $mutes => {
     if (get(keys.canSign)) {
@@ -183,6 +184,7 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
     updatePetnames,
     follow,
     unfollow,
+    isMuted,
     applyMutes,
     updateMutes,
     mute,

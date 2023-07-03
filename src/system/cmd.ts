@@ -1,7 +1,7 @@
 import {last, pick, uniqBy} from "ramda"
 import {get} from "svelte/store"
 import {doPipe} from "hurdak/lib/hurdak"
-import {Tags, roomAttrs, findRoot, findReply} from "src/util/nostr"
+import {Tags, channelAttrs, findRoot, findReply} from "src/util/nostr"
 import {parseContent} from "src/util/notes"
 import {getRelayForPersonHint, getRelayForEventHint} from "src/agent/relays"
 
@@ -29,7 +29,7 @@ export default ({keys, sync, pool, displayPubkey}) => {
       }),
     })
 
-  const setAppData = (d, content) => new PublishableEvent(30078, {content, tags: [["d", d]]})
+  const setAppData = (d, content = "") => new PublishableEvent(30078, {content, tags: [["d", d]]})
 
   const setPetnames = petnames => new PublishableEvent(3, {tags: petnames})
 
@@ -37,14 +37,17 @@ export default ({keys, sync, pool, displayPubkey}) => {
 
   const createList = list => new PublishableEvent(30001, {tags: list})
 
-  const createRoom = room =>
-    new PublishableEvent(40, {content: JSON.stringify(pick(roomAttrs, room))})
+  const createChannel = channel =>
+    new PublishableEvent(40, {content: JSON.stringify(pick(channelAttrs, channel))})
 
-  const updateRoom = ({id, ...room}) =>
-    new PublishableEvent(41, {content: JSON.stringify(pick(roomAttrs, room)), tags: [["e", id]]})
+  const updateChannel = ({id, ...channel}) =>
+    new PublishableEvent(41, {
+      content: JSON.stringify(pick(channelAttrs, channel)),
+      tags: [["e", id]],
+    })
 
-  const createChatMessage = (roomId, content, url) =>
-    new PublishableEvent(42, {content, tags: [["e", roomId, url, "root"]]})
+  const createChatMessage = (channelId, content, url) =>
+    new PublishableEvent(42, {content, tags: [["e", channelId, url, "root"]]})
 
   const createDirectMessage = (pubkey, content) =>
     new PublishableEvent(4, {content, tags: [["p", pubkey]]})
@@ -180,8 +183,8 @@ export default ({keys, sync, pool, displayPubkey}) => {
     setPetnames,
     setMutes,
     createList,
-    createRoom,
-    updateRoom,
+    createChannel,
+    updateChannel,
     createChatMessage,
     createDirectMessage,
     createNote,
