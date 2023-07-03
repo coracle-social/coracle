@@ -61,7 +61,7 @@
     "svelte-loading-spinners": "^0.3.4",
     "svelte-preprocess": "^5.0.1",
     "svelte-range-slider-pips": "^2.1.1",
-    "svelte-routing": "^1.6.0",
+    "svelte-routing": "^1.11.0",
     "svelte-switch": "^0.0.5",
     "throttle-debounce": "^5.0.0",
     "tippy.js": "^6.3.7",

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type {ComponentType, SvelteComponentTyped} from "svelte"
   import {Route} from "svelte-routing"
   import {onReady} from "src/agent/db"
   import {base64DecodeOrPlainWebSocketURL} from "src/util/misc"
@@ -21,6 +22,8 @@
   import UserProfile from "src/app/views/UserProfile.svelte"
   import UserSettings from "src/app/views/UserSettings.svelte"
 
+  const TypedRoute = Route as ComponentType<SvelteComponentTyped>
+
   let ready = false
 
   onReady(() => {
@@ -30,53 +33,53 @@
 
 {#if ready}
   <div class="pt-16 text-gray-2 lg:ml-56">
-    <Route path="/notifications" component={Notifications} />
-    <Route path="/notifications/:activeTab" component={Notifications} />
-    <Route path="/search">
+    <TypedRoute path="/notifications" component={Notifications} />
+    <TypedRoute path="/notifications/:activeTab" component={Notifications} />
+    <TypedRoute path="/search">
       <Search />
-    </Route>
-    <Route path="/notes" let:params>
+    </TypedRoute>
+    <TypedRoute path="/notes" let:params>
       <Feeds />
-    </Route>
-    <Route path="/people/:npub/:activeTab" let:params>
+    </TypedRoute>
+    <TypedRoute path="/people/:npub/:activeTab" let:params>
       {#key params.npub}
         <PersonDetail npub={params.npub} activeTab={params.activeTab} />
       {/key}
-    </Route>
-    <Route path="/chat" component={ChatList} />
-    <Route path="/chat/:entity" let:params>
+    </TypedRoute>
+    <TypedRoute path="/chat" component={ChatList} />
+    <TypedRoute path="/chat/:entity" let:params>
       {#key params.entity}
         <ChatDetail entity={params.entity} />
       {/key}
-    </Route>
-    <Route path="/messages">
+    </TypedRoute>
+    <TypedRoute path="/messages">
       <MessagesList activeTab="messages" />
-    </Route>
-    <Route path="/requests">
+    </TypedRoute>
+    <TypedRoute path="/requests">
       <MessagesList activeTab="requests" />
-    </Route>
-    <Route path="/messages/:entity" let:params>
+    </TypedRoute>
+    <TypedRoute path="/messages/:entity" let:params>
       {#key params.entity}
         <MessagesDetail entity={params.entity} />
       {/key}
-    </Route>
-    <Route path="/apps" component={Apps} />
-    <Route path="/keys" component={UserKeys} />
-    <Route path="/relays" component={RelayList} />
-    <Route path="/relays/:b64OrUrl" let:params>
+    </TypedRoute>
+    <TypedRoute path="/apps" component={Apps} />
+    <TypedRoute path="/keys" component={UserKeys} />
+    <TypedRoute path="/relays" component={RelayList} />
+    <TypedRoute path="/relays/:b64OrUrl" let:params>
       {#key params.b64url}
         <RelayDetail url={base64DecodeOrPlainWebSocketURL(params.b64OrUrl)} />
       {/key}
-    </Route>
-    <Route path="/profile" component={UserProfile} />
-    <Route path="/settings" component={UserSettings} />
-    <Route path="/login" component={Login} />
-    <Route path="/logout" component={Logout} />
-    <Route path="/:entity" let:params>
+    </TypedRoute>
+    <TypedRoute path="/profile" component={UserProfile} />
+    <TypedRoute path="/settings" component={UserSettings} />
+    <TypedRoute path="/login" component={Login} />
+    <TypedRoute path="/logout" component={Logout} />
+    <TypedRoute path="/:entity" let:params>
       {#key params.entity}
         <Bech32Entity entity={params.entity} />
       {/key}
-    </Route>
-    <Route path="*" component={NotFound} />
+    </TypedRoute>
+    <TypedRoute path="*" component={NotFound} />
   </div>
 {/if}

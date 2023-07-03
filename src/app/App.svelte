@@ -2,6 +2,7 @@
   import "@fortawesome/fontawesome-free/css/fontawesome.css"
   import "@fortawesome/fontawesome-free/css/solid.css"
 
+  import type {ComponentType, SvelteComponentTyped} from "svelte"
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {Router, links} from "svelte-routing"
@@ -28,6 +29,8 @@
   import TopNav from "src/app/TopNav.svelte"
   import Modal from "src/app/Modal.svelte"
   import ForegroundButtons from "src/app/ForegroundButtons.svelte"
+
+  const TypedRouter = Router as ComponentType<SvelteComponentTyped>
 
   Object.assign(window, {nip19, cmd, user, keys, network, pool, sync, db, bech32ToHex, hexToBech32})
 
@@ -162,7 +165,7 @@
   })
 </script>
 
-<Router url={pathname}>
+<TypedRouter url={pathname}>
   <div use:links>
     <Routes />
     <ForegroundButtons />
@@ -171,4 +174,4 @@
     <Modal />
     <Toast />
   </div>
-</Router>
+</TypedRouter>
