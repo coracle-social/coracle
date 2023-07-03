@@ -10,6 +10,7 @@
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {keys, routing} from "src/system"
+  import {watch} from "src/agent/db"
   import pool from "src/agent/pool"
   import user from "src/agent/user"
   import {loadAppData} from "src/app/state"
@@ -22,18 +23,17 @@
   export let showControls = false
 
   const {canSign} = keys
-  const {relays} = user
 
   let statusHover = false
   let quality = null
   let message = null
 
-  $: hasRelay = Boolean(find(propEq("url", relay.url), $relays))
+  const relays = watch(routing.policies, () => routing.getUserRelays())
 
-  const removeRelay = r => user.removeRelay(r.url)
+  const removeRelay = r => routing.removeUserRelay(r.url)
 
   const addRelay = r => {
-    user.addRelay(r.url)
+    routing.addUserRelay(r.url)
 
     const pubkey = keys.getPubkey()
     const profile = user.getProfile()
@@ -46,6 +46,8 @@
   const openModal = () => {
     modal.push({type: "relay/detail", url: relay.url})
   }
+
+  $: hasRelay = Boolean(find(propEq("url", relay.url), $relays))
 
   onMount(() => {
     return poll(10_000, () => {
@@ -114,7 +116,7 @@
       <span>Publish to this relay?</span>
       <Toggle
         value={relay.write}
-        on:change={() => user.setRelayWriteCondition(relay.url, !relay.write)} />
+        on:change={() => routing.setUserRelayPolicy(relay.url, {write: !relay.write})} />
     </div>
   {/if}
 </div>

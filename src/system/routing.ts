@@ -1,13 +1,14 @@
-import {sortBy, last, inc} from "ramda"
+import {sortBy, uniqBy, reject, whereEq, when, prop, last, inc} from "ramda"
+import {get} from "svelte/store"
 import {fuzzy, tryJson, now, fetchJson} from "src/util/misc"
 import {warn} from "src/util/logger"
-import {normalizeRelayUrl, isShareableRelay} from "src/util/nostr"
+import {normalizeRelayUrl, isShareableRelay, Tags} from "src/util/nostr"
 import {DUFFLEPUD_URL, DEFAULT_RELAYS, FORCE_RELAYS} from "src/system/env"
 import {Table, watch} from "src/agent/db"
 
-export default ({sync, sortByGraph}) => {
+export default ({keys, sync, getCmd, sortByGraph}) => {
   const relays = new Table("routing/relays", "url", {sort: sortBy(e => -e.count)})
-  const relaySelections = new Table("routing/relaySelections", "pubkey", {sort: sortByGraph})
+  const policies = new Table("routing/policies", "pubkey", {sort: sortByGraph})
 
   const addRelay = url => {
     const relay = relays.get(url)
@@ -22,16 +23,21 @@ export default ({sync, sortByGraph}) => {
     })
   }
 
-  const addPolicies = ({pubkey, created_at}, policies) => {
-    if (policies?.length > 0) {
-      const selection = relaySelections.get(pubkey)
-
-      if (created_at < selection?.created_at) {
+  const setPolicy = ({pubkey, created_at}, relays) => {
+    if (relays?.length > 0) {
+      if (created_at < policies.get(pubkey)?.created_at) {
         return
       }
 
-      policies.forEach(({url}) => addRelay(url))
-      relaySelections.patch({pubkey, created_at, policies})
+      policies.patch({
+        pubkey,
+        created_at,
+        relays: uniqBy(prop("url"), relays).map(relay => {
+          addRelay(relay.url)
+
+          return {read: true, write: true, ...relay}
+        }),
+      })
     }
   }
 
@@ -42,7 +48,7 @@ export default ({sync, sortByGraph}) => {
   })
 
   sync.addHandler(3, e => {
-    addPolicies(
+    setPolicy(
       e,
       tryJson(() => {
         Object.entries(JSON.parse(e.content || ""))
@@ -60,18 +66,21 @@ export default ({sync, sortByGraph}) => {
   })
 
   sync.addHandler(10002, e => {
-    addPolicies(
+    setPolicy(
       e,
-      e.tags.map(([_, url, mode = "read"]) => {
-        const write = mode === "write"
-        const read = mode === "read"
+      Tags.from(e)
+        .type("r")
+        .all()
+        .map(([_, url, mode]) => {
+          const write = !mode || mode === "write"
+          const read = !mode || mode === "read"
 
-        if (!write && !read) {
-          warn(`Encountered unknown relay mode: ${mode}`)
-        }
+          if (!write && !read) {
+            warn(`Encountered unknown relay mode: ${mode}`)
+          }
 
-        return {url: normalizeRelayUrl(url), write, read}
-      })
+          return {url: normalizeRelayUrl(url), write, read}
+        })
     )
   })
 
@@ -82,6 +91,32 @@ export default ({sync, sortByGraph}) => {
   const searchRelays = watch(relays, () => fuzzy(relays.all(), {keys: ["url"]}))
 
   const displayRelay = ({url}) => last(url.split("://"))
+
+  const getPubkeyRelays = (pubkey, mode = null) => {
+    const relays = policies.get(pubkey)?.relays || []
+
+    return mode ? relays.filter(prop(mode)) : relays
+  }
+
+  const getUserKey = () => keys.getPubkey() || "anonymous"
+
+  const getUserRelays = (...args) => getPubkeyRelays(getUserKey(), ...args)
+
+  const setUserRelays = relays => {
+    if (get(keys.canSign)) {
+      return getCmd().setRelays(relays).publish(relays)
+    } else {
+      setPolicy({pubkey: getUserKey(), created_at: now()}, relays)
+    }
+  }
+
+  const addUserRelay = url => setUserRelays(getUserRelays().concat({url}))
+
+  const removeUserRelay = url =>
+    setUserRelays(reject(whereEq({url: normalizeRelayUrl(url)}), getUserRelays()))
+
+  const setUserRelayPolicy = (url, policy) =>
+    setUserRelays(getUserRelays().map(when(whereEq({url}), p => ({...p, ...policy}))))
 
   const initialize = async () => {
     // Throw some hardcoded defaults in there
@@ -101,11 +136,18 @@ export default ({sync, sortByGraph}) => {
 
   return {
     relays,
-    relaySelections,
+    policies,
     getRelay,
     getRelayMeta,
     searchRelays,
     displayRelay,
+    getPubkeyRelays,
+    getUserKey,
+    getUserRelays,
+    setUserRelays,
+    addUserRelay,
+    removeUserRelay,
+    setUserRelayPolicy,
     initialize,
   }
 }

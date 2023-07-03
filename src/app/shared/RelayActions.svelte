@@ -3,7 +3,7 @@
   import {modal} from "src/partials/state"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {keys, routing} from "src/system"
-  import user from "src/agent/user"
+  import {watch} from "src/agent/db"
   import {addToList} from "src/app/state"
 
   export let relay
@@ -11,23 +11,23 @@
   relay = routing.getRelay(relay.url)
 
   const {canSign} = keys
-  const {relays: userRelays} = user
+  const relays = watch(routing.policies, () => routing.getUserRelays())
 
   let actions = []
 
-  $: joined = find(propEq("url", relay.url), $userRelays)
+  $: joined = find(propEq("url", relay.url), $relays)
   $: {
     actions = []
 
     if (!joined) {
       actions.push({
-        onClick: () => user.addRelay(relay.url),
+        onClick: () => routing.addUserRelay(relay.url),
         label: "Join",
         icon: "right-to-bracket",
       })
-    } else if ($userRelays.length > 1) {
+    } else if ($relays.length > 1) {
       actions.push({
-        onClick: () => user.removeRelay(relay.url),
+        onClick: () => routing.removeUserRelay(relay.url),
         label: "Leave",
         icon: "right-from-bracket",
       })

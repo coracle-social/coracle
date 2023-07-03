@@ -1,10 +1,8 @@
-import type {Relay} from "src/util/types"
 import type {Readable} from "svelte/store"
-import {uniqBy, without, reject, prop, assoc, whereEq, when, map} from "ramda"
+import {without, prop} from "ramda"
 import {synced} from "src/util/misc"
 import {derived, get} from "svelte/store"
 import keys from "src/system/keys"
-import pool from "src/agent/pool"
 
 const ext = {cmd: null}
 
@@ -14,14 +12,10 @@ const profile = synced("agent/user/profile", {
   lnurl: null,
   rooms_joined: [],
   last_checked: {},
-  relays: pool.defaultRelays,
 })
 
 const roomsJoined = derived(profile, prop("rooms_joined")) as Readable<string>
 const lastChecked = derived(profile, prop("last_checked")) as Readable<Record<string, number>>
-const relays = derived(profile, p =>
-  pool.forceRelays.length > 0 ? pool.forceRelays : p.relays
-) as Readable<Array<Relay>>
 
 // Keep a copy so we can avoid calling `get` all the time
 
@@ -67,28 +61,5 @@ export default {
   },
   leaveRoom(id) {
     this.setAppData("rooms_joined/v1", without([id], profileCopy.rooms_joined))
-  },
-
-  // Relays
-
-  relays,
-  getRelays: () => profileCopy.relays,
-  updateRelays(f) {
-    const $relays = uniqBy(prop("url"), f(profileCopy.relays))
-
-    profile.update(assoc("relays", $relays))
-
-    if (get(keys.canSign)) {
-      return ext.cmd.setRelays($relays).publish($relays)
-    }
-  },
-  addRelay(url) {
-    return this.updateRelays($relays => $relays.concat({url, write: true, read: true}))
-  },
-  removeRelay(url) {
-    return this.updateRelays(reject(whereEq({url})))
-  },
-  setRelayWriteCondition(url, write) {
-    return this.updateRelays(map(when(whereEq({url}), assoc("write", write))))
   },
 }

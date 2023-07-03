@@ -6,7 +6,10 @@ import {Tags, isRelay, findReplyId} from "src/util/nostr"
 import {shuffle} from "src/util/misc"
 import {routes} from "src/agent/db"
 import pool from "src/agent/pool"
-import user from "src/agent/user"
+
+const ext = {routing: null}
+
+export default {ext}
 
 // From Mike Dilger:
 // 1) Other people's write relays — pull events from people you follow,
@@ -63,8 +66,8 @@ export const getAllPubkeyWriteRelays = pubkeys => getAllPubkeyRelays(pubkeys, "w
 // Current user
 
 export const getUserRelays = () =>
-  user
-    .getRelays()
+  ext.routing
+    .getUserRelays()
     .filter(({url}) => isRelay(url))
     .map(assoc("score", 1))
 

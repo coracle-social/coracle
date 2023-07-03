@@ -10,17 +10,16 @@
   import {getUserReadRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import {watch} from "src/agent/db"
-  import user from "src/agent/user"
 
   export let q = ""
   export let limit = 50
-  export let relays = user.relays
   export let placeholder = "Search relays or add a custom url"
   export let hideIfEmpty = false
 
   let search
   let reviews = []
 
+  const userRelays = watch(routing.policies, () => routing.getUserRelays())
   const knownRelays = watch(routing.relays, () => routing.relays.all())
 
   $: ratings = mapValues(
@@ -29,7 +28,7 @@
   )
 
   $: {
-    const joined = new Set(pluck("url", $relays))
+    const joined = new Set(pluck("url", $userRelays))
 
     search = fuzzy(
       $knownRelays.filter(r => !joined.has(r.url)),
@@ -65,8 +64,8 @@
     {/each}
     <slot name="footer">
       <small class="text-center">
-        Showing {Math.min(($knownRelays || []).length - $relays.length, 50)}
-        of {($knownRelays || []).length - $relays.length} known relays
+        Showing {Math.min(($knownRelays || []).length - $userRelays.length, 50)}
+        of {($knownRelays || []).length - $userRelays.length} known relays
       </small>
     </slot>
   </div>

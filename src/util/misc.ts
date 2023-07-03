@@ -249,19 +249,7 @@ export const hsl = (hue, {saturation = 100, lightness = 50, opacity = 1} = {}) =
   `hsl(${hue}, ${saturation}%, ${lightness}%, ${opacity})`
 
 export const tryFunc = (f, ignore = null) => {
-  try {
-    const r = f()
-
-    if (is(Promise, r)) {
-      return r.catch(e => {
-        if (!ignore || !e.toString().includes(ignore)) {
-          warn(e)
-        }
-      })
-    } else {
-      return r
-    }
-  } catch (e) {
+  const onError = e => {
     if (ignore === false) {
       return
     }
@@ -271,6 +259,18 @@ export const tryFunc = (f, ignore = null) => {
     }
 
     warn(e)
+  }
+
+  try {
+    const r = f()
+
+    if (is(Promise, r)) {
+      return r.catch(onError)
+    } else {
+      return r
+    }
+  } catch (e) {
+    onError(e)
   }
 }
 

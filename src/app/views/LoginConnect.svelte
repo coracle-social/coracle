@@ -16,7 +16,6 @@
   import {DEFAULT_RELAYS, routing, keys} from "src/system"
   import {watch} from "src/agent/db"
   import network from "src/agent/network"
-  import user from "src/agent/user"
   import pool from "src/agent/pool"
   import {loadAppData} from "src/app/state"
 
@@ -64,7 +63,7 @@
 
           currentRelays[i] = null
 
-          if (searching && user.getRelays().length > 0) {
+          if (searching && routing.getUserRelays().length > 0) {
             searching = false
             modal = "success"
 

@@ -6,8 +6,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {cmd} from "src/system"
-  import user from "src/agent/user"
+  import {cmd, routing} from "src/system"
 
   export let url
 
@@ -27,7 +26,7 @@
           ["r", url],
         ],
       })
-      .publish(user.getRelays())
+      .publish(routing.getUserRelays())
 
     modal.pop()
   }

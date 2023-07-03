@@ -9,11 +9,9 @@
   import OnboardingRelays from "src/app/views/OnboardingRelays.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
-  import {DEFAULT_FOLLOWS, social} from "src/system"
+  import {DEFAULT_FOLLOWS, DEFAULT_RELAYS, social, routing} from "src/system"
   import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
   import network from "src/agent/network"
-  import user from "src/agent/user"
-  import pool from "src/agent/pool"
   import {keys, directory, cmd} from "src/system"
   import {loadAppData} from "src/app/state"
   import {modal} from "src/partials/state"
@@ -22,25 +20,21 @@
 
   const privkey = generatePrivateKey()
   const profile = {}
-  const {relays} = user
 
-  if ($relays.length === 0) {
-    user.updateRelays(() =>
-      (pool.forceUrls.length > 0 ? pool.forceUrls : pool.defaultUrls).map(url => ({
-        url,
-        write: true,
-      }))
-    )
+  if (routing.getUserRelays().length === 0) {
+    routing.setUserRelays(DEFAULT_RELAYS.map(url => ({url, read: true, write: true})))
   }
 
   const signup = async note => {
+    const relays = routing.getUserRelays()
+
     await keys.login("privkey", privkey)
 
     // Re-save preferences now that we have a key
     await Promise.all([
-      user.updateRelays(() => user.getRelays()),
-      cmd.updateUser(profile).publish(user.getRelays()),
-      note && cmd.createNote(note).publish(user.getRelays()),
+      routing.setUserRelays(relays),
+      cmd.updateUser(profile).publish(relays),
+      note && cmd.createNote(note).publish(relays),
       social.updatePetnames(
         social.getUserFollows().map(pubkey => {
           const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
@@ -60,7 +54,7 @@
   onMount(() => {
     // Prime our database with some defaults
     network.loadPeople(DEFAULT_FOLLOWS, {
-      relays: sampleRelays(user.getRelays()),
+      relays: sampleRelays(routing.getUserRelays()),
     })
   })
 </script>

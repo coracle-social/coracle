@@ -11,6 +11,7 @@ import initRouting from "src/system/routing"
 import initCmd from "src/system/cmd"
 import {getUserWriteRelays} from "src/agent/relays"
 import {default as agentSync} from "src/agent/sync"
+import relays from "src/agent/relays"
 import pool from "src/agent/pool"
 import user from "src/agent/user"
 
@@ -27,7 +28,7 @@ const settings = initSettings({keys, sync, getCmd, getUserWriteRelays})
 const directory = initDirectory({sync, sortByGraph: social.sortByGraph})
 const nip05 = initNip05({sync, sortByGraph: social.sortByGraph})
 const nip57 = initNip57({sync, sortByGraph: social.sortByGraph})
-const routing = initRouting({sync, sortByGraph: social.sortByGraph})
+const routing = initRouting({keys, sync, getCmd, sortByGraph: social.sortByGraph})
 const content = initContent({keys, sync, getCmd, getUserWriteRelays})
 const cmd = initCmd({keys, sync, pool, displayPubkey: directory.displayPubkey})
 
@@ -41,6 +42,7 @@ settings.store.subscribe($settings => {
 
 user.ext.cmd = cmd
 pool.ext.routing = routing
+relays.ext.routing = routing
 
 // ===========================================================
 // Initialization
