@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.2.35
+
+- [x] Add support for nsecbunker
+- [x] Switch from npm to yarn
+- [x] Upgrade nostr-tools, svelte-routing
+
 # 0.2.34
 
 - [x] Fix mentions on Safari
