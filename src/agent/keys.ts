@@ -1,4 +1,4 @@
-import {nip19, nip04, getPublicKey, getEventHash, signEvent, generatePrivateKey} from "nostr-tools"
+import {nip19, nip04, getPublicKey, getEventHash, getSignature, generatePrivateKey} from "nostr-tools"
 import NDK, {NDKEvent, NDKNip46Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk"
 import {get} from "svelte/store"
 import {error} from "src/util/logger"
@@ -82,7 +82,7 @@ const sign = async event => {
 
   if ($method === "privkey") {
     return Object.assign(event, {
-      sig: signEvent(event, get(privkey)),
+      sig: getSignature(event, get(privkey)),
     })
   }
 
