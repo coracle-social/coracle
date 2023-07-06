@@ -4,9 +4,8 @@
   import {tweened} from "svelte/motion"
   import {numberFmt} from "src/util/misc"
   import {modal} from "src/partials/state"
-  import {social} from "src/system"
+  import {social, routing} from "src/system"
   import {watch} from "src/agent/db"
-  import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import pool from "src/agent/pool"
 
@@ -35,7 +34,7 @@
       const followers = new Set()
 
       await network.load({
-        relays: sampleRelays(getPubkeyWriteRelays(pubkey)),
+        relays: routing.getUserHints(3, "read"),
         shouldProcess: false,
         filter: [{kinds: [3], "#p": [pubkey]}],
         onChunk: events => {

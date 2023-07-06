@@ -9,8 +9,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {keys, cmd, directory} from "src/system"
-  import {getUserWriteRelays} from "src/agent/relays"
+  import {keys, cmd, directory, routing} from "src/system"
   import {routes} from "src/app/state"
   import {publishWithToast} from "src/app/state"
 
@@ -28,8 +27,10 @@
   })
 
   const submit = async event => {
+    const relays = routing.getUserRelayUrls("write")
+
     event?.preventDefault()
-    publishWithToast(getUserWriteRelays(), cmd.updateUser(values))
+    publishWithToast(relays, cmd.updateUser(values))
     navigate(routes.person(keys.getPubkey(), "notes"))
   }
 

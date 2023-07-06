@@ -6,10 +6,9 @@
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {getAllPubkeyRelays, sampleRelays} from "src/agent/relays"
   import {watch} from "src/agent/db"
   import network from "src/agent/network"
-  import {keys, directory, cmd, chat} from "src/system"
+  import {keys, routing, directory, cmd, chat} from "src/system"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -23,7 +22,8 @@
 
   chat.setLastChecked(pubkey, now())
 
-  const getRelays = () => sampleRelays(getAllPubkeyRelays([pubkey, keys.getPubkey()]))
+  const getRelays = () =>
+    routing.mergeHints(3, [routing.getPubkeyHints(3, pubkey), routing.getUserHints(3)])
 
   const sendMessage = async content => {
     const cyphertext = await crypt.encrypt(pubkey, content)

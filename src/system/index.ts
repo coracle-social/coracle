@@ -11,14 +11,13 @@ import initRouting from "src/system/routing"
 import initChat from "src/system/chat"
 import initAlerts from "src/system/alerts"
 import initCmd from "src/system/cmd"
-import {getUserWriteRelays} from "src/agent/relays"
 import network from "src/agent/network"
-import relays from "src/agent/relays"
 import pool from "src/agent/pool"
 
 // Hacks for circular deps
 
 const getCmd = () => cmd
+const getUserWriteRelays = () => routing.getUserRelayUrls("write")
 
 // ===========================================================
 // Initialize various components
@@ -33,7 +32,7 @@ const routing = initRouting({keys, sync, getCmd, sortByGraph: social.sortByGraph
 const chat = initChat({keys, sync, getCmd, getUserWriteRelays})
 const alerts = initAlerts({keys, sync, chat, social, isUserEvent: () => false})
 const content = initContent({keys, sync, getCmd, getUserWriteRelays})
-const cmd = initCmd({keys, sync, pool, displayPubkey: directory.displayPubkey})
+const cmd = initCmd({keys, sync, pool, routing, displayPubkey: directory.displayPubkey})
 
 // Glue stuff together
 
@@ -44,7 +43,6 @@ settings.store.subscribe($settings => {
 })
 
 pool.ext.routing = routing
-relays.ext.routing = routing
 
 // ===========================================================
 // Initialization

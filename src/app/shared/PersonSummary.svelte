@@ -1,7 +1,6 @@
 <script lang="ts">
   import Anchor from "src/partials/Anchor.svelte"
-  import {keys, directory, social, nip05} from "src/system"
-  import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
+  import {keys, routing, directory, social, nip05} from "src/system"
   import {watch} from "src/agent/db"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -12,15 +11,11 @@
   const {canSign} = keys
   const following = watch(social.graph, () => social.isUserFollowing(pubkey))
   const muted = watch(social.graph, () => social.isUserIgnoring(pubkey))
-  const getRelays = () => sampleRelays(getPubkeyWriteRelays(pubkey))
   const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
   const handle = watch(nip05.handles, () => nip05.getHandle(pubkey))
 
-  const follow = () => {
-    const [{url}] = getRelays()
-
-    social.follow(pubkey, url, directory.displayPubkey(pubkey))
-  }
+  const follow = () =>
+    social.follow(pubkey, routing.getPubkeyHint(pubkey), directory.displayPubkey(pubkey))
 
   const unfollow = () => social.unfollow(pubkey)
 

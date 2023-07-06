@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {objOf} from "ramda"
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {warn} from "src/util/logger"
@@ -8,7 +7,7 @@
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import NaddrDetail from "src/app/views/NaddrDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
-  import {sampleRelays} from "src/agent/relays"
+  import {routing} from "src/system"
 
   export let entity
 
@@ -19,7 +18,7 @@
   onMount(() => {
     try {
       ;({type, data} = nip19.decode(entity) as {type: string; data: any})
-      relays = sampleRelays((data.relays || []).map(objOf("url")))
+      relays = routing.selectHints(3, data.relays || [])
     } catch (e) {
       warn(e)
     }

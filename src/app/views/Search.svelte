@@ -12,8 +12,7 @@
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Scan from "src/app/shared/Scan.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {keys, directory, content} from "src/system"
-  import {sampleRelays, getUserReadRelays} from "src/agent/relays"
+  import {keys, directory, routing, content} from "src/system"
   import network from "src/agent/network"
   import {watch} from "src/agent/db"
 
@@ -30,12 +29,12 @@
     // This allows us to populate results even if search isn't supported by forced urls
     if (q.length > 2) {
       network.load({
-        relays: sampleRelays([{url: "wss://relay.nostr.band"}]),
+        relays: routing.getSearchRelays(),
         filter: [{kinds: [0], search, limit: 10}],
       })
     } else if (directory.profiles._coll.count() < 50) {
       network.load({
-        relays: getUserReadRelays(),
+        relays: routing.getUserRelayUrls("read"),
         filter: [{kinds: [0], limit: 50}],
       })
     }

@@ -15,8 +15,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {keys, directory, cmd} from "src/system"
-  import {getUserWriteRelays, getRelayForPersonHint} from "src/agent/relays"
+  import {keys, directory, routing, cmd} from "src/system"
   import {toast, modal} from "src/partials/state"
   import {publishWithToast} from "src/app/state"
 
@@ -30,7 +29,7 @@
   let showPreview = false
   let showSettings = false
   let relays = writable(
-    (writeTo ? writeTo.map(url => ({url, score: 1})) : getUserWriteRelays()) as Array<{
+    (writeTo ? writeTo.map(url => ({url, score: 1})) : routing.getUserRelays("write")) as Array<{
       url: string
       score: number
     }>
@@ -47,9 +46,9 @@
     if (quote) {
       const {pubkey} = quote
       const profile = directory.getProfile(pubkey)
-      const pHint = getRelayForPersonHint(pubkey)
+      const pHint = routing.getPubkeyHint(pubkey) || ""
 
-      tags.push(["p", pubkey, pHint?.url || "", directory.displayProfile(profile)])
+      tags.push(["p", pubkey, pHint, directory.displayProfile(profile)])
     }
 
     if (content) {
@@ -179,7 +178,7 @@
         <div>
           {#each $relays as relay}
             <div
-              class="mr-1 mb-2 inline-block rounded-full border border-solid border-gray-1 py-1 px-2">
+              class="mb-2 mr-1 inline-block rounded-full border border-solid border-gray-1 px-2 py-1">
               <button
                 type="button"
                 class="fa fa-times cursor-pointer"

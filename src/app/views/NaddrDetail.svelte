@@ -6,9 +6,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {directory} from "src/system"
+  import {directory, routing} from "src/system"
   import network from "src/agent/network"
-  import {sampleRelays} from "src/agent/relays"
 
   export let identifier
   export let kind
@@ -23,7 +22,7 @@
   onMount(async () => {
     note = first(
       await network.load({
-        relays: sampleRelays(relays),
+        relays: routing.selectHints(3, relays),
         filter: {kinds: [kind], pubkey, "#d": [identifier]},
       })
     )

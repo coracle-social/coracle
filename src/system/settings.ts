@@ -6,7 +6,7 @@ import {DUFFLEPUD_URL, MULTIPLEXTR_URL} from "src/system/env"
 export default ({keys, sync, getCmd, getUserWriteRelays}) => {
   const store = synced("settings/store", {
     lastUpdated: 0,
-    relayLimit: 20,
+    relayLimit: 10,
     defaultZap: 21,
     showMedia: true,
     reportAnalytics: true,

@@ -7,8 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {keys, cmd, chat} from "src/system"
-  import {getRelaysForEventChildren, sampleRelays} from "src/agent/relays"
+  import {keys, cmd, chat, routing, settings} from "src/system"
   import network from "src/agent/network"
   import {watch} from "src/agent/db"
 
@@ -16,7 +15,8 @@
 
   const id = toHex(entity)
   const channel = watch(chat.channels, () => chat.channels.get(id) || {id})
-  const getRelays = () => sampleRelays($channel ? getRelaysForEventChildren($channel) : [])
+  const getRelays = () =>
+    routing.selectHints(settings.getSetting("relayLimit"), $channel.hints || [])
 
   chat.setLastChecked(id, now())
 
@@ -25,8 +25,8 @@
   }
 
   const sendMessage = async content => {
-    const [{url}] = getRelays()
-    const [event] = await cmd.createChatMessage(id, content, url).publish(getRelays())
+    const [hint] = getRelays()
+    const [event] = await cmd.createChatMessage(id, content, hint).publish(getRelays())
 
     return event
   }
@@ -42,7 +42,7 @@
     }
   })
 
-  document.title = $channel.name
+  document.title = $channel.name || "Coracle Chat"
 </script>
 
 <Channel {id} {sendMessage}>
@@ -57,7 +57,7 @@
       <div class="flex w-full items-center justify-between">
         <div class="flex items-center gap-4">
           <div class="text-lg font-bold">{$channel.name || ""}</div>
-          {#if $channel?.pubkey === keys.getPubkey()}
+          {#if $channel.pubkey === keys.getPubkey()}
             <button class="cursor-pointer text-sm" on:click={edit}>
               <i class="fa-solid fa-edit" /> Edit
             </button>

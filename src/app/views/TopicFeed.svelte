@@ -3,11 +3,11 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import TopicActions from "src/app/shared/TopicActions.svelte"
-  import {sampleRelays, getUserReadRelays} from "src/agent/relays"
+  import {routing} from "src/system"
 
   export let topic
 
-  const relays = sampleRelays(getUserReadRelays())
+  const relays = routing.getUserHints(3, "read")
   const filter = {kinds: [1], "#t": [topic]}
 </script>
 

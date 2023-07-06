@@ -7,6 +7,8 @@
   - [ ] Add userEvents and fill out isUserEvent
   - [ ] Add pagination to chat/dms
   - [ ] Fix scrolling to to when modal is open
+  - [ ] Change pool to take urls, not relay objects
+  - [ ] Take connection health into account when building hints
   - [ ] Test migration
 - [ ] Add custom emoji support
 - [ ] Fork and white label blowater

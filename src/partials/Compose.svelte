@@ -1,11 +1,10 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {last, partition, pluck, propEq} from "ramda"
+  import {last, partition, propEq} from "ramda"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {social, directory} from "src/system"
-  import {getPubkeyWriteRelays} from "src/agent/relays"
+  import {social, routing, directory} from "src/system"
 
   export let onSubmit
 
@@ -13,7 +12,7 @@
 
   const pubkeyEncoder = {
     encode: pubkey => {
-      const relays = pluck("url", getPubkeyWriteRelays(pubkey))
+      const relays = routing.getPubkeyHints(3, pubkey)
       const nprofile = nip19.nprofileEncode({pubkey, relays})
 
       return "nostr:" + nprofile

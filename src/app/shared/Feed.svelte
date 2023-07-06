@@ -13,9 +13,8 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {social} from "src/system"
+  import {social, settings, routing} from "src/system"
   import network from "src/agent/network"
-  import {sampleRelays, getAllPubkeyWriteRelays} from "src/agent/relays"
   import {mergeParents, compileFilter} from "src/app/state"
 
   export let relays = null
@@ -125,9 +124,15 @@
     }
 
     // If we have a search term we need to use only relays that support search
-    return filter.search
-      ? [{url: "wss://relay.nostr.band"}]
-      : sampleRelays(getAllPubkeyWriteRelays(compileFilter(filter).authors || []))
+    if (filter.search) {
+      return routing.getSearchRelays()
+    }
+
+    const limit = settings.getSetting("relayLimit")
+    const authors = compileFilter(filter).authors || []
+    const hints = authors.map(pubkey => routing.getPubkeyHints(limit, pubkey))
+
+    return routing.mergeHints(limit, hints)
   }
 
   const loadMore = async () => {
@@ -189,11 +194,11 @@
 
 <Content size="inherit" gap="gap-6">
   {#if notesBuffer.length > 0}
-    <div class="pointer-events-none fixed left-0 bottom-0 z-10 mb-8 flex w-full justify-center">
+    <div class="pointer-events-none fixed bottom-0 left-0 z-10 mb-8 flex w-full justify-center">
       <button
         in:fly={{y: 20}}
         class="pointer-events-auto cursor-pointer rounded-full border border-solid
-               border-accent-light bg-accent py-2 px-4 text-center text-white
+               border-accent-light bg-accent px-4 py-2 text-center text-white
                shadow-lg transition-colors hover:bg-accent-light"
         on:click={loadBufferedNotes}>
         Load {quantify(notesBuffer.length, "new note")}

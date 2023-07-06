@@ -5,9 +5,8 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {DEFAULT_FOLLOWS, social, directory} from "src/system"
+  import {DEFAULT_FOLLOWS, routing, social, directory} from "src/system"
   import {watch} from "src/agent/db"
-  import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import {modal} from "src/partials/state"
 
   const {searchProfiles} = directory
@@ -16,10 +15,10 @@
   if ($follows.size === 0) {
     social.updatePetnames(
       DEFAULT_FOLLOWS.map(pubkey => {
-        const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
+        const hint = routing.getPubkeyHint(pubkey) || ""
         const name = directory.displayPubkey(pubkey)
 
-        return ["p", pubkey, url, name]
+        return ["p", pubkey, hint, name]
       })
     )
   }

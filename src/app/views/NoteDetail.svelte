@@ -10,10 +10,9 @@
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {social} from "src/system"
+  import {social, routing} from "src/system"
   import Note from "src/app/shared/Note.svelte"
   import network from "src/agent/network"
-  import {sampleRelays} from "src/agent/relays"
 
   export let note
   export let relays = []
@@ -33,7 +32,7 @@
   onMount(async () => {
     if (!displayNote.pubkey) {
       await network.load({
-        relays: sampleRelays(relays),
+        relays: routing.selectHints(3, relays),
         filter: {ids: [displayNote.id]},
         onChunk: events => {
           displayNote = asDisplayEvent(first(events))

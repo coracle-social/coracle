@@ -7,7 +7,6 @@
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {routing} from "src/system"
-  import {getUserReadRelays} from "src/agent/relays"
   import network from "src/agent/network"
   import {watch} from "src/agent/db"
 
@@ -38,7 +37,7 @@
 
   onMount(async () => {
     reviews = await network.load({
-      relays: getUserReadRelays(),
+      relays: routing.getUserRelays("read"),
       filter: {
         limit: 1000,
         kinds: [1985],

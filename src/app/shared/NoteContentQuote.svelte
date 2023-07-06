@@ -1,15 +1,12 @@
 <script lang="ts">
-  import {objOf} from "ramda"
   import {fly} from "src/util/transition"
   import {warn} from "src/util/logger"
-  import {Tags} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {directory, social} from "src/system"
-  import {sampleRelays} from "src/agent/relays"
+  import {directory, routing, social} from "src/system"
   import network from "src/agent/network"
 
   export let note
@@ -24,9 +21,7 @@
 
     try {
       const events = await network.load({
-        relays: sampleRelays(
-          (relays || []).map(objOf("url")).concat(Tags.from(note).equals(id).relays())
-        ),
+        relays: routing.mergeHints(3, [relays, routing.getEventHints(3, note)]),
         filter: [{ids: [id]}],
       })
 

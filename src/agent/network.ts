@@ -1,4 +1,5 @@
-import type {MyEvent, Relay} from "src/util/types"
+import type {Filter} from "nostr-tools"
+import type {MyEvent} from "src/util/types"
 import {
   max,
   without,
@@ -16,14 +17,7 @@ import {
 import {personKinds, appDataKeys, findReplyId} from "src/util/nostr"
 import {chunk, ensurePlural} from "hurdak/lib/hurdak"
 import {batch, now, timedelta} from "src/util/misc"
-import {ENABLE_ZAPS, directory} from "src/system"
-import {
-  getRelaysForEventParent,
-  getAllPubkeyWriteRelays,
-  aggregateScores,
-  getRelaysForEventChildren,
-  sampleRelays,
-} from "src/agent/relays"
+import {ENABLE_ZAPS, routing, settings, directory} from "src/system"
 import pool from "src/agent/pool"
 
 const ext = {sync: null}
@@ -46,7 +40,19 @@ const getStalePubkeys = pubkeys => {
   })
 }
 
-const listen = ({relays, filter, onChunk = null, shouldProcess = true, delay = 500}) => {
+const listen = ({
+  relays,
+  filter,
+  onChunk = null,
+  shouldProcess = true,
+  delay = 500,
+}: {
+  relays: string[]
+  filter: Filter | Filter[]
+  onChunk?: (chunk: MyEvent[]) => void
+  shouldProcess?: boolean
+  delay?: number
+}) => {
   return pool.subscribe({
     filter,
     relays,
@@ -62,7 +68,19 @@ const listen = ({relays, filter, onChunk = null, shouldProcess = true, delay = 5
   })
 }
 
-const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5000}) => {
+const load = ({
+  relays,
+  filter,
+  onChunk = null,
+  shouldProcess = true,
+  timeout = 5000,
+}: {
+  relays: string[]
+  filter: Filter | Filter[]
+  onChunk?: (chunk: MyEvent[]) => void
+  shouldProcess?: boolean
+  timeout?: number
+}) => {
   return new Promise(resolve => {
     let completed = false
     const done = new Set()
@@ -77,9 +95,9 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5
       const isDone = done.size === relays.length
 
       if (force) {
-        relays.forEach(relay => {
-          if (!done.has(relay.url)) {
-            pool.Meta.onTimeout(relay.url)
+        relays.forEach(url => {
+          if (!done.has(url)) {
+            pool.Meta.onTimeout(url)
           }
         })
       }
@@ -119,7 +137,7 @@ const load = ({relays, filter, onChunk = null, shouldProcess = true, timeout = 5
 }
 
 class Cursor {
-  relays: Array<Relay>
+  relays: string[]
   limit: number
   delta?: number
   until: Record<string, number>
@@ -129,7 +147,7 @@ class Cursor {
     this.relays = relays
     this.limit = limit
     this.delta = delta
-    this.until = fromPairs(relays.map(({url}) => [url, until]))
+    this.until = fromPairs(relays.map(url => [url, until]))
     this.since = 0
     this.seen = new Set()
   }
@@ -175,9 +193,9 @@ class Cursor {
     // If we got zero results for any relays, they have nothing for the given window,
     // back until up to since for next time, but only for relays currently in the window
     if (this.delta) {
-      this.relays.forEach(r => {
-        if (this.until[r.url] > this.since && untilCopy[r.url] === this.until[r.url]) {
-          this.until[r.url] -= this.delta
+      this.relays.forEach(url => {
+        if (this.until[url] > this.since && untilCopy[url] === this.until[url]) {
+          this.until[url] -= this.delta
         }
       })
     }
@@ -186,7 +204,7 @@ class Cursor {
     // Group relays by rounded clusters to get some benefit out of
     // multiplextr despite paginating per-relay
     const threshold = timedelta(5, "minutes")
-    const untils = this.relays.map(({url}) => this.until[url])
+    const untils = this.relays.map(url => this.until[url])
 
     for (let i = 0; i < untils.length; i++) {
       for (let j = i + 1; j < untils.length; j++) {
@@ -220,7 +238,14 @@ class Cursor {
   }
 }
 
-const loadPeople = async (pubkeys, {relays = null, kinds = personKinds, force = false} = {}) => {
+const loadPeople = async (
+  pubkeys,
+  {
+    relays = null,
+    kinds = personKinds,
+    force = false,
+  }: {relays?: string[]; kinds?: number[]; force?: boolean} = {}
+) => {
   pubkeys = uniq(pubkeys)
 
   // If we're not reloading, only get pubkeys we don't already know about
@@ -230,7 +255,14 @@ const loadPeople = async (pubkeys, {relays = null, kinds = personKinds, force = 
 
   await Promise.all(
     chunk(256, pubkeys).map(async chunk => {
-      const chunkRelays = sampleRelays(relays || getAllPubkeyWriteRelays(chunk), 0.5)
+      const chunkRelays =
+        relays?.length > 0
+          ? relays
+          : routing.mergeHints(
+              settings.getSetting("relayLimit"),
+              chunk.map(pubkey => routing.getPubkeyHints(3, pubkey))
+            )
+
       const chunkFilter = [] as Array<Record<string, any>>
 
       chunkFilter.push({kinds: without([30078], kinds), authors: chunk})
@@ -254,8 +286,11 @@ const loadParents = (notes, opts = {}) => {
   }
 
   return load({
-    relays: sampleRelays(aggregateScores(notesWithParent.map(getRelaysForEventParent)), 0.3),
     filter: {ids: notesWithParent.map(findReplyId)},
+    relays: routing.mergeHints(
+      settings.getSetting("relayLimit"),
+      notesWithParent.map(e => routing.getParentHints(3, e))
+    ),
     ...opts,
   })
 }
@@ -264,7 +299,10 @@ const streamContext = ({notes, onChunk, maxDepth = 2}) => {
   const subs = []
   const seen = new Set()
   const kinds = ENABLE_ZAPS ? [1, 7, 9735] : [1, 7]
-  const relays = sampleRelays(aggregateScores(notes.map(getRelaysForEventChildren)))
+  const relays = routing.mergeHints(
+    settings.getSetting("relayLimit"),
+    notes.map(e => routing.getReplyHints(3, e))
+  )
 
   const loadChunk = (events, depth) => {
     // Remove anything from the chunk we've already seen

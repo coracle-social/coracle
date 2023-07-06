@@ -9,10 +9,8 @@
   import OnboardingRelays from "src/app/views/OnboardingRelays.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
-  import {DEFAULT_FOLLOWS, DEFAULT_RELAYS, social, routing} from "src/system"
-  import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
+  import {DEFAULT_FOLLOWS, DEFAULT_RELAYS, social, routing, keys, directory, cmd} from "src/system"
   import network from "src/agent/network"
-  import {keys, directory, cmd} from "src/system"
   import {loadAppData} from "src/app/state"
   import {modal} from "src/partials/state"
 
@@ -27,20 +25,21 @@
 
   const signup = async note => {
     const relays = routing.getUserRelays()
+    const urls = routing.getUserRelayUrls()
 
     await keys.login("privkey", privkey)
 
     // Re-save preferences now that we have a key
     await Promise.all([
       routing.setUserRelays(relays),
-      cmd.updateUser(profile).publish(relays),
-      note && cmd.createNote(note).publish(relays),
+      cmd.updateUser(profile).publish(urls),
+      note && cmd.createNote(note).publish(urls),
       social.updatePetnames(
         social.getUserFollows().map(pubkey => {
-          const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
+          const hint = routing.getPubkeyHint(pubkey) || ""
           const name = directory.displayPubkey(pubkey)
 
-          return ["p", pubkey, url, name]
+          return ["p", pubkey, hint, name]
         })
       ),
     ])
@@ -54,7 +53,7 @@
   onMount(() => {
     // Prime our database with some defaults
     network.loadPeople(DEFAULT_FOLLOWS, {
-      relays: sampleRelays(routing.getUserRelays()),
+      relays: routing.getUserHints("read"),
     })
   })
 </script>

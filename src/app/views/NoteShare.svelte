@@ -3,12 +3,11 @@
   import {toNostrURI} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import QRCode from "src/partials/QRCode.svelte"
-  import {getRelayForEventHint} from "src/agent/relays"
+  import {routing} from "src/system"
 
   export let note
 
-  const {url} = getRelayForEventHint(note)
-  const nevent = nip19.neventEncode({id: note.id, relays: [url]})
+  const nevent = nip19.neventEncode({id: note.id, relays: routing.getEventHints(3, note)})
 </script>
 
 <Content size="lg">

@@ -3,9 +3,8 @@ import {get} from "svelte/store"
 import {doPipe} from "hurdak/lib/hurdak"
 import {Tags, channelAttrs, findRoot, findReply} from "src/util/nostr"
 import {parseContent} from "src/util/notes"
-import {getRelayForPersonHint, getRelayForEventHint} from "src/agent/relays"
 
-export default ({keys, sync, pool, displayPubkey}) => {
+export default ({keys, sync, pool, routing, displayPubkey}) => {
   const authenticate = (url, challenge) =>
     new PublishableEvent(22242, {
       tags: [
@@ -116,9 +115,9 @@ export default ({keys, sync, pool, displayPubkey}) => {
 
   const mention = pubkey => {
     const name = displayPubkey(pubkey)
-    const hint = getRelayForPersonHint(pubkey)
+    const hint = routing.getPubkeyHint(pubkey) || ""
 
-    return ["p", pubkey, hint?.url || "", name]
+    return ["p", pubkey, hint, name]
   }
 
   const getReplyTags = (n, inherit = false) => {
@@ -129,11 +128,10 @@ export default ({keys, sync, pool, displayPubkey}) => {
           .all()
           .map(t => t.slice(0, 3))
       : []
-    const pHint = getRelayForPersonHint(n.pubkey)
-    const eHint = getRelayForEventHint(n) || pHint
-    const reply = ["e", n.id, eHint?.url || "", "reply"]
+    const eHint = routing.getEventHint(n) || ""
+    const reply = ["e", n.id, eHint, "reply"]
     const root = doPipe(findRoot(n) || findReply(n) || reply, [
-      t => (t.length < 3 ? t.concat(eHint?.url || "") : t),
+      t => (t.length < 3 ? t.concat(eHint) : t),
       t => t.slice(0, 3).concat("root"),
     ])
 
@@ -162,7 +160,7 @@ export default ({keys, sync, pool, displayPubkey}) => {
         throw e
       }
     }
-    async publish(relays, onProgress = null, verb = "EVENT") {
+    async publish(relays: string[], onProgress = null, verb = "EVENT") {
       const event = await this.getSignedEvent()
       // return console.log(event)
       const promise = pool.publish({relays, event, onProgress, verb})

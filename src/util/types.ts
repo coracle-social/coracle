@@ -1,12 +1,5 @@
 import type {Event} from "nostr-tools"
 
-export type Relay = {
-  url: string
-  score?: number
-  write?: boolean
-  read?: boolean
-}
-
 export type MyEvent = Event & {
   seen_on: string[]
 }

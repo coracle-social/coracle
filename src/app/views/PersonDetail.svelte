@@ -12,9 +12,8 @@
   import PersonNotes from "src/app/shared/PersonNotes.svelte"
   import PersonLikes from "src/app/shared/PersonLikes.svelte"
   import PersonRelays from "src/app/shared/PersonRelays.svelte"
-  import {nip05, directory} from "src/system"
+  import {nip05, directory, routing} from "src/system"
   import pool from "src/agent/pool"
-  import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
   import {watch} from "src/agent/db"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
@@ -33,8 +32,8 @@
   let loading = true
   let rgb, rgba
 
-  $: ownRelays = getPubkeyWriteRelays(pubkey)
-  $: relays = sampleRelays(relays.concat(ownRelays))
+  $: ownRelays = routing.getPubkeyRelays(pubkey)
+  $: relays = routing.getPubkeyHints(pubkey)
 
   $: {
     const color = parseHex(getThemeColor($theme, "gray-8"))

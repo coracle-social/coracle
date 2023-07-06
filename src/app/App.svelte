@@ -60,7 +60,7 @@
 
       const publishable = await system.cmd.authenticate(url, challenge)
 
-      return first(publishable.publish([{url}], null, "AUTH"))
+      return first(publishable.publish([url], null, "AUTH"))
     }
   }
 

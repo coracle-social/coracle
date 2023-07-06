@@ -8,6 +8,8 @@ export const FORCE_RELAYS = (import.meta.env.VITE_FORCE_RELAYS || "").split(",")
 
 export const COUNT_RELAYS = FORCE_RELAYS.length > 0 ? FORCE_RELAYS : ["wss://rbr.bio"]
 
+export const SEARCH_RELAYS = FORCE_RELAYS.length > 0 ? FORCE_RELAYS : ["wss://relay.nostr.band"]
+
 export const DEFAULT_RELAYS =
   FORCE_RELAYS.length > 0
     ? FORCE_RELAYS

@@ -1,18 +1,16 @@
 <script lang="ts">
-  import {pluck} from "ramda"
   import {nip19} from "nostr-tools"
   import {fly} from "src/util/transition"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
-  import {nip05} from "src/system"
-  import {getPubkeyWriteRelays} from "src/agent/relays"
+  import {nip05, routing} from "src/system"
 
   export let pubkey
 
   const handle = nip05.getHandle(pubkey)
   const npub = nip19.npubEncode(pubkey)
-  const relays = pluck("url", getPubkeyWriteRelays(pubkey))
+  const relays = routing.getPubkeyHints(3, pubkey)
   const nprofile = nip19.nprofileEncode({pubkey, relays})
 </script>
 

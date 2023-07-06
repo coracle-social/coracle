@@ -13,10 +13,18 @@ import {userKinds, noteKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import {userEvents} from "src/agent/db"
-import {DEFAULT_FOLLOWS, ENABLE_ZAPS, keys, social, alerts, settings, chat} from "src/system"
+import {
+  DEFAULT_FOLLOWS,
+  ENABLE_ZAPS,
+  keys,
+  social,
+  routing,
+  alerts,
+  settings,
+  chat,
+} from "src/system"
 import network from "src/agent/network"
 import pool from "src/agent/pool"
-import {getUserReadRelays, getUserRelays} from "src/agent/relays"
 
 // Routing
 
@@ -106,7 +114,7 @@ export const listen = async () => {
 
   ;(listen as any)._listener?.unsub()
   ;(listen as any)._listener = await network.listen({
-    relays: getUserReadRelays(),
+    relays: routing.getUserRelayUrls("read"),
     filter: [
       {kinds: noteKinds.concat(4), authors: [pubkey], since},
       {kinds, "#p": [pubkey], since},
@@ -123,7 +131,7 @@ export const slowConnections = writable([])
 
 setInterval(() => {
   // Only notify about relays the user is actually subscribed to
-  const relayUrls = new Set(pluck("url", getUserRelays()))
+  const relays = new Set(routing.getUserRelayUrls())
 
   // Prune connections we haven't used in a while
   Object.entries(pool.Meta.stats)
@@ -132,14 +140,12 @@ setInterval(() => {
 
   // Alert the user to any heinously slow connections
   slowConnections.set(
-    Object.keys(pool.Meta.stats).filter(
-      url => relayUrls.has(url) && first(pool.getQuality(url)) < 0.3
-    )
+    Object.keys(pool.Meta.stats).filter(url => relays.has(url) && first(pool.getQuality(url)) < 0.3)
   )
 }, 30_000)
 
 export const loadAppData = async pubkey => {
-  if (getUserReadRelays().length > 0) {
+  if (routing.getUserRelays("read").length > 0) {
     // Start our listener, but don't wait for it
     listen()
 

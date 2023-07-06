@@ -15,7 +15,6 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {ENABLE_ZAPS, keys, nip57, cmd, routing, social} from "src/system"
-  import {getEventPublishRelays} from "src/agent/relays"
   import pool from "src/agent/pool"
 
   export let note
@@ -42,11 +41,13 @@
   const unmute = () => social.unmute(note.id)
 
   const react = async content => {
-    like = first(await cmd.createReaction(note, content).publish(getEventPublishRelays(note)))
+    const relays = routing.getPublishHints(3, note)
+
+    like = first(await cmd.createReaction(note, content).publish(relays))
   }
 
   const deleteReaction = e => {
-    cmd.deleteEvents([e.id]).publish(getEventPublishRelays(note))
+    cmd.deleteEvents([e.id]).publish(routing.getPublishHints(3, note))
 
     like = null
     likes = reject(propEq("id", e.id), likes)

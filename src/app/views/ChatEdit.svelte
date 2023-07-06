@@ -8,8 +8,7 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {toast, modal} from "src/partials/state"
-  import {getUserWriteRelays} from "src/agent/relays"
-  import {cmd, chat} from "src/system"
+  import {cmd, chat, routing} from "src/system"
   import {publishWithToast} from "src/app/state"
 
   export let channel = {name: null, id: null, about: null, picture: null}
@@ -36,7 +35,7 @@
     if (!channel.name) {
       toast.show("error", "Please enter a name for your room.")
     } else {
-      const relays = getUserWriteRelays()
+      const relays = routing.getUserRelays("write")
 
       if (channel.id) {
         publishWithToast(relays, cmd.updateChannel(channel))

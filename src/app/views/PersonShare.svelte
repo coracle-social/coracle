@@ -1,14 +1,13 @@
 <script lang="ts">
-  import {pluck} from "ramda"
   import {nip19} from "nostr-tools"
   import {toNostrURI} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import QRCode from "src/partials/QRCode.svelte"
-  import {getPubkeyWriteRelays} from "src/agent/relays"
+  import {routing} from "src/system"
 
   export let pubkey
 
-  const relays = pluck("url", getPubkeyWriteRelays(pubkey).slice(0, 5))
+  const relays = routing.getPubkeyHints(3, pubkey)
   const nprofile = nip19.nprofileEncode({pubkey, relays})
 </script>
 

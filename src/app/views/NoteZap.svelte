@@ -1,6 +1,5 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {pluck} from "ramda"
   import {warn} from "src/util/logger"
   import {fetchJson, now} from "src/util/misc"
   import {modal} from "src/partials/state"
@@ -9,8 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import {directory} from "src/system"
-  import {getEventPublishRelays} from "src/agent/relays"
+  import {directory, routing} from "src/system"
   import network from "src/agent/network"
   import {keys, cmd, settings, nip57} from "src/system"
 
@@ -33,10 +31,9 @@
 
     const amount = zap.amount * 1000
     const zapper = nip57.zappers.get(note.pubkey)
-    const relays = getEventPublishRelays(note)
-    const urls = pluck("url", relays)
+    const relays = routing.getPublishHints(3, note)
     const publishable = cmd.requestZap(
-      urls,
+      relays,
       zap.message,
       note.pubkey,
       note.id,

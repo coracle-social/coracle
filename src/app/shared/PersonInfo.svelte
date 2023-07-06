@@ -4,8 +4,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
-  import {social, directory, nip05} from "src/system"
-  import {getPubkeyWriteRelays, sampleRelays} from "src/agent/relays"
+  import {social, routing, directory, nip05} from "src/system"
 
   export let pubkey
   export let hasPetname = null
@@ -20,9 +19,7 @@
   }
 
   const follow = async () => {
-    const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
-
-    await social.follow(pubkey, url, directory.displayProfile(profile))
+    await social.follow(pubkey, routing.getPubkeyHint(pubkey), directory.displayProfile(profile))
 
     isFollowing = getIsFollowing()
   }

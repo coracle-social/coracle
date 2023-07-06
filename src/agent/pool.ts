@@ -1,8 +1,8 @@
-import type {Relay, Filter} from "nostr-tools"
+import type {Filter} from "nostr-tools"
 import type {MyEvent} from "src/util/types"
 import {Socket, Pool, Plex, Relays, Executor} from "paravel"
 import {verifySignature} from "nostr-tools"
-import {pluck, objOf, identity} from "ramda"
+import {objOf, identity} from "ramda"
 import {ensurePlural, switcher} from "hurdak/lib/hurdak"
 import {warn, log, error} from "src/util/logger"
 import {union, sleep, difference} from "src/util/misc"
@@ -114,7 +114,7 @@ const getUrls = relays => {
     error(`Attempted to connect to zero urls`)
   }
 
-  const urls = new Set(pluck("url", relays).map(normalizeRelayUrl))
+  const urls = new Set(relays.map(normalizeRelayUrl))
 
   if (urls.size !== relays.length) {
     warn(`Attempted to connect to non-unique relays`)
@@ -304,7 +304,7 @@ async function publish({relays, event, onProgress, timeout = 3000, verb = "EVENT
 }
 
 type SubscribeOpts = {
-  relays: Relay[]
+  relays: string[]
   filter: Filter[] | Filter
   onEvent: (event: MyEvent) => void
   onEose?: (url: string) => void
@@ -319,10 +319,6 @@ async function subscribe({relays, filter, onEvent, onEose}: SubscribeOpts) {
   const eose = new Set()
 
   log(`Starting subscription with ${relays.length} relays`, filters, relays)
-
-  if (relays.length !== new Set(pluck("url", relays)).size) {
-    error(`Subscribed to non-unique relays`, relays)
-  }
 
   Meta.onSubscriptionStart(urls)
 

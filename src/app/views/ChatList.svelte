@@ -7,10 +7,9 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
-  import {keys, chat} from "src/system"
+  import {keys, chat, routing} from "src/system"
   import {watch} from "src/agent/db"
   import network from "src/agent/network"
-  import {getUserReadRelays, sampleRelays} from "src/agent/relays"
 
   let q = ""
   let search
@@ -29,7 +28,7 @@
 
   onMount(() => {
     const sub = network.listen({
-      relays: sampleRelays(getUserReadRelays()),
+      relays: routing.getUserHints(3, "read"),
       filter: [{kinds: [40, 41]}],
     })
 

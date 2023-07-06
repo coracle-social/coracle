@@ -13,8 +13,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
-  import {nip05, directory, social} from "src/system"
-  import {getRelaysForEventParent} from "src/agent/relays"
+  import {nip05, directory, routing, social} from "src/system"
   import {watch} from "src/agent/db"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
@@ -62,13 +61,13 @@
   }
 
   const goToParent = async () => {
-    const relays = getRelaysForEventParent(note)
+    const relays = routing.getParentHints(3, note)
 
     goToNote({note: {id: findReplyId(note)}, relays})
   }
 
   const goToRoot = async () => {
-    const relays = getRelaysForEventParent(note)
+    const relays = routing.getParentHints(3, note)
 
     goToNote({note: {id: findRootId(note)}, relays})
   }
@@ -181,7 +180,7 @@
   {#if !replyIsActive && visibleNotes.length > 0 && !showEntire && depth > 0 && !$muted}
     <div class="relative">
       <div
-        class="absolute top-0 right-0 z-10 -mt-4 -mr-2 flex h-6 w-6 cursor-pointer items-center
+        class="absolute right-0 top-0 z-10 -mr-2 -mt-4 flex h-6 w-6 cursor-pointer items-center
                  justify-center rounded-full border border-solid border-gray-7 bg-gray-8 text-gray-2"
         on:click={() => {
           collapsed = !collapsed

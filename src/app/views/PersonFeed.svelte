@@ -4,8 +4,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonActions from "src/app/shared/PersonActions.svelte"
-  import {nip05, directory} from "src/system"
-  import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
+  import {nip05, directory, settings, routing} from "src/system"
   import {watch} from "src/agent/db"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -17,10 +16,9 @@
 
   const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
   const handle = watch(nip05.handles, () => nip05.getHandle(pubkey))
+  const relays = routing.getPubkeyHints(settings.getSetting("relayLimit"), pubkey)
 
   let rgb, rgba
-
-  $: relays = sampleRelays(getPubkeyWriteRelays(pubkey))
 
   $: {
     const color = parseHex(getThemeColor($theme, "gray-7"))

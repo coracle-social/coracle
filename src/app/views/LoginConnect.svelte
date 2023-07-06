@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type {Relay} from "src/util/types"
   import {isNil, prop, uniqBy, objOf, find, all, last} from "ramda"
   import {onDestroy, onMount} from "svelte"
   import {navigate} from "svelte-routing"
@@ -22,7 +21,7 @@
   let modal = null
   let customRelayUrl = null
   let searching = true
-  let currentRelays = {} as Record<number, Relay>
+  let currentRelays = {} as Record<number, {url: string}>
   let attemptedRelays = new Set()
   let customRelays = []
   let allRelays = []
@@ -56,7 +55,7 @@
       currentRelays[i] = relay
 
       network
-        .loadPeople([keys.getPubkey()], {relays: [relay], force: true, kinds: userKinds})
+        .loadPeople([keys.getPubkey()], {relays: [relay.url], force: true, kinds: userKinds})
         .then(async () => {
           // Wait a bit before removing the relay to smooth out the ui
           await sleep(1000)

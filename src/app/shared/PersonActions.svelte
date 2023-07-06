@@ -4,8 +4,7 @@
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {keys, social, directory} from "src/system"
-  import {sampleRelays, getPubkeyWriteRelays} from "src/agent/relays"
+  import {keys, routing, social, directory} from "src/system"
   import {watch} from "src/agent/db"
   import pool from "src/agent/pool"
   import {addToList} from "src/app/state"
@@ -59,15 +58,12 @@
     }
   }
 
-  const follow = async () => {
-    const [{url}] = sampleRelays(getPubkeyWriteRelays(pubkey))
-
-    social.follow(pubkey, url, directory.displayPubkey(pubkey))
-  }
+  const follow = () =>
+    social.follow(pubkey, routing.getPubkeyHint(pubkey), directory.displayPubkey(pubkey))
 
   const unfollow = () => social.unfollow(pubkey)
 
-  const mute = async () => social.mute("p", pubkey)
+  const mute = () => social.mute("p", pubkey)
 
   const unmute = () => social.unmute(pubkey)
 

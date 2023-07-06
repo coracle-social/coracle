@@ -461,3 +461,9 @@ export const webSocketURLToPlainOrBase64 = (url: string): string => {
 }
 
 export const clamp = ([min, max], n) => Math.min(max, Math.max(min, n))
+
+export function* chain(...generators) {
+  for (const g of generators) {
+    yield* g
+  }
+}

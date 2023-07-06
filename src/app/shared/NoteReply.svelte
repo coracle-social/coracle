@@ -9,8 +9,7 @@
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/partials/Compose.svelte"
-  import {directory, cmd, keys} from "src/system"
-  import {getEventPublishRelays} from "src/agent/relays"
+  import {directory, routing, cmd, keys} from "src/system"
   import {publishWithToast} from "src/app/state"
 
   export let note
@@ -53,7 +52,7 @@
     }
 
     if (content) {
-      const relays = getEventPublishRelays(note)
+      const relays = routing.getPublishHints(3, note)
       const thunk = cmd.createReply(note, content, data.mentions.map(cmd.mention))
       const [event, promise] = await publishWithToast(relays, thunk)
 
@@ -128,7 +127,7 @@
         </div>
         <div on:click|stopPropagation>
           {#each data.mentions as pubkey}
-            <Chip class="mr-1 mb-1" theme="dark" onClick={() => removeMention(pubkey)}>
+            <Chip class="mb-1 mr-1" theme="dark" onClick={() => removeMention(pubkey)}>
               {directory.displayPubkey(pubkey)}
             </Chip>
           {:else}
