@@ -24,6 +24,8 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
     },
   })
 
+  const getHints = e => pluck("url", Tags.from(e).relays())
+
   sync.addHandler(40, e => {
     const channel = channels.get(e.id)
 
@@ -42,6 +44,7 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
       type: "public",
       pubkey: e.pubkey,
       updated_at: e.created_at,
+      hints: getHints(e),
       ...content,
     })
   })
@@ -69,13 +72,12 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
       return
     }
 
-    console.log('=========', e)
-
     channels.patch({
       id: channelId,
       type: "public",
       pubkey: e.pubkey,
       updated_at: e.created_at,
+      hints: getHints(e),
       ...content,
     })
   })
@@ -153,16 +155,22 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
       })
 
       if (keys.getPubkey() === author) {
+        const channel = channels.get(recipient)
+
         channels.patch({
           id: recipient,
           type: "private",
           last_sent: e.created_at,
+          hints: uniq(getHints(e).concat(channel?.hints || [])),
         })
       } else {
+        const channel = channels.get(author)
+
         channels.patch({
           id: author,
           type: "private",
           last_received: e.created_at,
+          hints: uniq(getHints(e).concat(channel?.hints || [])),
         })
       }
     })
@@ -173,7 +181,10 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
       return
     }
 
-    const channelId = Tags.from(e).getMeta("e")
+    const tags = Tags.from(e)
+    const channelId = tags.getMeta("e")
+    const channel = channels.get(channelId)
+    const hints = uniq(pluck("url", tags.relays()).concat(channel?.hints || []))
 
     messages.patch({
       id: e.id,
@@ -189,12 +200,14 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
         id: channelId,
         type: "public",
         last_sent: e.created_at,
+        hints,
       })
     } else {
       channels.patch({
         id: channelId,
         type: "public",
         last_received: e.created_at,
+        hints,
       })
     }
   })
