@@ -1,7 +1,7 @@
 import type {Writable} from "svelte/store"
 import Loki from "lokijs"
 import IncrementalIndexedDBAdapter from "lokijs/src/incremental-indexeddb-adapter"
-import {partition, uniqBy, sortBy, prop, always, pluck, without, is} from "ramda"
+import {partition, uniqBy, prop, always, pluck, without, is} from "ramda"
 import {throttle} from "throttle-debounce"
 import {writable} from "svelte/store"
 import {ensurePlural, noop, createMap} from "hurdak/lib/hurdak"
@@ -201,15 +201,6 @@ export const dropAll = () => {
 
   new Promise(resolve => loki.deleteDatabase(resolve))
 }
-
-// ----------------------------------------------------------------------------
-// Domain-specific collections
-
-const sortByCreatedAt = sortBy(e => -e.created_at)
-const sortByScore = sortBy(e => -e.score)
-
-export const userEvents = new Table("userEvents", "id", {max: 2000, sort: sortByCreatedAt})
-export const routes = new Table("routes", "id", {max: 10000, sort: sortByScore})
 
 const ready = writable(false)
 

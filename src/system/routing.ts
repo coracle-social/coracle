@@ -113,7 +113,10 @@ export default ({keys, sync, getCmd, sortByGraph}) => {
   const getUserRelayUrls = (...args) => pluck("url", getUserRelays(...args))
 
   const getSearchRelays = () =>
-    SEARCH_RELAYS.concat(relays.all({"meta.supported_nips": {$contains: 50}})).slice(0, 8)
+    SEARCH_RELAYS.concat(pluck("url", relays.all({"meta.supported_nips": {$contains: 50}}))).slice(
+      0,
+      8
+    )
 
   // Smart relay selection
   //

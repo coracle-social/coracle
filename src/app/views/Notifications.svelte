@@ -14,9 +14,8 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app/views/Notification.svelte"
-  import {social, alerts} from "src/system"
+  import {social, alerts, cache} from "src/system"
   import {watch} from "src/agent/db"
-  import {userEvents} from "src/agent/db"
 
   const {lastChecked} = alerts
   const tabs = ["Mentions & Replies", "Reactions"]
@@ -41,7 +40,7 @@
     ({notifications}) => -notifications.reduce((a, b) => Math.max(a, b.created_at), 0),
     $notifications
       .slice(0, limit)
-      .map(e => [e, userEvents.get(findReplyId(e))])
+      .map(e => [e, cache.events.get(findReplyId(e))])
       .filter(([e, ref]) => {
         if (ref && !noteKinds.includes(ref.kind)) {
           return false

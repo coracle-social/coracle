@@ -1,4 +1,4 @@
-import {sortBy, slice, reject, prop} from "ramda"
+import {sortBy, find, slice, reject, prop} from "ramda"
 import {get} from "svelte/store"
 import {ensurePlural} from "hurdak/lib/hurdak"
 import {now} from "src/util/misc"
@@ -134,12 +134,11 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
 
   const isMuted = e => {
     const m = getUserMutesSet()
-    const muted = m.has(e.id) || m.has(e.pubkey) || m.has(findReplyId(e)) || m.has(findRootId(e))
 
-    return !muted
+    return find(t => m.has(t), [e.id, e.pubkey, findReplyId(e), findRootId(e)])
   }
 
-  const applyMutes = events => events.filter(isMuted)
+  const applyMutes = events => reject(isMuted, events)
 
   const updateMutes = async $mutes => {
     if (get(keys.canSign)) {

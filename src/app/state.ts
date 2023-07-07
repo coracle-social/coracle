@@ -12,7 +12,6 @@ import {now, timedelta} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
-import {userEvents} from "src/agent/db"
 import {
   DEFAULT_FOLLOWS,
   ENABLE_ZAPS,
@@ -21,6 +20,7 @@ import {
   routing,
   alerts,
   settings,
+  cache,
   chat,
 } from "src/system"
 import network from "src/agent/network"
@@ -105,7 +105,7 @@ export const listen = async () => {
 
   const channelIds = pluck("id", chat.channels.all({joined: true}))
 
-  const eventIds = doPipe(userEvents, [
+  const eventIds = doPipe(cache.events, [
     t => t.all({kind: 1, created_at: {$gt: now() - timedelta(30, "days")}}),
     sortBy(e => -e.created_at),
     slice(0, 256),

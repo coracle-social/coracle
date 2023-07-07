@@ -318,7 +318,7 @@ async function subscribe({relays, filter, onEvent, onEose}: SubscribeOpts) {
   const seen = new Map()
   const eose = new Set()
 
-  log(`Starting subscription with ${relays.length} relays`, filters, relays)
+  log(`Starting subscription with ${relays.length} relays`, {filters, relays})
 
   Meta.onSubscriptionStart(urls)
 

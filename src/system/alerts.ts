@@ -5,7 +5,7 @@ import {derived} from "svelte/store"
 import {Table, watch} from "src/agent/db"
 
 export default ({keys, sync, chat, social, isUserEvent}) => {
-  const events = new Table("notifications", "id", {sort: sortBy(e => -e.created_at)})
+  const events = new Table("alerts/events", "id", {sort: sortBy(e => -e.created_at)})
   const lastChecked = synced("notifications/lastChecked", 0)
   const latestNotification = synced("notifications/latestNotification", 0)
 

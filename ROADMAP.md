@@ -38,6 +38,8 @@
 # Core
 
 - [ ] Private groups
+- [ ] Show npubs/nip05 when mentioning
+  - nevent1qqswv0ztgm8z6zeqmd0pzvwss7fzny675dx9lkqvr4zw0d9ad59eh3gpzemhxue69uhhyetvv9ujumn0wd68ytnzv9hxg6k804t
 - [ ] Support server-rendered link previews
 - [ ] Feeds load forever if a modal is open
 - [ ] Support other list types than 30001

@@ -3,6 +3,7 @@ import {ensurePlural, chunk} from "hurdak/lib/hurdak"
 import {sleep} from "src/util/misc"
 
 export default ({keys}) => {
+  const ANY_KIND = "system/sync/ANY_KIND"
   const handlers = {}
 
   const addHandler = (kind, f) => {
@@ -15,6 +16,10 @@ export default ({keys}) => {
 
     for (let i = 0; i < chunks.length; i++) {
       for (const event of chunks[i]) {
+        for (const handler of handlers[ANY_KIND] || []) {
+          await handler(event)
+        }
+
         for (const handler of handlers[event.kind] || []) {
           await handler(event)
         }
@@ -27,5 +32,5 @@ export default ({keys}) => {
     }
   }
 
-  return {processEvents, addHandler}
+  return {ANY_KIND, processEvents, addHandler}
 }

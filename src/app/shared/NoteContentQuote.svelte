@@ -17,7 +17,7 @@
   const openPerson = pubkey => modal.push({type: "person/feed", pubkey})
 
   const loadQuote = async () => {
-    const {id, relays} = value
+    const {id, relays = []} = value
 
     try {
       const events = await network.load({
@@ -30,6 +30,8 @@
       return events[0] || Promise.reject()
     } catch (e) {
       warn(e)
+
+      return Promise.reject()
     }
   }
 
