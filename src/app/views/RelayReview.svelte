@@ -26,7 +26,7 @@
           ["r", url],
         ],
       })
-      .publish(routing.getUserRelays())
+      .publish(routing.getUserRelayUrls())
 
     modal.pop()
   }

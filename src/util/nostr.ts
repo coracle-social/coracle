@@ -1,5 +1,5 @@
 import type {DisplayEvent} from "src/util/types"
-import {is, fromPairs, mergeLeft, last, identity, objOf, prop, flatten, uniq} from "ramda"
+import {is, fromPairs, mergeLeft, last, identity, prop, flatten, uniq} from "ramda"
 import {nip19} from "nostr-tools"
 import {ensurePlural, first} from "hurdak/lib/hurdak"
 import {tryJson, avg} from "src/util/misc"
@@ -43,7 +43,7 @@ export class Tags {
     return last(this.tags)
   }
   relays() {
-    return uniq(flatten(this.tags).filter(isShareableRelay)).map(objOf("url"))
+    return uniq(flatten(this.tags).filter(isShareableRelay))
   }
   topics() {
     return this.type("t")

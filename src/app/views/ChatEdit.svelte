@@ -35,7 +35,7 @@
     if (!channel.name) {
       toast.show("error", "Please enter a name for your room.")
     } else {
-      const relays = routing.getUserRelays("write")
+      const relays = routing.getUserRelayUrls("write")
 
       if (channel.id) {
         publishWithToast(relays, cmd.updateChannel(channel))

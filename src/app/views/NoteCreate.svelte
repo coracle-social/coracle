@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
-  import {last, reject, pluck, propEq} from "ramda"
+  import {without} from "ramda"
   import {fly} from "src/util/transition"
   import {writable} from "svelte/store"
   import {annotateMedia} from "src/util/misc"
@@ -28,12 +28,7 @@
   let compose = null
   let showPreview = false
   let showSettings = false
-  let relays = writable(
-    (writeTo ? writeTo.map(url => ({url, score: 1})) : routing.getUserRelays("write")) as Array<{
-      url: string
-      score: number
-    }>
-  )
+  let relays = writable(writeTo ? writeTo : routing.getUserRelayUrls("write"))
 
   const onSubmit = async () => {
     let content = compose.parse()
@@ -66,7 +61,7 @@
                   "/" +
                   nip19.neventEncode({
                     id: event.id,
-                    relays: pluck("url", $relays.slice(0, 3)),
+                    relays: $relays.slice(0, 3),
                   }),
               },
             }),
@@ -83,13 +78,13 @@
     showSettings = false
   }
 
-  const addRelay = relay => {
+  const addRelay = url => {
     q = ""
-    relays.update($r => $r.concat(relay))
+    relays.update($r => $r.concat(url))
   }
 
-  const removeRelay = relay => {
-    relays.update(reject(propEq("url", relay.url)))
+  const removeRelay = url => {
+    relays.update(without([url]))
   }
 
   const togglePreview = () => {
@@ -156,7 +151,7 @@
         }}>
         <span>
           Publishing to {#if $relays?.length === 1}
-            {last($relays[0].url.split("//"))}
+            {routing.displayRelay($relays[0])}
           {:else}
             {$relays.length} relays
           {/if}
@@ -176,14 +171,14 @@
         </div>
         <div>Select which relays to publish to:</div>
         <div>
-          {#each $relays as relay}
+          {#each $relays as url}
             <div
               class="mb-2 mr-1 inline-block rounded-full border border-solid border-gray-1 px-2 py-1">
               <button
                 type="button"
                 class="fa fa-times cursor-pointer"
-                on:click={() => removeRelay(relay)} />
-              {last(relay.url.split("//"))}
+                on:click={() => removeRelay(url)} />
+              {routing.displayRelay(url)}
             </div>
           {/each}
         </div>
@@ -193,7 +188,7 @@
               <button
                 slot="actions"
                 class="underline"
-                on:click|preventDefault={() => addRelay(relay)}>
+                on:click|preventDefault={() => addRelay(relay.url)}>
                 Add relay
               </button>
             </RelayCard>

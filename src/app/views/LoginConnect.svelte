@@ -62,7 +62,7 @@
 
           currentRelays[i] = null
 
-          if (searching && routing.getUserRelays().length > 0) {
+          if (searching && routing.getUserRelayUrls().length > 0) {
             searching = false
             modal = "success"
 

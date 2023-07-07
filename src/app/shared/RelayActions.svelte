@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {find, last, propEq} from "ramda"
+  import {last} from "ramda"
   import {modal} from "src/partials/state"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {keys, routing} from "src/system"
@@ -8,14 +8,13 @@
 
   export let relay
 
-  relay = routing.getRelay(relay.url)
-
   const {canSign} = keys
-  const relays = watch(routing.policies, () => routing.getUserRelays())
+  const meta = routing.getRelayMeta(relay.url)
+  const relays = watch(routing.policies, () => routing.getUserRelayUrls())
 
   let actions = []
 
-  $: joined = find(propEq("url", relay.url), $relays)
+  $: joined = $relays.includes(relay.url)
   $: {
     actions = []
 
@@ -47,9 +46,9 @@
       })
     }
 
-    if (relay.meta.contact) {
+    if (meta.contact) {
       actions.push({
-        onClick: () => window.open("mailto:" + last(relay.meta.contact.split(":"))),
+        onClick: () => window.open("mailto:" + last(meta.contact.split(":"))),
         label: "Contact",
         icon: "envelope",
       })

@@ -145,7 +145,7 @@ setInterval(() => {
 }, 30_000)
 
 export const loadAppData = async pubkey => {
-  if (routing.getUserRelays("read").length > 0) {
+  if (routing.getUserRelayUrls("read").length > 0) {
     // Start our listener, but don't wait for it
     listen()
 

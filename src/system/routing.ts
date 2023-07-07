@@ -103,8 +103,7 @@ export default ({keys, sync, getCmd, sortByGraph}) => {
     return mode ? relays.filter(prop(mode)) : relays
   }
 
-  const getPubkeyRelayUrls = (pubkey, mode = null) =>
-    pluck("url", getPubkeyRelays(pubkey, (mode = null)))
+  const getPubkeyRelayUrls = (pubkey, mode = null) => pluck("url", getPubkeyRelays(pubkey, mode))
 
   const getUserKey = () => keys.getPubkey() || "anonymous"
 
@@ -154,8 +153,8 @@ export default ({keys, sync, getCmd, sortByGraph}) => {
   const getPubkeyHints = hintSelector(function* (pubkey, mode = "write") {
     const other = mode === "write" ? "read" : "write"
 
-    yield* pluck("url", getPubkeyRelays(pubkey, mode))
-    yield* pluck("url", getPubkeyRelays(pubkey, other))
+    yield* getPubkeyRelayUrls(pubkey, mode)
+    yield* getPubkeyRelayUrls(pubkey, other)
   })
 
   const getPubkeyHint = (...args) => first(getPubkeyHints(1, ...args))
@@ -165,7 +164,7 @@ export default ({keys, sync, getCmd, sortByGraph}) => {
   const getUserHint = () => first(getUserHints(1, getUserKey()))
 
   const getEventHints = hintSelector(function* (event) {
-    yield* event.seen_on
+    yield* event.seen_on || []
     yield* getPubkeyHints(null, event.pubkey)
   })
 
@@ -176,9 +175,9 @@ export default ({keys, sync, getCmd, sortByGraph}) => {
   // will write replies there. However, this may include spam, so we may want
   // to read from the current user's network's read relays instead.
   const getReplyHints = hintSelector(function* (event) {
-    yield* pluck("url", getPubkeyRelays(event.pubkey, "write"))
-    yield* event.seen_on
-    yield* pluck("url", getPubkeyRelays(event.pubkey, "read"))
+    yield* getPubkeyRelayUrls(event.pubkey, "write")
+    yield* event.seen_on || []
+    yield* getPubkeyRelayUrls(event.pubkey, "read")
   })
 
   // If we're looking for an event's parent, tags are the most reliable hint,
@@ -187,7 +186,7 @@ export default ({keys, sync, getCmd, sortByGraph}) => {
     const parentId = findReplyId(event)
 
     yield* Tags.from(event).equals(parentId).relays()
-    yield* event.seen_on
+    yield* event.seen_on || []
     yield* getPubkeyHints(null, event.pubkey, "read")
   })
 
@@ -203,7 +202,7 @@ export default ({keys, sync, getCmd, sortByGraph}) => {
       pubkeys.map(pubkey => getPubkeyHints(3, pubkey, "read"))
     )
 
-    return uniq(hints.concat(getPubkeyRelays(getUserKey(), "write")))
+    return uniq(hints.concat(getPubkeyRelayUrls(getUserKey(), "write")))
   }
 
   const mergeHints = (limit, groups) => {

@@ -7,9 +7,9 @@
   import Feed from "src/app/shared/Feed.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
 
-  let activeTab = "reviews"
+  let activeTab = "search"
 
-  const tabs = ["reviews", "search"]
+  const tabs = ["search", "reviews"]
 
   const setActiveTab = tab => {
     activeTab = tab

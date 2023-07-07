@@ -13,7 +13,7 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {social, settings, routing} from "src/system"
+  import {keys, social, settings, routing} from "src/system"
   import network from "src/agent/network"
   import {mergeParents, compileFilter} from "src/app/state"
 
@@ -129,7 +129,7 @@
     }
 
     const limit = settings.getSetting("relayLimit")
-    const authors = compileFilter(filter).authors || []
+    const authors = (compileFilter(filter).authors || []).concat(keys.getPubkey())
     const hints = authors.map(pubkey => routing.getPubkeyHints(limit, pubkey))
 
     return routing.mergeHints(limit, hints)

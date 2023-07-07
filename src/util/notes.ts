@@ -189,9 +189,7 @@ export const truncateContent = (content, {showEntire, maxLength, showMedia = fal
     result.push(part)
 
     if (length > truncateAt && i < content.length - 1) {
-      if (isText || (isMedia && !showMedia)) {
-        result.push({type: ELLIPSIS})
-      }
+      result.push({type: ELLIPSIS})
 
       return false
     }

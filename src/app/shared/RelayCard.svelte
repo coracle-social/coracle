@@ -1,6 +1,5 @@
 <script lang="ts">
   import cx from "classnames"
-  import {find, propEq} from "ramda"
   import {between} from "hurdak/lib/hurdak"
   import {onMount} from "svelte"
   import {fly} from "src/util/transition"
@@ -27,7 +26,7 @@
   let quality = null
   let message = null
 
-  const relays = watch(routing.policies, () => routing.getUserRelays())
+  const relays = watch(routing.policies, () => new Set(routing.getUserRelayUrls()))
 
   const removeRelay = r => routing.removeUserRelay(r.url)
 
@@ -45,7 +44,7 @@
     modal.push({type: "relay/detail", url: relay.url})
   }
 
-  $: hasRelay = Boolean(find(propEq("url", relay.url), $relays))
+  $: hasRelay = $relays.includes(relay.url)
 
   onMount(() => {
     return poll(10_000, () => {
@@ -97,7 +96,7 @@
           <button class="flex items-center gap-3 text-gray-1" on:click={() => addRelay(relay)}>
             <i class="fa fa-right-to-bracket" /> Join
           </button>
-        {:else if $relays.length > 1}
+        {:else if $relays.size > 1}
           <button class="flex items-center gap-3 text-gray-1" on:click={() => removeRelay(relay)}>
             <i class="fa fa-right-from-bracket" /> Leave
           </button>

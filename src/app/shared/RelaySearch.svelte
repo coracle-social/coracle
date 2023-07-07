@@ -1,6 +1,6 @@
 <script>
   import {onMount} from "svelte"
-  import {pluck, groupBy} from "ramda"
+  import {groupBy} from "ramda"
   import {mapValues} from "hurdak/lib/hurdak"
   import {fuzzy} from "src/util/misc"
   import {normalizeRelayUrl, Tags, getAvgQuality} from "src/util/nostr"
@@ -18,7 +18,7 @@
   let search
   let reviews = []
 
-  const userRelays = watch(routing.policies, () => routing.getUserRelays())
+  const joined = watch(routing.policies, () => new Set(routing.getUserRelayUrls()))
   const knownRelays = watch(routing.relays, () => routing.relays.all())
 
   $: ratings = mapValues(
@@ -27,17 +27,15 @@
   )
 
   $: {
-    const joined = new Set(pluck("url", $userRelays))
-
     search = fuzzy(
-      $knownRelays.filter(r => !joined.has(r.url)),
+      $knownRelays.filter(r => !$joined.has(r.url)),
       {keys: ["name", "description", "url"]}
     )
   }
 
   onMount(async () => {
     reviews = await network.load({
-      relays: routing.getUserRelays("read"),
+      relays: routing.getUserHints("read"),
       filter: {
         limit: 1000,
         kinds: [1985],
@@ -63,8 +61,8 @@
     {/each}
     <slot name="footer">
       <small class="text-center">
-        Showing {Math.min(($knownRelays || []).length - $userRelays.length, 50)}
-        of {($knownRelays || []).length - $userRelays.length} known relays
+        Showing {Math.min(($knownRelays || []).length - $joined.size, 50)}
+        of {($knownRelays || []).length - $joined.size} known relays
       </small>
     </slot>
   </div>

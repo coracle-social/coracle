@@ -50,7 +50,9 @@
 <div class="py-2">
   <Card interactive invertColors class="my-2" on:click={openQuote}>
     {#await loadQuote()}
-      <Spinner />
+      <div class="px-20">
+        <Spinner />
+      </div>
     {:then quote}
       {#if muted}
         <p class="mb-1 py-24 text-center text-gray-5" in:fly={{y: 20}}>
