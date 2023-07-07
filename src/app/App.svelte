@@ -78,8 +78,13 @@
           document.body.style.position = `fixed`
         }
       } else if (!isNil(scrollY)) {
-        document.body.setAttribute("style", "")
-        window.scrollTo(0, scrollY)
+        const offset = scrollY
+
+        // I don't know why this timeout is necessary
+        setTimeout(() => {
+          document.body.setAttribute("style", "")
+          window.scrollTo(0, offset)
+        }, 100)
 
         scrollY = null
       }
