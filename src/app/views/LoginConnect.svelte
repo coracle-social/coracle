@@ -13,7 +13,7 @@
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {DEFAULT_RELAYS, routing, keys} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
   import network from "src/agent/network"
   import pool from "src/agent/pool"
   import {loadAppData} from "src/app/state"

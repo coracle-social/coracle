@@ -6,7 +6,7 @@
   import Content from "src/partials/Content.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
   import {DEFAULT_FOLLOWS, routing, social, directory} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
   import {modal} from "src/partials/state"
 
   const {searchProfiles} = directory

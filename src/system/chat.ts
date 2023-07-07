@@ -2,7 +2,7 @@ import {last, sortBy, pick, uniq, fromPairs, pluck, without} from "ramda"
 import {get} from "svelte/store"
 import {tryJson, tryFunc} from "src/util/misc"
 import {Tags, channelAttrs} from "src/util/nostr"
-import {Table} from "src/agent/db"
+import {Table} from "src/util/loki"
 
 export default ({keys, sync, getCmd, getUserWriteRelays}) => {
   const channels = new Table("chat/channels", "id", {

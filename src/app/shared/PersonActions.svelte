@@ -5,7 +5,7 @@
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {keys, routing, social, directory} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
   import pool from "src/agent/pool"
   import {addToList} from "src/app/state"
 

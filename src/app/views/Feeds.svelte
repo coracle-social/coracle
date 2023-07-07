@@ -9,7 +9,7 @@
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {keys, content, social} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
 
   const {canSign} = keys
   const lists = watch(content.lists, () => content.getUserLists())

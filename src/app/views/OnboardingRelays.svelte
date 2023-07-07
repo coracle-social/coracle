@@ -8,7 +8,7 @@
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {routing} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
 
   let q = ""
   let search

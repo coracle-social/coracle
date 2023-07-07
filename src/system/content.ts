@@ -2,7 +2,7 @@ import {nip19} from "nostr-tools"
 import {sortBy, nth, inc} from "ramda"
 import {fuzzy} from "src/util/misc"
 import {Tags} from "src/util/nostr"
-import {Table, watch} from "src/agent/db"
+import {Table, watch} from "src/util/loki"
 
 export default ({keys, sync, getCmd, getUserWriteRelays}) => {
   const topics = new Table("content/topics", "name", {sort: sortBy(e => -e.count)})

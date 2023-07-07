@@ -4,7 +4,7 @@
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {routing} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
   import {modal} from "src/partials/state"
 
   const relays = watch(routing.policies, () => routing.getUserRelays())

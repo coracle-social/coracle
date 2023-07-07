@@ -5,7 +5,7 @@
   import {numberFmt} from "src/util/misc"
   import {modal} from "src/partials/state"
   import {social, routing} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
   import network from "src/agent/network"
   import pool from "src/agent/pool"
 

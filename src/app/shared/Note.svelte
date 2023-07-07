@@ -14,7 +14,7 @@
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
   import {nip05, directory, routing, social} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
   export let note

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type {ComponentType, SvelteComponentTyped} from "svelte"
   import {Route} from "svelte-routing"
-  import {onReady} from "src/agent/db"
+  import {onReady} from "src/util/loki"
   import {base64DecodeOrPlainWebSocketURL} from "src/util/misc"
   import Notifications from "src/app/views/Notifications.svelte"
   import Bech32Entity from "src/app/views/Bech32Entity.svelte"

@@ -1,7 +1,7 @@
 import {nip19} from "nostr-tools"
 import {ellipsize} from "hurdak/lib/hurdak"
 import {tryJson, fuzzy} from "src/util/misc"
-import {Table, watch} from "src/agent/db"
+import {Table, watch} from "src/util/loki"
 
 export default ({keys, sync, sortByGraph}) => {
   const profiles = new Table("directory/profiles", "pubkey", {max: 5000, sort: sortByGraph})

@@ -3,7 +3,7 @@ import {get} from "svelte/store"
 import {ensurePlural} from "hurdak/lib/hurdak"
 import {now} from "src/util/misc"
 import {Tags, findReplyId, findRootId} from "src/util/nostr"
-import {Table} from "src/agent/db"
+import {Table} from "src/util/loki"
 
 export default ({keys, sync, getCmd, getUserWriteRelays}) => {
   // Don't delete the user's own info or those of direct follows

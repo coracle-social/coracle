@@ -14,7 +14,7 @@
   import PersonRelays from "src/app/shared/PersonRelays.svelte"
   import {nip05, directory, routing} from "src/system"
   import pool from "src/agent/pool"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"

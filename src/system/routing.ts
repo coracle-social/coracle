@@ -5,7 +5,7 @@ import {fuzzy, chain, tryJson, now, fetchJson} from "src/util/misc"
 import {warn} from "src/util/logger"
 import {normalizeRelayUrl, findReplyId, isShareableRelay, Tags} from "src/util/nostr"
 import {DUFFLEPUD_URL, DEFAULT_RELAYS, SEARCH_RELAYS, FORCE_RELAYS} from "src/system/env"
-import {Table, watch} from "src/agent/db"
+import {Table, watch} from "src/util/loki"
 
 export default ({keys, sync, getCmd, sortByGraph}) => {
   const relays = new Table("routing/relays", "url", {sort: sortBy(e => -e.count)})

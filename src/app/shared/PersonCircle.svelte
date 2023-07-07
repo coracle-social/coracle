@@ -4,7 +4,7 @@
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import LogoSvg from "src/partials/LogoSvg.svelte"
   import {directory} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
 
   export let pubkey
   export let size = 4

@@ -5,7 +5,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonActions from "src/app/shared/PersonActions.svelte"
   import {nip05, directory, settings, routing} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import PersonNotes from "src/app/shared/PersonNotes.svelte"

@@ -2,7 +2,7 @@ import {sortBy} from "ramda"
 import {synced} from "src/util/misc"
 import {Tags, isLike, findReplyId, findRootId} from "src/util/nostr"
 import {derived} from "svelte/store"
-import {Table, watch} from "src/agent/db"
+import {Table, watch} from "src/util/loki"
 
 export default ({keys, sync, chat, social, isUserEvent}) => {
   const events = new Table("alerts/events", "id", {sort: sortBy(e => -e.created_at)})

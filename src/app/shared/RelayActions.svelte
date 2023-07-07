@@ -3,7 +3,7 @@
   import {modal} from "src/partials/state"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {keys, routing} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
   import {addToList} from "src/app/state"
 
   export let relay

@@ -6,7 +6,7 @@
   import Content from "src/partials/Content.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import {chat} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
 
   export let note
 

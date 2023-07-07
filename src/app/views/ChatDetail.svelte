@@ -9,7 +9,7 @@
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {keys, cmd, chat, routing, settings} from "src/system"
   import network from "src/agent/network"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
 
   export let entity
 

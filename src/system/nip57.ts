@@ -1,7 +1,7 @@
 import {fetchJson, tryFunc, tryJson, hexToBech32, bech32ToHex} from "src/util/misc"
 import {invoiceAmount} from "src/util/lightning"
 import {Tags} from "src/util/nostr"
-import {Table} from "src/agent/db"
+import {Table} from "src/util/loki"
 
 const getLnUrl = address => {
   // Try to parse it as a lud06 LNURL

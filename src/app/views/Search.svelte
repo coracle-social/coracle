@@ -14,7 +14,7 @@
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
   import {keys, directory, routing, content} from "src/system"
   import network from "src/agent/network"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
 
   let q = ""
   let options = []

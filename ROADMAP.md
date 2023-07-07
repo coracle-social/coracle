@@ -1,14 +1,11 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Rename room to channel
   - [ ] Delete messages when leaving a room
-  - [ ] Convert watch to take the table object instead of its name
-  - [ ] Add userEvents and fill out isUserEvent
   - [ ] Add pagination to chat/dms
   - [ ] Fix scrolling to to when modal is open
-  - [ ] Change pool to take urls, not relay objects
   - [ ] Take connection health into account when building hints
+  - [ ] Re-apply filter to get rid of unwanted events
   - [ ] Test migration
 - [ ] Add custom emoji support
 - [ ] Fork and white label blowater

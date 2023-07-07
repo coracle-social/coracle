@@ -8,7 +8,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {routing} from "src/system"
   import network from "src/agent/network"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
 
   export let q = ""
   export let limit = 50

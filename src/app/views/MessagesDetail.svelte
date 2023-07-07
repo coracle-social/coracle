@@ -6,7 +6,7 @@
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
   import network from "src/agent/network"
   import {keys, routing, directory, cmd, chat} from "src/system"
   import {routes} from "src/app/state"

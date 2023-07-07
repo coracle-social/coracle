@@ -8,7 +8,7 @@
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
   import {content} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
 
   export let item
 

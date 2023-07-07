@@ -15,7 +15,7 @@
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app/views/Notification.svelte"
   import {social, alerts, cache} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
 
   const {lastChecked} = alerts
   const tabs = ["Mentions & Replies", "Reactions"]

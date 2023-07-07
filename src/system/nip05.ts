@@ -1,7 +1,7 @@
 import {last} from "ramda"
 import {nip05} from "nostr-tools"
 import {tryFunc, tryJson} from "src/util/misc"
-import {Table} from "src/agent/db"
+import {Table} from "src/util/loki"
 
 export default ({sync, sortByGraph}) => {
   const handles = new Table("nip05/handles", "pubkey", {max: 5000, sort: sortByGraph})

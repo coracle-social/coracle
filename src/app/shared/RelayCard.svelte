@@ -10,7 +10,7 @@
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {keys, routing, directory} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
   import pool from "src/agent/pool"
   import {loadAppData} from "src/app/state"
 

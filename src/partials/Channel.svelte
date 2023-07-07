@@ -4,7 +4,7 @@
   import {sleep} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import {keys, directory, chat} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
 
   export let id
   export let sendMessage

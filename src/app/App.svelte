@@ -19,7 +19,7 @@
     fetchJson,
     tryFetch,
   } from "src/util/misc"
-  import {onReady} from "src/agent/db"
+  import {onReady} from "src/util/loki"
   import * as system from "src/system"
   import pool from "src/agent/pool"
   import {loadAppData} from "src/app/state"

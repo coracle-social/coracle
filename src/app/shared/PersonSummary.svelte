@@ -1,7 +1,7 @@
 <script lang="ts">
   import Anchor from "src/partials/Anchor.svelte"
   import {keys, routing, directory, social, nip05} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import {routes} from "src/app/state"

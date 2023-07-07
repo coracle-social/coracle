@@ -1,5 +1,5 @@
 import {sortBy} from "ramda"
-import {Table} from "src/agent/db"
+import {Table} from "src/util/loki"
 
 export default ({keys, sync, social}) => {
   const events = new Table("cache/events", "id", {

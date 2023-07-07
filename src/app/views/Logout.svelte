@@ -2,7 +2,7 @@
   import {fly} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
-  import {dropAll} from "src/agent/db"
+  import {dropAll} from "src/util/loki"
 
   let confirmed = false
 

@@ -168,11 +168,10 @@ type WatchStore<T> = Writable<T> & {
   refresh: () => void
 }
 
-export const watch = (namesOrTables, f) => {
-  namesOrTables = ensurePlural(namesOrTables)
+export const watch = (tables, f) => {
+  tables = ensurePlural(tables)
 
   const store = writable(null) as WatchStore<any>
-  const tables = namesOrTables.map(name => (is(Table, name) ? name : registry[name]))
   const names = pluck("name", tables)
 
   // Initialize synchronously if possible

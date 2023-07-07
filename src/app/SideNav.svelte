@@ -3,7 +3,7 @@
   import {theme, installPrompt} from "src/partials/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {keys, directory, alerts} from "src/system"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/util/loki"
   import pool from "src/agent/pool"
   import {routes, slowConnections, menuIsOpen} from "src/app/state"
 
