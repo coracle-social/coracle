@@ -6,7 +6,7 @@
   import {fly} from "src/util/transition"
   import {quantify} from "hurdak/lib/hurdak"
   import {fuzzy, batch, createScroller, now, timedelta} from "src/util/misc"
-  import {asDisplayEvent, noteKinds} from "src/util/nostr"
+  import {asDisplayEvent, noteKinds, findReplyId} from "src/util/nostr"
   import Spinner from "src/partials/Spinner.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
@@ -73,7 +73,19 @@
 
     // Load parents before showing the notes so we have hierarchy. Give it a short
     // timeout, since this is really just a nice-to-have
-    const parents = await legacyNetwork.loadParents(filtered, {timeout: parentsTimeout})
+    const notesWithParent = filtered.filter(findReplyId)
+
+    const parents =
+      notesWithParent.length === 0
+        ? []
+        : await network.load({
+            timeout: parentsTimeout,
+            filter: {ids: notesWithParent.map(findReplyId)},
+            relays: routing.mergeHints(
+              settings.getSetting("relayLimit"),
+              notesWithParent.map(e => routing.getParentHints(3, e))
+            ),
+          })
 
     // Keep track of parents too
     for (const note of parents) {

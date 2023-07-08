@@ -6,8 +6,7 @@
   import {normalizeRelayUrl, Tags, getAvgQuality} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {routing} from "src/system"
-  import network from "src/agent/network"
+  import {routing, network} from "src/system"
   import {watch} from "src/util/loki"
 
   export let q = ""
@@ -33,14 +32,17 @@
     )
   }
 
-  onMount(async () => {
-    reviews = await network.load({
+  onMount(() => {
+    network.load({
       relays: routing.getUserHints("read"),
       filter: {
         limit: 1000,
         kinds: [1985],
         "#l": ["review/relay"],
         "#L": ["social.coracle.ontology"],
+      },
+      onEvent: event => {
+        reviews = reviews.concat(event)
       },
     })
   })

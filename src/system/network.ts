@@ -257,6 +257,65 @@ export default class Network extends EventEmitter {
       this.emit("sub:close", urls)
     }
   }
+  load = ({
+    relays,
+    filter,
+    onEvent = null,
+    shouldProcess = true,
+    timeout = 5000,
+  }: {
+    relays: string[]
+    filter: Filter | Filter[]
+    onEvent?: (event: MyEvent) => void
+    shouldProcess?: boolean
+    timeout?: number
+  }) => {
+    return new Promise(resolve => {
+      let completed = false
+      const eose = new Set()
+      const allEvents = []
+
+      const attemptToComplete = force => {
+        // If we've already unsubscribed we're good
+        if (completed) {
+          return
+        }
+
+        const isDone = eose.size === relays.length
+
+        if (force) {
+          relays.forEach(url => {
+            if (!eose.has(url)) {
+              this.pool.emit("timeout", url)
+            }
+          })
+        }
+
+        if (isDone || force) {
+          unsubscribe()
+          resolve(allEvents)
+          completed = true
+        }
+      }
+
+      // If a relay takes too long, give up
+      setTimeout(() => attemptToComplete(true), timeout)
+
+      const unsubscribe = this.subscribe({
+        relays,
+        filter,
+        shouldProcess,
+        onEvent: event => {
+          onEvent?.(event)
+          allEvents.push(event)
+        },
+        onEose: url => {
+          eose.add(url)
+          attemptToComplete(false)
+        },
+      })
+    }) as Promise<MyEvent[]>
+  }
   count = async filter => {
     const filters = ensurePlural(filter)
     const executor = this.getExecutor(COUNT_RELAYS)

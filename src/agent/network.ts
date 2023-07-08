@@ -1,5 +1,3 @@
-import type {Filter} from "nostr-tools"
-import type {MyEvent} from "src/util/types"
 import {
   max,
   without,
@@ -33,73 +31,8 @@ const getStalePubkeys = pubkeys => {
 
     const profile = directory.profiles.get(pubkey)
 
-    return !profile || profile.created_at < now() - timedelta(1, "days")
+    return !profile || profile.updated_at < now() - timedelta(1, "days")
   })
-}
-
-const load = ({
-  relays,
-  filter,
-  onChunk = null,
-  shouldProcess = true,
-  timeout = 5000,
-}: {
-  relays: string[]
-  filter: Filter | Filter[]
-  onChunk?: (chunk: MyEvent[]) => void
-  shouldProcess?: boolean
-  timeout?: number
-}) => {
-  return new Promise(resolve => {
-    let completed = false
-    const done = new Set()
-    const allEvents = []
-
-    const attemptToComplete = async force => {
-      // If we've already unsubscribed we're good
-      if (completed) {
-        return
-      }
-
-      const isDone = done.size === relays.length
-
-      if (force) {
-        relays.forEach(url => {
-          if (!done.has(url)) {
-            network.pool.emit("timeout", url)
-          }
-        })
-      }
-
-      if (isDone || force) {
-        unsubscribe()
-        resolve(allEvents)
-        completed = true
-      }
-    }
-
-    // If a relay takes too long, give up
-    setTimeout(() => attemptToComplete(true), timeout)
-
-    const unsubscribe = network.subscribe({
-      relays,
-      filter,
-      shouldProcess,
-      onEvent: batch(500, chunk => {
-        if (onChunk) {
-          onChunk(chunk)
-        }
-
-        for (const event of chunk) {
-          allEvents.push(event)
-        }
-      }),
-      onEose: url => {
-        done.add(url)
-        attemptToComplete(false)
-      },
-    })
-  }) as Promise<MyEvent[]>
 }
 
 class Cursor {
@@ -130,12 +63,12 @@ class Cursor {
       this.getGroupedRelays()
         .filter(([until]) => until > this.since)
         .map(([until, relays]) =>
-          load({
+          network.load({
             relays: relays,
             filter: ensurePlural(filter).map(
               mergeLeft({until, limit: this.limit, since: this.since})
             ),
-            onChunk: events => {
+            onEvent: batch(500, events => {
               for (const event of events) {
                 for (const url of event.seen_on) {
                   if (event.created_at < this.until[url]) {
@@ -151,7 +84,7 @@ class Cursor {
 
                 onEvent(event)
               }
-            },
+            }),
           })
         )
     )
@@ -239,26 +172,9 @@ const loadPeople = async (
         chunkFilter.push({kinds: [30078], authors: chunk, "#d": appDataKeys})
       }
 
-      await load({relays: chunkRelays, filter: chunkFilter})
+      await network.load({relays: chunkRelays, filter: chunkFilter})
     })
   )
-}
-
-const loadParents = (notes, opts = {}) => {
-  const notesWithParent = notes.filter(findReplyId)
-
-  if (notesWithParent.length === 0) {
-    return []
-  }
-
-  return load({
-    filter: {ids: notesWithParent.map(findReplyId)},
-    relays: routing.mergeHints(
-      settings.getSetting("relayLimit"),
-      notesWithParent.map(e => routing.getParentHints(3, e))
-    ),
-    ...opts,
-  })
 }
 
 const streamContext = ({notes, onChunk, maxDepth = 2}) => {
@@ -310,16 +226,16 @@ const streamContext = ({notes, onChunk, maxDepth = 2}) => {
 
     // Load data prior to now for our new ids
     chunk(256, newIds).forEach(ids => {
-      load({
+      network.load({
         relays,
         filter: [{kinds, "#e": ids}],
-        onChunk: newEvents => {
+        onEvent: batch(500, newEvents => {
           onChunk(newEvents)
 
           if (depth < maxDepth) {
             loadChunk(newEvents, depth + 1)
           }
-        },
+        }),
       })
     })
   }
@@ -362,10 +278,8 @@ const applyContext = (notes, context) => {
 }
 
 export default {
-  load,
   Cursor,
   loadPeople,
-  loadParents,
   streamContext,
   applyContext,
 }

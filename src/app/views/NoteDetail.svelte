@@ -10,9 +10,9 @@
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {social, routing} from "src/system"
+  import {social, routing, network} from "src/system"
   import Note from "src/app/shared/Note.svelte"
-  import network from "src/agent/network"
+  import legacyNetwork from "src/agent/network"
 
   export let note
   export let relays = []
@@ -34,8 +34,8 @@
       await network.load({
         relays: routing.selectHints(3, relays),
         filter: {ids: [displayNote.id]},
-        onChunk: events => {
-          displayNote = asDisplayEvent(first(events))
+        onEvent: event => {
+          displayNote = asDisplayEvent(event)
         },
       })
     }
@@ -43,11 +43,11 @@
     if (displayNote) {
       log("NoteDetail", nip19.noteEncode(displayNote.id), displayNote)
 
-      sub = network.streamContext({
+      sub = legacyNetwork.streamContext({
         maxDepth: depth,
         notes: [displayNote],
         onChunk: context => {
-          displayNote = first(network.applyContext([displayNote], social.applyMutes(context)))
+          displayNote = first(legacyNetwork.applyContext([displayNote], social.applyMutes(context)))
         },
       })
     }

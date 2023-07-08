@@ -1,6 +1,6 @@
 import {nip19} from "nostr-tools"
 import {ellipsize} from "hurdak/lib/hurdak"
-import {tryJson, fuzzy} from "src/util/misc"
+import {tryJson, now, fuzzy} from "src/util/misc"
 import {Table, watch} from "src/util/loki"
 
 export default ({keys, sync, sortByGraph}) => {
@@ -19,6 +19,7 @@ export default ({keys, sync, sortByGraph}) => {
         ...kind0,
         pubkey: e.pubkey,
         created_at: e.created_at,
+        updated_at: now(),
       })
     })
   })

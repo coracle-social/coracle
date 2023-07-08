@@ -2,11 +2,10 @@
   import {onMount} from "svelte"
   import {fly} from "src/util/transition"
   import {tweened} from "svelte/motion"
-  import {numberFmt} from "src/util/misc"
+  import {numberFmt, batch} from "src/util/misc"
   import {modal} from "src/partials/state"
   import {watch} from "src/util/loki"
   import {social, routing, network} from "src/system"
-  import legacyNetwork from "src/agent/network"
 
   export let pubkey
 
@@ -32,17 +31,17 @@
     } else {
       const followers = new Set()
 
-      await legacyNetwork.load({
+      await network.load({
         relays: routing.getUserHints(3, "read"),
         shouldProcess: false,
         filter: [{kinds: [3], "#p": [pubkey]}],
-        onChunk: events => {
+        onEvent: batch(300, events => {
           for (const e of events) {
             followers.add(e.pubkey)
           }
 
           followersCount.set(followers.size)
-        },
+        }),
       })
     }
   })

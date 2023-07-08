@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type {MyEvent} from "src/util/types"
   import {fly} from "src/util/transition"
   import {warn} from "src/util/logger"
   import {modal} from "src/partials/state"
@@ -6,8 +7,7 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {directory, routing, social} from "src/system"
-  import network from "src/agent/network"
+  import {directory, routing, social, network} from "src/system"
 
   export let note
   export let value
@@ -16,23 +16,26 @@
 
   const openPerson = pubkey => modal.push({type: "person/feed", pubkey})
 
-  const loadQuote = async () => {
+  const loadQuote = () => {
     const {id, relays = []} = value
 
-    try {
-      const events = await network.load({
-        relays: routing.mergeHints(3, [relays, routing.getEventHints(3, note)]),
-        filter: [{ids: [id]}],
-      })
+    return new Promise(async (resolve, reject) => {
+      try {
+        await network.load({
+          relays: routing.mergeHints(3, [relays, routing.getEventHints(3, note)]),
+          filter: [{ids: [id]}],
+          onEvent: event => {
+            muted = social.applyMutes([event]).length === 0
 
-      muted = social.applyMutes(events).length === 0
+            resolve(event)
+          },
+        })
+      } catch (e) {
+        warn(e)
+      }
 
-      return events[0] || Promise.reject()
-    } catch (e) {
-      warn(e)
-
-      return Promise.reject()
-    }
+      reject()
+    }) as Promise<MyEvent>
   }
 
   const openQuote = e => {

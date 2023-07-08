@@ -91,6 +91,10 @@ export default ({network}) => {
   const getRelayQuality = url => {
     const stats = relayStats.get(url)
 
+    if (!stats) {
+      return [0.5, "Not Connected"]
+    }
+
     if (stats.error) {
       return [
         0,

@@ -43,7 +43,7 @@
     modal.push({type: "relay/detail", url: relay.url})
   }
 
-  $: hasRelay = $relays.includes(relay.url)
+  $: hasRelay = $relays.has(relay.url)
 
   onMount(() => {
     return poll(10_000, () => {
