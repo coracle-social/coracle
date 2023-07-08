@@ -19,8 +19,6 @@ import {chunk, ensurePlural} from "hurdak/lib/hurdak"
 import {batch, now, timedelta} from "src/util/misc"
 import {ENABLE_ZAPS, routing, settings, directory, network} from "src/system"
 
-const ext = {sync: null}
-
 // If we ask for a pubkey and get nothing back, don't ask again this page load
 const attemptedPubkeys = new Set()
 
@@ -36,34 +34,6 @@ const getStalePubkeys = pubkeys => {
     const profile = directory.profiles.get(pubkey)
 
     return !profile || profile.created_at < now() - timedelta(1, "days")
-  })
-}
-
-const listen = ({
-  relays,
-  filter,
-  onChunk = null,
-  shouldProcess = true,
-  delay = 500,
-}: {
-  relays: string[]
-  filter: Filter | Filter[]
-  onChunk?: (chunk: MyEvent[]) => void
-  shouldProcess?: boolean
-  delay?: number
-}) => {
-  return network.subscribe({
-    filter,
-    relays,
-    onEvent: batch(delay, chunk => {
-      if (shouldProcess) {
-        ext.sync.processEvents(chunk)
-      }
-
-      if (onChunk) {
-        onChunk(chunk)
-      }
-    }),
   })
 }
 
@@ -114,11 +84,8 @@ const load = ({
     const subPromise = network.subscribe({
       relays,
       filter,
+      shouldProcess,
       onEvent: batch(500, chunk => {
-        if (shouldProcess) {
-          ext.sync.processEvents(chunk)
-        }
-
         if (onChunk) {
           onChunk(chunk)
         }
@@ -321,16 +288,16 @@ const streamContext = ({notes, onChunk, maxDepth = 2}) => {
     // Add a subscription for each chunk to listen for new likes/replies/zaps
     chunk(256, Array.from(seen)).forEach(ids => {
       subs.push(
-        listen({
+        network.subscribe({
           relays,
           filter: [{kinds, "#e": ids, since: now()}],
-          onChunk: newEvents => {
+          onEvent: batch(500, newEvents => {
             onChunk(newEvents)
 
             if (depth < maxDepth) {
               loadChunk(newEvents, depth + 1)
             }
-          },
+          }),
         })
       )
     })
@@ -395,9 +362,7 @@ const applyContext = (notes, context) => {
 }
 
 export default {
-  ext,
   load,
-  listen,
   Cursor,
   loadPeople,
   loadParents,

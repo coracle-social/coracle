@@ -14,7 +14,6 @@ import initAlerts from "src/system/alerts"
 import initCmd from "src/system/cmd"
 import Network from "src/system/network"
 import initMeta from "src/system/meta"
-import legacyNetwork from "src/agent/network"
 
 // Hacks for circular deps
 
@@ -36,13 +35,9 @@ const cache = initCache({keys, sync, social})
 const chat = initChat({keys, sync, getCmd, getUserWriteRelays})
 const alerts = initAlerts({keys, sync, chat, social, isUserEvent})
 const content = initContent({keys, sync, getCmd, getUserWriteRelays})
-const network = new Network({settings, routing})
+const network = new Network({sync, settings, routing})
 const cmd = initCmd({keys, sync, network, routing, displayPubkey: directory.displayPubkey})
 const meta = initMeta({network})
-
-// Glue stuff together
-
-legacyNetwork.ext.sync = sync
 
 // ===========================================================
 // Initialization

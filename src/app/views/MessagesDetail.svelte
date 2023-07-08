@@ -7,8 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {watch} from "src/util/loki"
-  import network from "src/agent/network"
-  import {keys, routing, directory, cmd, chat} from "src/system"
+  import {keys, routing, directory, cmd, chat, network} from "src/system"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -34,7 +33,7 @@
   }
 
   onMount(() => {
-    const sub = network.listen({
+    const sub = network.subscribe({
       relays: getRelays(),
       filter: [
         {kinds: [4], authors: [keys.getPubkey()], "#p": [pubkey]},

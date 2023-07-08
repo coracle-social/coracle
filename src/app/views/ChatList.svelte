@@ -7,9 +7,8 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
-  import {keys, chat, routing} from "src/system"
+  import {keys, chat, routing, network} from "src/system"
   import {watch} from "src/util/loki"
-  import network from "src/agent/network"
 
   let q = ""
   let search
@@ -27,7 +26,7 @@
   document.title = "Chat"
 
   onMount(() => {
-    const sub = network.listen({
+    const sub = network.subscribe({
       relays: routing.getUserHints(3, "read"),
       filter: [{kinds: [40, 41]}],
     })

@@ -52,12 +52,12 @@ export default ({network}) => {
       relayStats.patch({
         url,
         last_activity: Date.now(),
-        active_subs: stats.active_subs - 1,
+        active_subs: stats ? stats.active_subs - 1 : 0,
       })
     }
   })
 
-  network.on("event", url => {
+  network.on("event", ({url}) => {
     const stats = relayStats.get(url)
 
     relayStats.patch({

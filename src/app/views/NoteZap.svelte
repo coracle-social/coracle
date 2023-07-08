@@ -8,8 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import {directory, routing} from "src/system"
-  import network from "src/agent/network"
+  import {directory, routing, network} from "src/system"
   import {keys, cmd, settings, nip57} from "src/system"
 
   export let note
@@ -70,7 +69,7 @@
     }
 
     // Listen for the zap confirmation
-    sub = network.listen({
+    sub = network.subscribe({
       relays,
       filter: {
         kinds: [9735],
@@ -78,7 +77,7 @@
         "#p": [note.pubkey],
         since: zap.startedAt - 10,
       },
-      onChunk: chunk => {
+      onEvent: event => {
         zap.confirmed = true
         setTimeout(() => modal.pop(), 1000)
       },

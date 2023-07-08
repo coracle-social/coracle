@@ -7,7 +7,7 @@ import {writable, get} from "svelte/store"
 import {omit, pluck, sortBy, slice} from "ramda"
 import {createMap, doPipe, first} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
-import {hash, shuffle, sleep, clamp} from "src/util/misc"
+import {hash, batch, shuffle, sleep, clamp} from "src/util/misc"
 import {now, timedelta} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
@@ -115,7 +115,7 @@ export const listen = async () => {
   ])
 
   ;(listen as any)._listener?.unsub()
-  ;(listen as any)._listener = await legacyNetwork.listen({
+  ;(listen as any)._listener = await network.subscribe({
     relays: routing.getUserRelayUrls("read"),
     filter: [
       {kinds: noteKinds.concat(4), authors: [pubkey], since},
@@ -123,9 +123,9 @@ export const listen = async () => {
       {kinds, "#e": eventIds, since},
       {kinds: [42], "#e": channelIds, since},
     ],
-    onChunk: async events => {
-      await legacyNetwork.loadPeople(pluck("pubkey", events))
-    },
+    onEvent: batch(500, events => {
+      legacyNetwork.loadPeople(pluck("pubkey", events))
+    }),
   })
 }
 

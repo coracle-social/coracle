@@ -4,7 +4,7 @@ import {EventEmitter} from "events"
 import {verifySignature} from "nostr-tools"
 import {Pool, Plex, Relays, Executor, Socket} from "paravel"
 import {ensurePlural} from "hurdak/lib/hurdak"
-import {union, sleep, difference} from "src/util/misc"
+import {union, difference} from "src/util/misc"
 import {warn, error, log} from "src/util/logger"
 import {normalizeRelayUrl} from "src/util/nostr"
 import {FORCE_RELAYS, COUNT_RELAYS} from "src/system/env"
@@ -12,8 +12,9 @@ import {FORCE_RELAYS, COUNT_RELAYS} from "src/system/env"
 type SubscribeOpts = {
   relays: string[]
   filter: Filter[] | Filter
-  onEvent: (event: MyEvent) => void
+  onEvent?: (event: MyEvent) => void
   onEose?: (url: string) => void
+  shouldProcess?: boolean
 }
 
 const getUrls = relays => {
@@ -32,6 +33,9 @@ const getUrls = relays => {
 
 export default class Network extends EventEmitter {
   authHandler?: (url: string, challenge: string) => void
+  sync: {
+    processEvents: (events: MyEvent[]) => void
+  }
   settings: {
     getSetting: (name: string) => string
   }
@@ -44,32 +48,33 @@ export default class Network extends EventEmitter {
     }
   }
   pool: Pool
-  constructor({settings, routing}) {
+  constructor({sync, settings, routing}) {
     super()
 
     this.authHandler = null
+    this.sync = sync
     this.settings = settings
     this.routing = routing
     this.pool = new Pool()
   }
-  getExecutor = async (urls, {bypassBoot = false} = {}) => {
+  getExecutor = (urls, {bypassBoot = false} = {}) => {
     if (FORCE_RELAYS.length > 0) {
       urls = FORCE_RELAYS
     }
 
     let target
 
-    const multiplextrUrl = this.settings.getSetting("multiplextrUrl")
+    const muxUrl = this.settings.getSetting("multiplextrUrl")
 
     // Try to use our multiplexer, but if it fails to connect fall back to relays. If
     // we're only connecting to a single relay, just do it directly, unless we already
     // have a connection to the multiplexer open, in which case we're probably doing
     // AUTH with a single relay.
-    if (multiplextrUrl && (urls.length > 1 || this.pool.has(multiplextrUrl))) {
-      const socket = this.pool.get(multiplextrUrl)
+    if (muxUrl && (urls.length > 1 || this.pool.has(muxUrl))) {
+      const socket = this.pool.get(muxUrl)
 
       if (!socket.error) {
-        target = new Plex(urls, this.pool.get(multiplextrUrl))
+        target = new Plex(urls, socket)
       }
     }
 
@@ -87,27 +92,33 @@ export default class Network extends EventEmitter {
       },
       onOk(url, id, ok, message) {
         this.emit("error:clear", url, ok ? null : "forbidden")
+
+        // Once we get a good auth response don't wait to send stuff to the relay
+        if (ok) {
+          this.pool.get(url)
+          this.pool.booted = true
+        }
       },
     })
 
     // Eagerly connect and handle AUTH
-    await Promise.all(
-      executor.target.sockets.map(async socket => {
-        const {limitation} = this.routing.getRelayMeta(socket.url)
-        const waitForBoot = limitation?.payment_required || limitation?.auth_required
+    executor.target.sockets.forEach(socket => {
+      const {limitation} = this.routing.getRelayMeta(socket.url)
+      const waitForBoot = limitation?.payment_required || limitation?.auth_required
 
-        if (socket.status === Socket.STATUS.NEW) {
-          socket.booted = sleep(2000)
+      socket.connect()
 
-          await socket.connect()
+      // Delay REQ/EVENT until AUTH flow happens. Highly hacky, as this relies on
+      // overriding the `shouldDeferWork` property of the socket. We do it this way
+      // so that we're not blocking sending to all the other public relays
+      if (!bypassBoot && waitForBoot && socket.status === Socket.STATUS.PENDING) {
+        socket.shouldDeferWork = () => {
+          return socket.booted && socket.status !== Socket.STATUS.READY
         }
 
-        // Delay REQ/EVENT until AUTH flow happens
-        if (!bypassBoot && waitForBoot) {
-          await socket.booted
-        }
-      })
-    )
+        setTimeout(() => Object.assign(socket, {booted: true}), 2000)
+      }
+    })
 
     return executor
   }
@@ -173,7 +184,7 @@ export default class Network extends EventEmitter {
       attemptToResolve()
     })
   }
-  subscribe = async ({relays, filter, onEvent, onEose}: SubscribeOpts) => {
+  subscribe = async ({relays, filter, onEvent, onEose, shouldProcess = true}: SubscribeOpts) => {
     const urls = getUrls(relays)
     const executor = await this.getExecutor(urls)
     const filters = ensurePlural(filter)
@@ -214,7 +225,13 @@ export default class Network extends EventEmitter {
           return
         }
 
-        this.emit("event", url)
+        // TODO: validate that the event we asked for matches the filters we sent
+
+        this.emit("event", {url, event})
+
+        if (shouldProcess) {
+          this.sync.processEvents([event])
+        }
 
         onEvent(event)
       },

@@ -7,8 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {keys, cmd, chat, routing, settings} from "src/system"
-  import network from "src/agent/network"
+  import {keys, cmd, chat, routing, settings, network} from "src/system"
   import {watch} from "src/util/loki"
 
   export let entity
@@ -32,7 +31,7 @@
   }
 
   onMount(() => {
-    const sub = network.listen({
+    const sub = network.subscribe({
       relays: getRelays(),
       filter: [{kinds: [42], "#e": [id]}],
     })

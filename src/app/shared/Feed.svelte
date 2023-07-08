@@ -5,7 +5,7 @@
   import {last, equals, partition, always, uniqBy, sortBy, prop} from "ramda"
   import {fly} from "src/util/transition"
   import {quantify} from "hurdak/lib/hurdak"
-  import {fuzzy, createScroller, now, timedelta} from "src/util/misc"
+  import {fuzzy, batch, createScroller, now, timedelta} from "src/util/misc"
   import {asDisplayEvent, noteKinds} from "src/util/nostr"
   import Spinner from "src/partials/Spinner.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -13,8 +13,8 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {keys, social, settings, routing} from "src/system"
-  import network from "src/agent/network"
+  import {keys, social, settings, routing, network} from "src/system"
+  import legacyNetwork from "src/agent/network"
   import {mergeParents, compileFilter} from "src/app/state"
 
   export let relays = null
@@ -73,7 +73,7 @@
 
     // Load parents before showing the notes so we have hierarchy. Give it a short
     // timeout, since this is really just a nice-to-have
-    const parents = await network.loadParents(filtered, {timeout: parentsTimeout})
+    const parents = await legacyNetwork.loadParents(filtered, {timeout: parentsTimeout})
 
     // Keep track of parents too
     for (const note of parents) {
@@ -87,14 +87,14 @@
     )
 
     // Stream in additional data and merge it in
-    network.streamContext({
+    legacyNetwork.streamContext({
       maxDepth: 2,
       notes: combined.filter(canDisplay),
       onChunk: context => {
         context = social.applyMutes(context)
 
-        notesBuffer = network.applyContext(notesBuffer, context)
-        notes = network.applyContext(notes, context)
+        notesBuffer = legacyNetwork.applyContext(notesBuffer, context)
+        notes = legacyNetwork.applyContext(notes, context)
       },
     })
 
@@ -169,16 +169,16 @@
 
       // No point in subscribing if we have an end date
       if (!filter.until) {
-        sub = network.listen({
+        sub = network.subscribe({
           relays: getRelays(),
           filter: compileFilter({...filter, since}),
-          onChunk: chunk => {
+          onEvent: batch(500, chunk => {
             p = p.then(() => _key === key && onChunk(chunk))
-          },
+          }),
         })
       }
 
-      cursor = new network.Cursor({
+      cursor = new legacyNetwork.Cursor({
         relays: getRelays(),
         until: filter.until || now(),
         delta,
