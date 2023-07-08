@@ -15,11 +15,11 @@ export const loki = new Loki("agent.db", {
   throttledSaves: true,
   adapter: new Adapter(),
   autoloadCallback: () => {
+    listener.connect()
+
     for (const table of Object.values(registry)) {
       table.initialize()
     }
-
-    listener.connect()
 
     setTimeout(() => ready.set(true), 100)
   },
@@ -64,11 +64,14 @@ export class Table {
   }
   initialize() {
     this._coll = loki.addCollection(this.name, {unique: [this.pk]})
-    this._coll.addListener(["insert", "update"], () => {
-      for (const cb of this._subs) {
-        cb(this)
-      }
-    })
+    this._coll.addListener(["insert", "update"], this.notify)
+
+    this.notify()
+  }
+  notify = () => {
+    for (const cb of this._subs) {
+      cb(this)
+    }
   }
   subscribe(cb) {
     this._subs.push(cb)
@@ -183,7 +186,7 @@ export const watch = (tables, f) => {
   }
 
   // Debounce refresh so we don't get UI lag
-  store.refresh = throttle(300, async () => store.set(await f(...tables)))
+  store.refresh = throttle(50, async () => store.set(await f(...tables)))
 
   // Listen for changes
   listener.subscribe(name => {

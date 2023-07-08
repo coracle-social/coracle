@@ -11,7 +11,7 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
     const pubkey = keys.getPubkey()
 
     if (pubkey) {
-      const whitelist = new Set(graph.all({pubkey}).follows.concat(pubkey))
+      const whitelist = new Set(graph.get(pubkey).follows.concat(pubkey))
 
       return sortBy(x => (whitelist.has(x.pubkey) ? 0 : x.updated_at), xs)
     } else {
