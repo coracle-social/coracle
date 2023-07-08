@@ -33,17 +33,13 @@
   }
 
   onMount(() => {
-    const sub = network.subscribe({
+    return network.subscribe({
       relays: getRelays(),
       filter: [
         {kinds: [4], authors: [keys.getPubkey()], "#p": [pubkey]},
         {kinds: [4], authors: [pubkey], "#p": [keys.getPubkey()]},
       ],
     })
-
-    return () => {
-      sub.then(s => s.unsub())
-    }
   })
 
   document.title = `DMs with ${directory.displayProfile($profile)}`

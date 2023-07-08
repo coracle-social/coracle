@@ -26,7 +26,7 @@
   export let hideControls = false
   export let onEvent = null
 
-  let sub, scroller, cursor
+  let unsubscribe, scroller, cursor
   let key = Math.random()
   let search = ""
   let notes = []
@@ -153,7 +153,7 @@
     notesBuffer = []
     scroller?.stop()
     feedScroller?.stop()
-    sub?.then(s => s?.unsub())
+    unsubscribe?.()
     key = Math.random()
   }
 
@@ -169,7 +169,7 @@
 
       // No point in subscribing if we have an end date
       if (!filter.until) {
-        sub = network.subscribe({
+        unsubscribe = network.subscribe({
           relays: getRelays(),
           filter: compileFilter({...filter, since}),
           onEvent: batch(500, chunk => {

@@ -72,7 +72,7 @@ const load = ({
       }
 
       if (isDone || force) {
-        subPromise.then(sub => sub.unsub())
+        unsubscribe()
         resolve(allEvents)
         completed = true
       }
@@ -81,7 +81,7 @@ const load = ({
     // If a relay takes too long, give up
     setTimeout(() => attemptToComplete(true), timeout)
 
-    const subPromise = network.subscribe({
+    const unsubscribe = network.subscribe({
       relays,
       filter,
       shouldProcess,
@@ -283,7 +283,7 @@ const streamContext = ({notes, onChunk, maxDepth = 2}) => {
     events.forEach(e => seen.add(e.id))
 
     // Unsubscribe our current listeners since we're about to replace them
-    subs.map(sub => sub.then(s => s.unsub()))
+    subs.map(unsubscribe => unsubscribe())
 
     // Add a subscription for each chunk to listen for new likes/replies/zaps
     chunk(256, Array.from(seen)).forEach(ids => {
@@ -329,7 +329,7 @@ const streamContext = ({notes, onChunk, maxDepth = 2}) => {
 
   return {
     unsub: () => {
-      subs.map(sub => sub.then(s => s.unsub()))
+      subs.map(unsubscribe => unsubscribe())
     },
   }
 }

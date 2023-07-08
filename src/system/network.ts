@@ -106,6 +106,7 @@ export default class Network extends EventEmitter {
       const {limitation} = this.routing.getRelayMeta(socket.url)
       const waitForBoot = limitation?.payment_required || limitation?.auth_required
 
+      // This happens automatically, but kick it off anyway
       socket.connect()
 
       // Delay REQ/EVENT until AUTH flow happens. Highly hacky, as this relies on
@@ -122,9 +123,9 @@ export default class Network extends EventEmitter {
 
     return executor
   }
-  publish = async ({relays, event, onProgress, timeout = 3000, verb = "EVENT"}) => {
+  publish = ({relays, event, onProgress, timeout = 3000, verb = "EVENT"}) => {
     const urls = getUrls(relays)
-    const executor = await this.getExecutor(urls, {bypassBoot: verb === "AUTH"})
+    const executor = this.getExecutor(urls, {bypassBoot: verb === "AUTH"})
 
     this.emit("publish", urls)
 
@@ -184,9 +185,9 @@ export default class Network extends EventEmitter {
       attemptToResolve()
     })
   }
-  subscribe = async ({relays, filter, onEvent, onEose, shouldProcess = true}: SubscribeOpts) => {
+  subscribe = ({relays, filter, onEvent, onEose, shouldProcess = true}: SubscribeOpts) => {
     const urls = getUrls(relays)
-    const executor = await this.getExecutor(urls)
+    const executor = this.getExecutor(urls)
     const filters = ensurePlural(filter)
     const now = Date.now()
     const seen = new Map()
@@ -247,20 +248,18 @@ export default class Network extends EventEmitter {
       },
     })
 
-    return {
-      unsub: () => {
-        log(`Closing subscription`, filters)
+    return () => {
+      log(`Closing subscription`, filters)
 
-        sub.unsubscribe()
-        executor.target.cleanup()
+      sub.unsubscribe()
+      executor.target.cleanup()
 
-        this.emit("sub:close", urls)
-      },
+      this.emit("sub:close", urls)
     }
   }
   count = async filter => {
     const filters = ensurePlural(filter)
-    const executor = await this.getExecutor(COUNT_RELAYS)
+    const executor = this.getExecutor(COUNT_RELAYS)
 
     return new Promise(resolve => {
       const sub = executor.count(filters, {

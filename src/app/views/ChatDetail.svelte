@@ -31,14 +31,10 @@
   }
 
   onMount(() => {
-    const sub = network.subscribe({
+    return network.subscribe({
       relays: getRelays(),
       filter: [{kinds: [42], "#e": [id]}],
     })
-
-    return () => {
-      sub.then(s => s.unsub())
-    }
   })
 
   document.title = $channel.name || "Coracle Chat"

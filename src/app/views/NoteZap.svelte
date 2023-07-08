@@ -13,7 +13,7 @@
 
   export let note
 
-  let sub
+  let unsubscribe
   let zap = {
     amount: settings.getSetting("defaultZap"),
     message: "",
@@ -69,7 +69,7 @@
     }
 
     // Listen for the zap confirmation
-    sub = network.subscribe({
+    unsubscribe = network.subscribe({
       relays,
       filter: {
         kinds: [9735],
@@ -85,7 +85,7 @@
   }
 
   onDestroy(() => {
-    sub?.then(s => s.unsub())
+    unsubscribe?.()
   })
 </script>
 

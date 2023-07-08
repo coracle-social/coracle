@@ -26,14 +26,10 @@
   document.title = "Chat"
 
   onMount(() => {
-    const sub = network.subscribe({
+    return network.subscribe({
       relays: routing.getUserHints(3, "read"),
       filter: [{kinds: [40, 41]}],
     })
-
-    return () => {
-      sub.then(s => s?.unsub())
-    }
   })
 </script>
 
