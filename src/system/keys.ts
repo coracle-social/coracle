@@ -1,13 +1,6 @@
 import type {Writable, Readable} from "svelte/store"
 import {prop} from "ramda"
-import {
-  nip19,
-  nip04,
-  getPublicKey,
-  getEventHash,
-  getSignature,
-  generatePrivateKey,
-} from "nostr-tools"
+import {nip19, nip04, getPublicKey, getSignature, generatePrivateKey} from "nostr-tools"
 import {derived} from "svelte/store"
 import NDK, {NDKEvent, NDKNip46Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk"
 import {switcherFn} from "hurdak/lib/hurdak"
@@ -165,10 +158,11 @@ export default class Keys {
     this.keyState.set({})
   }
   async sign(event) {
-    const {method, pubkey, privkey} = this.getState()
+    const {method, privkey} = this.getState()
 
-    event.pubkey = pubkey
-    event.id = getEventHash(event)
+    console.assert(event.id)
+    console.assert(event.pubkey)
+    console.assert(event.created_at)
 
     return switcherFn(method, {
       bunker: async () => {

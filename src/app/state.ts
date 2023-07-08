@@ -25,6 +25,7 @@ import {
   chat,
   meta,
   network,
+  outbox,
 } from "src/system"
 import legacyNetwork from "src/agent/network"
 
@@ -208,8 +209,8 @@ export const mergeParents = (notes: Array<DisplayEvent>) => {
   return sortBy(e => -e.created_at, Object.values(omit(childIds, notesById)))
 }
 
-export const publishWithToast = (relays, thunk) =>
-  thunk.publish(relays, ({completed, succeeded, failed, timeouts, pending}) => {
+export const publishWithToast = (event, relays) =>
+  outbox.publish(event, relays, ({completed, succeeded, failed, timeouts, pending}) => {
     let message = `Published to ${succeeded.size}/${relays.length} relays`
 
     const extra = []

@@ -1,22 +1,21 @@
 import {last, pick, uniqBy} from "ramda"
-import {get} from "svelte/store"
 import {doPipe} from "hurdak/lib/hurdak"
 import {Tags, channelAttrs, findRoot, findReply} from "src/util/nostr"
 import {parseContent} from "src/util/notes"
 
-export default ({keys, sync, network, routing, displayPubkey}) => {
+export default ({routing, displayPubkey}) => {
   const authenticate = (url, challenge) =>
-    new PublishableEvent(22242, {
+    createEvent(22242, {
       tags: [
         ["challenge", challenge],
         ["relay", url],
       ],
     })
 
-  const updateUser = updates => new PublishableEvent(0, {content: JSON.stringify(updates)})
+  const updateUser = updates => createEvent(0, {content: JSON.stringify(updates)})
 
   const setRelays = newRelays =>
-    new PublishableEvent(10002, {
+    createEvent(10002, {
       tags: newRelays.map(r => {
         const t = ["r", r.url]
 
@@ -28,37 +27,35 @@ export default ({keys, sync, network, routing, displayPubkey}) => {
       }),
     })
 
-  const setAppData = (d, content = "") => new PublishableEvent(30078, {content, tags: [["d", d]]})
+  const setAppData = (d, content = "") => createEvent(30078, {content, tags: [["d", d]]})
 
-  const setPetnames = petnames => new PublishableEvent(3, {tags: petnames})
+  const setPetnames = petnames => createEvent(3, {tags: petnames})
 
-  const setMutes = mutes => new PublishableEvent(10000, {tags: mutes})
+  const setMutes = mutes => createEvent(10000, {tags: mutes})
 
-  const createList = list => new PublishableEvent(30001, {tags: list})
+  const createList = list => createEvent(30001, {tags: list})
 
   const createChannel = channel =>
-    new PublishableEvent(40, {content: JSON.stringify(pick(channelAttrs, channel))})
+    createEvent(40, {content: JSON.stringify(pick(channelAttrs, channel))})
 
   const updateChannel = ({id, ...channel}) =>
-    new PublishableEvent(41, {
+    createEvent(41, {
       content: JSON.stringify(pick(channelAttrs, channel)),
       tags: [["e", id]],
     })
 
   const createChatMessage = (channelId, content, url) =>
-    new PublishableEvent(42, {content, tags: [["e", channelId, url, "root"]]})
+    createEvent(42, {content, tags: [["e", channelId, url, "root"]]})
 
-  const createDirectMessage = (pubkey, content) =>
-    new PublishableEvent(4, {content, tags: [["p", pubkey]]})
+  const createDirectMessage = (pubkey, content) => createEvent(4, {content, tags: [["p", pubkey]]})
 
   const createNote = (content, tags = []) =>
-    new PublishableEvent(1, {content, tags: uniqTags(tagsFromContent(content, tags))})
+    createEvent(1, {content, tags: uniqTags(tagsFromContent(content, tags))})
 
-  const createReaction = (note, content) =>
-    new PublishableEvent(7, {content, tags: getReplyTags(note)})
+  const createReaction = (note, content) => createEvent(7, {content, tags: getReplyTags(note)})
 
   const createReply = (note, content, tags = []) =>
-    new PublishableEvent(1, {
+    createEvent(1, {
       content,
       tags: doPipe(tags, [
         tags => tags.concat(getReplyTags(note, true)),
@@ -79,14 +76,14 @@ export default ({keys, sync, network, routing, displayPubkey}) => {
       tags.push(["e", eventId])
     }
 
-    return new PublishableEvent(9734, {content, tags, tagClient: false})
+    return createEvent(9734, {content, tags, tagClient: false})
   }
 
-  const deleteEvents = ids => new PublishableEvent(5, {tags: ids.map(id => ["e", id])})
+  const deleteEvents = ids => createEvent(5, {tags: ids.map(id => ["e", id])})
 
-  const deleteNaddrs = naddrs => new PublishableEvent(5, {tags: naddrs.map(naddr => ["a", naddr])})
+  const deleteNaddrs = naddrs => createEvent(5, {tags: naddrs.map(naddr => ["a", naddr])})
 
-  const createLabel = payload => new PublishableEvent(1985, payload)
+  const createLabel = payload => createEvent(1985, payload)
 
   // Utils
 
@@ -140,36 +137,12 @@ export default ({keys, sync, network, routing, displayPubkey}) => {
 
   const uniqTags = uniqBy(t => t.slice(0, 2).join(":"))
 
-  class PublishableEvent {
-    event: Record<string, any>
-    constructor(kind, {content = "", tags = [], tagClient = true}) {
-      const pubkey = get(keys.pubkey)
-      const createdAt = Math.round(new Date().valueOf() / 1000)
-
-      if (tagClient) {
-        tags = tags.filter(t => t[0] !== "client").concat([["client", "coracle"]])
-      }
-
-      this.event = {kind, content, tags, pubkey, created_at: createdAt}
+  const createEvent = (kind, {content = "", tags = [], tagClient = true}) => {
+    if (tagClient) {
+      tags = tags.filter(t => t[0] !== "client").concat([["client", "coracle"]])
     }
-    getSignedEvent() {
-      try {
-        return keys.sign(this.event)
-      } catch (e) {
-        console.log(this.event)
-        throw e
-      }
-    }
-    async publish(relays: string[], onProgress = null, verb = "EVENT") {
-      const event = await this.getSignedEvent()
-      // return console.log(event)
-      const promise = network.publish({relays, event, onProgress, verb})
 
-      // Copy the event since loki mutates it to add metadata
-      sync.processEvents({...event, seen_on: []})
-
-      return [event, promise]
-    }
+    return {kind, content, tags}
   }
 
   return {
@@ -192,6 +165,5 @@ export default ({keys, sync, network, routing, displayPubkey}) => {
     deleteEvents,
     deleteNaddrs,
     createLabel,
-    PublishableEvent,
   }
 }

@@ -30,7 +30,7 @@
     const relays = routing.getUserRelayUrls("write")
 
     event?.preventDefault()
-    publishWithToast(relays, cmd.updateUser(values))
+    publishWithToast(cmd.updateUser(values), relays)
     navigate(routes.person(keys.getPubkey(), "notes"))
   }
 

@@ -7,7 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {watch} from "src/util/loki"
-  import {keys, routing, directory, cmd, chat, network} from "src/system"
+  import {keys, routing, directory, cmd, chat, network, outbox} from "src/system"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -25,7 +25,7 @@
 
   const sendMessage = async content => {
     const cyphertext = await keys.crypt.encrypt(pubkey, content)
-    const [event] = await cmd.createDirectMessage(pubkey, cyphertext).publish(getRelays())
+    const [event] = await outbox.publish(cmd.createDirectMessage(pubkey, cyphertext), getRelays())
 
     // Return unencrypted content so we can display it immediately
     return {...event, content}

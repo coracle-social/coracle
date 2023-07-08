@@ -1,6 +1,6 @@
 export * from "src/system/env"
 import Keys from "src/system/keys"
-import initSync from "src/system/sync"
+import Sync from "src/system/sync"
 import initSocial from "src/system/social"
 import initSettings from "src/system/settings"
 import initDirectory from "src/system/directory"
@@ -13,6 +13,7 @@ import initChat from "src/system/chat"
 import initAlerts from "src/system/alerts"
 import initCmd from "src/system/cmd"
 import Network from "src/system/network"
+import Outbox from "src/system/outbox"
 import initMeta from "src/system/meta"
 
 // Hacks for circular deps
@@ -24,8 +25,10 @@ const isUserEvent = id => cache.events.get(id)?.pubkey === keys.getPubkey()
 // ===========================================================
 // Initialize various components
 
-const keys = new Keys("coracle/system")
-const sync = initSync({keys})
+const ns = "coracle/system"
+
+const keys = new Keys(ns)
+const sync = new Sync(ns)
 const social = initSocial({keys, sync, getCmd, getUserWriteRelays})
 const settings = initSettings({keys, sync, getCmd, getUserWriteRelays})
 const directory = initDirectory({keys, sync, sortByGraph: social.sortByGraph})
@@ -37,7 +40,8 @@ const chat = initChat({keys, sync, getCmd, getUserWriteRelays})
 const alerts = initAlerts({keys, sync, chat, social, isUserEvent})
 const content = initContent({keys, sync, getCmd, getUserWriteRelays})
 const network = new Network({sync, settings, routing})
-const cmd = initCmd({keys, sync, network, routing, displayPubkey: directory.displayPubkey})
+const outbox = new Outbox(ns, {keys, sync, network})
+const cmd = initCmd({routing, displayPubkey: directory.displayPubkey})
 const meta = initMeta({network})
 
 // ===========================================================
@@ -63,6 +67,7 @@ export {
   chat,
   alerts,
   content,
+  outbox,
   cmd,
   initialize,
   network,

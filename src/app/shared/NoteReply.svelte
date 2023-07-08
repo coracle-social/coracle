@@ -52,9 +52,9 @@
     }
 
     if (content) {
+      const rawEvent = cmd.createReply(note, content, data.mentions.map(cmd.mention))
       const relays = routing.getPublishHints(3, note)
-      const thunk = cmd.createReply(note, content, data.mentions.map(cmd.mention))
-      const [event, promise] = await publishWithToast(relays, thunk)
+      const [event, promise] = await publishWithToast(rawEvent, relays)
 
       promise.then(({succeeded}) => {
         if (succeeded.size > 0) {

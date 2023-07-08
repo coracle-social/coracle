@@ -47,8 +47,8 @@
     }
 
     if (content) {
-      const thunk = cmd.createNote(content.trim(), tags)
-      const [event, promise] = await publishWithToast($relays, thunk)
+      const rawEvent = cmd.createNote(content.trim(), tags)
+      const [event, promise] = await publishWithToast(rawEvent, $relays)
 
       promise.then(() =>
         setTimeout(

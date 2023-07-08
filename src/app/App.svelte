@@ -8,7 +8,6 @@
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {isNil, last} from "ramda"
-  import {first} from "hurdak/lib/hurdak"
   import {
     timedelta,
     hexToBech32,
@@ -57,9 +56,10 @@
     if (get(system.keys.canSign) && !seenChallenges.has(challenge)) {
       seenChallenges.add(challenge)
 
-      const publishable = await system.cmd.authenticate(url, challenge)
+      const rawEvent = system.cmd.authenticate(url, challenge)
+      const [event] = await system.outbox.publish(rawEvent, [url], null, "AUTH")
 
-      return first(publishable.publish([url], null, "AUTH"))
+      return event
     }
   }
 

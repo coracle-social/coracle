@@ -14,7 +14,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {ENABLE_ZAPS, FORCE_RELAYS, keys, nip57, cmd, routing, social} from "src/system"
+  import {ENABLE_ZAPS, FORCE_RELAYS, keys, nip57, cmd, routing, social, outbox} from "src/system"
 
   export let note
   export let reply
@@ -42,11 +42,11 @@
   const react = async content => {
     const relays = routing.getPublishHints(3, note)
 
-    like = first(await cmd.createReaction(note, content).publish(relays))
+    like = first(await outbox.publish(cmd.createReaction(note, content), relays))
   }
 
   const deleteReaction = e => {
-    cmd.deleteEvents([e.id]).publish(routing.getPublishHints(3, note))
+    outbox.publish(cmd.deleteEvents([e.id]), routing.getPublishHints(3, note))
 
     like = null
     likes = reject(propEq("id", e.id), likes)

@@ -38,9 +38,9 @@
       const relays = routing.getUserRelayUrls("write")
 
       if (channel.id) {
-        publishWithToast(relays, cmd.updateChannel(channel))
+        publishWithToast(cmd.updateChannel(channel), relays)
       } else {
-        const [event] = await publishWithToast(relays, cmd.createChannel(channel))
+        const [event] = await publishWithToast(cmd.createChannel(channel), relays)
 
         // Auto join the room the user just created
         await chat.joinChannel(event.id)

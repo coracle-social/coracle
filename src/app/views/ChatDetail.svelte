@@ -7,7 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {keys, cmd, chat, routing, settings, network} from "src/system"
+  import {keys, cmd, chat, routing, settings, network, outbox} from "src/system"
   import {watch} from "src/util/loki"
 
   export let entity
@@ -25,9 +25,8 @@
 
   const sendMessage = async content => {
     const [hint] = getRelays()
-    const [event] = await cmd.createChatMessage(id, content, hint).publish(getRelays())
 
-    return event
+    await outbox.publish(cmd.createChatMessage(id, content, hint), getRelays())
   }
 
   onMount(() => {

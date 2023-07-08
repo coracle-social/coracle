@@ -8,8 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import {directory, routing, network} from "src/system"
-  import {keys, cmd, settings, nip57} from "src/system"
+  import {directory, routing, network, outbox, cmd, settings, nip57} from "src/system"
 
   export let note
 
@@ -31,17 +30,12 @@
     const amount = zap.amount * 1000
     const zapper = nip57.zappers.get(note.pubkey)
     const relays = routing.getPublishHints(3, note)
-    const publishable = cmd.requestZap(
-      relays,
-      zap.message,
-      note.pubkey,
-      note.id,
-      amount,
-      zapper.lnurl
+    const event = await outbox.prep(
+      cmd.requestZap(relays, zap.message, note.pubkey, note.id, amount, zapper.lnurl)
     )
-    const event = encodeURI(JSON.stringify(await keys.sign(publishable.event)))
+    const eventString = encodeURI(JSON.stringify(event))
     const res = await fetchJson(
-      `${zapper.callback}?amount=${amount}&nostr=${event}&lnurl=${zapper.lnurl}`
+      `${zapper.callback}?amount=${amount}&nostr=${eventString}&lnurl=${zapper.lnurl}`
     )
 
     // If they closed the dialog before fetch resolved, we're done

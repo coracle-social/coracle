@@ -9,7 +9,16 @@
   import OnboardingRelays from "src/app/views/OnboardingRelays.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
-  import {DEFAULT_FOLLOWS, DEFAULT_RELAYS, social, routing, keys, directory, cmd} from "src/system"
+  import {
+    DEFAULT_FOLLOWS,
+    DEFAULT_RELAYS,
+    social,
+    routing,
+    keys,
+    directory,
+    cmd,
+    outbox,
+  } from "src/system"
   import network from "src/agent/network"
   import {loadAppData} from "src/app/state"
   import {modal} from "src/partials/state"
@@ -32,8 +41,8 @@
     // Re-save preferences now that we have a key
     await Promise.all([
       routing.setUserRelays(relays),
-      cmd.updateUser(profile).publish(urls),
-      note && cmd.createNote(note).publish(urls),
+      outbox.publish(cmd.updateUser(profile), urls),
+      outbox.publish(note && cmd.createNote(note), urls),
       social.updatePetnames(
         social.getUserFollows().map(pubkey => {
           const hint = routing.getPubkeyHint(pubkey) || ""

@@ -6,7 +6,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {cmd, routing} from "src/system"
+  import {cmd, routing, outbox} from "src/system"
 
   export let url
 
@@ -15,18 +15,17 @@
 
   const onSubmit = () => {
     const review = compose.parse()
+    const event = cmd.createLabel({
+      content: review,
+      tagClient: false,
+      tags: [
+        ["L", "social.coracle.ontology"],
+        ["l", "review/relay", "social.coracle.ontology", JSON.stringify({quality: rating})],
+        ["r", url],
+      ],
+    })
 
-    cmd
-      .createLabel({
-        content: review,
-        tagClient: false,
-        tags: [
-          ["L", "social.coracle.ontology"],
-          ["l", "review/relay", "social.coracle.ontology", JSON.stringify({quality: rating})],
-          ["r", url],
-        ],
-      })
-      .publish(routing.getUserRelayUrls())
+    outbox.publish(event, routing.getUserRelayUrls())
 
     modal.pop()
   }

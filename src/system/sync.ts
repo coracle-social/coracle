@@ -2,25 +2,28 @@ import {identity} from "ramda"
 import {ensurePlural, chunk} from "hurdak/lib/hurdak"
 import {sleep} from "src/util/misc"
 
-export default ({keys}) => {
-  const ANY_KIND = "system/sync/ANY_KIND"
-  const handlers = {}
-
-  const addHandler = (kind, f) => {
-    handlers[kind] = handlers[kind] || []
-    handlers[kind].push(f)
+export default class Sync {
+  ns: string
+  ANY_KIND: string
+  handlers = {}
+  constructor(ns) {
+    this.ns = ns
+    this.ANY_KIND = `${ns}/ANY_KIND`
   }
-
-  const processEvents = async events => {
+  addHandler(kind, f) {
+    this.handlers[kind] = this.handlers[kind] || []
+    this.handlers[kind].push(f)
+  }
+  async processEvents(events) {
     const chunks = chunk(100, ensurePlural(events).filter(identity))
 
     for (let i = 0; i < chunks.length; i++) {
       for (const event of chunks[i]) {
-        for (const handler of handlers[ANY_KIND] || []) {
+        for (const handler of this.handlers[this.ANY_KIND] || []) {
           await handler(event)
         }
 
-        for (const handler of handlers[event.kind] || []) {
+        for (const handler of this.handlers[event.kind] || []) {
           await handler(event)
         }
       }
@@ -31,6 +34,4 @@ export default ({keys}) => {
       }
     }
   }
-
-  return {ANY_KIND, processEvents, addHandler}
 }
