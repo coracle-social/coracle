@@ -12,8 +12,7 @@
   import PersonNotes from "src/app/shared/PersonNotes.svelte"
   import PersonLikes from "src/app/shared/PersonLikes.svelte"
   import PersonRelays from "src/app/shared/PersonRelays.svelte"
-  import {nip05, directory, routing} from "src/system"
-  import pool from "src/agent/pool"
+  import {FORCE_RELAYS, nip05, directory, routing} from "src/system"
   import {watch} from "src/util/loki"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
@@ -24,7 +23,7 @@
   export let activeTab
   export let relays = []
 
-  const tabs = ["notes", "likes", pool.forceUrls.length === 0 && "relays"].filter(identity)
+  const tabs = ["notes", "likes", FORCE_RELAYS.length === 0 && "relays"].filter(identity)
   const pubkey = toHex(npub)
   const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
   const handle = watch(nip05.handles, () => nip05.getHandle(pubkey))

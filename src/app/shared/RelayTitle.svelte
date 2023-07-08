@@ -5,8 +5,7 @@
   import {poll, stringToHue, hsl} from "src/util/misc"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {routing} from "src/system"
-  import pool from "src/agent/pool"
+  import {routing, meta} from "src/system"
 
   export let relay
   export let rating = null
@@ -16,8 +15,8 @@
   let showStatus = false
 
   onMount(() => {
-    return poll(10_000, async () => {
-      ;[quality, message] = pool.getQuality(relay.url)
+    return poll(10_000, () => {
+      ;[quality, message] = meta.getRelayQuality(relay.url)
     })
   })
 </script>

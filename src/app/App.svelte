@@ -21,7 +21,6 @@
   } from "src/util/misc"
   import {onReady} from "src/util/loki"
   import * as system from "src/system"
-  import pool from "src/agent/pool"
   import {loadAppData} from "src/app/state"
   import {theme, getThemeVariables, appName, modal} from "src/partials/state"
   import {logUsage} from "src/app/state"
@@ -54,7 +53,7 @@
   const seenChallenges = new Set()
 
   // When we get an AUTH challenge from our pool, attempt to authenticate
-  pool.Config.authHandler = async (url, challenge) => {
+  system.network.authHandler = async (url, challenge) => {
     if (get(system.keys.canSign) && !seenChallenges.has(challenge)) {
       seenChallenges.add(challenge)
 

@@ -6,8 +6,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {settings} from "src/system"
-  import pool from "src/agent/pool"
+  import {FORCE_RELAYS, settings} from "src/system"
 
   let values = {...settings.getSettings()}
 
@@ -68,7 +67,7 @@
           >.
         </p>
       </div>
-      {#if pool.forceUrls.length === 0}
+      {#if FORCE_RELAYS.length === 0}
         <div class="flex flex-col gap-1">
           <strong>Multiplextr URL</strong>
           <Input bind:value={values.multiplextrUrl}>

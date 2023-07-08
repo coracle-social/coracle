@@ -6,12 +6,12 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
-  import pool from "src/agent/pool"
+  import {FORCE_RELAYS} from "src/system"
 
   export let privkey
 
   const nsec = nip19.nsecEncode(privkey)
-  const nextStage = pool.forceUrls.length > 0 ? "follows" : "relays"
+  const nextStage = FORCE_RELAYS.length > 0 ? "follows" : "relays"
 
   const copyKey = () => {
     copyToClipboard(nsec)

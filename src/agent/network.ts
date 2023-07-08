@@ -17,8 +17,7 @@ import {
 import {personKinds, appDataKeys, findReplyId} from "src/util/nostr"
 import {chunk, ensurePlural} from "hurdak/lib/hurdak"
 import {batch, now, timedelta} from "src/util/misc"
-import {ENABLE_ZAPS, routing, settings, directory} from "src/system"
-import pool from "src/agent/pool"
+import {ENABLE_ZAPS, routing, settings, directory, network} from "src/system"
 
 const ext = {sync: null}
 
@@ -53,7 +52,7 @@ const listen = ({
   shouldProcess?: boolean
   delay?: number
 }) => {
-  return pool.subscribe({
+  return network.subscribe({
     filter,
     relays,
     onEvent: batch(delay, chunk => {
@@ -97,7 +96,7 @@ const load = ({
       if (force) {
         relays.forEach(url => {
           if (!done.has(url)) {
-            pool.Meta.onTimeout(url)
+            network.pool.emit("timeout", url)
           }
         })
       }
@@ -112,7 +111,7 @@ const load = ({
     // If a relay takes too long, give up
     setTimeout(() => attemptToComplete(true), timeout)
 
-    const subPromise = pool.subscribe({
+    const subPromise = network.subscribe({
       relays,
       filter,
       onEvent: batch(500, chunk => {

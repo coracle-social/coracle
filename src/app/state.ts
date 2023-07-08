@@ -13,6 +13,7 @@ import {userKinds, noteKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import {
+  FORCE_RELAYS,
   DEFAULT_FOLLOWS,
   ENABLE_ZAPS,
   keys,
@@ -22,9 +23,10 @@ import {
   settings,
   cache,
   chat,
+  meta,
+  network,
 } from "src/system"
-import network from "src/agent/network"
-import pool from "src/agent/pool"
+import legacyNetwork from "src/agent/network"
 
 // Routing
 
@@ -113,7 +115,7 @@ export const listen = async () => {
   ])
 
   ;(listen as any)._listener?.unsub()
-  ;(listen as any)._listener = await network.listen({
+  ;(listen as any)._listener = await legacyNetwork.listen({
     relays: routing.getUserRelayUrls("read"),
     filter: [
       {kinds: noteKinds.concat(4), authors: [pubkey], since},
@@ -122,7 +124,7 @@ export const listen = async () => {
       {kinds: [42], "#e": channelIds, since},
     ],
     onChunk: async events => {
-      await network.loadPeople(pluck("pubkey", events))
+      await legacyNetwork.loadPeople(pluck("pubkey", events))
     },
   })
 }
@@ -132,16 +134,21 @@ export const slowConnections = writable([])
 setInterval(() => {
   // Only notify about relays the user is actually subscribed to
   const relays = new Set(routing.getUserRelayUrls())
+  const $slowConnections = []
 
   // Prune connections we haven't used in a while
-  Object.entries(pool.Meta.stats)
-    .filter(([url, stats]) => stats.lastRequest < Date.now() - 60_000)
-    .forEach(([url, stats]) => pool.disconnect(url))
+  for (const url of network.pool.data.keys()) {
+    const stats = meta.relayStats.get(url)
+
+    if (stats.active_subs === 0 && stats.last_activity < Date.now() - 60_000) {
+      network.pool.remove(url)
+    } else if (relays.has(url) && first(meta.getRelayQuality(url)) < 0.3) {
+      $slowConnections.push(url)
+    }
+  }
 
   // Alert the user to any heinously slow connections
-  slowConnections.set(
-    Object.keys(pool.Meta.stats).filter(url => relays.has(url) && first(pool.getQuality(url)) < 0.3)
-  )
+  slowConnections.set($slowConnections)
 }, 30_000)
 
 export const loadAppData = async pubkey => {
@@ -150,15 +157,15 @@ export const loadAppData = async pubkey => {
     listen()
 
     // Make sure the user and their network is loaded
-    await network.loadPeople([pubkey], {force: true, kinds: userKinds})
-    await network.loadPeople(social.getUserFollows())
+    await legacyNetwork.loadPeople([pubkey], {force: true, kinds: userKinds})
+    await legacyNetwork.loadPeople(social.getUserFollows())
   }
 }
 
 export const login = async (method, key) => {
   keys.login(method, key)
 
-  if (pool.forceUrls.length > 0) {
+  if (FORCE_RELAYS.length > 0) {
     modal.replace({
       type: "message",
       message: "Logging you in...",
@@ -168,7 +175,7 @@ export const login = async (method, key) => {
 
     await Promise.all([
       sleep(1500),
-      network.loadPeople([keys.getPubkey()], {force: true, kinds: userKinds}),
+      legacyNetwork.loadPeople([keys.getPubkey()], {force: true, kinds: userKinds}),
     ])
 
     navigate("/notes")

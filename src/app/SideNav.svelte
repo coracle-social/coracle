@@ -2,9 +2,8 @@
   import cx from "classnames"
   import {theme, installPrompt} from "src/partials/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {keys, directory, alerts} from "src/system"
+  import {FORCE_RELAYS, keys, directory, alerts} from "src/system"
   import {watch} from "src/util/loki"
-  import pool from "src/agent/pool"
   import {routes, slowConnections, menuIsOpen} from "src/app/state"
 
   const {canSign, pubkey} = keys
@@ -86,7 +85,7 @@
     </a>
   </li>
   <li class="mx-3 my-4 h-px bg-gray-6" />
-  {#if pool.forceUrls.length === 0}
+  {#if FORCE_RELAYS.length === 0}
     <li class="relative cursor-pointer">
       <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/relays">
         <i class="fa fa-server mr-2" /> Relays

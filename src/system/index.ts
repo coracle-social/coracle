@@ -12,8 +12,9 @@ import initCache from "src/system/cache"
 import initChat from "src/system/chat"
 import initAlerts from "src/system/alerts"
 import initCmd from "src/system/cmd"
-import network from "src/agent/network"
-import pool from "src/agent/pool"
+import Network from "src/system/network"
+import initMeta from "src/system/meta"
+import legacyNetwork from "src/agent/network"
 
 // Hacks for circular deps
 
@@ -35,17 +36,13 @@ const cache = initCache({keys, sync, social})
 const chat = initChat({keys, sync, getCmd, getUserWriteRelays})
 const alerts = initAlerts({keys, sync, chat, social, isUserEvent})
 const content = initContent({keys, sync, getCmd, getUserWriteRelays})
-const cmd = initCmd({keys, sync, pool, routing, displayPubkey: directory.displayPubkey})
+const network = new Network({settings, routing})
+const cmd = initCmd({keys, sync, network, routing, displayPubkey: directory.displayPubkey})
+const meta = initMeta({network})
 
 // Glue stuff together
 
-network.ext.sync = sync
-
-settings.store.subscribe($settings => {
-  pool.Config.multiplextrUrl = $settings.multiplextrUrl
-})
-
-pool.ext.routing = routing
+legacyNetwork.ext.sync = sync
 
 // ===========================================================
 // Initialization
@@ -72,4 +69,6 @@ export {
   content,
   cmd,
   initialize,
+  network,
+  meta,
 }

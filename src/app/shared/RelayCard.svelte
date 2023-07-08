@@ -8,9 +8,8 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {keys, routing, directory} from "src/system"
+  import {keys, routing, directory, meta} from "src/system"
   import {watch} from "src/util/loki"
-  import pool from "src/agent/pool"
   import {loadAppData} from "src/app/state"
 
   export let relay
@@ -48,7 +47,7 @@
 
   onMount(() => {
     return poll(10_000, () => {
-      ;[quality, message] = pool.getQuality(relay.url)
+      ;[quality, message] = meta.getRelayQuality(relay.url)
     })
   })
 </script>

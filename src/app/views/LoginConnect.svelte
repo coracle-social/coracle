@@ -12,10 +12,9 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {DEFAULT_RELAYS, routing, keys} from "src/system"
+  import {DEFAULT_RELAYS, FORCE_RELAYS, routing, keys, network} from "src/system"
   import {watch} from "src/util/loki"
-  import network from "src/agent/network"
-  import pool from "src/agent/pool"
+  import legacyNetwork from "src/agent/network"
   import {loadAppData} from "src/app/state"
 
   let modal = null
@@ -54,7 +53,7 @@
       attemptedRelays.add(relay.url)
       currentRelays[i] = relay
 
-      network
+      legacyNetwork
         .loadPeople([keys.getPubkey()], {relays: [relay.url], force: true, kinds: userKinds})
         .then(async () => {
           // Wait a bit before removing the relay to smooth out the ui
@@ -72,7 +71,7 @@
 
             navigate("/notes")
           } else {
-            pool.disconnect(relay.url)
+            network.pool.remove(relay.url)
           }
         })
     }
@@ -120,7 +119,7 @@
       }}>here</Anchor
     >.
   </p>
-  {#if pool.forceUrls.length > 0}
+  {#if FORCE_RELAYS.length > 0}
     <Spinner />
   {:else if Object.values(currentRelays).length > 0}
     <p>Currently searching:</p>

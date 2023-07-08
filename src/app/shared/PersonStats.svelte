@@ -4,10 +4,9 @@
   import {tweened} from "svelte/motion"
   import {numberFmt} from "src/util/misc"
   import {modal} from "src/partials/state"
-  import {social, routing} from "src/system"
   import {watch} from "src/util/loki"
-  import network from "src/agent/network"
-  import pool from "src/agent/pool"
+  import {social, routing, network} from "src/system"
+  import legacyNetwork from "src/agent/network"
 
   export let pubkey
 
@@ -26,14 +25,14 @@
 
   onMount(async () => {
     // Get our followers count
-    const count = await pool.count({kinds: [3], "#p": [pubkey]})
+    const count = await network.count({kinds: [3], "#p": [pubkey]})
 
     if (count) {
       followersCount.set(count)
     } else {
       const followers = new Set()
 
-      await network.load({
+      await legacyNetwork.load({
         relays: routing.getUserHints(3, "read"),
         shouldProcess: false,
         filter: [{kinds: [3], "#p": [pubkey]}],

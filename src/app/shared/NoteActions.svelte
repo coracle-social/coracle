@@ -14,8 +14,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {ENABLE_ZAPS, keys, nip57, cmd, routing, social} from "src/system"
-  import pool from "src/agent/pool"
+  import {ENABLE_ZAPS, FORCE_RELAYS, keys, nip57, cmd, routing, social} from "src/system"
 
   export let note
   export let reply
@@ -89,7 +88,7 @@
       actions.push({label: "Mute", icon: "microphone-slash", onClick: mute})
     }
 
-    if (pool.forceUrls.length === 0) {
+    if (FORCE_RELAYS.length === 0) {
       actions.push({
         label: "Details",
         icon: "info",
@@ -136,7 +135,7 @@
     {/if}
   </div>
   <div class="flex items-center">
-    {#if pool.forceUrls.length === 0}
+    {#if FORCE_RELAYS.length === 0}
       <!-- Mobile version -->
       <div
         style="transform: scale(-1, 1)"

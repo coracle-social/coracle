@@ -4,7 +4,7 @@ import {doPipe} from "hurdak/lib/hurdak"
 import {Tags, channelAttrs, findRoot, findReply} from "src/util/nostr"
 import {parseContent} from "src/util/notes"
 
-export default ({keys, sync, pool, routing, displayPubkey}) => {
+export default ({keys, sync, network, routing, displayPubkey}) => {
   const authenticate = (url, challenge) =>
     new PublishableEvent(22242, {
       tags: [
@@ -163,7 +163,7 @@ export default ({keys, sync, pool, routing, displayPubkey}) => {
     async publish(relays: string[], onProgress = null, verb = "EVENT") {
       const event = await this.getSignedEvent()
       // return console.log(event)
-      const promise = pool.publish({relays, event, onProgress, verb})
+      const promise = network.publish({relays, event, onProgress, verb})
 
       // Copy the event since loki mutates it to add metadata
       sync.processEvents({...event, seen_on: []})
