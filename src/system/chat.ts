@@ -85,7 +85,7 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
   sync.addHandler(30078, async e => {
     if (Tags.from(e).getMeta("d") === "coracle/last_checked/v1") {
       await tryJson(async () => {
-        const payload = await keys.decryptJson(e.content)
+        const payload = await keys.crypt.decryptJson(e.content)
 
         for (const key of Object.keys(payload)) {
           // Backwards compat from when we used to prefix id/pubkey
@@ -107,7 +107,7 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
   sync.addHandler(30078, async e => {
     if (Tags.from(e).getMeta("d") === "coracle/rooms_joined/v1") {
       await tryJson(async () => {
-        const channelIds = await keys.decryptJson(e.content)
+        const channelIds = await keys.crypt.decryptJson(e.content)
 
         // Just a bug from when I was building the feature, remove someday
         if (!Array.isArray(channelIds)) {
@@ -142,7 +142,6 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
     }
 
     await tryFunc(async () => {
-      const crypt = keys.getCrypt()
       const other = keys.getPubkey() === author ? recipient : author
 
       messages.patch({
@@ -150,7 +149,7 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
         channel: other,
         pubkey: e.pubkey,
         created_at: e.created_at,
-        content: await crypt.decrypt(other, e.content),
+        content: await keys.crypt.decrypt(other, e.content),
         tags: e.tags,
       })
 
@@ -215,7 +214,7 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
   const setAppData = async (key, content) => {
     if (get(keys.canSign)) {
       const d = `coracle/${key}`
-      const v = await keys.encryptJson(content)
+      const v = await keys.crypt.encryptJson(content)
 
       return getCmd().setAppData(d, v).publish(getUserWriteRelays())
     }

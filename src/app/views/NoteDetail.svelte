@@ -35,6 +35,7 @@
         relays: routing.selectHints(3, relays),
         filter: {ids: [displayNote.id]},
         onEvent: event => {
+          console.log(event)
           displayNote = asDisplayEvent(event)
         },
       })

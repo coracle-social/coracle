@@ -19,7 +19,7 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
       Tags.from(e).getMeta("d") === "coracle/settings/v1" &&
       e.created_at > getSetting("lastUpdated")
     ) {
-      const updates = await keys.decryptJson(e.content)
+      const updates = await keys.crypt.decryptJson(e.content)
 
       if (updates) {
         store.set({...getSettings(), ...updates, lastUpdated: e.created_at})
@@ -36,7 +36,7 @@ export default ({keys, sync, getCmd, getUserWriteRelays}) => {
 
     if (get(keys.canSign)) {
       const d = "coracle/settings/v1"
-      const v = await keys.encryptJson(settings)
+      const v = await keys.crypt.encryptJson(settings)
 
       return getCmd().setAppData(d, v).publish(getUserWriteRelays())
     }

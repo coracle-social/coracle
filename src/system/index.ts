@@ -1,5 +1,5 @@
 export * from "src/system/env"
-import keys from "src/system/keys"
+import Keys from "src/system/keys"
 import initSync from "src/system/sync"
 import initSocial from "src/system/social"
 import initSettings from "src/system/settings"
@@ -24,6 +24,7 @@ const isUserEvent = id => cache.events.get(id)?.pubkey === keys.getPubkey()
 // ===========================================================
 // Initialize various components
 
+const keys = new Keys("coracle/system")
 const sync = initSync({keys})
 const social = initSocial({keys, sync, getCmd, getUserWriteRelays})
 const settings = initSettings({keys, sync, getCmd, getUserWriteRelays})

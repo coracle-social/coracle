@@ -15,15 +15,11 @@
   const logIn = () => {
     const privkey = nsec.startsWith("nsec") ? toHex(nsec) : nsec
 
-    try {
-      keys.validate(privkey)
-    } catch (e) {
+    if (keys.isKeyValid(privkey)) {
+      login("privkey", privkey)
+    } else {
       toast.show("error", "Sorry, but that's an invalid private key.")
-
-      return
     }
-
-    login("privkey", privkey)
   }
 </script>
 

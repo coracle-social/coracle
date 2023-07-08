@@ -13,15 +13,11 @@
   const logIn = () => {
     const pubkey = npub.startsWith("npub") ? toHex(npub) : npub
 
-    try {
-      keys.validate(pubkey)
-    } catch (e) {
+    if (keys.isKeyValid(pubkey)) {
+      login("pubkey", pubkey)
+    } else {
       toast.show("error", "Sorry, but that's an invalid public key.")
-
-      return
     }
-
-    login("pubkey", pubkey)
   }
 </script>
 

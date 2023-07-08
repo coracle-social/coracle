@@ -14,15 +14,11 @@
     const [npub, token] = input.split("#")
     const pubkey = npub.startsWith("npub") ? toHex(npub) : npub
 
-    try {
-      keys.validate(pubkey)
-    } catch (e) {
+    if (keys.isKeyValid(pubkey)) {
+      login("bunker", {pubkey, token})
+    } else {
       toast.show("error", "Sorry, but that's an invalid public key.")
-
-      return
     }
-
-    login("bunker", {pubkey, token})
   }
 </script>
 

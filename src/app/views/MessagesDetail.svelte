@@ -15,7 +15,6 @@
   export let entity
 
   const id = toHex(entity)
-  const crypt = keys.getCrypt()
   const pubkey = toHex(entity)
   const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
 
@@ -25,7 +24,7 @@
     routing.mergeHints(3, [routing.getPubkeyHints(3, pubkey), routing.getUserHints(3)])
 
   const sendMessage = async content => {
-    const cyphertext = await crypt.encrypt(pubkey, content)
+    const cyphertext = await keys.crypt.encrypt(pubkey, content)
     const [event] = await cmd.createDirectMessage(pubkey, cyphertext).publish(getRelays())
 
     // Return unencrypted content so we can display it immediately

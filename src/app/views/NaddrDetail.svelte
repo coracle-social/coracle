@@ -1,13 +1,12 @@
 <script>
   import {onMount} from "svelte"
-  import {first, quantify} from "hurdak/lib/hurdak"
+  import {quantify} from "hurdak/lib/hurdak"
   import {routes} from "src/app/state"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {directory, routing} from "src/system"
-  import network from "src/agent/network"
+  import {directory, routing, network} from "src/system"
 
   export let identifier
   export let kind
@@ -20,12 +19,13 @@
   const display = directory.displayPubkey(pubkey)
 
   onMount(async () => {
-    note = first(
-      await network.load({
-        relays: routing.selectHints(3, relays),
-        filter: {kinds: [kind], pubkey, "#d": [identifier]},
-      })
-    )
+    await network.load({
+      relays: routing.selectHints(3, relays),
+      filter: {kinds: [kind], pubkey, "#d": [identifier]},
+      onEvent: event => {
+        note = event
+      },
+    })
 
     loading = false
   })

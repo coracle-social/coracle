@@ -140,6 +140,10 @@ setInterval(() => {
   for (const url of network.pool.data.keys()) {
     const stats = meta.relayStats.get(url)
 
+    if (!stats) {
+      continue
+    }
+
     if (stats.active_subs === 0 && stats.last_activity < Date.now() - 60_000) {
       network.pool.remove(url)
     } else if (relays.has(url) && first(meta.getRelayQuality(url)) < 0.3) {
