@@ -2,7 +2,7 @@
   import {ellipsize} from "hurdak/lib/hurdak"
   import {parseContent} from "src/util/notes"
   import Anchor from "src/partials/Anchor.svelte"
-  import {directory} from "src/system"
+  import {directory} from "src/app/system"
 
   export let pubkey
   export let truncate = false

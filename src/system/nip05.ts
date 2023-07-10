@@ -1,43 +1,56 @@
 import {last} from "ramda"
 import {nip05} from "nostr-tools"
-import {tryFunc, tryJson} from "src/util/misc"
+import {tryFunc, now, tryJson} from "src/util/misc"
 import {Table} from "src/util/loki"
+import type {System} from "src/system/system"
 
-export default ({sync, sortByGraph}) => {
-  const handles = new Table("nip05/handles", "pubkey", {max: 5000, sort: sortByGraph})
+export type Handle = {
+  profile: Record<string, any>
+  pubkey: string
+  address: string
+  created_at: number
+  updated_at: number
+}
 
-  sync.addHandler(0, e => {
-    tryJson(async () => {
-      const kind0 = JSON.parse(e.content)
-      const handle = handles.get(e.pubkey)
+export class Nip05 {
+  system: System
+  handles: Table<Handle>
+  constructor(system) {
+    this.system = system
 
-      if (!kind0.nip05 || e.created_at < handle?.created_at) {
-        return
-      }
+    this.handles = new Table(system.key("nip05/handles"), "pubkey", {
+      sort: system.sortByGraph,
+      max: 5000,
+    })
 
-      const profile = await tryFunc(() => nip05.queryProfile(kind0.nip05), true)
+    system.sync.addHandler(0, e => {
+      tryJson(async () => {
+        const kind0 = JSON.parse(e.content)
+        const handle = this.handles.get(e.pubkey)
 
-      if (profile?.pubkey !== e.pubkey) {
-        return
-      }
+        if (!kind0.nip05 || e.created_at < handle?.created_at) {
+          return
+        }
 
-      handles.patch({
-        profile: profile,
-        pubkey: e.pubkey,
-        address: kind0.nip05,
-        created_at: e.created_at,
+        const profile = await tryFunc(() => nip05.queryProfile(kind0.nip05), true)
+
+        if (profile?.pubkey !== e.pubkey) {
+          return
+        }
+
+        this.handles.patch({
+          profile: profile,
+          pubkey: e.pubkey,
+          address: kind0.nip05,
+          created_at: e.created_at,
+          updated_at: now(),
+        })
       })
     })
-  })
-
-  const getHandle = pubkey => handles.get(pubkey)
-
-  const displayHandle = handle =>
-    handle.address.startsWith("_@") ? last(handle.address.split("@")) : handle.address
-
-  return {
-    handles,
-    getHandle,
-    displayHandle,
   }
+
+  getHandle = pubkey => this.handles.get(pubkey)
+
+  displayHandle = handle =>
+    handle.address.startsWith("_@") ? last(handle.address.split("@")) : handle.address
 }

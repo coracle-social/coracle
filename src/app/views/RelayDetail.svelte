@@ -7,7 +7,7 @@
   import Rating from "src/partials/Rating.svelte"
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
   import RelayActions from "src/app/shared/RelayActions.svelte"
-  import {routing} from "src/system"
+  import {routing} from "src/app/system"
 
   export let url
 
@@ -41,8 +41,8 @@
       <Rating inert value={rating} />
     </div>
   {/if}
-  {#if relay.meta.description}
-    <p>{relay.meta.description}</p>
+  {#if relay.info.description}
+    <p>{relay.info.description}</p>
   {/if}
   <Tabs borderClass="border-gray-6" {tabs} {activeTab} {setActiveTab} />
   {#if activeTab === "reviews"}

@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {appName} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
-  import {alerts} from "src/system"
+  import {alerts} from "src/app/system"
   import {menuIsOpen} from "src/app/state"
 
   const {hasNewNotfications, hasNewChatMessages, hasNewDirectMessages} = alerts

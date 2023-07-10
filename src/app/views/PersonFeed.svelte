@@ -4,7 +4,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonActions from "src/app/shared/PersonActions.svelte"
-  import {nip05, directory, settings, routing} from "src/system"
+  import {nip05, routing, directory, user} from "src/app/system"
   import {watch} from "src/util/loki"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -16,7 +16,7 @@
 
   const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
   const handle = watch(nip05.handles, () => nip05.getHandle(pubkey))
-  const relays = routing.getPubkeyHints(settings.getSetting("relayLimit"), pubkey)
+  const relays = routing.getPubkeyHints(user.getSetting("relay_limit"), pubkey)
 
   let rgb, rgba
 

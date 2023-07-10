@@ -9,10 +9,10 @@
   import Content from "src/partials/Content.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {keys} from "src/system"
+  import {user} from "src/app/system"
   import {toast} from "src/partials/state"
 
-  const {pubkey, privkey, bunkerKey} = keys
+  const {pubkey, privkey, bunkerKey} = user.keys
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
   const keypairUrl = "https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/"
 

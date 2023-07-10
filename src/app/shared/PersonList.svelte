@@ -5,7 +5,7 @@
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {social, settings, routing, network} from "src/system"
+  import {social, routing, user, network} from "src/app/system"
   import legacyNetwork from "src/agent/network"
 
   export let type
@@ -19,7 +19,7 @@
     } else {
       await network.load({
         shouldProcess: false,
-        relays: routing.getPubkeyHints(settings.getSetting("relayLimit"), pubkey, "read"),
+        relays: routing.getPubkeyHints(user.getSetting("relay_limit"), pubkey, "read"),
         filter: {kinds: [3], "#p": [pubkey]},
         onEvent: batch(500, events => {
           const newPubkeys = pluck("pubkey", events)

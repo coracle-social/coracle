@@ -7,7 +7,7 @@
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import NaddrDetail from "src/app/views/NaddrDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
-  import {routing} from "src/system"
+  import {routing} from "src/app/system"
 
   export let entity
 

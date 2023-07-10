@@ -7,7 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {watch} from "src/util/loki"
-  import {keys, routing, directory, cmd, chat, network, outbox} from "src/system"
+  import {user, routing, directory, builder, chat, network, outbox} from "src/app/system"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -21,11 +21,17 @@
   chat.setLastChecked(pubkey, now())
 
   const getRelays = () =>
-    routing.mergeHints(3, [routing.getPubkeyHints(3, pubkey), routing.getUserHints(3)])
+    routing.mergeHints(3, [
+      routing.getPubkeyHints(3, pubkey),
+      routing.getPubkeyHints(3, user.getPubkey()),
+    ])
 
   const sendMessage = async content => {
-    const cyphertext = await keys.crypt.encrypt(pubkey, content)
-    const [event] = await outbox.publish(cmd.createDirectMessage(pubkey, cyphertext), getRelays())
+    const cyphertext = await user.crypt.encrypt(pubkey, content)
+    const [event] = await outbox.publish(
+      builder.createDirectMessage(pubkey, cyphertext),
+      getRelays()
+    )
 
     // Return unencrypted content so we can display it immediately
     return {...event, content}
@@ -35,8 +41,8 @@
     return network.subscribe({
       relays: getRelays(),
       filter: [
-        {kinds: [4], authors: [keys.getPubkey()], "#p": [pubkey]},
-        {kinds: [4], authors: [pubkey], "#p": [keys.getPubkey()]},
+        {kinds: [4], authors: [user.getPubkey()], "#p": [pubkey]},
+        {kinds: [4], authors: [pubkey], "#p": [user.getPubkey()]},
       ],
     })
   })
@@ -72,14 +78,14 @@
     slot="message"
     let:message
     class={cx("flex overflow-hidden text-ellipsis", {
-      "ml-12 justify-end": message.profile.pubkey === keys.getPubkey(),
-      "mr-12": message.profile.pubkey !== keys.getPubkey(),
+      "ml-12 justify-end": message.profile.pubkey === user.getPubkey(),
+      "mr-12": message.profile.pubkey !== user.getPubkey(),
     })}>
     <div
       class={cx("inline-block max-w-xl rounded-2xl px-4 py-2", {
         "rounded-br-none bg-gray-1 text-end text-gray-8":
-          message.profile.pubkey === keys.getPubkey(),
-        "rounded-bl-none bg-gray-7": message.profile.pubkey !== keys.getPubkey(),
+          message.profile.pubkey === user.getPubkey(),
+        "rounded-bl-none bg-gray-7": message.profile.pubkey !== user.getPubkey(),
       })}>
       <div class="break-words">
         {#if typeof message.content === "string"}
@@ -88,8 +94,8 @@
       </div>
       <small
         class="mt-1"
-        class:text-gray-7={message.profile.pubkey === keys.getPubkey()}
-        class:text-gray-1={message.profile.pubkey !== keys.getPubkey()}>
+        class:text-gray-7={message.profile.pubkey === user.getPubkey()}
+        class:text-gray-1={message.profile.pubkey !== user.getPubkey()}>
         {formatTimestamp(message.created_at)}
       </small>
     </div>

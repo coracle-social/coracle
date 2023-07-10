@@ -1,42 +1,112 @@
-import {sortBy, pluck, uniq, nth, uniqBy, reject, whereEq, when, prop, last, inc} from "ramda"
+import {sortBy, pluck, uniq, nth, uniqBy, prop, last, inc} from "ramda"
 import {first} from "hurdak/lib/hurdak"
-import {get} from "svelte/store"
+import type {Readable} from "svelte/store"
 import {fuzzy, chain, tryJson, now, fetchJson} from "src/util/misc"
 import {warn} from "src/util/logger"
 import {normalizeRelayUrl, findReplyId, isShareableRelay, Tags} from "src/util/nostr"
 import {DUFFLEPUD_URL, DEFAULT_RELAYS, SEARCH_RELAYS, FORCE_RELAYS} from "src/system/env"
 import {Table, watch} from "src/util/loki"
+import type {System} from "src/system/system"
+import type {Relay, RelayInfo, RelayPolicy} from "src/system/types"
 
-export default ({keys, sync, getCmd, sortByGraph}) => {
-  const relays = new Table("routing/relays", "url", {sort: sortBy(e => -e.count)})
-  const policies = new Table("routing/policies", "pubkey", {sort: sortByGraph})
+export class Routing {
+  system: System
+  relays: Table<Relay>
+  policies: Table<RelayPolicy>
+  searchRelays: Readable<(query: string) => Relay[]>
+  constructor(system) {
+    this.system = system
 
-  // Data sync
+    this.relays = new Table(system.key("routing/relays"), "url", {sort: sortBy(e => -e.count)})
 
-  const addRelay = url => {
-    const relay = relays.get(url)
+    this.policies = new Table(system.key("routing/policies"), "pubkey", {sort: system.sortByGraph})
 
-    relays.patch({
+    this.searchRelays = watch(this.relays, () => fuzzy(this.relays.all(), {keys: ["url"]}))
+
+    system.sync.addHandler(2, e => {
+      if (isShareableRelay(e.content)) {
+        this.addRelay(normalizeRelayUrl(e.content))
+      }
+    })
+
+    system.sync.addHandler(3, e => {
+      this.setPolicy(
+        e,
+        tryJson(() => {
+          Object.entries(JSON.parse(e.content || ""))
+            .filter(([url]) => isShareableRelay(url))
+            .map(([url, conditions]) => {
+              // @ts-ignore
+              const write = ![false, "!"].includes(conditions.write)
+              // @ts-ignore
+              const read = ![false, "!"].includes(conditions.read)
+
+              return {url: normalizeRelayUrl(url), write, read}
+            })
+        })
+      )
+    })
+
+    system.sync.addHandler(10002, e => {
+      this.setPolicy(
+        e,
+        Tags.from(e)
+          .type("r")
+          .all()
+          .map(([_, url, mode]) => {
+            const write = !mode || mode === "write"
+            const read = !mode || mode === "read"
+
+            if (!write && !read) {
+              warn(`Encountered unknown relay mode: ${mode}`)
+            }
+
+            return {url: normalizeRelayUrl(url), write, read}
+          })
+      )
+    })
+    ;(async () => {
+      // Throw some hardcoded defaults in there
+      DEFAULT_RELAYS.forEach(this.addRelay)
+
+      // Load relays from nostr.watch via dufflepud
+      if (FORCE_RELAYS.length === 0) {
+        try {
+          const json = await fetchJson(DUFFLEPUD_URL + "/relay")
+
+          json.relays.filter(isShareableRelay).forEach(this.addRelay)
+        } catch (e) {
+          warn("Failed to fetch relays list", e)
+        }
+      }
+    })()
+  }
+
+  addRelay = url => {
+    const relay = this.relays.get(url)
+
+    this.relays.patch({
       url,
       count: inc(relay?.count || 0),
       first_seen: relay?.first_seen || now(),
-      meta: {
+      info: {
         last_checked: 0,
       },
     })
   }
 
-  const setPolicy = ({pubkey, created_at}, relays) => {
+  setPolicy = ({pubkey, created_at}, relays) => {
     if (relays?.length > 0) {
-      if (created_at < policies.get(pubkey)?.created_at) {
+      if (created_at < this.policies.get(pubkey)?.created_at) {
         return
       }
 
-      policies.patch({
+      this.policies.patch({
         pubkey,
         created_at,
+        updated_at: now(),
         relays: uniqBy(prop("url"), relays).map(relay => {
-          addRelay(relay.url)
+          this.addRelay(relay.url)
 
           return {read: true, write: true, ...relay}
         }),
@@ -44,78 +114,28 @@ export default ({keys, sync, getCmd, sortByGraph}) => {
     }
   }
 
-  sync.addHandler(2, e => {
-    if (isShareableRelay(e.content)) {
-      addRelay(normalizeRelayUrl(e.content))
-    }
-  })
+  getRelay = (url: string): Relay => this.relays.get(url) || {url}
 
-  sync.addHandler(3, e => {
-    setPolicy(
-      e,
-      tryJson(() => {
-        Object.entries(JSON.parse(e.content || ""))
-          .filter(([url]) => isShareableRelay(url))
-          .map(([url, conditions]) => {
-            // @ts-ignore
-            const write = ![false, "!"].includes(conditions.write)
-            // @ts-ignore
-            const read = ![false, "!"].includes(conditions.read)
+  getRelayInfo = (url: string): RelayInfo => this.relays.get(url)?.info || {}
 
-            return {url: normalizeRelayUrl(url), write, read}
-          })
-      })
+  displayRelay = ({url}) => last(url.split("://"))
+
+  getSearchRelays = () => {
+    const searchableRelayUrls = pluck(
+      "url",
+      this.relays.all({"info.supported_nips": {$contains: 50}})
     )
-  })
 
-  sync.addHandler(10002, e => {
-    setPolicy(
-      e,
-      Tags.from(e)
-        .type("r")
-        .all()
-        .map(([_, url, mode]) => {
-          const write = !mode || mode === "write"
-          const read = !mode || mode === "read"
+    return uniq(SEARCH_RELAYS.concat(searchableRelayUrls)).slice(0, 8)
+  }
 
-          if (!write && !read) {
-            warn(`Encountered unknown relay mode: ${mode}`)
-          }
-
-          return {url: normalizeRelayUrl(url), write, read}
-        })
-    )
-  })
-
-  // Utils
-
-  const getRelay = url => relays.get(url) || {url}
-
-  const getRelayMeta = url => relays.get(url)?.meta || {}
-
-  const searchRelays = watch(relays, () => fuzzy(relays.all(), {keys: ["url"]}))
-
-  const displayRelay = ({url}) => last(url.split("://"))
-
-  const getPubkeyRelays = (pubkey, mode = null) => {
-    const relays = policies.get(pubkey)?.relays || []
+  getPubkeyRelays = (pubkey, mode = null) => {
+    const relays = this.policies.get(pubkey)?.relays || []
 
     return mode ? relays.filter(prop(mode)) : relays
   }
 
-  const getPubkeyRelayUrls = (pubkey, mode = null) => pluck("url", getPubkeyRelays(pubkey, mode))
-
-  const getUserKey = () => keys.getPubkey() || "anonymous"
-
-  const getUserRelays = (...args) => getPubkeyRelays(getUserKey(), ...args)
-
-  const getUserRelayUrls = (...args) => pluck("url", getUserRelays(...args))
-
-  const getSearchRelays = () =>
-    SEARCH_RELAYS.concat(pluck("url", relays.all({"meta.supported_nips": {$contains: 50}}))).slice(
-      0,
-      8
-    )
+  getPubkeyRelayUrls = (pubkey, mode = null) => pluck("url", this.getPubkeyRelays(pubkey, mode))
 
   // Smart relay selection
   //
@@ -131,81 +151,81 @@ export default ({keys, sync, getCmd, sortByGraph}) => {
   //    doesn't need to see.
   // 5) Advertise relays — write and read back your own relay list
 
-  const selectHints = (limit, hints) => {
-    const result = new Set() as Set<string>
+  selectHints = (limit, hints) => {
+    const ok = new Set()
+    const bad = new Set()
 
-    for (const hint of chain(hints, getUserRelayUrls(), DEFAULT_RELAYS)) {
-      result.add(hint)
+    for (const url of chain(hints, this.system.user.getRelayUrls(), DEFAULT_RELAYS)) {
+      // Filter out relays that appear to be broken
+      if (!isShareableRelay(url) || this.system.network.pool.get(url, {autoConnect: false})?.error) {
+        bad.add(url)
+      } else {
+        ok.add(url)
+      }
 
-      if (result.size > limit) {
+      if (ok.size > limit) {
         break
       }
     }
 
-    return Array.from(result)
+    // If we don't have enough hints, use the broken ones
+    return Array.from(ok).concat(Array.from(bad)).slice(0, limit)
   }
 
-  const hintSelector =
-    generateHints =>
+  hintSelector = generateHints =>
     (limit, ...args) =>
-      selectHints(limit, generateHints(...args))
+      this.selectHints(limit, generateHints.call(this, ...args))
 
-  const getPubkeyHints = hintSelector(function* (pubkey, mode = "write") {
+  getPubkeyHints = this.hintSelector(function* (pubkey, mode = "write") {
     const other = mode === "write" ? "read" : "write"
 
-    yield* getPubkeyRelayUrls(pubkey, mode)
-    yield* getPubkeyRelayUrls(pubkey, other)
+    yield* this.system.routing.getPubkeyRelayUrls(pubkey, mode)
+    yield* this.system.routing.getPubkeyRelayUrls(pubkey, other)
   })
 
-  const getPubkeyHint = (...args) => first(getPubkeyHints(1, ...args))
-
-  const getUserHints = (limit, ...args) => getPubkeyHints(limit, getUserKey(), ...args)
-
-  const getUserHint = () => first(getUserHints(1, getUserKey()))
-
-  const getEventHints = hintSelector(function* (event) {
+  getEventHints = this.hintSelector(function* (event) {
     yield* event.seen_on || []
-    yield* getPubkeyHints(null, event.pubkey)
+    yield* this.getPubkeyHints(null, event.pubkey)
   })
-
-  const getEventHint = event => first(getEventHints(1, event))
 
   // If we're looking for an event's children, the read relays the author has
   // advertised would be the most reliable option, since well-behaved clients
   // will write replies there. However, this may include spam, so we may want
   // to read from the current user's network's read relays instead.
-  const getReplyHints = hintSelector(function* (event) {
-    yield* getPubkeyRelayUrls(event.pubkey, "write")
+  getReplyHints = this.hintSelector(function* (event) {
+    yield* this.system.routing.getPubkeyRelayUrls(event.pubkey, "write")
     yield* event.seen_on || []
-    yield* getPubkeyRelayUrls(event.pubkey, "read")
+    yield* this.system.routing.getPubkeyRelayUrls(event.pubkey, "read")
   })
 
   // If we're looking for an event's parent, tags are the most reliable hint,
   // but we can also look at where the author of the note reads from
-  const getParentHints = hintSelector(function* (event) {
+  getParentHints = this.hintSelector(function* (event) {
     const parentId = findReplyId(event)
 
     yield* Tags.from(event).equals(parentId).relays()
     yield* event.seen_on || []
-    yield* getPubkeyHints(null, event.pubkey, "read")
+    yield* this.getPubkeyHints(null, event.pubkey, "read")
   })
 
   // If we're replying or reacting to an event, we want the author to know, as well as
   // anyone else who is tagged in the original event or the reply. Get everyone's read
   // relays. Limit how many per pubkey we publish to though. We also want to advertise
   // our content to our followers, so publish to our write relays as well.
-  const getPublishHints = (limit, event) => {
+  getPublishHints = (limit, event) => {
     const tags = Tags.from(event)
     const pubkeys = tags.type("p").values().all().concat(event.pubkey)
-    const hints = mergeHints(
+    const hints = this.mergeHints(
       limit,
-      pubkeys.map(pubkey => getPubkeyHints(3, pubkey, "read"))
+      pubkeys.map(pubkey => this.getPubkeyHints(3, pubkey, "read"))
     )
 
-    return uniq(hints.concat(getPubkeyRelayUrls(getUserKey(), "write")))
+    return uniq(
+      hints.concat(this.system.routing.getPubkeyRelayUrls(this.system.user.getStateKey(), "write"))
+    )
   }
 
-  const mergeHints = (limit, groups) => {
+  mergeHints = (limit, groups) => {
     const scores = {} as Record<string, any>
 
     for (const hints of groups) {
@@ -231,72 +251,5 @@ export default ({keys, sync, getCmd, sortByGraph}) => {
     return sortBy(([hint, {score}]) => -score, Object.entries(scores))
       .map(nth(0))
       .slice(0, limit)
-  }
-
-  // CRUD
-
-  const setUserRelays = relays => {
-    if (get(keys.canSign)) {
-      return getCmd().setRelays(relays).publish(relays)
-    } else {
-      setPolicy({pubkey: getUserKey(), created_at: now()}, relays)
-    }
-  }
-
-  const addUserRelay = url => setUserRelays(getUserRelays().concat({url}))
-
-  const removeUserRelay = url =>
-    setUserRelays(reject(whereEq({url: normalizeRelayUrl(url)}), getUserRelays()))
-
-  const setUserRelayPolicy = (url, policy) =>
-    setUserRelays(getUserRelays().map(when(whereEq({url}), p => ({...p, ...policy}))))
-
-  // Initialization
-
-  const initialize = async () => {
-    // Throw some hardcoded defaults in there
-    DEFAULT_RELAYS.forEach(addRelay)
-
-    // Load relays from nostr.watch via dufflepud
-    if (FORCE_RELAYS.length === 0) {
-      try {
-        const json = await fetchJson(DUFFLEPUD_URL + "/relay")
-
-        json.relays.filter(isShareableRelay).forEach(addRelay)
-      } catch (e) {
-        warn("Failed to fetch relays list", e)
-      }
-    }
-  }
-
-  return {
-    relays,
-    policies,
-    getRelay,
-    getRelayMeta,
-    searchRelays,
-    displayRelay,
-    getPubkeyRelays,
-    getPubkeyRelayUrls,
-    getUserKey,
-    getUserRelays,
-    getUserRelayUrls,
-    getSearchRelays,
-    selectHints,
-    getPubkeyHints,
-    getPubkeyHint,
-    getUserHints,
-    getUserHint,
-    getEventHints,
-    getEventHint,
-    getReplyHints,
-    getParentHints,
-    getPublishHints,
-    mergeHints,
-    setUserRelays,
-    addUserRelay,
-    removeUserRelay,
-    setUserRelayPolicy,
-    initialize,
   }
 }

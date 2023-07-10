@@ -7,7 +7,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
-  import {keys, chat, routing, network} from "src/system"
+  import {chat, routing, network, user} from "src/app/system"
   import {watch} from "src/util/loki"
 
   let q = ""
@@ -16,7 +16,6 @@
   let joinedChannels = []
   let otherChannels = []
 
-  const {canSign} = keys
   const channels = watch(chat.channels, () => chat.channels.all({type: "public"}))
 
   $: [joinedChannels, otherChannels] = partition(prop("joined"), $channels)
@@ -27,14 +26,14 @@
 
   onMount(() => {
     return network.subscribe({
-      relays: routing.getUserHints(3, "read"),
+      relays: routing.getPubkeyHints(3, user.getPubkey(), "read"),
       filter: [{kinds: [40, 41]}],
     })
   })
 </script>
 
 <Content>
-  {#if $canSign}
+  {#if user.canSign()}
     <div class="flex justify-between">
       <div class="flex items-center gap-2">
         <i class="fa fa-server fa-lg" />

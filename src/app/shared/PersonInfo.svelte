@@ -4,7 +4,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
-  import {social, routing, directory, nip05} from "src/system"
+  import {user, directory, nip05} from "src/app/system"
 
   export let pubkey
   export let hasPetname = null
@@ -12,22 +12,20 @@
   const profile = directory.getProfile(pubkey)
   const handle = nip05.getHandle(pubkey)
 
-  const unfollow = async () => {
-    await social.unfollow(pubkey)
+  const unfollow = () => {
+    user.unfollow(pubkey)
 
-    isFollowing = getIsFollowing()
+    isFollowing = false
   }
 
-  const follow = async () => {
-    await social.follow(pubkey, routing.getPubkeyHint(pubkey), directory.displayProfile(profile))
+  const follow = () => {
+    user.follow(pubkey)
 
-    isFollowing = getIsFollowing()
+    isFollowing = true
   }
-
-  const getIsFollowing = () => (hasPetname ? hasPetname(pubkey) : social.isUserFollowing(pubkey))
 
   // Set this manually to avoid a million listeners
-  let isFollowing = getIsFollowing()
+  let isFollowing = hasPetname ? hasPetname(pubkey) : user.isFollowing(pubkey)
 </script>
 
 <div in:fly={{y: 20}}>

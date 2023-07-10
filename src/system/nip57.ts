@@ -1,7 +1,8 @@
-import {fetchJson, tryFunc, tryJson, hexToBech32, bech32ToHex} from "src/util/misc"
+import {fetchJson, now, tryFunc, tryJson, hexToBech32, bech32ToHex} from "src/util/misc"
 import {invoiceAmount} from "src/util/lightning"
 import {Tags} from "src/util/nostr"
 import {Table} from "src/util/loki"
+import type {System} from "src/system/system"
 
 const getLnUrl = address => {
   // Try to parse it as a lud06 LNURL
@@ -19,45 +20,66 @@ const getLnUrl = address => {
   }
 }
 
-export default ({sync, sortByGraph}) => {
-  const zappers = new Table("zappers", "pubkey", {max: 5000, sort: sortByGraph})
+export type Zapper = {
+  pubkey: string
+  lnurl: string
+  callback: string
+  minSendable: number
+  maxSendable: number
+  nostrPubkey: string
+  created_at: number
+  updated_at: number
+}
 
-  sync.addHandler(0, e => {
-    tryJson(async () => {
-      const kind0 = JSON.parse(e.content)
-      const zapper = zappers.get(e.pubkey)
-      const address = (kind0.lud16 || kind0.lud06 || "").toLowerCase()
+export class Nip57 {
+  system: System
+  zappers: Table<Zapper>
+  constructor(system) {
+    this.system = system
 
-      if (!address || e.created_at < zapper?.created_at) {
-        return
-      }
+    this.zappers = new Table(system.key("niip57/zappers"), "pubkey", {
+      sort: system.sortByGraph,
+      max: 5000,
+    })
 
-      const url = getLnUrl(address)
+    system.sync.addHandler(0, e => {
+      tryJson(async () => {
+        const kind0 = JSON.parse(e.content)
+        const zapper = this.zappers.get(e.pubkey)
+        const address = (kind0.lud16 || kind0.lud06 || "").toLowerCase()
 
-      if (!url) {
-        return
-      }
+        if (!address || e.created_at < zapper?.created_at) {
+          return
+        }
 
-      const result = await tryFunc(() => fetchJson(url), true)
+        const url = getLnUrl(address)
 
-      if (!result?.allowsNostr || !result?.nostrPubkey) {
-        return
-      }
+        if (!url) {
+          return
+        }
 
-      zappers.patch({
-        pubkey: e.pubkey,
-        lnurl: hexToBech32("lnurl", url),
-        callback: result.callback,
-        minSendable: result.minSendable,
-        maxSendable: result.maxSendable,
-        nostrPubkey: result.nostrPubkey,
-        created_at: e.created_at,
+        const result = await tryFunc(() => fetchJson(url), true)
+
+        if (!result?.allowsNostr || !result?.nostrPubkey) {
+          return
+        }
+
+        this.zappers.patch({
+          pubkey: e.pubkey,
+          lnurl: hexToBech32("lnurl", url),
+          callback: result.callback,
+          minSendable: result.minSendable,
+          maxSendable: result.maxSendable,
+          nostrPubkey: result.nostrPubkey,
+          created_at: e.created_at,
+          updated_at: now(),
+        })
       })
     })
-  })
+  }
 
-  const processZaps = (zaps, pubkey) => {
-    const zapper = zappers.get(pubkey)
+  processZaps = (zaps, pubkey) => {
+    const zapper = this.zappers.get(pubkey)
 
     if (!zapper) {
       return []
@@ -103,10 +125,5 @@ export default ({sync, sortByGraph}) => {
 
         return true
       })
-  }
-
-  return {
-    zappers,
-    processZaps,
   }
 }

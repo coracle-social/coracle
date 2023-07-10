@@ -4,7 +4,7 @@
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
-  import {nip05, routing} from "src/system"
+  import {nip05, routing} from "src/app/system"
 
   export let pubkey
 

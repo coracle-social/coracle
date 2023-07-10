@@ -1,250 +1,252 @@
 import {last, sortBy, pick, uniq, fromPairs, pluck, without} from "ramda"
-import {get} from "svelte/store"
-import {tryJson, tryFunc} from "src/util/misc"
+import {tryJson, now, tryFunc} from "src/util/misc"
 import {Tags, channelAttrs} from "src/util/nostr"
 import {Table} from "src/util/loki"
+import type {System} from "src/system/system"
 
-export default ({keys, sync, getCmd, getUserWriteRelays}) => {
-  const channels = new Table("chat/channels", "id", {
-    sort: sortBy(x => {
-      if (x.joined || x.type === "private") return 0
-      if (!x.name || x.name.match(/test/i)) return Infinity
+const getHints = e => pluck("url", Tags.from(e).relays())
 
-      return x.updated_at
-    }),
-  })
+export type Channel = {
+  id: string
+  type: "public" | "private"
+  pubkey: string
+  updated_at: number
+  last_sent?: number
+  last_received?: number
+  last_checked?: number
+  joined?: boolean
+  hints: string[]
+}
 
-  const messages = new Table("chat/messages", "id", {
-    sort: xs => {
-      const channelIds = new Set(
-        pluck("id", channels.all({$or: [{joined: true}, {type: "private"}]}))
-      )
+export type Message = {
+  id: string
+  channel: string
+  pubkey: string
+  created_at: number
+  content: string
+  tags: string[][]
+}
 
-      return sortBy(x => (channelIds.has(x.id) ? 0 : x.created_at), xs)
-    },
-  })
+export class Chat {
+  system: System
+  channels: Table<Channel>
+  messages: Table<Message>
+  constructor(system) {
+    this.system = system
 
-  const getHints = e => pluck("url", Tags.from(e).relays())
+    this.channels = new Table(system.key("chat/channels"), "id", {
+      sort: sortBy(x => {
+        if (x.joined || x.type === "private") return 0
+        if (!x.name || x.name.match(/test/i)) return Infinity
 
-  sync.addHandler(40, e => {
-    const channel = channels.get(e.id)
-
-    if (e.created_at < channel?.updated_at) {
-      return
-    }
-
-    const content = tryJson(() => pick(channelAttrs, JSON.parse(e.content)))
-
-    if (!content?.name) {
-      return
-    }
-
-    channels.patch({
-      id: e.id,
-      type: "public",
-      pubkey: e.pubkey,
-      updated_at: e.created_at,
-      hints: getHints(e),
-      ...content,
+        return x.updated_at
+      }),
     })
-  })
 
-  sync.addHandler(41, e => {
-    const channelId = Tags.from(e).getMeta("e")
+    this.messages = new Table(system.key("chat/messages"), "id", {
+      sort: xs => {
+        const channelIds = new Set(
+          pluck("id", this.channels.all({$or: [{joined: true}, {type: "private"}]}))
+        )
 
-    if (!channelId) {
-      return
-    }
-
-    const channel = channels.get(channelId)
-
-    if (e.created_at < channel?.updated_at) {
-      return
-    }
-
-    if (e.pubkey !== channel?.pubkey) {
-      return
-    }
-
-    const content = tryJson(() => pick(channelAttrs, JSON.parse(e.content)))
-
-    if (!content?.name) {
-      return
-    }
-
-    channels.patch({
-      id: channelId,
-      type: "public",
-      pubkey: e.pubkey,
-      updated_at: e.created_at,
-      hints: getHints(e),
-      ...content,
+        return sortBy(x => (channelIds.has(x.id) ? 0 : x.created_at), xs)
+      },
     })
-  })
 
-  sync.addHandler(30078, async e => {
-    if (Tags.from(e).getMeta("d") === "coracle/last_checked/v1") {
-      await tryJson(async () => {
-        const payload = await keys.crypt.decryptJson(e.content)
+    system.sync.addHandler(40, e => {
+      const channel = this.channels.get(e.id)
 
-        for (const key of Object.keys(payload)) {
-          // Backwards compat from when we used to prefix id/pubkey
-          const channelId = last(key.split("/"))
-          const channel = channels.get(channelId)
-          const last_checked = Math.max(payload[channelId], channel?.last_checked || 0)
+      if (e.created_at < channel?.updated_at) {
+        return
+      }
 
-          // A bunch of junk got added to this setting. Integer keys, settings, etc
-          if (isNaN(last_checked) || last_checked < 1577836800) {
-            continue
-          }
+      const content = tryJson(() => pick(channelAttrs, JSON.parse(e.content)))
 
-          channels.patch({id: channelId, last_checked})
-        }
-      })
-    }
-  })
+      if (!content?.name) {
+        return
+      }
 
-  sync.addHandler(30078, async e => {
-    if (Tags.from(e).getMeta("d") === "coracle/rooms_joined/v1") {
-      await tryJson(async () => {
-        const channelIds = await keys.crypt.decryptJson(e.content)
-
-        // Just a bug from when I was building the feature, remove someday
-        if (!Array.isArray(channelIds)) {
-          return
-        }
-
-        channels.all({type: "public"}).forEach(channel => {
-          if (channel.joined && !channelIds.includes(channel.id)) {
-            channels.patch({id: channel.id, joined: false})
-          } else if (!channel.joined && channelIds.includes(channel.id)) {
-            channels.patch({id: channel.id, joined: true})
-          }
-        })
-      })
-    }
-  })
-
-  sync.addHandler(4, async e => {
-    if (!get(keys.canSign)) {
-      return
-    }
-
-    const author = e.pubkey
-    const recipient = Tags.from(e).type("p").values().first()
-
-    if (![author, recipient].includes(keys.getPubkey())) {
-      return
-    }
-
-    if (messages.get(e.id)) {
-      return
-    }
-
-    await tryFunc(async () => {
-      const other = keys.getPubkey() === author ? recipient : author
-
-      messages.patch({
+      this.channels.patch({
         id: e.id,
-        channel: other,
+        type: "public",
         pubkey: e.pubkey,
-        created_at: e.created_at,
-        content: await keys.crypt.decrypt(other, e.content),
-        tags: e.tags,
+        updated_at: now(),
+        hints: getHints(e),
+        ...content,
       })
+    })
 
-      if (keys.getPubkey() === author) {
-        const channel = channels.get(recipient)
+    system.sync.addHandler(41, e => {
+      const channelId = Tags.from(e).getMeta("e")
 
-        channels.patch({
-          id: recipient,
-          type: "private",
-          last_sent: e.created_at,
-          hints: uniq(getHints(e).concat(channel?.hints || [])),
-        })
-      } else {
-        const channel = channels.get(author)
+      if (!channelId) {
+        return
+      }
 
-        channels.patch({
-          id: author,
-          type: "private",
-          last_received: e.created_at,
-          hints: uniq(getHints(e).concat(channel?.hints || [])),
+      const channel = this.channels.get(channelId)
+
+      if (e.created_at < channel?.updated_at) {
+        return
+      }
+
+      if (e.pubkey !== channel?.pubkey) {
+        return
+      }
+
+      const content = tryJson(() => pick(channelAttrs, JSON.parse(e.content)))
+
+      if (!content?.name) {
+        return
+      }
+
+      this.channels.patch({
+        id: channelId,
+        type: "public",
+        pubkey: e.pubkey,
+        updated_at: now(),
+        hints: getHints(e),
+        ...content,
+      })
+    })
+
+    system.sync.addHandler(30078, async e => {
+      if (Tags.from(e).getMeta("d") === "coracle/last_checked/v1") {
+        await tryJson(async () => {
+          const payload = await this.system.user.crypt.decryptJson(e.content)
+
+          for (const key of Object.keys(payload)) {
+            // Backwards compat from when we used to prefix id/pubkey
+            const channelId = last(key.split("/"))
+            const channel = this.channels.get(channelId)
+            const last_checked = Math.max(payload[channelId], channel?.last_checked || 0)
+
+            // A bunch of junk got added to this setting. Integer keys, settings, etc
+            if (isNaN(last_checked) || last_checked < 1577836800) {
+              continue
+            }
+
+            this.channels.patch({id: channelId, last_checked})
+          }
         })
       }
     })
-  })
 
-  sync.addHandler(42, e => {
-    if (messages.get(e.id)) {
-      return
-    }
+    system.sync.addHandler(30078, async e => {
+      if (Tags.from(e).getMeta("d") === "coracle/rooms_joined/v1") {
+        await tryJson(async () => {
+          const channelIds = await this.system.user.crypt.decryptJson(e.content)
 
-    const tags = Tags.from(e)
-    const channelId = tags.getMeta("e")
-    const channel = channels.get(channelId)
-    const hints = uniq(pluck("url", tags.relays()).concat(channel?.hints || []))
+          // Just a bug from when I was building the feature, remove someday
+          if (!Array.isArray(channelIds)) {
+            return
+          }
 
-    messages.patch({
-      id: e.id,
-      channel: channelId,
-      pubkey: e.pubkey,
-      created_at: e.created_at,
-      content: e.content,
-      tags: e.tags,
+          this.channels.all({type: "public"}).forEach(channel => {
+            if (channel.joined && !channelIds.includes(channel.id)) {
+              this.channels.patch({id: channel.id, joined: false})
+            } else if (!channel.joined && channelIds.includes(channel.id)) {
+              this.channels.patch({id: channel.id, joined: true})
+            }
+          })
+        })
+      }
     })
 
-    if (keys.getPubkey() === e.pubkey) {
-      channels.patch({
+    system.sync.addHandler(4, async e => {
+      if (!this.system.user.canSign()) {
+        return
+      }
+
+      const author = e.pubkey
+      const recipient = Tags.from(e).type("p").values().first()
+
+      if (![author, recipient].includes(this.system.user.getPubkey())) {
+        return
+      }
+
+      if (this.messages.get(e.id)) {
+        return
+      }
+
+      await tryFunc(async () => {
+        const other = this.system.user.getPubkey() === author ? recipient : author
+
+        this.messages.patch({
+          id: e.id,
+          channel: other,
+          pubkey: e.pubkey,
+          created_at: e.created_at,
+          content: await this.system.user.crypt.decrypt(other, e.content),
+          tags: e.tags,
+        })
+
+        if (this.system.user.getPubkey() === author) {
+          const channel = this.channels.get(recipient)
+
+          this.channels.patch({
+            id: recipient,
+            type: "private",
+            last_sent: e.created_at,
+            hints: uniq(getHints(e).concat(channel?.hints || [])),
+          })
+        } else {
+          const channel = this.channels.get(author)
+
+          this.channels.patch({
+            id: author,
+            type: "private",
+            last_received: e.created_at,
+            hints: uniq(getHints(e).concat(channel?.hints || [])),
+          })
+        }
+      })
+    })
+
+    system.sync.addHandler(42, e => {
+      if (this.messages.get(e.id)) {
+        return
+      }
+
+      const tags = Tags.from(e)
+      const channelId = tags.getMeta("e")
+      const channel = this.channels.get(channelId)
+      const hints = uniq(pluck("url", tags.relays()).concat(channel?.hints || []))
+
+      this.messages.patch({
+        id: e.id,
+        channel: channelId,
+        pubkey: e.pubkey,
+        created_at: e.created_at,
+        content: e.content,
+        tags: e.tags,
+      })
+
+      this.channels.patch({
         id: channelId,
         type: "public",
         last_sent: e.created_at,
         hints,
       })
-    } else {
-      channels.patch({
-        id: channelId,
-        type: "public",
-        last_received: e.created_at,
-        hints,
-      })
-    }
-  })
-
-  const setAppData = async (key, content) => {
-    if (get(keys.canSign)) {
-      const d = `coracle/${key}`
-      const v = await keys.crypt.encryptJson(content)
-
-      return getCmd().setAppData(d, v).publish(getUserWriteRelays())
-    }
+    })
   }
 
-  const setLastChecked = (channelId, timestamp) => {
+  setLastChecked = (channelId, timestamp) => {
     const lastChecked = fromPairs(
-      channels.all({last_checked: {$type: "number"}}).map(r => [r.id, r.last_checked])
+      this.channels.all({last_checked: {$type: "number"}}).map(r => [r.id, r.last_checked])
     )
 
-    return setAppData("last_checked/v1", {...lastChecked, [channelId]: timestamp})
+    return this.system.user.setAppData("last_checked/v1", {...lastChecked, [channelId]: timestamp})
   }
 
-  const joinChannel = channelId => {
-    const channelIds = uniq(pluck("id", channels.all({joined: true})).concat(channelId))
+  joinChannel = channelId => {
+    const channelIds = uniq(pluck("id", this.channels.all({joined: true})).concat(channelId))
 
-    return setAppData("rooms_joined/v1", channelIds)
+    return this.system.user.setAppData("rooms_joined/v1", channelIds)
   }
 
-  const leaveChannel = channelId => {
-    const channelIds = without([channelId], pluck("id", channels.all({joined: true})))
+  leaveChannel = channelId => {
+    const channelIds = without([channelId], pluck("id", this.channels.all({joined: true})))
 
-    return setAppData("rooms_joined/v1", channelIds)
-  }
-
-  return {
-    channels,
-    messages,
-    setLastChecked,
-    joinChannel,
-    leaveChannel,
+    return this.system.user.setAppData("rooms_joined/v1", channelIds)
   }
 }

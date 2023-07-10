@@ -5,22 +5,15 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {DEFAULT_FOLLOWS, routing, social, directory} from "src/system"
+  import {DEFAULT_FOLLOWS, routing, social, user, directory, builder} from "src/app/system"
   import {watch} from "src/util/loki"
   import {modal} from "src/partials/state"
 
   const {searchProfiles} = directory
-  const follows = watch(social.graph, social.getUserFollowsSet)
+  const follows = watch(social.graph, user.getFollowsSet)
 
   if ($follows.size === 0) {
-    social.updatePetnames(
-      DEFAULT_FOLLOWS.map(pubkey => {
-        const hint = routing.getPubkeyHint(pubkey) || ""
-        const name = directory.displayPubkey(pubkey)
-
-        return ["p", pubkey, hint, name]
-      })
-    )
+    user.setPetnames(DEFAULT_FOLLOWS.map(builder.mention))
   }
 
   let q = ""

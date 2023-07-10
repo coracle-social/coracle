@@ -12,7 +12,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {DEFAULT_RELAYS, FORCE_RELAYS, routing, keys, network} from "src/system"
+  import {DEFAULT_RELAYS, FORCE_RELAYS, routing, user, network} from "src/app/system"
   import {watch} from "src/util/loki"
   import legacyNetwork from "src/agent/network"
   import {loadAppData} from "src/app/state"
@@ -54,20 +54,20 @@
       currentRelays[i] = relay
 
       legacyNetwork
-        .loadPeople([keys.getPubkey()], {relays: [relay.url], force: true, kinds: userKinds})
+        .loadPeople([user.getPubkey()], {relays: [relay.url], force: true, kinds: userKinds})
         .then(async () => {
           // Wait a bit before removing the relay to smooth out the ui
           await sleep(1000)
 
           currentRelays[i] = null
 
-          if (searching && routing.getUserRelayUrls().length > 0) {
+          if (searching && user.getRelayUrls().length > 0) {
             searching = false
             modal = "success"
 
             // Reload everything, it's possible we didn't get their petnames if we got a match
             // from something like purplepag.es. This helps us avoid nuking follow lists later
-            await Promise.all([loadAppData(keys.getPubkey()), sleep(1500)])
+            await Promise.all([loadAppData(user.getPubkey()), sleep(1500)])
 
             navigate("/notes")
           } else {

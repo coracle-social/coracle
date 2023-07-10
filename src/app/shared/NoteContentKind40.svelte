@@ -5,7 +5,7 @@
   import Card from "src/partials/Card.svelte"
   import Content from "src/partials/Content.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
-  import {chat} from "src/system"
+  import {chat} from "src/app/system"
   import {watch} from "src/util/loki"
 
   export let note

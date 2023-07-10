@@ -12,7 +12,7 @@
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Scan from "src/app/shared/Scan.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {keys, directory, routing, content} from "src/system"
+  import {user, directory, routing, content} from "src/app/system"
   import network from "src/agent/network"
   import {watch} from "src/util/loki"
 
@@ -34,7 +34,7 @@
       })
     } else if (directory.profiles._coll.count() < 50) {
       network.load({
-        relays: routing.getUserRelayUrls("read"),
+        relays: user.getRelayUrls("read"),
         filter: [{kinds: [0], limit: 50}],
       })
     }
@@ -72,7 +72,7 @@
   const profileOptions = watch(directory.profiles, () =>
     directory
       .getNamedProfiles()
-      .filter(profile => profile.pubkey !== keys.getPubkey())
+      .filter(profile => profile.pubkey !== user.getPubkey())
       .map(profile => {
         const {pubkey, name, nip05, display_name} = profile
 

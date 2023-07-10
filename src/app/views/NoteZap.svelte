@@ -8,13 +8,13 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import {directory, routing, network, outbox, cmd, settings, nip57} from "src/system"
+  import {directory, routing, user, network, outbox, builder, nip57} from "src/app/system"
 
   export let note
 
   let unsubscribe
   let zap = {
-    amount: settings.getSetting("defaultZap"),
+    amount: user.getSetting("default_zap"),
     message: "",
     invoice: null,
     loading: false,
@@ -31,7 +31,7 @@
     const zapper = nip57.zappers.get(note.pubkey)
     const relays = routing.getPublishHints(3, note)
     const event = await outbox.prep(
-      cmd.requestZap(relays, zap.message, note.pubkey, note.id, amount, zapper.lnurl)
+      builder.requestZap(relays, zap.message, note.pubkey, note.id, amount, zapper.lnurl)
     )
     const eventString = encodeURI(JSON.stringify(event))
     const res = await fetchJson(

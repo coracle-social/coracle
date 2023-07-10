@@ -4,7 +4,6 @@
 
   import type {ComponentType, SvelteComponentTyped} from "svelte"
   import {onMount} from "svelte"
-  import {get} from "svelte/store"
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {isNil, last} from "ramda"
@@ -19,7 +18,7 @@
     tryFetch,
   } from "src/util/misc"
   import {onReady} from "src/util/loki"
-  import * as system from "src/system"
+  import * as system from "src/app/system"
   import {loadAppData} from "src/app/state"
   import {theme, getThemeVariables, appName, modal} from "src/partials/state"
   import {logUsage} from "src/app/state"
@@ -53,10 +52,10 @@
 
   // When we get an AUTH challenge from our pool, attempt to authenticate
   system.network.authHandler = async (url, challenge) => {
-    if (get(system.keys.canSign) && !seenChallenges.has(challenge)) {
+    if (system.user.canSign() && !seenChallenges.has(challenge)) {
       seenChallenges.add(challenge)
 
-      const rawEvent = system.cmd.authenticate(url, challenge)
+      const rawEvent = system.builder.authenticate(url, challenge)
       const [event] = await system.outbox.publish(rawEvent, [url], null, "AUTH")
 
       return event
@@ -120,18 +119,14 @@
   })
 
   onReady(() => {
-    system.initialize()
-
-    const pubkey = system.keys.getPubkey()
+    const pubkey = system.user.getPubkey()
 
     if (pubkey) {
       loadAppData(pubkey)
     }
 
     const interval = setInterval(async () => {
-      const {dufflepudUrl} = system.settings.getSettings()
-
-      if (!dufflepudUrl) {
+      if (!system.user.getSetting("dufflepud_url")) {
         return
       }
 
@@ -144,7 +139,7 @@
         await Promise.all(
           staleRelays.map(relay =>
             tryFetch(async () => {
-              const meta = await fetchJson(dufflepudUrl + "/relay/info", {
+              const info = await fetchJson(system.user.dufflepud("relay/info"), {
                 method: "POST",
                 body: JSON.stringify({url: relay.url}),
                 headers: {
@@ -152,9 +147,9 @@
                 },
               })
 
-              meta.last_checked = now()
+              info.last_checked = now()
 
-              return {...relay, meta}
+              return {...relay, info}
             })
           )
         )

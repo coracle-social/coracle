@@ -13,7 +13,7 @@
   import SelectButton from "src/partials/SelectButton.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import {social, directory, content} from "src/system"
+  import {directory, user, content} from "src/app/system"
 
   export let filter
   export let onChange
@@ -138,7 +138,7 @@
 
   $: {
     scopeOptions =
-      social.getUserFollows().length > 0
+      user.getFollows().length > 0
         ? ["follows", "network", "global", "custom"]
         : ["network", "global", "custom"]
   }

@@ -1,6 +1,5 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {get} from "svelte/store"
   import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
   import Input from "src/partials/Input.svelte"
@@ -9,11 +8,11 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {keys, cmd, directory, routing} from "src/system"
+  import {user, builder} from "src/app/system"
   import {routes} from "src/app/state"
   import {publishWithToast} from "src/app/state"
 
-  let values = directory.getUserProfile()
+  let values = user.getProfile()
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
   const lud16Url = "https://blog.getalby.com/create-your-lightning-address/"
@@ -21,17 +20,17 @@
     "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
   onMount(async () => {
-    if (!get(keys.canSign)) {
+    if (!user.canSign()) {
       return navigate("/login")
     }
   })
 
   const submit = async event => {
-    const relays = routing.getUserRelayUrls("write")
+    const relays = user.getRelayUrls("write")
 
     event?.preventDefault()
-    publishWithToast(cmd.updateUser(values), relays)
-    navigate(routes.person(keys.getPubkey(), "notes"))
+    publishWithToast(builder.setProfile(values), relays)
+    navigate(routes.person(user.getPubkey(), "notes"))
   }
 
   document.title = "Profile"

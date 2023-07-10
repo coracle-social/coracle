@@ -4,10 +4,10 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
-  import {content} from "src/system"
+  import {content, user} from "src/app/system"
   import {watch} from "src/util/loki"
 
-  const lists = watch(content.lists, () => content.getUserLists())
+  const lists = watch(content.lists, () => user.getLists())
 
   const createFeed = () => {
     modal.push({type: "list/edit"})
@@ -34,7 +34,7 @@
     <div class="flex justify-start gap-3">
       <i
         class="fa fa-sm fa-trash cursor-pointer py-3"
-        on:click|stopPropagation={() => content.removeList(list.naddr)} />
+        on:click|stopPropagation={() => user.removeList(list.naddr)} />
       <div class="flex w-full justify-between">
         <div>
           <strong>{list.name}</strong>

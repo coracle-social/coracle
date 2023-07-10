@@ -6,7 +6,7 @@
   import {normalizeRelayUrl, Tags, getAvgQuality} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {routing, network} from "src/system"
+  import {routing, network, user} from "src/app/system"
   import {watch} from "src/util/loki"
 
   export let q = ""
@@ -17,7 +17,7 @@
   let search
   let reviews = []
 
-  const joined = watch(routing.policies, () => new Set(routing.getUserRelayUrls()))
+  const joined = watch(routing.policies, () => new Set(user.getRelayUrls()))
   const knownRelays = watch(routing.relays, () => routing.relays.all())
 
   $: ratings = mapValues(
@@ -34,7 +34,7 @@
 
   onMount(() => {
     network.load({
-      relays: routing.getUserHints("read"),
+      relays: routing.getPubkeyHints(3, user.getPubkey(), "read"),
       filter: {
         limit: 1000,
         kinds: [1985],

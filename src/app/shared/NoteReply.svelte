@@ -9,7 +9,7 @@
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/partials/Compose.svelte"
-  import {directory, routing, cmd, keys} from "src/system"
+  import {directory, user, routing, builder} from "src/app/system"
   import {publishWithToast} from "src/app/state"
 
   export let note
@@ -27,7 +27,7 @@
     data = {
       image: null,
       mentions: without(
-        [keys.getPubkey()],
+        [user.getPubkey()],
         uniq(Tags.from(note).type("p").values().all().concat(note.pubkey))
       ),
     }
@@ -52,7 +52,7 @@
     }
 
     if (content) {
-      const rawEvent = cmd.createReply(note, content, data.mentions.map(cmd.mention))
+      const rawEvent = builder.createReply(note, content, data.mentions.map(builder.mention))
       const relays = routing.getPublishHints(3, note)
       const [event, promise] = await publishWithToast(rawEvent, relays)
 
@@ -139,7 +139,7 @@
     </div>
     <div class="flex justify-end gap-2 text-sm text-gray-5">
       <span>
-        Posting as @{directory.displayPubkey(keys.getPubkey())}
+        Posting as @{directory.displayPubkey(user.getPubkey())}
       </span>
     </div>
   </div>

@@ -6,12 +6,12 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {FORCE_RELAYS, settings} from "src/system"
+  import {FORCE_RELAYS, user} from "src/app/system"
 
-  let values = {...settings.getSettings()}
+  let values = {...user.getSettings()}
 
   const submit = () => {
-    settings.setSettings(values)
+    user.setSettings(values)
 
     toast.show("info", "Your settings have been saved!")
   }
@@ -29,7 +29,7 @@
       <div class="flex flex-col gap-1">
         <div class="flex items-center gap-2">
           <strong>Show images and link previews</strong>
-          <Toggle bind:value={values.showMedia} />
+          <Toggle bind:value={values.show_media} />
         </div>
         <p class="text-sm text-gray-4">
           If enabled, {appName} will automatically retrieve a link preview for the last link in any note.
@@ -38,7 +38,7 @@
       <div class="flex flex-col gap-1">
         <div class="flex items-center gap-2">
           <strong>Default zap amount</strong>
-          <Input bind:value={values.defaultZap} />
+          <Input bind:value={values.default_zap} />
         </div>
         <p class="text-sm text-gray-4">
           The default amount of sats to use when sending a lightning tip.
@@ -47,9 +47,9 @@
       <div class="flex flex-col gap-1">
         <div class="flex justify-between">
           <strong>Max relays per request</strong>
-          <div>{values.relayLimit} relays</div>
+          <div>{values.relay_limit} relays</div>
         </div>
-        <Input type="range" bind:value={values.relayLimit} min={1} max={50} />
+        <Input type="range" bind:value={values.relay_limit} min={1} max={50} />
         <p class="mt-2 text-sm text-gray-1">
           This controls how many relays to max out at when loading feeds and event context. More is
           faster, but will require more bandwidth and processing power.
@@ -57,7 +57,7 @@
       </div>
       <div class="flex flex-col gap-1">
         <strong>Dufflepud URL</strong>
-        <Input bind:value={values.dufflepudUrl}>
+        <Input bind:value={values.dufflepud_url}>
           <i slot="before" class="fa-solid fa-server" />
         </Input>
         <p class="text-sm text-gray-4">
@@ -70,7 +70,7 @@
       {#if FORCE_RELAYS.length === 0}
         <div class="flex flex-col gap-1">
           <strong>Multiplextr URL</strong>
-          <Input bind:value={values.multiplextrUrl}>
+          <Input bind:value={values.multiplextr_url}>
             <i slot="before" class="fa-solid fa-server" />
           </Input>
           <p class="text-sm text-gray-4">
@@ -85,7 +85,7 @@
       <div class="flex flex-col gap-1">
         <div class="flex items-center gap-2">
           <strong>Report errors and analytics</strong>
-          <Toggle bind:value={values.reportAnalytics} />
+          <Toggle bind:value={values.report_analytics} />
         </div>
         <p class="text-sm text-gray-4">
           Keep this enabled if you would like developers to be able to know what features are used,

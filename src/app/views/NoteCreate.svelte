@@ -15,7 +15,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {keys, directory, routing, cmd} from "src/system"
+  import {directory, builder, routing, user} from "src/app/system"
   import {toast, modal} from "src/partials/state"
   import {publishWithToast} from "src/app/state"
 
@@ -28,7 +28,7 @@
   let compose = null
   let showPreview = false
   let showSettings = false
-  let relays = writable(writeTo ? writeTo : routing.getUserRelayUrls("write"))
+  let relays = writable(writeTo ? writeTo : user.getRelayUrls("write"))
 
   const onSubmit = async () => {
     let content = compose.parse()
@@ -39,15 +39,11 @@
     }
 
     if (quote) {
-      const {pubkey} = quote
-      const profile = directory.getProfile(pubkey)
-      const pHint = routing.getPubkeyHint(pubkey) || ""
-
-      tags.push(["p", pubkey, pHint, directory.displayProfile(profile)])
+      tags.push(builder.mention(quote.pubkey))
     }
 
     if (content) {
-      const rawEvent = cmd.createNote(content.trim(), tags)
+      const rawEvent = builder.createNote(content.trim(), tags)
       const [event, promise] = await publishWithToast(rawEvent, $relays)
 
       promise.then(() =>
@@ -92,7 +88,7 @@
   }
 
   onMount(() => {
-    if (pubkey && pubkey !== keys.getPubkey()) {
+    if (pubkey && pubkey !== user.getPubkey()) {
       compose.mention(directory.getProfile(pubkey))
     }
 
@@ -124,7 +120,7 @@
         </div>
         <div class="flex items-center justify-end gap-2 text-gray-5">
           <small>
-            Posting as @{directory.displayPubkey(keys.getPubkey())}
+            Posting as @{directory.displayPubkey(user.getPubkey())}
           </small>
           <span>•</span>
           <small on:click={togglePreview} class="cursor-pointer underline">

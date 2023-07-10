@@ -4,7 +4,7 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {social, routing, directory} from "src/system"
+  import {routing, directory, user} from "src/app/system"
 
   export let onSubmit
 
@@ -29,7 +29,7 @@
     let results = []
     if (word.length > 1 && word.startsWith("@")) {
       const [followed, notFollowed] = partition(
-        p => social.isUserFollowing(p.pubkey),
+        p => user.isFollowing(p.pubkey),
         $searchProfiles(word.slice(1))
       )
 

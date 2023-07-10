@@ -3,14 +3,14 @@
   import {ellipsize} from "hurdak/lib/hurdak"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {settings} from "src/system"
+  import {user} from "src/app/system"
 
   export let link
   export let onClick = null
   export let onClose = null
 
   const loadPreview = async () => {
-    const res = await fetch(settings.dufflepud("/link/preview"), {
+    const res = await fetch(user.dufflepud("link/preview"), {
       method: "POST",
       body: JSON.stringify({url: link.url}),
       headers: {
@@ -54,7 +54,7 @@
         </div>
       {/if}
     {:catch}
-      <p class="mb-1 py-24 px-12 text-center text-gray-5">
+      <p class="mb-1 px-12 py-24 text-center text-gray-5">
         Unable to load a preview for {link.url}
       </p>
     {/await}
@@ -62,7 +62,7 @@
   {#if onClose}
     <div
       on:click|preventDefault={onClose}
-      class="absolute top-0 right-0 m-1 flex h-6 w-6 cursor-pointer items-center justify-center
+      class="absolute right-0 top-0 m-1 flex h-6 w-6 cursor-pointer items-center justify-center
        rounded-full border border-solid border-gray-6 bg-white text-black opacity-50 shadow">
       <i class="fa fa-times" />
     </div>

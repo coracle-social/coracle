@@ -1,95 +1,104 @@
 import {Socket} from "paravel"
+import {now} from "src/util/misc"
 import {Table} from "src/util/loki"
 import {switcher} from "hurdak/lib/hurdak"
+import type {System} from "src/system/system"
+import type {RelayStat} from "src/system/types"
 
-export default ({network}) => {
-  const relayStats = new Table("meta/relayStats", "url")
+export class Meta {
+  system: System
+  relayStats: Table<RelayStat>
+  constructor(system) {
+    this.system = system
 
-  network.pool.on("open", ({url}) => {
-    relayStats.patch({url, last_opened: Date.now(), last_activity: Date.now()})
-  })
+    this.relayStats = new Table(system.key("meta/relayStats"), "url")
 
-  network.pool.on("close", ({url}) => {
-    relayStats.patch({url, last_closed: Date.now(), last_activity: Date.now()})
-  })
+    system.network.pool.on("open", ({url}) => {
+      this.relayStats.patch({url, last_opened: now(), last_activity: now()})
+    })
 
-  network.pool.on("error:set", (url, error) => {
-    relayStats.patch({url, error})
-  })
+    system.network.pool.on("close", ({url}) => {
+      this.relayStats.patch({url, last_closed: now(), last_activity: now()})
+    })
 
-  network.pool.on("error:clear", url => {
-    relayStats.patch({url, error: null})
-  })
+    system.network.pool.on("error:set", (url, error) => {
+      this.relayStats.patch({url, error})
+    })
 
-  network.on("publish", urls => {
-    relayStats.patch(
-      urls.map(url => ({
+    system.network.pool.on("error:clear", url => {
+      this.relayStats.patch({url, error: null})
+    })
+
+    system.network.on("publish", urls => {
+      this.relayStats.patch(
+        urls.map(url => ({
+          url,
+          last_publish: now(),
+          last_activity: now(),
+        }))
+      )
+    })
+
+    system.network.on("sub:open", urls => {
+      for (const url of urls) {
+        const stats = this.relayStats.get(url)
+
+        this.relayStats.patch({
+          url,
+          last_sub: now(),
+          last_activity: now(),
+          total_subs: (stats?.total_subs || 0) + 1,
+          active_subs: (stats?.active_subs || 0) + 1,
+        })
+      }
+    })
+
+    system.network.on("sub:close", urls => {
+      for (const url of urls) {
+        const stats = this.relayStats.get(url)
+
+        this.relayStats.patch({
+          url,
+          last_activity: now(),
+          active_subs: stats ? stats.active_subs - 1 : 0,
+        })
+      }
+    })
+
+    system.network.on("event", ({url}) => {
+      const stats = this.relayStats.get(url)
+
+      this.relayStats.patch({
         url,
-        last_publish: Date.now(),
-        last_activity: Date.now(),
-      }))
-    )
-  })
-
-  network.on("sub:open", urls => {
-    for (const url of urls) {
-      const stats = relayStats.get(url)
-
-      relayStats.patch({
-        url,
-        last_sub: Date.now(),
-        last_activity: Date.now(),
-        total_subs: (stats?.total_subs || 0) + 1,
-        active_subs: (stats?.active_subs || 0) + 1,
+        last_activity: now(),
+        events_count: (stats.events_count || 0) + 1,
       })
-    }
-  })
+    })
 
-  network.on("sub:close", urls => {
-    for (const url of urls) {
-      const stats = relayStats.get(url)
+    system.network.on("eose", (url, ms) => {
+      const stats = this.relayStats.get(url)
 
-      relayStats.patch({
+      this.relayStats.patch({
         url,
-        last_activity: Date.now(),
-        active_subs: stats ? stats.active_subs - 1 : 0,
+        last_activity: now(),
+        eose_count: (stats.eose_count || 0) + 1,
+        eose_timer: (stats.eose_timer || 0) + ms,
       })
-    }
-  })
-
-  network.on("event", ({url}) => {
-    const stats = relayStats.get(url)
-
-    relayStats.patch({
-      url,
-      last_activity: Date.now(),
-      events_count: (stats.events_count || 0) + 1,
     })
-  })
 
-  network.on("eose", (url, ms) => {
-    const stats = relayStats.get(url)
+    system.network.on("timeout", (url, ms) => {
+      const stats = this.relayStats.get(url)
 
-    relayStats.patch({
-      url,
-      last_activity: Date.now(),
-      eose_count: (stats.eose_count || 0) + 1,
-      eose_timer: (stats.eose_timer || 0) + ms,
+      this.relayStats.patch({
+        url,
+        last_activity: now(),
+        timeouts: (stats.timeouts || 0) + 1,
+      })
     })
-  })
+  }
 
-  network.on("timeout", (url, ms) => {
-    const stats = relayStats.get(url)
-
-    relayStats.patch({
-      url,
-      last_activity: Date.now(),
-      timeouts: (stats.timeouts || 0) + 1,
-    })
-  })
-
-  const getRelayQuality = url => {
-    const stats = relayStats.get(url)
+  getRelayQuality = url => {
+    const stats = this.relayStats.get(url)
 
     if (!stats) {
       return [0.5, "Not Connected"]
@@ -106,8 +115,8 @@ export default ({network}) => {
       ]
     }
 
-    const {timeouts, subs_count: subsCount, eose_timer: eoseTimer, eose_count: eoseCount} = stats
-    const timeoutRate = timeouts > 0 ? timeouts / subsCount : null
+    const {timeouts, total_subs: totalSubs, eose_timer: eoseTimer, eose_count: eoseCount} = stats
+    const timeoutRate = timeouts > 0 ? timeouts / totalSubs : null
     const eoseQuality = eoseCount > 0 ? Math.max(1, 500 / (eoseTimer / eoseCount)) : null
 
     if (timeoutRate && timeoutRate > 0.5) {
@@ -122,15 +131,10 @@ export default ({network}) => {
       return [eoseQuality, "Connected"]
     }
 
-    if (network.pool.get(url).status === Socket.STATUS.READY) {
+    if (this.system.network.pool.get(url).status === Socket.STATUS.READY) {
       return [1, "Connected"]
     }
 
     return [0.5, "Not Connected"]
-  }
-
-  return {
-    relayStats,
-    getRelayQuality,
   }
 }

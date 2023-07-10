@@ -8,6 +8,7 @@ import {union, difference} from "src/util/misc"
 import {warn, error, log} from "src/util/logger"
 import {normalizeRelayUrl} from "src/util/nostr"
 import {FORCE_RELAYS, COUNT_RELAYS} from "src/system/env"
+import type {System} from "src/system/system"
 
 type SubscribeOpts = {
   relays: string[]
@@ -31,30 +32,15 @@ const getUrls = relays => {
   return Array.from(urls)
 }
 
-export default class Network extends EventEmitter {
+export class Network extends EventEmitter {
   authHandler?: (url: string, challenge: string) => void
-  sync: {
-    processEvents: (events: MyEvent[]) => void
-  }
-  settings: {
-    getSetting: (name: string) => string
-  }
-  routing: {
-    getRelayMeta: (url: string) => {
-      limitation?: {
-        auth_required?: boolean
-        payment_required?: boolean
-      }
-    }
-  }
+  system: System
   pool: Pool
-  constructor({sync, settings, routing}) {
+  constructor(system) {
     super()
 
     this.authHandler = null
-    this.sync = sync
-    this.settings = settings
-    this.routing = routing
+    this.system = system
     this.pool = new Pool()
   }
   getExecutor = (urls, {bypassBoot = false} = {}) => {
@@ -64,7 +50,7 @@ export default class Network extends EventEmitter {
 
     let target
 
-    const muxUrl = this.settings.getSetting("multiplextrUrl")
+    const muxUrl = this.system.user.getSetting("multiplextr_url")
 
     // Try to use our multiplexer, but if it fails to connect fall back to relays. If
     // we're only connecting to a single relay, just do it directly, unless we already
@@ -103,7 +89,7 @@ export default class Network extends EventEmitter {
 
     // Eagerly connect and handle AUTH
     executor.target.sockets.forEach(socket => {
-      const {limitation} = this.routing.getRelayMeta(socket.url)
+      const {limitation} = this.system.routing.getRelayInfo(socket.url)
       const waitForBoot = limitation?.payment_required || limitation?.auth_required
 
       // This happens automatically, but kick it off anyway
@@ -231,7 +217,7 @@ export default class Network extends EventEmitter {
         this.emit("event", {url, event})
 
         if (shouldProcess) {
-          this.sync.processEvents([event])
+          this.system.sync.processEvents([event])
         }
 
         onEvent(event)
@@ -248,13 +234,22 @@ export default class Network extends EventEmitter {
       },
     })
 
+    let closed = false
+
     return () => {
-      log(`Closing subscription`, filters)
+
+      if (closed) {
+        error('Closed subscription twice', filters)
+      } else {
+        log(`Closing subscription`, filters)
+      }
 
       sub.unsubscribe()
       executor.target.cleanup()
 
       this.emit("sub:close", urls)
+
+      closed = true
     }
   }
   load = ({

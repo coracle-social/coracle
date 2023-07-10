@@ -7,15 +7,14 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {keys, cmd, chat, routing, settings, network, outbox} from "src/system"
+  import {builder, chat, user, routing, network, outbox} from "src/app/system"
   import {watch} from "src/util/loki"
 
   export let entity
 
   const id = toHex(entity)
   const channel = watch(chat.channels, () => chat.channels.get(id) || {id})
-  const getRelays = () =>
-    routing.selectHints(settings.getSetting("relayLimit"), $channel.hints || [])
+  const getRelays = () => routing.selectHints(user.getSetting("relay_limit"), $channel.hints || [])
 
   chat.setLastChecked(id, now())
 
@@ -26,7 +25,7 @@
   const sendMessage = async content => {
     const [hint] = getRelays()
 
-    await outbox.publish(cmd.createChatMessage(id, content, hint), getRelays())
+    await outbox.publish(builder.createChatMessage(id, content, hint), getRelays())
   }
 
   onMount(() => {
@@ -51,7 +50,7 @@
       <div class="flex w-full items-center justify-between">
         <div class="flex items-center gap-4">
           <div class="text-lg font-bold">{$channel.name || ""}</div>
-          {#if $channel.pubkey === keys.getPubkey()}
+          {#if $channel.pubkey === user.getPubkey()}
             <button class="cursor-pointer text-sm" on:click={edit}>
               <i class="fa-solid fa-edit" /> Edit
             </button>

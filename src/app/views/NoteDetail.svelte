@@ -1,5 +1,5 @@
 <script>
-  import {onMount, onDestroy} from "svelte"
+  import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {fly} from "src/util/transition"
   import {first} from "hurdak/lib/hurdak"
@@ -10,7 +10,7 @@
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {social, routing, network} from "src/system"
+  import {user, routing, network} from "src/app/system"
   import Note from "src/app/shared/Note.svelte"
   import legacyNetwork from "src/agent/network"
 
@@ -18,7 +18,6 @@
   export let relays = []
   export let invertColors = false
 
-  let sub = null
   let loading = true
   let feedRelay = null
   let displayNote = asDisplayEvent(note)
@@ -44,20 +43,16 @@
     if (displayNote) {
       log("NoteDetail", nip19.noteEncode(displayNote.id), displayNote)
 
-      sub = legacyNetwork.streamContext({
+      legacyNetwork.streamContext({
         maxDepth: depth,
         notes: [displayNote],
         onChunk: context => {
-          displayNote = first(legacyNetwork.applyContext([displayNote], social.applyMutes(context)))
+          displayNote = first(legacyNetwork.applyContext([displayNote], user.applyMutes(context)))
         },
       })
     }
 
     loading = false
-  })
-
-  onDestroy(() => {
-    sub?.unsub()
   })
 </script>
 

@@ -7,13 +7,13 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {routing} from "src/system"
+  import {routing, user} from "src/app/system"
   import {watch} from "src/util/loki"
 
   let q = ""
   let search
 
-  const userRelays = watch(routing.policies, () => routing.getUserRelays())
+  const userRelays = watch(routing.policies, () => user.getRelays())
   const knownRelays = watch(routing.relays, () => routing.relays.all())
 
   $: {

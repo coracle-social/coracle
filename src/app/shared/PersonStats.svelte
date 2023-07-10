@@ -5,7 +5,7 @@
   import {numberFmt, batch} from "src/util/misc"
   import {modal} from "src/partials/state"
   import {watch} from "src/util/loki"
-  import {social, routing, network} from "src/system"
+  import {social, user, routing, network} from "src/app/system"
 
   export let pubkey
 
@@ -32,7 +32,7 @@
       const followers = new Set()
 
       await network.load({
-        relays: routing.getUserHints(3, "read"),
+        relays: routing.getPubkeyHints(3, user.getPubkey(), "read"),
         shouldProcess: false,
         filter: [{kinds: [3], "#p": [pubkey]}],
         onEvent: batch(300, events => {

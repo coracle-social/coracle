@@ -12,7 +12,7 @@
   import PersonNotes from "src/app/shared/PersonNotes.svelte"
   import PersonLikes from "src/app/shared/PersonLikes.svelte"
   import PersonRelays from "src/app/shared/PersonRelays.svelte"
-  import {FORCE_RELAYS, nip05, directory, routing} from "src/system"
+  import {FORCE_RELAYS, nip05, directory, routing} from "src/app/system"
   import {watch} from "src/util/loki"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"

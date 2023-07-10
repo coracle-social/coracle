@@ -7,19 +7,17 @@
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
-  import {content} from "src/system"
+  import {user, content} from "src/app/system"
   import {watch} from "src/util/loki"
 
   export let item
 
-  const lists = watch(content.lists, content.getUserLists)
+  const lists = watch(content.lists, user.getLists)
   const label = item.type === "p" ? "person" : "topic"
 
   const modifyList = updateIn("tags", tags => (tags || []).concat([[item.type, item.value]]))
 
-  const selectlist = list => {
-    modal.replace({type: "list/edit", list: modifyList(list)})
-  }
+  const selectlist = list => modal.replace({type: "list/edit", list: modifyList(list)})
 </script>
 
 <Content size="lg">

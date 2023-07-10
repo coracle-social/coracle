@@ -9,16 +9,7 @@
   import OnboardingRelays from "src/app/views/OnboardingRelays.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
-  import {
-    DEFAULT_FOLLOWS,
-    DEFAULT_RELAYS,
-    social,
-    routing,
-    keys,
-    directory,
-    cmd,
-    outbox,
-  } from "src/system"
+  import {DEFAULT_FOLLOWS, DEFAULT_RELAYS, routing, builder, user} from "src/app/system"
   import network from "src/agent/network"
   import {loadAppData} from "src/app/state"
   import {modal} from "src/partials/state"
@@ -28,32 +19,25 @@
   const privkey = generatePrivateKey()
   const profile = {}
 
-  if (routing.getUserRelays().length === 0) {
-    routing.setUserRelays(DEFAULT_RELAYS.map(url => ({url, read: true, write: true})))
+  if (user.getRelays().length === 0) {
+    user.setRelays(DEFAULT_RELAYS.map(url => ({url, read: true, write: true})))
   }
 
   const signup = async note => {
-    const relays = routing.getUserRelays()
-    const urls = routing.getUserRelayUrls()
+    const relays = user.getRelays()
+    const petnames = user.getPetnames()
 
-    await keys.login("privkey", privkey)
+    await user.keys.login("privkey", privkey)
 
     // Re-save preferences now that we have a key
     await Promise.all([
-      routing.setUserRelays(relays),
-      outbox.publish(cmd.updateUser(profile), urls),
-      outbox.publish(note && cmd.createNote(note), urls),
-      social.updatePetnames(
-        social.getUserFollows().map(pubkey => {
-          const hint = routing.getPubkeyHint(pubkey) || ""
-          const name = directory.displayPubkey(pubkey)
-
-          return ["p", pubkey, hint, name]
-        })
-      ),
+      user.setRelays(relays),
+      user.setProfile(profile),
+      user.setPetnames(petnames),
+      note && user.publish(builder.createNote(note)),
     ])
 
-    loadAppData(keys.getPubkey())
+    loadAppData(user.getPubkey())
 
     modal.clear()
     navigate("/notes")
@@ -62,7 +46,7 @@
   onMount(() => {
     // Prime our database with some defaults
     network.loadPeople(DEFAULT_FOLLOWS, {
-      relays: routing.getUserHints("read"),
+      relays: routing.getPubkeyHints(user.getPubkey(), "read"),
     })
   })
 </script>

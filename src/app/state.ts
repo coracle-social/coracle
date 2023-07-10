@@ -16,17 +16,14 @@ import {
   FORCE_RELAYS,
   DEFAULT_FOLLOWS,
   ENABLE_ZAPS,
-  keys,
-  social,
-  routing,
   alerts,
-  settings,
   cache,
   chat,
   meta,
   network,
   outbox,
-} from "src/system"
+  user,
+} from "src/app/system"
 import legacyNetwork from "src/agent/network"
 
 // Routing
@@ -54,7 +51,7 @@ setTimeout(() => {
       return false
     }
 
-    if (!settings.getSetting("reportAnalytics")) {
+    if (!user.getSetting("report_analytics")) {
       return false
     }
 
@@ -76,13 +73,12 @@ const session = Math.random().toString().slice(2)
 export const logUsage = async name => {
   // Hash the user's pubkey so we can identify unique users without knowing
   // anything about them
-  const pubkey = keys.getPubkey()
+  const pubkey = user.getPubkey()
   const ident = pubkey ? hash(pubkey) : "unknown"
-  const {dufflepudUrl, reportAnalytics} = settings.getSettings()
 
-  if (reportAnalytics) {
+  if (user.getSetting("report_analytics")) {
     try {
-      await fetch(`${dufflepudUrl}/usage/${ident}/${session}/${name}`, {method: "post"})
+      await fetch(user.dufflepud(`usage/${ident}/${session}/${name}`), {method: "post"})
     } catch (e) {
       if (!e.toString().includes("Failed to fetch")) {
         warn(e)
@@ -94,7 +90,7 @@ export const logUsage = async name => {
 // Synchronization from events to state
 
 export const listen = async () => {
-  const pubkey = keys.getPubkey()
+  const pubkey = user.getPubkey()
   const kinds = noteKinds.concat([4, 7])
 
   if (ENABLE_ZAPS) {
@@ -117,7 +113,7 @@ export const listen = async () => {
 
   ;(listen as any)._listener?.unsub()
   ;(listen as any)._listener = await network.subscribe({
-    relays: routing.getUserRelayUrls("read"),
+    relays: user.getRelayUrls("read"),
     filter: [
       {kinds: noteKinds.concat(4), authors: [pubkey], since},
       {kinds, "#p": [pubkey], since},
@@ -134,20 +130,20 @@ export const slowConnections = writable([])
 
 setInterval(() => {
   // Only notify about relays the user is actually subscribed to
-  const relays = new Set(routing.getUserRelayUrls())
+  const userRelays = new Set(user.getRelayUrls())
   const $slowConnections = []
 
   // Prune connections we haven't used in a while
-  for (const url of network.pool.data.keys()) {
+  for (const [url, socket] of network.pool.data.entries()) {
     const stats = meta.relayStats.get(url)
 
     if (!stats) {
       continue
     }
 
-    if (stats.active_subs === 0 && stats.last_activity < Date.now() - 60_000) {
+    if (stats.last_activity < Date.now() - 60_000) {
       network.pool.remove(url)
-    } else if (relays.has(url) && first(meta.getRelayQuality(url)) < 0.3) {
+    } else if (userRelays.has(url) && first(meta.getRelayQuality(url)) < 0.3) {
       $slowConnections.push(url)
     }
   }
@@ -157,18 +153,18 @@ setInterval(() => {
 }, 30_000)
 
 export const loadAppData = async pubkey => {
-  if (routing.getUserRelayUrls("read").length > 0) {
+  if (user.getRelayUrls("read").length > 0) {
     // Start our listener, but don't wait for it
     listen()
 
     // Make sure the user and their network is loaded
     await legacyNetwork.loadPeople([pubkey], {force: true, kinds: userKinds})
-    await legacyNetwork.loadPeople(social.getUserFollows())
+    await legacyNetwork.loadPeople(user.getFollows())
   }
 }
 
 export const login = async (method, key) => {
-  keys.login(method, key)
+  user.keys.login(method, key)
 
   if (FORCE_RELAYS.length > 0) {
     modal.replace({
@@ -180,7 +176,7 @@ export const login = async (method, key) => {
 
     await Promise.all([
       sleep(1500),
-      legacyNetwork.loadPeople([keys.getPubkey()], {force: true, kinds: userKinds}),
+      legacyNetwork.loadPeople([user.getPubkey()], {force: true, kinds: userKinds}),
     ])
 
     navigate("/notes")
@@ -242,9 +238,9 @@ export const compileFilter = (filter: DynamicFilter): Filter => {
   if (filter.authors === "global") {
     filter = omit(["authors"], filter)
   } else if (filter.authors === "follows") {
-    filter = {...filter, authors: getAuthors(social.getUserFollows())}
+    filter = {...filter, authors: getAuthors(user.getFollows())}
   } else if (filter.authors === "network") {
-    filter = {...filter, authors: getAuthors(social.getUserNetwork())}
+    filter = {...filter, authors: getAuthors(user.getNetwork())}
   }
 
   return filter

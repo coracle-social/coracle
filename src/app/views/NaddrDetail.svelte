@@ -6,7 +6,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {directory, routing, network} from "src/system"
+  import {directory, routing, network} from "src/app/system"
 
   export let identifier
   export let kind

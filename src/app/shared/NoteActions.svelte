@@ -14,7 +14,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {ENABLE_ZAPS, FORCE_RELAYS, keys, nip57, cmd, routing, social, outbox} from "src/system"
+  import {ENABLE_ZAPS, FORCE_RELAYS, nip57, builder, routing, outbox, user} from "src/app/system"
 
   export let note
   export let reply
@@ -22,7 +22,6 @@
   export let showEntire
   export let setFeedRelay
 
-  const {canSign} = keys
   const zapper = nip57.zappers.get(note.pubkey)
   const bech32Note = nip19.noteEncode(note.id)
   const nevent = nip19.neventEncode({id: note.id, relays: [note.seen_on]})
@@ -31,22 +30,22 @@
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
 
-  const share = () => {
-    modal.push({type: "note/share", note})
-  }
+  const share = () => modal.push({type: "note/share", note})
 
   const quote = () => modal.push({type: "note/create", quote: note})
-  const mute = () => social.mute("e", note.id)
-  const unmute = () => social.unmute(note.id)
+
+  const unmute = () => user.unmute(note.pubkey)
+
+  const mute = () => user.mute("p", note.pubkey)
 
   const react = async content => {
     const relays = routing.getPublishHints(3, note)
 
-    like = first(await outbox.publish(cmd.createReaction(note, content), relays))
+    like = first(await outbox.publish(builder.createReaction(note, content), relays))
   }
 
   const deleteReaction = e => {
-    outbox.publish(cmd.deleteEvents([e.id]), routing.getPublishHints(3, note))
+    outbox.publish(builder.deleteEvents([e.id]), routing.getPublishHints(3, note))
 
     like = null
     likes = reject(propEq("id", e.id), likes)
@@ -60,20 +59,20 @@
   let actions = []
   let showDetails = false
 
-  $: disableActions = !$canSign || muted
+  $: disableActions = !user.canSign() || muted
   $: likes = note.reactions.filter(n => isLike(n.content))
-  $: like = like || find(propEq("pubkey", keys.getPubkey()), likes)
+  $: like = like || find(propEq("pubkey", user.getPubkey()), likes)
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
   $: $likesCount = allLikes.length
 
   $: zaps = nip57.processZaps(note.zaps, note.pubkey)
-  $: zap = zap || find(pathEq(["request", "pubkey"], keys.getPubkey()), zaps)
+  $: zap = zap || find(pathEq(["request", "pubkey"], user.getPubkey()), zaps)
   $: allZaps = zap
     ? zaps.filter(n => n.id !== zap?.id).concat(nip57.processZaps([zap], note.pubkey))
     : zaps
   $: $zapsTotal = sum(pluck("invoiceAmount", allZaps)) / 1000
 
-  $: canZap = zapper && note.pubkey !== keys.getPubkey()
+  $: canZap = zapper && note.pubkey !== user.getPubkey()
   $: $repliesCount = note.replies.length
 
   $: {
@@ -112,7 +111,7 @@
     </button>
     <button
       class={cx("w-16 text-left", {
-        "pointer-events-none opacity-50": disableActions || note.pubkey === keys.getPubkey(),
+        "pointer-events-none opacity-50": disableActions || note.pubkey === user.getPubkey(),
         "text-accent": like,
       })}
       on:click={() => (like ? deleteReaction(like) : react("+"))}>

@@ -15,7 +15,7 @@ import {
 import {personKinds, appDataKeys, findReplyId} from "src/util/nostr"
 import {chunk, ensurePlural} from "hurdak/lib/hurdak"
 import {batch, now, timedelta} from "src/util/misc"
-import {ENABLE_ZAPS, routing, settings, directory, network} from "src/system"
+import {ENABLE_ZAPS, user, routing, directory, network} from "src/app/system"
 
 // If we ask for a pubkey and get nothing back, don't ask again this page load
 const attemptedPubkeys = new Set()
@@ -158,7 +158,7 @@ const loadPeople = async (
         relays?.length > 0
           ? relays
           : routing.mergeHints(
-              settings.getSetting("relayLimit"),
+              user.getSetting("relay_limit"),
               chunk.map(pubkey => routing.getPubkeyHints(3, pubkey))
             )
 
@@ -178,11 +178,10 @@ const loadPeople = async (
 }
 
 const streamContext = ({notes, onChunk, maxDepth = 2}) => {
-  const subs = []
   const seen = new Set()
   const kinds = ENABLE_ZAPS ? [1, 7, 9735] : [1, 7]
   const relays = routing.mergeHints(
-    settings.getSetting("relayLimit"),
+    user.getSetting("relay_limit"),
     notes.map(e => routing.getReplyHints(3, e))
   )
 
@@ -194,6 +193,8 @@ const streamContext = ({notes, onChunk, maxDepth = 2}) => {
     if (events.length === 0) {
       return
     }
+
+    const subs = []
 
     // Add our new events to the list of stuff we've seen
     events.forEach(e => seen.add(e.id))
@@ -242,12 +243,6 @@ const streamContext = ({notes, onChunk, maxDepth = 2}) => {
 
   // Kick things off by loading our first chunk
   loadChunk(notes, 1)
-
-  return {
-    unsub: () => {
-      subs.map(unsubscribe => unsubscribe())
-    },
-  }
 }
 
 const applyContext = (notes, context) => {

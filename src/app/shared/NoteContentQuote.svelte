@@ -7,7 +7,7 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {directory, routing, social, network} from "src/system"
+  import {directory, routing, user, network} from "src/app/system"
 
   export let note
   export let value
@@ -25,7 +25,7 @@
           relays: routing.mergeHints(3, [relays, routing.getEventHints(3, note)]),
           filter: [{ids: [id]}],
           onEvent: event => {
-            muted = social.applyMutes([event]).length === 0
+            muted = user.applyMutes([event]).length === 0
 
             resolve(event)
           },

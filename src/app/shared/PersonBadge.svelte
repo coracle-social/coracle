@@ -3,7 +3,7 @@
   import {Link} from "svelte-routing"
   import {killEvent} from "src/util/html"
   import {routes} from "src/app/state"
-  import {directory} from "src/system"
+  import {directory} from "src/app/system"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
 
   export let pubkey

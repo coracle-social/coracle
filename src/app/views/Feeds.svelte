@@ -8,17 +8,16 @@
   import Content from "src/partials/Content.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
-  import {keys, content, social} from "src/system"
+  import {user, content} from "src/app/system"
   import {watch} from "src/util/loki"
 
-  const {canSign} = keys
-  const lists = watch(content.lists, () => content.getUserLists())
+  const lists = watch(content.lists, () => user.getLists())
 
   let relays = null
   let key = Math.random()
   let filter = {
     kinds: noteKinds,
-    authors: social.getUserFollows().length > 0 ? "follows" : "network",
+    authors: user.getFollows().length > 0 ? "follows" : "network",
   } as DynamicFilter
 
   const showLists = () => {
@@ -52,7 +51,7 @@
 </script>
 
 <Content>
-  {#if !keys.getPubkey()}
+  {#if !user.getPubkey()}
     <Content size="lg" class="text-center">
       <p class="text-xl">Don't have an account?</p>
       <p>
@@ -63,7 +62,7 @@
   {#key key}
     <Feed {filter} {relays}>
       <div slot="controls">
-        {#if $canSign}
+        {#if user.canSign()}
           {#if $lists.length > 0}
             <Popover placement="bottom" opts={{hideOnClick: true}} theme="transparent">
               <i slot="trigger" class="fa fa-ellipsis-v cursor-pointer p-2" />

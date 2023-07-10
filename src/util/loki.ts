@@ -43,15 +43,15 @@ const stubCollection = {
 // ----------------------------------------------------------------------------
 // Database table abstraction around loki
 
-const registry = {} as Record<string, Table>
+const registry = {} as Record<string, Table<any>>
 
-export class Table {
+export class Table<T> {
   name: string
   pk: string
   _max: number
-  _sort: (xs: Array<Record<string, any>>) => Array<Record<string, any>>
+  _sort: (xs: Array<T>) => Array<T>
   _coll?: Loki
-  _subs: Array<(t: Table) => void>
+  _subs: Array<() => void>
   constructor(name, pk, {max = 500, sort = null} = {}) {
     this.name = name
     this.pk = pk
@@ -70,7 +70,7 @@ export class Table {
   }
   notify = () => {
     for (const cb of this._subs) {
-      cb(this)
+      cb()
     }
   }
   subscribe(cb) {
@@ -80,7 +80,7 @@ export class Table {
       this._subs = without([cb], this._subs)
     }
   }
-  patch(items) {
+  patch(items: Record<string, any> | Record<string, any>[]) {
     if (loki.dead) {
       return
     }
@@ -126,16 +126,16 @@ export class Table {
   drop() {
     this._coll.clear({removeIndices: true})
   }
-  all(spec = null) {
+  all(spec = null): T[] {
     return this._coll.find(spec)
   }
-  find(spec = null) {
+  find(spec = null): T {
     return this._coll.findOne(spec)
   }
-  get(k) {
+  get(k): T | null {
     return this._coll.by(this.pk, k)
   }
-  max(k) {
+  max(k): number {
     return this._coll.max(k)
   }
 }
@@ -145,7 +145,7 @@ const listener = (() => {
 
   return {
     connect: () => {
-      for (const table of Object.values(registry) as Array<Table>) {
+      for (const table of Object.values(registry) as Array<Table<any>>) {
         table.subscribe(() => listeners.forEach(f => f(table.name)))
       }
     },

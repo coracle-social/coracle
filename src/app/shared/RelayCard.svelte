@@ -8,7 +8,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {keys, routing, directory, meta} from "src/system"
+  import {user, routing, meta} from "src/app/system"
   import {watch} from "src/util/loki"
   import {loadAppData} from "src/app/state"
 
@@ -19,22 +19,20 @@
   export let hideActions = false
   export let showControls = false
 
-  const {canSign} = keys
-
   let statusHover = false
   let quality = null
   let message = null
 
-  const relays = watch(routing.policies, () => new Set(routing.getUserRelayUrls()))
+  const relays = watch(routing.policies, () => new Set(user.getRelayUrls()))
 
-  const removeRelay = r => routing.removeUserRelay(r.url)
+  const removeRelay = r => user.removeRelay(r.url)
 
   const addRelay = r => {
-    routing.addUserRelay(r.url)
+    user.addRelay(r.url)
 
-    const pubkey = keys.getPubkey()
+    const pubkey = user.getPubkey()
 
-    if (pubkey && !directory.getUserProfile().created_at) {
+    if (pubkey && !user.getProfile().created_at) {
       loadAppData(pubkey)
     }
   }
@@ -106,13 +104,13 @@
   {#if relay.description}
     <p>{relay.description}</p>
   {/if}
-  {#if hasRelay && showControls && $canSign}
+  {#if hasRelay && showControls && user.canSign()}
     <div class="-mx-6 my-1 h-px bg-gray-7" />
     <div class="flex justify-between gap-2">
       <span>Publish to this relay?</span>
       <Toggle
         value={relay.write}
-        on:change={() => routing.setUserRelayPolicy(relay.url, {write: !relay.write})} />
+        on:change={() => user.setRelayPolicy(relay.url, {write: !relay.write})} />
     </div>
   {/if}
 </div>

@@ -4,23 +4,22 @@
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {FORCE_RELAYS, keys, routing, social, directory} from "src/system"
+  import {FORCE_RELAYS, user, social} from "src/app/system"
   import {watch} from "src/util/loki"
   import {addToList} from "src/app/state"
 
   export let pubkey
 
-  const {canSign} = keys
   const npub = nip19.npubEncode(pubkey)
-  const following = watch(social.graph, () => social.isUserFollowing(pubkey))
-  const muted = watch(social.graph, () => social.isUserIgnoring(pubkey))
+  const following = watch(social.graph, () => user.isFollowing(pubkey))
+  const muted = watch(social.graph, () => user.isIgnoring(pubkey))
 
   let actions = []
 
   $: {
     actions = []
 
-    if ($canSign) {
+    if (user.canSign()) {
       actions.push({
         onClick: () => addToList("p", pubkey),
         label: "Add to list",
@@ -30,7 +29,7 @@
 
     actions.push({onClick: share, label: "Share", icon: "share-nodes"})
 
-    if (keys.getPubkey() !== pubkey && $canSign) {
+    if (user.getPubkey() !== pubkey && user.canSign()) {
       actions.push({
         onClick: () => navigate(`/messages/${npub}`),
         label: "Message",
@@ -39,7 +38,7 @@
 
       if ($muted) {
         actions.push({onClick: unmute, label: "Unmute", icon: "microphone"})
-      } else if (keys.getPubkey() !== pubkey) {
+      } else if (user.getPubkey() !== pubkey) {
         actions.push({onClick: mute, label: "Mute", icon: "microphone-slash"})
       }
     }
@@ -48,7 +47,7 @@
       actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
     }
 
-    if (keys.getPubkey() === pubkey && $canSign) {
+    if (user.getPubkey() === pubkey && user.canSign()) {
       actions.push({
         onClick: () => navigate("/profile"),
         label: "Edit",
@@ -57,31 +56,26 @@
     }
   }
 
-  const follow = () =>
-    social.follow(pubkey, routing.getPubkeyHint(pubkey), directory.displayPubkey(pubkey))
+  const openProfileInfo = () => modal.push({type: "person/info", pubkey})
 
-  const unfollow = () => social.unfollow(pubkey)
+  const share = () => modal.push({type: "person/share", pubkey})
 
-  const mute = () => social.mute("p", pubkey)
+  const unfollow = () => user.unfollow(pubkey)
 
-  const unmute = () => social.unmute(pubkey)
+  const follow = () => user.follow(pubkey)
 
-  const openProfileInfo = () => {
-    modal.push({type: "person/info", pubkey})
-  }
+  const unmute = () => user.unmute(pubkey)
 
-  const share = () => {
-    modal.push({type: "person/share", pubkey})
-  }
+  const mute = () => user.mute("p", pubkey)
 </script>
 
 <div class="flex items-center gap-3">
-  {#if $canSign}
+  {#if user.canSign()}
     <Popover triggerType="mouseenter">
       <div slot="trigger">
         {#if $following}
           <i class="fa fa-user-minus cursor-pointer" on:click={unfollow} />
-        {:else if keys.getPubkey() !== pubkey}
+        {:else if user.getPubkey() !== pubkey}
           <i class="fa fa-user-plus cursor-pointer" on:click={follow} />
         {/if}
       </div>

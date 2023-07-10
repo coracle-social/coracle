@@ -2,13 +2,15 @@
   import cx from "classnames"
   import {theme, installPrompt} from "src/partials/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {FORCE_RELAYS, keys, directory, alerts} from "src/system"
+  import {FORCE_RELAYS, user, directory, alerts} from "src/app/system"
   import {watch} from "src/util/loki"
   import {routes, slowConnections, menuIsOpen} from "src/app/state"
 
-  const {canSign, pubkey} = keys
+  const {canSign} = user.keys
   const {hasNewNotfications, hasNewChatMessages, hasNewDirectMessages} = alerts
-  const profile = watch(directory.profiles, () => ($pubkey ? directory.getProfile($pubkey) : null))
+  const profile = watch(directory.profiles, () =>
+    user.getPubkey() ? directory.getProfile(user.getPubkey()) : null
+  )
 
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 
@@ -33,8 +35,8 @@
   class:-ml-56={!$menuIsOpen}>
   {#if $profile}
     <li>
-      <a href={routes.person($pubkey)} class="flex items-center gap-2 px-4 py-2 pb-6">
-        <PersonCircle size={6} pubkey={$pubkey} />
+      <a href={routes.person(user.getPubkey())} class="flex items-center gap-2 px-4 py-2 pb-6">
+        <PersonCircle size={6} pubkey={user.getPubkey()} />
         <span class="text-lg font-bold">{directory.displayProfile($profile)}</span>
       </a>
     </li>

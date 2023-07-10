@@ -3,11 +3,11 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {routing} from "src/system"
+  import {routing, user} from "src/app/system"
   import {watch} from "src/util/loki"
   import {modal} from "src/partials/state"
 
-  const relays = watch(routing.policies, () => routing.getUserRelays())
+  const relays = watch(routing.policies, () => user.getRelays())
 
   document.title = "Relays"
 </script>

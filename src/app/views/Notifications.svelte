@@ -14,7 +14,7 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app/views/Notification.svelte"
-  import {social, alerts, cache} from "src/system"
+  import {user, alerts, cache} from "src/app/system"
   import {watch} from "src/util/loki"
 
   const {lastChecked} = alerts
@@ -30,7 +30,7 @@
     return reverse(
       sortBy(
         e => formatTimestampAsLocalISODate(e.created_at).slice(0, 13) + findReplyId(e),
-        social.applyMutes(alerts.events.all())
+        user.applyMutes(alerts.events.all())
       )
     )
   })

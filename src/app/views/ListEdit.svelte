@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import {directory, content, routing} from "src/system"
+  import {directory, content, user, routing} from "src/app/system"
 
   export let list
 
@@ -42,7 +42,7 @@
       return toast.show("error", "A name is required for your list")
     }
 
-    const duplicates = content.getUserLists({
+    const duplicates = user.getLists({
       name: values.name,
       naddr: {$ne: list?.naddr},
     })
@@ -53,7 +53,7 @@
 
     const {name, params, relays} = values
 
-    content.putList(name, params, relays)
+    user.putList(name, params, relays)
     toast.show("info", "Your list has been saved!")
     modal.pop()
   }

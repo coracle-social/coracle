@@ -13,7 +13,7 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {keys, social, settings, routing, network} from "src/system"
+  import {user, routing, network} from "src/app/system"
   import legacyNetwork from "src/agent/network"
   import {mergeParents, compileFilter} from "src/app/state"
 
@@ -64,7 +64,7 @@
     const _key = key
 
     // Deduplicate and filter out stuff we don't want, apply user preferences
-    const filtered = social.applyMutes(newNotes.filter(n => !seen.has(n.id) && shouldDisplay(n)))
+    const filtered = user.applyMutes(newNotes.filter(n => !seen.has(n.id) && shouldDisplay(n)))
 
     // Keep track of what we've seen
     for (const note of filtered) {
@@ -82,7 +82,7 @@
             timeout: parentsTimeout,
             filter: {ids: notesWithParent.map(findReplyId)},
             relays: routing.mergeHints(
-              settings.getSetting("relayLimit"),
+              user.getSetting("relay_limit"),
               notesWithParent.map(e => routing.getParentHints(3, e))
             ),
           })
@@ -103,7 +103,7 @@
       maxDepth: 2,
       notes: combined.filter(canDisplay),
       onChunk: context => {
-        context = social.applyMutes(context)
+        context = user.applyMutes(context)
 
         notesBuffer = legacyNetwork.applyContext(notesBuffer, context)
         notes = legacyNetwork.applyContext(notes, context)
@@ -140,8 +140,8 @@
       return routing.getSearchRelays()
     }
 
-    const limit = settings.getSetting("relayLimit")
-    const authors = (compileFilter(filter).authors || []).concat(keys.getPubkey())
+    const limit = user.getSetting("relay_limit")
+    const authors = (compileFilter(filter).authors || []).concat(user.getPubkey())
     const hints = authors.map(pubkey => routing.getPubkeyHints(limit, pubkey))
 
     return routing.mergeHints(limit, hints)

@@ -13,7 +13,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
-  import {nip05, directory, routing, social} from "src/system"
+  import {nip05, user, directory, routing, social} from "src/app/system"
   import {watch} from "src/util/loki"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
@@ -38,7 +38,7 @@
   const interactive = !anchorId || !showEntire
   const author = watch(directory.profiles, () => directory.getProfile(note.pubkey))
   const handle = watch(nip05.handles, () => nip05.getHandle(note.pubkey))
-  const muted = watch(social.graph, () => social.isUserIgnoring(note.id))
+  const muted = watch(social.graph, () => user.isIgnoring(note.id))
 
   let border, childrenContainer, noteContainer
 
