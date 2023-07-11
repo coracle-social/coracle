@@ -152,27 +152,39 @@ export class Routing {
   // 5) Advertise relays — write and read back your own relay list
 
   selectHints = (limit, hints) => {
-    const ok = new Set()
-    const bad = new Set()
+    const seen = new Set()
+    const ok = []
+    const bad = []
 
     for (const url of chain(hints, this.system.user.getRelayUrls(), DEFAULT_RELAYS)) {
-      // Filter out relays that appear to be broken
-      if (!isShareableRelay(url) || this.system.network.pool.get(url, {autoConnect: false})?.error) {
-        bad.add(url)
-      } else {
-        ok.add(url)
+      if (seen.has(url)) {
+        continue
       }
 
-      if (ok.size > limit) {
+      seen.add(url)
+
+      // Filter out relays that appear to be broken or slow
+      if (!isShareableRelay(url)) {
+        bad.push(url)
+      } else if (this.system.network.pool.get(url, {autoConnect: false})?.error) {
+        bad.push(url)
+      } else if (first(this.system.meta.getRelayQuality(url)) < 0.5) {
+        bad.push(url)
+      } else {
+        ok.push(url)
+      }
+
+      if (ok.length > limit) {
         break
       }
     }
 
     // If we don't have enough hints, use the broken ones
-    return Array.from(ok).concat(Array.from(bad)).slice(0, limit)
+    return ok.concat(bad).slice(0, limit)
   }
 
-  hintSelector = generateHints =>
+  hintSelector =
+    generateHints =>
     (limit, ...args) =>
       this.selectHints(limit, generateHints.call(this, ...args))
 

@@ -7,8 +7,7 @@ import {writable, get} from "svelte/store"
 import {omit, pluck, sortBy, slice} from "ramda"
 import {createMap, doPipe, first} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
-import {hash, batch, shuffle, sleep, clamp} from "src/util/misc"
-import {now, timedelta} from "src/util/misc"
+import {hash, timedelta, now, batch, shuffle, sleep, clamp} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
@@ -134,14 +133,14 @@ setInterval(() => {
   const $slowConnections = []
 
   // Prune connections we haven't used in a while
-  for (const [url, socket] of network.pool.data.entries()) {
-    const stats = meta.relayStats.get(url)
+  for (const url of network.pool.data.keys()) {
+    const stats = meta.getRelayStats(url)
 
     if (!stats) {
       continue
     }
 
-    if (stats.last_activity < Date.now() - 60_000) {
+    if (stats.last_activity < now() - 60) {
       network.pool.remove(url)
     } else if (userRelays.has(url) && first(meta.getRelayQuality(url)) < 0.3) {
       $slowConnections.push(url)
@@ -150,7 +149,7 @@ setInterval(() => {
 
   // Alert the user to any heinously slow connections
   slowConnections.set($slowConnections)
-}, 30_000)
+}, 10_000)
 
 export const loadAppData = async pubkey => {
   if (user.getRelayUrls("read").length > 0) {

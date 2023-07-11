@@ -1,50 +1,47 @@
 import {Socket} from "paravel"
 import {now} from "src/util/misc"
-import {Table} from "src/util/loki"
 import {switcher} from "hurdak/lib/hurdak"
 import type {System} from "src/system/system"
 import type {RelayStat} from "src/system/types"
 
 export class Meta {
   system: System
-  relayStats: Table<RelayStat>
+  relayStats: Record<string, RelayStat>
   constructor(system) {
     this.system = system
 
-    this.relayStats = new Table(system.key("meta/relayStats"), "url")
+    this.relayStats = {}
 
     system.network.pool.on("open", ({url}) => {
-      this.relayStats.patch({url, last_opened: now(), last_activity: now()})
+      this.updateRelayStats(url, {last_opened: now(), last_activity: now()})
     })
 
     system.network.pool.on("close", ({url}) => {
-      this.relayStats.patch({url, last_closed: now(), last_activity: now()})
+      this.updateRelayStats(url, {last_closed: now(), last_activity: now()})
     })
 
     system.network.pool.on("error:set", (url, error) => {
-      this.relayStats.patch({url, error})
+      this.updateRelayStats(url, {error})
     })
 
     system.network.pool.on("error:clear", url => {
-      this.relayStats.patch({url, error: null})
+      this.updateRelayStats(url, {error: null})
     })
 
     system.network.on("publish", urls => {
-      this.relayStats.patch(
-        urls.map(url => ({
-          url,
+      for (const url of urls) {
+        this.updateRelayStats(url, {
           last_publish: now(),
           last_activity: now(),
-        }))
-      )
+        })
+      }
     })
 
     system.network.on("sub:open", urls => {
       for (const url of urls) {
-        const stats = this.relayStats.get(url)
+        const stats = this.getRelayStats(url)
 
-        this.relayStats.patch({
-          url,
+        this.updateRelayStats(url, {
           last_sub: now(),
           last_activity: now(),
           total_subs: (stats?.total_subs || 0) + 1,
@@ -55,10 +52,9 @@ export class Meta {
 
     system.network.on("sub:close", urls => {
       for (const url of urls) {
-        const stats = this.relayStats.get(url)
+        const stats = this.getRelayStats(url)
 
-        this.relayStats.patch({
-          url,
+        this.updateRelayStats(url, {
           last_activity: now(),
           active_subs: stats ? stats.active_subs - 1 : 0,
         })
@@ -66,20 +62,18 @@ export class Meta {
     })
 
     system.network.on("event", ({url}) => {
-      const stats = this.relayStats.get(url)
+      const stats = this.getRelayStats(url)
 
-      this.relayStats.patch({
-        url,
+      this.updateRelayStats(url, {
         last_activity: now(),
         events_count: (stats.events_count || 0) + 1,
       })
     })
 
     system.network.on("eose", (url, ms) => {
-      const stats = this.relayStats.get(url)
+      const stats = this.getRelayStats(url)
 
-      this.relayStats.patch({
-        url,
+      this.updateRelayStats(url, {
         last_activity: now(),
         eose_count: (stats.eose_count || 0) + 1,
         eose_timer: (stats.eose_timer || 0) + ms,
@@ -87,18 +81,25 @@ export class Meta {
     })
 
     system.network.on("timeout", (url, ms) => {
-      const stats = this.relayStats.get(url)
+      const stats = this.getRelayStats(url)
 
-      this.relayStats.patch({
-        url,
+      this.updateRelayStats(url, {
         last_activity: now(),
         timeouts: (stats.timeouts || 0) + 1,
       })
     })
   }
 
+  getRelayStats = url => this.relayStats[url]
+
+  updateRelayStats = (url, updates) => {
+    const stats = this.getRelayStats(url)
+
+    this.relayStats[url] = {...stats, ...updates}
+  }
+
   getRelayQuality = url => {
-    const stats = this.relayStats.get(url)
+    const stats = this.getRelayStats(url)
 
     if (!stats) {
       return [0.5, "Not Connected"]

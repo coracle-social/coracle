@@ -20,42 +20,40 @@
 </script>
 
 <div class="relative flex flex-col gap-4 px-3 py-2">
-  <div class="flex justify-between gap-2">
-    <Anchor href={routes.person(pubkey)} class="flex gap-4">
-      <PersonCircle size={14} {pubkey} />
-      <div class="flex flex-grow flex-col gap-2">
-        <h2 class="text-lg">{directory.displayProfile($profile)}</h2>
-        {#if $handle}
-          <div class="flex gap-1 text-sm">
-            <i class="fa fa-user-check text-accent" />
-            <span class="opacity-75">{nip05.displayHandle($handle)}</span>
-          </div>
-        {/if}
-      </div>
-    </Anchor>
-    <div class="flex gap-4 py-2 text-lg">
-      {#if user.canSign()}
-        {#if $muted}
-          <i
-            title="Unmute"
-            class="fa fa-microphone-slash w-6 cursor-pointer text-center"
-            on:click={unmute} />
-        {:else}
-          <i title="Mute" class="fa fa-microphone w-6 cursor-pointer text-center" on:click={mute} />
-        {/if}
-        {#if $following}
-          <i
-            title="Unfollow"
-            class="fa fa-user-minus w-6 cursor-pointer text-center"
-            on:click={unfollow} />
-        {:else}
-          <i
-            title="Follow"
-            class="fa fa-user-plus w-6 cursor-pointer text-center"
-            on:click={follow} />
-        {/if}
+  <Anchor href={routes.person(pubkey)} class="flex gap-4">
+    <PersonCircle size={14} {pubkey} />
+    <div class="flex flex-grow flex-col gap-2">
+      <h2 class="pr-16 text-lg">{directory.displayProfile($profile)}</h2>
+      {#if $handle}
+        <div class="flex gap-1 text-sm">
+          <i class="fa fa-user-check text-accent" />
+          <span class="opacity-75">{nip05.displayHandle($handle)}</span>
+        </div>
       {/if}
     </div>
+  </Anchor>
+  <div class="absolute right-1 top-1 flex gap-4 py-2 text-lg">
+    {#if user.canSign()}
+      {#if $muted}
+        <i
+          title="Unmute"
+          class="fa fa-microphone-slash w-6 cursor-pointer text-center"
+          on:click={unmute} />
+      {:else}
+        <i title="Mute" class="fa fa-microphone w-6 cursor-pointer text-center" on:click={mute} />
+      {/if}
+      {#if $following}
+        <i
+          title="Unfollow"
+          class="fa fa-user-minus w-6 cursor-pointer text-center"
+          on:click={unfollow} />
+      {:else}
+        <i
+          title="Follow"
+          class="fa fa-user-plus w-6 cursor-pointer text-center"
+          on:click={follow} />
+      {/if}
+    {/if}
   </div>
   <PersonAbout {pubkey} />
 </div>

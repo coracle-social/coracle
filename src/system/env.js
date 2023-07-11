@@ -17,7 +17,8 @@ export const DEFAULT_RELAYS =
         "wss://purplepag.es",
         "wss://relay.damus.io",
         "wss://relay.nostr.band",
-        "wss://nostr-pub.wellorder.net",
+        "wss://relayable.org",
+        "wss://nostr.wine",
       ]
 
 export const DEFAULT_FOLLOWS = (import.meta.env.VITE_DEFAULT_FOLLOWS || "")

@@ -15,6 +15,12 @@
   - [ ] Improve watchers so users of system don't need to know how they work
   - [ ] Check for TODOs
 - [ ] Add custom emoji support
+- [ ] Re-work note media
+  - [ ] Add webcam image/video capture
+  - [ ] Show list of media that can be viewed/removed below post
+  - [ ] Add url of media into post before publish
+  - [ ] Support multiple media
+  - [ ] Support bigger files, or at least handle errors. Monetize, or use nip 95
 - [ ] Fork and white label blowater
 - [ ] Add word/char count to compose
 - [ ] Show full nip05 unless it starts with an underscore
