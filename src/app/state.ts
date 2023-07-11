@@ -11,7 +11,8 @@ import {hash, timedelta, now, batch, shuffle, sleep, clamp} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
-import {
+import {PubkeyLoader} from "src/system"
+import system, {
   FORCE_RELAYS,
   DEFAULT_FOLLOWS,
   ENABLE_ZAPS,
@@ -23,7 +24,6 @@ import {
   outbox,
   user,
 } from "src/app/system"
-import legacyNetwork from "src/agent/network"
 
 // Routing
 
@@ -86,6 +86,8 @@ export const logUsage = async name => {
   }
 }
 
+export const pubkeyLoader = new PubkeyLoader(system)
+
 // Synchronization from events to state
 
 export const listen = async () => {
@@ -119,8 +121,8 @@ export const listen = async () => {
       {kinds, "#e": eventIds, since},
       {kinds: [42], "#e": channelIds, since},
     ],
-    onEvent: batch(500, events => {
-      legacyNetwork.loadPeople(pluck("pubkey", events))
+    onEvent: batch(3000, events => {
+      pubkeyLoader.loadPubkeys(pluck("pubkey", events))
     }),
   })
 }
@@ -157,8 +159,8 @@ export const loadAppData = async pubkey => {
     listen()
 
     // Make sure the user and their network is loaded
-    await legacyNetwork.loadPeople([pubkey], {force: true, kinds: userKinds})
-    await legacyNetwork.loadPeople(user.getFollows())
+    await pubkeyLoader.loadPubkeys([pubkey], {force: true, kinds: userKinds})
+    await pubkeyLoader.loadPubkeys(user.getFollows())
   }
 }
 
@@ -175,7 +177,7 @@ export const login = async (method, key) => {
 
     await Promise.all([
       sleep(1500),
-      legacyNetwork.loadPeople([user.getPubkey()], {force: true, kinds: userKinds}),
+      pubkeyLoader.loadPubkeys([user.getPubkey()], {force: true, kinds: userKinds}),
     ])
 
     navigate("/notes")

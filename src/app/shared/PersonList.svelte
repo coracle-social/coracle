@@ -6,7 +6,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
   import {social, routing, user, network} from "src/app/system"
-  import legacyNetwork from "src/agent/network"
+  import {pubkeyLoader} from "src/app/state"
 
   export let type
   export let pubkey
@@ -24,7 +24,7 @@
         onEvent: batch(500, events => {
           const newPubkeys = pluck("pubkey", events)
 
-          legacyNetwork.loadPeople(newPubkeys)
+          pubkeyLoader.loadPubkeys(newPubkeys)
 
           pubkeys = uniq(pubkeys.concat(newPubkeys))
         }),

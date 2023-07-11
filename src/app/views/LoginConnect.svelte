@@ -14,8 +14,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {DEFAULT_RELAYS, FORCE_RELAYS, routing, user, network} from "src/app/system"
   import {watch} from "src/util/loki"
-  import legacyNetwork from "src/agent/network"
-  import {loadAppData} from "src/app/state"
+  import {loadAppData, pubkeyLoader} from "src/app/state"
 
   let modal = null
   let customRelayUrl = null
@@ -53,27 +52,30 @@
       attemptedRelays.add(relay.url)
       currentRelays[i] = relay
 
-      legacyNetwork
-        .loadPeople([user.getPubkey()], {relays: [relay.url], force: true, kinds: userKinds})
-        .then(async () => {
-          // Wait a bit before removing the relay to smooth out the ui
-          await sleep(1000)
+      // Wait a bit before removing the relay to smooth out the ui
+      await Promise.all([
+        sleep(1500),
+        pubkeyLoader.loadPubkeys([user.getPubkey()], {
+          force: true,
+          relays: [relay.url],
+          kinds: userKinds,
+        }),
+      ])
 
-          currentRelays[i] = null
+      currentRelays[i] = null
 
-          if (searching && user.getRelayUrls().length > 0) {
-            searching = false
-            modal = "success"
+      if (searching && user.getRelayUrls().length > 0) {
+        searching = false
+        modal = "success"
 
-            // Reload everything, it's possible we didn't get their petnames if we got a match
-            // from something like purplepag.es. This helps us avoid nuking follow lists later
-            await Promise.all([loadAppData(user.getPubkey()), sleep(1500)])
+        // Reload everything, it's possible we didn't get their petnames if we got a match
+        // from something like purplepag.es. This helps us avoid nuking follow lists later
+        await Promise.all([loadAppData(user.getPubkey()), sleep(1500)])
 
-            navigate("/notes")
-          } else {
-            network.pool.remove(relay.url)
-          }
-        })
+        navigate("/notes")
+      } else {
+        network.pool.remove(relay.url)
+      }
     }
 
     // Wait for our relay list to load initially, then terminate when we've tried everything

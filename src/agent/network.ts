@@ -1,39 +1,9 @@
-import {
-  max,
-  without,
-  mergeLeft,
-  fromPairs,
-  sortBy,
-  assoc,
-  uniq,
-  uniqBy,
-  prop,
-  propEq,
-  groupBy,
-  pluck,
-} from "ramda"
-import {personKinds, appDataKeys, findReplyId} from "src/util/nostr"
+import {max, mergeLeft, fromPairs, sortBy, assoc, uniqBy, prop, propEq, groupBy, pluck} from "ramda"
+import {findReplyId} from "src/util/nostr"
 import {chunk, ensurePlural} from "hurdak/lib/hurdak"
 import {batch, now, timedelta} from "src/util/misc"
-import {ENABLE_ZAPS, user, routing, directory, network} from "src/app/system"
-
-// If we ask for a pubkey and get nothing back, don't ask again this page load
-const attemptedPubkeys = new Set()
-
-const getStalePubkeys = pubkeys => {
-  // If we're not reloading, only get pubkeys we don't already know about
-  return uniq(pubkeys).filter(pubkey => {
-    if (attemptedPubkeys.has(pubkey)) {
-      return false
-    }
-
-    attemptedPubkeys.add(pubkey)
-
-    const profile = directory.profiles.get(pubkey)
-
-    return !profile || profile.updated_at < now() - timedelta(1, "days")
-  })
-}
+import {PubkeyLoader} from "src/system"
+import system, {ENABLE_ZAPS, user, routing, network} from "src/app/system"
 
 class Cursor {
   relays: string[]
@@ -137,46 +107,6 @@ class Cursor {
   }
 }
 
-const loadPeople = async (
-  pubkeys,
-  {
-    relays = null,
-    kinds = personKinds,
-    force = false,
-  }: {relays?: string[]; kinds?: number[]; force?: boolean} = {}
-) => {
-  pubkeys = uniq(pubkeys)
-
-  // If we're not reloading, only get pubkeys we don't already know about
-  if (!force) {
-    pubkeys = getStalePubkeys(pubkeys)
-  }
-
-  await Promise.all(
-    chunk(256, pubkeys).map(async chunk => {
-      const chunkRelays =
-        relays?.length > 0
-          ? relays
-          : routing.mergeHints(
-              user.getSetting("relay_limit"),
-              chunk.map(pubkey => routing.getPubkeyHints(3, pubkey))
-            )
-
-      const chunkFilter = [] as Array<Record<string, any>>
-
-      chunkFilter.push({kinds: without([30078], kinds), authors: chunk})
-
-      // Add a separate filter for app data so we're not pulling down other people's stuff,
-      // or obsolete events of our own.
-      if (kinds.includes(30078)) {
-        chunkFilter.push({kinds: [30078], authors: chunk, "#d": appDataKeys})
-      }
-
-      await network.load({relays: chunkRelays, filter: chunkFilter})
-    })
-  )
-}
-
 const streamContext = ({notes, onChunk, maxDepth = 2}) => {
   const seen = new Set()
   const kinds = ENABLE_ZAPS ? [1, 7, 9735] : [1, 7]
@@ -223,7 +153,7 @@ const streamContext = ({notes, onChunk, maxDepth = 2}) => {
     const pubkeys = pluck("pubkey", events)
 
     // Load any people we should know about
-    loadPeople(pubkeys)
+    new PubkeyLoader(system).loadPubkeys(pubkeys)
 
     // Load data prior to now for our new ids
     chunk(256, newIds).forEach(ids => {
@@ -274,7 +204,6 @@ const applyContext = (notes, context) => {
 
 export default {
   Cursor,
-  loadPeople,
   streamContext,
   applyContext,
 }
