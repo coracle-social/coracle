@@ -1,22 +1,22 @@
 import {ensurePlural} from "hurdak/lib/hurdak"
 import {now} from "src/util/misc"
 import {Tags} from "src/util/nostr"
-import {Table} from "src/util/loki"
-import type {System} from "src/system/system"
+import type {Table} from "src/util/loki"
+import type {Sync} from "src/system/components/Sync"
 import type {GraphEntry} from "src/system/types"
 
 export class Social {
-  system: System
+  sync: Sync
   graph: Table<GraphEntry>
-  constructor(system) {
-    this.system = system
+  constructor(sync) {
+    this.sync = sync
 
-    this.graph = new Table(this.system.key("social/graph"), "pubkey", {
+    this.graph = sync.table("social/graph", "pubkey", {
       max: 5000,
-      sort: this.system.sortByGraph,
+      sort: sync.sortByPubkeyWhitelist,
     })
 
-    this.system.sync.addHandler(3, e => {
+    sync.addHandler(3, e => {
       const entry = this.graph.get(e.pubkey)
 
       if (e.created_at < entry?.petnames_updated_at) {
@@ -31,7 +31,7 @@ export class Social {
       })
     })
 
-    this.system.sync.addHandler(10000, e => {
+    sync.addHandler(10000, e => {
       const entry = this.graph.get(e.pubkey)
 
       if (e.created_at < entry?.mutes_updated_at) {

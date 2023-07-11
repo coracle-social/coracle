@@ -7,7 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {watch} from "src/util/loki"
-  import {user, routing, directory, builder, chat, network, outbox} from "src/app/system"
+  import {user, routing, directory, builder, network} from "src/app/system"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -18,7 +18,7 @@
   const pubkey = toHex(entity)
   const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
 
-  chat.setLastChecked(pubkey, now())
+  user.setLastChecked(pubkey, now())
 
   const getRelays = () =>
     routing.mergeHints(3, [
@@ -28,10 +28,7 @@
 
   const sendMessage = async content => {
     const cyphertext = await user.crypt.encrypt(pubkey, content)
-    const [event] = await outbox.publish(
-      builder.createDirectMessage(pubkey, cyphertext),
-      getRelays()
-    )
+    const [event] = await user.publish(builder.createDirectMessage(pubkey, cyphertext), getRelays())
 
     // Return unencrypted content so we can display it immediately
     return {...event, content}

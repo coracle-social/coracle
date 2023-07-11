@@ -5,8 +5,7 @@
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {social, routing, user, network} from "src/app/system"
-  import {pubkeyLoader} from "src/app/state"
+  import {social, routing, user, network, pubkeyLoader} from "src/app/system"
 
   export let type
   export let pubkey

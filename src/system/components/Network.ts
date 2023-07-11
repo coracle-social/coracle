@@ -1,5 +1,3 @@
-import type {Filter} from "nostr-tools"
-import type {MyEvent} from "src/util/types"
 import {EventEmitter} from "events"
 import {verifySignature, matchFilters} from "nostr-tools"
 import {Pool, Plex, Relays, Executor, Socket} from "paravel"
@@ -7,13 +5,20 @@ import {ensurePlural} from "hurdak/lib/hurdak"
 import {union, difference} from "src/util/misc"
 import {warn, error, log} from "src/util/logger"
 import {normalizeRelayUrl} from "src/util/nostr"
-import {FORCE_RELAYS, COUNT_RELAYS} from "src/system/env"
-import type {System} from "src/system/system"
+import type {Event, Filter, RelayInfo} from "src/system/types"
 
-type SubscribeOpts = {
+export type NetworkOpts = {
+  getMultiplextrUrl: () => string | null
+  processEvents: (events: Event[]) => void
+  getRelayInfo: (url: string) => RelayInfo | null
+  forceRelays: string[]
+  countRelays: string[]
+}
+
+export type SubscribeOpts = {
   relays: string[]
   filter: Filter[] | Filter
-  onEvent?: (event: MyEvent) => void
+  onEvent?: (event: Event) => void
   onEose?: (url: string) => void
   shouldProcess?: boolean
 }
@@ -34,23 +39,21 @@ const getUrls = relays => {
 
 export class Network extends EventEmitter {
   authHandler?: (url: string, challenge: string) => void
-  system: System
   pool: Pool
-  constructor(system) {
+  constructor(readonly opts: NetworkOpts) {
     super()
 
     this.authHandler = null
-    this.system = system
     this.pool = new Pool()
   }
   getExecutor = (urls, {bypassBoot = false} = {}) => {
-    if (FORCE_RELAYS.length > 0) {
-      urls = FORCE_RELAYS
+    if (this.opts.forceRelays.length > 0) {
+      urls = this.opts.forceRelays
     }
 
     let target
 
-    const muxUrl = this.system.user.getSetting("multiplextr_url")
+    const muxUrl = this.opts.getMultiplextrUrl()
 
     // Try to use our multiplexer, but if it fails to connect fall back to relays. If
     // we're only connecting to a single relay, just do it directly, unless we already
@@ -89,7 +92,7 @@ export class Network extends EventEmitter {
 
     // Eagerly connect and handle AUTH
     executor.target.sockets.forEach(socket => {
-      const {limitation} = this.system.routing.getRelayInfo(socket.url)
+      const {limitation} = this.opts.getRelayInfo(socket.url)
       const waitForBoot = limitation?.payment_required || limitation?.auth_required
 
       // This happens automatically, but kick it off anyway
@@ -219,7 +222,7 @@ export class Network extends EventEmitter {
         this.emit("event", {url, event})
 
         if (shouldProcess) {
-          this.system.sync.processEvents([event])
+          this.opts.processEvents([event])
         }
 
         onEvent(event)
@@ -262,7 +265,7 @@ export class Network extends EventEmitter {
   }: {
     relays: string[]
     filter: Filter | Filter[]
-    onEvent?: (event: MyEvent) => void
+    onEvent?: (event: Event) => void
     shouldProcess?: boolean
     timeout?: number
   }) => {
@@ -310,11 +313,11 @@ export class Network extends EventEmitter {
           attemptToComplete(false)
         },
       })
-    }) as Promise<MyEvent[]>
+    }) as Promise<Event[]>
   }
   count = async filter => {
     const filters = ensurePlural(filter)
-    const executor = this.getExecutor(COUNT_RELAYS)
+    const executor = this.getExecutor(this.opts.countRelays)
 
     return new Promise(resolve => {
       const sub = executor.count(filters, {

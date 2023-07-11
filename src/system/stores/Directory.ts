@@ -1,31 +1,28 @@
 import {nip19} from "nostr-tools"
 import {ellipsize} from "hurdak/lib/hurdak"
 import {tryJson, now, fuzzy} from "src/util/misc"
-import {Table, watch} from "src/util/loki"
-import type {System} from "src/system/system"
+import type {Table} from "src/util/loki"
 import type {Readable} from "svelte/store"
+import type {Sync} from "src/system/components/Sync"
 import type {Profile} from "src/system/types"
 
 export class Directory {
-  system: System
   profiles: Table<Profile>
   searchProfiles: Readable<(q: string) => Record<string, any>[]>
-  constructor(system) {
-    this.system = system
-
-    this.profiles = new Table(this.system.key("directory/profiles"), "pubkey", {
+  constructor(sync: Sync) {
+    this.profiles = sync.table("directory/profiles", "pubkey", {
       max: 5000,
-      sort: this.system.sortByGraph,
+      sort: sync.sortByPubkeyWhitelist,
     })
 
-    this.searchProfiles = watch(this.profiles, () => {
+    this.searchProfiles = this.profiles.watch(() => {
       return fuzzy(this.getNamedProfiles(), {
         keys: ["name", "display_name", {name: "nip05", weight: 0.5}, {name: "about", weight: 0.1}],
         threshold: 0.3,
       })
     })
 
-    this.system.sync.addHandler(0, e => {
+    sync.addHandler(0, e => {
       tryJson(() => {
         const kind0 = JSON.parse(e.content)
         const profile = this.profiles.get(e.pubkey)

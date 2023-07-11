@@ -1,29 +1,19 @@
 import {last} from "ramda"
 import {nip05} from "nostr-tools"
 import {tryFunc, now, tryJson} from "src/util/misc"
-import {Table} from "src/util/loki"
-import type {System} from "src/system/system"
-
-export type Handle = {
-  profile: Record<string, any>
-  pubkey: string
-  address: string
-  created_at: number
-  updated_at: number
-}
+import type {Table} from "src/util/loki"
+import type {Sync} from "src/system/components/Sync"
+import type {Handle} from "src/system/types"
 
 export class Nip05 {
-  system: System
   handles: Table<Handle>
-  constructor(system) {
-    this.system = system
-
-    this.handles = new Table(system.key("nip05/handles"), "pubkey", {
-      sort: system.sortByGraph,
+  constructor(sync: Sync) {
+    this.handles = sync.table("nip05/handles", "pubkey", {
       max: 5000,
+      sort: sync.sortByPubkeyWhitelist,
     })
 
-    system.sync.addHandler(0, e => {
+    sync.addHandler(0, e => {
       tryJson(async () => {
         const kind0 = JSON.parse(e.content)
         const handle = this.handles.get(e.pubkey)

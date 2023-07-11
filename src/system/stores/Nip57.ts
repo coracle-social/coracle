@@ -1,8 +1,9 @@
 import {fetchJson, now, tryFunc, tryJson, hexToBech32, bech32ToHex} from "src/util/misc"
 import {invoiceAmount} from "src/util/lightning"
 import {Tags} from "src/util/nostr"
-import {Table} from "src/util/loki"
-import type {System} from "src/system/system"
+import type {Table} from "src/util/loki"
+import type {Sync} from "src/system/components/Sync"
+import type {Zapper} from "src/system/types"
 
 const getLnUrl = address => {
   // Try to parse it as a lud06 LNURL
@@ -20,29 +21,15 @@ const getLnUrl = address => {
   }
 }
 
-export type Zapper = {
-  pubkey: string
-  lnurl: string
-  callback: string
-  minSendable: number
-  maxSendable: number
-  nostrPubkey: string
-  created_at: number
-  updated_at: number
-}
-
 export class Nip57 {
-  system: System
   zappers: Table<Zapper>
-  constructor(system) {
-    this.system = system
-
-    this.zappers = new Table(system.key("niip57/zappers"), "pubkey", {
-      sort: system.sortByGraph,
+  constructor(sync: Sync) {
+    this.zappers = sync.table("niip57/zappers", "pubkey", {
       max: 5000,
+      sort: sync.sortByPubkeyWhitelist,
     })
 
-    system.sync.addHandler(0, e => {
+    sync.addHandler(0, e => {
       tryJson(async () => {
         const kind0 = JSON.parse(e.content)
         const zapper = this.zappers.get(e.pubkey)

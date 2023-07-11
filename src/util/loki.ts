@@ -138,6 +138,9 @@ export class Table<T> {
   max(k): number {
     return this._coll.max(k)
   }
+  watch(f) {
+    return watch(this, f)
+  }
 }
 
 const listener = (() => {

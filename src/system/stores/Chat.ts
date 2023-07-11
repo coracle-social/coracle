@@ -1,40 +1,29 @@
-import {last, sortBy, pick, uniq, fromPairs, pluck, without} from "ramda"
+import {last, sortBy, pick, uniq, pluck} from "ramda"
+import {get} from "svelte/store"
 import {tryJson, now, tryFunc} from "src/util/misc"
 import {Tags, channelAttrs} from "src/util/nostr"
-import {Table} from "src/util/loki"
-import type {System} from "src/system/system"
+import type {Table} from "src/util/loki"
+import type {Readable} from "svelte/store"
+import type {Sync} from "src/system/components/Sync"
+import type {Crypt} from "src/system/components/User"
+import type {Channel, Message} from "src/system/types"
 
 const getHints = e => pluck("url", Tags.from(e).relays())
 
-export type Channel = {
-  id: string
-  type: "public" | "private"
-  pubkey: string
-  updated_at: number
-  last_sent?: number
-  last_received?: number
-  last_checked?: number
-  joined?: boolean
-  hints: string[]
-}
+const messageIsNew = ({last_checked, last_received, last_sent}: Channel) =>
+  last_received > Math.max(last_sent || 0, last_checked || 0)
 
-export type Message = {
-  id: string
-  channel: string
-  pubkey: string
-  created_at: number
-  content: string
-  tags: string[][]
+export type ChatOpts = {
+  getCrypt: () => Crypt
 }
 
 export class Chat {
-  system: System
   channels: Table<Channel>
   messages: Table<Message>
-  constructor(system) {
-    this.system = system
-
-    this.channels = new Table(system.key("chat/channels"), "id", {
+  hasNewDirectMessages: Readable<boolean>
+  hasNewChatMessages: Readable<boolean>
+  constructor(sync: Sync, readonly opts: ChatOpts) {
+    this.channels = sync.table("chat/channels", "id", {
       sort: sortBy(x => {
         if (x.joined || x.type === "private") return 0
         if (!x.name || x.name.match(/test/i)) return Infinity
@@ -43,7 +32,7 @@ export class Chat {
       }),
     })
 
-    this.messages = new Table(system.key("chat/messages"), "id", {
+    this.messages = sync.table("chat/messages", "id", {
       sort: xs => {
         const channelIds = new Set(
           pluck("id", this.channels.all({$or: [{joined: true}, {type: "private"}]}))
@@ -53,7 +42,19 @@ export class Chat {
       },
     })
 
-    system.sync.addHandler(40, e => {
+    this.hasNewDirectMessages = this.channels.watch(() => {
+      const channels = this.channels.all({type: "private", last_sent: {$type: "number"}})
+
+      return channels.filter(e => messageIsNew(e)).length > 0
+    })
+
+    this.hasNewChatMessages = this.channels.watch(() => {
+      const channels = this.channels.all({type: "public", joined: true})
+
+      return channels.filter(e => messageIsNew(e)).length > 0
+    })
+
+    sync.addHandler(40, e => {
       const channel = this.channels.get(e.id)
 
       if (e.created_at < channel?.updated_at) {
@@ -76,7 +77,7 @@ export class Chat {
       })
     })
 
-    system.sync.addHandler(41, e => {
+    sync.addHandler(41, e => {
       const channelId = Tags.from(e).getMeta("e")
 
       if (!channelId) {
@@ -109,10 +110,10 @@ export class Chat {
       })
     })
 
-    system.sync.addHandler(30078, async e => {
+    sync.addHandler(30078, async e => {
       if (Tags.from(e).getMeta("d") === "coracle/last_checked/v1") {
         await tryJson(async () => {
-          const payload = await this.system.user.crypt.decryptJson(e.content)
+          const payload = await this.opts.getCrypt().decryptJson(e.content)
 
           for (const key of Object.keys(payload)) {
             // Backwards compat from when we used to prefix id/pubkey
@@ -131,10 +132,10 @@ export class Chat {
       }
     })
 
-    system.sync.addHandler(30078, async e => {
+    sync.addHandler(30078, async e => {
       if (Tags.from(e).getMeta("d") === "coracle/rooms_joined/v1") {
         await tryJson(async () => {
-          const channelIds = await this.system.user.crypt.decryptJson(e.content)
+          const channelIds = await this.opts.getCrypt().decryptJson(e.content)
 
           // Just a bug from when I was building the feature, remove someday
           if (!Array.isArray(channelIds)) {
@@ -152,15 +153,15 @@ export class Chat {
       }
     })
 
-    system.sync.addHandler(4, async e => {
-      if (!this.system.user.canSign()) {
+    sync.addHandler(4, async e => {
+      if (!get(this.opts.getCrypt().keys.canSign)) {
         return
       }
 
       const author = e.pubkey
       const recipient = Tags.from(e).type("p").values().first()
 
-      if (![author, recipient].includes(this.system.user.getPubkey())) {
+      if (![author, recipient].includes(this.opts.getCrypt().keys.getPubkey())) {
         return
       }
 
@@ -169,18 +170,18 @@ export class Chat {
       }
 
       await tryFunc(async () => {
-        const other = this.system.user.getPubkey() === author ? recipient : author
+        const other = this.opts.getCrypt().keys.getPubkey() === author ? recipient : author
 
         this.messages.patch({
           id: e.id,
           channel: other,
           pubkey: e.pubkey,
           created_at: e.created_at,
-          content: await this.system.user.crypt.decrypt(other, e.content),
+          content: await this.opts.getCrypt().decrypt(other, e.content),
           tags: e.tags,
         })
 
-        if (this.system.user.getPubkey() === author) {
+        if (this.opts.getCrypt().keys.getPubkey() === author) {
           const channel = this.channels.get(recipient)
 
           this.channels.patch({
@@ -202,7 +203,7 @@ export class Chat {
       })
     })
 
-    system.sync.addHandler(42, e => {
+    sync.addHandler(42, e => {
       if (this.messages.get(e.id)) {
         return
       }
@@ -228,25 +229,5 @@ export class Chat {
         hints,
       })
     })
-  }
-
-  setLastChecked = (channelId, timestamp) => {
-    const lastChecked = fromPairs(
-      this.channels.all({last_checked: {$type: "number"}}).map(r => [r.id, r.last_checked])
-    )
-
-    return this.system.user.setAppData("last_checked/v1", {...lastChecked, [channelId]: timestamp})
-  }
-
-  joinChannel = channelId => {
-    const channelIds = uniq(pluck("id", this.channels.all({joined: true})).concat(channelId))
-
-    return this.system.user.setAppData("rooms_joined/v1", channelIds)
-  }
-
-  leaveChannel = channelId => {
-    const channelIds = without([channelId], pluck("id", this.channels.all({joined: true})))
-
-    return this.system.user.setAppData("rooms_joined/v1", channelIds)
   }
 }

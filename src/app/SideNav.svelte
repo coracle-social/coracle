@@ -2,12 +2,13 @@
   import cx from "classnames"
   import {theme, installPrompt} from "src/partials/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {FORCE_RELAYS, user, directory, alerts} from "src/app/system"
+  import {FORCE_RELAYS, user, directory, alerts, chat} from "src/app/system"
   import {watch} from "src/util/loki"
   import {routes, slowConnections, menuIsOpen} from "src/app/state"
 
   const {canSign} = user.keys
-  const {hasNewNotfications, hasNewChatMessages, hasNewDirectMessages} = alerts
+  const {hasNewNotfications} = alerts
+  const {hasNewChatMessages, hasNewDirectMessages} = chat
   const profile = watch(directory.profiles, () =>
     user.getPubkey() ? directory.getProfile(user.getPubkey()) : null
   )

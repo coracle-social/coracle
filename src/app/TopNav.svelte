@@ -2,10 +2,11 @@
   import {onMount} from "svelte"
   import {appName} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
-  import {alerts} from "src/app/system"
+  import {alerts, chat} from "src/app/system"
   import {menuIsOpen} from "src/app/state"
 
-  const {hasNewNotfications, hasNewChatMessages, hasNewDirectMessages} = alerts
+  const {hasNewNotfications} = alerts
+  const {hasNewChatMessages, hasNewDirectMessages} = chat
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
   const toggleMenu = () => menuIsOpen.update(x => !x)
 

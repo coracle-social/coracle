@@ -1,12 +1,30 @@
-import {nip19, nip04, getPublicKey, getSignature, generatePrivateKey} from "nostr-tools"
+import {
+  nip19,
+  nip04,
+  getPublicKey,
+  getSignature,
+  getEventHash,
+  generatePrivateKey,
+} from "nostr-tools"
 import NDK, {NDKEvent, NDKNip46Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk"
-import {when, whereEq, find, slice, reject, prop} from "ramda"
-import {switcherFn} from "hurdak/lib/hurdak"
+import {
+  when,
+  uniq,
+  pluck,
+  without,
+  fromPairs,
+  whereEq,
+  find,
+  slice,
+  assoc,
+  reject,
+  prop,
+} from "ramda"
+import {switcherFn, doPipe} from "hurdak/lib/hurdak"
 import {derived} from "svelte/store"
-import {synced, now, tryJson, tryFunc, sleep, getter} from "src/util/misc"
+import {now, tryJson, tryFunc, sleep, getter} from "src/util/misc"
 import {Tags, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
-import {DUFFLEPUD_URL, MULTIPLEXTR_URL} from "src/system/env"
-import type {System} from "src/system/system"
+import type {System} from "src/system/System"
 import type {UserSettings, KeyState} from "src/system/types"
 import type {Writable, Readable} from "svelte/store"
 
@@ -25,13 +43,15 @@ export class Crypt {
   constructor(keys) {
     this.keys = keys
   }
+
   async encrypt(pubkey, message) {
     const {method, privkey} = this.keys.getState()
 
     return switcherFn(method, {
-      extension: extension => withExtensionLock(() => {
-        return getExtension().nip04.encrypt(pubkey, message)
-      }),
+      extension: extension =>
+        withExtensionLock(() => {
+          return getExtension().nip04.encrypt(pubkey, message)
+        }),
       privkey: extension => nip04.encrypt(privkey, pubkey, message),
       bunker: async () => {
         const ndk = await this.keys.getNDK()
@@ -41,28 +61,30 @@ export class Crypt {
       },
     })
   }
+
   async decrypt(pubkey, message) {
     const {method, privkey} = this.keys.getState()
 
     return switcherFn(method, {
-      extension: () => withExtensionLock(() => {
-        return new Promise(async resolve => {
-          let result
+      extension: () =>
+        withExtensionLock(() => {
+          return new Promise(async resolve => {
+            let result
 
-          // Alby gives us a bunch of bogus errors, try multiple times
-          for (let i = 0; i < 3; i++) {
-            result = await tryFunc(() => getExtension().nip04.decrypt(pubkey, message))
+            // Alby gives us a bunch of bogus errors, try multiple times
+            for (let i = 0; i < 3; i++) {
+              result = await tryFunc(() => getExtension().nip04.decrypt(pubkey, message))
 
-            if (result) {
-              break
+              if (result) {
+                break
+              }
+
+              await sleep(30)
             }
 
-            await sleep(30)
-          }
-
-          resolve(result || `<Failed to decrypt message>`)
-        })
-      }),
+            resolve(result || `<Failed to decrypt message>`)
+          })
+        }),
       privkey: () => {
         return (
           tryFunc(() => nip04.decrypt(privkey, pubkey, message)) || `<Failed to decrypt message>`
@@ -76,11 +98,13 @@ export class Crypt {
       },
     })
   }
+
   async encryptJson(data) {
     const {pubkey} = this.keys.getState()
 
     return this.encrypt(pubkey, JSON.stringify(data))
   }
+
   async decryptJson(data) {
     const {pubkey} = this.keys.getState()
 
@@ -94,8 +118,9 @@ export class Keys {
   pubkey: Readable<string>
   canSign: Readable<boolean>
   ndk: NDK
-  constructor(user) {
-    this.keyState = synced(user.system.key("keys"), {})
+
+  constructor(sync) {
+    this.keyState = sync.store("keys", {})
     this.getState = getter(this.keyState)
     this.pubkey = derived(this.keyState, prop("pubkey"))
     this.canSign = derived(this.keyState, ({method}) =>
@@ -103,6 +128,9 @@ export class Keys {
     )
     this.ndk = null
   }
+
+  getPubkey = () => this.getState().pubkey
+
   isKeyValid = key => {
     // Validate the key before setting it to state by encoding it using bech32.
     // This will error if invalid (this works whether it's a public or a private key)
@@ -114,6 +142,7 @@ export class Keys {
 
     return true
   }
+
   prepareNdk = async (token?: string) => {
     const {pubkey, bunkerKey} = this.getState()
     const localSigner = new NDKPrivateKeySigner(bunkerKey)
@@ -131,6 +160,7 @@ export class Keys {
     await this.ndk.connect(5000)
     await this.ndk.signer.blockUntilReady()
   }
+
   getNDK = async () => {
     if (!this.ndk) {
       await this.prepareNdk()
@@ -138,6 +168,7 @@ export class Keys {
 
     return this.ndk
   }
+
   login = (method, key) => {
     this.keyState.update($state => {
       let pubkey = null
@@ -159,9 +190,11 @@ export class Keys {
       return {method, pubkey, privkey, bunkerKey}
     })
   }
+
   clear = () => {
     this.keyState.set({})
   }
+
   sign = async event => {
     const {method, privkey} = this.getState()
 
@@ -182,9 +215,10 @@ export class Keys {
           sig: getSignature(event, privkey),
         })
       },
-      extension: () => withExtensionLock(() => {
-        return getExtension().signEvent(event)
-      }),
+      extension: () =>
+        withExtensionLock(() => {
+          return getExtension().signEvent(event)
+        }),
     })
   }
 }
@@ -196,20 +230,21 @@ export class User {
   canSign: () => boolean
   settings: Writable<UserSettings>
   getSettings: () => UserSettings
+
   constructor(system) {
     this.system = system
-    this.keys = new Keys(this)
+    this.keys = new Keys(system.sync)
     this.crypt = new Crypt(this.keys)
     this.canSign = getter(this.keys.canSign)
 
-    this.settings = synced(system.key("settings/settings"), {
+    this.settings = system.sync.store("settings/settings", {
       last_updated: 0,
       relay_limit: 10,
       default_zap: 21,
       show_media: true,
       report_analytics: true,
-      dufflepud_url: DUFFLEPUD_URL,
-      multiplextr_url: MULTIPLEXTR_URL,
+      dufflepud_url: system.env.DUFFLEPUD_URL,
+      multiplextr_url: system.env.MULTIPLEXTR_URL,
     })
 
     this.getSettings = getter(this.settings)
@@ -236,7 +271,34 @@ export class User {
 
   getStateKey = () => (this.canSign() ? this.getPubkey() : "anonymous")
 
-  publish = event => this.system.outbox.publish(event, this.getRelayUrls("write"))
+  // Publish
+
+  async prepEvent(rawEvent) {
+    return doPipe(rawEvent, [
+      assoc("created_at", now()),
+      assoc("pubkey", this.getPubkey()),
+      e => ({...e, id: getEventHash(e)}),
+      this.keys.sign,
+    ])
+  }
+
+  async publish(event, relays = null, onProgress = null, verb = "EVENT") {
+    if (!event.sig) {
+      event = await this.prepEvent(event)
+    }
+
+    if (!relays) {
+      relays = this.getRelayUrls("write")
+    }
+
+    // return console.log(event)
+
+    const promise = this.system.network.publish({event, relays, onProgress, verb})
+
+    this.system.sync.processEvents(event)
+
+    return [event, promise]
+  }
 
   // Settings
 
@@ -366,4 +428,33 @@ export class User {
     this.publish(this.system.builder.createList([["d", name]].concat(params).concat(relays)))
 
   removeList = naddr => this.publish(this.system.builder.deleteNaddrs([naddr]))
+
+  // Chat
+
+  setLastChecked = (channelId, timestamp) => {
+    const lastChecked = fromPairs(
+      this.system.chat.channels
+        .all({last_checked: {$type: "number"}})
+        .map(r => [r.id, r.last_checked])
+    )
+
+    return this.setAppData("last_checked/v1", {...lastChecked, [channelId]: timestamp})
+  }
+
+  joinChannel = channelId => {
+    const channelIds = uniq(
+      pluck("id", this.system.chat.channels.all({joined: true})).concat(channelId)
+    )
+
+    return this.setAppData("rooms_joined/v1", channelIds)
+  }
+
+  leaveChannel = channelId => {
+    const channelIds = without(
+      [channelId],
+      pluck("id", this.system.chat.channels.all({joined: true}))
+    )
+
+    return this.setAppData("rooms_joined/v1", channelIds)
+  }
 }

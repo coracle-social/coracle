@@ -1,8 +1,13 @@
 import {last, pick, uniqBy} from "ramda"
-import {doPipe, first} from "hurdak/lib/hurdak"
+import {doPipe} from "hurdak/lib/hurdak"
 import {Tags, channelAttrs, findRoot, findReply} from "src/util/nostr"
 import {parseContent} from "src/util/notes"
-import type {System} from "src/system/system"
+
+export type BuilderOpts = {
+  getPubkeyPetname: (pubkey: string) => string
+  getPubkeyHint: (pubkey: string) => string
+  getEventHint: (event: Event) => string
+}
 
 const uniqTags = uniqBy(t => t.slice(0, 2).join(":"))
 
@@ -15,16 +20,19 @@ const buildEvent = (kind, {content = "", tags = [], tagClient = true}) => {
 }
 
 export class Builder {
-  system: System
-  constructor(system) {
-    this.system = system
+  getPubkeyPetname: BuilderOpts["getPubkeyPetname"]
+  getPubkeyHint: BuilderOpts["getPubkeyHint"]
+  getEventHint: BuilderOpts["getEventHint"]
+  constructor({getPubkeyPetname, getPubkeyHint, getEventHint}: BuilderOpts) {
+    this.getPubkeyPetname = getPubkeyPetname
+    this.getPubkeyHint = getPubkeyHint
+    this.getEventHint = getEventHint
   }
   mention = pubkey => {
-    const profile = this.system.directory.getProfile(pubkey)
-    const name = profile ? this.system.directory.displayProfile(profile) : ""
-    const hint = first(this.system.routing.getPubkeyHints(1, pubkey)) || ""
+    const hint = this.getPubkeyHint(pubkey)
+    const petname = this.getPubkeyPetname(pubkey)
 
-    return ["p", pubkey, hint, name]
+    return ["p", pubkey, hint, petname]
   }
   tagsFromContent(content, tags) {
     const seen = new Set(Tags.wrap(tags).values().all())
@@ -56,7 +64,7 @@ export class Builder {
           .all()
           .map(t => t.slice(0, 3))
       : []
-    const eHint = first(this.system.routing.getEventHints(1, n)) || ""
+    const eHint = this.getEventHint(n)
     const reply = ["e", n.id, eHint, "reply"]
     const root = doPipe(findRoot(n) || findReply(n) || reply, [
       t => (t.length < 3 ? t.concat(eHint) : t),

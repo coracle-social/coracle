@@ -15,6 +15,25 @@ export type Filter = {
   [key: `#${string}`]: string[]
 }
 
+export type Zapper = {
+  pubkey: string
+  lnurl: string
+  callback: string
+  minSendable: number
+  maxSendable: number
+  nostrPubkey: string
+  created_at: number
+  updated_at: number
+}
+
+export type Handle = {
+  profile: Record<string, any>
+  pubkey: string
+  address: string
+  created_at: number
+  updated_at: number
+}
+
 export type RelayInfo = {
   contact?: string
   description?: string
@@ -91,4 +110,25 @@ export type KeyState = {
   pubkey?: string
   privkey?: string
   bunkerKey?: string
+}
+
+export type Channel = {
+  id: string
+  type: "public" | "private"
+  pubkey: string
+  updated_at: number
+  last_sent?: number
+  last_received?: number
+  last_checked?: number
+  joined?: boolean
+  hints: string[]
+}
+
+export type Message = {
+  id: string
+  channel: string
+  pubkey: string
+  created_at: number
+  content: string
+  tags: string[][]
 }

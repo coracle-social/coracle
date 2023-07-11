@@ -9,8 +9,8 @@
   import OnboardingRelays from "src/app/views/OnboardingRelays.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
-  import {DEFAULT_FOLLOWS, DEFAULT_RELAYS, builder, user} from "src/app/system"
-  import {loadAppData, pubkeyLoader} from "src/app/state"
+  import {DEFAULT_FOLLOWS, DEFAULT_RELAYS, pubkeyLoader, builder, user} from "src/app/system"
+  import {loadAppData} from "src/app/state"
   import {modal} from "src/partials/state"
 
   export let stage

@@ -2,8 +2,7 @@ import {max, mergeLeft, fromPairs, sortBy, assoc, uniqBy, prop, propEq, groupBy,
 import {findReplyId} from "src/util/nostr"
 import {chunk, ensurePlural} from "hurdak/lib/hurdak"
 import {batch, now, timedelta} from "src/util/misc"
-import {PubkeyLoader} from "src/system"
-import system, {ENABLE_ZAPS, user, routing, network} from "src/app/system"
+import {ENABLE_ZAPS, user, routing, pubkeyLoader, network} from "src/app/system"
 
 class Cursor {
   relays: string[]
@@ -153,7 +152,7 @@ const streamContext = ({notes, onChunk, maxDepth = 2}) => {
     const pubkeys = pluck("pubkey", events)
 
     // Load any people we should know about
-    new PubkeyLoader(system).loadPubkeys(pubkeys)
+    pubkeyLoader.loadPubkeys(pubkeys)
 
     // Load data prior to now for our new ids
     chunk(256, newIds).forEach(ids => {

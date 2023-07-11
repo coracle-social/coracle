@@ -7,16 +7,15 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {builder, chat, user, routing, network, outbox} from "src/app/system"
-  import {watch} from "src/util/loki"
+  import {builder, chat, user, routing, network} from "src/app/system"
 
   export let entity
 
   const id = toHex(entity)
-  const channel = watch(chat.channels, () => chat.channels.get(id) || {id})
+  const channel = chat.channels.watch(() => chat.channels.get(id) || {id})
   const getRelays = () => routing.selectHints(user.getSetting("relay_limit"), $channel.hints || [])
 
-  chat.setLastChecked(id, now())
+  user.setLastChecked(id, now())
 
   const edit = () => {
     modal.push({type: "channel/edit", channel: $channel})
@@ -25,7 +24,7 @@
   const sendMessage = async content => {
     const [hint] = getRelays()
 
-    await outbox.publish(builder.createChatMessage(id, content, hint), getRelays())
+    await user.publish(builder.createChatMessage(id, content, hint), getRelays())
   }
 
   onMount(() => {

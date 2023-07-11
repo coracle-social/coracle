@@ -56,7 +56,7 @@
       seenChallenges.add(challenge)
 
       const rawEvent = system.builder.authenticate(url, challenge)
-      const [event] = await system.outbox.publish(rawEvent, [url], null, "AUTH")
+      const [event] = await system.user.publish(rawEvent, [url], null, "AUTH")
 
       return event
     }

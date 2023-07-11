@@ -53,7 +53,7 @@
 
     if (content) {
       const rawEvent = builder.createReply(note, content, data.mentions.map(builder.mention))
-      const relays = routing.getPublishHints(3, note)
+      const relays = routing.getPublishHints(3, note, user.getRelayUrls("write"))
       const [event, promise] = await publishWithToast(rawEvent, relays)
 
       promise.then(({succeeded}) => {

@@ -1,34 +1,37 @@
 import {Socket} from "paravel"
 import {now} from "src/util/misc"
 import {switcher} from "hurdak/lib/hurdak"
-import type {System} from "src/system/system"
 import type {RelayStat} from "src/system/types"
+import type {Network} from "src/system/components/Network"
+
+export type MetaOpts = {
+  network: Network
+}
 
 export class Meta {
-  system: System
+  network: Network
   relayStats: Record<string, RelayStat>
-  constructor(system) {
-    this.system = system
-
+  constructor({network}: MetaOpts) {
+    this.network = network
     this.relayStats = {}
 
-    system.network.pool.on("open", ({url}) => {
+    network.pool.on("open", ({url}) => {
       this.updateRelayStats(url, {last_opened: now(), last_activity: now()})
     })
 
-    system.network.pool.on("close", ({url}) => {
+    network.pool.on("close", ({url}) => {
       this.updateRelayStats(url, {last_closed: now(), last_activity: now()})
     })
 
-    system.network.pool.on("error:set", (url, error) => {
+    network.pool.on("error:set", (url, error) => {
       this.updateRelayStats(url, {error})
     })
 
-    system.network.pool.on("error:clear", url => {
+    network.pool.on("error:clear", url => {
       this.updateRelayStats(url, {error: null})
     })
 
-    system.network.on("publish", urls => {
+    network.on("publish", urls => {
       for (const url of urls) {
         this.updateRelayStats(url, {
           last_publish: now(),
@@ -37,7 +40,7 @@ export class Meta {
       }
     })
 
-    system.network.on("sub:open", urls => {
+    network.on("sub:open", urls => {
       for (const url of urls) {
         const stats = this.getRelayStats(url)
 
@@ -50,7 +53,7 @@ export class Meta {
       }
     })
 
-    system.network.on("sub:close", urls => {
+    network.on("sub:close", urls => {
       for (const url of urls) {
         const stats = this.getRelayStats(url)
 
@@ -61,7 +64,7 @@ export class Meta {
       }
     })
 
-    system.network.on("event", ({url}) => {
+    network.on("event", ({url}) => {
       const stats = this.getRelayStats(url)
 
       this.updateRelayStats(url, {
@@ -70,7 +73,7 @@ export class Meta {
       })
     })
 
-    system.network.on("eose", (url, ms) => {
+    network.on("eose", (url, ms) => {
       const stats = this.getRelayStats(url)
 
       this.updateRelayStats(url, {
@@ -80,7 +83,7 @@ export class Meta {
       })
     })
 
-    system.network.on("timeout", (url, ms) => {
+    network.on("timeout", (url, ms) => {
       const stats = this.getRelayStats(url)
 
       this.updateRelayStats(url, {
@@ -132,7 +135,7 @@ export class Meta {
       return [eoseQuality, "Connected"]
     }
 
-    if (this.system.network.pool.get(url).status === Socket.STATUS.READY) {
+    if (this.network.pool.get(url).status === Socket.STATUS.READY) {
       return [1, "Connected"]
     }
 

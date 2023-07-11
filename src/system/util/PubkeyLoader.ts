@@ -3,7 +3,12 @@ import {chunk} from "hurdak/lib/hurdak"
 import {personKinds, appDataKeys} from "src/util/nostr"
 import {now, timedelta} from "src/util/misc"
 import type {Filter} from "src/system/types"
-import type {System} from "src/system/system"
+
+export type PubkeyLoaderOpts = {
+  getLastUpdated: (pubkey: string) => number
+  getChunkRelays: (pubkeys: string[]) => string[]
+  loadChunk: (args: {filter: Filter | Filter[]; relays: string[]}) => Promise<void>
+}
 
 export type LoadPeopleOpts = {
   relays?: string[]
@@ -12,12 +17,16 @@ export type LoadPeopleOpts = {
 }
 
 export class PubkeyLoader {
-  system: System
   attemptedPubkeys: Set<string>
+  getLastUpdated: PubkeyLoaderOpts["getLastUpdated"]
+  getChunkRelays: PubkeyLoaderOpts["getChunkRelays"]
+  loadChunk: PubkeyLoaderOpts["loadChunk"]
 
-  constructor(system) {
-    this.system = system
+  constructor({getLastUpdated, getChunkRelays, loadChunk}: PubkeyLoaderOpts) {
     this.attemptedPubkeys = new Set()
+    this.getLastUpdated = getLastUpdated
+    this.getChunkRelays = getChunkRelays
+    this.loadChunk = loadChunk
   }
 
   getStalePubkeys = pubkeys => {
@@ -31,9 +40,7 @@ export class PubkeyLoader {
 
       this.attemptedPubkeys.add(pubkey)
 
-      const profile = this.system.directory.profiles.get(pubkey)
-
-      if (profile?.updated_at > since) {
+      if (this.getLastUpdated(pubkey) > since) {
         continue
       }
 
@@ -44,7 +51,6 @@ export class PubkeyLoader {
   }
 
   loadPubkeys = async (rawPubkeys, {relays, force, kinds = personKinds}: LoadPeopleOpts = {}) => {
-    const {network, routing, user} = this.system
     const pubkeys = force ? uniq(rawPubkeys) : this.getStalePubkeys(rawPubkeys)
 
     const getChunkRelays = chunk => {
@@ -52,10 +58,7 @@ export class PubkeyLoader {
         return relays
       }
 
-      return routing.mergeHints(
-        user.getSetting("relay_limit"),
-        chunk.map(pubkey => routing.getPubkeyHints(3, pubkey))
-      )
+      return this.getChunkRelays(chunk)
     }
 
     const getChunkFilter = chunk => {
@@ -74,7 +77,7 @@ export class PubkeyLoader {
 
     await Promise.all(
       chunk(256, pubkeys).map(async chunk => {
-        await network.load({
+        await this.loadChunk({
           relays: getChunkRelays(chunk),
           filter: getChunkFilter(chunk),
         })

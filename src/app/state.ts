@@ -11,17 +11,16 @@ import {hash, timedelta, now, batch, shuffle, sleep, clamp} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {findReplyId} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
-import {PubkeyLoader} from "src/system"
-import system, {
+import {
   FORCE_RELAYS,
   DEFAULT_FOLLOWS,
   ENABLE_ZAPS,
+  pubkeyLoader,
   alerts,
   cache,
   chat,
   meta,
   network,
-  outbox,
   user,
 } from "src/app/system"
 
@@ -85,8 +84,6 @@ export const logUsage = async name => {
     }
   }
 }
-
-export const pubkeyLoader = new PubkeyLoader(system)
 
 // Synchronization from events to state
 
@@ -207,7 +204,7 @@ export const mergeParents = (notes: Array<DisplayEvent>) => {
 }
 
 export const publishWithToast = (event, relays) =>
-  outbox.publish(event, relays, ({completed, succeeded, failed, timeouts, pending}) => {
+  user.publish(event, relays, ({completed, succeeded, failed, timeouts, pending}) => {
     let message = `Published to ${succeeded.size}/${relays.length} relays`
 
     const extra = []

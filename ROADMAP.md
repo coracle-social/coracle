@@ -1,6 +1,7 @@
 # Current
 
 - [ ] Refactor
+  - [ ] Inject env into system
   - [ ] Delete messages when leaving a room
   - [ ] Add pagination to chat/dms
   - [ ] Fix scrolling to to when modal is open
