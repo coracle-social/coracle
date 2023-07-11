@@ -1,7 +1,7 @@
 import type {Filter} from "nostr-tools"
 import type {MyEvent} from "src/util/types"
 import {EventEmitter} from "events"
-import {verifySignature} from "nostr-tools"
+import {verifySignature, matchFilters} from "nostr-tools"
 import {Pool, Plex, Relays, Executor, Socket} from "paravel"
 import {ensurePlural} from "hurdak/lib/hurdak"
 import {union, difference} from "src/util/misc"
@@ -212,7 +212,9 @@ export class Network extends EventEmitter {
           return
         }
 
-        // TODO: validate that the event we asked for matches the filters we sent
+        if (!matchFilters(filters, event)) {
+          return
+        }
 
         this.emit("event", {url, event})
 

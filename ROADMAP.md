@@ -1,18 +1,12 @@
 # Current
 
-- Cmd -> EventBuilder
-- Create new "command" module that wraps event builder + outbox + any local anonymous state
-- Move getUserRelays, getUserMutes etc back to user module?
-
 - [ ] Refactor
-  - [ ] Move system initialization to app/system
   - [ ] Delete messages when leaving a room
   - [ ] Add pagination to chat/dms
   - [ ] Fix scrolling to to when modal is open
-  - [ ] Take connection health into account when building hints
-  - [ ] Re-apply filter to get rid of unwanted events
   - [ ] Test migration
   - [ ] Improve watchers so users of system don't need to know how they work
+  - [ ] Remove external dependencies
   - [ ] Check for TODOs
 - [ ] Add custom emoji support
 - [ ] Re-work note media
