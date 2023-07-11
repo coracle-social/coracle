@@ -237,9 +237,8 @@ export class Network extends EventEmitter {
     let closed = false
 
     return () => {
-
       if (closed) {
-        error('Closed subscription twice', filters)
+        error("Closed subscription twice", filters)
       } else {
         log(`Closing subscription`, filters)
       }

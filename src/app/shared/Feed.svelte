@@ -17,7 +17,7 @@
   import legacyNetwork from "src/agent/network"
   import {mergeParents, compileFilter} from "src/app/state"
 
-  export let relays = null
+  export let relays = []
   export let filter = {} as DynamicFilter
   export let delta = timedelta(6, "hours")
   export let shouldDisplay = always(true)
@@ -131,7 +131,7 @@
   let p = Promise.resolve()
 
   const getRelays = () => {
-    if (relays) {
+    if (relays.length > 0) {
       return relays
     }
 

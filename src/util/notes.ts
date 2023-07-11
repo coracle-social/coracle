@@ -1,6 +1,6 @@
 import {last, pluck, identity} from "ramda"
 import {nip19} from "nostr-tools"
-import {first} from "hurdak/lib/hurdak"
+import {first, switcherFn} from "hurdak/lib/hurdak"
 import {fromNostrURI} from "src/util/nostr"
 
 export const NEWLINE = "newline"
@@ -170,21 +170,20 @@ export const truncateContent = (content, {showEntire, maxLength, showMedia = fal
   let length = 0
   const result = []
   const truncateAt = maxLength * 0.6
+  const mediaLength = maxLength / 3
+  const entityLength = 30
 
   content.every((part, i) => {
-    const isMedia = part.type === INVOICE || part.type.startsWith("nostr:") || part.value.isMedia
-    const textLength = part.value.url?.length || part.value.length
-    const isText =
-      [NOSTR_NPUB, NOSTR_NPROFILE, NOSTR_NADDR, TOPIC, TEXT].includes(part.type) ||
-      (part.type === LINK && !part.value.isMedia)
-
-    if (isText) {
-      length += textLength
-    }
-
-    if (isMedia) {
-      length += showMedia ? maxLength / 3 : textLength
-    }
+    length += switcherFn(part.type, {
+      [LINK]: () => (part.value.isMedia ? mediaLength : entityLength),
+      [INVOICE]: () => mediaLength,
+      [NOSTR_NOTE]: () => mediaLength,
+      [NOSTR_NEVENT]: () => mediaLength,
+      [NOSTR_NPUB]: () => entityLength,
+      [NOSTR_NPROFILE]: () => entityLength,
+      [NOSTR_NADDR]: () => entityLength,
+      default: () => part.value.length,
+    })
 
     result.push(part)
 

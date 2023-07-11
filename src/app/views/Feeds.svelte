@@ -13,7 +13,7 @@
 
   const lists = watch(content.lists, () => user.getLists())
 
-  let relays = null
+  let relays = []
   let key = Math.random()
   let filter = {
     kinds: noteKinds,
