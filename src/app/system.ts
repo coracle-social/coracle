@@ -1,5 +1,5 @@
 import {identity} from "ramda"
-import {DefaultSystem} from "src/system"
+import {createDefaultEngine} from "src/engine"
 
 export const DUFFLEPUD_URL = import.meta.env.VITE_DUFFLEPUD_URL
 
@@ -28,7 +28,7 @@ export const DEFAULT_FOLLOWS = (import.meta.env.VITE_DEFAULT_FOLLOWS || "")
 
 export const ENABLE_ZAPS = JSON.parse(import.meta.env.VITE_ENABLE_ZAPS)
 
-const system = new DefaultSystem("coracle/system", {
+const engine = createDefaultEngine({
   DUFFLEPUD_URL,
   MULTIPLEXTR_URL,
   FORCE_RELAYS,
@@ -37,19 +37,18 @@ const system = new DefaultSystem("coracle/system", {
   DEFAULT_RELAYS,
 })
 
-export default system
-export const sync = system.sync
-export const network = system.network
-export const meta = system.meta
-export const user = system.user
-export const cache = system.cache
-export const content = system.content
-export const directory = system.directory
-export const nip05 = system.nip05
-export const nip57 = system.nip57
-export const social = system.social
-export const routing = system.routing
-export const alerts = system.alerts
-export const chat = system.chat
-export const builder = system.builder
-export const pubkeyLoader = system.pubkeyLoader
+export default engine
+export const events = engine.Events
+export const network = engine.Network
+export const meta = engine.Meta
+export const user = engine.User
+export const content = engine.Content
+export const directory = engine.Directory
+export const nip05 = engine.Nip05
+export const nip57 = engine.Nip57
+export const social = engine.Social
+export const routing = engine.Routing
+export const alerts = engine.Alerts
+export const chat = engine.Chat
+export const builder = engine.Builder
+export const pubkeyLoader = engine.PubkeyLoader

@@ -125,3 +125,18 @@ export type Message = {
   content: string
   tags: string[][]
 }
+
+export type Topic = {
+  name: string
+  count?: number
+}
+
+export type List = {
+  name: string
+  naddr: string
+  pubkey: string
+  tags: string[][]
+  updated_at: number
+  created_at: number
+  deleted_at?: number
+}

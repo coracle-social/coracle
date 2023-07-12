@@ -6,7 +6,7 @@ import {Tags, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
 import type {System} from "src/system/System"
 import type {UserSettings} from "src/system/types"
 import type {Writable} from "svelte/store"
-import {engine} from "src/engine"
+import engine from "src/app/system"
 
 export class User {
   keys: typeof engine.keys

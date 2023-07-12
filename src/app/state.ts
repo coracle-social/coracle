@@ -4,7 +4,7 @@ import Bugsnag from "@bugsnag/js"
 import {nip19} from "nostr-tools"
 import {navigate} from "svelte-routing"
 import {writable, get} from "svelte/store"
-import {omit, pluck, sortBy, slice} from "ramda"
+import {omit, filter, pluck, sortBy, slice} from "ramda"
 import {createMap, doPipe, first} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
 import {hash, timedelta, now, batch, shuffle, sleep, clamp} from "src/util/misc"
@@ -17,7 +17,7 @@ import {
   ENABLE_ZAPS,
   pubkeyLoader,
   alerts,
-  cache,
+  events,
   chat,
   meta,
   network,
@@ -102,8 +102,8 @@ export const listen = async () => {
 
   const channelIds = pluck("id", chat.channels.all({joined: true}))
 
-  const eventIds = doPipe(cache.events, [
-    t => t.all({kind: 1, created_at: {$gt: now() - timedelta(30, "days")}}),
+  const eventIds = doPipe(events.cache.all(), [
+    filter(e => e.kind === 1 && e.created_at > now() - timedelta(30, "days")),
     sortBy(e => -e.created_at),
     slice(0, 256),
     pluck("id"),

@@ -6,7 +6,7 @@ import type {Table} from "src/util/loki"
 import type {Readable} from "svelte/store"
 import type {Sync} from "src/system/components/Sync"
 import type {Channel, Message} from "src/system/types"
-import type {engine} from "src/engine"
+import type engine from "src/app/system"
 
 const getHints = e => pluck("url", Tags.from(e).relays())
 
