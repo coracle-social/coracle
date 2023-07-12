@@ -19,8 +19,10 @@ export type Key<T> = Readable<T> & {
   remove: () => void
 }
 
-export type Collection<T> = Writable<T> & {
+export type Collection<T> = Writable<Map<any, T>> & {
   key: (k: string) => Key<T>
+  getKey: (k: string) => T
+  setKey: (k: string, v: T) => void
 }
 
 export const writable = <T>(defaultValue = null): Writable<T> => {
@@ -124,9 +126,12 @@ export const key = <T>(baseStore, k): Key<T> => {
 }
 
 export const collection = <T>(): Collection<T> => {
-  const baseStore = writable(new Map()) as Collection<T>
+  const baseStore = writable<Map<any, T>>(new Map())
 
-  baseStore.key = k => key(baseStore, k)
-
-  return baseStore
+  return {
+    ...baseStore,
+    key: k => key(baseStore, k),
+    getKey: k => baseStore.get().get(k),
+    setKey: (k, v) => baseStore.get().set(k, v),
+  }
 }

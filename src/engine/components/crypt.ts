@@ -2,16 +2,15 @@ import {nip04} from "nostr-tools"
 import {switcherFn} from "hurdak/lib/hurdak"
 import {tryJson, tryFunc, sleep} from "src/util/misc"
 
-export const contributeActions = ({keys}, emit) => {
+export function contributeActions({Keys}, emit) {
   async function encrypt(pubkey, message) {
-    const {method, privkey} = keys.current.get()
+    const {method, privkey} = Keys.current.get()
 
     return switcherFn(method, {
-      extension: () =>
-        keys.withExtension(ext => ext.nip04.encrypt(pubkey, message)),
+      extension: () => Keys.withExtension(ext => ext.nip04.encrypt(pubkey, message)),
       privkey: () => nip04.encrypt(privkey, pubkey, message),
       bunker: async () => {
-        const ndk = await keys.getNDK()
+        const ndk = await Keys.getNDK()
         const user = ndk.getUser({hexpubkey: pubkey})
 
         return ndk.signer.encrypt(user, message)
@@ -20,11 +19,11 @@ export const contributeActions = ({keys}, emit) => {
   }
 
   async function decrypt(pubkey, message) {
-    const {method, privkey} = keys.current.get()
+    const {method, privkey} = Keys.current.get()
 
     return switcherFn(method, {
       extension: () =>
-        keys.withExtension(ext => {
+        Keys.withExtension(ext => {
           return new Promise(async resolve => {
             let result
 
@@ -48,7 +47,7 @@ export const contributeActions = ({keys}, emit) => {
         )
       },
       bunker: async () => {
-        const ndk = await keys.getNDK()
+        const ndk = await Keys.getNDK()
         const user = ndk.getUser({hexpubkey: pubkey})
 
         return ndk.signer.decrypt(user, message)
@@ -57,13 +56,13 @@ export const contributeActions = ({keys}, emit) => {
   }
 
   async function encryptJson(data) {
-    const {pubkey} = keys.current.get()
+    const {pubkey} = Keys.current.get()
 
     return encrypt(pubkey, JSON.stringify(data))
   }
 
   async function decryptJson(data) {
-    const {pubkey} = keys.current.get()
+    const {pubkey} = Keys.current.get()
 
     return tryJson(async () => JSON.parse(await decrypt(pubkey, data)))
   }

@@ -467,3 +467,8 @@ export function* chain(...generators) {
     yield* g
   }
 }
+
+export const pushToKey = (xs, k, v) => {
+  xs[k] = xs[k] || []
+  xs[k].push(v)
+}

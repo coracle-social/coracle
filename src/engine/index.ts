@@ -1,10 +1,9 @@
-import {EventEmitter} from "events"
-import * as keys from "./components/keys"
-import * as crypt from "./components/crypt"
+import * as Keys from "./components/Keys"
+import * as Crypt from "./components/Crypt"
+import * as Events from "./components/Events"
+import * as Alerts from "./components/Alerts"
 
 export const createEngine = (engine, components) => {
-  const emitter = new EventEmitter()
-
   for (const component of components) {
     engine[component.name] = component.contributeState?.()
   }
@@ -15,21 +14,21 @@ export const createEngine = (engine, components) => {
     Object.assign(engine[component.name], selectors)
   }
 
-  const componentActions = components.map(c => [c, c.contributeActions?.(engine, emitter.emit)])
+  const componentActions = components.map(c => [c, c.contributeActions?.(engine)])
 
   for (const [component, actions] of componentActions) {
     Object.assign(engine[component.name], actions)
   }
 
   for (const component of components) {
-    component.initialize?.(engine, emitter)
+    component.initialize?.(engine)
   }
 
   return engine
 }
 
 export const createDefaultEngine = () => {
-  return createEngine({}, [keys, crypt])
+  return createEngine({}, {Keys, Crypt, Events, Alerts})
 }
 
 export const engine = createDefaultEngine()

@@ -3,8 +3,6 @@ import NDK, {NDKEvent, NDKNip46Signer, NDKPrivateKeySigner} from "@nostr-dev-kit
 import {switcherFn} from "hurdak/lib/hurdak"
 import {writable, collection, derived} from "../util/store"
 
-export const name = "keys"
-
 export type LoginMethod = "bunker" | "pubkey" | "privkey" | "extension"
 
 export type KeyState = {
@@ -28,8 +26,8 @@ export function contributeState() {
   return {pubkey, state, current, canSign}
 }
 
-export function contributeSelectors({keys}) {
-  const {current} = keys
+export function contributeSelectors({Keys}) {
+  const {current} = Keys
 
   let extensionLock = Promise.resolve()
 
@@ -88,8 +86,8 @@ export function contributeSelectors({keys}) {
   return {withExtension, isKeyValid, getNDK}
 }
 
-export function contributeActions({keys}, emit) {
-  const {pubkey, state, current, withExtension, getNDK} = keys
+export function contributeActions({Keys}) {
+  const {pubkey, state, current, withExtension, getNDK} = Keys
 
   const login = (method, key) => {
     let pubkey = null
