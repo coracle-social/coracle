@@ -1,100 +1,16 @@
-import {nip04, getEventHash} from "nostr-tools"
+import {getEventHash} from "nostr-tools"
 import {when, uniq, pluck, without, fromPairs, whereEq, find, slice, assoc, reject} from "ramda"
-import {switcherFn, doPipe} from "hurdak/lib/hurdak"
-import {now, tryJson, tryFunc, sleep, getter} from "src/util/misc"
+import {doPipe} from "hurdak/lib/hurdak"
+import {now, getter} from "src/util/misc"
 import {Tags, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
 import type {System} from "src/system/System"
 import type {UserSettings} from "src/system/types"
 import type {Writable} from "svelte/store"
 import {engine} from "src/engine"
 
-const getExtension = () => (window as {nostr?: any}).nostr
-
-let extensionLock = Promise.resolve()
-
-const withExtensionLock = f => {
-  extensionLock = extensionLock.then(f)
-
-  return extensionLock
-}
-
-export class Crypt {
-  keys: typeof engine.keys
-  constructor(keys) {
-    this.keys = keys
-  }
-
-  async encrypt(pubkey, message) {
-    const {method, privkey} = this.keys.current.get()
-
-    return switcherFn(method, {
-      extension: extension =>
-        withExtensionLock(() => {
-          return getExtension().nip04.encrypt(pubkey, message)
-        }),
-      privkey: extension => nip04.encrypt(privkey, pubkey, message),
-      bunker: async () => {
-        const ndk = await this.keys.getNDK()
-        const user = ndk.getUser({hexpubkey: pubkey})
-
-        return ndk.signer.encrypt(user, message)
-      },
-    })
-  }
-
-  async decrypt(pubkey, message) {
-    const {method, privkey} = this.keys.current.get()
-
-    return switcherFn(method, {
-      extension: () =>
-        withExtensionLock(() => {
-          return new Promise(async resolve => {
-            let result
-
-            // Alby gives us a bunch of bogus errors, try multiple times
-            for (let i = 0; i < 3; i++) {
-              result = await tryFunc(() => getExtension().nip04.decrypt(pubkey, message))
-
-              if (result) {
-                break
-              }
-
-              await sleep(30)
-            }
-
-            resolve(result || `<Failed to decrypt message>`)
-          })
-        }),
-      privkey: () => {
-        return (
-          tryFunc(() => nip04.decrypt(privkey, pubkey, message)) || `<Failed to decrypt message>`
-        )
-      },
-      bunker: async () => {
-        const ndk = await this.keys.getNDK()
-        const user = ndk.getUser({hexpubkey: pubkey})
-
-        return ndk.signer.decrypt(user, message)
-      },
-    })
-  }
-
-  async encryptJson(data) {
-    const {pubkey} = this.keys.current.get()
-
-    return this.encrypt(pubkey, JSON.stringify(data))
-  }
-
-  async decryptJson(data) {
-    const {pubkey} = this.keys.current.get()
-
-    return tryJson(async () => JSON.parse(await this.decrypt(pubkey, data)))
-  }
-}
-
 export class User {
   keys: typeof engine.keys
-  crypt: Crypt
+  crypt: typeof engine.crypt
   system: System
   canSign: () => boolean
   settings: Writable<UserSettings>
@@ -103,7 +19,7 @@ export class User {
   constructor(system) {
     this.system = system
     this.keys = engine.keys
-    this.crypt = new Crypt(this.keys)
+    this.crypt = engine.crypt
     this.canSign = getter(this.keys.canSign)
 
     this.settings = system.sync.store("settings/settings", {

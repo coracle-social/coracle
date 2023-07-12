@@ -5,8 +5,8 @@ import {Tags, channelAttrs} from "src/util/nostr"
 import type {Table} from "src/util/loki"
 import type {Readable} from "svelte/store"
 import type {Sync} from "src/system/components/Sync"
-import type {Crypt} from "src/system/components/User"
 import type {Channel, Message} from "src/system/types"
+import type {engine} from "src/engine"
 
 const getHints = e => pluck("url", Tags.from(e).relays())
 
@@ -14,7 +14,7 @@ const messageIsNew = ({last_checked, last_received, last_sent}: Channel) =>
   last_received > Math.max(last_sent || 0, last_checked || 0)
 
 export type ChatOpts = {
-  getCrypt: () => Crypt
+  getCrypt: () => typeof engine.crypt
 }
 
 export class Chat {
