@@ -1,7 +1,7 @@
 import {nip19} from "nostr-tools"
 import {ellipsize} from "hurdak/lib/hurdak"
 import {tryJson, now, fuzzy} from "src/util/misc"
-import type {Profile} from "src/system/types"
+import type {Profile} from "src/engine/types"
 import {collection, derived} from "../util/store"
 
 export function contributeState() {

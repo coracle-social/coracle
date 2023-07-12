@@ -5,7 +5,7 @@ import {ensurePlural} from "hurdak/lib/hurdak"
 import {union, difference} from "src/util/misc"
 import {warn, error, log} from "src/util/logger"
 import {normalizeRelayUrl} from "src/util/nostr"
-import type {Event, Filter} from "src/system/types"
+import type {Event, Filter} from "src/engine/types"
 
 export type SubscribeOpts = {
   relays: string[]

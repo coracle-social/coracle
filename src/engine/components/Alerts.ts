@@ -1,6 +1,6 @@
 import {Tags, isLike, findReplyId, findRootId} from "src/util/nostr"
 import {collection, writable, derived} from "../util/store"
-import type {Event} from "src/system/types"
+import type {Event} from "src/engine/types"
 
 export function contributeState() {
   const events = collection<Event>()

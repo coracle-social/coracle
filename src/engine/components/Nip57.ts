@@ -1,7 +1,7 @@
 import {fetchJson, now, tryFunc, tryJson, hexToBech32, bech32ToHex} from "src/util/misc"
 import {invoiceAmount} from "src/util/lightning"
 import {Tags} from "src/util/nostr"
-import type {Zapper} from "src/system/types"
+import type {Zapper} from "src/engine/types"
 import {collection} from "../util/store"
 
 const getLnUrl = address => {

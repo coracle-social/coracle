@@ -2,7 +2,7 @@ import {without, uniq} from "ramda"
 import {chunk} from "hurdak/lib/hurdak"
 import {personKinds, appDataKeys} from "src/util/nostr"
 import {now, timedelta} from "src/util/misc"
-import type {Filter} from "src/system/types"
+import type {Filter} from "src/engine/types"
 
 export type LoadPeopleOpts = {
   relays?: string[]

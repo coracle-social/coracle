@@ -2,7 +2,7 @@ import {sortBy, pluck, uniq, nth, uniqBy, prop, last, inc} from "ramda"
 import {fuzzy, chain, tryJson, now, fetchJson} from "src/util/misc"
 import {warn} from "src/util/logger"
 import {normalizeRelayUrl, findReplyId, isShareableRelay, Tags} from "src/util/nostr"
-import type {Relay, RelayInfo, RelayPolicy} from "src/system/types"
+import type {Relay, RelayInfo, RelayPolicy} from "src/engine/types"
 import {derived, collection} from "../util/store"
 
 export function contributeState() {

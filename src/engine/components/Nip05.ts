@@ -1,7 +1,7 @@
 import {last} from "ramda"
 import {nip05} from "nostr-tools"
 import {tryFunc, now, tryJson} from "src/util/misc"
-import type {Handle} from "src/system/types"
+import type {Handle} from "src/engine/types"
 import {collection} from "../util/store"
 
 export function contributeState() {

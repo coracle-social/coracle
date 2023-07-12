@@ -2,7 +2,7 @@ import {nip19} from "nostr-tools"
 import {always, nth, inc} from "ramda"
 import {fuzzy} from "src/util/misc"
 import {Tags} from "src/util/nostr"
-import type {Topic, List} from "src/system/types"
+import type {Topic, List} from "src/engine/types"
 import {derived, collection} from "../util/store"
 
 export function contributeState() {

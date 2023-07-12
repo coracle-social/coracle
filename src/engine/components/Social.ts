@@ -1,7 +1,7 @@
 import {ensurePlural} from "hurdak/lib/hurdak"
 import {now} from "src/util/misc"
 import {Tags} from "src/util/nostr"
-import type {GraphEntry} from "src/system/types"
+import type {GraphEntry} from "src/engine/types"
 import {collection} from "../util/store"
 
 export function contributeState() {

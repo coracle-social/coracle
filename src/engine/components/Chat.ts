@@ -1,7 +1,7 @@
 import {last, propEq, pick, uniq, pluck} from "ramda"
 import {tryJson, now, tryFunc} from "src/util/misc"
 import {Tags, channelAttrs} from "src/util/nostr"
-import type {Channel, Message} from "src/system/types"
+import type {Channel, Message} from "src/engine/types"
 import {collection, derived} from "../util/store"
 
 const getHints = e => pluck("url", Tags.from(e).relays())
