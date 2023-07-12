@@ -1,32 +1,12 @@
-import {
-  nip19,
-  nip04,
-  getPublicKey,
-  getSignature,
-  getEventHash,
-  generatePrivateKey,
-} from "nostr-tools"
-import NDK, {NDKEvent, NDKNip46Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk"
-import {
-  when,
-  uniq,
-  pluck,
-  without,
-  fromPairs,
-  whereEq,
-  find,
-  slice,
-  assoc,
-  reject,
-  prop,
-} from "ramda"
+import {nip04, getEventHash} from "nostr-tools"
+import {when, uniq, pluck, without, fromPairs, whereEq, find, slice, assoc, reject} from "ramda"
 import {switcherFn, doPipe} from "hurdak/lib/hurdak"
-import {derived} from "svelte/store"
 import {now, tryJson, tryFunc, sleep, getter} from "src/util/misc"
 import {Tags, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
 import type {System} from "src/system/System"
-import type {UserSettings, KeyState} from "src/system/types"
-import type {Writable, Readable} from "svelte/store"
+import type {UserSettings} from "src/system/types"
+import type {Writable} from "svelte/store"
+import {engine} from "src/engine"
 
 const getExtension = () => (window as {nostr?: any}).nostr
 
@@ -39,13 +19,13 @@ const withExtensionLock = f => {
 }
 
 export class Crypt {
-  keys: Keys
+  keys: typeof engine.keys
   constructor(keys) {
     this.keys = keys
   }
 
   async encrypt(pubkey, message) {
-    const {method, privkey} = this.keys.getState()
+    const {method, privkey} = this.keys.current.get()
 
     return switcherFn(method, {
       extension: extension =>
@@ -63,7 +43,7 @@ export class Crypt {
   }
 
   async decrypt(pubkey, message) {
-    const {method, privkey} = this.keys.getState()
+    const {method, privkey} = this.keys.current.get()
 
     return switcherFn(method, {
       extension: () =>
@@ -100,131 +80,20 @@ export class Crypt {
   }
 
   async encryptJson(data) {
-    const {pubkey} = this.keys.getState()
+    const {pubkey} = this.keys.current.get()
 
     return this.encrypt(pubkey, JSON.stringify(data))
   }
 
   async decryptJson(data) {
-    const {pubkey} = this.keys.getState()
+    const {pubkey} = this.keys.current.get()
 
     return tryJson(async () => JSON.parse(await this.decrypt(pubkey, data)))
   }
 }
 
-export class Keys {
-  keyState: Writable<KeyState>
-  getState: () => KeyState
-  pubkey: Readable<string>
-  canSign: Readable<boolean>
-  ndk: NDK
-
-  constructor(sync) {
-    this.keyState = sync.store("keys", {})
-    this.getState = getter(this.keyState)
-    this.pubkey = derived(this.keyState, prop("pubkey"))
-    this.canSign = derived(this.keyState, ({method}) =>
-      ["bunker", "privkey", "extension"].includes(method)
-    )
-    this.ndk = null
-  }
-
-  getPubkey = () => this.getState().pubkey
-
-  isKeyValid = key => {
-    // Validate the key before setting it to state by encoding it using bech32.
-    // This will error if invalid (this works whether it's a public or a private key)
-    try {
-      nip19.npubEncode(key)
-    } catch (e) {
-      return false
-    }
-
-    return true
-  }
-
-  prepareNdk = async (token?: string) => {
-    const {pubkey, bunkerKey} = this.getState()
-    const localSigner = new NDKPrivateKeySigner(bunkerKey)
-
-    this.ndk = new NDK({
-      explicitRelayUrls: [
-        "wss://relay.f7z.io",
-        "wss://relay.damus.io",
-        "wss://relay.nsecbunker.com",
-      ],
-    })
-
-    this.ndk.signer = Object.assign(new NDKNip46Signer(this.ndk, pubkey, localSigner), {token})
-
-    await this.ndk.connect(5000)
-    await this.ndk.signer.blockUntilReady()
-  }
-
-  getNDK = async () => {
-    if (!this.ndk) {
-      await this.prepareNdk()
-    }
-
-    return this.ndk
-  }
-
-  login = (method, key) => {
-    this.keyState.update($state => {
-      let pubkey = null
-      let privkey = null
-      let bunkerKey = null
-
-      if (method === "privkey") {
-        privkey = key
-        pubkey = getPublicKey(key)
-      } else if (["pubkey", "extension"].includes(method)) {
-        pubkey = key
-      } else if (method === "bunker") {
-        pubkey = key.pubkey
-        bunkerKey = generatePrivateKey()
-
-        this.prepareNdk(key.token)
-      }
-
-      return {method, pubkey, privkey, bunkerKey}
-    })
-  }
-
-  clear = () => {
-    this.keyState.set({})
-  }
-
-  sign = async event => {
-    const {method, privkey} = this.getState()
-
-    console.assert(event.id)
-    console.assert(event.pubkey)
-    console.assert(event.created_at)
-
-    return switcherFn(method, {
-      bunker: async () => {
-        const ndkEvent = new NDKEvent(await this.getNDK(), event)
-
-        await ndkEvent.sign(this.ndk.signer)
-
-        return ndkEvent.rawEvent()
-      },
-      privkey: () => {
-        return Object.assign(event, {
-          sig: getSignature(event, privkey),
-        })
-      },
-      extension: () =>
-        withExtensionLock(() => {
-          return getExtension().signEvent(event)
-        }),
-    })
-  }
-}
-
 export class User {
-  keys: Keys
+  keys: typeof engine.keys
   crypt: Crypt
   system: System
   canSign: () => boolean
@@ -233,7 +102,7 @@ export class User {
 
   constructor(system) {
     this.system = system
-    this.keys = new Keys(system.sync)
+    this.keys = engine.keys
     this.crypt = new Crypt(this.keys)
     this.canSign = getter(this.keys.canSign)
 
@@ -263,7 +132,7 @@ export class User {
     })
   }
 
-  getPubkey = () => this.keys.getState().pubkey
+  getPubkey = () => this.keys.pubkey.get()
 
   getProfile = () => this.system.directory.getProfile(this.getPubkey())
 

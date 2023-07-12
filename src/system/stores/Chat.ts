@@ -161,7 +161,7 @@ export class Chat {
       const author = e.pubkey
       const recipient = Tags.from(e).type("p").values().first()
 
-      if (![author, recipient].includes(this.opts.getCrypt().keys.getPubkey())) {
+      if (![author, recipient].includes(this.opts.getCrypt().keys.pubkey.get())) {
         return
       }
 
@@ -170,7 +170,7 @@ export class Chat {
       }
 
       await tryFunc(async () => {
-        const other = this.opts.getCrypt().keys.getPubkey() === author ? recipient : author
+        const other = this.opts.getCrypt().keys.pubkey.get() === author ? recipient : author
 
         this.messages.patch({
           id: e.id,
@@ -181,7 +181,7 @@ export class Chat {
           tags: e.tags,
         })
 
-        if (this.opts.getCrypt().keys.getPubkey() === author) {
+        if (this.opts.getCrypt().keys.pubkey.get() === author) {
           const channel = this.channels.get(recipient)
 
           this.channels.patch({

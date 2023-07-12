@@ -105,13 +105,6 @@ export type UserSettings = {
   multiplextr_url: string
 }
 
-export type KeyState = {
-  method?: string
-  pubkey?: string
-  privkey?: string
-  bunkerKey?: string
-}
-
 export type Channel = {
   id: string
   type: "public" | "private"

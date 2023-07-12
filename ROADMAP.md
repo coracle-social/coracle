@@ -1,5 +1,8 @@
 # Current
 
+Redux (state/selectors/actions) with stores at the center
+
+
 - [ ] Refactor
   - [ ] Inject env into system
   - [ ] Delete messages when leaving a room
