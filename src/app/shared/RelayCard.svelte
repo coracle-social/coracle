@@ -8,7 +8,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {user, routing, meta} from "src/app/system"
+  import {user, routing, meta} from "src/app/engine"
   import {watch} from "src/util/loki"
   import {loadAppData} from "src/app/state"
 

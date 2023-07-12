@@ -12,7 +12,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {DEFAULT_RELAYS, FORCE_RELAYS, routing, user, pubkeyLoader, network} from "src/app/system"
+  import {DEFAULT_RELAYS, FORCE_RELAYS, routing, user, pubkeyLoader, network} from "src/app/engine"
   import {watch} from "src/util/loki"
   import {loadAppData} from "src/app/state"
 

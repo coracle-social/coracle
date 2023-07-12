@@ -4,7 +4,7 @@
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {directory, routing} from "src/app/system"
+  import {directory, routing} from "src/app/engine"
 
   export let note, rating
 

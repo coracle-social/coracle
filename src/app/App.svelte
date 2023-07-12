@@ -18,7 +18,7 @@
     tryFetch,
   } from "src/util/misc"
   import {onReady} from "src/util/loki"
-  import * as system from "src/app/system"
+  import * as system from "src/app/engine"
   import {loadAppData} from "src/app/state"
   import {theme, getThemeVariables, appName, modal} from "src/partials/state"
   import {logUsage} from "src/app/state"

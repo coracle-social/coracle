@@ -13,7 +13,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
-  import {nip05, user, directory, routing, social} from "src/app/system"
+  import {nip05, user, directory, routing, social} from "src/app/engine"
   import {watch} from "src/util/loki"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 

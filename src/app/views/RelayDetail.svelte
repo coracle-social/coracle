@@ -7,7 +7,7 @@
   import Rating from "src/partials/Rating.svelte"
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
   import RelayActions from "src/app/shared/RelayActions.svelte"
-  import {routing} from "src/app/system"
+  import {routing} from "src/app/engine"
 
   export let url
 

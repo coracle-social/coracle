@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import {directory, routing, user, network, builder, nip57} from "src/app/system"
+  import {directory, routing, user, network, builder, nip57} from "src/app/engine"
 
   export let note
 

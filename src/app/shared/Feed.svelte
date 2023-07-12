@@ -13,7 +13,7 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {user, routing, network} from "src/app/system"
+  import {user, routing, network} from "src/app/engine"
   import legacyNetwork from "src/agent/network"
   import {mergeParents, compileFilter} from "src/app/state"
 

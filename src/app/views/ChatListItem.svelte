@@ -4,7 +4,7 @@
   import {fly} from "src/util/transition"
   import {ellipsize} from "hurdak/lib/hurdak"
   import Anchor from "src/partials/Anchor.svelte"
-  import {user, chat} from "src/app/system"
+  import {user, chat} from "src/app/engine"
 
   export let channel
 

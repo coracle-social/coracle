@@ -5,7 +5,7 @@
   import NoteContentKind9802 from "src/app/shared/NoteContentKind9802.svelte"
   import NoteContentKind1063 from "src/app/shared/NoteContentKind1063.svelte"
   import NoteContentKind30023 from "src/app/shared/NoteContentKind30023.svelte"
-  import {user} from "src/app/system"
+  import {user} from "src/app/engine"
 
   export let note
   export let anchorId = null

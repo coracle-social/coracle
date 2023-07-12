@@ -8,7 +8,7 @@
   import Content from "src/partials/Content.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
-  import {user, content} from "src/app/system"
+  import {user, content} from "src/app/engine"
   import {watch} from "src/util/loki"
 
   const lists = watch(content.lists, () => user.getLists())

@@ -10,7 +10,7 @@
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {user, routing, network} from "src/app/system"
+  import {user, routing, network} from "src/app/engine"
   import Note from "src/app/shared/Note.svelte"
   import legacyNetwork from "src/agent/network"
 

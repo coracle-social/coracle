@@ -5,7 +5,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {DEFAULT_FOLLOWS, social, user, directory, builder} from "src/app/system"
+  import {DEFAULT_FOLLOWS, social, user, directory, builder} from "src/app/engine"
   import {watch} from "src/util/loki"
   import {modal} from "src/partials/state"
 

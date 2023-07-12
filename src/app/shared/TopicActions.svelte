@@ -1,7 +1,7 @@
 <script lang="ts">
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {addToList} from "src/app/state"
-  import {user} from "src/app/system"
+  import {user} from "src/app/engine"
 
   export let topic
 

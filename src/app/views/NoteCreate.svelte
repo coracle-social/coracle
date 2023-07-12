@@ -15,7 +15,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {directory, builder, routing, user} from "src/app/system"
+  import {directory, builder, routing, user} from "src/app/engine"
   import {toast, modal} from "src/partials/state"
   import {publishWithToast} from "src/app/state"
 

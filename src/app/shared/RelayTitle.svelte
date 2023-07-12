@@ -5,7 +5,7 @@
   import {poll, stringToHue, hsl} from "src/util/misc"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {routing, meta} from "src/app/system"
+  import {routing, meta} from "src/app/engine"
 
   export let relay
   export let rating = null

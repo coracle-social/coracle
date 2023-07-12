@@ -9,7 +9,7 @@
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/partials/Compose.svelte"
-  import {directory, user, routing, builder} from "src/app/system"
+  import {directory, user, routing, builder} from "src/app/engine"
   import {publishWithToast} from "src/app/state"
 
   export let note

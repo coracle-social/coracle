@@ -7,7 +7,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
-  import {chat, routing, network, user} from "src/app/system"
+  import {chat, routing, network, user} from "src/app/engine"
   import {watch} from "src/util/loki"
 
   let q = ""

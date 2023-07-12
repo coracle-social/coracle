@@ -12,7 +12,7 @@
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Scan from "src/app/shared/Scan.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {user, directory, network, routing, content} from "src/app/system"
+  import {user, directory, network, routing, content} from "src/app/engine"
   import {watch} from "src/util/loki"
 
   let q = ""

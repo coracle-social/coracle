@@ -5,7 +5,7 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import MessagesListItem from "src/app/views/MessagesListItem.svelte"
-  import {chat} from "src/app/system"
+  import {chat} from "src/app/engine"
   import {watch} from "src/util/loki"
 
   export let activeTab = "messages"

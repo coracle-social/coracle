@@ -6,7 +6,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile, stripExifData, blobToFile} from "src/util/html"
   import {uploadFile, postJson} from "src/util/misc"
-  import {user} from "src/app/system"
+  import {user} from "src/app/engine"
 
   export let value
   export let icon

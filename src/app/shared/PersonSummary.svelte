@@ -1,10 +1,10 @@
 <script lang="ts">
   import Anchor from "src/partials/Anchor.svelte"
-  import {directory, social, nip05} from "src/app/system"
+  import {directory, social, nip05} from "src/app/engine"
   import {watch} from "src/util/loki"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
-  import {user} from "src/app/system"
+  import {user} from "src/app/engine"
   import {routes} from "src/app/state"
 
   export let pubkey

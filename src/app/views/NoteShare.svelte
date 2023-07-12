@@ -3,7 +3,7 @@
   import {toNostrURI} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import QRCode from "src/partials/QRCode.svelte"
-  import {routing} from "src/app/system"
+  import {routing} from "src/app/engine"
 
   export let note
 

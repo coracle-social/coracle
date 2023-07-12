@@ -2,7 +2,7 @@
   import {nip19} from "nostr-tools"
   import {navigate} from "svelte-routing"
   import {fade} from "src/util/transition"
-  import {user} from "src/app/system"
+  import {user} from "src/app/engine"
   import {modal, location} from "src/partials/state"
 
   let scrollY = 0

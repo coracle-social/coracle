@@ -14,7 +14,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {ENABLE_ZAPS, FORCE_RELAYS, nip57, builder, routing, user} from "src/app/system"
+  import {ENABLE_ZAPS, FORCE_RELAYS, nip57, builder, routing, user} from "src/app/engine"
 
   export let note
   export let reply

@@ -7,7 +7,7 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {directory, routing, user, network} from "src/app/system"
+  import {directory, routing, user, network} from "src/app/engine"
 
   export let note
   export let value

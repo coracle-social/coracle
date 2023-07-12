@@ -6,7 +6,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
-  import {FORCE_RELAYS} from "src/app/system"
+  import {FORCE_RELAYS} from "src/app/engine"
 
   export let privkey
 

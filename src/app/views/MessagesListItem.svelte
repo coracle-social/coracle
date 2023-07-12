@@ -4,7 +4,7 @@
   import {ellipsize} from "hurdak/lib/hurdak"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import Card from "src/partials/Card.svelte"
-  import {directory, alerts} from "src/app/system"
+  import {directory, alerts} from "src/app/engine"
 
   export let channel
 

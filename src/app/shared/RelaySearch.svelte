@@ -6,7 +6,7 @@
   import {normalizeRelayUrl, Tags, getAvgQuality} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {routing, network, user} from "src/app/system"
+  import {routing, network, user} from "src/app/engine"
   import {watch} from "src/util/loki"
 
   export let q = ""

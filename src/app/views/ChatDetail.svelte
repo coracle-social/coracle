@@ -7,7 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {builder, chat, user, routing, network} from "src/app/system"
+  import {builder, chat, user, routing, network} from "src/app/engine"
 
   export let entity
 

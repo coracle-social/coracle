@@ -3,7 +3,7 @@
   import {prop, max, path as getPath, reverse, pluck, sortBy, last} from "ramda"
   import {sleep} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
-  import {user, directory, chat} from "src/app/system"
+  import {user, directory, chat} from "src/app/engine"
   import {watch} from "src/util/loki"
 
   export let id

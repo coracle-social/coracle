@@ -4,7 +4,7 @@
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {FORCE_RELAYS, user, social} from "src/app/system"
+  import {FORCE_RELAYS, user, social} from "src/app/engine"
   import {watch} from "src/util/loki"
   import {addToList} from "src/app/state"
 

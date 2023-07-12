@@ -3,7 +3,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {routing, user} from "src/app/system"
+  import {routing, user} from "src/app/engine"
   import {watch} from "src/util/loki"
   import {modal} from "src/partials/state"
 

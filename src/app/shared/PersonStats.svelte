@@ -5,7 +5,7 @@
   import {numberFmt, batch} from "src/util/misc"
   import {modal} from "src/partials/state"
   import {watch} from "src/util/loki"
-  import {social, user, routing, network} from "src/app/system"
+  import {social, user, routing, network} from "src/app/engine"
 
   export let pubkey
 

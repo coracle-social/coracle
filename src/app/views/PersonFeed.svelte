@@ -4,7 +4,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonActions from "src/app/shared/PersonActions.svelte"
-  import {nip05, routing, directory, user} from "src/app/system"
+  import {nip05, routing, directory, user} from "src/app/engine"
   import {watch} from "src/util/loki"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"

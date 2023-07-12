@@ -3,7 +3,7 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import TopicActions from "src/app/shared/TopicActions.svelte"
-  import {routing, user} from "src/app/system"
+  import {routing, user} from "src/app/engine"
 
   export let topic
 

@@ -9,7 +9,7 @@
   import Content from "src/partials/Content.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {user} from "src/app/system"
+  import {user} from "src/app/engine"
   import {toast} from "src/partials/state"
 
   const {pubkey, privkey, bunkerKey} = user.keys

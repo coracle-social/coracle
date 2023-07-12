@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {theme, installPrompt} from "src/partials/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {FORCE_RELAYS, user, directory, alerts, chat} from "src/app/system"
+  import {FORCE_RELAYS, user, directory, alerts, chat} from "src/app/engine"
   import {watch} from "src/util/loki"
   import {routes, slowConnections, menuIsOpen} from "src/app/state"
 

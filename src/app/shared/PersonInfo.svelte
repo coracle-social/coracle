@@ -4,7 +4,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
-  import {user, directory, nip05} from "src/app/system"
+  import {user, directory, nip05} from "src/app/engine"
 
   export let pubkey
   export let hasPetname = null

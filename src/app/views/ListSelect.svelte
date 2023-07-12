@@ -7,7 +7,7 @@
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
-  import {user, content} from "src/app/system"
+  import {user, content} from "src/app/engine"
   import {watch} from "src/util/loki"
 
   export let item

@@ -6,7 +6,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {FORCE_RELAYS, user} from "src/app/system"
+  import {FORCE_RELAYS, user} from "src/app/engine"
 
   let values = {...user.getSettings()}
 

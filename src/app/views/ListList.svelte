@@ -4,7 +4,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
-  import {content, user} from "src/app/system"
+  import {content, user} from "src/app/engine"
   import {watch} from "src/util/loki"
 
   const lists = watch(content.lists, () => user.getLists())

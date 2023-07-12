@@ -3,7 +3,7 @@
   import {ellipsize} from "hurdak/lib/hurdak"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {user} from "src/app/system"
+  import {user} from "src/app/engine"
 
   export let link
   export let onClick = null

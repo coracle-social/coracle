@@ -8,7 +8,7 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {toast, modal} from "src/partials/state"
-  import {builder, user} from "src/app/system"
+  import {builder, user} from "src/app/engine"
   import {publishWithToast} from "src/app/state"
 
   export let channel = {name: null, id: null, about: null, picture: null}

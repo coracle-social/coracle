@@ -3,7 +3,7 @@
   import {stringToHue, hsl} from "src/util/misc"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import LogoSvg from "src/partials/LogoSvg.svelte"
-  import {directory} from "src/app/system"
+  import {directory} from "src/app/engine"
   import {watch} from "src/util/loki"
 
   export let pubkey

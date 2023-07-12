@@ -4,7 +4,7 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {routing, directory, user} from "src/app/system"
+  import {routing, directory, user} from "src/app/engine"
 
   export let onSubmit
 

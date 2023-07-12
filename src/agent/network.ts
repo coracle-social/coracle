@@ -2,7 +2,7 @@ import {max, mergeLeft, fromPairs, sortBy, assoc, uniqBy, prop, propEq, groupBy,
 import {findReplyId} from "src/util/nostr"
 import {chunk, ensurePlural} from "hurdak/lib/hurdak"
 import {batch, now, timedelta} from "src/util/misc"
-import {ENABLE_ZAPS, user, routing, pubkeyLoader, network} from "src/app/system"
+import {ENABLE_ZAPS, user, routing, pubkeyLoader, network} from "src/app/engine"
 
 class Cursor {
   relays: string[]
