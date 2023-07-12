@@ -1,7 +1,6 @@
 <script lang="ts">
   import type {ComponentType, SvelteComponentTyped} from "svelte"
   import {Route} from "svelte-routing"
-  import {onReady} from "src/util/loki"
   import {base64DecodeOrPlainWebSocketURL} from "src/util/misc"
   import Notifications from "src/app/views/Notifications.svelte"
   import Bech32Entity from "src/app/views/Bech32Entity.svelte"
@@ -21,12 +20,13 @@
   import RelayList from "src/app/views/RelayList.svelte"
   import UserProfile from "src/app/views/UserProfile.svelte"
   import UserSettings from "src/app/views/UserSettings.svelte"
+  import {storage} from "src/app/engine"
 
   const TypedRoute = Route as ComponentType<SvelteComponentTyped>
 
   let ready = false
 
-  onReady(() => {
+  storage.ready.then(() => {
     ready = true
   })
 </script>

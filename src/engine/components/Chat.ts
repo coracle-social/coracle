@@ -1,4 +1,4 @@
-import {last, propEq, pick, uniq, pluck} from "ramda"
+import {find, last, propEq, pick, uniq, pluck} from "ramda"
 import {tryJson, now, tryFunc} from "src/util/misc"
 import {Tags, channelAttrs} from "src/util/nostr"
 import type {Channel, Message} from "src/engine/types"
@@ -14,14 +14,16 @@ export class Chat {
     const channels = collection<Channel>()
     const messages = collection<Message>()
 
-    const hasNewDirectMessages = derived(channels, $channels =>
-      $channels.entries().filter(e => {
+    const hasNewDirectMessages = derived(
+      channels,
+      find(e => {
         return e.type === "private" && e.last_sent > 0 && messageIsNew(e)
       })
     )
 
-    const hasNewChatMessages = derived(channels, $channels =>
-      $channels.entries().filter(e => {
+    const hasNewChatMessages = derived(
+      channels,
+      find(e => {
         return e.type === "public" && e.joined > 0 && messageIsNew(e)
       })
     )

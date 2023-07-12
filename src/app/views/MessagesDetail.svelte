@@ -1,12 +1,12 @@
 <script lang="ts">
   import cx from "classnames"
+  import {defaultTo} from "ramda"
   import {onMount} from "svelte"
   import {toHex} from "src/util/nostr"
   import {now, formatTimestamp} from "src/util/misc"
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {watch} from "src/util/loki"
   import {user, routing, directory, builder, network} from "src/app/engine"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
@@ -16,7 +16,7 @@
 
   const id = toHex(entity)
   const pubkey = toHex(entity)
-  const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
+  const profile = directory.profiles.derived(defaultTo({pubkey}))
 
   user.setLastChecked(pubkey, now())
 

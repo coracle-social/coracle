@@ -2,19 +2,17 @@
   import {fly} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
-  import {dropAll} from "src/util/loki"
+  import {storage} from "src/app/engine"
 
   let confirmed = false
 
   const confirm = async () => {
     confirmed = true
 
-    await dropAll()
-
-    localStorage.clear()
+    await storage.clear()
 
     // do a hard refresh so everything gets totally cleared.
-    // Give them a moment to see the state transition. Dexie
+    // Give them a moment to see the state transition. IndexedDB
     // also apparently needs some time
     setTimeout(() => {
       window.location.href = "/login"

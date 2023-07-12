@@ -6,11 +6,10 @@
   import Content from "src/partials/Content.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
   import {DEFAULT_FOLLOWS, social, user, directory, builder} from "src/app/engine"
-  import {watch} from "src/util/loki"
   import {modal} from "src/partials/state"
 
   const {searchProfiles} = directory
-  const follows = watch(social.graph, user.getFollowsSet)
+  const follows = social.graph.derived(() => user.getFollowsSet())
 
   if ($follows.size === 0) {
     user.setPetnames(DEFAULT_FOLLOWS.map(builder.mention))

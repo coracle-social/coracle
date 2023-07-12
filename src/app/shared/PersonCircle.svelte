@@ -1,10 +1,10 @@
 <script lang="ts">
   import cx from "classnames"
+  import {defaultTo} from "ramda"
   import {stringToHue, hsl} from "src/util/misc"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import LogoSvg from "src/partials/LogoSvg.svelte"
   import {directory} from "src/app/engine"
-  import {watch} from "src/util/loki"
 
   export let pubkey
   export let size = 4
@@ -12,7 +12,7 @@
   const hue = stringToHue(pubkey)
   const primary = hsl(hue, {lightness: 80})
   const secondary = hsl(hue, {saturation: 30, lightness: 30})
-  const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
+  const profile = directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
 </script>
 
 {#if $profile.picture}

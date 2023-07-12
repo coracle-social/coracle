@@ -1,6 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {last} from "ramda"
+  import {last, defaultTo} from "ramda"
   import {onMount} from "svelte"
   import {quantify} from "hurdak/lib/hurdak"
   import {findRootId, findReplyId} from "src/util/nostr"
@@ -14,7 +14,6 @@
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
   import {nip05, user, directory, routing, social} from "src/app/engine"
-  import {watch} from "src/util/loki"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
   export let note
@@ -36,9 +35,9 @@
   const borderColor = invertColors ? "gray-6" : "gray-7"
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
-  const author = watch(directory.profiles, () => directory.getProfile(note.pubkey))
-  const handle = watch(nip05.handles, () => nip05.getHandle(note.pubkey))
-  const muted = watch(social.graph, () => user.isIgnoring(note.id))
+  const author = directory.profiles.key(note.pubkey).derived(defaultTo({pubkey: note.pubkey}))
+  const muted = social.graph.derived(() => user.isIgnoring(note.id))
+  const handle = nip05.handles.key(note.pubkey)
 
   let border, childrenContainer, noteContainer
 

@@ -4,10 +4,9 @@
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {routing, user} from "src/app/engine"
-  import {watch} from "src/util/loki"
   import {modal} from "src/partials/state"
 
-  const relays = watch(routing.policies, () => user.getRelays())
+  const relays = routing.policies.derived(() => user.getRelays())
 
   document.title = "Relays"
 </script>

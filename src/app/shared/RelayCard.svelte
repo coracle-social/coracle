@@ -8,8 +8,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {keys, user, routing, meta} from "src/app/engine"
-  import {watch} from "src/util/loki"
+  import {user, routing, meta, keys} from "src/app/engine"
   import {loadAppData} from "src/app/state"
 
   export let relay
@@ -23,7 +22,7 @@
   let quality = null
   let message = null
 
-  const relays = watch(routing.policies, () => new Set(user.getRelayUrls()))
+  const relays = routing.policies.key(keys.pubkey.get()).derived(() => new Set(user.getRelayUrls()))
 
   const removeRelay = r => user.removeRelay(r.url)
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {defaultTo} from "ramda"
   import {navigate} from "svelte-routing"
   import {nip19} from "nostr-tools"
   import {tryJson} from "src/util/misc"
@@ -6,12 +7,11 @@
   import Content from "src/partials/Content.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import {chat} from "src/app/engine"
-  import {watch} from "src/util/loki"
 
   export let note
 
   const {name, picture, about} = tryJson(() => JSON.parse(note.content))
-  const channel = watch(chat.channels, t => t.get(note.id) || {id: note.id, name, picture, about})
+  const channel = chat.channels.key(note.id).derived(defaultTo({id: note.id, name, picture, about}))
   const noteId = nip19.noteEncode(note.id)
 </script>
 

@@ -4,12 +4,11 @@
   import {tweened} from "svelte/motion"
   import {numberFmt, batch} from "src/util/misc"
   import {modal} from "src/partials/state"
-  import {watch} from "src/util/loki"
   import {social, user, routing, network} from "src/app/engine"
 
   export let pubkey
 
-  const followsCount = watch(social.graph, () => social.getFollowsSet(pubkey).size)
+  const followsCount = social.graph.key(pubkey).derived(() => social.getFollowsSet(pubkey).size)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
 
   let followersCount = tweened(0, {interpolate, duration: 1000})

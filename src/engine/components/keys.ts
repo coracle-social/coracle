@@ -18,7 +18,7 @@ export class Keys {
 
     const state = collection<KeyState>()
 
-    const current = derived<KeyState | null>([pubkey, state], ([k, m]) => m.get(k))
+    const current = derived<KeyState | null>([pubkey, state], ([k, m]) => state.getKey(k))
 
     const canSign = derived(current, keyState =>
       ["bunker", "privkey", "extension"].includes(keyState?.method)

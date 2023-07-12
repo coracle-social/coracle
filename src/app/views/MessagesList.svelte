@@ -1,16 +1,15 @@
 <script>
-  import {sortBy, partition, prop} from "ramda"
+  import {sortBy, partition, prop, filter, whereEq} from "ramda"
   import {toTitle} from "hurdak/lib/hurdak"
   import {navigate} from "svelte-routing"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import MessagesListItem from "src/app/views/MessagesListItem.svelte"
   import {chat} from "src/app/engine"
-  import {watch} from "src/util/loki"
 
   export let activeTab = "messages"
 
-  const channels = watch(chat.channels, () => chat.channels.all({type: "private"}))
+  const channels = chat.channels.derived(filter(whereEq({type: "private"})))
 
   const getChannels = tab =>
     sortBy(

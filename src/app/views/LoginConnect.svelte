@@ -13,7 +13,6 @@
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {DEFAULT_RELAYS, FORCE_RELAYS, routing, user, pubkeyLoader, network} from "src/app/engine"
-  import {watch} from "src/util/loki"
   import {loadAppData} from "src/app/state"
 
   let modal = null
@@ -23,11 +22,11 @@
   let attemptedRelays = new Set()
   let customRelays = []
   let allRelays = []
-  let knownRelays = watch(routing.relays, () =>
+  let knownRelays = routing.relays.derived($relays =>
     uniqBy(
       prop("url"),
       // Make sure our hardcoded urls are first, since they're more likely to find a match
-      DEFAULT_RELAYS.map(objOf("url")).concat(shuffle(routing.relays.all()))
+      DEFAULT_RELAYS.map(objOf("url")).concat(shuffle($relays))
     )
   )
 

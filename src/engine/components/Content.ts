@@ -15,7 +15,7 @@ export class Content {
   }
 
   static contributeSelectors({Content}) {
-    const getLists = (f = always(true)) => Content.lists.all().filter(l => !l.deleted_at && f(l))
+    const getLists = (f = always(true)) => Content.lists.get().filter(l => !l.deleted_at && f(l))
 
     const searchTopics = derived(Content.topics, $topics =>
       fuzzy($topics.values(), {keys: ["name"], threshold: 0.3})

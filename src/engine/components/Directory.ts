@@ -15,7 +15,7 @@ export class Directory {
     const getProfile = (pubkey: string): Profile => Directory.profiles.getKey(pubkey) || {pubkey}
 
     const getNamedProfiles = () =>
-      Directory.profiles.all().filter(p => p.name || p.nip05 || p.display_name)
+      Directory.profiles.get().filter(p => p.name || p.nip05 || p.display_name)
 
     const displayProfile = ({display_name, name, pubkey}: Profile) => {
       if (display_name) {

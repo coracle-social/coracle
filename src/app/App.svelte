@@ -17,8 +17,7 @@
     fetchJson,
     tryFetch,
   } from "src/util/misc"
-  import {onReady} from "src/util/loki"
-  import * as system from "src/app/engine"
+  import engine from "src/app/engine"
   import {loadAppData} from "src/app/state"
   import {theme, getThemeVariables, appName, modal} from "src/partials/state"
   import {logUsage} from "src/app/state"
@@ -31,7 +30,7 @@
 
   const TypedRouter = Router as ComponentType<SvelteComponentTyped>
 
-  Object.assign(window, {system, bech32ToHex, hexToBech32})
+  Object.assign(window, {engine, bech32ToHex, hexToBech32})
 
   export let pathname = location.pathname
   export let hash = location.hash
@@ -51,12 +50,12 @@
   const seenChallenges = new Set()
 
   // When we get an AUTH challenge from our pool, attempt to authenticate
-  system.network.authHandler = async (url, challenge) => {
-    if (system.keys.canSign.get() && !seenChallenges.has(challenge)) {
+  engine.Network.authHandler = async (url, challenge) => {
+    if (engine.Keys.canSign.get() && !seenChallenges.has(challenge)) {
       seenChallenges.add(challenge)
 
-      const rawEvent = system.builder.authenticate(url, challenge)
-      const [event] = await system.user.publish(rawEvent, [url], null, "AUTH")
+      const rawEvent = engine.Builder.authenticate(url, challenge)
+      const [event] = await engine.User.publish(rawEvent, [url], null, "AUTH")
 
       return event
     }
@@ -118,28 +117,28 @@
     }
   })
 
-  onReady(() => {
-    const pubkey = system.user.getPubkey()
+  engine.Storage.ready.then(() => {
+    const pubkey = engine.User.getPubkey()
 
     if (pubkey) {
       loadAppData(pubkey)
     }
 
     const interval = setInterval(async () => {
-      if (!system.user.getSetting("dufflepud_url")) {
+      if (!engine.User.getSetting("dufflepud_url")) {
         return
       }
 
       // Find relays with old/missing metadata and refresh them. Only pick a
       // few so we're not sending too many concurrent http requests
       const query = {"meta.last_checked": {$lt: now() - timedelta(7, "days")}}
-      const staleRelays = shuffle(system.routing.relays.all(query)).slice(0, 10)
+      const staleRelays = shuffle(engine.Routing.relays.all(query)).slice(0, 10)
 
-      system.routing.relays.patch(
+      engine.Routing.relays.patch(
         await Promise.all(
           staleRelays.map(relay =>
             tryFetch(async () => {
-              const info = await fetchJson(system.user.dufflepud("relay/info"), {
+              const info = await fetchJson(engine.User.dufflepud("relay/info"), {
                 method: "POST",
                 body: JSON.stringify({url: relay.url}),
                 headers: {

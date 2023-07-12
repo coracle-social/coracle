@@ -8,13 +8,12 @@
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {routing, user} from "src/app/engine"
-  import {watch} from "src/util/loki"
 
   let q = ""
   let search
 
-  const userRelays = watch(routing.policies, () => user.getRelays())
-  const knownRelays = watch(routing.relays, () => routing.relays.all())
+  const userRelays = routing.policies.derived(() => user.getRelays())
+  const knownRelays = routing.relays.derived()
 
   $: {
     const joined = new Set(pluck("url", $userRelays))

@@ -9,9 +9,8 @@
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {keys, user, content} from "src/app/engine"
-  import {watch} from "src/util/loki"
 
-  const lists = watch(content.lists, () => user.getLists())
+  const lists = content.lists.derived(() => user.getLists())
 
   let relays = []
   let key = Math.random()

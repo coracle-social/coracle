@@ -1,5 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import {defaultTo} from "ramda"
   import {now, formatTimestamp} from "src/util/misc"
   import {toHex} from "src/util/nostr"
   import {modal} from "src/partials/state"
@@ -12,7 +13,7 @@
   export let entity
 
   const id = toHex(entity)
-  const channel = chat.channels.watch(() => chat.channels.get(id) || {id})
+  const channel = chat.channels.key(id).derived(defaultTo({id}))
   const getRelays = () => routing.selectHints(user.getSetting("relay_limit"), $channel.hints || [])
 
   user.setLastChecked(id, now())

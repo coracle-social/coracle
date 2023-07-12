@@ -15,7 +15,6 @@
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app/views/Notification.svelte"
   import engine, {user, alerts} from "src/app/engine"
-  import {watch} from "src/util/loki"
 
   const {lastChecked} = alerts
   const tabs = ["Mentions & Replies", "Reactions"]
@@ -25,12 +24,12 @@
   let limit = 0
   let events = null
 
-  const notifications = watch(alerts.events, () => {
+  const notifications = alerts.events.derived($events => {
     // Sort by hour so we can group clustered reactions to the same parent
     return reverse(
       sortBy(
         e => formatTimestampAsLocalISODate(e.created_at).slice(0, 13) + findReplyId(e),
-        user.applyMutes(alerts.events.all())
+        user.applyMutes($events)
       )
     )
   })

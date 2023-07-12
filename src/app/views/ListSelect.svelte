@@ -8,11 +8,10 @@
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
   import {user, content} from "src/app/engine"
-  import {watch} from "src/util/loki"
 
   export let item
 
-  const lists = watch(content.lists, user.getLists)
+  const lists = content.lists.derived(() => user.getLists())
   const label = item.type === "p" ? "person" : "topic"
 
   const modifyList = updateIn("tags", tags => (tags || []).concat([[item.type, item.value]]))

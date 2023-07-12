@@ -2,7 +2,7 @@
   import {debounce} from "throttle-debounce"
   import {navigate} from "svelte-routing"
   import {nip05, nip19} from "nostr-tools"
-  import {identity} from "ramda"
+  import {identity, map} from "ramda"
   import {fuzzy, tryFunc} from "src/util/misc"
   import {fromNostrURI} from "src/util/nostr"
   import {modal} from "src/partials/state"
@@ -13,7 +13,6 @@
   import Scan from "src/app/shared/Scan.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
   import {user, directory, network, routing, content} from "src/app/engine"
-  import {watch} from "src/util/loki"
 
   let q = ""
   let options = []
@@ -62,13 +61,11 @@
     }
   })
 
-  const topicOptions = watch(content.topics, () =>
-    content.topics
-      .all()
-      .map(topic => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
+  const topicOptions = content.topics.derived(
+    map(topic => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
   )
 
-  const profileOptions = watch(directory.profiles, () =>
+  const profileOptions = directory.profiles.derived(() =>
     directory
       .getNamedProfiles()
       .filter(profile => profile.pubkey !== user.getPubkey())

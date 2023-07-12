@@ -1,11 +1,11 @@
 <script lang="ts">
+  import {defaultTo} from "ramda"
   import {parseHex} from "src/util/html"
   import {theme, getThemeColor} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonActions from "src/app/shared/PersonActions.svelte"
   import {nip05, routing, directory, user} from "src/app/engine"
-  import {watch} from "src/util/loki"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import PersonNotes from "src/app/shared/PersonNotes.svelte"
@@ -14,8 +14,8 @@
 
   export let pubkey
 
-  const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
-  const handle = watch(nip05.handles, () => nip05.getHandle(pubkey))
+  const handle = nip05.handles.key(pubkey)
+  const profile = directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
   const relays = routing.getPubkeyHints(user.getSetting("relay_limit"), pubkey)
 
   let rgb, rgba

@@ -1,10 +1,9 @@
 <script>
+  import {prop, whereEq, max, path as getPath, reverse, pluck, sortBy, last} from "ramda"
   import {fly} from "src/util/transition"
-  import {prop, max, path as getPath, reverse, pluck, sortBy, last} from "ramda"
   import {sleep} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import {keys, directory, chat} from "src/app/engine"
-  import {watch} from "src/util/loki"
 
   export let id
   export let sendMessage
@@ -54,9 +53,11 @@
   }
 
   // Group messages so we're only showing the person once per chunk
-  const messages = watch(chat.messages, () => {
+  const messages = chat.messages.derived($messages => {
+    const channelMessages = $messages.filter(whereEq({channel: id}))
+
     const result = reverse(
-      sortBy(prop("created_at"), chat.messages.all({channel: id})).reduce((mx, m) => {
+      sortBy(prop("created_at"), channelMessages).reduce((mx, m) => {
         const profile = directory.getProfile(m.pubkey)
         const showProfile = profile.pubkey !== getPath(["profile", "pubkey"], last(mx))
 

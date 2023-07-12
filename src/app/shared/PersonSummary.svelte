@@ -1,7 +1,7 @@
 <script lang="ts">
+  import {defaultTo} from "ramda"
   import Anchor from "src/partials/Anchor.svelte"
   import {directory, social, nip05} from "src/app/engine"
-  import {watch} from "src/util/loki"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import {keys, user} from "src/app/engine"
@@ -9,10 +9,10 @@
 
   export let pubkey
 
-  const following = watch(social.graph, () => user.isFollowing(pubkey))
-  const muted = watch(social.graph, () => user.isIgnoring(pubkey))
-  const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
-  const handle = watch(nip05.handles, () => nip05.getHandle(pubkey))
+  const following = social.graph.key(keys.pubkey.get()).derived(() => user.isFollowing(pubkey))
+  const muted = social.graph.key(keys.pubkey.get()).derived(() => user.isIgnoring(pubkey))
+  const profile = directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
+  const handle = nip05.handles.key(pubkey)
   const unfollow = () => user.unfollow(pubkey)
   const follow = () => user.follow(pubkey)
   const unmute = () => user.unmute(pubkey)

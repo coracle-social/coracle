@@ -1,6 +1,6 @@
 <script>
   import {onMount} from "svelte"
-  import {partition, prop} from "ramda"
+  import {partition, filter, whereEq, prop} from "ramda"
   import {fuzzy} from "src/util/misc"
   import {modal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
@@ -8,7 +8,6 @@
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
   import {chat, routing, network, user, keys} from "src/app/engine"
-  import {watch} from "src/util/loki"
 
   let q = ""
   let search
@@ -16,7 +15,7 @@
   let joinedChannels = []
   let otherChannels = []
 
-  const channels = watch(chat.channels, () => chat.channels.all({type: "public"}))
+  const channels = chat.channels.derived(filter(whereEq({type: "public"})))
 
   $: [joinedChannels, otherChannels] = partition(prop("joined"), $channels)
   $: search = fuzzy(otherChannels, {keys: ["name", "about"]})

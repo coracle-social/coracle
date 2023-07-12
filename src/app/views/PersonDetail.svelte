@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {identity} from "ramda"
+  import {identity, defaultTo} from "ramda"
   import {navigate} from "svelte-routing"
   import {log} from "src/util/logger"
   import {parseHex} from "src/util/html"
@@ -13,7 +13,6 @@
   import PersonLikes from "src/app/shared/PersonLikes.svelte"
   import PersonRelays from "src/app/shared/PersonRelays.svelte"
   import {FORCE_RELAYS, nip05, directory, routing} from "src/app/engine"
-  import {watch} from "src/util/loki"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -25,8 +24,8 @@
 
   const tabs = ["notes", "likes", FORCE_RELAYS.length === 0 && "relays"].filter(identity)
   const pubkey = toHex(npub)
-  const profile = watch(directory.profiles, () => directory.getProfile(pubkey))
-  const handle = watch(nip05.handles, () => nip05.getHandle(pubkey))
+  const handle = nip05.handles.key(pubkey)
+  const profile = directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
 
   let loading = true
   let rgb, rgba

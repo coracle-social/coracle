@@ -38,18 +38,19 @@ const engine = createDefaultEngine({
 })
 
 export default engine
-export const events = engine.Events
-export const network = engine.Network
-export const meta = engine.Meta
-export const user = engine.User
-export const keys = engine.Keys
+export const alerts = engine.Alerts
+export const builder = engine.Builder
+export const chat = engine.Chat
 export const content = engine.Content
 export const directory = engine.Directory
+export const events = engine.Events
+export const keys = engine.Keys
+export const meta = engine.Meta
+export const network = engine.Network
 export const nip05 = engine.Nip05
 export const nip57 = engine.Nip57
-export const social = engine.Social
-export const routing = engine.Routing
-export const alerts = engine.Alerts
-export const chat = engine.Chat
-export const builder = engine.Builder
 export const pubkeyLoader = engine.PubkeyLoader
+export const routing = engine.Routing
+export const social = engine.Social
+export const storage = engine.Storage
+export const user = engine.User

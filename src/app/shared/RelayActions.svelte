@@ -3,13 +3,12 @@
   import {modal} from "src/partials/state"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {routing, keys, user} from "src/app/engine"
-  import {watch} from "src/util/loki"
   import {addToList} from "src/app/state"
 
   export let relay
 
   const info = routing.getRelayInfo(relay.url)
-  const relays = watch(routing.policies, () => user.getRelayUrls())
+  const relays = routing.policies.key(keys.pubkey.get()).derived(() => user.getRelayUrls())
 
   let actions = []
 
