@@ -1,7 +1,7 @@
 <script lang="ts">
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {addToList} from "src/app/state"
-  import {user} from "src/app/engine"
+  import {keys} from "src/app/engine"
 
   export let topic
 
@@ -10,7 +10,7 @@
   $: {
     actions = []
 
-    if (user.canSign()) {
+    if (keys.canSign.get()) {
       actions.push({
         onClick: () => addToList("t", topic),
         label: "Add to list",

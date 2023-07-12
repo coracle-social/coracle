@@ -4,7 +4,7 @@
   import {watch} from "src/util/loki"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
-  import {user} from "src/app/engine"
+  import {keys, user} from "src/app/engine"
   import {routes} from "src/app/state"
 
   export let pubkey
@@ -33,7 +33,7 @@
     </div>
   </Anchor>
   <div class="absolute right-1 top-1 flex gap-4 py-2 text-lg">
-    {#if user.canSign()}
+    {#if keys.canSign.get()}
       {#if $muted}
         <i
           title="Unmute"

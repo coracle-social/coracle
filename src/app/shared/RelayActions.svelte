@@ -2,7 +2,7 @@
   import {last} from "ramda"
   import {modal} from "src/partials/state"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {routing, user} from "src/app/engine"
+  import {routing, keys, user} from "src/app/engine"
   import {watch} from "src/util/loki"
   import {addToList} from "src/app/state"
 
@@ -31,7 +31,7 @@
       })
     }
 
-    if (user.canSign()) {
+    if (keys.canSign.get()) {
       actions.push({
         onClick: () => addToList("r", relay.url),
         label: "Add to list",

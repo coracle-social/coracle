@@ -6,7 +6,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {user} from "src/app/engine"
+  import {keys} from "src/app/engine"
   import {login} from "src/app/state"
 
   let nsec = ""
@@ -15,7 +15,7 @@
   const logIn = () => {
     const privkey = nsec.startsWith("nsec") ? toHex(nsec) : nsec
 
-    if (user.keys.isKeyValid(privkey)) {
+    if (keys.isKeyValid(privkey)) {
       login("privkey", privkey)
     } else {
       toast.show("error", "Sorry, but that's an invalid private key.")

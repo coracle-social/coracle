@@ -22,6 +22,7 @@ import {
   meta,
   network,
   user,
+  keys,
 } from "src/app/engine"
 
 // Routing
@@ -71,7 +72,8 @@ const session = Math.random().toString().slice(2)
 export const logUsage = async name => {
   // Hash the user's pubkey so we can identify unique users without knowing
   // anything about them
-  const pubkey = user.getPubkey()
+  console.log(keys)
+  const pubkey = keys.pubkey.get()
   const ident = pubkey ? hash(pubkey) : "unknown"
 
   if (user.getSetting("report_analytics")) {
@@ -88,7 +90,7 @@ export const logUsage = async name => {
 // Synchronization from events to state
 
 export const listen = async () => {
-  const pubkey = user.getPubkey()
+  const pubkey = user.pubkey.get()
   const kinds = noteKinds.concat([4, 7])
 
   if (ENABLE_ZAPS) {
@@ -162,7 +164,7 @@ export const loadAppData = async pubkey => {
 }
 
 export const login = async (method, key) => {
-  user.keys.login(method, key)
+  keys.login(method, key)
 
   if (FORCE_RELAYS.length > 0) {
     modal.replace({
@@ -174,7 +176,7 @@ export const login = async (method, key) => {
 
     await Promise.all([
       sleep(1500),
-      pubkeyLoader.loadPubkeys([user.getPubkey()], {force: true, kinds: userKinds}),
+      pubkeyLoader.loadPubkeys([user.pubkey.get()], {force: true, kinds: userKinds}),
     ])
 
     navigate("/notes")

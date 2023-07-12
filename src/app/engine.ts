@@ -42,6 +42,7 @@ export const events = engine.Events
 export const network = engine.Network
 export const meta = engine.Meta
 export const user = engine.User
+export const keys = engine.Keys
 export const content = engine.Content
 export const directory = engine.Directory
 export const nip05 = engine.Nip05

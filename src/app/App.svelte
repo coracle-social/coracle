@@ -52,7 +52,7 @@
 
   // When we get an AUTH challenge from our pool, attempt to authenticate
   system.network.authHandler = async (url, challenge) => {
-    if (system.user.canSign() && !seenChallenges.has(challenge)) {
+    if (system.keys.canSign.get() && !seenChallenges.has(challenge)) {
       seenChallenges.add(challenge)
 
       const rawEvent = system.builder.authenticate(url, challenge)

@@ -9,7 +9,7 @@
   import OnboardingRelays from "src/app/views/OnboardingRelays.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
-  import {DEFAULT_FOLLOWS, DEFAULT_RELAYS, pubkeyLoader, builder, user} from "src/app/engine"
+  import {DEFAULT_FOLLOWS, DEFAULT_RELAYS, pubkeyLoader, builder, user, keys} from "src/app/engine"
   import {loadAppData} from "src/app/state"
   import {modal} from "src/partials/state"
 
@@ -26,7 +26,7 @@
     const relays = user.getRelays()
     const petnames = user.getPetnames()
 
-    await user.keys.login("privkey", privkey)
+    await keys.login("privkey", privkey)
 
     // Re-save preferences now that we have a key
     await Promise.all([
@@ -36,7 +36,7 @@
       note && user.publish(builder.createNote(note)),
     ])
 
-    loadAppData(user.getPubkey())
+    loadAppData(keys.pubkey.get())
 
     modal.clear()
     navigate("/notes")

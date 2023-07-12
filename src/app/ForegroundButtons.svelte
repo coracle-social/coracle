@@ -2,7 +2,7 @@
   import {nip19} from "nostr-tools"
   import {navigate} from "svelte-routing"
   import {fade} from "src/util/transition"
-  import {user} from "src/app/engine"
+  import {keys} from "src/app/engine"
   import {modal, location} from "src/partials/state"
 
   let scrollY = 0
@@ -10,7 +10,7 @@
   $: showCreateNote = $location.pathname.match(/messages|chat|relays$|keys|settings|logout$/)
   $: showLogin = !$location.pathname.match(/login$/)
 
-  const {canSign} = user.keys
+  const {canSign} = keys
 
   const scrollToTop = () => document.body.scrollIntoView({behavior: "smooth"})
 

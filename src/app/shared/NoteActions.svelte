@@ -14,7 +14,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {ENABLE_ZAPS, FORCE_RELAYS, nip57, builder, routing, user} from "src/app/engine"
+  import {ENABLE_ZAPS, FORCE_RELAYS, nip57, builder, routing, keys, user} from "src/app/engine"
 
   export let note
   export let reply
@@ -62,7 +62,7 @@
   let actions = []
   let showDetails = false
 
-  $: disableActions = !user.canSign() || muted
+  $: disableActions = !keys.canSign.get() || muted
   $: likes = note.reactions.filter(n => isLike(n.content))
   $: like = like || find(propEq("pubkey", user.getPubkey()), likes)
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes

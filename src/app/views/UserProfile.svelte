@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {user, builder} from "src/app/engine"
+  import {keys, user, builder} from "src/app/engine"
   import {routes} from "src/app/state"
   import {publishWithToast} from "src/app/state"
 
@@ -20,7 +20,7 @@
     "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
   onMount(async () => {
-    if (!user.canSign()) {
+    if (!keys.canSign.get()) {
       return navigate("/login")
     }
   })

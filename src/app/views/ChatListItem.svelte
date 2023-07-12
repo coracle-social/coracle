@@ -4,7 +4,7 @@
   import {fly} from "src/util/transition"
   import {ellipsize} from "hurdak/lib/hurdak"
   import Anchor from "src/partials/Anchor.svelte"
-  import {user, chat} from "src/app/engine"
+  import {keys, chat} from "src/app/engine"
 
   export let channel
 
@@ -31,7 +31,7 @@
           <i class="fa fa-right-from-bracket" />
           <span>Leave</span>
         </Anchor>
-      {:else if user.canSign()}
+      {:else if keys.canSign.get()}
         <Anchor theme="button" killEvent class="flex items-center gap-2" on:click={join}>
           <i class="fa fa-right-to-bracket" />
           <span>Join</span>

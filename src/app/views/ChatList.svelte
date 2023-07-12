@@ -7,7 +7,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
-  import {chat, routing, network, user} from "src/app/engine"
+  import {chat, routing, network, user, keys} from "src/app/engine"
   import {watch} from "src/util/loki"
 
   let q = ""
@@ -33,7 +33,7 @@
 </script>
 
 <Content>
-  {#if user.canSign()}
+  {#if keys.canSign.get()}
     <div class="flex justify-between">
       <div class="flex items-center gap-2">
         <i class="fa fa-server fa-lg" />

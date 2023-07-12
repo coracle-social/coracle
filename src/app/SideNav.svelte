@@ -1,16 +1,16 @@
 <script lang="ts">
   import cx from "classnames"
+  import {derived} from "svelte/store"
   import {theme, installPrompt} from "src/partials/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {FORCE_RELAYS, user, directory, alerts, chat} from "src/app/engine"
-  import {watch} from "src/util/loki"
+  import {FORCE_RELAYS, keys, directory, alerts, chat} from "src/app/engine"
   import {routes, slowConnections, menuIsOpen} from "src/app/state"
 
-  const {canSign} = user.keys
+  const {canSign, pubkey} = keys
   const {hasNewNotfications} = alerts
   const {hasNewChatMessages, hasNewDirectMessages} = chat
-  const profile = watch(directory.profiles, () =>
-    user.getPubkey() ? directory.getProfile(user.getPubkey()) : null
+  const profile = derived([pubkey, directory.profiles], () =>
+    $pubkey ? directory.getProfile($pubkey) : null
   )
 
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
@@ -36,8 +36,8 @@
   class:-ml-56={!$menuIsOpen}>
   {#if $profile}
     <li>
-      <a href={routes.person(user.getPubkey())} class="flex items-center gap-2 px-4 py-2 pb-6">
-        <PersonCircle size={6} pubkey={user.getPubkey()} />
+      <a href={routes.person($pubkey)} class="flex items-center gap-2 px-4 py-2 pb-6">
+        <PersonCircle size={6} pubkey={$pubkey} />
         <span class="text-lg font-bold">{directory.displayProfile($profile)}</span>
       </a>
     </li>

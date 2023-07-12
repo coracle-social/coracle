@@ -8,7 +8,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {user, routing, meta} from "src/app/engine"
+  import {keys, user, routing, meta} from "src/app/engine"
   import {watch} from "src/util/loki"
   import {loadAppData} from "src/app/state"
 
@@ -104,7 +104,7 @@
   {#if relay.description}
     <p>{relay.description}</p>
   {/if}
-  {#if hasRelay && showControls && user.canSign()}
+  {#if hasRelay && showControls && keys.canSign.get()}
     <div class="-mx-6 my-1 h-px bg-gray-7" />
     <div class="flex justify-between gap-2">
       <span>Publish to this relay?</span>

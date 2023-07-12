@@ -10,70 +10,72 @@ export type LoadPeopleOpts = {
   force?: boolean
 }
 
-export function contributeActions({Directory, Routing, User, Network}) {
-  const attemptedPubkeys = new Set()
+export class PubkeyLoader {
+  static contributeActions({Directory, Routing, User, Network}) {
+    const attemptedPubkeys = new Set()
 
-  const getStalePubkeys = pubkeys => {
-    const stale = new Set()
-    const since = now() - timedelta(3, "hours")
+    const getStalePubkeys = pubkeys => {
+      const stale = new Set()
+      const since = now() - timedelta(3, "hours")
 
-    for (const pubkey of pubkeys) {
-      if (stale.has(pubkey) || attemptedPubkeys.has(pubkey)) {
-        continue
+      for (const pubkey of pubkeys) {
+        if (stale.has(pubkey) || attemptedPubkeys.has(pubkey)) {
+          continue
+        }
+
+        attemptedPubkeys.add(pubkey)
+
+        if (Directory.profiles.getKey(pubkey)?.updated_at || 0 > since) {
+          continue
+        }
+
+        stale.add(pubkey)
       }
 
-      attemptedPubkeys.add(pubkey)
-
-      if (Directory.profiles.getKey(pubkey)?.updated_at || 0 > since) {
-        continue
-      }
-
-      stale.add(pubkey)
+      return stale
     }
 
-    return stale
-  }
+    const loadPubkeys = async (
+      rawPubkeys,
+      {relays, force, kinds = personKinds}: LoadPeopleOpts = {}
+    ) => {
+      const pubkeys = force ? uniq(rawPubkeys) : getStalePubkeys(rawPubkeys)
 
-  const loadPubkeys = async (
-    rawPubkeys,
-    {relays, force, kinds = personKinds}: LoadPeopleOpts = {}
-  ) => {
-    const pubkeys = force ? uniq(rawPubkeys) : getStalePubkeys(rawPubkeys)
+      const getChunkRelays = chunk => {
+        if (relays?.length > 0) {
+          return relays
+        }
 
-    const getChunkRelays = chunk => {
-      if (relays?.length > 0) {
-        return relays
+        return Routing.mergeHints(
+          User.getSetting("relay_limit"),
+          chunk.map(pubkey => Routing.getPubkeyHints(3, pubkey))
+        )
       }
 
-      return Routing.mergeHints(
-        User.getSetting("relay_limit"),
-        chunk.map(pubkey => Routing.getPubkeyHints(3, pubkey))
+      const getChunkFilter = chunk => {
+        const filter = [] as Filter[]
+
+        filter.push({kinds: without([30078], kinds), authors: chunk})
+
+        // Add a separate filter for app data so we're not pulling down other people's stuff,
+        // or obsolete events of our own.
+        if (kinds.includes(30078)) {
+          filter.push({kinds: [30078], authors: chunk, "#d": appDataKeys})
+        }
+
+        return filter
+      }
+
+      await Promise.all(
+        chunk(256, pubkeys).map(async chunk => {
+          await Network.load({
+            relays: getChunkRelays(chunk),
+            filter: getChunkFilter(chunk),
+          })
+        })
       )
     }
 
-    const getChunkFilter = chunk => {
-      const filter = [] as Filter[]
-
-      filter.push({kinds: without([30078], kinds), authors: chunk})
-
-      // Add a separate filter for app data so we're not pulling down other people's stuff,
-      // or obsolete events of our own.
-      if (kinds.includes(30078)) {
-        filter.push({kinds: [30078], authors: chunk, "#d": appDataKeys})
-      }
-
-      return filter
-    }
-
-    await Promise.all(
-      chunk(256, pubkeys).map(async chunk => {
-        await Network.load({
-          relays: getChunkRelays(chunk),
-          filter: getChunkFilter(chunk),
-        })
-      })
-    )
+    return {loadPubkeys}
   }
-
-  return {loadPubkeys}
 }

@@ -4,7 +4,7 @@
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {FORCE_RELAYS, user, social} from "src/app/engine"
+  import {FORCE_RELAYS, keys, user, social} from "src/app/engine"
   import {watch} from "src/util/loki"
   import {addToList} from "src/app/state"
 
@@ -19,7 +19,7 @@
   $: {
     actions = []
 
-    if (user.canSign()) {
+    if (keys.canSign.get()) {
       actions.push({
         onClick: () => addToList("p", pubkey),
         label: "Add to list",
@@ -29,7 +29,7 @@
 
     actions.push({onClick: share, label: "Share", icon: "share-nodes"})
 
-    if (user.getPubkey() !== pubkey && user.canSign()) {
+    if (user.getPubkey() !== pubkey && keys.canSign.get()) {
       actions.push({
         onClick: () => navigate(`/messages/${npub}`),
         label: "Message",
@@ -47,7 +47,7 @@
       actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
     }
 
-    if (user.getPubkey() === pubkey && user.canSign()) {
+    if (user.getPubkey() === pubkey && keys.canSign.get()) {
       actions.push({
         onClick: () => navigate("/profile"),
         label: "Edit",
@@ -70,7 +70,7 @@
 </script>
 
 <div class="flex items-center gap-3">
-  {#if user.canSign()}
+  {#if keys.canSign.get()}
     <Popover triggerType="mouseenter">
       <div slot="trigger">
         {#if $following}

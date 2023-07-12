@@ -3,7 +3,7 @@
   import {prop, max, path as getPath, reverse, pluck, sortBy, last} from "ramda"
   import {sleep} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
-  import {user, directory, chat} from "src/app/engine"
+  import {keys, directory, chat} from "src/app/engine"
   import {watch} from "src/util/loki"
 
   export let id
@@ -77,7 +77,7 @@
 
 <div class="flex h-full gap-4">
   <div class="relative w-full">
-    <div class="py-18 flex h-screen flex-col" class:pb-20={user.canSign()}>
+    <div class="py-18 flex h-screen flex-col" class:pb-20={keys.canSign.get()}>
       <ul
         class="channel-messages flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
         {#each $messages as m (m.id)}
@@ -95,7 +95,7 @@
     <div class="fixed top-0 z-20 w-full border-b border-solid border-gray-6 bg-gray-7">
       <slot name="header" />
     </div>
-    {#if user.canSign()}
+    {#if keys.canSign.get()}
       <div
         class="fixed bottom-0 z-10 flex w-full border-t border-solid border-gray-6 border-gray-7 bg-gray-6 lg:-ml-56 lg:pl-56">
         <textarea
