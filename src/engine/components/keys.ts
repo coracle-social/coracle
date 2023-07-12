@@ -88,7 +88,7 @@ export function contributeSelectors({keys}) {
   return {withExtension, isKeyValid, getNDK}
 }
 
-export function contributeActions({keys}) {
+export function contributeActions({keys}, emit) {
   const {pubkey, state, current, withExtension, getNDK} = keys
 
   const login = (method, key) => {

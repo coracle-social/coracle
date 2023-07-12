@@ -15,7 +15,7 @@ export const createEngine = (engine, components) => {
     Object.assign(engine[component.name], selectors)
   }
 
-  const componentActions = components.map(c => [c, c.contributeActions?.(engine)])
+  const componentActions = components.map(c => [c, c.contributeActions?.(engine, emitter.emit)])
 
   for (const [component, actions] of componentActions) {
     Object.assign(engine[component.name], actions)
