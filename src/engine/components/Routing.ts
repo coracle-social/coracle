@@ -10,9 +10,8 @@ export class Routing {
   static contributeState() {
     const relays = collection<Relay>()
     const policies = collection<RelayPolicy>()
-    const searchRelays = derived(relays, $relays => fuzzy($relays.values(), {keys: ["url"]}))
 
-    return {relays, policies, searchRelays}
+    return {relays, policies}
   }
 
   static contributeActions({Env, Routing, Network, Meta, User}) {
@@ -53,6 +52,10 @@ export class Routing {
     const getRelayInfo = (url: string): RelayInfo => Routing.relays.getKey(url)?.info || {}
 
     const displayRelay = ({url}) => last(url.split("://"))
+
+    const searchRelays = derived(Routing.relays, $relays =>
+      fuzzy($relays.values(), {keys: ["url"]})
+    )
 
     const getSearchRelays = () => {
       const searchableRelayUrls = Routing.relays
@@ -197,6 +200,7 @@ export class Routing {
       getRelay,
       getRelayInfo,
       displayRelay,
+      searchRelays,
       getSearchRelays,
       getPubkeyRelays,
       getPubkeyRelayUrls,

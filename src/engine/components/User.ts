@@ -3,11 +3,11 @@ import {when, uniq, pluck, without, fromPairs, whereEq, find, slice, assoc, reje
 import {doPipe} from "hurdak/lib/hurdak"
 import {now} from "src/util/misc"
 import {Tags, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
-import {collection} from "../util/store"
+import {writable} from "../util/store"
 
 export class User {
   static contributeState({Env}) {
-    const settings = collection<any>({
+    const settings = writable<any>({
       last_updated: 0,
       relay_limit: 10,
       default_zap: 21,
@@ -72,7 +72,7 @@ export class User {
 
     // Settings
 
-    const getSetting = k => User.settings.getKey(k)
+    const getSetting = k => User.settings.get()[k]
 
     const dufflepud = path => `${getSetting("dufflepud_url")}/${path}`
 
@@ -274,7 +274,7 @@ export class User {
     Events.addHandler(30078, async e => {
       if (
         Tags.from(e).getMeta("d") === "coracle/settings/v1" &&
-        e.created_at > User.settings.getKey("last_updated")
+        e.created_at > User.getSetting("last_updated")
       ) {
         const updates = await Crypt.decryptJson(e.content)
 

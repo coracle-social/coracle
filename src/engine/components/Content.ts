@@ -11,17 +11,17 @@ export class Content {
 
     const lists = collection<List>()
 
-    const searchTopics = derived(topics, $topics =>
-      fuzzy($topics.values(), {keys: ["name"], threshold: 0.3})
-    )
-
-    return {topics, lists, searchTopics}
+    return {topics, lists}
   }
 
   static contributeSelectors({Content}) {
     const getLists = (f = always(true)) => Content.lists.all().filter(l => !l.deleted_at && f(l))
 
-    return {getLists}
+    const searchTopics = derived(Content.topics, $topics =>
+      fuzzy($topics.values(), {keys: ["name"], threshold: 0.3})
+    )
+
+    return {getLists, searchTopics}
   }
 
   static initialize({Events, Content}) {

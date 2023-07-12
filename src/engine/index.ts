@@ -13,6 +13,7 @@ import {Nip57} from "./components/Nip57"
 import {PubkeyLoader} from "./components/PubkeyLoader"
 import {Routing} from "./components/Routing"
 import {Social} from "./components/Social"
+import {Storage} from "./components/Storage"
 import {User} from "./components/User"
 
 export const createEngine = (engine, components) => {
@@ -62,6 +63,7 @@ export const createDefaultEngine = Env => {
     PubkeyLoader,
     Routing,
     Social,
+    Storage,
     User,
   ])
 }

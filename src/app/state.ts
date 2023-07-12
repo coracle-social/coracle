@@ -72,7 +72,6 @@ const session = Math.random().toString().slice(2)
 export const logUsage = async name => {
   // Hash the user's pubkey so we can identify unique users without knowing
   // anything about them
-  console.log(keys)
   const pubkey = keys.pubkey.get()
   const ident = pubkey ? hash(pubkey) : "unknown"
 
