@@ -1,61 +1,25 @@
 import {ensurePlural} from "hurdak/lib/hurdak"
 import {now} from "src/util/misc"
 import {Tags} from "src/util/nostr"
-import type {Table} from "src/util/loki"
-import type {Sync} from "src/system/components/Sync"
 import type {GraphEntry} from "src/system/types"
+import {collection} from "../util/store"
 
-export class Social {
-  sync: Sync
-  graph: Table<GraphEntry>
-  constructor(sync) {
-    this.sync = sync
+export function contributeState() {
+  const graph = collection<GraphEntry>()
 
-    this.graph = sync.table("social/graph", "pubkey", {
-      max: 5000,
-      sort: sync.sortByPubkeyWhitelist,
-    })
+  return {graph}
+}
 
-    sync.addHandler(3, e => {
-      const entry = this.graph.get(e.pubkey)
+export function contributeActions({Social}) {
+  const getPetnames = pubkey => Social.graph.getKey(pubkey)?.petnames || []
 
-      if (e.created_at < entry?.petnames_updated_at) {
-        return
-      }
+  const getMutedTags = pubkey => Social.graph.getKey(pubkey)?.mutes || []
 
-      this.graph.patch({
-        pubkey: e.pubkey,
-        updated_at: now(),
-        petnames_updated_at: e.created_at,
-        petnames: Tags.from(e).type("p").all(),
-      })
-    })
-
-    sync.addHandler(10000, e => {
-      const entry = this.graph.get(e.pubkey)
-
-      if (e.created_at < entry?.mutes_updated_at) {
-        return
-      }
-
-      this.graph.patch({
-        pubkey: e.pubkey,
-        updated_at: now(),
-        mutes_updated_at: e.created_at,
-        mutes: Tags.from(e).type("p").all(),
-      })
-    })
-  }
-
-  getPetnames = pubkey => this.graph.get(pubkey)?.petnames || []
-
-  getMutedTags = pubkey => this.graph.get(pubkey)?.mutes || []
-
-  getFollowsSet = pubkeys => {
+  const getFollowsSet = pubkeys => {
     const follows = new Set()
 
     for (const pubkey of ensurePlural(pubkeys)) {
-      for (const tag of this.getPetnames(pubkey)) {
+      for (const tag of getPetnames(pubkey)) {
         follows.add(tag[1])
       }
     }
@@ -63,11 +27,11 @@ export class Social {
     return follows
   }
 
-  getMutesSet = pubkeys => {
+  const getMutesSet = pubkeys => {
     const mutes = new Set()
 
     for (const pubkey of ensurePlural(pubkeys)) {
-      for (const tag of this.getMutedTags(pubkey)) {
+      for (const tag of getMutedTags(pubkey)) {
         mutes.add(tag[1])
       }
     }
@@ -75,15 +39,15 @@ export class Social {
     return mutes
   }
 
-  getFollows = pubkeys => Array.from(this.getFollowsSet(pubkeys))
+  const getFollows = pubkeys => Array.from(getFollowsSet(pubkeys))
 
-  getMutes = pubkeys => Array.from(this.getMutesSet(pubkeys))
+  const getMutes = pubkeys => Array.from(getMutesSet(pubkeys))
 
-  getNetworkSet = (pubkeys, includeFollows = false) => {
-    const follows = this.getFollowsSet(pubkeys)
+  const getNetworkSet = (pubkeys, includeFollows = false) => {
+    const follows = getFollowsSet(pubkeys)
     const network = includeFollows ? follows : new Set()
 
-    for (const pubkey of this.getFollows(follows)) {
+    for (const pubkey of getFollows(follows)) {
       if (!follows.has(pubkey)) {
         network.add(pubkey)
       }
@@ -92,9 +56,54 @@ export class Social {
     return network
   }
 
-  getNetwork = pubkeys => Array.from(this.getNetworkSet(pubkeys))
+  const getNetwork = pubkeys => Array.from(getNetworkSet(pubkeys))
 
-  isFollowing = (a, b) => this.getFollowsSet(a).has(b)
+  const isFollowing = (a, b) => getFollowsSet(a).has(b)
 
-  isIgnoring = (a, b) => this.getMutesSet(a).has(b)
+  const isIgnoring = (a, b) => getMutesSet(a).has(b)
+
+  return {
+    getPetnames,
+    getMutedTags,
+    getFollowsSet,
+    getMutesSet,
+    getFollows,
+    getMutes,
+    getNetworkSet,
+    getNetwork,
+    isFollowing,
+    isIgnoring,
+  }
+}
+
+export function initialize({Events, Social}) {
+  Events.addHandler(3, e => {
+    const entry = Social.graph.getKey(e.pubkey)
+
+    if (e.created_at < entry?.petnames_updated_at) {
+      return
+    }
+
+    Social.graph.mergeKey(e.pubkey, {
+      pubkey: e.pubkey,
+      updated_at: now(),
+      petnames_updated_at: e.created_at,
+      petnames: Tags.from(e).type("p").all(),
+    })
+  })
+
+  Events.addHandler(10000, e => {
+    const entry = Social.graph.getKey(e.pubkey)
+
+    if (e.created_at < entry?.mutes_updated_at) {
+      return
+    }
+
+    Social.graph.mergeKey(e.pubkey, {
+      pubkey: e.pubkey,
+      updated_at: now(),
+      mutes_updated_at: e.created_at,
+      mutes: Tags.from(e).type("p").all(),
+    })
+  })
 }

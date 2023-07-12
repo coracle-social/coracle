@@ -4,9 +4,18 @@ import {doPipe} from "hurdak/lib/hurdak"
 import {now, getter} from "src/util/misc"
 import {Tags, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
 import type {System} from "src/system/System"
-import type {UserSettings} from "src/system/types"
 import type {Writable} from "svelte/store"
 import engine from "src/app/system"
+
+export type UserSettings = {
+  last_updated: number
+  relay_limit: number
+  default_zap: number
+  show_media: boolean
+  report_analytics: boolean
+  dufflepud_url: string
+  multiplextr_url: string
+}
 
 export class User {
   keys: typeof engine.keys

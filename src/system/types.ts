@@ -95,16 +95,6 @@ export type Profile = {
   display_name?: string
 }
 
-export type UserSettings = {
-  last_updated: number
-  relay_limit: number
-  default_zap: number
-  show_media: boolean
-  report_analytics: boolean
-  dufflepud_url: string
-  multiplextr_url: string
-}
-
 export type Channel = {
   id: string
   type: "public" | "private"

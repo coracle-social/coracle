@@ -127,8 +127,8 @@ export const key = <T>(baseStore, k): Key<T> => {
   return keyStore
 }
 
-export const collection = <T>(): Collection<T> => {
-  const baseStore = writable<Map<any, T>>(new Map())
+export const collection = <T>(defaults = {}): Collection<T> => {
+  const baseStore = writable<Map<any, T>>(new Map(Object.entries(defaults)))
 
   return {
     ...baseStore,

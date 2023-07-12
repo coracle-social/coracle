@@ -1,9 +1,8 @@
 import {fetchJson, now, tryFunc, tryJson, hexToBech32, bech32ToHex} from "src/util/misc"
 import {invoiceAmount} from "src/util/lightning"
 import {Tags} from "src/util/nostr"
-import type {Table} from "src/util/loki"
-import type {Sync} from "src/system/components/Sync"
 import type {Zapper} from "src/system/types"
+import {collection} from "../util/store"
 
 const getLnUrl = address => {
   // Try to parse it as a lud06 LNURL
@@ -21,52 +20,15 @@ const getLnUrl = address => {
   }
 }
 
-export class Nip57 {
-  zappers: Table<Zapper>
-  constructor(sync: Sync) {
-    this.zappers = sync.table("niip57/zappers", "pubkey", {
-      max: 5000,
-      sort: sync.sortByPubkeyWhitelist,
-    })
+export function contributeState() {
+  const zappers = collection<Zapper>()
 
-    sync.addHandler(0, e => {
-      tryJson(async () => {
-        const kind0 = JSON.parse(e.content)
-        const zapper = this.zappers.get(e.pubkey)
-        const address = (kind0.lud16 || kind0.lud06 || "").toLowerCase()
+  return {zappers}
+}
 
-        if (!address || e.created_at < zapper?.created_at) {
-          return
-        }
-
-        const url = getLnUrl(address)
-
-        if (!url) {
-          return
-        }
-
-        const result = await tryFunc(() => fetchJson(url), true)
-
-        if (!result?.allowsNostr || !result?.nostrPubkey) {
-          return
-        }
-
-        this.zappers.patch({
-          pubkey: e.pubkey,
-          lnurl: hexToBech32("lnurl", url),
-          callback: result.callback,
-          minSendable: result.minSendable,
-          maxSendable: result.maxSendable,
-          nostrPubkey: result.nostrPubkey,
-          created_at: e.created_at,
-          updated_at: now(),
-        })
-      })
-    })
-  }
-
-  processZaps = (zaps, pubkey) => {
-    const zapper = this.zappers.get(pubkey)
+export function contributeActions({Nip57}) {
+  const processZaps = (zaps, pubkey) => {
+    const zapper = Nip57.zappers.getKey(pubkey)
 
     if (!zapper) {
       return []
@@ -113,4 +75,43 @@ export class Nip57 {
         return true
       })
   }
+
+  return {processZaps}
+}
+
+export function initialize({Events, Nip57}) {
+  Events.addHandler(0, e => {
+    tryJson(async () => {
+      const kind0 = JSON.parse(e.content)
+      const zapper = Nip57.zappers.getKey(e.pubkey)
+      const address = (kind0.lud16 || kind0.lud06 || "").toLowerCase()
+
+      if (!address || e.created_at < zapper?.created_at) {
+        return
+      }
+
+      const url = getLnUrl(address)
+
+      if (!url) {
+        return
+      }
+
+      const result = await tryFunc(() => fetchJson(url), true)
+
+      if (!result?.allowsNostr || !result?.nostrPubkey) {
+        return
+      }
+
+      Nip57.zappers.setKey(e.pubkey, {
+        pubkey: e.pubkey,
+        lnurl: hexToBech32("lnurl", url),
+        callback: result.callback,
+        minSendable: result.minSendable,
+        maxSendable: result.maxSendable,
+        nostrPubkey: result.nostrPubkey,
+        created_at: e.created_at,
+        updated_at: now(),
+      })
+    })
+  })
 }

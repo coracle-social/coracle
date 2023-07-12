@@ -1,15 +1,25 @@
 import * as Alerts from "./components/Alerts"
+import * as Builder from "./components/Builder"
 import * as Chat from "./components/Chat"
 import * as Content from "./components/Content"
 import * as Crypt from "./components/Crypt"
+import * as Directory from "./components/Directory"
 import * as Events from "./components/Events"
 import * as Keys from "./components/Keys"
+import * as Meta from "./components/Meta"
+import * as Network from "./components/Network"
 import * as Nip05 from "./components/Nip05"
+import * as Nip57 from "./components/Nip57"
+import * as PubkeyLoader from "./components/PubkeyLoader"
 import * as Routing from "./components/Routing"
+import * as Social from "./components/Social"
+import * as User from "./components/User"
 
 export const createEngine = (engine, components) => {
-  for (const component of components) {
-    engine[component.name] = component.contributeState?.()
+  const componentState = components.map(c => [c, c.contributeState?.(engine)])
+
+  for (const [component, state] of componentState) {
+    Object.assign(engine[component.name], state)
   }
 
   const componentSelectors = components.map(c => [c, c.contributeSelectors?.(engine)])
@@ -36,16 +46,21 @@ export const createDefaultEngine = Env => {
     {Env},
     {
       Alerts,
+      Builder,
       Chat,
       Content,
       Crypt,
-      // Directory,
+      Directory,
       Events,
       Keys,
+      Meta,
+      Network,
       Nip05,
-      // Nip57,
+      Nip57,
+      PubkeyLoader,
       Routing,
-      // Social,
+      Social,
+      User,
     }
   )
 }
