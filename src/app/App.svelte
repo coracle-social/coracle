@@ -16,6 +16,8 @@
     tryFunc,
     fetchJson,
     tryFetch,
+    setLocalJson,
+    getLocalJson,
   } from "src/util/misc"
   import engine from "src/app/engine"
   import {loadAppData} from "src/app/state"
@@ -27,6 +29,22 @@
   import TopNav from "src/app/TopNav.svelte"
   import Modal from "src/app/Modal.svelte"
   import ForegroundButtons from "src/app/ForegroundButtons.svelte"
+
+  // Migration from 0.2.34
+  if (Object.hasOwn(localStorage, "agent/keys/pubkey")) {
+    setLocalJson("Keys.pubkey", getLocalJson("agent/keys/pubkey"))
+    setLocalJson("Keys.state", {
+      method: getLocalJson("agent/keys/method"),
+      pubkey: getLocalJson("agent/keys/pubkey"),
+      privkey: getLocalJson("agent/keys/privkey"),
+      bunkerKey: getLocalJson("agent/keys/bunkerKey"),
+    })
+
+    localStorage.removeItem("agent/keys/method")
+    localStorage.removeItem("agent/keys/pubkey")
+    localStorage.removeItem("agent/keys/privkey")
+    localStorage.removeItem("agent/keys/bunkerKey")
+  }
 
   const TypedRouter = Router as ComponentType<SvelteComponentTyped>
 
