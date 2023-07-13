@@ -1,4 +1,4 @@
-import {when, prop, uniq, pluck, without, fromPairs, whereEq, find, slice, reject} from "ramda"
+import {when, prop, uniq, pluck, fromPairs, whereEq, find, slice, reject} from "ramda"
 import {now} from "src/util/misc"
 import {Tags, appDataKeys, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
 import {writable} from "../util/store"
@@ -199,21 +199,23 @@ export class User {
       return setAppData(appDataKeys.NIP28_LAST_CHECKED, {...lastChecked, [id]: now()})
     }
 
-    const joinChannel = channelId => {
-      const channelIds = uniq(
-        pluck("id", Nip28.channels.get().filter(whereEq({joined: true}))).concat(channelId)
-      )
-
-      return setAppData(appDataKeys.NIP28_ROOMS_JOINED, channelIds)
-    }
-
-    const leaveChannel = channelId => {
-      const channelIds = without(
-        [channelId],
+    const saveChannels = () =>
+      setAppData(
+        appDataKeys.NIP28_ROOMS_JOINED,
         pluck("id", Nip28.channels.get().filter(whereEq({joined: true})))
       )
 
-      return setAppData(appDataKeys.NIP28_ROOMS_JOINED, channelIds)
+    const joinChannel = id => {
+      Nip28.channels.mergeKey(id, {id, joined: false})
+
+      return saveChannels()
+    }
+
+    const leaveChannel = id => {
+      Nip28.channels.mergeKey(id, {id, joined: false})
+      Nip28.messages.deleteWhere(m => m.channel === id)
+
+      return saveChannels()
     }
 
     return {

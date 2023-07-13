@@ -77,7 +77,6 @@ const syncCollections = async (engine, policies: Record<string, CollectionPolicy
     const base = getPath(key.split("."), engine).getBaseStore()
     const coll = loki.getCollection(getStorageKey(key)) || collections[key]
 
-    console.log(key, coll.find(), toMap(coll.find()))
     base.set(toMap(coll.find()))
 
     // Wait a bit before re-saving, it appears to take some time to load existing data

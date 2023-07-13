@@ -26,7 +26,7 @@
   onMount(() => {
     return network.subscribe({
       relays: nip65.getPubkeyHints(3, user.getPubkey(), "read"),
-      filter: [{inds: [40, 41]}],
+      filter: [{kinds: [40, 41]}],
     })
   })
 </script>

@@ -1,7 +1,9 @@
 <script>
+  import {onDestroy} from "svelte"
   import {prop, max, path as getPath, reverse, pluck, sortBy, last} from "ramda"
+  import {writable, derived} from "svelte/store"
   import {fly} from "src/util/transition"
-  import {sleep} from "src/util/misc"
+  import {sleep, createScroller} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import {keys, directory} from "src/app/engine"
 
@@ -9,8 +11,15 @@
   export let sendMessage
 
   let textarea
+  let limit = writable(20)
   let loading = sleep(30_000)
   let showNewMessages = false
+
+  onDestroy(() => {
+    scroller.stop()
+  })
+
+  const scroller = createScroller(() => limit.update(l => l + 20), {reverse: true})
 
   // flex-reverse-col means the first is the last
   const getLastListItem = () => document.querySelector("ul.channel-messages li")
@@ -53,7 +62,7 @@
   }
 
   // Group messages so we're only showing the person once per chunk
-  const groupedMessages = messages.derived($messages => {
+  const groupedMessages = derived([messages, limit], ([$messages, $limit]) => {
     const result = reverse(
       sortBy(prop("created_at"), $messages).reduce((mx, m) => {
         const profile = directory.getProfile(m.pubkey)
@@ -65,7 +74,7 @@
 
     setTimeout(stickToBottom, 100)
 
-    return result
+    return result.slice(0, $limit)
   })
 </script>
 

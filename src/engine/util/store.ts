@@ -29,6 +29,8 @@ export type Collection<T> = {
   getKey: (k: string) => T
   setKey: (k: string, v: T) => void
   mergeKey: (k: string, v: T) => void
+  deleteKey: (k: string) => void
+  deleteWhere: (f: (x: T) => boolean) => void
   getBaseStore: () => Writable<Map<any, T>>
 }
 
@@ -165,6 +167,24 @@ export const collection = <T>(defaults = {}): Collection<T> => {
     mergeKey: (k, v) => {
       baseStore.update(m => {
         m.set(k, {...m.get(k), ...v})
+
+        return m
+      })
+    },
+    deleteKey: k => {
+      baseStore.update(m => {
+        m.delete(k)
+
+        return m
+      })
+    },
+    deleteWhere: f => {
+      baseStore.update(m => {
+        for (const [k, v] of m.entries()) {
+          if (f(v)) {
+            m.delete(k)
+          }
+        }
 
         return m
       })

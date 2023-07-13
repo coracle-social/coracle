@@ -43,6 +43,6 @@ export class Outbox {
   }
 
   static initialize({Outbox}) {
-    Outbox.queue.listen(Outbox.publish)
+    Outbox.queue.listen(({event}) => Outbox.publish(event))
   }
 }

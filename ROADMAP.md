@@ -1,8 +1,7 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Delete messages when leaving a room
-  - [ ] Add pagination to chat/dms
+  - [ ] Improve collection abstraction. getKey -> get, define pk, get -> all
   - [ ] Use limit 1 to find most recent notification, then load when visiting the notifications page.
   - [ ] Remove external dependencies from engine, open source it?
   - [ ] If connections fail, re-open and re-send active subs

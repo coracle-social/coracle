@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {onMount} from "svelte"
+  import {onMount, onDestroy} from "svelte"
   import {defaultTo, filter, whereEq} from "ramda"
   import {formatTimestamp} from "src/util/misc"
   import {toHex} from "src/util/nostr"
@@ -34,6 +34,12 @@
       relays: getRelays(),
       filter: [{kinds: [42], "#e": [id]}],
     })
+  })
+
+  onDestroy(() => {
+    if (!$channel.joined) {
+      nip28.messages.deleteWhere(m => m.channel === id)
+    }
   })
 
   document.title = $channel.name || "Coracle Chat"
