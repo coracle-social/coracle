@@ -6,7 +6,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {builder, user} from "src/app/engine"
+  import {builder, outbox} from "src/app/engine"
 
   export let url
 
@@ -25,7 +25,7 @@
       ],
     })
 
-    user.publish(event)
+    outbox.publish(event)
 
     modal.pop()
   }

@@ -5,7 +5,7 @@
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {social, nip65, user, network, pubkeyLoader} from "src/app/engine"
+  import {nip02, nip65, user, network, pubkeyLoader} from "src/app/engine"
 
   export let type
   export let pubkey
@@ -14,7 +14,7 @@
 
   onMount(async () => {
     if (type === "follows") {
-      pubkeys = social.getFollows(pubkey)
+      pubkeys = nip02.getFollows(pubkey)
     } else {
       await network.load({
         shouldProcess: false,

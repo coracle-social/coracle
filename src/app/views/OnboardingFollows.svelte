@@ -5,11 +5,11 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {DEFAULT_FOLLOWS, social, user, directory, builder} from "src/app/engine"
+  import {DEFAULT_FOLLOWS, nip02, user, directory, builder} from "src/app/engine"
   import {modal} from "src/partials/state"
 
   const {searchProfiles} = directory
-  const follows = social.graph.derived(() => user.getFollowsSet())
+  const follows = nip02.graph.derived(() => user.getFollowsSet())
 
   if ($follows.size === 0) {
     user.setPetnames(DEFAULT_FOLLOWS.map(builder.mention))

@@ -85,7 +85,7 @@
       seenChallenges.add(challenge)
 
       const rawEvent = engine.Builder.authenticate(url, challenge)
-      const [event] = await engine.User.publish(rawEvent, [url], null, "AUTH")
+      const [event] = await engine.Outbox.publish(rawEvent, [url], null, "AUTH")
 
       return event
     }

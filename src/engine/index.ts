@@ -7,13 +7,14 @@ import {Events} from "./components/Events"
 import {Keys} from "./components/Keys"
 import {Meta} from "./components/Meta"
 import {Network} from "./components/Network"
+import {Nip02} from "./components/Nip02"
 import {Nip04} from "./components/Nip04"
 import {Nip05} from "./components/Nip05"
 import {Nip28} from "./components/Nip28"
 import {Nip57} from "./components/Nip57"
 import {Nip65} from "./components/Nip65"
+import {Outbox} from "./components/Outbox"
 import {PubkeyLoader} from "./components/PubkeyLoader"
-import {Social} from "./components/Social"
 import {Storage} from "./components/Storage"
 import {User} from "./components/User"
 
@@ -58,13 +59,14 @@ export const createDefaultEngine = Env => {
     Keys,
     Meta,
     Network,
+    Nip02,
     Nip04,
     Nip05,
     Nip28,
     Nip57,
     Nip65,
+    Outbox,
     PubkeyLoader,
-    Social,
     Storage,
     User,
   ])

@@ -1,18 +1,4 @@
-import {getEventHash} from "nostr-tools"
-import {
-  when,
-  prop,
-  uniq,
-  pluck,
-  without,
-  fromPairs,
-  whereEq,
-  find,
-  slice,
-  assoc,
-  reject,
-} from "ramda"
-import {doPipe} from "hurdak/lib/hurdak"
+import {when, prop, uniq, pluck, without, fromPairs, whereEq, find, slice, reject} from "ramda"
 import {now} from "src/util/misc"
 import {Tags, appDataKeys, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
 import {writable} from "../util/store"
@@ -33,55 +19,23 @@ export class User {
   }
 
   static contributeActions({
-    Keys,
+    Builder,
+    Content,
+    Crypt,
     Directory,
     Events,
+    Keys,
     Network,
-    Crypt,
-    Builder,
-    Social,
-    User,
+    Outbox,
+    Nip02,
     Nip04,
     Nip28,
     Nip65,
-    Content,
+    User,
   }) {
     const getPubkey = () => Keys.pubkey.get()
 
-    const getProfile = () => Directory.getProfile(getPubkey())
-
-    const isUserEvent = id => Events.cache.getKey(id)?.pubkey === getPubkey()
-
     const getStateKey = () => (Keys.canSign.get() ? getPubkey() : "anonymous")
-
-    // Publish
-
-    const prepEvent = async rawEvent => {
-      return doPipe(rawEvent, [
-        assoc("created_at", now()),
-        assoc("pubkey", getPubkey()),
-        e => ({...e, id: getEventHash(e)}),
-        Keys.sign,
-      ])
-    }
-
-    const publish = async (event, relays = null, onProgress = null, verb = "EVENT") => {
-      if (!event.sig) {
-        event = await prepEvent(event)
-      }
-
-      if (!relays) {
-        relays = getRelayUrls("write")
-      }
-
-      // return console.log(event)
-
-      const promise = Network.publish({event, relays, onProgress, verb})
-
-      Events.queue.push(event)
-
-      return [event, promise]
-    }
 
     // Settings
 
@@ -96,16 +50,14 @@ export class User {
         const d = appDataKeys.USER_SETTINGS
         const v = await Crypt.encryptJson(settings)
 
-        return publish(Builder.setAppData(d, v))
+        return Outbox.queue.push({event: Builder.setAppData(d, v)})
       }
     }
 
     const setAppData = async (d, content) => {
-      if (Keys.canSign.get()) {
-        const v = await Crypt.encryptJson(content)
+      const v = await Crypt.encryptJson(content)
 
-        return publish(Builder.setAppData(d, v))
-      }
+      return Outbox.queue.push({event: Builder.setAppData(d, v)})
     }
 
     // Nip65
@@ -116,7 +68,7 @@ export class User {
 
     const setRelays = relays => {
       if (Keys.canSign.get()) {
-        return publish(Builder.setRelays(relays))
+        return Outbox.queue.push({event: Builder.setRelays(relays)})
       } else {
         Nip65.setPolicy({pubkey: getStateKey(), created_at: now()}, relays)
       }
@@ -130,35 +82,35 @@ export class User {
     const setRelayPolicy = (url, policy) =>
       setRelays(getRelays().map(when(whereEq({url}), p => ({...p, ...policy}))))
 
-    // Social
+    // Nip02
 
-    const getPetnames = () => Social.getPetnames(getStateKey())
+    const getPetnames = () => Nip02.getPetnames(getStateKey())
 
-    const getMutedTags = () => Social.getMutedTags(getStateKey())
+    const getMutedTags = () => Nip02.getMutedTags(getStateKey())
 
-    const getFollowsSet = () => Social.getFollowsSet(getStateKey())
+    const getFollowsSet = () => Nip02.getFollowsSet(getStateKey())
 
-    const getMutesSet = () => Social.getMutesSet(getStateKey())
+    const getMutesSet = () => Nip02.getMutesSet(getStateKey())
 
-    const getFollows = () => Social.getFollows(getStateKey())
+    const getFollows = () => Nip02.getFollows(getStateKey())
 
-    const getMutes = () => Social.getMutes(getStateKey())
+    const getMutes = () => Nip02.getMutes(getStateKey())
 
-    const getNetworkSet = () => Social.getNetworkSet(getStateKey())
+    const getNetworkSet = () => Nip02.getNetworkSet(getStateKey())
 
-    const getNetwork = () => Social.getNetwork(getStateKey())
+    const getNetwork = () => Nip02.getNetwork(getStateKey())
 
-    const isFollowing = pubkey => Social.isFollowing(getStateKey(), pubkey)
+    const isFollowing = pubkey => Nip02.isFollowing(getStateKey(), pubkey)
 
-    const isIgnoring = pubkeyOrEventId => Social.isIgnoring(getStateKey(), pubkeyOrEventId)
+    const isIgnoring = pubkeyOrEventId => Nip02.isIgnoring(getStateKey(), pubkeyOrEventId)
 
-    const setProfile = $profile => publish(Builder.setProfile($profile))
+    const setProfile = $profile => Outbox.queue.push({event: Builder.setProfile($profile)})
 
     const setPetnames = async $petnames => {
       if (Keys.canSign.get()) {
-        await publish(Builder.setPetnames($petnames))
+        await Outbox.queue.push({event: Builder.setPetnames($petnames)})
       } else {
-        Social.graph.mergeKey(getStateKey(), {
+        Nip02.graph.mergeKey(getStateKey(), {
           pubkey: getStateKey(),
           updated_at: now(),
           petnames_updated_at: now(),
@@ -186,9 +138,9 @@ export class User {
 
     const setMutes = async $mutes => {
       if (Keys.canSign.get()) {
-        await publish(Builder.setMutes($mutes.map(slice(0, 2))))
+        await Outbox.queue.push({event: Builder.setMutes($mutes.map(slice(0, 2)))})
       } else {
-        Social.graph.mergeKey(getStateKey(), {
+        Nip02.graph.mergeKey(getStateKey(), {
           pubkey: getStateKey(),
           updated_at: now(),
           mutes_updated_at: now(),
@@ -207,9 +159,11 @@ export class User {
     const getLists = f => Content.getLists(l => l.pubkey === getStateKey() && (f ? f(l) : true))
 
     const putList = (name, params, relays) =>
-      publish(Builder.createList([["d", name]].concat(params).concat(relays)))
+      Outbox.queue.push({
+        event: Builder.createList([["d", name]].concat(params).concat(relays)),
+      })
 
-    const removeList = naddr => publish(Builder.deleteNaddrs([naddr]))
+    const removeList = naddr => Outbox.queue.push({event: Builder.deleteNaddrs([naddr])})
 
     // Messages
 
@@ -264,11 +218,7 @@ export class User {
 
     return {
       getPubkey,
-      getProfile,
-      isUserEvent,
       getStateKey,
-      prepEvent,
-      publish,
       getSetting,
       dufflepud,
       setSettings,

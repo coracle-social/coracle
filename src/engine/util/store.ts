@@ -25,6 +25,7 @@ export type Collection<T> = {
   subscribe: (f: (v: T[]) => void) => () => void
   derived: (f: (v: T[]) => void) => Readable<T[]>
   key: (k: string) => Key<T>
+  hasKey: (k: string) => boolean
   getKey: (k: string) => T
   setKey: (k: string, v: T) => void
   mergeKey: (k: string, v: T) => void
@@ -152,6 +153,7 @@ export const collection = <T>(defaults = {}): Collection<T> => {
     subscribe: f => arrayStore.subscribe(f),
     derived: f => derived(arrayStore, f),
     key: k => key(baseStore, k),
+    hasKey: k => baseStore.get().has(k),
     getKey: k => baseStore.get().get(k),
     setKey: (k, v) => {
       baseStore.update(m => {

@@ -9,7 +9,15 @@
   import OnboardingRelays from "src/app/views/OnboardingRelays.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
-  import {DEFAULT_FOLLOWS, DEFAULT_RELAYS, pubkeyLoader, builder, user, keys} from "src/app/engine"
+  import {
+    DEFAULT_FOLLOWS,
+    DEFAULT_RELAYS,
+    pubkeyLoader,
+    outbox,
+    builder,
+    user,
+    keys,
+  } from "src/app/engine"
   import {loadAppData} from "src/app/state"
   import {modal} from "src/partials/state"
 
@@ -33,7 +41,7 @@
       user.setRelays(relays),
       user.setProfile(profile),
       user.setPetnames(petnames),
-      note && user.publish(builder.createNote(note)),
+      note && outbox.publish(builder.createNote(note)),
     ])
 
     loadAppData(keys.pubkey.get())

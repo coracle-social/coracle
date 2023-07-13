@@ -8,11 +8,9 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {keys, user, builder} from "src/app/engine"
+  import {directory, keys, user, builder} from "src/app/engine"
   import {routes} from "src/app/state"
   import {publishWithToast} from "src/app/state"
-
-  let values = user.getProfile()
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
   const lud16Url = "https://blog.getalby.com/create-your-lightning-address/"
@@ -30,8 +28,12 @@
 
     event?.preventDefault()
     publishWithToast(builder.setProfile(values), relays)
-    navigate(routes.person(user.getPubkey(), "notes"))
+    navigate(routes.person($pubkey, "notes"))
   }
+
+  const {pubkey} = keys
+
+  let values = directory.getProfile($pubkey)
 
   document.title = "Profile"
 </script>

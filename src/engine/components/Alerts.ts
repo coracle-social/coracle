@@ -21,9 +21,11 @@ export class Alerts {
   static initialize({Alerts, Events, Keys, User}) {
     const isMention = e => Tags.from(e).pubkeys().includes(Keys.pubkey.get())
 
-    const isDescendant = e => User.isUserEvent(findRootId(e))
+    const isUserEvent = id => Events.cache.getKey(id)?.pubkey === Keys.pubkey.get()
 
-    const isReply = e => User.isUserEvent(findReplyId(e))
+    const isDescendant = e => isUserEvent(findRootId(e))
+
+    const isReply = e => isUserEvent(findReplyId(e))
 
     const handleNotification = condition => e => {
       const pubkey = Keys.pubkey.get()

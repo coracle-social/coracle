@@ -4,14 +4,15 @@
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {FORCE_RELAYS, keys, user, social} from "src/app/engine"
+  import {FORCE_RELAYS, keys, user, nip02} from "src/app/engine"
   import {addToList} from "src/app/state"
 
   export let pubkey
 
   const npub = nip19.npubEncode(pubkey)
-  const following = social.graph.key(keys.pubkey.get()).derived(() => user.isFollowing(pubkey))
-  const muted = social.graph.key(keys.pubkey.get()).derived(() => user.isIgnoring(pubkey))
+  const graphEntry = nip02.graph.key(keys.pubkey.get())
+  const following = graphEntry.derived(() => user.isFollowing(pubkey))
+  const muted = graphEntry.derived(() => user.isIgnoring(pubkey))
 
   let actions = []
 

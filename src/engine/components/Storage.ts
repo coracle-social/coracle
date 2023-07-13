@@ -217,6 +217,9 @@ export class Storage {
       "Events.cache": {
         sortEntries: sortByPubkeyWhitelist(prop("created_at")),
       },
+      "Nip02.graph": {
+        sortEntries: sortByPubkeyWhitelist(prop("updated_at")),
+      },
       "Nip05.handles": {
         sortEntries: sortByPubkeyWhitelist(prop("updated_at")),
       },
@@ -228,9 +231,6 @@ export class Storage {
         sortEntries: prop("count"),
       },
       "Nip65.policies": {
-        sortEntries: sortByPubkeyWhitelist(prop("updated_at")),
-      },
-      "Social.graph": {
         sortEntries: sortByPubkeyWhitelist(prop("updated_at")),
       },
     })

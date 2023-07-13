@@ -7,7 +7,7 @@
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {user, nip04, nip65, directory, builder, network} from "src/app/engine"
+  import {user, nip04, nip65, outbox, directory, builder, network} from "src/app/engine"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -28,7 +28,10 @@
 
   const sendMessage = async content => {
     const cyphertext = await user.crypt.encrypt(pubkey, content)
-    const [event] = await user.publish(builder.createDirectMessage(pubkey, cyphertext), getRelays())
+    const [event] = await outbox.publish(
+      builder.createDirectMessage(pubkey, cyphertext),
+      getRelays()
+    )
 
     // Return unencrypted content so we can display it immediately
     return {...event, content}

@@ -14,7 +14,16 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {ENABLE_ZAPS, FORCE_RELAYS, nip57, builder, nip65, keys, user} from "src/app/engine"
+  import {
+    ENABLE_ZAPS,
+    FORCE_RELAYS,
+    nip57,
+    builder,
+    nip65,
+    keys,
+    outbox,
+    user,
+  } from "src/app/engine"
 
   export let note
   export let reply
@@ -41,11 +50,11 @@
   const react = async content => {
     const relays = nip65.getPublishHints(3, note, user.getRelayUrls("write"))
 
-    like = first(await user.publish(builder.createReaction(note, content), relays))
+    like = first(await outbox.publish(builder.createReaction(note, content), relays))
   }
 
   const deleteReaction = e => {
-    user.publish(
+    outbox.publish(
       builder.deleteEvents([e.id]),
       nip65.getPublishHints(3, note, user.getRelayUrls("write"))
     )

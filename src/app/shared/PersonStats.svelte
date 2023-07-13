@@ -4,11 +4,11 @@
   import {tweened} from "svelte/motion"
   import {numberFmt, batch} from "src/util/misc"
   import {modal} from "src/partials/state"
-  import {social, user, nip65, network} from "src/app/engine"
+  import {nip02, user, nip65, network} from "src/app/engine"
 
   export let pubkey
 
-  const followsCount = social.graph.key(pubkey).derived(() => social.getFollowsSet(pubkey).size)
+  const followsCount = nip02.graph.key(pubkey).derived(() => nip02.getFollowsSet(pubkey).size)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
 
   let followersCount = tweened(0, {interpolate, duration: 1000})

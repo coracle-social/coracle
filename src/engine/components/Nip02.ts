@@ -4,17 +4,17 @@ import {Tags} from "src/util/nostr"
 import type {GraphEntry} from "src/engine/types"
 import {collection} from "../util/store"
 
-export class Social {
+export class Nip02 {
   static contributeState() {
     const graph = collection<GraphEntry>()
 
     return {graph}
   }
 
-  static contributeActions({Social}) {
-    const getPetnames = pubkey => Social.graph.getKey(pubkey)?.petnames || []
+  static contributeActions({Nip02}) {
+    const getPetnames = pubkey => Nip02.graph.getKey(pubkey)?.petnames || []
 
-    const getMutedTags = pubkey => Social.graph.getKey(pubkey)?.mutes || []
+    const getMutedTags = pubkey => Nip02.graph.getKey(pubkey)?.mutes || []
 
     const getFollowsSet = pubkeys => {
       const follows = new Set()
@@ -77,15 +77,15 @@ export class Social {
     }
   }
 
-  static initialize({Events, Social}) {
+  static initialize({Events, Nip02}) {
     Events.addHandler(3, e => {
-      const entry = Social.graph.getKey(e.pubkey)
+      const entry = Nip02.graph.getKey(e.pubkey)
 
       if (e.created_at < entry?.petnames_updated_at) {
         return
       }
 
-      Social.graph.mergeKey(e.pubkey, {
+      Nip02.graph.mergeKey(e.pubkey, {
         pubkey: e.pubkey,
         updated_at: now(),
         petnames_updated_at: e.created_at,
@@ -94,13 +94,13 @@ export class Social {
     })
 
     Events.addHandler(10000, e => {
-      const entry = Social.graph.getKey(e.pubkey)
+      const entry = Nip02.graph.getKey(e.pubkey)
 
       if (e.created_at < entry?.mutes_updated_at) {
         return
       }
 
-      Social.graph.mergeKey(e.pubkey, {
+      Nip02.graph.mergeKey(e.pubkey, {
         pubkey: e.pubkey,
         updated_at: now(),
         mutes_updated_at: e.created_at,

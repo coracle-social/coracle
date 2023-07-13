@@ -21,6 +21,7 @@ import {
   nip28,
   meta,
   network,
+  outbox,
   user,
   keys,
 } from "src/app/engine"
@@ -205,7 +206,7 @@ export const mergeParents = (notes: Array<DisplayEvent>) => {
 }
 
 export const publishWithToast = (event, relays) =>
-  user.publish(event, relays, ({completed, succeeded, failed, timeouts, pending}) => {
+  outbox.publish(event, relays, ({completed, succeeded, failed, timeouts, pending}) => {
     let message = `Published to ${succeeded.size}/${relays.length} relays`
 
     const extra = []

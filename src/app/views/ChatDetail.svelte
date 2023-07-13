@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {builder, nip28, user, nip65, network} from "src/app/engine"
+  import {builder, nip28, user, outbox, nip65, network} from "src/app/engine"
 
   export let entity
 
@@ -24,9 +24,9 @@
   }
 
   const sendMessage = async content => {
-    const [hint] = getRelays()
+    const relays = getRelays()
 
-    await user.publish(builder.createChatMessage(id, content, hint), getRelays())
+    await outbox.publish(builder.createChatMessage(id, content, relays[0]), relays)
   }
 
   onMount(() => {

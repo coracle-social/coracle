@@ -8,7 +8,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {user, nip65, meta, keys} from "src/app/engine"
+  import {user, directory, nip65, meta, keys} from "src/app/engine"
   import {loadAppData} from "src/app/state"
 
   export let relay
@@ -22,17 +22,17 @@
   let quality = null
   let message = null
 
-  const relays = nip65.policies.key(keys.pubkey.get()).derived(() => new Set(user.getRelayUrls()))
+  const {pubkey} = keys
+
+  const relays = nip65.policies.key($pubkey).derived(() => new Set(user.getRelayUrls()))
 
   const removeRelay = r => user.removeRelay(r.url)
 
   const addRelay = r => {
     user.addRelay(r.url)
 
-    const pubkey = user.getPubkey()
-
-    if (pubkey && !user.getProfile().created_at) {
-      loadAppData(pubkey)
+    if ($pubkey && !directory.profiles.hasKey($pubkey)) {
+      loadAppData($pubkey)
     }
   }
 

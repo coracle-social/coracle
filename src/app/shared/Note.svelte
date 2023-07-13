@@ -13,7 +13,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
-  import {nip05, user, directory, nip65, social} from "src/app/engine"
+  import {nip05, user, directory, nip65, nip02} from "src/app/engine"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
   export let note
@@ -36,7 +36,7 @@
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
   const author = directory.profiles.key(note.pubkey).derived(defaultTo({pubkey: note.pubkey}))
-  const muted = social.graph.derived(() => user.isIgnoring(note.id))
+  const muted = nip02.graph.derived(() => user.isIgnoring(note.id))
   const handle = nip05.handles.key(note.pubkey)
 
   let border, childrenContainer, noteContainer
