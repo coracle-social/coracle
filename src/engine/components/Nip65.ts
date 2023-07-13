@@ -8,8 +8,8 @@ import {derived, collection} from "../util/store"
 
 export class Nip65 {
   static contributeState() {
-    const relays = collection<Relay>()
-    const policies = collection<RelayPolicy>()
+    const relays = collection<Relay>("url")
+    const policies = collection<RelayPolicy>("pubkey")
 
     return {relays, policies}
   }
@@ -17,10 +17,9 @@ export class Nip65 {
   static contributeActions({Env, Nip65, Network, Meta, User}) {
     const addRelay = url => {
       if (isShareableRelay(url)) {
-        const relay = Nip65.relays.getKey(url)
+        const relay = Nip65.relays.key(url).get()
 
-        Nip65.relays.mergeKey(url, {
-          url,
+        Nip65.relays.key(url).merge({
           count: inc(relay?.count || 0),
           first_seen: relay?.first_seen || now(),
           info: {
@@ -32,12 +31,11 @@ export class Nip65 {
 
     const setPolicy = ({pubkey, created_at}, relays) => {
       if (relays?.length > 0) {
-        if (created_at < Nip65.policies.getKey(pubkey)?.created_at) {
+        if (created_at < Nip65.policies.key(pubkey).get()?.created_at) {
           return
         }
 
-        Nip65.policies.mergeKey(pubkey, {
-          pubkey,
+        Nip65.policies.key(pubkey).merge({
           created_at,
           updated_at: now(),
           relays: uniqBy(prop("url"), relays).map(relay => {
@@ -49,9 +47,9 @@ export class Nip65 {
       }
     }
 
-    const getRelay = (url: string): Relay => Nip65.relays.getKey(url) || {url}
+    const getRelay = (url: string): Relay => Nip65.relays.key(url).get() || {url}
 
-    const getRelayInfo = (url: string): RelayInfo => Nip65.relays.getKey(url)?.info || {}
+    const getRelayInfo = (url: string): RelayInfo => getRelay(url)?.info || {}
 
     const displayRelay = ({url}) => last(url.split("://"))
 
@@ -67,7 +65,7 @@ export class Nip65 {
     }
 
     const getPubkeyRelays = (pubkey, mode = null) => {
-      const relays = Nip65.policies.getKey(pubkey)?.relays || []
+      const relays = Nip65.policies.key(pubkey).get()?.relays || []
 
       return mode ? relays.filter(prop(mode)) : relays
     }

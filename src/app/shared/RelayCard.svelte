@@ -31,7 +31,7 @@
   const addRelay = r => {
     user.addRelay(r.url)
 
-    if ($pubkey && !directory.profiles.hasKey($pubkey)) {
+    if ($pubkey && !directory.profiles.key($pubkey).exists()) {
       loadAppData($pubkey)
     }
   }

@@ -7,12 +7,12 @@ import {collection} from "../util/store"
 export class Nip05 {
   static contributeState() {
     return {
-      handles: collection<Handle>(),
+      handles: collection<Handle>("pubkey"),
     }
   }
 
   static contributeSelectors({Nip05}) {
-    const getHandle = pubkey => Nip05.handles.getKey(pubkey)
+    const getHandle = pubkey => Nip05.handles.key(pubkey).get()
 
     const displayHandle = handle =>
       handle.address.startsWith("_@") ? last(handle.address.split("@")) : handle.address
@@ -24,9 +24,9 @@ export class Nip05 {
     Events.addHandler(0, e => {
       tryJson(async () => {
         const kind0 = JSON.parse(e.content)
-        const handle = Nip05.handles.getKey(e.pubkey)
+        const handle = Nip05.handles.key(e.pubkey)
 
-        if (!kind0.nip05 || e.created_at < handle?.created_at) {
+        if (!kind0.nip05 || e.created_at < handle.get()?.created_at) {
           return
         }
 
@@ -36,7 +36,7 @@ export class Nip05 {
           return
         }
 
-        Nip05.handles.setKey(e.pubkey, {
+        handle.set({
           profile: profile,
           pubkey: e.pubkey,
           address: kind0.nip05,

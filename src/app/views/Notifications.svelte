@@ -39,7 +39,7 @@
     ({notifications}) => -notifications.reduce((a, b) => Math.max(a, b.created_at), 0),
     $notifications
       .slice(0, limit)
-      .map(e => [e, engine.events.cache.getKey(findReplyId(e))])
+      .map(e => [e, engine.events.cache.key(findReplyId(e)).get()])
       .filter(([e, ref]) => {
         if (ref && !noteKinds.includes(ref.kind)) {
           return false

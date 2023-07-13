@@ -6,15 +6,15 @@ import {collection} from "../util/store"
 
 export class Nip02 {
   static contributeState() {
-    const graph = collection<GraphEntry>()
+    const graph = collection<GraphEntry>("pubkey")
 
     return {graph}
   }
 
   static contributeActions({Nip02}) {
-    const getPetnames = pubkey => Nip02.graph.getKey(pubkey)?.petnames || []
+    const getPetnames = pubkey => Nip02.graph.key(pubkey).get()?.petnames || []
 
-    const getMutedTags = pubkey => Nip02.graph.getKey(pubkey)?.mutes || []
+    const getMutedTags = pubkey => Nip02.graph.key(pubkey).get()?.mutes || []
 
     const getFollowsSet = pubkeys => {
       const follows = new Set()
@@ -79,14 +79,13 @@ export class Nip02 {
 
   static initialize({Events, Nip02}) {
     Events.addHandler(3, e => {
-      const entry = Nip02.graph.getKey(e.pubkey)
+      const entry = Nip02.graph.key(e.pubkey).get()
 
       if (e.created_at < entry?.petnames_updated_at) {
         return
       }
 
-      Nip02.graph.mergeKey(e.pubkey, {
-        pubkey: e.pubkey,
+      Nip02.graph.key(e.pubkey).merge({
         updated_at: now(),
         petnames_updated_at: e.created_at,
         petnames: Tags.from(e).type("p").all(),
@@ -94,14 +93,13 @@ export class Nip02 {
     })
 
     Events.addHandler(10000, e => {
-      const entry = Nip02.graph.getKey(e.pubkey)
+      const entry = Nip02.graph.key(e.pubkey).get()
 
       if (e.created_at < entry?.mutes_updated_at) {
         return
       }
 
-      Nip02.graph.mergeKey(e.pubkey, {
-        pubkey: e.pubkey,
+      Nip02.graph.key(e.pubkey).merge({
         updated_at: now(),
         mutes_updated_at: e.created_at,
         mutes: Tags.from(e).type("p").all(),

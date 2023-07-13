@@ -1,4 +1,4 @@
-import {is, findIndex, equals} from "ramda"
+import {is, reject, filter, map, findIndex, equals} from "ramda"
 import {ensurePlural} from "hurdak/lib/hurdak"
 
 export type Readable<T> = {
@@ -11,27 +11,6 @@ export type Readable<T> = {
 export type Writable<T> = Readable<T> & {
   set: (v: T) => void
   update: (f: (v: T) => T) => void
-}
-
-export type Key<T> = Readable<T> & {
-  set: (v: T) => void
-  merge: (d: Record<string, T>) => void
-  update: (f: (v: T) => T) => void
-  remove: () => void
-}
-
-export type Collection<T> = {
-  get: () => T[]
-  subscribe: (f: (v: T[]) => void) => () => void
-  derived: (f: (v: T[]) => void) => Readable<T[]>
-  key: (k: string) => Key<T>
-  hasKey: (k: string) => boolean
-  getKey: (k: string) => T
-  setKey: (k: string, v: T) => void
-  mergeKey: (k: string, v: T) => void
-  deleteKey: (k: string) => void
-  deleteWhere: (f: (x: T) => boolean) => void
-  getBaseStore: () => Writable<Map<any, T>>
 }
 
 export const writable = <T>(defaultValue = null): Writable<T> => {
@@ -106,89 +85,83 @@ export const derived = <T>(stores, getValue): Readable<T> => {
   return {notify, get, subscribe, derived: derived_}
 }
 
-export const key = <T>(baseStore, k): Key<T> => {
-  if (!is(Map, baseStore.get())) {
-    throw new Error("`key` can only be used on map collections")
+export class Key<T> {
+  readonly pk: string
+  readonly key: string
+  #base: Writable<Map<string, T>>
+  #store: Readable<T[]>
+
+  constructor(base, pk, key) {
+    if (!is(Map, base.get())) {
+      throw new Error("`key` can only be used on map collections")
+    }
+
+    this.pk = pk
+    this.key = key
+    this.#base = base
+    this.#store = derived(base, m => m.get(key))
   }
 
-  const keyStore = derived(baseStore, m => m.get(k)) as Key<T>
+  get = () => this.#base.get().get(this.key)
 
-  keyStore.set = v =>
-    baseStore.update(m => {
-      m.set(k, v)
+  subscribe = f => this.#store.subscribe(f)
 
-      return m
-    })
+  derived = f => this.#store.derived(f)
 
-  keyStore.merge = d =>
-    baseStore.update(m => {
-      m.set(k, {...m.get(k), ...d})
+  exists = () => this.#base.get().has(this.key)
 
-      return m
-    })
+  update = f =>
+    this.#base.update(m => {
+      const v = f(m.get(this.key))
 
-  keyStore.update = f =>
-    baseStore.update(m => {
-      m.set(k, f(m.get(k)))
+      // Make sure the pk always get set on the record
+      v[this.pk] = this.key
+
+      m.set(this.key, v)
 
       return m
     })
 
-  keyStore.remove = () =>
-    baseStore.update(m => {
-      m.delete(k)
+  set = v => this.update(() => v)
+
+  merge = d => this.update(v => ({...v, ...d}))
+
+  remove = () =>
+    this.#base.update(m => {
+      m.delete(this.key)
 
       return m
     })
-
-  keyStore.derived = f => derived(keyStore, f)
-
-  return keyStore
 }
 
-export const collection = <T>(defaults = {}): Collection<T> => {
-  const baseStore = writable<Map<any, T>>(new Map(Object.entries(defaults)))
-  const arrayStore = derived<T[]>(baseStore, m => Array.from(m.values()))
+export class Collection<T> {
+  readonly pk: string
+  #map: Writable<Map<string, T>>
+  #list: Readable<T[]>
 
-  return {
-    get: () => arrayStore.get(),
-    subscribe: f => arrayStore.subscribe(f),
-    derived: f => derived(arrayStore, f),
-    key: k => key(baseStore, k),
-    hasKey: k => baseStore.get().has(k),
-    getKey: k => baseStore.get().get(k),
-    setKey: (k, v) => {
-      baseStore.update(m => {
-        m.set(k, v)
-
-        return m
-      })
-    },
-    mergeKey: (k, v) => {
-      baseStore.update(m => {
-        m.set(k, {...m.get(k), ...v})
-
-        return m
-      })
-    },
-    deleteKey: k => {
-      baseStore.update(m => {
-        m.delete(k)
-
-        return m
-      })
-    },
-    deleteWhere: f => {
-      baseStore.update(m => {
-        for (const [k, v] of m.entries()) {
-          if (f(v)) {
-            m.delete(k)
-          }
-        }
-
-        return m
-      })
-    },
-    getBaseStore: () => baseStore,
+  constructor(pk) {
+    this.pk = pk
+    this.#map = writable(new Map())
+    this.#list = derived(this.#map, m => Array.from(m.values())) as Readable<T[]>
   }
+
+  get = () => this.#list.get()
+
+  subscribe = f => this.#list.subscribe(f)
+
+  derived = f => this.#list.derived(f)
+
+  key = k => new Key<T>(this.#map, this.pk, k)
+
+  set = xs => this.#map.set(new Map(xs.map(x => [x[this.pk], x])))
+
+  update = f => this.#map.update(xs => new Map(f(xs).map(x => [x[this.pk], x])))
+
+  reject = f => this.update(reject(f))
+
+  filter = f => this.update(filter(f))
+
+  map = f => this.update(map(f))
 }
+
+export const collection = <T>(pk) => new Collection<T>(pk)

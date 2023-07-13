@@ -177,7 +177,7 @@
             },
           })
 
-          engine.Nip65.relays.mergeKey(relay.url, {...info, last_checked: now()})
+          engine.Nip65.relays.key(relay.url).merge({...info, last_checked: now()})
         })
       }
     }, 30_000)

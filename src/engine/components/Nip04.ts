@@ -11,8 +11,8 @@ const messageIsNew = ({last_checked, last_received, last_sent}: Contact) =>
 
 export class Nip04 {
   static contributeState() {
-    const contacts = collection<Contact>()
-    const messages = collection<Message>()
+    const contacts = collection<Contact>("pubkey")
+    const messages = collection<Message>("contact")
 
     const hasNewMessages = derived(
       contacts,
@@ -30,7 +30,7 @@ export class Nip04 {
       return q =>
         searchProfiles(q)
           .filter(p => pubkeySet.has(p.pubkey))
-          .map(p => Nip04.contacts.getKey(p.pubkey))
+          .map(p => Nip04.contacts.key(p.pubkey).get())
     })
 
     return {messageIsNew, searchContacts}
@@ -45,7 +45,7 @@ export class Nip04 {
           for (const key of Object.keys(payload)) {
             // Backwards compat from when we used to prefix id/pubkey
             const pubkey = last(key.split("/"))
-            const contact = Nip04.contacts.getKey(pubkey)
+            const contact = Nip04.contacts.key(pubkey).get()
             const last_checked = Math.max(payload[pubkey], contact?.last_checked || 0)
 
             // A bunch of junk got added to this setting. Integer keys, settings, etc
@@ -53,7 +53,7 @@ export class Nip04 {
               continue
             }
 
-            Nip04.contacts.mergeKey(pubkey, {pubkey, last_checked})
+            Nip04.contacts.key(pubkey).merge({last_checked})
           }
         })
       }
@@ -71,15 +71,14 @@ export class Nip04 {
         return
       }
 
-      if (Nip04.messages.getKey(e.id)) {
+      if (Nip04.messages.key(e.id).get()) {
         return
       }
 
       await tryFunc(async () => {
         const other = Keys.pubkey.get() === author ? recipient : author
 
-        Nip04.messages.setKey(e.id, {
-          id: e.id,
+        Nip04.messages.key(e.id).set({
           contact: other,
           pubkey: e.pubkey,
           created_at: e.created_at,
@@ -88,18 +87,16 @@ export class Nip04 {
         })
 
         if (Keys.pubkey.get() === author) {
-          const contact = Nip04.contacts.getKey(recipient)
+          const contact = Nip04.contacts.key(recipient).get()
 
-          Nip04.contacts.mergeKey(recipient, {
-            pubkey: recipient,
+          Nip04.contacts.key(recipient).merge({
             last_sent: e.created_at,
             hints: uniq(getHints(e).concat(contact?.hints || [])),
           })
         } else {
-          const contact = Nip04.contacts.getKey(author)
+          const contact = Nip04.contacts.key(author).get()
 
-          Nip04.contacts.mergeKey(author, {
-            pubkey: author,
+          Nip04.contacts.key(author).merge({
             last_received: e.created_at,
             hints: uniq(getHints(e).concat(contact?.hints || [])),
           })

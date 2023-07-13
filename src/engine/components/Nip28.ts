@@ -11,8 +11,8 @@ const messageIsNew = ({last_checked, last_received, last_sent}: Channel) =>
 
 export class Nip28 {
   static contributeState() {
-    const channels = collection<Channel>()
-    const messages = collection<Message>()
+    const channels = collection<Channel>("id")
+    const messages = collection<Message>("channel")
 
     const hasNewMessages = derived(
       channels,
@@ -37,7 +37,7 @@ export class Nip28 {
 
   static initialize({Events, Nip28, Keys, Crypt}) {
     Events.addHandler(40, e => {
-      const channel = Nip28.channels.getKey(e.id)
+      const channel = Nip28.channels.key(e.id).get()
 
       if (e.created_at < channel?.updated_at) {
         return
@@ -49,8 +49,7 @@ export class Nip28 {
         return
       }
 
-      Nip28.channels.mergeKey(e.id, {
-        id: e.id,
+      Nip28.channels.key(e.id).merge({
         type: "public",
         pubkey: e.pubkey,
         updated_at: now(),
@@ -66,7 +65,7 @@ export class Nip28 {
         return
       }
 
-      const channel = Nip28.channels.getKey(channelId)
+      const channel = Nip28.channels.key(channelId).get()
 
       if (e.created_at < channel?.updated_at) {
         return
@@ -82,8 +81,7 @@ export class Nip28 {
         return
       }
 
-      Nip28.channels.mergeKey(channelId, {
-        id: channelId,
+      Nip28.channels.key(channelId).merge({
         pubkey: e.pubkey,
         updated_at: now(),
         hints: getHints(e),
@@ -99,7 +97,7 @@ export class Nip28 {
           for (const key of Object.keys(payload)) {
             // Backwards compat from when we used to prefix id/pubkey
             const id = last(key.split("/"))
-            const channel = Nip28.channels.getKey(id)
+            const channel = Nip28.channels.key(id).get()
             const last_checked = Math.max(payload[id], channel?.last_checked || 0)
 
             // A bunch of junk got added to this setting. Integer keys, settings, etc
@@ -107,7 +105,7 @@ export class Nip28 {
               continue
             }
 
-            Nip28.channels.mergeKey(id, {id, last_checked})
+            Nip28.channels.key(id).merge({last_checked})
           }
         })
       }
@@ -125,9 +123,9 @@ export class Nip28 {
 
           Nip28.channels.get().forEach(channel => {
             if (channel.joined && !channelIds.includes(channel.id)) {
-              Nip28.channels.mergeKey(channel.id, {joined: false})
+              Nip28.channels.key(channel.id).merge({joined: false})
             } else if (!channel.joined && channelIds.includes(channel.id)) {
-              Nip28.channels.mergeKey(channel.id, {joined: true})
+              Nip28.channels.key(channel.id).merge({joined: true})
             }
           })
         })
@@ -135,17 +133,16 @@ export class Nip28 {
     })
 
     Events.addHandler(42, e => {
-      if (Nip28.messages.getKey(e.id)) {
+      if (Nip28.messages.key(e.id).exists()) {
         return
       }
 
       const tags = Tags.from(e)
       const channelId = tags.getMeta("e")
-      const channel = Nip28.channels.getKey(channelId)
+      const channel = Nip28.channels.key(channelId).get()
       const hints = uniq(pluck("url", tags.relays()).concat(channel?.hints || []))
 
-      Nip28.messages.mergeKey(e.id, {
-        id: e.id,
+      Nip28.messages.key(e.id).merge({
         channel: channelId,
         pubkey: e.pubkey,
         created_at: e.created_at,
@@ -153,8 +150,7 @@ export class Nip28 {
         tags: e.tags,
       })
 
-      Nip28.channels.mergeKey(channelId, {
-        id: channelId,
+      Nip28.channels.key(channelId).merge({
         last_sent: e.created_at,
         hints,
       })

@@ -7,9 +7,9 @@ import {derived, collection} from "../util/store"
 
 export class Content {
   static contributeState() {
-    const topics = collection<Topic>()
+    const topics = collection<Topic>("name")
 
-    const lists = collection<List>()
+    const lists = collection<List>("naddr")
 
     return {topics, lists}
   }
@@ -32,9 +32,9 @@ export class Content {
       )
 
       for (const name of tagTopics.concat(contentTopics)) {
-        const topic = Content.topics.getKey(name)
+        const topic = Content.topics.key(name).get()
 
-        Content.topics.mergeKey(name, {name, count: inc(topic?.count || 0)})
+        Content.topics.key(name).merge({count: inc(topic?.count || 0)})
       }
     }
 
@@ -46,16 +46,15 @@ export class Content {
       const {pubkey, kind, created_at} = e
       const name = Tags.from(e).getMeta("d")
       const naddr = nip19.naddrEncode({identifier: name, pubkey, kind})
-      const list = Content.lists.getKey(naddr)
+      const list = Content.lists.key(naddr).get()
 
       if (created_at < list?.updated_at) {
         return
       }
 
-      Content.lists.mergeKey(naddr, {
+      Content.lists.key(naddr).merge({
         ...list,
         name,
-        naddr,
         pubkey,
         tags: e.tags,
         updated_at: created_at,
@@ -70,10 +69,10 @@ export class Content {
         .values()
         .all()
         .forEach(naddr => {
-          const list = Content.lists.getKey(naddr)
+          const list = Content.lists.key(naddr)
 
-          if (list) {
-            Content.lists.mergeKey(naddr, {deleted_at: e.created_at})
+          if (list.exists()) {
+            list.merge({deleted_at: e.created_at})
           }
         })
     })

@@ -22,14 +22,14 @@ const getLnUrl = address => {
 
 export class Nip57 {
   static contributeState() {
-    const zappers = collection<Zapper>()
+    const zappers = collection<Zapper>("pubkey")
 
     return {zappers}
   }
 
   static contributeActions({Nip57}) {
     const processZaps = (zaps, pubkey) => {
-      const zapper = Nip57.zappers.getKey(pubkey)
+      const zapper = Nip57.zappers.key(pubkey).get()
 
       if (!zapper) {
         return []
@@ -84,10 +84,10 @@ export class Nip57 {
     Events.addHandler(0, e => {
       tryJson(async () => {
         const kind0 = JSON.parse(e.content)
-        const zapper = Nip57.zappers.getKey(e.pubkey)
+        const zapper = Nip57.zappers.key(e.pubkey)
         const address = (kind0.lud16 || kind0.lud06 || "").toLowerCase()
 
-        if (!address || e.created_at < zapper?.created_at) {
+        if (!address || e.created_at < zapper.get()?.created_at) {
           return
         }
 
@@ -103,7 +103,7 @@ export class Nip57 {
           return
         }
 
-        Nip57.zappers.setKey(e.pubkey, {
+        zapper.set({
           pubkey: e.pubkey,
           lnurl: hexToBech32("lnurl", url),
           callback: result.callback,

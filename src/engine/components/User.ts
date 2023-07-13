@@ -110,8 +110,7 @@ export class User {
       if (Keys.canSign.get()) {
         await Outbox.queue.push({event: Builder.setPetnames($petnames)})
       } else {
-        Nip02.graph.mergeKey(getStateKey(), {
-          pubkey: getStateKey(),
+        Nip02.graph.key(getStateKey()).merge({
           updated_at: now(),
           petnames_updated_at: now(),
           petnames: $petnames,
@@ -140,8 +139,7 @@ export class User {
       if (Keys.canSign.get()) {
         await Outbox.queue.push({event: Builder.setMutes($mutes.map(slice(0, 2)))})
       } else {
-        Nip02.graph.mergeKey(getStateKey(), {
-          pubkey: getStateKey(),
+        Nip02.graph.key(getStateKey()).merge({
           updated_at: now(),
           mutes_updated_at: now(),
           mutes: $mutes,
@@ -206,14 +204,14 @@ export class User {
       )
 
     const joinChannel = id => {
-      Nip28.channels.mergeKey(id, {id, joined: false})
+      Nip28.channels.key(id).merge({joined: false})
 
       return saveChannels()
     }
 
     const leaveChannel = id => {
-      Nip28.channels.mergeKey(id, {id, joined: false})
-      Nip28.messages.deleteWhere(m => m.channel === id)
+      Nip28.channels.key(id).merge({joined: false})
+      Nip28.messages.reject(m => m.channel === id)
 
       return saveChannels()
     }

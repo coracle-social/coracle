@@ -6,13 +6,13 @@ import {collection} from "../util/store"
 
 export class Meta {
   static contributeState() {
-    const relayStats = collection<RelayStat>()
+    const relayStats = collection<RelayStat>("url")
 
     return {relayStats}
   }
 
   static contributeSelectors({Meta, Network}) {
-    const getRelayStats = url => Meta.relayStats.getKey(url)
+    const getRelayStats = url => Meta.relayStats.key(url).get()
 
     const getRelayQuality = url => {
       const stats = getRelayStats(url)
@@ -60,24 +60,24 @@ export class Meta {
 
   static initialize({Network, Meta}) {
     Network.pool.on("open", ({url}) => {
-      Meta.relayStats.mergeKey(url, {last_opened: now(), last_activity: now()})
+      Meta.relayStats.key(url).merge({last_opened: now(), last_activity: now()})
     })
 
     Network.pool.on("close", ({url}) => {
-      Meta.relayStats.mergeKey(url, {last_closed: now(), last_activity: now()})
+      Meta.relayStats.key(url).merge({last_closed: now(), last_activity: now()})
     })
 
     Network.pool.on("error:set", (url, error) => {
-      Meta.relayStats.mergeKey(url, {error})
+      Meta.relayStats.key(url).merge({error})
     })
 
     Network.pool.on("error:clear", url => {
-      Meta.relayStats.mergeKey(url, {error: null})
+      Meta.relayStats.key(url).merge({error: null})
     })
 
     Network.emitter.on("publish", urls => {
       for (const url of urls) {
-        Meta.relayStats.mergeKey(url, {
+        Meta.relayStats.key(url).merge({
           last_publish: now(),
           last_activity: now(),
         })
@@ -88,7 +88,7 @@ export class Meta {
       for (const url of urls) {
         const stats = Meta.getRelayStats(url)
 
-        Meta.relayStats.mergeKey(url, {
+        Meta.relayStats.key(url).merge({
           last_sub: now(),
           last_activity: now(),
           total_subs: (stats?.total_subs || 0) + 1,
@@ -101,7 +101,7 @@ export class Meta {
       for (const url of urls) {
         const stats = Meta.getRelayStats(url)
 
-        Meta.relayStats.mergeKey(url, {
+        Meta.relayStats.key(url).merge({
           last_activity: now(),
           active_subs: stats ? stats.active_subs - 1 : 0,
         })
@@ -111,7 +111,7 @@ export class Meta {
     Network.emitter.on("event", ({url}) => {
       const stats = Meta.getRelayStats(url)
 
-      Meta.relayStats.mergeKey(url, {
+      Meta.relayStats.key(url).merge({
         last_activity: now(),
         events_count: (stats.events_count || 0) + 1,
       })
@@ -120,7 +120,7 @@ export class Meta {
     Network.emitter.on("eose", (url, ms) => {
       const stats = Meta.getRelayStats(url)
 
-      Meta.relayStats.mergeKey(url, {
+      Meta.relayStats.key(url).merge({
         last_activity: now(),
         eose_count: (stats.eose_count || 0) + 1,
         eose_timer: (stats.eose_timer || 0) + ms,
@@ -130,7 +130,7 @@ export class Meta {
     Network.emitter.on("timeout", (url, ms) => {
       const stats = Meta.getRelayStats(url)
 
-      Meta.relayStats.mergeKey(url, {
+      Meta.relayStats.key(url).merge({
         last_activity: now(),
         timeouts: (stats.timeouts || 0) + 1,
       })

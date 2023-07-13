@@ -9,7 +9,7 @@ export class Events {
   static contributeState() {
     return {
       queue: queue(),
-      cache: collection<Event>(),
+      cache: collection<Event>("id"),
       handlers: {},
     }
   }
@@ -22,8 +22,8 @@ export class Events {
 
   static initialize({Events, Keys}) {
     Events.queue.listen(async event => {
-      if (event.pubkey === Keys.pubkey.get() && !Events.cache.getKey(event.id)) {
-        Events.cache.setKey(event.id, event)
+      if (event.pubkey === Keys.pubkey.get()) {
+        Events.cache.key(event.id).set(event)
       }
 
       for (const handler of Events.handlers[ANY_KIND] || []) {

@@ -25,7 +25,7 @@ export class PubkeyLoader {
 
         attemptedPubkeys.add(pubkey)
 
-        if (Directory.profiles.getKey(pubkey)?.updated_at || 0 > since) {
+        if (Directory.profiles.key(pubkey).get()?.updated_at || 0 > since) {
           continue
         }
 

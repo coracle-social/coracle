@@ -6,13 +6,13 @@ import {collection, derived} from "../util/store"
 
 export class Directory {
   static contributeState() {
-    const profiles = collection<Profile>()
+    const profiles = collection<Profile>("pubkey")
 
     return {profiles}
   }
 
   static contributeSelectors({Directory}) {
-    const getProfile = (pubkey: string): Profile => Directory.profiles.getKey(pubkey) || {pubkey}
+    const getProfile = (pubkey: string): Profile => Directory.profiles.key(pubkey).get() || {pubkey}
 
     const getNamedProfiles = () =>
       Directory.profiles.get().filter(p => p.name || p.nip05 || p.display_name)
@@ -51,15 +51,14 @@ export class Directory {
     Events.addHandler(0, e => {
       tryJson(() => {
         const kind0 = JSON.parse(e.content)
-        const profile = Directory.profiles.getKey(e.pubkey)
+        const profile = Directory.profiles.key(e.pubkey)
 
-        if (e.created_at < profile?.created_at) {
+        if (e.created_at < profile.get()?.created_at) {
           return
         }
 
-        Directory.profiles.mergeKey(e.pubkey, {
+        profile.merge({
           ...kind0,
-          pubkey: e.pubkey,
           created_at: e.created_at,
           updated_at: now(),
         })

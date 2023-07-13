@@ -4,7 +4,7 @@ import type {Event} from "src/engine/types"
 
 export class Alerts {
   static contributeState() {
-    const events = collection<Event>()
+    const events = collection<Event>("id")
 
     const lastChecked = writable(0)
 
@@ -21,7 +21,7 @@ export class Alerts {
   static initialize({Alerts, Events, Keys, User}) {
     const isMention = e => Tags.from(e).pubkeys().includes(Keys.pubkey.get())
 
-    const isUserEvent = id => Events.cache.getKey(id)?.pubkey === Keys.pubkey.get()
+    const isUserEvent = id => Events.cache.key(id).get()?.pubkey === Keys.pubkey.get()
 
     const isDescendant = e => isUserEvent(findRootId(e))
 
@@ -42,9 +42,7 @@ export class Alerts {
         return
       }
 
-      if (!Alerts.events.getKey(e.id)) {
-        Alerts.events.setKey(e.id, e)
-      }
+      Alerts.events.key(e.id).set(e)
     }
 
     Events.addHandler(

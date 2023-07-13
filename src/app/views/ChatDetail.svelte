@@ -38,7 +38,7 @@
 
   onDestroy(() => {
     if (!$channel.joined) {
-      nip28.messages.deleteWhere(m => m.channel === id)
+      nip28.messages.reject(m => m.channel === id)
     }
   })
 
