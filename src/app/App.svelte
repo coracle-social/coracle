@@ -31,7 +31,7 @@
 
   // Migration from 0.2.34
   if (Object.hasOwn(localStorage, "agent/keys/pubkey")) {
-    engine.Keys.state.setKey(getLocalJson("agent/keys/pubkey"), {
+    engine.Keys.setKeyState({
       method: getLocalJson("agent/keys/method"),
       pubkey: getLocalJson("agent/keys/pubkey"),
       privkey: getLocalJson("agent/keys/privkey"),
@@ -39,6 +39,18 @@
     })
 
     engine.Keys.pubkey.set(getLocalJson("agent/keys/pubkey"))
+
+    const {settings} = JSON.parse(localStorage.getItem("agent/user/profile"))
+
+    engine.User.setSettings({
+      last_updated: settings.lastUpdated || 0,
+      relay_limit: settings.relayLimit || 10,
+      default_zap: settings.defaultZap || 21,
+      show_media: settings.showMedia || true,
+      report_analytics: settings.reportAnalytics || true,
+      dufflepud_url: settings.dufflepudUrl || engine.Env.DUFFLEPUD_URL,
+      multiplextr_url: settings.multiplextrUrl || engine.Env.MULTIPLEXTR_URL,
+    })
 
     localStorage.removeItem("agent/keys/method")
     localStorage.removeItem("agent/keys/pubkey")

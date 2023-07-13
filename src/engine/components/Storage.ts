@@ -153,7 +153,7 @@ export class Storage {
     ])
 
     const getPubkeyWhitelist = () => {
-      const pubkeys = engine.Keys.state.get().map(prop("pubkey"))
+      const pubkeys = engine.getKeyState().map(prop("pubkey"))
 
       return union(new Set(pubkeys), engine.Social.getFollowsSet(pubkeys))
     }
