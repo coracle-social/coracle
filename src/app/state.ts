@@ -4,7 +4,7 @@ import Bugsnag from "@bugsnag/js"
 import {nip19} from "nostr-tools"
 import {navigate} from "svelte-routing"
 import {writable, get} from "svelte/store"
-import {omit, filter, pluck, sortBy, slice} from "ramda"
+import {whereEq, omit, filter, pluck, sortBy, slice} from "ramda"
 import {createMap, doPipe, first} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
 import {hash, timedelta, now, batch, shuffle, sleep, clamp} from "src/util/misc"
@@ -102,7 +102,7 @@ export const listen = async () => {
     clamp([now() - timedelta(30, "days"), now()], get(alerts.latestNotification)) -
     timedelta(1, "days")
 
-  const channelIds = pluck("id", nip28.channels.get({joined: true}))
+  const channelIds = pluck("id", nip28.channels.get().filter(whereEq({joined: true})))
 
   const eventIds = doPipe(events.cache.get(), [
     filter(e => e.kind === 1 && e.created_at > now() - timedelta(30, "days")),

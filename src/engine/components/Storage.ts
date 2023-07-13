@@ -32,14 +32,27 @@ const sortEntriesBy = f => sortBy(({key, record}) => f(record))
 
 const Adapter = window.indexedDB ? IncrementalIndexedDBAdapter : Loki.LokiMemoryAdapter
 
+const loki = new Loki("engine/Storage/db", {
+  adapter: new Adapter(),
+})
+
 const ready = defer()
 
 const dead = writable(false)
 
-const loki = new Loki("engine/Storage/db", {
-  adapter: new Adapter(),
-  autoloadCallback: ready.resolve,
-})
+const close = () => {
+  dead.set(true)
+
+  return new Promise(resolve => loki.close(resolve))
+}
+
+const clear = () => {
+  dead.set(true)
+
+  localStorage.clear()
+
+  return new Promise(resolve => loki.deleteDatabase(resolve))
+}
 
 window.addEventListener("beforeunload", () => loki.close())
 
@@ -144,20 +157,6 @@ export class Storage {
   }
 
   static contributeActions({Storage}) {
-    const close = () => {
-      dead.set(true)
-
-      return new Promise(resolve => loki.close(resolve))
-    }
-
-    const clear = () => {
-      dead.set(true)
-
-      localStorage.clear()
-
-      return new Promise(resolve => loki.deleteDatabase(resolve))
-    }
-
     return {close, clear}
   }
 
