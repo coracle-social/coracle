@@ -40,10 +40,10 @@ export class User {
     Crypt,
     Builder,
     Social,
-    Routing,
     User,
-    Chat,
     Nip04,
+    Nip28,
+    Nip65,
     Content,
   }) {
     const getPubkey = () => Keys.pubkey.get()
@@ -108,17 +108,17 @@ export class User {
       }
     }
 
-    // Routing
+    // Nip65
 
-    const getRelays = (mode?: string) => Routing.getPubkeyRelays(getStateKey(), mode)
+    const getRelays = (mode?: string) => Nip65.getPubkeyRelays(getStateKey(), mode)
 
-    const getRelayUrls = (mode?: string) => Routing.getPubkeyRelayUrls(getStateKey(), mode)
+    const getRelayUrls = (mode?: string) => Nip65.getPubkeyRelayUrls(getStateKey(), mode)
 
     const setRelays = relays => {
       if (Keys.canSign.get()) {
         return publish(Builder.setRelays(relays))
       } else {
-        Routing.setPolicy({pubkey: getStateKey(), created_at: now()}, relays)
+        Nip65.setPolicy({pubkey: getStateKey(), created_at: now()}, relays)
       }
     }
 
@@ -232,11 +232,11 @@ export class User {
       return setAppData(appDataKeys.NIP04_LAST_CHECKED, {...lastChecked, [pubkey]: now()})
     }
 
-    // Chat
+    // Nip28
 
     const setChannelLastChecked = id => {
       const lastChecked = fromPairs(
-        Chat.channels
+        Nip28.channels
           .get()
           .filter(prop("last_checked"))
           .map(r => [r.id, r.last_checked])
@@ -247,7 +247,7 @@ export class User {
 
     const joinChannel = channelId => {
       const channelIds = uniq(
-        pluck("id", Chat.channels.get().filter(whereEq({joined: true}))).concat(channelId)
+        pluck("id", Nip28.channels.get().filter(whereEq({joined: true}))).concat(channelId)
       )
 
       return setAppData(appDataKeys.NIP28_ROOMS_JOINED, channelIds)
@@ -256,7 +256,7 @@ export class User {
     const leaveChannel = channelId => {
       const channelIds = without(
         [channelId],
-        pluck("id", Chat.channels.get().filter(whereEq({joined: true})))
+        pluck("id", Nip28.channels.get().filter(whereEq({joined: true})))
       )
 
       return setAppData(appDataKeys.NIP28_ROOMS_JOINED, channelIds)

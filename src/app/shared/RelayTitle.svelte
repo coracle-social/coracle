@@ -5,7 +5,7 @@
   import {poll, stringToHue, hsl} from "src/util/misc"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {routing, meta} from "src/app/engine"
+  import {nip65, meta} from "src/app/engine"
 
   export let relay
   export let rating = null
@@ -28,7 +28,7 @@
     href={`/relays/${webSocketURLToPlainOrBase64(relay.url)}`}
     class="border-b border-solid"
     style={`border-color: ${hsl(stringToHue(relay.url))}`}>
-    {routing.displayRelay(relay)}
+    {nip65.displayRelay(relay)}
   </Anchor>
   <span
     on:mouseout={() => {

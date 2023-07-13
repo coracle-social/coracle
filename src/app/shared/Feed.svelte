@@ -13,7 +13,7 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {user, routing, network} from "src/app/engine"
+  import {user, nip65, network} from "src/app/engine"
   import legacyNetwork from "src/agent/network"
   import {mergeParents, compileFilter} from "src/app/state"
 
@@ -81,9 +81,9 @@
         : await network.load({
             timeout: parentsTimeout,
             filter: {ids: notesWithParent.map(findReplyId)},
-            relays: routing.mergeHints(
+            relays: nip65.mergeHints(
               user.getSetting("relay_limit"),
-              notesWithParent.map(e => routing.getParentHints(3, e))
+              notesWithParent.map(e => nip65.getParentHints(3, e))
             ),
           })
 
@@ -137,14 +137,14 @@
 
     // If we have a search term we need to use only relays that support search
     if (filter.search) {
-      return routing.getSearchRelays()
+      return nip65.getSearchRelays()
     }
 
     const limit = user.getSetting("relay_limit")
     const authors = (compileFilter(filter).authors || []).concat(user.getPubkey())
-    const hints = authors.map(pubkey => routing.getPubkeyHints(limit, pubkey))
+    const hints = authors.map(pubkey => nip65.getPubkeyHints(limit, pubkey))
 
-    return routing.mergeHints(limit, hints)
+    return nip65.mergeHints(limit, hints)
   }
 
   const loadMore = async () => {

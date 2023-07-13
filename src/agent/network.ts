@@ -2,7 +2,7 @@ import {max, mergeLeft, fromPairs, sortBy, assoc, uniqBy, prop, propEq, groupBy,
 import {findReplyId} from "src/util/nostr"
 import {chunk, ensurePlural} from "hurdak/lib/hurdak"
 import {batch, now, timedelta} from "src/util/misc"
-import {ENABLE_ZAPS, user, routing, pubkeyLoader, network} from "src/app/engine"
+import {ENABLE_ZAPS, user, nip65, pubkeyLoader, network} from "src/app/engine"
 
 class Cursor {
   relays: string[]
@@ -109,9 +109,9 @@ class Cursor {
 const streamContext = ({notes, onChunk, maxDepth = 2}) => {
   const seen = new Set()
   const kinds = ENABLE_ZAPS ? [1, 7, 9735] : [1, 7]
-  const relays = routing.mergeHints(
+  const relays = nip65.mergeHints(
     user.getSetting("relay_limit"),
-    notes.map(e => routing.getReplyHints(3, e))
+    notes.map(e => nip65.getReplyHints(3, e))
   )
 
   const loadChunk = (events, depth) => {

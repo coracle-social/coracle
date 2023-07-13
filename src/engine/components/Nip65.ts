@@ -6,7 +6,7 @@ import {normalizeRelayUrl, findReplyId, isShareableRelay, Tags} from "src/util/n
 import type {Relay, RelayInfo, RelayPolicy} from "src/engine/types"
 import {derived, collection} from "../util/store"
 
-export class Routing {
+export class Nip65 {
   static contributeState() {
     const relays = collection<Relay>()
     const policies = collection<RelayPolicy>()
@@ -14,12 +14,12 @@ export class Routing {
     return {relays, policies}
   }
 
-  static contributeActions({Env, Routing, Network, Meta, User}) {
+  static contributeActions({Env, Nip65, Network, Meta, User}) {
     const addRelay = url => {
       if (isShareableRelay(url)) {
-        const relay = Routing.relays.getKey(url)
+        const relay = Nip65.relays.getKey(url)
 
-        Routing.relays.mergeKey(url, {
+        Nip65.relays.mergeKey(url, {
           url,
           count: inc(relay?.count || 0),
           first_seen: relay?.first_seen || now(),
@@ -32,11 +32,11 @@ export class Routing {
 
     const setPolicy = ({pubkey, created_at}, relays) => {
       if (relays?.length > 0) {
-        if (created_at < Routing.policies.getKey(pubkey)?.created_at) {
+        if (created_at < Nip65.policies.getKey(pubkey)?.created_at) {
           return
         }
 
-        Routing.policies.mergeKey(pubkey, {
+        Nip65.policies.mergeKey(pubkey, {
           pubkey,
           created_at,
           updated_at: now(),
@@ -49,18 +49,16 @@ export class Routing {
       }
     }
 
-    const getRelay = (url: string): Relay => Routing.relays.getKey(url) || {url}
+    const getRelay = (url: string): Relay => Nip65.relays.getKey(url) || {url}
 
-    const getRelayInfo = (url: string): RelayInfo => Routing.relays.getKey(url)?.info || {}
+    const getRelayInfo = (url: string): RelayInfo => Nip65.relays.getKey(url)?.info || {}
 
     const displayRelay = ({url}) => last(url.split("://"))
 
-    const searchRelays = derived(Routing.relays, $relays =>
-      fuzzy($relays.values(), {keys: ["url"]})
-    )
+    const searchRelays = derived(Nip65.relays, $relays => fuzzy($relays.values(), {keys: ["url"]}))
 
     const getSearchRelays = () => {
-      const searchableRelayUrls = Routing.relays
+      const searchableRelayUrls = Nip65.relays
         .get()
         .filter(r => (r.info?.supported_nips || []).includes(50))
         .map(prop("url"))
@@ -69,7 +67,7 @@ export class Routing {
     }
 
     const getPubkeyRelays = (pubkey, mode = null) => {
-      const relays = Routing.policies.getKey(pubkey)?.relays || []
+      const relays = Nip65.policies.getKey(pubkey)?.relays || []
 
       return mode ? relays.filter(prop(mode)) : relays
     }
@@ -218,15 +216,15 @@ export class Routing {
     }
   }
 
-  static initialize({Env, Events, Routing}) {
+  static initialize({Env, Events, Nip65}) {
     Events.addHandler(2, e => {
       if (isShareableRelay(e.content)) {
-        Routing.addRelay(normalizeRelayUrl(e.content))
+        Nip65.addRelay(normalizeRelayUrl(e.content))
       }
     })
 
     Events.addHandler(3, e => {
-      Routing.setPolicy(
+      Nip65.setPolicy(
         e,
         tryJson(() => {
           Object.entries(JSON.parse(e.content || ""))
@@ -244,7 +242,7 @@ export class Routing {
     })
 
     Events.addHandler(10002, e => {
-      Routing.setPolicy(
+      Nip65.setPolicy(
         e,
         Tags.from(e)
           .type("r")
@@ -265,14 +263,14 @@ export class Routing {
       const {DEFAULT_RELAYS, FORCE_RELAYS, DUFFLEPUD_URL} = Env
 
       // Throw some hardcoded defaults in there
-      DEFAULT_RELAYS.forEach(Routing.addRelay)
+      DEFAULT_RELAYS.forEach(Nip65.addRelay)
 
       // Load relays from nostr.watch via dufflepud
       if (FORCE_RELAYS.length === 0 && DUFFLEPUD_URL) {
         try {
           const json = await fetchJson(DUFFLEPUD_URL + "/relay")
 
-          json.relays.filter(isShareableRelay).forEach(Routing.addRelay)
+          json.relays.filter(isShareableRelay).forEach(Nip65.addRelay)
         } catch (e) {
           warn("Failed to fetch relays list", e)
         }

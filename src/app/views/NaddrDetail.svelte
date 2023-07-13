@@ -6,7 +6,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {directory, routing, network} from "src/app/engine"
+  import {directory, nip65, network} from "src/app/engine"
 
   export let identifier
   export let kind
@@ -20,7 +20,7 @@
 
   onMount(async () => {
     await network.load({
-      relays: routing.selectHints(3, relays),
+      relays: nip65.selectHints(3, relays),
       filter: {kinds: [kind], pubkey, "#d": [identifier]},
       onEvent: event => {
         note = event

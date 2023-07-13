@@ -12,7 +12,7 @@
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Scan from "src/app/shared/Scan.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {user, directory, network, routing, content} from "src/app/engine"
+  import {user, directory, network, nip65, content} from "src/app/engine"
 
   let q = ""
   let options = []
@@ -25,7 +25,7 @@
     // This allows us to populate results even if search isn't supported by forced urls
     if (q.length > 2) {
       network.load({
-        relays: routing.getSearchRelays(),
+        relays: nip65.getSearchRelays(),
         filter: [{kinds: [0], search, limit: 10}],
       })
     } else if (directory.profiles.get().length < 50) {

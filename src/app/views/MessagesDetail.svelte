@@ -7,7 +7,7 @@
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {user, nip04, routing, directory, builder, network} from "src/app/engine"
+  import {user, nip04, nip65, directory, builder, network} from "src/app/engine"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -21,9 +21,9 @@
   user.setContactLastChecked(pubkey)
 
   const getRelays = () =>
-    routing.mergeHints(3, [
-      routing.getPubkeyHints(3, pubkey),
-      routing.getPubkeyHints(3, user.getPubkey()),
+    nip65.mergeHints(3, [
+      nip65.getPubkeyHints(3, pubkey),
+      nip65.getPubkeyHints(3, user.getPubkey()),
     ])
 
   const sendMessage = async content => {

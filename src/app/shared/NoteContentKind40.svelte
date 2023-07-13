@@ -6,12 +6,14 @@
   import Card from "src/partials/Card.svelte"
   import Content from "src/partials/Content.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
-  import {chat} from "src/app/engine"
+  import {nip28} from "src/app/engine"
 
   export let note
 
   const {name, picture, about} = tryJson(() => JSON.parse(note.content))
-  const channel = chat.channels.key(note.id).derived(defaultTo({id: note.id, name, picture, about}))
+  const channel = nip28.channels
+    .key(note.id)
+    .derived(defaultTo({id: note.id, name, picture, about}))
   const noteId = nip19.noteEncode(note.id)
 </script>
 

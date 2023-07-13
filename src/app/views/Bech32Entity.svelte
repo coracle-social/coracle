@@ -7,7 +7,7 @@
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import NaddrDetail from "src/app/views/NaddrDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
-  import {routing} from "src/app/engine"
+  import {nip65} from "src/app/engine"
 
   export let entity
 
@@ -18,7 +18,7 @@
   onMount(() => {
     try {
       ;({type, data} = nip19.decode(entity) as {type: string; data: any})
-      relays = routing.selectHints(3, data.relays || [])
+      relays = nip65.selectHints(3, data.relays || [])
     } catch (e) {
       warn(e)
     }

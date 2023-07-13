@@ -4,13 +4,13 @@
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
-  import {nip05, routing} from "src/app/engine"
+  import {nip05, nip65} from "src/app/engine"
 
   export let pubkey
 
   const handle = nip05.getHandle(pubkey)
   const npub = nip19.npubEncode(pubkey)
-  const relays = routing.getPubkeyHints(3, pubkey)
+  const relays = nip65.getPubkeyHints(3, pubkey)
   const nprofile = nip19.nprofileEncode({pubkey, relays})
 </script>
 

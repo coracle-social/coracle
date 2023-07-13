@@ -44,7 +44,7 @@ export class Network {
     return {relayHasError}
   }
 
-  static contributeActions({Network, User, Events, Routing, Env}) {
+  static contributeActions({Network, User, Events, Nip65, Env}) {
     const getExecutor = (urls, {bypassBoot = false} = {}) => {
       if (Env.FORCE_RELAYS?.length > 0) {
         urls = Env.FORCE_RELAYS
@@ -91,7 +91,7 @@ export class Network {
 
       // Eagerly connect and handle AUTH
       executor.target.sockets.forEach(socket => {
-        const {limitation} = Routing.getRelayInfo(socket.url)
+        const {limitation} = Nip65.getRelayInfo(socket.url)
         const waitForBoot = limitation?.payment_required || limitation?.auth_required
 
         // This happens automatically, but kick it off anyway

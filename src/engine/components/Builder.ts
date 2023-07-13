@@ -14,10 +14,10 @@ const buildEvent = (kind, {content = "", tags = [], tagClient = true}) => {
 }
 
 export class Builder {
-  static contributeActions({Routing, Directory}) {
-    const getEventHint = event => first(Routing.getEventHints(1, event)) || ""
+  static contributeActions({Nip65, Directory}) {
+    const getEventHint = event => first(Nip65.getEventHints(1, event)) || ""
 
-    const getPubkeyHint = pubkey => first(Routing.getPubkeyHints(1, pubkey)) || ""
+    const getPubkeyHint = pubkey => first(Nip65.getPubkeyHints(1, pubkey)) || ""
 
     const getPubkeyPetname = pubkey => {
       const profile = Directory.getProfile(pubkey)

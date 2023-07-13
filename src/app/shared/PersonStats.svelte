@@ -4,7 +4,7 @@
   import {tweened} from "svelte/motion"
   import {numberFmt, batch} from "src/util/misc"
   import {modal} from "src/partials/state"
-  import {social, user, routing, network} from "src/app/engine"
+  import {social, user, nip65, network} from "src/app/engine"
 
   export let pubkey
 
@@ -31,7 +31,7 @@
       const followers = new Set()
 
       await network.load({
-        relays: routing.getPubkeyHints(3, user.getPubkey(), "read"),
+        relays: nip65.getPubkeyHints(3, user.getPubkey(), "read"),
         shouldProcess: false,
         filter: [{kinds: [3], "#p": [pubkey]}],
         onEvent: batch(300, events => {

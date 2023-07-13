@@ -4,7 +4,7 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {routing, directory, user} from "src/app/engine"
+  import {nip65, directory, user} from "src/app/engine"
 
   export let onSubmit
 
@@ -12,7 +12,7 @@
 
   const pubkeyEncoder = {
     encode: pubkey => {
-      const relays = routing.getPubkeyHints(3, pubkey)
+      const relays = nip65.getPubkeyHints(3, pubkey)
       const nprofile = nip19.nprofileEncode({pubkey, relays})
 
       return "nostr:" + nprofile

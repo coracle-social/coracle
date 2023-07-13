@@ -4,7 +4,7 @@
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {directory, routing} from "src/app/engine"
+  import {directory, nip65} from "src/app/engine"
 
   export let note, rating
 
@@ -19,7 +19,7 @@
   })
 
   const display = switcherFn(type, {
-    r: () => routing.displayRelay({url: value}),
+    r: () => nip65.displayRelay({url: value}),
     p: () => directory.displayProfile(value),
     e: () => "a note",
     default: "something",

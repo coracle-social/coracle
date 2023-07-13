@@ -9,7 +9,7 @@ const getHints = e => pluck("url", Tags.from(e).relays())
 const messageIsNew = ({last_checked, last_received, last_sent}: Channel) =>
   last_received > Math.max(last_sent || 0, last_checked || 0)
 
-export class Chat {
+export class Nip28 {
   static contributeState() {
     const channels = collection<Channel>()
     const messages = collection<Message>()
@@ -24,8 +24,8 @@ export class Chat {
     return {channels, messages, hasNewMessages}
   }
 
-  static contributeSelectors({Chat}) {
-    const searchChannels = Chat.channels.derived($channels => {
+  static contributeSelectors({Nip28}) {
+    const searchChannels = Nip28.channels.derived($channels => {
       return fuzzy($channels, {
         keys: ["name", {name: "about", weight: 0.5}],
         threshold: 0.3,
@@ -35,9 +35,9 @@ export class Chat {
     return {messageIsNew, searchChannels}
   }
 
-  static initialize({Events, Chat, Keys, Crypt}) {
+  static initialize({Events, Nip28, Keys, Crypt}) {
     Events.addHandler(40, e => {
-      const channel = Chat.channels.getKey(e.id)
+      const channel = Nip28.channels.getKey(e.id)
 
       if (e.created_at < channel?.updated_at) {
         return
@@ -49,7 +49,7 @@ export class Chat {
         return
       }
 
-      Chat.channels.mergeKey(e.id, {
+      Nip28.channels.mergeKey(e.id, {
         id: e.id,
         type: "public",
         pubkey: e.pubkey,
@@ -66,7 +66,7 @@ export class Chat {
         return
       }
 
-      const channel = Chat.channels.getKey(channelId)
+      const channel = Nip28.channels.getKey(channelId)
 
       if (e.created_at < channel?.updated_at) {
         return
@@ -82,7 +82,7 @@ export class Chat {
         return
       }
 
-      Chat.channels.mergeKey(channelId, {
+      Nip28.channels.mergeKey(channelId, {
         id: channelId,
         pubkey: e.pubkey,
         updated_at: now(),
@@ -99,7 +99,7 @@ export class Chat {
           for (const key of Object.keys(payload)) {
             // Backwards compat from when we used to prefix id/pubkey
             const id = last(key.split("/"))
-            const channel = Chat.channels.getKey(id)
+            const channel = Nip28.channels.getKey(id)
             const last_checked = Math.max(payload[id], channel?.last_checked || 0)
 
             // A bunch of junk got added to this setting. Integer keys, settings, etc
@@ -107,7 +107,7 @@ export class Chat {
               continue
             }
 
-            Chat.channels.mergeKey(id, {id, last_checked})
+            Nip28.channels.mergeKey(id, {id, last_checked})
           }
         })
       }
@@ -123,11 +123,11 @@ export class Chat {
             return
           }
 
-          Chat.channels.get().forEach(channel => {
+          Nip28.channels.get().forEach(channel => {
             if (channel.joined && !channelIds.includes(channel.id)) {
-              Chat.channels.mergeKey(channel.id, {joined: false})
+              Nip28.channels.mergeKey(channel.id, {joined: false})
             } else if (!channel.joined && channelIds.includes(channel.id)) {
-              Chat.channels.mergeKey(channel.id, {joined: true})
+              Nip28.channels.mergeKey(channel.id, {joined: true})
             }
           })
         })
@@ -135,16 +135,16 @@ export class Chat {
     })
 
     Events.addHandler(42, e => {
-      if (Chat.messages.getKey(e.id)) {
+      if (Nip28.messages.getKey(e.id)) {
         return
       }
 
       const tags = Tags.from(e)
       const channelId = tags.getMeta("e")
-      const channel = Chat.channels.getKey(channelId)
+      const channel = Nip28.channels.getKey(channelId)
       const hints = uniq(pluck("url", tags.relays()).concat(channel?.hints || []))
 
-      Chat.messages.mergeKey(e.id, {
+      Nip28.messages.mergeKey(e.id, {
         id: e.id,
         channel: channelId,
         pubkey: e.pubkey,
@@ -153,7 +153,7 @@ export class Chat {
         tags: e.tags,
       })
 
-      Chat.channels.mergeKey(channelId, {
+      Nip28.channels.mergeKey(channelId, {
         id: channelId,
         last_sent: e.created_at,
         hints,

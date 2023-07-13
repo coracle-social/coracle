@@ -7,7 +7,7 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {directory, routing, user, network} from "src/app/engine"
+  import {directory, nip65, user, network} from "src/app/engine"
 
   export let note
   export let value
@@ -22,7 +22,7 @@
     return new Promise(async (resolve, reject) => {
       try {
         await network.load({
-          relays: routing.mergeHints(3, [relays, routing.getEventHints(3, note)]),
+          relays: nip65.mergeHints(3, [relays, nip65.getEventHints(3, note)]),
           filter: [{ids: [id]}],
           onEvent: event => {
             muted = user.applyMutes([event]).length === 0

@@ -8,13 +8,14 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import {directory, content, user, routing} from "src/app/engine"
+  import {directory, content, user, nip65} from "src/app/engine"
 
   export let list
 
   const {searchProfiles} = directory
   const {searchTopics} = content
-  const {searchRelays} = routing
+  const {searchRelays} = nip65
+
   const tags = Tags.wrap(list?.tags || [])
 
   let values = {
@@ -86,7 +87,7 @@
         <strong>Relays</strong>
         <MultiSelect search={_searchRelays} bind:value={values.relays}>
           <div slot="item" let:item>
-            {routing.displayRelay({url: item[1]})}
+            {nip65.displayRelay({url: item[1]})}
           </div>
         </MultiSelect>
         <p class="text-sm text-gray-4">

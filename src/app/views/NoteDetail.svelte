@@ -10,7 +10,7 @@
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {user, routing, network} from "src/app/engine"
+  import {user, nip65, network} from "src/app/engine"
   import Note from "src/app/shared/Note.svelte"
   import legacyNetwork from "src/agent/network"
 
@@ -31,7 +31,7 @@
   onMount(async () => {
     if (!displayNote.pubkey) {
       await network.load({
-        relays: routing.selectHints(3, relays),
+        relays: nip65.selectHints(3, relays),
         filter: {ids: [displayNote.id]},
         onEvent: event => {
           console.log(event)

@@ -11,7 +11,7 @@ export type LoadPeopleOpts = {
 }
 
 export class PubkeyLoader {
-  static contributeActions({Directory, Routing, User, Network}) {
+  static contributeActions({Directory, Nip65, User, Network}) {
     const attemptedPubkeys = new Set()
 
     const getStalePubkeys = pubkeys => {
@@ -46,9 +46,9 @@ export class PubkeyLoader {
           return relays
         }
 
-        return Routing.mergeHints(
+        return Nip65.mergeHints(
           User.getSetting("relay_limit"),
-          chunk.map(pubkey => Routing.getPubkeyHints(3, pubkey))
+          chunk.map(pubkey => Nip65.getPubkeyHints(3, pubkey))
         )
       }
 

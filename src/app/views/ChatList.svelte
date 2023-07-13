@@ -6,15 +6,15 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
-  import {chat, routing, network, user, keys} from "src/app/engine"
+  import {nip28, nip65, network, user, keys} from "src/app/engine"
 
   let q = ""
   let results = []
   let joinedChannels = []
   let otherChannels = []
 
-  const {searchChannels} = chat
-  const channels = chat.channels.derived(filter(whereEq({type: "public"})))
+  const {searchChannels} = nip28
+  const channels = nip28.channels.derived(filter(whereEq({type: "public"})))
 
   $: [joinedChannels, otherChannels] = partition(prop("joined"), $channels)
   $: results = $searchChannels(q)
@@ -25,8 +25,8 @@
 
   onMount(() => {
     return network.subscribe({
-      relays: routing.getPubkeyHints(3, user.getPubkey(), "read"),
-      filter: [{kinds: [40, 41]}],
+      relays: nip65.getPubkeyHints(3, user.getPubkey(), "read"),
+      filter: [{inds: [40, 41]}],
     })
   })
 </script>

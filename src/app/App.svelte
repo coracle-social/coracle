@@ -162,7 +162,7 @@
       // Find relays with old/missing metadata and refresh them. Only pick a
       // few so we're not sending too many concurrent http requests
       const staleRelays = shuffle(
-        engine.Routing.relays
+        engine.Nip65.relays
           .get()
           .filter(r => (r.meta?.last_checked || 0) < now() - timedelta(7, "days"))
       ).slice(0, 10)
@@ -177,7 +177,7 @@
             },
           })
 
-          engine.Routing.relays.mergeKey(relay.url, {...info, last_checked: now()})
+          engine.Nip65.relays.mergeKey(relay.url, {...info, last_checked: now()})
         })
       }
     }, 30_000)

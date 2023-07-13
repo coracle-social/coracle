@@ -12,7 +12,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {DEFAULT_RELAYS, FORCE_RELAYS, routing, user, pubkeyLoader, network} from "src/app/engine"
+  import {DEFAULT_RELAYS, FORCE_RELAYS, nip65, user, pubkeyLoader, network} from "src/app/engine"
   import {loadAppData} from "src/app/state"
 
   let modal = null
@@ -22,7 +22,7 @@
   let attemptedRelays = new Set()
   let customRelays = []
   let allRelays = []
-  let knownRelays = routing.relays.derived($relays =>
+  let knownRelays = nip65.relays.derived($relays =>
     uniqBy(
       prop("url"),
       // Make sure our hardcoded urls are first, since they're more likely to find a match

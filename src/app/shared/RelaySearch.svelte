@@ -6,7 +6,7 @@
   import {normalizeRelayUrl, Tags, getAvgQuality} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {routing, network, user, keys} from "src/app/engine"
+  import {nip65, network, user, keys} from "src/app/engine"
 
   export let q = ""
   export let limit = 50
@@ -16,8 +16,8 @@
   let search
   let reviews = []
 
-  const joined = routing.policies.key(keys.pubkey.get()).derived(() => new Set(user.getRelayUrls()))
-  const knownRelays = routing.relays
+  const joined = nip65.policies.key(keys.pubkey.get()).derived(() => new Set(user.getRelayUrls()))
+  const knownRelays = nip65.relays
 
   $: ratings = mapValues(
     events => getAvgQuality("review/relay", events),
@@ -33,7 +33,7 @@
 
   onMount(() => {
     network.load({
-      relays: routing.getPubkeyHints(3, user.getPubkey(), "read"),
+      relays: nip65.getPubkeyHints(3, user.getPubkey(), "read"),
       filter: {
         limit: 1000,
         kinds: [1985],

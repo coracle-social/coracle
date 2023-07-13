@@ -14,7 +14,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {ENABLE_ZAPS, FORCE_RELAYS, nip57, builder, routing, keys, user} from "src/app/engine"
+  import {ENABLE_ZAPS, FORCE_RELAYS, nip57, builder, nip65, keys, user} from "src/app/engine"
 
   export let note
   export let reply
@@ -39,7 +39,7 @@
   const mute = () => user.mute("p", note.pubkey)
 
   const react = async content => {
-    const relays = routing.getPublishHints(3, note, user.getRelayUrls("write"))
+    const relays = nip65.getPublishHints(3, note, user.getRelayUrls("write"))
 
     like = first(await user.publish(builder.createReaction(note, content), relays))
   }
@@ -47,7 +47,7 @@
   const deleteReaction = e => {
     user.publish(
       builder.deleteEvents([e.id]),
-      routing.getPublishHints(3, note, user.getRelayUrls("write"))
+      nip65.getPublishHints(3, note, user.getRelayUrls("write"))
     )
 
     like = null
@@ -164,7 +164,7 @@
                 style={`background: ${hsl(stringToHue(url))}`}
                 on:click={() => setFeedRelay?.({url})} />
             </div>
-            <div slot="tooltip">{routing.displayRelay({url})}</div>
+            <div slot="tooltip">{nip65.displayRelay({url})}</div>
           </Popover>
         {/each}
       </div>

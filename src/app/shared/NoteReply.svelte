@@ -9,7 +9,7 @@
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/partials/Compose.svelte"
-  import {directory, user, routing, builder} from "src/app/engine"
+  import {directory, user, nip65, builder} from "src/app/engine"
   import {publishWithToast} from "src/app/state"
 
   export let note
@@ -53,7 +53,7 @@
 
     if (content) {
       const rawEvent = builder.createReply(note, content, data.mentions.map(builder.mention))
-      const relays = routing.getPublishHints(3, note, user.getRelayUrls("write"))
+      const relays = nip65.getPublishHints(3, note, user.getRelayUrls("write"))
       const [event, promise] = await publishWithToast(rawEvent, relays)
 
       promise.then(({succeeded}) => {

@@ -8,7 +8,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {user, routing, meta, keys} from "src/app/engine"
+  import {user, nip65, meta, keys} from "src/app/engine"
   import {loadAppData} from "src/app/state"
 
   export let relay
@@ -22,7 +22,7 @@
   let quality = null
   let message = null
 
-  const relays = routing.policies.key(keys.pubkey.get()).derived(() => new Set(user.getRelayUrls()))
+  const relays = nip65.policies.key(keys.pubkey.get()).derived(() => new Set(user.getRelayUrls()))
 
   const removeRelay = r => user.removeRelay(r.url)
 
@@ -59,7 +59,7 @@
   <div class="flex items-center justify-between gap-2">
     <div class="flex items-center gap-2 text-xl">
       <i class={relay.url.startsWith("ws://") ? "fa fa-unlock" : "fa fa-lock"} />
-      <Anchor on:click={openModal}>{routing.displayRelay(relay)}</Anchor>
+      <Anchor on:click={openModal}>{nip65.displayRelay(relay)}</Anchor>
       {#if showStatus}
         <span
           on:mouseout={() => {

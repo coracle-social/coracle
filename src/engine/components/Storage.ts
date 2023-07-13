@@ -135,7 +135,7 @@ const syncCollections = async (engine, policies: Record<string, CollectionPolicy
       return
     }
 
-    store.set(toMap(sortEntries(fromMap(data)).slice(-maxRecords).map()))
+    store.set(toMap(sortEntries(fromMap(data)).slice(-maxRecords)))
   }, 30_000)
 }
 
@@ -188,13 +188,13 @@ export class Storage {
         maxRecords: 500,
         sortEntries: sortEntriesBy(prop("created_at")),
       },
-      "Chat.channels": {
+      "Nip28.channels": {
         maxRecords: 1000,
         sortEntries: sortEntriesBy(e =>
           e.joined ? 0 : -Math.max(e.last_checked || 0, e.last_sent || 0)
         ),
       },
-      "Chat.messages": {
+      "Nip28.messages": {
         maxRecords: 10000,
         sortEntries: sortEntriesBy(prop("created_at")),
       },
@@ -223,11 +223,11 @@ export class Storage {
       "Nip57.zappers": {
         sortEntries: sortByPubkeyWhitelist(prop("updated_at")),
       },
-      "Routing.relays": {
+      "Nip65.relays": {
         maxRecords: 2000,
         sortEntries: prop("count"),
       },
-      "Routing.policies": {
+      "Nip65.policies": {
         sortEntries: sortByPubkeyWhitelist(prop("updated_at")),
       },
       "Social.graph": {

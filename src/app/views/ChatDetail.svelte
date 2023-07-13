@@ -8,14 +8,14 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {builder, chat, user, routing, network} from "src/app/engine"
+  import {builder, nip28, user, nip65, network} from "src/app/engine"
 
   export let entity
 
   const id = toHex(entity)
-  const channel = chat.channels.key(id).derived(defaultTo({id}))
-  const messages = chat.messages.derived(filter(whereEq({channel: id})))
-  const getRelays = () => routing.selectHints(user.getSetting("relay_limit"), $channel.hints || [])
+  const channel = nip28.channels.key(id).derived(defaultTo({id}))
+  const messages = nip28.messages.derived(filter(whereEq({channel: id})))
+  const getRelays = () => nip65.selectHints(user.getSetting("relay_limit"), $channel.hints || [])
 
   user.setChannelLastChecked(id)
 

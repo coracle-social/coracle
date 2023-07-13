@@ -8,7 +8,7 @@
 
   export let contact
 
-  const hasNewMessages = nip04.messageIsNew(contact)
+  const hasNewMessages = nip04.contacts.key(contact.pubkey).derived(nip04.messageIsNew)
   const profile = directory.getProfile(contact.pubkey)
   const enter = () => navigate(`/messages/${nip19.npubEncode(contact.pubkey)}`)
 </script>
@@ -23,8 +23,8 @@
           <h2 class="text-lg">{directory.displayProfile(profile)}</h2>
         </div>
         <div class="relative">
-          <i class="fa fa-bell" class:text-gray-5={!hasNewMessages} />
-          {#if hasNewMessages}
+          <i class="fa fa-bell" class:text-gray-5={!$hasNewMessages} />
+          {#if $hasNewMessages}
             <div class="absolute right-0 top-0 mt-1 h-1 w-1 rounded-full bg-accent" />
           {/if}
         </div>

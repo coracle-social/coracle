@@ -18,7 +18,7 @@ import {
   pubkeyLoader,
   alerts,
   events,
-  chat,
+  nip28,
   meta,
   network,
   user,
@@ -101,7 +101,7 @@ export const listen = async () => {
     clamp([now() - timedelta(30, "days"), now()], get(alerts.latestNotification)) -
     timedelta(1, "days")
 
-  const channelIds = pluck("id", chat.channels.get({joined: true}))
+  const channelIds = pluck("id", nip28.channels.get({joined: true}))
 
   const eventIds = doPipe(events.cache.get(), [
     filter(e => e.kind === 1 && e.created_at > now() - timedelta(30, "days")),

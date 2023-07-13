@@ -7,7 +7,7 @@
   import Rating from "src/partials/Rating.svelte"
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
   import RelayActions from "src/app/shared/RelayActions.svelte"
-  import {routing} from "src/app/engine"
+  import {nip65} from "src/app/engine"
 
   export let url
 
@@ -18,7 +18,7 @@
 
   $: rating = getAvgQuality("review/relay", reviews)
 
-  const relay = routing.getRelay(url)
+  const relay = nip65.getRelay(url)
   const tabs = ["reviews", "notes"]
   const setActiveTab = tab => {
     activeTab = tab
@@ -28,7 +28,7 @@
     reviews = reviews.concat(chunk)
   })
 
-  document.title = routing.displayRelay(relay)
+  document.title = nip65.displayRelay(relay)
 </script>
 
 <Content>

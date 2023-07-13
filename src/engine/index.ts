@@ -1,6 +1,5 @@
 import {Alerts} from "./components/Alerts"
 import {Builder} from "./components/Builder"
-import {Chat} from "./components/Chat"
 import {Content} from "./components/Content"
 import {Crypt} from "./components/Crypt"
 import {Directory} from "./components/Directory"
@@ -10,9 +9,10 @@ import {Meta} from "./components/Meta"
 import {Network} from "./components/Network"
 import {Nip04} from "./components/Nip04"
 import {Nip05} from "./components/Nip05"
+import {Nip28} from "./components/Nip28"
 import {Nip57} from "./components/Nip57"
+import {Nip65} from "./components/Nip65"
 import {PubkeyLoader} from "./components/PubkeyLoader"
-import {Routing} from "./components/Routing"
 import {Social} from "./components/Social"
 import {Storage} from "./components/Storage"
 import {User} from "./components/User"
@@ -51,19 +51,19 @@ export const createDefaultEngine = Env => {
   return createEngine({Env}, [
     Alerts,
     Builder,
-    Chat,
     Content,
     Crypt,
     Directory,
     Events,
     Keys,
     Meta,
-    Nip04,
     Network,
+    Nip04,
     Nip05,
+    Nip28,
     Nip57,
+    Nip65,
     PubkeyLoader,
-    Routing,
     Social,
     Storage,
     User,
