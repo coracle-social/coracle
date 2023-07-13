@@ -3,7 +3,6 @@
 - [ ] Refactor
   - [ ] Delete messages when leaving a room
   - [ ] Add pagination to chat/dms
-  - [ ] Split out chat/dms
   - [ ] Use limit 1 to find most recent notification, then load when visiting the notifications page.
   - [ ] Remove external dependencies from engine, open source it?
   - [ ] If connections fail, re-open and re-send active subs
@@ -42,6 +41,7 @@
 # Core
 
 - [ ] Private groups
+- [ ] Proxy handle requests for CORS
 - [ ] Get rid of loki and persist directly to indexeddb. We're using double the storage
 - [ ] Show npubs/nip05 when mentioning
   - nevent1qqswv0ztgm8z6zeqmd0pzvwss7fzny675dx9lkqvr4zw0d9ad59eh3gpzemhxue69uhhyetvv9ujumn0wd68ytnzv9hxg6k804t

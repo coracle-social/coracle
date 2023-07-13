@@ -1,24 +1,24 @@
 <script lang="ts">
   import cx from "classnames"
-  import {defaultTo} from "ramda"
+  import {defaultTo, filter, whereEq} from "ramda"
   import {onMount} from "svelte"
   import {toHex} from "src/util/nostr"
-  import {now, formatTimestamp} from "src/util/misc"
+  import {formatTimestamp} from "src/util/misc"
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {user, routing, directory, builder, network} from "src/app/engine"
+  import {user, nip04, routing, directory, builder, network} from "src/app/engine"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
 
   export let entity
 
-  const id = toHex(entity)
   const pubkey = toHex(entity)
   const profile = directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
+  const messages = nip04.messages.derived(filter(whereEq({contact: pubkey})))
 
-  user.setLastChecked(pubkey, now())
+  user.setContactLastChecked(pubkey)
 
   const getRelays = () =>
     routing.mergeHints(3, [
@@ -47,7 +47,7 @@
   document.title = `DMs with ${directory.displayProfile($profile)}`
 </script>
 
-<Channel {id} {sendMessage}>
+<Channel {messages} {sendMessage}>
   <div slot="header" class="mb-2 flex h-20 items-start gap-4 overflow-hidden p-4">
     <div class="flex items-center gap-4">
       <Anchor

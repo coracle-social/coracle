@@ -1,6 +1,6 @@
-import {find, last, propEq, pick, uniq, pluck} from "ramda"
-import {tryJson, fuzzy, now, tryFunc} from "src/util/misc"
-import {Tags, channelAttrs} from "src/util/nostr"
+import {find, last, pick, uniq, pluck} from "ramda"
+import {tryJson, fuzzy, now} from "src/util/misc"
+import {Tags, appDataKeys, channelAttrs} from "src/util/nostr"
 import type {Channel, Message} from "src/engine/types"
 import {collection, derived} from "../util/store"
 
@@ -14,21 +14,14 @@ export class Chat {
     const channels = collection<Channel>()
     const messages = collection<Message>()
 
-    const hasNewDirectMessages = derived(
-      channels,
-      find(e => {
-        return e.type === "private" && e.last_sent > 0 && messageIsNew(e)
-      })
-    )
-
-    const hasNewChatMessages = derived(
+    const hasNewMessages = derived(
       channels,
       find(e => {
         return e.type === "public" && e.joined > 0 && messageIsNew(e)
       })
     )
 
-    return {channels, messages, hasNewDirectMessages, hasNewChatMessages}
+    return {channels, messages, hasNewMessages}
   }
 
   static contributeSelectors({Chat}) {
@@ -91,7 +84,6 @@ export class Chat {
 
       Chat.channels.mergeKey(channelId, {
         id: channelId,
-        type: "public",
         pubkey: e.pubkey,
         updated_at: now(),
         hints: getHints(e),
@@ -100,29 +92,29 @@ export class Chat {
     })
 
     Events.addHandler(30078, async e => {
-      if (Tags.from(e).getMeta("d") === "coracle/last_checked/v1") {
+      if (Tags.from(e).getMeta("d") === appDataKeys.NIP28_LAST_CHECKED) {
         await tryJson(async () => {
           const payload = await Crypt.decryptJson(e.content)
 
           for (const key of Object.keys(payload)) {
             // Backwards compat from when we used to prefix id/pubkey
-            const channelId = last(key.split("/"))
-            const channel = Chat.channels.getKey(channelId)
-            const last_checked = Math.max(payload[channelId], channel?.last_checked || 0)
+            const id = last(key.split("/"))
+            const channel = Chat.channels.getKey(id)
+            const last_checked = Math.max(payload[id], channel?.last_checked || 0)
 
             // A bunch of junk got added to this setting. Integer keys, settings, etc
             if (isNaN(last_checked) || last_checked < 1577836800) {
               continue
             }
 
-            Chat.channels.mergeKey(channelId, {last_checked})
+            Chat.channels.mergeKey(id, {id, last_checked})
           }
         })
       }
     })
 
     Events.addHandler(30078, async e => {
-      if (Tags.from(e).getMeta("d") === "coracle/rooms_joined/v1") {
+      if (Tags.from(e).getMeta("d") === appDataKeys.NIP28_ROOMS_JOINED) {
         await tryJson(async () => {
           const channelIds = await Crypt.decryptJson(e.content)
 
@@ -131,68 +123,15 @@ export class Chat {
             return
           }
 
-          Chat.channels
-            .get()
-            .filter(propEq("type", "public"))
-            .forEach(channel => {
-              if (channel.joined && !channelIds.includes(channel.id)) {
-                Chat.channels.mergeKey(channel.id, {joined: false})
-              } else if (!channel.joined && channelIds.includes(channel.id)) {
-                Chat.channels.mergeKey(channel.id, {joined: true})
-              }
-            })
+          Chat.channels.get().forEach(channel => {
+            if (channel.joined && !channelIds.includes(channel.id)) {
+              Chat.channels.mergeKey(channel.id, {joined: false})
+            } else if (!channel.joined && channelIds.includes(channel.id)) {
+              Chat.channels.mergeKey(channel.id, {joined: true})
+            }
+          })
         })
       }
-    })
-
-    Events.addHandler(4, async e => {
-      if (!Keys.canSign.get()) {
-        return
-      }
-
-      const author = e.pubkey
-      const recipient = Tags.from(e).type("p").values().first()
-
-      if (![author, recipient].includes(Keys.pubkey.get())) {
-        return
-      }
-
-      if (Chat.messages.getKey(e.id)) {
-        return
-      }
-
-      await tryFunc(async () => {
-        const other = Keys.pubkey.get() === author ? recipient : author
-
-        Chat.messages.setKey(e.id, {
-          id: e.id,
-          channel: other,
-          pubkey: e.pubkey,
-          created_at: e.created_at,
-          content: await Crypt.decrypt(other, e.content),
-          tags: e.tags,
-        })
-
-        if (Keys.pubkey.get() === author) {
-          const channel = Chat.channels.getKey(recipient)
-
-          Chat.channels.mergeKey(recipient, {
-            id: recipient,
-            type: "private",
-            last_sent: e.created_at,
-            hints: uniq(getHints(e).concat(channel?.hints || [])),
-          })
-        } else {
-          const channel = Chat.channels.getKey(author)
-
-          Chat.channels.mergeKey(author, {
-            id: author,
-            type: "private",
-            last_received: e.created_at,
-            hints: uniq(getHints(e).concat(channel?.hints || [])),
-          })
-        }
-      })
     })
 
     Events.addHandler(42, e => {
@@ -216,7 +155,6 @@ export class Chat {
 
       Chat.channels.mergeKey(channelId, {
         id: channelId,
-        type: "public",
         last_sent: e.created_at,
         hints,
       })

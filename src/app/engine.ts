@@ -47,6 +47,7 @@ export const events = engine.Events
 export const keys = engine.Keys
 export const meta = engine.Meta
 export const network = engine.Network
+export const nip04 = engine.Nip04
 export const nip05 = engine.Nip05
 export const nip57 = engine.Nip57
 export const pubkeyLoader = engine.PubkeyLoader

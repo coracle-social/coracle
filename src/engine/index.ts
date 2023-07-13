@@ -8,6 +8,7 @@ import {Events} from "./components/Events"
 import {Keys} from "./components/Keys"
 import {Meta} from "./components/Meta"
 import {Network} from "./components/Network"
+import {Nip04} from "./components/Nip04"
 import {Nip05} from "./components/Nip05"
 import {Nip57} from "./components/Nip57"
 import {PubkeyLoader} from "./components/PubkeyLoader"
@@ -57,6 +58,7 @@ export const createDefaultEngine = Env => {
     Events,
     Keys,
     Meta,
+    Nip04,
     Network,
     Nip05,
     Nip57,

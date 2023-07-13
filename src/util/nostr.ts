@@ -7,11 +7,13 @@ import {tryJson, avg} from "src/util/misc"
 export const noteKinds = [1, 1985, 30023, 1063, 9802]
 export const personKinds = [0, 2, 3, 10002]
 export const userKinds = personKinds.concat([10000, 30001, 30078])
-export const appDataKeys = [
-  "coracle/settings/v1",
-  "coracle/last_checked/v1",
-  "coracle/rooms_joined/v1",
-]
+
+export const appDataKeys = {
+  USER_SETTINGS: "nostr-engine/User/settings/v1",
+  NIP04_LAST_CHECKED: "nostr-engine/Nip04/last_checked/v1",
+  NIP28_LAST_CHECKED: "nostr-engine/Nip28/last_checked/v1",
+  NIP28_ROOMS_JOINED: "nostr-engine/Nip28/rooms_joined/v1",
+}
 
 export class Tags {
   tags: Array<any>

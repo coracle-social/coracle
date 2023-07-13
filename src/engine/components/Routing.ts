@@ -61,6 +61,7 @@ export class Routing {
 
     const getSearchRelays = () => {
       const searchableRelayUrls = Routing.relays
+        .get()
         .filter(r => (r.info?.supported_nips || []).includes(50))
         .map(prop("url"))
 

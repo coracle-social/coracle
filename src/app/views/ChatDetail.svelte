@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {defaultTo} from "ramda"
-  import {now, formatTimestamp} from "src/util/misc"
+  import {defaultTo, filter, whereEq} from "ramda"
+  import {formatTimestamp} from "src/util/misc"
   import {toHex} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Channel from "src/partials/Channel.svelte"
@@ -14,9 +14,10 @@
 
   const id = toHex(entity)
   const channel = chat.channels.key(id).derived(defaultTo({id}))
+  const messages = chat.messages.derived(filter(whereEq({channel: id})))
   const getRelays = () => routing.selectHints(user.getSetting("relay_limit"), $channel.hints || [])
 
-  user.setLastChecked(id, now())
+  user.setChannelLastChecked(id)
 
   const edit = () => {
     modal.push({type: "channel/edit", channel: $channel})
@@ -38,7 +39,7 @@
   document.title = $channel.name || "Coracle Chat"
 </script>
 
-<Channel {id} {sendMessage}>
+<Channel {messages} {sendMessage}>
   <div slot="header" class="flex items-start gap-4 p-4">
     <div class="flex items-center gap-4">
       <Anchor class="fa fa-arrow-left cursor-pointer text-2xl" href="/chat" />

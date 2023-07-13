@@ -1,11 +1,11 @@
 <script>
-  import {prop, whereEq, max, path as getPath, reverse, pluck, sortBy, last} from "ramda"
+  import {prop, max, path as getPath, reverse, pluck, sortBy, last} from "ramda"
   import {fly} from "src/util/transition"
   import {sleep} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
-  import {keys, directory, chat} from "src/app/engine"
+  import {keys, directory} from "src/app/engine"
 
-  export let id
+  export let messages
   export let sendMessage
 
   let textarea
@@ -20,7 +20,7 @@
   }
 
   const stickToBottom = async cb => {
-    const lastMessage = pluck("created_at", $messages).reduce(max, 0)
+    const lastMessage = pluck("created_at", $groupedMessages).reduce(max, 0)
     const $channelMessages = document.querySelector(".channel-messages")
     const shouldStick = $channelMessages?.scrollTop > -200
 
@@ -28,7 +28,7 @@
 
     if (shouldStick) {
       scrollToBottom()
-    } else if (lastMessage < pluck("created_at", $messages).reduce(max, 0)) {
+    } else if (lastMessage < pluck("created_at", $groupedMessages).reduce(max, 0)) {
       showNewMessages = true
     }
   }
@@ -53,11 +53,9 @@
   }
 
   // Group messages so we're only showing the person once per chunk
-  const messages = chat.messages.derived($messages => {
-    const channelMessages = $messages.filter(whereEq({channel: id}))
-
+  const groupedMessages = messages.derived($messages => {
     const result = reverse(
-      sortBy(prop("created_at"), channelMessages).reduce((mx, m) => {
+      sortBy(prop("created_at"), $messages).reduce((mx, m) => {
         const profile = directory.getProfile(m.pubkey)
         const showProfile = profile.pubkey !== getPath(["profile", "pubkey"], last(mx))
 
@@ -81,7 +79,7 @@
     <div class="py-18 flex h-screen flex-col" class:pb-20={keys.canSign.get()}>
       <ul
         class="channel-messages flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
-        {#each $messages as m (m.id)}
+        {#each $groupedMessages as m (m.id)}
           <li in:fly={{y: 20}} class="flex flex-col gap-2 py-1">
             <slot name="message" message={m} />
           </li>

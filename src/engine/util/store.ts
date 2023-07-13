@@ -5,6 +5,7 @@ export type Readable<T> = {
   notify: () => void
   get: () => T
   subscribe: (f: (v: T) => void) => () => void
+  derived: (f: (v: T) => void) => Readable<T>
 }
 
 export type Writable<T> = Readable<T> & {
@@ -17,7 +18,6 @@ export type Key<T> = Readable<T> & {
   merge: (d: Record<string, T>) => void
   update: (f: (v: T) => T) => void
   remove: () => void
-  derived: (f: (v: T) => void) => Readable<T>
 }
 
 export type Collection<T> = {
@@ -63,7 +63,9 @@ export const writable = <T>(defaultValue = null): Writable<T> => {
     return () => subs.splice(findIndex(equals(f), subs), 1)
   }
 
-  return {notify, get, set, update, subscribe}
+  const derived_ = f => derived<T>({get, subscribe}, f)
+
+  return {notify, get, set, update, subscribe, derived: derived_}
 }
 
 export const derived = <T>(stores, getValue): Readable<T> => {
@@ -96,7 +98,9 @@ export const derived = <T>(stores, getValue): Readable<T> => {
     }
   }
 
-  return {notify, get, subscribe}
+  const derived_ = f => derived<T>({get, subscribe}, f)
+
+  return {notify, get, subscribe, derived: derived_}
 }
 
 export const key = <T>(baseStore, k): Key<T> => {

@@ -14,7 +14,7 @@ import {
 } from "ramda"
 import {doPipe} from "hurdak/lib/hurdak"
 import {now} from "src/util/misc"
-import {Tags, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
+import {Tags, appDataKeys, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
 import {writable} from "../util/store"
 
 export class User {
@@ -43,6 +43,7 @@ export class User {
     Routing,
     User,
     Chat,
+    Nip04,
     Content,
   }) {
     const getPubkey = () => Keys.pubkey.get()
@@ -92,16 +93,15 @@ export class User {
       User.settings.update($settings => ({...$settings, ...settings}))
 
       if (Keys.canSign.get()) {
-        const d = "coracle/settings/v1"
+        const d = appDataKeys.USER_SETTINGS
         const v = await Crypt.encryptJson(settings)
 
         return publish(Builder.setAppData(d, v))
       }
     }
 
-    const setAppData = async (key, content) => {
+    const setAppData = async (d, content) => {
       if (Keys.canSign.get()) {
-        const d = `coracle/${key}`
         const v = await Crypt.encryptJson(content)
 
         return publish(Builder.setAppData(d, v))
@@ -211,9 +211,30 @@ export class User {
 
     const removeList = naddr => publish(Builder.deleteNaddrs([naddr]))
 
+    // Messages
+
+    const markAllMessagesRead = () => {
+      const lastChecked = fromPairs(
+        uniq(pluck("contact", Nip04.messages.get())).map(k => [k, now()])
+      )
+
+      return setAppData(appDataKeys.NIP04_LAST_CHECKED, lastChecked)
+    }
+
+    const setContactLastChecked = pubkey => {
+      const lastChecked = fromPairs(
+        Nip04.contacts
+          .get()
+          .filter(prop("last_checked"))
+          .map(r => [r.id, r.last_checked])
+      )
+
+      return setAppData(appDataKeys.NIP04_LAST_CHECKED, {...lastChecked, [pubkey]: now()})
+    }
+
     // Chat
 
-    const setLastChecked = (channelId, timestamp) => {
+    const setChannelLastChecked = id => {
       const lastChecked = fromPairs(
         Chat.channels
           .get()
@@ -221,7 +242,7 @@ export class User {
           .map(r => [r.id, r.last_checked])
       )
 
-      return setAppData("last_checked/v1", {...lastChecked, [channelId]: timestamp})
+      return setAppData(appDataKeys.NIP28_LAST_CHECKED, {...lastChecked, [id]: now()})
     }
 
     const joinChannel = channelId => {
@@ -229,7 +250,7 @@ export class User {
         pluck("id", Chat.channels.get().filter(whereEq({joined: true}))).concat(channelId)
       )
 
-      return setAppData("rooms_joined/v1", channelIds)
+      return setAppData(appDataKeys.NIP28_ROOMS_JOINED, channelIds)
     }
 
     const leaveChannel = channelId => {
@@ -238,7 +259,7 @@ export class User {
         pluck("id", Chat.channels.get().filter(whereEq({joined: true})))
       )
 
-      return setAppData("rooms_joined/v1", channelIds)
+      return setAppData(appDataKeys.NIP28_ROOMS_JOINED, channelIds)
     }
 
     return {
@@ -279,7 +300,9 @@ export class User {
       getLists,
       putList,
       removeList,
-      setLastChecked,
+      markAllMessagesRead,
+      setContactLastChecked,
+      setChannelLastChecked,
       joinChannel,
       leaveChannel,
     }

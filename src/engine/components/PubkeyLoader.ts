@@ -60,7 +60,7 @@ export class PubkeyLoader {
         // Add a separate filter for app data so we're not pulling down other people's stuff,
         // or obsolete events of our own.
         if (kinds.includes(30078)) {
-          filter.push({kinds: [30078], authors: chunk, "#d": appDataKeys})
+          filter.push({kinds: [30078], authors: chunk, "#d": Object.values(appDataKeys)})
         }
 
         return filter

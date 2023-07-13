@@ -1,36 +1,48 @@
 <script>
-  import {sortBy, partition, prop, filter, whereEq} from "ramda"
+  import {sortBy, partition, prop} from "ramda"
   import {toTitle} from "hurdak/lib/hurdak"
   import {navigate} from "svelte-routing"
   import Tabs from "src/partials/Tabs.svelte"
+  import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
   import MessagesListItem from "src/app/views/MessagesListItem.svelte"
-  import {chat} from "src/app/engine"
+  import {nip04, user} from "src/app/engine"
 
   export let activeTab = "messages"
 
-  const channels = chat.channels.derived(filter(whereEq({type: "private"})))
+  const {hasNewMessages, contacts} = nip04
 
-  const getChannels = tab =>
+  const getContacts = tab =>
     sortBy(
-      c => -Math.max(c.last_sent || 0, c.last_received || 0),
+      c => Math.max(c.last_sent || 0, c.last_received || 0),
       tab === "messages" ? accepted : requests
     )
 
   const getDisplay = tab => ({
     title: toTitle(tab),
-    badge: getChannels(tab).length,
+    badge: getContacts(tab).length,
   })
 
-  $: [accepted, requests] = partition(prop("last_sent"), $channels)
+  $: [accepted, requests] = partition(prop("last_sent"), $contacts)
 
   document.title = "Direct Messages"
 </script>
 
 <Content>
-  <Tabs tabs={["messages", "requests"]} {activeTab} setActiveTab={navigate} {getDisplay} />
-  {#each getChannels(activeTab) as channel (channel.id)}
-    <MessagesListItem {channel} />
+  <div class="relative">
+    <Tabs tabs={["messages", "requests"]} {activeTab} setActiveTab={navigate} {getDisplay} />
+    <Popover triggerType="mouseenter" class="absolute right-7 top-7">
+      <div slot="trigger">
+        <i
+          class="fa fa-bell cursor-bell cursor-pointer"
+          class:text-gray-5={!$hasNewMessages}
+          on:click={user.markAllMessagesRead} />
+      </div>
+      <div slot="tooltip">Mark all as read</div>
+    </Popover>
+  </div>
+  {#each getContacts(activeTab) as contact (contact.pubkey)}
+    <MessagesListItem {contact} />
   {:else}
     <Content size="lg" class="text-center">
       No messages found - start a conversation by clicking the envelope button on someone's profile.

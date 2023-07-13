@@ -3,12 +3,13 @@
   import {derived} from "svelte/store"
   import {theme, installPrompt} from "src/partials/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {FORCE_RELAYS, keys, directory, alerts, chat} from "src/app/engine"
+  import {FORCE_RELAYS, keys, directory, alerts, chat, nip04} from "src/app/engine"
   import {routes, slowConnections, menuIsOpen} from "src/app/state"
 
   const {canSign, pubkey} = keys
   const {hasNewNotfications} = alerts
-  const {hasNewChatMessages, hasNewDirectMessages} = chat
+  const {hasNewMessages: hasNewChatMessages} = chat
+  const {hasNewMessages: hasNewDirectMessages} = nip04
   const profile = derived([pubkey, directory.profiles], () =>
     $pubkey ? directory.getProfile($pubkey) : null
   )

@@ -105,13 +105,22 @@ export type Profile = {
 
 export type Channel = {
   id: string
-  type: "public" | "private"
   pubkey: string
   updated_at: number
   last_sent?: number
   last_received?: number
   last_checked?: number
   joined?: boolean
+  hints: string[]
+}
+
+export type Contact = {
+  id: string
+  pubkey: string
+  updated_at: number
+  last_sent?: number
+  last_received?: number
+  last_checked?: number
   hints: string[]
 }
 

@@ -2,11 +2,12 @@
   import {onMount} from "svelte"
   import {appName} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
-  import {alerts, chat} from "src/app/engine"
+  import {alerts, nip04, chat} from "src/app/engine"
   import {menuIsOpen} from "src/app/state"
 
   const {hasNewNotfications} = alerts
-  const {hasNewChatMessages, hasNewDirectMessages} = chat
+  const {hasNewMessages: hasNewChatMessages} = chat
+  const {hasNewMessages: hasNewDirectMessages} = nip04
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
   const toggleMenu = () => menuIsOpen.update(x => !x)
 

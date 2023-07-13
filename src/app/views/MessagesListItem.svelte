@@ -4,18 +4,18 @@
   import {ellipsize} from "hurdak/lib/hurdak"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import Card from "src/partials/Card.svelte"
-  import {directory, chat} from "src/app/engine"
+  import {directory, nip04} from "src/app/engine"
 
-  export let channel
+  export let contact
 
-  const hasNewMessages = chat.messageIsNew(channel)
-  const profile = directory.getProfile(channel.id)
-  const enter = () => navigate(`/messages/${nip19.npubEncode(channel.id)}`)
+  const hasNewMessages = nip04.messageIsNew(contact)
+  const profile = directory.getProfile(contact.pubkey)
+  const enter = () => navigate(`/messages/${nip19.npubEncode(contact.pubkey)}`)
 </script>
 
 <Card interactive on:click={enter}>
   <div class="flex gap-4 px-4 py-6">
-    <PersonCircle size={14} pubkey={channel.id} />
+    <PersonCircle size={14} pubkey={contact.pubkey} />
     <div class="flex min-w-0 flex-grow flex-col justify-start gap-2">
       <div class="flex flex-grow items-start justify-between gap-2">
         <div class="flex items-center gap-2 overflow-hidden">
