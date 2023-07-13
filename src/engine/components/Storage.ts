@@ -23,16 +23,13 @@ const loki = new Loki("agent.db", {
 
 window.addEventListener("beforeunload", () => loki.close())
 
-type ScalarPolicy = {
-  storageKey?: string
-}
-
-const syncScalars = (engine, policies: Record<string, ScalarPolicy>) => {
-  for (const [key, {storageKey}] of Object.entries(policies)) {
+const syncScalars = (engine, keys) => {
+  for (const key of keys) {
     const store = getPath(key.split("."), engine)
+    const storageKey = key.replace(/./g, "/")
 
-    if (Object.hasOwn(localStorage, storageKey || key)) {
-      store.set(getLocalJson(storageKey || key))
+    if (Object.hasOwn(localStorage, storageKey)) {
+      store.set(getLocalJson(storageKey))
     }
 
     store.subscribe(throttle(300, $value => setLocalJson(storageKey, $value)))
@@ -40,15 +37,15 @@ const syncScalars = (engine, policies: Record<string, ScalarPolicy>) => {
 }
 
 type CollectionPolicy = {
-  storageKey?: string
   maxRecords?: number
   sortRecords?: (records: any[]) => any[]
 }
 
 const syncCollections = (engine, policies: Record<string, CollectionPolicy>) => {
-  for (const [key, {storageKey}] of Object.entries(policies)) {
+  for (const key of Object.keys(policies)) {
     const store = getPath(key.split("."), engine)
-    const coll = loki.addCollection(storageKey || key, {unique: ["key"]})
+    const storageKey = key.replace(/./g, "/")
+    const coll = loki.addCollection(storageKey, {unique: ["key"]})
 
     ready.then(() => {
       store.getBaseStore().set(new Map(Object.entries(createMapOf("key", "record", coll.find()))))
@@ -99,7 +96,7 @@ const syncCollections = (engine, policies: Record<string, CollectionPolicy>) => 
   setInterval(() => {
     const policyEntries = Object.entries(policies)
     const [key, policy] = policyEntries[Math.floor(policyEntries.length * Math.random())]
-    const {maxRecords = 500, sortRecords = identity} = policy
+    const {maxRecords = 5000, sortRecords = identity} = policy
     const store = getPath(key.split("."), engine)
     const data = store.get()
 
@@ -135,13 +132,12 @@ export class Storage {
   }
 
   static initialize(engine) {
-    syncScalars(engine, {
-      "Alerts.lastChecked": {},
-      "Alerts.latestNotification": {},
-      "Keys.pubkey": {},
-      "Keys.state": {},
-      "User.settings": {},
-    })
+    syncScalars(engine, [
+      "Alerts.lastChecked",
+      "Alerts.latestNotification",
+      "Keys.pubkey",
+      "User.settings",
+    ])
 
     const getPubkeyWhitelist = () => {
       const pubkeys = engine.Keys.state.get().map(prop("pubkey"))
@@ -156,6 +152,9 @@ export class Storage {
     }
 
     syncCollections(engine, {
+      "Keys.state": {
+        maxRecords: 50,
+      },
       "Alerts.events": {
         maxRecords: 500,
         sortRecords: sortBy(prop("created_at")),
@@ -168,27 +167,21 @@ export class Storage {
         maxRecords: 10000,
         sortRecords: sortBy(prop("created_at")),
       },
-      "Content.topics": {
-        maxRecords: 5000,
-      },
+      "Content.topics": {},
       "Content.lists": {
         maxRecords: 500,
         sortRecords: sortByPubkeyWhitelist(prop("updated_at")),
       },
       "Directory.profiles": {
-        maxRecords: 5000,
         sortRecords: sortByPubkeyWhitelist(prop("updated_at")),
       },
       "Events.cache": {
-        maxRecords: 5000,
         sortRecords: sortByPubkeyWhitelist(prop("created_at")),
       },
       "Nip05.handles": {
-        maxRecords: 5000,
         sortRecords: sortByPubkeyWhitelist(prop("updated_at")),
       },
       "Nip57.zappers": {
-        maxRecords: 5000,
         sortRecords: sortByPubkeyWhitelist(prop("updated_at")),
       },
       "Routing.relays": {
@@ -196,11 +189,9 @@ export class Storage {
         sortRecords: prop("count"),
       },
       "Routing.policies": {
-        maxRecords: 5000,
         sortRecords: sortByPubkeyWhitelist(prop("updated_at")),
       },
       "Social.graph": {
-        maxRecords: 5000,
         sortRecords: sortByPubkeyWhitelist(prop("updated_at")),
       },
     })
