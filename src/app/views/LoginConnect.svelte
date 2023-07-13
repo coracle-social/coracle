@@ -30,6 +30,8 @@
     )
   )
 
+  console.log($knownRelays)
+
   $: allRelays = $knownRelays.concat(customRelays)
 
   const searchForRelays = async () => {

@@ -1,14 +1,10 @@
 # Current
 
-Redux (state/selectors/actions) with stores at the center
-
-
 - [ ] Refactor
-  - [ ] Inject env into system
   - [ ] Delete messages when leaving a room
   - [ ] Add pagination to chat/dms
-  - [ ] Fix scrolling to to when modal is open
-  - [ ] Test migration
+  - [ ] Fix scrolling to top when modal is open
+  - [ ] Add migration for user settings
   - [ ] Improve watchers so users of system don't need to know how they work
   - [ ] Remove external dependencies
   - [ ] Check for TODOs

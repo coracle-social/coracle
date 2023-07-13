@@ -88,8 +88,6 @@ export class Keys {
   }
 
   static contributeActions({Keys}) {
-    const {pubkey, state, current, withExtension, getNDK} = Keys
-
     const login = (method, key) => {
       let pubkey = null
       let privkey = null
@@ -104,15 +102,17 @@ export class Keys {
         pubkey = key.pubkey
         bunkerKey = generatePrivateKey()
 
-        getNDK(key.token)
+        Keys.getNDK(key.token)
       }
 
-      state.key(pubkey).set({method, pubkey, privkey, bunkerKey})
-      pubkey.set(pubkey)
+      console.log({method, pubkey, privkey, bunkerKey})
+
+      Keys.state.key(pubkey).set({method, pubkey, privkey, bunkerKey})
+      Keys.pubkey.set(pubkey)
     }
 
     const sign = async event => {
-      const {method, privkey} = current.get()
+      const {method, privkey} = Keys.current.get()
 
       console.assert(event.id)
       console.assert(event.pubkey)
@@ -120,7 +120,7 @@ export class Keys {
 
       return switcherFn(method, {
         bunker: async () => {
-          const ndk = await getNDK()
+          const ndk = await Keys.getNDK()
           const ndkEvent = new NDKEvent(ndk, event)
 
           await ndkEvent.sign(ndk.signer)
@@ -132,15 +132,15 @@ export class Keys {
             sig: getSignature(event, privkey),
           })
         },
-        extension: () => withExtension(ext => ext.signEvent(event)),
+        extension: () => Keys.withExtension(ext => ext.signEvent(event)),
       })
     }
 
     const clear = () => {
-      const $pubkey = pubkey.get()
+      const $pubkey = Keys.pubkey.get()
 
-      pubkey.set(null)
-      state.key($pubkey).remove()
+      Keys.pubkey.set(null)
+      Keys.state.key($pubkey).remove()
     }
 
     return {login, sign, clear}

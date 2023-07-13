@@ -16,7 +16,6 @@
     tryFunc,
     fetchJson,
     tryFetch,
-    setLocalJson,
     getLocalJson,
   } from "src/util/misc"
   import engine from "src/app/engine"
@@ -32,13 +31,14 @@
 
   // Migration from 0.2.34
   if (Object.hasOwn(localStorage, "agent/keys/pubkey")) {
-    setLocalJson("Keys.pubkey", getLocalJson("agent/keys/pubkey"))
-    setLocalJson("Keys.state", {
+    engine.Keys.state.setKey(getLocalJson("agent/keys/pubkey"), {
       method: getLocalJson("agent/keys/method"),
       pubkey: getLocalJson("agent/keys/pubkey"),
       privkey: getLocalJson("agent/keys/privkey"),
       bunkerKey: getLocalJson("agent/keys/bunkerKey"),
     })
+
+    engine.Keys.pubkey.set(getLocalJson("agent/keys/pubkey"))
 
     localStorage.removeItem("agent/keys/method")
     localStorage.removeItem("agent/keys/pubkey")
@@ -149,28 +149,25 @@
 
       // Find relays with old/missing metadata and refresh them. Only pick a
       // few so we're not sending too many concurrent http requests
-      const query = {"meta.last_checked": {$lt: now() - timedelta(7, "days")}}
-      const staleRelays = shuffle(engine.Routing.relays.all(query)).slice(0, 10)
+      const staleRelays = shuffle(
+        engine.Routing.relays
+          .get()
+          .filter(r => (r.meta?.last_checked || 0) < now() - timedelta(7, "days"))
+      ).slice(0, 10)
 
-      engine.Routing.relays.patch(
-        await Promise.all(
-          staleRelays.map(relay =>
-            tryFetch(async () => {
-              const info = await fetchJson(engine.User.dufflepud("relay/info"), {
-                method: "POST",
-                body: JSON.stringify({url: relay.url}),
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              })
+      for (const relay of staleRelays) {
+        tryFetch(async () => {
+          const info = await fetchJson(engine.User.dufflepud("relay/info"), {
+            method: "POST",
+            body: JSON.stringify({url: relay.url}),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
 
-              info.last_checked = now()
-
-              return {...relay, info}
-            })
-          )
-        )
-      )
+          engine.Routing.relays.mergeKey(relay.url, {...info, last_checked: now()})
+        })
+      }
     }, 30_000)
 
     return () => {

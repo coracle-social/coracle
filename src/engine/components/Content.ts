@@ -1,5 +1,5 @@
 import {nip19} from "nostr-tools"
-import {always, nth, inc} from "ramda"
+import {nth, inc} from "ramda"
 import {fuzzy} from "src/util/misc"
 import {Tags} from "src/util/nostr"
 import type {Topic, List} from "src/engine/types"
@@ -15,7 +15,7 @@ export class Content {
   }
 
   static contributeSelectors({Content}) {
-    const getLists = (f = always(true)) => Content.lists.get().filter(l => !l.deleted_at && f(l))
+    const getLists = f => Content.lists.get().filter(l => !l.deleted_at && (f ? f(l) : true))
 
     const searchTopics = derived(Content.topics, $topics =>
       fuzzy($topics.values(), {keys: ["name"], threshold: 0.3})

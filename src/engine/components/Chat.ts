@@ -120,13 +120,16 @@ export class Chat {
             return
           }
 
-          Chat.channels.filter(propEq("type", "public")).forEach(channel => {
-            if (channel.joined && !channelIds.includes(channel.id)) {
-              Chat.channels.mergeKey(channel.id, {joined: false})
-            } else if (!channel.joined && channelIds.includes(channel.id)) {
-              Chat.channels.mergeKey(channel.id, {joined: true})
-            }
-          })
+          Chat.channels
+            .get()
+            .filter(propEq("type", "public"))
+            .forEach(channel => {
+              if (channel.joined && !channelIds.includes(channel.id)) {
+                Chat.channels.mergeKey(channel.id, {joined: false})
+              } else if (!channel.joined && channelIds.includes(channel.id)) {
+                Chat.channels.mergeKey(channel.id, {joined: true})
+              }
+            })
         })
       }
     })

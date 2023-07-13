@@ -42,10 +42,7 @@
       return toast.show("error", "A name is required for your list")
     }
 
-    const duplicates = user.getLists({
-      name: values.name,
-      naddr: {$ne: list?.naddr},
-    })
+    const duplicates = user.getLists(l => l.name === values.name && l.naddr !== list?.naddr)
 
     if (duplicates.length > 0) {
       return toast.show("error", "That name is already in use")

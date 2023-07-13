@@ -1,5 +1,17 @@
 import {getEventHash} from "nostr-tools"
-import {when, uniq, pluck, without, fromPairs, whereEq, find, slice, assoc, reject} from "ramda"
+import {
+  when,
+  prop,
+  uniq,
+  pluck,
+  without,
+  fromPairs,
+  whereEq,
+  find,
+  slice,
+  assoc,
+  reject,
+} from "ramda"
 import {doPipe} from "hurdak/lib/hurdak"
 import {now} from "src/util/misc"
 import {Tags, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
@@ -192,7 +204,7 @@ export class User {
 
     // Content
 
-    const getLists = (spec = null) => Content.getLists({...spec, pubkey: getStateKey()})
+    const getLists = f => Content.getLists(l => l.pubkey === getStateKey() && (f ? f(l) : true))
 
     const putList = (name, params, relays) =>
       publish(Builder.createList([["d", name]].concat(params).concat(relays)))
@@ -203,39 +215,42 @@ export class User {
 
     const setLastChecked = (channelId, timestamp) => {
       const lastChecked = fromPairs(
-        Chat.channels.all({last_checked: {$type: "number"}}).map(r => [r.id, r.last_checked])
+        Chat.channels
+          .get()
+          .filter(prop("last_checked"))
+          .map(r => [r.id, r.last_checked])
       )
 
       return setAppData("last_checked/v1", {...lastChecked, [channelId]: timestamp})
     }
 
     const joinChannel = channelId => {
-      const channelIds = uniq(pluck("id", Chat.channels.all({joined: true})).concat(channelId))
+      const channelIds = uniq(
+        pluck("id", Chat.channels.get().filter(whereEq({joined: true}))).concat(channelId)
+      )
 
       return setAppData("rooms_joined/v1", channelIds)
     }
 
     const leaveChannel = channelId => {
-      const channelIds = without([channelId], pluck("id", Chat.channels.all({joined: true})))
+      const channelIds = without(
+        [channelId],
+        pluck("id", Chat.channels.get().filter(whereEq({joined: true})))
+      )
 
       return setAppData("rooms_joined/v1", channelIds)
     }
 
     return {
       getPubkey,
-
       getProfile,
-
       isUserEvent,
-
       getStateKey,
-
+      prepEvent,
+      publish,
       getSetting,
-
       dufflepud,
-
       setSettings,
-
       getRelays,
       getRelayUrls,
       setRelays,

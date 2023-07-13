@@ -100,11 +100,11 @@ const syncCollections = (engine, policies: Record<string, CollectionPolicy>) => 
     const store = getPath(key.split("."), engine)
     const data = store.get()
 
-    if (data.size < maxRecords * 1.1) {
+    if (data.length < maxRecords * 1.1) {
       return
     }
 
-    store.set(sortRecords(Array.from(data.values())).slice(-maxRecords))
+    store.getBaseStore().set(sortRecords(data).slice(-maxRecords))
   }, 30_000)
 }
 

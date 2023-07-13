@@ -89,7 +89,7 @@ export const logUsage = async name => {
 // Synchronization from events to state
 
 export const listen = async () => {
-  const pubkey = user.pubkey.get()
+  const pubkey = keys.pubkey.get()
   const kinds = noteKinds.concat([4, 7])
 
   if (ENABLE_ZAPS) {
@@ -101,9 +101,9 @@ export const listen = async () => {
     clamp([now() - timedelta(30, "days"), now()], get(alerts.latestNotification)) -
     timedelta(1, "days")
 
-  const channelIds = pluck("id", chat.channels.all({joined: true}))
+  const channelIds = pluck("id", chat.channels.get({joined: true}))
 
-  const eventIds = doPipe(events.cache.all(), [
+  const eventIds = doPipe(events.cache.get(), [
     filter(e => e.kind === 1 && e.created_at > now() - timedelta(30, "days")),
     sortBy(e => -e.created_at),
     slice(0, 256),
@@ -175,7 +175,7 @@ export const login = async (method, key) => {
 
     await Promise.all([
       sleep(1500),
-      pubkeyLoader.loadPubkeys([user.pubkey.get()], {force: true, kinds: userKinds}),
+      pubkeyLoader.loadPubkeys([keys.pubkey.get()], {force: true, kinds: userKinds}),
     ])
 
     navigate("/notes")
