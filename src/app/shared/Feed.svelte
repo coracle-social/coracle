@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type {DynamicFilter} from "src/util/types"
+  import type {DynamicFilter} from "src/engine/types"
   import {onMount, onDestroy} from "svelte"
   import {debounce} from "throttle-debounce"
   import {last, equals, partition, always, uniqBy, sortBy, prop} from "ramda"

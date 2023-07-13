@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import type {DynamicFilter} from "src/util/types"
+  import type {DynamicFilter} from "src/engine/types"
   import {objOf} from "ramda"
   import {Tags, noteKinds} from "src/util/nostr"
   import {modal, theme} from "src/partials/state"

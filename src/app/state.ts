@@ -1,5 +1,5 @@
 import type {Filter} from "nostr-tools"
-import type {DisplayEvent, DynamicFilter} from "src/util/types"
+import type {DisplayEvent, DynamicFilter} from "src/engine/types"
 import Bugsnag from "@bugsnag/js"
 import {nip19} from "nostr-tools"
 import {navigate} from "svelte-routing"

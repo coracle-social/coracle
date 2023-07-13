@@ -4,11 +4,11 @@
   import {ellipsize} from "hurdak/lib/hurdak"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import Card from "src/partials/Card.svelte"
-  import {directory, alerts} from "src/app/engine"
+  import {directory, chat} from "src/app/engine"
 
   export let channel
 
-  const hasNewMessages = alerts.messageIsNew(channel)
+  const hasNewMessages = chat.messageIsNew(channel)
   const profile = directory.getProfile(channel.id)
   const enter = () => navigate(`/messages/${nip19.npubEncode(channel.id)}`)
 </script>

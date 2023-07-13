@@ -3,11 +3,10 @@
 - [ ] Refactor
   - [ ] Delete messages when leaving a room
   - [ ] Add pagination to chat/dms
+  - [ ] Split out chat/dms
   - [ ] Use limit 1 to find most recent notification, then load when visiting the notifications page.
-  - [ ] Improve watchers so users of system don't need to know how they work
   - [ ] Remove external dependencies from engine, open source it?
   - [ ] If connections fail, re-open and re-send active subs
-  - [ ] Check for TODOs
 - [ ] Add custom emoji support
 - [ ] Re-work note media
   - [ ] Add webcam image/video capture

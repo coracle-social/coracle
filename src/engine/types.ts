@@ -4,6 +4,14 @@ export type Event = NostrToolsEvent & {
   seen_on: string[]
 }
 
+export type DisplayEvent = Event & {
+  replies: Event[]
+  reactions: Event[]
+  zaps: Event[]
+}
+
+export type DynamicFilter = Record<string, any>
+
 export type Filter = {
   ids?: string[]
   kinds?: number[]

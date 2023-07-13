@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type {MyEvent} from "src/util/types"
+  import type {Event} from "src/engine/types"
   import {fly} from "src/util/transition"
   import {warn} from "src/util/logger"
   import {modal} from "src/partials/state"
@@ -35,7 +35,7 @@
       }
 
       reject()
-    }) as Promise<MyEvent>
+    }) as Promise<Event>
   }
 
   const openQuote = e => {

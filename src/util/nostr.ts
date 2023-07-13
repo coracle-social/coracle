@@ -1,4 +1,4 @@
-import type {DisplayEvent} from "src/util/types"
+import type {DisplayEvent} from "src/engine/types"
 import {is, fromPairs, mergeLeft, last, identity, prop, flatten, uniq} from "ramda"
 import {nip19} from "nostr-tools"
 import {ensurePlural, first} from "hurdak/lib/hurdak"

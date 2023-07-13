@@ -16,7 +16,7 @@
 
   const id = toHex(entity)
   const pubkey = toHex(entity)
-  const profile = directory.profiles.derived(defaultTo({pubkey}))
+  const profile = directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
 
   user.setLastChecked(pubkey, now())
 

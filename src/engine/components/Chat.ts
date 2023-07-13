@@ -1,5 +1,5 @@
 import {find, last, propEq, pick, uniq, pluck} from "ramda"
-import {tryJson, now, tryFunc} from "src/util/misc"
+import {tryJson, fuzzy, now, tryFunc} from "src/util/misc"
 import {Tags, channelAttrs} from "src/util/nostr"
 import type {Channel, Message} from "src/engine/types"
 import {collection, derived} from "../util/store"
@@ -29,6 +29,17 @@ export class Chat {
     )
 
     return {channels, messages, hasNewDirectMessages, hasNewChatMessages}
+  }
+
+  static contributeSelectors({Chat}) {
+    const searchChannels = Chat.channels.derived($channels => {
+      return fuzzy($channels, {
+        keys: ["name", {name: "about", weight: 0.5}],
+        threshold: 0.3,
+      })
+    })
+
+    return {messageIsNew, searchChannels}
   }
 
   static initialize({Events, Chat, Keys, Crypt}) {

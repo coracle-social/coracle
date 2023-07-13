@@ -1,7 +1,6 @@
 <script>
   import {onMount} from "svelte"
   import {partition, filter, whereEq, prop} from "ramda"
-  import {fuzzy} from "src/util/misc"
   import {modal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
@@ -10,16 +9,17 @@
   import {chat, routing, network, user, keys} from "src/app/engine"
 
   let q = ""
-  let search
   let results = []
   let joinedChannels = []
   let otherChannels = []
 
+  const {searchChannels} = chat
   const channels = chat.channels.derived(filter(whereEq({type: "public"})))
 
   $: [joinedChannels, otherChannels] = partition(prop("joined"), $channels)
-  $: search = fuzzy(otherChannels, {keys: ["name", "about"]})
-  $: results = search(q).slice(0, 50)
+  $: results = $searchChannels(q)
+    .filter(c => c.type === "public" && !c.joined)
+    .slice(0, 50)
 
   document.title = "Chat"
 
@@ -38,7 +38,7 @@
         <i class="fa fa-server fa-lg" />
         <h2 class="staatliches text-2xl">Your rooms</h2>
       </div>
-      <Anchor theme="button-accent" on:click={() => modal.push({type: "room/edit"})}>
+      <Anchor theme="button-accent" on:click={() => modal.push({type: "channel/edit"})}>
         <i class="fa-solid fa-plus" /> Create Room
       </Anchor>
     </div>

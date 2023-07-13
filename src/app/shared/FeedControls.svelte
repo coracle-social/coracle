@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type {DynamicFilter} from "src/util/types"
+  import type {DynamicFilter} from "src/engine/types"
   import {fly} from "src/util/transition"
   import {pluck, prop, omit, objOf} from "ramda"
   import {debounce} from "throttle-debounce"

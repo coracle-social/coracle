@@ -170,7 +170,7 @@ export class Storage {
         sortRecords: sortBy(prop("created_at")),
       },
       "Chat.channels": {
-        maxRecords: 50,
+        maxRecords: 1000,
         sortRecords: sortBy(e => -Math.max(e.last_checked || 0, e.last_sent || 0)),
       },
       "Chat.messages": {
