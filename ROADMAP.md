@@ -3,8 +3,8 @@
 - [ ] Refactor
   - [ ] Delete messages when leaving a room
   - [ ] Add pagination to chat/dms
-  - [ ] Fix scrolling to top when modal is open
   - [ ] Add migration for user settings
+  - [ ] Use limit 1 to find most recent notification, then load when visiting the notifications page.
   - [ ] Improve watchers so users of system don't need to know how they work
   - [ ] Remove external dependencies
   - [ ] Check for TODOs
@@ -43,6 +43,7 @@
 # Core
 
 - [ ] Private groups
+- [ ] Get rid of loki and persist directly to indexeddb. We're using double the storage
 - [ ] Show npubs/nip05 when mentioning
   - nevent1qqswv0ztgm8z6zeqmd0pzvwss7fzny675dx9lkqvr4zw0d9ad59eh3gpzemhxue69uhhyetvv9ujumn0wd68ytnzv9hxg6k804t
 - [ ] Support server-rendered link previews

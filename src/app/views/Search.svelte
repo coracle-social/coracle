@@ -18,9 +18,7 @@
   let options = []
   let scanner
 
-  const openTopic = topic => {
-    modal.push({type: "topic/feed", topic})
-  }
+  const openTopic = topic => modal.push({type: "topic/feed", topic})
 
   const loadProfiles = debounce(500, search => {
     // If we have a query, search using nostr.band. If not, ask for random profiles.
@@ -30,7 +28,7 @@
         relays: routing.getSearchRelays(),
         filter: [{kinds: [0], search, limit: 10}],
       })
-    } else if (directory.profiles._coll.count() < 50) {
+    } else if (directory.profiles.get().length < 50) {
       network.load({
         relays: user.getRelayUrls("read"),
         filter: [{kinds: [0], limit: 50}],

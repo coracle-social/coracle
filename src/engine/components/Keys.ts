@@ -1,7 +1,8 @@
+import {propEq, find, reject} from "ramda"
 import {nip19, getPublicKey, getSignature, generatePrivateKey} from "nostr-tools"
 import NDK, {NDKEvent, NDKNip46Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk"
 import {switcherFn} from "hurdak/lib/hurdak"
-import {writable, collection, derived} from "../util/store"
+import {writable, derived} from "../util/store"
 
 export type LoginMethod = "bunker" | "pubkey" | "privkey" | "extension"
 
@@ -16,15 +17,21 @@ export class Keys {
   static contributeState() {
     const pubkey = writable<string | null>()
 
-    const state = collection<KeyState>()
+    const keyState = writable<KeyState[]>([])
 
-    const current = derived<KeyState | null>([pubkey, state], ([k, m]) => state.getKey(k))
+    const getKeyState = k => find(propEq("pubkey", k), keyState.get())
+
+    const setKeyState = v => keyState.update(s => reject(propEq("pubkey", v.pubkey), s).concat(v))
+
+    const removeKeyState = k => keyState.update(s => reject(propEq("pubkey", k), s))
+
+    const current = derived<KeyState | null>(pubkey, k => getKeyState(k))
 
     const canSign = derived(current, keyState =>
       ["bunker", "privkey", "extension"].includes(keyState?.method)
     )
 
-    return {pubkey, state, current, canSign}
+    return {pubkey, keyState, getKeyState, setKeyState, removeKeyState, current, canSign}
   }
 
   static contributeSelectors({Keys}) {
@@ -105,9 +112,7 @@ export class Keys {
         Keys.getNDK(key.token)
       }
 
-      console.log({method, pubkey, privkey, bunkerKey})
-
-      Keys.state.key(pubkey).set({method, pubkey, privkey, bunkerKey})
+      Keys.setKeyState({method, pubkey, privkey, bunkerKey})
       Keys.pubkey.set(pubkey)
     }
 
@@ -140,7 +145,7 @@ export class Keys {
       const $pubkey = Keys.pubkey.get()
 
       Keys.pubkey.set(null)
-      Keys.state.key($pubkey).remove()
+      Keys.removeKeyState($pubkey)
     }
 
     return {login, sign, clear}

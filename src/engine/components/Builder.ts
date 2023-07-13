@@ -155,6 +155,7 @@ export class Builder {
     const createLabel = payload => buildEvent(1985, payload)
 
     return {
+      mention,
       tagsFromContent,
       getReplyTags,
       authenticate,

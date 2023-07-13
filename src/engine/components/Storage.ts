@@ -3,7 +3,7 @@ import {throttle} from "throttle-debounce"
 import {identity, prop, path as getPath, sortBy, partition} from "ramda"
 import IncrementalIndexedDBAdapter from "lokijs/src/incremental-indexeddb-adapter"
 import {createMapOf, createMap} from "hurdak/lib/hurdak"
-import {defer, union, getLocalJson, setLocalJson} from "src/util/misc"
+import {defer, sleep, union, getLocalJson, setLocalJson} from "src/util/misc"
 import {writable} from "../util/store"
 
 const Adapter = window.indexedDB ? IncrementalIndexedDBAdapter : Loki.LokiMemoryAdapter
@@ -12,21 +12,21 @@ const ready = defer()
 
 const dead = writable(false)
 
-const loki = new Loki("agent.db", {
-  autoload: true,
-  autosave: true,
-  autosaveInterval: 4000,
-  throttledSaves: true,
+const loki = new Loki("engine/Storage/db", {
   adapter: new Adapter(),
-  autoloadCallback: () => ready.resolve(),
+  autoloadCallback: ready.resolve,
 })
 
 window.addEventListener("beforeunload", () => loki.close())
 
+const getStorageKey = key => "engine/" + key.replace(/\./g, "/")
+
+const saveDatabase = throttle(3000, () => loki.saveDatabase(e => e && console.error(e)))
+
 const syncScalars = (engine, keys) => {
   for (const key of keys) {
     const store = getPath(key.split("."), engine)
-    const storageKey = key.replace(/./g, "/")
+    const storageKey = getStorageKey(key)
 
     if (Object.hasOwn(localStorage, storageKey)) {
       store.set(getLocalJson(storageKey))
@@ -41,55 +41,67 @@ type CollectionPolicy = {
   sortRecords?: (records: any[]) => any[]
 }
 
-const syncCollections = (engine, policies: Record<string, CollectionPolicy>) => {
+const syncCollections = async (engine, policies: Record<string, CollectionPolicy>) => {
   for (const key of Object.keys(policies)) {
-    const store = getPath(key.split("."), engine)
-    const storageKey = key.replace(/./g, "/")
-    const coll = loki.addCollection(storageKey, {unique: ["key"]})
+    loki.addCollection(getStorageKey(key), {unique: ["key"]})
+  }
 
-    ready.then(() => {
-      store.getBaseStore().set(new Map(Object.entries(createMapOf("key", "record", coll.find()))))
+  const e = await new Promise(resolve => loki.loadDatabase({}, resolve))
+
+  if (e) {
+    console.error(e)
+  }
+
+  for (const key of Object.keys(policies)) {
+    const base = getPath(key.split("."), engine).getBaseStore()
+    const coll = loki.getCollection(getStorageKey(key))
+
+    base.set(new Map(Object.entries(createMapOf("key", "record", coll.find()))))
+
+    // Wait a bit before re-saving, it appears to take some time to load existing data
+    sleep(5000).then(() => {
+      base.subscribe(
+        throttle(3000, async records => {
+          if (dead.get()) {
+            return
+          }
+
+          const [updates, creates] = partition(
+            ({key}) => coll.by("key", key),
+            Array.from(records.entries()).map(([key, record]) => ({key, record}))
+          )
+
+          if (creates.length > 0) {
+            // Something internal to loki is broken
+            coll.changes = coll.changes || []
+            coll.insert(creates)
+          }
+
+          if (updates.length > 0) {
+            const updatesByPk = createMap("key", updates)
+
+            coll.updateWhere(
+              record => Boolean(updatesByPk[record.key]),
+              existingRecord => {
+                const {key, record} = updatesByPk[existingRecord.key]
+
+                return {
+                  key,
+                  record: {
+                    ...existingRecord,
+                    ...record,
+                  },
+                }
+              }
+            )
+          }
+
+          saveDatabase()
+        })
+      )
     })
 
-    store.subscribe(
-      throttle(1000, async records => {
-        if (dead) {
-          return
-        }
-
-        await ready
-
-        const [updates, creates] = partition(
-          ({key}) => coll.by("key", key),
-          records.map(([key, record]) => ({key, record}))
-        )
-
-        if (creates.length > 0) {
-          // Something internal to loki is broken
-          coll.changes = coll.changes || []
-          coll.insert(creates)
-        }
-
-        if (updates.length > 0) {
-          const updatesByPk = createMap("key", updates)
-
-          coll.updateWhere(
-            record => Boolean(updatesByPk[record.key]),
-            existingRecord => {
-              const {key, record} = updatesByPk[existingRecord.key]
-
-              return {
-                key,
-                record: {
-                  ...existingRecord,
-                  ...record,
-                },
-              }
-            }
-          )
-        }
-      })
-    )
+    ready.resolve()
   }
 
   // Every so often randomly prune a store
@@ -136,6 +148,7 @@ export class Storage {
       "Alerts.lastChecked",
       "Alerts.latestNotification",
       "Keys.pubkey",
+      "Keys.keyState",
       "User.settings",
     ])
 
@@ -152,9 +165,6 @@ export class Storage {
     }
 
     syncCollections(engine, {
-      "Keys.state": {
-        maxRecords: 50,
-      },
       "Alerts.events": {
         maxRecords: 500,
         sortRecords: sortBy(prop("created_at")),

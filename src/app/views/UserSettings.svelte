@@ -8,7 +8,7 @@
   import Heading from "src/partials/Heading.svelte"
   import {FORCE_RELAYS, user} from "src/app/engine"
 
-  let values = {...user.getSettings()}
+  let values = {...user.settings.get()}
 
   const submit = () => {
     user.setSettings(values)

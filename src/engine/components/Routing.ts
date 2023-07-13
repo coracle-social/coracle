@@ -16,16 +16,18 @@ export class Routing {
 
   static contributeActions({Env, Routing, Network, Meta, User}) {
     const addRelay = url => {
-      const relay = Routing.relays.getKey(url)
+      if (isShareableRelay(url)) {
+        const relay = Routing.relays.getKey(url)
 
-      Routing.relays.mergeKey(url, {
-        url,
-        count: inc(relay?.count || 0),
-        first_seen: relay?.first_seen || now(),
-        info: {
-          last_checked: 0,
-        },
-      })
+        Routing.relays.mergeKey(url, {
+          url,
+          count: inc(relay?.count || 0),
+          first_seen: relay?.first_seen || now(),
+          info: {
+            last_checked: 0,
+          },
+        })
+      }
     }
 
     const setPolicy = ({pubkey, created_at}, relays) => {

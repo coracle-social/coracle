@@ -30,8 +30,6 @@
     )
   )
 
-  console.log($knownRelays)
-
   $: allRelays = $knownRelays.concat(customRelays)
 
   const searchForRelays = async () => {
@@ -54,29 +52,29 @@
       currentRelays[i] = relay
 
       // Wait a bit before removing the relay to smooth out the ui
-      await Promise.all([
+      Promise.all([
         sleep(1500),
         pubkeyLoader.loadPubkeys([user.getPubkey()], {
           force: true,
           relays: [relay.url],
           kinds: userKinds,
         }),
-      ])
+      ]).then(async () => {
+        currentRelays[i] = null
 
-      currentRelays[i] = null
+        if (searching && user.getRelayUrls().length > 0) {
+          searching = false
+          modal = "success"
 
-      if (searching && user.getRelayUrls().length > 0) {
-        searching = false
-        modal = "success"
+          // Reload everything, it's possible we didn't get their petnames if we got a match
+          // from something like purplepag.es. This helps us avoid nuking follow lists later
+          await Promise.all([loadAppData(user.getPubkey()), sleep(1500)])
 
-        // Reload everything, it's possible we didn't get their petnames if we got a match
-        // from something like purplepag.es. This helps us avoid nuking follow lists later
-        await Promise.all([loadAppData(user.getPubkey()), sleep(1500)])
-
-        navigate("/notes")
-      } else {
-        network.pool.remove(relay.url)
-      }
+          navigate("/notes")
+        } else {
+          network.pool.remove(relay.url)
+        }
+      })
     }
 
     // Wait for our relay list to load initially, then terminate when we've tried everything
