@@ -47,7 +47,6 @@
     "hurdak": "github:ConsignCloud/hurdak",
     "husky": "^8.0.3",
     "insane": "^2.6.2",
-    "lokijs": "^1.5.12",
     "lru-cache": "^7.18.3",
     "marked": "^5.1.0",
     "nostr-tools": "^1.12.1",

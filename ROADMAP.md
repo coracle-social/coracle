@@ -1,8 +1,6 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Improve collection abstraction. getKey -> get, define pk, get -> all
-  - [ ] Get rid of loki
   - [ ] Use limit 1 to find most recent notification, then load when visiting the notifications page.
   - [ ] Remove external dependencies from engine, open source it?
   - [ ] If connections fail, re-open and re-send active subs
