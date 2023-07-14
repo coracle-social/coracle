@@ -41,12 +41,13 @@ export class IndexedDB {
     window.indexedDB.deleteDatabase(this.dbName)
   }
 
-  deleteStore(storeName) {
+  getAll(storeName) {
     return new Promise((resolve, reject) => {
-      this.db.deleteObjectStore()
-      this.db.oncomplete = e => resolve(e.target.result)
-      this.db.onabort = e => reject(e.target.error)
-      this.db.error = e => reject(e.target.error)
+      const store = this.db.transaction(storeName).objectStore(storeName)
+      const request = store.getAll()
+
+      request.onerror = e => reject(e.target.error)
+      request.onsuccess = e => resolve(e.target.result)
     })
   }
 
@@ -60,27 +61,6 @@ export class IndexedDB {
         request.onerror = e => reject(e.target.error)
         request.onsuccess = e => resolve(e.target.result)
       }
-    })
-  }
-
-  getAll(storeName) {
-    return new Promise((resolve, reject) => {
-      const store = this.db.transaction(storeName).objectStore(storeName)
-      const request = store.openCursor(null, IDBCursor.NEXT)
-      const results = []
-
-      request.onsuccess = e => {
-        const cursor = e.target.result
-
-        if (cursor) {
-          results.push(cursor.value)
-          cursor.continue()
-        } else {
-          resolve(results)
-        }
-      }
-
-      request.onerror = e => reject(e.target.error)
     })
   }
 

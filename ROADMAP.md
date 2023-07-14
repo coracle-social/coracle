@@ -1,9 +1,12 @@
 # Current
 
 - [ ] Refactor
+  - [ ] Cursor/feed - window each relay, double buffer
   - [ ] Use limit 1 to find most recent notification, then load when visiting the notifications page.
   - [ ] Remove external dependencies from engine, open source it?
   - [ ] If connections fail, re-open and re-send active subs
+  - [ ] Normalize all relay urls, see comment by daniele
+  - [ ] Pull x recent chat messages on chat detail and sort by that
 - [ ] Add custom emoji support
 - [ ] Re-work note media
   - [ ] Add webcam image/video capture
