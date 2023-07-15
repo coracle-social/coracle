@@ -31,7 +31,7 @@
   export let showEntire
   export let setFeedRelay
 
-  const zapper = nip57.zappers.get(note.pubkey)
+  const zapper = nip57.zappers.key(note.pubkey)
   const bech32Note = nip19.noteEncode(note.id)
   const nevent = nip19.neventEncode({id: note.id, relays: [note.seen_on]})
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
@@ -84,7 +84,7 @@
     : zaps
   $: $zapsTotal = sum(pluck("invoiceAmount", allZaps)) / 1000
 
-  $: canZap = zapper && note.pubkey !== user.getPubkey()
+  $: canZap = $zapper && note.pubkey !== user.getPubkey()
   $: $repliesCount = note.replies.length
 
   $: {

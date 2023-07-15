@@ -121,7 +121,7 @@ export const formatTimestampAsLocalISODate = ts => {
   return datetime
 }
 
-export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+export const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms))
 
 export const poll = (t, cb) => {
   let active = true
@@ -141,7 +141,7 @@ export const poll = (t, cb) => {
 
 export const createScroller = (
   loadMore,
-  {threshold = 3000, reverse = false, element = null} = {}
+  {threshold = 2000, reverse = false, element = null} = {}
 ) => {
   element = element || document.body
 

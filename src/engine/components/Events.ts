@@ -1,6 +1,6 @@
 import type {Event} from "src/engine/types"
 import {pushToKey} from "src/util/misc"
-import {queue} from "../util/queue"
+import {Worker} from "../util/Worker"
 import {collection} from "../util/store"
 
 export const ANY_KIND = "Events/ANY_KIND"
@@ -8,7 +8,7 @@ export const ANY_KIND = "Events/ANY_KIND"
 export class Events {
   static contributeState() {
     return {
-      queue: queue(),
+      queue: new Worker<Event>(),
       cache: collection<Event>("id"),
       handlers: {},
     }

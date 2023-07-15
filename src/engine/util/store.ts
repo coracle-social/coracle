@@ -147,6 +147,8 @@ export class Collection<T> {
 
   get = () => this.#list.get()
 
+  getMap = () => this.#map.get()
+
   subscribe = f => this.#list.subscribe(f)
 
   derived = f => this.#list.derived(f)
@@ -155,7 +157,7 @@ export class Collection<T> {
 
   set = xs => this.#map.set(new Map(xs.map(x => [x[this.pk], x])))
 
-  update = f => this.#map.update(xs => new Map(f(xs).map(x => [x[this.pk], x])))
+  update = f => this.#map.update(m => new Map(f(Array.from(m.values())).map(x => [x[this.pk], x])))
 
   reject = f => this.update(reject(f))
 

@@ -1,19 +1,20 @@
+import type {Event} from "src/engine/types"
 import {getEventHash} from "nostr-tools"
 import {assoc} from "ramda"
 import {doPipe} from "hurdak/lib/hurdak"
 import {now} from "src/util/misc"
-import {queue} from "../util/queue"
+import {Worker} from "../util/Worker"
 
 export class Outbox {
   static contributeState() {
     return {
-      queue: queue(),
+      queue: new Worker<Event>(),
     }
   }
 
   static contributeActions({Keys, Network, User, Events}) {
     const prepEvent = async rawEvent => {
-      return doPipe(rawEvent, [
+      return await doPipe(rawEvent, [
         assoc("created_at", now()),
         assoc("pubkey", Keys.pubkey.get()),
         e => ({...e, id: getEventHash(e)}),

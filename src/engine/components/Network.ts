@@ -6,6 +6,8 @@ import {union, difference} from "src/util/misc"
 import {warn, error, log} from "src/util/logger"
 import {normalizeRelayUrl} from "src/util/nostr"
 import type {Event, Filter} from "src/engine/types"
+import {Cursor, MultiCursor} from "src/engine/util/Cursor"
+import {Feed} from "src/engine/util/Feed"
 
 export type SubscribeOpts = {
   relays: string[]
@@ -44,7 +46,9 @@ export class Network {
     return {relayHasError}
   }
 
-  static contributeActions({Network, User, Events, Nip65, Env}) {
+  static contributeActions(engine) {
+    const {Network, User, Events, Nip65, Env} = engine
+
     const getExecutor = (urls, {bypassBoot = false} = {}) => {
       if (Env.FORCE_RELAYS?.length > 0) {
         urls = Env.FORCE_RELAYS
@@ -335,6 +339,13 @@ export class Network {
       })
     }
 
-    return {subscribe, publish, load, count}
+    const cursor = opts => new Cursor({...opts, load})
+
+    const multiCursor = ({relays, ...opts}) =>
+      new MultiCursor(relays.map(relay => cursor({relay, ...opts})))
+
+    const feed = opts => new Feed({engine, ...opts})
+
+    return {subscribe, publish, load, count, cursor, multiCursor, feed}
   }
 }

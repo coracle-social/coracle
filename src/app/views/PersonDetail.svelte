@@ -12,7 +12,7 @@
   import PersonNotes from "src/app/shared/PersonNotes.svelte"
   import PersonLikes from "src/app/shared/PersonLikes.svelte"
   import PersonRelays from "src/app/shared/PersonRelays.svelte"
-  import {FORCE_RELAYS, nip05, directory, nip65} from "src/app/engine"
+  import {FORCE_RELAYS, pubkeyLoader, nip05, directory, nip65} from "src/app/engine"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -41,6 +41,8 @@
   }
 
   log("Person", npub, $profile)
+
+  pubkeyLoader.loadPubkeys([pubkey], {force: true})
 
   document.title = directory.displayProfile($profile)
 

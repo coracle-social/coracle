@@ -46,7 +46,7 @@
       return false
     }
 
-    return showContext ? true : !r.isContext
+    return showContext ? true : r.matchesFilter
   })
 
   const goToNote = data => modal.push({type: "note/detail", ...data})

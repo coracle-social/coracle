@@ -1,47 +1,35 @@
 <script lang="ts">
-  import type {DynamicFilter} from "src/engine/types"
+  import type {DynamicFilter, DisplayEvent} from "src/engine/types"
   import {onMount, onDestroy} from "svelte"
-  import {debounce} from "throttle-debounce"
-  import {last, equals, partition, always, uniqBy, sortBy, prop} from "ramda"
+  import {readable} from "svelte/store"
+  import {last, equals} from "ramda"
   import {fly} from "src/util/transition"
   import {quantify} from "hurdak/lib/hurdak"
-  import {fuzzy, batch, createScroller, now, timedelta} from "src/util/misc"
-  import {asDisplayEvent, noteKinds, findReplyId} from "src/util/nostr"
+  import {createScroller, now} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
+  import {derived} from "src/engine/util/store"
   import {user, nip65, network} from "src/app/engine"
-  import legacyNetwork from "src/agent/network"
-  import {mergeParents, compileFilter} from "src/app/state"
+  import {compileFilter} from "src/app/state"
 
   export let relays = []
   export let filter = {} as DynamicFilter
-  export let delta = timedelta(6, "hours")
-  export let shouldDisplay = always(true)
-  export let parentsTimeout = 500
   export let invertColors = false
   export let hideControls = false
   export let onEvent = null
 
-  let unsubscribe, scroller, cursor
-  let key = Math.random()
-  let search = ""
-  let notes = []
-  let notesBuffer = []
+  let since = now()
+  let scroller, feed
   let feedRelay = null
   let feedScroller = null
+  let newNotes = readable([])
+  let oldNotes = readable([])
 
-  $: searchNotes = debounce(300, fuzzy(notes, {keys: ["content"]}))
-  $: filteredNotes = search ? searchNotes(search) : notes
-
-  const since = now()
-  const maxNotes = 100
-  const seen = new Set()
   const getModal = () => last(document.querySelectorAll(".modal-content"))
-  const canDisplay = e => noteKinds.includes(e.kind)
 
   const setFeedRelay = relay => {
     feedRelay = relay
@@ -53,82 +41,10 @@
   }
 
   const loadBufferedNotes = () => {
-    // Drop notes at the end if there are a lot
-    notes = uniqBy(prop("id"), notesBuffer.concat(notes).slice(0, maxNotes))
-    notesBuffer = []
+    since = now()
 
     document.body.scrollIntoView({behavior: "smooth"})
   }
-
-  const onChunk = async newNotes => {
-    const _key = key
-
-    // Deduplicate and filter out stuff we don't want, apply user preferences
-    const filtered = user.applyMutes(newNotes.filter(n => !seen.has(n.id) && shouldDisplay(n)))
-
-    // Keep track of what we've seen
-    for (const note of filtered) {
-      seen.add(note.id)
-    }
-
-    // Load parents before showing the notes so we have hierarchy. Give it a short
-    // timeout, since this is really just a nice-to-have
-    const notesWithParent = filtered.filter(findReplyId)
-
-    const parents =
-      notesWithParent.length === 0
-        ? []
-        : await network.load({
-            timeout: parentsTimeout,
-            filter: {ids: notesWithParent.map(findReplyId)},
-            relays: nip65.mergeHints(
-              user.getSetting("relay_limit"),
-              notesWithParent.map(e => nip65.getParentHints(3, e))
-            ),
-          })
-
-    // Keep track of parents too
-    for (const note of parents) {
-      seen.add(note.id)
-    }
-
-    // Combine notes and parents into a single collection
-    const combined = uniqBy(
-      prop("id"),
-      filtered.filter(canDisplay).concat(parents).map(asDisplayEvent)
-    )
-
-    // Stream in additional data and merge it in
-    legacyNetwork.streamContext({
-      maxDepth: 2,
-      notes: combined.filter(canDisplay),
-      onChunk: context => {
-        context = user.applyMutes(context)
-
-        notesBuffer = legacyNetwork.applyContext(notesBuffer, context)
-        notes = legacyNetwork.applyContext(notes, context)
-      },
-    })
-
-    // Show replies grouped by parent whenever possible
-    const merged = sortBy(e => -e.created_at, mergeParents(combined))
-
-    // Notify caller if they asked for it
-    for (const e of merged) {
-      onEvent?.(e)
-    }
-
-    // Split into notes before and after we started loading
-    const [bottom, top] = partition(e => e.created_at < since, merged)
-
-    // Slice new notes in case someone leaves the tab open for a long time
-    if (_key === key) {
-      notesBuffer = top.concat(notesBuffer).slice(0, maxNotes)
-      notes = uniqBy(prop("id"), notes.concat(bottom))
-    }
-  }
-
-  let p = Promise.resolve()
 
   const getRelays = () => {
     if (relays.length > 0) {
@@ -147,56 +63,40 @@
     return nip65.mergeHints(limit, hints)
   }
 
-  const loadMore = async () => {
-    const _key = key
-
-    // Wait for this page to load before trying again
-    await cursor.loadPage({
-      filter: compileFilter(filter),
-      onChunk: chunk => {
-        // Stack promises to avoid too many concurrent subscriptions
-        p = p.then(() => key === _key && onChunk(chunk))
-      },
-    })
+  const loadMore = () => {
+    feed.load()
   }
 
   export const stop = () => {
-    notes = []
-    notesBuffer = []
+    feed?.stop()
     scroller?.stop()
     feedScroller?.stop()
-    unsubscribe?.()
-    key = Math.random()
   }
 
   export const start = (newFilter = null) => {
     if (!equals(newFilter, filter)) {
       stop()
 
-      const _key = key
-
       if (newFilter) {
         filter = newFilter
       }
 
-      // No point in subscribing if we have an end date
-      if (!filter.until) {
-        unsubscribe = network.subscribe({
-          relays: getRelays(),
-          filter: compileFilter({...filter, since}),
-          onEvent: batch(500, chunk => {
-            p = p.then(() => _key === key && onChunk(chunk))
-          }),
-        })
-      }
-
-      cursor = new legacyNetwork.Cursor({
+      feed = network.feed({
+        depth: 2,
         relays: getRelays(),
-        until: filter.until || now(),
-        delta,
+        filter: compileFilter(filter),
       })
 
+      feed.start()
+
       scroller = createScroller(loadMore, {element: getModal()})
+
+      newNotes = derived<DisplayEvent[]>(feed.feed, notes =>
+        notes.filter(e => e.created_at > feed.since)
+      )
+      oldNotes = derived<DisplayEvent[]>(feed.feed, notes =>
+        notes.filter(e => e.created_at <= feed.since)
+      )
     }
   }
 
@@ -205,7 +105,7 @@
 </script>
 
 <Content size="inherit" gap="gap-6">
-  {#if notesBuffer.length > 0}
+  {#if $newNotes?.length > 0}
     <div class="pointer-events-none fixed bottom-0 left-0 z-10 mb-8 flex w-full justify-center">
       <button
         in:fly={{y: 20}}
@@ -213,7 +113,7 @@
                border-accent-light bg-accent px-4 py-2 text-center text-white
                shadow-lg transition-colors hover:bg-accent-light"
         on:click={loadBufferedNotes}>
-        Load {quantify(notesBuffer.length, "new note")}
+        Load {quantify($newNotes.length, "new note")}
       </button>
     </div>
   {/if}
@@ -225,7 +125,7 @@
   {/if}
 
   <div class="flex flex-col gap-4">
-    {#each filteredNotes as note (note.id)}
+    {#each $oldNotes as note (note.id)}
       <Note depth={2} {note} {feedRelay} {setFeedRelay} {invertColors} />
     {/each}
   </div>
@@ -235,6 +135,6 @@
 
 {#if feedRelay}
   <Modal onEscape={() => setFeedRelay(null)}>
-    <RelayFeed {feedRelay} {notes} depth={2} />
+    <RelayFeed {feedRelay} notes={$oldNotes} depth={2} />
   </Modal>
 {/if}

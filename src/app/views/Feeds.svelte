@@ -24,7 +24,7 @@
   }
 
   const loadListFeed = naddr => {
-    const list = content.lists.get(naddr)
+    const list = content.lists.key(naddr).get()
     const authors = Tags.from(list).pubkeys()
     const topics = Tags.from(list).topics()
     const urls = Tags.from(list).urls()

@@ -5,9 +5,10 @@ export type Event = NostrToolsEvent & {
 }
 
 export type DisplayEvent = Event & {
+  zaps: Event[]
   replies: Event[]
   reactions: Event[]
-  zaps: Event[]
+  matchesFilter?: boolean
 }
 
 export type DynamicFilter = Record<string, any>
