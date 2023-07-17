@@ -29,7 +29,7 @@
 
 {#if m.type === "note/detail"}
   {#key m.note.id}
-    <NoteDetail {...m} invertColors />
+    <NoteDetail note={m.note} relays={m.relays} invertColors />
   {/key}
 {:else if m.type === "note/create"}
   <NoteCreate pubkey={m.pubkey} quote={m.quote} writeTo={m.relays} />

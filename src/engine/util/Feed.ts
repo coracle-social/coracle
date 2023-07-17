@@ -278,7 +278,7 @@ export class Feed {
 
   stop() {
     this.stopped = true
-    this.unsubscribe()
+    this.unsubscribe?.()
 
     for (const unsubscribe of this.subs) {
       unsubscribe()
@@ -286,9 +286,11 @@ export class Feed {
   }
 
   async load() {
-    // If we don't have a decent number of notes yet, wait until we have enough
+    // If we don't have a decent number of notes yet, try to get enough
     // to avoid out of order notes
-    if (this.cursor.count() < this.limit * 2) {
+    if (this.cursor.count() < this.limit) {
+      this.cursor.load(this.limit)
+
       await sleep(500)
     }
 

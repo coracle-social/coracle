@@ -1,15 +1,14 @@
 import type {Filter} from "nostr-tools"
-import type {DisplayEvent, DynamicFilter} from "src/engine/types"
+import type {DynamicFilter} from "src/engine/types"
 import Bugsnag from "@bugsnag/js"
 import {nip19} from "nostr-tools"
 import {navigate} from "svelte-routing"
 import {writable, get} from "svelte/store"
 import {whereEq, omit, filter, pluck, sortBy, slice} from "ramda"
-import {createMap, doPipe, first} from "hurdak/lib/hurdak"
+import {doPipe, first} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
 import {hash, timedelta, now, batch, shuffle, sleep, clamp} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
-import {findReplyId} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import {
   FORCE_RELAYS,
@@ -183,26 +182,6 @@ export const login = async (method, key) => {
   } else {
     modal.push({type: "login/connect", noEscape: true})
   }
-}
-
-export const mergeParents = (notes: Array<DisplayEvent>) => {
-  const notesById = createMap("id", notes) as Record<string, DisplayEvent>
-  const childIds = []
-
-  for (const note of Object.values(notesById)) {
-    const parentId = findReplyId(note)
-
-    if (parentId) {
-      childIds.push(note.id)
-    }
-
-    // Add the current note to its parents replies, but only if we found a parent
-    if (notesById[parentId]) {
-      notesById[parentId].replies = notesById[parentId].replies.concat([note])
-    }
-  }
-
-  return sortBy(e => -e.created_at, Object.values(omit(childIds, notesById)))
 }
 
 export const publishWithToast = (event, relays) =>

@@ -1,26 +1,26 @@
 <script>
-  import {onMount} from "svelte"
-  import {nip19} from "nostr-tools"
+  import {propEq} from "ramda"
+  import {onMount, onDestroy} from "svelte"
   import {fly} from "src/util/transition"
-  import {first} from "hurdak/lib/hurdak"
-  import {log} from "src/util/logger"
   import {isMobile} from "src/util/html"
   import {asDisplayEvent} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {user, nip65, network} from "src/app/engine"
+  import {nip65, network} from "src/app/engine"
   import Note from "src/app/shared/Note.svelte"
-  import legacyNetwork from "src/agent/network"
 
   export let note
   export let relays = []
   export let invertColors = false
 
-  let loading = true
-  let feedRelay = null
-  let displayNote = asDisplayEvent(note)
+  console.log(nip65.selectHints(3, relays))
+  const feed = network.feed({
+    depth: 6,
+    relays: nip65.selectHints(3, relays),
+    filter: {ids: [note.id]},
+  })
 
   const depth = isMobile ? 3 : 6
 
@@ -28,44 +28,37 @@
     feedRelay = relay
   }
 
-  onMount(async () => {
-    if (!displayNote.pubkey) {
-      await network.load({
-        relays: nip65.selectHints(3, relays),
-        filter: {ids: [displayNote.id]},
-        onEvent: event => {
-          console.log(event)
-          displayNote = asDisplayEvent(event)
-        },
-      })
-    }
+  let loading = true
+  let feedRelay = null
+  let displayNote = feed.feed.derived($feed => {
+    console.log($feed)
+    const found = find(propEq("id", note.id), $feed)
 
-    if (displayNote) {
-      log("NoteDetail", nip19.noteEncode(displayNote.id), displayNote)
-
-      legacyNetwork.streamContext({
-        maxDepth: depth,
-        notes: [displayNote],
-        onChunk: context => {
-          displayNote = first(legacyNetwork.applyContext([displayNote], user.applyMutes(context)))
-        },
-      })
-    }
-
+    //if (found) {
     loading = false
+    //}
+
+    return asDisplayEvent(found || note)
   })
+
+  onMount(() => {
+    feed.start()
+    feed.loadAll()
+  })
+
+  onDestroy(() => feed.stop())
 </script>
 
-{#if !loading && !displayNote.pubkey}
+{#if !loading && !$displayNote.pubkey}
   <div in:fly={{y: 20}}>
     <Content size="lg" class="text-center">Sorry, we weren't able to find this note.</Content>
   </div>
-{:else if displayNote.pubkey}
+{:else if $displayNote.pubkey}
   <div in:fly={{y: 20}} class="m-auto flex w-full max-w-2xl flex-col gap-4 p-4">
     <Note
       showContext
-      anchorId={displayNote.id}
-      note={displayNote}
+      anchorId={note.id}
+      note={$displayNote}
       {depth}
       {invertColors}
       {feedRelay}
@@ -79,6 +72,6 @@
 
 {#if feedRelay}
   <Modal onEscape={() => setFeedRelay(null)}>
-    <RelayFeed {feedRelay} notes={[displayNote]} depth={6} showContext />
+    <RelayFeed {feedRelay} notes={[$displayNote]} depth={6} showContext />
   </Modal>
 {/if}

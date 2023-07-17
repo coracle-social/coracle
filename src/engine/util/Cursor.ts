@@ -22,7 +22,7 @@ export class Cursor {
   }
 
   load(n) {
-    const limit = n * 2 - this.buffer.length
+    const limit = n - this.buffer.length
 
     // If we're already loading, or we have enough buffered, do nothing
     if (this.loading || limit <= 0) {
@@ -52,6 +52,10 @@ export class Cursor {
 
   take(n = Infinity) {
     return this.buffer.splice(0, n)
+  }
+
+  count() {
+    return this.buffer.length
   }
 
   peek() {
