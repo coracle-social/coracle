@@ -13,8 +13,8 @@ import {
   assoc,
   reject,
 } from "ramda"
-import {ensurePlural, chunk} from "hurdak/lib/hurdak"
-import {batch, union, sleep, now} from "src/util/misc"
+import {ensurePlural, chunk, doPipe} from "hurdak/lib/hurdak"
+import {batch, timedelta, union, sleep, now} from "src/util/misc"
 import {findReplyId, Tags, noteKinds} from "src/util/nostr"
 import {collection} from "./store"
 import type {Collection} from "./store"
@@ -29,24 +29,24 @@ export type FeedOpts = {
 }
 
 export class Feed {
+  limit: number
   since: number
   stopped: boolean
   deferred: Event[]
   context: Collection<Event>
   feed: Collection<DisplayEvent>
-  ready: Promise<void>
   seen: Set<string>
   subs: Array<() => void>
   unsubscribe: () => void
   cursor: MultiCursor
 
   constructor(readonly opts: FeedOpts) {
+    this.limit = 20
     this.since = now()
     this.stopped = false
     this.deferred = []
     this.context = collection<Event>("id")
     this.feed = collection<DisplayEvent>("id")
-    this.ready = null
     this.seen = new Set()
     this.subs = []
   }
@@ -273,11 +273,7 @@ export class Feed {
     )
 
     // Load the first page as soon as possible
-    this.cursor.load(20)
-
-    // Wait for a moment so we have enough stuff buffered to avoid showing
-    // out of order notes
-    this.ready = sleep(500)
+    this.cursor.load(this.limit)
   }
 
   stop() {
@@ -290,25 +286,57 @@ export class Feed {
   }
 
   async load() {
-    await this.ready
+    // If we don't have a decent number of notes yet, wait until we have enough
+    // to avoid out of order notes
+    if (this.cursor.count() < this.limit * 2) {
+      await sleep(500)
+    }
 
     const notes = this.cursor.take(5)
     const deferred = this.deferred.splice(0)
 
-    // If something has a parent id but we haven't found the parent yet, skip it until we have it
-    const [defer, ok] = partition(this.isMissingParent, notes.concat(deferred))
+    const ok = doPipe(notes.concat(deferred), [
+      this.deferReactions,
+      this.deferOrphans,
+      this.deferAncient,
+    ])
 
     this.addToFeed(ok)
+  }
 
-    // Wait until we have hopefully loaded parents, then add the notes. If we're still missing
-    // parents, add important text content anyway, but continue to defer reactions/zaps
+  deferReactions = notes => {
+    const [defer, ok] = partition(e => !this.isTextNote(e) && this.isMissingParent(e), notes)
+
     setTimeout(() => {
-      const [text, reactions] = partition(this.isTextNote, defer)
-      const [deferReactions, readyReactions] = partition(this.isMissingParent, reactions)
+      // Defer again if we still don't have a parent, it's pointless to show an orphaned reaction
+      const [orphans, ready] = partition(this.isMissingParent, defer)
 
-      this.addToFeed(text.concat(readyReactions))
-      this.deferred = this.deferred.concat(deferReactions)
+      this.addToFeed(ready)
+      this.deferred = this.deferred.concat(orphans)
     }, 3000)
+
+    return ok
+  }
+
+  deferOrphans = notes => {
+    // If something has a parent id but we haven't found the parent yet, skip it until we have it.
+    const [defer, ok] = partition(e => this.isTextNote(e) && this.isMissingParent(e), notes)
+
+    setTimeout(() => this.addToFeed(defer), 3000)
+
+    return ok
+  }
+
+  deferAncient = notes => {
+    // Sometimes relays send very old data very quickly. Pop these off the queue and re-add
+    // them after we have more timely data. They still might be relevant, but order will still
+    // be maintained since everything before the cutoff will be deferred the same way.
+    const since = now() - timedelta(6, "hours")
+    const [defer, ok] = partition(e => e.created_at < since, notes)
+
+    setTimeout(() => this.addToFeed(defer), 1500)
+
+    return ok
   }
 
   addToFeed(notes) {

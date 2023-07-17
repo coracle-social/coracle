@@ -78,6 +78,10 @@ export class MultiCursor {
     }
   }
 
+  count() {
+    return this.#cursors.reduce((n, c) => n + c.buffer.length, 0)
+  }
+
   take(n) {
     const events = []
 

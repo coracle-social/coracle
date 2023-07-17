@@ -42,6 +42,7 @@
 - [ ] Private groups
 - [ ] Preload quotes
 - [ ] Add custom emoji support
+- [ ] Reminders for max time spent on coracle
 - [ ] Proxy handle requests for CORS
 - [ ] Show npubs/nip05 when mentioning
   - nevent1qqswv0ztgm8z6zeqmd0pzvwss7fzny675dx9lkqvr4zw0d9ad59eh3gpzemhxue69uhhyetvv9ujumn0wd68ytnzv9hxg6k804t
