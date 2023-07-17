@@ -1,5 +1,5 @@
 <script>
-  import {propEq} from "ramda"
+  import {propEq, find} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {fly} from "src/util/transition"
   import {isMobile} from "src/util/html"
@@ -15,8 +15,8 @@
   export let relays = []
   export let invertColors = false
 
-  console.log(nip65.selectHints(3, relays))
   const feed = network.feed({
+    limit: 1,
     depth: 6,
     relays: nip65.selectHints(3, relays),
     filter: {ids: [note.id]},
@@ -31,17 +31,21 @@
   let loading = true
   let feedRelay = null
   let displayNote = feed.feed.derived($feed => {
-    console.log($feed)
     const found = find(propEq("id", note.id), $feed)
 
-    //if (found) {
-    loading = false
-    //}
+    if (found) {
+      loading = false
+    }
 
     return asDisplayEvent(found || note)
   })
 
   onMount(() => {
+    // If our note came from a feed, we can load faster
+    if (note.replies) {
+      feed.hydrate([note])
+    }
+
     feed.start()
     feed.loadAll()
   })

@@ -1,4 +1,4 @@
-import {mergeLeft, identity, sortBy} from "ramda"
+import {all, prop, mergeLeft, identity, sortBy} from "ramda"
 import {ensurePlural, first} from "hurdak/lib/hurdak"
 import {now} from "src/util/misc"
 import type {Filter, Event} from "../types"
@@ -11,11 +11,13 @@ export type CursorOpts = {
 }
 
 export class Cursor {
+  done: boolean
   until: number
   buffer: Event[]
   loading: boolean
 
   constructor(readonly opts: CursorOpts) {
+    this.done = false
     this.until = now()
     this.buffer = []
     this.loading = false
@@ -25,7 +27,7 @@ export class Cursor {
     const limit = n - this.buffer.length
 
     // If we're already loading, or we have enough buffered, do nothing
-    if (this.loading || limit <= 0) {
+    if (this.done || this.loading || limit <= 0) {
       return null
     }
 
@@ -33,6 +35,8 @@ export class Cursor {
     const {relay, filter, onEvent} = this.opts
 
     this.loading = true
+
+    let count = 0
 
     return this.opts.subscribe({
       autoClose: true,
@@ -42,10 +46,13 @@ export class Cursor {
         this.until = Math.min(until, event.created_at)
         this.buffer.push(event)
 
+        count += 1
+
         onEvent?.(event)
       },
       onEose: () => {
         this.loading = false
+        this.done = count < limit
       },
     })
   }
@@ -78,6 +85,10 @@ export class MultiCursor {
 
   load(limit) {
     return this.#cursors.map(c => c.load(limit)).filter(identity)
+  }
+
+  done() {
+    return all(prop("done"), this.#cursors)
   }
 
   count() {

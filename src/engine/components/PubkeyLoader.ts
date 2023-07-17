@@ -68,9 +68,10 @@ export class PubkeyLoader {
 
         await Promise.all(
           chunk(256, pubkeys).map(async chunk => {
-            await Network.load({
+            await Network.subscribe({
               relays: getChunkRelays(chunk),
               filter: getChunkFilter(chunk),
+              timeout: 3000,
             })
           })
         )

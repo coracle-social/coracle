@@ -24,14 +24,16 @@
     // If we have a query, search using nostr.band. If not, ask for random profiles.
     // This allows us to populate results even if search isn't supported by forced urls
     if (q.length > 2) {
-      network.load({
+      network.subscribe({
         relays: nip65.getSearchRelays(),
         filter: [{kinds: [0], search, limit: 10}],
+        timeout: 3000,
       })
     } else if (directory.profiles.get().length < 50) {
-      network.load({
+      network.subscribe({
         relays: user.getRelayUrls("read"),
         filter: [{kinds: [0], limit: 50}],
+        timeout: 3000,
       })
     }
   })

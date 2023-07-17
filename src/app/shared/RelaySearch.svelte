@@ -32,7 +32,7 @@
   }
 
   onMount(() => {
-    network.load({
+    const sub = network.subscribe({
       relays: nip65.getPubkeyHints(3, user.getPubkey(), "read"),
       filter: {
         limit: 1000,
@@ -44,6 +44,8 @@
         reviews = reviews.concat(event)
       },
     })
+
+    return sub.close
   })
 </script>
 

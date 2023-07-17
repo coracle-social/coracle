@@ -114,9 +114,9 @@ export const listen = async () => {
   ;(listen as any)._listener = await network.subscribe({
     relays: user.getRelayUrls("read"),
     filter: [
-      {kinds: noteKinds.concat(4), authors: [pubkey], since},
-      {kinds, "#p": [pubkey], since},
-      {kinds, "#e": eventIds, since},
+      {kinds: noteKinds.concat(4), authors: [pubkey], since, limit: 1},
+      {kinds, "#p": [pubkey], since, limit: 1},
+      {kinds, "#e": eventIds, since, limit: 1},
       {kinds: [42], "#e": channelIds, since},
     ],
     onEvent: batch(3000, events => {

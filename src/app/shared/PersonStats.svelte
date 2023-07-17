@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {onMount} from "svelte"
+  import {onDestroy} from "svelte"
   import {fly} from "src/util/transition"
   import {tweened} from "svelte/motion"
   import {numberFmt, batch} from "src/util/misc"
@@ -11,17 +11,17 @@
   const followsCount = nip02.graph.key(pubkey).derived(() => nip02.getFollowsSet(pubkey).size)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
 
+  let sub
+  let canLoadFollowers = true
   let followersCount = tweened(0, {interpolate, duration: 1000})
 
-  const showFollows = () => {
-    modal.push({type: "person/follows", pubkey})
-  }
+  const showFollows = () => modal.push({type: "person/follows", pubkey})
 
-  const showFollowers = () => {
-    modal.push({type: "person/followers", pubkey})
-  }
+  const showFollowers = () => modal.push({type: "person/followers", pubkey})
 
-  onMount(async () => {
+  const loadFollowers = async () => {
+    canLoadFollowers = false
+
     // Get our followers count
     const count = await network.count({kinds: [3], "#p": [pubkey]})
 
@@ -30,9 +30,10 @@
     } else {
       const followers = new Set()
 
-      await network.load({
-        relays: nip65.getPubkeyHints(3, user.getPubkey(), "read"),
+      sub = network.subscribe({
+        timeout: 30_000,
         shouldProcess: false,
+        relays: nip65.getPubkeyHints(3, user.getPubkey(), "read"),
         filter: [{kinds: [3], "#p": [pubkey]}],
         onEvent: batch(300, events => {
           for (const e of events) {
@@ -43,6 +44,10 @@
         }),
       })
     }
+  }
+
+  onDestroy(() => {
+    sub?.close()
   })
 </script>
 
@@ -51,6 +56,15 @@
     <strong>{$followsCount}</strong> following
   </button>
   <button on:click={showFollowers}>
-    <strong>{numberFmt.format($followersCount)}</strong> followers
+    <strong>
+      {#if canLoadFollowers}
+        <i class="fa fa-download mr-1" on:click|stopPropagation={loadFollowers} />
+      {:else if $followersCount === 0}
+        <i class="fa fa-circle-notch fa-spin mr-1" />
+      {:else}
+        {numberFmt.format($followersCount)}
+      {/if}
+    </strong>
+    followers
   </button>
 </div>

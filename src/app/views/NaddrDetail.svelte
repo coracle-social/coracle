@@ -5,7 +5,6 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import Spinner from "src/partials/Spinner.svelte"
   import {directory, nip65, network} from "src/app/engine"
 
   export let identifier
@@ -14,12 +13,12 @@
   export let relays = []
 
   let note
-  let loading = true
 
   const display = directory.displayPubkey(pubkey)
 
   onMount(async () => {
-    await network.load({
+    const sub = network.subscribe({
+      timeout: 30_000,
       relays: nip65.selectHints(3, relays),
       filter: {kinds: [kind], pubkey, "#d": [identifier]},
       onEvent: event => {
@@ -27,7 +26,7 @@
       },
     })
 
-    loading = false
+    return sub.close
   })
 </script>
 
@@ -56,7 +55,5 @@
         {/if}
       {/each}
     </ul>
-  {:else if loading}
-    <Spinner />
   {/if}
 </Content>

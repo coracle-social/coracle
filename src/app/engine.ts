@@ -38,6 +38,24 @@ const engine = createDefaultEngine({
 })
 
 export default engine
+export const Alerts = engine.Alerts
+export const Builder = engine.Builder
+export const Content = engine.Content
+export const Directory = engine.Directory
+export const Events = engine.Events
+export const Keys = engine.Keys
+export const Meta = engine.Meta
+export const Network = engine.Network
+export const Nip02 = engine.Nip02
+export const Nip04 = engine.Nip04
+export const Nip05 = engine.Nip05
+export const Nip28 = engine.Nip28
+export const Nip57 = engine.Nip57
+export const Nip65 = engine.Nip65
+export const Outbox = engine.Outbox
+export const PubkeyLoader = engine.PubkeyLoader
+export const Storage = engine.Storage
+export const User = engine.User
 export const alerts = engine.Alerts
 export const builder = engine.Builder
 export const content = engine.Content

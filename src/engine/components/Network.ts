@@ -7,6 +7,7 @@ import {warn, error, log} from "src/util/logger"
 import {normalizeRelayUrl} from "src/util/nostr"
 import type {Event, Filter} from "src/engine/types"
 import {Cursor, MultiCursor} from "src/engine/util/Cursor"
+import {Subscription} from "src/engine/util/Subscription"
 import {Feed} from "src/engine/util/Feed"
 
 export type SubscribeOpts = {
@@ -14,7 +15,7 @@ export type SubscribeOpts = {
   filter: Filter[] | Filter
   onEvent?: (event: Event) => void
   onEose?: (url: string) => void
-  autoClose?: boolean
+  timeout?: number
   shouldProcess?: boolean
 }
 
@@ -183,14 +184,15 @@ export class Network {
     const subscribe = ({
       relays,
       filter,
-      onEvent,
       onEose,
-      autoClose,
+      onEvent,
+      timeout,
       shouldProcess = true,
     }: SubscribeOpts) => {
       const urls = getUrls(relays)
       const executor = getExecutor(urls)
       const filters = ensurePlural(filter)
+      const subscription = new Subscription()
       const now = Date.now()
       const seen = new Map()
       const eose = new Set()
@@ -199,26 +201,14 @@ export class Network {
 
       Network.emitter.emit("sub:open", urls)
 
-      let closed = false
-      const closeListeners = []
+      subscription.on("close", () => {
+        sub.unsubscribe()
+        executor.target.cleanup()
+        Network.emitter.emit("sub:close", urls)
+      })
 
-      const close = () => {
-        if (!closed) {
-          sub.unsubscribe()
-          executor.target.cleanup()
-          Network.emitter.emit("sub:close", urls)
-
-          for (const f of closeListeners) {
-            f()
-          }
-        }
-
-        closed = true
-      }
-
-      // If autoClose is set but we don't get an eose, make sure we clean up after ourselves
-      if (autoClose) {
-        setTimeout(close, 30_000)
+      if (timeout) {
+        setTimeout(subscription.close, timeout)
       }
 
       const sub = executor.subscribe(filters, {
@@ -260,7 +250,7 @@ export class Network {
             Events.queue.push(event)
           }
 
-          onEvent(event)
+          onEvent?.(event)
         },
         onEose: url => {
           onEose?.(url)
@@ -272,77 +262,13 @@ export class Network {
 
           eose.add(url)
 
-          if (autoClose && eose.size === relays.length) {
-            close()
+          if (timeout && eose.size === relays.length) {
+            subscription.close()
           }
         },
       })
 
-      return {
-        close,
-        isClosed: () => closed,
-        onClose: f => closeListeners.push(f),
-      }
-    }
-
-    const load = ({
-      relays,
-      filter,
-      onEvent = null,
-      shouldProcess = true,
-      timeout = 5000,
-    }: {
-      relays: string[]
-      filter: Filter | Filter[]
-      onEvent?: (event: Event) => void
-      shouldProcess?: boolean
-      timeout?: number
-    }) => {
-      return new Promise(resolve => {
-        let completed = false
-        const eose = new Set()
-        const allEvents = []
-
-        const attemptToComplete = force => {
-          // If we've already unsubscribed we're good
-          if (completed) {
-            return
-          }
-
-          const isDone = eose.size === relays.length
-
-          if (force) {
-            relays.forEach(url => {
-              if (!eose.has(url)) {
-                Network.pool.emit("timeout", url)
-              }
-            })
-          }
-
-          if (isDone || force) {
-            sub.close()
-            resolve(allEvents)
-            completed = true
-          }
-        }
-
-        // If a relay takes too long, give up
-        setTimeout(() => attemptToComplete(true), timeout)
-
-        const sub = subscribe({
-          relays,
-          filter,
-          shouldProcess,
-          onEvent: event => {
-            onEvent?.(event)
-            allEvents.push(event)
-          },
-          onEose: url => {
-            eose.add(url)
-            attemptToComplete(false)
-          },
-        })
-      }) as Promise<Event[]>
+      return subscription
     }
 
     const count = async filter => {
@@ -362,13 +288,13 @@ export class Network {
       })
     }
 
-    const cursor = opts => new Cursor({...opts, load})
+    const cursor = opts => new Cursor({...opts, subscribe})
 
     const multiCursor = ({relays, ...opts}) =>
       new MultiCursor(relays.map(relay => cursor({relay, ...opts})))
 
     const feed = opts => new Feed({engine, ...opts})
 
-    return {subscribe, publish, load, count, cursor, multiCursor, feed}
+    return {subscribe, publish, count, cursor, multiCursor, feed}
   }
 }

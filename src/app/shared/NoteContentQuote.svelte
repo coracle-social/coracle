@@ -1,7 +1,6 @@
 <script lang="ts">
-  import type {Event} from "src/engine/types"
+  import {onDestroy} from "svelte"
   import {fly} from "src/util/transition"
-  import {warn} from "src/util/logger"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
@@ -12,31 +11,24 @@
   export let note
   export let value
 
+  let quote = null
   let muted = false
+  let loading = true
 
   const openPerson = pubkey => modal.push({type: "person/feed", pubkey})
 
-  const loadQuote = () => {
-    const {id, relays = []} = value
+  const {id, relays = []} = value
 
-    return new Promise(async (resolve, reject) => {
-      try {
-        await network.load({
-          relays: nip65.mergeHints(3, [relays, nip65.getEventHints(3, note)]),
-          filter: [{ids: [id]}],
-          onEvent: event => {
-            muted = user.applyMutes([event]).length === 0
-
-            resolve(event)
-          },
-        })
-      } catch (e) {
-        warn(e)
-      }
-
-      reject()
-    }) as Promise<Event>
-  }
+  const sub = network.subscribe({
+    timeout: 5000,
+    relays: nip65.mergeHints(3, [relays, nip65.getEventHints(3, note)]),
+    filter: [{ids: [id]}],
+    onEvent: event => {
+      loading = false
+      muted = user.applyMutes([event]).length === 0
+      quote = event
+    },
+  })
 
   const openQuote = e => {
     // stopPropagation wasn't working for some reason
@@ -48,15 +40,19 @@
   const unmute = e => {
     muted = false
   }
+
+  onDestroy(() => {
+    sub.close()
+  })
 </script>
 
 <div class="py-2">
   <Card interactive invertColors class="my-2" on:click={openQuote}>
-    {#await loadQuote()}
+    {#if loading}
       <div class="px-20">
         <Spinner />
       </div>
-    {:then quote}
+    {:else if quote}
       {#if muted}
         <p class="mb-1 py-24 text-center text-gray-5" in:fly={{y: 20}}>
           You have muted this note.
@@ -75,10 +71,10 @@
         </div>
         <slot name="note-content" {quote} />
       {/if}
-    {:catch}
+    {:else}
       <p class="mb-1 py-24 text-center text-gray-5" in:fly={{y: 20}}>
         Unable to load a preview for quoted event
       </p>
-    {/await}
+    {/if}
   </Card>
 </div>

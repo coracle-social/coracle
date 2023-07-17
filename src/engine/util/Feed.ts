@@ -1,6 +1,7 @@
 import {matchFilters} from "nostr-tools"
 import {throttle} from "throttle-debounce"
 import {
+  omit,
   pluck,
   partition,
   identity,
@@ -22,7 +23,10 @@ import type {Collection} from "./store"
 import {Cursor, MultiCursor} from "./Cursor"
 import type {Event, DisplayEvent, Filter} from "../types"
 
+const fromDisplayEvent = omit(["zaps", "likes", "replies", "matchesFilter"])
+
 export type FeedOpts = {
+  limit?: number
   depth: number
   relays: string[]
   filter: Filter | Filter[]
@@ -37,11 +41,11 @@ export class Feed {
   context: Collection<Event>
   feed: Collection<DisplayEvent>
   seen: Set<string>
-  subs: Record<string, Array<() => void>>
+  subs: Record<string, Array<{close: () => void}>>
   cursor: MultiCursor
 
   constructor(readonly opts: FeedOpts) {
-    this.limit = 20
+    this.limit = opts.limit || 20
     this.since = now()
     this.stopped = false
     this.deferred = []
@@ -62,7 +66,7 @@ export class Feed {
     for (const sub of ensurePlural(subs)) {
       this.subs[key].push(sub)
 
-      sub.onClose(() => {
+      sub.on("close", () => {
         this.subs[key] = without([sub], this.subs[key])
       })
     }
@@ -81,6 +85,10 @@ export class Feed {
   }
 
   isMissingParent = e => {
+    if (!this.opts.shouldLoadParents) {
+      return false
+    }
+
     const parentId = findReplyId(e)
 
     return parentId && this.matchFilters(e) && !this.context.key(parentId).exists()
@@ -220,7 +228,7 @@ export class Feed {
       return
     }
 
-    this.subs.listeners.forEach(unsubscribe => unsubscribe())
+    this.subs.listeners.forEach(sub => sub.close())
 
     const contextByParentId = groupBy(findReplyId, this.context.get())
 
@@ -251,7 +259,7 @@ export class Feed {
 
     this.loadPubkeys(events)
 
-    if (shouldLoadParents) {
+    if (this.opts.shouldLoadParents && shouldLoadParents) {
       this.loadParents(events)
     }
 
@@ -264,7 +272,7 @@ export class Feed {
 
   start() {
     const {since} = this
-    const {relays, filter, engine} = this.opts
+    const {relays, filter, engine, depth} = this.opts
 
     // No point in subscribing if we have an end date
     if (!all(prop("until"), ensurePlural(filter))) {
@@ -273,7 +281,7 @@ export class Feed {
           relays,
           filter: ensurePlural(filter).map(assoc("since", since)),
           onEvent: batch(1000, context =>
-            this.addContext(context, {shouldLoadParents: true, depth: 6})
+            this.addContext(context, {shouldLoadParents: true, depth})
           ),
         }),
       ])
@@ -287,7 +295,7 @@ export class Feed {
             filter,
             subscribe: engine.Network.subscribe,
             onEvent: batch(100, context =>
-              this.addContext(context, {shouldLoadParents: true, depth: 6})
+              this.addContext(context, {shouldLoadParents: true, depth})
             ),
           })
       )
@@ -304,6 +312,32 @@ export class Feed {
       sub.close()
     }
   }
+
+  hydrate(feed) {
+    const {depth} = this.opts
+    const notes = []
+    const context = []
+
+    const addContext = ({zaps, replies, reactions, ...note}) => {
+      context.push(fromDisplayEvent(note))
+
+      zaps.map(zap => context.push(zap))
+      reactions.map(reaction => context.push(reaction))
+
+      replies.map(addContext)
+    }
+
+    feed.forEach(note => {
+      addContext(note)
+
+      notes.push(fromDisplayEvent(note))
+    })
+
+    this.feed.set(notes)
+    this.addContext(context, {depth})
+  }
+
+  // Loading
 
   async load() {
     // If we don't have a decent number of notes yet, try to get enough
@@ -328,6 +362,12 @@ export class Feed {
     this.addToFeed(ok)
   }
 
+  async loadAll() {
+    while (!this.cursor.done()) {
+      await this.load()
+    }
+  }
+
   deferReactions = notes => {
     const [defer, ok] = partition(e => !this.isTextNote(e) && this.isMissingParent(e), notes)
 
@@ -337,7 +377,7 @@ export class Feed {
 
       this.addToFeed(ready)
       this.deferred = this.deferred.concat(orphans)
-    }, 3000)
+    }, 1500)
 
     return ok
   }
@@ -346,7 +386,7 @@ export class Feed {
     // If something has a parent id but we haven't found the parent yet, skip it until we have it.
     const [defer, ok] = partition(e => this.isTextNote(e) && this.isMissingParent(e), notes)
 
-    setTimeout(() => this.addToFeed(defer), 3000)
+    setTimeout(() => this.addToFeed(defer), 1500)
 
     return ok
   }

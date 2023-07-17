@@ -12,12 +12,11 @@
 
   let pubkeys = []
 
-  onMount(async () => {
+  onMount(() => {
     if (type === "follows") {
       pubkeys = nip02.getFollows(pubkey)
     } else {
-      await network.load({
-        shouldProcess: false,
+      const sub = network.subscribe({
         relays: nip65.getPubkeyHints(user.getSetting("relay_limit"), pubkey, "read"),
         filter: {kinds: [3], "#p": [pubkey]},
         onEvent: batch(500, events => {
@@ -28,6 +27,8 @@
           pubkeys = uniq(pubkeys.concat(newPubkeys))
         }),
       })
+
+      return sub.close
     }
   })
 </script>
