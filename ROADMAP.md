@@ -1,7 +1,9 @@
 # Current
 
 - [ ] Refactor
+  - [ ] Remove load, use subscribe with autoClose. Add subscription class and put handlers on that.
   - [ ] Cancel load requests as well as subscribes when navigating to save bandwidth. Get rid of load?
+  - [ ] Abort context load requests when the next page is requested?
   - [ ] Use limit 1 to find most recent notification, then load when visiting the notifications page.
   - [ ] Remove external dependencies from engine, open source it?
   - [ ] If connections fail, re-open and re-send active subs

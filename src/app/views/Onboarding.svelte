@@ -52,7 +52,7 @@
 
   onMount(() => {
     // Prime our database with some defaults
-    pubkeyLoader.loadPubkeys(DEFAULT_FOLLOWS)
+    pubkeyLoader.load(DEFAULT_FOLLOWS)
   })
 </script>
 

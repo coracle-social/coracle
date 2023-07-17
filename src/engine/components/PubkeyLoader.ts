@@ -35,7 +35,7 @@ export class PubkeyLoader {
       return stale
     }
 
-    const loadPubkeys = batch(
+    const load = batch(
       300,
       async (pubkeyGroups, {relays, force, kinds = personKinds}: LoadPeopleOpts = {}) => {
         const rawPubkeys = flatten(pubkeyGroups)
@@ -77,6 +77,6 @@ export class PubkeyLoader {
       }
     )
 
-    return {loadPubkeys}
+    return {load}
   }
 }

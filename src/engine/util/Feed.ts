@@ -5,6 +5,7 @@ import {
   partition,
   identity,
   flatten,
+  without,
   groupBy,
   all,
   sortBy,
@@ -36,8 +37,7 @@ export class Feed {
   context: Collection<Event>
   feed: Collection<DisplayEvent>
   seen: Set<string>
-  subs: Array<() => void>
-  unsubscribe: () => void
+  subs: Record<string, Array<() => void>>
   cursor: MultiCursor
 
   constructor(readonly opts: FeedOpts) {
@@ -48,10 +48,25 @@ export class Feed {
     this.context = collection<Event>("id")
     this.feed = collection<DisplayEvent>("id")
     this.seen = new Set()
-    this.subs = []
+    this.subs = {
+      main: [],
+      notes: [],
+      context: [],
+      listeners: [],
+    }
   }
 
   // Utils
+
+  addSubs(key, subs) {
+    for (const sub of ensurePlural(subs)) {
+      this.subs[key].push(sub)
+
+      sub.onClose(() => {
+        this.subs[key] = without([sub], this.subs[key])
+      })
+    }
+  }
 
   getReplyKinds() {
     return this.opts.engine.Env.ENABLE_ZAPS ? [1, 7, 9735] : [1, 7]
@@ -151,7 +166,7 @@ export class Feed {
   // Context loaders
 
   loadPubkeys = events => {
-    this.opts.engine.PubkeyLoader.loadPubkeys(
+    this.opts.engine.PubkeyLoader.load(
       events.filter(this.isTextNote).flatMap(e => Tags.from(e).pubkeys().concat(e.pubkey))
     )
   }
@@ -163,11 +178,14 @@ export class Feed {
       .filter(({id}) => id && !this.seen.has(id))
 
     if (parentsInfo.length > 0) {
-      Network.load({
-        filter: {ids: pluck("id", parentsInfo)},
-        relays: this.mergeHints(pluck("hints", parentsInfo)),
-        onEvent: batch(100, context => this.addContext(context, {depth: 2})),
-      })
+      this.addSubs("context", [
+        Network.subscribe({
+          autoClose: true,
+          filter: {ids: pluck("id", parentsInfo)},
+          relays: this.mergeHints(pluck("hints", parentsInfo)),
+          onEvent: batch(100, context => this.addContext(context, {depth: 2})),
+        }),
+      ])
     }
   }
 
@@ -185,7 +203,8 @@ export class Feed {
       const events = flatten(pluck("events", groups)).filter(this.isTextNote)
 
       for (const c of chunk(256, events)) {
-        Network.load({
+        Network.subscribe({
+          autoClose: true,
           relays: this.mergeHints(c.map(e => Nip65.getReplyHints(3, e))),
           filter: {kinds: this.getReplyKinds(), "#e": pluck("id", c)},
           onEvent: batch(100, context => this.addContext(context, {depth: depth - 1})),
@@ -201,7 +220,7 @@ export class Feed {
       return
     }
 
-    this.subs.forEach(unsubscribe => unsubscribe())
+    this.subs.listeners.forEach(unsubscribe => unsubscribe())
 
     const contextByParentId = groupBy(findReplyId, this.context.get())
 
@@ -211,13 +230,13 @@ export class Feed {
         .flatMap(e => findNotes(contextByParentId[e.id] || []).concat(e))
 
     for (const c of chunk(256, findNotes(this.feed.get()))) {
-      this.subs.push(
+      this.addSubs("listeners", [
         Network.subscribe({
           relays: this.mergeHints(c.map(e => Nip65.getReplyHints(3, e))),
           filter: {kinds: this.getReplyKinds(), "#e": pluck("id", c), since: now()},
           onEvent: batch(100, context => this.addContext(context, {depth: 2})),
-        })
-      )
+        }),
+      ])
     }
   })
 
@@ -249,13 +268,15 @@ export class Feed {
 
     // No point in subscribing if we have an end date
     if (!all(prop("until"), ensurePlural(filter))) {
-      this.unsubscribe = engine.Network.subscribe({
-        relays,
-        filter: ensurePlural(filter).map(assoc("since", since)),
-        onEvent: batch(1000, context =>
-          this.addContext(context, {shouldLoadParents: true, depth: 6})
-        ),
-      })
+      this.addSubs("main", [
+        engine.Network.subscribe({
+          relays,
+          filter: ensurePlural(filter).map(assoc("since", since)),
+          onEvent: batch(1000, context =>
+            this.addContext(context, {shouldLoadParents: true, depth: 6})
+          ),
+        }),
+      ])
     }
 
     this.cursor = new MultiCursor(
@@ -264,7 +285,7 @@ export class Feed {
           new Cursor({
             relay,
             filter,
-            load: engine.Network.load,
+            subscribe: engine.Network.subscribe,
             onEvent: batch(100, context =>
               this.addContext(context, {shouldLoadParents: true, depth: 6})
             ),
@@ -273,15 +294,14 @@ export class Feed {
     )
 
     // Load the first page as soon as possible
-    this.cursor.load(this.limit)
+    this.addSubs("notes", this.cursor.load(this.limit))
   }
 
   stop() {
     this.stopped = true
-    this.unsubscribe?.()
 
-    for (const unsubscribe of this.subs) {
-      unsubscribe()
+    for (const sub of flatten(Object.values(this.subs))) {
+      sub.close()
     }
   }
 
@@ -289,13 +309,15 @@ export class Feed {
     // If we don't have a decent number of notes yet, try to get enough
     // to avoid out of order notes
     if (this.cursor.count() < this.limit) {
-      this.cursor.load(this.limit)
+      this.addSubs("notes", this.cursor.load(this.limit))
 
       await sleep(500)
     }
 
-    const notes = this.cursor.take(5)
+    const [subs, notes] = this.cursor.take(5)
     const deferred = this.deferred.splice(0)
+
+    this.addSubs("notes", subs)
 
     const ok = doPipe(notes.concat(deferred), [
       this.deferReactions,

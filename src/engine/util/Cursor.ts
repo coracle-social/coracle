@@ -1,4 +1,4 @@
-import {mergeLeft, sortBy} from "ramda"
+import {mergeLeft, identity, sortBy} from "ramda"
 import {ensurePlural, first} from "hurdak/lib/hurdak"
 import {now} from "src/util/misc"
 import type {Filter, Event} from "../types"
@@ -6,7 +6,7 @@ import type {Filter, Event} from "../types"
 export type CursorOpts = {
   relay: string
   filter: Filter | Filter[]
-  load: (opts: any) => Promise<Event[]>
+  subscribe: (opts: any) => void
   onEvent?: (e: Event) => void
 }
 
@@ -26,7 +26,7 @@ export class Cursor {
 
     // If we're already loading, or we have enough buffered, do nothing
     if (this.loading || limit <= 0) {
-      return
+      return null
     }
 
     const {until} = this
@@ -34,20 +34,20 @@ export class Cursor {
 
     this.loading = true
 
-    this.opts
-      .load({
-        relays: [relay],
-        filter: ensurePlural(filter).map(mergeLeft({until, limit})),
-        onEvent: event => {
-          this.until = Math.min(until, event.created_at)
-          this.buffer.push(event)
+    return this.opts.subscribe({
+      autoClose: true,
+      relays: [relay],
+      filter: ensurePlural(filter).map(mergeLeft({until, limit})),
+      onEvent: event => {
+        this.until = Math.min(until, event.created_at)
+        this.buffer.push(event)
 
-          onEvent?.(event)
-        },
-      })
-      .then(() => {
+        onEvent?.(event)
+      },
+      onEose: () => {
         this.loading = false
-      })
+      },
+    })
   }
 
   take(n = Infinity) {
@@ -77,9 +77,7 @@ export class MultiCursor {
   }
 
   load(limit) {
-    for (const cursor of this.#cursors) {
-      cursor.load(limit)
-    }
+    return this.#cursors.map(c => c.load(limit)).filter(identity)
   }
 
   count() {
@@ -114,8 +112,8 @@ export class MultiCursor {
     }
 
     // Preload the next page
-    this.load(n)
+    const subs = this.load(n)
 
-    return events
+    return [subs, events]
   }
 }

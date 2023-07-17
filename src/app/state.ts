@@ -120,7 +120,7 @@ export const listen = async () => {
       {kinds: [42], "#e": channelIds, since},
     ],
     onEvent: batch(3000, events => {
-      pubkeyLoader.loadPubkeys(pluck("pubkey", events))
+      pubkeyLoader.load(pluck("pubkey", events))
     }),
   })
 }
@@ -157,8 +157,8 @@ export const loadAppData = async pubkey => {
     listen()
 
     // Make sure the user and their network is loaded
-    await pubkeyLoader.loadPubkeys([pubkey], {force: true, kinds: userKinds})
-    await pubkeyLoader.loadPubkeys(user.getFollows())
+    pubkeyLoader.load([pubkey], {force: true, kinds: userKinds})
+    pubkeyLoader.load(user.getFollows())
   }
 }
 
@@ -175,7 +175,7 @@ export const login = async (method, key) => {
 
     await Promise.all([
       sleep(1500),
-      pubkeyLoader.loadPubkeys([keys.pubkey.get()], {force: true, kinds: userKinds}),
+      pubkeyLoader.load([keys.pubkey.get()], {force: true, kinds: userKinds}),
     ])
 
     navigate("/notes")

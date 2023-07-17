@@ -14,6 +14,7 @@ export type SubscribeOpts = {
   filter: Filter[] | Filter
   onEvent?: (event: Event) => void
   onEose?: (url: string) => void
+  autoClose?: boolean
   shouldProcess?: boolean
 }
 
@@ -179,7 +180,14 @@ export class Network {
       })
     }
 
-    const subscribe = ({relays, filter, onEvent, onEose, shouldProcess = true}: SubscribeOpts) => {
+    const subscribe = ({
+      relays,
+      filter,
+      onEvent,
+      onEose,
+      autoClose,
+      shouldProcess = true,
+    }: SubscribeOpts) => {
       const urls = getUrls(relays)
       const executor = getExecutor(urls)
       const filters = ensurePlural(filter)
@@ -190,6 +198,28 @@ export class Network {
       log(`Starting subscription with ${relays.length} relays`, {filters, relays})
 
       Network.emitter.emit("sub:open", urls)
+
+      let closed = false
+      const closeListeners = []
+
+      const close = () => {
+        if (!closed) {
+          sub.unsubscribe()
+          executor.target.cleanup()
+          Network.emitter.emit("sub:close", urls)
+
+          for (const f of closeListeners) {
+            f()
+          }
+        }
+
+        closed = true
+      }
+
+      // If autoClose is set but we don't get an eose, make sure we clean up after ourselves
+      if (autoClose) {
+        setTimeout(close, 30_000)
+      }
 
       const sub = executor.subscribe(filters, {
         onEvent: (url, event) => {
@@ -241,24 +271,17 @@ export class Network {
           }
 
           eose.add(url)
+
+          if (autoClose && eose.size === relays.length) {
+            close()
+          }
         },
       })
 
-      let closed = false
-
-      return () => {
-        if (closed) {
-          error("Closed subscription twice", filters)
-        } else {
-          log(`Closing subscription`, filters)
-        }
-
-        sub.unsubscribe()
-        executor.target.cleanup()
-
-        Network.emitter.emit("sub:close", urls)
-
-        closed = true
+      return {
+        close,
+        isClosed: () => closed,
+        onClose: f => closeListeners.push(f),
       }
     }
 
@@ -297,7 +320,7 @@ export class Network {
           }
 
           if (isDone || force) {
-            unsubscribe()
+            sub.close()
             resolve(allEvents)
             completed = true
           }
@@ -306,7 +329,7 @@ export class Network {
         // If a relay takes too long, give up
         setTimeout(() => attemptToComplete(true), timeout)
 
-        const unsubscribe = subscribe({
+        const sub = subscribe({
           relays,
           filter,
           shouldProcess,

@@ -54,7 +54,7 @@
       // Wait a bit before removing the relay to smooth out the ui
       Promise.all([
         sleep(1500),
-        pubkeyLoader.loadPubkeys([user.getPubkey()], {
+        pubkeyLoader.load([user.getPubkey()], {
           force: true,
           relays: [relay.url],
           kinds: userKinds,

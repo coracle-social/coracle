@@ -23,7 +23,7 @@
         onEvent: batch(500, events => {
           const newPubkeys = pluck("pubkey", events)
 
-          pubkeyLoader.loadPubkeys(newPubkeys)
+          pubkeyLoader.load(newPubkeys)
 
           pubkeys = uniq(pubkeys.concat(newPubkeys))
         }),

@@ -42,7 +42,7 @@
 
   log("Person", npub, $profile)
 
-  pubkeyLoader.loadPubkeys([pubkey], {force: true})
+  pubkeyLoader.load([pubkey], {force: true})
 
   document.title = directory.displayProfile($profile)
 
