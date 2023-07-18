@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.3.0
+
+- [x] Faster login and initial load
+- [x] Faster and more complete feed loading
+- [x] More bandwidth-sensitive notifications fetching
+
 # 0.2.35
 
 - [x] Add support for nsecbunker

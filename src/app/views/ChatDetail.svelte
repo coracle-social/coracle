@@ -30,10 +30,13 @@
   }
 
   onMount(() => {
-    return network.subscribe({
+    const sub = network.subscribe({
       relays: getRelays(),
       filter: [{kinds: [42], "#e": [id]}],
+      onEvent: e => console.log(e),
     })
+
+    return () => sub.close()
   })
 
   onDestroy(() => {

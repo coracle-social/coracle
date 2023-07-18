@@ -1,12 +1,13 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Add thread view
   - [ ] Use limit 1 to find most recent notification, then load when visiting the notifications page.
+  - [ ] Add pagination back to chat/messages. Cache is not cutting it, at least for chat.
   - [ ] Remove external dependencies from engine, open source it?
   - [ ] If connections fail, re-open and re-send active subs
   - [ ] Normalize all relay urls, see comment by daniele
   - [ ] Pull x recent chat messages on chat detail and sort by that
+  - [ ] Add thread view
 - [ ] Re-work note media
   - [ ] Add webcam image/video capture
   - [ ] Show list of media that can be viewed/removed below post

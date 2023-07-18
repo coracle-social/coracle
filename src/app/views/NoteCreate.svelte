@@ -147,7 +147,7 @@
         }}>
         <span>
           Publishing to {#if $relays?.length === 1}
-            {nip65.displayRelay($relays[0])}
+            {nip65.displayRelay({url: $relays[0]})}
           {:else}
             {$relays.length} relays
           {/if}

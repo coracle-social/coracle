@@ -7,7 +7,7 @@ import {writable, get} from "svelte/store"
 import {whereEq, omit, filter, pluck, sortBy, slice} from "ramda"
 import {doPipe, first} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
-import {hash, timedelta, now, batch, shuffle, sleep, clamp} from "src/util/misc"
+import {hash, timedelta, now, shuffle, sleep, clamp} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import {
@@ -119,9 +119,6 @@ export const listen = async () => {
       {kinds, "#e": eventIds, since, limit: 1},
       {kinds: [42], "#e": channelIds, since},
     ],
-    onEvent: batch(3000, events => {
-      pubkeyLoader.load(pluck("pubkey", events))
-    }),
   })
 }
 

@@ -30,6 +30,7 @@ export type FeedOpts = {
   depth: number
   relays: string[]
   filter: Filter | Filter[]
+  onEvent?: (e: Event) => void
   engine: any
 }
 
@@ -85,10 +86,6 @@ export class Feed {
   }
 
   isMissingParent = e => {
-    if (!this.opts.shouldLoadParents) {
-      return false
-    }
-
     const parentId = findReplyId(e)
 
     return parentId && this.matchFilters(e) && !this.context.key(parentId).exists()
@@ -251,7 +248,14 @@ export class Feed {
   // Adders
 
   addContext = (newEvents, {shouldLoadParents = false, depth = 0}) => {
+    const {onEvent} = this.opts
     const events = this.preprocessEvents(newEvents)
+
+    if (onEvent) {
+      for (const event of events) {
+        onEvent(event)
+      }
+    }
 
     this.feed.update($feed => this.applyContext($feed, events, false))
 
@@ -259,7 +263,7 @@ export class Feed {
 
     this.loadPubkeys(events)
 
-    if (this.opts.shouldLoadParents && shouldLoadParents) {
+    if (shouldLoadParents) {
       this.loadParents(events)
     }
 

@@ -1,16 +1,18 @@
 <script>
-  import {sortBy, partition, prop} from "ramda"
+  import {sortBy, pluck, partition, prop} from "ramda"
+  import {onMount} from "svelte"
   import {toTitle} from "hurdak/lib/hurdak"
+  import {now, batch, timedelta} from "src/util/misc"
   import {navigate} from "svelte-routing"
   import Tabs from "src/partials/Tabs.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
   import MessagesListItem from "src/app/views/MessagesListItem.svelte"
-  import {nip04, user} from "src/app/engine"
+  import {Nip04, PubkeyLoader, User, Network, Keys} from "src/app/engine"
 
   export let activeTab = "messages"
 
-  const {hasNewMessages, contacts} = nip04
+  const {hasNewMessages, contacts} = Nip04
 
   const getContacts = tab =>
     sortBy(
@@ -26,6 +28,23 @@
   $: [accepted, requests] = partition(prop("last_sent"), $contacts)
 
   document.title = "Direct Messages"
+
+  onMount(() => {
+    const pubkey = Keys.pubkey.get()
+    const since = now() - timedelta(90, "days")
+    const sub = Network.subscribe({
+      relays: User.getRelayUrls("read"),
+      filter: [
+        {kinds: [4], authors: [pubkey], since},
+        {kinds: [4], "#p": [pubkey], since},
+      ],
+      onEvent: batch(1000, events => {
+        PubkeyLoader.load(pluck("pubkey", events))
+      }),
+    })
+
+    return () => sub.close()
+  })
 </script>
 
 <Content>
@@ -36,7 +55,7 @@
         <i
           class="fa fa-bell cursor-bell cursor-pointer"
           class:text-gray-5={!$hasNewMessages}
-          on:click={user.markAllMessagesRead} />
+          on:click={User.markAllMessagesRead} />
       </div>
       <div slot="tooltip">Mark all as read</div>
     </Popover>

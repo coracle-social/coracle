@@ -1,10 +1,8 @@
-import {find, last, pick, uniq, pluck} from "ramda"
+import {find, last, pick, uniq} from "ramda"
 import {tryJson, fuzzy, now} from "src/util/misc"
 import {Tags, appDataKeys, channelAttrs} from "src/util/nostr"
 import type {Channel, Message} from "src/engine/types"
 import {collection, derived} from "../util/store"
-
-const getHints = e => pluck("url", Tags.from(e).relays())
 
 const messageIsNew = ({last_checked, last_received, last_sent}: Channel) =>
   last_received > Math.max(last_sent || 0, last_checked || 0)
@@ -12,7 +10,7 @@ const messageIsNew = ({last_checked, last_received, last_sent}: Channel) =>
 export class Nip28 {
   static contributeState() {
     const channels = collection<Channel>("id")
-    const messages = collection<Message>("channel")
+    const messages = collection<Message>("id")
 
     const hasNewMessages = derived(
       channels,
@@ -53,7 +51,7 @@ export class Nip28 {
         type: "public",
         pubkey: e.pubkey,
         updated_at: now(),
-        hints: getHints(e),
+        hints: Tags.from(e).relays(),
         ...content,
       })
     })
@@ -84,7 +82,7 @@ export class Nip28 {
       Nip28.channels.key(channelId).merge({
         pubkey: e.pubkey,
         updated_at: now(),
-        hints: getHints(e),
+        hints: Tags.from(e).relays(),
         ...content,
       })
     })
@@ -140,7 +138,7 @@ export class Nip28 {
       const tags = Tags.from(e)
       const channelId = tags.getMeta("e")
       const channel = Nip28.channels.key(channelId).get()
-      const hints = uniq(pluck("url", tags.relays()).concat(channel?.hints || []))
+      const hints = uniq(tags.relays().concat(channel?.hints || []))
 
       Nip28.messages.key(e.id).merge({
         channel: channelId,
@@ -150,10 +148,11 @@ export class Nip28 {
         tags: e.tags,
       })
 
-      Nip28.channels.key(channelId).merge({
-        last_sent: e.created_at,
-        hints,
-      })
+      if (e.pubkey === Keys.pubkey.get()) {
+        Nip28.channels.key(channelId).merge({last_sent: e.created_at, hints})
+      } else {
+        Nip28.channels.key(channelId).merge({last_received: e.created_at, hints})
+      }
     })
   }
 }

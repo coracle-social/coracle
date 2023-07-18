@@ -1,20 +1,22 @@
 <script>
   import {onMount} from "svelte"
-  import {partition, filter, whereEq, prop} from "ramda"
+  import {partition, pluck, filter, whereEq, uniq, prop} from "ramda"
+  import {now, timedelta, batch} from "src/util/misc"
+  import {Tags} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
-  import {nip28, nip65, network, user, keys} from "src/app/engine"
+  import {PubkeyLoader, Nip28, Nip65, Network, Keys} from "src/app/engine"
 
   let q = ""
   let results = []
   let joinedChannels = []
   let otherChannels = []
 
-  const {searchChannels} = nip28
-  const channels = nip28.channels.derived(filter(whereEq({type: "public"})))
+  const {searchChannels} = Nip28
+  const channels = Nip28.channels.derived(filter(whereEq({type: "public"})))
 
   $: [joinedChannels, otherChannels] = partition(prop("joined"), $channels)
   $: results = $searchChannels(q)
@@ -24,15 +26,41 @@
   document.title = "Chat"
 
   onMount(() => {
-    return network.subscribe({
-      relays: nip65.getPubkeyHints(3, user.getPubkey(), "read"),
-      filter: [{kinds: [40, 41]}],
-    })
+    const subs = []
+    const relays = Nip65.getPubkeyHints(3, Keys.pubkey.get(), "read")
+
+    subs.push(
+      Network.subscribe({
+        relays,
+        autoClose: true,
+        filter: [{kinds: [42], since: now() - timedelta(1, "days"), limit: 100}],
+        onEvent: batch(500, events => {
+          const channelIds = uniq(events.map(e => Tags.from(e).getMeta("e")))
+
+          PubkeyLoader.load(pluck("pubkey", events))
+
+          subs.push(
+            Network.subscribe({
+              relays,
+              autoClose: true,
+              filter: [
+                {kinds: [40], ids: channelIds},
+                {kinds: [41], "#e": channelIds},
+              ],
+            })
+          )
+        }),
+      })
+    )
+
+    return () => {
+      subs.map(s => s.close())
+    }
   })
 </script>
 
 <Content>
-  {#if keys.canSign.get()}
+  {#if Keys.canSign.get()}
     <div class="flex justify-between">
       <div class="flex items-center gap-2">
         <i class="fa fa-server fa-lg" />

@@ -85,7 +85,7 @@
         depth: 2,
         relays: getRelays(),
         filter: compileFilter(filter),
-        shouldLoadParents: true,
+        onEvent,
       })
 
       feed.start()
