@@ -35,6 +35,7 @@ const engine = createDefaultEngine({
   COUNT_RELAYS,
   SEARCH_RELAYS,
   DEFAULT_RELAYS,
+  ENABLE_ZAPS,
 })
 
 export default engine

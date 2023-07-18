@@ -281,17 +281,6 @@ export const union = (...sets) => new Set(sets.flatMap(s => Array.from(s)))
 
 export const difference = (a, b) => new Set(Array.from(a).filter(x => !b.has(x)))
 
-export const quantile = (a, q) => {
-  const sorted = sortBy(identity, a)
-  const pos = (sorted.length - 1) * q
-  const base = Math.floor(pos)
-  const rest = pos - base
-
-  return isNil(sorted[base + 1])
-    ? sorted[base]
-    : sorted[base] + rest * (sorted[base + 1] - sorted[base])
-}
-
 type FetchOpts = {
   method?: string
   headers?: Record<string, string | boolean>
@@ -346,31 +335,6 @@ export const formatSats = sats => {
   if (sats < 1_000_000) return numberFmt.format(round(1, sats / 1000)) + "K"
   if (sats < 100_000_000) return numberFmt.format(round(1, sats / 1_000_000)) + "MM"
   return numberFmt.format(round(2, sats / 100_000_000)) + "BTC"
-}
-
-type EventBusListener = {
-  id: string
-  handler: (...args: any[]) => void
-}
-
-export class EventBus {
-  listeners: Record<string, Array<EventBusListener>> = {}
-  on(name, handler) {
-    const id = randomId()
-
-    this.listeners[name] = this.listeners[name] || ([] as Array<EventBusListener>)
-    this.listeners[name].push({id, handler})
-
-    return id
-  }
-  off(name, id) {
-    this.listeners[name] = reject(whereEq({id}), this.listeners[name])
-  }
-  handle(k, ...payload) {
-    for (const {handler} of this.listeners[k] || []) {
-      handler(...payload)
-    }
-  }
 }
 
 export const annotateMedia = url => {

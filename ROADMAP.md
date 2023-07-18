@@ -1,12 +1,10 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Use limit 1 to find most recent notification, then load when visiting the notifications page.
-  - [ ] Add pagination back to chat/messages. Cache is not cutting it, at least for chat.
-  - [ ] Add DM button to user modal
-  - [ ] Send Sleepy marketing materials
   - [ ] Get back to blowater
+  - [ ] Fix feed control state
   - [ ] Remove external dependencies from engine, open source it?
+  - [ ] Show nip 5's in search and other places
   - [ ] If connections fail, re-open and re-send active subs
   - [ ] Normalize all relay urls, see comment by daniele
   - [ ] Pull x recent chat messages on chat detail and sort by that
@@ -45,6 +43,7 @@
 # Core
 
 - [ ] Private groups
+- [ ] Put topic/channel/list follows in petnames https://github.com/nostr-protocol/nips/pull/665#issuecomment-1640835240
 - [ ] Add custom emoji support
 - [ ] Reminders for max time spent on coracle
 - [ ] Proxy handle requests for CORS

@@ -92,7 +92,8 @@ export const killEvent = e => {
   e.stopImmediatePropagation()
 }
 
-export const isMobile = localStorage.mobile || window.navigator.maxTouchPoints > 1
+export const isMobile =
+  localStorage.mobile || window.navigator.maxTouchPoints > 1 || window.innerWidth < 400
 
 export const parseHex = hex => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)

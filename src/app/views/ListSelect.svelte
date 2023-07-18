@@ -29,7 +29,7 @@
   <p>
     Select a list to modify. The selected {label} will be added to it as an additional filter.
   </p>
-  {#each $lists as e (e.id)}
+  {#each $lists as e (e.naddr)}
     {@const meta = Tags.from(e).asMeta()}
     <BorderLeft on:click={() => selectlist(e)}>
       <strong>{meta.d}</strong>

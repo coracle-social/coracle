@@ -149,7 +149,7 @@ export const loadAppData = async () => {
   await PubkeyLoader.load(pubkey, {force: true, kinds: userKinds})
 
   // Load their network
-  PubkeyLoader.load(User.getFollows())
+  await PubkeyLoader.load(User.getFollows())
 
   // Load their messages and notifications
   Network.subscribe({

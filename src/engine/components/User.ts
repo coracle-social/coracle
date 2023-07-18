@@ -148,9 +148,9 @@ export class User {
     }
 
     const mute = (type, value) =>
-      setMutes(reject(t => t[1] === value, getMutes()).concat([[type, value]]))
+      setMutes(reject(t => t[1] === value, getMutedTags()).concat([[type, value]]))
 
-    const unmute = target => setMutes(reject(t => t[1] === target, getMutes()))
+    const unmute = target => setMutes(reject(t => t[1] === target, getMutedTags()))
 
     // Content
 

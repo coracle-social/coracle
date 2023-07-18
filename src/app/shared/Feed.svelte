@@ -31,6 +31,8 @@
 
   const getModal = () => last(document.querySelectorAll(".modal-content"))
 
+  const scrollerElement = getModal()
+
   const setFeedRelay = relay => {
     feedRelay = relay
 
@@ -89,7 +91,7 @@
         onEvent,
       })
 
-      scroller = createScroller(loadMore, {element: getModal()})
+      scroller = createScroller(loadMore, {element: scrollerElement})
 
       newNotes = derived<DisplayEvent[]>(feed.feed, notes =>
         notes.filter(e => e.created_at > feed.since)

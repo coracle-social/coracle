@@ -59,7 +59,7 @@
 
 <form on:submit|preventDefault={submit}>
   <Content>
-    <Heading class="text-center">{values.id ? "Edit" : "Add"} list</Heading>
+    <Heading class="text-center">{values.naddr ? "Edit" : "Add"} list</Heading>
     <div class="flex w-full flex-col gap-8">
       <div class="flex flex-col gap-1">
         <strong>Name</strong>

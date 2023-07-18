@@ -56,6 +56,6 @@
         "#r": [relay.url],
       }} />
   {:else}
-    <Feed invertColors relays={[relay]} filter={{kinds: [1]}} />
+    <Feed invertColors relays={[relay.url]} filter={{kinds: [1]}} />
   {/if}
 </Content>

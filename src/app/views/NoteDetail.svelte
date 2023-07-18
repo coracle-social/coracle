@@ -42,6 +42,8 @@
 
     await feed.loadAll()
 
+    console.log('NoteDetail', $displayNote)
+
     loading = false
   })
 
