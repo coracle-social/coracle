@@ -2,13 +2,14 @@ import {matchFilters} from "nostr-tools"
 import {throttle} from "throttle-debounce"
 import {
   omit,
+  pick,
   pluck,
   partition,
   identity,
   flatten,
   without,
   groupBy,
-  all,
+  any,
   sortBy,
   prop,
   uniqBy,
@@ -31,6 +32,7 @@ export type FeedOpts = {
   relays: string[]
   filter: Filter | Filter[]
   onEvent?: (e: Event) => void
+  shouldLoadParents?: boolean
   engine: any
 }
 
@@ -71,6 +73,10 @@ export class Feed {
         this.subs[key] = without([sub], this.subs[key])
       })
     }
+  }
+
+  getAllSubs(only = null) {
+    return flatten(Object.values(only ? pick(only, this.subs) : this.subs))
   }
 
   getReplyKinds() {
@@ -263,7 +269,7 @@ export class Feed {
 
     this.loadPubkeys(events)
 
-    if (shouldLoadParents) {
+    if (this.opts.shouldLoadParents && shouldLoadParents) {
       this.loadParents(events)
     }
 
@@ -279,7 +285,7 @@ export class Feed {
     const {relays, filter, engine, depth} = this.opts
 
     // No point in subscribing if we have an end date
-    if (!all(prop("until"), ensurePlural(filter))) {
+    if (!any(prop("until"), ensurePlural(filter))) {
       this.addSubs("main", [
         engine.Network.subscribe({
           relays,
@@ -312,7 +318,7 @@ export class Feed {
   stop() {
     this.stopped = true
 
-    for (const sub of flatten(Object.values(this.subs))) {
+    for (const sub of this.getAllSubs()) {
       sub.close()
     }
   }
@@ -367,8 +373,21 @@ export class Feed {
   }
 
   async loadAll() {
+    this.addSubs("notes", this.cursor.load(this.limit))
+
+    // Wait for our requested notes
     while (!this.cursor.done()) {
-      await this.load()
+      const [subs, notes] = this.cursor.take(this.limit)
+
+      this.addSubs("notes", subs)
+      this.addToFeed(notes)
+
+      await sleep(300)
+    }
+
+    // Wait for our requested context
+    while (this.getAllSubs(["notes", "context"]).length > 0) {
+      await sleep(300)
     }
   }
 
