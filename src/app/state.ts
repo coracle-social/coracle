@@ -3,19 +3,17 @@ import type {DynamicFilter} from "src/engine/types"
 import Bugsnag from "@bugsnag/js"
 import {nip19} from "nostr-tools"
 import {navigate} from "svelte-routing"
-import {writable, get} from "svelte/store"
+import {writable} from "svelte/store"
 import {whereEq, omit, filter, pluck, sortBy, slice} from "ramda"
 import {doPipe, first} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
-import {hash, timedelta, now, shuffle, sleep, clamp} from "src/util/misc"
+import {hash, timedelta, now, shuffle, sleep} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import {
   FORCE_RELAYS,
   DEFAULT_FOLLOWS,
-  ENABLE_ZAPS,
   pubkeyLoader,
-  alerts,
   events,
   nip28,
   meta,
@@ -90,16 +88,6 @@ export const logUsage = async name => {
 
 export const listen = async () => {
   const pubkey = keys.pubkey.get()
-  const kinds = noteKinds.concat([4, 7])
-
-  if (ENABLE_ZAPS) {
-    kinds.push(9735)
-  }
-
-  // Only grab notifications since we last checked, with some wiggle room
-  const since =
-    clamp([now() - timedelta(30, "days"), now()], get(alerts.latestNotification)) -
-    timedelta(1, "days")
 
   const channelIds = pluck("id", nip28.channels.get().filter(whereEq({joined: true})))
 
@@ -110,14 +98,20 @@ export const listen = async () => {
     pluck("id"),
   ])
 
+  // Only grab one event from each category/relay so we have enough to show
+  // the notification badges, but load the details lazily
   ;(listen as any)._listener?.unsub()
-  ;(listen as any)._listener = await network.subscribe({
+  ;(listen as any)._listener = network.subscribe({
     relays: user.getRelayUrls("read"),
     filter: [
-      {kinds: noteKinds.concat(4), authors: [pubkey], since, limit: 1},
-      {kinds, "#p": [pubkey], since, limit: 1},
-      {kinds, "#e": eventIds, since, limit: 1},
-      {kinds: [42], "#e": channelIds, since},
+      // Messages
+      {kinds: [4], authors: [pubkey], limit: 1},
+      {kinds: [4], "#p": [pubkey], limit: 1},
+      // Chat
+      {kinds: [42], "#e": channelIds, limit: 1},
+      // Mentions/replies
+      {kinds: noteKinds, "#p": [pubkey], limit: 1},
+      {kinds: noteKinds, "#e": eventIds, limit: 1},
     ],
   })
 }

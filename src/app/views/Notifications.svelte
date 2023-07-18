@@ -14,9 +14,9 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app/views/Notification.svelte"
-  import {Events, user, alerts} from "src/app/engine"
+  import {Events, User, Alerts} from "src/app/engine"
 
-  const {lastChecked} = alerts
+  const {lastChecked} = Alerts
   const tabs = ["Mentions & Replies", "Reactions"]
 
   export let activeTab = tabs[0]
@@ -24,12 +24,12 @@
   let limit = 0
   let events = null
 
-  const notifications = alerts.events.derived($events => {
+  const notifications = Alerts.events.derived($events => {
     // Sort by hour so we can group clustered reactions to the same parent
     return reverse(
       sortBy(
         e => formatTimestampAsLocalISODate(e.created_at).slice(0, 13) + findReplyId(e),
-        user.applyMutes($events)
+        User.applyMutes($events)
       )
     )
   })

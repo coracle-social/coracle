@@ -96,10 +96,6 @@ export class Key<T> {
       throw new Error("`key` can only be used on map collections")
     }
 
-    if (!key) {
-      throw new Error(`Invalid key: "${key}"`)
-    }
-
     this.pk = pk
     this.key = key
     this.#base = base
@@ -116,6 +112,10 @@ export class Key<T> {
 
   update = f =>
     this.#base.update(m => {
+      if (!this.key) {
+        throw new Error(`Cannot set key: "${this.key}"`)
+      }
+
       const v = f(m.get(this.key))
 
       // Make sure the pk always get set on the record
