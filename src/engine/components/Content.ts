@@ -43,6 +43,7 @@ export class Content {
     Events.addHandler(42, processTopics)
 
     Events.addHandler(30001, e => {
+      console.log("========", e)
       const {pubkey, kind, created_at} = e
       const name = Tags.from(e).getMeta("d")
       const naddr = nip19.naddrEncode({identifier: name, pubkey, kind})

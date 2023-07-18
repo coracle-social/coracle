@@ -1,4 +1,5 @@
-import {Tags, isLike, findReplyId, findRootId} from "src/util/nostr"
+import {reduce} from "ramda"
+import {Tags, noteKinds, isLike, findReplyId, findRootId} from "src/util/nostr"
 import {collection, writable, derived} from "../util/store"
 import type {Event} from "src/engine/types"
 
@@ -8,7 +9,7 @@ export class Alerts {
 
     const lastChecked = writable(0)
 
-    const latestNotification = writable(0)
+    const latestNotification = events.derived(reduce((n, e) => Math.max(n, e.created_at), 0))
 
     const hasNewNotfications = derived(
       [lastChecked, latestNotification],
@@ -45,10 +46,12 @@ export class Alerts {
       Alerts.events.key(e.id).set(e)
     }
 
-    Events.addHandler(
-      1,
-      handleNotification(e => isMention(e) || isReply(e) || isDescendant(e))
-    )
+    noteKinds.forEach(kind => {
+      Events.addHandler(
+        kind,
+        handleNotification(e => isMention(e) || isReply(e) || isDescendant(e))
+      )
+    })
 
     Events.addHandler(
       7,

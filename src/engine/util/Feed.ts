@@ -39,6 +39,7 @@ export type FeedOpts = {
 export class Feed {
   limit: number
   since: number
+  started: boolean
   stopped: boolean
   deferred: Event[]
   context: Collection<Event>
@@ -50,6 +51,7 @@ export class Feed {
   constructor(readonly opts: FeedOpts) {
     this.limit = opts.limit || 20
     this.since = now()
+    this.started = false
     this.stopped = false
     this.deferred = []
     this.context = collection<Event>("id")
@@ -98,7 +100,9 @@ export class Feed {
   }
 
   preprocessEvents = events => {
-    events = reject(e => this.seen.has(e.id), events)
+    const {User} = this.opts.engine
+
+    events = reject(e => this.seen.has(e.id) || User.isMuted(e), events)
 
     for (const event of events) {
       this.seen.add(event.id)
@@ -311,8 +315,7 @@ export class Feed {
       )
     )
 
-    // Load the first page as soon as possible
-    this.addSubs("notes", this.cursor.load(this.limit))
+    this.started = true
   }
 
   stop() {
@@ -350,6 +353,10 @@ export class Feed {
   // Loading
 
   async load() {
+    if (!this.started) {
+      this.start()
+    }
+
     // If we don't have a decent number of notes yet, try to get enough
     // to avoid out of order notes
     if (this.cursor.count() < this.limit) {
@@ -373,6 +380,10 @@ export class Feed {
   }
 
   async loadAll() {
+    if (!this.started) {
+      this.start()
+    }
+
     this.addSubs("notes", this.cursor.load(this.limit))
 
     // Wait for our requested notes

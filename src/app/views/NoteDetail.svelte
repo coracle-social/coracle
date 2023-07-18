@@ -31,23 +31,18 @@
   let loading = true
   let feedRelay = null
   let displayNote = feed.feed.derived($feed => {
-    const found = find(propEq("id", note.id), $feed)
-
-    if (found) {
-      loading = false
-    }
-
-    return asDisplayEvent(found || note)
+    return asDisplayEvent(find(propEq("id", note.id), $feed) || note)
   })
 
-  onMount(() => {
+  onMount(async () => {
     // If our note came from a feed, we can load faster
     if (note.replies) {
       feed.hydrate([note])
     }
 
-    feed.start()
-    feed.loadAll()
+    await feed.loadAll()
+
+    loading = false
   })
 
   onDestroy(() => feed.stop())

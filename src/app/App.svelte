@@ -18,8 +18,9 @@
     tryFetch,
     getLocalJson,
   } from "src/util/misc"
+  import {userKinds} from "src/util/nostr"
   import engine from "src/app/engine"
-  import {loadAppData} from "src/app/state"
+  import {listenForNotifications} from "src/app/state"
   import {theme, getThemeVariables, appName, modal} from "src/partials/state"
   import {logUsage} from "src/app/state"
   import SideNav from "src/app/SideNav.svelte"
@@ -148,10 +149,13 @@
   })
 
   engine.Storage.ready.then(() => {
-    const pubkey = engine.User.getPubkey()
+    const pubkey = engine.Keys.pubkey.get()
 
+    // Make sure the user's stuff is loaded, but don't call loadAppData
+    // since that reloads messages and stuff
     if (pubkey) {
-      loadAppData(pubkey)
+      engine.PubkeyLoader.load(pubkey, {force: true, kinds: userKinds})
+      listenForNotifications()
     }
 
     const interval = setInterval(async () => {

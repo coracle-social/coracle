@@ -89,13 +89,12 @@
         onEvent,
       })
 
-      feed.start()
-
       scroller = createScroller(loadMore, {element: getModal()})
 
       newNotes = derived<DisplayEvent[]>(feed.feed, notes =>
         notes.filter(e => e.created_at > feed.since)
       )
+
       oldNotes = derived<DisplayEvent[]>(feed.feed, notes =>
         notes.filter(e => e.created_at <= feed.since)
       )

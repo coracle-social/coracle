@@ -151,7 +151,7 @@
       <div
         style="transform: scale(-1, 1)"
         class="absolute right-0 top-0 m-3 grid grid-cols-3 gap-2 sm:hidden">
-        {#each sortBy(identity, note.seen_on) as url, i}
+        {#each sortBy(identity, note.seen_on || []) as url, i}
           <div class={`cursor-pointer order-${3 - (i % 3)}`}>
             <div
               class="h-3 w-3 rounded-full border border-solid border-gray-6"
@@ -165,7 +165,7 @@
         class={cx("hidden transition-opacity sm:flex", {
           "opacity-0 group-hover:opacity-100": !showEntire,
         })}>
-        {#each sortBy(identity, note.seen_on) as url, i}
+        {#each sortBy(identity, note.seen_on || []) as url, i}
           <Popover triggerType="mouseenter" interactive={false}>
             <div slot="trigger" class="cursor-pointer p-1">
               <div

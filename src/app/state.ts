@@ -7,20 +7,20 @@ import {writable} from "svelte/store"
 import {whereEq, omit, filter, pluck, sortBy, slice} from "ramda"
 import {doPipe, first} from "hurdak/lib/hurdak"
 import {warn} from "src/util/logger"
-import {hash, timedelta, now, shuffle, sleep} from "src/util/misc"
+import {hash, now, shuffle, sleep} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import {
   FORCE_RELAYS,
   DEFAULT_FOLLOWS,
-  pubkeyLoader,
-  events,
-  nip28,
-  meta,
-  network,
-  outbox,
-  user,
-  keys,
+  PubkeyLoader,
+  Events,
+  Nip28,
+  Meta,
+  Network,
+  Outbox,
+  User,
+  Keys,
 } from "src/app/engine"
 
 // Routing
@@ -48,7 +48,7 @@ setTimeout(() => {
       return false
     }
 
-    if (!user.getSetting("report_analytics")) {
+    if (!User.getSetting("report_analytics")) {
       return false
     }
 
@@ -70,12 +70,12 @@ const session = Math.random().toString().slice(2)
 export const logUsage = async name => {
   // Hash the user's pubkey so we can identify unique users without knowing
   // anything about them
-  const pubkey = keys.pubkey.get()
+  const pubkey = Keys.pubkey.get()
   const ident = pubkey ? hash(pubkey) : "unknown"
 
-  if (user.getSetting("report_analytics")) {
+  if (User.getSetting("report_analytics")) {
     try {
-      await fetch(user.dufflepud(`usage/${ident}/${session}/${name}`), {method: "post"})
+      await fetch(User.dufflepud(`usage/${ident}/${session}/${name}`), {method: "post"})
     } catch (e) {
       if (!e.toString().includes("Failed to fetch")) {
         warn(e)
@@ -84,15 +84,41 @@ export const logUsage = async name => {
   }
 }
 
+export const slowConnections = writable([])
+
+setInterval(() => {
+  // Only notify about relays the user is actually subscribed to
+  const userRelays = new Set(User.getRelayUrls())
+  const $slowConnections = []
+
+  // Prune connections we haven't used in a while
+  for (const url of Network.pool.data.keys()) {
+    const stats = Meta.getRelayStats(url)
+
+    if (!stats) {
+      continue
+    }
+
+    if (stats.last_activity < now() - 60) {
+      Network.pool.remove(url)
+    } else if (userRelays.has(url) && first(Meta.getRelayQuality(url)) < 0.3) {
+      $slowConnections.push(url)
+    }
+  }
+
+  // Alert the user to any heinously slow connections
+  slowConnections.set($slowConnections)
+}, 10_000)
+
 // Synchronization from events to state
 
-export const listen = async () => {
-  const pubkey = keys.pubkey.get()
+export const listenForNotifications = async () => {
+  const pubkey = Keys.pubkey.get()
 
-  const channelIds = pluck("id", nip28.channels.get().filter(whereEq({joined: true})))
+  const channelIds = pluck("id", Nip28.channels.get().filter(whereEq({joined: true})))
 
-  const eventIds = doPipe(events.cache.get(), [
-    filter(e => e.kind === 1 && e.created_at > now() - timedelta(30, "days")),
+  const eventIds = doPipe(Events.cache.get(), [
+    filter(e => noteKinds.includes(e.kind)),
     sortBy(e => -e.created_at),
     slice(0, 256),
     pluck("id"),
@@ -100,9 +126,9 @@ export const listen = async () => {
 
   // Only grab one event from each category/relay so we have enough to show
   // the notification badges, but load the details lazily
-  ;(listen as any)._listener?.unsub()
-  ;(listen as any)._listener = network.subscribe({
-    relays: user.getRelayUrls("read"),
+  ;(listenForNotifications as any)._listener?.close()
+  ;(listenForNotifications as any)._listener = Network.subscribe({
+    relays: User.getRelayUrls("read"),
     filter: [
       // Messages
       {kinds: [4], authors: [pubkey], limit: 1},
@@ -116,45 +142,32 @@ export const listen = async () => {
   })
 }
 
-export const slowConnections = writable([])
+export const loadAppData = async () => {
+  const pubkey = Keys.pubkey.get()
 
-setInterval(() => {
-  // Only notify about relays the user is actually subscribed to
-  const userRelays = new Set(user.getRelayUrls())
-  const $slowConnections = []
+  // Make sure the user and their follows are loaded
+  await PubkeyLoader.load(pubkey, {force: true, kinds: userKinds})
 
-  // Prune connections we haven't used in a while
-  for (const url of network.pool.data.keys()) {
-    const stats = meta.getRelayStats(url)
+  // Load their network
+  PubkeyLoader.load(User.getFollows())
 
-    if (!stats) {
-      continue
-    }
+  // Load their messages and notifications
+  Network.subscribe({
+    timeout: 10_000,
+    relays: User.getRelayUrls("read"),
+    filter: [
+      {kinds: [4], authors: [pubkey]},
+      {kinds: [4], "#p": [pubkey]},
+      {kinds: noteKinds, "#p": [pubkey]},
+    ],
+  })
 
-    if (stats.last_activity < now() - 60) {
-      network.pool.remove(url)
-    } else if (userRelays.has(url) && first(meta.getRelayQuality(url)) < 0.3) {
-      $slowConnections.push(url)
-    }
-  }
-
-  // Alert the user to any heinously slow connections
-  slowConnections.set($slowConnections)
-}, 10_000)
-
-export const loadAppData = async pubkey => {
-  if (user.getRelayUrls("read").length > 0) {
-    // Start our listener, but don't wait for it
-    listen()
-
-    // Make sure the user and their network is loaded
-    pubkeyLoader.load([pubkey], {force: true, kinds: userKinds})
-    pubkeyLoader.load(user.getFollows())
-  }
+  // Start our listener
+  listenForNotifications()
 }
 
 export const login = async (method, key) => {
-  keys.login(method, key)
+  Keys.login(method, key)
 
   if (FORCE_RELAYS.length > 0) {
     modal.replace({
@@ -166,7 +179,7 @@ export const login = async (method, key) => {
 
     await Promise.all([
       sleep(1500),
-      pubkeyLoader.load([keys.pubkey.get()], {force: true, kinds: userKinds}),
+      PubkeyLoader.load(Keys.pubkey.get(), {force: true, kinds: userKinds}),
     ])
 
     navigate("/notes")
@@ -176,7 +189,7 @@ export const login = async (method, key) => {
 }
 
 export const publishWithToast = (event, relays) =>
-  outbox.publish(event, relays, ({completed, succeeded, failed, timeouts, pending}) => {
+  Outbox.publish(event, relays, ({completed, succeeded, failed, timeouts, pending}) => {
     let message = `Published to ${succeeded.size}/${relays.length} relays`
 
     const extra = []
@@ -208,9 +221,9 @@ export const compileFilter = (filter: DynamicFilter): Filter => {
   if (filter.authors === "global") {
     filter = omit(["authors"], filter)
   } else if (filter.authors === "follows") {
-    filter = {...filter, authors: getAuthors(user.getFollows())}
+    filter = {...filter, authors: getAuthors(User.getFollows())}
   } else if (filter.authors === "network") {
-    filter = {...filter, authors: getAuthors(user.getNetwork())}
+    filter = {...filter, authors: getAuthors(User.getNetwork())}
   }
 
   return filter

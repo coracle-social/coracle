@@ -1,10 +1,13 @@
 <script>
-  import {pluck, reverse, max, last, sortBy} from "ramda"
-  import {onMount, onDestroy} from "svelte"
+  import {filter, slice, pluck, reverse, max, last, sortBy} from "ramda"
+  import {onMount} from "svelte"
+  import {doPipe} from "hurdak/lib/hurdak"
   import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
   import {
     now,
+    batch,
+    timedelta,
     formatTimestampAsDate,
     formatTimestampAsLocalISODate,
     createScroller,
@@ -14,9 +17,9 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app/views/Notification.svelte"
-  import {Events, User, Alerts} from "src/app/engine"
+  import {ENABLE_ZAPS, Events, PubkeyLoader, Keys, User, Network, Alerts} from "src/app/engine"
 
-  const {lastChecked} = Alerts
+  const lastChecked = Alerts.lastChecked.get()
   const tabs = ["Mentions & Replies", "Reactions"]
 
   export let activeTab = tabs[0]
@@ -25,6 +28,9 @@
   let events = null
 
   const notifications = Alerts.events.derived($events => {
+    // As long as we're on the page, don't show a notification
+    Alerts.lastChecked.set(now())
+
     // Sort by hour so we can group clustered reactions to the same parent
     return reverse(
       sortBy(
@@ -64,7 +70,7 @@
             notifications: [e],
             created_at: e.created_at,
             dateDisplay: formatTimestampAsDate(e.created_at),
-            showLine: e.created_at < $lastChecked && prevTimestamp >= $lastChecked,
+            showLine: e.created_at < lastChecked && prevTimestamp >= lastChecked,
           })
         }
 
@@ -86,13 +92,35 @@
   onMount(() => {
     document.title = "Notifications"
 
-    return createScroller(async () => {
+    const pubkey = Keys.pubkey.get()
+    const since = lastChecked - timedelta(30, "days")
+    const reactionKinds = ENABLE_ZAPS ? [7, 9735] : [7]
+    const eventIds = doPipe(Events.cache.get(), [
+      filter(e => noteKinds.includes(e.kind)),
+      sortBy(e => -e.created_at),
+      slice(0, 256),
+      pluck("id"),
+    ])
+
+    const sub = Network.subscribe({
+      relays: User.getRelayUrls("read"),
+      filter: [
+        {kinds: noteKinds.concat(reactionKinds), "#p": [pubkey], since},
+        {kinds: noteKinds.concat(reactionKinds), "#e": eventIds, since},
+      ],
+      onEvent: batch(1000, events => {
+        PubkeyLoader.load(pluck("pubkey", events))
+      }),
+    })
+
+    const scroller = createScroller(async () => {
       limit += 50
     })
-  })
 
-  onDestroy(() => {
-    lastChecked.set(now())
+    return () => {
+      sub.close()
+      scroller.stop()
+    }
   })
 </script>
 

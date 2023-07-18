@@ -12,8 +12,18 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {DEFAULT_RELAYS, FORCE_RELAYS, nip65, user, pubkeyLoader, network} from "src/app/engine"
+  import {
+    DEFAULT_RELAYS,
+    FORCE_RELAYS,
+    Nip65,
+    User,
+    Keys,
+    PubkeyLoader,
+    Network,
+  } from "src/app/engine"
   import {loadAppData} from "src/app/state"
+
+  const pubkey = Keys.pubkey.get()
 
   let modal = null
   let customRelayUrl = null
@@ -22,7 +32,7 @@
   let attemptedRelays = new Set()
   let customRelays = []
   let allRelays = []
-  let knownRelays = nip65.relays.derived($relays =>
+  let knownRelays = Nip65.relays.derived($relays =>
     uniqBy(
       prop("url"),
       // Make sure our hardcoded urls are first, since they're more likely to find a match
@@ -54,7 +64,7 @@
       // Wait a bit before removing the relay to smooth out the ui
       Promise.all([
         sleep(1500),
-        pubkeyLoader.load([user.getPubkey()], {
+        PubkeyLoader.load([pubkey], {
           force: true,
           relays: [relay.url],
           kinds: userKinds,
@@ -62,17 +72,17 @@
       ]).then(async () => {
         currentRelays[i] = null
 
-        if (searching && user.getRelayUrls().length > 0) {
+        if (searching && User.getRelayUrls().length > 0) {
           searching = false
           modal = "success"
 
           // Reload everything, it's possible we didn't get their petnames if we got a match
           // from something like purplepag.es. This helps us avoid nuking follow lists later
-          await Promise.all([loadAppData(user.getPubkey()), sleep(1500)])
+          await Promise.all([loadAppData(), sleep(1500)])
 
           navigate("/notes")
         } else {
-          network.pool.remove(relay.url)
+          Network.pool.remove(relay.url)
         }
       })
     }

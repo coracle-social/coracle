@@ -5,6 +5,7 @@
 - [x] Faster login and initial load
 - [x] Faster and more complete feed loading
 - [x] More bandwidth-sensitive notifications fetching
+- [x] Fewer missing profile badges
 
 # 0.2.35
 

@@ -8,8 +8,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {user, directory, nip65, meta, keys} from "src/app/engine"
-  import {loadAppData} from "src/app/state"
+  import {User, Nip65, Meta, Keys} from "src/app/engine"
 
   export let relay
   export let rating = null
@@ -22,19 +21,11 @@
   let quality = null
   let message = null
 
-  const {pubkey} = keys
+  const relays = Nip65.policies.key(Keys.pubkey.get()).derived(() => new Set(User.getRelayUrls()))
 
-  const relays = nip65.policies.key($pubkey).derived(() => new Set(user.getRelayUrls()))
+  const removeRelay = r => User.removeRelay(r.url)
 
-  const removeRelay = r => user.removeRelay(r.url)
-
-  const addRelay = r => {
-    user.addRelay(r.url)
-
-    if ($pubkey && !directory.profiles.key($pubkey).exists()) {
-      loadAppData($pubkey)
-    }
-  }
+  const addRelay = r => User.addRelay(r.url)
 
   const openModal = () => {
     modal.push({type: "relay/detail", url: relay.url})
@@ -44,7 +35,7 @@
 
   onMount(() => {
     return poll(10_000, () => {
-      ;[quality, message] = meta.getRelayQuality(relay.url)
+      ;[quality, message] = Meta.getRelayQuality(relay.url)
     })
   })
 </script>
@@ -59,7 +50,7 @@
   <div class="flex items-center justify-between gap-2">
     <div class="flex items-center gap-2 text-xl">
       <i class={relay.url.startsWith("ws://") ? "fa fa-unlock" : "fa fa-lock"} />
-      <Anchor on:click={openModal}>{nip65.displayRelay(relay)}</Anchor>
+      <Anchor on:click={openModal}>{Nip65.displayRelay(relay)}</Anchor>
       {#if showStatus}
         <span
           on:mouseout={() => {
@@ -103,13 +94,13 @@
   {#if relay.description}
     <p>{relay.description}</p>
   {/if}
-  {#if hasRelay && showControls && keys.canSign.get()}
+  {#if hasRelay && showControls && Keys.canSign.get()}
     <div class="-mx-6 my-1 h-px bg-gray-7" />
     <div class="flex justify-between gap-2">
       <span>Publish to this relay?</span>
       <Toggle
         value={relay.write}
-        on:change={() => user.setRelayPolicy(relay.url, {write: !relay.write})} />
+        on:change={() => User.setRelayPolicy(relay.url, {write: !relay.write})} />
     </div>
   {/if}
 </div>

@@ -18,7 +18,7 @@
     user,
     keys,
   } from "src/app/engine"
-  import {loadAppData} from "src/app/state"
+  import {listenForNotifications} from "src/app/state"
   import {modal} from "src/partials/state"
 
   export let stage
@@ -35,16 +35,17 @@
     const petnames = user.getPetnames()
 
     await keys.login("privkey", privkey)
+    await user.setRelays(relays)
 
     // Re-save preferences now that we have a key
     await Promise.all([
-      user.setRelays(relays),
       user.setProfile(profile),
       user.setPetnames(petnames),
       note && outbox.publish(builder.createNote(note)),
     ])
 
-    loadAppData(keys.pubkey.get())
+    // Start our notifications listener
+    listenForNotifications()
 
     modal.clear()
     navigate("/notes")

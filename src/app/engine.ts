@@ -41,6 +41,7 @@ export default engine
 export const Alerts = engine.Alerts
 export const Builder = engine.Builder
 export const Content = engine.Content
+export const Crypt = engine.Crypt
 export const Directory = engine.Directory
 export const Events = engine.Events
 export const Keys = engine.Keys

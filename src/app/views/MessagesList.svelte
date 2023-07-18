@@ -17,11 +17,11 @@
   const accepted = contacts.derived(filter(prop("last_sent")))
   const requests = contacts.derived(filter(complement(prop("last_sent"))))
 
-  const getContacts = tab => (tab === "messages" ? $accepted : $requests)
+  $: tabContacts = activeTab === "messages" ? $accepted : $requests
 
   const getDisplay = tab => ({
     title: toTitle(tab),
-    badge: getContacts(tab).length,
+    badge: (tab === "messages" ? $accepted : $requests).length,
   })
 
   document.title = "Direct Messages"
@@ -57,7 +57,7 @@
       <div slot="tooltip">Mark all as read</div>
     </Popover>
   </div>
-  {#each getContacts(activeTab) as contact (contact.pubkey)}
+  {#each tabContacts as contact (contact.pubkey)}
     <MessagesListItem {contact} />
   {:else}
     <Content size="lg" class="text-center">

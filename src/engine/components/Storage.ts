@@ -1,16 +1,10 @@
 import {throttle} from "throttle-debounce"
 import {prop, path as getPath, sortBy} from "ramda"
-import {defer, union, getLocalJson, setLocalJson} from "src/util/misc"
+import {defer, getLocalJson, setLocalJson} from "src/util/misc"
 import {writable} from "../util/store"
 import {IndexedDB} from "../util/indexeddb"
 
-const localStorageKeys = [
-  "Alerts.lastChecked",
-  "Alerts.latestNotification",
-  "Keys.pubkey",
-  "Keys.keyState",
-  "User.settings",
-]
+const localStorageKeys = ["Alerts.lastChecked", "Keys.pubkey", "Keys.keyState", "User.settings"]
 
 const policy = (key, max, sort) => ({key, max, sort})
 
@@ -108,13 +102,23 @@ export class Storage {
     const getPubkeyWhitelist = () => {
       const pubkeys = Keys.getKeyState().map(prop("pubkey"))
 
-      return union(new Set(pubkeys), Social.getFollowsSet(pubkeys))
+      return [new Set(pubkeys), Social.getFollowsSet(pubkeys)]
     }
 
     const sortByPubkeyWhitelist = fallback => rows => {
-      const whitelist = getPubkeyWhitelist()
+      const [pubkeys, follows] = getPubkeyWhitelist()
 
-      return sortBy(x => (whitelist.has(x.pubkey) ? Infinity : fallback(x)), rows)
+      return sortBy(x => {
+        if (pubkeys.has(x.pubkey)) {
+          return Number.MAX_SAFE_INTEGER
+        }
+
+        if (follows.has(x.pubkey)) {
+          return Number.MAX_SAFE_INTEGER - 1
+        }
+
+        return fallback(x)
+      }, rows)
     }
 
     return {close, clear, getPubkeyWhitelist, sortByPubkeyWhitelist}

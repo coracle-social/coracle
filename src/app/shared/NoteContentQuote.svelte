@@ -6,7 +6,7 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {directory, nip65, user, network} from "src/app/engine"
+  import {Directory, Nip65, User, Network} from "src/app/engine"
 
   export let note
   export let value
@@ -19,13 +19,13 @@
 
   const {id, relays = []} = value
 
-  const sub = network.subscribe({
+  const sub = Network.subscribe({
     timeout: 5000,
-    relays: nip65.mergeHints(3, [relays, nip65.getEventHints(3, note)]),
+    relays: Nip65.mergeHints(3, [relays, Nip65.getEventHints(3, note)]),
     filter: [{ids: [id]}],
     onEvent: event => {
       loading = false
-      muted = user.applyMutes([event]).length === 0
+      muted = User.applyMutes([event]).length === 0
       quote = event
     },
   })
@@ -66,7 +66,7 @@
             type="unstyled"
             class="flex items-center gap-2"
             on:click={() => openPerson(quote.pubkey)}>
-            <h2 class="text-lg">{directory.displayPubkey(quote.pubkey)}</h2>
+            <h2 class="text-lg">{Directory.displayPubkey(quote.pubkey)}</h2>
           </Anchor>
         </div>
         <slot name="note-content" {quote} />
