@@ -1,5 +1,5 @@
 <script>
-  import {sortBy, pluck, partition, prop} from "ramda"
+  import {sortBy, filter, complement, pluck, prop} from "ramda"
   import {onMount} from "svelte"
   import {toTitle} from "hurdak/lib/hurdak"
   import {now, batch, timedelta} from "src/util/misc"
@@ -12,20 +12,17 @@
 
   export let activeTab = "messages"
 
-  const {hasNewMessages, contacts} = Nip04
+  const {hasNewMessages} = Nip04
+  const contacts = Nip04.contacts.derived(sortBy(c => -(c.last_sent || c.last_received)))
+  const accepted = contacts.derived(filter(prop("last_sent")))
+  const requests = contacts.derived(filter(complement(prop("last_sent"))))
 
-  const getContacts = tab =>
-    sortBy(
-      c => Math.max(c.last_sent || 0, c.last_received || 0),
-      tab === "messages" ? accepted : requests
-    )
+  const getContacts = tab => (tab === "messages" ? $accepted : $requests)
 
   const getDisplay = tab => ({
     title: toTitle(tab),
     badge: getContacts(tab).length,
   })
-
-  $: [accepted, requests] = partition(prop("last_sent"), $contacts)
 
   document.title = "Direct Messages"
 

@@ -185,7 +185,7 @@ export class Feed {
     if (parentsInfo.length > 0) {
       this.addSubs("context", [
         Network.subscribe({
-          autoClose: true,
+          timeout: 3000,
           filter: {ids: pluck("id", parentsInfo)},
           relays: this.mergeHints(pluck("hints", parentsInfo)),
           onEvent: batch(100, context => this.addContext(context, {depth: 2})),
@@ -209,7 +209,7 @@ export class Feed {
 
       for (const c of chunk(256, events)) {
         Network.subscribe({
-          autoClose: true,
+          timeout: 3000,
           relays: this.mergeHints(c.map(e => Nip65.getReplyHints(3, e))),
           filter: {kinds: this.getReplyKinds(), "#e": pluck("id", c)},
           onEvent: batch(100, context => this.addContext(context, {depth: depth - 1})),

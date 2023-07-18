@@ -39,7 +39,7 @@ export class Cursor {
     let count = 0
 
     return this.opts.subscribe({
-      autoClose: true,
+      timeout: 10_000,
       relays: [relay],
       filter: ensurePlural(filter).map(mergeLeft({until, limit})),
       onEvent: event => {

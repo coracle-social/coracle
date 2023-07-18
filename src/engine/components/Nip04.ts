@@ -12,7 +12,7 @@ const messageIsNew = ({last_checked, last_received, last_sent}: Contact) =>
 export class Nip04 {
   static contributeState() {
     const contacts = collection<Contact>("pubkey")
-    const messages = collection<Message>("contact")
+    const messages = collection<Message>("id")
 
     const hasNewMessages = derived(
       contacts,

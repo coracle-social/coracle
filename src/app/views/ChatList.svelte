@@ -1,6 +1,7 @@
 <script>
   import {onMount} from "svelte"
-  import {partition, pluck, filter, whereEq, uniq, prop} from "ramda"
+  import {debounce} from "throttle-debounce"
+  import {complement, sortBy, pipe, pluck, filter, uniq, prop} from "ramda"
   import {now, timedelta, batch} from "src/util/misc"
   import {Tags} from "src/util/nostr"
   import {modal} from "src/partials/state"
@@ -12,16 +13,29 @@
 
   let q = ""
   let results = []
-  let joinedChannels = []
-  let otherChannels = []
 
-  const {searchChannels} = Nip28
-  const channels = Nip28.channels.derived(filter(whereEq({type: "public"})))
+  const channels = Nip28.channels.derived(
+    pipe(
+      filter(prop("name")),
+      sortBy(c => -(c.last_sent || c.last_received))
+    )
+  )
+  const joined = channels.derived(filter(prop("joined")))
+  const other = channels.derived(filter(complement(prop("joined"))))
+  const search = Nip28.getSearchChannels(other)
 
-  $: [joinedChannels, otherChannels] = partition(prop("joined"), $channels)
-  $: results = $searchChannels(q)
-    .filter(c => c.type === "public" && !c.joined)
-    .slice(0, 50)
+  const searchChannels = debounce(500, q => {
+    if (q.length > 3) {
+      Network.subscribe({
+        timeout: 5000,
+        relays: Nip65.getSearchRelays(),
+        filter: [{kinds: [40, 41], search: q}],
+      })
+    }
+  })
+
+  $: searchChannels(q)
+  $: results = $search(q).slice(0, 50)
 
   document.title = "Chat"
 
@@ -29,10 +43,11 @@
     const subs = []
     const relays = Nip65.getPubkeyHints(3, Keys.pubkey.get(), "read")
 
+    // Pull some relevant channels by grabbing recent messages
     subs.push(
       Network.subscribe({
         relays,
-        autoClose: true,
+        timeout: 2000,
         filter: [{kinds: [42], since: now() - timedelta(1, "days"), limit: 100}],
         onEvent: batch(500, events => {
           const channelIds = uniq(events.map(e => Tags.from(e).getMeta("e")))
@@ -42,7 +57,7 @@
           subs.push(
             Network.subscribe({
               relays,
-              autoClose: true,
+              timeout: 2000,
               filter: [
                 {kinds: [40], ids: channelIds},
                 {kinds: [41], "#e": channelIds},
@@ -70,7 +85,7 @@
         <i class="fa-solid fa-plus" /> Create Room
       </Anchor>
     </div>
-    {#each joinedChannels as channel (channel.id)}
+    {#each $joined as channel (channel.id)}
       <ChatListItem {channel} />
     {:else}
       <p class="text-center py-8">You haven't yet joined any rooms.</p>
@@ -91,7 +106,7 @@
       <ChatListItem {channel} />
     {/each}
     <small class="text-center">
-      Showing {Math.min(50, otherChannels.length)} of {otherChannels.length} known rooms
+      Showing {Math.min(50, $other.length)} of {$other.length} known rooms
     </small>
   {:else}
     <small class="text-center"> No matching rooms found </small>

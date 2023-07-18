@@ -11,7 +11,7 @@
   export let sendMessage
 
   let textarea
-  let limit = writable(20)
+  let limit = writable(5)
   let loading = sleep(30_000)
   let showNewMessages = false
 
@@ -19,7 +19,7 @@
     scroller.stop()
   })
 
-  const scroller = createScroller(() => limit.update(l => l + 20), {reverse: true})
+  const scroller = createScroller(() => limit.update(l => l + 5), {reverse: true})
 
   // flex-reverse-col means the first is the last
   const getLastListItem = () => document.querySelector("ul.channel-messages li")
@@ -62,7 +62,7 @@
   }
 
   // Group messages so we're only showing the person once per chunk
-  const groupedMessages = derived([messages, limit], ([$messages, $limit]) => {
+  const groupedMessages = derived([messages], ([$messages, $limit]) => {
     const result = reverse(
       sortBy(prop("created_at"), $messages).reduce((mx, m) => {
         const profile = directory.getProfile(m.pubkey)

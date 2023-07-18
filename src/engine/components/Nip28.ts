@@ -23,14 +23,17 @@ export class Nip28 {
   }
 
   static contributeSelectors({Nip28}) {
-    const searchChannels = Nip28.channels.derived($channels => {
-      return fuzzy($channels, {
-        keys: ["name", {name: "about", weight: 0.5}],
-        threshold: 0.3,
+    const getSearchChannels = channels =>
+      channels.derived($channels => {
+        return fuzzy($channels, {
+          keys: ["name", {name: "about", weight: 0.5}],
+          threshold: 0.3,
+        })
       })
-    })
 
-    return {messageIsNew, searchChannels}
+    const searchChannels = getSearchChannels(Nip28.channels)
+
+    return {messageIsNew, getSearchChannels, searchChannels}
   }
 
   static initialize({Events, Nip28, Keys, Crypt}) {
@@ -137,6 +140,11 @@ export class Nip28 {
 
       const tags = Tags.from(e)
       const channelId = tags.getMeta("e")
+
+      if (!channelId) {
+        return
+      }
+
       const channel = Nip28.channels.key(channelId).get()
       const hints = uniq(tags.relays().concat(channel?.hints || []))
 
