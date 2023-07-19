@@ -1,6 +1,6 @@
 import {sortBy, pluck, uniq, nth, uniqBy, prop, last, inc} from "ramda"
-import {first} from "hurdak/lib/hurdak"
-import {fuzzy, chain, tryJson, now, fetchJson} from "src/util/misc"
+import {first, chain, Fetch} from "hurdak"
+import {fuzzy, tryJson, now} from "src/util/misc"
 import {warn} from "src/util/logger"
 import {normalizeRelayUrl, findReplyId, isShareableRelay, Tags} from "src/util/nostr"
 import type {Relay, RelayInfo, RelayPolicy} from "src/engine/types"
@@ -266,7 +266,7 @@ export class Nip65 {
       // Load relays from nostr.watch via dufflepud
       if (FORCE_RELAYS.length === 0 && DUFFLEPUD_URL) {
         try {
-          const json = await fetchJson(DUFFLEPUD_URL + "/relay")
+          const json = await Fetch.fetchJson(DUFFLEPUD_URL + "/relay")
 
           json.relays.filter(isShareableRelay).forEach(Nip65.addRelay)
         } catch (e) {

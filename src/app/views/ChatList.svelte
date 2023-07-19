@@ -1,8 +1,9 @@
 <script>
   import {onMount} from "svelte"
   import {debounce} from "throttle-debounce"
+  import {batch, seconds} from "hurdak"
   import {complement, sortBy, pipe, pluck, filter, uniq, prop} from "ramda"
-  import {now, timedelta, batch} from "src/util/misc"
+  import {now} from "src/util/misc"
   import {Tags} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
@@ -48,7 +49,7 @@
       Network.subscribe({
         relays,
         timeout: 2000,
-        filter: [{kinds: [42], since: now() - timedelta(1, "days"), limit: 100}],
+        filter: [{kinds: [42], since: now() - seconds(1, "day"), limit: 100}],
         onEvent: batch(500, events => {
           const channelIds = uniq(events.map(e => Tags.from(e).getMeta("e")))
 

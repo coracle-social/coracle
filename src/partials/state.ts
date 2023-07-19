@@ -1,10 +1,10 @@
 import {prop, whereEq, reject, last, fromPairs} from "ramda"
-import {uuid, range} from "hurdak/lib/hurdak"
+import {randomId, range} from "hurdak"
 import type {Writable} from "svelte/store"
 import {navigate} from "svelte-routing"
 import {writable, get} from "svelte/store"
 import {globalHistory} from "svelte-routing/src/history"
-import {shadeColor, synced, WritableList} from "src/util/misc"
+import {shadeColor, synced} from "src/util/misc"
 
 // Settings
 
@@ -33,7 +33,7 @@ export interface Toast<T> extends Writable<T> {
 export const toast = writable(null) as Toast<any>
 
 toast.show = (type, message, timeout = 5) => {
-  const id = uuid()
+  const id = randomId()
 
   toast.set({id, type, message})
 
@@ -49,7 +49,7 @@ toast.show = (type, message, timeout = 5) => {
 // Modals
 
 export const modal = {
-  stack: new WritableList([]) as WritableList<any>,
+  stack: writable([]),
   getCurrent() {
     return last(get(modal.stack))
   },

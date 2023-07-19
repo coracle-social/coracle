@@ -1,7 +1,7 @@
 <script>
   import {nip19} from "nostr-tools"
   import {navigate} from "svelte-routing"
-  import {ellipsize} from "hurdak/lib/hurdak"
+  import {ellipsize} from "hurdak"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import Card from "src/partials/Card.svelte"
   import {directory, nip04} from "src/app/engine"

@@ -1,7 +1,7 @@
 <script lang="ts">
+  import {tryFunc} from "hurdak"
   import {nip19} from "nostr-tools"
   import {navigate} from "svelte-routing"
-  import {tryFunc} from "src/util/misc"
   import {fade} from "src/util/transition"
   import {keys} from "src/app/engine"
   import {modal, location} from "src/partials/state"

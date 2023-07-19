@@ -7,17 +7,8 @@
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {isNil, last} from "ramda"
-  import {
-    timedelta,
-    hexToBech32,
-    bech32ToHex,
-    shuffle,
-    now,
-    tryFunc,
-    fetchJson,
-    tryFetch,
-    getLocalJson,
-  } from "src/util/misc"
+  import {Storage, seconds, Fetch, shuffle, tryFunc} from "hurdak"
+  import {tryFetch, hexToBech32, bech32ToHex, now} from "src/util/misc"
   import {userKinds} from "src/util/nostr"
   import engine from "src/app/engine"
   import {listenForNotifications} from "src/app/state"
@@ -33,13 +24,13 @@
   // Migration from 0.2.34
   if (Object.hasOwn(localStorage, "agent/keys/pubkey")) {
     engine.Keys.setKeyState({
-      method: getLocalJson("agent/keys/method"),
-      pubkey: getLocalJson("agent/keys/pubkey"),
-      privkey: getLocalJson("agent/keys/privkey"),
-      bunkerKey: getLocalJson("agent/keys/bunkerKey"),
+      method: Storage.getJson("agent/keys/method"),
+      pubkey: Storage.getJson("agent/keys/pubkey"),
+      privkey: Storage.getJson("agent/keys/privkey"),
+      bunkerKey: Storage.getJson("agent/keys/bunkerKey"),
     })
 
-    engine.Keys.pubkey.set(getLocalJson("agent/keys/pubkey"))
+    engine.Keys.pubkey.set(Storage.getJson("agent/keys/pubkey"))
 
     const {settings} = JSON.parse(localStorage.getItem("agent/user/profile"))
 
@@ -168,12 +159,12 @@
       const staleRelays = shuffle(
         engine.Nip65.relays
           .get()
-          .filter(r => (r.meta?.last_checked || 0) < now() - timedelta(7, "days"))
+          .filter(r => (r.meta?.last_checked || 0) < now() - seconds(7, "day"))
       ).slice(0, 10)
 
       for (const relay of staleRelays) {
         tryFetch(async () => {
-          const info = await fetchJson(engine.User.dufflepud("relay/info"), {
+          const info = await Fetch.fetchJson(engine.User.dufflepud("relay/info"), {
             method: "POST",
             body: JSON.stringify({url: relay.url}),
             headers: {

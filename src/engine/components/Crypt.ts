@@ -1,6 +1,6 @@
 import {nip04} from "nostr-tools"
-import {switcherFn} from "hurdak/lib/hurdak"
-import {tryJson, tryFunc, sleep} from "src/util/misc"
+import {switcherFn, sleep, tryFunc} from "hurdak"
+import {tryJson} from "src/util/misc"
 
 export class Crypt {
   static contributeActions({Keys}, emit) {

@@ -1,8 +1,8 @@
 import type {DisplayEvent} from "src/engine/types"
 import {is, fromPairs, mergeLeft, last, identity, prop, flatten, uniq} from "ramda"
 import {nip19} from "nostr-tools"
-import {ensurePlural, first} from "hurdak/lib/hurdak"
-import {tryJson, avg} from "src/util/misc"
+import {ensurePlural, avg, first} from "hurdak"
+import {tryJson} from "src/util/misc"
 
 export const noteKinds = [1, 1985, 30023, 1063, 9802]
 export const personKinds = [0, 2, 3, 10002]

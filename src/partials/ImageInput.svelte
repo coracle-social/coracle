@@ -1,11 +1,11 @@
 <script lang="ts">
   import {filter, identity} from "ramda"
+  import {Fetch} from "hurdak"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile, stripExifData, blobToFile} from "src/util/html"
-  import {uploadFile, postJson} from "src/util/misc"
   import {user} from "src/app/engine"
 
   export let value
@@ -25,7 +25,7 @@
           const opts = filter(identity, {maxWidth, maxHeight})
 
           file = blobToFile(await stripExifData(inputFile, opts))
-          quote = await postJson(user.dufflepud("upload/quote"), {
+          quote = await Fetch.postJson(user.dufflepud("upload/quote"), {
             uploads: [{size: file.size}],
           })
         } else {
@@ -41,7 +41,7 @@
 
     try {
       const {id} = quote.uploads[0]
-      const {url} = await uploadFile(user.dufflepud(`upload/${id}`), file)
+      const {url} = await Fetch.uploadFile(user.dufflepud(`upload/${id}`), file)
 
       value = url
     } finally {

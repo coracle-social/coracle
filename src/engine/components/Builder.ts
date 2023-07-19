@@ -1,5 +1,5 @@
 import {last, pick, uniqBy} from "ramda"
-import {doPipe, first} from "hurdak/lib/hurdak"
+import {doPipe, first} from "hurdak"
 import {Tags, channelAttrs, findRoot, findReply} from "src/util/nostr"
 import {parseContent} from "src/util/notes"
 

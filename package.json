@@ -44,7 +44,7 @@
     "classnames": "^2.3.2",
     "compressorjs": "^1.1.1",
     "fuse.js": "^6.6.2",
-    "hurdak": "github:ConsignCloud/hurdak",
+    "hurdak": "^0.2.1",
     "husky": "^8.0.3",
     "insane": "^2.6.2",
     "lru-cache": "^7.18.3",

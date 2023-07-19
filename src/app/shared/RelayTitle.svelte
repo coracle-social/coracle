@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {between} from "hurdak/lib/hurdak"
+  import {between, poll} from "hurdak"
   import {webSocketURLToPlainOrBase64} from "src/util/misc"
-  import {poll, stringToHue, hsl} from "src/util/misc"
+  import {stringToHue, hsl} from "src/util/misc"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {nip65, meta} from "src/app/engine"

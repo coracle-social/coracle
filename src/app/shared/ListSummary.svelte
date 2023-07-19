@@ -1,6 +1,6 @@
 <script lang="ts">
   import {identity} from "ramda"
-  import {quantify} from "hurdak/lib/hurdak"
+  import {quantify} from "hurdak"
   import {Tags} from "src/util/nostr"
 
   export let list

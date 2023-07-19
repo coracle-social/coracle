@@ -1,5 +1,5 @@
 import {nip19} from "nostr-tools"
-import {ellipsize} from "hurdak/lib/hurdak"
+import {ellipsize} from "hurdak"
 import {tryJson, now, fuzzy} from "src/util/misc"
 import type {Profile} from "src/engine/types"
 import {collection, derived} from "../util/store"

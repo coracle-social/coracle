@@ -1,5 +1,5 @@
 import {all, prop, mergeLeft, identity, sortBy} from "ramda"
-import {ensurePlural, first} from "hurdak/lib/hurdak"
+import {ensurePlural, first} from "hurdak"
 import {now} from "src/util/misc"
 import type {Filter, Event} from "../types"
 

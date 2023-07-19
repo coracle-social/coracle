@@ -2,7 +2,7 @@
   import {nip19} from "nostr-tools"
   import {navigate} from "svelte-routing"
   import {fly} from "src/util/transition"
-  import {ellipsize} from "hurdak/lib/hurdak"
+  import {ellipsize} from "hurdak"
   import Anchor from "src/partials/Anchor.svelte"
   import {keys, user} from "src/app/engine"
 

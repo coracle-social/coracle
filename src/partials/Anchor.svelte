@@ -1,7 +1,7 @@
 <script>
   import cx from "classnames"
   import {navigate} from "svelte-routing"
-  import {switcher} from "hurdak/lib/hurdak"
+  import {switcher} from "hurdak"
   import {killEvent as _killEvent} from "src/util/html"
   import {createEventDispatcher} from "svelte"
 

@@ -1,5 +1,5 @@
 <script>
-  import {randomId} from "hurdak/lib/hurdak"
+  import {randomId} from "hurdak"
   import {onMount, onDestroy} from "svelte"
   import {fly, fade} from "src/util/transition"
   import {modal} from "src/partials/state"
@@ -78,7 +78,7 @@
       {/if}
       <div class="absolute mt-12 h-full w-full bg-gray-7" />
       <div
-        class="relative h-full w-full cursor-auto border-t border-solid border-gray-6 bg-gray-7 pt-2 pb-10"
+        class="relative h-full w-full cursor-auto border-t border-solid border-gray-6 bg-gray-7 pb-10 pt-2"
         on:click|stopPropagation>
         <slot />
       </div>

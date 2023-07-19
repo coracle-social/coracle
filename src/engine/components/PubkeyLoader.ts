@@ -1,7 +1,7 @@
 import {without, pluck, uniq} from "ramda"
-import {chunk, ensurePlural} from "hurdak/lib/hurdak"
+import {chunk, seconds, ensurePlural} from "hurdak"
 import {personKinds, appDataKeys} from "src/util/nostr"
-import {now, timedelta} from "src/util/misc"
+import {now} from "src/util/misc"
 import type {Filter} from "src/engine/types"
 
 export type LoadPeopleOpts = {
@@ -16,7 +16,7 @@ export class PubkeyLoader {
 
     const getStalePubkeys = pubkeys => {
       const stale = new Set()
-      const since = now() - timedelta(3, "hours")
+      const since = now() - seconds(3, "hour")
 
       for (const pubkey of pubkeys) {
         if (stale.has(pubkey) || attemptedPubkeys.has(pubkey)) {

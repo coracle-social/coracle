@@ -1,6 +1,7 @@
 import {last} from "ramda"
 import {nip05} from "nostr-tools"
-import {tryFunc, now, tryJson} from "src/util/misc"
+import {tryFunc} from "hurdak"
+import {now, tryJson} from "src/util/misc"
 import type {Handle} from "src/engine/types"
 import {collection} from "../util/store"
 

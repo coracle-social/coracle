@@ -3681,12 +3681,12 @@ https-browserify@^1.0.0:
   resolved "https://registry.npmjs.org/https-browserify/-/https-browserify-1.0.0.tgz"
   integrity sha512-J+FkSdyD+0mA0N+81tMotaRMfSL9SGi+xpD3T6YApKsc3bGSXJlfXri3VyFOeYkfLRQisDk1W+jIFFKBeUBbBg==
 
-"hurdak@github:ConsignCloud/hurdak":
-  version "0.0.5"
-  resolved "git+ssh://git@github.com/ConsignCloud/hurdak.git#91a8e9364123876715a1986c1d2dfc07eece20bf"
+hurdak@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/hurdak/-/hurdak-0.2.1.tgz#459b2c14a8cc349e4bdb1a3c885443e786ff0172"
+  integrity sha512-qC/EjTTvLOD4Dvm99ucKW8X7EtgeZLeUyf4jCz44HrVDYtL3al0vHyaIR0h2ag0KVbx5f261dm/bOgoWawSJXQ==
   dependencies:
-    ramda "^0.28.0"
-    uuid "^8.3.2"
+    ramda "^0.29.0"
 
 husky@^8.0.3:
   version "8.0.3"
@@ -5097,6 +5097,11 @@ ramda@^0.28.0:
   resolved "https://registry.npmjs.org/ramda/-/ramda-0.28.0.tgz"
   integrity sha512-9QnLuG/kPVgWvMQ4aODhsBUFKOUmnbUnsSXACv+NCQZcHbeb+v8Lodp8OVxtRULN1/xOyYLLaL6npE6dMq5QTA==
 
+ramda@^0.29.0:
+  version "0.29.0"
+  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.29.0.tgz#fbbb67a740a754c8a4cbb41e2a6e0eb8507f55fb"
+  integrity sha512-BBea6L67bYLtdbOqfp8f58fPMqEwx0doL+pAi8TZyp2YWz8R9G8z9x75CZI8W+ftqhFHCpEX2cRnUUXK130iKA==
+
 randombytes@^2.0.0, randombytes@^2.0.1, randombytes@^2.0.5, randombytes@^2.1.0:
   version "2.1.0"
   resolved "https://registry.npmjs.org/randombytes/-/randombytes-2.1.0.tgz"
@@ -6173,11 +6178,6 @@ util@^0.12.0, util@^0.12.4:
     is-generator-function "^1.0.7"
     is-typed-array "^1.1.3"
     which-typed-array "^1.1.2"
-
-uuid@^8.3.2:
-  version "8.3.2"
-  resolved "https://registry.npmjs.org/uuid/-/uuid-8.3.2.tgz"
-  integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
 
 validate-npm-package-license@^3.0.1:
   version "3.0.4"

@@ -1,6 +1,6 @@
 <script>
   import cx from "classnames"
-  import {ellipsize} from "hurdak/lib/hurdak"
+  import {ellipsize} from "hurdak"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import {user} from "src/app/engine"

@@ -1,4 +1,4 @@
-import {ensurePlural} from "hurdak/lib/hurdak"
+import {ensurePlural} from "hurdak"
 import {now} from "src/util/misc"
 import {Tags} from "src/util/nostr"
 import type {GraphEntry} from "src/engine/types"

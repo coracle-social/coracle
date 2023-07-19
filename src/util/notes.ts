@@ -1,6 +1,6 @@
 import {last, pluck, identity} from "ramda"
 import {nip19} from "nostr-tools"
-import {first, switcherFn} from "hurdak/lib/hurdak"
+import {first, switcherFn} from "hurdak"
 import {fromNostrURI} from "src/util/nostr"
 
 export const NEWLINE = "newline"

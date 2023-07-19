@@ -1,7 +1,7 @@
 import {propEq, find, reject} from "ramda"
 import {nip19, getPublicKey, getSignature, generatePrivateKey} from "nostr-tools"
 import NDK, {NDKEvent, NDKNip46Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk"
-import {switcherFn} from "hurdak/lib/hurdak"
+import {switcherFn} from "hurdak"
 import {writable, derived} from "../util/store"
 
 export type LoginMethod = "bunker" | "pubkey" | "privkey" | "extension"

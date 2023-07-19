@@ -1,13 +1,11 @@
 <script>
   import {filter, slice, pluck, reverse, max, last, sortBy} from "ramda"
   import {onMount} from "svelte"
-  import {doPipe} from "hurdak/lib/hurdak"
+  import {doPipe, batch, seconds} from "hurdak"
   import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
   import {
     now,
-    batch,
-    timedelta,
     formatTimestampAsDate,
     formatTimestampAsLocalISODate,
     createScroller,
@@ -93,7 +91,7 @@
     document.title = "Notifications"
 
     const pubkey = Keys.pubkey.get()
-    const since = lastChecked - timedelta(30, "days")
+    const since = lastChecked - seconds(30, "day")
     const reactionKinds = ENABLE_ZAPS ? [7, 9735] : [7]
     const eventIds = doPipe(Events.cache.get(), [
       filter(e => noteKinds.includes(e.kind)),

@@ -5,7 +5,7 @@
   import {find, reject, identity, propEq, pathEq, sum, pluck, sortBy} from "ramda"
   import {stringToHue, formatSats, hsl} from "src/util/misc"
   import {isLike} from "src/util/nostr"
-  import {quantify, first} from "hurdak/lib/hurdak"
+  import {quantify, first} from "hurdak"
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"

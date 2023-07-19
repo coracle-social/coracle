@@ -1,6 +1,6 @@
 import {Socket} from "paravel"
 import {now} from "src/util/misc"
-import {switcher} from "hurdak/lib/hurdak"
+import {switcher} from "hurdak"
 import type {RelayStat} from "src/engine/types"
 import {collection} from "../util/store"
 

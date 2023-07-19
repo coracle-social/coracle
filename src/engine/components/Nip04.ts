@@ -1,5 +1,6 @@
+import {tryFunc} from "hurdak"
 import {find, last, uniq, pluck} from "ramda"
-import {tryJson, tryFunc} from "src/util/misc"
+import {tryJson} from "src/util/misc"
 import {Tags, appDataKeys} from "src/util/nostr"
 import type {Contact, Message} from "src/engine/types"
 import {collection, derived} from "../util/store"

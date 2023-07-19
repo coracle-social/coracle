@@ -1,6 +1,6 @@
 <script>
   import {pipe, filter, map, when, identity, pluck, propEq, uniq} from "ramda"
-  import {closure, quantify} from "hurdak/lib/hurdak"
+  import {closure, quantify} from "hurdak"
   import {tryJson, formatTimestamp} from "src/util/misc"
   import {Tags} from "src/util/nostr"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"

@@ -1,5 +1,5 @@
 import {is, reject, filter, map, findIndex, equals} from "ramda"
-import {ensurePlural} from "hurdak/lib/hurdak"
+import {ensurePlural} from "hurdak"
 
 export type Readable<T> = {
   notify: () => void

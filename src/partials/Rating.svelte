@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {range} from "hurdak/lib/hurdak"
+  import {range} from "hurdak"
 
   export let inert = false
   export let value = 1

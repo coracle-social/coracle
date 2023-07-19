@@ -1,7 +1,7 @@
 <script>
   import {onMount} from "svelte"
   import {groupBy} from "ramda"
-  import {mapValues} from "hurdak/lib/hurdak"
+  import {mapVals} from "hurdak"
   import {fuzzy} from "src/util/misc"
   import {normalizeRelayUrl, Tags, getAvgQuality} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
@@ -19,7 +19,7 @@
   const joined = nip65.policies.key(keys.pubkey.get()).derived(() => new Set(user.getRelayUrls()))
   const knownRelays = nip65.relays
 
-  $: ratings = mapValues(
+  $: ratings = mapVals(
     events => getAvgQuality("review/relay", events),
     groupBy(e => Tags.from(e).getMeta("r"), reviews)
   )

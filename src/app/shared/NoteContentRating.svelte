@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {switcher, switcherFn} from "hurdak/lib/hurdak"
+  import {switcher, switcherFn} from "hurdak"
   import {Tags} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"

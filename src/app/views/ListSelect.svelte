@@ -1,5 +1,5 @@
 <script type="ts">
-  import {updateIn} from "hurdak/lib/hurdak"
+  import {updateIn} from "hurdak"
   import {Tags} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"

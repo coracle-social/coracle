@@ -1,8 +1,8 @@
 <script>
   import {sortBy, filter, complement, pluck, prop} from "ramda"
   import {onMount} from "svelte"
-  import {toTitle} from "hurdak/lib/hurdak"
-  import {now, batch, timedelta} from "src/util/misc"
+  import {toTitle, seconds, batch} from "hurdak"
+  import {now} from "src/util/misc"
   import {navigate} from "svelte-routing"
   import Tabs from "src/partials/Tabs.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -28,7 +28,7 @@
 
   onMount(() => {
     const pubkey = Keys.pubkey.get()
-    const since = now() - timedelta(90, "days")
+    const since = now() - seconds(90, "day")
     const sub = Network.subscribe({
       relays: User.getRelayUrls("read"),
       filter: [

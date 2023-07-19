@@ -1,9 +1,9 @@
 <script lang="ts">
   import cx from "classnames"
-  import {between} from "hurdak/lib/hurdak"
+  import {between, poll} from "hurdak"
   import {onMount} from "svelte"
   import {fly} from "src/util/transition"
-  import {poll, stringToHue, hsl} from "src/util/misc"
+  import {stringToHue, hsl} from "src/util/misc"
   import {modal} from "src/partials/state"
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"

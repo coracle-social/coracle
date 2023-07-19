@@ -16,8 +16,8 @@ import {
   assoc,
   reject,
 } from "ramda"
-import {ensurePlural, chunk, doPipe} from "hurdak/lib/hurdak"
-import {batch, timedelta, union, sleep, now} from "src/util/misc"
+import {ensurePlural, seconds, sleep, batch, union, chunk, doPipe} from "hurdak"
+import {now} from "src/util/misc"
 import {findReplyId, Tags, noteKinds} from "src/util/nostr"
 import {collection} from "./store"
 import type {Collection} from "./store"
@@ -429,7 +429,7 @@ export class Feed {
     // Sometimes relays send very old data very quickly. Pop these off the queue and re-add
     // them after we have more timely data. They still might be relevant, but order will still
     // be maintained since everything before the cutoff will be deferred the same way.
-    const since = now() - timedelta(6, "hours")
+    const since = now() - seconds(6, "hour")
     const [defer, ok] = partition(e => e.created_at < since, notes)
 
     setTimeout(() => this.addToFeed(defer), 1500)

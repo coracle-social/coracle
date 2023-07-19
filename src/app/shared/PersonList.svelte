@@ -1,7 +1,7 @@
 <script type="ts">
   import {onMount} from "svelte"
   import {uniq, pluck} from "ramda"
-  import {batch} from "src/util/misc"
+  import {batch} from "hurdak"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"

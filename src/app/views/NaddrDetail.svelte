@@ -1,6 +1,6 @@
 <script>
   import {onMount} from "svelte"
-  import {quantify} from "hurdak/lib/hurdak"
+  import {quantify} from "hurdak"
   import {routes} from "src/app/state"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"

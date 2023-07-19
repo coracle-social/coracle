@@ -1,4 +1,4 @@
-import {bytes} from "hurdak/lib/hurdak"
+import {bytes} from "hurdak"
 
 export const copyToClipboard = text => {
   const {activeElement} = document

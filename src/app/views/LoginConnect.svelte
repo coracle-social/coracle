@@ -1,8 +1,8 @@
 <script lang="ts">
   import {isNil, prop, uniqBy, objOf, find, all, last} from "ramda"
+  import {sleep, shuffle} from "hurdak"
   import {onDestroy, onMount} from "svelte"
   import {navigate} from "svelte-routing"
-  import {sleep, shuffle} from "src/util/misc"
   import {isRelay, userKinds} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Content from "src/partials/Content.svelte"

@@ -1,6 +1,6 @@
 <script>
   import {fly} from "src/util/transition"
-  import {toTitle} from "hurdak/lib/hurdak"
+  import {toTitle} from "hurdak"
 
   export let tabs
   export let activeTab

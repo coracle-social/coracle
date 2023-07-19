@@ -1,10 +1,9 @@
 import EventEmitter from "events"
-import type {Deferred} from "src/util/misc"
-import {defer} from "src/util/misc"
+import {defer} from "hurdak"
 
 export class Subscription extends EventEmitter {
   closed: boolean
-  complete: Deferred<void>
+  complete: ReturnType<typeof defer>
 
   constructor() {
     super()

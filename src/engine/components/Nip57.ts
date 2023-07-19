@@ -1,4 +1,5 @@
-import {fetchJson, now, tryFunc, tryJson, hexToBech32, bech32ToHex} from "src/util/misc"
+import {Fetch, tryFunc} from "hurdak"
+import {now, tryJson, hexToBech32, bech32ToHex} from "src/util/misc"
 import {invoiceAmount} from "src/util/lightning"
 import {Tags} from "src/util/nostr"
 import type {Zapper} from "src/engine/types"
@@ -97,7 +98,7 @@ export class Nip57 {
           return
         }
 
-        const result = await tryFunc(() => fetchJson(url), true)
+        const result = await tryFunc(() => Fetch.fetchJson(url), true)
 
         if (!result?.allowsNostr || !result?.nostrPubkey) {
           return

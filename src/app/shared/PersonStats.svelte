@@ -1,8 +1,9 @@
 <script lang="ts">
+  import {batch} from "hurdak"
   import {onDestroy} from "svelte"
   import {fly} from "src/util/transition"
   import {tweened} from "svelte/motion"
-  import {numberFmt, batch} from "src/util/misc"
+  import {numberFmt} from "src/util/misc"
   import {modal} from "src/partials/state"
   import {nip02, user, nip65, network} from "src/app/engine"
 

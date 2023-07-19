@@ -1,7 +1,8 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
+  import {Fetch} from "hurdak"
   import {warn} from "src/util/logger"
-  import {fetchJson, now} from "src/util/misc"
+  import {now} from "src/util/misc"
   import {modal} from "src/partials/state"
   import QRCode from "src/partials/QRCode.svelte"
   import Content from "src/partials/Content.svelte"
@@ -34,7 +35,7 @@
       builder.requestZap(relays, zap.message, note.pubkey, note.id, amount, zapper.lnurl)
     )
     const eventString = encodeURI(JSON.stringify(event))
-    const res = await fetchJson(
+    const res = await Fetch.fetchJson(
       `${zapper.callback}?amount=${amount}&nostr=${eventString}&lnurl=${zapper.lnurl}`
     )
 

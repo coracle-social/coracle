@@ -1,7 +1,7 @@
 import type {Event} from "src/engine/types"
 import {getEventHash} from "nostr-tools"
 import {assoc} from "ramda"
-import {doPipe} from "hurdak/lib/hurdak"
+import {doPipe} from "hurdak"
 import {now} from "src/util/misc"
 import {Worker} from "../util/Worker"
 

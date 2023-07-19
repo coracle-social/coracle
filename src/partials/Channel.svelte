@@ -1,9 +1,10 @@
 <script>
   import {onDestroy} from "svelte"
+  import {sleep} from "hurdak"
   import {prop, max, path as getPath, reverse, pluck, sortBy, last} from "ramda"
   import {writable, derived} from "svelte/store"
   import {fly} from "src/util/transition"
-  import {sleep, createScroller} from "src/util/misc"
+  import {createScroller} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import {keys, directory} from "src/app/engine"
 

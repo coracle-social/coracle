@@ -4,7 +4,7 @@
   import {readable} from "svelte/store"
   import {last, equals} from "ramda"
   import {fly} from "src/util/transition"
-  import {quantify} from "hurdak/lib/hurdak"
+  import {quantify} from "hurdak"
   import {createScroller, now} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import Modal from "src/partials/Modal.svelte"

@@ -1,6 +1,7 @@
+import {defer} from "hurdak"
 import {throttle} from "throttle-debounce"
 import {prop, path as getPath, sortBy} from "ramda"
-import {defer, getLocalJson, setLocalJson} from "src/util/misc"
+import {Storage as LocalStorage} from "hurdak"
 import {writable} from "../util/store"
 import {IndexedDB} from "../util/indexeddb"
 
@@ -36,10 +37,10 @@ const syncScalars = (engine, keys) => {
     const store = getPath(key.split("."), engine)
 
     if (Object.hasOwn(localStorage, key)) {
-      store.set(getLocalJson(key))
+      store.set(LocalStorage.getJson(key))
     }
 
-    store.subscribe(throttle(300, $value => setLocalJson(key, $value)))
+    store.subscribe(throttle(300, $value => LocalStorage.setJson(key, $value)))
   }
 }
 

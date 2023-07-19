@@ -1,5 +1,5 @@
 <script>
-  import {timedelta} from "src/util/misc"
+  import {seconds} from "hurdak"
   import {appName} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
@@ -29,7 +29,7 @@
     <Feed
       hideControls
       invertColors
-      delta={timedelta(30, "days")}
+      delta={seconds(30, "day")}
       filter={{
         kinds: [1985],
         "#l": ["review/relay"],

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {batch} from "src/util/misc"
+  import {batch} from "hurdak"
   import {normalizeRelayUrl, getAvgQuality} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import Feed from "src/app/shared/Feed.svelte"
