@@ -1909,7 +1909,7 @@ ansi-regex@^5.0.1:
 
 ansi-sequence-parser@^1.1.0:
   version "1.1.0"
-  resolved "https://registry.yarnpkg.com/ansi-sequence-parser/-/ansi-sequence-parser-1.1.0.tgz#4d790f31236ac20366b23b3916b789e1bde39aed"
+  resolved "https://registry.npmjs.org/ansi-sequence-parser/-/ansi-sequence-parser-1.1.0.tgz"
   integrity sha512-lEm8mt52to2fT8GhciPCGeCXACSz2UwIN4X2e2LJSnZ5uAbn2/dsYdOmUXq0AtWS5cpAupysIneExOgH0Vd2TQ==
 
 ansi-styles@^3.2.1:
@@ -3683,7 +3683,7 @@ https-browserify@^1.0.0:
 
 hurdak@^0.2.2:
   version "0.2.2"
-  resolved "https://registry.yarnpkg.com/hurdak/-/hurdak-0.2.2.tgz#2654f3366cfa3a994e673c8fab741a7d6af3fb59"
+  resolved "https://registry.npmjs.org/hurdak/-/hurdak-0.2.2.tgz"
   integrity sha512-QeI0ZxdsQKW3zJugGO7cLTzHup2RxA3cMsU93Vw86IYwWZ3O40gMDpXvjKBgcWAeYYl/jfFs0rLvKquGndqymQ==
   dependencies:
     ramda "^0.29.0"
@@ -4112,7 +4112,7 @@ json5@^2.2.0, json5@^2.2.2:
 
 jsonc-parser@^3.2.0:
   version "3.2.0"
-  resolved "https://registry.yarnpkg.com/jsonc-parser/-/jsonc-parser-3.2.0.tgz#31ff3f4c2b9793f89c67212627c51c6394f88e76"
+  resolved "https://registry.npmjs.org/jsonc-parser/-/jsonc-parser-3.2.0.tgz"
   integrity sha512-gfFQZrcTc8CnKXp6Y4/CBT3fTc0OVuDofpre4aEeEpSBPV5X5v4+Vmx+8snU7RLPrNHPKSgLxGo9YuQzz20o+w==
 
 jsonfile@^6.0.1:
@@ -4247,7 +4247,7 @@ lru-cache@^7.18.3:
 
 lunr@^2.3.9:
   version "2.3.9"
-  resolved "https://registry.yarnpkg.com/lunr/-/lunr-2.3.9.tgz#18b123142832337dd6e964df1a5a7707b25d35e1"
+  resolved "https://registry.npmjs.org/lunr/-/lunr-2.3.9.tgz"
   integrity sha512-zTU3DaZaF3Rt9rhN3uBMGQD3dD2/vFQqnvZCDv4dl5iOzq2IZQqTxu90r4E5J+nP70J3ilqVCrbho2eWaeW8Ow==
 
 magic-string@^0.25.0, magic-string@^0.25.7:
@@ -4283,7 +4283,7 @@ map-obj@^4.0.0:
 
 marked@^4.3.0:
   version "4.3.0"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-4.3.0.tgz#796362821b019f734054582038b116481b456cf3"
+  resolved "https://registry.npmjs.org/marked/-/marked-4.3.0.tgz"
   integrity sha512-PRsaiG84bK+AMvxziE/lCFss8juXjNaWzVbN5tXAm4XjeaS9NAHhop+PjQxz2A9h8Q4M/xGmzP8vqNwy6JeK0A==
 
 marked@^5.1.0:
@@ -4392,7 +4392,7 @@ minimatch@^5.0.1:
 
 minimatch@^9.0.0:
   version "9.0.3"
-  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-9.0.3.tgz#a6e00c3de44c3a542bfaae70abfc22420a6da825"
+  resolved "https://registry.npmjs.org/minimatch/-/minimatch-9.0.3.tgz"
   integrity sha512-RHiac9mvaRw0x3AYRgDC1CxAP7HTcNrrECeA8YYJeWnpo+2Q5CegtZjaotWTWxDG3UeGA1coE05iH1mPjT/2mg==
   dependencies:
     brace-expansion "^2.0.1"
@@ -4752,10 +4752,10 @@ pako@~1.0.5:
   resolved "https://registry.npmjs.org/pako/-/pako-1.0.11.tgz"
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
 
-paravel@^0.1.16:
-  version "0.1.16"
-  resolved "https://registry.yarnpkg.com/paravel/-/paravel-0.1.16.tgz#a231effcf2c2939a7e85f98a681202072328fe88"
-  integrity sha512-Ow5awCv8jRcjKA5nXFXCMP4a29cmEvZnTogLBWJG34CiAs5Blw6MHiIGTPO6vkOs7Nv3dVT0jylJamCJxOunZg==
+paravel@^0.1.19:
+  version "0.1.19"
+  resolved "https://registry.yarnpkg.com/paravel/-/paravel-0.1.19.tgz#ba5054625734a269a7598b16d218c9b541c6f0a7"
+  integrity sha512-ww0H91nfU0U8Pc9dUaeGfXpNO4EpFBv6gpFWbUN9kQMGm/CrCtxdIPj+IDlBtxvY4WCv+gYe+YI/KB1QDDcmrA==
   dependencies:
     events "^3.3.0"
     husky "^8.0.3"
@@ -5099,7 +5099,7 @@ ramda@^0.28.0:
 
 ramda@^0.29.0:
   version "0.29.0"
-  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.29.0.tgz#fbbb67a740a754c8a4cbb41e2a6e0eb8507f55fb"
+  resolved "https://registry.npmjs.org/ramda/-/ramda-0.29.0.tgz"
   integrity sha512-BBea6L67bYLtdbOqfp8f58fPMqEwx0doL+pAi8TZyp2YWz8R9G8z9x75CZI8W+ftqhFHCpEX2cRnUUXK130iKA==
 
 randombytes@^2.0.0, randombytes@^2.0.1, randombytes@^2.0.5, randombytes@^2.1.0:
@@ -5439,7 +5439,7 @@ shell-quote@^1.6.1:
 
 shiki@^0.14.1:
   version "0.14.3"
-  resolved "https://registry.yarnpkg.com/shiki/-/shiki-0.14.3.tgz#d1a93c463942bdafb9866d74d619a4347d0bbf64"
+  resolved "https://registry.npmjs.org/shiki/-/shiki-0.14.3.tgz"
   integrity sha512-U3S/a+b0KS+UkTyMjoNojvTgrBHjgp7L6ovhFVZsXmBGnVdQ4K4U9oK0z63w538S91ATngv1vXigHCSWOwnr+g==
   dependencies:
     ansi-sequence-parser "^1.1.0"
@@ -6050,7 +6050,7 @@ typedarray-to-buffer@^3.1.5:
 
 typedoc@^0.24.8:
   version "0.24.8"
-  resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.24.8.tgz#cce9f47ba6a8d52389f5e583716a2b3b4335b63e"
+  resolved "https://registry.npmjs.org/typedoc/-/typedoc-0.24.8.tgz"
   integrity sha512-ahJ6Cpcvxwaxfu4KtjA8qZNqS43wYt6JL27wYiIgl1vd38WW/KWX11YuAeZhuz9v+ttrutSsgK+XO1CjL1kA3w==
   dependencies:
     lunr "^2.3.9"
@@ -6242,12 +6242,12 @@ vm-browserify@^1.0.1:
 
 vscode-oniguruma@^1.7.0:
   version "1.7.0"
-  resolved "https://registry.yarnpkg.com/vscode-oniguruma/-/vscode-oniguruma-1.7.0.tgz#439bfad8fe71abd7798338d1cd3dc53a8beea94b"
+  resolved "https://registry.npmjs.org/vscode-oniguruma/-/vscode-oniguruma-1.7.0.tgz"
   integrity sha512-L9WMGRfrjOhgHSdOYgCt/yRMsXzLDJSL7BPrOZt73gU0iWO4mpqzqQzOz5srxqTvMBaR0XZTSrVWo4j55Rc6cA==
 
 vscode-textmate@^8.0.0:
   version "8.0.0"
-  resolved "https://registry.yarnpkg.com/vscode-textmate/-/vscode-textmate-8.0.0.tgz#2c7a3b1163ef0441097e0b5d6389cd5504b59e5d"
+  resolved "https://registry.npmjs.org/vscode-textmate/-/vscode-textmate-8.0.0.tgz"
   integrity sha512-AFbieoL7a5LMqcnOF04ji+rpXadgOXnZsxQr//r83kLPr7biP7am3g9zbaZIaBGwBRWeSvoMD4mgPdX3e4NWBg==
 
 web-streams-polyfill@^3.0.3:
