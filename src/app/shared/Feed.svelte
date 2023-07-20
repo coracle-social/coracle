@@ -1,7 +1,7 @@
 <script lang="ts">
   import type {DynamicFilter, DisplayEvent} from "src/engine/types"
   import {onMount, onDestroy} from "svelte"
-  import {readable} from "svelte/store"
+  import {readable, derived, writable} from "svelte/store"
   import {last, equals} from "ramda"
   import {fly} from "src/util/transition"
   import {quantify} from "hurdak"
@@ -12,7 +12,6 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {derived} from "src/engine/util/store"
   import {user, nip65, network} from "src/app/engine"
   import {compileFilter} from "src/app/state"
 
@@ -22,12 +21,13 @@
   export let hideControls = false
   export let onEvent = null
 
-  let since = now()
   let scroller, feed
   let feedRelay = null
   let feedScroller = null
   let newNotes = readable([])
   let oldNotes = readable([])
+
+  const since = writable(now())
 
   const getModal = () => last(document.querySelectorAll(".modal-content"))
 
@@ -43,7 +43,7 @@
   }
 
   const loadBufferedNotes = () => {
-    since = now()
+    since.set(now())
 
     document.body.scrollIntoView({behavior: "smooth"})
   }
@@ -93,12 +93,14 @@
 
       scroller = createScroller(loadMore, {element: scrollerElement})
 
-      newNotes = derived<DisplayEvent[]>(feed.feed, notes =>
-        notes.filter(e => e.created_at > feed.since)
+      since.set(now())
+
+      newNotes = derived([feed.feed, since], ([$notes, $since]) =>
+        ($notes as DisplayEvent[]).filter(e => e.created_at > $since)
       )
 
-      oldNotes = derived<DisplayEvent[]>(feed.feed, notes =>
-        notes.filter(e => e.created_at <= feed.since)
+      oldNotes = derived([feed.feed, since], ([$notes, $since]) =>
+        ($notes as DisplayEvent[]).filter(e => e.created_at <= $since)
       )
     }
   }
