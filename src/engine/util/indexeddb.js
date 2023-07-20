@@ -51,22 +51,41 @@ export class IndexedDB {
     })
   }
 
-  bulkAdd(storeName, data) {
-    return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction([storeName], "readwrite")
+  async bulkPut(storeName, data) {
+    const transaction = this.db.transaction(storeName, "readwrite")
+    const store = transaction.objectStore(storeName)
 
-      for (const row of data) {
-        const request = transaction.objectStore(storeName).add(row)
+    return Promise.all(
+      data.map(row => {
+        return new Promise((resolve, reject) => {
+          const request = store.put(row)
 
-        request.onerror = e => reject(e.target.error)
-        request.onsuccess = e => resolve(e.target.result)
-      }
-    })
+          request.onerror = e => reject(e.target.error)
+          request.onsuccess = e => resolve(e.target.result)
+        })
+      })
+    )
+  }
+
+  async bulkDelete(storeName, ids) {
+    const transaction = this.db.transaction(storeName, "readwrite")
+    const store = transaction.objectStore(storeName)
+
+    return Promise.all(
+      ids.map(id => {
+        return new Promise((resolve, reject) => {
+          const request = store.delete(id)
+
+          request.onerror = e => reject(e.target.error)
+          request.onsuccess = e => resolve(e.target.result)
+        })
+      })
+    )
   }
 
   clear(storeName) {
     return new Promise((resolve, reject) => {
-      const request = this.db.transaction([storeName], "readwrite").objectStore(storeName).clear()
+      const request = this.db.transaction(storeName, "readwrite").objectStore(storeName).clear()
 
       request.onerror = e => reject(e.target.error)
       request.onsuccess = e => resolve(e.target.result)
@@ -75,7 +94,7 @@ export class IndexedDB {
 
   count(storeName) {
     return new Promise((resolve, reject) => {
-      const request = this.db.transaction([storeName]).objectStore(storeName).count()
+      const request = this.db.transaction(storeName).objectStore(storeName).count()
 
       request.onerror = e => reject(e.target.error)
       request.onsuccess = e => resolve(e.target.result)

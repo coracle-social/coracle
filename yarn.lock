@@ -3681,10 +3681,10 @@ https-browserify@^1.0.0:
   resolved "https://registry.npmjs.org/https-browserify/-/https-browserify-1.0.0.tgz"
   integrity sha512-J+FkSdyD+0mA0N+81tMotaRMfSL9SGi+xpD3T6YApKsc3bGSXJlfXri3VyFOeYkfLRQisDk1W+jIFFKBeUBbBg==
 
-hurdak@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/hurdak/-/hurdak-0.2.1.tgz#459b2c14a8cc349e4bdb1a3c885443e786ff0172"
-  integrity sha512-qC/EjTTvLOD4Dvm99ucKW8X7EtgeZLeUyf4jCz44HrVDYtL3al0vHyaIR0h2ag0KVbx5f261dm/bOgoWawSJXQ==
+hurdak@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/hurdak/-/hurdak-0.2.2.tgz#2654f3366cfa3a994e673c8fab741a7d6af3fb59"
+  integrity sha512-QeI0ZxdsQKW3zJugGO7cLTzHup2RxA3cMsU93Vw86IYwWZ3O40gMDpXvjKBgcWAeYYl/jfFs0rLvKquGndqymQ==
   dependencies:
     ramda "^0.29.0"
 

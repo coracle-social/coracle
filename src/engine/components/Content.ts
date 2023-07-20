@@ -32,9 +32,11 @@ export class Content {
       )
 
       for (const name of tagTopics.concat(contentTopics)) {
-        const topic = Content.topics.key(name).get()
+        if (name) {
+          const topic = Content.topics.key(name).get()
 
-        Content.topics.key(name).merge({count: inc(topic?.count || 0)})
+          Content.topics.key(name).merge({count: inc(topic?.count || 0)})
+        }
       }
     }
 

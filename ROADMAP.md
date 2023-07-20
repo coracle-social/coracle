@@ -1,14 +1,16 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Get back to blowater
+  - [ ] Fix load new notes button
+  - [ ] Speed up note detail
   - [ ] Fix feed control state
   - [ ] Remove external dependencies from engine, open source it?
   - [ ] Show nip 5's in search and other places
   - [ ] If connections fail, re-open and re-send active subs
   - [ ] Normalize all relay urls, see comment by daniele
-  - [ ] Pull x recent chat messages on chat detail and sort by that
   - [ ] Add thread view
+- [ ] Email newsletter for priority content
+- [ ] Superfollow?
 - [ ] Re-work note media
   - [ ] Add webcam image/video capture
   - [ ] Show list of media that can be viewed/removed below post

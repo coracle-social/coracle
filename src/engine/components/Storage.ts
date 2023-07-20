@@ -1,6 +1,5 @@
-import {defer} from "hurdak"
-import {throttle} from "throttle-debounce"
-import {prop, path as getPath, sortBy} from "ramda"
+import {prop, pluck, splitAt, path as getPath, sortBy} from "ramda"
+import {sleep, defer, chunk, randomInt, throttle} from "hurdak"
 import {Storage as LocalStorage} from "hurdak"
 import {writable} from "../util/store"
 import {IndexedDB} from "../util/indexeddb"
@@ -51,13 +50,16 @@ const syncCollections = async (engine, policies) => {
     store.set(await engine.Storage.db.getAll(key))
 
     store.subscribe(
-      throttle(3000, async rows => {
+      throttle(randomInt(3000, 5000), async rows => {
         if (engine.Storage.dead.get()) {
           return
         }
 
-        await engine.Storage.db.clear(key)
-        await engine.Storage.db.bulkAdd(key, rows)
+        // Do it in small steps to avoid clogging stuff up
+        for (const records of chunk(100, rows)) {
+          await engine.Storage.db.bulkPut(key, records)
+          await sleep(50)
+        }
       })
     )
   }
@@ -72,7 +74,10 @@ const syncCollections = async (engine, policies) => {
       return
     }
 
-    store.set(sort(data).slice(-max))
+    const [discard, keep] = splitAt(max, sort(data))
+
+    store.set(keep)
+    engine.Storage.db.bulkDelete(key, pluck(store.pk, discard))
   }, 30_000)
 }
 
@@ -85,7 +90,7 @@ export class Storage {
     return {db: null, ready, dead}
   }
 
-  static contributeActions({Storage, Social, Keys}) {
+  static contributeActions({Storage, Nip02, Keys}) {
     const close = () => {
       Storage.dead.set(true)
 
@@ -101,9 +106,9 @@ export class Storage {
     }
 
     const getPubkeyWhitelist = () => {
-      const pubkeys = Keys.getKeyState().map(prop("pubkey"))
+      const pubkeys = Keys.keyState.get().map(prop("pubkey"))
 
-      return [new Set(pubkeys), Social.getFollowsSet(pubkeys)]
+      return [new Set(pubkeys), Nip02.getFollowsSet(pubkeys)]
     }
 
     const sortByPubkeyWhitelist = fallback => rows => {

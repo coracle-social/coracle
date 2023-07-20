@@ -258,12 +258,11 @@ export class Feed {
   // Adders
 
   addContext = (newEvents, {shouldLoadParents = false, depth = 0}) => {
-    const {onEvent} = this.opts
     const events = this.preprocessEvents(newEvents)
 
-    if (onEvent) {
+    if (this.opts.onEvent) {
       for (const event of events) {
-        onEvent(event)
+        this.opts.onEvent(event)
       }
     }
 
