@@ -17,6 +17,8 @@
   "devDependencies": {
     "@capacitor/cli": "^4.7.3",
     "@sveltejs/vite-plugin-svelte": "^1.1.0",
+    "@types/ramda": "^0.29.3",
+    "@types/throttle-debounce": "^5.0.0",
     "@typescript-eslint/eslint-plugin": "^5.50.0",
     "@typescript-eslint/parser": "^5.50.0",
     "autoprefixer": "^10.4.13",
@@ -44,7 +46,7 @@
     "classnames": "^2.3.2",
     "compressorjs": "^1.1.1",
     "fuse.js": "^6.6.2",
-    "hurdak": "^0.2.2",
+    "hurdak": "^0.2.3",
     "husky": "^8.0.3",
     "insane": "^2.6.2",
     "lru-cache": "^7.18.3",

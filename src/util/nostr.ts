@@ -1,4 +1,4 @@
-import type {DisplayEvent} from "src/engine/types"
+import type {Filter, Event, DisplayEvent} from "src/engine/types"
 import {is, fromPairs, mergeLeft, last, identity, prop, flatten, uniq} from "ramda"
 import {nip19} from "nostr-tools"
 import {ensurePlural, avg, first} from "hurdak"
@@ -16,15 +16,15 @@ export const appDataKeys = {
 }
 
 export class Tags {
-  tags: Array<any>
-  constructor(tags) {
+  tags: any[]
+  constructor(tags: any[]) {
     this.tags = tags
   }
-  static from(events) {
+  static from(events: Event | Event[]) {
     return new Tags(ensurePlural(events).flatMap(prop("tags")))
   }
-  static wrap(tags) {
-    return new Tags((tags || []).filter(identity))
+  static wrap(tags: any[]) {
+    return new Tags(tags.filter(identity))
   }
   all() {
     return this.tags
@@ -38,7 +38,7 @@ export class Tags {
   first() {
     return first(this.tags)
   }
-  nth(i) {
+  nth(i: number) {
     return this.tags[i]
   }
   last() {
@@ -62,35 +62,35 @@ export class Tags {
   asMeta() {
     return fromPairs(this.tags)
   }
-  getMeta(k) {
+  getMeta(k: string) {
     return this.type(k).values().first()
   }
   values() {
     return new Tags(this.tags.map(t => t[1]))
   }
-  filter(f) {
+  filter(f: (t: any) => boolean) {
     return new Tags(this.tags.filter(f))
   }
-  reject(f) {
+  reject(f: (t: any) => boolean) {
     return new Tags(this.tags.filter(t => !f(t)))
   }
-  any(f) {
+  any(f: (t: any) => boolean) {
     return this.filter(f).exists()
   }
-  type(type) {
+  type(type: string) {
     const types = ensurePlural(type)
 
     return new Tags(this.tags.filter(t => types.includes(t[0])))
   }
-  equals(value) {
+  equals(value: string) {
     return new Tags(this.tags.filter(t => t[1] === value))
   }
-  mark(mark) {
+  mark(mark: string) {
     return new Tags(this.tags.filter(t => last(t) === mark))
   }
 }
 
-export const findReplyAndRoot = e => {
+export const findReplyAndRoot = (e: Event) => {
   const tags = Tags.from(e)
     .type("e")
     .filter(t => last(t) !== "mention")
@@ -110,22 +110,19 @@ export const findReplyAndRoot = e => {
   return {reply: reply || root, root}
 }
 
-export const findReply = e => prop("reply", findReplyAndRoot(e))
+export const findReply = (e: Event) => prop("reply", findReplyAndRoot(e))
 
-export const findReplyId = e => findReply(e)?.[1]
+export const findReplyId = (e: Event) => findReply(e)?.[1]
 
-export const findRoot = e => prop("root", findReplyAndRoot(e))
+export const findRoot = (e: Event) => prop("root", findReplyAndRoot(e))
 
-export const findRootId = e => findRoot(e)?.[1]
+export const findRootId = (e: Event) => findRoot(e)?.[1]
 
-export const isLike = content => ["", "+", "🤙", "👍", "❤️", "😎", "🏅"].includes(content)
+export const isLike = (content: string) => ["", "+", "🤙", "👍", "❤️", "😎", "🏅"].includes(content)
 
-export const isRelay = url =>
-  typeof url === "string" &&
-  // It should have the protocol included
-  url.match(/^wss:\/\/.+/)
+export const isRelay = (url: string) => url.match(/^wss:\/\/.+/)
 
-export const isShareableRelay = url =>
+export const isShareableRelay = (url: string) =>
   isRelay(url) &&
   // Don't match stuff with a port number
   !url.slice(6).match(/:\d+/) &&
@@ -134,7 +131,7 @@ export const isShareableRelay = url =>
   // Skip nostr.wine's virtual relays
   !url.slice(6).match(/\/npub/)
 
-export const normalizeRelayUrl = url => {
+export const normalizeRelayUrl = (url: string) => {
   url = url.replace(/\/+$/, "").toLowerCase().trim()
 
   if (!url.startsWith("ws")) {
@@ -146,8 +143,12 @@ export const normalizeRelayUrl = url => {
 
 export const channelAttrs = ["name", "about", "picture"]
 
-export const asDisplayEvent = event =>
-  ({replies: [], reactions: [], zaps: [], ...event} as DisplayEvent)
+export const asDisplayEvent = (event: Event): DisplayEvent => ({
+  replies: [],
+  reactions: [],
+  zaps: [],
+  ...event,
+})
 
 export const toHex = (data: string): string | null => {
   if (data.match(/[a-zA-Z0-9]{64}/)) {
@@ -161,15 +162,18 @@ export const toHex = (data: string): string | null => {
   }
 }
 
-export const mergeFilter = (filter, extra) =>
+export const mergeFilter = (filter: Filter | Filter[], extra: Filter) =>
   is(Array, filter) ? filter.map(mergeLeft(extra)) : {...filter, ...extra}
 
-export const fromNostrURI = s => s.replace(/^[\w\+]+:\/?\/?/, "")
+export const fromNostrURI = (s: string) => s.replace(/^[\w\+]+:\/?\/?/, "")
 
-export const toNostrURI = s => `web+nostr://${s}`
+export const toNostrURI = (s: string) => `web+nostr://${s}`
 
-export const getLabelQuality = (label, event) =>
-  tryJson(() => JSON.parse(last(Tags.from(event).type("l").equals(label).first())).quality)
+export const getLabelQuality = (label: string, event: Event) => {
+  const json = tryJson(() => JSON.parse(last(Tags.from(event).type("l").equals(label).first())))
 
-export const getAvgQuality = (label, events) =>
+  return (json as {quality?: number})?.quality || 0
+}
+
+export const getAvgQuality = (label: string, events: Event[]) =>
   avg(events.map(e => getLabelQuality(label, e)).filter(identity))

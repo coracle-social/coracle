@@ -1,25 +1,25 @@
 import {bech32, utf8} from "@scure/base"
 import {debounce} from "throttle-debounce"
-import {mergeDeepRight, pluck} from "ramda"
-import {Storage, seconds, tryFunc, sleep, isObject, round} from "hurdak"
+import {pluck} from "ramda"
+import {Storage, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from "svelte/store"
 import {warn} from "src/util/logger"
 
-export const fuzzy = (data, opts = {}) => {
-  const fuse = new Fuse(data, opts)
+export const fuzzy = <T>(data: T[], opts = {}) => {
+  const {search} = new Fuse(data, opts) as {search: (q: string) => {item: T}[]}
 
   // Slice pattern because the docs warn that it"ll crash if too long
-  return q => (q ? pluck("item", fuse.search(q.slice(0, 32))) : data)
+  return (q: string) => (q ? pluck("item", search(q.slice(0, 32))) : data)
 }
 
 export const now = () => Math.round(new Date().valueOf() / 1000)
 
 export const getTimeZone = () => new Date().toString().match(/GMT[^\s]+/)
 
-export const createLocalDate = dateString => new Date(`${dateString} ${getTimeZone()}`)
+export const createLocalDate = (dateString: string) => new Date(`${dateString} ${getTimeZone()}`)
 
-export const formatTimestamp = ts => {
+export const formatTimestamp = (ts: number) => {
   const formatter = new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -28,7 +28,7 @@ export const formatTimestamp = ts => {
   return formatter.format(new Date(ts * 1000))
 }
 
-export const formatTimestampAsDate = ts => {
+export const formatTimestampAsDate = (ts: number) => {
   const formatter = new Intl.DateTimeFormat("en-US", {
     year: "numeric",
     month: "long",
@@ -38,7 +38,7 @@ export const formatTimestampAsDate = ts => {
   return formatter.format(new Date(ts * 1000))
 }
 
-export const formatTimestampRelative = ts => {
+export const formatTimestampRelative = (ts: number) => {
   let unit
   let delta = now() - ts
   if (delta < seconds(1, "minute")) {
@@ -61,7 +61,7 @@ export const formatTimestampRelative = ts => {
   return formatter.format(-delta, unit as Intl.RelativeTimeFormatUnit)
 }
 
-export const formatTimestampAsLocalISODate = ts => {
+export const formatTimestampAsLocalISODate = (ts: number) => {
   const date = new Date(ts * 1000)
   const offset = date.getTimezoneOffset() * 60000
   const datetime = new Date(date.getTime() - offset).toISOString()
@@ -69,12 +69,10 @@ export const formatTimestampAsLocalISODate = ts => {
   return datetime
 }
 
-export const createScroller = (
-  loadMore,
-  {threshold = 2000, reverse = false, element = null} = {}
+export const createScroller = <T>(
+  loadMore: () => Promise<T>,
+  {threshold = 2000, reverse = false, element = document.body} = {}
 ) => {
-  element = element || document.body
-
   let done = false
   const check = async () => {
     // While we have empty space, fill it
@@ -108,33 +106,16 @@ export const createScroller = (
   }
 }
 
-export const synced = (key, defaultValue = null) => {
-  // If it's an object, merge defaults
-  const store = writable(
-    isObject(defaultValue)
-      ? mergeDeepRight(defaultValue, Storage.getJson(key) || {})
-      : Storage.getJson(key) || defaultValue
-  )
+export const synced = (key: string, defaultValue: any) => {
+  const store = writable(Storage.getJson(key) || defaultValue)
 
   store.subscribe(debounce(1000, $value => Storage.setJson(key, $value)))
 
   return store
 }
 
-// DANGER: don't use this if it's disposable, it does not clean up subscriptions,
-// and will cause a memory leak
-export const getter = store => {
-  let value
-
-  store.subscribe(_value => {
-    value = _value
-  })
-
-  return () => value
-}
-
 // https://stackoverflow.com/a/21682946
-export const stringToHue = value => {
+export const stringToHue = (value: string) => {
   let hash = 0
   for (let i = 0; i < value.length; i++) {
     hash = value.charCodeAt(i) + ((hash << 5) - hash)
@@ -144,28 +125,39 @@ export const stringToHue = value => {
   return hash % 360
 }
 
-export const hsl = (hue, {saturation = 100, lightness = 50, opacity = 1} = {}) =>
+export const hsl = (hue: string, {saturation = 100, lightness = 50, opacity = 1} = {}) =>
   `hsl(${hue}, ${saturation}%, ${lightness}%, ${opacity})`
 
-export const tryJson = f => tryFunc(f, e => e.toString().includes("JSON") || warn(e))
+export const tryJson = (f: <T>() => T) =>
+  tryFunc(f, (e: Error) => {
+    if (!e.toString().includes("JSON")) {
+      warn(e)
+    }
+  })
 
-export const tryFetch = f => tryFunc(f, e => e.toString().includes("fetch") || warn(e))
+export const tryFetch = (f: <T>() => T) =>
+  tryFunc(f, (e: Error) => {
+    if (!e.toString().includes("fetch")) {
+      warn(e)
+    }
+  })
 
-export const hexToBech32 = (prefix, url) =>
+export const hexToBech32 = (prefix: string, url: string) =>
   bech32.encode(prefix, bech32.toWords(utf8.decode(url)), false)
 
-export const bech32ToHex = b32 => utf8.encode(bech32.fromWords(bech32.decode(b32, false).words))
+export const bech32ToHex = (b32: string) =>
+  utf8.encode(bech32.fromWords(bech32.decode(b32, false).words))
 
 export const numberFmt = new Intl.NumberFormat()
 
-export const formatSats = sats => {
+export const formatSats = (sats: number) => {
   if (sats < 1_000) return numberFmt.format(sats)
   if (sats < 1_000_000) return numberFmt.format(round(1, sats / 1000)) + "K"
   if (sats < 100_000_000) return numberFmt.format(round(1, sats / 1_000_000)) + "MM"
   return numberFmt.format(round(2, sats / 100_000_000)) + "BTC"
 }
 
-export const annotateMedia = url => {
+export const annotateMedia = (url: string) => {
   if (url.match(/\.(jpg|jpeg|png|gif|webp)/)) {
     return {type: "image", url}
   } else if (url.match(/\.(mov|webm|mp4)/)) {
@@ -175,7 +167,7 @@ export const annotateMedia = url => {
   }
 }
 
-export const shadeColor = (color, percent) => {
+export const shadeColor = (color: string, percent: number) => {
   let R = parseInt(color.substring(1, 3), 16)
   let G = parseInt(color.substring(3, 5), 16)
   let B = parseInt(color.substring(5, 7), 16)
@@ -227,7 +219,7 @@ export const webSocketURLToPlainOrBase64 = (url: string): string => {
   return url
 }
 
-export const pushToKey = (xs, k, v) => {
+export const pushToKey = (xs: any[], k: number, v: any) => {
   xs[k] = xs[k] || []
   xs[k].push(v)
 }
