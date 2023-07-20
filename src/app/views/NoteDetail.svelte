@@ -18,7 +18,7 @@
   const feed = network.feed({
     limit: 1,
     depth: 6,
-    relays: nip65.selectHints(3, relays),
+    relays: nip65.selectHints(10, relays),
     filter: {ids: [note.id]},
   })
 
@@ -42,7 +42,7 @@
 
     await feed.loadAll()
 
-    console.log('NoteDetail', $displayNote)
+    console.log("NoteDetail", $displayNote)
 
     loading = false
   })

@@ -39,7 +39,7 @@ export class Cursor {
     let count = 0
 
     return this.opts.subscribe({
-      timeout: 10_000,
+      timeout: 4000,
       relays: [relay],
       filter: ensurePlural(filter).map(mergeLeft({until, limit})),
       onEvent: event => {
@@ -53,6 +53,10 @@ export class Cursor {
       onEose: () => {
         this.loading = false
         this.done = count < limit
+      },
+      onClose: () => {
+        this.loading = false
+        this.done = true
       },
     })
   }

@@ -14,6 +14,7 @@ export type SubscribeOpts = {
   filter: Filter[] | Filter
   onEvent?: (event: Event) => void
   onEose?: (url: string) => void
+  onClose?: () => void
   timeout?: number
   shouldProcess?: boolean
 }
@@ -185,6 +186,7 @@ export class Network {
       filter,
       onEose,
       onEvent,
+      onClose,
       timeout,
       shouldProcess = true,
     }: SubscribeOpts) => {
@@ -204,6 +206,7 @@ export class Network {
         sub.unsubscribe()
         executor.target.cleanup()
         Network.emitter.emit("sub:close", urls)
+        onClose?.()
       })
 
       if (timeout) {

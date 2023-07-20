@@ -91,7 +91,8 @@
     document.title = "Notifications"
 
     const pubkey = Keys.pubkey.get()
-    const since = lastChecked - seconds(30, "day")
+    const since = Math.max(lastChecked - seconds(1, "hour"), now() - seconds(30, "day"))
+
     const reactionKinds = ENABLE_ZAPS ? [7, 9735] : [7]
     const eventIds = doPipe(Events.cache.get(), [
       filter(e => noteKinds.includes(e.kind)),

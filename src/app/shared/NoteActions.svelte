@@ -43,9 +43,9 @@
 
   const quote = () => modal.push({type: "note/create", quote: note})
 
-  const unmute = () => user.unmute(note.pubkey)
+  const unmute = () => user.unmute(note.id)
 
-  const mute = () => user.mute("p", note.pubkey)
+  const mute = () => user.mute("e", note.id)
 
   const react = async content => {
     const relays = nip65.getPublishHints(3, note, user.getRelayUrls("write"))

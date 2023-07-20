@@ -102,7 +102,7 @@ export class Nip02 {
       Nip02.graph.key(e.pubkey).merge({
         updated_at: now(),
         mutes_updated_at: e.created_at,
-        mutes: Tags.from(e).type("p").all(),
+        mutes: Tags.from(e).type(["e", "p"]).all(),
       })
     })
   }

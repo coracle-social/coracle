@@ -13,7 +13,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
-  import {nip05, user, directory, nip65, nip02} from "src/app/engine"
+  import {Nip05, Keys, User, directory, Nip65, Nip02} from "src/app/engine"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
   export let note
@@ -36,8 +36,8 @@
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
   const author = directory.profiles.key(note.pubkey).derived(defaultTo({pubkey: note.pubkey}))
-  const muted = nip02.graph.derived(() => user.isIgnoring(note.id))
-  const handle = nip05.handles.key(note.pubkey)
+  const muted = Nip02.graph.key(Keys.pubkey.get()).derived(() => User.isIgnoring(note.id))
+  const handle = Nip05.handles.key(note.pubkey)
 
   let border, childrenContainer, noteContainer
 
@@ -60,13 +60,13 @@
   }
 
   const goToParent = async () => {
-    const relays = nip65.getParentHints(3, note)
+    const relays = Nip65.getParentHints(3, note)
 
     goToNote({note: {id: findReplyId(note)}, relays})
   }
 
   const goToRoot = async () => {
-    const relays = nip65.getParentHints(3, note)
+    const relays = Nip65.getParentHints(3, note)
 
     goToNote({note: {id: findRootId(note)}, relays})
   }

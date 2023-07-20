@@ -189,7 +189,7 @@ export class Feed {
   loadParents = events => {
     const {Network, Nip65} = this.opts.engine
     const parentsInfo = events
-      .map(e => ({id: findReplyId(e), hints: Nip65.getParentHints(3, e)}))
+      .map(e => ({id: findReplyId(e), hints: Nip65.getParentHints(10, e)}))
       .filter(({id}) => id && !this.seen.has(id))
 
     if (parentsInfo.length > 0) {
@@ -220,7 +220,7 @@ export class Feed {
       for (const c of chunk(256, events)) {
         Network.subscribe({
           timeout: 3000,
-          relays: this.mergeHints(c.map(e => Nip65.getReplyHints(3, e))),
+          relays: this.mergeHints(c.map(e => Nip65.getReplyHints(10, e))),
           filter: {kinds: this.getReplyKinds(), "#e": pluck("id", c)},
           onEvent: batch(100, context => this.addContext(context, {depth: depth - 1})),
         })
@@ -247,7 +247,7 @@ export class Feed {
     for (const c of chunk(256, findNotes(this.feed.get()))) {
       this.addSubs("listeners", [
         Network.subscribe({
-          relays: this.mergeHints(c.map(e => Nip65.getReplyHints(3, e))),
+          relays: this.mergeHints(c.map(e => Nip65.getReplyHints(10, e))),
           filter: {kinds: this.getReplyKinds(), "#e": pluck("id", c), since: now()},
           onEvent: batch(100, context => this.addContext(context, {depth: 2})),
         }),
