@@ -5,12 +5,12 @@ type Derivable = Readable<any> | Readable<any>[]
 type Unsubscriber = () => void
 type Subscriber = <T>(v: T) => void | Unsubscriber
 type R = Record<string, any>
-type M = Map<string, R>
+type M<T> = Map<string, T>
 
 export interface Readable<T> {
   get: () => T | undefined
   subscribe: (f: Subscriber) => () => void
-  derived: <U>(f: <T>(v: T) => U) => Readable<U>
+  derived: <U>(f: (v: T) => U) => Readable<U>
 }
 
 export class Writable<T> implements Readable<T> {
@@ -72,7 +72,7 @@ export class Derived<T> implements Readable<T> {
     this.callerSubs.forEach(f => f(this.get()))
   }
 
-  get() {
+  get(): T {
     const isMulti = is(Array, this.stores)
     const inputs = ensurePlural(this.stores).map(s => s.get())
 
@@ -106,13 +106,13 @@ export class Derived<T> implements Readable<T> {
   }
 }
 
-export class Key implements Readable<R> {
+export class Key<T extends R> implements Readable<T> {
   readonly pk: string
   readonly key: string
-  private base: Writable<M>
-  private store: Readable<R>
+  private base: Writable<M<T>>
+  private store: Readable<T>
 
-  constructor(base: Writable<M>, pk: string, key: string) {
+  constructor(base: Writable<M<T>>, pk: string, key: string) {
     if (!is(Map, base.get())) {
       throw new Error("`key` can only be used on map collections")
     }
@@ -120,38 +120,38 @@ export class Key implements Readable<R> {
     this.pk = pk
     this.key = key
     this.base = base
-    this.store = base.derived<R>(m => m.get(key) as R)
+    this.store = base.derived<T>(m => m.get(key) as T)
   }
 
   get = () => this.base.get().get(this.key)
 
   subscribe = (f: Subscriber) => this.store.subscribe(f)
 
-  derived = <U>(f: <V>(v: V) => U) => this.store.derived<U>(f)
+  derived = <U>(f: (v: T) => U) => this.store.derived<U>(f)
 
   exists = () => this.base.get().has(this.key)
 
-  update = (f: (v: R) => R) =>
-    this.base.update((m: M) => {
+  update = (f: (v: T) => T) =>
+    this.base.update((m: M<T>) => {
       if (!this.key) {
         throw new Error(`Cannot set key: "${this.key}"`)
       }
 
-      const v = f(m.get(this.key) as R) as Record<string, any>
+      const v = f(m.get(this.key) as T) as Record<string, any>
 
       // Make sure the pk always get set on the record
       if (v) {
         v[this.pk] = this.key
 
-        m.set(this.key, v as R)
+        m.set(this.key, v as T)
       }
 
       return m
     })
 
-  set = (v: R) => this.update(() => v)
+  set = (v: T) => this.update(() => v)
 
-  merge = (d: R) => this.update(v => ({...v, ...d}))
+  merge = (d: T) => this.update(v => ({...v, ...d}))
 
   remove = () =>
     this.base.update(m => {
@@ -161,15 +161,15 @@ export class Key implements Readable<R> {
     })
 }
 
-export class Collection implements Readable<R[]> {
+export class Collection<T extends R> implements Readable<T[]> {
   readonly pk: string
-  #map: Writable<M>
-  #list: Readable<R[]>
+  #map: Writable<M<T>>
+  #list: Readable<T[]>
 
   constructor(pk: string) {
     this.pk = pk
     this.#map = writable(new Map())
-    this.#list = this.#map.derived<R[]>((m: M) => Array.from(m.values()))
+    this.#list = this.#map.derived<T[]>((m: M<T>) => Array.from(m.values()))
   }
 
   get = () => this.#list.get()
@@ -178,27 +178,27 @@ export class Collection implements Readable<R[]> {
 
   subscribe = (f: Subscriber) => this.#list.subscribe(f)
 
-  derived = <U>(f: <V>(v: V) => U) => this.#list.derived<U>(f)
+  derived = <U>(f: (v: T[]) => U) => this.#list.derived<U>(f)
 
   key = (k: string) => new Key(this.#map, this.pk, k)
 
-  set = (xs: R[]) => this.#map.set(new Map(xs.map(x => [x[this.pk], x])))
+  set = (xs: T[]) => this.#map.set(new Map(xs.map(x => [x[this.pk], x])))
 
-  update = (f: (v: R[]) => R[]) =>
+  update = (f: (v: T[]) => T[]) =>
     this.#map.update(m => new Map(f(Array.from(m.values())).map(x => [x[this.pk], x])))
 
-  reject = (f: (v: R) => boolean) => this.update(reject(f))
+  reject = (f: (v: T) => boolean) => this.update(reject(f))
 
-  filter = (f: (v: R) => boolean) => this.update(filter(f))
+  filter = (f: (v: T) => boolean) => this.update(filter(f))
 
-  map = (f: (v: R) => R) => this.update(map(f))
+  map = (f: (v: T) => T) => this.update(map(f))
 }
 
 export const writable = <T>(v: T) => new Writable(v)
 
-export const derived = <U>(stores: Derivable, getValue: (values: any) => U) =>
-  new Derived(stores, getValue) as Readable<U>
+export const derived = <T>(stores: Derivable, getValue: (values: any) => T) =>
+  new Derived(stores, getValue) as Readable<T>
 
-export const key = (base: Writable<M>, pk: string, key: string) => new Key(base, pk, key)
+export const key = <T extends R>(base: Writable<M<T>>, pk: string, key: string) => new Key<T>(base, pk, key)
 
-export const collection = (pk: string) => new Collection(pk)
+export const collection = <T extends R>(pk: string) => new Collection<T>(pk)
