@@ -3,14 +3,14 @@
   import {Link} from "svelte-routing"
   import {killEvent} from "src/util/html"
   import {routes} from "src/app/state"
-  import {directory} from "src/app/engine"
+  import {Directory} from "src/app/engine"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
 
   export let pubkey
   export let inert = false
 
-  const profile = directory.getProfile(pubkey)
-  const display = directory.displayProfile(profile)
+  const profile = Directory.getProfile(pubkey)
+  const display = Directory.displayProfile(profile)
 </script>
 
 {#if inert}

@@ -5,14 +5,14 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {DEFAULT_FOLLOWS, nip02, user, directory, builder} from "src/app/engine"
+  import {Env, Nip02, User, Directory, Builder} from "src/app/engine"
   import {modal} from "src/partials/state"
 
-  const {searchProfiles} = directory
-  const follows = nip02.graph.derived(() => user.getFollowsSet())
+  const {searchProfiles} = Directory
+  const follows = Nip02.graph.derived(() => User.getFollowsSet())
 
   if ($follows.size === 0) {
-    user.setPetnames(DEFAULT_FOLLOWS.map(builder.mention))
+    User.setPetnames(Env.DEFAULT_FOLLOWS.map(Builder.mention))
   }
 
   let q = ""

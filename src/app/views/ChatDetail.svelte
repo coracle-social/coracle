@@ -8,16 +8,16 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {builder, nip28, user, outbox, nip65, network} from "src/app/engine"
+  import {Builder, Nip28, User, Keys, Outbox, Nip65, Network} from "src/app/engine"
 
   export let entity
 
   const id = toHex(entity)
-  const channel = nip28.channels.key(id).derived(defaultTo({id}))
-  const messages = nip28.messages.derived(filter(whereEq({channel: id})))
-  const getRelays = () => nip65.selectHints(user.getSetting("relay_limit"), $channel.hints || [])
+  const channel = Nip28.channels.key(id).derived(defaultTo({id}))
+  const messages = Nip28.messages.derived(filter(whereEq({channel: id})))
+  const getRelays = () => Nip65.selectHints(User.getSetting("relay_limit"), $channel.hints || [])
 
-  user.setChannelLastChecked(id)
+  User.setChannelLastChecked(id)
 
   const edit = () => {
     modal.push({type: "channel/edit", channel: $channel})
@@ -26,11 +26,11 @@
   const sendMessage = async content => {
     const relays = getRelays()
 
-    await outbox.publish(builder.createChatMessage(id, content, relays[0]), relays)
+    await Outbox.publish(Builder.createChatMessage(id, content, relays[0]), relays)
   }
 
   onMount(() => {
-    const sub = network.subscribe({
+    const sub = Network.subscribe({
       relays: getRelays(),
       filter: [{kinds: [42], "#e": [id]}],
       onEvent: e => console.log(e),
@@ -41,7 +41,7 @@
 
   onDestroy(() => {
     if (!$channel.joined) {
-      nip28.messages.reject(m => m.channel === id)
+      Nip28.messages.reject(m => m.channel === id)
     }
   })
 
@@ -60,7 +60,7 @@
       <div class="flex w-full items-center justify-between">
         <div class="flex items-center gap-4">
           <div class="text-lg font-bold">{$channel.name || ""}</div>
-          {#if $channel.pubkey === user.getPubkey()}
+          {#if $channel.pubkey === Keys.pubkey.get()}
             <button class="cursor-pointer text-sm" on:click={edit}>
               <i class="fa-solid fa-edit" /> Edit
             </button>

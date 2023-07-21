@@ -8,15 +8,15 @@
   import Content from "src/partials/Content.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
-  import {keys, user, content} from "src/app/engine"
+  import {Keys, User, default as engine} from "src/app/engine"
 
-  const lists = content.lists.derived(() => user.getLists())
+  const lists = engine.Content.lists.derived(() => User.getLists())
 
   let relays = []
   let key = Math.random()
   let filter = {
     kinds: noteKinds,
-    authors: user.getFollows().length > 0 ? "follows" : "network",
+    authors: User.getFollows().length > 0 ? "follows" : "network",
   } as DynamicFilter
 
   const showLists = () => {
@@ -24,7 +24,7 @@
   }
 
   const loadListFeed = naddr => {
-    const list = content.lists.key(naddr).get()
+    const list = engine.Content.lists.key(naddr).get()
     const authors = Tags.from(list).pubkeys()
     const topics = Tags.from(list).topics()
     const urls = Tags.from(list).urls()
@@ -50,7 +50,7 @@
 </script>
 
 <Content>
-  {#if !user.getPubkey()}
+  {#if !Keys.pubkey.get()}
     <Content size="lg" class="text-center">
       <p class="text-xl">Don't have an account?</p>
       <p>
@@ -61,7 +61,7 @@
   {#key key}
     <Feed {filter} {relays}>
       <div slot="controls">
-        {#if keys.canSign.get()}
+        {#if Keys.canSign.get()}
           {#if $lists.length > 0}
             <Popover placement="bottom" opts={{hideOnClick: true}} theme="transparent">
               <i slot="trigger" class="fa fa-ellipsis-v cursor-pointer p-2" />

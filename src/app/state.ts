@@ -10,19 +10,8 @@ import {warn} from "src/util/logger"
 import {now} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
-import type {Event} from 'src/engine/types'
-import {
-  FORCE_RELAYS,
-  DEFAULT_FOLLOWS,
-  PubkeyLoader,
-  Events,
-  Nip28,
-  Meta,
-  Network,
-  Outbox,
-  User,
-  Keys,
-} from "src/app/engine"
+import type {Event} from "src/engine/types"
+import {PubkeyLoader, Events, Nip28, Meta, Network, Outbox, User, Keys} from "src/app/engine"
 
 // Routing
 
@@ -171,7 +160,7 @@ export const loadAppData = async () => {
 export const login = async (method: string, key: string) => {
   Keys.login(method, key)
 
-  if (FORCE_RELAYS.length > 0) {
+  if (Env.FORCE_RELAYS.length > 0) {
     modal.replace({
       type: "message",
       message: "Logging you in...",
@@ -218,7 +207,7 @@ export const publishWithToast = (event: Event, relays: string[]) =>
 
 export const compileFilter = (filter: DynamicFilter): Filter => {
   const getAuthors = (pubkeys: string[]) =>
-    shuffle(pubkeys.length > 0 ? pubkeys : DEFAULT_FOLLOWS as string[]).slice(0, 256)
+    shuffle(pubkeys.length > 0 ? pubkeys : (Env.DEFAULT_FOLLOWS as string[])).slice(0, 256)
 
   if (filter.authors === "global") {
     filter = omit(["authors"], filter)

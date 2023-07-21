@@ -4,13 +4,13 @@
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
-  import {nip05, nip65} from "src/app/engine"
+  import {Nip05, Nip65} from "src/app/engine"
 
   export let pubkey
 
-  const handle = nip05.getHandle(pubkey)
+  const handle = Nip05.getHandle(pubkey)
   const npub = nip19.npubEncode(pubkey)
-  const relays = nip65.getPubkeyHints(3, pubkey)
+  const relays = Nip65.getPubkeyHints(3, pubkey)
   const nprofile = nip19.nprofileEncode({pubkey, relays})
 </script>
 
@@ -26,7 +26,7 @@
     <h1 class="staatliches mt-4 text-2xl">NIP05</h1>
 
     {#if handle}
-      <CopyValue label="NIP 05 Identifier" value={nip05.displayHandle(handle)} />
+      <CopyValue label="NIP 05 Identifier" value={Nip05.displayHandle(handle)} />
       <div>
         <div class="mb-2 text-lg">NIP05 Relay Configuration</div>
         {#if handle.profile.relays?.length > 0}

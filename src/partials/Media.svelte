@@ -3,14 +3,14 @@
   import {ellipsize} from "hurdak"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {user} from "src/app/engine"
+  import {User} from "src/app/engine"
 
   export let link
   export let onClick = null
   export let onClose = null
 
   const loadPreview = async () => {
-    const res = await fetch(user.dufflepud("link/preview"), {
+    const res = await fetch(User.dufflepud("link/preview"), {
       method: "POST",
       body: JSON.stringify({url: link.url}),
       headers: {

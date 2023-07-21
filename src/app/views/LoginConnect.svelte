@@ -12,15 +12,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {
-    DEFAULT_RELAYS,
-    FORCE_RELAYS,
-    Nip65,
-    User,
-    Keys,
-    PubkeyLoader,
-    Network,
-  } from "src/app/engine"
+  import {Env, Nip65, User, Keys, PubkeyLoader, Network} from "src/app/engine"
   import {loadAppData} from "src/app/state"
 
   const pubkey = Keys.pubkey.get()
@@ -36,7 +28,7 @@
     uniqBy(
       prop("url"),
       // Make sure our hardcoded urls are first, since they're more likely to find a match
-      DEFAULT_RELAYS.map(objOf("url")).concat(shuffle($relays))
+      Env.DEFAULT_RELAYS.map(objOf("url")).concat(shuffle($relays))
     )
   )
 
@@ -130,7 +122,7 @@
       }}>here</Anchor
     >.
   </p>
-  {#if FORCE_RELAYS.length > 0}
+  {#if Env.FORCE_RELAYS.length > 0}
     <Spinner />
   {:else if Object.values(currentRelays).length > 0}
     <p>Currently searching:</p>

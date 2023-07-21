@@ -6,7 +6,7 @@
   import {fly} from "src/util/transition"
   import {createScroller} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
-  import {keys, directory} from "src/app/engine"
+  import {Keys, Directory} from "src/app/engine"
 
   export let messages
   export let sendMessage
@@ -66,7 +66,7 @@
   const groupedMessages = derived([messages], ([$messages, $limit]) => {
     const result = reverse(
       sortBy(prop("created_at"), $messages).reduce((mx, m) => {
-        const profile = directory.getProfile(m.pubkey)
+        const profile = Directory.getProfile(m.pubkey)
         const showProfile = profile.pubkey !== getPath(["profile", "pubkey"], last(mx))
 
         return mx.concat({...m, profile, showProfile})
@@ -86,7 +86,7 @@
 
 <div class="flex h-full gap-4">
   <div class="relative w-full">
-    <div class="py-18 flex h-screen flex-col" class:pb-20={keys.canSign.get()}>
+    <div class="py-18 flex h-screen flex-col" class:pb-20={Keys.canSign.get()}>
       <ul
         class="channel-messages flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
         {#each $groupedMessages as m (m.id)}
@@ -104,7 +104,7 @@
     <div class="fixed top-0 z-20 w-full border-b border-solid border-gray-6 bg-gray-7">
       <slot name="header" />
     </div>
-    {#if keys.canSign.get()}
+    {#if Keys.canSign.get()}
       <div
         class="fixed bottom-0 z-10 flex w-full border-t border-solid border-gray-6 border-gray-7 bg-gray-6 lg:-ml-56 lg:pl-56">
         <textarea

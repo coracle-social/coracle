@@ -7,7 +7,7 @@
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {user, nip04, nip65, outbox, Crypt, directory, builder, network} from "src/app/engine"
+  import {User, Nip04, Nip65, Outbox, Crypt, Directory, Builder, Network} from "src/app/engine"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -15,21 +15,21 @@
   export let entity
 
   const pubkey = toHex(entity)
-  const profile = directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
-  const messages = nip04.messages.derived(filter(whereEq({contact: pubkey})))
+  const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
+  const messages = Nip04.messages.derived(filter(whereEq({contact: pubkey})))
 
-  user.setContactLastChecked(pubkey)
+  User.setContactLastChecked(pubkey)
 
   const getRelays = () =>
-    nip65.mergeHints(3, [
-      nip65.getPubkeyHints(3, pubkey),
-      nip65.getPubkeyHints(3, user.getPubkey()),
+    Nip65.mergeHints(3, [
+      Nip65.getPubkeyHints(3, pubkey),
+      Nip65.getPubkeyHints(3, Keys.pubkey.get()),
     ])
 
   const sendMessage = async content => {
     const cyphertext = await Crypt.encrypt(pubkey, content)
-    const [event] = await outbox.publish(
-      builder.createDirectMessage(pubkey, cyphertext),
+    const [event] = await Outbox.publish(
+      Builder.createDirectMessage(pubkey, cyphertext),
       getRelays()
     )
 
@@ -38,16 +38,16 @@
   }
 
   onMount(() => {
-    return network.subscribe({
+    return Network.subscribe({
       relays: getRelays(),
       filter: [
-        {kinds: [4], authors: [user.getPubkey()], "#p": [pubkey]},
-        {kinds: [4], authors: [pubkey], "#p": [user.getPubkey()]},
+        {kinds: [4], authors: [Keys.pubkey.get()], "#p": [pubkey]},
+        {kinds: [4], authors: [pubkey], "#p": [Keys.pubkey.get()]},
       ],
     })
   })
 
-  document.title = `DMs with ${directory.displayProfile($profile)}`
+  document.title = `DMs with ${Directory.displayProfile($profile)}`
 </script>
 
 <Channel {messages} {sendMessage}>
@@ -63,7 +63,7 @@
       <div class="flex w-full items-center justify-between">
         <div class="flex items-center gap-4">
           <Anchor href={routes.person(pubkey)} class="text-lg font-bold">
-            {directory.displayProfile($profile)}
+            {Directory.displayProfile($profile)}
           </Anchor>
         </div>
         <div class="flex items-center gap-2">
@@ -78,14 +78,14 @@
     slot="message"
     let:message
     class={cx("flex overflow-hidden text-ellipsis", {
-      "ml-12 justify-end": message.profile.pubkey === user.getPubkey(),
-      "mr-12": message.profile.pubkey !== user.getPubkey(),
+      "ml-12 justify-end": message.profile.pubkey === Keys.pubkey.get(),
+      "mr-12": message.profile.pubkey !== Keys.pubkey.get(),
     })}>
     <div
       class={cx("inline-block max-w-xl rounded-2xl px-4 py-2", {
         "rounded-br-none bg-gray-1 text-end text-gray-8":
-          message.profile.pubkey === user.getPubkey(),
-        "rounded-bl-none bg-gray-7": message.profile.pubkey !== user.getPubkey(),
+          message.profile.pubkey === Keys.pubkey.get(),
+        "rounded-bl-none bg-gray-7": message.profile.pubkey !== Keys.pubkey.get(),
       })}>
       <div class="break-words">
         {#if typeof message.content === "string"}
@@ -94,8 +94,8 @@
       </div>
       <small
         class="mt-1"
-        class:text-gray-7={message.profile.pubkey === user.getPubkey()}
-        class:text-gray-1={message.profile.pubkey !== user.getPubkey()}>
+        class:text-gray-7={message.profile.pubkey === Keys.pubkey.get()}
+        class:text-gray-1={message.profile.pubkey !== Keys.pubkey.get()}>
         {formatTimestamp(message.created_at)}
       </small>
     </div>

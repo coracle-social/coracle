@@ -4,22 +4,22 @@
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {FORCE_RELAYS, keys, user, nip02} from "src/app/engine"
+  import {Env, Keys, User, Nip02} from "src/app/engine"
   import {addToList} from "src/app/state"
 
   export let pubkey
 
   const npub = nip19.npubEncode(pubkey)
-  const graphEntry = nip02.graph.key(keys.pubkey.get())
-  const following = graphEntry.derived(() => user.isFollowing(pubkey))
-  const muted = graphEntry.derived(() => user.isIgnoring(pubkey))
+  const graphEntry = Nip02.graph.key(Keys.pubkey.get())
+  const following = graphEntry.derived(() => User.isFollowing(pubkey))
+  const muted = graphEntry.derived(() => User.isIgnoring(pubkey))
 
   let actions = []
 
   $: {
     actions = []
 
-    if (keys.canSign.get()) {
+    if (Keys.canSign.get()) {
       actions.push({
         onClick: () => addToList("p", pubkey),
         label: "Add to list",
@@ -29,7 +29,7 @@
 
     actions.push({onClick: share, label: "Share", icon: "share-nodes"})
 
-    if (user.getPubkey() !== pubkey && keys.canSign.get()) {
+    if (Keys.pubkey.get() !== pubkey && Keys.canSign.get()) {
       actions.push({
         onClick: () => navigate(`/messages/${npub}`),
         label: "Message",
@@ -38,16 +38,16 @@
 
       if ($muted) {
         actions.push({onClick: unmute, label: "Unmute", icon: "microphone"})
-      } else if (user.getPubkey() !== pubkey) {
+      } else if (Keys.pubkey.get() !== pubkey) {
         actions.push({onClick: mute, label: "Mute", icon: "microphone-slash"})
       }
     }
 
-    if (FORCE_RELAYS.length === 0) {
+    if (Env.FORCE_RELAYS.length === 0) {
       actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
     }
 
-    if (user.getPubkey() === pubkey && keys.canSign.get()) {
+    if (Keys.pubkey.get() === pubkey && Keys.canSign.get()) {
       actions.push({
         onClick: () => navigate("/profile"),
         label: "Edit",
@@ -60,22 +60,22 @@
 
   const share = () => modal.push({type: "person/share", pubkey})
 
-  const unfollow = () => user.unfollow(pubkey)
+  const unfollow = () => User.unfollow(pubkey)
 
-  const follow = () => user.follow(pubkey)
+  const follow = () => User.follow(pubkey)
 
-  const unmute = () => user.unmute(pubkey)
+  const unmute = () => User.unmute(pubkey)
 
-  const mute = () => user.mute("p", pubkey)
+  const mute = () => User.mute("p", pubkey)
 </script>
 
 <div class="flex items-center gap-3">
-  {#if keys.canSign.get()}
+  {#if Keys.canSign.get()}
     <Popover triggerType="mouseenter">
       <div slot="trigger">
         {#if $following}
           <i class="fa fa-user-minus cursor-pointer" on:click={unfollow} />
-        {:else if user.getPubkey() !== pubkey}
+        {:else if Keys.pubkey.get() !== pubkey}
           <i class="fa fa-user-plus cursor-pointer" on:click={follow} />
         {/if}
       </div>

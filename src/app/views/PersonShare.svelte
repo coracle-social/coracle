@@ -3,11 +3,11 @@
   import {toNostrURI} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import QRCode from "src/partials/QRCode.svelte"
-  import {nip65} from "src/app/engine"
+  import {Nip65} from "src/app/engine"
 
   export let pubkey
 
-  const relays = nip65.getPubkeyHints(3, pubkey)
+  const relays = Nip65.getPubkeyHints(3, pubkey)
   const nprofile = nip19.nprofileEncode({pubkey, relays})
 </script>
 

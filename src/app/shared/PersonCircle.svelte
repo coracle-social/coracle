@@ -4,7 +4,7 @@
   import {stringToHue, hsl} from "src/util/misc"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import LogoSvg from "src/partials/LogoSvg.svelte"
-  import {directory} from "src/app/engine"
+  import {Directory} from "src/app/engine"
 
   export let pubkey
   export let size = 4
@@ -12,7 +12,7 @@
   const hue = stringToHue(pubkey)
   const primary = hsl(hue, {lightness: 80})
   const secondary = hsl(hue, {saturation: 30, lightness: 30})
-  const profile = directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
+  const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
 </script>
 
 {#if $profile.picture}

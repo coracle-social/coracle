@@ -4,12 +4,12 @@
   import {ellipsize} from "hurdak"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import Card from "src/partials/Card.svelte"
-  import {directory, nip04} from "src/app/engine"
+  import {Directory, Nip04} from "src/app/engine"
 
   export let contact
 
-  const hasNewMessages = nip04.contacts.key(contact.pubkey).derived(nip04.messageIsNew)
-  const profile = directory.getProfile(contact.pubkey)
+  const hasNewMessages = Nip04.contacts.key(contact.pubkey).derived(Nip04.messageIsNew)
+  const profile = Directory.getProfile(contact.pubkey)
   const enter = () => navigate(`/messages/${nip19.npubEncode(contact.pubkey)}`)
 </script>
 
@@ -20,7 +20,7 @@
       <div class="flex flex-grow items-start justify-between gap-2">
         <div class="flex items-center gap-2 overflow-hidden">
           <i class="fa fa-lock text-gray-1" />
-          <h2 class="text-lg">{directory.displayProfile(profile)}</h2>
+          <h2 class="text-lg">{Directory.displayProfile(profile)}</h2>
         </div>
         <div class="relative">
           <i class="fa fa-bell" class:text-gray-5={!$hasNewMessages} />

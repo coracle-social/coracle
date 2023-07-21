@@ -6,12 +6,12 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {FORCE_RELAYS, user} from "src/app/engine"
+  import {Env, User} from "src/app/engine"
 
-  let values = {...user.settings.get()}
+  let values = {...User.settings.get()}
 
   const submit = () => {
-    user.setSettings(values)
+    User.setSettings(values)
 
     toast.show("info", "Your settings have been saved!")
   }
@@ -67,7 +67,7 @@
           >.
         </p>
       </div>
-      {#if FORCE_RELAYS.length === 0}
+      {#if Env.FORCE_RELAYS.length === 0}
         <div class="flex flex-col gap-1">
           <strong>Multiplextr URL</strong>
           <Input bind:value={values.multiplextr_url}>

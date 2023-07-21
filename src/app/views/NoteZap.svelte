@@ -9,13 +9,13 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import {directory, nip65, user, outbox, network, builder, nip57} from "src/app/engine"
+  import {Directory, Nip65, User, Outbox, Network, Builder, Nip57} from "src/app/engine"
 
   export let note
 
   let sub
   let zap = {
-    amount: user.getSetting("default_zap"),
+    amount: User.getSetting("default_zap"),
     message: "",
     invoice: null,
     loading: false,
@@ -23,16 +23,16 @@
     confirmed: false,
   }
 
-  const author = directory.getProfile(note.pubkey)
+  const author = Directory.getProfile(note.pubkey)
 
   const loadZapInvoice = async () => {
     zap.loading = true
 
     const amount = zap.amount * 1000
-    const zapper = nip57.zappers.key(note.pubkey).get()
-    const relays = nip65.getPublishHints(3, note, user.getRelayUrls("write"))
-    const event = await outbox.prepEvent(
-      builder.requestZap(relays, zap.message, note.pubkey, note.id, amount, zapper.lnurl)
+    const zapper = Nip57.zappers.key(note.pubkey).get()
+    const relays = Nip65.getPublishHints(3, note, User.getRelayUrls("write"))
+    const event = await Outbox.prepEvent(
+      Builder.requestZap(relays, zap.message, note.pubkey, note.id, amount, zapper.lnurl)
     )
     const eventString = encodeURI(JSON.stringify(event))
     const res = await Fetch.fetchJson(
@@ -64,7 +64,7 @@
     }
 
     // Listen for the zap confirmation
-    sub = network.subscribe({
+    sub = Network.subscribe({
       relays,
       filter: {
         kinds: [9735],
@@ -87,7 +87,7 @@
 <Content size="lg">
   <div class="text-center">
     <h1 class="staatliches text-2xl">Send a zap</h1>
-    <p>to {directory.displayProfile(author)}</p>
+    <p>to {Directory.displayProfile(author)}</p>
   </div>
   {#if zap.confirmed}
     <div class="flex items-center justify-center gap-2 text-gray-1">

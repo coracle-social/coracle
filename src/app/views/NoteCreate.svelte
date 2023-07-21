@@ -15,7 +15,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {directory, builder, nip65, user} from "src/app/engine"
+  import {Directory, Builder, Nip65, Keys} from "src/app/engine"
   import {toast, modal} from "src/partials/state"
   import {publishWithToast} from "src/app/state"
 
@@ -28,7 +28,7 @@
   let compose = null
   let showPreview = false
   let showSettings = false
-  let relays = writable(writeTo ? writeTo : user.getRelayUrls("write"))
+  let relays = writable(writeTo ? writeTo : User.getRelayUrls("write"))
 
   const onSubmit = async () => {
     let content = compose.parse()
@@ -39,11 +39,11 @@
     }
 
     if (quote) {
-      tags.push(builder.mention(quote.pubkey))
+      tags.push(Builder.mention(quote.pubkey))
     }
 
     if (content) {
-      const rawEvent = builder.createNote(content.trim(), tags)
+      const rawEvent = Builder.createNote(content.trim(), tags)
       const [event, promise] = await publishWithToast(rawEvent, $relays)
 
       promise.then(() =>
@@ -88,8 +88,8 @@
   }
 
   onMount(() => {
-    if (pubkey && pubkey !== user.getPubkey()) {
-      compose.mention(directory.getProfile(pubkey))
+    if (pubkey && pubkey !== Keys.pubkey.get()) {
+      compose.mention(Directory.getProfile(pubkey))
     }
 
     if (quote) {
@@ -120,7 +120,7 @@
         </div>
         <div class="flex items-center justify-end gap-2 text-gray-5">
           <small>
-            Posting as @{directory.displayPubkey(user.getPubkey())}
+            Posting as @{Directory.displayPubkey(Keys.pubkey.get())}
           </small>
           <span>•</span>
           <small on:click={togglePreview} class="cursor-pointer underline">
@@ -147,7 +147,7 @@
         }}>
         <span>
           Publishing to {#if $relays?.length === 1}
-            {nip65.displayRelay({url: $relays[0]})}
+            {Nip65.displayRelay({url: $relays[0]})}
           {:else}
             {$relays.length} relays
           {/if}
@@ -174,7 +174,7 @@
                 type="button"
                 class="fa fa-times cursor-pointer"
                 on:click={() => removeRelay(url)} />
-              {nip65.displayRelay(url)}
+              {Nip65.displayRelay(url)}
             </div>
           {/each}
         </div>

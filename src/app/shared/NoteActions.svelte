@@ -14,16 +14,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {
-    ENABLE_ZAPS,
-    FORCE_RELAYS,
-    nip57,
-    builder,
-    nip65,
-    keys,
-    outbox,
-    user,
-  } from "src/app/engine"
+  import {Env, Nip57, Builder, Nip65, Keys, Outbox, User} from "src/app/engine"
 
   export let note
   export let reply
@@ -43,20 +34,20 @@
 
   const quote = () => modal.push({type: "note/create", quote: note})
 
-  const unmute = () => user.unmute(note.id)
+  const unmute = () => User.unmute(note.id)
 
-  const mute = () => user.mute("e", note.id)
+  const mute = () => User.mute("e", note.id)
 
   const react = async content => {
-    const relays = nip65.getPublishHints(3, note, user.getRelayUrls("write"))
+    const relays = Nip65.getPublishHints(3, note, User.getRelayUrls("write"))
 
-    like = first(await outbox.publish(builder.createReaction(note, content), relays))
+    like = first(await Outbox.publish(Builder.createReaction(note, content), relays))
   }
 
   const deleteReaction = e => {
-    outbox.publish(
-      builder.deleteEvents([e.id]),
-      nip65.getPublishHints(3, note, user.getRelayUrls("write"))
+    Outbox.publish(
+      Builder.deleteEvents([e.id]),
+      Nip65.getPublishHints(3, note, User.getRelayUrls("write"))
     )
 
     like = null
@@ -71,20 +62,20 @@
   let actions = []
   let showDetails = false
 
-  $: disableActions = !keys.canSign.get() || muted
+  $: disableActions = !Keys.canSign.get() || muted
   $: likes = note.reactions.filter(n => isLike(n.content))
-  $: like = like || find(propEq("pubkey", user.getPubkey()), likes)
+  $: like = like || find(propEq("pubkey", User.getPubkey()), likes)
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
   $: $likesCount = allLikes.length
 
-  $: zaps = nip57.processZaps(note.zaps, note.pubkey)
-  $: zap = zap || find(pathEq(["request", "pubkey"], user.getPubkey()), zaps)
+  $: zaps = Nip57.processZaps(note.zaps, note.pubkey)
+  $: zap = zap || find(pathEq(["request", "pubkey"], User.getPubkey()), zaps)
   $: allZaps = zap
-    ? zaps.filter(n => n.id !== zap?.id).concat(nip57.processZaps([zap], note.pubkey))
+    ? zaps.filter(n => n.id !== zap?.id).concat(Nip57.processZaps([zap], note.pubkey))
     : zaps
   $: $zapsTotal = sum(pluck("invoiceAmount", allZaps)) / 1000
 
-  $: canZap = $zapper && note.pubkey !== user.getPubkey()
+  $: canZap = $zapper && note.pubkey !== User.getPubkey()
   $: $repliesCount = note.replies.length
 
   $: {
@@ -99,7 +90,7 @@
       actions.push({label: "Mute", icon: "microphone-slash", onClick: mute})
     }
 
-    if (FORCE_RELAYS.length === 0) {
+    if (Env.FORCE_RELAYS.length === 0) {
       actions.push({
         label: "Details",
         icon: "info",
@@ -123,7 +114,7 @@
     </button>
     <button
       class={cx("w-16 text-left", {
-        "pointer-events-none opacity-50": disableActions || note.pubkey === user.getPubkey(),
+        "pointer-events-none opacity-50": disableActions || note.pubkey === User.getPubkey(),
         "text-accent": like,
       })}
       on:click={() => (like ? deleteReaction(like) : react("+"))}>
@@ -133,7 +124,7 @@
         })} />
       {$likesCount}
     </button>
-    {#if ENABLE_ZAPS}
+    {#if Env.ENABLE_ZAPS}
       <button
         class={cx("w-20 text-left", {
           "pointer-events-none opacity-50": disableActions || !canZap,
@@ -146,7 +137,7 @@
     {/if}
   </div>
   <div class="flex items-center">
-    {#if FORCE_RELAYS.length === 0}
+    {#if Env.FORCE_RELAYS.length === 0}
       <!-- Mobile version -->
       <div
         style="transform: scale(-1, 1)"
@@ -173,7 +164,7 @@
                 style={`background: ${hsl(stringToHue(url))}`}
                 on:click={() => setFeedRelay?.({url})} />
             </div>
-            <div slot="tooltip">{nip65.displayRelay({url})}</div>
+            <div slot="tooltip">{Nip65.displayRelay({url})}</div>
           </Popover>
         {/each}
       </div>

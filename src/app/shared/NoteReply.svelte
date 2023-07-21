@@ -9,7 +9,7 @@
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/partials/Compose.svelte"
-  import {directory, user, nip65, builder} from "src/app/engine"
+  import {Directory, User, Nip65, Builder} from "src/app/engine"
   import {publishWithToast} from "src/app/state"
 
   export let note
@@ -27,7 +27,7 @@
     data = {
       image: null,
       mentions: without(
-        [user.getPubkey()],
+        [User.getPubkey()],
         uniq(Tags.from(note).type("p").values().all().concat(note.pubkey))
       ),
     }
@@ -52,8 +52,8 @@
     }
 
     if (content) {
-      const rawEvent = builder.createReply(note, content, data.mentions.map(builder.mention))
-      const relays = nip65.getPublishHints(3, note, user.getRelayUrls("write"))
+      const rawEvent = Builder.createReply(note, content, data.mentions.map(Builder.mention))
+      const relays = Nip65.getPublishHints(3, note, User.getRelayUrls("write"))
       const [event, promise] = await publishWithToast(rawEvent, relays)
 
       promise.then(({succeeded}) => {
@@ -128,7 +128,7 @@
         <div on:click|stopPropagation>
           {#each data.mentions as pubkey}
             <Chip class="mb-1 mr-1" theme="dark" onClick={() => removeMention(pubkey)}>
-              {directory.displayPubkey(pubkey)}
+              {Directory.displayPubkey(pubkey)}
             </Chip>
           {:else}
             <div class="text-gray-2 inline-block py-2">No mentions</div>
@@ -139,7 +139,7 @@
     </div>
     <div class="flex justify-end gap-2 text-sm text-gray-5">
       <span>
-        Posting as @{directory.displayPubkey(user.getPubkey())}
+        Posting as @{Directory.displayPubkey(User.getPubkey())}
       </span>
     </div>
   </div>

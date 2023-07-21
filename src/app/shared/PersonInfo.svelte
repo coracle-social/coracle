@@ -4,28 +4,28 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
-  import {user, directory, nip05} from "src/app/engine"
+  import {User, Directory, Nip05} from "src/app/engine"
 
   export let pubkey
   export let hasPetname = null
 
-  const profile = directory.getProfile(pubkey)
-  const handle = nip05.getHandle(pubkey)
+  const profile = Directory.getProfile(pubkey)
+  const handle = Nip05.getHandle(pubkey)
 
   const unfollow = () => {
-    user.unfollow(pubkey)
+    User.unfollow(pubkey)
 
     isFollowing = false
   }
 
   const follow = () => {
-    user.follow(pubkey)
+    User.follow(pubkey)
 
     isFollowing = true
   }
 
   // Set this manually to avoid a million listeners
-  let isFollowing = hasPetname ? hasPetname(pubkey) : user.isFollowing(pubkey)
+  let isFollowing = hasPetname ? hasPetname(pubkey) : User.isFollowing(pubkey)
 </script>
 
 <div in:fly={{y: 20}}>
@@ -38,11 +38,11 @@
     <div class="flex min-w-0 flex-grow flex-col gap-4">
       <div class="flex items-start justify-between gap-2">
         <div class="flex flex-col gap-2">
-          <h1 class="text-xl">{directory.displayProfile(profile)}</h1>
+          <h1 class="text-xl">{Directory.displayProfile(profile)}</h1>
           {#if handle}
             <div class="flex gap-1 text-sm">
               <i class="fa fa-user-check text-accent" />
-              <span class="text-gray-1">{nip05.displayHandle(handle)}</span>
+              <span class="text-gray-1">{Nip05.displayHandle(handle)}</span>
             </div>
           {/if}
         </div>

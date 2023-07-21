@@ -1,22 +1,21 @@
 <script type="ts">
   import {updateIn} from "hurdak"
   import {Tags} from "src/util/nostr"
+  import {derived} from "svelte/store"
   import {modal} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
-  import E from "src/app/engine"
+  import {User, default as engine} from "src/app/engine"
 
   export let item
 
-  const lists = E.Content.lists.derived(() => E.User.getLists())
+  const lists = engine.Content.lists.derived(() => User.getLists())
   const label = item.type === "p" ? "person" : "topic"
 
-  const modifyList = updateIn("tags", (tags: string[][]) =>
-    (tags || []).concat([[item.type, item.value]])
-  )
+  const modifyList = updateIn("tags", tags => (tags || []).concat([[item.type, item.value]]))
 
   const selectlist = list => modal.replace({type: "list/edit", list: modifyList(list)})
 </script>

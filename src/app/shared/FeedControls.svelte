@@ -13,16 +13,16 @@
   import SelectButton from "src/partials/SelectButton.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import {directory, user, content} from "src/app/engine"
+  import {Directory, User, default as engine} from "src/app/engine"
 
   export let filter
   export let onChange
 
-  const {searchProfiles} = directory
-  const {searchTopics} = content
+  const {searchProfiles} = Directory
+  const {searchTopics} = engine.Content
 
   const displayPeople = pubkeys =>
-    pubkeys.length === 1 ? directory.displayPubkey(pubkeys[0]) : `${pubkeys.length} people`
+    pubkeys.length === 1 ? Directory.displayPubkey(pubkeys[0]) : `${pubkeys.length} people`
 
   const displayTopics = topics => (topics.length === 1 ? topics[0] : `${topics.length} topics`)
 
@@ -128,17 +128,17 @@
     until: filter.since,
     search: filter.search || "",
     authors: Array.isArray(filter.authors)
-      ? filter.authors.map(directory.getProfile)
+      ? filter.authors.map(Directory.getProfile)
       : filter.authors || "network",
     "#t": (filter["#t"] || []).map(objOf("name")),
-    "#p": (filter["#p"] || []).map(directory.getProfile),
+    "#p": (filter["#p"] || []).map(Directory.getProfile),
   }
 
   $: parts = getFilterParts(filter)
 
   $: {
     scopeOptions =
-      user.getFollows().length > 0
+      User.getFollows().length > 0
         ? ["follows", "network", "global", "custom"]
         : ["network", "global", "custom"]
   }

@@ -8,17 +8,17 @@
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {nip65, network} from "src/app/engine"
+  import {Nip65, Network} from "src/app/engine"
   import Note from "src/app/shared/Note.svelte"
 
   export let note
   export let relays = []
   export let invertColors = false
 
-  const feed = network.feed({
+  const feed = Network.feed({
     limit: 1,
     depth: 6,
-    relays: nip65.selectHints(10, relays),
+    relays: Nip65.selectHints(10, relays),
     filter: {ids: [note.id]},
   })
 

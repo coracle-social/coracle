@@ -1,7 +1,9 @@
 # Current
 
 - [ ] Refactor
+  - [ ] Get rid of User.getPubkey
   - [ ] Move pubkey loader to utils
+  - [ ] Rename content to nipxx
   - [ ] Have meta intercept subscribe/publish rather than listen to specific events
   - [ ] Speed up note detail
   - [ ] Fix feed control state

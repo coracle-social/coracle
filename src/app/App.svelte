@@ -11,7 +11,8 @@
   import {Storage, seconds, Fetch, shuffle, tryFunc} from "hurdak"
   import {tryFetch, hexToBech32, bech32ToHex, now} from "src/util/misc"
   import {userKinds} from "src/util/nostr"
-  import engine from "src/app/engine"
+  import {default as engine} from "src/app/engine"
+  import {Keys, Nip65, PubkeyLoader, User, Env, Network, Builder, Outbox} from "src/app/engine"
   import {listenForNotifications} from "src/app/state"
   import {theme, getThemeVariables, appName, modal} from "src/partials/state"
   import {logUsage} from "src/app/state"
@@ -24,25 +25,25 @@
 
   // Migration from 0.2.34
   if (Object.hasOwn(localStorage, "agent/keys/pubkey")) {
-    engine.Keys.setKeyState({
+    Keys.setKeyState({
       method: Storage.getJson("agent/keys/method"),
       pubkey: Storage.getJson("agent/keys/pubkey"),
       privkey: Storage.getJson("agent/keys/privkey"),
       bunkerKey: Storage.getJson("agent/keys/bunkerKey"),
     })
 
-    engine.Keys.pubkey.set(Storage.getJson("agent/keys/pubkey"))
+    Keys.pubkey.set(Storage.getJson("agent/keys/pubkey"))
 
     const {settings} = JSON.parse(localStorage.getItem("agent/user/profile"))
 
-    engine.User.setSettings({
+    User.setSettings({
       last_updated: settings.lastUpdated || 0,
       relay_limit: settings.relayLimit || 10,
       default_zap: settings.defaultZap || 21,
       show_media: settings.showMedia || true,
       report_analytics: settings.reportAnalytics || true,
-      dufflepud_url: settings.dufflepudUrl || engine.Env.DUFFLEPUD_URL,
-      multiplextr_url: settings.multiplextrUrl || engine.Env.MULTIPLEXTR_URL,
+      dufflepud_url: settings.dufflepudUrl || Env.DUFFLEPUD_URL,
+      multiplextr_url: settings.multiplextrUrl || Env.MULTIPLEXTR_URL,
     })
 
     localStorage.removeItem("agent/keys/method")
@@ -53,7 +54,7 @@
 
   const TypedRouter = Router as ComponentType<SvelteComponentTyped>
 
-  Object.assign(window, {engine, bech32ToHex, hexToBech32})
+  Object.assign(window, {...engine, bech32ToHex, hexToBech32})
 
   export let pathname = location.pathname
   export let hash = location.hash
@@ -80,12 +81,12 @@
   const seenChallenges = new Set()
 
   // When we get an AUTH challenge from our pool, attempt to authenticate
-  engine.Network.authHandler = async (url, challenge) => {
-    if (engine.Keys.canSign.get() && !seenChallenges.has(challenge)) {
+  Network.authHandler = async (url, challenge) => {
+    if (Keys.canSign.get() && !seenChallenges.has(challenge)) {
       seenChallenges.add(challenge)
 
-      const rawEvent = engine.Builder.authenticate(url, challenge)
-      const [event] = await engine.Outbox.publish(rawEvent, [url], null, "AUTH")
+      const rawEvent = Builder.authenticate(url, challenge)
+      const [event] = await Outbox.publish(rawEvent, [url], null, "AUTH")
 
       return event
     }
@@ -148,31 +149,29 @@
   })
 
   engine.Storage.ready.then(() => {
-    const pubkey = engine.Keys.pubkey.get()
+    const pubkey = Keys.pubkey.get()
 
     // Make sure the user's stuff is loaded, but don't call loadAppData
     // since that reloads messages and stuff
     if (pubkey) {
-      engine.PubkeyLoader.load(pubkey, {force: true, kinds: userKinds})
+      PubkeyLoader.load(pubkey, {force: true, kinds: userKinds})
       listenForNotifications()
     }
 
     const interval = setInterval(async () => {
-      if (!engine.User.getSetting("dufflepud_url")) {
+      if (!User.getSetting("dufflepud_url")) {
         return
       }
 
       // Find relays with old/missing metadata and refresh them. Only pick a
       // few so we're not sending too many concurrent http requests
       const staleRelays = shuffle(
-        engine.Nip65.relays
-          .get()
-          .filter(r => (r.info?.last_checked || 0) < now() - seconds(7, "day"))
+        Nip65.relays.get().filter(r => (r.info?.last_checked || 0) < now() - seconds(7, "day"))
       ).slice(0, 10) as Relay[]
 
       for (const relay of staleRelays) {
         tryFetch(async () => {
-          const info = await Fetch.fetchJson(engine.User.dufflepud("relay/info"), {
+          const info = await Fetch.fetchJson(User.dufflepud("relay/info"), {
             method: "POST",
             body: JSON.stringify({url: relay.url}),
             headers: {
@@ -180,7 +179,7 @@
             },
           })
 
-          engine.Nip65.relays.key(relay.url).merge({...info, last_checked: now()})
+          Nip65.relays.key(relay.url).merge({...info, last_checked: now()})
         })
       }
     }, 30_000)

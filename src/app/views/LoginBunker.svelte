@@ -5,7 +5,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {keys} from "src/app/engine"
+  import {Keys} from "src/app/engine"
   import {login} from "src/app/state"
 
   let input = ""
@@ -14,7 +14,7 @@
     const [npub, token] = input.split("#")
     const pubkey = npub.startsWith("npub") ? toHex(npub) : npub
 
-    if (keys.isKeyValid(pubkey)) {
+    if (Keys.isKeyValid(pubkey)) {
       login("bunker", {pubkey, token})
     } else {
       toast.show("error", "Sorry, but that's an invalid public key.")

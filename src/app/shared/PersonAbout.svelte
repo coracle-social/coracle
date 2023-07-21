@@ -2,12 +2,12 @@
   import {ellipsize} from "hurdak"
   import {parseContent} from "src/util/notes"
   import Anchor from "src/partials/Anchor.svelte"
-  import {directory} from "src/app/engine"
+  import {Directory} from "src/app/engine"
 
   export let pubkey
   export let truncate = false
 
-  const profile = directory.getProfile(pubkey)
+  const profile = Directory.getProfile(pubkey)
   const about = profile.about || ""
   const content = parseContent({content: truncate ? ellipsize(about, 140) : about})
 </script>
@@ -25,7 +25,7 @@
     {:else if type.startsWith("nostr:")}
       <Anchor class="underline" external href={"/" + value.entity}>
         {#if value.pubkey}
-          {directory.displayProfile(profile)}
+          {Directory.displayProfile(profile)}
         {:else if value.id}
           event {value.id}
         {:else}

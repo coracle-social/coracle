@@ -4,20 +4,20 @@
   import {directory, nip02, nip05} from "src/app/engine"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
-  import {keys, user} from "src/app/engine"
+  import {Keys, User} from "src/app/engine"
   import {routes} from "src/app/state"
 
   export let pubkey
 
-  const graphEntry = nip02.graph.key(keys.pubkey.get())
-  const following = graphEntry.derived(() => user.isFollowing(pubkey))
-  const muted = graphEntry.derived(() => user.isIgnoring(pubkey))
+  const graphEntry = nip02.graph.key(keyS.pubkey.get())
+  const following = graphEntry.derived(() => User.isFollowing(pubkey))
+  const muted = graphEntry.derived(() => User.isIgnoring(pubkey))
   const profile = directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
   const handle = nip05.handles.key(pubkey)
-  const unfollow = () => user.unfollow(pubkey)
-  const follow = () => user.follow(pubkey)
-  const unmute = () => user.unmute(pubkey)
-  const mute = () => user.mute("p", pubkey)
+  const unfollow = () => User.unfollow(pubkey)
+  const follow = () => User.follow(pubkey)
+  const unmute = () => User.unmute(pubkey)
+  const mute = () => User.mute("p", pubkey)
 </script>
 
 <div class="relative flex flex-col gap-4 px-3 py-2">
@@ -34,7 +34,7 @@
     </div>
   </Anchor>
   <div class="absolute right-1 top-1 flex gap-4 py-2 text-lg">
-    {#if keys.canSign.get()}
+    {#if Keys.canSign.get()}
       {#if $muted}
         <i
           title="Unmute"

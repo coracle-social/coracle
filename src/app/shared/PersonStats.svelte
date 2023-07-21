@@ -5,11 +5,11 @@
   import {tweened} from "svelte/motion"
   import {numberFmt} from "src/util/misc"
   import {modal} from "src/partials/state"
-  import {nip02, user, nip65, network} from "src/app/engine"
+  import {Nip02, User, Nip65, Network} from "src/app/engine"
 
   export let pubkey
 
-  const followsCount = nip02.graph.key(pubkey).derived(() => nip02.getFollowsSet(pubkey).size)
+  const followsCount = nip02.graph.key(pubkey).derived(() => Nip02.getFollowsSet(pubkey).size)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
 
   let sub
@@ -24,17 +24,17 @@
     canLoadFollowers = false
 
     // Get our followers count
-    const count = await network.count({kinds: [3], "#p": [pubkey]})
+    const count = await networK.count({kinds: [3], "#p": [pubkey]})
 
     if (count) {
       followersCount.set(count)
     } else {
       const followers = new Set()
 
-      sub = network.subscribe({
+      sub = Network.subscribe({
         timeout: 30_000,
         shouldProcess: false,
-        relays: nip65.getPubkeyHints(3, user.getPubkey(), "read"),
+        relays: Nip65.getPubkeyHints(3, User.getPubkey(), "read"),
         filter: [{kinds: [3], "#p": [pubkey]}],
         onEvent: batch(300, events => {
           for (const e of events) {

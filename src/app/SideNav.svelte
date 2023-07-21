@@ -3,15 +3,15 @@
   import {derived} from "svelte/store"
   import {theme, installPrompt} from "src/partials/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {FORCE_RELAYS, keys, directory, alerts, nip28, nip04} from "src/app/engine"
+  import {Env, Keys, Directory, Alerts, Nip28, Nip04} from "src/app/engine"
   import {routes, slowConnections, menuIsOpen} from "src/app/state"
 
-  const {canSign, pubkey} = keys
-  const {hasNewNotfications} = alerts
-  const {hasNewMessages: hasNewChatMessages} = nip28
-  const {hasNewMessages: hasNewDirectMessages} = nip04
-  const profile = derived([pubkey, directory.profiles], () =>
-    $pubkey ? directory.getProfile($pubkey) : null
+  const {canSign, pubkey} = Keys
+  const {hasNewNotfications} = Alerts
+  const {hasNewMessages: hasNewChatMessages} = Nip28
+  const {hasNewMessages: hasNewDirectMessages} = Nip04
+  const profile = derived([pubkey, Directory.profiles], () =>
+    $pubkey ? Directory.getProfile($pubkey) : null
   )
 
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
@@ -39,7 +39,7 @@
     <li>
       <a href={routes.person($pubkey)} class="flex items-center gap-2 px-4 py-2 pb-6">
         <PersonCircle size={6} pubkey={$pubkey} />
-        <span class="text-lg font-bold">{directory.displayProfile($profile)}</span>
+        <span class="text-lg font-bold">{Directory.displayProfile($profile)}</span>
       </a>
     </li>
     <li class="relative cursor-pointer">
@@ -89,7 +89,7 @@
     </a>
   </li>
   <li class="mx-3 my-4 h-px bg-gray-6" />
-  {#if FORCE_RELAYS.length === 0}
+  {#if Env.FORCE_RELAYS.length === 0}
     <li class="relative cursor-pointer">
       <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/relays">
         <i class="fa fa-server mr-2" /> Relays

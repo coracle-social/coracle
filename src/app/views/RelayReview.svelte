@@ -6,7 +6,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Compose from "src/partials/Compose.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {builder, outbox} from "src/app/engine"
+  import {Builder, Outbox} from "src/app/engine"
 
   export let url
 
@@ -15,7 +15,7 @@
 
   const onSubmit = () => {
     const review = compose.parse()
-    const event = builder.createLabel({
+    const event = Builder.createLabel({
       content: review,
       tagClient: false,
       tags: [
@@ -25,7 +25,7 @@
       ],
     })
 
-    outbox.publish(event)
+    Outbox.publish(event)
 
     modal.pop()
   }

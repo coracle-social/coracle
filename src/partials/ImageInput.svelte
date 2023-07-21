@@ -6,7 +6,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile, stripExifData, blobToFile} from "src/util/html"
-  import {user} from "src/app/engine"
+  import {User} from "src/app/engine"
 
   export let value
   export let icon
@@ -25,7 +25,7 @@
           const opts = filter(identity, {maxWidth, maxHeight})
 
           file = blobToFile(await stripExifData(inputFile, opts))
-          quote = await Fetch.postJson(user.dufflepud("upload/quote"), {
+          quote = await Fetch.postJson(User.dufflepud("upload/quote"), {
             uploads: [{size: file.size}],
           })
         } else {
@@ -41,7 +41,7 @@
 
     try {
       const {id} = quote.uploads[0]
-      const {url} = await Fetch.uploadFile(user.dufflepud(`upload/${id}`), file)
+      const {url} = await Fetch.uploadFile(User.dufflepud(`upload/${id}`), file)
 
       value = url
     } finally {

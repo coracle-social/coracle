@@ -7,13 +7,13 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {nip65, user} from "src/app/engine"
+  import {Nip65, User} from "src/app/engine"
 
   let q = ""
   let search
 
-  const userRelays = nip65.policies.derived(() => user.getRelays())
-  const knownRelays = nip65.relays.derived()
+  const userRelays = Nip65.policies.derived(() => User.getRelays())
+  const knownRelays = Nip65.relays.derived()
 
   $: {
     const joined = new Set(pluck("url", $userRelays))

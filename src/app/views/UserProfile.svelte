@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {directory, keys, user, builder} from "src/app/engine"
+  import {Directory, Keys, User, Builder} from "src/app/engine"
   import {routes} from "src/app/state"
   import {publishWithToast} from "src/app/state"
 
@@ -18,22 +18,22 @@
     "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
   onMount(async () => {
-    if (!keys.canSign.get()) {
+    if (!Keys.canSign.get()) {
       return navigate("/login")
     }
   })
 
   const submit = async event => {
-    const relays = user.getRelayUrls("write")
+    const relays = User.getRelayUrls("write")
 
     event?.preventDefault()
-    publishWithToast(builder.setProfile(values), relays)
+    publishWithToast(Builder.setProfile(values), relays)
     navigate(routes.person($pubkey, "notes"))
   }
 
-  const {pubkey} = keys
+  const {pubkey} = Keys
 
-  let values = directory.getProfile($pubkey)
+  let values = Directory.getProfile($pubkey)
 
   document.title = "Profile"
 </script>

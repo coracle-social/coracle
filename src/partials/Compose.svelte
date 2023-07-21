@@ -4,7 +4,7 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {nip65, directory, user} from "src/app/engine"
+  import {Nip65, Directory, User} from "src/app/engine"
 
   export let onSubmit
 
@@ -12,7 +12,7 @@
 
   const pubkeyEncoder = {
     encode: pubkey => {
-      const relays = nip65.getPubkeyHints(3, pubkey)
+      const relays = Nip65.getPubkeyHints(3, pubkey)
       const nprofile = nip19.nprofileEncode({pubkey, relays})
 
       return "nostr:" + nprofile
@@ -29,7 +29,7 @@
     let results = []
     if (word.length > 1 && word.startsWith("@")) {
       const [followed, notFollowed] = partition(
-        p => user.isFollowing(p.pubkey),
+        p => User.isFollowing(p.pubkey),
         $searchProfiles(word.slice(1))
       )
 
@@ -83,7 +83,7 @@
 
     // Mentions
     if ((force || word.length > 1) && word.startsWith("@") && profile) {
-      annotate("@", directory.displayProfile(profile).trim(), pubkeyEncoder.encode(profile.pubkey))
+      annotate("@", Directory.displayProfile(profile).trim(), pubkeyEncoder.encode(profile.pubkey))
     }
 
     // Topics
