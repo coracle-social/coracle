@@ -29,7 +29,7 @@ export class Nip28 {
   searchChannels = this.getSearchChannels(this.channels)
 
   initialize(engine: Engine) {
-    engine.components.Events.addHandler(40, (e: Event) => {
+    engine.Events.addHandler(40, (e: Event) => {
       const channel = this.channels.key(e.id).get()
 
       if (e.created_at < channel?.updated_at) {
@@ -50,7 +50,7 @@ export class Nip28 {
       })
     })
 
-    engine.components.Events.addHandler(41, (e: Event) => {
+    engine.Events.addHandler(41, (e: Event) => {
       const channelId = Tags.from(e).getMeta("e")
 
       if (!channelId) {
@@ -81,10 +81,10 @@ export class Nip28 {
       })
     })
 
-    engine.components.Events.addHandler(30078, async (e: Event) => {
+    engine.Events.addHandler(30078, async (e: Event) => {
       if (Tags.from(e).getMeta("d") === appDataKeys.NIP28_LAST_CHECKED) {
         await tryJson(async () => {
-          const payload = await engine.components.Crypt.decryptJson(e.content)
+          const payload = await engine.Crypt.decryptJson(e.content)
 
           for (const key of Object.keys(payload)) {
             // Backwards compat from when we used to prefix id/pubkey
@@ -103,10 +103,10 @@ export class Nip28 {
       }
     })
 
-    engine.components.Events.addHandler(30078, async (e: Event) => {
+    engine.Events.addHandler(30078, async (e: Event) => {
       if (Tags.from(e).getMeta("d") === appDataKeys.NIP28_ROOMS_JOINED) {
         await tryJson(async () => {
-          const channelIds = await engine.components.Crypt.decryptJson(e.content)
+          const channelIds = await engine.Crypt.decryptJson(e.content)
 
           // Just a bug from when I was building the feature, remove someday
           if (!Array.isArray(channelIds)) {
@@ -124,7 +124,7 @@ export class Nip28 {
       }
     })
 
-    engine.components.Events.addHandler(42, (e: Event) => {
+    engine.Events.addHandler(42, (e: Event) => {
       if (this.messages.key(e.id).exists()) {
         return
       }
@@ -147,7 +147,7 @@ export class Nip28 {
         tags: e.tags,
       })
 
-      if (e.pubkey === engine.components.Keys.pubkey.get()) {
+      if (e.pubkey === engine.Keys.pubkey.get()) {
         this.channels.key(channelId).merge({last_sent: e.created_at, hints})
       } else {
         this.channels.key(channelId).merge({last_received: e.created_at, hints})

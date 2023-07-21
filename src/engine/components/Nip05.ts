@@ -15,7 +15,7 @@ export class Nip05 {
     handle.address.startsWith("_@") ? last(handle.address.split("@")) : handle.address
 
   initialize(engine: Engine) {
-    engine.components.Events.addHandler(0, e => {
+    engine.Events.addHandler(0, e => {
       tryJson(async () => {
         const kind0 = JSON.parse(e.content)
         const handle = this.handles.key(e.pubkey)

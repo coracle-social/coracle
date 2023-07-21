@@ -3,7 +3,7 @@ import type {UnsignedEvent} from "nostr-tools"
 import {assoc} from "ramda"
 import {doPipe} from "hurdak"
 import {now} from "src/util/misc"
-import type {Progress} from "src/engine/components/Network"
+import type {Progress} from "src/engine/Network"
 import type {Engine} from "src/engine/Engine"
 import type {Event} from "src/engine/types"
 
@@ -18,12 +18,12 @@ export class Outbox {
     const event = {
       ...rawEvent,
       created_at: now(),
-      pubkey: this.engine.components.Keys.pubkey.get(),
+      pubkey: this.engine.Keys.pubkey.get(),
     }
 
     event.id = getEventHash(event as UnsignedEvent)
 
-    return this.engine.components.Keys.sign(event as Event)
+    return this.engine.Keys.sign(event as Event)
   }
 
   publish = async (
@@ -35,14 +35,14 @@ export class Outbox {
     const event = rawEvent.sig ? (rawEvent as Event) : await this.prepEvent(rawEvent)
 
     if (!relays) {
-      relays = this.engine.components.User.getRelayUrls("write")
+      relays = this.engine.User.getRelayUrls("write")
     }
 
     // return console.log(event)
 
-    this.engine.components.Events.queue.push(event)
+    this.engine.Events.queue.push(event)
 
-    return [event, this.engine.components.Network.publish({event, relays, onProgress, verb})]
+    return [event, this.engine.Network.publish({event, relays, onProgress, verb})]
   }
 
   initialize(engine: Engine) {

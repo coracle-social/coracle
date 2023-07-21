@@ -23,7 +23,7 @@ export class Nip04 {
 
   searchContacts = this.messages.derived($messages => {
     const pubkeySet = new Set(pluck("pubkey", $messages))
-    const searchProfiles = this.engine.components.Directory.searchProfiles.get()
+    const searchProfiles = this.engine.Directory.searchProfiles.get()
 
     return (q: string) =>
       searchProfiles(q)
@@ -34,10 +34,10 @@ export class Nip04 {
   initialize(engine: Engine) {
     this.engine = engine
 
-    engine.components.Events.addHandler(30078, async e => {
+    engine.Events.addHandler(30078, async e => {
       if (Tags.from(e).getMeta("d") === appDataKeys.NIP04_LAST_CHECKED) {
         await tryJson(async () => {
-          const payload = await engine.components.Crypt.decryptJson(e.content)
+          const payload = await engine.Crypt.decryptJson(e.content)
 
           for (const key of Object.keys(payload)) {
             // Backwards compat from when we used to prefix id/pubkey
@@ -56,15 +56,15 @@ export class Nip04 {
       }
     })
 
-    engine.components.Events.addHandler(4, async e => {
-      if (!engine.components.Keys.canSign.get()) {
+    engine.Events.addHandler(4, async e => {
+      if (!engine.Keys.canSign.get()) {
         return
       }
 
       const author = e.pubkey
       const recipient = Tags.from(e).type("p").values().first()
 
-      if (![author, recipient].includes(engine.components.Keys.pubkey.get())) {
+      if (![author, recipient].includes(engine.Keys.pubkey.get())) {
         return
       }
 
@@ -73,18 +73,18 @@ export class Nip04 {
       }
 
       await tryFunc(async () => {
-        const other = engine.components.Keys.pubkey.get() === author ? recipient : author
+        const other = engine.Keys.pubkey.get() === author ? recipient : author
 
         this.messages.key(e.id).set({
           id: e.id,
           contact: other,
           pubkey: e.pubkey,
           created_at: e.created_at,
-          content: await engine.components.Crypt.decrypt(other, e.content),
+          content: await engine.Crypt.decrypt(other, e.content),
           tags: e.tags,
         })
 
-        if (engine.components.Keys.pubkey.get() === author) {
+        if (engine.Keys.pubkey.get() === author) {
           const contact = this.contacts.key(recipient).get()
 
           this.contacts.key(recipient).merge({

@@ -3,6 +3,7 @@
   import "@fortawesome/fontawesome-free/css/solid.css"
 
   import type {ComponentType, SvelteComponentTyped} from "svelte"
+  import type {Relay} from "src/engine"
   import {onMount} from "svelte"
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
@@ -63,11 +64,18 @@
 
   $: style.textContent = `:root { ${getThemeVariables($theme)}; background: var(--gray-8); }`
 
-  tryFunc(() =>
-    (
-      navigator.registerProtocolHandler as (scheme: string, handler: string, name: string) => void
-    )?.("web+nostr", `${location.origin}/%s`, appName)
-  )
+  try {
+    const handler = navigator.registerProtocolHandler as (
+      scheme: string,
+      handler: string,
+      name: string
+    ) => void
+
+    handler?.("web+nostr", `${location.origin}/%s`, appName)
+    handler?.("nostr", `${location.origin}/%s`, appName)
+  } catch (e) {
+    // pass
+  }
 
   const seenChallenges = new Set()
 
@@ -160,7 +168,7 @@
         engine.Nip65.relays
           .get()
           .filter(r => (r.info?.last_checked || 0) < now() - seconds(7, "day"))
-      ).slice(0, 10)
+      ).slice(0, 10) as Relay[]
 
       for (const relay of staleRelays) {
         tryFetch(async () => {

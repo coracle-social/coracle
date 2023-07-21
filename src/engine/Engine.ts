@@ -21,32 +21,30 @@ import {User} from "./components/User"
 
 export class Engine {
   Env: Env
-  components = {
-    Alerts: new Alerts(),
-    Builder: new Builder(),
-    Content: new Content(),
-    Crypt: new Crypt(),
-    Directory: new Directory(),
-    Events: new Events(),
-    Keys: new Keys(),
-    Meta: new Meta(),
-    Network: new Network(),
-    Nip02: new Nip02(),
-    Nip04: new Nip04(),
-    Nip05: new Nip05(),
-    Nip28: new Nip28(),
-    Nip57: new Nip57(),
-    Nip65: new Nip65(),
-    Outbox: new Outbox(),
-    PubkeyLoader: new PubkeyLoader(),
-    Storage: new Storage(),
-    User: new User(),
-  }
+  Alerts = new Alerts()
+  Builder = new Builder()
+  Content = new Content()
+  Crypt = new Crypt()
+  Directory = new Directory()
+  Events = new Events()
+  Keys = new Keys()
+  Meta = new Meta()
+  Network = new Network()
+  Nip02 = new Nip02()
+  Nip04 = new Nip04()
+  Nip05 = new Nip05()
+  Nip28 = new Nip28()
+  Nip57 = new Nip57()
+  Nip65 = new Nip65()
+  Outbox = new Outbox()
+  PubkeyLoader = new PubkeyLoader()
+  Storage = new Storage()
+  User = new User()
 
   constructor(Env: Env) {
     this.Env = Env
 
-    for (const component of Object.values(this.components)) {
+    for (const component of Object.values(this)) {
       component.initialize?.(this)
     }
   }

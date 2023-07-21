@@ -3,7 +3,7 @@ import {ensurePlural, first} from "hurdak"
 import {now} from "src/util/misc"
 import type {Filter, Event} from "src/engine/types"
 import type {Subscription} from "src/engine/util/Subscription"
-import type {Network} from "src/engine/components/Network"
+import type {Network} from "src/engine/Network"
 
 export type CursorOpts = {
   relay: string

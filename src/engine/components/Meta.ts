@@ -4,7 +4,7 @@ import {switcher} from "hurdak"
 import {collection} from "src/engine/util/store"
 import type {RelayStat} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
-import type {Network} from "src/engine/components/Network"
+import type {Network} from "src/engine/Network"
 
 export class Meta {
   Network: Network
@@ -55,7 +55,7 @@ export class Meta {
   }
 
   initialize(engine: Engine) {
-    this.Network = engine.components.Network
+    this.Network = engine.Network
 
     this.Network.pool.on("open", ({url}: {url: string}) => {
       this.relayStats.key(url).merge({last_opened: now(), last_activity: now()})

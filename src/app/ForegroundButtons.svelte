@@ -18,11 +18,8 @@
   const createNote = () => {
     const pubkeyMatch = $location.pathname.match(/people\/(npub1[0-9a-z]+)/)
     const pubkey = pubkeyMatch ? nip19.decode(pubkeyMatch[1]).data : null
-    const relayMatch = $location.pathname.match(/relays\/(.+)/)
-    const relay = tryFunc(() => atob(relayMatch[1])) || relayMatch?.[1]
-    const relays = relay ? [relay] : null
 
-    modal.push({type: "note/create", pubkey, relays})
+    modal.push({type: "note/create", pubkey})
   }
 </script>
 

@@ -33,11 +33,11 @@ export class Content {
       }
     }
 
-    engine.components.Events.addHandler(1, processTopics)
+    engine.Events.addHandler(1, processTopics)
 
-    engine.components.Events.addHandler(42, processTopics)
+    engine.Events.addHandler(42, processTopics)
 
-    engine.components.Events.addHandler(30001, (e: Event) => {
+    engine.Events.addHandler(30001, (e: Event) => {
       const {pubkey, kind, created_at} = e
       const name = Tags.from(e).getMeta("d")
       const naddr = nip19.naddrEncode({identifier: name, pubkey, kind})
@@ -58,7 +58,7 @@ export class Content {
       })
     })
 
-    engine.components.Events.addHandler(5, (e: Event) => {
+    engine.Events.addHandler(5, (e: Event) => {
       Tags.from(e)
         .type("a")
         .values()

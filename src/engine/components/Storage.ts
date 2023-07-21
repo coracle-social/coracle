@@ -17,8 +17,7 @@ const sortContacts = sortBy((e: Contact) => -Math.max(e.last_checked || 0, e.las
 
 const policy = (key: string, max: number, sort: (xs: any[]) => any[]) => ({key, max, sort})
 
-const getStore = (key: string, engine: Engine) =>
-  getPath(key.split("."), engine.components) as Collection<any>
+const getStore = (key: string, engine: Engine) => getPath(key.split("."), engine) as Collection<any>
 
 export class Storage {
   engine: Engine
@@ -41,9 +40,9 @@ export class Storage {
   }
 
   getPubkeyWhitelist = () => {
-    const pubkeys = this.engine.components.Keys.keyState.get().map(prop("pubkey"))
+    const pubkeys = this.engine.Keys.keyState.get().map(prop("pubkey"))
 
-    return [new Set(pubkeys), this.engine.components.Nip02.getFollowsSet(pubkeys)]
+    return [new Set(pubkeys), this.engine.Nip02.getFollowsSet(pubkeys)]
   }
 
   sortByPubkeyWhitelist = (fallback: (x: any) => number) => (rows: Record<string, any>[]) => {

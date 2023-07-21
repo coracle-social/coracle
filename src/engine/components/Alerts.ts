@@ -12,7 +12,7 @@ export class Alerts {
   hasNewNotfications = derived([this.lastChecked, this.latestNotification], ([c, n]) => n > c)
 
   initialize(engine: Engine) {
-    const {Alerts, Events, Keys, User} = engine.components
+    const {Alerts, Events, Keys, User} = engine
 
     const isMention = (e: Event) => Tags.from(e).pubkeys().includes(Keys.pubkey.get())
 

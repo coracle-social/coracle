@@ -104,7 +104,7 @@ export class Feed {
   }
 
   preprocessEvents = (events: Event[]) => {
-    const {User} = this.opts.engine.components
+    const {User} = this.opts.engine
 
     events = reject((e: Event) => this.seen.has(e.id) || User.isMuted(e), events)
 
@@ -116,7 +116,7 @@ export class Feed {
   }
 
   mergeHints(groups: string[][]) {
-    const {Nip65, User} = this.opts.engine.components
+    const {Nip65, User} = this.opts.engine
 
     return Nip65.mergeHints(User.getSetting("relay_limit"), groups)
   }
@@ -182,13 +182,13 @@ export class Feed {
   // Context loaders
 
   loadPubkeys = (events: Event[]) => {
-    this.opts.engine.components.PubkeyLoader.load(
+    this.opts.engine.PubkeyLoader.load(
       events.filter(this.isTextNote).flatMap((e: Event) => Tags.from(e).pubkeys().concat(e.pubkey))
     )
   }
 
   loadParents = (events: Event[]) => {
-    const {Network, Nip65} = this.opts.engine.components
+    const {Network, Nip65} = this.opts.engine
     const parentsInfo = events
       .map((e: Event) => ({id: findReplyId(e), hints: Nip65.getParentHints(10, e)}))
       .filter(({id}: any) => id && !this.seen.has(id))
@@ -206,7 +206,7 @@ export class Feed {
   }
 
   loadContext = batch(300, (eventGroups: any) => {
-    const {Network, Nip65} = this.opts.engine.components
+    const {Network, Nip65} = this.opts.engine
     const groupsByDepth = groupBy(prop("depth"), eventGroups)
 
     for (const [depthStr, groups] of Object.entries(groupsByDepth)) {
@@ -231,7 +231,7 @@ export class Feed {
   })
 
   listenForContext = throttle(5000, () => {
-    const {Network, Nip65} = this.opts.engine.components
+    const {Network, Nip65} = this.opts.engine
 
     if (this.stopped) {
       return
@@ -292,7 +292,7 @@ export class Feed {
     // No point in subscribing if we have an end date
     if (!any(prop("until"), ensurePlural(filter) as any[])) {
       this.addSubs("main", [
-        engine.components.Network.subscribe({
+        engine.Network.subscribe({
           relays,
           filter: ensurePlural(filter).map(assoc("since", since)),
           onEvent: batch(1000, (context: Event[]) =>
@@ -308,7 +308,7 @@ export class Feed {
           new Cursor({
             relay,
             filter,
-            Network: engine.components.Network,
+            Network: engine.Network,
             onEvent: batch(100, (context: Event[]) =>
               this.addContext(context, {shouldLoadParents: true, depth})
             ),

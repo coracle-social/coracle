@@ -60,7 +60,7 @@ export class Nip02 {
   isIgnoring = (a: string, b: string) => this.getMutesSet(a).has(b)
 
   initialize(engine: Engine) {
-    engine.components.Events.addHandler(3, e => {
+    engine.Events.addHandler(3, e => {
       const entry = this.graph.key(e.pubkey).get()
 
       if (e.created_at < entry?.petnames_updated_at) {
@@ -74,7 +74,7 @@ export class Nip02 {
       })
     })
 
-    engine.components.Events.addHandler(10000, e => {
+    engine.Events.addHandler(10000, e => {
       const entry = this.graph.key(e.pubkey).get()
 
       if (e.created_at < entry?.mutes_updated_at) {

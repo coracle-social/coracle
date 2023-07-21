@@ -27,7 +27,7 @@ export class PubkeyLoader {
 
       this.attemptedPubkeys.add(pubkey)
 
-      if (this.engine.components.Directory.profiles.key(pubkey).get()?.updated_at || 0 > since) {
+      if (this.engine.Directory.profiles.key(pubkey).get()?.updated_at || 0 > since) {
         continue
       }
 
@@ -49,9 +49,9 @@ export class PubkeyLoader {
         return relays
       }
 
-      return this.engine.components.Nip65.mergeHints(
-        this.engine.components.User.getSetting("relay_limit"),
-        chunk.map(pubkey => this.engine.components.Nip65.getPubkeyHints(3, pubkey))
+      return this.engine.Nip65.mergeHints(
+        this.engine.User.getSetting("relay_limit"),
+        chunk.map(pubkey => this.engine.Nip65.getPubkeyHints(3, pubkey))
       )
     }
 
@@ -73,7 +73,7 @@ export class PubkeyLoader {
       pluck(
         "complete",
         chunk(256, pubkeys).map((chunk: string[]) =>
-          this.engine.components.Network.subscribe({
+          this.engine.Network.subscribe({
             relays: getChunkRelays(chunk),
             filter: getChunkFilter(chunk),
             timeout: 10_000,

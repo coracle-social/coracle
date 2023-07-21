@@ -40,7 +40,7 @@ export class Directory {
   })
 
   initialize(engine: Engine) {
-    engine.components.Events.addHandler(0, (e: Event) => {
+    engine.Events.addHandler(0, (e: Event) => {
       tryJson(() => {
         const kind0 = JSON.parse(e.content)
         const profile = this.profiles.key(e.pubkey)

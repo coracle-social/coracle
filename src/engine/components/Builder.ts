@@ -24,15 +24,15 @@ const buildEvent = (kind: number, {content = "", tags = [], tagClient = true}: E
 export class Builder {
   engine: Engine
 
-  getEventHint = (event: Event) => first(this.engine.components.Nip65.getEventHints(1, event)) || ""
+  getEventHint = (event: Event) => first(this.engine.Nip65.getEventHints(1, event)) || ""
 
   getPubkeyHint = (pubkey: string): string =>
-    first(this.engine.components.Nip65.getPubkeyHints(1, pubkey)) || ""
+    first(this.engine.Nip65.getPubkeyHints(1, pubkey)) || ""
 
   getPubkeyPetname = (pubkey: string) => {
-    const profile = this.engine.components.Directory.getProfile(pubkey)
+    const profile = this.engine.Directory.getProfile(pubkey)
 
-    return profile ? this.engine.components.Directory.displayProfile(profile) : ""
+    return profile ? this.engine.Directory.displayProfile(profile) : ""
   }
 
   mention = (pubkey: string): string[] => {
@@ -171,7 +171,7 @@ export class Builder {
 
   deleteNaddrs = (naddrs: string[]) => buildEvent(5, {tags: naddrs.map(naddr => ["a", naddr])})
 
-  createLabel = (payload: {content: string; tags: string[][]}) => buildEvent(1985, payload)
+  createLabel = (payload: EventOpts) => buildEvent(1985, payload)
 
   initialize(engine: Engine) {
     this.engine = engine

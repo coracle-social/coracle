@@ -86,7 +86,7 @@ export class Nip57 {
   }
 
   initialize(engine: Engine) {
-    engine.components.Events.addHandler(0, (e: Event) => {
+    engine.Events.addHandler(0, (e: Event) => {
       tryJson(async () => {
         const kind0 = JSON.parse(e.content)
         const zapper = this.zappers.key(e.pubkey)

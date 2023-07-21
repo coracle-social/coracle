@@ -14,7 +14,7 @@ export class Events {
 
   initialize(engine: Engine) {
     this.queue.listen(async event => {
-      if (event.pubkey === engine.components.Keys.pubkey.get()) {
+      if (event.pubkey === engine.Keys.pubkey.get()) {
         this.cache.key(event.id).set(event)
       }
 

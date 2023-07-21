@@ -10,9 +10,9 @@ export class User {
   engine: Engine
   settings: Writable<Record<string, any>>
 
-  getPubkey = () => this.engine.components.Keys.pubkey.get()
+  getPubkey = () => this.engine.Keys.pubkey.get()
 
-  getStateKey = () => (this.engine.components.Keys.canSign.get() ? this.getPubkey() : "anonymous")
+  getStateKey = () => (this.engine.Keys.canSign.get() ? this.getPubkey() : "anonymous")
 
   // Settings
 
@@ -23,40 +23,36 @@ export class User {
   setSettings = async (settings: Record<string, any>) => {
     this.settings.update($settings => ({...$settings, ...settings}))
 
-    if (this.engine.components.Keys.canSign.get()) {
+    if (this.engine.Keys.canSign.get()) {
       const d = appDataKeys.USER_SETTINGS
-      const v = await this.engine.components.Crypt.encryptJson(settings)
+      const v = await this.engine.Crypt.encryptJson(settings)
 
-      return this.engine.components.Outbox.publish(this.engine.components.Builder.setAppData(d, v))
+      return this.engine.Outbox.publish(this.engine.Builder.setAppData(d, v))
     }
   }
 
   setAppData = async (d: string, content: any) => {
-    const v = await this.engine.components.Crypt.encryptJson(content)
+    const v = await this.engine.Crypt.encryptJson(content)
 
-    return this.engine.components.Outbox.publish(this.engine.components.Builder.setAppData(d, v))
+    return this.engine.Outbox.publish(this.engine.Builder.setAppData(d, v))
   }
 
   // Nip65
 
-  getRelays = (mode?: string) =>
-    this.engine.components.Nip65.getPubkeyRelays(this.getStateKey(), mode)
+  getRelays = (mode?: string) => this.engine.Nip65.getPubkeyRelays(this.getStateKey(), mode)
 
-  getRelayUrls = (mode?: string) =>
-    this.engine.components.Nip65.getPubkeyRelayUrls(this.getStateKey(), mode)
+  getRelayUrls = (mode?: string) => this.engine.Nip65.getPubkeyRelayUrls(this.getStateKey(), mode)
 
   setRelays = (relays: RelayPolicyEntry[]) => {
-    if (this.engine.components.Keys.canSign.get()) {
-      return this.engine.components.Outbox.publish(this.engine.components.Builder.setRelays(relays))
+    if (this.engine.Keys.canSign.get()) {
+      return this.engine.Outbox.publish(this.engine.Builder.setRelays(relays))
     } else {
-      this.engine.components.Nip65.setPolicy(
-        {pubkey: this.getStateKey(), created_at: now()},
-        relays
-      )
+      this.engine.Nip65.setPolicy({pubkey: this.getStateKey(), created_at: now()}, relays)
     }
   }
 
-  addRelay = (url: string) => this.setRelays(this.getRelays().concat({url, read: true, write: true}))
+  addRelay = (url: string) =>
+    this.setRelays(this.getRelays().concat({url, read: true, write: true}))
 
   removeRelay = (url: string) =>
     this.setRelays(reject(whereEq({url: normalizeRelayUrl(url)}), this.getRelays()))
@@ -66,37 +62,35 @@ export class User {
 
   // Nip02
 
-  getPetnames = () => this.engine.components.Nip02.getPetnames(this.getStateKey())
+  getPetnames = () => this.engine.Nip02.getPetnames(this.getStateKey())
 
-  getMutedTags = () => this.engine.components.Nip02.getMutedTags(this.getStateKey())
+  getMutedTags = () => this.engine.Nip02.getMutedTags(this.getStateKey())
 
-  getFollowsSet = () => this.engine.components.Nip02.getFollowsSet(this.getStateKey())
+  getFollowsSet = () => this.engine.Nip02.getFollowsSet(this.getStateKey())
 
-  getMutesSet = () => this.engine.components.Nip02.getMutesSet(this.getStateKey())
+  getMutesSet = () => this.engine.Nip02.getMutesSet(this.getStateKey())
 
-  getFollows = () => this.engine.components.Nip02.getFollows(this.getStateKey())
+  getFollows = () => this.engine.Nip02.getFollows(this.getStateKey())
 
-  getMutes = () => this.engine.components.Nip02.getMutes(this.getStateKey())
+  getMutes = () => this.engine.Nip02.getMutes(this.getStateKey())
 
-  getNetworkSet = () => this.engine.components.Nip02.getNetworkSet(this.getStateKey())
+  getNetworkSet = () => this.engine.Nip02.getNetworkSet(this.getStateKey())
 
-  getNetwork = () => this.engine.components.Nip02.getNetwork(this.getStateKey())
+  getNetwork = () => this.engine.Nip02.getNetwork(this.getStateKey())
 
-  isFollowing = (pubkey: string) => this.engine.components.Nip02.isFollowing(this.getStateKey(), pubkey)
+  isFollowing = (pubkey: string) => this.engine.Nip02.isFollowing(this.getStateKey(), pubkey)
 
   isIgnoring = (pubkeyOrEventId: string) =>
-    this.engine.components.Nip02.isIgnoring(this.getStateKey(), pubkeyOrEventId)
+    this.engine.Nip02.isIgnoring(this.getStateKey(), pubkeyOrEventId)
 
   setProfile = ($profile: Record<string, any>) =>
-    this.engine.components.Outbox.publish(this.engine.components.Builder.setProfile($profile))
+    this.engine.Outbox.publish(this.engine.Builder.setProfile($profile))
 
   setPetnames = async ($petnames: string[][]) => {
-    if (this.engine.components.Keys.canSign.get()) {
-      await this.engine.components.Outbox.publish(
-        this.engine.components.Builder.setPetnames($petnames)
-      )
+    if (this.engine.Keys.canSign.get()) {
+      await this.engine.Outbox.publish(this.engine.Builder.setPetnames($petnames))
     } else {
-      this.engine.components.Nip02.graph.key(this.getStateKey()).merge({
+      this.engine.Nip02.graph.key(this.getStateKey()).merge({
         updated_at: now(),
         petnames_updated_at: now(),
         petnames: $petnames,
@@ -108,7 +102,7 @@ export class User {
     this.setPetnames(
       this.getPetnames()
         .filter(t => t[1] !== pubkey)
-        .concat([this.engine.components.Builder.mention(pubkey)])
+        .concat([this.engine.Builder.mention(pubkey)])
     )
 
   unfollow = (pubkey: string) =>
@@ -123,12 +117,10 @@ export class User {
   applyMutes = (events: Event[]) => reject(this.isMuted, events)
 
   setMutes = async ($mutes: string[][]) => {
-    if (this.engine.components.Keys.canSign.get()) {
-      await this.engine.components.Outbox.publish(
-        this.engine.components.Builder.setMutes($mutes.map(t => t.slice(0, 2)))
-      )
+    if (this.engine.Keys.canSign.get()) {
+      await this.engine.Outbox.publish(this.engine.Builder.setMutes($mutes.map(t => t.slice(0, 2))))
     } else {
-      this.engine.components.Nip02.graph.key(this.getStateKey()).merge({
+      this.engine.Nip02.graph.key(this.getStateKey()).merge({
         updated_at: now(),
         mutes_updated_at: now(),
         mutes: $mutes,
@@ -137,30 +129,31 @@ export class User {
   }
 
   mute = (type: string, value: string) =>
-    this.setMutes(reject((t: string[]) => t[1] === value, this.getMutedTags()).concat([[type, value]]))
+    this.setMutes(
+      reject((t: string[]) => t[1] === value, this.getMutedTags()).concat([[type, value]])
+    )
 
-  unmute = (target: string) => this.setMutes(reject((t: string[]) => t[1] === target, this.getMutedTags()))
+  unmute = (target: string) =>
+    this.setMutes(reject((t: string[]) => t[1] === target, this.getMutedTags()))
 
   // Lists
 
   getLists = (f?: (l: List) => boolean) =>
-    this.engine.components.Content.getLists(
-      l => l.pubkey === this.getStateKey() && (f ? f(l) : true)
-    )
+    this.engine.Content.getLists(l => l.pubkey === this.getStateKey() && (f ? f(l) : true))
 
   putList = (name: string, params: string[][], relays: string[]) =>
-    this.engine.components.Outbox.publish(
-      this.engine.components.Builder.createList([["d", name]].concat(params).concat(relays))
+    this.engine.Outbox.publish(
+      this.engine.Builder.createList([["d", name]].concat(params).concat(relays))
     )
 
   removeList = (naddr: string) =>
-    this.engine.components.Outbox.publish(this.engine.components.Builder.deleteNaddrs([naddr]))
+    this.engine.Outbox.publish(this.engine.Builder.deleteNaddrs([naddr]))
 
   // Messages
 
   markAllMessagesRead = () => {
     const lastChecked = fromPairs(
-      uniq(pluck("contact", this.engine.components.Nip04.messages.get())).map(k => [k, now()])
+      uniq(pluck("contact", this.engine.Nip04.messages.get())).map(k => [k, now()])
     )
 
     return this.setAppData(appDataKeys.NIP04_LAST_CHECKED, lastChecked)
@@ -168,7 +161,7 @@ export class User {
 
   setContactLastChecked = (pubkey: string) => {
     const lastChecked = fromPairs(
-      this.engine.components.Nip04.contacts
+      this.engine.Nip04.contacts
         .get()
         .filter(prop("last_checked"))
         .map(r => [r.id, r.last_checked])
@@ -181,7 +174,7 @@ export class User {
 
   setChannelLastChecked = (id: string) => {
     const lastChecked = fromPairs(
-      this.engine.components.Nip28.channels
+      this.engine.Nip28.channels
         .get()
         .filter(prop("last_checked"))
         .map(r => [r.id, r.last_checked])
@@ -193,18 +186,18 @@ export class User {
   saveChannels = () =>
     this.setAppData(
       appDataKeys.NIP28_ROOMS_JOINED,
-      pluck("id", this.engine.components.Nip28.channels.get().filter(whereEq({joined: true})))
+      pluck("id", this.engine.Nip28.channels.get().filter(whereEq({joined: true})))
     )
 
   joinChannel = (id: string) => {
-    this.engine.components.Nip28.channels.key(id).merge({joined: false})
+    this.engine.Nip28.channels.key(id).merge({joined: false})
 
     return this.saveChannels()
   }
 
   leaveChannel = (id: string) => {
-    this.engine.components.Nip28.channels.key(id).merge({joined: false})
-    this.engine.components.Nip28.messages.reject(m => m.channel === id)
+    this.engine.Nip28.channels.key(id).merge({joined: false})
+    this.engine.Nip28.messages.reject(m => m.channel === id)
 
     return this.saveChannels()
   }
@@ -222,12 +215,12 @@ export class User {
       multiplextr_url: engine.Env.MULTIPLEXTR_URL,
     })
 
-    engine.components.Events.addHandler(30078, async e => {
+    engine.Events.addHandler(30078, async e => {
       if (
         Tags.from(e).getMeta("d") === "coracle/settings/v1" &&
         e.created_at > this.getSetting("last_updated")
       ) {
-        const updates = await engine.components.Crypt.decryptJson(e.content)
+        const updates = await engine.Crypt.decryptJson(e.content)
 
         if (updates) {
           this.settings.update($settings => ({

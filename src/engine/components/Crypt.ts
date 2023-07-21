@@ -8,14 +8,14 @@ export class Crypt {
   engine: Engine
 
   async encrypt(pubkey: string, message: string) {
-    const {method, privkey} = this.engine.components.Keys.current.get() as KeyState
+    const {method, privkey} = this.engine.Keys.current.get() as KeyState
 
     return switcherFn(method, {
       extension: () =>
-        this.engine.components.Keys.withExtension((ext: any) => ext.nip04.encrypt(pubkey, message)),
+        this.engine.Keys.withExtension((ext: any) => ext.nip04.encrypt(pubkey, message)),
       privkey: () => nip04.encrypt(privkey as string, pubkey, message),
       bunker: async () => {
-        const ndk = await this.engine.components.Keys.getNDK()
+        const ndk = await this.engine.Keys.getNDK()
         const user = ndk.getUser({hexpubkey: pubkey})
 
         return ndk.signer.encrypt(user, message)
@@ -24,11 +24,11 @@ export class Crypt {
   }
 
   async decrypt(pubkey: string, message: string) {
-    const {method, privkey} = this.engine.components.Keys.current.get() as KeyState
+    const {method, privkey} = this.engine.Keys.current.get() as KeyState
 
     return switcherFn(method, {
       extension: () =>
-        this.engine.components.Keys.withExtension((ext: any) => {
+        this.engine.Keys.withExtension((ext: any) => {
           return new Promise(async resolve => {
             let result
 
@@ -53,7 +53,7 @@ export class Crypt {
         )
       },
       bunker: async () => {
-        const ndk = await this.engine.components.Keys.getNDK()
+        const ndk = await this.engine.Keys.getNDK()
         const user = ndk.getUser({hexpubkey: pubkey})
 
         return ndk.signer.decrypt(user, message)
@@ -62,13 +62,13 @@ export class Crypt {
   }
 
   async encryptJson(data: any) {
-    const {pubkey} = this.engine.components.Keys.current.get() as KeyState
+    const {pubkey} = this.engine.Keys.current.get() as KeyState
 
     return this.encrypt(pubkey, JSON.stringify(data))
   }
 
   async decryptJson(data: string) {
-    const {pubkey} = this.engine.components.Keys.current.get() as KeyState
+    const {pubkey} = this.engine.Keys.current.get() as KeyState
 
     return tryJson(async () => JSON.parse(await this.decrypt(pubkey, data)))
   }

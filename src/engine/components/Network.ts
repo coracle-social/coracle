@@ -67,7 +67,7 @@ export class Network {
 
     let target
 
-    const muxUrl = this.engine.components.User.getSetting("multiplextr_url")
+    const muxUrl = this.engine.User.getSetting("multiplextr_url")
 
     // Try to use our multiplexer, but if it fails to connect fall back to relays. If
     // we're only connecting to a single relay, just do it directly, unless we already
@@ -106,7 +106,7 @@ export class Network {
 
     // Eagerly connect and handle AUTH
     executor.target.sockets.forEach((socket: any) => {
-      const {limitation} = this.engine.components.Nip65.getRelayInfo(socket.url)
+      const {limitation} = this.engine.Nip65.getRelayInfo(socket.url)
       const waitForBoot = limitation?.payment_required || limitation?.auth_required
 
       // This happens automatically, but kick it off anyway
@@ -258,7 +258,7 @@ export class Network {
         this.emitter.emit("event", {url, event})
 
         if (shouldProcess) {
-          this.engine.components.Events.queue.push(event)
+          this.engine.Events.queue.push(event)
         }
 
         onEvent?.(event)

@@ -26,7 +26,10 @@ export class Nip65 {
     }
   }
 
-  setPolicy = ({pubkey, created_at}: {pubkey: string, created_at: number}, relays: RelayPolicyEntry[]) => {
+  setPolicy = (
+    {pubkey, created_at}: {pubkey: string; created_at: number},
+    relays: RelayPolicyEntry[]
+  ) => {
     if (relays?.length > 0) {
       if (created_at < this.policies.key(pubkey).get()?.created_at) {
         return
@@ -91,7 +94,7 @@ export class Nip65 {
 
     for (const url of chain(
       hints,
-      this.engine.components.User.getRelayUrls("write"),
+      this.engine.User.getRelayUrls("write"),
       this.engine.Env.DEFAULT_RELAYS
     )) {
       if (seen.has(url)) {
@@ -104,8 +107,8 @@ export class Nip65 {
       if (!isShareableRelay(url)) {
         bad.push(url)
       } else if (
-        this.engine.components.Network.relayHasError(url) ||
-        this.engine.components.Meta.getRelayQuality(url)[0] < 0.5
+        this.engine.Network.relayHasError(url) ||
+        this.engine.Meta.getRelayQuality(url)[0] < 0.5
       ) {
         bad.push(url)
       } else {
@@ -201,13 +204,13 @@ export class Nip65 {
   initialize(engine: Engine) {
     this.engine = engine
 
-    engine.components.Events.addHandler(2, e => {
+    engine.Events.addHandler(2, e => {
       if (isShareableRelay(e.content)) {
         this.addRelay(normalizeRelayUrl(e.content))
       }
     })
 
-    engine.components.Events.addHandler(3, e => {
+    engine.Events.addHandler(3, e => {
       this.setPolicy(
         e,
         tryJson<RelayPolicyEntry[]>(() => {
@@ -225,7 +228,7 @@ export class Nip65 {
       )
     })
 
-    engine.components.Events.addHandler(10002, e => {
+    engine.Events.addHandler(10002, e => {
       this.setPolicy(
         e,
         Tags.from(e)
