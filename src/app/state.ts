@@ -10,6 +10,7 @@ import {warn} from "src/util/logger"
 import {now} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
+import type {Event} from 'src/engine/types'
 import {
   FORCE_RELAYS,
   DEFAULT_FOLLOWS,
@@ -26,10 +27,11 @@ import {
 // Routing
 
 export const routes = {
-  person: (pubkey, tab = "notes") => `/people/${nip19.npubEncode(pubkey)}/${tab}`,
+  person: (pubkey: string, tab = "notes") => `/people/${nip19.npubEncode(pubkey)}/${tab}`,
 }
 
-export const addToList = (type, value) => modal.push({type: "list/select", item: {type, value}})
+export const addToList = (type: string, value: string) =>
+  modal.push({type: "list/select", item: {type, value}})
 
 // Menu
 
@@ -38,7 +40,7 @@ export const menuIsOpen = writable(false)
 // Redact long strings, especially hex and bech32 keys which are 64 and 63
 // characters long, respectively. Put the threshold a little lower in case
 // someone accidentally enters a key with the last few digits missing
-const redactErrorInfo = info =>
+const redactErrorInfo = (info: any) =>
   JSON.parse(JSON.stringify(info || null).replace(/\w{60}\w+/g, "[REDACTED]"))
 
 // Wait for bugsnag to be started in main
@@ -67,7 +69,7 @@ setTimeout(() => {
 
 const session = Math.random().toString().slice(2)
 
-export const logUsage = async name => {
+export const logUsage = async (name: string) => {
   // Hash the user's pubkey so we can identify unique users without knowing
   // anything about them
   const pubkey = Keys.pubkey.get()
@@ -101,7 +103,7 @@ setInterval(() => {
 
     if (stats.last_activity < now() - 60) {
       Network.pool.remove(url)
-    } else if (userRelays.has(url) && first(Meta.getRelayQuality(url)) < 0.3) {
+    } else if (userRelays.has(url) && Meta.getRelayQuality(url)[0] < 0.3) {
       $slowConnections.push(url)
     }
   }
@@ -117,9 +119,9 @@ export const listenForNotifications = async () => {
 
   const channelIds = pluck("id", Nip28.channels.get().filter(whereEq({joined: true})))
 
-  const eventIds = doPipe(Events.cache.get(), [
-    filter(e => noteKinds.includes(e.kind)),
-    sortBy(e => -e.created_at),
+  const eventIds: string[] = doPipe(Events.cache.get(), [
+    filter((e: Event) => noteKinds.includes(e.kind)),
+    sortBy((e: Event) => -e.created_at),
     slice(0, 256),
     pluck("id"),
   ])
@@ -166,7 +168,7 @@ export const loadAppData = async () => {
   listenForNotifications()
 }
 
-export const login = async (method, key) => {
+export const login = async (method: string, key: string) => {
   Keys.login(method, key)
 
   if (FORCE_RELAYS.length > 0) {
@@ -188,7 +190,7 @@ export const login = async (method, key) => {
   }
 }
 
-export const publishWithToast = (event, relays) =>
+export const publishWithToast = (event: Event, relays: string[]) =>
   Outbox.publish(event, relays, ({completed, succeeded, failed, timeouts, pending}) => {
     let message = `Published to ${succeeded.size}/${relays.length} relays`
 
@@ -215,8 +217,8 @@ export const publishWithToast = (event, relays) =>
 // Feeds
 
 export const compileFilter = (filter: DynamicFilter): Filter => {
-  const getAuthors = pubkeys =>
-    shuffle(pubkeys.length > 0 ? pubkeys : DEFAULT_FOLLOWS).slice(0, 256)
+  const getAuthors = (pubkeys: string[]) =>
+    shuffle(pubkeys.length > 0 ? pubkeys : DEFAULT_FOLLOWS as string[]).slice(0, 256)
 
   if (filter.authors === "global") {
     filter = omit(["authors"], filter)

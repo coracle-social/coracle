@@ -2,15 +2,8 @@ import EventEmitter from "events"
 import {defer} from "hurdak"
 
 export class Subscription extends EventEmitter {
-  closed: boolean
-  complete: ReturnType<typeof defer>
-
-  constructor() {
-    super()
-
-    this.closed = false
-    this.complete = defer()
-  }
+  closed = false
+  complete = defer()
 
   close = () => {
     if (!this.closed) {

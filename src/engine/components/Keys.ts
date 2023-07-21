@@ -2,67 +2,55 @@ import {propEq, find, reject} from "ramda"
 import {nip19, getPublicKey, getSignature, generatePrivateKey} from "nostr-tools"
 import NDK, {NDKEvent, NDKNip46Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk"
 import {switcherFn} from "hurdak"
-import {writable, derived} from "../util/store"
-
-export type LoginMethod = "bunker" | "pubkey" | "privkey" | "extension"
-
-export type KeyState = {
-  method: LoginMethod
-  pubkey: string
-  privkey: string | null
-  bunkerKey: string | null
-}
+import {writable, derived} from "src/engine/util/store"
+import type {KeyState, Event} from "src/engine/types"
+import type {Engine} from "src/engine/Engine"
 
 export class Keys {
-  static contributeState() {
-    const pubkey = writable<string | null>()
+  pubkey = writable<string | null>(null)
+  keyState = writable<KeyState[]>([])
+  current = derived(this.pubkey, k => this.getKeyState(k))
+  canSign = derived(this.current, keyState =>
+    ["bunker", "privkey", "extension"].includes(keyState?.method)
+  )
 
-    const keyState = writable<KeyState[]>([])
+  getKeyState = (k: string) => find(propEq("pubkey", k), this.keyState.get())
 
-    const getKeyState = k => find(propEq("pubkey", k), keyState.get())
+  setKeyState = (v: KeyState) =>
+    this.keyState.update((s: KeyState[]) => reject(propEq("pubkey", v.pubkey), s).concat(v))
 
-    const setKeyState = v => keyState.update(s => reject(propEq("pubkey", v.pubkey), s).concat(v))
+  removeKeyState = (k: string) =>
+    this.keyState.update((s: KeyState[]) => reject(propEq("pubkey", k), s))
 
-    const removeKeyState = k => keyState.update(s => reject(propEq("pubkey", k), s))
-
-    const current = derived<KeyState | null>(pubkey, k => getKeyState(k))
-
-    const canSign = derived(current, keyState =>
-      ["bunker", "privkey", "extension"].includes(keyState?.method)
-    )
-
-    return {pubkey, keyState, getKeyState, setKeyState, removeKeyState, current, canSign}
-  }
-
-  static contributeSelectors({Keys}) {
-    const {current} = Keys
-
+  withExtension = (() => {
     let extensionLock = Promise.resolve()
 
     const getExtension = () => (window as {nostr?: any}).nostr
 
-    const withExtension = f => {
+    return (f: (ext: any) => void) => {
       extensionLock = extensionLock.catch(e => console.error(e)).then(() => f(getExtension()))
 
       return extensionLock
     }
+  })()
 
-    const isKeyValid = key => {
-      // Validate the key before setting it to state by encoding it using bech32.
-      // This will error if invalid (this works whether it's a public or a private key)
-      try {
-        nip19.npubEncode(key)
-      } catch (e) {
-        return false
-      }
-
-      return true
+  isKeyValid = (key: string) => {
+    // Validate the key before setting it to state by encoding it using bech32.
+    // This will error if invalid (this works whether it's a public or a private key)
+    try {
+      nip19.npubEncode(key)
+    } catch (e) {
+      return false
     }
 
+    return true
+  }
+
+  getNDK = (() => {
     const ndkInstances = new Map()
 
     const prepareNDK = async (token?: string) => {
-      const {pubkey, bunkerKey} = current.get()
+      const {pubkey, bunkerKey} = this.current.get() as KeyState
       const localSigner = new NDKPrivateKeySigner(bunkerKey)
 
       const ndk = new NDK({
@@ -81,73 +69,74 @@ export class Keys {
       ndkInstances.set(pubkey, ndk)
     }
 
-    const getNDK = async () => {
-      const {pubkey} = current.get()
+    return async (token?: string) => {
+      const {pubkey} = this.current.get() as KeyState
 
       if (!ndkInstances.has(pubkey)) {
-        await prepareNDK()
+        await prepareNDK(token)
       }
 
       return ndkInstances.get(pubkey)
     }
+  })()
 
-    return {withExtension, isKeyValid, getNDK}
+  login = (method: string, key: string | {pubkey: string; token: string}) => {
+    let pubkey = null
+    let privkey = null
+    let bunkerKey = null
+
+    if (method === "privkey") {
+      privkey = key as string
+      pubkey = getPublicKey(privkey)
+    } else if (["pubkey", "extension"].includes(method)) {
+      pubkey = key as string
+    } else if (method === "bunker") {
+      pubkey = (key as {pubkey: string}).pubkey
+      bunkerKey = generatePrivateKey()
+
+      this.getNDK((key as {token: string}).token)
+    }
+
+    this.setKeyState({method, pubkey, privkey, bunkerKey})
+    this.pubkey.set(pubkey)
   }
 
-  static contributeActions({Keys}) {
-    const login = (method, key) => {
-      let pubkey = null
-      let privkey = null
-      let bunkerKey = null
+  sign = async (event: Event) => {
+    const {method, privkey} = this.current.get()
 
-      if (method === "privkey") {
-        privkey = key
-        pubkey = getPublicKey(key)
-      } else if (["pubkey", "extension"].includes(method)) {
-        pubkey = key
-      } else if (method === "bunker") {
-        pubkey = key.pubkey
-        bunkerKey = generatePrivateKey()
+    console.assert(event.id)
+    console.assert(event.pubkey)
+    console.assert(event.created_at)
 
-        Keys.getNDK(key.token)
-      }
+    return switcherFn(method, {
+      bunker: async () => {
+        const ndk = await this.getNDK()
+        const ndkEvent = new NDKEvent(ndk, event)
 
-      Keys.setKeyState({method, pubkey, privkey, bunkerKey})
-      Keys.pubkey.set(pubkey)
+        await ndkEvent.sign(ndk.signer)
+
+        return ndkEvent.rawEvent()
+      },
+      privkey: () => {
+        return Object.assign(event, {
+          sig: getSignature(event, privkey),
+        })
+      },
+      extension: () => this.withExtension(ext => ext.signEvent(event)),
+    })
+  }
+
+  clear = () => {
+    const $pubkey = this.pubkey.get()
+
+    this.pubkey.set(null)
+
+    if ($pubkey) {
+      this.removeKeyState($pubkey)
     }
+  }
 
-    const sign = async event => {
-      const {method, privkey} = Keys.current.get()
+  initialize(engine: Engine) {
 
-      console.assert(event.id)
-      console.assert(event.pubkey)
-      console.assert(event.created_at)
-
-      return switcherFn(method, {
-        bunker: async () => {
-          const ndk = await Keys.getNDK()
-          const ndkEvent = new NDKEvent(ndk, event)
-
-          await ndkEvent.sign(ndk.signer)
-
-          return ndkEvent.rawEvent()
-        },
-        privkey: () => {
-          return Object.assign(event, {
-            sig: getSignature(event, privkey),
-          })
-        },
-        extension: () => Keys.withExtension(ext => ext.signEvent(event)),
-      })
-    }
-
-    const clear = () => {
-      const $pubkey = Keys.pubkey.get()
-
-      Keys.pubkey.set(null)
-      Keys.removeKeyState($pubkey)
-    }
-
-    return {login, sign, clear}
   }
 }

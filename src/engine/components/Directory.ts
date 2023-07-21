@@ -1,59 +1,51 @@
 import {nip19} from "nostr-tools"
 import {ellipsize} from "hurdak"
 import {tryJson, now, fuzzy} from "src/util/misc"
-import type {Profile} from "src/engine/types"
-import {collection, derived} from "../util/store"
+import {collection, derived} from "src/engine/util/store"
+import type {Engine} from "src/engine/Engine"
+import type {Event, Profile} from "src/engine/types"
 
 export class Directory {
-  static contributeState() {
-    const profiles = collection<Profile>("pubkey")
+  profiles = collection<Profile>("pubkey")
 
-    return {profiles}
-  }
+  getProfile = (pubkey: string): Profile => this.profiles.key(pubkey).get() || {pubkey}
 
-  static contributeSelectors({Directory}) {
-    const getProfile = (pubkey: string): Profile => Directory.profiles.key(pubkey).get() || {pubkey}
+  getNamedProfiles = () => this.profiles.get().filter(p => p.name || p.nip05 || p.display_name)
 
-    const getNamedProfiles = () =>
-      Directory.profiles.get().filter(p => p.name || p.nip05 || p.display_name)
-
-    const displayProfile = ({display_name, name, pubkey}: Profile) => {
-      if (display_name) {
-        return ellipsize(display_name, 60)
-      }
-
-      if (name) {
-        return ellipsize(name, 60)
-      }
-
-      try {
-        return nip19.npubEncode(pubkey).slice(-8)
-      } catch (e) {
-        console.error(e)
-
-        return ""
-      }
+  displayProfile = ({display_name, name, pubkey}: Profile) => {
+    if (display_name) {
+      return ellipsize(display_name, 60)
     }
 
-    const displayPubkey = pubkey => displayProfile(getProfile(pubkey))
+    if (name) {
+      return ellipsize(name, 60)
+    }
 
-    const searchProfiles = derived(Directory.profiles, $profiles => {
-      return fuzzy(getNamedProfiles(), {
-        keys: ["name", "display_name", {name: "nip05", weight: 0.5}, {name: "about", weight: 0.1}],
-        threshold: 0.3,
-      })
-    })
+    try {
+      return nip19.npubEncode(pubkey).slice(-8)
+    } catch (e) {
+      console.error(e)
 
-    return {getProfile, getNamedProfiles, displayProfile, displayPubkey, searchProfiles}
+      return ""
+    }
   }
 
-  static initialize({Events, Directory}) {
-    Events.addHandler(0, e => {
+  displayPubkey = (pubkey: string) => this.displayProfile(this.getProfile(pubkey))
+
+  searchProfiles = derived(this.profiles, $profiles => {
+    return fuzzy(this.getNamedProfiles(), {
+      keys: ["name", "display_name", {name: "nip05", weight: 0.5}, {name: "about", weight: 0.1}],
+      threshold: 0.3,
+    })
+  })
+
+  initialize(engine: Engine) {
+    engine.components.Events.addHandler(0, (e: Event) => {
       tryJson(() => {
         const kind0 = JSON.parse(e.content)
-        const profile = Directory.profiles.key(e.pubkey)
+        const profile = this.profiles.key(e.pubkey)
 
-        if (e.created_at < profile.get()?.created_at) {
+        if (e.created_at < (profile.get()?.created_at || Infinity)) {
           return
         }
 

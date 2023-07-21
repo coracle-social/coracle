@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
 
-  export let src
+  export let src: string
   export let size = 4
 </script>
 

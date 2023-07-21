@@ -1,49 +1,51 @@
-import type {Event} from "src/engine/types"
 import {getEventHash} from "nostr-tools"
+import type {UnsignedEvent} from "nostr-tools"
 import {assoc} from "ramda"
 import {doPipe} from "hurdak"
 import {now} from "src/util/misc"
-import {Worker} from "../util/Worker"
+import type {Progress} from "src/engine/components/Network"
+import type {Engine} from "src/engine/Engine"
+import type {Event} from "src/engine/types"
 
 export class Outbox {
-  static contributeState() {
-    return {
-      queue: new Worker<Event>(),
+  engine: Engine
+
+  prepEvent = async (rawEvent: Partial<Event>): Promise<Event> => {
+    if (rawEvent.sig) {
+      return rawEvent as Event
     }
+
+    const event = {
+      ...rawEvent,
+      created_at: now(),
+      pubkey: this.engine.components.Keys.pubkey.get(),
+    }
+
+    event.id = getEventHash(event as UnsignedEvent)
+
+    return this.engine.components.Keys.sign(event as Event)
   }
 
-  static contributeActions({Keys, Network, User, Events}) {
-    const prepEvent = async rawEvent => {
-      return await doPipe(rawEvent, [
-        assoc("created_at", now()),
-        assoc("pubkey", Keys.pubkey.get()),
-        e => ({...e, id: getEventHash(e)}),
-        Keys.sign,
-      ])
+  publish = async (
+    rawEvent: Partial<Event>,
+    relays: string[] = null,
+    onProgress: (p: Progress) => void = null,
+    verb = "EVENT"
+  ) => {
+    const event = rawEvent.sig ? (rawEvent as Event) : await this.prepEvent(rawEvent)
+
+    if (!relays) {
+      relays = this.engine.components.User.getRelayUrls("write")
     }
 
-    const publish = async (event, relays = null, onProgress = null, verb = "EVENT") => {
-      if (!event.sig) {
-        event = await prepEvent(event)
-      }
+    // return console.log(event)
 
-      if (!relays) {
-        relays = User.getRelayUrls("write")
-      }
+    this.engine.components.Events.queue.push(event)
 
-      // return console.log(event)
-
-      const promise = Network.publish({event, relays, onProgress, verb})
-
-      Events.queue.push(event)
-
-      return [event, promise]
-    }
-
-    return {prepEvent, publish}
+    return [event, this.engine.components.Network.publish({event, relays, onProgress, verb})]
   }
 
-  static initialize({Outbox}) {
-    Outbox.queue.listen(({event}) => Outbox.publish(event))
+  initialize(engine: Engine) {
+    this.engine = engine
   }
 }

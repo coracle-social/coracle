@@ -2,6 +2,7 @@ import {last, pluck, identity} from "ramda"
 import {nip19} from "nostr-tools"
 import {first, switcherFn} from "hurdak"
 import {fromNostrURI} from "src/util/nostr"
+import type {Event} from "src/engine/types"
 
 export const NEWLINE = "newline"
 export const ELLIPSIS = "ellipsis"
@@ -15,11 +16,11 @@ export const NOSTR_NPUB = "nostr:npub"
 export const NOSTR_NPROFILE = "nostr:nprofile"
 export const NOSTR_NADDR = "nostr:naddr"
 
-export const urlIsMedia = url =>
-  !url.match(/\.(apk|docx|xlsx|csv|dmg)/) && last(url.split("://")).includes("/")
+export const urlIsMedia = (url: string) =>
+  !url.match(/\.(apk|docx|xlsx|csv|dmg)/) && last(url.split("://"))?.includes("/")
 
-export const parseContent = ({content, tags = []}) => {
-  const result = []
+export const parseContent = ({content, tags = []}: {content: string; tags: string[][]}) => {
+  const result: any[] = []
   let text = content.trim()
   let buffer = ""
 
@@ -42,7 +43,7 @@ export const parseContent = ({content, tags = []}) => {
         const [tag, value, url] = tags[i]
         const relays = [url].filter(identity)
 
-        let type, data, entity
+        let type, data: any, entity
         if (tag === "p") {
           type = "nprofile"
           data = {pubkey: value, relays}
@@ -162,13 +163,22 @@ export const parseContent = ({content, tags = []}) => {
   return result
 }
 
-export const truncateContent = (content, {showEntire, maxLength, showMedia = false}) => {
+type TruncateContentOpts = {
+  showEntire: boolean
+  maxLength: number
+  showMedia: boolean
+}
+
+export const truncateContent = (
+  content: any[],
+  {showEntire, maxLength, showMedia = false}: TruncateContentOpts
+) => {
   if (showEntire) {
     return content
   }
 
   let length = 0
-  const result = []
+  const result: any[] = []
   const truncateAt = maxLength * 0.6
   const mediaLength = maxLength / 3
   const entityLength = 30
@@ -199,7 +209,7 @@ export const truncateContent = (content, {showEntire, maxLength, showMedia = fal
   return result
 }
 
-export const getLinks = parts =>
+export const getLinks = (parts: any[]) =>
   pluck(
     "value",
     parts.filter(x => x.type === LINK && x.isMedia)

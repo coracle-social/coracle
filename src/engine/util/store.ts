@@ -8,7 +8,7 @@ type R = Record<string, any>
 type M<T> = Map<string, T>
 
 export interface Readable<T> {
-  get: () => T | undefined
+  get: () => T
   subscribe: (f: Subscriber) => () => void
   derived: <U>(f: (v: T) => U) => Readable<U>
 }
@@ -123,7 +123,7 @@ export class Key<T extends R> implements Readable<T> {
     this.store = base.derived<T>(m => m.get(key) as T)
   }
 
-  get = () => this.base.get().get(this.key)
+  get = () => this.base.get().get(this.key) as T
 
   subscribe = (f: Subscriber) => this.store.subscribe(f)
 
@@ -151,7 +151,7 @@ export class Key<T extends R> implements Readable<T> {
 
   set = (v: T) => this.update(() => v)
 
-  merge = (d: T) => this.update(v => ({...v, ...d}))
+  merge = (d: Partial<T>) => this.update(v => ({...v, ...d}))
 
   remove = () =>
     this.base.update(m => {
@@ -199,6 +199,7 @@ export const writable = <T>(v: T) => new Writable(v)
 export const derived = <T>(stores: Derivable, getValue: (values: any) => T) =>
   new Derived(stores, getValue) as Readable<T>
 
-export const key = <T extends R>(base: Writable<M<T>>, pk: string, key: string) => new Key<T>(base, pk, key)
+export const key = <T extends R>(base: Writable<M<T>>, pk: string, key: string) =>
+  new Key<T>(base, pk, key)
 
 export const collection = <T extends R>(pk: string) => new Collection<T>(pk)

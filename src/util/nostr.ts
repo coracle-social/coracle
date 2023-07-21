@@ -77,7 +77,7 @@ export class Tags {
   any(f: (t: any) => boolean) {
     return this.filter(f).exists()
   }
-  type(type: string) {
+  type(type: string | string[]) {
     const types = ensurePlural(type)
 
     return new Tags(this.tags.filter(t => types.includes(t[0])))

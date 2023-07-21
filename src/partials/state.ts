@@ -53,7 +53,7 @@ export const modal = {
   getCurrent() {
     return last(get(modal.stack))
   },
-  sync($stack, opts = {}) {
+  sync($stack: any[], opts = {}) {
     const hash = $stack.length > 0 ? `#m=${$stack.length}` : ""
 
     if (hash !== window.location.hash) {
@@ -62,16 +62,16 @@ export const modal = {
 
     return $stack
   },
-  remove(id) {
+  remove(id: string) {
     modal.stack.update($stack => modal.sync(reject(whereEq({id}), $stack)))
   },
-  push(data) {
+  push(data: {type: string, [k: string]: any}) {
     modal.stack.update($stack => modal.sync($stack.concat(data)))
   },
   pop() {
     modal.stack.update($stack => modal.sync($stack.slice(0, -1)))
   },
-  replace(data) {
+  replace(data: {type: string, [k: string]: any}) {
     modal.stack.update($stack => $stack.slice(0, -1).concat(data))
   },
   clear() {
@@ -84,7 +84,7 @@ export const modal = {
   },
 }
 
-location.subscribe($location => {
+location.subscribe(($location: any) => {
   const match = $location.hash.match(/\bm=(\d+)/)
   const i = match ? parseInt(match[1]) : 0
 
@@ -93,12 +93,12 @@ location.subscribe($location => {
 
 // Themes
 
-const THEME = fromPairs(import.meta.env.VITE_THEME.split(",").map(x => x.split(":")))
+const THEME = fromPairs(import.meta.env.VITE_THEME.split(",").map((x: string) => x.split(":"))) as Record<string, string>
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
 
 export const theme = synced("ui/theme", prefersDark ? "dark" : "light")
 
-export const getThemeColors = $theme => {
+export const getThemeColors = ($theme: string) => {
   for (const x of range(1, 10)) {
     const lum = $theme === "dark" ? (5 - x) * 25 : (x - 5) * 25
 
@@ -108,9 +108,9 @@ export const getThemeColors = $theme => {
   return THEME
 }
 
-export const getThemeColor = ($theme, k) => prop(k, getThemeColors($theme))
+export const getThemeColor = ($theme: string, k: string) => prop(k, getThemeColors($theme))
 
-export const getThemeVariables = $theme =>
+export const getThemeVariables = ($theme: string) =>
   Object.entries(getThemeColors($theme))
     .map(([k, v]) => `--${k}: ${v};`)
     .join("\n")

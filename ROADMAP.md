@@ -1,7 +1,8 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Fix load new notes button
+  - [ ] Move pubkey loader to utils
+  - [ ] Have meta intercept subscribe/publish rather than listen to specific events
   - [ ] Speed up note detail
   - [ ] Fix feed control state
   - [ ] Remove external dependencies from engine, open source it?

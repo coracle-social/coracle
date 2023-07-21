@@ -1,273 +1,236 @@
 import {when, prop, uniq, pluck, fromPairs, whereEq, find, slice, reject} from "ramda"
 import {now} from "src/util/misc"
 import {Tags, appDataKeys, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
-import {writable} from "../util/store"
+import type {RelayPolicyEntry, List, Event} from "src/engine/types"
+import {writable} from "src/engine/util/store"
+import type {Writable} from "src/engine/util/store"
+import type {Engine} from "src/engine/Engine"
 
 export class User {
-  static contributeState({Env}) {
-    const settings = writable<any>({
+  engine: Engine
+  settings: Writable<Record<string, any>>
+
+  getPubkey = () => this.engine.components.Keys.pubkey.get()
+
+  getStateKey = () => (this.engine.components.Keys.canSign.get() ? this.getPubkey() : "anonymous")
+
+  // Settings
+
+  getSetting = (k: string) => this.settings.get()[k]
+
+  dufflepud = (path: string) => `${this.getSetting("dufflepud_url")}/${path}`
+
+  setSettings = async (settings: Record<string, any>) => {
+    this.settings.update($settings => ({...$settings, ...settings}))
+
+    if (this.engine.components.Keys.canSign.get()) {
+      const d = appDataKeys.USER_SETTINGS
+      const v = await this.engine.components.Crypt.encryptJson(settings)
+
+      return this.engine.components.Outbox.publish(this.engine.components.Builder.setAppData(d, v))
+    }
+  }
+
+  setAppData = async (d: string, content: any) => {
+    const v = await this.engine.components.Crypt.encryptJson(content)
+
+    return this.engine.components.Outbox.publish(this.engine.components.Builder.setAppData(d, v))
+  }
+
+  // Nip65
+
+  getRelays = (mode?: string) =>
+    this.engine.components.Nip65.getPubkeyRelays(this.getStateKey(), mode)
+
+  getRelayUrls = (mode?: string) =>
+    this.engine.components.Nip65.getPubkeyRelayUrls(this.getStateKey(), mode)
+
+  setRelays = (relays: RelayPolicyEntry[]) => {
+    if (this.engine.components.Keys.canSign.get()) {
+      return this.engine.components.Outbox.publish(this.engine.components.Builder.setRelays(relays))
+    } else {
+      this.engine.components.Nip65.setPolicy(
+        {pubkey: this.getStateKey(), created_at: now()},
+        relays
+      )
+    }
+  }
+
+  addRelay = (url: string) => this.setRelays(this.getRelays().concat({url, read: true, write: true}))
+
+  removeRelay = (url: string) =>
+    this.setRelays(reject(whereEq({url: normalizeRelayUrl(url)}), this.getRelays()))
+
+  setRelayPolicy = (url: string, policy: Partial<RelayPolicyEntry>) =>
+    this.setRelays(this.getRelays().map(when(whereEq({url}), p => ({...p, ...policy}))))
+
+  // Nip02
+
+  getPetnames = () => this.engine.components.Nip02.getPetnames(this.getStateKey())
+
+  getMutedTags = () => this.engine.components.Nip02.getMutedTags(this.getStateKey())
+
+  getFollowsSet = () => this.engine.components.Nip02.getFollowsSet(this.getStateKey())
+
+  getMutesSet = () => this.engine.components.Nip02.getMutesSet(this.getStateKey())
+
+  getFollows = () => this.engine.components.Nip02.getFollows(this.getStateKey())
+
+  getMutes = () => this.engine.components.Nip02.getMutes(this.getStateKey())
+
+  getNetworkSet = () => this.engine.components.Nip02.getNetworkSet(this.getStateKey())
+
+  getNetwork = () => this.engine.components.Nip02.getNetwork(this.getStateKey())
+
+  isFollowing = (pubkey: string) => this.engine.components.Nip02.isFollowing(this.getStateKey(), pubkey)
+
+  isIgnoring = (pubkeyOrEventId: string) =>
+    this.engine.components.Nip02.isIgnoring(this.getStateKey(), pubkeyOrEventId)
+
+  setProfile = ($profile: Record<string, any>) =>
+    this.engine.components.Outbox.publish(this.engine.components.Builder.setProfile($profile))
+
+  setPetnames = async ($petnames: string[][]) => {
+    if (this.engine.components.Keys.canSign.get()) {
+      await this.engine.components.Outbox.publish(
+        this.engine.components.Builder.setPetnames($petnames)
+      )
+    } else {
+      this.engine.components.Nip02.graph.key(this.getStateKey()).merge({
+        updated_at: now(),
+        petnames_updated_at: now(),
+        petnames: $petnames,
+      })
+    }
+  }
+
+  follow = (pubkey: string) =>
+    this.setPetnames(
+      this.getPetnames()
+        .filter(t => t[1] !== pubkey)
+        .concat([this.engine.components.Builder.mention(pubkey)])
+    )
+
+  unfollow = (pubkey: string) =>
+    this.setPetnames(reject((t: string[]) => t[1] === pubkey, this.getPetnames()))
+
+  isMuted = (e: Event) => {
+    const m = this.getMutesSet()
+
+    return find(t => m.has(t), [e.id, e.pubkey, findReplyId(e), findRootId(e)])
+  }
+
+  applyMutes = (events: Event[]) => reject(this.isMuted, events)
+
+  setMutes = async ($mutes: string[][]) => {
+    if (this.engine.components.Keys.canSign.get()) {
+      await this.engine.components.Outbox.publish(
+        this.engine.components.Builder.setMutes($mutes.map(t => t.slice(0, 2)))
+      )
+    } else {
+      this.engine.components.Nip02.graph.key(this.getStateKey()).merge({
+        updated_at: now(),
+        mutes_updated_at: now(),
+        mutes: $mutes,
+      })
+    }
+  }
+
+  mute = (type: string, value: string) =>
+    this.setMutes(reject((t: string[]) => t[1] === value, this.getMutedTags()).concat([[type, value]]))
+
+  unmute = (target: string) => this.setMutes(reject((t: string[]) => t[1] === target, this.getMutedTags()))
+
+  // Lists
+
+  getLists = (f?: (l: List) => boolean) =>
+    this.engine.components.Content.getLists(
+      l => l.pubkey === this.getStateKey() && (f ? f(l) : true)
+    )
+
+  putList = (name: string, params: string[][], relays: string[]) =>
+    this.engine.components.Outbox.publish(
+      this.engine.components.Builder.createList([["d", name]].concat(params).concat(relays))
+    )
+
+  removeList = (naddr: string) =>
+    this.engine.components.Outbox.publish(this.engine.components.Builder.deleteNaddrs([naddr]))
+
+  // Messages
+
+  markAllMessagesRead = () => {
+    const lastChecked = fromPairs(
+      uniq(pluck("contact", this.engine.components.Nip04.messages.get())).map(k => [k, now()])
+    )
+
+    return this.setAppData(appDataKeys.NIP04_LAST_CHECKED, lastChecked)
+  }
+
+  setContactLastChecked = (pubkey: string) => {
+    const lastChecked = fromPairs(
+      this.engine.components.Nip04.contacts
+        .get()
+        .filter(prop("last_checked"))
+        .map(r => [r.id, r.last_checked])
+    )
+
+    return this.setAppData(appDataKeys.NIP04_LAST_CHECKED, {...lastChecked, [pubkey]: now()})
+  }
+
+  // Channels
+
+  setChannelLastChecked = (id: string) => {
+    const lastChecked = fromPairs(
+      this.engine.components.Nip28.channels
+        .get()
+        .filter(prop("last_checked"))
+        .map(r => [r.id, r.last_checked])
+    )
+
+    return this.setAppData(appDataKeys.NIP28_LAST_CHECKED, {...lastChecked, [id]: now()})
+  }
+
+  saveChannels = () =>
+    this.setAppData(
+      appDataKeys.NIP28_ROOMS_JOINED,
+      pluck("id", this.engine.components.Nip28.channels.get().filter(whereEq({joined: true})))
+    )
+
+  joinChannel = (id: string) => {
+    this.engine.components.Nip28.channels.key(id).merge({joined: false})
+
+    return this.saveChannels()
+  }
+
+  leaveChannel = (id: string) => {
+    this.engine.components.Nip28.channels.key(id).merge({joined: false})
+    this.engine.components.Nip28.messages.reject(m => m.channel === id)
+
+    return this.saveChannels()
+  }
+
+  initialize(engine: Engine) {
+    this.engine = engine
+
+    this.settings = writable<Record<string, any>>({
       last_updated: 0,
       relay_limit: 10,
       default_zap: 21,
       show_media: true,
       report_analytics: true,
-      dufflepud_url: Env.DUFFLEPUD_URL,
-      multiplextr_url: Env.MULTIPLEXTR_URL,
+      dufflepud_url: engine.Env.DUFFLEPUD_URL,
+      multiplextr_url: engine.Env.MULTIPLEXTR_URL,
     })
 
-    return {settings}
-  }
-
-  static contributeActions({
-    Builder,
-    Content,
-    Crypt,
-    Directory,
-    Events,
-    Keys,
-    Network,
-    Outbox,
-    Nip02,
-    Nip04,
-    Nip28,
-    Nip65,
-    User,
-  }) {
-    const getPubkey = () => Keys.pubkey.get()
-
-    const getStateKey = () => (Keys.canSign.get() ? getPubkey() : "anonymous")
-
-    // Settings
-
-    const getSetting = k => User.settings.get()[k]
-
-    const dufflepud = path => `${getSetting("dufflepud_url")}/${path}`
-
-    const setSettings = async settings => {
-      User.settings.update($settings => ({...$settings, ...settings}))
-
-      if (Keys.canSign.get()) {
-        const d = appDataKeys.USER_SETTINGS
-        const v = await Crypt.encryptJson(settings)
-
-        return Outbox.queue.push({event: Builder.setAppData(d, v)})
-      }
-    }
-
-    const setAppData = async (d, content) => {
-      const v = await Crypt.encryptJson(content)
-
-      return Outbox.queue.push({event: Builder.setAppData(d, v)})
-    }
-
-    // Nip65
-
-    const getRelays = (mode?: string) => Nip65.getPubkeyRelays(getStateKey(), mode)
-
-    const getRelayUrls = (mode?: string) => Nip65.getPubkeyRelayUrls(getStateKey(), mode)
-
-    const setRelays = relays => {
-      if (Keys.canSign.get()) {
-        return Outbox.queue.push({event: Builder.setRelays(relays)})
-      } else {
-        Nip65.setPolicy({pubkey: getStateKey(), created_at: now()}, relays)
-      }
-    }
-
-    const addRelay = url => setRelays(getRelays().concat({url, read: true, write: true}))
-
-    const removeRelay = url =>
-      setRelays(reject(whereEq({url: normalizeRelayUrl(url)}), getRelays()))
-
-    const setRelayPolicy = (url, policy) =>
-      setRelays(getRelays().map(when(whereEq({url}), p => ({...p, ...policy}))))
-
-    // Nip02
-
-    const getPetnames = () => Nip02.getPetnames(getStateKey())
-
-    const getMutedTags = () => Nip02.getMutedTags(getStateKey())
-
-    const getFollowsSet = () => Nip02.getFollowsSet(getStateKey())
-
-    const getMutesSet = () => Nip02.getMutesSet(getStateKey())
-
-    const getFollows = () => Nip02.getFollows(getStateKey())
-
-    const getMutes = () => Nip02.getMutes(getStateKey())
-
-    const getNetworkSet = () => Nip02.getNetworkSet(getStateKey())
-
-    const getNetwork = () => Nip02.getNetwork(getStateKey())
-
-    const isFollowing = pubkey => Nip02.isFollowing(getStateKey(), pubkey)
-
-    const isIgnoring = pubkeyOrEventId => Nip02.isIgnoring(getStateKey(), pubkeyOrEventId)
-
-    const setProfile = $profile => Outbox.queue.push({event: Builder.setProfile($profile)})
-
-    const setPetnames = async $petnames => {
-      if (Keys.canSign.get()) {
-        await Outbox.queue.push({event: Builder.setPetnames($petnames)})
-      } else {
-        Nip02.graph.key(getStateKey()).merge({
-          updated_at: now(),
-          petnames_updated_at: now(),
-          petnames: $petnames,
-        })
-      }
-    }
-
-    const follow = pubkey =>
-      setPetnames(
-        getPetnames()
-          .filter(t => t[1] !== pubkey)
-          .concat([Builder.mention(pubkey)])
-      )
-
-    const unfollow = pubkey => setPetnames(reject(t => t[1] === pubkey, getPetnames()))
-
-    const isMuted = e => {
-      const m = getMutesSet()
-
-      return find(t => m.has(t), [e.id, e.pubkey, findReplyId(e), findRootId(e)])
-    }
-
-    const applyMutes = events => reject(isMuted, events)
-
-    const setMutes = async $mutes => {
-      if (Keys.canSign.get()) {
-        await Outbox.queue.push({event: Builder.setMutes($mutes.map(slice(0, 2)))})
-      } else {
-        Nip02.graph.key(getStateKey()).merge({
-          updated_at: now(),
-          mutes_updated_at: now(),
-          mutes: $mutes,
-        })
-      }
-    }
-
-    const mute = (type, value) =>
-      setMutes(reject(t => t[1] === value, getMutedTags()).concat([[type, value]]))
-
-    const unmute = target => setMutes(reject(t => t[1] === target, getMutedTags()))
-
-    // Content
-
-    const getLists = f => Content.getLists(l => l.pubkey === getStateKey() && (f ? f(l) : true))
-
-    const putList = (name, params, relays) =>
-      Outbox.queue.push({
-        event: Builder.createList([["d", name]].concat(params).concat(relays)),
-      })
-
-    const removeList = naddr => Outbox.queue.push({event: Builder.deleteNaddrs([naddr])})
-
-    // Messages
-
-    const markAllMessagesRead = () => {
-      const lastChecked = fromPairs(
-        uniq(pluck("contact", Nip04.messages.get())).map(k => [k, now()])
-      )
-
-      return setAppData(appDataKeys.NIP04_LAST_CHECKED, lastChecked)
-    }
-
-    const setContactLastChecked = pubkey => {
-      const lastChecked = fromPairs(
-        Nip04.contacts
-          .get()
-          .filter(prop("last_checked"))
-          .map(r => [r.id, r.last_checked])
-      )
-
-      return setAppData(appDataKeys.NIP04_LAST_CHECKED, {...lastChecked, [pubkey]: now()})
-    }
-
-    // Nip28
-
-    const setChannelLastChecked = id => {
-      const lastChecked = fromPairs(
-        Nip28.channels
-          .get()
-          .filter(prop("last_checked"))
-          .map(r => [r.id, r.last_checked])
-      )
-
-      return setAppData(appDataKeys.NIP28_LAST_CHECKED, {...lastChecked, [id]: now()})
-    }
-
-    const saveChannels = () =>
-      setAppData(
-        appDataKeys.NIP28_ROOMS_JOINED,
-        pluck("id", Nip28.channels.get().filter(whereEq({joined: true})))
-      )
-
-    const joinChannel = id => {
-      Nip28.channels.key(id).merge({joined: false})
-
-      return saveChannels()
-    }
-
-    const leaveChannel = id => {
-      Nip28.channels.key(id).merge({joined: false})
-      Nip28.messages.reject(m => m.channel === id)
-
-      return saveChannels()
-    }
-
-    return {
-      getPubkey,
-      getStateKey,
-      getSetting,
-      dufflepud,
-      setSettings,
-      getRelays,
-      getRelayUrls,
-      setRelays,
-      addRelay,
-      removeRelay,
-      setRelayPolicy,
-      getPetnames,
-      getMutedTags,
-      getFollowsSet,
-      getMutesSet,
-      getFollows,
-      getMutes,
-      getNetworkSet,
-      getNetwork,
-      isFollowing,
-      isIgnoring,
-      setProfile,
-      setPetnames,
-      follow,
-      unfollow,
-      isMuted,
-      applyMutes,
-      setMutes,
-      mute,
-      unmute,
-      getLists,
-      putList,
-      removeList,
-      markAllMessagesRead,
-      setContactLastChecked,
-      setChannelLastChecked,
-      joinChannel,
-      leaveChannel,
-    }
-  }
-
-  static initialize({Events, Crypt, User}) {
-    Events.addHandler(30078, async e => {
+    engine.components.Events.addHandler(30078, async e => {
       if (
         Tags.from(e).getMeta("d") === "coracle/settings/v1" &&
-        e.created_at > User.getSetting("last_updated")
+        e.created_at > this.getSetting("last_updated")
       ) {
-        const updates = await Crypt.decryptJson(e.content)
+        const updates = await engine.components.Crypt.decryptJson(e.content)
 
         if (updates) {
-          User.settings.update($settings => ({
+          this.settings.update($settings => ({
             ...$settings,
             ...updates,
             last_updated: e.created_at,

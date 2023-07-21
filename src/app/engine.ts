@@ -1,5 +1,5 @@
 import {identity} from "ramda"
-import {createDefaultEngine} from "src/engine"
+import {Engine} from "src/engine"
 
 export const DUFFLEPUD_URL = import.meta.env.VITE_DUFFLEPUD_URL
 
@@ -28,7 +28,7 @@ export const DEFAULT_FOLLOWS = (import.meta.env.VITE_DEFAULT_FOLLOWS || "")
 
 export const ENABLE_ZAPS = JSON.parse(import.meta.env.VITE_ENABLE_ZAPS)
 
-const engine = createDefaultEngine({
+const engine = new Engine({
   DUFFLEPUD_URL,
   MULTIPLEXTR_URL,
   FORCE_RELAYS,
@@ -39,40 +39,40 @@ const engine = createDefaultEngine({
 })
 
 export default engine
-export const Alerts = engine.Alerts
-export const Builder = engine.Builder
-export const Content = engine.Content
-export const Crypt = engine.Crypt
-export const Directory = engine.Directory
-export const Events = engine.Events
-export const Keys = engine.Keys
-export const Meta = engine.Meta
-export const Network = engine.Network
-export const Nip02 = engine.Nip02
-export const Nip04 = engine.Nip04
-export const Nip05 = engine.Nip05
-export const Nip28 = engine.Nip28
-export const Nip57 = engine.Nip57
-export const Nip65 = engine.Nip65
-export const Outbox = engine.Outbox
-export const PubkeyLoader = engine.PubkeyLoader
-export const Storage = engine.Storage
-export const User = engine.User
-export const alerts = engine.Alerts
-export const builder = engine.Builder
-export const content = engine.Content
-export const directory = engine.Directory
-export const events = engine.Events
-export const keys = engine.Keys
-export const meta = engine.Meta
-export const network = engine.Network
-export const nip02 = engine.Nip02
-export const nip04 = engine.Nip04
-export const nip05 = engine.Nip05
-export const nip28 = engine.Nip28
-export const nip57 = engine.Nip57
-export const nip65 = engine.Nip65
-export const outbox = engine.Outbox
-export const pubkeyLoader = engine.PubkeyLoader
-export const storage = engine.Storage
-export const user = engine.User
+export const Alerts = engine.components.Alerts
+export const Builder = engine.components.Builder
+export const Content = engine.components.Content
+export const Crypt = engine.components.Crypt
+export const Directory = engine.components.Directory
+export const Events = engine.components.Events
+export const Keys = engine.components.Keys
+export const Meta = engine.components.Meta
+export const Network = engine.components.Network
+export const Nip02 = engine.components.Nip02
+export const Nip04 = engine.components.Nip04
+export const Nip05 = engine.components.Nip05
+export const Nip28 = engine.components.Nip28
+export const Nip57 = engine.components.Nip57
+export const Nip65 = engine.components.Nip65
+export const Outbox = engine.components.Outbox
+export const PubkeyLoader = engine.components.PubkeyLoader
+export const Storage = engine.components.Storage
+export const User = engine.components.User
+export const alerts = engine.components.Alerts
+export const builder = engine.components.Builder
+export const content = engine.components.Content
+export const directory = engine.components.Directory
+export const events = engine.components.Events
+export const keys = engine.components.Keys
+export const meta = engine.components.Meta
+export const network = engine.components.Network
+export const nip02 = engine.components.Nip02
+export const nip04 = engine.components.Nip04
+export const nip05 = engine.components.Nip05
+export const nip28 = engine.components.Nip28
+export const nip57 = engine.components.Nip57
+export const nip65 = engine.components.Nip65
+export const outbox = engine.components.Outbox
+export const pubkeyLoader = engine.components.PubkeyLoader
+export const storage = engine.components.Storage
+export const user = engine.components.User

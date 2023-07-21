@@ -6,6 +6,8 @@
     "baseUrl": ".",
     "paths": {
       "src/*": ["src/*"]
-    }
+    },
+    "strictPropertyInitialization": false,
+    "strictNullChecks": false
   }
 }

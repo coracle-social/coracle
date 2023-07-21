@@ -2,104 +2,86 @@ import {ensurePlural} from "hurdak"
 import {now} from "src/util/misc"
 import {Tags} from "src/util/nostr"
 import type {GraphEntry} from "src/engine/types"
-import {collection} from "../util/store"
+import type {Engine} from "src/engine/Engine"
+import {collection} from "src/engine/util/store"
 
 export class Nip02 {
-  static contributeState() {
-    const graph = collection<GraphEntry>("pubkey")
+  graph = collection<GraphEntry>("pubkey")
 
-    return {graph}
+  getPetnames = (pubkey: string) => this.graph.key(pubkey).get()?.petnames || []
+
+  getMutedTags = (pubkey: string) => this.graph.key(pubkey).get()?.mutes || []
+
+  getFollowsSet = (pubkeys: string | string[]) => {
+    const follows = new Set<string>()
+
+    for (const pubkey of ensurePlural(pubkeys)) {
+      for (const tag of this.getPetnames(pubkey)) {
+        follows.add(tag[1])
+      }
+    }
+
+    return follows
   }
 
-  static contributeActions({Nip02}) {
-    const getPetnames = pubkey => Nip02.graph.key(pubkey).get()?.petnames || []
+  getMutesSet = (pubkeys: string | string[]) => {
+    const mutes = new Set<string>()
 
-    const getMutedTags = pubkey => Nip02.graph.key(pubkey).get()?.mutes || []
-
-    const getFollowsSet = pubkeys => {
-      const follows = new Set()
-
-      for (const pubkey of ensurePlural(pubkeys)) {
-        for (const tag of getPetnames(pubkey)) {
-          follows.add(tag[1])
-        }
+    for (const pubkey of ensurePlural(pubkeys)) {
+      for (const tag of this.getMutedTags(pubkey)) {
+        mutes.add(tag[1])
       }
-
-      return follows
     }
 
-    const getMutesSet = pubkeys => {
-      const mutes = new Set()
-
-      for (const pubkey of ensurePlural(pubkeys)) {
-        for (const tag of getMutedTags(pubkey)) {
-          mutes.add(tag[1])
-        }
-      }
-
-      return mutes
-    }
-
-    const getFollows = pubkeys => Array.from(getFollowsSet(pubkeys))
-
-    const getMutes = pubkeys => Array.from(getMutesSet(pubkeys))
-
-    const getNetworkSet = (pubkeys, includeFollows = false) => {
-      const follows = getFollowsSet(pubkeys)
-      const network = includeFollows ? follows : new Set()
-
-      for (const pubkey of getFollows(follows)) {
-        if (!follows.has(pubkey)) {
-          network.add(pubkey)
-        }
-      }
-
-      return network
-    }
-
-    const getNetwork = pubkeys => Array.from(getNetworkSet(pubkeys))
-
-    const isFollowing = (a, b) => getFollowsSet(a).has(b)
-
-    const isIgnoring = (a, b) => getMutesSet(a).has(b)
-
-    return {
-      getPetnames,
-      getMutedTags,
-      getFollowsSet,
-      getMutesSet,
-      getFollows,
-      getMutes,
-      getNetworkSet,
-      getNetwork,
-      isFollowing,
-      isIgnoring,
-    }
+    return mutes
   }
 
-  static initialize({Events, Nip02}) {
-    Events.addHandler(3, e => {
-      const entry = Nip02.graph.key(e.pubkey).get()
+  getFollows = (pubkeys: string | string[]) => Array.from(this.getFollowsSet(pubkeys))
+
+  getMutes = (pubkeys: string | string[]) => Array.from(this.getMutesSet(pubkeys))
+
+  getNetworkSet = (pubkeys: string | string[], includeFollows = false) => {
+    const follows = this.getFollowsSet(pubkeys)
+    const network = includeFollows ? follows : new Set<string>()
+
+    for (const pubkey of this.getFollows(Array.from(follows))) {
+      if (!follows.has(pubkey)) {
+        network.add(pubkey)
+      }
+    }
+
+    return network
+  }
+
+  getNetwork = (pubkeys: string | string[]) => Array.from(this.getNetworkSet(pubkeys))
+
+  isFollowing = (a: string, b: string) => this.getFollowsSet(a).has(b)
+
+  isIgnoring = (a: string, b: string) => this.getMutesSet(a).has(b)
+
+  initialize(engine: Engine) {
+    engine.components.Events.addHandler(3, e => {
+      const entry = this.graph.key(e.pubkey).get()
 
       if (e.created_at < entry?.petnames_updated_at) {
         return
       }
 
-      Nip02.graph.key(e.pubkey).merge({
+      this.graph.key(e.pubkey).merge({
         updated_at: now(),
         petnames_updated_at: e.created_at,
         petnames: Tags.from(e).type("p").all(),
       })
     })
 
-    Events.addHandler(10000, e => {
-      const entry = Nip02.graph.key(e.pubkey).get()
+    engine.components.Events.addHandler(10000, e => {
+      const entry = this.graph.key(e.pubkey).get()
 
       if (e.created_at < entry?.mutes_updated_at) {
         return
       }
 
-      Nip02.graph.key(e.pubkey).merge({
+      this.graph.key(e.pubkey).merge({
         updated_at: now(),
         mutes_updated_at: e.created_at,
         mutes: Tags.from(e).type(["e", "p"]).all(),

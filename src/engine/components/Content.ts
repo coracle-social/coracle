@@ -3,29 +3,22 @@ import {nth, inc} from "ramda"
 import {fuzzy} from "src/util/misc"
 import {Tags} from "src/util/nostr"
 import type {Topic, List} from "src/engine/types"
-import {derived, collection} from "../util/store"
+import {derived, collection} from "src/engine/util/store"
+import type {Engine} from "src/engine/Engine"
+import type {Event} from "src/engine/types"
 
 export class Content {
-  static contributeState() {
-    const topics = collection<Topic>("name")
+  topics = collection<Topic>("name")
+  lists = collection<List>("naddr")
+  searchTopics = derived(this.topics, $topics =>
+    fuzzy($topics.values(), {keys: ["name"], threshold: 0.3})
+  )
 
-    const lists = collection<List>("naddr")
+  getLists = (f: (l: List) => boolean) =>
+    this.lists.get().filter(l => !l.deleted_at && (f ? f(l) : true))
 
-    return {topics, lists}
-  }
-
-  static contributeSelectors({Content}) {
-    const getLists = f => Content.lists.get().filter(l => !l.deleted_at && (f ? f(l) : true))
-
-    const searchTopics = derived(Content.topics, $topics =>
-      fuzzy($topics.values(), {keys: ["name"], threshold: 0.3})
-    )
-
-    return {getLists, searchTopics}
-  }
-
-  static initialize({Events, Content}) {
-    const processTopics = e => {
+  initialize(engine: Engine) {
+    const processTopics = (e: Event) => {
       const tagTopics = Tags.from(e).topics()
       const contentTopics = Array.from(e.content.toLowerCase().matchAll(/#(\w{2,100})/g)).map(
         nth(1)
@@ -33,45 +26,45 @@ export class Content {
 
       for (const name of tagTopics.concat(contentTopics)) {
         if (name) {
-          const topic = Content.topics.key(name).get()
+          const topic = this.topics.key(name).get()
 
-          Content.topics.key(name).merge({count: inc(topic?.count || 0)})
+          this.topics.key(name).merge({count: inc(topic?.count || 0)})
         }
       }
     }
 
-    Events.addHandler(1, processTopics)
+    engine.components.Events.addHandler(1, processTopics)
 
-    Events.addHandler(42, processTopics)
+    engine.components.Events.addHandler(42, processTopics)
 
-    Events.addHandler(30001, e => {
+    engine.components.Events.addHandler(30001, (e: Event) => {
       const {pubkey, kind, created_at} = e
       const name = Tags.from(e).getMeta("d")
       const naddr = nip19.naddrEncode({identifier: name, pubkey, kind})
-      const list = Content.lists.key(naddr).get()
+      const list = this.lists.key(naddr).get()
 
       if (created_at < list?.updated_at) {
         return
       }
 
-      Content.lists.key(naddr).merge({
+      this.lists.key(naddr).merge({
         ...list,
         name,
         pubkey,
         tags: e.tags,
         updated_at: created_at,
         created_at: list?.created_at || created_at,
-        deleted_at: null,
+        deleted_at: undefined,
       })
     })
 
-    Events.addHandler(5, e => {
+    engine.components.Events.addHandler(5, (e: Event) => {
       Tags.from(e)
         .type("a")
         .values()
         .all()
         .forEach(naddr => {
-          const list = Content.lists.key(naddr)
+          const list = this.lists.key(naddr)
 
           if (list.exists()) {
             list.merge({deleted_at: e.created_at})

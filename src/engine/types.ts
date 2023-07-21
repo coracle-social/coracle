@@ -6,7 +6,7 @@ export type Event = NostrToolsEvent & {
 
 export type DisplayEvent = Event & {
   zaps: Event[]
-  replies: Event[]
+  replies: DisplayEvent[]
   reactions: Event[]
   matchesFilter?: boolean
 }
@@ -47,6 +47,7 @@ export type RelayInfo = {
   contact?: string
   description?: string
   last_checked?: number
+  supported_nips?: number[]
   limitation?: {
     payment_required?: boolean
     auth_required?: boolean
@@ -60,17 +61,24 @@ export type Relay = {
   info?: RelayInfo
 }
 
+export type RelayPolicyEntry = {
+  url: string
+  read: boolean
+  write: boolean
+}
+
 export type RelayPolicy = {
   pubkey: string
   created_at: number
   updated_at: number
-  relays: {url: string; read: boolean; write: boolean}[]
+  relays: RelayPolicyEntry[]
 }
 
 export type RelayStat = {
   url: string
   error?: string
   last_opened?: number
+  last_closed?: number
   last_activity?: number
   last_publish?: number
   last_sub?: number
@@ -106,6 +114,7 @@ export type Profile = {
 
 export type Channel = {
   id: string
+  name?: string
   pubkey: string
   updated_at: number
   last_sent?: number
@@ -127,7 +136,8 @@ export type Contact = {
 
 export type Message = {
   id: string
-  channel: string
+  contact?: string
+  channel?: string
   pubkey: string
   created_at: number
   content: string
@@ -147,4 +157,21 @@ export type List = {
   updated_at: number
   created_at: number
   deleted_at?: number
+}
+
+export type Env = {
+  DUFFLEPUD_URL: string
+  MULTIPLEXTR_URL: string
+  FORCE_RELAYS: string[]
+  COUNT_RELAYS: string[]
+  SEARCH_RELAYS: string[]
+  DEFAULT_RELAYS: string[]
+  ENABLE_ZAPS: boolean
+}
+
+export type KeyState = {
+  method: string
+  pubkey: string
+  privkey: string | null
+  bunkerKey: string | null
 }

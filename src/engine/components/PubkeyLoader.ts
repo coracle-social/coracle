@@ -3,6 +3,7 @@ import {chunk, seconds, ensurePlural} from "hurdak"
 import {personKinds, appDataKeys} from "src/util/nostr"
 import {now} from "src/util/misc"
 import type {Filter} from "src/engine/types"
+import type {Engine} from "src/engine/Engine"
 
 export type LoadPeopleOpts = {
   relays?: string[]
@@ -11,76 +12,78 @@ export type LoadPeopleOpts = {
 }
 
 export class PubkeyLoader {
-  static contributeActions({Directory, Nip65, User, Network}) {
-    const attemptedPubkeys = new Set()
+  engine: Engine
 
-    const getStalePubkeys = pubkeys => {
-      const stale = new Set()
-      const since = now() - seconds(3, "hour")
+  attemptedPubkeys = new Set()
 
-      for (const pubkey of pubkeys) {
-        if (stale.has(pubkey) || attemptedPubkeys.has(pubkey)) {
-          continue
-        }
+  getStalePubkeys = (pubkeys: string[]) => {
+    const stale = new Set()
+    const since = now() - seconds(3, "hour")
 
-        attemptedPubkeys.add(pubkey)
-
-        if (Directory.profiles.key(pubkey).get()?.updated_at || 0 > since) {
-          continue
-        }
-
-        stale.add(pubkey)
+    for (const pubkey of pubkeys) {
+      if (stale.has(pubkey) || this.attemptedPubkeys.has(pubkey)) {
+        continue
       }
 
-      return stale
+      this.attemptedPubkeys.add(pubkey)
+
+      if (this.engine.components.Directory.profiles.key(pubkey).get()?.updated_at || 0 > since) {
+        continue
+      }
+
+      stale.add(pubkey)
     }
 
-    const load = async (
-      pubkeyGroups,
-      {relays, force, kinds = personKinds}: LoadPeopleOpts = {}
-    ) => {
-      const rawPubkeys = ensurePlural(pubkeyGroups).reduce((a, b) => a.concat(b), [])
-      const pubkeys = force ? uniq(rawPubkeys) : getStalePubkeys(rawPubkeys)
+    return Array.from(stale)
+  }
 
-      const getChunkRelays = chunk => {
-        if (relays?.length > 0) {
-          return relays
-        }
+  load = async (
+    pubkeyGroups: string | string[],
+    {relays, force, kinds = personKinds}: LoadPeopleOpts = {}
+  ) => {
+    const rawPubkeys = ensurePlural(pubkeyGroups).reduce((a, b) => a.concat(b), [])
+    const pubkeys = force ? uniq(rawPubkeys) : this.getStalePubkeys(rawPubkeys)
 
-        return Nip65.mergeHints(
-          User.getSetting("relay_limit"),
-          chunk.map(pubkey => Nip65.getPubkeyHints(3, pubkey))
-        )
+    const getChunkRelays = (chunk: string[]) => {
+      if (relays?.length > 0) {
+        return relays
       }
 
-      const getChunkFilter = chunk => {
-        const filter = [] as Filter[]
-
-        filter.push({kinds: without([30078], kinds), authors: chunk})
-
-        // Add a separate filter for app data so we're not pulling down other people's stuff,
-        // or obsolete events of our own.
-        if (kinds.includes(30078)) {
-          filter.push({kinds: [30078], authors: chunk, "#d": Object.values(appDataKeys)})
-        }
-
-        return filter
-      }
-
-      await Promise.all(
-        pluck(
-          "complete",
-          chunk(256, pubkeys).map(chunk =>
-            Network.subscribe({
-              relays: getChunkRelays(chunk),
-              filter: getChunkFilter(chunk),
-              timeout: 10_000,
-            })
-          )
-        )
+      return this.engine.components.Nip65.mergeHints(
+        this.engine.components.User.getSetting("relay_limit"),
+        chunk.map(pubkey => this.engine.components.Nip65.getPubkeyHints(3, pubkey))
       )
     }
 
-    return {load}
+    const getChunkFilter = (chunk: string[]) => {
+      const filter = [] as Filter[]
+
+      filter.push({kinds: without([30078], kinds), authors: chunk})
+
+      // Add a separate filter for app data so we're not pulling down other people's stuff,
+      // or obsolete events of our own.
+      if (kinds.includes(30078)) {
+        filter.push({kinds: [30078], authors: chunk, "#d": Object.values(appDataKeys)})
+      }
+
+      return filter
+    }
+
+    await Promise.all(
+      pluck(
+        "complete",
+        chunk(256, pubkeys).map((chunk: string[]) =>
+          this.engine.components.Network.subscribe({
+            relays: getChunkRelays(chunk),
+            filter: getChunkFilter(chunk),
+            timeout: 10_000,
+          })
+        )
+      )
+    )
+  }
+
+  initialize(engine: Engine) {
+    this.engine = engine
   }
 }

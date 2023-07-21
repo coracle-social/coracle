@@ -1,12 +1,14 @@
 import {all, prop, mergeLeft, identity, sortBy} from "ramda"
 import {ensurePlural, first} from "hurdak"
 import {now} from "src/util/misc"
-import type {Filter, Event} from "../types"
+import type {Filter, Event} from "src/engine/types"
+import type {Subscription} from "src/engine/util/Subscription"
+import type {Network} from "src/engine/components/Network"
 
 export type CursorOpts = {
   relay: string
   filter: Filter | Filter[]
-  subscribe: (opts: any) => void
+  Network: Network
   onEvent?: (e: Event) => void
 }
 
@@ -23,7 +25,7 @@ export class Cursor {
     this.loading = false
   }
 
-  load(n) {
+  load(n: number) {
     const limit = n - this.buffer.length
 
     // If we're already loading, or we have enough buffered, do nothing
@@ -38,11 +40,11 @@ export class Cursor {
 
     let count = 0
 
-    return this.opts.subscribe({
+    return this.opts.Network.subscribe({
       timeout: 4000,
       relays: [relay],
       filter: ensurePlural(filter).map(mergeLeft({until, limit})),
-      onEvent: event => {
+      onEvent: (event: Event) => {
         this.until = Math.min(until, event.created_at)
         this.buffer.push(event)
 
@@ -87,7 +89,7 @@ export class MultiCursor {
     this.#cursors = cursors
   }
 
-  load(limit) {
+  load(limit: number) {
     return this.#cursors.map(c => c.load(limit)).filter(identity)
   }
 
@@ -99,7 +101,7 @@ export class MultiCursor {
     return this.#cursors.reduce((n, c) => n + c.buffer.length, 0)
   }
 
-  take(n) {
+  take(n: number): [Subscription[], Event[]] {
     const events = []
 
     while (events.length < n) {

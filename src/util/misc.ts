@@ -125,17 +125,17 @@ export const stringToHue = (value: string) => {
   return hash % 360
 }
 
-export const hsl = (hue: string, {saturation = 100, lightness = 50, opacity = 1} = {}) =>
+export const hsl = (hue: number, {saturation = 100, lightness = 50, opacity = 1} = {}) =>
   `hsl(${hue}, ${saturation}%, ${lightness}%, ${opacity})`
 
-export const tryJson = (f: <T>() => T) =>
+export const tryJson = <T>(f: () => T) =>
   tryFunc(f, (e: Error) => {
     if (!e.toString().includes("JSON")) {
       warn(e)
     }
   })
 
-export const tryFetch = (f: <T>() => T) =>
+export const tryFetch = <T>(f: () => T) =>
   tryFunc(f, (e: Error) => {
     if (!e.toString().includes("fetch")) {
       warn(e)
@@ -219,7 +219,7 @@ export const webSocketURLToPlainOrBase64 = (url: string): string => {
   return url
 }
 
-export const pushToKey = (xs: any[], k: number, v: any) => {
-  xs[k] = xs[k] || []
-  xs[k].push(v)
+export const pushToKey = <T>(m: Record<string, T[]>, k: string, v: T) => {
+  m[k] = m[k] || []
+  m[k].push(v)
 }

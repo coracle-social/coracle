@@ -1,72 +1,63 @@
 import {find, last, pick, uniq} from "ramda"
 import {tryJson, fuzzy, now} from "src/util/misc"
 import {Tags, appDataKeys, channelAttrs} from "src/util/nostr"
-import type {Channel, Message} from "src/engine/types"
-import {collection, derived} from "../util/store"
+import type {Channel, Event, Message} from "src/engine/types"
+import type {Engine} from "src/engine/Engine"
+import {collection, derived} from "src/engine/util/store"
+import type {Readable} from "src/engine/util/store"
 
 const messageIsNew = ({last_checked, last_received, last_sent}: Channel) =>
   last_received > Math.max(last_sent || 0, last_checked || 0)
 
 export class Nip28 {
-  static contributeState() {
-    const channels = collection<Channel>("id")
-    const messages = collection<Message>("id")
+  channels = collection<Channel>("id")
+  messages = collection<Message>("id")
 
-    const hasNewMessages = derived(
-      channels,
-      find(e => {
-        return e.type === "public" && e.joined > 0 && messageIsNew(e)
+  hasNewMessages = derived(
+    this.channels,
+    find((c: Channel) => c.joined && messageIsNew(c))
+  )
+
+  getSearchChannels = (channels: Readable<Channel[]>) =>
+    channels.derived($channels => {
+      return fuzzy($channels, {
+        keys: ["name", {name: "about", weight: 0.5}],
+        threshold: 0.3,
       })
-    )
+    })
 
-    return {channels, messages, hasNewMessages}
-  }
+  searchChannels = this.getSearchChannels(this.channels)
 
-  static contributeSelectors({Nip28}) {
-    const getSearchChannels = channels =>
-      channels.derived($channels => {
-        return fuzzy($channels, {
-          keys: ["name", {name: "about", weight: 0.5}],
-          threshold: 0.3,
-        })
-      })
-
-    const searchChannels = getSearchChannels(Nip28.channels)
-
-    return {messageIsNew, getSearchChannels, searchChannels}
-  }
-
-  static initialize({Events, Nip28, Keys, Crypt}) {
-    Events.addHandler(40, e => {
-      const channel = Nip28.channels.key(e.id).get()
+  initialize(engine: Engine) {
+    engine.components.Events.addHandler(40, (e: Event) => {
+      const channel = this.channels.key(e.id).get()
 
       if (e.created_at < channel?.updated_at) {
         return
       }
 
-      const content = tryJson(() => pick(channelAttrs, JSON.parse(e.content)))
+      const content = tryJson(() => pick(channelAttrs, JSON.parse(e.content))) as Partial<Channel>
 
       if (!content?.name) {
         return
       }
 
-      Nip28.channels.key(e.id).merge({
-        type: "public",
+      this.channels.key(e.id).merge({
+        ...content,
         pubkey: e.pubkey,
         updated_at: now(),
         hints: Tags.from(e).relays(),
-        ...content,
       })
     })
 
-    Events.addHandler(41, e => {
+    engine.components.Events.addHandler(41, (e: Event) => {
       const channelId = Tags.from(e).getMeta("e")
 
       if (!channelId) {
         return
       }
 
-      const channel = Nip28.channels.key(channelId).get()
+      const channel = this.channels.key(channelId).get()
 
       if (e.created_at < channel?.updated_at) {
         return
@@ -76,29 +67,29 @@ export class Nip28 {
         return
       }
 
-      const content = tryJson(() => pick(channelAttrs, JSON.parse(e.content)))
+      const content = tryJson(() => pick(channelAttrs, JSON.parse(e.content))) as Partial<Channel>
 
       if (!content?.name) {
         return
       }
 
-      Nip28.channels.key(channelId).merge({
+      this.channels.key(channelId).merge({
+        ...content,
         pubkey: e.pubkey,
         updated_at: now(),
         hints: Tags.from(e).relays(),
-        ...content,
       })
     })
 
-    Events.addHandler(30078, async e => {
+    engine.components.Events.addHandler(30078, async (e: Event) => {
       if (Tags.from(e).getMeta("d") === appDataKeys.NIP28_LAST_CHECKED) {
         await tryJson(async () => {
-          const payload = await Crypt.decryptJson(e.content)
+          const payload = await engine.components.Crypt.decryptJson(e.content)
 
           for (const key of Object.keys(payload)) {
             // Backwards compat from when we used to prefix id/pubkey
             const id = last(key.split("/"))
-            const channel = Nip28.channels.key(id).get()
+            const channel = this.channels.key(id).get()
             const last_checked = Math.max(payload[id], channel?.last_checked || 0)
 
             // A bunch of junk got added to this setting. Integer keys, settings, etc
@@ -106,35 +97,35 @@ export class Nip28 {
               continue
             }
 
-            Nip28.channels.key(id).merge({last_checked})
+            this.channels.key(id).merge({last_checked})
           }
         })
       }
     })
 
-    Events.addHandler(30078, async e => {
+    engine.components.Events.addHandler(30078, async (e: Event) => {
       if (Tags.from(e).getMeta("d") === appDataKeys.NIP28_ROOMS_JOINED) {
         await tryJson(async () => {
-          const channelIds = await Crypt.decryptJson(e.content)
+          const channelIds = await engine.components.Crypt.decryptJson(e.content)
 
           // Just a bug from when I was building the feature, remove someday
           if (!Array.isArray(channelIds)) {
             return
           }
 
-          Nip28.channels.get().forEach(channel => {
+          this.channels.get().forEach(channel => {
             if (channel.joined && !channelIds.includes(channel.id)) {
-              Nip28.channels.key(channel.id).merge({joined: false})
+              this.channels.key(channel.id).merge({joined: false})
             } else if (!channel.joined && channelIds.includes(channel.id)) {
-              Nip28.channels.key(channel.id).merge({joined: true})
+              this.channels.key(channel.id).merge({joined: true})
             }
           })
         })
       }
     })
 
-    Events.addHandler(42, e => {
-      if (Nip28.messages.key(e.id).exists()) {
+    engine.components.Events.addHandler(42, (e: Event) => {
+      if (this.messages.key(e.id).exists()) {
         return
       }
 
@@ -145,10 +136,10 @@ export class Nip28 {
         return
       }
 
-      const channel = Nip28.channels.key(channelId).get()
+      const channel = this.channels.key(channelId).get()
       const hints = uniq(tags.relays().concat(channel?.hints || []))
 
-      Nip28.messages.key(e.id).merge({
+      this.messages.key(e.id).merge({
         channel: channelId,
         pubkey: e.pubkey,
         created_at: e.created_at,
@@ -156,10 +147,10 @@ export class Nip28 {
         tags: e.tags,
       })
 
-      if (e.pubkey === Keys.pubkey.get()) {
-        Nip28.channels.key(channelId).merge({last_sent: e.created_at, hints})
+      if (e.pubkey === engine.components.Keys.pubkey.get()) {
+        this.channels.key(channelId).merge({last_sent: e.created_at, hints})
       } else {
-        Nip28.channels.key(channelId).merge({last_received: e.created_at, hints})
+        this.channels.key(channelId).merge({last_received: e.created_at, hints})
       }
     })
   }

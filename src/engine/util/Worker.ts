@@ -1,7 +1,7 @@
 export class Worker<T> {
   buffer: T[]
   handlers: Array<(x: T) => void>
-  timeout: NodeJS.Timeout
+  timeout: NodeJS.Timeout | undefined
 
   constructor() {
     this.buffer = []
@@ -26,12 +26,12 @@ export class Worker<T> {
     }
   }
 
-  push = message => {
+  push = (message: T) => {
     this.buffer.push(message)
     this.#enqueueWork()
   }
 
-  listen = handler => {
+  listen = (handler: (x: T) => void) => {
     this.handlers.push(handler)
   }
 }

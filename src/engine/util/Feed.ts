@@ -1,6 +1,7 @@
 import {matchFilters} from "nostr-tools"
 import {throttle} from "throttle-debounce"
 import {
+  map,
   omit,
   pick,
   pluck,
@@ -17,14 +18,17 @@ import {
   reject,
 } from "ramda"
 import {ensurePlural, seconds, sleep, batch, union, chunk, doPipe} from "hurdak"
-import {now} from "src/util/misc"
+import {now, pushToKey} from "src/util/misc"
 import {findReplyId, Tags, noteKinds} from "src/util/nostr"
 import {collection} from "./store"
-import type {Collection} from "./store"
-import {Cursor, MultiCursor} from "./Cursor"
-import type {Event, DisplayEvent, Filter} from "../types"
+import {Cursor, MultiCursor} from "src/engine/util/Cursor"
+import type {Collection} from "src/engine/util/store"
+import type {Subscription} from "src/engine/util/Subscription"
+import type {Event, DisplayEvent, Filter} from "src/engine/types"
+import type {Engine} from "src/engine/Engine"
 
-const fromDisplayEvent = omit(["zaps", "likes", "replies", "matchesFilter"])
+const fromDisplayEvent = (e: DisplayEvent): Event =>
+  omit(["zaps", "likes", "replies", "matchesFilter"], e)
 
 export type FeedOpts = {
   limit?: number
@@ -33,7 +37,7 @@ export type FeedOpts = {
   filter: Filter | Filter[]
   onEvent?: (e: Event) => void
   shouldLoadParents?: boolean
-  engine: any
+  engine: Engine
 }
 
 export class Feed {
@@ -67,7 +71,7 @@ export class Feed {
 
   // Utils
 
-  addSubs(key, subs) {
+  addSubs(key: string, subs: Array<Subscription>) {
     for (const sub of ensurePlural(subs)) {
       this.subs[key].push(sub)
 
@@ -77,7 +81,7 @@ export class Feed {
     }
   }
 
-  getAllSubs(only = null) {
+  getAllSubs(only: string[] = []) {
     return flatten(Object.values(only ? pick(only, this.subs) : this.subs))
   }
 
@@ -85,24 +89,24 @@ export class Feed {
     return this.opts.engine.Env.ENABLE_ZAPS ? [1, 7, 9735] : [1, 7]
   }
 
-  matchFilters(e) {
+  matchFilters(e: Event) {
     return matchFilters(ensurePlural(this.opts.filter), e)
   }
 
-  isTextNote(e) {
+  isTextNote(e: Event) {
     return noteKinds.includes(e.kind)
   }
 
-  isMissingParent = e => {
+  isMissingParent = (e: Event) => {
     const parentId = findReplyId(e)
 
     return parentId && this.matchFilters(e) && !this.context.key(parentId).exists()
   }
 
-  preprocessEvents = events => {
-    const {User} = this.opts.engine
+  preprocessEvents = (events: Event[]) => {
+    const {User} = this.opts.engine.components
 
-    events = reject(e => this.seen.has(e.id) || User.isMuted(e), events)
+    events = reject((e: Event) => this.seen.has(e.id) || User.isMuted(e), events)
 
     for (const event of events) {
       this.seen.add(event.id)
@@ -111,19 +115,19 @@ export class Feed {
     return events
   }
 
-  mergeHints(groups) {
-    const {Nip65, User} = this.opts.engine
+  mergeHints(groups: string[][]) {
+    const {Nip65, User} = this.opts.engine.components
 
     return Nip65.mergeHints(User.getSetting("relay_limit"), groups)
   }
 
-  applyContext(notes, context, substituteParents = false) {
+  applyContext(notes: Event[], context: Event[], substituteParents = false) {
     const parentIds = new Set(notes.map(findReplyId).filter(identity))
     const forceShow = union(new Set(pluck("id", notes)), parentIds)
-    const contextById = {}
-    const zapsByParentId = {}
-    const reactionsByParentId = {}
-    const repliesByParentId = {}
+    const contextById = {} as Record<string, Event>
+    const zapsByParentId = {} as Record<string, Event[]>
+    const reactionsByParentId = {} as Record<string, Event[]>
+    const repliesByParentId = {} as Record<string, Event[]>
 
     for (const event of context.concat(notes)) {
       const parentId = findReplyId(event)
@@ -135,28 +139,25 @@ export class Feed {
       contextById[event.id] = event
 
       if (event.kind === 9735) {
-        zapsByParentId[parentId] = zapsByParentId[parentId] || []
-        zapsByParentId[parentId].push(event)
+        pushToKey(zapsByParentId, parentId, event)
       } else if (event.kind === 7) {
-        reactionsByParentId[parentId] = reactionsByParentId[parentId] || []
-        reactionsByParentId[parentId].push(event)
+        pushToKey(reactionsByParentId, parentId, event)
       } else {
-        repliesByParentId[parentId] = repliesByParentId[parentId] || []
-        repliesByParentId[parentId].push(event)
+        pushToKey(repliesByParentId, parentId, event)
       }
     }
 
-    const annotate = (note: DisplayEvent) => {
-      const {replies = [], reactions = [], zaps = []} = note
+    const annotate = (note: Event): DisplayEvent => {
+      const {replies = [], reactions = [], zaps = []} = note as DisplayEvent
       const combinedZaps = zaps.concat(zapsByParentId[note.id] || [])
       const combinedReactions = reactions.concat(reactionsByParentId[note.id] || [])
-      const combinedReplies = replies.concat(repliesByParentId[note.id] || [])
+      const combinedReplies = replies.concat(map(annotate, repliesByParentId[note.id] || []))
 
       return {
         ...note,
         zaps: uniqBy(prop("id"), combinedZaps),
         reactions: uniqBy(prop("id"), combinedReactions),
-        replies: sortBy(e => -e.created_at, uniqBy(prop("id"), combinedReplies.map(annotate))),
+        replies: sortBy((e: Event) => -e.created_at, uniqBy(prop("id"), combinedReplies)),
         matchesFilter: forceShow.has(note.id) || this.matchFilters(note),
       }
     }
@@ -180,17 +181,17 @@ export class Feed {
 
   // Context loaders
 
-  loadPubkeys = events => {
-    this.opts.engine.PubkeyLoader.load(
-      events.filter(this.isTextNote).flatMap(e => Tags.from(e).pubkeys().concat(e.pubkey))
+  loadPubkeys = (events: Event[]) => {
+    this.opts.engine.components.PubkeyLoader.load(
+      events.filter(this.isTextNote).flatMap((e: Event) => Tags.from(e).pubkeys().concat(e.pubkey))
     )
   }
 
-  loadParents = events => {
-    const {Network, Nip65} = this.opts.engine
+  loadParents = (events: Event[]) => {
+    const {Network, Nip65} = this.opts.engine.components
     const parentsInfo = events
-      .map(e => ({id: findReplyId(e), hints: Nip65.getParentHints(10, e)}))
-      .filter(({id}) => id && !this.seen.has(id))
+      .map((e: Event) => ({id: findReplyId(e), hints: Nip65.getParentHints(10, e)}))
+      .filter(({id}: any) => id && !this.seen.has(id))
 
     if (parentsInfo.length > 0) {
       this.addSubs("context", [
@@ -198,14 +199,14 @@ export class Feed {
           timeout: 3000,
           filter: {ids: pluck("id", parentsInfo)},
           relays: this.mergeHints(pluck("hints", parentsInfo)),
-          onEvent: batch(100, context => this.addContext(context, {depth: 2})),
+          onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: 2})),
         }),
       ])
     }
   }
 
-  loadContext = batch(300, eventGroups => {
-    const {Network, Nip65} = this.opts.engine
+  loadContext = batch(300, (eventGroups: any) => {
+    const {Network, Nip65} = this.opts.engine.components
     const groupsByDepth = groupBy(prop("depth"), eventGroups)
 
     for (const [depthStr, groups] of Object.entries(groupsByDepth)) {
@@ -215,21 +216,22 @@ export class Feed {
         continue
       }
 
-      const events = flatten(pluck("events", groups)).filter(this.isTextNote)
+      const events = flatten(pluck("events", groups as any[])).filter(this.isTextNote) as Event[]
 
       for (const c of chunk(256, events)) {
         Network.subscribe({
           timeout: 3000,
           relays: this.mergeHints(c.map(e => Nip65.getReplyHints(10, e))),
-          filter: {kinds: this.getReplyKinds(), "#e": pluck("id", c)},
-          onEvent: batch(100, context => this.addContext(context, {depth: depth - 1})),
+          filter: {kinds: this.getReplyKinds(), "#e": pluck("id", c as Event[])},
+
+          onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: depth - 1})),
         })
       }
     }
   })
 
   listenForContext = throttle(5000, () => {
-    const {Network, Nip65} = this.opts.engine
+    const {Network, Nip65} = this.opts.engine.components
 
     if (this.stopped) {
       return
@@ -239,7 +241,7 @@ export class Feed {
 
     const contextByParentId = groupBy(findReplyId, this.context.get())
 
-    const findNotes = events =>
+    const findNotes = (events: Event[]): Event[] =>
       events
         .filter(this.isTextNote)
         .flatMap(e => findNotes(contextByParentId[e.id] || []).concat(e))
@@ -249,7 +251,7 @@ export class Feed {
         Network.subscribe({
           relays: this.mergeHints(c.map(e => Nip65.getReplyHints(10, e))),
           filter: {kinds: this.getReplyKinds(), "#e": pluck("id", c), since: now()},
-          onEvent: batch(100, context => this.addContext(context, {depth: 2})),
+          onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: 2})),
         }),
       ])
     }
@@ -257,7 +259,7 @@ export class Feed {
 
   // Adders
 
-  addContext = (newEvents, {shouldLoadParents = false, depth = 0}) => {
+  addContext = (newEvents: Event[], {shouldLoadParents = false, depth = 0}) => {
     const events = this.preprocessEvents(newEvents)
 
     if (this.opts.onEvent) {
@@ -288,12 +290,12 @@ export class Feed {
     const {relays, filter, engine, depth} = this.opts
 
     // No point in subscribing if we have an end date
-    if (!any(prop("until"), ensurePlural(filter))) {
+    if (!any(prop("until"), ensurePlural(filter) as any[])) {
       this.addSubs("main", [
-        engine.Network.subscribe({
+        engine.components.Network.subscribe({
           relays,
           filter: ensurePlural(filter).map(assoc("since", since)),
-          onEvent: batch(1000, context =>
+          onEvent: batch(1000, (context: Event[]) =>
             this.addContext(context, {shouldLoadParents: true, depth})
           ),
         }),
@@ -306,8 +308,8 @@ export class Feed {
           new Cursor({
             relay,
             filter,
-            subscribe: engine.Network.subscribe,
-            onEvent: batch(100, context =>
+            Network: engine.components.Network,
+            onEvent: batch(100, (context: Event[]) =>
               this.addContext(context, {shouldLoadParents: true, depth})
             ),
           })
@@ -325,24 +327,22 @@ export class Feed {
     }
   }
 
-  hydrate(feed) {
+  hydrate(feed: DisplayEvent[]) {
     const {depth} = this.opts
-    const notes = []
-    const context = []
+    const notes: DisplayEvent[] = []
+    const context: Event[] = []
 
-    const addContext = ({zaps, replies, reactions, ...note}) => {
+    const addContext = (note: DisplayEvent) => {
       context.push(fromDisplayEvent(note))
 
-      zaps.map(zap => context.push(zap))
-      reactions.map(reaction => context.push(reaction))
-
-      replies.map(addContext)
+      note.zaps.forEach(zap => context.push(zap))
+      note.reactions.forEach(reaction => context.push(reaction))
+      note.replies.forEach(reply => addContext(reply))
     }
 
     feed.forEach(note => {
       addContext(note)
-
-      notes.push(fromDisplayEvent(note))
+      notes.push(note)
     })
 
     this.feed.set(notes)
@@ -401,7 +401,7 @@ export class Feed {
     }
   }
 
-  deferReactions = notes => {
+  deferReactions = (notes: Event[]) => {
     const [defer, ok] = partition(e => !this.isTextNote(e) && this.isMissingParent(e), notes)
 
     setTimeout(() => {
@@ -415,7 +415,7 @@ export class Feed {
     return ok
   }
 
-  deferOrphans = notes => {
+  deferOrphans = (notes: Event[]) => {
     // If something has a parent id but we haven't found the parent yet, skip it until we have it.
     const [defer, ok] = partition(e => this.isTextNote(e) && this.isMissingParent(e), notes)
 
@@ -424,7 +424,7 @@ export class Feed {
     return ok
   }
 
-  deferAncient = notes => {
+  deferAncient = (notes: Event[]) => {
     // Sometimes relays send very old data very quickly. Pop these off the queue and re-add
     // them after we have more timely data. They still might be relevant, but order will still
     // be maintained since everything before the cutoff will be deferred the same way.
@@ -436,7 +436,7 @@ export class Feed {
     return ok
   }
 
-  addToFeed(notes) {
+  addToFeed(notes: Event[]) {
     const context = this.context.get()
     const applied = this.applyContext(notes, context, true)
     const sorted = sortBy(e => -e.created_at, applied)
