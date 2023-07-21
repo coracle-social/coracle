@@ -4,8 +4,6 @@
   import {stringToHue, hsl} from "src/util/misc"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import LogoSvg from "src/partials/LogoSvg.svelte"
-  import type {Readable} from 'src/engine/util/store'
-  import type {Profile} from 'src/engine/types'
   import {directory} from "src/app/engine"
 
   export let pubkey
@@ -14,7 +12,7 @@
   const hue = stringToHue(pubkey)
   const primary = hsl(hue, {lightness: 80})
   const secondary = hsl(hue, {saturation: 30, lightness: 30})
-  const profile = directory.profiles.key(pubkey).derived(defaultTo({pubkey})) as Readable<Profile>
+  const profile = directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
 </script>
 
 {#if $profile.picture}

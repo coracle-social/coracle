@@ -38,7 +38,7 @@ const engine = new Engine({
   ENABLE_ZAPS,
 })
 
-export default engine
+export default engine.components
 export const Alerts = engine.components.Alerts
 export const Builder = engine.components.Builder
 export const Content = engine.components.Content

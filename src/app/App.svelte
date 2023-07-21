@@ -159,7 +159,7 @@
       const staleRelays = shuffle(
         engine.Nip65.relays
           .get()
-          .filter(r => (r.meta?.last_checked || 0) < now() - seconds(7, "day"))
+          .filter(r => (r.info?.last_checked || 0) < now() - seconds(7, "day"))
       ).slice(0, 10)
 
       for (const relay of staleRelays) {
