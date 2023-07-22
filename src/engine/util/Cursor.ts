@@ -3,22 +3,23 @@ import {ensurePlural, first} from "hurdak"
 import {now} from "src/util/misc"
 import type {Filter, Event} from "src/engine/types"
 import type {Subscription} from "src/engine/util/Subscription"
-import type {Network} from "src/engine/components/Network"
+import type {Engine} from "src/engine/Engine"
 
 export type CursorOpts = {
   relay: string
   filter: Filter | Filter[]
-  Network: Network
   onEvent?: (e: Event) => void
 }
 
 export class Cursor {
+  engine: Engine
   done: boolean
   until: number
   buffer: Event[]
   loading: boolean
 
-  constructor(readonly opts: CursorOpts) {
+  constructor(engine: Engine, readonly opts: CursorOpts) {
+    this.engine = engine
     this.done = false
     this.until = now()
     this.buffer = []
@@ -40,7 +41,7 @@ export class Cursor {
 
     let count = 0
 
-    return this.opts.Network.subscribe({
+    return this.engine.Network.subscribe({
       timeout: 4000,
       relays: [relay],
       filter: ensurePlural(filter).map(mergeLeft({until, limit})),

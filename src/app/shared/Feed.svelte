@@ -2,6 +2,7 @@
   import type {DynamicFilter, DisplayEvent} from "src/engine/types"
   import {onMount, onDestroy} from "svelte"
   import {readable, derived, writable} from "svelte/store"
+  import {Feed} from "src/engine"
   import {last, equals} from "ramda"
   import {fly} from "src/util/transition"
   import {quantify} from "hurdak"
@@ -12,7 +13,7 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {User, Nip65, Network} from "src/app/engine"
+  import engine, {User, Nip65} from "src/app/engine"
   import {compileFilter} from "src/app/state"
 
   export let relays = []
@@ -81,7 +82,7 @@
         filter = newFilter
       }
 
-      feed = Network.feed({
+      feed = new Feed(engine, {
         depth: 2,
         relays: getRelays(),
         filter: compileFilter(filter),

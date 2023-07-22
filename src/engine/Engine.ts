@@ -15,8 +15,6 @@ import {Nip28} from "./components/Nip28"
 import {Nip57} from "./components/Nip57"
 import {Nip65} from "./components/Nip65"
 import {Outbox} from "./components/Outbox"
-import {PubkeyLoader} from "./components/PubkeyLoader"
-import {Storage} from "./components/Storage"
 import {User} from "./components/User"
 
 export class Engine {
@@ -37,8 +35,6 @@ export class Engine {
   Nip57 = new Nip57()
   Nip65 = new Nip65()
   Outbox = new Outbox()
-  PubkeyLoader = new PubkeyLoader()
-  Storage = new Storage()
   User = new User()
 
   constructor(Env: Env) {

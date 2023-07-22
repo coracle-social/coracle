@@ -61,6 +61,7 @@ export class Writable<T> implements Readable<T> {
 export class Derived<T> implements Readable<T> {
   private callerSubs: Subscriber<T>[] = []
   private mySubs: Unsubscriber[] = []
+  private value: T = null
   private stores: Derivable
   private getValue: (values: any) => T
 
@@ -77,11 +78,16 @@ export class Derived<T> implements Readable<T> {
     this.callerSubs.forEach(f => f(this.get()))
   }
 
-  get(): T {
-    const isMulti = is(Array, this.stores)
-    const inputs = ensurePlural(this.stores).map(s => s.get())
+  getInput() {
+    if (is(Array, this.stores)) {
+      return ensurePlural(this.stores).map(s => s.get())
+    } else {
+      return this.stores.get()
+    }
+  }
 
-    return this.getValue(isMulti ? inputs : inputs[0])
+  get(): T {
+    return this.getValue(this.getInput())
   }
 
   subscribe(f: Subscriber<T>) {
@@ -93,6 +99,7 @@ export class Derived<T> implements Readable<T> {
 
     this.callerSubs.push(f)
     this.notify()
+
     return () => {
       const idx = findIndex(equals(f), this.callerSubs)
 

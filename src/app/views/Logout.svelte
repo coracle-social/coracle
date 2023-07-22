@@ -2,14 +2,14 @@
   import {fly} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
-  import {Storage} from "src/app/engine"
+  import {storage} from "src/app/engine"
 
   let confirmed = false
 
   const confirm = async () => {
     confirmed = true
 
-    await Storage.clear()
+    await storage.clear()
 
     // do a hard refresh so everything gets totally cleared.
     // Give them a moment to see the state transition. IndexedDB

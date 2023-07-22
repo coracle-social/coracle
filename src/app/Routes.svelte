@@ -20,13 +20,13 @@
   import RelayList from "src/app/views/RelayList.svelte"
   import UserProfile from "src/app/views/UserProfile.svelte"
   import UserSettings from "src/app/views/UserSettings.svelte"
-  import {Storage} from "src/app/engine"
+  import {storage} from "src/app/engine"
 
   const TypedRoute = Route as ComponentType<SvelteComponentTyped>
 
   let ready = false
 
-  Storage.ready.then(() => {
+  storage.ready.then(() => {
     ready = true
   })
 </script>

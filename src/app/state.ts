@@ -11,7 +11,7 @@ import {now} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import type {Event} from "src/engine/types"
-import {PubkeyLoader, Events, Nip28, Meta, Env, Network, Outbox, User, Keys} from "src/app/engine"
+import {pubkeyLoader, Events, Nip28, Meta, Env, Network, Outbox, User, Keys} from "src/app/engine"
 
 // Routing
 
@@ -137,10 +137,10 @@ export const loadAppData = async () => {
   const pubkey = Keys.pubkey.get()
 
   // Make sure the user and their follows are loaded
-  await PubkeyLoader.load(pubkey, {force: true, kinds: userKinds})
+  await pubkeyLoader.load(pubkey, {force: true, kinds: userKinds})
 
   // Load their network
-  await PubkeyLoader.load(User.getFollows())
+  pubkeyLoader.load(User.getFollows())
 
   // Load their messages and notifications
   Network.subscribe({
@@ -170,7 +170,7 @@ export const login = async (method: string, key: string | {pubkey: string; token
 
     await Promise.all([
       sleep(1500),
-      PubkeyLoader.load(Keys.pubkey.get(), {force: true, kinds: userKinds}),
+      pubkeyLoader.load(Keys.pubkey.get(), {force: true, kinds: userKinds}),
     ])
 
     navigate("/notes")

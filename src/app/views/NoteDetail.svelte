@@ -1,6 +1,7 @@
 <script>
   import {propEq, find} from "ramda"
   import {onMount, onDestroy} from "svelte"
+  import {Feed} from "src/engine"
   import {fly} from "src/util/transition"
   import {isMobile} from "src/util/html"
   import {asDisplayEvent} from "src/util/nostr"
@@ -8,14 +9,14 @@
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {Nip65, Network} from "src/app/engine"
+  import engine, {Nip65} from "src/app/engine"
   import Note from "src/app/shared/Note.svelte"
 
   export let note
   export let relays = []
   export let invertColors = false
 
-  const feed = Network.feed({
+  const feed = new Feed(engine, {
     limit: 1,
     depth: 6,
     relays: Nip65.selectHints(10, relays),

@@ -45,7 +45,7 @@ export class Directory {
         const kind0 = JSON.parse(e.content)
         const profile = this.profiles.key(e.pubkey)
 
-        if (e.created_at < (profile.get()?.created_at || Infinity)) {
+        if (e.created_at < (profile.get()?.created_at || 0)) {
           return
         }
 

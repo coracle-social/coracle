@@ -5,7 +5,7 @@
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {Nip02, Nip65, User, Network, PubkeyLoader} from "src/app/engine"
+  import {Nip02, Nip65, User, Network, pubkeyLoader} from "src/app/engine"
 
   export let type
   export let pubkey
@@ -22,7 +22,7 @@
         onEvent: batch(500, events => {
           const newPubkeys = pluck("pubkey", events)
 
-          PubkeyLoader.load(newPubkeys)
+          pubkeyLoader.load(newPubkeys)
 
           pubkeys = uniq(pubkeys.concat(newPubkeys))
         }),

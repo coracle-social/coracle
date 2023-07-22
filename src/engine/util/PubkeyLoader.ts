@@ -13,8 +13,11 @@ export type LoadPeopleOpts = {
 
 export class PubkeyLoader {
   engine: Engine
-
   attemptedPubkeys = new Set()
+
+  constructor(engine: Engine) {
+    this.engine = engine
+  }
 
   getStalePubkeys = (pubkeys: string[]) => {
     const stale = new Set()
@@ -81,9 +84,5 @@ export class PubkeyLoader {
         )
       )
     )
-  }
-
-  initialize(engine: Engine) {
-    this.engine = engine
   }
 }

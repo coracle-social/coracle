@@ -22,6 +22,7 @@ import {now, pushToKey} from "src/util/misc"
 import {findReplyId, Tags, noteKinds} from "src/util/nostr"
 import {collection} from "./store"
 import {Cursor, MultiCursor} from "src/engine/util/Cursor"
+import {PubkeyLoader} from "src/engine/util/PubkeyLoader"
 import type {Collection} from "src/engine/util/store"
 import type {Subscription} from "src/engine/util/Subscription"
 import type {Event, DisplayEvent, Filter} from "src/engine/types"
@@ -37,10 +38,11 @@ export type FeedOpts = {
   filter: Filter | Filter[]
   onEvent?: (e: Event) => void
   shouldLoadParents?: boolean
-  engine: Engine
 }
 
 export class Feed {
+  engine: Engine
+  pubkeyLoader: PubkeyLoader
   limit: number
   since: number
   started: boolean
@@ -52,7 +54,9 @@ export class Feed {
   subs: Record<string, Array<{close: () => void}>>
   cursor: MultiCursor
 
-  constructor(readonly opts: FeedOpts) {
+  constructor(engine: Engine, readonly opts: FeedOpts) {
+    this.engine = engine
+    this.pubkeyLoader = new PubkeyLoader(engine)
     this.limit = opts.limit || 20
     this.since = now()
     this.started = false
@@ -86,7 +90,7 @@ export class Feed {
   }
 
   getReplyKinds() {
-    return this.opts.engine.Env.ENABLE_ZAPS ? [1, 7, 9735] : [1, 7]
+    return this.engine.Env.ENABLE_ZAPS ? [1, 7, 9735] : [1, 7]
   }
 
   matchFilters(e: Event) {
@@ -104,7 +108,7 @@ export class Feed {
   }
 
   preprocessEvents = (events: Event[]) => {
-    const {User} = this.opts.engine
+    const {User} = this.engine
 
     events = reject((e: Event) => this.seen.has(e.id) || User.isMuted(e), events)
 
@@ -116,7 +120,7 @@ export class Feed {
   }
 
   mergeHints(groups: string[][]) {
-    const {Nip65, User} = this.opts.engine
+    const {Nip65, User} = this.engine
 
     return Nip65.mergeHints(User.getSetting("relay_limit"), groups)
   }
@@ -182,13 +186,13 @@ export class Feed {
   // Context loaders
 
   loadPubkeys = (events: Event[]) => {
-    this.opts.engine.PubkeyLoader.load(
+    this.pubkeyLoader.load(
       events.filter(this.isTextNote).flatMap((e: Event) => Tags.from(e).pubkeys().concat(e.pubkey))
     )
   }
 
   loadParents = (events: Event[]) => {
-    const {Network, Nip65} = this.opts.engine
+    const {Network, Nip65} = this.engine
     const parentsInfo = events
       .map((e: Event) => ({id: findReplyId(e), hints: Nip65.getParentHints(10, e)}))
       .filter(({id}: any) => id && !this.seen.has(id))
@@ -206,7 +210,7 @@ export class Feed {
   }
 
   loadContext = batch(300, (eventGroups: any) => {
-    const {Network, Nip65} = this.opts.engine
+    const {Network, Nip65} = this.engine
     const groupsByDepth = groupBy(prop("depth"), eventGroups)
 
     for (const [depthStr, groups] of Object.entries(groupsByDepth)) {
@@ -231,7 +235,7 @@ export class Feed {
   })
 
   listenForContext = throttle(5000, () => {
-    const {Network, Nip65} = this.opts.engine
+    const {Network, Nip65} = this.engine
 
     if (this.stopped) {
       return
@@ -287,12 +291,12 @@ export class Feed {
 
   start() {
     const {since} = this
-    const {relays, filter, engine, depth} = this.opts
+    const {relays, filter, depth} = this.opts
 
     // No point in subscribing if we have an end date
     if (!any(prop("until"), ensurePlural(filter) as any[])) {
       this.addSubs("main", [
-        engine.Network.subscribe({
+        this.engine.Network.subscribe({
           relays,
           filter: ensurePlural(filter).map(assoc("since", since)),
           onEvent: batch(1000, (context: Event[]) =>
@@ -305,10 +309,9 @@ export class Feed {
     this.cursor = new MultiCursor(
       relays.map(
         relay =>
-          new Cursor({
+          new Cursor(this.engine, {
             relay,
             filter,
-            Network: engine.Network,
             onEvent: batch(100, (context: Event[]) =>
               this.addContext(context, {shouldLoadParents: true, depth})
             ),

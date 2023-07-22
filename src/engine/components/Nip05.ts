@@ -20,7 +20,7 @@ export class Nip05 {
         const kind0 = JSON.parse(e.content)
         const handle = this.handles.key(e.pubkey)
 
-        if (!kind0.nip05 || e.created_at < (handle.get()?.created_at || Infinity)) {
+        if (!kind0.nip05 || e.created_at < (handle.get()?.created_at || 0)) {
           return
         }
 

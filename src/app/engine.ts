@@ -1,5 +1,5 @@
 import {identity} from "ramda"
-import {Engine} from "src/engine"
+import {Engine, StorageAdapter, PubkeyLoader} from "src/engine"
 
 const DUFFLEPUD_URL = import.meta.env.VITE_DUFFLEPUD_URL
 
@@ -37,6 +37,9 @@ const engine = new Engine({
   ENABLE_ZAPS,
 })
 
+export const storage = new StorageAdapter(engine)
+export const pubkeyLoader = new PubkeyLoader(engine)
+
 export default engine
 export const Env = engine.Env
 export const Alerts = engine.Alerts
@@ -55,6 +58,4 @@ export const Nip28 = engine.Nip28
 export const Nip57 = engine.Nip57
 export const Nip65 = engine.Nip65
 export const Outbox = engine.Outbox
-export const PubkeyLoader = engine.PubkeyLoader
-export const Storage = engine.Storage
 export const User = engine.User

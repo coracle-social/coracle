@@ -8,7 +8,7 @@
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
   import MessagesListItem from "src/app/views/MessagesListItem.svelte"
-  import {Nip04, PubkeyLoader, User, Network, Keys} from "src/app/engine"
+  import {Nip04, pubkeyLoader, User, Network, Keys} from "src/app/engine"
 
   export let activeTab = "messages"
 
@@ -36,7 +36,7 @@
         {kinds: [4], "#p": [pubkey], since},
       ],
       onEvent: batch(1000, events => {
-        PubkeyLoader.load(pluck("pubkey", events))
+        pubkeyLoader.load(pluck("pubkey", events))
       }),
     })
 

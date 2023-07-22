@@ -15,7 +15,7 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app/views/Notification.svelte"
-  import {Env, Events, PubkeyLoader, Keys, User, Network, Alerts} from "src/app/engine"
+  import {Env, Events, pubkeyLoader, Keys, User, Network, Alerts} from "src/app/engine"
 
   const lastChecked = Alerts.lastChecked.get()
   const tabs = ["Mentions & Replies", "Reactions"]
@@ -108,7 +108,7 @@
         {kinds: noteKinds.concat(reactionKinds), "#e": eventIds, since},
       ],
       onEvent: batch(1000, events => {
-        PubkeyLoader.load(pluck("pubkey", events))
+        pubkeyLoader.load(pluck("pubkey", events))
       }),
     })
 

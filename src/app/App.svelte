@@ -12,7 +12,17 @@
   import {tryFetch, hexToBech32, bech32ToHex, now} from "src/util/misc"
   import {userKinds} from "src/util/nostr"
   import {default as engine} from "src/app/engine"
-  import {Keys, Nip65, PubkeyLoader, User, Env, Network, Builder, Outbox} from "src/app/engine"
+  import {
+    Keys,
+    Nip65,
+    pubkeyLoader,
+    User,
+    Env,
+    Network,
+    Builder,
+    Outbox,
+    storage,
+  } from "src/app/engine"
   import {listenForNotifications} from "src/app/state"
   import {theme, getThemeVariables, appName, modal} from "src/partials/state"
   import {logUsage} from "src/app/state"
@@ -148,13 +158,13 @@
     }
   })
 
-  engine.Storage.ready.then(() => {
+  storage.ready.then(() => {
     const pubkey = Keys.pubkey.get()
 
     // Make sure the user's stuff is loaded, but don't call loadAppData
     // since that reloads messages and stuff
     if (pubkey) {
-      PubkeyLoader.load(pubkey, {force: true, kinds: userKinds})
+      pubkeyLoader.load(pubkey, {force: true, kinds: userKinds})
       listenForNotifications()
     }
 

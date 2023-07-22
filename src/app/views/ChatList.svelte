@@ -10,7 +10,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
-  import {PubkeyLoader, Nip28, Nip65, Network, Keys} from "src/app/engine"
+  import {pubkeyLoader, Nip28, Nip65, Network, Keys} from "src/app/engine"
 
   let q = ""
   let results = []
@@ -53,7 +53,7 @@
         onEvent: batch(500, events => {
           const channelIds = uniq(events.map(e => Tags.from(e).getMeta("e")))
 
-          PubkeyLoader.load(pluck("pubkey", events))
+          pubkeyLoader.load(pluck("pubkey", events))
 
           subs.push(
             Network.subscribe({

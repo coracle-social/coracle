@@ -6,11 +6,7 @@ import {warn, error, log} from "src/util/logger"
 import {normalizeRelayUrl} from "src/util/nostr"
 import type {Event, Filter} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
-import type {CursorOpts} from "src/engine/util/Cursor"
-import type {FeedOpts} from "src/engine/util/Feed"
-import {Cursor, MultiCursor} from "src/engine/util/Cursor"
 import {Subscription} from "src/engine/util/Subscription"
-import {Feed} from "src/engine/util/Feed"
 
 export type Progress = {
   succeeded: Set<string>
@@ -304,13 +300,6 @@ export class Network {
       }, 3000)
     })
   }
-
-  cursor = (opts: Partial<CursorOpts>) => new Cursor({...opts, Network: this} as CursorOpts)
-
-  multiCursor = ({relays, ...opts}: Partial<CursorOpts> & {relays: string[]}) =>
-    new MultiCursor(relays.map((relay: string) => this.cursor({relay, ...opts} as CursorOpts)))
-
-  feed = (opts: Partial<FeedOpts>) => new Feed({engine: this.engine, ...opts} as FeedOpts)
 
   initialize(engine: Engine) {
     this.engine = engine
