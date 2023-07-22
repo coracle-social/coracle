@@ -5,6 +5,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
+  import type {Profile} from "src/engine"
   import {Env, Nip02, User, Directory, Builder} from "src/app/engine"
   import {modal} from "src/partials/state"
 
@@ -17,7 +18,7 @@
 
   let q = ""
 
-  $: results = reject(p => $follows.has(p.pubkey), $searchProfiles(q))
+  $: results = reject((p: Profile) => $follows.has(p.pubkey), $searchProfiles(q))
 </script>
 
 <Content>

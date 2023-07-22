@@ -25,9 +25,9 @@
 
   const loadListFeed = naddr => {
     const list = engine.Content.lists.key(naddr).get()
-    const authors = Tags.from(list).pubkeys()
-    const topics = Tags.from(list).topics()
-    const urls = Tags.from(list).urls()
+    const authors = Tags.wrap(list.tags).pubkeys()
+    const topics = Tags.wrap(list.tags).topics()
+    const urls = Tags.wrap(list.tags).urls()
 
     if (urls.length > 0) {
       relays = urls.map(objOf("url"))

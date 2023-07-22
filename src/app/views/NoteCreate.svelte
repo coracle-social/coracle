@@ -15,7 +15,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {Directory, Builder, Nip65, Keys} from "src/app/engine"
+  import {Directory, User, Builder, Nip65, Keys} from "src/app/engine"
   import {toast, modal} from "src/partials/state"
   import {publishWithToast} from "src/app/state"
 
@@ -174,7 +174,7 @@
                 type="button"
                 class="fa fa-times cursor-pointer"
                 on:click={() => removeRelay(url)} />
-              {Nip65.displayRelay(url)}
+              {Nip65.displayRelay({url})}
             </div>
           {/each}
         </div>

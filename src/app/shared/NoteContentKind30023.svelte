@@ -11,7 +11,7 @@
   export let showMedia = false
 
   const tags = Tags.from(note)
-  const {title, summary, image} = tags.asMeta()
+  const {title, summary, image} = tags.asMeta() as {[k: string]: string}
 
   const openTopic = topic => {
     modal.push({type: "topic/feed", topic})
@@ -28,7 +28,7 @@
   {/if}
   <div>
     {#each tags.topics() as topic}
-      <Chip class="mr-2 mb-2 inline-block cursor-pointer" on:click={() => openTopic(topic)}>
+      <Chip class="mb-2 mr-2 inline-block cursor-pointer" on:click={() => openTopic(topic)}>
         #{topic}
       </Chip>
     {/each}

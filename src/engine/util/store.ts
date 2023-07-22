@@ -1,21 +1,22 @@
 import {is, reject, filter, map, findIndex, equals} from "ramda"
 import {ensurePlural} from "hurdak"
 
+type Invalidator<T> = (value?: T) => void
 type Derivable = Readable<any> | Readable<any>[]
+type Subscriber<T> = (value: T) => void
 type Unsubscriber = () => void
-type Subscriber = <T>(v: T) => void | Unsubscriber
 type R = Record<string, any>
 type M<T> = Map<string, T>
 
 export interface Readable<T> {
   get: () => T
-  subscribe: (f: Subscriber) => () => void
+  subscribe(this: void, run: Subscriber<T>, invalidate?: Invalidator<T>): Unsubscriber
   derived: <U>(f: (v: T) => U) => Readable<U>
 }
 
 export class Writable<T> implements Readable<T> {
   private value: T
-  private subs: Subscriber[] = []
+  private subs: Subscriber<T>[] = []
 
   constructor(defaultValue: T) {
     this.value = defaultValue
@@ -41,7 +42,7 @@ export class Writable<T> implements Readable<T> {
     this.notify()
   }
 
-  subscribe(f: Subscriber) {
+  subscribe(f: Subscriber<T>) {
     this.subs.push(f)
     this.notify()
 
@@ -58,7 +59,7 @@ export class Writable<T> implements Readable<T> {
 }
 
 export class Derived<T> implements Readable<T> {
-  private callerSubs: Subscriber[] = []
+  private callerSubs: Subscriber<T>[] = []
   private mySubs: Unsubscriber[] = []
   private stores: Derivable
   private getValue: (values: any) => T
@@ -79,7 +80,7 @@ export class Derived<T> implements Readable<T> {
     return this.getValue(isMulti ? inputs : inputs[0])
   }
 
-  subscribe(f: Subscriber) {
+  subscribe(f: Subscriber<T>) {
     if (this.callerSubs.length === 0) {
       for (const s of ensurePlural(this.stores)) {
         this.mySubs.push(s.subscribe(() => this.notify()))
@@ -125,7 +126,7 @@ export class Key<T extends R> implements Readable<T> {
 
   get = () => this.base.get().get(this.key) as T
 
-  subscribe = (f: Subscriber) => this.store.subscribe(f)
+  subscribe = (f: Subscriber<T>) => this.store.subscribe(f)
 
   derived = <U>(f: (v: T) => U) => this.store.derived<U>(f)
 
@@ -176,7 +177,7 @@ export class Collection<T extends R> implements Readable<T[]> {
 
   getMap = () => this.#map.get()
 
-  subscribe = (f: Subscriber) => this.#list.subscribe(f)
+  subscribe = (f: Subscriber<T[]>) => this.#list.subscribe(f)
 
   derived = <U>(f: (v: T[]) => U) => this.#list.derived<U>(f)
 

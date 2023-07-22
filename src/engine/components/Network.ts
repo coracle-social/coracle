@@ -127,7 +127,13 @@ export class Network {
     return executor
   }
 
-  publish = ({relays, event, onProgress, timeout = 3000, verb = "EVENT"}: PublishOpts) => {
+  publish = ({
+    relays,
+    event,
+    onProgress,
+    timeout = 3000,
+    verb = "EVENT",
+  }: PublishOpts): Promise<Progress> => {
     const urls = getUrls(relays)
     const executor = this.getExecutor(urls, {bypassBoot: verb === "AUTH"})
 

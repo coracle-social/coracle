@@ -4,7 +4,7 @@ import {Storage as LocalStorage} from "hurdak"
 import type {Channel, Contact} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
 import {writable} from "src/engine/util/store"
-import type {Writable, Collection} from "src/engine/util/store"
+import type {Collection} from "src/engine/util/store"
 import {IndexedDB} from "src/engine/util/indexeddb"
 
 const localStorageKeys = ["Alerts.lastChecked", "Keys.pubkey", "Keys.keyState", "User.settings"]

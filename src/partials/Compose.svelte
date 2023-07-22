@@ -23,7 +23,7 @@
     },
   }
 
-  const {searchProfiles} = directory
+  const {searchProfiles} = Directory
 
   const applySearch = word => {
     let results = []

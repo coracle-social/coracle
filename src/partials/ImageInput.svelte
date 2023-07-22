@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {filter, identity} from "ramda"
-  import {Fetch} from "hurdak"
+  import {identity} from "ramda"
+  import {Fetch, filterVals} from "hurdak"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
@@ -22,7 +22,7 @@
     if (input) {
       listener = listenForFile(input, async inputFile => {
         if (inputFile) {
-          const opts = filter(identity, {maxWidth, maxHeight})
+          const opts = filterVals(identity, {maxWidth, maxHeight})
 
           file = blobToFile(await stripExifData(inputFile, opts))
           quote = await Fetch.postJson(User.dufflepud("upload/quote"), {

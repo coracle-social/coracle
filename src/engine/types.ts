@@ -4,14 +4,17 @@ export type Event = NostrToolsEvent & {
   seen_on: string[]
 }
 
+export type ZapEvent = Event & {
+  invoiceAmount: number
+  request: Event
+}
+
 export type DisplayEvent = Event & {
   zaps: Event[]
   replies: DisplayEvent[]
   reactions: Event[]
   matchesFilter?: boolean
 }
-
-export type DynamicFilter = Record<string, any>
 
 export type Filter = {
   ids?: string[]
@@ -22,6 +25,10 @@ export type Filter = {
   limit?: number
   search?: string
   [key: `#${string}`]: string[]
+}
+
+export type DynamicFilter = Omit<Filter, "authors"> & {
+  authors?: string[] | "follows" | "network" | "global"
 }
 
 export type Zapper = {
@@ -115,6 +122,8 @@ export type Profile = {
 export type Channel = {
   id: string
   name?: string
+  about?: string
+  picture?: string
   pubkey: string
   updated_at: number
   last_sent?: number
@@ -167,6 +176,7 @@ export type Env = {
   SEARCH_RELAYS: string[]
   DEFAULT_RELAYS: string[]
   ENABLE_ZAPS: boolean
+  [key: string]: any
 }
 
 export type KeyState = {

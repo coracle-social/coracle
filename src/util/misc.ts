@@ -17,7 +17,7 @@ export const now = () => Math.round(new Date().valueOf() / 1000)
 
 export const getTimeZone = () => new Date().toString().match(/GMT[^\s]+/)
 
-export const createLocalDate = (dateString: string) => new Date(`${dateString} ${getTimeZone()}`)
+export const createLocalDate = (dateString: any) => new Date(`${dateString} ${getTimeZone()}`)
 
 export const formatTimestamp = (ts: number) => {
   const formatter = new Intl.DateTimeFormat("en-US", {
@@ -69,9 +69,15 @@ export const formatTimestampAsLocalISODate = (ts: number) => {
   return datetime
 }
 
+type ScrollerOpts = {
+  threshold?: number
+  reverse?: boolean
+  element?: Element
+}
+
 export const createScroller = <T>(
   loadMore: () => Promise<T>,
-  {threshold = 2000, reverse = false, element = document.body} = {}
+  {threshold = 2000, reverse = false, element = document.body}: ScrollerOpts = {}
 ) => {
   let done = false
   const check = async () => {

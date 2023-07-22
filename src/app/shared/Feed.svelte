@@ -29,7 +29,7 @@
 
   const since = writable(now())
 
-  const getModal = () => last(document.querySelectorAll(".modal-content"))
+  const getModal = () => last(Array.from(document.querySelectorAll(".modal-content")))
 
   const scrollerElement = getModal()
 
@@ -65,9 +65,7 @@
     return Nip65.mergeHints(limit, hints)
   }
 
-  const loadMore = () => {
-    feed.load()
-  }
+  const loadMore = () => feed.load()
 
   export const stop = () => {
     feed?.stop()

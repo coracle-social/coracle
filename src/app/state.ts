@@ -5,13 +5,13 @@ import {nip19} from "nostr-tools"
 import {navigate} from "svelte-routing"
 import {writable} from "svelte/store"
 import {whereEq, omit, filter, pluck, sortBy, slice} from "ramda"
-import {hash, sleep, shuffle, doPipe, first} from "hurdak"
+import {hash, sleep, shuffle, doPipe} from "hurdak"
 import {warn} from "src/util/logger"
 import {now} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import type {Event} from "src/engine/types"
-import {PubkeyLoader, Events, Nip28, Meta, Network, Outbox, User, Keys} from "src/app/engine"
+import {PubkeyLoader, Events, Nip28, Meta, Env, Network, Outbox, User, Keys} from "src/app/engine"
 
 // Routing
 
@@ -157,7 +157,7 @@ export const loadAppData = async () => {
   listenForNotifications()
 }
 
-export const login = async (method: string, key: string) => {
+export const login = async (method: string, key: string | {pubkey: string; token: string}) => {
   Keys.login(method, key)
 
   if (Env.FORCE_RELAYS.length > 0) {
@@ -179,7 +179,7 @@ export const login = async (method: string, key: string) => {
   }
 }
 
-export const publishWithToast = (event: Event, relays: string[]) =>
+export const publishWithToast = (event: Partial<Event>, relays: string[]) =>
   Outbox.publish(event, relays, ({completed, succeeded, failed, timeouts, pending}) => {
     let message = `Published to ${succeeded.size}/${relays.length} relays`
 
@@ -217,5 +217,5 @@ export const compileFilter = (filter: DynamicFilter): Filter => {
     filter = {...filter, authors: getAuthors(User.getNetwork())}
   }
 
-  return filter
+  return filter as Filter
 }

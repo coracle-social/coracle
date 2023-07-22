@@ -12,7 +12,7 @@
 
   // Put previews last since we need to load them asynchronously
   const annotated = sortBy(
-    l => (l.type === "preview" ? 1 : 0),
+    (l: any) => (l.type === "preview" ? 1 : 0),
     links.map(link => annotateMedia(link.url))
   )
 

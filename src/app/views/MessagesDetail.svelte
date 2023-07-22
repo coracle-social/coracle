@@ -7,7 +7,17 @@
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {User, Nip04, Nip65, Outbox, Crypt, Directory, Builder, Network} from "src/app/engine"
+  import {
+    User,
+    Nip04,
+    Nip65,
+    Outbox,
+    Crypt,
+    Directory,
+    Builder,
+    Network,
+    Keys,
+  } from "src/app/engine"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"

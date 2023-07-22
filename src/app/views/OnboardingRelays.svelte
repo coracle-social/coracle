@@ -13,7 +13,7 @@
   let search
 
   const userRelays = Nip65.policies.derived(() => User.getRelays())
-  const knownRelays = Nip65.relays.derived()
+  const knownRelays = Nip65.relays
 
   $: {
     const joined = new Set(pluck("url", $userRelays))

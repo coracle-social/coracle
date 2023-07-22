@@ -8,13 +8,13 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import {directory, content, user, nip65} from "src/app/engine"
+  import {Directory, User, Nip65, default as engine} from "src/app/engine"
 
   export let list
 
-  const {searchProfiles} = directory
-  const {searchTopics} = content
-  const {searchRelays} = nip65
+  const {searchProfiles} = Directory
+  const {searchTopics} = engine.Content
+  const {searchRelays} = Nip65
 
   const tags = Tags.wrap(list?.tags || [])
 
@@ -43,7 +43,7 @@
       return toast.show("error", "A name is required for your list")
     }
 
-    const duplicates = user.getLists(l => l.name === values.name && l.naddr !== list?.naddr)
+    const duplicates = User.getLists(l => l.name === values.name && l.naddr !== list?.naddr)
 
     if (duplicates.length > 0) {
       return toast.show("error", "That name is already in use")
@@ -51,7 +51,7 @@
 
     const {name, params, relays} = values
 
-    user.putList(name, params, relays)
+    User.putList(name, params, relays)
     toast.show("info", "Your list has been saved!")
     modal.pop()
   }
@@ -87,7 +87,7 @@
         <strong>Relays</strong>
         <MultiSelect search={_searchRelays} bind:value={values.relays}>
           <div slot="item" let:item>
-            {nip65.displayRelay({url: item[1]})}
+            {Nip65.displayRelay({url: item[1]})}
           </div>
         </MultiSelect>
         <p class="text-sm text-gray-4">

@@ -13,7 +13,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
-  import {Nip05, Keys, User, directory, Nip65, Nip02} from "src/app/engine"
+  import {Nip05, Keys, User, Directory, Nip65, Nip02} from "src/app/engine"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
   export let note
@@ -35,7 +35,7 @@
   const borderColor = invertColors ? "gray-6" : "gray-7"
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
-  const author = directory.profiles.key(note.pubkey).derived(defaultTo({pubkey: note.pubkey}))
+  const author = Directory.profiles.key(note.pubkey).derived(defaultTo({pubkey: note.pubkey}))
   const muted = Nip02.graph.key(Keys.pubkey.get()).derived(() => User.isIgnoring(note.id))
   const handle = Nip05.handles.key(note.pubkey)
 
@@ -77,7 +77,7 @@
     if (childrenContainer && noteContainer) {
       const lastChild = last(
         [].slice.apply(childrenContainer.children).filter(e => e.matches(".note"))
-      )
+      ) as any
 
       if (lastChild) {
         const height =
@@ -125,7 +125,7 @@
                 type="unstyled"
                 class="flex items-center gap-2 pr-16 text-lg font-bold"
                 on:click={() => modal.push({type: "person/feed", pubkey: note.pubkey})}>
-                <span>{directory.displayProfile($author)}</span>
+                <span>{Directory.displayProfile($author)}</span>
                 {#if $handle}
                   <i class="fa fa-circle-check text-sm text-accent" />
                 {/if}

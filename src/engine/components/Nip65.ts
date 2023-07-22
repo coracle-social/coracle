@@ -1,5 +1,5 @@
 import {sortBy, pluck, uniq, nth, uniqBy, prop, last, inc} from "ramda"
-import {first, chain, Fetch} from "hurdak"
+import {chain, Fetch} from "hurdak"
 import {fuzzy, tryJson, now} from "src/util/misc"
 import {warn} from "src/util/logger"
 import {normalizeRelayUrl, findReplyId, isShareableRelay, Tags} from "src/util/nostr"

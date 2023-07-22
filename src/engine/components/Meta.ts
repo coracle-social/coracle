@@ -4,7 +4,7 @@ import {switcher} from "hurdak"
 import {collection} from "src/engine/util/store"
 import type {RelayStat} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
-import type {Network} from "src/engine/Network"
+import type {Network} from "src/engine/components/Network"
 
 export class Meta {
   Network: Network

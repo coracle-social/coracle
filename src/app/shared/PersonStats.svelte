@@ -9,7 +9,7 @@
 
   export let pubkey
 
-  const followsCount = nip02.graph.key(pubkey).derived(() => Nip02.getFollowsSet(pubkey).size)
+  const followsCount = Nip02.graph.key(pubkey).derived(() => Nip02.getFollowsSet(pubkey).size)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
 
   let sub
@@ -24,7 +24,7 @@
     canLoadFollowers = false
 
     // Get our followers count
-    const count = await networK.count({kinds: [3], "#p": [pubkey]})
+    const count = await Network.count({kinds: [3], "#p": [pubkey]})
 
     if (count) {
       followersCount.set(count)

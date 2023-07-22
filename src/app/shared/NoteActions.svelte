@@ -1,8 +1,8 @@
-<script lang="ts">
+<script>
   import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {tweened} from "svelte/motion"
-  import {find, reject, identity, propEq, pathEq, sum, pluck, sortBy} from "ramda"
+  import {find, reject, identity, propEq, sum, pluck, sortBy} from "ramda"
   import {stringToHue, formatSats, hsl} from "src/util/misc"
   import {isLike} from "src/util/nostr"
   import {quantify, first} from "hurdak"
@@ -22,7 +22,7 @@
   export let showEntire
   export let setFeedRelay
 
-  const zapper = nip57.zappers.key(note.pubkey)
+  const zapper = Nip57.zappers.key(note.pubkey)
   const bech32Note = nip19.noteEncode(note.id)
   const nevent = nip19.neventEncode({id: note.id, relays: [note.seen_on]})
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
@@ -58,7 +58,7 @@
     modal.push({type: "note/zap", note})
   }
 
-  let like, likes, allLikes, zap, zaps, allZaps
+  let like, likes, allLikes, zap, zaps
   let actions = []
   let showDetails = false
 
@@ -69,11 +69,17 @@
   $: $likesCount = allLikes.length
 
   $: zaps = Nip57.processZaps(note.zaps, note.pubkey)
-  $: zap = zap || find(pathEq(["request", "pubkey"], User.getPubkey()), zaps)
-  $: allZaps = zap
-    ? zaps.filter(n => n.id !== zap?.id).concat(Nip57.processZaps([zap], note.pubkey))
-    : zaps
-  $: $zapsTotal = sum(pluck("invoiceAmount", allZaps)) / 1000
+  $: zap = zap || find(z => z.request.pubkey === Keys.pubkey.get(), zaps)
+
+  $: $zapsTotal =
+    sum(
+      pluck(
+        "invoiceAmount",
+        zap
+          ? zaps.filter(n => n.id !== zap?.id).concat(Nip57.processZaps([zap], note.pubkey))
+          : zaps
+      )
+    ) / 1000
 
   $: canZap = $zapper && note.pubkey !== User.getPubkey()
   $: $repliesCount = note.replies.length

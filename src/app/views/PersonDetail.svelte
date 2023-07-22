@@ -31,7 +31,7 @@
   let rgb, rgba
 
   $: ownRelays = Nip65.getPubkeyRelays(pubkey)
-  $: relays = Nip65.getPubkeyHints(pubkey)
+  $: relays = Nip65.getPubkeyHints(10, pubkey)
 
   $: {
     const color = parseHex(getThemeColor($theme, "gray-8"))

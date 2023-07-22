@@ -1,9 +1,7 @@
 import {getEventHash} from "nostr-tools"
 import type {UnsignedEvent} from "nostr-tools"
-import {assoc} from "ramda"
-import {doPipe} from "hurdak"
 import {now} from "src/util/misc"
-import type {Progress} from "src/engine/Network"
+import type {Progress} from "src/engine/components/Network"
 import type {Engine} from "src/engine/Engine"
 import type {Event} from "src/engine/types"
 
@@ -31,7 +29,7 @@ export class Outbox {
     relays: string[] = null,
     onProgress: (p: Progress) => void = null,
     verb = "EVENT"
-  ) => {
+  ): Promise<[Event, Promise<Progress>]> => {
     const event = rawEvent.sig ? (rawEvent as Event) : await this.prepEvent(rawEvent)
 
     if (!relays) {

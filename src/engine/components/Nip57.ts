@@ -3,13 +3,8 @@ import {now, tryJson, hexToBech32, bech32ToHex} from "src/util/misc"
 import {invoiceAmount} from "src/util/lightning"
 import {Tags} from "src/util/nostr"
 import type {Engine} from "src/engine/Engine"
-import type {Zapper, Event} from "src/engine/types"
+import type {Zapper, ZapEvent, Event} from "src/engine/types"
 import {collection} from "src/engine/util/store"
-
-type ZapEvent = Event & {
-  invoiceAmount: number
-  request: Event
-}
 
 const getLnUrl = (address: string): string => {
   // Try to parse it as a lud06 LNURL

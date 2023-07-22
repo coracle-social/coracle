@@ -22,7 +22,7 @@
     r: () => Nip65.displayRelay({url: value}),
     p: () => Directory.displayProfile(value),
     e: () => "a note",
-    default: "something",
+    default: () => "something",
   })
 </script>
 

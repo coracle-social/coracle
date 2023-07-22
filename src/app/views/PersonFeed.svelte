@@ -5,7 +5,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonActions from "src/app/shared/PersonActions.svelte"
-  import {nip05, nip65, directory, user} from "src/app/engine"
+  import {Nip05, Nip65, Directory, User} from "src/app/engine"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import PersonNotes from "src/app/shared/PersonNotes.svelte"
@@ -14,9 +14,9 @@
 
   export let pubkey
 
-  const handle = nip05.handles.key(pubkey)
-  const profile = directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
-  const relays = nip65.getPubkeyHints(user.getSetting("relay_limit"), pubkey)
+  const handle = Nip05.handles.key(pubkey)
+  const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
+  const relays = Nip65.getPubkeyHints(User.getSetting("relay_limit"), pubkey)
 
   let rgb, rgba
 
@@ -27,7 +27,7 @@
     rgb = `rgba(${color.join(", ")})`
   }
 
-  document.title = directory.displayProfile($profile)
+  document.title = Directory.displayProfile($profile)
 </script>
 
 <div
@@ -46,14 +46,14 @@
           <div class="flex items-center gap-2">
             <Anchor href={routes.person(pubkey)}>
               <h1 class="text-2xl">
-                {directory.displayProfile($profile)}
+                {Directory.displayProfile($profile)}
               </h1>
             </Anchor>
           </div>
           {#if $handle}
             <div class="flex gap-1 text-sm">
               <i class="fa fa-user-check text-accent" />
-              <span class="text-gray-1">{nip05.displayHandle($handle)}</span>
+              <span class="text-gray-1">{Nip05.displayHandle($handle)}</span>
             </div>
           {/if}
         </div>

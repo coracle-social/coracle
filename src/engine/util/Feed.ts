@@ -157,7 +157,7 @@ export class Feed {
         ...note,
         zaps: uniqBy(prop("id"), combinedZaps),
         reactions: uniqBy(prop("id"), combinedReactions),
-        replies: sortBy((e: Event) => -e.created_at, uniqBy(prop("id"), combinedReplies)),
+        replies: sortBy((e: DisplayEvent) => -e.created_at, uniqBy(prop("id"), combinedReplies)),
         matchesFilter: forceShow.has(note.id) || this.matchFilters(note),
       }
     }

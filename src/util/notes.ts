@@ -2,7 +2,6 @@ import {last, pluck, identity} from "ramda"
 import {nip19} from "nostr-tools"
 import {first, switcherFn} from "hurdak"
 import {fromNostrURI} from "src/util/nostr"
-import type {Event} from "src/engine/types"
 
 export const NEWLINE = "newline"
 export const ELLIPSIS = "ellipsis"
@@ -19,7 +18,7 @@ export const NOSTR_NADDR = "nostr:naddr"
 export const urlIsMedia = (url: string) =>
   !url.match(/\.(apk|docx|xlsx|csv|dmg)/) && last(url.split("://"))?.includes("/")
 
-export const parseContent = ({content, tags = []}: {content: string; tags: string[][]}) => {
+export const parseContent = ({content, tags = []}: {content: string; tags?: string[][]}) => {
   const result: any[] = []
   let text = content.trim()
   let buffer = ""
@@ -39,7 +38,7 @@ export const parseContent = ({content, tags = []}: {content: string; tags: strin
     if (mentionMatch) {
       const i = parseInt(mentionMatch[1])
 
-      if (tags[i]) {
+      if (tags?.[i]) {
         const [tag, value, url] = tags[i]
         const relays = [url].filter(identity)
 

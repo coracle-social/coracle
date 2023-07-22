@@ -8,7 +8,7 @@
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {isNil, last} from "ramda"
-  import {Storage, seconds, Fetch, shuffle, tryFunc} from "hurdak"
+  import {Storage, seconds, Fetch, shuffle} from "hurdak"
   import {tryFetch, hexToBech32, bech32ToHex, now} from "src/util/misc"
   import {userKinds} from "src/util/nostr"
   import {default as engine} from "src/app/engine"

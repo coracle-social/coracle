@@ -1,7 +1,6 @@
 import {reduce} from "ramda"
 import {Tags, noteKinds, isLike, findReplyId, findRootId} from "src/util/nostr"
 import {collection, writable, derived} from "src/engine/util/store"
-import type {Readable} from "src/engine/util/store"
 import type {Engine} from "src/engine/Engine"
 import type {Event} from "src/engine/types"
 

@@ -56,24 +56,24 @@
       const relays = Nip65.getPublishHints(3, note, User.getRelayUrls("write"))
       const [event, promise] = await publishWithToast(rawEvent, relays)
 
-      promise.then(({succeeded}) => {
-        if (succeeded.size > 0) {
-          toast.show("info", {
-            text: `Your note has been created!`,
-            link: {
-              text: "View",
-              href:
-                "/" +
-                nip19.neventEncode({
-                  id: event.id,
-                  relays: pluck("url", relays.slice(0, 3)),
-                }),
-            },
-          })
-        }
-      })
-
       reset()
+
+      const {succeeded} = await promise
+
+      if (succeeded.size > 0) {
+        toast.show("info", {
+          text: `Your note has been created!`,
+          link: {
+            text: "View",
+            href:
+              "/" +
+              nip19.neventEncode({
+                id: event.id,
+                relays: pluck("url", relays.slice(0, 3)),
+              }),
+          },
+        })
+      }
     }
   }
 

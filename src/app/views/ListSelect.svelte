@@ -1,7 +1,6 @@
-<script type="ts">
+<script>
   import {updateIn} from "hurdak"
   import {Tags} from "src/util/nostr"
-  import {derived} from "svelte/store"
   import {modal} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -30,11 +29,11 @@
   <p>
     Select a list to modify. The selected {label} will be added to it as an additional filter.
   </p>
-  {#each $lists as e (e.naddr)}
-    {@const meta = Tags.from(e).asMeta()}
-    <BorderLeft on:click={() => selectlist(e)}>
+  {#each $lists as list (list.naddr)}
+    {@const meta = Tags.wrap(list.tags).asMeta()}
+    <BorderLeft on:click={() => selectlist(list)}>
       <strong>{meta.d}</strong>
-      <ListSummary list={e} />
+      <ListSummary {list} />
     </BorderLeft>
   {:else}
     <p class="text-center py-12">You don't have any custom lists yet.</p>

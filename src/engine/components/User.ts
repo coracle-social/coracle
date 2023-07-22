@@ -1,4 +1,4 @@
-import {when, prop, uniq, pluck, fromPairs, whereEq, find, slice, reject} from "ramda"
+import {when, prop, uniq, pluck, fromPairs, whereEq, find, reject} from "ramda"
 import {now} from "src/util/misc"
 import {Tags, appDataKeys, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
 import type {RelayPolicyEntry, List, Event} from "src/engine/types"

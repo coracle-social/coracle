@@ -27,6 +27,7 @@ const DEFAULT_FOLLOWS = (import.meta.env.VITE_DEFAULT_FOLLOWS || "").split(",").
 const ENABLE_ZAPS = JSON.parse(import.meta.env.VITE_ENABLE_ZAPS)
 
 const engine = new Engine({
+  DEFAULT_FOLLOWS,
   DUFFLEPUD_URL,
   MULTIPLEXTR_URL,
   FORCE_RELAYS,

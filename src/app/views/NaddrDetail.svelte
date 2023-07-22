@@ -5,7 +5,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {directory, nip65, network} from "src/app/engine"
+  import {Directory, Nip65, Network} from "src/app/engine"
 
   export let identifier
   export let kind
@@ -14,12 +14,12 @@
 
   let note
 
-  const display = directory.displayPubkey(pubkey)
+  const display = Directory.displayPubkey(pubkey)
 
   onMount(async () => {
-    const sub = network.subscribe({
+    const sub = Network.subscribe({
       timeout: 30_000,
-      relays: nip65.selectHints(3, relays),
+      relays: Nip65.selectHints(3, relays),
       filter: {kinds: [kind], pubkey, "#d": [identifier]},
       onEvent: event => {
         note = event

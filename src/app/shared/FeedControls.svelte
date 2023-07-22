@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type {DynamicFilter} from "src/engine/types"
   import {fly} from "src/util/transition"
   import {pluck, prop, omit, objOf} from "ramda"
   import {debounce} from "throttle-debounce"
@@ -13,6 +12,8 @@
   import SelectButton from "src/partials/SelectButton.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
+  import type {DynamicFilter, Topic, Profile} from "src/engine"
+
   import {Directory, User, default as engine} from "src/app/engine"
 
   export let filter
@@ -66,7 +67,7 @@
   }
 
   const applyFilter = () => {
-    const newFilter = {kinds: noteKinds} as DynamicFilter
+    const newFilter: DynamicFilter = {kinds: noteKinds}
 
     if (_filter.since) {
       newFilter.since = createLocalDate(_filter.since).setHours(23, 59, 59, 0) / 1000
@@ -89,7 +90,8 @@
     }
 
     if (Array.isArray(_filter.authors)) {
-      newFilter.authors = _filter.authors.length > 0 ? pluck("pubkey", _filter.authors) : "global"
+      newFilter.authors =
+        _filter.authors.length > 0 ? (pluck("pubkey", _filter.authors) as string[]) : "global"
     } else {
       newFilter.authors = _filter.authors
     }
@@ -123,7 +125,14 @@
 
   let modal = null
   let scopeOptions = []
-  let _filter = {
+  let _filter: {
+    since?: number
+    until?: number
+    search?: string
+    authors: Profile[]
+    "#t": Topic[]
+    "#p": Profile[]
+  } = {
     since: filter.since,
     until: filter.since,
     search: filter.search || "",
