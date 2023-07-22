@@ -7,7 +7,7 @@
 
   let scrollY = 0
 
-  $: showCreateNote = $location.pathname.match(/messages|chat|relays$|keys|settings|logout$/)
+  $: showCreateNote = $location.pathname.match(/messages$|chat$|relays$|keys|settings|logout$/)
   $: showLogin = !$location.pathname.match(/login$/)
 
   const {canSign} = Keys

@@ -61,93 +61,95 @@ export class Storage {
     }, rows)
   }
 
-  async initialize(engine: Engine) {
+  initialize(engine: Engine) {
     this.engine = engine
 
-    for (const key of localStorageKeys) {
-      const store = getStore(key, engine)
-
-      if (Object.hasOwn(localStorage, key)) {
-        store.set(LocalStorage.getJson(key))
-      }
-
-      store.subscribe(throttle(300, $value => LocalStorage.setJson(key, $value)))
-    }
-
-    if (window.indexedDB) {
-      const policies = [
-        policy("Alerts.events", 500, sortBy(prop("created_at"))),
-        policy("Nip28.channels", 1000, sortChannels),
-        policy("Nip28.messages", 10000, sortBy(prop("created_at"))),
-        policy("Nip04.contacts", 1000, sortContacts),
-        policy("Nip04.messages", 10000, sortBy(prop("created_at"))),
-        policy("Content.topics", 1000, sortBy(prop("count"))),
-        policy("Content.lists", 500, this.sortByPubkeyWhitelist(prop("updated_at"))),
-        policy("Directory.profiles", 5000, this.sortByPubkeyWhitelist(prop("updated_at"))),
-        policy("Events.cache", 5000, this.sortByPubkeyWhitelist(prop("created_at"))),
-        policy("Nip02.graph", 5000, this.sortByPubkeyWhitelist(prop("updated_at"))),
-        policy("Nip05.handles", 5000, this.sortByPubkeyWhitelist(prop("updated_at"))),
-        policy("Nip57.zappers", 5000, this.sortByPubkeyWhitelist(prop("updated_at"))),
-        policy("Nip65.relays", 2000, prop("count")),
-        policy("Nip65.policies", 5000, this.sortByPubkeyWhitelist(prop("updated_at"))),
-      ]
-
-      this.db = new IndexedDB(
-        "nostr-engine/Storage",
-        1,
-        policies.map(({key}) => {
-          const store = getStore(key, engine)
-
-          return {
-            name: key,
-            opts: {
-              keyPath: store.pk,
-            },
-          }
-        })
-      )
-
-      window.addEventListener("beforeunload", () => this.close())
-
-      await this.db.open()
-
-      for (const {key} of policies) {
+    setTimeout(async () => {
+      for (const key of localStorageKeys) {
         const store = getStore(key, engine)
 
-        store.set(await this.db.getAll(key))
+        if (Object.hasOwn(localStorage, key)) {
+          store.set(LocalStorage.getJson(key))
+        }
 
-        store.subscribe(
-          throttle(randomInt(3000, 5000), async <T>(rows: T) => {
-            if (this.dead.get()) {
-              return
-            }
+        store.subscribe(throttle(300, $value => LocalStorage.setJson(key, $value)))
+      }
 
-            // Do it in small steps to avoid clogging stuff up
-            for (const records of chunk(100, rows as any[])) {
-              await this.db.bulkPut(key, records)
-              await sleep(50)
+      if (window.indexedDB) {
+        const policies = [
+          policy("Alerts.events", 500, sortBy(prop("created_at"))),
+          policy("Nip28.channels", 1000, sortChannels),
+          policy("Nip28.messages", 10000, sortBy(prop("created_at"))),
+          policy("Nip04.contacts", 1000, sortContacts),
+          policy("Nip04.messages", 10000, sortBy(prop("created_at"))),
+          policy("Content.topics", 1000, sortBy(prop("count"))),
+          policy("Content.lists", 500, this.sortByPubkeyWhitelist(prop("updated_at"))),
+          policy("Directory.profiles", 5000, this.sortByPubkeyWhitelist(prop("updated_at"))),
+          policy("Events.cache", 5000, this.sortByPubkeyWhitelist(prop("created_at"))),
+          policy("Nip02.graph", 5000, this.sortByPubkeyWhitelist(prop("updated_at"))),
+          policy("Nip05.handles", 5000, this.sortByPubkeyWhitelist(prop("updated_at"))),
+          policy("Nip57.zappers", 5000, this.sortByPubkeyWhitelist(prop("updated_at"))),
+          policy("Nip65.relays", 2000, prop("count")),
+          policy("Nip65.policies", 5000, this.sortByPubkeyWhitelist(prop("updated_at"))),
+        ]
+
+        this.db = new IndexedDB(
+          "nostr-engine/Storage",
+          1,
+          policies.map(({key}) => {
+            const store = getStore(key, engine)
+
+            return {
+              name: key,
+              opts: {
+                keyPath: store.pk,
+              },
             }
           })
         )
-      }
 
-      // Every so often randomly prune a store
-      setInterval(() => {
-        const {key, max, sort} = policies[Math.floor(policies.length * Math.random())]
-        const store = getStore(key, engine)
-        const data = store.get()
+        window.addEventListener("beforeunload", () => this.close())
 
-        if (data.length < max * 1.1) {
-          return
+        await this.db.open()
+
+        for (const {key} of policies) {
+          const store = getStore(key, engine)
+
+          store.set(await this.db.getAll(key))
+
+          store.subscribe(
+            throttle(randomInt(3000, 5000), async <T>(rows: T) => {
+              if (this.dead.get()) {
+                return
+              }
+
+              // Do it in small steps to avoid clogging stuff up
+              for (const records of chunk(100, rows as any[])) {
+                await this.db.bulkPut(key, records)
+                await sleep(50)
+              }
+            })
+          )
         }
 
-        const [discard, keep] = splitAt(max, sort(data))
+        // Every so often randomly prune a store
+        setInterval(() => {
+          const {key, max, sort} = policies[Math.floor(policies.length * Math.random())]
+          const store = getStore(key, engine)
+          const data = store.get()
 
-        store.set(keep)
-        this.db.bulkDelete(key, pluck(store.pk, discard))
-      }, 30_000)
-    }
+          if (data.length < max * 1.1) {
+            return
+          }
 
-    this.ready.resolve()
+          const [discard, keep] = splitAt(max, sort(data))
+
+          store.set(keep)
+          this.db.bulkDelete(key, pluck(store.pk, discard))
+        }, 30_000)
+      }
+
+      this.ready.resolve()
+    })
   }
 }

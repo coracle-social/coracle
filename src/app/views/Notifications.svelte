@@ -15,7 +15,7 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app/views/Notification.svelte"
-  import {ENABLE_ZAPS, Events, PubkeyLoader, Keys, User, Network, Alerts} from "src/app/engine"
+  import {Env, Events, PubkeyLoader, Keys, User, Network, Alerts} from "src/app/engine"
 
   const lastChecked = Alerts.lastChecked.get()
   const tabs = ["Mentions & Replies", "Reactions"]
@@ -93,7 +93,7 @@
     const pubkey = Keys.pubkey.get()
     const since = Math.max(lastChecked - seconds(1, "hour"), now() - seconds(30, "day"))
 
-    const reactionKinds = ENABLE_ZAPS ? [7, 9735] : [7]
+    const reactionKinds = Env.ENABLE_ZAPS ? [7, 9735] : [7]
     const eventIds = doPipe(Events.cache.get(), [
       filter(e => noteKinds.includes(e.kind)),
       sortBy(e => -e.created_at),

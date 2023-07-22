@@ -8,17 +8,17 @@ import {collection, derived} from "src/engine/util/store"
 
 const getHints = (e: Event) => pluck("url", Tags.from(e).relays())
 
-const messageIsNew = ({last_checked, last_received, last_sent}: Contact) =>
-  last_received > Math.max(last_sent || 0, last_checked || 0)
-
 export class Nip04 {
   engine: Engine
   contacts = collection<Contact>("pubkey")
   messages = collection<Message>("id")
 
+  messageIsNew = ({last_checked, last_received, last_sent}: Contact) =>
+    last_received > Math.max(last_sent || 0, last_checked || 0)
+
   hasNewMessages = derived(
     this.contacts,
-    find((e: Contact) => e.last_sent > 0 && messageIsNew(e))
+    find((e: Contact) => e.last_sent > 0 && this.messageIsNew(e))
   )
 
   searchContacts = this.messages.derived($messages => {

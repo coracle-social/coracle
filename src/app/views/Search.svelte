@@ -13,7 +13,7 @@
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Scan from "src/app/shared/Scan.svelte"
   import PersonInfo from "src/app/shared/PersonInfo.svelte"
-  import {user, directory, network, nip65, content} from "src/app/engine"
+  import {User, Keys, Directory, Network, Nip65, default as engine} from "src/app/engine"
 
   let q = ""
   let options = []
@@ -25,14 +25,14 @@
     // If we have a query, search using nostr.band. If not, ask for random profiles.
     // This allows us to populate results even if search isn't supported by forced urls
     if (q.length > 2) {
-      network.subscribe({
-        relays: nip65.getSearchRelays(),
+      Network.subscribe({
+        relays: Nip65.getSearchRelays(),
         filter: [{kinds: [0], search, limit: 10}],
         timeout: 3000,
       })
-    } else if (directory.profiles.get().length < 50) {
-      network.subscribe({
-        relays: user.getRelayUrls("read"),
+    } else if (Directory.profiles.get().length < 50) {
+      Network.subscribe({
+        relays: User.getRelayUrls("read"),
         filter: [{kinds: [0], limit: 50}],
         timeout: 3000,
       })
@@ -62,14 +62,13 @@
     }
   })
 
-  const topicOptions = content.topics.derived(
+  const topicOptions = engine.Content.topics.derived(
     map(topic => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
   )
 
-  const profileOptions = directory.profiles.derived(() =>
-    directory
-      .getNamedProfiles()
-      .filter(profile => profile.pubkey !== user.getPubkey())
+  const profileOptions = Directory.profiles.derived(() =>
+    Directory.getNamedProfiles()
+      .filter(profile => profile.pubkey !== Keys.pubkey.get())
       .map(profile => {
         const {pubkey, name, nip05, display_name} = profile
 

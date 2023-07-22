@@ -54,7 +54,7 @@ export class Writable<T> implements Readable<T> {
   }
 
   derived<U>(f: (v: T) => U): Derived<U> {
-    return new Derived<U>([this], f)
+    return new Derived<U>(this, f)
   }
 }
 
@@ -65,6 +65,10 @@ export class Derived<T> implements Readable<T> {
   private getValue: (values: any) => T
 
   constructor(stores: Derivable, getValue: (values: any) => T) {
+    if (!getValue) {
+      throw new Error(`Invalid derivation function`)
+    }
+
     this.stores = stores
     this.getValue = getValue
   }
@@ -103,7 +107,7 @@ export class Derived<T> implements Readable<T> {
   }
 
   derived<U>(f: (v: T) => U): Readable<U> {
-    return new Derived([this], f) as Readable<U>
+    return new Derived(this, f) as Readable<U>
   }
 }
 
