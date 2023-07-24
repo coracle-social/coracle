@@ -13,17 +13,13 @@ export type CursorOpts = {
 
 export class Cursor {
   engine: Engine
-  done: boolean
-  until: number
-  buffer: Event[]
-  loading: boolean
+  done = false
+  until = now()
+  buffer: Event[] = []
+  loading = false
 
   constructor(engine: Engine, readonly opts: CursorOpts) {
     this.engine = engine
-    this.done = false
-    this.until = now()
-    this.buffer = []
-    this.loading = false
   }
 
   load(n: number) {
@@ -59,7 +55,6 @@ export class Cursor {
       },
       onClose: () => {
         this.loading = false
-        this.done = true
       },
     })
   }
@@ -82,24 +77,25 @@ export class Cursor {
 }
 
 export class MultiCursor {
-  #seen_on: Map<string, string[]>
-  #cursors: Cursor[]
+  bufferFactor = 4
+  seen_on: Map<string, string[]>
+  cursors: Cursor[]
 
   constructor(cursors: Cursor[]) {
-    this.#seen_on = new Map()
-    this.#cursors = cursors
+    this.seen_on = new Map()
+    this.cursors = cursors
   }
 
   load(limit: number) {
-    return this.#cursors.map(c => c.load(limit)).filter(identity)
+    return this.cursors.map(c => c.load(limit)).filter(identity)
   }
 
   done() {
-    return all(prop("done"), this.#cursors)
+    return all(prop("done"), this.cursors)
   }
 
   count() {
-    return this.#cursors.reduce((n, c) => n + c.buffer.length, 0)
+    return this.cursors.reduce((n, c) => n + c.buffer.length, 0)
   }
 
   take(n: number): [Subscription[], Event[]] {
@@ -109,7 +105,7 @@ export class MultiCursor {
       // Find the most recent event available so that they're sorted
       const [cursor] = sortBy(
         c => -c.peek().created_at,
-        this.#cursors.filter(c => c.peek())
+        this.cursors.filter(c => c.peek())
       )
 
       if (!cursor) {
@@ -120,17 +116,17 @@ export class MultiCursor {
 
       // Merge seen_on via mutation so it applies to future. If we've already
       // seen the event, we're also done and we don't need to add it to our buffer
-      if (this.#seen_on.has(event.id)) {
-        this.#seen_on.get(event.id).push(event.seen_on[0])
+      if (this.seen_on.has(event.id)) {
+        this.seen_on.get(event.id).push(event.seen_on[0])
       } else {
-        this.#seen_on.set(event.id, event.seen_on)
+        this.seen_on.set(event.id, event.seen_on)
 
         events.push(event)
       }
     }
 
     // Preload the next page
-    const subs = this.load(n)
+    const subs = this.load(n * this.bufferFactor)
 
     return [subs, events]
   }

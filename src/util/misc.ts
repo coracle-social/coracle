@@ -7,10 +7,12 @@ import {writable} from "svelte/store"
 import {warn} from "src/util/logger"
 
 export const fuzzy = <T>(data: T[], opts = {}) => {
-  const {search} = new Fuse(data, opts) as {search: (q: string) => {item: T}[]}
+  const fuse = new Fuse(data, opts) as any
 
   // Slice pattern because the docs warn that it"ll crash if too long
-  return (q: string) => (q ? pluck("item", search(q.slice(0, 32))) : data)
+  return (q: string) => {
+    return q ? pluck("item", fuse.search(q.slice(0, 32)) as any[]) : data
+  }
 }
 
 export const now = () => Math.round(new Date().valueOf() / 1000)
@@ -228,4 +230,21 @@ export const webSocketURLToPlainOrBase64 = (url: string): string => {
 export const pushToKey = <T>(m: Record<string, T[]>, k: string, v: T) => {
   m[k] = m[k] || []
   m[k].push(v)
+}
+
+export const race = (p, promises) => {
+  const threshold = Math.ceil(promises.length * p)
+  let count = 0
+
+  return new Promise<void>((resolve, reject) => {
+    promises.forEach(p => {
+      p.then(() => {
+        count++
+
+        if (count >= threshold) {
+          resolve()
+        }
+      }).catch(reject)
+    })
+  })
 }

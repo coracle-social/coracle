@@ -1,7 +1,7 @@
 <script>
   import {propEq, find} from "ramda"
   import {onMount, onDestroy} from "svelte"
-  import {Feed} from "src/engine"
+  import {FeedLoader} from "src/engine"
   import {fly} from "src/util/transition"
   import {isMobile} from "src/util/html"
   import {asDisplayEvent} from "src/util/nostr"
@@ -16,7 +16,7 @@
   export let relays = []
   export let invertColors = false
 
-  const feed = new Feed(engine, {
+  const feed = new FeedLoader(engine, {
     limit: 1,
     depth: 6,
     relays: Nip65.selectHints(10, relays),

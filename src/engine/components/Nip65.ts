@@ -201,7 +201,7 @@ export class Nip65 {
       .slice(0, limit)
   }
 
-  initialize(engine: Engine) {
+  async initialize(engine: Engine) {
     this.engine = engine
 
     engine.Events.addHandler(2, e => {
@@ -246,22 +246,21 @@ export class Nip65 {
           })
       )
     })
-    ;(async () => {
-      const {DEFAULT_RELAYS, FORCE_RELAYS, DUFFLEPUD_URL} = engine.Env
 
-      // Throw some hardcoded defaults in there
-      DEFAULT_RELAYS.forEach(this.addRelay)
+    const {DEFAULT_RELAYS, FORCE_RELAYS, DUFFLEPUD_URL} = engine.Env
 
-      // Load relays from nostr.watch via dufflepud
-      if (FORCE_RELAYS.length === 0 && DUFFLEPUD_URL) {
-        try {
-          const json = await Fetch.fetchJson(DUFFLEPUD_URL + "/relay")
+    // Throw some hardcoded defaults in there
+    DEFAULT_RELAYS.forEach(this.addRelay)
 
-          json.relays.filter(isShareableRelay).forEach(this.addRelay)
-        } catch (e) {
-          warn("Failed to fetch relays list", e)
-        }
+    // Load relays from nostr.watch via dufflepud
+    if (FORCE_RELAYS.length === 0 && DUFFLEPUD_URL) {
+      try {
+        const json = await Fetch.fetchJson(DUFFLEPUD_URL + "/relay")
+
+        json.relays.filter(isShareableRelay).forEach(this.addRelay)
+      } catch (e) {
+        warn("Failed to fetch relays list", e)
       }
-    })()
+    }
   }
 }

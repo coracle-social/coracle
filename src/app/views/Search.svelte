@@ -58,7 +58,7 @@
       tryFunc(() => {
         nip19.decode(entity)
         navigate("/" + entity)
-      }, "TypeError")
+      })
     }
   })
 

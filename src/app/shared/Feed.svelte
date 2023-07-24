@@ -2,7 +2,7 @@
   import type {DynamicFilter, DisplayEvent} from "src/engine/types"
   import {onMount, onDestroy} from "svelte"
   import {readable, derived, writable} from "svelte/store"
-  import {Feed} from "src/engine"
+  import {FeedLoader} from "src/engine"
   import {last, equals} from "ramda"
   import {fly} from "src/util/transition"
   import {quantify} from "hurdak"
@@ -66,7 +66,7 @@
     return Nip65.mergeHints(limit, hints)
   }
 
-  const loadMore = () => feed.load()
+  const loadMore = () => feed.load(5)
 
   export const stop = () => {
     feed?.stop()
@@ -82,7 +82,7 @@
         filter = newFilter
       }
 
-      feed = new Feed(engine, {
+      feed = new FeedLoader(engine, {
         depth: 2,
         relays: getRelays(),
         filter: compileFilter(filter),
