@@ -6,7 +6,7 @@
   import {normalizeRelayUrl, Tags, getAvgQuality} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {Nip65, Network, User, Keys} from "src/app/engine"
+  import {Nip65, Network, Keys, User} from "src/app/engine"
 
   export let q = ""
   export let limit = 50
@@ -33,7 +33,7 @@
 
   onMount(() => {
     const sub = Network.subscribe({
-      relays: Nip65.getPubkeyHints(3, User.getPubkey(), "read"),
+      relays: Nip65.getPubkeyHints(3, Keys.pubkey.get(), "read"),
       filter: {
         limit: 1000,
         kinds: [1985],

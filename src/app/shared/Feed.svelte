@@ -13,7 +13,7 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import engine, {User, Nip65} from "src/app/engine"
+  import engine, {User, Keys, Nip65} from "src/app/engine"
   import {compileFilter} from "src/app/state"
 
   export let relays = []
@@ -58,7 +58,7 @@
     }
 
     const limit = User.getSetting("relay_limit")
-    const authors = (compileFilter(filter).authors || []).concat(User.getPubkey())
+    const authors = (compileFilter(filter).authors || []).concat(Keys.pubkey.get())
     const hints = authors.map(pubkey => Nip65.getPubkeyHints(limit, pubkey))
 
     return Nip65.mergeHints(limit, hints)

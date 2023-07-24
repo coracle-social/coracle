@@ -5,7 +5,7 @@
   import {tweened} from "svelte/motion"
   import {numberFmt} from "src/util/misc"
   import {modal} from "src/partials/state"
-  import {Nip02, User, Nip65, Network} from "src/app/engine"
+  import {Nip02, Keys, Nip65, Network} from "src/app/engine"
 
   export let pubkey
 
@@ -34,7 +34,7 @@
       sub = Network.subscribe({
         timeout: 30_000,
         shouldProcess: false,
-        relays: Nip65.getPubkeyHints(3, User.getPubkey(), "read"),
+        relays: Nip65.getPubkeyHints(3, Keys.pubkey.get(), "read"),
         filter: [{kinds: [3], "#p": [pubkey]}],
         onEvent: batch(300, events => {
           for (const e of events) {

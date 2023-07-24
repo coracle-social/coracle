@@ -10,9 +10,7 @@ export class User {
   engine: Engine
   settings: Writable<Record<string, any>>
 
-  getPubkey = () => this.engine.Keys.pubkey.get()
-
-  getStateKey = () => (this.engine.Keys.canSign.get() ? this.getPubkey() : "anonymous")
+  getStateKey = () => this.engine.Keys.pubkey.get() || "anonymous"
 
   // Settings
 

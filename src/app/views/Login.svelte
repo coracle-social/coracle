@@ -6,7 +6,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {User} from "src/app/engine"
+  import {Keys} from "src/app/engine"
   import {login} from "src/app/state"
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
@@ -29,7 +29,7 @@
     modal.push({type: "login/advanced"})
   }
 
-  if (User.getPubkey()) {
+  if (Keys.pubkey.get()) {
     navigate("/")
   }
 

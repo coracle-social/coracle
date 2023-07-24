@@ -64,7 +64,7 @@
 
   $: disableActions = !Keys.canSign.get() || muted
   $: likes = note.reactions.filter(n => isLike(n.content))
-  $: like = like || find(propEq("pubkey", User.getPubkey()), likes)
+  $: like = like || find(propEq("pubkey", Keys.pubkey.get()), likes)
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
   $: $likesCount = allLikes.length
 
@@ -81,7 +81,7 @@
       )
     ) / 1000
 
-  $: canZap = $zapper && note.pubkey !== User.getPubkey()
+  $: canZap = $zapper && note.pubkey !== Keys.pubkey.get()
   $: $repliesCount = note.replies.length
 
   $: {
@@ -120,7 +120,7 @@
     </button>
     <button
       class={cx("w-16 text-left", {
-        "pointer-events-none opacity-50": disableActions || note.pubkey === User.getPubkey(),
+        "pointer-events-none opacity-50": disableActions || note.pubkey === Keys.pubkey.get(),
         "text-accent": like,
       })}
       on:click={() => (like ? deleteReaction(like) : react("+"))}>

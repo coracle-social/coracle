@@ -9,7 +9,7 @@
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/partials/Compose.svelte"
-  import {Directory, User, Nip65, Builder} from "src/app/engine"
+  import {Directory, User, Keys, Nip65, Builder} from "src/app/engine"
   import {publishWithToast} from "src/app/state"
 
   export let note
@@ -27,7 +27,7 @@
     data = {
       image: null,
       mentions: without(
-        [User.getPubkey()],
+        [Keys.pubkey.get()],
         uniq(Tags.from(note).type("p").values().all().concat(note.pubkey))
       ),
     }
@@ -139,7 +139,7 @@
     </div>
     <div class="flex justify-end gap-2 text-sm text-gray-5">
       <span>
-        Posting as @{Directory.displayPubkey(User.getPubkey())}
+        Posting as @{Directory.displayPubkey(Keys.pubkey.get())}
       </span>
     </div>
   </div>
