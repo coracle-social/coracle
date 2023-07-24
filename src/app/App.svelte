@@ -21,6 +21,7 @@
     Network,
     Builder,
     Outbox,
+    Settings,
     storage,
   } from "src/app/engine"
   import {listenForNotifications} from "src/app/state"
@@ -169,7 +170,7 @@
     }
 
     const interval = setInterval(async () => {
-      if (!User.getSetting("dufflepud_url")) {
+      if (!Settings.getSetting("dufflepud_url")) {
         return
       }
 
@@ -181,7 +182,7 @@
 
       for (const relay of staleRelays) {
         tryFetch(async () => {
-          const info = await Fetch.fetchJson(User.dufflepud("relay/info"), {
+          const info = await Fetch.fetchJson(Settings.dufflepud("relay/info"), {
             method: "POST",
             body: JSON.stringify({url: relay.url}),
             headers: {

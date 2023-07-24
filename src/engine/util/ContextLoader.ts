@@ -99,7 +99,7 @@ export class ContextLoader {
   }
 
   getRelayLimit() {
-    return this.engine.User.getSetting("relay_limit")
+    return this.engine.Settings.getSetting("relay_limit")
   }
 
   mergeHints(groups: string[][]) {

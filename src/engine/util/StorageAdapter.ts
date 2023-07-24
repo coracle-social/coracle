@@ -7,7 +7,7 @@ import {writable} from "src/engine/util/store"
 import type {Collection} from "src/engine/util/store"
 import {IndexedDB} from "src/engine/util/indexeddb"
 
-const localStorageKeys = ["Alerts.lastChecked", "Keys.pubkey", "Keys.keyState", "User.settings"]
+const localStorageKeys = ["Alerts.lastChecked", "Keys.pubkey", "Keys.keyState", "Settings.settings"]
 
 const sortChannels = sortBy((e: Channel) =>
   e.joined ? 0 : -Math.max(e.last_checked || 0, e.last_sent || 0)

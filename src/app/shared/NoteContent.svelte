@@ -5,14 +5,14 @@
   import NoteContentKind9802 from "src/app/shared/NoteContentKind9802.svelte"
   import NoteContentKind1063 from "src/app/shared/NoteContentKind1063.svelte"
   import NoteContentKind30023 from "src/app/shared/NoteContentKind30023.svelte"
-  import {User} from "src/app/engine"
+  import {Settings} from "src/app/engine"
 
   export let note
   export let anchorId = null
   export let maxLength = 700
   export let showEntire = false
   export let expandable = true
-  export let showMedia = User.getSetting("show_media")
+  export let showMedia = Settings.getSetting("show_media")
 </script>
 
 {#if note.kind === 40}

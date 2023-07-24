@@ -17,6 +17,7 @@ export {Nip28} from "./components/Nip28"
 export {Nip57} from "./components/Nip57"
 export {Nip65} from "./components/Nip65"
 export {Outbox} from "./components/Outbox"
+export {Settings} from "./components/Settings"
 export {User} from "./components/User"
 
 export {FeedLoader} from "./util/FeedLoader"

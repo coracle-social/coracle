@@ -11,7 +11,18 @@ import {now} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import type {Event} from "src/engine/types"
-import {pubkeyLoader, Events, Nip28, Meta, Env, Network, Outbox, User, Keys} from "src/app/engine"
+import {
+  pubkeyLoader,
+  Events,
+  Nip28,
+  Meta,
+  Env,
+  Network,
+  Outbox,
+  User,
+  Settings,
+  Keys,
+} from "src/app/engine"
 
 // Routing
 
@@ -39,7 +50,7 @@ setTimeout(() => {
       return false
     }
 
-    if (!User.getSetting("report_analytics")) {
+    if (!Settings.getSetting("report_analytics")) {
       return false
     }
 
@@ -64,9 +75,9 @@ export const logUsage = async (name: string) => {
   const pubkey = Keys.pubkey.get()
   const ident = pubkey ? hash(pubkey) : "unknown"
 
-  if (User.getSetting("report_analytics")) {
+  if (Settings.getSetting("report_analytics")) {
     try {
-      await fetch(User.dufflepud(`usage/${ident}/${session}/${name}`), {method: "post"})
+      await fetch(Settings.dufflepud(`usage/${ident}/${session}/${name}`), {method: "post"})
     } catch (e) {
       if (!e.toString().includes("Failed to fetch")) {
         warn(e)

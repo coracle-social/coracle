@@ -64,7 +64,7 @@ export class Network {
 
     let target
 
-    const muxUrl = this.engine.User.getSetting("multiplextr_url")
+    const muxUrl = this.engine.Settings.getSetting("multiplextr_url")
 
     // Try to use our multiplexer, but if it fails to connect fall back to relays. If
     // we're only connecting to a single relay, just do it directly, unless we already

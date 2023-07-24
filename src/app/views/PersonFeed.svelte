@@ -5,7 +5,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonActions from "src/app/shared/PersonActions.svelte"
-  import {Nip05, Nip65, Directory, User} from "src/app/engine"
+  import {Nip05, Settings, Nip65, Directory} from "src/app/engine"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import PersonNotes from "src/app/shared/PersonNotes.svelte"
@@ -16,7 +16,7 @@
 
   const handle = Nip05.handles.key(pubkey)
   const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
-  const relays = Nip65.getPubkeyHints(User.getSetting("relay_limit"), pubkey)
+  const relays = Nip65.getPubkeyHints(Settings.getSetting("relay_limit"), pubkey)
 
   let rgb, rgba
 

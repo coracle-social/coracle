@@ -53,7 +53,7 @@ export class PubkeyLoader {
       }
 
       return this.engine.Nip65.mergeHints(
-        this.engine.User.getSetting("relay_limit"),
+        this.engine.Settings.getSetting("relay_limit"),
         chunk.map(pubkey => this.engine.Nip65.getPubkeyHints(3, pubkey))
       )
     }

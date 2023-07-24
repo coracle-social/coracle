@@ -9,13 +9,13 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import {Directory, Nip65, User, Outbox, Network, Builder, Nip57} from "src/app/engine"
+  import {Directory, Nip65, User, Outbox, Network, Builder, Nip57, Settings} from "src/app/engine"
 
   export let note
 
   let sub
   let zap = {
-    amount: User.getSetting("default_zap"),
+    amount: Settings.getSetting("default_zap"),
     message: "",
     invoice: null,
     loading: false,
