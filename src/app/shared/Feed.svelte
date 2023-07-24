@@ -22,7 +22,7 @@
   export let hideControls = false
   export let onEvent = null
 
-  let scroller, feed
+  let scroller, feed, scrollerElement
   let feedRelay = null
   let feedScroller = null
   let newNotes = readable([])
@@ -31,8 +31,6 @@
   const since = writable(now())
 
   const getModal = () => last(Array.from(document.querySelectorAll(".modal-content")))
-
-  const scrollerElement = getModal()
 
   const setFeedRelay = relay => {
     feedRelay = relay
@@ -104,7 +102,11 @@
     }
   }
 
-  onMount(start)
+  onMount(() => {
+    scrollerElement = getModal()
+    start()
+  })
+
   onDestroy(stop)
 </script>
 

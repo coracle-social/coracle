@@ -1,5 +1,5 @@
-import {partition, pluck, sortBy, omit, without, any, prop, assoc} from "ramda"
-import {ensurePlural, seconds, doPipe, sleep, throttle, batch} from "hurdak"
+import {partition, pluck, sortBy, without, any, prop, assoc} from "ramda"
+import {ensurePlural, seconds, doPipe, throttle, batch} from "hurdak"
 import {now, race} from "src/util/misc"
 import {Cursor, MultiCursor} from "src/engine/util/Cursor"
 import {PubkeyLoader} from "src/engine/util/PubkeyLoader"
@@ -8,9 +8,6 @@ import {writable} from "src/engine/util/store"
 import type {Subscription} from "src/engine/util/Subscription"
 import type {Event, DisplayEvent, Filter} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
-
-const fromDisplayEvent = (e: DisplayEvent): Event =>
-  omit(["zaps", "likes", "replies", "matchesFilter"], e)
 
 export type FeedOpts = {
   depth: number
@@ -79,7 +76,7 @@ export class FeedLoader {
 
     // Wait until a good number of subscriptions have completed to reduce the chance of
     // out of order notes
-    this.ready = race(0.5, pluck("complete", subs))
+    this.ready = race(0.1, pluck("complete", subs))
   }
 
   // Control
@@ -104,27 +101,6 @@ export class FeedLoader {
   }
 
   // Feed building
-
-  hydrate(feed: DisplayEvent[]) {
-    const {depth} = this.opts
-    const notes: DisplayEvent[] = []
-    const context: Event[] = []
-
-    const addContext = (note: DisplayEvent) => {
-      context.push(fromDisplayEvent(note))
-
-      note.zaps.forEach(zap => context.push(zap))
-      note.reactions.forEach(reaction => context.push(reaction))
-      note.replies.forEach(reply => addContext(reply))
-    }
-
-    feed.forEach(note => {
-      addContext(note)
-      notes.push(note)
-    })
-
-    this.context.addContext(context, {depth})
-  }
 
   addToFeed = (notes: Event[]) => {
     this.feed.update($feed => {
@@ -155,17 +131,6 @@ export class FeedLoader {
     ])
 
     this.addToFeed(ok)
-  }
-
-  async loadAll() {
-    this.addSubs(this.cursor.load(Infinity))
-
-    // Wait for our requested notes
-    while (!this.cursor.done()) {
-      this.load(20)
-
-      await sleep(300)
-    }
   }
 
   deferReactions = (notes: Event[]) => {

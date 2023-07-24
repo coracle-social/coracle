@@ -54,7 +54,8 @@ export class Network {
   authHandler: (url: string, challenge: string) => void
   emitter = new EventEmitter()
 
-  relayHasError = (url: string) => Boolean(this.pool.get(url, {autoConnect: false})?.error)
+  relayHasError = (url: string) =>
+    Boolean(this.pool.get(url, {autoConnect: false})?.status === Socket.STATUS.ERROR)
 
   getExecutor = (urls: string[], {bypassBoot = false} = {}) => {
     if (this.engine.Env.FORCE_RELAYS?.length > 0) {
@@ -72,7 +73,7 @@ export class Network {
     if (muxUrl && (urls.length > 1 || this.pool.has(muxUrl))) {
       const socket = this.pool.get(muxUrl)
 
-      if (!socket.error) {
+      if (socket.status !== Socket.STATUS.ERROR) {
         target = new Plex(urls, socket)
       }
     }
@@ -84,12 +85,12 @@ export class Network {
     const executor = new Executor(target)
 
     executor.handleAuth({
-      onAuth(url: string, challenge: string) {
+      onAuth: (url: string, challenge: string) => {
         this.emitter.emit("error:set", url, "unauthorized")
 
         return this.authHandler?.(url, challenge)
       },
-      onOk(url: string, id: string, ok: boolean, message: string) {
+      onOk: (url: string, id: string, ok: boolean, message: string) => {
         this.emitter.emit("error:clear", url, ok ? null : "forbidden")
 
         // Once we get a good auth response don't wait to send stuff to the relay
@@ -153,13 +154,12 @@ export class Network {
         const progress = getProgress()
 
         if (progress.pending.size === 0) {
-          log(`Finished publishing to ${urls.length} relays`, event, progress)
           resolve(progress)
           sub.unsubscribe()
           executor.target.cleanup()
-        } else if (onProgress) {
-          onProgress(progress)
         }
+
+        onProgress?.(progress)
       }
 
       setTimeout(() => {

@@ -62,7 +62,7 @@
   const goToParent = async () => {
     const relays = Nip65.getParentHints(3, note)
 
-    goToNote({note: {id: findReplyId(note)}, relays})
+    goToNote({note: {id: findReplyId(note), replies: [note]}, relays})
   }
 
   const goToRoot = async () => {

@@ -1,7 +1,7 @@
 import {matchFilters} from "nostr-tools"
 import {throttle} from "throttle-debounce"
 import {
-  map,
+  omit,
   pick,
   pluck,
   identity,
@@ -22,6 +22,9 @@ import type {Collection} from "src/engine/util/store"
 import type {Subscription} from "src/engine/util/Subscription"
 import type {Event, DisplayEvent, Filter} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
+
+const fromDisplayEvent = (e: DisplayEvent): Event =>
+  omit(["zaps", "likes", "replies", "matchesFilter"], e)
 
 export type ContextLoaderOpts = {
   filter: Filter | Filter[]
@@ -95,13 +98,16 @@ export class ContextLoader {
     return events
   }
 
-  mergeHints(groups: string[][]) {
-    const {Nip65, User} = this.engine
+  getRelayLimit() {
+    return this.engine.User.getSetting("relay_limit")
+  }
 
-    return Nip65.mergeHints(User.getSetting("relay_limit"), groups)
+  mergeHints(groups: string[][]) {
+    return this.engine.Nip65.mergeHints(this.getRelayLimit(), groups)
   }
 
   applyContext = (notes: Event[], substituteParents = false) => {
+    const {User} = this.engine
     const parentIds = new Set(notes.map(findReplyId).filter(identity))
     const forceShow = union(new Set(pluck("id", notes)), parentIds)
     const contextById = {} as Record<string, Event>
@@ -131,7 +137,9 @@ export class ContextLoader {
       const {replies = [], reactions = [], zaps = []} = note as DisplayEvent
       const combinedZaps = zaps.concat(zapsByParentId[note.id] || [])
       const combinedReactions = reactions.concat(reactionsByParentId[note.id] || [])
-      const combinedReplies = replies.concat(map(annotate, repliesByParentId[note.id] || []))
+      const combinedReplies = (replies as Event[])
+        .concat(repliesByParentId[note.id] || [])
+        .map(annotate)
 
       return {
         ...note,
@@ -143,19 +151,23 @@ export class ContextLoader {
     }
 
     if (substituteParents) {
-      notes = notes.map(note => {
-        for (let i = 0; i < 2; i++) {
-          const parent = contextById[findReplyId(note)]
+      // We may have loaded a reply from a follower to someone we muted
+      notes = reject(
+        User.isMuted,
+        notes.map(note => {
+          for (let i = 0; i < 2; i++) {
+            const parent = contextById[findReplyId(note)]
 
-          if (!parent) {
-            break
+            if (!parent) {
+              break
+            }
+
+            note = parent
           }
 
-          note = parent
-        }
-
-        return note
-      })
+          return note
+        })
+      )
     }
 
     return uniqBy(prop("id"), notes).map(annotate)
@@ -176,7 +188,10 @@ export class ContextLoader {
 
     const {Network, Nip65} = this.engine
     const parentsInfo = events
-      .map((e: Event) => ({id: findReplyId(e), hints: Nip65.getParentHints(10, e)}))
+      .map((e: Event) => ({
+        id: findReplyId(e),
+        hints: Nip65.getParentHints(this.getRelayLimit(), e),
+      }))
       .filter(({id}: any) => id && !this.seen.has(id))
 
     if (parentsInfo.length > 0) {
@@ -211,7 +226,7 @@ export class ContextLoader {
       for (const c of chunk(256, events)) {
         Network.subscribe({
           timeout: 3000,
-          relays: this.mergeHints(c.map(e => Nip65.getReplyHints(10, e))),
+          relays: this.mergeHints(c.map(e => Nip65.getReplyHints(this.getRelayLimit(), e))),
           filter: {kinds: this.getReplyKinds(), "#e": pluck("id", c as Event[])},
 
           onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: depth - 1})),
@@ -239,7 +254,7 @@ export class ContextLoader {
     for (const c of chunk(256, findNotes(this.data.get()))) {
       this.addSubs("listeners", [
         Network.subscribe({
-          relays: this.mergeHints(c.map(e => Nip65.getReplyHints(10, e))),
+          relays: this.mergeHints(c.map(e => Nip65.getReplyHints(this.getRelayLimit(), e))),
           filter: {kinds: this.getReplyKinds(), "#e": pluck("id", c), since: now()},
           onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: 2})),
         }),
@@ -269,6 +284,25 @@ export class ContextLoader {
     this.loadContext({events, depth})
 
     this.listenForContext()
+  }
+
+  hydrate(notes: Partial<DisplayEvent>[], depth) {
+    const context: Event[] = []
+
+    const addContext = (note: Partial<DisplayEvent>) => {
+      // Only add to context if it's a real event
+      if (note.sig) {
+        context.push(fromDisplayEvent(note as DisplayEvent))
+      }
+
+      note.zaps?.forEach(zap => context.push(zap))
+      note.reactions?.forEach(reaction => context.push(reaction))
+      note.replies?.forEach(reply => addContext(reply))
+    }
+
+    notes.forEach(addContext)
+
+    this.addContext(context, {depth})
   }
 
   // Control

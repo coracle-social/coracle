@@ -86,8 +86,7 @@ export const parseContent = ({content, tags = []}: {content: string; tags?: stri
 
         return [`nostr:${type}`, bech32, {...value, entity}]
       } catch (e) {
-        console.log(e)
-        // pass
+        console.warn(e)
       }
     }
   }

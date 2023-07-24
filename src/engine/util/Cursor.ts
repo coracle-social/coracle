@@ -1,6 +1,7 @@
-import {all, prop, mergeLeft, identity, sortBy} from "ramda"
-import {ensurePlural, first} from "hurdak"
+import {mergeRight, identity, sortBy} from "ramda"
+import {ensurePlural, seconds, first} from "hurdak"
 import {now} from "src/util/misc"
+import {EPOCH} from "src/util/nostr"
 import type {Filter, Event} from "src/engine/types"
 import type {Subscription} from "src/engine/util/Subscription"
 import type {Engine} from "src/engine/Engine"
@@ -13,10 +14,12 @@ export type CursorOpts = {
 
 export class Cursor {
   engine: Engine
-  done = false
   until = now()
+  delta = seconds(10, "minute")
+  since = now() - this.delta
   buffer: Event[] = []
   loading = false
+  done = false
 
   constructor(engine: Engine, readonly opts: CursorOpts) {
     this.engine = engine
@@ -30,7 +33,7 @@ export class Cursor {
       return null
     }
 
-    const {until} = this
+    const {since, until} = this
     const {relay, filter, onEvent} = this.opts
 
     this.loading = true
@@ -40,7 +43,7 @@ export class Cursor {
     return this.engine.Network.subscribe({
       timeout: 4000,
       relays: [relay],
-      filter: ensurePlural(filter).map(mergeLeft({until, limit})),
+      filter: ensurePlural(filter).map(mergeRight({until, limit, since})),
       onEvent: (event: Event) => {
         this.until = Math.min(until, event.created_at)
         this.buffer.push(event)
@@ -51,7 +54,18 @@ export class Cursor {
       },
       onEose: () => {
         this.loading = false
-        this.done = count < limit
+
+        // Relays can't be relied upon to return events in descending order, do exponential
+        // windowing to ensure we get the most recent stuff on first load, but eventually find it all
+        if (count === 0) {
+          this.delta *= 10
+        }
+
+        this.since -= this.delta
+
+        if (this.since <= EPOCH) {
+          this.done = true
+        }
       },
       onClose: () => {
         this.loading = false
@@ -88,10 +102,6 @@ export class MultiCursor {
 
   load(limit: number) {
     return this.cursors.map(c => c.load(limit)).filter(identity)
-  }
-
-  done() {
-    return all(prop("done"), this.cursors)
   }
 
   count() {

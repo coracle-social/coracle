@@ -8,6 +8,8 @@ export const noteKinds = [1, 1985, 30023, 1063, 9802]
 export const personKinds = [0, 2, 3, 10002]
 export const userKinds = personKinds.concat([10000, 30001, 30078])
 
+export const EPOCH = 1635724800
+
 export const appDataKeys = {
   USER_SETTINGS: "nostr-engine/User/settings/v1",
   NIP04_LAST_CHECKED: "nostr-engine/Nip04/last_checked/v1",
