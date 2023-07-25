@@ -1,25 +1,87 @@
 <script>
+  import {nip05} from "nostr-tools"
+  import {uniqBy, sortBy} from "ramda"
+  import {batch, quantify} from "hurdak"
+  import {tryJson, displayDomain, pushToKey} from "src/util/misc"
+  import {copyToClipboard} from "src/util/html"
+  import {Tags} from "src/util/nostr"
   import {fly} from "src/util/transition"
-  import Media from "src/partials/Media.svelte"
+  import {toast, modal} from "src/partials/state"
+  import Image from "src/partials/Image.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
+  import Chip from "src/partials/Chip.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import ImageCircle from "src/partials/ImageCircle.svelte"
+  import {Network, Directory, Nip05, User, pubkeyLoader} from "src/app/engine"
+  import {compileFilter} from "src/app/state"
 
-  const apps = [
-    ["https://zapstr.live", "Zapstr", "Stream music, zap artists"],
-    ["https://highlighter.com", "Highlighter", "Highlight anything and share it with friends."],
-    ["https://www.wavman.app", "Wavman", "A nostalgic music player built on nostr."],
-    ["https://feeds.nostr.band", "Feeds", "Find custom curated feeds - and create your own."],
-    ["https://blowater.deno.dev", "Blowater", "The best nostr micro-client for managing DMs."],
-    ["https://listr.lol", "Listr", "Build, share, and browse custom lists."],
-    ["https://nosbin.com", "Nosbin", "Copy/paste/share."],
-    ["https://nostrnests.com/", "Nostr Nests", "Live stream your thoughts, as the happen."],
-    ["https://nostr.watch", "Nostr Watch", "A directory of nostr relays."],
-    ["https://nostr.directory", "Nostr Directory", "Validate your nostr pubkey with Twitter."],
-    ["https://getalby.com", "Alby", "Sign in to nostr apps without sharing your private key."],
-    ["https://nostrplebs.com", "NostrPlebs", "Get verified at nostrplebs.com."],
-    ["https://nadar.tigerville.no", "Nadar", "Find out what relays know about your post."],
-    ["https://pinstr.app", "Pinstr", "Create and manage collections of notes."],
-  ]
+  const getColumns = xs => {
+    const cols = [[], []]
+
+    xs.forEach((x, i) => {
+      cols[i % 2].push(x)
+    })
+
+    return cols.flatMap(x => x)
+  }
+
+  const copy = (label, value) => {
+    copyToClipboard(value)
+    toast.show("info", `${label} copied to clipboard!`)
+  }
+
+  const goToNip05 = async entity => {
+    const profile = await nip05.queryProfile(entity)
+
+    if (profile) {
+      modal.push({type: "person/feed", pubkey: profile.pubkey})
+    } else {
+      copy("Address", entity)
+    }
+  }
+
+  Network.subscribe({
+    timeout: 5000,
+    filter: [{kinds: [31990]}, compileFilter({kinds: [31989], authors: "follows"})],
+    relays: User.getRelayUrls("read"),
+    onEvent: batch(500, events => {
+      const pubkeys = []
+
+      for (const e of events) {
+        pubkeys.push(e.pubkey)
+
+        if (e.kind === 31990) {
+          e.address = [e.kind, e.pubkey, Tags.from(e).getMeta("d")].join(":")
+
+          handlers = handlers.concat(e)
+        } else {
+          for (const a of Tags.from(e).type("a").values().all()) {
+            recsByNaddr = pushToKey(recsByNaddr, a, e)
+          }
+        }
+      }
+
+      pubkeyLoader.load(pubkeys)
+    }),
+  })
+
+  let handlers = []
+  let recsByNaddr = {}
+
+  $: apps = uniqBy(
+    e => e.info.name,
+    sortBy(
+      e => -e.recs.length,
+      handlers.map(e => {
+        e.recs = recsByNaddr[e.address] || []
+        e.info = tryJson(() => JSON.parse(e.content)) || Directory.getProfile(e.pubkey)
+        e.handle = Nip05.getHandle(e.pubkey)
+
+        return e
+      })
+    )
+  )
 
   document.title = "Apps"
 </script>
@@ -30,12 +92,51 @@
       <Heading>Recommended micro-apps</Heading>
       <p>Hand-picked recommendations to enhance your nostr experience.</p>
     </div>
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-      {#each apps as [url, title, description]}
-        <Card class="flex flex-col gap-2">
-          <h1 class="text-2xl">{title}</h1>
-          <p class="h-16">{description}</p>
-          <Media link={{url}} />
+    <div class="columns-sm gap-4">
+      {#each getColumns(apps) as app}
+        <Card class="mb-4 flex break-inside-avoid flex-col gap-4">
+          <div class="flex gap-4">
+            <ImageCircle size={14} src={app.info.picture} />
+            <div class="flex min-w-0 flex-grow flex-col gap-2">
+              <h1 class="text-2xl">{app.info.display_name || app.info.name}</h1>
+              {#if app.handle}
+                <div class="flex gap-1 text-sm">
+                  <i class="fa fa-user-check text-accent" />
+                  <span class="text-gray-1">{Nip05.displayHandle(app.handle)}</span>
+                </div>
+              {/if}
+            </div>
+          </div>
+          <p>{app.info.about}</p>
+          <div>
+            {#if app.info.website}
+              <Anchor external href={app.info.website} class="mb-2 mr-2 inline-block">
+                <Chip><i class="fa fa-link" />{displayDomain(app.info.website)}</Chip>
+              </Anchor>
+            {/if}
+            {#if app.info.lud16}
+              <div class="mb-2 mr-2 inline-block cursor-pointer">
+                <Chip on:click={() => copy("Address", app.info.lud16)}>
+                  <i class="fa fa-bolt" />{app.info.lud16}
+                </Chip>
+              </div>
+            {/if}
+            {#if app.info.nip05}
+              <div class="mb-2 mr-2 inline-block cursor-pointer">
+                <Chip on:click={() => goToNip05(app.info.nip05)}>
+                  <i class="fa fa-at" />{app.info.nip05}
+                </Chip>
+              </div>
+            {/if}
+          </div>
+          {#if app.recs.length > 0}
+            <i class="text-sm">
+              Recommended by {quantify(app.recs.length, "person", "people")} you follow.
+            </i>
+          {/if}
+          {#if app.info.banner}
+            <Image class="rounded" src={app.info.banner} />
+          {/if}
         </Card>
       {/each}
     </div>

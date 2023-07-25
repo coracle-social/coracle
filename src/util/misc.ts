@@ -1,7 +1,7 @@
 import {bech32, utf8} from "@scure/base"
 import {debounce} from "throttle-debounce"
 import {pluck} from "ramda"
-import {Storage, seconds, tryFunc, sleep, round} from "hurdak"
+import {Storage, first, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from "svelte/store"
 import {warn} from "src/util/logger"
@@ -230,6 +230,8 @@ export const webSocketURLToPlainOrBase64 = (url: string): string => {
 export const pushToKey = <T>(m: Record<string, T[]>, k: string, v: T) => {
   m[k] = m[k] || []
   m[k].push(v)
+
+  return m
 }
 
 export const race = (p, promises) => {
@@ -247,4 +249,12 @@ export const race = (p, promises) => {
       }).catch(reject)
     })
   })
+}
+
+export const displayUrl = url => {
+  return url.replace(/https?:\/\/(www\.)?/, "").replace(/\/$/, "")
+}
+
+export const displayDomain = url => {
+  return first(displayUrl(url).split(/[\/\?]/))
 }

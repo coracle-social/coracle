@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {annotateMedia} from "src/util/misc"
+  import {annotateMedia, displayUrl} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Media from "src/partials/Media.svelte"
 
@@ -19,6 +19,6 @@
   </div>
 {:else}
   <Anchor class="underline" external href={value.url}>
-    {value.url.replace(/https?:\/\/(www\.)?/, "")}
+    {displayUrl(value.url)}
   </Anchor>
 {/if}

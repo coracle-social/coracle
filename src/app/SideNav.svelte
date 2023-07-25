@@ -85,7 +85,7 @@
   </li>
   <li class="cursor-pointer">
     <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/apps">
-      <i class="fa fa-motorcycle mr-2" /> Apps
+      <i class="fa fa-box mr-2" /> Apps
     </a>
   </li>
   <li class="mx-3 my-4 h-px bg-gray-6" />

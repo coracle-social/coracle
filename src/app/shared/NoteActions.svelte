@@ -39,7 +39,7 @@
   const mute = () => User.mute("e", note.id)
 
   const react = async content => {
-    const relays = Nip65.getPublishHints(3, note, User.getRelayUrls("write"))
+    const relays = Nip65.getPublishHints(5, note, User.getRelayUrls("write"))
 
     like = first(await Outbox.publish(Builder.createReaction(note, content), relays))
   }

@@ -1,7 +1,8 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Improve publishing dialog, make it openable with relay deets
+  - [ ] Upgrade app store to use real events
+    - Show supported kinds
   - [ ] Remove external dependencies from engine, open source it?
   - [ ] Show nip 5's in search and other places
   - [ ] Normalize all relay urls, see comment by daniele
