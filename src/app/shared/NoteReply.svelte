@@ -1,10 +1,8 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
   import {createEventDispatcher} from "svelte"
-  import {without, pluck, uniq} from "ramda"
+  import {without, uniq} from "ramda"
   import {slide} from "src/util/transition"
   import {Tags} from "src/util/nostr"
-  import {toast} from "src/partials/state"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
@@ -53,27 +51,11 @@
 
     if (content) {
       const rawEvent = Builder.createReply(note, content, data.mentions.map(Builder.mention))
-      const relays = Nip65.getPublishHints(3, note, User.getRelayUrls("write"))
-      const [event, promise] = await publishWithToast(rawEvent, relays)
+      const relays = Nip65.getPublishHints(10, note, User.getRelayUrls("write"))
+
+      await publishWithToast(rawEvent, relays)
 
       reset()
-
-      const {succeeded} = await promise
-
-      if (succeeded.size > 0) {
-        toast.show("info", {
-          text: `Your note has been created!`,
-          link: {
-            text: "View",
-            href:
-              "/" +
-              nip19.neventEncode({
-                id: event.id,
-                relays: pluck("url", relays.slice(0, 3)),
-              }),
-          },
-        })
-      }
     }
   }
 

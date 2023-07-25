@@ -4,7 +4,6 @@
   - [ ] Improve publishing dialog, make it openable with relay deets
   - [ ] Remove external dependencies from engine, open source it?
   - [ ] Show nip 5's in search and other places
-  - [ ] If connections fail, re-open and re-send active subs
   - [ ] Normalize all relay urls, see comment by daniele
   - [ ] Add thread view
 - [ ] Email newsletter for priority content

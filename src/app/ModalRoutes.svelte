@@ -11,6 +11,7 @@
   import NoteCreate from "src/app/views/NoteCreate.svelte"
   import NoteZap from "src/app/views/NoteZap.svelte"
   import NoteShare from "src/app/views/NoteShare.svelte"
+  import PublishInfo from "src/app/views/PublishInfo.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import PersonFeed from "src/app/views/PersonFeed.svelte"
   import PersonList from "src/app/shared/PersonList.svelte"
@@ -37,6 +38,8 @@
   <NoteZap note={m.note} />
 {:else if m.type === "note/share"}
   <NoteShare note={m.note} />
+{:else if m.type === "publish/info"}
+  <PublishInfo event={m.event} progress={m.progress} />
 {:else if m.type === "relay/browse"}
   <RelayBrowse />
 {:else if m.type === "relay/detail"}

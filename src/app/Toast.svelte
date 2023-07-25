@@ -3,12 +3,14 @@
   import {is} from "ramda"
   import {fly} from "src/util/transition"
   import {toast} from "src/partials/state"
+
+  console.log($toast)
 </script>
 
 {#if $toast}
   {#key "key"}
     <div
-      class="pointer-events-none fixed top-0 left-0 right-0 z-30 flex justify-center"
+      class="pointer-events-none fixed left-0 right-0 top-0 z-30 flex justify-center"
       transition:fly={{y: -50, duration: 300}}>
       <div
         class={cx(
@@ -26,7 +28,10 @@
           <div>
             {$toast.message.text}
             {#if $toast.message.link}
-              <a class="ml-1 underline" href={$toast.message.link.href}>
+              <a
+                class="ml-1 cursor-pointer underline"
+                href={$toast.message.link.href}
+                on:click={$toast.message.link.onClick}>
                 {$toast.message.link.text}
               </a>
             {/if}

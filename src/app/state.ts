@@ -185,8 +185,12 @@ export const login = async (method: string, key: string | {pubkey: string; token
   }
 }
 
-export const publishWithToast = (event: Partial<Event>, relays: string[]) =>
-  Outbox.publish(event, relays, ({completed, succeeded, failed, timeouts, pending}) => {
+export const publishWithToast = async (
+  rawEvent: Partial<Event>,
+  relays: string[]
+): ReturnType<typeof Outbox.publish> => {
+  const [event, promise] = await Outbox.publish(rawEvent, relays, progress => {
+    const {succeeded, failed, timeouts, pending} = progress
     let message = `Published to ${succeeded.size}/${relays.length} relays`
 
     const extra = []
@@ -206,8 +210,21 @@ export const publishWithToast = (event: Partial<Event>, relays: string[]) =>
       message += ` (${extra.join(", ")})`
     }
 
-    toast.show("info", message, pending.size ? null : 5)
+    const payload = pending.size
+      ? message
+      : {
+          text: message,
+          link: {
+            text: "Details",
+            onClick: () => modal.push({type: "publish/info", event, progress}),
+          },
+        }
+
+    toast.show("info", payload, pending.size ? null : 5)
   })
+
+  return [event, promise]
+}
 
 // Feeds
 
