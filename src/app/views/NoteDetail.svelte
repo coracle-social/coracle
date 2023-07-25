@@ -9,8 +9,8 @@
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import engine, {Nip65, Network} from "src/app/engine"
   import Note from "src/app/shared/Note.svelte"
+  import engine, {Settings, Nip65, Network} from "src/app/engine"
 
   export let note
   export let relays = []
@@ -20,13 +20,11 @@
   const filter = {ids: [note.id]}
   const context = new ContextLoader(engine, {
     filter,
-    onEvent: () => {
-      setTimeout(() => {
-        // Update feed, but only if we have loaded an actual note
-        if (displayNote.sig) {
-          displayNote = first(context.applyContext([displayNote]))
-        }
-      }, 10)
+    onEvent: e => {
+      // Update feed, but only if we have loaded an actual note
+      if (displayNote.sig) {
+        displayNote = first(context.applyContext([displayNote]))
+      }
     },
   })
 
@@ -41,12 +39,12 @@
 
   onMount(async () => {
     // If our note came from a feed, we can preload context
-    context.hydrate([displayNote])
+    context.hydrate([displayNote], depth)
 
     sub = Network.subscribe({
       filter,
       timeout: 8000,
-      relays: Nip65.selectHints(10, relays),
+      relays: Nip65.selectHints(Settings.getSetting("relay_limit"), relays),
       onEvent: e => {
         context.addContext([e], {depth})
 

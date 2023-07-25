@@ -1,4 +1,4 @@
-import {partition, pluck, sortBy, without, any, prop, assoc} from "ramda"
+import {partition, uniqBy, pluck, sortBy, without, any, prop, assoc} from "ramda"
 import {ensurePlural, seconds, doPipe, throttle, batch} from "hurdak"
 import {now, race} from "src/util/misc"
 import {Cursor, MultiCursor} from "src/engine/util/Cursor"
@@ -104,14 +104,20 @@ export class FeedLoader {
 
   addToFeed = (notes: Event[]) => {
     this.feed.update($feed => {
-      const newFeed = ($feed as Event[]).concat(sortBy(e => -e.created_at, notes))
-
-      return this.context.applyContext(newFeed, true)
+      return uniqBy(
+        prop("id"),
+        $feed.concat(
+          this.context.applyContext(
+            sortBy(e => -e.created_at, notes),
+            true
+          )
+        )
+      )
     })
   }
 
   updateFeed = throttle(500, () => {
-    this.feed.update($feed => this.context.applyContext($feed, true))
+    this.feed.update($feed => this.context.applyContext($feed))
   })
 
   // Loading

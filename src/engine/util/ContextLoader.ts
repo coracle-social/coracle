@@ -267,12 +267,6 @@ export class ContextLoader {
   addContext = (newEvents: Event[], {shouldLoadParents = false, depth = 0}) => {
     const events = this.preprocessEvents(newEvents)
 
-    if (this.opts.onEvent) {
-      for (const event of events) {
-        this.opts.onEvent(event)
-      }
-    }
-
     this.data.update($context => $context.concat(events))
 
     this.loadPubkeys(events)
@@ -284,6 +278,12 @@ export class ContextLoader {
     this.loadContext({events, depth})
 
     this.listenForContext()
+
+    if (this.opts.onEvent) {
+      for (const event of events) {
+        this.opts.onEvent(event)
+      }
+    }
   }
 
   hydrate(notes: Partial<DisplayEvent>[], depth) {

@@ -7,7 +7,7 @@
   import {onMount} from "svelte"
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
-  import {isNil, last} from "ramda"
+  import {isNil, find, last} from "ramda"
   import {Storage, seconds, Fetch, shuffle} from "hurdak"
   import {tryFetch, hexToBech32, bech32ToHex, now} from "src/util/misc"
   import {userKinds} from "src/util/nostr"
@@ -108,7 +108,8 @@
 
     // Log modals, keep scroll position on body, but don't allow scrolling
     const unsubModal = modal.stack.subscribe($stack => {
-      if ($stack.filter(x => !x.mini).length > 0) {
+      console.log("=======", $stack, scrollY)
+      if (find(x => !x.mini, $stack)) {
         logUsage(btoa(["modal", last($stack).type].join(":")))
 
         // This is not idempotent, so don't duplicate it
