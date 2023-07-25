@@ -8,7 +8,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {User, Nip65, Meta, Keys} from "src/app/engine"
+  import {User, Nip65, Keys, Network} from "src/app/engine"
 
   export let relay
   export let rating = null
@@ -18,8 +18,7 @@
   export let showControls = false
 
   let statusHover = false
-  let quality = null
-  let message = null
+  let meta = null
 
   const relays = Nip65.policies.key(Keys.pubkey.get()).derived(() => new Set(User.getRelayUrls()))
 
@@ -35,7 +34,9 @@
 
   onMount(() => {
     return poll(10_000, () => {
-      ;[quality, message] = Meta.getRelayQuality(relay.url)
+      const socket = Network.pool.get(relay.url, {autoConnect: false})
+
+      meta = socket?.meta
     })
   })
 </script>
@@ -60,15 +61,15 @@
             statusHover = true
           }}
           class="h-2 w-2 cursor-pointer rounded-full bg-gray-6"
-          class:bg-gray-6={message === "Not connected"}
-          class:bg-danger={quality <= 0.3 && message !== "Not connected"}
-          class:bg-warning={between(0.3, 0.7, quality)}
-          class:bg-success={quality > 0.7} />
+          class:bg-gray-6={!meta}
+          class:bg-danger={meta && meta.quality <= 0.3}
+          class:bg-warning={meta && between(0.3, 0.7, meta.quality)}
+          class:bg-success={meta && meta.quality > 0.7} />
         <p
           class="hidden text-sm text-gray-1 transition-all sm:block"
           class:opacity-0={!statusHover}
           class:opacity-1={statusHover}>
-          {message}
+          {meta ? meta.description : "Not connected"}
         </p>
       {/if}
       {#if rating}

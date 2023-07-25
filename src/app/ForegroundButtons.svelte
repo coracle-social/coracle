@@ -7,7 +7,7 @@
 
   let scrollY = 0
 
-  $: showCreateNote = $location.pathname.match(/messages$|chat$|relays$|keys|settings|logout$/)
+  $: showCreateNote = !$location.pathname.match(/messages.|chat.|relays.|keys|settings|logout$/)
   $: showLogin = !$location.pathname.match(/login$/)
 
   const {canSign} = Keys
@@ -35,7 +35,7 @@
       <i class="fa fa-arrow-up" />
     </button>
   {/if}
-  {#if $canSign && !showCreateNote}
+  {#if $canSign && showCreateNote}
     <button
       class="color-white flex h-16 w-16 items-center justify-center rounded-full
             border border-accent-light bg-accent text-white shadow-2xl

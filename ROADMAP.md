@@ -1,9 +1,7 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Rename content to nipxx
-  - [ ] Have meta intercept subscribe/publish rather than listen to specific events
-  - [ ] Speed up note detail
+  - [ ] Improve publishing dialog, make it openable with relay deets
   - [ ] Fix feed control state
   - [ ] Remove external dependencies from engine, open source it?
   - [ ] Show nip 5's in search and other places

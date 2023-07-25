@@ -76,7 +76,7 @@ export class FeedLoader {
 
     // Wait until a good number of subscriptions have completed to reduce the chance of
     // out of order notes
-    this.ready = race(0.1, pluck("complete", subs))
+    this.ready = race(0.2, pluck("complete", subs))
   }
 
   // Control

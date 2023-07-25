@@ -106,10 +106,7 @@ export class Nip65 {
       // Filter out relays that appear to be broken or slow
       if (!isShareableRelay(url)) {
         bad.push(url)
-      } else if (
-        this.engine.Network.relayHasError(url) ||
-        this.engine.Meta.getRelayQuality(url)[0] < 0.5
-      ) {
+      } else if (this.engine.Network.relayIsLowQuality(url)) {
         bad.push(url)
       } else {
         ok.push(url)

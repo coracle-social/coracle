@@ -81,22 +81,6 @@ export type RelayPolicy = {
   relays: RelayPolicyEntry[]
 }
 
-export type RelayStat = {
-  url: string
-  error?: string
-  last_opened?: number
-  last_closed?: number
-  last_activity?: number
-  last_publish?: number
-  last_sub?: number
-  total_subs?: number
-  active_subs?: number
-  events_count?: number
-  eose_count?: number
-  eose_timer?: number
-  timeouts?: number
-}
-
 export type GraphEntry = {
   pubkey: string
   updated_at: number

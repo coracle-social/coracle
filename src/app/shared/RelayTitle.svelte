@@ -5,18 +5,19 @@
   import {stringToHue, hsl} from "src/util/misc"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {Nip65, Meta} from "src/app/engine"
+  import {Nip65, Network} from "src/app/engine"
 
   export let relay
   export let rating = null
 
-  let quality = null
-  let message = null
+  let meta = null
   let showStatus = false
 
   onMount(() => {
     return poll(10_000, () => {
-      ;[quality, message] = Meta.getRelayQuality(relay.url)
+      const socket = Network.pool.get(relay.url, {autoConnect: false})
+
+      meta = socket?.meta
     })
   })
 </script>
@@ -38,15 +39,15 @@
       showStatus = true
     }}
     class="h-2 w-2 cursor-pointer rounded-full bg-gray-6"
-    class:bg-gray-6={message === "Not connected"}
-    class:bg-danger={quality <= 0.3 && message !== "Not connected"}
-    class:bg-warning={between(0.3, 0.7, quality)}
-    class:bg-success={quality > 0.7} />
+    class:bg-gray-6={!meta}
+    class:bg-danger={meta && meta.quality <= 0.3}
+    class:bg-warning={meta && between(0.3, 0.7, meta.quality)}
+    class:bg-success={meta && meta.quality > 0.7} />
   <p
     class="hidden text-sm text-gray-1 transition-all sm:block"
     class:opacity-0={!showStatus}
     class:opacity-1={showStatus}>
-    {message}
+    {meta ? meta.description : "Not connected"}
   </p>
   {#if rating}
     <div class="px-4 text-sm">

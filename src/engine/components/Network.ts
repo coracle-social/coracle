@@ -1,4 +1,3 @@
-import {EventEmitter} from "events"
 import {verifySignature, matchFilters} from "nostr-tools"
 import {Pool, Plex, Relays, Executor, Socket} from "paravel"
 import {ensurePlural, union, difference} from "hurdak"
@@ -52,10 +51,8 @@ export class Network {
   engine: Engine
   pool = new Pool()
   authHandler: (url: string, challenge: string) => void
-  emitter = new EventEmitter()
 
-  relayHasError = (url: string) =>
-    Boolean(this.pool.get(url, {autoConnect: false})?.status === Socket.STATUS.ERROR)
+  relayIsLowQuality = (url: string) => this.pool.get(url, {autoConnect: false})?.meta?.quality < 0.5
 
   getExecutor = (urls: string[], {bypassBoot = false} = {}) => {
     if (this.engine.Env.FORCE_RELAYS?.length > 0) {
@@ -86,13 +83,9 @@ export class Network {
 
     executor.handleAuth({
       onAuth: (url: string, challenge: string) => {
-        this.emitter.emit("error:set", url, "unauthorized")
-
         return this.authHandler?.(url, challenge)
       },
       onOk: (url: string, id: string, ok: boolean, message: string) => {
-        this.emitter.emit("error:clear", url, ok ? null : "forbidden")
-
         // Once we get a good auth response don't wait to send stuff to the relay
         if (ok) {
           this.pool.get(url)
@@ -133,8 +126,6 @@ export class Network {
   }: PublishOpts): Promise<Progress> => {
     const urls = getUrls(relays)
     const executor = this.getExecutor(urls, {bypassBoot: verb === "AUTH"})
-
-    this.emitter.emit("publish", urls)
 
     log(`Publishing to ${urls.length} relays`, event, urls)
 
@@ -205,18 +196,14 @@ export class Network {
     const executor = this.getExecutor(urls)
     const filters = ensurePlural(filter)
     const subscription = new Subscription()
-    const now = Date.now()
     const seen = new Map()
     const eose = new Set()
 
     log(`Starting subscription with ${relays.length} relays`, {filters, relays})
 
-    this.emitter.emit("sub:open", urls)
-
     subscription.on("close", () => {
       sub.unsubscribe()
       executor.target.cleanup()
-      this.emitter.emit("sub:close", urls)
       onClose?.()
     })
 
@@ -257,8 +244,6 @@ export class Network {
           return
         }
 
-        this.emitter.emit("event", {url, event})
-
         if (shouldProcess) {
           this.engine.Events.queue.push(event)
         }
@@ -267,12 +252,6 @@ export class Network {
       },
       onEose: (url: string) => {
         onEose?.(url)
-
-        // Keep track of relay timing stats, but only for the first eose we get
-        if (!eose.has(url)) {
-          this.emitter.emit("eose", url, Date.now() - now)
-        }
-
         eose.add(url)
 
         if (timeout && eose.size === relays.length) {

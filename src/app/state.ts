@@ -15,7 +15,6 @@ import {
   pubkeyLoader,
   Events,
   Nip28,
-  Meta,
   Env,
   Network,
   Outbox,
@@ -94,16 +93,10 @@ setInterval(() => {
   const $slowConnections = []
 
   // Prune connections we haven't used in a while
-  for (const url of Network.pool.data.keys()) {
-    const stats = Meta.getRelayStats(url)
-
-    if (!stats) {
-      continue
-    }
-
-    if (stats.last_activity < now() - 60) {
+  for (const [url, socket] of Network.pool.data.entries()) {
+    if (socket.meta.last_activity < now() - 60) {
       Network.pool.remove(url)
-    } else if (userRelays.has(url) && Meta.getRelayQuality(url)[0] < 0.3) {
+    } else if (userRelays.has(url) && socket.meta.quality < 0.3) {
       $slowConnections.push(url)
     }
   }
@@ -113,6 +106,8 @@ setInterval(() => {
 }, 10_000)
 
 // Synchronization from events to state
+
+let listener
 
 export const listenForNotifications = async () => {
   const pubkey = Keys.pubkey.get()
@@ -128,8 +123,8 @@ export const listenForNotifications = async () => {
 
   // Only grab one event from each category/relay so we have enough to show
   // the notification badges, but load the details lazily
-  ;(listenForNotifications as any)._listener?.close()
-  ;(listenForNotifications as any)._listener = Network.subscribe({
+  listener?.close()
+  listener = Network.subscribe({
     relays: User.getRelayUrls("read"),
     filter: [
       // Messages

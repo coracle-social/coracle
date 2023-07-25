@@ -149,14 +149,8 @@ export class Key<T extends R> implements Readable<T> {
         throw new Error(`Cannot set key: "${this.key}"`)
       }
 
-      const v = f(m.get(this.key) as T) as Record<string, any>
-
       // Make sure the pk always get set on the record
-      if (v) {
-        v[this.pk] = this.key
-
-        m.set(this.key, v as T)
-      }
+      m.set(this.key, f({...m.get(this.key), [this.pk]: this.key}))
 
       return m
     })

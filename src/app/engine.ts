@@ -1,5 +1,5 @@
 import {identity} from "ramda"
-import {Engine, StorageAdapter, PubkeyLoader} from "src/engine"
+import {Engine, StorageAdapter, PubkeyLoader, RelayStats} from "src/engine"
 
 const DUFFLEPUD_URL = import.meta.env.VITE_DUFFLEPUD_URL
 
@@ -39,6 +39,7 @@ const engine = new Engine({
 
 export const storage = new StorageAdapter(engine)
 export const pubkeyLoader = new PubkeyLoader(engine)
+export const relayStats = new RelayStats(engine)
 
 export default engine
 export const Env = engine.Env
@@ -49,7 +50,6 @@ export const Crypt = engine.Crypt
 export const Directory = engine.Directory
 export const Events = engine.Events
 export const Keys = engine.Keys
-export const Meta = engine.Meta
 export const Network = engine.Network
 export const Nip02 = engine.Nip02
 export const Nip04 = engine.Nip04

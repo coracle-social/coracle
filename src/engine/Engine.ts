@@ -6,7 +6,6 @@ import {Crypt} from "./components/Crypt"
 import {Directory} from "./components/Directory"
 import {Events} from "./components/Events"
 import {Keys} from "./components/Keys"
-import {Meta} from "./components/Meta"
 import {Network} from "./components/Network"
 import {Nip02} from "./components/Nip02"
 import {Nip04} from "./components/Nip04"
@@ -27,7 +26,6 @@ export class Engine {
   Directory = new Directory()
   Events = new Events()
   Keys = new Keys()
-  Meta = new Meta()
   Network = new Network()
   Nip02 = new Nip02()
   Nip04 = new Nip04()
