@@ -2,7 +2,6 @@
 
 - [ ] Refactor
   - [ ] Improve publishing dialog, make it openable with relay deets
-  - [ ] Fix feed control state
   - [ ] Remove external dependencies from engine, open source it?
   - [ ] Show nip 5's in search and other places
   - [ ] If connections fail, re-open and re-send active subs

@@ -27,7 +27,7 @@
 
   const displayTopics = topics => (topics.length === 1 ? topics[0] : `${topics.length} topics`)
 
-  const getFilterParts = f => {
+  const getFilterParts = filter => {
     const parts = []
 
     if (typeof filter.authors === "string") {
@@ -63,7 +63,10 @@
   }
 
   const removePart = keys => {
-    onChange(omit(keys, filter))
+    filter = omit(keys, filter)
+    _filter = getFormFilter()
+
+    onChange(filter)
   }
 
   const applyFilter = () => {
@@ -110,6 +113,17 @@
     _filter = {..._filter, authors: scope === "custom" ? [] : scope}
   }
 
+  const getFormFilter = () => ({
+    since: filter.since,
+    until: filter.since,
+    search: filter.search || "",
+    authors: Array.isArray(filter.authors)
+      ? filter.authors.map(Directory.getProfile)
+      : filter.authors || "network",
+    "#t": (filter["#t"] || []).map(objOf("name")),
+    "#p": (filter["#p"] || []).map(Directory.getProfile),
+  })
+
   const open = () => {
     modal = "maxi"
   }
@@ -129,19 +143,10 @@
     since?: number
     until?: number
     search?: string
-    authors: Profile[]
-    "#t": Topic[]
-    "#p": Profile[]
-  } = {
-    since: filter.since,
-    until: filter.since,
-    search: filter.search || "",
-    authors: Array.isArray(filter.authors)
-      ? filter.authors.map(Directory.getProfile)
-      : filter.authors || "network",
-    "#t": (filter["#t"] || []).map(objOf("name")),
-    "#p": (filter["#p"] || []).map(Directory.getProfile),
-  }
+    authors?: Profile[]
+    "#t"?: Topic[]
+    "#p"?: Profile[]
+  } = getFormFilter()
 
   $: parts = getFilterParts(filter)
 
