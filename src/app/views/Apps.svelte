@@ -99,12 +99,7 @@
             <ImageCircle size={14} src={app.info.picture} />
             <div class="flex min-w-0 flex-grow flex-col gap-2">
               <h1 class="text-2xl">{app.info.display_name || app.info.name}</h1>
-              {#if app.handle}
-                <div class="flex gap-1 text-sm">
-                  <i class="fa fa-user-check text-accent" />
-                  <span class="text-gray-1">{Nip05.displayHandle(app.handle)}</span>
-                </div>
-              {/if}
+              <PersonHandle pubkey={app.pubkey} />
             </div>
           </div>
           <p>{app.info.about}</p>

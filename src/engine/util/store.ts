@@ -44,7 +44,8 @@ export class Writable<T> implements Readable<T> {
 
   subscribe(f: Subscriber<T>) {
     this.subs.push(f)
-    this.notify()
+
+    f(this.value)
 
     return () => {
       const idx = findIndex(equals(f), this.subs)
@@ -169,29 +170,29 @@ export class Key<T extends R> implements Readable<T> {
 
 export class Collection<T extends R> implements Readable<T[]> {
   readonly pk: string
-  #map: Writable<M<T>>
-  #list: Readable<T[]>
+  readonly mapStore: Writable<M<T>>
+  readonly listStore: Readable<T[]>
 
   constructor(pk: string) {
     this.pk = pk
-    this.#map = writable(new Map())
-    this.#list = this.#map.derived<T[]>((m: M<T>) => Array.from(m.values()))
+    this.mapStore = writable(new Map())
+    this.listStore = this.mapStore.derived<T[]>((m: M<T>) => Array.from(m.values()))
   }
 
-  get = () => this.#list.get()
+  get = () => this.listStore.get()
 
-  getMap = () => this.#map.get()
+  getMap = () => this.mapStore.get()
 
-  subscribe = (f: Subscriber<T[]>) => this.#list.subscribe(f)
+  subscribe = (f: Subscriber<T[]>) => this.listStore.subscribe(f)
 
-  derived = <U>(f: (v: T[]) => U) => this.#list.derived<U>(f)
+  derived = <U>(f: (v: T[]) => U) => this.listStore.derived<U>(f)
 
-  key = (k: string) => new Key(this.#map, this.pk, k)
+  key = (k: string) => new Key(this.mapStore, this.pk, k)
 
-  set = (xs: T[]) => this.#map.set(new Map(xs.map(x => [x[this.pk], x])))
+  set = (xs: T[]) => this.mapStore.set(new Map(xs.map(x => [x[this.pk], x])))
 
   update = (f: (v: T[]) => T[]) =>
-    this.#map.update(m => new Map(f(Array.from(m.values())).map(x => [x[this.pk], x])))
+    this.mapStore.update(m => new Map(f(Array.from(m.values())).map(x => [x[this.pk], x])))
 
   reject = (f: (v: T) => boolean) => this.update(reject(f))
 

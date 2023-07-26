@@ -5,14 +5,14 @@
   import {identity, map} from "ramda"
   import {tryFunc} from "hurdak"
   import {fuzzy} from "src/util/misc"
-  import {fromNostrURI} from "src/util/nostr"
+  import {fromNostrURI, isHex} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Scan from "src/app/shared/Scan.svelte"
-  import PersonInfo from "src/app/shared/PersonInfo.svelte"
+  import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import {User, Keys, Directory, Network, Nip65, default as engine} from "src/app/engine"
 
   let q = ""
@@ -46,7 +46,7 @@
       return
     }
 
-    if (entity.match(/^[a-f0-9]{64}$/)) {
+    if (isHex(entity)) {
       navigate("/" + nip19.npubEncode(entity))
     } else if (entity.includes("@")) {
       let profile = await nip05.queryProfile(entity)
@@ -125,7 +125,9 @@
         #{result.topic.name}
       </BorderLeft>
     {:else if result.type === "profile"}
-      <PersonInfo pubkey={result.id} />
+      <BorderLeft on:click={() => modal.push({type: "person/feed", pubkey: result.id})}>
+        <PersonSummary hideActions pubkey={result.id} />
+      </BorderLeft>
     {/if}
   {/each}
 </Content>

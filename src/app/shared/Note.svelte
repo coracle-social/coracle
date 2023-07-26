@@ -13,7 +13,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
-  import {Nip05, Keys, User, Directory, Nip65, Nip02} from "src/app/engine"
+  import {Keys, User, Directory, Nip65, Nip02} from "src/app/engine"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
   export let note
@@ -37,7 +37,7 @@
   const interactive = !anchorId || !showEntire
   const author = Directory.profiles.key(note.pubkey).derived(defaultTo({pubkey: note.pubkey}))
   const muted = Nip02.graph.key(Keys.pubkey.get()).derived(() => User.isIgnoring(note.id))
-  const handle = Nip05.handles.key(note.pubkey)
+  const following = User.followsSet.derived(s => s.has(note.pubkey))
 
   let border, childrenContainer, noteContainer
 
@@ -126,8 +126,8 @@
                 class="flex items-center gap-2 pr-16 text-lg font-bold"
                 on:click={() => modal.push({type: "person/feed", pubkey: note.pubkey})}>
                 <span>{Directory.displayProfile($author)}</span>
-                {#if $handle}
-                  <i class="fa fa-circle-check text-sm text-accent" />
+                {#if $following}
+                  <i class="fa fa-user-check text-sm text-accent" />
                 {/if}
               </Anchor>
             </div>

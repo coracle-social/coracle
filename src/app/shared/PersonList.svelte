@@ -4,7 +4,7 @@
   import {batch} from "hurdak"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import PersonInfo from "src/app/shared/PersonInfo.svelte"
+  import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import {Nip02, Nip65, Settings, Network, pubkeyLoader} from "src/app/engine"
 
   export let type
@@ -35,7 +35,7 @@
 
 <Content gap="gap-2">
   {#each pubkeys as pubkey}
-    <PersonInfo {pubkey} />
+    <PersonSummary {pubkey} />
   {:else}
     <Spinner />
   {/each}

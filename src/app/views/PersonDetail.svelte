@@ -11,7 +11,9 @@
   import PersonNotes from "src/app/shared/PersonNotes.svelte"
   import PersonLikes from "src/app/shared/PersonLikes.svelte"
   import PersonRelays from "src/app/shared/PersonRelays.svelte"
-  import {Env, pubkeyLoader, Nip05, Directory, Nip65} from "src/app/engine"
+  import PersonHandle from "src/app/shared/PersonHandle.svelte"
+  import PersonName from "src/app/shared/PersonName.svelte"
+  import {Env, pubkeyLoader, Directory, Nip65} from "src/app/engine"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -23,7 +25,6 @@
 
   const tabs = ["notes", "likes", Env.FORCE_RELAYS.length === 0 && "relays"].filter(identity)
   const pubkey = toHex(npub)
-  const handle = Nip05.handles.key(pubkey)
   const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
   const {rgb, rgba} = getThemeBackgroundGradient()
 
@@ -55,15 +56,8 @@
     <div class="flex flex-grow flex-col gap-4">
       <div class="flex items-start justify-between gap-4">
         <div class="flex flex-grow flex-col gap-2">
-          <div class="flex items-center gap-2">
-            <h1 class="text-2xl">{Directory.displayProfile($profile)}</h1>
-          </div>
-          {#if $handle}
-            <div class="flex gap-1 text-sm">
-              <i class="fa fa-user-check text-accent" />
-              <span class="text-gray-1">{Nip05.displayHandle($handle)}</span>
-            </div>
-          {/if}
+          <PersonName class="text-2xl" {pubkey} />
+          <PersonHandle {pubkey} />
         </div>
         <PersonActions {pubkey} />
       </div>

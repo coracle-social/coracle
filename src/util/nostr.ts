@@ -179,3 +179,5 @@ export const getLabelQuality = (label: string, event: Event) => {
 
 export const getAvgQuality = (label: string, events: Event[]) =>
   avg(events.map(e => getLabelQuality(label, e)).filter(identity))
+
+export const isHex = x => x.match(/^[a-f0-9]{64}$/)

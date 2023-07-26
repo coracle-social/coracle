@@ -1,4 +1,5 @@
 import {nip19} from "nostr-tools"
+import {omit} from "ramda"
 import {ellipsize} from "hurdak"
 import {tryJson, now, fuzzy} from "src/util/misc"
 import {collection, derived} from "src/engine/util/store"
@@ -42,7 +43,7 @@ export class Directory {
   initialize(engine: Engine) {
     engine.Events.addHandler(0, (e: Event) => {
       tryJson(() => {
-        const kind0 = JSON.parse(e.content)
+        const kind0 = omit(["pubkey"], JSON.parse(e.content))
         const profile = this.profiles.key(e.pubkey)
 
         if (e.created_at < (profile.get()?.created_at || 0)) {

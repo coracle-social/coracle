@@ -4,7 +4,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
-  import PersonInfo from "src/app/shared/PersonInfo.svelte"
+  import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import type {Profile} from "src/engine"
   import {Env, Nip02, User, Directory, Builder} from "src/app/engine"
   import {modal} from "src/partials/state"
@@ -45,7 +45,7 @@
     </div>
   {:else}
     {#each Array.from($follows) as pubkey}
-      <PersonInfo {pubkey} />
+      <PersonSummary {pubkey} />
     {/each}
   {/if}
   <div class="flex items-center gap-2">
@@ -56,6 +56,6 @@
     <i slot="before" class="fa-solid fa-search" />
   </Input>
   {#each results.slice(0, 50) as profile (profile.pubkey)}
-    <PersonInfo pubkey={profile.pubkey} />
+    <PersonSummary pubkey={profile.pubkey} />
   {/each}
 </Content>

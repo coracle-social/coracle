@@ -17,6 +17,8 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 - [Reporting Bugs](#reporting-bugs)
 - [Suggesting Enhancements](#suggesting-enhancements)
 - [Contributing Code](#contributing-code)
+- [Project Structure](#project-structure)
+- [User Experience Notes](#user-experience-notes)
 
 ## I Have a Question
 

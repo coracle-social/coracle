@@ -10,6 +10,8 @@
 
   let contenteditable, suggestions
 
+  const {followsSet} = User
+
   const pubkeyEncoder = {
     encode: pubkey => {
       const relays = Nip65.getPubkeyHints(3, pubkey)
@@ -29,7 +31,7 @@
     let results = []
     if (word.length > 1 && word.startsWith("@")) {
       const [followed, notFollowed] = partition(
-        p => User.isFollowing(p.pubkey),
+        p => $followsSet.has(p.pubkey),
         $searchProfiles(word.slice(1))
       )
 

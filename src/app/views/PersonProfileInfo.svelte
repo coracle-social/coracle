@@ -2,8 +2,8 @@
   import {nip19} from "nostr-tools"
   import {fly} from "src/util/transition"
   import Content from "src/partials/Content.svelte"
-  import RelayCard from "src/app/shared/RelayCard.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
+  import RelayCard from "src/app/shared/RelayCard.svelte"
   import {Nip05, Nip65} from "src/app/engine"
 
   export let pubkey

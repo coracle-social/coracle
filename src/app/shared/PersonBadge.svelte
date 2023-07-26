@@ -5,18 +5,18 @@
   import {routes} from "src/app/state"
   import {Directory} from "src/app/engine"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
+  import PersonName from "src/app/shared/PersonName.svelte"
 
   export let pubkey
   export let inert = false
 
-  const profile = Directory.getProfile(pubkey)
-  const display = Directory.displayProfile(profile)
+  const display = Directory.displayPubkey(pubkey)
 </script>
 
 {#if inert}
   <span class={cx($$props.class, "relative z-10 flex items-center gap-2")}>
     <PersonCircle {pubkey} />
-    <span class="text-lg font-bold">{display}</span>
+    <PersonName {pubkey} />
   </span>
 {:else}
   <Link
@@ -24,6 +24,6 @@
     class={cx($$props.class, "relative z-10 flex items-center gap-2")}
     on:click={killEvent}>
     <PersonCircle {pubkey} />
-    <span class="text-lg font-bold">{display}</span>
+    <PersonName {pubkey} />
   </Link>
 {/if}

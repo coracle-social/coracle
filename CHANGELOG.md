@@ -10,6 +10,7 @@
 - [x] Add support for kinds filter in advanced search
 - [x] Add support for displaying kinds 0, 3, 10002
 - [x] Add detailed summary of relays a note was published to
+- [x] Emphasize follow status instead of nip05 addresses
 
 # 0.2.35
 

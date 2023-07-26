@@ -1,13 +1,18 @@
-import {when, prop, uniq, pluck, fromPairs, whereEq, find, reject} from "ramda"
+import {nth, when, defaultTo, prop, uniq, pluck, fromPairs, whereEq, find, reject} from "ramda"
 import {now} from "src/util/misc"
 import {appDataKeys, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
+import {derived} from "src/engine/util/store"
+import type {Readable} from "src/engine/util/store"
 import type {RelayPolicyEntry, List, Event} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
 
 export class User {
   engine: Engine
+  stateKey: Readable<string>
+  followsSet: Readable<Set<string>>
+  mutesSet: Readable<Set<string>>
 
-  getStateKey = () => this.engine.Keys.pubkey.get() || "anonymous"
+  getStateKey = () => this.stateKey.get()
 
   // Settings
 
@@ -195,5 +200,17 @@ export class User {
 
   initialize(engine: Engine) {
     this.engine = engine
+
+    this.stateKey = engine.Keys.pubkey.derived(defaultTo("anonymous"))
+
+    this.followsSet = derived(
+      [engine.Nip02.graph.mapStore, this.stateKey],
+      ([graph, stateKey]) => new Set(graph.get(stateKey)?.petnames.map(nth(1)))
+    )
+
+    this.mutesSet = derived(
+      [engine.Nip02.graph.mapStore, this.stateKey],
+      ([graph, stateKey]) => new Set(graph.get(stateKey)?.mutes.map(nth(1)))
+    )
   }
 }

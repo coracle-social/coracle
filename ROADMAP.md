@@ -1,12 +1,12 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Remove external dependencies from engine, open source it?
-  - [ ] Show nip 5's in search and other places
+  - [ ] Lift all the person subscriptions into caller
+  - [ ] Move user to util
+  - [ ] Move kind0 back to its own property to avoid shadowing stuff
   - [ ] Normalize all relay urls, see comment by daniele
   - [ ] Add thread view
-- [ ] Email newsletter for priority content
-- [ ] Superfollow?
+  - [ ] Use image and fetch proxies for user-provided content (especially profile data: nip05, picture, banner) to avoid security warnings
 - [ ] Re-work note media
   - [ ] Add webcam image/video capture
   - [ ] Show list of media that can be viewed/removed below post
@@ -16,7 +16,6 @@
 - [ ] Fork and white label blowater
 - [ ] Add word/char count to compose
 - [ ] Show full nip05 unless it starts with an underscore, change icon to non-verified
-- [ ] nsec bunker support
 - [ ] Add relayset support with kind 30022
 - [ ] White-labeled
   - [ ] Add invite code registration for relay
@@ -27,7 +26,6 @@
   - [ ] Avoid leaking events from private relays
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
-- [ ] Convert app store to nip 89
 - [ ] Add imgproxy https://github.com/imgproxy/imgproxy
   - Protects metadata, saves bandwidth, fixes void.cat?
 - [ ] Put search icon in header or hover button, open in modal
@@ -41,6 +39,8 @@
 # Core
 
 - [ ] Private groups
+- [ ] Superfollow?
+- [ ] Email newsletter for priority content
 - [ ] Put topic/channel/list follows in petnames https://github.com/nostr-protocol/nips/pull/665#issuecomment-1640835240
 - [ ] Add custom emoji support
 - [ ] Reminders for max time spent on coracle
