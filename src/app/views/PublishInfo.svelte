@@ -1,18 +1,15 @@
 <script lang="ts">
-  import {displayList} from "hurdak"
   import {nip19} from "nostr-tools"
   import {modal} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import RelayCard from "src/app/shared/RelayCard.svelte"
   import {Nip65, User} from "src/app/engine"
   import {publishWithToast} from "src/app/state"
 
   export let event
   export let progress
-
-  const displayRelays = (s: Set<string>) =>
-    displayList(Array.from(s).map(url => Nip65.displayRelay({url})))
 
   const noteLink =
     "/" +
@@ -32,23 +29,31 @@
 <Content size="lg">
   {#if progress.succeeded.size > 0}
     <Heading>Success!</Heading>
-    <p>
-      Your note has been published to the following relays:
-      {displayRelays(progress.succeeded)}.
-    </p>
+    <p>Your note has been published to the following relays:</p>
+    <div class="flex flex-col gap-2">
+      {#each Array.from(progress.succeeded) as url}
+        <RelayCard relay={{url}} />
+      {/each}
+    </div>
   {:else}
     <Heading>Failed to publish!</Heading>
     <p>Your note was not published.</p>
   {/if}
   {#if progress.failed.size > 0}
-    <p>
-      The following relays rejected your note: {displayRelays(progress.failed)}.
-    </p>
+    <p>The following relays rejected your note:</p>
+    <div class="flex flex-col gap-2">
+      {#each Array.from(progress.failed) as url}
+        <RelayCard relay={{url}} />
+      {/each}
+    </div>
   {/if}
   {#if progress.timeouts.size > 0}
-    <p>
-      The following relays did not respond: {displayRelays(progress.timeouts)}.
-    </p>
+    <p>The following relays did not respond:</p>
+    <div class="flex flex-col gap-2">
+      {#each Array.from(progress.timeouts) as url}
+        <RelayCard relay={{url}} />
+      {/each}
+    </div>
   {/if}
   <div class="flex justify-center">
     {#if progress.succeeded.size > 0}

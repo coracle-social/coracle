@@ -9,6 +9,7 @@
 - [x] Use NIP 89 for app recommendations
 - [x] Add support for kinds filter in advanced search
 - [x] Add support for displaying kinds 0, 3, 10002
+- [x] Add detailed summary of relays a note was published to
 
 # 0.2.35
 

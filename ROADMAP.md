@@ -1,7 +1,6 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Improve publish summary, use relay cards
   - [ ] Remove external dependencies from engine, open source it?
   - [ ] Show nip 5's in search and other places
   - [ ] Normalize all relay urls, see comment by daniele
