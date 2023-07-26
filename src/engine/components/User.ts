@@ -186,14 +186,13 @@ export class User {
     )
 
   joinChannel = (id: string) => {
-    this.engine.Nip28.channels.key(id).merge({joined: false})
+    this.engine.Nip28.channels.key(id).merge({joined: true})
 
     return this.saveChannels()
   }
 
   leaveChannel = (id: string) => {
     this.engine.Nip28.channels.key(id).merge({joined: false})
-    this.engine.Nip28.messages.reject(m => m.channel === id)
 
     return this.saveChannels()
   }

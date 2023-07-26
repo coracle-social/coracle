@@ -71,11 +71,13 @@
       <div class="flex flex-col gap-1">
         <strong>Topics and People</strong>
         <MultiSelect {search} bind:value={values.params}>
-          <div slot="item" let:item>
+          <div slot="item" let:item let:context>
             {#if item[0] === "p"}
-              <div class="-my-1">
+              {#if context === "value"}
+                {Directory.displayPubkey(item[1])}
+              {:else}
                 <PersonBadge inert pubkey={item[1]} />
-              </div>
+              {/if}
             {:else}
               <strong>#{item[1]}</strong>
             {/if}

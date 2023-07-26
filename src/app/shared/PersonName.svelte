@@ -1,7 +1,7 @@
 <script lang="ts">
-  import cx from 'classnames'
-  import {defaultTo} from 'ramda'
-  import {Directory, User} from 'src/app/engine'
+  import cx from "classnames"
+  import {defaultTo} from "ramda"
+  import {Directory, User} from "src/app/engine"
 
   export let pubkey
 
@@ -9,9 +9,9 @@
   const following = User.followsSet.derived(s => s.has(pubkey))
 </script>
 
-<div class={cx("flex gap-2 items-center", $$props.class)}>
+<div class={cx("flex items-center gap-2", $$props.class)}>
   <span>{Directory.displayProfile($profile)}</span>
   {#if $following}
-    <i class="fa fa-user-check text-accent text-sm" />
+    <i class="fa fa-user-check text-xs text-accent" />
   {/if}
 </div>

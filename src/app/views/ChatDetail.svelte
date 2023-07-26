@@ -6,7 +6,7 @@
   import {modal} from "src/partials/state"
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import PersonBadge from "src/app/shared/PersonBadge.svelte"
+  import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {Builder, Settings, Nip28, User, Keys, Outbox, Nip65, Network} from "src/app/engine"
 
@@ -19,6 +19,10 @@
     Nip65.selectHints(Settings.getSetting("relay_limit"), $channel.hints || [])
 
   User.setChannelLastChecked(id)
+
+  const join = () => User.joinChannel($channel.id)
+
+  const leave = () => User.leaveChannel($channel.id)
 
   const edit = () => {
     modal.push({type: "channel/edit", channel: $channel})
@@ -66,10 +70,17 @@
             </button>
           {/if}
         </div>
-        <div class="flex items-center gap-2">
-          <i class="fa fa-lock-open text-gray-1" />
-          <span class="text-gray-1">Public</span>
-        </div>
+        {#if $channel.joined}
+          <Anchor theme="button" killEvent class="flex items-center gap-2" on:click={leave}>
+            <i class="fa fa-right-from-bracket" />
+            <span>Leave</span>
+          </Anchor>
+        {:else if Keys.canSign.get()}
+          <Anchor theme="button" killEvent class="flex items-center gap-2" on:click={join}>
+            <i class="fa fa-right-to-bracket" />
+            <span>Join</span>
+          </Anchor>
+        {/if}
       </div>
       <div>{$channel.about || ""}</div>
     </div>
@@ -77,7 +88,7 @@
   <div slot="message" let:message>
     {#if message.showProfile}
       <div class="flex items-center justify-between gap-4">
-        <PersonBadge pubkey={message.pubkey} />
+        <PersonBadgeSmall pubkey={message.pubkey} />
         <p class="text-sm text-gray-1">{formatTimestamp(message.created_at)}</p>
       </div>
     {/if}

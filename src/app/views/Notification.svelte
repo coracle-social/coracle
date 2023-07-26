@@ -3,7 +3,8 @@
   import {closure, quantify} from "hurdak"
   import {tryJson, formatTimestamp} from "src/util/misc"
   import {Tags} from "src/util/nostr"
-  import PersonBadge from "src/app/shared/PersonBadge.svelte"
+  import PersonCircle from "src/app/shared/PersonCircle.svelte"
+  import PersonName from "src/app/shared/PersonName.svelte"
   import Card from "src/partials/Card.svelte"
   import Popover from "src/partials/Popover.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
@@ -44,9 +45,10 @@
       on:click={() => modal.push({type: "note/detail", note})}>
       <div on:click|stopPropagation class="flex justify-between">
         {#if !event.ref}
-          <div class="flex items-center">
-            <PersonBadge class="float-left" pubkey={note?.pubkey} />
-            <span class="relative top-px pl-1">mentioned you.</span>
+          <div class="flex items-center gap-2">
+            <PersonCircle pubkey={note?.pubkey} />
+            <PersonName class="font-bold" pubkey={note?.pubkey} />
+            <span>mentioned you.</span>
           </div>
         {:else}
           <Popover>
@@ -54,7 +56,7 @@
               {quantify(pubkeys.length, "person", "people")}
               {actionText} your note.
             </div>
-            <div slot="tooltip" class="flex flex-col gap-4">
+            <div slot="tooltip" class="flex flex-col gap-4 py-2">
               {#if zaps.length > 0}
                 <NotificationSection pubkeys={pluck("pubkey", zaps)}>Zapped by</NotificationSection>
               {/if}

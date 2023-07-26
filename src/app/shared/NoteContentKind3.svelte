@@ -1,7 +1,7 @@
 <script lang="ts">
   import {Tags} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
-  import PersonBadge from "src/app/shared/PersonBadge.svelte"
+  import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import NoteContentEllipsis from "src/app/shared/NoteContentEllipsis.svelte"
   import {pubkeyLoader} from "src/app/engine"
 
@@ -19,7 +19,7 @@
   <div>
     {#each pubkeys as pubkey}
       <div class="inline-block rounded-full px-3 py-2 transition-colors hover:bg-gray-9">
-        <PersonBadge {pubkey} />
+        <PersonBadgeSmall {pubkey} />
       </div>
     {/each}
   </div>

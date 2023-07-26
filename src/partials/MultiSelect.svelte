@@ -61,7 +61,7 @@
 <div class="text-sm">
   {#each value as item}
     <Chip class="mb-1 mr-1" theme="dark" onClick={() => remove(item)}>
-      <slot name="item" {item}>
+      <slot name="item" context="value" {item}>
         {item}
       </slot>
     </Chip>
@@ -82,7 +82,7 @@
     <div class="absolute w-full">
       <Suggestions bind:this={suggestions} {select} {getKey}>
         <div slot="item" let:item>
-          <slot name="item" {item}>
+          <slot name="item" context="option" {item}>
             {item}
           </slot>
         </div>

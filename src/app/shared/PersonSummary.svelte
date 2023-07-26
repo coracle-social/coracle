@@ -22,7 +22,7 @@
 <div class="relative flex flex-grow flex-col gap-4 px-3 py-2">
   <Anchor on:click={showDetail} class="flex gap-4">
     <PersonCircle size={14} {pubkey} />
-    <div class="flex flex-grow flex-col gap-1 pr-16">
+    <div class="mr-16 flex flex-grow flex-col gap-1">
       <PersonName class="text-lg" {pubkey} />
       <PersonHandle {pubkey} />
     </div>
