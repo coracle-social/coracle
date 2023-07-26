@@ -1,8 +1,7 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Upgrade app store to use real events
-    - Show supported kinds
+  - [ ] Improve publish summary, use relay cards
   - [ ] Remove external dependencies from engine, open source it?
   - [ ] Show nip 5's in search and other places
   - [ ] Normalize all relay urls, see comment by daniele
@@ -17,7 +16,7 @@
   - [ ] Support bigger files, or at least handle errors. Monetize, or use nip 95
 - [ ] Fork and white label blowater
 - [ ] Add word/char count to compose
-- [ ] Show full nip05 unless it starts with an underscore
+- [ ] Show full nip05 unless it starts with an underscore, change icon to non-verified
 - [ ] nsec bunker support
 - [ ] Add relayset support with kind 30022
 - [ ] White-labeled

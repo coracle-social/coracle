@@ -1,8 +1,9 @@
 <script lang="ts">
   import {fly} from "src/util/transition"
-  import {pluck, prop, omit, objOf} from "ramda"
+  import {pluck, find, propEq, prop, equals, omit, objOf} from "ramda"
+  import {displayList} from "hurdak"
   import {debounce} from "throttle-debounce"
-  import {createLocalDate, formatTimestampAsDate} from "src/util/misc"
+  import {createLocalDate, fuzzy, formatTimestampAsDate} from "src/util/misc"
   import {noteKinds} from "src/util/nostr"
   import Chip from "src/partials/Chip.svelte"
   import Input from "src/partials/Input.svelte"
@@ -22,6 +23,26 @@
   const {searchProfiles} = Directory
   const {searchTopics} = engine.Content
 
+  type Kind = {
+    kind: number
+    label: string
+  }
+
+  const kinds = [
+    {kind: 0, label: "Profile data"},
+    {kind: 3, label: "Contacts list"},
+    {kind: 7, label: "Reaction"},
+    {kind: 1, label: "Text note"},
+    {kind: 1985, label: "Label"},
+    {kind: 1063, label: "Image data"},
+    {kind: 9735, label: "Reaction"},
+    {kind: 9802, label: "Highlights"},
+    {kind: 10002, label: "Relay selections"},
+    {kind: 30023, label: "Long form content"},
+  ]
+
+  const searchKinds = fuzzy(kinds, {keys: ["kind", "label"]})
+
   const displayPeople = pubkeys =>
     pubkeys.length === 1 ? Directory.displayPubkey(pubkeys[0]) : `${pubkeys.length} people`
 
@@ -29,6 +50,10 @@
 
   const getFilterParts = filter => {
     const parts = []
+
+    if (filter.kinds && !equals(filter.kinds, noteKinds)) {
+      parts.push({keys: null, label: `Kinds ${displayList(filter.kinds)}`})
+    }
 
     if (typeof filter.authors === "string") {
       parts.push({keys: null, label: `From ${filter.authors}`})
@@ -72,6 +97,12 @@
   const applyFilter = () => {
     const newFilter: DynamicFilter = {kinds: noteKinds}
 
+    if (_filter.kinds?.length > 0) {
+      newFilter.kinds = pluck("kind", _filter.kinds)
+    } else {
+      newFilter.kinds = noteKinds
+    }
+
     if (_filter.since) {
       newFilter.since = createLocalDate(_filter.since).setHours(23, 59, 59, 0) / 1000
     }
@@ -114,8 +145,9 @@
   }
 
   const getFormFilter = () => ({
+    kinds: filter.kinds?.map(k => find(propEq("kind", k), kinds)),
     since: filter.since,
-    until: filter.since,
+    until: filter.until,
     search: filter.search || "",
     authors: Array.isArray(filter.authors)
       ? filter.authors.map(Directory.getProfile)
@@ -140,6 +172,7 @@
   let modal = null
   let scopeOptions = []
   let _filter: {
+    kinds?: Kind[]
     since?: number
     until?: number
     search?: string
@@ -198,6 +231,12 @@
               <strong>Until</strong>
               <Input type="date" bind:value={_filter.until} />
             </div>
+          </div>
+          <div class="flex flex-col gap-1">
+            <strong>Kinds</strong>
+            <MultiSelect search={searchKinds} bind:value={_filter.kinds} getKey={prop("kind")}>
+              <div slot="item" let:item>{item.label} (kind {item.kind})</div>
+            </MultiSelect>
           </div>
           <div class="flex flex-col gap-1">
             <strong>Authors</strong>

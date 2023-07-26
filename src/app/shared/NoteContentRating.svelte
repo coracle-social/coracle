@@ -8,32 +8,42 @@
 
   export let note, rating
 
-  const [type, value] = Tags.from(note)
-    .reject(t => ["l", "L"].includes(t[0]))
-    .first()
+  const tag =
+    Tags.from(note)
+      .reject(t => ["l", "L"].includes(t[0]))
+      .first() || []
 
-  const action = switcher(type, {
-    r: () => modal.push({type: "relay/detail", url: value}),
-    p: () => modal.push({type: "person/feed", pubkey: value}),
-    e: () => modal.push({type: "note/detail", note: {id: value}}),
-  })
+  let action
+  let display
 
-  const display = switcherFn(type, {
-    r: () => Nip65.displayRelay({url: value}),
-    p: () => Directory.displayProfile(value),
-    e: () => "a note",
-    default: () => "something",
-  })
+  if (tag) {
+    const [type, value] = tag
+
+    action = switcher(type, {
+      r: () => modal.push({type: "relay/detail", url: value}),
+      p: () => modal.push({type: "person/feed", pubkey: value}),
+      e: () => modal.push({type: "note/detail", note: {id: value}}),
+    })
+
+    display = switcherFn(type, {
+      r: () => Nip65.displayRelay({url: value}),
+      p: () => Directory.displayProfile(value),
+      e: () => "a note",
+      default: () => "something",
+    })
+  }
 </script>
 
-<div class="mb-4 flex items-center gap-2 border-l-2 border-solid border-gray-5 pl-2">
-  Rated
-  {#if action}
-    <Anchor class="underline" on:click={action}>{display}</Anchor>
-  {:else}
-    {display}
-  {/if}
-  <div class="text-sm">
-    <Rating inert value={rating} />
+{#if tag}
+  <div class="mb-4 flex items-center gap-2 border-l-2 border-solid border-gray-5 pl-2">
+    Rated
+    {#if action}
+      <Anchor class="underline" on:click={action}>{display}</Anchor>
+    {:else}
+      {display}
+    {/if}
+    <div class="text-sm">
+      <Rating inert value={rating} />
+    </div>
   </div>
-</div>
+{/if}

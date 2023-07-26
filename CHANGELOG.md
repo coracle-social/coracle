@@ -6,6 +6,9 @@
 - [x] Faster and more complete feed loading
 - [x] More bandwidth-sensitive notifications fetching
 - [x] Fewer missing profile badges
+- [x] Use NIP 89 for app recommendations
+- [x] Add support for kinds filter in advanced search
+- [x] Add support for displaying kinds 0, 3, 10002
 
 # 0.2.35
 

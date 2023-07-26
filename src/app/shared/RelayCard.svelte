@@ -33,7 +33,7 @@
   $: hasRelay = $relays.has(relay.url)
 
   onMount(() => {
-    return poll(10_000, () => {
+    return poll(3000, () => {
       const socket = Network.pool.get(relay.url, {autoConnect: false})
 
       meta = socket?.meta

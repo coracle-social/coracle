@@ -4,6 +4,7 @@ import type {Writable} from "svelte/store"
 import {navigate} from "svelte-routing"
 import {writable, get} from "svelte/store"
 import {globalHistory} from "svelte-routing/src/history"
+import {parseHex} from "src/util/html"
 import {shadeColor, synced} from "src/util/misc"
 
 // Settings
@@ -65,13 +66,13 @@ export const modal = {
   remove(id: string) {
     modal.stack.update($stack => modal.sync(reject(whereEq({id}), $stack)))
   },
-  push(data: {type: string, [k: string]: any}) {
+  push(data: {type: string; [k: string]: any}) {
     modal.stack.update($stack => modal.sync($stack.concat(data)))
   },
   pop() {
     modal.stack.update($stack => modal.sync($stack.slice(0, -1)))
   },
-  replace(data: {type: string, [k: string]: any}) {
+  replace(data: {type: string; [k: string]: any}) {
     modal.stack.update($stack => $stack.slice(0, -1).concat(data))
   },
   clear() {
@@ -93,7 +94,9 @@ location.subscribe(($location: any) => {
 
 // Themes
 
-const THEME = fromPairs(import.meta.env.VITE_THEME.split(",").map((x: string) => x.split(":"))) as Record<string, string>
+const THEME = fromPairs(
+  import.meta.env.VITE_THEME.split(",").map((x: string) => x.split(":"))
+) as Record<string, string>
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
 
 export const theme = synced("ui/theme", prefersDark ? "dark" : "light")
@@ -114,3 +117,12 @@ export const getThemeVariables = ($theme: string) =>
   Object.entries(getThemeColors($theme))
     .map(([k, v]) => `--${k}: ${v};`)
     .join("\n")
+
+export const getThemeBackgroundGradient = () => {
+  const color = parseHex(getThemeColor(get(theme), "gray-8"))
+
+  return {
+    rgba: `rgba(${color.join(", ")}, 0.5)`,
+    rgb: `rgba(${color.join(", ")})`,
+  }
+}

@@ -252,7 +252,7 @@ export const race = (p, promises) => {
 }
 
 export const displayUrl = url => {
-  return url.replace(/https?:\/\/(www\.)?/, "").replace(/\/$/, "")
+  return url.replace(/(https?|wss?)?:\/\/(www\.)?/, "").replace(/\/$/, "")
 }
 
 export const displayDomain = url => {

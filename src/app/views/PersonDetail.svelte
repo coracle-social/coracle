@@ -2,9 +2,8 @@
   import {identity, defaultTo} from "ramda"
   import {navigate} from "svelte-routing"
   import {log} from "src/util/logger"
-  import {parseHex} from "src/util/html"
   import {toHex} from "src/util/nostr"
-  import {theme, getThemeColor} from "src/partials/state"
+  import {getThemeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -26,19 +25,12 @@
   const pubkey = toHex(npub)
   const handle = Nip05.handles.key(pubkey)
   const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
+  const {rgb, rgba} = getThemeBackgroundGradient()
 
   let loading = true
-  let rgb, rgba
 
   $: ownRelays = Nip65.getPubkeyRelays(pubkey)
   $: relays = Nip65.getPubkeyHints(10, pubkey)
-
-  $: {
-    const color = parseHex(getThemeColor($theme, "gray-8"))
-
-    rgba = `rgba(${color.join(", ")}, 0.4)`
-    rgb = `rgba(${color.join(", ")})`
-  }
 
   log("Person", npub, $profile)
 
