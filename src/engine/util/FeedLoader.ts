@@ -13,6 +13,7 @@ export type FeedOpts = {
   depth: number
   relays: string[]
   filter: Filter | Filter[]
+  isMuted: (e: Event) => boolean
   onEvent?: (e: Event) => void
   shouldLoadParents?: boolean
 }
@@ -36,6 +37,7 @@ export class FeedLoader {
 
     this.context = new ContextLoader(engine, {
       filter: opts.filter,
+      isMuted: opts.isMuted,
       onEvent: event => {
         opts.onEvent?.(event)
 

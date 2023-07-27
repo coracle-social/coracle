@@ -1,12 +1,11 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Lift all the person subscriptions into caller
-  - [ ] Move user to util
-  - [ ] Move kind0 back to its own property to avoid shadowing stuff
   - [ ] Normalize all relay urls, see comment by daniele
   - [ ] Add thread view
   - [ ] Use image and fetch proxies for user-provided content (especially profile data: nip05, picture, banner) to avoid security warnings
+- [ ] Add image uploads to chat
+- [ ] Remove profile popover
 - [ ] Re-work note media
   - [ ] Add webcam image/video capture
   - [ ] Show list of media that can be viewed/removed below post

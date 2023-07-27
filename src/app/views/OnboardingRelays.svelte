@@ -7,12 +7,12 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {Nip65, User} from "src/app/engine"
+  import {Nip65, user} from "src/app/engine"
 
   let q = ""
   let search
 
-  const userRelays = Nip65.policies.derived(() => User.getRelays())
+  const userRelays = Nip65.policies.derived(() => user.getRelays())
   const knownRelays = Nip65.relays
 
   $: {

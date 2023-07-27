@@ -1,12 +1,12 @@
 <script lang="ts">
   import cx from "classnames"
   import {defaultTo} from "ramda"
-  import {Directory, User} from "src/app/engine"
+  import {Directory, user} from "src/app/engine"
 
   export let pubkey
 
   const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
-  const following = User.followsSet.derived(s => s.has(pubkey))
+  const following = user.followsSet.derived(s => s.has(pubkey))
 </script>
 
 <div class={cx("flex items-center gap-2", $$props.class)}>

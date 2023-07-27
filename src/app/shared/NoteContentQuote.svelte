@@ -6,7 +6,7 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {Directory, Nip65, User, Network} from "src/app/engine"
+  import {Directory, Nip65, user, Network} from "src/app/engine"
 
   export let note
   export let value
@@ -25,7 +25,7 @@
     filter: [{ids: [id]}],
     onEvent: event => {
       loading = false
-      muted = User.applyMutes([event]).length === 0
+      muted = user.applyMutes([event]).length === 0
       quote = event
     },
   })

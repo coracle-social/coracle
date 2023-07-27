@@ -4,9 +4,9 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import Compose from "src/partials/Compose.svelte"
+  import Compose from "src/app/shared/Compose.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {Builder, Outbox} from "src/app/engine"
+  import {Builder, Outbox, user} from "src/app/engine"
 
   export let url
 
@@ -25,7 +25,7 @@
       ],
     })
 
-    Outbox.publish(event)
+    Outbox.publish(event, user.getRelayUrls("write"))
 
     modal.pop()
   }

@@ -9,7 +9,7 @@
   import OnboardingRelays from "src/app/views/OnboardingRelays.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
-  import {Env, pubkeyLoader, Outbox, Builder, User, Keys} from "src/app/engine"
+  import {Env, pubkeyLoader, Outbox, Builder, user, Keys} from "src/app/engine"
   import {listenForNotifications} from "src/app/state"
   import {modal} from "src/partials/state"
 
@@ -18,22 +18,22 @@
   const privkey = generatePrivateKey()
   const profile = {}
 
-  if (User.getRelays().length === 0) {
-    User.setRelays(Env.DEFAULT_RELAYS.map(url => ({url, read: true, write: true})))
+  if (user.getRelays().length === 0) {
+    user.setRelays(Env.DEFAULT_RELAYS.map(url => ({url, read: true, write: true})))
   }
 
   const signup = async note => {
-    const relays = User.getRelays()
-    const petnames = User.getPetnames()
+    const relays = user.getRelays()
+    const petnames = user.getPetnames()
 
     await Keys.login("privkey", privkey)
-    await User.setRelays(relays)
+    await user.setRelays(relays)
 
     // Re-save preferences now that we have a key
     await Promise.all([
-      User.setProfile(profile),
-      User.setPetnames(petnames),
-      note && Outbox.publish(Builder.createNote(note)),
+      user.setProfile(profile),
+      user.setPetnames(petnames),
+      note && Outbox.publish(Builder.createNote(note), user.getRelayUrls("write")),
     ])
 
     // Start our notifications listener

@@ -12,7 +12,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {Env, Nip65, User, Keys, pubkeyLoader, Network} from "src/app/engine"
+  import {Env, Nip65, user, Keys, pubkeyLoader, Network} from "src/app/engine"
   import {loadAppData} from "src/app/state"
 
   const pubkey = Keys.pubkey.get()
@@ -64,7 +64,7 @@
       ]).then(async () => {
         currentRelays[i] = null
 
-        if (searching && User.getRelayUrls().length > 0) {
+        if (searching && user.getRelayUrls().length > 0) {
           searching = false
           modal = "success"
 

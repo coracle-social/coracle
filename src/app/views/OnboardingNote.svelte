@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import Compose from "src/partials/Compose.svelte"
+  import Compose from "src/app/shared/Compose.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"

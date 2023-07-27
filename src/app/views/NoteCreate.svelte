@@ -6,7 +6,7 @@
   import {writable} from "svelte/store"
   import {annotateMedia} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
-  import Compose from "src/partials/Compose.svelte"
+  import Compose from "src/app/shared/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Media from "src/partials/Media.svelte"
   import Content from "src/partials/Content.svelte"
@@ -15,7 +15,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {Directory, User, Builder, Nip65, Keys} from "src/app/engine"
+  import {Directory, user, Builder, Nip65, Keys} from "src/app/engine"
   import {toast, modal} from "src/partials/state"
   import {publishWithToast} from "src/app/state"
 
@@ -28,7 +28,7 @@
   let compose = null
   let showPreview = false
   let showSettings = false
-  let relays = writable(writeTo ? writeTo : User.getRelayUrls("write"))
+  let relays = writable(writeTo ? writeTo : user.getRelayUrls("write"))
 
   const onSubmit = async () => {
     let content = compose.parse()

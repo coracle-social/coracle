@@ -9,7 +9,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import {Directory, Nip65, User, Outbox, Network, Builder, Nip57, Settings} from "src/app/engine"
+  import {Directory, Nip65, user, Outbox, Network, Builder, Nip57, Settings} from "src/app/engine"
 
   export let note
 
@@ -30,7 +30,7 @@
 
     const amount = zap.amount * 1000
     const zapper = Nip57.zappers.key(note.pubkey).get()
-    const relays = Nip65.getPublishHints(3, note, User.getRelayUrls("write"))
+    const relays = Nip65.getPublishHints(3, note, user.getRelayUrls("write"))
     const event = await Outbox.prepEvent(
       Builder.requestZap(relays, zap.message, note.pubkey, note.id, amount, zapper.lnurl)
     )

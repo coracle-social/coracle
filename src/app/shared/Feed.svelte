@@ -13,7 +13,7 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import engine, {Settings, Keys, Nip65} from "src/app/engine"
+  import engine, {Settings, user, Keys, Nip65} from "src/app/engine"
   import {compileFilter} from "src/app/state"
 
   export let relays = []
@@ -84,6 +84,7 @@
         depth: 2,
         relays: getRelays(),
         filter: compileFilter(filter),
+        isMuted: user.isMuted,
         shouldLoadParents: true,
         onEvent,
       })

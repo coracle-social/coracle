@@ -13,7 +13,7 @@
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Scan from "src/app/shared/Scan.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
-  import {User, Keys, Directory, Network, Nip65, default as engine} from "src/app/engine"
+  import {user, Keys, Directory, Network, Nip65, default as engine} from "src/app/engine"
 
   let q = ""
   let options = []
@@ -32,7 +32,7 @@
       })
     } else if (Directory.profiles.get().length < 50) {
       Network.subscribe({
-        relays: User.getRelayUrls("read"),
+        relays: user.getRelayUrls("read"),
         filter: [{kinds: [0], limit: 50}],
         timeout: 3000,
       })

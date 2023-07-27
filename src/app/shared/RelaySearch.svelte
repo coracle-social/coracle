@@ -6,7 +6,7 @@
   import {normalizeRelayUrl, Tags, getAvgQuality} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {Nip65, Network, Keys, User} from "src/app/engine"
+  import {Nip65, Network, Keys, user} from "src/app/engine"
 
   export let q = ""
   export let limit = 50
@@ -16,7 +16,7 @@
   let search
   let reviews = []
 
-  const joined = Nip65.policies.key(Keys.pubkey.get()).derived(() => new Set(User.getRelayUrls()))
+  const joined = Nip65.policies.key(Keys.pubkey.get()).derived(() => new Set(user.getRelayUrls()))
   const knownRelays = Nip65.relays
 
   $: ratings = mapVals(

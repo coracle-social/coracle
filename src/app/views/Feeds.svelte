@@ -8,15 +8,15 @@
   import Content from "src/partials/Content.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
-  import {Keys, User, default as engine} from "src/app/engine"
+  import {Keys, user, default as engine} from "src/app/engine"
 
-  const lists = engine.Content.lists.derived(() => User.getLists())
+  const lists = engine.Content.lists.derived(() => user.getLists())
 
   let relays = []
   let key = Math.random()
   let filter = {
     kinds: noteKinds,
-    authors: User.getFollows().length > 0 ? "follows" : "network",
+    authors: user.getFollows().length > 0 ? "follows" : "network",
   } as DynamicFilter
 
   const showLists = () => {

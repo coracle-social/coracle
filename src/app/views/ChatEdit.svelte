@@ -8,7 +8,7 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {toast, modal} from "src/partials/state"
-  import {Builder, User} from "src/app/engine"
+  import {Builder, user} from "src/app/engine"
   import {publishWithToast} from "src/app/state"
 
   export let channel = {name: null, id: null, about: null, picture: null}
@@ -35,7 +35,7 @@
     if (!channel.name) {
       toast.show("error", "Please enter a name for your room.")
     } else {
-      const relays = User.getRelayUrls("write")
+      const relays = user.getRelayUrls("write")
 
       if (channel.id) {
         publishWithToast(Builder.updateChannel(channel), relays)
@@ -43,7 +43,7 @@
         const [event] = await publishWithToast(Builder.createChannel(channel), relays)
 
         // Auto join the room the user just created
-        await User.joinChannel(event.id)
+        await user.joinChannel(event.id)
       }
 
       modal.pop()

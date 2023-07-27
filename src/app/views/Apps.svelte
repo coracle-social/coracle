@@ -13,7 +13,7 @@
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
-  import {Network, Directory, Nip05, User, pubkeyLoader} from "src/app/engine"
+  import {Network, Directory, Nip05, user, pubkeyLoader} from "src/app/engine"
   import {compileFilter} from "src/app/state"
 
   const getColumns = xs => {
@@ -44,7 +44,7 @@
   Network.subscribe({
     timeout: 5000,
     filter: [{kinds: [31990]}, compileFilter({kinds: [31989], authors: "follows"})],
-    relays: User.getRelayUrls("read"),
+    relays: user.getRelayUrls("read"),
     onEvent: batch(500, events => {
       const pubkeys = []
 
@@ -97,9 +97,11 @@
         <Card class="mb-4 flex break-inside-avoid flex-col gap-4">
           <div class="flex gap-4">
             <ImageCircle size={14} src={app.info.picture} />
-            <div class="flex min-w-0 flex-grow flex-col gap-2">
+            <div class="flex min-w-0 flex-grow flex-col">
               <h1 class="text-2xl">{app.info.display_name || app.info.name}</h1>
-              <PersonHandle pubkey={app.pubkey} />
+              {#if app.handle}
+                <span class="text-gray-3">{Nip05.displayHandle(app.handle)}</span>
+              {/if}
             </div>
           </div>
           <p>{app.info.about}</p>

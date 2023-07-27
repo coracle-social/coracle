@@ -15,7 +15,7 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app/views/Notification.svelte"
-  import {Env, Events, pubkeyLoader, Keys, User, Network, Alerts} from "src/app/engine"
+  import {Env, Events, pubkeyLoader, Keys, user, Network, Alerts} from "src/app/engine"
 
   const lastChecked = Alerts.lastChecked.get()
   const tabs = ["Mentions & Replies", "Reactions"]
@@ -33,7 +33,7 @@
     return reverse(
       sortBy(
         e => formatTimestampAsLocalISODate(e.created_at).slice(0, 13) + findReplyId(e),
-        User.applyMutes($events)
+        user.applyMutes($events)
       )
     )
   })
@@ -102,7 +102,7 @@
     ])
 
     const sub = Network.subscribe({
-      relays: User.getRelayUrls("read"),
+      relays: user.getRelayUrls("read"),
       filter: [
         {kinds: noteKinds.concat(reactionKinds), "#p": [pubkey], since},
         {kinds: noteKinds.concat(reactionKinds), "#e": eventIds, since},

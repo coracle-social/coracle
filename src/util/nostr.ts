@@ -1,7 +1,7 @@
 import type {Filter, Event, DisplayEvent} from "src/engine/types"
 import {is, fromPairs, mergeLeft, last, identity, prop, flatten, uniq} from "ramda"
 import {nip19} from "nostr-tools"
-import {ensurePlural, avg, first} from "hurdak"
+import {ensurePlural, tryFunc, avg, first} from "hurdak"
 import {tryJson} from "src/util/misc"
 
 export const noteKinds = [1, 1985, 30023, 1063, 9802]
@@ -122,7 +122,10 @@ export const findRootId = (e: Event) => findRoot(e)?.[1]
 
 export const isLike = (content: string) => ["", "+", "🤙", "👍", "❤️", "😎", "🏅"].includes(content)
 
-export const isRelay = (url: string) => url.match(/^wss:\/\/.+/)
+export const isRelay = (url: string) =>
+  url.match(/^wss:\/\/.+/) && // Is it actually a websocket link
+  url.match(/:\/\//g).length === 1 && // Sometimes bugs cause multiple relays to get concatenated
+  !url.match(/\s/)
 
 export const isShareableRelay = (url: string) =>
   isRelay(url) &&
@@ -134,13 +137,11 @@ export const isShareableRelay = (url: string) =>
   !url.slice(6).match(/\/npub/)
 
 export const normalizeRelayUrl = (url: string) => {
-  url = url.replace(/\/+$/, "").toLowerCase().trim()
-
-  if (!url.startsWith("ws")) {
+  if (!url.match(/^ws/)) {
     url = "wss://" + url
   }
 
-  return url
+  return tryFunc(() => new URL(url).href.replace(/\/+$/, "").toLowerCase())
 }
 
 export const channelAttrs = ["name", "about", "picture"]

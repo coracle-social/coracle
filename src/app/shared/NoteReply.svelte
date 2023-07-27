@@ -6,8 +6,8 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
-  import Compose from "src/partials/Compose.svelte"
-  import {Directory, User, Keys, Nip65, Builder} from "src/app/engine"
+  import Compose from "src/app/shared/Compose.svelte"
+  import {Directory, user, Keys, Nip65, Builder} from "src/app/engine"
   import {publishWithToast} from "src/app/state"
 
   export let note
@@ -51,7 +51,7 @@
 
     if (content) {
       const rawEvent = Builder.createReply(note, content, data.mentions.map(Builder.mention))
-      const relays = Nip65.getPublishHints(10, note, User.getRelayUrls("write"))
+      const relays = Nip65.getPublishHints(10, note, user.getRelayUrls("write"))
 
       await publishWithToast(rawEvent, relays)
 

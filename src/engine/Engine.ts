@@ -15,7 +15,6 @@ import {Nip57} from "./components/Nip57"
 import {Nip65} from "./components/Nip65"
 import {Outbox} from "./components/Outbox"
 import {Settings} from "./components/Settings"
-import {User} from "./components/User"
 
 export class Engine {
   Env: Env
@@ -35,7 +34,6 @@ export class Engine {
   Nip65 = new Nip65()
   Outbox = new Outbox()
   Settings = new Settings()
-  User = new User()
 
   constructor(Env: Env) {
     this.Env = Env

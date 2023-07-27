@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {Builder, Settings, Nip28, User, Keys, Outbox, Nip65, Network} from "src/app/engine"
+  import {Builder, Settings, Nip28, user, Keys, Outbox, Nip65, Network} from "src/app/engine"
 
   export let entity
 
@@ -18,11 +18,11 @@
   const getRelays = () =>
     Nip65.selectHints(Settings.getSetting("relay_limit"), $channel.hints || [])
 
-  User.setChannelLastChecked(id)
+  user.setChannelLastChecked(id)
 
-  const join = () => User.joinChannel($channel.id)
+  const join = () => user.joinChannel($channel.id)
 
-  const leave = () => User.leaveChannel($channel.id)
+  const leave = () => user.leaveChannel($channel.id)
 
   const edit = () => {
     modal.push({type: "channel/edit", channel: $channel})

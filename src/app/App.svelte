@@ -16,7 +16,7 @@
     Keys,
     Nip65,
     pubkeyLoader,
-    User,
+    user,
     Env,
     Network,
     Builder,
@@ -47,7 +47,7 @@
 
     const {settings} = JSON.parse(localStorage.getItem("agent/user/profile"))
 
-    User.setSettings({
+    user.setSettings({
       last_updated: settings.lastUpdated || 0,
       relay_limit: settings.relayLimit || 10,
       default_zap: settings.defaultZap || 21,
@@ -65,7 +65,7 @@
 
   const TypedRouter = Router as ComponentType<SvelteComponentTyped>
 
-  Object.assign(window, {...engine, bech32ToHex, hexToBech32})
+  Object.assign(window, {...engine, user, bech32ToHex, hexToBech32})
 
   export let pathname = location.pathname
   export let hash = location.hash

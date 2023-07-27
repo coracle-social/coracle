@@ -8,7 +8,7 @@
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
   import MessagesListItem from "src/app/views/MessagesListItem.svelte"
-  import {Nip04, pubkeyLoader, User, Network, Keys} from "src/app/engine"
+  import {Nip04, pubkeyLoader, user, Network, Keys} from "src/app/engine"
 
   export let activeTab = "messages"
 
@@ -30,7 +30,7 @@
     const pubkey = Keys.pubkey.get()
     const since = now() - seconds(90, "day")
     const sub = Network.subscribe({
-      relays: User.getRelayUrls("read"),
+      relays: user.getRelayUrls("read"),
       filter: [
         {kinds: [4], authors: [pubkey], since},
         {kinds: [4], "#p": [pubkey], since},
@@ -52,7 +52,7 @@
         <i
           class="fa fa-bell cursor-bell cursor-pointer"
           class:text-gray-5={!$hasNewMessages}
-          on:click={User.markAllMessagesRead} />
+          on:click={user.markAllMessagesRead} />
       </div>
       <div slot="tooltip">Mark all as read</div>
     </Popover>

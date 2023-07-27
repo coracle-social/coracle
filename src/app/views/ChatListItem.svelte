@@ -4,13 +4,13 @@
   import {fly} from "src/util/transition"
   import {ellipsize} from "hurdak"
   import Anchor from "src/partials/Anchor.svelte"
-  import {Keys, User} from "src/app/engine"
+  import {Keys, user} from "src/app/engine"
 
   export let channel
 
   const enter = () => navigate(`/chat/${nip19.noteEncode(channel.id)}`)
-  const join = () => User.joinChannel(channel.id)
-  const leave = () => User.leaveChannel(channel.id)
+  const join = () => user.joinChannel(channel.id)
+  const leave = () => user.leaveChannel(channel.id)
 </script>
 
 <button

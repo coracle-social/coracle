@@ -5,18 +5,18 @@
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
-  import {Keys, User} from "src/app/engine"
+  import {Keys, user} from "src/app/engine"
 
   export let pubkey
   export let hideActions = false
 
-  const following = User.followsSet.derived(s => s.has(pubkey))
-  const muted = User.mutesSet.derived(s => s.has(pubkey))
+  const following = user.followsSet.derived(s => s.has(pubkey))
+  const muted = user.mutesSet.derived(s => s.has(pubkey))
   const showDetail = () => modal.push({type: "person/feed", pubkey})
-  const unfollow = () => User.unfollow(pubkey)
-  const follow = () => User.follow(pubkey)
-  const unmute = () => User.unmute(pubkey)
-  const mute = () => User.mute("p", pubkey)
+  const unfollow = () => user.unfollow(pubkey)
+  const follow = () => user.follow(pubkey)
+  const unmute = () => user.unmute(pubkey)
+  const mute = () => user.mute("p", pubkey)
 </script>
 
 <div class="relative flex flex-grow flex-col gap-4 px-3 py-2">

@@ -11,7 +11,7 @@ export class Alerts {
   hasNewNotfications = derived([this.lastChecked, this.latestNotification], ([c, n]) => n > c)
 
   initialize(engine: Engine) {
-    const {Alerts, Events, Keys, User} = engine
+    const {Alerts, Events, Keys} = engine
 
     const isMention = (e: Event) => Tags.from(e).pubkeys().includes(Keys.pubkey.get())
 
@@ -24,7 +24,7 @@ export class Alerts {
     const handleNotification = (e: Event) => {
       const pubkey = Keys.pubkey.get()
 
-      if (!pubkey || e.pubkey === pubkey || User.isMuted(e)) {
+      if (!pubkey || e.pubkey === pubkey) {
         return
       }
 

@@ -8,7 +8,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {User, Nip65, Keys, Network} from "src/app/engine"
+  import {user, Nip65, Keys, Network} from "src/app/engine"
 
   export let relay
   export let rating = null
@@ -20,11 +20,11 @@
   let statusHover = false
   let meta = null
 
-  const relays = Nip65.policies.key(Keys.pubkey.get()).derived(() => new Set(User.getRelayUrls()))
+  const relays = Nip65.policies.key(Keys.pubkey.get()).derived(() => new Set(user.getRelayUrls()))
 
-  const removeRelay = r => User.removeRelay(r.url)
+  const removeRelay = r => user.removeRelay(r.url)
 
-  const addRelay = r => User.addRelay(r.url)
+  const addRelay = r => user.addRelay(r.url)
 
   const openModal = () => {
     modal.push({type: "relay/detail", url: relay.url})
@@ -101,7 +101,7 @@
       <span>Publish to this relay?</span>
       <Toggle
         value={relay.write}
-        on:change={() => User.setRelayPolicy(relay.url, {write: !relay.write})} />
+        on:change={() => user.setRelayPolicy(relay.url, {write: !relay.write})} />
     </div>
   {/if}
 </div>

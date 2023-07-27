@@ -26,15 +26,11 @@ export class Outbox {
 
   publish = async (
     rawEvent: Partial<Event>,
-    relays: string[] = null,
+    relays: string[],
     onProgress: (p: Progress) => void = null,
     verb = "EVENT"
   ): Promise<[Event, Promise<Progress>]> => {
     const event = rawEvent.sig ? (rawEvent as Event) : await this.prepEvent(rawEvent)
-
-    if (!relays) {
-      relays = this.engine.User.getRelayUrls("write")
-    }
 
     // return console.log(event)
 

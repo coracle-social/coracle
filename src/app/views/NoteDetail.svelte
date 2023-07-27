@@ -10,7 +10,7 @@
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import engine, {Settings, Nip65, Network} from "src/app/engine"
+  import engine, {Settings, Nip65, user, Network} from "src/app/engine"
 
   export let note
   export let relays = []
@@ -20,6 +20,7 @@
   const filter = {ids: [note.id]}
   const context = new ContextLoader(engine, {
     filter,
+    isMuted: user.isMuted,
     onEvent: e => {
       // Update feed, but only if we have loaded an actual note
       if (displayNote.sig) {

@@ -3,10 +3,10 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {Nip65, User} from "src/app/engine"
+  import {Nip65, user} from "src/app/engine"
   import {modal} from "src/partials/state"
 
-  const relays = Nip65.policies.derived(() => User.getRelays())
+  const relays = Nip65.policies.derived(() => user.getRelays())
 
   document.title = "Relays"
 </script>

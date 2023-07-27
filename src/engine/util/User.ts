@@ -12,6 +12,24 @@ export class User {
   followsSet: Readable<Set<string>>
   mutesSet: Readable<Set<string>>
 
+  constructor(engine: Engine) {
+    this.engine = engine
+
+    const {Keys, Nip02} = engine
+
+    this.stateKey = Keys.pubkey.derived(defaultTo("anonymous"))
+
+    this.followsSet = derived(
+      [Nip02.graph.mapStore, this.stateKey],
+      ([graph, stateKey]) => new Set(graph.get(stateKey)?.petnames.map(nth(1)))
+    )
+
+    this.mutesSet = derived(
+      [Nip02.graph.mapStore, this.stateKey],
+      ([graph, stateKey]) => new Set(graph.get(stateKey)?.mutes.map(nth(1)))
+    )
+  }
+
   getStateKey = () => this.stateKey.get()
 
   // Settings
@@ -23,14 +41,20 @@ export class User {
       const d = appDataKeys.USER_SETTINGS
       const v = await this.engine.Crypt.encryptJson(settings)
 
-      return this.engine.Outbox.publish(this.engine.Builder.setAppData(d, v))
+      return this.engine.Outbox.publish(
+        this.engine.Builder.setAppData(d, v),
+        this.getRelayUrls("write")
+      )
     }
   }
 
   setAppData = async (d: string, content: any) => {
     const v = await this.engine.Crypt.encryptJson(content)
 
-    return this.engine.Outbox.publish(this.engine.Builder.setAppData(d, v))
+    return this.engine.Outbox.publish(
+      this.engine.Builder.setAppData(d, v),
+      this.getRelayUrls("write")
+    )
   }
 
   // Nip65
@@ -41,7 +65,10 @@ export class User {
 
   setRelays = (relays: RelayPolicyEntry[]) => {
     if (this.engine.Keys.canSign.get()) {
-      return this.engine.Outbox.publish(this.engine.Builder.setRelays(relays))
+      return this.engine.Outbox.publish(
+        this.engine.Builder.setRelays(relays),
+        this.getRelayUrls("write")
+      )
     } else {
       this.engine.Nip65.setPolicy({pubkey: this.getStateKey(), created_at: now()}, relays)
     }
@@ -80,11 +107,14 @@ export class User {
     this.engine.Nip02.isIgnoring(this.getStateKey(), pubkeyOrEventId)
 
   setProfile = ($profile: Record<string, any>) =>
-    this.engine.Outbox.publish(this.engine.Builder.setProfile($profile))
+    this.engine.Outbox.publish(this.engine.Builder.setProfile($profile), this.getRelayUrls("write"))
 
   setPetnames = async ($petnames: string[][]) => {
     if (this.engine.Keys.canSign.get()) {
-      await this.engine.Outbox.publish(this.engine.Builder.setPetnames($petnames))
+      await this.engine.Outbox.publish(
+        this.engine.Builder.setPetnames($petnames),
+        this.getRelayUrls("write")
+      )
     } else {
       this.engine.Nip02.graph.key(this.getStateKey()).merge({
         updated_at: now(),
@@ -107,14 +137,17 @@ export class User {
   isMuted = (e: Event) => {
     const m = this.getMutesSet()
 
-    return find(t => m.has(t), [e.id, e.pubkey, findReplyId(e), findRootId(e)])
+    return Boolean(find(t => m.has(t), [e.id, e.pubkey, findReplyId(e), findRootId(e)]))
   }
 
   applyMutes = (events: Event[]) => reject(this.isMuted, events)
 
   setMutes = async ($mutes: string[][]) => {
     if (this.engine.Keys.canSign.get()) {
-      await this.engine.Outbox.publish(this.engine.Builder.setMutes($mutes.map(t => t.slice(0, 2))))
+      await this.engine.Outbox.publish(
+        this.engine.Builder.setMutes($mutes.map(t => t.slice(0, 2))),
+        this.getRelayUrls("write")
+      )
     } else {
       this.engine.Nip02.graph.key(this.getStateKey()).merge({
         updated_at: now(),
@@ -139,11 +172,15 @@ export class User {
 
   putList = (name: string, params: string[][], relays: string[]) =>
     this.engine.Outbox.publish(
-      this.engine.Builder.createList([["d", name]].concat(params).concat(relays))
+      this.engine.Builder.createList([["d", name]].concat(params).concat(relays)),
+      this.getRelayUrls("write")
     )
 
   removeList = (naddr: string) =>
-    this.engine.Outbox.publish(this.engine.Builder.deleteNaddrs([naddr]))
+    this.engine.Outbox.publish(
+      this.engine.Builder.deleteNaddrs([naddr]),
+      this.getRelayUrls("write")
+    )
 
   // Messages
 
@@ -195,21 +232,5 @@ export class User {
     this.engine.Nip28.channels.key(id).merge({joined: false})
 
     return this.saveChannels()
-  }
-
-  initialize(engine: Engine) {
-    this.engine = engine
-
-    this.stateKey = engine.Keys.pubkey.derived(defaultTo("anonymous"))
-
-    this.followsSet = derived(
-      [engine.Nip02.graph.mapStore, this.stateKey],
-      ([graph, stateKey]) => new Set(graph.get(stateKey)?.petnames.map(nth(1)))
-    )
-
-    this.mutesSet = derived(
-      [engine.Nip02.graph.mapStore, this.stateKey],
-      ([graph, stateKey]) => new Set(graph.get(stateKey)?.mutes.map(nth(1)))
-    )
   }
 }

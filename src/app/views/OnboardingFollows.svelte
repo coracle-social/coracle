@@ -6,14 +6,14 @@
   import Content from "src/partials/Content.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import type {Profile} from "src/engine"
-  import {Env, Nip02, User, Directory, Builder} from "src/app/engine"
+  import {Env, Nip02, user, Directory, Builder} from "src/app/engine"
   import {modal} from "src/partials/state"
 
   const {searchProfiles} = Directory
-  const follows = Nip02.graph.derived(() => User.getFollowsSet())
+  const follows = Nip02.graph.derived(() => user.getFollowsSet())
 
   if ($follows.size === 0) {
-    User.setPetnames(Env.DEFAULT_FOLLOWS.map(Builder.mention))
+    user.setPetnames(Env.DEFAULT_FOLLOWS.map(Builder.mention))
   }
 
   let q = ""

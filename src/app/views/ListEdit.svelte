@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import {Directory, User, Nip65, default as engine} from "src/app/engine"
+  import {Directory, user, Nip65, default as engine} from "src/app/engine"
 
   export let list
 
@@ -43,7 +43,7 @@
       return toast.show("error", "A name is required for your list")
     }
 
-    const duplicates = User.getLists(l => l.name === values.name && l.naddr !== list?.naddr)
+    const duplicates = user.getLists(l => l.name === values.name && l.naddr !== list?.naddr)
 
     if (duplicates.length > 0) {
       return toast.show("error", "That name is already in use")
@@ -51,7 +51,7 @@
 
     const {name, params, relays} = values
 
-    User.putList(name, params, relays)
+    user.putList(name, params, relays)
     toast.show("info", "Your list has been saved!")
     modal.pop()
   }

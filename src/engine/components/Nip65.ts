@@ -94,7 +94,7 @@ export class Nip65 {
 
     for (const url of chain(
       hints,
-      this.engine.User.getRelayUrls("write"),
+      this.getPubkeyRelayUrls(this.engine.Keys.pubkey.get(), "write"),
       this.engine.Env.DEFAULT_RELAYS
     )) {
       if (seen.has(url)) {

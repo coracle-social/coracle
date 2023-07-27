@@ -28,6 +28,7 @@ const fromDisplayEvent = (e: DisplayEvent): Event =>
 
 export type ContextLoaderOpts = {
   filter: Filter | Filter[]
+  isMuted: (e: Event) => boolean
   onEvent?: (e: Event) => void
   shouldLoadParents?: boolean
 }
@@ -87,9 +88,7 @@ export class ContextLoader {
   }
 
   preprocessEvents = (events: Event[]) => {
-    const {User} = this.engine
-
-    events = reject((e: Event) => this.seen.has(e.id) || User.isMuted(e), events)
+    events = reject((e: Event) => this.seen.has(e.id) || this.opts.isMuted(e), events)
 
     for (const event of events) {
       this.seen.add(event.id)
@@ -107,7 +106,6 @@ export class ContextLoader {
   }
 
   applyContext = (notes: Event[], substituteParents = false) => {
-    const {User} = this.engine
     const parentIds = new Set(notes.map(findReplyId).filter(identity))
     const forceShow = union(new Set(pluck("id", notes)), parentIds)
     const contextById = {} as Record<string, Event>
@@ -153,7 +151,7 @@ export class ContextLoader {
     if (substituteParents) {
       // We may have loaded a reply from a follower to someone we muted
       notes = reject(
-        User.isMuted,
+        this.opts.isMuted,
         notes.map(note => {
           for (let i = 0; i < 2; i++) {
             const parent = contextById[findReplyId(note)]

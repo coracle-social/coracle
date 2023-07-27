@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {Directory, Keys, User, Builder} from "src/app/engine"
+  import {Directory, Keys, user, Builder} from "src/app/engine"
   import {routes} from "src/app/state"
   import {publishWithToast} from "src/app/state"
 
@@ -24,7 +24,7 @@
   })
 
   const submit = async event => {
-    const relays = User.getRelayUrls("write")
+    const relays = user.getRelayUrls("write")
 
     event?.preventDefault()
     publishWithToast(Builder.setProfile(values), relays)
@@ -50,7 +50,7 @@
     </div>
     <div class="flex w-full flex-col gap-8">
       <div class="flex flex-col gap-1">
-        <strong>Username</strong>
+        <strong>username</strong>
         <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.name}>
           <i slot="before" class="fa-solid fa-user-astronaut" />
         </Input>

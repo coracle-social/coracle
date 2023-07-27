@@ -4,9 +4,9 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
-  import {default as engine, User} from "src/app/engine"
+  import {default as engine, user} from "src/app/engine"
 
-  const lists = engine.Content.lists.derived(() => User.getLists())
+  const lists = engine.Content.lists.derived(() => user.getLists())
 
   const createFeed = () => {
     modal.push({type: "list/edit"})
@@ -33,7 +33,7 @@
     <div class="flex justify-start gap-3">
       <i
         class="fa fa-sm fa-trash cursor-pointer py-3"
-        on:click|stopPropagation={() => User.removeList(list.naddr)} />
+        on:click|stopPropagation={() => user.removeList(list.naddr)} />
       <div class="flex w-full justify-between">
         <div>
           <strong>{list.name}</strong>

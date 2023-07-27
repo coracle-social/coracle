@@ -4,13 +4,13 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {Nip65, Directory, User} from "src/app/engine"
+  import {Nip65, Directory, user} from "src/app/engine"
 
   export let onSubmit
 
   let contenteditable, suggestions
 
-  const {followsSet} = User
+  const {followsSet} = user
 
   const pubkeyEncoder = {
     encode: pubkey => {

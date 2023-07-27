@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {
-    User,
+    user,
     Nip04,
     Nip65,
     Outbox,
@@ -28,7 +28,7 @@
   const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
   const messages = Nip04.messages.derived(filter(whereEq({contact: pubkey})))
 
-  User.setContactLastChecked(pubkey)
+  user.setContactLastChecked(pubkey)
 
   const getRelays = () =>
     Nip65.mergeHints(3, [

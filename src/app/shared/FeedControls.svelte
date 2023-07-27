@@ -14,7 +14,7 @@
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import type {DynamicFilter, Topic, Profile} from "src/engine"
-  import {Directory, User, default as engine} from "src/app/engine"
+  import {Directory, user, default as engine} from "src/app/engine"
 
   export let filter
   export let onChange
@@ -184,7 +184,7 @@
 
   $: {
     scopeOptions =
-      User.getFollows().length > 0
+      user.getFollows().length > 0
         ? ["follows", "network", "global", "custom"]
         : ["network", "global", "custom"]
   }

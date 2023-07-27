@@ -4,15 +4,15 @@
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {Env, Keys, User, Nip02} from "src/app/engine"
+  import {Env, Keys, user, Nip02} from "src/app/engine"
   import {addToList} from "src/app/state"
 
   export let pubkey
 
   const npub = nip19.npubEncode(pubkey)
   const graphEntry = Nip02.graph.key(Keys.pubkey.get())
-  const following = graphEntry.derived(() => User.isFollowing(pubkey))
-  const muted = graphEntry.derived(() => User.isIgnoring(pubkey))
+  const following = graphEntry.derived(() => user.isFollowing(pubkey))
+  const muted = graphEntry.derived(() => user.isIgnoring(pubkey))
 
   let actions = []
 
@@ -60,13 +60,13 @@
 
   const share = () => modal.push({type: "person/share", pubkey})
 
-  const unfollow = () => User.unfollow(pubkey)
+  const unfollow = () => user.unfollow(pubkey)
 
-  const follow = () => User.follow(pubkey)
+  const follow = () => user.follow(pubkey)
 
-  const unmute = () => User.unmute(pubkey)
+  const unmute = () => user.unmute(pubkey)
 
-  const mute = () => User.mute("p", pubkey)
+  const mute = () => user.mute("p", pubkey)
 </script>
 
 <div class="flex items-center gap-3">

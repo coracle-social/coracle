@@ -18,7 +18,7 @@ import {
   Env,
   Network,
   Outbox,
-  User,
+  user,
   Settings,
   Keys,
 } from "src/app/engine"
@@ -89,7 +89,7 @@ export const slowConnections = writable([])
 
 setInterval(() => {
   // Only notify about relays the user is actually subscribed to
-  const userRelays = new Set(User.getRelayUrls())
+  const userRelays = new Set(user.getRelayUrls())
   const $slowConnections = []
 
   // Prune connections we haven't used in a while
@@ -125,7 +125,7 @@ export const listenForNotifications = async () => {
   // the notification badges, but load the details lazily
   listener?.close()
   listener = Network.subscribe({
-    relays: User.getRelayUrls("read"),
+    relays: user.getRelayUrls("read"),
     filter: [
       // Messages
       {kinds: [4], authors: [pubkey], limit: 1},
@@ -146,12 +146,12 @@ export const loadAppData = async () => {
   await pubkeyLoader.load(pubkey, {force: true, kinds: userKinds})
 
   // Load their network
-  pubkeyLoader.load(User.getFollows())
+  pubkeyLoader.load(user.getFollows())
 
   // Load their messages and notifications
   Network.subscribe({
     timeout: 10_000,
-    relays: User.getRelayUrls("read"),
+    relays: user.getRelayUrls("read"),
     filter: [
       {kinds: [4], authors: [pubkey]},
       {kinds: [4], "#p": [pubkey]},
@@ -235,9 +235,9 @@ export const compileFilter = (filter: DynamicFilter): Filter => {
   if (filter.authors === "global") {
     filter = omit(["authors"], filter)
   } else if (filter.authors === "follows") {
-    filter = {...filter, authors: getAuthors(User.getFollows())}
+    filter = {...filter, authors: getAuthors(user.getFollows())}
   } else if (filter.authors === "network") {
-    filter = {...filter, authors: getAuthors(User.getNetwork())}
+    filter = {...filter, authors: getAuthors(user.getNetwork())}
   }
 
   return filter as Filter

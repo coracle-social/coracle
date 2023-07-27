@@ -14,7 +14,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {Env, Nip57, Builder, Nip65, Keys, Outbox, User} from "src/app/engine"
+  import {Env, Nip57, Builder, Nip65, Keys, Outbox, user} from "src/app/engine"
 
   export let note
   export let reply
@@ -34,12 +34,12 @@
 
   const quote = () => modal.push({type: "note/create", quote: note})
 
-  const unmute = () => User.unmute(note.id)
+  const unmute = () => user.unmute(note.id)
 
-  const mute = () => User.mute("e", note.id)
+  const mute = () => user.mute("e", note.id)
 
   const react = async content => {
-    const relays = Nip65.getPublishHints(5, note, User.getRelayUrls("write"))
+    const relays = Nip65.getPublishHints(5, note, user.getRelayUrls("write"))
 
     like = first(await Outbox.publish(Builder.createReaction(note, content), relays))
   }
@@ -47,7 +47,7 @@
   const deleteReaction = e => {
     Outbox.publish(
       Builder.deleteEvents([e.id]),
-      Nip65.getPublishHints(3, note, User.getRelayUrls("write"))
+      Nip65.getPublishHints(3, note, user.getRelayUrls("write"))
     )
 
     like = null
