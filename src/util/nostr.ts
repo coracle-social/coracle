@@ -141,7 +141,7 @@ export const normalizeRelayUrl = (url: string) => {
     url = "wss://" + url
   }
 
-  return tryFunc(() => new URL(url).href.replace(/\/+$/, "").toLowerCase())
+  return tryFunc(() => new URL(url).href.replace(/\/+$/, "").toLowerCase()) as string
 }
 
 export const channelAttrs = ["name", "about", "picture"]

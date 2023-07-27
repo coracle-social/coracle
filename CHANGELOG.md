@@ -11,6 +11,7 @@
 - [x] Add support for displaying kinds 0, 3, 10002
 - [x] Add detailed summary of relays a note was published to
 - [x] Emphasize follow status instead of nip05 addresses
+- [x] Add image uploads to chat
 
 # 0.2.35
 

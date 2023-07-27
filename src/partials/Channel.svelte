@@ -6,6 +6,7 @@
   import {fly} from "src/util/transition"
   import {createScroller} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
+  import ImageInput from "src/partials/ImageInput.svelte"
   import {Keys, Directory} from "src/app/engine"
 
   export let messages
@@ -41,6 +42,10 @@
     } else if (lastMessage < pluck("created_at", $groupedMessages).reduce(max, 0)) {
       showNewMessages = true
     }
+  }
+
+  const addImage = url => {
+    textarea.value = (textarea.value + "\n\n" + url).trim()
   }
 
   const send = async () => {
@@ -86,7 +91,7 @@
 
 <div class="flex h-full gap-4">
   <div class="relative w-full">
-    <div class="py-18 flex h-screen flex-col" class:pb-20={Keys.canSign.get()}>
+    <div class="-mt-16 pt-20 flex h-screen flex-col" class:pb-20={Keys.canSign.get()}>
       <ul
         class="channel-messages flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
         {#each $groupedMessages as m (m.id)}
@@ -115,12 +120,22 @@
           on:keypress={onKeyPress}
           class="w-full resize-none bg-gray-6 p-2
                text-gray-2 outline-0 placeholder:text-gray-1" />
-        <button
-          on:click={send}
-          class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-gray-7 p-4
-               py-8 text-gray-2 transition-all hover:bg-accent">
-          <i class="fa-solid fa-paper-plane fa-xl" />
-        </button>
+        <div>
+          <ImageInput hideInput onChange={addImage} icon="image">
+            <button
+              slot="button"
+              class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-gray-7 p-3
+                   py-6 text-gray-2 transition-all hover:bg-accent">
+              <i class="fa-solid fa-paperclip fa-lg" />
+            </button>
+          </ImageInput>
+          <button
+            on:click={send}
+            class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-gray-7 p-3
+                 py-6 text-gray-2 transition-all hover:bg-accent">
+            <i class="fa-solid fa-paper-plane fa-lg" />
+          </button>
+        </div>
       </div>
     {/if}
   </div>

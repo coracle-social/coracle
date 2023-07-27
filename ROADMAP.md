@@ -4,7 +4,6 @@
   - [ ] Normalize all relay urls, see comment by daniele
   - [ ] Add thread view
   - [ ] Use image and fetch proxies for user-provided content (especially profile data: nip05, picture, banner) to avoid security warnings
-- [ ] Add image uploads to chat
 - [ ] Remove profile popover
 - [ ] Re-work note media
   - [ ] Add webcam image/video capture

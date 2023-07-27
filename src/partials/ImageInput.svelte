@@ -13,6 +13,7 @@
   export let maxWidth = null
   export let maxHeight = null
   export let hideInput = false
+  export let onChange = null
 
   let input, file, listener, quote
   let loading = false
@@ -44,6 +45,7 @@
       const {url} = await Fetch.uploadFile(Settings.dufflepud(`upload/${id}`), file)
 
       value = url
+      onChange?.(url)
     } finally {
       loading = false
     }
@@ -60,28 +62,27 @@
   }
 </script>
 
-<div class="flex gap-2">
-  {#if !hideInput}
-    <Input type="text" wrapperClass="flex-grow" bind:value placeholder="https://">
-      <i slot="before" class={`fa fa-${icon}`} />
-    </Input>
-  {/if}
-  <div
-    on:click={() => {
-      isOpen = true
-    }}>
-    <slot name="button">
-      <div class="flex">
-        <Anchor theme="button">
-          <i class="fa fa-upload" />
-        </Anchor>
-      </div>
-    </slot>
-  </div>
+{#if !hideInput}
+  <Input type="text" wrapperClass="flex-grow" bind:value placeholder="https://">
+    <i slot="before" class={`fa fa-${icon}`} />
+  </Input>
+{/if}
+
+<div
+  on:click={() => {
+    isOpen = true
+  }}>
+  <slot name="button">
+    <div class="flex">
+      <Anchor theme="button">
+        <i class="fa fa-upload" />
+      </Anchor>
+    </div>
+  </slot>
 </div>
 
 {#if quote}
-  <Modal onEscape={decline}>
+  <Modal mini onEscape={decline}>
     <Content>
       <h1 class="staatliches text-2xl">Confirm File Upload</h1>
       <p>Please accept the following terms:</p>
@@ -93,7 +94,7 @@
     </Content>
   </Modal>
 {:else if isOpen}
-  <Modal onEscape={decline}>
+  <Modal mini onEscape={decline}>
     <Content>
       <h1 class="staatliches text-2xl">Upload a File</h1>
       <p>Click below to select a file to upload.</p>
