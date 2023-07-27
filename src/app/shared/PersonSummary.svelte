@@ -8,6 +8,7 @@
   import {Keys, user} from "src/app/engine"
 
   export let pubkey
+  export let inert = false
   export let hideActions = false
 
   const following = user.followsSet.derived(s => s.has(pubkey))
@@ -20,10 +21,10 @@
 </script>
 
 <div class="relative flex flex-grow flex-col gap-4 px-3 py-2">
-  <Anchor on:click={showDetail} class="flex gap-4">
+  <Anchor on:click={inert ? null : showDetail} class="flex gap-4">
     <PersonCircle size={14} {pubkey} />
     <div class="mr-16 flex flex-grow flex-col gap-1">
-      <PersonName class="text-lg" {pubkey} />
+      <PersonName inert class="text-lg" {pubkey} />
       <PersonHandle {pubkey} />
     </div>
   </Anchor>

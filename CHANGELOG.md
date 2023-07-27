@@ -13,6 +13,7 @@
 - [x] Emphasize follow status instead of nip05 addresses
 - [x] Add image uploads to chat
 - [x] Add new thread view
+- [x] Removed profile popover, click on a person's name to find mute and follow buttons
 
 # 0.2.35
 

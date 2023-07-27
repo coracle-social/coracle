@@ -56,7 +56,7 @@
     <div class="flex flex-grow flex-col gap-4">
       <div class="flex items-start justify-between gap-4">
         <div class="flex flex-grow flex-col gap-2">
-          <PersonName class="text-2xl" {pubkey} />
+          <PersonName inert class="text-2xl" {pubkey} />
           <PersonHandle {pubkey} />
         </div>
         <PersonActions {pubkey} />

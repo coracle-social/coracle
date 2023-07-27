@@ -40,12 +40,12 @@
 
 <Content>
   <div class="z-10 flex gap-4 text-gray-1">
-    <PersonCircle pubkey={$profile.pubkey} size={16} class="sm:h-32 sm:w-32" />
+    <PersonCircle {pubkey} size={16} class="sm:h-32 sm:w-32" />
     <div class="flex flex-grow flex-col gap-4">
       <div class="flex items-start justify-between gap-4">
         <div class="flex flex-grow flex-col gap-2">
           <Anchor href={routes.person(pubkey)}>
-            <PersonName {pubkey} />
+            <PersonName inert class="text-2xl" {pubkey} />
           </Anchor>
           <PersonHandle {pubkey} />
         </div>

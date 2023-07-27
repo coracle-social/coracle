@@ -9,6 +9,8 @@
 
   export let pubkey
 
+  const canSign = Keys.canSign.get()
+  const isSelf = Keys.pubkey.get() === pubkey
   const npub = nip19.npubEncode(pubkey)
   const graphEntry = Nip02.graph.key(Keys.pubkey.get())
   const following = graphEntry.derived(() => user.isFollowing(pubkey))
@@ -19,7 +21,7 @@
   $: {
     actions = []
 
-    if (Keys.canSign.get()) {
+    if (canSign) {
       actions.push({
         onClick: () => addToList("p", pubkey),
         label: "Add to list",
@@ -29,25 +31,19 @@
 
     actions.push({onClick: share, label: "Share", icon: "share-nodes"})
 
-    if (Keys.pubkey.get() !== pubkey && Keys.canSign.get()) {
+    if (!isSelf && canSign) {
       actions.push({
         onClick: () => navigate(`/messages/${npub}`),
         label: "Message",
         icon: "envelope",
       })
-
-      if ($muted) {
-        actions.push({onClick: unmute, label: "Unmute", icon: "microphone"})
-      } else if (Keys.pubkey.get() !== pubkey) {
-        actions.push({onClick: mute, label: "Mute", icon: "microphone-slash"})
-      }
     }
 
     if (Env.FORCE_RELAYS.length === 0) {
       actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
     }
 
-    if (Keys.pubkey.get() === pubkey && Keys.canSign.get()) {
+    if (isSelf && canSign) {
       actions.push({
         onClick: () => navigate("/profile"),
         label: "Edit",
@@ -70,12 +66,22 @@
 </script>
 
 <div class="flex items-center gap-3">
-  {#if Keys.canSign.get()}
+  {#if canSign && !isSelf}
     <Popover triggerType="mouseenter">
-      <div slot="trigger">
+      <div slot="trigger" class="w-6 text-center">
+        {#if $muted}
+          <i class="fa fa-microphone-slash cursor-pointer" on:click={unmute} />
+        {:else}
+          <i class="fa fa-microphone cursor-pointer" on:click={mute} />
+        {/if}
+      </div>
+      <div slot="tooltip">{$muted ? "Unmute" : "Mute"}</div>
+    </Popover>
+    <Popover triggerType="mouseenter">
+      <div slot="trigger" class="w-6 text-center">
         {#if $following}
           <i class="fa fa-user-minus cursor-pointer" on:click={unfollow} />
-        {:else if Keys.pubkey.get() !== pubkey}
+        {:else}
           <i class="fa fa-user-plus cursor-pointer" on:click={follow} />
         {/if}
       </div>

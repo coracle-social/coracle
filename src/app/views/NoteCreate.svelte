@@ -16,7 +16,7 @@
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
   import {Directory, user, Builder, Nip65, Keys} from "src/app/engine"
-  import {toast, modal} from "src/partials/state"
+  import {modal} from "src/partials/state"
   import {publishWithToast} from "src/app/state"
 
   export let quote = null
@@ -43,27 +43,7 @@
     }
 
     if (content) {
-      const rawEvent = Builder.createNote(content.trim(), tags)
-      const [event, promise] = await publishWithToast(rawEvent, $relays)
-
-      promise.then(() =>
-        setTimeout(
-          () =>
-            toast.show("info", {
-              text: `Your note has been created!`,
-              link: {
-                text: "View",
-                href:
-                  "/" +
-                  nip19.neventEncode({
-                    id: event.id,
-                    relays: $relays.slice(0, 3),
-                  }),
-              },
-            }),
-          3000
-        )
-      )
+      await publishWithToast(Builder.createNote(content.trim(), tags), $relays)
 
       modal.clear()
     }

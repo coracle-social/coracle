@@ -9,7 +9,7 @@
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import PersonSummary from "src/app/shared/PersonSummary.svelte"
+  import PersonName from "src/app/shared/PersonName.svelte"
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
@@ -37,7 +37,6 @@
   const interactive = !anchorId || !showEntire
   const author = Directory.profiles.key(note.pubkey).derived(defaultTo({pubkey: note.pubkey}))
   const muted = Nip02.graph.key(Keys.pubkey.get()).derived(() => user.isIgnoring(note.id))
-  const following = user.followsSet.derived(s => s.has(note.pubkey))
 
   let border, childrenContainer, noteContainer
 
@@ -119,22 +118,12 @@
       </div>
       <div class="flex min-w-0 flex-grow flex-col gap-2">
         <div class="flex flex-col items-start justify-between sm:flex-row sm:items-center">
-          <Popover triggerType="mouseenter">
-            <div slot="trigger">
-              <Anchor
-                type="unstyled"
-                class="flex items-center gap-2 pr-16 text-lg font-bold"
-                on:click={() => modal.push({type: "person/feed", pubkey: note.pubkey})}>
-                <span>{Directory.displayProfile($author)}</span>
-                {#if $following}
-                  <i class="fa fa-user-check text-sm text-accent" />
-                {/if}
-              </Anchor>
-            </div>
-            <div slot="tooltip">
-              <PersonSummary pubkey={note.pubkey} />
-            </div>
-          </Popover>
+          <Anchor
+            type="unstyled"
+            class="pr-16 text-lg font-bold"
+            on:click={() => modal.push({type: "person/feed", pubkey: note.pubkey})}>
+            <PersonName pubkey={$author.pubkey} />
+          </Anchor>
           <Anchor
             href={"/" + nip19.neventEncode({id: note.id, relays: note.seen_on})}
             class="text-sm text-gray-1"

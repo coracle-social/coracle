@@ -118,7 +118,6 @@
       class="fa-solid fa-camera cursor-pointer text-accent"
       on:click={() => scanner.start()} />
   </Input>
-
   {#each search(q).slice(0, 50) as result (result.type + result.id)}
     {#if result.type === "topic"}
       <BorderLeft on:click={() => openTopic(result.topic.name)}>
@@ -126,7 +125,7 @@
       </BorderLeft>
     {:else if result.type === "profile"}
       <BorderLeft on:click={() => modal.push({type: "person/feed", pubkey: result.id})}>
-        <PersonSummary hideActions pubkey={result.id} />
+        <PersonSummary inert hideActions pubkey={result.id} />
       </BorderLeft>
     {/if}
   {/each}

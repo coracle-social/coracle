@@ -107,13 +107,16 @@ export class FeedLoader {
     this.feed.update($feed => {
       // Avoid showing the same note twice, even if it's once as
       // a parent and once as a child
-      const ids = new Set(pluck('id', $feed))
+      const ids = new Set(pluck("id", $feed))
 
       return uniqBy(
         prop("id"),
         $feed.concat(
           this.context.applyContext(
-            sortBy(e => -e.created_at, notes.filter(e => !ids.has(e))),
+            sortBy(
+              e => -e.created_at,
+              notes.filter(e => !ids.has(e.id))
+            ),
             true
           )
         )

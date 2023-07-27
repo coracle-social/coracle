@@ -1,9 +1,7 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Add thread view
   - [ ] Use image and fetch proxies for user-provided content (especially profile data: nip05, picture, banner) to avoid security warnings
-- [ ] Remove profile popover
 - [ ] Re-work note media
   - [ ] Add webcam image/video capture
   - [ ] Show list of media that can be viewed/removed below post
@@ -12,7 +10,6 @@
   - [ ] Support bigger files, or at least handle errors. Monetize, or use nip 95
 - [ ] Fork and white label blowater
 - [ ] Add word/char count to compose
-- [ ] Show full nip05 unless it starts with an underscore, change icon to non-verified
 - [ ] Add relayset support with kind 30022
 - [ ] White-labeled
   - [ ] Add invite code registration for relay
@@ -26,12 +23,6 @@
 - [ ] Add imgproxy https://github.com/imgproxy/imgproxy
   - Protects metadata, saves bandwidth, fixes void.cat?
 - [ ] Put search icon in header or hover button, open in modal
-- [ ] Centralize relays
-  - This is ok, relays are the source of decentralization
-  - clients can help with discoverability
-  - Add agent to dufflepud database that scrapes relays and reviews
-  - Serve relays from dufflepud
-  - Or maybe set up a special purpose relay for relay recs?
 
 # Core
 

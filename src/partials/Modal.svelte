@@ -15,8 +15,11 @@
   const id = randomId()
   const {stack} = modal
 
-  $: _isOnTop = virtual || isOnTop
-  $: _onEscape = _isOnTop ? onEscape : null
+  const escapeIfOnTop = () => {
+    if (virtual || isOnTop) {
+      onEscape()
+    }
+  }
 
   onMount(() => {
     if (virtual) {
@@ -34,28 +37,25 @@
 <svelte:body
   on:keydown={e => {
     if (e.key === "Escape" && !root.querySelector(".modal")) {
-      _onEscape?.()
+      escapeIfOnTop?.()
     }
   }} />
 
 <div
   bind:this={root}
   transition:fade
-  class="modal fixed inset-0 z-30"
-  class:pointer-events-none={mini}>
-  {#if !mini}
-    <div
-      class="fixed inset-0 cursor-pointer bg-black opacity-50"
-      on:click|stopPropagation={_onEscape} />
-  {/if}
+  class="modal fixed inset-0 z-30">
+  <div
+    class="fixed inset-0 cursor-pointer bg-black opacity-50"
+    on:click|stopPropagation={escapeIfOnTop} />
   <div
     class="modal-content h-full overflow-auto"
     class:overflow-hidden={mini}
     class:pointer-events-none={mini}
-    class:cursor-pointer={_onEscape}
+    class:cursor-pointer={escapeIfOnTop}
     transition:fly={{y: 1000}}
     bind:this={content}
-    on:click={_onEscape}>
+    on:click={escapeIfOnTop}>
     <div
       class="pointer-events-auto mt-12 min-h-full transition transition-all duration-500"
       style={mini ? "margin-top: 55vh" : ""}>
