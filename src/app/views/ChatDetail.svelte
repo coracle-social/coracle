@@ -37,7 +37,10 @@
   onMount(() => {
     const sub = Network.subscribe({
       relays: getRelays(),
-      filter: [{kinds: [42], "#e": [id]}],
+      filter: [
+        {kinds: [40], ids: [id]},
+        {kinds: [41, 42], "#e": [id]},
+      ],
     })
 
     return () => sub.close()

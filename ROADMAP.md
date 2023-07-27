@@ -1,7 +1,6 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Normalize all relay urls, see comment by daniele
   - [ ] Add thread view
   - [ ] Use image and fetch proxies for user-provided content (especially profile data: nip05, picture, banner) to avoid security warnings
 - [ ] Remove profile popover
@@ -38,6 +37,7 @@
 
 - [ ] Private groups
 - [ ] Superfollow?
+- [ ] Make joined status interoperable, and persistent across logins
 - [ ] Email newsletter for priority content
 - [ ] Put topic/channel/list follows in petnames https://github.com/nostr-protocol/nips/pull/665#issuecomment-1640835240
 - [ ] Add custom emoji support

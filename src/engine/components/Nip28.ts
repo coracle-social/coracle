@@ -1,5 +1,5 @@
 import {find, last, pick, uniq} from "ramda"
-import {tryJson, fuzzy, now} from "src/util/misc"
+import {tryJson, fuzzy} from "src/util/misc"
 import {Tags, appDataKeys, channelAttrs} from "src/util/nostr"
 import type {Channel, Event, Message} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
@@ -45,7 +45,7 @@ export class Nip28 {
       this.channels.key(e.id).merge({
         ...content,
         pubkey: e.pubkey,
-        updated_at: now(),
+        updated_at: e.created_at,
         hints: Tags.from(e).relays(),
       })
     })
@@ -76,7 +76,7 @@ export class Nip28 {
       this.channels.key(channelId).merge({
         ...content,
         pubkey: e.pubkey,
-        updated_at: now(),
+        updated_at: e.created_at,
         hints: Tags.from(e).relays(),
       })
     })
