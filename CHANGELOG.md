@@ -12,6 +12,7 @@
 - [x] Add detailed summary of relays a note was published to
 - [x] Emphasize follow status instead of nip05 addresses
 - [x] Add image uploads to chat
+- [x] Add new thread view
 
 # 0.2.35
 

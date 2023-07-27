@@ -1,0 +1,55 @@
+<script>
+  import {quantify} from "hurdak"
+  import {onDestroy} from "svelte"
+  import {ThreadLoader} from "src/engine"
+  import Content from "src/partials/Content.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
+  import Spinner from "src/partials/Spinner.svelte"
+  import Note from "src/app/shared/Note.svelte"
+  import engine, {user} from "src/app/engine"
+
+  export let anchorId
+  export let relays
+
+  const loader = new ThreadLoader(engine, {anchorId, relays, isMuted: user.isMuted})
+  const {anchor, root, parent, ancestors} = loader
+
+  let loading = true
+  let showAncestors = false
+
+  $: loading = loading && !($anchor && $root && $parent)
+
+  onDestroy(() => {
+    loader.stop()
+
+    setTimeout(() => {
+      loading = false
+    }, 3000)
+  })
+</script>
+
+{#if loading}
+  <Spinner />
+{:else}
+  <Content>
+    {#if $root}
+      <Note invertColors note={$root} />
+    {/if}
+    {#if showAncestors}
+      {#each $ancestors as ancestor}
+        <Note invertColors showParent={false} note={ancestor} />
+      {/each}
+    {:else if $ancestors.length > 0}
+      <Anchor class="text-center text-gray-1" on:click={() => { showAncestors = true }}>
+        <i class="fa fa-up-down pr-2 text-sm" />
+        Show {quantify($ancestors.length, "other note")}
+      </Anchor>
+    {/if}
+    {#if $parent}
+      <Note invertColors showParent={false} note={$parent} />
+    {/if}
+    {#if $anchor}
+      <Note invertColors showContext showParent={false} anchorId={$anchor.id} note={$anchor} depth={2} />
+    {/if}
+  </Content>
+{/if}

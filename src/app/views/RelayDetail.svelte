@@ -49,12 +49,7 @@
     <Feed
       invertColors
       onEvent={onReview}
-      filter={{
-        kinds: [1985],
-        "#l": ["review/relay"],
-        "#L": ["social.coracle.ontology"],
-        "#r": [relay.url],
-      }} />
+      filter={{kinds: [1985], "#l": ["review/relay"], "#r": [relay.url]}} />
   {:else}
     <Feed invertColors relays={[relay.url]} filter={{kinds: [1]}} />
   {/if}

@@ -65,10 +65,10 @@
     goToNote({note: {id: findReplyId(note), replies: [note]}, relays})
   }
 
-  const goToRoot = async () => {
-    const relays = Nip65.getParentHints(3, note)
+  const goToThread = async () => {
+    const relays = Nip65.getEventHints(3, note)
 
-    goToNote({note: {id: findRootId(note)}, relays})
+    modal.push({type: "thread/detail", anchorId: note.id, relays})
   }
 
   const setBorderHeight = () => {
@@ -153,7 +153,7 @@
             {#if findRootId(note) && findRootId(note) !== findReplyId(note) && showParent}
               <small class="text-gray-1">
                 <i class="fa fa-code-pull-request" />
-                <Anchor class="underline" on:click={goToRoot}>View Thread</Anchor>
+                <Anchor class="underline" on:click={goToThread}>View Thread</Anchor>
               </small>
             {/if}
           </div>

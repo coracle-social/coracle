@@ -27,8 +27,8 @@ const fromDisplayEvent = (e: DisplayEvent): Event =>
   omit(["zaps", "likes", "replies", "matchesFilter"], e)
 
 export type ContextLoaderOpts = {
-  filter: Filter | Filter[]
   isMuted: (e: Event) => boolean
+  filter?: Filter | Filter[]
   onEvent?: (e: Event) => void
   shouldLoadParents?: boolean
 }
@@ -74,7 +74,7 @@ export class ContextLoader {
   }
 
   matchFilters(e: Event) {
-    return matchFilters(ensurePlural(this.opts.filter), e)
+    return this.opts.filter && matchFilters(ensurePlural(this.opts.filter), e)
   }
 
   isTextNote(e: Event) {
@@ -269,7 +269,7 @@ export class ContextLoader {
 
     this.loadPubkeys(events)
 
-    if (this.opts.shouldLoadParents && shouldLoadParents) {
+    if (shouldLoadParents) {
       this.loadParents(events)
     }
 
