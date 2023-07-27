@@ -1,9 +1,9 @@
 <script lang="ts">
-  import {isNil, prop, uniqBy, objOf, find, all, last} from "ramda"
+  import {isNil, prop, uniqBy, objOf, find, all} from "ramda"
   import {sleep, shuffle} from "hurdak"
   import {onDestroy, onMount} from "svelte"
   import {navigate} from "svelte-routing"
-  import {isRelay, userKinds} from "src/util/nostr"
+  import {normalizeRelayUrl, userKinds} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -89,11 +89,9 @@
   }
 
   const addCustomRelay = () => {
-    if (!customRelayUrl.startsWith("ws")) {
-      customRelayUrl = "wss://" + last(customRelayUrl.split("://"))
-    }
+    const url = normalizeRelayUrl(customRelayUrl)
 
-    if (!isRelay(customRelayUrl)) {
+    if (!url) {
       return toast.show("error", "That isn't a valid relay url")
     }
 
@@ -116,6 +114,7 @@
   <p class="text-left">
     We're searching for your profile on the network. If you'd like to select your relays manually
     instead, click <Anchor
+      theme="anchor"
       on:click={() => {
         customRelayUrl = ""
         modal = "custom"

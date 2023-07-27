@@ -202,9 +202,7 @@ export class Nip65 {
     this.engine = engine
 
     engine.Events.addHandler(2, e => {
-      if (isShareableRelay(e.content)) {
-        this.addRelay(normalizeRelayUrl(e.content))
-      }
+      this.addRelay(normalizeRelayUrl(e.content))
     })
 
     engine.Events.addHandler(3, e => {
@@ -254,7 +252,7 @@ export class Nip65 {
       try {
         const json = await Fetch.fetchJson(DUFFLEPUD_URL + "/relay")
 
-        json.relays.filter(isShareableRelay).forEach(this.addRelay)
+        json.relays.forEach(this.addRelay)
       } catch (e) {
         warn("Failed to fetch relays list", e)
       }

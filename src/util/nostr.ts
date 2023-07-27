@@ -122,13 +122,13 @@ export const findRootId = (e: Event) => findRoot(e)?.[1]
 
 export const isLike = (content: string) => ["", "+", "🤙", "👍", "❤️", "😎", "🏅"].includes(content)
 
-export const isRelay = (url: string) =>
-  url.match(/^wss:\/\/.+/) && // Is it actually a websocket link
-  url.match(/:\/\//g).length === 1 && // Sometimes bugs cause multiple relays to get concatenated
-  !url.match(/\s/)
-
 export const isShareableRelay = (url: string) =>
-  isRelay(url) &&
+  // Is it actually a websocket url
+  url.match(/^wss:\/\/.+/) &&
+  // Sometimes bugs cause multiple relays to get concatenated
+  url.match(/:\/\//g).length === 1 &&
+  // It shouldn't have any whitespace
+  !url.match(/\s/) &&
   // Don't match stuff with a port number
   !url.slice(6).match(/:\d+/) &&
   // Don't match raw ip addresses
@@ -137,11 +137,12 @@ export const isShareableRelay = (url: string) =>
   !url.slice(6).match(/\/npub/)
 
 export const normalizeRelayUrl = (url: string) => {
-  if (!url.match(/^ws/)) {
-    url = "wss://" + url
+  // If it doesn't start with a compatible protocol, strip the proto and add wss
+  if (!url.match(/^wss?:\/\/.+/)) {
+    url = "wss://" + url.replace(/.*:\/\//, "")
   }
 
-  return tryFunc(() => new URL(url).href.replace(/\/+$/, "").toLowerCase()) as string
+  return (tryFunc(() => new URL(url).href.replace(/\/+$/, "").toLowerCase()) || "") as string
 }
 
 export const channelAttrs = ["name", "about", "picture"]
