@@ -36,7 +36,10 @@
   style="background-color: rgba(15, 15, 14, 0.5)"
   class={cx("relative flex flex-col overflow-hidden rounded-xl border border-solid border-gray-6")}>
   {#if link.type === "image"}
-    <img alt="Link preview" src={link.url} class="max-h-96 object-contain object-center" />
+    <img
+      alt="Link preview"
+      src={Settings.imgproxy(link.url)}
+      class="max-h-96 object-contain object-center" />
   {:else if link.type === "video"}
     <video controls src={link.url} class="max-h-96 object-contain object-center" />
   {:else}
@@ -44,7 +47,10 @@
       <Spinner />
     {:then { title, description, image }}
       {#if image}
-        <img alt="Link preview" src={image} class="max-h-96 object-contain object-center" />
+        <img
+          alt="Link preview"
+          src={Settings.imgproxy(image)}
+          class="max-h-96 object-contain object-center" />
       {/if}
       <div class="h-px bg-gray-6" />
       {#if title}

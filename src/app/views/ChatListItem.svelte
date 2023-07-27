@@ -4,13 +4,14 @@
   import {fly} from "src/util/transition"
   import {ellipsize} from "hurdak"
   import Anchor from "src/partials/Anchor.svelte"
-  import {Keys, user} from "src/app/engine"
+  import {Keys, Settings, user} from "src/app/engine"
 
   export let channel
 
   const enter = () => navigate(`/chat/${nip19.noteEncode(channel.id)}`)
   const join = () => user.joinChannel(channel.id)
   const leave = () => user.leaveChannel(channel.id)
+  const picture = Settings.imgproxy(channel.picture, {w: 56, h: 56})
 </script>
 
 <button
@@ -19,7 +20,7 @@
   in:fly={{y: 20}}>
   <div
     class="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-solid border-white bg-cover bg-center"
-    style="background-image: url({channel.picture})" />
+    style={`background-image: url(${picture})`} />
   <div class="flex min-w-0 flex-grow flex-col justify-start gap-2">
     <div class="flex flex-grow items-start justify-between gap-2">
       <div class="flex items-center gap-2 overflow-hidden">

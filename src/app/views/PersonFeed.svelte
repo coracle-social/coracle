@@ -28,15 +28,15 @@
     rgb = `rgba(${color.join(", ")})`
   }
 
+  $: banner = Settings.imgproxy($profile.banner, {w: window.innerWidth})
+
   document.title = Directory.displayProfile($profile)
 </script>
 
 <div
   class="absolute left-0 -mt-2 h-64 w-full"
-  style="background-size: cover;
-         background-image:
-          linear-gradient(to bottom, {rgba}, {rgb}),
-          url('{$profile.banner}')" />
+  style={`background-size: cover;
+         background-image: linear-gradient(to bottom, ${rgba}, ${rgb}), url('${banner}')`} />
 
 <Content>
   <div class="z-10 flex gap-4 text-gray-1">

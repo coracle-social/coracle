@@ -13,7 +13,7 @@
   import PersonRelays from "src/app/shared/PersonRelays.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
-  import {Env, pubkeyLoader, Directory, Nip65} from "src/app/engine"
+  import {Env, Settings, pubkeyLoader, Directory, Nip65} from "src/app/engine"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -32,6 +32,7 @@
 
   $: ownRelays = Nip65.getPubkeyRelays(pubkey)
   $: relays = Nip65.getPubkeyHints(10, pubkey)
+  $: banner = Settings.imgproxy($profile.banner, {w: window.innerWidth})
 
   log("Person", npub, $profile)
 
@@ -44,11 +45,9 @@
 
 <div
   class="absolute left-0 h-64 w-full"
-  style="z-index: -1;
+  style={`z-index: -1;
          background-size: cover;
-         background-image:
-          linear-gradient(to bottom, {rgba}, {rgb}),
-          url('{$profile.banner}')" />
+         background-image: linear-gradient(to bottom, ${rgba}, ${rgb}), url('${banner}')`} />
 
 <Content>
   <div class="flex gap-4 text-gray-1">

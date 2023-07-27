@@ -1,6 +1,8 @@
 import {identity} from "ramda"
 import {Engine, User, StorageAdapter, PubkeyLoader, RelayStats} from "src/engine"
 
+const IMGPROXY_URL = import.meta.env.VITE_IMGPROXY_URL
+
 const DUFFLEPUD_URL = import.meta.env.VITE_DUFFLEPUD_URL
 
 const MULTIPLEXTR_URL = import.meta.env.VITE_MULTIPLEXTR_URL
@@ -28,6 +30,7 @@ const ENABLE_ZAPS = JSON.parse(import.meta.env.VITE_ENABLE_ZAPS)
 
 const engine = new Engine({
   DEFAULT_FOLLOWS,
+  IMGPROXY_URL,
   DUFFLEPUD_URL,
   MULTIPLEXTR_URL,
   FORCE_RELAYS,

@@ -52,6 +52,8 @@
     }
   })
 
+  $: picture = Settings.imgproxy($channel.picture, {w: 48, h: 48})
+
   document.title = $channel.name || "Coracle Chat"
 </script>
 
@@ -61,7 +63,7 @@
       <Anchor class="fa fa-arrow-left cursor-pointer text-2xl" href="/chat" />
       <div
         class="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-solid border-white bg-cover bg-center"
-        style="background-image: url({$channel.picture})" />
+        style={`background-image: url(${picture})`} />
     </div>
     <div class="flex w-full flex-col gap-2">
       <div class="flex w-full items-center justify-between">

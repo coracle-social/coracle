@@ -6,9 +6,9 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {Env, user} from "src/app/engine"
+  import {Env, Settings, user} from "src/app/engine"
 
-  let values = {...user.settings.get()}
+  let values = {...Settings.settings.get()}
 
   const submit = () => {
     user.setSettings(values)
@@ -67,11 +67,21 @@
           >.
         </p>
       </div>
+      <div class="flex flex-col gap-1">
+        <strong>Imgproxy URL</strong>
+        <Input bind:value={values.imgproxy_url}>
+          <i slot="before" class="fa-solid fa-image" />
+        </Input>
+        <p class="text-sm text-gray-4">
+          Enter a custom imgproxy url for resizing images on the fly to reduce bandwidth and improve
+          privacy. You can set up your own proxy <Anchor href="https://imgproxy.net/">here</Anchor>.
+        </p>
+      </div>
       {#if Env.FORCE_RELAYS.length === 0}
         <div class="flex flex-col gap-1">
           <strong>Multiplextr URL</strong>
           <Input bind:value={values.multiplextr_url}>
-            <i slot="before" class="fa-solid fa-server" />
+            <i slot="before" class="fa-solid fa-code-merge" />
           </Input>
           <p class="text-sm text-gray-4">
             Enter a custom proxy server for multiplexing relay connections. This can drastically

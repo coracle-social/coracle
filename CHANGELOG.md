@@ -14,6 +14,7 @@
 - [x] Add image uploads to chat
 - [x] Add new thread view
 - [x] Removed profile popover, click on a person's name to find mute and follow buttons
+- [x] Add configurable imgproxy url
 
 # 0.2.35
 

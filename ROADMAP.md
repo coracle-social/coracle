@@ -1,7 +1,7 @@
 # Current
 
 - [ ] Refactor
-  - [ ] Use image and fetch proxies for user-provided content (especially profile data: nip05, picture, banner) to avoid security warnings
+  - [ ] Remove personfeed
 - [ ] Re-work note media
   - [ ] Add webcam image/video capture
   - [ ] Show list of media that can be viewed/removed below post
@@ -20,8 +20,6 @@
   - [ ] Avoid leaking events from private relays
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
-- [ ] Add imgproxy https://github.com/imgproxy/imgproxy
-  - Protects metadata, saves bandwidth, fixes void.cat?
 - [ ] Put search icon in header or hover button, open in modal
 
 # Core
@@ -166,10 +164,6 @@
 - [ ] Use nip 56 for reporting
   - https://github.com/nostr-protocol/nips/pull/205#issuecomment-1419234230
 - [ ] Sync mentions box and in-reply mentions
-
-# Privacy
-
-- [ ] Add image proxy to avoid leaking user ips to hosts
 
 # Big Picture
 

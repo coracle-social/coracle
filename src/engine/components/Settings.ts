@@ -9,6 +9,12 @@ export class Settings {
 
   getSetting = (k: string) => this.settings.get()[k]
 
+  imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
+    const base = this.getSetting("imgproxy_url")
+
+    return base && url ? `${base}/x/s:${w}:${h}/${btoa(url)}` : url
+  }
+
   dufflepud = (path: string) => `${this.getSetting("dufflepud_url")}/${path}`
 
   initialize(engine: Engine) {
@@ -20,6 +26,7 @@ export class Settings {
       default_zap: 21,
       show_media: true,
       report_analytics: true,
+      imgproxy_url: engine.Env.IMGPROXY_URL,
       dufflepud_url: engine.Env.DUFFLEPUD_URL,
       multiplextr_url: engine.Env.MULTIPLEXTR_URL,
     })

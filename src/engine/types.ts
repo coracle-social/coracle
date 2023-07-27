@@ -153,6 +153,7 @@ export type List = {
 }
 
 export type Env = {
+  IMGPROXY_URL: string
   DUFFLEPUD_URL: string
   MULTIPLEXTR_URL: string
   FORCE_RELAYS: string[]

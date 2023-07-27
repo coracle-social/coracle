@@ -16,13 +16,13 @@
 <div class={cx(wrapperClass, "relative")}>
   <input {...$$props} class={className} bind:value on:change on:input />
   {#if $$slots.before}
-    <div class="absolute top-0 left-0 flex gap-2 px-3 pt-3 text-black opacity-75">
+    <div class="absolute left-0 top-0 flex gap-2 px-4 pt-3 text-black opacity-75">
       <slot name="before" />
     </div>
   {/if}
   {#if $$slots.after}
     <div
-      class="absolute top-0 right-0 m-px flex gap-2 rounded-full px-3 pt-3 text-black opacity-75">
+      class="absolute right-0 top-0 m-px flex gap-2 rounded-full px-4 pt-3 text-black opacity-75">
       <slot name="after" />
     </div>
   {/if}
