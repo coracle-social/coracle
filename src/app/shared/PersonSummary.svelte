@@ -13,7 +13,7 @@
 
   const following = user.followsSet.derived(s => s.has(pubkey))
   const muted = user.mutesSet.derived(s => s.has(pubkey))
-  const showDetail = () => modal.push({type: "person/feed", pubkey})
+  const showDetail = () => modal.push({type: "person/detail", pubkey})
   const unfollow = () => user.unfollow(pubkey)
   const follow = () => user.follow(pubkey)
   const unmute = () => user.unmute(pubkey)

@@ -1,7 +1,5 @@
 # Current
 
-- [ ] Refactor
-  - [ ] Remove personfeed
 - [ ] Re-work note media
   - [ ] Add webcam image/video capture
   - [ ] Show list of media that can be viewed/removed below post

@@ -8,7 +8,7 @@
 
   const {pubkey} = value
   const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
-  const openPerson = () => modal.push({type: "person/feed", pubkey})
+  const openPerson = () => modal.push({type: "person/detail", pubkey})
 </script>
 
 @<Anchor class="underline" killEvent on:click={openPerson}>

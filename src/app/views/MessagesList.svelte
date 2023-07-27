@@ -47,7 +47,7 @@
 <Content>
   <div class="relative">
     <Tabs tabs={["messages", "requests"]} {activeTab} setActiveTab={navigate} {getDisplay} />
-    <Popover triggerType="mouseenter" class="absolute right-7 top-7">
+    <Popover triggerType="mouseenter" class="absolute right-7 top-7 hidden sm:block">
       <div slot="trigger">
         <i
           class="fa fa-bell cursor-bell cursor-pointer"

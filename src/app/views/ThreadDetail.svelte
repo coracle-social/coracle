@@ -31,25 +31,29 @@
 {#if loading}
   <Spinner />
 {:else}
-  <Content>
+  <Content gap="gap-4">
     {#if $root}
       <Note invertColors note={$root} />
     {/if}
     {#if showAncestors}
       {#each $ancestors as ancestor}
-        <Note invertColors showParent={false} note={ancestor} />
+        <Note invertColors topLevel showParent={false} note={ancestor} />
       {/each}
     {:else if $ancestors.length > 0}
-      <Anchor class="text-center text-gray-1" on:click={() => { showAncestors = true }}>
+      <Anchor
+        class="text-center text-gray-1"
+        on:click={() => {
+          showAncestors = true
+        }}>
         <i class="fa fa-up-down pr-2 text-sm" />
         Show {quantify($ancestors.length, "other note")}
       </Anchor>
     {/if}
     {#if $parent}
-      <Note invertColors showParent={false} note={$parent} />
+      <Note invertColors topLevel showParent={false} note={$parent} />
     {/if}
     {#if $anchor}
-      <Note invertColors showContext showParent={false} anchorId={$anchor.id} note={$anchor} depth={2} />
+      <Note invertColors showContext topLevel showParent={false} note={$anchor} depth={2} />
     {/if}
   </Content>
 {/if}

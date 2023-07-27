@@ -15,7 +15,7 @@
   let muted = false
   let loading = true
 
-  const openPerson = pubkey => modal.push({type: "person/feed", pubkey})
+  const openPerson = pubkey => modal.push({type: "person/detail", pubkey})
 
   const {id, relays = []} = value
 

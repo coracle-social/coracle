@@ -15,9 +15,11 @@
     {#if relays.length === 0}
       <div class="pt-8 text-center">No relays found</div>
     {:else}
-      {#each relays as relay (relay.url)}
-        <RelayCard {relay} />
-      {/each}
+      <div class="flex flex-col gap-2">
+        {#each relays as relay (relay.url)}
+          <RelayCard {relay} />
+        {/each}
+      </div>
     {/if}
   </Content>
 </div>

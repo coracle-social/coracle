@@ -1,6 +1,5 @@
 <script lang="ts">
   import {identity, defaultTo} from "ramda"
-  import {navigate} from "svelte-routing"
   import {log} from "src/util/logger"
   import {toHex} from "src/util/nostr"
   import {getThemeBackgroundGradient} from "src/partials/state"
@@ -14,13 +13,11 @@
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
   import {Env, Settings, pubkeyLoader, Directory, Nip65} from "src/app/engine"
-  import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import PersonStats from "src/app/shared/PersonStats.svelte"
 
   export let npub
-  export let activeTab
   export let relays = []
 
   const tabs = ["notes", "likes", Env.FORCE_RELAYS.length === 0 && "relays"].filter(identity)
@@ -28,6 +25,7 @@
   const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
   const {rgb, rgba} = getThemeBackgroundGradient()
 
+  let activeTab = "notes"
   let loading = true
 
   $: ownRelays = Nip65.getPubkeyRelays(pubkey)
@@ -40,7 +38,9 @@
 
   document.title = Directory.displayProfile($profile)
 
-  const setActiveTab = tab => navigate(routes.person(pubkey, tab))
+  const setActiveTab = tab => {
+    activeTab = tab
+  }
 </script>
 
 <div

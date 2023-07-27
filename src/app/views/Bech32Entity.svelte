@@ -38,9 +38,9 @@
     <NaddrDetail {...data} />
   </Content>
 {:else if type === "nprofile"}
-  <PersonDetail npub={nip19.npubEncode(data.pubkey)} {relays} activeTab="notes" />
+  <PersonDetail npub={nip19.npubEncode(data.pubkey)} {relays} />
 {:else if type === "npub"}
-  <PersonDetail npub={entity} activeTab="notes" />
+  <PersonDetail npub={entity} />
 {:else}
   <Content size="lg" class="text-center">
     <div>Sorry, we weren't able to find "{entity}".</div>

@@ -26,7 +26,7 @@ import {
 // Routing
 
 export const routes = {
-  person: (pubkey: string, tab = "notes") => `/people/${nip19.npubEncode(pubkey)}/${tab}`,
+  person: (pubkey: string) => `/people/${nip19.npubEncode(pubkey)}`,
 }
 
 export const addToList = (type: string, value: string) =>

@@ -28,7 +28,7 @@
 
     event?.preventDefault()
     publishWithToast(Builder.setProfile(values), relays)
-    navigate(routes.person($pubkey, "notes"))
+    navigate(routes.person($pubkey))
   }
 
   const {pubkey} = Keys

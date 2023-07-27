@@ -124,7 +124,7 @@
         #{result.topic.name}
       </BorderLeft>
     {:else if result.type === "profile"}
-      <BorderLeft on:click={() => modal.push({type: "person/feed", pubkey: result.id})}>
+      <BorderLeft on:click={() => modal.push({type: "person/detail", pubkey: result.id})}>
         <PersonSummary inert hideActions pubkey={result.id} />
       </BorderLeft>
     {/if}

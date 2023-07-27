@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {nip19} from "nostr-tools"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import ChatEdit from "src/app/views/ChatEdit.svelte"
@@ -14,7 +15,7 @@
   import PublishInfo from "src/app/views/PublishInfo.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import ThreadDetail from "src/app/views/ThreadDetail.svelte"
-  import PersonFeed from "src/app/views/PersonFeed.svelte"
+  import PersonDetail from "src/app/views/PersonDetail.svelte"
   import PersonList from "src/app/shared/PersonList.svelte"
   import PersonProfileInfo from "src/app/views/PersonProfileInfo.svelte"
   import PersonShare from "src/app/views/PersonShare.svelte"
@@ -63,8 +64,8 @@
   <LoginBunker />
 {:else if m.type === "login/connect"}
   <LoginConnect />
-{:else if m.type === "person/feed"}
-  <PersonFeed pubkey={m.pubkey} />
+{:else if m.type === "person/detail"}
+  <PersonDetail npub={nip19.npubEncode(m.pubkey)} />
 {:else if m.type === "person/info"}
   <PersonProfileInfo pubkey={m.pubkey} />
 {:else if m.type === "person/share"}

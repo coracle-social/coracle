@@ -21,6 +21,7 @@
   export let setFeedRelay = null
   export let depth = 0
   export let anchorId = null
+  export let topLevel = false
   export let showParent = true
   export let showContext = false
   export let invertColors = false
@@ -104,7 +105,7 @@
 <div class="note">
   <div bind:this={noteContainer} class="group relative">
     <Card class="relative flex gap-4" on:click={onClick} {interactive} {invertColors}>
-      {#if !showParent}
+      {#if !showParent && !topLevel}
         <div
           class={`absolute -ml-4 h-px w-4 bg-${borderColor} z-10`}
           style="left: 0px; top: 27px;" />
@@ -112,7 +113,7 @@
       <div>
         <Anchor
           class="text-lg font-bold"
-          on:click={() => modal.push({type: "person/feed", pubkey: note.pubkey})}>
+          on:click={() => modal.push({type: "person/detail", pubkey: note.pubkey})}>
           <PersonCircle size={10} pubkey={note.pubkey} />
         </Anchor>
       </div>
@@ -121,7 +122,7 @@
           <Anchor
             type="unstyled"
             class="pr-16 text-lg font-bold"
-            on:click={() => modal.push({type: "person/feed", pubkey: note.pubkey})}>
+            on:click={() => modal.push({type: "person/detail", pubkey: note.pubkey})}>
             <PersonName pubkey={$author.pubkey} />
           </Anchor>
           <Anchor

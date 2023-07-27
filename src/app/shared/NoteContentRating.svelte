@@ -21,7 +21,7 @@
 
     action = switcher(type, {
       r: () => modal.push({type: "relay/detail", url: value}),
-      p: () => modal.push({type: "person/feed", pubkey: value}),
+      p: () => modal.push({type: "person/detail", pubkey: value}),
       e: () => modal.push({type: "note/detail", note: {id: value}}),
     })
 

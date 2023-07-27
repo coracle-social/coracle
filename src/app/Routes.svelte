@@ -41,9 +41,9 @@
     <TypedRoute path="/notes" let:params>
       <Feeds />
     </TypedRoute>
-    <TypedRoute path="/people/:npub/:activeTab" let:params>
+    <TypedRoute path="/people/:npub" let:params>
       {#key params.npub}
-        <PersonDetail npub={params.npub} activeTab={params.activeTab} />
+        <PersonDetail npub={params.npub} />
       {/key}
     </TypedRoute>
     <TypedRoute path="/chat" component={ChatList} />

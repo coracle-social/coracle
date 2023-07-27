@@ -35,7 +35,7 @@
     const profile = await nip05.queryProfile(entity)
 
     if (profile) {
-      modal.push({type: "person/feed", pubkey: profile.pubkey})
+      modal.push({type: "person/detail", pubkey: profile.pubkey})
     } else {
       copy("Address", entity)
     }
