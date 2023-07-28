@@ -52,7 +52,7 @@
     }
   })
 
-  $: picture = Settings.imgproxy($channel.picture, {w: 48, h: 48})
+  $: picture = Settings.imgproxy($channel.picture, {w: 96, h: 96})
 
   document.title = $channel.name || "Coracle Chat"
 </script>

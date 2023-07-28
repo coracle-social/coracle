@@ -5,7 +5,7 @@
   export let src: string
   export let size = 4
 
-  const url = Settings.imgproxy(src, {w: size * 4, h: size * 4})
+  const url = Settings.imgproxy(src, {w: size * 20, h: size * 20})
 </script>
 
 <div

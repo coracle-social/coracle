@@ -11,7 +11,7 @@
   const enter = () => navigate(`/chat/${nip19.noteEncode(channel.id)}`)
   const join = () => user.joinChannel(channel.id)
   const leave = () => user.leaveChannel(channel.id)
-  const picture = Settings.imgproxy(channel.picture, {w: 56, h: 56})
+  const picture = Settings.imgproxy(channel.picture, {w: 112, h: 112})
 </script>
 
 <button

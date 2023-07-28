@@ -24,7 +24,7 @@
   <Anchor on:click={inert ? null : showDetail} class="flex gap-4">
     <PersonCircle size={14} {pubkey} />
     <div class="mr-16 flex flex-grow flex-col gap-1">
-      <PersonName inert class="text-lg" {pubkey} />
+      <PersonName class="text-lg" {pubkey} />
       <PersonHandle {pubkey} />
     </div>
   </Anchor>

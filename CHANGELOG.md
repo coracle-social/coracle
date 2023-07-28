@@ -15,6 +15,7 @@
 - [x] Add new thread view
 - [x] Removed profile popover, click on a person's name to find mute and follow buttons
 - [x] Add configurable imgproxy url
+- [x] Show hover state on icon buttons
 
 # 0.2.35
 

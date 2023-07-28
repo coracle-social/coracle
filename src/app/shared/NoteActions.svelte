@@ -115,7 +115,7 @@
         "pointer-events-none opacity-50": disableActions,
       })}
       on:click={reply.start}>
-      <i class="fa fa-reply cursor-pointer" />
+      <i class="fa fa-reply cursor-pointer transition-transform hover:scale-110" />
       {$repliesCount}
     </button>
     <button
@@ -125,7 +125,7 @@
       })}
       on:click={() => (like ? deleteReaction(like) : react("+"))}>
       <i
-        class={cx("fa fa-heart cursor-pointer", {
+        class={cx("fa fa-heart cursor-pointer transition-transform hover:scale-110", {
           "fa-beat fa-beat-custom": like,
         })} />
       {$likesCount}
@@ -137,7 +137,7 @@
           "text-accent": zap,
         })}
         on:click={startZap}>
-        <i class="fa fa-bolt cursor-pointer" />
+        <i class="fa fa-bolt cursor-pointer transition-transform hover:scale-110" />
         {formatSats($zapsTotal)}
       </button>
     {/if}
