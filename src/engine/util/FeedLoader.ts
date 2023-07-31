@@ -1,6 +1,7 @@
-import {partition, uniqBy, pluck, sortBy, without, any, prop, assoc} from "ramda"
+import {partition, identity, uniqBy, pluck, sortBy, without, any, prop, assoc} from "ramda"
 import {ensurePlural, seconds, doPipe, throttle, batch} from "hurdak"
 import {now, race} from "src/util/misc"
+import {findReplyId} from "src/util/nostr"
 import {Cursor, MultiCursor} from "src/engine/util/Cursor"
 import {PubkeyLoader} from "src/engine/util/PubkeyLoader"
 import {ContextLoader} from "src/engine/util/ContextLoader"
@@ -107,7 +108,7 @@ export class FeedLoader {
     this.feed.update($feed => {
       // Avoid showing the same note twice, even if it's once as
       // a parent and once as a child
-      const ids = new Set(pluck("id", $feed))
+      const ids = new Set(pluck("id", $feed).concat($feed.map(findReplyId).filter(identity)))
 
       return uniqBy(
         prop("id"),
@@ -115,7 +116,7 @@ export class FeedLoader {
           this.context.applyContext(
             sortBy(
               e => -e.created_at,
-              notes.filter(e => !ids.has(e.id))
+              notes.filter(e => !ids.has(e.id) && !ids.has(findReplyId(e)))
             ),
             true
           )
