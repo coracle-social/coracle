@@ -87,9 +87,7 @@ export class Derived<T> implements Readable<T> {
     }
   }
 
-  get(): T {
-    return this.getValue(this.getInput())
-  }
+  get = (): T => this.getValue(this.getInput())
 
   subscribe(f: Subscriber<T>) {
     if (this.callerSubs.length === 0) {
@@ -99,7 +97,8 @@ export class Derived<T> implements Readable<T> {
     }
 
     this.callerSubs.push(f)
-    this.notify()
+
+    f(this.get())
 
     return () => {
       const idx = findIndex(equals(f), this.callerSubs)
