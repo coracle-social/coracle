@@ -1,5 +1,7 @@
 # Current
 
+- [ ] Remove notes whose children already exist in the feed
+- [ ] Speed up personlist, it's really slow
 - [ ] Put profile image on top right with a profile-related menu
 - [ ] Re-work note media
   - [ ] Add webcam image/video capture

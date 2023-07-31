@@ -115,7 +115,7 @@
         "pointer-events-none opacity-50": disableActions,
       })}
       on:click={reply.start}>
-      <i class="fa fa-reply cursor-pointer transition-transform hover:scale-110" />
+      <i class="fa fa-reply cursor-pointer" />
       {$repliesCount}
     </button>
     <button
@@ -125,7 +125,7 @@
       })}
       on:click={() => (like ? deleteReaction(like) : react("+"))}>
       <i
-        class={cx("fa fa-heart cursor-pointer transition-transform hover:scale-110", {
+        class={cx("fa fa-heart cursor-pointer", {
           "fa-beat fa-beat-custom": like,
         })} />
       {$likesCount}
@@ -137,7 +137,7 @@
           "text-accent": zap,
         })}
         on:click={startZap}>
-        <i class="fa fa-bolt cursor-pointer transition-transform hover:scale-110" />
+        <i class="fa fa-bolt cursor-pointer" />
         {formatSats($zapsTotal)}
       </button>
     {/if}
@@ -193,7 +193,7 @@
           {#each zaps as zap}
             <div class="flex flex-col gap-1">
               <PersonBadge pubkey={zap.request.pubkey} />
-              <span class="ml-6 text-sm text-gray-5"
+              <span class="ml-16 text-sm text-gray-5"
                 >{formatSats(zap.invoiceAmount / 1000)} sats</span>
             </div>
           {/each}

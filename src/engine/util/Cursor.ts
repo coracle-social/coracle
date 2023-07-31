@@ -45,7 +45,7 @@ export class Cursor {
       relays: [relay],
       filter: ensurePlural(filter).map(mergeRight({until, limit, since})),
       onEvent: (event: Event) => {
-        this.until = Math.min(until, event.created_at)
+        this.until = Math.min(until, event.created_at) - 1
         this.buffer.push(event)
 
         count += 1
@@ -126,7 +126,7 @@ export class MultiCursor {
 
       // Merge seen_on via mutation so it applies to future. If we've already
       // seen the event, we're also done and we don't need to add it to our buffer
-      if (this.seen_on.has(event.id)) {
+      if (this.seen_on.has(event.id) && !this.seen_on.get(event.id).includes(event.seen_on[0])) {
         this.seen_on.get(event.id).push(event.seen_on[0])
       } else {
         this.seen_on.set(event.id, event.seen_on)
