@@ -1,5 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
+  import {createEventDispatcher} from "svelte"
   import {last, partition, propEq} from "ramda"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
@@ -11,6 +12,7 @@
   let contenteditable, suggestions
 
   const {followsSet} = user
+  const dispatch = createEventDispatcher()
 
   const pubkeyEncoder = {
     encode: pubkey => {
@@ -148,6 +150,8 @@
     if (e.code === "ArrowDown") {
       suggestions.next()
     }
+
+    dispatch("keyup", e)
   }
 
   export const mention = profile => {

@@ -7,7 +7,6 @@
   - [ ] Support multiple media
   - [ ] Support bigger files, or at least handle errors. Monetize, or use nip 95
 - [ ] Fork and white label blowater
-- [ ] Add word/char count to compose
 - [ ] Add relayset support with kind 30022
 - [ ] White-labeled
   - [ ] Add invite code registration for relay

@@ -2,6 +2,7 @@
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {without} from "ramda"
+  import {throttle} from "hurdak"
   import {fly} from "src/util/transition"
   import {writable} from "svelte/store"
   import {annotateMedia} from "src/util/misc"
@@ -26,6 +27,7 @@
   let q = ""
   let image = null
   let compose = null
+  let wordCount = 0
   let showPreview = false
   let showSettings = false
   let relays = writable(writeTo ? writeTo : user.getRelayUrls("write"))
@@ -67,6 +69,10 @@
     showPreview = !showPreview
   }
 
+  const setWordCount = throttle(300, () => {
+    wordCount = compose.parse().match(/\s+/g)?.length || 0
+  })
+
   onMount(() => {
     if (pubkey && pubkey !== Keys.pubkey.get()) {
       compose.mention(Directory.getProfile(pubkey))
@@ -95,10 +101,14 @@
             <NoteContent note={{content: compose.parse(), tags: []}} />
           {/if}
           <div class:hidden={showPreview}>
-            <Compose bind:this={compose} {onSubmit} />
+            <Compose on:keyup={setWordCount} bind:this={compose} {onSubmit} />
           </div>
         </div>
         <div class="flex items-center justify-end gap-2 text-gray-5">
+          <small>
+            {wordCount} words
+          </small>
+          <span>•</span>
           <small>
             Posting as @{Directory.displayPubkey(Keys.pubkey.get())}
           </small>

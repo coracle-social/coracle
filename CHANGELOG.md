@@ -17,6 +17,7 @@
 - [x] Add configurable imgproxy url
 - [x] Show hover state on icon buttons
 - [x] Re-work navigation, put search in nav
+- [x] Add word count to new note
 
 # 0.2.35
 
