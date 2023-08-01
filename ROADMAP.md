@@ -1,6 +1,5 @@
 # Current
 
-- [ ] Add popover to person actions
 - [ ] Put profile image on top right with a profile-related menu
 - [ ] Re-work note media
   - [ ] Add webcam image/video capture
