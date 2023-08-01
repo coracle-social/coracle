@@ -16,6 +16,7 @@
 - [x] Removed profile popover, click on a person's name to find mute and follow buttons
 - [x] Add configurable imgproxy url
 - [x] Show hover state on icon buttons
+- [x] Re-work navigation, put search in nav
 
 # 0.2.35
 

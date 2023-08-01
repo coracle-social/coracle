@@ -14,7 +14,7 @@
       transition:fly={{y: -50, duration: 300}}>
       <div
         class={cx(
-          "pointer-events-auto m-2 ml-16 rounded border p-3 text-center shadow-xl sm:ml-2",
+          "pointer-events-auto m-2 ml-8 rounded border p-3 text-center shadow-xl sm:ml-2",
           "max-w-xl flex-grow transition-all",
           {
             "border-gray-6 bg-gray-7 text-gray-2": $toast.type === "info",

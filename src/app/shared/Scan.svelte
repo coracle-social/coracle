@@ -26,9 +26,13 @@
 
         await scanner.start()
 
-        resolve(scanner)
+        if (status === "closed") {
+          stop()
+        } else {
+          resolve(scanner)
 
-        status = "ready"
+          status = "ready"
+        }
       }, 1000)
     })
   }

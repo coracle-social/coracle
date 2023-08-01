@@ -1,6 +1,5 @@
 # Current
 
-- [ ] Put profile image on top right with a profile-related menu
 - [ ] Re-work note media
   - [ ] Add webcam image/video capture
   - [ ] Show list of media that can be viewed/removed below post
@@ -23,6 +22,7 @@
 
 # Core
 
+- [ ] Push notifications https://web.dev/notifications/
 - [ ] Put chat in window
 - [ ] Private groups
 - [ ] Superfollow?

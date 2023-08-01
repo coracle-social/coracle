@@ -15,7 +15,6 @@
   import MessagesList from "src/app/views/MessagesList.svelte"
   import NotFound from "src/app/views/NotFound.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
-  import Search from "src/app/views/Search.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
   import RelayList from "src/app/views/RelayList.svelte"
   import UserProfile from "src/app/views/UserProfile.svelte"
@@ -35,9 +34,6 @@
   <div class="pt-16 text-gray-2 lg:ml-56">
     <TypedRoute path="/notifications" component={Notifications} />
     <TypedRoute path="/notifications/:activeTab" component={Notifications} />
-    <TypedRoute path="/search">
-      <Search />
-    </TypedRoute>
     <TypedRoute path="/notes" let:params>
       <Feeds />
     </TypedRoute>
