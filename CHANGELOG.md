@@ -18,6 +18,7 @@
 - [x] Show hover state on icon buttons
 - [x] Re-work navigation, put search in nav
 - [x] Add word count to new note
+- [x] Add support for attaching multiple images to a note
 
 # 0.2.35
 

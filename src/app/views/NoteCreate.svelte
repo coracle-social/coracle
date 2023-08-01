@@ -25,7 +25,7 @@
   export let writeTo: string[] | null = null
 
   let q = ""
-  let image = null
+  let images = []
   let compose = null
   let wordCount = 0
   let showPreview = false
@@ -36,10 +36,6 @@
     let content = compose.parse()
     const tags = []
 
-    if (image) {
-      content = content + "\n" + image
-    }
-
     if (quote) {
       tags.push(Builder.mention(quote.pubkey))
     }
@@ -49,6 +45,20 @@
 
       modal.clear()
     }
+  }
+
+  const addImage = url => {
+    images = images.concat(url)
+    compose.write("\n" + url)
+  }
+
+  const removeImage = url => {
+    const content = compose.parse()
+
+    compose.clear()
+    compose.write(content.replace(url, ""))
+
+    images = without([url], images)
   }
 
   const closeSettings = () => {
@@ -105,10 +115,10 @@
           </div>
         </div>
         <div class="flex items-center justify-end gap-2 text-gray-5">
-          <small>
+          <small class="hidden sm:block">
             {wordCount} words
           </small>
-          <span>•</span>
+          <span class="hidden sm:block">•</span>
           <small>
             Posting as @{Directory.displayPubkey(Keys.pubkey.get())}
           </small>
@@ -118,17 +128,19 @@
           </small>
         </div>
       </div>
-      {#if image}
-        <Media
-          link={annotateMedia(image)}
-          onClose={() => {
-            image = null
-          }} />
+      {#if images.length > 0}
+        <div class="columns-2 gap-2 lg:columns-3">
+          {#each images as url}
+            <div class="mb-2">
+              <Media link={annotateMedia(url)} onClose={() => removeImage(url)} />
+            </div>
+          {/each}
+        </div>
       {/if}
       <div class="flex gap-2">
         <Anchor tag="button" theme="button" type="submit" class="flex-grow text-center"
           >Send</Anchor>
-        <ImageInput bind:value={image} icon="image" hideInput />
+        <ImageInput multi onChange={addImage} icon="image" hideInput />
       </div>
       <small
         class="flex cursor-pointer items-center justify-end gap-1"

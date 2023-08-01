@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {identity} from "ramda"
+  import {identity, pick} from "ramda"
   import {Fetch, filterVals} from "hurdak"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -8,29 +8,34 @@
   import {listenForFile, stripExifData, blobToFile} from "src/util/html"
   import {Settings} from "src/app/engine"
 
-  export let value
   export let icon
+  export let value = null
+  export let multi = false
   export let maxWidth = null
   export let maxHeight = null
   export let hideInput = false
   export let onChange = null
 
-  let input, file, listener, quote
+  let input, listener, quote
+  let files = []
   let loading = false
   let isOpen = false
 
   $: {
     if (input) {
-      listener = listenForFile(input, async inputFile => {
-        if (inputFile) {
+      listener = listenForFile(input, async inputFiles => {
+        if (inputFiles) {
           const opts = filterVals(identity, {maxWidth, maxHeight})
 
-          file = blobToFile(await stripExifData(inputFile, opts))
+          files = await Promise.all(
+            inputFiles.map(async f => blobToFile(await stripExifData(f, opts)))
+          )
+
           quote = await Fetch.postJson(Settings.dufflepud("upload/quote"), {
-            uploads: [{size: file.size}],
+            uploads: files.map(pick(["size"])),
           })
         } else {
-          file = null
+          files = []
           quote = null
         }
       })
@@ -41,22 +46,25 @@
     loading = true
 
     try {
-      const {id} = quote.uploads[0]
-      const {url} = await Fetch.uploadFile(Settings.dufflepud(`upload/${id}`), file)
+      await Promise.all(
+        quote.uploads.map(async ({id}, idx) => {
+          const {url} = await Fetch.uploadFile(Settings.dufflepud(`upload/${id}`), files[idx])
 
-      value = url
-      onChange?.(url)
+          value = url
+          onChange?.(url)
+        })
+      )
     } finally {
       loading = false
     }
 
-    file = null
+    files = []
     quote = null
     isOpen = false
   }
 
   const decline = () => {
-    file = null
+    files = []
     quote = null
     isOpen = false
   }
@@ -98,7 +106,7 @@
     <Content>
       <h1 class="staatliches text-2xl">Upload a File</h1>
       <p>Click below to select a file to upload.</p>
-      <input type="file" bind:this={input} />
+      <input multiple={multi} type="file" bind:this={input} />
     </Content>
   </Modal>
 {/if}

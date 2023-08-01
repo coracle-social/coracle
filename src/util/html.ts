@@ -51,10 +51,9 @@ export const stripExifData = async (file, opts = {}) => {
 export const listenForFile = (input, onChange) => {
   input.addEventListener("change", async e => {
     const target = e.target as HTMLInputElement
-    const [file] = target.files
 
-    if (file) {
-      onChange(file)
+    if (target.files.length > 0) {
+      onChange(Array.from(target.files))
     } else {
       onChange(null)
     }

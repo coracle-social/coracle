@@ -1,11 +1,5 @@
 # Current
 
-- [ ] Re-work note media
-  - [ ] Add webcam image/video capture
-  - [ ] Show list of media that can be viewed/removed below post
-  - [ ] Add url of media into post before publish
-  - [ ] Support multiple media
-  - [ ] Support bigger files, or at least handle errors. Monetize, or use nip 95
 - [ ] Fork and white label blowater
 - [ ] Add relayset support with kind 30022
 - [ ] White-labeled
@@ -17,7 +11,6 @@
   - [ ] Avoid leaking events from private relays
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
-- [ ] Put search icon in header or hover button, open in modal
 
 # Core
 

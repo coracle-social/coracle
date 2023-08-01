@@ -173,7 +173,7 @@
       <div slot="trigger" class="relative flex cursor-pointer items-center">
         <PersonCircle size={10} pubkey={$pubkey} />
         {#if $hasNewNotfications}
-          <div class="absolute right-0 top-1 h-2 w-2 rounded bg-accent" />
+          <div class="absolute right-0 h-[9px] w-[9px] rounded bg-accent" />
         {/if}
       </div>
       <div slot="tooltip" class="flex justify-end">

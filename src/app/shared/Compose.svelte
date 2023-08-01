@@ -177,6 +177,12 @@
     return div
   }
 
+  export const clear = () => {
+    const input = contenteditable.getInput()
+
+    input.innerHTML = ""
+  }
+
   export const nevent = text => {
     const input = contenteditable.getInput()
     const selection = window.getSelection()
@@ -190,6 +196,8 @@
   }
 
   export const write = text => {
+    contenteditable.getInput().focus()
+
     const selection = window.getSelection()
     const textNode = document.createTextNode(text)
 
