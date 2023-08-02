@@ -1,6 +1,5 @@
 <script>
   import {fly} from "src/util/transition"
-  import {navigate} from "svelte-routing"
   import {nip19} from "nostr-tools"
   import {copyToClipboard} from "src/util/html"
   import Input from "src/partials/Input.svelte"

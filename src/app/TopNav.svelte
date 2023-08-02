@@ -19,30 +19,31 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import {menuIsOpen, slowConnections} from "src/app/state"
-  import engine, {Keys, Alerts, Directory, Env, Network, Nip65, user} from "src/app/engine"
+  import engine, {Keys, Directory, Env, Network, Nip65, user} from "src/app/engine"
 
   const {pubkey} = Keys
-  const {hasNewNotfications} = Alerts
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
   const toggleMenu = () => menuIsOpen.update(x => !x)
   const profile = derived([pubkey, Directory.profiles], () =>
     $pubkey ? Directory.getProfile($pubkey) : null
   )
 
-  let term = null
+  let term = ""
+  let searchIsOpen = false
   let options = []
   let scanner
   let searchInput
 
-  const showLogin = () => modal.push({type: 'login/intro'})
+  const showLogin = () => modal.push({type: "login/intro"})
 
   const showSearch = () => {
-    term = ""
+    searchIsOpen = true
     searchInput.focus()
   }
 
   const hideSearch = () => {
-    term = null
+    term = ""
+    searchIsOpen = false
   }
 
   const showScan = () => {
@@ -78,7 +79,7 @@
     }
   })
 
-  const tryParseEntity = debounce(500, async entity => {
+  const tryParseEntity = async entity => {
     entity = fromNostrURI(entity)
 
     if (entity.length < 5) {
@@ -99,7 +100,9 @@
         navigate("/" + entity)
       })
     }
-  })
+
+    hideSearch()
+  }
 
   const topicOptions = engine.Content.topics.derived(
     map(topic => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
@@ -148,7 +151,7 @@
       }
 
       if (!(e.target as any).closest(".search-input")) {
-        term = null
+        searchIsOpen = false
       }
     })
   })
@@ -156,8 +159,8 @@
 
 <svelte:body
   on:keydown={e => {
-    if (e.key === "Escape" && term !== null) {
-      term = null
+    if (e.key === "Escape" && searchIsOpen) {
+      hideSearch()
     }
   }} />
 
@@ -171,23 +174,17 @@
     </div>
   </div>
   {#if $profile}
-    <Popover theme="transparent" placement="top-end">
+    <Popover opts={{hideOnClick: true}} theme="transparent" placement="top-end">
       <div slot="trigger" class="relative flex cursor-pointer items-center">
         <PersonCircle size={10} pubkey={$pubkey} />
-        {#if $hasNewNotfications}
-          <div class="absolute right-0 top-0 h-[9px] w-[9px] rounded bg-accent" />
-        {/if}
       </div>
       <div slot="tooltip" class="flex justify-end">
         <Card class="mt-1 overflow-hidden shadow-lg">
           <div class="-mx-3 -mt-1">
             <Anchor
-              class="relative block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-              href="/notifications">
-              <i class="fa fa-bell mr-2" /> Notifications
-              {#if $hasNewNotfications}
-                <div class="absolute left-6 top-4 h-1 w-1 rounded bg-accent" />
-              {/if}
+              class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
+              href={`/${nip19.npubEncode($profile.pubkey)}`}>
+              <i class="fa fa-user mr-2" /> Profile
             </Anchor>
             <Anchor
               class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
@@ -230,15 +227,15 @@
     {
       "sm:pr-16": $pubkey,
       "sm:pr-28": !$pubkey,
-      "pr-16": term === null && $pubkey,
-      "pr-28": term === null && !$pubkey,
+      "pr-16": searchIsOpen && $pubkey,
+      "pr-28": searchIsOpen && !$pubkey,
       "z-40 pr-0": term,
     }
   )}>
   <div
     class="pointer-events-auto relative z-10 cursor-pointer p-2"
-    class:text-black={term !== null}
-    class:-mr-2={term !== null}
+    class:text-black={searchIsOpen}
+    class:-mr-2={searchIsOpen}
     on:click={showSearch}>
     <i class="fa fa-search" />
   </div>
@@ -251,13 +248,13 @@
       "shadow-inset h-10 rounded-full border-gray-3 bg-input bg-input placeholder:text-gray-5",
       "pointer-events-auto cursor-pointer text-black transition-all",
       {
-        "-mr-6 w-0 opacity-0": term === null,
-        "opacity-1 -ml-12 w-full pl-10 sm:-mr-1 sm:w-64": term !== null,
+        "-mr-6 w-0 opacity-0": !searchIsOpen,
+        "opacity-1 -ml-12 w-full pl-10 sm:-mr-1 sm:w-64": searchIsOpen,
       }
     )} />
   <div
     class="pointer-events-auto cursor-pointer p-2 sm:block"
-    class:hidden={term !== null}
+    class:hidden={searchIsOpen}
     on:click={showScan}>
     <i class="fa fa-qrcode" />
   </div>

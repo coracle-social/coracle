@@ -1,6 +1,5 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {navigate} from "svelte-routing"
   import {fade} from "src/util/transition"
   import {modal, location} from "src/partials/state"
   import {Keys} from "src/app/engine"

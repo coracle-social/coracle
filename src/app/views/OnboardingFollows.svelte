@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {reject, prop} from "ramda"
+  import {reject} from "ramda"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -10,7 +10,9 @@
   import {modal} from "src/partials/state"
 
   const {searchProfiles} = Directory
-  const follows = Nip02.graph.key(user.getStateKey()).derived(g => g ? g.petnames.map(t => t[1]) : [])
+  const follows = Nip02.graph
+    .key(user.getStateKey())
+    .derived(g => (g ? g.petnames.map(t => t[1]) : []))
 
   if ($follows.length === 0) {
     user.setPetnames(Env.DEFAULT_FOLLOWS.map(Builder.mention))
@@ -47,7 +49,10 @@
     {#each $follows as pubkey (pubkey)}
       <PersonSummary {pubkey}>
         <div slot="actions">
-          <Anchor theme="button" class="flex items-center gap-2" on:click={() => user.unfollow(pubkey)}>
+          <Anchor
+            theme="button"
+            class="flex items-center gap-2"
+            on:click={() => user.unfollow(pubkey)}>
             <i class="fa fa-user-slash" /> Unfollow
           </Anchor>
         </div>
@@ -64,7 +69,10 @@
   {#each results.slice(0, 50) as profile (profile.pubkey)}
     <PersonSummary pubkey={profile.pubkey}>
       <div slot="actions">
-        <Anchor theme="button-accent" class="flex items-center gap-2" on:click={() => user.follow(profile.pubkey)}>
+        <Anchor
+          theme="button-accent"
+          class="flex items-center gap-2"
+          on:click={() => user.follow(profile.pubkey)}>
           <i class="fa fa-user-plus" /> Follow
         </Anchor>
       </div>

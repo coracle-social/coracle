@@ -9,7 +9,6 @@
   import Feeds from "src/app/views/Feeds.svelte"
   import UserKeys from "src/app/views/UserKeys.svelte"
   import Apps from "src/app/views/Apps.svelte"
-  import Login from "src/app/views/Login.svelte"
   import Logout from "src/app/views/Logout.svelte"
   import MessagesDetail from "src/app/views/MessagesDetail.svelte"
   import MessagesList from "src/app/views/MessagesList.svelte"
