@@ -1,6 +1,3 @@
-# Current
-
-
 # Core
 
 - [ ] Fork and white label blowater
@@ -40,21 +37,13 @@
     - [ ] Use a signed string so it's based on pubkey?
     - [ ] Nostream is public-read, apply registration to reads as well
   - [ ] Avoid leaking events from private relays
-- [ ] Image classification
-  - https://github.com/bhky/opennsfw2
 - [ ] Private groups
-- [ ] Convert app store to nip 89
-- [ ] Put search icon in header or hover button, open in modal
-- [ ] Hide muted quoted events
 - [ ] Centralize relays
   - This is ok, relays are the source of decentralization
   - clients can help with discoverability
   - Add agent to dufflepud database that scrapes relays and reviews
   - Serve relays from dufflepud
   - Or maybe set up a special purpose relay for relay recs?
-
-# Core
-
 - [ ] Deploy ontology.coracle.social
 - [ ] List detail pages with follow all and add all to list
 - [ ] Add threads - replies by self get shown at the top of replies?
@@ -171,7 +160,6 @@
 
 # Chat/DMs
 
-- [ ] Link/embed good chat/DM micro-apps
 - [ ] Ability to leave/mute DM conversation
 - [ ] Add notifications for chat messages
 - [ ] Add "new DM" button to dms list

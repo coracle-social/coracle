@@ -100,7 +100,9 @@ export const parseContent = ({content, tags = []}: {content: string; tags?: stri
   }
 
   const parseUrl = () => {
-    const raw = first(text.match(/^([a-z\+:]{2,30}:\/\/)?[^\s]+\.[a-z]{2,6}[^\s]*[^\.!?,:\s]/gi))
+    const raw = first(
+      text.match(/^([a-z\+:]{2,30}:\/\/)?[^\(\)\s]+\.[a-z]{2,6}[^\s]*[^\.!?,:\s]/gi)
+    )
 
     // Skip url if it's just the end of a filepath
     if (raw) {
