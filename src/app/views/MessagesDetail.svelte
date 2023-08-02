@@ -61,25 +61,19 @@
 </script>
 
 <Channel {messages} {sendMessage}>
-  <div slot="header" class="mb-2 flex h-20 items-start gap-4 overflow-hidden p-4">
-    <div class="flex items-center gap-4">
+  <div slot="header" class="flex h-16 items-start gap-4 overflow-hidden p-2">
+    <div class="flex items-center gap-4 pt-1">
       <Anchor
         type="unstyled"
         class="fa fa-arrow-left cursor-pointer text-2xl"
         on:click={() => history.back()} />
-      <PersonCircle {pubkey} size={12} />
+      <PersonCircle {pubkey} size={10} />
     </div>
-    <div class="flex w-full flex-col gap-2">
+    <div class="flex h-12 w-full flex-col pt-px">
       <div class="flex w-full items-center justify-between">
-        <div class="flex items-center gap-4">
-          <Anchor href={routes.person(pubkey)} class="text-lg font-bold">
-            {Directory.displayProfile($profile)}
-          </Anchor>
-        </div>
-        <div class="flex items-center gap-2">
-          <i class="fa fa-lock text-gray-1" />
-          <span class="text-gray-1">Encrypted</span>
-        </div>
+        <Anchor href={routes.person(pubkey)} class="font-bold">
+          {Directory.displayProfile($profile)}
+        </Anchor>
       </div>
       <PersonAbout truncate {pubkey} />
     </div>

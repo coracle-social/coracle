@@ -1,7 +1,6 @@
 # Current
 
-- [ ] Stop reflow when opening modal due to body scroll
-- [ ] Fix chat header
+- [ ] Fix person detail on small screens
 - [ ] Fork and white label blowater
 - [ ] Add relayset support with kind 30022
 - [ ] White-labeled

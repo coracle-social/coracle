@@ -106,7 +106,8 @@
         {/await}
       </ul>
     </div>
-    <div class="fixed top-0 z-20 w-full border-b border-solid border-gray-6 bg-gray-7">
+    <div
+      class="fixed top-0 z-20 -mt-px w-full border-b border-solid border-gray-6 bg-gray-7 sm:pr-48">
       <slot name="header" />
     </div>
     {#if Keys.canSign.get()}
