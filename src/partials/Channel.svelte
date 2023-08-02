@@ -1,5 +1,5 @@
 <script>
-  import {onDestroy} from "svelte"
+  import {onDestroy, onMount} from "svelte"
   import {sleep} from "hurdak"
   import {prop, max, path as getPath, reverse, pluck, sortBy, last} from "ramda"
   import {writable, derived} from "svelte/store"
@@ -13,18 +13,22 @@
   export let sendMessage
 
   let textarea
+  let container
+  let scroller
   let limit = writable(5)
   let loading = sleep(30_000)
   let showNewMessages = false
+
+  onMount(() => {
+    scroller = createScroller(() => limit.update(l => l + 5), {element: container, reverse: true})
+  })
 
   onDestroy(() => {
     scroller.stop()
   })
 
-  const scroller = createScroller(() => limit.update(l => l + 5), {reverse: true})
-
   // flex-reverse-col means the first is the last
-  const getLastListItem = () => document.querySelector("ul.channel-messages li")
+  const getLastListItem = () => container.querySelector("li")
 
   const scrollToBottom = () => {
     getLastListItem()?.scrollIntoView({behavior: "smooth"})
@@ -32,8 +36,7 @@
 
   const stickToBottom = async cb => {
     const lastMessage = pluck("created_at", $groupedMessages).reduce(max, 0)
-    const $channelMessages = document.querySelector(".channel-messages")
-    const shouldStick = $channelMessages?.scrollTop > -200
+    const shouldStick = container.scrollTop > -200
 
     await cb?.()
 
@@ -68,7 +71,7 @@
   }
 
   // Group messages so we're only showing the person once per chunk
-  const groupedMessages = derived([messages], ([$messages, $limit]) => {
+  const groupedMessages = derived([messages, limit], ([$messages, $limit]) => {
     const result = reverse(
       sortBy(prop("created_at"), $messages).reduce((mx, m) => {
         const profile = Directory.getProfile(m.pubkey)
@@ -93,7 +96,8 @@
   <div class="relative w-full">
     <div class="-mt-16 flex h-screen flex-col pt-20" class:pb-20={Keys.canSign.get()}>
       <ul
-        class="channel-messages flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
+        bind:this={container}
+        class="flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
         {#each $groupedMessages as m (m.id)}
           <li in:fly={{y: 20}} class="flex flex-col gap-2 py-1">
             <slot name="message" message={m} />

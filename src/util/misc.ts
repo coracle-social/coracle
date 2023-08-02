@@ -86,10 +86,8 @@ export const createScroller = <T>(
     // While we have empty space, fill it
     const {scrollY, innerHeight} = window
     const {scrollHeight, scrollTop} = element
-    const offset = scrollTop || scrollY
-    const shouldLoad = reverse
-      ? offset < threshold
-      : offset + innerHeight + threshold > scrollHeight
+    const offset = Math.abs(scrollTop || scrollY)
+    const shouldLoad = offset + innerHeight + threshold > scrollHeight
 
     // Only trigger loading the first time we reach the threshold
     if (shouldLoad) {

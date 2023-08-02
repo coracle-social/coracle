@@ -17,21 +17,25 @@
     channel.picture?.length > 500
       ? channel.picture
       : Settings.imgproxy(channel.picture, {w: 112, h: 112})
+
+  $: notify = channel.joined && (channel.last_checked || channel.last_sent) < channel.last_received
 </script>
 
 <button
-  class="flex cursor-pointer gap-4 rounded border border-solid border-gray-6 bg-gray-7 px-4 py-6 transition-all hover:bg-gray-6"
+  class="relative flex cursor-pointer gap-4 rounded border border-solid border-gray-6 bg-gray-7 px-4 py-6 transition-all hover:bg-gray-6"
   on:click={enter}
   in:fly={{y: 20}}>
   <div
     class="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-solid border-white bg-cover bg-center"
     style={`background-image: url(${picture})`} />
+  {#if notify}
+    <div class="absolute left-2 top-2 h-2 w-2 rounded bg-accent" />
+  {/if}
   <div class="flex min-w-0 flex-grow flex-col justify-start gap-2">
     <div class="flex flex-grow items-start justify-between gap-2">
-      <div class="flex items-center gap-2 overflow-hidden">
-        <i class="fa fa-lock-open text-gray-1" />
-        <h2 class="text-lg">{channel.name || ""}</h2>
-      </div>
+      <h2 class="text-lg">
+        {channel.name || ""}
+      </h2>
       {#if channel.joined}
         <Anchor theme="button" killEvent class="flex items-center gap-2" on:click={leave}>
           <i class="fa fa-right-from-bracket" />
