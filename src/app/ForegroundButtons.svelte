@@ -8,7 +8,6 @@
   let scrollY = 0
 
   $: showCreateNote = !$location.pathname.match(/messages.|chat.|relays.|keys|settings|logout$/)
-  $: showLogin = !$location.pathname.match(/login$/)
 
   const {canSign} = Keys
 
@@ -42,15 +41,6 @@
             transition-all hover:scale-105 hover:bg-accent-light"
       on:click={createNote}>
       <i class="fa fa-plus" />
-    </button>
-  {/if}
-  {#if !$canSign && showLogin}
-    <button
-      class="color-white flex h-16 w-16 items-center justify-center rounded-full
-            border border-accent-light bg-accent text-white shadow-2xl
-            transition-all hover:scale-105 hover:bg-accent-light"
-      on:click={() => navigate("/login")}>
-      <i class="fa fa-right-to-bracket" />
     </button>
   {/if}
 </div>

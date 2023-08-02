@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {onMount} from "svelte"
   import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
   import Input from "src/partials/Input.svelte"
@@ -16,12 +15,6 @@
   const lud16Url = "https://blog.getalby.com/create-your-lightning-address/"
   const pseudUrl =
     "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
-
-  onMount(async () => {
-    if (!Keys.canSign.get()) {
-      return navigate("/login")
-    }
-  })
 
   const submit = async event => {
     const relays = user.getRelayUrls("write")

@@ -3,6 +3,7 @@
   import {navigate} from "svelte-routing"
   import {nip19} from "nostr-tools"
   import {tryJson} from "src/util/misc"
+  import {Tags} from "src/util/nostr"
   import Card from "src/partials/Card.svelte"
   import Content from "src/partials/Content.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
@@ -14,7 +15,7 @@
   const channel = Nip28.channels
     .key(note.id)
     .derived(defaultTo({id: note.id, name, picture, about}))
-  const noteId = nip19.noteEncode(note.id)
+  const noteId = nip19.noteEncode(note.kind === 40 ? note.id : Tags.from(note).getMeta("e"))
 </script>
 
 <Card interactive invertColors on:click={() => navigate(`/chat/${noteId}`)}>

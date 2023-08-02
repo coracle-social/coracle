@@ -101,7 +101,7 @@
       <div class="flex gap-2 rounded-b bg-gray-7 p-2 text-sm text-gray-2">
         <div class="inline-block border-r border-solid border-gray-6 py-2 pl-1 pr-3">
           <div class="flex cursor-pointer items-center gap-3">
-            <ImageInput bind:value={data.image} icon="image" hideInput>
+            <ImageInput bind:value={data.image}>
               <i slot="button" class="fa fa-paperclip" />
             </ImageInput>
             <i class="fa fa-at" />

@@ -103,12 +103,11 @@
     }
   }
 
-  onMount(() => {
-    let scrollY
+  let scrollY
 
+  onMount(() => {
     // Log modals, keep scroll position on body, but don't allow scrolling
     const unsubModal = modal.stack.subscribe($stack => {
-      console.log("=======", $stack, scrollY)
       if (find(x => !x.mini, $stack)) {
         logUsage(btoa(["modal", last($stack).type].join(":")))
 

@@ -1,33 +1,15 @@
 <script lang="ts">
-  import {onMount} from "svelte"
   import {fly} from "src/util/transition"
-  import {error} from "src/util/logger"
-  import {stripExifData} from "src/util/html"
   import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
   import Textarea from "src/partials/Textarea.svelte"
+  import ImageInput from "src/partials/ImageInput.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {toast, modal} from "src/partials/state"
   import {Builder, user} from "src/app/engine"
   import {publishWithToast} from "src/app/state"
 
   export let channel = {name: null, id: null, about: null, picture: null}
-
-  onMount(async () => {
-    document.querySelector("[name=picture]").addEventListener("change", async e => {
-      const target = e.target as HTMLInputElement
-      const [file] = target.files
-
-      if (file) {
-        const reader = new FileReader()
-        reader.onerror = error
-        reader.onload = () => (channel.picture = reader.result)
-        reader.readAsDataURL(await stripExifData(file))
-      } else {
-        channel.picture = null
-      }
-    })
-  })
 
   const submit = async e => {
     e.preventDefault()
@@ -73,7 +55,7 @@
       </div>
       <div class="flex flex-col gap-1">
         <strong>Picture</strong>
-        <input type="file" name="picture" />
+        <ImageInput icon="image" bind:value={channel.picture} />
         <p class="text-sm text-gray-1">A picture to help people remember your room.</p>
       </div>
       <Anchor tag="button" theme="button" type="submit" class="text-center">Done</Anchor>

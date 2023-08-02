@@ -140,7 +140,7 @@
       <div class="flex gap-2">
         <Anchor tag="button" theme="button" type="submit" class="flex-grow text-center"
           >Send</Anchor>
-        <ImageInput multi onChange={addImage} icon="image" hideInput />
+        <ImageInput multi onChange={addImage} />
       </div>
       <small
         class="flex cursor-pointer items-center justify-end gap-1"

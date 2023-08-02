@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {reject} from "ramda"
+  import {reject, prop} from "ramda"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -10,15 +10,15 @@
   import {modal} from "src/partials/state"
 
   const {searchProfiles} = Directory
-  const follows = Nip02.graph.derived(() => user.getFollowsSet())
+  const follows = Nip02.graph.key(user.getStateKey()).derived(g => g ? g.petnames.map(t => t[1]) : [])
 
-  if ($follows.size === 0) {
+  if ($follows.length === 0) {
     user.setPetnames(Env.DEFAULT_FOLLOWS.map(Builder.mention))
   }
 
   let q = ""
 
-  $: results = reject((p: Profile) => $follows.has(p.pubkey), $searchProfiles(q))
+  $: results = reject((p: Profile) => $follows.includes(p.pubkey), $searchProfiles(q))
 </script>
 
 <Content>
@@ -38,14 +38,20 @@
     <i class="fa fa-user-astronaut fa-lg" />
     <h2 class="staatliches text-2xl">Your follows</h2>
   </div>
-  {#if $follows.size === 0}
+  {#if $follows.length === 0}
     <div class="mt-8 flex items-center justify-center gap-2 text-center">
       <i class="fa fa-triangle-exclamation" />
       <span>No follows selected</span>
     </div>
   {:else}
-    {#each Array.from($follows) as pubkey}
-      <PersonSummary {pubkey} />
+    {#each $follows as pubkey (pubkey)}
+      <PersonSummary {pubkey}>
+        <div slot="actions">
+          <Anchor theme="button" class="flex items-center gap-2" on:click={() => user.unfollow(pubkey)}>
+            <i class="fa fa-user-slash" /> Unfollow
+          </Anchor>
+        </div>
+      </PersonSummary>
     {/each}
   {/if}
   <div class="flex items-center gap-2">
@@ -56,6 +62,12 @@
     <i slot="before" class="fa-solid fa-search" />
   </Input>
   {#each results.slice(0, 50) as profile (profile.pubkey)}
-    <PersonSummary pubkey={profile.pubkey} />
+    <PersonSummary pubkey={profile.pubkey}>
+      <div slot="actions">
+        <Anchor theme="button-accent" class="flex items-center gap-2" on:click={() => user.follow(profile.pubkey)}>
+          <i class="fa fa-user-plus" /> Follow
+        </Anchor>
+      </div>
+    </PersonSummary>
   {/each}
 </Content>

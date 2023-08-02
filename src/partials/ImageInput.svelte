@@ -8,12 +8,11 @@
   import {listenForFile, stripExifData, blobToFile} from "src/util/html"
   import {Settings} from "src/app/engine"
 
-  export let icon
+  export let icon = null
   export let value = null
   export let multi = false
   export let maxWidth = null
   export let maxHeight = null
-  export let hideInput = false
   export let onChange = null
 
   let input, listener, quote
@@ -70,23 +69,24 @@
   }
 </script>
 
-{#if !hideInput}
-  <Input type="text" wrapperClass="flex-grow" bind:value placeholder="https://">
-    <i slot="before" class={`fa fa-${icon}`} />
-  </Input>
-{/if}
-
-<div
-  on:click={() => {
-    isOpen = true
-  }}>
-  <slot name="button">
-    <div class="flex">
-      <Anchor theme="button">
-        <i class="fa fa-upload" />
-      </Anchor>
-    </div>
-  </slot>
+<div class="flex gap-2">
+  {#if icon}
+    <Input type="text" wrapperClass="flex-grow" bind:value placeholder="https://">
+      <i slot="before" class={`fa fa-${icon}`} />
+    </Input>
+  {/if}
+  <div
+    on:click={() => {
+      isOpen = true
+    }}>
+    <slot name="button">
+      <div class="flex">
+        <Anchor theme="button">
+          <i class="fa fa-upload" />
+        </Anchor>
+      </div>
+    </slot>
+  </div>
 </div>
 
 {#if quote}

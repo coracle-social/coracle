@@ -1,7 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
   import type {DynamicFilter} from "src/engine/types"
-  import {objOf} from "ramda"
   import {Tags, noteKinds} from "src/util/nostr"
   import {modal, theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
@@ -19,9 +18,9 @@
     authors: user.getFollows().length > 0 ? "follows" : "network",
   } as DynamicFilter
 
-  const showLists = () => {
-    modal.push({type: "list/list"})
-  }
+  const showLists = () => modal.push({type: "list/list"})
+
+  const showLogin = () => modal.push({type: 'login/intro'})
 
   const loadListFeed = naddr => {
     const list = engine.Content.lists.key(naddr).get()
@@ -30,7 +29,7 @@
     const urls = Tags.wrap(list.tags).urls()
 
     if (urls.length > 0) {
-      relays = urls.map(objOf("url"))
+      relays = urls
     }
 
     filter = {kinds: [1, 1985], authors: "global"} as DynamicFilter
@@ -54,7 +53,7 @@
     <Content size="lg" class="text-center">
       <p class="text-xl">Don't have an account?</p>
       <p>
-        Click <Anchor class="underline" href="/login">here</Anchor> to join the nostr network.
+        Click <Anchor class="underline" on:click={showLogin}>here</Anchor> to join the nostr network.
       </p>
     </Content>
   {/if}

@@ -34,6 +34,8 @@
   let scanner
   let searchInput
 
+  const showLogin = () => modal.push({type: 'login/intro'})
+
   const showSearch = () => {
     term = ""
     searchInput.focus()
@@ -173,7 +175,7 @@
       <div slot="trigger" class="relative flex cursor-pointer items-center">
         <PersonCircle size={10} pubkey={$pubkey} />
         {#if $hasNewNotfications}
-          <div class="absolute right-0 h-[9px] w-[9px] rounded bg-accent" />
+          <div class="absolute right-0 top-0 h-[9px] w-[9px] rounded bg-accent" />
         {/if}
       </div>
       <div slot="tooltip" class="flex justify-end">
@@ -217,16 +219,19 @@
       </div>
     </Popover>
   {:else}
-    <Anchor theme="button-primary" href="/login">Log In</Anchor>
+    <Anchor theme="button-accent" on:click={showLogin}>Log In</Anchor>
   {/if}
 </div>
 
 <div
   class={cx(
-    "search-input pointer-events-none fixed top-0 z-10 w-full px-2 text-white sm:pr-16",
+    "search-input pointer-events-none fixed top-0 z-10 w-full px-2 text-gray-1",
     "flex h-16 items-center justify-end gap-4",
     {
-      "pr-16": term === null,
+      "sm:pr-16": $pubkey,
+      "sm:pr-28": !$pubkey,
+      "pr-16": term === null && $pubkey,
+      "pr-28": term === null && !$pubkey,
       "z-40 pr-0": term,
     }
   )}>
@@ -247,7 +252,7 @@
       "pointer-events-auto cursor-pointer text-black transition-all",
       {
         "-mr-6 w-0 opacity-0": term === null,
-        "opacity-1 -ml-12 sm:-mr-1 sm:w-64 w-full pl-10": term !== null,
+        "opacity-1 -ml-12 w-full pl-10 sm:-mr-1 sm:w-64": term !== null,
       }
     )} />
   <div

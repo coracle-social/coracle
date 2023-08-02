@@ -1,5 +1,4 @@
 <script>
-  import {onMount} from "svelte"
   import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
   import {nip19} from "nostr-tools"
@@ -25,12 +24,6 @@
     copyToClipboard(value)
     toast.show("info", `Your ${type} key has been copied to the clipboard.`)
   }
-
-  onMount(async () => {
-    if (!$pubkey) {
-      return navigate("/login")
-    }
-  })
 
   document.title = "Keys"
 </script>

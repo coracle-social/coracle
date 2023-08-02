@@ -31,7 +31,7 @@
 </script>
 
 {#if ready}
-  <div class="pt-16 text-gray-2 lg:ml-56">
+  <div class="pt-16 text-gray-2 lg:ml-48">
     <TypedRoute path="/notifications" component={Notifications} />
     <TypedRoute path="/notifications/:activeTab" component={Notifications} />
     <TypedRoute path="/notes" let:params>
@@ -69,7 +69,6 @@
     </TypedRoute>
     <TypedRoute path="/profile" component={UserProfile} />
     <TypedRoute path="/settings" component={UserSettings} />
-    <TypedRoute path="/login" component={Login} />
     <TypedRoute path="/logout" component={Logout} />
     <TypedRoute path="/:entity" let:params>
       {#key params.entity}

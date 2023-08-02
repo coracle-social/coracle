@@ -171,7 +171,7 @@ export const mergeFilter = (filter: Filter | Filter[], extra: Filter) =>
 
 export const fromNostrURI = (s: string) => s.replace(/^[\w\+]+:\/?\/?/, "")
 
-export const toNostrURI = (s: string) => `web+nostr://${s}`
+export const toNostrURI = (s: string) => `nostr://${s}`
 
 export const getLabelQuality = (label: string, event: Event) => {
   const json = tryJson(() => JSON.parse(last(Tags.from(event).type("l").equals(label).first())))

@@ -24,7 +24,9 @@
       </div>
     </Anchor>
     {#if !hideActions}
-      <PersonActions {pubkey} />
+      <slot name="actions">
+        <PersonActions {pubkey} />
+      </slot>
     {/if}
   </div>
   <PersonAbout truncate {pubkey} />

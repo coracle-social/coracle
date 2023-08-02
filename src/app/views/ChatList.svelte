@@ -3,17 +3,24 @@
   import {debounce} from "throttle-debounce"
   import {batch, seconds} from "hurdak"
   import {complement, propEq, sortBy, pipe, pluck, filter, uniq, prop} from "ramda"
-  import {now} from "src/util/misc"
+  import {now, createScroller} from "src/util/misc"
   import {Tags} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
-  import {pubkeyLoader, Nip28, Nip65, Network, Keys} from "src/app/engine"
+  import {pubkeyLoader, Nip28, Nip65, Network, Keys, user} from "src/app/engine"
 
   let q = ""
   let results = []
+  let limit = 5
+
+  const loadMore = () => {
+    limit += 5
+  }
+
+  const scroller = createScroller(loadMore)
 
   const channels = Nip28.channels.derived(
     pipe(
@@ -21,6 +28,7 @@
       sortBy(c => -(c.last_sent || c.last_received))
     )
   )
+
   const joined = channels.derived(filter(prop("joined")))
   const other = channels.derived(filter(complement(prop("joined"))))
   const search = Nip28.getSearchChannels(other)
@@ -36,7 +44,7 @@
   })
 
   $: searchChannels(q)
-  $: results = $search(q).slice(0, 50)
+  $: results = $search(q).slice(0, limit)
 
   document.title = "Chat"
 
@@ -51,7 +59,13 @@
         timeout: 2000,
         filter: [
           {kinds: [40, 41], authors: [Keys.pubkey.get()]},
-          {kinds: [42], since: now() - seconds(1, "day"), limit: 100},
+          {kinds: [40, 41], authors: user.getFollows().slice(0, 256), limit: 100},
+          {
+            limit: 100,
+            kinds: [42],
+            since: now() - seconds(1, "day"),
+            authors: user.getFollows().slice(0, 256),
+          },
         ],
         onEvent: batch(500, events => {
           const channelIds = uniq(
@@ -76,6 +90,7 @@
 
     return () => {
       subs.map(s => s.close())
+      scroller.stop()
     }
   })
 </script>
@@ -107,14 +122,9 @@
       <i slot="before" class="fa-solid fa-search" />
     </Input>
   </div>
-  {#if results.length > 0}
-    {#each results as channel (channel.id)}
-      <ChatListItem {channel} />
-    {/each}
-    <small class="text-center">
-      Showing {Math.min(50, $other.length)} of {$other.length} known rooms
-    </small>
+  {#each results as channel (channel.id)}
+    <ChatListItem {channel} />
   {:else}
     <small class="text-center"> No matching rooms found </small>
-  {/if}
+  {/each}
 </Content>

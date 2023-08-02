@@ -1,5 +1,7 @@
 # Current
 
+- [ ] Self profile detail in drop down
+- [ ] close menu on click
 - [ ] Fork and white label blowater
 - [ ] Add relayset support with kind 30022
 - [ ] White-labeled

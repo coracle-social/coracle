@@ -85,7 +85,7 @@ export class StorageAdapter {
     if (window.indexedDB) {
       const policies = [
         policy("Alerts.events", 500, sortBy(prop("created_at"))),
-        policy("Nip28.channels", 1000, sortChannels),
+        policy("Nip28.channels", 2000, sortChannels),
         policy("Nip28.messages", 10000, sortBy(prop("created_at"))),
         policy("Nip04.contacts", 1000, sortContacts),
         policy("Nip04.messages", 10000, sortBy(prop("created_at"))),

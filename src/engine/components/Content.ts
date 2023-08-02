@@ -3,16 +3,14 @@ import {nth, inc} from "ramda"
 import {fuzzy} from "src/util/misc"
 import {Tags} from "src/util/nostr"
 import type {Topic, List} from "src/engine/types"
-import {derived, collection} from "src/engine/util/store"
+import {collection} from "src/engine/util/store"
 import type {Engine} from "src/engine/Engine"
 import type {Event} from "src/engine/types"
 
 export class Content {
   topics = collection<Topic>("name")
   lists = collection<List>("naddr")
-  searchTopics = derived(this.topics, $topics =>
-    fuzzy($topics.values(), {keys: ["name"], threshold: 0.3})
-  )
+  searchTopics = this.topics.derived($topics => fuzzy($topics, {keys: ["name"], threshold: 0.3}))
 
   getLists = (f: (l: List) => boolean) =>
     this.lists.get().filter(l => !l.deleted_at && (f ? f(l) : true))

@@ -22,7 +22,7 @@
   <NoteContentKind0 {note} />
 {:else if note.kind === 3}
   <NoteContentKind3 {note} {showEntire} />
-{:else if note.kind === 40}
+{:else if [40, 41].includes(note.kind)}
   <NoteContentKind40 {note} />
 {:else if note.kind === 1985}
   <NoteContentKind1985 {note} {anchorId} {maxLength} {showEntire} />

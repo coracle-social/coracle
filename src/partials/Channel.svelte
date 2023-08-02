@@ -91,7 +91,7 @@
 
 <div class="flex h-full gap-4">
   <div class="relative w-full">
-    <div class="-mt-16 pt-20 flex h-screen flex-col" class:pb-20={Keys.canSign.get()}>
+    <div class="-mt-16 flex h-screen flex-col pt-20" class:pb-20={Keys.canSign.get()}>
       <ul
         class="channel-messages flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
         {#each $groupedMessages as m (m.id)}
@@ -111,7 +111,7 @@
     </div>
     {#if Keys.canSign.get()}
       <div
-        class="fixed bottom-0 z-10 flex w-full border-t border-solid border-gray-6 border-gray-7 bg-gray-6 lg:-ml-56 lg:pl-56">
+        class="fixed bottom-0 z-10 flex w-full border-t border-solid border-gray-6 border-gray-7 bg-gray-6 lg:-ml-48 lg:pl-48">
         <textarea
           rows="3"
           autofocus
@@ -121,7 +121,7 @@
           class="w-full resize-none bg-gray-6 p-2
                text-gray-2 outline-0 placeholder:text-gray-1" />
         <div>
-          <ImageInput hideInput onChange={addImage} icon="image">
+          <ImageInput onChange={addImage}>
             <button
               slot="button"
               class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-gray-7 p-3

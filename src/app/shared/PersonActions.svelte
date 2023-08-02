@@ -66,7 +66,7 @@
 </script>
 
 <div class="flex items-center gap-3">
-  {#if canSign && !isSelf}
+  {#if !isSelf}
     <Popover triggerType="mouseenter">
       <div slot="trigger" class="w-6 text-center">
         {#if $muted}

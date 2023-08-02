@@ -3,6 +3,7 @@
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import ChatEdit from "src/app/views/ChatEdit.svelte"
+  import Login from "src/app/views/Login.svelte"
   import LoginConnect from "src/app/views/LoginConnect.svelte"
   import LoginPrivKey from "src/app/views/LoginPrivKey.svelte"
   import LoginAdvanced from "src/app/views/LoginAdvanced.svelte"
@@ -54,6 +55,8 @@
   <Onboarding stage={m.stage} />
 {:else if m.type === "channel/edit"}
   <ChatEdit {...m} />
+{:else if m.type === "login/intro"}
+  <Login />
 {:else if m.type === "login/privkey"}
   <LoginPrivKey />
 {:else if m.type === "login/advanced"}
