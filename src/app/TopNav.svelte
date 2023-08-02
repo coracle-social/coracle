@@ -88,20 +88,21 @@
 
     if (isHex(entity)) {
       navigate("/" + nip19.npubEncode(entity))
+      hideSearch()
     } else if (entity.includes("@")) {
       let profile = await nip05.queryProfile(entity)
 
       if (profile) {
         navigate("/" + nip19.nprofileEncode(profile))
+        hideSearch()
       }
     } else {
       tryFunc(() => {
         nip19.decode(entity)
         navigate("/" + entity)
+        hideSearch()
       })
     }
-
-    hideSearch()
   }
 
   const topicOptions = engine.Content.topics.derived(
@@ -223,7 +224,7 @@
 <div
   class={cx(
     "search-input pointer-events-none fixed top-0 z-10 w-full px-2 text-gray-1",
-    "flex h-16 items-center justify-end gap-4",
+    "flex h-16 items-center justify-end gap-4 pr-16",
     {
       "sm:pr-16": $pubkey,
       "sm:pr-28": !$pubkey,

@@ -56,7 +56,7 @@
   <button on:click={showFollows}>
     <strong>{$followsCount}</strong> following
   </button>
-  <button on:click={showFollowers}>
+  <button on:click={showFollowers} class="hidden xs:block">
     <strong>
       {#if canLoadFollowers}
         <i class="fa fa-download mr-1" on:click|stopPropagation={loadFollowers} />

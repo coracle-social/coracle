@@ -12,7 +12,11 @@ export class Settings {
   imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
     const base = this.getSetting("imgproxy_url")
 
-    return base && url ? `${base}/x/s:${w}:${h}/${btoa(url)}` : url
+    try {
+      return base && url ? `${base}/x/s:${w}:${h}/${btoa(url)}` : url
+    } catch(e) {
+      return url
+    }
   }
 
   dufflepud = (path: string) => `${this.getSetting("dufflepud_url")}/${path}`
@@ -22,7 +26,7 @@ export class Settings {
 
     this.settings = writable<Record<string, any>>({
       last_updated: 0,
-      relay_limit: 10,
+      relay_limit: 5,
       default_zap: 21,
       show_media: true,
       report_analytics: true,

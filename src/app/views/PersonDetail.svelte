@@ -51,17 +51,26 @@
 
 <Content>
   <div class="flex gap-4 text-gray-1">
-    <PersonCircle {pubkey} size={16} class="sm:h-32 sm:w-32" />
-    <div class="flex flex-grow flex-col gap-4">
-      <div class="flex items-start justify-between gap-4">
-        <div class="flex flex-grow flex-col gap-2">
+    <PersonCircle {pubkey} size={12} class="mt-1 sm:h-32 sm:w-32" />
+    <div class="flex min-w-0 flex-grow flex-col gap-4">
+      <div class="flex flex-col">
+        <div class="flex items-center justify-between gap-4">
           <PersonName class="text-2xl" {pubkey} />
-          <PersonHandle {pubkey} />
+          <div class="hidden xs:block">
+            <PersonActions {pubkey} />
+          </div>
         </div>
-        <PersonActions {pubkey} />
+        <PersonHandle {pubkey} />
       </div>
-      <PersonAbout {pubkey} />
-      <PersonStats {pubkey} />
+      <div class="-ml-16 flex flex-grow flex-col gap-4 xs:ml-0">
+        <PersonAbout {pubkey} />
+        <div class="flex justify-between">
+          <PersonStats {pubkey} />
+          <div class="block xs:hidden">
+            <PersonActions {pubkey} />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

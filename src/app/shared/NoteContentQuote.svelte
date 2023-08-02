@@ -46,7 +46,7 @@
   })
 </script>
 
-<div class="py-2">
+<div class="py-2" on:click|stopPropagation>
   <Card interactive invertColors class="my-2" on:click={openQuote}>
     {#if loading}
       <div class="px-20">

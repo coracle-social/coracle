@@ -1,20 +1,12 @@
 # Current
 
-- [ ] Fix person detail on small screens
-- [ ] Fork and white label blowater
-- [ ] Add relayset support with kind 30022
-- [ ] White-labeled
-  - [ ] Add invite code registration for relay
-    - [ ] Add endpoint to nostream that updates whitelist
-    - [ ] Show invite code somewhere so users can share it.
-    - [ ] Use a signed string so it's based on pubkey?
-    - [ ] Nostream is public-read, apply registration to reads as well
-  - [ ] Avoid leaking events from private relays
-- [ ] Image classification
-  - https://github.com/bhky/opennsfw2
 
 # Core
 
+- [ ] Fork and white label blowater
+- [ ] Fix uploads
+  - Monetize, classify, or out source
+  - https://github.com/bhky/opennsfw2
 - [ ] Push notifications https://web.dev/notifications/
 - [ ] Put chat in window
 - [ ] Private groups
@@ -26,6 +18,7 @@
 - [ ] Reminders for max time spent on coracle
 - [ ] Proxy handle requests for CORS
 - [ ] Low data mode that hides counts on notes
+- [ ] Add relayset support with kind 30022
 - [ ] Show npubs/nip05 when mentioning
   - nevent1qqswv0ztgm8z6zeqmd0pzvwss7fzny675dx9lkqvr4zw0d9ad59eh3gpzemhxue69uhhyetvv9ujumn0wd68ytnzv9hxg6k804t
 - [ ] Support server-rendered link previews

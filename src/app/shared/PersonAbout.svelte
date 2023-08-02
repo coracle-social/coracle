@@ -12,7 +12,7 @@
   const content = parseContent({content: truncate ? ellipsize(about, 140) : about})
 </script>
 
-<p class="overflow-hidden text-ellipsis">
+<p>
   {#each content as { type, value }}
     {#if type === "newline"}
       {#each value as _}

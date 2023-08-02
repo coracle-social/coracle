@@ -4,9 +4,8 @@
 
   export let pubkey
   export let relays
-  export let invertColors = false
 
   const filter = {kinds: noteKinds, authors: [pubkey]}
 </script>
 
-<Feed {relays} {filter} {invertColors} />
+<Feed {relays} {filter} invertColors />

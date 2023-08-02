@@ -75,7 +75,7 @@
         </small>
       </div>
       <div class="break-word overflow-hidden text-gray-1">
-        <NoteContent maxLength={80} expandable={false} showMedia={false} {note} />
+        <NoteContent maxLength={240} expandable={false} showMedia={false} {note} />
       </div>
     </Card>
   </div>
