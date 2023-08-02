@@ -19,6 +19,10 @@
 - [x] Re-work navigation, put search in nav
 - [x] Add word count to new note
 - [x] Add support for attaching multiple images to a note
+- [x] Fix note parsing when parentheses are involved
+- [x] Fix person detail layout on small screens
+- [x] Fix chat/dm header
+- [x] Fix lots of bugs
 
 # 0.2.35
 
