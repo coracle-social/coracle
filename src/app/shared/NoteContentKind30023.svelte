@@ -36,7 +36,7 @@
 </div>
 
 {#if showEntire}
-  <div class="flex flex-col gap-4 leading-6">
+  <div class="flex flex-col gap-4 overflow-hidden text-ellipsis leading-6">
     {@html insane(marked.parse(note.content))}
   </div>
 {/if}
