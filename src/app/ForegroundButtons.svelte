@@ -6,7 +6,9 @@
 
   let scrollY = 0
 
-  $: showCreateNote = !$location.pathname.match(/messages.|chat.|relays.|keys|settings|logout$/)
+  $: showCreateNote = !$location.pathname.match(
+    /conversations.|chat.|relays.|keys|settings|logout$/
+  )
 
   const {canSign} = Keys
 

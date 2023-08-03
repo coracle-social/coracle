@@ -47,13 +47,13 @@
         <ChatDetail entity={params.entity} />
       {/key}
     </TypedRoute>
-    <TypedRoute path="/messages">
-      <MessagesList activeTab="messages" />
+    <TypedRoute path="/conversations">
+      <MessagesList activeTab="conversations" />
     </TypedRoute>
     <TypedRoute path="/requests">
       <MessagesList activeTab="requests" />
     </TypedRoute>
-    <TypedRoute path="/messages/:entity" let:params>
+    <TypedRoute path="/conversations/:entity" let:params>
       {#key params.entity}
         <MessagesDetail entity={params.entity} />
       {/key}

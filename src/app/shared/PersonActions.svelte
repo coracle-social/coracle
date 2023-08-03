@@ -33,7 +33,7 @@
 
     if (!isSelf && canSign) {
       actions.push({
-        onClick: () => navigate(`/messages/${npub}`),
+        onClick: () => navigate(`/conversations/${npub}`),
         label: "Message",
         icon: "envelope",
       })

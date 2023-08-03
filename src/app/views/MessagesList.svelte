@@ -10,18 +10,18 @@
   import MessagesListItem from "src/app/views/MessagesListItem.svelte"
   import {Nip04, pubkeyLoader, user, Network, Keys} from "src/app/engine"
 
-  export let activeTab = "messages"
+  export let activeTab = "conversations"
 
   const {hasNewMessages} = Nip04
   const contacts = Nip04.contacts.derived(sortBy(c => -(c.last_sent || c.last_received)))
   const accepted = contacts.derived(filter(prop("last_sent")))
   const requests = contacts.derived(filter(complement(prop("last_sent"))))
 
-  $: tabContacts = activeTab === "messages" ? $accepted : $requests
+  $: tabContacts = activeTab === "conversations" ? $accepted : $requests
 
   const getDisplay = tab => ({
     title: toTitle(tab),
-    badge: (tab === "messages" ? $accepted : $requests).length,
+    badge: (tab === "conversations" ? $accepted : $requests).length,
   })
 
   document.title = "Direct Messages"

@@ -45,7 +45,9 @@
       "cursor-pointer": $canSign,
       "pointer-events-none opacity-75": !$canSign,
     })}>
-    <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/messages">
+    <a
+      class="block px-4 py-2 transition-all hover:bg-accent hover:text-white"
+      href="/conversations">
       <i class="fa fa-envelope mr-2" /> Messages
       {#if $hasNewDirectMessages}
         <div

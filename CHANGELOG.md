@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.3.1
+
+- [x] 
+
 # 0.3.0
 
 - [x] Faster login and initial load

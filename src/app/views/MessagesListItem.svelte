@@ -10,7 +10,7 @@
 
   const hasNewMessages = Nip04.contacts.key(contact.pubkey).derived(Nip04.messageIsNew)
   const profile = Directory.getProfile(contact.pubkey)
-  const enter = () => navigate(`/messages/${nip19.npubEncode(contact.pubkey)}`)
+  const enter = () => navigate(`/conversations/${nip19.npubEncode(contact.pubkey)}`)
 </script>
 
 <Card interactive on:click={enter}>
