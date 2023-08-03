@@ -41,7 +41,7 @@
       <Rating inert value={rating} />
     </div>
   {/if}
-  {#if relay.info.description}
+  {#if relay.info?.description}
     <p>{relay.info.description}</p>
   {/if}
   <Tabs borderClass="border-gray-6" {tabs} {activeTab} {setActiveTab} />

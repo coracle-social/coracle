@@ -3,6 +3,7 @@
   import {ContextLoader} from "src/engine"
   import {onMount, onDestroy} from "svelte"
   import {fly} from "src/util/transition"
+  import {info} from "src/util/logger"
   import {isMobile} from "src/util/html"
   import {asDisplayEvent} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
@@ -58,7 +59,7 @@
     await sub.complete
     await Promise.all(context.getAllSubs())
 
-    console.log("NoteDetail", displayNote)
+    info("NoteDetail", displayNote)
 
     loading = false
   })

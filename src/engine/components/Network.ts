@@ -1,7 +1,7 @@
 import {verifySignature, matchFilters} from "nostr-tools"
 import {Pool, Plex, Relays, Executor, Socket} from "paravel"
 import {ensurePlural, union, difference} from "hurdak"
-import {warn, error, log} from "src/util/logger"
+import {warn, error, info} from "src/util/logger"
 import {normalizeRelayUrl} from "src/util/nostr"
 import type {Event, Filter} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
@@ -127,7 +127,7 @@ export class Network {
     const urls = getUrls(relays)
     const executor = this.getExecutor(urls, {bypassBoot: verb === "AUTH"})
 
-    log(`Publishing to ${urls.length} relays`, event, urls)
+    info(`Publishing to ${urls.length} relays`, event, urls)
 
     return new Promise(resolve => {
       const timeouts = new Set<string>()
@@ -199,7 +199,7 @@ export class Network {
     const seen = new Map()
     const eose = new Set()
 
-    log(`Starting subscription with ${relays.length} relays`, {filters, relays})
+    info(`Starting subscription with ${relays.length} relays`, {filters, relays})
 
     subscription.on("close", () => {
       sub.unsubscribe()

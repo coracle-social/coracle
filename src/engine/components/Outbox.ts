@@ -1,5 +1,6 @@
 import {getEventHash} from "nostr-tools"
 import type {UnsignedEvent} from "nostr-tools"
+import {info} from "src/util/logger"
 import {now} from "src/util/misc"
 import type {Progress} from "src/engine/components/Network"
 import type {Engine} from "src/engine/Engine"
@@ -18,6 +19,8 @@ export class Outbox {
       created_at: now(),
       pubkey: this.engine.Keys.pubkey.get(),
     }
+
+    info("Attempting to sign event", event)
 
     event.id = getEventHash(event as UnsignedEvent)
 

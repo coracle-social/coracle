@@ -36,7 +36,7 @@
 
   const stickToBottom = async cb => {
     const lastMessage = pluck("created_at", $groupedMessages).reduce(max, 0)
-    const shouldStick = container.scrollTop > -200
+    const shouldStick = container?.scrollTop > -200
 
     await cb?.()
 

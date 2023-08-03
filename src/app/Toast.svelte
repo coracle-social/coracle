@@ -3,8 +3,6 @@
   import {is} from "ramda"
   import {fly} from "src/util/transition"
   import {toast} from "src/partials/state"
-
-  console.log($toast)
 </script>
 
 {#if $toast}

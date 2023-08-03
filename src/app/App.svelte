@@ -47,15 +47,19 @@
 
     const {settings} = JSON.parse(localStorage.getItem("agent/user/profile"))
 
-    user.setSettings({
-      last_updated: settings.lastUpdated || 0,
-      relay_limit: settings.relayLimit || 10,
-      default_zap: settings.defaultZap || 21,
-      show_media: settings.showMedia || true,
-      report_analytics: settings.reportAnalytics || true,
-      dufflepud_url: settings.dufflepudUrl || Env.DUFFLEPUD_URL,
-      multiplextr_url: settings.multiplextrUrl || Env.MULTIPLEXTR_URL,
-    })
+    setTimeout(
+      () =>
+        user.setSettings({
+          last_updated: settings.lastUpdated || 0,
+          relay_limit: settings.relayLimit || 10,
+          default_zap: settings.defaultZap || 21,
+          show_media: settings.showMedia || true,
+          report_analytics: settings.reportAnalytics || true,
+          dufflepud_url: settings.dufflepudUrl || Env.DUFFLEPUD_URL,
+          multiplextr_url: settings.multiplextrUrl || Env.MULTIPLEXTR_URL,
+        }),
+      3000
+    )
 
     localStorage.removeItem("agent/keys/method")
     localStorage.removeItem("agent/keys/pubkey")

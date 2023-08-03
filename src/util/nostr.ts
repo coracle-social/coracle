@@ -138,7 +138,7 @@ export const isShareableRelay = (url: string) =>
 
 export const normalizeRelayUrl = (url: string) => {
   // If it doesn't start with a compatible protocol, strip the proto and add wss
-  if (!url.match(/^wss?:\/\/.+/)) {
+  if (!url.match(/^wss:\/\/.+/)) {
     url = "wss://" + url.replace(/.*:\/\//, "")
   }
 

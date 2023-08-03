@@ -1,7 +1,7 @@
 import {add, inc, dec} from "ramda"
 import {Socket} from "paravel"
 import {now} from "src/util/misc"
-import {log} from "src/util/logger"
+import {info} from "src/util/logger"
 import {switcherFn} from "hurdak"
 import type {Engine} from "src/engine/Engine"
 
@@ -139,7 +139,7 @@ export class RelayStats {
           !socket.meta.error
         ) {
           if (subs.size > 0) {
-            log(`Resuming ${subs.size} subscriptions on ${socket.url}`)
+            info(`Resuming ${subs.size} subscriptions on ${socket.url}`)
           }
 
           for (const payload of subs.values()) {

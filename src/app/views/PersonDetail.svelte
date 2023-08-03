@@ -1,6 +1,6 @@
 <script lang="ts">
   import {identity, defaultTo} from "ramda"
-  import {log} from "src/util/logger"
+  import {info} from "src/util/logger"
   import {toHex} from "src/util/nostr"
   import {getThemeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
@@ -32,7 +32,7 @@
   $: relays = Nip65.getPubkeyHints(10, pubkey)
   $: banner = Settings.imgproxy($profile.banner, {w: window.innerWidth})
 
-  log("Person", npub, $profile)
+  info("Person", npub, $profile)
 
   pubkeyLoader.load([pubkey], {force: true})
 

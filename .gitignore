@@ -25,3 +25,5 @@ android
 *.sln
 *.sw?
 ssl
+
+scratch.md

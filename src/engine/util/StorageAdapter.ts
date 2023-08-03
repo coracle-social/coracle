@@ -134,6 +134,10 @@ export class StorageAdapter {
             for (const records of chunk(100, rows as any[])) {
               await this.db.bulkPut(key, records)
               await sleep(50)
+
+              if (this.dead.get()) {
+                return
+              }
             }
           })
         )
@@ -145,7 +149,7 @@ export class StorageAdapter {
         const store = getStore(key, this.engine)
         const data = store.get()
 
-        if (data.length < max * 1.1) {
+        if (data.length < max * 1.1 || this.dead.get()) {
           return
         }
 

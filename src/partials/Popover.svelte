@@ -45,7 +45,7 @@
           instance.popper.addEventListener("mouseleave", e => instance.hide())
           instance.popper.addEventListener("click", e => {
             if (e.target.closest(".tippy-close") || opts.hideOnClick) {
-              instance.hide()
+              instance?.hide()
             }
           })
         }
