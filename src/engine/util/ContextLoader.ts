@@ -195,7 +195,7 @@ export class ContextLoader {
     if (parentsInfo.length > 0) {
       this.addSubs("context", [
         Network.subscribe({
-          timeout: 3000,
+          timeout: 5000,
           filter: {ids: pluck("id", parentsInfo)},
           relays: this.mergeHints(pluck("hints", parentsInfo)),
           onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: 2})),
@@ -223,7 +223,7 @@ export class ContextLoader {
 
       for (const c of chunk(256, events)) {
         Network.subscribe({
-          timeout: 3000,
+          timeout: 5000,
           relays: this.mergeHints(c.map(e => Nip65.getReplyHints(this.getRelayLimit(), e))),
           filter: {kinds: this.getReplyKinds(), "#e": pluck("id", c as Event[])},
 

@@ -69,7 +69,7 @@
         on:click={() => history.back()} />
       <PersonCircle {pubkey} size={10} />
     </div>
-    <div class="flex h-12 w-full flex-col pt-px">
+    <div class="flex h-12 w-full flex-col overflow-hidden pt-px">
       <div class="flex w-full items-center justify-between">
         <Anchor href={routes.person(pubkey)} class="font-bold">
           {Directory.displayProfile($profile)}

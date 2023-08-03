@@ -41,7 +41,7 @@ export class Cursor {
     let count = 0
 
     return this.engine.Network.subscribe({
-      timeout: 4000,
+      timeout: 5000,
       relays: [relay],
       filter: ensurePlural(filter).map(mergeRight({until, limit, since})),
       onEvent: (event: Event) => {

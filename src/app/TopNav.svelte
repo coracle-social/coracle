@@ -19,10 +19,23 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import {menuIsOpen, slowConnections} from "src/app/state"
-  import engine, {Keys, Directory, Env, Network, Nip65, user} from "src/app/engine"
+  import engine, {
+    Alerts,
+    Nip28,
+    Nip04,
+    Keys,
+    Directory,
+    Env,
+    Network,
+    Nip65,
+    user,
+  } from "src/app/engine"
 
   const {pubkey} = Keys
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
+  const {hasNewNotfications} = Alerts
+  const {hasNewMessages: hasNewChatMessages} = Nip28
+  const {hasNewMessages: hasNewDirectMessages} = Nip04
   const toggleMenu = () => menuIsOpen.update(x => !x)
   const profile = derived([pubkey, Directory.profiles], () =>
     $pubkey ? Directory.getProfile($pubkey) : null
@@ -172,6 +185,10 @@
     <div class="app-logo flex cursor-pointer items-center gap-2" on:click={toggleMenu}>
       <img alt="App Logo" src={logoUrl} class="w-10" />
       <h1 class="staatliches pt-1 text-3xl">{appName}</h1>
+      {#if $hasNewNotfications || $hasNewChatMessages || $hasNewDirectMessages}
+        <div
+          class="absolute left-8 top-4 h-2 w-2 rounded border border-solid border-white bg-accent" />
+      {/if}
     </div>
   </div>
   {#if $profile}

@@ -13,11 +13,13 @@
   export let activeTab = "conversations"
 
   const {hasNewMessages} = Nip04
-  const contacts = Nip04.contacts.derived(sortBy(c => -(c.last_sent || c.last_received)))
-  const accepted = contacts.derived(filter(prop("last_sent")))
-  const requests = contacts.derived(filter(complement(prop("last_sent"))))
+  const accepted = Nip04.contacts.derived(filter(prop("last_sent")))
+  const requests = Nip04.contacts.derived(filter(complement(prop("last_sent"))))
 
-  $: tabContacts = activeTab === "conversations" ? $accepted : $requests
+  $: tabContacts = sortBy(
+    c => -Math.max(c.last_sent || 0, c.last_received || 0),
+    activeTab === "conversations" ? $accepted : $requests
+  )
 
   const getDisplay = tab => ({
     title: toTitle(tab),
