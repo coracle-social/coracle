@@ -33,12 +33,12 @@ If you like Coracle and want to support its development, you can donate sats via
 - [ ] Reporting and basic distributed moderation
 - [ ] Content and person recommendations
 
-You can find a more complete changelog [here](./ROADMAP.md).
+You can find a more complete changelog [here](./CHANGELOG.md).
 
 # Run  Coracle locally:
 
 - Clone the project repository: `git clone https://github.com/coracle-social/coracle.git`
-- Navitage to the project directory: `cd coracle`
-- Install dependencies: `npm install`
+- Navigate to the project directory: `cd coracle`
+- Install dependencies: `yarn`
 - Add an env file from the template: `cp env.template env.local`
-- Start the development server: `npm run dev`
+- Start the development server: `yarn dev`

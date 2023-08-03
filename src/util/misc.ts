@@ -95,7 +95,7 @@ export const createScroller = <T>(
     }
 
     // No need to check all that often
-    await sleep(500)
+    await sleep(1000)
 
     if (!done) {
       requestAnimationFrame(check)

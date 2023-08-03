@@ -194,11 +194,12 @@
             </Anchor>
             {#if Env.FORCE_RELAYS.length === 0}
               <Anchor
-                class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
+                class="relative block p-3 px-4 transition-all hover:bg-accent hover:text-white"
                 href="/relays">
                 <i class="fa fa-server mr-2" /> Relays
                 {#if $slowConnections.length > 0}
-                  <div class="absolute left-8 top-2 h-2 w-2 rounded bg-accent" />
+                  <div
+                    class="absolute left-3 top-3 h-2 w-2 rounded border border-solid border-white bg-accent" />
                 {/if}
               </Anchor>
             {/if}
