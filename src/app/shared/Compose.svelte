@@ -1,11 +1,12 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
+  import {debounce} from "throttle-debounce"
   import {createEventDispatcher} from "svelte"
   import {last, partition, propEq} from "ramda"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {Nip65, Directory, user} from "src/app/engine"
+  import {Nip65, Network, Directory, user} from "src/app/engine"
 
   export let onSubmit
 
@@ -28,6 +29,17 @@
   }
 
   const {searchProfiles} = Directory
+
+  const loadProfiles = debounce(500, search => {
+    if (search.length > 2) {
+      Network.subscribe({
+        timeout: 3000,
+        relays: Nip65.getSearchRelays(),
+        filter: [{kinds: [0], search, limit: 10}],
+        onEvent: debounce(100, () => applySearch(getInfo().word)),
+      })
+    }
+  })
 
   const applySearch = word => {
     let results = []
@@ -133,6 +145,7 @@
     const {word} = getInfo()
 
     // Populate search data
+    loadProfiles(word)
     applySearch(word)
 
     if (["Tab"].includes(e.code)) {

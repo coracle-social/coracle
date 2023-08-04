@@ -2,7 +2,8 @@
 
 # 0.3.1
 
-- [x] 
+- [x] Fix not loading parents from non-followed accounts
+- [x] Load search results from network on mention suggestions
 
 # 0.3.0
 
