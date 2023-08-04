@@ -114,13 +114,13 @@ export class ContextLoader {
     const repliesByParentId = {} as Record<string, Event[]>
 
     for (const event of this.data.get()) {
-      const parentId = findReplyId(event)
-
       if (contextById[event.id]) {
         continue
       }
 
       contextById[event.id] = event
+
+      const parentId = findReplyId(event)
 
       if (event.kind === 9735) {
         pushToKey(zapsByParentId, parentId, event)

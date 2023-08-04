@@ -107,10 +107,8 @@ export class FeedLoader {
   addToFeed = (notes: Event[]) => {
     this.feed.update($feed => {
       // Avoid showing the same note twice, even if it's once as a parent and once as a child
-      const feedIds = pluck("id", $feed)
-      const feedParentIds = $feed.map(findReplyId).filter(identity)
-      const noteParentIds = notes.map(findReplyId).filter(identity)
-      const ids = new Set([...feedIds, ...feedParentIds, ...noteParentIds])
+      const feedIds = new Set(pluck("id", $feed))
+      const feedParentIds = new Set($feed.map(findReplyId).filter(identity))
 
       return uniqBy(
         prop("id"),
@@ -118,7 +116,7 @@ export class FeedLoader {
           this.context.applyContext(
             sortBy(
               e => -e.created_at,
-              notes.filter(e => !ids.has(findReplyId(e)))
+              notes.filter(e => !feedIds.has(findReplyId(e)) && !feedParentIds.has(e.id))
             ),
             true
           )
