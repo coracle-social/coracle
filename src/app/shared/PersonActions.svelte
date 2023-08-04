@@ -39,6 +39,10 @@
       })
     }
 
+    if (!isSelf && false) {
+      actions.push({onClick: loginAsUser, label: "Login as", icon: "right-to-bracket"})
+    }
+
     if (Env.FORCE_RELAYS.length === 0) {
       actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
     }
@@ -51,6 +55,8 @@
       })
     }
   }
+
+  const loginAsUser = () => Keys.login("pubkey", pubkey)
 
   const openProfileInfo = () => modal.push({type: "person/info", pubkey})
 

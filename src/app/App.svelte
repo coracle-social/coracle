@@ -3,6 +3,7 @@
   import "@fortawesome/fontawesome-free/css/solid.css"
 
   import type {ComponentType, SvelteComponentTyped} from "svelte"
+  import {nip19} from "nostr-tools"
   import type {Relay} from "src/engine"
   import {onMount} from "svelte"
   import {Router, links} from "svelte-routing"
@@ -69,7 +70,7 @@
 
   const TypedRouter = Router as ComponentType<SvelteComponentTyped>
 
-  Object.assign(window, {...engine, user, bech32ToHex, hexToBech32})
+  Object.assign(window, {...engine, nip19, user, bech32ToHex, hexToBech32})
 
   export let pathname = location.pathname
   export let hash = location.hash

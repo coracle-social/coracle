@@ -8,7 +8,7 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {Directory, Nip65, user, Network} from "src/app/engine"
+  import {Directory, Settings, Nip65, user, Network} from "src/app/engine"
 
   export let note
   export let value
@@ -23,7 +23,10 @@
 
   const sub = Network.subscribe({
     timeout: 5000,
-    relays: Nip65.mergeHints(3, [relays, Nip65.getEventHints(3, note)]),
+    relays: Nip65.mergeHints(Settings.getSetting("relay_limit"), [
+      relays,
+      Nip65.getEventHints(3, note),
+    ]),
     filter: (id
       ? {ids: [id]}
       : filterVals(xs => xs.length > 0, {

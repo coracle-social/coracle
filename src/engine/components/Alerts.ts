@@ -5,7 +5,7 @@ import type {Engine} from "src/engine/Engine"
 import type {Event} from "src/engine/types"
 
 export class Alerts {
-  events = collection<Event>("id")
+  events = collection<Event & {recipient: string}>("id")
   lastChecked = writable(0)
   latestNotification = this.events.derived(reduce((n, e) => Math.max(n, e.created_at), 0))
   hasNewNotfications = derived([this.lastChecked, this.latestNotification], ([c, n]) => n > c)
@@ -28,7 +28,7 @@ export class Alerts {
         return
       }
 
-      Alerts.events.key(e.id).set(e)
+      Alerts.events.key(e.id).set({...e, recipient: pubkey})
     }
 
     noteKinds.forEach(kind => {

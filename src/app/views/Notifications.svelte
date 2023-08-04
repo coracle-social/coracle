@@ -1,5 +1,5 @@
 <script>
-  import {filter, slice, pluck, reverse, max, last, sortBy} from "ramda"
+  import {filter, propEq, slice, pluck, reverse, max, last, sortBy} from "ramda"
   import {onMount} from "svelte"
   import {doPipe, batch, seconds} from "hurdak"
   import {fly} from "src/util/transition"
@@ -33,7 +33,7 @@
     return reverse(
       sortBy(
         e => formatTimestampAsLocalISODate(e.created_at).slice(0, 13) + findReplyId(e),
-        user.applyMutes($events)
+        user.applyMutes($events.filter(propEq("recipient", Keys.pubkey.get())))
       )
     )
   })

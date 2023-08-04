@@ -81,38 +81,7 @@ export class Network {
 
     const executor = new Executor(target)
 
-    executor.handleAuth({
-      onAuth: (url: string, challenge: string) => {
-        return this.authHandler?.(url, challenge)
-      },
-      onOk: (url: string, id: string, ok: boolean, message: string) => {
-        // Once we get a good auth response don't wait to send stuff to the relay
-        if (ok) {
-          this.pool.get(url)
-          this.pool.booted = true
-        }
-      },
-    })
-
-    // Eagerly connect and handle AUTH
-    executor.target.sockets.forEach((socket: any) => {
-      const {limitation} = this.engine.Nip65.getRelayInfo(socket.url)
-      const waitForBoot = limitation?.payment_required || limitation?.auth_required
-
-      // This happens automatically, but kick it off anyway
-      socket.connect()
-
-      // Delay REQ/EVENT until AUTH flow happens. Highly hacky, as this relies on
-      // overriding the `shouldDeferWork` property of the socket. We do it this way
-      // so that we're not blocking sending to all the other public relays
-      if (!bypassBoot && waitForBoot && socket.status === Socket.STATUS.PENDING) {
-        socket.shouldDeferWork = () => {
-          return socket.booted && socket.status !== Socket.STATUS.READY
-        }
-
-        setTimeout(() => Object.assign(socket, {booted: true}), 2000)
-      }
-    })
+    executor.handleAuth({onAuth: this.authHandler})
 
     return executor
   }

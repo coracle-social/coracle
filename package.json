@@ -53,7 +53,7 @@
     "marked": "^5.1.0",
     "nostr-tools": "^1.12.1",
     "npm-run-all": "^4.1.5",
-    "paravel": "^0.2.1",
+    "paravel": "^0.2.2",
     "qr-scanner": "^1.4.2",
     "qrcode": "^1.5.1",
     "ramda": "^0.28.0",
