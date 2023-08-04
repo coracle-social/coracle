@@ -63,7 +63,7 @@
     }
   }
 
-  const onKeyPress = e => {
+  const onKeyDown = e => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       send()
@@ -122,7 +122,7 @@
           autofocus
           placeholder="Type something..."
           bind:this={textarea}
-          on:keypress={onKeyPress}
+          on:keydown={onKeyDown}
           class="w-full resize-none bg-gray-6 p-2
                text-gray-2 outline-0 placeholder:text-gray-1" />
         <div>
