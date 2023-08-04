@@ -1,6 +1,6 @@
 import {verifySignature, matchFilters} from "nostr-tools"
 import {Pool, Plex, Relays, Executor, Socket} from "paravel"
-import {ensurePlural, union, difference} from "hurdak"
+import {noop, ensurePlural, union, difference} from "hurdak"
 import {warn, error, info} from "src/util/logger"
 import {normalizeRelayUrl} from "src/util/nostr"
 import type {Event, Filter} from "src/engine/types"
@@ -81,7 +81,7 @@ export class Network {
 
     const executor = new Executor(target)
 
-    executor.handleAuth({onAuth: this.authHandler})
+    executor.handleAuth({onAuth: this.authHandler, onOk: noop})
 
     return executor
   }
