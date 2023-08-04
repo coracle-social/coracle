@@ -6,30 +6,18 @@
   import {navigate} from "svelte-routing"
   import {debounce} from "throttle-debounce"
   import {onMount} from "svelte"
-  import {derived} from "svelte/store"
   import {fuzzy} from "src/util/misc"
   import {fromNostrURI, isHex} from "src/util/nostr"
   import {appName, modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
-  import Popover from "src/partials/Popover.svelte"
   import Card from "src/partials/Card.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
   import Scan from "src/app/shared/Scan.svelte"
-  import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
-  import {menuIsOpen, slowConnections} from "src/app/state"
-  import engine, {
-    Alerts,
-    Nip28,
-    Nip04,
-    Keys,
-    Directory,
-    Env,
-    Network,
-    Nip65,
-    user,
-  } from "src/app/engine"
+  import TopNavMenu from "src/app/TopNavMenu.svelte"
+  import {menuIsOpen} from "src/app/state"
+  import engine, {Alerts, Nip28, Nip04, Keys, Directory, Network, Nip65, user} from "src/app/engine"
 
   const {pubkey} = Keys
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
@@ -37,9 +25,6 @@
   const {hasNewMessages: hasNewChatMessages} = Nip28
   const {hasNewMessages: hasNewDirectMessages} = Nip04
   const toggleMenu = () => menuIsOpen.update(x => !x)
-  const profile = derived([pubkey, Directory.profiles], () =>
-    $pubkey ? Directory.getProfile($pubkey) : null
-  )
 
   let term = ""
   let searchIsOpen = false
@@ -191,49 +176,8 @@
       {/if}
     </div>
   </div>
-  {#if $profile}
-    <Popover opts={{hideOnClick: true}} theme="transparent" placement="top-end">
-      <div slot="trigger" class="relative flex cursor-pointer items-center">
-        <PersonCircle size={10} pubkey={$pubkey} />
-      </div>
-      <div slot="tooltip" class="flex justify-end">
-        <Card class="mt-1 overflow-hidden shadow-lg">
-          <div class="-mx-3 -mt-1">
-            <Anchor
-              class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-              href={`/${nip19.npubEncode($profile.pubkey)}`}>
-              <i class="fa fa-user mr-2" /> Profile
-            </Anchor>
-            <Anchor
-              class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-              href="/keys">
-              <i class="fa fa-key mr-2" /> Keys
-            </Anchor>
-            {#if Env.FORCE_RELAYS.length === 0}
-              <Anchor
-                class="relative block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-                href="/relays">
-                <i class="fa fa-server mr-2" /> Relays
-                {#if $slowConnections.length > 0}
-                  <div
-                    class="absolute left-3 top-3 h-2 w-2 rounded border border-solid border-white bg-accent" />
-                {/if}
-              </Anchor>
-            {/if}
-            <Anchor
-              class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-              href="/settings">
-              <i class="fa fa-gear mr-2" /> Settings
-            </Anchor>
-            <Anchor
-              class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-              href="/logout">
-              <i class="fa fa-right-from-bracket mr-2" /> Logout
-            </Anchor>
-          </div>
-        </Card>
-      </div>
-    </Popover>
+  {#if $pubkey}
+    <TopNavMenu />
   {:else}
     <Anchor theme="button-accent" on:click={showLogin}>Log In</Anchor>
   {/if}

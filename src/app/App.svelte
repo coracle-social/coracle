@@ -204,15 +204,19 @@
       clearInterval(interval)
     }
   })
+
+  const {pubkey} = Keys
 </script>
 
-<TypedRouter url={pathname}>
-  <div use:links>
-    <Routes />
-    <ForegroundButtons />
-    <SideNav />
-    <TopNav />
-    <Modal />
-    <Toast />
-  </div>
-</TypedRouter>
+{#key $pubkey}
+  <TypedRouter url={pathname}>
+    <div use:links>
+      <Routes />
+      <ForegroundButtons />
+      <SideNav />
+      <TopNav />
+      <Modal />
+      <Toast />
+    </div>
+  </TypedRouter>
+{/key}

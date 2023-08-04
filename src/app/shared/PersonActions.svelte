@@ -39,7 +39,7 @@
       })
     }
 
-    if (!isSelf && false) {
+    if (!isSelf) {
       actions.push({onClick: loginAsUser, label: "Login as", icon: "right-to-bracket"})
     }
 
@@ -56,7 +56,10 @@
     }
   }
 
-  const loginAsUser = () => Keys.login("pubkey", pubkey)
+  const loginAsUser = () => {
+    modal.clear()
+    Keys.login("pubkey", pubkey)
+  }
 
   const openProfileInfo = () => modal.push({type: "person/info", pubkey})
 
