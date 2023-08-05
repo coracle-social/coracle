@@ -12,14 +12,14 @@
   export let url
 
   let reviews = []
-  let activeTab = "reviews"
+  let activeTab = "notes"
 
   url = normalizeRelayUrl(url)
 
   $: rating = getAvgQuality("review/relay", reviews)
 
   const relay = Nip65.getRelay(url)
-  const tabs = ["reviews", "notes"]
+  const tabs = ["notes", "reviews"]
   const setActiveTab = tab => {
     activeTab = tab
   }
