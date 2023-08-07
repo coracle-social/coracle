@@ -52,9 +52,11 @@ export class PubkeyLoader {
         return relays
       }
 
+      const limit = this.engine.Settings.getSetting("relay_limit")
+
       return this.engine.Nip65.mergeHints(
-        this.engine.Settings.getSetting("relay_limit"),
-        chunk.map(pubkey => this.engine.Nip65.getPubkeyHints(3, pubkey))
+        limit,
+        chunk.map(pubkey => this.engine.Nip65.getPubkeyHints(limit, pubkey))
       )
     }
 

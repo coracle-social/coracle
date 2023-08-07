@@ -52,7 +52,7 @@
   {:else}
     {#each pubkeys as pubkey (pubkey)}
       <PersonSummary {pubkey}>
-        <div slot="actions">
+        <div slot="actions" class="flex items-start justify-end">
           <Anchor
             theme="button"
             class="flex items-center gap-2"

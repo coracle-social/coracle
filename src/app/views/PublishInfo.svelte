@@ -5,7 +5,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {Nip65, user} from "src/app/engine"
+  import {Settings, Nip65, user} from "src/app/engine"
   import {publishWithToast} from "src/app/state"
 
   export let event
@@ -19,7 +19,8 @@
     })
 
   const retry = () => {
-    const relays = Nip65.getPublishHints(10, event, user.getRelayUrls("write"))
+    const limit = Settings.getSetting("relay_limit")
+    const relays = Nip65.getPublishHints(limit, event, user.getRelayUrls("write"))
 
     publishWithToast(event, relays)
     modal.pop()

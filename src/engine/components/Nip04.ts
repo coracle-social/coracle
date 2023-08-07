@@ -35,6 +35,10 @@ export class Nip04 {
     this.engine = engine
 
     engine.Events.addHandler(30078, async e => {
+      if (!engine.Keys.canSign.get()) {
+        return
+      }
+
       if (Tags.from(e).getMeta("d") === appDataKeys.NIP04_LAST_CHECKED) {
         await tryJson(async () => {
           const payload = await engine.Crypt.decryptJson(e.content)

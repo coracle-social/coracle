@@ -1,4 +1,4 @@
-import {Tags} from "src/util/nostr"
+import {Tags, appDataKeys} from "src/util/nostr"
 import {writable} from "src/engine/util/store"
 import type {Writable} from "src/engine/util/store"
 import type {Engine} from "src/engine/Engine"
@@ -14,7 +14,7 @@ export class Settings {
 
     try {
       return base && url ? `${base}/x/s:${w}:${h}/${btoa(url)}` : url
-    } catch(e) {
+    } catch (e) {
       return url
     }
   }
@@ -26,7 +26,7 @@ export class Settings {
 
     this.settings = writable<Record<string, any>>({
       last_updated: 0,
-      relay_limit: 5,
+      relay_limit: 10,
       default_zap: 21,
       show_media: true,
       report_analytics: true,
@@ -37,7 +37,8 @@ export class Settings {
 
     engine.Events.addHandler(30078, async e => {
       if (
-        Tags.from(e).getMeta("d") === "coracle/settings/v1" &&
+        engine.Keys.canSign.get() &&
+        Tags.from(e).getMeta("d") === appDataKeys.USER_SETTINGS &&
         e.created_at > this.getSetting("last_updated")
       ) {
         const updates = await engine.Crypt.decryptJson(e.content)

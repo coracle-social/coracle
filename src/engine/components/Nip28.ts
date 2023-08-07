@@ -82,6 +82,10 @@ export class Nip28 {
     })
 
     engine.Events.addHandler(30078, async (e: Event) => {
+      if (!engine.Keys.canSign.get()) {
+        return
+      }
+
       if (Tags.from(e).getMeta("d") === appDataKeys.NIP28_LAST_CHECKED) {
         await tryJson(async () => {
           const payload = await engine.Crypt.decryptJson(e.content)
@@ -104,6 +108,10 @@ export class Nip28 {
     })
 
     engine.Events.addHandler(30078, async (e: Event) => {
+      if (!engine.Keys.canSign.get()) {
+        return
+      }
+
       if (Tags.from(e).getMeta("d") === appDataKeys.NIP28_ROOMS_JOINED) {
         await tryJson(async () => {
           const channelIds = await engine.Crypt.decryptJson(e.content)

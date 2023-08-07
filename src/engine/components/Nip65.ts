@@ -155,7 +155,7 @@ export class Nip65 {
 
     yield* Tags.from(event).equals(parentId).relays()
     yield* event.seen_on || []
-    yield* this.getPubkeyHints(null, event.pubkey, "read")
+    yield* this.getPubkeyHints(null, event.pubkey, "write")
   })
 
   // If we're replying or reacting to an event, we want the author to know, as well as

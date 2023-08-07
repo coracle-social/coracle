@@ -8,8 +8,6 @@
   const handle = Nip05.handles.key(pubkey)
 </script>
 
-{#if $handle}
-  <div class="opacity-75">{Nip05.displayHandle($handle)}</div>
-{:else}
-  <div class="overflow-hidden overflow-ellipsis opacity-75">{npub}</div>
-{/if}
+<div class="overflow-hidden overflow-ellipsis opacity-75">
+  {$handle ? Nip05.displayHandle($handle) : npub}
+</div>

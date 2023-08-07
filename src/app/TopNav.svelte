@@ -188,12 +188,10 @@
 <div
   class={cx(
     "search-input pointer-events-none fixed top-0 z-10 w-full px-2 text-gray-1",
-    "flex h-16 items-center justify-end gap-4 pr-16",
+    "flex h-16 items-center justify-end gap-4",
     {
-      "sm:pr-16": hasAccounts,
-      "sm:pr-28": !hasAccounts,
-      "pr-16": searchIsOpen && hasAccounts,
-      "pr-28": searchIsOpen && !hasAccounts,
+      "pr-16": hasAccounts,
+      "pr-28": !hasAccounts,
       "z-40 pr-0": term,
     }
   )}>

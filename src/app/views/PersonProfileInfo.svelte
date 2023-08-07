@@ -4,13 +4,13 @@
   import Content from "src/partials/Content.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {Nip05, Nip65} from "src/app/engine"
+  import {Settings, Nip05, Nip65} from "src/app/engine"
 
   export let pubkey
 
   const handle = Nip05.getHandle(pubkey)
   const npub = nip19.npubEncode(pubkey)
-  const relays = Nip65.getPubkeyHints(3, pubkey)
+  const relays = Nip65.getPubkeyHints(Settings.getSetting("relay_limit"), pubkey)
   const nprofile = nip19.nprofileEncode({pubkey, relays})
 </script>
 

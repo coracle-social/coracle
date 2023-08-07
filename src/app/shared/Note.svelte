@@ -13,7 +13,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
-  import {Keys, user, Directory, Nip65, Nip02} from "src/app/engine"
+  import {Settings, Keys, user, Directory, Nip65, Nip02} from "src/app/engine"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
   export let note
@@ -60,13 +60,13 @@
   }
 
   const goToParent = async () => {
-    const relays = Nip65.getParentHints(3, note)
+    const relays = Nip65.getParentHints(Settings.getSetting("relay_limit"), note)
 
     goToNote({note: {id: findReplyId(note), replies: [note]}, relays})
   }
 
   const goToThread = async () => {
-    const relays = Nip65.getEventHints(3, note)
+    const relays = Nip65.getEventHints(Settings.getSetting("relay_limit"), note)
 
     modal.push({type: "thread/detail", anchorId: note.id, relays})
   }
