@@ -6,6 +6,7 @@
 - [x] Load search results from network on mention suggestions
 - [x] Add log in as user
 - [x] Add multi-account support
+- [x] Remove authors limit of 256
 
 # 0.3.0
 

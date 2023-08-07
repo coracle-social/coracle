@@ -59,12 +59,12 @@
         timeout: 2000,
         filter: [
           {kinds: [40, 41], authors: [Keys.pubkey.get()]},
-          {kinds: [40, 41], authors: user.getFollows().slice(0, 256), limit: 100},
+          {kinds: [40, 41], authors: user.getFollows(), limit: 100},
           {
             limit: 100,
             kinds: [42],
             since: now() - seconds(1, "day"),
-            authors: user.getFollows().slice(0, 256),
+            authors: user.getFollows(),
           },
         ],
         onEvent: batch(500, events => {
