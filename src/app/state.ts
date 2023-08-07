@@ -95,7 +95,7 @@ setInterval(() => {
   // Prune connections we haven't used in a while
   for (const [url, socket] of Network.pool.data.entries()) {
     if (socket.meta.last_activity < now() - 60) {
-      Network.pool.remove(url)
+      Network.pool.get(url).disconnect()
     } else if (userRelays.has(url) && socket.meta.quality < 0.3) {
       $slowConnections.push(url)
     }

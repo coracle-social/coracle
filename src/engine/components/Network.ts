@@ -52,7 +52,7 @@ export class Network {
   pool = new Pool()
   authHandler: (url: string, challenge: string) => void
 
-  relayIsLowQuality = (url: string) => this.pool.get(url, {autoConnect: false})?.meta?.quality < 0.5
+  relayIsLowQuality = (url: string) => this.pool.get(url, {autoConnect: false})?.meta?.quality < 0.6
 
   getExecutor = (urls: string[], {bypassBoot = false} = {}) => {
     if (this.engine.Env.FORCE_RELAYS?.length > 0) {

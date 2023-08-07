@@ -7,6 +7,7 @@
 - [x] Add log in as user
 - [x] Add multi-account support
 - [x] Remove authors limit of 256
+- [x] Improve relay hints and selection
 
 # 0.3.0
 
