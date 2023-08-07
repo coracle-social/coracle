@@ -2,6 +2,7 @@
   import type {Filter} from "nostr-tools"
   import {onDestroy} from "svelte"
   import {filterVals} from "hurdak"
+  import {isShareableRelay} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
@@ -19,27 +20,31 @@
 
   const openPerson = pubkey => modal.push({type: "person/detail", pubkey})
 
-  const {id, identifier, kind, pubkey, relays = []} = value
+  const {id, identifier, kind, pubkey} = value
 
-  const sub = Network.subscribe({
-    timeout: 5000,
-    relays: Nip65.mergeHints(Settings.getSetting("relay_limit"), [
-      relays,
-      Nip65.getEventHints(3, note),
-    ]),
-    filter: (id
+  const relays = Nip65.mergeHints(Settings.getSetting("relay_limit"), [
+    // Agora social has a bug
+    (value.relays || []).flatMap(r => r.split(",")).filter(isShareableRelay),
+    Nip65.getEventHints(Settings.getSetting("relay_limit"), note),
+  ])
+
+  const filter = (
+    id
       ? {ids: [id]}
       : filterVals(xs => xs.length > 0, {
           "#d": [identifier],
           kinds: [kind],
           authors: [pubkey],
-        })) as Filter,
-    onEvent: event => {
-      loading = false
-      muted = user.applyMutes([event]).length === 0
-      quote = event
-    },
-  })
+        })
+  ) as Filter
+
+  const onEvent = event => {
+    loading = false
+    muted = user.applyMutes([event]).length === 0
+    quote = event
+  }
+
+  const sub = Network.subscribe({timeout: 5000, relays, filter, onEvent})
 
   const openQuote = e => {
     const noteId = id || quote?.id
