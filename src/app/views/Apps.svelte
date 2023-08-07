@@ -93,7 +93,7 @@
       <p>Hand-picked recommendations to enhance your nostr experience.</p>
     </div>
     <div class="columns-sm gap-4">
-      {#each getColumns(apps) as app}
+      {#each getColumns(apps) as app (app.id)}
         <Card class="mb-4 flex break-inside-avoid flex-col gap-4">
           <div class="flex gap-4">
             <ImageCircle size={14} src={app.info.picture} />

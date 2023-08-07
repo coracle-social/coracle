@@ -176,7 +176,7 @@ export const toNostrURI = (s: string) => `nostr://${s}`
 export const getLabelQuality = (label: string, event: Event) => {
   const json = tryJson(() => JSON.parse(last(Tags.from(event).type("l").equals(label).first())))
 
-  return (json as {quality?: number})?.quality || 0
+  return (json as {quality?: number})?.quality
 }
 
 export const getAvgQuality = (label: string, events: Event[]) =>

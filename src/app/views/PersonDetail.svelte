@@ -4,6 +4,7 @@
   import {toHex} from "src/util/nostr"
   import {getThemeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonActions from "src/app/shared/PersonActions.svelte"
@@ -53,7 +54,7 @@
   <div class="flex gap-4 text-gray-1">
     <PersonCircle {pubkey} size={12} class="mt-1 sm:h-32 sm:w-32" />
     <div class="flex min-w-0 flex-grow flex-col gap-4">
-      <div class="flex flex-col">
+      <Anchor class="flex flex-col" href={`/${npub}`}>
         <div class="flex items-center justify-between gap-4">
           <PersonName class="text-2xl" {pubkey} />
           <div class="hidden xs:block">
@@ -61,7 +62,7 @@
           </div>
         </div>
         <PersonHandle {pubkey} />
-      </div>
+      </Anchor>
       <div class="-ml-16 flex flex-grow flex-col gap-4 xs:ml-0">
         <PersonAbout {pubkey} />
         <div class="flex justify-between">
