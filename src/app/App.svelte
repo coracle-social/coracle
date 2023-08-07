@@ -208,15 +208,15 @@
   const {pubkey} = Keys
 </script>
 
-{#key $pubkey}
-  <TypedRouter url={pathname}>
-    <div use:links>
+<TypedRouter url={pathname}>
+  <div use:links>
+    {#key $pubkey || "anonymous"}
       <Routes />
       <ForegroundButtons />
       <SideNav />
       <TopNav />
-      <Modal />
-      <Toast />
-    </div>
-  </TypedRouter>
-{/key}
+    {/key}
+    <Modal />
+    <Toast />
+  </div>
+</TypedRouter>

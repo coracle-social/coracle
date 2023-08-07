@@ -1,12 +1,10 @@
 <script lang="ts">
   import {Capacitor} from "@capacitor/core"
   import {fly} from "src/util/transition"
-  import {navigate} from "svelte-routing"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {Keys} from "src/app/engine"
   import {login} from "src/app/state"
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
@@ -27,10 +25,6 @@
 
   const advancedLogIn = () => {
     modal.push({type: "login/advanced"})
-  }
-
-  if (Keys.pubkey.get()) {
-    navigate("/")
   }
 
   document.title = "Log In"

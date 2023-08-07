@@ -4,6 +4,8 @@
 
 - [x] Fix not loading parents from non-followed accounts
 - [x] Load search results from network on mention suggestions
+- [x] Add log in as user
+- [x] Add multi-account support
 
 # 0.3.0
 

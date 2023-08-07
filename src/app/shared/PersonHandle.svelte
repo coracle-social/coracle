@@ -9,7 +9,7 @@
 </script>
 
 {#if $handle}
-  <span class="opacity-75">{Nip05.displayHandle($handle)}</span>
+  <div class="opacity-75">{Nip05.displayHandle($handle)}</div>
 {:else}
-  <span class="overflow-hidden overflow-ellipsis opacity-75">{npub}</span>
+  <div class="overflow-hidden overflow-ellipsis opacity-75">{npub}</div>
 {/if}

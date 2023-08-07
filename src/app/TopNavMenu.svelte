@@ -1,5 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
+  import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Card from "src/partials/Card.svelte"
@@ -8,6 +9,8 @@
   import {Directory, Env, Keys} from "src/app/engine"
 
   const {pubkey, keyState} = Keys
+
+  const showLogin = () => modal.push({type: "login/advanced"})
 </script>
 
 <Popover theme="transparent" placement="top-end" opts={{hideOnClick: true}}>
@@ -15,11 +18,11 @@
     <PersonCircle size={10} pubkey={$pubkey} />
   </div>
   <div slot="tooltip" class="flex justify-end">
-    <Card class="mt-1 w-40 overflow-hidden shadow-lg">
+    <Card class="mt-1 w-48 overflow-hidden shadow-lg">
       <div class="-mx-3 -mt-1">
         <Anchor
           class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-          href={`/${nip19.npubEncode($pubkey)}`}>
+          href={$pubkey ? `/${nip19.npubEncode($pubkey)}` : null}>
           <i class="fa fa-user mr-2" /> Profile
         </Anchor>
         <Anchor class="block p-3 px-4 transition-all hover:bg-accent hover:text-white" href="/keys">
@@ -46,27 +49,30 @@
           href="/logout">
           <i class="fa fa-right-from-bracket mr-2" /> Logout
         </Anchor>
-        {#if $keyState.length > 1}
-          <div class="my-2 h-px w-full bg-gray-5" />
-          {#each $keyState as k}
-            {#if k.pubkey !== $pubkey}
-              <div
-                class="block flex cursor-pointer items-center justify-between gap-2 p-3 px-4
-                       transition-all hover:bg-accent hover:text-white"
-                on:click={() => Keys.pubkey.set(k.pubkey)}>
-                <div class="flex items-center gap-2">
-                  <PersonCircle pubkey={k.pubkey} />
-                  {Directory.displayPubkey(k.pubkey)}
-                </div>
-                <div
-                  class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
-                  on:click|stopPropagation={() => Keys.removeKeyState(k.pubkey)}>
-                  <i class="fa fa-circle-xmark fa-lg" />
-                </div>
+        <div class="my-2 h-px w-full bg-gray-5" />
+        {#each $keyState as k (k.pubkey)}
+          {#if k.pubkey !== $pubkey}
+            <div
+              class="block flex cursor-pointer items-center justify-between gap-2 p-3 px-4
+                     transition-all hover:bg-accent hover:text-white"
+              on:click={() => Keys.pubkey.set(k.pubkey)}>
+              <div class="flex items-center gap-2">
+                <PersonCircle pubkey={k.pubkey} />
+                {Directory.displayPubkey(k.pubkey)}
               </div>
-            {/if}
-          {/each}
-        {/if}
+              <div
+                class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
+                on:click|stopPropagation={() => Keys.removeKeyState(k.pubkey)}>
+                <i class="fa fa-circle-xmark fa-lg" />
+              </div>
+            </div>
+          {/if}
+        {/each}
+        <Anchor
+          class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
+          on:click={showLogin}>
+          <i class="fa fa-plus mr-2" /> Account
+        </Anchor>
       </div>
     </Card>
   </div>

@@ -8,6 +8,8 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
+
   import {user, Nip65, Keys, Network} from "src/app/engine"
 
   export let relay
@@ -20,17 +22,7 @@
   let statusHover = false
   let meta = null
 
-  const relays = Nip65.policies.key(Keys.pubkey.get()).derived(() => new Set(user.getRelayUrls()))
-
-  const removeRelay = r => user.removeRelay(r.url)
-
-  const addRelay = r => user.addRelay(r.url)
-
-  const openModal = () => {
-    modal.push({type: "relay/detail", url: relay.url})
-  }
-
-  $: hasRelay = $relays.has(relay.url)
+  const openModal = () => modal.push({type: "relay/detail", url: relay.url})
 
   onMount(() => {
     return poll(3000, () => {
@@ -80,22 +72,14 @@
     </div>
     {#if !hideActions}
       <slot name="actions">
-        {#if !hasRelay}
-          <button class="flex items-center gap-3 text-gray-1" on:click={() => addRelay(relay)}>
-            <i class="fa fa-right-to-bracket" /> Join
-          </button>
-        {:else if $relays.size > 1}
-          <button class="flex items-center gap-3 text-gray-1" on:click={() => removeRelay(relay)}>
-            <i class="fa fa-right-from-bracket" /> Leave
-          </button>
-        {/if}
+        <RelayCardActions {relay} />
       </slot>
     {/if}
   </div>
   {#if relay.description}
     <p>{relay.description}</p>
   {/if}
-  {#if hasRelay && showControls && Keys.canSign.get()}
+  {#if showControls && Keys.canSign.get()}
     <div class="-mx-6 my-1 h-px bg-gray-7" />
     <div class="flex justify-between gap-2">
       <span>Publish to this relay?</span>

@@ -13,7 +13,6 @@
   export let arrow = false
   export let opts = {} as {
     hideOnClick?: boolean
-    onHidden?: () => void
   }
 
   let trigger
@@ -55,8 +54,6 @@
         const [tooltipContents] = instance.popper.querySelector(".tippy-content").children
 
         tooltip.appendChild(tooltipContents)
-
-        opts.onHidden?.()
       },
     })
 

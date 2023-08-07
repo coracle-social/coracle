@@ -67,7 +67,7 @@ export class User {
     if (this.engine.Keys.canSign.get()) {
       return this.engine.Outbox.publish(
         this.engine.Builder.setRelays(relays),
-        this.getRelayUrls("write")
+        relays.map(r => r.url)
       )
     } else {
       this.engine.Nip65.setPolicy({pubkey: this.getStateKey(), created_at: now()}, relays)

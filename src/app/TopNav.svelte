@@ -19,7 +19,7 @@
   import {menuIsOpen} from "src/app/state"
   import engine, {Alerts, Nip28, Nip04, Keys, Directory, Network, Nip65, user} from "src/app/engine"
 
-  const {pubkey} = Keys
+  const {keyState} = Keys
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
   const {hasNewNotfications} = Alerts
   const {hasNewMessages: hasNewChatMessages} = Nip28
@@ -143,6 +143,8 @@
 
   $: search = fuzzy(options, {keys: ["text"], threshold: 0.3})
 
+  $: hasAccounts = $keyState.length > 0
+
   onMount(() => {
     document.querySelector("html").addEventListener("click", e => {
       if (!(e.target as any).closest(".app-logo")) {
@@ -172,11 +174,11 @@
       <h1 class="staatliches pt-1 text-3xl">{appName}</h1>
       {#if $hasNewNotfications || $hasNewChatMessages || $hasNewDirectMessages}
         <div
-          class="absolute left-8 top-4 h-2 w-2 rounded border border-solid border-white bg-accent" />
+          class="absolute left-8 top-4 h-2 w-2 rounded border border-solid border-white bg-accent sm:hidden" />
       {/if}
     </div>
   </div>
-  {#if $pubkey}
+  {#if hasAccounts}
     <TopNavMenu />
   {:else}
     <Anchor theme="button-accent" on:click={showLogin}>Log In</Anchor>
@@ -188,10 +190,10 @@
     "search-input pointer-events-none fixed top-0 z-10 w-full px-2 text-gray-1",
     "flex h-16 items-center justify-end gap-4 pr-16",
     {
-      "sm:pr-16": $pubkey,
-      "sm:pr-28": !$pubkey,
-      "pr-16": searchIsOpen && $pubkey,
-      "pr-28": searchIsOpen && !$pubkey,
+      "sm:pr-16": hasAccounts,
+      "sm:pr-28": !hasAccounts,
+      "pr-16": searchIsOpen && hasAccounts,
+      "pr-28": searchIsOpen && !hasAccounts,
       "z-40 pr-0": term,
     }
   )}>

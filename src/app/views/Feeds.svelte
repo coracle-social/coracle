@@ -11,13 +11,6 @@
 
   const lists = engine.Content.lists.derived(() => user.getLists())
 
-  let relays = []
-  let key = Math.random()
-  let filter = {
-    kinds: noteKinds,
-    authors: user.getFollows().length > 0 ? "follows" : "network",
-  } as DynamicFilter
-
   const showLists = () => modal.push({type: "list/list"})
 
   const showLogin = () => modal.push({type: 'login/intro'})
@@ -44,6 +37,13 @@
 
     key = Math.random()
   }
+
+  let relays = []
+  let key = Math.random()
+  let filter = {
+    kinds: noteKinds,
+    authors: user.getFollows().length > 0 ? "follows" : "network",
+  } as DynamicFilter
 
   document.title = "Feeds"
 </script>

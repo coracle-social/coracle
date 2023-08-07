@@ -1,8 +1,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import {last, map} from "ramda"
   import {generatePrivateKey} from "nostr-tools"
   import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
+  import {closure} from "hurdak"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
   import OnboardingKey from "src/app/views/OnboardingKey.svelte"
@@ -18,28 +20,60 @@
   const privkey = generatePrivateKey()
   const profile = {}
 
-  if (user.getRelays().length === 0) {
-    user.setRelays(Env.DEFAULT_RELAYS.map(url => ({url, read: true, write: true})))
-  }
+  let petnames = closure(() => {
+    if (Keys.keyState.get().length > 0) {
+      return []
+    }
 
-  const signup = async note => {
-    const relays = user.getRelays()
     const petnames = user.getPetnames()
 
-    await Keys.login("privkey", privkey)
-    await user.setRelays(relays)
+    if (petnames.length === 0) {
+      for (const pubkey of Env.DEFAULT_FOLLOWS) {
+        petnames.push(Builder.mention(pubkey))
+      }
+    }
 
-    // Re-save preferences now that we have a key
-    await Promise.all([
-      user.setProfile(profile),
-      user.setPetnames(petnames),
-      note && Outbox.publish(Builder.createNote(note), user.getRelayUrls("write")),
-    ])
+    return petnames
+  })
+
+  let relays = closure(() => {
+    const relays = user.getRelays()
+
+    if (relays.length === 0) {
+      for (const url of Env.DEFAULT_RELAYS) {
+        relays.push({url, read: true, write: true})
+      }
+    }
+
+    return relays
+  })
+
+  const signup = async note => {
+    Keys.login("privkey", privkey)
+
+    // Wait for the published event to go through
+    await last(await user.setRelays(relays))
+
+    // Re-save preferences now that we have a key and relays. Wait for them
+    // to persist so we have the correct user preferences
+    await Promise.all(
+      map(
+        xs => (xs ? last(xs) : null),
+        await Promise.all([
+          user.setProfile(profile),
+          user.setPetnames(petnames),
+          note && Outbox.publish(Builder.createNote(note), user.getRelayUrls("write")),
+        ])
+      )
+    )
 
     // Start our notifications listener
     listenForNotifications()
 
+    // Close all modals
     modal.clear()
+
+    // Go to our home page
     navigate("/notes")
   }
 
@@ -58,9 +92,9 @@
     {:else if stage === "key"}
       <OnboardingKey {privkey} />
     {:else if stage === "relays"}
-      <OnboardingRelays />
+      <OnboardingRelays bind:relays />
     {:else if stage === "follows"}
-      <OnboardingFollows />
+      <OnboardingFollows bind:petnames />
     {:else if stage === "note"}
       <OnboardingNote {signup} />
     {/if}
