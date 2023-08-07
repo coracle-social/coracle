@@ -4,7 +4,9 @@
   let input = null
 
   const stripStyle = node => {
-    if (node instanceof HTMLElement) {
+    if (node.tagName === "IMG") {
+      node.remove()
+    } else if (node instanceof HTMLElement) {
       if (!node.dataset?.coracle) {
         node.removeAttribute("class")
         node.removeAttribute("style")
@@ -33,7 +35,7 @@
 
     // If we're editing something we've already linked, un-link it
     // @ts-ignore
-    if (focusNode.parentNode.dataset?.coracle) {
+    if (focusNode.parentNode?.dataset?.coracle) {
       // @ts-ignore
       focusNode.parentNode.replaceWith(focusNode)
       selection.collapse(focusNode, focusOffset)
