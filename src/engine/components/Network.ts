@@ -81,7 +81,9 @@ export class Network {
 
     const executor = new Executor(target)
 
-    executor.handleAuth({onAuth: this.authHandler, onOk: noop})
+    if (this.authHandler) {
+      executor.handleAuth({onAuth: this.authHandler, onOk: noop})
+    }
 
     return executor
   }
