@@ -12,6 +12,10 @@ export class Settings {
   imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
     const base = this.getSetting("imgproxy_url")
 
+    if (url.endsWith(".gif")) {
+      return url
+    }
+
     try {
       return base && url ? `${base}/x/s:${w}:${h}/${btoa(url)}` : url
     } catch (e) {
