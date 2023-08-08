@@ -12,7 +12,7 @@ export class Settings {
   imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
     const base = this.getSetting("imgproxy_url")
 
-    if (url.endsWith(".gif")) {
+    if (!url || url.endsWith(".gif")) {
       return url
     }
 
