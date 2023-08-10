@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.3.2
+
+- [x] Prototype implementation of NIP 24 encrypted chat
+
 # 0.3.1
 
 - [x] Fix not loading parents from non-followed accounts
