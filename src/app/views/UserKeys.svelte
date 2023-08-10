@@ -10,14 +10,15 @@
   import {Keys} from "src/app/engine"
   import {toast} from "src/partials/state"
 
-  const {pubkey, privkey, bunkerKey} = Keys
+  const {current} = Keys
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
   const keypairUrl = "https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/"
 
   let asHex = false
 
-  $: pubkeyDisplay = asHex ? $pubkey : nip19.npubEncode($pubkey)
-  $: privkeyDisplay = asHex || !$privkey ? $privkey : nip19.nsecEncode($privkey)
+  $: pubkeyDisplay = asHex ? $current?.pubkey : nip19.npubEncode($current.pubkey)
+  $: privkeyDisplay =
+    asHex || !$current?.privkey ? $current.privkey : nip19.nsecEncode($current.privkey)
 
   const copyKey = (type, value) => {
     copyToClipboard(value)
@@ -61,7 +62,7 @@
           on nostr.
         </p>
       </div>
-      {#if $privkey}
+      {#if $current?.privkey}
         <div class="flex flex-col gap-1">
           <strong>Private Key</strong>
           <Input disabled type="password" value={privkeyDisplay}>
@@ -79,14 +80,14 @@
           </p>
         </div>
       {/if}
-      {#if $bunkerKey}
+      {#if $current?.bunkerKey}
         <div class="flex flex-col gap-1">
           <strong>Bunker Key</strong>
-          <Input disabled type="password" value={$bunkerKey}>
+          <Input disabled type="password" value={$current.bunkerKey}>
             <button
               slot="after"
               class="fa-solid fa-copy cursor-pointer"
-              on:click={() => copyKey("bunker", $bunkerKey)} />
+              on:click={() => copyKey("bunker", $current.bunkerKey)} />
           </Input>
           <p class="text-sm text-gray-1">
             Your bunker key is used to authorize Coracle with your nsec bunker to sign events on

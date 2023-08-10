@@ -9,7 +9,7 @@
 
   export let pubkey
 
-  const canSign = Keys.canSign.get()
+  const {canSign, canUseGiftWrap} = Keys
   const isSelf = Keys.pubkey.get() === pubkey
   const npub = nip19.npubEncode(pubkey)
   const graphEntry = Nip02.graph.key(Keys.pubkey.get())
@@ -21,7 +21,7 @@
   $: {
     actions = []
 
-    if (canSign) {
+    if ($canSign) {
       actions.push({
         onClick: () => addToList("p", pubkey),
         label: "Add to list",
@@ -31,12 +31,20 @@
 
     actions.push({onClick: share, label: "Share", icon: "share-nodes"})
 
-    if (!isSelf && canSign) {
-      actions.push({
-        onClick: () => navigate(`/conversations/${npub}`),
-        label: "Message",
-        icon: "envelope",
-      })
+    if (!isSelf && $canSign) {
+      if ($canUseGiftWrap) {
+        actions.push({
+          onClick: () => navigate(`/channels/${pubkey}`),
+          label: "Message",
+          icon: "envelope",
+        })
+      } else {
+        actions.push({
+          onClick: () => navigate(`/conversations/${npub}`),
+          label: "Message",
+          icon: "envelope",
+        })
+      }
     }
 
     if (!isSelf) {
@@ -47,7 +55,7 @@
       actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
     }
 
-    if (isSelf && canSign) {
+    if (isSelf && $canSign) {
       actions.push({
         onClick: () => navigate("/profile"),
         label: "Edit",

@@ -10,6 +10,7 @@ import {Network} from "./components/Network"
 import {Nip02} from "./components/Nip02"
 import {Nip04} from "./components/Nip04"
 import {Nip05} from "./components/Nip05"
+import {Nip24} from "./components/Nip24"
 import {Nip28} from "./components/Nip28"
 import {Nip57} from "./components/Nip57"
 import {Nip65} from "./components/Nip65"
@@ -29,6 +30,7 @@ export class Engine {
   Nip02 = new Nip02()
   Nip04 = new Nip04()
   Nip05 = new Nip05()
+  Nip24 = new Nip24()
   Nip28 = new Nip28()
   Nip57 = new Nip57()
   Nip65 = new Nip65()

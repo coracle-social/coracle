@@ -13,6 +13,7 @@ export class Keys {
   canSign = this.current.derived(keyState =>
     ["bunker", "privkey", "extension"].includes(keyState?.method)
   )
+  canUseGiftWrap = this.current.derived(keyState => keyState?.method === "privkey")
 
   getKeyState = (k: string) => find(propEq("pubkey", k), this.keyState.get())
 

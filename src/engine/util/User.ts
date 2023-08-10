@@ -203,6 +203,17 @@ export class User {
     return this.setAppData(appDataKeys.NIP04_LAST_CHECKED, {...lastChecked, [pubkey]: now()})
   }
 
+  setNip24ChannelLastChecked = (channelId: string) => {
+    const lastChecked = fromPairs(
+      this.engine.Nip24.channels
+        .get()
+        .filter(prop("last_checked"))
+        .map(r => [r.id, r.last_checked])
+    )
+
+    return this.setAppData(appDataKeys.NIP24_LAST_CHECKED, {...lastChecked, [channelId]: now()})
+  }
+
   // Channels
 
   setChannelLastChecked = (id: string) => {

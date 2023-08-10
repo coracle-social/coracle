@@ -1,13 +1,14 @@
 <script lang="ts">
   import cx from "classnames"
   import {theme, installPrompt} from "src/partials/state"
-  import {Keys, Nip28, Nip04, Alerts} from "src/app/engine"
+  import {Keys, Nip28, Nip04, Nip24, Alerts} from "src/app/engine"
   import {menuIsOpen} from "src/app/state"
 
-  const {canSign} = Keys
+  const {canSign, canUseGiftWrap} = Keys
   const {hasNewNotfications} = Alerts
   const {hasNewMessages: hasNewChatMessages} = Nip28
-  const {hasNewMessages: hasNewDirectMessages} = Nip04
+  const {hasNewMessages: hasNewDirectMessagesNip04} = Nip04
+  const {hasNewMessages: hasNewDirectMessagesNip24} = Nip24
 
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 
@@ -40,21 +41,37 @@
       <i class="fa fa-rss mr-2" /> Feed
     </a>
   </li>
-  <li
-    class={cx("relative", {
-      "cursor-pointer": $canSign,
-      "pointer-events-none opacity-75": !$canSign,
-    })}>
-    <a
-      class="block px-4 py-2 transition-all hover:bg-accent hover:text-white"
-      href="/conversations">
-      <i class="fa fa-envelope mr-2" /> Messages
-      {#if $hasNewDirectMessages}
-        <div
-          class="absolute left-7 top-2 h-2 w-2 rounded border border-solid border-white bg-accent" />
-      {/if}
-    </a>
-  </li>
+  {#if $canUseGiftWrap}
+    <li
+      class={cx("relative", {
+        "cursor-pointer": $canSign,
+        "pointer-events-none opacity-75": !$canSign,
+      })}>
+      <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/channels">
+        <i class="fa fa-envelope mr-2" /> Messages
+        {#if $hasNewDirectMessagesNip24}
+          <div
+            class="absolute left-7 top-2 h-2 w-2 rounded border border-solid border-white bg-accent" />
+        {/if}
+      </a>
+    </li>
+  {:else}
+    <li
+      class={cx("relative", {
+        "cursor-pointer": $canSign,
+        "pointer-events-none opacity-75": !$canSign,
+      })}>
+      <a
+        class="block px-4 py-2 transition-all hover:bg-accent hover:text-white"
+        href="/conversations">
+        <i class="fa fa-envelope mr-2" /> Messages
+        {#if $hasNewDirectMessagesNip04}
+          <div
+            class="absolute left-7 top-2 h-2 w-2 rounded border border-solid border-white bg-accent" />
+        {/if}
+      </a>
+    </li>
+  {/if}
   <li class="relative">
     <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/chat">
       <i class="fa fa-comment mr-2" /> Chat

@@ -58,6 +58,7 @@ export const Network = engine.Network
 export const Nip02 = engine.Nip02
 export const Nip04 = engine.Nip04
 export const Nip05 = engine.Nip05
+export const Nip24 = engine.Nip24
 export const Nip28 = engine.Nip28
 export const Nip57 = engine.Nip57
 export const Nip65 = engine.Nip65

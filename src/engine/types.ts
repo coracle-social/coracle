@@ -137,6 +137,15 @@ export type Message = {
   tags: string[][]
 }
 
+export type Nip24Channel = {
+  id: string
+  updated_at: number
+  last_sent?: number
+  last_received?: number
+  last_checked?: number
+  hints: string[]
+}
+
 export type Topic = {
   name: string
   count?: number

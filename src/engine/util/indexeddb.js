@@ -27,7 +27,11 @@ export class IndexedDB {
         this.db = e.target.result
 
         this.stores.forEach(o => {
-          this.db.createObjectStore(o.name, o.opts)
+          try {
+            this.db.createObjectStore(o.name, o.opts)
+          } catch (e) {
+            console.warn(e)
+          }
         })
       }
     })

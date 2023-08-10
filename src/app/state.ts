@@ -130,6 +130,7 @@ export const listenForNotifications = async () => {
       // Messages
       {kinds: [4], authors: [pubkey], limit: 1},
       {kinds: [4], "#p": [pubkey], limit: 1},
+      {kinds: [1059], "#p": [pubkey], limit: 1},
       // Chat
       {kinds: [42], "#e": channelIds, limit: 1},
       // Mentions/replies

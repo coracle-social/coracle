@@ -12,6 +12,8 @@
   import Logout from "src/app/views/Logout.svelte"
   import MessagesDetail from "src/app/views/MessagesDetail.svelte"
   import MessagesList from "src/app/views/MessagesList.svelte"
+  import ChannelsDetail from "src/app/views/ChannelsDetail.svelte"
+  import ChannelsList from "src/app/views/ChannelsList.svelte"
   import NotFound from "src/app/views/NotFound.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
@@ -56,6 +58,17 @@
     <TypedRoute path="/conversations/:entity" let:params>
       {#key params.entity}
         <MessagesDetail entity={params.entity} />
+      {/key}
+    </TypedRoute>
+    <TypedRoute path="/channels">
+      <ChannelsList activeTab="conversations" />
+    </TypedRoute>
+    <TypedRoute path="/channels/requests">
+      <ChannelsList activeTab="requests" />
+    </TypedRoute>
+    <TypedRoute path="/channels/:entity" let:params>
+      {#key params.entity}
+        <ChannelsDetail entity={params.entity} />
       {/key}
     </TypedRoute>
     <TypedRoute path="/apps" component={Apps} />

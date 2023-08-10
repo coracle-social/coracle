@@ -38,13 +38,8 @@
 
   const sendMessage = async content => {
     const cyphertext = await Crypt.encrypt(pubkey, content)
-    const [event] = await Outbox.publish(
-      Builder.createDirectMessage(pubkey, cyphertext),
-      getRelays()
-    )
 
-    // Return unencrypted content so we can display it immediately
-    return {...event, content}
+    await Outbox.publish(Builder.createDirectMessage(pubkey, cyphertext), getRelays())
   }
 
   onMount(() => {

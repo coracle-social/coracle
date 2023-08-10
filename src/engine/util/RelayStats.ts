@@ -143,7 +143,7 @@ export class RelayStats {
           }
 
           for (const payload of subs.values()) {
-            socket.send(payload)
+            socket.send(["REQ", ...payload])
           }
         }
       })

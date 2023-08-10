@@ -13,6 +13,7 @@ export const EPOCH = 1635724800
 export const appDataKeys = {
   USER_SETTINGS: "nostr-engine/User/settings/v1",
   NIP04_LAST_CHECKED: "nostr-engine/Nip04/last_checked/v1",
+  NIP24_LAST_CHECKED: "nostr-engine/Nip24/last_checked/v1",
   NIP28_LAST_CHECKED: "nostr-engine/Nip28/last_checked/v1",
   NIP28_ROOMS_JOINED: "nostr-engine/Nip28/rooms_joined/v1",
 }
