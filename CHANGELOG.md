@@ -3,6 +3,7 @@
 # 0.3.3
 
 - [x] Add ability to start a chat from the messages list page (NIP 24 only)
+- [x] Move notification info to modal
 
 # 0.3.2
 

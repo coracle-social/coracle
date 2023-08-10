@@ -16,6 +16,7 @@
   import NoteShare from "src/app/views/NoteShare.svelte"
   import PublishInfo from "src/app/views/PublishInfo.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
+  import NotificationInfo from "src/app/views/NotificationInfo.svelte"
   import ThreadDetail from "src/app/views/ThreadDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
   import PersonList from "src/app/shared/PersonList.svelte"
@@ -42,6 +43,8 @@
   <NoteZap note={m.note} />
 {:else if m.type === "note/share"}
   <NoteShare note={m.note} />
+{:else if m.type === "notification/info"}
+  <NotificationInfo zaps={m.zaps} likes={m.likes} replies={m.replies} />
 {:else if m.type === "thread/detail"}
   <ThreadDetail anchorId={m.anchorId} relays={m.relays} />
 {:else if m.type === "publish/info"}

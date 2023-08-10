@@ -6,9 +6,7 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
   import Card from "src/partials/Card.svelte"
-  import Popover from "src/partials/Popover.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import NotificationSection from "src/app/views/NotificationSection.svelte"
   import {modal} from "src/partials/state"
 
   export let event
@@ -35,6 +33,8 @@
 
     return "reacted to"
   })
+
+  const showDetails = () => modal.push({type: "notification/info", zaps, likes, replies})
 </script>
 
 {#if note}
@@ -51,24 +51,10 @@
             <span>mentioned you.</span>
           </div>
         {:else}
-          <Popover>
-            <div slot="trigger">
-              {quantify(pubkeys.length, "person", "people")}
-              {actionText} your note.
-            </div>
-            <div slot="tooltip" class="flex flex-col gap-4 py-2">
-              {#if zaps.length > 0}
-                <NotificationSection pubkeys={pluck("pubkey", zaps)}>Zapped by</NotificationSection>
-              {/if}
-              {#if likes.length > 0}
-                <NotificationSection pubkeys={pluck("pubkey", likes)}>Liked by</NotificationSection>
-              {/if}
-              {#if replies.length > 0}
-                <NotificationSection pubkeys={pluck("pubkey", replies)}
-                  >Replies</NotificationSection>
-              {/if}
-            </div>
-          </Popover>
+          <div on:click={showDetails}>
+            {quantify(pubkeys.length, "person", "people")}
+            {actionText} your note.
+          </div>
         {/if}
         <small>
           {formatTimestamp(event.created_at)}
