@@ -6,6 +6,7 @@
   import {navigate} from "svelte-routing"
   import {modal} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
@@ -56,6 +57,15 @@
     return () => sub.close()
   })
 </script>
+
+<div class="bg-gray-7">
+  <Content>
+    <p>
+      You are using an experimental version of private messaging. If you're looking for old-style
+      messages, click <Anchor theme="anchor" href="/conversations">here</Anchor>.
+    </p>
+  </Content>
+</div>
 
 <Content>
   <div class="relative">
