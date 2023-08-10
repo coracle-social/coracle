@@ -82,7 +82,7 @@
   const mute = () => user.mute("p", pubkey)
 </script>
 
-<div class="flex items-center gap-3">
+<div class="flex items-center gap-3" on:click|stopPropagation>
   {#if !isSelf}
     <Popover triggerType="mouseenter">
       <div slot="trigger" class="w-6 text-center">
