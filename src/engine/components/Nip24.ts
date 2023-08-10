@@ -19,6 +19,8 @@ export class Nip24 {
     find((e: Nip24Channel) => e.last_sent > 0 && this.messageIsNew(e))
   )
 
+  getChannelId = (pubkeys: string[]) => sortBy(identity, pubkeys).join(",")
+
   initialize(engine: Engine) {
     this.engine = engine
 
@@ -54,7 +56,7 @@ export class Nip24 {
           const pubkey = engine.Keys.pubkey.get()
           const pubkeys = without([pubkey], tags.type("p").values().all().concat(seal.pubkey))
           const channel = {
-            id: sortBy(identity, pubkeys).join(","),
+            id: this.getChannelId(pubkeys),
             hints: tags.relays(),
           } as Nip24Channel
 

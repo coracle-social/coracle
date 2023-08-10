@@ -26,7 +26,7 @@
   const leave = () => user.leaveChannel($channel.id)
 
   const edit = () => {
-    modal.push({type: "channel/edit", channel: $channel})
+    modal.push({type: "chat/edit", channel: $channel})
   }
 
   const sendMessage = async content => {

@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.3.3
+
+- [x] Add ability to start a chat from the messages list page (NIP 24 only)
+
 # 0.3.2
 
 - [x] Prototype implementation of NIP 24 encrypted chat

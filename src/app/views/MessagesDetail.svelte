@@ -82,8 +82,7 @@
     })}>
     <div
       class={cx("inline-block max-w-xl rounded-2xl px-4 py-2", {
-        "rounded-br-none bg-gray-1 text-end text-gray-8":
-          message.profile.pubkey === Keys.pubkey.get(),
+        "rounded-br-none bg-gray-1 text-gray-8": message.profile.pubkey === Keys.pubkey.get(),
         "rounded-bl-none bg-gray-7": message.profile.pubkey !== Keys.pubkey.get(),
       })}>
       <div class="break-words">

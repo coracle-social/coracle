@@ -4,6 +4,7 @@
   import {toTitle, seconds, batch} from "hurdak"
   import {now} from "src/util/misc"
   import {navigate} from "svelte-routing"
+  import {modal} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
@@ -48,8 +49,6 @@
           })
         }
 
-        console.log(pubkeys)
-
         pubkeyLoader.load(pubkeys)
       }),
     })
@@ -61,10 +60,18 @@
 <Content>
   <div class="relative">
     <Tabs tabs={["conversations", "requests"]} {activeTab} {setActiveTab} {getDisplay} />
-    <Popover triggerType="mouseenter" class="absolute right-7 top-7 hidden sm:block">
+    <Popover triggerType="mouseenter" class="absolute right-14 top-7 hidden sm:block">
       <div slot="trigger">
         <i
-          class="fa fa-bell cursor-bell cursor-pointer"
+          class="fa fa-envelope cursor-pointer"
+          on:click={() => modal.push({type: "channel/create"})} />
+      </div>
+      <div slot="tooltip">Create a new conversation</div>
+    </Popover>
+    <Popover triggerType="mouseenter" class="absolute right-5 top-7 hidden sm:block">
+      <div slot="trigger">
+        <i
+          class="fa fa-bell cursor-pointer"
           class:text-gray-5={!$hasNewMessages}
           on:click={user.markAllMessagesRead} />
       </div>
