@@ -1,6 +1,6 @@
 import type {UnsignedEvent, Event} from "nostr-tools"
 import {getPublicKey, getEventHash, getSignature} from "nostr-tools"
-import {getSharedSecret, encrypt, decrypt} from "./nip44"
+import {encrypt, decrypt} from "./nip44"
 
 export const now = (drift = 0) =>
   Math.round(Date.now() / 1000 - Math.random() * Math.pow(10, drift))
@@ -23,8 +23,7 @@ export const createRumor = event => {
 }
 
 export const createSeal = (authorPrivkey: string, recipientPubkey, rumor) => {
-  const sealKey = getSharedSecret(authorPrivkey, recipientPubkey)
-  const content = JSON.stringify(encrypt(sealKey, JSON.stringify(rumor)))
+  const content = encrypt(authorPrivkey, recipientPubkey, JSON.stringify(rumor))
 
   const seal = {
     content,
@@ -41,8 +40,7 @@ export const createSeal = (authorPrivkey: string, recipientPubkey, rumor) => {
 }
 
 export const createWrap = (wrapperPrivkey, recipientPubkey, seal, tags = []) => {
-  const conversationKey = getSharedSecret(wrapperPrivkey, recipientPubkey)
-  const content = JSON.stringify(encrypt(conversationKey, JSON.stringify(seal)))
+  const content = encrypt(wrapperPrivkey, recipientPubkey, JSON.stringify(seal))
 
   const wrap = {
     tags,
@@ -67,10 +65,8 @@ export const wrap = (authorPrivkey, recipientPubkey, wrapperPrivkey, event, tags
 }
 
 export const unwrap = (recipientPrivkey, wrap) => {
-  const sealKey = getSharedSecret(recipientPrivkey, wrap.pubkey)
-  const seal = JSON.parse(decrypt(sealKey, JSON.parse(wrap.content)))
-  const rumorKey = getSharedSecret(recipientPrivkey, seal.pubkey)
-  const rumor = JSON.parse(decrypt(rumorKey, JSON.parse(seal.content)))
+  const seal = JSON.parse(decrypt(recipientPrivkey, wrap.pubkey, wrap.content))
+  const rumor = JSON.parse(decrypt(recipientPrivkey, seal.pubkey, seal.content))
 
   return {wrap, seal, rumor}
 }
