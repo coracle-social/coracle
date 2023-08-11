@@ -10,7 +10,7 @@
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
-  import {withUnwrappedEvent} from "src/engine/util/giftWrap"
+  import {withUnwrappedEvent} from "src/engine/util/nip59"
   import {Nip24, pubkeyLoader, user, Network, Keys} from "src/app/engine"
 
   export let activeTab = "conversations"

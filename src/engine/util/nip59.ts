@@ -1,57 +1,9 @@
 import type {UnsignedEvent, Event} from "nostr-tools"
 import {getPublicKey, getEventHash, getSignature} from "nostr-tools"
-import {xchacha20} from "@noble/ciphers/chacha"
-import {secp256k1} from "@noble/curves/secp256k1"
-import {sha256} from "@noble/hashes/sha256"
-import {randomBytes} from "@noble/hashes/utils"
-import {base64} from "@scure/base"
-
-export const utf8Decoder = new TextDecoder()
-
-export const utf8Encoder = new TextEncoder()
-
-export const fromHex = hex => Uint8Array.from(hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)))
-
-export const toHex = bytes =>
-  bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, "0"), "")
+import {getSharedSecret, encrypt, decrypt} from "./nip44"
 
 export const now = (drift = 0) =>
   Math.round(Date.now() / 1000 - Math.random() * Math.pow(10, drift))
-
-export const getConversationKey = (privkeyA: string, pubkeyB: string): Uint8Array =>
-  sha256(secp256k1.getSharedSecret(privkeyA, "02" + pubkeyB).subarray(1, 33))
-
-export const getNonce = () => base64.encode(randomBytes(24))
-
-export type EncryptedPayload = {
-  ciphertext: string
-  nonce: string
-  v: 1
-}
-
-export function encrypt(key: Uint8Array, text: string, v = 1): EncryptedPayload {
-  if (v !== 1) throw new Error("NIP44: unknown encryption version")
-
-  const nonce = randomBytes(24)
-  const plaintext = utf8Encoder.encode(text)
-  const ciphertext = xchacha20(key, nonce, plaintext)
-
-  return {
-    ciphertext: base64.encode(ciphertext),
-    nonce: base64.encode(nonce),
-    v,
-  }
-}
-
-export function decrypt(key: Uint8Array, data: EncryptedPayload): string {
-  if (data.v !== 1) throw new Error("NIP44: unknown encryption version")
-
-  const nonce = base64.decode(data.nonce)
-  const ciphertext = base64.decode(data.ciphertext)
-  const plaintext = xchacha20(key, nonce, ciphertext)
-
-  return utf8Decoder.decode(plaintext)
-}
 
 export const createRumor = event => {
   if (event.sig) {
@@ -71,7 +23,7 @@ export const createRumor = event => {
 }
 
 export const createSeal = (authorPrivkey: string, recipientPubkey, rumor) => {
-  const sealKey = getConversationKey(authorPrivkey, recipientPubkey)
+  const sealKey = getSharedSecret(authorPrivkey, recipientPubkey)
   const content = JSON.stringify(encrypt(sealKey, JSON.stringify(rumor)))
 
   const seal = {
@@ -89,7 +41,7 @@ export const createSeal = (authorPrivkey: string, recipientPubkey, rumor) => {
 }
 
 export const createWrap = (wrapperPrivkey, recipientPubkey, seal, tags = []) => {
-  const conversationKey = getConversationKey(wrapperPrivkey, recipientPubkey)
+  const conversationKey = getSharedSecret(wrapperPrivkey, recipientPubkey)
   const content = JSON.stringify(encrypt(conversationKey, JSON.stringify(seal)))
 
   const wrap = {
@@ -115,9 +67,9 @@ export const wrap = (authorPrivkey, recipientPubkey, wrapperPrivkey, event, tags
 }
 
 export const unwrap = (recipientPrivkey, wrap) => {
-  const sealKey = getConversationKey(recipientPrivkey, wrap.pubkey)
+  const sealKey = getSharedSecret(recipientPrivkey, wrap.pubkey)
   const seal = JSON.parse(decrypt(sealKey, JSON.parse(wrap.content)))
-  const rumorKey = getConversationKey(recipientPrivkey, seal.pubkey)
+  const rumorKey = getSharedSecret(recipientPrivkey, seal.pubkey)
   const rumor = JSON.parse(decrypt(rumorKey, JSON.parse(seal.content)))
 
   return {wrap, seal, rumor}

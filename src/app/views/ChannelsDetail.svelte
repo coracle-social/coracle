@@ -6,7 +6,7 @@
   import {formatTimestamp} from "src/util/misc"
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {wrap} from "src/engine/util/giftWrap"
+  import {wrap} from "src/engine/util/nip59"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"

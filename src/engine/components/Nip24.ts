@@ -4,7 +4,7 @@ import {Tags, appDataKeys} from "src/util/nostr"
 import type {Nip24Channel, Message} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
 import {collection, derived} from "src/engine/util/store"
-import {withUnwrappedEvent} from "src/engine/util/giftWrap"
+import {withUnwrappedEvent} from "src/engine/util/nip59"
 
 export class Nip24 {
   engine: Engine
