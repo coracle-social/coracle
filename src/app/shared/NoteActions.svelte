@@ -111,7 +111,7 @@
 <div class="flex justify-between text-gray-1" on:click|stopPropagation>
   <div class="flex">
     <button
-      class={cx("w-16 text-left", {
+      class={cx("relative w-16 pt-1 text-left transition-all hover:pb-1 hover:pt-0", {
         "pointer-events-none opacity-50": disableActions,
       })}
       on:click={reply.start}>
@@ -119,7 +119,7 @@
       {$repliesCount}
     </button>
     <button
-      class={cx("w-16 text-left", {
+      class={cx("relative w-16 pt-1 text-left transition-all hover:pb-1 hover:pt-0", {
         "pointer-events-none opacity-50": disableActions || note.pubkey === Keys.pubkey.get(),
         "text-accent": like,
       })}
@@ -132,7 +132,7 @@
     </button>
     {#if Env.ENABLE_ZAPS}
       <button
-        class={cx("w-20 text-left", {
+        class={cx("relative w-20 pt-1 text-left transition-all hover:pb-1 hover:pt-0", {
           "pointer-events-none opacity-50": disableActions || !canZap,
           "text-accent": zap,
         })}
