@@ -4,10 +4,10 @@
   import {onMount} from "svelte"
   import {generatePrivateKey} from "nostr-tools"
   import {formatTimestamp} from "src/util/misc"
+  import {modal} from "src/partials/state"
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {wrap} from "src/engine/util/nip59"
-  import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
@@ -58,6 +58,8 @@
     }
   }
 
+  const showPerson = pubkey => modal.push({type: "person/detail", pubkey})
+
   onMount(() => {
     return Network.subscribe({
       relays: getRelays(),
@@ -71,11 +73,8 @@
 <Channel {messages} {sendMessage}>
   <div slot="header" class="flex h-16 items-start gap-4 overflow-hidden p-2">
     <div class="flex items-center gap-4 pt-1">
-      <Anchor
-        type="unstyled"
-        class="fa fa-arrow-left cursor-pointer text-2xl"
-        on:click={() => history.back()} />
-      <div class="mr-3 flex">
+      <Anchor type="unstyled" class="fa fa-arrow-left cursor-pointer text-2xl" href="/channels" />
+      <div class="mr-3 flex pt-1">
         {#each pubkeys as pubkey (pubkey)}
           <div class="-mr-3 inline-block">
             <PersonCircle size={10} class="h-8 w-8" {pubkey} />
@@ -83,11 +82,11 @@
         {/each}
       </div>
     </div>
-    <div class="flex h-12 w-full flex-col overflow-hidden pt-px">
+    <div class="flex h-12 w-full flex-col overflow-hidden pt-1">
       <div class="w-full">
         {#each pubkeys as pubkey, i (pubkey)}
           {#if i > 0}&bullet;{/if}
-          <Anchor href={routes.person(pubkey)} class="font-bold">
+          <Anchor on:click={() => showPerson(pubkey)} class="font-bold">
             {Directory.displayPubkey(pubkey)}
           </Anchor>
         {/each}
@@ -105,10 +104,15 @@
       "mr-12": message.profile.pubkey !== userPubkey,
     })}>
     <div
-      class={cx("inline-block max-w-xl rounded-2xl px-4 py-2", {
+      class={cx("inline-block flex max-w-xl flex-col rounded-2xl px-4 py-2", {
         "rounded-br-none bg-gray-1 text-gray-8": message.profile.pubkey === userPubkey,
         "rounded-bl-none bg-gray-7": message.profile.pubkey !== userPubkey,
       })}>
+      {#if message.showProfile && message.profile.pubkey !== userPubkey}
+        <Anchor class="mb-1" on:click={() => showPerson(message.profile.pubkey)}>
+          <strong>{Directory.displayProfile(message.profile)}</strong>
+        </Anchor>
+      {/if}
       <div class="break-words">
         {#if typeof message.content === "string"}
           <NoteContent showEntire note={message} />

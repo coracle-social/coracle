@@ -4,6 +4,10 @@
 
 - [x] Add ability to start a chat from the messages list page (NIP 24 only)
 - [x] Move notification info to modal
+- [x] Fix relay selection sorting
+- [x] Limit concurrent subscriptions
+- [x] Re-introduce shuffle+slice of authors
+- [x] Re-connect to sockets with an error after a while
 
 # 0.3.2
 

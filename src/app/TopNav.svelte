@@ -17,14 +17,27 @@
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import TopNavMenu from "src/app/TopNavMenu.svelte"
   import {menuIsOpen} from "src/app/state"
-  import engine, {Alerts, Nip28, Nip04, Keys, Directory, Network, Nip65, user} from "src/app/engine"
+  import engine, {
+    Alerts,
+    Nip28,
+    Nip04,
+    Nip24,
+    Keys,
+    Directory,
+    Network,
+    Nip65,
+    user,
+  } from "src/app/engine"
 
-  const {keyState} = Keys
+  const {keyState, canUseGiftWrap} = Keys
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
   const {hasNewNotfications} = Alerts
   const {hasNewMessages: hasNewChatMessages} = Nip28
   const {hasNewMessages: hasNewDirectMessages} = Nip04
+  const {hasNewMessages: hasNewNip24DirectMessages} = Nip24
   const toggleMenu = () => menuIsOpen.update(x => !x)
+
+  $: hasNewMessages = $hasNewDirectMessages || ($canUseGiftWrap && $hasNewNip24DirectMessages)
 
   let term = ""
   let searchIsOpen = false
@@ -172,9 +185,9 @@
     <div class="app-logo flex cursor-pointer items-center gap-2" on:click={toggleMenu}>
       <img alt="App Logo" src={logoUrl} class="w-10" />
       <h1 class="staatliches pt-1 text-3xl">{appName}</h1>
-      {#if $hasNewNotfications || $hasNewChatMessages || $hasNewDirectMessages}
+      {#if $hasNewNotfications || $hasNewChatMessages || hasNewMessages}
         <div
-          class="absolute left-8 top-4 h-2 w-2 rounded border border-solid border-white bg-accent sm:hidden" />
+          class="absolute left-8 top-4 h-2 w-2 rounded border border-solid border-white bg-accent" />
       {/if}
     </div>
   </div>

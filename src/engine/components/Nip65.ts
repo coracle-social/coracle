@@ -193,7 +193,7 @@ export class Nip65 {
       score.score = weight + Math.log1p(Math.exp(score.score - score.count))
     }
 
-    return sortBy(([hint, {score}]) => -score, Object.entries(scores))
+    return sortBy(([hint, {score}]) => score, Object.entries(scores))
       .map(nth(0))
       .slice(0, limit)
   }

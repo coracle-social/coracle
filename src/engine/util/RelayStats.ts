@@ -131,21 +131,29 @@ export class RelayStats {
         socket.off("send", onSend)
         socket.off("receive", onReceive)
 
-        // If we didn't purposely remove the socket and it's healthy, restart
-        // and re-send active subcriptions
-        if (
-          this.engine.Network.pool.has(socket.url) &&
-          socket.status !== Socket.STATUS.ERROR &&
-          !socket.meta.error
-        ) {
-          if (subs.size > 0) {
-            info(`Resuming ${subs.size} subscriptions on ${socket.url}`)
-          }
+        info(`Closed connection to ${socket.url}`)
 
-          for (const payload of subs.values()) {
-            socket.send(["REQ", ...payload])
+        const resumableSubs = Array.from(subs.values())
+
+        subs.clear()
+
+        setTimeout(() => {
+          // If we didn't purposely remove the socket and it's healthy, restart
+          // and re-send active subcriptions
+          if (
+            this.engine.Network.pool.has(socket.url) &&
+            socket.status !== Socket.STATUS.ERROR &&
+            !socket.meta.error
+          ) {
+            if (resumableSubs.length > 0) {
+              info(`Resuming ${resumableSubs.length} subscriptions on ${socket.url}`)
+            }
+
+            for (const payload of resumableSubs) {
+              socket.send(["REQ", ...payload])
+            }
           }
-        }
+        }, 1000)
       })
     })
   }

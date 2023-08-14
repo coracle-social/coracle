@@ -49,7 +49,7 @@
       })}>
       <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/channels">
         <i class="fa fa-envelope mr-2" /> Messages
-        {#if $hasNewDirectMessagesNip24}
+        {#if $hasNewDirectMessagesNip24 || $hasNewDirectMessagesNip04}
           <div
             class="absolute left-7 top-2 h-2 w-2 rounded border border-solid border-white bg-accent" />
         {/if}

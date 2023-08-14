@@ -5,7 +5,7 @@ import {nip19} from "nostr-tools"
 import {navigate} from "svelte-routing"
 import {writable} from "svelte/store"
 import {whereEq, omit, filter, pluck, sortBy, slice} from "ramda"
-import {hash, sleep, doPipe} from "hurdak"
+import {hash, sleep, doPipe, shuffle} from "hurdak"
 import {warn} from "src/util/logger"
 import {now} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
@@ -92,10 +92,13 @@ setInterval(() => {
   const userRelays = new Set(user.getRelayUrls())
   const $slowConnections = []
 
-  // Prune connections we haven't used in a while
+  // Prune connections we haven't used in a while, clear errors periodically,
+  // and keep track of slow connections
   for (const [url, socket] of Network.pool.data.entries()) {
     if (socket.meta.last_activity < now() - 60) {
-      Network.pool.get(url).disconnect()
+      socket.disconnect()
+    } else if (socket.lastError < Date.now() - 10_000) {
+      socket.clearError()
     } else if (userRelays.has(url) && socket.meta.quality < 0.3) {
       $slowConnections.push(url)
     }
@@ -230,7 +233,8 @@ export const publishWithToast = async (
 // Feeds
 
 export const compileFilter = (filter: DynamicFilter): Filter => {
-  const getAuthors = (pubkeys: string[]) => (pubkeys.length > 0 ? pubkeys : Env.DEFAULT_FOLLOWS)
+  const getAuthors = (pubkeys: string[]) =>
+    shuffle(pubkeys.length > 0 ? pubkeys : (Env.DEFAULT_FOLLOWS as string[])).slice(0, 1024)
 
   if (filter.authors === "global") {
     filter = omit(["authors"], filter)
