@@ -111,6 +111,7 @@ setInterval(() => {
 // Synchronization from events to state
 
 let listener
+let timeout
 
 export const listenForNotifications = async () => {
   const pubkey = Keys.pubkey.get()
@@ -141,6 +142,10 @@ export const listenForNotifications = async () => {
       {kinds: noteKinds, "#e": eventIds, limit: 1},
     ],
   })
+
+  clearTimeout(timeout)
+
+  timeout = setTimeout(listenForNotifications, 60_000)
 }
 
 export const loadAppData = async () => {
@@ -158,7 +163,7 @@ export const loadAppData = async () => {
     relays: user.getRelayUrls("read"),
     filter: [
       {kinds: [4], authors: [pubkey]},
-      {kinds: [4], "#p": [pubkey]},
+      {kinds: [4, 1059], "#p": [pubkey]},
       {kinds: noteKinds, "#p": [pubkey]},
     ],
   })

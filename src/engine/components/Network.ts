@@ -1,5 +1,5 @@
 import {verifySignature, matchFilters} from "nostr-tools"
-import {Pool, Plex, Relays, Executor, Socket} from "paravel"
+import {Pool, Plex, Relays, Executor} from "paravel"
 import {noop, ensurePlural, union, difference} from "hurdak"
 import {warn, error, info} from "src/util/logger"
 import {normalizeRelayUrl} from "src/util/nostr"
@@ -68,10 +68,14 @@ export class Network {
     // have a connection to the multiplexer open, in which case we're probably doing
     // AUTH with a single relay.
     if (muxUrl && (urls.length > 1 || this.pool.has(muxUrl))) {
-      const socket = this.pool.get(muxUrl)
+      const connection = this.pool.get(muxUrl)
 
-      if (socket.status !== Socket.STATUS.ERROR) {
-        target = new Plex(urls, socket)
+      connection.ensureConnected({
+        shouldReconnect: connection.meta.lastClose < Date.now() - 30_000,
+      })
+
+      if (connection.isHealthy()) {
+        target = new Plex(urls, connection)
       }
     }
 

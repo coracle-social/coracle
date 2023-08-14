@@ -13,7 +13,7 @@
 
   const showLists = () => modal.push({type: "list/list"})
 
-  const showLogin = () => modal.push({type: 'login/intro'})
+  const showLogin = () => modal.push({type: "login/intro"})
 
   const loadListFeed = naddr => {
     const list = engine.Content.lists.key(naddr).get()
@@ -25,7 +25,7 @@
       relays = urls
     }
 
-    filter = {kinds: [1, 1985], authors: "global"} as DynamicFilter
+    filter = {kinds: noteKinds, authors: "global"} as DynamicFilter
 
     if (authors.length > 0) {
       filter = {...filter, authors}

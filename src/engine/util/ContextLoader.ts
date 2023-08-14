@@ -1,18 +1,6 @@
 import {matchFilters} from "nostr-tools"
 import {throttle} from "throttle-debounce"
-import {
-  omit,
-  pick,
-  pluck,
-  identity,
-  flatten,
-  without,
-  groupBy,
-  sortBy,
-  prop,
-  uniqBy,
-  reject,
-} from "ramda"
+import {omit, pluck, identity, flatten, without, groupBy, sortBy, prop, uniqBy, reject} from "ramda"
 import {ensurePlural, batch, union, chunk} from "hurdak"
 import {now, pushToKey} from "src/util/misc"
 import {findReplyId, Tags, noteKinds} from "src/util/nostr"
@@ -65,8 +53,8 @@ export class ContextLoader {
     }
   }
 
-  getAllSubs(only: string[] = []) {
-    return flatten(Object.values(only ? pick(only, this.subs) : this.subs))
+  getAllSubs() {
+    return flatten(Object.values(this.subs))
   }
 
   getReplyKinds() {
@@ -221,14 +209,15 @@ export class ContextLoader {
 
       const events = flatten(pluck("events", groups as any[])).filter(this.isTextNote) as Event[]
 
-      for (const c of chunk(256, events)) {
-        Network.subscribe({
-          timeout: 5000,
-          relays: this.mergeHints(c.map(e => Nip65.getReplyHints(this.getRelayLimit(), e))),
-          filter: {kinds: this.getReplyKinds(), "#e": pluck("id", c as Event[])},
-
-          onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: depth - 1})),
-        })
+      for (const c of chunk(1024, events)) {
+        this.addSubs("context", [
+          Network.subscribe({
+            timeout: 5000,
+            relays: this.mergeHints(c.map(e => Nip65.getReplyHints(this.getRelayLimit(), e))),
+            filter: {kinds: this.getReplyKinds(), "#e": pluck("id", c as Event[])},
+            onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: depth - 1})),
+          }),
+        ])
       }
     }
   })
@@ -249,7 +238,7 @@ export class ContextLoader {
         .filter(this.isTextNote)
         .flatMap(e => findNotes(contextByParentId[e.id] || []).concat(e))
 
-    for (const c of chunk(256, findNotes(this.data.get()))) {
+    for (const c of chunk(1024, findNotes(this.data.get()))) {
       this.addSubs("listeners", [
         Network.subscribe({
           relays: this.mergeHints(c.map(e => Nip65.getReplyHints(this.getRelayLimit(), e))),

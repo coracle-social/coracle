@@ -19,7 +19,6 @@ export {Outbox} from "./components/Outbox"
 export {Settings} from "./components/Settings"
 
 export {User} from "./util/User"
-export {RelayStats} from "./util/RelayStats"
 export {FeedLoader} from "./util/FeedLoader"
 export {ThreadLoader} from "./util/ThreadLoader"
 export {ContextLoader} from "./util/ContextLoader"

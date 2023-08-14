@@ -8,6 +8,8 @@
 - [x] Limit concurrent subscriptions
 - [x] Re-introduce shuffle+slice of authors
 - [x] Re-connect to sockets with an error after a while
+- [x] Re-write connection management entirely
+- [x] Fix memory leak in context loader
 
 # 0.3.2
 

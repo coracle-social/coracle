@@ -1,5 +1,5 @@
 import {identity} from "ramda"
-import {Engine, User, StorageAdapter, PubkeyLoader, RelayStats} from "src/engine"
+import {Engine, User, StorageAdapter, PubkeyLoader} from "src/engine"
 
 const IMGPROXY_URL = import.meta.env.VITE_IMGPROXY_URL
 
@@ -42,7 +42,6 @@ const engine = new Engine({
 
 export const storage = new StorageAdapter(engine)
 export const pubkeyLoader = new PubkeyLoader(engine)
-export const relayStats = new RelayStats(engine)
 export const user = new User(engine)
 
 export default engine
