@@ -10,7 +10,7 @@
 
   const handle = Nip05.getHandle(pubkey)
   const npub = nip19.npubEncode(pubkey)
-  const relays = Nip65.getPubkeyHints(Settings.getSetting("relay_limit"), pubkey)
+  const relays = Nip65.getPubkeyHints(Settings.getSetting("relay_limit"), pubkey, "write")
   const nprofile = nip19.nprofileEncode({pubkey, relays})
 </script>
 

@@ -9,6 +9,7 @@
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {
     user,
+    Settings,
     Nip04,
     Nip65,
     Outbox,
@@ -25,21 +26,23 @@
   export let entity
 
   const pubkey = toHex(entity)
+  const relayLimit = Settings.getSetting("relay_limit")
   const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
   const messages = Nip04.messages.derived(filter(whereEq({contact: pubkey})))
 
   user.setContactLastChecked(pubkey)
 
   const getRelays = () =>
-    Nip65.mergeHints(3, [
-      Nip65.getPubkeyHints(3, pubkey),
-      Nip65.getPubkeyHints(3, Keys.pubkey.get()),
+    Nip65.mergeHints(relayLimit, [
+      Nip65.getPubkeyHints(relayLimit, pubkey, "read"),
+      Nip65.getPubkeyHints(relayLimit, Keys.pubkey.get(), "read"),
     ])
 
   const sendMessage = async content => {
     const cyphertext = await Crypt.encrypt(pubkey, content)
+    const event = Builder.createDirectMessage(pubkey, cyphertext)
 
-    await Outbox.publish(Builder.createDirectMessage(pubkey, cyphertext), getRelays())
+    await Outbox.publish(event, getRelays())
   }
 
   onMount(() => {

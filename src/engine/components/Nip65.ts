@@ -7,6 +7,11 @@ import type {Engine} from "src/engine/Engine"
 import type {Event, Relay, RelayInfo, RelayPolicy, RelayPolicyEntry} from "src/engine/types"
 import {derived, collection} from "src/engine/util/store"
 
+export enum Mode {
+  Read = "read",
+  Write = "write",
+}
+
 export class Nip65 {
   engine: Engine
   relays = collection<Relay>("url")
@@ -73,6 +78,11 @@ export class Nip65 {
   getPubkeyRelayUrls = (pubkey: string, mode: string = null) =>
     pluck("url", this.getPubkeyRelays(pubkey, mode))
 
+  getUserRelays = (mode: string = null) =>
+    this.getPubkeyRelays(this.engine.Keys.stateKey.get(), mode)
+
+  getUserRelayUrls = (mode: string = null) => pluck("url", this.getUserRelays(mode))
+
   // Smart relay selection
   //
   // From Mike Dilger:
@@ -87,14 +97,14 @@ export class Nip65 {
   //    doesn't need to see.
   // 5) Advertise relays — write and read back your own relay list
 
-  selectHints = (limit: number, hints: Iterable<string>) => {
+  selectHints = (limit: number | null, hints: Iterable<string>) => {
     const seen = new Set()
     const ok = []
     const bad = []
 
     for (const url of chain(
       hints,
-      this.getPubkeyRelayUrls(this.engine.Keys.pubkey.get(), "write"),
+      this.getUserRelayUrls(Mode.Read),
       this.engine.Env.DEFAULT_RELAYS
     )) {
       if (seen.has(url)) {
@@ -112,13 +122,13 @@ export class Nip65 {
         ok.push(url)
       }
 
-      if (ok.length > limit) {
+      if (limit && ok.length > limit) {
         break
       }
     }
 
     // If we don't have enough hints, use the broken ones
-    return ok.concat(bad).slice(0, limit)
+    return ok.concat(bad).slice(0, limit || Infinity)
   }
 
   hintSelector =
@@ -126,26 +136,19 @@ export class Nip65 {
     (limit: number, ...args: any[]) =>
       this.selectHints(limit, generateHints.call(this, ...args))
 
-  getPubkeyHints = this.hintSelector(function* (this: Nip65, pubkey: string, mode = "write") {
-    const other = mode === "write" ? "read" : "write"
-
+  getPubkeyHints = this.hintSelector(function* (this: Nip65, pubkey: string, mode: Mode) {
     yield* this.getPubkeyRelayUrls(pubkey, mode)
-    yield* this.getPubkeyRelayUrls(pubkey, other)
   })
 
   getEventHints = this.hintSelector(function* (this: Nip65, event: Event) {
-    yield* event.seen_on || []
-    yield* this.getPubkeyHints(null, event.pubkey)
+    yield* this.getPubkeyRelayUrls(event.pubkey, Mode.Write)
   })
 
   // If we're looking for an event's children, the read relays the author has
   // advertised would be the most reliable option, since well-behaved clients
-  // will write replies there. However, this may include spam, so we may want
-  // to read from the current user's network's read relays instead.
+  // will write replies there.
   getReplyHints = this.hintSelector(function* (this: Nip65, event) {
-    yield* this.getPubkeyRelayUrls(event.pubkey, "write")
-    yield* event.seen_on || []
-    yield* this.getPubkeyRelayUrls(event.pubkey, "read")
+    yield* this.getPubkeyRelayUrls(event.pubkey, Mode.Read)
   })
 
   // If we're looking for an event's parent, tags are the most reliable hint,
@@ -154,8 +157,7 @@ export class Nip65 {
     const parentId = findReplyId(event)
 
     yield* Tags.from(event).equals(parentId).relays()
-    yield* event.seen_on || []
-    yield* this.getPubkeyHints(null, event.pubkey, "write")
+    yield* this.getPubkeyRelayUrls(event.pubkey, Mode.Read)
   })
 
   // If we're replying or reacting to an event, we want the author to know, as well as
@@ -163,11 +165,11 @@ export class Nip65 {
   // relays. Limit how many per pubkey we publish to though. We also want to advertise
   // our content to our followers, so publish to our write relays as well.
   getPublishHints = (limit: number, event: Event, extraRelays: string[] = []) => {
-    const tags = Tags.from(event)
-    const pubkeys = tags.type("p").values().all().concat(event.pubkey)
-    const hintGroups = pubkeys.map(pubkey => this.getPubkeyHints(3, pubkey, "read"))
+    const pubkeys = Tags.from(event).type("p").values().all()
+    const hintGroups = pubkeys.map(pubkey => this.getPubkeyRelayUrls(pubkey, Mode.Read))
+    const authorRelays = this.getPubkeyRelayUrls(event.pubkey, Mode.Write)
 
-    return this.mergeHints(limit, hintGroups.concat([extraRelays]))
+    return this.mergeHints(limit, hintGroups.concat([extraRelays, authorRelays]))
   }
 
   mergeHints = (limit: number, groups: string[][]) => {
@@ -230,8 +232,8 @@ export class Nip65 {
           .type("r")
           .all()
           .map(([_, url, mode]) => {
-            const write = !mode || mode === "write"
-            const read = !mode || mode === "read"
+            const write = !mode || mode === Mode.Write
+            const read = !mode || mode === Mode.Read
 
             if (!write && !read) {
               warn(`Encountered unknown relay mode: ${mode}`)

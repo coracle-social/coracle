@@ -1,4 +1,4 @@
-import {propEq, find, reject} from "ramda"
+import {propEq, defaultTo, find, reject} from "ramda"
 import {nip19, getPublicKey, getSignature, generatePrivateKey} from "nostr-tools"
 import NDK, {NDKEvent, NDKNip46Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk"
 import {switcherFn} from "hurdak"
@@ -9,10 +9,15 @@ import type {Engine} from "src/engine/Engine"
 export class Keys {
   pubkey = writable<string | null>(null)
   keyState = writable<KeyState[]>([])
+
+  stateKey = this.pubkey.derived(defaultTo("anonymous"))
+
   current = this.pubkey.derived(k => this.getKeyState(k))
+
   canSign = this.current.derived(keyState =>
     ["bunker", "privkey", "extension"].includes(keyState?.method)
   )
+
   canUseGiftWrap = this.current.derived(keyState => keyState?.method === "privkey")
 
   getKeyState = (k: string) => find(propEq("pubkey", k), this.keyState.get())

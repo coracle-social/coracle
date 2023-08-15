@@ -23,6 +23,7 @@
 
   const tabs = ["notes", "likes", Env.FORCE_RELAYS.length === 0 && "relays"].filter(identity)
   const pubkey = toHex(npub)
+  const relayLimit = Settings.getSetting("relay_limit")
   const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
   const {rgb, rgba} = getThemeBackgroundGradient()
 
@@ -30,7 +31,10 @@
   let loading = true
 
   $: ownRelays = Nip65.getPubkeyRelays(pubkey)
-  $: relays = Nip65.getPubkeyHints(10, pubkey)
+  $: mergedRelays = Nip65.mergeHints(relayLimit, [
+    relays,
+    Nip65.getPubkeyHints(relayLimit, pubkey, "write"),
+  ])
   $: banner = Settings.imgproxy($profile.banner, {w: window.innerWidth})
 
   info("Person", npub, $profile)
@@ -78,9 +82,9 @@
   <Tabs {tabs} {activeTab} {setActiveTab} />
 
   {#if activeTab === "notes"}
-    <PersonNotes {pubkey} {relays} />
+    <PersonNotes {pubkey} relays={mergedRelays} />
   {:else if activeTab === "likes"}
-    <PersonLikes {pubkey} {relays} />
+    <PersonLikes {pubkey} relays={mergedRelays} />
   {:else if activeTab === "relays"}
     {#if ownRelays.length > 0}
       <PersonRelays relays={ownRelays} />

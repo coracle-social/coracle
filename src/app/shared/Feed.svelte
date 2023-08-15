@@ -57,7 +57,7 @@
 
     const limit = Settings.getSetting("relay_limit")
     const authors = (compileFilter(filter).authors || []).concat(Keys.pubkey.get())
-    const hints = authors.map(pubkey => Nip65.getPubkeyHints(limit, pubkey))
+    const hints = authors.map(pubkey => Nip65.getPubkeyHints(limit, pubkey, "write"))
 
     return Nip65.mergeHints(limit, hints)
   }

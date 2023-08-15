@@ -1,4 +1,4 @@
-import {nth, when, defaultTo, prop, uniq, pluck, fromPairs, whereEq, find, reject} from "ramda"
+import {nth, when, prop, uniq, pluck, fromPairs, whereEq, find, reject} from "ramda"
 import {now} from "src/util/misc"
 import {appDataKeys, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
 import {derived} from "src/engine/util/store"
@@ -17,20 +17,16 @@ export class User {
 
     const {Keys, Nip02} = engine
 
-    this.stateKey = Keys.pubkey.derived(defaultTo("anonymous"))
-
     this.followsSet = derived(
-      [Nip02.graph.mapStore, this.stateKey],
+      [Nip02.graph.mapStore, Keys.stateKey],
       ([graph, stateKey]) => new Set(graph.get(stateKey)?.petnames.map(nth(1)))
     )
 
     this.mutesSet = derived(
-      [Nip02.graph.mapStore, this.stateKey],
+      [Nip02.graph.mapStore, Keys.stateKey],
       ([graph, stateKey]) => new Set(graph.get(stateKey)?.mutes.map(nth(1)))
     )
   }
-
-  getStateKey = () => this.stateKey.get()
 
   // Settings
 
@@ -61,9 +57,11 @@ export class User {
 
   // Nip65
 
-  getRelays = (mode?: string) => this.engine.Nip65.getPubkeyRelays(this.getStateKey(), mode)
+  getRelays = (mode?: string) =>
+    this.engine.Nip65.getPubkeyRelays(this.engine.Keys.stateKey.get(), mode)
 
-  getRelayUrls = (mode?: string) => this.engine.Nip65.getPubkeyRelayUrls(this.getStateKey(), mode)
+  getRelayUrls = (mode?: string) =>
+    this.engine.Nip65.getPubkeyRelayUrls(this.engine.Keys.stateKey.get(), mode)
 
   setRelays = (relays: RelayPolicyEntry[]) => {
     if (this.engine.Keys.canSign.get()) {
@@ -72,7 +70,10 @@ export class User {
         relays.map(r => r.url)
       )
     } else {
-      this.engine.Nip65.setPolicy({pubkey: this.getStateKey(), created_at: now()}, relays)
+      this.engine.Nip65.setPolicy(
+        {pubkey: this.engine.Keys.stateKey.get(), created_at: now()},
+        relays
+      )
     }
   }
 
@@ -87,26 +88,27 @@ export class User {
 
   // Nip02
 
-  getPetnames = () => this.engine.Nip02.getPetnames(this.getStateKey())
+  getPetnames = () => this.engine.Nip02.getPetnames(this.engine.Keys.stateKey.get())
 
-  getMutedTags = () => this.engine.Nip02.getMutedTags(this.getStateKey())
+  getMutedTags = () => this.engine.Nip02.getMutedTags(this.engine.Keys.stateKey.get())
 
-  getFollowsSet = () => this.engine.Nip02.getFollowsSet(this.getStateKey())
+  getFollowsSet = () => this.engine.Nip02.getFollowsSet(this.engine.Keys.stateKey.get())
 
-  getMutesSet = () => this.engine.Nip02.getMutesSet(this.getStateKey())
+  getMutesSet = () => this.engine.Nip02.getMutesSet(this.engine.Keys.stateKey.get())
 
-  getFollows = () => this.engine.Nip02.getFollows(this.getStateKey())
+  getFollows = () => this.engine.Nip02.getFollows(this.engine.Keys.stateKey.get())
 
-  getMutes = () => this.engine.Nip02.getMutes(this.getStateKey())
+  getMutes = () => this.engine.Nip02.getMutes(this.engine.Keys.stateKey.get())
 
-  getNetworkSet = () => this.engine.Nip02.getNetworkSet(this.getStateKey())
+  getNetworkSet = () => this.engine.Nip02.getNetworkSet(this.engine.Keys.stateKey.get())
 
-  getNetwork = () => this.engine.Nip02.getNetwork(this.getStateKey())
+  getNetwork = () => this.engine.Nip02.getNetwork(this.engine.Keys.stateKey.get())
 
-  isFollowing = (pubkey: string) => this.engine.Nip02.isFollowing(this.getStateKey(), pubkey)
+  isFollowing = (pubkey: string) =>
+    this.engine.Nip02.isFollowing(this.engine.Keys.stateKey.get(), pubkey)
 
   isIgnoring = (pubkeyOrEventId: string) =>
-    this.engine.Nip02.isIgnoring(this.getStateKey(), pubkeyOrEventId)
+    this.engine.Nip02.isIgnoring(this.engine.Keys.stateKey.get(), pubkeyOrEventId)
 
   setProfile = ($profile: Record<string, any>) =>
     this.engine.Outbox.publish(this.engine.Builder.setProfile($profile), this.getRelayUrls("write"))
@@ -118,7 +120,7 @@ export class User {
         this.getRelayUrls("write")
       )
     } else {
-      this.engine.Nip02.graph.key(this.getStateKey()).merge({
+      this.engine.Nip02.graph.key(this.engine.Keys.stateKey.get()).merge({
         updated_at: now(),
         petnames_updated_at: now(),
         petnames: $petnames,
@@ -151,7 +153,7 @@ export class User {
         this.getRelayUrls("write")
       )
     } else {
-      this.engine.Nip02.graph.key(this.getStateKey()).merge({
+      this.engine.Nip02.graph.key(this.engine.Keys.stateKey.get()).merge({
         updated_at: now(),
         mutes_updated_at: now(),
         mutes: $mutes,
@@ -170,7 +172,9 @@ export class User {
   // Lists
 
   getLists = (f?: (l: List) => boolean) =>
-    this.engine.Content.getLists(l => l.pubkey === this.getStateKey() && (f ? f(l) : true))
+    this.engine.Content.getLists(
+      l => l.pubkey === this.engine.Keys.stateKey.get() && (f ? f(l) : true)
+    )
 
   putList = (name: string, params: string[][], relays: string[]) =>
     this.engine.Outbox.publish(

@@ -3,11 +3,13 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import TopicActions from "src/app/shared/TopicActions.svelte"
-  import {Nip65, Keys} from "src/app/engine"
+  import {Nip65, Settings, Keys} from "src/app/engine"
 
   export let topic
 
-  const relays = Nip65.getPubkeyHints(3, Keys.pubkey.get(), "read")
+  const pubkey = Keys.pubkey.get()
+  const limit = Settings.getSetting("relay_limit")
+  const relays = Nip65.getPubkeyHints(limit, pubkey, "read")
   const filter = {kinds: [1], "#t": [topic]}
 </script>
 

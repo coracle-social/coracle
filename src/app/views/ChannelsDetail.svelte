@@ -25,6 +25,7 @@
 
   export let entity
 
+  const relayLimit = Settings.getSetting("relay_limit")
   const userPubkey = Keys.pubkey.get()
   const channel = Nip24.channels.key(entity)
   const messages = Nip24.messages.derived(filter(whereEq({channel: entity})))
@@ -34,12 +35,6 @@
   if ($channel) {
     user.setNip24ChannelLastChecked(entity)
   }
-
-  const getRelays = () =>
-    Nip65.mergeHints(
-      Settings.getSetting("relay_limit"),
-      pubkeys.map(pubkey => Nip65.getPubkeyHints(Settings.getSetting("relay_limit"), pubkey))
-    )
 
   const sendMessage = async content => {
     const {privkey} = Keys.current.get()
@@ -53,8 +48,9 @@
     for (const pubkey of pubkeys.concat(userPubkey)) {
       const wrapperTags = [Builder.mention(pubkey)]
       const event = wrap(privkey, pubkey, generatePrivateKey(), rumor, wrapperTags)
+      const relays = Nip65.getPubkeyHints(relayLimit, pubkey, "read")
 
-      Outbox.publish(event, getRelays())
+      Outbox.publish(event, relays)
     }
   }
 
@@ -62,7 +58,7 @@
 
   onMount(() => {
     const sub = Network.subscribe({
-      relays: getRelays(),
+      relays: Nip65.getPubkeyHints(relayLimit, userPubkey, "read"),
       filter: [{kinds: [1059], "#p": [userPubkey]}],
     })
 

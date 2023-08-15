@@ -27,12 +27,13 @@ module.exports = {
     "a11y-click-events-have-key-events": "off",
     "a11y-autofocus": "off",
 
-    "no-unused-vars": ["error", {args: "none"}],
+    "no-unused-vars": "off",
+    "no-useless-escape": "off",
     "no-async-promise-executor": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-extra-semi": "off",
     "@typescript-eslint/ban-ts-comment": "off",
-    "no-useless-escape": "off",
+    "@typescript-eslint/no-unused-vars": ["error", {args: "none"}],
   },
   ignorePatterns: ["*.svg"],
 }

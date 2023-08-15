@@ -27,7 +27,7 @@ export class Builder {
   getEventHint = (event: Event) => first(this.engine.Nip65.getEventHints(1, event)) || ""
 
   getPubkeyHint = (pubkey: string): string =>
-    first(this.engine.Nip65.getPubkeyHints(1, pubkey)) || ""
+    first(this.engine.Nip65.getPubkeyHints(1, pubkey, "write")) || ""
 
   getPubkeyPetname = (pubkey: string) => {
     const profile = this.engine.Directory.getProfile(pubkey)

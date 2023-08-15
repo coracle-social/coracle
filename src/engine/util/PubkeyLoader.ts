@@ -56,7 +56,7 @@ export class PubkeyLoader {
 
       return this.engine.Nip65.mergeHints(
         limit,
-        chunk.map(pubkey => this.engine.Nip65.getPubkeyHints(limit, pubkey))
+        chunk.map(pubkey => this.engine.Nip65.getPubkeyHints(limit, pubkey, "write"))
       )
     }
 
