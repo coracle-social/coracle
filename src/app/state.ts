@@ -157,17 +157,6 @@ export const loadAppData = async () => {
   // Load their network
   pubkeyLoader.load(user.getFollows())
 
-  // Load their messages and notifications
-  Network.subscribe({
-    timeout: 10_000,
-    relays: user.getRelayUrls("read"),
-    filter: [
-      {kinds: [4], authors: [pubkey]},
-      {kinds: [4, 1059], "#p": [pubkey]},
-      {kinds: noteKinds, "#p": [pubkey]},
-    ],
-  })
-
   // Start our listener
   listenForNotifications()
 }

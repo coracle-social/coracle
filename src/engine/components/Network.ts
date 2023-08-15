@@ -1,4 +1,3 @@
-import {verifySignature, matchFilters} from "nostr-tools"
 import {Pool, Plex, Relays, Executor} from "paravel"
 import {noop, ensurePlural, union, difference} from "hurdak"
 import {warn, error, info} from "src/util/logger"
@@ -74,7 +73,7 @@ export class Network {
         shouldReconnect: connection.meta.lastClose < Date.now() - 30_000,
       })
 
-      if (connection.isHealthy()) {
+      if (connection.socket.isHealthy()) {
         target = new Plex(urls, connection)
       }
     }
@@ -167,72 +166,24 @@ export class Network {
     timeout,
     shouldProcess = true,
   }: SubscribeOpts) => {
-    const urls = getUrls(relays)
-    const executor = this.getExecutor(urls)
-    const filters = ensurePlural(filter)
-    const subscription = new Subscription()
-    const seen = new Map()
-    const eose = new Set()
-
-    info(`Starting subscription with ${relays.length} relays`, {filters, relays})
-
-    subscription.on("close", () => {
-      sub.unsubscribe()
-      executor.target.cleanup()
-      onClose?.()
+    const subscription = new Subscription({
+      executor: this.getExecutor(getUrls(relays)),
+      filters: ensurePlural(filter),
+      timeout,
+      relays,
     })
 
-    if (timeout) {
-      setTimeout(subscription.close, timeout)
-    }
+    info(`Starting subscription with ${relays.length} relays`, {filter, relays})
 
-    const sub = executor.subscribe(filters, {
-      onEvent: (url: string, event: Event) => {
-        const seen_on = seen.get(event.id)
+    if (onEose) subscription.on("eose", onEose)
+    if (onClose) subscription.on("close", onClose)
 
-        if (seen_on) {
-          if (!seen_on.includes(url)) {
-            seen_on.push(url)
-          }
+    subscription.on("event", event => {
+      if (shouldProcess) {
+        this.engine.Events.queue.push(event)
+      }
 
-          return
-        }
-
-        Object.assign(event, {
-          seen_on: [url],
-          content: event.content || "",
-        })
-
-        seen.set(event.id, event.seen_on)
-
-        try {
-          if (!verifySignature(event)) {
-            return
-          }
-        } catch (e) {
-          console.error(e)
-
-          return
-        }
-
-        if (!matchFilters(filters, event)) {
-          return
-        }
-
-        if (shouldProcess) {
-          this.engine.Events.queue.push(event)
-        }
-
-        onEvent?.(event)
-      },
-      onEose: (url: string) => {
-        onEose?.(url)
-        eose.add(url)
-
-        if (timeout && eose.size === relays.length) {
-          subscription.close()
-        }
-      },
+      onEvent?.(event)
     })
 
     return subscription

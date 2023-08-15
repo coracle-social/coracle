@@ -16,7 +16,6 @@
 
   const dispatch = createEventDispatcher()
 
-  $: _href = external ? href : null
   $: target = external ? "_blank" : null
 
   let className
@@ -49,7 +48,7 @@
       e.stopPropagation()
     }
 
-    if (href && !external) {
+    if (href && tag !== "a") {
       navigate(href)
     }
 
@@ -58,7 +57,7 @@
 </script>
 
 {#if tag === "a"}
-  <a class={className} on:click={onClick} href={_href} {target}>
+  <a class={className} on:click={onClick} {href} {target}>
     <slot />
   </a>
 {:else if tag === "button"}

@@ -61,7 +61,7 @@
       <Anchor
         type="unstyled"
         class="fa fa-arrow-left cursor-pointer text-2xl"
-        on:click={() => history.back()} />
+        href="/conversations" />
       <PersonCircle {pubkey} size={10} />
     </div>
     <div class="flex h-12 w-full flex-col overflow-hidden pt-px">

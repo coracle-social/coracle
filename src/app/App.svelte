@@ -11,21 +11,9 @@
   import {isNil, find, last} from "ramda"
   import {Storage, seconds, Fetch, shuffle} from "hurdak"
   import {tryFetch, hexToBech32, bech32ToHex, now} from "src/util/misc"
-  import {userKinds} from "src/util/nostr"
   import {default as engine} from "src/app/engine"
-  import {
-    Keys,
-    Nip65,
-    pubkeyLoader,
-    user,
-    Env,
-    Network,
-    Builder,
-    Outbox,
-    Settings,
-    storage,
-  } from "src/app/engine"
-  import {listenForNotifications} from "src/app/state"
+  import {Keys, Nip65, user, Env, Network, Builder, Outbox, Settings, storage} from "src/app/engine"
+  import {loadAppData} from "src/app/state"
   import {theme, getThemeVariables, appName, modal} from "src/partials/state"
   import {logUsage} from "src/app/state"
   import SideNav from "src/app/SideNav.svelte"
@@ -168,14 +156,11 @@
     }
   })
 
-  storage.ready.then(() => {
-    const pubkey = Keys.pubkey.get()
+  const {pubkey} = Keys
 
-    // Make sure the user's stuff is loaded, but don't call loadAppData
-    // since that reloads messages and stuff
-    if (pubkey) {
-      pubkeyLoader.load(pubkey, {force: true, kinds: userKinds})
-      listenForNotifications()
+  storage.ready.then(() => {
+    if ($pubkey) {
+      loadAppData()
     }
 
     const interval = setInterval(async () => {
@@ -208,8 +193,6 @@
       clearInterval(interval)
     }
   })
-
-  const {pubkey} = Keys
 </script>
 
 <TypedRouter url={pathname}>

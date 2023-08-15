@@ -76,7 +76,7 @@ export class PubkeyLoader {
 
     await Promise.all(
       pluck(
-        "complete",
+        "result",
         chunk(256, pubkeys).map((chunk: string[]) =>
           this.engine.Network.subscribe({
             relays: getChunkRelays(chunk),
