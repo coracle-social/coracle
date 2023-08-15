@@ -209,7 +209,7 @@ export class ContextLoader {
 
       const events = flatten(pluck("events", groups as any[])).filter(this.isTextNote) as Event[]
 
-      for (const c of chunk(1024, events)) {
+      for (const c of chunk(256, events)) {
         this.addSubs("context", [
           Network.subscribe({
             timeout: 5000,
@@ -238,7 +238,7 @@ export class ContextLoader {
         .filter(this.isTextNote)
         .flatMap(e => findNotes(contextByParentId[e.id] || []).concat(e))
 
-    for (const c of chunk(1024, findNotes(this.data.get()))) {
+    for (const c of chunk(256, findNotes(this.data.get()))) {
       this.addSubs("listeners", [
         Network.subscribe({
           relays: this.mergeHints(c.map(e => Nip65.getReplyHints(this.getRelayLimit(), e))),

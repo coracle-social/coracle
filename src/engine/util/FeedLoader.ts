@@ -27,6 +27,7 @@ export class FeedLoader {
   context: ContextLoader
   subs: Array<{close: () => void}> = []
   feed = writable<DisplayEvent[]>([])
+  stream = writable<Event[]>([])
   deferred: Event[] = []
   cursor: MultiCursor
   ready: Promise<void>
@@ -52,9 +53,10 @@ export class FeedLoader {
         this.engine.Network.subscribe({
           relays: opts.relays,
           filter: ensurePlural(opts.filter).map(assoc("since", this.since)),
-          onEvent: batch(1000, (context: Event[]) =>
+          onEvent: batch(1000, (context: Event[]) => {
             this.context.addContext(context, {shouldLoadParents: true, depth: opts.depth})
-          ),
+            this.stream.update($stream => $stream.concat(context))
+          }),
         }),
       ])
     }
@@ -146,6 +148,16 @@ export class FeedLoader {
     ])
 
     this.addToFeed(ok)
+  }
+
+  loadStream() {
+    this.stream.update($stream => {
+      this.feed.update($feed => {
+        return uniqBy(prop("id"), this.context.applyContext($stream).concat($feed))
+      })
+
+      return []
+    })
   }
 
   deferReactions = (notes: Event[]) => {
