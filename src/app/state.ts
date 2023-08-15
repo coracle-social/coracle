@@ -237,16 +237,16 @@ export const publishWithToast = async (
 
 // Feeds
 
-export const compileFilter = (filter: DynamicFilter): Filter => {
-  const getAuthors = (pubkeys: string[]) =>
-    shuffle(pubkeys.length > 0 ? pubkeys : (Env.DEFAULT_FOLLOWS as string[])).slice(0, 1024)
+export const getAuthorsWithDefaults = (pubkeys: string[]) =>
+  shuffle(pubkeys.length > 0 ? pubkeys : (Env.DEFAULT_FOLLOWS as string[])).slice(0, 1024)
 
+export const compileFilter = (filter: DynamicFilter): Filter => {
   if (filter.authors === "global") {
     filter = omit(["authors"], filter)
   } else if (filter.authors === "follows") {
-    filter = {...filter, authors: getAuthors(user.getFollows())}
+    filter = {...filter, authors: getAuthorsWithDefaults(user.getFollows())}
   } else if (filter.authors === "network") {
-    filter = {...filter, authors: getAuthors(user.getNetwork())}
+    filter = {...filter, authors: getAuthorsWithDefaults(user.getNetwork())}
   }
 
   return filter as Filter

@@ -11,6 +11,7 @@
 - [x] Re-write connection management entirely
 - [x] Fix memory leak in context loader
 - [x] Fix loading new notes on feeds
+- [x] Fix anonymous chat list
 
 # 0.3.2
 

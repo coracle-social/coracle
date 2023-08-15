@@ -11,6 +11,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
   import {pubkeyLoader, Nip28, Nip65, Network, Keys, user} from "src/app/engine"
+  import {getAuthorsWithDefaults} from "src/app/state"
 
   let q = ""
   let results = []
@@ -50,23 +51,25 @@
 
   onMount(() => {
     const subs = []
-    const relays = Nip65.getPubkeyHints(3, Keys.pubkey.get(), "read")
+    const pubkey = Keys.pubkey.get()
+    const relays = Nip65.getPubkeyHints(3, pubkey, "read")
+    const authors = getAuthorsWithDefaults(user.getFollows())
+    const since = now() - seconds(1, "day")
+    const filter = [
+      {kinds: [40, 41], authors, limit: 100},
+      {limit: 100, kinds: [42], since, authors},
+    ]
+
+    if (pubkey) {
+      filter.push({kinds: [40, 41], authors: [pubkey]})
+    }
 
     // Pull some relevant channels by grabbing recent messages
     subs.push(
       Network.subscribe({
         relays,
+        filter,
         timeout: 2000,
-        filter: [
-          {kinds: [40, 41], authors: [Keys.pubkey.get()]},
-          {kinds: [40, 41], authors: user.getFollows(), limit: 100},
-          {
-            limit: 100,
-            kinds: [42],
-            since: now() - seconds(1, "day"),
-            authors: user.getFollows(),
-          },
-        ],
         onEvent: batch(500, events => {
           const channelIds = uniq(
             events.filter(propEq("kind", 42)).map(e => Tags.from(e).getMeta("e"))

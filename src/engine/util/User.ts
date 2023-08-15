@@ -49,12 +49,14 @@ export class User {
   }
 
   setAppData = async (d: string, content: any) => {
-    const v = await this.engine.Crypt.encryptJson(content)
+    if (this.engine.Keys.canSign.get()) {
+      const v = await this.engine.Crypt.encryptJson(content)
 
-    return this.engine.Outbox.publish(
-      this.engine.Builder.setAppData(d, v),
-      this.getRelayUrls("write")
-    )
+      return this.engine.Outbox.publish(
+        this.engine.Builder.setAppData(d, v),
+        this.getRelayUrls("write")
+      )
+    }
   }
 
   // Nip65
