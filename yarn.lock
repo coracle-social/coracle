@@ -4779,10 +4779,10 @@ pako@~1.0.5:
   resolved "https://registry.npmjs.org/pako/-/pako-1.0.11.tgz"
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
 
-paravel@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/paravel/-/paravel-0.3.0.tgz#6509afa829c22430f7f3073f5f65cd54e76f0e1a"
-  integrity sha512-o/E4nakh0Q+qKE7MyfGSm5EF5gXUSMQ85ur7ixF0MzivIac0KYAzxz2HZo/9hU+lbwgJSMh9or1vE3oBDihz1Q==
+paravel@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/paravel/-/paravel-0.3.1.tgz#c7672294b60966a10a1e2c0c56f0ee14d7cb9a22"
+  integrity sha512-YYYAP9RQW6BQLZLrzl5rJx6j9uPZFM+zqr8rf8JgYLswHaJOTeqlAnBiSLSpMtobu3ZkOImUjEBSQSEBk6neNg==
   dependencies:
     events "^3.3.0"
     husky "^8.0.3"

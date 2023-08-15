@@ -207,7 +207,10 @@ export class ContextLoader {
         continue
       }
 
-      const events = flatten(pluck("events", groups as any[])).filter(this.isTextNote) as Event[]
+      const events = uniqBy(
+        prop("id"),
+        flatten(pluck("events", groups as any[])).filter(this.isTextNote)
+      ) as Event[]
 
       for (const c of chunk(256, events)) {
         this.addSubs("context", [
@@ -234,9 +237,12 @@ export class ContextLoader {
     const contextByParentId = groupBy(findReplyId, this.data.get())
 
     const findNotes = (events: Event[]): Event[] =>
-      events
-        .filter(this.isTextNote)
-        .flatMap(e => findNotes(contextByParentId[e.id] || []).concat(e))
+      uniqBy(
+        prop("id"),
+        events
+          .filter(this.isTextNote)
+          .flatMap(e => findNotes(contextByParentId[e.id] || []).concat(e))
+      )
 
     for (const c of chunk(256, findNotes(this.data.get()))) {
       this.addSubs("listeners", [

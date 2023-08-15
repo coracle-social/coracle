@@ -27,11 +27,8 @@
     scroller.stop()
   })
 
-  // flex-reverse-col means the first is the last
-  const getLastListItem = () => container.querySelector("li")
-
   const scrollToBottom = () => {
-    getLastListItem()?.scrollIntoView({behavior: "smooth"})
+    container.scrollIntoView({behavior: "smooth", block: "end"})
   }
 
   const stickToBottom = async cb => {

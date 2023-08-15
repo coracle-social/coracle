@@ -218,7 +218,7 @@ export const publishWithToast = async (
           },
         }
 
-    toast.show("info", payload, pending.size ? null : 5)
+    toast.show("info", payload, pending.size ? null : 8)
   })
 
   return [event, promise]

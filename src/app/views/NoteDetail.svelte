@@ -56,7 +56,7 @@
       },
     })
 
-    await sub.complete
+    await sub.result
     await Promise.all(context.getAllSubs())
 
     info("NoteDetail", displayNote)

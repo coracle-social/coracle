@@ -61,10 +61,12 @@
   const showPerson = pubkey => modal.push({type: "person/detail", pubkey})
 
   onMount(() => {
-    return Network.subscribe({
+    const sub = Network.subscribe({
       relays: getRelays(),
       filter: [{kinds: [1059], "#p": [userPubkey]}],
     })
+
+    return () => sub.close()
   })
 
   document.title = `Direct Messages`
