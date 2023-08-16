@@ -1,26 +1,11 @@
 import {Fetch, tryFunc} from "hurdak"
 import {now, tryJson, hexToBech32, bech32ToHex} from "src/util/misc"
 import {invoiceAmount} from "src/util/lightning"
+import {warn} from "src/util/logger"
 import {Tags} from "src/util/nostr"
 import type {Engine} from "src/engine/Engine"
 import type {Zapper, ZapEvent, Event} from "src/engine/types"
 import {collection} from "src/engine/util/store"
-
-const getLnUrl = (address: string): string => {
-  // Try to parse it as a lud06 LNURL
-  if (address.startsWith("lnurl1")) {
-    return tryFunc(() => bech32ToHex(address)) as string
-  }
-
-  // Try to parse it as a lud16 address
-  if (address.includes("@")) {
-    const [name, domain] = address.split("@")
-
-    if (domain && name) {
-      return `https://${domain}/.well-known/lnurlp/${name}`
-    }
-  }
-}
 
 export class Nip57 {
   zappers = collection<Zapper>("pubkey")
@@ -80,6 +65,48 @@ export class Nip57 {
       })
   }
 
+  getLnUrl(address: string): string {
+    // Try to parse it as a lud06 LNURL
+    if (address.startsWith("lnurl1")) {
+      return tryFunc(() => bech32ToHex(address)) as string
+    }
+
+    // Try to parse it as a lud16 address
+    if (address.includes("@")) {
+      const [name, domain] = address.split("@")
+
+      if (domain && name) {
+        return `https://${domain}/.well-known/lnurlp/${name}`
+      }
+    }
+  }
+
+  async fetchInvoice(zapper, event, amount) {
+    const {callback, lnurl} = zapper
+    const s = encodeURI(JSON.stringify(event))
+    const res = await Fetch.fetchJson(`${callback}?amount=${amount}&nostr=${s}&lnurl=${lnurl}`)
+
+    if (!res.pr) {
+      warn(JSON.stringify(res))
+    }
+
+    return res?.pr
+  }
+
+  async collectInvoice(invoice) {
+    const {webln} = window as {webln?: any}
+
+    if (webln) {
+      await webln.enable()
+
+      try {
+        webln.sendPayment(invoice)
+      } catch (e) {
+        warn(e)
+      }
+    }
+  }
+
   initialize(engine: Engine) {
     engine.Events.addHandler(0, (e: Event) => {
       tryJson(async () => {
@@ -91,7 +118,7 @@ export class Nip57 {
           return
         }
 
-        const url = getLnUrl(address)
+        const url = this.getLnUrl(address)
 
         if (!url) {
           return

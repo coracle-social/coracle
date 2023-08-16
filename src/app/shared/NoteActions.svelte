@@ -55,7 +55,7 @@
   }
 
   const startZap = () => {
-    modal.push({type: "note/zap", note})
+    modal.push({type: "zap/create", note, pubkey: note.pubkey})
   }
 
   let like, likes, allLikes, zap, zaps

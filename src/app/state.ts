@@ -94,12 +94,12 @@ setInterval(() => {
 
   // Prune connections we haven't used in a while, clear errors periodically,
   // and keep track of slow connections
-  for (const [url, socket] of Network.pool.data.entries()) {
-    if (socket.meta.last_activity < now() - 60) {
-      socket.disconnect()
-    } else if (socket.lastError < Date.now() - 10_000) {
-      socket.clearError()
-    } else if (userRelays.has(url) && socket.meta.quality < 0.3) {
+  for (const [url, connection] of Network.pool.data.entries()) {
+    if (connection.meta.last_activity < now() - 60) {
+      connection.disconnect()
+    } else if (connection.lastError < Date.now() - 10_000) {
+      connection.clearError()
+    } else if (userRelays.has(url) && connection.meta.quality < 0.3) {
       $slowConnections.push(url)
     }
   }

@@ -9,6 +9,7 @@
   import Feeds from "src/app/views/Feeds.svelte"
   import UserKeys from "src/app/views/UserKeys.svelte"
   import Apps from "src/app/views/Apps.svelte"
+  import About from "src/app/views/About.svelte"
   import Logout from "src/app/views/Logout.svelte"
   import MessagesDetail from "src/app/views/MessagesDetail.svelte"
   import MessagesList from "src/app/views/MessagesList.svelte"
@@ -72,6 +73,7 @@
       {/key}
     </TypedRoute>
     <TypedRoute path="/apps" component={Apps} />
+    <TypedRoute path="/about" component={About} />
     <TypedRoute path="/keys" component={UserKeys} />
     <TypedRoute path="/relays" component={RelayList} />
     <TypedRoute path="/relays/:b64OrUrl" let:params>

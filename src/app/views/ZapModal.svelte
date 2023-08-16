@@ -1,7 +1,5 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {Fetch} from "hurdak"
-  import {warn} from "src/util/logger"
   import {now} from "src/util/misc"
   import {modal} from "src/partials/state"
   import QRCode from "src/partials/QRCode.svelte"
@@ -11,7 +9,10 @@
   import Textarea from "src/partials/Textarea.svelte"
   import {Directory, Nip65, user, Outbox, Network, Builder, Nip57, Settings} from "src/app/engine"
 
-  export let note
+  export let pubkey
+  export let note = null
+  export let zapper = Nip57.zappers.key(pubkey).get()
+  export let author = Directory.getProfile(pubkey)
 
   let sub
   let zap = {
@@ -23,45 +24,27 @@
     confirmed: false,
   }
 
-  const author = Directory.getProfile(note.pubkey)
-
   const loadZapInvoice = async () => {
     zap.loading = true
 
     const amount = zap.amount * 1000
-    const zapper = Nip57.zappers.key(note.pubkey).get()
-    const relays = Nip65.getPublishHints(3, note, user.getRelayUrls("write"))
-    const event = await Outbox.prepEvent(
-      Builder.requestZap(relays, zap.message, note.pubkey, note.id, amount, zapper.lnurl)
-    )
-    const eventString = encodeURI(JSON.stringify(event))
-    const res = await Fetch.fetchJson(
-      `${zapper.callback}?amount=${amount}&nostr=${eventString}&lnurl=${zapper.lnurl}`
-    )
+    const relayLimit = Settings.getSetting("relay_limit")
+    const relays = note
+      ? Nip65.getPublishHints(relayLimit, note, user.getRelayUrls("write"))
+      : Nip65.getPubkeyHints(relayLimit, pubkey, "read")
+    const rawEvent = Builder.requestZap(relays, zap.message, pubkey, note?.id, amount, zapper.lnurl)
+    const signedEvent = await Outbox.prepEvent(rawEvent)
+    const invoice = await Nip57.fetchInvoice(zapper, signedEvent, amount)
 
     // If they closed the dialog before fetch resolved, we're done
     if (!zap) {
       return
     }
 
-    if (!res.pr) {
-      throw new Error(JSON.stringify(res))
-    }
-
-    zap.invoice = res.pr
+    zap.invoice = invoice
     zap.loading = false
 
-    // Open up alby or whatever
-    const {webln} = window as {webln?: any}
-    if (webln) {
-      await webln.enable()
-
-      try {
-        webln.sendPayment(zap.invoice)
-      } catch (e) {
-        warn(e)
-      }
-    }
+    await Nip57.collectInvoice(invoice)
 
     // Listen for the zap confirmation
     sub = Network.subscribe({
@@ -69,7 +52,7 @@
       filter: {
         kinds: [9735],
         authors: [zapper.nostrPubkey],
-        "#p": [note.pubkey],
+        "#p": [pubkey],
         since: zap.startedAt - 10,
       },
       onEvent: event => {

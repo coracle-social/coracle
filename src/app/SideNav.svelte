@@ -99,4 +99,9 @@
       <i class="fa fa-rocket mr-2" /> Install
     </li>
   {/if}
+  <li class="cursor-pointer">
+    <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/about">
+      <i class="fa fa-info-circle mr-2" /> About
+    </a>
+  </li>
 </ul>

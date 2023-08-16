@@ -12,7 +12,7 @@
   import LoginBunker from "src/app/views/LoginBunker.svelte"
   import Onboarding from "src/app/views/Onboarding.svelte"
   import NoteCreate from "src/app/views/NoteCreate.svelte"
-  import NoteZap from "src/app/views/NoteZap.svelte"
+  import ZapModal from "src/app/views/ZapModal.svelte"
   import NoteShare from "src/app/views/NoteShare.svelte"
   import PublishInfo from "src/app/views/PublishInfo.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
@@ -39,8 +39,8 @@
   {/key}
 {:else if m.type === "note/create"}
   <NoteCreate pubkey={m.pubkey} quote={m.quote} writeTo={m.relays} />
-{:else if m.type === "note/zap"}
-  <NoteZap note={m.note} />
+{:else if m.type === "zap/create"}
+  <ZapModal pubkey={m.pubkey} note={m.note} />
 {:else if m.type === "note/share"}
   <NoteShare note={m.note} />
 {:else if m.type === "notification/info"}
