@@ -37,30 +37,34 @@
 
   // Migration from 0.2.34
   if (Object.hasOwn(localStorage, "agent/keys/pubkey")) {
-    Keys.setKeyState({
-      method: Storage.getJson("agent/keys/method"),
-      pubkey: Storage.getJson("agent/keys/pubkey"),
-      privkey: Storage.getJson("agent/keys/privkey"),
-      bunkerKey: Storage.getJson("agent/keys/bunkerKey"),
-    })
+    try {
+      Keys.setKeyState({
+        method: Storage.getJson("agent/keys/method"),
+        pubkey: Storage.getJson("agent/keys/pubkey"),
+        privkey: Storage.getJson("agent/keys/privkey"),
+        bunkerKey: Storage.getJson("agent/keys/bunkerKey"),
+      })
 
-    Keys.pubkey.set(Storage.getJson("agent/keys/pubkey"))
+      Keys.pubkey.set(Storage.getJson("agent/keys/pubkey"))
 
-    const {settings} = JSON.parse(localStorage.getItem("agent/user/profile"))
+      const {settings} = JSON.parse(localStorage.getItem("agent/user/profile"))
 
-    setTimeout(
-      () =>
-        user.setSettings({
-          last_updated: settings.lastUpdated || 0,
-          relay_limit: settings.relayLimit || 10,
-          default_zap: settings.defaultZap || 21,
-          show_media: settings.showMedia || true,
-          report_analytics: settings.reportAnalytics || true,
-          dufflepud_url: settings.dufflepudUrl || Env.DUFFLEPUD_URL,
-          multiplextr_url: settings.multiplextrUrl || Env.MULTIPLEXTR_URL,
-        }),
-      3000
-    )
+      setTimeout(
+        () =>
+          user.setSettings({
+            last_updated: settings.lastUpdated || 0,
+            relay_limit: settings.relayLimit || 10,
+            default_zap: settings.defaultZap || 21,
+            show_media: settings.showMedia || true,
+            report_analytics: settings.reportAnalytics || true,
+            dufflepud_url: settings.dufflepudUrl || Env.DUFFLEPUD_URL,
+            multiplextr_url: settings.multiplextrUrl || Env.MULTIPLEXTR_URL,
+          }),
+        3000
+      )
+    } catch (e) {
+      // pass
+    }
 
     localStorage.removeItem("agent/keys/method")
     localStorage.removeItem("agent/keys/pubkey")
