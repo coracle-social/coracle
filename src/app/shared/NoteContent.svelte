@@ -7,6 +7,7 @@
   import NoteContentKind9802 from "src/app/shared/NoteContentKind9802.svelte"
   import NoteContentKind1063 from "src/app/shared/NoteContentKind1063.svelte"
   import NoteContentKind10002 from "src/app/shared/NoteContentKind10002.svelte"
+  import NoteContentKind30009 from "src/app/shared/NoteContentKind30009.svelte"
   import NoteContentKind30023 from "src/app/shared/NoteContentKind30023.svelte"
   import {Settings} from "src/app/engine"
 
@@ -32,6 +33,8 @@
   <NoteContentKind1063 {note} {showMedia} />
 {:else if note.kind === 10002}
   <NoteContentKind10002 {note} />
+{:else if note.kind === 30009}
+  <NoteContentKind30009 {note} {showMedia} />
 {:else if note.kind === 30023}
   <NoteContentKind30023 {note} {showEntire} {showMedia} />
 {:else}

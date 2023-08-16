@@ -12,6 +12,8 @@
 - [x] Fix memory leak in context loader
 - [x] Fix loading new notes on feeds
 - [x] Fix anonymous chat list
+- [x] Fine tune relay hints
+- [x] Add support for displaying kind 30009
 
 # 0.3.2
 

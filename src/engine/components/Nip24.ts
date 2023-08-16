@@ -32,7 +32,6 @@ export class Nip24 {
       if (Tags.from(e).getMeta("d") === appDataKeys.NIP24_LAST_CHECKED) {
         await tryJson(async () => {
           const payload = await engine.Crypt.decryptJson(e.content)
-          console.log(payload)
 
           for (const key of Object.keys(payload)) {
             const channel = this.channels.key(key).get()
