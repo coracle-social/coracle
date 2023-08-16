@@ -5,8 +5,6 @@
   export let note, showMedia
 
   const {name, description, image} = Tags.from(note).asMeta()
-
-  console.log(note)
 </script>
 
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
@@ -15,7 +13,7 @@
   {#if description}
     <p>{description}</p>
   {/if}
-  {#if showMedia && image}
-    <NoteContentLink showMedia value={{url: image, isMedia: true}} />
+  {#if image}
+    <NoteContentLink {showMedia} value={{url: image, isMedia: true}} />
   {/if}
 </div>

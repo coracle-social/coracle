@@ -13,7 +13,8 @@
 - [x] Fix loading new notes on feeds
 - [x] Fix anonymous chat list
 - [x] Fine tune relay hints
-- [x] Add support for displaying kind 30009
+- [x] Add support for displaying kinds 30009 and 31337
+- [x] Add support for spotify embeds
 
 # 0.3.2
 

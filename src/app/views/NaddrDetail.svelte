@@ -35,7 +35,7 @@
     This is a kind {kind} event called "{identifier}", published by
     <Anchor class="underline" href={routes.person(pubkey)}>@{display}</Anchor>.
   </p>
-  {#if note?.content}
+  {#if note}
     <NoteContent showEntire {note} />
   {/if}
   {#if note?.tags.length > 1}

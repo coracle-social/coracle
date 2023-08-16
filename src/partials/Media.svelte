@@ -1,5 +1,6 @@
 <script>
   import cx from "classnames"
+  import {last} from "ramda"
   import {ellipsize} from "hurdak"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -40,6 +41,18 @@
       alt="Link preview"
       src={Settings.imgproxy(link.url)}
       class="max-h-96 object-contain object-center" />
+  {:else if link.type === "spotify"}
+    {@const id = last(link.url.split("?")[0].match(/[0-9A-z]+$/))}
+    {@const src = `https://open.spotify.com/embed/track/${id}`}
+    <iframe
+      {src}
+      style="border-radius:12px"
+      width="100%"
+      height="352"
+      frameBorder="0"
+      allowfullscreen=""
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      loading="lazy" />
   {:else if link.type === "video"}
     <video controls src={link.url} class="max-h-96 object-contain object-center" />
   {:else}
