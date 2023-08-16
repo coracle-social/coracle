@@ -69,10 +69,6 @@ export class Network {
     if (muxUrl && (urls.length > 1 || this.pool.has(muxUrl))) {
       const connection = this.pool.get(muxUrl)
 
-      connection.ensureConnected({
-        shouldReconnect: connection.meta.lastClose < Date.now() - 30_000,
-      })
-
       if (connection.socket.isHealthy()) {
         target = new Plex(urls, connection)
       }
