@@ -8,7 +8,6 @@
 
   document.title = "About"
 
-  const version = import.meta.env.VITE_BUILD_VERSION
   const hash = import.meta.env.VITE_BUILD_HASH
   const nprofile =
     "nprofile1qqsf03c2gsmx5ef4c9zmxvlew04gdh7u94afnknp33qvv3c94kvwxgspz3mhxue69uhhyetvv9ujuerpd46hxtnfduq3xamnwvaz7tmjv4kxz7tpvfkx2tn0wfnszymhwden5te0dehhxarj9cmrswpwdaexwqgmwaehxw309a3ksunfwd68q6tvdshxummnw3erztnrdakszynhwden5te0danxvcmgv95kutnsw43qzrthwden5te0dehhxtnvdakqzynhwden5te0wp6hyurvv4cxzeewv4eszxrhwden5te0wfjkccte9eekummjwsh8xmmrd9skckx3ht0"
@@ -39,8 +38,8 @@
   <div class="flex flex-col items-center justify-center">
     <Heading>Coracle</Heading>
     <h2>An experimental nostr client</h2>
-    {#if version && hash}
-      <p class="mt-1 text-xs">v{version} build {hash.slice(0, 8)}</p>
+    {#if hash}
+      <p class="mt-1 text-xs">Running build {hash.slice(0, 8)}</p>
     {/if}
   </div>
   <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
