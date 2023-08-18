@@ -17,7 +17,7 @@
 
   const escapeIfOnTop = () => {
     if (virtual || isOnTop) {
-      onEscape()
+      onEscape?.()
     }
   }
 
@@ -41,10 +41,7 @@
     }
   }} />
 
-<div
-  bind:this={root}
-  transition:fade
-  class="modal fixed inset-0 z-30">
+<div bind:this={root} transition:fade class="modal fixed inset-0 z-30">
   <div
     class="fixed inset-0 cursor-pointer bg-black opacity-50"
     on:click|stopPropagation={escapeIfOnTop} />
