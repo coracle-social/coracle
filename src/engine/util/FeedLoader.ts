@@ -17,6 +17,7 @@ export type FeedOpts = {
   isMuted: (e: Event) => boolean
   onEvent?: (e: Event) => void
   shouldLoadParents?: boolean
+  shouldUseNip65?: boolean
 }
 
 export class FeedLoader {
@@ -38,6 +39,7 @@ export class FeedLoader {
     this.pubkeyLoader = new PubkeyLoader(engine)
 
     this.context = new ContextLoader(engine, {
+      relays: opts.shouldUseNip65 ? null : opts.relays,
       filter: opts.filter,
       isMuted: opts.isMuted,
       onEvent: event => {

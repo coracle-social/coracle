@@ -3,11 +3,13 @@
   import {fade} from "src/util/transition"
   import {modal, location} from "src/partials/state"
   import {Keys} from "src/app/engine"
+  import ForegroundButton from "src/partials/ForegroundButton.svelte"
+  import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
 
   let scrollY = 0
 
   $: showCreateNote = !$location.pathname.match(
-    /conversations.|channels.|chat.|relays.|keys|settings|logout$/
+    /conversations|channels|chat|relays|keys|settings|logout$/
   )
 
   const {canSign} = Keys
@@ -24,24 +26,19 @@
 
 <svelte:window bind:scrollY />
 
-<div class="fixed bottom-0 right-0 z-10 m-8 flex flex-col items-center gap-3">
+<ForegroundButtons>
   {#if scrollY > 1000}
-    <button
-      transition:fade|local={{delay: 200, duration: 200}}
-      class="flex h-12 w-12 items-center justify-center rounded-full
-          border border-gray-8 bg-gray-7 text-gray-1 shadow-2xl
-          transition-all hover:scale-105 hover:bg-gray-6"
-      on:click={scrollToTop}>
-      <i class="fa fa-arrow-up" />
-    </button>
+    <div transition:fade|local={{delay: 200, duration: 200}}>
+      <ForegroundButton theme="secondary" size="small" on:click={scrollToTop}>
+        <i class="fa fa-arrow-up" />
+      </ForegroundButton>
+    </div>
   {/if}
   {#if $canSign && showCreateNote}
-    <button
-      class="color-white flex h-16 w-16 items-center justify-center rounded-full
-            border border-accent-light bg-accent text-white shadow-2xl
-            transition-all hover:scale-105 hover:bg-accent-light"
-      on:click={createNote}>
-      <i class="fa fa-plus" />
-    </button>
+    <div out:fade|local={{delay: 200, duration: 200}}>
+      <ForegroundButton on:click={createNote}>
+        <i class="fa fa-plus" />
+      </ForegroundButton>
+    </div>
   {/if}
-</div>
+</ForegroundButtons>

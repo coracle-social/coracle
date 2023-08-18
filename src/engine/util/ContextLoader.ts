@@ -16,6 +16,7 @@ const fromDisplayEvent = (e: DisplayEvent): Event =>
 
 export type ContextLoaderOpts = {
   isMuted: (e: Event) => boolean
+  relays?: string[]
   filter?: Filter | Filter[]
   onEvent?: (e: Event) => void
   shouldLoadParents?: boolean
@@ -90,6 +91,10 @@ export class ContextLoader {
   }
 
   mergeHints(groups: string[][]) {
+    if (this.opts.relays) {
+      return this.opts.relays
+    }
+
     return this.engine.Nip65.mergeHints(this.getRelayLimit(), groups)
   }
 

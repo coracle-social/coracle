@@ -9,6 +9,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
+  import ForegroundButton from "src/partials/ForegroundButton.svelte"
+  import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
   import {withUnwrappedEvent} from "src/engine/util/nip59"
   import {Nip24, pubkeyLoader, user, Network, Keys} from "src/app/engine"
@@ -70,14 +72,6 @@
 <Content>
   <div class="relative">
     <Tabs tabs={["conversations", "requests"]} {activeTab} {setActiveTab} {getDisplay} />
-    <Popover triggerType="mouseenter" class="absolute right-14 top-7 hidden sm:block">
-      <div slot="trigger">
-        <i
-          class="fa fa-envelope cursor-pointer"
-          on:click={() => modal.push({type: "channel/create"})} />
-      </div>
-      <div slot="tooltip">Create a new conversation</div>
-    </Popover>
     <Popover triggerType="mouseenter" class="absolute right-5 top-7 hidden sm:block">
       <div slot="trigger">
         <i
@@ -94,3 +88,9 @@
     <Content size="lg" class="text-center">No messages found.</Content>
   {/each}
 </Content>
+
+<ForegroundButtons>
+  <ForegroundButton on:click={() => modal.push({type: "channel/create"})}>
+    <i class="fa fa-plus" />
+  </ForegroundButton>
+</ForegroundButtons>
