@@ -64,7 +64,7 @@
       <Anchor type="unstyled" class="fa fa-arrow-left cursor-pointer text-2xl" href="/chat" />
       <ImageCircle size={10} src={picture} />
     </div>
-    <div class="flex h-12 flex-grow flex-col pt-px">
+    <div class="flex h-12 flex-grow flex-col overflow-hidden pt-px">
       <div class="font-bold">{$channel.name || ""}</div>
       <div>{$channel.about || ""}</div>
     </div>

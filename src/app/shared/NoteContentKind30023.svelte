@@ -24,7 +24,7 @@
     <p>{summary}</p>
   {/if}
   {#if showMedia && image && urlIsMedia(image)}
-    <NoteContentLink value={{url: image, canDisplay: true}} showMedia />
+    <NoteContentLink value={{url: image, isMedia: true}} showMedia />
   {/if}
   <div>
     {#each tags.topics() as topic}
@@ -36,7 +36,7 @@
 </div>
 
 {#if showEntire}
-  <div class="flex flex-col gap-4 overflow-hidden text-ellipsis leading-6">
+  <div class="long-form-content flex flex-col gap-4 overflow-hidden text-ellipsis leading-6">
     {@html insane(marked.parse(note.content))}
   </div>
 {/if}

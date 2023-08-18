@@ -15,12 +15,12 @@
   let textarea
   let container
   let scroller
-  let limit = writable(5)
+  let limit = writable(10)
   let loading = sleep(30_000)
   let showNewMessages = false
 
   onMount(() => {
-    scroller = createScroller(() => limit.update(l => l + 5), {element: container, reverse: true})
+    scroller = createScroller(() => limit.update(l => l + 10), {element: container, reverse: true})
   })
 
   onDestroy(() => {
@@ -69,6 +69,10 @@
 
   // Group messages so we're only showing the person once per chunk
   const groupedMessages = derived([messages, limit], ([$messages, $limit]) => {
+    if ($groupedMessages?.length === $messages.length) {
+      scroller.stop()
+    }
+
     const result = reverse(
       sortBy(prop("created_at"), $messages).reduce((mx, m) => {
         const profile = Directory.getProfile(m.pubkey)
@@ -108,7 +112,7 @@
       </ul>
     </div>
     <div
-      class="fixed top-0 z-20 -mt-px w-full border-b border-solid border-gray-6 bg-gray-7 sm:pr-48">
+      class="fixed top-0 z-20 -mt-px w-full border-b border-solid border-gray-6 bg-gray-7 lg:pr-48">
       <slot name="header" />
     </div>
     {#if Keys.canSign.get()}

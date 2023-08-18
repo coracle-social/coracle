@@ -166,7 +166,7 @@ export const formatSats = (sats: number) => {
 export const annotateMedia = (url: string) => {
   if (url.match(/open.spotify.com/)) {
     return {type: "spotify", url}
-  } else if (url.match(/\.(jpg|jpeg|png|gif|webp)/)) {
+  } else if (url.match(/\.(jpe?g|png|gif|webp)/)) {
     return {type: "image", url}
   } else if (url.match(/\.(mov|webm|mp4)/)) {
     return {type: "video", url}
