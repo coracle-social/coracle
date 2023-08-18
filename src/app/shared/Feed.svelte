@@ -104,7 +104,7 @@
 
 <Content size="inherit" gap="gap-6">
   {#if $newNotes?.length > 0}
-    <div class="pointer-events-none fixed bottom-0 left-0 z-10 mb-8 flex w-full justify-center">
+    <div class="pointer-events-none fixed bottom-0 left-0 z-20 mb-8 flex w-full justify-center">
       <button
         in:fly={{y: 20}}
         class="pointer-events-auto cursor-pointer rounded-full border border-solid
