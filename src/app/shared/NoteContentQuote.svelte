@@ -44,7 +44,7 @@
     quote = event
   }
 
-  const sub = Network.subscribe({timeout: 5000, relays, filter, onEvent})
+  const sub = Network.subscribe({timeout: 30000, relays, filter, onEvent})
 
   const openQuote = e => {
     const noteId = id || quote?.id

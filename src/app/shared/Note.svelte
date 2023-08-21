@@ -118,7 +118,7 @@
         </Anchor>
       </div>
       <div class="flex min-w-0 flex-grow flex-col gap-2">
-        <div class="flex flex-col items-start justify-between sm:flex-row sm:items-center">
+        <div class="flex flex-col items-start justify-between sm:flex-row">
           <Anchor
             type="unstyled"
             class="pr-16 text-lg font-bold"
@@ -127,7 +127,7 @@
           </Anchor>
           <Anchor
             href={"/" + nip19.neventEncode({id: note.id, relays: note.seen_on})}
-            class="text-sm text-gray-1"
+            class="text-end text-sm text-gray-1"
             type="unstyled">
             {timestamp}
           </Anchor>

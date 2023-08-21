@@ -25,7 +25,16 @@
   class="fixed bottom-0 left-0 top-0 z-20 mt-16 w-48 overflow-hidden border-r border-gray-6 bg-gray-7 pb-20
          pt-4 text-gray-2 shadow-xl transition-all lg:ml-0"
   class:-ml-48={!$menuIsOpen}>
-  <li class="relative cursor-pointer">
+  <li class="cursor-pointer">
+    <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/notes">
+      <i class="fa fa-rss mr-2" /> Feed
+    </a>
+  </li>
+  <li
+    class={cx("relative", {
+      "cursor-pointer": $canSign,
+      "pointer-events-none opacity-75": !$canSign,
+    })}>
     <a
       class="block px-4 py-2 transition-all hover:bg-accent hover:text-white"
       href="/notifications">
@@ -34,11 +43,6 @@
         <div
           class="absolute left-6 top-3 h-2 w-2 rounded border border-solid border-white bg-accent" />
       {/if}
-    </a>
-  </li>
-  <li class="cursor-pointer">
-    <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/notes">
-      <i class="fa fa-rss mr-2" /> Feed
     </a>
   </li>
   {#if $canUseGiftWrap}
