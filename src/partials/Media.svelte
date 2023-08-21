@@ -42,8 +42,8 @@
       src={Settings.imgproxy(link.url)}
       class="max-h-96 object-contain object-center" />
   {:else if link.type === "spotify"}
-    {@const id = last(link.url.split("?")[0].match(/[0-9A-z]+$/))}
-    {@const src = `https://open.spotify.com/embed/track/${id}`}
+    {@const id = last(link.url.split("?")[0].match(/[a-z]+\/[0-9A-z]+$/))}
+    {@const src = `https://open.spotify.com/embed/${id}`}
     <iframe
       {src}
       style="border-radius:12px"
