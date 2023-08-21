@@ -94,6 +94,12 @@
     }
   }
 
+  $: {
+    if (window.scrollY === 0 && $newNotes?.length > 0) {
+      feed.loadStream()
+    }
+  }
+
   onMount(() => {
     scrollerElement = getModal()
     start()

@@ -165,7 +165,14 @@ export class FeedLoader {
   loadStream() {
     this.stream.update($stream => {
       this.feed.update($feed => {
-        return uniqBy(prop("id"), this.context.applyContext($stream).concat($feed))
+        return uniqBy(
+          prop("id"),
+          this.context
+            .applyContext($stream, {
+              substituteParents: true,
+            })
+            .concat($feed)
+        )
       })
 
       return []
