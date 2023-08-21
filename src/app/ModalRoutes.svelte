@@ -40,7 +40,7 @@
 {:else if m.type === "note/create"}
   <NoteCreate pubkey={m.pubkey} quote={m.quote} writeTo={m.relays} />
 {:else if m.type === "zap/create"}
-  <ZapModal pubkey={m.pubkey} note={m.note} />
+  <ZapModal pubkey={m.pubkey} note={m.note} author={m.author} zapper={m.zapper} />
 {:else if m.type === "note/share"}
   <NoteShare note={m.note} />
 {:else if m.type === "notification/info"}
