@@ -1,5 +1,5 @@
-import {partition, identity, uniqBy, pluck, sortBy, without, any, prop, assoc} from "ramda"
-import {ensurePlural, seconds, doPipe, throttle, batch} from "hurdak"
+import {partition, reject, identity, uniqBy, pluck, sortBy, without, any, prop, assoc} from "ramda"
+import {ensurePlural, union, seconds, doPipe, throttle, batch} from "hurdak"
 import {now, race} from "src/util/misc"
 import {findReplyId} from "src/util/nostr"
 import {Cursor, MultiCursor} from "src/engine/util/Cursor"
@@ -109,9 +109,12 @@ export class FeedLoader {
   // Feed building
 
   addToFeed = (notes: Event[]) => {
+    const getChildIds = note => note.replies.flatMap(child => [child.id, getChildIds(child)])
+
     this.feed.update($feed => {
       // Avoid showing the same note twice, even if it's once as a parent and once as a child
       const feedIds = new Set(pluck("id", $feed))
+      const feedChildIds = new Set($feed.flatMap(getChildIds))
       const feedParentIds = new Set($feed.map(findReplyId).filter(identity))
 
       return uniqBy(
@@ -120,9 +123,16 @@ export class FeedLoader {
           this.context.applyContext(
             sortBy(
               e => -e.created_at,
-              notes.filter(e => !feedIds.has(findReplyId(e)) && !feedParentIds.has(e.id))
+              reject(
+                (e: Event) =>
+                  feedIds.has(findReplyId(e)) || feedChildIds.has(e.id) || feedParentIds.has(e.id),
+                notes
+              )
             ),
-            true
+            {
+              substituteParents: true,
+              alreadySeen: union(feedIds, feedChildIds),
+            }
           )
         )
       )

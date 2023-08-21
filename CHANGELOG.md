@@ -16,6 +16,7 @@
 - [x] Add support for displaying kinds 30009 and 31337
 - [x] Add support for spotify embeds
 - [x] Add about page with links and donations/support
+- [x] Reduce number of duplicate notes in feeds
 
 # 0.3.2
 

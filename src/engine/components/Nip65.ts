@@ -2,7 +2,7 @@ import {sortBy, pluck, uniq, nth, uniqBy, prop, last, inc} from "ramda"
 import {chain, Fetch} from "hurdak"
 import {fuzzy, tryJson, now} from "src/util/misc"
 import {warn} from "src/util/logger"
-import {normalizeRelayUrl, findReplyId, isShareableRelay, Tags} from "src/util/nostr"
+import {normalizeRelayUrl, findReplyId, findRootId, isShareableRelay, Tags} from "src/util/nostr"
 import type {Engine} from "src/engine/Engine"
 import type {Event, Relay, RelayInfo, RelayPolicy, RelayPolicyEntry} from "src/engine/types"
 import {derived, collection} from "src/engine/util/store"
@@ -157,6 +157,13 @@ export class Nip65 {
     const parentId = findReplyId(event)
 
     yield* Tags.from(event).equals(parentId).relays()
+    yield* this.getPubkeyRelayUrls(event.pubkey, Mode.Read)
+  })
+
+  getRootHints = this.hintSelector(function* (this: Nip65, event) {
+    const rootId = findRootId(event)
+
+    yield* Tags.from(event).equals(rootId).relays()
     yield* this.getPubkeyRelayUrls(event.pubkey, Mode.Read)
   })
 

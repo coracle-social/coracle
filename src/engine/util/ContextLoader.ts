@@ -1,9 +1,9 @@
 import {matchFilters} from "nostr-tools"
 import {throttle} from "throttle-debounce"
-import {omit, pluck, identity, flatten, without, groupBy, sortBy, prop, uniqBy, reject} from "ramda"
+import {omit, pluck, flatten, without, groupBy, sortBy, prop, uniqBy, reject} from "ramda"
 import {ensurePlural, batch, union, chunk} from "hurdak"
 import {now, pushToKey} from "src/util/misc"
-import {findReplyId, Tags, noteKinds} from "src/util/nostr"
+import {findReplyAndRootIds, findReplyId, findRootId, Tags, noteKinds} from "src/util/nostr"
 import {collection} from "./store"
 import {PubkeyLoader} from "src/engine/util/PubkeyLoader"
 import type {Collection} from "src/engine/util/store"
@@ -98,9 +98,8 @@ export class ContextLoader {
     return this.engine.Nip65.mergeHints(this.getRelayLimit(), groups)
   }
 
-  applyContext = (notes: Event[], substituteParents = false) => {
-    const parentIds = new Set(notes.map(findReplyId).filter(identity))
-    const forceShow = union(new Set(pluck("id", notes)), parentIds)
+  applyContext = (notes: Event[], {substituteParents = false, alreadySeen = new Set()} = {}) => {
+    const dontShow = union(alreadySeen, new Set(pluck("id", notes)))
     const contextById = {} as Record<string, Event>
     const zapsByParentId = {} as Record<string, Event[]>
     const reactionsByParentId = {} as Record<string, Event[]>
@@ -137,7 +136,7 @@ export class ContextLoader {
         zaps: uniqBy(prop("id"), combinedZaps),
         reactions: uniqBy(prop("id"), combinedReactions),
         replies: sortBy((e: DisplayEvent) => -e.created_at, uniqBy(prop("id"), combinedReplies)),
-        matchesFilter: forceShow.has(note.id) || this.matchFilters(note),
+        matchesFilter: !dontShow.has(note.id) && this.matchFilters(note),
       }
     }
 
@@ -178,12 +177,20 @@ export class ContextLoader {
     }
 
     const {Network, Nip65} = this.engine
-    const parentsInfo = events
-      .map((e: Event) => ({
-        id: findReplyId(e),
-        hints: Nip65.getParentHints(this.getRelayLimit(), e),
-      }))
-      .filter(({id}: any) => id && !this.seen.has(id))
+    const parentsInfo = events.flatMap((e: Event) => {
+      const info = []
+      const {root, reply} = findReplyAndRootIds(e)
+
+      if (reply && !this.seen.has(reply)) {
+        info.push({id: reply, hints: Nip65.getParentHints(this.getRelayLimit(), e)})
+      }
+
+      if (root && !this.seen.has(root)) {
+        info.push({id: findRootId(e), hints: Nip65.getRootHints(this.getRelayLimit(), e)})
+      }
+
+      return info
+    })
 
     if (parentsInfo.length > 0) {
       this.addSubs("context", [
