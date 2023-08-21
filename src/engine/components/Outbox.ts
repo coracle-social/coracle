@@ -2,14 +2,14 @@ import {getEventHash} from "nostr-tools"
 import type {UnsignedEvent} from "nostr-tools"
 import {info} from "src/util/logger"
 import {now} from "src/util/misc"
-import type {Progress} from "src/engine/components/Network"
-import type {Engine} from "src/engine/Engine"
 import type {Event} from "src/engine/types"
+import type {Engine} from "src/engine/Engine"
+import type {PublishOpts} from "src/engine/components/Network"
 
 export class Outbox {
   engine: Engine
 
-  prepEvent = async (rawEvent: Partial<Event>): Promise<Event> => {
+  prep = async (rawEvent: Partial<Event>): Promise<Event> => {
     if (rawEvent.sig) {
       return rawEvent as Event
     }
@@ -27,19 +27,14 @@ export class Outbox {
     return this.engine.Keys.sign(event as Event)
   }
 
-  publish = async (
-    rawEvent: Partial<Event>,
-    relays: string[],
-    onProgress: (p: Progress) => void = null,
-    verb = "EVENT"
-  ): Promise<[Event, Promise<Progress>]> => {
-    const event = rawEvent.sig ? (rawEvent as Event) : await this.prepEvent(rawEvent)
+  publish = async ({event, ...opts}: Omit<PublishOpts, "event"> & {event: Partial<Event>}) => {
+    event = event.sig ? event : await this.prep(event)
 
     // return console.log(event)
 
-    this.engine.Events.queue.push(event)
+    this.engine.Events.queue.push(event as Event)
 
-    return [event, this.engine.Network.publish({event, relays, onProgress, verb})]
+    return this.engine.Network.publish({...opts, event} as PublishOpts)
   }
 
   initialize(engine: Engine) {

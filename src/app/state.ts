@@ -11,17 +11,7 @@ import {now} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import type {Event} from "src/engine/types"
-import {
-  pubkeyLoader,
-  Events,
-  Nip28,
-  Env,
-  Network,
-  Outbox,
-  user,
-  Settings,
-  Keys,
-} from "src/app/engine"
+import {pubkeyLoader, Events, Nip28, Env, Network, user, Settings, Keys} from "src/app/engine"
 
 // Routing
 
@@ -183,45 +173,40 @@ export const login = async (method: string, key: string | {pubkey: string; token
   }
 }
 
-export const publishWithToast = async (
-  rawEvent: Partial<Event>,
-  relays: string[]
-): ReturnType<typeof Outbox.publish> => {
-  const [event, promise] = await Outbox.publish(rawEvent, relays, progress => {
-    const {succeeded, failed, timeouts, pending} = progress
-    let message = `Published to ${succeeded.size}/${relays.length} relays`
+export const toastProgress = progress => {
+  const {event, succeeded, failed, timeouts, completed, pending} = progress
+  const total = completed.size + pending.size
 
-    const extra = []
-    if (failed.size > 0) {
-      extra.push(`${failed.size} failed`)
-    }
+  let message = `Published to ${succeeded.size}/${total} relays`
 
-    if (timeouts.size > 0) {
-      extra.push(`${timeouts.size} timed out`)
-    }
+  const extra = []
+  if (failed.size > 0) {
+    extra.push(`${failed.size} failed`)
+  }
 
-    if (pending.size > 0) {
-      extra.push(`${pending.size} pending`)
-    }
+  if (timeouts.size > 0) {
+    extra.push(`${timeouts.size} timed out`)
+  }
 
-    if (extra.length > 0) {
-      message += ` (${extra.join(", ")})`
-    }
+  if (pending.size > 0) {
+    extra.push(`${pending.size} pending`)
+  }
 
-    const payload = pending.size
-      ? message
-      : {
-          text: message,
-          link: {
-            text: "Details",
-            onClick: () => modal.push({type: "publish/info", event, progress}),
-          },
-        }
+  if (extra.length > 0) {
+    message += ` (${extra.join(", ")})`
+  }
 
-    toast.show("info", payload, pending.size ? null : 8)
-  })
+  const payload = pending.size
+    ? message
+    : {
+        text: message,
+        link: {
+          text: "Details",
+          onClick: () => modal.push({type: "publish/info", event, progress}),
+        },
+      }
 
-  return [event, promise]
+  toast.show("info", payload, pending.size ? null : 8)
 }
 
 // Feeds

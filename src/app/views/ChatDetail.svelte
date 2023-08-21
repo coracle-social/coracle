@@ -31,8 +31,9 @@
 
   const sendMessage = async content => {
     const relays = getRelays()
+    const event = Builder.createChatMessage(id, content, relays[0])
 
-    await Outbox.publish(Builder.createChatMessage(id, content, relays[0]), relays)
+    await Outbox.publish({event, relays})
   }
 
   onMount(() => {

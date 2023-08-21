@@ -93,8 +93,11 @@
     if (Keys.canSign.get() && !seenChallenges.has(challenge)) {
       seenChallenges.add(challenge)
 
-      const rawEvent = Builder.authenticate(url, challenge)
-      const [event] = await Outbox.publish(rawEvent, [url], null, "AUTH")
+      await Outbox.publish({
+        event: await Outbox.prep(Builder.authenticate(url, challenge)),
+        relays: [url],
+        verb: "AUTH",
+      })
 
       return event
     }

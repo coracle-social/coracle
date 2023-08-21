@@ -6,8 +6,8 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {toast, modal} from "src/partials/state"
-  import {Builder, user} from "src/app/engine"
-  import {publishWithToast} from "src/app/state"
+  import {Builder, Outbox, user} from "src/app/engine"
+  import {toastProgress} from "src/app/state"
 
   export let channel = {name: null, id: null, about: null, picture: null}
 
@@ -20,12 +20,14 @@
       const relays = user.getRelayUrls("write")
 
       if (channel.id) {
-        publishWithToast(Builder.updateChannel(channel), relays)
-      } else {
-        const [event] = await publishWithToast(Builder.createChannel(channel), relays)
+        const event = Builder.updateChannel(channel)
 
-        // Auto join the room the user just created
-        await user.joinChannel(event.id)
+        Outbox.publish({relays, event, onProgress: toastProgress})
+      } else {
+        const event = await Outbox.prep(Builder.createChannel(channel))
+
+        Outbox.publish({event, relays})
+        user.joinChannel(event.id)
       }
 
       modal.pop()

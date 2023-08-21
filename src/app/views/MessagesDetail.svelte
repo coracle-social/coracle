@@ -42,7 +42,7 @@
     const cyphertext = await Crypt.encrypt(pubkey, content)
     const event = Builder.createDirectMessage(pubkey, cyphertext)
 
-    await Outbox.publish(event, getRelays())
+    await Outbox.publish({event, relays: getRelays()})
   }
 
   onMount(() => {

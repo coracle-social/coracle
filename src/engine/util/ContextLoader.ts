@@ -1,6 +1,6 @@
 import {matchFilters} from "nostr-tools"
 import {throttle} from "throttle-debounce"
-import {omit, pluck, flatten, without, groupBy, sortBy, prop, uniqBy, reject} from "ramda"
+import {omit, find, pluck, flatten, without, groupBy, sortBy, prop, uniqBy, reject} from "ramda"
 import {ensurePlural, batch, union, chunk} from "hurdak"
 import {now, pushToKey} from "src/util/misc"
 import {findReplyAndRootIds, findReplyId, findRootId, Tags, noteKinds} from "src/util/nostr"
@@ -136,7 +136,9 @@ export class ContextLoader {
         zaps: uniqBy(prop("id"), combinedZaps),
         reactions: uniqBy(prop("id"), combinedReactions),
         replies: sortBy((e: DisplayEvent) => -e.created_at, uniqBy(prop("id"), combinedReplies)),
-        matchesFilter: !dontShow.has(note.id) && this.matchFilters(note),
+        matchesFilter:
+          !dontShow.has(note.id) &&
+          (this.matchFilters(note) || Boolean(find(prop("matchesFilter"), combinedReplies))),
       }
     }
 

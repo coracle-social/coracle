@@ -16,9 +16,9 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {Directory, user, Builder, Nip65, Keys} from "src/app/engine"
+  import {Directory, Outbox, user, Builder, Nip65, Keys} from "src/app/engine"
   import {modal} from "src/partials/state"
-  import {publishWithToast} from "src/app/state"
+  import {toastProgress} from "src/app/state"
 
   export let quote = null
   export let pubkey = null
@@ -41,7 +41,11 @@
     }
 
     if (content) {
-      await publishWithToast(Builder.createNote(content.trim(), tags), $relays)
+      Outbox.publish({
+        relays: $relays,
+        event: Builder.createNote(content.trim(), tags),
+        onProgress: toastProgress,
+      })
 
       modal.clear()
     }

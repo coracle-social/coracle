@@ -1,9 +1,10 @@
 import {propEq, defaultTo, find, reject} from "ramda"
+import type {Event} from "nostr-tools"
 import {nip19, getPublicKey, getSignature, generatePrivateKey} from "nostr-tools"
 import NDK, {NDKEvent, NDKNip46Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk"
 import {switcherFn} from "hurdak"
 import {writable} from "src/engine/util/store"
-import type {KeyState, Event} from "src/engine/types"
+import type {KeyState} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
 
 export class Keys {

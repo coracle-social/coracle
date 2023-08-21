@@ -7,20 +7,22 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {Directory, Keys, user, Builder} from "src/app/engine"
+  import {Outbox, Directory, Keys, user, Builder} from "src/app/engine"
   import {routes} from "src/app/state"
-  import {publishWithToast} from "src/app/state"
+  import {toastProgress} from "src/app/state"
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
   const lud16Url = "https://blog.getalby.com/create-your-lightning-address/"
   const pseudUrl =
     "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
-  const submit = async event => {
-    const relays = user.getRelayUrls("write")
+  const submit = () => {
+    Outbox.publish({
+      event: Builder.setProfile(values),
+      relays: user.getRelayUrls("write"),
+      onProgress: toastProgress,
+    })
 
-    event?.preventDefault()
-    publishWithToast(Builder.setProfile(values), relays)
     navigate(routes.person($pubkey))
   }
 
@@ -31,7 +33,7 @@
   document.title = "Profile"
 </script>
 
-<form on:submit={submit} in:fly={{y: 20}}>
+<form on:submit|preventDefault={submit} in:fly={{y: 20}}>
   <Content>
     <div class="mb-4 flex flex-col items-center justify-center">
       <Heading>About You</Heading>

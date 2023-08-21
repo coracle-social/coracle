@@ -33,7 +33,7 @@
       ? Nip65.getPublishHints(relayLimit, note, user.getRelayUrls("write"))
       : Nip65.getPubkeyHints(relayLimit, pubkey, "read")
     const rawEvent = Builder.requestZap(relays, zap.message, pubkey, note?.id, amount, zapper.lnurl)
-    const signedEvent = await Outbox.prepEvent(rawEvent)
+    const signedEvent = await Outbox.prep(rawEvent)
     const invoice = await Nip57.fetchInvoice(zapper, signedEvent, amount)
 
     // If they closed the dialog before fetch resolved, we're done

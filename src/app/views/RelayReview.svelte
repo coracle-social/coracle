@@ -25,7 +25,7 @@
       ],
     })
 
-    Outbox.publish(event, user.getRelayUrls("write"))
+    Outbox.publish({event, relays: user.getRelayUrls("write")})
 
     modal.pop()
   }

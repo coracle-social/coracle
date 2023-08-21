@@ -37,10 +37,10 @@ export class User {
       const d = appDataKeys.USER_SETTINGS
       const v = await this.engine.Crypt.encryptJson(settings)
 
-      return this.engine.Outbox.publish(
-        this.engine.Builder.setAppData(d, v),
-        this.getRelayUrls("write")
-      )
+      return this.engine.Outbox.publish({
+        event: this.engine.Builder.setAppData(d, v),
+        relays: this.getRelayUrls("write"),
+      })
     }
   }
 
@@ -48,10 +48,10 @@ export class User {
     if (this.engine.Keys.canSign.get()) {
       const v = await this.engine.Crypt.encryptJson(content)
 
-      return this.engine.Outbox.publish(
-        this.engine.Builder.setAppData(d, v),
-        this.getRelayUrls("write")
-      )
+      return this.engine.Outbox.publish({
+        event: this.engine.Builder.setAppData(d, v),
+        relays: this.getRelayUrls("write"),
+      })
     }
   }
 
@@ -65,10 +65,10 @@ export class User {
 
   setRelays = (relays: RelayPolicyEntry[]) => {
     if (this.engine.Keys.canSign.get()) {
-      return this.engine.Outbox.publish(
-        this.engine.Builder.setRelays(relays),
-        relays.map(r => r.url)
-      )
+      return this.engine.Outbox.publish({
+        event: this.engine.Builder.setRelays(relays),
+        relays: relays.map(r => r.url),
+      })
     } else {
       this.engine.Nip65.setPolicy(
         {pubkey: this.engine.Keys.stateKey.get(), created_at: now()},
@@ -111,14 +111,17 @@ export class User {
     this.engine.Nip02.isIgnoring(this.engine.Keys.stateKey.get(), pubkeyOrEventId)
 
   setProfile = ($profile: Record<string, any>) =>
-    this.engine.Outbox.publish(this.engine.Builder.setProfile($profile), this.getRelayUrls("write"))
+    this.engine.Outbox.publish({
+      event: this.engine.Builder.setProfile($profile),
+      relays: this.getRelayUrls("write"),
+    })
 
   setPetnames = async ($petnames: string[][]) => {
     if (this.engine.Keys.canSign.get()) {
-      await this.engine.Outbox.publish(
-        this.engine.Builder.setPetnames($petnames),
-        this.getRelayUrls("write")
-      )
+      await this.engine.Outbox.publish({
+        event: this.engine.Builder.setPetnames($petnames),
+        relays: this.getRelayUrls("write"),
+      })
     } else {
       this.engine.Nip02.graph.key(this.engine.Keys.stateKey.get()).merge({
         updated_at: now(),
@@ -148,10 +151,10 @@ export class User {
 
   setMutes = async ($mutes: string[][]) => {
     if (this.engine.Keys.canSign.get()) {
-      await this.engine.Outbox.publish(
-        this.engine.Builder.setMutes($mutes.map(t => t.slice(0, 2))),
-        this.getRelayUrls("write")
-      )
+      await this.engine.Outbox.publish({
+        event: this.engine.Builder.setMutes($mutes.map(t => t.slice(0, 2))),
+        relays: this.getRelayUrls("write"),
+      })
     } else {
       this.engine.Nip02.graph.key(this.engine.Keys.stateKey.get()).merge({
         updated_at: now(),
@@ -177,16 +180,16 @@ export class User {
     )
 
   putList = (name: string, params: string[][], relays: string[]) =>
-    this.engine.Outbox.publish(
-      this.engine.Builder.createList([["d", name]].concat(params).concat(relays)),
-      this.getRelayUrls("write")
-    )
+    this.engine.Outbox.publish({
+      event: this.engine.Builder.createList([["d", name]].concat(params).concat(relays)),
+      relays: this.getRelayUrls("write"),
+    })
 
   removeList = (naddr: string) =>
-    this.engine.Outbox.publish(
-      this.engine.Builder.deleteNaddrs([naddr]),
-      this.getRelayUrls("write")
-    )
+    this.engine.Outbox.publish({
+      event: this.engine.Builder.deleteNaddrs([naddr]),
+      relays: this.getRelayUrls("write"),
+    })
 
   // Messages
 

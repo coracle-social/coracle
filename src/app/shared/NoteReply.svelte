@@ -7,8 +7,8 @@
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/app/shared/Compose.svelte"
-  import {Directory, user, Keys, Nip65, Builder} from "src/app/engine"
-  import {publishWithToast} from "src/app/state"
+  import {Directory, Outbox, user, Keys, Nip65, Builder} from "src/app/engine"
+  import {toastProgress} from "src/app/state"
 
   export let note
   export let borderColor
@@ -50,10 +50,11 @@
     }
 
     if (content) {
-      const rawEvent = Builder.createReply(note, content, data.mentions.map(Builder.mention))
-      const relays = Nip65.getPublishHints(10, note, user.getRelayUrls("write"))
-
-      await publishWithToast(rawEvent, relays)
+      Outbox.publish({
+        event: Builder.createReply(note, content, data.mentions.map(Builder.mention)),
+        relays: Nip65.getPublishHints(10, note, user.getRelayUrls("write")),
+        onProgress: toastProgress,
+      })
 
       reset()
     }
@@ -72,7 +73,7 @@
 
 {#if data}
   <div
-    transition:slide
+    transition:slide|local
     class="note-reply relative z-10 my-2 flex flex-col gap-1"
     bind:this={container}
     on:click|stopPropagation>

@@ -1,6 +1,5 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {last, map} from "ramda"
   import {generatePrivateKey} from "nostr-tools"
   import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
@@ -52,20 +51,19 @@
     Keys.login("privkey", privkey)
 
     // Wait for the published event to go through
-    await last(await user.setRelays(relays))
+    await user.setRelays(relays)
 
     // Re-save preferences now that we have a key and relays. Wait for them
     // to persist so we have the correct user preferences
-    await Promise.all(
-      map(
-        xs => (xs ? last(xs) : null),
-        await Promise.all([
-          user.setProfile(profile),
-          user.setPetnames(petnames),
-          note && Outbox.publish(Builder.createNote(note), user.getRelayUrls("write")),
-        ])
-      )
-    )
+    await Promise.all([
+      user.setProfile(profile),
+      user.setPetnames(petnames),
+      note &&
+        Outbox.publish({
+          event: Builder.createNote(note),
+          relays: user.getRelayUrls("write"),
+        }),
+    ])
 
     // Start our notifications listener
     listenForNotifications()

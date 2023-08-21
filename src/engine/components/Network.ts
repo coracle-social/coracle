@@ -15,9 +15,9 @@ export type Progress = {
 }
 
 export type PublishOpts = {
-  relays: string[]
   event: Event
-  onProgress: (p: Progress) => void
+  relays: string[]
+  onProgress?: (p: Progress) => void
   timeout?: number
   verb?: string
 }

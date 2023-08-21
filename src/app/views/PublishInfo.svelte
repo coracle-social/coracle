@@ -5,8 +5,8 @@
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {Settings, Nip65, user} from "src/app/engine"
-  import {publishWithToast} from "src/app/state"
+  import {Outbox, Settings, Nip65, user} from "src/app/engine"
+  import {toastProgress} from "src/app/state"
 
   export let event
   export let progress
@@ -22,7 +22,8 @@
     const limit = Settings.getSetting("relay_limit")
     const relays = Nip65.getPublishHints(limit, event, user.getRelayUrls("write"))
 
-    publishWithToast(event, relays)
+    Outbox.publish({event, relays, onProgress: toastProgress})
+
     modal.pop()
   }
 </script>

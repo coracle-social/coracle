@@ -50,7 +50,7 @@
       const event = wrap(privkey, pubkey, generatePrivateKey(), rumor, wrapperTags)
       const relays = Nip65.getPubkeyHints(relayLimit, pubkey, "read")
 
-      Outbox.publish(event, relays)
+      Outbox.publish({event, relays})
     }
   }
 

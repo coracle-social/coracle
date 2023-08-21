@@ -5,7 +5,7 @@
   import {find, reject, identity, propEq, sum, pluck, sortBy} from "ramda"
   import {stringToHue, formatSats, hsl} from "src/util/misc"
   import {isLike} from "src/util/nostr"
-  import {quantify, first} from "hurdak"
+  import {quantify} from "hurdak"
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
@@ -39,16 +39,19 @@
   const mute = () => user.mute("e", note.id)
 
   const react = async content => {
-    const relays = Nip65.getPublishHints(5, note, user.getRelayUrls("write"))
+    like = await Outbox.prep(Builder.createReaction(note, content))
 
-    like = first(await Outbox.publish(Builder.createReaction(note, content), relays))
+    Outbox.publish({
+      event: like,
+      relays: Nip65.getPublishHints(5, note, user.getRelayUrls("write")),
+    })
   }
 
   const deleteReaction = e => {
-    Outbox.publish(
-      Builder.deleteEvents([e.id]),
-      Nip65.getPublishHints(3, note, user.getRelayUrls("write"))
-    )
+    Outbox.publish({
+      event: Builder.deleteEvents([e.id]),
+      relays: Nip65.getPublishHints(3, note, user.getRelayUrls("write")),
+    })
 
     like = null
     likes = reject(propEq("id", e.id), likes)
