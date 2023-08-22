@@ -12,8 +12,7 @@
   import ForegroundButton from "src/partials/ForegroundButton.svelte"
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
-  import {withUnwrappedEvent} from "src/engine/util/nip59"
-  import {Nip24, pubkeyLoader, user, Network, Keys} from "src/app/engine"
+  import {Nip24, Nip59, pubkeyLoader, user, Network, Keys} from "src/app/engine"
 
   export let activeTab = "conversations"
 
@@ -46,7 +45,7 @@
         const pubkeys = new Set()
 
         for (const event of events) {
-          withUnwrappedEvent(privkey, event, ({seal, rumor}) => {
+          Nip59.withUnwrappedEvent(event, privkey, ({seal, rumor}) => {
             pubkeys.add(seal.pubkey)
             pubkeys.add(rumor.pubkey)
           })

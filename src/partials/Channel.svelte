@@ -31,11 +31,9 @@
     container.scrollIntoView({behavior: "smooth", block: "end"})
   }
 
-  const stickToBottom = async cb => {
+  const stickToBottom = async () => {
     const lastMessage = pluck("created_at", $groupedMessages).reduce(max, 0)
     const shouldStick = container?.scrollTop > -200
-
-    await cb?.()
 
     if (shouldStick) {
       scrollToBottom()

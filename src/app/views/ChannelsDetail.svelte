@@ -7,13 +7,13 @@
   import {modal} from "src/partials/state"
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {wrap} from "src/engine/util/nip59"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {
     user,
     Nip24,
+    Nip59,
     Nip65,
     Outbox,
     Directory,
@@ -37,7 +37,6 @@
   }
 
   const sendMessage = async content => {
-    const {privkey} = Keys.current.get()
     const rumor = {
       kind: 14,
       content,
@@ -46,9 +45,11 @@
     }
 
     for (const pubkey of pubkeys.concat(userPubkey)) {
-      const wrapperTags = [Builder.mention(pubkey)]
-      const event = wrap(privkey, pubkey, generatePrivateKey(), rumor, wrapperTags)
       const relays = Nip65.getPubkeyHints(relayLimit, pubkey, "read")
+      const event = await Nip59.wrap(rumor, {
+        recipientPk: pubkey,
+        wrapperSk: generatePrivateKey(),
+      })
 
       Outbox.publish({event, relays})
     }

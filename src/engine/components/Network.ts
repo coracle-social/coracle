@@ -32,20 +32,6 @@ export type SubscribeOpts = {
   shouldProcess?: boolean
 }
 
-const getUrls = (relays: string[]) => {
-  if (relays.length === 0) {
-    error(`Attempted to connect to zero urls`)
-  }
-
-  const urls = new Set(relays.map(normalizeRelayUrl))
-
-  if (urls.size !== relays.length) {
-    warn(`Attempted to connect to non-unique relays`)
-  }
-
-  return Array.from(urls)
-}
-
 export class Network {
   engine: Engine
   pool = new Pool()
@@ -53,11 +39,25 @@ export class Network {
 
   relayIsLowQuality = (url: string) => this.pool.get(url, {autoConnect: false})?.meta?.quality < 0.6
 
-  getExecutor = (urls: string[], {bypassBoot = false} = {}) => {
+  getUrls = (relays: string[]) => {
     if (this.engine.Env.FORCE_RELAYS?.length > 0) {
-      urls = this.engine.Env.FORCE_RELAYS
+      return this.engine.Env.FORCE_RELAYS
     }
 
+    if (relays.length === 0) {
+      error(`Attempted to connect to zero urls`)
+    }
+
+    const urls = new Set(relays.map(normalizeRelayUrl))
+
+    if (urls.size !== relays.length) {
+      warn(`Attempted to connect to non-unique relays`)
+    }
+
+    return Array.from(urls)
+  }
+
+  getExecutor = (urls: string[], {bypassBoot = false} = {}) => {
     let target
 
     const muxUrl = this.engine.Settings.getSetting("multiplextr_url")
@@ -94,7 +94,7 @@ export class Network {
     timeout = 3000,
     verb = "EVENT",
   }: PublishOpts): Promise<Progress> => {
-    const urls = getUrls(relays)
+    const urls = this.getUrls(relays)
     const executor = this.getExecutor(urls, {bypassBoot: verb === "AUTH"})
 
     info(`Publishing to ${urls.length} relays`, event, urls)
@@ -108,7 +108,7 @@ export class Network {
         const completed = union(timeouts, succeeded, failed)
         const pending = difference(new Set(urls), completed)
 
-        return {succeeded, failed, timeouts, completed, pending}
+        return {event, succeeded, failed, timeouts, completed, pending}
       }
 
       const attemptToResolve = () => {
@@ -163,7 +163,7 @@ export class Network {
     shouldProcess = true,
   }: SubscribeOpts) => {
     const subscription = new Subscription({
-      executor: this.getExecutor(getUrls(relays)),
+      executor: this.getExecutor(this.getUrls(relays)),
       filters: ensurePlural(filter),
       timeout,
       relays,
@@ -187,7 +187,7 @@ export class Network {
 
   count = async (filter: Filter | Filter[]) => {
     const filters = ensurePlural(filter)
-    const executor = this.getExecutor(this.engine.Env.COUNT_RELAYS)
+    const executor = this.getExecutor(this.getUrls(this.engine.Env.COUNT_RELAYS))
 
     return new Promise(resolve => {
       const sub = executor.count(filters, {

@@ -1,4 +1,4 @@
-import {propEq, defaultTo, find, reject} from "ramda"
+import {propEq, equals, prop, defaultTo, find, reject} from "ramda"
 import type {Event} from "nostr-tools"
 import {nip19, getPublicKey, getSignature, generatePrivateKey} from "nostr-tools"
 import NDK, {NDKEvent, NDKNip46Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk"
@@ -15,11 +15,13 @@ export class Keys {
 
   current = this.pubkey.derived(k => this.getKeyState(k))
 
-  canSign = this.current.derived(keyState =>
-    ["bunker", "privkey", "extension"].includes(keyState?.method)
-  )
+  privkey = this.current.derived(prop("privkey"))
 
-  canUseGiftWrap = this.current.derived(keyState => keyState?.method === "privkey")
+  method = this.current.derived(prop("method"))
+
+  canSign = this.method.derived($method => ["bunker", "privkey", "extension"].includes($method))
+
+  canUseGiftWrap = this.method.derived(equals("privkey"))
 
   getKeyState = (k: string) => find(propEq("pubkey", k), this.keyState.get())
 

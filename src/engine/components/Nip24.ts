@@ -4,7 +4,6 @@ import {Tags, appDataKeys} from "src/util/nostr"
 import type {Nip24Channel, Message} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
 import {collection, derived} from "src/engine/util/store"
-import {withUnwrappedEvent} from "src/engine/util/nip59"
 
 export class Nip24 {
   engine: Engine
@@ -50,8 +49,8 @@ export class Nip24 {
         return
       }
 
-      withUnwrappedEvent(keyState.privkey, e, ({wrap, seal, rumor}) => {
-        if (rumor.kind === 14) {
+      engine.Nip59.withUnwrappedEvent(e, keyState.privkey, ({wrap, seal, rumor}) => {
+        if (rumor.kind === 14 && !this.messages.key(rumor.id).get()) {
           const tags = Tags.from(rumor)
           const pubkey = engine.Keys.pubkey.get()
           const pubkeys = without([pubkey], tags.type("p").values().all().concat(seal.pubkey))
@@ -61,9 +60,9 @@ export class Nip24 {
           } as Nip24Channel
 
           if (rumor.pubkey === keyState.pubkey) {
-            channel.last_sent = rumor.created_at
+            channel.last_sent = Math.max(channel.last_sent || 0, rumor.created_at)
           } else {
-            channel.last_received = rumor.created_at
+            channel.last_received = Math.max(channel.last_received || 0, rumor.created_at)
           }
 
           this.channels.key(channel.id).merge(channel)
