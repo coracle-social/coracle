@@ -7,7 +7,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile, stripExifData, blobToFile} from "src/util/html"
-  import {Builder} from "src/app/engine"
+  import {Builder, Outbox} from "src/app/engine"
 
   export let icon = null
   export let value = null
@@ -41,14 +41,18 @@
               body.append("file[]", file)
             }
 
+            const event = Outbox.prep(
+              Builder.nip98Auth([
+                ["u", url],
+                ["method", "POST"],
+              ])
+            )
+
             const result = await Fetch.fetchJson(url, {
               body,
               method: "POST",
               headers: {
-                Authorization: Builder.createNip98AuthHeader([
-                  ["u", url],
-                  ["method", "POST"],
-                ]),
+                Authorization: `Nostr ${btoa(JSON.stringify(event))}`,
               },
             })
 

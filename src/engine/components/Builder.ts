@@ -173,8 +173,7 @@ export class Builder {
 
   createLabel = (payload: EventOpts) => buildEvent(1985, payload)
 
-  createNip98AuthHeader = (tags: string[][]) =>
-    `Nostr ${btoa(JSON.stringify(buildEvent(27235, {tags})))}`
+  nip98Auth = (tags: string[][]) => buildEvent(27235, {tags})
 
   initialize(engine: Engine) {
     this.engine = engine
