@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.3.5
+
+- [x] Fix scrambled person list
+
 # 0.3.4
 
 - [x] Switch to nostr.build for image hosting

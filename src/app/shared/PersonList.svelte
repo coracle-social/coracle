@@ -34,7 +34,7 @@
 </script>
 
 <Content gap="gap-2">
-  {#each pubkeys as pubkey}
+  {#each pubkeys as pubkey (pubkey)}
     <PersonSummary {pubkey} />
   {:else}
     <Spinner />
