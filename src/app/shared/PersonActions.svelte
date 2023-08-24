@@ -29,8 +29,6 @@
       })
     }
 
-    actions.push({onClick: share, label: "Share", icon: "share-nodes"})
-
     if (!isSelf && $canSign) {
       if ($canUseGiftWrap) {
         actions.push({
@@ -70,8 +68,6 @@
   }
 
   const openProfileInfo = () => modal.push({type: "person/info", pubkey})
-
-  const share = () => modal.push({type: "person/share", pubkey})
 
   const unfollow = () => user.unfollow(pubkey)
 

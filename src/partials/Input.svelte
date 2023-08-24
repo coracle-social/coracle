@@ -9,7 +9,7 @@
   export let hideAfter = false
 
   const showBefore = $$slots.before && !hideBefore
-  const showAfter = $$slots.before && !hideAfter
+  const showAfter = $$slots.after && !hideAfter
   const className = cx(
     $$props.class,
     "rounded-full shadow-inset py-2 px-4 w-full placeholder:text-gray-5",

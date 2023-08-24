@@ -13,14 +13,13 @@
   import Onboarding from "src/app/views/Onboarding.svelte"
   import NoteCreate from "src/app/views/NoteCreate.svelte"
   import ZapModal from "src/app/views/ZapModal.svelte"
-  import NoteShare from "src/app/views/NoteShare.svelte"
   import PublishInfo from "src/app/views/PublishInfo.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import NotificationInfo from "src/app/views/NotificationInfo.svelte"
   import ThreadDetail from "src/app/views/ThreadDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
   import PersonList from "src/app/shared/PersonList.svelte"
-  import PersonProfileInfo from "src/app/views/PersonProfileInfo.svelte"
+  import PersonInfo from "src/app/views/PersonInfo.svelte"
   import PersonShare from "src/app/views/PersonShare.svelte"
   import TopicFeed from "src/app/views/TopicFeed.svelte"
   import ListList from "src/app/views/ListList.svelte"
@@ -29,6 +28,7 @@
   import RelayBrowse from "src/app/views/RelayBrowse.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
   import RelayReview from "src/app/views/RelayReview.svelte"
+  import QRCode from "src/app/views/QRCode.svelte"
 
   export let m
 </script>
@@ -41,8 +41,6 @@
   <NoteCreate pubkey={m.pubkey} quote={m.quote} writeTo={m.relays} />
 {:else if m.type === "zap/create"}
   <ZapModal pubkey={m.pubkey} note={m.note} author={m.author} zapper={m.zapper} />
-{:else if m.type === "note/share"}
-  <NoteShare note={m.note} />
 {:else if m.type === "notification/info"}
   <NotificationInfo zaps={m.zaps} likes={m.likes} replies={m.replies} />
 {:else if m.type === "thread/detail"}
@@ -76,7 +74,7 @@
 {:else if m.type === "person/detail"}
   <PersonDetail npub={nip19.npubEncode(m.pubkey)} />
 {:else if m.type === "person/info"}
-  <PersonProfileInfo pubkey={m.pubkey} />
+  <PersonInfo pubkey={m.pubkey} />
 {:else if m.type === "person/share"}
   <PersonShare pubkey={m.pubkey} />
 {:else if m.type === "person/follows"}
@@ -93,6 +91,8 @@
   <ListSelect item={m.item} />
 {:else if m.type === "list/edit"}
   <ListEdit list={m.list} />
+{:else if m.type === "qrcode"}
+  <QRCode value={m.value} />
 {:else if m.type === "message"}
   <Content size="lg">
     <div class="text-center">{m.message}</div>

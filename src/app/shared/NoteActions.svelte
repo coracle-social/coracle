@@ -4,7 +4,7 @@
   import {tweened} from "svelte/motion"
   import {find, reject, identity, propEq, sum, pluck, sortBy} from "ramda"
   import {stringToHue, formatSats, hsl} from "src/util/misc"
-  import {isLike} from "src/util/nostr"
+  import {isLike, toNostrURI} from "src/util/nostr"
   import {quantify} from "hurdak"
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
@@ -24,14 +24,11 @@
   export let setFeedRelay
 
   const zapper = Nip57.zappers.key(note.pubkey)
-  const bech32Note = nip19.noteEncode(note.id)
   const nevent = nip19.neventEncode({id: note.id, relays: [note.seen_on]})
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
-
-  const share = () => modal.push({type: "note/share", note})
 
   const quote = () => modal.push({type: "note/create", quote: note})
 
@@ -99,7 +96,6 @@
   $: {
     actions = []
 
-    actions.push({label: "Share", icon: "share-nodes", onClick: share})
     actions.push({label: "Quote", icon: "quote-left", onClick: quote})
 
     if (muted) {
@@ -229,9 +225,8 @@
         {/each}
       </div>
       <h1 class="staatliches text-2xl">Details</h1>
-      <CopyValue label="Identifier" value={nevent} />
-      <CopyValue label="Event ID (note)" value={bech32Note} />
-      <CopyValue label="Event ID (hex)" value={note.id} />
+      <CopyValue label="Link" value={toNostrURI(nevent)} />
+      <CopyValue label="Event ID" encode={nip19.noteEncode} value={note.id} />
     </Content>
   </Modal>
 {/if}

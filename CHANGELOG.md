@@ -12,6 +12,7 @@
 - [x] Fix spotify album embed
 - [x] Broadcast note button
 - [x] Open person detail on notification detail
+- [x] Clean up info modals
 
 # 0.3.3
 
