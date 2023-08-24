@@ -215,7 +215,7 @@
 
     const selection = window.getSelection()
     const textNode = document.createTextNode(text)
-    const target = last(input.childNodes) as unknown as Node
+    const target = (last(input.childNodes) || input) as unknown as Node
     const offset = target instanceof Text ? target.wholeText.length : target.childNodes.length
 
     selection.collapse(target, offset)
