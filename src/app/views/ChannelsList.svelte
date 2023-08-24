@@ -45,10 +45,7 @@
         const pubkeys = new Set()
 
         for (const event of events) {
-          Nip59.withUnwrappedEvent(event, privkey, ({seal, rumor}) => {
-            pubkeys.add(seal.pubkey)
-            pubkeys.add(rumor.pubkey)
-          })
+          Nip59.withUnwrappedEvent(event, privkey, e => pubkeys.add(e.pubkey))
         }
 
         pubkeyLoader.load(pubkeys)

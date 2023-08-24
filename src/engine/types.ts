@@ -1,7 +1,9 @@
 import type {Event as NostrToolsEvent} from "nostr-tools"
 
-export type Event = NostrToolsEvent & {
+export type Event = Omit<NostrToolsEvent, "kind"> & {
+  kind: number
   seen_on: string[]
+  wrap?: Event
 }
 
 export type ZapEvent = Event & {

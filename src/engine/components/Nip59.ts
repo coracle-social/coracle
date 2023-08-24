@@ -98,18 +98,21 @@ export class Nip59 {
   }
 
   withUnwrappedEvent = async (e, privkey, cb) => {
-    let wrap, seal, rumor
+    let seal, rumor
 
     try {
-      ;({wrap, seal, rumor} = await this.unwrap(e, privkey))
+      ;({seal, rumor} = await this.unwrap(e, privkey))
     } catch (e) {
       console.warn(e)
 
       return
     }
 
+    rumor.wrap = e
+    rumor.seen_on = e.seen_on
+
     if (seal.pubkey === rumor.pubkey) {
-      return cb({wrap, seal, rumor})
+      return cb(rumor)
     }
   }
 

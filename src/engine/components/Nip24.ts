@@ -49,11 +49,11 @@ export class Nip24 {
         return
       }
 
-      engine.Nip59.withUnwrappedEvent(e, keyState.privkey, ({wrap, seal, rumor}) => {
+      engine.Nip59.withUnwrappedEvent(e, keyState.privkey, rumor => {
         if (rumor.kind === 14 && !this.messages.key(rumor.id).get()) {
           const tags = Tags.from(rumor)
           const pubkey = engine.Keys.pubkey.get()
-          const pubkeys = without([pubkey], tags.type("p").values().all().concat(seal.pubkey))
+          const pubkeys = without([pubkey], tags.type("p").values().all().concat(rumor.pubkey))
           const channel = {
             id: this.getChannelId(pubkeys),
             hints: tags.relays(),
