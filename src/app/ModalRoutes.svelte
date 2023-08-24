@@ -20,7 +20,6 @@
   import PersonDetail from "src/app/views/PersonDetail.svelte"
   import PersonList from "src/app/shared/PersonList.svelte"
   import PersonInfo from "src/app/views/PersonInfo.svelte"
-  import PersonShare from "src/app/views/PersonShare.svelte"
   import TopicFeed from "src/app/views/TopicFeed.svelte"
   import ListList from "src/app/views/ListList.svelte"
   import ListSelect from "src/app/views/ListSelect.svelte"
@@ -75,8 +74,6 @@
   <PersonDetail npub={nip19.npubEncode(m.pubkey)} />
 {:else if m.type === "person/info"}
   <PersonInfo pubkey={m.pubkey} />
-{:else if m.type === "person/share"}
-  <PersonShare pubkey={m.pubkey} />
 {:else if m.type === "person/follows"}
   <PersonList type="follows" pubkey={m.pubkey} />
 {:else if m.type === "person/followers"}
