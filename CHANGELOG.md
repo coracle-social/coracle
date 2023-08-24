@@ -10,6 +10,8 @@
 - [x] Optimize store.notify
 - [x] Add field components
 - [x] Fix spotify album embed
+- [x] Broadcast note button
+- [x] Open person detail on notification detail
 
 # 0.3.3
 

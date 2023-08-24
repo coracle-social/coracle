@@ -3,6 +3,7 @@
   import {closure, quantify} from "hurdak"
   import {tryJson, formatTimestamp} from "src/util/misc"
   import {Tags} from "src/util/nostr"
+  import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
   import Card from "src/partials/Card.svelte"
@@ -35,6 +36,7 @@
   })
 
   const showDetails = () => modal.push({type: "notification/info", zaps, likes, replies})
+  const showPerson = () => modal.push({type: "person/detail", pubkey: note.pubkey})
 </script>
 
 {#if note}
@@ -45,11 +47,11 @@
       on:click={() => modal.push({type: "note/detail", note})}>
       <div on:click|stopPropagation class="flex justify-between">
         {#if !event.ref}
-          <div class="flex items-center gap-2">
-            <PersonCircle pubkey={note?.pubkey} />
-            <PersonName class="font-bold" pubkey={note?.pubkey} />
+          <Anchor on:click={showPerson} class="flex items-center gap-2">
+            <PersonCircle pubkey={note.pubkey} />
+            <PersonName class="font-bold" pubkey={note.pubkey} />
             <span>mentioned you.</span>
-          </div>
+          </Anchor>
         {:else}
           <div on:click={showDetails}>
             {quantify(pubkeys.length, "person", "people")}

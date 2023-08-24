@@ -14,6 +14,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
+  import {toastProgress} from "src/app/state"
   import {Env, Nip57, Builder, Nip65, Keys, Outbox, user} from "src/app/engine"
 
   export let note
@@ -61,6 +62,14 @@
     modal.push({type: "zap/create", note, pubkey: note.pubkey})
   }
 
+  const broadcast = () => {
+    Outbox.publish({
+      event: note,
+      relays: user.getRelayUrls("write"),
+      onProgress: toastProgress,
+    })
+  }
+
   let like, likes, allLikes, zap, zaps
   let actions = []
   let showDetails = false
@@ -100,6 +109,8 @@
     }
 
     if (Env.FORCE_RELAYS.length === 0) {
+      actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
+
       actions.push({
         label: "Details",
         icon: "info",
