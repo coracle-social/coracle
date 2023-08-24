@@ -1,5 +1,16 @@
 # Changelog
 
+# 0.3.4
+
+- [x] Switch to nostr.build for image hosting
+- [x] Fix url placement in non-empty text box
+- [x] Stop sending invalid search requests
+- [x] Stop loading new notes automatically
+- [x] Refactor gift wrap stuff in preparation for extension support
+- [x] Optimize store.notify
+- [x] Add field components
+- [x] Fix spotify album embed
+
 # 0.3.3
 
 - [x] Add ability to start a chat from the messages list page (NIP 24 only)
