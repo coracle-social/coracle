@@ -84,7 +84,9 @@
   }
 
   const setWordCount = throttle(300, () => {
-    wordCount = compose.parse().match(/\s+/g)?.length || 0
+    if (compose) {
+      wordCount = compose.parse().match(/\s+/g)?.length || 0
+    }
   })
 
   onMount(() => {

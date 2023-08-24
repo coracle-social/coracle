@@ -209,11 +209,16 @@
   }
 
   export const write = text => {
-    contenteditable.getInput().focus()
+    const input = contenteditable.getInput()
+
+    input.focus()
 
     const selection = window.getSelection()
     const textNode = document.createTextNode(text)
+    const target = last(input.childNodes) as unknown as Node
+    const offset = target instanceof Text ? target.wholeText.length : target.childNodes.length
 
+    selection.collapse(target, offset)
     selection.getRangeAt(0).insertNode(textNode)
     selection.collapse(textNode, text.length)
 
