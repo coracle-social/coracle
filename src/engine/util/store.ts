@@ -33,13 +33,16 @@ export class Writable<T> implements Readable<T> {
   }
 
   set(newValue: T) {
-    this.value = newValue
-    this.notify()
+    // Only notify if the value has changed. If the value was mutated, we can't tell
+    // if it changed, so go ahead and notify anyway
+    if (newValue === this.value || !equals(newValue, this.value)) {
+      this.value = newValue
+      this.notify()
+    }
   }
 
   update(f: (v: T) => T) {
-    this.value = f(this.value)
-    this.notify()
+    this.set(f(this.value))
   }
 
   subscribe(f: Subscriber<T>) {

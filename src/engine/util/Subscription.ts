@@ -3,6 +3,7 @@ import EventEmitter from "events"
 import {defer, tryFunc} from "hurdak"
 import type {Executor} from "paravel"
 import type {Event, Filter} from "src/engine/types"
+import {warn} from "src/util/logger"
 
 type SubscriptionOpts = {
   executor: typeof Executor
@@ -52,10 +53,12 @@ export class Subscription extends EventEmitter {
     this.seen.set(event.id, event.seen_on)
 
     if (!tryFunc(() => verifySignature(event))) {
+      warn("Signature verification failed", {event})
       return
     }
 
     if (!matchFilters(filters, event)) {
+      warn("Event failed to match filter", {filters, event})
       return
     }
 

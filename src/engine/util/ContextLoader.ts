@@ -1,7 +1,7 @@
 import {matchFilters} from "nostr-tools"
 import {throttle} from "throttle-debounce"
 import {omit, find, pluck, flatten, without, groupBy, sortBy, prop, uniqBy, reject} from "ramda"
-import {ensurePlural, batch, union, chunk} from "hurdak"
+import {ensurePlural, batch, chunk} from "hurdak"
 import {now, pushToKey} from "src/util/misc"
 import {findReplyAndRootIds, findReplyId, findRootId, Tags, noteKinds} from "src/util/nostr"
 import {collection} from "./store"
@@ -63,7 +63,7 @@ export class ContextLoader {
   }
 
   matchFilters(e: Event) {
-    return this.opts.filter && matchFilters(ensurePlural(this.opts.filter), e)
+    return !this.opts.filter || matchFilters(ensurePlural(this.opts.filter), e)
   }
 
   isTextNote(e: Event) {
@@ -99,13 +99,12 @@ export class ContextLoader {
   }
 
   applyContext = (notes: Event[], {substituteParents = false, alreadySeen = new Set()} = {}) => {
-    const dontShow = union(alreadySeen, new Set(pluck("id", notes)))
     const contextById = {} as Record<string, Event>
     const zapsByParentId = {} as Record<string, Event[]>
     const reactionsByParentId = {} as Record<string, Event[]>
     const repliesByParentId = {} as Record<string, Event[]>
 
-    for (const event of this.data.get()) {
+    for (const event of this.data.get().concat(notes)) {
       if (contextById[event.id]) {
         continue
       }
@@ -137,7 +136,7 @@ export class ContextLoader {
         reactions: uniqBy(prop("id"), combinedReactions),
         replies: sortBy((e: DisplayEvent) => -e.created_at, uniqBy(prop("id"), combinedReplies)),
         matchesFilter:
-          !dontShow.has(note.id) &&
+          !alreadySeen.has(note.id) &&
           (this.matchFilters(note) || Boolean(find(prop("matchesFilter"), combinedReplies))),
       }
     }

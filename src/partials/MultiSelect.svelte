@@ -1,6 +1,7 @@
 <script lang="ts">
   import {reject, equals, identity} from "ramda"
   import Chip from "src/partials/Chip.svelte"
+  import Input from "src/partials/Input.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
 
   export let value
@@ -56,6 +57,12 @@
       suggestions.next()
     }
   }
+
+  const onBlur = () => {
+    setTimeout(() => {
+      term = ""
+    }, 100)
+  }
 </script>
 
 <div class="text-sm">
@@ -68,18 +75,20 @@
   {/each}
 </div>
 
-<input
-  type="text"
-  class="shadow-inset w-full cursor-text rounded-full border border-solid border-gray-3 bg-input bg-input px-4
-         py-2 py-2 text-black outline-0 placeholder:text-gray-5"
+<Input
+  class="cursor-text text-black outline-0"
   {placeholder}
   bind:value={term}
-  bind:this={input}
-  on:keydown={onKeyDown} />
+  bind:element={input}
+  on:keydown={onKeyDown}
+  on:blur={onBlur}
+  hideBefore={!$$slots.before}>
+  <slot slot="before" name="before" />
+</Input>
 
 {#if search}
   <div class="relative w-full">
-    <div class="absolute w-full">
+    <div class="absolute z-10 w-full">
       <Suggestions bind:this={suggestions} {select} {getKey}>
         <div slot="item" let:item>
           <slot name="item" context="option" {item}>

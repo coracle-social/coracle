@@ -12,14 +12,13 @@
   import Content from "src/partials/Content.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import PersonBadge from "src/app/shared/PersonBadge.svelte"
+  import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import type {DynamicFilter, Topic, Profile} from "src/engine"
   import {Directory, user, default as engine} from "src/app/engine"
 
   export let filter
   export let onChange
 
-  const {searchProfiles} = Directory
   const {searchTopics} = engine.Content
 
   type Kind = {
@@ -244,20 +243,7 @@
               value={typeof _filter.authors === "string" ? _filter.authors : "custom"}
               options={scopeOptions} />
             {#if Array.isArray(_filter.authors)}
-              <MultiSelect
-                search={$searchProfiles}
-                bind:value={_filter.authors}
-                getKey={prop("pubkey")}>
-                <div slot="item" let:item let:context>
-                  <div class="-my-1">
-                    {#if context === "value"}
-                      {Directory.displayPubkey(item.pubkey)}
-                    {:else}
-                      <PersonBadge inert pubkey={item.pubkey} />
-                    {/if}
-                  </div>
-                </div>
-              </MultiSelect>
+              <PersonMultiSelect bind:value={_filter.authors} />
             {/if}
           </div>
           <div class="flex flex-col gap-1">
@@ -272,17 +258,7 @@
           </div>
           <div class="flex flex-col gap-1">
             <strong>Mentions</strong>
-            <MultiSelect search={$searchProfiles} bind:value={_filter["#p"]}>
-              <div slot="item" let:item let:context>
-                <div class="-my-1">
-                  {#if context === "value"}
-                    {Directory.displayPubkey(item.pubkey)}
-                  {:else}
-                    <PersonBadge inert pubkey={item.pubkey} />
-                  {/if}
-                </div>
-              </div>
-            </MultiSelect>
+            <PersonMultiSelect bind:value={_filter["#p"]} />
           </div>
           <div class="flex justify-end">
             <Anchor theme="button-accent" on:click={submit}>Apply Filters</Anchor>

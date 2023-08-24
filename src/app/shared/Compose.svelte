@@ -31,7 +31,7 @@
   const {searchProfiles} = Directory
 
   const loadProfiles = debounce(500, search => {
-    if (search.length > 2) {
+    if (search.length > 2 && search.startsWith("@")) {
       Network.subscribe({
         timeout: 3000,
         relays: Nip65.getSearchRelays(),

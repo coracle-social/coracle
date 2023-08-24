@@ -3,6 +3,7 @@
   import {createEventDispatcher} from "svelte"
 
   export let value
+  export let disabled = false
 
   const dispatch = createEventDispatcher()
 
@@ -13,6 +14,7 @@
 </script>
 
 <Switch
+  {disabled}
   checked={value}
   on:change={onChange}
   onColor="#ccc"

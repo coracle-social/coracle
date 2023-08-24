@@ -57,7 +57,9 @@
   </Input>
   <div class="flex flex-col gap-2">
     {#if q.match("^.+\\..+$")}
-      <RelayCard relay={{url: normalizeRelayUrl(q)}} />
+      <slot name="item" relay={{url: normalizeRelayUrl(q)}}>
+        <RelayCard relay={{url: normalizeRelayUrl(q)}} />
+      </slot>
     {/if}
     {#each !q && hideIfEmpty ? [] : search(q).slice(0, limit) as relay (relay.url)}
       <slot name="item" {relay}>

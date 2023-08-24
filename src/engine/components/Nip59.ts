@@ -3,9 +3,9 @@ import {getPublicKey, getEventHash, getSignature} from "nostr-tools"
 import type {Engine} from "src/engine/Engine"
 import type {Nip44Opts} from "src/engine/components/Nip44"
 
-type Rumor = UnsignedEvent & {id: string}
+export type Rumor = UnsignedEvent & {id: string}
 
-type WrapOpts = {
+export type WrapOpts = {
   recipientPk: string
   wrapperSk: string
   authorSk?: string
@@ -70,7 +70,7 @@ export class Nip59 {
     } as any
 
     wrap.id = getEventHash(wrap)
-    seal.sig = opts.sk ? getSignature(wrap, opts.sk) : await Keys.sign(wrap)
+    wrap.sig = opts.sk ? getSignature(wrap, opts.sk) : await Keys.sign(wrap)
 
     return wrap as Event
   }
@@ -108,7 +108,9 @@ export class Nip59 {
       return
     }
 
-    return cb({wrap, seal, rumor})
+    if (seal.pubkey === rumor.pubkey) {
+      return cb({wrap, seal, rumor})
+    }
   }
 
   initialize(engine: Engine) {

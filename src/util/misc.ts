@@ -1,6 +1,6 @@
 import {bech32, utf8} from "@scure/base"
 import {debounce} from "throttle-debounce"
-import {pluck} from "ramda"
+import {pluck, equals} from "ramda"
 import {Storage, first, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from "svelte/store"
@@ -257,4 +257,17 @@ export const displayUrl = url => {
 
 export const displayDomain = url => {
   return first(displayUrl(url).split(/[\/\?]/))
+}
+
+export const memoize = f => {
+  let prevArgs, result
+
+  return (...args) => {
+    if (!equals(prevArgs, args)) {
+      prevArgs = args
+      result = f(...args)
+    }
+
+    return result
+  }
 }

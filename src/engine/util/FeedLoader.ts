@@ -34,12 +34,14 @@ export class FeedLoader {
   ready: Promise<void>
 
   constructor(engine: Engine, readonly opts: FeedOpts) {
+    const urls = engine.Network.getUrls(opts.relays)
+
     this.engine = engine
 
     this.pubkeyLoader = new PubkeyLoader(engine)
 
     this.context = new ContextLoader(engine, {
-      relays: opts.shouldUseNip65 ? null : opts.relays,
+      relays: opts.shouldUseNip65 ? null : urls,
       filter: opts.filter,
       isMuted: opts.isMuted,
       onEvent: event => {
@@ -53,7 +55,7 @@ export class FeedLoader {
     if (!any(prop("until"), ensurePlural(opts.filter) as any[])) {
       this.addSubs([
         this.engine.Network.subscribe({
-          relays: opts.relays,
+          relays: urls,
           filter: ensurePlural(opts.filter).map(assoc("since", this.since)),
           onEvent: batch(1000, (context: Event[]) => {
             this.context.addContext(context, {shouldLoadParents: true, depth: opts.depth})
@@ -64,7 +66,7 @@ export class FeedLoader {
     }
 
     this.cursor = new MultiCursor(
-      opts.relays.map(
+      urls.map(
         relay =>
           new Cursor(this.engine, {
             relay,

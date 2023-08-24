@@ -110,7 +110,13 @@ export class Keys {
     this.pubkey.set(pubkey)
   }
 
-  sign = async (event: Event) => {
+  sign = async (event: Event, sk?: string) => {
+    if (sk) {
+      return Object.assign(event, {
+        sig: getSignature(event, sk),
+      })
+    }
+
     const {method, privkey} = this.current.get()
 
     console.assert(event.id)

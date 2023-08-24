@@ -7,6 +7,7 @@ import type {Engine} from "src/engine/Engine"
 import {Subscription} from "src/engine/util/Subscription"
 
 export type Progress = {
+  event: Event
   succeeded: Set<string>
   failed: Set<string>
   timeouts: Set<string>
@@ -162,14 +163,15 @@ export class Network {
     timeout,
     shouldProcess = true,
   }: SubscribeOpts) => {
+    const urls = this.getUrls(relays)
     const subscription = new Subscription({
-      executor: this.getExecutor(this.getUrls(relays)),
+      executor: this.getExecutor(urls),
       filters: ensurePlural(filter),
+      relays: urls,
       timeout,
-      relays,
     })
 
-    info(`Starting subscription with ${relays.length} relays`, {filter, relays})
+    info(`Starting subscription with ${urls.length} relays`, {filter, urls})
 
     if (onEose) subscription.on("eose", onEose)
     if (onClose) subscription.on("close", onClose)

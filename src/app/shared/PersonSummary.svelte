@@ -27,9 +27,11 @@
       </div>
     </Anchor>
     {#if !hideActions}
-      <slot name="actions">
-        <PersonActions {pubkey} />
-      </slot>
+      <div class="flex items-start justify-end">
+        <slot name="actions">
+          <PersonActions {pubkey} />
+        </slot>
+      </div>
     {/if}
   </div>
   <PersonAbout truncate {pubkey} />

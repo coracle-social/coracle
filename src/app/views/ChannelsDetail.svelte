@@ -13,7 +13,6 @@
   import {
     user,
     Nip24,
-    Nip59,
     Nip65,
     Outbox,
     Directory,
@@ -37,21 +36,19 @@
   }
 
   const sendMessage = async content => {
-    const rumor = {
-      kind: 14,
-      content,
-      pubkey: userPubkey,
-      tags: pubkeys.map(Builder.mention),
-    }
+    const event = {kind: 14, content, tags: pubkeys.map(Builder.mention)}
 
     for (const pubkey of pubkeys.concat(userPubkey)) {
       const relays = Nip65.getPubkeyHints(relayLimit, pubkey, "read")
-      const event = await Nip59.wrap(rumor, {
-        recipientPk: pubkey,
-        wrapperSk: generatePrivateKey(),
-      })
 
-      Outbox.publish({event, relays})
+      Outbox.publish({
+        event,
+        relays,
+        wrapWith: {
+          recipientPk: pubkey,
+          wrapperSk: generatePrivateKey(),
+        },
+      })
     }
   }
 

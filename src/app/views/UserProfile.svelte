@@ -7,7 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {Outbox, Directory, Keys, user, Builder} from "src/app/engine"
+  import {Directory, Outbox, Keys, user, Builder} from "src/app/engine"
   import {routes} from "src/app/state"
   import {toastProgress} from "src/app/state"
 
@@ -45,7 +45,7 @@
     </div>
     <div class="flex w-full flex-col gap-8">
       <div class="flex flex-col gap-1">
-        <strong>username</strong>
+        <strong>Username</strong>
         <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.name}>
           <i slot="before" class="fa-solid fa-user-astronaut" />
         </Input>
