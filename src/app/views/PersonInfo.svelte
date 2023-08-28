@@ -23,7 +23,7 @@
       <CopyValue label="Nostr Address" value={display} />
       <Content size="inherit" gap="gap-2">
         <strong>Nostr Address Relays</strong>
-        {#each handle.profile.relays as url}
+        {#each handle.profile.relays || [] as url}
           <RelayCard relay={{url}} />
         {:else}
           <p class="flex gap-2 items-center">
