@@ -1,7 +1,7 @@
 import {bech32, utf8} from "@scure/base"
 import {debounce} from "throttle-debounce"
-import {pluck, equals} from "ramda"
-import {Storage, first, seconds, tryFunc, sleep, round} from "hurdak"
+import {pluck, is, equals} from "ramda"
+import {Storage, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from "svelte/store"
 import {warn} from "src/util/logger"
@@ -270,4 +270,55 @@ export const memoize = f => {
 
     return result
   }
+}
+
+// https://stackoverflow.com/a/11900218/1467342
+export function roughSizeOfObject(o, max = Infinity) {
+  const seen = new Set()
+  const stack = [o]
+  let bytes = 0
+
+  while (stack.length) {
+    const value = stack.pop()
+
+    if (typeof value === "boolean") {
+      bytes += 4
+    } else if (typeof value === "string") {
+      bytes += value.length * 2
+    } else if (typeof value === "number") {
+      bytes += 8
+    } else if (isPojo(value) && !seen.has(value)) {
+      seen.add(value)
+
+      for (const [k, v] of Object.entries(value)) {
+        stack.push(k)
+        stack.push(v)
+      }
+    } else if (is(Map, value) && !seen.has(value)) {
+      seen.add(value)
+
+      for (const [k, v] of value.entries()) {
+        stack.push(k)
+        stack.push(v)
+      }
+    } else if (Array.isArray(value) && !seen.has(value)) {
+      seen.add(value)
+
+      for (const v of value) {
+        stack.push(v)
+      }
+    } else if (is(Set, value) && !seen.has(value)) {
+      seen.add(value)
+
+      for (const v of value.values()) {
+        stack.push(v)
+      }
+    }
+
+    if (bytes > max) {
+      return max
+    }
+  }
+
+  return bytes
 }

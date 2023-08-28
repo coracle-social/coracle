@@ -135,7 +135,7 @@ export const listenForNotifications = async () => {
 
   clearTimeout(timeout)
 
-  timeout = setTimeout(listenForNotifications, 60_000)
+  timeout = setTimeout(listenForNotifications, 3 * 60_000)
 }
 
 export const loadAppData = async () => {
