@@ -40,5 +40,5 @@ You can find a more complete changelog [here](./CHANGELOG.md).
 - Clone the project repository: `git clone https://github.com/coracle-social/coracle.git`
 - Navigate to the project directory: `cd coracle`
 - Install dependencies: `yarn`
-- Add an env file from the template: `cp env.template env.local`
+- Customize configuration in `.env` (optional)
 - Start the development server: `yarn dev`
