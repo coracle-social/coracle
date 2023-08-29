@@ -1,5 +1,5 @@
 import {is, reject, filter, map, findIndex, equals} from "ramda"
-import {ensurePlural, throttle} from "hurdak"
+import {ensurePlural} from "hurdak"
 
 type Invalidator<T> = (value?: T) => void
 type Derivable = Readable<any> | Readable<any>[]
@@ -22,11 +22,11 @@ export class Writable<T> implements Readable<T> {
     this.value = defaultValue
   }
 
-  notify = throttle(50, () => {
+  notify() {
     for (const sub of this.subs) {
       sub(this.value)
     }
-  })
+  }
 
   get() {
     return this.value
@@ -74,9 +74,9 @@ export class Derived<T> implements Readable<T> {
     this.getValue = getValue
   }
 
-  notify = throttle(50, () => {
+  notify() {
     this.callerSubs.forEach(f => f(this.get()))
-  })
+  }
 
   getInput() {
     if (is(Array, this.stores)) {
