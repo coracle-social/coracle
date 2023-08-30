@@ -30,6 +30,8 @@
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
 
+  const curate = () => modal.push({type: "label/create", note})
+
   const quote = () => modal.push({type: "note/create", quote: note})
 
   const unmute = () => user.unmute(note.id)
@@ -115,6 +117,8 @@
         },
       })
     }
+
+    actions.push({label: "Curate", icon: "tag", onClick: curate})
   }
 </script>
 

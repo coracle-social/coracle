@@ -93,6 +93,7 @@ export class StorageAdapter {
         policy("Nip24.messages", 10000, sortBy(prop("created_at"))),
         policy("Content.topics", 1000, sortBy(prop("count"))),
         policy("Content.lists", 500, this.sortByPubkeyWhitelist(prop("updated_at"))),
+        policy("Content.labels", 10000, this.sortByPubkeyWhitelist(prop("updated_at"))),
         policy("Directory.profiles", 5000, this.sortByPubkeyWhitelist(prop("updated_at"))),
         policy("Events.cache", 5000, this.sortByPubkeyWhitelist(prop("created_at"))),
         policy("Nip02.graph", 5000, this.sortByPubkeyWhitelist(prop("updated_at"))),
@@ -104,7 +105,7 @@ export class StorageAdapter {
 
       this.db = new IndexedDB(
         "nostr-engine/Storage",
-        2,
+        3,
         policies.map(({key}) => {
           const store = getStore(key, this.engine)
 

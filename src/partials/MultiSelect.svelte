@@ -38,11 +38,11 @@
     }
 
     if (event.key === "Enter") {
+      event.preventDefault()
+
       if (suggestions.get()) {
-        event.preventDefault()
         select(suggestions.get())
       } else if (term && termToItem) {
-        event.preventDefault()
         select(termToItem(term))
       }
     }

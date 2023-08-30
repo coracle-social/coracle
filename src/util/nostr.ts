@@ -4,7 +4,7 @@ import {ensurePlural, mapVals, tryFunc, avg, first} from "hurdak"
 import type {Filter, Event, DisplayEvent} from "src/engine/types"
 import {tryJson} from "src/util/misc"
 
-export const noteKinds = [1, 1985, 30023, 1063, 9802]
+export const noteKinds = [1, 30023, 1063, 9802]
 export const personKinds = [0, 2, 3, 10002]
 export const userKinds = personKinds.concat([10000, 30001, 30078])
 
@@ -68,6 +68,9 @@ export class Tags {
   getMeta(k: string) {
     return this.type(k).values().first()
   }
+  drop(n) {
+    return new Tags(this.tags.map(t => t.slice(n)))
+  }
   values() {
     return new Tags(this.tags.map(t => t[1]))
   }
@@ -88,8 +91,10 @@ export class Tags {
   equals(value: string) {
     return new Tags(this.tags.filter(t => t[1] === value))
   }
-  mark(mark: string) {
-    return new Tags(this.tags.filter(t => last(t) === mark))
+  mark(mark: string | string[]) {
+    const marks = ensurePlural(mark)
+
+    return new Tags(this.tags.filter(t => marks.includes(last(t))))
   }
 }
 

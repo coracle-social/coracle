@@ -30,6 +30,11 @@
       <i class="fa fa-rss mr-2" /> Feed
     </a>
   </li>
+  <li class="cursor-pointer">
+    <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/explore">
+      <i class="fa fa-compass mr-2" /> Explore
+    </a>
+  </li>
   <li
     class={cx("relative", {
       "cursor-pointer": $canSign,

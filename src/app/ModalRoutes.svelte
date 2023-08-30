@@ -24,6 +24,8 @@
   import ListList from "src/app/views/ListList.svelte"
   import ListSelect from "src/app/views/ListSelect.svelte"
   import ListEdit from "src/app/views/ListEdit.svelte"
+  import LabelCreate from "src/app/views/LabelCreate.svelte"
+  import LabelDetail from "src/app/views/LabelDetail.svelte"
   import RelayBrowse from "src/app/views/RelayBrowse.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
   import RelayReview from "src/app/views/RelayReview.svelte"
@@ -88,6 +90,10 @@
   <ListSelect item={m.item} />
 {:else if m.type === "list/edit"}
   <ListEdit list={m.list} />
+{:else if m.type === "label/create"}
+  <LabelCreate note={m.note} />
+{:else if m.type === "label/detail"}
+  <LabelDetail label={m.label} ids={m.ids} hints={m.hints} />
 {:else if m.type === "qrcode"}
   <QRCode value={m.value} />
 {:else if m.type === "message"}

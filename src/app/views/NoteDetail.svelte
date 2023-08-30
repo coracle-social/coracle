@@ -16,8 +16,11 @@
   export let note
   export let relays = []
   export let invertColors = false
+  export let depth = isMobile ? 3 : 6
+  export let setFeedRelay = relay => {
+    feedRelay = relay
+  }
 
-  const depth = isMobile ? 3 : 6
   const filter = {ids: [note.id]}
   const context = new ContextLoader(engine, {
     filter,
@@ -29,10 +32,6 @@
       }
     },
   })
-
-  const setFeedRelay = relay => {
-    feedRelay = relay
-  }
 
   let sub
   let loading = true

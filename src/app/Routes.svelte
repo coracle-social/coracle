@@ -7,6 +7,7 @@
   import ChatDetail from "src/app/views/ChatDetail.svelte"
   import ChatList from "src/app/views/ChatList.svelte"
   import Feeds from "src/app/views/Feeds.svelte"
+  import Explore from "src/app/views/Explore.svelte"
   import UserKeys from "src/app/views/UserKeys.svelte"
   import Apps from "src/app/views/Apps.svelte"
   import About from "src/app/views/About.svelte"
@@ -36,9 +37,8 @@
   <div class="pt-16 text-gray-2 lg:ml-48">
     <TypedRoute path="/notifications" component={Notifications} />
     <TypedRoute path="/notifications/:activeTab" component={Notifications} />
-    <TypedRoute path="/notes" let:params>
-      <Feeds />
-    </TypedRoute>
+    <TypedRoute path="/notes" component={Feeds} />
+    <TypedRoute path="/explore" component={Explore} />
     <TypedRoute path="/people/:npub" let:params>
       {#key params.npub}
         <PersonDetail npub={params.npub} />
