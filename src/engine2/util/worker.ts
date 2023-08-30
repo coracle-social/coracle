@@ -40,7 +40,7 @@ export class Worker<T> {
     this.#enqueueWork()
   }
 
-  on = (k, handler: (message: T) => void) => {
+  addHandler = (k, handler: (message: T) => void) => {
     if (!this.handlers.has(k)) {
       this.handlers.set(k, [])
     }
@@ -48,7 +48,7 @@ export class Worker<T> {
     this.handlers.get(k).push(handler)
   }
 
-  onAny = (handler: (message: T) => void) => {
-    this.on(ANY, handler)
+  addGlobalHandler = (handler: (message: T) => void) => {
+    this.addHandler(ANY, handler)
   }
 }
