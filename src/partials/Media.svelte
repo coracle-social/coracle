@@ -1,7 +1,7 @@
 <script>
-  import cx from "classnames"
   import {last} from "ramda"
   import {ellipsize} from "hurdak"
+  import Audio from "src/partials/Audio.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import {Settings} from "src/app/engine"
@@ -29,61 +29,65 @@
   }
 </script>
 
-<Anchor
-  external
-  type="unstyled"
-  href={onClick ? null : link.url}
-  on:click={onClick}
-  style="background-color: rgba(15, 15, 14, 0.5)"
-  class={cx("relative flex flex-col overflow-hidden rounded-xl border border-solid border-gray-6")}>
-  {#if link.type === "image"}
-    <img
-      alt="Link preview"
-      src={Settings.imgproxy(link.url)}
-      class="max-h-96 object-contain object-center" />
-  {:else if link.type === "spotify"}
-    {@const id = last(link.url.split("?")[0].match(/[a-z]+\/[0-9A-z]+$/))}
-    {@const src = `https://open.spotify.com/embed/${id}`}
-    <iframe
-      {src}
-      style="border-radius:12px"
-      width="100%"
-      height="352"
-      frameBorder="0"
-      allowfullscreen=""
-      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-      loading="lazy" />
-  {:else if link.type === "video"}
-    <video controls src={link.url} class="max-h-96 object-contain object-center" />
-  {:else}
-    {#await loadPreview()}
-      <Spinner />
-    {:then { title, description, image }}
-      {#if image}
-        <img
-          alt="Link preview"
-          src={Settings.imgproxy(image)}
-          class="max-h-96 object-contain object-center" />
-      {/if}
-      <div class="h-px bg-gray-6" />
-      {#if title}
-        <div class="flex flex-col bg-white px-4 py-2 text-black">
-          <strong class="overflow-hidden text-ellipsis whitespace-nowrap">{title}</strong>
-          <small>{ellipsize(description, 140)}</small>
-        </div>
-      {/if}
-    {:catch}
-      <p class="mb-1 px-12 py-24 text-center text-gray-5">
-        Unable to load a preview for {link.url}
-      </p>
-    {/await}
-  {/if}
-  {#if onClose}
-    <div
-      on:click|preventDefault={onClose}
-      class="absolute right-0 top-0 m-1 flex h-6 w-6 cursor-pointer items-center justify-center
-       rounded-full border border-solid border-gray-6 bg-white text-black opacity-50 shadow">
-      <i class="fa fa-times" />
-    </div>
-  {/if}
-</Anchor>
+{#if link.type === "audio"}
+  <Audio url={link.url} />
+{:else}
+  <Anchor
+    external
+    type="unstyled"
+    href={onClick ? null : link.url}
+    on:click={onClick}
+    style="background-color: rgba(15, 15, 14, 0.5)"
+    class="relative flex flex-col overflow-hidden rounded-xl border border-solid border-gray-6">
+    {#if link.type === "image"}
+      <img
+        alt="Link preview"
+        src={Settings.imgproxy(link.url)}
+        class="max-h-96 object-contain object-center" />
+    {:else if link.type === "spotify"}
+      {@const id = last(link.url.split("?")[0].match(/[a-z]+\/[0-9A-z]+$/))}
+      {@const src = `https://open.spotify.com/embed/${id}`}
+      <iframe
+        {src}
+        style="border-radius:12px"
+        width="100%"
+        height="352"
+        frameBorder="0"
+        allowfullscreen=""
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy" />
+    {:else if link.type === "video"}
+      <video controls src={link.url} class="max-h-96 object-contain object-center" />
+    {:else}
+      {#await loadPreview()}
+        <Spinner />
+      {:then { title, description, image }}
+        {#if image}
+          <img
+            alt="Link preview"
+            src={Settings.imgproxy(image)}
+            class="max-h-96 object-contain object-center" />
+        {/if}
+        <div class="h-px bg-gray-6" />
+        {#if title}
+          <div class="flex flex-col bg-white px-4 py-2 text-black">
+            <strong class="overflow-hidden text-ellipsis whitespace-nowrap">{title}</strong>
+            <small>{ellipsize(description, 140)}</small>
+          </div>
+        {/if}
+      {:catch}
+        <p class="mb-1 px-12 py-24 text-center text-gray-5">
+          Unable to load a preview for {link.url}
+        </p>
+      {/await}
+    {/if}
+    {#if onClose}
+      <div
+        on:click|preventDefault={onClose}
+        class="absolute right-0 top-0 m-1 flex h-6 w-6 cursor-pointer items-center justify-center
+         rounded-full border border-solid border-gray-6 bg-white text-black opacity-50 shadow">
+        <i class="fa fa-times" />
+      </div>
+    {/if}
+  </Anchor>
+{/if}

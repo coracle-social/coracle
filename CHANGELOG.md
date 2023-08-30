@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.3.6
+
+- [x] Add support for kind 1808
+
 # 0.3.5
 
 - [x] Fix scrambled person list

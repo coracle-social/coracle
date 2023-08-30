@@ -4,7 +4,7 @@ import {ensurePlural, mapVals, tryFunc, avg, first} from "hurdak"
 import type {Filter, Event, DisplayEvent} from "src/engine/types"
 import {tryJson} from "src/util/misc"
 
-export const noteKinds = [1, 30023, 1063, 9802]
+export const noteKinds = [1, 30023, 1063, 9802, 1808]
 export const personKinds = [0, 2, 3, 10002]
 export const userKinds = personKinds.concat([10000, 30001, 30078])
 

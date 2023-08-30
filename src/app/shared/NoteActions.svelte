@@ -101,6 +101,8 @@
     actions = []
 
     actions.push({label: "Quote", icon: "quote-left", onClick: quote})
+    actions.push({label: "Tag", icon: "tag", onClick: label})
+    actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
 
     if (muted) {
       actions.push({label: "Unmute", icon: "microphone", onClick: unmute})
@@ -119,9 +121,6 @@
         },
       })
     }
-
-    actions.push({label: "Tag", icon: "tag", onClick: label})
-    actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
   }
 </script>
 

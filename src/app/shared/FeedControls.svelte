@@ -31,6 +31,7 @@
     {kind: 3, label: "Contacts list"},
     {kind: 7, label: "Reaction"},
     {kind: 1, label: "Text note"},
+    {kind: 1808, label: "Track"},
     {kind: 1985, label: "Label"},
     {kind: 1063, label: "Image data"},
     {kind: 9735, label: "Reaction"},
