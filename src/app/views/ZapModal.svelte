@@ -11,8 +11,8 @@
 
   export let pubkey
   export let note = null
-  export let zapper = Nip57.zappers.key(pubkey).get()
-  export let author = Directory.getProfile(pubkey)
+  export let zapper = null
+  export let author = null
 
   let sub
   let zap = {
@@ -24,6 +24,9 @@
     confirmed: false,
   }
 
+  const _zapper = zapper || Nip57.zappers.key(pubkey).get()
+  const _author = author || Directory.getProfile(pubkey)
+
   const loadZapInvoice = async () => {
     zap.loading = true
 
@@ -32,9 +35,16 @@
     const relays = note
       ? Nip65.getPublishHints(relayLimit, note, user.getRelayUrls("write"))
       : Nip65.getPubkeyHints(relayLimit, pubkey, "read")
-    const rawEvent = Builder.requestZap(relays, zap.message, pubkey, note?.id, amount, zapper.lnurl)
+    const rawEvent = Builder.requestZap(
+      relays,
+      zap.message,
+      pubkey,
+      note?.id,
+      amount,
+      _zapper.lnurl
+    )
     const signedEvent = await Outbox.prep(rawEvent)
-    const invoice = await Nip57.fetchInvoice(zapper, signedEvent, amount)
+    const invoice = await Nip57.fetchInvoice(_zapper, signedEvent, amount)
 
     // If they closed the dialog before fetch resolved, we're done
     if (!zap) {
@@ -51,7 +61,7 @@
       relays,
       filter: {
         kinds: [9735],
-        authors: [zapper.nostrPubkey],
+        authors: [_zapper.nostrPubkey],
         "#p": [pubkey],
         since: zap.startedAt - 10,
       },
@@ -70,7 +80,7 @@
 <Content size="lg">
   <div class="text-center">
     <h1 class="staatliches text-2xl">Send a zap</h1>
-    <p>to {Directory.displayProfile(author)}</p>
+    <p>to {Directory.displayProfile(_author)}</p>
   </div>
   {#if zap.confirmed}
     <div class="flex items-center justify-center gap-2 text-gray-1">
