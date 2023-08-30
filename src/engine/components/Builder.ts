@@ -173,6 +173,8 @@ export class Builder {
 
   createLabel = (payload: EventOpts) => buildEvent(1985, payload)
 
+  createReport = (payload: EventOpts) => buildEvent(1984, payload)
+
   nip98Auth = (tags: string[][]) => buildEvent(27235, {tags})
 
   initialize(engine: Engine) {

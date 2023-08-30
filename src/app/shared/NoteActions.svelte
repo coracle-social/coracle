@@ -30,7 +30,9 @@
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
 
-  const curate = () => modal.push({type: "label/create", note})
+  const report = () => modal.push({type: "report/create", note})
+
+  const label = () => modal.push({type: "label/create", note})
 
   const quote = () => modal.push({type: "note/create", quote: note})
 
@@ -118,7 +120,8 @@
       })
     }
 
-    actions.push({label: "Curate", icon: "tag", onClick: curate})
+    actions.push({label: "Tag", icon: "tag", onClick: label})
+    actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
   }
 </script>
 

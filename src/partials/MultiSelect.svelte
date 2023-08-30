@@ -10,6 +10,7 @@
   export let search = null
   export let termToItem = null
   export let getKey: (x: any) => any = identity
+  export let autofocus = null
 
   let term = ""
   let input
@@ -77,6 +78,7 @@
 
 <Input
   class="cursor-text text-black outline-0"
+  {autofocus}
   {placeholder}
   bind:value={term}
   bind:element={input}

@@ -28,6 +28,10 @@
     for (const e of $labels) {
       const tags = Tags.from(e)
 
+      if (tags.type("e").count() === 0) {
+        continue
+      }
+
       for (const label of tags.type("l").mark(["#t", "ugc"]).values().all()) {
         $labelGroups[label] = $labelGroups[label] || {
           authors: new Set(),

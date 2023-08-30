@@ -1,51 +1,53 @@
 <script>
+  import {identity} from "ramda"
+  import {fuzzy} from "src/util/misc"
   import {modal, toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import engine, {Builder, Outbox, user} from "src/app/engine"
+  import {Builder, Outbox, user} from "src/app/engine"
 
   export let note
 
-  const {searchTopics} = engine.Content
+  const searchContentWarnings = fuzzy(["nudity", "profanity", "illegal", "spam", "impersonation"])
 
   const submit = () => {
-    const tags = [["e", note.id]]
+    const tags = [["p", note.pubkey]]
 
-    if (topics.length > 0) {
-      tags.push(["L", "#t"])
-
-      for (const topic of topics) {
-        tags.push(["l", topic.name, "#t"])
+    if (flags.length > 0) {
+      for (const flag of flags) {
+        tags.push(["e", note.id, flag])
       }
     }
 
     Outbox.publish({
-      event: Builder.createLabel({tagClient: false, tags}),
+      event: Builder.createReport({tagClient: false, tags}),
       relays: user.getRelayUrls("write"),
     })
 
-    toast.show("info", "Your tag has been saved!")
+    toast.show("info", "Your report has been sent!")
     modal.pop()
   }
 
-  let topics = []
+  let flags = []
 </script>
 
 <form on:submit|preventDefault={submit}>
   <Content>
-    <Heading class="text-center">Add Tags</Heading>
+    <Heading class="text-center">File a Report</Heading>
     <div class="flex w-full flex-col gap-8">
-      <Field label="Tags" info="Tag this content so other people can find it">
+      <Field
+        label="Content Warnings"
+        info="Flag this content as sensitive so other people can avoid it">
         <MultiSelect
           autofocus
-          search={$searchTopics}
-          bind:value={topics}
-          termToItem={name => ({name})}>
+          search={searchContentWarnings}
+          bind:value={flags}
+          termToItem={identity}>
           <div slot="item" let:item>
-            <strong>{item.name}</strong>
+            <strong>{item}</strong>
           </div>
         </MultiSelect>
       </Field>
