@@ -21,7 +21,7 @@ export const appDataKeys = {
 export class Tags {
   tags: any[]
   constructor(tags: any[]) {
-    this.tags = tags
+    this.tags = tags.filter(identity)
   }
   static from(events: Event | Event[]) {
     return new Tags(ensurePlural(events).flatMap(prop("tags")))
