@@ -3,6 +3,11 @@
 # 0.3.5
 
 - [x] Fix scrambled person list
+- [x] Add NIP-32 labeling for events
+- [x] Add Explore tab which surfaces labels from your follows list
+- [x] Add NIP-36 reports
+- [x] Fix zaps bug
+- [x] Fix person info relays
 
 # 0.3.4
 

@@ -37,6 +37,10 @@
 <form on:submit|preventDefault={submit}>
   <Content>
     <Heading class="text-center">Add Tags</Heading>
+    <p class="text-center">
+      Recommend content to people who follow you. You can find
+      your recommendations under the "Explore" tab.
+    </p>
     <div class="flex w-full flex-col gap-8">
       <Field label="Tags" info="Tag this content so other people can find it">
         <MultiSelect

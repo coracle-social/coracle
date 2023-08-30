@@ -82,7 +82,10 @@
     {@const {label, authors, ids, hints} = group}
     <Card>
       <div class="flex items-start justify-between">
-        <Heading>{label}</Heading>
+        <div class="flex gap-2">
+          <i class="fa fa-xl fa-tag my-8 ml-4" />
+          <Heading>{label}</Heading>
+        </div>
         <Anchor class="mt-4" theme="button-accent" on:click={() => showGroup(group)}
           >See more</Anchor>
       </div>

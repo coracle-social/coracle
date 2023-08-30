@@ -52,7 +52,7 @@ export class Cursor {
 
         onEvent?.(event)
       },
-      onEose: () => {
+      onClose: () => {
         this.loading = false
 
         // Relays can't be relied upon to return events in descending order, do exponential
@@ -61,14 +61,11 @@ export class Cursor {
           this.delta *= 10
         }
 
-        this.since -= this.delta
-
         if (this.since <= EPOCH) {
           this.done = true
         }
-      },
-      onClose: () => {
-        this.loading = false
+
+        this.since -= this.delta
       },
     })
   }
