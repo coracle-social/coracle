@@ -1,7 +1,7 @@
 import {nth, map} from "ramda"
 import {ensurePlural} from "hurdak"
 import {derived} from "src/engine2/util/store"
-import {socialGraph} from "src/engine2/state/core"
+import {socialGraph} from "src/engine2/state"
 
 export const derivePetnames = (pubkey: string) =>
   socialGraph.key(pubkey).derived(g => g?.petnames || [])

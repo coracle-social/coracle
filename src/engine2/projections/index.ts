@@ -1,1 +1,3 @@
-import "src/engine2/projections/nip02"
+import "./nip02"
+
+export * from "./core"

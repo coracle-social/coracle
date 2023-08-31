@@ -3,7 +3,6 @@ import type {UnsignedEvent} from "nostr-tools"
 import {getSignature, getPublicKey, getEventHash} from "nostr-tools"
 import type NDK from "@nostr-dev-kit/ndk"
 import {NDKEvent} from "@nostr-dev-kit/ndk"
-import {derived} from "src/engine2/util/store"
 import {withExtension} from "src/engine2/util/nip07"
 import type {Rumor, KeyState} from "src/engine2/model"
 
@@ -52,6 +51,3 @@ export class Signer {
     })
   }
 }
-
-export const deriveSigner = ({user, ndk}) =>
-  derived([user, ndk], ([$user, $ndk]) => new Signer($user, $ndk))

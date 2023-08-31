@@ -2,8 +2,118 @@ import {pluck, splitAt} from "ramda"
 import {sleep, defer, chunk, randomInt, throttle} from "hurdak"
 import {Storage as LocalStorage} from "hurdak"
 import type {Writable, Collection} from "src/engine2/util/store"
-import {IndexedDB} from "src/engine2/util/indexeddb"
 import {writable} from "src/engine2/util/store"
+
+type Store = {
+  name: string
+  opts: Record<string, any>
+}
+
+export class IndexedDB {
+  db: any
+
+  constructor(readonly dbName: string, readonly dbVersion: number, readonly stores: Store[]) {}
+
+  open() {
+    return new Promise<void>((resolve, reject) => {
+      if (!window.indexedDB) {
+        reject("Unsupported indexedDB")
+      }
+
+      const request = window.indexedDB.open(this.dbName, this.dbVersion)
+
+      request.onsuccess = e => {
+        this.db = request.result
+
+        resolve()
+      }
+
+      // @ts-ignore
+      request.onerror = e => reject(e.target.error)
+
+      request.onupgradeneeded = e => {
+        // @ts-ignore
+        this.db = e.target.result
+
+        this.stores.forEach(o => {
+          try {
+            this.db.createObjectStore(o.name, o.opts)
+          } catch (e) {
+            console.warn(e)
+          }
+        })
+      }
+    })
+  }
+
+  close() {
+    return this.db.close()
+  }
+
+  delete() {
+    window.indexedDB.deleteDatabase(this.dbName)
+  }
+
+  getAll(storeName): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      const store = this.db.transaction(storeName).objectStore(storeName)
+      const request = store.getAll()
+
+      request.onerror = e => reject(e.target.error)
+      request.onsuccess = e => resolve(e.target.result)
+    })
+  }
+
+  async bulkPut(storeName, data) {
+    const transaction = this.db.transaction(storeName, "readwrite")
+    const store = transaction.objectStore(storeName)
+
+    return Promise.all(
+      data.map(row => {
+        return new Promise((resolve, reject) => {
+          const request = store.put(row)
+
+          request.onerror = e => reject(e.target.error)
+          request.onsuccess = e => resolve(e.target.result)
+        })
+      })
+    )
+  }
+
+  async bulkDelete(storeName, ids) {
+    const transaction = this.db.transaction(storeName, "readwrite")
+    const store = transaction.objectStore(storeName)
+
+    return Promise.all(
+      ids.map(id => {
+        return new Promise((resolve, reject) => {
+          const request = store.delete(id)
+
+          request.onerror = e => reject(e.target.error)
+          request.onsuccess = e => resolve(e.target.result)
+        })
+      })
+    )
+  }
+
+  clear(storeName) {
+    return new Promise((resolve, reject) => {
+      const request = this.db.transaction(storeName, "readwrite").objectStore(storeName).clear()
+
+      request.onerror = e => reject(e.target.error)
+      request.onsuccess = e => resolve(e.target.result)
+    })
+  }
+
+  count(storeName) {
+    return new Promise((resolve, reject) => {
+      const request = this.db.transaction(storeName).objectStore(storeName).count()
+
+      request.onerror = e => reject(e.target.error)
+      request.onsuccess = e => resolve(e.target.result)
+    })
+  }
+}
 
 export class LocalStorageAdapter {
   constructor(readonly key: string, readonly store: Writable<any>) {}

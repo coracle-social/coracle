@@ -1,9 +1,9 @@
-import {derived, writable} from "src/engine2/util/store"
+import {writable} from "src/engine2/util/store"
 import NDK, {NDKNip46Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk"
 
-const instances = writable(new Map())
+export const ndkInstances = writable(new Map())
 
-const prepareNDK = ({pubkey, bunkerKey, bunkerToken}) => {
+export const prepareNdk = ({pubkey, bunkerKey, bunkerToken}) => {
   const localSigner = new NDKPrivateKeySigner(bunkerKey)
 
   const instance = new NDK({
@@ -20,16 +20,3 @@ const prepareNDK = ({pubkey, bunkerKey, bunkerToken}) => {
 
   return instance
 }
-
-export const deriveNDK = user =>
-  derived([user, instances], ([$user, $instances]) => {
-    if (!$user?.bunkerToken) {
-      return null
-    }
-
-    if (!$instances.has($user.pubkey)) {
-      $instances.set($user.pubkey, prepareNDK($user))
-    }
-
-    return $instances.get($user.pubkey)
-  })

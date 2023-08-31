@@ -1,6 +1,5 @@
 import {switcherFn} from "hurdak"
 import type {KeyState} from "src/engine2/model"
-import {derived} from "src/engine2/util/store"
 import {encryptFor, decryptFor} from "src/engine2/util/nip44"
 
 export class Crypto {
@@ -30,5 +29,3 @@ export class Crypto {
     })
   }
 }
-
-export const deriveCrypto = ({user}) => derived([user], ([$user]) => new Crypto($user))

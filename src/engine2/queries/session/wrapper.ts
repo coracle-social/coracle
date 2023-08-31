@@ -1,10 +1,9 @@
 import type {UnsignedEvent} from "nostr-tools"
 import {getPublicKey} from "nostr-tools"
-import {derived} from "src/engine2/util/store"
-import type {Signer} from "src/engine2/state/signer"
-import type {Crypto} from "src/engine2/state/crypto"
+import {nip59} from "src/engine2/util"
 import type {KeyState} from "src/engine2/model"
-import {getSeal, getWrap} from "src/engine2/util/nip59"
+import type {Signer} from "./signer"
+import type {Crypto} from "./crypto"
 
 export type WrapperParams = {
   author?: string
@@ -39,7 +38,7 @@ export class Wrapper {
 
   getSeal(rumor, {author, wrap: {recipient}}: WrapperParams) {
     const content = this.encrypt(rumor, recipient, author)
-    const rawEvent = getSeal(content, rumor.pubkey)
+    const rawEvent = nip59.seal(content, rumor.pubkey)
     const signedEvent = this.sign(rawEvent, author)
 
     return signedEvent
@@ -47,7 +46,7 @@ export class Wrapper {
 
   getWrap(seal, {wrap: {author, recipient}}: WrapperParams) {
     const content = this.encrypt(seal, recipient, author)
-    const rawEvent = getWrap(content, this.getAuthorPubkey(author), recipient)
+    const rawEvent = nip59.wrap(content, this.getAuthorPubkey(author), recipient)
     const signedEvent = this.sign(rawEvent, author)
 
     return signedEvent
@@ -87,9 +86,3 @@ export class Wrapper {
     }
   }
 }
-
-export const deriveWrapper = ({user, crypto, signer}) =>
-  derived(
-    [user, crypto, signer],
-    ([$user, $crypto, $signer]) => new Wrapper($user, $crypto, $signer)
-  )
