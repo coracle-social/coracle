@@ -3,8 +3,7 @@ import {Plex, Relays, Executor} from "paravel"
 import {error, warn} from "src/util/logger"
 import {normalizeRelayUrl} from "src/util/nostr"
 import {writable} from "src/engine2/util"
-import {env, settings} from "src/engine2/state"
-import {pool} from "./pool"
+import {env, pool, settings} from "src/engine2/state"
 
 export const authHandler = writable(null)
 

@@ -1,10 +1,12 @@
-import {find, whereEq} from "ramda"
+import {find, defaultTo, whereEq} from "ramda"
 import {derived} from "src/engine2/util/store"
 import {pubkey, keys} from "src/engine2/state"
 import {prepareNdk, ndkInstances} from "./ndk"
 import {Signer} from "./signer"
 import {Crypto} from "./crypto"
 import {Wrapper} from "./wrapper"
+
+export const stateKey = pubkey.derived(defaultTo("anonymous"))
 
 export const user = derived([pubkey, keys], ([$pubkey, $keys]) => {
   return find(whereEq({pubkey: $pubkey}), $keys)

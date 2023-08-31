@@ -1,3 +1,4 @@
+import {Pool} from "paravel"
 import {collection, writable} from "src/engine2/util/store"
 import type {
   Event,
@@ -30,3 +31,7 @@ export const handles = collection<Handle>("pubkey")
 export const zappers = collection<Zapper>("pubkey")
 export const relays = collection<Relay>("url")
 export const relayPolicies = collection<RelayPolicy>("pubkey")
+
+// Other stuff
+
+export const pool = new Pool()

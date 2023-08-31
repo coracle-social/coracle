@@ -86,6 +86,11 @@ export type Relay = {
   info?: RelayInfo
 }
 
+export enum RelayMode {
+  Read = "read",
+  Write = "write",
+}
+
 export type RelayPolicyEntry = {
   url: string
   read: boolean
