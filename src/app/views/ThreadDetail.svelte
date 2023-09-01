@@ -36,7 +36,7 @@
       <Note invertColors note={$root} />
     {/if}
     {#if showAncestors}
-      {#each $ancestors as ancestor}
+      {#each $ancestors as ancestor (ancestor.id)}
         <Note invertColors topLevel showParent={false} note={ancestor} />
       {/each}
     {:else if $ancestors.length > 0}
