@@ -31,9 +31,9 @@ export const stripExifData = async (file, opts = {}) => {
 
   return new Promise((resolve, _reject) => {
     new Compressor(file, {
-      maxWidth: 1024,
-      maxHeight: 1024,
-      convertSize: bytes(1, "mb"),
+      maxWidth: 2048,
+      maxHeight: 2048,
+      convertSize: bytes(10, "mb"),
       ...opts,
       success: resolve,
       error: e => {
