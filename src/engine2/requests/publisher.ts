@@ -1,6 +1,8 @@
 import EventEmitter from "events"
+import {omit} from "ramda"
 import {defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"
+import type {Event} from "src/engine2/model"
 import {getUrls, getExecutor} from "./executor"
 
 export type PublisherOpts = {
@@ -17,6 +19,10 @@ export class Publisher extends EventEmitter {
     super()
 
     const {verb, relays, event, timeout} = opts
+
+    if (event.wrap) {
+      throw new Error("Can't publish unwrapped events")
+    }
 
     const urls = getUrls(relays)
     const executor = getExecutor(urls, {bypassBoot: verb === "AUTH"})
@@ -56,7 +62,7 @@ export class Publisher extends EventEmitter {
       attemptToResolve()
     }, timeout)
 
-    const sub = executor.publish(event, {
+    const sub = executor.publish(omit(["seen_on"], event), {
       verb,
       onOk: (url: string) => {
         succeeded.add(url)
