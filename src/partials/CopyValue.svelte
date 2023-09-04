@@ -13,7 +13,7 @@
   $: displayValue = showEncoded && encode ? encode(value) : value
 
   const copy = () => {
-    copyToClipboard(value)
+    copyToClipboard(displayValue)
     toast.show("info", `${label} copied to clipboard!`)
   }
 
