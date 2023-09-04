@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.3.7
+
+- [x] Add ToS and Privacy Policy
+- [x] Use an ephemeral key when reporting content and expire reports
+
 # 0.3.6
 
 - [x] Add support for kind 1808

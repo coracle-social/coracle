@@ -1,6 +1,8 @@
 <script>
+  import {generatePrivateKey} from "nostr-tools"
   import {identity} from "ramda"
-  import {fuzzy} from "src/util/misc"
+  import {seconds} from "hurdak"
+  import {fuzzy, now} from "src/util/misc"
   import {modal, toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
@@ -14,7 +16,10 @@
   const searchContentWarnings = fuzzy(["nudity", "profanity", "illegal", "spam", "impersonation"])
 
   const submit = () => {
-    const tags = [["p", note.pubkey]]
+    const tags = [
+      ["p", note.pubkey],
+      ["expiration", now() + seconds(7, "day")],
+    ]
 
     if (flags.length > 0) {
       for (const flag of flags) {
@@ -25,6 +30,7 @@
     Outbox.publish({
       event: Builder.createReport({tagClient: false, tags}),
       relays: user.getRelayUrls("write"),
+      sk: generatePrivateKey(),
     })
 
     toast.show("info", "Your report has been sent!")

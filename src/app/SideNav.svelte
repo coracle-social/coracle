@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {theme, installPrompt} from "src/partials/state"
-  import Anchor from 'src/partials/Anchor.svelte'
+  import Anchor from "src/partials/Anchor.svelte"
   import {Keys, Nip28, Nip04, Nip24, Alerts} from "src/app/engine"
   import {menuIsOpen} from "src/app/state"
 
@@ -114,7 +114,7 @@
       <i class="fa fa-info-circle mr-2" /> About
     </a>
   </li>
-  <li class="absolute bottom-0 w-full flex justify-center gap-2 p-2 text-sm text-gray-5">
+  <li class="absolute bottom-0 flex w-full justify-center gap-2 p-2 text-sm text-gray-5">
     <Anchor external theme="anchor" href="/public/terms.html">Terms</Anchor>
     &bull;
     <Anchor external theme="anchor" href="/public/privacy.html">Privacy</Anchor>
