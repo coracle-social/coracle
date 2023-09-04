@@ -1,3 +1,4 @@
+import {omit} from "ramda"
 import {Pool, Plex, Relays, Executor} from "paravel"
 import {noop, ensurePlural, union, difference} from "hurdak"
 import {warn, error, info} from "src/util/logger"
@@ -98,6 +99,10 @@ export class Network {
     const urls = this.getUrls(relays)
     const executor = this.getExecutor(urls, {bypassBoot: verb === "AUTH"})
 
+    if (event.wrap) {
+      throw new Error("Can't publish unwrapped event")
+    }
+
     info(`Publishing to ${urls.length} relays`, event, urls)
 
     return new Promise(resolve => {
@@ -134,7 +139,7 @@ export class Network {
         attemptToResolve()
       }, timeout)
 
-      const sub = executor.publish(event, {
+      const sub = executor.publish(omit(["seen_on"], event), {
         verb,
         onOk: (url: string) => {
           succeeded.add(url)
