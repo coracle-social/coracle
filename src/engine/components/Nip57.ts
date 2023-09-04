@@ -118,13 +118,14 @@ export class Nip57 {
           return
         }
 
-        const url = this.getLnUrl(address)
+        const lnurl = this.getLnUrl(address)
 
-        if (!url) {
+        if (!lnurl) {
           return
         }
 
-        const result = (await tryFunc(() => Fetch.fetchJson(url))) as any
+        const url = engine.Settings.dufflepud("zapper/info")
+        const result = (await tryFunc(() => Fetch.postJson(url, {lnurl}))) as any
 
         if (!result?.allowsNostr || !result?.nostrPubkey) {
           return
@@ -132,7 +133,7 @@ export class Nip57 {
 
         zapper.set({
           pubkey: e.pubkey,
-          lnurl: hexToBech32("lnurl", url),
+          lnurl: hexToBech32("lnurl", lnurl),
           callback: result.callback,
           minSendable: result.minSendable,
           maxSendable: result.maxSendable,

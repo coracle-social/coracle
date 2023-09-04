@@ -1,6 +1,5 @@
 import {last} from "ramda"
-import {nip05} from "nostr-tools"
-import {tryFunc} from "hurdak"
+import {tryFunc, Fetch} from "hurdak"
 import {now, tryJson} from "src/util/misc"
 import type {Handle} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
@@ -24,7 +23,9 @@ export class Nip05 {
           return
         }
 
-        const profile = (await tryFunc(() => nip05.queryProfile(kind0.nip05))) as null | {
+        const body = {handle: kind0.nip05}
+        const url = engine.Settings.dufflepud("handle/info")
+        const profile = (await tryFunc(() => Fetch.postJson(url, body))) as null | {
           pubkey: string
         }
 
