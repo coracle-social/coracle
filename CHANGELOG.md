@@ -4,6 +4,7 @@
 
 - [x] Add ToS and Privacy Policy
 - [x] Use an ephemeral key when reporting content and expire reports
+- [x] Fix message ordering
 
 # 0.3.6
 

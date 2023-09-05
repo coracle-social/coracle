@@ -92,14 +92,14 @@ export class Nip04 {
           const contact = this.contacts.key(recipient).get()
 
           this.contacts.key(recipient).merge({
-            last_sent: e.created_at,
+            last_sent: Math.max(e.created_at, contact?.last_sent || 0),
             hints: uniq(getHints(e).concat(contact?.hints || [])),
           })
         } else {
           const contact = this.contacts.key(author).get()
 
           this.contacts.key(author).merge({
-            last_received: e.created_at,
+            last_received: Math.max(e.created_at, contact?.last_received || 0),
             hints: uniq(getHints(e).concat(contact?.hints || [])),
           })
         }

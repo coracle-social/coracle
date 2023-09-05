@@ -156,9 +156,15 @@ export class Nip28 {
       })
 
       if (e.pubkey === engine.Keys.pubkey.get()) {
-        this.channels.key(channelId).merge({last_sent: e.created_at, hints})
+        this.channels.key(channelId).merge({
+          last_sent: Math.max(e.created_at, channel?.last_sent || 0),
+          hints,
+        })
       } else {
-        this.channels.key(channelId).merge({last_received: e.created_at, hints})
+        this.channels.key(channelId).merge({
+          last_received: Math.max(e.created_at, channel?.last_received || 0),
+          hints,
+        })
       }
     })
   }
