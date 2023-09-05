@@ -1,9 +1,10 @@
 import type {UnsignedEvent} from "nostr-tools"
 import {getPublicKey} from "nostr-tools"
+import {tryJson} from "src/util/misc"
 import {nip59} from "src/engine2/util"
 import type {KeyState} from "src/engine2/model"
 import type {Signer} from "./signer"
-import type {Crypto} from "./crypto"
+import type {Nip44} from "./nip44"
 
 export type WrapperParams = {
   author?: string
@@ -14,7 +15,7 @@ export type WrapperParams = {
 }
 
 export class Wrapper {
-  constructor(readonly user: KeyState, readonly crypto: Crypto, readonly signer: Signer) {}
+  constructor(readonly user: KeyState, readonly nip44: Nip44, readonly signer: Signer) {}
 
   getAuthorPubkey(sk?: string) {
     return sk ? getPublicKey(sk) : this.user.pubkey
@@ -29,11 +30,18 @@ export class Wrapper {
   }
 
   encrypt(event, pk: string, sk?: string) {
-    return sk ? this.crypto.encryptWithKey(event, pk, sk) : this.crypto.encryptAsUser(event, pk)
+    const message = JSON.stringify(event)
+
+    return sk ? this.nip44.encrypt(message, pk, sk) : this.nip44.encryptAsUser(message, pk)
   }
 
   decrypt(event, sk?: string) {
-    return sk ? this.crypto.decryptWithKey(event, sk) : this.crypto.decryptAsUser(event)
+    const {pubkey, content} = event
+    const message = sk
+      ? this.nip44.decrypt(content, pubkey, sk)
+      : this.nip44.decryptAsUser(content, pubkey)
+
+    return tryJson(() => JSON.parse(message))
   }
 
   getSeal(rumor, {author, wrap: {recipient}}: WrapperParams) {
