@@ -49,25 +49,6 @@ export type DisplayEvent = Event & {
   matchesFilter?: boolean
 }
 
-export type Zapper = {
-  pubkey: string
-  lnurl: string
-  callback: string
-  minSendable: number
-  maxSendable: number
-  nostrPubkey: string
-  created_at: number
-  updated_at: number
-}
-
-export type Handle = {
-  profile: Record<string, any>
-  pubkey: string
-  address: string
-  created_at: number
-  updated_at: number
-}
-
 export type RelayInfo = {
   contact?: string
   description?: string
@@ -91,32 +72,13 @@ export enum RelayMode {
   Write = "write",
 }
 
-export type RelayPolicyEntry = {
+export type RelayPolicy = {
   url: string
   read: boolean
   write: boolean
 }
 
-export type RelayPolicy = {
-  pubkey: string
-  created_at: number
-  updated_at: number
-  relays: RelayPolicyEntry[]
-}
-
-export type GraphEntry = {
-  pubkey: string
-  updated_at: number
-  petnames_updated_at?: number
-  petnames?: string[][]
-  mutes_updated_at?: number
-  mutes?: string[][]
-}
-
 export type Profile = {
-  pubkey: string
-  created_at?: number
-  updated_at?: number
   name?: string
   nip05?: string
   lud16?: string
@@ -124,6 +86,38 @@ export type Profile = {
   banner?: string
   picture?: string
   display_name?: string
+}
+
+export type Handle = {
+  profile: Record<string, any>
+  pubkey: string
+  address: string
+}
+
+export type Zapper = {
+  pubkey: string
+  lnurl: string
+  callback: string
+  minSendable: number
+  maxSendable: number
+  nostrPubkey: string
+}
+
+export type Person = {
+  pubkey: string
+  last_fetched?: number
+  profile_updated_at?: number
+  profile?: Profile
+  petnames_updated_at?: number
+  petnames?: string[][]
+  mutes_updated_at?: number
+  mutes?: string[][]
+  relays_updated_at?: number
+  relays: RelayPolicy[]
+  handle_updated_at?: number
+  handle: Handle
+  zapper_updated_at?: number
+  zapper: Handle
 }
 
 export type Channel = {

@@ -1,12 +1,11 @@
 import {nth, map} from "ramda"
 import {ensurePlural} from "hurdak"
 import {derived} from "src/engine2/util/store"
-import {socialGraph} from "src/engine2/state"
+import {people} from "src/engine2/state"
 
-export const derivePetnames = (pubkey: string) =>
-  socialGraph.key(pubkey).derived(g => g?.petnames || [])
+export const derivePetnames = (pubkey: string) => people.key(pubkey).derived(g => g?.petnames || [])
 
-export const deriveMutes = (pubkey: string) => socialGraph.key(pubkey).derived(g => g?.mutes || [])
+export const deriveMutes = (pubkey: string) => people.key(pubkey).derived(g => g?.mutes || [])
 
 export const deriveFollowsSet = (pubkeys: string | string[]) =>
   derived(

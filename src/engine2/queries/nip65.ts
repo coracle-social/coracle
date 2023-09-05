@@ -5,7 +5,7 @@ import {findReplyId, findRootId, isShareableRelay, Tags} from "src/util/nostr"
 import {derived} from "src/engine2/util/store"
 import type {Event, Relay, RelayInfo} from "src/engine2/model"
 import {RelayMode} from "src/engine2/model"
-import {env, pool, relays, relayPolicies} from "src/engine2/state"
+import {env, pool, relays, people} from "src/engine2/state"
 import {stateKey} from "src/engine2/queries/session"
 
 export const relayIsLowQuality = (url: string) =>
@@ -29,7 +29,7 @@ export const getSearchRelays = () => {
 }
 
 export const getPubkeyRelays = (pubkey: string, mode: string = null) => {
-  const relays = relayPolicies.key(pubkey).get()?.relays || []
+  const relays = people.key(pubkey).get()?.relays || []
 
   return mode ? relays.filter(prop(mode)) : relays
 }

@@ -29,35 +29,19 @@ export const storage = new Storage([
     sort: sortByPubkeyWhitelist(prop("created_at")),
   }),
   new IndexedDBAdapter("topics", state.topics, {
-    max: 1000,
+    max: 10000,
     sort: sortBy(prop("created_at")),
   }),
   new IndexedDBAdapter("lists", state.lists, {
-    max: 1000,
-    sort: sortByPubkeyWhitelist(prop("created_at")),
-  }),
-  new IndexedDBAdapter("profiles", state.profiles, {
     max: 10000,
     sort: sortByPubkeyWhitelist(prop("created_at")),
   }),
-  new IndexedDBAdapter("socialGraph", state.socialGraph, {
+  new IndexedDBAdapter("people", state.people, {
     max: 10000,
-    sort: sortByPubkeyWhitelist(prop("created_at")),
-  }),
-  new IndexedDBAdapter("handles", state.handles, {
-    max: 10000,
-    sort: sortByPubkeyWhitelist(prop("created_at")),
-  }),
-  new IndexedDBAdapter("zappers", state.zappers, {
-    max: 10000,
-    sort: sortByPubkeyWhitelist(prop("created_at")),
+    sort: sortByPubkeyWhitelist(prop("last_fetched")),
   }),
   new IndexedDBAdapter("relays", state.relays, {
-    max: 1000,
-    sort: sortBy(prop("created_at")),
-  }),
-  new IndexedDBAdapter("relayPolicies", state.relayPolicies, {
     max: 10000,
-    sort: sortByPubkeyWhitelist(prop("created_at")),
+    sort: sortBy(prop("created_at")),
   }),
 ])

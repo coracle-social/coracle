@@ -3,7 +3,7 @@ import {chunk, seconds, ensurePlural} from "hurdak"
 import {personKinds, appDataKeys} from "src/util/nostr"
 import {now} from "src/util/misc"
 import type {Filter} from "src/engine2/model"
-import {profiles, settings} from "src/engine2/state"
+import {people, settings} from "src/engine2/state"
 import {mergeHints, getPubkeyHints} from "src/engine2/queries"
 import {Subscription} from "./subscription"
 
@@ -26,9 +26,13 @@ export const getStalePubkeys = (pubkeys: string[]) => {
 
     attemptedPubkeys.add(pubkey)
 
-    if (profiles.key(pubkey).get()?.updated_at || 0 > since) {
+    const key = people.key(pubkey)
+
+    if (key.get()?.last_fetched || 0 > since) {
       continue
     }
+
+    key.merge({last_fetched: now()})
 
     stale.add(pubkey)
   }

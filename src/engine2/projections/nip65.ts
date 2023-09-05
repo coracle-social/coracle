@@ -2,10 +2,10 @@ import {uniqBy, prop, inc} from "ramda"
 import {tryJson, now} from "src/util/misc"
 import {warn} from "src/util/logger"
 import {normalizeRelayUrl, isShareableRelay, Tags} from "src/util/nostr"
-import type {RelayPolicyEntry} from "src/engine2/model"
+import type {RelayPolicy} from "src/engine2/model"
 import {RelayMode} from "src/engine2/model"
-import {relays, relayPolicies} from "src/engine2/state"
-import {projections} from "src/engine2/projections/core"
+import {relays, people} from "src/engine2/state"
+import {projections, updateKey} from "src/engine2/projections/core"
 
 const addRelay = (url: string) => {
   if (isShareableRelay(url)) {
@@ -21,19 +21,10 @@ const addRelay = (url: string) => {
   }
 }
 
-const setPolicy = (
-  {pubkey, created_at}: {pubkey: string; created_at: number},
-  relays: RelayPolicyEntry[]
-) => {
+const setPolicy = (e, relays: RelayPolicy[]) => {
   if (relays?.length > 0) {
-    if (created_at < relayPolicies.key(pubkey).get()?.created_at) {
-      return
-    }
-
-    relayPolicies.key(pubkey).merge({
-      created_at,
-      updated_at: now(),
-      relays: uniqBy(prop("url"), relays).map((relay: RelayPolicyEntry) => {
+    updateKey(people.key(e.pubkey), e.created_at, {
+      relays: uniqBy(prop("url"), relays).map((relay: RelayPolicy) => {
         addRelay(relay.url)
 
         return {read: true, write: true, ...relay}
@@ -49,7 +40,7 @@ projections.addHandler(2, e => {
 projections.addHandler(3, e => {
   setPolicy(
     e,
-    tryJson<RelayPolicyEntry[]>(() => {
+    tryJson<RelayPolicy[]>(() => {
       return Object.entries(JSON.parse(e.content || ""))
         .filter(([url]) => isShareableRelay(url))
         .map(([url, conditions]) => {
@@ -60,7 +51,7 @@ projections.addHandler(3, e => {
 
           return {url: normalizeRelayUrl(url), write, read}
         })
-    }) as RelayPolicyEntry[]
+    }) as RelayPolicy[]
   )
 })
 
