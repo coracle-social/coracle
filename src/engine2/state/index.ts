@@ -1,6 +1,6 @@
 import {Pool} from "paravel"
 import {collection, writable} from "src/engine2/util/store"
-import type {Event, KeyState, Topic, List, Person, Relay} from "src/engine2/model"
+import type {Event, KeyState, Channel, Topic, List, Person, Relay} from "src/engine2/model"
 
 // Synchronous stores
 
@@ -18,6 +18,7 @@ export const topics = collection<Topic>("name")
 export const lists = collection<List>("naddr")
 export const people = collection<Person>("pubkey")
 export const relays = collection<Relay>("url")
+export const channels = collection<Channel>("id")
 
 // Other stuff
 

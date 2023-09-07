@@ -122,45 +122,18 @@ export type Person = {
 
 export type Channel = {
   id: string
-  name?: string
-  about?: string
-  picture?: string
-  pubkey: string
-  updated_at: number
+  type: "nip28" | "nip04" | "nip44"
+  relays: string[]
+  messages: Event[]
   last_sent?: number
   last_received?: number
   last_checked?: number
-  joined?: boolean
-  hints: string[]
-}
-
-export type Contact = {
-  id: string
-  pubkey: string
-  updated_at: number
-  last_sent?: number
-  last_received?: number
-  last_checked?: number
-  hints: string[]
-}
-
-export type Message = {
-  id: string
-  contact?: string
-  channel?: string
-  pubkey: string
-  created_at: number
-  content: string
-  tags: string[][]
-}
-
-export type Nip24Channel = {
-  id: string
-  updated_at: number
-  last_sent?: number
-  last_received?: number
-  last_checked?: number
-  hints: string[]
+  meta_updated_at?: number
+  meta?: {
+    name?: string
+    about?: string
+    picture?: string
+  }
 }
 
 export type Topic = {
