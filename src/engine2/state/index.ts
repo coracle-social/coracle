@@ -14,6 +14,8 @@ export const alertsLastChecked = writable(0)
 
 export const alerts = collection<Event & {recipient: string}>("id")
 export const events = collection<Event>("id")
+export const deletes = collection<{value: string}>("value")
+export const labels = collection<Event>("id")
 export const topics = collection<Topic>("name")
 export const lists = collection<List>("naddr")
 export const people = collection<Person>("pubkey")

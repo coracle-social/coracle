@@ -5,5 +5,8 @@ import "./nip28"
 import "./nip57"
 import "./nip65"
 import "./alerts"
+import "./deletes"
+import "./lists"
+import "./topics"
 
 export * from "./core"

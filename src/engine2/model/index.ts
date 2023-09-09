@@ -112,11 +112,11 @@ export type Person = {
   mutes_updated_at?: number
   mutes?: string[][]
   relays_updated_at?: number
-  relays: RelayPolicy[]
+  relays?: RelayPolicy[]
   handle_updated_at?: number
-  handle: Handle
+  handle?: Handle
   zapper_updated_at?: number
-  zapper: Zapper
+  zapper?: Zapper
 }
 
 export type Channel = {
@@ -142,14 +142,13 @@ export type Channel = {
 export type Topic = {
   name: string
   count?: number
+  last_seen?: number
 }
 
 export type List = {
   name: string
   naddr: string
   pubkey: string
+  tags_updated_at: number
   tags: string[][]
-  updated_at: number
-  created_at: number
-  deleted_at?: number
 }
