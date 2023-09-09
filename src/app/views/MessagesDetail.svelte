@@ -7,9 +7,9 @@
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
+  import {getSetting} from "src/engine2"
   import {
     user,
-    Settings,
     Nip04,
     Nip65,
     Outbox,
@@ -26,7 +26,7 @@
   export let entity
 
   const pubkey = toHex(entity)
-  const relayLimit = Settings.getSetting("relay_limit")
+  const relayLimit = getSetting("relay_limit")
   const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
   const messages = Nip04.messages.derived(filter(whereEq({contact: pubkey})))
 

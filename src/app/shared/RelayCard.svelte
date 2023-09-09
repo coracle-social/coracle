@@ -8,7 +8,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
-  import {user, Nip65, Settings, Keys} from "src/app/engine"
+  import {getSetting} from "src/engine2"
+  import {user, Nip65, Keys} from "src/app/engine"
 
   export let relay
   export let rating = null
@@ -31,7 +32,7 @@
     <div class="flex items-center gap-2 text-xl">
       <i class={relay.url.startsWith("ws://") ? "fa fa-unlock" : "fa fa-lock"} />
       <Anchor on:click={openModal}>{Nip65.displayRelay(relay)}</Anchor>
-      {#if showStatus && !Settings.getSetting("multiplextr_url")}
+      {#if showStatus && !getSetting("multiplextr_url")}
         <RelayStatus {relay} />
       {/if}
       {#if rating}

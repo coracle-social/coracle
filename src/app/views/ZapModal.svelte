@@ -7,7 +7,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import {Directory, Nip65, user, Outbox, Network, Builder, Nip57, Settings} from "src/app/engine"
+  import {getSetting} from "src/engine2"
+  import {Directory, Nip65, user, Outbox, Network, Builder, Nip57} from "src/app/engine"
 
   export let pubkey
   export let note = null
@@ -16,7 +17,7 @@
 
   let sub
   let zap = {
-    amount: Settings.getSetting("default_zap"),
+    amount: getSetting("default_zap"),
     message: "",
     invoice: null,
     loading: false,
@@ -31,7 +32,7 @@
     zap.loading = true
 
     const amount = zap.amount * 1000
-    const relayLimit = Settings.getSetting("relay_limit")
+    const relayLimit = getSetting("relay_limit")
     const relays = note
       ? Nip65.getPublishHints(relayLimit, note, user.getRelayUrls("write"))
       : Nip65.getPubkeyHints(relayLimit, pubkey, "read")

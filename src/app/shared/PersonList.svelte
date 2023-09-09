@@ -6,7 +6,8 @@
   import Spinner from "src/partials/Spinner.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import {loadPubkeys} from "src/engine2"
-  import {Nip02, Nip65, Settings, Network} from "src/app/engine"
+  import {getSetting} from "src/engine2"
+  import {Nip02, Nip65, Network} from "src/app/engine"
 
   export let type
   export let pubkey
@@ -18,7 +19,7 @@
       pubkeys = Nip02.getFollows(pubkey)
     } else {
       const sub = Network.subscribe({
-        relays: Nip65.getPubkeyHints(Settings.getSetting("relay_limit"), pubkey, "read"),
+        relays: Nip65.getPubkeyHints(getSetting("relay_limit"), pubkey, "read"),
         filter: {kinds: [3], "#p": [pubkey]},
         onEvent: batch(500, events => {
           const newPubkeys = pluck("pubkey", events)

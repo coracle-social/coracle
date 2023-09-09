@@ -9,15 +9,15 @@
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {Builder, Settings, Nip28, user, Keys, Outbox, Nip65, Network} from "src/app/engine"
+  import {getSetting, imgproxy} from "src/engine2"
+  import {Builder, Nip28, user, Keys, Outbox, Nip65, Network} from "src/app/engine"
 
   export let entity
 
   const id = toHex(entity)
   const channel = Nip28.channels.key(id).derived(defaultTo({id}))
   const messages = Nip28.messages.derived(filter(whereEq({channel: id})))
-  const getRelays = () =>
-    Nip65.selectHints(Settings.getSetting("relay_limit"), $channel.hints || [])
+  const getRelays = () => Nip65.selectHints(getSetting("relay_limit"), $channel.hints || [])
 
   user.setChannelLastChecked(id)
 
@@ -54,7 +54,7 @@
     }
   })
 
-  $: picture = Settings.imgproxy($channel.picture, {w: 96, h: 96})
+  $: picture = imgproxy($channel.picture, {w: 96, h: 96})
 
   document.title = $channel.name || "Coracle Chat"
 </script>

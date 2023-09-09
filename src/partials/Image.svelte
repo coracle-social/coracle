@@ -19,7 +19,7 @@
 
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Settings} from "src/app/engine"
+  import {imgproxy} from "src/engine2"
 
   export let src
 
@@ -33,7 +33,7 @@
   })
 </script>
 
-<img {...$$props} class:hidden={loading} bind:this={element} src={Settings.imgproxy(src)} />
+<img {...$$props} class:hidden={loading} bind:this={element} src={imgproxy(src)} />
 
 {#if loading}
   <slot name="placeholder">

@@ -9,11 +9,11 @@
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {isNil, find, last} from "ramda"
-  import {Storage, seconds, Fetch, shuffle} from "hurdak"
+  import {seconds, Fetch, shuffle} from "hurdak"
   import {tryFetch, hexToBech32, bech32ToHex, now} from "src/util/misc"
-  import {storage} from "src/engine2"
+  import {storage, getSetting, dufflepud} from "src/engine2"
   import {default as engine} from "src/app/engine"
-  import {Keys, Nip65, user, Env, Network, Builder, Outbox, Settings} from "src/app/engine"
+  import {Keys, Nip65, user, Network, Builder, Outbox} from "src/app/engine"
   import {loadAppData} from "src/app/state"
   import {theme, getThemeVariables, appName, modal} from "src/partials/state"
   import {logUsage} from "src/app/state"
@@ -23,43 +23,6 @@
   import TopNav from "src/app/TopNav.svelte"
   import Modal from "src/app/Modal.svelte"
   import ForegroundButtons from "src/app/ForegroundButtons.svelte"
-
-  // Migration from 0.2.34
-  if (Object.hasOwn(localStorage, "agent/keys/pubkey")) {
-    try {
-      Keys.setKeyState({
-        method: Storage.getJson("agent/keys/method"),
-        pubkey: Storage.getJson("agent/keys/pubkey"),
-        privkey: Storage.getJson("agent/keys/privkey"),
-        bunkerKey: Storage.getJson("agent/keys/bunkerKey"),
-      })
-
-      Keys.pubkey.set(Storage.getJson("agent/keys/pubkey"))
-
-      const {settings} = JSON.parse(localStorage.getItem("agent/user/profile"))
-
-      setTimeout(
-        () =>
-          user.setSettings({
-            last_updated: settings.lastUpdated || 0,
-            relay_limit: settings.relayLimit || 10,
-            default_zap: settings.defaultZap || 21,
-            show_media: settings.showMedia || true,
-            report_analytics: settings.reportAnalytics || true,
-            dufflepud_url: settings.dufflepudUrl || Env.DUFFLEPUD_URL,
-            multiplextr_url: settings.multiplextrUrl || Env.MULTIPLEXTR_URL,
-          }),
-        3000
-      )
-    } catch (e) {
-      // pass
-    }
-
-    localStorage.removeItem("agent/keys/method")
-    localStorage.removeItem("agent/keys/pubkey")
-    localStorage.removeItem("agent/keys/privkey")
-    localStorage.removeItem("agent/keys/bunkerKey")
-  }
 
   const TypedRouter = Router as ComponentType<SvelteComponentTyped>
 
@@ -168,7 +131,7 @@
     }
 
     const interval = setInterval(async () => {
-      if (!Settings.getSetting("dufflepud_url")) {
+      if (!getSetting("dufflepud_url")) {
         return
       }
 
@@ -180,7 +143,7 @@
 
       for (const relay of staleRelays) {
         tryFetch(async () => {
-          const info = await Fetch.fetchJson(Settings.dufflepud("relay/info"), {
+          const info = await Fetch.fetchJson(dufflepud("relay/info"), {
             method: "POST",
             body: JSON.stringify({url: relay.url}),
             headers: {

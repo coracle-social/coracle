@@ -61,4 +61,3 @@ export const Nip57 = engine.Nip57
 export const Nip59 = engine.Nip59
 export const Nip65 = engine.Nip65
 export const Outbox = engine.Outbox
-export const Settings = engine.Settings

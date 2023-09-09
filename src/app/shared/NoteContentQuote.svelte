@@ -9,7 +9,8 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {Directory, Settings, Nip65, user, Network} from "src/app/engine"
+  import {getSetting} from "src/engine2"
+  import {Directory, Nip65, user, Network} from "src/app/engine"
 
   export let note
   export let value
@@ -22,10 +23,10 @@
 
   const {id, identifier, kind, pubkey} = value
 
-  const relays = Nip65.mergeHints(Settings.getSetting("relay_limit"), [
+  const relays = Nip65.mergeHints(getSetting("relay_limit"), [
     // Agora social has a bug
     (value.relays || []).flatMap(r => r.split(",")).filter(isShareableRelay),
-    Nip65.getEventHints(Settings.getSetting("relay_limit"), note),
+    Nip65.getEventHints(getSetting("relay_limit"), note),
   ])
 
   const filter = (

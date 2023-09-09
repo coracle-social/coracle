@@ -13,8 +13,8 @@
   import PersonRelays from "src/app/shared/PersonRelays.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
-  import {loadPubkeys} from "src/engine2"
-  import {Env, Settings, Directory, Nip65} from "src/app/engine"
+  import {loadPubkeys, getSetting, imgproxy} from "src/engine2"
+  import {Env, Directory, Nip65} from "src/app/engine"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import PersonStats from "src/app/shared/PersonStats.svelte"
@@ -24,7 +24,7 @@
 
   const tabs = ["notes", "likes", Env.FORCE_RELAYS.length === 0 && "relays"].filter(identity)
   const pubkey = toHex(npub)
-  const relayLimit = Settings.getSetting("relay_limit")
+  const relayLimit = getSetting("relay_limit")
   const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
   const {rgb, rgba} = getThemeBackgroundGradient()
 
@@ -36,7 +36,7 @@
     relays,
     Nip65.getPubkeyHints(relayLimit, pubkey, "write"),
   ])
-  $: banner = Settings.imgproxy($profile.banner, {w: window.innerWidth})
+  $: banner = imgproxy($profile.banner, {w: window.innerWidth})
 
   info("Person", npub, $profile)
 

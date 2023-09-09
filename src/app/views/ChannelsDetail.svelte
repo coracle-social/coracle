@@ -10,21 +10,12 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {
-    user,
-    Nip24,
-    Nip65,
-    Outbox,
-    Directory,
-    Settings,
-    Builder,
-    Network,
-    Keys,
-  } from "src/app/engine"
+  import {getSetting} from "src/engine2"
+  import {user, Nip24, Nip65, Outbox, Directory, Builder, Network, Keys} from "src/app/engine"
 
   export let entity
 
-  const relayLimit = Settings.getSetting("relay_limit")
+  const relayLimit = getSetting("relay_limit")
   const userPubkey = Keys.pubkey.get()
   const channel = Nip24.channels.key(entity)
   const messages = Nip24.messages.derived(filter(whereEq({channel: entity})))
