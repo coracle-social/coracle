@@ -134,6 +134,10 @@ export type Channel = {
     about?: string
     picture?: string
   }
+  nip28?: {
+    owner?: string
+    joined?: string
+  }
 }
 
 export type Topic = {
