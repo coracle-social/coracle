@@ -17,21 +17,11 @@
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import TopNavMenu from "src/app/TopNavMenu.svelte"
   import {menuIsOpen} from "src/app/state"
-  import engine, {
-    Alerts,
-    Nip28,
-    Nip04,
-    Nip24,
-    Keys,
-    Directory,
-    Network,
-    Nip65,
-    user,
-  } from "src/app/engine"
+  import {hasNewNotfications} from "src/engine2"
+  import engine, {Nip28, Nip04, Nip24, Keys, Directory, Network, Nip65, user} from "src/app/engine"
 
   const {keyState, canUseGiftWrap} = Keys
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
-  const {hasNewNotfications} = Alerts
   const {hasNewMessages: hasNewChatMessages} = Nip28
   const {hasNewMessages: hasNewDirectMessages} = Nip04
   const {hasNewMessages: hasNewNip24DirectMessages} = Nip24

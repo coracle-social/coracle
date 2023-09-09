@@ -2,11 +2,11 @@
   import cx from "classnames"
   import {theme, installPrompt} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
-  import {Keys, Nip28, Nip04, Nip24, Alerts} from "src/app/engine"
+  import {hasNewNotfications} from "src/engine2"
+  import {Keys, Nip28, Nip04, Nip24} from "src/app/engine"
   import {menuIsOpen} from "src/app/state"
 
   const {canSign, canUseGiftWrap} = Keys
-  const {hasNewNotfications} = Alerts
   const {hasNewMessages: hasNewChatMessages} = Nip28
   const {hasNewMessages: hasNewDirectMessagesNip04} = Nip04
   const {hasNewMessages: hasNewDirectMessagesNip24} = Nip24

@@ -1,5 +1,4 @@
 import type {Env} from "./types"
-import {Alerts} from "./components/Alerts"
 import {Builder} from "./components/Builder"
 import {Content} from "./components/Content"
 import {Crypt} from "./components/Crypt"
@@ -21,7 +20,6 @@ import {Settings} from "./components/Settings"
 
 export class Engine {
   Env: Env
-  Alerts = new Alerts()
   Builder = new Builder()
   Content = new Content()
   Crypt = new Crypt()

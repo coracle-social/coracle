@@ -1,7 +1,6 @@
 export * from "./types"
 export {Engine} from "./Engine"
 
-export {Alerts} from "./components/Alerts"
 export {Builder} from "./components/Builder"
 export {Content} from "./components/Content"
 export {Crypt} from "./components/Crypt"

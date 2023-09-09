@@ -1,5 +1,6 @@
 export * from "./model"
 export * from "./state"
+export * from "./queries"
 export * from "./storage"
 export * from "./projections"
 export * from "./commands"

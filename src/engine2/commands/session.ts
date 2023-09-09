@@ -1,11 +1,11 @@
 import {reject, whereEq} from "ramda"
 import {generatePrivateKey, getPublicKey} from "nostr-tools"
 import type {KeyState} from "src/engine2/model"
-import * as state from "src/engine2/state"
+import {keys, pubkey} from "src/engine2/state"
 
 const addKey = (v: KeyState) => {
-  state.keys.update((s: KeyState[]) => reject(whereEq({pubkey: v.pubkey}), s).concat(v))
-  state.pubkey.set(v.pubkey)
+  keys.update((s: KeyState[]) => reject(whereEq({pubkey: v.pubkey}), s).concat(v))
+  pubkey.set(v.pubkey)
 }
 
 export const loginWithPrivateKey = privkey =>

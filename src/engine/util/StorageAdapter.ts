@@ -7,7 +7,7 @@ import {writable} from "src/engine/util/store"
 import type {Collection} from "src/engine/util/store"
 import {IndexedDB} from "src/engine/util/indexeddb"
 
-const localStorageKeys = ["Alerts.lastChecked", "Keys.pubkey", "Keys.keyState", "Settings.settings"]
+const localStorageKeys = ["Keys.pubkey", "Keys.keyState", "Settings.settings"]
 
 const sortChannels = sortBy((e: Channel) =>
   e.joined ? 0 : -Math.max(e.last_checked || 0, e.last_sent || 0)
@@ -84,7 +84,6 @@ export class StorageAdapter {
   async syncToIndexedDb() {
     if (window.indexedDB) {
       const policies = [
-        policy("Alerts.events", 500, sortBy(prop("created_at"))),
         policy("Nip28.channels", 2000, sortChannels),
         policy("Nip28.messages", 10000, sortBy(prop("created_at"))),
         policy("Nip04.contacts", 1000, sortContacts),

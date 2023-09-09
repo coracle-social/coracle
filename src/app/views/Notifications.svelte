@@ -15,9 +15,10 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app/views/Notification.svelte"
-  import {Env, Events, pubkeyLoader, Keys, user, Network, Alerts} from "src/app/engine"
+  import {alerts, alertsLastChecked} from "src/engine2"
+  import {Env, Events, pubkeyLoader, Keys, user, Network} from "src/app/engine"
 
-  const lastChecked = Alerts.lastChecked.get()
+  const lastChecked = alertsLastChecked.get()
   const tabs = ["Mentions & Replies", "Reactions"]
 
   export let activeTab = tabs[0]
@@ -25,9 +26,9 @@
   let limit = 0
   let events = null
 
-  const notifications = Alerts.events.derived($events => {
+  const notifications = alerts.derived($events => {
     // As long as we're on the page, don't show a notification
-    Alerts.lastChecked.set(now())
+    alertsLastChecked.set(now())
 
     // Sort by hour so we can group clustered reactions to the same parent
     return reverse(

@@ -46,7 +46,6 @@ export const user = new User(engine)
 
 export default engine
 export const Env = engine.Env
-export const Alerts = engine.Alerts
 export const Builder = engine.Builder
 export const Content = engine.Content
 export const Crypt = engine.Crypt
