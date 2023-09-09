@@ -1,7 +1,5 @@
-import {Fetch} from "hurdak"
 import {tryJson} from "src/util/misc"
 import {invoiceAmount} from "src/util/lightning"
-import {warn} from "src/util/logger"
 import {Tags} from "src/util/nostr"
 import type {Event, ZapEvent} from "src/engine2/model"
 import {people} from "src/engine2/state"
@@ -59,30 +57,4 @@ export function processZaps(zaps: Event[], pubkey: string) {
 
       return true
     })
-}
-
-export async function fetchInvoice(zapper, event, amount) {
-  const {callback, lnurl} = zapper
-  const s = encodeURI(JSON.stringify(event))
-  const res = await Fetch.fetchJson(`${callback}?amount=${amount}&nostr=${s}&lnurl=${lnurl}`)
-
-  if (!res.pr) {
-    warn(JSON.stringify(res))
-  }
-
-  return res?.pr
-}
-
-export async function collectInvoice(invoice) {
-  const {webln} = window as {webln?: any}
-
-  if (webln) {
-    await webln.enable()
-
-    try {
-      webln.sendPayment(invoice)
-    } catch (e) {
-      warn(e)
-    }
-  }
 }

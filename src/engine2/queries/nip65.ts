@@ -125,12 +125,12 @@ export const getRootHints = hintSelector(function* (event) {
 // anyone else who is tagged in the original event or the reply. Get everyone's read
 // relays. Limit how many per pubkey we publish to though. We also want to advertise
 // our content to our followers, so publish to our write relays as well.
-export const getPublishHints = (limit: number, event: Event, extraRelays: string[] = []) => {
+export const getPublishHints = (limit: number, event: Event) => {
   const pubkeys = Tags.from(event).type("p").values().all()
   const hintGroups = pubkeys.map(pubkey => getPubkeyRelayUrls(pubkey, RelayMode.Read))
   const authorRelays = getPubkeyRelayUrls(event.pubkey, RelayMode.Write)
 
-  return mergeHints(limit, hintGroups.concat([extraRelays, authorRelays]))
+  return mergeHints(limit, [...hintGroups, authorRelays, getUserRelayUrls(RelayMode.Write)])
 }
 
 export const getInboxHints = (limit: number, pubkeys: string[]) =>

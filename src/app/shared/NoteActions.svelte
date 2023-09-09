@@ -15,8 +15,8 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {toastProgress} from "src/app/state"
-  import {getUserRelayUrls} from "src/engine2"
-  import {Env, Nip57, Builder, Nip65, Keys, Outbox, user} from "src/app/engine"
+  import {zappers, getUserRelayUrls, processZaps} from "src/engine2"
+  import {Env, Builder, Nip65, Keys, Outbox, user} from "src/app/engine"
 
   export let note
   export let reply
@@ -24,7 +24,7 @@
   export let showEntire
   export let setFeedRelay
 
-  const zapper = Nip57.zappers.key(note.pubkey)
+  const zapper = zappers.key(note.pubkey)
   const nevent = nip19.neventEncode({id: note.id, relays: [note.seen_on]})
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const likesCount = tweened(0, {interpolate})
@@ -82,16 +82,14 @@
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
   $: $likesCount = allLikes.length
 
-  $: zaps = Nip57.processZaps(note.zaps, note.pubkey)
+  $: zaps = processZaps(note.zaps, note.pubkey)
   $: zap = zap || find(z => z.request.pubkey === Keys.pubkey.get(), zaps)
 
   $: $zapsTotal =
     sum(
       pluck(
         "invoiceAmount",
-        zap
-          ? zaps.filter(n => n.id !== zap?.id).concat(Nip57.processZaps([zap], note.pubkey))
-          : zaps
+        zap ? zaps.filter(n => n.id !== zap?.id).concat(processZaps([zap], note.pubkey)) : zaps
       )
     ) / 1000
 

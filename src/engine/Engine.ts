@@ -12,7 +12,6 @@ import {Nip05} from "./components/Nip05"
 import {Nip24} from "./components/Nip24"
 import {Nip28} from "./components/Nip28"
 import {Nip44} from "./components/Nip44"
-import {Nip57} from "./components/Nip57"
 import {Nip59} from "./components/Nip59"
 import {Nip65} from "./components/Nip65"
 import {Outbox} from "./components/Outbox"
@@ -33,7 +32,6 @@ export class Engine {
   Nip24 = new Nip24()
   Nip28 = new Nip28()
   Nip44 = new Nip44()
-  Nip57 = new Nip57()
   Nip59 = new Nip59()
   Nip65 = new Nip65()
   Outbox = new Outbox()

@@ -7,13 +7,11 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import {getSetting, getUserRelayUrls} from "src/engine2"
-  import {Directory, Nip65, Outbox, Network, Builder, Nip57} from "src/app/engine"
+  import {getSetting, requestZap, collectInvoice, loadZapResponse} from "src/engine2"
+  import {Directory} from "src/app/engine"
 
   export let pubkey
   export let note = null
-  export let zapper = null
-  export let author = null
 
   let sub
   let zap = {
@@ -25,27 +23,15 @@
     confirmed: false,
   }
 
-  const _zapper = zapper || Nip57.zappers.key(pubkey).get()
-  const _author = author || Directory.getProfile(pubkey)
-
   const loadZapInvoice = async () => {
     zap.loading = true
 
-    const amount = zap.amount * 1000
-    const relayLimit = getSetting("relay_limit")
-    const relays = note
-      ? Nip65.getPublishHints(relayLimit, note, getUserRelayUrls("write"))
-      : Nip65.getPubkeyHints(relayLimit, pubkey, "read")
-    const rawEvent = Builder.requestZap(
-      relays,
-      zap.message,
+    const {invoice, relays} = await requestZap({
       pubkey,
-      note?.id,
-      amount,
-      _zapper.lnurl
-    )
-    const signedEvent = await Outbox.prep(rawEvent)
-    const invoice = await Nip57.fetchInvoice(_zapper, signedEvent, amount)
+      event: note,
+      amount: zap.amount,
+      content: zap.message,
+    })
 
     // If they closed the dialog before fetch resolved, we're done
     if (!zap) {
@@ -55,21 +41,14 @@
     zap.invoice = invoice
     zap.loading = false
 
-    await Nip57.collectInvoice(invoice)
+    await collectInvoice(invoice)
 
     // Listen for the zap confirmation
-    sub = Network.subscribe({
-      relays,
-      filter: {
-        kinds: [9735],
-        authors: [_zapper.nostrPubkey],
-        "#p": [pubkey],
-        since: zap.startedAt - 10,
-      },
-      onEvent: event => {
-        zap.confirmed = true
-        setTimeout(() => modal.pop(), 1000)
-      },
+    sub = loadZapResponse({relays, pubkey})
+
+    sub.on("event", event => {
+      zap.confirmed = true
+      setTimeout(() => modal.pop(), 1000)
     })
   }
 
@@ -81,7 +60,7 @@
 <Content size="lg">
   <div class="text-center">
     <h1 class="staatliches text-2xl">Send a zap</h1>
-    <p>to {Directory.displayProfile(_author)}</p>
+    <p>to {Directory.displayPubkey(pubkey)}</p>
   </div>
   {#if zap.confirmed}
     <div class="flex items-center justify-center gap-2 text-gray-1">
