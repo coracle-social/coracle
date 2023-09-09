@@ -7,7 +7,8 @@
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/app/shared/Compose.svelte"
-  import {Directory, Network, Outbox, user, Keys, Nip65, Builder} from "src/app/engine"
+  import {getUserRelayUrls} from "src/engine2"
+  import {Directory, Network, Outbox, Keys, Nip65, Builder} from "src/app/engine"
   import {toastProgress} from "src/app/state"
 
   export let note
@@ -51,7 +52,7 @@
 
     if (content) {
       const event = Builder.createReply(note, content, data.mentions.map(Builder.mention))
-      const relays = Nip65.getPublishHints(10, note, user.getRelayUrls("write"))
+      const relays = Nip65.getPublishHints(10, note, getUserRelayUrls("write"))
 
       // Re-broadcast the note we're replying to
       Network.publish({relays, event: note})

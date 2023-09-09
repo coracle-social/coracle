@@ -8,6 +8,7 @@
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
   import MessagesListItem from "src/app/views/MessagesListItem.svelte"
+  import {getUserRelayUrls} from "src/engine2"
   import {Nip04, pubkeyLoader, user, Network, Keys} from "src/app/engine"
 
   export let activeTab = "conversations"
@@ -32,7 +33,7 @@
     const pubkey = Keys.pubkey.get()
     const since = now() - seconds(90, "day")
     const sub = Network.subscribe({
-      relays: user.getRelayUrls("read"),
+      relays: getUserRelayUrls("read"),
       filter: [
         {kinds: [4], authors: [pubkey], since},
         {kinds: [4], "#p": [pubkey], since},

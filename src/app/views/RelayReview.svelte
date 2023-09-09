@@ -6,7 +6,8 @@
   import Heading from "src/partials/Heading.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {Builder, Outbox, user} from "src/app/engine"
+  import {getUserRelayUrls} from "src/engine2"
+  import {Builder, Outbox} from "src/app/engine"
 
   export let url
 
@@ -25,7 +26,7 @@
       ],
     })
 
-    Outbox.publish({event, relays: user.getRelayUrls("write")})
+    Outbox.publish({event, relays: getUserRelayUrls("write")})
 
     modal.pop()
   }

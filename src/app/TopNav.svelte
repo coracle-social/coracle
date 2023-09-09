@@ -18,7 +18,8 @@
   import TopNavMenu from "src/app/TopNavMenu.svelte"
   import {menuIsOpen} from "src/app/state"
   import {hasNewNotfications} from "src/engine2"
-  import engine, {Nip28, Nip04, Nip24, Keys, Directory, Network, Nip65, user} from "src/app/engine"
+  import {getUserRelayUrls} from "src/engine2"
+  import engine, {Nip28, Nip04, Nip24, Keys, Directory, Network, Nip65} from "src/app/engine"
 
   const {keyState, canUseGiftWrap} = Keys
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
@@ -73,7 +74,7 @@
       })
     } else if (Directory.profiles.get().length < 50) {
       Network.subscribe({
-        relays: user.getRelayUrls("read"),
+        relays: getUserRelayUrls("read"),
         filter: [{kinds: [0], limit: 50}],
         timeout: 3000,
       })

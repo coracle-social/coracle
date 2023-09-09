@@ -4,9 +4,9 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {getSetting} from "src/engine2"
+  import {getSetting, getUserRelayUrls} from "src/engine2"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {Outbox, Nip65, user} from "src/app/engine"
+  import {Outbox, Nip65} from "src/app/engine"
   import {toastProgress} from "src/app/state"
 
   export let event
@@ -21,7 +21,7 @@
 
   const retry = () => {
     const limit = getSetting("relay_limit")
-    const relays = Nip65.getPublishHints(limit, event, user.getRelayUrls("write"))
+    const relays = Nip65.getPublishHints(limit, event, getUserRelayUrls("write"))
 
     Outbox.publish({event, relays, onProgress: toastProgress})
 

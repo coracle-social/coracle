@@ -9,7 +9,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import {Builder, Outbox, user} from "src/app/engine"
+  import {getUserRelayUrls} from "src/engine2"
+  import {Builder, Outbox} from "src/app/engine"
 
   export let note
 
@@ -29,7 +30,7 @@
 
     Outbox.publish({
       event: Builder.createReport({tagClient: false, tags}),
-      relays: user.getRelayUrls("write"),
+      relays: getUserRelayUrls("write"),
       sk: generatePrivateKey(),
     })
 

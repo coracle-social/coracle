@@ -5,7 +5,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import engine, {Builder, Outbox, user} from "src/app/engine"
+  import {getUserRelayUrls} from "src/engine2"
+  import engine, {Builder, Outbox} from "src/app/engine"
 
   export let note
 
@@ -24,7 +25,7 @@
 
     Outbox.publish({
       event: Builder.createLabel({tagClient: false, tags}),
-      relays: user.getRelayUrls("write"),
+      relays: getUserRelayUrls("write"),
     })
 
     toast.show("info", "Your tag has been saved!")
@@ -38,8 +39,8 @@
   <Content>
     <Heading class="text-center">Add Tags</Heading>
     <p class="text-center">
-      Recommend content to people who follow you. You can find
-      your recommendations under the "Explore" tab.
+      Recommend content to people who follow you. You can find your recommendations under the
+      "Explore" tab.
     </p>
     <div class="flex w-full flex-col gap-8">
       <Field label="Tags" info="Tag this content so other people can find it">

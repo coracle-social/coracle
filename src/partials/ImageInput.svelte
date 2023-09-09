@@ -1,13 +1,13 @@
 <script lang="ts">
   import {identity} from "ramda"
-  import {Fetch, filterVals} from "hurdak"
+  import {filterVals} from "hurdak"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile, stripExifData, blobToFile} from "src/util/html"
-  import {Builder, Outbox} from "src/app/engine"
+  import {uploadToNostrBuild} from "src/engine2"
 
   export let icon = null
   export let value = null
@@ -15,8 +15,6 @@
   export let maxWidth = null
   export let maxHeight = null
   export let onChange = null
-
-  const url = "https://nostr.build/api/v2/upload/files"
 
   let input, listener, loading
   let files = []
@@ -41,20 +39,7 @@
               body.append("file[]", file)
             }
 
-            const event = Outbox.prep(
-              Builder.nip98Auth([
-                ["u", url],
-                ["method", "POST"],
-              ])
-            )
-
-            const result = await Fetch.fetchJson(url, {
-              body,
-              method: "POST",
-              headers: {
-                Authorization: `Nostr ${btoa(JSON.stringify(event))}`,
-              },
-            })
+            const result = await uploadToNostrBuild(body)
 
             // Legacy weirdness
             for (const {url} of result.data) {

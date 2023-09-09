@@ -2,13 +2,14 @@
   import {last} from "ramda"
   import {modal} from "src/partials/state"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
+  import {getUserRelayUrls} from "src/engine2"
   import {Nip65, Keys, user} from "src/app/engine"
   import {addToList} from "src/app/state"
 
   export let relay
 
   const info = Nip65.getRelayInfo(relay.url)
-  const relays = Nip65.policies.key(Keys.pubkey.get()).derived(() => user.getRelayUrls())
+  const relays = Nip65.policies.key(Keys.pubkey.get()).derived(() => getUserRelayUrls())
 
   let actions = []
 

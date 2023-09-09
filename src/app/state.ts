@@ -10,7 +10,7 @@ import {warn} from "src/util/logger"
 import {now} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
-import {loadPubkeys, getSetting, dufflepud} from "src/engine2"
+import {loadPubkeys, getUserRelayUrls, getSetting, dufflepud} from "src/engine2"
 import type {Event} from "src/engine/types"
 import {Events, Nip28, Env, Network, user, Keys} from "src/app/engine"
 
@@ -80,7 +80,7 @@ export const slowConnections = writable([])
 
 setInterval(() => {
   // Only notify about relays the user is actually subscribed to
-  const userRelays = new Set(user.getRelayUrls())
+  const userRelays = new Set(getUserRelayUrls())
   const $slowConnections = []
 
   // Prune connections we haven't used in a while, clear errors periodically,
@@ -120,7 +120,7 @@ export const listenForNotifications = async () => {
   // the notification badges, but load the details lazily
   listener?.close()
   listener = Network.subscribe({
-    relays: user.getRelayUrls("read"),
+    relays: getUserRelayUrls("read"),
     filter: [
       // Messages
       {kinds: [4], authors: [pubkey], limit: 1},

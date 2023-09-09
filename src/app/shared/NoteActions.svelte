@@ -15,6 +15,7 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {toastProgress} from "src/app/state"
+  import {getUserRelayUrls} from "src/engine2"
   import {Env, Nip57, Builder, Nip65, Keys, Outbox, user} from "src/app/engine"
 
   export let note
@@ -45,14 +46,14 @@
 
     Outbox.publish({
       event: like,
-      relays: Nip65.getPublishHints(5, note, user.getRelayUrls("write")),
+      relays: Nip65.getPublishHints(5, note, getUserRelayUrls("write")),
     })
   }
 
   const deleteReaction = e => {
     Outbox.publish({
       event: Builder.deleteEvents([e.id]),
-      relays: Nip65.getPublishHints(3, note, user.getRelayUrls("write")),
+      relays: Nip65.getPublishHints(3, note, getUserRelayUrls("write")),
     })
 
     like = null
@@ -66,7 +67,7 @@
   const broadcast = () => {
     Outbox.publish({
       event: note,
-      relays: user.getRelayUrls("write"),
+      relays: getUserRelayUrls("write"),
       onProgress: toastProgress,
     })
   }

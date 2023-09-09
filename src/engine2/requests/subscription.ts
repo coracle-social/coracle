@@ -4,8 +4,8 @@ import EventEmitter from "events"
 import {defer, tryFunc} from "hurdak"
 import {warn, info} from "src/util/logger"
 import type {Event, Filter} from "src/engine2/model"
+import {getUrls, getExecutor} from "src/engine2/queries"
 import {projections} from "src/engine2/projections"
-import {getUrls, getExecutor} from "./executor"
 
 type SubscriptionOpts = {
   relays: string[]

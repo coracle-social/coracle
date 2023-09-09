@@ -12,6 +12,7 @@
   import ForegroundButton from "src/partials/ForegroundButton.svelte"
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
+  import {getUserRelayUrls} from "src/engine2"
   import {Nip24, Nip59, pubkeyLoader, user, Network, Keys} from "src/app/engine"
 
   export let activeTab = "conversations"
@@ -39,7 +40,7 @@
     const pubkey = Keys.pubkey.get()
     const since = now() - seconds(90, "day")
     const sub = Network.subscribe({
-      relays: user.getRelayUrls("read"),
+      relays: getUserRelayUrls("read"),
       filter: [{kinds: [1059], "#p": [pubkey], since}],
       onEvent: batch(1000, events => {
         const pubkeys = new Set()

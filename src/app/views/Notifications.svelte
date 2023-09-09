@@ -15,7 +15,7 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app/views/Notification.svelte"
-  import {alerts, alertsLastChecked} from "src/engine2"
+  import {alerts, alertsLastChecked, getUserRelayUrls} from "src/engine2"
   import {Env, Events, pubkeyLoader, Keys, user, Network} from "src/app/engine"
 
   const lastChecked = alertsLastChecked.get()
@@ -103,7 +103,7 @@
     ])
 
     const sub = Network.subscribe({
-      relays: user.getRelayUrls("read"),
+      relays: getUserRelayUrls("read"),
       filter: [
         {kinds: noteKinds.concat(reactionKinds), "#p": [pubkey], since},
         {kinds: noteKinds.concat(reactionKinds), "#e": eventIds, since},

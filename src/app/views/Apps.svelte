@@ -13,7 +13,8 @@
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
-  import {Network, Directory, Nip05, user, pubkeyLoader} from "src/app/engine"
+  import {getUserRelayUrls} from "src/engine2"
+  import {Network, Directory, Nip05, pubkeyLoader} from "src/app/engine"
   import {compileFilter} from "src/app/state"
 
   const getColumns = xs => {
@@ -44,7 +45,7 @@
   Network.subscribe({
     timeout: 5000,
     filter: [{kinds: [31990]}, compileFilter({kinds: [31989], authors: "follows"})],
-    relays: user.getRelayUrls("read"),
+    relays: getUserRelayUrls("read"),
     onEvent: batch(500, events => {
       const pubkeys = []
 

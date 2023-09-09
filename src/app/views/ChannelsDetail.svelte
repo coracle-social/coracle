@@ -2,7 +2,6 @@
   import cx from "classnames"
   import {filter, whereEq} from "ramda"
   import {onMount} from "svelte"
-  import {generatePrivateKey} from "nostr-tools"
   import {formatTimestamp} from "src/util/misc"
   import {modal} from "src/partials/state"
   import Channel from "src/partials/Channel.svelte"
@@ -10,12 +9,11 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {getSetting} from "src/engine2"
-  import {user, Nip24, Nip65, Outbox, Directory, Builder, Network, Keys} from "src/app/engine"
+  import {createNip24Message, loadNip59Messages} from "src/engine2"
+  import {user, Nip24, Directory, Keys} from "src/app/engine"
 
   export let entity
 
-  const relayLimit = getSetting("relay_limit")
   const userPubkey = Keys.pubkey.get()
   const channel = Nip24.channels.key(entity)
   const messages = Nip24.messages.derived(filter(whereEq({channel: entity})))
@@ -26,30 +24,12 @@
     user.setNip24ChannelLastChecked(entity)
   }
 
-  const sendMessage = async content => {
-    const event = {kind: 14, content, tags: pubkeys.map(Builder.mention)}
-
-    for (const pubkey of pubkeys.concat(userPubkey)) {
-      const relays = Nip65.getPubkeyHints(relayLimit, pubkey, "read")
-
-      Outbox.publish({
-        event,
-        relays,
-        wrapWith: {
-          recipientPk: pubkey,
-          wrapperSk: generatePrivateKey(),
-        },
-      })
-    }
-  }
+  const sendMessage = content => createNip24Message({content, channelId: entity})
 
   const showPerson = pubkey => modal.push({type: "person/detail", pubkey})
 
   onMount(() => {
-    const sub = Network.subscribe({
-      relays: Nip65.getPubkeyHints(relayLimit, userPubkey, "read"),
-      filter: [{kinds: [1059], "#p": [userPubkey]}],
-    })
+    const sub = loadNip59Messages()
 
     return () => sub.close()
   })

@@ -1,9 +1,10 @@
 <script lang="ts">
+  import {getUserRelayUrls} from "src/engine2"
   import {user, Nip65, Keys} from "src/app/engine"
 
   export let relay
 
-  const relays = Nip65.policies.key(Keys.pubkey.get()).derived(() => new Set(user.getRelayUrls()))
+  const relays = Nip65.policies.key(Keys.pubkey.get()).derived(() => new Set(getUserRelayUrls()))
 
   const removeRelay = r => user.removeRelay(r.url)
 

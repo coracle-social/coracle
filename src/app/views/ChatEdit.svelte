@@ -6,6 +6,7 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {toast, modal} from "src/partials/state"
+  import {getUserRelayUrls} from "src/engine2"
   import {Builder, Outbox, user} from "src/app/engine"
   import {toastProgress} from "src/app/state"
 
@@ -17,7 +18,7 @@
     if (!channel.name) {
       toast.show("error", "Please enter a name for your room.")
     } else {
-      const relays = user.getRelayUrls("write")
+      const relays = getUserRelayUrls("write")
 
       if (channel.id) {
         const event = Builder.updateChannel(channel)

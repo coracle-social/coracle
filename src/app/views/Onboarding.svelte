@@ -10,8 +10,8 @@
   import OnboardingRelays from "src/app/views/OnboardingRelays.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
-  import {loadPubkeys} from "src/engine2"
-  import {Env, Outbox, Builder, user, Keys} from "src/app/engine"
+  import {loadPubkeys, createNote} from "src/engine2"
+  import {Env, Builder, user, Keys} from "src/app/engine"
   import {listenForNotifications} from "src/app/state"
   import {modal} from "src/partials/state"
 
@@ -48,7 +48,7 @@
     return relays
   })
 
-  const signup = async note => {
+  const signup = async noteContent => {
     Keys.login("privkey", privkey)
 
     // Wait for the published event to go through
@@ -59,11 +59,7 @@
     await Promise.all([
       user.setProfile(profile),
       user.setPetnames(petnames),
-      note &&
-        Outbox.publish({
-          event: Builder.createNote(note),
-          relays: user.getRelayUrls("write"),
-        }),
+      noteContent && createNote({content: noteContent}),
     ])
 
     // Start our notifications listener

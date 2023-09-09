@@ -1,5 +1,5 @@
 import {switcherFn} from "hurdak"
-import type {UnsignedEvent} from "nostr-tools"
+import type {EventTemplate, UnsignedEvent} from "nostr-tools"
 import {getSignature, getPublicKey, getEventHash} from "nostr-tools"
 import type NDK from "@nostr-dev-kit/ndk"
 import {NDKEvent} from "@nostr-dev-kit/ndk"
@@ -9,32 +9,31 @@ import type {Rumor, KeyState} from "src/engine2/model"
 export class Signer {
   constructor(readonly user: KeyState | null, readonly ndk: NDK | null) {}
 
-  prepWithKey(event: UnsignedEvent, sk: string) {
-    event.pubkey = getPublicKey(sk)
-    ;(event as Rumor).id = getEventHash(event)
+  prepWithKey(event: EventTemplate, sk: string) {
+    ;(event as UnsignedEvent).pubkey = getPublicKey(sk)
+    ;(event as Rumor).id = getEventHash(event as UnsignedEvent)
 
-    return event
+    return event as Rumor
   }
 
-  prepAsUser(event: UnsignedEvent) {
+  prepAsUser(event: EventTemplate) {
     const {pubkey} = this.user
 
-    event.pubkey = pubkey
-    ;(event as Rumor).id = getEventHash(event)
+    ;(event as UnsignedEvent).pubkey = pubkey
+    ;(event as Rumor).id = getEventHash(event as UnsignedEvent)
 
-    return event
+    return event as Rumor
   }
 
-  signWithKey(event: UnsignedEvent, sk: string) {
-    event = this.prepWithKey(event, sk)
+  signWithKey(template: EventTemplate, sk: string) {
+    const event = this.prepWithKey(template, sk)
 
     return {...event, sig: getSignature(event, sk)}
   }
 
-  signAsUser(event: UnsignedEvent) {
+  signAsUser(template: EventTemplate) {
     const {method, privkey} = this.user
-
-    event = this.prepAsUser(event)
+    const event = this.prepAsUser(template)
 
     return switcherFn(method, {
       privkey: () => ({...event, sig: getSignature(event, privkey)}),

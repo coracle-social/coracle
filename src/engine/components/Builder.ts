@@ -129,9 +129,6 @@ export class Builder {
   createDirectMessage = (pubkey: string, content: string) =>
     buildEvent(4, {content, tags: [["p", pubkey]]})
 
-  createNote = (content: string, tags: string[][] = []) =>
-    buildEvent(1, {content, tags: uniqTags(this.tagsFromContent(content, tags))})
-
   createReaction = (note: Event, content: string) =>
     buildEvent(7, {content, tags: this.getReplyTags(note)})
 

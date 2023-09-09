@@ -1,5 +1,7 @@
 export * from "./session"
+export * from "./executor"
 export * from "./settings"
+export * from "./nip01"
 export * from "./nip02"
 export * from "./nip05"
 export * from "./nip57"

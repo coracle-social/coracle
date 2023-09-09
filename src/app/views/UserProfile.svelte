@@ -7,7 +7,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {Directory, Outbox, Keys, user, Builder} from "src/app/engine"
+  import {getUserRelayUrls} from "src/engine2"
+  import {Directory, Outbox, Keys, Builder} from "src/app/engine"
   import {routes} from "src/app/state"
   import {toastProgress} from "src/app/state"
 
@@ -19,7 +20,7 @@
   const submit = () => {
     Outbox.publish({
       event: Builder.setProfile(values),
-      relays: user.getRelayUrls("write"),
+      relays: getUserRelayUrls("write"),
       onProgress: toastProgress,
     })
 

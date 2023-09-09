@@ -16,7 +16,8 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {Directory, Network, Outbox, user, Builder, Nip65, Keys} from "src/app/engine"
+  import {createNote, getUserRelayUrls} from "src/engine2"
+  import {Directory, Network, Builder, Nip65, Keys} from "src/app/engine"
   import {modal} from "src/partials/state"
   import {toastProgress} from "src/app/state"
 
@@ -30,11 +31,15 @@
   let wordCount = 0
   let showPreview = false
   let showSettings = false
-  let relays = writable(writeTo ? writeTo : user.getRelayUrls("write"))
+  let relays = writable(writeTo ? writeTo : getUserRelayUrls("write"))
 
   const onSubmit = async () => {
-    let content = compose.parse()
     const tags = []
+    const content = compose.parse().trim()
+
+    if (!content) {
+      return
+    }
 
     if (quote) {
       tags.push(Builder.mention(quote.pubkey))
@@ -43,15 +48,9 @@
       Network.publish({relays: $relays, event: quote})
     }
 
-    if (content) {
-      Outbox.publish({
-        relays: $relays,
-        event: Builder.createNote(content.trim(), tags),
-        onProgress: toastProgress,
-      })
+    createNote({tags, content, relays: $relays}).on("progress", toastProgress)
 
-      modal.clear()
-    }
+    modal.clear()
   }
 
   const addImage = url => {

@@ -11,6 +11,7 @@
   import Content from "src/partials/Content.svelte"
   import NoteById from "src/app/shared/NoteById.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
+  import {getUserRelayUrls} from "src/engine2"
   import engine, {Network, Keys, user} from "src/app/engine"
 
   type LabelGroup = {
@@ -63,7 +64,7 @@
 
   onMount(() => {
     const sub = Network.subscribe({
-      relays: user.getRelayUrls("read"),
+      relays: getUserRelayUrls("read"),
       filter: {
         kinds: [1985],
         "#L": ["#t", "ugc"],

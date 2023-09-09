@@ -15,6 +15,5 @@ export {Nip28} from "./components/Nip28"
 export {Nip44} from "./components/Nip44"
 export {Nip57} from "./components/Nip57"
 export {Nip65} from "./components/Nip65"
-export {Outbox} from "./components/Outbox"
 
 export {User} from "./util/User"
