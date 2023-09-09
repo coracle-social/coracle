@@ -6,8 +6,8 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {toast, modal} from "src/partials/state"
-  import {getUserRelayUrls} from "src/engine2"
-  import {Builder, Outbox, user} from "src/app/engine"
+  import {publishNip28ChannelMeta} from "src/engine2"
+  import {user} from "src/app/engine"
   import {toastProgress} from "src/app/state"
 
   export let channel = {name: null, id: null, about: null, picture: null}
@@ -18,17 +18,13 @@
     if (!channel.name) {
       toast.show("error", "Please enter a name for your room.")
     } else {
-      const relays = getUserRelayUrls("write")
+      const {id, ...content} = channel
+      const pub = publishNip28ChannelMeta({id, content})
 
-      if (channel.id) {
-        const event = Builder.updateChannel(channel)
-
-        Outbox.publish({relays, event, onProgress: toastProgress})
+      if (id) {
+        pub.on("progress", toastProgress)
       } else {
-        const event = await Outbox.prep(Builder.createChannel(channel))
-
-        Outbox.publish({event, relays})
-        user.joinChannel(event.id)
+        user.joinChannel(pub.event.id)
       }
 
       modal.pop()

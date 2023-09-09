@@ -5,7 +5,9 @@ import {parseContent} from "src/util/notes"
 import {now} from "src/util/misc"
 import type {Event} from "src/engine2/model"
 import {people} from "src/engine2/state"
+import {signer, getUserRelayUrls} from "src/engine2/queries"
 import {getEventHints, getPubkeyHints, displayPerson} from "src/engine2/queries"
+import {Publisher} from "./publisher"
 
 export type EventOpts = {
   created_at?: number
@@ -15,6 +17,22 @@ export type EventOpts = {
 
 export function buildEvent(kind: number, {content = "", tags = [], created_at = null}: EventOpts) {
   return {kind, content, tags, created_at: created_at || now()}
+}
+
+export type PublishOpts = EventOpts & {
+  relays?: string[]
+}
+
+export function publishEvent(kind: number, {relays, content = "", tags = []}: PublishOpts) {
+  return Publisher.publish({
+    relays: relays || getUserRelayUrls("write"),
+    event: signer.get().signAsUser(
+      buildEvent(kind, {
+        content,
+        tags: uniqTags([...tags, tagsFromContent(content)]),
+      })
+    ),
+  })
 }
 
 export const uniqTags = uniqBy((t: string[]) => t.slice(0, 2).join(":"))

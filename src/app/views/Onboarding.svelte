@@ -10,7 +10,7 @@
   import OnboardingRelays from "src/app/views/OnboardingRelays.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
-  import {loadPubkeys, createNote} from "src/engine2"
+  import {loadPubkeys, publishNote} from "src/engine2"
   import {Env, Builder, user, Keys} from "src/app/engine"
   import {listenForNotifications} from "src/app/state"
   import {modal} from "src/partials/state"
@@ -59,7 +59,7 @@
     await Promise.all([
       user.setProfile(profile),
       user.setPetnames(petnames),
-      noteContent && createNote({content: noteContent}),
+      noteContent && publishNote({content: noteContent}),
     ])
 
     // Start our notifications listener

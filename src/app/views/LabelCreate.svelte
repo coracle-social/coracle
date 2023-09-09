@@ -5,8 +5,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import {getUserRelayUrls} from "src/engine2"
-  import engine, {Builder, Outbox} from "src/app/engine"
+  import {getUserRelayUrls, publishLabel} from "src/engine2"
+  import engine from "src/app/engine"
 
   export let note
 
@@ -23,10 +23,7 @@
       }
     }
 
-    Outbox.publish({
-      event: Builder.createLabel({tagClient: false, tags}),
-      relays: getUserRelayUrls("write"),
-    })
+    publishLabel({tags, relays: getUserRelayUrls("write")})
 
     toast.show("info", "Your tag has been saved!")
     modal.pop()

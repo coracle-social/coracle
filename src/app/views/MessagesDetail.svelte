@@ -7,18 +7,8 @@
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {getSetting} from "src/engine2"
-  import {
-    user,
-    Nip04,
-    Nip65,
-    Outbox,
-    Crypt,
-    Directory,
-    Builder,
-    Network,
-    Keys,
-  } from "src/app/engine"
+  import {publishNip04Message, loadNip04Messages} from "src/engine2"
+  import {user, Nip04, Directory, Keys} from "src/app/engine"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -26,33 +16,19 @@
   export let entity
 
   const pubkey = toHex(entity)
-  const relayLimit = getSetting("relay_limit")
   const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
   const messages = Nip04.messages.derived(filter(whereEq({contact: pubkey})))
 
   user.setContactLastChecked(pubkey)
 
-  const getRelays = () =>
-    Nip65.mergeHints(relayLimit, [
-      Nip65.getPubkeyHints(relayLimit, pubkey, "read"),
-      Nip65.getPubkeyHints(relayLimit, Keys.pubkey.get(), "read"),
-    ])
-
   const sendMessage = async content => {
-    const cyphertext = await Crypt.encrypt(pubkey, content)
-    const event = Builder.createDirectMessage(pubkey, cyphertext)
+    const pub = await publishNip04Message(pubkey, {content})
 
-    await Outbox.publish({event, relays: getRelays()})
+    await pub.result
   }
 
   onMount(() => {
-    const sub = Network.subscribe({
-      relays: getRelays(),
-      filter: [
-        {kinds: [4], authors: [Keys.pubkey.get()], "#p": [pubkey]},
-        {kinds: [4], authors: [pubkey], "#p": [Keys.pubkey.get()]},
-      ],
-    })
+    const sub = loadNip04Messages(pubkey)
 
     return () => sub.close()
   })

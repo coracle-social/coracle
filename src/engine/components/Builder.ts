@@ -1,6 +1,6 @@
-import {last, pick, uniqBy} from "ramda"
+import {last, uniqBy} from "ramda"
 import {doPipe, first} from "hurdak"
-import {Tags, channelAttrs, findRoot, findReply} from "src/util/nostr"
+import {Tags, findRoot, findReply} from "src/util/nostr"
 import {parseContent} from "src/util/notes"
 import type {Event, RelayPolicyEntry} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
@@ -114,15 +114,6 @@ export class Builder {
 
   createList = (list: string[][]) => buildEvent(30001, {tags: list})
 
-  createChannel = (channel: Record<string, any>) =>
-    buildEvent(40, {content: JSON.stringify(pick(channelAttrs, channel))})
-
-  updateChannel = ({id, ...channel}: Record<string, any>) =>
-    buildEvent(41, {
-      content: JSON.stringify(pick(channelAttrs, channel)),
-      tags: [["e", id]],
-    })
-
   createChatMessage = (channelId: string, content: string, url: string) =>
     buildEvent(42, {content, tags: [["e", channelId, url, "root"]]})
 
@@ -167,8 +158,6 @@ export class Builder {
   deleteEvents = (ids: string[]) => buildEvent(5, {tags: ids.map(id => ["e", id])})
 
   deleteNaddrs = (naddrs: string[]) => buildEvent(5, {tags: naddrs.map(naddr => ["a", naddr])})
-
-  createLabel = (payload: EventOpts) => buildEvent(1985, payload)
 
   createReport = (payload: EventOpts) => buildEvent(1984, payload)
 

@@ -133,6 +133,12 @@ export const getPublishHints = (limit: number, event: Event, extraRelays: string
   return mergeHints(limit, hintGroups.concat([extraRelays, authorRelays]))
 }
 
+export const getInboxHints = (limit: number, pubkeys: string[]) =>
+  mergeHints(
+    limit,
+    pubkeys.map(pk => getPubkeyHints(limit, pk, "read"))
+  )
+
 export const mergeHints = (limit: number, groups: string[][]) => {
   const scores = {} as Record<string, any>
 

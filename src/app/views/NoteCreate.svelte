@@ -16,7 +16,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {createNote, getUserRelayUrls} from "src/engine2"
+  import {publishNote, getUserRelayUrls} from "src/engine2"
   import {Directory, Network, Builder, Nip65, Keys} from "src/app/engine"
   import {modal} from "src/partials/state"
   import {toastProgress} from "src/app/state"
@@ -48,7 +48,7 @@
       Network.publish({relays: $relays, event: quote})
     }
 
-    createNote({tags, content, relays: $relays}).on("progress", toastProgress)
+    publishNote({tags, content, relays: $relays}).on("progress", toastProgress)
 
     modal.clear()
   }

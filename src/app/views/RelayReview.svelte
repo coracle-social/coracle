@@ -6,8 +6,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {getUserRelayUrls} from "src/engine2"
-  import {Builder, Outbox} from "src/app/engine"
+  import {publishLabel} from "src/engine2"
 
   export let url
 
@@ -15,18 +14,14 @@
   let rating
 
   const onSubmit = () => {
-    const review = compose.parse()
-    const event = Builder.createLabel({
-      content: review,
-      tagClient: false,
+    publishLabel({
+      content: compose.parse(),
       tags: [
         ["L", "social.coracle.ontology"],
         ["l", "review/relay", "social.coracle.ontology", JSON.stringify({quality: rating})],
         ["r", url],
       ],
     })
-
-    Outbox.publish({event, relays: getUserRelayUrls("write")})
 
     modal.pop()
   }
