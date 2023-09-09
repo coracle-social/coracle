@@ -95,7 +95,6 @@ export type Handle = {
 }
 
 export type Zapper = {
-  pubkey: string
   lnurl: string
   callback: string
   minSendable: number
@@ -117,7 +116,7 @@ export type Person = {
   handle_updated_at?: number
   handle: Handle
   zapper_updated_at?: number
-  zapper: Handle
+  zapper: Zapper
 }
 
 export type Channel = {
