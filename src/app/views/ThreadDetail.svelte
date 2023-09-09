@@ -1,17 +1,17 @@
 <script>
   import {quantify} from "hurdak"
   import {onDestroy} from "svelte"
-  import {ThreadLoader} from "src/engine"
+  import {ThreadLoader} from "src/engine2"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import engine, {user} from "src/app/engine"
+  import {user} from "src/app/engine"
 
   export let anchorId
   export let relays
 
-  const loader = new ThreadLoader(engine, {anchorId, relays, isMuted: user.isMuted})
+  const loader = new ThreadLoader({anchorId, relays, isMuted: user.isMuted})
   const {anchor, root, parent, ancestors} = loader
 
   let loading = true

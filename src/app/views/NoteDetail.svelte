@@ -1,6 +1,6 @@
 <script>
   import {first} from "hurdak"
-  import {ContextLoader} from "src/engine"
+  import {ContextLoader} from "src/engine2"
   import {onMount, onDestroy} from "svelte"
   import {fly} from "src/util/transition"
   import {info} from "src/util/logger"
@@ -11,7 +11,7 @@
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import engine, {Settings, Nip65, user, Network} from "src/app/engine"
+  import {Settings, Nip65, user, Network} from "src/app/engine"
 
   export let note
   export let relays = []
@@ -22,7 +22,7 @@
   }
 
   const filter = {ids: [note.id]}
-  const context = new ContextLoader(engine, {
+  const context = new ContextLoader({
     filter,
     isMuted: user.isMuted,
     onEvent: e => {
