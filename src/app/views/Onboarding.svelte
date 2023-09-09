@@ -10,7 +10,8 @@
   import OnboardingRelays from "src/app/views/OnboardingRelays.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
-  import {Env, pubkeyLoader, Outbox, Builder, user, Keys} from "src/app/engine"
+  import {loadPubkeys} from "src/engine2"
+  import {Env, Outbox, Builder, user, Keys} from "src/app/engine"
   import {listenForNotifications} from "src/app/state"
   import {modal} from "src/partials/state"
 
@@ -77,7 +78,7 @@
 
   onMount(() => {
     // Prime our database with some defaults
-    pubkeyLoader.load(Env.DEFAULT_FOLLOWS)
+    loadPubkeys(Env.DEFAULT_FOLLOWS)
   })
 </script>
 

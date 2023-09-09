@@ -22,7 +22,7 @@
   import RelayList from "src/app/views/RelayList.svelte"
   import UserProfile from "src/app/views/UserProfile.svelte"
   import UserSettings from "src/app/views/UserSettings.svelte"
-  import {storage} from "src/app/engine"
+  import {storage} from "src/engine2"
 
   const TypedRoute = Route as ComponentType<SvelteComponentTyped>
 

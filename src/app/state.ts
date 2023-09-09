@@ -10,8 +10,9 @@ import {warn} from "src/util/logger"
 import {now} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
+import {loadPubkeys} from "src/engine2"
 import type {Event} from "src/engine/types"
-import {pubkeyLoader, Events, Nip28, Env, Network, user, Settings, Keys} from "src/app/engine"
+import {Events, Nip28, Env, Network, user, Settings, Keys} from "src/app/engine"
 
 // Routing
 
@@ -142,10 +143,10 @@ export const loadAppData = async () => {
   const pubkey = Keys.pubkey.get()
 
   // Make sure the user and their follows are loaded
-  await pubkeyLoader.load(pubkey, {force: true, kinds: userKinds})
+  await loadPubkeys(pubkey, {force: true, kinds: userKinds})
 
   // Load their network
-  pubkeyLoader.load(user.getFollows())
+  loadPubkeys(user.getFollows())
 
   // Start our listener
   listenForNotifications()
@@ -164,7 +165,7 @@ export const login = async (method: string, key: string | {pubkey: string; token
 
     await Promise.all([
       sleep(1500),
-      pubkeyLoader.load(Keys.pubkey.get(), {force: true, kinds: userKinds}),
+      loadPubkeys(Keys.pubkey.get(), {force: true, kinds: userKinds}),
     ])
 
     navigate("/notes")

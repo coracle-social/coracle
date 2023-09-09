@@ -12,7 +12,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {Env, Nip65, user, Keys, pubkeyLoader, Network} from "src/app/engine"
+  import {loadPubkeys} from "src/engine2"
+  import {Env, Nip65, user, Keys, Network} from "src/app/engine"
   import {loadAppData} from "src/app/state"
 
   const pubkey = Keys.pubkey.get()
@@ -56,7 +57,7 @@
       // Wait a bit before removing the relay to smooth out the ui
       Promise.all([
         sleep(1500),
-        pubkeyLoader.load([pubkey], {
+        loadPubkeys([pubkey], {
           force: true,
           relays: [relay.url],
           kinds: userKinds,

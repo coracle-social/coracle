@@ -3,7 +3,7 @@
   import Content from "src/partials/Content.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import NoteContentEllipsis from "src/app/shared/NoteContentEllipsis.svelte"
-  import {pubkeyLoader} from "src/app/engine"
+  import {loadPubkeys} from "src/engine2"
 
   export let note
   export let showEntire
@@ -11,7 +11,7 @@
   const limit = showEntire ? Infinity : 5
   const pubkeys = Tags.from(note).type("p").values().all().slice(0, limit)
 
-  pubkeyLoader.load(pubkeys)
+  loadPubkeys(pubkeys)
 </script>
 
 <Content gap="gap-2" class="m-0">
