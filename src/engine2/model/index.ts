@@ -2,6 +2,8 @@ import type {Event as NostrToolsEvent, UnsignedEvent} from "nostr-tools"
 
 // Message types
 
+export type NostrEvent = NostrToolsEvent
+
 export type Event = Omit<NostrToolsEvent, "kind"> & {
   kind: number
   seen_on: string[]

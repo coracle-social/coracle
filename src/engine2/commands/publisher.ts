@@ -2,31 +2,31 @@ import EventEmitter from "events"
 import {omit} from "ramda"
 import {defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"
-import type {Event} from "src/engine2/model"
+import type {Event, NostrEvent} from "src/engine2/model"
 import {getUrls, getExecutor} from "src/engine2/queries"
 
-export type PublishOpts = {
+export type PublisherOpts = {
   timeout?: number
   verb?: string
 }
 
-export type StaticPublishOpts = PublishOpts & {
-  event: Event
+export type StaticPublisherOpts = PublisherOpts & {
+  event: NostrEvent
   relays: string[]
 }
 
 export class Publisher extends EventEmitter {
   result = defer()
 
-  constructor(readonly event: Event) {
+  constructor(readonly event: NostrEvent) {
     super()
 
-    if (event.wrap) {
+    if ((event as Event).wrap) {
       throw new Error("Can't publish unwrapped events")
     }
   }
 
-  static publish({event, relays, ...opts}: StaticPublishOpts) {
+  static publish({event, relays, ...opts}: StaticPublisherOpts) {
     const publisher = new Publisher(event)
 
     publisher.publish(relays, opts)
@@ -34,7 +34,7 @@ export class Publisher extends EventEmitter {
     return publisher
   }
 
-  publish(relays, {timeout, verb}: PublishOpts = {}) {
+  publish(relays, {timeout, verb}: PublisherOpts = {}) {
     const urls = getUrls(relays)
     const executor = getExecutor(urls, {bypassBoot: verb === "AUTH"})
 

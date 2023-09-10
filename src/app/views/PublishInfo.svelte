@@ -1,29 +1,30 @@
 <script lang="ts">
+  import {union} from "hurdak"
   import {nip19} from "nostr-tools"
   import {modal} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {getSetting, getUserRelayUrls} from "src/engine2"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {Outbox, Nip65} from "src/app/engine"
+  import {Publisher} from "src/engine2"
   import {toastProgress} from "src/app/state"
 
   export let event
   export let progress
 
+  const {succeeded, timeouts, failed} = progress
+
   const noteLink =
     "/" +
     nip19.neventEncode({
       id: event.id,
-      relays: Array.from(progress.succeeded),
+      relays: Array.from(succeeded),
     })
 
   const retry = () => {
-    const limit = getSetting("relay_limit")
-    const relays = Nip65.getPublishHints(limit, event, getUserRelayUrls("write"))
+    const relays = Array.from(union(timeouts, failed)) as string[]
 
-    Outbox.publish({event, relays, onProgress: toastProgress})
+    Publisher.publish({relays, event}).on("progress", toastProgress)
 
     modal.pop()
   }

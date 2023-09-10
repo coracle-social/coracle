@@ -5,7 +5,7 @@ import {nip19} from "nostr-tools"
 import {navigate} from "svelte-routing"
 import {writable} from "svelte/store"
 import {whereEq, omit, filter, pluck, sortBy, slice} from "ramda"
-import {hash, sleep, doPipe, shuffle} from "hurdak"
+import {hash, union, sleep, doPipe, shuffle} from "hurdak"
 import {warn} from "src/util/logger"
 import {now} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
@@ -176,9 +176,9 @@ export const login = async (method: string, key: string | {pubkey: string; token
 
 export const toastProgress = progress => {
   const {event, succeeded, failed, timeouts, completed, pending} = progress
-  const total = completed.size + pending.size
+  const relays = Array.from(union(completed, pending))
 
-  let message = `Published to ${succeeded.size}/${total} relays`
+  let message = `Published to ${succeeded.size}/${relays.length} relays`
 
   const extra = []
   if (failed.size > 0) {
@@ -203,7 +203,7 @@ export const toastProgress = progress => {
         text: message,
         link: {
           text: "Details",
-          onClick: () => modal.push({type: "publish/info", event, progress}),
+          onClick: () => modal.push({type: "publish/info", event, progress, relays}),
         },
       }
 

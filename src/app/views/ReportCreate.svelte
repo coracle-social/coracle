@@ -1,5 +1,4 @@
 <script>
-  import {generatePrivateKey} from "nostr-tools"
   import {identity} from "ramda"
   import {seconds} from "hurdak"
   import {fuzzy, now} from "src/util/misc"
@@ -9,8 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import {getUserRelayUrls} from "src/engine2"
-  import {Builder, Outbox} from "src/app/engine"
+  import {publishReport} from "src/engine2"
 
   export let note
 
@@ -28,12 +26,7 @@
       }
     }
 
-    Outbox.publish({
-      event: Builder.createReport({tagClient: false, tags}),
-      relays: getUserRelayUrls("write"),
-      sk: generatePrivateKey(),
-    })
-
+    publishReport({tags})
     toast.show("info", "Your report has been sent!")
     modal.pop()
   }
