@@ -11,9 +11,9 @@
   import {isNil, find, last} from "ramda"
   import {seconds, Fetch, shuffle} from "hurdak"
   import {tryFetch, hexToBech32, bech32ToHex, now} from "src/util/misc"
-  import {storage, getSetting, dufflepud} from "src/engine2"
+  import {storage, relays, getSetting, dufflepud} from "src/engine2"
   import {default as engine} from "src/app/engine"
-  import {Keys, Nip65, user, Network, Builder, Outbox} from "src/app/engine"
+  import {Keys, user} from "src/app/engine"
   import {loadAppData} from "src/app/state"
   import {theme, getThemeVariables, appName, modal} from "src/partials/state"
   import {logUsage} from "src/app/state"
@@ -48,23 +48,6 @@
     handler?.("nostr", `${location.origin}/%s`, appName)
   } catch (e) {
     // pass
-  }
-
-  const seenChallenges = new Set()
-
-  // When we get an AUTH challenge from our pool, attempt to authenticate
-  Network.authHandler = async (url, challenge) => {
-    if (Keys.canSign.get() && !seenChallenges.has(challenge)) {
-      seenChallenges.add(challenge)
-
-      await Outbox.publish({
-        event: await Outbox.prep(Builder.authenticate(url, challenge)),
-        relays: [url],
-        verb: "AUTH",
-      })
-
-      return event
-    }
   }
 
   let scrollY
@@ -138,7 +121,7 @@
       // Find relays with old/missing metadata and refresh them. Only pick a
       // few so we're not sending too many concurrent http requests
       const staleRelays = shuffle(
-        Nip65.relays.get().filter(r => (r.info?.last_checked || 0) < now() - seconds(7, "day"))
+        relays.get().filter(r => (r.info?.last_checked || 0) < now() - seconds(7, "day"))
       ).slice(0, 10) as Relay[]
 
       for (const relay of staleRelays) {
@@ -151,7 +134,7 @@
             },
           })
 
-          Nip65.relays.key(relay.url).merge({...info, last_checked: now()})
+          relays.key(relay.url).merge({...info, last_checked: now()})
         })
       }
     }, 30_000)

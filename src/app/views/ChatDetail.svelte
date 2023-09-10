@@ -9,15 +9,14 @@
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {getSetting, imgproxy} from "src/engine2"
-  import {Builder, Nip28, user, Keys, Outbox, Nip65, Network} from "src/app/engine"
+  import {imgproxy, publishNip28Message, loadNip28Messages} from "src/engine2"
+  import {Nip28, user, Keys} from "src/app/engine"
 
   export let entity
 
   const id = toHex(entity)
   const channel = Nip28.channels.key(id).derived(defaultTo({id}))
   const messages = Nip28.messages.derived(filter(whereEq({channel: id})))
-  const getRelays = () => Nip65.selectHints(getSetting("relay_limit"), $channel.hints || [])
 
   user.setChannelLastChecked(id)
 
@@ -29,21 +28,10 @@
     modal.push({type: "chat/edit", channel: $channel})
   }
 
-  const sendMessage = async content => {
-    const relays = getRelays()
-    const event = Builder.createChatMessage(id, content, relays[0])
-
-    await Outbox.publish({event, relays})
-  }
+  const sendMessage = content => publishNip28Message({channelId: id, content}).result
 
   onMount(() => {
-    const sub = Network.subscribe({
-      relays: getRelays(),
-      filter: [
-        {kinds: [40], ids: [id]},
-        {kinds: [41, 42], "#e": [id]},
-      ],
-    })
+    const sub = loadNip28Messages(id)
 
     return () => sub.close()
   })

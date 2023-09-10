@@ -7,11 +7,11 @@
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/app/shared/Compose.svelte"
-  import {getUserRelayUrls} from "src/engine2"
-  import {Directory, Network, Outbox, Keys, Nip65, Builder} from "src/app/engine"
+  import {publishReply, mention} from "src/engine2"
+  import {Directory, Keys} from "src/app/engine"
   import {toastProgress} from "src/app/state"
 
-  export let note
+  export let parent
   export let borderColor
 
   const dispatch = createEventDispatcher()
@@ -27,7 +27,7 @@
       image: null,
       mentions: without(
         [Keys.pubkey.get()],
-        uniq(Tags.from(note).type("p").values().all().concat(note.pubkey))
+        uniq(Tags.from(parent).type("p").values().all().concat(parent.pubkey))
       ),
     }
   }
@@ -43,21 +43,14 @@
     data.mentions = without([pubkey], data.mentions)
   }
 
-  const send = async () => {
-    let content = reply.parse()
+  const getContent = () => (reply.parse() + "\n" + data.image).trim()
 
-    if (data.image) {
-      content = (content + "\n" + data.image).trim()
-    }
+  const send = async () => {
+    const content = getContent()
+    const tags = data.mentions.map(mention)
 
     if (content) {
-      const event = Builder.createReply(note, content, data.mentions.map(Builder.mention))
-      const relays = Nip65.getPublishHints(10, note, getUserRelayUrls("write"))
-
-      // Re-broadcast the note we're replying to
-      Network.publish({relays, event: note})
-
-      Outbox.publish({event, relays, onProgress: toastProgress})
+      publishReply({parent, content, tags}).on("progress", toastProgress)
 
       reset()
     }

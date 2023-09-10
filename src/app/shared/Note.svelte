@@ -192,6 +192,7 @@
   {/if}
 
   <NoteReply
+    parent={note}
     bind:this={reply}
     on:start={() => {
       replyIsActive = true
@@ -199,7 +200,6 @@
     on:reset={() => {
       replyIsActive = false
     }}
-    {note}
     {borderColor} />
 
   {#if !collapsed && visibleNotes.length > 0 && depth > 0 && !$muted}
