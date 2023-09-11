@@ -15,8 +15,15 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {toastProgress} from "src/app/state"
-  import {zappers, getUserRelayUrls, processZaps} from "src/engine2"
-  import {Env, Builder, Nip65, Keys, Outbox, user} from "src/app/engine"
+  import {
+    Publisher,
+    publishDeletion,
+    zappers,
+    getUserRelayUrls,
+    publishReaction,
+    processZaps,
+  } from "src/engine2"
+  import {Env, Nip65, Keys, user} from "src/app/engine"
 
   export let note
   export let reply
@@ -41,20 +48,12 @@
 
   const mute = () => user.mute("e", note.id)
 
-  const react = async content => {
-    like = await Outbox.prep(Builder.createReaction(note, content))
-
-    Outbox.publish({
-      event: like,
-      relays: Nip65.getPublishHints(5, note, getUserRelayUrls("write")),
-    })
+  const react = content => {
+    like = publishReaction({parent: note, content}).event
   }
 
   const deleteReaction = e => {
-    Outbox.publish({
-      event: Builder.deleteEvents([e.id]),
-      relays: Nip65.getPublishHints(3, note, getUserRelayUrls("write")),
-    })
+    publishDeletion({events: [e]})
 
     like = null
     likes = reject(propEq("id", e.id), likes)
@@ -65,11 +64,9 @@
   }
 
   const broadcast = () => {
-    Outbox.publish({
-      event: note,
-      relays: getUserRelayUrls("write"),
-      onProgress: toastProgress,
-    })
+    const relays = getUserRelayUrls("write")
+
+    Publisher.publish({event: note, relays}).on("progress", toastProgress)
   }
 
   let like, likes, allLikes, zap, zaps

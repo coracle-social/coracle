@@ -1,6 +1,6 @@
 import {nip19} from "nostr-tools"
 import {is, fromPairs, mergeLeft, last, identity, prop, flatten, uniq} from "ramda"
-import {ensurePlural, mapVals, tryFunc, avg, first} from "hurdak"
+import {ensurePlural, between, mapVals, tryFunc, avg, first} from "hurdak"
 import type {Filter, Event, DisplayEvent} from "src/engine/types"
 import {tryJson} from "src/util/misc"
 
@@ -191,3 +191,11 @@ export const getAvgQuality = (label: string, events: Event[]) =>
   avg(events.map(e => getLabelQuality(label, e)).filter(identity))
 
 export const isHex = x => x.match(/^[a-f0-9]{64}$/)
+
+export const getIdOrNaddr = e => {
+  if (between(9999, 20000, e.kind) || between(39999, 40000, e.kind)) {
+    return `${e.kind}:${e.pubkey}:${Tags.from(e).getMeta("d")}`
+  }
+
+  return e.id
+}

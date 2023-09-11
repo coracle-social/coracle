@@ -1,5 +1,5 @@
 import {getSetting, getPublishHints} from "src/engine2/queries"
-import {publishEvent} from "./util"
+import {publishEvent, getReplyTags} from "./util"
 import {Publisher} from "./publisher"
 
 export const publishUserProfile = ({content, ...opts}) =>
@@ -13,5 +13,5 @@ export const publishReply = ({parent, content = "", tags = []}) => {
   // Re-broadcast the note we're replying to
   Publisher.publish({relays, event: parent})
 
-  return publishEvent(1, {relays, content, tags})
+  return publishEvent(1, {relays, content, tags: [...tags, ...getReplyTags(parent, true)]})
 }

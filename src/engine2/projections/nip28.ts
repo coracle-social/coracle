@@ -1,4 +1,4 @@
-import {prop, assocPath, pluck, last, uniqBy, uniq} from "ramda"
+import {prop, map, assocPath, pluck, last, uniqBy, uniq} from "ramda"
 import {Tags, appDataKeys} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import type {Event, Channel} from "src/engine2/model"
@@ -55,13 +55,17 @@ projections.addHandler(30078, async (e: Event) => {
         return
       }
 
-      channels.get().forEach(channel => {
-        if (channel.nip28?.joined && !channelIds.includes(channel.id)) {
-          channels.key(channel.id).update(assocPath(["nip28", "joined"], false))
-        } else if (!channel.nip28?.joined && channelIds.includes(channel.id)) {
-          channels.key(channel.id).update(assocPath(["nip28", "joined"], true))
-        }
-      })
+      channels.update(
+        map(channel => {
+          if (channel.nip28?.joined && !channelIds.includes(channel.id)) {
+            return assocPath(["nip28", "joined"], false, channel)
+          } else if (!channel.nip28?.joined && channelIds.includes(channel.id)) {
+            return assocPath(["nip28", "joined"], true, channel)
+          }
+
+          return channel
+        })
+      )
     })
   }
 
