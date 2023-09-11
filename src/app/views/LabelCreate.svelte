@@ -5,7 +5,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import {getUserRelayUrls, publishLabel} from "src/engine2"
+  import {publishLabel} from "src/engine2"
   import engine from "src/app/engine"
 
   export let note
@@ -23,7 +23,7 @@
       }
     }
 
-    publishLabel({tags, relays: getUserRelayUrls("write")})
+    publishLabel(tags)
 
     toast.show("info", "Your tag has been saved!")
     modal.pop()

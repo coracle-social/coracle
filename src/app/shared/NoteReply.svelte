@@ -50,7 +50,7 @@
     const tags = data.mentions.map(mention)
 
     if (content) {
-      publishReply({parent, content, tags}).on("progress", toastProgress)
+      publishReply(parent, content, tags).on("progress", toastProgress)
 
       reset()
     }

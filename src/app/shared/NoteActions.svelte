@@ -49,11 +49,11 @@
   const mute = () => user.mute("e", note.id)
 
   const react = content => {
-    like = publishReaction({parent: note, content}).event
+    like = publishReaction(note, content).event
   }
 
   const deleteReaction = e => {
-    publishDeletion({events: [e]})
+    publishDeletion([e])
 
     like = null
     likes = reject(propEq("id", e.id), likes)

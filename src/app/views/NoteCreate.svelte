@@ -48,7 +48,7 @@
       Network.publish({relays: $relays, event: quote})
     }
 
-    publishNote({tags, content, relays: $relays}).on("progress", toastProgress)
+    publishNote(content, tags, $relays).on("progress", toastProgress)
 
     modal.clear()
   }

@@ -18,7 +18,7 @@
     "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
   const submit = () => {
-    publishUserProfile({content: values}).on("progress", toastProgress)
+    publishUserProfile(values).on("progress", toastProgress)
 
     navigate(routes.person($pubkey))
   }

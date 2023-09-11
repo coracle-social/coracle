@@ -6,8 +6,7 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {toast, modal} from "src/partials/state"
-  import {publishNip28ChannelMeta} from "src/engine2"
-  import {user} from "src/app/engine"
+  import {joinNip28Channel, publishNip28ChannelCreate, publishNip28ChannelUpdate} from "src/engine2"
   import {toastProgress} from "src/app/state"
 
   export let channel = {name: null, id: null, about: null, picture: null}
@@ -19,12 +18,15 @@
       toast.show("error", "Please enter a name for your room.")
     } else {
       const {id, ...content} = channel
-      const pub = publishNip28ChannelMeta({id, content})
 
       if (id) {
+        const pub = publishNip28ChannelUpdate(id, content)
+
         pub.on("progress", toastProgress)
       } else {
-        user.joinChannel(pub.event.id)
+        const pub = publishNip28ChannelCreate(content)
+
+        joinNip28Channel(pub.event.id)
       }
 
       modal.pop()

@@ -26,7 +26,7 @@
       }
     }
 
-    publishReport({tags})
+    publishReport("", tags)
     toast.show("info", "Your report has been sent!")
     modal.pop()
   }

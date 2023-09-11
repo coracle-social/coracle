@@ -24,7 +24,7 @@
     user.setNip24ChannelLastChecked(entity)
   }
 
-  const sendMessage = content => createNip24Message({content, channelId: entity})
+  const sendMessage = content => createNip24Message(entity, content)
 
   const showPerson = pubkey => modal.push({type: "person/detail", pubkey})
 

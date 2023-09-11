@@ -22,7 +22,7 @@
   user.setContactLastChecked(pubkey)
 
   const sendMessage = async content => {
-    const pub = await publishNip04Message(pubkey, {content})
+    const pub = await publishNip04Message(pubkey, content)
 
     await pub.result
   }

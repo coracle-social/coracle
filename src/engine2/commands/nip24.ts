@@ -3,7 +3,7 @@ import {user, wrapper, getSetting, getPubkeyHints} from "src/engine2/queries"
 import {Publisher} from "./publisher"
 import {mention} from "./util"
 
-export function createNip24Message({content, channelId}) {
+export const createNip24Message = (channelId, content) => {
   const recipients = channelId.split(",")
   const template = {kind: 14, content, tags: recipients.map(mention)}
 

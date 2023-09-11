@@ -26,12 +26,7 @@
   const loadZapInvoice = async () => {
     zap.loading = true
 
-    const {invoice, relays} = await requestZap({
-      pubkey,
-      event: note,
-      amount: zap.amount,
-      content: zap.message,
-    })
+    const {invoice, relays} = await requestZap(zap.message, zap.amount, {pubkey, event: note})
 
     // If they closed the dialog before fetch resolved, we're done
     if (!zap) {

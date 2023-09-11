@@ -222,35 +222,4 @@ export class User {
 
     return this.setAppData(appDataKeys.NIP24_LAST_CHECKED, {...lastChecked, [channelId]: now()})
   }
-
-  // Channels
-
-  setChannelLastChecked = (id: string) => {
-    const lastChecked = fromPairs(
-      this.engine.Nip28.channels
-        .get()
-        .filter(prop("last_checked"))
-        .map(r => [r.id, r.last_checked])
-    )
-
-    return this.setAppData(appDataKeys.NIP28_LAST_CHECKED, {...lastChecked, [id]: now()})
-  }
-
-  saveChannels = () =>
-    this.setAppData(
-      appDataKeys.NIP28_ROOMS_JOINED,
-      pluck("id", this.engine.Nip28.channels.get().filter(whereEq({joined: true})))
-    )
-
-  joinChannel = (id: string) => {
-    this.engine.Nip28.channels.key(id).merge({joined: true})
-
-    return this.saveChannels()
-  }
-
-  leaveChannel = (id: string) => {
-    this.engine.Nip28.channels.key(id).merge({joined: false})
-
-    return this.saveChannels()
-  }
 }

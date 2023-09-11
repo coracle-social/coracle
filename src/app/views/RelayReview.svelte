@@ -6,7 +6,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {publishLabel} from "src/engine2"
+  import {publishReview} from "src/engine2"
 
   export let url
 
@@ -14,14 +14,11 @@
   let rating
 
   const onSubmit = () => {
-    publishLabel({
-      content: compose.parse(),
-      tags: [
-        ["L", "social.coracle.ontology"],
-        ["l", "review/relay", "social.coracle.ontology", JSON.stringify({quality: rating})],
-        ["r", url],
-      ],
-    })
+    publishReview(compose.parse(), [
+      ["L", "social.coracle.ontology"],
+      ["l", "review/relay", "social.coracle.ontology", JSON.stringify({quality: rating})],
+      ["r", url],
+    ])
 
     modal.pop()
   }

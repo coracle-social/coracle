@@ -1,11 +1,7 @@
 import {user, nip04, getInboxHints, getSetting} from "src/engine2/queries"
-import type {PublishOpts} from "./util"
 import {publishEvent} from "./util"
 
-export const publishNip04Message = async (
-  recipient,
-  {relays, content = "", tags = []}: PublishOpts
-) => {
+export const publishNip04Message = async (recipient, content, tags = [], relays = null) => {
   const pubkeys = [recipient, user.get().pubkey]
 
   return publishEvent(4, {

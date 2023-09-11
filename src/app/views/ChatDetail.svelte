@@ -9,8 +9,15 @@
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {imgproxy, publishNip28Message, loadNip28Messages} from "src/engine2"
-  import {Nip28, user, Keys} from "src/app/engine"
+  import {
+    imgproxy,
+    publishNip28Message,
+    joinNip28Channel,
+    leaveNip28Channel,
+    loadNip28Messages,
+    publishNip28ChannelChecked,
+  } from "src/engine2"
+  import {Nip28, Keys} from "src/app/engine"
 
   export let entity
 
@@ -18,17 +25,17 @@
   const channel = Nip28.channels.key(id).derived(defaultTo({id}))
   const messages = Nip28.messages.derived(filter(whereEq({channel: id})))
 
-  user.setChannelLastChecked(id)
+  publishNip28ChannelChecked(id)
 
-  const join = () => user.joinChannel($channel.id)
+  const join = () => joinNip28Channel($channel.id)
 
-  const leave = () => user.leaveChannel($channel.id)
+  const leave = () => leaveNip28Channel($channel.id)
 
   const edit = () => {
     modal.push({type: "chat/edit", channel: $channel})
   }
 
-  const sendMessage = content => publishNip28Message({channelId: id, content}).result
+  const sendMessage = content => publishNip28Message(id, content).result
 
   onMount(() => {
     const sub = loadNip28Messages(id)
@@ -37,6 +44,8 @@
   })
 
   onDestroy(() => {
+    publishNip28ChannelChecked(id)
+
     if (!$channel.joined) {
       Nip28.messages.reject(m => m.channel === id)
     }

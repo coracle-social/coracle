@@ -4,7 +4,7 @@ import {people} from "src/engine2/state"
 import {signer, getSetting, getPubkeyHints, getPublishHints} from "src/engine2/queries"
 import {buildEvent} from "./util"
 
-export async function requestZap({content, amount, pubkey, event}) {
+export async function requestZap(content, amount, {pubkey, event = null}) {
   const person = people.key(pubkey).get()
 
   if (!person?.zapper) {

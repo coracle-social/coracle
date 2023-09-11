@@ -59,7 +59,7 @@
     await Promise.all([
       user.setProfile(profile),
       user.setPetnames(petnames),
-      noteContent && publishNote({content: noteContent}),
+      noteContent && publishNote(noteContent),
     ])
 
     // Start our notifications listener
