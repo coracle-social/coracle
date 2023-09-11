@@ -2,15 +2,9 @@ import {prop, propEq, find, without, uniqBy, uniq} from "ramda"
 import {Tags, appDataKeys} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import type {Event, Channel} from "src/engine2/model"
-import {keys, people, channels} from "src/engine2/state"
+import {keys, channels} from "src/engine2/state"
 import {wrapper, nip04, getNip24ChannelId, canSign} from "src/engine2/queries"
-import {projections, updateKey} from "src/engine2/projections/core"
-
-projections.addHandler(3, e => {
-  updateKey(people.key(e.pubkey), e.created_at, {
-    petnames: Tags.from(e).type("p").all(),
-  })
-})
+import {projections} from "src/engine2/projections/core"
 
 projections.addHandler(30078, async e => {
   if (!canSign.get()) {
@@ -21,11 +15,11 @@ projections.addHandler(30078, async e => {
     await tryJson(async () => {
       const payload = JSON.parse(await nip04.get().decryptAsUser(e.content, e.pubkey))
 
-      for (const id of Object.keys(payload)) {
+      for (const [id, ts] of Object.entries(payload) as [string, number][]) {
         const channel = channels.key(id)
 
         channel.merge({
-          last_checked: Math.max(payload[id], channel.get()?.last_checked || 0),
+          last_checked: Math.max(ts, channel.get()?.last_checked || 0),
         })
       }
     })

@@ -12,8 +12,8 @@
   import ForegroundButton from "src/partials/ForegroundButton.svelte"
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
-  import {getUserRelayUrls} from "src/engine2"
-  import {Nip24, Nip59, pubkeyLoader, user, Network, Keys} from "src/app/engine"
+  import {getUserRelayUrls, nip24MarkAllRead} from "src/engine2"
+  import {Nip24, Nip59, pubkeyLoader, Network, Keys} from "src/app/engine"
 
   export let activeTab = "conversations"
 
@@ -74,7 +74,7 @@
         <i
           class="fa fa-bell cursor-pointer"
           class:text-gray-5={!$hasNewMessages}
-          on:click={user.markAllMessagesRead} />
+          on:click={nip24MarkAllRead} />
       </div>
       <div slot="tooltip">Mark all as read</div>
     </Popover>

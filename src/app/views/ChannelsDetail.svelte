@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {filter, whereEq} from "ramda"
-  import {onMount} from "svelte"
+  import {onMount, onDestroy} from "svelte"
   import {formatTimestamp} from "src/util/misc"
   import {modal} from "src/partials/state"
   import Channel from "src/partials/Channel.svelte"
@@ -9,20 +9,16 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {createNip24Message, loadNip59Messages} from "src/engine2"
-  import {user, Nip24, Directory, Keys} from "src/app/engine"
+  import {createNip24Message, nip24MarkChannelRead, loadNip59Messages} from "src/engine2"
+  import {Nip24, Directory, Keys} from "src/app/engine"
 
   export let entity
 
   const userPubkey = Keys.pubkey.get()
-  const channel = Nip24.channels.key(entity)
   const messages = Nip24.messages.derived(filter(whereEq({channel: entity})))
   const pubkeys = entity.split(",")
 
-  // Only mark a real channel as checked
-  if ($channel) {
-    user.setNip24ChannelLastChecked(entity)
-  }
+  nip24MarkChannelRead(entity)
 
   const sendMessage = content => createNip24Message(entity, content)
 
@@ -32,6 +28,10 @@
     const sub = loadNip59Messages()
 
     return () => sub.close()
+  })
+
+  onDestroy(() => {
+    nip24MarkChannelRead(entity)
   })
 
   document.title = `Direct Messages`

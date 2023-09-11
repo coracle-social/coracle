@@ -8,8 +8,8 @@
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
   import MessagesListItem from "src/app/views/MessagesListItem.svelte"
-  import {getUserRelayUrls} from "src/engine2"
-  import {Nip04, pubkeyLoader, user, Network, Keys} from "src/app/engine"
+  import {getUserRelayUrls, nip04MarkAllRead} from "src/engine2"
+  import {Nip04, pubkeyLoader, Network, Keys} from "src/app/engine"
 
   export let activeTab = "conversations"
 
@@ -55,7 +55,7 @@
         <i
           class="fa fa-bell cursor-pointer"
           class:text-gray-5={!$hasNewMessages}
-          on:click={user.markAllMessagesRead} />
+          on:click={nip04MarkAllRead} />
       </div>
       <div slot="tooltip">Mark all as read</div>
     </Popover>

@@ -1,14 +1,14 @@
 <script lang="ts">
   import cx from "classnames"
   import {defaultTo, filter, whereEq} from "ramda"
-  import {onMount} from "svelte"
+  import {onMount, onDestroy} from "svelte"
   import {toHex} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {publishNip04Message, loadNip04Messages} from "src/engine2"
-  import {user, Nip04, Directory, Keys} from "src/app/engine"
+  import {publishNip04Message, nip04MarkChannelRead, loadNip04Messages} from "src/engine2"
+  import {Nip04, Directory, Keys} from "src/app/engine"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -19,7 +19,7 @@
   const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
   const messages = Nip04.messages.derived(filter(whereEq({contact: pubkey})))
 
-  user.setContactLastChecked(pubkey)
+  nip04MarkChannelRead(pubkey)
 
   const sendMessage = async content => {
     const pub = await publishNip04Message(pubkey, content)
@@ -31,6 +31,10 @@
     const sub = loadNip04Messages(pubkey)
 
     return () => sub.close()
+  })
+
+  onDestroy(() => {
+    nip04MarkChannelRead(pubkey)
   })
 
   document.title = `DMs with ${Directory.displayProfile($profile)}`

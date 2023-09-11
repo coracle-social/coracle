@@ -1,4 +1,4 @@
-import {nth, when, prop, uniq, pluck, fromPairs, whereEq, find, reject} from "ramda"
+import {nth, when, whereEq, find, reject} from "ramda"
 import {now} from "src/util/misc"
 import {appDataKeys, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
 import {derived} from "src/engine/util/store"
@@ -190,36 +190,4 @@ export class User {
       event: this.engine.Builder.deleteNaddrs([naddr]),
       relays: this.getRelayUrls("write"),
     })
-
-  // Messages
-
-  markAllMessagesRead = () => {
-    const lastChecked = fromPairs(
-      uniq(pluck("contact", this.engine.Nip04.messages.get())).map(k => [k, now()])
-    )
-
-    return this.setAppData(appDataKeys.NIP04_LAST_CHECKED, lastChecked)
-  }
-
-  setContactLastChecked = (pubkey: string) => {
-    const lastChecked = fromPairs(
-      this.engine.Nip04.contacts
-        .get()
-        .filter(prop("last_checked"))
-        .map(r => [r.id, r.last_checked])
-    )
-
-    return this.setAppData(appDataKeys.NIP04_LAST_CHECKED, {...lastChecked, [pubkey]: now()})
-  }
-
-  setNip24ChannelLastChecked = (channelId: string) => {
-    const lastChecked = fromPairs(
-      this.engine.Nip24.channels
-        .get()
-        .filter(prop("last_checked"))
-        .map(r => [r.id, r.last_checked])
-    )
-
-    return this.setAppData(appDataKeys.NIP24_LAST_CHECKED, {...lastChecked, [channelId]: now()})
-  }
 }
