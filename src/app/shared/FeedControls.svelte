@@ -13,8 +13,9 @@
   import SelectButton from "src/partials/SelectButton.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
+  import {follows} from "src/engine2"
   import type {DynamicFilter, Topic, Profile} from "src/engine"
-  import {Directory, user, default as engine} from "src/app/engine"
+  import {Directory, default as engine} from "src/app/engine"
 
   export let filter
   export let onChange
@@ -184,7 +185,7 @@
 
   $: {
     scopeOptions =
-      user.getFollows().length > 0
+      $follows.length > 0
         ? ["follows", "network", "global", "custom"]
         : ["network", "global", "custom"]
   }

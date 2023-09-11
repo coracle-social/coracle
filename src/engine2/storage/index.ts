@@ -1,11 +1,14 @@
-import {prop, sortBy} from "ramda"
+import {prop, nth, sortBy} from "ramda"
 import * as state from "src/engine2/state"
-import {deriveFollowsSet} from "src/engine2/queries"
 import {Storage, LocalStorageAdapter, IndexedDBAdapter} from "./util"
 
 const sortByPubkeyWhitelist = (fallback: (x: any) => number) => (rows: Record<string, any>[]) => {
   const pubkeys = new Set(state.keys.get().map(prop("pubkey")))
-  const follows = deriveFollowsSet(Array.from(pubkeys)).get()
+  const follows = new Set(
+    Array.from(pubkeys)
+      .flatMap(pk => state.people.key(pk).get().petnames || [])
+      .map(nth(1))
+  )
 
   return sortBy(x => {
     if (pubkeys.has(x.pubkey)) {

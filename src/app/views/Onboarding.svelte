@@ -10,8 +10,15 @@
   import OnboardingRelays from "src/app/views/OnboardingRelays.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
-  import {loadPubkeys, publishNote} from "src/engine2"
-  import {Env, Builder, user, Keys} from "src/app/engine"
+  import {
+    user,
+    loadPubkeys,
+    publishNote,
+    publishPetnames,
+    publishProfile,
+    publishRelays,
+  } from "src/engine2"
+  import {Env, Builder, Keys} from "src/app/engine"
   import {listenForNotifications} from "src/app/state"
   import {modal} from "src/partials/state"
 
@@ -25,7 +32,7 @@
       return []
     }
 
-    const petnames = user.getPetnames()
+    const {petnames} = user.get()
 
     if (petnames.length === 0) {
       for (const pubkey of Env.DEFAULT_FOLLOWS) {
@@ -37,7 +44,7 @@
   })
 
   let relays = closure(() => {
-    const relays = user.getRelays()
+    const {relays} = user.get()
 
     if (relays.length === 0) {
       for (const url of Env.DEFAULT_RELAYS) {
@@ -52,13 +59,13 @@
     Keys.login("privkey", privkey)
 
     // Wait for the published event to go through
-    await user.setRelays(relays)
+    await publishRelays(relays)
 
     // Re-save preferences now that we have a key and relays. Wait for them
     // to persist so we have the correct user preferences
     await Promise.all([
-      user.setProfile(profile),
-      user.setPetnames(petnames),
+      publishProfile(profile),
+      publishPetnames(petnames),
       noteContent && publishNote(noteContent),
     ])
 

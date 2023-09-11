@@ -10,9 +10,9 @@ import {warn} from "src/util/logger"
 import {now} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
-import {loadPubkeys, getUserRelayUrls, getSetting, dufflepud} from "src/engine2"
-import type {Event} from "src/engine/types"
-import {Events, Nip28, Env, Network, user, Keys} from "src/app/engine"
+import type {Event} from "src/engine2"
+import {loadPubkeys, follows, network, getUserRelayUrls, getSetting, dufflepud} from "src/engine2"
+import {Events, Nip28, Env, Network, Keys} from "src/app/engine"
 
 // Routing
 
@@ -146,7 +146,7 @@ export const loadAppData = async () => {
   await loadPubkeys(pubkey, {force: true, kinds: userKinds})
 
   // Load their network
-  loadPubkeys(user.getFollows())
+  loadPubkeys(follows.get())
 
   // Start our listener
   listenForNotifications()
@@ -219,9 +219,9 @@ export const compileFilter = (filter: DynamicFilter): Filter => {
   if (filter.authors === "global") {
     filter = omit(["authors"], filter)
   } else if (filter.authors === "follows") {
-    filter = {...filter, authors: getAuthorsWithDefaults(user.getFollows())}
+    filter = {...filter, authors: getAuthorsWithDefaults(follows.get())}
   } else if (filter.authors === "network") {
-    filter = {...filter, authors: getAuthorsWithDefaults(user.getNetwork())}
+    filter = {...filter, authors: getAuthorsWithDefaults(network.get())}
   }
 
   return filter as Filter

@@ -2,7 +2,7 @@ import {getSetting, getPublishHints} from "src/engine2/queries"
 import {publishEvent, getReplyTags} from "./util"
 import {Publisher} from "./publisher"
 
-export const publishUserProfile = profile => publishEvent(0, {content: JSON.stringify(profile)})
+export const publishProfile = profile => publishEvent(0, {content: JSON.stringify(profile)})
 
 export const publishNote = (content, tags = [], relays = null) =>
   publishEvent(1, {content, tags, relays})

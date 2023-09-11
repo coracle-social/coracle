@@ -4,8 +4,8 @@
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {mute, unmute, isMuted} from "src/engine2"
-  import {Env, Keys, user, Nip02} from "src/app/engine"
+  import {mute, unmute, follow, unfollow, isMuted, isFollowing} from "src/engine2"
+  import {Env, Keys} from "src/app/engine"
   import {addToList} from "src/app/state"
 
   export let pubkey
@@ -13,9 +13,8 @@
   const {canSign, canUseGiftWrap} = Keys
   const isSelf = Keys.pubkey.get() === pubkey
   const npub = nip19.npubEncode(pubkey)
-  const graphEntry = Nip02.graph.key(Keys.pubkey.get())
-  const following = graphEntry.derived(() => user.isFollowing(pubkey))
-  const muted = graphEntry.derived(() => isMuted(pubkey))
+  const following = isFollowing(pubkey)
+  const muted = isMuted(pubkey)
 
   let actions = []
 
@@ -70,9 +69,9 @@
 
   const openProfileInfo = () => modal.push({type: "person/info", pubkey})
 
-  const unfollow = () => user.unfollow(pubkey)
+  const unfollowPerson = () => unfollow(pubkey)
 
-  const follow = () => user.follow(pubkey)
+  const followPerson = () => follow("p", pubkey)
 
   const unmutePerson = () => unmute(pubkey)
 
@@ -94,9 +93,9 @@
     <Popover triggerType="mouseenter">
       <div slot="trigger" class="w-6 text-center">
         {#if $following}
-          <i class="fa fa-user-minus cursor-pointer" on:click={unfollow} />
+          <i class="fa fa-user-minus cursor-pointer" on:click={unfollowPerson} />
         {:else}
-          <i class="fa fa-user-plus cursor-pointer" on:click={follow} />
+          <i class="fa fa-user-plus cursor-pointer" on:click={followPerson} />
         {/if}
       </div>
       <div slot="tooltip">{$following ? "Unfollow" : "Follow"}</div>

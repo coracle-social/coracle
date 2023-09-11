@@ -6,13 +6,13 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {Nip65, Network, Directory, user} from "src/app/engine"
+  import {isFollowing} from "src/engine2"
+  import {Nip65, Network, Directory} from "src/app/engine"
 
   export let onSubmit
 
   let contenteditable, suggestions
 
-  const {followsSet} = user
   const dispatch = createEventDispatcher()
 
   const pubkeyEncoder = {
@@ -45,7 +45,7 @@
     let results = []
     if (word.length > 1 && word.startsWith("@")) {
       const [followed, notFollowed] = partition(
-        p => $followsSet.has(p.pubkey),
+        p => isFollowing(p.pubkey).get(),
         $searchProfiles(word.slice(1))
       )
 

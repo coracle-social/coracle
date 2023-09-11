@@ -11,8 +11,8 @@
   import Content from "src/partials/Content.svelte"
   import NoteById from "src/app/shared/NoteById.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
-  import {getUserRelayUrls} from "src/engine2"
-  import engine, {Network, Keys, user} from "src/app/engine"
+  import {getUserRelayUrls, follows} from "src/engine2"
+  import engine, {Network, Keys} from "src/app/engine"
 
   type LabelGroup = {
     label: string
@@ -68,7 +68,7 @@
       filter: {
         kinds: [1985],
         "#L": ["#t", "ugc"],
-        authors: user.getFollows().concat($pubkey),
+        authors: $follows.concat($pubkey),
       },
     })
 

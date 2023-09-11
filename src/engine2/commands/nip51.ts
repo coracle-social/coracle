@@ -14,10 +14,13 @@ export const publishMutes = async ($mutes: string[][]) => {
 }
 
 export const mute = (type: string, pubkey: string) =>
-  publishMutes([...reject((t: string[]) => t[1] === pubkey, user.get().mutes), [type, pubkey]])
+  publishMutes([
+    ...reject((t: string[]) => t[1] === pubkey, user.get().mutes || []),
+    [type, pubkey],
+  ])
 
 export const unmute = (value: string) =>
-  publishMutes(reject((t: string[]) => t[1] === value, user.get().mutes))
+  publishMutes(reject((t: string[]) => t[1] === value, user.get().mutes || []))
 
 export const publishPersonList = (name, tags) => publishEvent(30000, {tags: [["d", name], ...tags]})
 

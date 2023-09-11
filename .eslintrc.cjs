@@ -33,7 +33,10 @@ module.exports = {
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-extra-semi": "off",
     "@typescript-eslint/ban-ts-comment": "off",
-    "@typescript-eslint/no-unused-vars": ["error", {args: "none"}],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {args: "none", destructuredArrayIgnorePattern: "^_d?$"},
+    ],
   },
   ignorePatterns: ["*.svg"],
 }

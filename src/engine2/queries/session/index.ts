@@ -10,14 +10,14 @@ import {Wrapper} from "./wrapper"
 
 export const stateKey = pubkey.derived(defaultTo("anonymous"))
 
-export const user = derived([pubkey, keys, people.mapStore], ([$pubkey, $keys, $people]) => {
-  if (!$pubkey) {
+export const user = derived([stateKey, keys, people.mapStore], ([$key, $keys, $people]) => {
+  if (!$key) {
     return null
   }
 
   return {
-    ...$people.get($pubkey),
-    ...find(whereEq({pubkey: $pubkey}), $keys),
+    ...$people.get($key),
+    ...find(whereEq({pubkey: $key}), $keys),
   } as KeyState & Person
 })
 

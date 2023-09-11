@@ -8,7 +8,13 @@ import {collection} from "src/engine2/util/store"
 import type {Collection} from "src/engine2/util/store"
 import type {Event, DisplayEvent, Filter} from "src/engine2/model"
 import {settings, env} from "src/engine2/state"
-import {mergeHints, isMuted, getReplyHints, getRootHints, getParentHints} from "src/engine2/queries"
+import {
+  mergeHints,
+  isEventMuted,
+  getReplyHints,
+  getRootHints,
+  getParentHints,
+} from "src/engine2/queries"
 import {Subscription} from "./subscription"
 import {loadPubkeys} from "./pubkeys"
 
@@ -75,7 +81,7 @@ export class ContextLoader {
   }
 
   preprocessEvents = (events: Event[]) => {
-    events = reject((e: Event) => this.seen.has(e.id) || isMuted(e), events)
+    events = reject((e: Event) => this.seen.has(e.id) || isEventMuted(e).get(), events)
 
     for (const event of events) {
       this.seen.add(event.id)
@@ -142,7 +148,7 @@ export class ContextLoader {
     if (substituteParents) {
       // We may have loaded a reply from a follower to someone we muted
       notes = reject(
-        isMuted,
+        (e: Event) => isEventMuted(e).get(),
         notes.map(note => {
           for (let i = 0; i < 2; i++) {
             const parent = contextById[findReplyId(note)]

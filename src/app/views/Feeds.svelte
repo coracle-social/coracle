@@ -8,8 +8,8 @@
   import Content from "src/partials/Content.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
-  import {stateKey, lists} from "src/engine2"
-  import {Keys, user} from "src/app/engine"
+  import {stateKey, follows, lists} from "src/engine2"
+  import {Keys} from "src/app/engine"
 
   const userLists = lists.derived(filter(propEq("pubkey", stateKey.get())))
 
@@ -44,7 +44,7 @@
   let key = Math.random()
   let feedFilter = {
     kinds: noteKinds,
-    authors: user.getFollows().length > 0 ? "follows" : "network",
+    authors: $follows.length > 0 ? "follows" : "network",
   } as DynamicFilter
 
   document.title = "Feeds"

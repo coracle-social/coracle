@@ -2,31 +2,31 @@ import {sortBy, pluck, uniq, nth, prop, last} from "ramda"
 import {chain} from "hurdak"
 import {fuzzy} from "src/util/misc"
 import {findReplyId, findRootId, isShareableRelay, Tags} from "src/util/nostr"
-import {derived} from "src/engine2/util/store"
-import type {Event, Relay, RelayInfo} from "src/engine2/model"
+import type {Event, Relay} from "src/engine2/model"
 import {RelayMode} from "src/engine2/model"
 import {env, pool, relays, people} from "src/engine2/state"
-import {stateKey} from "src/engine2/queries/session"
+import {stateKey, user} from "src/engine2/queries/session"
+
+export const relayPolicies = user.derived($user => $user.relays || [])
+
+export const relayUrls = relayPolicies.derived(pluck("url"))
+
+export const hasRelay = url => relayUrls.derived(urls => urls.includes(url))
 
 export const relayIsLowQuality = (url: string) =>
   pool.get(url, {autoConnect: false})?.meta?.quality < 0.6
 
-export const getRelay = (url: string): Relay => relays.key(url).get() || {url}
-
-export const getRelayInfo = (url: string): RelayInfo => getRelay(url)?.info || {}
-
 export const displayRelay = ({url}: Relay) => last(url.split("://"))
 
-export const searchRelays = derived(relays, $relays => fuzzy($relays.values(), {keys: ["url"]}))
+export const searchRelays = relays.derived($relays => fuzzy($relays, {keys: ["url"]}))
 
-export const getSearchRelays = () => {
-  const searchableRelayUrls = relays
-    .get()
+export const searchableRelays = relays.derived($relays => {
+  const searchableRelayUrls = $relays
     .filter(r => (r.info?.supported_nips || []).includes(50))
     .map(prop("url"))
 
   return uniq(env.get().SEARCH_RELAYS.concat(searchableRelayUrls)).slice(0, 8)
-}
+})
 
 export const getPubkeyRelays = (pubkey: string, mode: string = null) => {
   const relays = people.key(pubkey).get()?.relays || []

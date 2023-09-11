@@ -2,30 +2,29 @@
   import {last} from "ramda"
   import {modal} from "src/partials/state"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {getUserRelayUrls} from "src/engine2"
-  import {Nip65, Keys, user} from "src/app/engine"
+  import {relayUrls, addRelay, removeRelay, hasRelay} from "src/engine2"
+  import {Nip65, Keys} from "src/app/engine"
   import {addToList} from "src/app/state"
 
   export let relay
 
   const info = Nip65.getRelayInfo(relay.url)
-  const relays = Nip65.policies.key(Keys.pubkey.get()).derived(() => getUserRelayUrls())
+  const joined = hasRelay(relay.url)
 
   let actions = []
 
-  $: joined = $relays.includes(relay.url)
   $: {
     actions = []
 
-    if (!joined) {
+    if (!$joined) {
       actions.push({
-        onClick: () => user.addRelay(relay.url),
+        onClick: () => addRelay(relay.url),
         label: "Join",
         icon: "right-to-bracket",
       })
-    } else if ($relays.length > 1) {
+    } else if ($relayUrls.length > 1) {
       actions.push({
-        onClick: () => user.removeRelay(relay.url),
+        onClick: () => removeRelay(relay.url),
         label: "Leave",
         icon: "right-from-bracket",
       })

@@ -1,16 +1,15 @@
 <script lang="ts">
   import cx from "classnames"
-  import {defaultTo} from "ramda"
-  import {Directory, user} from "src/app/engine"
+  import {isFollowing, derivePerson, displayPerson} from "src/engine2"
 
   export let pubkey
 
-  const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
-  const following = user.followsSet.derived(s => s.has(pubkey))
+  const person = derivePerson(pubkey)
+  const following = isFollowing(pubkey)
 </script>
 
 <div class={cx("flex items-center gap-2", $$props.class)}>
-  <span>{Directory.displayProfile($profile)}</span>
+  <span>{displayPerson($person)}</span>
   {#if $following}
     <i class="fa fa-user-check ml-2 text-xs text-accent" />
   {/if}

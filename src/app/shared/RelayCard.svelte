@@ -8,8 +8,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
-  import {getSetting} from "src/engine2"
-  import {user, Nip65, Keys} from "src/app/engine"
+  import {getSetting, setRelayPolicy} from "src/engine2"
+  import {Nip65, Keys} from "src/app/engine"
 
   export let relay
   export let rating = null
@@ -56,7 +56,7 @@
       <span>Publish to this relay?</span>
       <Toggle
         value={relay.write}
-        on:change={() => user.setRelayPolicy(relay.url, {write: !relay.write})} />
+        on:change={() => setRelayPolicy(relay.url, {write: !relay.write})} />
     </div>
   {/if}
 </div>

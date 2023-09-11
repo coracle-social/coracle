@@ -12,8 +12,8 @@
   import {seconds, Fetch, shuffle} from "hurdak"
   import {tryFetch, hexToBech32, bech32ToHex, now} from "src/util/misc"
   import {storage, relays, getSetting, dufflepud} from "src/engine2"
-  import {default as engine} from "src/app/engine"
-  import {Keys, user} from "src/app/engine"
+  import * as engine from "src/engine2"
+  import {Keys} from "src/app/engine"
   import {loadAppData} from "src/app/state"
   import {theme, getThemeVariables, appName, modal} from "src/partials/state"
   import {logUsage} from "src/app/state"
@@ -26,7 +26,7 @@
 
   const TypedRouter = Router as ComponentType<SvelteComponentTyped>
 
-  Object.assign(window, {...engine, nip19, user, bech32ToHex, hexToBech32})
+  Object.assign(window, {...engine, nip19, bech32ToHex, hexToBech32})
 
   export let pathname = location.pathname
   export let hash = location.hash

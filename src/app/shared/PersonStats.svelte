@@ -5,11 +5,12 @@
   import {tweened} from "svelte/motion"
   import {numberFmt} from "src/util/misc"
   import {modal} from "src/partials/state"
-  import {Nip02, Keys, Nip65, Network} from "src/app/engine"
+  import {people} from "src/engine2"
+  import {Keys, Nip65, Network} from "src/app/engine"
 
   export let pubkey
 
-  const followsCount = Nip02.graph.key(pubkey).derived(() => Nip02.getFollowsSet(pubkey).size)
+  const followsCount = people.key(pubkey).derived($p => $p.petnames?.length || 0)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
 
   let sub

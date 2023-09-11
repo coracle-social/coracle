@@ -1,5 +1,5 @@
 import {identity} from "ramda"
-import {Engine, User} from "src/engine"
+import {Engine} from "src/engine"
 
 const IMGPROXY_URL = import.meta.env.VITE_IMGPROXY_URL
 
@@ -40,8 +40,6 @@ const engine = new Engine({
   ENABLE_ZAPS,
 })
 
-export const user = new User(engine)
-
 export default engine
 export const Env = engine.Env
 export const Builder = engine.Builder
@@ -51,7 +49,6 @@ export const Directory = engine.Directory
 export const Events = engine.Events
 export const Keys = engine.Keys
 export const Network = engine.Network
-export const Nip02 = engine.Nip02
 export const Nip04 = engine.Nip04
 export const Nip05 = engine.Nip05
 export const Nip24 = engine.Nip24

@@ -6,7 +6,6 @@ import {Directory} from "./components/Directory"
 import {Events} from "./components/Events"
 import {Keys} from "./components/Keys"
 import {Network} from "./components/Network"
-import {Nip02} from "./components/Nip02"
 import {Nip04} from "./components/Nip04"
 import {Nip05} from "./components/Nip05"
 import {Nip24} from "./components/Nip24"
@@ -26,7 +25,6 @@ export class Engine {
   Events = new Events()
   Keys = new Keys()
   Network = new Network()
-  Nip02 = new Nip02()
   Nip04 = new Nip04()
   Nip05 = new Nip05()
   Nip24 = new Nip24()

@@ -7,7 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {publishUserProfile} from "src/engine2"
+  import {publishProfile} from "src/engine2"
   import {Directory, Keys} from "src/app/engine"
   import {routes} from "src/app/state"
   import {toastProgress} from "src/app/state"
@@ -18,7 +18,7 @@
     "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
   const submit = () => {
-    publishUserProfile(values).on("progress", toastProgress)
+    publishProfile(values).on("progress", toastProgress)
 
     navigate(routes.person($pubkey))
   }

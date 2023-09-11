@@ -1,45 +1,26 @@
-import {nth, map} from "ramda"
-import {ensurePlural} from "hurdak"
-import {derived} from "src/engine2/util/store"
+import {nth} from "ramda"
+import {difference} from "hurdak"
 import {people} from "src/engine2/state"
+import {user} from "src/engine2/queries"
 
-export const derivePetnames = (pubkey: string) => people.key(pubkey).derived(g => g?.petnames || [])
+export const follows = user.derived($user => ($user.petnames || []).map(nth(1)))
 
-export const deriveMutes = (pubkey: string) => people.key(pubkey).derived(g => g?.mutes || [])
+export const followsSet = follows.derived($follows => new Set($follows))
 
-export const deriveFollowsSet = (pubkeys: string | string[]) =>
-  derived(
-    ensurePlural(pubkeys).map(derivePetnames),
-    petnameGroups => new Set(petnameGroups.flatMap(map(nth(1))))
-  )
+export const networkSet = followsSet.derived($follows => {
+  const $network = new Set()
 
-export const deriveMutesSet = (pubkeys: string | string[]) =>
-  derived(
-    ensurePlural(pubkeys).map(deriveMutes),
-    petnameGroups => new Set(petnameGroups.flatMap(map(nth(1))))
-  )
-
-export const deriveNetworkSet = (pubkeys: string | string[], includeFollows = false) =>
-  derived(deriveFollowsSet(pubkeys), ([follows]) => {
-    const network = includeFollows ? follows : new Set<string>()
-
-    for (const pubkey of deriveFollowsSet(Array.from(follows)).get()) {
-      if (!follows.has(pubkey)) {
-        network.add(pubkey)
+  for (const follow of $follows) {
+    for (const [_, pubkey] of people.key(follow).get()?.petnames || []) {
+      if (!$follows.has(pubkey)) {
+        $network.add(pubkey)
       }
     }
+  }
 
-    return network
-  })
+  return difference($network, $follows)
+})
 
-export const getFollows = (pubkeys: string | string[]) =>
-  Array.from(deriveFollowsSet(pubkeys).get())
+export const network = networkSet.derived($networkSet => Array.from($networkSet) as string[])
 
-export const getMutes = (pubkeys: string | string[]) => Array.from(deriveMutesSet(pubkeys).get())
-
-export const getNetwork = (pubkeys: string | string[]) =>
-  Array.from(deriveNetworkSet(pubkeys).get())
-
-export const isFollowing = (a: string, b: string) => deriveFollowsSet(a).get().has(b)
-
-export const isIgnoring = (a: string, b: string) => deriveMutesSet(a).get().has(b)
+export const isFollowing = (pubkey: string) => followsSet.derived(s => s.has(pubkey))
