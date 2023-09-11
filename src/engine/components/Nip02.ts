@@ -57,8 +57,6 @@ export class Nip02 {
 
   isFollowing = (a: string, b: string) => this.getFollowsSet(a).has(b)
 
-  isIgnoring = (a: string, b: string) => this.getMutesSet(a).has(b)
-
   initialize(engine: Engine) {
     engine.Events.addHandler(3, e => {
       const entry = this.graph.key(e.pubkey).get()

@@ -1,9 +1,9 @@
-import {nth, when, whereEq, find, reject} from "ramda"
+import {nth, when, whereEq, reject} from "ramda"
 import {now} from "src/util/misc"
-import {appDataKeys, normalizeRelayUrl, findReplyId, findRootId} from "src/util/nostr"
+import {appDataKeys, normalizeRelayUrl} from "src/util/nostr"
 import {derived} from "src/engine/util/store"
 import type {Readable} from "src/engine/util/store"
-import type {RelayPolicyEntry, List, Event} from "src/engine/types"
+import type {RelayPolicyEntry} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
 
 export class User {
@@ -107,9 +107,6 @@ export class User {
   isFollowing = (pubkey: string) =>
     this.engine.Nip02.isFollowing(this.engine.Keys.stateKey.get(), pubkey)
 
-  isIgnoring = (pubkeyOrEventId: string) =>
-    this.engine.Nip02.isIgnoring(this.engine.Keys.stateKey.get(), pubkeyOrEventId)
-
   setProfile = ($profile: Record<string, any>) =>
     this.engine.Outbox.publish({
       event: this.engine.Builder.setProfile($profile),
@@ -140,54 +137,4 @@ export class User {
 
   unfollow = (pubkey: string) =>
     this.setPetnames(reject((t: string[]) => t[1] === pubkey, this.getPetnames()))
-
-  isMuted = (e: Event) => {
-    const m = this.getMutesSet()
-
-    return Boolean(find(t => m.has(t), [e.id, e.pubkey, findReplyId(e), findRootId(e)]))
-  }
-
-  applyMutes = (events: Event[]) => reject(this.isMuted, events)
-
-  setMutes = async ($mutes: string[][]) => {
-    if (this.engine.Keys.canSign.get()) {
-      await this.engine.Outbox.publish({
-        event: this.engine.Builder.setMutes($mutes.map(t => t.slice(0, 2))),
-        relays: this.getRelayUrls("write"),
-      })
-    } else {
-      this.engine.Nip02.graph.key(this.engine.Keys.stateKey.get()).merge({
-        updated_at: now(),
-        mutes_updated_at: now(),
-        mutes: $mutes,
-      })
-    }
-  }
-
-  mute = (type: string, value: string) =>
-    this.setMutes(
-      reject((t: string[]) => t[1] === value, this.getMutedTags()).concat([[type, value]])
-    )
-
-  unmute = (target: string) =>
-    this.setMutes(reject((t: string[]) => t[1] === target, this.getMutedTags()))
-
-  // Lists
-
-  getLists = (f?: (l: List) => boolean) =>
-    this.engine.Content.getLists(
-      l => l.pubkey === this.engine.Keys.stateKey.get() && (f ? f(l) : true)
-    )
-
-  putList = (name: string, params: string[][], relays: string[]) =>
-    this.engine.Outbox.publish({
-      event: this.engine.Builder.createList([["d", name]].concat(params).concat(relays)),
-      relays: this.getRelayUrls("write"),
-    })
-
-  removeList = (naddr: string) =>
-    this.engine.Outbox.publish({
-      event: this.engine.Builder.deleteNaddrs([naddr]),
-      relays: this.getRelayUrls("write"),
-    })
 }

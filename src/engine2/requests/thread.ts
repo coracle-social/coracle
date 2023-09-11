@@ -9,7 +9,6 @@ import {Subscription} from "./subscription"
 export type ThreadOpts = {
   anchorId: string
   relays: string[]
-  isMuted: (e: Event) => boolean
 }
 
 export class ThreadLoader {
@@ -22,7 +21,6 @@ export class ThreadLoader {
 
   constructor(readonly opts: ThreadOpts) {
     this.context = new ContextLoader({
-      isMuted: opts.isMuted,
       onEvent: this.updateThread,
     })
 

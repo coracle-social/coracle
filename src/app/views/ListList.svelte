@@ -1,12 +1,13 @@
 <script type="ts">
+  import {propEq, filter} from "ramda"
   import {modal, appName} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
-  import {default as engine, user} from "src/app/engine"
+  import {stateKey, lists, publishDeletion} from "src/engine2"
 
-  const lists = engine.Content.lists.derived(() => user.getLists())
+  const userLists = lists.derived(filter(propEq("pubkey", stateKey.get())))
 
   const createFeed = () => {
     modal.push({type: "list/edit"})
@@ -29,11 +30,11 @@
     handing using the "<i class="fa fa-plus" /> List" button above, or by clicking the
     <i class="fa fa-scroll px-1" /> icon that appears throughout {appName}.
   </p>
-  {#each $lists as list (list.naddr)}
+  {#each $userLists as list (list.naddr)}
     <div class="flex justify-start gap-3">
       <i
         class="fa fa-sm fa-trash cursor-pointer py-3"
-        on:click|stopPropagation={() => user.removeList(list.naddr)} />
+        on:click|stopPropagation={() => publishDeletion([list.naddr])} />
       <div class="flex w-full justify-between">
         <div>
           <strong>{list.name}</strong>

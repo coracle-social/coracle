@@ -13,7 +13,6 @@ export type FeedOpts = {
   depth: number
   relays: string[]
   filters: Filter[]
-  isMuted: (e: Event) => boolean
   onEvent?: (e: Event) => void
   shouldLoadParents?: boolean
   shouldUseNip65?: boolean
@@ -36,7 +35,6 @@ export class FeedLoader {
     this.context = new ContextLoader({
       relays: opts.shouldUseNip65 ? null : urls,
       filters: opts.filters,
-      isMuted: opts.isMuted,
       onEvent: event => {
         opts.onEvent?.(event)
 

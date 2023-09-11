@@ -1,7 +1,7 @@
 import {find, defaultTo, whereEq} from "ramda"
-import type {KeyState} from "src/engine2/model"
+import type {KeyState, Person} from "src/engine2/model"
 import {derived} from "src/engine2/util/store"
-import {pubkey, keys} from "src/engine2/state"
+import {pubkey, keys, people} from "src/engine2/state"
 import {prepareNdk, ndkInstances} from "./ndk"
 import {Signer} from "./signer"
 import {Nip04} from "./nip04"
@@ -10,8 +10,15 @@ import {Wrapper} from "./wrapper"
 
 export const stateKey = pubkey.derived(defaultTo("anonymous"))
 
-export const user = derived([pubkey, keys], ([$pubkey, $keys]) => {
-  return find(whereEq({pubkey: $pubkey}), $keys) as KeyState | null
+export const user = derived([pubkey, keys, people.mapStore], ([$pubkey, $keys, $people]) => {
+  if (!$pubkey) {
+    return null
+  }
+
+  return {
+    ...$people.get($pubkey),
+    ...find(whereEq({pubkey: $pubkey}), $keys),
+  } as KeyState & Person
 })
 
 export const canSign = user.derived(({method}) =>

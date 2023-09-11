@@ -1,5 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
+  import {filter, propEq} from "ramda"
   import type {DynamicFilter} from "src/engine/types"
   import {Tags, noteKinds} from "src/util/nostr"
   import {modal, theme} from "src/partials/state"
@@ -7,16 +8,17 @@
   import Content from "src/partials/Content.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
-  import {Keys, user, default as engine} from "src/app/engine"
+  import {stateKey, lists} from "src/engine2"
+  import {Keys, user} from "src/app/engine"
 
-  const lists = engine.Content.lists.derived(() => user.getLists())
+  const userLists = lists.derived(filter(propEq("pubkey", stateKey.get())))
 
   const showLists = () => modal.push({type: "list/list"})
 
   const showLogin = () => modal.push({type: "login/intro"})
 
   const loadListFeed = naddr => {
-    const list = engine.Content.lists.key(naddr).get()
+    const list = lists.key(naddr).get()
     const authors = Tags.wrap(list.tags).pubkeys()
     const topics = Tags.wrap(list.tags).topics()
     const urls = Tags.wrap(list.tags).urls()
@@ -25,14 +27,14 @@
       relays = urls
     }
 
-    filter = {kinds: noteKinds, authors: "global"} as DynamicFilter
+    feedFilter = {kinds: noteKinds, authors: "global"} as DynamicFilter
 
     if (authors.length > 0) {
-      filter = {...filter, authors}
+      feedFilter = {...feedFilter, authors}
     }
 
     if (topics.length > 0) {
-      filter = {...filter, "#t": topics}
+      feedFilter = {...feedFilter, "#t": topics}
     }
 
     key = Math.random()
@@ -40,7 +42,7 @@
 
   let relays = []
   let key = Math.random()
-  let filter = {
+  let feedFilter = {
     kinds: noteKinds,
     authors: user.getFollows().length > 0 ? "follows" : "network",
   } as DynamicFilter
@@ -58,16 +60,16 @@
     </Content>
   {/if}
   {#key key}
-    <Feed {filter} {relays}>
+    <Feed filter={feedFilter} {relays}>
       <div slot="controls">
         {#if Keys.canSign.get()}
-          {#if $lists.length > 0}
+          {#if $userLists.length > 0}
             <Popover placement="bottom" opts={{hideOnClick: true}} theme="transparent">
               <i slot="trigger" class="fa fa-ellipsis-v cursor-pointer p-2" />
               <div
                 slot="tooltip"
                 class="flex flex-col items-start overflow-hidden rounded border border-solid border-gray-8 bg-black">
-                {#each $lists as list (list.naddr)}
+                {#each $userLists as list (list.naddr)}
                   <button
                     class={cx("w-full px-3 py-2 text-left transition-colors", {
                       "hover:bg-gray-7": $theme === "dark",

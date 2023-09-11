@@ -9,8 +9,8 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {getSetting} from "src/engine2"
-  import {Directory, Nip65, user, Network} from "src/app/engine"
+  import {getSetting, isMuted} from "src/engine2"
+  import {Directory, Nip65, Network} from "src/app/engine"
 
   export let note
   export let value
@@ -41,7 +41,7 @@
 
   const onEvent = event => {
     loading = false
-    muted = user.applyMutes([event]).length === 0
+    muted = isMuted(event)
     quote = event
   }
 

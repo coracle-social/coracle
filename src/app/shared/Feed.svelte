@@ -14,7 +14,7 @@
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
   import {getSetting} from "src/engine2"
-  import {user, Keys, Nip65} from "src/app/engine"
+  import {Keys, Nip65} from "src/app/engine"
   import {compileFilter} from "src/app/state"
 
   export let relays = []
@@ -83,7 +83,6 @@
         depth: 2,
         relays: getRelays(),
         filters: [compileFilter(filter)],
-        isMuted: user.isMuted,
         shouldLoadParents: true,
         onEvent,
       })

@@ -6,12 +6,11 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {user} from "src/app/engine"
 
   export let anchorId
   export let relays
 
-  const loader = new ThreadLoader({anchorId, relays, isMuted: user.isMuted})
+  const loader = new ThreadLoader({anchorId, relays})
   const {anchor, root, parent, ancestors} = loader
 
   let loading = true

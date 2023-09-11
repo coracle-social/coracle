@@ -4,6 +4,7 @@
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
+  import {mute, unmute, isMuted} from "src/engine2"
   import {Env, Keys, user, Nip02} from "src/app/engine"
   import {addToList} from "src/app/state"
 
@@ -14,7 +15,7 @@
   const npub = nip19.npubEncode(pubkey)
   const graphEntry = Nip02.graph.key(Keys.pubkey.get())
   const following = graphEntry.derived(() => user.isFollowing(pubkey))
-  const muted = graphEntry.derived(() => user.isIgnoring(pubkey))
+  const muted = graphEntry.derived(() => isMuted(pubkey))
 
   let actions = []
 
@@ -73,9 +74,9 @@
 
   const follow = () => user.follow(pubkey)
 
-  const unmute = () => user.unmute(pubkey)
+  const unmutePerson = () => unmute(pubkey)
 
-  const mute = () => user.mute("p", pubkey)
+  const mutePerson = () => mute("p", pubkey)
 </script>
 
 <div class="flex items-center gap-3" on:click|stopPropagation>
@@ -83,9 +84,9 @@
     <Popover triggerType="mouseenter">
       <div slot="trigger" class="w-6 text-center">
         {#if $muted}
-          <i class="fa fa-microphone-slash cursor-pointer" on:click={unmute} />
+          <i class="fa fa-microphone-slash cursor-pointer" on:click={unmutePerson} />
         {:else}
-          <i class="fa fa-microphone cursor-pointer" on:click={mute} />
+          <i class="fa fa-microphone cursor-pointer" on:click={mutePerson} />
         {/if}
       </div>
       <div slot="tooltip">{$muted ? "Unmute" : "Mute"}</div>

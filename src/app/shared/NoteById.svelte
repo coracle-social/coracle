@@ -1,20 +1,19 @@
 <script>
   import {first} from "hurdak"
-  import {ContextLoader} from "src/engine"
   import {onMount, onDestroy} from "svelte"
   import {fly} from "src/util/transition"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import engine, {Settings, Nip65, user, Network} from "src/app/engine"
+  import {ContextLoader} from "src/engine2"
+  import engine, {Settings, Nip65, Network} from "src/app/engine"
 
   export let id
   export let relays = []
   export let invertColors = false
 
   const context = new ContextLoader(engine, {
-    filter: {ids: [id]},
-    isMuted: user.isMuted,
+    filters: [{ids: [id]}],
     onEvent: e => {
       // Update feed, but only if we have loaded an actual note
       if (note) {
