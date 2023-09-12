@@ -1,4 +1,4 @@
-<script type="ts">
+<script lang="ts">
   import {onMount} from "svelte"
   import {uniq, pluck} from "ramda"
   import {batch} from "hurdak"
@@ -6,7 +6,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import type {Event} from "src/engine2"
-  import {Subscription, getSetting, loadPubkeys, getPubkeyHints, follows} from "src/engine2"
+  import {subscribe, getSetting, loadPubkeys, getPubkeyHints, follows} from "src/engine2"
 
   export let type
   export let pubkey
@@ -17,23 +17,19 @@
     if (type === "follows") {
       pubkeys = $follows
     } else {
-      const sub = new Subscription({
+      const sub = subscribe({
         relays: getPubkeyHints(getSetting("relay_limit"), pubkey, "read"),
         filters: [{kinds: [3], "#p": [pubkey]}],
-      })
-
-      sub.on(
-        "event",
-        batch(500, (events: Event[]) => {
+        onEvent: batch(500, (events: Event[]) => {
           const newPubkeys = pluck("pubkey", events)
 
           loadPubkeys(newPubkeys)
 
           pubkeys = uniq(pubkeys.concat(newPubkeys))
-        })
-      )
+        }),
+      })
 
-      return sub.close
+      return () => sub.close()
     }
   })
 </script>

@@ -1,12 +1,12 @@
 import {now} from "src/util/misc"
 import {people} from "src/engine2/state"
-import {Subscription} from "./subscription"
+import {subscribe} from "./subscription"
 
-export function loadZapResponse({pubkey, relays}) {
+export const listenForZapResponse = (pubkey, opts) => {
   const {zapper} = people.key(pubkey).get()
 
-  return new Subscription({
-    relays,
+  return subscribe({
+    ...opts,
     filters: [
       {
         kinds: [9735],

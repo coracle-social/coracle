@@ -6,7 +6,7 @@
   import {numberFmt} from "src/util/misc"
   import {modal} from "src/partials/state"
   import type {Event} from "src/engine2"
-  import {session, people, count, Subscription, getPubkeyHints} from "src/engine2"
+  import {session, people, count, subscribe, getPubkeyHints} from "src/engine2"
 
   export let pubkey
 
@@ -32,23 +32,18 @@
     } else {
       const followers = new Set()
 
-      sub = new Subscription({
-        timeout: 30_000,
+      sub = subscribe({
         ephemeral: true,
         relays: getPubkeyHints(3, $session?.pubkey, "read"),
         filters: [{kinds: [3], "#p": [pubkey]}],
-      })
-
-      sub.on(
-        "event",
-        batch(300, (events: Event[]) => {
+        onEvent: batch(300, (events: Event[]) => {
           for (const e of events) {
             followers.add(e.pubkey)
           }
 
           followersCount.set(followers.size)
-        })
-      )
+        }),
+      })
     }
   }
 

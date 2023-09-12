@@ -13,7 +13,7 @@
     displayPerson,
     publishNip04Message,
     nip04MarkChannelRead,
-    loadNip04Messages,
+    listenForNip04Messages,
   } from "src/engine2"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
@@ -34,7 +34,7 @@
   }
 
   onMount(() => {
-    const sub = loadNip04Messages(pubkey)
+    const sub = listenForNip04Messages(pubkey)
 
     return () => sub.close()
   })

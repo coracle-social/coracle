@@ -21,7 +21,7 @@
     },
   })
 
-  let sub, note
+  let note
   let loading = true
 
   onMount(async () => {
@@ -32,18 +32,13 @@
         context.addContext([e], {depth: 0})
 
         note = first(context.applyContext([e]))
-
-        sub.close()
       },
     })
-
-    await Promise.all(context.getAllSubs())
 
     loading = false
   })
 
   onDestroy(() => {
-    sub?.close()
     context.stop()
   })
 </script>

@@ -4,7 +4,7 @@ import {findReplyId, findRootId} from "src/util/nostr"
 import type {Event, DisplayEvent} from "src/engine2/model"
 import {writable} from "src/engine2/util/store"
 import {ContextLoader} from "./context"
-import {Subscription} from "./subscription"
+import {load} from "./load"
 
 export type ThreadOpts = {
   anchorId: string
@@ -36,20 +36,15 @@ export class ThreadLoader {
     const filteredIds = ids.filter(id => id && !seen.has(id))
 
     if (filteredIds.length > 0) {
-      const sub = new Subscription({
-        timeout: 4000,
+      load({
         relays: this.opts.relays,
         filters: [{ids: filteredIds}],
-      })
-
-      sub.on(
-        "event",
-        batch(300, (events: Event[]) => {
+        onEvent: batch(300, (events: Event[]) => {
           this.context.addContext(events, {depth: 1})
           this.addToThread(this.context.applyContext(events))
           this.loadNotes(events.flatMap(e => [findReplyId(e), findRootId(e)]))
-        })
-      )
+        }),
+      })
     }
   }
 

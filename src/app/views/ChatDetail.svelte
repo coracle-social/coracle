@@ -17,7 +17,7 @@
     publishNip28Message,
     joinNip28Channel,
     leaveNip28Channel,
-    loadNip28Messages,
+    listenForNip28Messages,
     publishNip28ChannelChecked,
   } from "src/engine2"
 
@@ -37,7 +37,7 @@
   const sendMessage = content => publishNip28Message(id, content).result
 
   onMount(() => {
-    const sub = loadNip28Messages(id)
+    const sub = listenForNip28Messages(id)
 
     return () => sub.close()
   })

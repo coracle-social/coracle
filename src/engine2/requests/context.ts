@@ -15,8 +15,9 @@ import {
   getRootHints,
   getParentHints,
 } from "src/engine2/queries"
-import {Subscription} from "./subscription"
+import {subscribe} from "./subscription"
 import {loadPubkeys} from "./pubkeys"
+import {load} from "./load"
 
 const fromDisplayEvent = (e: DisplayEvent): Event =>
   omit(["zaps", "likes", "replies", "matchesFilter"], e)
@@ -32,32 +33,25 @@ export class ContextLoader {
   stopped: boolean
   data: Collection<Event>
   seen: Set<string>
-  subs: Record<string, Array<{close: () => void}>>
+  subs: {close: () => void}[]
 
   constructor(readonly opts: ContextLoaderOpts) {
     this.stopped = false
     this.data = collection<Event>("id")
     this.seen = new Set()
-    this.subs = {
-      context: [],
-      listeners: [],
-    }
+    this.subs = []
   }
 
   // Utils
 
-  addSubs(key: string, subs: Array<Subscription>) {
-    for (const sub of ensurePlural(subs)) {
-      this.subs[key].push(sub)
+  addSubs(subs) {
+    for (const sub of subs) {
+      this.subs.push(sub)
 
       sub.on("close", () => {
-        this.subs[key] = without([sub], this.subs[key])
+        this.subs = without([sub], this.subs)
       })
     }
-  }
-
-  getAllSubs() {
-    return flatten(Object.values(this.subs))
   }
 
   getReplyKinds() {
@@ -197,18 +191,11 @@ export class ContextLoader {
     })
 
     if (parentsInfo.length > 0) {
-      const sub = new Subscription({
-        timeout: 5000,
+      load({
         filters: [{ids: pluck("id", parentsInfo)}],
         relays: this.mergeHints(pluck("hints", parentsInfo)),
+        onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: 2})),
       })
-
-      sub.on(
-        "event",
-        batch(100, (context: Event[]) => this.addContext(context, {depth: 2}))
-      )
-
-      this.addSubs("context", [sub])
     }
   }
 
@@ -232,18 +219,11 @@ export class ContextLoader {
       ) as Event[]
 
       for (const c of chunk(256, events)) {
-        const sub = new Subscription({
-          timeout: 5000,
+        load({
           relays: this.mergeHints(c.map(e => getReplyHints(this.getRelayLimit(), e))),
           filters: [{kinds: this.getReplyKinds(), "#e": pluck("id", c as Event[])}],
+          onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: depth - 1})),
         })
-
-        sub.on(
-          "event",
-          batch(100, (context: Event[]) => this.addContext(context, {depth: depth - 1}))
-        )
-
-        this.addSubs("context", [sub])
       }
     }
   })
@@ -253,7 +233,7 @@ export class ContextLoader {
       return
     }
 
-    this.subs.listeners.forEach(sub => sub.close())
+    this.subs.forEach(sub => sub.close())
 
     const contextByParentId = groupBy(findReplyId, this.data.get())
 
@@ -266,17 +246,13 @@ export class ContextLoader {
       )
 
     for (const c of chunk(256, findNotes(this.data.get()))) {
-      const sub = new Subscription({
-        relays: this.mergeHints(c.map(e => getReplyHints(this.getRelayLimit(), e))),
-        filters: [{kinds: this.getReplyKinds(), "#e": pluck("id", c), since: now()}],
-      })
-
-      sub.on(
-        "event",
-        batch(100, (context: Event[]) => this.addContext(context, {depth: 2}))
-      )
-
-      this.addSubs("listeners", [sub])
+      this.addSubs([
+        subscribe({
+          relays: this.mergeHints(c.map(e => getReplyHints(this.getRelayLimit(), e))),
+          filters: [{kinds: this.getReplyKinds(), "#e": pluck("id", c), since: now()}],
+          onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: 2})),
+        }),
+      ])
     }
   })
 
@@ -328,7 +304,7 @@ export class ContextLoader {
   stop() {
     this.stopped = true
 
-    for (const sub of this.getAllSubs()) {
+    for (const sub of this.subs) {
       sub.close()
     }
   }

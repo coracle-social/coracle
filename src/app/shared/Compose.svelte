@@ -7,9 +7,9 @@
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
   import {
+    load,
     derivePerson,
     displayPerson,
-    Subscription,
     isFollowing,
     searchableRelays,
     getPubkeyHints,
@@ -37,13 +37,11 @@
 
   const loadPeople = debounce(500, search => {
     if (search.length > 2 && search.startsWith("@")) {
-      const sub = new Subscription({
-        timeout: 3000,
+      load({
         relays: $searchableRelays,
         filters: [{kinds: [0], search, limit: 10}],
+        onEvent: () => applySearch(getInfo().word),
       })
-
-      sub.on("event", () => applySearch(getInfo().word))
     }
   })
 

@@ -18,7 +18,7 @@ import {
   channels,
   follows,
   network,
-  Subscription,
+  subscribe,
   getUserRelayUrls,
   getSetting,
   dufflepud,
@@ -129,7 +129,7 @@ export const listenForNotifications = async () => {
   // Only grab one event from each category/relay so we have enough to show
   // the notification badges, but load the details lazily
   listener?.close()
-  listener = new Subscription({
+  listener = subscribe({
     relays: getUserRelayUrls("read"),
     filters: [
       // Messages

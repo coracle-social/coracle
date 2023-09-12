@@ -11,7 +11,7 @@
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {Subscription, selectHints, getSetting} from "src/engine2"
+  import {load, selectHints, getSetting} from "src/engine2"
 
   export let note
   export let relays = []
@@ -31,7 +31,6 @@
     },
   })
 
-  let sub
   let loading = true
   let feedRelay = null
   let displayNote = asDisplayEvent(note)
@@ -40,22 +39,15 @@
     // If our note came from a feed, we can preload context
     context.hydrate([displayNote], depth)
 
-    sub = new Subscription({
+    await load({
       filters: [{ids: [note.id]}],
-      timeout: 8000,
       relays: selectHints(getSetting("relay_limit"), relays),
+      onEvent: e => {
+        context.addContext([e], {depth})
+
+        displayNote = first(context.applyContext([e]))
+      },
     })
-
-    sub.on("event", e => {
-      context.addContext([e], {depth})
-
-      displayNote = first(context.applyContext([e]))
-
-      sub.close()
-    })
-
-    await sub.result
-    await Promise.all(context.getAllSubs())
 
     info("NoteDetail", displayNote)
 
@@ -63,7 +55,6 @@
   })
 
   onDestroy(() => {
-    sub?.close()
     context.stop()
   })
 </script>

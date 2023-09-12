@@ -1,6 +1,5 @@
 <script lang="ts">
   import type {Filter} from "nostr-tools"
-  import {onDestroy} from "svelte"
   import {filterVals} from "hurdak"
   import {isShareableRelay} from "src/util/nostr"
   import {fly} from "src/util/transition"
@@ -10,9 +9,9 @@
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {
+    load,
     getSetting,
     displayPubkey,
-    Subscription,
     isEventMuted,
     getEventHints,
     mergeHints,
@@ -29,29 +28,26 @@
 
   const {id, identifier, kind, pubkey} = value
 
-  const relays = mergeHints(getSetting("relay_limit"), [
-    // Agora social has a bug
-    (value.relays || []).flatMap(r => r.split(",")).filter(isShareableRelay),
-    getEventHints(getSetting("relay_limit"), note),
-  ])
-
-  const filters = [
-    id
-      ? {ids: [id]}
-      : filterVals(xs => xs.length > 0, {
-          "#d": [identifier],
-          kinds: [kind],
-          authors: [pubkey],
-        }),
-  ] as Filter[]
-
-  const sub = new Subscription({timeout: 30000, relays, filters})
-
-  sub.on("event", event => {
-    loading = false
-    muted = isEventMuted(event).get()
-    quote = event
-    sub.close()
+  load({
+    relays: mergeHints(getSetting("relay_limit"), [
+      // Agora social has a bug
+      (value.relays || []).flatMap(r => r.split(",")).filter(isShareableRelay),
+      getEventHints(getSetting("relay_limit"), note),
+    ]),
+    filters: [
+      id
+        ? {ids: [id]}
+        : filterVals(xs => xs.length > 0, {
+            "#d": [identifier],
+            kinds: [kind],
+            authors: [pubkey],
+          }),
+    ] as Filter[],
+    onEvent: event => {
+      loading = false
+      muted = isEventMuted(event).get()
+      quote = event
+    },
   })
 
   const openQuote = e => {
@@ -66,10 +62,6 @@
   const unmute = e => {
     muted = false
   }
-
-  onDestroy(() => {
-    sub.close()
-  })
 </script>
 
 <div class="py-2" on:click|stopPropagation>

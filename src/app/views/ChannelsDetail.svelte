@@ -14,7 +14,7 @@
     displayPubkey,
     createNip24Message,
     nip24MarkChannelRead,
-    loadNip59Messages,
+    listenForNip59Messages,
   } from "src/engine2"
 
   export let entity
@@ -29,7 +29,7 @@
   const showPerson = pubkey => modal.push({type: "person/detail", pubkey})
 
   onMount(() => {
-    const sub = loadNip59Messages()
+    const sub = listenForNip59Messages()
 
     return () => sub.close()
   })

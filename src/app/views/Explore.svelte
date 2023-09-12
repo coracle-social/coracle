@@ -11,7 +11,7 @@
   import Content from "src/partials/Content.svelte"
   import NoteById from "src/app/shared/NoteById.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
-  import {session, labels, getUserRelayUrls, follows, Subscription} from "src/engine2"
+  import {session, labels, getUserRelayUrls, follows, subscribe} from "src/engine2"
 
   type LabelGroup = {
     label: string
@@ -60,7 +60,7 @@
   const showGroup = ({label, ids, hints}) => modal.push({type: "label/detail", label, ids, hints})
 
   onMount(() => {
-    const sub = new Subscription({
+    const sub = subscribe({
       relays: getUserRelayUrls("read"),
       filters: [
         {

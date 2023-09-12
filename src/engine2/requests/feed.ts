@@ -5,7 +5,7 @@ import {findReplyId} from "src/util/nostr"
 import type {Event, DisplayEvent, Filter} from "src/engine2/model"
 import {writable} from "src/engine2/util/store"
 import {getUrls} from "src/engine2/queries"
-import {Subscription} from "./subscription"
+import {subscribe} from "./subscription"
 import {Cursor, MultiCursor} from "./cursor"
 import {ContextLoader} from "./context"
 
@@ -44,20 +44,16 @@ export class FeedLoader {
 
     // No point in subscribing if we have an end date
     if (!any(prop("until"), ensurePlural(opts.filters) as any[])) {
-      const sub = new Subscription({
-        relays: urls,
-        filters: opts.filters.map(assoc("since", this.since)),
-      })
-
-      sub.on(
-        "event",
-        batch(1000, (context: Event[]) => {
-          this.context.addContext(context, {shouldLoadParents: true, depth: opts.depth})
-          this.stream.update($stream => $stream.concat(context))
-        })
-      )
-
-      this.addSubs([sub])
+      this.addSubs([
+        subscribe({
+          relays: urls,
+          filters: opts.filters.map(assoc("since", this.since)),
+          onEvent: batch(1000, (context: Event[]) => {
+            this.context.addContext(context, {shouldLoadParents: true, depth: opts.depth})
+            this.stream.update($stream => $stream.concat(context))
+          }),
+        }),
+      ])
     }
 
     this.cursor = new MultiCursor(
@@ -84,7 +80,7 @@ export class FeedLoader {
 
   // Control
 
-  addSubs(subs: Array<Subscription>) {
+  addSubs(subs) {
     for (const sub of ensurePlural(subs)) {
       this.subs.push(sub)
 

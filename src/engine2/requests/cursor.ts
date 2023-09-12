@@ -3,7 +3,8 @@ import {seconds, first} from "hurdak"
 import {now} from "src/util/misc"
 import {EPOCH} from "src/util/nostr"
 import type {Filter, Event} from "src/engine2/model"
-import {Subscription} from "./subscription"
+import type {Subscription} from "./subscription"
+import {subscribe} from "./subscription"
 
 export type CursorOpts = {
   relay: string
@@ -36,38 +37,34 @@ export class Cursor {
 
     let count = 0
 
-    const sub = new Subscription({
+    return subscribe({
       timeout: 5000,
       relays: [relay],
       filters: filters.map(mergeRight({until, limit, since})),
+      onEvent: (event: Event) => {
+        this.until = Math.min(until, event.created_at) - 1
+        this.buffer.push(event)
+
+        count += 1
+
+        onEvent?.(event)
+      },
+      onClose: () => {
+        this.loading = false
+
+        // Relays can't be relied upon to return events in descending order, do exponential
+        // windowing to ensure we get the most recent stuff on first load, but eventually find it all
+        if (count === 0) {
+          this.delta *= 10
+        }
+
+        if (this.since <= EPOCH) {
+          this.done = true
+        }
+
+        this.since -= this.delta
+      },
     })
-
-    sub.on("event", (event: Event) => {
-      this.until = Math.min(until, event.created_at) - 1
-      this.buffer.push(event)
-
-      count += 1
-
-      onEvent?.(event)
-    })
-
-    sub.on("close", () => {
-      this.loading = false
-
-      // Relays can't be relied upon to return events in descending order, do exponential
-      // windowing to ensure we get the most recent stuff on first load, but eventually find it all
-      if (count === 0) {
-        this.delta *= 10
-      }
-
-      if (this.since <= EPOCH) {
-        this.done = true
-      }
-
-      this.since -= this.delta
-    })
-
-    return sub
   }
 
   take(n = Infinity) {

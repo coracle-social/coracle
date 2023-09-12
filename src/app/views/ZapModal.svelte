@@ -7,7 +7,13 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import {getSetting, displayPubkey, requestZap, collectInvoice, loadZapResponse} from "src/engine2"
+  import {
+    getSetting,
+    displayPubkey,
+    requestZap,
+    collectInvoice,
+    listenForZapResponse,
+  } from "src/engine2"
 
   export let pubkey
   export let note = null
@@ -38,11 +44,13 @@
     await collectInvoice(invoice)
 
     // Listen for the zap confirmation
-    sub = loadZapResponse({relays, pubkey})
-
-    sub.on("event", event => {
-      zap.confirmed = true
-      setTimeout(() => modal.pop(), 1000)
+    sub = listenForZapResponse(pubkey, {
+      relays,
+      onEvent: event => {
+        zap.confirmed = true
+        setTimeout(() => modal.pop(), 1000)
+        sub.close()
+      },
     })
   }
 

@@ -18,6 +18,7 @@
   import TopNavMenu from "src/app/TopNavMenu.svelte"
   import {menuIsOpen} from "src/app/state"
   import {
+    load,
     topics,
     people,
     peopleWithName,
@@ -29,7 +30,6 @@
     hasNewNotfications,
     getUserRelayUrls,
     searchableRelays,
-    Subscription,
   } from "src/engine2"
 
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
@@ -75,16 +75,14 @@
     // If we have a query, search using nostr.band. If not, ask for random profiles.
     // This allows us to populate results even if search isn't supported by forced urls
     if (term.length > 2) {
-      new Subscription({
+      load({
         relays: $searchableRelays,
         filters: [{kinds: [0], search, limit: 10}],
-        timeout: 3000,
       })
     } else if (people.get().length < 50) {
-      new Subscription({
+      load({
         relays: getUserRelayUrls("read"),
         filters: [{kinds: [0], limit: 50}],
-        timeout: 3000,
       })
     }
   })

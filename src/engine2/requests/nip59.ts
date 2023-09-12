@@ -1,10 +1,10 @@
 import {user, getPubkeyHints, getSetting} from "src/engine2/queries"
-import {Subscription} from "./subscription"
+import {subscribe} from "./subscription"
 
-export function loadNip59Messages() {
+export function listenForNip59Messages() {
   const {pubkey} = user.get()
 
-  return new Subscription({
+  return subscribe({
     relays: getPubkeyHints(getSetting("relay_limit"), pubkey, "read"),
     filters: [{kinds: [1059], "#p": [pubkey]}],
   })
