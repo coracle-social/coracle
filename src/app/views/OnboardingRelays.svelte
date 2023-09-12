@@ -8,14 +8,12 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {Nip65} from "src/app/engine"
+  import {relays as knownRelays} from "src/engine2"
 
   export let relays: Relay[]
 
   let q = ""
   let search
-
-  const {relays: known} = Nip65
 
   const addRelay = relay => {
     relays = relays.concat(relay)
@@ -28,7 +26,7 @@
   $: joined = new Set(pluck("url", relays))
 
   $: search = fuzzy(
-    $known.filter(r => !joined.has(r.url)),
+    $knownRelays.filter(r => !joined.has(r.url)),
     {keys: ["name", "description", "url"]}
   )
 </script>
@@ -91,7 +89,7 @@
     </RelayCard>
   {/each}
   <small class="text-center">
-    Showing {Math.min($known.length - relays.length, 50)}
-    of {$known.length - relays.length} known relays
+    Showing {Math.min($knownRelays.length - relays.length, 50)}
+    of {$knownRelays.length - relays.length} known relays
   </small>
 </Content>

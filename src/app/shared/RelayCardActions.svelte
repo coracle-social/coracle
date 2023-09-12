@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {relayUrls, removeRelay, addRelay, hasRelay} from "src/engine2"
+  import {relayPolicyUrls, removeRelay, addRelay, hasRelay} from "src/engine2"
 
   export let relay
 
@@ -10,7 +10,7 @@
   <button class="flex items-center gap-3 text-gray-1" on:click={() => addRelay(relay.url)}>
     <i class="fa fa-right-to-bracket" /> Join
   </button>
-{:else if $relayUrls.length > 1}
+{:else if $relayPolicyUrls.length > 1}
   <button class="flex items-center gap-3 text-gray-1" on:click={() => removeRelay(relay.url)}>
     <i class="fa fa-right-from-bracket" /> Leave
   </button>

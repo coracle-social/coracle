@@ -1,14 +1,14 @@
 <script lang="ts">
-  import {last} from "ramda"
+  import {last, prop} from "ramda"
   import {modal} from "src/partials/state"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {relayUrls, addRelay, removeRelay, hasRelay} from "src/engine2"
-  import {Nip65, Keys} from "src/app/engine"
+  import {relays, relayPolicyUrls, addRelay, removeRelay, hasRelay} from "src/engine2"
+  import {Keys} from "src/app/engine"
   import {addToList} from "src/app/state"
 
   export let relay
 
-  const info = Nip65.getRelayInfo(relay.url)
+  const info = relays.key(relay.url).derived(prop("info"))
   const joined = hasRelay(relay.url)
 
   let actions = []
@@ -22,7 +22,7 @@
         label: "Join",
         icon: "right-to-bracket",
       })
-    } else if ($relayUrls.length > 1) {
+    } else if ($relayPolicyUrls.length > 1) {
       actions.push({
         onClick: () => removeRelay(relay.url),
         label: "Leave",
@@ -44,9 +44,9 @@
       })
     }
 
-    if (info.contact) {
+    if ($info?.contact) {
       actions.push({
-        onClick: () => window.open("mailto:" + last(info.contact.split(":"))),
+        onClick: () => window.open("mailto:" + last($info.contact.split(":"))),
         label: "Contact",
         icon: "envelope",
       })

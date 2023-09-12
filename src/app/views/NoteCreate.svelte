@@ -16,8 +16,8 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {publishNote, getUserRelayUrls, mention} from "src/engine2"
-  import {Directory, Network, Nip65, Keys} from "src/app/engine"
+  import {publishNote, displayRelay, getUserRelayUrls, mention} from "src/engine2"
+  import {Directory, Network, Keys} from "src/app/engine"
   import {modal} from "src/partials/state"
   import {toastProgress} from "src/app/state"
 
@@ -157,7 +157,7 @@
         }}>
         <span>
           Publishing to {#if $relays?.length === 1}
-            {Nip65.displayRelay({url: $relays[0]})}
+            {displayRelay({url: $relays[0]})}
           {:else}
             {$relays.length} relays
           {/if}
@@ -184,7 +184,7 @@
                 type="button"
                 class="fa fa-times cursor-pointer"
                 on:click={() => removeRelay(url)} />
-              {Nip65.displayRelay({url})}
+              {displayRelay({url})}
             </div>
           {/each}
         </div>

@@ -52,4 +52,3 @@ export const Nip04 = engine.Nip04
 export const Nip05 = engine.Nip05
 export const Nip28 = engine.Nip28
 export const Nip44 = engine.Nip44
-export const Nip65 = engine.Nip65

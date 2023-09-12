@@ -13,8 +13,15 @@
   import PersonRelays from "src/app/shared/PersonRelays.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
-  import {loadPubkeys, getSetting, imgproxy} from "src/engine2"
-  import {Env, Directory, Nip65} from "src/app/engine"
+  import {
+    loadPubkeys,
+    getSetting,
+    imgproxy,
+    getPubkeyRelays,
+    mergeHints,
+    getPubkeyHints,
+  } from "src/engine2"
+  import {Env, Directory} from "src/app/engine"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import PersonStats from "src/app/shared/PersonStats.svelte"
@@ -31,11 +38,8 @@
   let activeTab = "notes"
   let loading = true
 
-  $: ownRelays = Nip65.getPubkeyRelays(pubkey)
-  $: mergedRelays = Nip65.mergeHints(relayLimit, [
-    relays,
-    Nip65.getPubkeyHints(relayLimit, pubkey, "write"),
-  ])
+  $: ownRelays = getPubkeyRelays(pubkey)
+  $: mergedRelays = mergeHints(relayLimit, [relays, getPubkeyHints(relayLimit, pubkey, "write")])
   $: banner = imgproxy($profile.banner, {w: window.innerWidth})
 
   info("Person", npub, $profile)

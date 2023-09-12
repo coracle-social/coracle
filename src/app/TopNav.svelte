@@ -23,8 +23,9 @@
     hasNewNip24Messages,
     hasNewNotfications,
     getUserRelayUrls,
+    searchableRelays,
   } from "src/engine2"
-  import engine, {Keys, Directory, Network, Nip65} from "src/app/engine"
+  import engine, {Keys, Directory, Network} from "src/app/engine"
 
   const {keyState, canUseGiftWrap} = Keys
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
@@ -71,7 +72,7 @@
     // This allows us to populate results even if search isn't supported by forced urls
     if (term.length > 2) {
       Network.subscribe({
-        relays: Nip65.getSearchRelays(),
+        relays: $searchableRelays,
         filter: [{kinds: [0], search, limit: 10}],
         timeout: 3000,
       })

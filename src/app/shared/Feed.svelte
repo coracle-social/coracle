@@ -13,8 +13,8 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {getSetting} from "src/engine2"
-  import {Keys, Nip65} from "src/app/engine"
+  import {getSetting, searchableRelays, mergeHints, getPubkeyHints} from "src/engine2"
+  import {Keys} from "src/app/engine"
   import {compileFilter} from "src/app/state"
 
   export let relays = []
@@ -53,14 +53,14 @@
 
     // If we have a search term we need to use only relays that support search
     if (filter.search) {
-      return Nip65.getSearchRelays()
+      return $searchableRelays
     }
 
     const limit = getSetting("relay_limit")
     const authors = (compileFilter(filter).authors || []).concat(Keys.pubkey.get())
-    const hints = authors.map(pubkey => Nip65.getPubkeyHints(limit, pubkey, "write"))
+    const hints = authors.map(pubkey => getPubkeyHints(limit, pubkey, "write"))
 
-    return Nip65.mergeHints(limit, hints)
+    return mergeHints(limit, hints)
   }
 
   const loadMore = () => feed.load(5)

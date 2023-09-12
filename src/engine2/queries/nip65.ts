@@ -9,9 +9,9 @@ import {stateKey, user} from "src/engine2/queries/session"
 
 export const relayPolicies = user.derived($user => $user.relays || [])
 
-export const relayUrls = relayPolicies.derived(pluck("url"))
+export const relayPolicyUrls = relayPolicies.derived(pluck("url"))
 
-export const hasRelay = url => relayUrls.derived(urls => urls.includes(url))
+export const hasRelay = url => relayPolicyUrls.derived(urls => urls.includes(url))
 
 export const relayIsLowQuality = (url: string) =>
   pool.get(url, {autoConnect: false})?.meta?.quality < 0.6
@@ -25,7 +25,7 @@ export const searchableRelays = relays.derived($relays => {
     .filter(r => (r.info?.supported_nips || []).includes(50))
     .map(prop("url"))
 
-  return uniq(env.get().SEARCH_RELAYS.concat(searchableRelayUrls)).slice(0, 8)
+  return uniq(env.get().SEARCH_RELAYS.concat(searchableRelayUrls)).slice(0, 8) as string[]
 })
 
 export const getPubkeyRelays = (pubkey: string, mode: string = null) => {

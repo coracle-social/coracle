@@ -6,8 +6,8 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {isFollowing} from "src/engine2"
-  import {Nip65, Network, Directory} from "src/app/engine"
+  import {isFollowing, searchableRelays, getPubkeyHints} from "src/engine2"
+  import {Network, Directory} from "src/app/engine"
 
   export let onSubmit
 
@@ -17,7 +17,7 @@
 
   const pubkeyEncoder = {
     encode: pubkey => {
-      const relays = Nip65.getPubkeyHints(3, pubkey, "write")
+      const relays = getPubkeyHints(3, pubkey, "write")
       const nprofile = nip19.nprofileEncode({pubkey, relays})
 
       return "nostr:" + nprofile
@@ -34,7 +34,7 @@
     if (search.length > 2 && search.startsWith("@")) {
       Network.subscribe({
         timeout: 3000,
-        relays: Nip65.getSearchRelays(),
+        relays: $searchableRelays,
         filter: [{kinds: [0], search, limit: 10}],
         onEvent: debounce(100, () => applySearch(getInfo().word)),
       })

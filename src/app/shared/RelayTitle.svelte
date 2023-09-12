@@ -4,8 +4,7 @@
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
-  import {getSetting} from "src/engine2"
-  import {Nip65} from "src/app/engine"
+  import {getSetting, displayRelay} from "src/engine2"
 
   export let relay
   export let rating = null
@@ -18,7 +17,7 @@
     href={`/relays/${webSocketURLToPlainOrBase64(relay.url)}`}
     class="border-b border-solid"
     style={`border-color: ${hsl(stringToHue(relay.url))}`}>
-    {Nip65.displayRelay(relay)}
+    {displayRelay(relay)}
   </Anchor>
   {#if !getSetting("multiplextr_url")}
     <RelayStatus {relay} />
