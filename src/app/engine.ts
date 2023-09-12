@@ -42,7 +42,6 @@ const engine = new Engine({
 
 export default engine
 export const Env = engine.Env
-export const Builder = engine.Builder
 export const Content = engine.Content
 export const Crypt = engine.Crypt
 export const Directory = engine.Directory
@@ -51,9 +50,6 @@ export const Keys = engine.Keys
 export const Network = engine.Network
 export const Nip04 = engine.Nip04
 export const Nip05 = engine.Nip05
-export const Nip24 = engine.Nip24
 export const Nip28 = engine.Nip28
 export const Nip44 = engine.Nip44
-export const Nip59 = engine.Nip59
 export const Nip65 = engine.Nip65
-export const Outbox = engine.Outbox

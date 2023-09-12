@@ -1,6 +1,5 @@
 <script lang="ts">
   import cx from "classnames"
-  import {filter, whereEq} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {formatTimestamp} from "src/util/misc"
   import {modal} from "src/partials/state"
@@ -9,13 +8,13 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {createNip24Message, nip24MarkChannelRead, loadNip59Messages} from "src/engine2"
-  import {Nip24, Directory, Keys} from "src/app/engine"
+  import {channels, createNip24Message, nip24MarkChannelRead, loadNip59Messages} from "src/engine2"
+  import {Directory, Keys} from "src/app/engine"
 
   export let entity
 
   const userPubkey = Keys.pubkey.get()
-  const messages = Nip24.messages.derived(filter(whereEq({channel: entity})))
+  const channel = channels.key(entity)
   const pubkeys = entity.split(",")
 
   nip24MarkChannelRead(entity)
@@ -37,7 +36,7 @@
   document.title = `Direct Messages`
 </script>
 
-<Channel {messages} {sendMessage}>
+<Channel messages={$channel.messages} {sendMessage}>
   <div slot="header" class="flex h-16 items-start gap-4 overflow-hidden p-2">
     <div class="flex items-center gap-4 pt-1">
       <Anchor type="unstyled" class="fa fa-arrow-left cursor-pointer text-2xl" href="/channels" />

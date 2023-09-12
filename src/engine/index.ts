@@ -1,7 +1,6 @@
 export * from "./types"
 export {Engine} from "./Engine"
 
-export {Builder} from "./components/Builder"
 export {Content} from "./components/Content"
 export {Crypt} from "./components/Crypt"
 export {Directory} from "./components/Directory"

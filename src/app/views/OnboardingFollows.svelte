@@ -5,16 +5,16 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
-  import type {Profile} from "src/engine"
-  import {Directory, Builder} from "src/app/engine"
+  import type {Person} from "src/engine2"
+  import {mention, people, getPeopleSearch} from "src/engine2"
   import {modal} from "src/partials/state"
 
   export let petnames
 
-  const {searchProfiles} = Directory
+  const searchPeople = people.derived(getPeopleSearch)
 
   const addFollow = pubkey => {
-    petnames = petnames.concat([Builder.mention(pubkey)])
+    petnames = [...petnames, mention(pubkey)]
   }
 
   const removeFollow = pubkey => {
@@ -24,7 +24,7 @@
   let q = ""
 
   $: pubkeys = petnames.map(t => t[1])
-  $: results = reject((p: Profile) => pubkeys.includes(p.pubkey), $searchProfiles(q))
+  $: results = reject((p: Person) => pubkeys.includes(p.pubkey), $searchPeople(q))
 </script>
 
 <Content>

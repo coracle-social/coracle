@@ -4,15 +4,11 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
-  import {Nip24} from "src/app/engine"
+  import {getNip24ChannelId} from "src/engine2"
 
   let profiles = []
 
-  const submit = () => {
-    const channelId = Nip24.getChannelId(pluck("pubkey", profiles))
-
-    navigate(`/channels/${channelId}`)
-  }
+  const submit = () => navigate(`/channels/${getNip24ChannelId(pluck("pubkey", profiles))}`)
 </script>
 
 <form on:submit|preventDefault={submit} class="flex justify-center py-12">

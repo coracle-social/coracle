@@ -16,8 +16,8 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {publishNote, getUserRelayUrls} from "src/engine2"
-  import {Directory, Network, Builder, Nip65, Keys} from "src/app/engine"
+  import {publishNote, getUserRelayUrls, mention} from "src/engine2"
+  import {Directory, Network, Nip65, Keys} from "src/app/engine"
   import {modal} from "src/partials/state"
   import {toastProgress} from "src/app/state"
 
@@ -42,7 +42,7 @@
     }
 
     if (quote) {
-      tags.push(Builder.mention(quote.pubkey))
+      tags.push(mention(quote.pubkey))
 
       // Re-broadcast the note we're quoting
       Network.publish({relays: $relays, event: quote})

@@ -12,13 +12,14 @@
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
   import {
     user,
+    mention,
     loadPubkeys,
     publishNote,
     publishPetnames,
     publishProfile,
     publishRelays,
   } from "src/engine2"
-  import {Env, Builder, Keys} from "src/app/engine"
+  import {Env, Keys} from "src/app/engine"
   import {listenForNotifications} from "src/app/state"
   import {modal} from "src/partials/state"
 
@@ -36,7 +37,7 @@
 
     if (petnames.length === 0) {
       for (const pubkey of Env.DEFAULT_FOLLOWS) {
-        petnames.push(Builder.mention(pubkey))
+        petnames.push(mention(pubkey))
       }
     }
 
