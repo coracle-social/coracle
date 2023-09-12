@@ -11,8 +11,8 @@
   import Content from "src/partials/Content.svelte"
   import NoteById from "src/app/shared/NoteById.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
-  import {getUserRelayUrls, follows, Subscription} from "src/engine2"
-  import engine, {Keys} from "src/app/engine"
+  import {labels, getUserRelayUrls, follows, Subscription} from "src/engine2"
+  import {Keys} from "src/app/engine"
 
   type LabelGroup = {
     label: string
@@ -23,7 +23,7 @@
 
   const {pubkey} = Keys
 
-  const labelGroups = engine.Content.labels.derived($labels => {
+  const labelGroups = labels.derived($labels => {
     const $labelGroups = {}
 
     for (const e of $labels) {

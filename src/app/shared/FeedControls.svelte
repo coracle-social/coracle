@@ -13,14 +13,12 @@
   import SelectButton from "src/partials/SelectButton.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
-  import {follows} from "src/engine2"
+  import {topics, follows, getTopicSearch} from "src/engine2"
   import type {DynamicFilter, Topic, Profile} from "src/engine"
-  import {Directory, default as engine} from "src/app/engine"
+  import {Directory} from "src/app/engine"
 
   export let filter
   export let onChange
-
-  const {searchTopics} = engine.Content
 
   type Kind = {
     kind: number
@@ -40,6 +38,8 @@
     {kind: 10002, label: "Relay selections"},
     {kind: 30023, label: "Long form content"},
   ]
+
+  const searchTopics = topics.derived(getTopicSearch)
 
   const searchKinds = fuzzy(kinds, {keys: ["kind", "label"]})
 

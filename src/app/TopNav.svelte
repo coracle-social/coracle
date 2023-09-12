@@ -18,6 +18,7 @@
   import TopNavMenu from "src/app/TopNavMenu.svelte"
   import {menuIsOpen} from "src/app/state"
   import {
+    topics,
     hasNewNip28Messages,
     hasNewNip04Messages,
     hasNewNip24Messages,
@@ -26,7 +27,7 @@
     searchableRelays,
     Subscription,
   } from "src/engine2"
-  import engine, {Keys, Directory} from "src/app/engine"
+  import {Keys, Directory} from "src/app/engine"
 
   const {keyState, canUseGiftWrap} = Keys
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
@@ -112,7 +113,7 @@
     }
   }
 
-  const topicOptions = engine.Content.topics.derived(
+  const topicOptions = topics.derived(
     map(topic => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
   )
 

@@ -40,3 +40,5 @@ export const getPeopleSearch = $people =>
     keys: ["name", "display_name", {name: "nip05", weight: 0.5}, {name: "about", weight: 0.1}],
     threshold: 0.3,
   })
+
+export const getTopicSearch = $topics => fuzzy($topics, {keys: ["name"], threshold: 0.3})

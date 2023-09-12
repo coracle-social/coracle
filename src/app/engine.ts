@@ -42,9 +42,6 @@ const engine = new Engine({
 
 export default engine
 export const Env = engine.Env
-export const Content = engine.Content
-export const Crypt = engine.Crypt
 export const Directory = engine.Directory
 export const Events = engine.Events
 export const Keys = engine.Keys
-export const Nip04 = engine.Nip04
