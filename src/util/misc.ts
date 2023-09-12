@@ -1,6 +1,6 @@
 import {bech32, utf8} from "@scure/base"
 import {debounce} from "throttle-debounce"
-import {pluck, is, equals} from "ramda"
+import {pluck, sum, is, equals} from "ramda"
 import {Storage, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from "svelte/store"
@@ -324,3 +324,5 @@ export function roughSizeOfObject(o, max = Infinity) {
 
   return bytes
 }
+
+export const sumBy = (f, xs) => sum(xs.map(f))

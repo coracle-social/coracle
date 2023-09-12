@@ -14,6 +14,7 @@ import {
   env,
   pool,
   session,
+  loadDeletes,
   loadPubkeys,
   channels,
   follows,
@@ -154,6 +155,9 @@ export const loadAppData = async () => {
 
   // Make sure the user and their follows are loaded
   await loadPubkeys(pubkey, {force: true, kinds: userKinds})
+
+  // Load deletes
+  loadDeletes()
 
   // Load their network
   loadPubkeys(follows.get())
