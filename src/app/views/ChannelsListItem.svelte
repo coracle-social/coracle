@@ -1,17 +1,19 @@
-<script>
+<script lang="ts">
   import {navigate} from "svelte-routing"
   import {displayList} from "hurdak"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import Card from "src/partials/Card.svelte"
-  import {Directory, Nip24} from "src/app/engine"
+  import {people, channels, displayPerson, loadPubkeys, hasNewMessages} from "src/engine2"
 
   export let channel
 
   const pubkeys = channel.id.split(",")
-  const hasNewMessages = Nip24.channels.key(channel.id).derived(Nip24.messageIsNew)
-  const profiles = Directory.profiles.derived(() => pubkeys.map(Directory.getProfile))
+  const showAlert = channels.key(channel.id).derived(hasNewMessages)
+  const members = people.mapStore.derived($p => pubkeys.map(pk => $p.get(pk)))
 
   const enter = () => navigate(`/channels/${channel.id}`)
+
+  loadPubkeys(pubkeys)
 </script>
 
 <Card interactive on:click={enter}>
@@ -24,11 +26,11 @@
           </div>
         {/each}
       </div>
-      <h2>{displayList($profiles.map(Directory.displayProfile))}</h2>
+      <h2>{displayList($members.map(displayPerson))}</h2>
     </div>
     <div class="relative">
-      <i class="fa fa-bell" class:text-gray-5={!$hasNewMessages} />
-      {#if $hasNewMessages}
+      <i class="fa fa-bell" class:text-gray-5={!$showAlert} />
+      {#if $showAlert}
         <div class="absolute right-0 top-0 mt-1 h-1 w-1 rounded-full bg-accent" />
       {/if}
     </div>

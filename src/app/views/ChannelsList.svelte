@@ -1,6 +1,5 @@
-<script>
-  import {sortBy, filter, prop} from "ramda"
-  import {onMount} from "svelte"
+<script lang="ts">
+  import {whereEq, complement, prop, filter} from "ramda"
   import {toTitle, seconds, batch} from "hurdak"
   import {now} from "src/util/misc"
   import {navigate} from "svelte-routing"
@@ -12,20 +11,25 @@
   import ForegroundButton from "src/partials/ForegroundButton.svelte"
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
-  import {getUserRelayUrls, nip24MarkAllRead} from "src/engine2"
-  import {Nip24, Nip59, pubkeyLoader, Network, Keys} from "src/app/engine"
+  import {
+    load,
+    session,
+    loadPubkeys,
+    channels,
+    hasNewNip24Messages,
+    sortChannels,
+    getUserRelayUrls,
+    nip24MarkAllRead,
+    nip59,
+  } from "src/engine2"
 
   export let activeTab = "conversations"
 
-  const {privkey} = Keys.current.get()
-  const {hasNewMessages} = Nip24
-  const accepted = Nip24.channels.derived(filter(prop("last_sent")))
-  const requests = Nip24.channels.derived(filter(c => c.last_received && !c.last_sent))
+  const nip24Channels = channels.derived(filter(whereEq({type: "nip24"})))
+  const accepted = nip24Channels.derived(filter(prop("last_sent")))
+  const requests = nip24Channels.derived(filter(complement(prop("last_sent"))))
 
-  $: tabChannels = sortBy(
-    c => -Math.max(c.last_sent || 0, c.last_received || 0),
-    activeTab === "conversations" ? $accepted : $requests
-  )
+  $: tabChannels = sortChannels(activeTab === "conversations" ? $accepted : $requests)
 
   const getDisplay = tab => ({
     title: toTitle(tab),
@@ -36,24 +40,18 @@
 
   document.title = "Direct Messages"
 
-  onMount(() => {
-    const pubkey = Keys.pubkey.get()
-    const since = now() - seconds(90, "day")
-    const sub = Network.subscribe({
-      relays: getUserRelayUrls("read"),
-      filter: [{kinds: [1059], "#p": [pubkey], since}],
-      onEvent: batch(1000, events => {
-        const pubkeys = new Set()
+  load({
+    relays: getUserRelayUrls("read"),
+    filters: [{kinds: [1059], "#p": [$session.pubkey], since: now() - seconds(90, "day")}],
+    onEvent: batch(1000, events => {
+      const pubkeys = new Set<string>()
 
-        for (const event of events) {
-          Nip59.withUnwrappedEvent(event, privkey, e => pubkeys.add(e.pubkey))
-        }
+      for (const event of events) {
+        $nip59.withUnwrappedEvent(event, $session.privkey, e => pubkeys.add(e.pubkey))
+      }
 
-        pubkeyLoader.load(pubkeys)
-      }),
-    })
-
-    return () => sub.close()
+      loadPubkeys(Array.from(pubkeys))
+    }),
   })
 </script>
 
@@ -73,7 +71,7 @@
       <div slot="trigger">
         <i
           class="fa fa-bell cursor-pointer"
-          class:text-gray-5={!$hasNewMessages}
+          class:text-gray-5={!$hasNewNip24Messages}
           on:click={nip24MarkAllRead} />
       </div>
       <div slot="tooltip">Mark all as read</div>

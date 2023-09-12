@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {pluck} from "ramda"
   import {Tags} from "src/util/nostr"
   import {modal, toast} from "src/partials/state"
@@ -8,14 +8,18 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import {lists, publishBookmarksList} from "src/engine2"
-  import {Directory, user, Nip65, default as engine} from "src/app/engine"
+  import {
+    user,
+    lists,
+    searchPeople,
+    searchTopics,
+    searchRelays,
+    displayPubkey,
+    displayRelay,
+    publishBookmarksList,
+  } from "src/engine2"
 
   export let list
-
-  const {searchProfiles} = Directory
-  const {searchTopics} = engine.Content
-  const {searchRelays} = Nip65
 
   const tags = Tags.wrap(list?.tags || [])
 
@@ -32,7 +36,7 @@
         .map(({name}) => ["t", name])
     }
 
-    return $searchProfiles(q)
+    return $searchPeople(q)
       .slice(0, 5)
       .map(({pubkey}) => ["p", pubkey])
   }
@@ -44,7 +48,7 @@
       return toast.show("error", "A name is required for your list")
     }
 
-    const duplicates = lists.filter(
+    const duplicates = $lists.filter(
       l => l.pubkey === user.get().pubkey && l.name === values.name && l.naddr !== list?.naddr
     )
 
@@ -62,7 +66,7 @@
 
 <form on:submit|preventDefault={submit}>
   <Content>
-    <Heading class="text-center">{values.naddr ? "Edit" : "Add"} list</Heading>
+    <Heading class="text-center">{list?.naddr ? "Edit" : "Add"} list</Heading>
     <div class="flex w-full flex-col gap-8">
       <div class="flex flex-col gap-1">
         <strong>Name</strong>
@@ -77,7 +81,7 @@
           <div slot="item" let:item let:context>
             {#if item[0] === "p"}
               {#if context === "value"}
-                {Directory.displayPubkey(item[1])}
+                {displayPubkey(item[1])}
               {:else}
                 <PersonBadge inert pubkey={item[1]} />
               {/if}
@@ -92,7 +96,7 @@
         <strong>Relays</strong>
         <MultiSelect search={_searchRelays} bind:value={values.relays}>
           <div slot="item" let:item>
-            {Nip65.displayRelay({url: item[1]})}
+            {displayRelay({url: item[1]})}
           </div>
         </MultiSelect>
         <p class="text-sm text-gray-4">

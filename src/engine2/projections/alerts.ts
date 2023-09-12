@@ -1,18 +1,18 @@
 import {Tags, isLike, noteKinds, findReplyId, findRootId} from "src/util/nostr"
 import type {Event} from "src/engine2/model"
-import {pubkey, events, alerts} from "src/engine2/state"
+import {session, events, alerts} from "src/engine2/state"
 import {projections} from "src/engine2/projections/core"
 
-const isMention = (e: Event) => Tags.from(e).pubkeys().includes(pubkey.get())
+const isMention = (e: Event) => Tags.from(e).pubkeys().includes(session.get().pubkey)
 
-const isUserEvent = (id: string) => events.key(id).get()?.pubkey === pubkey.get()
+const isUserEvent = (id: string) => events.key(id).get()?.pubkey === session.get().pubkey
 
 const isDescendant = (e: Event) => isUserEvent(findRootId(e))
 
 const isReply = (e: Event) => isUserEvent(findReplyId(e))
 
 const handleNotification = (e: Event) => {
-  const $pubkey = pubkey.get()
+  const $pubkey = session.get().pubkey
 
   if (!$pubkey || e.pubkey === $pubkey) {
     return

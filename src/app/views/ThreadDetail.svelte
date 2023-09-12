@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {quantify} from "hurdak"
   import {onDestroy} from "svelte"
   import {ThreadLoader} from "src/engine2"

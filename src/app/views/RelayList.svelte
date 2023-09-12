@@ -1,12 +1,10 @@
-<script>
+<script lang="ts">
   import {fly} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {Nip65, user} from "src/app/engine"
+  import {relayPolicies} from "src/engine2"
   import {modal} from "src/partials/state"
-
-  const relays = Nip65.policies.derived(() => user.getRelays())
 
   document.title = "Relays"
 </script>
@@ -26,15 +24,15 @@
       Relays are hubs for your content and connections. At least one is required to interact with
       the network, but you can join as many as you like.
     </p>
-    {#if $relays.length === 0}
+    {#if $relayPolicies.length === 0}
       <div class="mt-8 flex items-center justify-center gap-2 text-center">
         <i class="fa fa-triangle-exclamation" />
         No relays connected
       </div>
     {/if}
     <div class="grid grid-cols-1 gap-4">
-      {#each $relays as relay (relay.url)}
-        <RelayCard showStatus showControls {relay} />
+      {#each $relayPolicies as policy (policy.url)}
+        <RelayCard showStatus showControls relay={policy} />
       {/each}
     </div>
   </Content>

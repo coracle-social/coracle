@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {identity} from "ramda"
   import {seconds} from "hurdak"
   import {fuzzy, now} from "src/util/misc"

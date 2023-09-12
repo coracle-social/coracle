@@ -1,28 +1,25 @@
-<script>
+<script lang="ts">
   import cx from "classnames"
-  import {Link} from "svelte-routing"
-  import {killEvent} from "src/util/html"
   import {routes} from "src/app/state"
-  import {Directory} from "src/app/engine"
+  import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
+  import {displayPubkey} from "src/engine2"
 
   export let pubkey
   export let inert = false
-
-  const display = Directory.displayPubkey(pubkey)
 </script>
 
 {#if inert}
   <span class={cx($$props.class, "relative z-10 flex items-center gap-2")}>
     <PersonCircle {pubkey} />
-    <span>{display}</span>
+    <span>{displayPubkey(pubkey)}</span>
   </span>
 {:else}
-  <Link
-    to={routes.person(pubkey)}
-    class={cx($$props.class, "relative z-10 flex items-center gap-2")}
-    on:click={killEvent}>
+  <Anchor
+    killEvent
+    href={routes.person(pubkey)}
+    class={cx($$props.class, "relative z-10 flex items-center gap-2")}>
     <PersonCircle {pubkey} />
-    <span>{display}</span>
-  </Link>
+    <span>{displayPubkey(pubkey)}</span>
+  </Anchor>
 {/if}

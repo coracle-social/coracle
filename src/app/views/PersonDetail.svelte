@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {identity, defaultTo} from "ramda"
+  import {identity} from "ramda"
   import {info} from "src/util/logger"
   import {toHex} from "src/util/nostr"
   import {getThemeBackgroundGradient} from "src/partials/state"
@@ -7,13 +7,19 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
+  import PersonName from "src/app/shared/PersonName.svelte"
   import PersonActions from "src/app/shared/PersonActions.svelte"
   import PersonNotes from "src/app/shared/PersonNotes.svelte"
   import PersonLikes from "src/app/shared/PersonLikes.svelte"
   import PersonRelays from "src/app/shared/PersonRelays.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
-  import PersonName from "src/app/shared/PersonName.svelte"
+  import PersonCircle from "src/app/shared/PersonCircle.svelte"
+  import PersonAbout from "src/app/shared/PersonAbout.svelte"
+  import PersonStats from "src/app/shared/PersonStats.svelte"
   import {
+    env,
+    derivePerson,
+    displayPerson,
     loadPubkeys,
     getSetting,
     imgproxy,
@@ -21,18 +27,14 @@
     mergeHints,
     getPubkeyHints,
   } from "src/engine2"
-  import {Env, Directory} from "src/app/engine"
-  import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import PersonAbout from "src/app/shared/PersonAbout.svelte"
-  import PersonStats from "src/app/shared/PersonStats.svelte"
 
   export let npub
   export let relays = []
 
-  const tabs = ["notes", "likes", Env.FORCE_RELAYS.length === 0 && "relays"].filter(identity)
+  const tabs = ["notes", "likes", $env.FORCE_RELAYS.length === 0 && "relays"].filter(identity)
   const pubkey = toHex(npub)
   const relayLimit = getSetting("relay_limit")
-  const profile = Directory.profiles.key(pubkey).derived(defaultTo({pubkey}))
+  const person = derivePerson(pubkey)
   const {rgb, rgba} = getThemeBackgroundGradient()
 
   let activeTab = "notes"
@@ -40,13 +42,13 @@
 
   $: ownRelays = getPubkeyRelays(pubkey)
   $: mergedRelays = mergeHints(relayLimit, [relays, getPubkeyHints(relayLimit, pubkey, "write")])
-  $: banner = imgproxy($profile.banner, {w: window.innerWidth})
+  $: banner = imgproxy($person.profile?.banner, {w: window.innerWidth})
 
-  info("Person", npub, $profile)
+  info("Person", npub, $person)
 
   loadPubkeys([pubkey], {force: true})
 
-  document.title = Directory.displayProfile($profile)
+  document.title = displayPerson($person)
 
   const setActiveTab = tab => {
     activeTab = tab

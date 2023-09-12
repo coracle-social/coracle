@@ -1,11 +1,10 @@
-<script>
-  import {onMount} from "svelte"
+<script lang="ts">
   import {quantify} from "hurdak"
   import {routes} from "src/app/state"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {Directory, Settings, Nip65, Network} from "src/app/engine"
+  import {load, displayPubkey, getSetting, selectHints} from "src/engine2"
 
   export let identifier
   export let kind
@@ -14,19 +13,14 @@
 
   let note
 
-  const display = Directory.displayPubkey(pubkey)
+  const display = displayPubkey(pubkey)
 
-  onMount(async () => {
-    const sub = Network.subscribe({
-      timeout: 30_000,
-      relays: Nip65.selectHints(Settings.getSetting("relay_limit"), relays),
-      filter: {kinds: [kind], authors: [pubkey], "#d": [identifier]},
-      onEvent: event => {
-        note = event
-      },
-    })
-
-    return () => sub.close()
+  load({
+    relays: selectHints(getSetting("relay_limit"), relays),
+    filters: [{kinds: [kind], authors: [pubkey], "#d": [identifier]}],
+    onEvent: event => {
+      note = event
+    },
   })
 </script>
 

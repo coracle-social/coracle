@@ -17,9 +17,9 @@
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
   import {Publisher, publishNote, displayRelay, getUserRelayUrls, mention} from "src/engine2"
-  import {Directory, Keys} from "src/app/engine"
   import {modal} from "src/partials/state"
   import {toastProgress} from "src/app/state"
+  import {session, displayPubkey} from "src/engine2"
 
   export let quote = null
   export let pubkey = null
@@ -92,8 +92,8 @@
   })
 
   onMount(() => {
-    if (pubkey && pubkey !== Keys.pubkey.get()) {
-      compose.mention(Directory.getProfile(pubkey))
+    if (pubkey && pubkey !== $session.pubkey) {
+      compose.mention(pubkey)
     }
 
     if (quote) {
@@ -128,7 +128,7 @@
           </small>
           <span class="hidden sm:block">•</span>
           <small>
-            Posting as @{Directory.displayPubkey(Keys.pubkey.get())}
+            Posting as @{displayPubkey($session.pubkey)}
           </small>
           <span>•</span>
           <small on:click={togglePreview} class="cursor-pointer underline">

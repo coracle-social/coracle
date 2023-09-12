@@ -1,16 +1,10 @@
-<script>
+<script lang="ts">
   import Feed from "src/app/shared/Feed.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import TopicActions from "src/app/shared/TopicActions.svelte"
-  import {Nip65, Settings, Keys} from "src/app/engine"
 
   export let topic
-
-  const pubkey = Keys.pubkey.get()
-  const limit = Settings.getSetting("relay_limit")
-  const relays = Nip65.getPubkeyHints(limit, pubkey, "read")
-  const filter = {kinds: [1], "#t": [topic]}
 </script>
 
 <Content>
@@ -20,5 +14,5 @@
       <TopicActions {topic} />
     </div>
   </div>
-  <Feed {relays} {filter} />
+  <Feed filter={{kinds: [1], "#t": [topic]}} />
 </Content>

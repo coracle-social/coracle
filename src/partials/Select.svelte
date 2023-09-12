@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import cx from "classnames"
 
   export let wrapperClass = ""
@@ -15,10 +15,10 @@
   <select {...$$props} class={className} bind:value>
     <slot />
   </select>
-  <div class="absolute top-0 left-0 flex gap-2 px-3 pt-3 text-gray-7">
+  <div class="absolute left-0 top-0 flex gap-2 px-3 pt-3 text-gray-7">
     <slot name="before" />
   </div>
-  <div class="absolute top-0 right-0 flex gap-2 px-3 pt-3 text-gray-7">
+  <div class="absolute right-0 top-0 flex gap-2 px-3 pt-3 text-gray-7">
     <slot name="after" />
   </div>
 </div>

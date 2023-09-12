@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {fly} from "src/util/transition"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"

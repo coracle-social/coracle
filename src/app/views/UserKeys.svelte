@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {fly} from "src/util/transition"
   import {nip19} from "nostr-tools"
   import {copyToClipboard} from "src/util/html"

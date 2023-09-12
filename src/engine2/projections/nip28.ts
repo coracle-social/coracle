@@ -2,7 +2,7 @@ import {prop, map, assocPath, pluck, last, uniqBy, uniq} from "ramda"
 import {Tags, appDataKeys} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import type {Event, Channel} from "src/engine2/model"
-import {keys, channels} from "src/engine2/state"
+import {sessions, channels} from "src/engine2/state"
 import {nip04, canSign} from "src/engine2/queries"
 import {projections, updateKey} from "src/engine2/projections/core"
 
@@ -93,7 +93,7 @@ projections.addHandler(30078, async (e: Event) => {
 projections.addHandler(42, (e: Event) => {
   const tags = Tags.from(e)
   const channelId = tags.getMeta("e")
-  const pubkeys = pluck("pubkey", keys.get())
+  const pubkeys = pluck("pubkey", Object.values(sessions.get()))
 
   if (!channelId) {
     return

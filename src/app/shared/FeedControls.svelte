@@ -13,9 +13,8 @@
   import SelectButton from "src/partials/SelectButton.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
-  import {topics, follows, getTopicSearch} from "src/engine2"
-  import type {DynamicFilter, Topic, Profile} from "src/engine"
-  import {Directory} from "src/app/engine"
+  import type {DynamicFilter, Topic, Person} from "src/engine2"
+  import {follows, searchTopics, derivePerson, displayPubkey} from "src/engine2"
 
   export let filter
   export let onChange
@@ -39,12 +38,10 @@
     {kind: 30023, label: "Long form content"},
   ]
 
-  const searchTopics = topics.derived(getTopicSearch)
-
   const searchKinds = fuzzy(kinds, {keys: ["kind", "label"]})
 
   const displayPeople = pubkeys =>
-    pubkeys.length === 1 ? Directory.displayPubkey(pubkeys[0]) : `${pubkeys.length} people`
+    pubkeys.length === 1 ? displayPubkey(pubkeys[0]) : `${pubkeys.length} people`
 
   const displayTopics = topics => (topics.length === 1 ? topics[0] : `${topics.length} topics`)
 
@@ -150,10 +147,10 @@
     until: filter.until,
     search: filter.search || "",
     authors: Array.isArray(filter.authors)
-      ? filter.authors.map(Directory.getProfile)
+      ? filter.authors.map(pk => derivePerson(pk).get())
       : filter.authors || "network",
     "#t": (filter["#t"] || []).map(objOf("name")),
-    "#p": (filter["#p"] || []).map(Directory.getProfile),
+    "#p": (filter["#p"] || []).map(pk => derivePerson(pk).get()),
   })
 
   const open = () => {
@@ -176,9 +173,9 @@
     since?: number
     until?: number
     search?: string
-    authors?: Profile[]
+    authors?: Person[]
     "#t"?: Topic[]
-    "#p"?: Profile[]
+    "#p"?: Person[]
   } = getFormFilter()
 
   $: parts = getFilterParts(filter)

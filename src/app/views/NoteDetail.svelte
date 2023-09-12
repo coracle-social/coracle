@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {first} from "hurdak"
   import {ContextLoader} from "src/engine2"
   import {onMount, onDestroy} from "svelte"
@@ -11,8 +11,7 @@
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {Subscription} from "src/engine2"
-  import {Settings, Nip65} from "src/app/engine"
+  import {Subscription, selectHints, getSetting} from "src/engine2"
 
   export let note
   export let relays = []
@@ -44,7 +43,7 @@
     sub = new Subscription({
       filters: [{ids: [note.id]}],
       timeout: 8000,
-      relays: Nip65.selectHints(Settings.getSetting("relay_limit"), relays),
+      relays: selectHints(getSetting("relay_limit"), relays),
     })
 
     sub.on("event", e => {

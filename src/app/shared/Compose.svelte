@@ -7,13 +7,13 @@
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
   import {
-    people,
+    derivePerson,
     displayPerson,
     Subscription,
     isFollowing,
     searchableRelays,
     getPubkeyHints,
-    getPeopleSearch,
+    searchPeople,
   } from "src/engine2"
 
   export let onSubmit
@@ -34,8 +34,6 @@
       return nip19.decode(last(link.split(":"))).data.pubkey
     },
   }
-
-  const searchPeople = people.derived(getPeopleSearch)
 
   const loadPeople = debounce(500, search => {
     if (search.length > 2 && search.startsWith("@")) {
@@ -175,7 +173,7 @@
     dispatch("keyup", e)
   }
 
-  export const mention = person => {
+  export const mention = pubkey => {
     const input = contenteditable.getInput()
     const selection = window.getSelection()
     const textNode = document.createTextNode("@")
@@ -187,7 +185,7 @@
     selection.getRangeAt(0).insertNode(spaceNode)
     selection.collapse(input, 1)
 
-    autocomplete({person, force: true})
+    autocomplete({person: derivePerson(pubkey).get(), force: true})
   }
 
   const createNewLines = (n = 1) => {

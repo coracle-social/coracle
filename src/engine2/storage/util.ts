@@ -131,7 +131,7 @@ export class LocalStorageAdapter {
 
 type IndexedDBAdapterOpts = {
   max: number
-  sort: (xs: any[]) => any[]
+  sort?: (xs: any[]) => any[]
 }
 
 export class IndexedDBAdapter {
@@ -186,7 +186,7 @@ export class IndexedDBAdapter {
       return
     }
 
-    const [discard, keep] = splitAt(max, sort(data))
+    const [discard, keep] = splitAt(max, sort ? sort(data) : data)
 
     store.set(keep)
 

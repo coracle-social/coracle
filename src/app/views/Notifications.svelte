@@ -1,5 +1,5 @@
-<script>
-  import {filter, propEq, slice, pluck, reverse, max, last, sortBy} from "ramda"
+<script lang="ts">
+  import {filter, slice, pluck, reverse, max, last, sortBy} from "ramda"
   import {onMount} from "svelte"
   import {doPipe, batch, seconds} from "hurdak"
   import {fly} from "src/util/transition"
@@ -15,8 +15,18 @@
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import Notification from "src/app/views/Notification.svelte"
-  import {alerts, alertsLastChecked, getUserRelayUrls} from "src/engine2"
-  import {Env, Events, pubkeyLoader, Keys, user, Network} from "src/app/engine"
+  import type {Event} from "src/engine2"
+  import {
+    env,
+    subscribe,
+    session,
+    events,
+    loadPubkeys,
+    alerts,
+    alertsLastChecked,
+    isEventMuted,
+    getUserRelayUrls,
+  } from "src/engine2"
 
   const lastChecked = alertsLastChecked.get()
   const tabs = ["Mentions & Replies", "Reactions"]
@@ -24,7 +34,7 @@
   export let activeTab = tabs[0]
 
   let limit = 0
-  let events = null
+  let notificationEvents = null
 
   const notifications = alerts.derived($events => {
     // As long as we're on the page, don't show a notification
@@ -34,17 +44,17 @@
     return reverse(
       sortBy(
         e => formatTimestampAsLocalISODate(e.created_at).slice(0, 13) + findReplyId(e),
-        user.applyMutes($events.filter(propEq("recipient", Keys.pubkey.get())))
+        $events.filter(e => e.recipient === $session.pubkey && !isEventMuted(e))
       )
     )
   })
 
   // Group notifications so we're only showing the parent once per chunk
-  $: events = sortBy(
-    ({notifications}) => -notifications.reduce((a, b) => Math.max(a, b.created_at), 0),
+  $: notificationEvents = sortBy(
+    ({notifications}: any) => -notifications.reduce((a, b) => Math.max(a, b.created_at), 0),
     $notifications
       .slice(0, limit)
-      .map(e => [e, Events.cache.key(findReplyId(e)).get()])
+      .map(e => [e, events.key(findReplyId(e)).get()])
       .filter(([e, ref]) => {
         if (ref && !noteKinds.includes(ref.kind)) {
           return false
@@ -58,17 +68,23 @@
       })
       .reduce((r, [e, ref]) => {
         const prev = last(r)
+        // @ts-ignore
         const prevTimestamp = pluck("created_at", prev?.notifications || []).reduce(max, 0)
 
+        // @ts-ignore
         if (ref && prev?.ref === ref) {
+          // @ts-ignore
           prev.notifications.push(e)
         } else {
           r = r.concat({
+            // @ts-ignore
             ref,
             key: e.id,
             notifications: [e],
+            // @ts-ignore
             created_at: e.created_at,
             dateDisplay: formatTimestampAsDate(e.created_at),
+            // @ts-ignore
             showLine: e.created_at < lastChecked && prevTimestamp >= lastChecked,
           })
         }
@@ -80,8 +96,8 @@
   const setActiveTab = tab => navigate(`/notifications/${tab}`)
 
   const getLineText = i => {
-    const event = events[i]
-    const prev = events[i - 1]
+    const event = notificationEvents[i]
+    const prev = notificationEvents[i - 1]
 
     if (prev?.dateDisplay !== event.dateDisplay) {
       return event.dateDisplay
@@ -91,25 +107,23 @@
   onMount(() => {
     document.title = "Notifications"
 
-    const pubkey = Keys.pubkey.get()
     const since = Math.max(lastChecked - seconds(1, "hour"), now() - seconds(30, "day"))
-
-    const reactionKinds = Env.ENABLE_ZAPS ? [7, 9735] : [7]
-    const eventIds = doPipe(Events.cache.get(), [
-      filter(e => noteKinds.includes(e.kind)),
-      sortBy(e => -e.created_at),
+    const reactionKinds = $env.ENABLE_ZAPS ? [7, 9735] : [7]
+    const eventIds = doPipe(events.get(), [
+      filter((e: Event) => noteKinds.includes(e.kind)),
+      sortBy((e: Event) => -e.created_at),
       slice(0, 256),
       pluck("id"),
     ])
 
-    const sub = Network.subscribe({
+    const sub = subscribe({
       relays: getUserRelayUrls("read"),
-      filter: [
-        {kinds: noteKinds.concat(reactionKinds), "#p": [pubkey], since},
+      filters: [
+        {kinds: noteKinds.concat(reactionKinds), "#p": [$session.pubkey], since},
         {kinds: noteKinds.concat(reactionKinds), "#e": eventIds, since},
       ],
-      onEvent: batch(1000, events => {
-        pubkeyLoader.load(pluck("pubkey", events))
+      onEvent: batch(1000, (events: Event[]) => {
+        loadPubkeys(pluck("pubkey", events))
       }),
     })
 
@@ -124,10 +138,10 @@
   })
 </script>
 
-{#if events}
+{#if notificationEvents}
   <Content>
     <Tabs {tabs} {activeTab} {setActiveTab} />
-    {#each events as event, i (event.key)}
+    {#each notificationEvents as event, i (event.key)}
       {@const lineText = getLineText(i)}
       {#if lineText}
         <div class="flex items-center gap-4">

@@ -3,11 +3,11 @@ import type {EventTemplate, UnsignedEvent} from "nostr-tools"
 import {getSignature, getPublicKey, getEventHash} from "nostr-tools"
 import type NDK from "@nostr-dev-kit/ndk"
 import {NDKEvent} from "@nostr-dev-kit/ndk"
-import {withExtension} from "src/engine2/util/nip07"
-import type {Rumor, KeyState} from "src/engine2/model"
+import type {Rumor, Session} from "src/engine2/model"
+import {withExtension} from "src/engine2/queries/nip07"
 
 export class Signer {
-  constructor(readonly user: KeyState | null, readonly ndk: NDK | null) {}
+  constructor(readonly session: Session | null, readonly ndk: NDK | null) {}
 
   prepWithKey(event: EventTemplate, sk: string) {
     ;(event as UnsignedEvent).pubkey = getPublicKey(sk)
@@ -17,7 +17,7 @@ export class Signer {
   }
 
   prepAsUser(event: EventTemplate) {
-    const {pubkey} = this.user
+    const {pubkey} = this.session
 
     ;(event as UnsignedEvent).pubkey = pubkey
     ;(event as Rumor).id = getEventHash(event as UnsignedEvent)
@@ -32,7 +32,7 @@ export class Signer {
   }
 
   signAsUser(template: EventTemplate) {
-    const {method, privkey} = this.user
+    const {method, privkey} = this.session
     const event = this.prepAsUser(template)
 
     return switcherFn(method, {

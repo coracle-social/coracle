@@ -31,7 +31,7 @@ export type DynamicFilter = Omit<Filter, "authors"> & {
 
 // Domain types
 
-export type KeyState = {
+export type Session = {
   method: string
   pubkey: string
   privkey?: string

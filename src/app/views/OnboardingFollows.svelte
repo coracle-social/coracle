@@ -6,12 +6,10 @@
   import Content from "src/partials/Content.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import type {Person} from "src/engine2"
-  import {mention, people, getPeopleSearch} from "src/engine2"
+  import {mention, searchPeople} from "src/engine2"
   import {modal} from "src/partials/state"
 
   export let petnames
-
-  const searchPeople = people.derived(getPeopleSearch)
 
   const addFollow = pubkey => {
     petnames = [...petnames, mention(pubkey)]

@@ -1,19 +1,17 @@
-<script>
+<script lang="ts">
   import Feed from "src/app/shared/Feed.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {Nip65, Settings} from "src/app/engine"
+  import {selectHints, getSetting} from "src/engine2"
 
   export let label
   export let hints
   export let ids
 
-  const limit = Settings.getSetting("relay_limit")
-  const relays = Nip65.selectHints(limit, hints)
-  const filter = {ids}
+  const relays = selectHints(getSetting("relay_limit"), hints)
 </script>
 
 <Content>
   <Heading>{label}</Heading>
-  <Feed invertColors {relays} {filter} />
+  <Feed invertColors {relays} filter={{ids}} />
 </Content>

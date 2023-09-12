@@ -1,24 +1,23 @@
-<script>
+<script lang="ts">
   import {nip19} from "nostr-tools"
   import {navigate} from "svelte-routing"
   import {fly} from "src/util/transition"
   import {ellipsize} from "hurdak"
   import Anchor from "src/partials/Anchor.svelte"
-  import {Keys, Settings, user} from "src/app/engine"
+  import {canSign, imgproxy, joinNip28Channel, leaveNip28Channel} from "src/engine2"
 
   export let channel
 
   const enter = () => navigate(`/chat/${nip19.noteEncode(channel.id)}`)
-  const join = () => user.joinChannel(channel.id)
-  const leave = () => user.leaveChannel(channel.id)
+  const join = () => joinNip28Channel(channel.id)
+  const leave = () => leaveNip28Channel(channel.id)
 
   // Accommodate data urls from legacy
   const picture =
-    channel.picture?.length > 500
-      ? channel.picture
-      : Settings.imgproxy(channel.picture, {w: 112, h: 112})
+    channel.picture?.length > 500 ? channel.picture : imgproxy(channel.picture, {w: 112, h: 112})
 
-  $: notify = channel.joined && (channel.last_checked || channel.last_sent) < channel.last_received
+  $: notify =
+    channel.nip28.joined && (channel.last_checked || channel.last_sent) < channel.last_received
 </script>
 
 <button
@@ -36,12 +35,12 @@
       <h2 class="text-lg">
         {channel.name || ""}
       </h2>
-      {#if channel.joined}
+      {#if channel.nip28.joined}
         <Anchor theme="button" killEvent class="flex items-center gap-2" on:click={leave}>
           <i class="fa fa-right-from-bracket" />
           <span>Leave</span>
         </Anchor>
-      {:else if Keys.canSign.get()}
+      {:else if $canSign}
         <Anchor theme="button" killEvent class="flex items-center gap-2" on:click={join}>
           <i class="fa fa-right-to-bracket" />
           <span>Join</span>

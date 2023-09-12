@@ -175,7 +175,7 @@ export type Env = {
   [key: string]: any
 }
 
-export type KeyState = {
+export type Session = {
   method: string
   pubkey: string
   privkey: string | null

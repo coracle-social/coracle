@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import cx from "classnames"
   import {fly} from "src/util/transition"
 

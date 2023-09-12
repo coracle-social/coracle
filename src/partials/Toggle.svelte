@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import Switch from "svelte-switch"
   import {createEventDispatcher} from "svelte"
 

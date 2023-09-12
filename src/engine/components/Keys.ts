@@ -4,16 +4,16 @@ import {nip19, getPublicKey, getSignature, generatePrivateKey} from "nostr-tools
 import NDK, {NDKEvent, NDKNip46Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk"
 import {switcherFn} from "hurdak"
 import {writable} from "src/engine/util/store"
-import type {KeyState} from "src/engine/types"
+import type {Session} from "src/engine/types"
 import type {Engine} from "src/engine/Engine"
 
 export class Keys {
   pubkey = writable<string | null>(null)
-  keyState = writable<KeyState[]>([])
+  keyState = writable<Session[]>([])
 
   stateKey = this.pubkey.derived(defaultTo("anonymous"))
 
-  current = this.pubkey.derived(k => this.getKeyState(k))
+  current = this.pubkey.derived(k => this.getSession(k))
 
   privkey = this.current.derived(prop("privkey"))
 
@@ -23,13 +23,13 @@ export class Keys {
 
   canUseGiftWrap = this.method.derived(equals("privkey"))
 
-  getKeyState = (k: string) => find(propEq("pubkey", k), this.keyState.get())
+  getSession = (k: string) => find(propEq("pubkey", k), this.keyState.get())
 
-  setKeyState = (v: KeyState) =>
-    this.keyState.update((s: KeyState[]) => reject(propEq("pubkey", v.pubkey), s).concat(v))
+  setSession = (v: Session) =>
+    this.keyState.update((s: Session[]) => reject(propEq("pubkey", v.pubkey), s).concat(v))
 
-  removeKeyState = (k: string) =>
-    this.keyState.update((s: KeyState[]) => reject(propEq("pubkey", k), s))
+  removeSession = (k: string) =>
+    this.keyState.update((s: Session[]) => reject(propEq("pubkey", k), s))
 
   withExtension = (() => {
     let extensionLock = Promise.resolve()
@@ -59,7 +59,7 @@ export class Keys {
     const ndkInstances = new Map()
 
     const prepareNDK = async (token?: string) => {
-      const {pubkey, bunkerKey} = this.current.get() as KeyState
+      const {pubkey, bunkerKey} = this.current.get() as Session
       const localSigner = new NDKPrivateKeySigner(bunkerKey)
 
       const ndk = new NDK({
@@ -79,7 +79,7 @@ export class Keys {
     }
 
     return async (token?: string) => {
-      const {pubkey} = this.current.get() as KeyState
+      const {pubkey} = this.current.get() as Session
 
       if (!ndkInstances.has(pubkey)) {
         await prepareNDK(token)
@@ -106,7 +106,7 @@ export class Keys {
       this.getNDK((key as {token: string}).token)
     }
 
-    this.setKeyState({method, pubkey, privkey, bunkerKey})
+    this.setSession({method, pubkey, privkey, bunkerKey})
     this.pubkey.set(pubkey)
   }
 
@@ -147,7 +147,7 @@ export class Keys {
     this.pubkey.set(null)
 
     if ($pubkey) {
-      this.removeKeyState($pubkey)
+      this.removeSession($pubkey)
     }
   }
 

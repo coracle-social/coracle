@@ -1,6 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {last, defaultTo} from "ramda"
+  import {last} from "ramda"
   import {onMount} from "svelte"
   import {quantify} from "hurdak"
   import {findRootId, findReplyId} from "src/util/nostr"
@@ -13,12 +13,11 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
-  import {getSetting, isMuted, getParentHints, getEventHints} from "src/engine2"
-  import {Directory} from "src/app/engine"
+  import {getSetting, derivePerson, isMuted, getParentHints, getEventHints} from "src/engine2"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
   export let note
-  export let feedRelay
+  export let feedRelay = null
   export let setFeedRelay = null
   export let depth = 0
   export let anchorId = null
@@ -37,7 +36,7 @@
   const borderColor = invertColors ? "gray-6" : "gray-7"
   const showEntire = anchorId === note.id
   const interactive = !anchorId || !showEntire
-  const author = Directory.profiles.key(note.pubkey).derived(defaultTo({pubkey: note.pubkey}))
+  const author = derivePerson(note.pubkey)
   const muted = isMuted(note.id)
 
   let border, childrenContainer, noteContainer

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {updateIn} from "hurdak"
   import {Tags} from "src/util/nostr"
   import {modal} from "src/partials/state"
@@ -7,14 +7,13 @@
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
-  import {user, default as engine} from "src/app/engine"
+  import {userLists} from "src/engine2"
 
   export let item
 
-  const lists = engine.Content.lists.derived(() => user.getLists())
   const label = item.type === "p" ? "person" : "topic"
 
-  const modifyList = updateIn("tags", tags => (tags || []).concat([[item.type, item.value]]))
+  const modifyList = updateIn("tags", (tags: string[][]) => [...tags, [item.type, item.value]])
 
   const selectlist = list => modal.replace({type: "list/edit", list: modifyList(list)})
 </script>
@@ -29,7 +28,7 @@
   <p>
     Select a list to modify. The selected {label} will be added to it as an additional filter.
   </p>
-  {#each $lists as list (list.naddr)}
+  {#each $userLists as list (list.naddr)}
     {@const meta = Tags.wrap(list.tags).asMeta()}
     <BorderLeft on:click={() => selectlist(list)}>
       <strong>{meta.d}</strong>

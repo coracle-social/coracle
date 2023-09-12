@@ -1,6 +1,6 @@
 <svelte:options accessors />
 
-<script>
+<script lang="ts">
   import cx from "classnames"
 
   export let value

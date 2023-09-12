@@ -1,4 +1,4 @@
-import {assocPath, prop, fromPairs, whereEq, pluck} from "ramda"
+import {assocPath, path, prop, fromPairs, pluck} from "ramda"
 import {appDataKeys} from "src/util/nostr"
 import {now} from "src/util/misc"
 import {channels} from "src/engine2/state"
@@ -33,7 +33,7 @@ export const publishNip28ChannelChecked = (id: string) => {
 export const saveNip28Channels = () =>
   setAppData(
     appDataKeys.NIP28_ROOMS_JOINED,
-    pluck("id", channels.get().filter(whereEq({joined: true})))
+    pluck("id", channels.get().filter(path(["nip28", "joined"])))
   )
 
 export const joinNip28Channel = (id: string) => {

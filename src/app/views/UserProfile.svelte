@@ -7,8 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {publishProfile} from "src/engine2"
-  import {Directory, Keys} from "src/app/engine"
+  import {session, user, publishProfile} from "src/engine2"
   import {routes} from "src/app/state"
   import {toastProgress} from "src/app/state"
 
@@ -20,12 +19,10 @@
   const submit = () => {
     publishProfile(values).on("progress", toastProgress)
 
-    navigate(routes.person($pubkey))
+    navigate(routes.person($session.pubkey))
   }
 
-  const {pubkey} = Keys
-
-  let values = Directory.getProfile($pubkey)
+  let values = user.get()
 
   document.title = "Profile"
 </script>

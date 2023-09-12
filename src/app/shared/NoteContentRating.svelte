@@ -4,8 +4,7 @@
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {displayRelay} from "src/engine2"
-  import {Directory} from "src/app/engine"
+  import {displayRelay, displayPubkey} from "src/engine2"
 
   export let note, rating
 
@@ -28,7 +27,7 @@
 
     display = switcherFn(type, {
       r: () => displayRelay({url: value}),
-      p: () => Directory.displayProfile(value),
+      p: () => displayPubkey(value),
       e: () => "a note",
       default: () => "something",
     })

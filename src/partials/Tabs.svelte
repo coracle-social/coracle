@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {fly} from "src/util/transition"
   import {toTitle} from "hurdak"
 

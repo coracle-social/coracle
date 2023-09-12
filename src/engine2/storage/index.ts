@@ -3,10 +3,10 @@ import * as state from "src/engine2/state"
 import {Storage, LocalStorageAdapter, IndexedDBAdapter} from "./util"
 
 const sortByPubkeyWhitelist = (fallback: (x: any) => number) => (rows: Record<string, any>[]) => {
-  const pubkeys = new Set(state.keys.get().map(prop("pubkey")))
+  const pubkeys = new Set(Object.values(state.sessions.get()).map(prop("pubkey")))
   const follows = new Set(
     Array.from(pubkeys)
-      .flatMap(pk => state.people.key(pk).get().petnames || [])
+      .flatMap((pk: string) => state.people.key(pk).get().petnames || [])
       .map(nth(1))
   )
 
@@ -24,16 +24,22 @@ const sortByPubkeyWhitelist = (fallback: (x: any) => number) => (rows: Record<st
 }
 
 export const storage = new Storage([
-  new LocalStorageAdapter("Keys.keyState", state.keys),
-  new LocalStorageAdapter("Keys.pubkey", state.pubkey),
+  new LocalStorageAdapter("sessions", state.sessions),
+  new LocalStorageAdapter("session", state.session),
   new LocalStorageAdapter("settings", state.settings),
+  new LocalStorageAdapter("alertsLastChecked", state.alertsLastChecked),
   new IndexedDBAdapter("events", state.events, {
     max: 10000,
     sort: sortByPubkeyWhitelist(prop("created_at")),
   }),
-  new IndexedDBAdapter("topics", state.topics, {
+  new IndexedDBAdapter("deletes", state.deletes, {max: 10000}),
+  new IndexedDBAdapter("labels", state.labels, {
     max: 10000,
     sort: sortBy(prop("created_at")),
+  }),
+  new IndexedDBAdapter("topics", state.topics, {
+    max: 10000,
+    sort: sortBy(prop("last_seen")),
   }),
   new IndexedDBAdapter("lists", state.lists, {
     max: 10000,
@@ -45,6 +51,10 @@ export const storage = new Storage([
   }),
   new IndexedDBAdapter("relays", state.relays, {
     max: 10000,
-    sort: sortBy(prop("created_at")),
+    sort: sortBy(prop("count")),
+  }),
+  new IndexedDBAdapter("channels", state.channels, {
+    max: 10000,
+    sort: sortBy(prop("last_checked")),
   }),
 ])

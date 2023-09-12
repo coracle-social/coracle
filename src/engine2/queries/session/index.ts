@@ -1,49 +1,41 @@
-import {find, defaultTo, whereEq} from "ramda"
-import type {KeyState, Person} from "src/engine2/model"
+import {whereEq} from "ramda"
 import {derived} from "src/engine2/util/store"
-import {pubkey, keys, people} from "src/engine2/state"
+import {session, people} from "src/engine2/state"
 import {prepareNdk, ndkInstances} from "./ndk"
 import {Signer} from "./signer"
 import {Nip04} from "./nip04"
 import {Nip44} from "./nip44"
-import {Wrapper} from "./wrapper"
+import {Nip59} from "./nip59"
 
-export const stateKey = pubkey.derived(defaultTo("anonymous"))
+export const stateKey = session.derived($s => $s?.pubkey || "anonymous")
 
-export const user = derived([stateKey, keys, people.mapStore], ([$key, $keys, $people]) => {
-  if (!$key) {
-    return null
-  }
+export const user = derived([session, people.mapStore], ([$s, $p]) => $p.get($s?.pubkey))
 
-  return {
-    ...$people.get($key),
-    ...find(whereEq({pubkey: $key}), $keys),
-  } as KeyState & Person
-})
-
-export const canSign = user.derived(({method}) =>
+export const canSign = session.derived(({method}) =>
   ["bunker", "privkey", "extension"].includes(method)
 )
 
-export const ndk = derived([user, ndkInstances], ([$user, $instances]) => {
-  if (!$user?.bunkerToken) {
+export const canUseGiftWrap = session.derived(whereEq({method: "privkey"}))
+
+export const ndk = derived([session, ndkInstances], ([$session, $instances]) => {
+  if (!$session?.bunkerToken) {
     return null
   }
 
-  if (!$instances.has($user.pubkey)) {
-    $instances.set($user.pubkey, prepareNdk($user))
+  if (!$instances.has($session.pubkey)) {
+    $instances.set($session.pubkey, prepareNdk($session))
   }
 
-  return $instances.get($user.pubkey)
+  return $instances.get($session.pubkey)
 })
 
-export const nip04 = derived([user, ndk], ([$user, $ndk]) => new Nip04($user, $ndk))
+export const signer = derived([session, ndk], ([$session, $ndk]) => new Signer($session, $ndk))
 
-export const nip44 = derived([user], ([$user]) => new Nip44($user))
+export const nip04 = derived([session, ndk], ([$session, $ndk]) => new Nip04($session, $ndk))
 
-export const signer = derived([user, ndk], ([$user, $ndk]) => new Signer($user, $ndk))
+export const nip44 = derived([session], ([$session]) => new Nip44($session))
 
-export const wrapper = derived(
-  [user, nip44, signer],
-  ([$user, $nip44, $signer]) => new Wrapper($user, $nip44, $signer)
+export const nip59 = derived(
+  [session, nip44, signer],
+  ([$session, $nip44, $signer]) => new Nip59($session, $nip44, $signer)
 )

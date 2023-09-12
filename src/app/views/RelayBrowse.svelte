@@ -1,5 +1,4 @@
-<script>
-  import {seconds} from "hurdak"
+<script lang="ts">
   import {appName} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
@@ -29,7 +28,6 @@
     <Feed
       hideControls
       invertColors
-      delta={seconds(30, "day")}
       filter={{
         kinds: [1985],
         "#l": ["review/relay"],

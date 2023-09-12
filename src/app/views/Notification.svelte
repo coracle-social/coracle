@@ -1,5 +1,5 @@
-<script>
-  import {pipe, filter, map, when, identity, pluck, propEq, uniq} from "ramda"
+<script lang="ts">
+  import {when, identity, pluck, propEq, uniq} from "ramda"
   import {closure, quantify} from "hurdak"
   import {tryJson, formatTimestamp} from "src/util/misc"
   import {Tags} from "src/util/nostr"
@@ -9,16 +9,20 @@
   import Card from "src/partials/Card.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {modal} from "src/partials/state"
+  import type {Event} from "src/engine2"
 
   export let event
 
   // Translate zap confirmations to zap requests
-  const modifyZaps = pipe(
-    map(
-      when(propEq("kind", 9735), e => tryJson(() => JSON.parse(Tags.from(e).asMeta().description)))
-    ),
-    filter(identity)
-  )
+  const modifyZaps = (events: Event[]) =>
+    events
+      .map(
+        when(
+          (e: Event) => e.kind === 9735,
+          (e: Event) => tryJson(() => JSON.parse(Tags.from(e).asMeta().description as string))
+        )
+      )
+      .filter(identity)
 
   const notifications = modifyZaps(event.notifications)
   const note = event.ref || notifications[0]

@@ -1,7 +1,7 @@
 import {sortBy, pluck, uniq, nth, prop, last} from "ramda"
 import {chain} from "hurdak"
 import {fuzzy} from "src/util/misc"
-import {findReplyId, findRootId, isShareableRelay, Tags} from "src/util/nostr"
+import {findReplyId, normalizeRelayUrl, findRootId, isShareableRelay, Tags} from "src/util/nostr"
 import type {Event, Relay} from "src/engine2/model"
 import {RelayMode} from "src/engine2/model"
 import {env, pool, relays, people} from "src/engine2/state"
@@ -18,7 +18,11 @@ export const relayIsLowQuality = (url: string) =>
 
 export const displayRelay = ({url}: Relay) => last(url.split("://"))
 
-export const searchRelays = relays.derived($relays => fuzzy($relays, {keys: ["url"]}))
+export const getRelaySearch = $relays => fuzzy($relays, {keys: ["url", "name", "description"]})
+
+export const searchRelays = relays.derived(getRelaySearch)
+
+export const urlToRelay = url => ({url: normalizeRelayUrl(url)} as Relay)
 
 export const searchableRelays = relays.derived($relays => {
   const urls = $relays.filter(r => (r.info?.supported_nips || []).includes(50)).map(prop("url"))

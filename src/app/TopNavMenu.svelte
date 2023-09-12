@@ -6,29 +6,27 @@
   import Card from "src/partials/Card.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {slowConnections} from "src/app/state"
-  import {Directory, Env, Keys} from "src/app/engine"
-
-  const {pubkey, keyState} = Keys
+  import {env, session, sessions, logoutPubkey, displayPubkey} from "src/engine2"
 
   const showLogin = () => modal.push({type: "login/advanced"})
 </script>
 
 <Popover theme="transparent" placement="top-end" opts={{hideOnClick: true}}>
   <div slot="trigger" class="relative flex cursor-pointer items-center">
-    <PersonCircle size={10} pubkey={$pubkey} />
+    <PersonCircle size={10} pubkey={$session.pubkey} />
   </div>
   <div slot="tooltip" class="flex justify-end">
     <Card class="mt-1 w-48 overflow-hidden shadow-lg">
       <div class="-mx-3 -mt-1">
         <Anchor
           class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-          href={$pubkey ? `/${nip19.npubEncode($pubkey)}` : null}>
+          href={`/${nip19.npubEncode($session.pubkey)}`}>
           <i class="fa fa-user mr-2" /> Profile
         </Anchor>
         <Anchor class="block p-3 px-4 transition-all hover:bg-accent hover:text-white" href="/keys">
           <i class="fa fa-key mr-2" /> Keys
         </Anchor>
-        {#if Env.FORCE_RELAYS.length === 0}
+        {#if $env.FORCE_RELAYS.length === 0}
           <Anchor
             class="relative block p-3 px-4 transition-all hover:bg-accent hover:text-white"
             href="/relays">
@@ -50,19 +48,19 @@
           <i class="fa fa-right-from-bracket mr-2" /> Logout
         </Anchor>
         <div class="my-2 h-px w-full bg-gray-5" />
-        {#each $keyState as k (k.pubkey)}
-          {#if k.pubkey !== $pubkey}
+        {#each Object.values($sessions) as s (s.pubkey)}
+          {#if s.pubkey !== $session.pubkey}
             <div
               class="block flex cursor-pointer items-center justify-between gap-2 p-3 px-4
                      transition-all hover:bg-accent hover:text-white"
-              on:click={() => Keys.pubkey.set(k.pubkey)}>
+              on:click={() => session.set(s)}>
               <div class="flex items-center gap-2">
-                <PersonCircle pubkey={k.pubkey} />
-                {Directory.displayPubkey(k.pubkey)}
+                <PersonCircle pubkey={s.pubkey} />
+                {displayPubkey(s.pubkey)}
               </div>
               <div
                 class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
-                on:click|stopPropagation={() => Keys.removeKeyState(k.pubkey)}>
+                on:click|stopPropagation={() => logoutPubkey(s.pubkey)}>
                 <i class="fa fa-circle-xmark fa-lg" />
               </div>
             </div>

@@ -1,11 +1,11 @@
 import {nip04} from "nostr-tools"
 import type NDK from "@nostr-dev-kit/ndk"
 import {switcherFn, sleep, tryFunc} from "hurdak"
-import {withExtension} from "src/engine2/util/nip07"
-import type {KeyState} from "src/engine2/model"
+import type {Session} from "src/engine2/model"
+import {withExtension} from "src/engine2/queries/nip07"
 
 export class Nip04 {
-  constructor(readonly user: KeyState | null, readonly ndk: NDK | null) {}
+  constructor(readonly session: Session | null, readonly ndk: NDK | null) {}
 
   async encrypt(message: string, pk: string, sk: string) {
     return nip04.encrypt(sk, pk, message)
@@ -16,7 +16,7 @@ export class Nip04 {
   }
 
   async encryptAsUser(message: string, pk: string) {
-    const {method, privkey} = this.user
+    const {method, privkey} = this.session
 
     return switcherFn(method, {
       privkey: () => this.encrypt(message, pk, privkey),
@@ -30,7 +30,7 @@ export class Nip04 {
   }
 
   async decryptAsUser(message: string, pk: string) {
-    const {method, privkey} = this.user
+    const {method, privkey} = this.session
 
     return switcherFn(method, {
       privkey: () => this.decrypt(message, pk, privkey),

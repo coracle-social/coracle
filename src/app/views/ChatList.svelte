@@ -1,8 +1,7 @@
-<script>
+<script lang="ts">
   import {onMount} from "svelte"
-  import {debounce} from "throttle-debounce"
   import {batch, seconds} from "hurdak"
-  import {complement, propEq, sortBy, pipe, pluck, filter, uniq, prop} from "ramda"
+  import {pluck, filter, uniq, path} from "ramda"
   import {now, createScroller} from "src/util/misc"
   import {Tags} from "src/util/nostr"
   import {modal} from "src/partials/state"
@@ -10,78 +9,80 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
-  import {pubkeyLoader, Nip28, Nip65, Network, Keys, user} from "src/app/engine"
+  import type {Event, Filter} from "src/engine2"
+  import {
+    session,
+    canSign,
+    follows,
+    stateKey,
+    searchNip28Channels,
+    load,
+    getPubkeyHints,
+    searchableRelays,
+    sortChannels,
+    nip28ChannelsWithMeta,
+    loadPubkeys,
+  } from "src/engine2"
   import {getAuthorsWithDefaults} from "src/app/state"
 
   let q = ""
   let results = []
   let limit = 5
 
-  const loadMore = () => {
+  const loadMore = async () => {
     limit += 5
   }
 
   const scroller = createScroller(loadMore)
 
-  const channels = Nip28.channels.derived(
-    pipe(
-      filter(prop("name")),
-      sortBy(c => -(c.last_sent || c.last_received))
-    )
-  )
+  const channels = nip28ChannelsWithMeta.derived(sortChannels)
 
-  const joined = channels.derived(filter(prop("joined")))
-  const other = channels.derived(filter(complement(prop("joined"))))
-  const search = Nip28.getSearchChannels(other)
+  const joined = channels.derived(filter(path(["nip28", "joined"])))
 
-  const searchChannels = debounce(500, q => {
+  const searchChannels = q => {
     if (q.length > 3) {
-      Network.subscribe({
-        timeout: 5000,
-        relays: Nip65.getSearchRelays(),
-        filter: [{kinds: [40, 41], search: q}],
+      load({
+        relays: $searchableRelays,
+        filters: [{kinds: [40, 41], search: q}],
       })
     }
-  })
+  }
 
   $: searchChannels(q)
-  $: results = $search(q).slice(0, limit)
+  $: results = $searchNip28Channels(q).slice(0, limit)
 
   document.title = "Chat"
 
   onMount(() => {
     const subs = []
-    const pubkey = Keys.pubkey.get()
-    const relays = Nip65.getPubkeyHints(3, pubkey, "read")
-    const authors = getAuthorsWithDefaults(user.getFollows())
+    const relays = getPubkeyHints(3, $stateKey, "read")
+    const authors = getAuthorsWithDefaults($follows)
     const since = now() - seconds(1, "day")
-    const filter = [
+    const filters = [
       {kinds: [40, 41], authors, limit: 100},
       {limit: 100, kinds: [42], since, authors},
-    ]
+    ] as Filter[]
 
-    if (pubkey) {
-      filter.push({kinds: [40, 41], authors: [pubkey]})
+    if ($session.pubkey) {
+      filters.push({kinds: [40, 41], authors: [$session.pubkey]})
     }
 
     // Pull some relevant channels by grabbing recent messages
     subs.push(
-      Network.subscribe({
+      load({
         relays,
-        filter,
-        timeout: 2000,
-        onEvent: batch(500, events => {
+        filters,
+        onEvent: batch(500, (events: Event[]) => {
           const channelIds = uniq(
-            events.filter(propEq("kind", 42)).map(e => Tags.from(e).getMeta("e"))
+            events.filter(e => e.kind === 42).map(e => Tags.from(e).getMeta("e"))
           )
 
-          pubkeyLoader.load(pluck("pubkey", events))
+          loadPubkeys(pluck("pubkey", events))
 
           subs.push(
-            Network.subscribe({
+            load({
               relays,
-              timeout: 2000,
-              filter: [
+              filters: [
                 {kinds: [40], ids: channelIds},
                 {kinds: [41], "#e": channelIds},
               ],
@@ -99,7 +100,7 @@
 </script>
 
 <Content>
-  {#if Keys.canSign.get()}
+  {#if $canSign}
     <div class="flex justify-between">
       <div class="flex items-center gap-2">
         <i class="fa fa-server fa-lg" />

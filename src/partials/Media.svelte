@@ -1,25 +1,17 @@
-<script>
+<script lang="ts">
   import {last} from "ramda"
-  import {ellipsize} from "hurdak"
+  import {ellipsize, Fetch} from "hurdak"
   import Audio from "src/partials/Audio.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {Settings} from "src/app/engine"
+  import {dufflepud, imgproxy} from "src/engine2"
 
   export let link
   export let onClick = null
   export let onClose = null
 
   const loadPreview = async () => {
-    const res = await fetch(Settings.dufflepud("link/preview"), {
-      method: "POST",
-      body: JSON.stringify({url: link.url}),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-
-    const json = await res.json()
+    const json = await Fetch.postJson(dufflepud("link/preview"), {url: link.url})
 
     if (!json.title && !json.image) {
       throw new Error("Unable to load preview")
@@ -42,18 +34,18 @@
     {#if link.type === "image"}
       <img
         alt="Link preview"
-        src={Settings.imgproxy(link.url)}
+        src={imgproxy(link.url)}
         class="max-h-96 object-contain object-center" />
     {:else if link.type === "spotify"}
       {@const id = last(link.url.split("?")[0].match(/[a-z]+\/[0-9A-z]+$/))}
       {@const src = `https://open.spotify.com/embed/${id}`}
       <iframe
         {src}
+        allowfullscreen
         style="border-radius:12px"
         width="100%"
         height="352"
         frameBorder="0"
-        allowfullscreen=""
         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
         loading="lazy" />
     {:else if link.type === "video"}
@@ -65,7 +57,7 @@
         {#if image}
           <img
             alt="Link preview"
-            src={Settings.imgproxy(image)}
+            src={imgproxy(image)}
             class="max-h-96 object-contain object-center" />
         {/if}
         <div class="h-px bg-gray-6" />

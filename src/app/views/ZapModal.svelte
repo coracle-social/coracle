@@ -7,8 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import {getSetting, requestZap, collectInvoice, loadZapResponse} from "src/engine2"
-  import {Directory} from "src/app/engine"
+  import {getSetting, displayPubkey, requestZap, collectInvoice, loadZapResponse} from "src/engine2"
 
   export let pubkey
   export let note = null
@@ -55,7 +54,7 @@
 <Content size="lg">
   <div class="text-center">
     <h1 class="staatliches text-2xl">Send a zap</h1>
-    <p>to {Directory.displayPubkey(pubkey)}</p>
+    <p>to {displayPubkey(pubkey)}</p>
   </div>
   {#if zap.confirmed}
     <div class="flex items-center justify-center gap-2 text-gray-1">

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {fade} from "src/util/transition"
   import {Circle2} from "svelte-loading-spinners"
 

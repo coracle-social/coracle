@@ -9,8 +9,14 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {getSetting, Subscription, isEventMuted, getEventHints, mergeHints} from "src/engine2"
-  import {Directory} from "src/app/engine"
+  import {
+    getSetting,
+    displayPubkey,
+    Subscription,
+    isEventMuted,
+    getEventHints,
+    mergeHints,
+  } from "src/engine2"
 
   export let note
   export let value
@@ -86,7 +92,7 @@
             type="unstyled"
             class="flex items-center gap-2"
             on:click={() => openPerson(quote.pubkey)}>
-            <h2 class="text-lg">{Directory.displayPubkey(quote.pubkey)}</h2>
+            <h2 class="text-lg">{displayPubkey(quote.pubkey)}</h2>
           </Anchor>
         </div>
         <slot name="note-content" {quote} />

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import cx from "classnames"
   import {navigate} from "svelte-routing"
   import {switcher} from "hurdak"

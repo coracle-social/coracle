@@ -46,7 +46,7 @@ export const load = batch(500, (requests: LoadOpts[]) => {
   const relays = uniq(requests.flatMap(prop("relays")))
   const filters = combineFilters(requests.flatMap(prop("filters")))
 
-  const sub = subscribe({relays, filters, timeout: 3000})
+  const sub = subscribe({relays, filters, timeout: 30_000})
 
   sub.on("event", (e: Event) => {
     for (const req of requests) {
@@ -72,5 +72,5 @@ export const load = batch(500, (requests: LoadOpts[]) => {
     }
   })
 
-  return sub
+  return sub.result
 })

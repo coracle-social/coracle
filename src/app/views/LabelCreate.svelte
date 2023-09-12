@@ -1,16 +1,13 @@
-<script>
+<script lang="ts">
   import {modal, toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import {publishLabel} from "src/engine2"
-  import engine from "src/app/engine"
+  import {publishLabel, searchTopics} from "src/engine2"
 
   export let note
-
-  const {searchTopics} = engine.Content
 
   const submit = () => {
     const tags = [["e", note.id]]

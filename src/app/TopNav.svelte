@@ -19,6 +19,10 @@
   import {menuIsOpen} from "src/app/state"
   import {
     topics,
+    people,
+    peopleWithName,
+    session,
+    canUseGiftWrap,
     hasNewNip28Messages,
     hasNewNip04Messages,
     hasNewNip24Messages,
@@ -27,9 +31,7 @@
     searchableRelays,
     Subscription,
   } from "src/engine2"
-  import {Keys, Directory} from "src/app/engine"
 
-  const {keyState, canUseGiftWrap} = Keys
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
 
   const toggleMenu = () => menuIsOpen.update(x => !x)
@@ -78,7 +80,7 @@
         filters: [{kinds: [0], search, limit: 10}],
         timeout: 3000,
       })
-    } else if (Directory.profiles.get().length < 50) {
+    } else if (people.get().length < 50) {
       new Subscription({
         relays: getUserRelayUrls("read"),
         filters: [{kinds: [0], limit: 50}],
@@ -117,17 +119,21 @@
     map(topic => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
   )
 
-  const profileOptions = Directory.profiles.derived(() =>
-    Directory.getNamedProfiles()
-      .filter(profile => profile.pubkey !== Keys.pubkey.get())
-      .map(profile => {
-        const {pubkey, name, nip05, display_name} = profile
+  const profileOptions = peopleWithName.derived($people =>
+    $people
+      .filter(person => person.pubkey !== $session.pubkey)
+      .map(person => {
+        const {
+          pubkey,
+          profile: {name, display_name},
+          handle: {address},
+        } = person
 
         return {
-          profile,
+          person,
           id: pubkey,
           type: "profile",
-          text: "@" + [name, nip05, display_name].filter(identity).join(" "),
+          text: "@" + [name, address, display_name].filter(identity).join(" "),
         }
       })
   )
@@ -152,8 +158,6 @@
   }
 
   $: search = fuzzy(options, {keys: ["text"], threshold: 0.3})
-
-  $: hasAccounts = $keyState.length > 0
 
   onMount(() => {
     document.querySelector("html").addEventListener("click", e => {
@@ -188,7 +192,7 @@
       {/if}
     </div>
   </div>
-  {#if hasAccounts}
+  {#if $session}
     <TopNavMenu />
   {:else}
     <Anchor theme="button-accent" on:click={showLogin}>Log In</Anchor>
@@ -200,8 +204,8 @@
     "search-input pointer-events-none fixed top-0 z-10 w-full px-2 text-gray-1",
     "flex h-16 items-center justify-end gap-4",
     {
-      "pr-16": hasAccounts,
-      "pr-28": !hasAccounts,
+      "pr-16": $session,
+      "pr-28": !$session,
       "z-40 pr-0": term,
     }
   )}>

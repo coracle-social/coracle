@@ -1,9 +1,9 @@
-import {prop, propEq, find, without, uniqBy, uniq} from "ramda"
+import {prop, without, uniqBy, uniq} from "ramda"
 import {Tags, appDataKeys} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import type {Event, Channel} from "src/engine2/model"
-import {keys, channels} from "src/engine2/state"
-import {wrapper, nip04, getNip24ChannelId, canSign} from "src/engine2/queries"
+import {sessions, channels} from "src/engine2/state"
+import {nip59, nip04, getNip24ChannelId, canSign} from "src/engine2/queries"
 import {projections} from "src/engine2/projections/core"
 
 projections.addHandler(30078, async e => {
@@ -27,15 +27,15 @@ projections.addHandler(30078, async e => {
 })
 
 projections.addHandler(1059, e => {
-  const user = find(propEq("pubkey", Tags.from(e).getMeta("p")), keys.get())
+  const session = sessions.get()[Tags.from(e).getMeta("p")]
 
-  if (!user?.privkey) {
+  if (!session?.privkey) {
     return
   }
 
-  const {pubkey, privkey} = user
+  const {pubkey, privkey} = session
 
-  wrapper.get().withUnwrappedEvent(e, privkey, (rumor: Event) => {
+  nip59.get().withUnwrappedEvent(e, privkey, (rumor: Event) => {
     if (rumor.kind !== 14) {
       return
     }

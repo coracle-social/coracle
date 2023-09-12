@@ -1,5 +1,5 @@
 import {tryJson} from "src/util/misc"
-import {invoiceAmount} from "src/util/lightning"
+import {getInvoiceAmount} from "src/util/lightning"
 import {Tags} from "src/util/nostr"
 import type {Event, ZapEvent} from "src/engine2/model"
 import {people} from "src/engine2/state"
@@ -20,7 +20,7 @@ export function processZaps(zaps: Event[], pubkey: string) {
 
       return tryJson(() => ({
         ...zap,
-        invoiceAmount: invoiceAmount(zapMeta.bolt11),
+        invoiceAmount: getInvoiceAmount(zapMeta.bolt11),
         request: JSON.parse(zapMeta.description),
       })) as ZapEvent
     })

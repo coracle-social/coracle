@@ -42,6 +42,5 @@ const engine = new Engine({
 
 export default engine
 export const Env = engine.Env
-export const Directory = engine.Directory
 export const Events = engine.Events
 export const Keys = engine.Keys

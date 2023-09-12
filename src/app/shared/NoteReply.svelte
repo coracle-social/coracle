@@ -7,8 +7,7 @@
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/app/shared/Compose.svelte"
-  import {publishReply, mention} from "src/engine2"
-  import {Directory, Keys} from "src/app/engine"
+  import {publishReply, session, displayPubkey, mention} from "src/engine2"
   import {toastProgress} from "src/app/state"
 
   export let parent
@@ -26,7 +25,7 @@
     data = {
       image: null,
       mentions: without(
-        [Keys.pubkey.get()],
+        [$session.pubkey],
         uniq(Tags.from(parent).type("p").values().all().concat(parent.pubkey))
       ),
     }
@@ -107,7 +106,7 @@
         <div on:click|stopPropagation>
           {#each data.mentions as pubkey}
             <Chip class="mb-1 mr-1" theme="dark" onClick={() => removeMention(pubkey)}>
-              {Directory.displayPubkey(pubkey)}
+              {displayPubkey(pubkey)}
             </Chip>
           {:else}
             <div class="text-gray-2 inline-block py-2">No mentions</div>
@@ -118,7 +117,7 @@
     </div>
     <div class="flex justify-end gap-2 text-sm text-gray-5">
       <span>
-        Posting as @{Directory.displayPubkey(Keys.pubkey.get())}
+        Posting as @{displayPubkey($session.pubkey)}
       </span>
     </div>
   </div>

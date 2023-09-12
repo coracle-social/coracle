@@ -1,6 +1,5 @@
-<script>
-  import {sortBy, filter, complement, pluck, prop} from "ramda"
-  import {onMount} from "svelte"
+<script lang="ts">
+  import {filter, whereEq, complement, pluck, prop} from "ramda"
   import {toTitle, seconds, batch} from "hurdak"
   import {now} from "src/util/misc"
   import {navigate} from "svelte-routing"
@@ -8,43 +7,43 @@
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
   import MessagesListItem from "src/app/views/MessagesListItem.svelte"
-  import {getUserRelayUrls, nip04MarkAllRead} from "src/engine2"
-  import {Nip04, pubkeyLoader, Network, Keys} from "src/app/engine"
+  import {
+    session,
+    channels,
+    load,
+    loadPubkeys,
+    hasNewNip04Messages,
+    getUserRelayUrls,
+    sortChannels,
+    nip04MarkAllRead,
+  } from "src/engine2"
 
   export let activeTab = "conversations"
 
-  const {hasNewMessages} = Nip04
-  const accepted = Nip04.contacts.derived(filter(prop("last_sent")))
-  const requests = Nip04.contacts.derived(filter(complement(prop("last_sent"))))
+  const since = now() - seconds(90, "day")
+  const nip04Channels = channels.derived(filter(whereEq({type: "nip04"})))
+  const accepted = nip04Channels.derived(filter(prop("last_sent")))
+  const requests = nip04Channels.derived(filter(complement(prop("last_sent"))))
 
-  $: tabContacts = sortBy(
-    c => -Math.max(c.last_sent || 0, c.last_received || 0),
-    activeTab === "conversations" ? $accepted : $requests
-  )
+  $: tabChannels = sortChannels(activeTab === "conversations" ? $accepted : $requests)
 
   const getDisplay = tab => ({
     title: toTitle(tab),
     badge: (tab === "conversations" ? $accepted : $requests).length,
   })
 
-  document.title = "Direct Messages"
-
-  onMount(() => {
-    const pubkey = Keys.pubkey.get()
-    const since = now() - seconds(90, "day")
-    const sub = Network.subscribe({
-      relays: getUserRelayUrls("read"),
-      filter: [
-        {kinds: [4], authors: [pubkey], since},
-        {kinds: [4], "#p": [pubkey], since},
-      ],
-      onEvent: batch(1000, events => {
-        pubkeyLoader.load(pluck("pubkey", events))
-      }),
-    })
-
-    return () => sub.close()
+  load({
+    relays: getUserRelayUrls("read"),
+    filters: [
+      {kinds: [4], authors: [$session.pubkey], since},
+      {kinds: [4], "#p": [$session.pubkey], since},
+    ],
+    onEvent: batch(1000, events => {
+      loadPubkeys(pluck("pubkey", events))
+    }),
   })
+
+  document.title = "Direct Messages"
 </script>
 
 <Content>
@@ -54,14 +53,14 @@
       <div slot="trigger">
         <i
           class="fa fa-bell cursor-pointer"
-          class:text-gray-5={!$hasNewMessages}
+          class:text-gray-5={!$hasNewNip04Messages}
           on:click={nip04MarkAllRead} />
       </div>
       <div slot="tooltip">Mark all as read</div>
     </Popover>
   </div>
-  {#each tabContacts as contact (contact.pubkey)}
-    <MessagesListItem {contact} />
+  {#each tabChannels as channel (channel.id)}
+    <MessagesListItem {channel} />
   {:else}
     <Content size="lg" class="text-center">
       No messages found - start a conversation by clicking the envelope button on someone's profile.

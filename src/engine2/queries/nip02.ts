@@ -3,7 +3,7 @@ import {difference} from "hurdak"
 import {people} from "src/engine2/state"
 import {user} from "src/engine2/queries"
 
-export const follows = user.derived($user => ($user.petnames || []).map(nth(1)))
+export const follows = user.derived($user => ($user.petnames || []).map(nth(1)) as string[])
 
 export const followsSet = follows.derived($follows => new Set($follows))
 

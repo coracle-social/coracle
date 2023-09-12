@@ -1,54 +1,52 @@
-<script>
-  import {onMount} from "svelte"
-  import {groupBy} from "ramda"
+<script lang="ts">
+  import {groupBy, filter} from "ramda"
   import {mapVals} from "hurdak"
-  import {fuzzy} from "src/util/misc"
-  import {normalizeRelayUrl, Tags, getAvgQuality} from "src/util/nostr"
+  import {Tags, getAvgQuality} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {getUserRelayUrls, getSetting} from "src/engine2"
-  import {Nip65, Network, Keys} from "src/app/engine"
+  import type {Relay} from "src/engine2"
+  import {
+    load,
+    session,
+    relays,
+    getPubkeyHints,
+    getRelaySearch,
+    relayPolicyUrls,
+    urlToRelay,
+    getSetting,
+  } from "src/engine2"
 
   export let q = ""
   export let limit = 50
   export let placeholder = "Search relays or add a custom url"
   export let hideIfEmpty = false
 
-  let search
   let reviews = []
 
-  const pubkey = Keys.pubkey.get()
+  const searchRelays = relays
+    .derived(filter((r: Relay) => !$relayPolicyUrls.includes(r.url)))
+    .derived(getRelaySearch)
+
   const relayLimit = getSetting("relay_limit")
-  const joined = Nip65.policies.key(Keys.pubkey.get()).derived(() => new Set(getUserRelayUrls()))
-  const knownRelays = Nip65.relays
 
   $: ratings = mapVals(
     events => getAvgQuality("review/relay", events),
     groupBy(e => Tags.from(e).getMeta("r"), reviews)
   )
 
-  $: {
-    search = fuzzy(
-      $knownRelays.filter(r => !$joined.has(r.url)),
-      {keys: ["name", "description", "url"]}
-    )
-  }
-
-  onMount(() => {
-    const sub = Network.subscribe({
-      relays: Nip65.getPubkeyHints(relayLimit, pubkey, "read"),
-      filter: {
+  load({
+    relays: getPubkeyHints(relayLimit, $session.pubkey, "read"),
+    filters: [
+      {
         limit: 1000,
         kinds: [1985],
         "#l": ["review/relay"],
         "#L": ["social.coracle.ontology"],
       },
-      onEvent: event => {
-        reviews = reviews.concat(event)
-      },
-    })
-
-    return sub.close
+    ],
+    onEvent: event => {
+      reviews = reviews.concat(event)
+    },
   })
 </script>
 
@@ -58,19 +56,19 @@
   </Input>
   <div class="flex flex-col gap-2">
     {#if q.match("^.+\\..+$")}
-      <slot name="item" relay={{url: normalizeRelayUrl(q)}}>
-        <RelayCard relay={{url: normalizeRelayUrl(q)}} />
+      <slot name="item" relay={urlToRelay(q)}>
+        <RelayCard relay={urlToRelay(q)} />
       </slot>
     {/if}
-    {#each !q && hideIfEmpty ? [] : search(q).slice(0, limit) as relay (relay.url)}
+    {#each !q && hideIfEmpty ? [] : $searchRelays(q).slice(0, limit) as relay (relay.url)}
       <slot name="item" {relay}>
         <RelayCard rating={ratings[relay.url]} {relay} />
       </slot>
     {/each}
     <slot name="footer">
       <small class="text-center">
-        Showing {Math.min(($knownRelays || []).length - $joined.size, 50)}
-        of {($knownRelays || []).length - $joined.size} known relays
+        Showing {Math.min(($relays || []).length - $relayPolicyUrls.length, 50)}
+        of {($relays || []).length - $relayPolicyUrls.length} known relays
       </small>
     </slot>
   </div>

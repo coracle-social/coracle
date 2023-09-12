@@ -1,10 +1,28 @@
 import type {UnsignedEvent} from "nostr-tools"
 import {getPublicKey} from "nostr-tools"
 import {tryJson} from "src/util/misc"
-import {nip59} from "src/engine2/util"
-import type {KeyState} from "src/engine2/model"
+import type {Session} from "src/engine2/model"
 import type {Signer} from "./signer"
 import type {Nip44} from "./nip44"
+
+export const now = (drift = 0) =>
+  Math.round(Date.now() / 1000 - Math.random() * Math.pow(10, drift))
+
+export const seal = (content, pubkey) => ({
+  kind: 13,
+  created_at: now(5),
+  tags: [],
+  content,
+  pubkey,
+})
+
+export const wrap = (content, pubkey, recipient) => ({
+  kind: 1059,
+  created_at: now(5),
+  tags: [["p", recipient]],
+  content,
+  pubkey,
+})
 
 export type WrapperParams = {
   author?: string
@@ -14,11 +32,11 @@ export type WrapperParams = {
   }
 }
 
-export class Wrapper {
-  constructor(readonly user: KeyState, readonly nip44: Nip44, readonly signer: Signer) {}
+export class Nip59 {
+  constructor(readonly session: Session, readonly nip44: Nip44, readonly signer: Signer) {}
 
   getAuthorPubkey(sk?: string) {
-    return sk ? getPublicKey(sk) : this.user.pubkey
+    return sk ? getPublicKey(sk) : this.session.pubkey
   }
 
   prep(event: UnsignedEvent, sk?: string) {
@@ -46,7 +64,7 @@ export class Wrapper {
 
   getSeal(rumor, {author, wrap: {recipient}}: WrapperParams) {
     const content = this.encrypt(rumor, recipient, author)
-    const rawEvent = nip59.seal(content, rumor.pubkey)
+    const rawEvent = seal(content, rumor.pubkey)
     const signedEvent = this.sign(rawEvent, author)
 
     return signedEvent
@@ -54,7 +72,7 @@ export class Wrapper {
 
   getWrap(seal, {wrap: {author, recipient}}: WrapperParams) {
     const content = this.encrypt(seal, recipient, author)
-    const rawEvent = nip59.wrap(content, this.getAuthorPubkey(author), recipient)
+    const rawEvent = wrap(content, this.getAuthorPubkey(author), recipient)
     const signedEvent = this.sign(rawEvent, author)
 
     return signedEvent

@@ -1,24 +1,37 @@
-import {reject, whereEq} from "ramda"
+import {omit, assoc} from "ramda"
 import {generatePrivateKey, getPublicKey} from "nostr-tools"
-import type {KeyState} from "src/engine2/model"
-import {pool, keys, pubkey} from "src/engine2/state"
+import type {Session} from "src/engine2/model"
+import {pool, sessions, session} from "src/engine2/state"
 import {canSign, signer} from "src/engine2/queries"
 import {buildEvent} from "./util"
 
-const addKey = (v: KeyState) => {
-  keys.update((s: KeyState[]) => reject(whereEq({pubkey: v.pubkey}), s).concat(v))
-  pubkey.set(v.pubkey)
+const addSession = (s: Session) => {
+  sessions.update(assoc(s.pubkey, s))
+  session.set(s)
 }
 
 export const loginWithPrivateKey = privkey =>
-  addKey({method: "privkey", pubkey: getPublicKey(privkey), privkey})
+  addSession({method: "privkey", pubkey: getPublicKey(privkey), privkey})
 
-export const loginWithPublicKey = pubkey => addKey({method: "pubkey", pubkey})
+export const loginWithPublicKey = pubkey => addSession({method: "pubkey", pubkey})
 
-export const loginWithExtension = pubkey => addKey({method: "extension", pubkey})
+export const loginWithExtension = pubkey => addSession({method: "extension", pubkey})
 
 export const loginWithNsecBunker = (pubkey, bunkerToken) =>
-  addKey({method: "bunker", pubkey, bunkerKey: generatePrivateKey(), bunkerToken})
+  addSession({method: "bunker", pubkey, bunkerKey: generatePrivateKey(), bunkerToken})
+
+export const logoutPubkey = pubkey => {
+  if (session.get().pubkey === pubkey) {
+    throw new Error("Can't destroy the current session, use logout instead")
+  }
+
+  sessions.update(omit([pubkey]))
+}
+
+export const logout = () => {
+  session.set(null)
+  sessions.set({})
+}
 
 const seenChallenges = new Set()
 

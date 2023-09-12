@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {randomId} from "hurdak"
   import {onMount, onDestroy} from "svelte"
   import {fly, fade} from "src/util/transition"
@@ -23,7 +23,7 @@
 
   onMount(() => {
     if (virtual) {
-      modal.push({id, mini, virtual: true})
+      modal.push({type: "virtual", id, mini, virtual: true})
     }
   })
 

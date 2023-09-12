@@ -1,15 +1,16 @@
-<script>
+<script lang="ts">
   import {onDestroy, onMount} from "svelte"
   import {sleep} from "hurdak"
-  import {prop, max, path as getPath, reverse, pluck, sortBy, last} from "ramda"
-  import {writable, derived} from "svelte/store"
+  import {prop, max, reverse, pluck, sortBy, last} from "ramda"
+  import {writable} from "svelte/store"
   import {fly} from "src/util/transition"
   import {createScroller} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import {Keys, Directory} from "src/app/engine"
+  import type {Event} from "src/engine2"
+  import {canSign} from "src/engine2"
 
-  export let messages
+  export let messages: Event[]
   export let sendMessage
 
   let textarea
@@ -18,9 +19,13 @@
   let limit = writable(10)
   let loading = sleep(30_000)
   let showNewMessages = false
+  let groupedMessages = []
 
   onMount(() => {
-    scroller = createScroller(() => limit.update(l => l + 10), {element: container, reverse: true})
+    scroller = createScroller(async () => limit.update(l => l + 10), {
+      element: container,
+      reverse: true,
+    })
   })
 
   onDestroy(() => {
@@ -32,12 +37,12 @@
   }
 
   const stickToBottom = async () => {
-    const lastMessage = pluck("created_at", $groupedMessages).reduce(max, 0)
+    const lastMessage = pluck("created_at", groupedMessages).reduce(max, 0)
     const shouldStick = container?.scrollTop > -200
 
     if (shouldStick) {
       scrollToBottom()
-    } else if (lastMessage < pluck("created_at", $groupedMessages).reduce(max, 0)) {
+    } else if (lastMessage < pluck("created_at", groupedMessages).reduce(max, 0)) {
       showNewMessages = true
     }
   }
@@ -66,24 +71,21 @@
   }
 
   // Group messages so we're only showing the person once per chunk
-  const groupedMessages = derived([messages, limit], ([$messages, $limit]) => {
-    if ($groupedMessages?.length === $messages.length) {
+  $: {
+    if (groupedMessages?.length === messages.length) {
       scroller.stop()
     }
 
     const result = reverse(
-      sortBy(prop("created_at"), $messages).reduce((mx, m) => {
-        const profile = Directory.getProfile(m.pubkey)
-        const showProfile = profile.pubkey !== getPath(["profile", "pubkey"], last(mx))
-
-        return mx.concat({...m, profile, showProfile})
+      sortBy(prop("created_at"), messages).reduce((mx, m) => {
+        return mx.concat({...m, showProfile: m.pubkey !== last(mx).pubkey})
       }, [])
     )
 
     setTimeout(stickToBottom, 100)
 
-    return result.slice(0, $limit)
-  })
+    groupedMessages = result.slice(0, $limit) as (Event & {showProfile: boolean})[]
+  }
 </script>
 
 <svelte:window
@@ -93,11 +95,11 @@
 
 <div class="flex h-full gap-4">
   <div class="relative w-full">
-    <div class="-mt-16 flex h-screen flex-col pt-20" class:pb-20={Keys.canSign.get()}>
+    <div class="-mt-16 flex h-screen flex-col pt-20" class:pb-20={$canSign}>
       <ul
         bind:this={container}
         class="flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
-        {#each $groupedMessages as m (m.id)}
+        {#each groupedMessages as m (m.id)}
           <li in:fly={{y: 20}} class="flex flex-col gap-2 py-1">
             <slot name="message" message={m} />
           </li>
@@ -113,7 +115,7 @@
       class="fixed top-0 z-20 -mt-px w-full border-b border-solid border-gray-6 bg-gray-7 lg:pr-48">
       <slot name="header" />
     </div>
-    {#if Keys.canSign.get()}
+    {#if $canSign}
       <div
         class="fixed bottom-0 z-10 flex w-full border-t border-solid border-gray-6 border-gray-7 bg-gray-6 lg:-ml-48 lg:pl-48">
         <textarea

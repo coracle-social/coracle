@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {tweened} from "svelte/motion"
@@ -15,24 +15,30 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {toastProgress} from "src/app/state"
+  import type {ZapEvent, DisplayEvent} from "src/engine2"
   import {
+    env,
+    mute,
+    unmute,
+    canSign,
+    session,
     Publisher,
     publishDeletion,
-    zappers,
+    people,
     getUserRelayUrls,
     publishReaction,
     processZaps,
+    displayRelay,
   } from "src/engine2"
-  import {Env, Nip65, Keys, user} from "src/app/engine"
 
-  export let note
+  export let note: DisplayEvent
   export let reply
   export let muted
   export let showEntire
   export let setFeedRelay
 
-  const zapper = zappers.key(note.pubkey)
-  const nevent = nip19.neventEncode({id: note.id, relays: [note.seen_on]})
+  const person = people.key(note.pubkey)
+  const nevent = nip19.neventEncode({id: note.id, relays: note.seen_on})
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
@@ -44,9 +50,9 @@
 
   const quote = () => modal.push({type: "note/create", quote: note})
 
-  const unmute = () => user.unmute(note.id)
+  const unmuteNote = () => unmute(note.id)
 
-  const mute = () => user.mute("e", note.id)
+  const muteNote = () => mute("e", note.id)
 
   const react = content => {
     like = publishReaction(note, content).event
@@ -73,24 +79,25 @@
   let actions = []
   let showDetails = false
 
-  $: disableActions = !Keys.canSign.get() || muted
+  $: disableActions = !$canSign || muted
   $: likes = note.reactions.filter(n => isLike(n.content))
-  $: like = like || find(propEq("pubkey", Keys.pubkey.get()), likes)
+  $: like = like || find(propEq("pubkey", $session.pubkey), likes)
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
   $: $likesCount = allLikes.length
 
   $: zaps = processZaps(note.zaps, note.pubkey)
-  $: zap = zap || find(z => z.request.pubkey === Keys.pubkey.get(), zaps)
+  $: zap = zap || find((z: ZapEvent) => z.request.pubkey === $session.pubkey, zaps)
 
   $: $zapsTotal =
     sum(
       pluck(
+        // @ts-ignore
         "invoiceAmount",
         zap ? zaps.filter(n => n.id !== zap?.id).concat(processZaps([zap], note.pubkey)) : zaps
       )
     ) / 1000
 
-  $: canZap = $zapper && note.pubkey !== Keys.pubkey.get()
+  $: canZap = $person?.zapper && note.pubkey !== $session.pubkey
   $: $repliesCount = note.replies.length
 
   $: {
@@ -101,12 +108,12 @@
     //actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
 
     if (muted) {
-      actions.push({label: "Unmute", icon: "microphone", onClick: unmute})
+      actions.push({label: "Unmute", icon: "microphone", onClick: unmuteNote})
     } else {
-      actions.push({label: "Mute", icon: "microphone-slash", onClick: mute})
+      actions.push({label: "Mute", icon: "microphone-slash", onClick: muteNote})
     }
 
-    if (Env.FORCE_RELAYS.length === 0) {
+    if ($env.FORCE_RELAYS.length === 0) {
       actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
 
       actions.push({
@@ -132,7 +139,7 @@
     </button>
     <button
       class={cx("relative w-16 pt-1 text-left transition-all hover:pb-1 hover:pt-0", {
-        "pointer-events-none opacity-50": disableActions || note.pubkey === Keys.pubkey.get(),
+        "pointer-events-none opacity-50": disableActions || note.pubkey === $session.pubkey,
         "text-accent": like,
       })}
       on:click={() => (like ? deleteReaction(like) : react("+"))}>
@@ -142,7 +149,7 @@
         })} />
       {$likesCount}
     </button>
-    {#if Env.ENABLE_ZAPS}
+    {#if $env.ENABLE_ZAPS}
       <button
         class={cx("relative w-20 pt-1 text-left transition-all hover:pb-1 hover:pt-0", {
           "pointer-events-none opacity-50": disableActions || !canZap,
@@ -155,12 +162,12 @@
     {/if}
   </div>
   <div class="flex items-center">
-    {#if Env.FORCE_RELAYS.length === 0}
+    {#if $env.FORCE_RELAYS.length === 0}
       <!-- Mobile version -->
       <div
         style="transform: scale(-1, 1)"
         class="absolute right-0 top-0 m-3 grid grid-cols-3 gap-2 sm:hidden">
-        {#each sortBy(identity, note.seen_on || []) as url, i}
+        {#each sortBy(identity, note.seen_on) as url, i}
           <div class={`cursor-pointer order-${3 - (i % 3)}`}>
             <div
               class="h-3 w-3 rounded-full border border-solid border-gray-6"
@@ -174,7 +181,7 @@
         class={cx("hidden transition-opacity sm:flex", {
           "opacity-0 group-hover:opacity-100": !showEntire,
         })}>
-        {#each sortBy(identity, note.seen_on || []) as url, i}
+        {#each sortBy(identity, note.seen_on) as url, i}
           <Popover triggerType="mouseenter" interactive={false}>
             <div slot="trigger" class="cursor-pointer p-1">
               <div
@@ -182,7 +189,7 @@
                 style={`background: ${hsl(stringToHue(url))}`}
                 on:click={() => setFeedRelay?.({url})} />
             </div>
-            <div slot="tooltip">{Nip65.displayRelay({url})}</div>
+            <div slot="tooltip">{displayRelay({url})}</div>
           </Popover>
         {/each}
       </div>

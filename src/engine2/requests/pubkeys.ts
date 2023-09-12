@@ -1,11 +1,11 @@
-import {without, pluck, uniq} from "ramda"
+import {without, uniq} from "ramda"
 import {chunk, seconds, ensurePlural} from "hurdak"
 import {personKinds, appDataKeys} from "src/util/nostr"
 import {now} from "src/util/misc"
 import type {Filter} from "src/engine2/model"
 import {people, settings} from "src/engine2/state"
 import {mergeHints, getPubkeyHints} from "src/engine2/queries"
-import {Subscription} from "./subscription"
+import {load} from "./load"
 
 export type LoadPeopleOpts = {
   relays?: string[]
@@ -75,16 +75,11 @@ export const loadPubkeys = async (
   }
 
   await Promise.all(
-    pluck(
-      "result",
-      chunk(256, pubkeys).map(
-        (chunk: string[]) =>
-          new Subscription({
-            relays: getChunkRelays(chunk),
-            filters: getChunkFilters(chunk),
-            timeout: 10_000,
-          })
-      )
+    chunk(256, pubkeys).map((chunk: string[]) =>
+      load({
+        relays: getChunkRelays(chunk),
+        filters: getChunkFilters(chunk),
+      })
     )
   )
 }

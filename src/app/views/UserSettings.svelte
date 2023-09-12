@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {fly} from "src/util/transition"
   import {toast, appName} from "src/partials/state"
   import Toggle from "src/partials/Toggle.svelte"
@@ -6,12 +6,12 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {Env, Settings, user} from "src/app/engine"
+  import {env, settings, publishSettings} from "src/engine2"
 
-  let values = {...Settings.settings.get()}
+  let values = {...settings.get()}
 
   const submit = () => {
-    user.setSettings(values)
+    publishSettings(values)
 
     toast.show("info", "Your settings have been saved!")
   }
@@ -77,7 +77,7 @@
           privacy. You can set up your own proxy <Anchor href="https://imgproxy.net/">here</Anchor>.
         </p>
       </div>
-      {#if Env.FORCE_RELAYS.length === 0}
+      {#if $env.FORCE_RELAYS.length === 0}
         <div class="flex flex-col gap-1">
           <strong>Multiplextr URL</strong>
           <Input bind:value={values.multiplextr_url}>

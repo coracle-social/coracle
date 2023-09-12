@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import Hls from "hls.js"
   import {onDestroy} from "svelte"
 

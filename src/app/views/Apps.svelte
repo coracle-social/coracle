@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {nip05} from "nostr-tools"
   import {uniqBy, sortBy} from "ramda"
   import {batch, quantify} from "hurdak"
@@ -13,8 +13,8 @@
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
-  import {getUserRelayUrls} from "src/engine2"
-  import {Network, Directory, Nip05, pubkeyLoader} from "src/app/engine"
+  import type {Person, Event} from "src/engine2"
+  import {getUserRelayUrls, loadPubkeys, load, displayHandle, derivePerson} from "src/engine2"
   import {compileFilter} from "src/app/state"
 
   const getColumns = xs => {
@@ -42,9 +42,8 @@
     }
   }
 
-  Network.subscribe({
-    timeout: 5000,
-    filter: [{kinds: [31990]}, compileFilter({kinds: [31989], authors: "follows"})],
+  load({
+    filters: [{kinds: [31990]}, compileFilter({kinds: [31989], authors: "follows"})],
     relays: getUserRelayUrls("read"),
     onEvent: batch(500, events => {
       const pubkeys = []
@@ -53,7 +52,7 @@
         pubkeys.push(e.pubkey)
 
         if (e.kind === 31990) {
-          e.address = [e.kind, e.pubkey, Tags.from(e).getMeta("d")].join(":")
+          ;(e as any).address = [e.kind, e.pubkey, Tags.from(e).getMeta("d")].join(":")
 
           handlers = handlers.concat(e)
         } else {
@@ -63,23 +62,32 @@
         }
       }
 
-      pubkeyLoader.load(pubkeys)
+      loadPubkeys(pubkeys)
     }),
   })
 
   let handlers = []
   let recsByNaddr = {}
 
+  type App = Event & {
+    address: string
+    recs: Event[]
+    profile: Person["profile"]
+    handle: Person["handle"]
+  }
+
   $: apps = uniqBy(
-    e => e.info.name,
+    (e: App) => e.profile?.name,
     sortBy(
       e => -e.recs.length,
       handlers.map(e => {
-        e.recs = recsByNaddr[e.address] || []
-        e.info = tryJson(() => JSON.parse(e.content)) || Directory.getProfile(e.pubkey)
-        e.handle = Nip05.getHandle(e.pubkey)
+        const $person = derivePerson(e.pubkey).get()
 
-        return e
+        e.recs = recsByNaddr[e.address] || []
+        e.profile = tryJson(() => JSON.parse(e.content)) || $person?.profile
+        e.handle = $person?.handle
+
+        return e as App
       })
     )
   )
@@ -97,32 +105,32 @@
       {#each getColumns(apps) as app (app.id)}
         <Card class="mb-4 flex break-inside-avoid flex-col gap-4">
           <div class="flex gap-4">
-            <ImageCircle size={14} src={app.info.picture} />
+            <ImageCircle size={14} src={app.profile.picture} />
             <div class="flex min-w-0 flex-grow flex-col">
-              <h1 class="text-2xl">{app.info.display_name || app.info.name}</h1>
+              <h1 class="text-2xl">{app.profile.display_name || app.profile.name}</h1>
               {#if app.handle}
-                <span class="text-gray-3">{Nip05.displayHandle(app.handle)}</span>
+                <span class="text-gray-3">{displayHandle(app.handle)}</span>
               {/if}
             </div>
           </div>
-          <p>{app.info.about}</p>
+          <p>{app.profile.about}</p>
           <div>
-            {#if app.info.website}
-              <Anchor external href={app.info.website} class="mb-2 mr-2 inline-block">
-                <Chip><i class="fa fa-link" />{displayDomain(app.info.website)}</Chip>
+            {#if app.profile.website}
+              <Anchor external href={app.profile.website} class="mb-2 mr-2 inline-block">
+                <Chip><i class="fa fa-link" />{displayDomain(app.profile.website)}</Chip>
               </Anchor>
             {/if}
-            {#if app.info.lud16}
+            {#if app.profile.lud16}
               <div class="mb-2 mr-2 inline-block cursor-pointer">
-                <Chip on:click={() => copy("Address", app.info.lud16)}>
-                  <i class="fa fa-bolt" />{app.info.lud16}
+                <Chip on:click={() => copy("Address", app.profile.lud16)}>
+                  <i class="fa fa-bolt" />{app.profile.lud16}
                 </Chip>
               </div>
             {/if}
-            {#if app.info.nip05}
+            {#if app.profile.nip05}
               <div class="mb-2 mr-2 inline-block cursor-pointer">
-                <Chip on:click={() => goToNip05(app.info.nip05)}>
-                  <i class="fa fa-at" />{app.info.nip05}
+                <Chip on:click={() => goToNip05(app.profile.nip05)}>
+                  <i class="fa fa-at" />{app.profile.nip05}
                 </Chip>
               </div>
             {/if}
@@ -132,8 +140,8 @@
               Recommended by {quantify(app.recs.length, "person", "people")} you follow.
             </i>
           {/if}
-          {#if app.info.banner}
-            <Image class="rounded" src={app.info.banner} />
+          {#if app.profile.banner}
+            <Image class="rounded" src={app.profile.banner} />
           {/if}
         </Card>
       {/each}

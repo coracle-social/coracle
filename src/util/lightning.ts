@@ -38,7 +38,7 @@ function hrpToMillisat(hrpString: string) {
   return millisatoshisBN
 }
 
-export function invoiceAmount(bolt11: string): number {
+export function getInvoiceAmount(bolt11: string): number {
   const hrp = bolt11.match(/lnbc(\d+\w)/)
   const bn = hrpToMillisat(hrp[1])
   return Number(bn)

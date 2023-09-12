@@ -8,8 +8,14 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {channels, createNip24Message, nip24MarkChannelRead, loadNip59Messages} from "src/engine2"
-  import {Directory, Keys} from "src/app/engine"
+  import {
+    channels,
+    displayPubkey,
+    createNip24Message,
+    nip24MarkChannelRead,
+    loadNip59Messages,
+  } from "src/engine2"
+  import {Keys} from "src/app/engine"
 
   export let entity
 
@@ -53,7 +59,7 @@
         {#each pubkeys as pubkey, i (pubkey)}
           {#if i > 0}&bullet;{/if}
           <Anchor on:click={() => showPerson(pubkey)} class="font-bold">
-            {Directory.displayPubkey(pubkey)}
+            {displayPubkey(pubkey)}
           </Anchor>
         {/each}
       </div>
@@ -66,17 +72,17 @@
     slot="message"
     let:message
     class={cx("flex overflow-hidden text-ellipsis", {
-      "ml-12 justify-end": message.profile.pubkey === userPubkey,
-      "mr-12": message.profile.pubkey !== userPubkey,
+      "ml-12 justify-end": message.pubkey === userPubkey,
+      "mr-12": message.pubkey !== userPubkey,
     })}>
     <div
       class={cx("inline-block flex max-w-xl flex-col rounded-2xl px-4 py-2", {
-        "rounded-br-none bg-gray-1 text-gray-8": message.profile.pubkey === userPubkey,
-        "rounded-bl-none bg-gray-7": message.profile.pubkey !== userPubkey,
+        "rounded-br-none bg-gray-1 text-gray-8": message.pubkey === userPubkey,
+        "rounded-bl-none bg-gray-7": message.pubkey !== userPubkey,
       })}>
-      {#if message.showProfile && message.profile.pubkey !== userPubkey}
-        <Anchor class="mb-1" on:click={() => showPerson(message.profile.pubkey)}>
-          <strong>{Directory.displayProfile(message.profile)}</strong>
+      {#if message.showProfile && message.pubkey !== userPubkey}
+        <Anchor class="mb-1" on:click={() => showPerson(message.pubkey)}>
+          <strong>{displayPubkey(message.pubkey)}</strong>
         </Anchor>
       {/if}
       <div class="break-words">
@@ -86,8 +92,8 @@
       </div>
       <small
         class="mt-1"
-        class:text-gray-7={message.profile.pubkey === userPubkey}
-        class:text-gray-1={message.profile.pubkey !== userPubkey}>
+        class:text-gray-7={message.pubkey === userPubkey}
+        class:text-gray-1={message.pubkey !== userPubkey}>
         {formatTimestamp(message.created_at)}
       </small>
     </div>

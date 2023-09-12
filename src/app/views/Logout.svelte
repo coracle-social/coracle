@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
   import {fly} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
-  import {storage} from "src/app/engine"
+  import {storage} from "src/engine2"
 
   let confirmed = false
 

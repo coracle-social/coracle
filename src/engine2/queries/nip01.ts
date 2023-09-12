@@ -3,7 +3,7 @@ import {ellipsize} from "hurdak"
 import {nip19} from "nostr-tools"
 import {fuzzy} from "src/util/misc"
 import type {Person} from "src/engine2/model"
-import {people} from "src/engine2/state"
+import {topics, people} from "src/engine2/state"
 
 export const peopleWithName = people.derived($people =>
   $people.filter(({profile: p}) => p.name || p.nip05 || p.display_name)
@@ -41,4 +41,8 @@ export const getPeopleSearch = $people =>
     threshold: 0.3,
   })
 
+export const searchPeople = peopleWithName.derived(getPeopleSearch)
+
 export const getTopicSearch = $topics => fuzzy($topics, {keys: ["name"], threshold: 0.3})
+
+export const searchTopics = topics.derived(getTopicSearch)
