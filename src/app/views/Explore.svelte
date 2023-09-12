@@ -11,8 +11,8 @@
   import Content from "src/partials/Content.svelte"
   import NoteById from "src/app/shared/NoteById.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
-  import {getUserRelayUrls, follows} from "src/engine2"
-  import engine, {Network, Keys} from "src/app/engine"
+  import {getUserRelayUrls, follows, Subscription} from "src/engine2"
+  import engine, {Keys} from "src/app/engine"
 
   type LabelGroup = {
     label: string
@@ -63,13 +63,15 @@
   const showGroup = ({label, ids, hints}) => modal.push({type: "label/detail", label, ids, hints})
 
   onMount(() => {
-    const sub = Network.subscribe({
+    const sub = new Subscription({
       relays: getUserRelayUrls("read"),
-      filter: {
-        kinds: [1985],
-        "#L": ["#t", "ugc"],
-        authors: $follows.concat($pubkey),
-      },
+      filters: [
+        {
+          kinds: [1985],
+          "#L": ["#t", "ugc"],
+          authors: $follows.concat($pubkey),
+        },
+      ],
     })
 
     return () => sub.close()

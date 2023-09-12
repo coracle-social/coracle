@@ -1,7 +1,7 @@
 <script lang="ts">
   import {poll} from "hurdak"
   import {onMount} from "svelte"
-  import {Network} from "src/app/engine"
+  import {pool} from "src/engine2"
 
   export let relay
 
@@ -11,7 +11,7 @@
 
   onMount(() => {
     return poll(3000, () => {
-      const cxn = Network.pool.get(relay.url, {autoConnect: false})
+      const cxn = pool.get(relay.url, {autoConnect: false})
 
       if (cxn) {
         description = cxn.meta.getDescription()

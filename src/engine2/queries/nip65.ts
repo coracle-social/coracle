@@ -21,11 +21,9 @@ export const displayRelay = ({url}: Relay) => last(url.split("://"))
 export const searchRelays = relays.derived($relays => fuzzy($relays, {keys: ["url"]}))
 
 export const searchableRelays = relays.derived($relays => {
-  const searchableRelayUrls = $relays
-    .filter(r => (r.info?.supported_nips || []).includes(50))
-    .map(prop("url"))
+  const urls = $relays.filter(r => (r.info?.supported_nips || []).includes(50)).map(prop("url"))
 
-  return uniq(env.get().SEARCH_RELAYS.concat(searchableRelayUrls)).slice(0, 8) as string[]
+  return uniq(env.get().SEARCH_RELAYS.concat(urls)).slice(0, 8) as string[]
 })
 
 export const getPubkeyRelays = (pubkey: string, mode: string = null) => {

@@ -9,8 +9,8 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {getSetting, isEventMuted, getEventHints, mergeHints} from "src/engine2"
-  import {Directory, Network} from "src/app/engine"
+  import {getSetting, Subscription, isEventMuted, getEventHints, mergeHints} from "src/engine2"
+  import {Directory} from "src/app/engine"
 
   export let note
   export let value
@@ -29,23 +29,24 @@
     getEventHints(getSetting("relay_limit"), note),
   ])
 
-  const filter = (
+  const filters = [
     id
       ? {ids: [id]}
       : filterVals(xs => xs.length > 0, {
           "#d": [identifier],
           kinds: [kind],
           authors: [pubkey],
-        })
-  ) as Filter
+        }),
+  ] as Filter[]
 
-  const onEvent = event => {
+  const sub = new Subscription({timeout: 30000, relays, filters})
+
+  sub.on("event", event => {
     loading = false
     muted = isEventMuted(event).get()
     quote = event
-  }
-
-  const sub = Network.subscribe({timeout: 30000, relays, filter, onEvent})
+    sub.close()
+  })
 
   const openQuote = e => {
     const noteId = id || quote?.id

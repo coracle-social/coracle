@@ -6,8 +6,15 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {isFollowing, searchableRelays, getPubkeyHints} from "src/engine2"
-  import {Network, Directory} from "src/app/engine"
+  import {
+    people,
+    displayPerson,
+    Subscription,
+    isFollowing,
+    searchableRelays,
+    getPubkeyHints,
+    getPeopleSearch,
+  } from "src/engine2"
 
   export let onSubmit
 
@@ -28,16 +35,17 @@
     },
   }
 
-  const {searchProfiles} = Directory
+  const searchPeople = people.derived(getPeopleSearch)
 
-  const loadProfiles = debounce(500, search => {
+  const loadPeople = debounce(500, search => {
     if (search.length > 2 && search.startsWith("@")) {
-      Network.subscribe({
+      const sub = new Subscription({
         timeout: 3000,
         relays: $searchableRelays,
-        filter: [{kinds: [0], search, limit: 10}],
-        onEvent: debounce(100, () => applySearch(getInfo().word)),
+        filters: [{kinds: [0], search, limit: 10}],
       })
+
+      sub.on("event", () => applySearch(getInfo().word))
     }
   })
 
@@ -46,7 +54,7 @@
     if (word.length > 1 && word.startsWith("@")) {
       const [followed, notFollowed] = partition(
         p => isFollowing(p.pubkey).get(),
-        $searchProfiles(word.slice(1))
+        $searchPeople(word.slice(1))
       )
 
       results = followed.concat(notFollowed)
@@ -64,7 +72,7 @@
     return {selection, node, offset, word}
   }
 
-  const autocomplete = ({profile = null, force = false} = {}) => {
+  const autocomplete = ({person = null, force = false} = {}) => {
     let completed = false
 
     const {selection, node, offset, word} = getInfo()
@@ -98,8 +106,8 @@
     }
 
     // Mentions
-    if ((force || word.length > 1) && word.startsWith("@") && profile) {
-      annotate("@", Directory.displayProfile(profile).trim(), pubkeyEncoder.encode(profile.pubkey))
+    if ((force || word.length > 1) && word.startsWith("@") && person) {
+      annotate("@", displayPerson(person).trim(), pubkeyEncoder.encode(person.pubkey))
     }
 
     // Topics
@@ -130,7 +138,7 @@
 
     // Enter adds a newline, so do it on key down
     if (["Enter"].includes(e.code)) {
-      autocomplete({profile: suggestions.get()})
+      autocomplete({person: suggestions.get()})
     }
 
     // Only autocomplete topics on space
@@ -145,11 +153,11 @@
     const {word} = getInfo()
 
     // Populate search data
-    loadProfiles(word)
+    loadPeople(word)
     applySearch(word)
 
     if (["Tab"].includes(e.code)) {
-      autocomplete({profile: suggestions.get()})
+      autocomplete({person: suggestions.get()})
     }
 
     if (["Escape", "Space"].includes(e.code)) {
@@ -167,7 +175,7 @@
     dispatch("keyup", e)
   }
 
-  export const mention = profile => {
+  export const mention = person => {
     const input = contenteditable.getInput()
     const selection = window.getSelection()
     const textNode = document.createTextNode("@")
@@ -179,7 +187,7 @@
     selection.getRangeAt(0).insertNode(spaceNode)
     selection.collapse(input, 1)
 
-    autocomplete({profile, force: true})
+    autocomplete({person, force: true})
   }
 
   const createNewLines = (n = 1) => {
@@ -258,7 +266,7 @@
   <slot name="addon" />
 </div>
 
-<Suggestions bind:this={suggestions} select={profile => autocomplete({profile})}>
+<Suggestions bind:this={suggestions} select={person => autocomplete({person})}>
   <div slot="item" let:item>
     <PersonBadge inert pubkey={item.pubkey} />
   </div>

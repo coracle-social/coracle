@@ -5,9 +5,8 @@
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
-  import {loadPubkeys} from "src/engine2"
-  import {getSetting, getPubkeyHints, follows} from "src/engine2"
-  import {Network} from "src/app/engine"
+  import type {Event} from "src/engine2"
+  import {Subscription, getSetting, loadPubkeys, getPubkeyHints, follows} from "src/engine2"
 
   export let type
   export let pubkey
@@ -18,17 +17,21 @@
     if (type === "follows") {
       pubkeys = $follows
     } else {
-      const sub = Network.subscribe({
+      const sub = new Subscription({
         relays: getPubkeyHints(getSetting("relay_limit"), pubkey, "read"),
-        filter: {kinds: [3], "#p": [pubkey]},
-        onEvent: batch(500, events => {
+        filters: [{kinds: [3], "#p": [pubkey]}],
+      })
+
+      sub.on(
+        "event",
+        batch(500, (events: Event[]) => {
           const newPubkeys = pluck("pubkey", events)
 
           loadPubkeys(newPubkeys)
 
           pubkeys = uniq(pubkeys.concat(newPubkeys))
-        }),
-      })
+        })
+      )
 
       return sub.close
     }

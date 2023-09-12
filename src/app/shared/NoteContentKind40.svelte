@@ -7,27 +7,27 @@
   import Card from "src/partials/Card.svelte"
   import Content from "src/partials/Content.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
-  import {Nip28} from "src/app/engine"
+  import {channels} from "src/engine2"
 
   export let note
 
   const {name, picture, about} = tryJson(() => JSON.parse(note.content))
-  const channel = Nip28.channels
+  const channel = channels
     .key(note.id)
-    .derived(defaultTo({id: note.id, name, picture, about}))
+    .derived(defaultTo({id: note.id, meta: {name, picture, about}}))
   const noteId = nip19.noteEncode(note.kind === 40 ? note.id : Tags.from(note).getMeta("e"))
 </script>
 
 <Card interactive invertColors on:click={() => navigate(`/chat/${noteId}`)}>
   <Content>
     <div class="flex items-center gap-2">
-      {#if $channel.picture}
-        <ImageCircle size={10} src={$channel.picture} />
+      {#if $channel.meta?.picture}
+        <ImageCircle size={10} src={$channel.meta?.picture} />
       {/if}
-      <h3 class="staatliches text-2xl">{$channel.name}</h3>
+      <h3 class="staatliches text-2xl">{$channel.meta?.name}</h3>
     </div>
-    {#if $channel.about}
-      <p>{$channel.about}</p>
+    {#if $channel.meta?.about}
+      <p>{$channel.meta?.about}</p>
     {/if}
   </Content>
 </Card>

@@ -4,15 +4,25 @@ import Bugsnag from "@bugsnag/js"
 import {nip19} from "nostr-tools"
 import {navigate} from "svelte-routing"
 import {writable} from "svelte/store"
-import {whereEq, omit, filter, pluck, sortBy, slice} from "ramda"
+import {omit, path, filter, pluck, sortBy, slice} from "ramda"
 import {hash, union, sleep, doPipe, shuffle} from "hurdak"
 import {warn} from "src/util/logger"
 import {now} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
 import type {Event} from "src/engine2"
-import {loadPubkeys, follows, network, getUserRelayUrls, getSetting, dufflepud} from "src/engine2"
-import {Events, Nip28, Env, Network, Keys} from "src/app/engine"
+import {
+  pool,
+  loadPubkeys,
+  channels,
+  follows,
+  network,
+  Subscription,
+  getUserRelayUrls,
+  getSetting,
+  dufflepud,
+} from "src/engine2"
+import {Events, Env, Keys} from "src/app/engine"
 
 // Routing
 
@@ -85,7 +95,7 @@ setInterval(() => {
 
   // Prune connections we haven't used in a while, clear errors periodically,
   // and keep track of slow connections
-  for (const [url, connection] of Network.pool.data.entries()) {
+  for (const [url, connection] of pool.data.entries()) {
     if (connection.meta.last_activity < now() - 60) {
       connection.disconnect()
     } else if (connection.lastError < Date.now() - 10_000) {
@@ -107,7 +117,7 @@ let timeout
 export const listenForNotifications = async () => {
   const pubkey = Keys.pubkey.get()
 
-  const channelIds = pluck("id", Nip28.channels.get().filter(whereEq({joined: true})))
+  const channelIds = pluck("id", channels.get().filter(path(["nip28", "joined"])))
 
   const eventIds: string[] = doPipe(Events.cache.get(), [
     filter((e: Event) => noteKinds.includes(e.kind)),
@@ -119,9 +129,9 @@ export const listenForNotifications = async () => {
   // Only grab one event from each category/relay so we have enough to show
   // the notification badges, but load the details lazily
   listener?.close()
-  listener = Network.subscribe({
+  listener = new Subscription({
     relays: getUserRelayUrls("read"),
-    filter: [
+    filters: [
       // Messages
       {kinds: [4], authors: [pubkey], limit: 1},
       {kinds: [4], "#p": [pubkey], limit: 1},

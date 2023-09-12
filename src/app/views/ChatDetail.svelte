@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount, onDestroy} from "svelte"
-  import {defaultTo, filter, whereEq} from "ramda"
+  import {assoc} from "ramda"
   import {formatTimestamp} from "src/util/misc"
   import {toHex} from "src/util/nostr"
   import {modal} from "src/partials/state"
@@ -10,6 +10,7 @@
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {
+    channels,
     imgproxy,
     publishNip28Message,
     joinNip28Channel,
@@ -17,23 +18,20 @@
     loadNip28Messages,
     publishNip28ChannelChecked,
   } from "src/engine2"
-  import {Nip28, Keys} from "src/app/engine"
+  import {Keys} from "src/app/engine"
 
   export let entity
 
   const id = toHex(entity)
-  const channel = Nip28.channels.key(id).derived(defaultTo({id}))
-  const messages = Nip28.messages.derived(filter(whereEq({channel: id})))
+  const channel = channels.key(id)
 
   publishNip28ChannelChecked(id)
 
-  const join = () => joinNip28Channel($channel.id)
+  const join = () => joinNip28Channel(id)
 
-  const leave = () => leaveNip28Channel($channel.id)
+  const leave = () => leaveNip28Channel(id)
 
-  const edit = () => {
-    modal.push({type: "chat/edit", channel: $channel})
-  }
+  const edit = () => modal.push({type: "chat/edit", channel: $channel})
 
   const sendMessage = content => publishNip28Message(id, content).result
 
@@ -46,35 +44,36 @@
   onDestroy(() => {
     publishNip28ChannelChecked(id)
 
-    if (!$channel.joined) {
-      Nip28.messages.reject(m => m.channel === id)
+    // Save on memory by deleting messages we don't care about
+    if (!$channel?.nip28?.joined) {
+      channel.update(assoc("messages", []))
     }
   })
 
-  $: picture = imgproxy($channel.picture, {w: 96, h: 96})
+  $: picture = imgproxy($channel?.meta?.picture, {w: 96, h: 96})
 
-  document.title = $channel.name || "Coracle Chat"
+  document.title = $channel?.meta?.name || "Coracle Chat"
 </script>
 
-<Channel {messages} {sendMessage}>
+<Channel messages={$channel?.messages || []} {sendMessage}>
   <div slot="header" class="flex h-16 items-start gap-4 overflow-hidden p-2">
     <div class="flex items-center gap-4 pt-1">
       <Anchor type="unstyled" class="fa fa-arrow-left cursor-pointer text-2xl" href="/chat" />
       <ImageCircle size={10} src={picture} />
     </div>
     <div class="flex h-12 flex-grow flex-col overflow-hidden pt-px">
-      <div class="font-bold">{$channel.name || ""}</div>
-      <div>{$channel.about || ""}</div>
+      <div class="font-bold">{$channel?.meta?.name || ""}</div>
+      <div>{$channel?.meta?.about || ""}</div>
     </div>
     <div class="flex h-12 flex-col pt-px">
       <div class="flex w-full items-center justify-between">
         <div class="flex gap-2">
-          {#if $channel.pubkey === Keys.pubkey.get()}
+          {#if $channel?.nip28?.owner === Keys.pubkey.get()}
             <button class="cursor-pointer text-sm" on:click={edit}>
               <i class="fa-solid fa-edit" /> Edit
             </button>
           {/if}
-          {#if $channel.joined}
+          {#if $channel?.nip28?.joined}
             <Anchor theme="button" killEvent class="flex items-center gap-2" on:click={leave}>
               <i class="fa fa-right-from-bracket" />
               <span>Leave</span>

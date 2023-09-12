@@ -24,8 +24,9 @@
     hasNewNotfications,
     getUserRelayUrls,
     searchableRelays,
+    Subscription,
   } from "src/engine2"
-  import engine, {Keys, Directory, Network} from "src/app/engine"
+  import engine, {Keys, Directory} from "src/app/engine"
 
   const {keyState, canUseGiftWrap} = Keys
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
@@ -71,15 +72,15 @@
     // If we have a query, search using nostr.band. If not, ask for random profiles.
     // This allows us to populate results even if search isn't supported by forced urls
     if (term.length > 2) {
-      Network.subscribe({
+      new Subscription({
         relays: $searchableRelays,
-        filter: [{kinds: [0], search, limit: 10}],
+        filters: [{kinds: [0], search, limit: 10}],
         timeout: 3000,
       })
     } else if (Directory.profiles.get().length < 50) {
-      Network.subscribe({
+      new Subscription({
         relays: getUserRelayUrls("read"),
-        filter: [{kinds: [0], limit: 50}],
+        filters: [{kinds: [0], limit: 50}],
         timeout: 3000,
       })
     }

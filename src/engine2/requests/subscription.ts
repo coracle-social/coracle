@@ -7,7 +7,7 @@ import type {Event, Filter} from "src/engine2/model"
 import {getUrls, getExecutor} from "src/engine2/queries"
 import {projections} from "src/engine2/projections"
 
-type SubscriptionOpts = {
+export type SubscriptionOpts = {
   relays: string[]
   filters: Filter[]
   timeout?: number
@@ -101,4 +101,20 @@ export class Subscription extends EventEmitter {
       this.removeAllListeners()
     }
   }
+}
+
+export type SubscribeOpts = SubscriptionOpts & {
+  onEvent?: (e: Event) => void
+  onEose?: (url: string) => void
+  onClose?: (events: Event[]) => void
+}
+
+export const subscribe = (opts: SubscribeOpts) => {
+  const sub = new Subscription(opts)
+
+  if (opts.onEvent) sub.on("event", opts.onEvent)
+  if (opts.onEose) sub.on("eose", opts.onEose)
+  if (opts.onClose) sub.on("close", opts.onClose)
+
+  return sub
 }

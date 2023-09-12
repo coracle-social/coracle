@@ -5,8 +5,9 @@
   import {tweened} from "svelte/motion"
   import {numberFmt} from "src/util/misc"
   import {modal} from "src/partials/state"
-  import {people, getPubkeyHints} from "src/engine2"
-  import {Keys, Network} from "src/app/engine"
+  import type {Event} from "src/engine2"
+  import {people, count, Subscription, getPubkeyHints} from "src/engine2"
+  import {Keys} from "src/app/engine"
 
   export let pubkey
 
@@ -25,26 +26,30 @@
     canLoadFollowers = false
 
     // Get our followers count
-    const count = await Network.count({kinds: [3], "#p": [pubkey]})
+    const total = await count([{kinds: [3], "#p": [pubkey]}])
 
-    if (count) {
-      followersCount.set(count)
+    if (total) {
+      followersCount.set(total)
     } else {
       const followers = new Set()
 
-      sub = Network.subscribe({
+      sub = new Subscription({
         timeout: 30_000,
-        shouldProcess: false,
+        ephemeral: true,
         relays: getPubkeyHints(3, Keys.pubkey.get(), "read"),
-        filter: [{kinds: [3], "#p": [pubkey]}],
-        onEvent: batch(300, events => {
+        filters: [{kinds: [3], "#p": [pubkey]}],
+      })
+
+      sub.on(
+        "event",
+        batch(300, (events: Event[]) => {
           for (const e of events) {
             followers.add(e.pubkey)
           }
 
           followersCount.set(followers.size)
-        }),
-      })
+        })
+      )
     }
   }
 

@@ -4,12 +4,11 @@
   import Content from "src/partials/Content.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {getPubkeyHints} from "src/engine2"
-  import {Nip05} from "src/app/engine"
+  import {getPubkeyHints, displayHandle, people} from "src/engine2"
 
   export let pubkey
 
-  const handle = Nip05.getHandle(pubkey)
+  const person = people.key(pubkey)
   const relays = getPubkeyHints(3, pubkey, "write")
   const nprofile = nip19.nprofileEncode({pubkey, relays})
 </script>
@@ -19,12 +18,12 @@
     <h1 class="staatliches text-2xl">Details</h1>
     <CopyValue label="Link" value={nprofile} />
     <CopyValue label="Public Key" encode={nip19.npubEncode} value={pubkey} />
-    {#if handle}
-      {@const display = Nip05.displayHandle(handle)}
+    {#if $person?.handle}
+      {@const display = displayHandle($person.handle)}
       <CopyValue label="Nostr Address" value={display} />
       <Content size="inherit" gap="gap-2">
         <strong>Nostr Address Relays</strong>
-        {#each handle.profile.relays || [] as url}
+        {#each $person.handle.profile.relays || [] as url}
           <RelayCard relay={{url}} />
         {:else}
           <p class="flex gap-2 items-center">

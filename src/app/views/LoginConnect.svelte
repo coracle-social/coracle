@@ -12,8 +12,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {relays, loadPubkeys, getUserRelayUrls} from "src/engine2"
-  import {Env, Keys, Network} from "src/app/engine"
+  import {relays, pool, loadPubkeys, getUserRelayUrls} from "src/engine2"
+  import {Env, Keys} from "src/app/engine"
   import {loadAppData} from "src/app/state"
 
   const pubkey = Keys.pubkey.get()
@@ -75,7 +75,7 @@
 
           navigate("/notes")
         } else {
-          Network.pool.remove(relay.url)
+          pool.remove(relay.url)
         }
       })
     }
