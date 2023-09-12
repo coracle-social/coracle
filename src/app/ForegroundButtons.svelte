@@ -2,7 +2,7 @@
   import {nip19} from "nostr-tools"
   import {fade} from "src/util/transition"
   import {modal, location} from "src/partials/state"
-  import {Keys} from "src/app/engine"
+  import {canSign} from "src/engine2"
   import ForegroundButton from "src/partials/ForegroundButton.svelte"
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
 
@@ -11,8 +11,6 @@
   $: showCreateNote = !$location.pathname.match(
     /conversations|channels|chat|relays|keys|settings|logout$/
   )
-
-  const {canSign} = Keys
 
   const scrollToTop = () => document.body.scrollIntoView({behavior: "smooth"})
 

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {pluck} from 'ramda'
-  import type {Event} from 'src/engine/types'
+  import {pluck} from "ramda"
+  import type {Event} from "src/engine2"
   import Content from "src/partials/Content.svelte"
   import NotificationSection from "src/app/views/NotificationSection.svelte"
 

@@ -1,4 +1,5 @@
 import {whereEq} from "ramda"
+import {nip19} from "nostr-tools"
 import {derived} from "src/engine2/util/store"
 import {session, people} from "src/engine2/state"
 import {prepareNdk, ndkInstances} from "./ndk"
@@ -6,6 +7,18 @@ import {Signer} from "./signer"
 import {Nip04} from "./nip04"
 import {Nip44} from "./nip44"
 import {Nip59} from "./nip59"
+
+export const isKeyValid = (key: string) => {
+  // Validate the key before setting it to state by encoding it using bech32.
+  // This will error if invalid (this works whether it's a public or a private key)
+  try {
+    nip19.npubEncode(key)
+  } catch (e) {
+    return false
+  }
+
+  return true
+}
 
 export const stateKey = session.derived($s => $s?.pubkey || "anonymous")
 

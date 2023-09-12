@@ -7,6 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {
+    session,
     channels,
     derivePerson,
     displayPerson,
@@ -14,7 +15,6 @@
     nip04MarkChannelRead,
     loadNip04Messages,
   } from "src/engine2"
-  import {Keys} from "src/app/engine"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -68,13 +68,13 @@
     slot="message"
     let:message
     class={cx("flex overflow-hidden text-ellipsis", {
-      "ml-12 justify-end": message.pubkey === Keys.pubkey.get(),
-      "mr-12": message.pubkey !== Keys.pubkey.get(),
+      "ml-12 justify-end": message.pubkey === $session.pubkey,
+      "mr-12": message.pubkey !== $session.pubkey,
     })}>
     <div
       class={cx("inline-block max-w-xl rounded-2xl px-4 py-2", {
-        "rounded-br-none bg-gray-1 text-gray-8": message.pubkey === Keys.pubkey.get(),
-        "rounded-bl-none bg-gray-7": message.pubkey !== Keys.pubkey.get(),
+        "rounded-br-none bg-gray-1 text-gray-8": message.pubkey === $session.pubkey,
+        "rounded-bl-none bg-gray-7": message.pubkey !== $session.pubkey,
       })}>
       <div class="break-words">
         {#if typeof message.content === "string"}
@@ -83,8 +83,8 @@
       </div>
       <small
         class="mt-1"
-        class:text-gray-7={message.pubkey === Keys.pubkey.get()}
-        class:text-gray-1={message.pubkey !== Keys.pubkey.get()}>
+        class:text-gray-7={message.pubkey === $session.pubkey}
+        class:text-gray-1={message.pubkey !== $session.pubkey}>
         {formatTimestamp(message.created_at)}
       </small>
     </div>

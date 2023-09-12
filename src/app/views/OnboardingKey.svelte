@@ -6,12 +6,12 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
-  import {Env} from "src/app/engine"
+  import {env} from "src/engine2"
 
   export let privkey
 
   const nsec = nip19.nsecEncode(privkey)
-  const nextStage = Env.FORCE_RELAYS.length > 0 ? "follows" : "relays"
+  const nextStage = $env.FORCE_RELAYS.length > 0 ? "follows" : "relays"
 
   const copyKey = () => {
     copyToClipboard(nsec)

@@ -4,17 +4,18 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {Keys} from "src/app/engine"
   import {toast} from "src/partials/state"
-  import {login} from "src/app/state"
+  import {isKeyValid, loginWithPublicKey} from "src/engine2"
+  import {boot} from "src/app/state"
 
   let npub = ""
 
   const logIn = () => {
     const pubkey = npub.startsWith("npub") ? toHex(npub) : npub
 
-    if (Keys.isKeyValid(pubkey)) {
-      login("pubkey", pubkey)
+    if (isKeyValid(pubkey)) {
+      loginWithPublicKey(pubkey)
+      boot()
     } else {
       toast.show("error", "Sorry, but that's an invalid public key.")
     }

@@ -9,17 +9,16 @@
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {
+    session,
     channels,
     displayPubkey,
     createNip24Message,
     nip24MarkChannelRead,
     loadNip59Messages,
   } from "src/engine2"
-  import {Keys} from "src/app/engine"
 
   export let entity
 
-  const userPubkey = Keys.pubkey.get()
   const channel = channels.key(entity)
   const pubkeys = entity.split(",")
 
@@ -72,15 +71,15 @@
     slot="message"
     let:message
     class={cx("flex overflow-hidden text-ellipsis", {
-      "ml-12 justify-end": message.pubkey === userPubkey,
-      "mr-12": message.pubkey !== userPubkey,
+      "ml-12 justify-end": message.pubkey === $session.pubkey,
+      "mr-12": message.pubkey !== $session.pubkey,
     })}>
     <div
       class={cx("inline-block flex max-w-xl flex-col rounded-2xl px-4 py-2", {
-        "rounded-br-none bg-gray-1 text-gray-8": message.pubkey === userPubkey,
-        "rounded-bl-none bg-gray-7": message.pubkey !== userPubkey,
+        "rounded-br-none bg-gray-1 text-gray-8": message.pubkey === $session.pubkey,
+        "rounded-bl-none bg-gray-7": message.pubkey !== $session.pubkey,
       })}>
-      {#if message.showProfile && message.pubkey !== userPubkey}
+      {#if message.showProfile && message.pubkey !== $session.pubkey}
         <Anchor class="mb-1" on:click={() => showPerson(message.pubkey)}>
           <strong>{displayPubkey(message.pubkey)}</strong>
         </Anchor>
@@ -92,8 +91,8 @@
       </div>
       <small
         class="mt-1"
-        class:text-gray-7={message.pubkey === userPubkey}
-        class:text-gray-1={message.pubkey !== userPubkey}>
+        class:text-gray-7={message.pubkey === $session.pubkey}
+        class:text-gray-1={message.pubkey !== $session.pubkey}>
         {formatTimestamp(message.created_at)}
       </small>
     </div>

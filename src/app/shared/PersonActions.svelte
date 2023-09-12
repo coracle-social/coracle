@@ -4,14 +4,24 @@
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {mute, unmute, follow, unfollow, isMuted, isFollowing} from "src/engine2"
-  import {Env, Keys} from "src/app/engine"
-  import {addToList} from "src/app/state"
+  import {
+    env,
+    loginWithPublicKey,
+    session,
+    mute,
+    unmute,
+    canSign,
+    canUseGiftWrap,
+    follow,
+    unfollow,
+    isMuted,
+    isFollowing,
+  } from "src/engine2"
+  import {addToList, boot} from "src/app/state"
 
   export let pubkey
 
-  const {canSign, canUseGiftWrap} = Keys
-  const isSelf = Keys.pubkey.get() === pubkey
+  const isSelf = $session?.pubkey === pubkey
   const npub = nip19.npubEncode(pubkey)
   const following = isFollowing(pubkey)
   const muted = isMuted(pubkey)
@@ -49,7 +59,7 @@
       actions.push({onClick: loginAsUser, label: "Login as", icon: "right-to-bracket"})
     }
 
-    if (Env.FORCE_RELAYS.length === 0) {
+    if ($env.FORCE_RELAYS.length === 0) {
       actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
     }
 
@@ -64,7 +74,8 @@
 
   const loginAsUser = () => {
     modal.clear()
-    Keys.login("pubkey", pubkey)
+    loginWithPublicKey(pubkey)
+    boot()
   }
 
   const openProfileInfo = () => modal.push({type: "person/info", pubkey})

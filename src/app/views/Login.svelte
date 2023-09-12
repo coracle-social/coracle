@@ -5,19 +5,18 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {login} from "src/app/state"
+  import {withExtension, loginWithExtension} from "src/engine2"
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
 
-  const autoLogIn = async () => {
-    const {nostr} = window as any
-
-    if (nostr) {
-      login("extension", await nostr.getPublicKey())
-    } else {
-      modal.push({type: "login/privkey"})
-    }
-  }
+  const autoLogIn = () =>
+    withExtension(async ext => {
+      if (ext) {
+        loginWithExtension(await ext.getPublicKey())
+      } else {
+        modal.push({type: "login/privkey"})
+      }
+    })
 
   const signUp = () => {
     modal.push({type: "onboarding", stage: "intro"})

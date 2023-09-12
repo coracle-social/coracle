@@ -4,16 +4,15 @@
 
   import type {ComponentType, SvelteComponentTyped} from "svelte"
   import {nip19} from "nostr-tools"
-  import type {Relay} from "src/engine"
   import {onMount} from "svelte"
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
   import {isNil, find, last} from "ramda"
   import {seconds, Fetch, shuffle} from "hurdak"
   import {tryFetch, hexToBech32, bech32ToHex, now} from "src/util/misc"
-  import {storage, relays, getSetting, dufflepud} from "src/engine2"
+  import type {Relay} from "src/engine2"
+  import {storage, session, stateKey, relays, getSetting, dufflepud} from "src/engine2"
   import * as engine from "src/engine2"
-  import {Keys} from "src/app/engine"
   import {loadAppData} from "src/app/state"
   import {theme, getThemeVariables, appName, modal} from "src/partials/state"
   import {logUsage} from "src/app/state"
@@ -106,10 +105,8 @@
     }
   })
 
-  const {pubkey} = Keys
-
   storage.ready.then(() => {
-    if ($pubkey) {
+    if ($session) {
       loadAppData()
     }
 
@@ -147,7 +144,7 @@
 
 <TypedRouter url={pathname}>
   <div use:links>
-    {#key $pubkey || "anonymous"}
+    {#key $stateKey}
       <Routes />
       <ForegroundButtons />
       <SideNav />

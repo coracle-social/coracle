@@ -7,11 +7,10 @@
     hasNewNip04Messages,
     hasNewNip24Messages,
     hasNewNotfications,
+    canUseGiftWrap,
+    canSign,
   } from "src/engine2"
-  import {Keys} from "src/app/engine"
   import {menuIsOpen} from "src/app/state"
-
-  const {canSign, canUseGiftWrap} = Keys
 
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 

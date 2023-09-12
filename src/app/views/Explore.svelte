@@ -11,8 +11,7 @@
   import Content from "src/partials/Content.svelte"
   import NoteById from "src/app/shared/NoteById.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
-  import {labels, getUserRelayUrls, follows, Subscription} from "src/engine2"
-  import {Keys} from "src/app/engine"
+  import {session, labels, getUserRelayUrls, follows, Subscription} from "src/engine2"
 
   type LabelGroup = {
     label: string
@@ -20,8 +19,6 @@
     hints: string[]
     authors: string[]
   }
-
-  const {pubkey} = Keys
 
   const labelGroups = labels.derived($labels => {
     const $labelGroups = {}
@@ -69,7 +66,7 @@
         {
           kinds: [1985],
           "#L": ["#t", "ugc"],
-          authors: $follows.concat($pubkey),
+          authors: $follows.concat($session.pubkey),
         },
       ],
     })

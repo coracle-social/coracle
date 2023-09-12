@@ -8,8 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
-  import {getSetting, displayRelay, setRelayPolicy} from "src/engine2"
-  import {Keys} from "src/app/engine"
+  import {canSign, getSetting, displayRelay, setRelayPolicy} from "src/engine2"
 
   export let relay
   export let rating = null
@@ -50,7 +49,7 @@
   {#if relay.description}
     <p>{relay.description}</p>
   {/if}
-  {#if showControls && Keys.canSign.get()}
+  {#if showControls && $canSign}
     <div class="-mx-6 my-1 h-px bg-gray-7" />
     <div class="flex justify-between gap-2">
       <span>Publish to this relay?</span>

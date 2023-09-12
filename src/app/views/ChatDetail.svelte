@@ -10,6 +10,8 @@
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {
+    canSign,
+    session,
     channels,
     imgproxy,
     publishNip28Message,
@@ -18,7 +20,6 @@
     loadNip28Messages,
     publishNip28ChannelChecked,
   } from "src/engine2"
-  import {Keys} from "src/app/engine"
 
   export let entity
 
@@ -68,7 +69,7 @@
     <div class="flex h-12 flex-col pt-px">
       <div class="flex w-full items-center justify-between">
         <div class="flex gap-2">
-          {#if $channel?.nip28?.owner === Keys.pubkey.get()}
+          {#if $channel?.nip28?.owner === $session.pubkey}
             <button class="cursor-pointer text-sm" on:click={edit}>
               <i class="fa-solid fa-edit" /> Edit
             </button>
@@ -78,7 +79,7 @@
               <i class="fa fa-right-from-bracket" />
               <span>Leave</span>
             </Anchor>
-          {:else if Keys.canSign.get()}
+          {:else if $canSign}
             <Anchor theme="button" killEvent class="flex items-center gap-2" on:click={join}>
               <i class="fa fa-right-to-bracket" />
               <span>Join</span>

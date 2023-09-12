@@ -12,11 +12,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {relays, pool, loadPubkeys, getUserRelayUrls} from "src/engine2"
-  import {Env, Keys} from "src/app/engine"
+  import {env, session, relays, pool, loadPubkeys, getUserRelayUrls} from "src/engine2"
   import {loadAppData} from "src/app/state"
-
-  const pubkey = Keys.pubkey.get()
 
   let modal = null
   let customRelayUrl = null
@@ -29,7 +26,7 @@
     uniqBy(
       prop("url"),
       // Make sure our hardcoded urls are first, since they're more likely to find a match
-      Env.DEFAULT_RELAYS.map(objOf("url")).concat(shuffle($relays))
+      $env.DEFAULT_RELAYS.map(objOf("url")).concat(shuffle($relays))
     )
   )
 
@@ -57,7 +54,7 @@
       // Wait a bit before removing the relay to smooth out the ui
       Promise.all([
         sleep(1500),
-        loadPubkeys([pubkey], {
+        loadPubkeys([$session.pubkey], {
           force: true,
           relays: [relay.url],
           kinds: userKinds,
@@ -122,7 +119,7 @@
       }}>here</Anchor
     >.
   </p>
-  {#if Env.FORCE_RELAYS.length > 0}
+  {#if $env.FORCE_RELAYS.length > 0}
     <Spinner />
   {:else if Object.values(currentRelays).length > 0}
     <p>Currently searching:</p>

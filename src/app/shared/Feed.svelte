@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type {DynamicFilter} from "src/engine/types"
   import {onMount, onDestroy} from "svelte"
   import {readable} from "svelte/store"
   import {FeedLoader} from "src/engine2"
@@ -13,8 +12,8 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {getSetting, searchableRelays, mergeHints, getPubkeyHints} from "src/engine2"
-  import {Keys} from "src/app/engine"
+  import type {DynamicFilter} from "src/engine2"
+  import {session, getSetting, searchableRelays, mergeHints, getPubkeyHints} from "src/engine2"
   import {compileFilter} from "src/app/state"
 
   export let relays = []
@@ -57,7 +56,7 @@
     }
 
     const limit = getSetting("relay_limit")
-    const authors = (compileFilter(filter).authors || []).concat(Keys.pubkey.get())
+    const authors = (compileFilter(filter).authors || []).concat($session.pubkey)
     const hints = authors.map(pubkey => getPubkeyHints(limit, pubkey, "write"))
 
     return mergeHints(limit, hints)

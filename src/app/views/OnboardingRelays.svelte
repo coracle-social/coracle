@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type {Relay} from "src/engine"
   import {pluck, reject, propEq} from "ramda"
   import {fuzzy} from "src/util/misc"
   import {modal} from "src/partials/state"
@@ -8,6 +7,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
+  import type {Relay} from "src/engine2"
   import {relays as knownRelays} from "src/engine2"
 
   export let relays: Relay[]

@@ -11,15 +11,17 @@
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
   import {
+    env,
     user,
     mention,
+    session,
     loadPubkeys,
     publishNote,
     publishPetnames,
     publishProfile,
     publishRelays,
+    loginWithPrivateKey,
   } from "src/engine2"
-  import {Env, Keys} from "src/app/engine"
   import {listenForNotifications} from "src/app/state"
   import {modal} from "src/partials/state"
 
@@ -29,14 +31,14 @@
   const profile = {}
 
   let petnames = closure(() => {
-    if (Keys.keyState.get().length > 0) {
+    if ($session) {
       return []
     }
 
     const {petnames} = user.get()
 
     if (petnames.length === 0) {
-      for (const pubkey of Env.DEFAULT_FOLLOWS) {
+      for (const pubkey of $env.DEFAULT_FOLLOWS) {
         petnames.push(mention(pubkey))
       }
     }
@@ -48,7 +50,7 @@
     const {relays} = user.get()
 
     if (relays.length === 0) {
-      for (const url of Env.DEFAULT_RELAYS) {
+      for (const url of $env.DEFAULT_RELAYS) {
         relays.push({url, read: true, write: true})
       }
     }
@@ -57,7 +59,7 @@
   })
 
   const signup = async noteContent => {
-    Keys.login("privkey", privkey)
+    loginWithPrivateKey(privkey)
 
     // Wait for the published event to go through
     await publishRelays(relays)
@@ -82,7 +84,7 @@
 
   onMount(() => {
     // Prime our database with some defaults
-    loadPubkeys(Env.DEFAULT_FOLLOWS)
+    loadPubkeys($env.DEFAULT_FOLLOWS)
   })
 </script>
 

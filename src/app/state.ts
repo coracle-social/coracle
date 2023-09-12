@@ -1,5 +1,4 @@
 import type {Filter} from "nostr-tools"
-import type {DynamicFilter} from "src/engine/types"
 import Bugsnag from "@bugsnag/js"
 import {nip19} from "nostr-tools"
 import {navigate} from "svelte-routing"
@@ -10,9 +9,11 @@ import {warn} from "src/util/logger"
 import {now} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
-import type {Event} from "src/engine2"
+import type {DynamicFilter, Event} from "src/engine2"
 import {
+  env,
   pool,
+  session,
   loadPubkeys,
   channels,
   follows,
@@ -21,8 +22,8 @@ import {
   getUserRelayUrls,
   getSetting,
   dufflepud,
+  events,
 } from "src/engine2"
-import {Events, Env, Keys} from "src/app/engine"
 
 // Routing
 
@@ -67,17 +68,17 @@ setTimeout(() => {
   })
 })
 
-const session = Math.random().toString().slice(2)
+const sessionId = Math.random().toString().slice(2)
 
 export const logUsage = async (name: string) => {
   // Hash the user's pubkey so we can identify unique users without knowing
   // anything about them
-  const pubkey = Keys.pubkey.get()
+  const pubkey = session.get()?.pubkey
   const ident = pubkey ? hash(pubkey) : "unknown"
 
   if (getSetting("report_analytics")) {
     try {
-      await fetch(dufflepud(`usage/${ident}/${session}/${name}`), {method: "post"})
+      await fetch(dufflepud(`usage/${ident}/${sessionId}/${name}`), {method: "post"})
     } catch (e) {
       if (!e.toString().includes("Failed to fetch")) {
         warn(e)
@@ -115,11 +116,10 @@ let listener
 let timeout
 
 export const listenForNotifications = async () => {
-  const pubkey = Keys.pubkey.get()
-
+  const {pubkey} = session.get()
   const channelIds = pluck("id", channels.get().filter(path(["nip28", "joined"])))
 
-  const eventIds: string[] = doPipe(Events.cache.get(), [
+  const eventIds: string[] = doPipe(events.get(), [
     filter((e: Event) => noteKinds.includes(e.kind)),
     sortBy((e: Event) => -e.created_at),
     slice(0, 256),
@@ -150,7 +150,7 @@ export const listenForNotifications = async () => {
 }
 
 export const loadAppData = async () => {
-  const pubkey = Keys.pubkey.get()
+  const {pubkey} = session.get()
 
   // Make sure the user and their follows are loaded
   await loadPubkeys(pubkey, {force: true, kinds: userKinds})
@@ -162,10 +162,8 @@ export const loadAppData = async () => {
   listenForNotifications()
 }
 
-export const login = async (method: string, key: string | {pubkey: string; token: string}) => {
-  Keys.login(method, key)
-
-  if (Env.FORCE_RELAYS.length > 0) {
+export const boot = async () => {
+  if (env.get().FORCE_RELAYS.length > 0) {
     modal.replace({
       type: "message",
       message: "Logging you in...",
@@ -175,7 +173,7 @@ export const login = async (method: string, key: string | {pubkey: string; token
 
     await Promise.all([
       sleep(1500),
-      loadPubkeys(Keys.pubkey.get(), {force: true, kinds: userKinds}),
+      loadPubkeys([session.get().pubkey], {force: true, kinds: userKinds}),
     ])
 
     navigate("/notes")
@@ -223,7 +221,7 @@ export const toastProgress = progress => {
 // Feeds
 
 export const getAuthorsWithDefaults = (pubkeys: string[]) =>
-  shuffle(pubkeys.length > 0 ? pubkeys : (Env.DEFAULT_FOLLOWS as string[])).slice(0, 1024)
+  shuffle(pubkeys.length > 0 ? pubkeys : (env.get().DEFAULT_FOLLOWS as string[])).slice(0, 1024)
 
 export const compileFilter = (filter: DynamicFilter): Filter => {
   if (filter.authors === "global") {

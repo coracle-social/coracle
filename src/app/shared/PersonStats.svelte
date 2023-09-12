@@ -6,8 +6,7 @@
   import {numberFmt} from "src/util/misc"
   import {modal} from "src/partials/state"
   import type {Event} from "src/engine2"
-  import {people, count, Subscription, getPubkeyHints} from "src/engine2"
-  import {Keys} from "src/app/engine"
+  import {session, people, count, Subscription, getPubkeyHints} from "src/engine2"
 
   export let pubkey
 
@@ -36,7 +35,7 @@
       sub = new Subscription({
         timeout: 30_000,
         ephemeral: true,
-        relays: getPubkeyHints(3, Keys.pubkey.get(), "read"),
+        relays: getPubkeyHints(3, $session?.pubkey, "read"),
         filters: [{kinds: [3], "#p": [pubkey]}],
       })
 

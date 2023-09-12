@@ -6,8 +6,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {Keys} from "src/app/engine"
-  import {login} from "src/app/state"
+  import {isKeyValid, loginWithPrivateKey} from "src/engine2"
+  import {boot} from "src/app/state"
 
   let nsec = ""
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
@@ -15,8 +15,9 @@
   const logIn = () => {
     const privkey = nsec.startsWith("nsec") ? toHex(nsec) : nsec
 
-    if (Keys.isKeyValid(privkey)) {
-      login("privkey", privkey)
+    if (isKeyValid(privkey)) {
+      loginWithPrivateKey(privkey)
+      boot()
     } else {
       toast.show("error", "Sorry, but that's an invalid private key.")
     }

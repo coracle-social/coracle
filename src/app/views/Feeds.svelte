@@ -1,15 +1,14 @@
 <script lang="ts">
   import cx from "classnames"
   import {filter, propEq} from "ramda"
-  import type {DynamicFilter} from "src/engine/types"
   import {Tags, noteKinds} from "src/util/nostr"
   import {modal, theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
-  import {stateKey, follows, lists} from "src/engine2"
-  import {Keys} from "src/app/engine"
+  import type {DynamicFilter} from "src/engine2"
+  import {session, canSign, stateKey, follows, lists} from "src/engine2"
 
   const userLists = lists.derived(filter(propEq("pubkey", stateKey.get())))
 
@@ -51,7 +50,7 @@
 </script>
 
 <Content>
-  {#if !Keys.pubkey.get()}
+  {#if !$session}
     <Content size="lg" class="text-center">
       <p class="text-xl">Don't have an account?</p>
       <p>
@@ -62,7 +61,7 @@
   {#key key}
     <Feed filter={feedFilter} {relays}>
       <div slot="controls">
-        {#if Keys.canSign.get()}
+        {#if $canSign}
           {#if $userLists.length > 0}
             <Popover placement="bottom" opts={{hideOnClick: true}} theme="transparent">
               <i slot="trigger" class="fa fa-ellipsis-v cursor-pointer p-2" />

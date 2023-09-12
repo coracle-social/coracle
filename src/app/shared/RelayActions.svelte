@@ -2,8 +2,7 @@
   import {last, prop} from "ramda"
   import {modal} from "src/partials/state"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {relays, relayPolicyUrls, addRelay, removeRelay, hasRelay} from "src/engine2"
-  import {Keys} from "src/app/engine"
+  import {canSign, relays, relayPolicyUrls, addRelay, removeRelay, hasRelay} from "src/engine2"
   import {addToList} from "src/app/state"
 
   export let relay
@@ -30,7 +29,7 @@
       })
     }
 
-    if (Keys.canSign.get()) {
+    if ($canSign) {
       actions.push({
         onClick: () => addToList("r", relay.url),
         label: "Add to list",
