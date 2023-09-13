@@ -2,7 +2,7 @@ import {Fetch, tryFunc} from "hurdak"
 import {tryJson, hexToBech32, bech32ToHex} from "src/util/misc"
 import {people} from "src/engine2/state"
 import {dufflepud} from "src/engine2/queries"
-import {projections, updateKey} from "src/engine2/projections/core"
+import {projections, updateStore} from "src/engine2/projections/core"
 
 projections.addHandler(0, e => {
   tryJson(async () => {
@@ -25,7 +25,7 @@ projections.addHandler(0, e => {
       return
     }
 
-    updateKey(people.key(e.pubkey), e.created_at, {
+    updateStore(people.key(e.pubkey), e.created_at, {
       zapper: {
         lnurl: hexToBech32("lnurl", lnurl),
         callback: result.callback,

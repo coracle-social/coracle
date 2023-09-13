@@ -2,14 +2,14 @@ import {reject} from "ramda"
 import {now} from "src/util/misc"
 import {people} from "src/engine2/state"
 import {user, canSign, stateKey} from "src/engine2/queries"
-import {updateKey} from "src/engine2/projections"
+import {updateStore} from "src/engine2/projections"
 import {publishEvent} from "./util"
 
 export const publishMutes = async ($mutes: string[][]) => {
   if (canSign.get()) {
     publishEvent(10000, {tags: $mutes.map(t => t.slice(0, 2))})
   } else {
-    updateKey(people.key(stateKey.get()), now(), {mutes: $mutes})
+    updateStore(people.key(stateKey.get()), now(), {mutes: $mutes})
   }
 }
 

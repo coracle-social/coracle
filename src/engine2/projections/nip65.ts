@@ -5,7 +5,7 @@ import {normalizeRelayUrl, isShareableRelay, Tags} from "src/util/nostr"
 import type {RelayPolicy} from "src/engine2/model"
 import {RelayMode} from "src/engine2/model"
 import {relays, people} from "src/engine2/state"
-import {projections, updateKey} from "src/engine2/projections/core"
+import {projections, updateStore} from "src/engine2/projections/core"
 
 const addRelay = (url: string) => {
   if (isShareableRelay(url)) {
@@ -23,7 +23,7 @@ const addRelay = (url: string) => {
 
 const setPolicy = (e, relays: RelayPolicy[]) => {
   if (relays?.length > 0) {
-    updateKey(people.key(e.pubkey), e.created_at, {
+    updateStore(people.key(e.pubkey), e.created_at, {
       relays: uniqBy(prop("url"), relays).map((relay: RelayPolicy) => {
         addRelay(relay.url)
 

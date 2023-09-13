@@ -1,23 +1,21 @@
-import {tryJson} from "src/util/misc"
+import {tryFunc} from "hurdak"
 import {Tags, appDataKeys} from "src/util/nostr"
-import {settings} from "src/engine2/state"
-import {getSetting, canSign, nip04, user} from "src/engine2/queries"
-import {projections} from "src/engine2/projections/core"
+import {sessions} from "src/engine2/state"
+import {nip04} from "src/engine2/queries"
+import {projections, updateRecord} from "src/engine2/projections/core"
 
 projections.addHandler(30078, e => {
-  if (
-    canSign.get() &&
-    Tags.from(e).getMeta("d") === appDataKeys.USER_SETTINGS &&
-    e.created_at > getSetting("updated_at")
-  ) {
-    tryJson(async () => {
-      const updates = JSON.parse(await nip04.get().decryptAsUser(e.content, user.get().pubkey))
+  if (Tags.from(e).getMeta("d") === appDataKeys.USER_SETTINGS) {
+    sessions.updateAsync(async $sessions => {
+      if ($sessions[e.pubkey]) {
+        await tryFunc(async () => {
+          $sessions[e.pubkey] = updateRecord($sessions[e.pubkey], e.created_at, {
+            settings: JSON.parse(await nip04.get().decryptAsUser(e.content, e.pubkey)),
+          })
+        })
+      }
 
-      settings.update($settings => ({
-        ...$settings,
-        ...updates,
-        updated_at: e.created_at,
-      }))
+      return $sessions
     })
   }
 })

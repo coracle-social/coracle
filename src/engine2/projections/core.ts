@@ -6,9 +6,7 @@ export const projections = new Worker<Event>({
   getKey: prop("kind"),
 })
 
-export const updateKey = (key, timestamp, updates, modify = (a: any) => a) => {
-  let record = key.get()
-
+export const updateRecord = (record, timestamp, updates) => {
   for (const [field, value] of Object.entries(updates)) {
     const tsField = `${field}_updated_at`
     const lastUpdated = record?.[tsField] || 0
@@ -23,5 +21,8 @@ export const updateKey = (key, timestamp, updates, modify = (a: any) => a) => {
     }
   }
 
-  key.set(modify(record))
+  return record
 }
+
+export const updateStore = (store, timestamp, updates) =>
+  store.set(updateRecord(store.get(), timestamp, updates))

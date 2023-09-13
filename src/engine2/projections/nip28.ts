@@ -1,22 +1,21 @@
-import {prop, pipe, assoc, map, assocPath, pluck, last, uniqBy, uniq} from "ramda"
+import {prop, map, assocPath, pluck, last, uniqBy, uniq} from "ramda"
 import {Tags, appDataKeys} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import type {Event, Channel} from "src/engine2/model"
 import {sessions, channels} from "src/engine2/state"
 import {nip04, canSign} from "src/engine2/queries"
-import {projections, updateKey} from "src/engine2/projections/core"
+import {projections, updateRecord, updateStore} from "src/engine2/projections/core"
 
 projections.addHandler(40, (e: Event) => {
   const meta = tryJson(() => JSON.parse(e.content))
   const relays = Tags.from(e).relays()
 
   if (meta?.name) {
-    updateKey(
-      channels.key(e.id),
-      e.created_at,
-      {meta, relays},
-      pipe(assoc("type", "nip28"), assocPath(["nip28", "owner"], e.pubkey))
-    )
+    channels.key(e.id).update($channel => ({
+      ...updateRecord($channel, e.created_at, {meta, relays}),
+      nip28: {...$channel?.nip28, owner: e.pubkey},
+      type: "nip28",
+    }))
   }
 })
 
@@ -37,7 +36,7 @@ projections.addHandler(41, (e: Event) => {
   const relays = Tags.from(e).relays()
 
   if (meta?.name) {
-    updateKey(channels.key(channelId), e.created_at, {meta, relays})
+    updateStore(channels.key(channelId), e.created_at, {meta, relays})
   }
 })
 

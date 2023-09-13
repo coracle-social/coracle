@@ -1,5 +1,5 @@
 import {appDataKeys} from "src/util/nostr"
-import {settings, session} from "src/engine2/state"
+import {session} from "src/engine2/state"
 import {canSign, nip04} from "src/engine2/queries"
 import {publishEvent} from "./util"
 
@@ -14,6 +14,8 @@ export const setAppData = async (d: string, data: any) => {
 }
 
 export const publishSettings = async (updates: Record<string, any>) => {
-  settings.update($settings => ({...$settings, ...updates}))
-  setAppData(appDataKeys.USER_SETTINGS, settings.get())
+  setAppData(appDataKeys.USER_SETTINGS, {
+    ...session.get().settings,
+    ...updates,
+  })
 }

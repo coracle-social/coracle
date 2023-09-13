@@ -2,14 +2,14 @@ import {reject} from "ramda"
 import {now} from "src/util/misc"
 import {people} from "src/engine2/state"
 import {user, canSign, stateKey} from "src/engine2/queries"
-import {updateKey} from "src/engine2/projections"
+import {updateStore} from "src/engine2/projections"
 import {publishEvent, mention} from "./util"
 
 export const publishPetnames = async ($petnames: string[][]) => {
   if (canSign.get()) {
     publishEvent(3, {tags: $petnames})
   } else {
-    updateKey(people.key(stateKey.get()), now(), {petnames: $petnames})
+    updateStore(people.key(stateKey.get()), now(), {petnames: $petnames})
   }
 }
 

@@ -4,7 +4,7 @@ import {isShareableRelay, normalizeRelayUrl} from "src/util/nostr"
 import type {RelayPolicy} from "src/engine2/model"
 import {people} from "src/engine2/state"
 import {canSign, stateKey, relayPolicies} from "src/engine2/queries"
-import {updateKey} from "src/engine2/projections"
+import {updateStore} from "src/engine2/projections"
 import {publishEvent} from "./util"
 
 export const publishRelays = async ($relays: RelayPolicy[]) => {
@@ -23,7 +23,7 @@ export const publishRelays = async ($relays: RelayPolicy[]) => {
         }),
     })
   } else {
-    updateKey(people.key(stateKey.get()), now(), {relays: $relays})
+    updateStore(people.key(stateKey.get()), now(), {relays: $relays})
   }
 }
 

@@ -6,7 +6,6 @@ import type {Event, Delete, Session, Channel, Topic, List, Person, Relay} from "
 
 export const sessions = writable<Record<string, Session>>({})
 export const session = writable<Session | null>(null)
-export const settings = writable<Record<string, any>>({})
 export const env = writable<Record<string, any>>({})
 export const alertsLastChecked = writable(0)
 

@@ -1,5 +1,5 @@
 import {prop} from "ramda"
-import {env, settings} from "src/engine2/state"
+import {env, session} from "src/engine2/state"
 
 export const getDefaultSettings = () => ({
   relay_limit: 10,
@@ -11,7 +11,7 @@ export const getDefaultSettings = () => ({
   multiplextr_url: env.get().MULTIPLEXTR_URL,
 })
 
-export const getSettings = () => ({...getDefaultSettings(), ...settings.get()})
+export const getSettings = () => ({...getDefaultSettings(), ...session.get()?.settings})
 
 export const getSetting = k => prop(k, getSettings())
 
