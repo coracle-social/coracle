@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {map, sortBy} from "ramda"
+  import {map, identity, sortBy} from "ramda"
   import {quantify} from "hurdak"
   import {Tags} from "src/util/nostr"
   import {modal} from "src/partials/state"
@@ -11,7 +11,15 @@
   import Content from "src/partials/Content.svelte"
   import NoteById from "src/app/shared/NoteById.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
-  import {session, labels, getUserRelayUrls, follows, subscribe} from "src/engine2"
+  import {
+    session,
+    getSetting,
+    getPubkeysWithDefaults,
+    labels,
+    getPubkeyHints,
+    follows,
+    subscribe,
+  } from "src/engine2"
 
   type LabelGroup = {
     label: string
@@ -61,12 +69,12 @@
 
   onMount(() => {
     const sub = subscribe({
-      relays: getUserRelayUrls("read"),
+      relays: getPubkeyHints(getSetting("relay_limit"), $session?.pubkey, "read"),
       filters: [
         {
           kinds: [1985],
           "#L": ["#t", "ugc"],
-          authors: $follows.concat($session.pubkey),
+          authors: getPubkeysWithDefaults($follows).concat($session?.pubkey).filter(identity),
         },
       ],
     })

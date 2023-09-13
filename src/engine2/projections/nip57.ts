@@ -6,9 +6,7 @@ import {projections, updateKey} from "src/engine2/projections/core"
 
 projections.addHandler(0, e => {
   tryJson(async () => {
-    const {
-      kind0: {lud16, lud06},
-    } = JSON.parse(e.content)
+    const {lud16, lud06} = JSON.parse(e.content)
     const address = (lud16 || lud06 || "").toLowerCase()
 
     if (!address) {

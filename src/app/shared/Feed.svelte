@@ -13,8 +13,14 @@
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
   import type {DynamicFilter} from "src/engine2"
-  import {session, getSetting, searchableRelays, mergeHints, getPubkeyHints} from "src/engine2"
-  import {compileFilter} from "src/app/state"
+  import {
+    session,
+    compileFilter,
+    getSetting,
+    searchableRelays,
+    mergeHints,
+    getPubkeyHints,
+  } from "src/engine2"
 
   export let relays = []
   export let filter = {} as DynamicFilter
@@ -56,7 +62,7 @@
     }
 
     const limit = getSetting("relay_limit")
-    const authors = (compileFilter(filter).authors || []).concat($session.pubkey)
+    const authors = (compileFilter(filter).authors || []).concat($session?.pubkey)
     const hints = authors.map(pubkey => getPubkeyHints(limit, pubkey, "write"))
 
     return mergeHints(limit, hints)

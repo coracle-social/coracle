@@ -1,4 +1,3 @@
-import {whereEq} from "ramda"
 import {nip19} from "nostr-tools"
 import {derived} from "src/engine2/util/store"
 import {session, people} from "src/engine2/state"
@@ -24,11 +23,11 @@ export const stateKey = session.derived($s => $s?.pubkey || "anonymous")
 
 export const user = derived([session, people.mapStore], ([$s, $p]) => $p.get($s?.pubkey))
 
-export const canSign = session.derived(({method}) =>
-  ["bunker", "privkey", "extension"].includes(method)
+export const canSign = session.derived($session =>
+  ["bunker", "privkey", "extension"].includes($session?.method)
 )
 
-export const canUseGiftWrap = session.derived(whereEq({method: "privkey"}))
+export const canUseGiftWrap = session.derived($session => $session?.method === "privkey")
 
 export const ndk = derived([session, ndkInstances], ([$session, $instances]) => {
   if (!$session?.bunkerToken) {

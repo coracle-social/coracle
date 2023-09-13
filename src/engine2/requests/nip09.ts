@@ -5,7 +5,7 @@ import {getUserRelayUrls} from "src/engine2/queries"
 import {load} from "./load"
 
 export const loadDeletes = () => {
-  const since = sumBy(prop("value"), deletes.get())
+  const since = sumBy(prop("created_at"), deletes.get().filter(prop("created_at"))) || 0
   const authors = Object.values(sessions.get()).map(prop("pubkey"))
 
   return load({

@@ -22,8 +22,8 @@
     sortChannels,
     nip28ChannelsWithMeta,
     loadPubkeys,
+    getPubkeysWithDefaults,
   } from "src/engine2"
-  import {getAuthorsWithDefaults} from "src/app/state"
 
   let q = ""
   let results = []
@@ -54,46 +54,42 @@
   document.title = "Chat"
 
   onMount(() => {
-    const subs = []
     const relays = getPubkeyHints(3, $stateKey, "read")
-    const authors = getAuthorsWithDefaults($follows)
+    const authors = getPubkeysWithDefaults($follows)
     const since = now() - seconds(1, "day")
     const filters = [
       {kinds: [40, 41], authors, limit: 100},
-      {limit: 100, kinds: [42], since, authors},
+      {kinds: [42], since, authors, limit: 100},
     ] as Filter[]
 
-    if ($session.pubkey) {
+    if ($session) {
       filters.push({kinds: [40, 41], authors: [$session.pubkey]})
     }
 
     // Pull some relevant channels by grabbing recent messages
-    subs.push(
-      load({
-        relays,
-        filters,
-        onEvent: batch(500, (events: Event[]) => {
-          const channelIds = uniq(
-            events.filter(e => e.kind === 42).map(e => Tags.from(e).getMeta("e"))
-          )
+    load({
+      relays,
+      filters,
+      onEvent: batch(500, (events: Event[]) => {
+        const channelIds = uniq(
+          events.filter(e => e.kind === 42).map(e => Tags.from(e).getMeta("e"))
+        )
 
-          loadPubkeys(pluck("pubkey", events))
+        loadPubkeys(pluck("pubkey", events))
 
-          subs.push(
-            load({
-              relays,
-              filters: [
-                {kinds: [40], ids: channelIds},
-                {kinds: [41], "#e": channelIds},
-              ],
-            })
-          )
-        }),
-      })
-    )
+        if (channelIds.length > 0) {
+          load({
+            relays,
+            filters: [
+              {kinds: [40], ids: channelIds},
+              {kinds: [41], "#e": channelIds},
+            ],
+          })
+        }
+      }),
+    })
 
     return () => {
-      subs.map(s => s.close())
       scroller.stop()
     }
   })

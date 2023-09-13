@@ -41,6 +41,10 @@ export class Writable<T> implements Readable<T> {
     this.set(f(this.value))
   }
 
+  async updateAsync(f: (v: T) => Promise<T>) {
+    this.set(await f(this.value))
+  }
+
   subscribe(f: Subscriber<T>) {
     this.subs.push(f)
 
@@ -149,7 +153,11 @@ export class Key<T extends R> implements Readable<T> {
       }
 
       // Make sure the pk always get set on the record
-      m.set(this.key, f({...m.get(this.key), [this.pk]: this.key}))
+      const {pk, key} = this
+      const oldValue = {...m.get(key), [pk]: key}
+      const newValue = {...f(oldValue), [pk]: key}
+
+      m.set(this.key, newValue)
 
       return m
     })
@@ -191,6 +199,11 @@ export class Collection<T extends R> implements Readable<T[]> {
 
   update = (f: (v: T[]) => T[]) =>
     this.mapStore.update(m => new Map(f(Array.from(m.values())).map(x => [x[this.pk], x])))
+
+  updateAsync = async (f: (v: T[]) => Promise<T[]>) =>
+    this.mapStore.updateAsync(
+      async m => new Map((await f(Array.from(m.values()))).map(x => [x[this.pk], x]))
+    )
 
   reject = (f: (v: T) => boolean) => this.update(reject(f))
 

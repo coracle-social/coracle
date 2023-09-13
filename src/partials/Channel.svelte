@@ -73,12 +73,12 @@
   // Group messages so we're only showing the person once per chunk
   $: {
     if (groupedMessages?.length === messages.length) {
-      scroller.stop()
+      scroller?.stop()
     }
 
     const result = reverse(
       sortBy(prop("created_at"), messages).reduce((mx, m) => {
-        return mx.concat({...m, showProfile: m.pubkey !== last(mx).pubkey})
+        return mx.concat({...m, showProfile: m.pubkey !== last(mx)?.pubkey})
       }, [])
     )
 

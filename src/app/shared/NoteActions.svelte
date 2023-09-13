@@ -4,7 +4,7 @@
   import {tweened} from "svelte/motion"
   import {find, reject, identity, propEq, sum, pluck, sortBy} from "ramda"
   import {stringToHue, formatSats, hsl} from "src/util/misc"
-  import {isLike, toNostrURI} from "src/util/nostr"
+  import {isLike, fromDisplayEvent, toNostrURI} from "src/util/nostr"
   import {quantify} from "hurdak"
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
@@ -54,8 +54,10 @@
 
   const muteNote = () => mute("e", note.id)
 
-  const react = content => {
-    like = publishReaction(note, content).event
+  const react = async content => {
+    const pub = await publishReaction(note, content)
+
+    like = pub.event
   }
 
   const deleteReaction = e => {
@@ -71,8 +73,9 @@
 
   const broadcast = () => {
     const relays = getUserRelayUrls("write")
+    const event = fromDisplayEvent(note)
 
-    Publisher.publish({event: note, relays}).on("progress", toastProgress)
+    Publisher.publish({event, relays}).on("progress", toastProgress)
   }
 
   let like, likes, allLikes, zap, zaps
@@ -81,12 +84,12 @@
 
   $: disableActions = !$canSign || muted
   $: likes = note.reactions.filter(n => isLike(n.content))
-  $: like = like || find(propEq("pubkey", $session.pubkey), likes)
+  $: like = like || find(propEq("pubkey", $session?.pubkey), likes)
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
   $: $likesCount = allLikes.length
 
   $: zaps = processZaps(note.zaps, note.pubkey)
-  $: zap = zap || find((z: ZapEvent) => z.request.pubkey === $session.pubkey, zaps)
+  $: zap = zap || find((z: ZapEvent) => z.request.pubkey === $session?.pubkey, zaps)
 
   $: $zapsTotal =
     sum(
@@ -97,7 +100,7 @@
       )
     ) / 1000
 
-  $: canZap = $person?.zapper && note.pubkey !== $session.pubkey
+  $: canZap = $person?.zapper && note.pubkey !== $session?.pubkey
   $: $repliesCount = note.replies.length
 
   $: {
@@ -139,7 +142,7 @@
     </button>
     <button
       class={cx("relative w-16 pt-1 text-left transition-all hover:pb-1 hover:pt-0", {
-        "pointer-events-none opacity-50": disableActions || note.pubkey === $session.pubkey,
+        "pointer-events-none opacity-50": disableActions || note.pubkey === $session?.pubkey,
         "text-accent": like,
       })}
       on:click={() => (like ? deleteReaction(like) : react("+"))}>

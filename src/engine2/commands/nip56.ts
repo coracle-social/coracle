@@ -4,8 +4,8 @@ import {buildEvent} from "./util"
 import {Publisher} from "./publisher"
 
 // Use an ephemeral private key for user privacy
-export const publishReport = (content = "", tags = [], relays = null) =>
+export const publishReport = async (content = "", tags = [], relays = null) =>
   Publisher.publish({
     relays: relays || getUserRelayUrls("write"),
-    event: signer.get().signWithKey(buildEvent(1984, {content, tags}), generatePrivateKey()),
+    event: await signer.get().signWithKey(buildEvent(1984, {content, tags}), generatePrivateKey()),
   })

@@ -3,7 +3,8 @@ import {Plex, Relays, Executor} from "paravel"
 import {error, warn} from "src/util/logger"
 import {normalizeRelayUrl} from "src/util/nostr"
 import {writable} from "src/engine2/util"
-import {env, pool, settings} from "src/engine2/state"
+import {env, pool} from "src/engine2/state"
+import {getSetting} from "src/engine2/queries"
 
 export const authHandler = writable(null)
 
@@ -30,7 +31,7 @@ export const getUrls = (relays: string[]) => {
 export const getExecutor = (urls: string[], {bypassBoot = false} = {}) => {
   let target
 
-  const {multiplextr_url: muxUrl} = settings.get()
+  const muxUrl = getSetting("multiplextr_url")
 
   // Try to use our multiplexer, but if it fails to connect fall back to relays. If
   // we're only connecting to a single relay, just do it directly, unless we already

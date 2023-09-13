@@ -1,10 +1,10 @@
 import {without, uniq} from "ramda"
-import {chunk, seconds, ensurePlural} from "hurdak"
+import {chunk, seconds} from "hurdak"
 import {personKinds, appDataKeys} from "src/util/nostr"
 import {now} from "src/util/misc"
 import type {Filter} from "src/engine2/model"
-import {people, settings} from "src/engine2/state"
-import {mergeHints, getPubkeyHints} from "src/engine2/queries"
+import {people} from "src/engine2/state"
+import {getSetting, mergeHints, getPubkeyHints} from "src/engine2/queries"
 import {load} from "./load"
 
 export type LoadPeopleOpts = {
@@ -28,7 +28,7 @@ export const getStalePubkeys = (pubkeys: string[]) => {
 
     const key = people.key(pubkey)
 
-    if (key.get()?.last_fetched || 0 > since) {
+    if ((key.get()?.last_fetched || 0) > since) {
       continue
     }
 
@@ -41,10 +41,9 @@ export const getStalePubkeys = (pubkeys: string[]) => {
 }
 
 export const loadPubkeys = async (
-  pubkeyGroups: string | string[],
+  rawPubkeys: string[],
   {relays, force, kinds = personKinds}: LoadPeopleOpts = {}
 ) => {
-  const rawPubkeys = ensurePlural(pubkeyGroups).reduce((a, b) => a.concat(b), [])
   const pubkeys = force ? uniq(rawPubkeys) : getStalePubkeys(rawPubkeys)
 
   const getChunkRelays = (chunk: string[]) => {
@@ -52,7 +51,7 @@ export const loadPubkeys = async (
       return relays
     }
 
-    const {relay_limit: limit} = settings.get()
+    const limit = getSetting("relay_limit")
 
     return mergeHints(
       limit,

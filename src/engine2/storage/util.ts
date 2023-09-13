@@ -225,7 +225,7 @@ export class Storage {
     if (window.indexedDB) {
       const dbConfig = indexedDBAdapters.map(adapter => adapter.getIndexedDBConfig())
 
-      this.db = new IndexedDB("nostr-engine/Storage", 2, dbConfig)
+      this.db = new IndexedDB("nostr-engine/Storage", 4, dbConfig)
 
       window.addEventListener("beforeunload", () => this.close())
 

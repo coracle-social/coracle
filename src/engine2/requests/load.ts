@@ -1,6 +1,7 @@
 import {matchFilters} from "nostr-tools"
 import {prop, groupBy, uniq} from "ramda"
-import {batch} from "hurdak"
+import {defer} from "hurdak"
+import {pushToKey} from "src/util/misc"
 import {subscribe} from "./subscription"
 import type {Event, Filter} from "src/engine2/model"
 
@@ -12,16 +13,17 @@ export type LoadOpts = {
   onClose?: (events: Event[]) => void
 }
 
-export const calculateGroup = ({since, until, ...filter}: Filter) => {
+export type LoadItem = {
+  request: LoadOpts
+  result: ReturnType<typeof defer>
+}
+
+export const calculateGroup = ({limit, since, until, ...filter}: Filter) => {
   const group = Object.keys(filter)
 
-  if (since) {
-    group.push(`since:${since}`)
-  }
-
-  if (until) {
-    group.push(`until:${until}`)
-  }
+  if (since) group.push(`since:${since}`)
+  if (limit) group.push(`limit:${limit}`)
+  if (until) group.push(`until:${until}`)
 
   return group.sort().join("-")
 }
@@ -33,7 +35,11 @@ export const combineFilters = filters => {
     const newFilter = {}
 
     for (const k of Object.keys(group[0])) {
-      newFilter[k] = uniq(group.flatMap(prop(k)))
+      if (["since", "until", "limit"].includes(k)) {
+        newFilter[k] = group[0][k]
+      } else {
+        newFilter[k] = uniq(group.flatMap(prop(k)))
+      }
     }
 
     result.push(newFilter)
@@ -42,35 +48,59 @@ export const combineFilters = filters => {
   return result
 }
 
-export const load = batch(500, (requests: LoadOpts[]) => {
-  const relays = uniq(requests.flatMap(prop("relays")))
-  const filters = combineFilters(requests.flatMap(prop("filters")))
+const queue = []
 
-  const sub = subscribe({relays, filters, timeout: 30_000})
+export const execute = () => {
+  const itemsByRelay = {}
+  for (const item of queue.splice(0)) {
+    for (const url of item.request.relays) {
+      pushToKey(itemsByRelay, url, item)
+    }
+  }
 
-  sub.on("event", (e: Event) => {
-    for (const req of requests) {
-      if (!req.onEvent) {
-        continue
+  // Group by relay, then by filter
+  for (const [url, items] of Object.entries(itemsByRelay) as [string, LoadItem[]][]) {
+    const filters = combineFilters(items.flatMap(item => item.request.filters))
+
+    const sub = subscribe({
+      filters,
+      relays: [url],
+      timeout: 15000,
+      onEvent: e => {
+        for (const {request} of items) {
+          if (request.onEvent && matchFilters(request.filters, e)) {
+            request.onEvent(e)
+          }
+        }
+      },
+      onEose: url => {
+        for (const {request} of items) {
+          request.onEose?.(url)
+        }
+      },
+      onClose: events => {
+        for (const {request} of items) {
+          request.onClose?.(events)
+        }
+      },
+    })
+
+    sub.result.then(events => {
+      for (const item of items) {
+        item.result.resolve(events)
       }
+    })
+  }
+}
 
-      if (matchFilters(req.filters, e)) {
-        req.onEvent(e)
-      }
-    }
-  })
+export const load = (request: LoadOpts) => {
+  const result = defer()
 
-  sub.on("eose", url => {
-    for (const req of requests) {
-      req.onEose?.(url)
-    }
-  })
+  if (queue.length === 0) {
+    setTimeout(execute, 500)
+  }
 
-  sub.on("close", events => {
-    for (const req of requests) {
-      req.onClose?.(events)
-    }
-  })
+  queue.push({request, result})
 
-  return sub.result
-})
+  return result
+}

@@ -6,6 +6,7 @@
   import {fly} from "src/util/transition"
   import {writable} from "svelte/store"
   import {annotateMedia} from "src/util/misc"
+  import {fromDisplayEvent} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
@@ -45,10 +46,15 @@
       tags.push(mention(quote.pubkey))
 
       // Re-broadcast the note we're quoting
-      Publisher.publish({relays: $relays, event: quote})
+      Publisher.publish({
+        relays: $relays,
+        event: fromDisplayEvent(quote),
+      })
     }
 
-    publishNote(content, tags, $relays).on("progress", toastProgress)
+    const pub = await publishNote(content, tags, $relays)
+
+    pub.on("progress", toastProgress)
 
     modal.clear()
   }

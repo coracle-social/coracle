@@ -14,8 +14,14 @@
   import Heading from "src/partials/Heading.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import type {Person, Event} from "src/engine2"
-  import {getUserRelayUrls, loadPubkeys, load, displayHandle, derivePerson} from "src/engine2"
-  import {compileFilter} from "src/app/state"
+  import {
+    getUserRelayUrls,
+    compileFilter,
+    loadPubkeys,
+    load,
+    displayHandle,
+    derivePerson,
+  } from "src/engine2"
 
   const getColumns = xs => {
     const cols = [[], []]

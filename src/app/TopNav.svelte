@@ -119,19 +119,17 @@
 
   const profileOptions = peopleWithName.derived($people =>
     $people
-      .filter(person => person.pubkey !== $session.pubkey)
+      .filter(person => person.pubkey !== $session?.pubkey)
       .map(person => {
-        const {
-          pubkey,
-          profile: {name, display_name},
-          handle: {address},
-        } = person
+        const {pubkey, profile, handle} = person
 
         return {
           person,
           id: pubkey,
           type: "profile",
-          text: "@" + [name, address, display_name].filter(identity).join(" "),
+          text:
+            "@" +
+            [profile?.name, handle?.address, profile?.display_name].filter(identity).join(" "),
         }
       })
   )

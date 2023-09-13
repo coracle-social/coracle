@@ -16,8 +16,10 @@
   const pseudUrl =
     "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
-  const submit = () => {
-    publishProfile(values).on("progress", toastProgress)
+  const submit = async () => {
+    const pub = await publishProfile(values)
+
+    pub.on("progress", toastProgress)
 
     navigate(routes.person($session.pubkey))
   }

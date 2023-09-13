@@ -20,11 +20,11 @@
       const {id, ...content} = channel
 
       if (id) {
-        const pub = publishNip28ChannelUpdate(id, content)
+        const pub = await publishNip28ChannelUpdate(id, content)
 
         pub.on("progress", toastProgress)
       } else {
-        const pub = publishNip28ChannelCreate(content)
+        const pub = await publishNip28ChannelCreate(content)
 
         joinNip28Channel(pub.event.id)
       }

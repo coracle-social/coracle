@@ -1,4 +1,4 @@
-import {prop, map, assocPath, pluck, last, uniqBy, uniq} from "ramda"
+import {prop, pipe, assoc, map, assocPath, pluck, last, uniqBy, uniq} from "ramda"
 import {Tags, appDataKeys} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import type {Event, Channel} from "src/engine2/model"
@@ -15,7 +15,7 @@ projections.addHandler(40, (e: Event) => {
       channels.key(e.id),
       e.created_at,
       {meta, relays},
-      assocPath(["nip28", "owner"], e.pubkey)
+      pipe(assoc("type", "nip28"), assocPath(["nip28", "owner"], e.pubkey))
     )
   }
 })
@@ -48,7 +48,7 @@ projections.addHandler(30078, async (e: Event) => {
 
   if (Tags.from(e).getMeta("d") === appDataKeys.NIP28_ROOMS_JOINED) {
     await tryJson(async () => {
-      const channelIds = await nip04.get().decryptAsUser(e.content, e.pubkey)
+      const channelIds = JSON.parse(await nip04.get().decryptAsUser(e.content, e.pubkey))
 
       // Just a bug from when I was building the feature, remove someday
       if (!Array.isArray(channelIds)) {
@@ -71,7 +71,7 @@ projections.addHandler(30078, async (e: Event) => {
 
   if (Tags.from(e).getMeta("d") === appDataKeys.NIP28_LAST_CHECKED) {
     await tryJson(async () => {
-      const payload = await nip04.get().decryptAsUser(e.content, e.pubkey)
+      const payload = JSON.parse(await nip04.get().decryptAsUser(e.content, e.pubkey))
 
       for (const key of Object.keys(payload)) {
         // Backwards compat from when we used to prefix id/pubkey

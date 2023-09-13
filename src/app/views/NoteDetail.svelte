@@ -39,19 +39,18 @@
     // If our note came from a feed, we can preload context
     context.hydrate([displayNote], depth)
 
-    await load({
+    load({
       filters: [{ids: [note.id]}],
       relays: selectHints(getSetting("relay_limit"), relays),
       onEvent: e => {
         context.addContext([e], {depth})
 
         displayNote = first(context.applyContext([e]))
+        loading = false
       },
     })
 
     info("NoteDetail", displayNote)
-
-    loading = false
   })
 
   onDestroy(() => {

@@ -4,7 +4,7 @@
   import {fly} from "src/util/transition"
   import {ellipsize} from "hurdak"
   import Anchor from "src/partials/Anchor.svelte"
-  import {canSign, imgproxy, joinNip28Channel, leaveNip28Channel} from "src/engine2"
+  import {canSign, hasNewMessages, imgproxy, joinNip28Channel, leaveNip28Channel} from "src/engine2"
 
   export let channel
 
@@ -14,10 +14,11 @@
 
   // Accommodate data urls from legacy
   const picture =
-    channel.picture?.length > 500 ? channel.picture : imgproxy(channel.picture, {w: 112, h: 112})
+    channel.meta?.picture?.length > 500
+      ? channel.meta.picture
+      : imgproxy(channel.meta.picture, {w: 112, h: 112})
 
-  $: notify =
-    channel.nip28.joined && (channel.last_checked || channel.last_sent) < channel.last_received
+  $: showBadge = channel.nip28.joined && hasNewMessages(channel)
 </script>
 
 <button
@@ -27,13 +28,13 @@
   <div
     class="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-solid border-white bg-cover bg-center"
     style={`background-image: url(${picture})`} />
-  {#if notify}
+  {#if showBadge}
     <div class="absolute left-2 top-2 h-2 w-2 rounded bg-accent" />
   {/if}
   <div class="flex min-w-0 flex-grow flex-col justify-start gap-2">
     <div class="flex flex-grow items-start justify-between gap-2">
       <h2 class="text-lg">
-        {channel.name || ""}
+        {channel.meta?.name || ""}
       </h2>
       {#if channel.nip28.joined}
         <Anchor theme="button" killEvent class="flex items-center gap-2" on:click={leave}>
@@ -47,9 +48,9 @@
         </Anchor>
       {/if}
     </div>
-    {#if channel.about}
+    {#if channel.meta?.about}
       <p class="text-start text-gray-1">
-        {ellipsize(channel.about, 300)}
+        {ellipsize(channel.meta.about, 300)}
       </p>
     {/if}
   </div>

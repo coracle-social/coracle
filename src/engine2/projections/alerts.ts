@@ -3,22 +3,22 @@ import type {Event} from "src/engine2/model"
 import {session, events, alerts} from "src/engine2/state"
 import {projections} from "src/engine2/projections/core"
 
-const isMention = (e: Event) => Tags.from(e).pubkeys().includes(session.get().pubkey)
+const isMention = (e: Event) => Tags.from(e).pubkeys().includes(session.get()?.pubkey)
 
-const isUserEvent = (id: string) => events.key(id).get()?.pubkey === session.get().pubkey
+const isUserEvent = (id: string) => events.key(id).get()?.pubkey === session.get()?.pubkey
 
 const isDescendant = (e: Event) => isUserEvent(findRootId(e))
 
 const isReply = (e: Event) => isUserEvent(findReplyId(e))
 
 const handleNotification = (e: Event) => {
-  const $pubkey = session.get().pubkey
+  const $session = session.get()
 
-  if (!$pubkey || e.pubkey === $pubkey) {
+  if (!$session || e.pubkey === $session.pubkey) {
     return
   }
 
-  alerts.key(e.id).set({...e, recipient: $pubkey})
+  alerts.key(e.id).set({...e, recipient: $session.pubkey})
 }
 
 noteKinds.forEach(kind => {

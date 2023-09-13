@@ -1,5 +1,5 @@
 import {nip19} from "nostr-tools"
-import {is, fromPairs, mergeLeft, last, identity, prop, flatten, uniq} from "ramda"
+import {omit, is, fromPairs, mergeLeft, last, identity, prop, flatten, uniq} from "ramda"
 import {ensurePlural, between, mapVals, tryFunc, avg, first} from "hurdak"
 import type {Filter, Event, DisplayEvent} from "src/engine2/model"
 import {tryJson} from "src/util/misc"
@@ -161,6 +161,9 @@ export const asDisplayEvent = (event: Event): DisplayEvent => ({
   zaps: [],
   ...event,
 })
+
+export const fromDisplayEvent = e =>
+  omit(["replies", "reactions", "zaps", "matchesFilter"], e) as Event
 
 export const toHex = (data: string): string | null => {
   if (data.match(/[a-zA-Z0-9]{64}/)) {

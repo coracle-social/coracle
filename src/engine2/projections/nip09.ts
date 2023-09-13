@@ -8,6 +8,6 @@ projections.addHandler(5, e => {
     .values()
     .all()
     .forEach(value => {
-      deletes.key(value).set({value})
+      deletes.key(value).set({value, created_at: e.created_at})
     })
 })

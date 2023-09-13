@@ -6,7 +6,7 @@ import type {Person} from "src/engine2/model"
 import {topics, people} from "src/engine2/state"
 
 export const peopleWithName = people.derived($people =>
-  $people.filter(({profile: p}) => p.name || p.nip05 || p.display_name)
+  $people.filter(({profile: p}) => p?.name || p?.nip05 || p?.display_name)
 )
 
 export const derivePerson = pubkey => people.key(pubkey).derived(defaultTo({pubkey}))

@@ -1,15 +1,14 @@
-import type {Filter} from "nostr-tools"
 import Bugsnag from "@bugsnag/js"
 import {nip19} from "nostr-tools"
 import {navigate} from "svelte-routing"
 import {writable} from "svelte/store"
-import {omit, path, filter, pluck, sortBy, slice} from "ramda"
-import {hash, union, sleep, doPipe, shuffle} from "hurdak"
+import {path, filter, pluck, sortBy, slice} from "ramda"
+import {hash, union, sleep, doPipe} from "hurdak"
 import {warn} from "src/util/logger"
 import {now} from "src/util/misc"
 import {userKinds, noteKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
-import type {DynamicFilter, Event} from "src/engine2"
+import type {Event} from "src/engine2"
 import {
   env,
   pool,
@@ -18,7 +17,6 @@ import {
   loadPubkeys,
   channels,
   follows,
-  network,
   subscribe,
   getUserRelayUrls,
   getSetting,
@@ -154,7 +152,7 @@ export const loadAppData = async () => {
   const {pubkey} = session.get()
 
   // Make sure the user and their follows are loaded
-  await loadPubkeys(pubkey, {force: true, kinds: userKinds})
+  await loadPubkeys([pubkey], {force: true, kinds: userKinds})
 
   // Load deletes
   loadDeletes()
@@ -220,21 +218,4 @@ export const toastProgress = progress => {
       }
 
   toast.show("info", payload, pending.size ? null : 8)
-}
-
-// Feeds
-
-export const getAuthorsWithDefaults = (pubkeys: string[]) =>
-  shuffle(pubkeys.length > 0 ? pubkeys : (env.get().DEFAULT_FOLLOWS as string[])).slice(0, 1024)
-
-export const compileFilter = (filter: DynamicFilter): Filter => {
-  if (filter.authors === "global") {
-    filter = omit(["authors"], filter)
-  } else if (filter.authors === "follows") {
-    filter = {...filter, authors: getAuthorsWithDefaults(follows.get())}
-  } else if (filter.authors === "network") {
-    filter = {...filter, authors: getAuthorsWithDefaults(network.get())}
-  }
-
-  return filter as Filter
 }

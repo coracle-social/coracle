@@ -42,14 +42,16 @@
     data.mentions = without([pubkey], data.mentions)
   }
 
-  const getContent = () => (reply.parse() + "\n" + data.image).trim()
+  const getContent = () => (reply.parse() + "\n" + (data.image || "")).trim()
 
   const send = async () => {
     const content = getContent()
     const tags = data.mentions.map(mention)
 
     if (content) {
-      publishReply(parent, content, tags).on("progress", toastProgress)
+      const pub = await publishReply(parent, content, tags)
+
+      pub.on("progress", toastProgress)
 
       reset()
     }

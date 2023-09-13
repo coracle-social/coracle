@@ -1,34 +1,44 @@
 import {uniq, prop, uniqBy} from "ramda"
-import {tryFunc} from "hurdak"
+import {tryFunc, sleep} from "hurdak"
 import {tryJson} from "src/util/misc"
 import {Tags, appDataKeys} from "src/util/nostr"
 import type {Channel} from "src/engine2/model"
+import {EventKind} from "src/engine2/model"
 import {channels} from "src/engine2/state"
 import {user, nip04, canSign} from "src/engine2/queries"
 import {projections} from "src/engine2/projections/core"
 
 projections.addHandler(30078, async e => {
   if (canSign.get() && Tags.from(e).getMeta("d") === appDataKeys.NIP04_LAST_CHECKED) {
-    await tryJson(async () => {
-      const payload = await nip04.get().decryptAsUser(e.content, user.get().pubkey)
+    channels.mapStore.updateAsync(async $channels => {
+      await tryJson(async () => {
+        const payload = JSON.parse(await nip04.get().decryptAsUser(e.content, user.get().pubkey))
 
-      for (const [id, ts] of Object.entries(payload) as [string, number][]) {
-        // Ignore weird old stuff
-        if (id.includes('/')) {
-          continue
+        for (const [id, ts] of Object.entries(payload) as [string, number][]) {
+          // Ignore weird old stuff
+          if (id === "undefined" || id.includes("/")) {
+            continue
+          }
+
+          const channel =
+            $channels.get(id) || ({id, type: "nip04", relays: e.seen_on, messages: []} as Channel)
+
+          $channels.set(id, {
+            ...channel,
+            last_checked: Math.max(ts, channel.last_checked || 0),
+          })
+
+          // No need to lock up the UI decrypting a bunch of stuff
+          await sleep(16)
         }
+      })
 
-        const channel = channels.key(id)
-
-        channel.merge({
-          last_checked: Math.max(ts, channel.get()?.last_checked || 0),
-        })
-      }
+      return $channels
     })
   }
 })
 
-projections.addHandler(4, async e => {
+projections.addHandler(EventKind.Nip04Message, async e => {
   if (!canSign.get()) {
     return
   }

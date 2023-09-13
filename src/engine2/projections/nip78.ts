@@ -11,7 +11,7 @@ projections.addHandler(30078, e => {
     e.created_at > getSetting("updated_at")
   ) {
     tryJson(async () => {
-      const updates = await nip04.get().decryptAsUser(e.content, user.get().pubkey)
+      const updates = JSON.parse(await nip04.get().decryptAsUser(e.content, user.get().pubkey))
 
       settings.update($settings => ({
         ...$settings,

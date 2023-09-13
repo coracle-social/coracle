@@ -15,7 +15,10 @@ export type EventOpts = {
   tags?: string[][]
 }
 
-export function buildEvent(kind: number, {content = "", tags = [], created_at = null}: EventOpts) {
+export const buildEvent = (
+  kind: number,
+  {content = "", tags = [], created_at = null}: EventOpts
+) => {
   return {kind, content, tags, created_at: created_at || now()}
 }
 
@@ -23,10 +26,14 @@ export type PublishOpts = EventOpts & {
   relays?: string[]
 }
 
-export function publishEvent(kind: number, {relays, content = "", tags = []}: PublishOpts) {
+export const publishEvent = async (
+  kind: number,
+  {relays, content = "", tags = []}: PublishOpts
+) => {
   return Publisher.publish({
+    timeout: 5000,
     relays: relays || getUserRelayUrls("write"),
-    event: signer.get().signAsUser(
+    event: await signer.get().signAsUser(
       buildEvent(kind, {
         content,
         tags: uniqTags([...tags, tagsFromContent(content)]),

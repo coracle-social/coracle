@@ -6,9 +6,9 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {env, settings, publishSettings} from "src/engine2"
+  import {env, getSettings, publishSettings} from "src/engine2"
 
-  let values = {...settings.get()}
+  let values = getSettings()
 
   const submit = () => {
     publishSettings(values)

@@ -34,7 +34,11 @@
 
   const edit = () => modal.push({type: "chat/edit", channel: $channel})
 
-  const sendMessage = content => publishNip28Message(id, content).result
+  const sendMessage = async content => {
+    const pub = await publishNip28Message(id, content)
+
+    return pub.result
+  }
 
   onMount(() => {
     const sub = listenForNip28Messages(id)
@@ -69,7 +73,7 @@
     <div class="flex h-12 flex-col pt-px">
       <div class="flex w-full items-center justify-between">
         <div class="flex gap-2">
-          {#if $channel?.nip28?.owner === $session.pubkey}
+          {#if $channel?.nip28?.owner === $session?.pubkey}
             <button class="cursor-pointer text-sm" on:click={edit}>
               <i class="fa-solid fa-edit" /> Edit
             </button>

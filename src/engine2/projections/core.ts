@@ -23,5 +23,5 @@ export const updateKey = (key, timestamp, updates, modify = (a: any) => a) => {
     }
   }
 
-  key.set(record)
+  key.set(modify(record))
 }
