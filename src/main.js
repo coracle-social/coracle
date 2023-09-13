@@ -1,8 +1,10 @@
 import "src/app.css"
 
 import {identity} from "ramda"
+import {Fetch} from "hurdak"
 import Bugsnag from "@bugsnag/js"
-import {env} from "src/engine2"
+import {tryFetch} from "src/util/misc"
+import {env, relays} from "src/engine2"
 import App from "src/app/App.svelte"
 import {installPrompt} from "src/partials/state"
 
@@ -48,6 +50,7 @@ const DEFAULT_FOLLOWS = (import.meta.env.VITE_DEFAULT_FOLLOWS || "").split(",").
 
 const ENABLE_ZAPS = JSON.parse(import.meta.env.VITE_ENABLE_ZAPS)
 
+// Prep our env
 env.set({
   DEFAULT_FOLLOWS,
   IMGPROXY_URL,
@@ -59,6 +62,20 @@ env.set({
   DEFAULT_RELAYS,
   ENABLE_ZAPS,
 })
+
+const addRelay = url => relays.key(url).merge({url})
+
+// Throw some hardcoded defaults in there
+DEFAULT_RELAYS.forEach(addRelay)
+
+// Load relays from nostr.watch via dufflepud
+if (FORCE_RELAYS.length === 0 && DUFFLEPUD_URL) {
+  tryFetch(async () => {
+    const json = await Fetch.fetchJson(DUFFLEPUD_URL + "/relay")
+
+    json.relays.forEach(addRelay)
+  })
+}
 
 export default new App({
   target: document.getElementById("app"),
