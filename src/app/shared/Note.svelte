@@ -13,7 +13,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
-  import {getSetting, derivePerson, isMuted, getParentHints, getEventHints} from "src/engine2"
+  import {derivePerson, isMuted, getParentHints, getEventHints} from "src/engine2"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
   export let note
@@ -59,17 +59,11 @@
     }
   }
 
-  const goToParent = async () => {
-    const relays = getParentHints(getSetting("relay_limit"), note)
+  const goToParent = () =>
+    goToNote({note: {id: findReplyId(note), replies: [note]}, relays: getParentHints(note)})
 
-    goToNote({note: {id: findReplyId(note), replies: [note]}, relays})
-  }
-
-  const goToThread = async () => {
-    const relays = getEventHints(getSetting("relay_limit"), note)
-
-    modal.push({type: "thread/detail", anchorId: note.id, relays})
-  }
+  const goToThread = () =>
+    modal.push({type: "thread/detail", anchorId: note.id, relays: getEventHints(note)})
 
   const setBorderHeight = () => {
     const getHeight = e => e?.getBoundingClientRect().height || 0

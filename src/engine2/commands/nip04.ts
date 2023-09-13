@@ -4,7 +4,7 @@ import {now} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
 import {EventKind} from "src/engine2/model"
 import {channels} from "src/engine2/state"
-import {user, nip04, getInboxHints, getSetting} from "src/engine2/queries"
+import {user, nip04, getInboxHints} from "src/engine2/queries"
 import {setAppData} from "./nip78"
 import {publishEvent} from "./util"
 
@@ -12,7 +12,7 @@ export const publishNip04Message = async (recipient, content, tags = [], relays 
   const pubkeys = [recipient, user.get().pubkey]
 
   return publishEvent(EventKind.Nip04Message, {
-    relays: relays || getInboxHints(getSetting("relay_limit"), pubkeys),
+    relays: relays || getInboxHints(pubkeys),
     content: await nip04.get().encryptAsUser(content, recipient),
     tags: [...tags, ["p", recipient]],
   })

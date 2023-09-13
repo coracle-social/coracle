@@ -8,14 +8,7 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {
-    load,
-    getSetting,
-    displayPubkey,
-    isEventMuted,
-    getEventHints,
-    mergeHints,
-  } from "src/engine2"
+  import {load, displayPubkey, isEventMuted, getEventHints, mergeHints} from "src/engine2"
 
   export let note
   export let value
@@ -29,10 +22,10 @@
   const {id, identifier, kind, pubkey} = value
 
   load({
-    relays: mergeHints(getSetting("relay_limit"), [
+    relays: mergeHints([
       // Agora social has a bug
       (value.relays || []).flatMap(r => r.split(",")).filter(isShareableRelay),
-      getEventHints(getSetting("relay_limit"), note),
+      getEventHints(note),
     ]),
     filters: [
       id

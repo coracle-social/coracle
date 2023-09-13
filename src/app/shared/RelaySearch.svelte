@@ -13,7 +13,6 @@
     getRelaySearch,
     relayPolicyUrls,
     urlToRelay,
-    getSetting,
   } from "src/engine2"
 
   export let q = ""
@@ -27,15 +26,13 @@
     .derived(filter((r: Relay) => !$relayPolicyUrls.includes(r.url)))
     .derived(getRelaySearch)
 
-  const relayLimit = getSetting("relay_limit")
-
   $: ratings = mapVals(
     events => getAvgQuality("review/relay", events),
     groupBy(e => Tags.from(e).getMeta("r"), reviews)
   )
 
   load({
-    relays: getPubkeyHints(relayLimit, $session.pubkey, "read"),
+    relays: getPubkeyHints($session.pubkey, "read"),
     filters: [
       {
         limit: 1000,

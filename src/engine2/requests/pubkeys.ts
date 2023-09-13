@@ -4,7 +4,7 @@ import {personKinds, appDataKeys} from "src/util/nostr"
 import {now} from "src/util/misc"
 import type {Filter} from "src/engine2/model"
 import {people} from "src/engine2/state"
-import {getSetting, mergeHints, getPubkeyHints} from "src/engine2/queries"
+import {mergeHints, getPubkeyHints} from "src/engine2/queries"
 import {load} from "./load"
 
 export type LoadPeopleOpts = {
@@ -51,12 +51,7 @@ export const loadPubkeys = async (
       return relays
     }
 
-    const limit = getSetting("relay_limit")
-
-    return mergeHints(
-      limit,
-      chunk.map(pubkey => getPubkeyHints(limit, pubkey, "write"))
-    )
+    return mergeHints(chunk.map(pubkey => getPubkeyHints(pubkey, "write")))
   }
 
   const getChunkFilters = (chunk: string[]) => {

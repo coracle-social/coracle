@@ -13,7 +13,6 @@
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {
     session,
-    getSetting,
     getPubkeysWithDefaults,
     labels,
     getPubkeyHints,
@@ -69,7 +68,7 @@
 
   onMount(() => {
     const sub = subscribe({
-      relays: getPubkeyHints(getSetting("relay_limit"), $session?.pubkey, "read"),
+      relays: getPubkeyHints($session?.pubkey, "read"),
       filters: [
         {
           kinds: [1985],

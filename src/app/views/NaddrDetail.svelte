@@ -4,7 +4,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {load, displayPubkey, getSetting, selectHints} from "src/engine2"
+  import {load, displayPubkey, selectHints} from "src/engine2"
 
   export let identifier
   export let kind
@@ -16,7 +16,7 @@
   const display = displayPubkey(pubkey)
 
   load({
-    relays: selectHints(getSetting("relay_limit"), relays),
+    relays: selectHints(relays),
     filters: [{kinds: [kind], authors: [pubkey], "#d": [identifier]}],
     onEvent: event => {
       note = event

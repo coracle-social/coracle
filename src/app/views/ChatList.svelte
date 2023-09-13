@@ -54,7 +54,7 @@
   document.title = "Chat"
 
   onMount(() => {
-    const relays = getPubkeyHints(3, $stateKey, "read")
+    const relays = getPubkeyHints.limit(3).getHints($stateKey, "read")
     const authors = getPubkeysWithDefaults($follows)
     const since = now() - seconds(1, "day")
     const filters = [

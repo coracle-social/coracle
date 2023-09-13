@@ -1,7 +1,7 @@
 import {Fetch} from "hurdak"
 import {warn} from "src/util/logger"
 import {people} from "src/engine2/state"
-import {signer, getSetting, getPubkeyHints, getPublishHints} from "src/engine2/queries"
+import {signer, getPubkeyHints, getPublishHints} from "src/engine2/queries"
 import {buildEvent} from "./util"
 
 export async function requestZap(content, amount, {pubkey, event = null}) {
@@ -13,9 +13,7 @@ export async function requestZap(content, amount, {pubkey, event = null}) {
 
   const {callback, lnurl} = person.zapper
   const msats = amount * 1000
-  const relays = event
-    ? getPublishHints(getSetting("relay_limit"), event)
-    : getPubkeyHints(getSetting("relay_limit"), pubkey, "read")
+  const relays = event ? getPublishHints(event) : getPubkeyHints(pubkey, "read")
 
   const tags = [
     ["relays", ...relays],

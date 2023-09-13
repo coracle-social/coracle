@@ -44,7 +44,7 @@ export const publishEvent = async (
 
 export const uniqTags = uniqBy((t: string[]) => t.slice(0, 2).join(":"))
 
-export const getEventHint = (event: Event) => first(getEventHints(1, event)) || ""
+export const getEventHint = (event: Event) => first(getEventHints.limit(1).getHints(event)) || ""
 
 export const getPubkeyHint = (pubkey: string): string =>
   first(getPubkeyHints(1, pubkey, "write")) || ""

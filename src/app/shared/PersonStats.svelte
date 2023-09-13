@@ -34,7 +34,7 @@
 
       sub = subscribe({
         ephemeral: true,
-        relays: getPubkeyHints(3, $session?.pubkey, "read"),
+        relays: getPubkeyHints.limit(3).getHints($session?.pubkey, "read"),
         filters: [{kinds: [3], "#p": [pubkey]}],
         onEvent: batch(300, (events: Event[]) => {
           for (const e of events) {

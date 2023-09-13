@@ -6,7 +6,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import type {Event} from "src/engine2"
-  import {subscribe, getSetting, loadPubkeys, getPubkeyHints, follows} from "src/engine2"
+  import {subscribe, loadPubkeys, getPubkeyHints, follows} from "src/engine2"
 
   export let type
   export let pubkey
@@ -18,7 +18,7 @@
       pubkeys = $follows
     } else {
       const sub = subscribe({
-        relays: getPubkeyHints(getSetting("relay_limit"), pubkey, "read"),
+        relays: getPubkeyHints(pubkey, "read"),
         filters: [{kinds: [3], "#p": [pubkey]}],
         onEvent: batch(500, (events: Event[]) => {
           const newPubkeys = pluck("pubkey", events)

@@ -11,7 +11,7 @@
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {load, selectHints, getSetting} from "src/engine2"
+  import {load, selectHints} from "src/engine2"
 
   export let note
   export let relays = []
@@ -41,7 +41,7 @@
 
     load({
       filters: [{ids: [note.id]}],
-      relays: selectHints(getSetting("relay_limit"), relays),
+      relays: selectHints(relays),
       onEvent: e => {
         context.addContext([e], {depth})
 

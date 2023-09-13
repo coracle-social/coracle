@@ -18,7 +18,7 @@
   onMount(() => {
     try {
       ;({type, data} = nip19.decode(entity) as {type: string; data: any})
-      relays = selectHints(3, data.relays || [])
+      relays = selectHints(data.relays || [], 3)
     } catch (e) {
       warn(e)
     }

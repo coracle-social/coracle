@@ -4,7 +4,7 @@ import {generatePrivateKey} from "nostr-tools"
 import {now} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
 import {channels} from "src/engine2/state"
-import {user, nip59, getSetting, getPubkeyHints} from "src/engine2/queries"
+import {user, nip59, getPubkeyHints} from "src/engine2/queries"
 import {setAppData} from "./nip78"
 import {Publisher} from "./publisher"
 import {mention} from "./util"
@@ -15,7 +15,7 @@ export const createNip24Message = (channelId, content) => {
 
   for (const pubkey of recipients.concat(user.get().pubkey)) {
     Publisher.publish({
-      relays: getPubkeyHints(getSetting("relay_limit"), pubkey, "read"),
+      relays: getPubkeyHints(pubkey, "read"),
       event: nip59.get().wrap(template, {
         wrap: {
           author: generatePrivateKey(),

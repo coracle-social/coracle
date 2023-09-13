@@ -24,7 +24,7 @@
 
   const pubkeyEncoder = {
     encode: pubkey => {
-      const relays = getPubkeyHints(3, pubkey, "write")
+      const relays = getPubkeyHints.limit(3).getHints(pubkey, "write")
       const nprofile = nip19.nprofileEncode({pubkey, relays})
 
       return "nostr:" + nprofile

@@ -9,7 +9,6 @@ import type {Collection} from "src/engine2/util/store"
 import type {Event, DisplayEvent, Filter} from "src/engine2/model"
 import {env} from "src/engine2/state"
 import {
-  getSetting,
   mergeHints,
   isEventMuted,
   getReplyHints,
@@ -90,7 +89,7 @@ export class ContextLoader {
       return this.opts.relays
     }
 
-    return mergeHints(getSetting("relay_limit"), groups)
+    return mergeHints(groups)
   }
 
   applyContext = (notes: Event[], {substituteParents = false, alreadySeen = new Set()} = {}) => {
@@ -177,11 +176,11 @@ export class ContextLoader {
       const {root, reply} = findReplyAndRootIds(e)
 
       if (reply && !this.seen.has(reply)) {
-        info.push({id: reply, hints: getParentHints(getSetting("relay_limit"), e)})
+        info.push({id: reply, hints: getParentHints(e)})
       }
 
       if (root && !this.seen.has(root)) {
-        info.push({id: findRootId(e), hints: getRootHints(getSetting("relay_limit"), e)})
+        info.push({id: findRootId(e), hints: getRootHints(e)})
       }
 
       return info
@@ -217,7 +216,7 @@ export class ContextLoader {
 
       for (const c of chunk(256, events)) {
         load({
-          relays: this.mergeHints(c.map(e => getReplyHints(getSetting("relay_limit"), e))),
+          relays: this.mergeHints(c.map(e => getReplyHints(e))),
           filters: [{kinds: this.getReplyKinds(), "#e": pluck("id", c as Event[])}],
           onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: depth - 1})),
         })
@@ -245,7 +244,7 @@ export class ContextLoader {
     for (const c of chunk(256, findNotes(this.data.get()))) {
       this.addSubs([
         subscribe({
-          relays: this.mergeHints(c.map(e => getReplyHints(getSetting("relay_limit"), e))),
+          relays: this.mergeHints(c.map(e => getReplyHints(e))),
           filters: [{kinds: this.getReplyKinds(), "#e": pluck("id", c), since: now()}],
           onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: 2})),
         }),

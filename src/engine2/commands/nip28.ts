@@ -2,7 +2,7 @@ import {assocPath, path, prop, fromPairs, pluck} from "ramda"
 import {appDataKeys} from "src/util/nostr"
 import {now} from "src/util/misc"
 import {channels} from "src/engine2/state"
-import {selectHints, getSetting} from "src/engine2/queries"
+import {selectHints} from "src/engine2/queries"
 import {publishEvent} from "./util"
 import {setAppData} from "./nip78"
 
@@ -14,9 +14,9 @@ export const publishNip28ChannelUpdate = (id, content) =>
 
 export const publishNip28Message = (id, content) => {
   const channel = channels.key(id).get()
-  const relays = selectHints(getSetting("relay_limit"), channel?.relays || [])
+  const [hint] = selectHints(channel?.relays || [])
 
-  return publishEvent(42, {content, tags: [["e", id, relays[0], "root"]]})
+  return publishEvent(42, {content, tags: [["e", id, hint, "root"]]})
 }
 
 export const publishNip28ChannelChecked = (id: string) => {

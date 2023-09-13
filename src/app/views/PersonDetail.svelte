@@ -21,7 +21,6 @@
     derivePerson,
     displayPerson,
     loadPubkeys,
-    getSetting,
     imgproxy,
     getPubkeyRelays,
     mergeHints,
@@ -33,7 +32,6 @@
 
   const tabs = ["notes", "likes", $env.FORCE_RELAYS.length === 0 && "relays"].filter(identity)
   const pubkey = toHex(npub)
-  const relayLimit = getSetting("relay_limit")
   const person = derivePerson(pubkey)
   const {rgb, rgba} = getThemeBackgroundGradient()
 
@@ -41,7 +39,7 @@
   let loading = true
 
   $: ownRelays = getPubkeyRelays(pubkey)
-  $: mergedRelays = mergeHints(relayLimit, [relays, getPubkeyHints(relayLimit, pubkey, "write")])
+  $: mergedRelays = mergeHints([relays, getPubkeyHints(pubkey, "write")])
   $: banner = imgproxy($person.profile?.banner, {w: window.innerWidth})
 
   info("Person", npub, $person)

@@ -6,6 +6,7 @@ import type {Event, Relay} from "src/engine2/model"
 import {RelayMode} from "src/engine2/model"
 import {env, pool, relays, people} from "src/engine2/state"
 import {stateKey, user} from "src/engine2/queries/session"
+import {getSetting} from "src/engine2/queries/nip78"
 
 export const relayPolicies = user.derived($user => $user.relays || [])
 
@@ -57,10 +58,14 @@ export const getUserRelayUrls = (mode: string = null) => pluck("url", getUserRel
 //    doesn't need to see.
 // 5) Advertise relays — write and read back your own relay list
 
-export const selectHints = (limit: number | null, hints: Iterable<string>) => {
+export const selectHints = (hints: Iterable<string>, limit: number = null) => {
   const seen = new Set()
   const ok = []
   const bad = []
+
+  if (!limit) {
+    limit = getSetting("relay_limit")
+  }
 
   for (const url of chain(hints, getUserRelayUrls(RelayMode.Read), env.get().DEFAULT_RELAYS)) {
     if (seen.has(url)) {
@@ -78,19 +83,39 @@ export const selectHints = (limit: number | null, hints: Iterable<string>) => {
       ok.push(url)
     }
 
-    if (limit && ok.length > limit) {
+    if (ok.length > limit) {
       break
     }
   }
 
   // If we don't have enough hints, use the broken ones
-  return ok.concat(bad).slice(0, limit || Infinity)
+  return ok.concat(bad).slice(0, limit)
 }
 
-export const hintSelector =
-  (generateHints: (...args: any[]) => Iterable<string>) =>
-  (limit: number, ...args: any[]) =>
-    selectHints(limit, generateHints(...args))
+export class HintSelector {
+  #limit = getSetting("relay_limit")
+
+  constructor(readonly generateHints) {}
+
+  limit = limit => {
+    this.#limit = limit
+
+    return this
+  }
+
+  getHints = (...args) => {
+    return selectHints(this.generateHints(...args), this.#limit)
+  }
+}
+
+export const hintSelector = (generateHints: (...args: any[]) => Iterable<string>) => {
+  const selector = new HintSelector(generateHints)
+  const getHints = selector.getHints
+
+  ;(getHints as any).limit = selector.limit
+
+  return getHints as typeof getHints & {limit: typeof selector.limit}
+}
 
 export const getPubkeyHints = hintSelector(function* (pubkey: string, mode: RelayMode) {
   yield* getPubkeyRelayUrls(pubkey, mode)
@@ -127,21 +152,19 @@ export const getRootHints = hintSelector(function* (event) {
 // anyone else who is tagged in the original event or the reply. Get everyone's read
 // relays. Limit how many per pubkey we publish to though. We also want to advertise
 // our content to our followers, so publish to our write relays as well.
-export const getPublishHints = (limit: number, event: Event) => {
+export const getPublishHints = hintSelector(function* (event: Event) {
   const pubkeys = Tags.from(event).type("p").values().all()
   const hintGroups = pubkeys.map(pubkey => getPubkeyRelayUrls(pubkey, RelayMode.Read))
   const authorRelays = getPubkeyRelayUrls(event.pubkey, RelayMode.Write)
 
-  return mergeHints(limit, [...hintGroups, authorRelays, getUserRelayUrls(RelayMode.Write)])
-}
+  yield* mergeHints([...hintGroups, authorRelays, getUserRelayUrls(RelayMode.Write)])
+})
 
-export const getInboxHints = (limit: number, pubkeys: string[]) =>
-  mergeHints(
-    limit,
-    pubkeys.map(pk => getPubkeyHints(limit, pk, "read"))
-  )
+export const getInboxHints = hintSelector(function* (pubkeys: string[]) {
+  yield* mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read")))
+})
 
-export const mergeHints = (limit: number, groups: string[][]) => {
+export const mergeHints = (groups: string[][], limit: number = null) => {
   const scores = {} as Record<string, any>
 
   for (const hints of groups) {
@@ -166,5 +189,5 @@ export const mergeHints = (limit: number, groups: string[][]) => {
 
   return sortBy(([hint, {score}]) => score, Object.entries(scores))
     .map(nth(0))
-    .slice(0, limit)
+    .slice(0, limit || getSetting("relay_limit"))
 }

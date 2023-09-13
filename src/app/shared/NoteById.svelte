@@ -5,7 +5,7 @@
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {load, ContextLoader, selectHints, getSetting} from "src/engine2"
+  import {load, ContextLoader, selectHints} from "src/engine2"
 
   export let id
   export let relays = []
@@ -27,7 +27,7 @@
   onMount(async () => {
     await load({
       filters: [{ids: [id]}],
-      relays: selectHints(getSetting("relay_limit"), relays),
+      relays: selectHints(relays),
       onEvent: e => {
         context.addContext([e], {depth: 0})
 
