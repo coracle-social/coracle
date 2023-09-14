@@ -5,14 +5,14 @@
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {load, ContextLoader, selectHints} from "src/engine2"
+  import {load, ContextLoader, selectHints, getIdFilter} from "src/engine2"
 
   export let id
   export let relays = []
   export let invertColors = false
 
   const context = new ContextLoader({
-    filters: [{ids: [id]}],
+    filters: [getIdFilter(id)],
     onEvent: e => {
       // Update feed, but only if we have loaded an actual note
       if (note) {
@@ -26,7 +26,7 @@
 
   onMount(async () => {
     await load({
-      filters: [{ids: [id]}],
+      filters: [getIdFilter(id)],
       relays: selectHints(relays),
       onEvent: e => {
         context.addContext([e], {depth: 0})

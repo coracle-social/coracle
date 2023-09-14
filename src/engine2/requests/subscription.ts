@@ -72,7 +72,7 @@ export class Subscription extends EventEmitter {
       return
     }
 
-    if (this.opts.shouldProject === false) {
+    if (this.opts.shouldProject !== false) {
       projections.push(event)
     }
 

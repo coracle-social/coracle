@@ -1,6 +1,5 @@
 <script lang="ts">
   import {first} from "hurdak"
-  import {ContextLoader} from "src/engine2"
   import {onMount, onDestroy} from "svelte"
   import {fly} from "src/util/transition"
   import {info} from "src/util/logger"
@@ -11,7 +10,7 @@
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {load, selectHints, getIdFilter} from "src/engine2"
+  import {load, ContextLoader, selectHints, getIdFilter} from "src/engine2"
 
   export let note
   export let relays = []

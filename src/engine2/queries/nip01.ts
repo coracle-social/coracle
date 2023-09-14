@@ -37,7 +37,12 @@ export const displayPubkey = (pubkey: string) => displayPerson(derivePerson(pubk
 
 export const getPeopleSearch = $people =>
   fuzzy($people, {
-    keys: ["name", "display_name", {name: "nip05", weight: 0.5}, {name: "about", weight: 0.1}],
+    keys: [
+      "profile.name",
+      "profile.display_name",
+      {name: "profile.nip05", weight: 0.5},
+      {name: "about", weight: 0.1},
+    ],
     threshold: 0.3,
   })
 

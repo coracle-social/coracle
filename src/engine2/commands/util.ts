@@ -36,7 +36,7 @@ export const publishEvent = async (
     event: await signer.get().signAsUser(
       buildEvent(kind, {
         content,
-        tags: uniqTags([...tags, tagsFromContent(content)]),
+        tags: uniqTags([...tags, ...tagsFromContent(content)]),
       })
     ),
   })

@@ -52,7 +52,7 @@ projections.addHandler(EventKind.Nip04Message, async e => {
     const other = pubkey === e.pubkey ? recipient : e.pubkey
     const content = await nip04.get().decryptAsUser(e.content, other)
 
-    channels.key(e.pubkey).update($channel => {
+    channels.key(other).update($channel => {
       const updates = {
         ...$channel,
         id: e.pubkey,

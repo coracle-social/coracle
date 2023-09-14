@@ -3,7 +3,7 @@ import {throttle} from "throttle-debounce"
 import {omit, find, pluck, flatten, without, groupBy, sortBy, prop, uniqBy, reject} from "ramda"
 import {ensurePlural, batch, chunk} from "hurdak"
 import {now, pushToKey} from "src/util/misc"
-import {findReplyAndRootIds, findReplyId, findRootId, Tags, noteKinds} from "src/util/nostr"
+import {findReplyAndRootIds, findReplyId, findRootId, Tags, reactionKinds} from "src/util/nostr"
 import {collection} from "src/engine2/util/store"
 import type {Collection} from "src/engine2/util/store"
 import type {Event, DisplayEvent, Filter} from "src/engine2/model"
@@ -65,7 +65,7 @@ export class ContextLoader {
   }
 
   isTextNote(e: Event) {
-    return noteKinds.includes(e.kind)
+    return !reactionKinds.includes(e.kind)
   }
 
   isMissingParent = (e: Event) => {
