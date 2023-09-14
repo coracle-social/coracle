@@ -1,4 +1,5 @@
-import {is, reject, filter, map, findIndex, equals} from "ramda"
+import {throttle} from "throttle-debounce"
+import {is, identity, reject, filter, map, findIndex, equals} from "ramda"
 import {ensurePlural} from "hurdak"
 
 type Invalidator<T> = (value?: T) => void
@@ -12,6 +13,7 @@ export interface Readable<T> {
   get: () => T
   subscribe(this: void, run: Subscriber<T>, invalidate?: Invalidator<T>): Unsubscriber
   derived: <U>(f: (v: T) => U) => Readable<U>
+  throttle(t: number): Readable<T>
 }
 
 export class Writable<T> implements Readable<T> {
@@ -60,6 +62,10 @@ export class Writable<T> implements Readable<T> {
   derived<U>(f: (v: T) => U): Derived<U> {
     return new Derived<U>(this, f)
   }
+
+  throttle = (t: number) => {
+    return new Derived<T>(this, identity, t)
+  }
 }
 
 export class Derived<T> implements Readable<T> {
@@ -69,16 +75,20 @@ export class Derived<T> implements Readable<T> {
   private stores: Derivable
   private getValue: (values: any) => T
 
-  constructor(stores: Derivable, getValue: (values: any) => T) {
+  constructor(stores: Derivable, getValue: (values: any) => T, t = 0) {
     if (!getValue) {
       throw new Error(`Invalid derivation function`)
     }
 
     this.stores = stores
     this.getValue = getValue
+
+    if (t) {
+      this.notify = throttle(t, this.notify)
+    }
   }
 
-  notify() {
+  notify = () => {
     this.callerSubs.forEach(f => f(this.get()))
   }
 
@@ -119,6 +129,10 @@ export class Derived<T> implements Readable<T> {
   derived<U>(f: (v: T) => U): Readable<U> {
     return new Derived(this, f) as Readable<U>
   }
+
+  throttle = (t: number) => {
+    return new Derived<T>(this, identity, t)
+  }
 }
 
 export class Key<T extends R> implements Readable<T> {
@@ -143,6 +157,8 @@ export class Key<T extends R> implements Readable<T> {
   subscribe = (f: Subscriber<T>) => this.store.subscribe(f)
 
   derived = <U>(f: (v: T) => U) => this.store.derived<U>(f)
+
+  throttle = (t: number) => this.store.throttle(t)
 
   exists = () => this.base.get().has(this.key)
 
@@ -192,6 +208,8 @@ export class Collection<T extends R> implements Readable<T[]> {
   subscribe = (f: Subscriber<T[]>) => this.listStore.subscribe(f)
 
   derived = <U>(f: (v: T[]) => U) => this.listStore.derived<U>(f)
+
+  throttle = (t: number) => this.listStore.throttle(t)
 
   key = (k: string) => new Key(this.mapStore, this.pk, k)
 

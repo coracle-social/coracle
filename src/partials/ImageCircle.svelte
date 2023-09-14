@@ -12,7 +12,7 @@
   class={cx(
     $$props.class,
     `overflow-hidden w-${size} h-${size} inline-block shrink-0 rounded-full border border-solid
-     border-gray-1 bg-cover bg-center`
+     border-gray-1 bg-gray-9 bg-cover bg-center`
   )}
   style={`background-image: url(${url}); ${$$props.style || ""}`}>
   <slot />

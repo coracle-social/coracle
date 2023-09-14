@@ -26,7 +26,7 @@ const sortByPubkeyWhitelist = (fallback: (x: any) => number) => (rows: Record<st
 export const storage = new Storage([
   new LocalStorageAdapter("sessions", state.sessions),
   new LocalStorageAdapter("session", state.session),
-  new LocalStorageAdapter("alertsLastChecked", state.alertsLastChecked),
+  new LocalStorageAdapter("notificationsLastChecked", state.notificationsLastChecked),
   new IndexedDBAdapter("events", state.events, {
     max: 10000,
     sort: sortByPubkeyWhitelist(prop("created_at")),

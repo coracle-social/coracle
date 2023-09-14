@@ -11,7 +11,7 @@
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {load, selectHints} from "src/engine2"
+  import {load, selectHints, getIdFilter} from "src/engine2"
 
   export let note
   export let relays = []
@@ -22,7 +22,7 @@
   }
 
   const context = new ContextLoader({
-    filters: [{ids: [note.id]}],
+    filters: [getIdFilter(note.id)],
     onEvent: e => {
       // Update feed, but only if we have loaded an actual note
       if (displayNote.sig) {
@@ -40,7 +40,7 @@
     context.hydrate([displayNote], depth)
 
     load({
-      filters: [{ids: [note.id]}],
+      filters: [getIdFilter(note.id)],
       relays: selectHints(relays),
       onEvent: e => {
         context.addContext([e], {depth})
@@ -66,7 +66,7 @@
   <div in:fly={{y: 20}} class="m-auto flex w-full max-w-2xl flex-col gap-4 p-4">
     <Note
       showContext
-      anchorId={note.id}
+      anchorId={displayNote.id}
       note={displayNote}
       {depth}
       {invertColors}

@@ -33,7 +33,7 @@
       const followers = new Set()
 
       sub = subscribe({
-        ephemeral: true,
+        shouldProject: false,
         relays: getPubkeyHints.limit(3).getHints($session?.pubkey, "read"),
         filters: [{kinds: [3], "#p": [pubkey]}],
         onEvent: batch(300, (events: Event[]) => {

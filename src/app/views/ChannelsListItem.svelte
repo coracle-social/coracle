@@ -1,7 +1,7 @@
 <script lang="ts">
   import {navigate} from "svelte-routing"
   import {displayList} from "hurdak"
-  import PersonCircle from "src/app/shared/PersonCircle.svelte"
+  import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import Card from "src/partials/Card.svelte"
   import {people, channels, displayPerson, loadPubkeys, hasNewMessages} from "src/engine2"
 
@@ -19,13 +19,7 @@
 <Card interactive on:click={enter}>
   <div class="flex justify-between gap-8 px-2 py-4">
     <div class="flex gap-8">
-      <div class="flex">
-        {#each pubkeys as pubkey (pubkey)}
-          <div class="-mr-3 inline-block">
-            <PersonCircle size={8} class="h-8 w-8" {pubkey} />
-          </div>
-        {/each}
-      </div>
+      <PersonCircles {pubkeys} />
       <h2>{displayList($members.map(displayPerson))}</h2>
     </div>
     <div class="relative">

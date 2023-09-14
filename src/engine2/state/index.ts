@@ -7,11 +7,10 @@ import type {Event, Delete, Session, Channel, Topic, List, Person, Relay} from "
 export const sessions = writable<Record<string, Session>>({})
 export const session = writable<Session | null>(null)
 export const env = writable<Record<string, any>>({})
-export const alertsLastChecked = writable(0)
+export const notificationsLastChecked = writable(0)
 
 // Async stores
 
-export const alerts = collection<Event & {recipient: string}>("id")
 export const events = collection<Event>("id")
 export const deletes = collection<Delete>("value")
 export const labels = collection<Event>("id")

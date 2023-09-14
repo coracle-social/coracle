@@ -1,161 +1,99 @@
 <script lang="ts">
-  import {filter, slice, pluck, reverse, max, last, sortBy} from "ramda"
+  import {find} from "ramda"
   import {onMount} from "svelte"
-  import {doPipe, batch, seconds} from "hurdak"
   import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
-  import {
-    now,
-    formatTimestampAsDate,
-    formatTimestampAsLocalISODate,
-    createScroller,
-  } from "src/util/misc"
-  import {findReplyId, noteKinds} from "src/util/nostr"
-  import Spinner from "src/partials/Spinner.svelte"
+  import {now, createScroller, formatTimestampAsLocalISODate} from "src/util/misc"
+  import {noteKinds, reactionKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
-  import Notification from "src/app/views/Notification.svelte"
+  import NotificationReactions from "src/app/views/NotificationReactions.svelte"
+  import NotificationMention from "src/app/views/NotificationMention.svelte"
+  import NotificationReplies from "src/app/views/NotificationReplies.svelte"
   import type {Event} from "src/engine2"
   import {
-    env,
-    subscribe,
-    session,
-    events,
-    loadPubkeys,
-    alerts,
-    alertsLastChecked,
-    isEventMuted,
-    getUserRelayUrls,
+    notifications,
+    groupNotifications,
+    notificationsLastChecked,
+    loadNotifications,
   } from "src/engine2"
 
-  const lastChecked = alertsLastChecked.get()
   const tabs = ["Mentions & Replies", "Reactions"]
 
-  export let activeTab = tabs[0]
-
-  let limit = 0
-  let notificationEvents = null
-
-  const notifications = alerts.derived($events => {
-    // As long as we're on the page, don't show a notification
-    alertsLastChecked.set(now())
-
-    // Sort by hour so we can group clustered reactions to the same parent
-    return reverse(
-      sortBy(
-        e => formatTimestampAsLocalISODate(e.created_at).slice(0, 13) + findReplyId(e),
-        $events.filter(e => e.recipient === $session.pubkey && !isEventMuted(e))
-      )
-    )
-  })
-
-  // Group notifications so we're only showing the parent once per chunk
-  $: notificationEvents = sortBy(
-    ({notifications}: any) => -notifications.reduce((a, b) => Math.max(a, b.created_at), 0),
-    $notifications
-      .slice(0, limit)
-      .map(e => [e, events.key(findReplyId(e)).get()])
-      .filter(([e, ref]) => {
-        if (ref && !noteKinds.includes(ref.kind)) {
-          return false
-        }
-
-        if (activeTab === tabs[0]) {
-          return noteKinds.includes(e.kind)
-        } else {
-          return [7, 9735].includes(e.kind) && ref
-        }
-      })
-      .reduce((r, [e, ref]) => {
-        const prev = last(r)
-        // @ts-ignore
-        const prevTimestamp = pluck("created_at", prev?.notifications || []).reduce(max, 0)
-
-        // @ts-ignore
-        if (ref && prev?.ref === ref) {
-          // @ts-ignore
-          prev.notifications.push(e)
-        } else {
-          r = r.concat({
-            // @ts-ignore
-            ref,
-            key: e.id,
-            notifications: [e],
-            // @ts-ignore
-            created_at: e.created_at,
-            dateDisplay: formatTimestampAsDate(e.created_at),
-            // @ts-ignore
-            showLine: e.created_at < lastChecked && prevTimestamp >= lastChecked,
-          })
-        }
-
-        return r
-      }, [])
-  )
+  const throttledNotifications = notifications.throttle(300)
 
   const setActiveTab = tab => navigate(`/notifications/${tab}`)
 
   const getLineText = i => {
-    const event = notificationEvents[i]
-    const prev = notificationEvents[i - 1]
+    const cur = tabNotifications[i]
+    const prev = tabNotifications[i - 1]
 
-    if (prev?.dateDisplay !== event.dateDisplay) {
-      return event.dateDisplay
+    if (
+      !prev ||
+      formatTimestampAsLocalISODate(prev.timestamp) !== formatTimestampAsLocalISODate(cur.timestamp)
+    ) {
+      return formatTimestampAsLocalISODate(cur.timestamp)
     }
   }
 
+  export let activeTab = tabs[0]
+
+  let limit = 20
+
+  $: groupedNotifications = groupNotifications($throttledNotifications).slice(0, limit)
+
+  $: tabNotifications =
+    activeTab === tabs[0]
+      ? groupedNotifications.filter(
+          n => !n.event || find((e: Event) => noteKinds.includes(e.kind), n.interactions)
+        )
+      : groupedNotifications.filter(n =>
+          find((e: Event) => reactionKinds.includes(e.kind), n.interactions)
+        )
+
+  $: console.log(
+    tabNotifications[0].interactions,
+    find((e: Event) => noteKinds.includes(e.kind), tabNotifications[0].interactions)
+  )
+
+  document.title = "Notifications"
+
   onMount(() => {
-    document.title = "Notifications"
+    loadNotifications()
 
-    const since = Math.max(lastChecked - seconds(1, "hour"), now() - seconds(30, "day"))
-    const reactionKinds = $env.ENABLE_ZAPS ? [7, 9735] : [7]
-    const eventIds = doPipe(events.get(), [
-      filter((e: Event) => noteKinds.includes(e.kind)),
-      sortBy((e: Event) => -e.created_at),
-      slice(0, 256),
-      pluck("id"),
-    ])
-
-    const sub = subscribe({
-      relays: getUserRelayUrls("read"),
-      filters: [
-        {kinds: noteKinds.concat(reactionKinds), "#p": [$session.pubkey], since},
-        {kinds: noteKinds.concat(reactionKinds), "#e": eventIds, since},
-      ],
-      onEvent: batch(1000, (events: Event[]) => {
-        loadPubkeys(pluck("pubkey", events))
-      }),
-    })
+    notificationsLastChecked.set(now())
 
     const scroller = createScroller(async () => {
-      limit += 50
+      limit += 20
     })
 
     return () => {
-      sub.close()
       scroller.stop()
+      notificationsLastChecked.set(now())
     }
   })
 </script>
 
-{#if notificationEvents}
-  <Content>
-    <Tabs {tabs} {activeTab} {setActiveTab} />
-    {#each notificationEvents as event, i (event.key)}
-      {@const lineText = getLineText(i)}
-      {#if lineText}
-        <div class="flex items-center gap-4">
-          <small class="whitespace-nowrap text-gray-1">{lineText}</small>
-          <div class="h-px w-full bg-gray-6" />
-        </div>
-      {/if}
-      <div in:fly={{y: 20}}>
-        <Notification {event} />
+<Content>
+  <Tabs {tabs} {activeTab} {setActiveTab} />
+  {#each tabNotifications as notification, i (notification.key)}
+    {@const lineText = getLineText(i)}
+    {#if lineText}
+      <div class="flex items-center gap-4">
+        <small class="whitespace-nowrap text-gray-1">{lineText}</small>
+        <div class="h-px w-full bg-gray-6" />
       </div>
-    {:else}
-      <Content size="lg" class="text-center">No notifications found - check back later!</Content>
-    {/each}
-  </Content>
-{:else}
-  <Spinner />
-{/if}
+    {/if}
+    <div in:fly={{y: 20}}>
+      {#if !notification.event}
+        <NotificationMention {notification} />
+      {:else if activeTab === tabs[0]}
+        <NotificationReplies {notification} />
+      {:else}
+        <NotificationReactions {notification} />
+      {/if}
+    </div>
+  {:else}
+    <Content size="lg" class="text-center">No notifications found - check back later!</Content>
+  {/each}
+</Content>

@@ -1,6 +1,8 @@
 import {nip19} from "nostr-tools"
+import {propEq} from "ramda"
+import {createMap} from "hurdak"
 import {derived} from "src/engine2/util/store"
-import {session, people} from "src/engine2/state"
+import {session, events, people} from "src/engine2/state"
 import {prepareNdk, ndkInstances} from "./ndk"
 import {Signer} from "./signer"
 import {Nip04} from "./nip04"
@@ -22,6 +24,12 @@ export const isKeyValid = (key: string) => {
 export const stateKey = session.derived($s => $s?.pubkey || "anonymous")
 
 export const user = derived([session, people.mapStore], ([$s, $p]) => $p.get($s?.pubkey))
+
+export const userEvents = derived([session, events], ([$session, $events]) => {
+  return $session ? $events.filter(propEq("pubkey", $session.pubkey)) : []
+})
+
+export const userEventsById = userEvents.derived($events => createMap("id", $events))
 
 export const canSign = session.derived($session =>
   ["bunker", "privkey", "extension"].includes($session?.method)

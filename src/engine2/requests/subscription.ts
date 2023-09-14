@@ -11,7 +11,7 @@ export type SubscriptionOpts = {
   relays: string[]
   filters: Filter[]
   timeout?: number
-  ephemeral?: boolean
+  shouldProject?: boolean
 }
 
 export class Subscription extends EventEmitter {
@@ -72,7 +72,7 @@ export class Subscription extends EventEmitter {
       return
     }
 
-    if (!this.opts.ephemeral) {
+    if (this.opts.shouldProject === false) {
       projections.push(event)
     }
 

@@ -6,6 +6,7 @@ import {tryJson} from "src/util/misc"
 
 export const noteKinds = [1, 30023, 1063, 9802, 1808]
 export const personKinds = [0, 2, 3, 10002]
+export const reactionKinds = [7, 9735]
 export const userKinds = personKinds.concat([10000, 30001, 30078])
 
 export const EPOCH = 1635724800
@@ -100,7 +101,7 @@ export class Tags {
 
 export const findReplyAndRoot = (e: Event) => {
   const tags = Tags.from(e)
-    .type("e")
+    .type(["a", "e"])
     .filter(t => last(t) !== "mention")
   const legacy = tags.any(t => !["reply", "root"].includes(last(t)))
 

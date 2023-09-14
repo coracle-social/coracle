@@ -214,3 +214,10 @@ export type List = {
   tags_updated_at: number
   tags: string[][]
 }
+
+export type Notification = {
+  key: string
+  event: Event
+  timestamp: number
+  interactions: Event[]
+}

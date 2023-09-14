@@ -15,10 +15,10 @@
   import ZapModal from "src/app/views/ZapModal.svelte"
   import PublishInfo from "src/app/views/PublishInfo.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
-  import NotificationInfo from "src/app/views/NotificationInfo.svelte"
   import ThreadDetail from "src/app/views/ThreadDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
   import PersonList from "src/app/shared/PersonList.svelte"
+  import PersonList2 from "src/app/shared/PersonList2.svelte"
   import PersonInfo from "src/app/views/PersonInfo.svelte"
   import TopicFeed from "src/app/views/TopicFeed.svelte"
   import ListList from "src/app/views/ListList.svelte"
@@ -43,8 +43,6 @@
   <NoteCreate pubkey={m.pubkey} quote={m.quote} writeTo={m.relays} />
 {:else if m.type === "zap/create"}
   <ZapModal pubkey={m.pubkey} note={m.note} />
-{:else if m.type === "notification/info"}
-  <NotificationInfo zaps={m.zaps} likes={m.likes} replies={m.replies} />
 {:else if m.type === "thread/detail"}
   <ThreadDetail anchorId={m.anchorId} relays={m.relays} />
 {:else if m.type === "publish/info"}
@@ -77,6 +75,8 @@
   <PersonDetail npub={nip19.npubEncode(m.pubkey)} />
 {:else if m.type === "person/info"}
   <PersonInfo pubkey={m.pubkey} />
+{:else if m.type === "person/list"}
+  <PersonList2 pubkeys={m.pubkeys} />
 {:else if m.type === "person/follows"}
   <PersonList type="follows" pubkey={m.pubkey} />
 {:else if m.type === "person/followers"}

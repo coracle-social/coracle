@@ -6,7 +6,7 @@
     hasNewNip28Messages,
     hasNewNip04Messages,
     hasNewNip24Messages,
-    hasNewNotfications,
+    hasNewNotifications,
     canUseGiftWrap,
     canSign,
   } from "src/engine2"
@@ -46,7 +46,7 @@
       class="block px-4 py-2 transition-all hover:bg-accent hover:text-white"
       href="/notifications">
       <i class="fa fa-bell mr-2" /> Notifications
-      {#if $hasNewNotfications}
+      {#if $hasNewNotifications}
         <div
           class="absolute left-6 top-3 h-2 w-2 rounded border border-solid border-white bg-accent" />
       {/if}

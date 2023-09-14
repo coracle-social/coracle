@@ -27,7 +27,7 @@
     hasNewNip28Messages,
     hasNewNip04Messages,
     hasNewNip24Messages,
-    hasNewNotfications,
+    hasNewNotifications,
     getUserRelayUrls,
     searchableRelays,
   } from "src/engine2"
@@ -182,7 +182,7 @@
     <div class="app-logo flex cursor-pointer items-center gap-2" on:click={toggleMenu}>
       <img alt="App Logo" src={logoUrl} class="w-10" />
       <h1 class="staatliches pt-1 text-3xl">{appName}</h1>
-      {#if $hasNewNotfications || $hasNewNip28Messages || hasNewDMs}
+      {#if $hasNewNotifications || $hasNewNip28Messages || hasNewDMs}
         <div
           class="absolute left-8 top-4 h-2 w-2 rounded border border-solid border-white bg-accent" />
       {/if}

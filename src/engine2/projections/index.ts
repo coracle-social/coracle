@@ -1,4 +1,3 @@
-import "./alerts"
 import "./nip01"
 import "./nip02"
 import "./nip04"
