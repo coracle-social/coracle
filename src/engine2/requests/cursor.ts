@@ -125,7 +125,11 @@ export class MultiCursor {
 
       // Merge seen_on via mutation so it applies to future. If we've already
       // seen the event, we're also done and we don't need to add it to our buffer
-      if (this.seen_on.has(event.id) && !this.seen_on.get(event.id).includes(event.seen_on[0])) {
+      if (
+        event.seen_on.length > 0 &&
+        this.seen_on.has(event.id) &&
+        !this.seen_on.get(event.id).includes(event.seen_on[0])
+      ) {
         this.seen_on.get(event.id).push(event.seen_on[0])
       } else {
         this.seen_on.set(event.id, event.seen_on)

@@ -6,13 +6,13 @@
   import Card from "src/partials/Card.svelte"
   import Content from "src/partials/Content.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
-  import {imgproxy} from "src/engine2"
+  import {imgproxy, getEventHints} from "src/engine2"
 
   export let note
 
   const {pubkey, content} = note
   const {name, picture, about, banner} = tryJson(() => JSON.parse(content))
-  const nprofile = nip19.nprofileEncode({pubkey, relays: note.seen_on})
+  const nprofile = nip19.nprofileEncode({pubkey, relays: getEventHints(note)})
   const {rgba} = getThemeBackgroundGradient()
   const bannerUrl = imgproxy(banner)
 </script>

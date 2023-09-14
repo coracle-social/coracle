@@ -1,9 +1,9 @@
 import {matchFilters} from "nostr-tools"
-import {prop, groupBy, uniq} from "ramda"
 import {defer} from "hurdak"
 import {pushToKey} from "src/util/misc"
-import {subscribe} from "./subscription"
 import type {Event, Filter} from "src/engine2/model"
+import {subscribe} from "./subscription"
+import {combineFilters} from "./filter"
 
 export type LoadOpts = {
   relays: string[]
@@ -16,36 +16,6 @@ export type LoadOpts = {
 export type LoadItem = {
   request: LoadOpts
   result: ReturnType<typeof defer>
-}
-
-export const calculateGroup = ({limit, since, until, ...filter}: Filter) => {
-  const group = Object.keys(filter)
-
-  if (since) group.push(`since:${since}`)
-  if (limit) group.push(`limit:${limit}`)
-  if (until) group.push(`until:${until}`)
-
-  return group.sort().join("-")
-}
-
-export const combineFilters = filters => {
-  const result = []
-
-  for (const group of Object.values(groupBy(calculateGroup, filters))) {
-    const newFilter = {}
-
-    for (const k of Object.keys(group[0])) {
-      if (["since", "until", "limit"].includes(k)) {
-        newFilter[k] = group[0][k]
-      } else {
-        newFilter[k] = uniq(group.flatMap(prop(k)))
-      }
-    }
-
-    result.push(newFilter)
-  }
-
-  return result
 }
 
 const queue = []

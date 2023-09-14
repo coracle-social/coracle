@@ -20,7 +20,7 @@
   import {Publisher, publishNote, displayRelay, getUserRelayUrls, mention} from "src/engine2"
   import {modal} from "src/partials/state"
   import {toastProgress} from "src/app/state"
-  import {session, displayPubkey} from "src/engine2"
+  import {session, getEventHints, displayPubkey} from "src/engine2"
 
   export let quote = null
   export let pubkey = null
@@ -103,7 +103,7 @@
     }
 
     if (quote) {
-      const nevent = nip19.neventEncode({id: quote.id, relays: quote.seen_on})
+      const nevent = nip19.neventEncode({id: quote.id, relays: getEventHints(quote)})
 
       compose.nevent("nostr:" + nevent)
     }

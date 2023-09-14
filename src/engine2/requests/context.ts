@@ -17,6 +17,7 @@ import {
 } from "src/engine2/queries"
 import {subscribe} from "./subscription"
 import {loadPubkeys} from "./pubkeys"
+import {getIdFilters} from "./filter"
 import {load} from "./load"
 
 const fromDisplayEvent = (e: DisplayEvent): Event =>
@@ -188,7 +189,7 @@ export class ContextLoader {
 
     if (parentsInfo.length > 0) {
       load({
-        filters: [{ids: pluck("id", parentsInfo)}],
+        filters: getIdFilters(pluck("id", parentsInfo)),
         relays: this.mergeHints(pluck("hints", parentsInfo)),
         onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: 2})),
       })

@@ -3,6 +3,7 @@ import type {Executor} from "paravel"
 import EventEmitter from "events"
 import {defer, tryFunc} from "hurdak"
 import {warn, info} from "src/util/logger"
+import {isShareableRelay} from "src/util/nostr"
 import type {Event, Filter} from "src/engine2/model"
 import {getUrls, getExecutor} from "src/engine2/queries"
 import {projections} from "src/engine2/projections"
@@ -50,14 +51,14 @@ export class Subscription extends EventEmitter {
     const seen_on = this.seen.get(event.id)
 
     if (seen_on) {
-      if (!seen_on.includes(url)) {
+      if (!seen_on.includes(url) && isShareableRelay(url)) {
         seen_on.push(url)
       }
 
       return
     }
 
-    event.seen_on = [url]
+    event.seen_on = isShareableRelay(url) ? [url] : []
     event.content = event.content || ""
 
     this.seen.set(event.id, event.seen_on)

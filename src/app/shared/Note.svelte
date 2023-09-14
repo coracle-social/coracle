@@ -120,7 +120,7 @@
             <PersonName pubkey={$author.pubkey} />
           </Anchor>
           <Anchor
-            href={"/" + nip19.neventEncode({id: note.id, relays: note.seen_on})}
+            href={"/" + nip19.neventEncode({id: note.id, relays: getEventHints(note)})}
             class="text-end text-sm text-gray-1"
             type="unstyled">
             {timestamp}

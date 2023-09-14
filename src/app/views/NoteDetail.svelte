@@ -10,7 +10,7 @@
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {load, ContextLoader, selectHints, getIdFilter} from "src/engine2"
+  import {load, ContextLoader, selectHints, getIdFilters} from "src/engine2"
 
   export let note
   export let relays = []
@@ -21,7 +21,7 @@
   }
 
   const context = new ContextLoader({
-    filters: [getIdFilter(note.id)],
+    filters: getIdFilters([note.id]),
     onEvent: e => {
       // Update feed, but only if we have loaded an actual note
       if (displayNote.sig) {
@@ -39,7 +39,7 @@
     context.hydrate([displayNote], depth)
 
     load({
-      filters: [getIdFilter(note.id)],
+      filters: getIdFilters([note.id]),
       relays: selectHints(relays),
       onEvent: e => {
         context.addContext([e], {depth})

@@ -5,7 +5,7 @@ import {Tags, appDataKeys} from "src/util/nostr"
 import type {Channel} from "src/engine2/model"
 import {EventKind} from "src/engine2/model"
 import {channels} from "src/engine2/state"
-import {user, nip04, canSign} from "src/engine2/queries"
+import {user, getEventHints, nip04, canSign} from "src/engine2/queries"
 import {projections} from "src/engine2/projections/core"
 
 projections.addHandler(30078, async e => {
@@ -21,7 +21,13 @@ projections.addHandler(30078, async e => {
           }
 
           const channel =
-            $channels.get(id) || ({id, type: "nip04", relays: e.seen_on, messages: []} as Channel)
+            $channels.get(id) ||
+            ({
+              id,
+              type: "nip04",
+              relays: getEventHints(e),
+              messages: [],
+            } as Channel)
 
           $channels.set(id, {
             ...channel,

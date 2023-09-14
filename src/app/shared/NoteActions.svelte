@@ -29,6 +29,7 @@
     publishReaction,
     processZaps,
     displayRelay,
+    getEventHints,
   } from "src/engine2"
 
   export let note: DisplayEvent
@@ -38,7 +39,7 @@
   export let setFeedRelay
 
   const person = people.key(note.pubkey)
-  const nevent = nip19.neventEncode({id: note.id, relays: note.seen_on})
+  const nevent = nip19.neventEncode({id: note.id, relays: getEventHints(note)})
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})

@@ -74,10 +74,13 @@ export const selectHints = (hints: Iterable<string>, limit: number = null) => {
 
     seen.add(url)
 
-    // Filter out relays that appear to be broken or slow
+    // Skip relays that just shouldn't ever be published
     if (!isShareableRelay(url)) {
-      bad.push(url)
-    } else if (relayIsLowQuality(url)) {
+      continue
+    }
+
+    // Filter out relays that appear to be broken or slow
+    if (relayIsLowQuality(url)) {
       bad.push(url)
     } else {
       ok.push(url)
@@ -123,6 +126,7 @@ export const getPubkeyHints = hintSelector(function* (pubkey: string, mode: Rela
 
 export const getEventHints = hintSelector(function* (event: Event) {
   yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Write)
+  yield* event.seen_on.filter(isShareableRelay)
 })
 
 // If we're looking for an event's children, the read relays the author has
