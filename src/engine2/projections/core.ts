@@ -1,6 +1,7 @@
 import {prop} from "ramda"
 import {Worker} from "src/engine2/util/worker"
 import type {Event} from "src/engine2/model"
+import {events, sessions} from "src/engine2/state"
 
 export const projections = new Worker<Event>({
   getKey: prop("kind"),
@@ -26,3 +27,9 @@ export const updateRecord = (record, timestamp, updates) => {
 
 export const updateStore = (store, timestamp, updates) =>
   store.set(updateRecord(store.get(), timestamp, updates))
+
+projections.addGlobalHandler(e => {
+  if (sessions.get()[e.pubkey]) {
+    events.key(e.id).set(e)
+  }
+})

@@ -51,11 +51,6 @@
           find((e: Event) => reactionKinds.includes(e.kind), n.interactions)
         )
 
-  $: console.log(
-    tabNotifications[0].interactions,
-    find((e: Event) => noteKinds.includes(e.kind), tabNotifications[0].interactions)
-  )
-
   document.title = "Notifications"
 
   onMount(() => {

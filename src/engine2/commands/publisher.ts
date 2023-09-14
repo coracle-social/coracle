@@ -36,7 +36,7 @@ export class Publisher extends EventEmitter {
 
   publish(relays, {timeout, verb}: PublisherOpts = {}) {
     const urls = getUrls(relays)
-    const executor = getExecutor(urls, {bypassBoot: verb === "AUTH"})
+    const executor = getExecutor(urls)
 
     info(`Publishing to ${urls.length} relays`, this.event, urls)
 

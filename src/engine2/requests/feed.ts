@@ -13,9 +13,9 @@ export type FeedOpts = {
   depth: number
   relays: string[]
   filters: Filter[]
+  delta?: number
   onEvent?: (e: Event) => void
   shouldLoadParents?: boolean
-  shouldUseNip65?: boolean
 }
 
 export class FeedLoader {
@@ -33,7 +33,7 @@ export class FeedLoader {
     const urls = getUrls(opts.relays)
 
     this.context = new ContextLoader({
-      relays: opts.shouldUseNip65 ? null : urls,
+      relays: urls,
       filters: opts.filters,
       onEvent: event => {
         opts.onEvent?.(event)
@@ -61,10 +61,11 @@ export class FeedLoader {
         relay =>
           new Cursor({
             relay,
+            delta: opts.delta,
             filters: opts.filters,
-            onEvent: batch(100, (context: Event[]) =>
+            onEvent: batch(100, (context: Event[]) => {
               this.context.addContext(context, {shouldLoadParents: true, depth: opts.depth})
-            ),
+            }),
           })
       )
     )

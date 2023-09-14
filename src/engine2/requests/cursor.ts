@@ -10,17 +10,22 @@ export type CursorOpts = {
   relay: string
   filters: Filter[]
   onEvent?: (e: Event) => void
+  delta?: number
 }
 
 export class Cursor {
-  until = now()
-  delta = seconds(10, "minute")
-  since = now() - this.delta
+  delta: number
+  since: number
   buffer: Event[] = []
+
+  until = now()
   loading = false
   done = false
 
-  constructor(readonly opts: CursorOpts) {}
+  constructor(readonly opts: CursorOpts) {
+    this.delta = opts.delta || seconds(10, "minute")
+    this.since = now() - this.delta
+  }
 
   load(n: number) {
     const limit = n - this.buffer.length

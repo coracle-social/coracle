@@ -19,7 +19,9 @@
   export let filter = {} as DynamicFilter
   export let invertColors = false
   export let hideControls = false
+  export let queryCache = false
   export let onEvent = null
+  export let delta = null
 
   let scroller, feed, scrollerElement
   let feedRelay = null
@@ -45,19 +47,25 @@
   }
 
   const getRelays = () => {
-    if (relays.length > 0) {
-      return relays
-    }
+    let selection = relays
 
     // If we have a search term we need to use only relays that support search
-    if (filter.search) {
-      return $searchableRelays
+    if (selection.length === 0 && filter.search) {
+      selection = $searchableRelays
     }
 
-    const authors = (compileFilter(filter).authors || []).concat($session?.pubkey)
-    const hints = authors.map(pubkey => getPubkeyHints(pubkey, "write"))
+    if (selection.length === 0) {
+      const authors = (compileFilter(filter).authors || []).concat($session?.pubkey)
+      const hints = authors.map(pubkey => getPubkeyHints(pubkey, "write"))
 
-    return mergeHints(hints)
+      selection = mergeHints(hints)
+    }
+
+    if (queryCache) {
+      selection = [...selection, "local://coracle.relay"]
+    }
+
+    return selection
   }
 
   const loadMore = () => feed.load(5)
@@ -82,6 +90,7 @@
         filters: [compileFilter(filter)],
         shouldLoadParents: true,
         onEvent,
+        delta,
       })
 
       oldNotes = feed.feed

@@ -3683,7 +3683,7 @@ he@0.5.0:
 
 hls.js@^1.4.10:
   version "1.4.10"
-  resolved "https://registry.yarnpkg.com/hls.js/-/hls.js-1.4.10.tgz#3feac40f21a558453b243b5b926b7317e70624e1"
+  resolved "https://registry.npmjs.org/hls.js/-/hls.js-1.4.10.tgz"
   integrity sha512-wAVSj4Fm2MqOHy5+BlYnlKxXvJlv5IuZHjlzHu18QmjRzSDFQiUDWdHs5+NsFMQrgKEBwuWDcyvaMC9dUzJ5Uw==
 
 hmac-drbg@^1.0.1:
@@ -4784,10 +4784,10 @@ pako@~1.0.5:
   resolved "https://registry.npmjs.org/pako/-/pako-1.0.11.tgz"
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
 
-paravel@^0.3.2:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/paravel/-/paravel-0.3.2.tgz#f6f20920e012d7edae94cc75687858cdd67d3d71"
-  integrity sha512-7SYUR3XshEAB1yrlHLm+QZrWQtntkReKxoWgsyCRy3/mHLPSxtFb+MTZTeNGWsmodpj+BqV0SZE/Rkg8Coug3w==
+paravel@^0.3.3:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/paravel/-/paravel-0.3.3.tgz#f2f8bd8fb6b829a09f027dd5f43f557e69c9e5f4"
+  integrity sha512-kCZy5nhBEyyGEs3NwQ3mNB9PpS2cdwZyCKGVXUfd+jK20Ins5vUfmP34cB0N+xF8L2Hccz1QjraxDfSdS+Od3g==
   dependencies:
     events "^3.3.0"
     husky "^8.0.3"
