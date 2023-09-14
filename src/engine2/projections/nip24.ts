@@ -15,13 +15,18 @@ projections.addHandler(30078, async e => {
     await tryJson(async () => {
       const payload = JSON.parse(await nip04.get().decryptAsUser(e.content, e.pubkey))
 
-      for (const [id, ts] of Object.entries(payload) as [string, number][]) {
-        const channel = channels.key(id)
+      channels.mapStore.update($channels => {
+        for (const [id, ts] of Object.entries(payload) as [string, number][]) {
+          const channel = $channels.get(id)
 
-        channel.merge({
-          last_checked: Math.max(ts, channel.get()?.last_checked || 0),
-        })
-      }
+          $channels.set(id, {
+            ...channel,
+            last_checked: Math.max(ts, channel?.last_checked || 0),
+          })
+        }
+
+        return $channels
+      })
     })
   }
 })

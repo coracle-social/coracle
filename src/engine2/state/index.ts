@@ -8,6 +8,8 @@ export const sessions = writable<Record<string, Session>>({})
 export const session = writable<Session | null>(null)
 export const env = writable<Record<string, any>>({})
 export const notificationsLastChecked = writable(0)
+export const nip04ChannelsLastChecked = writable(0)
+export const nip24ChannelsLastChecked = writable(0)
 
 // Async stores
 

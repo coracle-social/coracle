@@ -90,8 +90,8 @@ export class Nip59 {
     // Skip trying to parse the old version
     if (!wrap.content.includes("ciphertext")) {
       try {
-        const seal = await this.decrypt(wrap.content, sk)
-        const rumor = await this.decrypt(seal.content, sk)
+        const seal = await this.decrypt(wrap, sk)
+        const rumor = await this.decrypt(seal, sk)
 
         if (seal.pubkey === rumor.pubkey) {
           return Object.assign(rumor, {wrap, seen_on: wrap.seen_on})

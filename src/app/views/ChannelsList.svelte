@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {whereEq, complement, prop, filter} from "ramda"
-  import {toTitle, seconds, batch} from "hurdak"
-  import {now} from "src/util/misc"
+  import {complement, prop, filter} from "ramda"
+  import {toTitle} from "hurdak"
   import {navigate} from "svelte-routing"
   import {modal} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
@@ -12,20 +11,15 @@
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
   import {
-    load,
-    session,
-    loadPubkeys,
-    channels,
+    nip24Channels,
     hasNewNip24Messages,
     sortChannels,
-    getUserRelayUrls,
     nip24MarkAllRead,
-    nip59,
+    loadAllNip24Messages,
   } from "src/engine2"
 
   export let activeTab = "conversations"
 
-  const nip24Channels = channels.derived(filter(whereEq({type: "nip24"})))
   const accepted = nip24Channels.derived(filter(prop("last_sent")))
   const requests = nip24Channels.derived(filter(complement(prop("last_sent"))))
 
@@ -40,19 +34,7 @@
 
   document.title = "Direct Messages"
 
-  load({
-    relays: getUserRelayUrls("read"),
-    filters: [{kinds: [1059], "#p": [$session.pubkey], since: now() - seconds(90, "day")}],
-    onEvent: batch(1000, events => {
-      const pubkeys = new Set<string>()
-
-      for (const event of events) {
-        $nip59.withUnwrappedEvent(event, $session.privkey, e => pubkeys.add(e.pubkey))
-      }
-
-      loadPubkeys(Array.from(pubkeys))
-    }),
-  })
+  loadAllNip24Messages()
 </script>
 
 <div class="bg-gray-7">

@@ -1,4 +1,5 @@
 import {prop} from "ramda"
+import {batch} from "hurdak"
 import {Worker} from "src/engine2/util/worker"
 import type {Event} from "src/engine2/model"
 import {events, sessions} from "src/engine2/state"
@@ -28,8 +29,19 @@ export const updateRecord = (record, timestamp, updates) => {
 export const updateStore = (store, timestamp, updates) =>
   store.set(updateRecord(store.get(), timestamp, updates))
 
-projections.addGlobalHandler(e => {
-  if (sessions.get()[e.pubkey]) {
-    events.key(e.id).set(e)
-  }
-})
+projections.addGlobalHandler(
+  batch(500, chunk => {
+    const $sessions = sessions.get()
+    const userEvents = chunk.filter(e => $sessions[e.pubkey])
+
+    if (userEvents.length > 0) {
+      events.mapStore.update($events => {
+        for (const e of userEvents) {
+          $events.set(e.id, e)
+        }
+
+        return $events
+      })
+    }
+  })
+)

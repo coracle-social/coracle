@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {filter, whereEq, complement, prop} from "ramda"
+  import {filter, complement, prop} from "ramda"
   import {toTitle} from "hurdak"
   import {navigate} from "svelte-routing"
   import Tabs from "src/partials/Tabs.svelte"
@@ -7,7 +7,7 @@
   import Content from "src/partials/Content.svelte"
   import MessagesListItem from "src/app/views/MessagesListItem.svelte"
   import {
-    channels,
+    nip04Channels,
     hasNewNip04Messages,
     sortChannels,
     nip04MarkAllRead,
@@ -16,7 +16,6 @@
 
   export let activeTab = "conversations"
 
-  const nip04Channels = channels.derived(filter(whereEq({type: "nip04"})))
   const accepted = nip04Channels.derived(filter(prop("last_sent")))
   const requests = nip04Channels.derived(filter(complement(prop("last_sent"))))
 

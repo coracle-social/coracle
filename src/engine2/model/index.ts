@@ -18,6 +18,7 @@ export enum EventKind {
   ChannelMessage = 42,
   ChannelHideMessage = 43,
   ChannelMuteUser = 44,
+  GiftWrap = 1059,
   FileMetadata = 1063,
   LiveChatMessage = 1311,
   Report = 1984,

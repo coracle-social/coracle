@@ -2,7 +2,7 @@ import {pluck} from "ramda"
 import {batch, seconds} from "hurdak"
 import {now} from "src/util/misc"
 import {EventKind} from "src/engine2/model"
-import {session} from "src/engine2/state"
+import {session, nip04ChannelsLastChecked} from "src/engine2/state"
 import {getInboxHints, getUserRelayUrls} from "src/engine2/queries"
 import {load} from "./load"
 import {loadPubkeys} from "./pubkeys"
@@ -10,7 +10,9 @@ import {subscribe} from "./subscription"
 
 export function loadAllNip04Messages() {
   const {pubkey} = session.get()
-  const since = now() - seconds(90, "day")
+  const since = Math.max(0, nip04ChannelsLastChecked.get() - seconds(7, "day"))
+
+  nip04ChannelsLastChecked.set(now())
 
   load({
     relays: getUserRelayUrls("read"),

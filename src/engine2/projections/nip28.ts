@@ -69,22 +69,27 @@ projections.addHandler(30078, async (e: Event) => {
   }
 
   if (Tags.from(e).getMeta("d") === appDataKeys.NIP28_LAST_CHECKED) {
+    console.log(e)
     await tryJson(async () => {
       const payload = JSON.parse(await nip04.get().decryptAsUser(e.content, e.pubkey))
 
-      for (const key of Object.keys(payload)) {
-        // Backwards compat from when we used to prefix id/pubkey
-        const id = last(key.split("/"))
-        const channel = channels.key(id).get()
-        const last_checked = Math.max(payload[id], channel?.last_checked || 0)
+      channels.mapStore.update($channels => {
+        for (const key of Object.keys(payload)) {
+          // Backwards compat from when we used to prefix id/pubkey
+          const id = last(key.split("/"))
+          const channel = $channels.get(id)
+          const last_checked = Math.max(payload[id], channel?.last_checked || 0)
 
-        // A bunch of junk got added to this setting. Integer keys, settings, etc
-        if (isNaN(last_checked) || last_checked < 1577836800) {
-          continue
+          // A bunch of junk got added to this setting. Integer keys, settings, etc
+          if (isNaN(last_checked) || last_checked < 1577836800) {
+            continue
+          }
+
+          $channels.set(id, {...channel, id, last_checked})
         }
 
-        channels.key(id).merge({last_checked})
-      }
+        return $channels
+      })
     })
   }
 })

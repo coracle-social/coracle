@@ -1,13 +1,14 @@
 <script lang="ts">
   import {navigate} from "svelte-routing"
+  import {without} from "ramda"
   import {displayList} from "hurdak"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import Card from "src/partials/Card.svelte"
-  import {people, channels, displayPerson, loadPubkeys, hasNewMessages} from "src/engine2"
+  import {people, channels, displayPerson, loadPubkeys, hasNewMessages, session} from "src/engine2"
 
   export let channel
 
-  const pubkeys = channel.id.split(",")
+  const pubkeys = without([$session.pubkey], channel.id.split(",")) as string[]
   const showAlert = channels.key(channel.id).derived(hasNewMessages)
   const members = people.mapStore.derived($p => pubkeys.map(pk => $p.get(pk)))
 
