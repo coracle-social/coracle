@@ -2,7 +2,7 @@ import {nip19} from "nostr-tools"
 import {propEq} from "ramda"
 import {createMap} from "hurdak"
 import {derived} from "src/engine2/util/store"
-import {session, events, people} from "src/engine2/state"
+import {sessions, pubkey, events, people} from "src/engine2/state"
 import {prepareNdk, ndkInstances} from "./ndk"
 import {Signer} from "./signer"
 import {Nip04} from "./nip04"
@@ -21,7 +21,9 @@ export const isKeyValid = (key: string) => {
   return true
 }
 
-export const stateKey = session.derived($s => $s?.pubkey || "anonymous")
+export const stateKey = pubkey.derived($pk => $pk || "anonymous")
+
+export const session = derived([pubkey, sessions], ([$pk, $sessions]) => $sessions[$pk])
 
 export const user = derived([session, people.mapStore], ([$s, $p]) => $p.get($s?.pubkey))
 

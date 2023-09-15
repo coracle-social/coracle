@@ -69,7 +69,6 @@ projections.addHandler(30078, async (e: Event) => {
   }
 
   if (Tags.from(e).getMeta("d") === appDataKeys.NIP28_LAST_CHECKED) {
-    console.log(e)
     await tryJson(async () => {
       const payload = JSON.parse(await nip04.get().decryptAsUser(e.content, e.pubkey))
 

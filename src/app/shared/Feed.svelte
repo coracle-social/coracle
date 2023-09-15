@@ -21,7 +21,6 @@
   export let hideControls = false
   export let queryCache = false
   export let onEvent = null
-  export let delta = null
 
   let scroller, feed, scrollerElement
   let feedRelay = null
@@ -90,7 +89,6 @@
         filters: [compileFilter(filter)],
         shouldLoadParents: true,
         onEvent,
-        delta,
       })
 
       oldNotes = feed.feed

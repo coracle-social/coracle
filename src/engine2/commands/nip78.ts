@@ -1,6 +1,5 @@
 import {appDataKeys} from "src/util/nostr"
-import {session} from "src/engine2/state"
-import {canSign, nip04} from "src/engine2/queries"
+import {session, canSign, nip04} from "src/engine2/queries"
 import {publishEvent} from "./util"
 
 export const setAppData = async (d: string, data: any) => {

@@ -1,13 +1,13 @@
 import {omit, assoc} from "ramda"
 import {generatePrivateKey, getPublicKey} from "nostr-tools"
 import type {Session} from "src/engine2/model"
-import {pool, sessions, session} from "src/engine2/state"
-import {canSign, signer} from "src/engine2/queries"
+import {pool, sessions, pubkey} from "src/engine2/state"
+import {canSign, signer, session} from "src/engine2/queries"
 import {buildEvent} from "./util"
 
 const addSession = (s: Session) => {
   sessions.update(assoc(s.pubkey, s))
-  session.set(s)
+  pubkey.set(s.pubkey)
 }
 
 export const loginWithPrivateKey = privkey =>
@@ -29,7 +29,7 @@ export const logoutPubkey = pubkey => {
 }
 
 export const logout = () => {
-  session.set(null)
+  pubkey.set(null)
   sessions.set({})
 }
 

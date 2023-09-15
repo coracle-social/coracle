@@ -1,16 +1,16 @@
 import {mergeRight, identity, sortBy} from "ramda"
-import {seconds, first} from "hurdak"
+import {first} from "hurdak"
 import {now} from "src/util/misc"
 import {EPOCH} from "src/util/nostr"
 import type {Filter, Event} from "src/engine2/model"
 import type {Subscription} from "./subscription"
 import {subscribe} from "./subscription"
+import {guessFilterDelta} from "./filter"
 
 export type CursorOpts = {
   relay: string
   filters: Filter[]
   onEvent?: (e: Event) => void
-  delta?: number
 }
 
 export class Cursor {
@@ -23,7 +23,7 @@ export class Cursor {
   done = false
 
   constructor(readonly opts: CursorOpts) {
-    this.delta = opts.delta || seconds(10, "minute")
+    this.delta = guessFilterDelta(opts.filters)
     this.since = now() - this.delta
   }
 

@@ -13,7 +13,6 @@ export type FeedOpts = {
   depth: number
   relays: string[]
   filters: Filter[]
-  delta?: number
   onEvent?: (e: Event) => void
   shouldLoadParents?: boolean
 }
@@ -61,7 +60,6 @@ export class FeedLoader {
         relay =>
           new Cursor({
             relay,
-            delta: opts.delta,
             filters: opts.filters,
             onEvent: batch(100, (context: Event[]) => {
               this.context.addContext(context, {shouldLoadParents: true, depth: opts.depth})

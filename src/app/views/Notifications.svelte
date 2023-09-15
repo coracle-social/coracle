@@ -3,7 +3,7 @@
   import {onMount} from "svelte"
   import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
-  import {now, createScroller, formatTimestampAsLocalISODate} from "src/util/misc"
+  import {now, createScroller, formatTimestampAsDate} from "src/util/misc"
   import {noteKinds, reactionKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
@@ -28,11 +28,8 @@
     const cur = tabNotifications[i]
     const prev = tabNotifications[i - 1]
 
-    if (
-      !prev ||
-      formatTimestampAsLocalISODate(prev.timestamp) !== formatTimestampAsLocalISODate(cur.timestamp)
-    ) {
-      return formatTimestampAsLocalISODate(cur.timestamp)
+    if (!prev || formatTimestampAsDate(prev.timestamp) !== formatTimestampAsDate(cur.timestamp)) {
+      return formatTimestampAsDate(cur.timestamp)
     }
   }
 

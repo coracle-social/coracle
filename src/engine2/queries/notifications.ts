@@ -2,12 +2,16 @@ import {max, sortBy} from "ramda"
 import {Tags, findReplyId, findReplyAndRootIds} from "src/util/nostr"
 import {formatTimestampAsLocalISODate, tryJson} from "src/util/misc"
 import {derived} from "src/engine2/util/store"
-import {session, events, notificationsLastChecked} from "src/engine2/state"
-import {userEventsById} from "src/engine2/queries/session"
+import {events, notificationsLastChecked} from "src/engine2/state"
+import {session, userEventsById} from "src/engine2/queries/session"
 
 export const notifications = derived(
   [session, userEventsById.throttle(500), events.throttle(500)],
   ([$session, $userEventsById, $events]) => {
+    if (!$session) {
+      return []
+    }
+
     return $events.filter(e => {
       const {root, reply} = findReplyAndRootIds(e)
 

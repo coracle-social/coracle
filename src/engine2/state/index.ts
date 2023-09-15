@@ -4,8 +4,8 @@ import type {Event, Delete, Session, Channel, Topic, List, Person, Relay} from "
 
 // Synchronous stores
 
+export const pubkey = writable<string | null>(null)
 export const sessions = writable<Record<string, Session>>({})
-export const session = writable<Session | null>(null)
 export const env = writable<Record<string, any>>({})
 export const notificationsLastChecked = writable(0)
 export const nip04ChannelsLastChecked = writable(0)

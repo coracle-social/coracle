@@ -1,8 +1,8 @@
 import {seconds} from "hurdak"
 import {now} from "src/util/misc"
 import {EventKind} from "src/engine2/model"
-import {session, nip24ChannelsLastChecked} from "src/engine2/state"
-import {getUserRelayUrls, nip24Channels, getNip24ChannelPubkeys} from "src/engine2/queries"
+import {nip24ChannelsLastChecked} from "src/engine2/state"
+import {session, getUserRelayUrls, nip24Channels, getNip24ChannelPubkeys} from "src/engine2/queries"
 import {load} from "./load"
 import {loadPubkeys} from "./pubkeys"
 

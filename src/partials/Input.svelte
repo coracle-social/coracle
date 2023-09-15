@@ -16,6 +16,12 @@
     "bg-input border border-solid border-gray-3 text-black",
     {"pl-10": showBefore, "pr-10": showAfter}
   )
+
+  $: {
+    if ($$props.type === "range" && typeof value === "string") {
+      value = parseInt(value)
+    }
+  }
 </script>
 
 <div class={cx(wrapperClass, "relative")}>

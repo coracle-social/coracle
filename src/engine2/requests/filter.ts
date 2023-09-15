@@ -1,5 +1,5 @@
-import {omit, prop, groupBy, uniq} from "ramda"
-import {shuffle} from "hurdak"
+import {omit, find, prop, groupBy, uniq} from "ramda"
+import {shuffle, seconds, avg} from "hurdak"
 import type {DynamicFilter, Filter} from "src/engine2/model"
 import {env} from "src/engine2/state"
 import {follows, network} from "src/engine2/queries"
@@ -55,6 +55,30 @@ export const getIdFilters = values => {
   }
 
   return filters
+}
+
+export const getFilterGenerality = filter => {
+  if (filter.ids) {
+    return 1
+  }
+
+  const hasTags = find(k => k.startsWith("#"), Object.keys(filter))
+
+  if (filter.pubkeys && hasTags) {
+    return 0.8
+  }
+
+  if (filter.pubkeys) {
+    return 1 - Math.max(1, filter.pubkeys.length / 100)
+  }
+
+  return 0
+}
+
+export const guessFilterDelta = filters => {
+  const avgGenerality = avg(filters.map(getFilterGenerality))
+
+  return Math.round(seconds(7, "day") * Math.max(0.001, avgGenerality))
 }
 
 export const getPubkeysWithDefaults = (pubkeys: string[]) =>

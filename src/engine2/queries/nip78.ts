@@ -1,5 +1,6 @@
 import {prop} from "ramda"
-import {env, session} from "src/engine2/state"
+import {env} from "src/engine2/state"
+import {session} from "src/engine2/queries"
 
 export const getDefaultSettings = () => ({
   relay_limit: 10,

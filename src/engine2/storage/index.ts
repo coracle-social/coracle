@@ -24,8 +24,8 @@ const sortByPubkeyWhitelist = (fallback: (x: any) => number) => (rows: Record<st
 }
 
 export const storage = new Storage([
+  new LocalStorageAdapter("pubkey", state.pubkey),
   new LocalStorageAdapter("sessions", state.sessions),
-  new LocalStorageAdapter("session", state.session),
   new LocalStorageAdapter("notificationsLastChecked", state.notificationsLastChecked),
   new LocalStorageAdapter("nip04ChannelsLastChecked", state.nip04ChannelsLastChecked),
   new LocalStorageAdapter("nip24ChannelsLastChecked", state.nip24ChannelsLastChecked),

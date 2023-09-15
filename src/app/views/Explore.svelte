@@ -12,12 +12,12 @@
   import NoteById from "src/app/shared/NoteById.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {
-    session,
-    getPubkeysWithDefaults,
     labels,
-    getPubkeyHints,
+    session,
     follows,
     subscribe,
+    getPubkeyHints,
+    getPubkeysWithDefaults,
   } from "src/engine2"
 
   type LabelGroup = {
