@@ -1,9 +1,11 @@
 import {verifySignature, matchFilters} from "nostr-tools"
 import type {Executor} from "paravel"
 import EventEmitter from "events"
-import {defer, tryFunc} from "hurdak"
+import {assoc, map} from "ramda"
+import {defer, tryFunc, updateIn} from "hurdak"
 import {warn, info} from "src/util/logger"
 import {isShareableRelay} from "src/util/nostr"
+import {now} from "src/util/misc"
 import type {Event, Filter} from "src/engine2/model"
 import {getUrls, getExecutor} from "src/engine2/queries"
 import {projections} from "src/engine2/projections"
@@ -29,7 +31,11 @@ export class Subscription extends EventEmitter {
   constructor(readonly opts: SubscriptionOpts) {
     super()
 
-    const {timeout, relays, filters} = opts
+    this.start()
+  }
+
+  start = () => {
+    const {timeout, relays, filters} = this.opts
 
     if (timeout) {
       setTimeout(this.close, timeout)
@@ -121,4 +127,13 @@ export const subscribe = (opts: SubscribeOpts) => {
   if (opts.onClose) sub.on("close", opts.onClose)
 
   return sub
+}
+
+export const subscribePersistent = async (opts: SubscribeOpts) => {
+  /* eslint no-constant-condition: 0 */
+  while (true) {
+    await subscribe(opts).result
+
+    opts = updateIn("filters", map(assoc("since", now())), opts)
+  }
 }

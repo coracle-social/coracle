@@ -1,12 +1,12 @@
-import {pluck, without, sortBy} from "ramda"
-import {seconds, batch} from "hurdak"
+import {pluck, slice, filter, without, sortBy} from "ramda"
+import {seconds, batch, doPipe} from "hurdak"
 import {now} from "src/util/misc"
 import type {Event} from "src/engine2/model"
 import {EventKind} from "src/engine2/model"
 import {noteKinds, reactionKinds} from "src/util/nostr"
 import {env, sessions, events, notificationsLastChecked} from "src/engine2/state"
-import {mergeHints, getPubkeyHints} from "src/engine2/queries"
-import {subscribe} from "./subscription"
+import {mergeHints, getPubkeyHints, nip28ChannelsForUser} from "src/engine2/queries"
+import {subscribe, subscribePersistent} from "./subscription"
 import {ContextLoader} from "./context"
 
 export const loadNotifications = () => {
@@ -52,5 +52,33 @@ export const loadNotifications = () => {
         events.key(e.id).set(e)
       }
     }),
+  })
+}
+
+export const listenForNotifications = async () => {
+  const pubkeys = Object.keys(sessions.get())
+  const channelIds = pluck("id", nip28ChannelsForUser.get())
+
+  const eventIds: string[] = doPipe(events.get(), [
+    filter((e: Event) => noteKinds.includes(e.kind)),
+    sortBy((e: Event) => -e.created_at),
+    slice(0, 256),
+    pluck("id"),
+  ])
+
+  // Only grab one event from each category/relay so we have enough to show
+  // the notification badges, but load the details lazily
+  subscribePersistent({
+    relays: mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read"))),
+    filters: [
+      // Messages
+      {kinds: [4], "#p": pubkeys, limit: 1},
+      {kinds: [1059], "#p": pubkeys, limit: 1},
+      // Chat
+      {kinds: [42], "#e": channelIds, limit: 1},
+      // Mentions/replies
+      {kinds: noteKinds, "#p": pubkeys, limit: 1},
+      {kinds: noteKinds, "#e": eventIds, limit: 1},
+    ],
   })
 }

@@ -2,26 +2,22 @@ import Bugsnag from "@bugsnag/js"
 import {nip19} from "nostr-tools"
 import {navigate} from "svelte-routing"
 import {writable} from "svelte/store"
-import {path, filter, pluck, sortBy, slice} from "ramda"
-import {hash, union, sleep, doPipe} from "hurdak"
+import {hash, union, sleep} from "hurdak"
 import {warn} from "src/util/logger"
 import {now} from "src/util/misc"
-import {userKinds, noteKinds} from "src/util/nostr"
+import {userKinds} from "src/util/nostr"
 import {modal, toast} from "src/partials/state"
-import type {Event} from "src/engine2"
 import {
   env,
   pool,
   session,
+  follows,
   loadDeletes,
   loadPubkeys,
-  channels,
-  follows,
-  subscribe,
   getUserRelayUrls,
+  listenForNotifications,
   getSetting,
   dufflepud,
-  events,
 } from "src/engine2"
 
 // Routing
@@ -110,43 +106,6 @@ setInterval(() => {
 }, 10_000)
 
 // Synchronization from events to state
-
-let listener
-let timeout
-
-export const listenForNotifications = async () => {
-  const {pubkey} = session.get()
-  const channelIds = pluck("id", channels.get().filter(path(["nip28", "joined"])))
-
-  const eventIds: string[] = doPipe(events.get(), [
-    filter((e: Event) => noteKinds.includes(e.kind)),
-    sortBy((e: Event) => -e.created_at),
-    slice(0, 256),
-    pluck("id"),
-  ])
-
-  // Only grab one event from each category/relay so we have enough to show
-  // the notification badges, but load the details lazily
-  listener?.close()
-  listener = subscribe({
-    relays: getUserRelayUrls("read"),
-    filters: [
-      // Messages
-      {kinds: [4], authors: [pubkey], limit: 1},
-      {kinds: [4], "#p": [pubkey], limit: 1},
-      // {kinds: [1059], "#p": [pubkey], limit: 1},
-      // Chat
-      {kinds: [42], "#e": channelIds, limit: 1},
-      // Mentions/replies
-      {kinds: noteKinds, "#p": [pubkey], limit: 1},
-      {kinds: noteKinds, "#e": eventIds, limit: 1},
-    ],
-  })
-
-  clearTimeout(timeout)
-
-  timeout = setTimeout(listenForNotifications, 3 * 60_000)
-}
 
 export const loadAppData = async () => {
   const {pubkey} = session.get()

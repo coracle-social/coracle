@@ -21,8 +21,8 @@
     publishProfile,
     publishRelays,
     loginWithPrivateKey,
+    listenForNotifications,
   } from "src/engine2"
-  import {listenForNotifications} from "src/app/state"
   import {modal} from "src/partials/state"
 
   export let stage

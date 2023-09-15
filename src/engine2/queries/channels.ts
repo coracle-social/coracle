@@ -1,4 +1,4 @@
-import {sortBy, identity, find, pipe, filter, path, whereEq} from "ramda"
+import {sortBy, identity, find, filter, path, whereEq} from "ramda"
 import {fuzzy} from "src/util/misc"
 import type {Channel} from "src/engine2/model"
 import {channels} from "src/engine2/state"
@@ -37,8 +37,8 @@ export const nip28ChannelsWithMeta = channels
   .throttle(300)
   .derived(filter((c: Channel) => c.meta && c.type === "nip28"))
 
+export const nip28ChannelsForUser = nip28ChannelsWithMeta.derived(filter(path(["nip28", "joined"])))
+
 export const searchNip28Channels = nip28ChannelsWithMeta.derived(getChannelSearch)
 
-export const hasNewNip28Messages = nip28ChannelsWithMeta.derived(
-  pipe(filter(path(["nip28", "joined"])), find(hasNewMessages))
-)
+export const hasNewNip28Messages = nip28ChannelsForUser.derived(find(hasNewMessages))
