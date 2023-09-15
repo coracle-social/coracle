@@ -1,5 +1,5 @@
 import {pluck, slice, filter, without, sortBy} from "ramda"
-import {seconds, batch, doPipe} from "hurdak"
+import {seconds, doPipe} from "hurdak"
 import {now} from "src/util/misc"
 import type {Event} from "src/engine2/model"
 import {EventKind} from "src/engine2/model"
@@ -7,7 +7,6 @@ import {noteKinds, reactionKinds} from "src/util/nostr"
 import {env, sessions, events, notificationsLastChecked} from "src/engine2/state"
 import {mergeHints, getPubkeyHints, nip28ChannelsForUser} from "src/engine2/queries"
 import {subscribe, subscribePersistent} from "./subscription"
-import {ContextLoader} from "./context"
 
 export const loadNotifications = () => {
   const pubkeys = Object.keys(sessions.get())
@@ -30,28 +29,17 @@ export const loadNotifications = () => {
   const filters = [
     {kinds, "#p": pubkeys, since},
     {kinds, "#e": eventIds, since},
+    {kinds, authors: pubkeys, since},
   ]
-
-  const context = new ContextLoader({
-    filters,
-    onEvent: e => {
-      events.key(e.id).set(e)
-    },
-  })
 
   return subscribe({
     filters,
     timeout: 15000,
     shouldProject: false,
     relays: mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read"))),
-    onEvent: batch(500, (chunk: Event[]) => {
-      context.addContext(chunk, {shouldLoadParents: true})
-
-      // Save to our event database
-      for (const e of chunk) {
-        events.key(e.id).set(e)
-      }
-    }),
+    onEvent: (e: Event) => {
+      events.key(e.id).set(e)
+    },
   })
 }
 

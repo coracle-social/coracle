@@ -10,7 +10,7 @@
 
   export let notification: Notification
 
-  const {event: note, interactions} = notification
+  const {event: note, interactions, timestamp} = notification
   const replies = interactions.filter(e => noteKinds.includes(e.kind))
   const pubkeys = uniq(pluck("pubkey", replies))
 </script>
@@ -21,7 +21,7 @@
   on:click={() => modal.push({type: "note/detail", note})}>
   <div on:click|stopPropagation class="flex justify-between">
     <NotificationPeople {pubkeys} actionText="replied to your note" />
-    <small>{formatTimestamp(note.created_at)}</small>
+    <small>{formatTimestamp(timestamp)}</small>
   </div>
   <div class="break-word overflow-hidden text-gray-1">
     <NoteContent {note} />

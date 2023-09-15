@@ -66,7 +66,10 @@ export const groupNotifications = $notifications => {
     g => -g.timestamp,
     Object.values(groups).map((group: any) => {
       const {event, interactions} = group
-      const timestamp = event?.created_at || interactions.map(ix => ix.created_at).reduce(max, 0)
+      const timestamp = interactions
+        .map(ix => ix.created_at)
+        .concat(event?.created_at || 0)
+        .reduce(max, 0)
 
       return {...group, timestamp}
     })

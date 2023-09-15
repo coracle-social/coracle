@@ -17,7 +17,7 @@
   on:click={() => modal.push({type: "note/detail", note})}>
   <div on:click|stopPropagation class="flex justify-between">
     <NotificationPeople pubkeys={[note.pubkey]} actionText="mentioned you" />
-    <small>{formatTimestamp(note.created_at)}</small>
+    <small>{formatTimestamp(notification.timestamp)}</small>
   </div>
   <div class="break-word overflow-hidden text-gray-1">
     <NoteContent {note} />

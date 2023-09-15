@@ -11,7 +11,7 @@
 
   export let notification: Notification
 
-  const {event: note, interactions} = notification
+  const {event: note, interactions, timestamp} = notification
   const likes = interactions.filter(e => e.kind === EventKind.Reaction)
   const zaps = interactions.filter(e => e.kind === EventKind.ZapRequest)
   const pubkeys = uniq(pluck("pubkey", [...likes, ...zaps]))
@@ -30,7 +30,7 @@
   on:click={() => modal.push({type: "note/detail", note})}>
   <div on:click|stopPropagation class="flex justify-between">
     <NotificationPeople {pubkeys} actionText={`${actionText} your note`} />
-    <small>{formatTimestamp(note.created_at)}</small>
+    <small>{formatTimestamp(timestamp)}</small>
   </div>
   <div class="break-word overflow-hidden text-gray-1">
     <NoteContent {note} />
