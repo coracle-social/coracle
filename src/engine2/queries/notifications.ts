@@ -1,5 +1,5 @@
 import {max, sortBy} from "ramda"
-import {Tags, findReplyId, findReplyAndRootIds} from "src/util/nostr"
+import {Tags, reactionKinds, findReplyId, findReplyAndRootIds} from "src/util/nostr"
 import {formatTimestampAsLocalISODate, tryJson} from "src/util/misc"
 import {derived} from "src/engine2/util/store"
 import {events, notificationsLastChecked} from "src/engine2/state"
@@ -51,7 +51,7 @@ export const groupNotifications = $notifications => {
     const eventId = findReplyId(ix)
     const event = $userEventsById[eventId]
 
-    if (eventId && !event) {
+    if ((eventId || reactionKinds.includes(ix.kind)) && !event) {
       continue
     }
 
