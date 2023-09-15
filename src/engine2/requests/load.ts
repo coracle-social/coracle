@@ -1,8 +1,9 @@
-import {matchFilters} from "nostr-tools"
 import {defer} from "hurdak"
+import {matchFilters} from "nostr-tools"
 import {pushToKey} from "src/util/misc"
+import {info} from "src/util/logger"
 import type {Event, Filter} from "src/engine2/model"
-import {subscribe} from "./subscription"
+import {Subscription} from "./subscription"
 import {combineFilters} from "./filter"
 
 export type LoadOpts = {
@@ -21,6 +22,11 @@ export type LoadItem = {
 const queue = []
 
 export const execute = () => {
+  info(
+    `Loading ${queue.length} grouped requests`,
+    combineFilters(queue.flatMap(item => item.request.filters))
+  )
+
   const itemsByRelay = {}
   for (const item of queue.splice(0)) {
     for (const url of item.request.relays) {
@@ -31,28 +37,26 @@ export const execute = () => {
   // Group by relay, then by filter
   for (const [url, items] of Object.entries(itemsByRelay) as [string, LoadItem[]][]) {
     const filters = combineFilters(items.flatMap(item => item.request.filters))
+    const sub = new Subscription({filters, relays: [url], timeout: 15000})
 
-    const sub = subscribe({
-      filters,
-      relays: [url],
-      timeout: 15000,
-      onEvent: e => {
-        for (const {request} of items) {
-          if (request.onEvent && matchFilters(request.filters, e)) {
-            request.onEvent(e)
-          }
+    sub.on("event", e => {
+      for (const {request} of items) {
+        if (request.onEvent && matchFilters(request.filters, e)) {
+          request.onEvent(e)
         }
-      },
-      onEose: url => {
-        for (const {request} of items) {
-          request.onEose?.(url)
-        }
-      },
-      onClose: events => {
-        for (const {request} of items) {
-          request.onClose?.(events)
-        }
-      },
+      }
+    })
+
+    sub.on("eose", url => {
+      for (const {request} of items) {
+        request.onEose?.(url)
+      }
+    })
+
+    sub.on("close", events => {
+      for (const {request} of items) {
+        request.onClose?.(events)
+      }
     })
 
     sub.result.then(events => {

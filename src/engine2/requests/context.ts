@@ -1,6 +1,6 @@
 import {matchFilters} from "nostr-tools"
 import {throttle} from "throttle-debounce"
-import {omit, find, pluck, flatten, without, groupBy, sortBy, prop, uniqBy, reject} from "ramda"
+import {omit, find, pluck, without, groupBy, sortBy, prop, uniqBy, reject} from "ramda"
 import {ensurePlural, batch, chunk} from "hurdak"
 import {now, pushToKey} from "src/util/misc"
 import {findReplyAndRootIds, findReplyId, findRootId, Tags, reactionKinds} from "src/util/nostr"
@@ -27,6 +27,7 @@ export type ContextLoaderOpts = {
   relays?: string[]
   filters?: Filter[]
   onEvent?: (e: Event) => void
+  shouldListen?: boolean
   shouldLoadParents?: boolean
 }
 
@@ -196,34 +197,19 @@ export class ContextLoader {
     }
   }
 
-  loadContext = batch(300, (eventGroups: any) => {
+  loadContext = (events, depth) => {
     if (this.stopped) {
       return
     }
 
-    const groupsByDepth = groupBy(prop("depth"), eventGroups)
-
-    for (const [depthStr, groups] of Object.entries(groupsByDepth)) {
-      const depth = parseInt(depthStr)
-
-      if (depth === 0) {
-        continue
-      }
-
-      const events = uniqBy(
-        prop("id"),
-        flatten(pluck("events", groups as any[])).filter(this.isTextNote)
-      ) as Event[]
-
-      for (const c of chunk(256, events)) {
-        load({
-          relays: this.mergeHints(c.map(e => getReplyHints(e))),
-          filters: [{kinds: this.getReplyKinds(), "#e": pluck("id", c as Event[])}],
-          onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: depth - 1})),
-        })
-      }
+    for (const c of chunk(256, uniqBy(prop("id"), events.filter(this.isTextNote)))) {
+      load({
+        relays: this.mergeHints(c.map(e => getReplyHints(e))),
+        filters: [{kinds: this.getReplyKinds(), "#e": pluck("id", c as Event[])}],
+        onEvent: batch(100, (context: Event[]) => this.addContext(context, {depth: depth - 1})),
+      })
     }
-  })
+  }
 
   listenForContext = throttle(10_000, () => {
     if (this.stopped) {
@@ -266,9 +252,13 @@ export class ContextLoader {
       this.loadParents(events)
     }
 
-    this.loadContext({events, depth})
+    if (depth > 0) {
+      this.loadContext(events, depth)
+    }
 
-    this.listenForContext()
+    if (this.opts.shouldListen) {
+      this.listenForContext()
+    }
 
     if (this.opts.onEvent) {
       for (const event of events) {

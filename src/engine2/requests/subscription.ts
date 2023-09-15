@@ -42,8 +42,6 @@ export class Subscription extends EventEmitter {
       onEvent: this.onEvent,
       onEose: this.onEose,
     })
-
-    info(`Starting subscription with ${urls.length} relays`, {filters, urls})
   }
 
   onEvent = (url: string, event: Event) => {
@@ -112,6 +110,11 @@ export type SubscribeOpts = SubscriptionOpts & {
 
 export const subscribe = (opts: SubscribeOpts) => {
   const sub = new Subscription(opts)
+
+  info(`Starting subscription with ${opts.relays.length} relays`, {
+    relays: opts.relays,
+    filters: opts.filters,
+  })
 
   if (opts.onEvent) sub.on("event", opts.onEvent)
   if (opts.onEose) sub.on("eose", opts.onEose)

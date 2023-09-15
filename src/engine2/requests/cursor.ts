@@ -2,9 +2,10 @@ import {mergeRight, identity, sortBy} from "ramda"
 import {first} from "hurdak"
 import {now} from "src/util/misc"
 import {EPOCH} from "src/util/nostr"
+import {info} from "src/util/logger"
 import type {Filter, Event} from "src/engine2/model"
-import type {Subscription} from "./subscription"
-import {subscribe} from "./subscription"
+import {getUrls} from "src/engine2/queries"
+import {Subscription} from "./subscription"
 import {guessFilterDelta} from "./filter"
 
 export type CursorOpts = {
@@ -42,34 +43,38 @@ export class Cursor {
 
     let count = 0
 
-    return subscribe({
+    const sub = new Subscription({
       timeout: 5000,
       relays: [relay],
       filters: filters.map(mergeRight({until, limit, since})),
-      onEvent: (event: Event) => {
-        this.until = Math.min(until, event.created_at) - 1
-        this.buffer.push(event)
-
-        count += 1
-
-        onEvent?.(event)
-      },
-      onClose: () => {
-        this.loading = false
-
-        // Relays can't be relied upon to return events in descending order, do exponential
-        // windowing to ensure we get the most recent stuff on first load, but eventually find it all
-        if (count === 0) {
-          this.delta *= 10
-        }
-
-        if (this.since <= EPOCH) {
-          this.done = true
-        }
-
-        this.since -= this.delta
-      },
     })
+
+    sub.on("event", (event: Event) => {
+      this.until = Math.min(until, event.created_at) - 1
+      this.buffer.push(event)
+
+      count += 1
+
+      onEvent?.(event)
+    })
+
+    sub.on("close", () => {
+      this.loading = false
+
+      // Relays can't be relied upon to return events in descending order, do exponential
+      // windowing to ensure we get the most recent stuff on first load, but eventually find it all
+      if (count === 0) {
+        this.delta *= 10
+      }
+
+      if (this.since <= EPOCH) {
+        this.done = true
+      }
+
+      this.since -= this.delta
+    })
+
+    return sub
   }
 
   take(n = Infinity) {
@@ -89,18 +94,37 @@ export class Cursor {
   }
 }
 
+export type MultiCursorOpts = {
+  relays: string[]
+  filters: Filter[]
+  onEvent: (e: Event) => void
+}
+
 export class MultiCursor {
   bufferFactor = 4
-  seen_on: Map<string, string[]>
+  seen_on = new Map<string, string[]>()
   cursors: Cursor[]
 
-  constructor(cursors: Cursor[]) {
-    this.seen_on = new Map()
-    this.cursors = cursors
+  constructor(readonly opts: MultiCursorOpts) {
+    this.cursors = getUrls(opts.relays).map(
+      url =>
+        new Cursor({
+          relay: url,
+          filters: opts.filters,
+          onEvent: opts.onEvent,
+        })
+    )
   }
 
   load(limit: number) {
-    return this.cursors.map(c => c.load(limit)).filter(identity)
+    const subs = this.cursors.map(c => c.load(limit)).filter(identity)
+
+    info(`Loading ${limit} more events`, {
+      filters: this.opts.filters,
+      relays: subs.flatMap(sub => sub.opts.relays),
+    })
+
+    return subs
   }
 
   count() {

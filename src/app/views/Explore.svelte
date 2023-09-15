@@ -105,7 +105,7 @@
             </Chip>
           {/each}
         </div>
-        <NoteById invertColors id={ids[0]} relays={hints} />
+        <NoteById invertColors loadOnly id={ids[0]} relays={hints} />
       </Content>
     </Card>
   {/each}

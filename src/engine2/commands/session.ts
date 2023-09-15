@@ -39,7 +39,7 @@ export const handleAuth = async (url, challenge) => {
   if (canSign.get() && !seenChallenges.has(challenge)) {
     seenChallenges.add(challenge)
 
-    const event = signer.get().signAsUser(
+    const event = await signer.get().signAsUser(
       buildEvent(22242, {
         tags: [
           ["challenge", challenge],

@@ -6,7 +6,7 @@ import type {Event, DisplayEvent, Filter} from "src/engine2/model"
 import {writable} from "src/engine2/util/store"
 import {getUrls} from "src/engine2/queries"
 import {subscribe} from "./subscription"
-import {Cursor, MultiCursor} from "./cursor"
+import {MultiCursor} from "./cursor"
 import {ContextLoader} from "./context"
 
 export type FeedOpts = {
@@ -55,18 +55,13 @@ export class FeedLoader {
       ])
     }
 
-    this.cursor = new MultiCursor(
-      urls.map(
-        relay =>
-          new Cursor({
-            relay,
-            filters: opts.filters,
-            onEvent: batch(100, (context: Event[]) => {
-              this.context.addContext(context, {shouldLoadParents: true, depth: opts.depth})
-            }),
-          })
-      )
-    )
+    this.cursor = new MultiCursor({
+      relays: opts.relays,
+      filters: opts.filters,
+      onEvent: batch(100, (context: Event[]) => {
+        this.context.addContext(context, {shouldLoadParents: true, depth: opts.depth})
+      }),
+    })
 
     const subs = this.cursor.load(50)
 

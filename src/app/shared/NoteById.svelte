@@ -10,8 +10,10 @@
   export let id
   export let relays = []
   export let invertColors = false
+  export let loadOnly = false
 
   const context = new ContextLoader({
+    shouldListen: !loadOnly,
     filters: getIdFilters([id]),
     onEvent: e => {
       // Update feed, but only if we have loaded an actual note
