@@ -14,6 +14,7 @@ export type FeedOpts = {
   relays: string[]
   filters: Filter[]
   onEvent?: (e: Event) => void
+  shouldListen?: boolean
   shouldLoadParents?: boolean
 }
 
@@ -34,6 +35,7 @@ export class FeedLoader {
     this.context = new ContextLoader({
       relays: urls,
       filters: opts.filters,
+      shouldListen: opts.shouldListen,
       onEvent: event => {
         opts.onEvent?.(event)
 
@@ -42,7 +44,7 @@ export class FeedLoader {
     })
 
     // No point in subscribing if we have an end date
-    if (!any(prop("until"), ensurePlural(opts.filters) as any[])) {
+    if (opts.shouldListen && !any(prop("until"), ensurePlural(opts.filters) as any[])) {
       this.addSubs([
         subscribe({
           relays: urls,

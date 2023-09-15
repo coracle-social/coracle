@@ -7,6 +7,7 @@
 - [x] Fix message ordering
 - [x] Add local relay
 - [x] Reduce wait time for person feeds
+- [x] Add global music player
 
 # 0.3.6
 

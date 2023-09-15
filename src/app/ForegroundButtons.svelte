@@ -5,14 +5,20 @@
   import {canSign} from "src/engine2"
   import ForegroundButton from "src/partials/ForegroundButton.svelte"
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
+  import MusicPlayer from "src/app/MusicPlayer.svelte"
 
   let scrollY = 0
+  let playerIsOpen = false
 
   $: showCreateNote = !$location.pathname.match(
     /conversations|channels|chat|relays|keys|settings|logout$/
   )
 
   const scrollToTop = () => document.body.scrollIntoView({behavior: "smooth"})
+
+  const showPlayer = () => {
+    playerIsOpen = true
+  }
 
   const createNote = () => {
     const pubkeyMatch = $location.pathname.match(/people\/(npub1[0-9a-z]+)/)
@@ -32,6 +38,11 @@
       </ForegroundButton>
     </div>
   {/if}
+  <div transition:fade|local={{delay: 200, duration: 200}}>
+    <ForegroundButton theme="secondary" size="small" on:click={showPlayer}>
+      <i class="fa fa-music" />
+    </ForegroundButton>
+  </div>
   {#if $canSign && showCreateNote}
     <div out:fade|local={{delay: 200, duration: 200}}>
       <ForegroundButton on:click={createNote}>
@@ -40,3 +51,5 @@
     </div>
   {/if}
 </ForegroundButtons>
+
+<MusicPlayer bind:isOpen={playerIsOpen} />

@@ -1,6 +1,7 @@
 <script lang="ts">
   import {last} from "ramda"
   import {ellipsize, Fetch} from "hurdak"
+  import {AudioController} from "src/util/audio"
   import Audio from "src/partials/Audio.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -22,7 +23,7 @@
 </script>
 
 {#if link.type === "audio"}
-  <Audio url={link.url} />
+  <Audio controller={new AudioController(link.url)} />
 {:else}
   <Anchor
     external

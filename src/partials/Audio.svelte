@@ -1,54 +1,59 @@
 <script lang="ts">
-  import Hls from "hls.js"
-  import {onDestroy} from "svelte"
+  import {onMount, onDestroy} from "svelte"
 
-  export let url
+  export let controller
+  export let autoPlay = false
+  export let autoCleanup = true
 
-  let visualizer, timeout
-
-  const audio = new Audio()
-  const hls = new Hls()
-
-  hls.loadSource(url)
-  hls.attachMedia(audio)
-
-  const toggleAudio = e => {
-    if (timeout) {
-      audio.pause()
-      timeout = clearInterval(timeout)
-    } else {
-      audio.play()
-      timeout = setInterval(updateAudio, 30)
-    }
-  }
-
-  const updateAudio = () => {
-    const {currentTime, duration} = audio
-    const pct = currentTime ? currentTime / duration : 0
-
-    visualizer.childNodes[0].style = `width: ${pct * 100}%;`
-  }
+  let visualizer
+  let playing = Boolean(controller.interval)
 
   const setAudioPosition = ({clientX}) => {
     const {left, width} = visualizer.getBoundingClientRect()
-    const pct = (clientX - left) / width
 
-    if (!isNaN(audio.duration)) {
-      audio.currentTime = Math.round(audio.duration * pct)
-    }
+    controller.setProgress((clientX - left) / width)
   }
 
+  const onProgress = p => {
+    visualizer.childNodes[0].style = `width: ${p * 100}%;`
+  }
+
+  const onPlay = () => {
+    playing = true
+  }
+
+  const onPause = () => {
+    playing = false
+  }
+
+  onMount(() => {
+    onProgress(controller.progress)
+
+    controller.on("progress", onProgress)
+    controller.on("play", onPlay)
+    controller.on("pause", onPause)
+
+    if (autoPlay) {
+      controller.play()
+    }
+  })
+
   onDestroy(() => {
-    clearInterval(timeout)
-    hls?.destroy()
+    if (autoCleanup) {
+      controller.cleanup()
+    } else {
+      controller.off("progress", onProgress)
+      controller.off("play", onPlay)
+      controller.off("pause", onPause)
+    }
   })
 </script>
 
 <div class="flex items-center gap-2" on:click|stopPropagation>
   <div
     class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-accent"
-    on:click={toggleAudio}>
-    {#if timeout}
+    on:click={controller.toggle}>
+    {#if playing}
       <i class="fa fa-pause" />
     {:else}
       <i class="fa fa-play ml-1" />

@@ -13,7 +13,7 @@
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
   import type {DynamicFilter} from "src/engine2"
-  import {session, compileFilter, searchableRelays, mergeHints, getPubkeyHints} from "src/engine2"
+  import {compileFilter, searchableRelays, getRelaysFromFilters} from "src/engine2"
 
   export let relays = []
   export let filter = {} as DynamicFilter
@@ -54,10 +54,7 @@
     }
 
     if (selection.length === 0) {
-      const authors = (compileFilter(filter).authors || []).concat($session?.pubkey)
-      const hints = authors.map(pubkey => getPubkeyHints(pubkey, "write"))
-
-      selection = mergeHints(hints)
+      selection = getRelaysFromFilters([compileFilter(filter)])
     }
 
     if (queryCache) {
@@ -87,6 +84,7 @@
         depth: 2,
         relays: getRelays(),
         filters: [compileFilter(filter)],
+        shouldListen: true,
         shouldLoadParents: true,
         onEvent,
       })

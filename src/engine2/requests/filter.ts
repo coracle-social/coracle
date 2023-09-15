@@ -1,8 +1,8 @@
 import {omit, find, prop, groupBy, uniq} from "ramda"
 import {shuffle, seconds, avg} from "hurdak"
 import type {DynamicFilter, Filter} from "src/engine2/model"
-import {env} from "src/engine2/state"
-import {follows, network} from "src/engine2/queries"
+import {env, pubkey} from "src/engine2/state"
+import {follows, network, mergeHints, getPubkeyHints} from "src/engine2/queries"
 
 export const calculateFilterGroup = ({limit, since, until, ...filter}: Filter) => {
   const group = Object.keys(filter)
@@ -95,3 +95,12 @@ export const compileFilter = (filter: DynamicFilter): Filter => {
 
   return filter as Filter
 }
+
+export const getRelaysFromFilters = filters =>
+  mergeHints(
+    filters.flatMap(filter =>
+      filter.authors
+        ? filter.authors.map(pubkey => getPubkeyHints(pubkey, "write"))
+        : getPubkeyHints(pubkey.get(), "read")
+    )
+  )

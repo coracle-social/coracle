@@ -54,7 +54,7 @@
   onMount(() => {
     // Log modals, keep scroll position on body, but don't allow scrolling
     const unsubModal = modal.stack.subscribe($stack => {
-      if (find(x => !x.mini, $stack)) {
+      if ($stack.length > 0) {
         logUsage(btoa(["modal", last($stack).type].join(":")))
 
         // This is not idempotent, so don't duplicate it
@@ -142,15 +142,19 @@
   })
 </script>
 
-<TypedRouter url={pathname}>
-  <div use:links>
-    {#key $stateKey}
-      <Routes />
-      <ForegroundButtons />
-      <SideNav />
-      <TopNav />
-    {/key}
-    <Modal />
-    <Toast />
-  </div>
-</TypedRouter>
+{#await storage.ready}
+  <!-- pass -->
+{:then}
+  <TypedRouter url={pathname}>
+    <div use:links>
+      {#key $stateKey}
+        <Routes />
+        <ForegroundButtons />
+        <SideNav />
+        <TopNav />
+      {/key}
+      <Modal />
+      <Toast />
+    </div>
+  </TypedRouter>
+{/await}

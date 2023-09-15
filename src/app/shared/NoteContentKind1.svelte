@@ -21,7 +21,8 @@
   import NoteContentQuote from "src/app/shared/NoteContentQuote.svelte"
   import NoteContentEntity from "src/app/shared/NoteContentEntity.svelte"
 
-  export let note, maxLength
+  export let note
+  export let maxLength = 700
   export let anchorId = false
   export let showEntire = false
   export let showMedia = false

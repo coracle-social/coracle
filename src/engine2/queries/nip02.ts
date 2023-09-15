@@ -1,5 +1,4 @@
 import {nth} from "ramda"
-import {difference} from "hurdak"
 import {people} from "src/engine2/state"
 import {user} from "src/engine2/queries"
 
@@ -18,7 +17,7 @@ export const networkSet = followsSet.derived($follows => {
     }
   }
 
-  return difference($network, $follows)
+  return $network
 })
 
 export const network = networkSet.derived($networkSet => Array.from($networkSet) as string[])
