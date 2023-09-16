@@ -55,17 +55,19 @@
   }
 
   onMount(() => {
-    ;[...content?.querySelectorAll("a")].forEach(a => {
-      const [entity] = a.href.match(regex)
+    if (content) {
+      ;[...content.querySelectorAll("a")].forEach(a => {
+        const [entity] = a.href.match(regex)
 
-      if (entity) {
-        a.addEventListener("click", e => {
-          e.preventDefault()
+        if (entity) {
+          a.addEventListener("click", e => {
+            e.preventDefault()
 
-          modal.push({type: "bech32", entity})
-        })
-      }
-    })
+            modal.push({type: "bech32", entity})
+          })
+        }
+      })
+    }
   })
 </script>
 

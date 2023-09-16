@@ -326,3 +326,7 @@ export function roughSizeOfObject(o, max = Infinity) {
 }
 
 export const sumBy = (f, xs) => sum(xs.map(f))
+
+export const stripProto = url => url.replace(/.*:\/\//, "")
+
+export const ensureProto = url => (url.includes("://") ? url : "https://" + url)

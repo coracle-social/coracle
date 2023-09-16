@@ -7,7 +7,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {session, user, publishProfile} from "src/engine2"
+  import Field from "src/partials/Field.svelte"
+  import {pubkey, people, publishProfile} from "src/engine2"
   import {routes} from "src/app/state"
   import {toastProgress} from "src/app/state"
 
@@ -21,10 +22,10 @@
 
     pub.on("progress", toastProgress)
 
-    navigate(routes.person($session.pubkey))
+    navigate(routes.person($pubkey))
   }
 
-  let values = user.get()
+  let values = people.key($pubkey).get()?.profile || {}
 
   document.title = "Profile"
 </script>
@@ -40,59 +41,54 @@
       </p>
     </div>
     <div class="flex w-full flex-col gap-8">
-      <div class="flex flex-col gap-1">
-        <strong>Username</strong>
+      <Field label="Username">
         <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.name}>
           <i slot="before" class="fa-solid fa-user-astronaut" />
         </Input>
-        <p class="text-sm text-gray-1">
-          Your username can be changed at any time. To prevent spoofing, a few characters of your
-          public key will also be displayed next to your posts.
-        </p>
-      </div>
-      <div class="flex flex-col gap-1">
-        <strong>NIP-05 Identifier</strong>
+        <div slot="info">In most clients, this image will be shown on your profile page.</div>
+      </Field>
+      <Field label="NIP-05 Identifier">
         <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.nip05}>
           <i slot="before" class="fa-solid fa-user-check" />
         </Input>
-        <p class="text-sm text-gray-1">
+        <div slot="info">
           Enter a <Anchor class="underline" external href={nip05Url}>NIP-05</Anchor> address to verify
           your public key.
-        </p>
-      </div>
-      <div class="flex flex-col gap-1">
-        <strong>Lightning address</strong>
+        </div>
+      </Field>
+      <Field label="Lightning address">
         <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.lud16}>
           <i slot="before" class="fa-solid fa-bolt" />
         </Input>
-        <p class="text-sm text-gray-1">
+        <div slot="info">
           Enter a <Anchor class="underline" external href={lud16Url}>LUD-16</Anchor> address to enable
           sending and receiving lightning tips (LUD-06 will also work).
-        </p>
-      </div>
-      <div class="flex flex-col gap-1">
-        <strong>About you</strong>
+        </div>
+      </Field>
+      <Field label="Website">
+        <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.website}>
+          <i slot="before" class="fa-solid fa-link" />
+        </Input>
+        <div slot="info">Enter any url where people can find out more about you.</div>
+      </Field>
+      <Field label="About you">
         <Textarea name="about" bind:value={values.about} />
-        <p class="text-sm text-gray-1">
+        <div slot="info">
           Tell the world about yourself. This will be shown on your profile page.
-        </p>
-      </div>
-      <div class="flex flex-col gap-1">
-        <strong>Profile Picture</strong>
+        </div>
+      </Field>
+      <Field label="Profile Picture">
         <ImageInput
           bind:value={values.picture}
           icon="image-portrait"
           maxWidth={480}
           maxHeight={480} />
-        <p class="text-sm text-gray-1">Please be mindful of others and only use small images.</p>
-      </div>
-      <div class="flex flex-col gap-1">
-        <strong>Profile Banner</strong>
+        <p slot="info">Please be mindful of others and only use small images.</p>
+      </Field>
+      <Field label="Profile Banner">
         <ImageInput bind:value={values.banner} icon="panorama" />
-        <p class="text-sm text-gray-1">
-          In most clients, this image will be shown on your profile page.
-        </p>
-      </div>
+        <div slot="info">In most clients, this image will be shown on your profile page.</div>
+      </Field>
       <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>
     </div>
   </Content>

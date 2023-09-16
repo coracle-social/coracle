@@ -143,6 +143,7 @@ export type Profile = {
   about?: string
   banner?: string
   picture?: string
+  website?: string
   display_name?: string
 }
 

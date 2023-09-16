@@ -37,7 +37,7 @@
       "Explore" tab.
     </p>
     <div class="flex w-full flex-col gap-8">
-      <Field label="Tags" info="Tag this content so other people can find it">
+      <Field label="Tags">
         <MultiSelect
           autofocus
           search={$searchTopics}
@@ -47,6 +47,7 @@
             <strong>{item.name}</strong>
           </div>
         </MultiSelect>
+        <div slot="info">Tag this content so other people can find it.</div>
       </Field>
       <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>
     </div>

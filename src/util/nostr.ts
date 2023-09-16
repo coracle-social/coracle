@@ -2,7 +2,7 @@ import {nip19} from "nostr-tools"
 import {omit, is, fromPairs, mergeLeft, last, identity, prop, flatten, uniq} from "ramda"
 import {ensurePlural, between, mapVals, tryFunc, avg, first} from "hurdak"
 import type {Filter, Event, DisplayEvent} from "src/engine2/model"
-import {tryJson} from "src/util/misc"
+import {tryJson, stripProto} from "src/util/misc"
 
 export const noteKinds = [1, 30023, 1063, 9802, 1808]
 export const personKinds = [0, 2, 3, 10002]
@@ -148,7 +148,7 @@ export const isShareableRelay = (url: string) =>
 export const normalizeRelayUrl = (url: string) => {
   // If it doesn't start with a compatible protocol, strip the proto and add wss
   if (!url.match(/^(wss|local):\/\/.+/)) {
-    url = "wss://" + url.replace(/.*:\/\//, "")
+    url = "wss://" + stripProto(url)
   }
 
   return (tryFunc(() => new URL(url).href.replace(/\/+$/, "").toLowerCase()) || "") as string

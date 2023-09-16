@@ -38,9 +38,7 @@
   <Content>
     <Heading class="text-center">File a Report</Heading>
     <div class="flex w-full flex-col gap-8">
-      <Field
-        label="Content Warnings"
-        info="Flag this content as sensitive so other people can avoid it">
+      <Field label="Content Warnings">
         <MultiSelect
           autofocus
           search={searchContentWarnings}
@@ -50,6 +48,7 @@
             <strong>{item}</strong>
           </div>
         </MultiSelect>
+        <div slot="info">Flag this content as sensitive so other people can avoid it.</div>
       </Field>
       <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>
     </div>

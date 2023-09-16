@@ -9,6 +9,7 @@
 - [x] Reduce wait time for person feeds
 - [x] Add global music player
 - [x] Support bech32 entities in long form content
+- [x] Add support for profile website
 
 # 0.3.6
 

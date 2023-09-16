@@ -2,6 +2,7 @@
   import {identity} from "ramda"
   import {info} from "src/util/logger"
   import {toHex} from "src/util/nostr"
+  import {stripProto, ensureProto} from "src/util/misc"
   import {getThemeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -72,6 +73,15 @@
         </div>
         <PersonHandle {pubkey} />
       </Anchor>
+      {#if $person.profile?.website}
+        <Anchor
+          external
+          class="flex items-center gap-2 text-sm"
+          href={ensureProto($person.profile.website)}>
+          <i class="fa fa-link text-accent" />
+          {stripProto($person.profile.website)}
+        </Anchor>
+      {/if}
       <div class="-ml-16 flex flex-grow flex-col gap-4 xs:ml-0">
         <PersonAbout {pubkey} />
         <div class="flex justify-between">

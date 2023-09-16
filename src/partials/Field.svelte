@@ -1,6 +1,5 @@
 <script lang="ts">
   export let label
-  export let info
 </script>
 
 <div class="flex flex-col gap-1">
@@ -9,7 +8,7 @@
     <slot name="display" />
   </div>
   <slot />
-  {#if info}
-    <p class="text-sm text-gray-4">{info}</p>
-  {/if}
+  <p class="text-sm text-gray-4">
+    <slot name="info" />
+  </p>
 </div>

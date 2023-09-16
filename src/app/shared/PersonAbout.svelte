@@ -15,9 +15,7 @@
 <p>
   {#each content as { type, value }}
     {#if type === "newline"}
-      {#each value as _}
-        <br />
-      {/each}
+      {" "}
     {:else if type === "link"}
       <Anchor class="underline" external href={value.url}>
         {value.url.replace(/https?:\/\/(www\.)?/, "")}
