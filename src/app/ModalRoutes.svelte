@@ -30,6 +30,7 @@
   import RelayBrowse from "src/app/views/RelayBrowse.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
   import RelayReview from "src/app/views/RelayReview.svelte"
+  import Bech32Entity from "src/app/views/Bech32Entity.svelte"
   import QRCode from "src/app/views/QRCode.svelte"
 
   export let m
@@ -97,6 +98,8 @@
   <LabelDetail label={m.label} ids={m.ids} hints={m.hints} />
 {:else if m.type === "report/create"}
   <ReportCreate note={m.note} />
+{:else if m.type === "bech32"}
+  <Bech32Entity entity={m.entity} />
 {:else if m.type === "qrcode"}
   <QRCode value={m.value} />
 {:else if m.type === "message"}

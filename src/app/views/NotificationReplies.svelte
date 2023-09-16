@@ -1,11 +1,9 @@
 <script lang="ts">
   import {pluck, uniq} from "ramda"
   import {formatTimestamp} from "src/util/misc"
-  import {noteKinds} from "src/util/nostr"
-  import Card from "src/partials/Card.svelte"
-  import NoteContent from "src/app/shared/NoteContent.svelte"
+  import {noteKinds, asDisplayEvent} from "src/util/nostr"
   import NotificationPeople from "src/app/shared/NotificationPeople.svelte"
-  import {modal} from "src/partials/state"
+  import Note from "src/app/shared/Note.svelte"
   import type {Notification} from "src/engine2/model"
 
   export let notification: Notification
@@ -15,15 +13,15 @@
   const pubkeys = uniq(pluck("pubkey", replies))
 </script>
 
-<Card
-  interactive
-  class="flex w-full flex-col gap-2 text-left"
-  on:click={() => modal.push({type: "note/detail", note})}>
-  <div on:click|stopPropagation class="flex justify-between">
+<div class="flex flex-col gap-4">
+  <div class="flex justify-between">
     <NotificationPeople {pubkeys} actionText="replied to your note" />
     <small>{formatTimestamp(timestamp)}</small>
   </div>
-  <div class="break-word overflow-hidden text-gray-1">
-    <NoteContent {note} />
+  <Note topLevel note={asDisplayEvent(note)} />
+  <div class="ml-8 flex flex-col gap-4">
+    {#each replies as reply (reply.id)}
+      <Note topLevel showParent={false} note={asDisplayEvent(reply)} />
+    {/each}
   </div>
-</Card>
+</div>

@@ -101,6 +101,6 @@ export const getRelaysFromFilters = filters =>
     filters.flatMap(filter =>
       filter.authors
         ? filter.authors.map(pubkey => getPubkeyHints(pubkey, "write"))
-        : getPubkeyHints(pubkey.get(), "read")
+        : [getPubkeyHints(pubkey.get(), "read")]
     )
   )

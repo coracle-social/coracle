@@ -10,9 +10,9 @@ import {MultiCursor} from "./cursor"
 import {ContextLoader} from "./context"
 
 export type FeedOpts = {
-  depth: number
   relays: string[]
   filters: Filter[]
+  depth?: number
   onEvent?: (e: Event) => void
   shouldListen?: boolean
   shouldLoadParents?: boolean

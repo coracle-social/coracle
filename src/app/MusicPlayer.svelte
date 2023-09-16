@@ -4,7 +4,7 @@
   import {throttle} from "throttle-debounce"
   import {Tags} from "src/util/nostr"
   import {AudioController} from "src/util/audio"
-  import {modal} from 'src/partials/state'
+  import {modal} from "src/partials/state"
   import Audio from "src/partials/Audio.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -18,13 +18,13 @@
   export let isOpen
 
   const filters = [
-    compileFilter({kinds: [1808], authors: "follows"}),
-    compileFilter({kinds: [1808], authors: "network"}),
+    compileFilter({kinds: [1808], authors: "follows", limit: 10}),
+    compileFilter({kinds: [1808], authors: "network", limit: 10}),
   ]
 
   const relays = getRelaysFromFilters(filters)
 
-  const feed = new FeedLoader({depth: 2, filters, relays})
+  const feed = new FeedLoader({filters, relays})
 
   const notes = feed.feed
 
@@ -46,10 +46,9 @@
     i = Math.min($notes.length - 1, inc(i))
   }
 
-  const loadMore = throttle(3000, () => feed.load(10))
+  const loadMore = throttle(10000, () => feed.load(10))
 
-  const goToPerson = () =>
-    modal.push({type: "person/detail", pubkey: note.pubkey})
+  const goToPerson = () => modal.push({type: "person/detail", pubkey: note.pubkey})
 
   let i = 0
   let playing = false

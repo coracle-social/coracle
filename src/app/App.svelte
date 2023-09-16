@@ -7,7 +7,7 @@
   import {onMount} from "svelte"
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
-  import {isNil, find, last} from "ramda"
+  import {isNil, last} from "ramda"
   import {seconds, Fetch, shuffle} from "hurdak"
   import {tryFetch, hexToBech32, bech32ToHex, now} from "src/util/misc"
   import type {Relay} from "src/engine2"

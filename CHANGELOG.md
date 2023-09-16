@@ -8,6 +8,7 @@
 - [x] Add local relay
 - [x] Reduce wait time for person feeds
 - [x] Add global music player
+- [x] Support bech32 entities in long form content
 
 # 0.3.6
 
