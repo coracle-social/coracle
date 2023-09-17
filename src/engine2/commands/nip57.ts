@@ -28,9 +28,7 @@ export async function requestZap(content, amount, {pubkey, event = null}) {
 
   const zap = signer.get().prepAsUser(buildEvent(9734, {content, tags}))
   const zapString = encodeURI(JSON.stringify(zap))
-  const res = await Fetch.fetchJson(
-    `${callback}?amount=${amount}&nostr=${zapString}&lnurl=${lnurl}`
-  )
+  const res = await Fetch.fetchJson(`${callback}?amount=${msats}&nostr=${zapString}&lnurl=${lnurl}`)
 
   if (!res.pr) {
     warn(JSON.stringify(res))

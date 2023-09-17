@@ -13,13 +13,13 @@
 </script>
 
 {#if pubkeys.length === 1}
-  <Anchor on:click={showPerson} class="flex items-center gap-2">
+  <Anchor on:click={showPerson} class="flex cursor-pointer items-center gap-2">
     <PersonCircle pubkey={pubkeys[0]} />
     <PersonName class="font-bold" pubkey={pubkeys[0]} />
     <span>{actionText}.</span>
   </Anchor>
 {:else}
-  <div class="flex gap-6" on:click={showPeople}>
+  <div class="flex cursor-pointer gap-6" on:click={showPeople}>
     <PersonCircles size={4} pubkeys={pubkeys.slice(0, 8)} />
     <small>{pubkeys.length} people {actionText}.</small>
   </div>
