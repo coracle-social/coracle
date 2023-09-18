@@ -166,11 +166,11 @@ export const formatSats = (sats: number) => {
 export const annotateMedia = (url: string) => {
   if (url.match(/open.spotify.com/)) {
     return {type: "spotify", url}
-  } else if (url.match(/\.(jpe?g|png|gif|webp)/)) {
+  } else if (url.match(/\.(jpe?g|png|gif|webp)$/)) {
     return {type: "image", url}
-  } else if (url.match(/\.(mov|webm|mp4)/)) {
+  } else if (url.match(/\.(mov|webm|mp4)$/)) {
     return {type: "video", url}
-  } else if (url.match(/\.(wav|m3u8)/)) {
+  } else if (url.match(/\.(wav|m3u8)$/)) {
     return {type: "audio", url}
   } else {
     return {type: "preview", url}
@@ -229,9 +229,16 @@ export const webSocketURLToPlainOrBase64 = (url: string): string => {
   return url
 }
 
-export const pushToKey = <T>(m: Record<string, T[]>, k: string, v: T) => {
-  m[k] = m[k] || []
-  m[k].push(v)
+export const pushToKey = <T>(m: Record<string, T[]> | Map<string, T[]>, k: string, v: T) => {
+  if (m instanceof Map) {
+    const a = m.get(k) || []
+
+    a.push(v)
+    m.set(k, a)
+  } else {
+    m[k] = m[k] || []
+    m[k].push(v)
+  }
 
   return m
 }

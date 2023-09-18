@@ -2,9 +2,9 @@
   import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {tweened} from "svelte/motion"
-  import {find, reject, identity, propEq, sum, pluck, sortBy} from "ramda"
+  import {find, pathEq, reject, identity, propEq, sum, pluck, sortBy} from "ramda"
   import {stringToHue, formatSats, hsl} from "src/util/misc"
-  import {isLike, fromDisplayEvent, toNostrURI} from "src/util/nostr"
+  import {fromDisplayEvent, toNostrURI} from "src/util/nostr"
   import {quantify} from "hurdak"
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
@@ -15,7 +15,7 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {toastProgress} from "src/app/state"
-  import type {ZapEvent, DisplayEvent} from "src/engine2"
+  import type {Event} from "src/engine2"
   import {
     env,
     mute,
@@ -27,16 +27,19 @@
     people,
     getUserRelayUrls,
     publishReaction,
-    processZaps,
+    processZap,
     displayRelay,
     getEventHints,
   } from "src/engine2"
 
-  export let note: DisplayEvent
+  export let note: Event
   export let reply
   export let muted
   export let showEntire
   export let setFeedRelay
+  export let replies
+  export let likes
+  export let zaps
 
   const person = people.key(note.pubkey)
   const nevent = nip19.neventEncode({id: note.id, relays: getEventHints(note)})
@@ -79,30 +82,28 @@
     Publisher.publish({event, relays}).on("progress", toastProgress)
   }
 
-  let like, likes, allLikes, zap, zaps
-  let actions = []
+  let like, allLikes, zap
   let showDetails = false
+  let actions = []
 
   $: disableActions = !$canSign || muted
-  $: likes = note.reactions.filter(n => isLike(n.content))
   $: like = like || find(propEq("pubkey", $session?.pubkey), likes)
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
   $: $likesCount = allLikes.length
 
-  $: zaps = processZaps(note.zaps, note.pubkey)
-  $: zap = zap || find((z: ZapEvent) => z.request.pubkey === $session?.pubkey, zaps)
+  $: zap = zap || find(pathEq(["request", "pubkey"], $session?.pubkey), zaps)
 
   $: $zapsTotal =
     sum(
       pluck(
         // @ts-ignore
         "invoiceAmount",
-        zap ? zaps.filter(n => n.id !== zap?.id).concat(processZaps([zap], note.pubkey)) : zaps
+        zap ? zaps.filter(n => n.id !== zap?.id).concat(processZap(zap, $person?.zapper)) : zaps
       )
     ) / 1000
 
   $: canZap = $person?.zapper && note.pubkey !== $session?.pubkey
-  $: $repliesCount = note.replies.length
+  $: $repliesCount = replies.length
 
   $: {
     actions = []

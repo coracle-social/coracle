@@ -6,6 +6,7 @@ import {info} from "src/util/logger"
 import type {Filter, Event} from "src/engine2/model"
 import {getUrls} from "src/engine2/queries"
 import {Subscription} from "./subscription"
+import {EventTracker} from "./eventTracker"
 import {guessFilterDelta} from "./filter"
 
 export type CursorOpts = {
@@ -102,7 +103,7 @@ export type MultiCursorOpts = {
 
 export class MultiCursor {
   bufferFactor = 4
-  seen_on = new Map<string, string[]>()
+  tracker = new EventTracker()
   cursors: Cursor[]
 
   constructor(readonly opts: MultiCursorOpts) {
@@ -146,18 +147,9 @@ export class MultiCursor {
       }
 
       const event = cursor.pop()
+      const seen = this.tracker.add(event, event.seen_on)
 
-      // Merge seen_on via mutation so it applies to future. If we've already
-      // seen the event, we're also done and we don't need to add it to our buffer
-      if (
-        event.seen_on.length > 0 &&
-        this.seen_on.has(event.id) &&
-        !this.seen_on.get(event.id).includes(event.seen_on[0])
-      ) {
-        this.seen_on.get(event.id).push(event.seen_on[0])
-      } else {
-        this.seen_on.set(event.id, event.seen_on)
-
+      if (!seen) {
         events.push(event)
       }
     }

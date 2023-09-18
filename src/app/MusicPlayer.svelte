@@ -26,8 +26,6 @@
 
   const feed = new FeedLoader({filters, relays})
 
-  const notes = feed.feed
-
   const close = () => {
     isOpen = false
   }
@@ -43,7 +41,7 @@
     controller?.cleanup()
     controller = null
 
-    i = Math.min($notes.length - 1, inc(i))
+    i = Math.min($feed.length - 1, inc(i))
   }
 
   const loadMore = throttle(10000, () => feed.load(10))
@@ -54,7 +52,7 @@
   let playing = false
   let controller
 
-  $: note = $notes[i]
+  $: note = $feed[i]
 
   $: {
     if (!controller && note) {
@@ -83,7 +81,7 @@
   }
 
   $: {
-    if ($notes.slice(i).length < 10) {
+    if ($feed.slice(i).length < 10) {
       loadMore()
     }
   }
@@ -114,7 +112,7 @@
             </div>
             <i
               class="fa fa-2x fa-forward-step cursor-pointer"
-              class:opacity-50={i >= $notes.length - 1}
+              class:opacity-50={i >= $feed.length - 1}
               on:click={next} />
           </div>
         {/key}

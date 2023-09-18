@@ -4,11 +4,11 @@ import EventEmitter from "events"
 import {assoc, map} from "ramda"
 import {defer, tryFunc, updateIn} from "hurdak"
 import {warn, info} from "src/util/logger"
-import {isShareableRelay} from "src/util/nostr"
 import {now} from "src/util/misc"
 import type {Event, Filter} from "src/engine2/model"
 import {getUrls, getExecutor} from "src/engine2/queries"
 import {projections} from "src/engine2/projections"
+import {EventTracker} from "./eventTracker"
 
 export type SubscriptionOpts = {
   relays: string[]
@@ -23,8 +23,8 @@ export class Subscription extends EventEmitter {
   closed: number = null
   result = defer()
   events = []
-  seen = new Map()
   eose = new Set()
+  tracker = new EventTracker()
   sub: {unsubscribe: () => void} = null
   id = Math.random().toString().slice(12, 16)
 
@@ -52,20 +52,13 @@ export class Subscription extends EventEmitter {
 
   onEvent = (url: string, event: Event) => {
     const {filters} = this.opts
-    const seen_on = this.seen.get(event.id)
+    const seen = this.tracker.add(event, url)
 
-    if (seen_on) {
-      if (!seen_on.includes(url) && isShareableRelay(url)) {
-        seen_on.push(url)
-      }
-
+    if (seen) {
       return
     }
 
-    event.seen_on = isShareableRelay(url) ? [url] : []
     event.content = event.content || ""
-
-    this.seen.set(event.id, event.seen_on)
 
     if (!tryFunc(() => verifySignature(event))) {
       warn("Signature verification failed", {event})

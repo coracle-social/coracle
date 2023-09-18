@@ -21,7 +21,7 @@ export const combineFilters = filters => {
     const newFilter = {}
 
     for (const k of Object.keys(group[0])) {
-      if (["since", "until", "limit"].includes(k)) {
+      if (["since", "until", "limit", "search"].includes(k)) {
         newFilter[k] = group[0][k]
       } else {
         newFilter[k] = uniq(group.flatMap(prop(k)))

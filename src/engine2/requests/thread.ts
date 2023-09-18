@@ -1,9 +1,8 @@
 import {uniqBy, identity, prop, pluck, sortBy} from "ramda"
-import {throttle, batch} from "hurdak"
+import {batch} from "hurdak"
 import {findReplyId, findRootId} from "src/util/nostr"
 import type {Event, DisplayEvent} from "src/engine2/model"
 import {writable} from "src/engine2/util/store"
-import {ContextLoader} from "./context"
 import {load} from "./load"
 
 export type ThreadOpts = {
@@ -13,25 +12,24 @@ export type ThreadOpts = {
 
 export class ThreadLoader {
   stopped = false
-  context: ContextLoader
   anchor = writable<DisplayEvent>(null)
   parent = writable<DisplayEvent>(null)
   ancestors = writable<DisplayEvent[]>([])
   root = writable<DisplayEvent>(null)
 
   constructor(readonly opts: ThreadOpts) {
-    this.context = new ContextLoader({
-      onEvent: this.updateThread,
-    })
-
-    this.loadNotes([opts.anchorId], 2)
+    this.loadNotes([opts.anchorId])
   }
 
   stop() {
-    this.context.stop()
+    this.stopped = true
   }
 
-  loadNotes(ids, depth = 1) {
+  loadNotes(ids) {
+    if (this.stopped) {
+      return
+    }
+
     const seen = new Set(pluck("id", this.getThread()))
     const filteredIds = ids.filter(id => id && !seen.has(id))
 
@@ -40,8 +38,7 @@ export class ThreadLoader {
         relays: this.opts.relays,
         filters: [{ids: filteredIds}],
         onEvent: batch(300, (events: Event[]) => {
-          this.context.addContext(events, {depth: 1})
-          this.addToThread(this.context.applyContext(events))
+          this.addToThread(events)
           this.loadNotes(events.flatMap(e => [findReplyId(e), findRootId(e)]))
         }),
       })
@@ -81,8 +78,4 @@ export class ThreadLoader {
       )
     }
   }
-
-  updateThread = throttle(500, () => {
-    this.addToThread(this.context.applyContext(this.getThread()))
-  })
 }

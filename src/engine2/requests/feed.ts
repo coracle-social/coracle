@@ -1,13 +1,14 @@
-import {partition, reject, identity, uniqBy, pluck, sortBy, without, any, prop, assoc} from "ramda"
-import {ensurePlural, union, seconds, doPipe, throttle, batch} from "hurdak"
+import {partition, uniqBy, identity, pluck, sortBy, without, any, prop, assoc} from "ramda"
+import {ensurePlural, seconds, doPipe, batch} from "hurdak"
 import {now, race} from "src/util/misc"
 import {findReplyId} from "src/util/nostr"
-import type {Event, DisplayEvent, Filter} from "src/engine2/model"
+import type {DisplayEvent, Event, Filter} from "src/engine2/model"
 import {writable} from "src/engine2/util/store"
 import {getUrls} from "src/engine2/queries"
 import {subscribe} from "./subscription"
 import {MultiCursor} from "./cursor"
-import {ContextLoader} from "./context"
+import {getIdFilters} from "./filter"
+import {load} from "./load"
 
 export type FeedOpts = {
   relays: string[]
@@ -21,10 +22,10 @@ export type FeedOpts = {
 export class FeedLoader {
   since = now()
   stopped = false
-  context: ContextLoader
   subs: Array<{close: () => void}> = []
-  feed = writable<DisplayEvent[]>([])
-  stream = writable<Event[]>([])
+  buffer = writable<Event[]>([])
+  notes = writable<DisplayEvent[]>([])
+  parents = new Map<string, DisplayEvent>()
   deferred: Event[] = []
   cursor: MultiCursor
   ready: Promise<void>
@@ -32,26 +33,15 @@ export class FeedLoader {
   constructor(readonly opts: FeedOpts) {
     const urls = getUrls(opts.relays)
 
-    this.context = new ContextLoader({
-      relays: urls,
-      filters: opts.filters,
-      shouldListen: opts.shouldListen,
-      onEvent: event => {
-        opts.onEvent?.(event)
-
-        this.updateFeed()
-      },
-    })
-
     // No point in subscribing if we have an end date
     if (opts.shouldListen && !any(prop("until"), ensurePlural(opts.filters) as any[])) {
       this.addSubs([
         subscribe({
           relays: urls,
           filters: opts.filters.map(assoc("since", this.since)),
-          onEvent: batch(1000, (context: Event[]) => {
-            this.context.addContext(context, {shouldLoadParents: true, depth: opts.depth})
-            this.stream.update($stream => $stream.concat(context))
+          onEvent: batch(1000, (events: Event[]) => {
+            this.loadParents(events)
+            this.buffer.update($buffer => $buffer.concat(events))
           }),
         }),
       ])
@@ -60,9 +50,7 @@ export class FeedLoader {
     this.cursor = new MultiCursor({
       relays: opts.relays,
       filters: opts.filters,
-      onEvent: batch(100, (context: Event[]) => {
-        this.context.addContext(context, {shouldLoadParents: true, depth: opts.depth})
-      }),
+      onEvent: batch(100, this.loadParents),
     })
 
     const subs = this.cursor.load(50)
@@ -72,6 +60,16 @@ export class FeedLoader {
     // Wait until a good number of subscriptions have completed to reduce the chance of
     // out of order notes
     this.ready = race(0.2, pluck("result", subs))
+  }
+
+  loadParents = notes => {
+    const parentIds = notes.map(findReplyId).filter(identity)
+
+    load({
+      relays: this.opts.relays,
+      filters: getIdFilters(parentIds),
+      onEvent: e => this.parents.set(e.id, e),
+    })
   }
 
   // Control
@@ -88,7 +86,6 @@ export class FeedLoader {
 
   stop() {
     this.stopped = true
-    this.context.stop()
 
     for (const sub of this.subs) {
       sub.close()
@@ -97,40 +94,57 @@ export class FeedLoader {
 
   // Feed building
 
-  addToFeed = (notes: Event[]) => {
-    const getChildIds = note => note.replies.flatMap(child => [child.id, getChildIds(child)])
+  buildFeedChunk = (notes: Event[]) => {
+    const seen = new Set(pluck("id", this.notes.get()))
+    const parents = []
 
-    this.feed.update($feed => {
-      // Avoid showing the same note twice, even if it's once as a parent and once as a child
-      const feedIds = new Set(pluck("id", $feed))
-      const feedChildIds = new Set($feed.flatMap(getChildIds))
-      const feedParentIds = new Set($feed.map(findReplyId).filter(identity))
-
-      return uniqBy(
+    return sortBy(
+      (e: DisplayEvent) => -e.created_at,
+      uniqBy(
         prop("id"),
-        $feed.concat(
-          this.context.applyContext(
-            sortBy(
-              e => -e.created_at,
-              reject(
-                (e: Event) =>
-                  feedIds.has(findReplyId(e)) || feedChildIds.has(e.id) || feedParentIds.has(e.id),
-                notes
-              )
-            ),
-            {
-              substituteParents: true,
-              alreadySeen: union(feedIds, feedChildIds),
+        notes
+          .filter(e => {
+            const parentId = findReplyId(e)
+
+            // If we've seen this note or its parent, don't add it again
+            if (seen.has(e.id) || seen.has(parentId)) {
+              return false
             }
-          )
-        )
+
+            // If we have a parent, show that instead, with replies grouped underneath
+            const parent = this.parents.get(parentId)
+
+            if (parent && !seen.has(findReplyId(parent))) {
+              if (!parent.replies) {
+                parent.replies = []
+              }
+
+              parent.replies.push(e)
+
+              parents.push(parent)
+
+              return false
+            }
+
+            return true
+          })
+          .concat(parents)
+          .map((e: DisplayEvent) => {
+            if (e.replies) {
+              e.replies = uniqBy(prop("id"), e.replies)
+            }
+
+            return e
+          })
       )
-    })
+    )
   }
 
-  updateFeed = throttle(500, () => {
-    this.feed.update($feed => this.context.applyContext($feed))
-  })
+  addToFeed = (notes: Event[]) => {
+    this.notes.update($notes => uniqBy(prop("id"), $notes.concat(this.buildFeedChunk(notes))))
+  }
+
+  subscribe = f => this.notes.subscribe(f)
 
   // Loading
 
@@ -142,55 +156,26 @@ export class FeedLoader {
 
     this.addSubs(subs)
 
-    const ok = doPipe(notes.concat(deferred), [
-      this.deferReactions,
-      this.deferOrphans,
-      this.deferAncient,
-    ])
+    const ok = doPipe(notes.concat(deferred), [this.deferOrphans, this.deferAncient])
 
     this.addToFeed(ok)
   }
 
-  loadStream() {
-    this.stream.update($stream => {
-      this.feed.update($feed => {
-        return uniqBy(
-          prop("id"),
-          this.context
-            .applyContext($stream, {
-              substituteParents: true,
-            })
-            .concat($feed)
-        )
-      })
+  loadBuffer() {
+    this.buffer.update($buffer => {
+      this.addToFeed($buffer)
 
       return []
     })
   }
 
-  deferReactions = (notes: Event[]) => {
-    const [defer, ok] = partition(
-      e => !this.context.isTextNote(e) && this.context.isMissingParent(e),
-      notes
-    )
-
-    setTimeout(() => {
-      // Defer again if we still don't have a parent, it's pointless to show an orphaned reaction
-      const [orphans, ready] = partition(this.context.isMissingParent, defer)
-
-      this.addToFeed(ready)
-      this.deferred = this.deferred.concat(orphans)
-    }, 1500)
-
-    return ok
-  }
-
   deferOrphans = (notes: Event[]) => {
     // If something has a parent id but we haven't found the parent yet, skip it until we have it.
-    const [defer, ok] = partition(
-      e => this.context.isTextNote(e) && this.context.isMissingParent(e),
-      notes
-    )
+    const [defer, ok] = partition(e => {
+      const parentId = findReplyId(e)
+
+      return parentId && !this.parents.get(parentId)
+    }, notes)
 
     setTimeout(() => this.addToFeed(defer), 1500)
 

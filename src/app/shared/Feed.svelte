@@ -89,7 +89,7 @@
         onEvent,
       })
 
-      oldNotes = feed.feed
+      oldNotes = feed.notes
       newNotes = feed.stream
 
       scroller = createScroller(loadMore, {element: scrollerElement})

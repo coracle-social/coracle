@@ -156,15 +156,9 @@ export const normalizeRelayUrl = (url: string) => {
 
 export const channelAttrs = ["name", "about", "picture"]
 
-export const asDisplayEvent = (event: Event): DisplayEvent => ({
-  replies: [],
-  reactions: [],
-  zaps: [],
-  ...event,
-})
+export const asDisplayEvent = (event: Event): DisplayEvent => ({replies: [], ...event})
 
-export const fromDisplayEvent = e =>
-  omit(["replies", "reactions", "zaps", "matchesFilter"], e) as Event
+export const fromDisplayEvent = e => omit(["replies"], e) as Event
 
 export const toHex = (data: string): string | null => {
   if (data.match(/[a-zA-Z0-9]{64}/)) {

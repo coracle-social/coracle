@@ -74,10 +74,7 @@ export type ZapEvent = Event & {
 }
 
 export type DisplayEvent = Event & {
-  zaps: Event[]
-  replies: DisplayEvent[]
-  reactions: Event[]
-  matchesFilter?: boolean
+  replies?: DisplayEvent[]
 }
 
 export type Filter = {

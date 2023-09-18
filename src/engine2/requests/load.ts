@@ -4,6 +4,7 @@ import {pushToKey} from "src/util/misc"
 import {info} from "src/util/logger"
 import type {Event, Filter} from "src/engine2/model"
 import {Subscription} from "./subscription"
+import {EventTracker} from "./eventTracker"
 import {combineFilters} from "./filter"
 
 export type LoadOpts = {
@@ -34,12 +35,20 @@ export const execute = () => {
     }
   }
 
+  const tracker = new EventTracker()
+
   // Group by relay, then by filter
   for (const [url, items] of Object.entries(itemsByRelay) as [string, LoadItem[]][]) {
     const filters = combineFilters(items.flatMap(item => item.request.filters))
     const sub = new Subscription({filters, relays: [url], timeout: 15000})
 
     sub.on("event", e => {
+      const seen = tracker.add(e, url)
+
+      if (seen) {
+        return
+      }
+
       for (const {request} of items) {
         if (request.onEvent && matchFilters(request.filters, e)) {
           request.onEvent(e)

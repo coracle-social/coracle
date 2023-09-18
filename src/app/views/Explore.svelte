@@ -9,8 +9,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
-  import NoteById from "src/app/shared/NoteById.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
+  import NoteDetail from "src/app/views/NoteDetail.svelte"
   import {
     labels,
     session,
@@ -105,7 +105,7 @@
             </Chip>
           {/each}
         </div>
-        <NoteById invertColors loadOnly id={ids[0]} relays={hints} />
+        <NoteDetail invertColors note={{id: ids[0]}} relays={hints} depth={0} />
       </Content>
     </Card>
   {/each}

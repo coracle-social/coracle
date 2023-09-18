@@ -10,7 +10,7 @@
 
   export let pubkey
 
-  const followsCount = people.key(pubkey).derived($p => $p.petnames?.length || 0)
+  const followsCount = people.key(pubkey).derived($p => $p?.petnames?.length || 0)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
 
   let sub
