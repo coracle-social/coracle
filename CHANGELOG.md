@@ -12,6 +12,7 @@
 - [x] Add support for profile website
 - [x] Speed up reaction/reply loading
 - [x] Add content-warning support
+- [x] Link to github for feedback
 
 # 0.3.6
 

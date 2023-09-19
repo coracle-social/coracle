@@ -61,10 +61,9 @@
         <h3 class="text-center text-xl sm:h-12">Get in touch</h3>
         <p class="sm:h-24">Having problems? Let us know.</p>
         <div class="flex justify-center">
-          <Anchor
-            theme="button-accent"
-            href="/conversations/npub1jlrs53pkdfjnts29kveljul2sm0actt6n8dxrrzqcersttvcuv3qdjynqn"
-            >Send a message</Anchor>
+          <Anchor theme="button-accent" href="https://github.com/coracle-social/coracle/issues/new">
+            Open an Issue
+          </Anchor>
         </div>
       </Content>
     </Card>

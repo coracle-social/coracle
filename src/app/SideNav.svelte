@@ -115,6 +115,13 @@
       <i class="fa fa-info-circle mr-2" /> About
     </a>
   </li>
+  <li class="cursor-pointer">
+    <a
+      class="block px-4 py-2 transition-all hover:bg-accent hover:text-white"
+      href="https://github.com/coracle-social/coracle/issues/new">
+      <i class="fa fa-message mr-2" /> Feedback
+    </a>
+  </li>
   <li class="absolute bottom-0 flex w-full justify-center gap-2 p-2 text-sm text-gray-5">
     <Anchor external theme="anchor" href="/public/terms.html">Terms</Anchor>
     &bull;
