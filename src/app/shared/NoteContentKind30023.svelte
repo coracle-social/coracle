@@ -31,7 +31,7 @@
   }
 
   const convertEntities = markdown => {
-    for (const uri of markdown.match(regex)) {
+    for (const uri of markdown.match(regex) || []) {
       const entity = fromNostrURI(uri)
 
       let type, data
@@ -57,7 +57,7 @@
   onMount(() => {
     if (content) {
       ;[...content.querySelectorAll("a")].forEach(a => {
-        const [entity] = a.href.match(regex)
+        const [entity] = a.href.match(regex) || []
 
         if (entity) {
           a.addEventListener("click", e => {

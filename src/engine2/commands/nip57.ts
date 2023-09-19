@@ -26,7 +26,7 @@ export async function requestZap(content, amount, {pubkey, event = null}) {
     tags.push(["e", event.id])
   }
 
-  const zap = signer.get().prepAsUser(buildEvent(9734, {content, tags}))
+  const zap = await signer.get().signAsUser(buildEvent(9734, {content, tags}))
   const zapString = encodeURI(JSON.stringify(zap))
   const res = await Fetch.fetchJson(`${callback}?amount=${msats}&nostr=${zapString}&lnurl=${lnurl}`)
 

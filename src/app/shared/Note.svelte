@@ -1,6 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {last, uniqBy, prop, identity} from "ramda"
+  import {last, sortBy, uniqBy, prop, identity} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, switcherFn} from "hurdak"
   import {findRootId, findReplyId, isLike} from "src/util/nostr"
@@ -13,6 +13,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
+  import type {Event} from "src/engine2"
   import {
     env,
     load,
@@ -47,7 +48,10 @@
   let actions = null
   let visibleNotes = []
   let collapsed = false
-  let replies = (context || []).filter(e => e.kind === 1 && findReplyId(e) === event.id)
+  let replies = sortBy(
+    (e: Event) => -e.created_at,
+    (context || []).filter(e => e.kind === 1 && findReplyId(e) === event.id)
+  )
   let likes = []
   let zaps = []
 
@@ -115,6 +119,8 @@
       })
     }
 
+    ;(window as any).NoteDetail = event
+
     const loadKinds = [7]
 
     if (ENABLE_ZAPS) {
@@ -133,21 +139,23 @@
         "1": () => {
           if (!isEventMuted(e).get()) {
             if (findReplyId(e) === event.id) {
-              replies = uniqBy(prop("id"), replies.concat(e))
+              replies = sortBy((e: Event) => -e.created_at, uniqBy(prop("id"), replies.concat(e)))
             }
 
             context = uniqBy(prop("id"), (context || []).concat(e))
           }
         },
         "7": () => {
-          if (isLike(e.content)) {
+          if (isLike(e.content) && findReplyId(e) === event.id) {
             likes = likes.concat(e)
           }
         },
         "9735": () => {
-          const {zapper} = derivePerson(event.pubkey).get()
+          if (findReplyId(e) === event.id) {
+            const {zapper} = derivePerson(event.pubkey).get()
 
-          zaps = zaps.concat(processZap(e, zapper)).filter(identity)
+            zaps = zaps.concat(processZap(e, zapper)).filter(identity)
+          }
         },
       })
     }

@@ -108,7 +108,6 @@ setInterval(() => {
 // Synchronization from events to state
 
 export const loadAppData = async () => {
-  return
   const {pubkey} = session.get()
 
   // Make sure the user and their follows are loaded

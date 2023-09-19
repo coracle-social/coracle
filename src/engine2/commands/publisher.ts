@@ -78,6 +78,8 @@ export class Publisher extends EventEmitter {
       attemptToResolve()
     }, timeout)
 
+    // return console.log('PUBLISH', this.event)
+
     const sub = executor.publish(this.event, {
       verb,
       onOk: (url: string) => {

@@ -23,6 +23,10 @@ export type LoadItem = {
 const queue = []
 
 export const execute = () => {
+  if (queue.length === 0) {
+    return
+  }
+
   info(
     `Loading ${queue.length} grouped requests`,
     combineFilters(queue.flatMap(item => item.request.filters))

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {getContentWarning} from "src/util/nostr"
+  import Anchor from "src/partials/Anchor.svelte"
   import NoteContentKind0 from "src/app/shared/NoteContentKind0.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import NoteContentKind3 from "src/app/shared/NoteContentKind3.svelte"
@@ -19,9 +21,23 @@
   export let showEntire = false
   export let expandable = true
   export let showMedia = getSetting("show_media")
+
+  let warning = getSetting("hide_sensitive") ? getContentWarning(note) : null
+
+  const ignoreWarning = () => {
+    warning = null
+  }
 </script>
 
-{#if note.kind === 0}
+{#if warning}
+  <div class="flex gap-2 text-gray-4">
+    <i class="fa fa-warning m-1" />
+    <p>
+      This note has been flagged by the author as "{warning}".<br />
+      <Anchor theme="anchor" on:click={ignoreWarning}>Show anyway</Anchor>
+    </p>
+  </div>
+{:else if note.kind === 0}
   <NoteContentKind0 {note} />
 {:else if note.kind === 3}
   <NoteContentKind3 {note} {showEntire} />

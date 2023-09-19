@@ -6,6 +6,7 @@ export const getDefaultSettings = () => ({
   relay_limit: 10,
   default_zap: 21,
   show_media: true,
+  hide_sensitive: true,
   report_analytics: true,
   imgproxy_url: env.get().IMGPROXY_URL,
   dufflepud_url: env.get().DUFFLEPUD_URL,

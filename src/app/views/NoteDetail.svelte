@@ -13,8 +13,6 @@
     feedRelay = relay
   }
 
-  console.log("NoteDetail", note)
-
   let feedRelay = null
 </script>
 

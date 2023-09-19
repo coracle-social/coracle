@@ -13,6 +13,8 @@
   import Media from "src/partials/Media.svelte"
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
+  import Input from "src/partials/Input.svelte"
+  import Field from "src/partials/Field.svelte"
   import Heading from "src/partials/Heading.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
@@ -28,6 +30,7 @@
 
   let q = ""
   let images = []
+  let warning = null
   let compose = null
   let wordCount = 0
   let showPreview = false
@@ -40,6 +43,10 @@
 
     if (!content) {
       return
+    }
+
+    if (warning) {
+      tags.push(["content-warning", warning])
     }
 
     if (quote) {
@@ -157,17 +164,21 @@
         <ImageInput multi onChange={addImage} />
       </div>
       <small
-        class="flex cursor-pointer items-center justify-end gap-1"
+        class="flex cursor-pointer items-center justify-end gap-2"
         on:click={() => {
           showSettings = true
         }}>
         <span>
-          Publishing to {#if $relays?.length === 1}
+          {#if $relays?.length === 1}
             {displayRelay({url: $relays[0]})}
           {:else}
             {$relays.length} relays
           {/if}
         </span>
+        <span>•</span>
+        <i class="fa fa-warning" />
+        {warning || 0}
+        <span>•</span>
         <i class="fa fa-edit" />
       </small>
     </div>
@@ -179,8 +190,11 @@
     <form on:submit|preventDefault={closeSettings}>
       <Content>
         <div class="mb-4 flex items-center justify-center">
-          <Heading>Note relays</Heading>
+          <Heading>Note settings</Heading>
         </div>
+        <Field icon="fa-warning" label="Content warnings">
+          <Input bind:value={warning} placeholder="Why might people want to skip this post?" />
+        </Field>
         <div>Select which relays to publish to:</div>
         <div>
           {#each $relays as url}
@@ -205,11 +219,8 @@
               </button>
             </RelayCard>
           </div>
-          <div slot="footer">
-            <Anchor tag="button" theme="button" type="submit" class="w-full text-center"
-              >Done</Anchor>
-          </div>
         </RelaySearch>
+        <Anchor tag="button" theme="button" type="submit" class="w-full text-center">Done</Anchor>
       </Content>
     </form>
   </Modal>

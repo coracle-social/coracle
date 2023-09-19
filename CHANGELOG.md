@@ -10,6 +10,8 @@
 - [x] Add global music player
 - [x] Support bech32 entities in long form content
 - [x] Add support for profile website
+- [x] Speed up reaction/reply loading
+- [x] Add content-warning support
 
 # 0.3.6
 

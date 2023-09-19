@@ -1,5 +1,5 @@
 import {nip19} from "nostr-tools"
-import {omit, is, fromPairs, mergeLeft, last, identity, prop, flatten, uniq} from "ramda"
+import {find, omit, is, fromPairs, mergeLeft, last, identity, prop, flatten, uniq} from "ramda"
 import {ensurePlural, between, mapVals, tryFunc, avg, first} from "hurdak"
 import type {Filter, Event, DisplayEvent} from "src/engine2/model"
 import {tryJson, stripProto} from "src/util/misc"
@@ -196,4 +196,28 @@ export const getIdOrNaddr = e => {
   }
 
   return e.id
+}
+
+const WARN_TAGS = new Set([
+  "nsfw",
+  "nude",
+  "nudity",
+  "porn",
+  "ass",
+  "boob",
+  "boostr",
+  "sex",
+  "sexy",
+  "fuck",
+])
+
+export const getContentWarning = e => {
+  const tags = Tags.from(e)
+  const warning = tags.type("content-warning").values().first()
+
+  if (warning) {
+    return warning
+  }
+
+  return find(t => WARN_TAGS.has(t.toLowerCase()), tags.type("t").values().all())
 }

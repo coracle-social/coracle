@@ -147,6 +147,10 @@ body,
   text-indent: -20px;
 }
 
+.long-form-content li p {
+  display: inline;
+}
+
 .long-form-content a {
   text-decoration: underline;
 }
