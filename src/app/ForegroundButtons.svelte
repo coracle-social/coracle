@@ -10,7 +10,7 @@
   let scrollY = 0
   let playerIsOpen = false
 
-  $: showCreateNote = !$location.pathname.match(
+  $: showButtons = !$location.pathname.match(
     /conversations|channels|chat|relays|keys|settings|logout$/
   )
 
@@ -38,12 +38,14 @@
       </ForegroundButton>
     </div>
   {/if}
-  <div transition:fade|local={{delay: 200, duration: 200}}>
-    <ForegroundButton theme="secondary" size="small" on:click={showPlayer}>
-      <i class="fa fa-music" />
-    </ForegroundButton>
-  </div>
-  {#if $canSign && showCreateNote}
+  {#if showButtons}
+    <div transition:fade|local={{delay: 200, duration: 200}}>
+      <ForegroundButton theme="secondary" size="small" on:click={showPlayer}>
+        <i class="fa fa-music" />
+      </ForegroundButton>
+    </div>
+  {/if}
+  {#if $canSign && showButtons}
     <div out:fade|local={{delay: 200, duration: 200}}>
       <ForegroundButton on:click={createNote}>
         <i class="fa fa-plus" />

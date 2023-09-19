@@ -1,4 +1,4 @@
-import {max, sortBy} from "ramda"
+import {prop, max, sortBy} from "ramda"
 import {Tags, reactionKinds, findReplyId, findReplyAndRootIds} from "src/util/nostr"
 import {formatTimestampAsLocalISODate, tryJson} from "src/util/misc"
 import {derived} from "src/engine2/util/store"
@@ -27,9 +27,8 @@ export const notifications = derived(
 
 export const hasNewNotifications = derived(
   [notificationsLastChecked, notifications],
-  ([$notificationsLastChecked, $notifications]) => {
-    return $notifications[0]?.created_at > $notificationsLastChecked
-  }
+  ([$notificationsLastChecked, $notifications]) =>
+    $notifications.map(prop("created_at")).reduce(max, 0) > $notificationsLastChecked
 )
 
 export const groupNotifications = $notifications => {

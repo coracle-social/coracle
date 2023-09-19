@@ -48,10 +48,11 @@ export class Publisher extends EventEmitter {
     const failed = new Set<string>()
 
     const getProgress = () => {
+      const attempted = new Set(urls)
       const completed = union(timeouts, succeeded, failed)
-      const pending = difference(new Set(urls), completed)
+      const pending = difference(attempted, completed)
 
-      return {event: this.event, succeeded, failed, timeouts, completed, pending}
+      return {event: this.event, attempted, succeeded, failed, timeouts, completed, pending}
     }
 
     const attemptToResolve = () => {

@@ -60,10 +60,11 @@
     </div>
   {/if}
   <div class="flex justify-center">
-    {#if progress.succeeded.size > 0}
-      <Anchor theme="button" href={noteLink}>View your note</Anchor>
-    {:else}
+    {#if progress.succeeded.size < progress.attempted.size}
       <Anchor theme="button" on:click={retry}>Try again</Anchor>
+    {/if}
+    {#if progress.succeeded.size > 0}
+      <Anchor theme="button-accent" href={noteLink}>View your note</Anchor>
     {/if}
   </div>
 </Content>

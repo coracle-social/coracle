@@ -8,15 +8,14 @@ import {env, sessions, events, notificationsLastChecked} from "src/engine2/state
 import {mergeHints, getPubkeyHints, nip28ChannelsForUser} from "src/engine2/queries"
 import {subscribe, subscribePersistent} from "./subscription"
 
+export const getNotificationKinds = () =>
+  without(env.get().ENABLE_ZAPS ? [] : [EventKind.Zap], [...noteKinds, ...reactionKinds])
+
 export const loadNotifications = () => {
+  const kinds = getNotificationKinds()
   const pubkeys = Object.keys(sessions.get())
   const cutoff = now() - seconds(30, "day")
   const since = Math.max(cutoff, notificationsLastChecked.get() - seconds(1, "day"))
-
-  const kinds = without(env.get().ENABLE_ZAPS ? [] : [EventKind.Zap], [
-    ...noteKinds,
-    ...reactionKinds,
-  ])
 
   const eventIds = pluck(
     "id",
@@ -44,6 +43,7 @@ export const loadNotifications = () => {
 }
 
 export const listenForNotifications = async () => {
+  const kinds = getNotificationKinds()
   const pubkeys = Object.keys(sessions.get())
   const channelIds = pluck("id", nip28ChannelsForUser.get())
 
@@ -68,5 +68,10 @@ export const listenForNotifications = async () => {
       {kinds: noteKinds, "#p": pubkeys, limit: 1},
       {kinds: noteKinds, "#e": eventIds, limit: 1},
     ],
+    onEvent: (e: Event) => {
+      if (kinds.includes(e.kind)) {
+        events.key(e.id).set(e)
+      }
+    },
   })
 }

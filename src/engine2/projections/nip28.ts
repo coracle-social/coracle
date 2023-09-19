@@ -2,7 +2,7 @@ import {prop, map, assocPath, pluck, last, uniqBy, uniq} from "ramda"
 import {Tags, appDataKeys} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import type {Event, Channel} from "src/engine2/model"
-import {sessions, channels} from "src/engine2/state"
+import {nip28ChannelsLastJoined, sessions, channels} from "src/engine2/state"
 import {nip04, canSign} from "src/engine2/queries"
 import {projections, updateRecord, updateStore} from "src/engine2/projections/core"
 
@@ -45,7 +45,11 @@ projections.addHandler(30078, async (e: Event) => {
     return
   }
 
-  if (Tags.from(e).getMeta("d") === appDataKeys.NIP28_ROOMS_JOINED) {
+  const d = Tags.from(e).getMeta("d")
+
+  if (d === appDataKeys.NIP28_ROOMS_JOINED && e.created_at > nip28ChannelsLastJoined.get()) {
+    nip28ChannelsLastJoined.set(e.created_at)
+
     await tryJson(async () => {
       const channelIds = JSON.parse(await nip04.get().decryptAsUser(e.content, e.pubkey))
 

@@ -29,6 +29,7 @@ export const storage = new Storage([
   new LocalStorageAdapter("notificationsLastChecked", state.notificationsLastChecked),
   new LocalStorageAdapter("nip04ChannelsLastChecked", state.nip04ChannelsLastChecked),
   new LocalStorageAdapter("nip24ChannelsLastChecked", state.nip24ChannelsLastChecked),
+  new LocalStorageAdapter("nip28ChannelsLastJoined", state.nip28ChannelsLastJoined),
   new IndexedDBAdapter("events", state.events, {
     max: 10000,
     sort: sortByPubkeyWhitelist(prop("created_at")),
