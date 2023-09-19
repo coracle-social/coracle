@@ -1,6 +1,18 @@
-import {partition, uniqBy, identity, pluck, sortBy, without, any, prop, assoc} from "ramda"
+import {
+  partition,
+  find,
+  propEq,
+  uniqBy,
+  identity,
+  pluck,
+  sortBy,
+  without,
+  any,
+  prop,
+  assoc,
+} from "ramda"
 import {ensurePlural, seconds, doPipe, batch} from "hurdak"
-import {now, race} from "src/util/misc"
+import {now, race, pushToKey} from "src/util/misc"
 import {findReplyId, noteKinds} from "src/util/nostr"
 import type {DisplayEvent, Event, Filter} from "src/engine2/model"
 import {writable} from "src/engine2/util/store"
@@ -95,6 +107,8 @@ export class FeedLoader {
   // Feed building
 
   buildFeedChunk = (notes: Event[]) => {
+    const {filters} = this.opts
+    const search = filters.length === 1 && filters[0].search?.toLowerCase()
     const seen = new Set(pluck("id", this.notes.get()))
     const parents = []
 
@@ -103,34 +117,40 @@ export class FeedLoader {
       uniqBy(
         prop("id"),
         notes
-          .filter(e => {
-            const parentId = findReplyId(e)
+          // If we have a parent, show that instead, with replies grouped underneath
+          .map(e => {
+            /* eslint no-constant-condition: 0 */
+            while (true) {
+              const parentId = findReplyId(e)
 
-            // If we've seen this note or its parent, don't add it again
-            if (seen.has(e.id) || seen.has(parentId)) {
-              return false
-            }
-
-            // If we have a parent, show that instead, with replies grouped underneath
-            const parent = this.parents.get(parentId)
-
-            if (parent && !seen.has(findReplyId(parent))) {
-              if (!parent.replies) {
-                parent.replies = []
+              if (!parentId) {
+                break
               }
 
-              if (noteKinds.includes(e.kind)) {
-                parent.replies.push(e)
+              const parent = this.parents.get(parentId)
+
+              if (!parent) {
+                break
               }
 
-              parents.push(parent)
+              if (noteKinds.includes(e.kind) && !find(propEq("id", e.id), parent.replies || [])) {
+                pushToKey(parent as any, "replies", e)
+              }
 
-              return false
+              e = parent
             }
 
-            return noteKinds.includes(e.kind)
+            return e
           })
           .concat(parents)
+          // If we've seen this note or its parent, don't add it again
+          .filter(e => {
+            if (seen.has(e.id)) return false
+            if (!noteKinds.includes(e.kind)) return false
+            if (search && !e.content.toLowerCase().includes(search)) return false
+
+            return true
+          })
           .map((e: DisplayEvent) => {
             if (e.replies) {
               e.replies = uniqBy(prop("id"), e.replies)

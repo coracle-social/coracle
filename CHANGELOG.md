@@ -15,6 +15,7 @@
 - [x] Link to github for feedback
 - [x] Fix chat room joined status
 - [x] Fix list deletion
+- [x] Reduce repeated notes in feeds
 
 # 0.3.6
 

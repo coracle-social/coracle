@@ -24,7 +24,7 @@
   })
 </script>
 
-<Content size="lg">
+<Content>
   <p>
     This is a kind {kind} event called "{identifier}", published by
     <Anchor class="underline" href={routes.person(pubkey)}>@{display}</Anchor>.

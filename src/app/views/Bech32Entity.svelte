@@ -26,17 +26,11 @@
 </script>
 
 {#if type === "nevent"}
-  <Content>
-    <NoteDetail note={{id: data.id}} {relays} />
-  </Content>
+  <NoteDetail note={{id: data.id}} {relays} />
 {:else if type === "note"}
-  <Content>
-    <NoteDetail note={{id: data}} />
-  </Content>
+  <NoteDetail note={{id: data}} />
 {:else if type === "naddr"}
-  <Content>
-    <NaddrDetail {...data} />
-  </Content>
+  <NaddrDetail {...data} />
 {:else if type === "nprofile"}
   <PersonDetail npub={nip19.npubEncode(data.pubkey)} {relays} />
 {:else if type === "npub"}
