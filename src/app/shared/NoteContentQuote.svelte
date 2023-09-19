@@ -2,7 +2,6 @@
   import type {Filter} from "nostr-tools"
   import {filterVals} from "hurdak"
   import {isShareableRelay} from "src/util/nostr"
-  import {fly} from "src/util/transition"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
@@ -65,7 +64,7 @@
       </div>
     {:else if quote}
       {#if muted}
-        <p class="mb-1 py-24 text-center text-gray-5" in:fly={{y: 20}}>
+        <p class="mb-1 py-24 text-center text-gray-5">
           You have muted this note.
           <Anchor class="underline" on:click={unmute}>Show</Anchor>
         </p>
@@ -83,9 +82,7 @@
         <slot name="note-content" {quote} />
       {/if}
     {:else}
-      <p class="mb-1 py-24 text-center text-gray-5" in:fly={{y: 20}}>
-        Unable to load a preview for quoted event
-      </p>
+      <p class="mb-1 py-24 text-center text-gray-5">Unable to load a preview for quoted event</p>
     {/if}
   </Card>
 </div>

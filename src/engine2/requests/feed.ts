@@ -1,7 +1,7 @@
 import {partition, uniqBy, identity, pluck, sortBy, without, any, prop, assoc} from "ramda"
 import {ensurePlural, seconds, doPipe, batch} from "hurdak"
 import {now, race} from "src/util/misc"
-import {findReplyId} from "src/util/nostr"
+import {findReplyId, noteKinds} from "src/util/nostr"
 import type {DisplayEvent, Event, Filter} from "src/engine2/model"
 import {writable} from "src/engine2/util/store"
 import {getUrls} from "src/engine2/queries"
@@ -119,14 +119,16 @@ export class FeedLoader {
                 parent.replies = []
               }
 
-              parent.replies.push(e)
+              if (noteKinds.includes(e.kind)) {
+                parent.replies.push(e)
+              }
 
               parents.push(parent)
 
               return false
             }
 
-            return true
+            return noteKinds.includes(e.kind)
           })
           .concat(parents)
           .map((e: DisplayEvent) => {

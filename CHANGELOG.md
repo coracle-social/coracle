@@ -13,6 +13,8 @@
 - [x] Speed up reaction/reply loading
 - [x] Add content-warning support
 - [x] Link to github for feedback
+- [x] Fix chat room joined status
+- [x] Fix list deletion
 
 # 0.3.6
 

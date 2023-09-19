@@ -1,6 +1,5 @@
 <script lang="ts">
   import cx from "classnames"
-  import {filter, propEq} from "ramda"
   import {Tags, noteKinds} from "src/util/nostr"
   import {modal, theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
@@ -8,9 +7,7 @@
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import type {DynamicFilter} from "src/engine2"
-  import {session, canSign, stateKey, follows, lists} from "src/engine2"
-
-  const userLists = lists.derived(filter(propEq("pubkey", stateKey.get())))
+  import {session, canSign, follows, lists, userLists} from "src/engine2"
 
   const showLists = () => modal.push({type: "list/list"})
 

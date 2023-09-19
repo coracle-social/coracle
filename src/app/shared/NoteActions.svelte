@@ -4,7 +4,7 @@
   import {tweened} from "svelte/motion"
   import {find, pathEq, reject, identity, propEq, sum, pluck, sortBy} from "ramda"
   import {stringToHue, formatSats, hsl} from "src/util/misc"
-  import {fromDisplayEvent, toNostrURI} from "src/util/nostr"
+  import {fromDisplayEvent, getIdOrNaddr, toNostrURI} from "src/util/nostr"
   import {quantify} from "hurdak"
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
@@ -65,7 +65,7 @@
   }
 
   const deleteReaction = e => {
-    publishDeletion([e])
+    publishDeletion([getIdOrNaddr(e)])
 
     like = null
     likes = reject(propEq("id", e.id), likes)

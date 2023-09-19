@@ -1,7 +1,6 @@
 <script lang="ts">
   import {batch} from "hurdak"
   import {onDestroy} from "svelte"
-  import {fly} from "src/util/transition"
   import {tweened} from "svelte/motion"
   import {numberFmt} from "src/util/misc"
   import {modal} from "src/partials/state"
@@ -52,7 +51,7 @@
   })
 </script>
 
-<div class="flex gap-8" in:fly={{y: 20}}>
+<div class="flex gap-8">
   <button on:click={showFollows}>
     <strong>{$followsCount}</strong> following
   </button>

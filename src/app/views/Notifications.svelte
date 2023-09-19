@@ -66,17 +66,17 @@
   })
 </script>
 
-<Content>
-  <Tabs {tabs} {activeTab} {setActiveTab} />
-  {#each tabNotifications as notification, i (notification.key)}
-    {@const lineText = getLineText(i)}
-    {#if lineText}
-      <div class="flex items-center gap-4">
-        <small class="whitespace-nowrap text-gray-1">{lineText}</small>
-        <div class="h-px w-full bg-gray-6" />
-      </div>
-    {/if}
-    <div in:fly={{y: 20}}>
+<div in:fly={{y: 20}}>
+  <Content>
+    <Tabs {tabs} {activeTab} {setActiveTab} />
+    {#each tabNotifications as notification, i (notification.key)}
+      {@const lineText = getLineText(i)}
+      {#if lineText}
+        <div class="flex items-center gap-4">
+          <small class="whitespace-nowrap text-gray-1">{lineText}</small>
+          <div class="h-px w-full bg-gray-6" />
+        </div>
+      {/if}
       {#if !notification.event}
         <NotificationMention {notification} />
       {:else if activeTab === tabs[0]}
@@ -84,8 +84,8 @@
       {:else}
         <NotificationReactions {notification} />
       {/if}
-    </div>
-  {:else}
-    <Content size="lg" class="text-center">No notifications found - check back later!</Content>
-  {/each}
-</Content>
+    {:else}
+      <Content size="lg" class="text-center">No notifications found - check back later!</Content>
+    {/each}
+  </Content>
+</div>

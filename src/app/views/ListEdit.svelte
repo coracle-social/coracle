@@ -9,8 +9,7 @@
   import Input from "src/partials/Input.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import {
-    user,
-    lists,
+    userLists,
     searchPeople,
     searchTopics,
     searchRelays,
@@ -48,9 +47,7 @@
       return toast.show("error", "A name is required for your list")
     }
 
-    const duplicates = $lists.filter(
-      l => l.pubkey === user.get().pubkey && l.name === values.name && l.naddr !== list?.naddr
-    )
+    const duplicates = $userLists.filter(l => l.name === values.name && l.naddr !== list?.naddr)
 
     if (duplicates.length > 0) {
       return toast.show("error", "That name is already in use")

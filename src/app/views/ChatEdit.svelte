@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {fly} from "src/util/transition"
   import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
   import Textarea from "src/partials/Textarea.svelte"
@@ -34,7 +33,7 @@
   }
 </script>
 
-<form on:submit={submit} class="flex justify-center py-12" in:fly={{y: 20}}>
+<form on:submit={submit} class="flex justify-center py-12">
   <Content>
     <div class="mb-4 flex flex-col items-center justify-center">
       <h1 class="staatliches text-6xl">Name your room</h1>

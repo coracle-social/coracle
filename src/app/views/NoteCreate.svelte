@@ -3,7 +3,6 @@
   import {nip19} from "nostr-tools"
   import {without} from "ramda"
   import {throttle} from "hurdak"
-  import {fly} from "src/util/transition"
   import {writable} from "svelte/store"
   import {annotateMedia} from "src/util/misc"
   import {fromDisplayEvent} from "src/util/nostr"
@@ -117,7 +116,7 @@
   })
 </script>
 
-<form on:submit|preventDefault={onSubmit} in:fly={{y: 20}}>
+<form on:submit|preventDefault={onSubmit}>
   <Content size="lg">
     <Heading class="text-center">Create a note</Heading>
     <div class="flex w-full flex-col gap-4">

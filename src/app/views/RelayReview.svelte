@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {fly} from "src/util/transition"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
@@ -24,7 +23,7 @@
   }
 </script>
 
-<form on:submit|preventDefault={onSubmit} in:fly={{y: 20}}>
+<form on:submit|preventDefault={onSubmit}>
   <Content size="lg">
     <Heading class="text-center">Leave a review</Heading>
     <div class="flex w-full flex-col gap-4">

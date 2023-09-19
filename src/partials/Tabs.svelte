@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {fly} from "src/util/transition"
   import {toTitle} from "hurdak"
 
   export let tabs
@@ -10,8 +9,7 @@
 </script>
 
 <div
-  class={`flex items-center justify-between overflow-auto border-b border-solid pt-2 ${borderClass}`}
-  in:fly={{y: 20}}>
+  class={`flex items-center justify-between overflow-auto border-b border-solid pt-2 ${borderClass}`}>
   <div class="flex">
     {#each tabs as tab}
       {@const {title, badge} = getDisplay(tab)}

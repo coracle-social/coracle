@@ -1,13 +1,10 @@
 <script type="ts">
-  import {propEq, filter} from "ramda"
   import {modal, appName} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
-  import {stateKey, lists, publishDeletion} from "src/engine2"
-
-  const userLists = lists.derived(filter(propEq("pubkey", stateKey.get())))
+  import {userLists, publishDeletion} from "src/engine2"
 
   const createFeed = () => {
     modal.push({type: "list/edit"})

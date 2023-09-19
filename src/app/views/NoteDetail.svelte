@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {fly} from "src/util/transition"
   import {isMobile} from "src/util/html"
+  import Content from "src/partials/Content.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Note from "src/app/shared/Note.svelte"
@@ -16,7 +16,7 @@
   let feedRelay = null
 </script>
 
-<div in:fly={{y: 20}} class="m-auto flex w-full max-w-2xl flex-col gap-4 p-4">
+<Content>
   <Note
     showContext
     anchorId={note.id}
@@ -26,7 +26,7 @@
     {invertColors}
     {feedRelay}
     {setFeedRelay} />
-</div>
+</Content>
 
 {#if feedRelay}
   <Modal onEscape={() => setFeedRelay(null)}>
