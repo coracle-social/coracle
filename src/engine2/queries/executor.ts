@@ -1,12 +1,11 @@
 import {partition} from "ramda"
 import {noop, sleep} from "hurdak"
-import {matchFilters} from "nostr-tools"
 import {Emitter, Plex, Relays, Executor, Multi} from "paravel"
 import {error, warn} from "src/util/logger"
 import {normalizeRelayUrl} from "src/util/nostr"
 import {writable} from "src/engine2/util"
 import {env, pool, events} from "src/engine2/state"
-import {getSetting} from "src/engine2/queries"
+import {getSetting, matchFilters} from "src/engine2/queries"
 
 export const authHandler = writable(null)
 

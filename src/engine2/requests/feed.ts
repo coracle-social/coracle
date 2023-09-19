@@ -16,10 +16,9 @@ import {now, race, pushToKey} from "src/util/misc"
 import {findReplyId, noteKinds} from "src/util/nostr"
 import type {DisplayEvent, Event, Filter} from "src/engine2/model"
 import {writable} from "src/engine2/util/store"
-import {getUrls} from "src/engine2/queries"
+import {getUrls, getIdFilters} from "src/engine2/queries"
 import {subscribe} from "./subscription"
 import {MultiCursor} from "./cursor"
-import {getIdFilters} from "./filter"
 import {load} from "./load"
 
 export type FeedOpts = {
@@ -107,8 +106,6 @@ export class FeedLoader {
   // Feed building
 
   buildFeedChunk = (notes: Event[]) => {
-    const {filters} = this.opts
-    const search = filters.length === 1 && filters[0].search?.toLowerCase()
     const seen = new Set(pluck("id", this.notes.get()))
     const parents = []
 
@@ -147,7 +144,6 @@ export class FeedLoader {
           .filter(e => {
             if (seen.has(e.id)) return false
             if (!noteKinds.includes(e.kind)) return false
-            if (search && !e.content.toLowerCase().includes(search)) return false
 
             return true
           })

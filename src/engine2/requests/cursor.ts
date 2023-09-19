@@ -4,10 +4,9 @@ import {now} from "src/util/misc"
 import {EPOCH} from "src/util/nostr"
 import {info} from "src/util/logger"
 import type {Filter, Event} from "src/engine2/model"
-import {getUrls} from "src/engine2/queries"
+import {getUrls, guessFilterDelta} from "src/engine2/queries"
 import {Subscription} from "./subscription"
 import {EventTracker} from "./eventTracker"
-import {guessFilterDelta} from "./filter"
 
 export type CursorOpts = {
   relay: string

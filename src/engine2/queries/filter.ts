@@ -1,8 +1,23 @@
-import {omit, find, prop, groupBy, uniq} from "ramda"
+import {matchFilter as nostrToolsMatchFilter} from "nostr-tools"
+import {omit, any, find, prop, groupBy, uniq} from "ramda"
 import {shuffle, seconds, avg} from "hurdak"
 import type {DynamicFilter, Filter} from "src/engine2/model"
 import {env, pubkey} from "src/engine2/state"
 import {follows, network, mergeHints, getPubkeyHints} from "src/engine2/queries"
+
+export const matchFilter = (filter, event) => {
+  if (!nostrToolsMatchFilter(filter, event)) {
+    return false
+  }
+
+  if (filter.search) {
+    return event.content.toLowerCase().includes(filter.search.toLowerCase())
+  }
+
+  return true
+}
+
+export const matchFilters = (filters, event) => any(f => matchFilter(f, event), filters)
 
 export const calculateFilterGroup = ({limit, since, until, ...filter}: Filter) => {
   const group = Object.keys(filter)

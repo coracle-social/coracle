@@ -1,11 +1,10 @@
 import {defer} from "hurdak"
-import {matchFilters} from "nostr-tools"
 import {pushToKey} from "src/util/misc"
 import {info} from "src/util/logger"
 import type {Event, Filter} from "src/engine2/model"
+import {matchFilters, combineFilters} from "src/engine2/queries"
 import {Subscription} from "./subscription"
 import {EventTracker} from "./eventTracker"
-import {combineFilters} from "./filter"
 
 export type LoadOpts = {
   relays: string[]

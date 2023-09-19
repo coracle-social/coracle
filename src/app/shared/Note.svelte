@@ -46,7 +46,6 @@
   let reply = null
   let replyIsActive = false
   let actions = null
-  let visibleNotes = []
   let collapsed = false
   let replies = sortBy(
     (e: Event) => -e.created_at,

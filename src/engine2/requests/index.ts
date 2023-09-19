@@ -1,7 +1,6 @@
 export * from "./cursor"
 export * from "./feed"
 export * from "./pubkeys"
-export * from "./filter"
 export * from "./notifications"
 export * from "./count"
 export * from "./load"
