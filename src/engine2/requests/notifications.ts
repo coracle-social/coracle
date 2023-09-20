@@ -5,7 +5,7 @@ import type {Event} from "src/engine2/model"
 import {EventKind} from "src/engine2/model"
 import {noteKinds, reactionKinds} from "src/util/nostr"
 import {env, sessions, events, notificationsLastChecked} from "src/engine2/state"
-import {mergeHints, getPubkeyHints, nip28ChannelsForUser} from "src/engine2/queries"
+import {mergeHints, isEventMuted, getPubkeyHints, nip28ChannelsForUser} from "src/engine2/queries"
 import {subscribe, subscribePersistent} from "./subscription"
 
 export const getNotificationKinds = () =>
@@ -37,7 +37,9 @@ export const loadNotifications = () => {
     shouldProject: false,
     relays: mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read"))),
     onEvent: (e: Event) => {
-      events.key(e.id).set(e)
+      if (!isEventMuted(e)) {
+        events.key(e.id).set(e)
+      }
     },
   })
 }
@@ -69,7 +71,7 @@ export const listenForNotifications = async () => {
       {kinds: noteKinds, "#e": eventIds, limit: 1},
     ],
     onEvent: (e: Event) => {
-      if (kinds.includes(e.kind)) {
+      if (kinds.includes(e.kind) && !isEventMuted(e)) {
         events.key(e.id).set(e)
       }
     },
