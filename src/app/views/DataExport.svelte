@@ -22,23 +22,13 @@
 
     const {pubkey, handle} = $user
     const filename = handle?.address || pubkey.slice(0, 16)
-    const ext = shouldCompress ? "zst" : "jsonl"
-
-    let data = new TextEncoder().encode(jsonl)
-
-    if (shouldCompress) {
-      const {ZstdInit} = await import("@oneidentity/zstd-js")
-      const {ZstdSimple} = await ZstdInit()
-
-      data = ZstdSimple.compress(data)
-    }
-
+    const data = new TextEncoder().encode(jsonl)
     const blob = new Blob([data], {type: "application/octet-stream"})
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
 
     a.href = url
-    a.download = `${filename}.${ext}`
+    a.download = `${filename}.jsonl`
     a.click()
 
     URL.revokeObjectURL(url)
@@ -46,7 +36,6 @@
 
   let userOnly = true
   let includeEncrypted = false
-  let shouldCompress = true
 </script>
 
 <form on:submit|preventDefault={submit}>
@@ -66,10 +55,6 @@
           If enabled, encrypted DMs and wrapped events will be exported. The events will remain
           encrypted, so this will not reduce security.
         </p>
-      </FieldInline>
-      <FieldInline label="Compress export">
-        <Toggle bind:value={shouldCompress} />
-        <p slot="info">If enabled, your export will be compressed using the .zst file format.</p>
       </FieldInline>
       <Anchor tag="button" theme="button" type="submit" class="text-center">Export</Anchor>
     </div>

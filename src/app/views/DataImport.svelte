@@ -31,15 +31,7 @@
 
     reader.onload = async loadEvent => {
       try {
-        let data = new Uint8Array(loadEvent.target.result as ArrayBuffer)
-
-        if (file.name.endsWith(".zst")) {
-          const {ZstdInit} = await import("@oneidentity/zstd-js")
-          const {ZstdSimple} = await ZstdInit()
-
-          data = ZstdSimple.decompress(data)
-        }
-
+        const data = new Uint8Array(loadEvent.target.result as ArrayBuffer)
         const jsonl = new TextDecoder().decode(data)
         const newEvents = jsonl.split("\n").map(l => JSON.parse(l)) as Event[]
 
@@ -83,9 +75,10 @@
     </div>
     <div class="flex w-full flex-col gap-8">
       <Field label="Only export user events">
-        <Input type="file" on:change={setFile} accept=".jsonl,.zst" />
+        <Input type="file" on:change={setFile} accept=".jsonl" />
         <p slot="info">
-          Nostr exports are .jsonl files, and may be compressed using zstd compression.
+          Nostr exports are .jsonl files. Some software may compress exports, be sure to upload an
+          uncompressed version.
         </p>
       </Field>
       <Anchor {loading} tag="button" theme="button" type="submit" class="text-center"
