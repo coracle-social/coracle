@@ -59,7 +59,7 @@
       {/each}
     </div>
   {/if}
-  <div class="flex justify-center">
+  <div class="flex justify-center gap-2">
     {#if progress.succeeded.size < progress.attempted.size}
       <Anchor theme="button" on:click={retry}>Try again</Anchor>
     {/if}

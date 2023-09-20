@@ -44,6 +44,11 @@
         </Anchor>
         <Anchor
           class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
+          href="/database">
+          <i class="fa fa-database mr-2" /> Database
+        </Anchor>
+        <Anchor
+          class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
           href="/logout">
           <i class="fa fa-right-from-bracket mr-2" /> Logout
         </Anchor>

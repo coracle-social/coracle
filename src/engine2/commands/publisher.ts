@@ -37,7 +37,7 @@ export class Publisher extends EventEmitter {
     return publisher
   }
 
-  publish(relays, {timeout, verb}: PublisherOpts = {}) {
+  publish(relays, {timeout = 10_000, verb}: PublisherOpts = {}) {
     const urls = getUrls(relays)
     const executor = getExecutor(urls)
 

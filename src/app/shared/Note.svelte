@@ -27,6 +27,7 @@
     getIdFilters,
     getUserRelayUrls,
     mergeHints,
+    loadPubkeys,
   } from "src/engine2"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
@@ -131,7 +132,7 @@
     }
 
     const selectedRelays = mergeHints([relays, getReplyHints(event)])
-    const loadFilters = [{kinds: ENABLE_ZAPS ? [1, 7, 9735] : [1, 7], "#e": [event.id]}]
+    const loadFilters = [{kinds: loadKinds, "#e": [event.id]}]
 
     const onEvent = e => {
       switcherFn(e.kind.toString(), {
@@ -160,6 +161,10 @@
     }
 
     load({relays: selectedRelays, filters: loadFilters, onEvent})
+
+    if (event.pubkey) {
+      loadPubkeys([event.pubkey])
+    }
   })
 
   onDestroy(() => {

@@ -11,7 +11,12 @@ import {mention} from "./util"
 
 export const createNip24Message = (channelId, content) => {
   const recipients = channelId.split(",")
-  const template = {kind: 14, content, tags: recipients.map(mention)}
+  const template = {
+    content,
+    kind: 14,
+    created_at: now(),
+    tags: recipients.map(mention),
+  }
 
   for (const pubkey of recipients.concat(user.get().pubkey)) {
     Publisher.publish({

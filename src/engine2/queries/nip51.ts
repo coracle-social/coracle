@@ -2,16 +2,16 @@ import {find, whereEq, nth} from "ramda"
 import {derived} from "src/engine2/util"
 import type {Event} from "src/engine2/model"
 import {findReplyAndRootIds} from "src/util/nostr"
-import {lists} from "src/engine2/state"
+import {lists, pubkey} from "src/engine2/state"
 import {deletesSet} from "src/engine2/queries/nip09"
-import {user, session} from "src/engine2/queries/session"
+import {user} from "src/engine2/queries/session"
 
 export const activeLists = derived([lists, deletesSet], ([$lists, $deletesSet]) =>
   $lists.filter($l => !$deletesSet.has($l.naddr))
 )
 
-export const userLists = derived([session, activeLists], ([$session, $activeLists]) =>
-  $activeLists.filter(whereEq({pubkey: $session.pubkey}))
+export const userLists = derived([pubkey, activeLists], ([$pubkey, $activeLists]) =>
+  $activeLists.filter(whereEq({pubkey: $pubkey}))
 )
 
 export const mutes = user.derived($user => ($user?.mutes || []).map(nth(1)))

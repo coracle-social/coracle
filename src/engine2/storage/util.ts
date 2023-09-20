@@ -1,4 +1,4 @@
-import {pluck, splitAt} from "ramda"
+import {pluck, prop, splitAt} from "ramda"
 import {sleep, defer, chunk, randomInt, throttle} from "hurdak"
 import {Storage as LocalStorage} from "hurdak"
 import type {Writable, Collection} from "src/engine2/util/store"
@@ -162,7 +162,7 @@ export class IndexedDBAdapter {
         }
 
         // Do it in small steps to avoid clogging stuff up
-        for (const records of chunk(100, rows as any[])) {
+        for (const records of chunk(100, (rows as any[]).filter(prop(store.pk)))) {
           await storage.db.bulkPut(key, records)
           await sleep(50)
 

@@ -27,6 +27,8 @@
   import LabelCreate from "src/app/views/LabelCreate.svelte"
   import LabelDetail from "src/app/views/LabelDetail.svelte"
   import ReportCreate from "src/app/views/ReportCreate.svelte"
+  import DataImport from "src/app/views/DataImport.svelte"
+  import DataExport from "src/app/views/DataExport.svelte"
   import RelayBrowse from "src/app/views/RelayBrowse.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
   import RelayReview from "src/app/views/RelayReview.svelte"
@@ -98,6 +100,10 @@
   <LabelDetail label={m.label} ids={m.ids} hints={m.hints} />
 {:else if m.type === "report/create"}
   <ReportCreate note={m.note} />
+{:else if m.type === "data/export"}
+  <DataExport />
+{:else if m.type === "data/import"}
+  <DataImport />
 {:else if m.type === "bech32"}
   <Bech32Entity entity={m.entity} />
 {:else if m.type === "qrcode"}

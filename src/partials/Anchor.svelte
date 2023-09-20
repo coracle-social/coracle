@@ -23,8 +23,11 @@
 
   $: className = cx(
     $$props.class,
-    "cursor-pointer transition-all",
-    {"opacity-50": loading},
+    "transition-all",
+    {
+      "opacity-50": loading,
+      "cursor-pointer": !loading,
+    },
     switcher(theme, {
       anchor: "underline",
       button:

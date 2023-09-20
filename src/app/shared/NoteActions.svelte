@@ -6,7 +6,7 @@
   import {stringToHue, formatSats, hsl} from "src/util/misc"
   import {fromDisplayEvent, getIdOrNaddr, toNostrURI} from "src/util/nostr"
   import {quantify} from "hurdak"
-  import {modal} from "src/partials/state"
+  import {modal, toast} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -14,7 +14,6 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {toastProgress} from "src/app/state"
   import type {Event} from "src/engine2"
   import {
     env,
@@ -79,7 +78,9 @@
     const relays = getUserRelayUrls("write")
     const event = fromDisplayEvent(note)
 
-    Publisher.publish({event, relays}).on("progress", toastProgress)
+    Publisher.publish({event, relays})
+
+    toast.show("info", "Note has been re-published!")
   }
 
   let like, allLikes, zap

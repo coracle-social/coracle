@@ -10,5 +10,5 @@ projections.addHandler(1059, e => {
     return
   }
 
-  nip59.get().withUnwrappedEvent(e, session.privkey, projections.push)
+  nip59.get().withUnwrappedEvent(e, session.privkey, e => projections.push(e))
 })

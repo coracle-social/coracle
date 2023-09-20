@@ -1,4 +1,4 @@
-import {sortBy, identity, find, filter, path, whereEq} from "ramda"
+import {sortBy, uniq, identity, find, filter, path, whereEq} from "ramda"
 import {fuzzy} from "src/util/misc"
 import type {Channel} from "src/engine2/model"
 import {channels} from "src/engine2/state"
@@ -27,7 +27,7 @@ export const nip24Channels = channels.throttle(300).derived(filter(whereEq({type
 
 export const hasNewNip24Messages = nip24Channels.derived(find(hasNewMessages))
 
-export const getNip24ChannelId = (pubkeys: string[]) => sortBy(identity, pubkeys).join(",")
+export const getNip24ChannelId = (pubkeys: string[]) => sortBy(identity, uniq(pubkeys)).join(",")
 
 export const getNip24ChannelPubkeys = (id: string) => id.split(",")
 
