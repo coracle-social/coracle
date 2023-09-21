@@ -1,7 +1,7 @@
 <script lang="ts">
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {addToList} from "src/app/state"
-  import {canSign} from "src/engine2"
+  import {canSign} from "src/engine"
 
   export let topic
 

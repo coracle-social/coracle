@@ -9,7 +9,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ChatListItem from "src/app/views/ChatListItem.svelte"
-  import type {Event, Filter} from "src/engine2"
+  import type {Event, Filter} from "src/engine"
   import {
     session,
     canSign,
@@ -23,7 +23,7 @@
     nip28ChannelsWithMeta,
     loadPubkeys,
     getPubkeysWithDefaults,
-  } from "src/engine2"
+  } from "src/engine"
 
   let q = ""
   let results = []

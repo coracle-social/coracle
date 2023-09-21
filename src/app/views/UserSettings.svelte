@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {env, getSettings, publishSettings} from "src/engine2"
+  import {env, getSettings, publishSettings} from "src/engine"
 
   let values = getSettings()
 

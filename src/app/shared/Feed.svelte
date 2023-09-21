@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount, onDestroy} from "svelte"
   import {readable} from "svelte/store"
-  import {FeedLoader} from "src/engine2"
+  import {FeedLoader} from "src/engine"
   import {last, equals} from "ramda"
   import {fly} from "src/util/transition"
   import {quantify} from "hurdak"
@@ -12,8 +12,8 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import type {DynamicFilter} from "src/engine2"
-  import {compileFilter, searchableRelays, getRelaysFromFilters} from "src/engine2"
+  import type {DynamicFilter} from "src/engine"
+  import {compileFilter, searchableRelays, getRelaysFromFilters} from "src/engine"
 
   export let relays = []
   export let filter = {} as DynamicFilter

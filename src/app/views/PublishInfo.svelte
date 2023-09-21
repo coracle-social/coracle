@@ -6,7 +6,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {Publisher} from "src/engine2"
+  import {Publisher} from "src/engine"
   import {toastProgress} from "src/app/state"
 
   export let event

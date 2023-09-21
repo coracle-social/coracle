@@ -4,7 +4,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
-  import {getNip24ChannelId} from "src/engine2"
+  import {getNip24ChannelId} from "src/engine"
 
   let profiles = []
 

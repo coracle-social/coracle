@@ -4,7 +4,7 @@
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
-  import {getSetting, displayRelay} from "src/engine2"
+  import {getSetting, displayRelay} from "src/engine"
 
   export let relay
   export let rating = null

@@ -7,8 +7,8 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import type {Relay} from "src/engine2"
-  import {relays as knownRelays} from "src/engine2"
+  import type {Relay} from "src/engine"
+  import {relays as knownRelays} from "src/engine"
 
   export let relays: Relay[]
 

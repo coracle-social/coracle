@@ -30,7 +30,7 @@
     hasNewNotifications,
     getUserRelayUrls,
     searchableRelays,
-  } from "src/engine2"
+  } from "src/engine"
 
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
 

@@ -16,7 +16,7 @@
     unfollow,
     isMuted,
     isFollowing,
-  } from "src/engine2"
+  } from "src/engine"
   import {addToList, boot} from "src/app/state"
 
   export let pubkey

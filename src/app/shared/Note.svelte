@@ -13,7 +13,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import Card from "src/partials/Card.svelte"
-  import type {Event} from "src/engine2"
+  import type {Event} from "src/engine"
   import {
     env,
     load,
@@ -28,7 +28,7 @@
     getUserRelayUrls,
     mergeHints,
     loadPubkeys,
-  } from "src/engine2"
+  } from "src/engine"
   import NoteContent from "src/app/shared/NoteContent.svelte"
 
   export let note

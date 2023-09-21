@@ -7,8 +7,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import type {Event} from "src/engine2"
-  import {events, EventKind, projections} from "src/engine2"
+  import type {Event} from "src/engine"
+  import {events, EventKind, projections} from "src/engine"
 
   const encryptedKinds = [EventKind.Nip04Message, EventKind.GiftWrap]
 

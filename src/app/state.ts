@@ -18,7 +18,7 @@ import {
   listenForNotifications,
   getSetting,
   dufflepud,
-} from "src/engine2"
+} from "src/engine"
 
 // Routing
 

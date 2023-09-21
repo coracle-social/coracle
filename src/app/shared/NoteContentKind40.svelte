@@ -7,7 +7,7 @@
   import Card from "src/partials/Card.svelte"
   import Content from "src/partials/Content.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
-  import {channels} from "src/engine2"
+  import {channels} from "src/engine"
 
   export let note
 

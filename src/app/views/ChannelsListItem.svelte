@@ -4,7 +4,7 @@
   import {displayList} from "hurdak"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import Card from "src/partials/Card.svelte"
-  import {people, channels, displayPerson, loadPubkeys, hasNewMessages, session} from "src/engine2"
+  import {people, channels, displayPerson, loadPubkeys, hasNewMessages, session} from "src/engine"
 
   export let channel
 

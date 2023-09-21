@@ -2,7 +2,7 @@
   import {ellipsize} from "hurdak"
   import {parseContent} from "src/util/notes"
   import Anchor from "src/partials/Anchor.svelte"
-  import {displayPerson, derivePerson} from "src/engine2"
+  import {displayPerson, derivePerson} from "src/engine"
 
   export let pubkey
   export let truncate = false

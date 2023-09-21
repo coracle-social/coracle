@@ -4,8 +4,8 @@
   import {tweened} from "svelte/motion"
   import {numberFmt} from "src/util/misc"
   import {modal} from "src/partials/state"
-  import type {Event} from "src/engine2"
-  import {session, people, count, subscribe, getPubkeyHints} from "src/engine2"
+  import type {Event} from "src/engine"
+  import {session, people, count, subscribe, getPubkeyHints} from "src/engine"
 
   export let pubkey
 

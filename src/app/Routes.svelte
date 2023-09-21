@@ -23,7 +23,7 @@
   import UserProfile from "src/app/views/UserProfile.svelte"
   import UserSettings from "src/app/views/UserSettings.svelte"
   import UserData from "src/app/views/UserData.svelte"
-  import {storage} from "src/engine2"
+  import {storage} from "src/engine"
 
   const TypedRoute = Route as ComponentType<SvelteComponentTyped>
 

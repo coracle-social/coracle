@@ -13,7 +13,7 @@
   import NoteContentKind30009 from "src/app/shared/NoteContentKind30009.svelte"
   import NoteContentKind30023 from "src/app/shared/NoteContentKind30023.svelte"
   import NoteContentKind31337 from "src/app/shared/NoteContentKind31337.svelte"
-  import {getSetting} from "src/engine2"
+  import {getSetting} from "src/engine"
 
   export let note
   export let anchorId = null

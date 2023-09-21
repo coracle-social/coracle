@@ -14,7 +14,7 @@
     publishNip04Message,
     nip04MarkChannelRead,
     listenForNip04Messages,
-  } from "src/engine2"
+  } from "src/engine"
   import {routes} from "src/app/state"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"

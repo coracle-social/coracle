@@ -9,7 +9,7 @@
     hasNewNotifications,
     canUseGiftWrap,
     canSign,
-  } from "src/engine2"
+  } from "src/engine"
   import {menuIsOpen} from "src/app/state"
 
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))

@@ -4,7 +4,7 @@
   import {fly} from "src/util/transition"
   import {ellipsize} from "hurdak"
   import Anchor from "src/partials/Anchor.svelte"
-  import {canSign, hasNewMessages, imgproxy, joinNip28Channel, leaveNip28Channel} from "src/engine2"
+  import {canSign, hasNewMessages, imgproxy, joinNip28Channel, leaveNip28Channel} from "src/engine"
 
   export let channel
 

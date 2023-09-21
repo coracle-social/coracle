@@ -2,7 +2,7 @@
   import {prop} from "ramda"
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import {searchPeople, displayPubkey} from "src/engine2"
+  import {searchPeople, displayPubkey} from "src/engine"
 
   export let value
 </script>

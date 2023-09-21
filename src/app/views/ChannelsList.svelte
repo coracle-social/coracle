@@ -16,7 +16,7 @@
     sortChannels,
     nip24MarkAllRead,
     loadAllNip24Messages,
-  } from "src/engine2"
+  } from "src/engine"
 
   export let activeTab = "conversations"
 

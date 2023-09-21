@@ -12,7 +12,7 @@
     sortChannels,
     nip04MarkAllRead,
     loadAllNip04Messages,
-  } from "src/engine2"
+  } from "src/engine"
 
   export let activeTab = "conversations"
 

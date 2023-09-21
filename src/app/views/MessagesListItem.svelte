@@ -4,7 +4,7 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import Card from "src/partials/Card.svelte"
-  import {displayPubkey, hasNewMessages} from "src/engine2"
+  import {displayPubkey, hasNewMessages} from "src/engine"
 
   export let channel
 

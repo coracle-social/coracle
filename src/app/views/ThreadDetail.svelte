@@ -1,7 +1,7 @@
 <script lang="ts">
   import {quantify} from "hurdak"
   import {onDestroy} from "svelte"
-  import {ThreadLoader} from "src/engine2"
+  import {ThreadLoader} from "src/engine"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"

@@ -15,7 +15,7 @@
     createNip24Message,
     nip24MarkChannelRead,
     listenForNip59Messages,
-  } from "src/engine2"
+  } from "src/engine"
 
   export let entity
 

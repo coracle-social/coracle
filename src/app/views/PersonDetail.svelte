@@ -26,7 +26,7 @@
     getPubkeyRelays,
     mergeHints,
     getPubkeyHints,
-  } from "src/engine2"
+  } from "src/engine"
 
   export let npub
   export let relays = []

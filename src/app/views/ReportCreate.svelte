@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import {publishReport} from "src/engine2"
+  import {publishReport} from "src/engine"
 
   export let note
 

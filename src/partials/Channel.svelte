@@ -7,8 +7,8 @@
   import {createScroller} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import type {Event} from "src/engine2"
-  import {canSign} from "src/engine2"
+  import type {Event} from "src/engine"
+  import {canSign} from "src/engine"
 
   export let messages: Event[]
   export let sendMessage

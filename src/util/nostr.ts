@@ -1,7 +1,7 @@
 import {nip19} from "nostr-tools"
 import {find, omit, is, fromPairs, mergeLeft, last, identity, prop, flatten, uniq} from "ramda"
 import {ensurePlural, between, mapVals, tryFunc, avg, first} from "hurdak"
-import type {Filter, Event, DisplayEvent} from "src/engine2/model"
+import type {Filter, Event, DisplayEvent} from "src/engine/model"
 import {tryJson, stripProto} from "src/util/misc"
 
 export const noteKinds = [1, 30023, 1063, 9802, 1808]

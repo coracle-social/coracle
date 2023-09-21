@@ -1,6 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {people, displayHandle} from "src/engine2"
+  import {people, displayHandle} from "src/engine"
 
   export let pubkey
 

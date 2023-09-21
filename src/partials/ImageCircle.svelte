@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {imgproxy} from "src/engine2"
+  import {imgproxy} from "src/engine"
 
   export let src: string
   export let size = 4

@@ -12,7 +12,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {env, session, relays, pool, loadPubkeys, getUserRelayUrls} from "src/engine2"
+  import {env, session, relays, pool, loadPubkeys, getUserRelayUrls} from "src/engine"
   import {loadAppData} from "src/app/state"
 
   let modal = null

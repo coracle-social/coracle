@@ -19,7 +19,7 @@
 
 <script lang="ts">
   import {onMount} from "svelte"
-  import {imgproxy} from "src/engine2"
+  import {imgproxy} from "src/engine"
 
   export let src
 

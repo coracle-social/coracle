@@ -5,7 +5,7 @@
   import Content from "src/partials/Content.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {people} from "src/engine2"
+  import {people} from "src/engine"
 
   document.title = "About"
 

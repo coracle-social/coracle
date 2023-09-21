@@ -4,7 +4,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
-  import {userLists, publishDeletion} from "src/engine2"
+  import {userLists, publishDeletion} from "src/engine"
 
   const createFeed = () => {
     modal.push({type: "list/edit"})

@@ -3,7 +3,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {relayPolicies} from "src/engine2"
+  import {relayPolicies} from "src/engine"
   import {modal} from "src/partials/state"
 
   document.title = "Relays"

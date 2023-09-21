@@ -4,7 +4,7 @@
   import {Tags, getAvgQuality} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import type {Relay} from "src/engine2"
+  import type {Relay} from "src/engine"
   import {
     load,
     session,
@@ -13,7 +13,7 @@
     getRelaySearch,
     relayPolicyUrls,
     urlToRelay,
-  } from "src/engine2"
+  } from "src/engine"
 
   export let q = ""
   export let limit = 50

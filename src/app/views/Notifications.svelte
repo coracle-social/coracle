@@ -10,13 +10,13 @@
   import NotificationReactions from "src/app/views/NotificationReactions.svelte"
   import NotificationMention from "src/app/views/NotificationMention.svelte"
   import NotificationReplies from "src/app/views/NotificationReplies.svelte"
-  import type {Event} from "src/engine2"
+  import type {Event} from "src/engine"
   import {
     notifications,
     groupNotifications,
     notificationsLastChecked,
     loadNotifications,
-  } from "src/engine2"
+  } from "src/engine"
 
   const tabs = ["Mentions & Replies", "Reactions"]
 

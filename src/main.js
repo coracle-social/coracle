@@ -4,7 +4,7 @@ import {identity} from "ramda"
 import {Fetch} from "hurdak"
 import Bugsnag from "@bugsnag/js"
 import {tryFetch} from "src/util/misc"
-import {env, relays} from "src/engine2"
+import {env, relays} from "src/engine"
 import App from "src/app/App.svelte"
 import {installPrompt} from "src/partials/state"
 

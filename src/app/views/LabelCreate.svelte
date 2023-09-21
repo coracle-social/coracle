@@ -5,7 +5,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
-  import {publishLabel, searchTopics} from "src/engine2"
+  import {publishLabel, searchTopics} from "src/engine"
 
   export let note
 

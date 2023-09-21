@@ -7,7 +7,7 @@
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/app/shared/Compose.svelte"
-  import {publishReply, session, displayPubkey, mention} from "src/engine2"
+  import {publishReply, session, displayPubkey, mention} from "src/engine"
   import {toastProgress} from "src/app/state"
 
   export let parent

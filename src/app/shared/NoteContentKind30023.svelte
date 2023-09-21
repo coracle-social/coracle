@@ -10,7 +10,7 @@
   import {modal} from "src/partials/state"
   import Chip from "src/partials/Chip.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
-  import {displayPubkey} from "src/engine2"
+  import {displayPubkey} from "src/engine"
 
   marked.use({
     mangle: false,

@@ -3,7 +3,7 @@
   import Content from "src/partials/Content.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import NoteContentEllipsis from "src/app/shared/NoteContentEllipsis.svelte"
-  import {loadPubkeys} from "src/engine2"
+  import {loadPubkeys} from "src/engine"
 
   export let note
   export let showEntire

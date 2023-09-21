@@ -10,7 +10,7 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
-  import {events, getEventHints} from "src/engine2"
+  import {events, getEventHints} from "src/engine"
 
   const sortedEvents = events.derived(sortBy(e => -e.created_at))
 

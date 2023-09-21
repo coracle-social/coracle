@@ -4,7 +4,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {withExtension, loginWithExtension} from "src/engine2"
+  import {withExtension, loginWithExtension} from "src/engine"
   import {boot} from "src/app/state"
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"

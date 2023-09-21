@@ -22,7 +22,7 @@
     publishRelays,
     loginWithPrivateKey,
     listenForNotifications,
-  } from "src/engine2"
+  } from "src/engine"
   import {modal} from "src/partials/state"
 
   export let stage

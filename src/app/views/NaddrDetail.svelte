@@ -4,7 +4,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {load, displayPubkey, selectHints} from "src/engine2"
+  import {load, displayPubkey, selectHints} from "src/engine"
 
   export let identifier
   export let kind

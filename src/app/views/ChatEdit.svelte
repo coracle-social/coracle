@@ -5,7 +5,7 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {toast, modal} from "src/partials/state"
-  import {joinNip28Channel, publishNip28ChannelCreate, publishNip28ChannelUpdate} from "src/engine2"
+  import {joinNip28Channel, publishNip28ChannelCreate, publishNip28ChannelUpdate} from "src/engine"
   import {toastProgress} from "src/app/state"
 
   export let channel = {name: null, id: null, about: null, picture: null}

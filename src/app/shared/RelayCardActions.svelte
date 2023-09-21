@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {relayPolicyUrls, removeRelay, addRelay, hasRelay} from "src/engine2"
+  import {relayPolicyUrls, removeRelay, addRelay, hasRelay} from "src/engine"
 
   export let relay
 

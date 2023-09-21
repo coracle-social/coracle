@@ -3,7 +3,7 @@
   import Content from "src/partials/Content.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {getPubkeyHints, displayHandle, people} from "src/engine2"
+  import {getPubkeyHints, displayHandle, people} from "src/engine"
 
   export let pubkey
 

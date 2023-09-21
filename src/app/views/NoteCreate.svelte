@@ -18,10 +18,10 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {Publisher, publishNote, displayRelay, getUserRelayUrls, mention} from "src/engine2"
+  import {Publisher, publishNote, displayRelay, getUserRelayUrls, mention} from "src/engine"
   import {modal} from "src/partials/state"
   import {toastProgress} from "src/app/state"
-  import {session, getEventHints, displayPubkey} from "src/engine2"
+  import {session, getEventHints, displayPubkey} from "src/engine"
 
   export let quote = null
   export let pubkey = null

@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
-  import {canSign, getSetting, displayRelay, setRelayPolicy} from "src/engine2"
+  import {canSign, getSetting, displayRelay, setRelayPolicy} from "src/engine"
 
   export let relay
   export let rating = null

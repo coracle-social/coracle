@@ -6,8 +6,8 @@
   import Content from "src/partials/Content.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
-  import type {DynamicFilter} from "src/engine2"
-  import {session, canSign, follows, lists, userLists} from "src/engine2"
+  import type {DynamicFilter} from "src/engine"
+  import {session, canSign, follows, lists, userLists} from "src/engine"
 
   const showLists = () => modal.push({type: "list/list"})
 

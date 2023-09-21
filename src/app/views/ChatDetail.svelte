@@ -19,7 +19,7 @@
     leaveNip28Channel,
     listenForNip28Messages,
     publishNip28ChannelChecked,
-  } from "src/engine2"
+  } from "src/engine"
 
   export let entity
 

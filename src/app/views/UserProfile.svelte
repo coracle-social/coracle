@@ -8,7 +8,7 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Field from "src/partials/Field.svelte"
-  import {pubkey, people, publishProfile} from "src/engine2"
+  import {pubkey, people, publishProfile} from "src/engine"
   import {routes} from "src/app/state"
   import {toastProgress} from "src/app/state"
 

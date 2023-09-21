@@ -14,7 +14,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import type {Event} from "src/engine2"
+  import type {Event} from "src/engine"
   import {
     env,
     mute,
@@ -29,7 +29,7 @@
     processZap,
     displayRelay,
     getEventHints,
-  } from "src/engine2"
+  } from "src/engine"
 
   export let note: Event
   export let reply

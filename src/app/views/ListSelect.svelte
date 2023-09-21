@@ -7,7 +7,7 @@
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
-  import {userLists} from "src/engine2"
+  import {userLists} from "src/engine"
 
   export let item
 

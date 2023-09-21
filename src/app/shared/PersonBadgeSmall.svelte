@@ -3,7 +3,7 @@
   import {routes} from "src/app/state"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {displayPubkey} from "src/engine2"
+  import {displayPubkey} from "src/engine"
 
   export let pubkey
   export let inert = false

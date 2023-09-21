@@ -5,8 +5,8 @@
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
-  import type {Person} from "src/engine2"
-  import {mention, searchPeople} from "src/engine2"
+  import type {Person} from "src/engine"
+  import {mention, searchPeople} from "src/engine"
   import {modal} from "src/partials/state"
 
   export let petnames

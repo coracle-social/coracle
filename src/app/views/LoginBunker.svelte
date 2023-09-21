@@ -5,7 +5,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {isKeyValid, loginWithNsecBunker} from "src/engine2"
+  import {isKeyValid, loginWithNsecBunker} from "src/engine"
   import {boot} from "src/app/state"
 
   let input = ""

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
-  import {derivePerson, displayPerson} from "src/engine2"
+  import {derivePerson, displayPerson} from "src/engine"
 
   export let value
 

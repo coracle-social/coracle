@@ -7,7 +7,7 @@
   import Content from "src/partials/Content.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {session} from "src/engine2"
+  import {session} from "src/engine"
   import {toast} from "src/partials/state"
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"

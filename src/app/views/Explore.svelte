@@ -18,7 +18,7 @@
     subscribe,
     getPubkeyHints,
     getPubkeysWithDefaults,
-  } from "src/engine2"
+  } from "src/engine"
 
   type LabelGroup = {
     label: string

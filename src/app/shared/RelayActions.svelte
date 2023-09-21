@@ -2,7 +2,7 @@
   import {last, prop} from "ramda"
   import {modal} from "src/partials/state"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {canSign, relays, relayPolicyUrls, addRelay, removeRelay, hasRelay} from "src/engine2"
+  import {canSign, relays, relayPolicyUrls, addRelay, removeRelay, hasRelay} from "src/engine"
   import {addToList} from "src/app/state"
 
   export let relay

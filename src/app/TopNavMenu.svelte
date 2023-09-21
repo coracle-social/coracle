@@ -6,7 +6,7 @@
   import Card from "src/partials/Card.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {slowConnections} from "src/app/state"
-  import {env, pubkey, sessions, logoutPubkey, displayPubkey} from "src/engine2"
+  import {env, pubkey, sessions, logoutPubkey, displayPubkey} from "src/engine"
 
   const showLogin = () => modal.push({type: "login/advanced"})
 </script>

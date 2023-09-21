@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {isFollowing, derivePerson, displayPerson} from "src/engine2"
+  import {isFollowing, derivePerson, displayPerson} from "src/engine"
 
   export let pubkey
 

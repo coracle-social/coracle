@@ -2,7 +2,7 @@
   import {nip19} from "nostr-tools"
   import {fade} from "src/util/transition"
   import {modal, location} from "src/partials/state"
-  import {canSign} from "src/engine2"
+  import {canSign} from "src/engine"
   import ForegroundButton from "src/partials/ForegroundButton.svelte"
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
   import MusicPlayer from "src/app/MusicPlayer.svelte"

@@ -13,7 +13,7 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import NoteContentLabel from "src/app/shared/NoteContentLabel.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
-  import {FeedLoader, compileFilter, getRelaysFromFilters} from "src/engine2"
+  import {FeedLoader, compileFilter, getRelaysFromFilters} from "src/engine"
 
   export let isOpen
 

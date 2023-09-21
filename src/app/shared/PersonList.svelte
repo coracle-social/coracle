@@ -5,8 +5,8 @@
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
-  import type {Event} from "src/engine2"
-  import {subscribe, loadPubkeys, getPubkeyHints, follows} from "src/engine2"
+  import type {Event} from "src/engine"
+  import {subscribe, loadPubkeys, getPubkeyHints, follows} from "src/engine"
 
   export let type
   export let pubkey

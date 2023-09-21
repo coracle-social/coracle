@@ -5,7 +5,7 @@
   import Audio from "src/partials/Audio.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {dufflepud, imgproxy} from "src/engine2"
+  import {dufflepud, imgproxy} from "src/engine"
 
   export let link
   export let onClick = null

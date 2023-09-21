@@ -1,7 +1,7 @@
 <script lang="ts">
   import {poll} from "hurdak"
   import {onMount} from "svelte"
-  import {pool} from "src/engine2"
+  import {pool} from "src/engine"
 
   export let relay
 

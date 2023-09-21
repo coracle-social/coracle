@@ -14,7 +14,7 @@
     searchableRelays,
     getPubkeyHints,
     searchPeople,
-  } from "src/engine2"
+  } from "src/engine"
 
   export let onSubmit
 

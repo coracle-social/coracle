@@ -13,8 +13,8 @@
   import SelectButton from "src/partials/SelectButton.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
-  import type {DynamicFilter, Topic, Person} from "src/engine2"
-  import {follows, searchTopics, derivePerson, displayPubkey} from "src/engine2"
+  import type {DynamicFilter, Topic, Person} from "src/engine"
+  import {follows, searchTopics, derivePerson, displayPubkey} from "src/engine"
 
   export let filter
   export let onChange

@@ -2,7 +2,7 @@
   import {formatTimestamp} from "src/util/misc"
   import Note from "src/app/shared/Note.svelte"
   import NotificationPeople from "src/app/shared/NotificationPeople.svelte"
-  import type {Notification} from "src/engine2"
+  import type {Notification} from "src/engine"
 
   export let notification: Notification
 

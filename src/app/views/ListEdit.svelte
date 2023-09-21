@@ -16,7 +16,7 @@
     displayPubkey,
     displayRelay,
     publishBookmarksList,
-  } from "src/engine2"
+  } from "src/engine"
 
   export let list
 

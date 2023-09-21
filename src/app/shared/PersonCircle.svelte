@@ -1,7 +1,7 @@
 <script lang="ts">
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import PlaceholderCircle from "src/app/shared/PlaceholderCircle.svelte"
-  import {derivePerson} from "src/engine2"
+  import {derivePerson} from "src/engine"
 
   export let pubkey
   export let size = 4

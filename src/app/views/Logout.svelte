@@ -2,7 +2,7 @@
   import {fly} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
-  import {storage} from "src/engine2"
+  import {storage} from "src/engine"
 
   let confirmed = false
 

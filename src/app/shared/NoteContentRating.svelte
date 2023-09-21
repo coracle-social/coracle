@@ -4,7 +4,7 @@
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {displayRelay, displayPubkey} from "src/engine2"
+  import {displayRelay, displayPubkey} from "src/engine"
 
   export let note, rating
 

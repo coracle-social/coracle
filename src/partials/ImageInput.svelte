@@ -7,7 +7,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile, stripExifData, blobToFile} from "src/util/html"
-  import {uploadToNostrBuild} from "src/engine2"
+  import {uploadToNostrBuild} from "src/engine"
 
   export let icon = null
   export let value = null
