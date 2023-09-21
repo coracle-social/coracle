@@ -49,6 +49,8 @@ export const listenForNotifications = async () => {
   const pubkeys = Object.keys(sessions.get())
   const channelIds = pluck("id", nip28ChannelsForUser.get())
 
+  const relays = mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read")))
+
   const eventIds: string[] = doPipe(events.get(), [
     filter((e: Event) => noteKinds.includes(e.kind)),
     sortBy((e: Event) => -e.created_at),
@@ -56,20 +58,30 @@ export const listenForNotifications = async () => {
     pluck("id"),
   ])
 
+  const filters = [
+    // NIP04 Messages
+    {kinds: [4], "#p": pubkeys, limit: 1},
+    // NIP24 Messages
+    {kinds: [1059], "#p": pubkeys, limit: 1},
+    // Mentions
+    {kinds: noteKinds, "#p": pubkeys, limit: 1},
+  ]
+
+  // Chat
+  if (channelIds.length > 0) {
+    filters.push({kinds: [42], "#e": channelIds, limit: 1})
+  }
+
+  // Replies
+  if (eventIds.length > 0) {
+    filters.push({kinds: noteKinds, "#e": eventIds, limit: 1})
+  }
+
   // Only grab one event from each category/relay so we have enough to show
   // the notification badges, but load the details lazily
   subscribePersistent({
-    relays: mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read"))),
-    filters: [
-      // Messages
-      {kinds: [4], "#p": pubkeys, limit: 1},
-      {kinds: [1059], "#p": pubkeys, limit: 1},
-      // Chat
-      {kinds: [42], "#e": channelIds, limit: 1},
-      // Mentions/replies
-      {kinds: noteKinds, "#p": pubkeys, limit: 1},
-      {kinds: noteKinds, "#e": eventIds, limit: 1},
-    ],
+    relays,
+    filters,
     onEvent: (e: Event) => {
       if (kinds.includes(e.kind) && !isEventMuted(e).get()) {
         events.key(e.id).set(e)

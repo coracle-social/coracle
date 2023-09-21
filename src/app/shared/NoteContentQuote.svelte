@@ -7,7 +7,14 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {load, displayPubkey, isEventMuted, getEventHints, mergeHints} from "src/engine"
+  import {
+    load,
+    loadPubkeys,
+    displayPubkey,
+    isEventMuted,
+    getEventHints,
+    mergeHints,
+  } from "src/engine"
 
   export let note
   export let value
@@ -39,6 +46,8 @@
       loading = false
       muted = isEventMuted(event).get()
       quote = event
+
+      loadPubkeys([quote.pubkey])
     },
   })
 

@@ -11,7 +11,10 @@ export const matchFilter = (filter, event) => {
   }
 
   if (filter.search) {
-    return event.content.toLowerCase().includes(filter.search.toLowerCase())
+    const content = event.content.toLowerCase()
+    const terms = filter.search.toLowerCase().split(/\s+/g)
+
+    return any(s => content.includes(s), terms)
   }
 
   return true

@@ -142,7 +142,10 @@
               replies = sortBy((e: Event) => -e.created_at, uniqBy(prop("id"), replies.concat(e)))
             }
 
-            context = uniqBy(prop("id"), (context || []).concat(e))
+            context = sortBy(
+              (e: Event) => -e.created_at,
+              uniqBy(prop("id"), (context || []).concat(e))
+            )
           }
         },
         "7": () => {

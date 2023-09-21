@@ -129,7 +129,7 @@
           type: "profile",
           text:
             "@" +
-            [profile?.name, handle?.address, profile?.display_name].filter(identity).join(" "),
+            [profile?.name, profile?.display_name, handle?.address].filter(identity).join(" "),
         }
       })
   )
@@ -153,7 +153,7 @@
     }
   }
 
-  $: search = fuzzy(options, {keys: ["text"], threshold: 0.3})
+  $: search = fuzzy(options, {keys: ["text"], threshold: 0.5})
 
   onMount(() => {
     document.querySelector("html").addEventListener("click", e => {
