@@ -4,6 +4,7 @@ import {formatTimestampAsLocalISODate, tryJson} from "src/util/misc"
 import {derived} from "src/engine2/util/store"
 import {events, notificationsLastChecked} from "src/engine2/state"
 import {session, userEventsById} from "src/engine2/queries/session"
+import {isEventMuted} from "src/engine2/queries/nip51"
 
 export const notifications = derived(
   [session, userEventsById.throttle(500), events.throttle(500)],
@@ -15,11 +16,14 @@ export const notifications = derived(
     return $events.filter(e => {
       const {root, reply} = findReplyAndRootIds(e)
 
+      if (e.pubkey === $session.pubkey || isEventMuted(e).get()) {
+        return false
+      }
+
       return (
-        !$userEventsById[e.id] &&
-        ($userEventsById[root] ||
-          $userEventsById[reply] ||
-          Tags.from(e).pubkeys().includes($session.pubkey))
+        $userEventsById[root] ||
+        $userEventsById[reply] ||
+        Tags.from(e).pubkeys().includes($session.pubkey)
       )
     })
   }
@@ -50,7 +54,7 @@ export const groupNotifications = $notifications => {
     const eventId = findReplyId(ix)
     const event = $userEventsById[eventId]
 
-    if ((eventId || reactionKinds.includes(ix.kind)) && !event) {
+    if (reactionKinds.includes(ix.kind) && !event) {
       continue
     }
 

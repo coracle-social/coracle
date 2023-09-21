@@ -16,6 +16,7 @@
 - [x] Fix chat room joined status
 - [x] Fix list deletion
 - [x] Reduce repeated notes in feeds
+- [x] Add database import/export
 
 # 0.3.6
 

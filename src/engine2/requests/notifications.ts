@@ -37,7 +37,7 @@ export const loadNotifications = () => {
     shouldProject: false,
     relays: mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read"))),
     onEvent: (e: Event) => {
-      if (!isEventMuted(e)) {
+      if (!isEventMuted(e).get()) {
         events.key(e.id).set(e)
       }
     },
@@ -71,7 +71,7 @@ export const listenForNotifications = async () => {
       {kinds: noteKinds, "#e": eventIds, limit: 1},
     ],
     onEvent: (e: Event) => {
-      if (kinds.includes(e.kind) && !isEventMuted(e)) {
+      if (kinds.includes(e.kind) && !isEventMuted(e).get()) {
         events.key(e.id).set(e)
       }
     },
