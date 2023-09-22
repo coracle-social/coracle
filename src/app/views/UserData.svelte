@@ -2,7 +2,6 @@
   import {nip19} from "nostr-tools"
   import {commaFormat} from "hurdak"
   import {onDestroy} from "svelte"
-  import {sortBy} from "ramda"
   import {createScroller, formatTimestamp} from "src/util/misc"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
@@ -10,9 +9,9 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
-  import {events, getEventHints} from "src/engine"
+  import {events, getEventHints, sortEventsDesc} from "src/engine"
 
-  const sortedEvents = events.derived(sortBy(e => -e.created_at))
+  const sortedEvents = events.derived(sortEventsDesc)
 
   const scroller = createScroller(async () => {
     limit += 50

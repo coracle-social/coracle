@@ -14,8 +14,8 @@
     canUseGiftWrap,
     follow,
     unfollow,
-    isMuted,
-    isFollowing,
+    deriveMuted,
+    deriveFollowing,
   } from "src/engine"
   import {addToList, boot} from "src/app/state"
 
@@ -23,8 +23,8 @@
 
   const isSelf = $session?.pubkey === pubkey
   const npub = nip19.npubEncode(pubkey)
-  const following = isFollowing(pubkey)
-  const muted = isMuted(pubkey)
+  const following = deriveFollowing(pubkey)
+  const muted = deriveMuted(pubkey)
 
   let actions = []
 

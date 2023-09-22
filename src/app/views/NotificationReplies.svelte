@@ -4,7 +4,7 @@
   import {noteKinds} from "src/util/nostr"
   import NotificationPeople from "src/app/shared/NotificationPeople.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import type {Notification} from "src/engine/model"
+  import type {Notification} from "src/engine"
 
   export let notification: Notification
 

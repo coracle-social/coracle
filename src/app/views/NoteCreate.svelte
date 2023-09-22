@@ -84,7 +84,7 @@
     showSettings = false
   }
 
-  const addRelay = url => {
+  const saveRelay = url => {
     q = ""
     relays.update($r => $r.concat(url))
   }
@@ -213,7 +213,7 @@
               <button
                 slot="actions"
                 class="underline"
-                on:click|preventDefault={() => addRelay(relay.url)}>
+                on:click|preventDefault={() => saveRelay(relay.url)}>
                 Add relay
               </button>
             </RelayCard>

@@ -17,8 +17,9 @@
   import {
     env,
     load,
-    isMuted,
+    mutes,
     processZap,
+    deriveMuted,
     derivePerson,
     getReplyHints,
     isEventMuted,
@@ -59,7 +60,7 @@
   const borderColor = invertColors ? "gray-6" : "gray-7"
   const showEntire = anchorId === event.id
   const interactive = !anchorId || !showEntire
-  const muted = isMuted(event.id)
+  const muted = deriveMuted(event.id)
 
   let interval, border, childrenContainer, noteContainer
 
@@ -137,7 +138,7 @@
     const onEvent = e => {
       switcherFn(e.kind.toString(), {
         "1": () => {
-          if (!isEventMuted(e).get()) {
+          if (!isEventMuted($mutes, e)) {
             if (findReplyId(e) === event.id) {
               replies = sortBy((e: Event) => -e.created_at, uniqBy(prop("id"), replies.concat(e)))
             }

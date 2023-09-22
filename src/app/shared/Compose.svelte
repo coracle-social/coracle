@@ -8,9 +8,9 @@
   import Suggestions from "src/partials/Suggestions.svelte"
   import {
     load,
+    follows,
     derivePerson,
     displayPerson,
-    isFollowing,
     searchableRelays,
     getPubkeyHints,
     searchPeople,
@@ -49,7 +49,7 @@
     let results = []
     if (word.length > 1 && word.startsWith("@")) {
       const [followed, notFollowed] = partition(
-        p => isFollowing(p.pubkey).get(),
+        p => $follows.has(p.pubkey),
         $searchPeople(word.slice(1))
       )
 

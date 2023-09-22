@@ -17,6 +17,7 @@
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import TopNavMenu from "src/app/TopNavMenu.svelte"
   import {menuIsOpen} from "src/app/state"
+  import type {Topic} from "src/engine"
   import {
     load,
     topics,
@@ -114,7 +115,7 @@
   }
 
   const topicOptions = topics.derived(
-    map(topic => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
+    map((topic: Topic) => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
   )
 
   const profileOptions = peopleWithName.derived($people =>

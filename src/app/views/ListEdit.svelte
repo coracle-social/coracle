@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {pluck} from "ramda"
   import {Tags} from "src/util/nostr"
   import {modal, toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
@@ -40,7 +39,7 @@
       .map(({pubkey}) => ["p", pubkey])
   }
 
-  const _searchRelays = q => pluck("url", $searchRelays(q)).map(url => ["r", url])
+  const searchRelayTags = q => $searchRelays(q).map(r => ["r", r.url])
 
   const submit = () => {
     if (!values.name) {
@@ -91,7 +90,7 @@
       </div>
       <div class="flex flex-col gap-1">
         <strong>Relays</strong>
-        <MultiSelect search={_searchRelays} bind:value={values.relays}>
+        <MultiSelect search={searchRelayTags} bind:value={values.relays}>
           <div slot="item" let:item>
             {displayRelay({url: item[1]})}
           </div>

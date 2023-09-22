@@ -117,7 +117,7 @@ export const loadAppData = async () => {
   loadDeletes()
 
   // Load their network
-  loadPubkeys(follows.get())
+  loadPubkeys(Array.from(follows.get()))
 
   // Start our listener
   listenForNotifications()

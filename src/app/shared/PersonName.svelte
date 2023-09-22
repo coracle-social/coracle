@@ -1,11 +1,11 @@
 <script lang="ts">
   import cx from "classnames"
-  import {isFollowing, derivePerson, displayPerson} from "src/engine"
+  import {deriveFollowing, derivePerson, displayPerson} from "src/engine"
 
   export let pubkey
 
   const person = derivePerson(pubkey)
-  const following = isFollowing(pubkey)
+  const following = deriveFollowing(pubkey)
 </script>
 
 <div class={cx("flex items-center gap-2", $$props.class)}>

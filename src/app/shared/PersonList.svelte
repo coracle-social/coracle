@@ -15,7 +15,7 @@
 
   onMount(() => {
     if (type === "follows") {
-      pubkeys = $follows
+      pubkeys = Array.from($follows)
     } else {
       const sub = subscribe({
         relays: getPubkeyHints(pubkey, "read"),

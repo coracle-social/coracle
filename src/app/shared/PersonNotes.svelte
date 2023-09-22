@@ -1,7 +1,7 @@
 <script lang="ts">
   import {noteKinds} from "src/util/nostr"
   import Feed from "src/app/shared/Feed.svelte"
-  import {sessions} from "src/engine/state"
+  import {sessions} from "src/engine"
 
   export let pubkey
   export let relays

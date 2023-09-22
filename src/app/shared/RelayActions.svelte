@@ -2,13 +2,13 @@
   import {last, prop} from "ramda"
   import {modal} from "src/partials/state"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {canSign, relays, relayPolicyUrls, addRelay, removeRelay, hasRelay} from "src/engine"
+  import {canSign, relays, relayPolicyUrls, joinRelay, leaveRelay, deriveHasRelay} from "src/engine"
   import {addToList} from "src/app/state"
 
   export let relay
 
   const info = relays.key(relay.url).derived(prop("info"))
-  const joined = hasRelay(relay.url)
+  const joined = deriveHasRelay(relay.url)
 
   let actions = []
 
@@ -17,13 +17,13 @@
 
     if (!$joined) {
       actions.push({
-        onClick: () => addRelay(relay.url),
+        onClick: () => joinRelay(relay.url),
         label: "Join",
         icon: "right-to-bracket",
       })
     } else if ($relayPolicyUrls.length > 1) {
       actions.push({
-        onClick: () => removeRelay(relay.url),
+        onClick: () => leaveRelay(relay.url),
         label: "Leave",
         icon: "right-from-bracket",
       })

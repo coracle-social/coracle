@@ -1,13 +1,13 @@
 <script lang="ts">
   import {batch} from "hurdak"
-  import {normalizeRelayUrl, getAvgQuality} from "src/util/nostr"
+  import {getAvgQuality} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Rating from "src/partials/Rating.svelte"
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
   import RelayActions from "src/app/shared/RelayActions.svelte"
-  import {relays, displayRelay} from "src/engine"
+  import {relays, normalizeRelayUrl, displayRelay} from "src/engine"
 
   export let url
 

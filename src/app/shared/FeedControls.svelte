@@ -182,7 +182,7 @@
 
   $: {
     scopeOptions =
-      $follows.length > 0
+      $follows.size > 0
         ? ["follows", "network", "global", "custom"]
         : ["network", "global", "custom"]
   }

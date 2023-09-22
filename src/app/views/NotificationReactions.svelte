@@ -6,8 +6,8 @@
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NotificationPeople from "src/app/shared/NotificationPeople.svelte"
   import {modal} from "src/partials/state"
-  import type {Notification} from "src/engine/model"
-  import {EventKind} from "src/engine/model"
+  import type {Notification} from "src/engine"
+  import {EventKind} from "src/engine"
 
   export let notification: Notification
 

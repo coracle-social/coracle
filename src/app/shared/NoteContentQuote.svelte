@@ -1,7 +1,6 @@
 <script lang="ts">
   import type {Filter} from "nostr-tools"
   import {filterVals} from "hurdak"
-  import {isShareableRelay} from "src/util/nostr"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
@@ -9,10 +8,12 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {
     load,
+    mutes,
     loadPubkeys,
     displayPubkey,
     isEventMuted,
     getEventHints,
+    isShareableRelay,
     mergeHints,
   } from "src/engine"
 
@@ -44,7 +45,7 @@
     ] as Filter[],
     onEvent: event => {
       loading = false
-      muted = isEventMuted(event).get()
+      muted = isEventMuted($mutes, event)
       quote = event
 
       loadPubkeys([quote.pubkey])

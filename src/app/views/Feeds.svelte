@@ -40,7 +40,7 @@
   let key = Math.random()
   let feedFilter = {
     kinds: noteKinds,
-    authors: $follows.length > 0 ? "follows" : "network",
+    authors: $follows.size > 0 ? "follows" : "network",
   } as DynamicFilter
 
   document.title = "Feeds"

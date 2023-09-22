@@ -4,7 +4,7 @@ import {identity} from "ramda"
 import {Fetch} from "hurdak"
 import Bugsnag from "@bugsnag/js"
 import {tryFetch} from "src/util/misc"
-import {env, relays} from "src/engine"
+import {env, saveRelay} from "src/engine"
 import App from "src/app/App.svelte"
 import {installPrompt} from "src/partials/state"
 
@@ -63,17 +63,15 @@ env.set({
   ENABLE_ZAPS,
 })
 
-const addRelay = url => relays.key(url).merge({url})
-
 // Throw some hardcoded defaults in there
-DEFAULT_RELAYS.forEach(addRelay)
+DEFAULT_RELAYS.forEach(saveRelay)
 
 // Load relays from nostr.watch via dufflepud
 if (FORCE_RELAYS.length === 0 && DUFFLEPUD_URL) {
   tryFetch(async () => {
     const json = await Fetch.fetchJson(DUFFLEPUD_URL + "/relay")
 
-    json.relays.forEach(addRelay)
+    json.relays.forEach(saveRelay)
   })
 }
 

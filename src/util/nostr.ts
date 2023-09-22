@@ -1,8 +1,9 @@
 import {nip19} from "nostr-tools"
 import {find, omit, is, fromPairs, mergeLeft, last, identity, prop, flatten, uniq} from "ramda"
-import {ensurePlural, between, mapVals, tryFunc, avg, first} from "hurdak"
-import type {Filter, Event, DisplayEvent} from "src/engine/model"
-import {tryJson, stripProto} from "src/util/misc"
+import {ensurePlural, between, mapVals, avg, first} from "hurdak"
+import type {Filter, Event, DisplayEvent} from "src/engine"
+import {isShareableRelay} from "src/engine"
+import {tryJson} from "src/util/misc"
 
 export const noteKinds = [1, 30023, 1063, 9802, 1808]
 export const personKinds = [0, 2, 3, 10002]
@@ -130,29 +131,6 @@ export const findRoot = (e: Event) => prop("root", findReplyAndRoot(e))
 export const findRootId = (e: Event) => findRoot(e)?.[1]
 
 export const isLike = (content: string) => ["", "+", "🤙", "👍", "❤️", "😎", "🏅"].includes(content)
-
-export const isShareableRelay = (url: string) =>
-  // Is it actually a websocket url
-  url.match(/^wss:\/\/.+/) &&
-  // Sometimes bugs cause multiple relays to get concatenated
-  url.match(/:\/\//g).length === 1 &&
-  // It shouldn't have any whitespace
-  !url.match(/\s/) &&
-  // Don't match stuff with a port number
-  !url.slice(6).match(/:\d+/) &&
-  // Don't match raw ip addresses
-  !url.slice(6).match(/\d+\.\d+\.\d+\.\d+/) &&
-  // Skip nostr.wine's virtual relays
-  !url.slice(6).match(/\/npub/)
-
-export const normalizeRelayUrl = (url: string) => {
-  // If it doesn't start with a compatible protocol, strip the proto and add wss
-  if (!url.match(/^(wss|local):\/\/.+/)) {
-    url = "wss://" + stripProto(url)
-  }
-
-  return (tryFunc(() => new URL(url).href.replace(/\/+$/, "").toLowerCase()) || "") as string
-}
 
 export const channelAttrs = ["name", "about", "picture"]
 

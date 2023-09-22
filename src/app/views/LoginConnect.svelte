@@ -3,7 +3,7 @@
   import {sleep, shuffle} from "hurdak"
   import {onDestroy, onMount} from "svelte"
   import {navigate} from "svelte-routing"
-  import {normalizeRelayUrl, userKinds} from "src/util/nostr"
+  import {userKinds} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -12,7 +12,15 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {env, session, relays, pool, loadPubkeys, getUserRelayUrls} from "src/engine"
+  import {
+    env,
+    session,
+    relays,
+    pool,
+    loadPubkeys,
+    getUserRelayUrls,
+    normalizeRelayUrl,
+  } from "src/engine"
   import {loadAppData} from "src/app/state"
 
   let modal = null

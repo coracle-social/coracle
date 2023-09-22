@@ -15,7 +15,7 @@
   let q = ""
   let search
 
-  const addRelay = relay => {
+  const saveRelay = relay => {
     relays = relays.concat(relay)
   }
 
@@ -82,7 +82,7 @@
   {#each (search(q) || []).slice(0, 50) as relay (relay.url)}
     <RelayCard {relay}>
       <div slot="actions">
-        <button class="flex items-center gap-3 text-gray-1" on:click={() => addRelay(relay)}>
+        <button class="flex items-center gap-3 text-gray-1" on:click={() => saveRelay(relay)}>
           <i class="fa fa-right-to-bracket" /> Join
         </button>
       </div>
