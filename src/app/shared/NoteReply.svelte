@@ -18,6 +18,7 @@
   let data = null
   let reply = null
   let container = null
+  let draft = ""
 
   export const start = () => {
     dispatch("start")
@@ -29,10 +30,16 @@
         uniq(Tags.from(parent).type("p").values().all().concat(parent.pubkey))
       ),
     }
+
+    setTimeout(() => reply.write(draft))
   }
 
   const reset = () => {
     dispatch("reset")
+
+    if (reply) {
+      draft = reply.parse()
+    }
 
     data = null
     reply = null

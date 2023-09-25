@@ -18,6 +18,7 @@
 - [x] Reduce repeated notes in feeds
 - [x] Add database import/export
 - [x] Use a bloom filter for deletes
+- [x] Remember reply drafts
 
 # 0.3.6
 
