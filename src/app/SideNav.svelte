@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {theme, installPrompt} from "src/partials/state"
+  import {modal, theme, installPrompt} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import {
     hasNewNip28Messages,
@@ -13,6 +13,10 @@
   import {menuIsOpen} from "src/app/state"
 
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
+
+  const openNip28Chat = () => {
+    modal.push({type: "chat/redirect"})
+  }
 
   const install = () => {
     $installPrompt.prompt()
@@ -84,7 +88,9 @@
     </li>
   {/if}
   <li class="relative">
-    <a class="block px-4 py-2 transition-all hover:bg-accent hover:text-white" href="/chat">
+    <a
+      class="block px-4 py-2 transition-all hover:bg-accent hover:text-white"
+      on:click={openNip28Chat}>
       <i class="fa fa-comment mr-2" /> Chat
       {#if $hasNewNip28Messages}
         <div

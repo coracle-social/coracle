@@ -29,6 +29,7 @@
   import ReportCreate from "src/app/views/ReportCreate.svelte"
   import DataImport from "src/app/views/DataImport.svelte"
   import DataExport from "src/app/views/DataExport.svelte"
+  import ChatRedirect from "src/app/views/ChatRedirect.svelte"
   import RelayBrowse from "src/app/views/RelayBrowse.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
   import RelayReview from "src/app/views/RelayReview.svelte"
@@ -104,6 +105,8 @@
   <DataExport />
 {:else if m.type === "data/import"}
   <DataImport />
+{:else if m.type === "chat/redirect"}
+  <ChatRedirect />
 {:else if m.type === "bech32"}
   <Bech32Entity entity={m.entity} />
 {:else if m.type === "qrcode"}
