@@ -10,6 +10,7 @@
   $: nonVirtual = $stack.filter(m => !m.virtual)
 
   const closeModal = async () => {
+    document.title = modal.getCurrent().prevDocTitle
     modal.pop()
     menuIsOpen.set(false)
   }

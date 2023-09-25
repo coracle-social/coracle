@@ -49,7 +49,7 @@
     return showContext ? true : r.matchesFilter
   })
 
-  const goToNote = data => modal.push({type: "note/detail", ...data})
+  const goToNote = data => modal.push({type: "note/detail", prevDocTitle: document.title, ...data})
 
   const onClick = e => {
     const target = e.target as HTMLElement
@@ -68,7 +68,7 @@
   const goToThread = async () => {
     const relays = Nip65.getEventHints(Settings.getSetting("relay_limit"), note)
 
-    modal.push({type: "thread/detail", anchorId: note.id, relays})
+    modal.push({type: "thread/detail", anchorId: note.id, relays, prevDocTitle: document.title})
   }
 
   const setBorderHeight = () => {
@@ -113,7 +113,7 @@
       <div>
         <Anchor
           class="text-lg font-bold"
-          on:click={() => modal.push({type: "person/detail", pubkey: note.pubkey})}>
+          on:click={() => modal.push({type: "person/detail", pubkey: note.pubkey, prevDocTitle: document.title})}>
           <PersonCircle size={10} pubkey={note.pubkey} />
         </Anchor>
       </div>
@@ -122,7 +122,7 @@
           <Anchor
             type="unstyled"
             class="pr-16 text-lg font-bold"
-            on:click={() => modal.push({type: "person/detail", pubkey: note.pubkey})}>
+            on:click={() => modal.push({type: "person/detail", pubkey: note.pubkey, prevDocTitle: document.title})}>
             <PersonName pubkey={$author.pubkey} />
           </Anchor>
           <Anchor
