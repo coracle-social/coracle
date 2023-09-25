@@ -1,7 +1,7 @@
-import {sleep} from 'hurdak'
-import {Emitter} from 'paravel'
-import {events} from "src/engine/events/state"
-import {matchFilters} from '../filters'
+import {sleep} from "hurdak"
+import {Emitter} from "paravel"
+import {events} from "src/engine/events/derived"
+import {matchFilters} from "../filters"
 
 export class LocalTarget extends Emitter {
   constructor() {

@@ -1,13 +1,14 @@
 import {whereEq} from "ramda"
-import {derived} from "src/engine/core/utils"
+import {derivedCollection} from "src/engine/core/utils"
 import {pubkey} from "src/engine/session/state"
-import {lists} from "src/engine/lists/state"
-import {deletesSet} from "src/engine/events/derived"
+import {deletes} from "src/engine/events/state"
+import type {List} from "./model"
+import {_lists} from "./state"
 
-export const activeLists = derived([lists, deletesSet], ([$lists, $deletesSet]) =>
-  $lists.filter($l => !$deletesSet.has($l.naddr))
+export const lists = derivedCollection<List>("naddr", [_lists, deletes], ([$l, $d]) =>
+  $l.filter(l => !$d.has(l.naddr))
 )
 
-export const userLists = derived([pubkey, activeLists], ([$pubkey, $activeLists]) =>
-  $activeLists.filter(whereEq({pubkey: $pubkey}))
+export const userLists = derivedCollection<List>("naddr", [lists, pubkey], ([$l, $pk]) =>
+  $l.filter(whereEq({pubkey: $pk}))
 )

@@ -1,4 +1,4 @@
-import {prop, pluck, splitAt, nth, sortBy} from "ramda"
+import {prop, identity, pluck, splitAt, nth, sortBy} from "ramda"
 import {sleep, defer, chunk, randomInt, throttle} from "hurdak"
 import {Storage as LocalStorage} from "hurdak"
 import {sessions} from "src/engine/session/state"
@@ -117,17 +117,27 @@ export class IndexedDB {
   }
 }
 
+export type LocalStorageAdapterOpts = {
+  load: (x: any) => any
+  dump: (x: any) => any
+}
+
 export class LocalStorageAdapter {
-  constructor(readonly key: string, readonly store: Writable<any>) {}
+  constructor(
+    readonly key: string,
+    readonly store: Writable<any>,
+    readonly opts?: LocalStorageAdapterOpts
+  ) {}
 
   initialize(storage: Storage) {
-    const {key, store} = this
+    const {key, store, opts} = this
+    const {load, dump} = opts || {load: identity, dump: identity}
 
     if (Object.hasOwn(localStorage, key)) {
-      store.set(LocalStorage.getJson(key))
+      store.set(load(LocalStorage.getJson(key)))
     }
 
-    store.subscribe(throttle(300, $value => LocalStorage.setJson(key, $value)))
+    store.subscribe(throttle(300, $value => LocalStorage.setJson(key, dump($value))))
   }
 }
 

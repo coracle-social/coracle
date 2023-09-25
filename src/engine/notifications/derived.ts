@@ -1,17 +1,17 @@
 import {prop, max, sortBy} from "ramda"
 import {Tags, reactionKinds, findReplyId, findReplyAndRootIds} from "src/util/nostr"
 import {formatTimestampAsLocalISODate, tryJson} from "src/util/misc"
-import {events} from "src/engine/events/state"
+import {events} from "src/engine/events/derived"
 import {derived} from "src/engine/core/utils"
 import {isEventMuted} from "src/engine/people/utils"
 import {mutes} from "src/engine/people/derived"
 import {session} from "src/engine/session/derived"
-import {userEventsById} from "src/engine/events/derived"
+import {userEvents} from "src/engine/events/derived"
 import {notificationsLastChecked} from "./state"
 
 export const notifications = derived(
-  [session, userEventsById.throttle(500), events.throttle(500)],
-  ([$session, $userEventsById, $events]) => {
+  [session, userEvents.mapStore.throttle(500), events.throttle(500)],
+  ([$session, $userEvents, $events]) => {
     if (!$session) {
       return []
     }
@@ -24,8 +24,8 @@ export const notifications = derived(
       }
 
       return (
-        $userEventsById[root] ||
-        $userEventsById[reply] ||
+        $userEvents.get(root) ||
+        $userEvents.get(reply) ||
         Tags.from(e).pubkeys().includes($session.pubkey)
       )
     })
@@ -39,7 +39,7 @@ export const hasNewNotifications = derived(
 )
 
 export const groupNotifications = $notifications => {
-  const $userEventsById = userEventsById.get()
+  const $userEvents = userEvents.mapStore.get()
 
   // Convert zaps to zap requests
   const convertZap = e => {
@@ -55,7 +55,7 @@ export const groupNotifications = $notifications => {
   // Group notifications by event
   for (const ix of $notifications) {
     const eventId = findReplyId(ix)
-    const event = $userEventsById[eventId]
+    const event = $userEvents.get(eventId)
 
     if (reactionKinds.includes(ix.kind) && !event) {
       continue

@@ -12,11 +12,6 @@ export type Rumor = UnsignedEvent & {
   id: string
 }
 
-export type Delete = {
-  value: string
-  created_at: number
-}
-
 export enum EventKind {
   Profile = 0,
   Note = 1,

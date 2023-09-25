@@ -1,13 +1,13 @@
-import {prop, propEq} from "ramda"
-import {createMap} from "hurdak"
-import {derived} from "src/engine/core/utils"
+import {whereEq} from "ramda"
+import {DerivedCollection} from "src/engine/core/utils"
 import {pubkey} from "src/engine/session/state"
-import {deletes, events} from "./state"
+import type {Event} from "./model"
+import {deletes, _events} from "./state"
 
-export const deletesSet = deletes.derived($deletes => new Set($deletes.map(prop("value"))))
-
-export const userEvents = derived([pubkey, events], ([$pubkey, $events]) =>
-  $pubkey ? $events.filter(propEq("pubkey", $pubkey)) : []
+export const events = new DerivedCollection<Event>("id", [_events, deletes], ([$e, $d]) =>
+  $e.filter(e => !$d.has(e.id))
 )
 
-export const userEventsById = userEvents.derived($events => createMap("id", $events))
+export const userEvents = new DerivedCollection<Event>("id", [events, pubkey], ([$e, $pk]) =>
+  $pk ? $e.filter(whereEq({pubkey: $pk})) : []
+)

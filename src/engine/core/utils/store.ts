@@ -20,11 +20,15 @@ export class Writable<T> implements Readable<T> {
   private value: T
   private subs: Subscriber<T>[] = []
 
-  constructor(defaultValue: T) {
+  constructor(defaultValue: T, t?: number) {
     this.value = defaultValue
+
+    if (t) {
+      this.notify = throttle(t, this.notify)
+    }
   }
 
-  notify() {
+  notify = () => {
     for (const sub of this.subs) {
       sub(this.value)
     }
@@ -71,15 +75,11 @@ export class Writable<T> implements Readable<T> {
 export class Derived<T> implements Readable<T> {
   private callerSubs: Subscriber<T>[] = []
   private mySubs: Unsubscriber[] = []
-  private value: T = null
   private stores: Derivable
   private getValue: (values: any) => T
+  private latestValue: T | undefined
 
   constructor(stores: Derivable, getValue: (values: any) => T, t = 0) {
-    if (!getValue) {
-      throw new Error(`Invalid derivation function`)
-    }
-
     this.stores = stores
     this.getValue = getValue
 
@@ -89,6 +89,7 @@ export class Derived<T> implements Readable<T> {
   }
 
   notify = () => {
+    this.latestValue = undefined
     this.callerSubs.forEach(f => f(this.get()))
   }
 
@@ -100,12 +101,18 @@ export class Derived<T> implements Readable<T> {
     }
   }
 
-  get = (): T => this.getValue(this.getInput())
+  get = (): T => {
+    if (this.latestValue === undefined) {
+      this.latestValue = this.getValue(this.getInput())
+    }
+
+    return this.latestValue
+  }
 
   subscribe(f: Subscriber<T>) {
     if (this.callerSubs.length === 0) {
       for (const s of ensurePlural(this.stores)) {
-        this.mySubs.push(s.subscribe(() => this.notify()))
+        this.mySubs.push(s.subscribe(this.notify))
       }
     }
 
@@ -190,15 +197,47 @@ export class Key<T extends R> implements Readable<T> {
     })
 }
 
+export class DerivedKey<T extends R> implements Readable<T> {
+  readonly pk: string
+  readonly key: string
+  private base: Readable<M<T>>
+  private store: Readable<T>
+
+  constructor(base: Readable<M<T>>, pk: string, key: string) {
+    if (!is(Map, base.get())) {
+      throw new Error("`key` can only be used on map collections")
+    }
+
+    this.pk = pk
+    this.key = key
+    this.base = base
+    this.store = base.derived<T>(m => m.get(key) as T)
+  }
+
+  get = () => this.base.get().get(this.key) as T
+
+  subscribe = (f: Subscriber<T>) => this.store.subscribe(f)
+
+  derived = <U>(f: (v: T) => U) => this.store.derived<U>(f)
+
+  throttle = (t: number) => this.store.throttle(t)
+
+  exists = () => this.base.get().has(this.key)
+}
+
 export class Collection<T extends R> implements Readable<T[]> {
   readonly pk: string
   readonly mapStore: Writable<M<T>>
   readonly listStore: Readable<T[]>
 
-  constructor(pk: string) {
+  constructor(pk: string, t?: number) {
     this.pk = pk
     this.mapStore = writable(new Map())
     this.listStore = this.mapStore.derived<T[]>((m: M<T>) => Array.from(m.values()))
+
+    if (t) {
+      this.mapStore.notify = throttle(t, this.mapStore.notify)
+    }
   }
 
   get = () => this.listStore.get()
@@ -230,10 +269,28 @@ export class Collection<T extends R> implements Readable<T[]> {
   map = (f: (v: T) => T) => this.update(map(f))
 }
 
+export class DerivedCollection<T extends R> extends Derived<T[]> {
+  readonly mapStore: Readable<M<T>>
+
+  constructor(readonly pk: string, stores: Derivable, getValue: (values: any) => T[], t = 0) {
+    super(stores, getValue, t)
+
+    this.mapStore = new Derived(this, xs => new Map(xs.map(x => [x[pk], x])), t)
+  }
+
+  key = (k: string) => new DerivedKey(this.mapStore, this.pk, k)
+}
+
 export const writable = <T>(v: T) => new Writable(v)
 
 export const derived = <T>(stores: Derivable, getValue: (values: any) => T) =>
-  new Derived(stores, getValue) as Readable<T>
+  new Derived(stores, getValue)
+
+export const derivedCollection = <T>(
+  pk: string,
+  stores: Derivable,
+  getValue: (values: any) => T[]
+) => new DerivedCollection(pk, stores, getValue)
 
 export const key = <T extends R>(base: Writable<M<T>>, pk: string, key: string) =>
   new Key<T>(base, pk, key)

@@ -1,7 +1,7 @@
 import {projections} from "src/engine/core/projections"
 import {EventKind} from "src/engine/events/model"
-import {labels} from "./state"
+import {_labels} from "./state"
 
 projections.addHandler(EventKind.Label, e => {
-  labels.key(e.id).set(e)
+  _labels.key(e.id).set(e)
 })

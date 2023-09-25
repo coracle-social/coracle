@@ -1,18 +1,33 @@
 import {pluck, slice, filter, without, sortBy} from "ramda"
-import {seconds, doPipe} from "hurdak"
+import {seconds, batch, doPipe} from "hurdak"
 import {now} from "src/util/misc"
 import {noteKinds, reactionKinds} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import type {Filter} from "src/engine/network/model"
 import {EventKind} from "src/engine/events/model"
 import {env, sessions} from "src/engine/session/state"
-import {events} from "src/engine/events/state"
+import {_events} from "src/engine/events/state"
+import {events} from "src/engine/events/derived"
 import {isEventMuted} from "src/engine/people/utils"
 import {mergeHints, getPubkeyHints} from "src/engine/relays/utils"
 import {subscribe, subscribePersistent} from "src/engine/network/utils"
 import {mutes} from "src/engine/people/derived"
 import {nip28ChannelsForUser} from "src/engine/channels/derived"
 import {notificationsLastChecked} from "./state"
+
+const onNotificationEvent = batch(300, (chunk: Event[]) => {
+  const $mutes = mutes.get()
+  const kinds = getNotificationKinds()
+  const events = chunk.filter(e => kinds.includes(e.kind) && !isEventMuted($mutes, e))
+
+  _events.mapStore.update($m => {
+    for (const e of events) {
+      $m.set(e.id, e)
+    }
+
+    return $m
+  })
+})
 
 export const getNotificationKinds = () =>
   without(env.get().ENABLE_ZAPS ? [] : [EventKind.Zap], [...noteKinds, ...reactionKinds])
@@ -42,16 +57,11 @@ export const loadNotifications = () => {
     timeout: 15000,
     shouldProject: false,
     relays: mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read"))),
-    onEvent: (e: Event) => {
-      if (!isEventMuted(mutes.get(), e)) {
-        events.key(e.id).set(e)
-      }
-    },
+    onEvent: onNotificationEvent,
   })
 }
 
 export const listenForNotifications = async () => {
-  const kinds = getNotificationKinds()
   const pubkeys = Object.keys(sessions.get())
   const channelIds = pluck("id", nip28ChannelsForUser.get())
 
@@ -88,10 +98,6 @@ export const listenForNotifications = async () => {
   subscribePersistent({
     relays,
     filters,
-    onEvent: (e: Event) => {
-      if (kinds.includes(e.kind) && !isEventMuted(mutes.get(), e)) {
-        events.key(e.id).set(e)
-      }
-    },
+    onEvent: onNotificationEvent,
   })
 }

@@ -8,7 +8,7 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import type {Event} from "src/engine"
-  import {events, EventKind, projections} from "src/engine"
+  import {_events, EventKind, projections} from "src/engine"
 
   const encryptedKinds = [EventKind.Nip04Message, EventKind.GiftWrap]
 
@@ -41,7 +41,7 @@
           projections.push(event)
 
           if (!encryptedKinds.includes(event.kind)) {
-            events.key(event.id).set(event)
+            _events.key(event.id).set(event)
           }
         }
 

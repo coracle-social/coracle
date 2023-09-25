@@ -4,7 +4,7 @@ import {updateRecord} from "src/engine/core/commands"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
 import {EventKind} from "src/engine/events/model"
-import {lists} from "./state"
+import {_lists} from "./state"
 
 projections.addHandler(EventKind.BookmarkList, (e: Event) => {
   const name = Tags.from(e).getMeta("d")
@@ -14,7 +14,7 @@ projections.addHandler(EventKind.BookmarkList, (e: Event) => {
     kind: e.kind,
   })
 
-  lists.key(naddr).update($list => ({
+  _lists.key(naddr).update($list => ({
     ...updateRecord($list, e.created_at, {tags: e.tags}),
     pubkey: e.pubkey,
     name,

@@ -3,16 +3,18 @@ import {projections} from "src/engine/core/projections"
 import {sessions} from "src/engine/session/state"
 import {nip59} from "src/engine/session/derived"
 import {EventKind} from "./model"
-import {deletes} from "./state"
+import {deletes, deletesLastUpdated} from "./state"
 
 projections.addHandler(EventKind.Delete, e => {
-  Tags.from(e)
-    .type(["a", "e"])
-    .values()
-    .all()
-    .forEach(value => {
-      deletes.key(value).set({value, created_at: e.created_at})
-    })
+  const values = Tags.from(e).type(["a", "e"]).values().all()
+
+  deletesLastUpdated.update(ts => Math.max(ts, e.created_at))
+
+  deletes.update($deletes => {
+    values.forEach(v => $deletes.add(v))
+
+    return $deletes
+  })
 })
 
 projections.addHandler(EventKind.GiftWrap, e => {
