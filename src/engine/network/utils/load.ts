@@ -23,14 +23,13 @@ export type LoadItem = {
 const queue = []
 
 export const execute = () => {
-  if (queue.length === 0) {
+  const filters = combineFilters(queue.flatMap(item => item.request.filters))
+
+  if (filters.length === 0) {
     return
   }
 
-  info(
-    `Loading ${queue.length} grouped requests`,
-    combineFilters(queue.flatMap(item => item.request.filters))
-  )
+  info(`Loading ${queue.length} grouped requests`, filters)
 
   const itemsByRelay = {}
   for (const item of queue.splice(0)) {

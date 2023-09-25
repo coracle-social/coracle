@@ -1,9 +1,7 @@
-import {nth, find, last} from "ramda"
+import {nth, last} from "ramda"
 import {ellipsize} from "hurdak"
 import {nip19} from "nostr-tools"
 import {fuzzy} from "src/util/misc"
-import {findReplyAndRootIds} from 'src/util/nostr'
-import type {Event} from "src/engine/events/model"
 import type {Person, Handle} from "./model"
 import {people} from "./state"
 
@@ -66,10 +64,4 @@ export const getNetwork = $person => {
   }
 
   return network
-}
-
-export const isEventMuted = ($mutes, e: Event) => {
-  const {reply, root} = findReplyAndRootIds(e)
-
-  return Boolean(find(t => $mutes.has(t), [e.id, e.pubkey, reply, root]))
 }

@@ -1,10 +1,8 @@
 import {prop, max, sortBy} from "ramda"
 import {Tags, reactionKinds, findReplyId, findReplyAndRootIds} from "src/util/nostr"
 import {formatTimestampAsLocalISODate, tryJson} from "src/util/misc"
-import {events} from "src/engine/events/derived"
+import {events, isEventMuted} from "src/engine/events/derived"
 import {derived} from "src/engine/core/utils"
-import {isEventMuted} from "src/engine/people/utils"
-import {mutes} from "src/engine/people/derived"
 import {session} from "src/engine/session/derived"
 import {userEvents} from "src/engine/events/derived"
 import {notificationsLastChecked} from "./state"
@@ -16,10 +14,12 @@ export const notifications = derived(
       return []
     }
 
+    const $isEventMuted = isEventMuted.get()
+
     return $events.filter(e => {
       const {root, reply} = findReplyAndRootIds(e)
 
-      if (e.pubkey === $session.pubkey || isEventMuted(mutes.get(), e)) {
+      if (e.pubkey === $session.pubkey || $isEventMuted(e)) {
         return false
       }
 

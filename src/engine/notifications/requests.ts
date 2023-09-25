@@ -7,18 +7,16 @@ import type {Filter} from "src/engine/network/model"
 import {EventKind} from "src/engine/events/model"
 import {env, sessions} from "src/engine/session/state"
 import {_events} from "src/engine/events/state"
-import {events} from "src/engine/events/derived"
-import {isEventMuted} from "src/engine/people/utils"
+import {events, isEventMuted} from "src/engine/events/derived"
 import {mergeHints, getPubkeyHints} from "src/engine/relays/utils"
 import {subscribe, subscribePersistent} from "src/engine/network/utils"
-import {mutes} from "src/engine/people/derived"
 import {nip28ChannelsForUser} from "src/engine/channels/derived"
 import {notificationsLastChecked} from "./state"
 
 const onNotificationEvent = batch(300, (chunk: Event[]) => {
-  const $mutes = mutes.get()
   const kinds = getNotificationKinds()
-  const events = chunk.filter(e => kinds.includes(e.kind) && !isEventMuted($mutes, e))
+  const $isEventMuted = isEventMuted.get()
+  const events = chunk.filter(e => kinds.includes(e.kind) && !$isEventMuted(e))
 
   _events.mapStore.update($m => {
     for (const e of events) {

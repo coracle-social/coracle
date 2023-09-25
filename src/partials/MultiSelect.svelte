@@ -18,6 +18,10 @@
 
   $: suggestions?.setData(term ? search(term).slice(0, 10) : [])
 
+  const create = term => {
+    select(termToItem(term))
+  }
+
   const remove = item => {
     value = reject(equals(item), value)
   }
@@ -30,7 +34,7 @@
   const onKeyDown = event => {
     if (term && termToItem && delimiters.includes(event.key)) {
       event.preventDefault()
-      select(termToItem(term))
+      create(term)
     }
 
     if (event.key === "Escape") {
@@ -44,7 +48,7 @@
       if (suggestions.get()) {
         select(suggestions.get())
       } else if (term && termToItem) {
-        select(termToItem(term))
+        create(term)
       }
     }
 
@@ -91,7 +95,12 @@
 {#if search}
   <div class="relative w-full">
     <div class="absolute z-10 w-full">
-      <Suggestions bind:this={suggestions} {select} {getKey}>
+      <Suggestions
+        bind:this={suggestions}
+        create={termToItem ? create : null}
+        {select}
+        {term}
+        {getKey}>
         <div slot="item" let:item>
           <slot name="item" context="option" {item}>
             {item}

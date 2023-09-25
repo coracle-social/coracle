@@ -1,4 +1,5 @@
 import {
+  reject,
   partition,
   find,
   propEq,
@@ -16,6 +17,7 @@ import {now, race, pushToKey} from "src/util/misc"
 import {findReplyId, noteKinds} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
+import {isEventMuted} from "src/engine/events/derived"
 import {writable} from "src/engine/core/utils"
 import type {Filter} from "../model"
 import {getIdFilters} from "./filters"
@@ -54,8 +56,10 @@ export class FeedLoader {
           relays: urls,
           filters: opts.filters.map(assoc("since", this.since)),
           onEvent: batch(1000, (events: Event[]) => {
+            const $isEventMuted = isEventMuted.get()
+
             this.loadParents(events)
-            this.buffer.update($buffer => $buffer.concat(events))
+            this.buffer.update($buffer => $buffer.concat(reject($isEventMuted, events)))
           }),
         }),
       ])
@@ -77,7 +81,8 @@ export class FeedLoader {
   }
 
   loadParents = notes => {
-    const parentIds = notes.map(findReplyId).filter(identity)
+    const $isEventMuted = isEventMuted.get()
+    const parentIds = reject($isEventMuted, notes).map(findReplyId).filter(identity)
 
     load({
       relays: this.opts.relays,
@@ -162,7 +167,11 @@ export class FeedLoader {
   }
 
   addToFeed = (notes: Event[]) => {
-    this.notes.update($notes => uniqBy(prop("id"), $notes.concat(this.buildFeedChunk(notes))))
+    const $isEventMuted = isEventMuted.get()
+
+    this.notes.update($notes =>
+      uniqBy(prop("id"), $notes.concat(this.buildFeedChunk(reject($isEventMuted, notes))))
+    )
   }
 
   subscribe = f => this.notes.subscribe(f)

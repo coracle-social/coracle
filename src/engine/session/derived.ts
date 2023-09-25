@@ -1,15 +1,13 @@
 import {derived} from "src/engine/core/utils"
 import {people} from "src/engine/people/state"
 import {sessions, pubkey} from "./state"
-import {getNdk, Signer, Nip04, Nip44, Nip59} from "./utils"
+import {getSettings, getNdk, Signer, Nip04, Nip44, Nip59} from "./utils"
 
 export const stateKey = pubkey.derived($pk => $pk || "anonymous")
 
 export const session = derived([pubkey, sessions], ([$pk, $sessions]) => $sessions[$pk])
 
 export const user = derived([session, people.mapStore], ([$s, $p]) => $p.get($s?.pubkey))
-
-export const canUseGiftWrap = session.derived($session => $session?.method === "privkey")
 
 export const ndk = session.derived(getNdk)
 
@@ -25,3 +23,7 @@ export const nip59 = derived(
 )
 
 export const canSign = signer.derived($signer => $signer.canSign())
+
+export const canUseGiftWrap = session.derived($session => $session?.method === "privkey")
+
+export const settings = user.derived(getSettings)

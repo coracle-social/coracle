@@ -8,7 +8,6 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {
     load,
-    mutes,
     loadPubkeys,
     displayPubkey,
     isEventMuted,
@@ -45,7 +44,7 @@
     ] as Filter[],
     onEvent: event => {
       loading = false
-      muted = isEventMuted($mutes, event)
+      muted = $isEventMuted(event)
       quote = event
 
       loadPubkeys([quote.pubkey])

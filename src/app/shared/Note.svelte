@@ -17,7 +17,6 @@
   import {
     env,
     load,
-    mutes,
     processZap,
     deriveMuted,
     derivePerson,
@@ -138,7 +137,7 @@
     const onEvent = e => {
       switcherFn(e.kind.toString(), {
         "1": () => {
-          if (!isEventMuted($mutes, e)) {
+          if (!$isEventMuted(e)) {
             if (findReplyId(e) === event.id) {
               replies = sortBy((e: Event) => -e.created_at, uniqBy(prop("id"), replies.concat(e)))
             }

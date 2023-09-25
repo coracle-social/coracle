@@ -40,7 +40,6 @@ We will then take care of the issue as soon as possible.
 
 ### Reporting Bugs
 
-
 #### Before Submitting a Bug Report
 
 A good bug report shouldn't leave others needing to chase you up for more information. Therefore, we ask you to investigate carefully, collect information and describe the issue in detail in your report.
@@ -79,6 +78,7 @@ Enhancement suggestions are tracked as [GitHub issues](/issues).
 We welcome pull requests. To ensure your pull request is accepted, please follow the guidelines below:
 
 - Base your pull request on an issue that has already been discussed and acknowledged as a problem or desirable enhancement. (ROADMAP.md)[ROADMAP.md] also contains several tasks that have not been put into issues yet.
+- Set your pull request up to merge into the `dev` branch of the upstream repo.
 - Make sure your pull request passes all checks and follows code style. You can autoformat, lint, and check types using the scripts in package.json. More broadly, code style is generally procedural, with some functional paradigms, using objects mostly as singletons with an initialization step. Try to use (but not over-use) svelte stores, ramda, and hurdak when possible.
 
 #### Development and Deployment

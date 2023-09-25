@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {pluck, identity} from "ramda"
   import {fly} from "src/util/transition"
   import {toast, appName} from "src/partials/state"
   import Field from "src/partials/Field.svelte"
@@ -6,11 +7,14 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import MultiSelect from "src/partials/MultiSelect.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {env, getSettings, publishSettings} from "src/engine"
+  import {env, getSettings, publishSettings, searchTopics} from "src/engine"
 
   let values = getSettings()
+
+  const searchWords = q => pluck("name", $searchTopics(q))
 
   const submit = () => {
     publishSettings(values)
@@ -40,6 +44,10 @@
           If enabled, content flagged by the author as potentially sensitive will be hidden.
         </p>
       </FieldInline>
+      <Field label="Mute words and topics">
+        <MultiSelect bind:value={values.muted_words} search={searchWords} termToItem={identity} />
+        <p slot="info">Notes containing these words will be hidden by default.</p>
+      </Field>
       <Field label="Default zap amount">
         <Input bind:value={values.default_zap} />
         <p slot="info">The default amount of sats to use when sending a lightning tip.</p>

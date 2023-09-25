@@ -19,6 +19,7 @@
 - [x] Add database import/export
 - [x] Use a bloom filter for deletes
 - [x] Remember reply drafts
+- [x] Topic/keyword mutes
 
 # 0.3.6
 
