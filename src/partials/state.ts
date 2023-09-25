@@ -67,9 +67,11 @@ export const modal = {
     modal.stack.update($stack => modal.sync(reject(whereEq({id}), $stack)))
   },
   push(data: {type: string; [k: string]: any}) {
+    data.prevDocTitle = document.title
     modal.stack.update($stack => modal.sync($stack.concat(data)))
   },
   pop() {
+    document.title = this.getCurrent().prevDocTitle
     modal.stack.update($stack => modal.sync($stack.slice(0, -1)))
   },
   replace(data: {type: string; [k: string]: any}) {
