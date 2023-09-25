@@ -20,6 +20,7 @@
 - [x] Use a bloom filter for deletes
 - [x] Remember reply drafts
 - [x] Topic/keyword mutes
+- [x] Improve quote loading
 
 # 0.3.6
 

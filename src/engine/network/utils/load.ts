@@ -29,7 +29,7 @@ export const execute = () => {
     return
   }
 
-  info(`Loading ${queue.length} grouped requests`, filters)
+  const nRequests = queue.length
 
   const itemsByRelay = {}
   for (const item of queue.splice(0)) {
@@ -37,6 +37,8 @@ export const execute = () => {
       pushToKey(itemsByRelay, url, item)
     }
   }
+
+  info(`Loading ${nRequests} grouped requests`, filters)
 
   const tracker = new Tracker()
 
@@ -80,6 +82,10 @@ export const execute = () => {
 }
 
 export const load = (request: LoadOpts) => {
+  if (request.filters.length === 0) {
+    return Promise.resolve([])
+  }
+
   const result = defer()
 
   if (queue.length === 0) {

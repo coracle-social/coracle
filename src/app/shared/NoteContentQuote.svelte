@@ -11,8 +11,9 @@
     loadPubkeys,
     displayPubkey,
     isEventMuted,
-    getEventHints,
+    getParentHints,
     isShareableRelay,
+    getUserRelayUrls,
     mergeHints,
   } from "src/engine"
 
@@ -26,13 +27,15 @@
   const openPerson = pubkey => modal.push({type: "person/detail", pubkey})
 
   const {id, identifier, kind, pubkey} = value
+  const relays = mergeHints([
+    // Agora social has a bug
+    (value.relays || []).flatMap(r => r.split(",")).filter(isShareableRelay),
+    getUserRelayUrls("read"),
+    getParentHints(note),
+  ])
 
   load({
-    relays: mergeHints([
-      // Agora social has a bug
-      (value.relays || []).flatMap(r => r.split(",")).filter(isShareableRelay),
-      getEventHints(note),
-    ]),
+    relays,
     filters: [
       id
         ? {ids: [id]}
@@ -56,7 +59,7 @@
 
     // stopPropagation wasn't working for some reason
     if (noteId && e.target.textContent !== "Show") {
-      modal.push({type: "note/detail", note: {id: noteId}})
+      modal.push({type: "note/detail", note: quote || {id: noteId}, relays})
     }
   }
 

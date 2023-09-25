@@ -130,7 +130,8 @@ export const findRoot = (e: Event) => prop("root", findReplyAndRoot(e))
 
 export const findRootId = (e: Event) => findRoot(e)?.[1]
 
-export const isLike = (content: string) => ["", "+", "🤙", "👍", "❤️", "😎", "🏅"].includes(content)
+export const isLike = (content: string) =>
+  ["", "+", "🤙", "👍", "❤️", "😎", "🏅", "🫂"].includes(content)
 
 export const channelAttrs = ["name", "about", "picture"]
 
