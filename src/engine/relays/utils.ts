@@ -43,8 +43,11 @@ export const displayRelay = ({url}: Relay) => last(url.split("://"))
 
 export const getRelaySearch = $relays => fuzzy($relays, {keys: ["url", "name", "description"]})
 
-export const getSearchableRelays = $relays => {
-  const urls = pluck('url', $relays.filter(r => (r.info?.supported_nips || []).includes(50)))
+export const getSearchableRelays = ($relays: Relay[]) => {
+  const urls = pluck(
+    "url",
+    $relays.filter(r => (r.info?.supported_nips || []).includes(50))
+  )
 
   return uniq(env.get().SEARCH_RELAYS.concat(urls)).slice(0, 8) as string[]
 }
