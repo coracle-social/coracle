@@ -37,6 +37,14 @@ export class IndexedDB {
         // @ts-ignore
         this.db = e.target.result
 
+        const names = pluck("name", this.stores)
+
+        Array.from(this.db.objectStoreNames).forEach((name: string) => {
+          if (!names.includes(name)) {
+            this.db.deleteObjectStore(name)
+          }
+        })
+
         this.stores.forEach(o => {
           try {
             this.db.createObjectStore(o.name, o.opts)
@@ -53,7 +61,12 @@ export class IndexedDB {
   }
 
   delete() {
-    window.indexedDB.deleteDatabase(this.dbName)
+    return new Promise<void>((resolve, reject) => {
+      const request = window.indexedDB.deleteDatabase(this.dbName)
+
+      request.onerror = e => reject()
+      request.onsuccess = e => resolve()
+    })
   }
 
   getAll(storeName): Promise<any[]> {

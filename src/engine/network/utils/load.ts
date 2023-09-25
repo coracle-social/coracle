@@ -7,7 +7,7 @@ import type {Event} from "src/engine/events/model"
 import {mergeHints} from "src/engine/relays/utils"
 import type {Filter} from "../model"
 import {matchFilters, combineFilters} from "./filters"
-import {subscribe} from "./subscribe"
+import {Subscription} from "./subscribe"
 import {Tracker} from "./tracker"
 
 export type LoadOpts = {
@@ -26,31 +26,34 @@ export type LoadItem = {
 const queue = []
 
 const loadChunk = (chunk, relays, eventWasSeen = always(false)) => {
-  const sub = subscribe({
+  const sub = new Subscription({
     relays,
     timeout: 15000,
     filters: combineFilters(chunk.flatMap(getPath(["request", "filters"]))),
-    onEvent: e => {
-      if (eventWasSeen(e)) {
-        return
-      }
+  })
 
-      for (const {request} of chunk) {
-        if (request.onEvent && matchFilters(request.filters, e)) {
-          request.onEvent(e)
-        }
+  sub.on("event", e => {
+    if (eventWasSeen(e)) {
+      return
+    }
+
+    for (const {request} of chunk) {
+      if (request.onEvent && matchFilters(request.filters, e)) {
+        request.onEvent(e)
       }
-    },
-    onEose: url => {
-      for (const {request} of chunk) {
-        request.onEose?.(url)
-      }
-    },
-    onClose: events => {
-      for (const {request} of chunk) {
-        request.onClose?.(events)
-      }
-    },
+    }
+  })
+
+  sub.on("eose", url => {
+    for (const {request} of chunk) {
+      request.onEose?.(url)
+    }
+  })
+
+  sub.on("close", events => {
+    for (const {request} of chunk) {
+      request.onClose?.(events)
+    }
   })
 
   sub.result.then(events => {
