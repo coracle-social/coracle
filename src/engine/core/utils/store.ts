@@ -102,7 +102,8 @@ export class Derived<T> implements Readable<T> {
   }
 
   get = (): T => {
-    if (this.latestValue === undefined) {
+    // Recalculate if we're not subscribed, because we won't get notified when deps change
+    if (this.latestValue === undefined || this.mySubs.length === 0) {
       this.latestValue = this.getValue(this.getInput())
     }
 
