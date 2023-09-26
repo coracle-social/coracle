@@ -18,7 +18,7 @@
     <Media link={annotateMedia(value.url)} onClose={close} />
   </div>
 {:else}
-  <Anchor class="underline" external href={value.url}>
+  <Anchor stopPropagation class="underline" external href={value.url}>
     {displayUrl(value.url)}
   </Anchor>
 {/if}
