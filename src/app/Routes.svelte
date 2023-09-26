@@ -21,6 +21,7 @@
   import RelayDetail from "src/app/views/RelayDetail.svelte"
   import RelayList from "src/app/views/RelayList.svelte"
   import UserProfile from "src/app/views/UserProfile.svelte"
+  import UserContent from "src/app/views/UserContent.svelte"
   import UserSettings from "src/app/views/UserSettings.svelte"
   import UserData from "src/app/views/UserData.svelte"
   import {storage} from "src/engine"
@@ -83,6 +84,7 @@
       {/key}
     </TypedRoute>
     <TypedRoute path="/profile" component={UserProfile} />
+    <TypedRoute path="/content" component={UserContent} />
     <TypedRoute path="/settings" component={UserSettings} />
     <TypedRoute path="/database" component={UserData} />
     <TypedRoute path="/logout" component={Logout} />

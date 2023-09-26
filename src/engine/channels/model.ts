@@ -14,6 +14,9 @@ export type Channel = {
     about?: string
     picture?: string
   }
+  nip04?: {
+    plaintext: string
+  }
   nip28?: {
     owner?: string
     joined?: string

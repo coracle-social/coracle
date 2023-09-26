@@ -1,23 +1,18 @@
 <script lang="ts">
-  import {pluck, identity} from "ramda"
   import {fly} from "src/util/transition"
   import {toast, appName} from "src/partials/state"
   import Field from "src/partials/Field.svelte"
-  import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import MultiSelect from "src/partials/MultiSelect.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {env, getSettings, publishSettings, searchTopics} from "src/engine"
+  import {env, getSettings, publishSettings} from "src/engine"
 
-  let values = getSettings()
-
-  const searchWords = q => pluck("name", $searchTopics(q))
+  let settings = getSettings()
 
   const submit = () => {
-    publishSettings(values)
+    publishSettings(settings)
 
     toast.show("info", "Your settings have been saved!")
   }
@@ -32,39 +27,23 @@
       <p>Make {appName} work the way you want it to.</p>
     </div>
     <div class="flex w-full flex-col gap-8">
-      <FieldInline label="Show images and link previews">
-        <Toggle bind:value={values.show_media} />
-        <p slot="info">
-          If enabled, {appName} will automatically retrieve a link preview for the last link in any note.
-        </p>
-      </FieldInline>
-      <FieldInline label="Hide sensitive content">
-        <Toggle bind:value={values.hide_sensitive} />
-        <p slot="info">
-          If enabled, content flagged by the author as potentially sensitive will be hidden.
-        </p>
-      </FieldInline>
-      <Field label="Mute words and topics">
-        <MultiSelect bind:value={values.muted_words} search={searchWords} termToItem={identity} />
-        <p slot="info">Notes containing these words will be hidden by default.</p>
-      </Field>
       <Field label="Default zap amount">
-        <Input bind:value={values.default_zap} />
+        <Input bind:value={settings.default_zap} />
         <p slot="info">The default amount of sats to use when sending a lightning tip.</p>
       </Field>
       <Field>
         <div slot="label" class="flex justify-between">
           <strong>Max relays per request</strong>
-          <div>{values.relay_limit} relays</div>
+          <div>{settings.relay_limit} relays</div>
         </div>
-        <Input type="range" bind:value={values.relay_limit} min={1} max={50} />
+        <Input type="range" bind:value={settings.relay_limit} min={1} max={50} />
         <p slot="info">
           This controls how many relays to max out at when loading feeds and event context. More is
           faster, but will require more bandwidth and processing power.
         </p>
       </Field>
       <Field label="Dufflepud URL">
-        <Input bind:value={values.dufflepud_url}>
+        <Input bind:value={settings.dufflepud_url}>
           <i slot="before" class="fa-solid fa-server" />
         </Input>
         <p slot="info">
@@ -75,7 +54,7 @@
         </p>
       </Field>
       <Field label="Imgproxy URL">
-        <Input bind:value={values.imgproxy_url}>
+        <Input bind:value={settings.imgproxy_url}>
           <i slot="before" class="fa-solid fa-image" />
         </Input>
         <p slot="info">
@@ -85,7 +64,7 @@
       </Field>
       {#if $env.FORCE_RELAYS.length === 0}
         <Field label="Multiplextr URL">
-          <Input bind:value={values.multiplextr_url}>
+          <Input bind:value={settings.multiplextr_url}>
             <i slot="before" class="fa-solid fa-code-merge" />
           </Input>
           <p slot="info">
@@ -98,7 +77,7 @@
         </Field>
       {/if}
       <Field label="Report errors and analytics">
-        <Toggle bind:value={values.report_analytics} />
+        <Toggle bind:value={settings.report_analytics} />
         <p slot="info">
           Keep this enabled if you would like developers to be able to know what features are used,
           and to diagnose and fix bugs.

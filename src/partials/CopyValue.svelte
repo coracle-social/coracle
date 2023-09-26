@@ -32,9 +32,11 @@
       </Popover>
     {/if}
   </div>
-  <div class="flex min-w-0 items-center gap-4 font-mono text-sm">
-    <i class="fa-solid fa-copy cursor-pointer" on:click={copy} />
-    <i class="fa-solid fa-qrcode cursor-pointer" on:click={share} />
+  <div class="flex min-w-0 gap-4 font-mono text-sm">
+    <div class="flex gap-4 p-1">
+      <i class="fa-solid fa-copy cursor-pointer" on:click={copy} />
+      <i class="fa-solid fa-qrcode cursor-pointer" on:click={share} />
+    </div>
     <p class="min-w-0 overflow-hidden text-ellipsis">
       {displayValue}
     </p>

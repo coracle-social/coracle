@@ -156,7 +156,7 @@ projections.addHandler(EventKind.Nip04Message, async e => {
 
   await tryFunc(async () => {
     const other = session.pubkey === e.pubkey ? recipient : e.pubkey
-    const content = await nip04.decryptAsUser(e.content, other)
+    const plaintext = await nip04.decryptAsUser(e.content, other)
 
     channels.key(other).update($channel => {
       const updates = {
@@ -164,7 +164,7 @@ projections.addHandler(EventKind.Nip04Message, async e => {
         id: e.pubkey,
         type: "nip04",
         relays: uniq([...relays, ...($channel?.relays || [])]),
-        messages: uniqBy(prop("id"), [{...e, content}, ...($channel?.messages || [])]),
+        messages: uniqBy(prop("id"), [{...e, nip04: {plaintext}}, ...($channel?.messages || [])]),
       }
 
       if (e.pubkey === session.pubkey) {

@@ -1,7 +1,19 @@
 import {nip19} from "nostr-tools"
-import {find, omit, is, fromPairs, mergeLeft, last, identity, prop, flatten, uniq} from "ramda"
+import {
+  find,
+  complement,
+  pick,
+  is,
+  fromPairs,
+  mergeLeft,
+  last,
+  identity,
+  prop,
+  flatten,
+  uniq,
+} from "ramda"
 import {ensurePlural, between, mapVals, avg, first} from "hurdak"
-import type {Filter, Event, DisplayEvent} from "src/engine"
+import type {Filter, Event} from "src/engine"
 import {isShareableRelay} from "src/engine"
 import {tryJson} from "src/util/misc"
 
@@ -85,10 +97,11 @@ export class Tags {
   any(f: (t: any) => boolean) {
     return this.filter(f).exists()
   }
-  type(type: string | string[]) {
+  type(type: string | string[], {reject = false} = {}) {
     const types = ensurePlural(type)
+    const pred = t => types.includes(t[0])
 
-    return new Tags(this.tags.filter(t => types.includes(t[0])))
+    return new Tags(this.tags.filter(reject ? complement(pred) : pred))
   }
   equals(value: string) {
     return new Tags(this.tags.filter(t => t[1] === value))
@@ -135,9 +148,8 @@ export const isLike = (content: string) =>
 
 export const channelAttrs = ["name", "about", "picture"]
 
-export const asDisplayEvent = (event: Event): DisplayEvent => ({replies: [], ...event})
-
-export const fromDisplayEvent = e => omit(["replies"], e) as Event
+export const asNostrEvent = e =>
+  pick(["content", "created_at", "id", "kind", "pubkey", "sig", "tags"], e) as Event
 
 export const toHex = (data: string): string | null => {
   if (data.match(/[a-zA-Z0-9]{64}/)) {

@@ -60,7 +60,7 @@
         <NoteContentLink {value} showMedia={showMedia && isStartOrEnd(i)} />
       {:else if type.match(/^nostr:np(rofile|ub)$/)}
         <NoteContentPerson {value} />
-      {:else if type.startsWith("nostr:") && showMedia && isStartOrEnd(i) && value.id !== anchorId}
+      {:else if type.startsWith("nostr:") && isStartOrEnd(i) && value.id !== anchorId}
         <NoteContentQuote {note} {value}>
           <div slot="note-content" let:quote>
             <slot name="note-content" {quote} />

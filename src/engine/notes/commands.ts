@@ -1,4 +1,4 @@
-import {fromDisplayEvent} from "src/util/nostr"
+import {asNostrEvent} from "src/util/nostr"
 import {getPublishHints, getUserRelayUrls} from "src/engine/relays/utils"
 import {Publisher, publishEvent, getReplyTags} from "src/engine/network/utils"
 
@@ -9,7 +9,7 @@ export const publishReply = (parent, content, tags = []) => {
   const relays = getPublishHints(parent)
 
   // Re-broadcast the note we're replying to
-  Publisher.publish({relays, event: fromDisplayEvent(parent)})
+  Publisher.publish({relays, event: asNostrEvent(parent)})
 
   return publishEvent(1, {relays, content, tags: [...tags, ...getReplyTags(parent, true)]})
 }
@@ -24,7 +24,7 @@ export const publishReaction = (parent, content = "", tags = []) => {
   const relays = getPublishHints(parent)
 
   // Re-broadcast the note we're reacting to
-  Publisher.publish({relays, event: fromDisplayEvent(parent)})
+  Publisher.publish({relays, event: asNostrEvent(parent)})
 
   return publishEvent(7, {relays, content, tags: [...tags, ...getReplyTags(parent)]})
 }

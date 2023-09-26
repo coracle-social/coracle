@@ -4,7 +4,7 @@
   import {tweened} from "svelte/motion"
   import {find, pathEq, reject, identity, propEq, sum, pluck, sortBy} from "ramda"
   import {stringToHue, formatSats, hsl} from "src/util/misc"
-  import {fromDisplayEvent, getIdOrNaddr, toNostrURI} from "src/util/nostr"
+  import {asNostrEvent, getIdOrNaddr, toNostrURI} from "src/util/nostr"
   import {quantify} from "hurdak"
   import {modal, toast} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
@@ -76,7 +76,7 @@
 
   const broadcast = () => {
     const relays = getUserRelayUrls("write")
-    const event = fromDisplayEvent(note)
+    const event = asNostrEvent(note)
 
     Publisher.publish({event, relays})
 
@@ -242,6 +242,7 @@
       <h1 class="staatliches text-2xl">Details</h1>
       <CopyValue label="Link" value={toNostrURI(nevent)} />
       <CopyValue label="Event ID" encode={nip19.noteEncode} value={note.id} />
+      <CopyValue label="Event JSON" value={JSON.stringify(note)} />
     </Content>
   </Modal>
 {/if}

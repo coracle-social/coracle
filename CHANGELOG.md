@@ -20,6 +20,8 @@
 - [x] Use a bloom filter for deletes
 - [x] Remember reply drafts
 - [x] Topic/keyword mutes
+- [x] Add person mute list to settings
+- [x] Split out content settings into its own page
 - [x] Improve quote loading
 
 # 0.3.6

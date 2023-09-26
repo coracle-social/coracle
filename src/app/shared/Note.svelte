@@ -119,8 +119,6 @@
       })
     }
 
-    ;(window as any).NoteDetail = event
-
     const loadKinds = [7]
 
     if (ENABLE_ZAPS) {

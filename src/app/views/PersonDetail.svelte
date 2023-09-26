@@ -19,6 +19,7 @@
   import PersonStats from "src/app/shared/PersonStats.svelte"
   import {
     env,
+    mutes,
     derivePerson,
     displayPerson,
     loadPubkeys,
@@ -96,7 +97,9 @@
 
   <Tabs {tabs} {activeTab} {setActiveTab} />
 
-  {#if activeTab === "notes"}
+  {#if $mutes.has(pubkey)}
+    <Content size="lg" class="text-center">You have muted this person.</Content>
+  {:else if activeTab === "notes"}
     <PersonNotes {pubkey} relays={mergedRelays} />
   {:else if activeTab === "likes"}
     <PersonLikes {pubkey} relays={mergedRelays} />

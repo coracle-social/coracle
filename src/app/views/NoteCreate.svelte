@@ -5,7 +5,7 @@
   import {throttle} from "hurdak"
   import {writable} from "svelte/store"
   import {annotateMedia} from "src/util/misc"
-  import {fromDisplayEvent} from "src/util/nostr"
+  import {asNostrEvent} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
@@ -54,7 +54,7 @@
       // Re-broadcast the note we're quoting
       Publisher.publish({
         relays: $relays,
-        event: fromDisplayEvent(quote),
+        event: asNostrEvent(quote),
       })
     }
 

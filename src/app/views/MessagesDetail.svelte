@@ -77,9 +77,7 @@
         "rounded-bl-none bg-gray-7": message.pubkey !== $session.pubkey,
       })}>
       <div class="break-words">
-        {#if typeof message.content === "string"}
-          <NoteContent showEntire note={message} />
-        {/if}
+        <NoteContent showEntire note={{...message, content: message.nip04.plaintext}} />
       </div>
       <small
         class="mt-1"

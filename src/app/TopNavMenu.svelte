@@ -39,6 +39,11 @@
         {/if}
         <Anchor
           class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
+          href="/content">
+          <i class="fa fa-volume-xmark mr-2" /> Content
+        </Anchor>
+        <Anchor
+          class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
           href="/settings">
           <i class="fa fa-gear mr-2" /> Settings
         </Anchor>
