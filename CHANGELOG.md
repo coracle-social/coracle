@@ -25,6 +25,7 @@
 - [x] Improve quote loading
 - [x] Show quotes even when media previews are off
 - [x] Stop cursor events when menu is open
+- [x] Restore document title on back
 
 # 0.3.6
 
