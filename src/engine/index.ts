@@ -1,6 +1,4 @@
-import {ScalableBloomFilter} from "bloom-filters"
 import {prop, sortBy} from "ramda"
-import {tryFunc} from "hurdak"
 import {Storage, LocalStorageAdapter, IndexedDBAdapter, sortByPubkeyWhitelist} from "./core"
 import {_lists} from "./lists"
 import {people} from "./people"
@@ -36,11 +34,11 @@ export * from "./zaps"
 export const storage = new Storage([
   new LocalStorageAdapter("pubkey", pubkey),
   new LocalStorageAdapter("sessions", sessions),
-  new LocalStorageAdapter("deletes", deletes, {
-    dump: f => f.saveAsJSON(),
-    load: d => tryFunc(() => ScalableBloomFilter.fromJSON(d)) || new ScalableBloomFilter(),
+  new LocalStorageAdapter("deletes2", deletes, {
+    dump: s => Array.from(s),
+    load: a => new Set(a || []),
   }),
-  new LocalStorageAdapter("deletesLastUpdated", deletesLastUpdated),
+  new LocalStorageAdapter("deletesLastUpdated2", deletesLastUpdated),
   new LocalStorageAdapter("notificationsLastChecked", notificationsLastChecked),
   new LocalStorageAdapter("nip04ChannelsLastChecked", nip04ChannelsLastChecked),
   new LocalStorageAdapter("nip24ChannelsLastChecked", nip24ChannelsLastChecked),

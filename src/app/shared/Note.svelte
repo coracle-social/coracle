@@ -18,7 +18,6 @@
     env,
     load,
     processZap,
-    deriveMuted,
     derivePerson,
     getReplyHints,
     isEventMuted,
@@ -46,6 +45,7 @@
   let event = note
   let reply = null
   let replyIsActive = false
+  let showMuted = false
   let actions = null
   let collapsed = false
   let replies = sortBy(
@@ -59,7 +59,6 @@
   const borderColor = invertColors ? "gray-6" : "gray-7"
   const showEntire = anchorId === event.id
   const interactive = !anchorId || !showEntire
-  const muted = deriveMuted(event.id)
 
   let interval, border, childrenContainer, noteContainer
 
@@ -100,6 +99,8 @@
       }
     }
   }
+
+  $: muted = !showMuted && $isEventMuted(event)
 
   // Show only notes that were passed in by the parent unless we want to show all
   $: visibleNotes = ((showContext ? replies : note.replies) || []).filter(
@@ -219,20 +220,25 @@
                 </small>
               {/if}
             </div>
-            {#if $muted}
+            {#if muted}
               <p class="border-l-2 border-solid border-gray-6 pl-4 text-gray-1">
                 You have muted this note.
+                <Anchor
+                  theme="anchor"
+                  on:click={() => {
+                    showMuted = true
+                  }}>Show</Anchor>
               </p>
             {:else}
               <NoteContent {anchorId} note={event} {showEntire} />
             {/if}
             <NoteActions
               note={event}
-              muted={$muted}
               bind:this={actions}
               bind:replies
               bind:likes
               bind:zaps
+              {muted}
               {reply}
               {setFeedRelay}
               {showEntire} />
@@ -241,7 +247,7 @@
       </Card>
     </div>
 
-    {#if !replyIsActive && visibleNotes.length > 0 && !showEntire && depth > 0 && !$muted}
+    {#if !replyIsActive && visibleNotes.length > 0 && !showEntire && depth > 0 && !muted}
       <div class="relative">
         <div
           class="absolute right-0 top-0 z-10 -mr-2 -mt-4 flex h-6 w-6 cursor-pointer items-center
@@ -276,7 +282,7 @@
       }}
       {borderColor} />
 
-    {#if !collapsed && visibleNotes.length > 0 && depth > 0 && !$muted}
+    {#if !collapsed && visibleNotes.length > 0 && depth > 0 && !muted}
       <div class="relative mt-4">
         <div class={`absolute w-px bg-${borderColor} z-10 -mt-4 ml-4 h-0`} bind:this={border} />
         <div class="note-children relative ml-8 flex flex-col gap-4" bind:this={childrenContainer}>

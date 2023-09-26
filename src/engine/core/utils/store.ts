@@ -270,14 +270,24 @@ export class Collection<T extends R> implements Readable<T[]> {
   map = (f: (v: T) => T) => this.update(map(f))
 }
 
-export class DerivedCollection<T extends R> extends Derived<T[]> {
+export class DerivedCollection<T extends R> implements Readable<T[]> {
+  readonly listStore: Derived<T[]>
   readonly mapStore: Readable<M<T>>
 
   constructor(readonly pk: string, stores: Derivable, getValue: (values: any) => T[], t = 0) {
-    super(stores, getValue, t)
-
-    this.mapStore = new Derived(this, xs => new Map(xs.map(x => [x[pk], x])), t)
+    this.listStore = new Derived(stores, getValue, t)
+    this.mapStore = new Derived(this.listStore, xs => new Map(xs.map(x => [x[pk], x])))
   }
+
+  get = () => this.listStore.get()
+
+  getMap = () => this.mapStore.get()
+
+  subscribe = (f: Subscriber<T[]>) => this.listStore.subscribe(f)
+
+  derived = <U>(f: (v: T[]) => U) => this.listStore.derived<U>(f)
+
+  throttle = (t: number) => this.listStore.throttle(t)
 
   key = (k: string) => new DerivedKey(this.mapStore, this.pk, k)
 }

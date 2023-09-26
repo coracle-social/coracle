@@ -44,7 +44,7 @@ export const hasNewNotifications = derived(
   }
 )
 
-export const groupNotifications = $notifications => {
+export const groupNotifications = ($notifications, kinds) => {
   const $userEvents = userEvents.mapStore.get()
 
   // Convert zaps to zap requests
@@ -62,6 +62,10 @@ export const groupNotifications = $notifications => {
   for (const ix of $notifications) {
     const event = $userEvents.get(findReplyId(ix))
 
+    if (!kinds.includes(ix.kind)) {
+      continue
+    }
+
     if (reactionKinds.includes(ix.kind) && !event) {
       continue
     }
@@ -78,7 +82,7 @@ export const groupNotifications = $notifications => {
     Object.values(groups).map((group: any) => {
       const {event, interactions} = group
       const timestamp = interactions
-        .map(ix => ix.created_at)
+        .map(e => e.created_at)
         .concat(event?.created_at || 0)
         .reduce(max, 0)
 

@@ -11,9 +11,9 @@ export const events = new DerivedCollection<Event>("id", [_events, deletes], ([$
   $e.filter(e => !$d.has(e.id))
 )
 
-export const userEvents = new DerivedCollection<Event>("id", [events, pubkey], ([$e, $pk]) =>
-  $pk ? $e.filter(whereEq({pubkey: $pk})) : []
-)
+export const userEvents = new DerivedCollection<Event>("id", [events, pubkey], ([$e, $pk]) => {
+  return $pk ? $e.filter(whereEq({pubkey: $pk})) : []
+})
 
 export const isEventMuted = derived([mutes, settings], ([$mutes, $settings]) => {
   const words = $settings.muted_words
@@ -27,7 +27,7 @@ export const isEventMuted = derived([mutes, settings], ([$mutes, $settings]) => 
       return true
     }
 
-    if (regex && e.content.toLowerCase().match(regex)) {
+    if (regex && e.content?.toLowerCase().match(regex)) {
       return true
     }
 

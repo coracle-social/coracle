@@ -37,7 +37,9 @@
 
   let limit = 20
 
-  $: groupedNotifications = groupNotifications($throttledNotifications).slice(0, limit)
+  $: tabKinds = activeTab === tabs[0] ? noteKinds : reactionKinds.concat(9734)
+
+  $: groupedNotifications = groupNotifications($throttledNotifications, tabKinds).slice(0, limit)
 
   $: tabNotifications =
     activeTab === tabs[0]
