@@ -85,10 +85,10 @@ export const execute = () => {
       }
     }
 
+    const tracker = new Tracker()
+
     // Group by relay, then by filter
     for (const [url, chunk] of Object.entries(itemsByRelay) as [string, LoadItem[]][]) {
-      const tracker = new Tracker()
-
       loadChunk(chunk, [url], e => tracker.add(e, url))
     }
   }

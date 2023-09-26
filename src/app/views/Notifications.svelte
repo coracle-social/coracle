@@ -53,15 +53,17 @@
   onMount(() => {
     loadNotifications()
 
-    notificationsLastChecked.set(now())
+    const unsub = throttledNotifications.subscribe(() => {
+      notificationsLastChecked.set(now())
+    })
 
     const scroller = createScroller(async () => {
       limit += 20
     })
 
     return () => {
+      unsub()
       scroller.stop()
-      notificationsLastChecked.set(now())
     }
   })
 </script>

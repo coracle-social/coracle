@@ -34,8 +34,14 @@ export const notifications = derived(
 
 export const hasNewNotifications = derived(
   [notificationsLastChecked, notifications],
-  ([$notificationsLastChecked, $notifications]) =>
-    $notifications.map(prop("created_at")).reduce(max, 0) > $notificationsLastChecked
+  ([$notificationsLastChecked, $notifications]) => {
+    const maxCreatedAt = $notifications
+      .filter(e => !reactionKinds.includes(e.kind))
+      .map(prop("created_at"))
+      .reduce(max, 0)
+
+    return maxCreatedAt > $notificationsLastChecked
+  }
 )
 
 export const groupNotifications = $notifications => {
