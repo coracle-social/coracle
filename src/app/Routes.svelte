@@ -24,6 +24,7 @@
   import UserContent from "src/app/views/UserContent.svelte"
   import UserSettings from "src/app/views/UserSettings.svelte"
   import UserData from "src/app/views/UserData.svelte"
+  import {menuIsOpen} from "src/app/state"
   import {storage} from "src/engine"
 
   const TypedRoute = Route as ComponentType<SvelteComponentTyped>
@@ -36,7 +37,7 @@
 </script>
 
 {#if ready}
-  <div class="pt-16 text-gray-2 lg:ml-48">
+  <div class="pt-16 text-gray-2 lg:ml-48" class:pointer-events-none={$menuIsOpen}>
     <TypedRoute path="/notifications" component={Notifications} />
     <TypedRoute path="/notifications/:activeTab" component={Notifications} />
     <TypedRoute path="/notes" component={Feeds} />

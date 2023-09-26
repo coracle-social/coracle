@@ -23,6 +23,8 @@
 - [x] Add person mute list to settings
 - [x] Split out content settings into its own page
 - [x] Improve quote loading
+- [x] Show quotes even when media previews are off
+- [x] Stop cursor events when menu is open
 
 # 0.3.6
 
