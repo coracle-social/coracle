@@ -59,7 +59,8 @@ export const groupNotifications = ($notifications, kinds) => {
 
   // Group notifications by event
   for (const ix of $notifications) {
-    const event = $userEvents.get(findReplyId(ix))
+    const parentId = findReplyId(ix)
+    const event = $userEvents.get(parentId)
 
     if (!kinds.includes(ix.kind)) {
       continue
@@ -70,7 +71,8 @@ export const groupNotifications = ($notifications, kinds) => {
     }
 
     // Group and sort by day/event so we can group clustered reactions to the same event
-    const key = formatTimestampAsLocalISODate(ix.created_at).slice(0, 13) + (event?.id || ix.id)
+    const key =
+      formatTimestampAsLocalISODate(ix.created_at).slice(0, 13) + (parentId || `self:${ix.id}`)
 
     groups[key] = groups[key] || {key, event, interactions: []}
     groups[key].interactions.push(convertZap(ix))

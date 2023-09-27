@@ -1,10 +1,14 @@
 <script lang="ts">
+  import {uniq, pluck} from "ramda"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
+  import type {Notification} from "src/engine"
 
-  export let pubkeys
+  export let notification: Notification
   export let actionText
+
+  const pubkeys = uniq(pluck("pubkey", notification.interactions))
 </script>
 
 {#if pubkeys.length === 1}

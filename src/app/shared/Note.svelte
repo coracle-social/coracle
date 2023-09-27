@@ -7,6 +7,7 @@
   import {formatTimestamp} from "src/util/misc"
   import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
+  import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
@@ -41,6 +42,7 @@
   export let showParent = true
   export let showContext = false
   export let invertColors = false
+  export let showLoading = false
 
   let event = note
   let reply = null
@@ -298,4 +300,6 @@
       </div>
     {/if}
   </div>
+{:else if showLoading}
+  <Spinner />
 {/if}

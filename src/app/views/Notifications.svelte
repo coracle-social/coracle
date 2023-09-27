@@ -30,7 +30,7 @@
 
   export let activeTab = tabs[0]
 
-  let limit = 20
+  let limit = 5
 
   $: tabKinds = activeTab === tabs[0] ? noteKinds : reactionKinds.concat(9734)
 
@@ -55,7 +55,7 @@
     })
 
     const scroller = createScroller(async () => {
-      limit += 20
+      limit += 5
     })
 
     return () => {
@@ -65,7 +65,7 @@
   })
 </script>
 
-<div in:fly={{y: 20}}>
+<div in:fly={{y: 20, delay: 500}}>
   <Content>
     <Tabs {tabs} {activeTab} {setActiveTab} />
     {#each tabNotifications as notification, i (notification.key)}

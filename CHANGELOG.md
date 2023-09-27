@@ -1,5 +1,17 @@
 # Changelog
 
+# 0.3.8
+
+- [x] Show more information on notifications page, particularly for mentions
+- [x] Fix message tabs and message sync tracking
+- [x] Remove nip28 chat
+- [x] Fix crash on apps page
+- [x] Segregate messages and sync timestamps by session for multiple accounts
+- [x] Group notifications by hour instead of day
+- [x] Don't mute the user's own notes
+- [x] Stop propagation when clicking links
+- [x] Fix out of date derived stores
+
 # 0.3.7
 
 - [x] Add ToS and Privacy Policy
