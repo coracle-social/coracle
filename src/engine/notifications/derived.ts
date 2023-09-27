@@ -71,7 +71,7 @@ export const groupNotifications = ($notifications, kinds) => {
     }
 
     // Group and sort by day/event so we can group clustered reactions to the same event
-    const key = formatTimestampAsLocalISODate(ix.created_at).slice(0, 11) + (event?.id || ix.id)
+    const key = formatTimestampAsLocalISODate(ix.created_at).slice(0, 13) + (event?.id || ix.id)
 
     groups[key] = groups[key] || {key, event, interactions: []}
     groups[key].interactions.push(convertZap(ix))
