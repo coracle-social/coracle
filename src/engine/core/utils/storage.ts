@@ -227,7 +227,7 @@ export class Storage {
   }
 
   clear = () => {
-    this.dead.set(true)
+    this.close()
 
     localStorage.clear()
 
