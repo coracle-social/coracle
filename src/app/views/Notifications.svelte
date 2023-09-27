@@ -51,7 +51,7 @@
     loadNotifications()
 
     const unsub = throttledNotifications.subscribe(() => {
-      sessions.update(assocPath([$pubkey, "notifications_last_checked"], now()))
+      sessions.update(assocPath([$pubkey, "notifications_last_synced"], now()))
     })
 
     const scroller = createScroller(async () => {

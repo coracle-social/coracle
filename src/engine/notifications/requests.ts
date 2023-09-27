@@ -9,12 +9,14 @@ import {env, sessions} from "src/engine/session/state"
 import {_events} from "src/engine/events/state"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {mergeHints, getPubkeyHints} from "src/engine/relays/utils"
-import {subscribe, subscribePersistent} from "src/engine/network/utils"
+import {loadPubkeys, subscribe, subscribePersistent} from "src/engine/network/utils"
 
 const onNotificationEvent = batch(300, (chunk: Event[]) => {
   const kinds = getNotificationKinds()
   const $isEventMuted = isEventMuted.get()
   const events = chunk.filter(e => kinds.includes(e.kind) && !$isEventMuted(e))
+
+  loadPubkeys(pluck("pubkey", events))
 
   _events.mapStore.update($m => {
     for (const e of events) {
@@ -33,7 +35,7 @@ export const loadNotifications = () => {
   const pubkeys = Object.keys(sessions.get())
   const cutoff = now() - seconds(30, "day")
   const $sessions = Object.values(sessions.get())
-  const lastChecked = pluck("notifications_last_checked", $sessions).filter(identity).reduce(max, 0)
+  const lastChecked = pluck("notifications_last_synced", $sessions).filter(identity).reduce(max, 0)
   const since = Math.max(cutoff, lastChecked - seconds(1, "day"))
 
   const eventIds = pluck(

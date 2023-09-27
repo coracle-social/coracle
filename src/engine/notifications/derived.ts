@@ -39,7 +39,7 @@ export const hasNewNotifications = derived(
       .map(prop("created_at"))
       .reduce(max, 0)
 
-    return maxCreatedAt > ($session.notifications_last_checked || 0)
+    return maxCreatedAt > ($session?.notifications_last_synced || 0)
   }
 )
 

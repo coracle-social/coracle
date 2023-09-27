@@ -21,11 +21,6 @@
 
   $: tabChannels = sortChannels(activeTab === "conversations" ? $accepted : $requests)
 
-  const getDisplay = tab => ({
-    title: toTitle(tab),
-    badge: (tab === "conversations" ? $accepted : $requests).length,
-  })
-
   loadAllNip04Messages()
 
   document.title = "Direct Messages"
@@ -33,7 +28,14 @@
 
 <Content>
   <div class="relative">
-    <Tabs tabs={["conversations", "requests"]} {activeTab} setActiveTab={navigate} {getDisplay} />
+    <Tabs tabs={["conversations", "requests"]} {activeTab} setActiveTab={navigate}>
+      <div slot="tab" let:tab class="flex gap-2">
+        <div>{toTitle(tab)}</div>
+        <div class="h-6 rounded-full bg-gray-6 px-2">
+          {(tab === "conversations" ? $accepted : $requests).length}
+        </div>
+      </div>
+    </Tabs>
     <Popover triggerType="mouseenter" class="absolute right-7 top-7 hidden sm:block">
       <div slot="trigger">
         <i

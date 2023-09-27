@@ -108,12 +108,15 @@ projections.addHandler(EventKind.Nip04Message, async e => {
     const plaintext = await nip04.decryptAsUser(e.content, other)
 
     channels.key(other).update($channel => {
+      const messages = [...($channel?.messages || []), {...e, nip04: {plaintext}}]
+
       const updates = {
         ...$channel,
         id: e.pubkey,
         type: "nip04",
         relays: uniq([...relays, ...($channel?.relays || [])]),
-        messages: uniqBy(prop("id"), [{...e, nip04: {plaintext}}, ...($channel?.messages || [])]),
+        members: [session.pubkey, recipient],
+        messages: uniqBy(prop("id"), messages),
       }
 
       if (e.pubkey === session.pubkey) {
@@ -142,6 +145,7 @@ projections.addHandler(EventKind.Nip44Message, e => {
         ...$channel,
         id: channelId,
         type: "nip24",
+        members: pubkeys,
         relays: uniq([...tags.relays(), ...($channel?.relays || [])]),
         messages: uniqBy(prop("id"), [e, ...($channel?.messages || [])]),
       }

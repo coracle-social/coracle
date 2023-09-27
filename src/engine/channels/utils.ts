@@ -9,5 +9,3 @@ export const hasNewMessages = (c: Channel) =>
   c.last_received > Math.max(c.last_sent || 0, c.last_checked || 0)
 
 export const getNip24ChannelId = (pubkeys: string[]) => sortBy(identity, uniq(pubkeys)).join(",")
-
-export const getNip24ChannelPubkeys = (id: string) => id.split(",")

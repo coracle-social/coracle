@@ -25,11 +25,6 @@
 
   $: tabChannels = sortChannels(activeTab === "conversations" ? $accepted : $requests)
 
-  const getDisplay = tab => ({
-    title: toTitle(tab),
-    badge: (tab === "conversations" ? $accepted : $requests).length,
-  })
-
   const setActiveTab = tab => navigate(tab === "conversations" ? "/channels" : "/channels/requests")
 
   document.title = "Direct Messages"
@@ -48,7 +43,14 @@
 
 <Content>
   <div class="relative">
-    <Tabs tabs={["conversations", "requests"]} {activeTab} {setActiveTab} {getDisplay} />
+    <Tabs tabs={["conversations", "requests"]} {activeTab} {setActiveTab}>
+      <div slot="tab" let:tab class="flex gap-2">
+        <div>{toTitle(tab)}</div>
+        <div class="h-6 rounded-full bg-gray-6 px-2">
+          {(tab === "conversations" ? $accepted : $requests).length}
+        </div>
+      </div>
+    </Tabs>
     <Popover triggerType="mouseenter" class="absolute right-5 top-7 hidden sm:block">
       <div slot="trigger">
         <i
