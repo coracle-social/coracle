@@ -5,11 +5,12 @@
   import NotificationPeople from "src/app/shared/NotificationPeople.svelte"
   import Note from "src/app/shared/Note.svelte"
   import type {Notification} from "src/engine"
+  import {sortEventsDesc} from "src/engine"
 
   export let notification: Notification
 
   const {event: note, interactions, timestamp} = notification
-  const replies = interactions.filter(e => noteKinds.includes(e.kind))
+  const replies = sortEventsDesc(interactions.filter(e => noteKinds.includes(e.kind)))
   const pubkeys = uniq(pluck("pubkey", replies))
 </script>
 

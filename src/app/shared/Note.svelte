@@ -32,7 +32,7 @@
 
   export let note
   export let relays = []
-  export let context = null
+  export let context = []
   export let feedRelay = null
   export let setFeedRelay = null
   export let depth = 0
@@ -48,10 +48,6 @@
   let showMuted = false
   let actions = null
   let collapsed = false
-  let replies = sortBy(
-    (e: Event) => -e.created_at,
-    (context || []).filter(e => e.kind === 1 && findReplyId(e) === event.id)
-  )
   let likes = []
   let zaps = []
 
@@ -102,6 +98,11 @@
 
   $: muted = !showMuted && $isEventMuted(event)
 
+  $: replies = sortBy(
+    (e: Event) => -e.created_at,
+    context.filter(e => e.kind === 1 && findReplyId(e) === event.id)
+  )
+
   // Show only notes that were passed in by the parent unless we want to show all
   $: visibleNotes = ((showContext ? replies : note.replies) || []).filter(
     e => !feedRelay || e.seen_on.includes(feedRelay.url)
@@ -120,14 +121,10 @@
       })
     }
 
-    const loadKinds = [7]
+    const loadKinds = [1, 7]
 
     if (ENABLE_ZAPS) {
       loadKinds.push(9735)
-    }
-
-    if (!context) {
-      loadKinds.push(1)
     }
 
     const selectedRelays = mergeHints([relays, getReplyHints(event)])
@@ -137,14 +134,7 @@
       switcherFn(e.kind.toString(), {
         "1": () => {
           if (!$isEventMuted(e)) {
-            if (findReplyId(e) === event.id) {
-              replies = sortBy((e: Event) => -e.created_at, uniqBy(prop("id"), replies.concat(e)))
-            }
-
-            context = sortBy(
-              (e: Event) => -e.created_at,
-              uniqBy(prop("id"), (context || []).concat(e))
-            )
+            context = sortBy((e: Event) => -e.created_at, uniqBy(prop("id"), context.concat(e)))
           }
         },
         "7": () => {

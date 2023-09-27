@@ -15,12 +15,16 @@ export const userEvents = new DerivedCollection<Event>("id", [events, pubkey], (
   return $pk ? $e.filter(whereEq({pubkey: $pk})) : []
 })
 
-export const isEventMuted = derived([mutes, settings], ([$mutes, $settings]) => {
+export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settings, $pubkey]) => {
   const words = $settings.muted_words
   const regex =
     words.length > 0 ? new RegExp(`\\b(${words.map(w => w.toLowerCase()).join("|")})\\b`) : null
 
   return (e: Event) => {
+    if (e.pubkey === $pubkey) {
+      return false
+    }
+
     const {reply, root} = findReplyAndRootIds(e)
 
     if (find(t => $mutes.has(t), [e.id, e.pubkey, reply, root])) {
