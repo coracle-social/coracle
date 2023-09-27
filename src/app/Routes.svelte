@@ -4,8 +4,6 @@
   import {base64DecodeOrPlainWebSocketURL} from "src/util/misc"
   import Notifications from "src/app/views/Notifications.svelte"
   import Bech32Entity from "src/app/views/Bech32Entity.svelte"
-  import ChatDetail from "src/app/views/ChatDetail.svelte"
-  import ChatList from "src/app/views/ChatList.svelte"
   import Feeds from "src/app/views/Feeds.svelte"
   import Explore from "src/app/views/Explore.svelte"
   import UserKeys from "src/app/views/UserKeys.svelte"
@@ -45,12 +43,6 @@
     <TypedRoute path="/people/:npub" let:params>
       {#key params.npub}
         <PersonDetail npub={params.npub} />
-      {/key}
-    </TypedRoute>
-    <TypedRoute path="/chat" component={ChatList} />
-    <TypedRoute path="/chat/:entity" let:params>
-      {#key params.entity}
-        <ChatDetail entity={params.entity} />
       {/key}
     </TypedRoute>
     <TypedRoute path="/conversations">

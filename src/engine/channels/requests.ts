@@ -3,8 +3,7 @@ import {batch, seconds} from "hurdak"
 import {EventKind} from "src/engine/events/model"
 import {pubkey} from "src/engine/session/state"
 import {load, loadPubkeys, subscribe} from "src/engine/network/utils"
-import {getInboxHints, selectHints, getPubkeyHints, getUserRelayUrls} from "src/engine/relays/utils"
-import {channels} from "./state"
+import {getInboxHints, getPubkeyHints, getUserRelayUrls} from "src/engine/relays/utils"
 import {getNip24ChannelPubkeys} from "./utils"
 import {nip24Channels, nip04Channels} from "./derived"
 
@@ -53,19 +52,6 @@ export const loadAllNip24Messages = () => {
     relays: getUserRelayUrls("read"),
     filters: [{kinds: [EventKind.GiftWrap], "#p": [$pubkey], since}],
     onClose: () => setTimeout(unsubscribe, 1000),
-  })
-}
-
-export const listenForNip28Messages = channelId => {
-  const channel = channels.key(channelId).get()
-  const relays = selectHints(channel?.relays || [])
-
-  return subscribe({
-    relays,
-    filters: [
-      {kinds: [40], ids: [channelId]},
-      {kinds: [41, 42], "#e": [channelId]},
-    ],
   })
 }
 

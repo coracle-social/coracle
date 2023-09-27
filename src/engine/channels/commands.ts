@@ -1,11 +1,11 @@
 import {generatePrivateKey} from "nostr-tools"
-import {assoc, assocPath, path, prop, fromPairs, pluck, whereEq, when, map} from "ramda"
+import {assoc, whereEq, when, map} from "ramda"
 import {createMapOf} from "hurdak"
 import {now} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
 import {EventKind} from "src/engine/events/model"
 import {Publisher, publishEvent, mention} from "src/engine/network/utils"
-import {selectHints, getInboxHints, getPubkeyHints} from "src/engine/relays/utils"
+import {getInboxHints, getPubkeyHints} from "src/engine/relays/utils"
 import {user, nip04, nip59} from "src/engine/session/derived"
 import {setAppData} from "src/engine/session/commands"
 import {channels} from "./state"
@@ -78,46 +78,4 @@ export const nip24MarkChannelRead = (pubkey: string) => {
   channels.key(pubkey).update(assoc("last_checked", now()))
 
   publishNip24Read()
-}
-
-export const publishNip28ChannelCreate = content =>
-  publishEvent(40, {content: JSON.stringify(content)})
-
-export const publishNip28ChannelUpdate = (id, content) =>
-  publishEvent(41, {content: JSON.stringify(content), tags: [["e", id]]})
-
-export const publishNip28Message = (id, content) => {
-  const channel = channels.key(id).get()
-  const [hint] = selectHints(channel?.relays || [])
-
-  return publishEvent(42, {content, tags: [["e", id, hint, "root"]]})
-}
-
-export const publishNip28ChannelChecked = (id: string) => {
-  const lastChecked = fromPairs(
-    channels
-      .get()
-      .filter(prop("last_checked"))
-      .map(r => [r.id, r.last_checked])
-  )
-
-  return setAppData(appDataKeys.NIP28_LAST_CHECKED, {...lastChecked, [id]: now()})
-}
-
-export const saveNip28Channels = () =>
-  setAppData(
-    appDataKeys.NIP28_ROOMS_JOINED,
-    pluck("id", channels.get().filter(path(["nip28", "joined"])))
-  )
-
-export const joinNip28Channel = (id: string) => {
-  channels.key(id).update(assocPath(["nip28", "joined"], true))
-
-  return saveNip28Channels()
-}
-
-export const leaveNip28Channel = (id: string) => {
-  channels.key(id).update(assocPath(["nip28", "joined"], false))
-
-  return saveNip28Channels()
 }

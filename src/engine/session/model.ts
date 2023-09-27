@@ -7,5 +7,4 @@ export type Session = {
   settings?: Record<string, any>
   settings_updated_at?: number
   notifications_last_checked?: number
-  nip28_channels_last_joined?: number
 }

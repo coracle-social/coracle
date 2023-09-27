@@ -2,7 +2,6 @@
   import {nip19} from "nostr-tools"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import ChatEdit from "src/app/views/ChatEdit.svelte"
   import ChannelCreate from "src/app/views/ChannelCreate.svelte"
   import Login from "src/app/views/Login.svelte"
   import LoginConnect from "src/app/views/LoginConnect.svelte"
@@ -61,8 +60,6 @@
   <Onboarding stage={m.stage} />
 {:else if m.type === "channel/create"}
   <ChannelCreate />
-{:else if m.type === "chat/edit"}
-  <ChatEdit {...m} />
 {:else if m.type === "login/intro"}
   <Login />
 {:else if m.type === "login/privkey"}

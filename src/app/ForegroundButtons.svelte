@@ -10,9 +10,7 @@
   let scrollY = 0
   let playerIsOpen = false
 
-  $: showButtons = !$location.pathname.match(
-    /conversations|channels|chat|relays|keys|settings|logout$/
-  )
+  $: showButtons = !$location.pathname.match(/conversations|channels|relays|keys|settings|logout$/)
 
   const scrollToTop = () => document.body.scrollIntoView({behavior: "smooth"})
 

@@ -10,7 +10,6 @@ import {_events} from "src/engine/events/state"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {mergeHints, getPubkeyHints} from "src/engine/relays/utils"
 import {subscribe, subscribePersistent} from "src/engine/network/utils"
-import {nip28ChannelsForUser} from "src/engine/channels/derived"
 
 const onNotificationEvent = batch(300, (chunk: Event[]) => {
   const kinds = getNotificationKinds()
@@ -62,8 +61,6 @@ export const loadNotifications = () => {
 
 export const listenForNotifications = async () => {
   const pubkeys = Object.keys(sessions.get())
-  const channelIds = pluck("id", nip28ChannelsForUser.get())
-
   const relays = mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read")))
 
   const eventIds: string[] = doPipe(events.get(), [
@@ -81,11 +78,6 @@ export const listenForNotifications = async () => {
     // Mentions
     {kinds: noteKinds, "#p": pubkeys, limit: 1},
   ]
-
-  // Chat
-  if (channelIds.length > 0) {
-    filters.push({kinds: [42], "#e": channelIds, limit: 1})
-  }
 
   // Replies
   if (eventIds.length > 0) {

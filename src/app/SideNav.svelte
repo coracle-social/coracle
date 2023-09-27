@@ -3,7 +3,6 @@
   import {modal, theme, installPrompt} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import {
-    hasNewNip28Messages,
     hasNewNip04Messages,
     hasNewNip24Messages,
     hasNewNotifications,
@@ -87,15 +86,11 @@
       </a>
     </li>
   {/if}
-  <li class="relative">
+  <li class="cursor-pointer">
     <a
       class="block px-4 py-2 transition-all hover:bg-accent hover:text-white"
       on:click={openNip28Chat}>
       <i class="fa fa-comment mr-2" /> Chat
-      {#if $hasNewNip28Messages}
-        <div
-          class="absolute left-7 top-2 h-2 w-2 rounded border border-solid border-white bg-accent" />
-      {/if}
     </a>
   </li>
   <li class="cursor-pointer">
