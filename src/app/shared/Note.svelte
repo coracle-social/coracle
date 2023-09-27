@@ -123,42 +123,39 @@
       })
     }
 
-    const loadKinds = [1, 7]
+    loadPubkeys([event.pubkey])
+
+    const kinds = [1, 7]
 
     if (ENABLE_ZAPS) {
-      loadKinds.push(9735)
+      kinds.push(9735)
     }
 
-    const selectedRelays = mergeHints([relays, getReplyHints(event)])
-    const loadFilters = [{kinds: loadKinds, "#e": [event.id]}]
+    load({
+      relays: mergeHints([relays, getReplyHints(event)]),
+      filters: [{kinds, "#e": [event.id]}],
+      onEvent: e => {
+        switcherFn(e.kind.toString(), {
+          "1": () => {
+            if (!$isEventMuted(e)) {
+              context = sortBy((e: Event) => -e.created_at, uniqBy(prop("id"), context.concat(e)))
+            }
+          },
+          "7": () => {
+            if (isLike(e.content) && findReplyId(e) === event.id) {
+              likes = likes.concat(e)
+            }
+          },
+          "9735": () => {
+            if (findReplyId(e) === event.id) {
+              const {zapper} = derivePerson(event.pubkey).get()
 
-    const onEvent = e => {
-      switcherFn(e.kind.toString(), {
-        "1": () => {
-          if (!$isEventMuted(e)) {
-            context = sortBy((e: Event) => -e.created_at, uniqBy(prop("id"), context.concat(e)))
-          }
-        },
-        "7": () => {
-          if (isLike(e.content) && findReplyId(e) === event.id) {
-            likes = likes.concat(e)
-          }
-        },
-        "9735": () => {
-          if (findReplyId(e) === event.id) {
-            const {zapper} = derivePerson(event.pubkey).get()
-
-            zaps = zaps.concat(processZap(e, zapper)).filter(identity)
-          }
-        },
-      })
-    }
-
-    load({relays: selectedRelays, filters: loadFilters, onEvent})
-
-    if (event.pubkey) {
-      loadPubkeys([event.pubkey])
-    }
+              zaps = zaps.concat(processZap(e, zapper)).filter(identity)
+            }
+          },
+        })
+      },
+    })
   })
 
   onDestroy(() => {
