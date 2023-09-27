@@ -90,7 +90,7 @@
         const $person = derivePerson(e.pubkey).get()
 
         e.recs = recsByNaddr[e.address] || []
-        e.profile = tryJson(() => JSON.parse(e.content)) || $person?.profile
+        e.profile = tryJson(() => JSON.parse(e.content)) || $person?.profile || {}
         e.handle = $person?.handle
 
         return e as App
