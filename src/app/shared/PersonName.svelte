@@ -8,7 +8,7 @@
   const following = deriveFollowing(pubkey)
 </script>
 
-<div class={cx("flex items-center gap-2", $$props.class)}>
+<div class={cx("flex items-center gap-1", $$props.class)}>
   <span>{displayPerson($person)}</span>
   {#if $following}
     <i class="fa fa-user-check ml-2 text-xs text-accent" />
