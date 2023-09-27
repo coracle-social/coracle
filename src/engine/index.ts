@@ -7,13 +7,7 @@ import {_labels} from "./labels"
 import {topics} from "./topics"
 import {deletes, _events, deletesLastUpdated} from "./events"
 import {pubkey, sessions} from "./session"
-import {notificationsLastChecked} from "./notifications"
-import {
-  channels,
-  nip04ChannelsLastChecked,
-  nip24ChannelsLastChecked,
-  nip28ChannelsLastJoined,
-} from "./channels"
+import {channels} from "./channels"
 
 export * from "./core"
 export * from "./channels"
@@ -39,10 +33,6 @@ export const storage = new Storage([
     load: a => new Set(a || []),
   }),
   new LocalStorageAdapter("deletesLastUpdated2", deletesLastUpdated),
-  new LocalStorageAdapter("notificationsLastChecked", notificationsLastChecked),
-  new LocalStorageAdapter("nip04ChannelsLastChecked", nip04ChannelsLastChecked),
-  new LocalStorageAdapter("nip24ChannelsLastChecked", nip24ChannelsLastChecked),
-  new LocalStorageAdapter("nip28ChannelsLastJoined", nip28ChannelsLastJoined),
   new IndexedDBAdapter("events", _events, 10000, sortByPubkeyWhitelist(prop("created_at"))),
   new IndexedDBAdapter("labels", _labels, 10000, sortBy(prop("created_at"))),
   new IndexedDBAdapter("topics", topics, 10000, sortBy(prop("last_seen"))),

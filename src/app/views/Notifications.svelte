@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {find} from "ramda"
+  import {find, assocPath} from "ramda"
   import {onMount} from "svelte"
   import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
@@ -11,12 +11,7 @@
   import NotificationMention from "src/app/views/NotificationMention.svelte"
   import NotificationReplies from "src/app/views/NotificationReplies.svelte"
   import type {Event} from "src/engine"
-  import {
-    notifications,
-    groupNotifications,
-    notificationsLastChecked,
-    loadNotifications,
-  } from "src/engine"
+  import {pubkey, sessions, notifications, groupNotifications, loadNotifications} from "src/engine"
 
   const tabs = ["Mentions & Replies", "Reactions"]
 
@@ -56,7 +51,7 @@
     loadNotifications()
 
     const unsub = throttledNotifications.subscribe(() => {
-      notificationsLastChecked.set(now())
+      sessions.update(assocPath([$pubkey, "notifications_last_checked"], now()))
     })
 
     const scroller = createScroller(async () => {

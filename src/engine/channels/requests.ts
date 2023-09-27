@@ -1,19 +1,18 @@
-import {pluck} from "ramda"
+import {pluck, max, identity} from "ramda"
 import {batch, seconds} from "hurdak"
-import {now} from "src/util/misc"
 import {EventKind} from "src/engine/events/model"
 import {pubkey} from "src/engine/session/state"
 import {load, loadPubkeys, subscribe} from "src/engine/network/utils"
 import {getInboxHints, selectHints, getPubkeyHints, getUserRelayUrls} from "src/engine/relays/utils"
-import {channels, nip04ChannelsLastChecked, nip24ChannelsLastChecked} from "./state"
+import {channels} from "./state"
 import {getNip24ChannelPubkeys} from "./utils"
-import {nip24Channels} from "./derived"
+import {nip24Channels, nip04Channels} from "./derived"
 
 export const loadAllNip04Messages = () => {
   const $pubkey = pubkey.get()
-  const since = Math.max(0, nip04ChannelsLastChecked.get() - seconds(7, "day"))
-
-  nip04ChannelsLastChecked.set(now())
+  const $channels = nip04Channels.get()
+  const lastChecked = pluck("last_received", $channels).filter(identity).reduce(max, 0)
+  const since = Math.max(0, lastChecked - seconds(7, "day"))
 
   load({
     relays: getUserRelayUrls("read"),
@@ -41,9 +40,9 @@ export const listenForNip04Messages = (contactPubkey: string) => {
 
 export const loadAllNip24Messages = () => {
   const $pubkey = pubkey.get()
-  const since = Math.max(0, nip24ChannelsLastChecked.get() - seconds(7, "day"))
-
-  nip24ChannelsLastChecked.set(now())
+  const $channels = nip24Channels.get()
+  const lastChecked = pluck("last_received", $channels).filter(identity).reduce(max, 0)
+  const since = Math.max(0, lastChecked - seconds(7, "day"))
 
   // To avoid unwrapping everything twice, listen to channels and load pubkeys there
   const unsubscribe = nip24Channels.throttle(1000).subscribe($channels => {

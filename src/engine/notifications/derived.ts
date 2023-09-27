@@ -5,7 +5,6 @@ import {events, isEventMuted} from "src/engine/events/derived"
 import {derived} from "src/engine/core/utils"
 import {session} from "src/engine/session/derived"
 import {userEvents} from "src/engine/events/derived"
-import {notificationsLastChecked} from "./state"
 
 export const notifications = derived(
   [session, userEvents.mapStore.throttle(500), events.throttle(500)],
@@ -33,14 +32,14 @@ export const notifications = derived(
 )
 
 export const hasNewNotifications = derived(
-  [notificationsLastChecked, notifications],
-  ([$notificationsLastChecked, $notifications]) => {
+  [session, notifications],
+  ([$session, $notifications]) => {
     const maxCreatedAt = $notifications
       .filter(e => !reactionKinds.includes(e.kind))
       .map(prop("created_at"))
       .reduce(max, 0)
 
-    return maxCreatedAt > $notificationsLastChecked
+    return maxCreatedAt > ($session.notifications_last_checked || 0)
   }
 )
 

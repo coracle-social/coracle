@@ -1,4 +1,4 @@
-import {pluck, slice, filter, without, sortBy} from "ramda"
+import {pluck, identity, max, slice, filter, without, sortBy} from "ramda"
 import {seconds, batch, doPipe} from "hurdak"
 import {now} from "src/util/misc"
 import {noteKinds, reactionKinds} from "src/util/nostr"
@@ -11,7 +11,6 @@ import {events, isEventMuted} from "src/engine/events/derived"
 import {mergeHints, getPubkeyHints} from "src/engine/relays/utils"
 import {subscribe, subscribePersistent} from "src/engine/network/utils"
 import {nip28ChannelsForUser} from "src/engine/channels/derived"
-import {notificationsLastChecked} from "./state"
 
 const onNotificationEvent = batch(300, (chunk: Event[]) => {
   const kinds = getNotificationKinds()
@@ -34,7 +33,9 @@ export const loadNotifications = () => {
   const kinds = getNotificationKinds()
   const pubkeys = Object.keys(sessions.get())
   const cutoff = now() - seconds(30, "day")
-  const since = Math.max(cutoff, notificationsLastChecked.get() - seconds(1, "day"))
+  const $sessions = Object.values(sessions.get())
+  const lastChecked = pluck("notifications_last_checked", $sessions).filter(identity).reduce(max, 0)
+  const since = Math.max(cutoff, lastChecked - seconds(1, "day"))
 
   const eventIds = pluck(
     "id",

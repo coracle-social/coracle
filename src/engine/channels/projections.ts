@@ -10,7 +10,7 @@ import {getEventHints} from "src/engine/relays/utils"
 import {projections} from "src/engine/core/projections"
 import {updateRecord, updateStore} from "src/engine/core/commands"
 import type {Channel} from "./model"
-import {channels, nip28ChannelsLastJoined} from "./state"
+import {channels} from "./state"
 import {getNip24ChannelId} from "./utils"
 
 const getSession = pubkey => sessions.get()[pubkey]
@@ -86,8 +86,11 @@ projections.addHandler(EventKind.AppData, async e => {
     })
   }
 
-  if (d === appDataKeys.NIP28_ROOMS_JOINED && e.created_at > nip28ChannelsLastJoined.get()) {
-    nip28ChannelsLastJoined.set(e.created_at)
+  if (
+    d === appDataKeys.NIP28_ROOMS_JOINED &&
+    e.created_at > (session.nip28_channels_last_joined || 0)
+  ) {
+    sessions.update(assocPath([session.pubkey, "nip28_channels_last_joined"], e.created_at))
 
     await tryJson(async () => {
       const channelIds = JSON.parse(await nip04.decryptAsUser(e.content, e.pubkey))
