@@ -111,7 +111,7 @@
       {#each getColumns(apps) as app (app.id)}
         <Card class="mb-4 flex break-inside-avoid flex-col gap-4">
           <div class="flex gap-4">
-            <ImageCircle size={14} src={app.profile.picture} />
+            <ImageCircle class="h-14 w-14" src={app.profile.picture} />
             <div class="flex min-w-0 flex-grow flex-col">
               <h1 class="text-2xl">{app.profile.display_name || app.profile.name}</h1>
               {#if app.handle}

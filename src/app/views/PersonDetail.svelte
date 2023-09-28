@@ -63,7 +63,7 @@
 
 <Content>
   <div class="flex gap-4 text-gray-1">
-    <PersonCircle {pubkey} size={12} class="mt-1 sm:h-32 sm:w-32" />
+    <PersonCircle {pubkey} class="mt-1 h-12 w-12 sm:h-32 sm:w-32" />
     <div class="flex min-w-0 flex-grow flex-col gap-4">
       <Anchor class="flex flex-col" href={`/${npub}`}>
         <div class="flex items-center justify-between gap-4">

@@ -4,7 +4,6 @@
   import LogoSvg from "src/partials/LogoSvg.svelte"
 
   export let pubkey
-  export let size = 4
 
   const hue = stringToHue(pubkey || "")
   const primary = hsl(hue, {lightness: 80})
@@ -14,7 +13,7 @@
 <div
   class={cx(
     $$props.class,
-    `relative overflow-hidden w-${size} h-${size} inline-block shrink-0 rounded-full border border-solid
+    `relative inline-block shrink-0 overflow-hidden rounded-full border border-solid
      border-gray-1 bg-cover bg-center`
   )}
   style="--logo-color: {primary}; --logo-bg-color: {secondary}; background-color: var(--logo-bg-color);">

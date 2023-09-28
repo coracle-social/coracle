@@ -48,7 +48,7 @@
       <div class="mr-3 flex pt-1">
         {#each pubkeys as pubkey (pubkey)}
           <div class="-mr-3 inline-block">
-            <PersonCircle size={10} class="h-8 w-8" {pubkey} />
+            <PersonCircle class="h-10 w-10" {pubkey} />
           </div>
         {/each}
       </div>

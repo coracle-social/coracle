@@ -179,7 +179,7 @@
           <Anchor
             class="text-lg font-bold"
             on:click={() => modal.push({type: "person/detail", pubkey: event.pubkey})}>
-            <PersonCircle size={10} pubkey={event.pubkey} />
+            <PersonCircle class="h-10 w-10" pubkey={event.pubkey} />
           </Anchor>
         </div>
         <div class="flex min-w-0 flex-grow flex-col gap-2">

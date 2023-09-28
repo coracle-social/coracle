@@ -82,7 +82,7 @@
         </p>
       {:else}
         <div class="mb-4 flex items-center gap-4">
-          <PersonCircle size={6} pubkey={quote.pubkey} />
+          <PersonCircle class="h-6 w-6" pubkey={quote.pubkey} />
           <Anchor
             stopPropagation
             type="unstyled"

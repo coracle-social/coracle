@@ -20,7 +20,7 @@
     <Anchor
       on:click={inert ? null : showDetail}
       class={cx("col-span-3 flex gap-4 overflow-hidden", {"col-span-4": hideActions})}>
-      <PersonCircle size={14} {pubkey} />
+      <PersonCircle class="h-14 w-14" {pubkey} />
       <div class="mr-16 flex min-w-0 flex-grow flex-col gap-1">
         <PersonName class="text-lg" {pubkey} />
         <PersonHandle {pubkey} />

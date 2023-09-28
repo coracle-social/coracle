@@ -18,7 +18,7 @@
   <Content>
     <div class="flex items-center gap-2">
       {#if picture}
-        <ImageCircle size={10} src={picture} />
+        <ImageCircle class="h-10 w-10" src={picture} />
       {/if}
       <h3 class="staatliches text-2xl">{name}</h3>
     </div>

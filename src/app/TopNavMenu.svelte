@@ -13,7 +13,7 @@
 
 <Popover theme="transparent" placement="top-end" opts={{hideOnClick: true}}>
   <div slot="trigger" class="relative flex cursor-pointer items-center">
-    <PersonCircle size={10} pubkey={$pubkey} />
+    <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
   </div>
   <div slot="tooltip" class="flex justify-end">
     <Card class="mt-1 w-48 overflow-hidden shadow-lg">

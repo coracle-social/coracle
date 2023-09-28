@@ -2,13 +2,14 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
 
   export let pubkeys
-  export let size = 8
+
+  const klass = $$props.class || "w-8 h-8"
 </script>
 
 <div class="flex">
   {#each pubkeys as pubkey (pubkey)}
     <div class="z-10 -mr-3 inline-block">
-      <PersonCircle {size} {pubkey} />
+      <PersonCircle class={klass} {pubkey} />
     </div>
   {/each}
 </div>

@@ -53,7 +53,7 @@
         type="unstyled"
         class="fa fa-arrow-left cursor-pointer text-2xl"
         href="/conversations" />
-      <PersonCircle {pubkey} size={10} />
+      <PersonCircle {pubkey} class="h-10 w-10" />
     </div>
     <div class="flex h-12 w-full flex-col overflow-hidden pt-px">
       <div class="flex w-full items-center justify-between">

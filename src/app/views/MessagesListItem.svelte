@@ -16,7 +16,7 @@
 
 <Card interactive on:click={enter}>
   <div class="flex gap-4 px-4 py-6">
-    <PersonCircle size={14} pubkey={channel.id} />
+    <PersonCircle class="h-14 w-14" pubkey={channel.id} />
     <div class="flex min-w-0 flex-grow flex-col justify-start gap-2">
       <div class="flex flex-grow items-start justify-between gap-2">
         <div class="flex items-center gap-2 overflow-hidden">
