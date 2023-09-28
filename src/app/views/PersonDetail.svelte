@@ -26,6 +26,7 @@
     imgproxy,
     getPubkeyRelays,
     mergeHints,
+    selectHints,
     getPubkeyHints,
   } from "src/engine"
 
@@ -41,7 +42,7 @@
   let loading = true
 
   $: ownRelays = getPubkeyRelays(pubkey)
-  $: mergedRelays = mergeHints([relays, getPubkeyHints(pubkey, "write")])
+  $: mergedRelays = selectHints(mergeHints([relays, getPubkeyHints(pubkey, "write")]))
   $: banner = imgproxy($person.profile?.banner, {w: window.innerWidth})
 
   info("Person", npub, $person)
