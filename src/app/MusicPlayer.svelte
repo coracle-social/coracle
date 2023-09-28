@@ -18,8 +18,9 @@
   export let isOpen
 
   const filters = [
-    compileFilter({kinds: [1808], authors: "follows", limit: 10}),
-    compileFilter({kinds: [1808], authors: "network", limit: 10}),
+    //compileFilter({kinds: [1808], authors: "follows", limit: 10}),
+    //compileFilter({kinds: [1808], authors: "network", limit: 10}),
+    compileFilter({kinds: [1808], limit: 10}),
   ]
 
   const relays = getRelaysFromFilters(filters)
@@ -44,9 +45,11 @@
     i = Math.min($feed.length - 1, inc(i))
   }
 
-  const loadMore = throttle(10000, () => feed.load(10))
+  const loadMore = throttle(3000, () => feed.load(10))
 
   const goToPerson = () => modal.push({type: "person/detail", pubkey: note.pubkey})
+
+  const goToNote = () => modal.push({type: "note/detail", note})
 
   let i = 0
   let playing = false
@@ -107,7 +110,12 @@
               <Anchor on:click={goToPerson}>
                 <PersonBadge inert pubkey={note.pubkey} />
               </Anchor>
-              <NoteContentKind1 showEntire {note} />
+              <div class="flex gap-2">
+                <Anchor on:click={goToNote}>
+                  <i class="fa fa-link text-accent" />
+                </Anchor>
+                <NoteContentKind1 showEntire {note} />
+              </div>
               <NoteContentLabel type="t" {note} />
             </div>
             <i

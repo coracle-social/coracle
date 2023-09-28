@@ -81,9 +81,9 @@
       }
 
       feed = new FeedLoader({
-        depth: 2,
         relays: getRelays(),
         filters: [compileFilter(filter)],
+        shouldDefer: true,
         shouldListen: true,
         shouldLoadParents: true,
         onEvent,

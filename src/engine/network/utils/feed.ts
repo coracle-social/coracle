@@ -12,7 +12,7 @@ import {
   prop,
   assoc,
 } from "ramda"
-import {ensurePlural, seconds, doPipe, batch} from "hurdak"
+import {ensurePlural, doPipe, batch} from "hurdak"
 import {now, race, pushToKey} from "src/util/misc"
 import {findReplyId, noteKinds} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
@@ -20,7 +20,7 @@ import type {Event} from "src/engine/events/model"
 import {isEventMuted} from "src/engine/events/derived"
 import {writable} from "src/engine/core/utils"
 import type {Filter} from "../model"
-import {getIdFilters} from "./filters"
+import {getIdFilters, guessFilterDelta} from "./filters"
 import {getUrls} from "./executor"
 import {subscribe} from "./subscribe"
 import {MultiCursor} from "./cursor"
@@ -29,8 +29,8 @@ import {load} from "./load"
 export type FeedOpts = {
   relays: string[]
   filters: Filter[]
-  depth?: number
   onEvent?: (e: Event) => void
+  shouldDefer?: boolean
   shouldListen?: boolean
   shouldLoadParents?: boolean
 }
@@ -57,7 +57,10 @@ export class FeedLoader {
           relays: urls,
           filters: opts.filters.map(assoc("since", this.since)),
           onEvent: batch(1000, (events: Event[]) => {
-            this.loadParents(events)
+            if (opts.shouldLoadParents) {
+              this.loadParents(events)
+            }
+
             this.buffer.update($buffer => $buffer.concat(reject(this.isEventMuted, events)))
           }),
         }),
@@ -67,7 +70,11 @@ export class FeedLoader {
     this.cursor = new MultiCursor({
       relays: opts.relays,
       filters: opts.filters,
-      onEvent: batch(100, this.loadParents),
+      onEvent: batch(100, events => {
+        if (opts.shouldLoadParents) {
+          this.loadParents(events)
+        }
+      }),
     })
 
     const subs = this.cursor.load(50)
@@ -182,13 +189,16 @@ export class FeedLoader {
     await this.ready
 
     const [subs, notes] = this.cursor.take(n)
-    const deferred = this.deferred.splice(0)
 
     this.addSubs(subs)
 
-    const ok = doPipe(notes.concat(deferred), [this.deferOrphans, this.deferAncient])
+    if (this.opts.shouldDefer) {
+      const deferred = this.deferred.splice(0)
 
-    this.addToFeed(ok)
+      this.addToFeed(doPipe(notes.concat(deferred), [this.deferOrphans, this.deferAncient]))
+    } else {
+      this.addToFeed(notes)
+    }
   }
 
   loadBuffer() {
@@ -200,6 +210,10 @@ export class FeedLoader {
   }
 
   deferOrphans = (notes: Event[]) => {
+    if (!this.opts.shouldLoadParents) {
+      return notes
+    }
+
     // If something has a parent id but we haven't found the parent yet, skip it until we have it.
     const [defer, ok] = partition(e => {
       const parentId = findReplyId(e)
@@ -216,7 +230,7 @@ export class FeedLoader {
     // Sometimes relays send very old data very quickly. Pop these off the queue and re-add
     // them after we have more timely data. They still might be relevant, but order will still
     // be maintained since everything before the cutoff will be deferred the same way.
-    const since = now() - seconds(6, "hour")
+    const since = now() - guessFilterDelta(this.opts.filters)
     const [defer, ok] = partition(e => e.created_at < since, notes)
 
     setTimeout(() => this.addToFeed(defer), 4000)

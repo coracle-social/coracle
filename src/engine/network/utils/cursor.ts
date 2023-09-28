@@ -1,7 +1,6 @@
-import {mergeRight, identity, sortBy} from "ramda"
+import {mergeRight, pluck, max, identity, sortBy} from "ramda"
 import {first} from "hurdak"
 import {now} from "src/util/misc"
-import {EPOCH} from "src/util/nostr"
 import {info} from "src/util/logger"
 import type {Event} from "src/engine/events/model"
 import type {Filter} from "../model"
@@ -19,15 +18,20 @@ export type CursorOpts = {
 export class Cursor {
   delta: number
   since: number
+  until: number
   buffer: Event[] = []
 
-  until = now()
   loading = false
   done = false
 
   constructor(readonly opts: CursorOpts) {
+    // If we're looking for something old, don't pointlessly ask for new stuff
+    const untils = pluck("until", opts.filters).filter(identity)
+    const maxUntil = untils.length === opts.filters.length ? untils.reduce(max, 0) : now()
+
     this.delta = guessFilterDelta(opts.filters)
-    this.since = now() - this.delta
+    this.since = maxUntil - this.delta
+    this.until = maxUntil
   }
 
   load(n: number) {
@@ -46,7 +50,7 @@ export class Cursor {
     let count = 0
 
     const sub = new Subscription({
-      timeout: 5000,
+      timeout: 3000,
       relays: [relay],
       filters: filters.map(mergeRight({until, limit, since})),
     })
@@ -69,11 +73,11 @@ export class Cursor {
         this.delta *= 10
       }
 
-      if (this.since <= EPOCH) {
+      if (this.since === 0) {
         this.done = true
+      } else {
+        this.since = Math.max(0, this.since - this.delta)
       }
-
-      this.since -= this.delta
     })
 
     return sub

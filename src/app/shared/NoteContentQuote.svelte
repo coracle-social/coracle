@@ -13,8 +13,7 @@
     isEventMuted,
     getParentHints,
     isShareableRelay,
-    getUserRelayUrls,
-    mergeHints,
+    selectHints,
   } from "src/engine"
 
   export let note
@@ -27,12 +26,10 @@
   const openPerson = pubkey => modal.push({type: "person/detail", pubkey})
 
   const {id, identifier, kind, pubkey} = value
-  const relays = mergeHints([
-    // Agora social has a bug
-    (value.relays || []).flatMap(r => r.split(",")).filter(isShareableRelay),
-    getUserRelayUrls("read"),
-    getParentHints(note),
-  ])
+
+  // Prioritize hints in relay selection by merging directly instead of with mergeHints
+  const hints = (value.relays || []).filter(isShareableRelay)
+  const relays = selectHints([...hints, ...getParentHints(note)])
 
   load({
     relays,

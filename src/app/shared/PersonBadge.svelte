@@ -8,12 +8,11 @@
 
   export let pubkey
   export let inert = false
-  export let size = 12
 </script>
 
 {#if inert}
   <div class={cx($$props.class, "relative z-10 flex gap-4")}>
-    <PersonCircle {size} {pubkey} />
+    <PersonCircle class="h-12 w-12" {pubkey} />
     <div class="flex flex-col" style="min-width: 48px;">
       <PersonName {pubkey} />
       <PersonHandle {pubkey} />
@@ -24,7 +23,7 @@
     killEvent
     href={routes.person(pubkey)}
     class={cx($$props.class, "relative z-10 flex gap-4")}>
-    <PersonCircle {size} {pubkey} />
+    <PersonCircle class="h-12 w-12" {pubkey} />
     <div class="flex flex-col" style="min-width: 48px;">
       <PersonName {pubkey} />
       <PersonHandle {pubkey} />
