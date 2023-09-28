@@ -271,6 +271,9 @@
       on:reset={() => {
         replyIsActive = false
       }}
+      on:event={e => {
+        context = [e.detail, ...context]
+      }}
       {borderColor} />
 
     {#if !collapsed && visibleNotes.length > 0 && depth > 0 && !muted}

@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.3.9
+
+- [x] Show reply immediately after sending
+- [x] Fix relay detail page
+- [x] Improve up music, quote, and old note loading
+
 # 0.3.8
 
 - [x] Show more information on notifications page, particularly for mentions

@@ -34,12 +34,18 @@
     setTimeout(() => reply.write(draft))
   }
 
-  const reset = () => {
-    dispatch("reset")
-
+  const saveDraft = () => {
     if (reply) {
       draft = reply.parse()
     }
+  }
+
+  const clearDraft = () => {
+    draft = ""
+  }
+
+  const reset = () => {
+    dispatch("reset")
 
     data = null
     reply = null
@@ -58,7 +64,11 @@
     if (content) {
       const pub = await publishReply(parent, content, tags)
 
+      dispatch("event", pub.event)
+
       pub.on("progress", toastProgress)
+
+      clearDraft()
 
       reset()
     }
@@ -68,6 +78,7 @@
     const target = e.target as HTMLElement
 
     if (container && !container.contains(target)) {
+      saveDraft()
       reset()
     }
   }
