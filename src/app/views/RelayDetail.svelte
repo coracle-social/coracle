@@ -7,7 +7,7 @@
   import Rating from "src/partials/Rating.svelte"
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
   import RelayActions from "src/app/shared/RelayActions.svelte"
-  import {relays, normalizeRelayUrl, displayRelay} from "src/engine"
+  import {deriveRelay, normalizeRelayUrl, displayRelay} from "src/engine"
 
   export let url
 
@@ -18,7 +18,7 @@
 
   $: rating = getAvgQuality("review/relay", reviews)
 
-  const relay = relays.key(url)
+  const relay = deriveRelay(url)
   const tabs = ["notes", "reviews"]
   const setActiveTab = tab => {
     activeTab = tab
