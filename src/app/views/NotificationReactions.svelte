@@ -28,7 +28,7 @@
   class="flex w-full flex-col gap-2 text-left"
   on:click={() => modal.push({type: "note/detail", note})}>
   <div on:click|stopPropagation class="flex justify-between">
-    <small>{formatTimestamp(timestamp)}</small>
+    {formatTimestamp(timestamp)}
   </div>
   <div class="break-word overflow-hidden text-gray-1">
     <NoteContent {note} />

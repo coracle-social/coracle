@@ -46,7 +46,8 @@ const FORCE_RELAYS = (import.meta.env.VITE_FORCE_RELAYS || "").split(",").filter
 
 const COUNT_RELAYS = FORCE_RELAYS.length > 0 ? FORCE_RELAYS : ["wss://rbr.bio"]
 
-const SEARCH_RELAYS = FORCE_RELAYS.length > 0 ? FORCE_RELAYS : ["wss://relay.nostr.band"]
+const SEARCH_RELAYS =
+  FORCE_RELAYS.length > 0 ? FORCE_RELAYS : ["wss://relay.nostr.band", "wss://nostr.wine"]
 
 const DEFAULT_RELAYS =
   FORCE_RELAYS.length > 0

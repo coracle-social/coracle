@@ -19,6 +19,7 @@
 <Content>
   <Note
     showContext
+    showLoading
     anchorId={note.id}
     {note}
     {depth}
