@@ -1,5 +1,5 @@
 import EventEmitter from "events"
-import {last, uniqBy} from "ramda"
+import {last, omit, uniqBy} from "ramda"
 import {doPipe, defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"
 import {now} from "src/util/misc"
@@ -25,7 +25,7 @@ export type StaticPublisherOpts = PublisherOpts & {
 
 export class Publisher extends EventEmitter {
   result = defer()
-  event: NostrEvent
+  event: Event
 
   constructor(event: NostrEvent) {
     super()
@@ -34,7 +34,7 @@ export class Publisher extends EventEmitter {
       throw new Error("Can't publish unwrapped events")
     }
 
-    this.event = event
+    this.event = {...event, seen_on: []}
   }
 
   static publish({event, relays, ...opts}: StaticPublisherOpts) {
@@ -75,7 +75,7 @@ export class Publisher extends EventEmitter {
       this.emit("progress", progress)
     }
 
-    projections.push({...this.event, seen_on: []})
+    projections.push(this.event)
 
     setTimeout(() => {
       for (const url of urls) {
@@ -89,9 +89,11 @@ export class Publisher extends EventEmitter {
 
     // return console.log('PUBLISH', this.event)
 
-    const sub = executor.publish(this.event, {
+    const sub = executor.publish(omit(["seen_on"], this.event), {
       verb,
       onOk: (url: string) => {
+        this.event.seen_on.push(url)
+
         succeeded.add(url)
         timeouts.delete(url)
         failed.delete(url)
