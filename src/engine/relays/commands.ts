@@ -7,7 +7,7 @@ import {publishEvent} from "src/engine/network/utils"
 import {normalizeRelayUrl, isShareableRelay} from "./utils"
 import type {RelayPolicy} from "./model"
 import {relays} from "./state"
-import {relayPolicies} from './derived'
+import {relayPolicies} from "./derived"
 
 export const saveRelay = (url: string) => {
   if (isShareableRelay(url)) {
@@ -35,9 +35,11 @@ export const saveRelayPolicy = (e, relays: RelayPolicy[]) => {
   }
 }
 
-export const publishRelays = async ($relays: RelayPolicy[]) => {
+export const publishRelays = ($relays: RelayPolicy[]) => {
+  updateStore(people.key(stateKey.get()), now(), {relays: $relays})
+
   if (canSign.get()) {
-    publishEvent(10002, {
+    return publishEvent(10002, {
       tags: $relays
         .filter(r => isShareableRelay(r.url))
         .map(r => {
@@ -50,8 +52,6 @@ export const publishRelays = async ($relays: RelayPolicy[]) => {
           return t
         }),
     })
-  } else {
-    updateStore(people.key(stateKey.get()), now(), {relays: $relays})
   }
 }
 

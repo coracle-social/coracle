@@ -13,26 +13,27 @@ export type LoadPeopleOpts = {
   force?: boolean
 }
 
-export const attemptedPubkeys = new Set()
+export const attemptedPubkeys = new Map()
 
 export const getStalePubkeys = (pubkeys: string[]) => {
   const stale = new Set()
   const since = now() - seconds(3, "hour")
 
   for (const pubkey of pubkeys) {
-    if (stale.has(pubkey) || attemptedPubkeys.has(pubkey)) {
+    const attempts = attemptedPubkeys.get(pubkey) | 0
+    if (stale.has(pubkey) || attempts > 1) {
       continue
     }
 
-    attemptedPubkeys.add(pubkey)
+    attemptedPubkeys.set(pubkey, attempts + 1)
 
-    const key = people.key(pubkey)
+    const person = people.key(pubkey).get()
 
-    if ((key.get()?.last_fetched || 0) > since) {
+    if (person?.profile && (person?.last_fetched || 0) > since) {
       continue
     }
 
-    key.merge({last_fetched: now()})
+    people.key(pubkey).merge({last_fetched: now()})
 
     stale.add(pubkey)
   }

@@ -7,11 +7,11 @@ import {people} from "./state"
 
 export const publishProfile = profile => publishEvent(0, {content: JSON.stringify(profile)})
 
-export const publishPetnames = async ($petnames: string[][]) => {
+export const publishPetnames = ($petnames: string[][]) => {
+  updateStore(people.key(stateKey.get()), now(), {petnames: $petnames})
+
   if (canSign.get()) {
-    publishEvent(3, {tags: $petnames})
-  } else {
-    updateStore(people.key(stateKey.get()), now(), {petnames: $petnames})
+    return publishEvent(3, {tags: $petnames})
   }
 }
 
@@ -27,11 +27,11 @@ export const follow = (type: string, value: string) => {
 export const unfollow = (value: string) =>
   publishPetnames(reject((t: string[]) => t[1] === value, user.get().petnames || []))
 
-export const publishMutes = async ($mutes: string[][]) => {
+export const publishMutes = ($mutes: string[][]) => {
+  updateStore(people.key(stateKey.get()), now(), {mutes: $mutes})
+
   if (canSign.get()) {
-    publishEvent(10000, {tags: $mutes.map(t => t.slice(0, 2))})
-  } else {
-    updateStore(people.key(stateKey.get()), now(), {mutes: $mutes})
+    return publishEvent(10000, {tags: $mutes.map(t => t.slice(0, 2))})
   }
 }
 

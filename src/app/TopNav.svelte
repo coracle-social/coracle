@@ -4,7 +4,6 @@
   import {tryFunc} from "hurdak"
   import {nip05, nip19} from "nostr-tools"
   import {navigate} from "svelte-routing"
-  import {debounce} from "throttle-debounce"
   import {onMount} from "svelte"
   import {fuzzy} from "src/util/misc"
   import {fromNostrURI, isHex} from "src/util/nostr"
@@ -19,17 +18,14 @@
   import {menuIsOpen} from "src/app/state"
   import type {Topic} from "src/engine"
   import {
-    load,
     topics,
-    people,
     peopleWithName,
     session,
     canUseGiftWrap,
     hasNewNip04Messages,
     hasNewNip24Messages,
     hasNewNotifications,
-    getUserRelayUrls,
-    searchableRelays,
+    loadPeople,
   } from "src/engine"
 
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
@@ -70,22 +66,6 @@
     hideSearch()
     modal.push({type: "person/detail", pubkey})
   }
-
-  const loadProfiles = debounce(500, search => {
-    // If we have a query, search using nostr.band. If not, ask for random profiles.
-    // This allows us to populate results even if search isn't supported by forced urls
-    if (term.length > 2) {
-      load({
-        relays: $searchableRelays,
-        filters: [{kinds: [0], search, limit: 10}],
-      })
-    } else if (people.get().length < 50) {
-      load({
-        relays: getUserRelayUrls("read"),
-        filters: [{kinds: [0], limit: 50}],
-      })
-    }
-  })
 
   const tryParseEntity = async entity => {
     entity = fromNostrURI(entity)
@@ -136,7 +116,7 @@
 
   $: {
     if (term) {
-      loadProfiles(term)
+      loadPeople(term)
       tryParseEntity(term)
     }
   }

@@ -1,9 +1,9 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {generatePrivateKey} from "nostr-tools"
-  import {fly} from "src/util/transition"
   import {navigate} from "svelte-routing"
   import {closure} from "hurdak"
+  import {fly} from "src/util/transition"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
   import OnboardingKey from "src/app/views/OnboardingKey.svelte"
@@ -35,7 +35,7 @@
       return []
     }
 
-    const {petnames} = user.get()
+    const petnames = user.get()?.petnames || []
 
     if (petnames.length === 0) {
       for (const pubkey of $env.DEFAULT_FOLLOWS) {
@@ -47,7 +47,7 @@
   })
 
   let relays = closure(() => {
-    const {relays} = user.get()
+    const relays = user.get()?.relays || []
 
     if (relays.length === 0) {
       for (const url of $env.DEFAULT_RELAYS) {
@@ -61,16 +61,17 @@
   const signup = async noteContent => {
     loginWithPrivateKey(privkey)
 
-    // Wait for the published event to go through
-    await publishRelays(relays)
+    // Do this first so we know where to publish everything else
+    publishRelays(relays)
 
-    // Re-save preferences now that we have a key and relays. Wait for them
-    // to persist so we have the correct user preferences
-    await Promise.all([
-      publishProfile(profile),
-      publishPetnames(petnames),
-      noteContent && publishNote(noteContent),
-    ])
+    // Re-save preferences now that we have a key and relays
+    publishProfile(profile)
+    publishPetnames(petnames)
+
+    // Publish our welcome note
+    if (noteContent) {
+      publishNote(noteContent)
+    }
 
     // Start our notifications listener
     listenForNotifications()

@@ -1,13 +1,13 @@
 <script lang="ts">
   import {reject} from "ramda"
+  import {modal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import type {Person} from "src/engine"
-  import {mention, searchPeople} from "src/engine"
-  import {modal} from "src/partials/state"
+  import {mention, loadPeople, searchPeople} from "src/engine"
 
   export let petnames
 
@@ -21,6 +21,7 @@
 
   let q = ""
 
+  $: loadPeople(q)
   $: pubkeys = petnames.map(t => t[1])
   $: results = reject((p: Person) => pubkeys.includes(p.pubkey), $searchPeople(q))
 </script>

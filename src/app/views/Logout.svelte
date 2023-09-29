@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {tryFunc} from "hurdak"
   import {fly} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
@@ -9,7 +10,7 @@
   const confirm = async () => {
     confirmed = true
 
-    await storage.clear()
+    await tryFunc(() => storage.clear())
 
     // do a hard refresh so everything gets totally cleared.
     // Give them a moment to see the state transition. IndexedDB
