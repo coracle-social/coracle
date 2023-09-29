@@ -2637,6 +2637,11 @@ data-uri-to-buffer@^4.0.0:
   resolved "https://registry.npmjs.org/data-uri-to-buffer/-/data-uri-to-buffer-4.0.1.tgz"
   integrity sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A==
 
+date-picker-svelte@^2.8.0:
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/date-picker-svelte/-/date-picker-svelte-2.8.0.tgz#5fe1bea9e4f97942267ef545b498a75704470c34"
+  integrity sha512-L9h5mBAq+f85oXa9uPouHNVmi6HkjZwdhcUR8ca578alSiP9rBv4ZnoocR1Jv+s0TpYfBMSWseb+Buk5egF81g==
+
 debug@^2.2.0:
   version "2.6.9"
   resolved "https://registry.npmjs.org/debug/-/debug-2.6.9.tgz"

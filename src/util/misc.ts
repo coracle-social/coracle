@@ -63,12 +63,15 @@ export const formatTimestampRelative = (ts: number) => {
   return formatter.format(-delta, unit as Intl.RelativeTimeFormatUnit)
 }
 
-export const formatTimestampAsLocalISODate = (ts: number) => {
-  const date = new Date(ts * 1000)
+export const formatDateAsLocalISODate = (date: Date) => {
   const offset = date.getTimezoneOffset() * 60000
   const datetime = new Date(date.getTime() - offset).toISOString()
 
   return datetime
+}
+
+export const formatTimestampAsLocalISODate = (ts: number) => {
+  return formatDateAsLocalISODate(new Date(ts * 1000))
 }
 
 type ScrollerOpts = {

@@ -7,6 +7,7 @@
   import {noteKinds} from "src/util/nostr"
   import Chip from "src/partials/Chip.svelte"
   import Input from "src/partials/Input.svelte"
+  import DateInput from "src/partials/DateInput.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
@@ -76,9 +77,9 @@
 
       parts.push({keys: ["since", "until"], label: `Between ${since} and ${until}`})
     } else if (filter.since) {
-      parts.push({keys: ["since"], label: `After ${formatTimestampAsDate(filter.since)}`})
+      parts.push({keys: ["since"], label: `From ${formatTimestampAsDate(filter.since)}`})
     } else if (filter.until) {
-      parts.push({keys: ["until"], label: `Before ${formatTimestampAsDate(filter.until)}`})
+      parts.push({keys: ["until"], label: `Through ${formatTimestampAsDate(filter.until)}`})
     }
 
     return parts
@@ -222,11 +223,11 @@
           <div class="grid grid-cols-2 gap-2">
             <div class="flex flex-col gap-1">
               <strong>Since</strong>
-              <Input type="date" bind:value={_filter.since} />
+              <DateInput bind:value={_filter.since} />
             </div>
             <div class="flex flex-col gap-1">
               <strong>Until</strong>
-              <Input type="date" bind:value={_filter.until} />
+              <DateInput bind:value={_filter.until} />
             </div>
           </div>
           <div class="flex flex-col gap-1">
