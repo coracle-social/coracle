@@ -1,22 +1,29 @@
 import {pluck, identity, max, slice, filter, without, sortBy} from "ramda"
 import {seconds, batch, doPipe} from "hurdak"
 import {now} from "src/util/misc"
-import {noteKinds, reactionKinds} from "src/util/nostr"
+import {noteKinds, findReplyId, reactionKinds} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import type {Filter} from "src/engine/network/model"
 import {EventKind} from "src/engine/events/model"
 import {env, sessions} from "src/engine/session/state"
 import {_events} from "src/engine/events/state"
 import {events, isEventMuted} from "src/engine/events/derived"
-import {mergeHints, getPubkeyHints} from "src/engine/relays/utils"
-import {loadPubkeys, subscribe, subscribePersistent} from "src/engine/network/utils"
+import {mergeHints, getPubkeyHints, getParentHints} from "src/engine/relays/utils"
+import {loadPubkeys, load, subscribe, subscribePersistent} from "src/engine/network/utils"
 
 const onNotificationEvent = batch(300, (chunk: Event[]) => {
   const kinds = getNotificationKinds()
   const $isEventMuted = isEventMuted.get()
   const events = chunk.filter(e => kinds.includes(e.kind) && !$isEventMuted(e))
+  const eventsWithParent = chunk.filter(e => findReplyId(e))
 
   loadPubkeys(pluck("pubkey", events))
+
+  load({
+    relays: mergeHints(eventsWithParent.map(getParentHints)),
+    filters: [{ids: eventsWithParent.map(findReplyId)}],
+    onEvent: e => _events.update($events => $events.concat(e)),
+  })
 
   _events.mapStore.update($m => {
     for (const e of events) {

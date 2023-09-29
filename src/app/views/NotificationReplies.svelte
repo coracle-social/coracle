@@ -1,6 +1,6 @@
 <script lang="ts">
   import {formatTimestamp} from "src/util/misc"
-  import {noteKinds} from "src/util/nostr"
+  import {noteKinds, LOCAL_RELAY_URL} from "src/util/nostr"
   import NotificationPeople from "src/app/shared/NotificationPeople.svelte"
   import Note from "src/app/shared/Note.svelte"
   import type {Notification} from "src/engine"
@@ -17,5 +17,5 @@
     <NotificationPeople {notification} actionText="replied to your note" />
     <small>{formatTimestamp(timestamp)}</small>
   </div>
-  <Note topLevel depth={1} note={{...note, replies}} />
+  <Note topLevel depth={1} relays={[LOCAL_RELAY_URL]} note={{...note, replies}} />
 </div>

@@ -6,6 +6,7 @@
   import {fly} from "src/util/transition"
   import {quantify} from "hurdak"
   import {createScroller} from "src/util/misc"
+  import {LOCAL_RELAY_URL} from "src/util/nostr"
   import Spinner from "src/partials/Spinner.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
@@ -58,7 +59,7 @@
     }
 
     if (queryCache) {
-      selection = [...selection, "local://coracle.relay"]
+      selection = [...selection, LOCAL_RELAY_URL]
     }
 
     return selection

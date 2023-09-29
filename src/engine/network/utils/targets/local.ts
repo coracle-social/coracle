@@ -1,5 +1,6 @@
 import {sleep} from "hurdak"
 import {Emitter} from "paravel"
+import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {events} from "src/engine/events/derived"
 import {matchFilters} from "../filters"
 
@@ -23,13 +24,13 @@ export class LocalTarget extends Emitter {
         const event = events.key(id).get()
 
         if (event) {
-          this.emit("EVENT", "local://coracle.relay", subId, event)
+          this.emit("EVENT", LOCAL_RELAY_URL, subId, event)
         }
       }
     } else {
       for (const event of events.get()) {
         if (matchFilters(filters, event)) {
-          this.emit("EVENT", "local://coracle.relay", subId, event)
+          this.emit("EVENT", LOCAL_RELAY_URL, subId, event)
         }
       }
     }
