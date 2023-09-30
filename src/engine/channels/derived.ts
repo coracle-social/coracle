@@ -1,13 +1,14 @@
-import {find, filter, whereEq} from "ramda"
+import {none, find, filter, whereEq} from "ramda"
 import {derived} from "src/engine/core/utils"
 import {pubkey} from "src/engine/session/state"
+import {mutes} from "src/engine/people/derived"
 import type {Channel} from "./model"
 import {hasNewMessages} from "./utils"
 import {channels} from "./state"
 
 export const userChannels = derived(
-  [channels.throttle(300), pubkey],
-  ([$channels, $pk]): Channel[] => {
+  [channels.throttle(300), mutes, pubkey],
+  ([$channels, $mutes, $pk]): Channel[] => {
     if (!$pk) {
       return []
     }
@@ -17,7 +18,7 @@ export const userChannels = derived(
         return false
       }
 
-      return $channel.members?.includes($pk)
+      return $channel.members?.includes($pk) && none(pk => $mutes.has(pk), $channel.members || [])
     })
   }
 )

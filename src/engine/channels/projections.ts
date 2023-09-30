@@ -115,7 +115,7 @@ projections.addHandler(EventKind.Nip04Message, async e => {
         id: e.pubkey,
         type: "nip04",
         relays: uniq([...relays, ...($channel?.relays || [])]),
-        members: [session.pubkey, recipient],
+        members: [session.pubkey, other],
         messages: uniqBy(prop("id"), messages),
       }
 
