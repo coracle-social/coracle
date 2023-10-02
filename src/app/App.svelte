@@ -7,10 +7,9 @@
   import {onMount} from "svelte"
   import {Router, links} from "svelte-routing"
   import {globalHistory} from "svelte-routing/src/history"
-  import {isNil, last} from "ramda"
-  import {seconds, Fetch, shuffle} from "hurdak"
+  import {isNil, pluck, last} from "ramda"
+  import {seconds, Fetch} from "hurdak"
   import {tryFetch, hexToBech32, bech32ToHex, now} from "src/util/misc"
-  import type {Relay} from "src/engine"
   import {storage, session, stateKey, relays, getSetting, dufflepud} from "src/engine"
   import * as engine from "src/engine"
   import {loadAppData} from "src/app/state"
@@ -116,24 +115,25 @@
       }
 
       // Find relays with old/missing metadata and refresh them. Only pick a
-      // few so we're not sending too many concurrent http requests
-      const staleRelays = shuffle(
-        relays.get().filter(r => (r.info?.last_checked || 0) < now() - seconds(7, "day"))
-      ).slice(0, 10) as Relay[]
+      // few so we're not asking for too much data at once
+      const staleRelays = relays
+        .get()
+        .filter(r => (r.info?.last_checked || 0) < now() - seconds(7, "day"))
+        .slice(0, 50)
 
-      for (const relay of staleRelays) {
-        tryFetch(async () => {
-          const info = await Fetch.fetchJson(dufflepud("relay/info"), {
-            method: "POST",
-            body: JSON.stringify({url: relay.url}),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
-
-          relays.key(relay.url).merge({...info, last_checked: now()})
+      tryFetch(async () => {
+        const result = await Fetch.fetchJson(dufflepud("relay/info"), {
+          method: "POST",
+          body: JSON.stringify({urls: pluck("url", staleRelays)}),
+          headers: {
+            "Content-Type": "application/json",
+          },
         })
-      }
+
+        for (const {url, info} of result.data) {
+          relays.key(url).merge({...info, url, last_checked: now()})
+        }
+      })
     }, 30_000)
 
     return () => {

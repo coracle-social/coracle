@@ -33,7 +33,7 @@ projections.addHandler(EventKind.Delete, e => {
 projections.addHandler(EventKind.GiftWrap, e => {
   const session = sessions.get()[Tags.from(e).getMeta("p")]
 
-  if (!session?.privkey) {
+  if (session?.method !== "privkey") {
     return
   }
 

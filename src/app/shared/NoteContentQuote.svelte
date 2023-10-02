@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type {Filter} from "nostr-tools"
   import {filterVals} from "hurdak"
   import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
@@ -13,6 +12,7 @@
     isEventMuted,
     getParentHints,
     isShareableRelay,
+    getIdFilters,
     selectHints,
   } from "src/engine"
 
@@ -33,15 +33,15 @@
 
   load({
     relays,
-    filters: [
-      id
-        ? {ids: [id]}
-        : filterVals(xs => xs.length > 0, {
+    filters: id
+      ? getIdFilters([id])
+      : [
+          filterVals(xs => xs.length > 0, {
             "#d": [identifier],
             kinds: [kind],
             authors: [pubkey],
           }),
-    ] as Filter[],
+        ],
     onEvent: event => {
       loading = false
       muted = $isEventMuted(event)

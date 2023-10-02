@@ -1,18 +1,39 @@
-import {tryFunc, Fetch} from "hurdak"
+import {uniq} from "ramda"
+import {tryFunc, createMapOf, Fetch} from "hurdak"
 import {Tags} from "src/util/nostr"
-import {tryJson, hexToBech32} from "src/util/misc"
+import {tryJson, hexToBech32, createBatcher} from "src/util/misc"
 import {updateStore} from "src/engine/core/commands"
 import {projections} from "src/engine/core/projections"
 import {dufflepud} from "src/engine/session/utils"
 import {getLnUrl} from "src/engine/zaps/utils"
 import {people} from "./state"
 
+const fetchHandle = createBatcher(500, async (handles: string[]) => {
+  const {data} = await tryFunc(() =>
+    Fetch.postJson(dufflepud("handle/info"), {handles: uniq(handles)})
+  )
+
+  const infoByHandle = createMapOf("handle", "info", data)
+
+  return handles.map(h => infoByHandle[h])
+})
+
+const fetchZapper = createBatcher(500, async (lnurls: string[]) => {
+  const {data} = await tryFunc(() =>
+    Fetch.postJson(dufflepud("zapper/info"), {lnurls: uniq(lnurls)})
+  )
+
+  const infoByLnurl = createMapOf("lnurl", "info", data)
+
+  return lnurls.map(h => infoByLnurl[h])
+})
+
 const updateHandle = async (e, {nip05}) => {
   if (!nip05) {
     return
   }
 
-  const profile = await tryFunc(() => Fetch.postJson(dufflepud("handle/info"), {handle: nip05}))
+  const profile = await fetchHandle(nip05)
 
   if (profile?.pubkey === e.pubkey) {
     updateStore(people.key(e.pubkey), e.created_at, {
@@ -34,7 +55,7 @@ const updateZapper = async (e, {lud16, lud06}) => {
     return
   }
 
-  const result = await tryFunc(() => Fetch.postJson(dufflepud("zapper/info"), {lnurl}))
+  const result = await fetchZapper(lnurl)
 
   if (!result?.allowsNostr || !result?.nostrPubkey) {
     return

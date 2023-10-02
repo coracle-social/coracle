@@ -4,6 +4,7 @@ import {findReplyId, findRootId} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {writable} from "src/engine/core/utils"
+import {getIdFilters} from "./filters"
 import {load} from "./load"
 
 export type ThreadOpts = {
@@ -37,7 +38,7 @@ export class ThreadLoader {
     if (filteredIds.length > 0) {
       load({
         relays: this.opts.relays,
-        filters: [{ids: filteredIds}],
+        filters: getIdFilters(filteredIds),
         onEvent: batch(300, (events: Event[]) => {
           this.addToThread(events)
           this.loadNotes(events.flatMap(e => [findReplyId(e), findRootId(e)]))

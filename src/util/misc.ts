@@ -1,7 +1,7 @@
 import {bech32, utf8} from "@scure/base"
 import {debounce} from "throttle-debounce"
 import {pluck, sum, is, equals} from "ramda"
-import {Storage, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
+import {Storage, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from "svelte/store"
 import {warn} from "src/util/logger"
@@ -340,3 +340,30 @@ export const sumBy = (f, xs) => sum(xs.map(f))
 export const stripProto = url => url.replace(/.*:\/\//, "")
 
 export const ensureProto = url => (url.includes("://") ? url : "https://" + url)
+
+export const createBatcher = <T, U>(t, execute: (request: T[]) => U[] | Promise<U[]>) => {
+  const queue = []
+
+  const _execute = async () => {
+    const items = queue.splice(0)
+    const results = await execute(pluck("request", items))
+
+    if (results.length !== items.length) {
+      console.warn("Execute must return a promise for each request", results, items)
+    }
+
+    results.forEach(async (r, i) => items[i].deferred.resolve(await r))
+  }
+
+  return (request: T): Promise<U> => {
+    const deferred = defer<U>()
+
+    if (queue.length === 0) {
+      setTimeout(_execute, t)
+    }
+
+    queue.push({request, deferred})
+
+    return deferred
+  }
+}

@@ -2,11 +2,12 @@
   import {onMount} from "svelte"
   import {uniq, pluck} from "ramda"
   import {batch} from "hurdak"
+  import {Tags} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import type {Event} from "src/engine"
-  import {subscribe, loadPubkeys, getPubkeyHints, follows} from "src/engine"
+  import {subscribe, loadPubkeys, getPubkeyHints} from "src/engine"
 
   export let type
   export let pubkey
@@ -14,23 +15,30 @@
   let pubkeys = []
 
   onMount(() => {
-    if (type === "follows") {
-      pubkeys = Array.from($follows)
-    } else {
-      const sub = subscribe({
-        relays: getPubkeyHints(pubkey, "read"),
-        filters: [{kinds: [3], "#p": [pubkey]}],
-        onEvent: batch(500, (events: Event[]) => {
-          const newPubkeys = pluck("pubkey", events)
+    const sub =
+      type === "follows"
+        ? subscribe({
+            relays: getPubkeyHints(pubkey, "read"),
+            filters: [{kinds: [3], authors: [pubkey]}],
+            onEvent: (e: Event) => {
+              pubkeys = Tags.from(e).type("p").values().all()
 
-          loadPubkeys(newPubkeys)
+              loadPubkeys(pubkeys)
+            },
+          })
+        : subscribe({
+            relays: getPubkeyHints(pubkey, "read"),
+            filters: [{kinds: [3], "#p": [pubkey]}],
+            onEvent: batch(500, (events: Event[]) => {
+              const newPubkeys = pluck("pubkey", events)
 
-          pubkeys = uniq(pubkeys.concat(newPubkeys))
-        }),
-      })
+              loadPubkeys(newPubkeys)
 
-      return () => sub.close()
-    }
+              pubkeys = uniq(pubkeys.concat(newPubkeys))
+            }),
+          })
+
+    return () => sub.close()
   })
 </script>
 

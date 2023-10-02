@@ -57,7 +57,7 @@ export class IndexedDB {
   }
 
   close() {
-    return this.db.close()
+    return this.db?.close()
   }
 
   delete() {

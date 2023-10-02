@@ -9,7 +9,13 @@ import {env, sessions} from "src/engine/session/state"
 import {_events} from "src/engine/events/state"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {mergeHints, getPubkeyHints, getParentHints} from "src/engine/relays/utils"
-import {loadPubkeys, load, subscribe, subscribePersistent} from "src/engine/network/utils"
+import {
+  loadPubkeys,
+  load,
+  subscribe,
+  subscribePersistent,
+  getIdFilters,
+} from "src/engine/network/utils"
 
 const onNotificationEvent = batch(300, (chunk: Event[]) => {
   const kinds = getNotificationKinds()
@@ -21,7 +27,7 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
 
   load({
     relays: mergeHints(eventsWithParent.map(getParentHints)),
-    filters: [{ids: eventsWithParent.map(findReplyId)}],
+    filters: getIdFilters(eventsWithParent.map(findReplyId)),
     onEvent: e => _events.update($events => $events.concat(e)),
   })
 
