@@ -1,5 +1,14 @@
 # Changelog
 
+# 0.3.9
+
+- [x] Close stale connections to prevent stalling
+- [x] Fix onboarding profile picture upload
+- [x] Batch zapper/handle requests
+- [x] Fix invalid id filters
+- [x] Mute DMs from muted accounts
+- [x] Add better date picker
+
 # 0.3.8
 
 - [x] Show reply immediately after sending
