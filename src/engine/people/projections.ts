@@ -33,10 +33,16 @@ const updateHandle = async (e, {nip05}) => {
     return
   }
 
+  const person = people.key(e.pubkey)
+
+  if (person.get()?.handle_updated_at > e.created_at) {
+    return
+  }
+
   const profile = await fetchHandle(nip05)
 
   if (profile?.pubkey === e.pubkey) {
-    updateStore(people.key(e.pubkey), e.created_at, {
+    updateStore(person, e.created_at, {
       handle: {address: nip05, profile},
     })
   }
@@ -55,13 +61,19 @@ const updateZapper = async (e, {lud16, lud06}) => {
     return
   }
 
+  const person = people.key(e.pubkey)
+
+  if (person.get()?.zapper_updated_at > e.created_at) {
+    return
+  }
+
   const result = await fetchZapper(lnurl)
 
   if (!result?.allowsNostr || !result?.nostrPubkey) {
     return
   }
 
-  updateStore(people.key(e.pubkey), e.created_at, {
+  updateStore(person, e.created_at, {
     zapper: {
       lnurl: hexToBech32("lnurl", lnurl),
       callback: result.callback,

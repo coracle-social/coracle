@@ -8,6 +8,8 @@
 - [x] Fix invalid id filters
 - [x] Mute DMs from muted accounts
 - [x] Add better date picker
+- [x] Reduce redundant nip05 calls
+- [x] Reduce redundant signature verification
 
 # 0.3.8
 

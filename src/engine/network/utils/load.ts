@@ -1,4 +1,4 @@
-import {always, path as getPath} from "ramda"
+import {assoc, path as getPath} from "ramda"
 import {defer} from "hurdak"
 import {pushToKey} from "src/util/misc"
 import {info} from "src/util/logger"
@@ -25,18 +25,15 @@ export type LoadItem = {
 
 const queue = []
 
-const loadChunk = (chunk, relays, eventWasSeen = always(false)) => {
+const loadChunk = (chunk, relays, tracker) => {
   const sub = new Subscription({
     relays,
     timeout: 15000,
     filters: combineFilters(chunk.flatMap(getPath(["request", "filters"]))),
+    shouldIgnore: tracker.add,
   })
 
   sub.on("event", e => {
-    if (eventWasSeen(e)) {
-      return
-    }
-
     for (const {request} of chunk) {
       if (request.onEvent && matchFilters(request.filters, e)) {
         request.onEvent(e)
@@ -71,12 +68,15 @@ export const execute = () => {
   }
 
   const items = queue.splice(0)
+  const tracker = new Tracker()
 
   info(`Loading ${items.length} grouped requests`, filters)
 
   // If we're using multiplexer, let it do its thing
   if (getSetting("multiplextr_url")) {
-    loadChunk(items, mergeHints(items.map(getPath(["request", "relays"]))))
+    const relays = mergeHints(items.map(getPath(["request", "relays"])))
+
+    loadChunk(items, relays, tracker)
   } else {
     const itemsByRelay = {}
     for (const item of items) {
@@ -85,11 +85,9 @@ export const execute = () => {
       }
     }
 
-    const tracker = new Tracker()
-
     // Group by relay, then by filter
     for (const [url, chunk] of Object.entries(itemsByRelay) as [string, LoadItem[]][]) {
-      loadChunk(chunk, [url], e => tracker.add(e, url))
+      loadChunk(chunk, [url], tracker)
     }
   }
 }
@@ -108,4 +106,18 @@ export const load = (request: LoadOpts) => {
   queue.push({request, result})
 
   return result
+}
+
+export const loadOne = (request: LoadOpts) => {
+  return new Promise(resolve => {
+    load({
+      ...request,
+      filters: request.filters.map(assoc("limit", 1)),
+      onEvent: e => {
+        request.onEvent?.(e)
+
+        resolve(e)
+      },
+    })
+  })
 }

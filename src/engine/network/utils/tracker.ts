@@ -4,7 +4,7 @@ import {isShareableRelay} from "src/engine/relays/utils"
 export class Tracker {
   urlsByEventId = new Map()
 
-  add(event, urls) {
+  add = (event, urls) => {
     const seen = this.urlsByEventId.get(event.id)
 
     event.seen_on = seen || []

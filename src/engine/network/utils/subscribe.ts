@@ -16,6 +16,7 @@ export type SubscriptionOpts = {
   relays: string[]
   filters: Filter[]
   timeout?: number
+  shouldIgnore?: (e: Event, url: string) => boolean
   shouldProject?: boolean
 }
 
@@ -63,6 +64,10 @@ export class Subscription extends EventEmitter {
     const seen = this.tracker.add(event, url)
 
     if (seen) {
+      return
+    }
+
+    if (this.opts.shouldIgnore?.(event, url)) {
       return
     }
 

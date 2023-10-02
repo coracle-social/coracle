@@ -13,6 +13,7 @@ export type CursorOpts = {
   relay: string
   filters: Filter[]
   onEvent?: (e: Event) => void
+  shouldIgnore?: (e: Event, url: string) => boolean
 }
 
 export class Cursor {
@@ -53,6 +54,7 @@ export class Cursor {
       timeout: 3000,
       relays: [relay],
       filters: filters.map(mergeRight({until, limit, since})),
+      shouldIgnore: this.opts.shouldIgnore,
     })
 
     sub.on("event", (event: Event) => {
@@ -118,6 +120,7 @@ export class MultiCursor {
           relay: url,
           filters: opts.filters,
           onEvent: opts.onEvent,
+          shouldIgnore: this.tracker.add,
         })
     )
   }
@@ -151,12 +154,7 @@ export class MultiCursor {
         break
       }
 
-      const event = cursor.pop()
-      const seen = this.tracker.add(event, event.seen_on)
-
-      if (!seen) {
-        events.push(event)
-      }
+      events.push(cursor.pop())
     }
 
     // Preload the next page
