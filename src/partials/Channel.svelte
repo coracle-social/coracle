@@ -95,7 +95,7 @@
 
 <div class="flex h-full gap-4">
   <div class="relative w-full">
-    <div class="-mt-16 flex h-screen flex-col pt-20" class:pb-20={$canSign}>
+    <div class="-mt-16 flex h-screen flex-col pt-16" class:pb-24={$canSign}>
       <ul
         bind:this={container}
         class="flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
