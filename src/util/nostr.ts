@@ -194,7 +194,7 @@ const WARN_TAGS = new Set([
   "porn",
   "ass",
   "boob",
-  "boostr",
+  "boobstr",
   "sex",
   "sexy",
   "fuck",

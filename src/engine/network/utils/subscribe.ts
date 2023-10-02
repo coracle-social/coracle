@@ -43,9 +43,15 @@ export class Subscription extends EventEmitter {
       setTimeout(this.close, timeout)
     }
 
-    const urls = getUrls(relays)
+    this.executor = getExecutor(getUrls(relays))
 
-    this.executor = getExecutor(urls)
+    // If one of our connections gets closed make sure to kill our sub
+    this.executor.target.connections.forEach(con => {
+      con.on("close", () => {
+        this.close()
+      })
+    })
+
     this.sub = this.executor.subscribe(filters, {
       onEvent: this.onEvent,
       onEose: this.onEose,

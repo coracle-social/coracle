@@ -16,7 +16,6 @@
 
   const setDate = d => {
     date = d
-    console.log(d)
     value = formatDateAsLocalISODate(d).slice(0, 10)
   }
 

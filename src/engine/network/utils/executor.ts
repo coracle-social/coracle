@@ -1,5 +1,5 @@
-import {partition} from "ramda"
-import {noop} from "hurdak"
+import {max, partition} from "ramda"
+import {noop, pickVals} from "hurdak"
 import {Plex, Relays, Executor, Multi} from "paravel"
 import {error, warn} from "src/util/logger"
 import {normalizeRelayUrl} from "src/engine/relays/utils"
@@ -82,3 +82,17 @@ export const getExecutor = (urls: string[]) => {
 
   return executor
 }
+
+setInterval(() => {
+  const activityKeys = ["lastRequest", "lastPublish", "lastEvent"]
+
+  for (const [url, con] of pool.data.entries()) {
+    // @ts-ignore
+    const lastActivity = pickVals(activityKeys, con.meta).reduce(max)
+
+    // If our connection hasn't been used in a while, close it and reopen
+    if (lastActivity && lastActivity < Date.now() - 60_000) {
+      pool.remove(url)
+    }
+  }
+}, 10_000)
