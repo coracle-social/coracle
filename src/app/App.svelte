@@ -119,7 +119,7 @@
       const staleRelays = relays
         .get()
         .filter(r => (r.info?.last_checked || 0) < now() - seconds(7, "day"))
-        .slice(0, 50)
+        .slice(0, 20)
 
       tryFetch(async () => {
         const result = await Fetch.fetchJson(dufflepud("relay/info"), {
