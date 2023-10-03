@@ -20,7 +20,6 @@ export const deriveMuted = (value: string) => mutes.derived(s => s.has(value))
 export const deriveFollowing = (pubkey: string) => follows.derived(s => s.has(pubkey))
 
 export const possibleImposters = peopleWithName.throttle(1000).derived($people => {
-  const t = Date.now()
   const pubkeys = new Set()
   const seen = new Set()
 
@@ -34,8 +33,6 @@ export const possibleImposters = peopleWithName.throttle(1000).derived($people =
       seen.add(key)
     }
   }
-
-  console.log(Date.now() - t)
 
   return pubkeys
 })

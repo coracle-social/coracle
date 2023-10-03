@@ -28,7 +28,7 @@
     loadPeople,
   } from "src/engine"
 
-  const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
+  //const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
 
   const toggleMenu = () => menuIsOpen.update(x => !x)
 
@@ -160,7 +160,12 @@
             border-gray-6 bg-gray-7 px-2 text-gray-2">
   <div>
     <div class="app-logo flex cursor-pointer items-center gap-2" on:click={toggleMenu}>
-      <img alt="App Logo" src={logoUrl} class="w-10" />
+      <!-- <img alt="App Logo" src={logoUrl} class="w-10" /> -->
+      <img
+        alt="Happy Harvest!"
+        src="/images/pumpkin.png"
+        class="w-10"
+        title="png image from pngtree.com" />
       <h1 class="staatliches pt-1 text-3xl">{appName}</h1>
       {#if $hasNewNotifications || hasNewDMs}
         <div
