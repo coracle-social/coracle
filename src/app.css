@@ -12,24 +12,24 @@
 }
 
 @font-face {
-  font-family: "Montserrat";
+  font-family: "Figtree";
   font-style: normal;
   font-weight: 400;
-  src: local(""), url("/fonts/Montserrat Regular 400.ttf") format("truetype");
+  src: local(""), url("/fonts/Figtree-VariableFont_wght.ttf") format("truetype");
 }
 
 @font-face {
-  font-family: "Montserrat";
+  font-family: "Figtree";
   font-style: bold;
   font-weight: 600;
-  src: local(""), url("/fonts/Montserrat SemiBold 600.ttf") format("truetype");
+  src: local(""), url("/fonts/Figtree-VariableFont_wght.ttf") format("truetype");
 }
 
 @font-face {
-  font-family: "Montserrat";
+  font-family: "Figtree";
   font-style: italic;
   font-weight: 400;
-  src: local(""), url("/fonts/Montserrat Italic 400.ttf") format("truetype");
+  src: local(""), url("/fonts/Figtree-Italic-VariableFont_wght.ttf") format("truetype");
 }
 
 @font-face {
@@ -40,7 +40,7 @@
 }
 
 .montserrat {
-  font-family: Montserrat;
+  font-family: Figtree;
   font-weight: 400;
 }
 
@@ -49,7 +49,7 @@
 }
 
 :root {
-  font-family: Montserrat;
+  font-family: Figtree;
 }
 
 html,
