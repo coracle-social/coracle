@@ -12,6 +12,7 @@
 - [x] Reduce redundant signature verification
 - [x] Show how many people you follow follow someone you don't follow
 - [x] Improve and optimize followers count
+- [x] Show warning next to possible imposters
 
 # 0.3.8
 
