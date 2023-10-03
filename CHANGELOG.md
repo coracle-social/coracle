@@ -10,6 +10,7 @@
 - [x] Add better date picker
 - [x] Reduce redundant nip05 calls
 - [x] Reduce redundant signature verification
+- [x] Show how many people you follow follow someone you don't follow
 
 # 0.3.8
 

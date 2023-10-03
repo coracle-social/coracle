@@ -1,32 +1,24 @@
+import {join} from "ramda"
 import {base64} from "@scure/base"
 import {randomBytes} from "@noble/hashes/utils"
 import {secp256k1} from "@noble/curves/secp256k1"
 import {sha256} from "@noble/hashes/sha256"
 import {xchacha20} from "@noble/ciphers/chacha"
 import {switcherFn} from "hurdak"
-import {LRUCache} from "src/util/lruCache"
+import {cached} from "src/util/lruCache"
 import type {Session} from "src/engine/session/model"
 
 export const utf8Decoder = new TextDecoder()
 
 export const utf8Encoder = new TextEncoder()
 
-export const sharedSecretCache = new LRUCache<string, Uint8Array>(100)
-
 // Deriving shared secret is an expensive computation, cache it
-export function getSharedSecret(sk: string, pk: string) {
-  const cacheKey = `${sk}:${pk}`
-
-  let result = sharedSecretCache.get(cacheKey)
-
-  if (!result) {
-    result = sha256(secp256k1.getSharedSecret(sk, "02" + pk).subarray(1, 33))
-
-    sharedSecretCache.set(cacheKey, result)
-  }
-
-  return result
-}
+export const getSharedSecret = cached({
+  maxSize: 100,
+  getKey: join(":"),
+  getValue: ([sk, pk]: string[]) =>
+    sha256(secp256k1.getSharedSecret(sk, "02" + pk).subarray(1, 33)),
+})
 
 export function encryptWithSharedSecret(key: Uint8Array, text: string, v = 1) {
   if (v !== 1) {

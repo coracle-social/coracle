@@ -1,7 +1,8 @@
-import {nth, last} from "ramda"
+import {join, nth, last} from "ramda"
 import {ellipsize} from "hurdak"
 import {nip19} from "nostr-tools"
 import {fuzzy} from "src/util/misc"
+import {cached} from "src/util/lruCache"
 import type {Person, Handle} from "./model"
 import {people} from "./state"
 
@@ -47,9 +48,13 @@ export const getPeopleSearch = $people =>
     threshold: 0.3,
   })
 
-export const getMutes = $person => new Set(($person?.mutes || []).map(nth(1)) as string[])
+export const getMutedPubkeys = $person => ($person?.mutes || []).map(nth(1)) as string[]
 
-export const getFollows = $person => new Set(($person?.petnames || []).map(nth(1)) as string[])
+export const getMutes = $person => new Set(getMutedPubkeys($person))
+
+export const getFollowedPubkeys = $person => ($person?.petnames || []).map(nth(1)) as string[]
+
+export const getFollows = $person => new Set(getFollowedPubkeys($person))
 
 export const getNetwork = $person => {
   const pubkeys = getFollows($person)
@@ -65,3 +70,12 @@ export const getNetwork = $person => {
 
   return network
 }
+
+export const getFollowsWhoFollow = cached({
+  maxSize: 1000,
+  getKey: join(":"),
+  getValue: ([pk, tpk]) =>
+    getFollowedPubkeys(people.key(pk).get()).filter(pk =>
+      getFollowedPubkeys(people.key(pk).get()).includes(tpk)
+    ),
+})

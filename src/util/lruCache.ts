@@ -27,3 +27,29 @@ export class LRUCache<T, U> {
     }
   }
 }
+
+export function cached<T, V>({
+  maxSize,
+  getKey,
+  getValue,
+}: {
+  maxSize: number
+  getKey: (args: any[]) => T
+  getValue: (args: any[]) => V
+}) {
+  const cache = new LRUCache<T, V>(maxSize)
+
+  return (...args) => {
+    const k = getKey(args)
+
+    let v = cache.get(k)
+
+    if (!v) {
+      v = getValue(args)
+
+      cache.set(k, v)
+    }
+
+    return v
+  }
+}
