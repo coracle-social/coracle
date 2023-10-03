@@ -13,6 +13,8 @@
 - [x] Show how many people you follow follow someone you don't follow
 - [x] Improve and optimize followers count
 - [x] Show warning next to possible imposters
+- [x] Switch font to Lato
+- [x] Fix anonymous relay usage
 
 # 0.3.8
 
