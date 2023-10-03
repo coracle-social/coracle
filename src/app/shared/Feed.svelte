@@ -2,11 +2,12 @@
   import {onMount, onDestroy} from "svelte"
   import {readable} from "svelte/store"
   import {FeedLoader} from "src/engine"
-  import {last, equals} from "ramda"
+  import {equals} from "ramda"
   import {fly} from "src/util/transition"
   import {quantify} from "hurdak"
   import {createScroller} from "src/util/misc"
   import {LOCAL_RELAY_URL} from "src/util/nostr"
+  import {getModal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
@@ -28,8 +29,6 @@
   let feedScroller = null
   let oldNotes = readable([])
   let newNotes = readable([])
-
-  const getModal = () => last(Array.from(document.querySelectorAll(".modal-content")))
 
   const setFeedRelay = relay => {
     feedRelay = relay

@@ -11,6 +11,7 @@
 - [x] Reduce redundant nip05 calls
 - [x] Reduce redundant signature verification
 - [x] Show how many people you follow follow someone you don't follow
+- [x] Improve and optimize followers count
 
 # 0.3.8
 

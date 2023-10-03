@@ -56,6 +56,10 @@ export const getFollowedPubkeys = $person => ($person?.petnames || []).map(nth(1
 
 export const getFollows = $person => new Set(getFollowedPubkeys($person))
 
+export const isFollowing = ($person, pubkey) => getFollowedPubkeys($person).includes(pubkey)
+
+export const getFollowers = pubkey => people.get().filter($p => isFollowing($p, pubkey))
+
 export const getNetwork = $person => {
   const pubkeys = getFollows($person)
   const network = new Set<string>()
@@ -75,7 +79,5 @@ export const getFollowsWhoFollow = cached({
   maxSize: 1000,
   getKey: join(":"),
   getValue: ([pk, tpk]) =>
-    getFollowedPubkeys(people.key(pk).get()).filter(pk =>
-      getFollowedPubkeys(people.key(pk).get()).includes(tpk)
-    ),
+    getFollowedPubkeys(people.key(pk).get()).filter(pk => isFollowing(people.key(pk).get(), tpk)),
 })

@@ -128,3 +128,5 @@ export const getThemeBackgroundGradient = () => {
     rgb: `rgba(${color.join(", ")})`,
   }
 }
+
+export const getModal = () => last(Array.from(document.querySelectorAll(".modal-content")))

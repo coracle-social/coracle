@@ -9,9 +9,11 @@ import {getLnUrl} from "src/engine/zaps/utils"
 import {people} from "./state"
 
 const fetchHandle = createBatcher(500, async (handles: string[]) => {
-  const {data} = await tryFunc(() =>
-    Fetch.postJson(dufflepud("handle/info"), {handles: uniq(handles)})
-  )
+  const data = await tryFunc(async () => {
+    const res = await Fetch.postJson(dufflepud("handle/info"), {handles: uniq(handles)})
+
+    return res?.data || []
+  })
 
   const infoByHandle = createMapOf("handle", "info", data)
 
@@ -19,9 +21,11 @@ const fetchHandle = createBatcher(500, async (handles: string[]) => {
 })
 
 const fetchZapper = createBatcher(500, async (lnurls: string[]) => {
-  const {data} = await tryFunc(() =>
-    Fetch.postJson(dufflepud("zapper/info"), {lnurls: uniq(lnurls)})
-  )
+  const data = await tryFunc(async () => {
+    const res = await Fetch.postJson(dufflepud("zapper/info"), {lnurls: uniq(lnurls)})
+
+    return res?.data || []
+  })
 
   const infoByLnurl = createMapOf("lnurl", "info", data)
 
