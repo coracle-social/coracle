@@ -12,8 +12,8 @@ const fetchHandle = createBatcher(500, async (handles: string[]) => {
   const data = await tryFunc(async () => {
     const res = await Fetch.postJson(dufflepud("handle/info"), {handles: uniq(handles)})
 
-    return res?.data || []
-  })
+    return res?.data
+  }) || []
 
   const infoByHandle = createMapOf("handle", "info", data)
 
@@ -24,8 +24,8 @@ const fetchZapper = createBatcher(500, async (lnurls: string[]) => {
   const data = await tryFunc(async () => {
     const res = await Fetch.postJson(dufflepud("zapper/info"), {lnurls: uniq(lnurls)})
 
-    return res?.data || []
-  })
+    return res?.data
+  }) || []
 
   const infoByLnurl = createMapOf("lnurl", "info", data)
 
