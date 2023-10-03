@@ -7,7 +7,7 @@ export const stateKey = pubkey.derived($pk => $pk || "anonymous")
 
 export const session = derived([pubkey, sessions], ([$pk, $sessions]) => $sessions[$pk])
 
-export const user = derived([session, people.mapStore], ([$s, $p]) => $p.get($s?.pubkey))
+export const user = derived([stateKey, people.mapStore], ([$k, $p]) => $p.get($k))
 
 export const ndk = session.derived(getNdk)
 

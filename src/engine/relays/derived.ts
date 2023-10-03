@@ -7,7 +7,7 @@ export const searchRelays = relays.derived(getRelaySearch)
 
 export const searchableRelays = relays.derived(getSearchableRelays)
 
-export const relayPolicies = user.derived($user => $user.relays || [])
+export const relayPolicies = user.derived($user => $user?.relays || [])
 
 export const relayPolicyUrls = relayPolicies.derived(pluck("url"))
 

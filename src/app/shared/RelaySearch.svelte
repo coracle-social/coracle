@@ -32,7 +32,7 @@
   )
 
   load({
-    relays: getPubkeyHints($session.pubkey, "read"),
+    relays: getPubkeyHints($session?.pubkey, "read"),
     filters: [
       {
         limit: 1000,
