@@ -23,7 +23,7 @@
     compileFilter({kinds: [1808], limit: 10}),
   ]
 
-  const relays = getRelaysFromFilters(filters)
+  const relays = getRelaysFromFilters(filters).concat("wss://relay.stemstr.app")
 
   const feed = new FeedLoader({filters, relays})
 
