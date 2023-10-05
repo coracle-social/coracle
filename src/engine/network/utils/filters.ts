@@ -90,12 +90,12 @@ export const getFilterGenerality = filter => {
 
   const hasTags = find(k => k.startsWith("#"), Object.keys(filter))
 
-  if (filter.pubkeys && hasTags) {
+  if (filter.authors && hasTags) {
     return 0.8
   }
 
-  if (filter.pubkeys) {
-    return 1 - Math.max(1, filter.pubkeys.length / 100)
+  if (filter.authors) {
+    return 1 - Math.min(1, filter.authors.length / 100)
   }
 
   return 0
@@ -104,14 +104,16 @@ export const getFilterGenerality = filter => {
 export const guessFilterDelta = filters => {
   const avgGenerality = avg(filters.map(getFilterGenerality))
 
-  return Math.round(seconds(7, "day") * Math.max(0.001, avgGenerality))
+  return Math.round(seconds(1, "day") * Math.max(0.005, avgGenerality))
 }
 
-export const getPubkeysWithDefaults = (pubkeys: Set<string>) =>
-  shuffle(pubkeys.size > 0 ? Array.from(pubkeys) : (env.get().DEFAULT_FOLLOWS as string[])).slice(
-    0,
-    1024
-  )
+export const getPubkeysWithDefaults = (pubkeys: Set<string>) => {
+  if (pubkeys.size === 0) {
+    pubkeys = new Set(env.get().DEFAULT_FOLLOWS)
+  }
+
+  return shuffle(Array.from(pubkeys)).slice(0, 1024)
+}
 
 export const compileFilter = (filter: DynamicFilter): Filter => {
   if (filter.authors === "global") {

@@ -8,6 +8,7 @@
 - [x] Clean up note component, particulary context sharing
 - [x] Add LRU cache for verifySignature to reduce load on CPU
 - [x] Group notifications by 3 hour chunks
+- [x] Fix guessFilterDelta
 
 # 0.3.9
 
