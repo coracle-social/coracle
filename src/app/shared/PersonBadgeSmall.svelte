@@ -1,8 +1,8 @@
 <script lang="ts">
   import cx from "classnames"
-  import {routes} from "src/app/state"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
+  import {router} from "src/app/router"
   import {displayPubkey} from "src/engine"
 
   export let pubkey
@@ -17,7 +17,7 @@
 {:else}
   <Anchor
     killEvent
-    href={routes.person(pubkey)}
+    href={router.at("people").of(pubkey).path}
     class={cx($$props.class, "relative z-10 flex items-center gap-2")}>
     <PersonCircle {pubkey} />
     <span>{displayPubkey(pubkey)}</span>

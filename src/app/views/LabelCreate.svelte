@@ -1,16 +1,17 @@
 <script lang="ts">
-  import {modal, toast} from "src/partials/state"
+  import {toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
+  import {router} from "src/app/router"
   import {publishLabel, searchTopics} from "src/engine"
 
-  export let note
+  export let eid
 
   const submit = () => {
-    const tags = [["e", note.id]]
+    const tags = [["e", eid]]
 
     if (topics.length > 0) {
       tags.push(["L", "#t"])
@@ -23,7 +24,7 @@
     publishLabel(tags)
 
     toast.show("info", "Your tag has been saved!")
-    modal.pop()
+    router.pop()
   }
 
   let topics = []

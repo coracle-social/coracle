@@ -15,7 +15,7 @@
     nip04MarkChannelRead,
     listenForNip04Messages,
   } from "src/engine"
-  import {routes} from "src/app/state"
+  import {router} from "src/app/router"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
 
@@ -57,7 +57,7 @@
     </div>
     <div class="flex h-12 w-full flex-col overflow-hidden pt-px">
       <div class="flex w-full items-center justify-between">
-        <Anchor href={routes.person(pubkey)} class="font-bold">
+        <Anchor modal href={router.at("people").of(pubkey).path} class="font-bold">
           {displayPerson($person)}
         </Anchor>
       </div>

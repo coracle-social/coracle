@@ -1,12 +1,11 @@
 import Bugsnag from "@bugsnag/js"
-import {nip19} from "nostr-tools"
-import {navigate} from "svelte-routing"
 import {writable} from "svelte/store"
 import {hash, union, sleep} from "hurdak"
 import {warn} from "src/util/logger"
 import {now} from "src/util/misc"
 import {userKinds} from "src/util/nostr"
-import {modal, toast} from "src/partials/state"
+import {toast} from "src/partials/state"
+import {router} from "src/app/router"
 import {
   env,
   pool,
@@ -19,15 +18,6 @@ import {
   getSetting,
   dufflepud,
 } from "src/engine"
-
-// Routing
-
-export const routes = {
-  person: (pubkey: string) => `/people/${nip19.npubEncode(pubkey)}`,
-}
-
-export const addToList = (type: string, value: string) =>
-  modal.push({type: "list/select", item: {type, value}})
 
 // Menu
 
@@ -65,11 +55,12 @@ setTimeout(() => {
 
 const sessionId = Math.random().toString().slice(2)
 
-export const logUsage = async (name: string) => {
+export const logUsage = async (path: string) => {
   // Hash the user's pubkey so we can identify unique users without knowing
   // anything about them
   const pubkey = session.get()?.pubkey
   const ident = pubkey ? hash(pubkey) : "unknown"
+  const name = path.replace(/(npub|nprofile|note|nevent)1[^\/]+/g, (_, m) => `<${m}>`)
 
   if (getSetting("report_analytics")) {
     try {
@@ -125,21 +116,19 @@ export const loadAppData = async () => {
 
 export const boot = async () => {
   if (env.get().FORCE_RELAYS.length > 0) {
-    modal.replace({
-      type: "message",
-      message: "Logging you in...",
-      spinner: true,
-      noEscape: true,
-    })
+    router
+      .at("message")
+      .qp({message: "Logging you in...", spinner: true})
+      .replaceModal({noEscape: true})
 
     await Promise.all([
       sleep(1500),
       loadPubkeys([session.get().pubkey], {force: true, kinds: userKinds}),
     ])
 
-    navigate("/notes")
+    router.at("notes").push()
   } else {
-    modal.push({type: "login/connect", noEscape: true})
+    router.at("login/connect").open({noEscape: true})
   }
 }
 
@@ -172,7 +161,8 @@ export const toastProgress = progress => {
         text: message,
         link: {
           text: "Details",
-          onClick: () => modal.push({type: "publish/info", event, progress, relays}),
+          onClick: () =>
+            router.at("notes").of(event.id).at("status").qp({relays}).cx({event, progress}).open(),
         },
       }
 

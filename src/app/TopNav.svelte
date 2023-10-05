@@ -3,11 +3,10 @@
   import {identity, map} from "ramda"
   import {tryFunc} from "hurdak"
   import {nip05, nip19} from "nostr-tools"
-  import {navigate} from "svelte-routing"
   import {onMount} from "svelte"
   import {fuzzy} from "src/util/misc"
   import {fromNostrURI, isHex} from "src/util/nostr"
-  import {appName, modal} from "src/partials/state"
+  import {appName} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -16,6 +15,7 @@
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import TopNavMenu from "src/app/TopNavMenu.svelte"
   import {menuIsOpen} from "src/app/state"
+  import {router} from "src/app/router"
   import type {Topic} from "src/engine"
   import {
     topics,
@@ -40,7 +40,7 @@
   let scanner
   let searchInput
 
-  const showLogin = () => modal.push({type: "login/intro"})
+  const showLogin = () => router.at("login/intro").open()
 
   const showSearch = () => {
     searchIsOpen = true
@@ -59,12 +59,12 @@
 
   const openTopic = topic => {
     hideSearch()
-    modal.push({type: "topic/feed", topic})
+    router.at("topic").of(topic).open()
   }
 
   const openPerson = pubkey => {
     hideSearch()
-    modal.push({type: "person/detail", pubkey})
+    router.at("people").of(pubkey).open()
   }
 
   const tryParseEntity = async entity => {
@@ -75,19 +75,19 @@
     }
 
     if (isHex(entity)) {
-      navigate("/" + nip19.npubEncode(entity))
+      router.at("people").of(entity).open()
       hideSearch()
     } else if (entity.includes("@")) {
       let profile = await nip05.queryProfile(entity)
 
       if (profile) {
-        navigate("/" + nip19.nprofileEncode(profile))
+        router.at("people").of(nip19.nprofileEncode(profile)).open()
         hideSearch()
       }
     } else {
       tryFunc(() => {
         nip19.decode(entity)
-        navigate("/" + entity)
+        router.at(entity).open()
         hideSearch()
       })
     }

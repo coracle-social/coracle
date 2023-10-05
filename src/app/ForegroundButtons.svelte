@@ -1,16 +1,16 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
   import {fade} from "src/util/transition"
-  import {modal, location} from "src/partials/state"
   import {canSign} from "src/engine"
   import ForegroundButton from "src/partials/ForegroundButton.svelte"
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
   import MusicPlayer from "src/app/MusicPlayer.svelte"
+  import {router} from "src/app/router"
 
   let scrollY = 0
   let playerIsOpen = false
 
-  $: showButtons = !$location.pathname.match(/conversations|channels|logout$/)
+  const {page} = router
 
   const scrollToTop = () => document.body.scrollIntoView({behavior: "smooth"})
 
@@ -19,11 +19,13 @@
   }
 
   const createNote = () => {
-    const pubkeyMatch = $location.pathname.match(/people\/(npub1[0-9a-z]+)/)
+    const pubkeyMatch = $page.path.match(/(npub1[0-9a-z]+)/)
     const pubkey = pubkeyMatch ? nip19.decode(pubkeyMatch[1]).data : null
 
-    modal.push({type: "note/create", pubkey})
+    router.at("notes/create").qp({pubkey}).open()
   }
+
+  $: showButtons = !$page.path.match(/conversations|channels|logout$/)
 </script>
 
 <svelte:window bind:scrollY />

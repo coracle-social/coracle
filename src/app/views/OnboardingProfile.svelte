@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {modal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
@@ -8,6 +7,9 @@
   import Content from "src/partials/Content.svelte"
 
   export let profile
+  export let setStage
+
+  const next = () => setStage("key")
 </script>
 
 <Content size="lg">
@@ -37,10 +39,5 @@
       <p class="text-sm text-gray-1">Please be mindful of others and only use small images.</p>
     </div>
   </div>
-  <Anchor
-    theme="button-accent"
-    class="text-center"
-    on:click={() => modal.replace({type: "onboarding", stage: "key"})}>
-    Continue
-  </Anchor>
+  <Anchor theme="button-accent" class="text-center" on:click={next}>Continue</Anchor>
 </Content>

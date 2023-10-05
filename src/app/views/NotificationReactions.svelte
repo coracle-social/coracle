@@ -4,7 +4,7 @@
   import Card from "src/partials/Card.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NotificationPeople from "src/app/shared/NotificationPeople.svelte"
-  import {modal} from "src/partials/state"
+  import {router} from "src/app/router"
   import type {Notification} from "src/engine"
   import {EventKind} from "src/engine"
 
@@ -13,6 +13,9 @@
   const {event: note, interactions, timestamp} = notification
   const likes = interactions.filter(e => e.kind === EventKind.Reaction)
   const zaps = interactions.filter(e => e.kind === EventKind.ZapRequest)
+  const context = interactions.concat(note)
+
+  const goToNote = () => router.at("notes").of(note.id).qp({relays: note.seen_on}).cx({context}).open()
 
   const actionText = closure(() => {
     if (likes.length === 0) return "zapped"
@@ -23,10 +26,7 @@
 </script>
 
 <NotificationPeople {notification} actionText={`${actionText} your note`} />
-<Card
-  interactive
-  class="flex w-full flex-col gap-2 text-left"
-  on:click={() => modal.push({type: "note/detail", note})}>
+<Card interactive class="flex w-full flex-col gap-2 text-left" on:click={goToNote}>
   <div on:click|stopPropagation class="flex justify-between">
     {formatTimestamp(timestamp)}
   </div>

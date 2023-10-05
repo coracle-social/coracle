@@ -1,40 +1,26 @@
 <script lang="ts">
-  import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
-  import {warn} from "src/util/logger"
-  import {fromNostrURI} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import NaddrDetail from "src/app/views/NaddrDetail.svelte"
+  import RelayDetail from "src/app/views/RelayDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
-  import {selectHints} from "src/engine"
 
-  export let entity
-
-  entity = fromNostrURI(entity)
-
-  let type, data, relays
-
-  onMount(() => {
-    try {
-      ;({type, data} = nip19.decode(entity) as {type: string; data: any})
-      relays = selectHints(data.relays || [], 3)
-    } catch (e) {
-      warn(e)
-    }
-  })
+  export let entity, type, data, relays
 </script>
 
 {#if type === "nevent"}
-  <NoteDetail note={{id: data.id}} {relays} />
+  <NoteDetail eid={data.id} {relays} />
 {:else if type === "note"}
-  <NoteDetail note={{id: data}} />
+  <NoteDetail eid={data} {relays} />
 {:else if type === "naddr"}
   <NaddrDetail {...data} />
+{:else if type === "nrelay"}
+  <RelayDetail url={data} />
 {:else if type === "nprofile"}
-  <PersonDetail npub={nip19.npubEncode(data.pubkey)} {relays} />
+  <PersonDetail npub={nip19.npubEncode(data.pubkey)} pubkey={data.pubkey} {relays} />
 {:else if type === "npub"}
-  <PersonDetail npub={entity} />
+  <PersonDetail npub={nip19.npubEncode(data)} pubkey={data} />
 {:else}
   <Content size="lg" class="text-center">
     <div>Sorry, we weren't able to find "{entity}".</div>

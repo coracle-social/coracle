@@ -2,7 +2,7 @@
   import {randomId} from "hurdak"
   import {onMount, onDestroy} from "svelte"
   import {fly, fade} from "src/util/transition"
-  import {modal} from "src/partials/state"
+  import {router} from "src/app/router"
 
   export let mini = false
   export let index = null
@@ -13,7 +13,7 @@
   let root, content
 
   const id = randomId()
-  const {stack} = modal
+  const {modals} = router
 
   const escapeIfOnTop = () => {
     if (virtual || isOnTop) {
@@ -23,13 +23,13 @@
 
   onMount(() => {
     if (virtual) {
-      modal.push({type: "virtual", id, mini, virtual: true})
+      router.go("virtual", {virtual: true, mini, id})
     }
   })
 
   onDestroy(() => {
     if (virtual) {
-      modal.remove(id)
+      router.remove(id)
     }
   })
 </script>
@@ -63,9 +63,9 @@
                  border border-solid border-accent-light bg-accent text-white transition-colors hover:bg-accent-light">
             <i class="fa fa-times fa-lg" />
           </div>
-          {#if $stack.length > 1 && index > 0}
+          {#if $modals.length > 1 && index > 0}
             <div
-              on:click|stopPropagation={() => modal.clear()}
+              on:click|stopPropagation={() => router.clearModals()}
               class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
                    border border-solid border-gray-7 bg-gray-6 text-gray-1 transition-colors hover:bg-gray-5">
               <i class="fa fa-angles-down fa-lg" />

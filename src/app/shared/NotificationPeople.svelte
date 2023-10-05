@@ -1,10 +1,10 @@
 <script lang="ts">
   import {uniq, pluck} from "ramda"
-  import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
+  import {router} from "src/app/router"
   import type {Notification} from "src/engine"
 
   export let notification: Notification
@@ -12,8 +12,8 @@
 
   const pubkeys = uniq(pluck("pubkey", notification.interactions))
 
-  const showPerson = () => modal.push({type: "person/detail", pubkey: pubkeys[0]})
-  const showPeople = () => modal.push({type: "person/list", pubkeys})
+  const showPerson = () => router.at("people").of(pubkeys[0]).open()
+  const showPeople = () => router.at("people/list").qp({pubkeys}).open()
 </script>
 
 {#if pubkeys.length === 1}

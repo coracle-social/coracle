@@ -1,16 +1,14 @@
 <script lang="ts">
   import {prop} from "ramda"
   import Anchor from "src/partials/Anchor.svelte"
-  import {modal} from "src/partials/state"
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
+  import {router} from "src/app/router"
   import {searchPeople, displayPubkey} from "src/engine"
 
   export let value
 
-  const showPerson = person => {
-    modal.push({type: "person/detail", pubkey: person.pubkey})
-  }
+  const showPerson = person => router.at("people").of(person.pubkey).open()
 </script>
 
 <MultiSelect bind:value search={$searchPeople} getKey={prop("pubkey")}>

@@ -6,7 +6,7 @@
   import {stringToHue, formatSats, hsl} from "src/util/misc"
   import {asNostrEvent, getIdOrNaddr, toNostrURI} from "src/util/nostr"
   import {quantify} from "hurdak"
-  import {modal, toast} from "src/partials/state"
+  import {toast} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -14,6 +14,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
+  import {router} from "src/app/router"
   import type {Event} from "src/engine"
   import {
     env,
@@ -25,6 +26,7 @@
     publishDeletion,
     people,
     getUserRelayUrls,
+    getPublishHints,
     publishReaction,
     processZap,
     displayRelay,
@@ -47,11 +49,11 @@
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
 
-  //const report = () => modal.push({type: "report/create", note})
+  //const report = () => router.at("notes").of(note.id).qp({pubkey: note.pubkey}).at('report').open()
 
-  const label = () => modal.push({type: "label/create", note})
+  const label = () => router.at("notes").of(note.id).at("label").open()
 
-  const quote = () => modal.push({type: "note/create", quote: note})
+  const quote = () => router.at("notes/create").cx({quote: note}).open()
 
   const unmuteNote = () => unmute(note.id)
 
@@ -70,9 +72,13 @@
     likes = reject(propEq("id", e.id), likes)
   }
 
-  const startZap = () => {
-    modal.push({type: "zap/create", note, pubkey: note.pubkey})
-  }
+  const startZap = () =>
+    router
+      .at("people")
+      .of(note.pubkey)
+      .at("zap")
+      .qp({eid: note.id, relays: getPublishHints(note)})
+      .open()
 
   const broadcast = () => {
     const relays = getUserRelayUrls("write")

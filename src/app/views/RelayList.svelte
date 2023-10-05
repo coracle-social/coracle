@@ -3,8 +3,10 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
+  import {router} from "src/app/router"
   import {relayPolicies} from "src/engine"
-  import {modal} from "src/partials/state"
+
+  const browse = () => router.at("relays/browse").open()
 
   document.title = "Relays"
 </script>
@@ -16,7 +18,7 @@
         <i class="fa fa-server fa-lg" />
         <h2 class="staatliches text-2xl">Your relays</h2>
       </div>
-      <Anchor theme="button-accent" on:click={() => modal.push({type: "relay/browse"})}>
+      <Anchor theme="button-accent" class="flex items-center gap-2" on:click={browse}>
         <i class="fa-solid fa-compass" /> Browse Relays
       </Anchor>
     </div>

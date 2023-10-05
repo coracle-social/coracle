@@ -2,33 +2,35 @@
   import {identity} from "ramda"
   import {seconds} from "hurdak"
   import {fuzzy, now} from "src/util/misc"
-  import {modal, toast} from "src/partials/state"
+  import {toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
+  import {router} from "src/app/router"
   import {publishReport} from "src/engine"
 
-  export let note
+  export let eid
+  export let pubkey
 
   const searchContentWarnings = fuzzy(["nudity", "profanity", "illegal", "spam", "impersonation"])
 
   const submit = () => {
     const tags = [
-      ["p", note.pubkey],
+      ["p", pubkey],
       ["expiration", now() + seconds(7, "day")],
     ]
 
     if (flags.length > 0) {
       for (const flag of flags) {
-        tags.push(["e", note.id, flag])
+        tags.push(["e", eid, flag])
       }
     }
 
     publishReport("", tags)
     toast.show("info", "Your report has been sent!")
-    modal.pop()
+    router.pop()
   }
 
   let flags = []

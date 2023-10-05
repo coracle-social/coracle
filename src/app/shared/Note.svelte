@@ -1,19 +1,19 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
   import {last, sortBy, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify} from "hurdak"
   import {findRootId, findReplyId, isLike} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
-  import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import Card from "src/partials/Card.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
-  import Card from "src/partials/Card.svelte"
+  import NoteContent from "src/app/shared/NoteContent.svelte"
+  import {router} from "src/app/router"
   import type {Event} from "src/engine"
   import {
     env,
@@ -30,7 +30,6 @@
     mergeHints,
     loadPubkeys,
   } from "src/engine"
-  import NoteContent from "src/app/shared/NoteContent.svelte"
 
   export let note
   export let relays = []
@@ -60,21 +59,37 @@
 
   let interval, border, childrenContainer, noteContainer
 
-  const goToNote = data => modal.push({type: "note/detail", ...data})
-
   const onClick = e => {
     const target = e.target as HTMLElement
 
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
-      goToNote({note: event})
+      router
+        .at("notes")
+        .of(event.id)
+        .qp({relays: getEventHints(event)})
+        .cx({context: ctx.concat(event)})
+        .open()
     }
   }
 
+  const showPerson = () => router.at("people").of(event.pubkey).open()
+
   const goToParent = () =>
-    goToNote({note: {id: findReplyId(event), replies: [event]}, relays: getParentHints(event)})
+    router
+      .at("notes")
+      .of(findReplyId(event))
+      .qp({relays: getParentHints(event)})
+      .cx({context: ctx.concat(event)})
+      .open()
 
   const goToThread = () =>
-    modal.push({type: "thread/detail", anchorId: event.id, relays: getEventHints(event)})
+    router
+      .at("notes")
+      .of(event.id)
+      .at("thread")
+      .qp({relays: getEventHints(event)})
+      .cx({context: ctx.concat(event)})
+      .open()
 
   const setBorderHeight = () => {
     const getHeight = e => e?.getBoundingClientRect().height || 0
@@ -165,22 +180,20 @@
             style="left: 0px; top: 27px;" />
         {/if}
         <div>
-          <Anchor
-            class="text-lg font-bold"
-            on:click={() => modal.push({type: "person/detail", pubkey: event.pubkey})}>
+          <Anchor class="text-lg font-bold" on:click={showPerson}>
             <PersonCircle class="h-10 w-10" pubkey={event.pubkey} />
           </Anchor>
         </div>
         <div class="flex min-w-0 flex-grow flex-col gap-2">
           <div class="flex flex-col items-start justify-between sm:flex-row">
-            <Anchor
-              type="unstyled"
-              class="pr-16 text-lg font-bold"
-              on:click={() => modal.push({type: "person/detail", pubkey: event.pubkey})}>
+            <Anchor type="unstyled" class="pr-16 text-lg font-bold" on:click={showPerson}>
               <PersonName pubkey={event.pubkey} />
             </Anchor>
             <Anchor
-              href={"/" + nip19.neventEncode({id: event.id, relays: getEventHints(event)})}
+              href={router
+                .at("notes")
+                .of(event.id)
+                .qp({relays: getEventHints(event)}).path}
               class="text-end text-sm text-gray-1"
               type="unstyled">
               {formatTimestamp(event.created_at)}

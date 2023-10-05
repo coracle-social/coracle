@@ -1,7 +1,8 @@
+import {nip19} from "nostr-tools"
 import {sortBy, pluck, uniq, nth, prop, last} from "ramda"
 import {chain, first, tryFunc} from "hurdak"
 import {fuzzy, stripProto} from "src/util/misc"
-import {findReplyId, findRootId, Tags} from "src/util/nostr"
+import {fromNostrURI, findReplyId, findRootId, Tags} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import {env} from "src/engine/session/state"
 import {stateKey} from "src/engine/session/derived"
@@ -12,12 +13,16 @@ import type {Relay} from "./model"
 import {RelayMode} from "./model"
 
 export const isShareableRelay = (url: string) =>
-  // Is it actually a websocket url
-  url.match(/^wss:\/\/.+/) &&
+  // Is it actually a websocket url and has a dot
+  url.match(/^wss?:\/\/.+\..+/) &&
   // Sometimes bugs cause multiple relays to get concatenated
   url.match(/:\/\//g).length === 1 &&
   // It shouldn't have any whitespace
   !url.match(/\s/) &&
+  // It shouldn't have any url-encoded whitespace
+  !url.match(/%/) &&
+  // Is it secure
+  url.match(/^wss:\/\/.+/) &&
   // Don't match stuff with a port number
   !url.slice(6).match(/:\d+/) &&
   // Don't match raw ip addresses
@@ -35,6 +40,16 @@ export const normalizeRelayUrl = (url: string) => {
 }
 
 export const urlToRelay = url => ({url: normalizeRelayUrl(url)} as Relay)
+
+export const decodeRelay = entity => {
+  entity = fromNostrURI(entity)
+
+  try {
+    return {url: nip19.decode(entity).data}
+  } catch (e) {
+    return {url: entity}
+  }
+}
 
 export const relayIsLowQuality = (url: string) =>
   pool.get(url, {autoConnect: false})?.meta?.quality < 0.6

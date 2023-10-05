@@ -1,7 +1,6 @@
 <script lang="ts">
   import {identity} from "ramda"
   import {info} from "src/util/logger"
-  import {toHex} from "src/util/nostr"
   import {stripProto, ensureProto} from "src/util/misc"
   import {getThemeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
@@ -31,10 +30,10 @@
   } from "src/engine"
 
   export let npub
+  export let pubkey
   export let relays = []
 
   const tabs = ["notes", "likes", $env.FORCE_RELAYS.length === 0 && "relays"].filter(identity)
-  const pubkey = toHex(npub)
   const person = derivePerson(pubkey)
   const {rgb, rgba} = getThemeBackgroundGradient()
 
@@ -45,7 +44,7 @@
   $: mergedRelays = selectHints(mergeHints([relays, getPubkeyHints(pubkey, "write")]))
   $: banner = imgproxy($person.profile?.banner, {w: window.innerWidth})
 
-  info("Person", npub, $person)
+  info("Person", npub, pubkey, relays, $person)
 
   loadPubkeys([pubkey], {force: true})
 

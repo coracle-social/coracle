@@ -1,21 +1,27 @@
 <script lang="ts">
   import {updateIn} from "hurdak"
   import {Tags} from "src/util/nostr"
-  import {modal} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
+  import {router} from "src/app/router"
   import {userLists} from "src/engine"
 
-  export let item
+  export let type
+  export let value
 
-  const label = item.type === "p" ? "person" : "topic"
+  const label = type === "p" ? "person" : "topic"
 
-  const modifyList = updateIn("tags", (tags: string[][]) => [...tags, [item.type, item.value]])
+  const modifyList = updateIn("tags", (tags: string[][]) => [...tags, [type, value]])
 
-  const selectlist = list => modal.replace({type: "list/edit", list: modifyList(list)})
+  const selectlist = list =>
+    router
+      .at("lists")
+      .of(list.naddr)
+      .cx({list: modifyList(list)})
+      .replaceModal()
 </script>
 
 <Content size="lg">

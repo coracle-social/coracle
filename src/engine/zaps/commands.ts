@@ -1,11 +1,10 @@
 import {Fetch} from "hurdak"
 import {warn} from "src/util/logger"
 import {people} from "src/engine/people/state"
-import {getPublishHints, getPubkeyHints} from "src/engine/relays/utils"
 import {buildEvent} from "src/engine/network/utils"
 import {signer} from "src/engine/session/derived"
 
-export async function requestZap(content, amount, {pubkey, event = null}) {
+export async function requestZap(content, amount, {pubkey, relays, eid = null}) {
   const person = people.key(pubkey).get()
 
   if (!person?.zapper) {
@@ -14,7 +13,6 @@ export async function requestZap(content, amount, {pubkey, event = null}) {
 
   const {callback, lnurl} = person.zapper
   const msats = amount * 1000
-  const relays = event ? getPublishHints(event) : getPubkeyHints(pubkey, "read")
 
   const tags = [
     ["relays", ...relays],
@@ -23,8 +21,8 @@ export async function requestZap(content, amount, {pubkey, event = null}) {
     ["p", pubkey],
   ]
 
-  if (event) {
-    tags.push(["e", event.id])
+  if (eid) {
+    tags.push(["e", eid])
   }
 
   const zap = await signer.get().signAsUser(buildEvent(9734, {content, tags}))
@@ -35,7 +33,7 @@ export async function requestZap(content, amount, {pubkey, event = null}) {
     warn(JSON.stringify(res))
   }
 
-  return {relays, invoice: res?.pr}
+  return res?.pr
 }
 
 export async function collectInvoice(invoice) {

@@ -1,8 +1,6 @@
 <script lang="ts">
   import {complement, prop, filter} from "ramda"
   import {toTitle} from "hurdak"
-  import {navigate} from "svelte-routing"
-  import {modal} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -10,6 +8,7 @@
   import ForegroundButton from "src/partials/ForegroundButton.svelte"
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
+  import {router} from "src/app/router"
   import {
     nip24Channels,
     hasNewNip24Messages,
@@ -18,14 +17,18 @@
     loadAllNip24Messages,
   } from "src/engine"
 
-  export let activeTab = "conversations"
-
+  const activeTab = window.location.pathname.slice(1) === "channels" ? "conversations" : "requests"
   const accepted = nip24Channels.derived(filter(prop("last_sent")))
   const requests = nip24Channels.derived(filter(complement(prop("last_sent"))))
+  const setActiveTab = tab => {
+    const path = tab === "requests" ? "channels/requests" : "channels"
+
+    router.at(path).push()
+  }
 
   $: tabChannels = sortChannels(activeTab === "conversations" ? $accepted : $requests)
 
-  const setActiveTab = tab => navigate(tab === "conversations" ? "/channels" : "/channels/requests")
+  const createChannel = () => router.at("channel/create").open()
 
   document.title = "Direct Messages"
 
@@ -69,7 +72,7 @@
 </Content>
 
 <ForegroundButtons>
-  <ForegroundButton on:click={() => modal.push({type: "channel/create"})}>
+  <ForegroundButton on:click={createChannel}>
     <i class="fa fa-plus" />
   </ForegroundButton>
 </ForegroundButtons>

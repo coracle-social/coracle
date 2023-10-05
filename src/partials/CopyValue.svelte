@@ -1,8 +1,9 @@
 <script lang="ts">
   import {copyToClipboard} from "src/util/html"
-  import {toast, modal} from "src/partials/state"
+  import {toast} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import Toggle from "src/partials/Toggle.svelte"
+  import {router} from "src/app/router"
 
   export let label
   export let value
@@ -17,7 +18,7 @@
     toast.show("info", `${label} copied to clipboard!`)
   }
 
-  const share = () => modal.push({type: "qrcode", value: displayValue})
+  const share = () => router.at("qrcode").at(displayValue).open()
 </script>
 
 <div class="flex flex-col gap-2">

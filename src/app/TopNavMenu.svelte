@@ -1,14 +1,14 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Card from "src/partials/Card.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {slowConnections} from "src/app/state"
+  import {router} from "src/app/router"
   import {env, pubkey, sessions, logoutPubkey, displayPubkey} from "src/engine"
 
-  const showLogin = () => modal.push({type: "login/advanced"})
+  const showLogin = () => router.at("login/advanced").open()
 </script>
 
 <Popover theme="transparent" placement="top-end" opts={{hideOnClick: true}}>
@@ -23,13 +23,15 @@
           href={`/${nip19.npubEncode($pubkey)}`}>
           <i class="fa fa-user mr-2" /> Profile
         </Anchor>
-        <Anchor class="block p-3 px-4 transition-all hover:bg-accent hover:text-white" href="/keys">
+        <Anchor
+          class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
+          href="/settings/keys">
           <i class="fa fa-key mr-2" /> Keys
         </Anchor>
         {#if $env.FORCE_RELAYS.length === 0}
           <Anchor
             class="relative block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-            href="/relays">
+            href="/settings/relays">
             <i class="fa fa-server mr-2" /> Relays
             {#if $slowConnections.length > 0}
               <div
@@ -39,7 +41,7 @@
         {/if}
         <Anchor
           class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-          href="/content">
+          href="/settings/content">
           <i class="fa fa-volume-xmark mr-2" /> Content
         </Anchor>
         <Anchor
@@ -49,7 +51,7 @@
         </Anchor>
         <Anchor
           class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-          href="/database">
+          href="/settings/data">
           <i class="fa fa-database mr-2" /> Database
         </Anchor>
         <Anchor

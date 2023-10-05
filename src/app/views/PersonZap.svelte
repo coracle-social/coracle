@@ -1,24 +1,26 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
   import {now} from "src/util/misc"
-  import {modal} from "src/partials/state"
   import QRCode from "src/partials/QRCode.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
+  import {router} from "src/app/router"
   import {
     getSetting,
     displayPubkey,
     requestZap,
     collectInvoice,
+    getPubkeyHints,
     listenForZapResponse,
   } from "src/engine"
 
   export let pubkey
-  export let note = null
+  export let eid = null
+  export let relays = null
 
-  let sub
+  let sub, unmounted
   let zap = {
     amount: getSetting("default_zap"),
     message: "",
@@ -31,7 +33,11 @@
   const loadZapInvoice = async () => {
     zap.loading = true
 
-    const {invoice, relays} = await requestZap(zap.message, zap.amount, {pubkey, event: note})
+    const invoice = await requestZap(zap.message, zap.amount, {
+      eid,
+      pubkey,
+      relays: relays || getPubkeyHints(pubkey),
+    })
 
     // If they closed the dialog before fetch resolved, we're done
     if (!zap) {
@@ -48,13 +54,20 @@
       relays,
       onEvent: event => {
         zap.confirmed = true
-        setTimeout(() => modal.pop(), 1000)
+
+        setTimeout(() => {
+          if (!unmounted) {
+            router.pop()
+          }
+        }, 1000)
+
         sub.close()
       },
     })
   }
 
   onDestroy(() => {
+    unmounted = true
     sub?.close()
   })
 </script>

@@ -1,17 +1,17 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {navigate} from "svelte-routing"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import Card from "src/partials/Card.svelte"
   import {displayPubkey, hasNewMessages} from "src/engine"
+  import {router} from "src/app/router"
 
   export let channel
 
   const showAlert = hasNewMessages(channel)
   const npub = nip19.npubEncode(channel.id)
 
-  const enter = () => navigate(`/conversations/${npub}`)
+  const enter = () => router.at("conversations").at(npub).push()
 </script>
 
 <Card interactive on:click={enter}>

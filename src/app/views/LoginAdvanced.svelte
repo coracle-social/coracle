@@ -1,27 +1,16 @@
 <script lang="ts">
-  import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import {router} from "src/app/router"
 
   const BUNKER_URL = "https://nsecbunker.com"
 
-  const pubkeyLogIn = () => {
-    modal.push({type: "login/pubkey"})
-  }
-
-  const bunkerLogIn = () => {
-    modal.push({type: "login/bunker"})
-  }
-
-  const privkeyLogIn = () => {
-    modal.push({type: "login/privkey"})
-  }
-
-  const signUp = () => {
-    modal.push({type: "onboarding", stage: "intro"})
-  }
+  const pubkeyLogIn = () => router.at("login/pubkey").replaceModal()
+  const bunkerLogIn = () => router.at("login/bunker").replaceModal()
+  const privkeyLogIn = () => router.at("login/privkey").replaceModal()
+  const signUp = () => router.at("onboarding").replaceModal()
 </script>
 
 <Content size="lg">

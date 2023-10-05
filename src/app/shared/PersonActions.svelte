@@ -1,7 +1,5 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {navigate} from "svelte-routing"
-  import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {
@@ -17,7 +15,8 @@
     deriveMuted,
     deriveFollowing,
   } from "src/engine"
-  import {addToList, boot} from "src/app/state"
+  import {boot} from "src/app/state"
+  import {router} from "src/app/router"
 
   export let pubkey
 
@@ -33,7 +32,7 @@
 
     if ($canSign) {
       actions.push({
-        onClick: () => addToList("p", pubkey),
+        onClick: () => router.at("lists/select").qp({type: "p", value: pubkey}).open(),
         label: "Add to list",
         icon: "scroll",
       })
@@ -42,13 +41,13 @@
     if (!isSelf && $canSign) {
       if ($canUseGiftWrap) {
         actions.push({
-          onClick: () => navigate(`/channels/${pubkey}`),
+          onClick: () => router.at("channels").of(pubkey).push(),
           label: "Message",
           icon: "envelope",
         })
       } else {
         actions.push({
-          onClick: () => navigate(`/conversations/${npub}`),
+          onClick: () => router.at("conversations").of(npub).push(),
           label: "Message",
           icon: "envelope",
         })
@@ -65,7 +64,7 @@
 
     if (isSelf && $canSign) {
       actions.push({
-        onClick: () => navigate("/profile"),
+        onClick: () => router.at("settings/profile").open(),
         label: "Edit",
         icon: "edit",
       })
@@ -73,12 +72,12 @@
   }
 
   const loginAsUser = () => {
-    modal.clear()
+    router.clearModals()
     loginWithPublicKey(pubkey)
     boot()
   }
 
-  const openProfileInfo = () => modal.push({type: "person/info", pubkey})
+  const openProfileInfo = () => router.at("people").of(pubkey).at("info").open()
 
   const unfollowPerson = () => unfollow(pubkey)
 

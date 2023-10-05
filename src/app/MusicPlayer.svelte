@@ -4,7 +4,6 @@
   import {throttle} from "throttle-debounce"
   import {Tags} from "src/util/nostr"
   import {AudioController} from "src/util/audio"
-  import {modal} from "src/partials/state"
   import Audio from "src/partials/Audio.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -14,6 +13,7 @@
   import NoteContentLabel from "src/app/shared/NoteContentLabel.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {FeedLoader, compileFilter, getRelaysFromFilters} from "src/engine"
+  import {router} from "src/app/router"
 
   export let isOpen
 
@@ -47,9 +47,9 @@
 
   const loadMore = throttle(5000, () => feed.load(1))
 
-  const goToPerson = () => modal.push({type: "person/detail", pubkey: note.pubkey})
+  const showNote = () => router.at("events").of(note.id).open()
 
-  const goToNote = () => modal.push({type: "note/detail", note})
+  const showPerson = () => router.at("people").of(note.pubkey).open()
 
   let i = 0
   let playing = false
@@ -107,11 +107,11 @@
               on:click={prev} />
             <div class="text-overflow-nowrap flex min-w-0 flex-grow flex-col gap-4 overflow-hidden">
               <Audio autoCleanup={false} {controller} />
-              <Anchor on:click={goToPerson}>
+              <Anchor on:click={showPerson}>
                 <PersonBadge inert pubkey={note.pubkey} />
               </Anchor>
               <div class="flex gap-2">
-                <Anchor on:click={goToNote}>
+                <Anchor on:click={showNote}>
                   <i class="fa fa-link text-accent" />
                 </Anchor>
                 <NoteContentKind1 showEntire {note} />

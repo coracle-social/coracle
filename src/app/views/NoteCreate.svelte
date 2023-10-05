@@ -19,8 +19,8 @@
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
   import {Publisher, publishNote, displayRelay, getUserRelayUrls, mention} from "src/engine"
-  import {modal} from "src/partials/state"
   import {toastProgress} from "src/app/state"
+  import {router} from "src/app/router"
   import {session, getEventHints, displayPubkey} from "src/engine"
 
   export let quote = null
@@ -62,7 +62,7 @@
 
     pub.on("progress", toastProgress)
 
-    modal.clear()
+    router.clearModals()
   }
 
   const addImage = url => {

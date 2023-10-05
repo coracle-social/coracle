@@ -7,10 +7,10 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
 
-  export let anchorId
+  export let eid
   export let relays
 
-  const loader = new ThreadLoader({anchorId, relays})
+  const loader = new ThreadLoader({anchorId: eid, relays})
   const {anchor, root, parent, ancestors} = loader
 
   let loading = true

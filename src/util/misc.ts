@@ -1,7 +1,7 @@
 import {bech32, utf8} from "@scure/base"
 import {debounce} from "throttle-debounce"
-import {pluck, sum, is, equals} from "ramda"
-import {Storage, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
+import {pluck, identity, sum, is, equals} from "ramda"
+import {ensurePlural, Storage, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from "svelte/store"
 import {warn} from "src/util/logger"
@@ -204,34 +204,6 @@ export const shadeColor = (color: string, percent: number) => {
   return "#" + RR + GG + BB
 }
 
-export const base64DecodeOrPlainWebSocketURL = (data: string): string => {
-  try {
-    return atob(data)
-  } catch (err) {
-    if (data.startsWith("ws://") || data.startsWith("wss://")) {
-      return data
-    }
-
-    return "wss://" + data
-  }
-}
-
-export const webSocketURLToPlainOrBase64 = (url: string): string => {
-  if (url.startsWith("ws://")) {
-    return btoa(url)
-  }
-
-  if (url.startsWith("wss://")) {
-    url = url.slice(6)
-  }
-
-  if (url.includes("/")) {
-    return btoa(url)
-  }
-
-  return url
-}
-
 export const pushToKey = <T>(m: Record<string, T[]> | Map<string, T[]>, k: string, v: T) => {
   if (m instanceof Map) {
     const a = m.get(k) || []
@@ -367,3 +339,5 @@ export const createBatcher = <T, U>(t, execute: (request: T[]) => U[] | Promise<
     return deferred
   }
 }
+
+export const asArray = v => ensurePlural(v).filter(identity)

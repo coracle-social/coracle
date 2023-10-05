@@ -1,18 +1,18 @@
 <script lang="ts">
   import cx from "classnames"
-  import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
   import PersonActions from "src/app/shared/PersonActions.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
+  import {router} from "src/app/router"
 
   export let pubkey
   export let inert = false
   export let hideActions = false
 
-  const showDetail = () => modal.push({type: "person/detail", pubkey})
+  const showDetail = () => router.at("people").of(pubkey).open()
 </script>
 
 <div class="relative flex flex-grow flex-col gap-4 px-3 py-2">

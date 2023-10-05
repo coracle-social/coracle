@@ -1,10 +1,11 @@
 <script lang="ts">
   import {filterVals} from "hurdak"
-  import {modal} from "src/partials/state"
+  import {asArray} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
+  import {router} from "src/app/router"
   import {
     load,
     loadPubkeys,
@@ -22,8 +23,6 @@
   let quote = null
   let muted = false
   let loading = true
-
-  const openPerson = pubkey => modal.push({type: "person/detail", pubkey})
 
   const {id, identifier, kind, pubkey} = value
 
@@ -56,7 +55,12 @@
 
     // stopPropagation wasn't working for some reason
     if (noteId && e.target.textContent !== "Show") {
-      modal.push({type: "note/detail", note: quote || {id: noteId}, relays})
+      router
+        .at("notes")
+        .of(noteId)
+        .qp({relays})
+        .cx({context: asArray(quote)})
+        .open()
     }
   }
 
@@ -81,10 +85,11 @@
         <div class="mb-4 flex items-center gap-4">
           <PersonCircle class="h-6 w-6" pubkey={quote.pubkey} />
           <Anchor
+            modal
             stopPropagation
             type="unstyled"
             class="flex items-center gap-2"
-            on:click={() => openPerson(quote.pubkey)}>
+            href={router.at("people").of(quote.pubkey).path}>
             <h2 class="text-lg">{displayPubkey(quote.pubkey)}</h2>
           </Anchor>
         </div>

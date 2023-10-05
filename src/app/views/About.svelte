@@ -1,10 +1,10 @@
 <script lang="ts">
-  import {modal} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import {router} from "src/app/router"
   import {people} from "src/engine"
 
   document.title = "About"
@@ -13,7 +13,6 @@
   const nprofile =
     "nprofile1qqsf03c2gsmx5ef4c9zmxvlew04gdh7u94afnknp33qvv3c94kvwxgspz3mhxue69uhhyetvv9ujuerpd46hxtnfduq3xamnwvaz7tmjv4kxz7tpvfkx2tn0wfnszymhwden5te0dehhxarj9cmrswpwdaexwqgmwaehxw309a3ksunfwd68q6tvdshxummnw3erztnrdakszynhwden5te0danxvcmgv95kutnsw43qzrthwden5te0dehhxtnvdakqzynhwden5te0wp6hyurvv4cxzeewv4eszxrhwden5te0wfjkccte9eekummjwsh8xmmrd9skckx3ht0"
   const pubkey = "8ec86ac9e10979998652068ee6b00223b8e3265aabb3fe28fb6b3b6e294adc96"
-  const npub = "npub1jlrs53pkdfjnts29kveljul2sm0actt6n8dxrrzqcersttvcuv3qdjynqn"
 
   // Provide complete details in case they haven't loaded coracle's profile
   people.key(pubkey).update($person => ({
@@ -32,8 +31,6 @@
       minSendable: 1000,
     },
   }))
-
-  const zap = () => modal.push({type: "zap/create", pubkey})
 </script>
 
 <Content gap="8" class="gap-8">
@@ -52,7 +49,9 @@
           All funds donated will be used to support server costs and development.
         </p>
         <div class="flex justify-center">
-          <Anchor theme="button-accent" on:click={zap}>Zap the developer</Anchor>
+          <Anchor modal theme="button-accent" href={router.at("people").of(pubkey).at("zap").path}>
+            Zap the developer
+          </Anchor>
         </div>
       </Content>
     </Card>
@@ -70,7 +69,8 @@
   </div>
   <div class="flex flex-col gap-4">
     <p class="text-center">
-      Built with 💜 by @<Anchor theme="anchor" href={`/${npub}`}>hodlbod</Anchor>
+      Built with 💜 by @<Anchor modal theme="anchor" href={router.at("people").of(pubkey).path}
+        >hodlbod</Anchor>
     </p>
     <p class="flex justify-center gap-4">
       <Popover triggerType="mouseenter">

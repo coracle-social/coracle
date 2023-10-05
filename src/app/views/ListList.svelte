@@ -1,18 +1,15 @@
 <script type="ts">
-  import {modal, appName} from "src/partials/state"
+  import {appName} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
+  import {router} from "src/app/router"
   import {userLists, publishDeletion} from "src/engine"
 
-  const createFeed = () => {
-    modal.push({type: "list/edit"})
-  }
+  const createFeed = () => router.at("lists/create").open()
 
-  const editList = list => {
-    modal.push({type: "list/edit", list})
-  }
+  const editList = list => router.at("lists").of(list.naddr).open()
 </script>
 
 <Content>

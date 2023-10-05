@@ -1,14 +1,14 @@
 <script lang="ts">
   import {pluck} from "ramda"
-  import {navigate} from "svelte-routing"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
-  import {getNip24ChannelId} from "src/engine"
+  import {router} from "src/app/router"
 
   let profiles = []
 
-  const submit = () => navigate(`/channels/${getNip24ChannelId(pluck("pubkey", profiles))}`)
+  const pubkeys = pluck("pubkey", profiles)
+  const submit = () => router.at("channels").of(pubkeys).open()
 </script>
 
 <form on:submit|preventDefault={submit} class="flex justify-center py-12">

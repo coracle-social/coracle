@@ -3,7 +3,6 @@
   import {map, identity, sortBy} from "ramda"
   import {quantify} from "hurdak"
   import {Tags} from "src/util/nostr"
-  import {modal} from "src/partials/state"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -11,6 +10,7 @@
   import Content from "src/partials/Content.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import Note from "src/app/shared/Note.svelte"
+  import {router} from "src/app/router"
   import {
     labels,
     session,
@@ -64,7 +64,7 @@
     )
   })
 
-  const showGroup = ({label, ids, hints}) => modal.push({type: "label/detail", label, ids, hints})
+  const showGroup = ({label, ids, hints}) => router.at("labels").of(label).qp({ids, hints}).open()
 
   onMount(() => {
     const sub = subscribe({

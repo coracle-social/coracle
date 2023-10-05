@@ -2,7 +2,6 @@
   import {find, assocPath} from "ramda"
   import {onMount} from "svelte"
   import {fly} from "src/util/transition"
-  import {navigate} from "svelte-routing"
   import {now, createScroller, formatTimestampAsDate} from "src/util/misc"
   import {noteKinds, reactionKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
@@ -10,6 +9,7 @@
   import NotificationReactions from "src/app/views/NotificationReactions.svelte"
   import NotificationMention from "src/app/views/NotificationMention.svelte"
   import NotificationReplies from "src/app/views/NotificationReplies.svelte"
+  import {router} from "src/app/router"
   import type {Event} from "src/engine"
   import {pubkey, sessions, notifications, groupNotifications, loadNotifications} from "src/engine"
 
@@ -17,7 +17,7 @@
 
   const throttledNotifications = notifications.throttle(300)
 
-  const setActiveTab = tab => navigate(`/notifications/${tab}`)
+  const setActiveTab = tab => router.at("notifications").at(tab).push()
 
   const getLineText = i => {
     const cur = tabNotifications[i]

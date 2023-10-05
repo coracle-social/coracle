@@ -164,7 +164,7 @@ export const toHex = (data: string): string | null => {
 export const mergeFilter = (filter: Filter | Filter[], extra: Filter) =>
   is(Array, filter) ? filter.map(mergeLeft(extra)) : {...filter, ...extra}
 
-export const fromNostrURI = (s: string) => s.replace(/^[\w\+]+:\/?\/?/, "")
+export const fromNostrURI = (s: string) => s.replace(/^nostr:\/?\/?/, "")
 
 export const toNostrURI = (s: string) => `nostr:${s}`
 

@@ -1,8 +1,10 @@
-import {join, nth, last} from "ramda"
-import {ellipsize} from "hurdak"
 import {nip19} from "nostr-tools"
+import {join, nth, last} from "ramda"
+import {ellipsize, switcherFn} from "hurdak"
 import {fuzzy} from "src/util/misc"
+import {fromNostrURI} from "src/util/nostr"
 import {cached} from "src/util/lruCache"
+import {getPubkeyHints} from "src/engine/relays/utils"
 import type {Person, Handle} from "./model"
 import {people} from "./state"
 
@@ -81,3 +83,36 @@ export const getFollowsWhoFollow = cached({
   getValue: ([pk, tpk]) =>
     getFollowedPubkeys(people.key(pk).get()).filter(pk => isFollowing(people.key(pk).get(), tpk)),
 })
+
+const annotatePerson = pubkey => {
+  const relays = getPubkeyHints.limit(3).getHints(pubkey, "write")
+
+  return {
+    pubkey,
+    relays,
+    npub: nip19.npubEncode(pubkey),
+    nprofile: nip19.nprofileEncode({pubkey, relays}),
+  }
+}
+
+export const decodePerson = entity => {
+  entity = fromNostrURI(entity)
+
+  let type, data
+  try {
+    ;({type, data} = nip19.decode(entity))
+  } catch (e) {
+    return annotatePerson(entity)
+  }
+
+  return switcherFn(type, {
+    nprofile: () => ({
+      pubkey: data.pubkey,
+      relays: data.relays,
+      npub: nip19.npubEncode(data.pubkey),
+      nprofile: nip19.nprofileEncode(data),
+    }),
+    npub: () => annotatePerson(data),
+    default: () => annotatePerson(entity),
+  })
+}

@@ -2,7 +2,7 @@
   import {onDestroy} from "svelte"
   import {tweened} from "svelte/motion"
   import {numberFmt} from "src/util/misc"
-  import {modal} from "src/partials/state"
+  import {router} from "src/app/router"
   import {people, getFollowers} from "src/engine"
 
   export let pubkey
@@ -13,9 +13,9 @@
   let sub
   let followersCount = tweened(0, {interpolate, duration: 1000})
 
-  const showFollows = () => modal.push({type: "person/follows", pubkey})
+  const showFollows = () => router.at("people").of(pubkey).at("follows").open()
 
-  const showFollowers = () => modal.push({type: "person/followers", pubkey})
+  const showFollowers = () => router.at("people").of(pubkey).at("followers").open()
 
   followersCount.set(getFollowers(pubkey).length)
 

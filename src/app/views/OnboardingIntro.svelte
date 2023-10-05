@@ -2,10 +2,12 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"
-  import {modal} from "src/partials/state"
+
+  export let setStage
 
   const tutorialUrl = "https://nostr.com/"
   const videoUrl = "https://dufflepud.us-southeast-1.linodeobjects.com/coracle_intro.mp4"
+  const next = () => setStage("profile")
 </script>
 
 <Content size="lg" class="text-center">
@@ -19,9 +21,5 @@
     When you’re ready to dive in, click below and we’ll guide you through the process of creating an
     account.
   </p>
-  <Anchor
-    theme="button-accent"
-    on:click={() => modal.replace({type: "onboarding", stage: "profile"})}>
-    Let's go!
-  </Anchor>
+  <Anchor theme="button-accent" on:click={next}>Let's go!</Anchor>
 </Content>

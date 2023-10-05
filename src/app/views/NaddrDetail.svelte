@@ -1,9 +1,9 @@
 <script lang="ts">
   import {quantify} from "hurdak"
-  import {routes} from "src/app/state"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
+  import {router} from "src/app/router"
   import {load, displayPubkey, selectHints} from "src/engine"
 
   export let identifier
@@ -27,7 +27,7 @@
 <Content>
   <p>
     This is a kind {kind} event called "{identifier}", published by
-    <Anchor class="underline" href={routes.person(pubkey)}>@{display}</Anchor>.
+    <Anchor class="underline" href={router.at("people").of(pubkey).path}>@{display}</Anchor>.
   </p>
   {#if note}
     <NoteContent showEntire {note} />
@@ -39,7 +39,8 @@
         {#if type !== "d"}
           <li>
             {#if type === "p"}
-              <Anchor class="underline" href={routes.person(value)}>@{display}</Anchor>
+              <Anchor class="underline" href={router.at("people").of(value).path}
+                >@{display}</Anchor>
             {:else if type === "e"}
               <Anchor class="underline" href={value}>Event {value}</Anchor>
             {:else}

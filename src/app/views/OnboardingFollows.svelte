@@ -1,6 +1,5 @@
 <script lang="ts">
   import {reject} from "ramda"
-  import {modal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -10,6 +9,9 @@
   import {mention, loadPeople, searchPeople} from "src/engine"
 
   export let petnames
+  export let setStage
+
+  const next = () => setStage("note")
 
   const addFollow = pubkey => {
     petnames = [...petnames, mention(pubkey)]
@@ -33,11 +35,7 @@
       To get you started, we’ve added some interesting people to your follow list. You can update
       your follows list at any time.
     </p>
-    <Anchor
-      theme="button-accent"
-      on:click={() => modal.replace({type: "onboarding", stage: "note"})}>
-      Continue
-    </Anchor>
+    <Anchor theme="button-accent" on:click={next}>Continue</Anchor>
   </Content>
   <div class="flex items-center gap-2">
     <i class="fa fa-user-astronaut fa-lg" />

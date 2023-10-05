@@ -1,7 +1,10 @@
 <script lang="ts">
+  import {onDestroy} from "svelte"
   import {groupBy, filter} from "ramda"
   import {mapVals} from "hurdak"
+  import {createScroller} from "src/util/misc"
   import {Tags, getAvgQuality} from "src/util/nostr"
+  import {getModal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import type {Relay} from "src/engine"
@@ -12,6 +15,7 @@
     getPubkeyHints,
     getRelaySearch,
     relayPolicyUrls,
+    isShareableRelay,
     urlToRelay,
   } from "src/engine"
 
@@ -23,8 +27,14 @@
   let reviews = []
 
   const searchRelays = relays
-    .derived(filter((r: Relay) => !$relayPolicyUrls.includes(r.url)))
+    .derived(filter((r: Relay) => !$relayPolicyUrls.includes(r.url) && isShareableRelay(r.url)))
     .derived(getRelaySearch)
+
+  const loadMore = async () => {
+    limit += 50
+  }
+
+  const scroller = createScroller(loadMore, {element: getModal()})
 
   $: ratings = mapVals(
     events => getAvgQuality("review/relay", events),
@@ -45,6 +55,10 @@
       reviews = reviews.concat(event)
     },
   })
+
+  onDestroy(() => {
+    scroller.stop()
+  })
 </script>
 
 <div class="flex flex-col gap-4">
@@ -62,11 +76,13 @@
         <RelayCard rating={ratings[relay.url]} {relay} />
       </slot>
     {/each}
-    <slot name="footer">
-      <small class="text-center">
-        Showing {Math.min(($relays || []).length - $relayPolicyUrls.length, 50)}
-        of {($relays || []).length - $relayPolicyUrls.length} known relays
-      </small>
-    </slot>
+    {#if q || !hideIfEmpty}
+      <slot name="footer">
+        <small class="text-center">
+          Showing {Math.min(($relays || []).length - $relayPolicyUrls.length, limit)}
+          of {($relays || []).length - $relayPolicyUrls.length} known relays
+        </small>
+      </slot>
+    {/if}
   </div>
 </div>

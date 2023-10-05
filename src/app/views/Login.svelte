@@ -1,10 +1,10 @@
 <script lang="ts">
   import {Capacitor} from "@capacitor/core"
-  import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {withExtension, loginWithExtension} from "src/engine"
+  import {router} from "src/app/router"
   import {boot} from "src/app/state"
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
@@ -15,17 +15,13 @@
         loginWithExtension(await ext.getPublicKey())
         boot()
       } else {
-        modal.push({type: "login/privkey"})
+        router.at("login/privkey").open()
       }
     })
 
-  const signUp = () => {
-    modal.push({type: "onboarding", stage: "intro"})
-  }
+  const signUp = () => router.at("onboarding").open()
 
-  const advancedLogIn = () => {
-    modal.push({type: "login/advanced"})
-  }
+  const advancedLogIn = () => router.at("login/advanced").open()
 
   document.title = "Log In"
 </script>

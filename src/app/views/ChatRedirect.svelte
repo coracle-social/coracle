@@ -1,12 +1,13 @@
 <script lang="ts">
-  import {modal, appName} from "src/partials/state"
+  import {appName} from "src/partials/state"
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import {router} from "src/app/router"
 </script>
 
-<Content size="lg" on:click={modal.pop}>
+<Content size="lg" on:click={router.clearModals}>
   <div class="flex flex-col items-center justify-center">
     <Heading>Select Chat App</Heading>
     <p>

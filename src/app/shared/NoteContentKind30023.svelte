@@ -7,9 +7,9 @@
   import {warn} from "src/util/logger"
   import {Tags, fromNostrURI} from "src/util/nostr"
   import {urlIsMedia} from "src/util/notes"
-  import {modal} from "src/partials/state"
   import Chip from "src/partials/Chip.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
+  import {router} from "src/app/router"
   import {displayPubkey} from "src/engine"
 
   marked.use({
@@ -26,9 +26,7 @@
   const regex = /(nostr:)?n(event|ote|pub|profile|addr)\w+/g
   const {title, summary, image} = tags.asMeta() as {[k: string]: string}
 
-  const openTopic = topic => {
-    modal.push({type: "topic/feed", topic})
-  }
+  const openTopic = topic => router.at("topics").of(topic).open()
 
   const convertEntities = markdown => {
     for (const uri of markdown.match(regex) || []) {
@@ -63,7 +61,7 @@
           a.addEventListener("click", e => {
             e.preventDefault()
 
-            modal.push({type: "bech32", entity})
+            router.at(entity).open()
           })
         }
       })

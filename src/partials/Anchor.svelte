@@ -1,14 +1,15 @@
 <script lang="ts">
   import cx from "classnames"
-  import {navigate} from "svelte-routing"
   import {switcher} from "hurdak"
   import {killEvent as _killEvent} from "src/util/html"
   import {createEventDispatcher} from "svelte"
+  import {router} from "src/app/router"
 
   export let stopPropagation = false
   export let killEvent = false
   export let external = false
   export let loading = false
+  export let modal = false
   export let theme = "unstyled"
   export let type = null
   export let href = null
@@ -53,7 +54,7 @@
     }
 
     if (href && !external) {
-      navigate(href)
+      router.at(href).push({modal})
     }
 
     dispatch("click", e)

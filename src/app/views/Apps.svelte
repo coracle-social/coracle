@@ -6,13 +6,14 @@
   import {copyToClipboard} from "src/util/html"
   import {Tags} from "src/util/nostr"
   import {fly} from "src/util/transition"
-  import {toast, modal} from "src/partials/state"
+  import {toast} from "src/partials/state"
   import Image from "src/partials/Image.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
+  import {router} from "src/app/router"
   import type {Person, Event} from "src/engine"
   import {
     getUserRelayUrls,
@@ -42,7 +43,7 @@
     const profile = await nip05.queryProfile(entity)
 
     if (profile) {
-      modal.push({type: "person/detail", pubkey: profile.pubkey})
+      router.at("people").of(profile.pubkey).open()
     } else {
       copy("Address", entity)
     }

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import {webSocketURLToPlainOrBase64} from "src/util/misc"
   import {stringToHue, hsl} from "src/util/misc"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
+  import {router} from "src/app/router"
   import {getSetting, displayRelay} from "src/engine"
 
   export let relay
@@ -14,7 +14,7 @@
   <i class={relay.url.startsWith("wss") ? "fa fa-lock" : "fa fa-unlock"} />
   <Anchor
     type="unstyled"
-    href={`/relays/${webSocketURLToPlainOrBase64(relay.url)}`}
+    href={router.at("relays").of(relay.url).path}
     class="border-b border-solid"
     style={`border-color: ${hsl(stringToHue(relay.url))}`}>
     {displayRelay(relay)}

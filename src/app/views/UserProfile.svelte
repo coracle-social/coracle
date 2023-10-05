@@ -1,6 +1,5 @@
 <script lang="ts">
   import {fly} from "src/util/transition"
-  import {navigate} from "svelte-routing"
   import Input from "src/partials/Input.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Textarea from "src/partials/Textarea.svelte"
@@ -9,7 +8,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Field from "src/partials/Field.svelte"
   import {pubkey, people, publishProfile} from "src/engine"
-  import {routes} from "src/app/state"
+  import {router} from "src/app/router"
   import {toastProgress} from "src/app/state"
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
@@ -22,10 +21,10 @@
 
     pub.on("progress", toastProgress)
 
-    navigate(routes.person($pubkey))
+    router.pop()
   }
 
-  let values = people.key($pubkey).get()?.profile || {}
+  let values = {...people.key($pubkey).get()?.profile}
 
   document.title = "Profile"
 </script>

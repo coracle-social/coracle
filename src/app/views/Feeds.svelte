@@ -1,17 +1,18 @@
 <script lang="ts">
   import cx from "classnames"
   import {Tags, noteKinds} from "src/util/nostr"
-  import {modal, theme} from "src/partials/state"
+  import {theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
+  import {router} from "src/app/router"
   import type {DynamicFilter} from "src/engine"
   import {session, canSign, follows, lists, userLists} from "src/engine"
 
-  const showLists = () => modal.push({type: "list/list"})
+  const showLists = () => router.at("lists").open()
 
-  const showLogin = () => modal.push({type: "login/intro"})
+  const showLogin = () => router.at("login/intro").open()
 
   const loadListFeed = naddr => {
     const list = lists.key(naddr).get()

@@ -1,12 +1,13 @@
 <script lang="ts">
   import {sleep} from "hurdak"
   import {error} from "src/util/logger"
-  import {appName, toast, modal} from "src/partials/state"
+  import {appName, toast} from "src/partials/state"
   import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import {router} from "src/app/router"
   import type {Event} from "src/engine"
   import {_events, EventKind, projections} from "src/engine"
 
@@ -51,7 +52,7 @@
 
         toast.show("info", "Import complete!")
 
-        setTimeout(() => modal.pop(), 2000)
+        setTimeout(() => router.clearModals(), 2000)
       } catch (e) {
         error(e)
 

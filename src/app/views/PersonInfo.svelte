@@ -3,13 +3,12 @@
   import Content from "src/partials/Content.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {getPubkeyHints, displayHandle, people} from "src/engine"
+  import {displayHandle, people} from "src/engine"
 
   export let pubkey
+  export let nprofile
 
   const person = people.key(pubkey)
-  const relays = getPubkeyHints.limit(3).getHints(pubkey, "write")
-  const nprofile = nip19.nprofileEncode({pubkey, relays})
 </script>
 
 <Content>

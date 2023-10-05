@@ -1,10 +1,10 @@
 <script lang="ts">
-  import {modal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import Rating from "src/partials/Rating.svelte"
+  import {router} from "src/app/router"
   import {publishReview} from "src/engine"
 
   export let url
@@ -19,7 +19,7 @@
       ["r", url],
     ])
 
-    modal.pop()
+    router.pop()
   }
 </script>
 

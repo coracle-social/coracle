@@ -1,9 +1,8 @@
 <script lang="ts">
   import {last, prop} from "ramda"
-  import {modal} from "src/partials/state"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {canSign, relays, relayPolicyUrls, joinRelay, leaveRelay, deriveHasRelay} from "src/engine"
-  import {addToList} from "src/app/state"
+  import {router} from "src/app/router"
 
   export let relay
 
@@ -31,13 +30,13 @@
 
     if ($canSign) {
       actions.push({
-        onClick: () => addToList("r", relay.url),
+        onClick: () => router.at("lists/select").qp({type: "r", value: relay.url}).open(),
         label: "Add to list",
         icon: "scroll",
       })
 
       actions.push({
-        onClick: () => modal.push({type: "relay/review", url: relay.url}),
+        onClick: () => router.at("relays").of(relay.url).at("review").open(),
         label: "Review",
         icon: "feather",
       })

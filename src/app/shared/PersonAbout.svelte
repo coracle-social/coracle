@@ -21,7 +21,7 @@
         {value.url.replace(/https?:\/\/(www\.)?/, "")}
       </Anchor>
     {:else if type.startsWith("nostr:")}
-      <Anchor class="underline" external href={"/" + value.entity}>
+      <Anchor modal class="underline" href={value.entity}>
         {#if value.pubkey}
           {displayPerson($person)}
         {:else if value.id}

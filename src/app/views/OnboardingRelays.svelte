@@ -1,7 +1,6 @@
 <script lang="ts">
   import {pluck, reject, propEq} from "ramda"
   import {fuzzy} from "src/util/misc"
-  import {modal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -11,9 +10,12 @@
   import {relays as knownRelays} from "src/engine"
 
   export let relays: Relay[]
+  export let setStage
 
   let q = ""
   let search
+
+  const next = () => setStage("follows")
 
   const saveRelay = relay => {
     relays = relays.concat(relay)
@@ -40,12 +42,7 @@
       You can change your selection any time.
     </p>
   </div>
-  <Anchor
-    theme="button-accent"
-    class="text-center"
-    on:click={() => modal.replace({type: "onboarding", stage: "follows"})}>
-    Continue
-  </Anchor>
+  <Anchor theme="button-accent" class="text-center" on:click={next}>Continue</Anchor>
   <div class="flex items-center gap-2">
     <i class="fa fa-server fa-lg" />
     <h2 class="staatliches text-2xl">Your relays</h2>

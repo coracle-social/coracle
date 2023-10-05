@@ -1,7 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {generatePrivateKey} from "nostr-tools"
-  import {navigate} from "svelte-routing"
   import {closure} from "hurdak"
   import {fly} from "src/util/transition"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
@@ -23,12 +22,16 @@
     loginWithPrivateKey,
     listenForNotifications,
   } from "src/engine"
-  import {modal} from "src/partials/state"
+  import {router} from "src/app/router"
 
   export let stage
 
   const privkey = generatePrivateKey()
   const profile = {}
+
+  const setStage = s => {
+    stage = s
+  }
 
   let petnames = closure(() => {
     if ($session) {
@@ -77,10 +80,10 @@
     listenForNotifications()
 
     // Close all modals
-    modal.clear()
+    router.clearModals()
 
     // Go to our home page
-    navigate("/notes")
+    router.at("notes").push()
   }
 
   onMount(() => {
@@ -92,15 +95,15 @@
 {#key stage}
   <div in:fly={{y: 20}}>
     {#if stage === "intro"}
-      <OnboardingIntro />
+      <OnboardingIntro {setStage} />
     {:else if stage === "profile"}
-      <OnboardingProfile {profile} />
+      <OnboardingProfile {setStage} {profile} />
     {:else if stage === "key"}
-      <OnboardingKey {privkey} />
+      <OnboardingKey {setStage} {privkey} />
     {:else if stage === "relays"}
-      <OnboardingRelays bind:relays />
+      <OnboardingRelays {setStage} bind:relays />
     {:else if stage === "follows"}
-      <OnboardingFollows bind:petnames />
+      <OnboardingFollows {setStage} bind:petnames />
     {:else if stage === "note"}
       <OnboardingNote {signup} />
     {/if}

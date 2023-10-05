@@ -1,25 +1,13 @@
-import {prop, whereEq, reject, last, fromPairs} from "ramda"
+import {prop, last, fromPairs} from "ramda"
 import {randomId, range} from "hurdak"
 import type {Writable} from "svelte/store"
-import {navigate} from "svelte-routing"
 import {writable, get} from "svelte/store"
-import {globalHistory} from "svelte-routing/src/history"
 import {parseHex} from "src/util/html"
 import {shadeColor, synced} from "src/util/misc"
 
 // Settings
 
 export const appName = import.meta.env.VITE_APP_NAME
-
-// Location
-
-export const location = (() => {
-  const store = writable(window.location)
-
-  globalHistory.listen(({location}) => store.set(location))
-
-  return store
-})()
 
 // Install prompt
 
@@ -46,53 +34,6 @@ toast.show = (type, message, timeout = 5) => {
     }, timeout * 1000)
   }
 }
-
-// Modals
-
-export const modal = {
-  stack: writable([]),
-  getCurrent() {
-    return last(get(modal.stack))
-  },
-  sync($stack: any[], opts = {}) {
-    const hash = $stack.length > 0 ? `#m=${$stack.length}` : ""
-
-    if (hash !== window.location.hash) {
-      navigate(window.location.pathname + hash, opts)
-    }
-
-    return $stack
-  },
-  remove(id: string) {
-    modal.stack.update($stack => modal.sync(reject(whereEq({id}), $stack)))
-  },
-  push(data: {type: string; [k: string]: any}) {
-    data.prevDocTitle = document.title
-    modal.stack.update($stack => modal.sync($stack.concat(data)))
-  },
-  pop() {
-    document.title = this.getCurrent()?.prevDocTitle || document.title
-    modal.stack.update($stack => modal.sync($stack.slice(0, -1)))
-  },
-  replace(data: {type: string; [k: string]: any}) {
-    modal.stack.update($stack => $stack.slice(0, -1).concat(data))
-  },
-  clear() {
-    const stackSize = (get(modal.stack) as any).length
-
-    // Reverse history so the back button doesn't bring our modal back up
-    for (let i = 0; i < stackSize; i++) {
-      modal.pop()
-    }
-  },
-}
-
-location.subscribe(($location: any) => {
-  const match = $location.hash.match(/\bm=(\d+)/)
-  const i = match ? parseInt(match[1]) : 0
-
-  modal.stack.update($stack => (i < $stack.length ? $stack.slice(0, i) : $stack))
-})
 
 // Themes
 

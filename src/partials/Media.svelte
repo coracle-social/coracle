@@ -10,6 +10,7 @@
   export let link
   export let onClick = null
   export let onClose = null
+  export let fullSize = false
 
   const loadPreview = async () => {
     const json = await Fetch.postJson(dufflepud("link/preview"), {url: link.url})
@@ -36,7 +37,8 @@
       <img
         alt="Link preview"
         src={imgproxy(link.url)}
-        class="max-h-96 object-contain object-center" />
+        class:max-h-96={!fullSize}
+        class="object-contain object-center" />
     {:else if link.type === "spotify"}
       {@const id = last(link.url.split("?")[0].match(/[a-z]+\/[0-9A-z]+$/))}
       {@const src = `https://open.spotify.com/embed/${id}`}

@@ -78,7 +78,7 @@
           // from something like purplepag.es. This helps us avoid nuking follow lists later
           await Promise.all([loadAppData(), sleep(1500)])
 
-          navigate("/notes")
+          navigate("notes")
         } else {
           pool.remove(relay.url)
         }

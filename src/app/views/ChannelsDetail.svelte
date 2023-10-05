@@ -2,12 +2,12 @@
   import cx from "classnames"
   import {onMount, onDestroy} from "svelte"
   import {formatTimestamp} from "src/util/misc"
-  import {modal} from "src/partials/state"
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
+  import {router} from "src/app/router"
   import {
     session,
     channels,
@@ -18,15 +18,15 @@
   } from "src/engine"
 
   export let entity
+  export let pubkeys
 
   const channel = channels.key(entity)
-  const pubkeys = entity.split(",")
 
   nip24MarkChannelRead(entity)
 
   const sendMessage = content => createNip24Message(entity, content)
 
-  const showPerson = pubkey => modal.push({type: "person/detail", pubkey})
+  const showPerson = pubkey => router.at("people").of(pubkey).open()
 
   onMount(() => {
     const sub = listenForNip59Messages()

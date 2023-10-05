@@ -1,7 +1,6 @@
 <script lang="ts">
   import {filter, complement, prop} from "ramda"
   import {toTitle} from "hurdak"
-  import {navigate} from "svelte-routing"
   import Tabs from "src/partials/Tabs.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
@@ -13,11 +12,12 @@
     nip04MarkAllRead,
     loadAllNip04Messages,
   } from "src/engine"
+  import {router} from "src/app/router"
 
-  export let activeTab = "conversations"
-
+  const activeTab = window.location.pathname.slice(1)
   const accepted = nip04Channels.derived(filter(prop("last_sent")))
   const requests = nip04Channels.derived(filter(complement(prop("last_sent"))))
+  const setActiveTab = tab => router.at(tab).push()
 
   $: tabChannels = sortChannels(activeTab === "conversations" ? $accepted : $requests)
 
@@ -28,7 +28,7 @@
 
 <Content>
   <div class="relative">
-    <Tabs tabs={["conversations", "requests"]} {activeTab} setActiveTab={navigate}>
+    <Tabs tabs={["conversations", "requests"]} {activeTab} {setActiveTab}>
       <div slot="tab" let:tab class="flex gap-2">
         <div>{toTitle(tab)}</div>
         <div class="h-6 rounded-full bg-gray-6 px-2">
