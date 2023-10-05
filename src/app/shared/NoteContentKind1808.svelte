@@ -12,6 +12,8 @@
 
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
   <NoteContentKind1 {note} {anchorId} {maxLength} {showEntire} />
-  <Media link={annotateMedia(stream_url)} />
+  {#if stream_url}
+    <Media link={annotateMedia(stream_url)} />
+  {/if}
   <NoteContentLabel type="t" {note} />
 </div>
