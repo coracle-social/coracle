@@ -18,7 +18,6 @@
 
 <Content>
   <Note
-    showContext
     showLoading
     anchorId={note.id}
     {note}
@@ -31,6 +30,6 @@
 
 {#if feedRelay}
   <Modal onEscape={() => setFeedRelay(null)}>
-    <RelayFeed {feedRelay} notes={[note]} depth={6} showContext />
+    <RelayFeed {feedRelay} notes={[note]} depth={6} />
   </Modal>
 {/if}

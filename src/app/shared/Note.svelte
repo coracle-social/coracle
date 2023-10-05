@@ -1,8 +1,8 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {last, sortBy, uniqBy, prop, identity} from "ramda"
+  import {last, sortBy, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
-  import {quantify, switcherFn} from "hurdak"
+  import {quantify} from "hurdak"
   import {findRootId, findReplyId, isLike} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import {modal} from "src/partials/state"
@@ -18,14 +18,14 @@
   import {
     env,
     load,
-    processZap,
-    derivePerson,
+    processZaps,
+    matchFilters,
     getReplyHints,
     isEventMuted,
     getParentHints,
     getEventHints,
     getIdFilters,
-    getUserRelayUrls,
+    selectHints,
     mergeHints,
     loadPubkeys,
   } from "src/engine"
@@ -34,13 +34,13 @@
   export let note
   export let relays = []
   export let context = []
+  export let filters = null
   export let feedRelay = null
   export let setFeedRelay = null
   export let depth = 0
   export let anchorId = null
   export let topLevel = false
   export let showParent = true
-  export let showContext = false
   export let invertColors = false
   export let showLoading = false
 
@@ -50,8 +50,7 @@
   let showMuted = false
   let actions = null
   let collapsed = false
-  let likes = []
-  let zaps = []
+  let ctx = context
 
   const {ENABLE_ZAPS} = $env
   const borderColor = invertColors ? "gray-6" : "gray-7"
@@ -100,14 +99,23 @@
 
   $: muted = !showMuted && $isEventMuted(event)
 
+  $: children = ctx.filter(e => findReplyId(e) === event.id)
+
   $: replies = sortBy(
     (e: Event) => -e.created_at,
-    context.filter(e => e.kind === 1 && findReplyId(e) === event.id)
+    children.filter(e => e.kind === 1)
   )
 
-  // Show only notes that were passed in by the parent unless we want to show all
-  $: visibleNotes = ((showContext ? replies : note.replies) || []).filter(
-    e => !feedRelay || e.seen_on.includes(feedRelay.url)
+  $: likes = children.filter(e => e.kind === 7 && isLike(e.content))
+
+  $: zaps = processZaps(
+    children.filter(e => e.kind === 9735),
+    event.pubkey
+  )
+
+  // Show only notes that match our filters and feed relay
+  $: visibleNotes = replies.filter(
+    e => (!filters || matchFilters(filters, e)) && (!feedRelay || e.seen_on.includes(feedRelay.url))
   )
 
   onMount(async () => {
@@ -115,7 +123,7 @@
 
     if (!event.pubkey) {
       await load({
-        relays: mergeHints([relays, getUserRelayUrls("read")]),
+        relays: selectHints(relays),
         filters: getIdFilters([event.id]),
         onEvent: e => {
           event = e
@@ -136,25 +144,9 @@
         relays: mergeHints([relays, getReplyHints(event)]),
         filters: [{kinds, "#e": [event.id]}],
         onEvent: e => {
-          switcherFn(e.kind.toString(), {
-            "1": () => {
-              if (!$isEventMuted(e)) {
-                context = sortBy((e: Event) => -e.created_at, uniqBy(prop("id"), context.concat(e)))
-              }
-            },
-            "7": () => {
-              if (isLike(e.content) && findReplyId(e) === event.id) {
-                likes = likes.concat(e)
-              }
-            },
-            "9735": () => {
-              if (findReplyId(e) === event.id) {
-                const {zapper} = derivePerson(event.pubkey).get()
-
-                zaps = zaps.concat(processZap(e, zapper)).filter(identity)
-              }
-            },
-          })
+          if (!$isEventMuted(e)) {
+            ctx = uniqBy(prop("id"), ctx.concat(e))
+          }
         },
       })
     }
@@ -272,7 +264,7 @@
         replyIsActive = false
       }}
       on:event={e => {
-        context = [e.detail, ...context]
+        ctx = [e.detail, ...ctx]
       }}
       {borderColor} />
 
@@ -291,12 +283,11 @@
               showParent={false}
               note={r}
               depth={depth - 1}
-              {context}
+              context={ctx}
               {feedRelay}
               {setFeedRelay}
               {invertColors}
-              {anchorId}
-              {showContext} />
+              {anchorId} />
           {/each}
         </div>
       </div>

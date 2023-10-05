@@ -1,5 +1,14 @@
 # Changelog
 
+# 0.3.10
+
+- [x] Use local relay on all requests
+- [x] Use filters to control which replies are shown
+- [x] Fix nasty bug where combined requests would prevent each other from receiving events. This will fix threads and notifications frequently not loading.
+- [x] Clean up note component, particulary context sharing
+- [x] Add LRU cache for verifySignature to reduce load on CPU
+- [x] Group notifications by 3 hour chunks
+
 # 0.3.9
 
 - [x] Close stale connections to prevent stalling

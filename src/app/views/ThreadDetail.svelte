@@ -52,7 +52,7 @@
       <Note invertColors topLevel showParent={false} note={$parent} />
     {/if}
     {#if $anchor}
-      <Note invertColors showContext topLevel showParent={false} note={$anchor} depth={2} />
+      <Note invertColors topLevel showParent={false} note={$anchor} depth={2} />
     {/if}
   </Content>
 {/if}

@@ -1,6 +1,7 @@
 import {prop, max, sortBy} from "ramda"
+import {seconds} from "hurdak"
 import {Tags, reactionKinds, findReplyId, findReplyAndRootIds} from "src/util/nostr"
-import {formatTimestampAsLocalISODate, tryJson} from "src/util/misc"
+import {tryJson, now} from "src/util/misc"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {derived} from "src/engine/core/utils"
 import {session} from "src/engine/session/derived"
@@ -71,8 +72,9 @@ export const groupNotifications = ($notifications, kinds) => {
     }
 
     // Group and sort by day/event so we can group clustered reactions to the same event
-    const key =
-      formatTimestampAsLocalISODate(ix.created_at).slice(0, 13) + (parentId || `self:${ix.id}`)
+    const delta = now() - ix.created_at
+    const deltaDisplay = Math.round(delta / seconds(3, "hour")).toString()
+    const key = deltaDisplay + (parentId || `self:${ix.id}`)
 
     groups[key] = groups[key] || {key, event, interactions: []}
     groups[key].interactions.push(convertZap(ix))

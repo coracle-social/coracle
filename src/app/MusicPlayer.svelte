@@ -20,7 +20,7 @@
   const filters = [
     //compileFilter({kinds: [1808], authors: "follows", limit: 10}),
     //compileFilter({kinds: [1808], authors: "network", limit: 10}),
-    compileFilter({kinds: [1808], limit: 10}),
+    compileFilter({kinds: [1808]}),
   ]
 
   const relays = getRelaysFromFilters(filters).concat("wss://relay.stemstr.app")
@@ -45,7 +45,7 @@
     i = Math.min($feed.length - 1, inc(i))
   }
 
-  const loadMore = throttle(3000, () => feed.load(10))
+  const loadMore = throttle(5000, () => feed.load(1))
 
   const goToPerson = () => modal.push({type: "person/detail", pubkey: note.pubkey})
 
@@ -84,7 +84,7 @@
   }
 
   $: {
-    if ($feed.slice(i).length < 10) {
+    if ($feed.slice(i).length < 1) {
       loadMore()
     }
   }

@@ -1,10 +1,17 @@
-import {matchFilter as nostrToolsMatchFilter} from "nostr-tools"
+import {verifySignature, getEventHash, matchFilter as nostrToolsMatchFilter} from "nostr-tools"
 import {omit, any, find, prop, groupBy, uniq} from "ramda"
-import {shuffle, seconds, avg} from "hurdak"
+import {shuffle, tryFunc, seconds, avg} from "hurdak"
+import {cached} from "src/util/lruCache"
 import {env, pubkey} from "src/engine/session/state"
 import {follows, network} from "src/engine/people/derived"
 import {mergeHints, getPubkeyHints} from "src/engine/relays/utils"
 import type {DynamicFilter, Filter} from "../model"
+
+export const hasValidSignature = cached({
+  maxSize: 10000,
+  getKey: ([e]) => [getEventHash(e), e.sig].join(":"),
+  getValue: ([e]) => tryFunc(() => verifySignature(e)),
+})
 
 export const matchFilter = (filter, event) => {
   if (!nostrToolsMatchFilter(filter, event)) {
@@ -101,7 +108,10 @@ export const guessFilterDelta = filters => {
 }
 
 export const getPubkeysWithDefaults = (pubkeys: Set<string>) =>
-  shuffle(pubkeys.size > 0 ? Array.from(pubkeys) : (env.get().DEFAULT_FOLLOWS as string[])).slice(0, 1024)
+  shuffle(pubkeys.size > 0 ? Array.from(pubkeys) : (env.get().DEFAULT_FOLLOWS as string[])).slice(
+    0,
+    1024
+  )
 
 export const compileFilter = (filter: DynamicFilter): Filter => {
   if (filter.authors === "global") {

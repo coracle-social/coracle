@@ -1,22 +1,21 @@
-import {verifySignature} from "nostr-tools"
 import type {Executor} from "paravel"
 import EventEmitter from "events"
 import {assoc, map} from "ramda"
-import {defer, tryFunc, updateIn} from "hurdak"
+import {defer, updateIn} from "hurdak"
 import {now} from "src/util/misc"
 import {warn, info} from "src/util/logger"
 import type {Event} from "src/engine/events/model"
 import {projections} from "src/engine/core/projections"
 import {getUrls, getExecutor} from "./executor"
 import type {Filter} from "../model"
-import {matchFilters} from "./filters"
+import {matchFilters, hasValidSignature} from "./filters"
 import {Tracker} from "./tracker"
 
 export type SubscriptionOpts = {
   relays: string[]
   filters: Filter[]
   timeout?: number
-  shouldIgnore?: (e: Event, url: string) => boolean
+  tracker?: Tracker
   shouldProject?: boolean
 }
 
@@ -27,13 +26,14 @@ export class Subscription extends EventEmitter {
   result = defer()
   events = []
   eose = new Set()
-  tracker = new Tracker()
+  tracker: Tracker
   sub: {unsubscribe: () => void} = null
   id = Math.random().toString().slice(12, 16)
 
   constructor(readonly opts: SubscriptionOpts) {
     super()
 
+    this.tracker = opts.tracker || new Tracker()
     this.start()
   }
 
@@ -67,13 +67,9 @@ export class Subscription extends EventEmitter {
       return
     }
 
-    if (this.opts.shouldIgnore?.(event, url)) {
-      return
-    }
-
     event.content = event.content || ""
 
-    if (!tryFunc(() => verifySignature(event))) {
+    if (!hasValidSignature(event)) {
       warn("Signature verification failed", {event})
       return
     }

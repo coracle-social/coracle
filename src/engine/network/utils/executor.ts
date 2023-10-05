@@ -1,4 +1,4 @@
-import {max, partition} from "ramda"
+import {max} from "ramda"
 import {noop, pickVals} from "hurdak"
 import {Plex, Relays, Executor, Multi} from "paravel"
 import {error, warn} from "src/util/logger"
@@ -31,7 +31,6 @@ export const getUrls = (relays: string[]) => {
 }
 
 export const getTarget = (urls: string[]) => {
-  const [localUrls, remoteUrls] = partition(url => url.startsWith("local://"), urls)
   const muxUrl = getSetting("multiplextr_url")
 
   // Try to use our multiplexer, but if it fails to connect fall back to relays. If
@@ -40,17 +39,17 @@ export const getTarget = (urls: string[]) => {
   // AUTH with a single relay.
   let target
 
-  if (muxUrl && (remoteUrls.length > 1 || pool.has(muxUrl))) {
+  if (muxUrl && (urls.length > 1 || pool.has(muxUrl))) {
     const connection = pool.get(muxUrl)
 
     if (connection.socket.isHealthy()) {
-      target = new Plex(remoteUrls, connection)
+      target = new Plex(urls, connection)
     }
   } else {
-    target = new Relays(remoteUrls.map(url => pool.get(url)))
+    target = new Relays(urls.map(url => pool.get(url)))
   }
 
-  return localUrls.length > 0 ? new Multi([target, new LocalTarget()]) : target
+  return new Multi([target, new LocalTarget()])
 }
 
 const seenChallenges = new Set()

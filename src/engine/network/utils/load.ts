@@ -1,5 +1,5 @@
-import {assoc, path as getPath} from "ramda"
-import {defer} from "hurdak"
+import {assoc, uniq, path as getPath} from "ramda"
+import {defer, batch} from "hurdak"
 import {pushToKey} from "src/util/misc"
 import {info} from "src/util/logger"
 import {getSetting} from "src/engine/session/utils"
@@ -23,17 +23,17 @@ export type LoadItem = {
   result: ReturnType<typeof defer>
 }
 
-const queue = []
-
 const loadChunk = (chunk, relays, tracker) => {
-  const sub = new Subscription({
-    relays,
-    timeout: 15000,
-    filters: combineFilters(chunk.flatMap(getPath(["request", "filters"]))),
-    shouldIgnore: tracker.add,
-  })
+  const filters = combineFilters(chunk.flatMap(getPath(["request", "filters"])))
+  const sub = new Subscription({relays, filters, timeout: 15000})
 
   sub.on("event", e => {
+    // We have use a shared tracker in addition to the one in subscription so all urls
+    // end up on the event (since we create a subscription per url). Don't filter those
+    // events out though, since they may be requested by multiple load requests. Then,
+    // track again per request to deduplicate.
+    tracker.add(e, e.seen_on)
+
     for (const {request} of chunk) {
       if (request.onEvent && matchFilters(request.filters, e)) {
         request.onEvent(e)
@@ -53,24 +53,24 @@ const loadChunk = (chunk, relays, tracker) => {
     }
   })
 
-  sub.result.then(events => {
-    for (const item of chunk) {
-      item.result.resolve(events)
+  sub.result.then((events: Event[]) => {
+    for (const {request, result} of chunk) {
+      result.resolve(events.filter(e => matchFilters(request.filters, e)))
     }
   })
 }
 
-export const execute = () => {
-  const filters = combineFilters(queue.flatMap(item => item.request.filters))
+export const execute = batch(500, (items: LoadItem[]) => {
+  const filters = combineFilters(items.flatMap(item => item.request.filters))
+  const relays = uniq(items.flatMap(item => item.request.relays))
 
   if (filters.length === 0) {
     return
   }
 
-  const items = queue.splice(0)
-  const tracker = new Tracker()
+  info(`Loading ${items.length} grouped requests`, {filters, relays})
 
-  info(`Loading ${items.length} grouped requests`, filters)
+  const tracker = new Tracker()
 
   // If we're using multiplexer, let it do its thing
   if (getSetting("multiplextr_url")) {
@@ -90,7 +90,7 @@ export const execute = () => {
       loadChunk(chunk, [url], tracker)
     }
   }
-}
+})
 
 export const load = (request: LoadOpts) => {
   if (request.filters.length === 0) {
@@ -99,11 +99,7 @@ export const load = (request: LoadOpts) => {
 
   const result = defer()
 
-  if (queue.length === 0) {
-    setTimeout(execute, 500)
-  }
-
-  queue.push({request, result})
+  execute({request, result})
 
   return result
 }

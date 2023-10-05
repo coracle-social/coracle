@@ -6,7 +6,6 @@
   import {fly} from "src/util/transition"
   import {quantify} from "hurdak"
   import {createScroller} from "src/util/misc"
-  import {LOCAL_RELAY_URL} from "src/util/nostr"
   import {getModal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -21,7 +20,6 @@
   export let filter = {} as DynamicFilter
   export let invertColors = false
   export let hideControls = false
-  export let queryCache = false
   export let onEvent = null
 
   let scroller, feed, scrollerElement
@@ -54,11 +52,7 @@
     }
 
     if (selection.length === 0) {
-      selection = getRelaysFromFilters([compileFilter(filter)])
-    }
-
-    if (queryCache) {
-      selection = [...selection, LOCAL_RELAY_URL]
+      selection = getRelaysFromFilters(filters)
     }
 
     return selection
@@ -81,8 +75,8 @@
       }
 
       feed = new FeedLoader({
+        filters,
         relays: getRelays(),
-        filters: [compileFilter(filter)],
         shouldDefer: true,
         shouldListen: true,
         shouldLoadParents: true,
@@ -95,6 +89,8 @@
       scroller = createScroller(loadMore, {element: scrollerElement})
     }
   }
+
+  $: filters = [compileFilter(filter)]
 
   onMount(() => {
     scrollerElement = getModal()
@@ -126,7 +122,14 @@
 
   <div class="flex flex-col gap-4">
     {#each $oldNotes as note (note.id)}
-      <Note depth={2} {note} {feedRelay} {setFeedRelay} {invertColors} />
+      <Note
+        depth={2}
+        context={note.replies || []}
+        {filters}
+        {note}
+        {feedRelay}
+        {setFeedRelay}
+        {invertColors} />
     {/each}
   </div>
 

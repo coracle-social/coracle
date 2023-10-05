@@ -39,7 +39,7 @@ export function cached<T, V>({
 }) {
   const cache = new LRUCache<T, V>(maxSize)
 
-  return (...args) => {
+  const get = (...args) => {
     const k = getKey(args)
 
     let v = cache.get(k)
@@ -52,4 +52,10 @@ export function cached<T, V>({
 
     return v
   }
+
+  get.cache = cache
+  get.getKey = getKey
+  get.getValue = getValue
+
+  return get
 }
