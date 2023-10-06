@@ -1,4 +1,4 @@
-import {assoc, uniq, path as getPath} from "ramda"
+import {flatten, assoc, uniq, path as getPath} from "ramda"
 import {defer, batch} from "hurdak"
 import {pushToKey} from "src/util/misc"
 import {info} from "src/util/logger"
@@ -21,6 +21,9 @@ export type LoadOpts = {
 export type LoadItem = {
   request: LoadOpts
   result: ReturnType<typeof defer>
+  tracker: Tracker
+  chunkResult?: Promise<Event[]>
+  chunkResults: Promise<Event[]>[]
 }
 
 const loadChunk = (chunk, relays, tracker) => {
@@ -34,8 +37,8 @@ const loadChunk = (chunk, relays, tracker) => {
     // track again per request to deduplicate.
     tracker.add(e, e.seen_on)
 
-    for (const {request} of chunk) {
-      if (request.onEvent && matchFilters(request.filters, e)) {
+    for (const {request, tracker} of chunk) {
+      if (request.onEvent && !tracker.add(e, e.seen_on) && matchFilters(request.filters, e)) {
         request.onEvent(e)
       }
     }
@@ -48,14 +51,11 @@ const loadChunk = (chunk, relays, tracker) => {
   })
 
   sub.on("close", events => {
-    for (const {request} of chunk) {
-      request.onClose?.(events)
-    }
-  })
+    for (const {request, chunkResult} of chunk) {
+      const matchingEvents = events.filter(e => matchFilters(request.filters, e))
 
-  sub.result.then((events: Event[]) => {
-    for (const {request, result} of chunk) {
-      result.resolve(events.filter(e => matchFilters(request.filters, e)))
+      request.onClose?.(matchingEvents)
+      chunkResult.resolve(matchingEvents)
     }
   })
 }
@@ -81,13 +81,22 @@ export const execute = batch(500, (items: LoadItem[]) => {
     const itemsByRelay = {}
     for (const item of items) {
       for (const url of item.request.relays) {
-        pushToKey(itemsByRelay, url, item)
+        const chunkResult = defer() as Promise<Event[]>
+
+        item.chunkResults.push(chunkResult)
+
+        pushToKey(itemsByRelay, url, {...item, chunkResult})
       }
     }
 
     // Group by relay, then by filter
     for (const [url, chunk] of Object.entries(itemsByRelay) as [string, LoadItem[]][]) {
       loadChunk(chunk, [url], tracker)
+    }
+
+    // Merge results from each chunk into a single result set
+    for (const item of items) {
+      Promise.all(item.chunkResults).then(eventGroups => item.result.resolve(flatten(eventGroups)))
     }
   }
 })
@@ -98,8 +107,9 @@ export const load = (request: LoadOpts) => {
   }
 
   const result = defer()
+  const tracker = new Tracker()
 
-  execute({request, result})
+  execute({request, result, tracker, chunkResults: []})
 
   return result
 }

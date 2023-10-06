@@ -18,6 +18,7 @@
   import {
     env,
     load,
+    loadOne,
     processZaps,
     matchFilters,
     getReplyHints,
@@ -122,12 +123,9 @@
     interval = setInterval(setBorderHeight, 400)
 
     if (!event.pubkey) {
-      await load({
+      event = await loadOne({
         relays: selectHints(relays),
         filters: getIdFilters([event.id]),
-        onEvent: e => {
-          event = e
-        },
       })
     }
 
