@@ -84,7 +84,7 @@
   }
 
   $: {
-    if ($feed.slice(i).length < 1) {
+    if ($feed.slice(i).length < 5) {
       loadMore()
     }
   }
