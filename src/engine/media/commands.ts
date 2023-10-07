@@ -14,8 +14,8 @@ export const uploadToNostrBuild = async body => {
   })
 
   const event = await ($signer.canSign()
-    ? $signer.prepAsUser(template)
-    : $signer.prepWithKey(template, generatePrivateKey()))
+    ? $signer.signAsUser(template)
+    : $signer.signWithKey(template, generatePrivateKey()))
 
   return Fetch.fetchJson(url, {
     body,
