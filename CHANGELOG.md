@@ -9,6 +9,7 @@
 - [x] Add LRU cache for verifySignature to reduce load on CPU
 - [x] Group notifications by 3 hour chunks
 - [x] Fix guessFilterDelta
+- [x] Sign NIP 98 upload header
 
 # 0.3.9
 
