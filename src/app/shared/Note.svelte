@@ -2,7 +2,7 @@
   import {last, sortBy, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify} from "hurdak"
-  import {findRootId, findReplyId, isLike} from "src/util/nostr"
+  import {findRootId, isChildOf, findReplyId, isLike} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -26,6 +26,7 @@
     getParentHints,
     getEventHints,
     getIdFilters,
+    getReplyFilters,
     selectHints,
     mergeHints,
     loadPubkeys,
@@ -113,7 +114,7 @@
 
   $: muted = !showMuted && $isEventMuted(event)
 
-  $: children = ctx.filter(e => findReplyId(e) === event.id)
+  $: children = ctx.filter(e => isChildOf(e, event))
 
   $: replies = sortBy(
     (e: Event) => -e.created_at,
@@ -153,7 +154,7 @@
 
       load({
         relays: mergeHints([relays, getReplyHints(event)]),
-        filters: [{kinds, "#e": [event.id]}],
+        filters: getReplyFilters([event], {kinds}),
         onEvent: e => {
           if (!$isEventMuted(e)) {
             ctx = uniqBy(prop("id"), ctx.concat(e))

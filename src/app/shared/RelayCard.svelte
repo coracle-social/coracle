@@ -1,5 +1,4 @@
 <script lang="ts">
-  import cx from "classnames"
   import {fly} from "src/util/transition"
   import {stringToHue, hsl} from "src/util/misc"
   import Toggle from "src/partials/Toggle.svelte"
@@ -12,23 +11,21 @@
 
   export let relay
   export let rating = null
-  export let theme = "gray-8"
   export let showStatus = false
   export let hideActions = false
   export let showControls = false
 </script>
 
 <div
-  class={cx(
-    `bg-${theme}`,
-    "flex flex-col justify-between gap-3 rounded-xl border border-l-2 border-solid border-gray-6 px-6 py-3 shadow"
-  )}
+  class="flex flex-col justify-between gap-3 rounded-xl border border-l-2 border-solid border-gray-6 bg-gray-8 px-6 py-3 shadow"
   style={`border-left-color: ${hsl(stringToHue(relay.url))}`}
   in:fly={{y: 20}}>
   <div class="flex items-center justify-between gap-2">
-    <div class="flex items-center gap-2 text-xl min-w-0">
+    <div class="flex min-w-0 items-center gap-2 text-xl">
       <i class={relay.url.startsWith("ws://") ? "fa fa-unlock" : "fa fa-lock"} />
-      <Anchor href={router.at("relays").of(relay.url).path} class="overflow-hidden whitespace-nowrap text-ellipsis">
+      <Anchor
+        href={router.at("relays").of(relay.url).path}
+        class="overflow-hidden text-ellipsis whitespace-nowrap">
         {displayRelay(relay)}
       </Anchor>
       {#if showStatus && !getSetting("multiplextr_url")}

@@ -3,9 +3,6 @@
   import Feed from "src/app/shared/Feed.svelte"
 
   export let pubkey
-  export let relays
-
-  const filter = {kinds: noteKinds, authors: [pubkey]}
 </script>
 
-<Feed {relays} {filter} />
+<Feed filter={{kinds: noteKinds, authors: [pubkey]}} />

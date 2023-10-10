@@ -24,9 +24,6 @@
     loadPubkeys,
     imgproxy,
     getPubkeyRelays,
-    mergeHints,
-    selectHints,
-    getPubkeyHints,
   } from "src/engine"
 
   export let npub
@@ -41,12 +38,11 @@
   let loading = true
 
   $: ownRelays = getPubkeyRelays(pubkey)
-  $: mergedRelays = selectHints(mergeHints([relays, getPubkeyHints(pubkey, "write")]))
   $: banner = imgproxy($person.profile?.banner, {w: window.innerWidth})
 
-  info("Person", npub, pubkey, relays, $person)
+  info("Person", npub, pubkey, $person)
 
-  loadPubkeys([pubkey], {force: true})
+  loadPubkeys([pubkey], {force: true, relays})
 
   document.title = displayPerson($person)
 
@@ -100,9 +96,9 @@
   {#if $mutes.has(pubkey)}
     <Content size="lg" class="text-center">You have muted this person.</Content>
   {:else if activeTab === "notes"}
-    <PersonNotes {pubkey} relays={mergedRelays} />
+    <PersonNotes {pubkey} />
   {:else if activeTab === "likes"}
-    <PersonLikes {pubkey} relays={mergedRelays} />
+    <PersonLikes {pubkey} />
   {:else if activeTab === "relays"}
     {#if ownRelays.length > 0}
       <PersonRelays relays={ownRelays} />

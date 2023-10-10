@@ -111,6 +111,18 @@ export class Tags {
   }
 }
 
+export const getNaddr = (e: Event) => [e.kind, e.pubkey, Tags.from(e).getMeta("d") || ""].join(":")
+
+export const getIds = (e: Event) => {
+  const ids = [e.id]
+
+  if (e.kind >= 10000) {
+    ids.push(getNaddr(e))
+  }
+
+  return ids
+}
+
 export const findReplyAndRoot = (e: Event) => {
   const tags = Tags.from(e)
     .type(["a", "e"])
@@ -140,6 +152,8 @@ export const findReplyId = (e: Event) => findReply(e)?.[1]
 export const findRoot = (e: Event) => prop("root", findReplyAndRoot(e))
 
 export const findRootId = (e: Event) => findRoot(e)?.[1]
+
+export const isChildOf = (a, b) => getIds(b).includes(findReplyId(a))
 
 export const isLike = (content: string) =>
   ["", "+", "🤙", "👍", "❤️", "😎", "🏅", "🫂", "🤣", "😂", "💜"].includes(content)

@@ -1,6 +1,7 @@
 import {verifySignature, getEventHash, matchFilter as nostrToolsMatchFilter} from "nostr-tools"
 import {omit, any, find, prop, groupBy, uniq} from "ramda"
 import {shuffle, tryFunc, seconds, avg} from "hurdak"
+import {Tags} from "src/util/nostr"
 import {cached} from "src/util/lruCache"
 import {env, pubkey} from "src/engine/session/state"
 import {follows, network} from "src/engine/people/derived"
@@ -78,6 +79,33 @@ export const getIdFilters = values => {
 
   if (ids.length > 0) {
     filters.push({ids})
+  }
+
+  return filters
+}
+
+export const getReplyFilters = (events, filter) => {
+  const a = []
+  const e = []
+
+  for (const event of events) {
+    e.push(event.id)
+
+    if (event.kind >= 10000) {
+      const tags = Tags.from(event).asMeta()
+
+      a.push([event.kind, event.pubkey, tags.d || ""].join(":"))
+    }
+  }
+
+  const filters = []
+
+  if (a.length > 0) {
+    filters.push({...filter, "#a": a})
+  }
+
+  if (e.length > 0) {
+    filters.push({...filter, "#e": e})
   }
 
   return filters

@@ -1,5 +1,12 @@
 # Changelog
 
+# 0.3.11
+
+- [x] Re-write routing to make modal links persistent and handle history better
+- [x] Handle a tag replies
+- [x] Fix feed search
+- [x] Simplify card theme using css
+
 # 0.3.10
 
 - [x] Use local relay on all requests

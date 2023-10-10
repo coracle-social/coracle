@@ -93,7 +93,7 @@
 
   const mediaRouteOpts = {
     decode: {
-      url: v => ({url: atob(v)}),
+      url: v => ({url: decodeURIComponent(v)}),
     },
   }
 

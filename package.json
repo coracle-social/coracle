@@ -50,7 +50,7 @@
     "date-picker-svelte": "^2.8.0",
     "fuse.js": "^6.6.2",
     "hls.js": "^1.4.10",
-    "hurdak": "^0.2.4",
+    "hurdak": "^0.2.5",
     "husky": "^8.0.3",
     "insane": "^2.6.2",
     "lru-cache": "^7.18.3",

@@ -1,10 +1,7 @@
 <script lang="ts">
-  import {quantify} from "hurdak"
   import Content from "src/partials/Content.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
-  import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {router} from "src/app/router"
-  import {load, displayPubkey, selectHints} from "src/engine"
+  import Note from "src/app/shared/Note.svelte"
+  import {load, selectHints} from "src/engine"
 
   export let identifier
   export let kind
@@ -12,8 +9,6 @@
   export let relays = []
 
   let note
-
-  const display = displayPubkey(pubkey)
 
   load({
     relays: selectHints(relays),
@@ -25,30 +20,7 @@
 </script>
 
 <Content>
-  <p>
-    This is a kind {kind} event called "{identifier}", published by
-    <Anchor class="underline" href={router.at("people").of(pubkey).path}>@{display}</Anchor>.
-  </p>
   {#if note}
-    <NoteContent showEntire {note} />
-  {/if}
-  {#if note?.tags.length > 1}
-    <p>This note has {quantify(note.tags.length - 1, "tag")}:</p>
-    <ul class="list-inside list-disc">
-      {#each note.tags as [type, value, ...rest]}
-        {#if type !== "d"}
-          <li>
-            {#if type === "p"}
-              <Anchor class="underline" href={router.at("people").of(value).path}
-                >@{display}</Anchor>
-            {:else if type === "e"}
-              <Anchor class="underline" href={value}>Event {value}</Anchor>
-            {:else}
-              {type}: {value} {rest.length > 0 ? rest.join(", ") : ""}
-            {/if}
-          </li>
-        {/if}
-      {/each}
-    </ul>
+    <Note topLevel depth={3} anchorId={note.id} {note} />
   {/if}
 </Content>

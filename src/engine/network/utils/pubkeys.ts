@@ -48,11 +48,13 @@ export const loadPubkeys = async (
   const pubkeys = force ? uniq(rawPubkeys) : getStalePubkeys(rawPubkeys)
 
   const getChunkRelays = (chunk: string[]) => {
-    if (relays?.length > 0) {
-      return relays
+    const groups = chunk.map(pubkey => getPubkeyHints(pubkey, "write"))
+
+    if (relays) {
+      groups.push(relays)
     }
 
-    return mergeHints(chunk.map(pubkey => getPubkeyHints(pubkey, "write")))
+    return mergeHints(groups)
   }
 
   const getChunkFilters = (chunk: string[]) => {
