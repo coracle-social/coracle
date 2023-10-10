@@ -105,7 +105,7 @@
             </Chip>
           {/each}
         </div>
-        <Note note={{id: ids[0]}} invertColors relays={hints} />
+        <Note note={{id: ids[0]}} relays={hints} />
       </Content>
     </Card>
   {/each}

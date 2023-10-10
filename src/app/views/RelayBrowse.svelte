@@ -25,10 +25,7 @@
   </div>
   <Tabs {tabs} {activeTab} {setActiveTab} />
   {#if activeTab === "reviews"}
-    <Feed
-      hideControls
-      invertColors
-      filter={{kinds: [1985], "#l": ["review/relay"]}} />
+    <Feed hideControls filter={{kinds: [1985], "#l": ["review/relay"]}} />
   {:else}
     <RelaySearch />
   {/if}

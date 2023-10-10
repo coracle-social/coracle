@@ -18,7 +18,6 @@
 
   export let relays = []
   export let filter = {} as DynamicFilter
-  export let invertColors = false
   export let hideControls = false
   export let onEvent = null
 
@@ -122,14 +121,7 @@
 
   <div class="flex flex-col gap-4">
     {#each $oldNotes as note (note.id)}
-      <Note
-        depth={2}
-        context={note.replies || []}
-        {filters}
-        {note}
-        {feedRelay}
-        {setFeedRelay}
-        {invertColors} />
+      <Note depth={2} context={note.replies || []} {filters} {note} {feedRelay} {setFeedRelay} />
     {/each}
   </div>
 

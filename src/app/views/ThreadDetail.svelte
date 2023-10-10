@@ -32,11 +32,11 @@
 {:else}
   <Content gap="gap-4">
     {#if $root}
-      <Note invertColors note={$root} />
+      <Note note={$root} />
     {/if}
     {#if showAncestors}
       {#each $ancestors as ancestor (ancestor.id)}
-        <Note invertColors topLevel showParent={false} note={ancestor} />
+        <Note topLevel showParent={false} note={ancestor} />
       {/each}
     {:else if $ancestors.length > 0}
       <Anchor
@@ -49,10 +49,10 @@
       </Anchor>
     {/if}
     {#if $parent}
-      <Note invertColors topLevel showParent={false} note={$parent} />
+      <Note topLevel showParent={false} note={$parent} />
     {/if}
     {#if $anchor}
-      <Note invertColors topLevel showParent={false} note={$anchor} depth={2} />
+      <Note topLevel showParent={false} note={$anchor} depth={2} />
     {/if}
   </Content>
 {/if}

@@ -70,7 +70,7 @@
 </script>
 
 <div class="py-2" on:click|stopPropagation>
-  <Card interactive invertColors class="my-2" on:click={openQuote}>
+  <Card interactive class="my-2" on:click={openQuote}>
     {#if loading}
       <div class="px-20">
         <Spinner />

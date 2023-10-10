@@ -9,7 +9,6 @@
   export let eid
   export let relays = []
   export let context = []
-  export let invertColors = false
   export let depth = isMobile ? 2 : 5
   export let setFeedRelay = relay => {
     feedRelay = relay
@@ -21,16 +20,7 @@
 </script>
 
 <Content>
-  <Note
-    showLoading
-    anchorId={eid}
-    {note}
-    {depth}
-    {relays}
-    {context}
-    {invertColors}
-    {feedRelay}
-    {setFeedRelay} />
+  <Note showLoading anchorId={eid} {note} {depth} {relays} {context} {feedRelay} {setFeedRelay} />
 </Content>
 
 {#if feedRelay}

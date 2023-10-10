@@ -223,11 +223,11 @@
     <Content>
       {#each search(term).slice(0, 50) as result (result.type + result.id)}
         {#if result.type === "topic"}
-          <Card invertColors interactive on:click={() => openTopic(result.topic.name)}>
+          <Card interactive on:click={() => openTopic(result.topic.name)}>
             #{result.topic.name}
           </Card>
         {:else if result.type === "profile"}
-          <Card invertColors interactive on:click={() => openPerson(result.id)}>
+          <Card interactive on:click={() => openPerson(result.id)}>
             <PersonSummary inert hideActions pubkey={result.id} />
           </Card>
         {/if}

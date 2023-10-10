@@ -14,7 +14,7 @@
   const goToChat = () => window.open(`https://chat.coracle.social/chat/${noteId}`)
 </script>
 
-<Card interactive invertColors on:click={goToChat}>
+<Card interactive on:click={goToChat}>
   <Content>
     <div class="flex items-center gap-2">
       {#if picture}

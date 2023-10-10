@@ -11,7 +11,6 @@
   import {toastProgress} from "src/app/state"
 
   export let parent
-  export let borderColor
 
   const dispatch = createEventDispatcher()
 
@@ -92,7 +91,8 @@
     class="note-reply relative z-10 my-2 flex flex-col gap-1"
     bind:this={container}
     on:click|stopPropagation>
-    <div class={`border border-${borderColor} overflow-hidden rounded-2xl border-solid`}>
+    <div
+      class="overflow-hidden rounded-2xl border border-solid border-gray-7 group-[.modal]:border-gray-6">
       <div class="bg-gray-7 p-3 text-gray-2" class:rounded-b={data.mentions.length === 0}>
         <Compose bind:this={reply} onSubmit={send} style="min-height: 4rem">
           <div class="flex flex-col justify-start" slot="addon">
@@ -113,7 +113,7 @@
             }} />
         </div>
       {/if}
-      <div class={`h-px bg-${borderColor}`} />
+      <div class="h-px bg-gray-7 group-[.modal]:bg-gray-6" />
       <div class="flex gap-2 rounded-b bg-gray-7 p-2 text-sm text-gray-2">
         <div class="inline-block border-r border-solid border-gray-6 py-2 pl-1 pr-3">
           <div class="flex cursor-pointer items-center gap-3">

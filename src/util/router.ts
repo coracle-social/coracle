@@ -46,8 +46,8 @@ const asPath = (...parts: string[]) => {
 
 type RouterExtensionParams = {
   path: string
-  queryParams: Record<string, any>
-  context: Record<string, any>
+  queryParams?: Record<string, any>
+  context?: Record<string, any>
 }
 
 class RouterExtension {
@@ -197,7 +197,7 @@ export class Router {
 
   // Extensions
 
-  extend(path, getId) {
+  extend(path: string, getId) {
     this.extensions[path] = new RouterExtension(this, {path}, getId)
   }
 

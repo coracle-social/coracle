@@ -11,5 +11,5 @@
 
 <Content>
   <Heading>{label}</Heading>
-  <Feed invertColors relays={selectHints(hints)} filter={{ids}} />
+  <Feed relays={selectHints(hints)} filter={{ids}} />
 </Content>

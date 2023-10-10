@@ -41,7 +41,6 @@
   export let anchorId = null
   export let topLevel = false
   export let showParent = true
-  export let invertColors = false
   export let showLoading = false
 
   let event = note
@@ -53,7 +52,6 @@
   let ctx = context
 
   const {ENABLE_ZAPS} = $env
-  const borderColor = invertColors ? "gray-6" : "gray-7"
   const showEntire = anchorId === event.id
   const interactive = !anchorId || !showEntire
 
@@ -173,10 +171,10 @@
 {#if event.pubkey}
   <div class="note">
     <div bind:this={noteContainer} class="group relative">
-      <Card class="relative flex gap-4" on:click={onClick} {interactive} {invertColors}>
+      <Card class="relative flex gap-4" on:click={onClick} {interactive}>
         {#if !showParent && !topLevel}
           <div
-            class={`absolute -ml-4 h-px w-4 bg-${borderColor} z-10`}
+            class="absolute z-10 -ml-4 h-px w-4 bg-gray-7 group-[.modal]:bg-gray-6"
             style="left: 0px; top: 27px;" />
         {/if}
         <div>
@@ -276,12 +274,13 @@
       }}
       on:event={e => {
         ctx = [e.detail, ...ctx]
-      }}
-      {borderColor} />
+      }} />
 
     {#if !collapsed && visibleNotes.length > 0 && depth > 0 && !muted}
       <div class="relative mt-4">
-        <div class={`absolute w-px bg-${borderColor} z-10 -mt-4 ml-4 h-0`} bind:this={border} />
+        <div
+          class="absolute z-10 -mt-4 ml-4 h-0 w-px bg-gray-7 group-[.modal]:bg-gray-6"
+          bind:this={border} />
         <div class="note-children relative ml-8 flex flex-col gap-4" bind:this={childrenContainer}>
           {#if !showEntire && replies.length > visibleNotes.length}
             <button class="ml-5 cursor-pointer py-2 text-gray-1 outline-0" on:click={onClick}>
@@ -297,7 +296,6 @@
               context={ctx}
               {feedRelay}
               {setFeedRelay}
-              {invertColors}
               {anchorId} />
           {/each}
         </div>

@@ -28,7 +28,7 @@
     <!-- If someone clicks on a child note that was seen on a relay the parent was not
          seen on, we get nothing, so just show everything - but pass down the filter -->
     {#each filteredNotes.length > 0 ? filteredNotes : notes as note (note.id)}
-      <Note invertColors {depth} {note} {feedRelay} />
+      <Note {depth} {note} {feedRelay} />
     {/each}
   </div>
 

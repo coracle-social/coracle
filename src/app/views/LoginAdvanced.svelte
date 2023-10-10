@@ -19,13 +19,13 @@
     <p>Find more options for logging in to nostr below.</p>
   </Content>
   <Content gap="gap-4">
-    <Card invertColors interactive on:click={pubkeyLogIn}>
+    <Card interactive on:click={pubkeyLogIn}>
       <Content gap="gap-4">
         <h2 class="text-lg font-bold">Log in with npub</h2>
         <p>Use this to access a read-only view of your account (or someone else's).</p>
       </Content>
     </Card>
-    <Card invertColors interactive on:click={bunkerLogIn}>
+    <Card interactive on:click={bunkerLogIn}>
       <Content gap="gap-4">
         <h2 class="text-lg font-bold">Log in with bunker</h2>
         <p>
@@ -34,13 +34,13 @@
         </p>
       </Content>
     </Card>
-    <Card invertColors interactive on:click={signUp}>
+    <Card interactive on:click={signUp}>
       <Content gap="gap-4">
         <h2 class="text-lg font-bold">Create a new account</h2>
         <p>Create a fresh private key and walk through our onboarding process.</p>
       </Content>
     </Card>
-    <Card invertColors interactive on:click={privkeyLogIn}>
+    <Card interactive on:click={privkeyLogIn}>
       <Content gap="gap-4">
         <h2 class="text-lg font-bold">Log in with nsec</h2>
         <p>Log in with your private key. Note that this method is not recommended!</p>

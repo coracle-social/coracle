@@ -8,4 +8,4 @@
   const filter = {kinds: noteKinds, authors: [pubkey]}
 </script>
 
-<Feed invertColors {relays} {filter} />
+<Feed {relays} {filter} />

@@ -17,7 +17,7 @@
   const bannerUrl = imgproxy(banner)
 </script>
 
-<Card interactive invertColors class="overflow-hidden" on:click={() => navigate(nprofile)}>
+<Card interactive class="overflow-hidden" on:click={() => navigate(nprofile)}>
   <div
     class="relative -m-4 p-4"
     style="background-size: cover; background-image: linear-gradient({rgba}, {rgba}), url('{bannerUrl}')">
