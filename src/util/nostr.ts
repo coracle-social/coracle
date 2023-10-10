@@ -224,3 +224,5 @@ export const getContentWarning = e => {
 
   return find(t => WARN_TAGS.has(t.toLowerCase()), tags.type("t").values().all())
 }
+
+export const buildATag = (kind, pubkey, ident = "") => [kind, pubkey, ident].join(":")

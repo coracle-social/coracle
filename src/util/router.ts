@@ -1,5 +1,5 @@
-import {takeWhile, filter, identity, reject, path as getPath} from "ramda"
-import {first} from "hurdak"
+import {takeWhile, fromPairs, filter, identity, reject, path as getPath} from "ramda"
+import {first, filterVals} from "hurdak"
 import type {ComponentType, SvelteComponentTyped} from "svelte"
 import {globalHistory} from "svelte-routing/src/history"
 import {pick} from "svelte-routing/src/utils"
@@ -75,19 +75,27 @@ class RouterExtension {
 
   at = path => this.clone({path: asPath(this.path, path)})
 
-  qp = queryParams => this.clone({queryParams: {...this.queryParams, ...queryParams}})
+  qp = queryParams =>
+    this.clone({
+      queryParams: filterVals(identity, {...this.queryParams, ...queryParams}),
+    })
 
-  cx = context => this.clone({context: {...this.context, ...context}})
+  cx = context =>
+    this.clone({
+      context: filterVals(identity, {...this.context, ...context}),
+    })
 
-  go = (config = {}) => {
+  toString = () => {
     let path = this.path
 
     if (this.queryParams) {
       path += "?" + new URLSearchParams(this.queryParams)
     }
 
-    this.router.go(path, {...config, context: this.context})
+    return path
   }
+
+  go = (config = {}) => this.router.go(this.toString(), {...config, context: this.context})
 
   push = (config = {}) => this.go(config)
 
@@ -203,5 +211,15 @@ export class Router {
 
   at(path) {
     return this.extensions[path] || new RouterExtension(this, {path})
+  }
+
+  from(historyItem) {
+    const [path, qs] = historyItem.path.split("?")
+
+    return this.at(path).qp(fromPairs(Array.from(new URLSearchParams(qs).entries())))
+  }
+
+  fromCurrent() {
+    return this.from(first(this.nonVirtual.get()))
   }
 }

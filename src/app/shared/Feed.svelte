@@ -1,40 +1,28 @@
 <script lang="ts">
-  import {onMount, onDestroy} from "svelte"
+  import {onMount} from "svelte"
   import {readable} from "svelte/store"
   import {FeedLoader} from "src/engine"
-  import {equals} from "ramda"
   import {fly} from "src/util/transition"
   import {quantify} from "hurdak"
   import {createScroller} from "src/util/misc"
   import {getModal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
-  import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
+  import RelayTitle from "src/app/shared/RelayTitle.svelte"
+  import RelayActions from "src/app/shared/RelayActions.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
-  import RelayFeed from "src/app/shared/RelayFeed.svelte"
   import Note from "src/app/shared/Note.svelte"
   import type {DynamicFilter} from "src/engine"
-  import {compileFilter, searchableRelays, getRelaysFromFilters} from "src/engine"
+  import {urlToRelay, compileFilter, searchableRelays, getRelaysFromFilters} from "src/engine"
 
   export let relays = []
   export let filter = {} as DynamicFilter
   export let hideControls = false
   export let onEvent = null
 
-  let scroller, feed, scrollerElement
-  let feedRelay = null
-  let feedScroller = null
+  let feed
   let oldNotes = readable([])
   let newNotes = readable([])
-
-  const setFeedRelay = relay => {
-    feedRelay = relay
-
-    setTimeout(() => {
-      feedScroller?.stop()
-      feedScroller = !relay ? null : createScroller(loadMore, {element: getModal()})
-    }, 300)
-  }
 
   const loadBufferedNotes = () => {
     feed.loadStream()
@@ -51,7 +39,7 @@
     }
 
     if (selection.length === 0) {
-      selection = getRelaysFromFilters(filters)
+      selection = getRelaysFromFilters([compileFilter(filter)])
     }
 
     return selection
@@ -59,47 +47,43 @@
 
   const loadMore = () => feed.load(5)
 
-  export const stop = () => {
-    feed?.stop()
-    scroller?.stop()
-    feedScroller?.stop()
-  }
-
-  export const start = (newFilter = null) => {
-    if (!equals(newFilter, filter)) {
-      stop()
-
-      if (newFilter) {
-        filter = newFilter
-      }
-
-      feed = new FeedLoader({
-        filters: [compileFilter(filter)],
-        relays: getRelays(),
-        shouldDefer: true,
-        shouldListen: true,
-        shouldLoadParents: true,
-        onEvent,
-      })
-
-      oldNotes = feed.notes
-      newNotes = feed.stream
-
-      scroller = createScroller(loadMore, {element: scrollerElement})
-    }
-  }
-
-  $: filters = [compileFilter(filter)]
-
   onMount(() => {
-    scrollerElement = getModal()
-    start()
-  })
+    feed = new FeedLoader({
+      filters: [compileFilter(filter)],
+      relays: getRelays(),
+      shouldDefer: true,
+      shouldListen: true,
+      shouldLoadParents: true,
+      onEvent,
+    })
 
-  onDestroy(stop)
+    oldNotes = feed.notes
+    newNotes = feed.stream
+
+    const scroller = createScroller(loadMore, {element: getModal()})
+
+    return () => {
+      feed?.stop()
+      scroller?.stop()
+    }
+  })
 </script>
 
 <Content size="inherit" gap="gap-6">
+  {#if relays.length === 1}
+    {@const relay = urlToRelay(relays[0])}
+    <div class="flex items-center justify-between gap-2">
+      <RelayTitle {relay} />
+      <RelayActions {relay} />
+    </div>
+    {#if relay.info.description}
+      <p>{relay.info.description}</p>
+    {/if}
+    <p class="border-l-2 border-gray-6 pl-4 text-gray-4">
+      Below is your current feed including only notes seen on this relay.
+    </p>
+  {/if}
+
   {#if $newNotes?.length > 0}
     <div class="pointer-events-none fixed bottom-0 left-0 z-20 mb-8 flex w-full justify-center">
       <button
@@ -114,22 +98,16 @@
   {/if}
 
   {#if !hideControls}
-    <FeedControls {filter} onChange={start}>
+    <FeedControls {filter}>
       <slot name="controls" slot="controls" />
     </FeedControls>
   {/if}
 
   <div class="flex flex-col gap-4">
     {#each $oldNotes as note (note.id)}
-      <Note depth={2} context={note.replies || []} {filters} {note} {feedRelay} {setFeedRelay} />
+      <Note depth={2} context={note.replies || []} filters={[compileFilter(filter)]} {note} />
     {/each}
   </div>
 
   <Spinner />
 </Content>
-
-{#if feedRelay}
-  <Modal onEscape={() => setFeedRelay(null)}>
-    <RelayFeed {feedRelay} notes={$oldNotes} depth={2} />
-  </Modal>
-{/if}

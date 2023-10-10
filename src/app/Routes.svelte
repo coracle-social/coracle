@@ -59,6 +59,13 @@
   import {menuIsOpen, logUsage} from "src/app/state"
   import {router} from "src/app/router"
 
+  const defaultDecoders = {
+    url: v => ({url: decodeURIComponent(v)}),
+    relays: s => ({relays: s.split(",")}),
+    pubkeys: s => ({pubkeys: s.split(",")}),
+    filter: s => ({filter: tryJson(() => JSON.parse(s))}),
+  }
+
   router.register("/about", About)
   router.register("/apps", Apps)
   router.register("/bech32", Bech32Entity)
@@ -91,16 +98,13 @@
   router.register("/settings/data/import", DataImport)
   router.register("/topic/:topic", TopicFeed)
 
-  const mediaRouteOpts = {
-    decode: {
-      url: v => ({url: decodeURIComponent(v)}),
-    },
-  }
+  const mediaRouteOpts = {decode: defaultDecoders}
 
   router.register("/media/:url", MediaDetail, mediaRouteOpts)
 
   const listsRouteOpts = {
     decode: {
+      ...defaultDecoders,
       list: json => tryJson(() => JSON.parse(json)),
     },
   }
@@ -112,6 +116,7 @@
 
   const channelsRouteOpts = {
     decode: {
+      ...defaultDecoders,
       entity: channelId => ({pubkeys: channelId.split(",")}),
     },
   }
@@ -123,14 +128,14 @@
 
   const notesRouteOpts = {
     decode: {
+      ...defaultDecoders,
       entity: decodeEvent,
-      relays: s => ({relays: s.split(",")}),
     },
   }
 
-  router.register("/", Feeds)
-  router.register("/notes", Feeds)
-  router.register("/notes/create", NoteCreate)
+  router.register("/", Feeds, notesRouteOpts)
+  router.register("/notes", Feeds, notesRouteOpts)
+  router.register("/notes/create", NoteCreate, notesRouteOpts)
   router.register("/notes/:entity", NoteDetail, notesRouteOpts)
   router.register("/notes/:entity/thread", ThreadDetail, notesRouteOpts)
   // router.register("/notes/:entity/report", ReportCreate)
@@ -139,9 +144,8 @@
 
   const peopleRouteOpts = {
     decode: {
+      ...defaultDecoders,
       entity: decodePerson,
-      relays: s => ({relays: s.split(",")}),
-      pubkeys: s => ({pubkeys: s.split(",")}),
     },
   }
 
@@ -155,6 +159,7 @@
 
   const relayRouteOpts = {
     decode: {
+      ...defaultDecoders,
       entity: decodeRelay,
     },
   }

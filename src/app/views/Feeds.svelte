@@ -10,6 +10,8 @@
   import type {DynamicFilter} from "src/engine"
   import {session, canSign, follows, lists, userLists} from "src/engine"
 
+  export let relays = []
+
   const showLists = () => router.at("lists").open()
 
   const showLogin = () => router.at("login/intro").open()
@@ -37,7 +39,6 @@
     key = Math.random()
   }
 
-  let relays = []
   let key = Math.random()
   let feedFilter = {
     kinds: noteKinds,

@@ -1,29 +1,36 @@
 <script lang="ts">
-  import {quantify} from "hurdak"
-  import {onDestroy} from "svelte"
+  import {onMount} from "svelte"
+  import {quantify, defer} from "hurdak"
   import {ThreadLoader} from "src/engine"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
+  import {dereferenceNote} from "src/engine"
 
-  export let eid
   export let relays
 
-  const loader = new ThreadLoader({anchorId: eid, relays})
-  const {anchor, root, parent, ancestors} = loader
-
   let loading = true
+  let promise: Promise<void> = defer()
   let showAncestors = false
+  let loader: ThreadLoader, anchor, root, parent, ancestors
 
-  $: loading = loading && !($anchor && $root && $parent)
-
-  onDestroy(() => {
-    loader.stop()
-
-    setTimeout(() => {
+  $: {
+    if (anchor && $root && $parent) {
       loading = false
-    }, 3000)
+    }
+  }
+
+  onMount(() => {
+    promise = dereferenceNote($$props).then(note => {
+      anchor = note
+      loader = new ThreadLoader(note, relays)
+      ;({root, parent, ancestors} = loader)
+    })
+
+    return () => {
+      promise.then(() => loader.stop())
+    }
   })
 </script>
 
@@ -31,9 +38,7 @@
   <Spinner />
 {:else}
   <Content gap="gap-4">
-    {#if $root}
-      <Note note={$root} />
-    {/if}
+    <Note note={$root} />
     {#if showAncestors}
       {#each $ancestors as ancestor (ancestor.id)}
         <Note topLevel showParent={false} note={ancestor} />
@@ -48,11 +53,7 @@
         Show {quantify($ancestors.length, "other note")}
       </Anchor>
     {/if}
-    {#if $parent}
-      <Note topLevel showParent={false} note={$parent} />
-    {/if}
-    {#if $anchor}
-      <Note topLevel showParent={false} note={$anchor} depth={2} />
-    {/if}
+    <Note topLevel showParent={false} note={$parent} />
+    <Note topLevel showParent={false} note={anchor} depth={2} />
   </Content>
 {/if}

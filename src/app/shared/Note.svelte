@@ -36,8 +36,6 @@
   export let relays = []
   export let context = []
   export let filters = null
-  export let feedRelay = null
-  export let setFeedRelay = null
   export let depth = 0
   export let anchorId = null
   export let topLevel = false
@@ -129,9 +127,7 @@
   )
 
   // Show only notes that match our filters and feed relay
-  $: visibleNotes = replies.filter(
-    e => (!filters || matchFilters(filters, e)) && (!feedRelay || e.seen_on.includes(feedRelay.url))
-  )
+  $: visibleNotes = replies.filter(e => !filters || matchFilters(filters, e))
 
   onMount(async () => {
     interval = setInterval(setBorderHeight, 400)
@@ -233,7 +229,6 @@
               bind:zaps
               {muted}
               {reply}
-              {setFeedRelay}
               {showEntire} />
           </div>
         </div>
@@ -290,14 +285,7 @@
             </button>
           {/if}
           {#each visibleNotes as r (r.id)}
-            <svelte:self
-              showParent={false}
-              note={r}
-              depth={depth - 1}
-              context={ctx}
-              {feedRelay}
-              {setFeedRelay}
-              {anchorId} />
+            <svelte:self showParent={false} note={r} depth={depth - 1} context={ctx} {anchorId} />
           {/each}
         </div>
       </div>

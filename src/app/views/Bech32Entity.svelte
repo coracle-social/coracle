@@ -2,7 +2,6 @@
   import {nip19} from "nostr-tools"
   import Content from "src/partials/Content.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
-  import NaddrDetail from "src/app/views/NaddrDetail.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
 
@@ -14,7 +13,7 @@
 {:else if type === "note"}
   <NoteDetail eid={data} {relays} />
 {:else if type === "naddr"}
-  <NaddrDetail {...data} />
+  <NoteDetail {...data} />
 {:else if type === "nrelay"}
   <RelayDetail url={data} />
 {:else if type === "nprofile"}

@@ -1,30 +1,28 @@
 <script lang="ts">
-  import {find, whereEq} from "ramda"
+  import {onMount} from "svelte"
+  import {defer} from "hurdak"
   import {isMobile} from "src/util/html"
   import Content from "src/partials/Content.svelte"
-  import RelayFeed from "src/app/shared/RelayFeed.svelte"
-  import Modal from "src/partials/Modal.svelte"
+  import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
+  import type {Event} from "src/engine"
+  import {dereferenceNote} from "src/engine"
 
-  export let eid
   export let relays = []
   export let context = []
   export let depth = isMobile ? 2 : 5
-  export let setFeedRelay = relay => {
-    feedRelay = relay
-  }
 
-  const note = find(whereEq({id: eid}), context) || {id: eid}
+  let promise: Promise<Event> = defer()
 
-  let feedRelay = null
+  onMount(() => {
+    promise = dereferenceNote($$props)
+  })
 </script>
 
 <Content>
-  <Note showLoading anchorId={eid} {note} {depth} {relays} {context} {feedRelay} {setFeedRelay} />
+  {#await promise}
+    <Spinner />
+  {:then note}
+    <Note showLoading anchorId={note.id} {note} {depth} {relays} {context} />
+  {/await}
 </Content>
-
-{#if feedRelay}
-  <Modal onEscape={() => setFeedRelay(null)}>
-    <RelayFeed {feedRelay} notes={[note]} depth={6} />
-  </Modal>
-{/if}

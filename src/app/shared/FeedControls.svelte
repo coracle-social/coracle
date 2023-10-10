@@ -14,11 +14,11 @@
   import SelectButton from "src/partials/SelectButton.svelte"
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
+  import {router} from "src/app/router"
   import type {DynamicFilter, Topic, Person} from "src/engine"
   import {follows, searchTopics, derivePerson, displayPubkey} from "src/engine"
 
   export let filter
-  export let onChange
 
   type Kind = {
     kind: number
@@ -84,6 +84,12 @@
 
     return parts
   }
+
+  const onChange = filter =>
+    router
+      .fromCurrent()
+      .qp({filter: JSON.stringify(filter)})
+      .push()
 
   const removePart = keys => {
     filter = omit(keys, filter)

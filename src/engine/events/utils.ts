@@ -30,6 +30,12 @@ export const decodeEvent = entity => {
       note: nip19.noteEncode(data.id),
       nevent: nip19.neventEncode(data),
     }),
+    naddr: () => ({
+      kind: data.kind,
+      pubkey: data.pubkey,
+      identifier: data.identifier,
+      relays: data.relays,
+    }),
     note: () => annotateEvent(data),
     default: () => annotateEvent(entity),
   })

@@ -37,7 +37,6 @@
   export let reply
   export let muted
   export let showEntire
-  export let setFeedRelay
   export let replies
   export let likes
   export let zaps
@@ -88,6 +87,12 @@
 
     toast.show("info", "Note has been re-published!")
   }
+
+  const setFeedRelay = url =>
+    router
+      .fromCurrent()
+      .qp({relays: [url]})
+      .open()
 
   let like, allLikes, zap
   let showDetails = false
@@ -184,7 +189,7 @@
             <div
               class="h-3 w-3 rounded-full border border-solid border-gray-6"
               style={`background: ${hsl(stringToHue(url))}`}
-              on:click={() => setFeedRelay?.({url})} />
+              on:click={() => setFeedRelay(url)} />
           </div>
         {/each}
       </div>
@@ -199,7 +204,7 @@
               <div
                 class="h-3 w-3 rounded-full border border-solid border-gray-6"
                 style={`background: ${hsl(stringToHue(url))}`}
-                on:click={() => setFeedRelay?.({url})} />
+                on:click={() => setFeedRelay(url)} />
             </div>
             <div slot="tooltip">{displayRelay({url})}</div>
           </Popover>
