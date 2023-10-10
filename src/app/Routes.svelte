@@ -1,7 +1,7 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
   import {isNil, reverse} from "ramda"
-  import {onMount} from 'svelte'
+  import {onMount} from "svelte"
   import {memoize, tryJson} from "src/util/misc"
   import {fromNostrURI} from "src/util/nostr"
   import Modal from "src/partials/Modal.svelte"
@@ -124,7 +124,7 @@
   const notesRouteOpts = {
     decode: {
       entity: decodeEvent,
-      relays: s => ({relays: s.split(',')}),
+      relays: s => ({relays: s.split(",")}),
     },
   }
 
@@ -140,7 +140,8 @@
   const peopleRouteOpts = {
     decode: {
       entity: decodePerson,
-      pubkeys: s => ({relays: s.split(',')}),
+      relays: s => ({relays: s.split(",")}),
+      pubkeys: s => ({pubkeys: s.split(",")}),
     },
   }
 
@@ -227,9 +228,9 @@
 
   $: {
     if ($modal) {
-      console.log('modal', $modal, getProps($modal))
+      console.log("modal", $modal, getProps($modal))
     } else {
-      console.log('page', $page, getProps($page))
+      console.log("page", $page, getProps($page))
     }
   }
 

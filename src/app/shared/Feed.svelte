@@ -74,7 +74,7 @@
       }
 
       feed = new FeedLoader({
-        filters,
+        filters: [compileFilter(filter)],
         relays: getRelays(),
         shouldDefer: true,
         shouldListen: true,

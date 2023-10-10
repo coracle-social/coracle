@@ -1,9 +1,9 @@
 <script lang="ts">
-  import {navigate} from "svelte-routing"
   import {without} from "ramda"
   import {displayList} from "hurdak"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import Card from "src/partials/Card.svelte"
+  import {router} from "src/app/router"
   import {people, channels, displayPerson, loadPubkeys, hasNewMessages, session} from "src/engine"
 
   export let channel
@@ -12,7 +12,7 @@
   const showAlert = channels.key(channel.id).derived(hasNewMessages)
   const members = people.mapStore.derived($p => pubkeys.map(pk => $p.get(pk)))
 
-  const enter = () => navigate(`/channels/${channel.id}`)
+  const enter = () => router.at("channels").of(channel.id).push()
 
   loadPubkeys(pubkeys)
 </script>

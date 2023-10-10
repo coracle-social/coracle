@@ -14,7 +14,7 @@ import {
 } from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
 import {now, race, pushToKey} from "src/util/misc"
-import {findReplyId, noteKinds} from "src/util/nostr"
+import {findReplyId, noteKinds, reactionKinds} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {isEventMuted} from "src/engine/events/derived"
@@ -160,7 +160,7 @@ export class FeedLoader {
           // If we've seen this note or its parent, don't add it again
           .filter(e => {
             if (seen.has(e.id)) return false
-            if (!noteKinds.includes(e.kind)) return false
+            if (reactionKinds.includes(e.kind)) return false
 
             return true
           })

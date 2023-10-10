@@ -2,7 +2,6 @@
   import {isNil, prop, uniqBy, objOf, find, all} from "ramda"
   import {sleep, shuffle} from "hurdak"
   import {onDestroy, onMount} from "svelte"
-  import {navigate} from "svelte-routing"
   import {userKinds} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
@@ -12,6 +11,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
+  import {router} from "src/app/router"
+  import {loadAppData} from "src/app/state"
   import {
     env,
     session,
@@ -21,7 +22,6 @@
     getUserRelayUrls,
     normalizeRelayUrl,
   } from "src/engine"
-  import {loadAppData} from "src/app/state"
 
   let modal = null
   let customRelayUrl = null
@@ -78,7 +78,7 @@
           // from something like purplepag.es. This helps us avoid nuking follow lists later
           await Promise.all([loadAppData(), sleep(1500)])
 
-          navigate("notes")
+          router.at("notes").push()
         } else {
           pool.remove(relay.url)
         }

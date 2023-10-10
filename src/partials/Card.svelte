@@ -6,7 +6,7 @@
 </script>
 
 <div
-  on:click
+  on:click|stopPropagation
   in:fly={{y: 20}}
   class={cx(
     $$props.class,

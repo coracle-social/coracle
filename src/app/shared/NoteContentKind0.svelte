@@ -1,23 +1,28 @@
 <script lang="ts">
-  import {navigate} from "svelte-routing"
-  import {nip19} from "nostr-tools"
   import {tryJson} from "src/util/misc"
   import {getThemeBackgroundGradient} from "src/partials/state"
   import Card from "src/partials/Card.svelte"
   import Content from "src/partials/Content.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
+  import {router} from "src/app/router"
   import {imgproxy, getEventHints} from "src/engine"
 
   export let note
 
   const {pubkey, content} = note
   const {name, picture, about, banner} = tryJson(() => JSON.parse(content))
-  const nprofile = nip19.nprofileEncode({pubkey, relays: getEventHints(note)})
   const {rgba} = getThemeBackgroundGradient()
   const bannerUrl = imgproxy(banner)
+
+  const showPerson = () =>
+    router
+      .at("people")
+      .of(pubkey)
+      .qp({relays: getEventHints(note)})
+      .open()
 </script>
 
-<Card interactive class="overflow-hidden" on:click={() => navigate(nprofile)}>
+<Card interactive class="overflow-hidden" on:click={showPerson}>
   <div
     class="relative -m-4 p-4"
     style="background-size: cover; background-image: linear-gradient({rgba}, {rgba}), url('{bannerUrl}')">
