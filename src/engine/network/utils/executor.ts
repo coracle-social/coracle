@@ -55,7 +55,7 @@ export const getTarget = (urls: string[]) => {
 const seenChallenges = new Set()
 
 export const onAuth = async (url, challenge) => {
-  if (canSign.get() && !seenChallenges.has(challenge)) {
+  if (canSign.get() && !seenChallenges.has(challenge) && getSetting("auto_authenticate")) {
     seenChallenges.add(challenge)
 
     const event = await signer.get().signAsUser(

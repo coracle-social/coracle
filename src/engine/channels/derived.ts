@@ -1,4 +1,4 @@
-import {none, find, filter, whereEq} from "ramda"
+import {prop, none, any, filter, whereEq} from "ramda"
 import {derived} from "src/engine/core/utils"
 import {pubkey} from "src/engine/session/state"
 import {mutes} from "src/engine/people/derived"
@@ -27,10 +27,14 @@ export const userChannels = derived(
 
 export const nip04Channels = userChannels.derived(filter(whereEq({type: "nip04"})))
 
-export const hasNewNip04Messages = nip04Channels.derived(find(hasNewMessages))
+export const unreadNip04Channels = nip04Channels.derived(filter(hasNewMessages))
+
+export const hasNewNip04Messages = unreadNip04Channels.derived(any(prop("last_sent")))
 
 // Nip24
 
 export const nip24Channels = userChannels.derived(filter(whereEq({type: "nip24"})))
 
-export const hasNewNip24Messages = nip24Channels.derived(find(hasNewMessages))
+export const unreadNip24Channels = nip24Channels.derived(filter(hasNewMessages))
+
+export const hasNewNip24Messages = unreadNip24Channels.derived(any(prop("last_sent")))

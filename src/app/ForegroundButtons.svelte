@@ -25,7 +25,7 @@
     router.at("notes/create").qp({pubkey}).open()
   }
 
-  $: showButtons = !$page.path.match(/conversations|channels|logout$/)
+  $: showButtons = !$page?.path.match(/conversations|channels|logout$/)
 </script>
 
 <svelte:window bind:scrollY />

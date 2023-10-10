@@ -8,12 +8,10 @@
   import {getModal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
   import Content from "src/partials/Content.svelte"
-  import RelayTitle from "src/app/shared/RelayTitle.svelte"
-  import RelayActions from "src/app/shared/RelayActions.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import Note from "src/app/shared/Note.svelte"
   import type {DynamicFilter} from "src/engine"
-  import {urlToRelay, compileFilter, searchableRelays, getRelaysFromFilters} from "src/engine"
+  import {compileFilter, searchableRelays, getRelaysFromFilters} from "src/engine"
 
   export let relays = []
   export let filter = {} as DynamicFilter
@@ -70,20 +68,6 @@
 </script>
 
 <Content size="inherit" gap="gap-6">
-  {#if relays.length === 1}
-    {@const relay = urlToRelay(relays[0])}
-    <div class="flex items-center justify-between gap-2">
-      <RelayTitle {relay} />
-      <RelayActions {relay} />
-    </div>
-    {#if relay.info.description}
-      <p>{relay.info.description}</p>
-    {/if}
-    <p class="border-l-2 border-gray-6 pl-4 text-gray-4">
-      Below is your current feed including only notes seen on this relay.
-    </p>
-  {/if}
-
   {#if $newNotes?.length > 0}
     <div class="pointer-events-none fixed bottom-0 left-0 z-20 mb-8 flex w-full justify-center">
       <button

@@ -116,10 +116,7 @@ export const loadAppData = async () => {
 
 export const boot = async () => {
   if (env.get().FORCE_RELAYS.length > 0) {
-    router
-      .at("message")
-      .qp({message: "Logging you in...", spinner: true})
-      .replaceModal({noEscape: true})
+    router.at("message").cx({message: "Logging you in..."}).replaceModal({noEscape: true})
 
     await Promise.all([
       sleep(1500),

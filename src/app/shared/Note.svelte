@@ -48,7 +48,7 @@
   let showMuted = false
   let actions = null
   let collapsed = false
-  let ctx = context
+  let ctx = uniqBy(prop("id"), context)
 
   const {ENABLE_ZAPS} = $env
   const showEntire = anchorId === event.id
@@ -57,14 +57,13 @@
   let interval, border, childrenContainer, noteContainer
 
   const onClick = e => {
-    const target = e.target as HTMLElement
+    const target = e.detail.target as HTMLElement
 
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
       router
         .at("notes")
         .of(event.id)
-        .qp({relays: getEventHints(event)})
-        .cx({context: ctx.concat(event)})
+        .cx({context: ctx.concat(event), relays: getEventHints(event)})
         .open()
     }
   }
@@ -75,8 +74,7 @@
     router
       .at("notes")
       .of(findReplyId(event))
-      .qp({relays: getParentHints(event)})
-      .cx({context: ctx.concat(event)})
+      .cx({context: ctx.concat(event), relays: getParentHints(event)})
       .open()
 
   const goToThread = () =>
@@ -84,8 +82,7 @@
       .at("notes")
       .of(event.id)
       .at("thread")
-      .qp({relays: getEventHints(event)})
-      .cx({context: ctx.concat(event)})
+      .cx({context: ctx.concat(event), relays: getEventHints(event)})
       .open()
 
   const setBorderHeight = () => {
@@ -168,7 +165,7 @@
 {#if event.pubkey}
   <div class="note">
     <div bind:this={noteContainer} class="group relative">
-      <Card class="relative flex gap-4" on:click={onClick} {interactive}>
+      <Card stopPropagation class="relative flex gap-4" on:click={onClick} {interactive}>
         {#if !showParent && !topLevel}
           <div
             class="absolute z-10 -ml-4 h-px w-4 bg-gray-7 group-[.modal]:bg-gray-6"
@@ -188,7 +185,8 @@
               href={router
                 .at("notes")
                 .of(event.id)
-                .qp({relays: getEventHints(event)}).path}
+                .cx({relays: getEventHints(event)})
+                .toString()}
               class="text-end text-sm text-gray-1"
               type="unstyled">
               {formatTimestamp(event.created_at)}

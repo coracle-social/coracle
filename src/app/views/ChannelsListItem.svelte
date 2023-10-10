@@ -8,11 +8,12 @@
 
   export let channel
 
-  const pubkeys = without([$session.pubkey], channel.id.split(",")) as string[]
+  const allPubkeys = channel.id.split(",") as string[]
+  const pubkeys = without([$session.pubkey], allPubkeys)
   const showAlert = channels.key(channel.id).derived(hasNewMessages)
   const members = people.mapStore.derived($p => pubkeys.map(pk => $p.get(pk)))
 
-  const enter = () => router.at("channels").of(channel.id).push()
+  const enter = () => router.at("channels").of(allPubkeys).push()
 
   loadPubkeys(pubkeys)
 </script>

@@ -2,6 +2,7 @@
   import {fly} from "src/util/transition"
   import {toast, appName} from "src/partials/state"
   import Field from "src/partials/Field.svelte"
+  import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -42,6 +43,12 @@
           faster, but will require more bandwidth and processing power.
         </p>
       </Field>
+      <FieldInline label="Authenticate with relays">
+        <Toggle bind:value={settings.auto_authenticate} />
+        <p slot="info">
+          Allows {appName} to authenticate with relays that have access controls automatically.
+        </p>
+      </FieldInline>
       <Field label="Dufflepud URL">
         <Input bind:value={settings.dufflepud_url}>
           <i slot="before" class="fa-solid fa-server" />
@@ -76,13 +83,13 @@
           </p>
         </Field>
       {/if}
-      <Field label="Report errors and analytics">
+      <FieldInline label="Report errors and analytics">
         <Toggle bind:value={settings.report_analytics} />
         <p slot="info">
           Keep this enabled if you would like developers to be able to know what features are used,
           and to diagnose and fix bugs.
         </p>
-      </Field>
+      </FieldInline>
       <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>
     </div>
   </Content>

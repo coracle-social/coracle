@@ -18,7 +18,7 @@
     router
       .at("people")
       .of(pubkey)
-      .qp({relays: getEventHints(note)})
+      .cx({relays: getEventHints(note)})
       .open()
 </script>
 

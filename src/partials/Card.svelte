@@ -1,13 +1,25 @@
 <script lang="ts">
   import cx from "classnames"
+  import {createEventDispatcher} from "svelte"
   import {fly} from "src/util/transition"
 
   export let interactive = false
+  export let stopPropagation = false
+
+  const dispatch = createEventDispatcher()
+
+  const onClick = e => {
+    if (stopPropagation) {
+      e.stopPropagation()
+    }
+
+    dispatch("click", e)
+  }
 </script>
 
 <div
-  on:click|stopPropagation
   in:fly={{y: 20}}
+  on:click={onClick}
   class={cx(
     $$props.class,
     "card group rounded-2xl border border-solid border-gray-6 bg-gray-7 p-3 text-gray-2",

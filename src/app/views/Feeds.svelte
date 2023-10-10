@@ -11,6 +11,12 @@
   import {session, canSign, follows, lists, userLists} from "src/engine"
 
   export let relays = []
+  export let filter: DynamicFilter = {
+    kinds: noteKinds,
+    authors: $follows.size > 0 ? "follows" : "network",
+  }
+
+  let key = Math.random()
 
   const showLists = () => router.at("lists").open()
 
@@ -26,24 +32,18 @@
       relays = urls
     }
 
-    feedFilter = {kinds: noteKinds, authors: "global"} as DynamicFilter
+    filter = {kinds: noteKinds, authors: "global"} as DynamicFilter
 
     if (authors.length > 0) {
-      feedFilter = {...feedFilter, authors}
+      filter = {...filter, authors}
     }
 
     if (topics.length > 0) {
-      feedFilter = {...feedFilter, "#t": topics}
+      filter = {...filter, "#t": topics}
     }
 
     key = Math.random()
   }
-
-  let key = Math.random()
-  let feedFilter = {
-    kinds: noteKinds,
-    authors: $follows.size > 0 ? "follows" : "network",
-  } as DynamicFilter
 
   document.title = "Feeds"
 </script>
@@ -58,7 +58,7 @@
     </Content>
   {/if}
   {#key key}
-    <Feed filter={feedFilter} {relays}>
+    <Feed {filter} {relays}>
       <div slot="controls">
         {#if $canSign}
           {#if $userLists.length > 0}

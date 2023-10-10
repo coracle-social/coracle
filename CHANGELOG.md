@@ -6,6 +6,8 @@
 - [x] Handle a tag replies
 - [x] Fix feed search
 - [x] Simplify card theme using css
+- [x] Make relay auth opt-in
+- [x] Fix notification badge for non-accepted conversations
 
 # 0.3.10
 

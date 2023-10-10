@@ -85,11 +85,7 @@
     return parts
   }
 
-  const onChange = filter =>
-    router
-      .fromCurrent()
-      .qp({filter: JSON.stringify(filter)})
-      .push()
+  const onChange = filter => router.fromCurrent().qp({filter}).push()
 
   const removePart = keys => {
     filter = omit(keys, filter)

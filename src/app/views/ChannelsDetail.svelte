@@ -17,14 +17,14 @@
     listenForNip59Messages,
   } from "src/engine"
 
-  export let entity
+  export let channelId
   export let pubkeys
 
-  const channel = channels.key(entity)
+  const channel = channels.key(channelId)
 
-  nip24MarkChannelRead(entity)
+  nip24MarkChannelRead(channelId)
 
-  const sendMessage = content => createNip24Message(entity, content)
+  const sendMessage = content => createNip24Message(channelId, content)
 
   const showPerson = pubkey => router.at("people").of(pubkey).open()
 
@@ -35,7 +35,7 @@
   })
 
   onDestroy(() => {
-    nip24MarkChannelRead(entity)
+    nip24MarkChannelRead(channelId)
   })
 
   document.title = `Direct Messages`

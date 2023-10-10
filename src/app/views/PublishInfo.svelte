@@ -64,7 +64,8 @@
           href={router
             .at("notes")
             .of(eid)
-            .qp({relays: Array.from(succeeded)}).path}>
+            .qp({relays: Array.from(succeeded)})
+            .toString()}>
           View your note
         </Anchor>
       {/if}

@@ -64,7 +64,8 @@
     )
   })
 
-  const showGroup = ({label, ids, hints}) => router.at("labels").of(label).qp({ids, hints}).open()
+  const showGroup = ({label, ids, hints}) =>
+    router.at("labels").of(label).qp({ids}).cx({hints}).open()
 
   onMount(() => {
     const sub = subscribe({

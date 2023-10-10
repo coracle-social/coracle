@@ -48,7 +48,7 @@
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
 
-  //const report = () => router.at("notes").of(note.id).qp({pubkey: note.pubkey}).at('report').open()
+  //const report = () => router.at("notes").of(note.id).at('report').qp({pubkey: note.pubkey}).open()
 
   const label = () => router.at("notes").of(note.id).at("label").open()
 
@@ -76,7 +76,8 @@
       .at("people")
       .of(note.pubkey)
       .at("zap")
-      .qp({eid: note.id, relays: getPublishHints(note)})
+      .qp({eid: note.id})
+      .cx({relays: getPublishHints(note)})
       .open()
 
   const broadcast = () => {
@@ -91,7 +92,7 @@
   const setFeedRelay = url =>
     router
       .fromCurrent()
-      .qp({relays: [url]})
+      .cx({relays: [url]})
       .open()
 
   let like, allLikes, zap

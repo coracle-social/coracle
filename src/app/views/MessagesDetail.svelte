@@ -1,7 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
   import {onMount, onDestroy} from "svelte"
-  import {toHex} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -19,9 +18,8 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
 
-  export let entity
+  export let pubkey
 
-  const pubkey = toHex(entity)
   const person = derivePerson(pubkey)
   const channel = channels.key(pubkey)
 
@@ -57,7 +55,7 @@
     </div>
     <div class="flex h-12 w-full flex-col overflow-hidden pt-px">
       <div class="flex w-full items-center justify-between">
-        <Anchor modal href={router.at("people").of(pubkey).path} class="font-bold">
+        <Anchor modal href={router.at("people").of(pubkey).toString()} class="font-bold">
           {displayPerson($person)}
         </Anchor>
       </div>

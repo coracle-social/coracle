@@ -1,9 +1,8 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
   import {isNil, reverse} from "ramda"
   import {onMount} from "svelte"
-  import {memoize, tryJson} from "src/util/misc"
-  import {fromNostrURI} from "src/util/nostr"
+  import {memoize, parseQueryString} from "src/util/misc"
+  import type {HistoryItem} from "src/util/router"
   import Modal from "src/partials/Modal.svelte"
   import About from "src/app/views/About.svelte"
   import Apps from "src/app/views/Apps.svelte"
@@ -30,6 +29,7 @@
   import Logout from "src/app/views/Logout.svelte"
   import MessagesDetail from "src/app/views/MessagesDetail.svelte"
   import MessagesList from "src/app/views/MessagesList.svelte"
+  import ModalMessage from "src/app/views/ModalMessage.svelte"
   import NoteCreate from "src/app/views/NoteCreate.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import Notifications from "src/app/views/Notifications.svelte"
@@ -55,140 +55,152 @@
   import UserKeys from "src/app/views/UserKeys.svelte"
   import UserProfile from "src/app/views/UserProfile.svelte"
   import UserSettings from "src/app/views/UserSettings.svelte"
-  import {decodePerson, decodeRelay, decodeEvent, selectHints} from "src/engine"
   import {menuIsOpen, logUsage} from "src/app/state"
-  import {router} from "src/app/router"
+  import {
+    router,
+    asChannelId,
+    asPerson,
+    asCsv,
+    asString,
+    asMedia,
+    asFilter,
+    asNote,
+    asRelays,
+    asRelay,
+    asEntity,
+  } from "src/app/router"
 
-  const defaultDecoders = {
-    url: v => ({url: decodeURIComponent(v)}),
-    relays: s => ({relays: s.split(",")}),
-    pubkeys: s => ({pubkeys: s.split(",")}),
-    filter: s => ({filter: tryJson(() => JSON.parse(s))}),
-  }
+  // Routes
 
   router.register("/about", About)
   router.register("/apps", Apps)
   router.register("/bech32", Bech32Entity)
+
+  router.register("/channels", ChannelsList)
+  router.register("/channels/create", ChannelCreate)
+  router.register("/channels/requests", ChannelsList)
+  router.register("/channels/:channelId", ChannelsDetail, {
+    channelId: asChannelId,
+  })
+
   router.register("/chat/redirect", ChatRedirect)
-  router.register("/requests", MessagesList)
+
   router.register("/conversations", MessagesList)
-  router.register("/conversations/:entity", MessagesDetail)
+  router.register("/conversations/requests", MessagesList)
+  router.register("/conversations/:entity", MessagesDetail, {
+    entity: asPerson,
+  })
+
   router.register("/explore", Explore)
-  router.register("/labels/:label", LabelDetail)
-  router.register("/login/intro", Login)
+
+  router.register("/labels/:label", LabelDetail, {
+    ids: asCsv("ids"),
+  })
+
+  router.register("/lists", ListList)
+  router.register("/lists/create", ListEdit)
+  router.register("/lists/select", ListSelect, {
+    type: asString("type"),
+    value: asString("value"),
+  })
+  router.register("/lists/:naddr", ListEdit)
+
   router.register("/login/advanced", LoginAdvanced)
   router.register("/login/bunker", LoginBunker)
   router.register("/login/connect", LoginConnect)
+  router.register("/login/intro", Login)
   router.register("/login/privkey", LoginPrivKey)
   router.register("/login/pubkey", LoginPubKey)
   router.register("/logout", Logout)
-  router.register("/qrcode/:code", QRCode)
+
+  router.register("/media/:url", MediaDetail, {
+    url: asMedia("url"),
+  })
+
+  router.register("/message", ModalMessage)
+
+  router.register("/", Feeds, {
+    filter: asFilter,
+  })
+  router.register("/notes", Feeds, {
+    filter: asFilter,
+  })
+  router.register("/notes/create", NoteCreate, {
+    pubkey: asPerson,
+  })
+  router.register("/notes/:entity", NoteDetail, {
+    entity: asNote,
+  })
+  router.register("/notes/:entity/label", LabelCreate, {
+    entity: asNote,
+  })
+  router.register("/notes/:entity/status", PublishInfo, {
+    entity: asNote,
+    relays: asRelays,
+  })
+  router.register("/notes/:entity/thread", ThreadDetail, {
+    entity: asNote,
+  })
+  // router.register("/notes/:entity/report", ReportCreate, {
+  //   entity: asNote,
+  //   pubkey: asPerson,
+  // })
+
   router.register("/notifications", Notifications)
   router.register("/notifications/:activeTab", Notifications)
+
   router.register("/onboarding", Onboarding)
-  router.register("/messages/requests", MessagesList)
-  router.register("/messages/:id", MessagesDetail)
+
+  router.register("/people/list", PersonList, {
+    pubkeys: asCsv("pubkeys"),
+  })
+  router.register("/people/:entity", PersonDetail, {
+    entity: asPerson,
+    filter: asFilter,
+  })
+  router.register("/people/:entity/followers", PersonFollowers, {
+    entity: asPerson,
+  })
+  router.register("/people/:entity/follows", PersonFollows, {
+    entity: asPerson,
+  })
+  router.register("/people/:entity/info", PersonInfo, {
+    entity: asPerson,
+  })
+  router.register("/people/:entity/zap", PersonZap, {
+    entity: asPerson,
+    eid: asNote,
+  })
+
+  router.register("/qrcode/:code", QRCode)
+
+  router.register("/relays/browse", RelayBrowse)
+  router.register("/relays/:entity", RelayDetail, {
+    entity: asRelay,
+  })
+  router.register("/relays/:entity/review", RelayReview, {
+    entity: asRelay,
+  })
+
   router.register("/settings", UserSettings)
-  router.register("/settings/keys", UserKeys)
-  router.register("/settings/relays", RelayList)
-  router.register("/settings/profile", UserProfile)
   router.register("/settings/content", UserContent)
   router.register("/settings/data", UserData)
   router.register("/settings/data/export", DataExport)
   router.register("/settings/data/import", DataImport)
-  router.register("/topic/:topic", TopicFeed)
+  router.register("/settings/keys", UserKeys)
+  router.register("/settings/profile", UserProfile)
+  router.register("/settings/relays", RelayList)
 
-  const mediaRouteOpts = {decode: defaultDecoders}
+  router.register("/topics/:topic", TopicFeed)
 
-  router.register("/media/:url", MediaDetail, mediaRouteOpts)
-
-  const listsRouteOpts = {
-    decode: {
-      ...defaultDecoders,
-      list: json => tryJson(() => JSON.parse(json)),
-    },
-  }
-
-  router.register("/lists", ListList)
-  router.register("/lists/select", ListSelect)
-  router.register("/lists/create", ListEdit)
-  router.register("/lists/:naddr", ListEdit, listsRouteOpts)
-
-  const channelsRouteOpts = {
-    decode: {
-      ...defaultDecoders,
-      entity: channelId => ({pubkeys: channelId.split(",")}),
-    },
-  }
-
-  router.register("/channels", ChannelsList)
-  router.register("/channels/requests", ChannelsList)
-  router.register("/channels/create", ChannelCreate)
-  router.register("/channels/:entity", ChannelsDetail, channelsRouteOpts)
-
-  const notesRouteOpts = {
-    decode: {
-      ...defaultDecoders,
-      entity: decodeEvent,
-    },
-  }
-
-  router.register("/", Feeds, notesRouteOpts)
-  router.register("/notes", Feeds, notesRouteOpts)
-  router.register("/notes/create", NoteCreate, notesRouteOpts)
-  router.register("/notes/:entity", NoteDetail, notesRouteOpts)
-  router.register("/notes/:entity/thread", ThreadDetail, notesRouteOpts)
-  // router.register("/notes/:entity/report", ReportCreate)
-  router.register("/notes/:entity/label", LabelCreate)
-  router.register("/notes/:entity/status", PublishInfo)
-
-  const peopleRouteOpts = {
-    decode: {
-      ...defaultDecoders,
-      entity: decodePerson,
-    },
-  }
-
-  router.register("/people/:entity", PersonDetail, peopleRouteOpts)
-  router.register("/people/:entity/detail", PersonDetail, peopleRouteOpts)
-  router.register("/people/:entity/followers", PersonFollowers, peopleRouteOpts)
-  router.register("/people/:entity/follows", PersonFollows, peopleRouteOpts)
-  router.register("/people/:entity/info", PersonInfo, peopleRouteOpts)
-  router.register("/people/:entity/list", PersonList, peopleRouteOpts)
-  router.register("/people/:entity/zap", PersonZap, peopleRouteOpts)
-
-  const relayRouteOpts = {
-    decode: {
-      ...defaultDecoders,
-      entity: decodeRelay,
-    },
-  }
-
-  router.register("/relays/browse", RelayBrowse)
-  router.register("/relays/:entity", RelayDetail, relayRouteOpts)
-  router.register("/relays/:entity/review", RelayReview, relayRouteOpts)
-
-  const entityRouteOpts = {
-    decode: {
-      entity: entity => {
-        entity = fromNostrURI(entity)
-
-        let type, data, relays
-
-        try {
-          ;({type, data} = nip19.decode(entity) as {type: string; data: any})
-          relays = selectHints(data.relays || [], 3)
-        } catch (e) {
-          // pass
-        }
-
-        return {type, data, relays}
-      },
-    },
-  }
-
-  router.register("/:entity", Bech32Entity, entityRouteOpts)
-  router.register("/:entity/*", Bech32Entity, entityRouteOpts)
+  router.register("/:entity", Bech32Entity, {
+    entity: asEntity,
+    filter: asFilter,
+  })
+  router.register("/:entity/*", Bech32Entity, {
+    entity: asEntity,
+    filter: asFilter,
+  })
 
   router.init()
 
@@ -199,30 +211,17 @@
     menuIsOpen.set(false)
   }
 
-  const getProps = ({config, path, params, route}) => {
-    const data = {...config.context}
+  const getProps = ({config, path, params, route}: HistoryItem) => {
+    const data = {...config.context, ...params}
+    const queryParams = parseQueryString(path)
 
-    for (const [k, v] of Object.entries(params)) {
-      const decode = route.opts?.decode?.[k]
+    // Prefer decoding route params. If there's an overload, ignore query params to avoid
+    // route param injection for anything other than white-listed decoders
+    for (const [k, serializer] of Object.entries(route.serializers || {})) {
+      const v = params[k] || queryParams[k]
 
-      data[k] = v
-
-      if (decode) {
-        Object.assign(data, decode(v))
-      }
-    }
-
-    const [qs] = path.split("?").slice(1)
-
-    if (qs) {
-      for (const [k, v] of new URLSearchParams(qs)) {
-        const decode = route.opts?.decode?.[k]
-
-        data[k] = v
-
-        if (decode) {
-          Object.assign(data, decode(v))
-        }
+      if (v) {
+        Object.assign(data, serializer.decode(v))
       }
     }
 

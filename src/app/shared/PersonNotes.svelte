@@ -1,8 +1,0 @@
-<script lang="ts">
-  import {noteKinds} from "src/util/nostr"
-  import Feed from "src/app/shared/Feed.svelte"
-
-  export let pubkey
-</script>
-
-<Feed filter={{kinds: noteKinds, authors: [pubkey]}} />

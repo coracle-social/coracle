@@ -28,7 +28,7 @@
 
   $: tabChannels = sortChannels(activeTab === "conversations" ? $accepted : $requests)
 
-  const createChannel = () => router.at("channel/create").open()
+  const createChannel = () => router.at("channels/create").open()
 
   document.title = "Direct Messages"
 
@@ -54,15 +54,17 @@
         </div>
       </div>
     </Tabs>
-    <Popover triggerType="mouseenter" class="absolute right-5 top-7 hidden sm:block">
-      <div slot="trigger">
-        <i
-          class="fa fa-bell cursor-pointer"
-          class:text-gray-5={!$hasNewNip24Messages}
-          on:click={nip24MarkAllRead} />
-      </div>
-      <div slot="tooltip">Mark all as read</div>
-    </Popover>
+    {#if activeTab === "conversations"}
+      <Popover triggerType="mouseenter" class="absolute right-5 top-7 hidden sm:block">
+        <div slot="trigger">
+          <i
+            class="fa fa-bell cursor-pointer"
+            class:text-gray-5={!$hasNewNip24Messages}
+            on:click={nip24MarkAllRead} />
+        </div>
+        <div slot="tooltip">Mark all as read</div>
+      </Popover>
+    {/if}
   </div>
   {#each tabChannels as channel (channel.id)}
     <ChannelsListItem {channel} />

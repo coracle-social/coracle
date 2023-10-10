@@ -1,20 +1,24 @@
-import {takeWhile, fromPairs, filter, identity, reject, path as getPath} from "ramda"
+import {takeWhile, filter, identity, reject, path as getPath} from "ramda"
 import {first, filterVals} from "hurdak"
 import type {ComponentType, SvelteComponentTyped} from "svelte"
 import {globalHistory} from "svelte-routing/src/history"
 import {pick} from "svelte-routing/src/utils"
+import {buildQueryString, parseQueryString} from "src/util/misc"
 import {writable} from "src/engine"
 
 export type Component = ComponentType<SvelteComponentTyped>
 
-export type ComponentOpts = {
-  decode: Record<string, (v: string) => Record<string, any>>
+export type Serializer = {
+  encode: (v: any) => string
+  decode: (v: string) => any
 }
+
+export type ComponentSerializers = Record<string, Serializer>
 
 export type Route = {
   path: string
   component: Component
-  opts?: ComponentOpts
+  serializers?: ComponentSerializers
 }
 
 export type HistoryItem = {
@@ -30,7 +34,9 @@ export type HistoryItem = {
     context?: Record<string, any>
   }
   route: {
+    path: string
     component: Component
+    serializers?: ComponentSerializers
   }
 }
 
@@ -75,10 +81,21 @@ class RouterExtension {
 
   at = path => this.clone({path: asPath(this.path, path)})
 
-  qp = queryParams =>
-    this.clone({
+  qp = queryParams => {
+    const match = pick(this.router.routes, this.path)
+
+    for (const [k, v] of Object.entries(queryParams)) {
+      const serializer = match.route.serializers?.[k]
+
+      if (serializer) {
+        queryParams[k] = serializer.encode(v)
+      }
+    }
+
+    return this.clone({
       queryParams: filterVals(identity, {...this.queryParams, ...queryParams}),
     })
+  }
 
   cx = context =>
     this.clone({
@@ -89,7 +106,7 @@ class RouterExtension {
     let path = this.path
 
     if (this.queryParams) {
-      path += "?" + new URLSearchParams(this.queryParams)
+      path += buildQueryString(this.queryParams)
     }
 
     return path
@@ -117,39 +134,29 @@ export class Router {
   modal = this.modals.derived(first)
 
   init() {
-    this.at(window.location.pathname).push()
+    this.at(window.location.pathname + window.location.search).push()
   }
 
   listen() {
-    return globalHistory.listen(({location}) => {
+    return globalHistory.listen(({location, action}) => {
       const {pathname, search} = location
-      const $nonVirtual = this.nonVirtual.get()
+      const [cur, prev] = this.nonVirtual.get()
       const path = search ? pathname + search : pathname
 
       // If we're going back, splice instead of push
-      if (path === $nonVirtual[1]?.path) {
-        this.history.update($history => {
-          if ($history.length >= 2) {
-            $history.splice(0, 1)
-          }
-
-          return $history
-        })
-      } else if (path !== $nonVirtual[0].path) {
+      if (action === "POP" && path === prev?.path) {
+        this.history.update($history => $history.slice(1))
+      } else if (path !== cur.path) {
         this.go(path)
       }
     })
   }
 
-  register = (path: string, component: Component, opts?: ComponentOpts) => {
-    this.routes.push({path, component, opts})
+  register = (path: string, component: Component, serializers?: ComponentSerializers) => {
+    this.routes.push({path, component, serializers})
   }
 
   go(path, config: HistoryItem["config"] = {}) {
-    if (!path.startsWith("/")) {
-      path = "/" + path
-    }
-
     const match = pick(this.routes, path)
 
     if (!match) {
@@ -206,17 +213,23 @@ export class Router {
   // Extensions
 
   extend(path: string, getId) {
-    this.extensions[path] = new RouterExtension(this, {path}, getId)
+    this.extensions[path] = new RouterExtension(this, {path: asPath(path)}, getId)
   }
 
   at(path) {
-    return this.extensions[path] || new RouterExtension(this, {path})
+    return this.extensions[path] || new RouterExtension(this, {path: asPath(path)})
   }
 
   from(historyItem) {
     const [path, qs] = historyItem.path.split("?")
 
-    return this.at(path).qp(fromPairs(Array.from(new URLSearchParams(qs).entries())))
+    let ext = this.at(path)
+
+    if (qs) {
+      ext = ext.qp(parseQueryString(qs || ""))
+    }
+
+    return ext
   }
 
   fromCurrent() {

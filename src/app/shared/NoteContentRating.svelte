@@ -20,9 +20,9 @@
     const [type, value] = tag
 
     href = switcherFn(type, {
-      r: () => router.at("relays").of(value).path,
-      p: () => router.at("people").of(value).path,
-      e: () => router.at("notes").of(value).path,
+      r: () => router.at("relays").of(value).toString(),
+      p: () => router.at("people").of(value).toString(),
+      e: () => router.at("notes").of(value).toString(),
     })
 
     display = switcherFn(type, {

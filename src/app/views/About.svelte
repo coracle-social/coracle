@@ -49,7 +49,10 @@
           All funds donated will be used to support server costs and development.
         </p>
         <div class="flex justify-center">
-          <Anchor modal theme="button-accent" href={router.at("people").of(pubkey).at("zap").path}>
+          <Anchor
+            modal
+            theme="button-accent"
+            href={router.at("people").of(pubkey).at("zap").toString()}>
             Zap the developer
           </Anchor>
         </div>
@@ -69,8 +72,10 @@
   </div>
   <div class="flex flex-col gap-4">
     <p class="text-center">
-      Built with 💜 by @<Anchor modal theme="anchor" href={router.at("people").of(pubkey).path}
-        >hodlbod</Anchor>
+      Built with 💜 by @<Anchor
+        modal
+        theme="anchor"
+        href={router.at("people").of(pubkey).toString()}>hodlbod</Anchor>
     </p>
     <p class="flex justify-center gap-4">
       <Popover triggerType="mouseenter">

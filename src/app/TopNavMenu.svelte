@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Card from "src/partials/Card.svelte"
@@ -20,7 +19,7 @@
       <div class="-mx-3 -mt-1">
         <Anchor
           class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-          href={`/${nip19.npubEncode($pubkey)}`}>
+          href={router.at("people").of($pubkey).toString()}>
           <i class="fa fa-user mr-2" /> Profile
         </Anchor>
         <Anchor

@@ -21,7 +21,7 @@
 {:else}
   <Anchor
     killEvent
-    href={router.at("people").of(pubkey).path}
+    href={router.at("people").of(pubkey).toString()}
     class={cx($$props.class, "relative z-10 flex gap-4")}>
     <PersonCircle class="h-12 w-12" {pubkey} />
     <div class="flex flex-col" style="min-width: 48px;">

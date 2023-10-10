@@ -70,7 +70,8 @@
               href={router
                 .at("notes")
                 .of(event.id)
-                .qp({relays: getEventHints(event)}).path}>
+                .cx({relays: getEventHints(event)})
+                .toString()}>
               <i class="fa fa-link text-accent" />
             </Anchor>
           </td>

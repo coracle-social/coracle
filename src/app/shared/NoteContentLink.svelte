@@ -2,7 +2,7 @@
   import {annotateMedia, displayUrl} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Media from "src/partials/Media.svelte"
-  import {router} from 'src/app/router'
+  import {router} from "src/app/router"
 
   export let value
   export let showMedia
@@ -18,12 +18,16 @@
   <div class="py-2">
     <Media link={annotateMedia(value.url)} onClose={close} />
   </div>
-{:else}
+{:else if value.isMedia}
   <Anchor
     modal
     stopPropagation
     class="underline"
-    href={value.isMedia ? router.at('media').of(value.url).path : value.url}>
+    href={router.at("media").of(value.url).toString()}>
+    {displayUrl(value.url)}
+  </Anchor>
+{:else}
+  <Anchor external stopPropagation class="underline" href={value.url}>
     {displayUrl(value.url)}
   </Anchor>
 {/if}

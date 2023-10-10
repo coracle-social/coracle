@@ -1,6 +1,6 @@
 import {bech32, utf8} from "@scure/base"
 import {debounce} from "throttle-debounce"
-import {pluck, identity, sum, is, equals} from "ramda"
+import {pluck, fromPairs, last, identity, sum, is, equals} from "ramda"
 import {ensurePlural, Storage, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js/dist/fuse.min.js"
 import {writable} from "svelte/store"
@@ -341,3 +341,8 @@ export const createBatcher = <T, U>(t, execute: (request: T[]) => U[] | Promise<
 }
 
 export const asArray = v => ensurePlural(v).filter(identity)
+
+export const buildQueryString = params => "?" + new URLSearchParams(params)
+
+export const parseQueryString = path =>
+  fromPairs(Array.from(new URLSearchParams(last(path.split("?")))))

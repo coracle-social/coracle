@@ -15,7 +15,7 @@
   const zaps = interactions.filter(e => e.kind === EventKind.ZapRequest)
   const context = interactions.concat(note)
 
-  const goToNote = () => router.at("notes").of(note.id).qp({relays: note.seen_on}).cx({context}).open()
+  const goToNote = () => router.at("notes").of(note.id).cx({relays: note.seen_on, context}).open()
 
   const actionText = closure(() => {
     if (likes.length === 0) return "zapped"

@@ -54,12 +54,11 @@
     const noteId = id || quote?.id
 
     // stopPropagation wasn't working for some reason
-    if (noteId && e.target.textContent !== "Show") {
+    if (noteId && e.detail.target.textContent !== "Show") {
       router
         .at("notes")
         .of(noteId)
-        .qp({relays})
-        .cx({context: asArray(quote)})
+        .cx({relays, context: asArray(quote)})
         .open()
     }
   }
@@ -70,7 +69,7 @@
 </script>
 
 <div class="py-2" on:click|stopPropagation>
-  <Card interactive class="my-2" on:click={openQuote}>
+  <Card interactive stopPropagation class="my-2" on:click={openQuote}>
     {#if loading}
       <div class="px-20">
         <Spinner />
@@ -89,7 +88,7 @@
             stopPropagation
             type="unstyled"
             class="flex items-center gap-2"
-            href={router.at("people").of(quote.pubkey).path}>
+            href={router.at("people").of(quote.pubkey).toString()}>
             <h2 class="text-lg">{displayPubkey(quote.pubkey)}</h2>
           </Anchor>
         </div>

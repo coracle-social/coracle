@@ -14,7 +14,7 @@
   <i class={relay.url.startsWith("wss") ? "fa fa-lock" : "fa fa-unlock"} />
   <Anchor
     type="unstyled"
-    href={router.at("relays").of(relay.url).path}
+    href={router.at("relays").of(relay.url).toString()}
     class="border-b border-solid"
     style={`border-color: ${hsl(stringToHue(relay.url))}`}>
     {displayRelay(relay)}
