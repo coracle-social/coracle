@@ -3,7 +3,8 @@ import {findReplyAndRootIds} from "src/util/nostr"
 import {derived, DerivedCollection} from "src/engine/core/utils"
 import {pubkey} from "src/engine/session/state"
 import {settings} from "src/engine/session/derived"
-import {mutes} from "src/engine/people/derived"
+import {getFollowsWhoFollow} from "src/engine/people/utils"
+import {mutes, follows} from "src/engine/people/derived"
 import type {Event} from "./model"
 import {deletes, _events} from "./state"
 
@@ -17,6 +18,8 @@ export const userEvents = new DerivedCollection<Event>("id", [events, pubkey], (
 
 export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settings, $pubkey]) => {
   const words = $settings.muted_words
+  const minWot = $settings.min_wot_score
+  const $follows = follows.get()
   const regex =
     words.length > 0 ? new RegExp(`\\b(${words.map(w => w.toLowerCase()).join("|")})\\b`) : null
 
@@ -32,6 +35,10 @@ export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settin
     }
 
     if (regex && e.content?.toLowerCase().match(regex)) {
+      return true
+    }
+
+    if (!$follows.has(e.pubkey) && getFollowsWhoFollow($pubkey, e.pubkey).length < minWot) {
       return true
     }
 

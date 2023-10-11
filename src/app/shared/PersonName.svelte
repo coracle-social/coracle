@@ -1,5 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
+  import Popover from "src/partials/Popover.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import {
     deriveFollowing,
     derivePerson,
@@ -39,10 +41,16 @@
         <i class="fa fa-warning text-warning" />
       </span>
     {:else if $followCount}
-      <span class="px-2 py-1 text-xs">
-        <i class="fa fa-diagram-project text-accent" />
-        {$followCount}
-      </span>
+      <Popover triggerType="mouseenter">
+        <span slot="trigger" class="px-2 py-1 text-xs">
+          <i class="fa fa-diagram-project text-accent" />
+          {$followCount}
+        </span>
+        <Anchor modal slot="tooltip" class="flex items-center gap-1" href="/help/web-of-trust">
+          <i class="fa fa-info-circle" />
+          WoT Score
+        </Anchor>
+      </Popover>
     {/if}
   </div>
 </div>

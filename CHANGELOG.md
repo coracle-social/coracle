@@ -8,6 +8,8 @@
 - [x] Simplify card theme using css
 - [x] Make relay auth opt-in
 - [x] Fix notification badge for non-accepted conversations
+- [x] Add WoT help information
+- [x] Add WoT threshold setting
 
 # 0.3.10
 

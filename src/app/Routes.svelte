@@ -14,6 +14,7 @@
   import DataExport from "src/app/views/DataExport.svelte"
   import DataImport from "src/app/views/DataImport.svelte"
   import Explore from "src/app/views/Explore.svelte"
+  import Help from "src/app/views/Help.svelte"
   import Feeds from "src/app/views/Feeds.svelte"
   import LabelCreate from "src/app/views/LabelCreate.svelte"
   import LabelDetail from "src/app/views/LabelDetail.svelte"
@@ -92,6 +93,8 @@
   })
 
   router.register("/explore", Explore)
+
+  router.register("/help/:topic", Help)
 
   router.register("/labels/:label", LabelDetail, {
     ids: asCsv("ids"),

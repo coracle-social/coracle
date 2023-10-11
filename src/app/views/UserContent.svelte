@@ -4,6 +4,7 @@
   import {fly} from "src/util/transition"
   import {Tags} from "src/util/nostr"
   import {toast, appName} from "src/partials/state"
+  import Input from "src/partials/Input.svelte"
   import Field from "src/partials/Field.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
@@ -67,6 +68,17 @@
           If enabled, content flagged by the author as potentially sensitive will be hidden.
         </p>
       </FieldInline>
+      <Field>
+        <div slot="label" class="flex justify-between">
+          <strong>Minimum WoT score</strong>
+          <div>{settings.min_wot_score}</div>
+        </div>
+        <Input type="range" bind:value={settings.min_wot_score} min={0} max={100} />
+        <p slot="info">
+          Select a minimum web-of-trust score (how many people you follow who also follow a given
+          account). Accounts with a lower score will be auto-muted.
+        </p>
+      </Field>
       <Field label="Muted accounts">
         <PersonMultiSelect bind:value={mutedPeople} />
         <p slot="info">Notes from these people will be hidden by default.</p>

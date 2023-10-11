@@ -57,7 +57,7 @@
   let interval, border, childrenContainer, noteContainer
 
   const onClick = e => {
-    const target = e.detail.target as HTMLElement
+    const target = (e.detail?.target || e.target) as HTMLElement
 
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
       router
