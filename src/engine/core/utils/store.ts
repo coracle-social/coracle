@@ -297,6 +297,8 @@ export const writable = <T>(v: T) => new Writable(v)
 export const derived = <T>(stores: Derivable, getValue: (values: any) => T) =>
   new Derived(stores, getValue)
 
+export const readable = <T>(v: T) => derived(new Writable(v), identity) as Readable<T>
+
 export const derivedCollection = <T>(
   pk: string,
   stores: Derivable,

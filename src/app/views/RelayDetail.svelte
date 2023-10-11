@@ -10,6 +10,7 @@
   import {deriveRelay, normalizeRelayUrl, displayRelay} from "src/engine"
 
   export let url
+  export let filter = {kinds: [1]}
 
   let reviews = []
   let activeTab = "notes"
@@ -48,6 +49,6 @@
   {#if activeTab === "reviews"}
     <Feed onEvent={onReview} filter={{kinds: [1985], "#l": ["review/relay"], "#r": [$relay.url]}} />
   {:else}
-    <Feed relays={[$relay.url]} filter={{kinds: [1]}} />
+    <Feed noCache relays={[$relay.url]} {filter} />
   {/if}
 </Content>

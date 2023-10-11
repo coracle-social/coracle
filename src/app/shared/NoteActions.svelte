@@ -170,7 +170,7 @@
     </button>
     {#if $env.ENABLE_ZAPS}
       <button
-        class={cx("relative w-20 pt-1 text-left transition-all hover:pb-1 hover:pt-0", {
+        class={cx("relative w-16 pt-1 text-left transition-all hover:pb-1 hover:pt-0 sm:w-20", {
           "pointer-events-none opacity-50": disableActions || !canZap,
           "text-accent": zap,
         })}
@@ -218,7 +218,7 @@
         {/each}
       </div>
     {/if}
-    <div class="ml-2">
+    <div class="ml-1 sm:ml-2">
       <OverflowMenu {actions} />
     </div>
   </div>
