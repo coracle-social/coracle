@@ -1,6 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {debounce} from "throttle-debounce"
+  import {debounce, throttle} from "throttle-debounce"
   import {createEventDispatcher} from "svelte"
   import {last, partition, propEq} from "ramda"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
@@ -45,7 +45,7 @@
     }
   })
 
-  const applySearch = word => {
+  const applySearch = throttle(300, word => {
     let results = []
     if (word.length > 1 && word.startsWith("@")) {
       const [followed, notFollowed] = partition(
@@ -57,7 +57,7 @@
     }
 
     suggestions.setData(results.slice(0, 5))
-  }
+  })
 
   const getInfo = () => {
     const selection = window.getSelection()
@@ -128,7 +128,7 @@
     }
 
     // If we have suggestions, re-route keyboard commands
-    if (suggestions.get() && ["Enter", "ArrowUp", "ArrowDown"].includes(e.code)) {
+    if (["Enter", "ArrowUp", "ArrowDown"].includes(e.code) && suggestions.get()) {
       e.preventDefault()
     }
 

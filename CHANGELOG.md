@@ -17,6 +17,7 @@
 - [x] Tighten up note actions on mobile
 - [x] Don't show cached notes on relay-specific feeds
 - [x] Allow copying note text without opening the note
+- [x] Use real links so cmd+click works
 
 # 0.3.10
 

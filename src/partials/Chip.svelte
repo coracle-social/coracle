@@ -2,7 +2,7 @@
   import cx from "classnames"
 
   export let theme = "dark"
-  export let onClick = null
+  export let onRemove = null
 
   const className = cx($$props.class, "inline-block rounded-full border border-solid py-1 px-2", {
     "border-gray-1": theme === "dark",
@@ -10,10 +10,10 @@
   })
 </script>
 
-<div class={className} on:click>
+<div class={className}>
   <div class="flex items-center gap-2 whitespace-nowrap">
-    {#if onClick}
-      <i class="fa fa-times cursor-pointer" on:click|preventDefault={onClick} />
+    {#if onRemove}
+      <i class="fa fa-times cursor-pointer" on:click|preventDefault={onRemove} />
     {/if}
     <slot />
   </div>

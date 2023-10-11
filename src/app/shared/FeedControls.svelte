@@ -213,7 +213,7 @@
     <div class="mb-2 mr-2 inline-block py-1">Showing notes:</div>
   {/if}
   {#each parts as { keys, label }}
-    <Chip class="mb-2 mr-2 inline-block" onClick={keys ? () => removePart(keys) : null}>
+    <Chip class="mb-2 mr-2 inline-block" onRemove={keys ? () => removePart(keys) : null}>
       {label}
     </Chip>
   {/each}

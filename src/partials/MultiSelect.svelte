@@ -72,7 +72,7 @@
 
 <div class="text-sm">
   {#each value as item}
-    <Chip class="mb-1 mr-1" theme="dark" onClick={() => remove(item)}>
+    <Chip class="mb-1 mr-1" theme="dark" onRemove={() => remove(item)}>
       <slot name="item" context="value" {item}>
         {item}
       </slot>

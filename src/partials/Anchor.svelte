@@ -1,12 +1,10 @@
 <script lang="ts">
   import cx from "classnames"
   import {switcher} from "hurdak"
-  import {killEvent as _killEvent} from "src/util/html"
   import {createEventDispatcher} from "svelte"
   import {router} from "src/app/router"
 
   export let stopPropagation = false
-  export let killEvent = false
   export let external = false
   export let loading = false
   export let modal = false
@@ -17,7 +15,6 @@
 
   const dispatch = createEventDispatcher()
 
-  $: _href = external ? href : null
   $: target = external ? "_blank" : null
 
   let className
@@ -45,15 +42,13 @@
   )
 
   const onClick = e => {
-    if (killEvent) {
-      _killEvent(e)
-    }
-
     if (stopPropagation) {
       e.stopPropagation()
     }
 
-    if (href && !external) {
+    if (href && !external && !e.metaKey && !e.ctrlKey) {
+      e.preventDefault()
+
       router.at(href).push({modal})
     }
 
@@ -62,7 +57,7 @@
 </script>
 
 {#if tag === "a"}
-  <a class={className} on:click={onClick} href={_href} {target}>
+  <a class={className} on:click={onClick} {href} {target}>
     <slot />
   </a>
 {:else if tag === "button"}

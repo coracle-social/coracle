@@ -125,7 +125,7 @@
         </div>
         <div on:click|stopPropagation>
           {#each data.mentions as pubkey}
-            <Chip class="mb-1 mr-1" theme="dark" onClick={() => removeMention(pubkey)}>
+            <Chip class="mb-1 mr-1" theme="dark" onRemove={() => removeMention(pubkey)}>
               {displayPubkey(pubkey)}
             </Chip>
           {:else}

@@ -4,6 +4,6 @@
   export let value
 </script>
 
-<Anchor modal class="underline" killEvent href={value.entity}>
+<Anchor modal class="underline" href={value.entity}>
   {value.entity.slice(0, 16) + "..."}
 </Anchor>

@@ -16,7 +16,6 @@
   </span>
 {:else}
   <Anchor
-    killEvent
     href={router.at("people").of(pubkey).toString()}
     class={cx($$props.class, "relative z-10 flex items-center gap-2")}>
     <PersonCircle {pubkey} />

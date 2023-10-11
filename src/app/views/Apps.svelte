@@ -128,18 +128,18 @@
               </Anchor>
             {/if}
             {#if app.profile.lud16}
-              <div class="mb-2 mr-2 inline-block cursor-pointer">
-                <Chip on:click={() => copy("Address", app.profile.lud16)}>
+              <Anchor class="mb-2 mr-2 inline-block cursor-pointer" on:click={() => copy("Address", app.profile.lud16)}>
+                <Chip>
                   <i class="fa fa-bolt" />{app.profile.lud16}
                 </Chip>
-              </div>
+              </Anchor>
             {/if}
             {#if app.profile.nip05}
-              <div class="mb-2 mr-2 inline-block cursor-pointer">
-                <Chip on:click={() => goToNip05(app.profile.nip05)}>
+              <Anchor class="mb-2 mr-2 inline-block cursor-pointer" on:click={() => goToNip05(app.profile.nip05)}>
+                <Chip>
                   <i class="fa fa-at" />{app.profile.nip05}
                 </Chip>
-              </div>
+              </Anchor>
             {/if}
           </div>
           {#if app.recs.length > 0}

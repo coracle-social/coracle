@@ -85,12 +85,6 @@ export const escapeHtml = html => {
   return div.innerHTML
 }
 
-export const killEvent = e => {
-  e.preventDefault()
-  e.stopPropagation()
-  e.stopImmediatePropagation()
-}
-
 export const isMobile =
   localStorage.mobile || window.navigator.maxTouchPoints > 1 || window.innerWidth < 400
 

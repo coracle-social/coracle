@@ -8,6 +8,7 @@
   import {Tags, fromNostrURI} from "src/util/nostr"
   import {urlIsMedia} from "src/util/notes"
   import Chip from "src/partials/Chip.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
   import {router} from "src/app/router"
   import {displayPubkey} from "src/engine"
@@ -25,8 +26,6 @@
   const tags = Tags.from(note)
   const regex = /(nostr:)?n(event|ote|pub|profile|addr)\w+/g
   const {title, summary, image} = tags.asMeta() as {[k: string]: string}
-
-  const openTopic = topic => router.at("topics").of(topic).open()
 
   const convertEntities = markdown => {
     for (const uri of markdown.match(regex) || []) {
@@ -79,9 +78,9 @@
   {/if}
   <div>
     {#each tags.topics() as topic}
-      <Chip class="mb-2 mr-2 inline-block cursor-pointer" on:click={() => openTopic(topic)}>
-        #{topic}
-      </Chip>
+      <Anchor modal href={router.at("topics").of(topic).toString()}>
+        <Chip class="mb-2 mr-2 inline-block cursor-pointer">#{topic}</Chip>
+      </Anchor>
     {/each}
   </div>
 </div>

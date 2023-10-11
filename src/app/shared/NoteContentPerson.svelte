@@ -9,6 +9,6 @@
   const person = derivePerson(pubkey)
 </script>
 
-@<Anchor class="underline" killEvent href={router.at("people").of(pubkey).toString()}>
+@<Anchor modal class="underline" href={router.at("people").of(pubkey).toString()}>
   {displayPerson($person)}
 </Anchor>

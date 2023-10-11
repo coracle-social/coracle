@@ -5,6 +5,6 @@
   export let value
 </script>
 
-<Anchor class="underline" killEvent href={router.at("topics").of(value).toString()}>
+<Anchor modal class="underline" href={router.at("topics").of(value).toString()}>
   #{value}
 </Anchor>
