@@ -1,8 +1,9 @@
 import {nip19} from "nostr-tools"
+import normalizeUrl from "normalize-url"
 import {sortBy, pluck, uniq, nth, prop, last} from "ramda"
-import {chain, displayList, first, tryFunc} from "hurdak"
+import {chain, displayList, first} from "hurdak"
 import {fuzzy, stripProto} from "src/util/misc"
-import {fromNostrURI, findReplyId, findRootId, Tags} from "src/util/nostr"
+import {fromNostrURI, LOCAL_RELAY_URL, findReplyId, findRootId, Tags} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import {env} from "src/engine/session/state"
 import {stateKey} from "src/engine/session/derived"
@@ -31,12 +32,22 @@ export const isShareableRelay = (url: string) =>
   !url.slice(6).match(/\/npub/)
 
 export const normalizeRelayUrl = (url: string) => {
-  // If it doesn't start with a compatible protocol, strip the proto and add wss
-  if (!url.match(/^(wss|local):\/\/.+/)) {
-    url = "wss://" + stripProto(url)
+  if (url === LOCAL_RELAY_URL) {
+    return url
   }
 
-  return (tryFunc(() => new URL(url).href.replace(/\/+$/, "").toLowerCase()) || "") as string
+  // Use our library to normalize
+  url = normalizeUrl(url, {stripHash: true, stripAuthentication: false})
+
+  // Strip the protocol since only wss works
+  url = stripProto(url)
+
+  // Urls without pathnames are supposed to have a trailing slash
+  if (!url.includes("/")) {
+    url += "/"
+  }
+
+  return "wss://" + url
 }
 
 export const urlToRelay = url => ({url: normalizeRelayUrl(url)} as Relay)

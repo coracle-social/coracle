@@ -20,6 +20,7 @@
 - [x] Use real links so cmd+click works
 - [x] Add show/hide replies toggle to feeds
 - [x] Don't ruin gifs and webp uploads
+- [x] Normalize urls more robustly
 
 # 0.3.10
 
