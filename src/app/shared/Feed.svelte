@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {reject} from "ramda"
+  import {Storage} from "hurdak"
   import {FeedLoader} from "src/engine"
   import {createScroller} from "src/util/misc"
   import {getModal} from "src/partials/state"
@@ -9,7 +10,13 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import Note from "src/app/shared/Note.svelte"
   import type {Event, DynamicFilter} from "src/engine"
-  import {readable, compileFilter, searchableRelays, getRelaysFromFilters} from "src/engine"
+  import {
+    readable,
+    writable,
+    compileFilter,
+    searchableRelays,
+    getRelaysFromFilters,
+  } from "src/engine"
 
   export let relays = []
   export let filter: DynamicFilter = {}
@@ -19,6 +26,7 @@
 
   let feed
   let notes = readable([])
+  let hideReplies = writable(Storage.getJson("hideReplies"))
 
   const getRelays = () => {
     let selection = relays
@@ -37,20 +45,32 @@
 
   const loadMore = () => feed.load(5)
 
-  onMount(() => {
+  const start = () => {
+    feed?.stop()
+
     feed = new FeedLoader({
       filters: [compileFilter(filter)],
       relays: getRelays(),
       shouldDefer: true,
-      shouldListen: true,
       shouldLoadParents: true,
+      shouldHideReplies: $hideReplies,
       onEvent,
     })
-    ;({notes} = feed)
+
+    notes = feed.notes
 
     if (noCache) {
       notes = notes.derived(reject((e: Event) => e.seen_on.length === 0))
     }
+  }
+
+  hideReplies.subscribe($hideReplies => {
+    start()
+    Storage.setJson("hideReplies", $hideReplies)
+  })
+
+  onMount(() => {
+    start()
 
     const scroller = createScroller(loadMore, {element: getModal()})
 
@@ -63,13 +83,17 @@
 
 <Content size="inherit" gap="gap-6">
   {#if !hideControls}
-    <FeedControls {filter} {relays}>
+    <FeedControls {hideReplies} {filter} {relays}>
       <slot name="controls" slot="controls" />
     </FeedControls>
   {/if}
   <div class="flex flex-col gap-4">
     {#each $notes as note (note.id)}
-      <Note depth={2} context={note.replies || []} filters={[compileFilter(filter)]} {note} />
+      <Note
+        depth={$hideReplies ? 0 : 2}
+        context={note.replies || []}
+        filters={[compileFilter(filter)]}
+        {note} />
     {/each}
   </div>
   <Spinner />

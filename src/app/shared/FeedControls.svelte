@@ -1,11 +1,12 @@
 <script lang="ts">
   import {fly} from "src/util/transition"
-  import {pluck, find, propEq, prop, equals, omit, objOf} from "ramda"
+  import {pluck, not, find, propEq, prop, equals, omit, objOf} from "ramda"
   import {displayList} from "hurdak"
   import {debounce} from "throttle-debounce"
   import {createLocalDate, fuzzy, formatTimestampAsDate} from "src/util/misc"
   import {noteKinds} from "src/util/nostr"
   import Chip from "src/partials/Chip.svelte"
+  import Toggle from "src/partials/Toggle.svelte"
   import Input from "src/partials/Input.svelte"
   import DateInput from "src/partials/DateInput.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -27,6 +28,7 @@
 
   export let filter
   export let relays
+  export let hideReplies
 
   type Kind = {
     kind: number
@@ -148,6 +150,8 @@
     applyFilter()
   }
 
+  const toggleReplies = () => hideReplies.update(not)
+
   const onScopeChange = scope => {
     _filter = {..._filter, authors: scope === "custom" ? [] : scope}
   }
@@ -201,6 +205,10 @@
 
 <div in:fly={{y: 20}}>
   <div class="float-right flex justify-end gap-1">
+    <div class="flex items-center gap-1">
+      <Toggle scale={0.6} value={!$hideReplies} on:change={toggleReplies} />
+      <small class="text-gray-3">Show replies</small>
+    </div>
     <i
       class="fa fa-search cursor-pointer p-2"
       on:click={() => {

@@ -4,6 +4,7 @@
 
   export let value
   export let disabled = false
+  export let scale = 1
 
   const dispatch = createEventDispatcher()
 
@@ -20,12 +21,12 @@
   onColor="#ccc"
   offColor="#ccc"
   onHandleColor="#EB5E28"
-  handleDiameter={20}
+  handleDiameter={Math.round(20 * scale)}
   unCheckedIcon={false}
   boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
   activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-  height={20}
-  width={36}>
+  height={Math.round(20 * scale)}
+  width={Math.round(36 * scale)}>
   <span slot="checkedIcon" />
   <span slot="unCheckedIcon" />
 </Switch>

@@ -32,6 +32,7 @@ export type FeedOpts = {
   onEvent?: (e: Event) => void
   shouldDefer?: boolean
   shouldListen?: boolean
+  shouldHideReplies?: boolean
   shouldLoadParents?: boolean
 }
 
@@ -57,11 +58,13 @@ export class FeedLoader {
           relays: urls,
           filters: opts.filters.map(assoc("since", this.since)),
           onEvent: batch(1000, (events: Event[]) => {
+            events = this.discardEvents(events)
+
             if (opts.shouldLoadParents) {
               this.loadParents(events)
             }
 
-            this.buffer.update($buffer => $buffer.concat(reject(this.isEventMuted, events)))
+            this.buffer.update($buffer => $buffer.concat(events))
           }),
         }),
       ])
@@ -72,7 +75,7 @@ export class FeedLoader {
       filters: opts.filters,
       onEvent: batch(100, events => {
         if (opts.shouldLoadParents) {
-          this.loadParents(events)
+          this.loadParents(this.discardEvents(events))
         }
       }),
     })
@@ -86,17 +89,31 @@ export class FeedLoader {
     this.ready = race(0.2, pluck("result", subs))
   }
 
+  discardEvents(events) {
+    return events.filter(e => {
+      if (this.isEventMuted(e)) {
+        return false
+      }
+
+      if (this.opts.shouldHideReplies && findReplyId(e)) {
+        return false
+      }
+
+      return true
+    })
+  }
+
   loadParents = notes => {
     const parentIds = reject(this.isEventMuted, notes).map(findReplyId).filter(identity)
 
     load({
       relays: this.opts.relays,
       filters: getIdFilters(parentIds),
-      onEvent: e => {
-        if (!this.isEventMuted(e)) {
+      onEvent: batch(100, events => {
+        for (const e of this.discardEvents(events)) {
           this.parents.set(e.id, e)
         }
-      },
+      }),
     })
   }
 
@@ -176,9 +193,7 @@ export class FeedLoader {
   }
 
   addToFeed = (notes: Event[]) => {
-    this.notes.update($notes =>
-      uniqBy(prop("id"), $notes.concat(this.buildFeedChunk(reject(this.isEventMuted, notes))))
-    )
+    this.notes.update($notes => uniqBy(prop("id"), $notes.concat(this.buildFeedChunk(notes))))
   }
 
   subscribe = f => this.notes.subscribe(f)
@@ -188,7 +203,8 @@ export class FeedLoader {
   async load(n) {
     await this.ready
 
-    const [subs, notes] = this.cursor.take(n)
+    const [subs, events] = this.cursor.take(n)
+    const notes = this.discardEvents(events)
 
     this.addSubs(subs)
 
