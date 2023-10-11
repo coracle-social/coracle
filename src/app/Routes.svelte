@@ -285,7 +285,7 @@
   {/if}
 </div>
 
-{#each reverse($modals).filter(m => !m.config.virtual) as m, i (m.path)}
+{#each reverse($modals).filter(m => !m.config.virtual) as m, i (m.path + i)}
   <Modal
     index={i}
     virtual={false}

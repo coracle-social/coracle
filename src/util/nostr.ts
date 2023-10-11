@@ -111,12 +111,14 @@ export class Tags {
   }
 }
 
+export const isReplaceable = e => e.kind >= 10000
+
 export const getNaddr = (e: Event) => [e.kind, e.pubkey, Tags.from(e).getMeta("d") || ""].join(":")
 
 export const getIds = (e: Event) => {
   const ids = [e.id]
 
-  if (e.kind >= 10000) {
+  if (isReplaceable(e)) {
     ids.push(getNaddr(e))
   }
 

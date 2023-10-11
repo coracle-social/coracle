@@ -4,7 +4,7 @@ import {doPipe, defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"
 import {now} from "src/util/misc"
 import {parseContent} from "src/util/notes"
-import {Tags, findRoot, findReply} from "src/util/nostr"
+import {Tags, isReplaceable, getNaddr, findRoot, findReply} from "src/util/nostr"
 import type {Event, NostrEvent} from "src/engine/events/model"
 import {people} from "src/engine/people/state"
 import {displayPerson} from "src/engine/people/utils"
@@ -75,6 +75,8 @@ export class Publisher extends EventEmitter {
       this.emit("progress", progress)
     }
 
+    // return
+
     projections.push(this.event)
 
     setTimeout(() => {
@@ -86,8 +88,6 @@ export class Publisher extends EventEmitter {
 
       attemptToResolve()
     }, timeout)
-
-    // return console.log('PUBLISH', this.event)
 
     const sub = executor.publish(omit(["seen_on"], this.event), {
       verb,
@@ -179,20 +179,24 @@ export const tagsFromContent = (content: string) => {
   return tags
 }
 
-export const getReplyTags = (n: Event, inherit = false) => {
+export const getReplyTags = (parent: Event, inherit = false) => {
   const extra = inherit
-    ? Tags.from(n)
-        .type("e")
+    ? Tags.from(parent)
+        .type(["e", "a"])
         .reject(t => last(t) === "mention")
         .all()
         .map(t => t.slice(0, 3))
     : []
-  const eHint = getEventHint(n)
-  const reply = ["e", n.id, eHint, "reply"]
-  const root = doPipe(findRoot(n) || findReply(n) || reply, [
-    t => (t.length < 3 ? t.concat(eHint) : t),
+  const hint = getEventHint(parent)
+  const reply = ["e", parent.id, hint, "reply"]
+  const root = doPipe(findRoot(parent) || findReply(parent) || reply, [
+    t => (t.length < 3 ? t.concat(hint) : t),
     t => t.slice(0, 3).concat("root"),
   ])
 
-  return [mention(n.pubkey), root, ...extra, reply]
+  if (isReplaceable(parent)) {
+    extra.push(["a", getNaddr(parent), hint, "reply"])
+  }
+
+  return [mention(parent.pubkey), root, ...extra, reply]
 }
