@@ -16,6 +16,8 @@ const annotateEvent = eid => ({
 export const decodeEvent = entity => {
   entity = fromNostrURI(entity)
 
+  console.log(entity)
+
   let type, data
   try {
     ;({type, data} = nip19.decode(entity))

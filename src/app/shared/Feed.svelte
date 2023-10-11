@@ -14,7 +14,7 @@
   import {compileFilter, searchableRelays, getRelaysFromFilters} from "src/engine"
 
   export let relays = []
-  export let filter = {} as DynamicFilter
+  export let filter: DynamicFilter = {}
   export let hideControls = false
   export let onEvent = null
 
@@ -82,7 +82,7 @@
   {/if}
 
   {#if !hideControls}
-    <FeedControls {filter}>
+    <FeedControls {filter} {relays}>
       <slot name="controls" slot="controls" />
     </FeedControls>
   {/if}

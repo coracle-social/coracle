@@ -111,7 +111,7 @@ export const asRelay = {
 
 export const asFilter = {
   encode: encodeFilter,
-  decode: decodeAs(name, decodeFilter),
+  decode: decodeAs("filter", decodeFilter),
 }
 
 export const asChannelId = {

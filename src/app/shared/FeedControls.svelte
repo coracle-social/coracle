@@ -16,9 +16,17 @@
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import {router} from "src/app/router"
   import type {DynamicFilter, Topic, Person} from "src/engine"
-  import {follows, searchTopics, derivePerson, displayPubkey} from "src/engine"
+  import {
+    follows,
+    displayRelays,
+    urlToRelay,
+    searchTopics,
+    derivePerson,
+    displayPubkey,
+  } from "src/engine"
 
   export let filter
+  export let relays
 
   type Kind = {
     kind: number
@@ -201,13 +209,19 @@
     <i class="fa fa-sliders cursor-pointer p-2" on:click={open} />
     <slot name="controls" />
   </div>
-  {#if parts.length > 0}
+  {#if parts.length > 0 || relays.length > 0}
     <div class="mb-2 mr-2 inline-block py-1">Showing notes:</div>
   {/if}
   {#each parts as { keys, label }}
-    <Chip class="mb-2 mr-2 inline-block" onClick={keys ? () => removePart(keys) : null}
-      >{label}</Chip>
+    <Chip class="mb-2 mr-2 inline-block" onClick={keys ? () => removePart(keys) : null}>
+      {label}
+    </Chip>
   {/each}
+  {#if relays.length > 0}
+    <Chip class="mb-2 mr-2 inline-block">
+      Found on {displayRelays(relays.map(urlToRelay), 2)}
+    </Chip>
+  {/if}
 </div>
 
 {#if modal}

@@ -40,7 +40,7 @@ export type HistoryItem = {
   }
 }
 
-const asPath = (...parts: string[]) => {
+export const asPath = (...parts: string[]) => {
   let path = parts.filter(identity).join("/")
 
   if (path && !path.startsWith("/")) {
@@ -48,6 +48,36 @@ const asPath = (...parts: string[]) => {
   }
 
   return path
+}
+
+export const decodeQueryString = ({path, route}: HistoryItem) => {
+  const queryParams = parseQueryString(path)
+
+  const data = {}
+
+  for (const [k, serializer] of Object.entries(route.serializers || {})) {
+    const v = queryParams[k]
+
+    if (v) {
+      Object.assign(data, serializer.decode(v))
+    }
+  }
+
+  return data
+}
+
+export const decodeRouteParams = ({params, route}: HistoryItem) => {
+  const data = {...params}
+
+  for (const [k, serializer] of Object.entries(route.serializers || {})) {
+    const v = params[k]
+
+    if (v) {
+      Object.assign(data, serializer.decode(v))
+    }
+  }
+
+  return data
 }
 
 type RouterExtensionParams = {
@@ -221,15 +251,7 @@ export class Router {
   }
 
   from(historyItem) {
-    const [path, qs] = historyItem.path.split("?")
-
-    let ext = this.at(path)
-
-    if (qs) {
-      ext = ext.qp(parseQueryString(qs || ""))
-    }
-
-    return ext
+    return this.at(first(historyItem.path.split("?"))).qp(decodeQueryString(historyItem))
   }
 
   fromCurrent() {

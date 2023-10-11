@@ -1,8 +1,9 @@
 <script lang="ts">
   import {isNil, reverse} from "ramda"
   import {onMount} from "svelte"
-  import {memoize, parseQueryString} from "src/util/misc"
+  import {memoize} from "src/util/misc"
   import type {HistoryItem} from "src/util/router"
+  import {decodeQueryString, decodeRouteParams} from "src/util/router"
   import Modal from "src/partials/Modal.svelte"
   import About from "src/app/views/About.svelte"
   import Apps from "src/app/views/Apps.svelte"
@@ -214,22 +215,11 @@
     menuIsOpen.set(false)
   }
 
-  const getProps = ({config, path, params, route}: HistoryItem) => {
-    const data = {...config.context, ...params}
-    const queryParams = parseQueryString(path)
-
-    // Prefer decoding route params. If there's an overload, ignore query params to avoid
-    // route param injection for anything other than white-listed decoders
-    for (const [k, serializer] of Object.entries(route.serializers || {})) {
-      const v = params[k] || queryParams[k]
-
-      if (v) {
-        Object.assign(data, serializer.decode(v))
-      }
-    }
-
-    return data
-  }
+  const getProps = (item: HistoryItem) => ({
+    ...item.config.context,
+    ...decodeQueryString(item),
+    ...decodeRouteParams(item),
+  })
 
   let scrollY
 

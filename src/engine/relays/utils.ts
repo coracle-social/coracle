@@ -1,6 +1,6 @@
 import {nip19} from "nostr-tools"
 import {sortBy, pluck, uniq, nth, prop, last} from "ramda"
-import {chain, first, tryFunc} from "hurdak"
+import {chain, displayList, first, tryFunc} from "hurdak"
 import {fuzzy, stripProto} from "src/util/misc"
 import {fromNostrURI, findReplyId, findRootId, Tags} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
@@ -55,6 +55,9 @@ export const relayIsLowQuality = (url: string) =>
   pool.get(url, {autoConnect: false})?.meta?.quality < 0.6
 
 export const displayRelay = ({url}: Relay) => last(url.split("://"))
+
+export const displayRelays = (relays: Relay[], max = 3) =>
+  displayList(relays.map(displayRelay), "and", max)
 
 export const getRelaySearch = $relays => fuzzy($relays, {keys: ["url", "name", "description"]})
 

@@ -10,6 +10,8 @@
 - [x] Fix notification badge for non-accepted conversations
 - [x] Add WoT help information
 - [x] Add WoT threshold setting
+- [x] Show relays in feed controls
+- [x] Exclude angle brackets from url regex
 
 # 0.3.10
 
