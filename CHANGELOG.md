@@ -16,6 +16,7 @@
 - [x] Show local relay dot if note is loaded from cache
 - [x] Tighten up note actions on mobile
 - [x] Don't show cached notes on relay-specific feeds
+- [x] Allow copying note text without opening the note
 
 # 0.3.10
 

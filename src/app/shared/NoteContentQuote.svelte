@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {onMount} from "svelte"
   import {filterVals} from "hurdak"
   import {asArray} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
@@ -7,7 +8,7 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {router} from "src/app/router"
   import {
-    load,
+    loadOne,
     loadPubkeys,
     displayPubkey,
     isEventMuted,
@@ -30,26 +31,6 @@
   const hints = (value.relays || []).filter(isShareableRelay)
   const relays = selectHints([...hints, ...getParentHints(note)])
 
-  load({
-    relays,
-    filters: id
-      ? getIdFilters([id])
-      : [
-          filterVals(xs => xs.length > 0, {
-            "#d": [identifier],
-            kinds: [kind],
-            authors: [pubkey],
-          }),
-        ],
-    onEvent: event => {
-      loading = false
-      muted = $isEventMuted(event)
-      quote = event
-
-      loadPubkeys([quote.pubkey])
-    },
-  })
-
   const openQuote = e => {
     const noteId = id || quote?.id
 
@@ -66,6 +47,27 @@
   const unmute = e => {
     muted = false
   }
+
+  onMount(async () => {
+    quote = await loadOne({
+      relays,
+      filters: id
+        ? getIdFilters([id])
+        : [
+            filterVals(xs => xs.length > 0, {
+              "#d": [identifier],
+              kinds: [kind],
+              authors: [pubkey],
+            }),
+          ],
+    })
+
+    if (quote) {
+      loading = false
+      muted = $isEventMuted(quote)
+      loadPubkeys([quote.pubkey])
+    }
+  })
 </script>
 
 <div class="py-2" on:click|stopPropagation>
