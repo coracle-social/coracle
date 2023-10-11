@@ -30,7 +30,13 @@
 
           try {
             files = await Promise.all(
-              inputFiles.map(async f => blobToFile(await stripExifData(f, opts)))
+              inputFiles.map(async f => {
+                if (f.type.match("image/(webp|gif)")) {
+                  return f
+                }
+
+                return blobToFile(await stripExifData(f, opts))
+              })
             )
 
             const body = new FormData()

@@ -19,6 +19,7 @@
 - [x] Allow copying note text without opening the note
 - [x] Use real links so cmd+click works
 - [x] Add show/hide replies toggle to feeds
+- [x] Don't ruin gifs and webp uploads
 
 # 0.3.10
 
