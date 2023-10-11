@@ -10,13 +10,14 @@
   export let isOnTop = true
   export let onEscape = null
 
-  let root, content
+  let root, content, closing
 
   const id = randomId()
   const {modals} = router
 
   const escapeIfOnTop = () => {
-    if (virtual || isOnTop) {
+    if (!closing && (virtual || isOnTop)) {
+      closing = true
       onEscape?.()
     }
   }
@@ -41,7 +42,11 @@
     }
   }} />
 
-<div bind:this={root} transition:fade class="modal group fixed inset-0 z-30">
+<div
+  bind:this={root}
+  transition:fade
+  class="modal group fixed inset-0 z-30"
+  class:pointer-events-none={closing}>
   <div
     class="fixed inset-0 cursor-pointer bg-black opacity-50"
     on:click|stopPropagation={escapeIfOnTop} />

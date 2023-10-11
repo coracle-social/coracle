@@ -12,6 +12,8 @@
 - [x] Add WoT threshold setting
 - [x] Show relays in feed controls
 - [x] Exclude angle brackets from url regex
+- [x] Fix double modal close bug on double click/esc
+- [x] Show local relay dot if note is loaded from cache
 
 # 0.3.10
 

@@ -75,8 +75,8 @@
         </div>
         <Input type="range" bind:value={settings.min_wot_score} min={0} max={100} />
         <p slot="info">
-          Select a minimum web-of-trust score (how many people you follow who also follow a given
-          account). Accounts with a lower score will be auto-muted.
+          Select a minimum <Anchor theme="anchor" modal href="/help/web-of-trust">web-of-trust</Anchor>
+          score. Notes from accounts with a lower score will be automatically hidden.
         </p>
       </Field>
       <Field label="Muted accounts">

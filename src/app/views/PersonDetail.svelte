@@ -30,7 +30,6 @@
   export let pubkey
   export let relays = []
   export let filter = {kinds: noteKinds, authors: [pubkey]}
-  console.log("======", filter)
 
   const tabs = ["notes", "likes", $env.FORCE_RELAYS.length === 0 && "relays"].filter(identity)
   const person = derivePerson(pubkey)

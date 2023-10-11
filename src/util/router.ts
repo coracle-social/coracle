@@ -114,17 +114,17 @@ class RouterExtension {
   qp = queryParams => {
     const match = pick(this.router.routes, this.path)
 
+    const data = {...this.queryParams}
+
     for (const [k, v] of Object.entries(queryParams)) {
       const serializer = match.route.serializers?.[k]
 
-      if (serializer) {
-        queryParams[k] = serializer.encode(v)
+      if (serializer && v) {
+        data[k] = serializer.encode(v)
       }
     }
 
-    return this.clone({
-      queryParams: filterVals(identity, {...this.queryParams, ...queryParams}),
-    })
+    return this.clone({queryParams: data})
   }
 
   cx = context =>
@@ -136,13 +136,18 @@ class RouterExtension {
     let path = this.path
 
     if (this.queryParams) {
-      path += buildQueryString(this.queryParams)
+      const qs = buildQueryString(this.queryParams)
+
+      if (qs.length > 1) {
+        path += qs
+      }
     }
 
     return path
   }
 
-  go = (config = {}) => this.router.go(this.toString(), {...config, context: this.context})
+  go = (config = {}) =>
+    this.router.go(this.toString(), filterVals(identity, {...config, context: this.context}))
 
   push = (config = {}) => this.go(config)
 

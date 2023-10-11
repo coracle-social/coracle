@@ -3,11 +3,12 @@
   import {nip19} from "nostr-tools"
   import {tweened} from "svelte/motion"
   import {find, pathEq, reject, identity, propEq, sum, pluck, sortBy} from "ramda"
-  import {stringToHue, formatSats, hsl} from "src/util/misc"
-  import {asNostrEvent, getIdOrNaddr, toNostrURI} from "src/util/nostr"
+  import {formatSats} from "src/util/misc"
+  import {LOCAL_RELAY_URL, asNostrEvent, getIdOrNaddr, toNostrURI} from "src/util/nostr"
   import {quantify} from "hurdak"
   import {toast} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
+  import ColorDot from "src/partials/ColorDot.svelte"
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
@@ -187,10 +188,11 @@
         class="absolute right-0 top-0 m-3 grid grid-cols-3 gap-2 sm:hidden">
         {#each sortBy(identity, note.seen_on) as url, i}
           <div class={`cursor-pointer order-${3 - (i % 3)}`}>
-            <div
-              class="h-3 w-3 rounded-full border border-solid border-gray-6"
-              style={`background: ${hsl(stringToHue(url))}`}
-              on:click={() => setFeedRelay(url)} />
+            <ColorDot value={url} on:click={() => setFeedRelay(url)} />
+          </div>
+        {:else}
+          <div class="cursor-pointer order-3">
+            <ColorDot value={LOCAL_RELAY_URL} />
           </div>
         {/each}
       </div>
@@ -202,12 +204,16 @@
         {#each sortBy(identity, note.seen_on) as url, i}
           <Popover triggerType="mouseenter" interactive={false}>
             <div slot="trigger" class="cursor-pointer p-1">
-              <div
-                class="h-3 w-3 rounded-full border border-solid border-gray-6"
-                style={`background: ${hsl(stringToHue(url))}`}
-                on:click={() => setFeedRelay(url)} />
+              <ColorDot value={url} on:click={() => setFeedRelay(url)} />
             </div>
             <div slot="tooltip">{displayRelay({url})}</div>
+          </Popover>
+        {:else}
+          <Popover triggerType="mouseenter" interactive={false}>
+            <div slot="trigger" class="cursor-pointer p-1">
+              <ColorDot value={LOCAL_RELAY_URL} />
+            </div>
+            <div slot="tooltip">Loaded from cache</div>
           </Popover>
         {/each}
       </div>
