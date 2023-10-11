@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {last, sortBy, uniqBy, prop} from "ramda"
+  import {last, reject, propEq, sortBy, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify} from "hurdak"
   import {findRootId, isChildOf, findReplyId, isLike} from "src/util/nostr"
@@ -84,6 +84,10 @@
       .at("thread")
       .cx({context: ctx.concat(event), relays: getEventHints(event)})
       .open()
+
+  const removeFromContext = e => {
+    ctx = reject(propEq("id", e.id), ctx)
+  }
 
   const setBorderHeight = () => {
     const getHeight = e => e?.getBoundingClientRect().height || 0
@@ -222,9 +226,10 @@
             <NoteActions
               note={event}
               bind:this={actions}
-              bind:replies
-              bind:likes
-              bind:zaps
+              {removeFromContext}
+              {replies}
+              {likes}
+              {zaps}
               {muted}
               {reply}
               {showEntire} />

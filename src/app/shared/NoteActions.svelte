@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {tweened} from "svelte/motion"
-  import {find, pathEq, reject, identity, propEq, sum, pluck, sortBy} from "ramda"
+  import {find, pathEq, identity, propEq, sum, pluck, sortBy} from "ramda"
   import {formatSats} from "src/util/misc"
   import {LOCAL_RELAY_URL, asNostrEvent, getIdOrNaddr, toNostrURI} from "src/util/nostr"
   import {quantify} from "hurdak"
@@ -38,6 +38,7 @@
   export let reply
   export let muted
   export let showEntire
+  export let removeFromContext
   export let replies
   export let likes
   export let zaps
@@ -69,7 +70,7 @@
     publishDeletion([getIdOrNaddr(e)])
 
     like = null
-    likes = reject(propEq("id", e.id), likes)
+    removeFromContext(e)
   }
 
   const startZap = () =>
