@@ -50,7 +50,7 @@
 
   onMount(async () => {
     quote = await loadOne({
-      relays,
+      relays: relays,
       filters: id
         ? getIdFilters([id])
         : [

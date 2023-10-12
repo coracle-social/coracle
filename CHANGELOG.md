@@ -23,7 +23,8 @@
 - [x] Normalize urls more robustly
 - [x] Add back button to onboarding steps
 - [x] Fix load grouping to split limited loads out
-- [x] Fix load to actuall return events
+- [x] Fix load to actually return events
+- [x] Allow showing hidden replies
 
 # 0.3.10
 

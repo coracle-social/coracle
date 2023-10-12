@@ -15,7 +15,6 @@
   let promise: Promise<Event> = defer()
 
   onMount(() => {
-    console.log($$props)
     promise = dereferenceNote($$props)
   })
 </script>

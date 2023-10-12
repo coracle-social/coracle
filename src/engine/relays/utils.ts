@@ -65,7 +65,7 @@ export const decodeRelay = entity => {
 export const relayIsLowQuality = (url: string) =>
   pool.get(url, {autoConnect: false})?.meta?.quality < 0.6
 
-export const displayRelay = ({url}: Relay) => last(url.split("://"))
+export const displayRelay = ({url}: Relay) => last(url.split("://")).replace(/\/$/, "")
 
 export const displayRelays = (relays: Relay[], max = 3) =>
   displayList(relays.map(displayRelay), "and", max)

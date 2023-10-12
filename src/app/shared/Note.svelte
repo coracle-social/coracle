@@ -1,8 +1,9 @@
 <script lang="ts">
-  import {last, reject, propEq, sortBy, uniqBy, prop} from "ramda"
+  import {last, partition, reject, propEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
-  import {quantify} from "hurdak"
+  import {quantify, batch} from "hurdak"
   import {findRootId, isChildOf, findReplyId, isLike} from "src/util/nostr"
+  import {fly} from "src/util/transition"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -14,7 +15,6 @@
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {router} from "src/app/router"
-  import type {Event} from "src/engine"
   import {
     env,
     load,
@@ -30,6 +30,7 @@
     selectHints,
     mergeHints,
     loadPubkeys,
+    sortEventsDesc,
   } from "src/engine"
 
   export let note
@@ -41,13 +42,14 @@
   export let topLevel = false
   export let showParent = true
   export let showLoading = false
+  export let showMuted = false
 
   let event = note
   let reply = null
   let replyIsActive = false
-  let showMuted = false
+  let showMutedReplies = false
   let actions = null
-  let collapsed = false
+  let collapsed = depth === 0
   let ctx = uniqBy(prop("id"), context)
 
   const {ENABLE_ZAPS} = $env
@@ -113,22 +115,32 @@
 
   $: muted = !showMuted && $isEventMuted(event)
 
+  // Find children in our context
   $: children = ctx.filter(e => isChildOf(e, event))
 
-  $: replies = sortBy(
-    (e: Event) => -e.created_at,
-    children.filter(e => e.kind === 1)
-  )
+  // Sort our replies
+  $: replies = sortEventsDesc(children.filter(e => e.kind === 1))
 
+  // Find notes that match our filter
+  $: matchingReplies = collapsed ? [] : replies.filter(e => !filters || matchFilters(filters, e))
+
+  // Split out muted notes
+  $: [mutedReplies, unmutedReplies] = partition($isEventMuted, matchingReplies)
+
+  // Only show unmuted, matching notes
+  $: visibleReplies = unmutedReplies.filter(e => !filters || matchFilters(filters, e))
+
+  // Notify the user if there are muted notes if they would otherwise see them
+  $: hiddenReplies = mutedReplies.filter(e => !filters || matchFilters(filters, e))
+
+  // Split out likes
   $: likes = children.filter(e => e.kind === 7 && isLike(e.content))
 
+  // Split out zaps
   $: zaps = processZaps(
     children.filter(e => e.kind === 9735),
     event.pubkey
   )
-
-  // Show only notes that match our filters and feed relay
-  $: visibleNotes = replies.filter(e => !filters || matchFilters(filters, e))
 
   onMount(async () => {
     interval = setInterval(setBorderHeight, 400)
@@ -152,11 +164,9 @@
       load({
         relays: mergeHints([relays, getReplyHints(event)]),
         filters: getReplyFilters([event], {kinds}),
-        onEvent: e => {
-          if (!$isEventMuted(e)) {
-            ctx = uniqBy(prop("id"), ctx.concat(e))
-          }
-        },
+        onEvent: batch(200, events => {
+          ctx = uniqBy(prop("id"), ctx.concat(events))
+        }),
       })
     }
   })
@@ -230,7 +240,6 @@
               {replies}
               {likes}
               {zaps}
-              {muted}
               {reply}
               {showEntire} />
           </div>
@@ -238,7 +247,7 @@
       </Card>
     </div>
 
-    {#if !replyIsActive && visibleNotes.length > 0 && !showEntire && depth > 0 && !muted}
+    {#if !replyIsActive && unmutedReplies.length > 0 && !showEntire && depth > 0}
       <div class="relative">
         <div
           class="absolute right-0 top-0 z-10 -mr-2 -mt-4 flex h-6 w-6 cursor-pointer items-center
@@ -275,21 +284,52 @@
         ctx = [e.detail, ...ctx]
       }} />
 
-    {#if !collapsed && visibleNotes.length > 0 && depth > 0 && !muted}
+    {#if visibleReplies.length > 0 || hiddenReplies.length > 0}
       <div class="relative mt-4">
         <div
           class="absolute z-10 -mt-4 ml-4 h-0 w-px bg-gray-7 group-[.modal]:bg-gray-6"
           bind:this={border} />
         <div class="note-children relative ml-8 flex flex-col gap-4" bind:this={childrenContainer}>
-          {#if !showEntire && replies.length > visibleNotes.length}
+          {#if !showEntire && unmutedReplies.length > visibleReplies.length}
             <button class="ml-5 cursor-pointer py-2 text-gray-1 outline-0" on:click={onClick}>
               <i class="fa fa-up-down pr-2 text-sm" />
-              Show {quantify(replies.length - visibleNotes.length, "other reply", "more replies")}
+              Show {quantify(
+                unmutedReplies.length - visibleReplies.length,
+                "other reply",
+                "more replies"
+              )}
             </button>
           {/if}
-          {#each visibleNotes as r (r.id)}
-            <svelte:self showParent={false} note={r} depth={depth - 1} context={ctx} {anchorId} />
+          {#each visibleReplies as r (r.id)}
+            <svelte:self
+              showParent={false}
+              showMuted
+              note={r}
+              depth={depth - 1}
+              context={ctx}
+              {anchorId} />
           {/each}
+          {#if showEntire && showMutedReplies}
+            {#each hiddenReplies as r (r.id)}
+              <svelte:self
+                showParent={false}
+                showMuted
+                note={r}
+                depth={depth - 1}
+                context={ctx}
+                {anchorId} />
+            {/each}
+          {:else if showEntire && hiddenReplies.length > 0}
+            <button
+              class="ml-5 cursor-pointer py-2 text-gray-1 outline-0"
+              in:fly={{y: 20}}
+              on:click={() => {
+                showMutedReplies = true
+              }}>
+              <i class="fa fa-up-down pr-2 text-sm" />
+              Show {quantify(hiddenReplies.length, "hidden reply", "hidden replies")}
+            </button>
+          {/if}
         </div>
       </div>
     {/if}

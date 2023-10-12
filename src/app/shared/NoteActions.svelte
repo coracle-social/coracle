@@ -32,11 +32,11 @@
     processZap,
     displayRelay,
     getEventHints,
+    isEventMuted,
   } from "src/engine"
 
   export let note: Event
   export let reply
-  export let muted
   export let showEntire
   export let removeFromContext
   export let replies
@@ -45,6 +45,7 @@
 
   const person = people.key(note.pubkey)
   const nevent = nip19.neventEncode({id: note.id, relays: getEventHints(note)})
+  const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note))
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
@@ -101,7 +102,7 @@
   let showDetails = false
   let actions = []
 
-  $: disableActions = !$canSign || muted
+  $: disableActions = !$canSign || $muted
   $: like = like || find(propEq("pubkey", $session?.pubkey), likes)
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
   $: $likesCount = allLikes.length
@@ -127,7 +128,7 @@
     actions.push({label: "Tag", icon: "tag", onClick: label})
     //actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
 
-    if (muted) {
+    if ($muted) {
       actions.push({label: "Unmute", icon: "microphone", onClick: unmuteNote})
     } else {
       actions.push({label: "Mute", icon: "microphone-slash", onClick: muteNote})
