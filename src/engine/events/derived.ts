@@ -24,7 +24,7 @@ export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settin
     words.length > 0 ? new RegExp(`\\b(${words.map(w => w.toLowerCase()).join("|")})\\b`) : null
 
   return (e: Event) => {
-    if (e.pubkey === $pubkey) {
+    if (!$pubkey || e.pubkey === $pubkey) {
       return false
     }
 

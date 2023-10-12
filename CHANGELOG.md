@@ -21,6 +21,7 @@
 - [x] Add show/hide replies toggle to feeds
 - [x] Don't ruin gifs and webp uploads
 - [x] Normalize urls more robustly
+- [x] Add back button to onboarding steps
 
 # 0.3.10
 

@@ -24,7 +24,7 @@
   } from "src/engine"
   import {router} from "src/app/router"
 
-  export let stage
+  export let stage = "intro"
 
   const privkey = generatePrivateKey()
   const profile = {}
@@ -105,7 +105,7 @@
     {:else if stage === "follows"}
       <OnboardingFollows {setStage} bind:petnames />
     {:else if stage === "note"}
-      <OnboardingNote {signup} />
+      <OnboardingNote {setStage} {signup} />
     {/if}
   </div>
 {/key}

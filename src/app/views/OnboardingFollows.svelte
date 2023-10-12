@@ -6,11 +6,12 @@
   import Content from "src/partials/Content.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import type {Person} from "src/engine"
-  import {mention, loadPeople, searchPeople} from "src/engine"
+  import {env, mention, loadPeople, searchPeople} from "src/engine"
 
   export let petnames
   export let setStage
 
+  const prev = () => setStage($env.FORCE_RELAYS.length > 0 ? "follows" : "relays")
   const next = () => setStage("note")
 
   const addFollow = pubkey => {
@@ -35,7 +36,10 @@
       To get you started, we’ve added some interesting people to your follow list. You can update
       your follows list at any time.
     </p>
-    <Anchor theme="button-accent" on:click={next}>Continue</Anchor>
+    <div class="flex gap-2">
+      <Anchor theme="button" on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
+      <Anchor theme="button-accent" class="flex-grow text-center" on:click={next}>Continue</Anchor>
+    </div>
   </Content>
   <div class="flex items-center gap-2">
     <i class="fa fa-user-astronaut fa-lg" />

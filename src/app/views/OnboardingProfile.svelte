@@ -9,6 +9,7 @@
   export let profile
   export let setStage
 
+  const prev = () => setStage("intro")
   const next = () => setStage("key")
 </script>
 
@@ -39,5 +40,8 @@
       <p class="text-sm text-gray-1">Please be mindful of others and only use small images.</p>
     </div>
   </div>
-  <Anchor theme="button-accent" class="text-center" on:click={next}>Continue</Anchor>
+  <div class="flex gap-2">
+    <Anchor theme="button" on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
+    <Anchor theme="button-accent" class="flex-grow text-center" on:click={next}>Continue</Anchor>
+  </div>
 </Content>

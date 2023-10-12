@@ -6,13 +6,12 @@
   import Content from "src/partials/Content.svelte"
 
   export let signup
+  export let setStage
 
   let compose = null
 
-  const onSubmit = () => {
-    signup(compose.parse())
-  }
-
+  const prev = () => setStage("follows")
+  const next = () => signup(compose.parse())
   const skip = () => signup()
 
   onMount(() => {
@@ -27,10 +26,12 @@
     lend a hand.
   </p>
   <div class="border-l-2 border-solid border-gray-6 pl-4">
-    <Compose bind:this={compose} {onSubmit} />
+    <Compose bind:this={compose} onSubmit={next} />
   </div>
-  <Anchor theme="button-accent" class="flex-grow text-center" on:click={onSubmit}
-    >Say Hello!</Anchor>
+  <div class="flex gap-2">
+    <Anchor theme="button" on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
+    <Anchor theme="button-accent" class="flex-grow text-center" on:click={next}>Say Hello!</Anchor>
+  </div>
   <Anchor class="text-center" on:click={skip}>
     Skip and see your feed <i class="fa fa-arrow-right" />
   </Anchor>

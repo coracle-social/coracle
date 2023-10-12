@@ -15,6 +15,7 @@
   let q = ""
   let search
 
+  const prev = () => setStage("key")
   const next = () => setStage("follows")
 
   const saveRelay = relay => {
@@ -42,7 +43,10 @@
       You can change your selection any time.
     </p>
   </div>
-  <Anchor theme="button-accent" class="text-center" on:click={next}>Continue</Anchor>
+  <div class="flex gap-2">
+    <Anchor theme="button" on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
+    <Anchor theme="button-accent" class="flex-grow text-center" on:click={next}>Continue</Anchor>
+  </div>
   <div class="flex items-center gap-2">
     <i class="fa fa-server fa-lg" />
     <h2 class="staatliches text-2xl">Your relays</h2>

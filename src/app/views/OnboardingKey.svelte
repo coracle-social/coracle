@@ -12,6 +12,7 @@
   export let setStage
 
   const nsec = nip19.nsecEncode(privkey)
+  const prev = () => setStage("profile")
   const next = () => setStage($env.FORCE_RELAYS.length > 0 ? "follows" : "relays")
 
   const copyKey = () => {
@@ -26,12 +27,13 @@
     Your private key is your password, and gives you total control over your Nostr account. We've
     generated a fresh one for you below – store it somewhere safe!
   </p>
-  <div class="flex gap-2">
-    <Input disabled placeholder={"•".repeat(53)} wrapperClass="flex-grow">
-      <i slot="before" class="fa fa-lock" />
-      <button slot="after" class="fa fa-copy cursor-pointer" on:click={copyKey} />
-    </Input>
-    <Anchor theme="button-accent" on:click={next}>Got it</Anchor>
-  </div>
+  <Input disabled placeholder={"•".repeat(53)} wrapperClass="flex-grow">
+    <i slot="before" class="fa fa-lock" />
+    <button slot="after" class="fa fa-copy cursor-pointer" on:click={copyKey} />
+  </Input>
   <p>If you don't want to save your keys now, you can find them later in {appName}'s settings.</p>
+  <div class="flex gap-2">
+    <Anchor theme="button" on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
+    <Anchor theme="button-accent" class="flex-grow text-center" on:click={next}>Got it</Anchor>
+  </div>
 </Content>
