@@ -1,4 +1,4 @@
-import {flatten, assoc, uniq, path as getPath} from "ramda"
+import {assoc, flatten, uniq, path as getPath} from "ramda"
 import {defer, batch} from "hurdak"
 import {pushToKey} from "src/util/misc"
 import {info} from "src/util/logger"
@@ -10,25 +10,35 @@ import {matchFilters, combineFilters} from "./filters"
 import {Subscription} from "./subscribe"
 import {Tracker} from "./tracker"
 
-export type LoadOpts = {
+export type LoadOneOpts = {
   relays: string[]
   filters: Filter[]
+}
+
+export type LoadOpts = LoadOneOpts & {
   onEvent?: (e: Event) => void
   onEose?: (url: string) => void
   onClose?: (events: Event[]) => void
 }
 
 export type LoadItem = {
-  request: LoadOpts
-  result: ReturnType<typeof defer>
   tracker: Tracker
-  chunkResult?: Promise<Event[]>
-  chunkResults: Promise<Event[]>[]
+  request: LoadOpts
+  results: ReturnType<typeof defer>[]
+  result: ReturnType<typeof defer>
 }
 
 const loadChunk = (chunk, relays, tracker) => {
   const filters = combineFilters(chunk.flatMap(getPath(["request", "filters"])))
   const sub = new Subscription({relays, filters, timeout: 15000})
+
+  const chunkResults = []
+  for (const item of chunk) {
+    const deferred = defer() as Promise<Event[]>
+
+    item.results.push(deferred)
+    chunkResults.push({deferred, events: []})
+  }
 
   sub.on("event", e => {
     // We have use a shared tracker in addition to the one in subscription so all urls
@@ -37,26 +47,29 @@ const loadChunk = (chunk, relays, tracker) => {
     // track again per request to deduplicate.
     tracker.add(e, e.seen_on)
 
-    for (const {request, tracker} of chunk) {
-      if (request.onEvent && !tracker.add(e, e.seen_on) && matchFilters(request.filters, e)) {
-        request.onEvent(e)
+    chunk.forEach(({request, tracker}, i) => {
+      const {events} = chunkResults[i]
+
+      if (!tracker.add(e, e.seen_on) && matchFilters(request.filters, e)) {
+        events.push(e)
+        request.onEvent?.(e)
       }
-    }
+    })
   })
 
   sub.on("eose", url => {
-    for (const {request} of chunk) {
+    chunk.forEach(({request}) => {
       request.onEose?.(url)
-    }
+    })
   })
 
-  sub.on("close", events => {
-    for (const {request, chunkResult} of chunk) {
-      const matchingEvents = events.filter(e => matchFilters(request.filters, e))
+  sub.on("close", () => {
+    chunk.forEach(({request}, i) => {
+      const {deferred, events} = chunkResults[i]
 
-      request.onClose?.(matchingEvents)
-      chunkResult.resolve(matchingEvents)
-    }
+      request.onClose?.(events)
+      deferred.resolve(events)
+    })
   })
 }
 
@@ -81,11 +94,7 @@ export const execute = batch(500, (items: LoadItem[]) => {
     const itemsByRelay = {}
     for (const item of items) {
       for (const url of item.request.relays) {
-        const chunkResult = defer() as Promise<Event[]>
-
-        item.chunkResults.push(chunkResult)
-
-        pushToKey(itemsByRelay, url, {...item, chunkResult})
+        pushToKey(itemsByRelay, url, item)
       }
     }
 
@@ -96,7 +105,7 @@ export const execute = batch(500, (items: LoadItem[]) => {
 
     // Merge results from each chunk into a single result set
     for (const item of items) {
-      Promise.all(item.chunkResults).then(eventGroups => item.result.resolve(flatten(eventGroups)))
+      Promise.all(item.results).then(eventChunks => item.result.resolve(flatten(eventChunks)))
     }
   }
 })
@@ -109,21 +118,10 @@ export const load = (request: LoadOpts) => {
   const result = defer()
   const tracker = new Tracker()
 
-  execute({request, result, tracker, chunkResults: []})
+  execute({tracker, request, result, results: []})
 
   return result
 }
 
-export const loadOne = (request: LoadOpts) => {
-  return new Promise(resolve => {
-    load({
-      ...request,
-      filters: request.filters.map(assoc("limit", 1)),
-      onEvent: e => {
-        request.onEvent?.(e)
-
-        resolve(e)
-      },
-    })
-  })
-}
+export const loadOne = ({relays, filters}: LoadOneOpts) =>
+  new Promise(onEvent => load({relays, onEvent, filters: filters.map(assoc("limit", 1))}))

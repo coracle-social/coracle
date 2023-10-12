@@ -83,6 +83,8 @@ export class Subscription extends EventEmitter {
       projections.push(event)
     }
 
+    this.events.push(event)
+
     this.emit("event", event)
   }
 
@@ -101,9 +103,9 @@ export class Subscription extends EventEmitter {
   close = () => {
     if (!this.closed) {
       this.closed = Date.now()
-      this.result.resolve(this.events)
       this.sub.unsubscribe()
       this.executor.target.cleanup()
+      this.result.resolve(this.events)
       this.emit("close", this.events)
       this.removeAllListeners()
     }
