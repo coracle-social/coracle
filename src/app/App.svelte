@@ -237,8 +237,8 @@
 
   let scrollY
 
-  router.history.subscribe(() => {
-    if (router.modal.get()) {
+  router.history.subscribe($history => {
+    if ($history[0].config.modal) {
       // This is not idempotent, so don't duplicate it
       if (document.body.style.position !== "fixed") {
         scrollY = window.scrollY

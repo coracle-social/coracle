@@ -22,6 +22,7 @@
 - [x] Don't ruin gifs and webp uploads
 - [x] Normalize urls more robustly
 - [x] Add back button to onboarding steps
+- [x] Fix load grouping to split limited loads out
 
 # 0.3.10
 

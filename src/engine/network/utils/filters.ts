@@ -1,6 +1,6 @@
 import {verifySignature, getEventHash, matchFilter as nostrToolsMatchFilter} from "nostr-tools"
 import {omit, any, find, prop, groupBy, uniq} from "ramda"
-import {shuffle, tryFunc, seconds, avg} from "hurdak"
+import {shuffle, randomId, tryFunc, seconds, avg} from "hurdak"
 import {Tags} from "src/util/nostr"
 import {cached} from "src/util/lruCache"
 import {env, pubkey} from "src/engine/session/state"
@@ -31,12 +31,13 @@ export const matchFilter = (filter, event) => {
 
 export const matchFilters = (filters, event) => any(f => matchFilter(f, event), filters)
 
-export const calculateFilterGroup = ({limit, since, until, ...filter}: Filter) => {
+export const calculateFilterGroup = ({since, until, limit, search, ...filter}: Filter) => {
   const group = Object.keys(filter)
 
   if (since) group.push(`since:${since}`)
-  if (limit) group.push(`limit:${limit}`)
   if (until) group.push(`until:${until}`)
+  if (limit) group.push(`limit:${randomId()}`)
+  if (search) group.push(`search:${search}`)
 
   return group.sort().join("-")
 }
