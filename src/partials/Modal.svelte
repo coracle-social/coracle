@@ -66,7 +66,7 @@
           <div
             class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
                  border border-solid border-accent-light bg-accent text-white transition-colors hover:bg-accent-light">
-            <i class="fa fa-times fa-lg" />
+            <i class="fa fa-times fa-lg cy-modal-close" />
           </div>
           {#if $modals.length > 1 && index > 0}
             <div

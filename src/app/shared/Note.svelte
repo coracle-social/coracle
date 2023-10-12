@@ -223,7 +223,7 @@
             </div>
             {#if muted}
               <p class="border-l-2 border-solid border-gray-6 pl-4 text-gray-1">
-                You have muted this note.
+                You have hidden this note.
                 <Anchor
                   theme="anchor"
                   on:click={() => {
@@ -233,10 +233,12 @@
             {:else}
               <NoteContent {anchorId} note={event} {showEntire} />
             {/if}
+            <div class="cy-note-click-target h-px" />
             <NoteActions
               note={event}
               bind:this={actions}
               {removeFromContext}
+              {showMuted}
               {replies}
               {likes}
               {zaps}

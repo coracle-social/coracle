@@ -37,6 +37,7 @@
 
   export let note: Event
   export let reply
+  export let showMuted
   export let showEntire
   export let removeFromContext
   export let replies
@@ -102,7 +103,7 @@
   let showDetails = false
   let actions = []
 
-  $: disableActions = !$canSign || $muted
+  $: disableActions = !$canSign || ($muted && !showMuted)
   $: like = like || find(propEq("pubkey", $session?.pubkey), likes)
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
   $: $likesCount = allLikes.length

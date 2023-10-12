@@ -3,6 +3,7 @@
   "include": ["src/**/*"],
   "compilerOptions": {
     "baseUrl": ".",
+    "module": "esnext",
     "paths": {
       "src/*": ["src/*"]
     },

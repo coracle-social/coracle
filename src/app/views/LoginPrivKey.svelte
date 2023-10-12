@@ -33,7 +33,7 @@
         <i slot="before" class="fa fa-key" />
       </Input>
     </div>
-    <Anchor theme="button" on:click={logIn}>Log In</Anchor>
+    <Anchor theme="button" class="cy-login-submit" on:click={logIn}>Log In</Anchor>
   </div>
   {#if !Capacitor.isNativePlatform()}
     <p class="rounded border-2 border-solid border-warning bg-gray-8 px-6 py-3">

@@ -2,7 +2,7 @@
   import "@fortawesome/fontawesome-free/css/fontawesome.css"
   import "@fortawesome/fontawesome-free/css/solid.css"
 
-  import {nip19} from "nostr-tools"
+  import {nip19, getPublicKey, generatePrivateKey} from "nostr-tools"
   import {pluck} from "ramda"
   import {seconds, Fetch} from "hurdak"
   import {tryFetch, hexToBech32, bech32ToHex, now} from "src/util/misc"
@@ -223,7 +223,15 @@
 
   // Globals
 
-  Object.assign(window, {...engine, nip19, bech32ToHex, hexToBech32, router})
+  Object.assign(window, {
+    ...engine,
+    nip19,
+    bech32ToHex,
+    hexToBech32,
+    router,
+    getPublicKey,
+    generatePrivateKey,
+  })
 
   // Theme
 

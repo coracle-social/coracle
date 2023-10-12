@@ -1,8 +1,9 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {generatePrivateKey} from "nostr-tools"
-  import {closure} from "hurdak"
+  import {closure, sleep} from "hurdak"
   import {fly} from "src/util/transition"
+  import Content from "src/partials/Content.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
   import OnboardingKey from "src/app/views/OnboardingKey.svelte"
@@ -62,6 +63,13 @@
   })
 
   const signup = async noteContent => {
+    // Go to our home page
+    router.at("notes").push()
+
+    // Make things async since the `key` change in App.svelte prevents the modal
+    // animation from completing, and it gets stuck. This is a svelte bug
+    await sleep(10)
+
     loginWithPrivateKey(privkey)
 
     // Do this first so we know where to publish everything else
@@ -78,12 +86,6 @@
 
     // Start our notifications listener
     listenForNotifications()
-
-    // Close all modals
-    router.clearModals()
-
-    // Go to our home page
-    router.at("notes").push()
   }
 
   onMount(() => {
@@ -94,18 +96,20 @@
 
 {#key stage}
   <div in:fly={{y: 20}}>
-    {#if stage === "intro"}
-      <OnboardingIntro {setStage} />
-    {:else if stage === "profile"}
-      <OnboardingProfile {setStage} {profile} />
-    {:else if stage === "key"}
-      <OnboardingKey {setStage} {privkey} />
-    {:else if stage === "relays"}
-      <OnboardingRelays {setStage} bind:relays />
-    {:else if stage === "follows"}
-      <OnboardingFollows {setStage} bind:petnames />
-    {:else if stage === "note"}
-      <OnboardingNote {setStage} {signup} />
-    {/if}
+    <Content size="lg">
+      {#if stage === "intro"}
+        <OnboardingIntro {setStage} />
+      {:else if stage === "profile"}
+        <OnboardingProfile {setStage} {profile} />
+      {:else if stage === "key"}
+        <OnboardingKey {setStage} {privkey} />
+      {:else if stage === "relays"}
+        <OnboardingRelays {setStage} bind:relays />
+      {:else if stage === "follows"}
+        <OnboardingFollows {setStage} bind:petnames />
+      {:else if stage === "note"}
+        <OnboardingNote {setStage} {signup} />
+      {/if}
+    </Content>
   </div>
 {/key}

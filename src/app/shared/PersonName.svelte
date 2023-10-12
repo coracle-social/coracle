@@ -30,7 +30,7 @@
 </script>
 
 <div class={cx("flex items-center gap-1", $$props.class)}>
-  <span>{displayPerson($person)}</span>
+  <span class="cy-person-name">{displayPerson($person)}</span>
   <div class="flex items-center gap-1 font-normal">
     {#if $following}
       <span class="px-2 py-1 text-xs">

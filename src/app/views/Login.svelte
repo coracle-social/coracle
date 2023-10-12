@@ -15,13 +15,13 @@
         loginWithExtension(await ext.getPublicKey())
         boot()
       } else {
-        router.at("login/privkey").open()
+        router.at("login/privkey").replaceModal()
       }
     })
 
-  const signUp = () => router.at("onboarding").open()
+  const signUp = () => router.at("onboarding").replaceModal()
 
-  const advancedLogIn = () => router.at("login/advanced").open()
+  const advancedLogIn = () => router.at("login/advanced").replaceModal()
 
   document.title = "Log In"
 </script>

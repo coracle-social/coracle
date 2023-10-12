@@ -131,13 +131,15 @@
     <Spinner />
   {:else if Object.values(currentRelays).length > 0}
     <p>Currently searching:</p>
-    {#each Object.values(currentRelays) as relay}
-      <div class="h-12">
-        {#if relay}
-          <RelayCard hideActions relay={{...relay, description: null}} />
-        {/if}
-      </div>
-    {/each}
+    <Content gap="gap-4" size="inherit">
+      {#each Object.values(currentRelays) as relay}
+        <div class="h-12">
+          {#if relay}
+            <RelayCard hideActions relay={{...relay, description: null}} />
+          {/if}
+        </div>
+      {/each}
+    </Content>
   {/if}
 </Content>
 
