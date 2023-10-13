@@ -17,7 +17,7 @@ import type {Filter, Event} from "src/engine"
 import {isShareableRelay} from "src/engine"
 import {tryJson} from "src/util/misc"
 
-export const noteKinds = [1, 30023, 1063, 9802, 1808]
+export const noteKinds = [1, 30023, 1063, 9802, 1808, 32123]
 export const personKinds = [0, 2, 3, 10002]
 export const reactionKinds = [7, 9735]
 export const userKinds = personKinds.concat([10000, 30001, 30078])

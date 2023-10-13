@@ -114,20 +114,20 @@ export const getReplyFilters = (events, filter) => {
 
 export const getFilterGenerality = filter => {
   if (filter.ids) {
-    return 1
+    return 0
   }
 
   const hasTags = find(k => k.startsWith("#"), Object.keys(filter))
 
   if (filter.authors && hasTags) {
-    return 0.8
+    return 0.2
   }
 
   if (filter.authors) {
-    return 1 - Math.min(1, filter.authors.length / 100)
+    return Math.min(1, filter.authors.length / 100)
   }
 
-  return 0
+  return 1
 }
 
 export const guessFilterDelta = filters => {

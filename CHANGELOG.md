@@ -25,6 +25,7 @@
 - [x] Fix load grouping to split limited loads out
 - [x] Fix load to actually return events
 - [x] Allow showing hidden replies
+- [x] Add 32123 support to notes and music player
 
 # 0.3.10
 

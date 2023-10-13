@@ -173,7 +173,7 @@ export const annotateMedia = (url: string) => {
     return {type: "image", url}
   } else if (url.match(/\.(mov|webm|mp4)$/)) {
     return {type: "video", url}
-  } else if (url.match(/\.(wav|m3u8)$/)) {
+  } else if (url.match(/\.(wav|mp3|m3u8)$/)) {
     return {type: "audio", url}
   } else {
     return {type: "preview", url}

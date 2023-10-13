@@ -6,13 +6,18 @@ export class AudioController extends EventEmitter {
   progress = 0
   interval: any = null
   audio = new Audio()
-  hls = new Hls()
+  hls?: Hls
 
   constructor(readonly url) {
     super()
 
-    this.hls.loadSource(this.url)
-    this.hls.attachMedia(this.audio)
+    if (url.endsWith("m3u8")) {
+      this.hls = new Hls()
+      this.hls.loadSource(this.url)
+      this.hls.attachMedia(this.audio)
+    } else {
+      this.audio.src = url
+    }
   }
 
   reportProgress = () => {
@@ -63,6 +68,7 @@ export class AudioController extends EventEmitter {
   cleanup() {
     clearInterval(this.interval)
 
-    this.hls.destroy()
+    this.hls?.destroy()
+    this.audio.pause()
   }
 }

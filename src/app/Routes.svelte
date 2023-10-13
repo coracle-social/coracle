@@ -14,9 +14,9 @@
   }
 
   const getProps = (item: HistoryItem) => ({
-    ...item.config.context,
-    ...decodeQueryString(item),
     ...decodeRouteParams(item),
+    ...decodeQueryString(item),
+    ...item.config.context,
   })
 
   $: {

@@ -147,6 +147,7 @@
   })
   router.register("/notes/:entity", NoteDetail, {
     entity: asNote,
+    relays: asRelays,
   })
   router.register("/notes/:entity/label", LabelCreate, {
     entity: asNote,
@@ -157,6 +158,7 @@
   })
   router.register("/notes/:entity/thread", ThreadDetail, {
     entity: asNote,
+    relays: asRelays,
   })
   // router.register("/notes/:entity/report", ReportCreate, {
   //   entity: asNote,

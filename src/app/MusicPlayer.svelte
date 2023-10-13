@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
   import {dec, inc} from "ramda"
+  import {switcherFn} from "hurdak"
   import {throttle} from "throttle-debounce"
   import {Tags} from "src/util/nostr"
   import {AudioController} from "src/util/audio"
@@ -17,13 +18,10 @@
 
   export let isOpen
 
-  const filters = [
-    //compileFilter({kinds: [1808], authors: "follows", limit: 10}),
-    //compileFilter({kinds: [1808], authors: "network", limit: 10}),
-    compileFilter({kinds: [1808]}),
-  ]
+  const filters = [compileFilter({kinds: [1808, 32123]})]
 
-  const relays = getRelaysFromFilters(filters).concat("wss://relay.stemstr.app")
+  const hints = ["wss://relay.stemstr.app", "wss://relay.wavlake.com"]
+  const relays = getRelaysFromFilters(filters).concat(hints)
 
   const feed = new FeedLoader({filters, relays})
 
@@ -47,9 +45,26 @@
 
   const loadMore = throttle(5000, () => feed.load(1))
 
-  const showNote = () => router.at("events").of(note.id).open()
+  const showNote = () => {
+    close()
+    router
+      .at("notes")
+      .of(note.id)
+      .qp({relays: note.seen_on})
+      .cx({context: [note]})
+      .open()
+  }
 
-  const showPerson = () => router.at("people").of(note.pubkey).open()
+  const showPerson = () => {
+    close()
+    router.at("people").of(note.pubkey).qp({relays: note.seen_on}).open()
+  }
+
+  const getStreamUrl = e =>
+    switcherFn(e.kind, {
+      1808: () => Tags.from(e).asMeta().stream_url,
+      32123: () => JSON.parse(e.content).enclosure,
+    })
 
   let i = 0
   let playing = false
@@ -59,7 +74,7 @@
 
   $: {
     if (!controller && note) {
-      const url = Tags.from(note).asMeta().stream_url
+      const url = getStreamUrl(note)
 
       if (url) {
         controller = new AudioController(url)
@@ -114,7 +129,12 @@
                 <Anchor on:click={showNote}>
                   <i class="fa fa-link text-accent" />
                 </Anchor>
-                <NoteContentKind1 showEntire {note} />
+                {#if note.kind === 1808}
+                  <NoteContentKind1 showEntire {note} />
+                {:else}
+                  {@const {title, creator} = JSON.parse(note.content)}
+                  <p>{title} by {creator}</p>
+                {/if}
               </div>
               <NoteContentLabel type="t" {note} />
             </div>

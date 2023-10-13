@@ -13,6 +13,7 @@
   import NoteContentKind30009 from "src/app/shared/NoteContentKind30009.svelte"
   import NoteContentKind30023 from "src/app/shared/NoteContentKind30023.svelte"
   import NoteContentKind31337 from "src/app/shared/NoteContentKind31337.svelte"
+  import NoteContentKind32123 from "src/app/shared/NoteContentKind32123.svelte"
   import {getSetting} from "src/engine"
 
   export let note
@@ -59,6 +60,8 @@
   <NoteContentKind30023 {note} {showEntire} {showMedia} />
 {:else if note.kind === 31337}
   <NoteContentKind31337 {note} {showMedia} />
+{:else if note.kind === 32123}
+  <NoteContentKind32123 {note} />
 {:else}
   <NoteContentKind1 {note} {anchorId} {maxLength} {showEntire} {showMedia} {expandable}>
     <div slot="note-content" let:quote>
