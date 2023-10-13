@@ -1,36 +1,10 @@
-import {uniq} from "ramda"
-import {tryFunc, createMapOf, Fetch} from "hurdak"
 import {Tags} from "src/util/nostr"
-import {tryJson, hexToBech32, createBatcher} from "src/util/misc"
+import {tryJson} from "src/util/misc"
 import {updateStore} from "src/engine/core/commands"
 import {projections} from "src/engine/core/projections"
-import {dufflepud} from "src/engine/session/utils"
-import {getLnUrl} from "src/engine/zaps/utils"
+import {getLnUrl, getZapper} from "src/engine/zaps/utils"
 import {people} from "./state"
-
-const fetchHandle = createBatcher(500, async (handles: string[]) => {
-  const data = await tryFunc(async () => {
-    const res = await Fetch.postJson(dufflepud("handle/info"), {handles: uniq(handles)})
-
-    return res?.data
-  }) || []
-
-  const infoByHandle = createMapOf("handle", "info", data)
-
-  return handles.map(h => infoByHandle[h])
-})
-
-const fetchZapper = createBatcher(500, async (lnurls: string[]) => {
-  const data = await tryFunc(async () => {
-    const res = await Fetch.postJson(dufflepud("zapper/info"), {lnurls: uniq(lnurls)})
-
-    return res?.data
-  }) || []
-
-  const infoByLnurl = createMapOf("lnurl", "info", data)
-
-  return lnurls.map(h => infoByLnurl[h])
-})
+import {getHandle} from "./utils"
 
 const updateHandle = async (e, {nip05}) => {
   if (!nip05) {
@@ -43,7 +17,7 @@ const updateHandle = async (e, {nip05}) => {
     return
   }
 
-  const profile = await fetchHandle(nip05)
+  const profile = await getHandle(nip05)
 
   if (profile?.pubkey === e.pubkey) {
     updateStore(person, e.created_at, {
@@ -71,21 +45,13 @@ const updateZapper = async (e, {lud16, lud06}) => {
     return
   }
 
-  const result = await fetchZapper(lnurl)
+  const zapper = await getZapper(lnurl)
 
-  if (!result?.allowsNostr || !result?.nostrPubkey) {
+  if (!zapper?.allowsNostr || !zapper?.nostrPubkey) {
     return
   }
 
-  updateStore(person, e.created_at, {
-    zapper: {
-      lnurl: hexToBech32("lnurl", lnurl),
-      callback: result.callback,
-      minSendable: result.minSendable,
-      maxSendable: result.maxSendable,
-      nostrPubkey: result.nostrPubkey,
-    },
-  })
+  updateStore(person, e.created_at, {zapper})
 }
 
 projections.addHandler(0, e => {

@@ -27,6 +27,7 @@
         "lnurl1dp68gurn8ghj7em909ek2u3wve6kuep09emk2mrv944kummhdchkcmn4wfk8qtmrdaexzcmvv5tqwy7g",
       callback: "https://api.geyser.fund/.well-known/lnurlp/coracle",
       nostrPubkey: "b6dcdddf86675287d1a4e8620d92aa905c258d850bf8cc923d39df1edfee5ee7",
+      allowsNostr: true,
       maxSendable: 5000000000,
       minSendable: 1000,
     },

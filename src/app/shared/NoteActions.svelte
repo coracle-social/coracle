@@ -25,7 +25,6 @@
     session,
     Publisher,
     publishDeletion,
-    people,
     getUserRelayUrls,
     getPublishHints,
     publishReaction,
@@ -43,8 +42,8 @@
   export let replies
   export let likes
   export let zaps
+  export let zapper
 
-  const person = people.key(note.pubkey)
   const nevent = nip19.neventEncode({id: note.id, relays: getEventHints(note)})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note))
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
@@ -80,7 +79,7 @@
       .at("people")
       .of(note.pubkey)
       .at("zap")
-      .qp({eid: note.id})
+      .qp({eid: note.id, lnurl: zapper.lnurl})
       .cx({relays: getPublishHints(note)})
       .open()
 
@@ -115,11 +114,11 @@
       pluck(
         // @ts-ignore
         "invoiceAmount",
-        zap ? zaps.filter(n => n.id !== zap?.id).concat(processZap(zap, $person?.zapper)) : zaps
+        zap ? zaps.filter(n => n.id !== zap?.id).concat(processZap(zap, zapper)) : zaps
       )
     ) / 1000
 
-  $: canZap = $person?.zapper && note.pubkey !== $session?.pubkey
+  $: canZap = zapper && note.pubkey !== $session?.pubkey
   $: $repliesCount = replies.length
 
   $: {

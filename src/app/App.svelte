@@ -187,8 +187,9 @@
     entity: asPerson,
   })
   router.register("/people/:entity/zap", PersonZap, {
-    entity: asPerson,
     eid: asNote,
+    entity: asPerson,
+    lnurl: asString("lnurl"),
   })
 
   router.register("/qrcode/:code", QRCode)

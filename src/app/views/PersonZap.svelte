@@ -12,6 +12,7 @@
     displayPubkey,
     requestZap,
     collectInvoice,
+    selectHints,
     getPubkeyHints,
     listenForZapResponse,
   } from "src/engine"
@@ -19,6 +20,7 @@
   export let pubkey
   export let eid = null
   export let relays = null
+  export let lnurl = null
 
   let sub, unmounted
   let zap = {
@@ -30,13 +32,16 @@
     confirmed: false,
   }
 
+  const hints = selectHints(relays || getPubkeyHints(pubkey))
+
   const loadZapInvoice = async () => {
     zap.loading = true
 
     const invoice = await requestZap(zap.message, zap.amount, {
       eid,
+      lnurl,
       pubkey,
-      relays: relays || getPubkeyHints(pubkey),
+      relays: hints,
     })
 
     // If they closed the dialog before fetch resolved, we're done
@@ -50,8 +55,8 @@
     await collectInvoice(invoice)
 
     // Listen for the zap confirmation
-    sub = listenForZapResponse(pubkey, {
-      relays,
+    sub = await listenForZapResponse(pubkey, lnurl, {
+      relays: hints,
       onEvent: event => {
         zap.confirmed = true
 

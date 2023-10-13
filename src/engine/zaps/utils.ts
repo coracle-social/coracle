@@ -1,10 +1,12 @@
-import {identity} from "ramda"
-import {tryFunc} from "hurdak"
-import {tryJson, bech32ToHex} from "src/util/misc"
+import {identity, pick, uniq} from "ramda"
+import {Fetch, tryFunc, createMapOf} from "hurdak"
+import {tryJson, hexToBech32, bech32ToHex, createBatcher} from "src/util/misc"
 import {Tags} from "src/util/nostr"
+import {cached} from "src/util/lruCache"
 import {people} from "src/engine/people/state"
+import {dufflepud} from "src/engine/session/utils"
 import type {Event} from "src/engine/events/model"
-import type {ZapEvent} from "./model"
+import type {Zapper, ZapEvent} from "./model"
 
 const DIVISORS = {
   m: BigInt(1e3),
@@ -53,9 +55,13 @@ export const getInvoiceAmount = (bolt11: string) => {
 }
 
 export const getLnUrl = (address: string) => {
-  // Try to parse it as a lud06 LNURL
   if (address.startsWith("lnurl1")) {
-    return tryFunc(() => bech32ToHex(address)) as string
+    return address
+  }
+
+  // If it's a regular url, just encode it
+  if (address.includes("://")) {
+    return hexToBech32("lnurl", address)
   }
 
   // Try to parse it as a lud16 address
@@ -63,9 +69,48 @@ export const getLnUrl = (address: string) => {
     const [name, domain] = address.split("@")
 
     if (domain && name) {
-      return `https://${domain}/.well-known/lnurlp/${name}`
+      return hexToBech32("lnurl", `https://${domain}/.well-known/lnurlp/${name}`)
     }
   }
+}
+
+export const fetchZapper = createBatcher(3000, async (lnurls: string[]) => {
+  const keys = ["callback", "minSendable", "maxSendable", "nostrPubkey", "allowsNostr"]
+  const data =
+    (await tryFunc(async () => {
+      // Dufflepud expects plaintext but we store lnurls encoded
+      const res = await Fetch.postJson(dufflepud("zapper/info"), {
+        lnurls: uniq(lnurls).map(bech32ToHex),
+      })
+
+      return res?.data
+    })) || []
+
+  const infoByLnurl = createMapOf("lnurl", "info", data)
+
+  return lnurls.map(lnurl => {
+    const zapper = infoByLnurl[bech32ToHex(lnurl)]
+
+    if (!zapper) {
+      return null
+    }
+
+    return {...pick(keys, zapper), lnurl} as Zapper
+  })
+})
+
+export const getZapper = cached({
+  maxSize: 100,
+  getKey: ([lnurl]) => lnurl,
+  getValue: ([lnurl]) => fetchZapper(lnurl),
+})
+
+export const getZapperForPubkey = async (pubkey, lnurl = null) => {
+  const zapper = people.key(pubkey).get()?.zapper
+
+  // Allow the caller to specify a lnurl override, but don't fetch
+  // if we already know it
+  return zapper?.lnurl === lnurl ? zapper : await getZapper(lnurl)
 }
 
 export const processZap = (event, zapper) => {
@@ -117,9 +162,7 @@ export const processZap = (event, zapper) => {
   return zap
 }
 
-export const processZaps = (zaps: Event[], pubkey: string) => {
-  const {zapper} = people.key(pubkey).get() || {}
-
+export const processZaps = (zaps: Event[], zapper) => {
   if (!zapper) {
     return []
   }

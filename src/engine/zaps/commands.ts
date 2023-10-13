@@ -1,23 +1,21 @@
 import {Fetch} from "hurdak"
 import {warn} from "src/util/logger"
-import {people} from "src/engine/people/state"
 import {buildEvent} from "src/engine/network/utils"
 import {signer} from "src/engine/session/derived"
+import {getZapperForPubkey} from "./utils"
 
-export async function requestZap(content, amount, {pubkey, relays, eid = null}) {
-  const person = people.key(pubkey).get()
+export const requestZap = async (content, amount, {pubkey, relays, eid = null, lnurl = null}) => {
+  const zapper = await getZapperForPubkey(pubkey, lnurl)
 
-  if (!person?.zapper) {
-    throw new Error("Can't zap a person without a zapper")
+  if (!zapper) {
+    throw new Error("Can't zap without a zapper")
   }
 
-  const {callback, lnurl} = person.zapper
   const msats = amount * 1000
-
   const tags = [
     ["relays", ...relays],
     ["amount", msats.toString()],
-    ["lnurl", lnurl],
+    ["lnurl", zapper.lnurl],
     ["p", pubkey],
   ]
 
@@ -27,7 +25,8 @@ export async function requestZap(content, amount, {pubkey, relays, eid = null}) 
 
   const zap = await signer.get().signAsUser(buildEvent(9734, {content, tags}))
   const zapString = encodeURI(JSON.stringify(zap))
-  const res = await Fetch.fetchJson(`${callback}?amount=${msats}&nostr=${zapString}&lnurl=${lnurl}`)
+  const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
+  const res = await Fetch.fetchJson(zapper.callback + qs)
 
   if (!res.pr) {
     warn(JSON.stringify(res))

@@ -2,7 +2,7 @@
   import {last, partition, reject, propEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, batch} from "hurdak"
-  import {findRootId, isChildOf, findReplyId, isLike} from "src/util/nostr"
+  import {Tags, findRootId, isChildOf, findReplyId, isLike} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
@@ -18,7 +18,10 @@
   import {
     env,
     load,
+    people,
     loadOne,
+    getLnUrl,
+    getZapper,
     processZaps,
     matchFilters,
     getReplyHints,
@@ -44,6 +47,7 @@
   export let showLoading = false
   export let showMuted = false
 
+  let zapper, unsubZapper
   let event = note
   let reply = null
   let replyIsActive = false
@@ -139,11 +143,21 @@
   // Split out zaps
   $: zaps = processZaps(
     children.filter(e => e.kind === 9735),
-    event.pubkey
+    zapper
   )
 
   onMount(async () => {
     interval = setInterval(setBorderHeight, 400)
+
+    const zapAddress = Tags.from(note).getMeta("zap")
+
+    if (zapAddress) {
+      zapper = await getZapper(getLnUrl(zapAddress))
+    } else {
+      unsubZapper = people.key(note.pubkey).subscribe($p => {
+        zapper = $p?.zapper
+      })
+    }
 
     if (!event.pubkey) {
       event = await loadOne({
@@ -173,6 +187,7 @@
 
   onDestroy(() => {
     clearInterval(interval)
+    unsubZapper?.()
   })
 </script>
 
@@ -243,6 +258,7 @@
               {likes}
               {zaps}
               {reply}
+              {zapper}
               {showEntire} />
           </div>
         </div>

@@ -1,9 +1,9 @@
 import {now} from "src/util/misc"
-import {people} from "src/engine/people/state"
 import {subscribe} from "src/engine/network/utils"
+import {getZapperForPubkey} from "./utils"
 
-export const listenForZapResponse = (pubkey, opts) => {
-  const {zapper} = people.key(pubkey).get()
+export const listenForZapResponse = async (pubkey, lnurl = null, opts) => {
+  const zapper = await getZapperForPubkey(pubkey, lnurl)
 
   return subscribe({
     ...opts,

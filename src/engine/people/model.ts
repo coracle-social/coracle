@@ -1,4 +1,5 @@
-import type {RelayPolicy} from 'src/engine/relays/model'
+import type {RelayPolicy} from "src/engine/relays/model"
+import type {Zapper} from "src/engine/zaps/model"
 
 export type Profile = {
   name?: string
@@ -15,14 +16,6 @@ export type Handle = {
   profile: Record<string, any>
   pubkey: string
   address: string
-}
-
-export type Zapper = {
-  lnurl: string
-  callback: string
-  minSendable: number
-  maxSendable: number
-  nostrPubkey: string
 }
 
 export type Person = {

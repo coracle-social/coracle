@@ -1,12 +1,32 @@
 import {nip19} from "nostr-tools"
-import {join, nth, last} from "ramda"
-import {ellipsize, switcherFn} from "hurdak"
-import {fuzzy} from "src/util/misc"
+import {uniq, join, nth, last} from "ramda"
+import {Fetch, tryFunc, createMapOf, ellipsize, switcherFn} from "hurdak"
+import {fuzzy, createBatcher} from "src/util/misc"
 import {fromNostrURI} from "src/util/nostr"
 import {cached} from "src/util/lruCache"
+import {dufflepud} from "src/engine/session/utils"
 import {getPubkeyHints} from "src/engine/relays/utils"
 import type {Person, Handle} from "./model"
 import {people} from "./state"
+
+export const fetchHandle = createBatcher(3000, async (handles: string[]) => {
+  const data =
+    (await tryFunc(async () => {
+      const res = await Fetch.postJson(dufflepud("handle/info"), {handles: uniq(handles)})
+
+      return res?.data
+    })) || []
+
+  const infoByHandle = createMapOf("handle", "info", data)
+
+  return handles.map(h => infoByHandle[h])
+})
+
+export const getHandle = cached({
+  maxSize: 100,
+  getKey: ([handle]) => handle,
+  getValue: ([handle]) => fetchHandle(handle),
+})
 
 export const personHasName = ({profile: p}: Person) => Boolean(p?.name || p?.display_name)
 
