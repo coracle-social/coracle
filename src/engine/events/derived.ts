@@ -23,7 +23,7 @@ export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settin
   const regex =
     words.length > 0 ? new RegExp(`\\b(${words.map(w => w.toLowerCase()).join("|")})\\b`) : null
 
-  return (e: Event) => {
+  return (e: Event, strict = false) => {
     if (!$pubkey || e.pubkey === $pubkey) {
       return false
     }
@@ -36,6 +36,10 @@ export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settin
 
     if (regex && e.content?.toLowerCase().match(regex)) {
       return true
+    }
+
+    if (strict) {
+      return false
     }
 
     if (!$follows.has(e.pubkey) && getFollowsWhoFollow($pubkey, e.pubkey).length < minWot) {

@@ -117,7 +117,7 @@
     }
   }
 
-  $: muted = !showMuted && $isEventMuted(event)
+  $: muted = !showMuted && $isEventMuted(event, true)
 
   // Find children in our context
   $: children = ctx.filter(e => isChildOf(e, event))
@@ -196,9 +196,7 @@
     <div bind:this={noteContainer} class="group relative">
       <Card stopPropagation class="relative flex gap-4" on:click={onClick} {interactive}>
         {#if !showParent && !topLevel}
-          <div
-            class="absolute z-10 -ml-4 h-px w-4 bg-gray-7 group-[.modal]:bg-gray-6"
-            style="left: 0px; top: 27px;" />
+          <div class="absolute z-10 -ml-4 h-px w-4 bg-gray-6" style="left: 0px; top: 27px;" />
         {/if}
         <div>
           <Anchor class="text-lg font-bold" on:click={showPerson}>
@@ -269,7 +267,7 @@
       <div class="relative">
         <div
           class="absolute right-0 top-0 z-10 -mr-2 -mt-4 flex h-6 w-6 cursor-pointer items-center
-                   justify-center rounded-full border border-solid border-gray-7 bg-gray-8 text-gray-2"
+                   justify-center rounded-full border border-solid border-gray-6 bg-gray-8 text-gray-2"
           on:click={() => {
             collapsed = !collapsed
           }}>
@@ -304,9 +302,7 @@
 
     {#if visibleReplies.length > 0 || hiddenReplies.length > 0}
       <div class="relative mt-4">
-        <div
-          class="absolute z-10 -mt-4 ml-4 h-0 w-px bg-gray-7 group-[.modal]:bg-gray-6"
-          bind:this={border} />
+        <div class="absolute z-10 -mt-4 ml-4 h-0 w-px bg-gray-6" bind:this={border} />
         <div class="note-children relative ml-8 flex flex-col gap-4" bind:this={childrenContainer}>
           {#if !showEntire && unmutedReplies.length > visibleReplies.length}
             <button class="ml-5 cursor-pointer py-2 text-gray-1 outline-0" on:click={onClick}>

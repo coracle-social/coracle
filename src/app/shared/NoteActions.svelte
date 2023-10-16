@@ -45,7 +45,7 @@
   export let zapper
 
   const nevent = nip19.neventEncode({id: note.id, relays: getEventHints(note)})
-  const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note))
+  const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})

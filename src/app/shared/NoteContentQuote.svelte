@@ -64,7 +64,7 @@
 
     if (quote) {
       loading = false
-      muted = $isEventMuted(quote)
+      muted = $isEventMuted(quote, true)
       loadPubkeys([quote.pubkey])
     }
   })
