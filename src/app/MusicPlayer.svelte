@@ -49,8 +49,7 @@
     close()
     router
       .at("notes")
-      .of(note.id)
-      .qp({relays: note.seen_on})
+      .of(note.id, {relays: note.seen_on})
       .cx({context: [note]})
       .open()
   }

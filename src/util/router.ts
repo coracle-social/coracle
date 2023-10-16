@@ -90,7 +90,7 @@ class RouterExtension {
   constructor(
     readonly router,
     readonly params: RouterExtensionParams,
-    readonly getId: (v: string) => string = identity
+    readonly getId: (...args: any[]) => string = identity
   ) {}
 
   get path() {
@@ -105,7 +105,7 @@ class RouterExtension {
     return this.params.context
   }
 
-  of = value => this.at(this.getId(value))
+  of = (...args) => this.at(this.getId(...args))
 
   clone = params => new RouterExtension(this.router, {...this.params, ...params})
 

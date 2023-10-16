@@ -63,8 +63,7 @@
           theme="button-accent"
           href={router
             .at("notes")
-            .of(eid)
-            .qp({relays: Array.from(succeeded)})
+            .of(eid, {relays: Array.from(succeeded)})
             .toString()}>
           View your note
         </Anchor>

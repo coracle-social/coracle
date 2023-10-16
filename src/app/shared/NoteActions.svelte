@@ -51,11 +51,20 @@
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
 
-  //const report = () => router.at("notes").of(note.id).at('report').qp({pubkey: note.pubkey}).open()
+  //const report = () => router.at("notes").of(note.id, {relays: getEventHints(note)}).at('report').qp({pubkey: note.pubkey}).open()
 
-  const label = () => router.at("notes").of(note.id).at("label").open()
+  const label = () =>
+    router
+      .at("notes")
+      .of(note.id, {relays: getEventHints(note)})
+      .at("label")
+      .open()
 
-  const quote = () => router.at("notes/create").cx({quote: note}).open()
+  const quote = () =>
+    router
+      .at("notes/create")
+      .cx({quote: note, relays: getEventHints(note)})
+      .open()
 
   const unmuteNote = () => unmute(note.id)
 
@@ -77,10 +86,9 @@
   const startZap = () =>
     router
       .at("people")
-      .of(note.pubkey)
+      .of(note.pubkey, {relays: getPublishHints(note)})
       .at("zap")
       .qp({eid: note.id, lnurl: zapper.lnurl})
-      .cx({relays: getPublishHints(note)})
       .open()
 
   const broadcast = () => {

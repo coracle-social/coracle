@@ -8,8 +8,8 @@ import {
   decodeRelay,
   decodeEvent,
   selectHints,
-  normalizeRelayUrl,
   getNip24ChannelId,
+  getPubkeyHints,
 } from "src/engine"
 
 // Decoders
@@ -20,7 +20,6 @@ export const decodeJson = json => tryJson(() => JSON.parse(json))
 export const encodeCsv = xs => xs.join(",")
 export const decodeCsv = x => x.split(",")
 export const encodeRelays = xs => xs.map(url => last(url.split("//"))).join(",")
-export const decodeRelays = x => x.split(",").map(normalizeRelayUrl)
 
 export const encodeFilter = f =>
   Object.entries(f)
@@ -119,17 +118,14 @@ export const asChannelId = {
   decode: decodeAs("pubkeys", decodeCsv),
 }
 
-export const asRelays = {
-  encode: encodeRelays,
-  decode: decodeAs("relays", decodeRelays),
-}
-
 // Router and extensions
 
 export const router = new Router()
 
 router.extend("media", encodeURIComponent)
-router.extend("notes", nip19.noteEncode)
-router.extend("people", nip19.npubEncode)
+router.extend("notes", (id, {relays = []} = {}) =>
+  relays ? nip19.neventEncode({id, relays}) : nip19.noteEncode(id)
+)
+router.extend("people", pubkey => nip19.nprofileEncode({pubkey, relays: getPubkeyHints(pubkey)}))
 router.extend("relays", nip19.nrelayEncode)
 router.extend("channels", getNip24ChannelId)

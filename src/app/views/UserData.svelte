@@ -69,8 +69,7 @@
             <Anchor
               href={router
                 .at("notes")
-                .of(event.id)
-                .cx({relays: getEventHints(event)})
+                .of(event.id, {relays: getEventHints(event)})
                 .toString()}>
               <i class="fa fa-link text-accent" />
             </Anchor>

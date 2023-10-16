@@ -27,6 +27,7 @@
 - [x] Allow showing hidden replies
 - [x] Add 32123 support to notes and music player
 - [x] Add support for zap splits
+- [x] Encode relays into urls when possible
 
 # 0.3.10
 

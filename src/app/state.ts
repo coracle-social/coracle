@@ -159,7 +159,7 @@ export const toastProgress = progress => {
         link: {
           text: "Details",
           onClick: () =>
-            router.at("notes").of(event.id).at("status").qp({relays}).cx({event, progress}).open(),
+            router.at("notes").of(event.id, {relays}).at("status").cx({event, progress}).open(),
         },
       }
 

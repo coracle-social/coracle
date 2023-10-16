@@ -68,8 +68,8 @@
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
       router
         .at("notes")
-        .of(event.id)
-        .cx({context: ctx.concat(event), relays: getEventHints(event)})
+        .of(event.id, {relays: getEventHints(event)})
+        .cx({context: ctx.concat(event)})
         .open()
     }
   }
@@ -79,16 +79,16 @@
   const goToParent = () =>
     router
       .at("notes")
-      .of(findReplyId(event))
-      .cx({context: ctx.concat(event), relays: getParentHints(event)})
+      .of(findReplyId(event), {relays: getParentHints(event)})
+      .cx({context: ctx.concat(event)})
       .open()
 
   const goToThread = () =>
     router
       .at("notes")
-      .of(event.id)
+      .of(event.id, {relays: getEventHints(event)})
       .at("thread")
-      .cx({context: ctx.concat(event), relays: getEventHints(event)})
+      .cx({context: ctx.concat(event)})
       .open()
 
   const removeFromContext = e => {
@@ -211,8 +211,7 @@
             <Anchor
               href={router
                 .at("notes")
-                .of(event.id)
-                .cx({relays: getEventHints(event)})
+                .of(event.id, {relays: getEventHints(event)})
                 .toString()}
               class="text-end text-sm text-gray-1"
               type="unstyled">

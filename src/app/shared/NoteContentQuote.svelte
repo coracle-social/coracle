@@ -38,8 +38,8 @@
     if (noteId && e.detail.target.textContent !== "Show") {
       router
         .at("notes")
-        .of(noteId)
-        .cx({relays, context: asArray(quote)})
+        .of(noteId, {relays})
+        .cx({context: asArray(quote)})
         .open()
     }
   }
