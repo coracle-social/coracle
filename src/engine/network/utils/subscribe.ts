@@ -47,11 +47,7 @@ export class Subscription extends EventEmitter {
     this.executor = getExecutor(getUrls(relays))
 
     // If one of our connections gets closed make sure to kill our sub
-    this.executor.target.connections.forEach(con => {
-      con.on("close", () => {
-        this.close()
-      })
-    })
+    this.executor.target.connections.forEach(con => con.on("close", this.close))
 
     this.sub = this.executor.subscribe(filters, {
       onEvent: this.onEvent,
@@ -104,6 +100,7 @@ export class Subscription extends EventEmitter {
     if (!this.closed) {
       this.closed = Date.now()
       this.sub.unsubscribe()
+      this.executor.target.connections.forEach(con => con.off("close", this.close))
       this.executor.target.cleanup()
       this.result.resolve(this.events)
       this.emit("close", this.events)

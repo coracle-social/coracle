@@ -192,6 +192,10 @@
 </script>
 
 {#if event.pubkey}
+  {@const path = router
+    .at("notes")
+    .of(event.id, {relays: getEventHints(event)})
+    .toString()}
   <div class="note">
     <div bind:this={noteContainer} class="group relative">
       <Card stopPropagation class="relative flex gap-4" on:click={onClick} {interactive}>
@@ -208,13 +212,7 @@
             <Anchor type="unstyled" class="pr-16 text-lg font-bold" on:click={showPerson}>
               <PersonName pubkey={event.pubkey} />
             </Anchor>
-            <Anchor
-              href={router
-                .at("notes")
-                .of(event.id, {relays: getEventHints(event)})
-                .toString()}
-              class="text-end text-sm text-gray-1"
-              type="unstyled">
+            <Anchor href={path} class="text-end text-sm text-gray-1" type="unstyled">
               {formatTimestamp(event.created_at)}
             </Anchor>
           </div>
