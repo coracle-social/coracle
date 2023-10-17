@@ -14,22 +14,20 @@
   let hidden = false
 </script>
 
-<div class="overflow-hidden text-ellipsis whitespace-nowrap">
-  {#if showMedia && value.isMedia && !hidden}
-    <div class="py-2">
-      <Media link={annotateMedia(value.url)} onClose={close} />
-    </div>
-  {:else if value.isMedia}
-    <Anchor
-      modal
-      stopPropagation
-      class="underline"
-      href={router.at("media").of(value.url).toString()}>
-      {displayUrl(value.url)}
-    </Anchor>
-  {:else}
-    <Anchor external stopPropagation class="underline" href={value.url}>
-      {displayUrl(value.url)}
-    </Anchor>
-  {/if}
-</div>
+{#if showMedia && value.isMedia && !hidden}
+  <div class="py-2">
+    <Media link={annotateMedia(value.url)} onClose={close} />
+  </div>
+{:else if value.isMedia}
+  <Anchor
+    modal
+    stopPropagation
+    class="underline overflow-hidden text-ellipsis whitespace-nowrap"
+    href={router.at("media").of(value.url).toString()}>
+    {displayUrl(value.url)}
+  </Anchor>
+{:else}
+  <Anchor external stopPropagation class="underline overflow-hidden text-ellipsis whitespace-nowrap" href={value.url}>
+    {displayUrl(value.url)}
+  </Anchor>
+{/if}

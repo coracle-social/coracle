@@ -123,6 +123,8 @@
     zapper
   )
 
+  $: showHiddenReplies = showEntire && showMutedReplies && hiddenReplies.length > 0
+
   onMount(async () => {
     const zapAddress = Tags.from(note).getMeta("zap")
 
@@ -265,6 +267,7 @@
 
     <NoteReply
       parent={event}
+      showBorder={visibleReplies.length > 0 || showHiddenReplies}
       bind:this={reply}
       on:start={() => {
         replyIsActive = true
@@ -278,16 +281,17 @@
 
     {#if visibleReplies.length > 0 || hiddenReplies.length > 0}
       <div class="note-children relative ml-8 mt-2 flex flex-col">
-        {#if !showEntire && unmutedReplies.length > visibleReplies.length}
+        {#if !showEntire && replies.length > visibleReplies.length}
           <button class="ml-5 cursor-pointer py-2 text-gray-1 outline-0" on:click={onClick}>
             <i class="fa fa-up-down pr-2 text-sm" />
             Show {quantify(
-              unmutedReplies.length - visibleReplies.length,
+              replies.length - visibleReplies.length,
               "other reply",
               "more replies"
             )}
           </button>
-        {:else if visibleReplies.length > 0 || (showEntire && showMutedReplies && hiddenReplies.length > 0)}
+          <div class="absolute -left-4 -top-2 h-14 w-px bg-gray-6" />
+        {:else if visibleReplies.length > 0 || showHiddenReplies}
           <div class="absolute -left-4 -top-2 h-4 w-px bg-gray-6" />
         {/if}
         {#each visibleReplies as r, i (r.id)}
@@ -300,7 +304,7 @@
             context={ctx}
             {anchorId} />
         {/each}
-        {#if showEntire && showMutedReplies}
+        {#if showHiddenReplies}
           {#each hiddenReplies as r, i (r.id)}
             <svelte:self
               isLastReply={i === hiddenReplies.length - 1}

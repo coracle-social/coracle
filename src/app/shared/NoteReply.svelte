@@ -11,6 +11,7 @@
   import {toastProgress} from "src/app/state"
 
   export let parent
+  export let showBorder
 
   const dispatch = createEventDispatcher()
 
@@ -91,7 +92,9 @@
     class="note-reply relative z-10 my-2 flex flex-col gap-1"
     bind:this={container}
     on:click|stopPropagation>
-    <div class="absolute bottom-0 left-4 top-0 z-0 -my-2 ml-px w-px bg-gray-6" />
+    {#if showBorder}
+      <div class="absolute bottom-0 left-4 top-0 z-0 -my-2 w-px bg-gray-6" />
+    {/if}
     <div class="z-10 overflow-hidden rounded-2xl border border-solid border-gray-6">
       <div class="bg-gray-7 p-3 text-gray-2" class:rounded-b={data.mentions.length === 0}>
         <Compose bind:this={reply} onSubmit={send} style="min-height: 4rem">
