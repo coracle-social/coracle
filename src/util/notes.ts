@@ -105,26 +105,28 @@ export const parseContent = ({content, tags = []}: {content: string; tags?: stri
     )
 
     // Skip url if it's just the end of a filepath
-    if (raw) {
-      const prev = last(result)
-
-      if (prev?.type === "text" && prev.value.endsWith("/")) {
-        return
-      }
-
-      let url = raw
-
-      // Skip ellipses and very short non-urls
-      if (url.match(/\.\./)) {
-        return
-      }
-
-      if (!url.match("://")) {
-        url = "https://" + url
-      }
-
-      return [LINK, raw, {url, isMedia: urlIsMedia(url)}]
+    if (!raw) {
+      return
     }
+
+    const prev = last(result)
+
+    if (prev?.type === "text" && prev.value.endsWith("/")) {
+      return
+    }
+
+    let url = raw
+
+    // Skip ellipses and very short non-urls
+    if (url.match(/\.\./)) {
+      return
+    }
+
+    if (!url.match("://")) {
+      url = "https://" + url
+    }
+
+    return [LINK, raw, {url, isMedia: urlIsMedia(url)}]
   }
 
   while (text) {

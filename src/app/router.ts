@@ -2,7 +2,7 @@ import {last, fromPairs, identity} from "ramda"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {tryJson} from "src/util/misc"
-import {fromNostrURI} from "src/util/nostr"
+import {fromNostrURI, fromATag} from "src/util/nostr"
 import {
   decodePerson,
   decodeRelay,
@@ -123,11 +123,25 @@ export const asChannelId = {
 export const router = new Router()
 
 router.extend("media", encodeURIComponent)
-router.extend("notes", (id, {relays = []} = {}) =>
-  relays ? nip19.neventEncode({id, relays}) : nip19.noteEncode(id)
-)
-router.extend("people", (pubkey, {relays = []} = {}) =>
-  nip19.nprofileEncode({pubkey, relays: relays.concat(getPubkeyHints(pubkey))})
-)
 router.extend("relays", nip19.nrelayEncode)
 router.extend("channels", getNip24ChannelId)
+
+router.extend("notes", (id, {relays = []} = {}) => {
+  if (id.includes(":")) {
+    return nip19.naddrEncode({...fromATag(id), relays})
+  }
+
+  if (relays.length > 0) {
+    return nip19.neventEncode({id, relays})
+  }
+
+  return nip19.noteEncode(id)
+})
+
+router.extend("people", (pubkey, {relays = []} = {}) => {
+  if (relays.length < 3) {
+    relays = relays.concat(getPubkeyHints.limit(3 - relays.length).getHints(pubkey))
+  }
+
+  return nip19.nprofileEncode({pubkey, relays})
+})

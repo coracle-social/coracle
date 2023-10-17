@@ -31,6 +31,7 @@
 - [x] Opt-in to local relay when it's actually useful
 - [x] Fix link overflow when media previews are off
 - [x] Speed things up by using animations more sparingly
+- [x] Fix DM view scrolling and formatting of messages with links
 
 # 0.3.10
 

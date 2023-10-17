@@ -24,7 +24,7 @@
 
   let content
   const tags = Tags.from(note)
-  const regex = /(nostr:)?n(event|ote|pub|profile|addr)\w+/g
+  const regex = /(nostr:)?n(event|ote|pub|profile|addr)\w{10,1000}/g
   const {title, summary, image} = tags.asMeta() as {[k: string]: string}
 
   const convertEntities = markdown => {

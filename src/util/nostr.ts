@@ -228,3 +228,9 @@ export const getContentWarning = e => {
 }
 
 export const buildATag = (kind, pubkey, ident = "") => [kind, pubkey, ident].join(":")
+
+export const fromATag = a => {
+  const [kind, pubkey, identifier] = a.split(":")
+
+  return {kind, pubkey, identifier}
+}
