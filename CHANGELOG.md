@@ -30,6 +30,7 @@
 - [x] Encode relays into urls when possible
 - [x] Opt-in to local relay when it's actually useful
 - [x] Fix link overflow when media previews are off
+- [x] Speed things up by using animations more sparingly
 
 # 0.3.10
 

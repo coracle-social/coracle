@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {fly} from "src/util/transition"
   import {toast, appName} from "src/partials/state"
   import Field from "src/partials/Field.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
@@ -21,7 +20,7 @@
   document.title = "Settings"
 </script>
 
-<form on:submit|preventDefault={submit} in:fly={{y: 20}}>
+<form on:submit|preventDefault={submit}>
   <Content>
     <div class="mb-4 flex flex-col items-center justify-center">
       <Heading>App Settings</Heading>

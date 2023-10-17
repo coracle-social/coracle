@@ -4,6 +4,7 @@
   import {Storage} from "hurdak"
   import {FeedLoader} from "src/engine"
   import {createScroller} from "src/util/misc"
+  import {fly} from "src/util/transition"
   import {getModal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
   import Content from "src/partials/Content.svelte"
@@ -88,12 +89,14 @@
     </FeedControls>
   {/if}
   <div class="flex flex-col gap-4">
-    {#each $notes as note (note.id)}
-      <Note
-        depth={$hideReplies ? 0 : 2}
-        context={note.replies || []}
-        filters={[compileFilter(filter)]}
-        {note} />
+    {#each $notes as note, i (note.id)}
+      <div in:fly={{y: 20, duration: i < 5 ? 100 : 0}}>
+        <Note
+          depth={$hideReplies ? 0 : 2}
+          context={note.replies || []}
+          filters={[compileFilter(filter)]}
+          {note} />
+      </div>
     {/each}
   </div>
   <Spinner />

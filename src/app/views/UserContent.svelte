@@ -1,7 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {pluck, identity} from "ramda"
-  import {fly} from "src/util/transition"
   import {Tags} from "src/util/nostr"
   import {toast, appName} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
@@ -49,7 +48,7 @@
   document.title = "Content Preferences"
 </script>
 
-<form on:submit|preventDefault={submit} in:fly={{y: 20}}>
+<form on:submit|preventDefault={submit}>
   <Content>
     <div class="mb-4 flex flex-col items-center justify-center">
       <Heading>Content Settings</Heading>
@@ -75,7 +74,8 @@
         </div>
         <Input type="range" bind:value={settings.min_wot_score} min={0} max={100} />
         <p slot="info">
-          Select a minimum <Anchor theme="anchor" modal href="/help/web-of-trust">web-of-trust</Anchor>
+          Select a minimum <Anchor theme="anchor" modal href="/help/web-of-trust"
+            >web-of-trust</Anchor>
           score. Notes from accounts with a lower score will be automatically hidden.
         </p>
       </Field>

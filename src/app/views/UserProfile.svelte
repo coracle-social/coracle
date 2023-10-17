@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {fly} from "src/util/transition"
   import Input from "src/partials/Input.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Textarea from "src/partials/Textarea.svelte"
@@ -29,7 +28,7 @@
   document.title = "Profile"
 </script>
 
-<form on:submit|preventDefault={submit} in:fly={{y: 20}}>
+<form on:submit|preventDefault={submit}>
   <Content>
     <div class="mb-4 flex flex-col items-center justify-center">
       <Heading>About You</Heading>

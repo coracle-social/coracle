@@ -2,6 +2,7 @@
   import {onMount} from "svelte"
   import {defer} from "hurdak"
   import {isMobile} from "src/util/html"
+  import {fly} from "src/util/transition"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
@@ -23,6 +24,8 @@
   {#await promise}
     <Spinner />
   {:then note}
-    <Note showLoading anchorId={note.id} {note} {depth} {relays} {context} />
+    <div in:fly={{y: 20}}>
+      <Note showLoading anchorId={note.id} {note} {depth} {relays} {context} />
+    </div>
   {/await}
 </Content>

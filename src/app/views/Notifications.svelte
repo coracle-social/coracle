@@ -1,7 +1,6 @@
 <script lang="ts">
   import {find, assocPath} from "ramda"
   import {onMount} from "svelte"
-  import {fly} from "src/util/transition"
   import {now, createScroller, formatTimestampAsDate} from "src/util/misc"
   import {noteKinds, reactionKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
@@ -30,7 +29,7 @@
 
   export let activeTab = tabs[0]
 
-  let limit = 5
+  let limit = 4
 
   $: tabKinds = activeTab === tabs[0] ? noteKinds : reactionKinds.concat(9734)
 
@@ -55,7 +54,7 @@
     })
 
     const scroller = createScroller(async () => {
-      limit += 5
+      limit += 4
     })
 
     return () => {
@@ -65,26 +64,24 @@
   })
 </script>
 
-<div in:fly={{y: 20, delay: 500}}>
-  <Content>
-    <Tabs {tabs} {activeTab} {setActiveTab} />
-    {#each tabNotifications as notification, i (notification.key)}
-      {@const lineText = getLineText(i)}
-      {#if lineText}
-        <div class="flex items-center gap-4">
-          <small class="whitespace-nowrap text-gray-1">{lineText}</small>
-          <div class="h-px w-full bg-gray-6" />
-        </div>
-      {/if}
-      {#if !notification.event}
-        <NotificationMention {notification} />
-      {:else if activeTab === tabs[0]}
-        <NotificationReplies {notification} />
-      {:else}
-        <NotificationReactions {notification} />
-      {/if}
+<Content>
+  <Tabs {tabs} {activeTab} {setActiveTab} />
+  {#each tabNotifications as notification, i (notification.key)}
+    {@const lineText = getLineText(i)}
+    {#if lineText}
+      <div class="flex items-center gap-4">
+        <small class="whitespace-nowrap text-gray-1">{lineText}</small>
+        <div class="h-px w-full bg-gray-6" />
+      </div>
+    {/if}
+    {#if !notification.event}
+      <NotificationMention {notification} />
+    {:else if activeTab === tabs[0]}
+      <NotificationReplies {notification} />
     {:else}
-      <Content size="lg" class="text-center">No notifications found - check back later!</Content>
-    {/each}
-  </Content>
-</div>
+      <NotificationReactions {notification} />
+    {/if}
+  {:else}
+    <Content size="lg" class="text-center">No notifications found - check back later!</Content>
+  {/each}
+</Content>

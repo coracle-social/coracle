@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {fly} from "src/util/transition"
   import {stringToHue, hsl} from "src/util/misc"
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
@@ -18,8 +17,7 @@
 
 <div
   class="flex flex-col justify-between gap-3 rounded-xl border border-l-2 border-solid border-gray-6 bg-gray-8 px-6 py-3 shadow"
-  style={`border-left-color: ${hsl(stringToHue(relay.url))}`}
-  in:fly={{y: 20}}>
+  style={`border-left-color: ${hsl(stringToHue(relay.url))}`}>
   <div class="flex items-center justify-between gap-2">
     <div class="flex min-w-0 items-center gap-2 text-xl">
       <i class={relay.url.startsWith("ws://") ? "fa fa-unlock" : "fa fa-lock"} />
@@ -32,7 +30,7 @@
         <RelayStatus {relay} />
       {/if}
       {#if rating}
-        <div class="px-4 text-sm" in:fly={{y: 20}}>
+        <div class="px-4 text-sm">
           <Rating inert value={rating} />
         </div>
       {/if}

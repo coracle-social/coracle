@@ -1,7 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
   import {createEventDispatcher} from "svelte"
-  import {fly} from "src/util/transition"
 
   export let interactive = false
   export let stopPropagation = false
@@ -35,7 +34,6 @@
 </script>
 
 <div
-  in:fly={{y: 20}}
   on:mousedown={startClick}
   on:touchstart={startClick}
   on:click={onClick}

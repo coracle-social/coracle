@@ -2,8 +2,8 @@
   import {partition, reject, propEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, batch} from "hurdak"
-  import {LOCAL_RELAY_URL, Tags, findRootId, isChildOf, findReplyId, isLike} from "src/util/nostr"
   import {fly} from "src/util/transition"
+  import {LOCAL_RELAY_URL, Tags, findRootId, isChildOf, findReplyId, isLike} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -57,7 +57,6 @@
   let collapsed = depth === 0
   let ctx = uniqBy(prop("id"), context)
 
-  const {ENABLE_ZAPS} = $env
   const showEntire = anchorId === event.id
   const interactive = !anchorId || !showEntire
 
@@ -128,7 +127,7 @@
   onMount(async () => {
     const zapAddress = Tags.from(note).getMeta("zap")
 
-    if (zapAddress) {
+    if (zapAddress && getLnUrl(zapAddress)) {
       zapper = await getZapper(getLnUrl(zapAddress))
     } else {
       unsubZapper = people.key(note.pubkey).subscribe($p => {
@@ -148,7 +147,7 @@
 
       const kinds = [1, 7]
 
-      if (ENABLE_ZAPS) {
+      if ($env.ENABLE_ZAPS) {
         kinds.push(9735)
       }
 
@@ -284,41 +283,42 @@
         {#if !showEntire && replies.length > visibleReplies.length}
           <button class="ml-5 cursor-pointer py-2 text-gray-1 outline-0" on:click={onClick}>
             <i class="fa fa-up-down pr-2 text-sm" />
-            Show {quantify(
-              replies.length - visibleReplies.length,
-              "other reply",
-              "more replies"
-            )}
+            Show {quantify(replies.length - visibleReplies.length, "other reply", "more replies")}
           </button>
           <div class="absolute -left-4 -top-2 h-14 w-px bg-gray-6" />
         {:else if visibleReplies.length > 0 || showHiddenReplies}
           <div class="absolute -left-4 -top-2 h-4 w-px bg-gray-6" />
         {/if}
-        {#each visibleReplies as r, i (r.id)}
-          <svelte:self
-            isLastReply={!showMutedReplies && i === visibleReplies.length - 1}
-            showParent={false}
-            showMuted
-            note={r}
-            depth={depth - 1}
-            context={ctx}
-            {anchorId} />
-        {/each}
+        {#if visibleReplies.length}
+          <div in:fly={{y: 20}}>
+            {#each visibleReplies as r, i (r.id)}
+              <svelte:self
+                isLastReply={!showMutedReplies && i === visibleReplies.length - 1}
+                showParent={false}
+                showMuted
+                note={r}
+                depth={depth - 1}
+                context={ctx}
+                {anchorId} />
+            {/each}
+          </div>
+        {/if}
         {#if showHiddenReplies}
-          {#each hiddenReplies as r, i (r.id)}
-            <svelte:self
-              isLastReply={i === hiddenReplies.length - 1}
-              showParent={false}
-              showMuted
-              note={r}
-              depth={depth - 1}
-              context={ctx}
-              {anchorId} />
-          {/each}
+          <div in:fly={{y: 20}}>
+            {#each hiddenReplies as r, i (r.id)}
+              <svelte:self
+                isLastReply={i === hiddenReplies.length - 1}
+                showParent={false}
+                showMuted
+                note={r}
+                depth={depth - 1}
+                context={ctx}
+                {anchorId} />
+            {/each}
+          </div>
         {:else if showEntire && hiddenReplies.length > 0}
           <button
             class="ml-5 cursor-pointer py-2 text-gray-1 outline-0"
-            in:fly={{y: 20}}
             on:click={() => {
               showMutedReplies = true
             }}>

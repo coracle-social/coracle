@@ -5,7 +5,6 @@
   import {tryJson, displayDomain, pushToKey} from "src/util/misc"
   import {copyToClipboard} from "src/util/html"
   import {Tags} from "src/util/nostr"
-  import {fly} from "src/util/transition"
   import {toast} from "src/partials/state"
   import Image from "src/partials/Image.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -102,56 +101,58 @@
   document.title = "Apps"
 </script>
 
-<div in:fly={{y: 20}}>
-  <div class="flex flex-col gap-12 p-4">
-    <div class="flex flex-col items-center justify-center">
-      <Heading>Recommended micro-apps</Heading>
-      <p>Hand-picked recommendations to enhance your nostr experience.</p>
-    </div>
-    <div class="columns-sm gap-4">
-      {#each getColumns(apps) as app (app.id)}
-        <Card class="mb-4 flex break-inside-avoid flex-col gap-4">
-          <div class="flex gap-4">
-            <ImageCircle class="h-14 w-14" src={app.profile.picture} />
-            <div class="flex min-w-0 flex-grow flex-col">
-              <h1 class="text-2xl">{app.profile.display_name || app.profile.name}</h1>
-              {#if app.handle}
-                <span class="text-gray-3">{displayHandle(app.handle)}</span>
-              {/if}
-            </div>
-          </div>
-          <p>{app.profile.about}</p>
-          <div>
-            {#if app.profile.website}
-              <Anchor external href={app.profile.website} class="mb-2 mr-2 inline-block">
-                <Chip><i class="fa fa-link" />{displayDomain(app.profile.website)}</Chip>
-              </Anchor>
-            {/if}
-            {#if app.profile.lud16}
-              <Anchor class="mb-2 mr-2 inline-block cursor-pointer" on:click={() => copy("Address", app.profile.lud16)}>
-                <Chip>
-                  <i class="fa fa-bolt" />{app.profile.lud16}
-                </Chip>
-              </Anchor>
-            {/if}
-            {#if app.profile.nip05}
-              <Anchor class="mb-2 mr-2 inline-block cursor-pointer" on:click={() => goToNip05(app.profile.nip05)}>
-                <Chip>
-                  <i class="fa fa-at" />{app.profile.nip05}
-                </Chip>
-              </Anchor>
+<div class="flex flex-col gap-12 p-4">
+  <div class="flex flex-col items-center justify-center">
+    <Heading>Recommended micro-apps</Heading>
+    <p>Hand-picked recommendations to enhance your nostr experience.</p>
+  </div>
+  <div class="columns-sm gap-4">
+    {#each getColumns(apps) as app (app.id)}
+      <Card class="mb-4 flex break-inside-avoid flex-col gap-4">
+        <div class="flex gap-4">
+          <ImageCircle class="h-14 w-14" src={app.profile.picture} />
+          <div class="flex min-w-0 flex-grow flex-col">
+            <h1 class="text-2xl">{app.profile.display_name || app.profile.name}</h1>
+            {#if app.handle}
+              <span class="text-gray-3">{displayHandle(app.handle)}</span>
             {/if}
           </div>
-          {#if app.recs.length > 0}
-            <i class="text-sm">
-              Recommended by {quantify(app.recs.length, "person", "people")} you follow.
-            </i>
+        </div>
+        <p>{app.profile.about}</p>
+        <div>
+          {#if app.profile.website}
+            <Anchor external href={app.profile.website} class="mb-2 mr-2 inline-block">
+              <Chip><i class="fa fa-link" />{displayDomain(app.profile.website)}</Chip>
+            </Anchor>
           {/if}
-          {#if app.profile.banner}
-            <Image class="rounded" src={app.profile.banner} />
+          {#if app.profile.lud16}
+            <Anchor
+              class="mb-2 mr-2 inline-block cursor-pointer"
+              on:click={() => copy("Address", app.profile.lud16)}>
+              <Chip>
+                <i class="fa fa-bolt" />{app.profile.lud16}
+              </Chip>
+            </Anchor>
           {/if}
-        </Card>
-      {/each}
-    </div>
+          {#if app.profile.nip05}
+            <Anchor
+              class="mb-2 mr-2 inline-block cursor-pointer"
+              on:click={() => goToNip05(app.profile.nip05)}>
+              <Chip>
+                <i class="fa fa-at" />{app.profile.nip05}
+              </Chip>
+            </Anchor>
+          {/if}
+        </div>
+        {#if app.recs.length > 0}
+          <i class="text-sm">
+            Recommended by {quantify(app.recs.length, "person", "people")} you follow.
+          </i>
+        {/if}
+        {#if app.profile.banner}
+          <Image class="rounded" src={app.profile.banner} />
+        {/if}
+      </Card>
+    {/each}
   </div>
 </div>

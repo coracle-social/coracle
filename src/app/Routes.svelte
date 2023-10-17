@@ -1,5 +1,6 @@
 <script lang="ts">
   import {reverse} from "ramda"
+  import {fly} from "src/util/transition"
   import type {HistoryItem} from "src/util/router"
   import {decodeQueryString, decodeRouteParams} from "src/util/router"
   import Modal from "src/partials/Modal.svelte"
@@ -31,7 +32,9 @@
 <div class="pt-16 text-gray-2 lg:ml-48" class:pointer-events-none={$menuIsOpen}>
   {#if $page}
     {#key $page.path}
-      <svelte:component this={$page.route.component} {...getProps($page)} />
+      <div in:fly={{y: 20}}>
+        <svelte:component this={$page.route.component} {...getProps($page)} />
+      </div>
     {/key}
   {/if}
 </div>

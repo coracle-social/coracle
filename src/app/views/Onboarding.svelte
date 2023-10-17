@@ -2,7 +2,6 @@
   import {onMount} from "svelte"
   import {generatePrivateKey} from "nostr-tools"
   import {closure, sleep} from "hurdak"
-  import {fly} from "src/util/transition"
   import Content from "src/partials/Content.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
@@ -95,21 +94,19 @@
 </script>
 
 {#key stage}
-  <div in:fly={{y: 20}}>
-    <Content size="lg">
-      {#if stage === "intro"}
-        <OnboardingIntro {setStage} />
-      {:else if stage === "profile"}
-        <OnboardingProfile {setStage} {profile} />
-      {:else if stage === "key"}
-        <OnboardingKey {setStage} {privkey} />
-      {:else if stage === "relays"}
-        <OnboardingRelays {setStage} bind:relays />
-      {:else if stage === "follows"}
-        <OnboardingFollows {setStage} bind:petnames />
-      {:else if stage === "note"}
-        <OnboardingNote {setStage} {signup} />
-      {/if}
-    </Content>
-  </div>
+  <Content size="lg">
+    {#if stage === "intro"}
+      <OnboardingIntro {setStage} />
+    {:else if stage === "profile"}
+      <OnboardingProfile {setStage} {profile} />
+    {:else if stage === "key"}
+      <OnboardingKey {setStage} {privkey} />
+    {:else if stage === "relays"}
+      <OnboardingRelays {setStage} bind:relays />
+    {:else if stage === "follows"}
+      <OnboardingFollows {setStage} bind:petnames />
+    {:else if stage === "note"}
+      <OnboardingNote {setStage} {signup} />
+    {/if}
+  </Content>
 {/key}

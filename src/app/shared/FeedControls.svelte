@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {fly} from "src/util/transition"
   import {pluck, not, find, propEq, prop, equals, omit, objOf} from "ramda"
   import {displayList} from "hurdak"
   import {debounce} from "throttle-debounce"
@@ -204,7 +203,7 @@
   }
 </script>
 
-<div in:fly={{y: 20}}>
+<div>
   <div class="float-right flex justify-end gap-1">
     <div class="flex items-center gap-1">
       <Toggle scale={0.6} value={!$hideReplies} on:change={toggleReplies} />

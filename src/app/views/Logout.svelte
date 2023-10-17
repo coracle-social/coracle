@@ -26,7 +26,7 @@
   {#if confirmed}
     <div in:fly={{y: 20}}>Clearing your local database...</div>
   {:else}
-    <div class="flex flex-col items-center gap-8" in:fly={{y: 20}}>
+    <div class="flex flex-col items-center gap-8">
       <div>Are you sure you want to log out? All data will be cleared.</div>
       <Anchor theme="button" on:click={confirm}>Log out</Anchor>
     </div>
