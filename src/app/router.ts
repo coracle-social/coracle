@@ -126,6 +126,8 @@ router.extend("media", encodeURIComponent)
 router.extend("notes", (id, {relays = []} = {}) =>
   relays ? nip19.neventEncode({id, relays}) : nip19.noteEncode(id)
 )
-router.extend("people", pubkey => nip19.nprofileEncode({pubkey, relays: getPubkeyHints(pubkey)}))
+router.extend("people", (pubkey, {relays = []} = {}) =>
+  nip19.nprofileEncode({pubkey, relays: relays.concat(getPubkeyHints(pubkey))})
+)
 router.extend("relays", nip19.nrelayEncode)
 router.extend("channels", getNip24ChannelId)

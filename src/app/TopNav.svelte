@@ -2,6 +2,7 @@
   import cx from "classnames"
   import {identity, map} from "ramda"
   import {tryFunc} from "hurdak"
+  import {throttle} from "throttle-debounce"
   import {nip05, nip19} from "nostr-tools"
   import {onMount} from "svelte"
   import {fuzzy} from "src/util/misc"
@@ -50,6 +51,7 @@
   const hideSearch = () => {
     term = ""
     searchIsOpen = false
+    scanner?.stop()
   }
 
   const showScan = () => {
@@ -67,31 +69,39 @@
     router.at("people").of(pubkey).open()
   }
 
-  const tryParseEntity = async entity => {
-    entity = fromNostrURI(entity)
+  const tryParseEntity = throttle(
+    500,
+    async entity => {
+      entity = fromNostrURI(entity)
 
-    if (entity.length < 5) {
-      return
-    }
-
-    if (isHex(entity)) {
-      router.at("people").of(entity).open()
-      hideSearch()
-    } else if (entity.includes("@")) {
-      let profile = await nip05.queryProfile(entity)
-
-      if (profile) {
-        router.at("people").of(nip19.nprofileEncode(profile)).open()
-        hideSearch()
+      if (entity.length < 5) {
+        return
       }
-    } else {
-      tryFunc(() => {
-        nip19.decode(entity)
-        router.at(entity).open()
+
+      if (isHex(entity)) {
+        router.at("people").of(entity).open()
         hideSearch()
-      })
+      } else if (entity.includes("@")) {
+        let profile = await nip05.queryProfile(entity)
+
+        if (profile) {
+          const {pubkey, relays} = profile
+
+          router.at("people").of(pubkey, {relays}).open()
+          hideSearch()
+        }
+      } else {
+        tryFunc(() => {
+          nip19.decode(entity)
+          router.at(entity).open()
+          hideSearch()
+        })
+      }
+    },
+    {
+      noTrailing: true,
     }
-  }
+  )
 
   const topicOptions = topics.derived(
     map((topic: Topic) => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
