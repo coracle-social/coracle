@@ -278,14 +278,20 @@
         ctx = [e.detail, ...ctx]
       }} />
 
-    {#if visibleReplies.length > 0 || hiddenReplies.length > 0}
+    {#if visibleReplies.length > 0 || (showEntire && hiddenReplies.length > 0)}
       <div class="note-children relative ml-8 mt-2 flex flex-col">
-        {#if !showEntire && replies.length > visibleReplies.length}
+        {#if !showEntire && unmutedReplies.length > visibleReplies.length}
           <button class="ml-5 cursor-pointer py-2 text-gray-1 outline-0" on:click={onClick}>
             <i class="fa fa-up-down pr-2 text-sm" />
-            Show {quantify(replies.length - visibleReplies.length, "other reply", "more replies")}
+            Show {quantify(
+              unmutedReplies.length - visibleReplies.length,
+              "other reply",
+              "more replies"
+            )}
           </button>
-          <div class="absolute -left-4 -top-2 h-14 w-px bg-gray-6" />
+          {#if visibleReplies.length || showHiddenReplies}
+            <div class="absolute -left-4 -top-2 h-14 w-px bg-gray-6" />
+          {/if}
         {:else if visibleReplies.length > 0 || showHiddenReplies}
           <div class="absolute -left-4 -top-2 h-4 w-px bg-gray-6" />
         {/if}
