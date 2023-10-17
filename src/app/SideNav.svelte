@@ -40,7 +40,7 @@
     {/if}
   </NavItem>
   {#if $canUseGiftWrap}
-    <NavItem href="/channels">
+    <NavItem disabled={!$canSign} href="/channels">
       <i class="fa fa-envelope mr-2" /> Messages
       {#if $hasNewNip24Messages || $hasNewNip04Messages}
         <div

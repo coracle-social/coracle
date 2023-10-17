@@ -32,43 +32,51 @@ projections.addHandler(EventKind.AppData, async e => {
   const nip04 = getNip04(session)
 
   if (d === appDataKeys.NIP04_LAST_CHECKED) {
-    channels.mapStore.updateAsync(async $channels => {
-      await tryJson(async () => {
-        const payload = JSON.parse(await nip04.decryptAsUser(e.content, e.pubkey))
+    const payload = tryJson(async () => JSON.parse(await nip04.decryptAsUser(e.content, e.pubkey)))
 
-        for (const [id, ts] of Object.entries(payload) as [string, number][]) {
-          // Ignore weird old stuff
-          if (id === "undefined" || id.includes("/")) {
-            continue
-          }
+    if (payload) {
+      const updates = {}
 
-          const channel =
-            $channels.get(id) ||
-            ({
-              id,
-              type: "nip04",
-              relays: getEventHints(e),
-              messages: [],
-            } as Channel)
-
-          $channels.set(id, {
-            ...channel,
-            last_checked: Math.max(ts, channel.last_checked || 0),
-          })
-
-          // No need to lock up the UI decrypting a bunch of stuff
-          await sleep(16)
+      for (const [id, ts] of Object.entries(payload) as [string, number][]) {
+        // Ignore weird old stuff
+        if (id === "undefined" || id.includes("/")) {
+          continue
         }
-      })
 
-      return $channels
-    })
+        const channel =
+          channels.key(id).get() ||
+          ({
+            id,
+            type: "nip04",
+            relays: getEventHints(e),
+            messages: [],
+          } as Channel)
+
+        updates[id] = {
+          ...channel,
+          last_checked: Math.max(ts, channel.last_checked || 0),
+        }
+
+        // No need to lock up the UI decrypting a bunch of stuff
+        await sleep(16)
+      }
+
+      channels.mapStore.update($channels => {
+        for (const [k, v] of Object.entries(updates)) {
+          $channels.set(k, v as Channel)
+        }
+
+        return $channels
+      })
+    }
   }
 
   if (d === appDataKeys.NIP24_LAST_CHECKED) {
-    await tryJson(async () => {
-      const payload = JSON.parse(await nip04.decryptAsUser(e.content, e.pubkey))
+    const payload = await tryJson(async () =>
+      JSON.parse(await nip04.decryptAsUser(e.content, e.pubkey))
+    )
 
+    if (payload) {
       channels.mapStore.update($channels => {
         for (const [id, ts] of Object.entries(payload) as [string, number][]) {
           const channel = $channels.get(id)
@@ -81,7 +89,7 @@ projections.addHandler(EventKind.AppData, async e => {
 
         return $channels
       })
-    })
+    }
   }
 })
 
