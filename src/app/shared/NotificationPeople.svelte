@@ -11,20 +11,23 @@
   export let actionText
 
   const pubkeys = uniq(pluck("pubkey", notification.interactions))
-
-  const showPerson = () => router.at("people").of(pubkeys[0]).open()
-  const showPeople = () => router.at("people/list").qp({pubkeys}).open()
 </script>
 
 {#if pubkeys.length === 1}
-  <Anchor on:click={showPerson} class="flex cursor-pointer items-center gap-2">
+  <Anchor
+    modal
+    href={router.at("people").of(pubkeys[0]).toString()}
+    class="flex cursor-pointer items-center gap-2">
     <PersonCircle class="h-6 w-6" pubkey={pubkeys[0]} />
     <PersonName class="font-bold" pubkey={pubkeys[0]} />
     <span>{actionText}.</span>
   </Anchor>
 {:else}
-  <div class="flex cursor-pointer gap-6" on:click={showPeople}>
+  <Anchor
+    modal
+    class="flex cursor-pointer gap-6"
+    href={router.at("people/list").qp({pubkeys}).toString()}>
     <PersonCircles class="h-6 w-6" pubkeys={pubkeys.slice(0, 8)} />
     <span>{pubkeys.length} people {actionText}.</span>
-  </div>
+  </Anchor>
 {/if}
