@@ -1,6 +1,6 @@
 import {uniqBy, identity, prop, sortBy} from "ramda"
 import {batch} from "hurdak"
-import {getIds, findReplyId, findRootId} from "src/util/nostr"
+import {LOCAL_RELAY_URL, getIds, findReplyId, findRootId} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {writable} from "src/engine/core/utils"
@@ -32,7 +32,7 @@ export class ThreadLoader {
 
     if (filteredIds.length > 0) {
       load({
-        relays: selectHints(this.relays),
+        relays: selectHints(this.relays).concat(LOCAL_RELAY_URL),
         filters: getIdFilters(filteredIds),
         onEvent: batch(300, (events: Event[]) => {
           this.addToThread(events)

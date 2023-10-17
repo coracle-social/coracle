@@ -1,5 +1,5 @@
-import {takeWhile, filter, identity, reject, path as getPath} from "ramda"
-import {first, filterVals} from "hurdak"
+import {takeWhile, filter, identity, mergeLeft, reject, path as getPath} from "ramda"
+import {first, filterVals, updateIn} from "hurdak"
 import type {ComponentType, SvelteComponentTyped} from "svelte"
 import {globalHistory} from "svelte-routing/src/history"
 import {pick} from "svelte-routing/src/utils"
@@ -84,6 +84,7 @@ type RouterExtensionParams = {
   path: string
   queryParams?: Record<string, any>
   context?: Record<string, any>
+  config?: Record<string, any>
 }
 
 class RouterExtension {
@@ -103,6 +104,10 @@ class RouterExtension {
 
   get context() {
     return this.params.context
+  }
+
+  get config() {
+    return this.params.config
   }
 
   of = (...args) => this.at(this.getId(...args))
@@ -127,10 +132,9 @@ class RouterExtension {
     return this.clone({queryParams: data})
   }
 
-  cx = context =>
-    this.clone({
-      context: filterVals(identity, {...this.context, ...context}),
-    })
+  cx = context => this.clone(updateIn("context", mergeLeft(context), this.params))
+
+  cg = config => this.clone(updateIn("config", mergeLeft(config), this.params))
 
   toString = () => {
     let path = this.path
@@ -146,8 +150,15 @@ class RouterExtension {
     return path
   }
 
-  go = (config = {}) =>
-    this.router.go(this.toString(), filterVals(identity, {...config, context: this.context}))
+  go = (newConfig = {}) => {
+    const config = filterVals(identity, {
+      ...this.config,
+      ...newConfig,
+      context: this.context,
+    })
+
+    this.router.go(this.toString(), config)
+  }
 
   push = (config = {}) => this.go(config)
 
@@ -256,7 +267,10 @@ export class Router {
   }
 
   from(historyItem) {
-    return this.at(first(historyItem.path.split("?"))).qp(decodeQueryString(historyItem))
+    const path = first(historyItem.path.split("?"))
+    const params = decodeQueryString(historyItem)
+
+    return this.at(path).qp(params).cg(historyItem.config)
   }
 
   fromCurrent() {

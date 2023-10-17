@@ -14,7 +14,7 @@ import {
 } from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
 import {now, race, pushToKey} from "src/util/misc"
-import {findReplyId, noteKinds, reactionKinds} from "src/util/nostr"
+import {findReplyId, noteKinds, reactionKinds, LOCAL_RELAY_URL} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {isEventMuted} from "src/engine/events/derived"
@@ -107,7 +107,7 @@ export class FeedLoader {
     const parentIds = reject(this.isEventMuted, notes).map(findReplyId).filter(identity)
 
     load({
-      relays: this.opts.relays,
+      relays: this.opts.relays.concat(LOCAL_RELAY_URL),
       filters: getIdFilters(parentIds),
       onEvent: batch(100, events => {
         for (const e of this.discardEvents(events)) {

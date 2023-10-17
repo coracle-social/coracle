@@ -2,7 +2,7 @@
   import {partition, reject, propEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, batch} from "hurdak"
-  import {Tags, findRootId, isChildOf, findReplyId, isLike} from "src/util/nostr"
+  import {LOCAL_RELAY_URL, Tags, findRootId, isChildOf, findReplyId, isLike} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
@@ -136,7 +136,7 @@
 
     if (!event.pubkey) {
       event = await loadOne({
-        relays: selectHints(relays),
+        relays: selectHints(relays).concat(LOCAL_RELAY_URL),
         filters: getIdFilters([event.id]),
       })
     }
@@ -151,7 +151,7 @@
       }
 
       load({
-        relays: mergeHints([relays, getReplyHints(event)]),
+        relays: mergeHints([relays, getReplyHints(event)]).concat(LOCAL_RELAY_URL),
         filters: getReplyFilters([event], {kinds}),
         onEvent: batch(200, events => {
           ctx = uniqBy(prop("id"), ctx.concat(events))

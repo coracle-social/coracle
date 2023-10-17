@@ -28,6 +28,8 @@
 - [x] Add 32123 support to notes and music player
 - [x] Add support for zap splits
 - [x] Encode relays into urls when possible
+- [x] Opt-in to local relay when it's actually useful
+- [x] Fix link overflow when media previews are off
 
 # 0.3.10
 
