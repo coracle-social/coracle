@@ -1,10 +1,11 @@
 import {uniqBy, identity, prop, sortBy} from "ramda"
 import {batch} from "hurdak"
-import {LOCAL_RELAY_URL, getIds, findReplyId, findRootId} from "src/util/nostr"
+import {LOCAL_RELAY_URL, findReplyId, findRootId} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {writable} from "src/engine/core/utils"
 import {selectHints} from "src/engine/relays/utils"
+import {getIds} from "src/engine/events/utils"
 import {getIdFilters} from "./filters"
 import {load} from "./load"
 

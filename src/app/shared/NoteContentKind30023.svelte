@@ -68,7 +68,7 @@
   })
 </script>
 
-<div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
+<div class="flex flex-col gap-4 overflow-hidden text-ellipsis">
   <h3 class="staatliches text-2xl">{title}</h3>
   {#if summary && !showEntire}
     <p>{summary}</p>

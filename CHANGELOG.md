@@ -1,12 +1,15 @@
 # Changelog
 
+# 0.3.12
+
+- [x] Add support for kind 30311 (streams)
+
 # 0.3.11
 
 - [x] Re-write routing to make modal links persistent and handle history better
 - [x] Handle a tag replies
 - [x] Fix feed search
 - [x] Simplify card theme using css
-- [x] Make relay auth opt-in
 - [x] Fix notification badge for non-accepted conversations
 - [x] Add WoT help information
 - [x] Add WoT threshold setting
@@ -17,7 +20,7 @@
 - [x] Tighten up note actions on mobile
 - [x] Don't show cached notes on relay-specific feeds
 - [x] Allow copying note text without opening the note
-- [x] Use real links so cmd+click works
+- [x] Support cmd+click of certain links
 - [x] Add show/hide replies toggle to feeds
 - [x] Don't ruin gifs and webp uploads
 - [x] Normalize urls more robustly
@@ -26,13 +29,12 @@
 - [x] Fix load to actually return events
 - [x] Allow showing hidden replies
 - [x] Add 32123 support to notes and music player
-- [x] Add support for zap splits
+- [x] Add support for zap splits (wavlake version only)
 - [x] Encode relays into urls when possible
 - [x] Opt-in to local relay when it's actually useful
 - [x] Fix link overflow when media previews are off
 - [x] Speed things up by using animations more sparingly
 - [x] Fix DM view scrolling and formatting of messages with links
-
 # 0.3.10
 
 - [x] Use local relay on all requests

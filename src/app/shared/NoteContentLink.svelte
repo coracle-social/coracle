@@ -22,12 +22,16 @@
   <Anchor
     modal
     stopPropagation
-    class="underline overflow-hidden text-ellipsis whitespace-nowrap"
+    class="overflow-hidden text-ellipsis whitespace-nowrap underline"
     href={router.at("media").of(value.url).toString()}>
     {displayUrl(value.url)}
   </Anchor>
 {:else}
-  <Anchor external stopPropagation class="underline overflow-hidden text-ellipsis whitespace-nowrap" href={value.url}>
+  <Anchor
+    external
+    stopPropagation
+    class="overflow-hidden text-ellipsis whitespace-nowrap underline"
+    href={value.url}>
     {displayUrl(value.url)}
   </Anchor>
 {/if}

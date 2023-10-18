@@ -221,8 +221,7 @@
   router.init()
 
   // Globals
-
-  Object.assign(window, {
+  ;(window as any).g = {
     ...engine,
     nip19,
     bech32ToHex,
@@ -230,7 +229,7 @@
     router,
     getPublicKey,
     generatePrivateKey,
-  })
+  }
 
   // Theme
 

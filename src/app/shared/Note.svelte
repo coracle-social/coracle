@@ -3,7 +3,7 @@
   import {onMount, onDestroy} from "svelte"
   import {quantify, batch} from "hurdak"
   import {fly} from "src/util/transition"
-  import {LOCAL_RELAY_URL, Tags, findRootId, isChildOf, findReplyId, isLike} from "src/util/nostr"
+  import {LOCAL_RELAY_URL, Tags, findRootId, findReplyId, isLike} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -34,6 +34,7 @@
     mergeHints,
     loadPubkeys,
     sortEventsDesc,
+    isChildOf,
   } from "src/engine"
 
   export let note

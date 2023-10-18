@@ -32,7 +32,7 @@
     scroller.stop()
   })
 
-  const scrollToBottom = () => container.childNodes[0].scrollIntoView({behavior: "smooth"})
+  const scrollToBottom = () => container.scrollIntoView({behavior: "smooth", block: "end"})
 
   const stickToBottom = async () => {
     const lastMessage = pluck("created_at", groupedMessages).reduce(max, 0)

@@ -4,13 +4,14 @@ import {doPipe, defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"
 import {now} from "src/util/misc"
 import {parseContent} from "src/util/notes"
-import {Tags, isReplaceable, getNaddr, findRoot, findReply} from "src/util/nostr"
+import {Tags, findRoot, findReply} from "src/util/nostr"
 import type {Event, NostrEvent} from "src/engine/events/model"
 import {people} from "src/engine/people/state"
 import {displayPerson} from "src/engine/people/utils"
 import {getUserRelayUrls, getEventHint, getPubkeyHint} from "src/engine/relays/utils"
 import {signer} from "src/engine/session/derived"
 import {projections} from "src/engine/core/projections"
+import {Naddr, isReplaceable} from "src/engine/events/utils"
 import {getUrls, getExecutor} from "./executor"
 
 export type PublisherOpts = {
@@ -195,7 +196,7 @@ export const getReplyTags = (parent: Event, inherit = false) => {
   ])
 
   if (isReplaceable(parent)) {
-    extra.push(["a", getNaddr(parent), hint, "reply"])
+    extra.push(Naddr.fromEvent(parent).asTag("reply"))
   }
 
   return [mention(parent.pubkey), root, ...extra, reply]

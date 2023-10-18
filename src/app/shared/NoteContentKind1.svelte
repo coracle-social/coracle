@@ -41,7 +41,7 @@
   export const isStartOrEnd = i => isNewline(i - 1) || isNewline(i + 1)
 </script>
 
-<div class="flex max-w-full flex-col gap-2 overflow-hidden text-ellipsis">
+<div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
   <p>
     {#each shortContent as { type, value }, i}
       {#if type === NEWLINE}

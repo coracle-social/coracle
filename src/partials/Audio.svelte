@@ -52,7 +52,7 @@
 <div class="flex items-center gap-2" on:click|stopPropagation>
   <div
     class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-accent"
-    on:click|stopPropagation={controller.toggle}>
+    on:click={controller.toggle}>
     {#if playing}
       <i class="fa fa-pause" />
     {:else}
@@ -62,7 +62,7 @@
   <div
     class="flex h-2 flex-grow cursor-pointer overflow-hidden rounded-full bg-gray-6"
     bind:this={visualizer}
-    on:click|stopPropagation={setAudioPosition}>
+    on:click={setAudioPosition}>
     <div class="inline-block h-2 bg-accent" />
   </div>
 </div>

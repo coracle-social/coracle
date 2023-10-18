@@ -6,6 +6,7 @@ import {cached} from "src/util/lruCache"
 import {env, pubkey} from "src/engine/session/state"
 import {follows, network} from "src/engine/people/derived"
 import {mergeHints, getPubkeyHints} from "src/engine/relays/utils"
+import {Naddr} from "src/engine/events/utils"
 import type {DynamicFilter, Filter} from "../model"
 
 export const hasValidSignature = cached({
@@ -68,9 +69,7 @@ export const getIdFilters = values => {
 
   for (const value of values) {
     if (value.includes(":")) {
-      const [kind, pubkey, d] = value.split(":")
-
-      aFilters.push({kinds: [parseInt(kind)], authors: [pubkey], "#d": [d]})
+      aFilters.push(Naddr.fromTagValue(value).asFilter())
     } else {
       ids.push(value)
     }
