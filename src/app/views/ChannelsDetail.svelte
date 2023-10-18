@@ -70,8 +70,9 @@
   <div
     slot="message"
     let:message
-    class={cx("rounded-2xl px-4 py-2", {
-      "ml-12 justify-end rounded-br-none bg-gray-1 text-gray-8": message.pubkey === $session.pubkey,
+    class={cx("max-w-xl rounded-2xl px-4 py-2", {
+      "ml-12 justify-self-end rounded-br-none bg-gray-1 text-gray-8":
+        message.pubkey === $session.pubkey,
       "mr-12 rounded-bl-none bg-gray-7": message.pubkey !== $session.pubkey,
     })}>
     {#if message.showProfile && message.pubkey !== $session.pubkey}

@@ -98,7 +98,7 @@
         bind:this={container}
         class="flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
         {#each groupedMessages as m (m.id)}
-          <li in:fly={{y: 20}} class="flex flex-col gap-2 py-1">
+          <li in:fly={{y: 20}} class="grid gap-2 py-1">
             <slot name="message" message={m} />
           </li>
         {/each}

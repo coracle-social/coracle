@@ -270,7 +270,10 @@
   onMount(() => {
     const unsubPage = router.page.subscribe(
       memoize($page => {
-        logUsage(btoa($page.path))
+        if ($page) {
+          logUsage(btoa($page.path))
+        }
+
         window.scrollTo(0, 0)
       })
     )
@@ -349,8 +352,8 @@
   <!-- pass -->
 {:then}
   <div>
+    <Routes />
     {#key $stateKey}
-      <Routes />
       <ForegroundButtons />
       <SideNav />
       <TopNav />

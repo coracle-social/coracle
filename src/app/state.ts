@@ -123,7 +123,7 @@ export const boot = async () => {
       loadPubkeys([session.get().pubkey], {force: true, kinds: userKinds}),
     ])
 
-    router.at("notes").push()
+    router.at("notes").replace()
   } else {
     router.at("login/connect").open({noEscape: true})
   }

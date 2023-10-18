@@ -22,7 +22,7 @@ export const nip59 = derived(
   ([$session, $nip44, $signer]) => new Nip59($session, $nip44, $signer)
 )
 
-export const canSign = signer.derived($signer => $signer.canSign() && window.crypto.subtle)
+export const canSign = signer.derived($signer => $signer.canSign())
 
 export const canUseGiftWrap = session.derived($session => $session?.method === "privkey")
 

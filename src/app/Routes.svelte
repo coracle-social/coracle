@@ -5,6 +5,7 @@
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/router"
+  import {stateKey} from "src/engine"
 
   const {page, modal, modals} = router
 
@@ -22,15 +23,17 @@
   }
 </script>
 
-<div class="pt-16 text-gray-2 lg:ml-48" class:pointer-events-none={$menuIsOpen}>
-  {#if $page}
-    {#key $page.path}
-      <div in:fly={{y: 20}}>
-        <svelte:component this={$page.route.component} {...getProps($page)} />
-      </div>
-    {/key}
-  {/if}
-</div>
+{#key $stateKey}
+  <div class="pt-16 text-gray-2 lg:ml-48" class:pointer-events-none={$menuIsOpen}>
+    {#if $page}
+      {#key $page.path}
+        <div in:fly={{y: 20}}>
+          <svelte:component this={$page.route.component} {...getProps($page)} />
+        </div>
+      {/key}
+    {/if}
+  </div>
+{/key}
 
 {#each reverse($modals).filter(m => !m.config.virtual) as m, i (m.path + i)}
   <Modal
@@ -38,6 +41,8 @@
     virtual={false}
     isOnTop={m === $modal}
     onEscape={m.config.noEscape ? null : closeModal}>
-    <svelte:component this={m.route.component} {...getProps(m)} />
+    {#key $stateKey}
+      <svelte:component this={m.route.component} {...getProps(m)} />
+    {/key}
   </Modal>
 {/each}
