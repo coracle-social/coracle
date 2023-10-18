@@ -1,8 +1,7 @@
 <script lang="ts">
   import {reverse} from "ramda"
   import {fly} from "src/util/transition"
-  import type {HistoryItem} from "src/util/router"
-  import {decodeQueryString, decodeRouteParams} from "src/util/router"
+  import {getProps} from "src/util/router"
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/router"
@@ -14,16 +13,10 @@
     menuIsOpen.set(false)
   }
 
-  const getProps = (item: HistoryItem) => ({
-    ...decodeRouteParams(item),
-    ...decodeQueryString(item),
-    ...item.config.context,
-  })
-
   $: {
     if ($modal) {
       console.log("modal", $modal, getProps($modal))
-    } else {
+    } else if ($page) {
       console.log("page", $page, getProps($page))
     }
   }

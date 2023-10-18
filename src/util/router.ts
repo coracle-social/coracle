@@ -80,6 +80,12 @@ export const decodeRouteParams = ({params, route}: HistoryItem) => {
   return data
 }
 
+export const getProps = (item: HistoryItem) => ({
+  ...decodeRouteParams(item),
+  ...decodeQueryString(item),
+  ...item.config.context,
+})
+
 type RouterExtensionParams = {
   path: string
   queryParams?: Record<string, any>
