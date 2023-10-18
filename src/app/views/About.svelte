@@ -64,7 +64,10 @@
         <h3 class="text-center text-xl sm:h-12">Get in touch</h3>
         <p class="sm:h-24">Having problems? Let us know.</p>
         <div class="flex justify-center">
-          <Anchor theme="button-accent" href="https://github.com/coracle-social/coracle/issues/new">
+          <Anchor
+            external
+            theme="button-accent"
+            href="https://github.com/coracle-social/coracle/issues/new">
             Open an Issue
           </Anchor>
         </div>
