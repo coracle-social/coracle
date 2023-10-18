@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
   import {fade} from "src/util/transition"
+  import {getProps} from "src/util/router"
   import {canSign} from "src/engine"
   import ForegroundButton from "src/partials/ForegroundButton.svelte"
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
@@ -19,10 +19,18 @@
   }
 
   const createNote = () => {
-    const pubkeyMatch = $page.path.match(/(npub1[0-9a-z]+)/)
-    const pubkey = pubkeyMatch ? nip19.decode(pubkeyMatch[1]).data : null
+    const params = {} as any
+    const props = getProps($page) as any
 
-    router.at("notes/create").qp({pubkey}).open()
+    if ($page.path.startsWith("/people") && props.pubkey) {
+      params.pubkey = props.pubkey
+    }
+
+    if ($page.path.startsWith("/groups") && props.address) {
+      params.group = props.address
+    }
+
+    router.at("notes/create").qp(params).open()
   }
 
   $: showButtons = !$page?.path.match(/^\/conversations|channels|logout|settings/)

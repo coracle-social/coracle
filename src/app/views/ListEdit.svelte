@@ -1,6 +1,7 @@
 <script lang="ts">
   import {Tags} from "paravel"
   import {randomId} from "hurdak"
+  import {Naddr} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
@@ -10,7 +11,6 @@
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import {router} from "src/app/router"
   import {
-    Naddr,
     userLists,
     searchPeople,
     searchTopics,

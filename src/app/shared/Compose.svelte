@@ -2,7 +2,7 @@
   import {nip19} from "nostr-tools"
   import {debounce, throttle} from "throttle-debounce"
   import {createEventDispatcher} from "svelte"
-  import {last, partition, propEq} from "ramda"
+  import {last, partition, whereEq} from "ramda"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
@@ -244,8 +244,8 @@
     content = content.replace(/[\u200B\u00A0]/g, " ").trim()
 
     // Strip the @ sign in mentions
-    annotations.filter(propEq("prefix", "@")).forEach(({value}, index) => {
-      content = content.replace("@" + value, value)
+    annotations.filter(whereEq({prefix: "@"})).forEach(({prefix, value}, index) => {
+      content = content.replace(prefix + value, value)
     })
 
     return content

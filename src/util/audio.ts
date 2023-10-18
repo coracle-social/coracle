@@ -51,7 +51,7 @@ export class AudioController extends EventEmitter {
       this.audio.pause()
       this.emit("pause")
 
-      clearInterval(this.interval)
+      clearInterval(this.interval as unknown as number)
 
       this.interval = null
     }
@@ -66,7 +66,7 @@ export class AudioController extends EventEmitter {
   }
 
   cleanup() {
-    clearInterval(this.interval)
+    clearInterval(this.interval as unknown as number)
 
     this.hls?.destroy()
     this.audio.pause()

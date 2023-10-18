@@ -4,7 +4,7 @@ import {createMapOf} from "hurdak"
 import {now} from "paravel"
 import {appDataKeys} from "src/util/nostr"
 import {EventKind} from "src/engine/events/model"
-import {Publisher, publishEvent, mention} from "src/engine/network/utils"
+import {Publisher, createAndPublish, mention} from "src/engine/network/utils"
 import {getInboxHints, getPubkeyHints} from "src/engine/relays/utils"
 import {user, nip04, nip59} from "src/engine/session/derived"
 import {setAppData} from "src/engine/session/commands"
@@ -13,7 +13,7 @@ import {channels} from "./state"
 export const publishNip04Message = async (recipient, content, tags = [], relays = null) => {
   const pubkeys = [recipient, user.get().pubkey]
 
-  return publishEvent(EventKind.Nip04Message, {
+  return createAndPublish(EventKind.Nip04Message, {
     relays: relays || getInboxHints(pubkeys),
     content: await nip04.get().encryptAsUser(content, recipient),
     tags: [...tags, ["p", recipient]],

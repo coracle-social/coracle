@@ -1,6 +1,7 @@
 <script lang="ts">
   import {Tags} from "paravel"
   import {urlIsMedia} from "src/util/notes"
+  import {Naddr} from "src/util/nostr"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -8,13 +9,13 @@
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import {Naddr} from "src/engine"
+  import {getEventHints} from "src/engine"
 
   export let note
   export let showMedia = false
 
   const tags = Tags.from(note)
-  const naddr = Naddr.fromEvent(note).encode()
+  const naddr = Naddr.fromEvent(note, getEventHints(note)).encode()
   const {title, summary, image, status, p} = tags.getDict() as Record<string, string>
 </script>
 

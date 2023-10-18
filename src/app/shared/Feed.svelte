@@ -22,6 +22,7 @@
   export let relays = []
   export let filter: DynamicFilter = {}
   export let hideControls = false
+  export let showGroup = false
   export let noCache = false
   export let onEvent = null
 
@@ -101,6 +102,7 @@
           depth={$hideReplies ? 0 : 2}
           context={note.replies || []}
           filters={[compileFilter(filter)]}
+          {showGroup}
           {note} />
       </div>
     {/each}

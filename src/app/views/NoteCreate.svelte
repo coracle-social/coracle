@@ -1,9 +1,9 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
-  import {without} from "ramda"
-  import {throttle} from "hurdak"
-  import {writable} from "svelte/store"
+  import {without, identity, prop, uniqBy} from "ramda"
+  import {throttle, quantify} from "hurdak"
+  import {createEvent, Tags} from "paravel"
   import {annotateMedia} from "src/util/misc"
   import {asNostrEvent} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
@@ -11,30 +11,60 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import Media from "src/partials/Media.svelte"
   import Content from "src/partials/Content.svelte"
-  import Modal from "src/partials/Modal.svelte"
-  import Input from "src/partials/Input.svelte"
-  import Field from "src/partials/Field.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {Publisher, publishNote, displayRelay, getUserRelayUrls, mention} from "src/engine"
+  import NoteOptions from "src/app/shared/NoteOptions.svelte"
+  import {Publisher, mention} from "src/engine"
   import {toastProgress} from "src/app/state"
   import {router} from "src/app/router"
-  import {session, getEventHints, displayPubkey} from "src/engine"
+  import {
+    session,
+    getEventHints,
+    displayGroup,
+    groups,
+    getUserRelayUrls,
+    publishToZeroOrMoreGroups,
+  } from "src/engine"
 
   export let quote = null
   export let pubkey = null
-  export let writeTo: string[] | null = null
+  export let group = null
 
-  let q = ""
   let images = []
-  let warning = null
   let compose = null
   let wordCount = 0
   let showPreview = false
-  let showSettings = false
-  let relays = writable(writeTo ? writeTo : getUserRelayUrls("write"))
+  let defaultGroup = quote ? Tags.from(quote).getCommunity() : group
+  let options
+  let opts = {
+    warning: "",
+    groups: [defaultGroup].filter(identity),
+    relays: getUserRelayUrls("write"),
+    anonymous: false,
+    shouldWrap: true,
+  }
+
+  const setOpts = e => {
+    opts = {...opts, ...e.detail}
+  }
+
+  const groupOptions = session.derived($session => {
+    const options = []
+
+    for (const address of Object.keys($session.groups || {})) {
+      const group = groups.key(address).get()
+
+      if (group) {
+        options.push(group)
+      }
+    }
+
+    if (defaultGroup) {
+      options.push({address: defaultGroup})
+    }
+
+    return uniqBy(prop("address"), options)
+  })
 
   const onSubmit = async () => {
     const tags = []
@@ -44,23 +74,26 @@
       return
     }
 
-    if (warning) {
-      tags.push(["content-warning", warning])
+    if (opts.warning) {
+      tags.push(["content-warning", opts.warning])
     }
 
     if (quote) {
       tags.push(mention(quote.pubkey))
 
       // Re-broadcast the note we're quoting
-      Publisher.publish({
-        relays: $relays,
-        event: asNostrEvent(quote),
-      })
+      if (!opts.groups.length) {
+        Publisher.publish({
+          relays: opts.relays,
+          event: asNostrEvent(quote),
+        })
+      }
     }
 
-    const pub = await publishNote(content, tags, $relays)
+    const template = createEvent(1, {content, tags})
+    const pubs = await publishToZeroOrMoreGroups(opts.groups, template, opts)
 
-    pub.on("progress", toastProgress)
+    pubs[0].on("progress", toastProgress)
 
     router.clearModals()
   }
@@ -77,20 +110,6 @@
     compose.write(content.replace(url, ""))
 
     images = without([url], images)
-  }
-
-  const closeSettings = () => {
-    q = ""
-    showSettings = false
-  }
-
-  const saveRelay = url => {
-    q = ""
-    relays.update($r => $r.concat(url))
-  }
-
-  const removeRelay = url => {
-    relays.update(without([url]))
   }
 
   const togglePreview = () => {
@@ -121,7 +140,22 @@
     <Heading class="text-center">Create a note</Heading>
     <div class="flex w-full flex-col gap-4">
       <div class="flex flex-col gap-2">
-        <strong>What do you want to say?</strong>
+        <div class="flex items-center justify-between">
+          <strong>What do you want to say?</strong>
+          {#if $groupOptions.length > 0}
+            <div
+              class="flex items-center gap-2"
+              class:cursor-pointer={!quote?.group}
+              on:click={quote?.group ? null : options.setView("groups")}>
+              <i class="fa fa-circle-nodes" />
+              {#if opts.groups.length === 1}
+                {displayGroup(groups.key(opts.groups[0]).get())}
+              {:else if opts.groups.length > 1}
+                {quantify(opts.groups.length, "group")}
+              {/if}
+            </div>
+          {/if}
+        </div>
         <div
           class="mt-4 rounded-xl border border-solid border-gray-6 p-3"
           class:bg-input={!showPreview}
@@ -137,10 +171,6 @@
         <div class="flex items-center justify-end gap-2 text-gray-5">
           <small class="hidden sm:block">
             {wordCount} words
-          </small>
-          <span class="hidden sm:block">•</span>
-          <small>
-            Posting as @{displayPubkey($session.pubkey)}
           </small>
           <span>•</span>
           <small on:click={togglePreview} class="cursor-pointer underline">
@@ -164,53 +194,20 @@
       </div>
       <small
         class="flex cursor-pointer items-center justify-end gap-4"
-        on:click={() => {
-          showSettings = true
-        }}>
-        <span><i class="fa fa-server" /> {$relays.length}</span>
-        <span><i class="fa fa-warning" /> {warning || 0}</span>
+        on:click={() => options.setView("settings")}>
+        {#if opts.anonymous}
+          <span><i class="fa fa-user-secret" /></span>
+          <span>•</span>
+        {/if}
+        <span><i class="fa fa-server" /> {opts.relays?.length}</span>
+        <span><i class="fa fa-warning" /> {opts.warning || 0}</span>
       </small>
     </div>
   </Content>
 </form>
 
-{#if showSettings}
-  <Modal onEscape={closeSettings}>
-    <form on:submit|preventDefault={closeSettings}>
-      <Content>
-        <div class="mb-4 flex items-center justify-center">
-          <Heading>Note settings</Heading>
-        </div>
-        <Field icon="fa-warning" label="Content warnings">
-          <Input bind:value={warning} placeholder="Why might people want to skip this post?" />
-        </Field>
-        <div>Select which relays to publish to:</div>
-        <div>
-          {#each $relays as url}
-            <div
-              class="mb-2 mr-1 inline-block rounded-full border border-solid border-gray-1 px-2 py-1">
-              <button
-                type="button"
-                class="fa fa-times cursor-pointer"
-                on:click={() => removeRelay(url)} />
-              {displayRelay({url})}
-            </div>
-          {/each}
-        </div>
-        <RelaySearch bind:q limit={3} hideIfEmpty>
-          <div slot="item" let:relay>
-            <RelayCard {relay}>
-              <button
-                slot="actions"
-                class="underline"
-                on:click|preventDefault={() => saveRelay(relay.url)}>
-                Add relay
-              </button>
-            </RelayCard>
-          </div>
-        </RelaySearch>
-        <Anchor tag="button" theme="button" type="submit" class="w-full text-center">Done</Anchor>
-      </Content>
-    </form>
-  </Modal>
-{/if}
+<NoteOptions
+  bind:this={options}
+  on:change={setOpts}
+  initialValues={opts}
+  groupOptions={$groupOptions} />

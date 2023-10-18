@@ -1,11 +1,12 @@
 <script type="ts">
+  import {Naddr} from "src/util/nostr"
   import {appName} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
   import {router} from "src/app/router"
-  import {Naddr, userLists, publishDeletion} from "src/engine"
+  import {userLists, publishDeletion} from "src/engine"
 
   const createFeed = () => router.at("lists/create").open()
 

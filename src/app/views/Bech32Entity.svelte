@@ -1,9 +1,11 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
+  import {Naddr} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
+  import GroupDetail from "src/app/views/GroupDetail.svelte"
 
   export let entity, type, data, relays
 </script>
@@ -13,7 +15,11 @@
 {:else if type === "note"}
   <NoteDetail eid={data} {relays} />
 {:else if type === "naddr"}
-  <NoteDetail {...data} />
+  {#if data.kind === 34550}
+    <GroupDetail address={Naddr.decode(entity).asTagValue()} activeTab="notes" />
+  {:else}
+    <NoteDetail {...data} />
+  {/if}
 {:else if type === "nrelay"}
   <RelayDetail url={data} />
 {:else if type === "nprofile"}

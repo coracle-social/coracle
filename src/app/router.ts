@@ -3,8 +3,8 @@ import {fromNostrURI} from "paravel"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {tryJson} from "src/util/misc"
+import {Naddr} from "src/util/nostr"
 import {
-  Naddr,
   decodePerson,
   decodeRelay,
   decodeEvent,
@@ -119,6 +119,11 @@ export const asChannelId = {
   decode: decodeAs("pubkeys", decodeCsv),
 }
 
+export const asGroup = k => ({
+  encode: a => Naddr.fromTagValue(a).encode(),
+  decode: decodeAs(k, naddr => Naddr.decode(naddr).asTagValue()),
+})
+
 // Router and extensions
 
 export const router = new Router()
@@ -127,6 +132,7 @@ router.extend("media", encodeURIComponent)
 router.extend("labels", encodeURIComponent)
 router.extend("relays", nip19.nrelayEncode)
 router.extend("channels", getNip24ChannelId)
+router.extend("groups", asGroup("group").encode)
 
 router.extend("notes", (id, {relays = []} = {}) => {
   if (id.includes(":")) {

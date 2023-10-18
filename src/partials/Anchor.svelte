@@ -6,6 +6,7 @@
 
   export let stopPropagation = false
   export let external = false
+  export let disabled = false
   export let loading = false
   export let modal = false
   export let theme = "unstyled"
@@ -21,11 +22,8 @@
 
   $: className = cx(
     $$props.class,
-    "transition-all",
-    {
-      "opacity-50": loading,
-      "cursor-pointer": !loading,
-    },
+    "transition-all cursor-pointer",
+    {"opacity-50 pointer-events-none": loading || disabled},
     switcher(theme, {
       anchor: "underline",
       button:

@@ -1,10 +1,11 @@
 <script lang="ts">
-  import {filter, complement, prop} from "ramda"
+  import {filter} from "ramda"
   import {toTitle} from "hurdak"
   import Tabs from "src/partials/Tabs.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
   import MessagesListItem from "src/app/views/MessagesListItem.svelte"
+  import type {Channel} from "src/engine"
   import {
     nip04Channels,
     hasNewNip04Messages,
@@ -16,8 +17,8 @@
 
   const activeTab =
     window.location.pathname.slice(1) === "conversations" ? "conversations" : "requests"
-  const accepted = nip04Channels.derived(filter(prop("last_sent")))
-  const requests = nip04Channels.derived(filter(complement(prop("last_sent"))))
+  const accepted = nip04Channels.derived(filter((c: Channel) => Boolean(c.last_sent)))
+  const requests = nip04Channels.derived(filter((c: Channel) => !c.last_sent))
   const setActiveTab = tab => {
     const path = tab === "requests" ? "conversations/requests" : "conversations"
 
@@ -41,7 +42,7 @@
         </div>
       </div>
     </Tabs>
-    {#if activeTab === 'conversations'}
+    {#if activeTab === "conversations"}
       <Popover triggerType="mouseenter" class="absolute right-7 top-7 hidden sm:block">
         <div slot="trigger">
           <i

@@ -1,0 +1,67 @@
+<script lang="ts">
+  import Card from "src/partials/Card.svelte"
+  import Chip from "src/partials/Chip.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
+  import Content from "src/partials/Content.svelte"
+  import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
+  import {groupRequests} from "src/engine"
+  import {router} from "src/app/router"
+
+  export let address
+  export let request
+
+  const dismiss = () => groupRequests.key(request.id).merge({resolved: true})
+
+  const resolve = () => {
+    if (request.kind === 25) {
+      router
+        .at("groups")
+        .of(address)
+        .at("rotate")
+        .qp({addMembers: [request.pubkey]})
+        .open()
+    }
+
+    if (request.kind === 26) {
+      router
+        .at("groups")
+        .of(address)
+        .at("rotate")
+        .qp({removeMembers: [request.pubkey]})
+        .open()
+    }
+  }
+</script>
+
+<Card interactive>
+  <Content>
+    <div class="flex items-center justify-between">
+      <p class="text-xl">
+        {#if request.kind === 25}
+          Request to join
+        {:else if request.kind === 26}
+          Key rotation request
+        {/if}
+      </p>
+      <div class="hidden gap-2 sm:flex">
+        <Anchor on:click={dismiss} theme="button">Dismiss</Anchor>
+        <Anchor on:click={resolve} theme="button-accent">Resolve</Anchor>
+      </div>
+    </div>
+    <p class="border-l-2 border-solid border-gray-5 pl-2">
+      "{request.content}"
+    </p>
+    <p>
+      Resolving this request will
+      {#if request.kind === 25}
+        add <Chip><PersonBadgeSmall pubkey={request.pubkey} /></Chip> to the group.
+      {:else if request.kind === 26}
+        remove <Chip><PersonBadgeSmall pubkey={request.pubkey} /></Chip> from the group.
+      {/if}
+    </p>
+    <div class="flex gap-2 sm:hidden">
+      <Anchor on:click={dismiss} theme="button">Dismiss</Anchor>
+      <Anchor on:click={resolve} theme="button-accent">Resolve</Anchor>
+    </div>
+  </Content>
+</Card>

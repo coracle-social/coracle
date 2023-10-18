@@ -1,7 +1,7 @@
 export const updateRecord = (record, timestamp, updates) => {
   for (const [field, value] of Object.entries(updates)) {
     const tsField = `${field}_updated_at`
-    const lastUpdated = record?.[tsField] || 0
+    const lastUpdated = record?.[tsField] || -1
 
     if (timestamp > lastUpdated) {
       record = {

@@ -1,13 +1,23 @@
 <script lang="ts">
   import {Tags} from "paravel"
   import {createEventDispatcher} from "svelte"
-  import {without, uniq} from "ramda"
+  import {without, identity, uniq} from "ramda"
+  import {getGroupAddress, asNostrEvent} from "src/util/nostr"
   import {slide} from "src/util/transition"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"
   import Compose from "src/app/shared/Compose.svelte"
-  import {publishReply, session, displayPubkey, mention} from "src/engine"
+  import NoteOptions from "src/app/shared/NoteOptions.svelte"
+  import {
+    Publisher,
+    buildReply,
+    publishToZeroOrMoreGroups,
+    session,
+    getPublishHints,
+    displayPubkey,
+    mention,
+  } from "src/engine"
   import {toastProgress} from "src/app/state"
 
   export let parent
@@ -19,6 +29,14 @@
   let reply = null
   let container = null
   let draft = ""
+  let options
+  let opts = {
+    warning: "",
+    groups: parent.wrap ? [Tags.from(parent).getCommunity()] : [],
+    shouldWrap: Boolean(parent.wrap),
+    relays: getPublishHints(parent),
+    anonymous: false,
+  }
 
   export const start = () => {
     dispatch("start")
@@ -32,6 +50,10 @@
     }
 
     setTimeout(() => reply.write(draft))
+  }
+
+  const setOpts = e => {
+    opts = {...opts, ...e.detail}
   }
 
   const saveDraft = () => {
@@ -59,19 +81,31 @@
 
   const send = async () => {
     const content = getContent()
+
+    if (!content) {
+      return
+    }
+
     const tags = data.mentions.map(mention)
 
-    if (content) {
-      const pub = await publishReply(parent, content, tags)
-
-      dispatch("event", pub.event)
-
-      pub.on("progress", toastProgress)
-
-      clearDraft()
-
-      reset()
+    if (opts.warning) {
+      tags.push(["content-warning", opts.warning])
     }
+
+    // Re-broadcast the note we're replying to
+    if (!opts.shouldWrap) {
+      Publisher.publish({relays: opts.relays, event: asNostrEvent(parent)})
+    }
+
+    const template = buildReply(parent, content, tags)
+    const addresses = [getGroupAddress(parent)].filter(identity)
+    const pubs = await publishToZeroOrMoreGroups(addresses, template, opts)
+
+    pubs[0].on("progress", toastProgress)
+
+    clearDraft()
+
+    reset()
   }
 
   const onBodyClick = e => {
@@ -123,6 +157,7 @@
             <ImageInput bind:value={data.image}>
               <i slot="button" class="fa fa-paperclip" />
             </ImageInput>
+            <i class="fa fa-cog" on:click={() => options.setView("settings")} />
             <i class="fa fa-at" />
           </div>
         </div>
@@ -138,10 +173,7 @@
         </div>
       </div>
     </div>
-    <div class="flex justify-end gap-2 text-sm text-gray-5">
-      <span>
-        Posting as @{displayPubkey($session.pubkey)}
-      </span>
-    </div>
   </div>
 {/if}
+
+<NoteOptions bind:this={options} on:change={setOpts} initialValues={opts} showRelays={!opts.shouldWrap} />

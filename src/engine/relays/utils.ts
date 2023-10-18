@@ -1,13 +1,14 @@
 import {nip19} from "nostr-tools"
 import {Tags, isShareableRelay, normalizeRelayUrl as normalize, fromNostrURI} from "paravel"
-import {sortBy, pluck, uniq, nth, prop, last} from "ramda"
+import {sortBy, whereEq, pluck, uniq, nth, prop, last} from "ramda"
 import {chain, displayList, first} from "hurdak"
 import {fuzzy} from "src/util/misc"
-import {LOCAL_RELAY_URL} from "src/util/nostr"
+import {LOCAL_RELAY_URL, Naddr} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import {env} from "src/engine/session/state"
 import {stateKey} from "src/engine/session/derived"
 import {people} from "src/engine/people/state"
+import {groups, groupSharedKeys} from "src/engine/groups/state"
 import {pool} from "src/engine/network/state"
 import {getSetting} from "src/engine/session/utils"
 import type {Relay} from "./model"
@@ -68,6 +69,23 @@ export const getPubkeyRelayUrls = (pubkey: string, mode: string = null) =>
 export const getUserRelays = (mode: string = null) => getPubkeyRelays(stateKey.get(), mode)
 
 export const getUserRelayUrls = (mode: string = null) => pluck("url", getUserRelays(mode))
+
+export const getGroupRelayUrls = address => {
+  const group = groups.key(address).get()
+  const keys = groupSharedKeys.get()
+
+  if (group?.relays) {
+    return group.relays
+  }
+
+  const latestKey = last(sortBy(prop("created_at"), keys.filter(whereEq({group: address}))))
+
+  if (latestKey) {
+    return latestKey.hints
+  }
+
+  return []
+}
 
 // Smart relay selection
 //
@@ -188,6 +206,11 @@ export const getPublishHints = hintSelector(function* (event: Event) {
 
 export const getInboxHints = hintSelector(function* (pubkeys: string[]) {
   yield* mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read")))
+})
+
+export const getGroupHints = hintSelector(function* (address: string) {
+  yield* getGroupRelayUrls(address)
+  yield* getPubkeyHints(Naddr.fromTagValue(address).pubkey)
 })
 
 export const mergeHints = (groups: string[][], limit: number = null) => {

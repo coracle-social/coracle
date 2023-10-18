@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {pluck, reject, propEq} from "ramda"
+  import {pluck} from "ramda"
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -23,7 +23,7 @@
   }
 
   const removeRelay = relay => {
-    relays = reject(propEq("url", relay.url), relays)
+    relays = relays.filter(r => r.url !== relay.url)
   }
 
   $: joined = new Set(pluck("url", relays))

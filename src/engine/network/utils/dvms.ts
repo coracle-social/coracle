@@ -3,7 +3,7 @@ import {seconds} from "hurdak"
 import {generatePrivateKey} from "nostr-tools"
 import {getUserRelayUrls} from "src/engine/relays/utils"
 import type {Event} from "src/engine/events/model"
-import {publishEvent} from "./publish"
+import {createAndPublish} from "./publish"
 import {subscribe} from "./subscribe"
 
 export type DVMRequestOpts = {
@@ -31,7 +31,7 @@ export const dvmRequest = async ({
     input = JSON.stringify(input)
   }
 
-  publishEvent(kind, {
+  createAndPublish(kind, {
     relays,
     sk: generatePrivateKey(),
     tags: tags.concat([

@@ -74,7 +74,6 @@ export const getLnUrl = (address: string) => {
 }
 
 export const fetchZapper = createBatcher(3000, async (lnurls: string[]) => {
-  const keys = ["callback", "minSendable", "maxSendable", "nostrPubkey", "allowsNostr"]
   const data =
     (await tryFunc(async () => {
       // Dufflepud expects plaintext but we store lnurls encoded
@@ -94,7 +93,10 @@ export const fetchZapper = createBatcher(3000, async (lnurls: string[]) => {
       return null
     }
 
-    return {...pick(keys, zapper), lnurl} as Zapper
+    return {
+      ...pick(["callback", "minSendable", "maxSendable", "nostrPubkey", "allowsNostr"], zapper),
+      lnurl,
+    } as Zapper
   })
 })
 

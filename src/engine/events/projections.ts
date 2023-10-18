@@ -10,7 +10,7 @@ import {_events, deletes, deletesLastUpdated} from "./state"
 projections.addGlobalHandler(
   batch(500, (chunk: Event[]) => {
     const $sessions = sessions.get()
-    const userEvents = chunk.filter(e => $sessions[e.pubkey])
+    const userEvents = chunk.filter(e => $sessions[e.pubkey] && !e.wrap)
 
     if (userEvents.length > 0) {
       _events.update($events => $events.concat(userEvents))
@@ -33,9 +33,7 @@ projections.addHandler(EventKind.Delete, e => {
 projections.addHandler(EventKind.GiftWrap, e => {
   const session = sessions.get()[Tags.from(e).getValue("p")]
 
-  if (session?.method !== "privkey") {
-    return
+  if (session?.privkey) {
+    nip59.get().withUnwrappedEvent(e, session.privkey, e => projections.push(e))
   }
-
-  nip59.get().withUnwrappedEvent(e, session.privkey, e => projections.push(e))
 })

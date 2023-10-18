@@ -3,7 +3,7 @@ import {now, normalizeRelayUrl, isShareableRelay} from "paravel"
 import {people} from "src/engine/people/state"
 import {canSign, stateKey} from "src/engine/session/derived"
 import {updateStore} from "src/engine/core/commands"
-import {publishEvent} from "src/engine/network/utils"
+import {createAndPublish} from "src/engine/network/utils"
 import type {RelayPolicy} from "./model"
 import {relays} from "./state"
 import {relayPolicies} from "./derived"
@@ -40,7 +40,7 @@ export const publishRelays = ($relays: RelayPolicy[]) => {
   updateStore(people.key(stateKey.get()), now(), {relays: $relays})
 
   if (canSign.get()) {
-    return publishEvent(10002, {
+    return createAndPublish(10002, {
       tags: $relays
         .filter(r => isShareableRelay(r.url))
         .map(r => {

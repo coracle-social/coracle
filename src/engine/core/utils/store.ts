@@ -196,6 +196,14 @@ export class Key<T extends R> implements Readable<T> {
 
       return m
     })
+
+  pop = () => {
+    const v = this.get()
+
+    this.remove()
+
+    return v
+  }
 }
 
 export class DerivedKey<T extends R> implements Readable<T> {

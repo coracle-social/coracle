@@ -1,7 +1,8 @@
+import {uniq, prop} from "ramda"
 import {sleep} from "hurdak"
 import {Emitter, hasValidSignature, matchFilters} from "paravel"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
-import {events} from "src/engine/events/derived"
+import {events, eventsByKind} from "src/engine/events/derived"
 
 export class LocalTarget extends Emitter {
   constructor() {
@@ -34,7 +35,19 @@ export class LocalTarget extends Emitter {
         tryEvent(events.key(id).get())
       }
     } else {
-      for (const event of events.get()) {
+      let $events
+
+      // Optimization: only iterate over events with the kinds we want
+      if (filters.every(prop("kinds"))) {
+        const kinds = uniq(filters.flatMap(prop("kinds")))
+        const $eventsByKind = eventsByKind.get()
+
+        $events = kinds.flatMap(k => $eventsByKind[k] || [])
+      } else {
+        $events = events.get()
+      }
+
+      for (const event of $events) {
         tryEvent(event)
       }
     }

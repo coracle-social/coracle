@@ -1,7 +1,7 @@
 import {omit, assoc} from "ramda"
 import {generatePrivateKey, getPublicKey} from "nostr-tools"
 import {appDataKeys} from "src/util/nostr"
-import {publishEvent} from "src/engine/network/utils"
+import {createAndPublish} from "src/engine/network/utils"
 import type {Session} from "./model"
 import {sessions, pubkey} from "./state"
 import {canSign, nip04, session} from "./derived"
@@ -40,7 +40,7 @@ export const setAppData = async (d: string, data: any) => {
     const json = JSON.stringify(data)
     const content = await nip04.get().encryptAsUser(json, pubkey)
 
-    return publishEvent(30078, {content, tags: [["d", d]]})
+    return createAndPublish(30078, {content, tags: [["d", d]]})
   }
 }
 

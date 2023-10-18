@@ -2,6 +2,7 @@ import type {SubscriptionOpts} from "paravel"
 import {Subscription, now} from "paravel"
 import {assoc, map} from "ramda"
 import {updateIn} from "hurdak"
+import {LOCAL_RELAY_URL} from 'src/util/nostr'
 import type {Event} from "src/engine/events/model"
 import {projections} from "src/engine/core/projections"
 import {getUrls, getExecutor} from "./executor"
@@ -21,7 +22,7 @@ export const subscribe = (opts: SubscribeOpts) => {
     ...opts,
     hasSeen: tracker.add,
     closeOnEose: Boolean(opts.timeout),
-    executor: getExecutor(getUrls(opts.relays)),
+    executor: getExecutor(getUrls(opts.relays.concat(LOCAL_RELAY_URL))),
   })
 
   sub.on("event", e => {

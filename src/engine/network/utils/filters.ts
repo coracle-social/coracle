@@ -1,10 +1,10 @@
 import {omit, find, prop, groupBy, uniq} from "ramda"
 import {shuffle, randomId, seconds, avg} from "hurdak"
 import {Tags} from "paravel"
+import {Naddr} from "src/util/nostr"
 import {env, pubkey} from "src/engine/session/state"
 import {follows, network} from "src/engine/people/derived"
 import {mergeHints, getPubkeyHints} from "src/engine/relays/utils"
-import {Naddr} from "src/engine/events/utils"
 import type {DynamicFilter, Filter} from "../model"
 
 export const calculateFilterGroup = ({since, until, limit, search, ...filter}: Filter) => {
@@ -87,7 +87,7 @@ export const getReplyFilters = (events, filter) => {
 }
 
 export const getFilterGenerality = filter => {
-  if (filter.ids) {
+  if (filter.ids || filter["#e"] || filter["#a"]) {
     return 0
   }
 

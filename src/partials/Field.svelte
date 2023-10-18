@@ -6,7 +6,7 @@
 <div class="flex flex-col gap-1">
   <slot name="label">
     <div class="flex justify-between">
-      <label class="font-bold">
+      <label class="flex items-center gap-2 font-bold">
         {#if icon}
           <i class={`fa ${icon}`} />
         {/if}

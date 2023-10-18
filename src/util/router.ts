@@ -189,6 +189,7 @@ export class Router {
   page = this.pages.derived(first)
   modals = this.nonVirtual.derived(takeWhile((h: HistoryItem) => h.config.modal))
   modal = this.modals.derived(first)
+  current = this.nonVirtual.derived(first)
 
   init() {
     this.at(window.location.pathname + window.location.search).push()
@@ -289,6 +290,6 @@ export class Router {
   }
 
   fromCurrent() {
-    return this.from(first(this.nonVirtual.get()))
+    return this.from(this.current.get())
   }
 }

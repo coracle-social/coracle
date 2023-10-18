@@ -1,11 +1,11 @@
 <script lang="ts">
   import {matchFilters} from "paravel"
-  import {reject, propEq, uniqBy, prop} from "ramda"
+  import {reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, batch} from "hurdak"
   import {Tags} from "paravel"
   import {fly} from "src/util/transition"
-  import {LOCAL_RELAY_URL, isLike} from "src/util/nostr"
+  import {isLike} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -20,6 +20,8 @@
   import {
     env,
     load,
+    nip59,
+    groups,
     people,
     loadOne,
     getLnUrl,
@@ -31,7 +33,9 @@
     getIdFilters,
     getReplyFilters,
     getSetting,
+    getRecipientKey,
     selectHints,
+    displayGroup,
     mergeHints,
     loadPubkeys,
     sortEventsDesc,
@@ -49,8 +53,10 @@
   export let showParent = true
   export let showLoading = false
   export let showMuted = false
+  export let showGroup = false
 
   let zapper, unsubZapper
+  let ready = false
   let event = note
   let reply = null
   let replyIsActive = false
@@ -92,7 +98,7 @@
       .open()
 
   const removeFromContext = e => {
-    ctx = reject(propEq("id", e.id), ctx)
+    ctx = reject(whereEq({id: e.id}), ctx)
   }
 
   $: tags = Tags.from(event).normalize()
@@ -161,28 +167,32 @@
 
     if (!event.pubkey) {
       event = await loadOne({
-        relays: selectHints(relays).concat(LOCAL_RELAY_URL),
+        relays: selectHints(relays),
         filters: getIdFilters([event.id]),
       })
     }
 
-    if (event.pubkey) {
-      const hints = getReplyHints(event)
+    if (event.kind === 1059) {
+      event = await nip59.get().unwrap(event, getRecipientKey(event))
+    }
 
+    ready = true
+
+    if (event.pubkey) {
       loadPubkeys([event.pubkey])
 
       const kinds = [1]
 
-      if (getSetting('enable_reactions')) {
+      if (getSetting("enable_reactions")) {
         kinds.push(7)
       }
 
-      if ($env.ENABLE_ZAPS) {
+      if ($env.ENABLE_ZAPS && !event.wrap) {
         kinds.push(9735)
       }
 
       load({
-        relays: mergeHints([relays, hints]).concat(LOCAL_RELAY_URL),
+        relays: mergeHints([relays, getReplyHints(event)]),
         filters: getReplyFilters([event], {kinds}),
         onEvent: batch(200, events => {
           ctx = uniqBy(prop("id"), ctx.concat(events))
@@ -196,11 +206,22 @@
   })
 </script>
 
-{#if event.pubkey}
+{#if ready}
+  {@const address = tags.getCommunity()}
   {@const path = router
     .at("notes")
     .of(event.id, {relays: getEventHints(event)})
     .toString()}
+  {#if address && showGroup}
+    <p class="py-2 text-gray-3">
+      Posted in +<Anchor
+        modal
+        theme="anchor"
+        href={router.at("groups").of(address).at("notes").toString()}>
+        {displayGroup(groups.key(address).get())}
+      </Anchor>
+    </p>
+  {/if}
   <div class="note relative" class:py-2={!showParent && !topLevel}>
     {#if !showParent && !topLevel}
       <div class="absolute -left-4 h-px w-4 bg-gray-6" style="top: 27px;" />

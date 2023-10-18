@@ -216,7 +216,7 @@ export class Storage {
   ready = defer()
   dead = writable(false)
 
-  constructor(readonly adapters: (LocalStorageAdapter | IndexedDBAdapter)[]) {
+  constructor(readonly version, readonly adapters: (LocalStorageAdapter | IndexedDBAdapter)[]) {
     this.initialize()
   }
 
@@ -242,7 +242,7 @@ export class Storage {
     if (window.indexedDB) {
       const dbConfig = indexedDBAdapters.map(adapter => adapter.getIndexedDBConfig())
 
-      this.db = new IndexedDB("nostr-engine/Storage", 5, dbConfig)
+      this.db = new IndexedDB("nostr-engine/Storage", this.version, dbConfig)
 
       window.addEventListener("beforeunload", () => this.close())
 

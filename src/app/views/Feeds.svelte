@@ -59,7 +59,7 @@
     </Content>
   {/if}
   {#key key}
-    <Feed {filter} {relays}>
+    <Feed showGroup {filter} {relays}>
       <div slot="controls">
         {#if $canSign}
           {#if $userLists.length > 0}

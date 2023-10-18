@@ -21,7 +21,7 @@
   export let note
   export let value
 
-  let quote = null
+  let quote
   let muted = false
   let loading = true
 
@@ -32,7 +32,7 @@
   const relays = selectHints([...hints, ...getParentHints(note)])
 
   const openQuote = e => {
-    const noteId = id || quote?.id
+    const noteId = value.id || quote?.id
 
     // stopPropagation wasn't working for some reason
     if (noteId && e.detail.target.textContent !== "Show") {

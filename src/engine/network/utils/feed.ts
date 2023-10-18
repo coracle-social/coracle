@@ -2,7 +2,6 @@ import {
   reject,
   partition,
   find,
-  propEq,
   uniqBy,
   identity,
   pluck,
@@ -15,7 +14,7 @@ import {
 import {ensurePlural, doPipe, batch} from "hurdak"
 import {now, Tags} from "paravel"
 import {race, pushToKey} from "src/util/misc"
-import {noteKinds, reactionKinds, LOCAL_RELAY_URL} from "src/util/nostr"
+import {noteKinds, reactionKinds} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {isEventMuted} from "src/engine/events/derived"
@@ -113,7 +112,7 @@ export class FeedLoader {
       .filter(identity)
 
     load({
-      relays: this.opts.relays.concat(LOCAL_RELAY_URL),
+      relays: this.opts.relays,
       filters: getIdFilters(parentIds),
       onEvent: batch(100, events => {
         for (const e of this.discardEvents(events)) {
@@ -170,7 +169,7 @@ export class FeedLoader {
                 break
               }
 
-              if (noteKinds.includes(e.kind) && !find(propEq("id", e.id), parent.replies || [])) {
+              if (noteKinds.includes(e.kind) && !find(r => r.id === e.id, parent.replies || [])) {
                 pushToKey(parent as any, "replies", e)
               }
 

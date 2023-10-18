@@ -1,12 +1,12 @@
 <script lang="ts">
-  import {last, prop} from "ramda"
+  import {last} from "ramda"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {canSign, relays, relayPolicyUrls, joinRelay, leaveRelay, deriveHasRelay} from "src/engine"
   import {router} from "src/app/router"
 
   export let relay
 
-  const info = relays.key(relay.url).derived(prop("info"))
+  const info = relays.key(relay.url).derived(r => r.info)
   const joined = deriveHasRelay(relay.url)
 
   let actions = []

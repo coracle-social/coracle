@@ -91,7 +91,12 @@ export class Nip59 {
     if (!wrap.content.includes("ciphertext")) {
       try {
         const seal = await this.decrypt(wrap, sk)
+
+        if (!seal) throw new Error("Failed to decrypt wrapper")
+
         const rumor = await this.decrypt(seal, sk)
+
+        if (!rumor) throw new Error("Failed to decrypt seal")
 
         if (seal.pubkey === rumor.pubkey) {
           return Object.assign(rumor, {wrap, seen_on: wrap.seen_on})

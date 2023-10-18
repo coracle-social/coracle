@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {complement, prop, filter} from "ramda"
+  import {filter} from "ramda"
   import {toTitle} from "hurdak"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -9,6 +9,7 @@
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
   import {router} from "src/app/router"
+  import type {Channel} from "src/engine"
   import {
     nip24Channels,
     hasNewNip24Messages,
@@ -18,8 +19,8 @@
   } from "src/engine"
 
   const activeTab = window.location.pathname.slice(1) === "channels" ? "conversations" : "requests"
-  const accepted = nip24Channels.derived(filter(prop("last_sent")))
-  const requests = nip24Channels.derived(filter(complement(prop("last_sent"))))
+  const accepted = nip24Channels.derived(filter((c: Channel) => Boolean(c.last_sent)))
+  const requests = nip24Channels.derived(filter((c: Channel) => !c.last_sent))
   const setActiveTab = tab => {
     const path = tab === "requests" ? "channels/requests" : "channels"
 

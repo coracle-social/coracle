@@ -2,7 +2,7 @@
   import {theme, installPrompt} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import NavItem from "src/partials/NavItem.svelte"
-  import {hasNewNip04Messages, hasNewNotifications, canSign} from "src/engine"
+  import {hasNewNip04Messages, hasNewNotifications, canSign, canUseGiftWrap} from "src/engine"
   import {menuIsOpen} from "src/app/state"
 
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
@@ -39,6 +39,9 @@
       <div
         class="absolute left-7 top-2 h-2 w-2 rounded border border-solid border-white bg-accent" />
     {/if}
+  </NavItem>
+  <NavItem disabled={!$canUseGiftWrap} href="/groups">
+    <i class="fa fa-circle-nodes mr-2" /> Groups
   </NavItem>
   <NavItem modal href="/chat/redirect">
     <i class="fa fa-comment mr-2" /> Chat

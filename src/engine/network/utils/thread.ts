@@ -1,7 +1,6 @@
 import {uniqBy, identity, prop, sortBy} from "ramda"
 import {batch} from "hurdak"
 import {Tags} from "paravel"
-import {LOCAL_RELAY_URL} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {writable} from "src/engine/core/utils"
@@ -34,7 +33,7 @@ export class ThreadLoader {
 
     if (filteredIds.length > 0) {
       load({
-        relays: selectHints(this.relays).concat(LOCAL_RELAY_URL),
+        relays: selectHints(this.relays),
         filters: getIdFilters(filteredIds),
         onEvent: batch(300, (events: Event[]) => {
           this.addToThread(events)

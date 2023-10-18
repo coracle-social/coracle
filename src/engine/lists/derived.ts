@@ -1,8 +1,8 @@
 import {whereEq, sortBy} from "ramda"
+import {Naddr} from "src/util/nostr"
 import {derivedCollection} from "src/engine/core/utils"
 import {pubkey} from "src/engine/session/state"
 import {deletes} from "src/engine/events/state"
-import {Naddr} from "src/engine/events/utils"
 import type {List} from "./model"
 import {_lists} from "./state"
 
