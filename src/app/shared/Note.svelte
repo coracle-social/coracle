@@ -294,7 +294,7 @@
         ctx = [e.detail, ...ctx]
       }} />
 
-    {#if visibleReplies.length > 0 || hiddenReplies.length > 0}
+    {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
       <div class="note-children relative ml-8 mt-2 flex flex-col">
         {#if hiddenReplies.length > 0}
           <button class="ml-5 cursor-pointer py-2 text-gray-1 outline-0" on:click={onClick}>
