@@ -2,6 +2,7 @@
   import {annotateMedia, displayUrl} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Media from "src/partials/Media.svelte"
+  import {isShareableRelay} from "src/engine"
   import {router} from "src/app/router"
 
   export let value
@@ -24,6 +25,14 @@
     stopPropagation
     class="overflow-hidden text-ellipsis whitespace-nowrap underline"
     href={router.at("media").of(value.url).toString()}>
+    {displayUrl(value.url)}
+  </Anchor>
+{:else if isShareableRelay(value.url)}
+  <Anchor
+    modal
+    stopPropagation
+    class="overflow-hidden text-ellipsis whitespace-nowrap underline"
+    href={router.at("relays").of(value.url).toString()}>
     {displayUrl(value.url)}
   </Anchor>
 {:else}

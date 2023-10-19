@@ -5,6 +5,7 @@
 - [x] Add support for kind 30311 (streams)
 - [x] Fix DM message sizing and layout
 - [x] Fix bug with relay limit mutable state
+- [x] Open relay detail page for relay links in content
 
 # 0.3.11
 
