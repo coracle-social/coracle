@@ -11,7 +11,7 @@
   const showAlert = hasNewMessages(channel)
   const npub = nip19.npubEncode(channel.id)
 
-  const enter = () => router.at("conversations").at(npub).push()
+  const enter = () => router.at("conversations").of(npub).push()
 </script>
 
 <Card interactive on:click={enter}>
