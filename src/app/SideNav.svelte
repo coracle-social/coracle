@@ -32,7 +32,7 @@
   <NavItem href="/explore">
     <i class="fa fa-compass mr-2" /> Explore
   </NavItem>
-  <NavItem disabled={!$canSign} href="/notifications">
+  <NavItem href="/notifications">
     <i class="fa fa-bell mr-2" /> Notifications
     {#if $hasNewNotifications}
       <div
