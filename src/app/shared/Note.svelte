@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {partition, reject, propEq, uniqBy, prop} from "ramda"
+  import {reject, propEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, batch} from "hurdak"
   import {fly} from "src/util/transition"
@@ -102,17 +102,34 @@
   // Sort our replies
   $: replies = sortEventsDesc(children.filter(e => e.kind === 1))
 
-  // Find notes that match our filter
-  $: matchingReplies = collapsed ? [] : replies.filter(e => !filters || matchFilters(filters, e))
+  let mutedReplies, hiddenReplies, visibleReplies
 
-  // Split out muted notes
-  $: [mutedReplies, unmutedReplies] = partition($isEventMuted, matchingReplies)
+  $: {
+    mutedReplies = []
+    hiddenReplies = []
+    visibleReplies = []
 
-  // Only show unmuted, matching notes
-  $: visibleReplies = unmutedReplies.filter(e => !filters || matchFilters(filters, e))
+    for (const e of replies) {
+      if ($isEventMuted(e)) {
+        mutedReplies.push(e)
+      } else if (collapsed) {
+        hiddenReplies.push(e)
+      } else if (!showEntire && filters && !matchFilters(filters, e)) {
+        hiddenReplies.push(e)
+      } else {
+        visibleReplies.push(e)
+      }
+    }
 
-  // Notify the user if there are muted notes if they would otherwise see them
-  $: hiddenReplies = mutedReplies.filter(e => !filters || matchFilters(filters, e))
+    if (depth === 0) {
+      mutedReplies.splice(0)
+      hiddenReplies.splice(0)
+    }
+
+    if (showMutedReplies) {
+      visibleReplies = visibleReplies.concat(mutedReplies.splice(0))
+    }
+  }
 
   // Split out likes
   $: likes = children.filter(e => e.kind === 7 && isLike(e.content))
@@ -122,8 +139,6 @@
     children.filter(e => e.kind === 9735),
     zapper
   )
-
-  $: showHiddenReplies = showEntire && showMutedReplies && hiddenReplies.length > 0
 
   onMount(async () => {
     const zapAddress = Tags.from(note).getMeta("zap")
@@ -241,7 +256,7 @@
       </Card>
     </div>
 
-    {#if !replyIsActive && unmutedReplies.length > 0 && !showEntire && depth > 0}
+    {#if !replyIsActive && visibleReplies.length > 0 && !showEntire && depth > 0}
       <div class="relative">
         <div
           class="absolute right-0 top-0 z-10 -mr-2 -mt-4 flex h-6 w-6 cursor-pointer items-center
@@ -267,7 +282,7 @@
 
     <NoteReply
       parent={event}
-      showBorder={visibleReplies.length > 0 || showHiddenReplies}
+      showBorder={visibleReplies.length > 0}
       bind:this={reply}
       on:start={() => {
         replyIsActive = true
@@ -279,28 +294,24 @@
         ctx = [e.detail, ...ctx]
       }} />
 
-    {#if visibleReplies.length > 0 || (showEntire && hiddenReplies.length > 0)}
+    {#if visibleReplies.length > 0 || hiddenReplies.length > 0}
       <div class="note-children relative ml-8 mt-2 flex flex-col">
-        {#if !showEntire && unmutedReplies.length > visibleReplies.length}
+        {#if hiddenReplies.length > 0}
           <button class="ml-5 cursor-pointer py-2 text-gray-1 outline-0" on:click={onClick}>
             <i class="fa fa-up-down pr-2 text-sm" />
-            Show {quantify(
-              unmutedReplies.length - visibleReplies.length,
-              "other reply",
-              "more replies"
-            )}
+            Show {quantify(hiddenReplies.length, "other reply", "more replies")}
           </button>
-          {#if visibleReplies.length || showHiddenReplies}
+          {#if visibleReplies.length > 0}
             <div class="absolute -left-4 -top-2 h-14 w-px bg-gray-6" />
           {/if}
-        {:else if visibleReplies.length > 0 || showHiddenReplies}
+        {:else if visibleReplies.length > 0}
           <div class="absolute -left-4 -top-2 h-4 w-px bg-gray-6" />
         {/if}
         {#if visibleReplies.length}
           <div in:fly={{y: 20}}>
             {#each visibleReplies as r, i (r.id)}
               <svelte:self
-                isLastReply={!showMutedReplies && i === visibleReplies.length - 1}
+                isLastReply={i === visibleReplies.length - 1}
                 showParent={false}
                 showMuted
                 note={r}
@@ -310,27 +321,14 @@
             {/each}
           </div>
         {/if}
-        {#if showHiddenReplies}
-          <div in:fly={{y: 20}}>
-            {#each hiddenReplies as r, i (r.id)}
-              <svelte:self
-                isLastReply={i === hiddenReplies.length - 1}
-                showParent={false}
-                showMuted
-                note={r}
-                depth={depth - 1}
-                context={ctx}
-                {anchorId} />
-            {/each}
-          </div>
-        {:else if showEntire && hiddenReplies.length > 0}
+        {#if showEntire && mutedReplies.length > 0}
           <button
             class="ml-5 cursor-pointer py-2 text-gray-1 outline-0"
             on:click={() => {
               showMutedReplies = true
             }}>
             <i class="fa fa-up-down pr-2 text-sm" />
-            Show {quantify(hiddenReplies.length, "hidden reply", "hidden replies")}
+            Show {quantify(mutedReplies.length, "hidden reply", "hidden replies")}
           </button>
         {/if}
       </div>

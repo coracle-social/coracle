@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {quantify, defer} from "hurdak"
+  import {fly} from "src/util/transition"
   import {ThreadLoader} from "src/engine"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -41,7 +42,9 @@
     <Note note={$root} />
     {#if showAncestors}
       {#each $ancestors as ancestor (ancestor.id)}
-        <Note topLevel showParent={false} note={ancestor} />
+        <div in:fly={{y: 20}}>
+          <Note topLevel showParent={false} note={ancestor} />
+        </div>
       {/each}
     {:else if $ancestors.length > 0}
       <Anchor
