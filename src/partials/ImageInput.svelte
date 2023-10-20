@@ -93,7 +93,7 @@
   <Modal mini onEscape={decline}>
     <Content>
       {#if loading}
-        <Spinner delay={0}>Uploading your media...</Spinner>
+        <Spinner delay={0}>Uploading your media using {settings.mediaprovider_url.split("/.well-known")[0] }</Spinner>
       {:else}
         <h1 class="staatliches text-2xl">Upload a File</h1>
         <p>Click below to select a file to upload.</p>
