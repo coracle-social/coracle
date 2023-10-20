@@ -34,6 +34,7 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] White-labeling support
 - [x] NIP 51 person lists
 - [x] Exportable copy of all user events
+- [x] NIP96 - HTTP File Storage Integration
 - [ ] Reporting and basic distributed moderation
 - [ ] Content and person recommendations
 - [ ] Private groups including administration, moderation, and membership
