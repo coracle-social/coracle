@@ -3,7 +3,7 @@ import {findReplyAndRootIds} from "src/util/nostr"
 import {derived, DerivedCollection} from "src/engine/core/utils"
 import {pubkey} from "src/engine/session/state"
 import {settings} from "src/engine/session/derived"
-import {getFollowsWhoFollow} from "src/engine/people/utils"
+import {getWotScore} from "src/engine/people/utils"
 import {mutes, follows} from "src/engine/people/derived"
 import type {Event} from "./model"
 import {deletes, _events} from "./state"
@@ -42,7 +42,7 @@ export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settin
       return false
     }
 
-    if (!$follows.has(e.pubkey) && getFollowsWhoFollow($pubkey, e.pubkey).length < minWot) {
+    if (!$follows.has(e.pubkey) && getWotScore($pubkey, e.pubkey) < minWot) {
       return true
     }
 

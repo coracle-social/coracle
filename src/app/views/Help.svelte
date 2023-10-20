@@ -7,7 +7,7 @@
   export let topic
 
   const descriptions = {
-    "web-of-trust": `WoT (Web Of Trust) is one of the best ways to determine how trustworthy someone might be, based on your social graph.\nIn ${appName}, this number is equal to how many people you follow that also follow a given person. This allows you to see at a glance if someone is already in your network. This helps reduce spam, impostors, and objectionable content.\nYou can set a minimum web of trust score on your content settings page, which will automatically mute anyone with a lower score than your threshold.`,
+    "web-of-trust": `WoT (Web Of Trust) is one of the best ways to determine how trustworthy someone might be, based on your social graph.\nIn ${appName}, this number is equal to how many people you follow that also follow a given person, minus <span class="code">pow(2, log(n))</span>, where <span class="code">n</span> is how many people you follow who have muted this person. This allows you to see at a glance if someone is accepted in your network. This helps reduce spam, impostors, and objectionable content.\nYou can set a minimum web of trust score on your content settings page, which will automatically mute anyone with a lower score than your threshold.`,
   }
 </script>
 

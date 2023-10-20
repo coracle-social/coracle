@@ -72,7 +72,7 @@
           <strong>Minimum WoT score</strong>
           <div>{settings.min_wot_score}</div>
         </div>
-        <Input type="range" bind:value={settings.min_wot_score} min={0} max={100} />
+        <Input type="range" bind:value={settings.min_wot_score} min={-10} max={10} />
         <p slot="info">
           Select a minimum <Anchor theme="anchor" modal href="/help/web-of-trust"
             >web-of-trust</Anchor>

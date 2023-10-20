@@ -74,6 +74,8 @@ export const getMutedPubkeys = $person => ($person?.mutes || []).map(nth(1)) as 
 
 export const getMutes = $person => new Set(getMutedPubkeys($person))
 
+export const isMuting = ($person, pubkey) => getMutedPubkeys($person).includes(pubkey)
+
 export const getFollowedPubkeys = $person => ($person?.petnames || []).map(nth(1)) as string[]
 
 export const getFollows = $person => new Set(getFollowedPubkeys($person))
@@ -103,6 +105,17 @@ export const getFollowsWhoFollow = cached({
   getValue: ([pk, tpk]) =>
     getFollowedPubkeys(people.key(pk).get()).filter(pk => isFollowing(people.key(pk).get(), tpk)),
 })
+
+export const getFollowsWhoMute = cached({
+  maxSize: 1000,
+  getKey: join(":"),
+  getValue: ([pk, tpk]) =>
+    getFollowedPubkeys(people.key(pk).get()).filter(pk => isMuting(people.key(pk).get(), tpk)),
+})
+
+export const getWotScore = (pk, tpk) =>
+  getFollowsWhoFollow(pk, tpk).length -
+  Math.pow(2, Math.log(Math.max(1, getFollowsWhoMute(pk, tpk).length)))
 
 const annotatePerson = pubkey => {
   const relays = getPubkeyHints.limit(3).getHints(pubkey, "write")

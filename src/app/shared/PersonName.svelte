@@ -8,7 +8,7 @@
     displayPerson,
     session,
     follows,
-    getFollowsWhoFollow,
+    getWotScore,
     possibleImposters,
   } from "src/engine"
 
@@ -18,12 +18,12 @@
 
   const following = deriveFollowing(pubkey)
 
-  const followCount = follows.derived(pks => {
+  const wotScore = follows.derived(pks => {
     if (!$session || $following || pubkey === $session.pubkey) {
       return null
     }
 
-    return getFollowsWhoFollow($session.pubkey, pubkey).length
+    return getWotScore($session.pubkey, pubkey)
   })
 
   const mayBeImposter = possibleImposters.derived(pubkeys => pubkeys.has(pubkey))
@@ -40,11 +40,11 @@
       <span class="px-2 py-1 text-xs">
         <i class="fa fa-warning text-warning" />
       </span>
-    {:else if $followCount}
+    {:else if $wotScore !== null}
       <Popover triggerType="mouseenter">
         <span slot="trigger" class="px-2 py-1 text-xs">
           <i class="fa fa-diagram-project text-accent" />
-          {$followCount}
+          {$wotScore}
         </span>
         <Anchor modal slot="tooltip" class="flex items-center gap-1" href="/help/web-of-trust">
           <i class="fa fa-info-circle" />

@@ -179,3 +179,10 @@ body,
   --date-picker-highlight-border: transparent;
   --date-picker-highlight-shadow: transparent;
 }
+
+.code {
+  background-color: var(--gray-8);
+  line-height: 1.5em;
+  box-decoration-break: clone;
+  padding: 1px 0.2em;
+}
