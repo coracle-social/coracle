@@ -7,7 +7,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile, stripExifData, blobToFile} from "src/util/html"
-  import {uploadToNostrBuild} from "src/engine"
+  import {uploadToMediaProvider, getSettings} from "src/engine"
 
   export let icon = null
   export let value = null
@@ -19,6 +19,7 @@
   let input, listener, loading
   let files = []
   let isOpen = false
+  let settings = getSettings()
 
   $: {
     if (input) {
@@ -45,13 +46,12 @@
               body.append("file[]", file)
             }
 
-            const result = await uploadToNostrBuild(body)
-
-            // Legacy weirdness
-            for (const {url} of result.data) {
-              value = url
-              onChange?.(url)
+            const result = await uploadToMediaProvider(settings.mediaprovider_url, body)
+            if (result != "" && result != null){
+              value = result
+              onChange?.(value)
             }
+
           } finally {
             isOpen = false
             loading = false
