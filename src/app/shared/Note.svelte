@@ -126,6 +126,11 @@
       hiddenReplies.splice(0)
     }
 
+    if (!showEntire && visibleReplies.length === 0) {
+      mutedReplies.splice(0)
+      hiddenReplies.splice(0)
+    }
+
     if (showMutedReplies) {
       visibleReplies = visibleReplies.concat(mutedReplies.splice(0))
     }
