@@ -8,6 +8,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile, stripExifData, blobToFile} from "src/util/html"
   import {uploadToMediaProvider, getSettings} from "src/engine"
+  import {displayDomain} from "src/util/misc"
+
 
   export let icon = null
   export let value = null
@@ -40,16 +42,14 @@
               })
             )
 
-            const body = new FormData()
-
             for (const file of files) {
+              const body = new FormData()
               body.append("file[]", file)
-            }
-
-            const result = await uploadToMediaProvider(settings.mediaprovider_url, body)
-            if (result != "" && result != null){
-              value = result
-              onChange?.(value)
+              const result = await uploadToMediaProvider(settings.nip96_url, body)
+              if (result != "" && result != null){
+                value = result
+                onChange?.(value)
+              }
             }
 
           } finally {
@@ -93,7 +93,8 @@
   <Modal mini onEscape={decline}>
     <Content>
       {#if loading}
-        <Spinner delay={0}>Uploading your media using {settings.mediaprovider_url.split("/.well-known")[0] }</Spinner>
+        <Spinner delay={0}>Uploading your media using {displayDomain(settings.nip96_url) }</Spinner>
+
       {:else}
         <h1 class="staatliches text-2xl">Upload a File</h1>
         <p>Click below to select a file to upload.</p>

@@ -48,12 +48,12 @@
           Allows {appName} to authenticate with relays that have access controls automatically.
         </p>
       </FieldInline>
-      <Field label="Media provider URL">
-        <Input bind:value={settings.mediaprovider_url}>
+      <Field label="Upload Provider URL">
+        <Input bind:value={settings.nip96_url}>
           <i slot="before" class="fa-solid fa-server" />
         </Input>
         <p slot="info">
-          Enter a custom url for {appName}'s media provider server (BETA)</p>
+          Enter a custom url for {appName}'s upload provider server.</p>
       </Field>
       <Field label="Dufflepud URL">
         <Input bind:value={settings.dufflepud_url}>

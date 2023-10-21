@@ -36,7 +36,7 @@ window.addEventListener("beforeinstallprompt", e => {
   installPrompt.set(e)
 })
 
-const MEDIAPROVIDER_URL = import.meta.env.VITE_MEDIAPROVIDER_URL
+const NIP96_URL = import.meta.env.VITE_NIP96_URL
 
 const IMGPROXY_URL = import.meta.env.VITE_IMGPROXY_URL
 
@@ -69,7 +69,7 @@ const ENABLE_ZAPS = JSON.parse(import.meta.env.VITE_ENABLE_ZAPS)
 // Prep our env
 env.set({
   DEFAULT_FOLLOWS,
-  MEDIAPROVIDER_URL,
+  NIP96_URL,
   IMGPROXY_URL,
   DUFFLEPUD_URL,
   MULTIPLEXTR_URL,
