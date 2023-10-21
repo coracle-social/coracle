@@ -163,22 +163,12 @@
         <ImageInput multi onChange={addImage} />
       </div>
       <small
-        class="flex cursor-pointer items-center justify-end gap-2"
+        class="flex cursor-pointer items-center justify-end gap-4"
         on:click={() => {
           showSettings = true
         }}>
-        <span>
-          {#if $relays?.length === 1}
-            {displayRelay({url: $relays[0]})}
-          {:else}
-            {$relays.length} relays
-          {/if}
-        </span>
-        <span>•</span>
-        <i class="fa fa-warning" />
-        {warning || 0}
-        <span>•</span>
-        <i class="fa fa-edit" />
+        <span><i class="fa fa-server" /> {$relays.length}</span>
+        <span><i class="fa fa-warning" /> {warning || 0}</span>
       </small>
     </div>
   </Content>

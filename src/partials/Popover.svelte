@@ -42,7 +42,13 @@
         // If we've already triggered it, tooltipContents will be empty
         if (tooltipContents) {
           instance.popper.querySelector(".tippy-content").appendChild(tooltipContents)
-          instance.popper.addEventListener("mouseleave", e => instance.hide())
+
+          instance.popper.addEventListener("mouseleave", e => {
+            if (triggerType !== "click") {
+              instance.hide()
+            }
+          })
+
           instance.popper.addEventListener("click", e => {
             if (e.target.closest(".tippy-close") || opts.hideOnClick) {
               instance?.hide()
