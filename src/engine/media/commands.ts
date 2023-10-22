@@ -4,6 +4,7 @@ import {signer} from "src/engine/session/derived"
 import {buildEvent} from "src/engine/network/utils"
 import crypto from "crypto"
 import { Tags } from "src/util/nostr"
+import {cached} from "src/util/lruCache"
 
 export const uploadToMediaProvider = async (url: string, body: FormData): Promise<string> => {
 
@@ -83,8 +84,13 @@ const prepareNIP98Event = async(url: string, method: string, body : FormData) : 
 
 }
 
-const getMediaProviderURL = async (url:string): Promise<string> => {
-  
+export const getMediaProviderURL = cached({
+  maxSize: 100,
+  getKey: ([url]) => url,
+  getValue: ([url]) => fetchMediaProviderURL(url),
+})
+
+const fetchMediaProviderURL = async (url:string): Promise<string> => {
   let NIP96json = await Fetch.fetchJson(url, {method: "GET",})
   console.debug("NIP96_json", NIP96json)
   if (NIP96json.api_url.length > 0){
