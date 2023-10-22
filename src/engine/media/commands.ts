@@ -5,6 +5,7 @@ import {buildEvent} from "src/engine/network/utils"
 import crypto from "crypto"
 import { Tags } from "src/util/nostr"
 import {cached} from "src/util/lruCache"
+import {poll} from "hurdak"
 
 export const uploadToMediaProvider = async (url: string, body: FormData): Promise<string> => {
 
@@ -33,6 +34,25 @@ export const uploadToMediaProvider = async (url: string, body: FormData): Promis
         Authorization: `Nostr ${btoa(JSON.stringify(eventProcessing))}`,
       }});
 
+    // let timeout : number = 0;
+    // let test = poll(1000, async () => {
+    //   if (timeout == 120){ // 2 minutes of timeout. TODO, make it configurable
+    //     console.debug("Processing timeout reached");
+    //     return "";
+    //   };
+    //   processingResponse = await Fetch.fetchJson(response.processing_url, {
+    //     method: "GET",
+    //     headers: {
+    //       Authorization: `Nostr ${btoa(JSON.stringify(eventProcessing))}`,
+    //     }});
+    //   console.debug("Processing status", processingResponse.status, "(" + processingResponse.percentage + "%)")
+    //   timeout++
+    //   if (processingResponse.status == "success"){
+    //     console.debug("Processing done");
+    //     return processingResponse.nip94_event.tags.type("url").values().first()
+    //   };
+    // });
+
     let timeout : number = 0;
     while(processingResponse.status == "processing"){
       if (timeout == 120){ // 2 minutes of timeout. TODO, make it configurable
@@ -47,7 +67,7 @@ export const uploadToMediaProvider = async (url: string, body: FormData): Promis
 
       if (processingResponse.status == "success"){
         console.debug("Processing done");
-        return processingResponse.nip94_event.tags.type("url").values().first()
+        return Tags.from(processingResponse.nip94_event).type("url").values().first();
       };
       console.debug("Processing status", processingResponse.status, "(" + processingResponse.percentage + "%)")
       await new Promise(resolve => setTimeout(resolve, 1000)) // 1 second of delay
