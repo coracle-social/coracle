@@ -1,5 +1,5 @@
 import {Fetch} from "hurdak"
-import {generatePrivateKey, type Event} from "nostr-tools"
+import {generatePrivateKey} from "nostr-tools"
 import {signer} from "src/engine/session/derived"
 import {buildEvent} from "src/engine/network/utils"
 import crypto from "crypto"
