@@ -7,6 +7,7 @@
 - [x] Fix bug with relay limit mutable state
 - [x] Open relay detail page for relay links in content
 - [x] Include mutes in WoT score calculation
+- [x] Fix explore/label detail pages
 
 # 0.3.11
 

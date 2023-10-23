@@ -77,7 +77,7 @@
     asPerson,
     asCsv,
     asString,
-    asMedia,
+    asUrlComponent,
     asFilter,
     asNote,
     asRelay,
@@ -110,7 +110,8 @@
   router.register("/help/:topic", Help)
 
   router.register("/labels/:label", LabelDetail, {
-    ids: asCsv("ids"),
+    label: asUrlComponent("label"),
+    relays: asCsv("relays"),
   })
 
   router.register("/lists", ListList)
@@ -130,7 +131,7 @@
   router.register("/logout", Logout)
 
   router.register("/media/:url", MediaDetail, {
-    url: asMedia("url"),
+    url: asUrlComponent("url"),
   })
 
   router.register("/message", ModalMessage)

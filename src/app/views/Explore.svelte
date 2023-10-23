@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {map, identity, sortBy} from "ramda"
+  import {identity, sortBy} from "ramda"
   import {quantify} from "hurdak"
   import {Tags} from "src/util/nostr"
   import Card from "src/partials/Card.svelte"
@@ -20,14 +20,7 @@
     getPubkeysWithDefaults,
   } from "src/engine"
 
-  type LabelGroup = {
-    label: string
-    ids: string[]
-    hints: string[]
-    authors: string[]
-  }
-
-  const labelGroups = labels.derived($labels => {
+  const labelGroups = labels.throttle(1000).derived($labels => {
     const $labelGroups = {}
 
     for (const e of $labels) {
@@ -39,33 +32,39 @@
 
       for (const label of tags.type("l").mark(["#t", "ugc"]).values().all()) {
         $labelGroups[label] = $labelGroups[label] || {
+          label,
           authors: new Set(),
-          hints: new Set(),
-          ids: new Set(),
+          relays: new Set(),
+          size: 0,
         }
 
-        $labelGroups[label].authors.add(e.pubkey)
+        const group = $labelGroups[label]
+
+        group.authors.add(e.pubkey)
 
         for (const [id, hint] of tags.type("e").drop(1).all()) {
-          $labelGroups[label].ids.add(id)
+          group.size += 1
 
           if (hint) {
-            $labelGroups[label].hints.add(hint)
+            group.relays.add(hint)
+          }
+
+          if (e.created_at > (group.feature?.created_at || 0)) {
+            group.feature = {id, created_at: e.created_at}
           }
         }
       }
     }
 
-    return sortBy(
-      ({authors, ids}) => -(authors.length * ids.length),
-      Object.entries($labelGroups).map(
-        ([label, group]) => ({label, ...map(Array.from, group as any)} as LabelGroup)
-      )
-    )
+    return sortBy(({authors, size}) => -(authors.size * size), Object.values($labelGroups))
   })
 
-  const showGroup = ({label, ids, hints}) =>
-    router.at("labels").of(label).qp({ids}).cx({hints}).open()
+  const showGroup = ({label, relays}) =>
+    router
+      .at("labels")
+      .of(label)
+      .qp({relays: Array.from(relays)})
+      .open()
 
   onMount(() => {
     const sub = subscribe({
@@ -87,7 +86,7 @@
 
 <Content>
   {#each $labelGroups as group (group.label)}
-    {@const {label, authors, ids, hints} = group}
+    {@const {label, authors, size, feature, relays} = group}
     <Card>
       <div class="flex items-start justify-between">
         <div class="flex gap-2">
@@ -99,14 +98,14 @@
       </div>
       <Content>
         <div class="flex gap-2">
-          <p class="py-1">{quantify(ids.length, "note")}, curated by</p>
-          {#each authors as pubkey (pubkey)}
+          <p class="py-1">{quantify(size, "note")}, curated by</p>
+          {#each Array.from(authors) as pubkey (pubkey)}
             <Chip class="mb-1 mr-1">
               <PersonBadgeSmall {pubkey} />
             </Chip>
           {/each}
         </div>
-        <Note note={{id: ids[0]}} relays={hints} />
+        <Note note={{id: feature.id}} relays={Array.from(relays)} />
       </Content>
     </Card>
   {/each}

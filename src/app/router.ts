@@ -84,7 +84,7 @@ export const asCsv = name => ({
   decode: decodeAs(name, decodeCsv),
 })
 
-export const asMedia = name => ({
+export const asUrlComponent = name => ({
   encode: encodeURIComponent,
   decode: decodeAs(name, decodeURIComponent),
 })
@@ -124,6 +124,7 @@ export const asChannelId = {
 export const router = new Router()
 
 router.extend("media", encodeURIComponent)
+router.extend("labels", encodeURIComponent)
 router.extend("relays", nip19.nrelayEncode)
 router.extend("channels", getNip24ChannelId)
 

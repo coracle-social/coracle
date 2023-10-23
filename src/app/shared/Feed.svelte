@@ -90,7 +90,7 @@
   {/if}
   <div class="flex flex-col gap-4">
     {#each $notes as note, i (note.id)}
-      <div in:fly={{y: 20, duration: i < 5 ? 100 : 0}}>
+      <div in:fly={{y: 20}}>
         <Note
           depth={$hideReplies ? 0 : 2}
           context={note.replies || []}

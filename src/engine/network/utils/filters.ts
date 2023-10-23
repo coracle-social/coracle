@@ -140,7 +140,7 @@ export const getPubkeysWithDefaults = (pubkeys: Set<string>) => {
     pubkeys = new Set(env.get().DEFAULT_FOLLOWS)
   }
 
-  return shuffle(Array.from(pubkeys)).slice(0, 1024)
+  return shuffle(Array.from(pubkeys)).slice(0, 1000)
 }
 
 export const compileFilter = (filter: DynamicFilter): Filter => {
