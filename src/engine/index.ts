@@ -10,6 +10,7 @@ import {pubkey, sessions} from "./session"
 import {channels} from "./channels"
 
 export * from "./core"
+export * from "./auth"
 export * from "./channels"
 export * from "./events"
 export * from "./labels"

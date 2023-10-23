@@ -10,7 +10,6 @@
   import {uploadToMediaProvider, getSettings} from "src/engine"
   import {displayDomain} from "src/util/misc"
 
-
   export let icon = null
   export let value = null
   export let multi = false
@@ -42,16 +41,22 @@
               })
             )
 
-            for (const file of files) {
-              const body = new FormData()
-              body.append("file[]", file)
-              const result = await uploadToMediaProvider(settings.nip96_url, body)
-              if (result != "" && result != null){
+            const results = await Promise.all(
+              files.map(file => {
+                const body = new FormData()
+
+                body.append("file[]", file)
+
+                return uploadToMediaProvider(settings.nip96_url, body)
+              })
+            )
+
+            for (const result of results) {
+              if (result) {
                 value = result
                 onChange?.(value)
               }
             }
-
           } finally {
             isOpen = false
             loading = false
@@ -93,8 +98,7 @@
   <Modal mini onEscape={decline}>
     <Content>
       {#if loading}
-        <Spinner delay={0}>Uploading your media using {displayDomain(settings.nip96_url) }</Spinner>
-
+        <Spinner delay={0}>Uploading your media using {displayDomain(settings.nip96_url)}</Spinner>
       {:else}
         <h1 class="staatliches text-2xl">Upload a File</h1>
         <p>Click below to select a file to upload.</p>

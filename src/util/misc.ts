@@ -346,3 +346,17 @@ export const buildQueryString = params => "?" + new URLSearchParams(params)
 
 export const parseQueryString = path =>
   fromPairs(Array.from(new URLSearchParams(last(path.split("?")))))
+
+export const joinPath = (...parts) => {
+  let path = ""
+
+  for (let part of parts) {
+    if (!part.endsWith("/")) {
+      part += "/"
+    }
+
+    path += part
+  }
+
+  return path.slice(0, -1)
+}
