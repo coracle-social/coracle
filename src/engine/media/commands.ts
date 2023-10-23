@@ -76,7 +76,7 @@ export const uploadToMediaProvider = async (url: string, body: FormData): Promis
   };
     
   if(response.nip94_event.tags.length > 0){
-    console.log("response.nip94_event.tags", Tags.from(response.nip94_event).type("url").values().first());
+    console.log("URL:", Tags.from(response.nip94_event).type("url").values().first());
     return Tags.from(response.nip94_event).type("url").values().first();
   };
 
@@ -111,6 +111,9 @@ export const getMediaProviderURL = cached({
 })
 
 const fetchMediaProviderURL = async (url:string): Promise<string> => {
+
+  if(url.endsWith("/")){ url = url + ".well-known/nostr/nip96.json"} else {url = url + "/.well-known/nostr/nip96.json"}
+
   let NIP96json = await Fetch.fetchJson(url, {method: "GET",})
   console.debug("NIP96_json", NIP96json) 
   if (NIP96json.api_url.length > 0){
