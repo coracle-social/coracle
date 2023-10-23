@@ -8,25 +8,27 @@
 
   const person = derivePerson(pubkey)
   const following = deriveFollowing(pubkey)
-  const wotScore = getWotScore($session.pubkey, pubkey)
+  const wotScore = getWotScore($session?.pubkey, pubkey)
 </script>
 
 <div class={cx("flex items-center gap-1", $$props.class)}>
   <span class="cy-person-name">{displayPerson($person)}</span>
-  <div class="flex items-center gap-1 font-normal">
-    <Popover triggerType="mouseenter">
-      <span slot="trigger" class="px-2 py-1 text-xs">
-        {#if $following}
-          <i class="fa fa-check-circle text-accent" />
-        {:else}
-          <i class="fa fa-diagram-project text-accent" />
-        {/if}
-        {wotScore}
-      </span>
-      <Anchor modal slot="tooltip" class="flex items-center gap-1" href="/help/web-of-trust">
-        <i class="fa fa-info-circle" />
-        WoT Score
-      </Anchor>
-    </Popover>
-  </div>
+  {#if $session}
+    <div class="flex items-center gap-1 font-normal">
+      <Popover triggerType="mouseenter">
+        <span slot="trigger" class="px-2 py-1 text-xs">
+          {#if $following}
+            <i class="fa fa-check-circle text-accent" />
+          {:else}
+            <i class="fa fa-diagram-project text-accent" />
+          {/if}
+          {wotScore}
+        </span>
+        <Anchor modal slot="tooltip" class="flex items-center gap-1" href="/help/web-of-trust">
+          <i class="fa fa-info-circle" />
+          WoT Score
+        </Anchor>
+      </Popover>
+    </div>
+  {/if}
 </div>

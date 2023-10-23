@@ -21,7 +21,9 @@
 <Anchor external href={`https://zap.stream/${naddr}`}>
   <Card interactive>
     <Content class="relative">
-      <PersonBadge pubkey={p} />
+      {#if p}
+        <PersonBadge pubkey={p} />
+      {/if}
       <div class="flex items-center justify-between gap-2">
         <p class="staatliches text-2xl">{title}</p>
         <Chip class="text-sm">
