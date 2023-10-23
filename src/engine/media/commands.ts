@@ -112,7 +112,7 @@ export const getMediaProviderURL = cached({
 
 const fetchMediaProviderURL = async (url:string): Promise<string> => {
   let NIP96json = await Fetch.fetchJson(url, {method: "GET",})
-  console.debug("NIP96_json", NIP96json)
+  console.debug("NIP96_json", NIP96json) 
   if (NIP96json.api_url.length > 0){
     return NIP96json.api_url
   }
