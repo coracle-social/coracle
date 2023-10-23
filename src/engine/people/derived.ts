@@ -18,21 +18,3 @@ export const network = user.derived(getNetwork)
 export const deriveMuted = (value: string) => mutes.derived(s => s.has(value))
 
 export const deriveFollowing = (pubkey: string) => follows.derived(s => s.has(pubkey))
-
-export const possibleImposters = peopleWithName.throttle(1000).derived($people => {
-  const pubkeys = new Set()
-  const seen = new Set()
-
-  for (const person of $people) {
-    const {name, about} = person.profile
-    const key = `${name}:${about}`
-
-    if (seen.has(key)) {
-      pubkeys.add(person.pubkey)
-    } else {
-      seen.add(key)
-    }
-  }
-
-  return pubkeys
-})

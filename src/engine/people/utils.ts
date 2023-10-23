@@ -114,8 +114,7 @@ export const getFollowsWhoMute = cached({
 })
 
 export const getWotScore = (pk, tpk) =>
-  getFollowsWhoFollow(pk, tpk).length -
-  Math.pow(2, Math.log(Math.max(1, getFollowsWhoMute(pk, tpk).length)))
+  getFollowsWhoFollow(pk, tpk).length - Math.pow(2, Math.log(getFollowsWhoMute(pk, tpk).length))
 
 const annotatePerson = pubkey => {
   const relays = getPubkeyHints.limit(3).getHints(pubkey, "write")
