@@ -53,7 +53,7 @@
           <i slot="before" class="fa-solid fa-server" />
         </Input>
         <p slot="info">
-          Enter a custom url for {appName}'s upload provider server.</p>
+          Enter a custom url for {appName}'s upload provider server. You can find a full list of NIP-96 compatible servers <a href="https://github.com/quentintaranpino/NIP96-compatible-servers">here</a></p>
       </Field>
       <Field label="Dufflepud URL">
         <Input bind:value={settings.dufflepud_url}>
