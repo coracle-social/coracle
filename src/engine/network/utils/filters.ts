@@ -130,9 +130,9 @@ export const getFilterGenerality = filter => {
 }
 
 export const guessFilterDelta = filters => {
-  const avgGenerality = avg(filters.map(getFilterGenerality))
+  const avgSpecificity = 1 - avg(filters.map(getFilterGenerality))
 
-  return Math.round(seconds(1, "day") * Math.max(0.005, avgGenerality))
+  return Math.round(seconds(1, "day") * Math.max(0.005, avgSpecificity))
 }
 
 export const getPubkeysWithDefaults = (pubkeys: Set<string>) => {
