@@ -86,7 +86,7 @@ export class FeedLoader {
 
     // Wait until a good number of subscriptions have completed to reduce the chance of
     // out of order notes
-    this.ready = race(0.2, pluck("result", subs))
+    this.ready = race(0.2, subs.map(s => new Promise(r => s.on('close', r))))
   }
 
   discardEvents(events) {

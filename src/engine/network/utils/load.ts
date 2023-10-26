@@ -7,7 +7,7 @@ import type {Event} from "src/engine/events/model"
 import {mergeHints} from "src/engine/relays/utils"
 import type {Filter} from "../model"
 import {matchFilters, combineFilters} from "./filters"
-import {Subscription} from "./subscribe"
+import {subscribe} from "./subscribe"
 import {Tracker} from "./tracker"
 
 export type LoadOneOpts = {
@@ -30,7 +30,7 @@ export type LoadItem = {
 
 const loadChunk = (chunk, relays, tracker) => {
   const filters = combineFilters(chunk.flatMap(getPath(["request", "filters"])))
-  const sub = new Subscription({relays, filters, timeout: 15000})
+  const sub = subscribe({relays, filters, timeout: 15000})
 
   const chunkResults = []
   for (const item of chunk) {

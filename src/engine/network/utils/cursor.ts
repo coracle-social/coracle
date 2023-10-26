@@ -1,12 +1,13 @@
 import {mergeRight, pluck, max, identity, sortBy} from "ramda"
 import {first} from "hurdak"
+import type {Subscription} from "paravel"
 import {now} from "src/util/misc"
 import {info} from "src/util/logger"
 import type {Event} from "src/engine/events/model"
 import type {Filter} from "../model"
 import {getUrls} from "./executor"
 import {guessFilterDelta} from "./filters"
-import {Subscription} from "./subscribe"
+import {subscribe} from "./subscribe"
 import {Tracker} from "./tracker"
 
 export type CursorOpts = {
@@ -50,36 +51,34 @@ export class Cursor {
 
     let count = 0
 
-    const sub = new Subscription({
+    const sub = subscribe({
       timeout: 3000,
       relays: [relay],
-      filters: filters.map(mergeRight({until, limit, since})),
       tracker: this.opts.tracker,
-    })
+      filters: filters.map(mergeRight({until, limit, since})),
+      onEvent: (event: Event) => {
+        this.until = Math.min(until, event.created_at) - 1
+        this.buffer.push(event)
 
-    sub.on("event", (event: Event) => {
-      this.until = Math.min(until, event.created_at) - 1
-      this.buffer.push(event)
+        count += 1
 
-      count += 1
+        onEvent?.(event)
+      },
+      onClose: () => {
+        this.loading = false
 
-      onEvent?.(event)
-    })
+        // Relays can't be relied upon to return events in descending order, do exponential
+        // windowing to ensure we get the most recent stuff on first load, but eventually find it all
+        if (count === 0) {
+          this.delta *= 10
+        }
 
-    sub.on("close", () => {
-      this.loading = false
-
-      // Relays can't be relied upon to return events in descending order, do exponential
-      // windowing to ensure we get the most recent stuff on first load, but eventually find it all
-      if (count === 0) {
-        this.delta *= 10
-      }
-
-      if (this.since === 0) {
-        this.done = true
-      } else {
-        this.since = Math.max(0, this.since - this.delta)
-      }
+        if (this.since === 0) {
+          this.done = true
+        } else {
+          this.since = Math.max(0, this.since - this.delta)
+        }
+      },
     })
 
     return sub
@@ -140,7 +139,7 @@ export class MultiCursor {
     return this.cursors.reduce((n, c) => n + c.buffer.length, 0)
   }
 
-  take(n: number): [Subscription[], Event[]] {
+  take(n: number): [(typeof Subscription)[], Event[]] {
     const events = []
 
     while (events.length < n) {
