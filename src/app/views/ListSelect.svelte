@@ -14,7 +14,7 @@
 
   const label = type === "p" ? "person" : "topic"
 
-  const modifyList = updateIn("tags", (tags: string[][]) => [...tags, [type, value]])
+  const modifyList = updateIn("tags", (tags: string[][] = []) => [...tags, [type, value]])
 
   const selectlist = list =>
     router
