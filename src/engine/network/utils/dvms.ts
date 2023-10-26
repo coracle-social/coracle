@@ -6,7 +6,6 @@ import {subscribe} from "./subscribe"
 
 export type DVMRequestOpts = {
   requestKind: number
-  resultKind: number
   input: any
   tags?: string[][]
   relays?: string[]
@@ -15,8 +14,7 @@ export type DVMRequestOpts = {
 }
 
 export const dvmRequest = async ({
-  requestKind,
-  resultKind,
+  kind,
   input,
   tags = [],
   timeout = 30_000,
@@ -31,10 +29,10 @@ export const dvmRequest = async ({
     input = JSON.stringify(input)
   }
 
-  publishEvent(requestKind, {relays, tags: [["i", input], ...tags]})
+  publishEvent(kind, {relays, tags: [["i", input], ...tags]})
 
   return new Promise(resolve => {
-    const kinds = [resultKind]
+    const kinds = [kind + 1000]
 
     if (onProgress) {
       kinds.push(7000)
