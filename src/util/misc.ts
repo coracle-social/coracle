@@ -1,5 +1,6 @@
 import {bech32, utf8} from "@scure/base"
 import {debounce} from "throttle-debounce"
+import {now} from "paravel"
 import {pluck, fromPairs, last, identity, sum, is, equals} from "ramda"
 import {ensurePlural, Storage, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js/dist/fuse.min.js"
@@ -14,8 +15,6 @@ export const fuzzy = <T>(data: T[], opts = {}) => {
     return q ? pluck("item", fuse.search(q.slice(0, 32)) as any[]) : data
   }
 }
-
-export const now = () => Math.round(new Date().valueOf() / 1000)
 
 export const getTimeZone = () => new Date().toString().match(/GMT[^\s]+/)
 

@@ -1,11 +1,11 @@
-import {now} from "src/util/misc"
+import {now} from "paravel"
 import {getUserRelayUrls} from "src/engine/relays/utils"
 import type {Event} from "src/engine/events/model"
 import {publishEvent} from "./publish"
 import {subscribe} from "./subscribe"
 
 export type DVMRequestOpts = {
-  requestKind: number
+  kind: number
   input: any
   tags?: string[][]
   relays?: string[]

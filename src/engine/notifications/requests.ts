@@ -1,6 +1,6 @@
-import {pluck, identity, max, slice, filter, without, sortBy} from "ramda"
+import {now} from "paravel"
 import {seconds, batch, doPipe} from "hurdak"
-import {now} from "src/util/misc"
+import {pluck, identity, max, slice, filter, without, sortBy} from "ramda"
 import {noteKinds, findReplyId, reactionKinds} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import type {Filter} from "src/engine/network/model"

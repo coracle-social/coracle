@@ -1,6 +1,6 @@
 import {Fetch} from "hurdak"
+import {createEvent} from "paravel"
 import {warn} from "src/util/logger"
-import {buildEvent} from "src/engine/network/utils"
 import {signer} from "src/engine/session/derived"
 import {getZapperForPubkey} from "./utils"
 
@@ -23,7 +23,7 @@ export const requestZap = async (content, amount, {pubkey, relays, eid = null, l
     tags.push(["e", eid])
   }
 
-  const zap = await signer.get().signAsUser(buildEvent(9734, {content, tags}))
+  const zap = await signer.get().signAsUser(createEvent(9734, {content, tags}))
   const zapString = encodeURI(JSON.stringify(zap))
   const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
   const res = await Fetch.fetchJson(zapper.callback + qs)

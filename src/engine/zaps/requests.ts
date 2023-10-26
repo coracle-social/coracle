@@ -1,4 +1,4 @@
-import {now} from "src/util/misc"
+import {now} from "paravel"
 import {subscribe} from "src/engine/network/utils"
 import {getZapperForPubkey} from "./utils"
 

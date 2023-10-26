@@ -1,6 +1,6 @@
 import {without, uniq} from "ramda"
 import {chunk, seconds} from "hurdak"
-import {now} from "src/util/misc"
+import {now} from "paravel"
 import {personKinds, appDataKeys} from "src/util/nostr"
 import {people} from "src/engine/people/state"
 import {mergeHints, getPubkeyHints} from "src/engine/relays/utils"

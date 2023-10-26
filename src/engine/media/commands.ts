@@ -1,12 +1,12 @@
 import {Fetch} from "hurdak"
+import {createEvent} from "paravel"
 import {generatePrivateKey} from "nostr-tools"
 import {signer} from "src/engine/session/derived"
-import {buildEvent} from "src/engine/network/utils"
 
 export const uploadToNostrBuild = async body => {
   const $signer = signer.get()
   const url = "https://nostr.build/api/v2/upload/files"
-  const template = buildEvent(27235, {
+  const template = createEvent(27235, {
     tags: [
       ["u", url],
       ["method", "POST"],

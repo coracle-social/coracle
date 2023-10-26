@@ -1,7 +1,8 @@
 <script lang="ts">
   import {find, assocPath} from "ramda"
   import {onMount} from "svelte"
-  import {now, createScroller, formatTimestampAsDate} from "src/util/misc"
+  import {now} from "paravel"
+  import {createScroller, formatTimestampAsDate} from "src/util/misc"
   import {noteKinds, reactionKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"

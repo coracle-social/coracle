@@ -1,7 +1,7 @@
 import {mergeRight, pluck, max, identity, sortBy} from "ramda"
 import {first} from "hurdak"
 import type {Subscription} from "paravel"
-import {now} from "src/util/misc"
+import {now} from "paravel"
 import {info} from "src/util/logger"
 import type {Event} from "src/engine/events/model"
 import type {Filter} from "../model"

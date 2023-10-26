@@ -13,7 +13,8 @@ import {
   assoc,
 } from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
-import {now, race, pushToKey} from "src/util/misc"
+import {now} from "paravel"
+import {race, pushToKey} from "src/util/misc"
 import {findReplyId, noteKinds, reactionKinds, LOCAL_RELAY_URL} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
@@ -86,7 +87,10 @@ export class FeedLoader {
 
     // Wait until a good number of subscriptions have completed to reduce the chance of
     // out of order notes
-    this.ready = race(0.2, subs.map(s => new Promise(r => s.on('close', r))))
+    this.ready = race(
+      0.2,
+      subs.map(s => new Promise(r => s.on("close", r)))
+    )
   }
 
   discardEvents(events) {

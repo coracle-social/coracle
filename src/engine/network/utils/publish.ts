@@ -1,8 +1,8 @@
 import EventEmitter from "events"
+import {createEvent} from "paravel"
 import {last, omit, uniqBy} from "ramda"
 import {doPipe, defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"
-import {now} from "src/util/misc"
 import {parseContent} from "src/util/notes"
 import {Tags, findRoot, findReply} from "src/util/nostr"
 import type {Event, NostrEvent} from "src/engine/events/model"
@@ -118,13 +118,6 @@ export type EventOpts = {
   tags?: string[][]
 }
 
-export const buildEvent = (
-  kind: number,
-  {content = "", tags = [], created_at = null}: EventOpts
-) => {
-  return {kind, content, tags, created_at: created_at || now()}
-}
-
 export type PublishOpts = EventOpts & {
   relays?: string[]
 }
@@ -137,7 +130,7 @@ export const publishEvent = async (
     timeout: 5000,
     relays: relays || getUserRelayUrls("write"),
     event: await signer.get().signAsUser(
-      buildEvent(kind, {
+      createEvent(kind, {
         content,
         tags: uniqTags([...tags, ...tagsFromContent(content)]),
       })

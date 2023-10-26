@@ -1,11 +1,10 @@
 import type {SubscriptionOpts} from "paravel"
-import {Subscription} from "paravel"
+import {Subscription, now} from "paravel"
 import {assoc, map} from "ramda"
 import {updateIn} from "hurdak"
-import {now} from "src/util/misc"
 import type {Event} from "src/engine/events/model"
 import {projections} from "src/engine/core/projections"
-import {getUrls, getExecutor} from './executor'
+import {getUrls, getExecutor} from "./executor"
 import {Tracker} from "./tracker"
 
 export type SubscribeOpts = typeof SubscriptionOpts & {

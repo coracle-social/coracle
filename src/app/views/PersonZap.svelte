@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {now} from "src/util/misc"
+  import {now} from "paravel"
   import QRCode from "src/partials/QRCode.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"

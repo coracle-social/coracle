@@ -1,7 +1,7 @@
 import {generatePrivateKey} from "nostr-tools"
 import {assoc, whereEq, when, map} from "ramda"
 import {createMapOf} from "hurdak"
-import {now} from "src/util/misc"
+import {now} from "paravel"
 import {appDataKeys} from "src/util/nostr"
 import {EventKind} from "src/engine/events/model"
 import {Publisher, publishEvent, mention} from "src/engine/network/utils"

@@ -1,7 +1,8 @@
 <script lang="ts">
   import {identity} from "ramda"
   import {seconds} from "hurdak"
-  import {fuzzy, now} from "src/util/misc"
+  import {now} from "paravel"
+  import {fuzzy} from "src/util/misc"
   import {toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Content from "src/partials/Content.svelte"

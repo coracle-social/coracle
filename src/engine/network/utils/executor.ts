@@ -1,6 +1,6 @@
 import {max, partition, equals} from "ramda"
 import {noop, pickVals} from "hurdak"
-import {Plex, Relays, Executor, Multi} from "paravel"
+import {Plex, Relays, Executor, Multi, createEvent} from "paravel"
 import {error, warn} from "src/util/logger"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {normalizeRelayUrl} from "src/engine/relays/utils"
@@ -9,7 +9,6 @@ import {pool} from "src/engine/network/state"
 import {getSetting} from "src/engine/session/utils"
 import {signer, canSign} from "src/engine/session/derived"
 import {LocalTarget} from "./targets"
-import {buildEvent} from "./publish"
 
 export const getUrls = (relays: string[]) => {
   const {FORCE_RELAYS} = env.get()
@@ -65,7 +64,7 @@ export const onAuth = async (url, challenge) => {
     seenChallenges.add(challenge)
 
     const event = await signer.get().signAsUser(
-      buildEvent(22242, {
+      createEvent(22242, {
         tags: [
           ["challenge", challenge],
           ["relay", url],

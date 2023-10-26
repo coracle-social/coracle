@@ -1,5 +1,5 @@
 import {reject} from "ramda"
-import {now} from "src/util/misc"
+import {now} from "paravel"
 import {stateKey, user, canSign} from "src/engine/session/derived"
 import {updateStore} from "src/engine/core/commands"
 import {publishEvent, mention} from "src/engine/network/utils"

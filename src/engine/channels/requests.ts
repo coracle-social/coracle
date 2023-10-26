@@ -1,6 +1,6 @@
 import {pluck, assocPath} from "ramda"
 import {batch, seconds} from "hurdak"
-import {now} from "src/util/misc"
+import {now} from "paravel"
 import {EventKind} from "src/engine/events/model"
 import {sessions} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
