@@ -138,7 +138,9 @@ export const publishEvent = async (
   })
 }
 
-export const uniqTags = uniqBy((t: string[]) => t.slice(0, 2).join(":"))
+export const uniqTags = uniqBy((t: string[]) =>
+  t[0] === "param" ? t.join(":") : t.slice(0, 2).join(":")
+)
 
 export const getPubkeyPetname = (pubkey: string) => {
   const person = people.key(pubkey).get()
