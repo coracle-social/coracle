@@ -47,7 +47,7 @@ const MULTIPLEXTR_URL = import.meta.env.VITE_MULTIPLEXTR_URL
 const FORCE_RELAYS = fromCsv(import.meta.env.VITE_FORCE_RELAYS)
 
 const DVM_RELAYS =
-  FORCE_RELAYS.length > 0 ? FORCE_RELAYS : fromCsv(import.meta.env.VITE_FORCE_RELAYS)
+  FORCE_RELAYS.length > 0 ? FORCE_RELAYS : fromCsv(import.meta.env.VITE_DVM_RELAYS)
 
 const SEARCH_RELAYS =
   FORCE_RELAYS.length > 0 ? FORCE_RELAYS : ["wss://relay.nostr.band", "wss://nostr.wine"]

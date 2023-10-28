@@ -117,6 +117,10 @@ export const selectHints = (hints: Iterable<string>, limit: number = null) => {
     limit = getSetting("relay_limit")
   }
 
+  if (env.get().FORCE_RELAYS.length > 0) {
+    return env.get().FORCE_RELAYS.slice(0, limit)
+  }
+
   for (const url of chain(hints, getUserRelayUrls(RelayMode.Read), env.get().DEFAULT_RELAYS)) {
     if (seen.has(url)) {
       continue

@@ -34,6 +34,7 @@
     mergeHints,
     loadPubkeys,
     sortEventsDesc,
+    loadReactions,
     isChildOf,
   } from "src/engine"
 
@@ -163,8 +164,15 @@
       })
     }
 
+
     if (event.pubkey) {
+      const hints = getReplyHints(event)
+
       loadPubkeys([event.pubkey])
+
+      for await (const c of loadReactions(event.id, hints)) {
+        console.log(event.id, c)
+      }
 
       const kinds = [1, 7]
 
@@ -173,7 +181,7 @@
       }
 
       load({
-        relays: mergeHints([relays, getReplyHints(event)]).concat(LOCAL_RELAY_URL),
+        relays: mergeHints([relays, hints]).concat(LOCAL_RELAY_URL),
         filters: getReplyFilters([event], {kinds}),
         onEvent: batch(200, events => {
           ctx = uniqBy(prop("id"), ctx.concat(events))
