@@ -74,9 +74,6 @@
   <NavItem href="/about">
     <i class="fa fa-info-circle mr-2" /> About
   </NavItem>
-  <NavItem external href="https://github.com/coracle-social/coracle/issues/new">
-    <i class="fa fa-message mr-2" /> Feedback
-  </NavItem>
   <li class="absolute bottom-0 flex w-full justify-center gap-2 p-2 text-sm text-gray-5">
     <Anchor external theme="anchor" href="/public/terms.html">Terms</Anchor>
     &bull;
