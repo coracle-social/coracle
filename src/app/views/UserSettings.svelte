@@ -21,7 +21,7 @@
 
   document.title = "Settings"
   
-  const searchUploadProviders = fuzzy(settings.nip96_url)
+  const searchUploadProviders = fuzzy((import.meta.env.VITE_NIP96_URL || "").split(","))
 
 </script>
 

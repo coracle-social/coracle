@@ -10,7 +10,7 @@ export const getDefaultSettings = () => ({
   report_analytics: true,
   auto_authenticate: false,
   min_wot_score: 1,
-  nip96_url: ["https://nostrcheck.me","https://nostr.build"],
+  nip96_url: (import.meta.env.VITE_NIP96_URL || "").split(","),
   imgproxy_url: env.get().IMGPROXY_URL,
   dufflepud_url: env.get().DUFFLEPUD_URL,
   multiplextr_url: env.get().MULTIPLEXTR_URL,
