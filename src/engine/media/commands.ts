@@ -14,7 +14,7 @@ export const getMediaProviderURL = cached({
 const fetchMediaProviderURL = async host =>
   prop("api_url", await Fetch.fetchJson(joinPath(host, ".well-known/nostr/nip96.json")))
 
-export const uploadToMediaProvider = async (url, body) => {
+export const uploadToMediaProvider =  async (url, body) => {
   const startTime = now()
   const apiUrl = await getMediaProviderURL(url)
   const response = await nip98Fetch(apiUrl, "POST", body)
