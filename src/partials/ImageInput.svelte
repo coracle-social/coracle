@@ -42,16 +42,22 @@
             )
 
             const results = await Promise.all(
-              files.map(file => {
+              files.map(async file => {
                 const body = new FormData()
 
                 body.append("file[]", file)
-
-                return uploadToMediaProvider(settings.nip96_url, body)
+                
+                let urls = []
+                for (const url of settings.nip96_url) {
+                  let result = await uploadToMediaProvider(url, body)
+                  console.debug(result)
+                  urls.push(result)
+                }
+                return urls
               })
             )
 
-            for (const result of results) {
+           for (const result of results) {
               if (result) {
                 value = result
                 onChange?.(value)
@@ -98,7 +104,8 @@
   <Modal mini onEscape={decline}>
     <Content>
       {#if loading}
-        <Spinner delay={0}>Uploading your media using {displayDomain(settings.nip96_url)}</Spinner>
+        <Spinner delay={0}>Uploading your media using several media servers</Spinner>
+        <!-- <Spinner delay={0}>Uploading your media using several media serversayDomain(settings.nip96_url.join(' '))}</Spinner> -->
       {:else}
         <h1 class="staatliches text-2xl">Upload a File</h1>
         <p>Click below to select a file to upload.</p>

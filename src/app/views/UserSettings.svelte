@@ -8,6 +8,8 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {env, getSettings, publishSettings} from "src/engine"
+  import MultiSelect from "src/partials/MultiSelect.svelte"
+  import { fuzzy } from "src/util/misc"
 
   let settings = getSettings()
 
@@ -18,6 +20,9 @@
   }
 
   document.title = "Settings"
+  
+  const searchUploadProviders = fuzzy(settings.nip96_url)
+
 </script>
 
 <form on:submit|preventDefault={submit}>
@@ -49,12 +54,18 @@
         </p>
       </FieldInline>
       <Field label="Upload Provider URL">
-        <Input bind:value={settings.nip96_url}>
+        <!-- <Input bind:value={settings.nip96_url}>
           <i slot="before" class="fa-solid fa-server" />
-        </Input>
+        </Input> -->
         <p slot="info">
           Enter a custom url for {appName}'s upload provider server. You can find a full list of NIP-96 compatible servers <a href="https://github.com/quentintaranpino/NIP96-compatible-servers">here</a></p>
-      </Field>
+          <MultiSelect
+          search={searchUploadProviders}
+          bind:value= {settings.nip96_url}
+        >
+          </MultiSelect>
+        </Field>
+
       <Field label="Dufflepud URL">
         <Input bind:value={settings.dufflepud_url}>
           <i slot="before" class="fa-solid fa-server" />
