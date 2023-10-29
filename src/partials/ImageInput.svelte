@@ -8,7 +8,6 @@
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile, stripExifData, blobToFile} from "src/util/html"
   import {uploadToMediaProvider, getSettings} from "src/engine"
-  import {displayDomain} from "src/util/misc"
 
   export let icon = null
   export let value = null
@@ -104,8 +103,7 @@
   <Modal mini onEscape={decline}>
     <Content>
       {#if loading}
-        <Spinner delay={0}>Uploading your media using several media servers</Spinner>
-        <!-- <Spinner delay={0}>Uploading your media using several media serversayDomain(settings.nip96_url.join(' '))}</Spinner> -->
+        <Spinner delay={0}>Uploading files using the following servers: {settings.nip96_url.join(' | ')}</Spinner>
       {:else}
         <h1 class="staatliches text-2xl">Upload a File</h1>
         <p>Click below to select a file to upload.</p>
