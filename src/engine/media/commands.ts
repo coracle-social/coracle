@@ -59,7 +59,7 @@ export const createNIP94 = async (events) => {
 
   console.debug("tags", tags)
 
-  const template = buildEvent(30023, {tags})
+  const template = buildEvent(1063, {tags})
   const $signer = signer.get()
 
   const event = $signer.canSign()
