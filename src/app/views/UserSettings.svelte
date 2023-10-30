@@ -58,7 +58,7 @@
           Allows {appName} to authenticate with relays that have access controls automatically.
         </p>
       </FieldInline>
-      <Field label="Upload Provider URL">
+      <Field label="Upload Providers URL">
         <p slot="info">
          Enter a custom url for {appName}'s upload provider server. You can find a full list of NIP-96 compatible servers <a href="https://github.com/quentintaranpino/NIP96-compatible-servers">here</a></p>
         <MultiSelect search={searchUploadProviders || ""} bind:value= {settings.nip96_url}
