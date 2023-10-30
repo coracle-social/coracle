@@ -21,7 +21,12 @@
 
   document.title = "Settings"
    
-  const searchUploadProviders = fuzzy(settings.nip96_url, {keys: ["url"]})
+  let defaultNip96Urls: { url: string}[] = [];
+  for (const url of JSON.parse(JSON.stringify(import.meta.env.VITE_NIP96_URLS.split(","))))
+  {
+    defaultNip96Urls.push({url: url})
+  }
+  const searchUploadProviders = fuzzy(defaultNip96Urls, {keys: ["url"]})
 
 </script>
 
