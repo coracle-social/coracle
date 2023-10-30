@@ -21,6 +21,11 @@
   let isOpen = false
   let settings = getSettings()
 
+  let selectedServers = [] 
+  for (const server of settings.nip96_url) {
+    selectedServers.push(server.url)
+  }
+
   $: {
     if (input) {
       listener = listenForFile(input, async inputFiles => {
@@ -47,10 +52,13 @@
                 body.append("file[]", file)
                 
                 let urls = []
-                for (const url of settings.nip96_url) {
-                  let result = await uploadToMediaProvider(url, body)
-                  console.debug(result)
-                  urls.push(result)
+                for (const server of settings.nip96_url) {
+                  try{
+                    let result = await uploadToMediaProvider(server.url, body)
+                    urls.push(result)
+                  } catch (e) {
+                    console.error(e)
+                  }
                 }
                 return urls
               })
@@ -103,7 +111,7 @@
   <Modal mini onEscape={decline}>
     <Content>
       {#if loading}
-        <Spinner delay={0}>Uploading files using the following servers: {settings.nip96_url.join(' | ')}</Spinner>
+        <Spinner delay={0}>Uploading files using the following servers: {selectedServers}</Spinner>
       {:else}
         <h1 class="staatliches text-2xl">Upload a File</h1>
         <p>Click below to select a file to upload.</p>
