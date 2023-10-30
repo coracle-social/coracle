@@ -7,7 +7,8 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile, stripExifData, blobToFile} from "src/util/html"
-  import {uploadToMediaProvider, getSettings} from "src/engine"
+  import {uploadToMediaProvider, getSettings, createNIP94} from "src/engine"
+  import { Tags } from "src/util/nostr"
 
   export let icon = null
   export let value = null
@@ -51,16 +52,17 @@
 
                 body.append("file[]", file)
                 
-                let urls = []
+                let nip94Events = []
                 for (const server of settings.nip96_url) {
                   try{
                     let result = await uploadToMediaProvider(server.url, body)
-                    urls.push(result)
+                    nip94Events.push(result)
                   } catch (e) {
                     console.error(e)
                   }
                 }
-                return urls
+                console.debug(await createNIP94(nip94Events))
+                return Tags.from(nip94Events).type("url").values().first()
               })
             )
 

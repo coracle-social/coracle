@@ -4,6 +4,9 @@ import {now, joinPath} from "src/util/misc"
 import {Tags} from "src/util/nostr"
 import {cached} from "src/util/lruCache"
 import {nip98Fetch} from "src/engine/auth/commands"
+import {generatePrivateKey} from "nostr-tools"
+import {signer} from "src/engine/session/derived"
+import {buildEvent} from "src/engine/network/utils"
 
 export const getMediaProviderURL = cached({
   maxSize: 10,
@@ -34,5 +37,36 @@ export const uploadToMediaProvider =  async (url, body) => {
     await sleep(3000)
   }
 
-  return Tags.from(response.nip94_event).type("url").values().first()
+  // return Tags.from(response.nip94_event).type("url").values().first()
+  return response.nip94_event
 }
+
+export const createNIP94 = async (events) => {
+
+  const tags = []
+  for (const event of events) {
+    tags.push(["url", Tags.from(event).type("url").values().first()])
+  }
+
+  // We add only the first m field, do you think that is necessary to control all of m fields are the same?
+  tags.push(["m", Tags.from(events[0]).type("m").values().first()])
+
+  // We add only the first x field, do you think that is necessary to control all of x fields are the same?
+  tags.push(["x", Tags.from(events[0]).type("x").values().first()])
+
+  // We add only the first ox field, do you think that is necessary to control all of ox fields are the same?
+  tags.push(["ox", Tags.from(events[0]).type("ox").values().first()])
+
+  console.debug("tags", tags)
+
+  const template = buildEvent(30023, {tags})
+  const $signer = signer.get()
+
+  const event = $signer.canSign()
+    ? await $signer.signAsUser(template)
+    : await $signer.signWithKey(template, generatePrivateKey())
+
+  return event
+}
+
+
