@@ -113,6 +113,17 @@
 
   const togglePreview = () => {
     showPreview = !showPreview
+
+    //Replace compose nevent for inages array urls
+      const content = compose.parse()
+      for (const event of nip94Events) {
+        compose.clear()
+        if (showPreview){
+        compose.write(content.replace("nostr:" + nip19.neventEncode({id: event.id, relays: $relays}),Tags.from(event).type("url").values().first()))
+        }else{
+        compose.write(content.replace(Tags.from(event).type("url").values().first(),"nostr:" + nip19.neventEncode({id: event.id, relays: $relays})))
+        }
+    }
   }
 
   const setWordCount = throttle(300, () => {
