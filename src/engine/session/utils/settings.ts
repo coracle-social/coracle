@@ -10,11 +10,17 @@ export const getDefaultSettings = () => ({
   report_analytics: true,
   auto_authenticate: false,
   min_wot_score: 1,
-  nip96_url: (import.meta.env.VITE_NIP96_URL || "").split(","),
+  nip96_url: nip96Urls,
   imgproxy_url: env.get().IMGPROXY_URL,
   dufflepud_url: env.get().DUFFLEPUD_URL,
   multiplextr_url: env.get().MULTIPLEXTR_URL,
 })
+
+let nip96Urls: { url: string}[] = [];
+for (const url of JSON.parse(JSON.stringify(import.meta.env.VITE_NIP96_URLS.split(","))))
+{
+  nip96Urls.push({url: url})
+}
 
 export const getSettings = () => {
   const session = sessions.get()[pubkey.get()]
