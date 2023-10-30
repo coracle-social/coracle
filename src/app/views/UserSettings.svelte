@@ -20,8 +20,8 @@
   }
 
   document.title = "Settings"
-  
-  const searchUploadProviders = fuzzy((import.meta.env.VITE_NIP96_URL || "").split(","))
+   
+  const searchUploadProviders = fuzzy(settings.nip96_url, {keys: ["url"]})
 
 </script>
 
@@ -54,17 +54,15 @@
         </p>
       </FieldInline>
       <Field label="Upload Provider URL">
-        <!-- <Input bind:value={settings.nip96_url}>
-          <i slot="before" class="fa-solid fa-server" />
-        </Input> -->
         <p slot="info">
-          Enter a custom url for {appName}'s upload provider server. You can find a full list of NIP-96 compatible servers <a href="https://github.com/quentintaranpino/NIP96-compatible-servers">here</a></p>
-          <MultiSelect
-          search={searchUploadProviders}
-          bind:value= {settings.nip96_url}
-        >
-          </MultiSelect>
-        </Field>
+         Enter a custom url for {appName}'s upload provider server. You can find a full list of NIP-96 compatible servers <a href="https://github.com/quentintaranpino/NIP96-compatible-servers">here</a></p>
+        <MultiSelect search={searchUploadProviders || ""} bind:value= {settings.nip96_url}
+          termToItem={url => ({url})}>
+          <div slot="item" let:item>
+            <strong>{item.url}</strong> 
+          </div>
+        </MultiSelect>
+      </Field>
 
       <Field label="Dufflepud URL">
         <Input bind:value={settings.dufflepud_url}>
