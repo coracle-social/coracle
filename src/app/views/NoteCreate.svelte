@@ -5,7 +5,7 @@
   import {throttle} from "hurdak"
   import {writable} from "svelte/store"
   import {annotateMedia} from "src/util/misc"
-  import {asNostrEvent} from "src/util/nostr"
+  import {Tags, asNostrEvent} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
@@ -35,10 +35,11 @@
   let showPreview = false
   let showSettings = false
   let relays = writable(writeTo ? writeTo : getUserRelayUrls("write"))
+  let nip94Events = []
 
   const onSubmit = async () => {
     const tags = []
-    const content = compose.parse().trim()
+    let content = compose.parse().trim()
 
     if (!content) {
       return
@@ -58,6 +59,16 @@
       })
     }
 
+    if (nip94Events.length > 0) {
+      for (const event of nip94Events) {
+      // Create a NIP-94 event for each uploaded image.
+      Publisher.publish({
+                relays: $relays,
+                event: asNostrEvent(event),
+       })
+      }
+    }
+
     const pub = await publishNote(content, tags, $relays)
 
     pub.on("progress", toastProgress)
@@ -65,17 +76,24 @@
     router.clearModals()
   }
 
-  const addImage = url => {
-    images = images.concat(url)
-    compose.write("\n" + url)
+  const addImage = event => {
+    images = images.splice(0).concat(images.concat(Tags.from(event).type("url").values().first()))
+    nip94Events.push(event)
+    compose.write("\n" + "nostr:" + nip19.neventEncode({id: event.id, relays: $relays}))
   }
 
   const removeImage = url => {
     const content = compose.parse()
 
-    compose.clear()
-    compose.write(content.replace(url, ""))
-
+    // Find event on nip94Event and remove it from the compose
+    for (const event of nip94Events) {
+      if (Tags.from(event).type("url").values().first() === url) {
+        nip94Events = without([event], nip94Events)
+        compose.clear()
+        compose.write(content.replace("nostr:" + nip19.neventEncode({id: event.id, relays: $relays})," "))
+      }
+    }
+    // Find url in images and remove it from preview
     images = without([url], images)
   }
 
@@ -110,9 +128,9 @@
 
     if (quote) {
       const nevent = nip19.neventEncode({id: quote.id, relays: getEventHints(quote)})
-
       compose.nevent("nostr:" + nevent)
     }
+
   })
 </script>
 

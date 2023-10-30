@@ -7,8 +7,8 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile, stripExifData, blobToFile} from "src/util/html"
-  import {uploadToMediaProvider, getSettings, createNIP94} from "src/engine"
-  import { Tags } from "src/util/nostr"
+  import {uploadToMediaProvider, getSettings, createNIP94, Publisher, writable, getUserRelayUrls} from "src/engine"
+  import { Tags, asNostrEvent } from "src/util/nostr"
 
   export let icon = null
   export let value = null
@@ -16,11 +16,13 @@
   export let maxWidth = null
   export let maxHeight = null
   export let onChange = null
+  export let writeTo: string[] | null = null
 
   let input, listener, loading
   let files = []
   let isOpen = false
   let settings = getSettings()
+  let relays = writable(writeTo ? writeTo : getUserRelayUrls("write"))
 
   let selectedServers = [] 
   for (const server of settings.nip96_url) {
@@ -61,8 +63,9 @@
                     console.error(e)
                   }
                 }
-                console.debug(await createNIP94(nip94Events))
-                return Tags.from(nip94Events).type("url").values().first()
+                let nip94Event = await createNIP94(nip94Events)
+                console.debug(nip94Event)
+                return nip94Event
               })
             )
 
