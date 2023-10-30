@@ -116,7 +116,7 @@
   <Modal mini onEscape={decline}>
     <Content>
       {#if loading}
-        <Spinner delay={0}>Uploading files using the following servers: {selectedServers}</Spinner>
+        <Spinner delay={0}>Uploading files using: {selectedServers.join(", ")}</Spinner>
       {:else}
         <h1 class="staatliches text-2xl">Upload a File</h1>
         <p>Click below to select a file to upload.</p>
