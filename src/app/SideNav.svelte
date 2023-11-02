@@ -2,13 +2,7 @@
   import {theme, installPrompt} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import NavItem from "src/partials/NavItem.svelte"
-  import {
-    hasNewNip04Messages,
-    hasNewNip24Messages,
-    hasNewNotifications,
-    canUseGiftWrap,
-    canSign,
-  } from "src/engine"
+  import {hasNewNip04Messages, hasNewNotifications, canSign} from "src/engine"
   import {menuIsOpen} from "src/app/state"
 
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
@@ -39,23 +33,13 @@
         class="absolute left-6 top-3 h-2 w-2 rounded border border-solid border-white bg-accent" />
     {/if}
   </NavItem>
-  {#if $canUseGiftWrap}
-    <NavItem disabled={!$canSign} href="/channels">
-      <i class="fa fa-envelope mr-2" /> Messages
-      {#if $hasNewNip24Messages || $hasNewNip04Messages}
-        <div
-          class="absolute left-7 top-2 h-2 w-2 rounded border border-solid border-white bg-accent" />
-      {/if}
-    </NavItem>
-  {:else}
-    <NavItem disabled={!$canSign} href="/conversations">
-      <i class="fa fa-envelope mr-2" /> Messages
-      {#if $hasNewNip04Messages}
-        <div
-          class="absolute left-7 top-2 h-2 w-2 rounded border border-solid border-white bg-accent" />
-      {/if}
-    </NavItem>
-  {/if}
+  <NavItem disabled={!$canSign} href="/conversations">
+    <i class="fa fa-envelope mr-2" /> Messages
+    {#if $hasNewNip04Messages}
+      <div
+        class="absolute left-7 top-2 h-2 w-2 rounded border border-solid border-white bg-accent" />
+    {/if}
+  </NavItem>
   <NavItem modal href="/chat/redirect">
     <i class="fa fa-comment mr-2" /> Chat
   </NavItem>

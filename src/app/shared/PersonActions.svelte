@@ -9,7 +9,6 @@
     mute,
     unmute,
     canSign,
-    canUseGiftWrap,
     follow,
     unfollow,
     deriveMuted,
@@ -39,19 +38,11 @@
     }
 
     if (!isSelf && $canSign) {
-      if ($canUseGiftWrap) {
-        actions.push({
-          onClick: () => router.at("channels").of(pubkey).push(),
-          label: "Message",
-          icon: "envelope",
-        })
-      } else {
-        actions.push({
-          onClick: () => router.at("conversations").of(npub).push(),
-          label: "Message",
-          icon: "envelope",
-        })
-      }
+      actions.push({
+        onClick: () => router.at("conversations").of(npub).push(),
+        label: "Message",
+        icon: "envelope",
+      })
     }
 
     if (!isSelf) {
