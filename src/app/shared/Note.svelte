@@ -170,9 +170,9 @@
 
       loadPubkeys([event.pubkey])
 
-      for await (const c of loadReactions(event.id, hints)) {
-        console.log(event.id, c)
-      }
+      //  for await (const c of loadReactions(event.id, hints)) {
+      //    console.log(event.id, c)
+      //  }
 
       const kinds = [1, 7]
 
