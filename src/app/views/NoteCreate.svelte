@@ -60,10 +60,10 @@
       })
     }
 
-    if (nip94Events.length > 0) {
+    if (nip94Events.length > 0 && settings.nip94_events) {
       for (const event of nip94Events) {
       // Create a NIP-94 event for each uploaded image.
-      Publisher.publish({
+      await Publisher.publish({
                 relays: $relays,
                 event: asNostrEvent(event),
        })
