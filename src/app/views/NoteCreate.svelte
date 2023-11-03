@@ -81,7 +81,7 @@
     images = images.splice(0).concat(images.concat(Tags.from(event).type("url").values().first()))
     event.nevent = "nostr:" + nip19.neventEncode({id: event.id, relays: $relays})
     nip94Events.push(event)
-    if (settings.NIP94_events) {
+    if (settings.nip94_events) {
       compose.write("\n" + event.nevent)
     } else {
       compose.write("\n" + Tags.from(event).type("url").values().first())
@@ -94,7 +94,7 @@
       if (Tags.from(event).type("url").values().first() === url) {
         const content = compose.parse()
         compose.clear()
-        if (settings.NIP94_events) {
+        if (settings.nip94_events) {
           compose.write(content.replace(event.nevent, "")) //NIP94 enabled
         } else {
           compose.write(content.replace(url, "")) //NIP94 disabled
@@ -125,7 +125,7 @@
     showPreview = !showPreview
 
     //Replace compose nevent for inages array urls
-    if (settings.NIP94_events){
+    if (settings.nip94_events){
       for (const event of nip94Events) {
         const content = compose.parse()
         compose.clear()

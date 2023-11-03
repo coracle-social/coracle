@@ -71,7 +71,7 @@
       </Field>
 
       <Field label="Publish media as NIP94">
-        <Toggle bind:value={settings.NIP94_events} />
+        <Toggle bind:value={settings.nip94_events} />
         <p slot="info">
           Use NIP94 events instead regular URL links for every uploaded media file.
         </p>
