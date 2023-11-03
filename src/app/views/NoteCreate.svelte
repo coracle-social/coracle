@@ -78,26 +78,28 @@
 
   const addImage = event => {
     images = images.splice(0).concat(images.concat(Tags.from(event).type("url").values().first()))
+    event.nevent = "nostr:" + nip19.neventEncode({id: event.id, relays: $relays})
     nip94Events.push(event)
-    compose.write("\n" + "nostr:" + nip19.neventEncode({id: event.id, relays: $relays}))
+    compose.write("\n" + event.nevent)
   }
 
   const removeImage = url => {
-    const content = compose.parse()
-
     // Find event on nip94Event and remove it from the compose
     for (const event of nip94Events) {
       if (Tags.from(event).type("url").values().first() === url) {
-        nip94Events = without([event], nip94Events)
+        const content = compose.parse()
         compose.clear()
-        compose.write(content.replace("nostr:" + nip19.neventEncode({id: event.id, relays: $relays})," "))
+        compose.write(content.replace(event.nevent, ""))
+        nip94Events = without([event], nip94Events)
       }
     }
+
     // Find url in images and remove it from preview
     images = without([url], images)
+
   }
 
-  const closeSettings = () => {
+  const closeSettings = () => { 
     q = ""
     showSettings = false
   }
@@ -115,13 +117,13 @@
     showPreview = !showPreview
 
     //Replace compose nevent for inages array urls
-      const content = compose.parse()
       for (const event of nip94Events) {
+        const content = compose.parse()
         compose.clear()
         if (showPreview){
-        compose.write(content.replace("nostr:" + nip19.neventEncode({id: event.id, relays: $relays}),Tags.from(event).type("url").values().first()))
+        compose.write(content.replace(event.nevent,Tags.from(event).type("url").values().first()))
         }else{
-        compose.write(content.replace(Tags.from(event).type("url").values().first(),"nostr:" + nip19.neventEncode({id: event.id, relays: $relays})))
+        compose.write(content.replace(Tags.from(event).type("url").values().first(),event.nevent))
         }
     }
   }
