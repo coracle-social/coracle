@@ -18,7 +18,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {Publisher, publishNote, displayRelay, getUserRelayUrls, mention} from "src/engine"
+  import {Publisher, publishNote, displayRelay, getUserRelayUrls, mention, getSettings} from "src/engine"
   import {toastProgress} from "src/app/state"
   import {router} from "src/app/router"
   import {session, getEventHints, displayPubkey} from "src/engine"
@@ -36,6 +36,7 @@
   let showSettings = false
   let relays = writable(writeTo ? writeTo : getUserRelayUrls("write"))
   let nip94Events = []
+  let settings = getSettings()
 
   const onSubmit = async () => {
     const tags = []
@@ -80,21 +81,28 @@
     images = images.splice(0).concat(images.concat(Tags.from(event).type("url").values().first()))
     event.nevent = "nostr:" + nip19.neventEncode({id: event.id, relays: $relays})
     nip94Events.push(event)
-    compose.write("\n" + event.nevent)
+    if (settings.NIP94_events) {
+      compose.write("\n" + event.nevent)
+    } else {
+      compose.write("\n" + Tags.from(event).type("url").values().first())
+    }
   }
 
   const removeImage = url => {
-    // Find event on nip94Event and remove it from the compose
+
     for (const event of nip94Events) {
       if (Tags.from(event).type("url").values().first() === url) {
         const content = compose.parse()
         compose.clear()
-        compose.write(content.replace(event.nevent, ""))
+        if (settings.NIP94_events) {
+          compose.write(content.replace(event.nevent, "")) //NIP94 enabled
+        } else {
+          compose.write(content.replace(url, "")) //NIP94 disabled
+        }
         nip94Events = without([event], nip94Events)
       }
     }
 
-    // Find url in images and remove it from preview
     images = without([url], images)
 
   }
@@ -117,6 +125,7 @@
     showPreview = !showPreview
 
     //Replace compose nevent for inages array urls
+    if (settings.NIP94_events){
       for (const event of nip94Events) {
         const content = compose.parse()
         compose.clear()
@@ -125,6 +134,7 @@
         }else{
         compose.write(content.replace(Tags.from(event).type("url").values().first(),event.nevent))
         }
+      }
     }
   }
 

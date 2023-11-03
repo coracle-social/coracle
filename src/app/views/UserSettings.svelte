@@ -60,13 +60,21 @@
       </FieldInline>
       <Field label="Upload Providers URL">
         <p slot="info">
-         Enter a custom url for {appName}'s upload provider server. You can find a full list of NIP-96 compatible servers <a href="https://github.com/quentintaranpino/NIP96-compatible-servers">here</a></p>
+         Enter a custom url for {appName}'s upload provider server. You can find a full list of NIP-96 compatible servers <a href="https://github.com/quentintaranpino/NIP96-compatible-servers">here</a>
+        </p>
         <MultiSelect search={searchUploadProviders || ""} bind:value= {settings.nip96_url}
           termToItem={url => ({url})}>
           <div slot="item" let:item>
             <strong>{item.url}</strong> 
           </div>
         </MultiSelect>
+      </Field>
+
+      <Field label="Publish media as NIP94">
+        <Toggle bind:value={settings.NIP94_events} />
+        <p slot="info">
+          Use NIP94 events instead regular URL links for every uploaded media file.
+        </p>
       </Field>
 
       <Field label="Dufflepud URL">
