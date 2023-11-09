@@ -96,7 +96,7 @@ projections.addHandler(EventKind.AppData, async e => {
 
 projections.addHandler(EventKind.Nip04Message, async e => {
   const tags = Tags.from(e)
-  const relays = tags.relays()
+  const relays = tags.relays().all()
   const recipient = tags.type("p").values().first()
   const session = getSession(e.pubkey) || getSession(recipient)
 
@@ -155,7 +155,7 @@ projections.addHandler(EventKind.Nip44Message, e => {
         id: channelId,
         type: "nip24",
         members: pubkeys,
-        relays: uniq([...tags.relays(), ...($channel?.relays || [])]),
+        relays: uniq([...tags.relays().all(), ...($channel?.relays || [])]),
         messages: uniqBy(prop("id"), [e, ...($channel?.messages || [])]),
       }
 
