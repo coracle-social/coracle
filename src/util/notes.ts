@@ -1,7 +1,7 @@
 import {last, pluck, identity} from "ramda"
+import {fromNostrURI} from "paravel"
 import {nip19} from "nostr-tools"
 import {first, switcherFn} from "hurdak"
-import {fromNostrURI} from "src/util/nostr"
 
 export const NEWLINE = "newline"
 export const ELLIPSIS = "ellipsis"

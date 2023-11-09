@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {matchFilters} from "paravel"
   import {reject, propEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, batch} from "hurdak"
@@ -23,7 +24,6 @@
     getLnUrl,
     getZapper,
     processZaps,
-    matchFilters,
     getReplyHints,
     isEventMuted,
     getParentHints,

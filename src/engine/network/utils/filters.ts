@@ -1,36 +1,11 @@
-import {verifySignature, getEventHash, matchFilter as nostrToolsMatchFilter} from "nostr-tools"
-import {omit, any, find, prop, groupBy, uniq} from "ramda"
-import {shuffle, randomId, tryFunc, seconds, avg} from "hurdak"
+import {omit, find, prop, groupBy, uniq} from "ramda"
+import {shuffle, randomId, seconds, avg} from "hurdak"
 import {Tags} from "src/util/nostr"
-import {cached} from "src/util/lruCache"
 import {env, pubkey} from "src/engine/session/state"
 import {follows, network} from "src/engine/people/derived"
 import {mergeHints, getPubkeyHints} from "src/engine/relays/utils"
 import {Naddr} from "src/engine/events/utils"
 import type {DynamicFilter, Filter} from "../model"
-
-export const hasValidSignature = cached({
-  maxSize: 10000,
-  getKey: ([e]) => [getEventHash(e), e.sig].join(":"),
-  getValue: ([e]) => tryFunc(() => verifySignature(e)),
-})
-
-export const matchFilter = (filter, event) => {
-  if (!nostrToolsMatchFilter(filter, event)) {
-    return false
-  }
-
-  if (filter.search) {
-    const content = event.content.toLowerCase()
-    const terms = filter.search.toLowerCase().split(/\s+/g)
-
-    return any(s => content.includes(s), terms)
-  }
-
-  return true
-}
-
-export const matchFilters = (filters, event) => any(f => matchFilter(f, event), filters)
 
 export const calculateFilterGroup = ({since, until, limit, search, ...filter}: Filter) => {
   const group = Object.keys(filter)

@@ -1,11 +1,11 @@
 import {drop} from "ramda"
+import {normalizeRelayUrl, isShareableRelay} from "paravel"
 import {tryJson} from "src/util/misc"
 import {warn} from "src/util/logger"
 import {Tags} from "src/util/nostr"
 import {projections} from "src/engine/core/projections"
 import type {RelayPolicy} from "./model"
 import {RelayMode} from "./model"
-import {normalizeRelayUrl, isShareableRelay} from "./utils"
 import {saveRelay, saveRelayPolicy} from "./commands"
 
 projections.addHandler(2, e => {

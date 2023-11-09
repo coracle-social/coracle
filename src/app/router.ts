@@ -1,8 +1,8 @@
 import {last, fromPairs, identity} from "ramda"
+import {fromNostrURI} from "paravel"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {tryJson} from "src/util/misc"
-import {fromNostrURI} from "src/util/nostr"
 import {
   Naddr,
   decodePerson,

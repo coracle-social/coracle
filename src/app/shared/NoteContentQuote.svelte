@@ -1,5 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import {isShareableRelay} from "paravel"
   import {filterVals} from "hurdak"
   import {asArray} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
@@ -13,7 +14,6 @@
     displayPubkey,
     isEventMuted,
     getParentHints,
-    isShareableRelay,
     getIdFilters,
     selectHints,
   } from "src/engine"

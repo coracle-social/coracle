@@ -1,10 +1,11 @@
 <script lang="ts">
   import cx from "classnames"
   import {nip19} from "nostr-tools"
+  import {toNostrURI} from "paravel"
   import {tweened} from "svelte/motion"
   import {find, pathEq, identity, propEq, sum, pluck, sortBy} from "ramda"
   import {formatSats} from "src/util/misc"
-  import {LOCAL_RELAY_URL, asNostrEvent, getIdOrNaddr, toNostrURI} from "src/util/nostr"
+  import {LOCAL_RELAY_URL, asNostrEvent, getIdOrNaddr} from "src/util/nostr"
   import {quantify} from "hurdak"
   import {toast} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"

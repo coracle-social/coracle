@@ -2,6 +2,7 @@
   import {onDestroy} from "svelte"
   import {groupBy, filter} from "ramda"
   import {mapVals} from "hurdak"
+  import {isShareableRelay} from "paravel"
   import {createScroller} from "src/util/misc"
   import {Tags, getAvgQuality} from "src/util/nostr"
   import {getModal} from "src/partials/state"
@@ -15,7 +16,6 @@
     getPubkeyHints,
     getRelaySearch,
     relayPolicyUrls,
-    isShareableRelay,
     urlToRelay,
   } from "src/engine"
 

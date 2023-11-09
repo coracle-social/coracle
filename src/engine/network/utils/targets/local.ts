@@ -1,8 +1,7 @@
 import {sleep} from "hurdak"
-import {Emitter} from "paravel"
+import {Emitter, hasValidSignature, matchFilters} from "paravel"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {events} from "src/engine/events/derived"
-import {matchFilters, hasValidSignature} from "../filters"
 
 export class LocalTarget extends Emitter {
   constructor() {

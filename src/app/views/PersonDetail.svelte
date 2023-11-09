@@ -1,7 +1,8 @@
 <script lang="ts">
   import {identity} from "ramda"
+  import {stripProto} from "paravel"
   import {info} from "src/util/logger"
-  import {stripProto, ensureProto} from "src/util/misc"
+  import {ensureProto} from "src/util/misc"
   import {noteKinds} from "src/util/nostr"
   import {getThemeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"

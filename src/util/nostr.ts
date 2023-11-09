@@ -1,3 +1,4 @@
+import {isShareableRelay} from "paravel"
 import {nip19} from "nostr-tools"
 import {
   find,
@@ -14,7 +15,6 @@ import {
 } from "ramda"
 import {ensurePlural, between, mapVals, avg, first} from "hurdak"
 import type {Filter, Event} from "src/engine"
-import {isShareableRelay} from "src/engine"
 import {tryJson} from "src/util/misc"
 
 export const noteKinds = [1, 30023, 1063, 9802, 1808, 32123]
@@ -163,10 +163,6 @@ export const toHex = (data: string): string | null => {
 
 export const mergeFilter = (filter: Filter | Filter[], extra: Filter) =>
   is(Array, filter) ? filter.map(mergeLeft(extra)) : {...filter, ...extra}
-
-export const fromNostrURI = (s: string) => s.replace(/^nostr:\/?\/?/, "")
-
-export const toNostrURI = (s: string) => `nostr:${s}`
 
 export const getLabelQuality = (label: string, event: Event) => {
   const json = tryJson(() => JSON.parse(last(Tags.from(event).type("l").equals(label).first())))

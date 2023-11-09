@@ -1,5 +1,5 @@
 import {ensurePlural} from "hurdak"
-import {isShareableRelay} from "src/engine/relays/utils"
+import {isShareableRelay} from "paravel"
 
 export class Tracker {
   urlsByEventId = new Map()

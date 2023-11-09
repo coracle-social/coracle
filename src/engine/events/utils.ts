@@ -1,8 +1,9 @@
 import type {AddressPointer} from "nostr-tools/lib/nip19"
 import {nip19} from "nostr-tools"
 import {sortBy} from "ramda"
+import {fromNostrURI} from "paravel"
 import {tryFunc, switcherFn} from "hurdak"
-import {fromNostrURI, findReplyId, Tags} from "src/util/nostr"
+import {findReplyId, Tags} from "src/util/nostr"
 import {getEventHints} from "src/engine/relays/utils"
 import type {Event} from "./model"
 

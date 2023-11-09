@@ -1,3 +1,4 @@
+import {matchFilters} from "paravel"
 import {assoc, flatten, uniq, path as getPath} from "ramda"
 import {defer, batch} from "hurdak"
 import {pushToKey} from "src/util/misc"
@@ -6,7 +7,7 @@ import {getSetting} from "src/engine/session/utils"
 import type {Event} from "src/engine/events/model"
 import {mergeHints} from "src/engine/relays/utils"
 import type {Filter} from "../model"
-import {matchFilters, combineFilters} from "./filters"
+import {combineFilters} from "./filters"
 import {subscribe} from "./subscribe"
 import {Tracker} from "./tracker"
 

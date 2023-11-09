@@ -1,8 +1,8 @@
 <script lang="ts">
+  import {isShareableRelay} from "paravel"
   import {annotateMedia, displayUrl} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Media from "src/partials/Media.svelte"
-  import {isShareableRelay} from "src/engine"
   import {router} from "src/app/router"
 
   export let value

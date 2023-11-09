@@ -1,11 +1,11 @@
 import {join} from "ramda"
+import {cached} from "paravel"
 import {base64} from "@scure/base"
 import {randomBytes} from "@noble/hashes/utils"
 import {secp256k1} from "@noble/curves/secp256k1"
 import {sha256} from "@noble/hashes/sha256"
 import {xchacha20} from "@noble/ciphers/chacha"
 import {switcherFn} from "hurdak"
-import {cached} from "src/util/lruCache"
 import type {Session} from "src/engine/session/model"
 
 export const utf8Decoder = new TextDecoder()
