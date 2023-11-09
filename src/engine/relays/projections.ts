@@ -1,8 +1,6 @@
-import {drop} from "ramda"
-import {normalizeRelayUrl, isShareableRelay} from "paravel"
+import {normalizeRelayUrl, isShareableRelay, Tags} from "paravel"
 import {tryJson} from "src/util/misc"
 import {warn} from "src/util/logger"
-import {Tags} from "src/util/nostr"
 import {projections} from "src/engine/core/projections"
 import type {RelayPolicy} from "./model"
 import {RelayMode} from "./model"
@@ -35,8 +33,8 @@ projections.addHandler(10002, e => {
     e,
     Tags.from(e)
       .type(["r", "relay"])
+      .drop(1)
       .all()
-      .map(drop(1))
       .filter(([url]: [string]) => isShareableRelay(url))
       .map(([url, mode]: [string, string]) => {
         const write = !mode || mode === RelayMode.Write

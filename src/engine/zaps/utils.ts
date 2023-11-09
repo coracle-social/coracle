@@ -1,8 +1,7 @@
-import {cached} from "paravel"
+import {cached, Tags} from "paravel"
 import {identity, pick, uniq} from "ramda"
 import {Fetch, tryFunc, createMapOf} from "hurdak"
 import {tryJson, hexToBech32, bech32ToHex, createBatcher} from "src/util/misc"
-import {Tags} from "src/util/nostr"
 import {people} from "src/engine/people/state"
 import {dufflepud} from "src/engine/session/utils"
 import type {Event} from "src/engine/events/model"
@@ -118,7 +117,7 @@ export const processZap = (event, zapper) => {
     return null
   }
 
-  const zapMeta = Tags.from(event).asMeta() as {
+  const zapMeta = Tags.from(event).getDict() as {
     bolt11: string
     description: string
   }
@@ -139,7 +138,7 @@ export const processZap = (event, zapper) => {
   }
 
   const {invoiceAmount, request} = zap
-  const reqMeta = Tags.from(request).asMeta() as {
+  const reqMeta = Tags.from(request).getDict() as {
     amount?: string
     lnurl?: string
   }

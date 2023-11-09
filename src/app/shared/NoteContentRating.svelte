@@ -1,6 +1,6 @@
 <script lang="ts">
   import {switcherFn} from "hurdak"
-  import {Tags} from "src/util/nostr"
+  import {Tags} from "paravel"
   import Anchor from "src/partials/Anchor.svelte"
   import Rating from "src/partials/Rating.svelte"
   import {router} from "src/app/router"
@@ -8,10 +8,9 @@
 
   export let note, rating
 
-  const tag =
-    Tags.from(note)
-      .reject(t => ["l", "L"].includes(t[0]))
-      .first() || []
+  const tag = Tags.from(note)
+    .reject(t => ["l", "L"].includes(t[0]))
+    .first()
 
   let href
   let display

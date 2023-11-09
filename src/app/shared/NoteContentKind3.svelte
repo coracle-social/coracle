@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "src/util/nostr"
+  import {Tags} from "paravel"
   import Content from "src/partials/Content.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import NoteContentEllipsis from "src/app/shared/NoteContentEllipsis.svelte"

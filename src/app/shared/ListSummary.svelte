@@ -1,13 +1,13 @@
 <script lang="ts">
   import {identity} from "ramda"
   import {quantify} from "hurdak"
-  import {Tags} from "src/util/nostr"
+  import {Tags} from "paravel"
 
   export let list
 
-  const topics = Tags.from(list).topics()
-  const authors = Tags.from(list).pubkeys()
-  const relays = Tags.from(list).urls()
+  const topics = Tags.from(list).topics().all()
+  const authors = Tags.from(list).pubkeys().all()
+  const relays = Tags.from(list).urls().all()
 
   const summary = [
     topics.length > 0 && quantify(topics.length, "topic"),

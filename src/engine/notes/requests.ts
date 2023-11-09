@@ -1,6 +1,6 @@
 import {find, pluck, whereEq} from "ramda"
 import {batch, sleep} from "hurdak"
-import {Tags} from "src/util/nostr"
+import {Tags} from "paravel"
 import {env} from "src/engine/session/state"
 import {loadOne, getIdFilters, dvmRequest} from "src/engine/network/utils"
 import {selectHints, mergeHints} from "src/engine/relays/utils"
@@ -32,7 +32,7 @@ export const dereferenceNote = async ({
         return false
       }
 
-      return !identifier || Tags.from(e).getMeta("d") === identifier
+      return !identifier || Tags.from(e).getValue("d") === identifier
     }, context)
 
     if (note) {

@@ -1,10 +1,10 @@
 <script lang="ts">
   import {nip05} from "nostr-tools"
+  import {Tags} from "paravel"
   import {uniqBy, sortBy} from "ramda"
   import {batch, quantify} from "hurdak"
   import {tryJson, displayDomain, pushToKey} from "src/util/misc"
   import {copyToClipboard} from "src/util/html"
-  import {Tags} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Image from "src/partials/Image.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -58,7 +58,7 @@
         pubkeys.push(e.pubkey)
 
         if (e.kind === 31990) {
-          ;(e as any).address = [e.kind, e.pubkey, Tags.from(e).getMeta("d")].join(":")
+          ;(e as any).address = [e.kind, e.pubkey, Tags.from(e).getValue("d")].join(":")
 
           handlers = handlers.concat(e)
         } else {

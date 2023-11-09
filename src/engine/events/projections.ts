@@ -1,5 +1,5 @@
 import {batch} from "hurdak"
-import {Tags} from "src/util/nostr"
+import {Tags} from "paravel"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
 import {sessions} from "src/engine/session/state"
@@ -31,7 +31,7 @@ projections.addHandler(EventKind.Delete, e => {
 })
 
 projections.addHandler(EventKind.GiftWrap, e => {
-  const session = sessions.get()[Tags.from(e).getMeta("p")]
+  const session = sessions.get()[Tags.from(e).getValue("p")]
 
   if (session?.method !== "privkey") {
     return

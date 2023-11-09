@@ -3,8 +3,9 @@
   import {reject, propEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, batch} from "hurdak"
+  import {Tags} from "paravel"
   import {fly} from "src/util/transition"
-  import {LOCAL_RELAY_URL, Tags, findRootId, findReplyId, isLike} from "src/util/nostr"
+  import {LOCAL_RELAY_URL, isLike} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -26,7 +27,6 @@
     processZaps,
     getReplyHints,
     isEventMuted,
-    getParentHints,
     getEventHints,
     getIdFilters,
     getReplyFilters,
@@ -78,7 +78,7 @@
   const goToParent = () =>
     router
       .at("notes")
-      .of(findReplyId(event), {relays: getParentHints(event)})
+      .of(tags.getReply(), {relays: tags.mark("reply").relays().all()})
       .cx({context: ctx.concat(event)})
       .open()
 
@@ -93,6 +93,8 @@
   const removeFromContext = e => {
     ctx = reject(propEq("id", e.id), ctx)
   }
+
+  $: tags = Tags.from(event).normalize()
 
   $: muted = !showMuted && $isEventMuted(event, true)
 
@@ -146,7 +148,7 @@
   )
 
   onMount(async () => {
-    const zapAddress = Tags.from(note).getMeta("zap")
+    const zapAddress = Tags.from(note).getValue("zap")
 
     if (zapAddress && getLnUrl(zapAddress)) {
       zapper = await getZapper(getLnUrl(zapAddress))
@@ -221,13 +223,13 @@
           </div>
           <div class="flex flex-col gap-2">
             <div class="flex gap-2">
-              {#if findReplyId(event) && showParent}
+              {#if tags.getReply() && showParent}
                 <small class="text-gray-1">
                   <i class="fa fa-code-merge" />
                   <Anchor class="underline" on:click={goToParent}>View Parent</Anchor>
                 </small>
               {/if}
-              {#if findRootId(event) && findRootId(event) !== findReplyId(event) && showParent}
+              {#if tags.getRoot() && tags.getRoot() !== tags.getReply() && showParent}
                 <small class="text-gray-1">
                   <i class="fa fa-code-pull-request" />
                   <Anchor class="underline" on:click={goToThread}>View Thread</Anchor>

@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {identity, sortBy} from "ramda"
   import {quantify} from "hurdak"
-  import {Tags} from "src/util/nostr"
+  import {Tags} from "paravel"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"

@@ -1,6 +1,6 @@
 import {omit, find, prop, groupBy, uniq} from "ramda"
 import {shuffle, randomId, seconds, avg} from "hurdak"
-import {Tags} from "src/util/nostr"
+import {Tags} from "paravel"
 import {env, pubkey} from "src/engine/session/state"
 import {follows, network} from "src/engine/people/derived"
 import {mergeHints, getPubkeyHints} from "src/engine/relays/utils"
@@ -67,9 +67,9 @@ export const getReplyFilters = (events, filter) => {
     e.push(event.id)
 
     if (event.kind >= 10000) {
-      const tags = Tags.from(event).asMeta()
+      const d = Tags.from(event).getValue("d") || ""
 
-      a.push([event.kind, event.pubkey, tags.d || ""].join(":"))
+      a.push([event.kind, event.pubkey, d].join(":"))
     }
   }
 

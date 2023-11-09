@@ -1,7 +1,7 @@
 import {prop, max, sortBy} from "ramda"
 import {seconds} from "hurdak"
-import {now} from "paravel"
-import {Tags, reactionKinds, findReplyId, findReplyAndRootIds} from "src/util/nostr"
+import {now, Tags} from "paravel"
+import {reactionKinds} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {derived} from "src/engine/core/utils"
@@ -18,16 +18,16 @@ export const notifications = derived(
     const $isEventMuted = isEventMuted.get()
 
     return $events.filter(e => {
-      const {root, reply} = findReplyAndRootIds(e)
-
       if (e.pubkey === $session.pubkey || $isEventMuted(e)) {
         return false
       }
 
+      const tags = Tags.from(e).normalize()
+
       return (
-        $userEvents.get(root) ||
-        $userEvents.get(reply) ||
-        Tags.from(e).pubkeys().includes($session.pubkey)
+        $userEvents.get(tags.mark("root").getValue()) ||
+        $userEvents.get(tags.mark("reply").getValue()) ||
+        tags.pubkeys().has($session.pubkey)
       )
     })
   }
@@ -51,7 +51,7 @@ export const groupNotifications = ($notifications, kinds) => {
   // Convert zaps to zap requests
   const convertZap = e => {
     if (e.kind === 9735) {
-      return tryJson(() => JSON.parse(Tags.from(e).asMeta().description as string))
+      return tryJson(() => JSON.parse(Tags.from(e).getDict().description as string))
     }
 
     return e
@@ -61,7 +61,7 @@ export const groupNotifications = ($notifications, kinds) => {
 
   // Group notifications by event
   for (const ix of $notifications) {
-    const parentId = findReplyId(ix)
+    const parentId = Tags.from(ix).getReply()
     const event = $userEvents.get(parentId)
 
     if (!kinds.includes(ix.kind)) {

@@ -1,10 +1,10 @@
 <script lang="ts">
-  import {Tags} from "src/util/nostr"
+  import {Tags} from "paravel"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
 
   export let note, showMedia
 
-  const {name, description, image} = Tags.from(note).asMeta()
+  const {name, description, image} = Tags.from(note).getDict()
 </script>
 
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">

@@ -1,7 +1,8 @@
 import {prop, uniqBy, uniq} from "ramda"
+import {Tags} from "paravel"
 import {tryFunc, sleep} from "hurdak"
 import {tryJson} from "src/util/misc"
-import {Tags, appDataKeys} from "src/util/nostr"
+import {appDataKeys} from "src/util/nostr"
 import {EventKind} from "src/engine/events/model"
 import {sessions} from "src/engine/session/state"
 import {Signer, Nip04, getNdk} from "src/engine/session/utils"
@@ -16,7 +17,7 @@ const getSigner = session => new Signer(session, getNdk(session))
 const getNip04 = session => new Nip04(session, getNdk(session))
 
 projections.addHandler(EventKind.AppData, async e => {
-  const d = Tags.from(e).getMeta("d")
+  const d = Tags.from(e).getValue("d")
   const session = getSession(e.pubkey)
 
   if (!session) {

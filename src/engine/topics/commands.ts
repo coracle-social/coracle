@@ -1,5 +1,5 @@
 import {nth, inc} from "ramda"
-import {Tags} from "src/util/nostr"
+import {Tags} from "paravel"
 import type {Event} from "src/engine/events/model"
 import {topics} from "./state"
 
@@ -15,7 +15,7 @@ export const addTopic = (e, name) => {
 }
 
 export const processTopics = (e: Event) => {
-  const tagTopics = Tags.from(e).topics()
+  const tagTopics = Tags.from(e).topics().all()
   const contentTopics = Array.from(e.content.toLowerCase().matchAll(/#(\w{2,100})/g)).map(nth(1))
 
   for (const name of tagTopics.concat(contentTopics)) {

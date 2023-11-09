@@ -2,9 +2,9 @@
   import {onDestroy} from "svelte"
   import {groupBy, filter} from "ramda"
   import {mapVals} from "hurdak"
-  import {isShareableRelay} from "paravel"
+  import {isShareableRelay, Tags} from "paravel"
   import {createScroller} from "src/util/misc"
-  import {Tags, getAvgQuality} from "src/util/nostr"
+  import {getAvgQuality} from "src/util/nostr"
   import {getModal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
@@ -38,7 +38,7 @@
 
   $: ratings = mapVals(
     events => getAvgQuality("review/relay", events),
-    groupBy(e => Tags.from(e).getMeta("r"), reviews)
+    groupBy(e => Tags.from(e).getValue("r"), reviews)
   )
 
   load({

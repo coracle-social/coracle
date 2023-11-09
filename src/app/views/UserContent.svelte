@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {pluck, identity} from "ramda"
-  import {Tags} from "src/util/nostr"
+  import {pluck, equals, identity} from "ramda"
+  import {Tags} from "paravel"
   import {toast, appName} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Field from "src/partials/Field.svelte"
@@ -23,7 +23,7 @@
     publishMutes,
   } from "src/engine"
 
-  const muteTags = Tags.wrap($user.mutes || [])
+  const muteTags = new Tags($user.mutes || [])
 
   let settings = getSettings()
   let mutedPeople = muteTags.type("p").values().all().map(getPersonWithDefault)
@@ -32,7 +32,7 @@
 
   const submit = () => {
     const pubkeyMutes = mutedPeople.map(p => ["p", p.pubkey])
-    const otherMutes = muteTags.type("p", {reject: true}).all()
+    const otherMutes = muteTags.reject(equals("p")).all()
     const allMutes = [...pubkeyMutes, ...otherMutes]
 
     publishSettings(settings)

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {pluck} from "ramda"
+  import {Tags} from "paravel"
   import {formatTimestamp} from "src/util/misc"
-  import {findReplyId} from "src/util/nostr"
   import Note from "src/app/shared/Note.svelte"
   import NotificationPeople from "src/app/shared/NotificationPeople.svelte"
   import type {Notification} from "src/engine"
@@ -9,7 +9,7 @@
   export let notification: Notification
 
   const {timestamp, interactions} = notification
-  const parentId = findReplyId(interactions[0])
+  const parentId = Tags.from(interactions[0]).getReply()
   const note = parentId ? {id: parentId} : interactions[0]
 </script>
 

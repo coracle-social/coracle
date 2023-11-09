@@ -126,8 +126,9 @@
   )
 
   $: {
-    if (term) {
+    if (term.length < 30) {
       loadPeople(term)
+    } else if (term) {
       tryParseEntity(term)
     }
   }

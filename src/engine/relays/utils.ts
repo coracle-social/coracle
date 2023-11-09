@@ -1,9 +1,14 @@
 import {nip19} from "nostr-tools"
-import {isShareableRelay, normalizeRelayUrl as _normalizeRelayUrl, fromNostrURI} from "paravel"
+import {
+  Tags,
+  isShareableRelay,
+  normalizeRelayUrl as _normalizeRelayUrl,
+  fromNostrURI,
+} from "paravel"
 import {sortBy, pluck, uniq, nth, prop, last} from "ramda"
 import {chain, displayList, first} from "hurdak"
 import {fuzzy} from "src/util/misc"
-import {LOCAL_RELAY_URL, findReplyId, findRootId, Tags} from "src/util/nostr"
+import {LOCAL_RELAY_URL} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import {env} from "src/engine/session/state"
 import {stateKey} from "src/engine/session/derived"
@@ -161,16 +166,12 @@ export const getReplyHints = hintSelector(function* (event) {
 // If we're looking for an event's parent, tags are the most reliable hint,
 // but we can also look at where the author of the note reads from
 export const getParentHints = hintSelector(function* (event) {
-  const parentId = findReplyId(event)
-
-  yield* Tags.from(event).equals(parentId).relays()
+  yield* Tags.from(event).normalize().mark("reply").relays().all()
   yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Read)
 })
 
 export const getRootHints = hintSelector(function* (event) {
-  const rootId = findRootId(event)
-
-  yield* Tags.from(event).equals(rootId).relays()
+  yield* Tags.from(event).normalize().mark("root").relays().all()
   yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Read)
 })
 

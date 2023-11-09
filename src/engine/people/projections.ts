@@ -1,4 +1,4 @@
-import {Tags} from "src/util/nostr"
+import {Tags} from "paravel"
 import {tryJson} from "src/util/misc"
 import {updateStore} from "src/engine/core/commands"
 import {projections} from "src/engine/core/projections"

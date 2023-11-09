@@ -1,6 +1,6 @@
 <script lang="ts">
   import {updateIn} from "hurdak"
-  import {Tags} from "src/util/nostr"
+  import {Tags} from "paravel"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import BorderLeft from "src/partials/BorderLeft.svelte"
@@ -35,7 +35,7 @@
     Select a list to modify. The selected {label} will be added to it as an additional filter.
   </p>
   {#each $userLists as list (list.naddr)}
-    {@const meta = Tags.wrap(list.tags).asMeta()}
+    {@const meta = Tags.from(list).getDict()}
     <BorderLeft on:click={() => selectlist(list)}>
       <strong>{meta.d}</strong>
       <ListSummary {list} />

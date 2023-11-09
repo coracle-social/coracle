@@ -4,9 +4,8 @@
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {switcherFn} from "hurdak"
-  import {fromNostrURI} from "paravel"
+  import {fromNostrURI, Tags} from "paravel"
   import {warn} from "src/util/logger"
-  import {Tags} from "src/util/nostr"
   import {urlIsMedia} from "src/util/notes"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -26,7 +25,7 @@
   let content
   const tags = Tags.from(note)
   const regex = /(nostr:)?n(event|ote|pub|profile|addr)\w{10,1000}/g
-  const {title, summary, image} = tags.asMeta() as {[k: string]: string}
+  const {title, summary, image} = tags.getDict() as {[k: string]: string}
 
   const convertEntities = markdown => {
     for (const uri of markdown.match(regex) || []) {
@@ -78,7 +77,7 @@
     <NoteContentLink value={{url: image, isMedia: true}} showMedia />
   {/if}
   <div>
-    {#each tags.topics() as topic}
+    {#each tags.topics().all() as topic}
       <Anchor modal href={router.at("topics").of(topic).toString()}>
         <Chip class="mb-2 mr-2 inline-block cursor-pointer">#{topic}</Chip>
       </Anchor>

@@ -1,8 +1,8 @@
 <script lang="ts">
+  import {Tags} from "paravel"
   import {createEventDispatcher} from "svelte"
   import {without, uniq} from "ramda"
   import {slide} from "src/util/transition"
-  import {Tags} from "src/util/nostr"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Media from "src/partials/Media.svelte"

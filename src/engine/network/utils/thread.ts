@@ -1,6 +1,7 @@
 import {uniqBy, identity, prop, sortBy} from "ramda"
 import {batch} from "hurdak"
-import {LOCAL_RELAY_URL, findReplyId, findRootId} from "src/util/nostr"
+import {Tags} from "paravel"
+import {LOCAL_RELAY_URL} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {writable} from "src/engine/core/utils"
@@ -16,7 +17,7 @@ export class ThreadLoader {
   root = writable<DisplayEvent>(null)
 
   constructor(readonly note: Event, readonly relays: string[]) {
-    this.loadNotes([findReplyId(note), findRootId(note)])
+    this.loadNotes(Tags.from(note).type(["e", "a"]).values().all())
   }
 
   stop() {
@@ -37,7 +38,7 @@ export class ThreadLoader {
         filters: getIdFilters(filteredIds),
         onEvent: batch(300, (events: Event[]) => {
           this.addToThread(events)
-          this.loadNotes(events.flatMap(e => [findReplyId(e), findRootId(e)]))
+          this.loadNotes(events.flatMap(e => Tags.from(e).type(["e", "a"]).values().all()))
         }),
       })
     }
@@ -52,12 +53,13 @@ export class ThreadLoader {
   }
 
   addToThread(events) {
+    const tags = Tags.from(this.note).normalize()
     const ancestors = []
 
     for (const event of events) {
-      if (event.id === findReplyId(this.note)) {
+      if (event.id === tags.getReply()) {
         this.parent.set(event)
-      } else if (event.id === findRootId(this.note)) {
+      } else if (event.id === tags.getRoot()) {
         this.root.set(event)
       } else {
         ancestors.push(event)

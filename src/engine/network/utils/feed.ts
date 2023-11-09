@@ -13,9 +13,9 @@ import {
   assoc,
 } from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
-import {now} from "paravel"
+import {now, Tags} from "paravel"
 import {race, pushToKey} from "src/util/misc"
-import {findReplyId, noteKinds, reactionKinds, LOCAL_RELAY_URL} from "src/util/nostr"
+import {noteKinds, reactionKinds, LOCAL_RELAY_URL} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {isEventMuted} from "src/engine/events/derived"
@@ -99,7 +99,7 @@ export class FeedLoader {
         return false
       }
 
-      if (this.opts.shouldHideReplies && findReplyId(e)) {
+      if (this.opts.shouldHideReplies && Tags.from(e).getReply()) {
         return false
       }
 
@@ -108,7 +108,9 @@ export class FeedLoader {
   }
 
   loadParents = notes => {
-    const parentIds = reject(this.isEventMuted, notes).map(findReplyId).filter(identity)
+    const parentIds = reject(this.isEventMuted, notes)
+      .map(e => Tags.from(e).getReply())
+      .filter(identity)
 
     load({
       relays: this.opts.relays.concat(LOCAL_RELAY_URL),
@@ -156,7 +158,7 @@ export class FeedLoader {
           .map(e => {
             /* eslint no-constant-condition: 0 */
             while (true) {
-              const parentId = findReplyId(e)
+              const parentId = Tags.from(e).getReply()
 
               if (!parentId) {
                 break
@@ -236,7 +238,7 @@ export class FeedLoader {
 
     // If something has a parent id but we haven't found the parent yet, skip it until we have it.
     const [defer, ok] = partition(e => {
-      const parentId = findReplyId(e)
+      const parentId = Tags.from(e).getReply()
 
       return parentId && !this.parents.get(parentId)
     }, notes)

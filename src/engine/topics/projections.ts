@@ -1,4 +1,4 @@
-import {Tags} from "src/util/nostr"
+import {Tags} from "paravel"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
 import {EventKind} from "src/engine/events/model"

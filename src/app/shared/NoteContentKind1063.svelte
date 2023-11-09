@@ -1,11 +1,11 @@
 <script lang="ts">
-  import {Tags} from "src/util/nostr"
+  import {Tags} from "paravel"
   import {urlIsMedia} from "src/util/notes"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
 
   export let note, showMedia
 
-  const url = Tags.from(note).getMeta("url")
+  const url = Tags.from(note).getValue("url")
 </script>
 
 {#if url}

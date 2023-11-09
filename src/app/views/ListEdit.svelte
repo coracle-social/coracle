@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "src/util/nostr"
+  import {Tags} from "paravel"
   import {toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
@@ -28,7 +28,7 @@
   const tags = list ? Tags.from(list) : Tags.from([])
 
   let values = {
-    name: tags.getMeta("d") || "",
+    name: tags.getValue("d") || "",
     params: tags.type(["t", "p"]).all(),
     relays: tags.type("r").all(),
   }

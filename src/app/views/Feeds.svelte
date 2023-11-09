@@ -1,6 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
-  import {Tags, noteKinds} from "src/util/nostr"
+  import {Tags} from "paravel"
+  import {noteKinds} from "src/util/nostr"
   import {theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
@@ -24,9 +25,9 @@
 
   const loadListFeed = naddr => {
     const list = lists.key(naddr).get()
-    const authors = Tags.wrap(list.tags).pubkeys()
-    const topics = Tags.wrap(list.tags).topics()
-    const urls = Tags.wrap(list.tags).urls()
+    const authors = Tags.from(list).pubkeys().all()
+    const topics = Tags.from(list).topics().all()
+    const urls = Tags.from(list).urls().all()
 
     if (urls.length > 0) {
       relays = urls

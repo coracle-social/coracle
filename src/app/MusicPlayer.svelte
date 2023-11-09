@@ -3,7 +3,7 @@
   import {dec, inc} from "ramda"
   import {switcherFn} from "hurdak"
   import {throttle} from "throttle-debounce"
-  import {Tags} from "src/util/nostr"
+  import {Tags} from "paravel"
   import {AudioController} from "src/util/audio"
   import Audio from "src/partials/Audio.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -61,7 +61,7 @@
 
   const getStreamUrl = e =>
     switcherFn(e.kind, {
-      1808: () => Tags.from(e).asMeta().stream_url,
+      1808: () => Tags.from(e).getValue("stream_url"),
       32123: () => JSON.parse(e.content).enclosure,
     })
 

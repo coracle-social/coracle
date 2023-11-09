@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "src/util/nostr"
+  import {Tags} from "paravel"
   import Chip from "src/partials/Chip.svelte"
 
   export let note

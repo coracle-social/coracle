@@ -1,5 +1,5 @@
 import {whereEq, find} from "ramda"
-import {findReplyAndRootIds} from "src/util/nostr"
+import {Tags} from "paravel"
 import {derived, DerivedCollection} from "src/engine/core/utils"
 import {pubkey} from "src/engine/session/state"
 import {settings} from "src/engine/session/derived"
@@ -28,7 +28,8 @@ export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settin
       return false
     }
 
-    const {reply, root} = findReplyAndRootIds(e)
+    const reply = Tags.from(e).getReply()
+    const root = Tags.from(e).getRoot()
 
     if (find(t => $mutes.has(t), [e.id, e.pubkey, reply, root])) {
       return true

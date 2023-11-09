@@ -1,8 +1,8 @@
 <script lang="ts">
   import {identity} from "ramda"
+  import {Tags} from "paravel"
   import {onMount} from "svelte"
   import {fly} from "src/util/transition"
-  import {findReplyId, Tags} from "src/util/nostr"
   import {createScroller} from "src/util/misc"
   import {getModal} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
@@ -31,9 +31,9 @@
     limit += 5
   }
 
-  $: ids = sortEventsDesc($labels.filter(e => Tags.from(e).getMeta("l") === label))
+  $: ids = sortEventsDesc($labels.filter(e => Tags.from(e).getValue("l") === label))
     .slice(0, limit)
-    .map(findReplyId)
+    .map(e => Tags.from(e).getReply())
 
   onMount(() => {
     const scroller = createScroller(loadMore, {element: getModal()})

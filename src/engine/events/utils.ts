@@ -1,9 +1,8 @@
 import type {AddressPointer} from "nostr-tools/lib/nip19"
 import {nip19} from "nostr-tools"
 import {sortBy} from "ramda"
-import {fromNostrURI} from "paravel"
+import {fromNostrURI, Tags} from "paravel"
 import {tryFunc, switcherFn} from "hurdak"
-import {findReplyId, Tags} from "src/util/nostr"
 import {getEventHints} from "src/engine/relays/utils"
 import type {Event} from "./model"
 
@@ -21,7 +20,7 @@ export const getIds = (e: Event) => {
   return ids
 }
 
-export const isChildOf = (a, b) => getIds(b).includes(findReplyId(a))
+export const isChildOf = (a, b) => getIds(b).includes(Tags.from(a).getReply())
 
 const annotateEvent = eid => ({
   eid,
@@ -65,7 +64,7 @@ export class Naddr {
   }
 
   static fromEvent = (e: Event) =>
-    new Naddr(e.kind, e.pubkey, Tags.from(e).getMeta("d"), getEventHints(e))
+    new Naddr(e.kind, e.pubkey, Tags.from(e).getValue("d"), getEventHints(e))
 
   static fromTagValue = (a, relays = []) => {
     const [kind, pubkey, identifier] = a.split(":")

@@ -1,10 +1,9 @@
 import EventEmitter from "events"
-import {createEvent} from "paravel"
-import {last, omit, uniqBy} from "ramda"
-import {doPipe, defer, union, difference} from "hurdak"
+import {createEvent, Tags} from "paravel"
+import {omit, uniqBy} from "ramda"
+import {defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"
 import {parseContent} from "src/util/notes"
-import {Tags, findRoot, findReply} from "src/util/nostr"
 import type {Event, NostrEvent} from "src/engine/events/model"
 import {people} from "src/engine/people/state"
 import {displayPerson} from "src/engine/people/utils"
@@ -179,19 +178,17 @@ export const tagsFromContent = (content: string) => {
 }
 
 export const getReplyTags = (parent: Event, inherit = false) => {
-  const extra = inherit
-    ? Tags.from(parent)
-        .type(["e", "a"])
-        .reject(t => last(t) === "mention")
-        .all()
-        .map(t => t.slice(0, 3))
-    : []
   const hint = getEventHint(parent)
-  const reply = ["e", parent.id, hint, "reply"]
-  const root = doPipe(findRoot(parent) || findReply(parent) || reply, [
-    t => (t.length < 3 ? t.concat(hint) : t),
-    t => t.slice(0, 3).concat("root"),
-  ])
+  const tags = Tags.from(parent).normalize()
+  const reply = tags.mark("reply").first() || ["e", parent.id, hint, "reply"]
+  const root = tags.mark("root").first() || reply.slice(0, 3).concat("root")
+  const extra = inherit
+    ? tags
+        .type(["a", "e"])
+        .reject(t => [reply[1], root[1]].includes(t[1]))
+        .take(3)
+        .all()
+    : []
 
   if (isReplaceable(parent)) {
     extra.push(Naddr.fromEvent(parent).asTag("reply"))

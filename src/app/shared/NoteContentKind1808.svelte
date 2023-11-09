@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "src/util/nostr"
+  import {Tags} from "paravel"
   import {annotateMedia} from "src/util/misc"
   import Media from "src/partials/Media.svelte"
   import NoteContentLabel from "src/app/shared/NoteContentLabel.svelte"
@@ -7,7 +7,7 @@
 
   export let note, anchorId, maxLength, showEntire
 
-  const {stream_url} = Tags.from(note).asMeta() as {stream_url: string}
+  const {stream_url} = Tags.from(note).getDict() as {stream_url: string}
 </script>
 
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
