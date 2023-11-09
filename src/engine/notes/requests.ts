@@ -103,6 +103,11 @@ export async function* loadReactions(id: string, relays: string[]) {
 
   while (!done) {
     await sleep(300)
-    yield count
+
+    if (count > 0) {
+      yield count
+    }
   }
+
+  yield count
 }

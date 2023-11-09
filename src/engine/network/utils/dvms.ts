@@ -1,4 +1,6 @@
 import {now} from "paravel"
+import {seconds} from "hurdak"
+import {generatePrivateKey} from "nostr-tools"
 import {getUserRelayUrls} from "src/engine/relays/utils"
 import type {Event} from "src/engine/events/model"
 import {publishEvent} from "./publish"
@@ -29,7 +31,14 @@ export const dvmRequest = async ({
     input = JSON.stringify(input)
   }
 
-  publishEvent(kind, {relays, tags: [["i", input], ...tags]})
+  publishEvent(kind, {
+    relays,
+    sk: generatePrivateKey(),
+    tags: tags.concat([
+      ["i", input],
+      ["expiration", now() + seconds(1, "hour")],
+    ]),
+  })
 
   return new Promise(resolve => {
     const kinds = [kind + 1000]

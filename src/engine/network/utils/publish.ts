@@ -119,22 +119,25 @@ export type EventOpts = {
 }
 
 export type PublishOpts = EventOpts & {
+  sk?: string
   relays?: string[]
 }
 
 export const publishEvent = async (
   kind: number,
-  {relays, content = "", tags = []}: PublishOpts
+  {relays, content = "", tags = [], sk}: PublishOpts
 ) => {
+  const template = createEvent(kind, {
+    content,
+    tags: uniqTags([...tags, ...tagsFromContent(content)]),
+  })
+
   return Publisher.publish({
     timeout: 5000,
     relays: relays || getUserRelayUrls("write"),
-    event: await signer.get().signAsUser(
-      createEvent(kind, {
-        content,
-        tags: uniqTags([...tags, ...tagsFromContent(content)]),
-      })
-    ),
+    event: sk
+      ? await signer.get().signWithKey(template, sk)
+      : await signer.get().signAsUser(template),
   })
 }
 
