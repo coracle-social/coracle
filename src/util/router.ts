@@ -15,29 +15,31 @@ export type Serializer = {
 
 export type ComponentSerializers = Record<string, Serializer>
 
-export type Route = {
+export type RegisterOpts = {
+  serializers?: ComponentSerializers
+  requireUser?: boolean
+}
+
+export type Route = RegisterOpts & {
   path: string
   component: Component
-  serializers?: ComponentSerializers
+}
+
+export type RouteConfig = {
+  id?: string
+  mini?: boolean
+  modal?: boolean
+  virtual?: boolean
+  noEscape?: boolean
+  replace?: boolean
+  context?: Record<string, any>
 }
 
 export type HistoryItem = {
   path: string
   params: Record<string, any>
-  config: {
-    id?: string
-    mini?: boolean
-    modal?: boolean
-    virtual?: boolean
-    noEscape?: boolean
-    replace?: boolean
-    context?: Record<string, any>
-  }
-  route: {
-    path: string
-    component: Component
-    serializers?: ComponentSerializers
-  }
+  config: RouteConfig
+  route: Route
 }
 
 export const asPath = (...parts: string[]) => {
@@ -204,8 +206,12 @@ export class Router {
     })
   }
 
-  register = (path: string, component: Component, serializers?: ComponentSerializers) => {
-    this.routes.push({path, component, serializers})
+  register = (
+    path: string,
+    component: Component,
+    {serializers, requireUser}: RegisterOpts = {}
+  ) => {
+    this.routes.push({path, component, serializers, requireUser})
   }
 
   go(path, config: HistoryItem["config"] = {}) {

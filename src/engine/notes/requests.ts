@@ -50,13 +50,14 @@ export const dereferenceNote = async ({
 
 type LoadReactionsRequest = {
   id: string
+  relays: string[]
   onProgress: (n: number) => void
   onResult: (n: number) => void
 }
 
 const executeLoadReactions = batch(500, async (requests: LoadReactionsRequest[]) => {
   const ids = pluck("id", requests)
-  const relays = mergeHints(pluck('relays', requests))
+  const relays = mergeHints(pluck("relays", requests))
 
   let data = {}
 
@@ -65,10 +66,7 @@ const executeLoadReactions = batch(500, async (requests: LoadReactionsRequest[])
     timeout: 10000,
     relays: env.get().DVM_RELAYS,
     input: [{kinds: [7], "#e": ids}],
-    tags: [
-      ...relays.map(url => ["param", "relay", url]),
-      ["param", "group", "reply"],
-    ],
+    tags: [...relays.map(url => ["param", "relay", url]), ["param", "group", "reply"]],
     onProgress: e => {
       data = JSON.parse(e.content)
 

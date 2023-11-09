@@ -5,7 +5,7 @@
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/router"
-  import {stateKey} from "src/engine"
+  import {session, stateKey} from "src/engine"
 
   const {page, modal, modals} = router
 
@@ -19,6 +19,12 @@
       console.log("modal", $modal, getProps($modal))
     } else if ($page) {
       console.log("page", $page, getProps($page))
+    }
+  }
+
+  $: {
+    if (!$session && $page?.route.requireUser) {
+      router.go("/", {replace: true})
     }
   }
 </script>

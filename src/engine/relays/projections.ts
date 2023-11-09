@@ -1,3 +1,4 @@
+import {drop} from "ramda"
 import {tryJson} from "src/util/misc"
 import {warn} from "src/util/logger"
 import {Tags} from "src/util/nostr"
@@ -33,9 +34,11 @@ projections.addHandler(10002, e => {
   saveRelayPolicy(
     e,
     Tags.from(e)
-      .type("r")
+      .type(["r", "relay"])
       .all()
-      .map(([_, url, mode]) => {
+      .map(drop(1))
+      .filter(([url]: [string]) => isShareableRelay(url))
+      .map(([url, mode]: [string, string]) => {
         const write = !mode || mode === RelayMode.Write
         const read = !mode || mode === RelayMode.Read
 

@@ -5,7 +5,9 @@ import {getSettings, getNdk, Signer, Nip04, Nip44, Nip59} from "./utils"
 
 export const stateKey = pubkey.derived($pk => $pk || "anonymous")
 
-export const session = derived([pubkey, sessions], ([$pk, $sessions]) => $sessions[$pk])
+export const session = derived([pubkey, sessions], ([$pk, $sessions]) =>
+  $pk ? $sessions[$pk] : null
+)
 
 export const user = derived([stateKey, people.mapStore], ([$k, $p]) => $p.get($k))
 

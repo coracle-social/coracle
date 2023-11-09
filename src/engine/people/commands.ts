@@ -19,7 +19,7 @@ export const follow = (type: string, value: string) => {
   const tag = type === "p" ? mention(value) : [type, value]
 
   return publishPetnames([
-    ...reject((t: string[]) => t[1] === value, user.get().petnames || []),
+    ...reject((t: string[]) => t[1] === value, user.get()?.petnames || []),
     tag,
   ])
 }

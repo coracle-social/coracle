@@ -1,7 +1,7 @@
 import type {AddressPointer} from "nostr-tools/lib/nip19"
 import {nip19} from "nostr-tools"
 import {sortBy} from "ramda"
-import {switcherFn} from "hurdak"
+import {tryFunc, switcherFn} from "hurdak"
 import {fromNostrURI, findReplyId, Tags} from "src/util/nostr"
 import {getEventHints} from "src/engine/relays/utils"
 import type {Event} from "./model"
@@ -25,8 +25,8 @@ export const isChildOf = (a, b) => getIds(b).includes(findReplyId(a))
 const annotateEvent = eid => ({
   eid,
   relays: [],
-  note: nip19.noteEncode(eid),
-  nevent: nip19.neventEncode({id: eid, relays: []}),
+  note: tryFunc(() => nip19.noteEncode(eid)),
+  nevent: tryFunc(() => nip19.neventEncode({id: eid, relays: []})),
 })
 
 export const decodeEvent = entity => {

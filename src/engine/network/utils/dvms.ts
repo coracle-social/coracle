@@ -20,7 +20,7 @@ export const dvmRequest = async ({
   timeout = 30_000,
   relays = null,
   onProgress = null,
-}: DVMRequestOpts) => {
+}: DVMRequestOpts): Promise<Event> => {
   if (!relays) {
     relays = getUserRelayUrls()
   }

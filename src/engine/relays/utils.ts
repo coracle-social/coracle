@@ -170,7 +170,8 @@ export const getPubkeyHints = hintSelector(function* (pubkey: string, mode: Rela
   yield* getPubkeyRelayUrls(pubkey, mode)
 })
 
-export const getPubkeyHint = (pubkey: string) => first(getPubkeyHints(1, pubkey, "write")) || ""
+export const getPubkeyHint = (pubkey: string): string =>
+  first(getPubkeyHints(1, pubkey, "write")) || ""
 
 export const getEventHints = hintSelector(function* (event: Event) {
   yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Write)

@@ -34,7 +34,6 @@
     mergeHints,
     loadPubkeys,
     sortEventsDesc,
-    loadReactions,
     isChildOf,
   } from "src/engine"
 
@@ -163,7 +162,6 @@
         filters: getIdFilters([event.id]),
       })
     }
-
 
     if (event.pubkey) {
       const hints = getReplyHints(event)

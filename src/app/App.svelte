@@ -95,7 +95,9 @@
   router.register("/channels/create", ChannelCreate)
   router.register("/channels/requests", ChannelsList)
   router.register("/channels/:channelId", ChannelsDetail, {
-    channelId: asChannelId,
+    serializers: {
+      channelId: asChannelId,
+    },
   })
 
   router.register("/chat/redirect", ChatRedirect)
@@ -103,7 +105,9 @@
   router.register("/conversations", MessagesList)
   router.register("/conversations/requests", MessagesList)
   router.register("/conversations/:entity", MessagesDetail, {
-    entity: asPerson,
+    serializers: {
+      entity: asPerson,
+    },
   })
 
   router.register("/explore", Explore)
@@ -111,15 +115,19 @@
   router.register("/help/:topic", Help)
 
   router.register("/labels/:label", LabelDetail, {
-    label: asUrlComponent("label"),
-    relays: asCsv("relays"),
+    serializers: {
+      label: asUrlComponent("label"),
+      relays: asCsv("relays"),
+    },
   })
 
   router.register("/lists", ListList)
   router.register("/lists/create", ListEdit)
   router.register("/lists/select", ListSelect, {
-    type: asString("type"),
-    value: asString("value"),
+    serializers: {
+      type: asString("type"),
+      value: asString("value"),
+    },
   })
   router.register("/lists/:naddr", ListEdit)
 
@@ -132,92 +140,145 @@
   router.register("/logout", Logout)
 
   router.register("/media/:url", MediaDetail, {
-    url: asUrlComponent("url"),
+    serializers: {
+      url: asUrlComponent("url"),
+    },
   })
 
   router.register("/message", ModalMessage)
 
   router.register("/", Feeds, {
-    filter: asFilter,
+    serializers: {
+      filter: asFilter,
+    },
   })
   router.register("/notes", Feeds, {
-    filter: asFilter,
+    serializers: {
+      filter: asFilter,
+    },
   })
   router.register("/notes/create", NoteCreate, {
-    pubkey: asPerson,
+    requireUser: true,
+    serializers: {
+      pubkey: asPerson,
+    },
   })
   router.register("/notes/:entity", NoteDetail, {
-    entity: asNote,
+    serializers: {
+      entity: asNote,
+    },
   })
   router.register("/notes/:entity/label", LabelCreate, {
-    entity: asNote,
+    serializers: {
+      entity: asNote,
+    },
   })
   router.register("/notes/:entity/status", PublishInfo, {
-    entity: asNote,
+    serializers: {
+      entity: asNote,
+    },
   })
   router.register("/notes/:entity/thread", ThreadDetail, {
-    entity: asNote,
+    serializers: {
+      entity: asNote,
+    },
   })
-  // router.register("/notes/:entity/report", ReportCreate, {
-  //   entity: asNote,
-  //   pubkey: asPerson,
-  // })
 
-  router.register("/notifications", Notifications)
-  router.register("/notifications/:activeTab", Notifications)
+  router.register("/notifications", Notifications, {
+    requireUser: true,
+  })
+  router.register("/notifications/:activeTab", Notifications, {
+    requireUser: true,
+  })
 
   router.register("/onboarding", Onboarding)
 
   router.register("/people/list", PersonList, {
-    pubkeys: asCsv("pubkeys"),
+    serializers: {
+      pubkeys: asCsv("pubkeys"),
+    },
   })
   router.register("/people/:entity", PersonDetail, {
-    entity: asPerson,
-    filter: asFilter,
+    serializers: {
+      entity: asPerson,
+      filter: asFilter,
+    },
   })
   router.register("/people/:entity/followers", PersonFollowers, {
-    entity: asPerson,
+    serializers: {
+      entity: asPerson,
+    },
   })
   router.register("/people/:entity/follows", PersonFollows, {
-    entity: asPerson,
+    serializers: {
+      entity: asPerson,
+    },
   })
   router.register("/people/:entity/info", PersonInfo, {
-    entity: asPerson,
+    serializers: {
+      entity: asPerson,
+    },
   })
   router.register("/people/:entity/zap", PersonZap, {
-    eid: asNote,
-    entity: asPerson,
-    lnurl: asString("lnurl"),
+    serializers: {
+      eid: asNote,
+      entity: asPerson,
+      lnurl: asString("lnurl"),
+    },
   })
 
   router.register("/qrcode/:code", QRCode)
 
   router.register("/relays/browse", RelayBrowse)
   router.register("/relays/:entity", RelayDetail, {
-    entity: asRelay,
+    serializers: {
+      entity: asRelay,
+    },
   })
   router.register("/relays/:entity/review", RelayReview, {
-    entity: asRelay,
+    serializers: {
+      entity: asRelay,
+    },
   })
 
-  router.register("/settings", UserSettings)
-  router.register("/settings/content", UserContent)
-  router.register("/settings/data", UserData)
-  router.register("/settings/data/export", DataExport)
-  router.register("/settings/data/import", DataImport)
-  router.register("/settings/keys", UserKeys)
-  router.register("/settings/profile", UserProfile)
-  router.register("/settings/relays", RelayList)
+  router.register("/settings", UserSettings, {
+    requireUser: true,
+  })
+  router.register("/settings/content", UserContent, {
+    requireUser: true,
+  })
+  router.register("/settings/data", UserData, {
+    requireUser: true,
+  })
+  router.register("/settings/data/export", DataExport, {
+    requireUser: true,
+  })
+  router.register("/settings/data/import", DataImport, {
+    requireUser: true,
+  })
+  router.register("/settings/keys", UserKeys, {
+    requireUser: true,
+  })
+  router.register("/settings/profile", UserProfile, {
+    requireUser: true,
+  })
+  router.register("/settings/relays", RelayList, {
+    requireUser: true,
+  })
 
   router.register("/topics/:topic", TopicFeed)
 
   router.register("/:entity", Bech32Entity, {
-    entity: asEntity,
-    filter: asFilter,
+    serializers: {
+      entity: asEntity,
+      filter: asFilter,
+    },
   })
   router.register("/:entity/*", Bech32Entity, {
-    entity: asEntity,
-    filter: asFilter,
+    serializers: {
+      entity: asEntity,
+      filter: asFilter,
+    },
   })
 
   router.init()
