@@ -1,6 +1,6 @@
 import EventEmitter from "events"
 import {createEvent, Tags} from "paravel"
-import {omit, uniqBy} from "ramda"
+import {omit, uniqBy, nth} from "ramda"
 import {defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"
 import {parseContent} from "src/util/notes"
@@ -180,13 +180,12 @@ export const tagsFromContent = (content: string) => {
 export const getReplyTags = (parent: Event, inherit = false) => {
   const hint = getEventHint(parent)
   const tags = Tags.from(parent).normalize()
-  const reply = tags.mark("reply").first() || ["e", parent.id, hint, "reply"]
-  const root = tags.mark("root").first() || reply.slice(0, 3).concat("root")
+  const reply = ["e", parent.id, hint, "reply"]
+  const root = tags.mark("root").first() || reply.slice(0, 3).concat('root')
   const extra = inherit
     ? tags
         .type(["a", "e"])
-        .reject(t => [reply[1], root[1]].includes(t[1]))
-        .take(3)
+        .map(t => t.slice(0, 3).concat('mention'))
         .all()
     : []
 
@@ -194,5 +193,5 @@ export const getReplyTags = (parent: Event, inherit = false) => {
     extra.push(Naddr.fromEvent(parent).asTag("reply"))
   }
 
-  return [mention(parent.pubkey), root, ...extra, reply]
+  return uniqBy(nth(1), [mention(parent.pubkey), root, ...extra, reply])
 }
