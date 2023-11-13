@@ -13,6 +13,7 @@
 - [x] Add experimental DVM code
 - [x] Disable NIP 24 messages for now
 - [x] Use NIP 85 for relay reviews
+- [x] Improve feed controls UX
 
 # 0.3.11
 

@@ -1,9 +1,9 @@
 <script lang="ts">
   import {pluck, not, find, propEq, prop, equals, omit, objOf} from "ramda"
   import {displayList} from "hurdak"
-  import {debounce} from "throttle-debounce"
   import {createLocalDate, fuzzy, formatTimestampAsDate} from "src/util/misc"
   import {noteKinds} from "src/util/nostr"
+  import {getKey} from "src/util/router"
   import Chip from "src/partials/Chip.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Input from "src/partials/Input.svelte"
@@ -28,6 +28,7 @@
   export let filter
   export let relays
   export let hideReplies
+  export let updateFilter
 
   type Kind = {
     kind: number
@@ -95,7 +96,14 @@
     return parts
   }
 
-  const onChange = filter => router.fromCurrent().qp({filter}).replace()
+  const onChange = filter => {
+    router
+      .fromCurrent()
+      .qp({filter})
+      .replace({key: getKey(router.page.get())})
+
+    updateFilter(filter)
+  }
 
   const removePart = keys => {
     filter = omit(keys, filter)
@@ -142,8 +150,6 @@
 
     onChange(newFilter)
   }
-
-  const applySearch = debounce(400, applyFilter)
 
   const clearSearch = () => {
     _filter.search = ""
@@ -238,7 +244,7 @@
       <Content size="lg">
         <div class="flex flex-col gap-1">
           <strong>Search</strong>
-          <Input autofocus bind:value={_filter.search} on:input={applySearch}>
+          <Input autofocus bind:value={_filter.search}>
             <i slot="before" class="fa fa-search" />
             <i slot="after" class="fa fa-times cursor-pointer" on:click={clearSearch} />
           </Input>
@@ -284,10 +290,10 @@
             <strong>Mentions</strong>
             <PersonMultiSelect bind:value={_filter["#p"]} />
           </div>
-          <div class="flex justify-end">
-            <Anchor theme="button-accent" on:click={submit}>Apply Filters</Anchor>
-          </div>
         {/if}
+        <div class="flex justify-end">
+          <Anchor theme="button-accent" on:click={submit}>Apply Filters</Anchor>
+        </div>
       </Content>
     </form>
   </Modal>

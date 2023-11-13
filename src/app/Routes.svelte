@@ -1,7 +1,7 @@
 <script lang="ts">
   import {reverse} from "ramda"
   import {fly} from "src/util/transition"
-  import {getProps} from "src/util/router"
+  import {getProps, getKey} from "src/util/router"
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/router"
@@ -32,7 +32,7 @@
 {#key $stateKey}
   <div class="pt-16 text-gray-2 lg:ml-48" class:pointer-events-none={$menuIsOpen}>
     {#if $page}
-      {#key $page.path}
+      {#key getKey($page)}
         <div in:fly={{y: 20}}>
           <svelte:component this={$page.route.component} {...getProps($page)} />
         </div>
@@ -41,7 +41,7 @@
   </div>
 {/key}
 
-{#each reverse($modals).filter(m => !m.config.virtual) as m, i (m.path + i)}
+{#each reverse($modals).filter(m => !m.config.virtual) as m, i (getKey(m) + i)}
   <Modal
     index={i}
     virtual={false}

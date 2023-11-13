@@ -65,6 +65,12 @@
     }
   }
 
+  const updateFilter = newFilter => {
+    filter = newFilter
+
+    start()
+  }
+
   hideReplies.subscribe($hideReplies => {
     start()
     Storage.setJson("hideReplies", $hideReplies)
@@ -84,7 +90,7 @@
 
 <Content size="inherit" gap="gap-6">
   {#if !hideControls}
-    <FeedControls {hideReplies} {filter} {relays}>
+    <FeedControls {hideReplies} {filter} {relays} {updateFilter}>
       <slot name="controls" slot="controls" />
     </FeedControls>
   {/if}

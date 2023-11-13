@@ -33,6 +33,7 @@ export type RouteConfig = {
   noEscape?: boolean
   replace?: boolean
   context?: Record<string, any>
+  key?: string
 }
 
 export type HistoryItem = {
@@ -81,6 +82,8 @@ export const decodeRouteParams = ({params, route}: HistoryItem) => {
 
   return data
 }
+
+export const getKey = (item: HistoryItem) => item.config.key || item.path
 
 export const getProps = (item: HistoryItem) => ({
   ...decodeRouteParams(item),
@@ -214,7 +217,7 @@ export class Router {
     this.routes.push({path, component, serializers, requireUser})
   }
 
-  go(path, config: HistoryItem["config"] = {}) {
+  go(path, config: RouteConfig = {}) {
     const match = pick(this.routes, path)
 
     if (!match) {
