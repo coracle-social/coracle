@@ -1,6 +1,6 @@
 <script lang="ts">
   import {batch} from "hurdak"
-  import {getAvgQuality} from "src/util/nostr"
+  import {getAvgRating} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -17,7 +17,7 @@
 
   url = normalizeRelayUrl(url)
 
-  $: rating = getAvgQuality("review/relay", reviews)
+  $: rating = getAvgRating(reviews)
 
   const relay = deriveRelay(url)
   const tabs = ["notes", "reviews"]
@@ -47,7 +47,8 @@
   {/if}
   <Tabs borderClass="border-gray-6" {tabs} {activeTab} {setActiveTab} />
   {#if activeTab === "reviews"}
-    <Feed onEvent={onReview} filter={{kinds: [1985], "#l": ["review/relay"], "#r": [$relay.url]}} />
+    <Feed onEvent={onReview} filter={{kinds: [1985], "#l": ["review/relay"], "#r": [$relay.url, $relay.url.slice(0, -1)]}} />
+
   {:else}
     <Feed noCache relays={[$relay.url]} {filter} />
   {/if}

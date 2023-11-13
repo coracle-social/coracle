@@ -4,7 +4,7 @@
   import {mapVals} from "hurdak"
   import {isShareableRelay, Tags} from "paravel"
   import {createScroller} from "src/util/misc"
-  import {getAvgQuality} from "src/util/nostr"
+  import {getAvgRating} from "src/util/nostr"
   import {getModal} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
@@ -37,21 +37,15 @@
   const scroller = createScroller(loadMore, {element: getModal()})
 
   $: ratings = mapVals(
-    events => getAvgQuality("review/relay", events),
+    getAvgRating,
     groupBy(e => Tags.from(e).getValue("r"), reviews)
   )
 
   load({
     relays: getPubkeyHints($session?.pubkey, "read"),
-    filters: [
-      {
-        limit: 1000,
-        kinds: [1985],
-        "#l": ["review/relay"],
-        "#L": ["social.coracle.ontology"],
-      },
-    ],
+    filters: [{limit: 1000, kinds: [1985], "#l": ["review/relay"]}],
     onEvent: event => {
+      console.log(event)
       reviews = reviews.concat(event)
     },
   })

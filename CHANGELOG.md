@@ -12,6 +12,7 @@
 - [x] Move some utilities to paravel
 - [x] Add experimental DVM code
 - [x] Disable NIP 24 messages for now
+- [x] Use NIP 85 for relay reviews
 
 # 0.3.11
 

@@ -8,9 +8,7 @@
 
   export let note, rating
 
-  const tag = Tags.from(note)
-    .reject(t => ["l", "L"].includes(t[0]))
-    .first()
+  const tag = Tags.from(note).type(["r", "p", "e"]).first()
 
   let href
   let display
@@ -23,18 +21,19 @@
       r: () => router.at("relays").of(value).toString(),
       p: () => router.at("people").of(value, {relays}).toString(),
       e: () => router.at("notes").of(value, {relays}).toString(),
+      default: () => null,
     })
 
     display = switcherFn(type, {
       r: () => displayRelay({url: value}),
       p: () => displayPubkey(value),
       e: () => "a note",
-      default: () => "something",
+      default: () => null,
     })
   }
 </script>
 
-{#if tag}
+{#if display}
   <div class="mb-4 flex items-center gap-2 border-l-2 border-solid border-gray-5 pl-2">
     Rated
     {#if href}

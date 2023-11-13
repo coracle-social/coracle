@@ -14,8 +14,9 @@
 
   const onSubmit = () => {
     publishReview(compose.parse(), [
-      ["L", "social.coracle.ontology"],
-      ["l", "review/relay", "social.coracle.ontology", JSON.stringify({quality: rating})],
+      ["L", "review"],
+      ["l", "review/relay", "review"],
+      ["value", rating, "rating", "review"],
       ["r", url],
     ])
 
