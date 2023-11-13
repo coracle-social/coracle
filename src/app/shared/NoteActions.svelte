@@ -29,6 +29,7 @@
     getUserRelayUrls,
     getPublishHints,
     publishReaction,
+    getSetting,
     processZap,
     displayRelay,
     getEventHints,
@@ -167,18 +168,20 @@
       <i class="fa fa-reply cursor-pointer" />
       {$repliesCount}
     </button>
-    <button
-      class={cx("relative w-16 pt-1 text-left transition-all hover:pb-1 hover:pt-0", {
-        "pointer-events-none opacity-50": disableActions || note.pubkey === $session?.pubkey,
-        "text-accent": like,
-      })}
-      on:click={() => (like ? deleteReaction(like) : react("+"))}>
-      <i
-        class={cx("fa fa-heart cursor-pointer", {
-          "fa-beat fa-beat-custom": like,
-        })} />
-      {$likesCount}
-    </button>
+    {#if getSetting('enable_reactions')}
+      <button
+        class={cx("relative w-16 pt-1 text-left transition-all hover:pb-1 hover:pt-0", {
+          "pointer-events-none opacity-50": disableActions || note.pubkey === $session?.pubkey,
+          "text-accent": like,
+        })}
+        on:click={() => (like ? deleteReaction(like) : react("+"))}>
+        <i
+          class={cx("fa fa-heart cursor-pointer", {
+            "fa-beat fa-beat-custom": like,
+          })} />
+        {$likesCount}
+      </button>
+    {/if}
     {#if $env.ENABLE_ZAPS}
       <button
         class={cx("relative w-16 pt-1 text-left transition-all hover:pb-1 hover:pt-0 sm:w-20", {

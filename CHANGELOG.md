@@ -8,6 +8,10 @@
 - [x] Open relay detail page for relay links in content
 - [x] Include mutes in WoT score calculation
 - [x] Fix explore/label detail pages
+- [x] Add setting to disable likes/reactions
+- [x] Move some utilities to paravel
+- [x] Add experimental DVM code
+- [x] Disable NIP 24 messages for now
 
 # 0.3.11
 

@@ -30,6 +30,7 @@
     getEventHints,
     getIdFilters,
     getReplyFilters,
+    getSetting,
     selectHints,
     mergeHints,
     loadPubkeys,
@@ -170,7 +171,11 @@
 
       loadPubkeys([event.pubkey])
 
-      const kinds = [1, 7]
+      const kinds = [1]
+
+      if (getSetting('enable_reactions')) {
+        kinds.push(7)
+      }
 
       if ($env.ENABLE_ZAPS) {
         kinds.push(9735)

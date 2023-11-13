@@ -55,6 +55,13 @@
       <p>Control who and what you see on {appName}.</p>
     </div>
     <div class="flex w-full flex-col gap-8">
+      <FieldInline label="Show likes on notes">
+        <Toggle bind:value={settings.enable_reactions} />
+        <p slot="info">
+          Show how many likes and reactions a note received. Disabling this can reduce
+          how much data {appName} uses.
+        </p>
+      </FieldInline>
       <FieldInline label="Show images and link previews">
         <Toggle bind:value={settings.show_media} />
         <p slot="info">
