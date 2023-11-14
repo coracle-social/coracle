@@ -1,10 +1,8 @@
 import {Tags} from "paravel"
-import {last} from 'ramda'
 import {nip19} from "nostr-tools"
 import {pick, is, mergeLeft, identity} from "ramda"
 import {between, avg} from "hurdak"
 import type {Filter, Event} from "src/engine"
-import {tryJson} from 'src/util/misc'
 
 export const noteKinds = [1, 30023, 1063, 9802, 1808, 32123]
 export const personKinds = [0, 2, 3, 10000, 10002]
@@ -42,20 +40,14 @@ export const toHex = (data: string): string | null => {
 export const mergeFilter = (filter: Filter | Filter[], extra: Filter) =>
   is(Array, filter) ? filter.map(mergeLeft(extra)) : {...filter, ...extra}
 
-export const getRating = (event: Event) => {
-  const tags = Tags.from(event)
-  const rating = parseInt(tags.nthEq(2, "rating").values().first())
-
-  if (!isNaN(rating)) {
-    return rating
-  }
-
-  const json = tryJson(() => {
-    return JSON.parse(last(tags.nthEq(1, "review/relay").first()))
-  })
-
-  return (json as {quality?: number})?.quality
-}
+export const getRating = (event: Event) =>
+  parseInt(
+    Tags.from(event)
+      .type("rating")
+      .filter(t => t.length === 2)
+      .pluck(1)
+      .first()
+  )
 
 export const getAvgRating = (events: Event[]) => avg(events.map(getRating).filter(identity))
 

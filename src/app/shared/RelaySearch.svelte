@@ -16,6 +16,7 @@
     getPubkeyHints,
     getRelaySearch,
     relayPolicyUrls,
+    normalizeRelayUrl,
     urlToRelay,
   } from "src/engine"
 
@@ -38,14 +39,13 @@
 
   $: ratings = mapVals(
     getAvgRating,
-    groupBy(e => Tags.from(e).getValue("r"), reviews)
+    groupBy(e => normalizeRelayUrl(Tags.from(e).getValue("r")), reviews)
   )
 
   load({
     relays: getPubkeyHints($session?.pubkey, "read"),
-    filters: [{limit: 1000, kinds: [1985], "#l": ["review/relay"]}],
+    filters: [{limit: 1000, kinds: [1986], "#l": ["review/relay"]}],
     onEvent: event => {
-      console.log(event)
       reviews = reviews.concat(event)
     },
   })
@@ -61,8 +61,9 @@
   </Input>
   <div class="flex flex-col gap-2">
     {#if q.match("^.+\\..+$")}
-      <slot name="item" relay={urlToRelay(q)}>
-        <RelayCard relay={urlToRelay(q)} />
+      {@const relay = urlToRelay(q)}
+      <slot name="item" {relay}>
+        <RelayCard rating={ratings[relay.url]} {relay} />
       </slot>
     {/if}
     {#each !q && hideIfEmpty ? [] : $searchRelays(q).slice(0, limit) as relay (relay.url)}

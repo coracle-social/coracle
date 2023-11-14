@@ -9,6 +9,8 @@ import {relays} from "./state"
 import {relayPolicies} from "./derived"
 
 export const saveRelay = (url: string) => {
+  url = normalizeRelayUrl(url)
+
   if (isShareableRelay(url)) {
     const relay = relays.key(url).get()
 

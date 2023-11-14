@@ -1,10 +1,5 @@
 import {nip19} from "nostr-tools"
-import {
-  Tags,
-  isShareableRelay,
-  normalizeRelayUrl as _normalizeRelayUrl,
-  fromNostrURI,
-} from "paravel"
+import {Tags, isShareableRelay, normalizeRelayUrl as normalize, fromNostrURI} from "paravel"
 import {sortBy, pluck, uniq, nth, prop, last} from "ramda"
 import {chain, displayList, first} from "hurdak"
 import {fuzzy} from "src/util/misc"
@@ -23,7 +18,11 @@ export const normalizeRelayUrl = (url: string) => {
     return url
   }
 
-  return _normalizeRelayUrl(url)
+  try {
+    return normalize(url)
+  } catch (e) {
+    return url
+  }
 }
 
 export const urlToRelay = url => ({url: normalizeRelayUrl(url)} as Relay)

@@ -16,7 +16,7 @@
     publishReview(compose.parse(), [
       ["L", "review"],
       ["l", "review/relay", "review"],
-      ["value", rating, "rating", "review"],
+      ["rating", rating],
       ["r", url],
     ])
 

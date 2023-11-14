@@ -47,8 +47,13 @@
   {/if}
   <Tabs borderClass="border-gray-6" {tabs} {activeTab} {setActiveTab} />
   {#if activeTab === "reviews"}
-    <Feed onEvent={onReview} filter={{kinds: [1985], "#l": ["review/relay"], "#r": [$relay.url, $relay.url.slice(0, -1)]}} />
-
+    <Feed
+      onEvent={onReview}
+      filter={{
+        kinds: [1986],
+        "#l": ["review/relay"],
+        "#r": [$relay.url],
+      }} />
   {:else}
     <Feed noCache relays={[$relay.url]} {filter} />
   {/if}

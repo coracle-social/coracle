@@ -43,6 +43,7 @@
     {kind: 1808, label: "Remix"},
     {kind: 32123, label: "Song"},
     {kind: 1985, label: "Label"},
+    {kind: 1986, label: "Review"},
     {kind: 1063, label: "Image data"},
     {kind: 9735, label: "Reaction"},
     {kind: 9802, label: "Highlights"},
