@@ -187,7 +187,7 @@ export const getReplyTags = (parent: Event, inherit = false) => {
   const hint = getEventHint(parent)
   const tags = Tags.from(parent).normalize()
   const reply = ["e", parent.id, hint, "reply"]
-  const root = tags.mark("root").first() || reply.slice(0, 3).concat('root')
+  const root = (tags.mark("root").first() || tags.mark("reply").first() || reply).slice(0, 3).concat('root')
   const extra = inherit
     ? tags
         .type(["a", "e"])
