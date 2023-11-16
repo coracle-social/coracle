@@ -15,6 +15,7 @@
 - [x] Use NIP 85 for relay reviews
 - [x] Improve feed controls UX
 - [x] Add rendering support for kind 1986
+- [x] Fix publish failure detection
 
 # 0.3.11
 

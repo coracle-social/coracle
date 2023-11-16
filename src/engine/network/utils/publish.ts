@@ -91,12 +91,18 @@ export class Publisher extends EventEmitter {
 
     const sub = executor.publish(omit(["seen_on"], this.event), {
       verb,
-      onOk: (url: string) => {
+      onOk: (url: string, eventId: string, ok: boolean) => {
         this.event.seen_on.push(url)
 
-        succeeded.add(url)
+        if (ok) {
+          succeeded.add(url)
+          failed.delete(url)
+        } else {
+          succeeded.delete(url)
+          failed.add(url)
+        }
+
         timeouts.delete(url)
-        failed.delete(url)
         attemptToResolve()
       },
       onError: (url: string) => {

@@ -16,7 +16,6 @@
     const privkey = nsec.startsWith("nsec") ? toHex(nsec) : nsec
 
     if (isKeyValid(privkey)) {
-      console.log(privkey)
       loginWithPrivateKey(privkey)
       boot()
     } else {
