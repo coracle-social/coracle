@@ -1,5 +1,6 @@
 <script lang="ts">
   import {Tags} from "paravel"
+  import {randomId} from "hurdak"
   import {toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
@@ -9,6 +10,7 @@
   import MultiSelect from "src/partials/MultiSelect.svelte"
   import {router} from "src/app/router"
   import {
+    Naddr,
     userLists,
     searchPeople,
     searchTopics,
@@ -21,14 +23,14 @@
   export let list = null
   export let naddr = null
 
-  if (!list) {
+  if (!list && naddr) {
     list = userLists.key(naddr).get()
   }
 
   const tags = list ? Tags.from(list) : Tags.from([])
 
   let values = {
-    name: tags.getValue("d") || "",
+    name: tags.getValue("name") || tags.getValue("d") || "",
     params: tags.type(["t", "p"]).all(),
     relays: tags.type("r").all(),
   }
@@ -58,9 +60,10 @@
       return toast.show("error", "That name is already in use")
     }
 
+    const id = naddr ? Naddr.decode(naddr).identifier : randomId()
     const {name, params, relays} = values
 
-    publishBookmarksList(name, [...params, ...relays])
+    publishBookmarksList(id, name, [...params, ...relays])
     toast.show("info", "Your list has been saved!")
     router.pop()
   }

@@ -7,7 +7,7 @@ import type {Filter, Event} from "src/engine"
 export const noteKinds = [1, 30023, 1063, 9802, 1808, 32123]
 export const personKinds = [0, 2, 3, 10000, 10002]
 export const reactionKinds = [7, 9735]
-export const userKinds = [...personKinds, 30001, 30078]
+export const userKinds = [...personKinds, 30001, 30003, 30078]
 
 export const LOCAL_RELAY_URL = "local://coracle.relay"
 

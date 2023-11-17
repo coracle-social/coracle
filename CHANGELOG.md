@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.3.13
+
+- [x] Update lists to use new 30003 user bookmarks kind
+
 # 0.3.12
 
 - [x] Add support for kind 30311 (streams)

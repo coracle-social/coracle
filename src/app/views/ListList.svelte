@@ -5,7 +5,7 @@
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
   import {router} from "src/app/router"
-  import {userLists, publishDeletion} from "src/engine"
+  import {Naddr, userLists, publishDeletion} from "src/engine"
 
   const createFeed = () => router.at("lists/create").open()
 
@@ -28,7 +28,7 @@
     <div class="flex justify-start gap-3">
       <i
         class="fa fa-sm fa-trash cursor-pointer py-3"
-        on:click|stopPropagation={() => publishDeletion([list.naddr])} />
+        on:click|stopPropagation={() => publishDeletion([Naddr.decode(list.naddr).asTagValue()])} />
       <div class="flex w-full justify-between">
         <div>
           <strong>{list.name}</strong>

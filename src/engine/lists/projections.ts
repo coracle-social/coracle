@@ -1,15 +1,16 @@
-import {nip19} from "nostr-tools"
 import {Tags} from "paravel"
+import {nip19} from "nostr-tools"
 import {updateRecord} from "src/engine/core/commands"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
-import {EventKind} from "src/engine/events/model"
 import {_lists} from "./state"
 
-projections.addHandler(EventKind.BookmarkList, (e: Event) => {
-  const name = Tags.from(e).getValue("d")
+const handleBookmarkList = (e: Event) => {
+  const tags = Tags.from(e)
+  const d = tags.getValue("d")
+  const name = tags.getValue("name") || d
   const naddr = nip19.naddrEncode({
-    identifier: name,
+    identifier: d,
     pubkey: e.pubkey,
     kind: e.kind,
   })
@@ -19,4 +20,7 @@ projections.addHandler(EventKind.BookmarkList, (e: Event) => {
     pubkey: e.pubkey,
     name,
   }))
-})
+}
+
+projections.addHandler(30001, handleBookmarkList)
+projections.addHandler(30003, handleBookmarkList)
