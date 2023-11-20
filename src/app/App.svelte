@@ -25,7 +25,6 @@
   import ChannelCreate from "src/app/views/ChannelCreate.svelte"
   import ChannelsDetail from "src/app/views/ChannelsDetail.svelte"
   import ChannelsList from "src/app/views/ChannelsList.svelte"
-  import ChatRedirect from "src/app/views/ChatRedirect.svelte"
   import DataExport from "src/app/views/DataExport.svelte"
   import DataImport from "src/app/views/DataImport.svelte"
   import Explore from "src/app/views/Explore.svelte"
@@ -106,8 +105,6 @@
       channelId: asChannelId,
     },
   })
-
-  router.register("/chat/redirect", ChatRedirect)
 
   router.register("/conversations", MessagesList, {
     requireUser: true,

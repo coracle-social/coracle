@@ -43,9 +43,6 @@
   <NavItem disabled={!$canUseGiftWrap} href="/groups">
     <i class="fa fa-circle-nodes mr-2" /> Groups
   </NavItem>
-  <NavItem modal href="/chat/redirect">
-    <i class="fa fa-comment mr-2" /> Chat
-  </NavItem>
   <NavItem href="/apps">
     <i class="fa fa-box mr-2" /> Apps
   </NavItem>
