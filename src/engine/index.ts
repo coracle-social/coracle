@@ -3,7 +3,7 @@ import {Storage, LocalStorageAdapter, IndexedDBAdapter, sortByPubkeyWhitelist} f
 import {_lists} from "./lists"
 import {people} from "./people"
 import {relays} from "./relays"
-import {groups, groupSharedKeys, groupAdminKeys, groupRequests} from "./groups"
+import {groups, groupSharedKeys, groupAdminKeys, groupRequests, groupAlerts} from "./groups"
 import {_labels} from "./labels"
 import {topics} from "./topics"
 import {deletes, _events, deletesLastUpdated} from "./events"
@@ -27,7 +27,7 @@ export * from "./session"
 export * from "./topics"
 export * from "./zaps"
 
-export const storage = new Storage(6, [
+export const storage = new Storage(8, [
   new LocalStorageAdapter("pubkey", pubkey),
   new LocalStorageAdapter("sessions", sessions),
   new LocalStorageAdapter("deletes2", deletes, {
@@ -43,7 +43,8 @@ export const storage = new Storage(6, [
   new IndexedDBAdapter("relays", relays, 1000, sortBy(prop("count"))),
   new IndexedDBAdapter("channels", channels, 1000, sortBy(prop("last_checked"))),
   new IndexedDBAdapter("groups", groups, 1000, sortBy(prop("count"))),
-  new IndexedDBAdapter("groupRequests", groupRequests, 1000, sortBy(prop("created_at"))),
+  new IndexedDBAdapter("groupAlerts", groupAlerts, 30, sortBy(prop("created_at"))),
+  new IndexedDBAdapter("groupRequests", groupRequests, 100, sortBy(prop("created_at"))),
   new IndexedDBAdapter("groupSharedKeys", groupSharedKeys, 1000, sortBy(prop("created_at"))),
   new IndexedDBAdapter("groupAdminKeys", groupAdminKeys, 1000),
 ])

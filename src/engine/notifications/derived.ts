@@ -5,6 +5,7 @@ import {reactionKinds} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {derived} from "src/engine/core/utils"
+import {groupRequests, groupAlerts} from "src/engine/groups/state"
 import {session} from "src/engine/session/derived"
 import {userEvents} from "src/engine/events/derived"
 
@@ -33,11 +34,22 @@ export const notifications = derived(
   }
 )
 
+export const otherNotifications = derived([groupRequests, groupAlerts], ([$requests, $alerts]) =>
+  sortBy(
+    n => -n.created_at,
+    [
+      ...$requests.filter(r => !r.resolved).map(request => ({t: "request", ...request})),
+      ...$alerts.map(alert => ({t: "alert", ...alert})),
+    ]
+  )
+)
+
 export const hasNewNotifications = derived(
-  [session, notifications],
-  ([$session, $notifications]) => {
+  [session, notifications, otherNotifications],
+  ([$session, $notifications, $otherNotifications]) => {
     const maxCreatedAt = $notifications
       .filter(e => !reactionKinds.includes(e.kind))
+      .concat($otherNotifications)
       .map(prop("created_at"))
       .reduce(max, 0)
 

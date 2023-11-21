@@ -45,3 +45,8 @@ export type GroupRequest = Event & {
   group: string
   resolved: boolean
 }
+
+export type GroupAlert = Event & {
+  group: string
+  type: "exit" | "invite"
+}

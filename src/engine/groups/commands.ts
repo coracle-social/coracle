@@ -257,16 +257,8 @@ export const publishGroupInvites = async (address, pubkeys, relays, gracePeriod 
   return publishKeyRotations(address, pubkeys, template)
 }
 
-export const publishGroupEvictions = async (address, pubkeys, gracePeriod) => {
-  const template = createEvent(24, {
-    tags: [
-      ["a", address],
-      ["grace_period", String(gracePeriod)],
-    ],
-  })
-
-  publishKeyRotations(address, pubkeys, template)
-}
+export const publishGroupEvictions = async (address, pubkeys) =>
+  publishKeyRotations(address, pubkeys, createEvent(24, {tags: [["a", address]]}))
 
 export const publishGroupMeta = async (address, meta) => {
   const template = createEvent(34550, {

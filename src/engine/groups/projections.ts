@@ -10,7 +10,7 @@ import {_events} from "src/engine/events/state"
 import {sessions} from "src/engine/session/state"
 import {nip59} from "src/engine/session/derived"
 import {GroupAccess, MemberAccess} from "./model"
-import {groups, groupSharedKeys, groupRequests} from "./state"
+import {groups, groupSharedKeys, groupRequests, groupAlerts} from "./state"
 import {deriveAdminKeyForGroup, getRecipientKey} from "./utils"
 import {modifyGroupStatus, setGroupStatus} from "./commands"
 
@@ -39,6 +39,12 @@ projections.addHandler(24, (e: Event) => {
       ...$key,
     }))
   }
+
+  groupAlerts.key(e.id).set({
+    ...e,
+    group: address,
+    type: privkey ? "invite" : "exit",
+  })
 
   setGroupStatus(recipient, address, e.created_at, {
     access: privkey ? MemberAccess.Granted : MemberAccess.Revoked,

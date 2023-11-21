@@ -5,13 +5,7 @@
   import {tweened} from "svelte/motion"
   import {identity, sum, uniqBy, prop, pluck, sortBy} from "ramda"
   import {formatSats} from "src/util/misc"
-  import {
-    LOCAL_RELAY_URL,
-    getGroupAddress,
-    getIdOrAddressTag,
-    asNostrEvent,
-    getIdOrAddress,
-  } from "src/util/nostr"
+  import {LOCAL_RELAY_URL, getGroupAddress, getIdOrAddressTag, asNostrEvent} from "src/util/nostr"
   import {quantify} from "hurdak"
   import {toast} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"

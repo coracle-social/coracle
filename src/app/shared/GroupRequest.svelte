@@ -3,12 +3,15 @@
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
+  import GroupCircle from "src/app/shared/GroupCircle.svelte"
+  import GroupName from "src/app/shared/GroupName.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {groupRequests} from "src/engine"
   import {router} from "src/app/router"
 
   export let address
   export let request
+  export let showGroup = false
 
   const dismiss = () => groupRequests.key(request.id).merge({resolved: true})
 
@@ -54,9 +57,20 @@
     <p>
       Resolving this request will
       {#if request.kind === 25}
-        add <Chip><PersonBadgeSmall pubkey={request.pubkey} /></Chip> to the group.
+        add <Chip class="relative top-px mx-1"><PersonBadgeSmall pubkey={request.pubkey} /></Chip> to
       {:else if request.kind === 26}
-        remove <Chip><PersonBadgeSmall pubkey={request.pubkey} /></Chip> from the group.
+        remove <Chip class="relative top-px mx-1"
+          ><PersonBadgeSmall pubkey={request.pubkey} /></Chip> from
+      {/if}
+      {#if showGroup}
+        <Anchor modal href={router.at("groups").of(address).at("notes").toString()}>
+          <Chip class="relative top-px mx-1">
+            <GroupCircle {address} class="h-4 w-4" />
+            <GroupName {address} />
+          </Chip>
+        </Anchor>
+      {:else}
+        the group.
       {/if}
     </p>
     <div class="flex gap-2 sm:hidden">

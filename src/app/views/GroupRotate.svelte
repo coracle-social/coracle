@@ -60,10 +60,10 @@
     })
 
     // Send new invites
-    publishGroupInvites(address, newMembers, gracePeriod)
+    publishGroupInvites(address, newMembers, $group.relays, gracePeriod)
 
     // Send evictions
-    publishGroupEvictions(address, removedMembers, gracePeriod)
+    publishGroupEvictions(address, removedMembers)
 
     // Re-publish group info
     publishGroupMeta(address, $group)
