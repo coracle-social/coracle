@@ -37,7 +37,9 @@
     Publisher,
     mention,
     signer,
-    deriveGroupAccess,
+    deriveGroupStatus,
+    deriveMembershipLevel,
+    MembershipLevel,
     publishToZeroOrMoreGroups,
     publishDeletion,
     getUserRelayUrls,
@@ -101,11 +103,11 @@
     removeFromContext(e)
   }
 
-  const crossPost = async address => {
+  const crossPost = async (address = null) => {
     const relays = getPublishHints(note)
     const tags = [getIdOrAddressTag(note, relays[0]), mention(note.pubkey)]
     const content = JSON.stringify(asNostrEvent(note))
-    const shouldWrap = groups.key(address).get()?.access === "closed"
+    const shouldWrap = deriveMembershipLevel(address).get() === MembershipLevel.Private
 
     let template
     if (note.kind === 1) {
@@ -147,9 +149,9 @@
 
     for (const addr of Object.keys($session.groups || {})) {
       const group = groups.key(addr).get()
-      const access = deriveGroupAccess(addr).get()
+      const {access} = deriveGroupStatus(addr).get()
 
-      if (group && access === "granted" && addr !== address) {
+      if (group && access && addr !== address) {
         options.push(group)
       }
     }
@@ -163,7 +165,7 @@
   $: disableActions =
     !$canSign ||
     ($muted && !showMuted) ||
-    (note.wrap && deriveGroupAccess(address).get() !== "granted")
+    (note.wrap && deriveGroupStatus(address).get() !== "granted")
   $: like = like || likes.find(e => e.pubkey === $session?.pubkey)
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
   $: $likesCount = allLikes.length
@@ -185,7 +187,7 @@
     actions = []
 
     actions.push({label: "Quote", icon: "quote-left", onClick: quote})
-    actions.push({label: "Cross-post", icon: "shuffle", onClick: () => setView('cross-post')})
+    actions.push({label: "Cross-post", icon: "shuffle", onClick: () => setView("cross-post")})
     actions.push({label: "Tag", icon: "tag", onClick: label})
     //actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
 
@@ -331,15 +333,15 @@
         <div>Select where you'd like to post to:</div>
         <div class="flex flex-col gap-2">
           {#if address}
-          <Card invertColors interactive on:click={() => crossPost()}>
-            <div class="flex gap-4 text-gray-1">
-              <i class="fa fa-earth-asia fa-2x" />
-              <div class="flex min-w-0 flex-grow flex-col gap-4">
-                <p class="text-2xl">Global</p>
-                <p>Post to your main feed.</p>
+            <Card invertColors interactive on:click={() => crossPost()}>
+              <div class="flex gap-4 text-gray-1">
+                <i class="fa fa-earth-asia fa-2x" />
+                <div class="flex min-w-0 flex-grow flex-col gap-4">
+                  <p class="text-2xl">Global</p>
+                  <p>Post to your main feed.</p>
+                </div>
               </div>
-            </div>
-          </Card>
+            </Card>
           {/if}
           {#each $groupOptions as g (g.address)}
             <Card invertColors interactive on:click={() => crossPost(g.address)}>

@@ -2,12 +2,12 @@ import {prop, sortBy, last, whereEq} from "ramda"
 import {ellipsize} from "hurdak"
 import {Tags} from "paravel"
 import {Naddr} from "src/util/nostr"
-import {derived} from "src/engine/core/utils"
 import {pubkey} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {getUserRelayUrls, mergeHints} from "src/engine/relays/utils"
 import {groups, groupSharedKeys, groupAdminKeys} from "./state"
 import type {Group} from "./model"
+import {MembershipLevel, GroupAccess, MemberAccess} from "./model"
 
 export const getGroupNaddr = (group: Group) =>
   Naddr.fromTagValue(group.address, group.relays).encode()
@@ -72,14 +72,21 @@ export const deriveSharedKeyForGroup = (address: string) =>
 
 export const deriveAdminKeyForGroup = (address: string) => groupAdminKeys.key(address.split(":")[1])
 
-export const deriveGroupAccess = address => {
-  return derived([groups.key(address), session], ([$group, $session]) => {
-    const status = $session?.groups?.[address] || {}
+export const deriveGroupAccess = address =>
+  groups.key(address).derived($group => $group.access || GroupAccess.Closed)
 
-    if ($group?.access === "open") {
-      return status.joined ? "granted" : null
-    } else {
-      return status.access
+export const deriveGroupStatus = address =>
+  session.derived($session => $session?.groups?.[address] || {})
+
+export const deriveMembershipLevel = address =>
+  deriveGroupStatus(address).derived(({joined, access}) => {
+    if (access === MemberAccess.Granted) {
+      return MembershipLevel.Private
     }
+
+    if (joined) {
+      return MembershipLevel.Public
+    }
+
+    return MembershipLevel.None
   })
-}

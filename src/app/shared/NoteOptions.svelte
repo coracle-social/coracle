@@ -14,7 +14,14 @@
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
   import {mergeHints, displayRelay, getGroupRelayUrls} from "src/engine"
-  import {env, groups, getUserRelayUrls, deriveGroupAccess} from "src/engine"
+  import {
+    env,
+    deriveGroupAccess,
+    GroupAccess,
+    MembershipLevel,
+    getUserRelayUrls,
+    deriveMembershipLevel,
+  } from "src/engine"
 
   export let groupOptions = []
   export let showRelays = $env.FORCE_RELAYS.length === 0
@@ -76,25 +83,25 @@
   }
 
   const onSubmit = () => {
-    if (canPostPrivately || canPostPublicly) {
-      initialValues = values
-      dispatch("change", values)
-      setView(null)
-    }
+    initialValues = values
+    dispatch("change", values)
+    setView(null)
   }
 
   $: {
-    canPostPrivately = values.groups.length > 0
+    canPostPrivately = false
     canPostPublicly = true
 
     for (const address of values.groups) {
-      const group = groups.key(address).get()
       const access = deriveGroupAccess(address).get()
+      const membershipLevel = deriveMembershipLevel(address).get()
 
-      if (group.access === "open" || access !== "granted") {
-        canPostPrivately = false
-      } else if (group.access === "closed") {
-        canPostPublicly = false
+      if (access !== GroupAccess.Closed) {
+        canPostPublicly = true
+      }
+
+      if (membershipLevel === MembershipLevel.Private) {
+        canPostPrivately = true
       }
     }
 
@@ -176,17 +183,7 @@
               </Card>
             {/each}
           </div>
-          {#if !canPostPrivately && !canPostPublicly}
-            <p class="rounded-full border border-solid border-danger bg-gray-8 px-4 py-2">
-              You have selected a mix of public and private groups. Please choose one or the other.
-            </p>
-          {/if}
-          <Anchor
-            tag="button"
-            theme="button"
-            type="submit"
-            class="text-center"
-            disabled={!canPostPrivately && !canPostPublicly}>Done</Anchor>
+          <Anchor tag="button" theme="button" type="submit" class="text-center">Done</Anchor>
         {/if}
       </Content>
     </form>

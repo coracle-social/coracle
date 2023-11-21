@@ -16,8 +16,9 @@ import {
   getGroupRelayUrls,
   mergeHints,
 } from "src/engine/relays/utils"
+import {GroupAccess, MemberAccess, MembershipLevel} from "./model"
 import {groups, groupAdminKeys, groupSharedKeys} from "./state"
-import {deriveGroupAccess, deriveAdminKeyForGroup, deriveSharedKeyForGroup} from "./utils"
+import {deriveMembershipLevel, deriveAdminKeyForGroup, deriveSharedKeyForGroup} from "./utils"
 
 // Key state management
 
@@ -119,7 +120,7 @@ export const publishToGroupsPublicly = async (
   for (const address of addresses) {
     const {access} = groups.key(address).get()
 
-    if (access === "closed") {
+    if (access === GroupAccess.Closed) {
       throw new Error("Attempted to publish publicly to a closed group")
     }
 
@@ -146,13 +147,13 @@ export const publishToGroupsPrivately = async (
     const thisTemplate = updateIn("tags", (tags: string[][]) => [...tags, ["a", address]], template)
     const {access} = groups.key(address).get()
     const sharedKey = deriveSharedKeyForGroup(address).get()
-    const userAccess = deriveGroupAccess(address).get()
+    const membershipStatus = deriveMembershipLevel(address).get()
 
-    if (access === "open") {
+    if (access === GroupAccess.Open) {
       throw new Error("Attempted to publish privately to a group that does not allow it")
     }
 
-    if (userAccess !== "granted") {
+    if (membershipStatus !== MembershipLevel.Private) {
       throw new Error("Attempted to publish privately to a group the user is not a member of")
     }
 
@@ -250,7 +251,7 @@ export const publishGroupMeta = async (address, meta) => {
     ],
   })
 
-  return meta.access === "closed"
+  return meta.access === GroupAccess.Closed
     ? publishAsGroupAdminPrivately(address, template, meta.relays)
     : publishAsGroupAdminPublicly(address, template, meta.relays)
 }
@@ -270,11 +271,11 @@ export const setGroupStatus = (pubkey, address, timestamp, updates) =>
     [pubkey]: modifyGroupStatus($sessions[pubkey], address, timestamp, updates),
   }))
 
-export const resetGroupAccess = address =>
-  setGroupStatus(pubkey.get(), address, now(), {access: null})
+export const resetMemberAccess = address =>
+  setGroupStatus(pubkey.get(), address, now(), {access: MemberAccess.None})
 
 export const publishGroupEntryRequest = address => {
-  setGroupStatus(pubkey.get(), address, now(), {access: "requested"})
+  setGroupStatus(pubkey.get(), address, now(), {access: MemberAccess.Requested})
 
   return publishToGroupAdmin(
     address,
@@ -286,7 +287,7 @@ export const publishGroupEntryRequest = address => {
 }
 
 export const publishGroupExitRequest = address => {
-  setGroupStatus(pubkey.get(), address, now(), {access: null})
+  setGroupStatus(pubkey.get(), address, now(), {access: MemberAccess.None})
 
   return publishToGroupAdmin(
     address,
@@ -310,7 +311,7 @@ export const leavePublicGroup = address =>
 export const joinGroup = address => {
   const group = groups.key(address)
 
-  if (group.get()?.access === "open") {
+  if (group.get()?.access === GroupAccess.Open) {
     joinPublicGroup(address)
   } else {
     publishGroupEntryRequest(address)
@@ -320,7 +321,7 @@ export const joinGroup = address => {
 export const leaveGroup = address => {
   const group = groups.key(address)
 
-  if (group.get().access === "open") {
+  if (group.get().access === GroupAccess.Open) {
     leavePublicGroup(address)
   } else {
     publishGroupExitRequest(address)

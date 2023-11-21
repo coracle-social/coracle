@@ -1,16 +1,35 @@
 import type {Event} from "src/engine/events/model"
 
+export enum GroupAccess {
+  Open = "open",
+  Closed = "closed",
+  Hybrid = "hybrid",
+}
+
+export enum MemberAccess {
+  None = null,
+  Requested = "requested",
+  Granted = "granted",
+  Revoked = "revoked",
+}
+
+export enum MembershipLevel {
+  None = null,
+  Public = "public",
+  Private = "private",
+}
+
 export type Group = {
   id: string
   pubkey: string
   address: string
   updated_at?: number
-  access?: "open" | "closed" | "hybrid"
   relays?: string[]
   name?: string
   image?: string
   description?: string
   moderators?: string[]
+  access?: GroupAccess
 }
 
 export type GroupKey = {

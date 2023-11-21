@@ -7,16 +7,16 @@
     deriveAdminKeyForGroup,
     leaveGroup,
     joinGroup,
-    resetGroupAccess,
     getGroupNaddr,
-    deriveGroupAccess,
+    deriveGroupStatus,
+    resetMemberAccess,
   } from "src/engine"
 
   export let address
 
   const group = groups.key(address)
   const adminKey = deriveAdminKeyForGroup(address)
-  const access = deriveGroupAccess(address)
+  const status = deriveGroupStatus(address)
 
   let actions = []
 
@@ -50,7 +50,7 @@
     }
   }
 
-  const clear = () => resetGroupAccess(address)
+  const clear = () => resetMemberAccess(address)
 
   const leave = () => leaveGroup(address)
 
@@ -59,28 +59,28 @@
 
 <div class="flex items-center gap-3" on:click|stopPropagation>
   {#if !$adminKey}
-    {#if !$access}
+    {#if !$status.access}
       <Popover triggerType="mouseenter">
         <div slot="trigger" class="w-6 text-center">
           <i class="fa fa-right-to-bracket cursor-pointer" on:click={join} />
         </div>
         <div slot="tooltip">Join</div>
       </Popover>
-    {:else if $access === "requested"}
+    {:else if $status.access === "requested"}
       <Popover triggerType="mouseenter">
         <div slot="trigger" class="w-6 text-center">
           <i class="fa fa-hourglass cursor-pointer" />
         </div>
         <div slot="tooltip">Access Pending</div>
       </Popover>
-    {:else if $access === "granted"}
+    {:else if $status.access === "granted"}
       <Popover triggerType="mouseenter">
         <div slot="trigger" class="w-6 text-center">
           <i class="fa fa-right-from-bracket cursor-pointer" on:click={leave} />
         </div>
         <div slot="tooltip">Leave</div>
       </Popover>
-    {:else if $access === "revoked"}
+    {:else if $status.access === "revoked"}
       <Popover triggerType="mouseenter">
         <div slot="trigger" class="w-6 text-center">
           <i class="fa fa-times cursor-pointer" on:click={clear} />

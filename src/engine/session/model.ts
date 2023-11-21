@@ -1,7 +1,9 @@
+import type {MemberAccess} from "src/engine/groups/model"
+
 export type GroupStatus = {
   joined: boolean
   joined_updated_at: number
-  access: "requested" | "granted" | "revoked"
+  access: MemberAccess
   access_updated_at: number
 }
 

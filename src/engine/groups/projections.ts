@@ -9,6 +9,7 @@ import {EventKind} from "src/engine/events/model"
 import {_events} from "src/engine/events/state"
 import {sessions} from "src/engine/session/state"
 import {nip59} from "src/engine/session/derived"
+import {GroupAccess, MemberAccess} from "./model"
 import {groups, groupSharedKeys, groupRequests} from "./state"
 import {deriveAdminKeyForGroup, getRecipientKey} from "./utils"
 import {modifyGroupStatus, setGroupStatus} from "./commands"
@@ -40,7 +41,7 @@ projections.addHandler(24, (e: Event) => {
   }
 
   setGroupStatus(recipient, address, e.created_at, {
-    access: privkey ? "granted" : "revoked",
+    access: privkey ? MemberAccess.Granted : MemberAccess.Revoked,
   })
 })
 
@@ -61,7 +62,7 @@ projections.addHandler(34550, (e: Event) => {
     id: meta.d,
     pubkey: e.pubkey,
     updated_at: e.created_at,
-    access: meta.access || "open",
+    access: meta.access || GroupAccess.Open,
     relays: tags.type("relay").values().all(),
     name: meta.name,
     image: meta.image,
@@ -111,9 +112,9 @@ const handleGroupRequest = access => (e: Event) => {
   }
 }
 
-projections.addHandler(25, handleGroupRequest("requested"))
+projections.addHandler(25, handleGroupRequest(MemberAccess.Requested))
 
-projections.addHandler(26, handleGroupRequest(null))
+projections.addHandler(26, handleGroupRequest(MemberAccess.None))
 
 // All other events are messages sent to the group
 

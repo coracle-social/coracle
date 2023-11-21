@@ -14,6 +14,8 @@
   import GroupMember from "src/app/shared/GroupMember.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {
+    GroupAccess,
+    MemberAccess,
     displayGroup,
     groups,
     subscribe,
@@ -23,15 +25,17 @@
     deriveAdminKeyForGroup,
     deriveSharedKeyForGroup,
     getRelaysFromFilters,
+    deriveGroupStatus,
     deriveGroupAccess,
   } from "src/engine"
   import {router} from "src/app/router"
 
   export let address, activeTab
 
-  const group = groups.key(address)
   const {rgb, rgba} = getThemeBackgroundGradient()
+  const group = groups.key(address)
   const access = deriveGroupAccess(address)
+  const status = deriveGroupStatus(address)
   const sharedKey = deriveSharedKeyForGroup(address)
   const adminKey = deriveAdminKeyForGroup(address)
   const filter = {kinds: noteKinds, "#a": [address]}
@@ -104,14 +108,14 @@
     <Tabs {tabs} {activeTab} {setActiveTab} />
   {/if}
 
-  {#if (!$group?.access || $group?.access === "closed") && $access !== "granted"}
+  {#if $access === GroupAccess.Closed && $status.access !== MemberAccess.Granted}
     <p class="m-auto max-w-sm py-12 text-center">
-      {#if $access === "requested"}
+      {#if $status.access === MemberAccess.Requested}
         Your access request is awaiting approval.
       {:else}
         You don't have access to this group.
       {/if}
-      {#if !$access}
+      {#if !$status.access}
         Click <Anchor theme="anchor" on:click={() => joinGroup(address)}>here</Anchor> to request entry.
       {/if}
     </p>

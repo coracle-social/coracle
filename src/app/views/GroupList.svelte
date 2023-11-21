@@ -14,7 +14,7 @@
     getUserRelayUrls,
     mergeHints,
     getGroupReqInfo,
-    deriveGroupAccess,
+    deriveMembershipLevel,
     session,
   } from "src/engine"
 
@@ -25,7 +25,7 @@
   const scroller = createScroller(loadMore, {element: getModal()})
 
   const groupList = derived([groups, session], ([$groups, $session]) => {
-    const [joined, other] = partition(g => deriveGroupAccess(g.address).get(), $groups)
+    const [joined, other] = partition(g => deriveMembershipLevel(g.address).get(), $groups)
 
     return {joined, other}
   })
