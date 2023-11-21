@@ -33,7 +33,6 @@
   let opts = {
     warning: "",
     groups: parent.wrap ? [Tags.from(parent).getCommunity()] : [],
-    shouldWrap: Boolean(parent.wrap),
     relays: getPublishHints(parent),
     anonymous: false,
   }
@@ -93,7 +92,7 @@
     }
 
     // Re-broadcast the note we're replying to
-    if (!opts.shouldWrap) {
+    if (!parent.wrap) {
       Publisher.publish({relays: opts.relays, event: asNostrEvent(parent)})
     }
 
@@ -176,4 +175,8 @@
   </div>
 {/if}
 
-<NoteOptions bind:this={options} on:change={setOpts} initialValues={opts} showRelays={!opts.shouldWrap} />
+<NoteOptions
+  bind:this={options}
+  on:change={setOpts}
+  initialValues={opts}
+  showRelays={!parent.wrap} />

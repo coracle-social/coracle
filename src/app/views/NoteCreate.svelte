@@ -24,6 +24,7 @@
     groups,
     getUserRelayUrls,
     publishToZeroOrMoreGroups,
+    deriveMembershipLevel,
   } from "src/engine"
 
   export let quote = null
@@ -41,7 +42,6 @@
     groups: [defaultGroup].filter(identity),
     relays: getUserRelayUrls("write"),
     anonymous: false,
-    shouldWrap: true,
   }
 
   const setOpts = e => {
@@ -54,7 +54,7 @@
     for (const address of Object.keys($session.groups || {})) {
       const group = groups.key(address).get()
 
-      if (group) {
+      if (group && deriveMembershipLevel(address).get()) {
         options.push(group)
       }
     }

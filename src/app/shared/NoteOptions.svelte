@@ -14,14 +14,7 @@
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
   import {mergeHints, displayRelay, getGroupRelayUrls} from "src/engine"
-  import {
-    env,
-    deriveGroupAccess,
-    GroupAccess,
-    MembershipLevel,
-    getUserRelayUrls,
-    deriveMembershipLevel,
-  } from "src/engine"
+  import {env, getUserRelayUrls} from "src/engine"
 
   export let groupOptions = []
   export let showRelays = $env.FORCE_RELAYS.length === 0
@@ -30,15 +23,12 @@
     groups: string[]
     relays: string[]
     anonymous: boolean
-    shouldWrap: boolean
   }
 
   let values = {...initialValues}
   let view = null
   let relaySearch = ""
   let relaysDirty = false
-  let canPostPrivately = false
-  let canPostPublicly = false
 
   const dispatch = createEventDispatcher()
 
@@ -64,9 +54,6 @@
   }
 
   const setGroup = address => {
-    // Reset this, it'll get reset reactively below
-    values.shouldWrap = true
-
     if (values.groups.includes(address)) {
       values.groups = without([address], values.groups)
     } else {
@@ -86,28 +73,6 @@
     initialValues = values
     dispatch("change", values)
     setView(null)
-  }
-
-  $: {
-    canPostPrivately = false
-    canPostPublicly = true
-
-    for (const address of values.groups) {
-      const access = deriveGroupAccess(address).get()
-      const membershipLevel = deriveMembershipLevel(address).get()
-
-      if (access !== GroupAccess.Closed) {
-        canPostPublicly = true
-      }
-
-      if (membershipLevel === MembershipLevel.Private) {
-        canPostPrivately = true
-      }
-    }
-
-    values.shouldWrap = values.shouldWrap && canPostPrivately
-
-    dispatch("change", {shouldWrap: values.shouldWrap})
   }
 </script>
 
@@ -161,14 +126,6 @@
           <div class="mb-4 flex items-center justify-center">
             <Heading>Post to a group</Heading>
           </div>
-          {#if canPostPrivately && canPostPublicly}
-            <FieldInline label="Post privately">
-              <Toggle bind:value={values.shouldWrap} />
-              <p slot="info">
-                When enabled, your note will only be visible to other members of the group.
-              </p>
-            </FieldInline>
-          {/if}
           <div>Select any groups you'd like to post to:</div>
           <div class="flex flex-col gap-2">
             {#each groupOptions as g (g.address)}

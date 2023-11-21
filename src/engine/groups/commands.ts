@@ -1,6 +1,6 @@
 import {generatePrivateKey, getPublicKey} from "nostr-tools"
 import {now, createEvent} from "paravel"
-import {without, prop} from "ramda"
+import {without, partition, prop} from "ramda"
 import {updateIn, randomId, filterVals} from "hurdak"
 import {Naddr} from "src/util/nostr"
 import {updateRecord} from "src/engine/core/commands"
@@ -18,7 +18,12 @@ import {
 } from "src/engine/relays/utils"
 import {GroupAccess, MemberAccess, MembershipLevel} from "./model"
 import {groups, groupAdminKeys, groupSharedKeys} from "./state"
-import {deriveMembershipLevel, deriveAdminKeyForGroup, deriveSharedKeyForGroup} from "./utils"
+import {
+  deriveGroupAccess,
+  deriveMembershipLevel,
+  deriveAdminKeyForGroup,
+  deriveSharedKeyForGroup,
+} from "./utils"
 
 // Key state management
 
@@ -176,7 +181,7 @@ export const publishToGroupsPrivately = async (
 export const publishToZeroOrMoreGroups = async (
   addresses,
   template,
-  {shouldWrap, relays, anonymous = false}
+  {relays, anonymous = false, shouldWrapIfPossible = true}
 ) => {
   if (addresses.length === 0) {
     const event = anonymous
@@ -186,12 +191,36 @@ export const publishToZeroOrMoreGroups = async (
     return [await Publisher.publish({relays, event})]
   }
 
-  // Don't use relay overrides if sending to a closed group
-  if (shouldWrap) {
-    return publishToGroupsPrivately(addresses, template, {anonymous})
+  const [wrap, nowrap] = partition(a => {
+    const access = deriveGroupAccess(a).get()
+    const membershipLevel = deriveMembershipLevel(a).get()
+
+    if (membershipLevel === MembershipLevel.Private) {
+      if (access === GroupAccess.Closed) {
+        return true
+      }
+
+      if (access === GroupAccess.Hybrid) {
+        return shouldWrapIfPossible
+      }
+    }
+
+    return false
+  }, addresses)
+
+  const subs = []
+
+  if (wrap.length > 0) {
+    for (const sub of await publishToGroupsPrivately(wrap, template, {anonymous})) {
+      subs.push(sub)
+    }
   }
 
-  return [await publishToGroupsPublicly(addresses, template, {relays, anonymous})]
+  if (nowrap.length > 0) {
+    subs.push(await publishToGroupsPublicly(wrap, template, {relays, anonymous}))
+  }
+
+  return subs
 }
 
 // Admin functions

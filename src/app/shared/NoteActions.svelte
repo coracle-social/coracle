@@ -38,8 +38,6 @@
     mention,
     signer,
     deriveGroupStatus,
-    deriveMembershipLevel,
-    MembershipLevel,
     publishToZeroOrMoreGroups,
     publishDeletion,
     getUserRelayUrls,
@@ -91,7 +89,7 @@
       Publisher.publish({relays, event: asNostrEvent(note)})
     }
 
-    publishToZeroOrMoreGroups([address], template, {relays, shouldWrap: Boolean(note.wrap)})
+    publishToZeroOrMoreGroups([address].filter(identity), template, {relays})
 
     like = await signer.get().signAsUser(template)
   }
@@ -107,7 +105,6 @@
     const relays = getPublishHints(note)
     const tags = [getIdOrAddressTag(note, relays[0]), mention(note.pubkey)]
     const content = JSON.stringify(asNostrEvent(note))
-    const shouldWrap = deriveMembershipLevel(address).get() === MembershipLevel.Private
 
     let template
     if (note.kind === 1) {
@@ -116,7 +113,7 @@
       template = createEvent(16, {content, tags: [...tags, ["k", note.kind]]})
     }
 
-    publishToZeroOrMoreGroups([address], template, {relays, shouldWrap})
+    publishToZeroOrMoreGroups([address].filter(identity), template, {relays})
 
     setView(null)
   }
