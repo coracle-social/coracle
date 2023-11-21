@@ -54,13 +54,17 @@ export const getAvgRating = (events: Event[]) => avg(events.map(getRating).filte
 
 export const isHex = x => x.match(/^[a-f0-9]{64}$/)
 
-export const getIdOrAddress = e => {
-  if (between(9999, 20000, e.kind) || between(39999, 40000, e.kind)) {
-    return Naddr.fromEvent(e).asTagValue()
-  }
+export const isReplaceable = e => between(9999, 20000, e.kind)
 
-  return e.id
-}
+export const isParameterizedReplaceable = e => between(39999, 40000, e.kind)
+
+export const isAddressable = e => isReplaceable(e) || isParameterizedReplaceable(e)
+
+export const getIdOrAddress = e =>
+  isAddressable(e) ? Naddr.fromEvent(e).asTagValue() : e.id
+
+export const getIdAndAddress = e =>
+  isAddressable(e) ? [e.id, Naddr.fromEvent(e).asTagValue()] : [e.id]
 
 export const getIdOrAddressTag = (e, hint) => {
   const value = getIdOrAddress(e)

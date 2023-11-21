@@ -39,7 +39,7 @@
     signer,
     deriveGroupStatus,
     publishToZeroOrMoreGroups,
-    publishDeletion,
+    publishDeletionForEvent,
     getUserRelayUrls,
     getPublishHints,
     getSetting,
@@ -95,7 +95,7 @@
   }
 
   const deleteReaction = e => {
-    publishDeletion([getIdOrAddress(e)])
+    publishDeletionForEvent(e)
 
     like = null
     removeFromContext(e)
