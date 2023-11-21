@@ -80,9 +80,14 @@ export class Naddr {
   }
 
   static decode = naddr => {
-    const {type, data} = nip19.decode(naddr) as {
-      type: "naddr"
-      data: AddressPointer
+    let type, data
+    try {
+      ({type, data} = nip19.decode(naddr) as {
+        type: "naddr"
+        data: AddressPointer
+      })
+    } catch (e) {
+      throw new Error(`Invalid naddr ${naddr}`)
     }
 
     if (type !== "naddr") {

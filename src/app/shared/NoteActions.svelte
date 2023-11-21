@@ -117,7 +117,7 @@
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
   $: $likesCount = allLikes.length
 
-  $: zap = zap || find(pathEq(["request", "pubkey"], $session?.pubkey), zaps)
+  $: zap = zap || find(pathEq($session?.pubkey, ["request", "pubkey"]), zaps)
 
   $: $zapsTotal =
     sum(

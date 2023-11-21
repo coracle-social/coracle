@@ -15,11 +15,14 @@ const handleBookmarkList = (e: Event) => {
     kind: e.kind,
   })
 
-  _lists.key(naddr).update($list => ({
-    ...updateRecord($list, e.created_at, {tags: e.tags}),
-    pubkey: e.pubkey,
-    name,
-  }))
+  // Avoid malformed lists
+  if (name) {
+    _lists.key(naddr).update($list => ({
+      ...updateRecord($list, e.created_at, {tags: e.tags}),
+      pubkey: e.pubkey,
+      name,
+    }))
+  }
 }
 
 projections.addHandler(30001, handleBookmarkList)
