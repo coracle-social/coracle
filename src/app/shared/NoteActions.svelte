@@ -3,12 +3,20 @@
   import {nip19} from "nostr-tools"
   import {toNostrURI, createEvent} from "paravel"
   import {tweened} from "svelte/motion"
-  import {identity, sum, pluck, sortBy} from "ramda"
+  import {identity, sum, uniqBy, prop, pluck, sortBy} from "ramda"
   import {formatSats} from "src/util/misc"
-  import {LOCAL_RELAY_URL, getGroupAddress, asNostrEvent, getIdOrAddress} from "src/util/nostr"
+  import {
+    LOCAL_RELAY_URL,
+    getGroupAddress,
+    getIdOrAddressTag,
+    asNostrEvent,
+    getIdOrAddress,
+  } from "src/util/nostr"
   import {quantify} from "hurdak"
   import {toast} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
+  import Card from "src/partials/Card.svelte"
+  import Heading from "src/partials/Heading.svelte"
   import ColorDot from "src/partials/ColorDot.svelte"
   import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -16,15 +24,18 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
+  import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import {router} from "src/app/router"
   import type {Event} from "src/engine"
   import {
     env,
     mute,
     unmute,
+    groups,
     canSign,
     session,
     Publisher,
+    mention,
     signer,
     deriveGroupAccess,
     publishToZeroOrMoreGroups,
@@ -44,11 +55,10 @@
   export let showMuted
   export let showEntire
   export let removeFromContext
-  export let replies
-  export let likes
-  export let zaps
+  export let replies, likes, zaps
   export let zapper
 
+  const address = getGroupAddress(note)
   const relays = getEventHints(note)
   const nevent = nip19.neventEncode({id: note.id, relays})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
@@ -58,6 +68,10 @@
   const repliesCount = tweened(0, {interpolate})
 
   //const report = () => router.at("notes").of(note.id, {relays: getEventHints(note)}).at('report').qp({pubkey: note.pubkey}).open()
+
+  const setView = v => {
+    view = v
+  }
 
   const label = () => router.at("notes").of(note.id, {relays}).at("label").open()
 
@@ -87,6 +101,24 @@
     removeFromContext(e)
   }
 
+  const crossPost = async address => {
+    const relays = getPublishHints(note)
+    const tags = [getIdOrAddressTag(note, relays[0]), mention(note.pubkey)]
+    const content = JSON.stringify(asNostrEvent(note))
+    const shouldWrap = groups.key(address).get()?.access === "closed"
+
+    let template
+    if (note.kind === 1) {
+      template = createEvent(6, {content, tags})
+    } else {
+      template = createEvent(16, {content, tags: [...tags, ["k", note.kind]]})
+    }
+
+    publishToZeroOrMoreGroups([address], template, {relays, shouldWrap})
+
+    setView(null)
+  }
+
   const startZap = () =>
     router
       .at("people")
@@ -110,11 +142,24 @@
       .cx({relays: [url]})
       .open()
 
-  let like, allLikes, zap
-  let showDetails = false
+  const groupOptions = session.derived($session => {
+    const options = []
+
+    for (const addr of Object.keys($session.groups || {})) {
+      const group = groups.key(addr).get()
+      const access = deriveGroupAccess(addr).get()
+
+      if (group && access === "granted" && addr !== address) {
+        options.push(group)
+      }
+    }
+
+    return uniqBy(prop("address"), options)
+  })
+
+  let view
   let actions = []
 
-  $: address = getGroupAddress(note)
   $: disableActions =
     !$canSign ||
     ($muted && !showMuted) ||
@@ -140,6 +185,7 @@
     actions = []
 
     actions.push({label: "Quote", icon: "quote-left", onClick: quote})
+    actions.push({label: "Cross-post", icon: "shuffle", onClick: () => setView('cross-post')})
     actions.push({label: "Tag", icon: "tag", onClick: label})
     //actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
 
@@ -156,9 +202,7 @@
     actions.push({
       label: "Details",
       icon: "info",
-      onClick: () => {
-        showDetails = true
-      },
+      onClick: () => setView("info"),
     })
   }
 </script>
@@ -243,43 +287,67 @@
   </div>
 </div>
 
-{#if showDetails}
-  <Modal
-    onEscape={() => {
-      showDetails = false
-    }}>
+{#if view}
+  <Modal onEscape={() => setView(null)}>
     <Content>
-      {#if zaps.length > 0}
-        <h1 class="staatliches text-2xl">Zapped By</h1>
-        <div class="grid grid-cols-2 gap-2">
-          {#each zaps as zap}
-            <div class="flex flex-col gap-1">
-              <PersonBadge pubkey={zap.request.pubkey} />
-              <span class="ml-16 text-sm text-gray-5"
-                >{formatSats(zap.invoiceAmount / 1000)} sats</span>
+      {#if view === "info"}
+        {#if zaps.length > 0}
+          <h1 class="staatliches text-2xl">Zapped By</h1>
+          <div class="grid grid-cols-2 gap-2">
+            {#each zaps as zap}
+              <div class="flex flex-col gap-1">
+                <PersonBadge pubkey={zap.request.pubkey} />
+                <span class="ml-16 text-sm text-gray-5"
+                  >{formatSats(zap.invoiceAmount / 1000)} sats</span>
+              </div>
+            {/each}
+          </div>
+        {/if}
+        {#if likes.length > 0}
+          <h1 class="staatliches text-2xl">Liked By</h1>
+          <div class="grid grid-cols-2 gap-2">
+            {#each likes as like}
+              <PersonBadge pubkey={like.pubkey} />
+            {/each}
+          </div>
+        {/if}
+        {#if note.seen_on.length > 0}
+          <h1 class="staatliches text-2xl">Relays</h1>
+          <p>This note was found on {quantify(note.seen_on.length, "relay")} below.</p>
+          <div class="flex flex-col gap-2">
+            {#each note.seen_on as url}
+              <RelayCard relay={{url}} />
+            {/each}
+          </div>
+        {/if}
+        <h1 class="staatliches text-2xl">Details</h1>
+        <CopyValue label="Link" value={toNostrURI(nevent)} />
+        <CopyValue label="Event ID" encode={nip19.noteEncode} value={note.id} />
+        <CopyValue label="Event JSON" value={JSON.stringify(asNostrEvent(note))} />
+      {:else if view === "cross-post"}
+        <div class="mb-4 flex items-center justify-center">
+          <Heading>Cross-post</Heading>
+        </div>
+        <div>Select where you'd like to post to:</div>
+        <div class="flex flex-col gap-2">
+          {#if address}
+          <Card invertColors interactive on:click={() => crossPost()}>
+            <div class="flex gap-4 text-gray-1">
+              <i class="fa fa-earth-asia fa-2x" />
+              <div class="flex min-w-0 flex-grow flex-col gap-4">
+                <p class="text-2xl">Global</p>
+                <p>Post to your main feed.</p>
+              </div>
             </div>
+          </Card>
+          {/if}
+          {#each $groupOptions as g (g.address)}
+            <Card invertColors interactive on:click={() => crossPost(g.address)}>
+              <GroupSummary address={g.address} />
+            </Card>
           {/each}
         </div>
       {/if}
-      {#if likes.length > 0}
-        <h1 class="staatliches text-2xl">Liked By</h1>
-        <div class="grid grid-cols-2 gap-2">
-          {#each likes as like}
-            <PersonBadge pubkey={like.pubkey} />
-          {/each}
-        </div>
-      {/if}
-      <h1 class="staatliches text-2xl">Relays</h1>
-      <p>This note was found on {quantify(note.seen_on.length, "relay")} below.</p>
-      <div class="flex flex-col gap-2">
-        {#each note.seen_on as url}
-          <RelayCard relay={{url}} />
-        {/each}
-      </div>
-      <h1 class="staatliches text-2xl">Details</h1>
-      <CopyValue label="Link" value={toNostrURI(nevent)} />
-      <CopyValue label="Event ID" encode={nip19.noteEncode} value={note.id} />
-      <CopyValue label="Event JSON" value={JSON.stringify(asNostrEvent(note))} />
     </Content>
   </Modal>
 {/if}

@@ -154,6 +154,9 @@
     zapper
   )
 
+  // Split out reposts
+  $: reposts = children.filter(e => [6, 16].includes(e.kind))
+
   onMount(async () => {
     const zapAddress = Tags.from(note).getValue("zap")
 
@@ -189,6 +192,11 @@
 
       if ($env.ENABLE_ZAPS && !event.wrap) {
         kinds.push(9735)
+      }
+
+      if ($env.ENABLE_GROUPS && !event.wrap) {
+        kinds.push(6)
+        kinds.push(16)
       }
 
       load({

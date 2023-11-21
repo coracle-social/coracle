@@ -62,6 +62,13 @@ export const getIdOrAddress = e => {
   return e.id
 }
 
+export const getIdOrAddressTag = (e, hint) => {
+  const value = getIdOrAddress(e)
+  const type = value.includes(":") ? "a" : "e"
+
+  return [type, value, hint]
+}
+
 export const getGroupAddress = e =>
   Tags.from(e)
     .type("a")
