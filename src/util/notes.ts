@@ -1,5 +1,5 @@
 import {last, pluck, identity} from "ramda"
-import {fromNostrURI} from "paravel"
+import {fromNostrURI, Tags} from "paravel"
 import {nip19} from "nostr-tools"
 import {first, switcherFn} from "hurdak"
 
@@ -20,7 +20,7 @@ export const urlIsMedia = (url: string) =>
 
 export const parseContent = ({content, tags = []}: {content: string; tags?: string[][]}) => {
   const result: any[] = []
-  let text = content.trim()
+  let text = content.trim() || new Tags(tags).getValue('alt') || ""
   let buffer = ""
 
   const parseNewline = () => {
