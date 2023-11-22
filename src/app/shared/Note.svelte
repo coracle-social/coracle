@@ -11,6 +11,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
+  import NoteMeta from "src/app/shared/NoteMeta.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
   import NoteReply from "src/app/shared/NoteReply.svelte"
@@ -21,7 +22,6 @@
     env,
     load,
     nip59,
-    groups,
     people,
     loadOne,
     getLnUrl,
@@ -35,7 +35,6 @@
     getSetting,
     getRecipientKey,
     selectHints,
-    displayGroup,
     mergeHints,
     loadPubkeys,
     sortEventsDesc,
@@ -154,9 +153,6 @@
     zapper
   )
 
-  // Split out reposts
-  $: reposts = children.filter(e => [6, 16].includes(e.kind))
-
   onMount(async () => {
     const zapAddress = Tags.from(note).getValue("zap")
 
@@ -194,11 +190,6 @@
         kinds.push(9735)
       }
 
-      if ($env.ENABLE_GROUPS && !event.wrap) {
-        kinds.push(6)
-        kinds.push(16)
-      }
-
       load({
         relays: mergeHints([relays, getReplyHints(event)]),
         filters: getReplyFilters([event], {kinds}),
@@ -215,21 +206,11 @@
 </script>
 
 {#if ready}
-  {@const address = tags.getCommunity()}
   {@const path = router
     .at("notes")
     .of(event.id, {relays: getEventHints(event)})
     .toString()}
-  {#if address && showGroup}
-    <p class="py-2 text-gray-3">
-      Posted in +<Anchor
-        modal
-        theme="anchor"
-        href={router.at("groups").of(address).at("notes").toString()}>
-        {displayGroup(groups.key(address).get())}
-      </Anchor>
-    </p>
-  {/if}
+  <NoteMeta note={event} {showGroup} />
   <div class="note relative" class:py-2={!showParent && !topLevel}>
     {#if !showParent && !topLevel}
       <div class="absolute -left-4 h-px w-4 bg-gray-6" style="top: 27px;" />

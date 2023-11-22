@@ -1,4 +1,4 @@
-import {omit, find, prop, groupBy, uniq} from "ramda"
+import {omit, without, find, prop, groupBy, uniq} from "ramda"
 import {shuffle, randomId, seconds, avg} from "hurdak"
 import {Tags} from "paravel"
 import {Naddr} from "src/util/nostr"
@@ -118,16 +118,48 @@ export const getPubkeysWithDefaults = (pubkeys: Set<string>) => {
   return shuffle(Array.from(pubkeys)).slice(0, 1000)
 }
 
-export const compileFilter = (filter: DynamicFilter): Filter => {
-  if (filter.authors === "global") {
-    filter = omit(["authors"], filter)
-  } else if (filter.authors === "follows") {
-    filter = {...filter, authors: getPubkeysWithDefaults(follows.get())}
-  } else if (filter.authors === "network") {
-    filter = {...filter, authors: getPubkeysWithDefaults(network.get())}
+export type CompileFiltersOpts = {
+  includeReposts?: boolean
+}
+
+export const compileFilters = (filters: DynamicFilter[], opts: CompileFiltersOpts = {}) => {
+  // Dereference authors
+  filters = filters.map(filter => {
+    if (filter.authors === "global") {
+      filter = omit(["authors"], filter)
+    } else if (filter.authors === "follows") {
+      filter = {...filter, authors: getPubkeysWithDefaults(follows.get())}
+    } else if (filter.authors === "network") {
+      filter = {...filter, authors: getPubkeysWithDefaults(network.get())}
+    }
+
+    return filter
+  })
+
+  // Add repost filters
+  if (opts.includeReposts) {
+    filters = filters.flatMap(original => {
+      const filterChunk = [original]
+
+      if (!original.kinds) {
+        filterChunk.push({...original, kinds: [6, 16]})
+      } else {
+        if (original.kinds.includes(1)) {
+          filterChunk.push({...original, kinds: [6]})
+        }
+
+        const otherKinds = without([1], original.kinds)
+
+        if (otherKinds.length > 0) {
+          filterChunk.push({...original, kinds: [16], "#k": otherKinds.map(String)})
+        }
+      }
+
+      return filterChunk
+    })
   }
 
-  return filter as Filter
+  return filters as Filter[]
 }
 
 export const getRelaysFromFilters = filters =>

@@ -1,6 +1,6 @@
 # Changelog
 
-# 0.3.13
+# 0.4.0
 
 - [x] Update lists to use new 30003 user bookmarks kind
 - [x] Add NIP 72 community support
@@ -8,6 +8,7 @@
 - [x] Re-work keys page, include group keys
 - [x] Add anonymous posting
 - [x] Add note options dialog to replies
+- [x] Add support for reposts and cross-posts
 
 # 0.3.12
 

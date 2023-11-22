@@ -47,8 +47,12 @@ export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settin
       return false
     }
 
-    const address = tags.getCommunity()
-    const wotAdjustment = address && deriveMembershipLevel(address).get() ? 1 : 0
+    const wotAdjustment = tags
+      .communities()
+      .all()
+      .some(a => deriveMembershipLevel(a).get())
+      ? 1
+      : 0
 
     if (!$follows.has(e.pubkey) && getWotScore($pubkey, e.pubkey) < minWot - wotAdjustment) {
       return true

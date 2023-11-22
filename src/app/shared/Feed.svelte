@@ -14,7 +14,7 @@
   import {
     readable,
     writable,
-    compileFilter,
+    compileFilters,
     searchableRelays,
     getRelaysFromFilters,
   } from "src/engine"
@@ -39,7 +39,7 @@
     }
 
     if (selection.length === 0) {
-      selection = getRelaysFromFilters([compileFilter(filter)])
+      selection = getRelaysFromFilters(compileFilters([filter]))
     }
 
     return selection
@@ -51,7 +51,7 @@
     feed?.stop()
 
     feed = new FeedLoader({
-      filters: [compileFilter(filter)],
+      filters: compileFilters([filter], {includeReposts: true}),
       relays: getRelays(),
       shouldDefer: true,
       shouldLoadParents: true,
@@ -101,7 +101,7 @@
         <Note
           depth={$hideReplies ? 0 : 2}
           context={note.replies || []}
-          filters={[compileFilter(filter)]}
+          filters={compileFilters([filter])}
           {showGroup}
           {note} />
       </div>

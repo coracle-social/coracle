@@ -32,8 +32,9 @@
   let options
   let opts = {
     warning: "",
-    groups: parent.wrap ? [Tags.from(parent).getCommunity()] : [],
+    groups: parent.wrap ? Tags.from(parent).communities().all() : [],
     relays: getPublishHints(parent),
+    shouldWrap: true,
     anonymous: false,
   }
 

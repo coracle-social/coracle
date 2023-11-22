@@ -16,7 +16,7 @@
   import type {Person, Event} from "src/engine"
   import {
     getUserRelayUrls,
-    compileFilter,
+    compileFilters,
     loadPubkeys,
     load,
     displayHandle,
@@ -49,7 +49,7 @@
   }
 
   load({
-    filters: [{kinds: [31990]}, compileFilter({kinds: [31989], authors: "follows"})],
+    filters: compileFilters([{kinds: [31990]}, {kinds: [31989], authors: "follows"}]),
     relays: getUserRelayUrls("read"),
     onEvent: batch(500, events => {
       const pubkeys = []

@@ -78,7 +78,7 @@ export class Publisher extends EventEmitter {
 
     // return
 
-    projections.push(this.event)
+    projections.push({...this.event})
 
     setTimeout(() => {
       for (const url of urls) {
@@ -193,7 +193,9 @@ export const getReplyTags = (parent: Event, inherit = false) => {
   const tags = Tags.from(parent).normalize()
   const reply = ["e", parent.id, hint, "reply"]
   // The spec says only root should be used if no intermediate reply, but some clients don't follow it
-  const root = (tags.mark("root").first() || tags.mark("reply").first() || reply).slice(0, 3).concat('root')
+  const root = (tags.mark("root").first() || tags.mark("reply").first() || reply)
+    .slice(0, 3)
+    .concat("root")
   const extra = inherit
     ? tags
         .type(["a", "e"])

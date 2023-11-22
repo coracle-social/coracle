@@ -17,7 +17,7 @@
   import NoteContentEllipsis from "src/app/shared/NoteContentEllipsis.svelte"
   import NoteContentTopic from "src/app/shared/NoteContentTopic.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
-  import NoteContentPerson from "src/app/shared/NoteContentPerson.svelte"
+  import PersonLink from "src/app/shared/PersonLink.svelte"
   import NoteContentQuote from "src/app/shared/NoteContentQuote.svelte"
   import NoteContentEntity from "src/app/shared/NoteContentEntity.svelte"
 
@@ -59,7 +59,7 @@
       {:else if type === LINK}
         <NoteContentLink {value} showMedia={showMedia && isStartOrEnd(i)} />
       {:else if type.match(/^nostr:np(rofile|ub)$/)}
-        <NoteContentPerson {value} />
+        <PersonLink pubkey={value.pubkey} />
       {:else if type.startsWith("nostr:") && isStartOrEnd(i) && value.id !== anchorId}
         <NoteContentQuote {note} {value}>
           <div slot="note-content" let:quote>

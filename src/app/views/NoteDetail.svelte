@@ -25,7 +25,7 @@
     <Spinner />
   {:then note}
     <div in:fly={{y: 20}}>
-      <Note showLoading anchorId={note.id} {note} {depth} {relays} {context} />
+      <Note showGroup showLoading anchorId={note.id} {note} {depth} {relays} {context} />
     </div>
   {/await}
 </Content>

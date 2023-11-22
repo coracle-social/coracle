@@ -35,12 +35,13 @@
   let compose = null
   let wordCount = 0
   let showPreview = false
-  let defaultGroup = quote ? Tags.from(quote).getCommunity() : group
+  let defaultGroups = quote ? Tags.from(quote).communities().all() : [group].filter(identity)
   let options
   let opts = {
     warning: "",
-    groups: [defaultGroup].filter(identity),
+    groups: defaultGroups,
     relays: getUserRelayUrls("write"),
+    shouldWrap: true,
     anonymous: false,
   }
 
@@ -59,8 +60,8 @@
       }
     }
 
-    if (defaultGroup) {
-      options.push({address: defaultGroup})
+    for (const address of defaultGroups) {
+      options.push({address})
     }
 
     return uniqBy(prop("address"), options)

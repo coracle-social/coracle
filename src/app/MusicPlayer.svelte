@@ -13,12 +13,12 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import NoteContentLabel from "src/app/shared/NoteContentLabel.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
-  import {FeedLoader, compileFilter, getRelaysFromFilters} from "src/engine"
+  import {FeedLoader, compileFilters, getRelaysFromFilters} from "src/engine"
   import {router} from "src/app/router"
 
   export let isOpen
 
-  const filters = [compileFilter({kinds: [1808, 32123]})]
+  const filters = compileFilters([{kinds: [1808, 32123]}])
 
   const hints = ["wss://relay.stemstr.app", "wss://relay.wavlake.com"]
   const relays = getRelaysFromFilters(filters).concat(hints)

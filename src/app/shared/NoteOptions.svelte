@@ -14,7 +14,7 @@
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
   import {mergeHints, displayRelay, getGroupRelayUrls} from "src/engine"
-  import {env, getUserRelayUrls} from "src/engine"
+  import {env, getUserRelayUrls, deriveMembershipLevel, MembershipLevel} from "src/engine"
 
   export let groupOptions = []
   export let showRelays = $env.FORCE_RELAYS.length === 0
@@ -23,6 +23,7 @@
     groups: string[]
     relays: string[]
     anonymous: boolean
+    shouldWrap: boolean
   }
 
   let values = {...initialValues}
@@ -140,6 +141,12 @@
               </Card>
             {/each}
           </div>
+          {#if values.groups.some(a => deriveMembershipLevel(a).get() === MembershipLevel.Private)}
+            <FieldInline icon="fa-user-secret" label="Post privately">
+              <Toggle bind:value={values.shouldWrap} />
+              <p slot="info">Post to groups anonymously (when available)</p>
+            </FieldInline>
+          {/if}
           <Anchor tag="button" theme="button" type="submit" class="text-center">Done</Anchor>
         {/if}
       </Content>

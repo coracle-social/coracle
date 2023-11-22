@@ -16,6 +16,7 @@
   import Modal from "src/partials/Modal.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
+  import GroupLink from "src/app/shared/GroupLink.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
@@ -31,7 +32,8 @@
     Publisher,
     mention,
     signer,
-    deriveGroupStatus,
+    deriveMembershipLevel,
+    MembershipLevel,
     publishToZeroOrMoreGroups,
     publishDeletionForEvent,
     getUserRelayUrls,
@@ -52,8 +54,8 @@
   export let replies, likes, zaps
   export let zapper
 
-  const address = getGroupAddress(note)
   const relays = getEventHints(note)
+  const address = getGroupAddress(note)
   const nevent = nip19.neventEncode({id: note.id, relays})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
@@ -109,6 +111,8 @@
 
     publishToZeroOrMoreGroups([address].filter(identity), template, {relays})
 
+    toast.show("info", "Note has been cross-posted!")
+
     setView(null)
   }
 
@@ -140,9 +144,9 @@
 
     for (const addr of Object.keys($session.groups || {})) {
       const group = groups.key(addr).get()
-      const {access} = deriveGroupStatus(addr).get()
+      const membershipLevel = deriveMembershipLevel(addr).get()
 
-      if (group && access && addr !== address) {
+      if (group && membershipLevel && addr !== address) {
         options.push(group)
       }
     }
@@ -156,7 +160,7 @@
   $: disableActions =
     !$canSign ||
     ($muted && !showMuted) ||
-    (note.wrap && deriveGroupStatus(address).get() !== "granted")
+    (note.wrap && deriveMembershipLevel(address).get() !== MembershipLevel.Private)
   $: like = like || likes.find(e => e.pubkey === $session?.pubkey)
   $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
   $: $likesCount = allLikes.length
@@ -178,7 +182,11 @@
     actions = []
 
     actions.push({label: "Quote", icon: "quote-left", onClick: quote})
-    actions.push({label: "Cross-post", icon: "shuffle", onClick: () => setView("cross-post")})
+
+    if (!note.wrap) {
+      actions.push({label: "Cross-post", icon: "shuffle", onClick: () => setView("cross-post")})
+    }
+
     actions.push({label: "Tag", icon: "tag", onClick: label})
     //actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
 
@@ -234,6 +242,16 @@
         <i class="fa fa-bolt cursor-pointer" />
         {formatSats($zapsTotal)}
       </button>
+    {/if}
+    {#if note.wrap}
+      <Popover triggerType="mouseenter">
+        <div slot="trigger" class="relative w-16 cursor-pointer pt-1 text-left opacity-50 sm:w-20">
+          <i class="fa fa-circle-nodes" />
+        </div>
+        <div slot="tooltip">
+          This note has been posted privately to <GroupLink {address} />.
+        </div>
+      </Popover>
     {/if}
   </div>
   <div class="flex items-center">

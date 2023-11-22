@@ -26,7 +26,7 @@ module.exports = {
   rules: {
     "a11y-click-events-have-key-events": "off",
     "a11y-autofocus": "off",
-
+    "no-constant-condition": "off",
     "no-unused-vars": "off",
     "no-useless-escape": "off",
     "no-async-promise-executor": "off",

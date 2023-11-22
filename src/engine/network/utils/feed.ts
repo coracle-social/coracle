@@ -1,20 +1,8 @@
-import {
-  reject,
-  partition,
-  find,
-  uniqBy,
-  identity,
-  pluck,
-  sortBy,
-  without,
-  any,
-  prop,
-  assoc,
-} from "ramda"
+import {partition, find, uniqBy, identity, pluck, sortBy, without, any, prop, assoc} from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
-import {now, Tags} from "paravel"
-import {race, pushToKey} from "src/util/misc"
-import {noteKinds, reactionKinds} from "src/util/nostr"
+import {now, hasValidSignature, Tags} from "paravel"
+import {race, tryJson, pushToKey} from "src/util/misc"
+import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {isEventMuted} from "src/engine/events/derived"
@@ -43,6 +31,7 @@ export class FeedLoader {
   buffer = writable<Event[]>([])
   notes = writable<DisplayEvent[]>([])
   parents = new Map<string, DisplayEvent>()
+  reposts = new Map<string, Event[]>()
   deferred: Event[] = []
   cursor: MultiCursor
   ready: Promise<void>
@@ -107,7 +96,8 @@ export class FeedLoader {
   }
 
   loadParents = notes => {
-    const parentIds = reject(this.isEventMuted, notes)
+    const parentIds = notes
+      .filter(e => !repostKinds.includes(e.kind) && !this.isEventMuted(e))
       .map(e => Tags.from(e).getReply())
       .filter(identity)
 
@@ -153,9 +143,21 @@ export class FeedLoader {
       uniqBy(
         prop("id"),
         notes
-          // If we have a parent, show that instead, with replies grouped underneath
-          .map(e => {
-            /* eslint no-constant-condition: 0 */
+          .map((e: Event) => {
+            // If we have a repost, use its contents instead
+            if (repostKinds.includes(e.kind)) {
+              const wrappedEvent = tryJson(() => JSON.parse(e.content))
+
+              if (wrappedEvent && hasValidSignature(wrappedEvent)) {
+                const reposts = this.reposts.get(wrappedEvent.id) || []
+
+                this.reposts.set(wrappedEvent.id, [...reposts, e])
+
+                e = {...wrappedEvent, seen_on: e.seen_on}
+              }
+            }
+
+            // If we have a parent, show that instead, with replies grouped underneath
             while (true) {
               const parentId = Tags.from(e).getReply()
 
@@ -182,6 +184,7 @@ export class FeedLoader {
           // If we've seen this note or its parent, don't add it again
           .filter(e => {
             if (seen.has(e.id)) return false
+            if (repostKinds.includes(e.kind)) return false
             if (reactionKinds.includes(e.kind)) return false
 
             return true
@@ -190,6 +193,8 @@ export class FeedLoader {
             if (e.replies) {
               e.replies = uniqBy(prop("id"), e.replies)
             }
+
+            e.reposts = this.reposts.get(e.id)
 
             return e
           })

@@ -128,9 +128,13 @@ export const publishToGroupsPublicly = async (
     if (access === GroupAccess.Closed) {
       throw new Error("Attempted to publish publicly to a closed group")
     }
-
-    template.tags.push(["a", address])
   }
+
+  template = updateIn(
+    "tags",
+    (tags: string[][]) => [...tags, ...addresses.map(a => ["a", a])],
+    template
+  )
 
   const event = anonymous
     ? await signer.get().signWithKey(template, generatePrivateKey())
@@ -181,7 +185,7 @@ export const publishToGroupsPrivately = async (
 export const publishToZeroOrMoreGroups = async (
   addresses,
   template,
-  {relays, anonymous = false, shouldWrapIfPossible = true}
+  {relays, anonymous = false, shouldWrap = true}
 ) => {
   if (addresses.length === 0) {
     const event = anonymous
@@ -201,7 +205,7 @@ export const publishToZeroOrMoreGroups = async (
       }
 
       if (access === GroupAccess.Hybrid) {
-        return shouldWrapIfPossible
+        return shouldWrap
       }
     }
 
@@ -217,7 +221,7 @@ export const publishToZeroOrMoreGroups = async (
   }
 
   if (nowrap.length > 0) {
-    subs.push(await publishToGroupsPublicly(wrap, template, {relays, anonymous}))
+    subs.push(await publishToGroupsPublicly(nowrap, template, {relays, anonymous}))
   }
 
   return subs

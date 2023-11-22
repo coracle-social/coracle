@@ -7,6 +7,7 @@ import type {Filter, Event} from "src/engine"
 export const noteKinds = [1, 30023, 1063, 9802, 1808, 32123]
 export const personKinds = [0, 2, 3, 10000, 10002]
 export const reactionKinds = [7, 9735]
+export const repostKinds = [6, 16]
 export const userKinds = [...personKinds, 30001, 30003, 30078, 10004]
 
 export const LOCAL_RELAY_URL = "local://coracle.relay"
@@ -60,8 +61,7 @@ export const isParameterizedReplaceable = e => between(39999, 40000, e.kind)
 
 export const isAddressable = e => isReplaceable(e) || isParameterizedReplaceable(e)
 
-export const getIdOrAddress = e =>
-  isAddressable(e) ? Naddr.fromEvent(e).asTagValue() : e.id
+export const getIdOrAddress = e => (isAddressable(e) ? Naddr.fromEvent(e).asTagValue() : e.id)
 
 export const getIdAndAddress = e =>
   isAddressable(e) ? [e.id, Naddr.fromEvent(e).asTagValue()] : [e.id]
@@ -101,14 +101,16 @@ export class Naddr {
   }
 
   static decode = naddr => {
-    let type,
-      data = {}
+    let type
+    let data = {} as any
     try {
       ;({type, data} = nip19.decode(naddr) as {
         type: "naddr"
-        data: AddressPointer
+        data: any
       })
-    } catch (e) {}
+    } catch (e) {
+      // pass
+    }
 
     if (type !== "naddr") {
       console.warn(`Invalid naddr ${naddr}`)
