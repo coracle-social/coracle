@@ -165,20 +165,6 @@ export const formatSats = (sats: number) => {
   return numberFmt.format(round(2, sats / 100_000_000)) + "BTC"
 }
 
-export const annotateMedia = (url: string) => {
-  if (url.match(/open.spotify.com/)) {
-    return {type: "spotify", url}
-  } else if (url.match(/\.(jpe?g|png|gif|webp)$/)) {
-    return {type: "image", url}
-  } else if (url.match(/\.(mov|webm|mp4)$/)) {
-    return {type: "video", url}
-  } else if (url.match(/\.(wav|mp3|m3u8)$/)) {
-    return {type: "audio", url}
-  } else {
-    return {type: "preview", url}
-  }
-}
-
 export const shadeColor = (color: string, percent: number) => {
   let R = parseInt(color.substring(1, 3), 16)
   let G = parseInt(color.substring(3, 5), 16)
@@ -343,3 +329,17 @@ export const buildQueryString = params => "?" + new URLSearchParams(params)
 
 export const parseQueryString = path =>
   fromPairs(Array.from(new URLSearchParams(last(path.split("?")))))
+
+export const joinPath = (...parts) => {
+  let path = ""
+
+  for (let part of parts) {
+    if (!part.endsWith("/")) {
+      part += "/"
+    }
+
+    path += part
+  }
+
+  return path.slice(0, -1)
+}

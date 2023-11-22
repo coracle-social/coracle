@@ -45,7 +45,7 @@
 <div
   bind:this={root}
   transition:fade
-  class="modal group fixed inset-0 z-30"
+  class="modal group fixed inset-0 z-40"
   class:pointer-events-none={closing}>
   <div
     class="fixed inset-0 cursor-pointer bg-black opacity-50"

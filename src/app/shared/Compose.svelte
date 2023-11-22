@@ -220,7 +220,7 @@
     const selection = window.getSelection()
     const textNode = document.createTextNode(text)
     const target = (last(input.childNodes) || input) as unknown as Node
-    const offset = target instanceof Text ? target.wholeText.length : target.childNodes.length
+    const offset = target instanceof Text ? target.textContent.length : target.childNodes.length
 
     selection.collapse(target, offset)
     selection.getRangeAt(0).insertNode(textNode)

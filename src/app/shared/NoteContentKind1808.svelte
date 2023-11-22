@@ -1,6 +1,5 @@
 <script lang="ts">
   import {Tags} from "paravel"
-  import {annotateMedia} from "src/util/misc"
   import Media from "src/partials/Media.svelte"
   import NoteContentLabel from "src/app/shared/NoteContentLabel.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
@@ -13,7 +12,7 @@
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
   <NoteContentKind1 {note} {anchorId} {maxLength} {showEntire} />
   {#if stream_url}
-    <Media link={annotateMedia(stream_url)} />
+    <Media url={stream_url} />
   {/if}
   <NoteContentLabel type="t" {note} />
 </div>

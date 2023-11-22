@@ -1,70 +1,53 @@
 <script lang="ts">
-  import {identity} from "ramda"
-  import {filterVals} from "hurdak"
+  import {createEventDispatcher} from "svelte"
+  import {displayList} from "hurdak"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {listenForFile, stripExifData, blobToFile} from "src/util/html"
-  import {uploadToNostrBuild} from "src/engine"
+  import {listenForFile} from "src/util/html"
+  import {uploadFiles, settings} from "src/engine"
 
   export let icon = null
   export let value = null
   export let multi = false
   export let maxWidth = null
   export let maxHeight = null
-  export let onChange = null
+  export let hostLimit = 1
+
+  const urls = $settings.nip96_urls.slice(0, hostLimit)
+  const dispatch = createEventDispatcher()
 
   let input, listener, loading
-  let files = []
   let isOpen = false
 
   $: {
     if (input) {
       listener = listenForFile(input, async inputFiles => {
         if (inputFiles) {
-          const opts = filterVals(identity, {maxWidth, maxHeight})
-
           loading = true
 
           try {
-            files = await Promise.all(
-              inputFiles.map(async f => {
-                if (f.type.match("image/(webp|gif)")) {
-                  return f
-                }
+            for (const tags of await uploadFiles(urls, inputFiles, {
+              maxWidth,
+              maxHeight,
+            })) {
+              // For inputs that only want one file
+              value = tags.type("url").values().first()
 
-                return blobToFile(await stripExifData(f, opts))
-              })
-            )
-
-            const body = new FormData()
-
-            for (const file of files) {
-              body.append("file[]", file)
-            }
-
-            const result = await uploadToNostrBuild(body)
-
-            // Legacy weirdness
-            for (const {url} of result.data) {
-              value = url
-              onChange?.(url)
+              dispatch("change", tags)
             }
           } finally {
             isOpen = false
             loading = false
           }
-        } else {
-          files = []
         }
       })
     }
   }
 
   const decline = () => {
-    files = []
     isOpen = false
   }
 </script>
@@ -93,7 +76,7 @@
   <Modal mini onEscape={decline}>
     <Content>
       {#if loading}
-        <Spinner delay={0}>Uploading your media...</Spinner>
+        <Spinner delay={0}>Uploading files using: {displayList(urls)}</Spinner>
       {:else}
         <h1 class="staatliches text-2xl">Upload a File</h1>
         <p>Click below to select a file to upload.</p>

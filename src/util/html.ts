@@ -16,7 +16,7 @@ export const copyToClipboard = text => {
   return result
 }
 
-export const stripExifData = async (file, opts = {}) => {
+export const stripExifData = async (file, {maxWidth = null, maxHeight = null} = {}) => {
   if (window.DataTransferItem && file instanceof DataTransferItem) {
     file = file.getAsFile()
   }
@@ -31,10 +31,9 @@ export const stripExifData = async (file, opts = {}) => {
 
   return new Promise((resolve, _reject) => {
     new Compressor(file, {
-      maxWidth: 2048,
-      maxHeight: 2048,
+      maxWidth: maxWidth || 2048,
+      maxHeight: maxHeight || 2048,
       convertSize: bytes(10, "mb"),
-      ...opts,
       success: resolve,
       error: e => {
         // Non-images break compressor

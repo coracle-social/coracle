@@ -1,6 +1,6 @@
 <script lang="ts">
   import {isShareableRelay} from "paravel"
-  import {annotateMedia, displayUrl} from "src/util/misc"
+  import {displayUrl} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Media from "src/partials/Media.svelte"
   import {router} from "src/app/router"
@@ -17,7 +17,7 @@
 
 {#if showMedia && value.isMedia && !hidden}
   <div class="py-2">
-    <Media link={annotateMedia(value.url)} onClose={close} />
+    <Media url={value.url} onClose={close} />
   </div>
 {:else if value.isMedia}
   <Anchor

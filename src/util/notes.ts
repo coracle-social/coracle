@@ -1,4 +1,4 @@
-import {last, pluck, identity} from "ramda"
+import {last, map, pluck, identity} from "ramda"
 import {fromNostrURI, Tags} from "paravel"
 import {nip19} from "nostr-tools"
 import {first, switcherFn} from "hurdak"
@@ -18,10 +18,24 @@ export const NOSTR_NADDR = "nostr:naddr"
 export const urlIsMedia = (url: string) =>
   !url.match(/\.(apk|docx|xlsx|csv|dmg)/) && last(url.split("://"))?.includes("/")
 
-export const parseContent = ({content, tags = []}: {content: string; tags?: string[][]}) => {
+export const parseContent = (event: {content: string; tags?: string[][]}) => {
   const result: any[] = []
-  let text = content.trim() || new Tags(tags).getValue("alt") || ""
+  const tags = new Tags(event.tags || [])
+  let text = event.content.trim() || tags.getValue("alt") || ""
   let buffer = ""
+
+  const getMeta = url =>
+    tags
+      .type("imeta")
+      .map(
+        map((m: string) => {
+          const parts = m.split(" ")
+
+          return [parts[0], parts.slice(1).join(" ")]
+        })
+      )
+      .filter(meta => new Tags(meta).type("url").nthEq(1, url).exists())
+      .flatMap(identity)
 
   const parseNewline = () => {
     const newline = first(text.match(/^\n+/))
@@ -126,7 +140,7 @@ export const parseContent = ({content, tags = []}: {content: string; tags?: stri
       url = "https://" + url
     }
 
-    return [LINK, raw, {url, isMedia: urlIsMedia(url)}]
+    return [LINK, raw, {url, isMedia: urlIsMedia(url), meta: getMeta(url)}]
   }
 
   while (text) {

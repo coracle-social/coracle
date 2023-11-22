@@ -44,6 +44,8 @@ const DUFFLEPUD_URL = import.meta.env.VITE_DUFFLEPUD_URL
 
 const MULTIPLEXTR_URL = import.meta.env.VITE_MULTIPLEXTR_URL
 
+const NIP96_URLS = fromCsv(import.meta.env.VITE_NIP96_URLS)
+
 const FORCE_RELAYS = fromCsv(import.meta.env.VITE_FORCE_RELAYS)
 
 const DVM_RELAYS = FORCE_RELAYS.length > 0 ? FORCE_RELAYS : fromCsv(import.meta.env.VITE_DVM_RELAYS)
@@ -65,6 +67,7 @@ const ENABLE_JUKEBOX = JSON.parse(import.meta.env.VITE_ENABLE_JUKEBOX)
 // Prep our env
 env.set({
   DEFAULT_FOLLOWS,
+  NIP96_URLS,
   IMGPROXY_URL,
   DUFFLEPUD_URL,
   MULTIPLEXTR_URL,

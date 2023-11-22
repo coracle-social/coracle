@@ -1,19 +1,18 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
-  import {without, identity, prop, uniqBy} from "ramda"
+  import {join, identity, prop, uniqBy} from "ramda"
   import {throttle, quantify} from "hurdak"
   import {createEvent, Tags} from "paravel"
-  import {annotateMedia} from "src/util/misc"
   import {asNostrEvent} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import Media from "src/partials/Media.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
+  import NoteImages from "src/app/shared/NoteImages.svelte"
   import {Publisher, mention} from "src/engine"
   import {toastProgress} from "src/app/state"
   import {router} from "src/app/router"
@@ -31,8 +30,7 @@
   export let pubkey = null
   export let group = null
 
-  let images = []
-  let compose = null
+  let images, compose
   let charCount = 0
   let wordCount = 0
   let showPreview = false
@@ -76,6 +74,10 @@
       return
     }
 
+    for (const imeta of images.value) {
+      tags.push(["imeta", ...imeta.all().map(join(" "))])
+    }
+
     if (opts.warning) {
       tags.push(["content-warning", opts.warning])
     }
@@ -98,20 +100,6 @@
     pubs[0].on("progress", toastProgress)
 
     router.clearModals()
-  }
-
-  const addImage = url => {
-    images = images.concat(url)
-    compose.write("\n" + url)
-  }
-
-  const removeImage = url => {
-    const content = compose.parse()
-
-    compose.clear()
-    compose.write(content.replace(url, ""))
-
-    images = without([url], images)
   }
 
   const togglePreview = () => {
@@ -187,19 +175,11 @@
           </small>
         </div>
       </div>
-      {#if images.length > 0}
-        <div class="columns-2 gap-2 lg:columns-3">
-          {#each images as url}
-            <div class="mb-2">
-              <Media link={annotateMedia(url)} onClose={() => removeImage(url)} />
-            </div>
-          {/each}
-        </div>
-      {/if}
+      <NoteImages bind:this={images} bind:compose />
       <div class="flex gap-2">
         <Anchor tag="button" theme="button" type="submit" class="flex-grow text-center"
           >Send</Anchor>
-        <ImageInput multi onChange={addImage} />
+        <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)} />
       </div>
       <small
         class="flex cursor-pointer items-center justify-end gap-4"

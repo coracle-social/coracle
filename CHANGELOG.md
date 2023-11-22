@@ -5,6 +5,9 @@
 - [x] Update lists to use new 30003 user bookmarks kind
 - [x] Add NIP 72 community support
 - [x] Add NIP 87 closed community support
+- [x] Add NIP 96 file storage
+- [x] Add NIP 98 auth support
+- [x] Add DIP 01 imeta tag creation
 - [x] Re-work keys page, include group keys
 - [x] Add anonymous posting
 - [x] Add note options dialog to replies
@@ -13,6 +16,7 @@
 - [x] Fix throttled notifications derive loop
 - [x] Conservatively load from cache when on a slow network
 - [x] Add refresh button to feeds
+- [x] Add image previews to note reply
 
 # 0.3.12
 

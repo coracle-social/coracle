@@ -45,8 +45,8 @@
     }
   }
 
-  const addImage = url => {
-    textarea.value = (textarea.value + "\n\n" + url).trim()
+  const addImage = imeta => {
+    textarea.value += "\n" + imeta.type("url").values().first()
   }
 
   const send = async () => {
@@ -125,7 +125,7 @@
           class="w-full resize-none bg-gray-6 p-2
                text-gray-2 outline-0 placeholder:text-gray-1" />
         <div>
-          <ImageInput onChange={addImage}>
+          <ImageInput multi on:change={e => addImage(e.detail)}>
             <button
               slot="button"
               class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-gray-7 p-3

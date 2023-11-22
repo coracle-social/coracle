@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {identity} from "ramda"
   import {toast, appName} from "src/partials/state"
   import Field from "src/partials/Field.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
@@ -8,6 +9,8 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {env, getSettings, publishSettings} from "src/engine"
+  import MultiSelect from "src/partials/MultiSelect.svelte"
+  import {fuzzy} from "src/util/misc"
 
   let settings = getSettings()
 
@@ -16,6 +19,8 @@
 
     toast.show("info", "Your settings have been saved!")
   }
+
+  const searchUploadProviders = fuzzy($env.NIP96_URLS, {keys: ["url"]})
 
   document.title = "Settings"
 </script>
@@ -48,6 +53,21 @@
           Allows {appName} to authenticate with relays that have access controls automatically.
         </p>
       </FieldInline>
+      <Field label="Upload Providers URL">
+        <p slot="info">
+          Enter one or more urls for nostr media servers. You can find a full list of NIP-96
+          compatible servers
+          <a href="https://github.com/quentintaranpino/NIP96-compatible-servers">here</a>
+        </p>
+        <MultiSelect
+          search={searchUploadProviders}
+          bind:value={settings.nip96_urls}
+          termToItem={identity}>
+          <div slot="item" let:item>
+            <strong>{item}</strong>
+          </div>
+        </MultiSelect>
+      </Field>
       <Field label="Dufflepud URL">
         <Input bind:value={settings.dufflepud_url}>
           <i slot="before" class="fa-solid fa-server" />

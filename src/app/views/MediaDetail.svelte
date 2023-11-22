@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {annotateMedia} from "src/util/misc"
   import Content from "src/partials/Content.svelte"
   import Media from "src/partials/Media.svelte"
 
@@ -7,5 +6,5 @@
 </script>
 
 <Content>
-  <Media fullSize link={annotateMedia(url)} />
+  <Media fullSize {url} />
 </Content>
