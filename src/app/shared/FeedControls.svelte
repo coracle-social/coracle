@@ -5,8 +5,11 @@
   import {noteKinds} from "src/util/nostr"
   import {getKey} from "src/util/router"
   import Chip from "src/partials/Chip.svelte"
+  import Menu from "src/partials/Menu.svelte"
+  import MenuItem from "src/partials/MenuItem.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Input from "src/partials/Input.svelte"
+  import Popover from "src/partials/Popover.svelte"
   import DateInput from "src/partials/DateInput.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -58,45 +61,6 @@
 
   const displayTopics = topics => (topics.length === 1 ? topics[0] : `${topics.length} topics`)
 
-  const getFilterParts = filter => {
-    const parts = []
-
-    if (filter.kinds && !equals(filter.kinds, noteKinds)) {
-      parts.push({keys: null, label: `Kinds ${displayList(filter.kinds)}`})
-    }
-
-    if (typeof filter.authors === "string") {
-      parts.push({keys: null, label: `From ${filter.authors}`})
-    } else if (filter.authors?.length > 0) {
-      parts.push({keys: null, label: `By ${displayPeople(filter.authors)}`})
-    }
-
-    if (filter["#p"]?.length > 0) {
-      parts.push({keys: ["#p"], label: `Mentioning ${displayPeople(filter["#p"])}`})
-    }
-
-    if (filter["#t"]?.length > 0) {
-      parts.push({keys: ["#t"], label: `Related to ${displayTopics(filter["#t"])}`})
-    }
-
-    if (filter.search) {
-      parts.push({keys: ["search"], label: `Matching ${filter.search}`})
-    }
-
-    if (filter.since && filter.until) {
-      const since = formatTimestampAsDate(filter.since)
-      const until = formatTimestampAsDate(filter.until)
-
-      parts.push({keys: ["since", "until"], label: `Between ${since} and ${until}`})
-    } else if (filter.since) {
-      parts.push({keys: ["since"], label: `From ${formatTimestampAsDate(filter.since)}`})
-    } else if (filter.until) {
-      parts.push({keys: ["until"], label: `Through ${formatTimestampAsDate(filter.until)}`})
-    }
-
-    return parts
-  }
-
   const onChange = filter => {
     router
       .fromCurrent()
@@ -108,6 +72,13 @@
 
   const removePart = keys => {
     filter = omit(keys, filter)
+    _filter = getFormFilter()
+
+    onChange(filter)
+  }
+
+  const modifyFilter = updates => {
+    filter = {...filter, ...updates}
     _filter = getFormFilter()
 
     onChange(filter)
@@ -200,8 +171,6 @@
     "#p"?: Person[]
   } = getFormFilter()
 
-  $: parts = getFilterParts(filter)
-
   $: {
     scopeOptions =
       $follows.size > 0
@@ -219,14 +188,69 @@
     <i class="fa fa-search cursor-pointer p-2" on:click={open} />
     <slot name="controls" />
   </div>
-  {#if parts.length > 0 || relays.length > 0}
-    <div class="mb-2 mr-2 inline-block py-1">Showing notes:</div>
+  <div class="mb-2 mr-2 inline-block py-1">Showing notes:</div>
+  {#if filter.kinds && !equals(filter.kinds, noteKinds)}
+    <Chip class="mb-2 mr-2 inline-block">Kinds {displayList(filter.kinds)}</Chip>
   {/if}
-  {#each parts as { keys, label }}
-    <Chip class="mb-2 mr-2 inline-block" onRemove={keys ? () => removePart(keys) : null}>
-      {label}
+  {#if !filter.authors || typeof filter.authors === "string"}
+    <Popover
+      class="inline-block"
+      placement="bottom-end"
+      theme="transparent"
+      opts={{hideOnClick: true}}>
+      <div slot="trigger" class="cursor-pointer">
+        <Chip class="mb-2 mr-2 inline-block">
+          From {filter.authors || "global"}
+          <i class="fa fa-caret-down p-1" />
+        </Chip>
+      </div>
+      <div slot="tooltip">
+        <Menu>
+          <MenuItem on:click={() => modifyFilter({authors: "follows"})}>
+            <i class="fa fa-user-plus mr-2" /> Follows
+          </MenuItem>
+          <MenuItem on:click={() => modifyFilter({authors: "network"})}>
+            <i class="fa fa-share-nodes mr-2" /> Network
+          </MenuItem>
+          <MenuItem on:click={() => modifyFilter({authors: "global"})}>
+            <i class="fa fa-earth-americas mr-2" /> Global
+          </MenuItem>
+        </Menu>
+      </div>
+    </Popover>
+  {:else if filter.authors?.length > 0}
+    <Chip class="mb-2 mr-2 inline-block">By {displayPeople(filter.authors)}</Chip>
+  {/if}
+  {#if filter["#p"]?.length > 0}
+    <Chip class="mb-2 mr-2 inline-block" onRemove={() => removePart(["#p"])}>
+      Mentioning {displayPeople(filter["#p"])}
     </Chip>
-  {/each}
+  {/if}
+  {#if filter["#t"]?.length > 0}
+    <Chip class="mb-2 mr-2 inline-block" onRemove={() => removePart(["#t"])}>
+      Related to {displayTopics(filter["#t"])}
+    </Chip>
+  {/if}
+  {#if filter.search}
+    <Chip class="mb-2 mr-2 inline-block" onRemove={() => removePart(["search"])}>
+      Matching {filter.search}
+    </Chip>
+  {/if}
+  {#if filter.since && filter.until}
+    {@const since = formatTimestampAsDate(filter.since)}
+    {@const until = formatTimestampAsDate(filter.until)}
+    <Chip class="mb-2 mr-2 inline-block" onRemove={() => removePart(["since", "until"])}>
+      Between {since} and {until}
+    </Chip>
+  {:else if filter.since}
+    <Chip class="mb-2 mr-2 inline-block" onRemove={() => removePart(["since"])}>
+      From {formatTimestampAsDate(filter.since)}
+    </Chip>
+  {:else if filter.until}
+    <Chip class="mb-2 mr-2 inline-block" onRemove={() => removePart(["until"])}>
+      From {formatTimestampAsDate(filter.until)}
+    </Chip>
+  {/if}
   {#if relays.length > 0}
     <Chip class="mb-2 mr-2 inline-block">
       Found on {displayRelays(relays.map(urlToRelay), 2)}

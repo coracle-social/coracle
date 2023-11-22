@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
-  import Card from "src/partials/Card.svelte"
+  import Menu from "src/partials/Menu.svelte"
+  import MenuItem from "src/partials/MenuItem.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {slowConnections} from "src/app/state"
   import {router} from "src/app/router"
@@ -15,74 +15,55 @@
     <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
   </div>
   <div slot="tooltip" class="flex justify-end">
-    <Card class="mt-1 w-48 overflow-hidden shadow-lg">
-      <div class="-mx-3 -mt-1">
-        <Anchor
-          class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-          href={router.at("people").of($pubkey).toString()}>
-          <i class="fa fa-user mr-2" /> Profile
-        </Anchor>
-        <Anchor
-          class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-          href="/settings/keys">
-          <i class="fa fa-key mr-2" /> Keys
-        </Anchor>
-        {#if $env.FORCE_RELAYS.length === 0}
-          <Anchor
-            class="relative block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-            href="/settings/relays">
-            <i class="fa fa-server mr-2" /> Relays
-            {#if $slowConnections.length > 0}
-              <div
-                class="absolute left-3 top-3 h-2 w-2 rounded border border-solid border-white bg-accent" />
-            {/if}
-          </Anchor>
-        {/if}
-        <Anchor
-          class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-          href="/settings/content">
-          <i class="fa fa-volume-xmark mr-2" /> Content
-        </Anchor>
-        <Anchor
-          class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-          href="/settings">
-          <i class="fa fa-gear mr-2" /> Settings
-        </Anchor>
-        <Anchor
-          class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-          href="/settings/data">
-          <i class="fa fa-database mr-2" /> Database
-        </Anchor>
-        <Anchor
-          class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-          href="/logout">
-          <i class="fa fa-right-from-bracket mr-2" /> Logout
-        </Anchor>
-        <div class="my-2 h-px w-full bg-gray-5" />
-        {#each Object.values($sessions) as s (s.pubkey)}
-          {#if s.pubkey !== $pubkey}
+    <Menu class="w-48">
+      <MenuItem href={router.at("people").of($pubkey).toString()}>
+        <i class="fa fa-user mr-2" /> Profile
+      </MenuItem>
+      <MenuItem href="/settings/keys">
+        <i class="fa fa-key mr-2" /> Keys
+      </MenuItem>
+      {#if $env.FORCE_RELAYS.length === 0}
+        <MenuItem href="/settings/relays">
+          <i class="fa fa-server mr-2" /> Relays
+          {#if $slowConnections.length > 0}
             <div
-              class="block flex cursor-pointer items-center justify-between gap-2 p-3 px-4
-                     transition-all hover:bg-accent hover:text-white"
-              on:click={() => pubkey.set(s.pubkey)}>
-              <div class="flex items-center gap-2">
-                <PersonCircle pubkey={s.pubkey} />
-                {displayPubkey(s.pubkey)}
-              </div>
-              <div
-                class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
-                on:click|stopPropagation={() => logoutPubkey(s.pubkey)}>
-                <i class="fa fa-circle-xmark fa-lg" />
-              </div>
-            </div>
+              class="absolute left-3 top-3 h-2 w-2 rounded border border-solid border-white bg-accent" />
           {/if}
-        {/each}
-        <Anchor
-          class="block p-3 px-4 transition-all hover:bg-accent hover:text-white"
-          on:click={showLogin}>
-          <i class="fa fa-plus mr-2" /> Account
-        </Anchor>
-      </div>
-    </Card>
+        </MenuItem>
+      {/if}
+      <MenuItem href="/settings/content">
+        <i class="fa fa-volume-xmark mr-2" /> Content
+      </MenuItem>
+      <MenuItem href="/settings">
+        <i class="fa fa-gear mr-2" /> Settings
+      </MenuItem>
+      <MenuItem href="/settings/data">
+        <i class="fa fa-database mr-2" /> Database
+      </MenuItem>
+      <MenuItem href="/logout">
+        <i class="fa fa-right-from-bracket mr-2" /> Logout
+      </MenuItem>
+      <div class="my-2 h-px w-full bg-gray-5" />
+      {#each Object.values($sessions) as s (s.pubkey)}
+        {#if s.pubkey !== $pubkey}
+          <MenuItem
+            class="flex cursor-pointer items-center justify-between gap-2"
+            on:click={() => pubkey.set(s.pubkey)}>
+            <div class="flex items-center gap-2">
+              <PersonCircle pubkey={s.pubkey} />
+              {displayPubkey(s.pubkey)}
+            </div>
+            <div
+              class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
+              on:click|stopPropagation={() => logoutPubkey(s.pubkey)}>
+              <i class="fa fa-circle-xmark fa-lg" />
+            </div>
+          </MenuItem>
+        {/if}
+      {/each}
+      <MenuItem on:click={showLogin}>
+        <i class="fa fa-plus mr-2" /> Account
+      </MenuItem>
+    </Menu>
   </div>
 </Popover>
