@@ -176,11 +176,11 @@
   })
 
   const open = () => {
-    modal = "maxi"
+    isOpen = true
   }
 
   const onEscape = () => {
-    modal = null
+    isOpen = false
   }
 
   const submit = () => {
@@ -188,7 +188,7 @@
     applyFilter()
   }
 
-  let modal = null
+  let isOpen = false
   let scopeOptions = []
   let _filter: {
     kinds?: Kind[]
@@ -211,17 +211,12 @@
 </script>
 
 <div>
-  <div class="float-right flex justify-end gap-1">
-    <div class="flex items-center gap-1">
+  <div class="float-right flex justify-end">
+    <div class="flex items-center gap-1 pr-2">
       <Toggle scale={0.6} value={!$hideReplies} on:change={toggleReplies} />
       <small class="text-gray-3">Show replies</small>
     </div>
-    <i
-      class="fa fa-search cursor-pointer p-2"
-      on:click={() => {
-        modal = modal ? null : "mini"
-      }} />
-    <i class="fa fa-sliders cursor-pointer p-2" on:click={open} />
+    <i class="fa fa-search cursor-pointer p-2" on:click={open} />
     <slot name="controls" />
   </div>
   {#if parts.length > 0 || relays.length > 0}
@@ -239,8 +234,8 @@
   {/if}
 </div>
 
-{#if modal}
-  <Modal {onEscape} mini={modal === "mini"}>
+{#if isOpen}
+  <Modal {onEscape}>
     <form on:submit|preventDefault={submit}>
       <Content size="lg">
         <div class="flex flex-col gap-1">
@@ -250,48 +245,46 @@
             <i slot="after" class="fa fa-times cursor-pointer" on:click={clearSearch} />
           </Input>
         </div>
-        {#if modal === "maxi"}
-          <div class="grid grid-cols-2 gap-2">
-            <div class="flex flex-col gap-1">
-              <strong>Since</strong>
-              <DateInput bind:value={_filter.since} />
-            </div>
-            <div class="flex flex-col gap-1">
-              <strong>Until</strong>
-              <DateInput bind:value={_filter.until} />
-            </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="flex flex-col gap-1">
+            <strong>Since</strong>
+            <DateInput bind:value={_filter.since} />
           </div>
           <div class="flex flex-col gap-1">
-            <strong>Kinds</strong>
-            <MultiSelect search={searchKinds} bind:value={_filter.kinds} getKey={prop("kind")}>
-              <div slot="item" let:item>{item.label} (kind {item.kind})</div>
-            </MultiSelect>
+            <strong>Until</strong>
+            <DateInput bind:value={_filter.until} />
           </div>
-          <div class="flex flex-col gap-1">
-            <strong>Authors</strong>
-            <SelectButton
-              onChange={onScopeChange}
-              value={typeof _filter.authors === "string" ? _filter.authors : "custom"}
-              options={scopeOptions} />
-            {#if Array.isArray(_filter.authors)}
-              <PersonMultiSelect bind:value={_filter.authors} />
-            {/if}
-          </div>
-          <div class="flex flex-col gap-1">
-            <strong>Topics</strong>
-            <MultiSelect search={$searchTopics} bind:value={_filter["#t"]}>
-              <div slot="item" let:item>
-                <div class="-my-1">
-                  #{item.name}
-                </div>
+        </div>
+        <div class="flex flex-col gap-1">
+          <strong>Kinds</strong>
+          <MultiSelect search={searchKinds} bind:value={_filter.kinds} getKey={prop("kind")}>
+            <div slot="item" let:item>{item.label} (kind {item.kind})</div>
+          </MultiSelect>
+        </div>
+        <div class="flex flex-col gap-1">
+          <strong>Authors</strong>
+          <SelectButton
+            onChange={onScopeChange}
+            value={typeof _filter.authors === "string" ? _filter.authors : "custom"}
+            options={scopeOptions} />
+          {#if Array.isArray(_filter.authors)}
+            <PersonMultiSelect bind:value={_filter.authors} />
+          {/if}
+        </div>
+        <div class="flex flex-col gap-1">
+          <strong>Topics</strong>
+          <MultiSelect search={$searchTopics} bind:value={_filter["#t"]}>
+            <div slot="item" let:item>
+              <div class="-my-1">
+                #{item.name}
               </div>
-            </MultiSelect>
-          </div>
-          <div class="flex flex-col gap-1">
-            <strong>Mentions</strong>
-            <PersonMultiSelect bind:value={_filter["#p"]} />
-          </div>
-        {/if}
+            </div>
+          </MultiSelect>
+        </div>
+        <div class="flex flex-col gap-1">
+          <strong>Mentions</strong>
+          <PersonMultiSelect bind:value={_filter["#p"]} />
+        </div>
         <div class="flex justify-end">
           <Anchor theme="button-accent" on:click={submit}>Apply Filters</Anchor>
         </div>

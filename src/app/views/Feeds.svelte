@@ -64,7 +64,7 @@
         {#if $canSign}
           {#if $userLists.length > 0}
             <Popover placement="bottom" opts={{hideOnClick: true}} theme="transparent">
-              <i slot="trigger" class="fa fa-ellipsis-v cursor-pointer p-2" />
+              <i slot="trigger" class="fa fa-scroll cursor-pointer p-2" />
               <div
                 slot="tooltip"
                 class="flex flex-col items-start overflow-hidden rounded border border-solid border-gray-8 bg-black">

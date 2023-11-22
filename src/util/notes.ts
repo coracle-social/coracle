@@ -20,7 +20,7 @@ export const urlIsMedia = (url: string) =>
 
 export const parseContent = ({content, tags = []}: {content: string; tags?: string[][]}) => {
   const result: any[] = []
-  let text = content.trim() || new Tags(tags).getValue('alt') || ""
+  let text = content.trim() || new Tags(tags).getValue("alt") || ""
   let buffer = ""
 
   const parseNewline = () => {
@@ -59,7 +59,7 @@ export const parseContent = ({content, tags = []}: {content: string; tags?: stri
   }
 
   const parseTopic = () => {
-    const topic = first(text.match(/^#\w+/i))
+    const topic: string = first(text.match(/^#\w+/i))
 
     // Skip numeric topics
     if (topic && !topic.match(/^#\d+$/)) {
@@ -100,7 +100,7 @@ export const parseContent = ({content, tags = []}: {content: string; tags?: stri
   }
 
   const parseUrl = () => {
-    const raw = first(
+    const raw: string = first(
       text.match(/^([a-z\+:]{2,30}:\/\/)?[^<>\(\)\s]+\.[a-z]{2,6}[^\s]*[^<>"'\.!?,:\s]/gi)
     )
 
