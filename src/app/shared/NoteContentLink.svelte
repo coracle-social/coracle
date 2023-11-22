@@ -24,6 +24,7 @@
     modal
     stopPropagation
     class="overflow-hidden text-ellipsis whitespace-nowrap underline"
+    externalHref={value.url}
     href={router.at("media").of(value.url).toString()}>
     {displayUrl(value.url)}
   </Anchor>

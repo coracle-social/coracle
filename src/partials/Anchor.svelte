@@ -5,6 +5,7 @@
   import {router} from "src/app/router"
 
   export let stopPropagation = false
+  export let externalHref = null
   export let external = false
   export let disabled = false
   export let loading = false
@@ -55,7 +56,7 @@
 </script>
 
 {#if tag === "a"}
-  <a class={className} on:click={onClick} {href} {target}>
+  <a class={className} on:click={onClick} href={externalHref || href} {target}>
     <slot />
   </a>
 {:else if tag === "button"}
