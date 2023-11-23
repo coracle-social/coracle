@@ -23,9 +23,9 @@
     {/if}
     {#if showGroup}
       {#if addresses.length === 1}
-        in <GroupLink address={addresses[0]} />
+        from <GroupLink address={addresses[0]} />
       {:else if addresses.length > 1}
-        in {addresses.length} groups
+        from {addresses.length} groups
       {/if}
     {/if}
   </p>

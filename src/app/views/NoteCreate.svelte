@@ -33,6 +33,7 @@
 
   let images = []
   let compose = null
+  let charCount = 0
   let wordCount = 0
   let showPreview = false
   let defaultGroups = quote ? Tags.from(quote).communities().all() : [group].filter(identity)
@@ -117,9 +118,11 @@
     showPreview = !showPreview
   }
 
-  const setWordCount = throttle(300, () => {
+  const updateCounts = throttle(300, () => {
     if (compose) {
-      wordCount = compose.parse().match(/\s+/g)?.length || 0
+      const content = compose.parse()
+      charCount = content.length || 0
+      wordCount = content.match(/\s+/g)?.length || 0
     }
   })
 
@@ -166,10 +169,14 @@
             <NoteContent note={{content: compose.parse(), tags: []}} />
           {/if}
           <div class:hidden={showPreview}>
-            <Compose on:keyup={setWordCount} bind:this={compose} {onSubmit} />
+            <Compose on:keyup={updateCounts} bind:this={compose} {onSubmit} />
           </div>
         </div>
         <div class="flex items-center justify-end gap-2 text-gray-5">
+          <small class="hidden sm:block">
+            {charCount} characters
+          </small>
+          <span>•</span>
           <small class="hidden sm:block">
             {wordCount} words
           </small>
