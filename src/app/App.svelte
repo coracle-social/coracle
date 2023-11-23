@@ -102,9 +102,14 @@
 
   router.register("/chat/redirect", ChatRedirect)
 
-  router.register("/conversations", MessagesList)
-  router.register("/conversations/requests", MessagesList)
+  router.register("/conversations", MessagesList, {
+    requireUser: true,
+  })
+  router.register("/conversations/requests", MessagesList, {
+    requireUser: true,
+  })
   router.register("/conversations/:entity", MessagesDetail, {
+    requireUser: true,
     serializers: {
       entity: asPerson,
     },
