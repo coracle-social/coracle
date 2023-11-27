@@ -62,10 +62,11 @@
   const displayTopics = topics => (topics.length === 1 ? topics[0] : `${topics.length} topics`)
 
   const onChange = filter => {
-    router
-      .fromCurrent()
-      .qp({filter})
-      .replace({key: getKey(router.page.get())})
+    onEscape()
+
+    const key = getKey(router.current.get())
+
+    router.fromCurrent().qp({filter}).replace({key})
 
     updateFilter(filter)
   }
@@ -94,7 +95,7 @@
     }
 
     if (_filter.since) {
-      newFilter.since = createLocalDate(_filter.since).setHours(23, 59, 59, 0) / 1000
+      newFilter.since = createLocalDate(_filter.since).setHours(0, 0, 0, 0) / 1000
     }
 
     if (_filter.until) {
@@ -125,7 +126,6 @@
 
   const clearSearch = () => {
     _filter.search = ""
-    applyFilter()
   }
 
   const toggleReplies = () => hideReplies.update(not)
@@ -152,11 +152,6 @@
 
   const onEscape = () => {
     isOpen = false
-  }
-
-  const submit = () => {
-    onEscape()
-    applyFilter()
   }
 
   let isOpen = false
@@ -248,7 +243,7 @@
     </Chip>
   {:else if filter.until}
     <Chip class="mb-2 mr-2 inline-block" onRemove={() => removePart(["until"])}>
-      From {formatTimestampAsDate(filter.until)}
+      Through {formatTimestampAsDate(filter.until)}
     </Chip>
   {/if}
   {#if relays.length > 0}
@@ -260,7 +255,7 @@
 
 {#if isOpen}
   <Modal {onEscape}>
-    <form on:submit|preventDefault={submit}>
+    <form on:submit|preventDefault={applyFilter}>
       <Content size="lg">
         <div class="flex flex-col gap-1">
           <strong>Search</strong>
@@ -310,7 +305,7 @@
           <PersonMultiSelect bind:value={_filter["#p"]} />
         </div>
         <div class="flex justify-end">
-          <Anchor theme="button-accent" on:click={submit}>Apply Filters</Anchor>
+          <Anchor theme="button-accent" type="submit">Apply Filters</Anchor>
         </div>
       </Content>
     </form>
