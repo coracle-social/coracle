@@ -261,15 +261,25 @@ export class Collection<T extends R> implements Readable<T[]> {
 
   key = (k: string) => new Key(this.mapStore, this.pk, k)
 
-  set = (xs: T[]) => this.mapStore.set(new Map(xs.map(x => [x[this.pk], x])))
+  set = (xs: T[]) => {
+    const m = new Map()
 
-  update = (f: (v: T[]) => T[]) =>
-    this.mapStore.update(m => new Map(f(Array.from(m.values())).map(x => [x[this.pk], x])))
+    for (const x of xs) {
+      if (!x) {
+        console.error("Empty value passed to collection store")
+      } else if (!x[this.pk]) {
+        console.error(`Value with empty ${this.pk} passed to collection store`, x)
+      } else {
+        m.set(x[this.pk], x)
+      }
+    }
 
-  updateAsync = async (f: (v: T[]) => Promise<T[]>) =>
-    this.mapStore.updateAsync(
-      async m => new Map((await f(Array.from(m.values()))).map(x => [x[this.pk], x]))
-    )
+    this.mapStore.set(m)
+  }
+
+  update = (f: (v: T[]) => T[]) => this.set(f(this.get()))
+
+  updateAsync = async (f: (v: T[]) => Promise<T[]>) => this.set(await f(this.get()))
 
   reject = (f: (v: T) => boolean) => this.update(reject(f))
 

@@ -121,8 +121,9 @@
   const updateCounts = throttle(300, () => {
     if (compose) {
       const content = compose.parse()
+
       charCount = content.length || 0
-      wordCount = content.match(/\s+/g)?.length || 0
+      wordCount = content.trim() ? (content.match(/\s+/g)?.length || 0) + 1 : 0
     }
   })
 
