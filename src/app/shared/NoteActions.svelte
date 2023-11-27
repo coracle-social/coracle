@@ -133,11 +133,8 @@
     toast.show("info", "Note has been re-published!")
   }
 
-  const setFeedRelay = url =>
-    router
-      .fromCurrent()
-      .cx({relays: [url]})
-      .open()
+  const openRelay = url =>
+    router.at('relays').of(url).open()
 
   const groupOptions = session.derived($session => {
     const options = []
@@ -262,7 +259,7 @@
         class="absolute right-0 top-0 m-3 grid grid-cols-3 gap-2 sm:hidden">
         {#each sortBy(identity, note.seen_on) as url, i}
           <div class={`cursor-pointer order-${3 - (i % 3)}`}>
-            <ColorDot value={url} on:click={() => setFeedRelay(url)} />
+            <ColorDot value={url} on:click={() => openRelay(url)} />
           </div>
         {:else}
           <div class="cursor-pointer order-3">
@@ -278,7 +275,7 @@
         {#each sortBy(identity, note.seen_on) as url, i}
           <Popover triggerType="mouseenter" interactive={false}>
             <div slot="trigger" class="cursor-pointer p-1">
-              <ColorDot value={url} on:click={() => setFeedRelay(url)} />
+              <ColorDot value={url} on:click={() => openRelay(url)} />
             </div>
             <div slot="tooltip">{displayRelay({url})}</div>
           </Popover>

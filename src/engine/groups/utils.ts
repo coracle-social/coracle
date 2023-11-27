@@ -73,7 +73,7 @@ export const deriveSharedKeyForGroup = (address: string) =>
 export const deriveAdminKeyForGroup = (address: string) => groupAdminKeys.key(address.split(":")[1])
 
 export const deriveGroupAccess = address =>
-  groups.key(address).derived($group => $group.access || GroupAccess.Closed)
+  groups.key(address).derived($group => $group?.access || GroupAccess.Closed)
 
 export const deriveGroupStatus = address =>
   session.derived($session => $session?.groups?.[address] || {})

@@ -268,6 +268,7 @@
   router.register("/relays/:entity", RelayDetail, {
     serializers: {
       entity: asRelay,
+      filter: asFilter,
     },
   })
   router.register("/relays/:entity/review", RelayReview, {

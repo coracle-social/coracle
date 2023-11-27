@@ -1,6 +1,6 @@
 <script lang="ts">
   import {batch} from "hurdak"
-  import {getAvgRating} from "src/util/nostr"
+  import {getAvgRating, noteKinds} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -10,7 +10,7 @@
   import {deriveRelay, normalizeRelayUrl, displayRelay} from "src/engine"
 
   export let url
-  export let filter = {kinds: [1]}
+  export let filter = {kinds: noteKinds, authors: 'network'}
 
   let reviews = []
   let activeTab = "notes"
