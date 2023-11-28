@@ -1,7 +1,7 @@
 <script lang="ts">
   import {fade} from "src/util/transition"
   import {getProps} from "src/util/router"
-  import {canSign} from "src/engine"
+  import {canSign, env} from "src/engine"
   import ForegroundButton from "src/partials/ForegroundButton.svelte"
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
   import MusicPlayer from "src/app/MusicPlayer.svelte"
@@ -46,7 +46,7 @@
       </ForegroundButton>
     </div>
   {/if}
-  {#if showButtons}
+  {#if showButtons && $env.ENABLE_JUKEBOX}
     <div transition:fade|local={{delay: 200, duration: 200}}>
       <ForegroundButton theme="secondary" size="small" on:click={showPlayer}>
         <i class="fa fa-music" />
@@ -62,4 +62,6 @@
   {/if}
 </ForegroundButtons>
 
-<MusicPlayer bind:isOpen={playerIsOpen} />
+{#if $env.ENABLE_JUKEBOX}
+  <MusicPlayer bind:isOpen={playerIsOpen} />
+{/if}

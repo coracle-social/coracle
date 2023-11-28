@@ -7,10 +7,11 @@
   import Rating from "src/partials/Rating.svelte"
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
   import RelayActions from "src/app/shared/RelayActions.svelte"
+  import type {DynamicFilter} from "src/engine"
   import {deriveRelay, normalizeRelayUrl, displayRelay} from "src/engine"
 
   export let url
-  export let filter = {kinds: noteKinds, authors: 'network'}
+  export let filter: DynamicFilter = {kinds: noteKinds, authors: "network"}
 
   let reviews = []
   let activeTab = "notes"

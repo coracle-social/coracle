@@ -60,6 +60,8 @@ const ENABLE_ZAPS = JSON.parse(import.meta.env.VITE_ENABLE_ZAPS)
 
 const ENABLE_GROUPS = JSON.parse(import.meta.env.VITE_ENABLE_GROUPS)
 
+const ENABLE_JUKEBOX = JSON.parse(import.meta.env.VITE_ENABLE_JUKEBOX)
+
 // Prep our env
 env.set({
   DEFAULT_FOLLOWS,
@@ -72,6 +74,7 @@ env.set({
   DEFAULT_RELAYS,
   ENABLE_ZAPS,
   ENABLE_GROUPS,
+  ENABLE_JUKEBOX,
 })
 
 // Throw some hardcoded defaults in there

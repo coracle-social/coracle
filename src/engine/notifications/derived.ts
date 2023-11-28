@@ -6,20 +6,21 @@ import {tryJson} from "src/util/misc"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {derived} from "src/engine/core/utils"
 import {groupRequests, groupAlerts} from "src/engine/groups/state"
+import {pubkey} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {userEvents} from "src/engine/events/derived"
 
 export const notifications = derived(
-  [session, userEvents.mapStore.throttle(500), events.throttle(500)],
-  ([$session, $userEvents, $events]) => {
-    if (!$session) {
+  [pubkey, userEvents.mapStore.throttle(500), events.throttle(500)],
+  ([$pubkey, $userEvents, $events]) => {
+    if (!$pubkey) {
       return []
     }
 
     const $isEventMuted = isEventMuted.get()
 
     return $events.filter(e => {
-      if (e.pubkey === $session.pubkey || $isEventMuted(e)) {
+      if (e.pubkey === $pubkey || $isEventMuted(e)) {
         return false
       }
 
@@ -28,7 +29,7 @@ export const notifications = derived(
       return (
         $userEvents.get(tags.mark("root").getValue()) ||
         $userEvents.get(tags.mark("reply").getValue()) ||
-        tags.pubkeys().has($session.pubkey)
+        tags.pubkeys().has($pubkey)
       )
     })
   }

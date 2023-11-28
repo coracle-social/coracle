@@ -1,3 +1,4 @@
+import {max, pluck} from "ramda"
 import {batch} from "hurdak"
 import {Tags} from "paravel"
 import {projections} from "src/engine/core/projections"
@@ -18,17 +19,20 @@ projections.addGlobalHandler(
   })
 )
 
-projections.addHandler(EventKind.Delete, e => {
-  const values = Tags.from(e).type(["a", "e"]).values().all()
+projections.addHandler(
+  EventKind.Delete,
+  batch(500, (chunk: Event[]) => {
+    const values = Tags.from(chunk).type(["a", "e"]).values().all()
 
-  deletesLastUpdated.update(ts => Math.max(ts, e.created_at))
+    deletesLastUpdated.update(ts => max(ts, pluck("created_at", chunk).reduce(max)))
 
-  deletes.update($deletes => {
-    values.forEach(v => $deletes.add(v))
+    deletes.update($deletes => {
+      values.forEach(v => $deletes.add(v))
 
-    return $deletes
+      return $deletes
+    })
   })
-})
+)
 
 projections.addHandler(EventKind.GiftWrap, e => {
   const session = sessions.get()[Tags.from(e).getValue("p")]

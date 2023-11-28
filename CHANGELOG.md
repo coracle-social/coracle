@@ -9,6 +9,8 @@
 - [x] Add anonymous posting
 - [x] Add note options dialog to replies
 - [x] Add support for reposts and cross-posts
+- [x] Bump paravel to fix missing tags after normalize (fixes mention notifications)
+- [x] Fix throttled notifications derive loop
 
 # 0.3.12
 

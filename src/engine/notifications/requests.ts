@@ -55,7 +55,12 @@ export const loadNotifications = () => {
     "id",
     sortBy(
       e => -e.created_at,
-      events.get().filter(e => e.created_at > cutoff && pubkeys.includes(e.pubkey))
+      events
+        .get()
+        .filter(
+          e =>
+            !reactionKinds.includes(e.kind) && e.created_at > cutoff && pubkeys.includes(e.pubkey)
+        )
     ).slice(0, 256)
   )
 
@@ -68,6 +73,7 @@ export const loadNotifications = () => {
   return subscribe({
     filters,
     timeout: 15000,
+    skipCache: true,
     shouldProject: false,
     relays: mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read"))),
     onEvent: onNotificationEvent,
@@ -104,6 +110,7 @@ export const listenForNotifications = async () => {
   subscribePersistent({
     relays,
     filters,
+    skipCache: true,
     onEvent: onNotificationEvent,
   })
 }
