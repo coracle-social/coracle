@@ -11,6 +11,8 @@
 - [x] Add support for reposts and cross-posts
 - [x] Bump paravel to fix missing tags after normalize (fixes mention notifications)
 - [x] Fix throttled notifications derive loop
+- [x] Conservatively load from cache when on a slow network
+- [x] Add refresh button to feeds
 
 # 0.3.12
 

@@ -1,9 +1,11 @@
 <script lang="ts">
+  import {randomId} from 'hurdak'
   import {theme, installPrompt} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import NavItem from "src/partials/NavItem.svelte"
   import {hasNewNip04Messages, hasNewNotifications, canSign, canUseGiftWrap} from "src/engine"
   import {menuIsOpen} from "src/app/state"
+  import {router} from "src/app/router"
 
   const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 
@@ -20,7 +22,7 @@
   class="fixed bottom-0 left-0 top-0 z-20 mt-16 w-48 overflow-hidden border-r border-gray-6 bg-gray-7 pb-20
          pt-4 text-gray-2 shadow-xl transition-all lg:ml-0"
   class:-ml-48={!$menuIsOpen}>
-  <NavItem href="/notes">
+  <NavItem on:click={() => router.at('notes').push({key: randomId()})}>
     <i class="fa fa-rss mr-2" /> Feed
   </NavItem>
   <NavItem href="/explore">
