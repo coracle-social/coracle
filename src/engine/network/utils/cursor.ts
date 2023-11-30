@@ -54,6 +54,7 @@ export class Cursor {
     const sub = subscribe({
       timeout: 3000,
       relays: [relay],
+      skipCache: true,
       tracker: this.opts.tracker,
       filters: filters.map(mergeRight({until, limit, since})),
       onEvent: (event: Event) => {

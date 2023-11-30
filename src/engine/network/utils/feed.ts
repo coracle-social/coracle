@@ -1,8 +1,8 @@
-import {partition, find, uniqBy, identity, pluck, sortBy, without, any, prop, assoc} from "ramda"
+import {partition, uniqBy, identity, pluck, sortBy, without, any, prop, assoc} from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
 import {now, hasValidSignature, Tags} from "paravel"
-import {race, tryJson, pushToKey} from "src/util/misc"
-import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {race, tryJson} from "src/util/misc"
+import {LOCAL_RELAY_URL, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {isEventMuted} from "src/engine/events/derived"
@@ -32,8 +32,10 @@ export class FeedLoader {
   notes = writable<DisplayEvent[]>([])
   parents = new Map<string, DisplayEvent>()
   reposts = new Map<string, Event[]>()
+  replies = new Map<string, Event[]>()
   deferred: Event[] = []
-  cursor: MultiCursor
+  remoteCursor: MultiCursor
+  localCursor: MultiCursor
   ready: Promise<void>
   isEventMuted = isEventMuted.get()
 
@@ -59,7 +61,7 @@ export class FeedLoader {
       ])
     }
 
-    this.cursor = new MultiCursor({
+    this.remoteCursor = new MultiCursor({
       relays: opts.relays,
       filters: opts.filters,
       onEvent: batch(100, events => {
@@ -69,15 +71,27 @@ export class FeedLoader {
       }),
     })
 
-    const subs = this.cursor.load(50)
+    this.localCursor = new MultiCursor({
+      relays: [LOCAL_RELAY_URL],
+      filters: opts.filters,
+      onEvent: batch(100, events => {
+        if (opts.shouldLoadParents) {
+          this.loadParents(this.discardEvents(events))
+        }
+      }),
+    })
 
-    this.addSubs(subs)
+    const remoteSubs = this.remoteCursor.load(50)
+    const localSubs = this.localCursor.load(50)
+
+    this.addSubs(remoteSubs)
+    this.addSubs(localSubs)
 
     // Wait until a good number of subscriptions have completed to reduce the chance of
     // out of order notes
     this.ready = race(
       0.2,
-      subs.map(s => new Promise(r => s.on("close", r)))
+      remoteSubs.map(s => new Promise(r => s.on("close", r)))
     )
   }
 
@@ -157,6 +171,14 @@ export class FeedLoader {
               }
             }
 
+            // Keep track of replies
+            if (noteKinds.includes(e.kind)) {
+              const parentId = Tags.from(e).getReply()
+              const replies = this.replies.get(parentId) || []
+
+              this.replies.set(parentId, [...replies, e])
+            }
+
             // If we have a parent, show that instead, with replies grouped underneath
             while (true) {
               const parentId = Tags.from(e).getReply()
@@ -169,10 +191,6 @@ export class FeedLoader {
 
               if (!parent) {
                 break
-              }
-
-              if (noteKinds.includes(e.kind) && !find(r => r.id === e.id, parent.replies || [])) {
-                pushToKey(parent as any, "replies", e)
               }
 
               e = parent
@@ -190,10 +208,7 @@ export class FeedLoader {
             return true
           })
           .map((e: DisplayEvent) => {
-            if (e.replies) {
-              e.replies = uniqBy(prop("id"), e.replies)
-            }
-
+            e.replies = this.replies.get(e.id)
             e.reposts = this.reposts.get(e.id)
 
             return e
@@ -213,18 +228,28 @@ export class FeedLoader {
   async load(n) {
     await this.ready
 
-    const [subs, events] = this.cursor.take(n)
+    const [subs, events] = this.remoteCursor.take(n)
     const notes = this.discardEvents(events)
 
     this.addSubs(subs)
 
-    if (this.opts.shouldDefer) {
-      const deferred = this.deferred.splice(0)
+    let ok = notes
 
-      this.addToFeed(doPipe(notes.concat(deferred), [this.deferOrphans, this.deferAncient]))
-    } else {
-      this.addToFeed(notes)
+    // Skip anything out of order or missing context
+    if (this.opts.shouldDefer) {
+      ok = doPipe(notes.concat(this.deferred.splice(0)), [this.deferOrphans, this.deferAncient])
     }
+
+    // If we have nothing load something from the cache to keep the user happy
+    if (ok.length === 0) {
+      const [subs, events] = this.localCursor.take(1)
+
+      this.addSubs(subs)
+
+      ok = events
+    }
+
+    this.addToFeed(ok)
   }
 
   loadBuffer() {
