@@ -8,8 +8,8 @@
 # 0.3.13
 
 - [x] Update lists to use new 30003 user bookmarks kind
-- [x] Add NIP 96 file storage
-- [x] Add NIP 98 auth support
+- [x] Add NIP 96 file storage (thanks to @quentintaranpino)
+- [x] Add NIP 98 auth support (thanks to @quentintaranpino)
 - [x] Add DIP 01 imeta tag creation
 - [x] Re-work keys page, include group keys
 - [x] Add anonymous posting

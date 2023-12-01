@@ -46,17 +46,17 @@
       <div class="my-2 h-px w-full bg-gray-5" />
       {#each Object.values($sessions) as s (s.pubkey)}
         {#if s.pubkey !== $pubkey}
-          <MenuItem
-            class="flex cursor-pointer items-center justify-between gap-2"
-            on:click={() => pubkey.set(s.pubkey)}>
-            <div class="flex items-center gap-2">
-              <PersonCircle pubkey={s.pubkey} />
-              {displayPubkey(s.pubkey)}
-            </div>
-            <div
-              class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
-              on:click|stopPropagation={() => logoutPubkey(s.pubkey)}>
-              <i class="fa fa-circle-xmark fa-lg" />
+          <MenuItem on:click={() => pubkey.set(s.pubkey)}>
+            <div class="flex cursor-pointer items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <PersonCircle pubkey={s.pubkey} />
+                {displayPubkey(s.pubkey)}
+              </div>
+              <div
+                class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
+                on:click|stopPropagation={() => logoutPubkey(s.pubkey)}>
+                <i class="fa fa-circle-xmark fa-lg" />
+              </div>
             </div>
           </MenuItem>
         {/if}
