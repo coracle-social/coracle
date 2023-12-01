@@ -3,7 +3,7 @@
   import {theme, installPrompt} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import NavItem from "src/partials/NavItem.svelte"
-  import {hasNewNip04Messages, hasNewNotifications, canSign, canUseGiftWrap} from "src/engine"
+  import {env, hasNewNip04Messages, hasNewNotifications, canSign, canUseGiftWrap} from "src/engine"
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/router"
 
@@ -42,9 +42,11 @@
         class="absolute left-7 top-2 h-2 w-2 rounded border border-solid border-white bg-accent" />
     {/if}
   </NavItem>
-  <NavItem disabled={!$canUseGiftWrap} href="/groups">
-    <i class="fa fa-circle-nodes mr-2" /> Groups
-  </NavItem>
+  {#if $env.ENABLE_GROUPS}
+    <NavItem disabled={!$canUseGiftWrap} href="/groups">
+      <i class="fa fa-circle-nodes mr-2" /> Groups
+    </NavItem>
+  {/if}
   <NavItem href="/apps">
     <i class="fa fa-box mr-2" /> Apps
   </NavItem>

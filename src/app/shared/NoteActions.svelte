@@ -180,7 +180,7 @@
 
     actions.push({label: "Quote", icon: "quote-left", onClick: quote})
 
-    if (!note.wrap) {
+    if (!note.wrap && $env.ENABLE_GROUPS) {
       actions.push({label: "Cross-post", icon: "shuffle", onClick: () => setView("cross-post")})
     }
 

@@ -1,7 +1,8 @@
 <script>
   import {onMount, onDestroy} from "svelte"
   import {derived} from "svelte/store"
-  import {partition} from "ramda"
+  import {partition, assoc} from "ramda"
+  import {now} from "paravel"
   import {fuzzy, createScroller} from "src/util/misc"
   import {getModal} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
@@ -15,6 +16,7 @@
     mergeHints,
     getGroupReqInfo,
     deriveMembershipLevel,
+    updateCurrentSession,
     session,
   } from "src/engine"
 
@@ -40,11 +42,13 @@
   document.title = "Groups"
 
   onMount(() => {
-    const {admins, recipients, relays} = getGroupReqInfo()
+    const {admins, recipients, relays, since} = getGroupReqInfo()
+
+    updateCurrentSession(assoc("groups_last_synced", now()))
 
     load({
       relays: mergeHints([relays, getUserRelayUrls("read")]),
-      filters: [{kinds: [1059], "#p": recipients, limit: 1000}],
+      filters: [{kinds: [1059], "#p": recipients, since}],
     })
 
     load({

@@ -8,8 +8,10 @@
   export let note: DisplayEvent
   export let showGroup
 
-  const repostPubkeys = uniq(pluck('pubkey', note.reposts || []))
-  const addresses = Tags.from(note).communities().all()
+  const reposts = note.reposts || []
+  const repostPubkeys = uniq(pluck('pubkey', reposts))
+  const fromAddresses = Tags.from(note).communities().all()
+  const toAddresses = Tags.from(reposts).communities().all()
 </script>
 
 {#if repostPubkeys.length > 0}
@@ -21,11 +23,15 @@
       Reposted
     {/if}
     {#if showGroup}
-      from
-      {#if addresses.length === 1}
-        <GroupLink address={addresses[0]} />
-      {:else if addresses.length > 1}
-        {addresses.length} groups
+      {#if fromAddresses.length === 1}
+        from <GroupLink address={fromAddresses[0]} />
+      {:else if fromAddresses.length > 1}
+        from {fromAddresses.length} groups
+      {/if}
+      {#if toAddresses.length === 1}
+        to <GroupLink address={toAddresses[0]} />
+      {:else if toAddresses.length > 1}
+        to {toAddresses.length} groups
       {/if}
     {/if}
     by
@@ -35,12 +41,12 @@
       {repostPubkeys.length} people
     {/if}
   </p>
-{:else if addresses.length > 0 && showGroup}
+{:else if fromAddresses.length > 0 && showGroup}
   <p class="pb-2 text-gray-4">
-    {#if addresses.length === 1}
-      Posted in <GroupLink address={addresses[0]} />
-    {:else if addresses.length > 1}
-      Posted in {addresses.length} groups
+    {#if fromAddresses.length === 1}
+      Posted in <GroupLink address={fromAddresses[0]} />
+    {:else if fromAddresses.length > 1}
+      Posted in {fromAddresses.length} groups
     {/if}
   </p>
 {/if}

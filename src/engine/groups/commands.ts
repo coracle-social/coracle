@@ -5,8 +5,9 @@ import {updateIn, randomId, filterVals} from "hurdak"
 import {Naddr} from "src/util/nostr"
 import {updateRecord} from "src/engine/core/commands"
 import {Publisher} from "src/engine/network/utils"
-import {pubkey, sessions} from "src/engine/session/state"
+import {pubkey} from "src/engine/session/state"
 import {nip59, signer, session} from "src/engine/session/derived"
+import {updateSession} from "src/engine/session/commands"
 import {displayPubkey} from "src/engine/people/utils"
 import {publishCommunitiesList} from "src/engine/lists/commands"
 import {
@@ -291,10 +292,7 @@ export const modifyGroupStatus = (session, address, timestamp, updates) => {
 }
 
 export const setGroupStatus = (pubkey, address, timestamp, updates) =>
-  sessions.update($sessions => ({
-    ...$sessions,
-    [pubkey]: modifyGroupStatus($sessions[pubkey], address, timestamp, updates),
-  }))
+  updateSession(pubkey, s => modifyGroupStatus(s, address, timestamp, updates))
 
 export const resetMemberAccess = address =>
   setGroupStatus(pubkey.get(), address, now(), {access: MemberAccess.None})

@@ -1,5 +1,5 @@
 import {prop, sortBy, last, whereEq} from "ramda"
-import {ellipsize} from "hurdak"
+import {ellipsize, seconds} from "hurdak"
 import {Tags} from "paravel"
 import {Naddr} from "src/util/nostr"
 import {pubkey} from "src/engine/session/state"
@@ -36,13 +36,18 @@ export const getRecipientKey = wrap => {
 }
 
 export const getGroupReqInfo = (address = null) => {
+  let since = session.get().groups_last_synced || 0
   let $groupSharedKeys = groupSharedKeys.get()
   let $groupAdminKeys = groupAdminKeys.get()
 
   if (address) {
+    since = session.get().groups[address]?.last_synced || 0
     $groupSharedKeys = $groupSharedKeys.filter(whereEq({group: address}))
     $groupAdminKeys = $groupAdminKeys.filter(whereEq({group: address}))
   }
+
+  // Account for timestamp randomization
+  since = Math.max(0, since - seconds(7, "day"))
 
   const admins = []
   const recipients = [pubkey.get()]
@@ -62,7 +67,7 @@ export const getGroupReqInfo = (address = null) => {
 
   const relays = mergeHints([getUserRelayUrls("read"), ...Object.values(relaysByGroup)])
 
-  return {admins, recipients, relays}
+  return {admins, recipients, relays, since}
 }
 
 export const deriveSharedKeyForGroup = (address: string) =>

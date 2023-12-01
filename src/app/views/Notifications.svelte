@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {find, assocPath} from "ramda"
+  import {find, assoc} from "ramda"
   import {onMount} from "svelte"
   import {now} from "paravel"
   import {createScroller, formatTimestampAsDate} from "src/util/misc"
@@ -15,13 +15,12 @@
   import type {Event} from "src/engine"
   import {
     env,
-    pubkey,
     session,
-    sessions,
     notifications,
     otherNotifications,
     groupNotifications,
     loadNotifications,
+    updateCurrentSession,
   } from "src/engine"
 
   const tabs = ["Mentions & Replies", "Reactions"]
@@ -70,7 +69,7 @@
     loadNotifications()
 
     const unsub = throttledNotifications.subscribe(() => {
-      sessions.update(assocPath([$pubkey, "notifications_last_synced"], now()))
+      updateCurrentSession(assoc("notifications_last_synced", now()))
     })
 
     const scroller = createScroller(async () => {

@@ -1,6 +1,7 @@
 <script>
   import {onMount} from "svelte"
-  import {whereEq, without, uniq} from "ramda"
+  import {now} from "paravel"
+  import {whereEq, assocPath, without, uniq} from "ramda"
   import {noteKinds} from "src/util/nostr"
   import {getKey} from "src/util/router"
   import {getThemeBackgroundGradient} from "src/partials/state"
@@ -27,6 +28,7 @@
     getRelaysFromFilters,
     deriveGroupStatus,
     deriveGroupAccess,
+    updateCurrentSession,
   } from "src/engine"
   import {router} from "src/app/router"
 
@@ -52,9 +54,11 @@
       .push({key: getKey(router.current.get())})
 
   onMount(() => {
-    const {recipients, relays} = getGroupReqInfo(address)
+    const {recipients, relays, since} = getGroupReqInfo(address)
 
-    const sub = subscribe({relays, filters: [{kinds: [1059], "#p": recipients}]})
+    updateCurrentSession(assocPath(["groups", address, "last_synced"], now()))
+
+    const sub = subscribe({relays, filters: [{kinds: [1059], "#p": recipients, since}]})
 
     return () => sub.close()
   })
