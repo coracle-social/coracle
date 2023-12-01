@@ -53,11 +53,11 @@
           Allows {appName} to authenticate with relays that have access controls automatically.
         </p>
       </FieldInline>
-      <Field label="Upload Providers URL">
+      <Field label="Upload Provider URLs">
         <p slot="info">
           Enter one or more urls for nostr media servers. You can find a full list of NIP-96
           compatible servers
-          <a href="https://github.com/quentintaranpino/NIP96-compatible-servers">here</a>
+          <Anchor theme="anchor" href="https://github.com/quentintaranpino/NIP96-compatible-servers">here</Anchor>
         </p>
         <MultiSelect
           search={searchUploadProviders}
@@ -75,6 +75,7 @@
         <p slot="info">
           Enter a custom url for {appName}'s helper application. Dufflepud is used for hosting
           images and loading link previews. You can find the source code <Anchor
+            theme="anchor"
             href="https://github.com/coracle-social/dufflepud">here</Anchor
           >.
         </p>
@@ -85,7 +86,7 @@
         </Input>
         <p slot="info">
           Enter a custom imgproxy url for resizing images on the fly to reduce bandwidth and improve
-          privacy. You can set up your own proxy <Anchor href="https://imgproxy.net/">here</Anchor>.
+          privacy. You can set up your own proxy <Anchor theme="anchor" href="https://imgproxy.net/">here</Anchor>.
         </p>
       </Field>
       {#if $env.FORCE_RELAYS.length === 0}
@@ -96,7 +97,7 @@
           <p slot="info">
             Enter a custom proxy server for multiplexing relay connections. This can drastically
             improve resource usage, but has some privacy trade-offs. Leave blank to connect to
-            relays directly. You can find the source code <Anchor
+            relays directly. You can find the source code <Anchor theme="anchor"
               href="https://github.com/coracle-social/multiplextr">here</Anchor
             >.
           </p>

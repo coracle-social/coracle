@@ -173,6 +173,7 @@ body,
 }
 
 .date-time-field input {
+  width: 100% !important;
   border: none !important;
   padding: 0.5rem !important;
   --date-picker-background: transparent;

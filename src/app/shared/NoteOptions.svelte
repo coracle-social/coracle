@@ -81,74 +81,73 @@
   <Modal onEscape={() => setView(null)}>
     <form on:submit|preventDefault={onSubmit}>
       <Content>
-        {#if view === "settings"}
-          <div class="mb-4 flex items-center justify-center">
-            <Heading>Note settings</Heading>
-          </div>
-          <Field icon="fa-warning" label="Content warnings">
-            <Input
-              bind:value={values.warning}
-              placeholder="Why might people want to skip this post?" />
+        <div class="mb-4 flex items-center justify-center">
+          <Heading>Note settings</Heading>
+        </div>
+        <Field icon="fa-warning" label="Content warnings">
+          <Input
+            bind:value={values.warning}
+            placeholder="Why might people want to skip this post?" />
+        </Field>
+        {#if groupOptions.length > 0}
+          <Field icon="fa-circle-nodes" label="Groups">
+            <div class="flex flex-col gap-2">
+              {#each groupOptions as g (g.address)}
+                <Card invertColors interactive on:click={() => setGroup(g.address)}>
+                  <GroupSummary address={g.address}>
+                    <div slot="actions">
+                      {#if values.groups.includes(g.address)}
+                        <i class="fa fa-circle-check text-accent" />
+                      {/if}
+                    </div>
+                  </GroupSummary>
+                </Card>
+              {/each}
+            </div>
           </Field>
-          {#if showRelays}
-            <Field icon="fa-database" label="Select which relays to publish to">
-              <div>
-                {#each values.relays as url}
-                  <div
-                    class="mb-2 mr-1 inline-block rounded-full border border-solid border-gray-1 px-2 py-1">
-                    <button
-                      type="button"
-                      class="fa fa-times cursor-pointer"
-                      on:click={() => removeRelay(url)} />
-                    {displayRelay({url})}
-                  </div>
-                {/each}
-              </div>
-              <RelaySearch bind:q={relaySearch} limit={3} hideIfEmpty>
-                <div slot="item" let:relay>
-                  <RelayCard {relay}>
-                    <button
-                      slot="actions"
-                      class="underline"
-                      on:click|preventDefault={() => addRelay(relay.url)}>
-                      Add relay
-                    </button>
-                  </RelayCard>
-                </div>
-              </RelaySearch>
-            </Field>
-          {/if}
-          <FieldInline icon="fa-user-secret" label="Post anonymously">
-            <Toggle bind:value={values.anonymous} />
-            <p slot="info">Enable this to create an anonymous note.</p>
-          </FieldInline>
-          <Anchor tag="button" theme="button" type="submit" class="w-full text-center">Done</Anchor>
-        {:else if view === "groups"}
-          <div class="mb-4 flex items-center justify-center">
-            <Heading>Post to a group</Heading>
-          </div>
-          <div>Select any groups you'd like to post to:</div>
-          <div class="flex flex-col gap-2">
-            {#each groupOptions as g (g.address)}
-              <Card invertColors interactive on:click={() => setGroup(g.address)}>
-                <GroupSummary address={g.address}>
-                  <div slot="actions">
-                    {#if values.groups.includes(g.address)}
-                      <i class="fa fa-circle-check text-accent" />
-                    {/if}
-                  </div>
-                </GroupSummary>
-              </Card>
-            {/each}
-          </div>
-          {#if values.groups.some(a => deriveMembershipLevel(a).get() === MembershipLevel.Private)}
-            <FieldInline icon="fa-user-secret" label="Post privately">
-              <Toggle bind:value={values.shouldWrap} />
-              <p slot="info">Post to groups anonymously (when available)</p>
-            </FieldInline>
-          {/if}
-          <Anchor tag="button" theme="button" type="submit" class="text-center">Done</Anchor>
         {/if}
+        {#if showRelays}
+          <Field icon="fa-database" label="Select which relays to publish to">
+            <div>
+              {#each values.relays as url}
+                <div
+                  class="mb-2 mr-1 inline-block rounded-full border border-solid border-gray-1 px-2 py-1">
+                  <button
+                    type="button"
+                    class="fa fa-times cursor-pointer"
+                    on:click={() => removeRelay(url)} />
+                  {displayRelay({url})}
+                </div>
+              {/each}
+            </div>
+            <RelaySearch bind:q={relaySearch} limit={3} hideIfEmpty>
+              <div slot="item" let:relay>
+                <RelayCard {relay}>
+                  <button
+                    slot="actions"
+                    class="underline"
+                    on:click|preventDefault={() => addRelay(relay.url)}>
+                    Add relay
+                  </button>
+                </RelayCard>
+              </div>
+            </RelaySearch>
+          </Field>
+        {/if}
+        <FieldInline icon="fa-user-secret" label="Post anonymously">
+          <Toggle bind:value={values.anonymous} />
+          <p slot="info">Enable this to create an anonymous note.</p>
+        </FieldInline>
+        {#if values.groups.some(a => deriveMembershipLevel(a).get() === MembershipLevel.Private)}
+          <FieldInline icon="fa-eye-slash" label="Post privately">
+            <Toggle bind:value={values.shouldWrap} />
+            <p slot="info">
+              When available, only other members of groups you post to will be able to see your
+              post.
+            </p>
+          </FieldInline>
+        {/if}
+        <Anchor tag="button" theme="button" type="submit" class="text-center">Done</Anchor>
       </Content>
     </form>
   </Modal>

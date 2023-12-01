@@ -1,4 +1,4 @@
-import {prop, sortBy, last, whereEq} from "ramda"
+import {prop, defaultTo, sortBy, last, whereEq} from "ramda"
 import {ellipsize, seconds} from "hurdak"
 import {Tags} from "paravel"
 import {Naddr} from "src/util/nostr"
@@ -18,6 +18,12 @@ export const getGroupName = (group: Group) => group.name || group.id
 
 export const displayGroup = (group: Group) => ellipsize(group ? getGroupName(group) : "No name", 60)
 
+export const deriveGroup = address => {
+  const {identifier, pubkey} = Naddr.fromTagValue(address)
+
+  return groups.key(address).derived(defaultTo({id: identifier, pubkey, address}))
+}
+
 export const getRecipientKey = wrap => {
   const pubkey = Tags.from(wrap).pubkeys().first()
   const sharedKey = groupSharedKeys.key(pubkey).get()
@@ -36,12 +42,12 @@ export const getRecipientKey = wrap => {
 }
 
 export const getGroupReqInfo = (address = null) => {
-  let since = session.get().groups_last_synced || 0
+  let since = session.get()?.groups_last_synced || 0
   let $groupSharedKeys = groupSharedKeys.get()
   let $groupAdminKeys = groupAdminKeys.get()
 
   if (address) {
-    since = session.get().groups[address]?.last_synced || 0
+    since = session.get()?.groups[address]?.last_synced || 0
     $groupSharedKeys = $groupSharedKeys.filter(whereEq({group: address}))
     $groupAdminKeys = $groupAdminKeys.filter(whereEq({group: address}))
   }
@@ -72,7 +78,7 @@ export const getGroupReqInfo = (address = null) => {
 
 export const deriveSharedKeyForGroup = (address: string) =>
   groupSharedKeys.derived($keys =>
-    last(sortBy(prop("created_at"), $keys.filter(whereEq({group: address}))))
+    last(sortBy(prop("created_at"), $keys.filter(whereEq({group: address})))),
   )
 
 export const deriveAdminKeyForGroup = (address: string) => groupAdminKeys.key(address.split(":")[1])

@@ -1,15 +1,24 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
+  import {v4 as uuid} from "uuid"
   import {join, identity, prop, uniqBy} from "ramda"
-  import {throttle, quantify} from "hurdak"
+  import {throttle, toTitle, switcherFn} from "hurdak"
   import {createEvent, Tags} from "paravel"
   import {asNostrEvent} from "src/util/nostr"
+  import {dateToSeconds} from "src/util/misc"
+  import {toast} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
+  import DateTimeInput from "src/partials/DateTimeInput.svelte"
+  import Field from "src/partials/Field.svelte"
+  import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
-  import Heading from "src/partials/Heading.svelte"
+  import Popover from "src/partials/Popover.svelte"
+  import Menu from "src/partials/Menu.svelte"
+  import MenuItem from "src/partials/MenuItem.svelte"
+  import Chip from "src/partials/Chip.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NoteImages from "src/app/shared/NoteImages.svelte"
@@ -17,15 +26,15 @@
   import {toastProgress} from "src/app/state"
   import {router} from "src/app/router"
   import {
+    groups,
     session,
     getEventHints,
-    displayGroup,
-    groups,
     getUserRelayUrls,
     publishToZeroOrMoreGroups,
     deriveMembershipLevel,
   } from "src/engine"
 
+  export let type = "note"
   export let quote = null
   export let pubkey = null
   export let group = null
@@ -37,11 +46,15 @@
   let defaultGroups = quote ? Tags.from(quote).communities().all() : [group].filter(identity)
   let options
   let opts = {
+    title: "",
     warning: "",
     groups: defaultGroups,
     relays: getUserRelayUrls("write"),
     shouldWrap: true,
     anonymous: false,
+    location: null,
+    start: null,
+    end: null,
   }
 
   const setOpts = e => {
@@ -70,8 +83,13 @@
     const tags = []
     const content = compose.parse().trim()
 
-    if (!content) {
-      return
+    if (!content) return toast.show("error", "Please provide a description.")
+
+    if (type === "calendar_event") {
+      if (!opts.title) return toast.show("error", "Please name your event.")
+      if (!opts.start || !opts.end) {
+        return toast.show("error", "Please provide a start and end date and time.")
+      }
     }
 
     for (const imeta of images.getValue()) {
@@ -94,7 +112,23 @@
       }
     }
 
-    const template = createEvent(1, {content, tags})
+    const template = switcherFn(type, {
+      note: () => createEvent(1, {content, tags}),
+      listing: () => console.error("not implemented"),
+      calendar_event: () =>
+        createEvent(31923, {
+          content,
+          tags: [
+            ...tags,
+            ["d", uuid()],
+            ["name", opts.title],
+            ["start", dateToSeconds(opts.start)],
+            ["end", dateToSeconds(opts.end)],
+            ["location", opts.location || ""],
+          ],
+        }),
+    })
+
     const pubs = await publishToZeroOrMoreGroups(opts.groups, template, opts)
 
     pubs[0].on("progress", toastProgress)
@@ -115,6 +149,10 @@
     }
   })
 
+  const setType = t => {
+    type = t
+  }
+
   onMount(() => {
     if (pubkey && pubkey !== $session.pubkey) {
       compose.mention(pubkey)
@@ -130,27 +168,42 @@
 
 <form on:submit|preventDefault={onSubmit}>
   <Content size="lg">
-    <Heading class="text-center">Create a note</Heading>
-    <div class="flex w-full flex-col gap-4">
-      <div class="flex flex-col gap-2">
-        <div class="flex items-center justify-between">
-          <strong>What do you want to say?</strong>
-          {#if $groupOptions.length > 0}
-            <div
-              class="flex items-center gap-2"
-              class:cursor-pointer={!quote?.group}
-              on:click={quote?.group ? null : options.setView("groups")}>
-              <i class="fa fa-circle-nodes" />
-              {#if opts.groups.length === 1}
-                {displayGroup(groups.key(opts.groups[0]).get())}
-              {:else if opts.groups.length > 1}
-                {quantify(opts.groups.length, "group")}
-              {/if}
-            </div>
-          {/if}
+    <div class="flex gap-2">
+      <span class="text-2xl font-bold">Create a</span>
+      <Popover theme="transparent" placement="bottom" opts={{hideOnClick: true}}>
+        <div slot="trigger">
+          <Chip class="cursor-pointer">{toTitle(type)} <i class="fa fa-caret-down" /></Chip>
         </div>
+        <div slot="tooltip">
+          <Menu class="-mt-2 w-24">
+            <MenuItem on:click={() => setType("note")}>Note</MenuItem>
+            <MenuItem on:click={() => setType("calendar_event")}>Event</MenuItem>
+            <MenuItem on:click={() => setType("listing")}>Listing</MenuItem>
+          </Menu>
+        </div>
+      </Popover>
+    </div>
+    <div class="flex w-full flex-col gap-4">
+      {#if type !== "note"}
+        <Field label="Title">
+          <Input bind:value={opts.title} />
+        </Field>
+      {/if}
+      {#if type === "calendar_event"}
+        <div class="grid grid-cols-2 gap-2">
+          <div class="flex flex-col gap-1">
+            <strong>Start</strong>
+            <DateTimeInput bind:value={opts.start} />
+          </div>
+          <div class="flex flex-col gap-1">
+            <strong>End</strong>
+            <DateTimeInput bind:value={opts.end} />
+          </div>
+        </div>
+      {/if}
+      <Field label={type === "note" ? "What do you want to say?" : "Description"}>
         <div
-          class="mt-4 rounded-xl border border-solid border-gray-6 p-3"
+          class="rounded-xl border border-solid border-gray-6 p-3"
           class:bg-input={!showPreview}
           class:text-black={!showPreview}
           class:bg-gray-7={showPreview}>
@@ -174,7 +227,7 @@
             {showPreview ? "Hide" : "Show"} Preview
           </small>
         </div>
-      </div>
+      </Field>
       <NoteImages bind:this={images} bind:compose />
       <div class="flex gap-2">
         <Anchor tag="button" theme="button" type="submit" class="flex-grow text-center"
@@ -184,9 +237,7 @@
       <small
         class="flex cursor-pointer items-center justify-end gap-4"
         on:click={() => options.setView("settings")}>
-        {#if opts.anonymous}
-          <span><i class="fa fa-user-secret" /></span>
-        {/if}
+        <span><i class="fa fa-circle-nodes" /> {opts.groups.length}</span>
         <span><i class="fa fa-server" /> {opts.relays?.length}</span>
         <span><i class="fa fa-warning" /> {opts.warning || 0}</span>
       </small>

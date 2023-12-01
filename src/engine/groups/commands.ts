@@ -121,7 +121,7 @@ export const publishAsGroupAdminPrivately = async (address, template, relays = n
 export const publishToGroupsPublicly = async (
   addresses,
   template,
-  {relays = null, anonymous = false} = {}
+  {relays = null, anonymous = false} = {},
 ) => {
   for (const address of addresses) {
     const {access} = groups.key(address).get()
@@ -134,7 +134,7 @@ export const publishToGroupsPublicly = async (
   template = updateIn(
     "tags",
     (tags: string[][]) => [...tags, ...addresses.map(a => ["a", a])],
-    template
+    template,
   )
 
   const event = anonymous
@@ -150,7 +150,7 @@ export const publishToGroupsPublicly = async (
 export const publishToGroupsPrivately = async (
   addresses,
   template,
-  {relays = null, anonymous = false} = {}
+  {relays = null, anonymous = false} = {},
 ) => {
   const pubs = []
   for (const address of addresses) {
@@ -176,7 +176,10 @@ export const publishToGroupsPrivately = async (
     })
 
     pubs.push(
-      Publisher.publish({event, relays: relays || mergeHints(addresses.map(getGroupPublishRelays))})
+      Publisher.publish({
+        event,
+        relays: relays || mergeHints(addresses.map(getGroupPublishRelays)),
+      }),
     )
   }
 
@@ -186,7 +189,7 @@ export const publishToGroupsPrivately = async (
 export const publishToZeroOrMoreGroups = async (
   addresses,
   template,
-  {relays, anonymous = false, shouldWrap = true}
+  {relays, anonymous = false, shouldWrap = true},
 ) => {
   if (addresses.length === 0) {
     const event = anonymous
@@ -213,19 +216,19 @@ export const publishToZeroOrMoreGroups = async (
     return false
   }, addresses)
 
-  const subs = []
+  const pubs = []
 
   if (wrap.length > 0) {
     for (const sub of await publishToGroupsPrivately(wrap, template, {anonymous})) {
-      subs.push(sub)
+      pubs.push(sub)
     }
   }
 
   if (nowrap.length > 0) {
-    subs.push(await publishToGroupsPublicly(nowrap, template, {relays, anonymous}))
+    pubs.push(await publishToGroupsPublicly(nowrap, template, {relays, anonymous}))
   }
 
-  return subs
+  return pubs
 }
 
 // Admin functions
@@ -245,7 +248,7 @@ export const publishKeyRotations = async (address, pubkeys, template) => {
       })
 
       return Publisher.publish({event, relays})
-    })
+    }),
   )
 }
 
@@ -305,7 +308,7 @@ export const publishGroupEntryRequest = address => {
     createEvent(25, {
       content: `${displayPubkey(pubkey.get())} would like to join the group`,
       tags: [["a", address]],
-    })
+    }),
   )
 }
 
@@ -317,18 +320,18 @@ export const publishGroupExitRequest = address => {
     createEvent(26, {
       content: `${displayPubkey(pubkey.get())} is leaving the group`,
       tags: [["a", address]],
-    })
+    }),
   )
 }
 
 export const joinPublicGroup = address =>
   publishCommunitiesList(
-    Object.keys(filterVals(prop("joined"), session.get().groups)).concat(address)
+    Object.keys(filterVals(prop("joined"), session.get().groups)).concat(address),
   )
 
 export const leavePublicGroup = address =>
   publishCommunitiesList(
-    without([address], Object.keys(filterVals(prop("joined"), session.get().groups)))
+    without([address], Object.keys(filterVals(prop("joined"), session.get().groups))),
   )
 
 export const joinGroup = address => {

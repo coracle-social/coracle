@@ -3,11 +3,11 @@
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/router"
   import {
-    groups,
     deriveAdminKeyForGroup,
     leaveGroup,
     joinGroup,
     getGroupNaddr,
+    deriveGroup,
     deriveGroupStatus,
     deriveGroupAccess,
     resetMemberAccess,
@@ -16,7 +16,7 @@
 
   export let address
 
-  const group = groups.key(address)
+  const group = deriveGroup(address)
   const adminKey = deriveAdminKeyForGroup(address)
   const access = deriveGroupAccess(address)
   const status = deriveGroupStatus(address)

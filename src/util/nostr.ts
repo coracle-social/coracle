@@ -4,7 +4,7 @@ import {pick, is, mergeLeft, identity} from "ramda"
 import {between, avg} from "hurdak"
 import type {Filter, Event} from "src/engine"
 
-export const noteKinds = [1, 30023, 1063, 9802, 1808, 32123]
+export const noteKinds = [1, 30023, 1063, 9802, 1808, 32123, 31923]
 export const personKinds = [0, 2, 3, 10000, 10002]
 export const reactionKinds = [7, 9735]
 export const repostKinds = [6, 16]
@@ -48,7 +48,7 @@ export const getRating = (event: Event) =>
       .type("rating")
       .filter(t => t.length === 2)
       .pluck(1)
-      .first()
+      .first(),
   )
 
 export const getAvgRating = (events: Event[]) => avg(events.map(getRating).filter(identity))
@@ -80,7 +80,12 @@ export const getGroupAddress = e =>
     .find(a => a.startsWith("34550:"))
 
 export class Naddr {
-  constructor(readonly kind, readonly pubkey, readonly identifier, readonly relays) {
+  constructor(
+    readonly kind,
+    readonly pubkey,
+    readonly identifier,
+    readonly relays,
+  ) {
     this.kind = parseInt(kind)
     this.identifier = identifier || ""
   }

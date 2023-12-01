@@ -43,7 +43,7 @@
       on:touchstart={onTouchStart}
       on:touchmove={onTouchMove}
       on:touchend={onTouchEnd}
-      class="pointer-events-none fixed left-0 right-0 top-0 z-30 flex justify-center"
+      class="pointer-events-none fixed left-0 right-0 top-0 z-50 flex justify-center"
       transition:fly={{y: -50, duration: 300}}>
       <div
         style={`transform: translate(${offset}px, 0)`}

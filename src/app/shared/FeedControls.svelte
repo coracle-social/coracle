@@ -1,7 +1,7 @@
 <script lang="ts">
   import {pluck, not, prop, equals, omit, objOf} from "ramda"
   import {displayList} from "hurdak"
-  import {createLocalDate, fuzzy, formatTimestampAsDate} from "src/util/misc"
+  import {createLocalDate, dateToSeconds, fuzzy, formatTimestampAsDate} from "src/util/misc"
   import {noteKinds} from "src/util/nostr"
   import {getKey} from "src/util/router"
   import Chip from "src/partials/Chip.svelte"
@@ -95,11 +95,11 @@
     }
 
     if (_filter.since) {
-      newFilter.since = createLocalDate(_filter.since).setHours(0, 0, 0, 0) / 1000
+      newFilter.since = dateToSeconds(createLocalDate(_filter.since).setHours(0, 0, 0, 0))
     }
 
     if (_filter.until) {
-      newFilter.until = createLocalDate(_filter.until).setHours(23, 59, 59, 0) / 1000
+      newFilter.until = dateToSeconds(createLocalDate(_filter.until).setHours(23, 59, 59, 0))
     }
 
     if (_filter.search) {

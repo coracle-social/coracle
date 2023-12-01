@@ -16,6 +16,8 @@ export const fuzzy = <T>(data: T[], opts = {}) => {
   }
 }
 
+export const dateToSeconds = date => Math.round(date.valueOf() / 1000)
+
 export const getTimeZone = () => new Date().toString().match(/GMT[^\s]+/)
 
 export const createLocalDate = (dateString: any) => new Date(`${dateString} ${getTimeZone()}`)

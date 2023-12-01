@@ -13,19 +13,20 @@
   import GroupAbout from "src/app/shared/GroupAbout.svelte"
   import GroupRequest from "src/app/shared/GroupRequest.svelte"
   import GroupMember from "src/app/shared/GroupMember.svelte"
+  import GroupEvents from "src/app/shared/GroupEvents.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {
     GroupAccess,
     MemberAccess,
     displayGroup,
-    groups,
+    session,
     subscribe,
     joinGroup,
     groupRequests,
+    deriveGroup,
     getGroupReqInfo,
     deriveAdminKeyForGroup,
     deriveSharedKeyForGroup,
-    getRelaysFromFilters,
     deriveGroupStatus,
     deriveGroupAccess,
     updateCurrentSession,
@@ -35,16 +36,16 @@
   export let address, activeTab
 
   const {rgb, rgba} = getThemeBackgroundGradient()
-  const group = groups.key(address)
+  const group = deriveGroup(address)
   const access = deriveGroupAccess(address)
   const status = deriveGroupStatus(address)
   const sharedKey = deriveSharedKeyForGroup(address)
   const adminKey = deriveAdminKeyForGroup(address)
-  const filter = {kinds: noteKinds, "#a": [address]}
-  const relays = getRelaysFromFilters([filter])
   const requests = groupRequests.derived(requests =>
-    requests.filter(whereEq({group: address, resolved: false}))
+    requests.filter(whereEq({group: address, resolved: false})),
   )
+
+  const {recipients, relays, since} = getGroupReqInfo(address)
 
   const setActiveTab = tab =>
     router
@@ -54,8 +55,6 @@
       .push({key: getKey(router.current.get())})
 
   onMount(() => {
-    const {recipients, relays, since} = getGroupReqInfo(address)
-
     updateCurrentSession(assocPath(["groups", address, "last_synced"], now()))
 
     const sub = subscribe({relays, filters: [{kinds: [1059], "#p": recipients, since}]})
@@ -64,13 +63,13 @@
   })
 
   $: members = uniq(
-    without([$group?.pubkey], ($sharedKey?.members || []).concat($adminKey?.members || []))
+    without([$group?.pubkey], ($sharedKey?.members || []).concat($adminKey?.members || [])),
   )
 
   let tabs
 
   $: {
-    tabs = ["notes"]
+    tabs = ["notes", "events"]
 
     if ($sharedKey) {
       tabs.push("members")
@@ -96,10 +95,11 @@
 
 <Content>
   <div class="flex gap-4 text-gray-1">
-    <GroupCircle {address} class="mt-1 h-12 w-12 sm:h-32 sm:w-32" />
+    <GroupCircle {address} class="mt-1 h-10 w-10 sm:h-32 sm:w-32" />
     <div class="flex min-w-0 flex-grow flex-col gap-4">
       <div class="flex items-center justify-between gap-4">
-        <span class="text-2xl">{displayGroup($group)}</span>
+        <Anchor on:click={() => setActiveTab("notes")} class="text-2xl"
+          >{displayGroup($group)}</Anchor>
         <div class="hidden xs:block">
           <GroupActions {address} />
         </div>
@@ -119,12 +119,14 @@
       {:else}
         You don't have access to this group.
       {/if}
-      {#if !$status.access}
+      {#if $session && !$status.access}
         Click <Anchor theme="anchor" on:click={() => joinGroup(address)}>here</Anchor> to request entry.
       {/if}
     </p>
   {:else if activeTab === "notes"}
-    <Feed shouldListen hideControls {filter} {relays} />
+    <Feed shouldListen hideControls filter={{kinds: noteKinds, "#a": [address]}} {relays} />
+  {:else if activeTab === "events"}
+    <GroupEvents {group} {relays} />
   {:else if activeTab === "members"}
     {#each members as pubkey (pubkey)}
       <GroupMember {address} {pubkey} />
