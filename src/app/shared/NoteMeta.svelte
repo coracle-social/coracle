@@ -15,18 +15,24 @@
 {#if repostPubkeys.length > 0}
   <p class="flex gap-1 pb-2 text-gray-4 items-center text-sm">
     <i class="fa fa-rotate" />
-    Reposted by
+    {#if showGroup}
+      Cross-posted
+    {:else}
+      Reposted
+    {/if}
+    {#if showGroup}
+      from
+      {#if addresses.length === 1}
+        <GroupLink address={addresses[0]} />
+      {:else if addresses.length > 1}
+        {addresses.length} groups
+      {/if}
+    {/if}
+    by
     {#if repostPubkeys.length === 1}
       <PersonLink pubkey={repostPubkeys[0]} />
     {:else}
       {repostPubkeys.length} people
-    {/if}
-    {#if showGroup}
-      {#if addresses.length === 1}
-        from <GroupLink address={addresses[0]} />
-      {:else if addresses.length > 1}
-        from {addresses.length} groups
-      {/if}
     {/if}
   </p>
 {:else if addresses.length > 0 && showGroup}

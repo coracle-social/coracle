@@ -80,13 +80,14 @@ projections.addHandler(34550, (e: Event) => {
 // Public community membership
 
 projections.addHandler(10004, (e: Event) => {
-  const addresses = Tags.from(e).type("a").values().all()
-
   let $session = sessions.get()[e.pubkey]
 
   if (!$session) {
     return
   }
+
+  const addresses = Tags.from(e).communities().all()
+
 
   for (const address of uniq(Object.keys($session.groups || {}).concat(addresses))) {
     $session = modifyGroupStatus($session, address, e.created_at, {

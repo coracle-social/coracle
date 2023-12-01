@@ -306,7 +306,7 @@
           <PersonMultiSelect bind:value={_filter["#p"]} />
         </div>
         <div class="flex justify-end">
-          <Anchor theme="button-accent" type="submit">Apply Filters</Anchor>
+          <Anchor theme="button-accent" type="submit" on:click={applyFilter}>Apply Filters</Anchor>
         </div>
       </Content>
     </form>

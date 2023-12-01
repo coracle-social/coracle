@@ -334,9 +334,8 @@ export const leavePublicGroup = address =>
   )
 
 export const joinGroup = address => {
-  const group = groups.key(address)
-
-  if (group.get()?.access === GroupAccess.Open) {
+  console.log(deriveGroupAccess(address).get())
+  if (deriveGroupAccess(address).get() === GroupAccess.Open) {
     joinPublicGroup(address)
   } else {
     publishGroupEntryRequest(address)
@@ -344,9 +343,7 @@ export const joinGroup = address => {
 }
 
 export const leaveGroup = address => {
-  const group = groups.key(address)
-
-  if (group.get().access === GroupAccess.Open) {
+  if (deriveGroupAccess(address).get() === GroupAccess.Open) {
     leavePublicGroup(address)
   } else {
     publishGroupExitRequest(address)

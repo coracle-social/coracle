@@ -2,6 +2,7 @@ import {partition, uniqBy, identity, pluck, sortBy, without, any, prop, assoc} f
 import {ensurePlural, doPipe, batch} from "hurdak"
 import {now, hasValidSignature, Tags} from "paravel"
 import {race, tryJson} from "src/util/misc"
+import {info} from "src/util/logger"
 import {LOCAL_RELAY_URL, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
@@ -96,8 +97,11 @@ export class FeedLoader {
   }
 
   discardEvents(events) {
+    // Be more tolerant when looking at communities
+    const strict = this.opts.filters.some(prop('#a'))
+
     return events.filter(e => {
-      if (this.isEventMuted(e)) {
+      if (this.isEventMuted(e, strict)) {
         return false
       }
 
@@ -208,8 +212,12 @@ export class FeedLoader {
             return true
           })
           .map((e: DisplayEvent) => {
+            // Only show cross-posts, not reposts from global to global
+            const getGroupId = event => Tags.from(event).communities().first()
+            const groupId = getGroupId(e)
+
             e.replies = this.replies.get(e.id)
-            e.reposts = this.reposts.get(e.id)
+            e.reposts = (this.reposts.get(e.id) || []).filter(r => getGroupId(r) !== groupId)
 
             return e
           })
@@ -227,6 +235,11 @@ export class FeedLoader {
 
   async load(n) {
     await this.ready
+
+    info(`Loading ${n} more events`, {
+      filters: this.opts.filters,
+      relays: this.opts.relays,
+    })
 
     const [subs, events] = this.remoteCursor.take(n)
     const notes = this.discardEvents(events)

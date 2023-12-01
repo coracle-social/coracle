@@ -66,8 +66,9 @@
   const reset = () => {
     dispatch("reset")
 
-    mentions = null
+    isOpen = false
     compose = null
+    mentions = []
   }
 
   const removeMention = pubkey => {
@@ -83,7 +84,7 @@
 
     const tags = mentions.map(mention)
 
-    for (const imeta of images.value) {
+    for (const imeta of images.getValue()) {
       tags.push(["imeta", ...imeta.all().map(join(" "))])
     }
 

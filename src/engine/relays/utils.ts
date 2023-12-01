@@ -143,15 +143,15 @@ export const selectHints = (hints: Iterable<string>, limit: number = null) => {
 }
 
 export class HintSelector {
-  constructor(readonly generateHints, readonly hintsLimit) {}
+  constructor(readonly generateHints, readonly hintsLimit = null) {}
 
   limit = hintsLimit => new HintSelector(this.generateHints, hintsLimit)
 
-  getHints = (...args) => selectHints(this.generateHints(...args), this.hintsLimit)
+  getHints = (...args) => selectHints(this.generateHints(...args), this.hintsLimit || getSetting('relay_limit'))
 }
 
 export const hintSelector = (generateHints: (...args: any[]) => Iterable<string>) => {
-  const selector = new HintSelector(generateHints, getSetting("relay_limit"))
+  const selector = new HintSelector(generateHints)
   const getHints = selector.getHints
 
   ;(getHints as any).limit = selector.limit

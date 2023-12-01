@@ -74,7 +74,7 @@
       return
     }
 
-    for (const imeta of images.value) {
+    for (const imeta of images.getValue()) {
       tags.push(["imeta", ...imeta.all().map(join(" "))])
     }
 

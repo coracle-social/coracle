@@ -139,7 +139,7 @@
   const groupOptions = session.derived($session => {
     const options = []
 
-    for (const addr of Object.keys($session.groups || {})) {
+    for (const addr of Object.keys($session?.groups || {})) {
       const group = groups.key(addr).get()
       const membershipLevel = deriveMembershipLevel(addr).get()
 

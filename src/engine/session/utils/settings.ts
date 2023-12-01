@@ -11,7 +11,7 @@ export const getDefaultSettings = () => ({
   auto_authenticate: false,
   min_wot_score: 1,
   enable_reactions: true,
-  nip96_urls: env.get().NIP96_URLS,
+  nip96_urls: env.get().NIP96_URLS.slice(0, 1),
   imgproxy_url: env.get().IMGPROXY_URL,
   dufflepud_url: env.get().DUFFLEPUD_URL,
   multiplextr_url: env.get().MULTIPLEXTR_URL,

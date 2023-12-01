@@ -126,14 +126,7 @@ export class MultiCursor {
   }
 
   load(limit: number) {
-    const subs = this.cursors.map(c => c.load(limit)).filter(identity)
-
-    info(`Loading ${limit} more events`, {
-      filters: this.opts.filters,
-      relays: subs.flatMap(sub => sub.opts.relays),
-    })
-
-    return subs
+    return this.cursors.map(c => c.load(limit)).filter(identity)
   }
 
   count() {

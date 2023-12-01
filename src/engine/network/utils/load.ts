@@ -125,4 +125,4 @@ export const load = (request: LoadOpts) => {
 }
 
 export const loadOne = ({relays, filters}: LoadOneOpts) =>
-  new Promise(onEvent => load({relays, onEvent, filters: filters.map(assoc("limit", 1))}))
+  new Promise(onEvent => load({relays, onEvent, filters}))

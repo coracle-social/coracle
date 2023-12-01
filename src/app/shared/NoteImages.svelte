@@ -7,6 +7,8 @@
 
   const getUrl = imeta => imeta.type("url").values().first()
 
+  export const getValue = () => value
+
   export const addImage = imeta => {
     value = value.concat(imeta)
     compose.write("\n" + getUrl(imeta))
@@ -22,10 +24,12 @@
   }
 </script>
 
-<div class="columns-2 gap-2 lg:columns-3">
-  {#each value as imeta}
-    <div class="pb-2">
-      <Media {imeta} url={getUrl(imeta)} onClose={() => removeImage(imeta)} />
-    </div>
-  {/each}
-</div>
+{#if value.length > 0}
+  <div class="columns-2 gap-2 lg:columns-3">
+    {#each value as imeta}
+      <div class="pb-2">
+        <Media {imeta} url={getUrl(imeta)} onClose={() => removeImage(imeta)} />
+      </div>
+    {/each}
+  </div>
+{/if}
