@@ -2,9 +2,12 @@
 
 # 0.4.0
 
-- [x] Update lists to use new 30003 user bookmarks kind
 - [x] Add NIP 72 community support
 - [x] Add NIP 87 closed community support
+
+# 0.3.13
+
+- [x] Update lists to use new 30003 user bookmarks kind
 - [x] Add NIP 96 file storage
 - [x] Add NIP 98 auth support
 - [x] Add DIP 01 imeta tag creation

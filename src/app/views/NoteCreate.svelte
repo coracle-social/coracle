@@ -186,7 +186,6 @@
         on:click={() => options.setView("settings")}>
         {#if opts.anonymous}
           <span><i class="fa fa-user-secret" /></span>
-          <span>•</span>
         {/if}
         <span><i class="fa fa-server" /> {opts.relays?.length}</span>
         <span><i class="fa fa-warning" /> {opts.warning || 0}</span>
