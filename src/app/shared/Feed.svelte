@@ -21,6 +21,7 @@
 
   export let relays = []
   export let filter: DynamicFilter = {}
+  export let shouldListen = false
   export let hideControls = false
   export let showGroup = false
   export let noCache = false
@@ -53,6 +54,7 @@
     feed = new FeedLoader({
       filters: compileFilters([filter], {includeReposts: true}),
       relays: getRelays(),
+      shouldListen,
       shouldDefer: true,
       shouldLoadParents: true,
       shouldHideReplies: $hideReplies,

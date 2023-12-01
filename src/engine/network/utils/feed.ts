@@ -1,4 +1,4 @@
-import {partition, uniqBy, identity, pluck, sortBy, without, any, prop, assoc} from "ramda"
+import {partition, prop, uniqBy, identity, pluck, sortBy, without, any, assoc} from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
 import {now, hasValidSignature, Tags} from "paravel"
 import {race, tryJson} from "src/util/misc"
@@ -21,6 +21,7 @@ export type FeedOpts = {
   onEvent?: (e: Event) => void
   shouldDefer?: boolean
   shouldListen?: boolean
+  shouldBuffer?: boolean
   shouldHideReplies?: boolean
   shouldLoadParents?: boolean
 }
@@ -49,14 +50,18 @@ export class FeedLoader {
         subscribe({
           relays: urls,
           filters: opts.filters.map(assoc("since", this.since)),
-          onEvent: batch(1000, (events: Event[]) => {
+          onEvent: batch(300, (events: Event[]) => {
             events = this.discardEvents(events)
 
             if (opts.shouldLoadParents) {
               this.loadParents(events)
             }
 
-            this.buffer.update($buffer => $buffer.concat(events))
+            if (opts.shouldBuffer) {
+              this.buffer.update($buffer => $buffer.concat(events))
+            } else {
+              this.addToFeed(events, {prepend: true})
+            }
           }),
         }),
       ])
@@ -98,7 +103,7 @@ export class FeedLoader {
 
   discardEvents(events) {
     // Be more tolerant when looking at communities
-    const strict = this.opts.filters.some(prop('#a'))
+    const strict = this.opts.filters.some(f => f["#a"])
 
     return events.filter(e => {
       if (this.isEventMuted(e, strict)) {
@@ -225,8 +230,13 @@ export class FeedLoader {
     )
   }
 
-  addToFeed = (notes: Event[]) => {
-    this.notes.update($notes => uniqBy(prop("id"), $notes.concat(this.buildFeedChunk(notes))))
+  addToFeed = (notes: Event[], {prepend = false} = {}) => {
+    this.notes.update($notes => {
+      const chunk = this.buildFeedChunk(notes)
+      const combined = prepend ? [...chunk, ...$notes] : [...$notes, ...chunk]
+
+      return uniqBy(prop("id"), combined)
+    })
   }
 
   subscribe = f => this.notes.subscribe(f)

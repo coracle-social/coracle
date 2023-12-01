@@ -2,8 +2,8 @@ import {mergeRight, pluck, max, identity, sortBy} from "ramda"
 import {first} from "hurdak"
 import type {Subscription} from "paravel"
 import {now} from "paravel"
-import {info} from "src/util/logger"
 import type {Event} from "src/engine/events/model"
+import {sortEventsDesc} from "src/engine/events/utils"
 import type {Filter} from "../model"
 import {getUrls} from "./executor"
 import {guessFilterDelta} from "./filters"
@@ -59,7 +59,7 @@ export class Cursor {
       filters: filters.map(mergeRight({until, limit, since})),
       onEvent: (event: Event) => {
         this.until = Math.min(until, event.created_at) - 1
-        this.buffer.push(event)
+        this.buffer = sortEventsDesc([...this.buffer, event])
 
         count += 1
 

@@ -1,7 +1,8 @@
 import {matchFilters} from "paravel"
-import {assoc, flatten, uniq, path as getPath} from "ramda"
+import {flatten, uniq, path as getPath} from "ramda"
 import {defer, batch} from "hurdak"
 import {pushToKey} from "src/util/misc"
+import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {info} from "src/util/logger"
 import {getSetting} from "src/engine/session/utils"
 import type {Event} from "src/engine/events/model"
@@ -31,7 +32,7 @@ export type LoadItem = {
 
 const loadChunk = (chunk, relays, tracker) => {
   const filters = combineFilters(chunk.flatMap(getPath(["request", "filters"])))
-  const sub = subscribe({relays, filters, timeout: 15000})
+  const sub = subscribe({relays, filters, timeout: 15000, skipCache: true})
 
   const chunkResults = []
   for (const item of chunk) {
@@ -94,7 +95,7 @@ export const execute = batch(500, (items: LoadItem[]) => {
   } else {
     const itemsByRelay = {}
     for (const item of items) {
-      for (const url of item.request.relays) {
+      for (const url of item.request.relays.concat(LOCAL_RELAY_URL)) {
         pushToKey(itemsByRelay, url, item)
       }
     }

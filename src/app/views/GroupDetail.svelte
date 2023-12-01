@@ -120,7 +120,7 @@
       {/if}
     </p>
   {:else if activeTab === "notes"}
-    <Feed hideControls {filter} {relays} />
+    <Feed shouldListen hideControls {filter} {relays} />
   {:else if activeTab === "members"}
     {#each members as pubkey (pubkey)}
       <GroupMember {address} {pubkey} />
