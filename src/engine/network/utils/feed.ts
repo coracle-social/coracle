@@ -97,7 +97,7 @@ export class FeedLoader {
     // out of order notes
     this.ready = race(
       0.2,
-      remoteSubs.map(s => new Promise(r => s.on("close", r)))
+      remoteSubs.map(s => new Promise(r => s.on("close", r))),
     )
   }
 
@@ -172,11 +172,17 @@ export class FeedLoader {
               const wrappedEvent = tryJson(() => JSON.parse(e.content))
 
               if (wrappedEvent && hasValidSignature(wrappedEvent)) {
-                const reposts = this.reposts.get(wrappedEvent.id) || []
+                const originalGroup = Tags.from(wrappedEvent).communities().first()
+                const repostGroup = Tags.from(e).communities().first()
 
-                this.reposts.set(wrappedEvent.id, [...reposts, e])
+                // Only show cross-posts, not reposts from global to global
+                if (originalGroup !== repostGroup) {
+                  const reposts = this.reposts.get(wrappedEvent.id) || []
 
-                e = {...wrappedEvent, seen_on: e.seen_on}
+                  this.reposts.set(wrappedEvent.id, [...reposts, e])
+
+                  e = {...wrappedEvent, seen_on: e.seen_on}
+                }
               }
             }
 
@@ -217,16 +223,12 @@ export class FeedLoader {
             return true
           })
           .map((e: DisplayEvent) => {
-            // Only show cross-posts, not reposts from global to global
-            const getGroupId = event => Tags.from(event).communities().first()
-            const groupId = getGroupId(e)
-
             e.replies = this.replies.get(e.id)
-            e.reposts = (this.reposts.get(e.id) || []).filter(r => getGroupId(r) !== groupId)
+            e.reposts = this.reposts.get(e.id)
 
             return e
-          })
-      )
+          }),
+      ),
     )
   }
 
