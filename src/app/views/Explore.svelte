@@ -56,6 +56,7 @@
       }
     }
 
+    // @ts-ignore
     return sortBy(({authors, size}) => -(authors.size * size), Object.values($labelGroups))
   })
 

@@ -14,7 +14,11 @@ type Store = {
 export class IndexedDB {
   db: any
 
-  constructor(readonly dbName: string, readonly dbVersion: number, readonly stores: Store[]) {}
+  constructor(
+    readonly dbName: string,
+    readonly dbVersion: number,
+    readonly stores: Store[],
+  ) {}
 
   open() {
     return new Promise<void>((resolve, reject) => {
@@ -39,7 +43,7 @@ export class IndexedDB {
 
         const names = pluck("name", this.stores)
 
-        Array.from(this.db.objectStoreNames).forEach((name: string) => {
+        Array.from(this.db.objectStoreNames as string[]).forEach((name: string) => {
           if (!names.includes(name)) {
             this.db.deleteObjectStore(name)
           }
@@ -91,7 +95,7 @@ export class IndexedDB {
           request.onerror = e => reject(e.target.error)
           request.onsuccess = e => resolve(e.target.result)
         })
-      })
+      }),
     )
   }
 
@@ -107,7 +111,7 @@ export class IndexedDB {
           request.onerror = e => reject(e.target.error)
           request.onsuccess = e => resolve(e.target.result)
         })
-      })
+      }),
     )
   }
 
@@ -139,7 +143,7 @@ export class LocalStorageAdapter {
   constructor(
     readonly key: string,
     readonly store: Writable<any>,
-    readonly opts?: LocalStorageAdapterOpts
+    readonly opts?: LocalStorageAdapterOpts,
   ) {}
 
   initialize(storage: Storage) {
@@ -159,7 +163,7 @@ export class IndexedDBAdapter {
     readonly key: string,
     readonly store: Collection<any>,
     readonly max: number,
-    readonly sort?: (xs: any[]) => any[]
+    readonly sort?: (xs: any[]) => any[],
   ) {}
 
   getIndexedDBConfig() {
@@ -191,7 +195,7 @@ export class IndexedDBAdapter {
             return
           }
         }
-      })
+      }),
     )
   }
 
@@ -216,7 +220,10 @@ export class Storage {
   ready = defer()
   dead = writable(false)
 
-  constructor(readonly version, readonly adapters: (LocalStorageAdapter | IndexedDBAdapter)[]) {
+  constructor(
+    readonly version,
+    readonly adapters: (LocalStorageAdapter | IndexedDBAdapter)[],
+  ) {
     this.initialize()
   }
 
@@ -236,7 +243,7 @@ export class Storage {
 
   async initialize() {
     const indexedDBAdapters = this.adapters.filter(
-      a => a instanceof IndexedDBAdapter
+      a => a instanceof IndexedDBAdapter,
     ) as IndexedDBAdapter[]
 
     if (window.indexedDB) {
@@ -268,7 +275,7 @@ export const sortByPubkeyWhitelist =
     const follows = new Set(
       Array.from(pubkeys)
         .flatMap((pk: string) => people.key(pk).get().petnames || [])
-        .map(nth(1))
+        .map(nth(1)),
     )
 
     return sortBy(x => {

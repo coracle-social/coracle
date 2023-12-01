@@ -3,7 +3,7 @@ import {debounce} from "throttle-debounce"
 import {now} from "paravel"
 import {pluck, fromPairs, last, identity, sum, is, equals} from "ramda"
 import {ensurePlural, Storage, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
-import Fuse from "fuse.js/dist/fuse.min.js"
+import Fuse from "fuse.js"
 import {writable} from "svelte/store"
 import {warn} from "src/util/logger"
 
@@ -81,7 +81,7 @@ type ScrollerOpts = {
 
 export const createScroller = <T>(
   loadMore: () => Promise<T>,
-  {threshold = 2000, reverse = false, element = document.body}: ScrollerOpts = {}
+  {threshold = 2000, reverse = false, element = document.body}: ScrollerOpts = {},
 ) => {
   let done = false
   const check = async () => {

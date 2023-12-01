@@ -13,12 +13,6 @@
   import {router} from "src/app/router"
   import {displayPubkey} from "src/engine"
 
-  marked.use({
-    mangle: false,
-    headerIds: false,
-    headerPrefix: false,
-  })
-
   export let note, showEntire
   export let showMedia = false
 

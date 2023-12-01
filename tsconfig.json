@@ -8,6 +8,7 @@
       "src/*": ["src/*"]
     },
     "isolatedModules": true,
+    "noImplicitAny": false,
     "strictPropertyInitialization": false,
     "strictNullChecks": false
   }

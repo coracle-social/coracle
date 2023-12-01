@@ -1,4 +1,4 @@
-import {pluck, assocPath} from "ramda"
+import {assocPath} from "ramda"
 import {batch, seconds} from "hurdak"
 import {now} from "paravel"
 import {EventKind} from "src/engine/events/model"
@@ -21,7 +21,7 @@ export const loadAllNip04Messages = () => {
       {kinds: [4], "#p": [pubkey], since},
     ],
     onEvent: batch(1000, events => {
-      loadPubkeys(pluck("pubkey", events))
+      loadPubkeys(events.map(e => e.pubkey))
     }),
   })
 }

@@ -1,10 +1,120 @@
-import {takeWhile, filter, identity, mergeLeft, reject, path as getPath} from "ramda"
+import {takeWhile, find, filter, identity, mergeLeft, reject, path as getPath} from "ramda"
 import {first, filterVals, updateIn} from "hurdak"
 import type {ComponentType, SvelteComponentTyped} from "svelte"
-import {globalHistory} from "svelte-routing/src/history"
-import {pick} from "svelte-routing/src/utils"
 import {buildQueryString, parseQueryString} from "src/util/misc"
+import {globalHistory} from "src/util/history"
 import {writable} from "src/engine"
+
+// Adapted from https://github.com/EmilTholin/svelte-routing/blob/master/src/utils.js
+
+const PARAM = /^:(.+)/
+const SEGMENT_POINTS = 4
+const STATIC_POINTS = 3
+const DYNAMIC_POINTS = 2
+const SPLAT_PENALTY = 1
+const ROOT_POINTS = 1
+
+const segmentize = uri => uri.replace(/(^\/+|\/+$)/g, "").split("/")
+
+const rankRoute = (route, index) => {
+  const score = route.default
+    ? 0
+    : segmentize(route.path).reduce((score, segment) => {
+        score += SEGMENT_POINTS
+
+        if (segment === "") {
+          score += ROOT_POINTS
+        } else if (PARAM.test(segment)) {
+          score += DYNAMIC_POINTS
+        } else if (segment[0] === "*") {
+          score -= SEGMENT_POINTS + SPLAT_PENALTY
+        } else {
+          score += STATIC_POINTS
+        }
+
+        return score
+      }, 0)
+
+  return {route, score, index}
+}
+
+const pickRoute = (routes, uri) => {
+  let match
+  let default_
+
+  const [uriPathname] = uri.split("?")
+  const uriSegments = segmentize(uriPathname)
+  const isRootUri = uriSegments[0] === ""
+  const ranked = routes
+    .map(rankRoute)
+    .sort((a, b) => (a.score < b.score ? 1 : a.score > b.score ? -1 : a.index - b.index))
+
+  for (let i = 0, l = ranked.length; i < l; i++) {
+    const route = ranked[i].route
+    let missed = false
+
+    if (route.default) {
+      default_ = {
+        route,
+        params: {},
+        uri,
+      }
+      continue
+    }
+
+    const routeSegments = segmentize(route.path)
+    const params = {}
+    const max = Math.max(uriSegments.length, routeSegments.length)
+    let index = 0
+
+    for (; index < max; index++) {
+      const routeSegment = routeSegments[index]
+      const uriSegment = uriSegments[index]
+
+      if (routeSegment && routeSegment[0] === "*") {
+        // Hit a splat, just grab the rest, and return a match
+        // uri:   /files/documents/work
+        // route: /files/* or /files/*splatname
+        const splatName = routeSegment === "*" ? "*" : routeSegment.slice(1)
+
+        params[splatName] = uriSegments.slice(index).map(decodeURIComponent).join("/")
+        break
+      }
+
+      if (typeof uriSegment === "undefined") {
+        // URI is shorter than the route, no match
+        // uri:   /users
+        // route: /users/:userId
+        missed = true
+        break
+      }
+
+      const dynamicMatch = PARAM.exec(routeSegment)
+
+      if (dynamicMatch && !isRootUri) {
+        const value = decodeURIComponent(uriSegment)
+        params[dynamicMatch[1]] = value
+      } else if (routeSegment !== uriSegment) {
+        // Current segments don't match, not dynamic, not splat, so no match
+        // uri:   /users/123/settings
+        // route: /users/:id/profile
+        missed = true
+        break
+      }
+    }
+
+    if (!missed) {
+      match = {
+        route,
+        params,
+        uri: "/" + uriSegments.slice(0, index).join("/"),
+      }
+      break
+    }
+  }
+
+  return match || default_ || null
+}
 
 export type Component = ComponentType<SvelteComponentTyped>
 
@@ -102,7 +212,7 @@ class RouterExtension {
   constructor(
     readonly router,
     readonly params: RouterExtensionParams,
-    readonly getId: (...args: any[]) => string = identity
+    readonly getId: (...args: any[]) => string = identity,
   ) {}
 
   get path() {
@@ -128,7 +238,7 @@ class RouterExtension {
   at = path => this.clone({path: asPath(this.path, path)})
 
   qp = queryParams => {
-    const match = pick(this.router.routes, this.path)
+    const match = pickRoute(this.router.routes, this.path)
 
     const data = {...this.queryParams}
 
@@ -186,10 +296,10 @@ export class Router {
   history = writable<HistoryItem[]>([])
   nonVirtual = this.history.derived(reject(getPath(["config", "virtual"])))
   pages = this.nonVirtual.derived(filter((h: HistoryItem) => !h.config.modal))
-  page = this.pages.derived(first)
+  page = this.nonVirtual.derived(find((h: HistoryItem) => !h.config.modal))
   modals = this.nonVirtual.derived(takeWhile((h: HistoryItem) => h.config.modal))
-  modal = this.modals.derived(first)
-  current = this.nonVirtual.derived(first)
+  modal = this.nonVirtual.derived(find((h: HistoryItem) => h.config.modal))
+  current = this.nonVirtual.derived(history => history[0])
 
   init() {
     this.at(window.location.pathname + window.location.search).push()
@@ -213,13 +323,13 @@ export class Router {
   register = (
     path: string,
     component: Component,
-    {serializers, requireUser}: RegisterOpts = {}
+    {serializers, requireUser}: RegisterOpts = {},
   ) => {
     this.routes.push({path, component, serializers, requireUser})
   }
 
   go(path, config: RouteConfig = {}) {
-    const match = pick(this.routes, path)
+    const match = pickRoute(this.routes, path)
 
     if (!match) {
       throw new Error(`Failed to match ${path}`)
