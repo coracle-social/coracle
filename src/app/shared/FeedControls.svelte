@@ -52,6 +52,7 @@
     {kind: 9802, label: "Highlights"},
     {kind: 10002, label: "Relay selections"},
     {kind: 30023, label: "Long form content"},
+    {kind: 31923, label: "Calendar Event"},
   ]
 
   const searchKinds = fuzzy(kinds, {keys: ["kind", "label"]})
@@ -134,7 +135,7 @@
     _filter = {..._filter, authors: scope === "custom" ? [] : scope}
   }
 
-  const getFormFilter = () => ({
+  const getFormFilter = () => console.log(filter)||({
     kinds: filter.kinds?.map((k: number) => kinds.find(x => x.kind === k)),
     since: filter.since,
     until: filter.until,
@@ -180,7 +181,6 @@
       <Toggle scale={0.6} value={!$hideReplies} on:change={toggleReplies} />
       <small class="text-gray-3">Show replies</small>
     </div>
-    <i class="fa fa-sliders cursor-pointer p-2" on:click={open} />
     <slot name="controls" />
   </div>
   <div class="mb-2 mr-2 inline-block py-1">Showing notes:</div>
@@ -251,6 +251,11 @@
       Found on {displayRelays(relays.map(urlToRelay), 2)}
     </Chip>
   {/if}
+  <div class="border border-gray-1 rounded-full inline-block" on:click={open}>
+    <div class="w-7 h-7 justify-center items-center flex">
+      <i class="fa fa-plus cursor-pointer" />
+    </div>
+  </div>
 </div>
 
 {#if isOpen}
