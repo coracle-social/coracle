@@ -6,7 +6,7 @@
 
   export let relay
 
-  const info = relays.key(relay.url).derived(r => r.info)
+  const info = relays.key(relay.url).derived(r => r?.info)
   const joined = deriveHasRelay(relay.url)
 
   let actions = []

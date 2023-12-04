@@ -124,9 +124,7 @@ export const publishToGroupsPublicly = async (
   {relays = null, anonymous = false} = {},
 ) => {
   for (const address of addresses) {
-    const {access} = groups.key(address).get()
-
-    if (access === GroupAccess.Closed) {
+    if (deriveGroupAccess(address).get() === GroupAccess.Closed) {
       throw new Error("Attempted to publish publicly to a closed group")
     }
   }

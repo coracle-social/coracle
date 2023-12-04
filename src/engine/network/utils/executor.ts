@@ -46,7 +46,9 @@ export const getTarget = (urls: string[]) => {
     if (connection.socket.isHealthy()) {
       target = new Plex(remoteUrls, connection)
     }
-  } else {
+  }
+
+  if (!target) {
     target = new Relays(remoteUrls.map(url => pool.get(url)))
   }
 
@@ -69,7 +71,7 @@ export const onAuth = async (url, challenge) => {
           ["challenge", challenge],
           ["relay", url],
         ],
-      })
+      }),
     )
 
     pool.get(url).send(["AUTH", event])

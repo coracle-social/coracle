@@ -20,8 +20,6 @@
     days: getDaysInMonth(date.getFullYear(), date.getMonth()),
   })
 
-  const getTimezoneOffset = () => new Date().getTimezoneOffset() * 60000
-
   function getDaysInMonth(year, month) {
     const days = []
     const firstDay = new Date(year, month, 1).getDay()
