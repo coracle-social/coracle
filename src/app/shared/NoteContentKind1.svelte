@@ -23,7 +23,6 @@
 
   export let note
   export let maxLength = 700
-  export let anchorId = false
   export let showEntire = false
   export let showMedia = false
   export let expandable = true
@@ -60,7 +59,7 @@
         <NoteContentLink {value} showMedia={showMedia && isStartOrEnd(i)} />
       {:else if type.match(/^nostr:np(rofile|ub)$/)}
         <PersonLink pubkey={value.pubkey} />
-      {:else if type.startsWith("nostr:") && isStartOrEnd(i) && value.id !== anchorId}
+      {:else if type.startsWith("nostr:") && isStartOrEnd(i)}
         <NoteContentQuote {note} {value}>
           <div slot="note-content" let:quote>
             <slot name="note-content" {quote} />

@@ -264,7 +264,7 @@
                   }}>Show</Anchor>
               </p>
             {:else}
-              <NoteContent {anchorId} note={event} {showEntire} />
+              <NoteContent note={event} {showEntire} />
             {/if}
             <div class="cy-note-click-target h-px" />
             <NoteActions

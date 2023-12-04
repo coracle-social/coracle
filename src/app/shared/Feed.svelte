@@ -1,6 +1,5 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {reject} from "ramda"
   import {Storage} from "hurdak"
   import {FeedLoader} from "src/engine"
   import {createScroller} from "src/util/misc"
@@ -10,7 +9,7 @@
   import Content from "src/partials/Content.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import type {Event, DynamicFilter} from "src/engine"
+  import type {DynamicFilter} from "src/engine"
   import {
     readable,
     writable,

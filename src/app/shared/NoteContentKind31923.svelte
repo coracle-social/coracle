@@ -1,6 +1,4 @@
 <script lang="ts">
-  import {Tags} from "paravel"
-  import {formatTimestampAsDate} from "src/util/misc"
   import EventInfo from "src/app/shared/EventInfo.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
 

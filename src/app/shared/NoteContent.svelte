@@ -20,7 +20,6 @@
   import {getSetting} from "src/engine"
 
   export let note
-  export let anchorId = null
   export let maxLength = 700
   export let showEntire = false
   export let expandable = true
@@ -48,13 +47,13 @@
 {:else if [40, 41].includes(note.kind)}
   <NoteContentKind40 {note} />
 {:else if note.kind === 1808}
-  <NoteContentKind1808 {note} {anchorId} {maxLength} {showEntire} />
+  <NoteContentKind1808 {note} {maxLength} {showEntire} />
 {:else if note.kind === 1985}
-  <NoteContentKind1985 {note} {anchorId} {maxLength} {showEntire} />
+  <NoteContentKind1985 {note} {maxLength} {showEntire} />
 {:else if note.kind === 1986}
-  <NoteContentKind1986 {note} {anchorId} {maxLength} {showEntire} />
+  <NoteContentKind1986 {note} {maxLength} {showEntire} />
 {:else if note.kind === 9802}
-  <NoteContentKind9802 {note} {anchorId} {maxLength} {showEntire} {showMedia} />
+  <NoteContentKind9802 {note} {maxLength} {showEntire} {showMedia} />
 {:else if note.kind === 1063}
   <NoteContentKind1063 {note} {showMedia} />
 {:else if note.kind === 10002}
@@ -72,9 +71,9 @@
 {:else if note.kind === 32123}
   <NoteContentKind32123 {note} />
 {:else}
-  <NoteContentKind1 {note} {anchorId} {maxLength} {showEntire} {showMedia} {expandable}>
+  <NoteContentKind1 {note} {maxLength} {showEntire} {showMedia} {expandable}>
     <div slot="note-content" let:quote>
-      <svelte:self note={quote} {anchorId} {maxLength} />
+      <svelte:self note={quote} {maxLength} />
     </div>
   </NoteContentKind1>
 {/if}
