@@ -26,7 +26,7 @@ export const normalizeRelayUrl = (url: string) => {
   }
 }
 
-export const urlToRelay = url => ({url: normalizeRelayUrl(url)} as Relay)
+export const urlToRelay = url => ({url: normalizeRelayUrl(url)}) as Relay
 
 export const decodeRelay = entity => {
   entity = fromNostrURI(entity)
@@ -51,7 +51,7 @@ export const getRelaySearch = $relays => fuzzy($relays, {keys: ["url", "name", "
 export const getSearchableRelays = ($relays: Relay[]) => {
   const urls = pluck(
     "url",
-    $relays.filter(r => (r.info?.supported_nips || []).includes(50))
+    $relays.filter(r => (r.info?.supported_nips || []).includes(50)),
   )
 
   return uniq(env.get().SEARCH_RELAYS.concat(urls)).slice(0, 8) as string[]
@@ -143,11 +143,15 @@ export const selectHints = (hints: Iterable<string>, limit: number = null) => {
 }
 
 export class HintSelector {
-  constructor(readonly generateHints, readonly hintsLimit = null) {}
+  constructor(
+    readonly generateHints,
+    readonly hintsLimit = null,
+  ) {}
 
   limit = hintsLimit => new HintSelector(this.generateHints, hintsLimit)
 
-  getHints = (...args) => selectHints(this.generateHints(...args), this.hintsLimit || getSetting('relay_limit'))
+  getHints = (...args) =>
+    selectHints(this.generateHints(...args), this.hintsLimit || getSetting("relay_limit"))
 }
 
 export const hintSelector = (generateHints: (...args: any[]) => Iterable<string>) => {
@@ -183,12 +187,12 @@ export const getReplyHints = hintSelector(function* (event) {
 // If we're looking for an event's parent, tags are the most reliable hint,
 // but we can also look at where the author of the note reads from
 export const getParentHints = hintSelector(function* (event) {
-  yield* Tags.from(event).normalize().mark("reply").relays().all()
+  yield* Tags.from(event).getReplyHints()
   yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Read)
 })
 
 export const getRootHints = hintSelector(function* (event) {
-  yield* Tags.from(event).normalize().mark("root").relays().all()
+  yield* Tags.from(event).getRootHints()
   yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Read)
 })
 

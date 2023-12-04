@@ -21,7 +21,8 @@
   import {toastProgress} from "src/app/state"
 
   export let parent
-  export let showBorder
+  export let showBorder = false
+  export let forceOpen = false
 
   const dispatch = createEventDispatcher()
 
@@ -43,7 +44,7 @@
     isOpen = true
     mentions = without(
       [$session.pubkey],
-      uniq(Tags.from(parent).type("p").values().all().concat(parent.pubkey))
+      uniq(Tags.from(parent).type("p").values().all().concat(parent.pubkey)),
     )
 
     setTimeout(() => compose.write(draft))
@@ -111,7 +112,7 @@
   const onBodyClick = e => {
     const target = e.target as HTMLElement
 
-    if (container && !container.contains(target)) {
+    if (isOpen && container && !container.contains(target)) {
       saveDraft()
       reset()
     }
@@ -120,7 +121,7 @@
 
 <svelte:body on:click={onBodyClick} />
 
-{#if isOpen}
+{#if isOpen || forceOpen}
   <div
     transition:slide|local
     class="note-reply relative z-10 my-2 flex flex-col gap-1"
@@ -174,4 +175,4 @@
   bind:this={options}
   on:change={setOpts}
   initialValues={opts}
-  showRelays={!parent.wrap} />
+  hideFields={parent.wrap ? ["shouldWrap", "relays"] : []} />

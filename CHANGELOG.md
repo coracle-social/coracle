@@ -5,6 +5,10 @@
 - [x] Add NIP 72 community support
 - [x] Add NIP 87 closed community support
 
+# 0.3.14
+
+- [x] Remove sliders icon, add plus button next to pills instead
+
 # 0.3.13
 
 - [x] Update lists to use new 30003 user bookmarks kind

@@ -1,6 +1,6 @@
 import EventEmitter from "events"
 import {createEvent, Tags} from "paravel"
-import {omit, uniqBy, nth} from "ramda"
+import {omit, identity, uniqBy} from "ramda"
 import {defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"
 import {parseContent} from "src/util/notes"
@@ -8,7 +8,7 @@ import {Naddr} from "src/util/nostr"
 import type {Event, NostrEvent} from "src/engine/events/model"
 import {people} from "src/engine/people/state"
 import {displayPerson} from "src/engine/people/utils"
-import {getUserRelayUrls, getEventHints, getEventHint, getPubkeyHint} from "src/engine/relays/utils"
+import {getUserRelayUrls, getEventHints, getPubkeyHint} from "src/engine/relays/utils"
 import {signer} from "src/engine/session/derived"
 import {projections} from "src/engine/core/projections"
 import {isReplaceable} from "src/engine/events/utils"
@@ -141,7 +141,7 @@ export const publish = async (template, {sk, relays}: PublishOpts) => {
 
 export const createAndPublish = async (
   kind: number,
-  {relays, sk, content = "", tags = []}: PublishOpts
+  {relays, sk, content = "", tags = []}: PublishOpts,
 ) => {
   const template = createEvent(kind, {
     content,
@@ -152,7 +152,7 @@ export const createAndPublish = async (
 }
 
 export const uniqTags = uniqBy((t: string[]) =>
-  t[0] === "param" ? t.join(":") : t.slice(0, 2).join(":")
+  t[0] === "param" ? t.join(":") : t.slice(0, 2).join(":"),
 )
 
 export const getPubkeyPetname = (pubkey: string) => {
@@ -189,23 +189,53 @@ export const tagsFromContent = (content: string) => {
 }
 
 export const getReplyTags = (parent: Event, inherit = false) => {
-  const hint = getEventHint(parent)
-  const tags = Tags.from(parent).normalize()
-  const reply = ["e", parent.id, hint, "reply"]
-  // The spec says only root should be used if no intermediate reply, but some clients don't follow it
-  const root = (tags.mark("root").first() || tags.mark("reply").first() || reply)
-    .slice(0, 3)
-    .concat("root")
-  const extra = inherit
-    ? tags
-        .type(["a", "e"])
-        .map(t => t.slice(0, 3).concat("mention"))
-        .all()
-    : []
+  const hints = getEventHints(parent)
+  const replyTags = [mention(parent.pubkey)]
+  const parentAddress = isReplaceable(parent) ? Naddr.fromEvent(parent).asTagValue() : null
+  const replyTagValues = [parent.id, parentAddress].filter(identity)
 
-  if (isReplaceable(parent)) {
-    extra.push(Naddr.fromEvent(parent, getEventHints(parent)).asTag("reply"))
+  // Based on NIP 10 legacy tags, order is root, mentions, reply
+  const {roots, replies, mentions} = Tags.from(parent).getAncestors()
+
+  // Root comes first
+  if (roots.exists()) {
+    for (const t of roots.all()) {
+      replyTags.push(t.concat("root"))
+    }
+  } else {
+    for (const t of replies.all()) {
+      replyTags.push(t.concat("root"))
+    }
   }
 
-  return uniqBy(nth(1), [mention(parent.pubkey), root, ...extra, reply])
+  if (inherit) {
+    // Make sure we don't repeat any tag values
+    const isRepeated = v => replyTagValues.includes(v) || replyTags.find(t => t[1] === v)
+
+    // Inherit mentions
+    for (const t of mentions.all()) {
+      if (!isRepeated(t[1])) {
+        replyTags.push(t.concat("mention"))
+      }
+    }
+
+    // Inherit replies if they weren't already included
+    if (roots.exists()) {
+      for (const t of replies.all()) {
+        if (!isRepeated(t[1])) {
+          replyTags.push(t.concat("mention"))
+        }
+      }
+    }
+  }
+
+  // Add e-tag reply
+  replyTags.push(["e", parent.id, hints[0], "reply"])
+
+  // Add a-tag reply if relevant
+  if (isReplaceable(parent)) {
+    replyTags.push(Naddr.fromEvent(parent, hints).asTag("reply"))
+  }
+
+  return replyTags
 }

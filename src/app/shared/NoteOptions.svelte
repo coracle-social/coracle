@@ -17,7 +17,7 @@
   import {env, getUserRelayUrls, deriveMembershipLevel, MembershipLevel} from "src/engine"
 
   export let groupOptions = []
-  export let showRelays = $env.FORCE_RELAYS.length === 0
+  export let hideFields = []
   export let initialValues: {
     warning: string
     groups: string[]
@@ -106,7 +106,7 @@
             </div>
           </Field>
         {/if}
-        {#if showRelays}
+        {#if !hideFields.includes("relays") && $env.FORCE_RELAYS.length === 0}
           <Field icon="fa-database" label="Select which relays to publish to">
             <div>
               {#each values.relays as url}
@@ -138,7 +138,7 @@
           <Toggle bind:value={values.anonymous} />
           <p slot="info">Enable this to create an anonymous note.</p>
         </FieldInline>
-        {#if values.groups.some(a => deriveMembershipLevel(a).get() === MembershipLevel.Private)}
+        {#if !hideFields.includes("shouldWrap") && values.groups.some(a => deriveMembershipLevel(a).get() === MembershipLevel.Private)}
           <FieldInline icon="fa-eye-slash" label="Post privately">
             <Toggle bind:value={values.shouldWrap} />
             <p slot="info">

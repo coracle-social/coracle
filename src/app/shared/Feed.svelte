@@ -21,10 +21,11 @@
 
   export let relays = []
   export let filter: DynamicFilter = {}
+  export let shouldDisplay = null
   export let shouldListen = false
   export let hideControls = false
+  export let hideSpinner = false
   export let showGroup = false
-  export let noCache = false
   export let onEvent = null
 
   let feed
@@ -63,8 +64,8 @@
 
     notes = feed.notes
 
-    if (noCache) {
-      notes = notes.derived(reject((e: Event) => e.seen_on.length === 0))
+    if (shouldDisplay) {
+      notes = notes.derived(xs => xs.filter(shouldDisplay))
     }
   }
 
@@ -109,5 +110,7 @@
       </div>
     {/each}
   </div>
-  <Spinner />
+  {#if !hideSpinner}
+    <Spinner />
+  {/if}
 </Content>

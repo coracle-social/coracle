@@ -193,7 +193,7 @@
       actions.push({label: "Mute", icon: "microphone-slash", onClick: muteNote})
     }
 
-    if ($env.FORCE_RELAYS.length === 0) {
+    if ($env.FORCE_RELAYS.length === 0 && !note.wrap) {
       actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
     }
 

@@ -81,12 +81,13 @@
 
   const showPerson = () => router.at("people").of(event.pubkey).open()
 
-  const goToParent = () =>
+  const goToParent = () => {
     router
       .at("notes")
-      .of(tags.getReply(), {relays: tags.mark("reply").relays().all()})
+      .of(tags.getReply(), {relays: tags.getReplyHints()})
       .cx({context: ctx.concat(event)})
       .open()
+  }
 
   const goToThread = () =>
     router
@@ -100,7 +101,7 @@
     ctx = reject(whereEq({id: e.id}), ctx)
   }
 
-  $: tags = Tags.from(event).normalize()
+  $: tags = Tags.from(event)
 
   $: muted = !showMuted && $isEventMuted(event, true)
 
@@ -150,7 +151,7 @@
   // Split out zaps
   $: zaps = processZaps(
     children.filter(e => e.kind === 9735),
-    zapper
+    zapper,
   )
 
   onMount(async () => {
@@ -206,6 +207,8 @@
 </script>
 
 {#if ready}
+  {@const rootId = tags.getRoot("e")}
+  {@const replyId = tags.getReply("e")}
   {@const path = router
     .at("notes")
     .of(event.id, {relays: getEventHints(event)})
@@ -238,13 +241,13 @@
           </div>
           <div class="flex flex-col gap-2">
             <div class="flex gap-2">
-              {#if tags.getReply() && showParent}
+              {#if replyId && replyId !== anchorId && showParent}
                 <small class="text-gray-1">
                   <i class="fa fa-code-merge" />
                   <Anchor class="underline" on:click={goToParent}>View Parent</Anchor>
                 </small>
               {/if}
-              {#if tags.getRoot() && tags.getRoot() !== tags.getReply() && showParent}
+              {#if rootId && rootId !== anchorId && rootId !== replyId && showParent}
                 <small class="text-gray-1">
                   <i class="fa fa-code-pull-request" />
                   <Anchor class="underline" on:click={goToThread}>View Thread</Anchor>

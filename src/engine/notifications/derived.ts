@@ -24,15 +24,15 @@ export const notifications = derived(
         return false
       }
 
-      const tags = Tags.from(e).normalize()
+      const tags = Tags.from(e)
 
       return (
-        $userEvents.get(tags.mark("root").getValue()) ||
-        $userEvents.get(tags.mark("reply").getValue()) ||
+        $userEvents.get(tags.getRoot("e")) ||
+        $userEvents.get(tags.getRoot("a")) ||
         tags.pubkeys().has($pubkey)
       )
     })
-  }
+  },
 )
 
 export const otherNotifications = derived([groupRequests, groupAlerts], ([$requests, $alerts]) =>
@@ -41,8 +41,8 @@ export const otherNotifications = derived([groupRequests, groupAlerts], ([$reque
     [
       ...$requests.filter(r => !r.resolved).map(request => ({t: "request", ...request})),
       ...$alerts.map(alert => ({t: "alert", ...alert})),
-    ]
-  )
+    ],
+  ),
 )
 
 export const hasNewNotifications = derived(
@@ -55,7 +55,7 @@ export const hasNewNotifications = derived(
       .reduce(max, 0)
 
     return maxCreatedAt > ($session?.notifications_last_synced || 0)
-  }
+  },
 )
 
 export const groupNotifications = ($notifications, kinds) => {
@@ -104,6 +104,6 @@ export const groupNotifications = ($notifications, kinds) => {
         .reduce(max, 0)
 
       return {...group, timestamp}
-    })
+    }),
   )
 }

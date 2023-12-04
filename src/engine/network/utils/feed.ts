@@ -196,7 +196,7 @@ export class FeedLoader {
 
             // If we have a parent, show that instead, with replies grouped underneath
             while (true) {
-              const parentId = Tags.from(e).getReply()
+              const parentId = Tags.from(e).getReply("e")
 
               if (!parentId) {
                 break

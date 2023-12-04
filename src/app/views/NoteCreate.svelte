@@ -38,6 +38,7 @@
   export let quote = null
   export let pubkey = null
   export let group = null
+  export let initialValues = {}
 
   let images, compose
   let charCount = 0
@@ -55,6 +56,7 @@
     location: null,
     start: null,
     end: null,
+    ...initialValues,
   }
 
   const setOpts = e => {
@@ -122,8 +124,8 @@
             ...tags,
             ["d", uuid()],
             ["name", opts.title],
-            ["start", dateToSeconds(opts.start)],
-            ["end", dateToSeconds(opts.end)],
+            ["start", dateToSeconds(opts.start).toString()],
+            ["end", dateToSeconds(opts.end).toString()],
             ["location", opts.location || ""],
           ],
         }),
@@ -177,7 +179,7 @@
         <div slot="tooltip">
           <Menu class="-mt-2 w-24">
             <MenuItem on:click={() => setType("note")}>Note</MenuItem>
-            <MenuItem on:click={() => setType("calendar_event")}>Event</MenuItem>
+            <MenuItem on:click={() => setType("calendar_event")}>Calendar Event</MenuItem>
             <MenuItem on:click={() => setType("listing")}>Listing</MenuItem>
           </Menu>
         </div>

@@ -28,6 +28,7 @@
   import DataExport from "src/app/views/DataExport.svelte"
   import DataImport from "src/app/views/DataImport.svelte"
   import Explore from "src/app/views/Explore.svelte"
+  import EventDetail from "src/app/views/EventDetail.svelte"
   import GroupList from "src/app/views/GroupList.svelte"
   import GroupDetail from "src/app/views/GroupDetail.svelte"
   import GroupCreate from "src/app/views/GroupCreate.svelte"
@@ -81,7 +82,7 @@
     router,
     asChannelId,
     asPerson,
-    asGroup,
+    asNaddr,
     asCsv,
     asString,
     asUrlComponent,
@@ -121,28 +122,34 @@
 
   router.register("/explore", Explore)
 
+  router.register("/events/:address", EventDetail, {
+    serializers: {
+      address: asNaddr("address"),
+    },
+  })
+
   router.register("/groups", GroupList)
   router.register("/groups/new", GroupCreate)
   router.register("/groups/:address/edit", GroupEdit, {
     serializers: {
-      address: asGroup("address"),
+      address: asNaddr("address"),
     },
   })
   router.register("/groups/:address/info", GroupInfo, {
     serializers: {
-      address: asGroup("address"),
+      address: asNaddr("address"),
     },
   })
   router.register("/groups/:address/rotate", GroupRotate, {
     serializers: {
-      address: asGroup("address"),
+      address: asNaddr("address"),
       addMembers: asCsv("addMembers"),
       removeMembers: asCsv("removeMembers"),
     },
   })
   router.register("/groups/:address/:activeTab", GroupDetail, {
     serializers: {
-      address: asGroup("address"),
+      address: asNaddr("address"),
     },
   })
 
@@ -195,7 +202,8 @@
     requireUser: true,
     serializers: {
       pubkey: asPerson,
-      group: asGroup("group"),
+      group: asNaddr("group"),
+      type: asString("type"),
     },
   })
   router.register("/notes/:entity", NoteDetail, {
@@ -374,7 +382,7 @@
         }
 
         window.scrollTo(0, 0)
-      })
+      }),
     )
 
     const unsubModal = router.modal.subscribe($modal => {
@@ -398,7 +406,7 @@
     const handler = navigator.registerProtocolHandler as (
       scheme: string,
       handler: string,
-      name: string
+      name: string,
     ) => void
 
     handler?.("web+nostr", `${location.origin}/%s`, appName)

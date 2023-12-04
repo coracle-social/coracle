@@ -135,7 +135,7 @@
     _filter = {..._filter, authors: scope === "custom" ? [] : scope}
   }
 
-  const getFormFilter = () => console.log(filter)||({
+  const getFormFilter = () => ({
     kinds: filter.kinds?.map((k: number) => kinds.find(x => x.kind === k)),
     since: filter.since,
     until: filter.until,
@@ -251,8 +251,8 @@
       Found on {displayRelays(relays.map(urlToRelay), 2)}
     </Chip>
   {/if}
-  <div class="border border-gray-1 rounded-full inline-block" on:click={open}>
-    <div class="w-7 h-7 justify-center items-center flex">
+  <div class="inline-block rounded-full border border-gray-1" on:click={open}>
+    <div class="flex h-7 w-7 items-center justify-center">
       <i class="fa fa-plus cursor-pointer" />
     </div>
   </div>

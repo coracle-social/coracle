@@ -49,7 +49,7 @@ export const decodeFilter = s =>
       }
 
       return [k, v.split(",")]
-    })
+    }),
   )
 
 export const decodeEntity = entity => {
@@ -119,7 +119,7 @@ export const asChannelId = {
   decode: decodeAs("pubkeys", decodeCsv),
 }
 
-export const asGroup = k => ({
+export const asNaddr = k => ({
   encode: a => Naddr.fromTagValue(a).encode(),
   decode: decodeAs(k, naddr => Naddr.decode(naddr).asTagValue()),
 })
@@ -132,7 +132,8 @@ router.extend("media", encodeURIComponent)
 router.extend("labels", encodeURIComponent)
 router.extend("relays", nip19.nrelayEncode)
 router.extend("channels", getNip24ChannelId)
-router.extend("groups", asGroup("group").encode)
+router.extend("groups", asNaddr("group").encode)
+router.extend("events", asNaddr("event").encode)
 
 router.extend("notes", (id, {relays = []} = {}) => {
   if (id.includes(":")) {

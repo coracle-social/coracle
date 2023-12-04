@@ -15,7 +15,10 @@ export class ThreadLoader {
   ancestors = writable<DisplayEvent[]>([])
   root = writable<DisplayEvent>(null)
 
-  constructor(readonly note: Event, readonly relays: string[]) {
+  constructor(
+    readonly note: Event,
+    readonly relays: string[],
+  ) {
     this.loadNotes(Tags.from(note).type(["e", "a"]).values().all())
   }
 
@@ -52,13 +55,13 @@ export class ThreadLoader {
   }
 
   addToThread(events) {
-    const tags = Tags.from(this.note).normalize()
+    const tags = Tags.from(this.note)
     const ancestors = []
 
     for (const event of events) {
-      if (event.id === tags.getReply()) {
+      if (event.id === tags.getReply("e")) {
         this.parent.set(event)
-      } else if (event.id === tags.getRoot()) {
+      } else if (event.id === tags.getRoot("e")) {
         this.root.set(event)
       } else {
         ancestors.push(event)
@@ -67,7 +70,7 @@ export class ThreadLoader {
 
     if (ancestors.length > 0) {
       this.ancestors.update($xs =>
-        sortBy(prop("created_at"), uniqBy(prop("id"), ancestors.concat($xs)))
+        sortBy(prop("created_at"), uniqBy(prop("id"), ancestors.concat($xs))),
       )
     }
   }

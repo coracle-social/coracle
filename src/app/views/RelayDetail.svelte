@@ -26,6 +26,8 @@
     activeTab = tab
   }
 
+  const shouldDisplay = e => e.seen_on.length > 0
+
   const onReview = batch(1000, chunk => {
     reviews = reviews.concat(chunk)
   })
@@ -56,6 +58,6 @@
         "#r": [$relay.url],
       }} />
   {:else}
-    <Feed noCache relays={[$relay.url]} {filter} />
+    <Feed {shouldDisplay} relays={[$relay.url]} {filter} />
   {/if}
 </Content>
