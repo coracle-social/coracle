@@ -180,7 +180,6 @@
       <Toggle scale={0.6} value={!$hideReplies} on:change={toggleReplies} />
       <small class="text-gray-3">Show replies</small>
     </div>
-    <i class="fa fa-refresh cursor-pointer p-2" on:click={applyFilter} />
     <i class="fa fa-sliders cursor-pointer p-2" on:click={open} />
     <slot name="controls" />
   </div>
