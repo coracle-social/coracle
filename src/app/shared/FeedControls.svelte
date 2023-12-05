@@ -180,6 +180,7 @@
     <div class="flex items-center gap-1 pr-2">
       <Toggle scale={0.6} value={!$hideReplies} on:change={toggleReplies} />
       <small class="text-gray-3">Show replies</small>
+      <i class="fa fa-search cursor-pointer p-2" on:click={open} />
     </div>
     <slot name="controls" />
   </div>
