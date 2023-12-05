@@ -16,9 +16,9 @@
     <h2 class="text-xl font-bold">
       {displayGroup(group)}
     </h2>
-    {#if group.about}
+    {#if group.description}
       <p class="text-start text-gray-1">
-        {ellipsize(group.about, 300)}
+        {ellipsize(group.description, 300)}
       </p>
     {/if}
   </div>

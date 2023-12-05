@@ -31,13 +31,17 @@
     on:keydown />
   {#if showBefore}
     <div class="absolute left-0 top-0 flex gap-2 px-4 pt-2 text-black opacity-75">
-      <slot name="before" />
+      <div>
+        <slot name="before" />
+      </div>
     </div>
   {/if}
   {#if showAfter}
     <div
       class="absolute right-0 top-0 m-px flex gap-2 rounded-full px-4 pt-2 text-black opacity-75">
-      <slot name="after" />
+      <div>
+        <slot name="after" />
+      </div>
     </div>
   {/if}
 </div>

@@ -47,7 +47,7 @@ export const getGroupReqInfo = (address = null) => {
   let $groupAdminKeys = groupAdminKeys.get()
 
   if (address) {
-    since = session.get()?.groups[address]?.last_synced || 0
+    since = session.get()?.groups?.[address]?.last_synced || 0
     $groupSharedKeys = $groupSharedKeys.filter(whereEq({group: address}))
     $groupAdminKeys = $groupAdminKeys.filter(whereEq({group: address}))
   }

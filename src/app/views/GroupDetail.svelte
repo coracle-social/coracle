@@ -13,7 +13,7 @@
   import GroupAbout from "src/app/shared/GroupAbout.svelte"
   import GroupRequest from "src/app/shared/GroupRequest.svelte"
   import GroupMember from "src/app/shared/GroupMember.svelte"
-  import GroupEvents from "src/app/shared/GroupEvents.svelte"
+  import GroupCalendar from "src/app/shared/GroupCalendar.svelte"
   import GroupMarket from "src/app/shared/GroupMarket.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {
@@ -71,7 +71,7 @@
   let tabs
 
   $: {
-    tabs = ["notes", "events", "market"]
+    tabs = ["notes", "calendar", "market"]
 
     if ($sharedKey) {
       tabs.push("members")
@@ -131,16 +131,18 @@
       hideControls
       filter={{kinds: without([30402], noteKinds), "#a": [address]}}
       {relays} />
-  {:else if activeTab === "events"}
-    <GroupEvents {group} {relays} />
+  {:else if activeTab === "calendar"}
+    <GroupCalendar {group} {relays} />
   {:else if activeTab === "market"}
     <GroupMarket {group} {relays} />
   {:else if activeTab === "members"}
-    {#each members as pubkey (pubkey)}
-      <GroupMember {address} {pubkey} />
-    {:else}
-      <p class="text-center py-12">No members found.</p>
-    {/each}
+    <Content size="inherit" gap="gap-4">
+      {#each members as pubkey (pubkey)}
+        <GroupMember {address} {pubkey} />
+      {:else}
+        <p class="text-center py-12">No members found.</p>
+      {/each}
+    </Content>
   {:else if activeTab === "admin"}
     {#each $requests as request (request.id)}
       <GroupRequest {address} {request} />

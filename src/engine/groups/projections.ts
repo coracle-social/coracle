@@ -6,9 +6,10 @@ import {Naddr, LOCAL_RELAY_URL} from "src/util/nostr"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
 import {EventKind} from "src/engine/events/model"
+import {selectHints} from "src/engine/relays/utils"
 import {sessions} from "src/engine/session/state"
 import {nip59} from "src/engine/session/derived"
-import {getExecutor} from "src/engine/network/utils"
+import {getExecutor, getIdFilters, load} from "src/engine/network/utils"
 import {GroupAccess, MemberAccess} from "./model"
 import {groups, groupSharedKeys, groupRequests, groupAlerts} from "./state"
 import {deriveAdminKeyForGroup, getRecipientKey} from "./utils"
@@ -28,16 +29,26 @@ projections.addHandler(24, (e: Event) => {
 
   if (privkey) {
     const pubkey = getPublicKey(privkey)
+    const relays = tags.type("relay").values().all()
 
     groupSharedKeys.key(pubkey).update($key => ({
       pubkey,
       privkey,
       group: address,
       created_at: e.created_at,
-      hints: tags.type("relay").values().all(),
+      hints: relays,
       members: [],
       ...$key,
     }))
+
+    // Load the group's metadata and posts
+    load({
+      relays: selectHints(relays),
+      filters: [
+        ...getIdFilters([address]),
+        {kinds: [1059], "#p": [pubkey]},
+      ],
+    })
   }
 
   groupAlerts.key(e.id).set({

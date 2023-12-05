@@ -132,6 +132,11 @@ export class FeedLoader {
   }
 
   loadParents = notes => {
+    // Add notes to parents too since they might match
+    for (const e of notes) {
+      this.parents.set(e.id, e)
+    }
+
     const parentIds = notes
       .filter(e => !repostKinds.includes(e.kind) && !this.isEventMuted(e))
       .map(e => getParentId(e))

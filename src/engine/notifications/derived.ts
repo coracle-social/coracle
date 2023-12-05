@@ -1,11 +1,11 @@
-import {prop, max, sortBy} from "ramda"
+import {prop, assoc, max, sortBy} from "ramda"
 import {seconds} from "hurdak"
 import {now, Tags} from "paravel"
 import {reactionKinds, getParentId} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {derived} from "src/engine/core/utils"
-import {groupRequests, groupAlerts} from "src/engine/groups/state"
+import {groupRequests, groupAdminKeys, groupAlerts} from "src/engine/groups/state"
 import {pubkey} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {userEvents} from "src/engine/events/derived"
@@ -29,14 +29,19 @@ export const notifications = derived(
   },
 )
 
-export const otherNotifications = derived([groupRequests, groupAlerts], ([$requests, $alerts]) =>
-  sortBy(
-    n => -n.created_at,
-    [
-      ...$requests.filter(r => !r.resolved).map(request => ({t: "request", ...request})),
-      ...$alerts.map(alert => ({t: "alert", ...alert})),
-    ],
-  ),
+export const otherNotifications = derived(
+  [groupRequests, groupAlerts, groupAdminKeys],
+  ([$requests, $alerts, $adminKeys]) => {
+    const adminPubkeys = new Set($adminKeys.map(k => k.pubkey))
+
+    return sortBy(
+      n => -n.created_at,
+      [
+        ...$requests.filter(r => !r.resolved).map(assoc("t", "request")),
+        ...$alerts.filter(a => !adminPubkeys.has(a.pubkey)).map(assoc("t", "alert")),
+      ],
+    )
+  },
 )
 
 export const hasNewNotifications = derived(

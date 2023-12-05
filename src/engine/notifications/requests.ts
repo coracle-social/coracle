@@ -41,7 +41,7 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
 })
 
 export const getNotificationKinds = () =>
-  without(env.get().ENABLE_ZAPS ? [] : [EventKind.Zap], [...noteKinds, ...reactionKinds])
+  without(env.get().ENABLE_ZAPS ? [] : [EventKind.Zap], [...noteKinds, ...reactionKinds, 1059])
 
 export const loadNotifications = () => {
   const kinds = getNotificationKinds()
@@ -74,7 +74,6 @@ export const loadNotifications = () => {
     filters,
     timeout: 15000,
     skipCache: true,
-    shouldProject: false,
     relays: mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read"))),
     onEvent: onNotificationEvent,
   })
