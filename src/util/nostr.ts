@@ -4,7 +4,7 @@ import {pick, is, mergeLeft, identity} from "ramda"
 import {between, avg} from "hurdak"
 import type {Filter, Event} from "src/engine"
 
-export const noteKinds = [1, 30023, 1063, 9802, 1808, 32123, 31923]
+export const noteKinds = [1, 30023, 1063, 9802, 1808, 32123, 31923, 30402]
 export const personKinds = [0, 2, 3, 10000, 10002]
 export const reactionKinds = [7, 9735]
 export const repostKinds = [6, 16]
@@ -55,6 +55,40 @@ export const getAvgRating = (events: Event[]) => avg(events.map(getRating).filte
 
 export const isHex = x => x.match(/^[a-f0-9]{64}$/)
 
+export const getParentId = (e, type = null) => {
+  const {roots, replies} = Tags.from(e).getAncestors()
+
+  if (type) {
+    return replies.type(type).values().first() || roots.type(type).values().first()
+  }
+
+  return (
+    replies.type("e").values().first() ||
+    replies.type("a").values().first() ||
+    roots.type("e").values().first() ||
+    roots.type("a").values().first()
+  )
+}
+
+export const getParentIds = e => {
+  const {roots, replies} = Tags.from(e).getAncestors()
+  const tags = replies.exists() ? replies : roots
+
+  return tags.values().all()
+}
+
+export const getRootId = (e, type = null) => {
+  const {roots} = Tags.from(e).getAncestors()
+
+  if (type) {
+    return roots.type(type).values().first()
+  }
+
+  return roots.type("e").values().first() || roots.type("a").values().first()
+}
+
+export const getRootIds = e => Tags.from(e).roots().values().all()
+
 export const isReplaceable = e => between(9999, 20000, e.kind)
 
 export const isParameterizedReplaceable = e => between(39999, 40000, e.kind)
@@ -78,6 +112,13 @@ export const getGroupAddress = e =>
     .type("a")
     .values()
     .find(a => a.startsWith("34550:"))
+
+export const isChildOf = (a, b) => {
+  const {roots, replies} = Tags.from(a).getAncestors()
+  const parentIds = (replies.exists() ? replies : roots).values().all()
+
+  return Boolean(getIdAndAddress(b).find(x => parentIds.includes(x)))
+}
 
 export class Naddr {
   constructor(

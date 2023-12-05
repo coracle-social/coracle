@@ -1,7 +1,7 @@
 import {prop, max, sortBy} from "ramda"
 import {seconds} from "hurdak"
 import {now, Tags} from "paravel"
-import {reactionKinds} from "src/util/nostr"
+import {reactionKinds, getParentId} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {derived} from "src/engine/core/utils"
@@ -24,13 +24,7 @@ export const notifications = derived(
         return false
       }
 
-      const tags = Tags.from(e)
-
-      return (
-        $userEvents.get(tags.getRoot("e")) ||
-        $userEvents.get(tags.getRoot("a")) ||
-        tags.pubkeys().has($pubkey)
-      )
+      return $userEvents.get(getParentId(e, "e")) || Tags.from(e).pubkeys().has($pubkey)
     })
   },
 )
@@ -74,7 +68,7 @@ export const groupNotifications = ($notifications, kinds) => {
 
   // Group notifications by event
   for (const ix of $notifications) {
-    const parentId = Tags.from(ix).getReply()
+    const parentId = getParentId(ix, "e")
     const event = $userEvents.get(parentId)
 
     if (!kinds.includes(ix.kind)) {

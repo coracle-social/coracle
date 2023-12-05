@@ -4,6 +4,7 @@
   import {onMount} from "svelte"
   import {fly} from "src/util/transition"
   import {createScroller} from "src/util/misc"
+  import {getParentId} from "src/util/nostr"
   import {getModal} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -33,7 +34,7 @@
 
   $: ids = sortEventsDesc($labels.filter(e => Tags.from(e).getValue("l") === label))
     .slice(0, limit)
-    .map(e => Tags.from(e).getReply())
+    .map(e => getParentId(e, "e"))
 
   onMount(() => {
     const scroller = createScroller(loadMore, {element: getModal()})

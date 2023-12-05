@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {Tags} from "paravel"
   import {whereEq} from "ramda"
   import Calendar from "@event-calendar/core"
@@ -6,7 +6,7 @@
   import Interaction from "@event-calendar/interaction"
   import {secondsToDate} from "src/util/misc"
   import {Naddr} from "src/util/nostr"
-  import {themeColors, theme} from "src/partials/state"
+  import {themeColors} from "src/partials/state"
   import {router} from "src/app/router"
   import {load, pubkey} from "src/engine"
 

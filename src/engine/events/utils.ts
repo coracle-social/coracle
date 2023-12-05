@@ -1,26 +1,10 @@
 import {nip19} from "nostr-tools"
 import {sortBy} from "ramda"
-import {fromNostrURI, Tags} from "paravel"
+import {fromNostrURI} from "paravel"
 import {tryFunc, switcherFn} from "hurdak"
-import {Naddr} from "src/util/nostr"
-import {getEventHints} from "src/engine/relays/utils"
 import type {Event} from "./model"
 
 export const sortEventsDesc = sortBy((e: Event) => -e.created_at)
-
-export const isReplaceable = e => e.kind >= 10000
-
-export const getIds = (e: Event) => {
-  const ids = [e.id]
-
-  if (isReplaceable(e)) {
-    ids.push(Naddr.fromEvent(e, getEventHints(e)).asTagValue())
-  }
-
-  return ids
-}
-
-export const isChildOf = (a, b) => getIds(b).includes(Tags.from(a).getReply())
 
 const annotateEvent = eid => ({
   eid,

@@ -5,7 +5,15 @@
   import {quantify, batch} from "hurdak"
   import {Tags} from "paravel"
   import {fly} from "src/util/transition"
-  import {getIdOrAddress, isLike} from "src/util/nostr"
+  import {
+    getIdOrAddress,
+    isChildOf,
+    isLike,
+    getParentId,
+    getRootId,
+    getParentIds,
+    getRootIds,
+  } from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -38,7 +46,6 @@
     mergeHints,
     loadPubkeys,
     sortEventsDesc,
-    isChildOf,
   } from "src/engine"
 
   export let note
@@ -84,7 +91,7 @@
   const goToParent = () => {
     router
       .at("notes")
-      .of(tags.getReply(), {relays: tags.getReplyHints()})
+      .of(getParentId(note), {relays: tags.getReplyHints()})
       .cx({context: ctx.concat(event)})
       .open()
   }
@@ -207,8 +214,8 @@
 </script>
 
 {#if ready}
-  {@const rootId = tags.getRoot("e")}
-  {@const replyId = tags.getReply("e")}
+  {@const rootId = getRootId(note)}
+  {@const replyId = getParentId(note)}
   {@const path = router
     .at("notes")
     .of(event.id, {relays: getEventHints(event)})
@@ -241,13 +248,13 @@
           </div>
           <div class="flex flex-col gap-2">
             <div class="flex gap-2">
-              {#if replyId && !tags.replies().values().has(anchor) && showParent}
+              {#if replyId && !getParentIds(note).includes(anchor) && showParent}
                 <small class="text-gray-1">
                   <i class="fa fa-code-merge" />
                   <Anchor class="underline" on:click={goToParent}>View Parent</Anchor>
                 </small>
               {/if}
-              {#if rootId && !tags.roots().values().has(anchor) && rootId !== replyId && showParent}
+              {#if rootId && !getRootIds(note).includes(anchor) && rootId !== replyId && showParent}
                 <small class="text-gray-1">
                   <i class="fa fa-code-pull-request" />
                   <Anchor class="underline" on:click={goToThread}>View Thread</Anchor>

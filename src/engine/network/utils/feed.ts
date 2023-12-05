@@ -3,7 +3,15 @@ import {ensurePlural, doPipe, batch} from "hurdak"
 import {now, hasValidSignature, Tags} from "paravel"
 import {race, tryJson} from "src/util/misc"
 import {info} from "src/util/logger"
-import {LOCAL_RELAY_URL, getIdOrAddress, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {
+  LOCAL_RELAY_URL,
+  getIdOrAddress,
+  getIdAndAddress,
+  noteKinds,
+  reactionKinds,
+  repostKinds,
+  getParentId,
+} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {isEventMuted} from "src/engine/events/derived"
@@ -111,7 +119,7 @@ export class FeedLoader {
         return false
       }
 
-      if (this.opts.shouldHideReplies && Tags.from(e).getReply()) {
+      if (this.opts.shouldHideReplies && getParentId(e)) {
         return false
       }
 
@@ -126,7 +134,7 @@ export class FeedLoader {
   loadParents = notes => {
     const parentIds = notes
       .filter(e => !repostKinds.includes(e.kind) && !this.isEventMuted(e))
-      .map(e => Tags.from(e).getReply())
+      .map(e => getParentId(e))
       .filter(identity)
 
     load({
@@ -193,7 +201,7 @@ export class FeedLoader {
 
             // Keep track of replies
             if (noteKinds.includes(e.kind)) {
-              const parentId = Tags.from(e).getReply()
+              const parentId = getParentId(e)
               const replies = this.replies.get(parentId) || []
 
               this.replies.set(parentId, [...replies, e])
@@ -201,7 +209,7 @@ export class FeedLoader {
 
             // If we have a parent, show that instead, with replies grouped underneath
             while (true) {
-              const parentId = Tags.from(e).getReply("e")
+              const parentId = getParentId(e)
 
               if (!parentId) {
                 break
@@ -228,8 +236,8 @@ export class FeedLoader {
             return true
           })
           .map((e: DisplayEvent) => {
-            e.replies = this.replies.get(e.id)
-            e.reposts = this.reposts.get(e.id)
+            e.replies = getIdAndAddress(e).flatMap(k => this.replies.get(k) || [])
+            e.reposts = getIdAndAddress(e).flatMap(k => this.reposts.get(k) || [])
 
             return e
           }),
@@ -297,7 +305,7 @@ export class FeedLoader {
 
     // If something has a parent id but we haven't found the parent yet, skip it until we have it.
     const [defer, ok] = partition(e => {
-      const parentId = Tags.from(e).getReply()
+      const parentId = getParentId(e)
 
       return parentId && !this.parents.get(parentId)
     }, notes)

@@ -14,6 +14,7 @@
   import GroupRequest from "src/app/shared/GroupRequest.svelte"
   import GroupMember from "src/app/shared/GroupMember.svelte"
   import GroupEvents from "src/app/shared/GroupEvents.svelte"
+  import GroupMarket from "src/app/shared/GroupMarket.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {
     GroupAccess,
@@ -70,7 +71,7 @@
   let tabs
 
   $: {
-    tabs = ["notes", "events"]
+    tabs = ["notes", "events", "market"]
 
     if ($sharedKey) {
       tabs.push("members")
@@ -128,6 +129,8 @@
     <Feed shouldListen hideControls filter={{kinds: noteKinds, "#a": [address]}} {relays} />
   {:else if activeTab === "events"}
     <GroupEvents {group} {relays} />
+  {:else if activeTab === "market"}
+    <GroupMarket {group} {relays} />
   {:else if activeTab === "members"}
     {#each members as pubkey (pubkey)}
       <GroupMember {address} {pubkey} />

@@ -179,7 +179,7 @@
         <div slot="tooltip">
           <Menu class="-mt-2 w-24">
             <MenuItem on:click={() => setType("note")}>Note</MenuItem>
-            <MenuItem on:click={() => setType("calendar_event")}>Calendar Event</MenuItem>
+            <MenuItem on:click={() => setType("calendar_event")}>Event</MenuItem>
             <MenuItem on:click={() => setType("listing")}>Listing</MenuItem>
           </Menu>
         </div>

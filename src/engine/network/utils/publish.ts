@@ -1,17 +1,16 @@
 import EventEmitter from "events"
 import {createEvent, Tags} from "paravel"
-import {omit, identity, uniqBy} from "ramda"
+import {omit, uniqBy} from "ramda"
 import {defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"
 import {parseContent} from "src/util/notes"
-import {Naddr} from "src/util/nostr"
+import {Naddr, isAddressable, getIdAndAddress} from "src/util/nostr"
 import type {Event, NostrEvent} from "src/engine/events/model"
 import {people} from "src/engine/people/state"
 import {displayPerson} from "src/engine/people/utils"
 import {getUserRelayUrls, getEventHints, getPubkeyHint} from "src/engine/relays/utils"
 import {signer} from "src/engine/session/derived"
 import {projections} from "src/engine/core/projections"
-import {isReplaceable} from "src/engine/events/utils"
 import {getUrls, getExecutor} from "./executor"
 
 export type PublisherOpts = {
@@ -191,8 +190,7 @@ export const tagsFromContent = (content: string) => {
 export const getReplyTags = (parent: Event, inherit = false) => {
   const hints = getEventHints(parent)
   const replyTags = [mention(parent.pubkey)]
-  const parentAddress = isReplaceable(parent) ? Naddr.fromEvent(parent).asTagValue() : null
-  const replyTagValues = [parent.id, parentAddress].filter(identity)
+  const replyTagValues = getIdAndAddress(parent)
 
   // Based on NIP 10 legacy tags, order is root, mentions, reply
   const {roots, replies, mentions} = Tags.from(parent).getAncestors()
@@ -233,7 +231,7 @@ export const getReplyTags = (parent: Event, inherit = false) => {
   replyTags.push(["e", parent.id, hints[0], "reply"])
 
   // Add a-tag reply if relevant
-  if (isReplaceable(parent)) {
+  if (isAddressable(parent)) {
     replyTags.push(Naddr.fromEvent(parent, hints).asTag("reply"))
   }
 

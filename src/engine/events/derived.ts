@@ -10,7 +10,7 @@ import type {Event} from "./model"
 import {deletes, _events} from "./state"
 
 export const events = new DerivedCollection<Event>("id", [_events, deletes], ([$e, $d]) =>
-  $e.filter(e => !$d.has(e.id))
+  $e.filter(e => !$d.has(e.id)),
 )
 
 export const userEvents = new DerivedCollection<Event>("id", [events, pubkey], ([$e, $pk]) => {
@@ -32,10 +32,11 @@ export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settin
     }
 
     const tags = Tags.from(e)
-    const reply = tags.getReply()
-    const root = tags.getRoot()
+    const {roots, replies} = tags.getAncestors()
 
-    if (find(t => $mutes.has(t), [e.id, e.pubkey, reply, root])) {
+    if (
+      find(t => $mutes.has(t), [e.id, e.pubkey, ...roots.values().all(), ...replies.values().all()])
+    ) {
       return true
     }
 
