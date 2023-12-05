@@ -3,7 +3,7 @@ import {ensurePlural, doPipe, batch} from "hurdak"
 import {now, hasValidSignature, Tags} from "paravel"
 import {race, tryJson} from "src/util/misc"
 import {info} from "src/util/logger"
-import {LOCAL_RELAY_URL, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {LOCAL_RELAY_URL, getIdOrAddress, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {isEventMuted} from "src/engine/events/derived"
@@ -19,6 +19,7 @@ export type FeedOpts = {
   relays: string[]
   filters: Filter[]
   onEvent?: (e: Event) => void
+  anchor?: string
   shouldDefer?: boolean
   shouldListen?: boolean
   shouldBuffer?: boolean
@@ -111,6 +112,10 @@ export class FeedLoader {
       }
 
       if (this.opts.shouldHideReplies && Tags.from(e).getReply()) {
+        return false
+      }
+
+      if (getIdOrAddress(e) === this.opts.anchor) {
         return false
       }
 

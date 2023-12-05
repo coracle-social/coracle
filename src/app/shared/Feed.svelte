@@ -20,6 +20,7 @@
 
   export let relays = []
   export let filter: DynamicFilter = {}
+  export let anchor = null
   export let shouldDisplay = null
   export let shouldListen = false
   export let hideControls = false
@@ -54,6 +55,7 @@
     feed = new FeedLoader({
       filters: compileFilters([filter], {includeReposts: true}),
       relays: getRelays(),
+      anchor,
       shouldListen,
       shouldDefer: true,
       shouldLoadParents: true,
@@ -105,6 +107,7 @@
           context={note.replies || []}
           filters={compileFilters([filter])}
           {showGroup}
+          {anchor}
           {note} />
       </div>
     {/each}

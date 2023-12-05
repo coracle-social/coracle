@@ -1,6 +1,7 @@
 import {uniqBy, identity, prop, sortBy} from "ramda"
 import {batch} from "hurdak"
 import {Tags} from "paravel"
+import {getIdOrAddress} from 'src/util/nostr'
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {writable} from "src/engine/core/utils"
@@ -8,6 +9,16 @@ import {selectHints} from "src/engine/relays/utils"
 import {getIds} from "src/engine/events/utils"
 import {getIdFilters} from "./filters"
 import {load} from "./load"
+
+const getAncestorIds = e => {
+  const {roots, replies, mentions} = Tags.from(e).getAncestors()
+
+  return [
+    ...roots.values().all(),
+    ...replies.values().all(),
+    ...mentions.values().all(),
+  ]
+}
 
 export class ThreadLoader {
   stopped = false
@@ -19,7 +30,7 @@ export class ThreadLoader {
     readonly note: Event,
     readonly relays: string[],
   ) {
-    this.loadNotes(Tags.from(note).type(["e", "a"]).values().all())
+    this.loadNotes(getAncestorIds(note))
   }
 
   stop() {
@@ -40,7 +51,7 @@ export class ThreadLoader {
         filters: getIdFilters(filteredIds),
         onEvent: batch(300, (events: Event[]) => {
           this.addToThread(events)
-          this.loadNotes(events.flatMap(e => Tags.from(e).type(["e", "a"]).values().all()))
+          this.loadNotes(events.flatMap(getAncestorIds))
         }),
       })
     }
@@ -59,9 +70,9 @@ export class ThreadLoader {
     const ancestors = []
 
     for (const event of events) {
-      if (event.id === tags.getReply("e")) {
+      if (tags.replies().values().has(getIdOrAddress(event))) {
         this.parent.set(event)
-      } else if (event.id === tags.getRoot("e")) {
+      } else if (tags.roots().values().has(getIdOrAddress(event))) {
         this.root.set(event)
       } else {
         ancestors.push(event)

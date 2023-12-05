@@ -5,7 +5,7 @@
   import {quantify, batch} from "hurdak"
   import {Tags} from "paravel"
   import {fly} from "src/util/transition"
-  import {isLike} from "src/util/nostr"
+  import {getIdOrAddress, isLike} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -46,7 +46,7 @@
   export let context = []
   export let filters = null
   export let depth = 0
-  export let anchorId = null
+  export let anchor = null
   export let topLevel = false
   export let isLastReply = false
   export let showParent = true
@@ -64,8 +64,8 @@
   let collapsed = depth === 0
   let ctx = uniqBy(prop("id"), context)
 
-  const showEntire = anchorId === event.id
-  const interactive = !anchorId || !showEntire
+  const showEntire = anchor === getIdOrAddress(event)
+  const interactive = !anchor || !showEntire
 
   const onClick = e => {
     const target = (e.detail?.target || e.target) as HTMLElement
@@ -241,13 +241,13 @@
           </div>
           <div class="flex flex-col gap-2">
             <div class="flex gap-2">
-              {#if replyId && replyId !== anchorId && showParent}
+              {#if replyId && !tags.replies().values().has(anchor) && showParent}
                 <small class="text-gray-1">
                   <i class="fa fa-code-merge" />
                   <Anchor class="underline" on:click={goToParent}>View Parent</Anchor>
                 </small>
               {/if}
-              {#if rootId && rootId !== anchorId && rootId !== replyId && showParent}
+              {#if rootId && !tags.roots().values().has(anchor) && rootId !== replyId && showParent}
                 <small class="text-gray-1">
                   <i class="fa fa-code-pull-request" />
                   <Anchor class="underline" on:click={goToThread}>View Thread</Anchor>
@@ -344,7 +344,7 @@
                 note={r}
                 depth={depth - 1}
                 context={ctx}
-                {anchorId} />
+                {anchor} />
             {/each}
           </div>
         {/if}

@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {defer} from "hurdak"
   import {Tags} from 'paravel'
-  import {Naddr, noteKinds} from "src/util/nostr"
+  import {Naddr, getIdOrAddress, noteKinds} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
@@ -60,7 +60,12 @@
           <OverflowMenu actions={actions} />
         </EventInfo>
       </div>
-      <Feed hideControls shouldListen hideSpinner filter={{kinds: noteKinds, '#a': [address]}} />
+      <Feed
+        hideSpinner
+        hideControls
+        shouldListen
+        anchor={getIdOrAddress(event)}
+        filter={{kinds: noteKinds, '#a': [address]}} />
     </Content>
   </div>
   {#if replyIsOpen}
