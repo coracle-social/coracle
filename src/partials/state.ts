@@ -1,7 +1,7 @@
 import {prop, last, fromPairs} from "ramda"
 import {randomId, range} from "hurdak"
 import type {Writable} from "svelte/store"
-import {writable, get} from "svelte/store"
+import {writable, derived, get} from "svelte/store"
 import {parseHex} from "src/util/html"
 import {shadeColor, synced} from "src/util/misc"
 
@@ -38,13 +38,13 @@ toast.show = (type, message, timeout = 5) => {
 // Themes
 
 const THEME = fromPairs(
-  import.meta.env.VITE_THEME.split(",").map((x: string) => x.split(":"))
+  import.meta.env.VITE_THEME.split(",").map((x: string) => x.split(":")),
 ) as Record<string, string>
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
 
 export const theme = synced("ui/theme", prefersDark ? "dark" : "light")
 
-export const getThemeColors = ($theme: string) => {
+export const themeColors = derived(theme, $theme => {
   for (const x of range(1, 10)) {
     const lum = $theme === "dark" ? (5 - x) * 25 : (x - 5) * 25
 
@@ -52,22 +52,21 @@ export const getThemeColors = ($theme: string) => {
   }
 
   return THEME
-}
+})
 
-export const getThemeColor = ($theme: string, k: string) => prop(k, getThemeColors($theme))
-
-export const getThemeVariables = ($theme: string) =>
-  Object.entries(getThemeColors($theme))
+export const themeVariables = derived(themeColors, $colors => {
+  return Object.entries($colors)
     .map(([k, v]) => `--${k}: ${v};`)
     .join("\n")
+})
 
-export const getThemeBackgroundGradient = () => {
-  const color = parseHex(getThemeColor(get(theme), "gray-8"))
+export const themeBackgroundGradient = derived(themeColors, $colors => {
+  const color = parseHex($colors["gray-8"])
 
   return {
     rgba: `rgba(${color.join(", ")}, 0.5)`,
     rgb: `rgba(${color.join(", ")})`,
   }
-}
+})
 
 export const getModal = () => last(Array.from(document.querySelectorAll(".modal-content")))

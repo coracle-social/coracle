@@ -1,6 +1,6 @@
 <script lang="ts">
   import {tryJson} from "src/util/misc"
-  import {getThemeBackgroundGradient} from "src/partials/state"
+  import {themeBackgroundGradient} from "src/partials/state"
   import Card from "src/partials/Card.svelte"
   import Content from "src/partials/Content.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
@@ -11,8 +11,9 @@
 
   const {pubkey, content} = note
   const {name, picture, about, banner} = tryJson(() => JSON.parse(content))
-  const {rgba} = getThemeBackgroundGradient()
   const bannerUrl = imgproxy(banner)
+
+  $: ({rgba} = $themeBackgroundGradient)
 
   const showPerson = () =>
     router

@@ -6,7 +6,7 @@
   import Interaction from "@event-calendar/interaction"
   import {secondsToDate} from "src/util/misc"
   import {Naddr} from "src/util/nostr"
-  import {getThemeColor, theme} from "src/partials/state"
+  import {themeColors, theme} from "src/partials/state"
   import {router} from "src/app/router"
   import {load, pubkey} from "src/engine"
 
@@ -52,7 +52,7 @@
       title: meta.name,
       start: secondsToDate(meta.start),
       end: secondsToDate(meta.end),
-      backgroundColor: getThemeColor($theme, isOwn ? "accent" : "gray-2"),
+      backgroundColor: $themeColors[isOwn ? "accent" : "gray-2"],
       _ctx: e,
     }
   })

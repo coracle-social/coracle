@@ -4,7 +4,7 @@
   import {info} from "src/util/logger"
   import {ensureProto} from "src/util/misc"
   import {noteKinds} from "src/util/nostr"
-  import {getThemeBackgroundGradient} from "src/partials/state"
+  import {themeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
@@ -34,13 +34,13 @@
 
   const tabs = ["notes", "likes", $env.FORCE_RELAYS.length === 0 && "relays"].filter(identity)
   const person = derivePerson(pubkey)
-  const {rgb, rgba} = getThemeBackgroundGradient()
 
   let activeTab = "notes"
   let loading = true
 
   $: ownRelays = getPubkeyRelays(pubkey)
   $: banner = imgproxy($person.profile?.banner, {w: window.innerWidth})
+  $: ({rgb, rgba} = $themeBackgroundGradient)
 
   info("Person", npub, pubkey, $person)
 

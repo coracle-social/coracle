@@ -10,7 +10,7 @@
   import {storage, session, stateKey, relays, getSetting, dufflepud} from "src/engine"
   import * as engine from "src/engine"
   import {loadAppData} from "src/app/state"
-  import {theme, getThemeVariables, appName} from "src/partials/state"
+  import {themeVariables, appName} from "src/partials/state"
   import SideNav from "src/app/SideNav.svelte"
   import Routes from "src/app/Routes.svelte"
   import Toast from "src/app/Toast.svelte"
@@ -344,7 +344,7 @@
 
   document.head.append(style)
 
-  $: style.textContent = `:root { ${getThemeVariables($theme)}; background: var(--gray-8); }`
+  $: style.textContent = `:root { ${$themeVariables}; background: var(--gray-8); }`
 
   // Scroll position
 

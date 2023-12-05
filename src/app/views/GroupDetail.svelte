@@ -4,7 +4,7 @@
   import {whereEq, assocPath, without, uniq} from "ramda"
   import {noteKinds} from "src/util/nostr"
   import {getKey} from "src/util/router"
-  import {getThemeBackgroundGradient} from "src/partials/state"
+  import {themeBackgroundGradient} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -35,7 +35,6 @@
 
   export let address, activeTab
 
-  const {rgb, rgba} = getThemeBackgroundGradient()
   const group = deriveGroup(address)
   const access = deriveGroupAccess(address)
   const status = deriveGroupStatus(address)
@@ -61,6 +60,8 @@
 
     return () => sub.close()
   })
+
+  $: ({rgb, rgba} = $themeBackgroundGradient)
 
   $: members = uniq(
     without([$group?.pubkey], ($sharedKey?.members || []).concat($adminKey?.members || [])),
