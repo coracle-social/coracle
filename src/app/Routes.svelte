@@ -30,7 +30,7 @@
 </script>
 
 {#key $stateKey}
-  <div class="pt-16 text-gray-2 lg:ml-48" class:pointer-events-none={$menuIsOpen}>
+  <div class="pt-16 pb-24 text-gray-2 lg:ml-48" class:pointer-events-none={$menuIsOpen}>
     {#if $page}
       {#key getKey($page)}
         <div in:fly={{y: 20}}>

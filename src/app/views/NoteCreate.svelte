@@ -3,7 +3,7 @@
   import {nip19} from "nostr-tools"
   import {v4 as uuid} from "uuid"
   import {join, whereEq, identity, prop, uniqBy} from "ramda"
-  import {throttle, toTitle, switcherFn} from "hurdak"
+  import {throttle, commaFormat, toTitle, switcherFn} from "hurdak"
   import {createEvent, now, Tags} from "paravel"
   import {asNostrEvent} from "src/util/nostr"
   import {currencyOptions} from "src/util/i18n"
@@ -118,7 +118,11 @@
     }
 
     for (const imeta of images.getValue()) {
-      tags.push(["imeta", ...imeta.all().map(join(" "))])
+      if (type === "listing") {
+        tags.push(["image", imeta.type("url").values().first()])
+      } else {
+        tags.push(["imeta", ...imeta.all().map(join(" "))])
+      }
     }
 
     if (opts.warning) {
@@ -277,11 +281,11 @@
         </div>
         <div class="flex items-center justify-end gap-2 text-gray-5">
           <small class="hidden sm:block">
-            {charCount} characters
+            {commaFormat(charCount)} characters
           </small>
           <span>•</span>
           <small class="hidden sm:block">
-            {wordCount} words
+            {commaFormat(wordCount)} words
           </small>
           <span>•</span>
           <small on:click={togglePreview} class="cursor-pointer underline">
@@ -289,7 +293,7 @@
           </small>
         </div>
       </Field>
-      <NoteImages bind:this={images} bind:compose />
+      <NoteImages bind:this={images} bind:compose includeInContent={type !== 'listing'} />
       <div class="flex gap-2">
         <Anchor tag="button" theme="button" type="submit" class="flex-grow text-center"
           >Send</Anchor>

@@ -4,6 +4,7 @@
 
   export let compose
   export let value = []
+  export let includeInContent = false
 
   const getUrl = imeta => imeta.type("url").values().first()
 
@@ -11,7 +12,10 @@
 
   export const addImage = imeta => {
     value = value.concat(imeta)
-    compose.write("\n" + getUrl(imeta))
+
+    if (includeInContent) {
+      compose.write("\n" + getUrl(imeta))
+    }
   }
 
   export const removeImage = imeta => {

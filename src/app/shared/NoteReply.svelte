@@ -143,7 +143,7 @@
         </Compose>
       </div>
       <div class="bg-gray-7 p-2">
-        <NoteImages bind:this={images} bind:compose />
+        <NoteImages bind:this={images} bind:compose includeInContent />
       </div>
       <div class="h-px bg-gray-7 group-[.modal]:bg-gray-6" />
       <div class="flex gap-2 rounded-b bg-gray-7 p-2 text-sm text-gray-2">

@@ -66,7 +66,7 @@
 {:else if note.kind === 30311}
   <NoteContentKind30311 {note} {showMedia} />
 {:else if note.kind === 30402}
-  <NoteContentKind30402 {note} {showMedia} />
+  <NoteContentKind30402 {note} {showEntire} {showMedia} />
 {:else if note.kind === 31337}
   <NoteContentKind31337 {note} {showMedia} />
 {:else if note.kind === 31923}
