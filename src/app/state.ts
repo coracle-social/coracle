@@ -9,6 +9,7 @@ import {router} from "src/app/router"
 import {
   env,
   pool,
+  pubkey,
   session,
   follows,
   loadDeletes,
@@ -47,7 +48,7 @@ setTimeout(() => {
     event.exceptions = redactErrorInfo(event.exceptions)
     event.breadcrumbs = redactErrorInfo(event.breadcrumbs)
 
-    event.setUser(session)
+    event.setUser(session.get())
 
     return true
   })
@@ -58,8 +59,8 @@ const sessionId = Math.random().toString().slice(2)
 export const logUsage = async (path: string) => {
   // Hash the user's pubkey so we can identify unique users without knowing
   // anything about them
-  const pubkey = session.get()?.pubkey
-  const ident = pubkey ? hash(pubkey) : "unknown"
+  const $pubkey = pubkey.get()
+  const ident = $pubkey ? hash($pubkey) : "unknown"
   const name = path.replace(/(npub|nprofile|note|nevent)1[^\/]+/g, (_, m) => `<${m}>`)
 
   if (getSetting("report_analytics")) {
@@ -98,17 +99,12 @@ setInterval(() => {
 
 // Synchronization from events to state
 
-export const loadAppData = async () => {
-  const {pubkey} = session.get()
-
-  // Make sure the user and their follows are loaded
-  await loadPubkeys([pubkey], {force: true, kinds: userKinds})
+export const loadAppData = () => {
+  // Make sure the user is loaded
+  loadPubkeys([pubkey.get()], {force: true, kinds: userKinds})
 
   // Load deletes
   loadDeletes()
-
-  // Load their network
-  loadPubkeys(Array.from(follows.get()))
 
   // Start our listener
   listenForNotifications()
@@ -118,10 +114,7 @@ export const boot = async () => {
   if (env.get().FORCE_RELAYS.length > 0) {
     router.at("message").cx({message: "Logging you in..."}).replaceModal({noEscape: true})
 
-    await Promise.all([
-      sleep(1500),
-      loadPubkeys([session.get().pubkey], {force: true, kinds: userKinds}),
-    ])
+    loadAppData(), await sleep(3000)
 
     router.at("notes").replace()
   } else {

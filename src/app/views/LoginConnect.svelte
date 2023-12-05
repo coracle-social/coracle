@@ -34,8 +34,8 @@
     uniqBy(
       prop("url"),
       // Make sure our hardcoded urls are first, since they're more likely to find a match
-      $env.DEFAULT_RELAYS.map(objOf("url")).concat(shuffle($relays))
-    )
+      $env.DEFAULT_RELAYS.map(objOf("url")).concat(shuffle($relays)),
+    ),
   )
 
   $: allRelays = $knownRelays.concat(customRelays)
@@ -59,15 +59,15 @@
       attemptedRelays.add(relay.url)
       currentRelays[i] = relay
 
+      // Kick this off but don't wait for it so we can move quickly
+      loadPubkeys([$session.pubkey], {
+        force: true,
+        relays: [relay.url],
+        kinds: userKinds,
+      })
+
       // Wait a bit before removing the relay to smooth out the ui
-      Promise.all([
-        sleep(1500),
-        loadPubkeys([$session.pubkey], {
-          force: true,
-          relays: [relay.url],
-          kinds: userKinds,
-        }),
-      ]).then(async () => {
+      sleep(1500).then(async () => {
         currentRelays[i] = null
 
         if (searching && getUserRelayUrls().length > 0) {
@@ -76,7 +76,10 @@
 
           // Reload everything, it's possible we didn't get their petnames if we got a match
           // from something like purplepag.es. This helps us avoid nuking follow lists later
-          await Promise.all([loadAppData(), sleep(1500)])
+          loadAppData()
+
+          // Artificially wait since relays might not respond quickly
+          await sleep(3000)
 
           router.at("notes").push()
         } else {

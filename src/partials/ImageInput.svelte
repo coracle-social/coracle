@@ -36,6 +36,9 @@
               // For inputs that only want one file
               value = tags.type("url").values().first()
 
+              // Debug an intermittent error
+              console.log(tags, value)
+
               dispatch("change", tags)
             }
           } finally {

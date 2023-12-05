@@ -6,7 +6,7 @@
   import {router} from "src/app/router"
 
   export let value
-  export let showMedia
+  export let showMedia = false
 
   const close = () => {
     hidden = true
