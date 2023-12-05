@@ -19,6 +19,7 @@
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
 
   export let pubkey
+  export let initialMessage = ""
 
   const person = derivePerson(pubkey)
   const channel = channels.key(pubkey)
@@ -44,7 +45,7 @@
   document.title = `DMs with ${displayPerson($person)}`
 </script>
 
-<Channel messages={$channel?.messages || []} {sendMessage}>
+<Channel messages={$channel?.messages || []} {initialMessage} {sendMessage}>
   <div slot="header" class="flex h-16 items-start gap-4 overflow-hidden p-2">
     <div class="flex items-center gap-4 pt-1">
       <Anchor

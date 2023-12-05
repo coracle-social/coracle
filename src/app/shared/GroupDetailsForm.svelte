@@ -17,7 +17,7 @@
   import Field from "src/partials/Field.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
-  import MultiSelect from "src/partials/MultiSelect.svelte"
+  import SearchSelect from "src/partials/SearchSelect.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Input from "src/partials/Input.svelte"
@@ -77,12 +77,13 @@
         <div slot="info">The group's decription</div>
       </Field>
       <Field label="Relays">
-        <MultiSelect
+        <SearchSelect
+          multiple
           search={searchRelayUrls}
           bind:value={values.relays}
           termToItem={normalizeRelayUrl}>
           <i slot="before" class="fa fa-clipboard" />
-        </MultiSelect>
+        </SearchSelect>
         <div slot="info">
           Which relays members should publish notes to. For additional privacy, select relays you
           host yourself.

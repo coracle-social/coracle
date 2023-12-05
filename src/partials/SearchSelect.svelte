@@ -11,24 +11,33 @@
   export let termToItem = null
   export let getKey: (x: any) => any = identity
   export let autofocus = null
+  export let multiple = false
+  export let defaultOptions = []
 
-  let term = ""
+  let term = multiple ? "" : getKey(value)
   let input
   let suggestions
+  let focused = false
 
-  $: suggestions?.setData(term ? search(term).slice(0, 10) : [])
+  $: suggestions?.setData(term ? search(term).slice(0, 10) : defaultOptions)
 
   const create = term => {
     select(termToItem(term))
   }
 
   const remove = item => {
-    value = reject(equals(item), value)
+    value = multiple ? reject(equals(item), value) : null
   }
 
   const select = item => {
-    value = value.concat([item])
-    term = ""
+    if (multiple) {
+      value = value.concat([item])
+      term = ""
+    } else {
+      value = item
+      term = getKey(item)
+      focused = false
+    }
   }
 
   const onKeyDown = event => {
@@ -63,22 +72,32 @@
     }
   }
 
+  const onFocus = () => {
+    focused = true
+  }
+
   const onBlur = () => {
     setTimeout(() => {
-      term = ""
+     focused = false
+
+     if (multiple) {
+        term = ""
+      }
     }, 100)
   }
 </script>
 
-<div class="text-sm">
-  {#each value as item}
-    <Chip class="mb-1 mr-1" theme="dark" onRemove={() => remove(item)}>
-      <slot name="item" context="value" {item}>
-        {item}
-      </slot>
-    </Chip>
-  {/each}
-</div>
+{#if multiple}
+  <div class="text-sm">
+    {#each value as item}
+      <Chip class="mb-1 mr-1" theme="dark" onRemove={() => remove(item)}>
+        <slot name="item" context="value" {item}>
+          {item}
+        </slot>
+      </Chip>
+    {/each}
+  </div>
+{/if}
 
 <Input
   class="cursor-text text-black outline-0"
@@ -87,12 +106,20 @@
   bind:value={term}
   bind:element={input}
   on:keydown={onKeyDown}
+  on:focus={onFocus}
   on:blur={onBlur}
   hideBefore={!$$slots.before}>
   <slot slot="before" name="before" />
+  <div slot="after" on:click={() => input.focus()}>
+    {#if defaultOptions.length > 0}
+      <div class="cursor-pointer">
+        <i class="fa fa-caret-down" />
+      </div>
+    {/if}
+  </div>
 </Input>
 
-{#if search}
+{#if focused}
   <div class="relative w-full">
     <div class="absolute z-10 w-full">
       <Suggestions

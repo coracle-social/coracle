@@ -4,7 +4,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
-  import MultiSelect from "src/partials/MultiSelect.svelte"
+  import SearchSelect from "src/partials/SearchSelect.svelte"
   import {router} from "src/app/router"
   import {publishLabel, searchTopics} from "src/engine"
 
@@ -39,7 +39,8 @@
     </p>
     <div class="flex w-full flex-col gap-8">
       <Field label="Tags">
-        <MultiSelect
+        <SearchSelect
+          multiple
           autofocus
           search={$searchTopics}
           bind:value={topics}
@@ -47,7 +48,7 @@
           <div slot="item" let:item>
             <strong>{item.name}</strong>
           </div>
-        </MultiSelect>
+        </SearchSelect>
         <div slot="info">Tag this content so other people can find it.</div>
       </Field>
       <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>

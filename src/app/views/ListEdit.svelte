@@ -8,7 +8,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
-  import MultiSelect from "src/partials/MultiSelect.svelte"
+  import SearchSelect from "src/partials/SearchSelect.svelte"
   import {router} from "src/app/router"
   import {
     userLists,
@@ -82,7 +82,7 @@
       </div>
       <div class="flex flex-col gap-1">
         <strong>Topics and People</strong>
-        <MultiSelect {search} bind:value={values.params}>
+        <SearchSelect multiple {search} bind:value={values.params}>
           <div slot="item" let:item let:context>
             {#if item[0] === "p"}
               {#if context === "value"}
@@ -94,16 +94,16 @@
               <strong>#{item[1]}</strong>
             {/if}
           </div>
-        </MultiSelect>
+        </SearchSelect>
         <p class="text-sm text-gray-4">Type "@" to look for people, and "#" to look for topics.</p>
       </div>
       <div class="flex flex-col gap-1">
         <strong>Relays</strong>
-        <MultiSelect search={searchRelayTags} bind:value={values.relays}>
+        <SearchSelect multiple search={searchRelayTags} bind:value={values.relays}>
           <div slot="item" let:item>
             {displayRelay({url: item[1]})}
           </div>
-        </MultiSelect>
+        </SearchSelect>
         <p class="text-sm text-gray-4">
           Select which relays to limit this list to. If you leave this blank, your default relays
           will be used.

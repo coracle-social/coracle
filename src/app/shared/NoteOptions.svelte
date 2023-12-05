@@ -35,11 +35,8 @@
 
   export const setView = name => {
     view = name
-
-    if (!view) {
-      relaySearch = ""
-      values = {...initialValues}
-    }
+    relaySearch = ""
+    values = {...initialValues}
   }
 
   const addRelay = url => {

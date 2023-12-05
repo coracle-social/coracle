@@ -51,7 +51,7 @@
         <slot name="item" {item} />
       </button>
     {/each}
-    {#if create}
+    {#if create && term}
       {@const i = data.length}
       <button
         class="flex cursor-pointer items-center gap-1 border-l-2 border-solid px-4 py-2 text-left text-gray-1 hover:border-accent hover:bg-gray-7"

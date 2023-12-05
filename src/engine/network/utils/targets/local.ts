@@ -1,6 +1,6 @@
 import {uniq, prop} from "ramda"
 import {sleep} from "hurdak"
-import {Emitter, hasValidSignature, matchFilters} from "paravel"
+import {Emitter, matchFilters} from "paravel"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {_events} from "src/engine/events/state"
 import {events, eventsByKind} from "src/engine/events/derived"
@@ -8,16 +8,11 @@ import {events, eventsByKind} from "src/engine/events/derived"
 const subs = new Map()
 
 const onREQ = async (target, subId, ...filters) => {
-  const {cache, getKey} = hasValidSignature
-
   // Make sure this is async, listeners don't otherwise get attached
   await sleep(10)
 
   const tryEvent = event => {
     if (event && matchFilters(filters, event)) {
-      // Make sure we're not wasting time validating signatures
-      cache.set(getKey([event]), true)
-
       target.emit("EVENT", LOCAL_RELAY_URL, subId, event)
     }
   }

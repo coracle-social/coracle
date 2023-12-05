@@ -8,7 +8,7 @@
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
-  import MultiSelect from "src/partials/MultiSelect.svelte"
+  import SearchSelect from "src/partials/SearchSelect.svelte"
   import {router} from "src/app/router"
   import {publishReport} from "src/engine"
 
@@ -42,7 +42,8 @@
     <Heading class="text-center">File a Report</Heading>
     <div class="flex w-full flex-col gap-8">
       <Field label="Content Warnings">
-        <MultiSelect
+        <SearchSelect
+          multiple
           autofocus
           search={searchContentWarnings}
           bind:value={flags}
@@ -50,7 +51,7 @@
           <div slot="item" let:item>
             <strong>{item}</strong>
           </div>
-        </MultiSelect>
+        </SearchSelect>
         <div slot="info">Flag this content as sensitive so other people can avoid it.</div>
       </Field>
       <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>

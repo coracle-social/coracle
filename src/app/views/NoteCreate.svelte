@@ -2,15 +2,18 @@
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {v4 as uuid} from "uuid"
-  import {join, identity, prop, uniqBy} from "ramda"
+  import {join, whereEq, identity, prop, uniqBy} from "ramda"
   import {throttle, toTitle, switcherFn} from "hurdak"
-  import {createEvent, Tags} from "paravel"
+  import {createEvent, now, Tags} from "paravel"
   import {asNostrEvent} from "src/util/nostr"
+  import {currencyOptions} from "src/util/i18n"
   import {dateToSeconds} from "src/util/misc"
   import {toast} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
+  import CurrencyInput from "src/partials/CurrencyInput.svelte"
+  import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
   import DateTimeInput from "src/partials/DateTimeInput.svelte"
   import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
@@ -49,6 +52,9 @@
   let opts = {
     title: "",
     warning: "",
+    summary: "",
+    price: "",
+    currency: currencyOptions.find(whereEq({code: "SAT"})),
     groups: defaultGroups,
     relays: getUserRelayUrls("write"),
     shouldWrap: true,
@@ -88,9 +94,26 @@
     if (!content) return toast.show("error", "Please provide a description.")
 
     if (type === "calendar_event") {
-      if (!opts.title) return toast.show("error", "Please name your event.")
+      if (!opts.title) {
+        return toast.show("error", "Please name your event.")
+      }
+
       if (!opts.start || !opts.end) {
         return toast.show("error", "Please provide a start and end date and time.")
+      }
+    }
+
+    if (type === "listing") {
+      if (!opts.title) {
+        return toast.show("error", "Please name your listing.")
+      }
+
+      if (isNaN(parseFloat(opts.price))) {
+        return toast.show("error", "Please provide a valid price.")
+      }
+
+      if (!opts.currency) {
+        return toast.show("error", "Please select a currency.")
       }
     }
 
@@ -116,7 +139,19 @@
 
     const template = switcherFn(type, {
       note: () => createEvent(1, {content, tags}),
-      listing: () => console.error("not implemented"),
+      listing: () =>
+        createEvent(30402, {
+          content,
+          tags: [
+            ...tags,
+            ["d", uuid()],
+            ["title", opts.title],
+            ["summary", opts.summary || ""],
+            ["location", opts.location || ""],
+            ["published_at", now().toString()],
+            ["price", opts.price, opts.currency.code],
+          ],
+        }),
       calendar_event: () =>
         createEvent(31923, {
           content,
@@ -191,6 +226,25 @@
           <Input bind:value={opts.title} />
         </Field>
       {/if}
+      {#if type === "listing"}
+        <Field label="Summary">
+          <Input bind:value={opts.summary} />
+        </Field>
+        <Field label="Price">
+          <div class="grid grid-cols-3 gap-2">
+            <div class="col-span-2">
+              <Input type="number" placeholder="0" bind:value={opts.price}>
+                <span slot="before">
+                  <CurrencySymbol code={opts.currency?.code || "USD"} />
+                </span>
+              </Input>
+            </div>
+            <div class="relative">
+              <CurrencyInput bind:value={opts.currency} />
+            </div>
+          </div>
+        </Field>
+      {/if}
       {#if type === "calendar_event"}
         <div class="grid grid-cols-2 gap-2">
           <div class="flex flex-col gap-1">
@@ -202,6 +256,11 @@
             <DateTimeInput bind:value={opts.end} />
           </div>
         </div>
+      {/if}
+      {#if type !== "note"}
+        <Field label="Location (optional)">
+          <Input bind:value={opts.location} />
+        </Field>
       {/if}
       <Field label={type === "note" ? "What do you want to say?" : "Description"}>
         <div
@@ -248,7 +307,7 @@
 </form>
 
 <NoteOptions
-  bind:this={options}
   on:change={setOpts}
+  bind:this={options}
   initialValues={opts}
   groupOptions={$groupOptions} />

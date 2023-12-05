@@ -1,6 +1,7 @@
 <script lang="ts">
   import {ellipsize} from "hurdak"
   import {parseContent} from "src/util/notes"
+  import {displayUrl} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import {displayPerson, derivePerson} from "src/engine"
 
@@ -18,7 +19,7 @@
       {" "}
     {:else if type === "link"}
       <Anchor class="underline" external href={value.url}>
-        {value.url.replace(/https?:\/\/(www\.)?/, "")}
+        {displayUrl(value.url)}
       </Anchor>
     {:else if type.startsWith("nostr:")}
       <Anchor modal class="underline" href={value.entity}>

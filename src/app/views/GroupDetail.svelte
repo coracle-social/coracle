@@ -126,7 +126,11 @@
       {/if}
     </p>
   {:else if activeTab === "notes"}
-    <Feed shouldListen hideControls filter={{kinds: noteKinds, "#a": [address]}} {relays} />
+    <Feed
+      shouldListen
+      hideControls
+      filter={{kinds: without([30402], noteKinds), "#a": [address]}}
+      {relays} />
   {:else if activeTab === "events"}
     <GroupEvents {group} {relays} />
   {:else if activeTab === "market"}

@@ -9,7 +9,7 @@
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {env, getSettings, publishSettings} from "src/engine"
-  import MultiSelect from "src/partials/MultiSelect.svelte"
+  import SearchSelect from "src/partials/SearchSelect.svelte"
   import {fuzzy} from "src/util/misc"
 
   let settings = getSettings()
@@ -57,16 +57,17 @@
         <p slot="info">
           Enter one or more urls for nostr media servers. You can find a full list of NIP-96
           compatible servers
-          <Anchor theme="anchor" href="https://github.com/quentintaranpino/NIP96-compatible-servers">here</Anchor>
+          <Anchor theme="anchor" href="https://github.com/quentintaranpino/NIP96-compatible-servers"
+            >here</Anchor>
         </p>
-        <MultiSelect
+        <SearchSelect
           search={searchUploadProviders}
           bind:value={settings.nip96_urls}
           termToItem={identity}>
           <div slot="item" let:item>
             <strong>{item}</strong>
           </div>
-        </MultiSelect>
+        </SearchSelect>
       </Field>
       <Field label="Dufflepud URL">
         <Input bind:value={settings.dufflepud_url}>
@@ -86,7 +87,9 @@
         </Input>
         <p slot="info">
           Enter a custom imgproxy url for resizing images on the fly to reduce bandwidth and improve
-          privacy. You can set up your own proxy <Anchor theme="anchor" href="https://imgproxy.net/">here</Anchor>.
+          privacy. You can set up your own proxy <Anchor theme="anchor" href="https://imgproxy.net/"
+            >here</Anchor
+          >.
         </p>
       </Field>
       {#if $env.FORCE_RELAYS.length === 0}
@@ -97,7 +100,8 @@
           <p slot="info">
             Enter a custom proxy server for multiplexing relay connections. This can drastically
             improve resource usage, but has some privacy trade-offs. Leave blank to connect to
-            relays directly. You can find the source code <Anchor theme="anchor"
+            relays directly. You can find the source code <Anchor
+              theme="anchor"
               href="https://github.com/coracle-social/multiplextr">here</Anchor
             >.
           </p>

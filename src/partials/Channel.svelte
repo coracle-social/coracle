@@ -12,6 +12,7 @@
 
   export let messages: Event[]
   export let sendMessage
+  export let initialMessage = ""
 
   let textarea
   let container
@@ -22,6 +23,8 @@
   let groupedMessages = []
 
   onMount(() => {
+    textarea.value = initialMessage
+
     scroller = createScroller(async () => limit.update(l => l + 10), {
       element: container,
       reverse: true,
@@ -77,7 +80,7 @@
     const result = reverse(
       sortBy(prop("created_at"), messages).reduce((mx, m) => {
         return mx.concat({...m, showProfile: m.pubkey !== last(mx)?.pubkey})
-      }, [])
+      }, []),
     )
 
     setTimeout(stickToBottom, 100)

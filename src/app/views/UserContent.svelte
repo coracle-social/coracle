@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {pluck, equals, identity} from "ramda"
+  import {pluck, identity} from "ramda"
   import {Tags} from "paravel"
   import {toast, appName} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
@@ -8,7 +8,7 @@
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import MultiSelect from "src/partials/MultiSelect.svelte"
+  import SearchSelect from "src/partials/SearchSelect.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
@@ -26,13 +26,13 @@
   const muteTags = new Tags($user.mutes || [])
 
   let settings = getSettings()
-  let mutedPeople = muteTags.type("p").values().all().map(getPersonWithDefault)
+  let mutedPeople = muteTags.type("p").values().uniq().all().map(getPersonWithDefault)
 
   const searchWords = q => pluck("name", $searchTopics(q))
 
   const submit = () => {
     const pubkeyMutes = mutedPeople.map(p => ["p", p.pubkey])
-    const otherMutes = muteTags.reject(equals("p")).all()
+    const otherMutes = muteTags.reject(t => t[0] === "p").all()
     const allMutes = [...pubkeyMutes, ...otherMutes]
 
     publishSettings(settings)
@@ -58,8 +58,8 @@
       <FieldInline label="Show likes on notes">
         <Toggle bind:value={settings.enable_reactions} />
         <p slot="info">
-          Show how many likes and reactions a note received. Disabling this can reduce
-          how much data {appName} uses.
+          Show how many likes and reactions a note received. Disabling this can reduce how much data {appName}
+          uses.
         </p>
       </FieldInline>
       <FieldInline label="Show images and link previews">
@@ -91,7 +91,11 @@
         <p slot="info">Notes from these people will be hidden by default.</p>
       </Field>
       <Field label="Muted words and topics">
-        <MultiSelect bind:value={settings.muted_words} search={searchWords} termToItem={identity} />
+        <SearchSelect
+          multiple
+          bind:value={settings.muted_words}
+          search={searchWords}
+          termToItem={identity} />
         <p slot="info">Notes containing these words will be hidden by default.</p>
       </Field>
       <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>

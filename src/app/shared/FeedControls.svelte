@@ -15,7 +15,7 @@
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
-  import MultiSelect from "src/partials/MultiSelect.svelte"
+  import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import {router} from "src/app/router"
   import type {DynamicFilter, Topic, Person} from "src/engine"
@@ -53,6 +53,7 @@
     {kind: 10002, label: "Relay selections"},
     {kind: 30023, label: "Long form content"},
     {kind: 31923, label: "Calendar Event"},
+    {kind: 30402, label: "Classified Listing"},
   ]
 
   const searchKinds = fuzzy(kinds, {keys: ["kind", "label"]})
@@ -282,9 +283,13 @@
         </div>
         <div class="flex flex-col gap-1">
           <strong>Kinds</strong>
-          <MultiSelect search={searchKinds} bind:value={_filter.kinds} getKey={prop("kind")}>
+          <SearchSelect
+            multiple
+            search={searchKinds}
+            bind:value={_filter.kinds}
+            getKey={prop("kind")}>
             <div slot="item" let:item>{item.label} (kind {item.kind})</div>
-          </MultiSelect>
+          </SearchSelect>
         </div>
         <div class="flex flex-col gap-1">
           <strong>Authors</strong>
@@ -298,13 +303,13 @@
         </div>
         <div class="flex flex-col gap-1">
           <strong>Topics</strong>
-          <MultiSelect search={$searchTopics} bind:value={_filter["#t"]}>
+          <SearchSelect multiple search={$searchTopics} bind:value={_filter["#t"]}>
             <div slot="item" let:item>
               <div class="-my-1">
                 #{item.name}
               </div>
             </div>
-          </MultiSelect>
+          </SearchSelect>
         </div>
         <div class="flex flex-col gap-1">
           <strong>Mentions</strong>

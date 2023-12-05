@@ -12,6 +12,13 @@
 }
 
 @font-face {
+  font-family: "Satoshis";
+  font-style: normal;
+  font-weight: 400;
+  src: local(""), url("/fonts/Satoshi Symbol.ttf") format("truetype");
+}
+
+@font-face {
   font-family: "Lato";
   font-style: normal;
   font-weight: 400;
