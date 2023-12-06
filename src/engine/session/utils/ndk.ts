@@ -2,11 +2,13 @@ import NDK, {NDKNip46Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk"
 
 export const ndkInstances = new Map()
 
-export const prepareNdk = ({pubkey, bunkerKey, bunkerToken}) => {
+export const prepareNdk = ({pubkey, bunkerKey, bunkerToken, bunkerRelay}) => {
   const localSigner = new NDKPrivateKeySigner(bunkerKey)
 
   const instance = new NDK({
-    explicitRelayUrls: ["wss://relay.f7z.io", "wss://relay.damus.io", "wss://relay.nsecbunker.com"],
+    explicitRelayUrls: bunkerRelay
+      ? [bunkerRelay]
+      : ["wss://relay.f7z.io", "wss://relay.damus.io", "wss://relay.nsecbunker.com"],
   })
 
   const nip46Signer = new NDKNip46Signer(instance, pubkey, localSigner)
@@ -21,7 +23,7 @@ export const prepareNdk = ({pubkey, bunkerKey, bunkerToken}) => {
 }
 
 export const getNdk = session => {
-  if (!session?.bunkerToken) {
+  if (!session?.bunkerKey) {
     return null
   }
 

@@ -18,8 +18,8 @@ export const loginWithPublicKey = pubkey => addSession({method: "pubkey", pubkey
 
 export const loginWithExtension = pubkey => addSession({method: "extension", pubkey})
 
-export const loginWithNsecBunker = (pubkey, bunkerToken) =>
-  addSession({method: "bunker", pubkey, bunkerKey: generatePrivateKey(), bunkerToken})
+export const loginWithNsecBunker = (pubkey, bunkerToken, bunkerRelay) =>
+  addSession({method: "bunker", pubkey, bunkerKey: generatePrivateKey(), bunkerToken, bunkerRelay})
 
 export const logoutPubkey = pubkey => {
   if (session.get().pubkey === pubkey) {
