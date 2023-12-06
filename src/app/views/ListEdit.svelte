@@ -76,7 +76,7 @@
       <div class="flex flex-col gap-1">
         <strong>Name</strong>
         <Input bind:value={values.name} placeholder="My list" />
-        <p class="text-sm text-gray-4">
+        <p class="text-sm text-light">
           Lists are identified by their name, so this has to be unique.
         </p>
       </div>
@@ -95,7 +95,7 @@
             {/if}
           </div>
         </SearchSelect>
-        <p class="text-sm text-gray-4">Type "@" to look for people, and "#" to look for topics.</p>
+        <p class="text-sm text-light">Type "@" to look for people, and "#" to look for topics.</p>
       </div>
       <div class="flex flex-col gap-1">
         <strong>Relays</strong>
@@ -104,7 +104,7 @@
             {displayRelay({url: item[1]})}
           </div>
         </SearchSelect>
-        <p class="text-sm text-gray-4">
+        <p class="text-sm text-light">
           Select which relays to limit this list to. If you leave this blank, your default relays
           will be used.
         </p>

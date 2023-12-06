@@ -22,7 +22,7 @@
           Group invitation
         {/if}
       </p>
-      <small class="text-gray-3">
+      <small class="text-lighter">
         {formatTimestamp(alert.created_at)}
       </small>
     </div>
@@ -42,7 +42,7 @@
       {/if}
     </p>
     {#if alert.content}
-      <p class="border-l-2 border-solid border-gray-5 pl-2">
+      <p class="border-l-2 border-solid border-mid pl-2">
         "{alert.content}"
       </p>
     {/if}

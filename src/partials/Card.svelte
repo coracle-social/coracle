@@ -39,11 +39,11 @@
   on:click={onClick}
   class={cx(
     $$props.class,
-    "card group rounded-2xl border border-solid border-gray-6 bg-gray-7 p-3 text-gray-2",
-    "group-[.modal]:border group-[.modal]:border-solid group-[.modal]:border-gray-6 group-[.modal]:bg-gray-8",
-    "group-[.card]:border group-[.card]:border-solid group-[.card]:border-gray-6 group-[.card]:bg-gray-8",
+    "card group rounded-2xl border border-solid border-mid bg-cocoa p-3 text-lightest",
+    "group-[.modal]:border group-[.modal]:border-solid group-[.modal]:border-mid group-[.modal]:bg-dark",
+    "group-[.card]:border group-[.card]:border-solid group-[.card]:border-mid group-[.card]:bg-dark",
     {
-      "cursor-pointer transition-all hover:bg-gray-8 group-[.card]:hover:bg-gray-7 group-[.modal]:hover:bg-gray-7":
+      "cursor-pointer transition-all hover:bg-dark group-[.card]:hover:bg-cocoa group-[.modal]:hover:bg-cocoa":
         interactive,
     }
   )}>

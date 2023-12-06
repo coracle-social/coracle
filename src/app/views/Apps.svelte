@@ -114,7 +114,7 @@
           <div class="flex min-w-0 flex-grow flex-col">
             <h1 class="text-2xl">{app.profile.display_name || app.profile.name}</h1>
             {#if app.handle}
-              <span class="text-gray-3">{displayHandle(app.handle)}</span>
+              <span class="text-lighter">{displayHandle(app.handle)}</span>
             {/if}
           </div>
         </div>

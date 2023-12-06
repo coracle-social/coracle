@@ -6,5 +6,5 @@
 
 <div
   on:click
-  class="h-3 w-3 rounded-full border border-solid border-gray-6"
+  class="h-3 w-3 rounded-full border border-solid border-mid"
   style={`background: ${hsl(stringToHue(value))}`} />

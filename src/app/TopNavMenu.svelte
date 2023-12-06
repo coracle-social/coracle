@@ -43,7 +43,7 @@
       <MenuItem href="/logout">
         <i class="fa fa-right-from-bracket mr-2" /> Logout
       </MenuItem>
-      <div class="my-2 h-px w-full bg-gray-5" />
+      <div class="my-2 h-px w-full bg-mid" />
       {#each Object.values($sessions) as s (s.pubkey)}
         {#if s.pubkey !== $pubkey}
           <MenuItem on:click={() => pubkey.set(s.pubkey)}>

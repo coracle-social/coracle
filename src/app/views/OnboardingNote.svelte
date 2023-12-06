@@ -23,7 +23,7 @@
   Your're all set! If have any questions, just ask! People around these parts are always ready to
   lend a hand.
 </p>
-<div class="border-l-2 border-solid border-gray-6 pl-4">
+<div class="border-l-2 border-solid border-mid pl-4">
   <Compose bind:this={compose} onSubmit={next} />
 </div>
 <div class="flex gap-2">

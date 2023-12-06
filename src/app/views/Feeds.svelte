@@ -67,12 +67,12 @@
               <i slot="trigger" class="fa fa-scroll cursor-pointer p-2" />
               <div
                 slot="tooltip"
-                class="flex flex-col items-start overflow-hidden rounded border border-solid border-gray-8 bg-black">
+                class="flex flex-col items-start overflow-hidden rounded border border-solid border-dark bg-black">
                 {#each $userLists as list (list.naddr)}
                   <button
                     class={cx("w-full px-3 py-2 text-left transition-colors", {
-                      "hover:bg-gray-7": $theme === "dark",
-                      "hover:bg-gray-1": $theme === "light",
+                      "hover:bg-cocoa": $theme === "dark",
+                      "hover:bg-lightest": $theme === "light",
                     })}
                     on:click={() => loadListFeed(list.naddr)}>
                     <i class="fa fa-scroll fa-sm mr-1" />
@@ -82,8 +82,8 @@
                 <button
                   on:click={showLists}
                   class={cx("w-full px-3 py-2 text-left transition-colors", {
-                    "hover:bg-gray-7": $theme === "dark",
-                    "hover:bg-gray-1": $theme === "light",
+                    "hover:bg-cocoa": $theme === "dark",
+                    "hover:bg-lightest": $theme === "light",
                   })}>
                   <i class="fa fa-cog fa-sm mr-1" /> Customize
                 </button>

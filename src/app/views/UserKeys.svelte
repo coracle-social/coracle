@@ -50,7 +50,7 @@
   </div>
   <div>
     <CopyValue label="Public Key" value={$session?.pubkey} encode={nip19.npubEncode} />
-    <small class="text-gray-2">
+    <small class="text-lightest">
       Your public key identifies your account. You can share this with people trying to find you on
       nostr.
     </small>
@@ -62,7 +62,7 @@
         label="Private Key"
         value={$session?.privkey}
         encode={nip19.nsecEncode} />
-      <small class="text-gray-2">
+      <small class="text-lightest">
         Your private key is used to prove your identity by cryptographically signing messages. <strong
           >Do not share this with anyone.</strong>
         Be careful about copying this into other apps - instead, consider using a <Anchor
@@ -78,7 +78,7 @@
         label="Bunker Key"
         value={$session?.bunkerKey}
         encode={nip19.nsecEncode} />
-      <small class="text-gray-2">
+      <small class="text-lightest">
         Your bunker key is used to authorize Coracle with your nsec bunker to sign events on your
         behalf. Save this if you would like to log in elsewhere without re-authorizing.
       </small>

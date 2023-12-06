@@ -48,7 +48,7 @@
   {#if $relay.info?.description}
     <p>{$relay.info.description}</p>
   {/if}
-  <Tabs borderClass="border-gray-6" {tabs} {activeTab} {setActiveTab} />
+  <Tabs borderClass="border-mid" {tabs} {activeTab} {setActiveTab} />
   {#if activeTab === "reviews"}
     <Feed
       onEvent={onReview}

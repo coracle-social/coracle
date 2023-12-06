@@ -61,7 +61,7 @@
     bind:this={el}>
     {#if urls.length > 1}
       <div
-        class="transition-duration-300 relative left-4 z-10 -mr-8 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-solid border-gray-1 bg-gray-8 opacity-75 transition-all hover:opacity-100"
+        class="transition-duration-300 relative left-4 z-10 -mr-8 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-solid border-lightest bg-dark opacity-75 transition-all hover:opacity-100"
         on:click={prev}>
         <i class="fa fa-chevron-left" />
       </div>
@@ -75,7 +75,7 @@
     </div>
     {#if urls.length > 1}
       <div
-        class="transition-duration-300 relative right-4 z-10 -ml-8 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-solid border-gray-1 bg-gray-8 opacity-75 transition-all hover:opacity-100"
+        class="transition-duration-300 relative right-4 z-10 -ml-8 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-solid border-lightest bg-dark opacity-75 transition-all hover:opacity-100"
         on:click={next}>
         <i class="fa fa-chevron-right" />
       </div>

@@ -18,7 +18,7 @@
       <div class="flex flex-col gap-1">
         <strong>Group members</strong>
         <PersonMultiSelect bind:value={profiles} />
-        <p class="text-sm text-gray-1">Who do you want to invite?</p>
+        <p class="text-sm text-lightest">Who do you want to invite?</p>
       </div>
       <Anchor tag="button" theme="button" type="submit" class="text-center">Done</Anchor>
     </div>

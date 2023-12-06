@@ -223,11 +223,11 @@
   <NoteMeta note={event} {showGroup} />
   <div class="note relative" class:py-2={!showParent && !topLevel}>
     {#if !showParent && !topLevel}
-      <div class="absolute -left-4 h-px w-4 bg-gray-6" style="top: 27px;" />
+      <div class="absolute -left-4 h-px w-4 bg-mid" style="top: 27px;" />
       {#if isLastReply}
-        <div class="absolute -left-4 w-px bg-gray-6" style="height: 19px;" />
+        <div class="absolute -left-4 w-px bg-mid" style="height: 19px;" />
       {:else}
-        <div class="absolute -left-4 h-full w-px bg-gray-6" />
+        <div class="absolute -left-4 h-full w-px bg-mid" />
       {/if}
     {/if}
     <div class="group relative">
@@ -242,27 +242,27 @@
             <Anchor type="unstyled" class="pr-16 text-lg font-bold" on:click={showPerson}>
               <PersonName pubkey={event.pubkey} />
             </Anchor>
-            <Anchor href={path} class="text-end text-sm text-gray-1" type="unstyled">
+            <Anchor href={path} class="text-end text-sm text-lightest" type="unstyled">
               {formatTimestamp(event.created_at)}
             </Anchor>
           </div>
           <div class="flex flex-col gap-2">
             <div class="flex gap-2">
               {#if replyId && !getParentIds(event).includes(anchor) && showParent}
-                <small class="text-gray-1">
+                <small class="text-lightest">
                   <i class="fa fa-code-merge" />
                   <Anchor class="underline" on:click={goToParent}>View Parent</Anchor>
                 </small>
               {/if}
               {#if rootId && !getRootIds(event).includes(anchor) && rootId !== replyId && showParent}
-                <small class="text-gray-1">
+                <small class="text-lightest">
                   <i class="fa fa-code-pull-request" />
                   <Anchor class="underline" on:click={goToThread}>View Thread</Anchor>
                 </small>
               {/if}
             </div>
             {#if muted}
-              <p class="border-l-2 border-solid border-gray-6 pl-4 text-gray-1">
+              <p class="border-l-2 border-solid border-mid pl-4 text-lightest">
                 You have hidden this note.
                 <Anchor
                   theme="anchor"
@@ -294,7 +294,7 @@
       <div class="relative">
         <div
           class="absolute right-0 top-0 z-10 -mr-2 -mt-4 flex h-6 w-6 cursor-pointer items-center
-                   justify-center rounded-full border border-solid border-gray-6 bg-gray-8 text-gray-2"
+                   justify-center rounded-full border border-solid border-mid bg-dark text-lightest"
           on:click={() => {
             collapsed = !collapsed
           }}>
@@ -331,15 +331,15 @@
     {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
       <div class="note-children relative ml-8 mt-2 flex flex-col">
         {#if hiddenReplies.length > 0}
-          <button class="ml-5 cursor-pointer py-2 text-gray-1 outline-0" on:click={onClick}>
+          <button class="ml-5 cursor-pointer py-2 text-lightest outline-0" on:click={onClick}>
             <i class="fa fa-up-down pr-2 text-sm" />
             Show {quantify(hiddenReplies.length, "other reply", "more replies")}
           </button>
           {#if visibleReplies.length > 0}
-            <div class="absolute -left-4 -top-2 h-14 w-px bg-gray-6" />
+            <div class="absolute -left-4 -top-2 h-14 w-px bg-mid" />
           {/if}
         {:else if visibleReplies.length > 0}
-          <div class="absolute -left-4 -top-2 h-4 w-px bg-gray-6" />
+          <div class="absolute -left-4 -top-2 h-4 w-px bg-mid" />
         {/if}
         {#if visibleReplies.length}
           <div in:fly={{y: 20}}>
@@ -357,7 +357,7 @@
         {/if}
         {#if showEntire && mutedReplies.length > 0}
           <button
-            class="ml-5 cursor-pointer py-2 text-gray-1 outline-0"
+            class="ml-5 cursor-pointer py-2 text-lightest outline-0"
             on:click={() => {
               showMutedReplies = true
             }}>

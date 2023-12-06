@@ -28,15 +28,15 @@
     switcher(theme, {
       anchor: "underline",
       button:
-        "py-2 px-4 rounded-full bg-input text-accent whitespace-nowrap border border-solid border-gray-6 hover:bg-input-hover",
+        "py-2 px-4 rounded-full bg-warm text-accent whitespace-nowrap border border-solid border-mid hover:bg-warm-l",
       "button-circle":
-        "w-10 h-10 flex justify-center items-center rounded-full bg-input text-accent whitespace-nowrap border border-solid border-gray-6 hover:bg-input-hover",
+        "w-10 h-10 flex justify-center items-center rounded-full bg-warm text-accent whitespace-nowrap border border-solid border-mid hover:bg-warm-l",
       "button-circle-dark":
-        "w-10 h-10 flex justify-center items-center rounded-full bg-gray-8 text-white whitespace-nowrap border border-solid border-gray-7",
+        "w-10 h-10 flex justify-center items-center rounded-full bg-dark text-white whitespace-nowrap border border-solid border-cocoa",
       "button-accent":
-        "py-2 px-4 rounded-full bg-accent text-white whitespace-nowrap border border-solid border-accent-light hover:bg-accent-light",
+        "py-2 px-4 rounded-full bg-accent text-white whitespace-nowrap border border-solid border-accent-l hover:bg-accent-l",
       "button-minimal":
-        "py-2 px-4 rounded-full whitespace-nowrap border border-solid border-gray-2",
+        "py-2 px-4 rounded-full whitespace-nowrap border border-solid border-lightest",
     })
   )
 

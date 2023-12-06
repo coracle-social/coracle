@@ -113,33 +113,33 @@
       </ul>
     </div>
     <div
-      class="fixed top-0 z-20 -mt-px w-full border-b border-solid border-gray-6 bg-gray-7 lg:pr-48">
+      class="fixed top-0 z-20 -mt-px w-full border-b border-solid border-mid bg-cocoa lg:pr-48">
       <slot name="header" />
     </div>
     {#if $canSign}
       <div
-        class="fixed bottom-0 z-10 flex w-full border-t border-solid border-gray-6 border-gray-7 bg-gray-6 lg:-ml-48 lg:pl-48">
+        class="fixed bottom-0 z-10 flex w-full border-t border-solid border-mid border-cocoa bg-mid lg:-ml-48 lg:pl-48">
         <textarea
           rows="3"
           autofocus
           placeholder="Type something..."
           bind:this={textarea}
           on:keydown={onKeyDown}
-          class="w-full resize-none bg-gray-6 p-2
-               text-gray-2 outline-0 placeholder:text-gray-1" />
+          class="w-full resize-none bg-mid p-2
+               text-lightest outline-0 placeholder:text-lightest" />
         <div>
           <ImageInput multi on:change={e => addImage(e.detail)}>
             <button
               slot="button"
-              class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-gray-7 p-3
-                   py-6 text-gray-2 transition-all hover:bg-accent">
+              class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-cocoa p-3
+                   py-6 text-lightest transition-all hover:bg-accent">
               <i class="fa-solid fa-paperclip fa-lg" />
             </button>
           </ImageInput>
           <button
             on:click={send}
-            class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-gray-7 p-3
-                 py-6 text-gray-2 transition-all hover:bg-accent">
+            class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-cocoa p-3
+                 py-6 text-lightest transition-all hover:bg-accent">
             <i class="fa-solid fa-paper-plane fa-lg" />
           </button>
         </div>
@@ -151,7 +151,7 @@
       class="fixed bottom-32 flex w-full cursor-pointer justify-center"
       transition:fly|local={{y: 20}}
       on:click={scrollToBottom}>
-      <div class="rounded-full bg-accent px-4 py-2 text-gray-2">New messages found</div>
+      <div class="rounded-full bg-accent px-4 py-2 text-lightest">New messages found</div>
     </div>
   {/if}
 </div>

@@ -34,7 +34,7 @@
 </script>
 
 {#if warning}
-  <div class="flex gap-2 text-gray-4">
+  <div class="flex gap-2 text-light">
     <i class="fa fa-warning m-1" />
     <p>
       This note has been flagged by the author as "{warning}".<br />

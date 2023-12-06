@@ -58,7 +58,7 @@
         <Spinner>Loading your camera...</Spinner>
       {/if}
       <div
-        class="m-auto rounded border border-solid border-gray-6 bg-gray-8 p-4"
+        class="m-auto rounded border border-solid border-mid bg-dark p-4"
         class:hidden={status !== "ready"}>
         <video class="m-auto rounded" bind:this={video} />
       </div>

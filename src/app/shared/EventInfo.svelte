@@ -25,7 +25,7 @@
     <Anchor class="text-2xl" href={router.at("events").of(address).toString()}>{name}</Anchor>
     <slot />
   </div>
-  <div class="flex gap-2 text-sm text-gray-4">
+  <div class="flex gap-2 text-sm text-light">
     {#if event.wrap}
       <span>Private</span>
       <span>•</span>
@@ -46,8 +46,8 @@
       </span>
     {/if}
   </div>
-  <div class="h-px bg-gray-6" />
-  <div class="flex items-center gap-2 text-sm text-gray-4">
+  <div class="h-px bg-mid" />
+  <div class="flex items-center gap-2 text-sm text-light">
     <i class="fa fa-clock" />
     Starts at {timeFmt.format(startDate)} — {isSingleDay
       ? timeFmt.format(endDate)

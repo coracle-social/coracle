@@ -51,7 +51,7 @@
         <Anchor on:click={resolve} theme="button-accent">Resolve</Anchor>
       </div>
     </div>
-    <p class="border-l-2 border-solid border-gray-5 pl-2">
+    <p class="border-l-2 border-solid border-mid pl-2">
       "{request.content}"
     </p>
     <p>

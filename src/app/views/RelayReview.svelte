@@ -36,7 +36,7 @@
       </div>
       <Compose
         {onSubmit}
-        class="shadow-inset rounded bg-input px-2 py-2 text-black"
+        class="shadow-inset rounded bg-warm px-2 py-2 text-black"
         style="min-height: 6rem"
         bind:this={compose} />
       <Anchor tag="button" theme="button" type="submit" class="flex-grow text-center">Send</Anchor>

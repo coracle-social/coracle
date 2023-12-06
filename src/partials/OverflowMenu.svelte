@@ -26,10 +26,10 @@
         class="relative flex flex-col gap-2"
         on:click={() => instance.hide()}>
         <div
-          class="absolute bottom-0 right-0 top-0 w-32 rounded-3xl bg-gray-8"
+          class="absolute bottom-0 right-0 top-0 w-32 rounded-3xl bg-dark"
           style="filter: blur(15px)" />
         {#each actions as { label, icon, onClick }}
-          <div class="relative z-10 cursor-pointer text-gray-2" on:click={onClick}>
+          <div class="relative z-10 cursor-pointer text-lightest" on:click={onClick}>
             <span class="absolute right-0 mr-12 mt-2 whitespace-nowrap">{label}</span>
             <Anchor theme="button-circle"><i class={`fa fa-${icon}`} /></Anchor>
           </div>

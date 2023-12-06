@@ -12,13 +12,13 @@
   const membershipLevel = deriveMembershipLevel(address)
 </script>
 
-<div class="flex gap-4 text-gray-1">
+<div class="flex gap-4 text-lightest">
   <GroupCircle {address} class="h-8 w-8" />
   <div class="flex min-w-0 flex-grow flex-col gap-4">
     <div class="flex items-center justify-between gap-4">
       <div class="flex items-center">
         <GroupName class="text-2xl" {address} />
-        <Chip class="scale-75 border-gray-3 text-gray-3">
+        <Chip class="scale-75 border-lighter text-lighter">
           <i
             class="fa"
             class:fa-lock={$membershipLevel === MembershipLevel.Private}

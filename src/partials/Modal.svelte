@@ -65,22 +65,22 @@
         <div class="pointer-events-none sticky top-0 z-20 flex w-full flex-col items-end gap-2 p-2">
           <div
             class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
-                 border border-solid border-accent-light bg-accent text-white transition-colors hover:bg-accent-light">
+                 border border-solid border-accent-l bg-accent text-white transition-colors hover:bg-accent-l">
             <i class="fa fa-times fa-lg cy-modal-close" />
           </div>
           {#if $modals.length > 1 && index > 0}
             <div
               on:click|stopPropagation={() => router.clearModals()}
               class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
-                   border border-solid border-gray-7 bg-gray-6 text-gray-1 transition-colors hover:bg-gray-5">
+                   border border-solid border-cocoa bg-mid text-lightest transition-colors hover:bg-mid">
               <i class="fa fa-angles-down fa-lg" />
             </div>
           {/if}
         </div>
       {/if}
-      <div class="absolute mt-12 h-full w-full bg-gray-7" />
+      <div class="absolute mt-12 h-full w-full bg-cocoa" />
       <div
-        class="relative h-full w-full cursor-auto border-t border-solid border-gray-6 bg-gray-7 pb-10 pt-2"
+        class="relative h-full w-full cursor-auto border-t border-solid border-mid bg-cocoa pb-10 pt-2"
         on:click|stopPropagation>
         <slot />
       </div>

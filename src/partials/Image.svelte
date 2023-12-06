@@ -46,6 +46,6 @@
 
 {#if loading}
   <slot name="placeholder">
-    <div class="placeholder h-48 rounded bg-gray-5" />
+    <div class="placeholder h-48 rounded bg-mid" />
   </slot>
 {/if}

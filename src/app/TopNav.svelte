@@ -169,7 +169,7 @@
 
 <div
   class="cy-top-nav fixed top-0 z-10 flex h-16 w-full items-center justify-between
-            border-b border-gray-6 bg-gray-7 px-2 text-gray-2">
+            border-b border-mid bg-cocoa px-2 text-lightest">
   <div>
     <div class="app-logo flex cursor-pointer items-center gap-2" on:click={toggleMenu}>
       <img alt="App Logo" src={logoUrl} class="w-10" />
@@ -195,7 +195,7 @@
 
 <div
   class={cx(
-    "search-input pointer-events-none fixed top-0 z-10 w-full px-2 text-gray-1",
+    "search-input pointer-events-none fixed top-0 z-10 w-full px-2 text-lightest",
     "cy-top-nav flex h-16 items-center justify-end gap-4",
     {
       "pr-16": $session,
@@ -216,7 +216,7 @@
     bind:this={searchInput}
     on:change={() => searchInput.focus()}
     class={cx(
-      "shadow-inset h-10 rounded-full border-gray-3 bg-input bg-input placeholder:text-gray-5",
+      "shadow-inset h-10 rounded-full border-lighter bg-warm bg-warm placeholder:text-mid",
       "pointer-events-auto cursor-pointer text-black transition-all",
       {
         "-mr-6 w-0 opacity-0": !searchIsOpen,

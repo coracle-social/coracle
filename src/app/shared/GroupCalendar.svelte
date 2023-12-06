@@ -52,7 +52,7 @@
       title: meta.name,
       start: secondsToDate(meta.start),
       end: secondsToDate(meta.end),
-      backgroundColor: $themeColors[isOwn ? "accent" : "gray-2"],
+      backgroundColor: $themeColors[isOwn ? "accent" : "lightest"],
       _ctx: e,
     }
   })

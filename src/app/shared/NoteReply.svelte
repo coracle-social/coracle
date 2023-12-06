@@ -128,10 +128,10 @@
     bind:this={container}
     on:click|stopPropagation>
     {#if showBorder}
-      <div class="absolute bottom-0 left-4 top-0 z-0 -my-2 w-px bg-gray-6" />
+      <div class="absolute bottom-0 left-4 top-0 z-0 -my-2 w-px bg-mid" />
     {/if}
-    <div class="z-10 overflow-hidden rounded-2xl border border-solid border-gray-6">
-      <div class="bg-gray-7 p-3 text-gray-2" class:rounded-b={mentions.length === 0}>
+    <div class="z-10 overflow-hidden rounded-2xl border border-solid border-mid">
+      <div class="bg-cocoa p-3 text-lightest" class:rounded-b={mentions.length === 0}>
         <Compose bind:this={compose} onSubmit={send} style="min-height: 4rem">
           <div class="flex flex-col justify-start" slot="addon">
             <button
@@ -142,12 +142,12 @@
           </div>
         </Compose>
       </div>
-      <div class="bg-gray-7 p-2">
+      <div class="bg-cocoa p-2">
         <NoteImages bind:this={images} bind:compose includeInContent />
       </div>
-      <div class="h-px bg-gray-7 group-[.modal]:bg-gray-6" />
-      <div class="flex gap-2 rounded-b bg-gray-7 p-2 text-sm text-gray-2">
-        <div class="inline-block border-r border-solid border-gray-6 py-2 pl-1 pr-3">
+      <div class="h-px bg-cocoa group-[.modal]:bg-mid" />
+      <div class="flex gap-2 rounded-b bg-cocoa p-2 text-sm text-lightest">
+        <div class="inline-block border-r border-solid border-mid py-2 pl-1 pr-3">
           <div class="flex cursor-pointer items-center gap-3">
             <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}>
               <i slot="button" class="fa fa-paperclip" />
@@ -162,7 +162,7 @@
               {displayPubkey(pubkey)}
             </Chip>
           {:else}
-            <div class="text-gray-2 inline-block py-2">No mentions</div>
+            <div class="text-lightest inline-block py-2">No mentions</div>
           {/each}
           <div class="-mb-2" />
         </div>

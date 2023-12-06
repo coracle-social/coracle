@@ -268,10 +268,10 @@
       {/if}
       <Field label={type === "note" ? "What do you want to say?" : "Description"}>
         <div
-          class="rounded-xl border border-solid border-gray-6 p-3"
-          class:bg-input={!showPreview}
+          class="rounded-xl border border-solid border-mid p-3"
+          class:bg-warm={!showPreview}
           class:text-black={!showPreview}
-          class:bg-gray-7={showPreview}>
+          class:bg-cocoa={showPreview}>
           {#if showPreview}
             <NoteContent note={{content: compose.parse(), tags: []}} />
           {/if}
@@ -279,7 +279,7 @@
             <Compose on:keyup={updateCounts} bind:this={compose} {onSubmit} />
           </div>
         </div>
-        <div class="flex items-center justify-end gap-2 text-gray-5">
+        <div class="flex items-center justify-end gap-2 text-mid">
           <small class="hidden sm:block">
             {commaFormat(charCount)} characters
           </small>

@@ -14,7 +14,7 @@
   class={cx(
     $$props.class,
     `relative inline-block shrink-0 overflow-hidden rounded-full border border-solid
-     border-gray-1 bg-cover bg-center`
+     border-lightest bg-cover bg-center`
   )}
   style="--logo-color: {primary}; --logo-bg-color: {secondary}; background-color: var(--logo-bg-color);">
   <LogoSvg

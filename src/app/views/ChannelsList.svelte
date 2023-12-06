@@ -36,7 +36,7 @@
   loadAllNip24Messages()
 </script>
 
-<div class="bg-gray-7">
+<div class="bg-cocoa">
   <Content>
     <p>
       You are using an experimental version of private messaging. If you're looking for old-style
@@ -50,7 +50,7 @@
     <Tabs tabs={["conversations", "requests"]} {activeTab} {setActiveTab}>
       <div slot="tab" let:tab class="flex gap-2">
         <div>{toTitle(tab)}</div>
-        <div class="h-6 rounded-full bg-gray-6 px-2">
+        <div class="h-6 rounded-full bg-mid px-2">
           {(tab === "conversations" ? $accepted : $requests).length}
         </div>
       </div>
@@ -60,7 +60,7 @@
         <div slot="trigger">
           <i
             class="fa fa-bell cursor-pointer"
-            class:text-gray-5={!$hasNewNip24Messages}
+            class:text-mid={!$hasNewNip24Messages}
             on:click={nip24MarkAllRead} />
         </div>
         <div slot="tooltip">Mark all as read</div>

@@ -67,17 +67,17 @@
     slot="message"
     let:message
     class={cx("max-w-xl rounded-2xl px-4 py-2", {
-      "ml-12 justify-self-end rounded-br-none bg-gray-1 text-gray-8":
+      "ml-12 justify-self-end rounded-br-none bg-lightest text-dark":
         message.pubkey === $session.pubkey,
-      "mr-12 rounded-bl-none bg-gray-6": message.pubkey !== $session.pubkey,
+      "mr-12 rounded-bl-none bg-mid": message.pubkey !== $session.pubkey,
     })}>
     <div class="break-words">
       <NoteContent showEntire note={{...message, content: message.nip04.plaintext}} />
     </div>
     <small
       class="mt-1"
-      class:text-gray-7={message.pubkey === $session.pubkey}
-      class:text-gray-1={message.pubkey !== $session.pubkey}>
+      class:text-cocoa={message.pubkey === $session.pubkey}
+      class:text-lightest={message.pubkey !== $session.pubkey}>
       {formatTimestamp(message.created_at)}
     </small>
   </div>

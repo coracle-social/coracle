@@ -38,13 +38,13 @@
 
 {#if data.length > 0 || (create && term)}
   <div
-    class="z-10 mt-2 flex flex-col overflow-hidden rounded border border-solid border-gray-6"
+    class="z-10 mt-2 flex flex-col overflow-hidden rounded border border-solid border-mid"
     in:fly={{y: 20}}>
     {#each data as item, i (getKey(item))}
       <button
-        class="cursor-pointer border-l-2 border-solid px-4 py-2 text-left text-gray-1 hover:border-accent hover:bg-gray-7"
-        class:bg-gray-8={index !== i}
-        class:bg-gray-7={index === i}
+        class="cursor-pointer border-l-2 border-solid px-4 py-2 text-left text-lightest hover:border-accent hover:bg-cocoa"
+        class:bg-dark={index !== i}
+        class:bg-cocoa={index === i}
         class:border-transparent={index !== i}
         class:border-accent={index === i}
         on:click|preventDefault={() => select(item)}>
@@ -54,9 +54,9 @@
     {#if create && term}
       {@const i = data.length}
       <button
-        class="flex cursor-pointer items-center gap-1 border-l-2 border-solid px-4 py-2 text-left text-gray-1 hover:border-accent hover:bg-gray-7"
-        class:bg-gray-8={index !== i}
-        class:bg-gray-7={index === i}
+        class="flex cursor-pointer items-center gap-1 border-l-2 border-solid px-4 py-2 text-left text-lightest hover:border-accent hover:bg-cocoa"
+        class:bg-dark={index !== i}
+        class:bg-cocoa={index === i}
         class:border-transparent={index !== i}
         class:border-accent={index === i}
         on:click|preventDefault={() => create(term)}>

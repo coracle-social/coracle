@@ -11,8 +11,8 @@
     {
       "h-12 w-12": size === 'small',
       "h-16 w-16": size === 'large',
-      "text-white border-accent-light bg-accent hover:bg-accent-light": theme === 'primary',
-      "border-gray-8 bg-gray-7 text-gray-1 hover:bg-gray-6": theme === 'secondary'
+      "text-white border-accent-l bg-accent hover:bg-accent-l": theme === 'primary',
+      "border-dark bg-cocoa text-lightest hover:bg-mid": theme === 'secondary'
     }
    )
 </script>

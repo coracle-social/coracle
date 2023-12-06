@@ -36,7 +36,7 @@
     href={onClick ? null : url}
     on:click={onClick}
     style="background-color: rgba(15, 15, 14, 0.5)"
-    class="relative flex flex-col overflow-hidden rounded-xl border border-solid border-gray-6">
+    class="relative flex flex-col overflow-hidden rounded-xl border border-solid border-mid">
     {#if url.match(/open.spotify.com/)}
       {@const id = last(url.split("?")[0].match(/[a-z]+\/[0-9A-z]+$/))}
       {@const src = `https://open.spotify.com/embed/${id}`}
@@ -66,7 +66,7 @@
             src={imgproxy(image)}
             class="max-h-96 object-contain object-center" />
         {/if}
-        <div class="h-px bg-gray-6" />
+        <div class="h-px bg-mid" />
         {#if title}
           <div class="flex flex-col bg-white px-4 py-2 text-black">
             <strong class="overflow-hidden text-ellipsis whitespace-nowrap">{title}</strong>
@@ -74,7 +74,7 @@
           </div>
         {/if}
       {:catch}
-        <p class="mb-1 px-12 py-24 text-center text-gray-5">
+        <p class="mb-1 px-12 py-24 text-center text-mid">
           Unable to load a preview for {url}
         </p>
       {/await}
@@ -83,7 +83,7 @@
       <div
         on:click|preventDefault={onClose}
         class="absolute right-0 top-0 m-1 flex h-6 w-6 cursor-pointer items-center justify-center
-         rounded-full border border-solid border-gray-6 bg-white text-black opacity-50 shadow">
+         rounded-full border border-solid border-mid bg-white text-black opacity-50 shadow">
         <i class="fa fa-times" />
       </div>
     {/if}

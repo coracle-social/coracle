@@ -205,7 +205,7 @@
   }
 </script>
 
-<div class="flex justify-between text-gray-1" on:click|stopPropagation>
+<div class="flex justify-between text-lightest" on:click|stopPropagation>
   <div class="flex">
     <button
       class={cx("relative w-16 pt-1 text-left transition-all hover:pb-1 hover:pt-0", {
@@ -305,7 +305,7 @@
             {#each zaps as zap}
               <div class="flex flex-col gap-1">
                 <PersonBadge pubkey={zap.request.pubkey} />
-                <span class="ml-16 text-sm text-gray-5"
+                <span class="ml-16 text-sm text-mid"
                   >{formatSats(zap.invoiceAmount / 1000)} sats</span>
               </div>
             {/each}
@@ -340,7 +340,7 @@
         <div class="flex flex-col gap-2">
           {#if address}
             <Card invertColors interactive on:click={() => crossPost()}>
-              <div class="flex gap-4 text-gray-1">
+              <div class="flex gap-4 text-lightest">
                 <i class="fa fa-earth-asia fa-2x" />
                 <div class="flex min-w-0 flex-grow flex-col gap-4">
                   <p class="text-2xl">Global</p>

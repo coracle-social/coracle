@@ -344,7 +344,7 @@
 
   document.head.append(style)
 
-  $: style.textContent = `:root { ${$themeVariables}; background: var(--gray-8); }`
+  $: style.textContent = `:root { ${$themeVariables}; background: var(--dark); }`
 
   // Scroll position
 

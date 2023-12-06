@@ -17,7 +17,7 @@
       {displayGroup(group)}
     </h2>
     {#if group.description}
-      <p class="text-start text-gray-1">
+      <p class="text-start text-lightest">
         {ellipsize(group.description, 300)}
       </p>
     {/if}

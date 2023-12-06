@@ -88,7 +88,7 @@
     <div slot="tab" let:tab class="flex gap-2">
       <div>{tab}</div>
       {#if tab === tabs[2] && uncheckedOtherNotifications.length > 0}
-        <div class="h-6 rounded-full bg-gray-6 px-2">
+        <div class="h-6 rounded-full bg-mid px-2">
           {uncheckedOtherNotifications.length}
         </div>
       {/if}
@@ -99,8 +99,8 @@
       {@const lineText = getLineText(i)}
       {#if lineText}
         <div class="flex items-center gap-4">
-          <small class="whitespace-nowrap text-gray-1">{lineText}</small>
-          <div class="h-px w-full bg-gray-6" />
+          <small class="whitespace-nowrap text-lightest">{lineText}</small>
+          <div class="h-px w-full bg-mid" />
         </div>
       {/if}
       {#if !notification.event}

@@ -10,6 +10,6 @@
 </script>
 
 <div class="flex flex-col gap-1 px-12">
-  <p class="text-gray-4 text-center">{monthFmt.format(date)}</p>
+  <p class="text-light text-center">{monthFmt.format(date)}</p>
   <p class="text-3xl text-center">{dayFmt.format(date)}</p>
 </div>

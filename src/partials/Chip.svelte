@@ -8,8 +8,8 @@
     $$props.class,
     "inline-block rounded-full border border-solid py-1 px-2 cy-chip",
     {
-      "border-gray-1": theme === "dark",
-      "border-gray-8": theme === "light",
+      "border-lightest": theme === "dark",
+      "border-dark": theme === "light",
     }
   )
 </script>

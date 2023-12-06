@@ -4,7 +4,7 @@
   export let tabs: string[]
   export let activeTab
   export let setActiveTab
-  export let borderClass = "border-gray-7"
+  export let borderClass = "border-cocoa"
 </script>
 
 <div
@@ -12,7 +12,7 @@
   <div class="flex">
     {#each tabs as tab}
       <button
-        class="flex cursor-pointer gap-2 border-solid border-gray-6 px-8 py-4 hover:border-b"
+        class="flex cursor-pointer gap-2 border-solid border-mid px-8 py-4 hover:border-b"
         class:border-b={activeTab === tab}
         on:click|preventDefault={() => setActiveTab(tab)}>
         <slot name="tab" {tab}>{toTitle(tab)}</slot>

@@ -39,15 +39,15 @@
       </span>
     </div>
     {#if location}
-      <div class="flex items-center gap-2 text-sm text-gray-4">
+      <div class="flex items-center gap-2 text-sm text-light">
         <i class="fa fa-location-dot" />
         {location}
       </div>
     {/if}
     {#if summary !== note.content}
-      <p class="text-gray-3">{summary}</p>
+      <p class="text-lighter">{summary}</p>
     {/if}
-    <div class="h-px bg-gray-6" />
+    <div class="h-px bg-mid" />
     <NoteContentKind1 {note} {showEntire} />
   </div>
   {#if showMedia}

@@ -83,14 +83,14 @@
     <p>to {displayPubkey(pubkey)}</p>
   </div>
   {#if zap.confirmed}
-    <div class="flex items-center justify-center gap-2 text-gray-1">
+    <div class="flex items-center justify-center gap-2 text-lightest">
       <i class="fa fa-champagne-glasses" />
       <p>Success! Zap confirmed.</p>
     </div>
   {:else if zap.invoice}
     <QRCode code={zap.invoice} />
-    <p class="text-center text-gray-1">Copy or scan using a lightning wallet to pay your zap.</p>
-    <div class="flex items-center justify-center gap-2 text-gray-1">
+    <p class="text-center text-lightest">Copy or scan using a lightning wallet to pay your zap.</p>
+    <div class="flex items-center justify-center gap-2 text-lightest">
       <i class="fa fa-circle-notch fa-spin" />
       Waiting for confirmation...
     </div>

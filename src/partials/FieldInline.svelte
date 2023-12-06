@@ -15,7 +15,7 @@
       <slot />
     </div>
   </slot>
-  <p class="text-sm text-gray-4">
+  <p class="text-sm text-lighter">
     <slot name="info" />
   </p>
 </div>

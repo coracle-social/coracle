@@ -19,8 +19,8 @@
 </script>
 
 <ul
-  class="fixed bottom-0 left-0 top-0 z-20 mt-16 w-48 overflow-hidden border-r border-gray-6 bg-gray-7 pb-20
-         pt-4 text-gray-2 shadow-xl transition-all lg:ml-0"
+  class="fixed bottom-0 left-0 top-0 z-20 mt-16 w-48 overflow-hidden border-r border-mid bg-cocoa pb-20
+         pt-4 text-lightest shadow-xl transition-all lg:ml-0"
   class:-ml-48={!$menuIsOpen}>
   <NavItem on:click={() => router.at('notes').push({key: randomId()})}>
     <i class="fa fa-rss mr-2" /> Feed
@@ -50,7 +50,7 @@
   <NavItem href="/apps">
     <i class="fa fa-box mr-2" /> Apps
   </NavItem>
-  <li class="mx-3 my-4 h-px bg-gray-6" />
+  <li class="mx-3 my-4 h-px bg-mid" />
   <NavItem on:click={toggleTheme}>
     <i class="fa fa-lightbulb mr-2" /> Theme
   </NavItem>
@@ -65,7 +65,7 @@
   <NavItem external href="https://github.com/coracle-social/coracle/issues/new">
     <i class="fa fa-message mr-2" /> Feedback
   </NavItem>
-  <li class="absolute bottom-0 flex w-full justify-center gap-2 p-2 text-sm text-gray-5">
+  <li class="absolute bottom-0 flex w-full justify-center gap-2 p-2 text-sm text-mid">
     <Anchor external theme="anchor" href="/public/terms.html">Terms</Anchor>
     &bull;
     <Anchor external theme="anchor" href="/public/privacy.html">Privacy</Anchor>

@@ -24,7 +24,7 @@
 </script>
 
 <div
-  class={cx("rounded-xl border border-solid border-gray-6 bg-gray-8 p-4", {
+  class={cx("rounded-xl border border-solid border-mid bg-dark p-4", {
     "m-auto max-w-sm": !fullWidth,
   })}>
   <div class="m-auto flex max-w-sm flex-col gap-4">
