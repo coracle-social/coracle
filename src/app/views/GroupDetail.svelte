@@ -31,6 +31,7 @@
     deriveGroupStatus,
     deriveGroupAccess,
     updateCurrentSession,
+    loadGroups,
   } from "src/engine"
   import {router} from "src/app/router"
 
@@ -55,6 +56,7 @@
       .push({key: getKey(router.current.get())})
 
   onMount(() => {
+    loadGroups([address])
     updateCurrentSession(assocPath(["groups", address, "last_synced"], now()))
 
     const sub = subscribe({relays, filters: [{kinds: [1059], "#p": recipients, since}]})

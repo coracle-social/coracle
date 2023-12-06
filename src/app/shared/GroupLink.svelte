@@ -1,12 +1,14 @@
 <script lang="ts">
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/router"
-  import {groups, displayGroup} from 'src/engine'
+  import {deriveGroup, displayGroup, loadGroups} from "src/engine"
 
   export let address
 
-  const group = groups.key(address)
+  const group = deriveGroup(address)
   const path = router.at("groups").of(address).at("notes").toString()
+
+  loadGroups([address])
 </script>
 
 <span class={$$props.class}>
