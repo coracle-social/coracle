@@ -14,6 +14,7 @@ export type Session = {
   privkey?: string
   bunkerKey?: string
   bunkerToken?: string
+  bunkerRelay?: string
   settings?: Record<string, any>
   settings_updated_at?: number
   groups_last_synced?: number
