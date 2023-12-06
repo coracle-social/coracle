@@ -1,5 +1,5 @@
 import {prop, last, fromPairs} from "ramda"
-import {randomId, range} from "hurdak"
+import {randomId} from "hurdak"
 import type {Writable} from "svelte/store"
 import {writable, derived, get} from "svelte/store"
 import {parseHex} from "src/util/html"
@@ -47,7 +47,7 @@ const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
 
 export const theme = synced("ui/theme", prefersDark ? "dark" : "light")
 
-export const themeColors = derived(theme, $theme => $theme === 'dark' ? DARK_THEME : LIGHT_THEME)
+export const themeColors = derived(theme, $theme => ($theme === "dark" ? DARK_THEME : LIGHT_THEME))
 
 export const themeVariables = derived(themeColors, $colors => {
   return Object.entries($colors)

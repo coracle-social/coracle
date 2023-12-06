@@ -23,20 +23,18 @@
 
   $: className = cx(
     $$props.class,
-    "transition-all cursor-pointer",
+    "transition-all cursor-pointer staatliches text-xl",
     {"opacity-50 pointer-events-none": loading || disabled},
     switcher(theme, {
       anchor: "underline",
       button:
-        "py-2 px-4 rounded-full bg-warm text-accent whitespace-nowrap border border-solid border-mid hover:bg-warm-l",
+        "h-7 px-6 rounded bg-warm text-accent whitespace-nowrap hover:bg-warm-l",
       "button-circle":
-        "w-10 h-10 flex justify-center items-center rounded-full bg-warm text-accent whitespace-nowrap border border-solid border-mid hover:bg-warm-l",
-      "button-circle-dark":
-        "w-10 h-10 flex justify-center items-center rounded-full bg-dark text-white whitespace-nowrap border border-solid border-cocoa",
+        "w-10 h-10 flex justify-center items-center rounded bg-warm text-accent whitespace-nowrap hover:bg-warm-l",
       "button-accent":
-        "py-2 px-4 rounded-full bg-accent text-white whitespace-nowrap border border-solid border-accent-l hover:bg-accent-l",
+        "h-7 px-6 rounded bg-accent text-white whitespace-nowrap hover:bg-accent-l",
       "button-minimal":
-        "py-2 px-4 rounded-full whitespace-nowrap border border-solid border-lightest",
+        "h-7 px-6 rounded whitespace-nowrap",
     })
   )
 

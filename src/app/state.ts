@@ -10,11 +10,15 @@ import {
   env,
   pool,
   pubkey,
+  derived,
   session,
   loadDeletes,
   loadPubkeys,
   getUserRelayUrls,
   listenForNotifications,
+  hasNewNip04Messages,
+  hasNewNip24Messages,
+  canUseGiftWrap,
   getSetting,
   dufflepud,
 } from "src/engine"
@@ -22,6 +26,13 @@ import {
 // Menu
 
 export const menuIsOpen = writable(false)
+
+export const toggleMenu = () => menuIsOpen.update(x => !x)
+
+export const hasNewDMs = derived(
+  [hasNewNip04Messages, hasNewNip24Messages, canUseGiftWrap],
+  ([nip04, nip24, canUseGiftWrap]) => nip04 || (canUseGiftWrap && nip24),
+)
 
 // Redact long strings, especially hex and bech32 keys which are 64 and 63
 // characters long, respectively. Put the threshold a little lower in case

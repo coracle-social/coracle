@@ -1,45 +1,38 @@
 <script lang="ts">
   import QrScanner from "qr-scanner"
-  import {onDestroy} from "svelte"
+  import {onDestroy, createEventDispatcher} from "svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Content from "src/partials/Content.svelte"
 
-  export let onScan
+  export let isOpen
 
   let video
   let scanner
-  let status = "closed"
+
+  const dispatch = createEventDispatcher()
 
   const onDecode = result => {
-    onScan(result.data)
+    dispatch('scan', result.data)
   }
 
-  export const start = () => {
-    status = "loading"
+  const start = () => {
+    setTimeout(async () => {
+      const s = new QrScanner(video, onDecode, {
+        returnDetailedScanResult: true,
+      })
 
-    scanner = new Promise(resolve => {
-      setTimeout(async () => {
-        const scanner = new QrScanner(video, onDecode, {
-          returnDetailedScanResult: true,
-        })
+      await s.start()
 
-        await scanner.start()
+      scanner = s
 
-        if (status === "closed") {
-          stop()
-        } else {
-          resolve(scanner)
-
-          status = "ready"
-        }
-      }, 1000)
-    })
+      if (!isOpen) {
+        stop()
+      }
+    }, 1000)
   }
 
-  export const stop = async () => {
-    status = "closed"
-
+  const stop = async () => {
     if (scanner) {
       const s = await scanner
 
@@ -48,13 +41,19 @@
     }
   }
 
+  $: {
+    if (!isOpen) {
+      stop()
+    }
+  }
+
   onDestroy(stop)
 </script>
 
-{#if status !== "closed"}
+{#if isOpen}
   <Modal onEscape={stop}>
     <Content>
-      {#if status === "loading"}
+      {#if !scanner}
         <Spinner>Loading your camera...</Spinner>
       {/if}
       <div

@@ -10,8 +10,7 @@
 <div
   class={cx(
     $$props.class,
-    `inline-block shrink-0 overflow-hidden rounded-full border border-solid
-     border-lightest bg-black bg-cover bg-center`
+    "inline-block shrink-0 overflow-hidden rounded-full bg-black bg-cover bg-center"
   )}
   style={`background-image: url(${url}); ${$$props.style || ""}`}>
   <slot />
