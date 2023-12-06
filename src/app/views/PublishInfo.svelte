@@ -56,11 +56,12 @@
     {/if}
     <div class="flex justify-center gap-2">
       {#if progress.succeeded.size < progress.attempted.size}
-        <Anchor theme="button" on:click={retry}>Try again</Anchor>
+        <Anchor button on:click={retry}>Try again</Anchor>
       {/if}
       {#if progress.succeeded.size > 0}
         <Anchor
-          theme="button-accent"
+          button
+          accent
           href={router
             .at("notes")
             .of(eid, {relays: Array.from(succeeded)})

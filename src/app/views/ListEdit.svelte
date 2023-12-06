@@ -109,7 +109,7 @@
           will be used.
         </p>
       </div>
-      <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>
+      <Anchor button tag="button" type="submit">Save</Anchor>
     </div>
   </Content>
 </form>

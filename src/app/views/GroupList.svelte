@@ -71,7 +71,7 @@
       <i class="fa fa-circle-nodes fa-lg" />
       <h2 class="staatliches text-2xl">Your groups</h2>
     </div>
-    <Anchor modal theme="button-accent" href="/groups/new">
+    <Anchor modal button accent href="/groups/new">
       <i class="fa-solid fa-plus" /> Create Group
     </Anchor>
   </div>

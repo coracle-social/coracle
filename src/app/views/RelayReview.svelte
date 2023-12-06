@@ -39,7 +39,7 @@
         class="shadow-inset rounded bg-warm px-2 py-2 text-black"
         style="min-height: 6rem"
         bind:this={compose} />
-      <Anchor tag="button" theme="button" type="submit" class="flex-grow text-center">Send</Anchor>
+      <Anchor button tag="button" type="submit" class="flex-grow">Send</Anchor>
     </div>
   </Content>
 </form>

@@ -39,7 +39,7 @@
           events in your database.
         </p>
         <div class="flex justify-center">
-          <Anchor modal theme="button-accent" href="/settings/data/export">Create Backup</Anchor>
+          <Anchor modal button accent href="/settings/data/export">Create Backup</Anchor>
         </div>
       </Content>
     </Card>
@@ -48,7 +48,7 @@
         <h3 class="text-center text-xl sm:h-12">Import Database</h3>
         <p class="sm:h-24">Upload a nostr export file to pull events into your database.</p>
         <div class="flex justify-center">
-          <Anchor modal theme="button-accent" href="/settings/data/import">Upload Backup</Anchor>
+          <Anchor modal button accent href="/settings/data/import">Upload Backup</Anchor>
         </div>
       </Content>
     </Card>

@@ -87,7 +87,7 @@
         <ImageInput bind:value={values.banner} icon="panorama" />
         <div slot="info">In most clients, this image will be shown on your profile page.</div>
       </Field>
-      <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>
+      <Anchor button tag="button" type="submit">Save</Anchor>
     </div>
   </Content>
 </form>

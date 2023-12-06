@@ -47,8 +47,8 @@
         {/if}
       </p>
       <div class="hidden gap-2 sm:flex">
-        <Anchor on:click={dismiss} theme="button">Dismiss</Anchor>
-        <Anchor on:click={resolve} theme="button-accent">Resolve</Anchor>
+        <Anchor on:click={dismiss} button>Dismiss</Anchor>
+        <Anchor on:click={resolve} button accent>Resolve</Anchor>
       </div>
     </div>
     <p class="border-l-2 border-solid border-mid pl-2">
@@ -74,8 +74,8 @@
       {/if}
     </p>
     <div class="flex gap-2 sm:hidden">
-      <Anchor on:click={dismiss} theme="button">Dismiss</Anchor>
-      <Anchor on:click={resolve} theme="button-accent">Resolve</Anchor>
+      <Anchor on:click={dismiss} button>Dismiss</Anchor>
+      <Anchor on:click={resolve} button accent>Resolve</Anchor>
     </div>
   </Content>
 </Card>

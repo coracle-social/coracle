@@ -47,13 +47,13 @@
   {#if $session}
     <TopNavMenu />
   {:else}
-    <Anchor theme="button-accent" on:click={showLogin}>Log In</Anchor>
+    <Anchor button accent on:click={showLogin}>Log In</Anchor>
   {/if}
 </div>
 
 <div class="fixed bottom-0 left-0 right-0 flex justify-between items-center bg-dark py-2 px-4">
   <SearchAndScan />
-  <Anchor theme="button-accent">Post +</Anchor>
+  <Anchor button accent>Post +</Anchor>
   <div class="flex items-center" on:click={toggleMenu}>
     <i class="fa fa-bars text-warm fa-2xl" />
     {#if $session}

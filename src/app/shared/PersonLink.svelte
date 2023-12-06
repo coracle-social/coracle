@@ -12,7 +12,7 @@
 </script>
 
 <span class={$$props.class}>
-  @<Anchor modal theme="anchor" href={path}>
+  @<Anchor modal underline href={path}>
     {displayPerson($person)}
   </Anchor>
 </span>

@@ -81,7 +81,7 @@
         </div>
         <Input type="range" bind:value={settings.min_wot_score} min={-10} max={10} />
         <p slot="info">
-          Select a minimum <Anchor theme="anchor" modal href="/help/web-of-trust"
+          Select a minimum <Anchor underline modal href="/help/web-of-trust"
             >web-of-trust</Anchor>
           score. Notes from accounts with a lower score will be automatically hidden.
         </p>
@@ -98,7 +98,7 @@
           termToItem={identity} />
         <p slot="info">Notes containing these words will be hidden by default.</p>
       </Field>
-      <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>
+      <Anchor button tag="button" type="submit">Save</Anchor>
     </div>
   </Content>
 </form>

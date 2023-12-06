@@ -93,6 +93,6 @@
       <Input type="range" bind:value={graceHours} min={0} max={72} />
       <div slot="info">Set how long the old key will still be valid for posting to the group.</div>
     </Field>
-    <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>
+    <Anchor button tag="button" type="submit">Save</Anchor>
   </Content>
 </form>

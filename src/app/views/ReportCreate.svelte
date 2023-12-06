@@ -54,7 +54,7 @@
         </SearchSelect>
         <div slot="info">Flag this content as sensitive so other people can avoid it.</div>
       </Field>
-      <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>
+      <Anchor button tag="button" type="submit">Save</Anchor>
     </div>
   </Content>
 </form>

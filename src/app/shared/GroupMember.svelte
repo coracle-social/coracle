@@ -25,7 +25,7 @@
   <PersonSummary inert {pubkey}>
     <div slot="actions" on:click|stopPropagation>
       {#if $adminKey && pubkey !== $session.pubkey}
-        <Anchor on:click={remove} theme="button-accent">Remove</Anchor>
+        <Anchor on:click={remove} button accent>Remove</Anchor>
       {/if}
     </div>
   </PersonSummary>

@@ -19,4 +19,4 @@
   When you’re ready to dive in, click below and we’ll guide you through the process of creating an
   account.
 </p>
-<Anchor theme="button-accent" class="text-center" on:click={next}>Let's go!</Anchor>
+<Anchor button accent class="text-center" on:click={next}>Let's go!</Anchor>

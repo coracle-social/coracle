@@ -16,7 +16,7 @@
 <Content>
   <div class="flex items-center justify-between">
     <Heading>Your Lists</Heading>
-    <Anchor theme="button-accent" on:click={createFeed}>
+    <Anchor button accent on:click={createFeed}>
       <i class="fa fa-plus" /> List
     </Anchor>
   </div>

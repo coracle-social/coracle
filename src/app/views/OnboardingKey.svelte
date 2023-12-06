@@ -31,6 +31,6 @@
 </Input>
 <p>If you don't want to save your keys now, you can find them later in {appName}'s settings.</p>
 <div class="flex gap-2">
-  <Anchor theme="button" on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
-  <Anchor theme="button-accent" class="flex-grow text-center" on:click={next}>Got it</Anchor>
+  <Anchor button on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
+  <Anchor button accent class="flex-grow" on:click={next}>Got it</Anchor>
 </div>

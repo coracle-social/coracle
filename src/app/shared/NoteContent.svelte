@@ -38,7 +38,7 @@
     <i class="fa fa-warning m-1" />
     <p>
       This note has been flagged by the author as "{warning}".<br />
-      <Anchor theme="anchor" on:click={ignoreWarning}>Show anyway</Anchor>
+      <Anchor underline on:click={ignoreWarning}>Show anyway</Anchor>
     </p>
   </div>
 {:else if note.kind === 0}

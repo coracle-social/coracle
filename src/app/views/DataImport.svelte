@@ -82,8 +82,7 @@
           uncompressed version.
         </p>
       </Field>
-      <Anchor {loading} tag="button" theme="button" type="submit" class="text-center"
-        >Import</Anchor>
+      <Anchor {loading} button tag="button" type="submit" class="text-center">Import</Anchor>
     </div>
   </Content>
 </form>

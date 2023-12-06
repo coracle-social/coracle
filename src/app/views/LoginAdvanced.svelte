@@ -30,7 +30,7 @@
         <h2 class="text-lg font-bold">Log in with bunker</h2>
         <p>
           Keep your keys secure by storing them in an
-          <Anchor external stopPropagation theme="anchor" href={BUNKER_URL}>Nsec Bunker</Anchor>.
+          <Anchor external stopPropagation underline href={BUNKER_URL}>Nsec Bunker</Anchor>.
         </p>
       </Content>
     </Card>

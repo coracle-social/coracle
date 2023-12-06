@@ -31,7 +31,7 @@
         {#each actions as { label, icon, onClick }}
           <div class="relative z-10 cursor-pointer text-lightest" on:click={onClick}>
             <span class="absolute right-0 mr-12 mt-2 whitespace-nowrap">{label}</span>
-            <Anchor theme="button-circle"><i class={`fa fa-${icon}`} /></Anchor>
+            <Anchor button circle><i class={`fa fa-${icon}`} /></Anchor>
           </div>
         {/each}
       </div>

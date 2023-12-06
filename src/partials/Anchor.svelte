@@ -10,7 +10,10 @@
   export let disabled = false
   export let loading = false
   export let modal = false
-  export let theme = "unstyled"
+  export let button = false
+  export let accent = false
+  export let circle = false
+  export let underline = false
   export let type = null
   export let href = null
   export let tag = "a"
@@ -21,22 +24,14 @@
 
   let className
 
-  $: className = cx(
-    $$props.class,
-    "transition-all cursor-pointer staatliches text-xl",
-    {"opacity-50 pointer-events-none": loading || disabled},
-    switcher(theme, {
-      anchor: "underline",
-      button:
-        "h-7 px-6 rounded bg-warm text-accent whitespace-nowrap hover:bg-warm-l",
-      "button-circle":
-        "w-10 h-10 flex justify-center items-center rounded bg-warm text-accent whitespace-nowrap hover:bg-warm-l",
-      "button-accent":
-        "h-7 px-6 rounded bg-accent text-white whitespace-nowrap hover:bg-accent-l",
-      "button-minimal":
-        "h-7 px-6 rounded whitespace-nowrap",
-    })
-  )
+  $: className = cx($$props.class, "transition-all cursor-pointer", {
+    underline: underline,
+    "opacity-50 pointer-events-none": loading || disabled,
+    "bg-warm text-accent hover:bg-warm-l": button && !accent,
+    "bg-accent text-white hover:bg-accent-l": button && accent,
+    "text-xl staatliches h-7 px-6 rounded whitespace-nowrap flex justify-center items-center gap-2": button,
+    "w-10 h-10 flex justify-center items-center rounded-full": circle,
+  })
 
   const onClick = e => {
     if (stopPropagation) {

@@ -295,8 +295,7 @@
       </Field>
       <NoteImages bind:this={images} bind:compose includeInContent={type !== 'listing'} />
       <div class="flex gap-2">
-        <Anchor tag="button" theme="button" type="submit" class="flex-grow text-center"
-          >Send</Anchor>
+        <Anchor button tag="button" type="submit" class="flex-grow">Send</Anchor>
         <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)} />
       </div>
       <small

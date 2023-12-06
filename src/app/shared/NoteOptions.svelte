@@ -144,7 +144,7 @@
             </p>
           </FieldInline>
         {/if}
-        <Anchor tag="button" theme="button" type="submit" class="text-center">Done</Anchor>
+        <Anchor button tag="button" type="submit">Done</Anchor>
       </Content>
     </form>
   </Modal>

@@ -34,8 +34,8 @@
   follows list at any time.
 </p>
 <div class="flex gap-2">
-  <Anchor theme="button" on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
-  <Anchor theme="button-accent" class="flex-grow text-center" on:click={next}>Continue</Anchor>
+  <Anchor button on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
+  <Anchor button accent class="flex-grow" on:click={next}>Continue</Anchor>
 </div>
 <div class="flex items-center gap-2">
   <i class="fa fa-user-astronaut fa-lg" />
@@ -51,7 +51,7 @@
     <PersonSummary {pubkey}>
       <div slot="actions" class="flex items-start justify-end">
         <Anchor
-          theme="button"
+          button
           class="flex items-center gap-2"
           on:click={() => removeFollow(pubkey)}>
           <i class="fa fa-user-slash" /> Unfollow
@@ -70,10 +70,7 @@
 {#each results.slice(0, 50) as profile (profile.pubkey)}
   <PersonSummary pubkey={profile.pubkey}>
     <div slot="actions" class="flex items-start justify-end">
-      <Anchor
-        theme="button-accent"
-        class="flex items-center gap-2"
-        on:click={() => addFollow(profile.pubkey)}>
+      <Anchor button accent on:click={() => addFollow(profile.pubkey)}>
         <i class="fa fa-user-plus" /> Follow
       </Anchor>
     </div>

@@ -51,7 +51,7 @@
         </SearchSelect>
         <div slot="info">Tag this content so other people can find it.</div>
       </Field>
-      <Anchor tag="button" theme="button" type="submit" class="text-center">Save</Anchor>
+      <Anchor button tag="button" type="submit">Save</Anchor>
     </div>
   </Content>
 </form>

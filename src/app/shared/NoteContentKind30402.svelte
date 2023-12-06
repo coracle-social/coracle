@@ -61,6 +61,6 @@
   {/if}
   <NoteContentTopics {note} />
   <div class="flex justify-center">
-    <Anchor theme="button-accent" on:click={sendMessage}>Make an offer</Anchor>
+    <Anchor button accent on:click={sendMessage}>Make an offer</Anchor>
   </div>
 </Content>

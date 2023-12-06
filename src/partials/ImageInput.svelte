@@ -64,7 +64,7 @@
     }}>
     <slot name="button">
       <div class="flex">
-        <Anchor theme="button">
+        <Anchor button>
           <i class="fa fa-upload" />
         </Anchor>
       </div>

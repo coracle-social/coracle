@@ -40,7 +40,7 @@
   <Content>
     <p>
       You are using an experimental version of private messaging. If you're looking for old-style
-      messages, click <Anchor theme="anchor" href="/conversations">here</Anchor>.
+      messages, click <Anchor underline href="/conversations">here</Anchor>.
     </p>
   </Content>
 </div>

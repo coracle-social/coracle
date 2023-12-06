@@ -66,8 +66,8 @@
     <i class="fa fa-message mr-2" /> Feedback
   </NavItem>
   <li class="absolute bottom-0 flex w-full justify-center gap-2 p-2 text-sm text-mid">
-    <Anchor external theme="anchor" href="/public/terms.html">Terms</Anchor>
+    <Anchor external underline href="/public/terms.html">Terms</Anchor>
     &bull;
-    <Anchor external theme="anchor" href="/public/privacy.html">Privacy</Anchor>
+    <Anchor external underline href="/public/privacy.html">Privacy</Anchor>
   </li>
 </ul>

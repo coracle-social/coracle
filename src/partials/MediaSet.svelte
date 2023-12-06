@@ -18,7 +18,7 @@
 </script>
 
 <div class="my-8 flex justify-center">
-  <Anchor theme="button-minimal" on:click={openModal}>
+  <Anchor button on:click={openModal}>
     <i class="fa fa-plus" /> Show all {links.length} link previews
   </Anchor>
 </div>

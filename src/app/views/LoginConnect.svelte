@@ -123,7 +123,7 @@
   <p class="text-left">
     We're searching for your profile on the network. If you'd like to select your relays manually
     instead, click <Anchor
-      theme="anchor"
+      underline
       on:click={() => {
         customRelayUrl = ""
         modal = "custom"
@@ -176,7 +176,7 @@
           <Input bind:value={customRelayUrl} wrapperClass="flex-grow">
             <i slot="before" class="fa fa-search" />
           </Input>
-          <Anchor theme="button" on:click={addCustomRelay}>Search relay</Anchor>
+          <Anchor button on:click={addCustomRelay}>Search relay</Anchor>
         </form>
       {/if}
     </Content>

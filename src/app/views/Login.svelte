@@ -41,8 +41,8 @@
     </p>
     <div class="flex flex-col items-center gap-4">
       <div class="flex gap-4">
-        <Anchor class="w-32 text-center" theme="button-accent" on:click={autoLogIn}>Log In</Anchor>
-        <Anchor class="w-32 text-center" theme="button" on:click={signUp}>Sign Up</Anchor>
+        <Anchor class="w-32 text-center" button accent on:click={autoLogIn}>Log In</Anchor>
+        <Anchor class="w-32 text-center" button on:click={signUp}>Sign Up</Anchor>
       </div>
       <Anchor on:click={advancedLogIn}>
         <i class="fa fa-cogs" /> Advanced Login

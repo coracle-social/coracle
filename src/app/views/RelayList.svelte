@@ -16,7 +16,7 @@
       <i class="fa fa-server fa-lg" />
       <h2 class="staatliches text-2xl">Your relays</h2>
     </div>
-    <Anchor theme="button-accent" class="flex items-center gap-2" on:click={browse}>
+    <Anchor button accent on:click={browse}>
       <i class="fa-solid fa-compass" /> Browse Relays
     </Anchor>
   </div>

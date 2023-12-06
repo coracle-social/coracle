@@ -56,7 +56,7 @@
           encrypted, so this will not reduce security.
         </p>
       </FieldInline>
-      <Anchor tag="button" theme="button" type="submit" class="text-center">Export</Anchor>
+      <Anchor button tag="button" type="submit">Export</Anchor>
     </div>
   </Content>
 </form>

@@ -28,7 +28,7 @@
   {:else}
     <div class="flex flex-col items-center gap-8">
       <div>Are you sure you want to log out? All data will be cleared.</div>
-      <Anchor theme="button" on:click={confirm}>Log out</Anchor>
+      <Anchor button on:click={confirm}>Log out</Anchor>
     </div>
   {/if}
 </Content>

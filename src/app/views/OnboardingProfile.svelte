@@ -34,6 +34,6 @@
   </div>
 </div>
 <div class="flex gap-2">
-  <Anchor theme="button" on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
-  <Anchor theme="button-accent" class="flex-grow text-center" on:click={next}>Continue</Anchor>
+  <Anchor button on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
+  <Anchor button accent class="flex-grow" on:click={next}>Continue</Anchor>
 </div>

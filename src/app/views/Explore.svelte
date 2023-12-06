@@ -94,7 +94,7 @@
           <i class="fa fa-xl fa-tag my-8 ml-4" />
           <Heading>{label}</Heading>
         </div>
-        <Anchor class="mt-4" theme="button-accent" on:click={() => showGroup(group)}
+        <Anchor class="mt-4" button accent on:click={() => showGroup(group)}
           >See more</Anchor>
       </div>
       <Content>

@@ -265,7 +265,7 @@
               <p class="border-l-2 border-solid border-mid pl-4 text-lightest">
                 You have hidden this note.
                 <Anchor
-                  theme="anchor"
+                  underline
                   on:click={() => {
                     showMuted = true
                   }}>Show</Anchor>

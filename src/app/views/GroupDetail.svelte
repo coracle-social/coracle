@@ -124,7 +124,7 @@
         You don't have access to this group.
       {/if}
       {#if $session && !$status.access}
-        Click <Anchor theme="anchor" on:click={() => joinGroup(address)}>here</Anchor> to request entry.
+        Click <Anchor underline on:click={() => joinGroup(address)}>here</Anchor> to request entry.
       {/if}
     </p>
   {:else if activeTab === "notes"}

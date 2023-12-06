@@ -52,7 +52,8 @@
         <div class="flex justify-center">
           <Anchor
             modal
-            theme="button-accent"
+            button
+            accent
             href={router.at("people").of(pubkey).at("zap").toString()}>
             Zap the developer
           </Anchor>
@@ -65,8 +66,9 @@
         <p class="sm:h-24">Having problems? Let us know.</p>
         <div class="flex justify-center">
           <Anchor
+            button
+            accent
             external
-            theme="button-accent"
             href="https://github.com/coracle-social/coracle/issues/new">
             Open an Issue
           </Anchor>
@@ -78,7 +80,7 @@
     <p class="text-center">
       Built with 💜 by @<Anchor
         modal
-        theme="anchor"
+        underline
         href={router.at("people").of(pubkey).toString()}>hodlbod</Anchor>
     </p>
     <p class="flex justify-center gap-4">
