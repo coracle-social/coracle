@@ -23,11 +23,11 @@ import {
   dufflepud,
 } from "src/engine"
 
-// Menu
+// Global state
 
 export const menuIsOpen = writable(false)
 
-export const toggleMenu = () => menuIsOpen.update(x => !x)
+export const searchIsOpen = writable(false)
 
 export const hasNewDMs = derived(
   [hasNewNip04Messages, hasNewNip24Messages, canUseGiftWrap],

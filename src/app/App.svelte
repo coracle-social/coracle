@@ -11,23 +11,22 @@
   import * as engine from "src/engine"
   import {loadAppData} from "src/app/state"
   import {themeVariables, appName} from "src/partials/state"
-  import SideNav from "src/app/SideNav.svelte"
+  import Menu from "src/app/Menu.svelte"
+  import SearchAndScan from "src/app/SearchAndScan.svelte"
   import Routes from "src/app/Routes.svelte"
   import Toast from "src/app/Toast.svelte"
-  import TopNav from "src/app/TopNav.svelte"
+  import Nav from "src/app/Nav.svelte"
   import ForegroundButtons from "src/app/ForegroundButtons.svelte"
   import {isNil} from "ramda"
   import {onMount} from "svelte"
   import {memoize} from "src/util/misc"
   import About from "src/app/views/About.svelte"
-  import Apps from "src/app/views/Apps.svelte"
   import Bech32Entity from "src/app/views/Bech32Entity.svelte"
   import ChannelCreate from "src/app/views/ChannelCreate.svelte"
   import ChannelsDetail from "src/app/views/ChannelsDetail.svelte"
   import ChannelsList from "src/app/views/ChannelsList.svelte"
   import DataExport from "src/app/views/DataExport.svelte"
   import DataImport from "src/app/views/DataImport.svelte"
-  import Explore from "src/app/views/Explore.svelte"
   import EventDetail from "src/app/views/EventDetail.svelte"
   import GroupList from "src/app/views/GroupList.svelte"
   import GroupDetail from "src/app/views/GroupDetail.svelte"
@@ -95,7 +94,6 @@
   // Routes
 
   router.register("/about", About)
-  router.register("/apps", Apps)
   router.register("/bech32", Bech32Entity)
 
   router.register("/channels", ChannelsList)
@@ -119,8 +117,6 @@
       entity: asPerson,
     },
   })
-
-  router.register("/explore", Explore)
 
   router.register("/events/:address", EventDetail, {
     serializers: {
@@ -462,8 +458,9 @@
     <Routes />
     {#key $stateKey}
       <ForegroundButtons />
-      <SideNav />
-      <TopNav />
+      <SearchAndScan />
+      <Nav />
+      <Menu />
       <Toast />
     {/key}
   </div>

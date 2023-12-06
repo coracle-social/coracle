@@ -1,6 +1,5 @@
 <script lang="ts">
   import cx from "classnames"
-  import {switcher} from "hurdak"
   import {createEventDispatcher} from "svelte"
   import {router} from "src/app/router"
 
@@ -29,7 +28,8 @@
     "opacity-50 pointer-events-none": loading || disabled,
     "bg-warm text-accent hover:bg-warm-l": button && !accent,
     "bg-accent text-white hover:bg-accent-l": button && accent,
-    "text-xl staatliches h-7 px-6 rounded whitespace-nowrap flex justify-center items-center gap-2": button,
+    "text-xl staatliches h-7 px-6 rounded whitespace-nowrap flex justify-center items-center gap-2":
+      button,
     "w-10 h-10 flex justify-center items-center rounded-full": circle,
   })
 

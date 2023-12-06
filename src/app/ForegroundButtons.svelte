@@ -38,6 +38,7 @@
 
 <svelte:window bind:scrollY />
 
+<!--
 <ForegroundButtons>
   {#if scrollY > 1000}
     <div transition:fade|local={{delay: 200, duration: 200}}>
@@ -53,14 +54,8 @@
       </ForegroundButton>
     </div>
   {/if}
-  {#if $canSign && showButtons}
-    <div out:fade|local={{delay: 200, duration: 200}}>
-      <ForegroundButton on:click={createNote}>
-        <i class="fa fa-plus" />
-      </ForegroundButton>
-    </div>
-  {/if}
 </ForegroundButtons>
+-->
 
 {#if $env.ENABLE_JUKEBOX}
   <MusicPlayer bind:isOpen={playerIsOpen} />

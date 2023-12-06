@@ -36,7 +36,9 @@
               // For inputs that only want one file
               value = tags.type("url").values().first()
 
-              dispatch("change", tags)
+              if (value) {
+                dispatch("change", tags)
+              }
             }
           } finally {
             isOpen = false

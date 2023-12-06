@@ -1,26 +1,23 @@
 <script lang="ts">
-  import cx from "classnames"
   import {tryFunc} from "hurdak"
   import {fromNostrURI} from "paravel"
   import {throttle} from "throttle-debounce"
   import {nip05, nip19} from "nostr-tools"
   import {isHex} from "src/util/nostr"
+  import Modal from "src/partials/Modal.svelte"
+  import Input from "src/partials/Input.svelte"
   import Scan from "src/app/Scan.svelte"
-  import Search from "src/app/Search.svelte"
+  import SearchResults from "src/app/SearchResults.svelte"
   import {router} from "src/app/router"
-  import {
-    loadPeople,
-  } from "src/engine"
+  import {searchIsOpen} from "src/app/state"
 
-  let inputIsOpen = false
-  let mode
+  let scanning = false
+  let term = ""
 
-  const setMode = m => {
-    mode = m
-  }
+  const closeSearch = () => searchIsOpen.set(false)
 
-  const showInput = () => {
-    inputIsOpen = true
+  const startScanner = () => {
+    scanning = true
   }
 
   const tryParseEntity = throttle(
@@ -34,7 +31,7 @@
 
       if (isHex(entity)) {
         router.at("people").of(entity).open()
-        mode = null
+        scanning = false
       } else if (entity.includes("@")) {
         let profile = await nip05.queryProfile(entity)
 
@@ -42,26 +39,24 @@
           const {pubkey, relays} = profile
 
           router.at("people").of(pubkey, {relays}).open()
-          mode = null
+          scanning = false
         }
       } else {
         tryFunc(() => {
           nip19.decode(entity)
           router.at(entity).open()
-          mode = null
+          scanning = false
         })
       }
     },
     {
       noTrailing: true,
-    }
+    },
   )
 
-  const onSearch = e => {
-    if (e.detail.length < 30) {
-      loadPeople(e.detail)
-    } else if (e.detail) {
-      tryParseEntity(e.detail)
+  $: {
+    if (term.length > 30) {
+      tryParseEntity(term)
     }
   }
 
@@ -70,20 +65,29 @@
   }
 </script>
 
-<div class="search-input">
-  <div
-    class="border-2 border-solid border-warm text-accent rounded-full w-10 h-10 pl-3 pt-2 p-1 cursor-pointer"
-    on:click={showInput}>
-    <i class="fa fa-search scale-150" />
-  </div>
-  <Search
-    on:search={onSearch}
-    isOpen={mode === "search"}
-    on:click={() => setMode('search')}
-    on:close={() => setMode(null)} />
-  <Scan
-    on:scan={onScan}
-    isOpen={mode === "scan"}
-    on:click={() => setMode('scan')}
-    on:close={() => setMode(null)} />
-</div>
+<svelte:body
+  on:keydown={e => {
+    if (e.key === "Escape") {
+      closeSearch()
+    }
+  }} />
+
+{#if $searchIsOpen}
+  <Modal onEscape={closeSearch}>
+    {#if scanning}
+      <Scan {onScan} />
+    {:else}
+      <SearchResults onClose={closeSearch} {term} />
+    {/if}
+    <div
+      class="fixed bottom-0 left-0 right-0 flex items-center gap-3 border-t border-solid border-mid bg-dark px-3 py-2 text-warm">
+      <div class="flex-grow">
+        <Input autofocus bind:value={term}>
+          <i slot="before" class="fa fa-search" />
+          <i slot="after" class="fa fa-qrcode cursor-pointer" on:click={startScanner} />
+        </Input>
+      </div>
+      <i class="fa fa-times fa-2xl cursor-pointer" on:click={closeSearch} />
+    </div>
+  </Modal>
+{/if}
