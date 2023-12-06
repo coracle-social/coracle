@@ -11,18 +11,23 @@
   let input = ""
 
   const parse = () => {
-    const r = { pubkey: '', relay: '', token: '' }
-    if (input.startsWith('bunker://')) {
+    const r = {pubkey: "", relay: "", token: ""}
+
+    if (input.startsWith("bunker://")) {
       try {
         const url = new URL(input)
+
         r.pubkey = url.pathname.slice(2)
-        r.relay = url.searchParams.get('relay') || ''
-      } catch {}
+        r.relay = url.searchParams.get("relay") || ""
+      } catch {
+        // pass
+      }
     } else {
       const [npub, token] = input.split("#")
       r.pubkey = npub.startsWith("npub") ? toHex(npub) : npub
       r.token = token
     }
+
     return r
   }
 
@@ -40,8 +45,9 @@
 <Content size="lg" class="text-center">
   <Heading>Login with NsecBunker</Heading>
   <p>
-    To log in remotely, enter your nsec bunker token or pubkey or bunker: string below. 
-    If you're not using a token, you'll need to approve authorization requests in your bunker's admin interface.
+    To log in remotely, enter your nsec bunker token, pubkey or bunker:// string below. If you're
+    not using a token, you'll need to approve authorization requests in your bunker's admin
+    interface.
   </p>
   <div class="flex gap-2">
     <div class="flex-grow">

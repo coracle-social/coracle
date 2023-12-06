@@ -8,6 +8,11 @@
 # 0.3.14
 
 - [x] Remove sliders icon, add plus button next to pills instead
+- [x] NIP 52 time-based calendar events publish/render
+- [x] NIP 99 classifieds publish/render
+- [x] Add support for bunker:// (@brugeman)
+- [x] Improve theme switching reactivity
+- [x] Re-work replies, note rendering, and feed controls
 
 # 0.3.13
 

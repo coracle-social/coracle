@@ -1,16 +1,15 @@
 <script lang="ts">
   import {Tags} from "paravel"
-  import {commaFormat} from 'hurdak'
-  import {Naddr} from 'src/util/nostr'
+  import {commaFormat} from "hurdak"
+  import {Naddr} from "src/util/nostr"
   import Content from "src/partials/Content.svelte"
   import Carousel from "src/partials/Carousel.svelte"
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Image from "src/partials/Image.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
-  import {router} from 'src/app/router'
+  import {router} from "src/app/router"
 
   export let note
   export let showMedia = false
@@ -22,19 +21,21 @@
   const [price = 0, code = "SAT"] = tags.type("price").drop(1).first() || []
 
   const sendMessage = () => {
-    const initialMessage = `Hi, I'd like to make an offer on this listing:\n${Naddr.fromEvent(note).encode()}`
+    const initialMessage = `Hi, I'd like to make an offer on this listing:\n${Naddr.fromEvent(
+      note,
+    ).encode()}`
 
-    router.at('conversations').of(note.pubkey).cx({initialMessage}).push()
+    router.at("conversations").of(note.pubkey).cx({initialMessage}).push()
   }
 </script>
 
-
 <Content size="inherit">
   <div class="flex flex-col gap-2">
-    <div class="flex gap-2 text-xl justify-between">
+    <div class="flex justify-between gap-2 text-xl">
       <strong>{title}</strong>
       <span class="whitespace-nowrap">
-        <CurrencySymbol {code} />{commaFormat(price)} {code}
+        <CurrencySymbol {code} />{commaFormat(price)}
+        {code}
       </span>
     </div>
     {#if location}

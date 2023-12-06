@@ -11,7 +11,6 @@ import {
   pool,
   pubkey,
   session,
-  follows,
   loadDeletes,
   loadPubkeys,
   getUserRelayUrls,
