@@ -5,11 +5,12 @@
 
   export let address
 
+  const group = groups.key(address)
   const path = router.at("groups").of(address).at("notes").toString()
 </script>
 
 <span class={$$props.class}>
-  +<Anchor modal theme="anchor" href={path}>
-    {displayGroup(groups.key(address).get())}
+  <Anchor modal theme="anchor" href={path}>
+    {displayGroup($group)}
   </Anchor>
 </span>

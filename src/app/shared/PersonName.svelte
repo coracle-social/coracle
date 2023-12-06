@@ -11,12 +11,12 @@
   const wotScore = getWotScore($session?.pubkey, pubkey)
 </script>
 
-<div class={cx("flex items-center gap-1", $$props.class)}>
+<div class={cx("flex gap-1", $$props.class)}>
   <span class="cy-person-name">{displayPerson($person)}</span>
   {#if $session}
-    <div class="flex items-center gap-1 font-normal">
+    <div class="flex gap-1 font-normal">
       <Popover triggerType="mouseenter">
-        <span slot="trigger" class="px-2 py-1 text-xs">
+        <span slot="trigger" class="px-2 py-1 text-xs whitespace-nowrap">
           {#if $following}
             <i class="fa fa-check-circle text-accent" />
           {:else}
