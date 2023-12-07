@@ -61,6 +61,7 @@
             >here</Anchor>
         </p>
         <SearchSelect
+          multiple
           search={searchUploadProviders}
           bind:value={settings.nip96_urls}
           termToItem={identity}>
