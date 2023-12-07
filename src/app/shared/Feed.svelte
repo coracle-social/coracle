@@ -7,6 +7,7 @@
   import {getModal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
   import Content from "src/partials/Content.svelte"
+  import MobileInset from "src/partials/MobileInset.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import Note from "src/app/shared/Note.svelte"
   import type {DynamicFilter} from "src/engine"
@@ -93,26 +94,26 @@
   })
 </script>
 
-<Content size="inherit" gap="gap-6">
-  {#if !hideControls}
+{#if !hideControls}
+  <MobileInset>
     <FeedControls {hideReplies} {filter} {relays} {updateFilter}>
       <slot name="controls" slot="controls" />
     </FeedControls>
-  {/if}
-  <div class="flex flex-col gap-4">
-    {#each $notes as note, i (note.id)}
-      <div in:fly={{y: 20}}>
-        <Note
-          depth={$hideReplies ? 0 : 2}
-          context={note.replies || []}
-          filters={compileFilters([filter])}
-          {showGroup}
-          {anchor}
-          {note} />
-      </div>
-    {/each}
+  </MobileInset>
+{/if}
+
+{#each $notes as note, i (note.id)}
+  <div in:fly={{y: 20}}>
+    <Note
+      depth={$hideReplies ? 0 : 2}
+      context={note.replies || []}
+      filters={compileFilters([filter])}
+      {showGroup}
+      {anchor}
+      {note} />
   </div>
-  {#if !hideSpinner}
-    <Spinner />
-  {/if}
-</Content>
+{/each}
+
+{#if !hideSpinner}
+  <Spinner />
+{/if}

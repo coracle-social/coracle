@@ -29,9 +29,9 @@
           class="absolute bottom-0 right-0 top-0 w-32 rounded-3xl bg-dark"
           style="filter: blur(15px)" />
         {#each actions as { label, icon, onClick }}
-          <div class="relative z-10 cursor-pointer text-lightest" on:click={onClick}>
-            <span class="absolute right-0 mr-12 mt-2 whitespace-nowrap">{label}</span>
-            <Anchor button circle><i class={`fa fa-${icon}`} /></Anchor>
+          <div class="relative z-10 cursor-pointer text-lightest flex items-center" on:click={onClick}>
+            <span class="absolute right-0 mr-12 whitespace-nowrap">{label}</span>
+            <Anchor button circle><i class={`fa fa-${icon} text-sm`} /></Anchor>
           </div>
         {/each}
       </div>

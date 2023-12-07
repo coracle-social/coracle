@@ -31,7 +31,7 @@
   }
 </script>
 
-<div class="absolute top-3 left-3 flex justify-between items-center">
+<div class="absolute top-0 w-full p-3 flex justify-between items-center border-b border-solid border-mid">
   <img alt="App Logo" src={logoUrl} class="w-10" />
 </div>
 

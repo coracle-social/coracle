@@ -6,6 +6,7 @@
   import {noteKinds, reactionKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
+  import MobileInset from "src/partials/MobileInset.svelte"
   import GroupAlert from "src/app/shared/GroupAlert.svelte"
   import GroupRequest from "src/app/shared/GroupRequest.svelte"
   import NotificationReactions from "src/app/views/NotificationReactions.svelte"
@@ -83,45 +84,44 @@
   })
 </script>
 
-<Content>
-  <Tabs {tabs} {activeTab} {setActiveTab}>
-    <div slot="tab" let:tab class="flex gap-2">
-      <div>{tab}</div>
-      {#if tab === tabs[2] && uncheckedOtherNotifications.length > 0}
-        <div class="h-6 rounded-full bg-mid px-2">
-          {uncheckedOtherNotifications.length}
-        </div>
-      {/if}
-    </div>
-  </Tabs>
-  {#if tabs.slice(0, 2).includes(activeTab)}
-    {#each tabNotifications as notification, i (notification.key)}
-      {@const lineText = getLineText(i)}
-      {#if lineText}
-        <div class="flex items-center gap-4">
-          <small class="whitespace-nowrap text-lightest">{lineText}</small>
-          <div class="h-px w-full bg-mid" />
-        </div>
-      {/if}
-      {#if !notification.event}
-        <NotificationMention {notification} />
-      {:else if activeTab === tabs[0]}
-        <NotificationReplies {notification} />
-      {:else}
-        <NotificationReactions {notification} />
-      {/if}
+<Tabs {tabs} {activeTab} {setActiveTab}>
+  <div slot="tab" let:tab class="flex gap-2">
+    <div>{tab}</div>
+    {#if tab === tabs[2] && uncheckedOtherNotifications.length > 0}
+      <div class="h-6 rounded-full bg-mid px-2">
+        {uncheckedOtherNotifications.length}
+      </div>
+    {/if}
+  </div>
+</Tabs>
+
+{#if tabs.slice(0, 2).includes(activeTab)}
+  {#each tabNotifications as notification, i (notification.key)}
+    {@const lineText = getLineText(i)}
+    {#if lineText}
+      <MobileInset class="flex items-center gap-4">
+        <small class="whitespace-nowrap text-lightest">{lineText}</small>
+        <div class="h-px w-full bg-mid" />
+      </MobileInset>
+    {/if}
+    {#if !notification.event}
+      <NotificationMention {notification} />
+    {:else if activeTab === tabs[0]}
+      <NotificationReplies {notification} />
     {:else}
-      <Content size="lg" class="text-center">No notifications found - check back later!</Content>
-    {/each}
+      <NotificationReactions {notification} />
+    {/if}
   {:else}
-    {#each $otherNotifications as notification, i (notification.id)}
-      {#if notification.t === "alert"}
-        <GroupAlert address={notification.group} alert={notification} />
-      {:else if notification.t === "request"}
-        <GroupRequest showGroup address={notification.group} request={notification} />
-      {/if}
-    {:else}
-      <Content size="lg" class="text-center">No notifications found - check back later!</Content>
-    {/each}
-  {/if}
-</Content>
+    <Content size="lg" class="text-center">No notifications found - check back later!</Content>
+  {/each}
+{:else}
+  {#each $otherNotifications as notification, i (notification.id)}
+    {#if notification.t === "alert"}
+      <GroupAlert address={notification.group} alert={notification} />
+    {:else if notification.t === "request"}
+      <GroupRequest showGroup address={notification.group} request={notification} />
+    {/if}
+  {:else}
+    <Content size="lg" class="text-center">No notifications found - check back later!</Content>
+  {/each}
+{/if}

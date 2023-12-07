@@ -32,33 +32,32 @@
   document.title = "Direct Messages"
 </script>
 
-<Content>
-  <div class="relative">
-    <Tabs tabs={["conversations", "requests"]} {activeTab} {setActiveTab}>
-      <div slot="tab" let:tab class="flex gap-2">
-        <div>{toTitle(tab)}</div>
-        <div class="h-6 rounded-full bg-mid px-2">
-          {(tab === "conversations" ? $accepted : $requests).length}
-        </div>
+<div class="relative">
+  <Tabs tabs={["conversations", "requests"]} {activeTab} {setActiveTab}>
+    <div slot="tab" let:tab class="flex gap-2">
+      <div>{toTitle(tab)}</div>
+      <div class="h-6 rounded-full bg-mid px-2">
+        {(tab === "conversations" ? $accepted : $requests).length}
       </div>
-    </Tabs>
-    {#if activeTab === "conversations"}
-      <Popover triggerType="mouseenter" class="absolute right-7 top-7 hidden sm:block">
-        <div slot="trigger">
-          <i
-            class="fa fa-bell cursor-pointer"
-            class:text-mid={!$hasNewNip04Messages}
-            on:click={nip04MarkAllRead} />
-        </div>
-        <div slot="tooltip">Mark all as read</div>
-      </Popover>
-    {/if}
-  </div>
-  {#each tabChannels as channel (channel.id)}
-    <MessagesListItem {channel} />
-  {:else}
-    <Content size="lg" class="text-center">
-      No messages found - start a conversation by clicking the envelope button on someone's profile.
-    </Content>
-  {/each}
-</Content>
+    </div>
+  </Tabs>
+  {#if activeTab === "conversations"}
+    <Popover triggerType="mouseenter" class="absolute right-7 top-7 hidden sm:block">
+      <div slot="trigger">
+        <i
+          class="fa fa-bell cursor-pointer"
+          class:text-mid={!$hasNewNip04Messages}
+          on:click={nip04MarkAllRead} />
+      </div>
+      <div slot="tooltip">Mark all as read</div>
+    </Popover>
+  {/if}
+</div>
+
+{#each tabChannels as channel (channel.id)}
+  <MessagesListItem {channel} />
+{:else}
+  <Content size="lg" class="text-center">
+    No messages found - start a conversation by clicking the envelope button on someone's profile.
+  </Content>
+{/each}

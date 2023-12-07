@@ -21,12 +21,10 @@
   })
 </script>
 
-<Content>
-  {#await promise}
-    <Spinner />
-  {:then note}
-    <div in:fly={{y: 20}}>
-      <Note showGroup showLoading anchor={getIdOrAddress(note)} {note} {depth} {relays} {context} />
-    </div>
-  {/await}
-</Content>
+{#await promise}
+  <Spinner />
+{:then note}
+  <div in:fly={{y: 20}}>
+    <Note showGroup showLoading anchor={getIdOrAddress(note)} {note} {depth} {relays} {context} />
+  </div>
+{/await}

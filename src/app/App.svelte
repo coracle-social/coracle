@@ -455,6 +455,9 @@
   <!-- pass -->
 {:then}
   <div>
+    <div class="w-full p-3 flex justify-between items-center border-b border-solid border-mid">
+      <img alt="App Logo" src={import.meta.env.VITE_LOGO_URL || "/images/logo.png"} class="w-10" />
+    </div>
     <Routes />
     {#key $stateKey}
       <ForegroundButtons />

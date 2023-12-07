@@ -2,6 +2,7 @@
   import {closure} from "hurdak"
   import {formatTimestamp} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
+  import MobileInset from 'src/partials/MobileInset.svelte'
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NotificationPeople from "src/app/shared/NotificationPeople.svelte"
   import {router} from "src/app/router"
@@ -25,7 +26,10 @@
   })
 </script>
 
-<NotificationPeople {notification} actionText={`${actionText} your note`} />
+<MobileInset>
+  <NotificationPeople {notification} actionText={`${actionText} your note`} />
+</MobileInset>
+
 <Card interactive class="flex w-full flex-col gap-2 text-left" on:click={goToNote}>
   <div on:click|stopPropagation class="flex justify-between">
     {formatTimestamp(timestamp)}

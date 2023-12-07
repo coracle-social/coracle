@@ -3,8 +3,9 @@
   import {onDestroy} from "svelte"
   import {createScroller, formatTimestamp} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
-  import Content from "src/partials/Content.svelte"
+  import MobileInset from "src/partials/MobileInset.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {router} from "src/app/router"
@@ -25,34 +26,36 @@
   })
 </script>
 
-<Content>
-  <div class="mb-4 flex flex-col items-center justify-center">
-    <Heading>App Database</Heading>
-    <p>View, import, and export your local database.</p>
-  </div>
-  <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
-    <Card>
-      <Content>
-        <h3 class="text-center text-xl sm:h-12">Export Database</h3>
-        <p class="sm:h-24">
-          Click below to download a backup of all {commaFormat($events.length)}
-          events in your database.
-        </p>
-        <div class="flex justify-center">
-          <Anchor modal button accent href="/settings/data/export">Create Backup</Anchor>
-        </div>
-      </Content>
-    </Card>
-    <Card>
-      <Content>
-        <h3 class="text-center text-xl sm:h-12">Import Database</h3>
-        <p class="sm:h-24">Upload a nostr export file to pull events into your database.</p>
-        <div class="flex justify-center">
-          <Anchor modal button accent href="/settings/data/import">Upload Backup</Anchor>
-        </div>
-      </Content>
-    </Card>
-  </div>
+<div class="mb-4 flex flex-col items-center justify-center">
+  <Heading>App Database</Heading>
+  <p>View, import, and export your local database.</p>
+</div>
+
+<div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
+  <Card>
+    <FlexColumn class="py-6 text-center">
+      <h3 class="text-xl sm:h-12">Export Database</h3>
+      <p class="sm:h-24">
+        Click below to download a backup of all {commaFormat($events.length)}
+        events in your database.
+      </p>
+      <div class="flex justify-center">
+        <Anchor modal button accent href="/settings/data/export">Create Backup</Anchor>
+      </div>
+    </FlexColumn>
+  </Card>
+  <Card>
+    <FlexColumn class="py-6 text-center">
+      <h3 class="text-xl sm:h-12">Import Database</h3>
+      <p class="sm:h-24">Upload a nostr export file to pull events into your database.</p>
+      <div class="flex justify-center">
+        <Anchor modal button accent href="/settings/data/import">Upload Backup</Anchor>
+      </div>
+    </FlexColumn>
+  </Card>
+</div>
+
+<MobileInset>
   <table>
     <thead>
       <tr>
@@ -83,4 +86,4 @@
       {/each}
     </tbody>
   </table>
-</Content>
+</MobileInset>

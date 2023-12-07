@@ -176,9 +176,9 @@
   }
 </script>
 
-<div>
+<div class="-mb-2 mt-4">
   <div class="float-right flex justify-end">
-    <div class="flex items-center gap-1 pr-2">
+    <div class="flex items-center gap-1 px-2">
       <Toggle scale={0.6} value={!$hideReplies} on:change={toggleReplies} />
       <small class="text-lighter">Show replies</small>
     </div>

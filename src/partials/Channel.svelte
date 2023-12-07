@@ -94,9 +94,9 @@
     showNewMessages = false
   }} />
 
-<div class="flex h-full gap-4">
-  <div class="relative w-full">
-    <div class="-mt-16 flex h-screen flex-col pt-16" class:pb-24={$canSign}>
+<div class="fixed inset-0 flex gap-4 z-10">
+  <div class="w-full">
+    <div class="flex h-screen flex-col" class:pb-24={$canSign}>
       <ul
         bind:this={container}
         class="flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">

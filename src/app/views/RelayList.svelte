@@ -1,6 +1,6 @@
 <script lang="ts">
   import Anchor from "src/partials/Anchor.svelte"
-  import Content from "src/partials/Content.svelte"
+  import MobileInset from "src/partials/MobileInset.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {router} from "src/app/router"
   import {relayPolicies} from "src/engine"
@@ -10,7 +10,7 @@
   document.title = "Relays"
 </script>
 
-<Content>
+<MobileInset class="flex flex-col gap-4">
   <div class="flex justify-between">
     <div class="flex items-center gap-2">
       <i class="fa fa-server fa-lg" />
@@ -24,15 +24,16 @@
     Relays are hubs for your content and connections. At least one is required to interact with the
     network, but you can join as many as you like.
   </p>
-  {#if $relayPolicies.length === 0}
-    <div class="mt-8 flex items-center justify-center gap-2 text-center">
-      <i class="fa fa-triangle-exclamation" />
-      No relays connected
-    </div>
-  {/if}
-  <div class="grid grid-cols-1 gap-4">
-    {#each $relayPolicies as policy (policy.url)}
-      <RelayCard showStatus showControls relay={policy} />
-    {/each}
+</MobileInset>
+
+{#if $relayPolicies.length === 0}
+  <div class="mt-8 flex items-center justify-center gap-2 text-center">
+    <i class="fa fa-triangle-exclamation" />
+    No relays connected
   </div>
-</Content>
+{/if}
+<div class="grid grid-cols-1 gap-4">
+  {#each $relayPolicies as policy (policy.url)}
+    <RelayCard showStatus showControls relay={policy} />
+  {/each}
+</div>

@@ -342,7 +342,7 @@
           <div class="absolute -left-4 -top-2 h-4 w-px bg-mid" />
         {/if}
         {#if visibleReplies.length}
-          <div in:fly={{y: 20}}>
+          <div in:fly={{y: 20}} class="-mb-2">
             {#each visibleReplies as r, i (r.id)}
               <svelte:self
                 isLastReply={i === visibleReplies.length - 1}

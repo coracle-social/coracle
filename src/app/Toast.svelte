@@ -48,8 +48,8 @@
       <div
         style={`transform: translate(${offset}px, 0)`}
         class={cx(
-          "pointer-events-auto m-2 rounded border p-3 text-center shadow-xl sm:ml-2",
-          "max-w-xl flex-grow transition-all",
+          "pointer-events-auto m-2 rounded border p-3 pr-8 text-center shadow-xl sm:ml-2",
+          "max-w-xl flex-grow transition-all relative",
           {
             "border-mid bg-cocoa text-lightest": $toast.type === "info",
             "border-warning bg-cocoa text-lightest": $toast.type === "warning",
@@ -71,6 +71,9 @@
             {/if}
           </div>
         {/if}
+        <div class="absolute right-1 top-0 p-3 cursor-pointer" on:click={() => toast.set(null)}>
+          <i class="fa fa-times" />
+        </div>
       </div>
     </div>
   {/key}

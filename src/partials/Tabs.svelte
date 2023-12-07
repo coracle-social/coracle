@@ -8,11 +8,11 @@
 </script>
 
 <div
-  class={`flex items-center justify-between overflow-auto border-b border-solid pt-2 ${borderClass}`}>
+  class={`flex items-center justify-between overflow-auto border-b border-solid ${borderClass}`}>
   <div class="flex">
     {#each tabs as tab}
       <button
-        class="flex cursor-pointer gap-2 border-solid border-mid px-8 py-4 hover:border-b"
+        class="flex cursor-pointer gap-2 border-solid border-mid px-8 pb-4 hover:border-b items-end"
         class:border-b={activeTab === tab}
         on:click|preventDefault={() => setActiveTab(tab)}>
         <slot name="tab" {tab}>{toTitle(tab)}</slot>

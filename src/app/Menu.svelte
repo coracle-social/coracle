@@ -20,9 +20,13 @@
     })
   }
 
+  const closeSubMenu = () => {
+    subMenu = null
+  }
+
   const closeMenu = () => {
     menuIsOpen.set(false)
-    subMenu = null
+    closeSubMenu()
   }
 
   const setSubMenu = name => {
@@ -34,7 +38,7 @@
 
 {#if $menuIsOpen}
   <!-- mobile version -->
-  <SliderMenu on:click={closeMenu}>
+  <SliderMenu onClick={closeMenu} onEscape={closeMenu}>
     <div on:click|stopPropagation>
       <MenuItem class="py-4" on:click={() => setSubMenu('about')}>About</MenuItem>
       <MenuItem class="py-4" on:click={() => setSubMenu('settings')}>Settings</MenuItem>
@@ -77,10 +81,10 @@
 {/if}
 
 {#if subMenu === "about"}
-  <SliderMenu on:click={closeMenu}>
-    <MenuItem class="py-4" href="/public/terms.html">Terms</MenuItem>
-    <MenuItem class="py-4" href="/public/privacy.html">Privacy</MenuItem>
-    <MenuItem class="py-4" external href="https://github.com/coracle-social/coracle/issues/new">
+  <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
+    <MenuItem external class="py-4" href="/terms.html">Terms</MenuItem>
+    <MenuItem external class="py-4" href="/privacy.html">Privacy</MenuItem>
+    <MenuItem external class="py-4" href="https://github.com/coracle-social/coracle/issues/new">
       Feedback
     </MenuItem>
     {#if $installPrompt}
@@ -91,7 +95,7 @@
 {/if}
 
 {#if subMenu === "settings"}
-  <SliderMenu on:click={closeMenu}>
+  <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
     <MenuItem class="py-4" on:click={toggleTheme}>Toggle Theme</MenuItem>
     <MenuItem class="py-4" href="/settings">Configuration</MenuItem>
     <MenuItem class="py-4" href="/settings/data">Database</MenuItem>
@@ -101,7 +105,7 @@
 {/if}
 
 {#if subMenu === "account"}
-  <SliderMenu on:click={closeMenu}>
+  <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
     <MenuItem class="py-4" href="/logout">Logout</MenuItem>
     <div on:click|stopPropagation>
       <MenuItem class="py-4"  on:click={() => setSubMenu('accounts')}>Switch Account</MenuItem>
@@ -114,7 +118,7 @@
 {/if}
 
 {#if subMenu === "accounts"}
-  <SliderMenu on:click={closeMenu}>
+  <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
     {#each Object.values($sessions) as s (s.pubkey)}
       {#if s.pubkey !== $pubkey}
         <MenuItem class="py-4" on:click={() => pubkey.set(s.pubkey)}>
