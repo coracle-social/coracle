@@ -13,6 +13,14 @@ export const appName = import.meta.env.VITE_APP_NAME
 
 export const installPrompt = writable(null)
 
+export const installAsPWA = () => {
+  $installPrompt.prompt()
+
+  $installPrompt.userChoice.then(result => {
+    installPrompt.set(null)
+  })
+}
+
 // Toast
 
 export interface Toast<T> extends Writable<T> {
@@ -46,6 +54,8 @@ const LIGHT_THEME = parseTheme(import.meta.env.VITE_LIGHT_THEME)
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
 
 export const theme = synced("ui/theme", prefersDark ? "dark" : "light")
+
+export const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 
 export const themeColors = derived(theme, $theme => ($theme === "dark" ? DARK_THEME : LIGHT_THEME))
 

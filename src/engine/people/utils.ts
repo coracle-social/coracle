@@ -99,14 +99,14 @@ export const getNetwork = $person => {
 }
 
 export const getFollowsWhoFollow = cached({
-  maxSize: 1000,
+  maxSize: 10000,
   getKey: join(":"),
   getValue: ([pk, tpk]) =>
     getFollowedPubkeys(people.key(pk).get()).filter(pk => isFollowing(people.key(pk).get(), tpk)),
 })
 
 export const getFollowsWhoMute = cached({
-  maxSize: 1000,
+  maxSize: 10000,
   getKey: join(":"),
   getValue: ([pk, tpk]) =>
     getFollowedPubkeys(people.key(pk).get()).filter(pk => isMuting(people.key(pk).get(), tpk)),

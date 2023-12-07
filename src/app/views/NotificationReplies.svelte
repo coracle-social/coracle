@@ -11,7 +11,7 @@
   const {event, interactions, timestamp} = notification
 </script>
 
-<MobileInset class="flex justify-between">
+<MobileInset class="flex justify-between items-center">
   <NotificationPeople {notification} actionText="replied to your note" />
   <small>{formatTimestamp(timestamp)}</small>
 </MobileInset>

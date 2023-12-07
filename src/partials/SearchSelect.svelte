@@ -14,6 +14,7 @@
   export let multiple = false
   export let defaultOptions = []
 
+
   let term = multiple ? "" : getKey(value)
   let input
   let suggestions

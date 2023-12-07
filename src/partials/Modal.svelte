@@ -82,7 +82,9 @@
       <div
         class="relative h-full w-full cursor-auto border-t border-solid border-mid bg-cocoa pb-10 pt-2"
         on:click|stopPropagation>
-        <slot />
+        <div class="m-auto max-w-2xl">
+          <slot />
+        </div>
       </div>
     </div>
   </div>

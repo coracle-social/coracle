@@ -42,7 +42,7 @@
     </div>
   </Tabs>
   {#if activeTab === "conversations"}
-    <Popover triggerType="mouseenter" class="absolute right-7 top-7 hidden sm:block">
+    <Popover triggerType="mouseenter" class="absolute right-7 top-1 hidden sm:block">
       <div slot="trigger">
         <i
           class="fa fa-bell cursor-pointer"

@@ -64,7 +64,7 @@
     ).map(r => r.item) as any[]
   }
 
-  $: !term.startsWith('#') && loadPeople(term)
+  $: term?.startsWith('#') || loadPeople(term)
 
   $: firstChar = term ? term.slice(0, 1) : null
 

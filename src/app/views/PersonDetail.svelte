@@ -7,6 +7,7 @@
   import {themeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import Content from "src/partials/Content.svelte"
   import MobileInset from "src/partials/MobileInset.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Feed from "src/app/shared/Feed.svelte"
@@ -54,12 +55,12 @@
 </script>
 
 <div
-class="absolute left-0 h-64 w-full"
+class="absolute left-0 h-96 w-full -mt-4"
 style={`z-index: -1;
        background-size: cover;
-       background-image: linear-gradient(to bottom, ${rgba}, ${rgb}), url('${banner}')`} />
+       background-image: linear-gradient(to bottom, ${rgba}, ${rgba}, ${rgb}), url('${banner}')`} />
 
-<MobileInset class="flex gap-4 text-lightest pt-2">
+<MobileInset class="flex gap-4 text-lightest">
   <PersonCircle {pubkey} class="mt-1 h-12 w-12 sm:h-32 sm:w-32" />
   <div class="flex min-w-0 flex-grow flex-col gap-4">
     <div class="flex flex-col">

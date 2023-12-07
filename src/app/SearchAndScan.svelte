@@ -9,12 +9,12 @@
   import Scan from "src/app/Scan.svelte"
   import SearchResults from "src/app/SearchResults.svelte"
   import {router} from "src/app/router"
-  import {searchIsOpen} from "src/app/state"
+  import {searchTerm} from "src/app/state"
 
   let scanning = false
-  let term = ""
+  let innerWidth = 0
 
-  const closeSearch = () => searchIsOpen.set(false)
+  const closeSearch = () => searchTerm.set(null)
 
   const startScanner = () => {
     scanning = true
@@ -55,8 +55,8 @@
   )
 
   $: {
-    if (term.length > 30) {
-      tryParseEntity(term)
+    if ($searchTerm?.length > 30) {
+      tryParseEntity($searchTerm)
     }
   }
 
@@ -65,6 +65,8 @@
   }
 </script>
 
+<svelte:window bind:innerWidth />
+
 <svelte:body
   on:keydown={e => {
     if (e.key === "Escape") {
@@ -72,22 +74,24 @@
     }
   }} />
 
-{#if $searchIsOpen}
+{#if $searchTerm !== null}
   <Modal onEscape={closeSearch}>
     {#if scanning}
       <Scan {onScan} />
     {:else}
-      <SearchResults onClose={closeSearch} {term} />
+      <SearchResults onClose={closeSearch} term={$searchTerm} />
     {/if}
-    <div
-      class="fixed bottom-0 left-0 right-0 flex items-center gap-3 border-t border-solid border-mid bg-dark px-3 py-2 text-warm">
-      <div class="flex-grow">
-        <Input autofocus bind:value={term}>
-          <i slot="before" class="fa fa-search" />
-          <i slot="after" class="fa fa-qrcode cursor-pointer" on:click={startScanner} />
-        </Input>
+    {#if innerWidth < 1024}
+      <div
+        class="fixed bottom-0 left-0 right-0 flex items-center gap-3 border-t border-solid border-mid bg-dark px-3 py-2">
+        <div class="flex-grow">
+          <Input autofocus bind:value={$searchTerm}>
+            <i slot="before" class="fa fa-search" />
+            <i slot="after" class="fa fa-qrcode cursor-pointer" on:click={startScanner} />
+          </Input>
+        </div>
+        <i class="fa fa-times fa-2xl cursor-pointer" on:click={closeSearch} />
       </div>
-      <i class="fa fa-times fa-2xl cursor-pointer" on:click={closeSearch} />
-    </div>
+    {/if}
   </Modal>
 {/if}

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {fade, fly} from 'src/util/transition'
+  import {fade, fly} from "src/util/transition"
 
   export let onEscape
   export let onClick
@@ -12,12 +12,15 @@
     }
   }} />
 
-<div transition:fade class="sm:hidden fixed inset-0 bg-black opacity-75 cursor-pointer" on:click={onEscape} />
-<div transition:fly={{y: 600, duration: 300}} class="sm:hidden fixed bottom-0 left-0 right-0 rounded-t-2xl border border-solid border-mid bg-dark pt-8" on:click={onClick}>
-  <div class="text-center staatliches text-lg flex flex-col gap-1">
+<div transition:fade class="fixed inset-0 cursor-pointer bg-black opacity-75" on:click={onEscape} />
+<div
+  transition:fly={{y: 600, duration: 300}}
+  class="fixed bottom-0 left-0 right-0 rounded-t-2xl border border-solid border-mid bg-dark pt-8"
+  on:click={onClick}>
+  <div class="staatliches flex flex-col gap-1 text-center text-lg">
     <slot />
   </div>
-  <div class="h-16 flex justify-end items-center text-white p-3 cursor-pointer">
+  <div class="flex h-16 cursor-pointer items-center justify-end p-3 text-white">
     <i class="fa fa-times fa-2x" on:click|stopPropagation={onEscape} />
   </div>
 </div>
