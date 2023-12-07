@@ -188,12 +188,20 @@ export const tagsFromContent = (content: string) => {
 }
 
 export const getReplyTags = (parent: Event, inherit = false) => {
+  const tags = Tags.from(parent)
   const hints = getEventHints(parent)
   const replyTags = [mention(parent.pubkey)]
   const replyTagValues = getIdAndAddress(parent)
 
+  // Inherit p-tag mentions
+  if (inherit) {
+    for (const pubkey of tags.type("p").values().all()) {
+      replyTags.push(mention(pubkey))
+    }
+  }
+
   // Based on NIP 10 legacy tags, order is root, mentions, reply
-  const {roots, replies, mentions} = Tags.from(parent).getAncestors()
+  const {roots, replies, mentions} = tags.getAncestors()
 
   // Root comes first
   if (roots.exists()) {

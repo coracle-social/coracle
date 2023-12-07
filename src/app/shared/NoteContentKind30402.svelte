@@ -48,7 +48,7 @@
       <p class="text-gray-3">{summary}</p>
     {/if}
     <div class="h-px bg-gray-6" />
-    <NoteContentKind1 {note} />
+    <NoteContentKind1 {note} {showEntire} />
   </div>
   {#if showMedia}
     <Carousel urls={images} />
