@@ -91,7 +91,7 @@
   const goToParent = () => {
     router
       .at("notes")
-      .of(getParentId(note), {relays: tags.getReplyHints()})
+      .of(getParentId(event), {relays: tags.getReplyHints()})
       .cx({context: ctx.concat(event)})
       .open()
   }
@@ -162,12 +162,12 @@
   )
 
   onMount(async () => {
-    const zapAddress = Tags.from(note).getValue("zap")
+    const zapAddress = Tags.from(event).getValue("zap")
 
     if (zapAddress && getLnUrl(zapAddress)) {
       zapper = await getZapper(getLnUrl(zapAddress))
     } else {
-      unsubZapper = people.key(note.pubkey).subscribe($p => {
+      unsubZapper = people.key(event.pubkey).subscribe($p => {
         zapper = $p?.zapper
       })
     }
@@ -214,8 +214,8 @@
 </script>
 
 {#if ready}
-  {@const rootId = getRootId(note)}
-  {@const replyId = getParentId(note)}
+  {@const rootId = getRootId(event)}
+  {@const replyId = getParentId(event)}
   {@const path = router
     .at("notes")
     .of(event.id, {relays: getEventHints(event)})
@@ -248,13 +248,13 @@
           </div>
           <div class="flex flex-col gap-2">
             <div class="flex gap-2">
-              {#if replyId && !getParentIds(note).includes(anchor) && showParent}
+              {#if replyId && !getParentIds(event).includes(anchor) && showParent}
                 <small class="text-gray-1">
                   <i class="fa fa-code-merge" />
                   <Anchor class="underline" on:click={goToParent}>View Parent</Anchor>
                 </small>
               {/if}
-              {#if rootId && !getRootIds(note).includes(anchor) && rootId !== replyId && showParent}
+              {#if rootId && !getRootIds(event).includes(anchor) && rootId !== replyId && showParent}
                 <small class="text-gray-1">
                   <i class="fa fa-code-pull-request" />
                   <Anchor class="underline" on:click={goToThread}>View Thread</Anchor>
