@@ -2,7 +2,7 @@ import {nip19} from "nostr-tools"
 import {fromNostrURI, cached} from "paravel"
 import {uniq, join, nth, last} from "ramda"
 import {Fetch, tryFunc, createMapOf, ellipsize, switcherFn} from "hurdak"
-import {fuzzy, createBatcher} from "src/util/misc"
+import {fuzzy, createBatcher, pushToKey} from "src/util/misc"
 import {dufflepud} from "src/engine/session/utils"
 import {getPubkeyHints} from "src/engine/relays/utils"
 import type {Person, Handle} from "./model"
@@ -99,18 +99,57 @@ export const getNetwork = $person => {
 }
 
 export const getFollowsWhoFollow = cached({
-  maxSize: 10000,
+  maxSize: 100000,
   getKey: join(":"),
   getValue: ([pk, tpk]) =>
     getFollowedPubkeys(people.key(pk).get()).filter(pk => isFollowing(people.key(pk).get(), tpk)),
 })
 
 export const getFollowsWhoMute = cached({
-  maxSize: 10000,
+  maxSize: 100000,
   getKey: join(":"),
   getValue: ([pk, tpk]) =>
     getFollowedPubkeys(people.key(pk).get()).filter(pk => isMuting(people.key(pk).get(), tpk)),
 })
+
+export const primeWotCaches = pk => {
+  const mutes = {}
+  const follows = {}
+
+  // Get follows mutes from the current user's follows list
+  for (const followPk of Array.from(getFollows(people.key(pk).get()))) {
+    const follow = people.key(followPk).get()
+
+    for (const mutedPk of Array.from(getMutes(follow))) {
+      pushToKey(mutes, mutedPk, followPk)
+    }
+
+    for (const followedPk of Array.from(getFollows(follow))) {
+      pushToKey(follows, followedPk, followPk)
+    }
+  }
+
+  // Populate mutes cache
+  for (const [k, pubkeys] of Object.entries(mutes)) {
+    getFollowsWhoMute.cache.set(getFollowsWhoMute.getKey([pk, k]), pubkeys)
+  }
+
+  // Populate follows cache
+  for (const [k, pubkeys] of Object.entries(follows)) {
+    getFollowsWhoFollow.cache.set(getFollowsWhoFollow.getKey([pk, k]), pubkeys)
+  }
+
+  // For everyone else in our database, populate an empty list
+  for (const person of people.get()) {
+    if (!mutes[person.pubkey]) {
+      getFollowsWhoMute.cache.set(getFollowsWhoMute.getKey([pk, person.pubkey]), [])
+    }
+
+    if (!follows[person.pubkey]) {
+      getFollowsWhoFollow.cache.set(getFollowsWhoFollow.getKey([pk, person.pubkey]), [])
+    }
+  }
+}
 
 export const getWotScore = (pk, tpk) =>
   getFollowsWhoFollow(pk, tpk).length -

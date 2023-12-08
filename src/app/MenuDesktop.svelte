@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {randomId} from "hurdak"
-  import {appName, toggleTheme} from "src/partials/state"
+  import {toggleTheme} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"

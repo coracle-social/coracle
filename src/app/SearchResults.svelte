@@ -1,5 +1,6 @@
 <script lang="ts">
   import Fuse from "fuse.js"
+  import {throttle} from "throttle-debounce"
   import {identity, sortBy, map} from "ramda"
   import Card from "src/partials/Card.svelte"
   import Content from "src/partials/Content.svelte"
@@ -10,6 +11,7 @@
     pubkey,
     topics,
     peopleWithName,
+    primeWotCaches,
     getWotScore,
     loadPeople,
     session,
@@ -17,6 +19,8 @@
 
   export let term
   export let onClose
+
+  let results = []
 
   const openTopic = topic => {
     onClose()
@@ -29,7 +33,7 @@
   }
 
   const topicOptions = topics.derived(
-    map((topic: Topic) => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
+    map((topic: Topic) => ({type: "topic", id: topic.name, topic, text: "#" + topic.name})),
   )
 
   const profileOptions = peopleWithName.derived($people =>
@@ -44,7 +48,7 @@
           type: "profile",
           text: [profile?.name, profile?.display_name, handle?.address].filter(identity).join(" "),
         }
-      })
+      }),
   )
 
   const search = s => {
@@ -52,19 +56,29 @@
       return sortBy(r => -getWotScore($pubkey, r.person.pubkey), $profileOptions) as any[]
     }
 
-    return sortBy(
-      ({score, item}: any) => {
-        if (item.type === "profile") {
-          return (score - 1) * Math.sqrt(getWotScore($pubkey, item.person.pubkey))
-        }
+    return sortBy(({score, item}: any) => {
+      if (item.type === "profile") {
+        return (score - 1) * Math.sqrt(getWotScore($pubkey, item.person.pubkey))
+      }
 
-        return -score
-      },
-      fuse.search(s)
-    ).map(r => r.item) as any[]
+      return -score
+    }, fuse.search(s)).map(r => r.item) as any[]
   }
 
-  $: term?.startsWith('#') || loadPeople(term)
+  const populateResults = throttle(300, s => {
+    results = search(s).slice(0, 50)
+  })
+
+  // Prime our wot cache
+  if ($pubkey) {
+    primeWotCaches($pubkey)
+  }
+
+  $: {
+    if (term && !term.startsWith("#")) {
+      loadPeople(term)
+    }
+  }
 
   $: firstChar = term ? term.slice(0, 1) : null
 
@@ -76,10 +90,12 @@
     shouldSort: false,
     includeScore: true,
   })
+
+  $: populateResults(term)
 </script>
 
 <Content gap="gap-3">
-  {#each search(term).slice(0, 50) as result (result.type + result.id)}
+  {#each results as result (result.type + result.id)}
     {#if result.type === "topic"}
       <Card interactive on:click={() => openTopic(result.topic.name)}>
         #{result.topic.name}

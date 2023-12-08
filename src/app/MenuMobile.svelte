@@ -1,6 +1,6 @@
 <script lang="ts">
   import {randomId} from "hurdak"
-  import {appName, toggleTheme, installPrompt, installAsPWA} from "src/partials/state"
+  import {toggleTheme, installPrompt, installAsPWA} from "src/partials/state"
   import SliderMenu from "src/partials/SliderMenu.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
