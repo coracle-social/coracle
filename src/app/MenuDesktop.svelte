@@ -28,7 +28,9 @@
   }
 
   const setSubMenu = name => {
-    subMenu = name
+    setTimeout(() => {
+      subMenu = name
+    }, subMenu ? 100 : 0)
   }
 
   const goToFeed = () => router.at("notes").push({key: randomId()})
@@ -38,8 +40,6 @@
 
   let subMenu, active
 
-  $: myNotesPath = router.at("people").of($pubkey).toString()
-
   $: {
     if ($page.path.startsWith("/notes")) {
       active = "feed"
@@ -47,10 +47,10 @@
       active = "notifications"
     } else if ($page.path.startsWith("/channels")) {
       active = "channels"
-    } else if ($page.path.startsWith(myNotesPath)) {
-      active = "my_notes"
     }
   }
+
+  $: console.log(subMenu)
 </script>
 
 <div
@@ -95,31 +95,26 @@
     <MenuDesktopItem disabled={!$canUseGiftWrap} path="/groups">Groups</MenuDesktopItem>
   {/if}
   <FlexColumn small class="absolute bottom-0 w-60">
+    <Anchor class={secondaryClass} on:click={() => setSubMenu("account")}>Account</Anchor>
     <Anchor class={secondaryClass} on:click={() => setSubMenu("settings")}>Settings</Anchor>
     <div class="staatliches block flex h-8 gap-2 px-8 text-light">
-      <Anchor external class=" hover:text-warm" href="/about">About</Anchor> /
-      <Anchor
-        external
-        class=" hover:text-warm"
-        href="https://github.com/coracle-social/coracle/issues/new">Feedback</Anchor>
-    </div>
-    <div class="staatliches block flex h-8 gap-2 px-8 text-light">
-      <Anchor external class=" hover:text-warm" href="/terms.html">Terms</Anchor> /
-      <Anchor external class=" hover:text-warm" href="/privacy.html">Privacy</Anchor>
+      <Anchor class="hover:text-warm" href="/about">About</Anchor> /
+      <Anchor external class="hover:text-warm" href="/terms.html">Terms</Anchor> /
+      <Anchor external class="hover:text-warm" href="/privacy.html">Privacy</Anchor>
     </div>
     {#if subMenu === "settings"}
       <MenuDesktopSecondary onEscape={closeSubMenu}>
-        <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" on:click={toggleTheme}>
-          <i class="fa fa-palette" /> Toggle Theme
-        </MenuItem>
         <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" href="/settings">
-          <i class="fa fa-cog" /> Configuration
+          <i class="fa fa-cog" /> App Settings
+        </MenuItem>
+        <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" href="/settings/content">
+          <i class="fa fa-volume-xmark" /> Content
         </MenuItem>
         <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" href="/settings/data">
           <i class="fa fa-database" /> Database
         </MenuItem>
-        <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" href="/settings/content">
-          <i class="fa fa-volume-xmark" /> Content
+        <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" on:click={toggleTheme}>
+          <i class="fa fa-palette" /> Toggle Theme
         </MenuItem>
       </MenuDesktopSecondary>
     {:else if subMenu === "account"}
@@ -149,14 +144,16 @@
             </MenuItem>
           {/if}
         {/each}
-        <MenuItem class="py-4" on:click={() => router.at("login/advanced").open()}>
+        <MenuItem
+          class="staatliches pl-8 py-4 flex gap-4 items-center"
+          on:click={() => router.at("login/advanced").open()}>
           Add Account
         </MenuItem>
       </MenuDesktopSecondary>
     {/if}
     <div
-      class="group relative z-10 max-w-full cursor-pointer border-t border-solid border-mid px-7 pb-6 pt-3">
-      <Anchor class="flex items-center gap-2" on:click={() => setSubMenu("account")}>
+      class="group relative z-10 max-w-full cursor-pointer border-t border-solid border-mid px-7 pb-4 pt-3">
+      <Anchor class="flex items-center gap-2" href={router.at("people").of($pubkey).toString()}>
         <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
         <div class="flex flex-col">
           <span>@{displayPubkey($pubkey)}</span>
