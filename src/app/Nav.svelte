@@ -44,7 +44,7 @@
         class="h-7 !px-2 py-px !bg-dark border-mid text-warm !rounded outline-none"
         bind:this={searchInput}
         bind:value={$searchTerm} />
-      <Anchor button class="-ml-2 z-10 text-dark">Search</Anchor>
+      <Anchor button class="-ml-2 z-feature text-dark">Search</Anchor>
     </div>
     <Anchor button accent on:click={createNote}>Post +</Anchor>
   {/if}

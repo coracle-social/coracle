@@ -4,6 +4,14 @@ module.exports = {
   safelist: ["w-4", "h-4"],
   theme: {
     extend: {},
+    zIndex: {
+      none: 0,
+      nav: 1,
+      feature: 2,
+      popover: 3,
+      modal: 4,
+      toast: 5,
+    },
     screens: {
       xs: "400px",
       sm: "640px",

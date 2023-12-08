@@ -1,25 +1,23 @@
 <script lang="ts">
   import {pluck} from "ramda"
   import Content from "src/partials/Content.svelte"
+  import Field from "src/partials/Field.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import {router} from "src/app/router"
 
   let profiles = []
 
-  const pubkeys = pluck("pubkey", profiles)
-  const submit = () => router.at("channels").of(pubkeys).open()
+  const submit = () => router.at("channels").of(pluck("pubkey", profiles)).push()
 </script>
 
 <form on:submit|preventDefault={submit} class="flex justify-center py-12">
   <Content>
     <h2 class="staatliches text-center text-6xl">Start a conversation</h2>
     <div class="flex w-full flex-col gap-8 pb-56">
-      <div class="flex flex-col gap-1">
-        <strong>Group members</strong>
+      <Field label="Who do you want to talk to?">
         <PersonMultiSelect bind:value={profiles} />
-        <p class="text-sm text-lightest">Who do you want to invite?</p>
-      </div>
+      </Field>
       <Anchor button tag="button" type="submit">Done</Anchor>
     </div>
   </Content>

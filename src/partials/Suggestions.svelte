@@ -38,7 +38,7 @@
 
 {#if data.length > 0 || (create && term)}
   <div
-    class="z-10 mt-2 flex flex-col overflow-hidden rounded border border-solid border-mid"
+    class="mt-2 flex flex-col overflow-hidden rounded border border-solid border-mid"
     in:fly={{y: 20}}>
     {#each data as item, i (getKey(item))}
       <button

@@ -8,7 +8,7 @@
 
 <div class="flex">
   {#each pubkeys as pubkey (pubkey)}
-    <div class="z-10 -mr-3 inline-block">
+    <div class="z-feature -mr-3 inline-block">
       <PersonCircle class={klass} {pubkey} />
     </div>
   {/each}

@@ -120,9 +120,9 @@
   </div>
 </Input>
 
-{#if focused}
+{#if focused && term}
   <div class="relative w-full">
-    <div class="absolute z-10 w-full">
+    <div class="absolute z-popover w-full">
       <Suggestions
         bind:this={suggestions}
         create={termToItem ? create : null}

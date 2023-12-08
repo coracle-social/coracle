@@ -45,7 +45,7 @@
 <div
   bind:this={root}
   transition:fade
-  class="modal group fixed inset-0 z-40"
+  class="modal group fixed inset-0 z-modal"
   class:pointer-events-none={closing}>
   <div
     class="fixed inset-0 cursor-pointer bg-black opacity-50"
@@ -62,7 +62,7 @@
       class="pointer-events-auto mt-12 min-h-full transition transition-all duration-500"
       style={mini ? "margin-top: 55vh" : ""}>
       {#if onEscape}
-        <div class="pointer-events-none sticky top-0 z-20 flex w-full flex-col items-end gap-2 p-2">
+        <div class="pointer-events-none sticky top-0 z-popover flex w-full flex-col items-end gap-2 p-2">
           <div
             class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
                  border border-solid border-accent-l bg-accent text-white transition-colors hover:bg-accent-l">
@@ -82,7 +82,7 @@
       <div
         class="relative h-full w-full cursor-auto border-t border-solid border-mid bg-cocoa pb-10 pt-2"
         on:click|stopPropagation>
-        <div class="m-auto max-w-2xl">
+        <div class="m-auto max-w-2xl py-4 flex flex-col gap-4">
           <slot />
         </div>
       </div>

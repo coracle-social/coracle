@@ -5,7 +5,7 @@ import {randomBytes} from "@noble/hashes/utils"
 import {secp256k1} from "@noble/curves/secp256k1"
 import {sha256} from "@noble/hashes/sha256"
 import {xchacha20} from "@noble/ciphers/chacha"
-import {switcherFn} from "hurdak"
+import {switcher, switcherFn} from "hurdak"
 import type {Session} from "src/engine/session/model"
 
 export const utf8Decoder = new TextDecoder()
@@ -61,6 +61,16 @@ export function decryptFor(sk: string, pk: string, payload: string) {
 
 export class Nip44 {
   constructor(readonly session: Session) {}
+
+  isEnabled() {
+    const {method} = this.session
+
+    return switcher(method, {
+      privkey: true,
+      extension: Boolean(window.nostr.nip44),
+      default: false,
+    })
+  }
 
   encrypt(message: string, pk: string, sk: string) {
     return encryptFor(sk, pk, message)

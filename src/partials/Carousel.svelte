@@ -6,6 +6,7 @@
   let el
   let i = 0
   let h = 0
+  let direction = 1
 
   $: max = urls.length
 
@@ -21,35 +22,40 @@
   }
 
   const prev = () => {
-    i = i - 1 + (max % max)
+    direction = -1
+    i = (i - 1 + max) % max
     forceHeightDuringTransition()
   }
 
   const next = () => {
+    direction = 1
     i = (i + 1) % max
     forceHeightDuringTransition()
   }
 
-  const getPixels = () => el.clientWidth
-
   const send = node => () => {
-    let top = node.offsetTop - parseFloat(getComputedStyle(node).marginTop)
-    let left = node.offsetLeft
+    const top = node.offsetTop - parseFloat(getComputedStyle(node).marginTop)
+    const left = node.offsetLeft
 
     return {
       duration,
       // Remove the element from the normal flow so that it doesn't interfere with the
       // placement of the new element, but position it exactly where it was.
-      css: (t, u) =>
-        `position:absolute;top:${top}px;left:${left}px;transform:translateX(-${Math.floor(
-          getPixels() * u,
-        )}px)`,
+      css: (t, u) => {
+        const translate = -1 * direction * Math.floor(el.clientWidth * u)
+
+        return `position:absolute;top:${top}px;left:${left}px;transform:translateX(${translate}px)`
+      },
     }
   }
 
   const receive = node => () => ({
     duration,
-    css: (t, u) => `transform:translateX(${Math.floor(getPixels() * u)}px)`,
+    css: (t, u) => {
+      const translate = direction * Math.floor(el.clientWidth * u)
+
+      return `transform:translateX(${translate}px)`
+    },
   })
 </script>
 
@@ -61,21 +67,21 @@
     bind:this={el}>
     {#if urls.length > 1}
       <div
-        class="transition-duration-300 relative left-4 z-10 -mr-8 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-solid border-lightest bg-dark opacity-75 transition-all hover:opacity-100"
+        class="transition-duration-300 relative left-4 -mr-8 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-solid border-lightest bg-dark opacity-75 transition-all hover:opacity-100"
         on:click={prev}>
         <i class="fa fa-chevron-left" />
       </div>
     {/if}
     <div>
       {#key i}
-        <div in:receive out:send>
+        <div in:receive out:send|local>
           <Image src={urls[i]} />
         </div>
       {/key}
     </div>
     {#if urls.length > 1}
       <div
-        class="transition-duration-300 relative right-4 z-10 -ml-8 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-solid border-lightest bg-dark opacity-75 transition-all hover:opacity-100"
+        class="transition-duration-300 relative right-4 -ml-8 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-solid border-lightest bg-dark opacity-75 transition-all hover:opacity-100"
         on:click={next}>
         <i class="fa fa-chevron-right" />
       </div>

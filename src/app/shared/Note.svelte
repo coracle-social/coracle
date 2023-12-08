@@ -293,8 +293,8 @@
     {#if !replyIsActive && visibleReplies.length > 0 && !showEntire && depth > 0}
       <div class="relative">
         <div
-          class="absolute right-0 top-0 z-10 -mr-2 -mt-4 flex h-6 w-6 cursor-pointer items-center
-                   justify-center rounded-full border border-solid border-mid bg-dark text-lightest"
+          class="absolute right-0 top-0 -mr-2 -mt-4 flex h-6 w-6 cursor-pointer items-center
+                 justify-center rounded-full border border-solid border-mid bg-dark text-lightest"
           on:click={() => {
             collapsed = !collapsed
           }}>

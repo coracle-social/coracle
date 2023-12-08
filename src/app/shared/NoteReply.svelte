@@ -124,13 +124,13 @@
 {#if isOpen || forceOpen}
   <div
     transition:slide|local
-    class="note-reply relative z-10 my-2 flex flex-col gap-1"
+    class="note-reply relative z-feature my-2 flex flex-col gap-1"
     bind:this={container}
     on:click|stopPropagation>
     {#if showBorder}
-      <div class="absolute bottom-0 left-4 top-0 z-0 -my-2 w-px bg-mid" />
+      <div class="absolute bottom-0 left-4 top-0 z-none -my-2 w-px bg-mid" />
     {/if}
-    <div class="z-10 overflow-hidden rounded-2xl border border-solid border-mid">
+    <div class="z-feature overflow-hidden rounded-2xl border border-solid border-mid">
       <div class="bg-cocoa p-3 text-lightest" class:rounded-b={mentions.length === 0}>
         <Compose bind:this={compose} onSubmit={send} style="min-height: 4rem">
           <div class="flex flex-col justify-start" slot="addon">

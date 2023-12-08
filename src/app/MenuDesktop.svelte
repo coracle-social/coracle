@@ -152,7 +152,7 @@
       </MenuDesktopSecondary>
     {/if}
     <div
-      class="group relative z-10 max-w-full cursor-pointer border-t border-solid border-mid px-7 pb-4 pt-3">
+      class="cursor-pointer border-t border-solid border-mid px-7 pb-4 pt-3">
       <Anchor class="flex items-center gap-2" href={router.at("people").of($pubkey).toString()}>
         <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
         <div class="flex flex-col">

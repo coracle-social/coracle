@@ -8,7 +8,7 @@
   const {dark, light, accent} = $themeColors
 </script>
 
-<div class="flex flex-col items-center justify-center gap-4 py-20" in:fade={{delay}}>
+<div class="flex flex-col items-center justify-center gap-4 py-20" in:fade|local={{delay}}>
   <slot />
   <Circle2 colorOuter={accent} colorInner={dark} colorCenter={light} />
 </div>

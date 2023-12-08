@@ -8,7 +8,6 @@
   import Spinner from "src/partials/Spinner.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import type {Event} from "src/engine"
-  import {canSign} from "src/engine"
 
   export let messages: Event[]
   export let sendMessage
@@ -94,57 +93,52 @@
     showNewMessages = false
   }} />
 
-<div class="fixed inset-0 flex gap-4 z-10">
-  <div class="w-full">
-    <div class="flex h-screen flex-col" class:pb-24={$canSign}>
-      <ul
-        bind:this={container}
-        class="flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
-        {#each groupedMessages as m (m.id)}
-          <li in:fly={{y: 20}} class="grid gap-2 py-1">
-            <slot name="message" message={m} />
-          </li>
-        {/each}
-        {#await loading}
-          <Spinner>Looking for messages...</Spinner>
-        {:then}
-          <div in:fly={{y: 20}} class="py-20 text-center">End of message history</div>
-        {/await}
-      </ul>
+<div class="fixed z-feature inset-0 flex flex-col lg:ml-60">
+  <div class="border-b border-solid border-mid lg:pr-48">
+    <slot name="header" />
+  </div>
+  <div class="flex flex-col flex-grow">
+    <ul
+      bind:this={container}
+      class="flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
+      {#each groupedMessages as m (m.id)}
+        <li in:fly={{y: 20}} class="grid gap-2 py-1">
+          <slot name="message" message={m} />
+        </li>
+      {/each}
+      {#await loading}
+        <Spinner>Looking for messages...</Spinner>
+      {:then}
+        <div in:fly={{y: 20}} class="py-20 text-center">End of message history</div>
+      {/await}
+    </ul>
+  </div>
+  <div
+    class="flex border-t border-solid border-mid border-cocoa bg-mid">
+    <textarea
+      rows="3"
+      autofocus
+      placeholder="Type something..."
+      bind:this={textarea}
+      on:keydown={onKeyDown}
+      class="w-full resize-none bg-mid p-2
+           text-lightest outline-0 placeholder:text-lightest" />
+    <div>
+      <ImageInput multi on:change={e => addImage(e.detail)}>
+        <button
+          slot="button"
+          class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-cocoa p-3
+               py-6 text-lightest transition-all hover:bg-accent">
+          <i class="fa-solid fa-paperclip fa-lg" />
+        </button>
+      </ImageInput>
+      <button
+        on:click={send}
+        class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-cocoa p-3
+             py-6 text-lightest transition-all hover:bg-accent">
+        <i class="fa-solid fa-paper-plane fa-lg" />
+      </button>
     </div>
-    <div
-      class="fixed top-0 z-20 -mt-px w-full border-b border-solid border-mid bg-cocoa lg:pr-48">
-      <slot name="header" />
-    </div>
-    {#if $canSign}
-      <div
-        class="fixed bottom-0 z-10 flex w-full border-t border-solid border-mid border-cocoa bg-mid lg:-ml-48 lg:pl-48">
-        <textarea
-          rows="3"
-          autofocus
-          placeholder="Type something..."
-          bind:this={textarea}
-          on:keydown={onKeyDown}
-          class="w-full resize-none bg-mid p-2
-               text-lightest outline-0 placeholder:text-lightest" />
-        <div>
-          <ImageInput multi on:change={e => addImage(e.detail)}>
-            <button
-              slot="button"
-              class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-cocoa p-3
-                   py-6 text-lightest transition-all hover:bg-accent">
-              <i class="fa-solid fa-paperclip fa-lg" />
-            </button>
-          </ImageInput>
-          <button
-            on:click={send}
-            class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-cocoa p-3
-                 py-6 text-lightest transition-all hover:bg-accent">
-            <i class="fa-solid fa-paper-plane fa-lg" />
-          </button>
-        </div>
-      </div>
-    {/if}
   </div>
   {#if showNewMessages}
     <div
