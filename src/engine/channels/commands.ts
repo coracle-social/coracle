@@ -3,41 +3,11 @@ import {assoc, whereEq, when, map} from "ramda"
 import {createMapOf} from "hurdak"
 import {now} from "paravel"
 import {appDataKeys} from "src/util/nostr"
-import {EventKind} from "src/engine/events/model"
-import {Publisher, createAndPublish, mention} from "src/engine/network/utils"
-import {getInboxHints, getPubkeyHints} from "src/engine/relays/utils"
-import {user, nip04, nip59} from "src/engine/session/derived"
+import {Publisher, mention} from "src/engine/network/utils"
+import {getPubkeyHints} from "src/engine/relays/utils"
+import {user, nip59} from "src/engine/session/derived"
 import {setAppData} from "src/engine/session/commands"
 import {channels} from "./state"
-
-export const publishNip04Message = async (recipient, content, tags = [], relays = null) => {
-  const pubkeys = [recipient, user.get().pubkey]
-
-  return createAndPublish(EventKind.Nip04Message, {
-    relays: relays || getInboxHints(pubkeys),
-    content: await nip04.get().encryptAsUser(content, recipient),
-    tags: [...tags, ["p", recipient]],
-  })
-}
-
-export const publishNip04Read = () =>
-  setAppData(
-    appDataKeys.NIP04_LAST_CHECKED,
-    createMapOf("id", "last_checked", channels.get().filter(whereEq({type: "nip04"})))
-  )
-
-export const nip04MarkAllRead = () => {
-  // @ts-ignore
-  channels.update(map(when(whereEq({type: "nip04"}), assoc("last_checked", now()))))
-
-  publishNip04Read()
-}
-
-export const nip04MarkChannelRead = (pubkey: string) => {
-  channels.key(pubkey).update(assoc("last_checked", now()))
-
-  publishNip04Read()
-}
 
 export const createNip24Message = (channelId, content) => {
   const recipients = channelId.split(",")
@@ -64,7 +34,7 @@ export const createNip24Message = (channelId, content) => {
 export const publishNip24Read = () =>
   setAppData(
     appDataKeys.NIP24_LAST_CHECKED,
-    createMapOf("id", "last_checked", channels.get().filter(whereEq({type: "nip24"})))
+    createMapOf("id", "last_checked", channels.get().filter(whereEq({type: "nip24"}))),
   )
 
 export const nip24MarkAllRead = () => {

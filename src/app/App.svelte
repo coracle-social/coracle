@@ -48,8 +48,6 @@
   import LoginPrivKey from "src/app/views/LoginPrivKey.svelte"
   import LoginPubKey from "src/app/views/LoginPubKey.svelte"
   import Logout from "src/app/views/Logout.svelte"
-  import MessagesDetail from "src/app/views/MessagesDetail.svelte"
-  import MessagesList from "src/app/views/MessagesList.svelte"
   import ModalMessage from "src/app/views/ModalMessage.svelte"
   import NoteCreate from "src/app/views/NoteCreate.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
@@ -102,19 +100,6 @@
   router.register("/channels/:channelId", ChannelsDetail, {
     serializers: {
       channelId: asChannelId,
-    },
-  })
-
-  router.register("/conversations", MessagesList, {
-    requireUser: true,
-  })
-  router.register("/conversations/requests", MessagesList, {
-    requireUser: true,
-  })
-  router.register("/conversations/:entity", MessagesDetail, {
-    requireUser: true,
-    serializers: {
-      entity: asPerson,
     },
   })
 

@@ -6,7 +6,7 @@
   import Heading from "src/partials/Heading.svelte"
   import {events, user, EventKind} from "src/engine"
 
-  const encryptedKinds = [EventKind.Nip04Message, EventKind.GiftWrap]
+  const encryptedKinds = [EventKind.GiftWrap]
 
   const submit = async () => {
     const jsonl = $events

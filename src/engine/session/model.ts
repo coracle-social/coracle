@@ -19,7 +19,6 @@ export type Session = {
   settings_updated_at?: number
   groups_last_synced?: number
   notifications_last_synced?: number
-  nip04_messages_last_synced?: number
   nip24_messages_last_synced?: number
   groups?: Record<string, GroupStatus>
 }

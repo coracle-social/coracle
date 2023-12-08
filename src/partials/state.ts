@@ -1,9 +1,17 @@
+import {debounce} from "throttle-debounce"
 import {prop, last, fromPairs} from "ramda"
-import {randomId} from "hurdak"
-import type {Writable} from "svelte/store"
-import {writable, derived, get} from "svelte/store"
+import {randomId, Storage} from "hurdak"
 import {parseHex} from "src/util/html"
-import {synced} from "src/util/misc"
+import type {Writable} from "src/engine"
+import {writable} from "src/engine"
+
+export const synced = (key: string, defaultValue: any) => {
+  const store = writable(Storage.getJson(key) || defaultValue)
+
+  store.subscribe(debounce(1000, $value => Storage.setJson(key, $value)))
+
+  return store
+}
 
 // Settings
 
@@ -14,9 +22,9 @@ export const appName = import.meta.env.VITE_APP_NAME
 export const installPrompt = writable(null)
 
 export const installAsPWA = () => {
-  $installPrompt.prompt()
+  installPrompt.get().prompt()
 
-  $installPrompt.userChoice.then(result => {
+  installPrompt.get().userChoice.then(result => {
     installPrompt.set(null)
   })
 }
@@ -36,7 +44,7 @@ toast.show = (type, message, timeout = 5) => {
 
   if (timeout) {
     setTimeout(() => {
-      if (prop("id", get(toast)) === id) {
+      if (prop("id", toast.get()) === id) {
         toast.set(null)
       }
     }, timeout * 1000)
@@ -45,7 +53,8 @@ toast.show = (type, message, timeout = 5) => {
 
 // Themes
 
-const parseTheme = raw => fromPairs(raw.split(",").map((x: string) => x.split(":")))
+const parseTheme = raw =>
+  fromPairs(raw.split(",").map((x: string) => x.split(":"))) as Record<string, string>
 
 const DARK_THEME = parseTheme(import.meta.env.VITE_DARK_THEME)
 
@@ -57,15 +66,15 @@ export const theme = synced("ui/theme", prefersDark ? "dark" : "light")
 
 export const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 
-export const themeColors = derived(theme, $theme => ($theme === "dark" ? DARK_THEME : LIGHT_THEME))
+export const themeColors = theme.derived($theme => ($theme === "dark" ? DARK_THEME : LIGHT_THEME))
 
-export const themeVariables = derived(themeColors, $colors => {
+export const themeVariables = themeColors.derived($colors => {
   return Object.entries($colors)
     .map(([k, v]) => `--${k}: ${v};`)
     .join("\n")
 })
 
-export const themeBackgroundGradient = derived(themeColors, $colors => {
+export const themeBackgroundGradient = themeColors.derived($colors => {
   const color = parseHex($colors["dark"])
 
   return {

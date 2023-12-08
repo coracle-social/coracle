@@ -39,7 +39,7 @@
 
     if (!isSelf && $canSign) {
       actions.push({
-        onClick: () => router.at("conversations").of(npub).push(),
+        onClick: () => router.at("channels").of([$session.pubkey, npub]).push(),
         label: "Message",
         icon: "envelope",
       })

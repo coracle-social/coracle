@@ -1,10 +1,8 @@
 import {bech32, utf8} from "@scure/base"
-import {debounce} from "throttle-debounce"
 import {now, stripProto} from "paravel"
 import {pluck, fromPairs, last, identity, sum, is, equals} from "ramda"
-import {ensurePlural, Storage, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
+import {ensurePlural, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js"
-import {writable} from "svelte/store"
 import {warn} from "src/util/logger"
 
 export const fuzzy = <T>(data: T[], opts = {}) => {
@@ -116,14 +114,6 @@ export const createScroller = <T>(
       done = true
     },
   }
-}
-
-export const synced = (key: string, defaultValue: any) => {
-  const store = writable(Storage.getJson(key) || defaultValue)
-
-  store.subscribe(debounce(1000, $value => Storage.setJson(key, $value)))
-
-  return store
 }
 
 // https://stackoverflow.com/a/21682946

@@ -91,8 +91,6 @@ export const listenForNotifications = async () => {
   ])
 
   const filters: Filter[] = [
-    // NIP04 Messages
-    {kinds: [4], "#p": pubkeys, limit: 1},
     // NIP24 Messages
     {kinds: [1059], "#p": pubkeys, limit: 1},
     // Mentions

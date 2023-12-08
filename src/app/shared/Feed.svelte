@@ -6,7 +6,6 @@
   import {fly} from "src/util/transition"
   import {getModal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
-  import Content from "src/partials/Content.svelte"
   import MobileInset from "src/partials/MobileInset.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import Note from "src/app/shared/Note.svelte"

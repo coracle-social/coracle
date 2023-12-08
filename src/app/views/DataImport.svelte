@@ -11,7 +11,7 @@
   import type {Event} from "src/engine"
   import {_events, EventKind, projections} from "src/engine"
 
-  const encryptedKinds = [EventKind.Nip04Message, EventKind.GiftWrap]
+  const encryptedKinds = [EventKind.GiftWrap]
 
   const setFile = e => {
     file = e.target.files[0]

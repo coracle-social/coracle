@@ -16,7 +16,6 @@ import {
   loadPubkeys,
   getUserRelayUrls,
   listenForNotifications,
-  hasNewNip04Messages,
   hasNewNip24Messages,
   canUseGiftWrap,
   getSetting,
@@ -30,8 +29,8 @@ export const menuIsOpen = writable(false)
 export const searchTerm = writable(null)
 
 export const hasNewDMs = derived(
-  [hasNewNip04Messages, hasNewNip24Messages, canUseGiftWrap],
-  ([nip04, nip24, canUseGiftWrap]) => nip04 || (canUseGiftWrap && nip24),
+  [hasNewNip24Messages, canUseGiftWrap],
+  ([$hasNew, $canUseGiftWrap]) => $canUseGiftWrap && $hasNew,
 )
 
 // Redact long strings, especially hex and bech32 keys which are 64 and 63

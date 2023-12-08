@@ -20,17 +20,7 @@ export const userChannels = derived(
 
       return $channel.members?.includes($pk) && none(pk => $mutes.has(pk), $channel.members || [])
     })
-  }
-)
-
-// Nip04
-
-export const nip04Channels = userChannels.derived(filter(whereEq({type: "nip04"})))
-
-export const unreadNip04Channels = nip04Channels.derived(filter(hasNewMessages))
-
-export const hasNewNip04Messages = unreadNip04Channels.derived(
-  any((c: Channel) => Boolean(c.last_sent))
+  },
 )
 
 // Nip24
@@ -40,5 +30,5 @@ export const nip24Channels = userChannels.derived(filter(whereEq({type: "nip24"}
 export const unreadNip24Channels = nip24Channels.derived(filter(hasNewMessages))
 
 export const hasNewNip24Messages = unreadNip24Channels.derived(
-  any((c: Channel) => Boolean(c.last_sent))
+  any((c: Channel) => Boolean(c.last_sent)),
 )

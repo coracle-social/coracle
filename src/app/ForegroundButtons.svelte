@@ -33,7 +33,7 @@
     router.at("notes/create").qp(params).open()
   }
 
-  $: showButtons = !$page?.path.match(/^\/conversations|channels|logout|settings/)
+  $: showButtons = !$page?.path.match(/^\/channels|logout|settings/)
 </script>
 
 <svelte:window bind:scrollY />

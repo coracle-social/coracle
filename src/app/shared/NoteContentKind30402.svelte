@@ -10,6 +10,7 @@
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {router} from "src/app/router"
+  import {pubkey} from "src/engine"
 
   export let note
   export let showMedia = false
@@ -25,7 +26,7 @@
       note,
     ).encode()}`
 
-    router.at("conversations").of(note.pubkey).cx({initialMessage}).push()
+    router.at("channels").of([$pubkey, note.pubkey]).cx({initialMessage}).push()
   }
 </script>
 

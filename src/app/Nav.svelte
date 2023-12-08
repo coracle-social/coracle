@@ -12,8 +12,6 @@
 
   const {page} = router
 
-  const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
-
   const openMenu = () => menuIsOpen.set(true)
 
   const openSearch = () => searchTerm.set("")

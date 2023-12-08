@@ -1,12 +1,20 @@
 <script lang="ts">
-  import {randomId} from 'hurdak'
-  import {appName, toggleTheme, installPrompt, installAsPWA} from 'src/partials/state'
+  import {randomId} from "hurdak"
+  import {appName, toggleTheme, installPrompt, installAsPWA} from "src/partials/state"
   import SliderMenu from "src/partials/SliderMenu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {slowConnections, menuIsOpen} from "src/app/state"
   import {router} from "src/app/router"
-  import {env, canUseGiftWrap, hasNewNip04Messages, hasNewNotifications, pubkey, sessions, displayPubkey} from "src/engine"
+  import {
+    env,
+    canUseGiftWrap,
+    hasNewNip24Messages,
+    hasNewNotifications,
+    pubkey,
+    sessions,
+    displayPubkey,
+  } from "src/engine"
 
   const closeSubMenu = () => {
     subMenu = null
@@ -27,9 +35,9 @@
 {#if $menuIsOpen}
   <SliderMenu onClick={closeMenu} onEscape={closeMenu}>
     <div on:click|stopPropagation>
-      <MenuItem class="py-4" on:click={() => setSubMenu('about')}>About</MenuItem>
-      <MenuItem class="py-4" on:click={() => setSubMenu('settings')}>Settings</MenuItem>
-      <MenuItem class="py-4" on:click={() => setSubMenu('account')}>Account</MenuItem>
+      <MenuItem class="py-4" on:click={() => setSubMenu("about")}>About</MenuItem>
+      <MenuItem class="py-4" on:click={() => setSubMenu("settings")}>Settings</MenuItem>
+      <MenuItem class="py-4" on:click={() => setSubMenu("account")}>Account</MenuItem>
     </div>
     {#if $env.FORCE_RELAYS.length === 0}
       <MenuItem class="py-4" href="/settings/relays">
@@ -37,7 +45,7 @@
           Relays
           {#if $slowConnections.length > 0}
             <div
-              class="absolute top-0 -right-2 h-2 w-2 rounded border border-solid border-white bg-accent" />
+              class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
           {/if}
         </div>
       </MenuItem>
@@ -45,12 +53,12 @@
     {#if $env.ENABLE_GROUPS}
       <MenuItem disabled={!$canUseGiftWrap} class="py-4" href="/groups">Groups</MenuItem>
     {/if}
-    <MenuItem class="py-4" href="/conversations">
+    <MenuItem class="py-4" href="/channels">
       <div class="relative inline-block">
         Messages
-        {#if $hasNewNip04Messages}
+        {#if $hasNewNip24Messages}
           <div
-            class="absolute top-0 -right-2 h-2 w-2 rounded border border-solid border-white bg-accent" />
+            class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
         {/if}
       </div>
     </MenuItem>
@@ -59,11 +67,11 @@
         Notifications
         {#if $hasNewNotifications}
           <div
-            class="absolute top-0 -right-2 h-2 w-2 rounded border border-solid border-white bg-accent" />
+            class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
         {/if}
       </div>
     </MenuItem>
-    <MenuItem on:click={() => router.at('notes').push({key: randomId()})}>Feed</MenuItem>
+    <MenuItem on:click={() => router.at("notes").push({key: randomId()})}>Feed</MenuItem>
   </SliderMenu>
 {/if}
 
@@ -95,12 +103,10 @@
   <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
     <MenuItem class="py-4" href="/logout">Logout</MenuItem>
     <div on:click|stopPropagation>
-      <MenuItem class="py-4"  on:click={() => setSubMenu('accounts')}>Switch Account</MenuItem>
+      <MenuItem class="py-4" on:click={() => setSubMenu("accounts")}>Switch Account</MenuItem>
     </div>
     <MenuItem class="py-4" href="/settings/profile">Edit Profile</MenuItem>
-    <MenuItem class="py-4" href={router.at("people").of($pubkey).toString()}>
-      My Notes
-    </MenuItem>
+    <MenuItem class="py-4" href={router.at("people").of($pubkey).toString()}>My Notes</MenuItem>
   </SliderMenu>
 {/if}
 
@@ -110,7 +116,7 @@
       {#if s.pubkey !== $pubkey}
         <MenuItem class="py-4" on:click={() => pubkey.set(s.pubkey)}>
           <div class="flex items-center justify-center gap-2">
-            <PersonCircle class="w-8 h-8 border border-solid border-warm" pubkey={s.pubkey} />
+            <PersonCircle class="h-8 w-8 border border-solid border-warm" pubkey={s.pubkey} />
             {displayPubkey(s.pubkey)}
           </div>
         </MenuItem>

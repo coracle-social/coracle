@@ -4,7 +4,6 @@
   import {isMobile} from "src/util/html"
   import {getIdOrAddress} from "src/util/nostr"
   import {fly} from "src/util/transition"
-  import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
   import type {Event} from "src/engine"
