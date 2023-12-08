@@ -4,6 +4,10 @@
 
 - [x] Add NIP 72 community support
 - [x] Add NIP 87 closed community support
+- [x] Add group notes
+- [x] Add group calendars
+- [x] Add group marketplace
+- [x] Support cross-posting
 
 # 0.3.14
 
@@ -13,6 +17,8 @@
 - [x] Add support for bunker:// (@brugeman)
 - [x] Improve theme switching reactivity
 - [x] Re-work replies, note rendering, and feed controls
+- [x] Speed up login
+- [x] Better a-tag reply support
 
 # 0.3.13
 
