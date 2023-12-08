@@ -82,7 +82,13 @@
         <Spinner delay={0}>Uploading files using: {displayList(urls)}</Spinner>
       {:else}
         <h1 class="staatliches text-2xl">Upload a File</h1>
-        <p>Click below to select a file to upload.</p>
+        <div class="flex flex-col gap-2">
+          <p>Click below to select a file to upload.</p>
+          <p class="text-sm text-gray-3">
+            <i class="fa fa-warning" />
+            Note that images are stored unencrypted and publicly accessible.
+          </p>
+        </div>
         <input multiple={multi} type="file" bind:this={input} />
       {/if}
     </Content>
