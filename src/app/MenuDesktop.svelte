@@ -20,6 +20,7 @@
     pubkey,
     sessions,
     displayPerson,
+    displayPubkey,
   } from "src/engine"
 
   const {page} = router
@@ -29,9 +30,12 @@
   }
 
   const setSubMenu = name => {
-    setTimeout(() => {
-      subMenu = name
-    }, subMenu ? 100 : 0)
+    setTimeout(
+      () => {
+        subMenu = name
+      },
+      subMenu ? 100 : 0,
+    )
   }
 
   const goToFeed = () => router.at("notes").push({key: randomId()})
@@ -58,7 +62,10 @@
   class={cx(
     "fixed bottom-0 left-0 top-0 w-60 border-r border-solid border-mid bg-cocoa transition-colors",
   )}>
-  <Anchor class="mb-4 flex items-center gap-1 h-16 px-6" external href="https://info.coracle.social">
+  <Anchor
+    class="mb-4 flex h-16 items-center gap-1 px-6"
+    external
+    href="https://info.coracle.social">
     <img alt="App Logo" src={import.meta.env.VITE_LOGO_URL || "/images/logo.png"} class="w-10" />
     <h1 class="staatliches text-3xl">Coracle</h1>
   </Anchor>
@@ -105,31 +112,33 @@
     </div>
     {#if subMenu === "settings"}
       <MenuDesktopSecondary onEscape={closeSubMenu}>
-        <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" on:click={toggleTheme}>
+        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" on:click={toggleTheme}>
           <i class="fa fa-palette" /> Toggle Theme
         </MenuItem>
-        <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" href="/settings">
+        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings">
           <i class="fa fa-cog" /> App Settings
         </MenuItem>
-        <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" href="/settings/content">
+        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings/content">
           <i class="fa fa-volume-xmark" /> Content Settings
         </MenuItem>
-        <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" href="/settings/data">
+        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings/data">
           <i class="fa fa-database" /> Database
         </MenuItem>
       </MenuDesktopSecondary>
     {:else if subMenu === "account"}
       <MenuDesktopSecondary onEscape={closeSubMenu}>
-        <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" href="/settings/keys">
+        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings/keys">
           <i class="fa fa-key" /> Keys
         </MenuItem>
-        <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" href="/settings/profile">
+        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings/profile">
           <i class="fa fa-user-circle" /> Edit Profile
         </MenuItem>
-        <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" on:click={() => setSubMenu("accounts")}>
+        <MenuItem
+          class="staatliches flex items-center gap-4 py-4 pl-8"
+          on:click={() => setSubMenu("accounts")}>
           <i class="fa fa-right-left" /> Switch Account
         </MenuItem>
-        <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" href="/logout">
+        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/logout">
           <i class="fa fa-right-to-bracket" /> Log Out
         </MenuItem>
       </MenuDesktopSecondary>
@@ -146,18 +155,17 @@
           {/if}
         {/each}
         <MenuItem
-          class="staatliches pl-8 py-4 flex gap-4 items-center"
+          class="staatliches flex items-center gap-4 py-4 pl-8"
           on:click={() => router.at("login/advanced").open()}>
           Add Account
         </MenuItem>
       </MenuDesktopSecondary>
     {/if}
-    <div
-      class="cursor-pointer border-t border-solid border-mid px-7 pb-4 pt-3">
+    <div class="cursor-pointer border-t border-solid border-mid px-7 pb-4 pt-3">
       {#if $user}
         <Anchor class="flex items-center gap-2" href={router.at("people").of($pubkey).toString()}>
           <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
-          <div class="flex flex-col min-w-0">
+          <div class="flex min-w-0 flex-col">
             <span>@{displayPerson($user)}</span>
             <PersonHandle class="text-sm" pubkey={$pubkey} />
           </div>

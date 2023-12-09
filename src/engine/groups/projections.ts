@@ -11,7 +11,7 @@ import {sessions} from "src/engine/session/state"
 import {nip59} from "src/engine/session/derived"
 import {getExecutor, getIdFilters, load} from "src/engine/network/utils"
 import {GroupAccess, MemberAccess} from "./model"
-import {groups, groupSharedKeys, groupRequests, groupAlerts} from "./state"
+import {groups, groupSharedKeys, groupAdminKeys, groupRequests, groupAlerts} from "./state"
 import {deriveAdminKeyForGroup, getRecipientKey} from "./utils"
 import {modifyGroupStatus, setGroupStatus} from "./commands"
 
@@ -29,9 +29,11 @@ projections.addHandler(24, (e: Event) => {
 
   if (privkey) {
     const pubkey = getPublicKey(privkey)
+    const role = tags.getValue("role")
     const relays = tags.type("relay").values().all()
+    const keys = role === "admin" ? groupAdminKeys : groupSharedKeys
 
-    groupSharedKeys.key(pubkey).update($key => ({
+    keys.key(pubkey).update($key => ({
       pubkey,
       privkey,
       group: address,
@@ -47,6 +49,7 @@ projections.addHandler(24, (e: Event) => {
       filters: [
         ...getIdFilters([address]),
         {kinds: [1059], "#p": [pubkey]},
+        {kinds: [1059], authors: [pubkey]},
       ],
     })
   }
@@ -120,7 +123,7 @@ const handleGroupRequest = access => (e: Event) => {
         ...e,
         group: address,
         resolved: false,
-      })
+      }),
     )
   }
 
@@ -147,7 +150,7 @@ projections.addGlobalHandler((e: Event) => {
     getExecutor([LOCAL_RELAY_URL]).publish(e)
 
     sharedKey.update(
-      updateIn("members", (members?: string[]) => uniq([...(members || []), e.pubkey]))
+      updateIn("members", (members?: string[]) => uniq([...(members || []), e.pubkey])),
     )
   }
 })

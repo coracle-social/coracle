@@ -231,7 +231,7 @@ export const publishToZeroOrMoreGroups = async (
 
 // Admin functions
 
-export const publishKeyRotations = async (address, pubkeys, template) => {
+export const publishKeyShares = async (address, pubkeys, template) => {
   const adminKey = deriveAdminKeyForGroup(address).get()
 
   return await Promise.all(
@@ -250,21 +250,37 @@ export const publishKeyRotations = async (address, pubkeys, template) => {
   )
 }
 
-export const publishGroupInvites = async (address, pubkeys, relays, gracePeriod = 0) => {
+export const publishAdminKeyShares = async (address, pubkeys, relays) => {
+  const {privkey} = deriveAdminKeyForGroup(address).get()
   const template = createEvent(24, {
     tags: [
       ["a", address],
-      ["grace_period", String(gracePeriod)],
-      ["privkey", deriveSharedKeyForGroup(address).get().privkey],
+      ["role", "admin"],
+      ["privkey", privkey],
       ...relays.map(url => ["relay", url]),
     ],
   })
 
-  return publishKeyRotations(address, pubkeys, template)
+  return publishKeyShares(address, pubkeys, template)
+}
+
+export const publishGroupInvites = async (address, pubkeys, relays, gracePeriod = 0) => {
+  const {privkey} = deriveSharedKeyForGroup(address).get()
+  const template = createEvent(24, {
+    tags: [
+      ["a", address],
+      ["role", "member"],
+      ["privkey", privkey],
+      ["grace_period", String(gracePeriod)],
+      ...relays.map(url => ["relay", url]),
+    ],
+  })
+
+  return publishKeyShares(address, pubkeys, template)
 }
 
 export const publishGroupEvictions = async (address, pubkeys) =>
-  publishKeyRotations(address, pubkeys, createEvent(24, {tags: [["a", address]]}))
+  publishKeyShares(address, pubkeys, createEvent(24, {tags: [["a", address]]}))
 
 export const publishGroupMeta = async (address, meta) => {
   const template = createEvent(34550, {

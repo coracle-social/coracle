@@ -1,5 +1,4 @@
 <script lang="ts">
-  import cx from 'classnames'
   import {toTitle} from "hurdak"
 
   export let tabs: string[]
