@@ -109,6 +109,10 @@
     modal = null
   }
 
+  const skip = () => {
+    router.at("notes").push()
+  }
+
   onMount(() => {
     searchForRelays()
   })
@@ -120,7 +124,7 @@
 
 <Content size="lg">
   <Heading class="text-center">Connect to Nostr</Heading>
-  <p class="text-left">
+  <p>
     We're searching for your profile on the network. If you'd like to select your relays manually
     instead, click <Anchor
       underline
@@ -129,6 +133,10 @@
         modal = "custom"
       }}>here</Anchor
     >.
+  </p>
+  <p>
+    You can also <Anchor underline on:click={skip}>skip this step</Anchor>,
+    but be aware that your profile and relays may not get properly synchronized.
   </p>
   {#if $env.FORCE_RELAYS.length > 0}
     <Spinner />

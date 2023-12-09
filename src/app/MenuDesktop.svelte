@@ -13,12 +13,13 @@
   import {router} from "src/app/router"
   import {
     env,
+    user,
     canUseGiftWrap,
     hasNewNip24Messages,
     hasNewNotifications,
     pubkey,
     sessions,
-    displayPubkey,
+    displayPerson,
   } from "src/engine"
 
   const {page} = router
@@ -153,11 +154,11 @@
     {/if}
     <div
       class="cursor-pointer border-t border-solid border-mid px-7 pb-4 pt-3">
-      {#if $pubkey}
+      {#if $user}
         <Anchor class="flex items-center gap-2" href={router.at("people").of($pubkey).toString()}>
           <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
           <div class="flex flex-col min-w-0">
-            <span>@{displayPubkey($pubkey)}</span>
+            <span>@{displayPerson($user)}</span>
             <PersonHandle class="text-sm" pubkey={$pubkey} />
           </div>
         </Anchor>
