@@ -35,29 +35,27 @@
   document.title = displayRelay($relay)
 </script>
 
-<Content>
-  <div class="flex items-center justify-between gap-2">
-    <RelayTitle relay={$relay} />
-    <RelayActions relay={$relay} />
+<div class="flex items-center justify-between gap-2">
+  <RelayTitle relay={$relay} />
+  <RelayActions relay={$relay} />
+</div>
+{#if rating}
+  <div class="text-sm">
+    <Rating inert value={rating} />
   </div>
-  {#if rating}
-    <div class="text-sm">
-      <Rating inert value={rating} />
-    </div>
-  {/if}
-  {#if $relay.info?.description}
-    <p>{$relay.info.description}</p>
-  {/if}
-  <Tabs borderClass="border-mid" {tabs} {activeTab} {setActiveTab} />
-  {#if activeTab === "reviews"}
-    <Feed
-      onEvent={onReview}
-      filter={{
-        kinds: [1986],
-        "#l": ["review/relay"],
-        "#r": [$relay.url],
-      }} />
-  {:else}
-    <Feed {shouldDisplay} relays={[$relay.url]} {filter} />
-  {/if}
-</Content>
+{/if}
+{#if $relay.info?.description}
+  <p>{$relay.info.description}</p>
+{/if}
+<Tabs {tabs} {activeTab} {setActiveTab} />
+{#if activeTab === "reviews"}
+  <Feed
+    onEvent={onReview}
+    filter={{
+      kinds: [1986],
+      "#l": ["review/relay"],
+      "#r": [$relay.url],
+    }} />
+{:else}
+  <Feed {shouldDisplay} relays={[$relay.url]} {filter} />
+{/if}

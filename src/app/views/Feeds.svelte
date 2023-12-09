@@ -49,7 +49,7 @@
 </script>
 
 {#if !$session}
-  <div class="text-center">
+  <div class="text-center py-16">
     <p class="text-xl">Don't have an account?</p>
     <p>
       Click <Anchor class="underline" on:click={showLogin}>here</Anchor> to join the nostr network.

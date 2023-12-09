@@ -28,10 +28,7 @@
 
 <Content size="lg" class="text-center">
   <div class="flex max-w-2xl flex-col gap-8">
-    <div class="mb-4 flex flex-col items-center justify-center">
-      <Heading>Welcome!</Heading>
-      <i>To the Nostr Network</i>
-    </div>
+    <Heading>Welcome!</Heading>
     <p class="text-center">
       Click below to log in or create an account.
       {#if !Capacitor.isNativePlatform()}

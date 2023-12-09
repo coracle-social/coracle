@@ -269,7 +269,7 @@
       <Field label={type === "note" ? "What do you want to say?" : "Description"}>
         <div
           class="rounded-xl border border-solid border-mid p-3"
-          class:bg-warm={!showPreview}
+          class:bg-white={!showPreview}
           class:text-black={!showPreview}
           class:bg-cocoa={showPreview}>
           {#if showPreview}
@@ -279,7 +279,7 @@
             <Compose on:keyup={updateCounts} bind:this={compose} {onSubmit} />
           </div>
         </div>
-        <div class="flex items-center justify-end gap-2 text-mid">
+        <div class="flex items-center justify-end gap-2 text-lighter">
           <small class="hidden sm:block">
             {commaFormat(charCount)} characters
           </small>

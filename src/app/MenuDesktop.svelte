@@ -57,7 +57,7 @@
   class={cx(
     "fixed bottom-0 left-0 top-0 w-60 border-r border-solid border-mid bg-cocoa transition-colors",
   )}>
-  <Anchor class="mb-4 flex items-center gap-1 p-6" external href="https://info.coracle.social">
+  <Anchor class="mb-4 flex items-center gap-1 h-16 px-6" external href="https://info.coracle.social">
     <img alt="App Logo" src={import.meta.env.VITE_LOGO_URL || "/images/logo.png"} class="w-10" />
     <h1 class="staatliches text-3xl">Coracle</h1>
   </Anchor>
@@ -104,17 +104,17 @@
     </div>
     {#if subMenu === "settings"}
       <MenuDesktopSecondary onEscape={closeSubMenu}>
+        <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" on:click={toggleTheme}>
+          <i class="fa fa-palette" /> Toggle Theme
+        </MenuItem>
         <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" href="/settings">
           <i class="fa fa-cog" /> App Settings
         </MenuItem>
         <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" href="/settings/content">
-          <i class="fa fa-volume-xmark" /> Content
+          <i class="fa fa-volume-xmark" /> Content Settings
         </MenuItem>
         <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" href="/settings/data">
           <i class="fa fa-database" /> Database
-        </MenuItem>
-        <MenuItem class="staatliches pl-8 py-4 flex gap-4 items-center" on:click={toggleTheme}>
-          <i class="fa fa-palette" /> Toggle Theme
         </MenuItem>
       </MenuDesktopSecondary>
     {:else if subMenu === "account"}
@@ -153,13 +153,17 @@
     {/if}
     <div
       class="cursor-pointer border-t border-solid border-mid px-7 pb-4 pt-3">
-      <Anchor class="flex items-center gap-2" href={router.at("people").of($pubkey).toString()}>
-        <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
-        <div class="flex flex-col">
-          <span>@{displayPubkey($pubkey)}</span>
-          <PersonHandle class="text-sm" pubkey={$pubkey} />
-        </div>
-      </Anchor>
+      {#if $pubkey}
+        <Anchor class="flex items-center gap-2" href={router.at("people").of($pubkey).toString()}>
+          <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
+          <div class="flex flex-col min-w-0">
+            <span>@{displayPubkey($pubkey)}</span>
+            <PersonHandle class="text-sm" pubkey={$pubkey} />
+          </div>
+        </Anchor>
+      {:else}
+        <Anchor modal button accent href="/login/intro">Log In</Anchor>
+      {/if}
     </div>
   </FlexColumn>
 </div>

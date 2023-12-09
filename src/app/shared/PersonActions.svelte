@@ -13,6 +13,7 @@
     unfollow,
     deriveMuted,
     deriveFollowing,
+    getUserRelayUrls,
   } from "src/engine"
   import {boot} from "src/app/state"
   import {router} from "src/app/router"
@@ -28,6 +29,14 @@
 
   $: {
     actions = []
+
+    if (!isSelf && $canSign) {
+      actions.push({
+        onClick: $muted ? unmutePerson : mutePerson,
+        label: $muted ? 'Unmute' : 'Mute',
+        icon: $muted ? "microphone-slash" : 'microphone',
+      })
+    }
 
     if ($canSign) {
       actions.push({
@@ -69,20 +78,13 @@
   const unmutePerson = () => unmute(pubkey)
 
   const mutePerson = () => mute("p", pubkey)
+
+  const share = () =>
+    router.at('qrcode').of(nip19.nprofileEncode({pubkey, relays: getUserRelayUrls('write')})).open()
 </script>
 
 <div class="flex items-center gap-3" on:click|stopPropagation>
   {#if !isSelf}
-    <Popover triggerType="mouseenter">
-      <div slot="trigger" class="w-6 text-center">
-        {#if $muted}
-          <i class="fa fa-microphone-slash cursor-pointer" on:click={unmutePerson} />
-        {:else}
-          <i class="fa fa-microphone cursor-pointer" on:click={mutePerson} />
-        {/if}
-      </div>
-      <div slot="tooltip">{$muted ? "Unmute" : "Mute"}</div>
-    </Popover>
     <Popover triggerType="mouseenter">
       <div slot="trigger" class="w-6 text-center">
         {#if $following}
@@ -94,5 +96,11 @@
       <div slot="tooltip">{$following ? "Unfollow" : "Follow"}</div>
     </Popover>
   {/if}
+  <Popover triggerType="mouseenter">
+    <div slot="trigger" class="w-6 text-center">
+      <i class="fa fa-qrcode cursor-pointer" on:click={share} />
+    </div>
+    <div slot="tooltip">Share</div>
+  </Popover>
   <OverflowMenu {actions} />
 </div>

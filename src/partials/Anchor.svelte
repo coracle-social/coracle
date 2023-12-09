@@ -26,7 +26,7 @@
   $: className = cx($$props.class, "transition-all cursor-pointer", {
     underline: underline,
     "opacity-50 pointer-events-none": loading || disabled,
-    "bg-warm text-accent hover:bg-warm-l": button && !accent,
+    "bg-white text-black hover:bg-white-l border border-solid border-warm": button && !accent,
     "bg-accent text-white hover:bg-accent-l": button && accent,
     "text-xl staatliches rounded whitespace-nowrap flex justify-center items-center gap-2": button,
     "h-7 px-6": button && !circle,

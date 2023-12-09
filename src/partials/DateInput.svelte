@@ -11,7 +11,7 @@
   const className = cx(
     $$props.class,
     "rounded-full shadow-inset py-2 px-4 w-full placeholder:text-mid",
-    "bg-warm border border-solid border-lighter text-black pl-10"
+    "bg-white border border-solid border-lighter text-black pl-10"
   )
 
   const setDate = d => {

@@ -17,6 +17,10 @@
   const openSearch = () => searchTerm.set("")
 
   const createNote = () => {
+    if (!$pubkey) {
+      return router.at('/login/intro').open()
+    }
+
     const params = {} as any
     const props = getProps($page) as any
 
@@ -44,7 +48,7 @@
         class="h-7 !px-2 py-px !bg-dark border-mid text-warm !rounded outline-none"
         bind:this={searchInput}
         bind:value={$searchTerm} />
-      <Anchor button class="-ml-2 z-feature text-dark">Search</Anchor>
+      <Anchor button class="-ml-2 z-feature">Search</Anchor>
     </div>
     <Anchor button accent on:click={createNote}>Post +</Anchor>
   {/if}
