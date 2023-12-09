@@ -6,6 +6,7 @@
   import {getKey} from "src/util/router"
   import {themeBackgroundGradient} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
+  import MobileInset from "src/partials/MobileInset.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
@@ -97,59 +98,57 @@
          background-size: cover;
          background-image: linear-gradient(to bottom, ${rgba}, ${rgb}), url('${$group?.meta?.banner}')`} />
 
-<Content>
-  <div class="flex gap-4 text-lightest">
-    <GroupCircle {address} class="mt-1 h-10 w-10 sm:h-32 sm:w-32" />
-    <div class="flex min-w-0 flex-grow flex-col gap-4">
-      <div class="flex items-center justify-between gap-4">
-        <Anchor on:click={() => setActiveTab("notes")} class="text-2xl"
-          >{displayGroup($group)}</Anchor>
-        <div class="hidden xs:block">
-          <GroupActions {address} />
-        </div>
+<MobileInset class="flex gap-4 text-lightest">
+  <GroupCircle {address} class="mt-1 h-10 w-10 sm:h-32 sm:w-32" />
+  <div class="flex min-w-0 flex-grow flex-col gap-4">
+    <div class="flex items-center justify-between gap-4">
+      <Anchor on:click={() => setActiveTab("notes")} class="text-2xl"
+        >{displayGroup($group)}</Anchor>
+      <div class="hidden xs:block">
+        <GroupActions {address} />
       </div>
-      <GroupAbout {address} />
     </div>
+    <GroupAbout {address} />
   </div>
+</MobileInset>
 
-  {#if tabs.length > 1}
-    <Tabs {tabs} {activeTab} {setActiveTab} />
-  {/if}
+{#if tabs.length > 1}
+  <Tabs {tabs} {activeTab} {setActiveTab} />
+{/if}
 
-  {#if $access === GroupAccess.Closed && $status.access !== MemberAccess.Granted}
-    <p class="m-auto max-w-sm py-12 text-center">
-      {#if $status.access === MemberAccess.Requested}
-        Your access request is awaiting approval.
-      {:else}
-        You don't have access to this group.
-      {/if}
-      {#if $session && !$status.access}
-        Click <Anchor underline on:click={() => joinGroup(address)}>here</Anchor> to request entry.
-      {/if}
-    </p>
-  {:else if activeTab === "notes"}
-    <Feed
-      shouldListen
-      hideControls
-      filter={{kinds: without([30402], noteKinds), "#a": [address]}}
-      {relays} />
-  {:else if activeTab === "calendar"}
-    <GroupCalendar {group} {relays} />
-  {:else if activeTab === "market"}
-    <GroupMarket {group} {relays} />
-  {:else if activeTab === "members"}
-    <Content size="inherit" gap="gap-4">
-      {#each members as pubkey (pubkey)}
-        <GroupMember {address} {pubkey} />
-      {:else}
-        <p class="text-center py-12">No members found.</p>
-      {/each}
-    </Content>
-  {:else if activeTab === "admin"}
-    {#each $requests as request (request.id)}
-      <GroupRequest {address} {request} />
+{#if $access === GroupAccess.Closed && $status.access !== MemberAccess.Granted}
+  <p class="m-auto max-w-sm py-12 text-center">
+    {#if $status.access === MemberAccess.Requested}
+      Your access request is awaiting approval.
     {:else}
-      <p class="text-center py-12">No action items found.</p>
+      You don't have access to this group.
+    {/if}
+    {#if $session && !$status.access}
+      Click <Anchor underline on:click={() => joinGroup(address)}>here</Anchor> to request entry.
+    {/if}
+  </p>
+{:else if activeTab === "notes"}
+  <Feed
+    shouldListen
+    hideControls
+    filter={{kinds: without([30402], noteKinds), "#a": [address]}}
+    {relays} />
+{:else if activeTab === "calendar"}
+  <GroupCalendar {group} {relays} />
+{:else if activeTab === "market"}
+  <GroupMarket {group} {relays} />
+{:else if activeTab === "members"}
+  <Content size="inherit" gap="gap-4">
+    {#each members as pubkey (pubkey)}
+      <GroupMember {address} {pubkey} />
+    {:else}
+      <p class="text-center py-12">No members found.</p>
     {/each}
-  {/if}
-</Content>
+  </Content>
+{:else if activeTab === "admin"}
+  {#each $requests as request (request.id)}
+    <GroupRequest {address} {request} />
+  {:else}
+    <p class="text-center py-12">No action items found.</p>
+  {/each}
+{/if}

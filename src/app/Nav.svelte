@@ -39,10 +39,8 @@
 <svelte:window bind:innerWidth />
 
 <!-- top nav -->
-<div class="fixed top-0 left-0 right-0 flex justify-end items-center h-16 gap-8 bg-dark px-4 border-b border-solid border-mid">
-  {#if innerWidth < 1024}
-    <img alt="App Logo" src={import.meta.env.VITE_LOGO_URL || "/images/logo.png"} class="w-10" />
-  {:else}
+{#if innerWidth >= 1024}
+  <div class="fixed top-0 left-0 right-0 flex justify-end items-center h-16 gap-8 bg-dark px-4 border-b border-solid border-mid">
     <div class="flex">
       <Input
         class="h-7 !px-2 py-px !bg-dark border-mid text-warm !rounded outline-none"
@@ -51,8 +49,8 @@
       <Anchor button class="-ml-2 z-feature">Search</Anchor>
     </div>
     <Anchor button accent on:click={createNote}>Post +</Anchor>
-  {/if}
-</div>
+  </div>
+{/if}
 
 <!-- bottom nav -->
 {#if innerWidth < 1024}
@@ -67,12 +65,10 @@
     <div class="flex items-center cursor-pointer" on:click={openMenu}>
       <i class="fa fa-bars fa-2xl" />
       {#if $pubkey}
-        <div class="-ml-2 border-4 border-solid border-dark rounded-full">
-          <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
-          {#if $hasNewNotifications || $hasNewDMs}
-            <div class="absolute right-4 top-4 h-2 w-2 rounded bg-accent" />
-          {/if}
-        </div>
+        <PersonCircle class="h-12 w-12 -ml-2 border-4 !border-dark" pubkey={$pubkey} />
+        {#if $hasNewNotifications || $hasNewDMs}
+          <div class="absolute right-4 top-4 h-2 w-2 rounded bg-accent" />
+        {/if}
       {/if}
     </div>
   </div>

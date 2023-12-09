@@ -65,26 +65,24 @@
   })
 </script>
 
-<Content>
-  <div class="flex justify-between">
-    <div class="flex items-center gap-2">
-      <i class="fa fa-circle-nodes fa-lg" />
-      <h2 class="staatliches text-2xl">Your groups</h2>
-    </div>
-    <Anchor modal button accent href="/groups/new">
-      <i class="fa-solid fa-plus" /> Create Group
-    </Anchor>
+<div class="flex justify-between">
+  <div class="flex items-center gap-2">
+    <i class="fa fa-circle-nodes fa-lg" />
+    <h2 class="staatliches text-2xl">Your groups</h2>
   </div>
-  {#each $groupList.joined as group (group.address)}
-    <GroupListItem {group} />
-  {:else}
-    <p class="text-center py-8">You haven't yet joined any groups.</p>
-  {/each}
-  <div class="mb-2 border-b border-solid border-mid pt-2" />
-  <Input bind:value={q} type="text" wrapperClass="flex-grow" placeholder="Search groups">
-    <i slot="before" class="fa-solid fa-search" />
-  </Input>
-  {#each searchGroups(q).slice(0, limit) as group (group.address)}
-    <GroupListItem {group} />
-  {/each}
-</Content>
+  <Anchor modal button accent href="/groups/new">
+    <i class="fa-solid fa-plus" /> Create Group
+  </Anchor>
+</div>
+{#each $groupList.joined as group (group.address)}
+  <GroupListItem {group} />
+{:else}
+  <p class="text-center py-8">You haven't yet joined any groups.</p>
+{/each}
+<div class="mb-2 border-b border-solid border-mid pt-2" />
+<Input bind:value={q} type="text" wrapperClass="flex-grow" placeholder="Search groups">
+  <i slot="before" class="fa-solid fa-search" />
+</Input>
+{#each searchGroups(q).slice(0, limit) as group (group.address)}
+  <GroupListItem {group} />
+{/each}
