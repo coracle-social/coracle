@@ -14,7 +14,7 @@
     name: getGroupName($group),
     image: $group.image || "",
     description: $group.description || "",
-    isPublic: $group.access !== "closed",
+    isPublic: $group.access && $group.access !== "closed",
     relays: $group.relays || [],
   }
 

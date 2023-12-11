@@ -22,6 +22,7 @@ projections.addHandler(24, (e: Event) => {
   const privkey = tags.getValue("privkey")
   const address = tags.getValue("a")
   const recipient = Tags.from(e.wrap).getValue("p")
+  const relays = tags.type("relay").values().all()
 
   if (!address) {
     return
@@ -30,7 +31,6 @@ projections.addHandler(24, (e: Event) => {
   if (privkey) {
     const pubkey = getPublicKey(privkey)
     const role = tags.getValue("role")
-    const relays = tags.type("relay").values().all()
     const keys = role === "admin" ? groupAdminKeys : groupSharedKeys
 
     keys.key(pubkey).update($key => ({
@@ -52,6 +52,12 @@ projections.addHandler(24, (e: Event) => {
         {kinds: [1059], authors: [pubkey]},
       ],
     })
+  }
+
+  if (relays.length > 0) {
+    const {identifier: id, pubkey} = Naddr.fromTagValue(address)
+
+    groups.key(address).update($group => ({address, pubkey, id, relays, ...$group}))
   }
 
   groupAlerts.key(e.id).set({
@@ -162,6 +168,7 @@ projections.addHandler(EventKind.GiftWrap, wrap => {
 
   if (sk) {
     nip59.get().withUnwrappedEvent(wrap, sk, rumor => {
+      console.log("======", rumor)
       projections.push(rumor)
     })
   }
