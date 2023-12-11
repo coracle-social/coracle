@@ -61,6 +61,14 @@
     if ($env.FORCE_RELAYS.length === 0) {
       actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
     }
+
+    if (isSelf && $canSign) {
+      actions.push({
+        onClick: () => router.at("settings/profile").open(),
+        label: "Edit",
+        icon: "edit",
+      })
+    }
   }
 
   const loginAsUser = () => {

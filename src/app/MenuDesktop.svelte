@@ -54,8 +54,6 @@
       active = "channels"
     }
   }
-
-  $: console.log(subMenu)
 </script>
 
 <div
@@ -103,10 +101,9 @@
     <MenuDesktopItem disabled={!$canUseGiftWrap} path="/groups">Groups</MenuDesktopItem>
   {/if}
   <FlexColumn small class="absolute bottom-0 w-60">
-    <Anchor class={secondaryClass} on:click={() => setSubMenu("account")}>Account</Anchor>
+    <Anchor class={secondaryClass} href="/about">About</Anchor>
     <Anchor class={secondaryClass} on:click={() => setSubMenu("settings")}>Settings</Anchor>
     <div class="staatliches block flex h-8 gap-2 px-8 text-light">
-      <Anchor class="hover:text-warm" href="/about">About</Anchor> /
       <Anchor external class="hover:text-warm" href="/terms.html">Terms</Anchor> /
       <Anchor external class="hover:text-warm" href="/privacy.html">Privacy</Anchor>
     </div>
@@ -127,11 +124,11 @@
       </MenuDesktopSecondary>
     {:else if subMenu === "account"}
       <MenuDesktopSecondary onEscape={closeSubMenu}>
+        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href={router.at("people").of($pubkey).toString()}>
+          <i class="fa fa-user-circle" /> Profile
+        </MenuItem>
         <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings/keys">
           <i class="fa fa-key" /> Keys
-        </MenuItem>
-        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings/profile">
-          <i class="fa fa-user-circle" /> Edit Profile
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
@@ -163,7 +160,7 @@
     {/if}
     <div class="cursor-pointer border-t border-solid border-mid px-7 pb-4 pt-3">
       {#if $user}
-        <Anchor class="flex items-center gap-2" href={router.at("people").of($pubkey).toString()}>
+        <Anchor class="flex items-center gap-2" on:click={() => setSubMenu("account")}>
           <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
           <div class="flex min-w-0 flex-col">
             <span>@{displayPerson($user)}</span>
