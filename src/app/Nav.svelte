@@ -14,11 +14,11 @@
 
   const openMenu = () => menuIsOpen.set(true)
 
-  const openSearch = () => searchTerm.set("")
+  const openSearch = () => router.at("/search").open()
 
   const createNote = () => {
     if (!$pubkey) {
-      return router.at('/login/intro').open()
+      return router.at("/login/intro").open()
     }
 
     const params = {} as any
@@ -40,13 +40,12 @@
 
 <!-- top nav -->
 {#if innerWidth >= 1024}
-  <div class="fixed top-0 left-0 right-0 flex justify-end items-center h-16 gap-8 bg-dark px-4 border-b border-solid border-mid">
+  <div
+    class="fixed left-0 right-0 top-0 flex h-16 items-center justify-end gap-8 border-b border-solid border-mid bg-dark px-4"
+    on:click={openSearch}>
     <div class="flex">
-      <Input
-        class="h-7 !px-2 py-px !bg-dark border-mid text-warm !rounded outline-none"
-        bind:this={searchInput}
-        bind:value={$searchTerm} />
-      <Anchor button class="-ml-2 z-feature">Search</Anchor>
+      <Input class="h-7 !rounded border-mid !bg-dark !px-2 py-px text-warm outline-none" bind:value={$searchTerm} />
+      <Anchor button class="z-feature -ml-2">Search</Anchor>
     </div>
     <Anchor button accent on:click={createNote}>Post +</Anchor>
   </div>
@@ -55,17 +54,17 @@
 <!-- bottom nav -->
 {#if innerWidth < 1024}
   <div
-    class="fixed bottom-0 left-0 right-0 flex justify-between items-center bg-dark py-2 px-4 border-t border-solid border-mid">
+    class="fixed bottom-0 left-0 right-0 flex items-center justify-between border-t border-solid border-mid bg-dark px-4 py-2">
     <div
-      class="border-2 border-solid border-warm text-accent rounded-full w-10 h-10 pl-3 pt-2 p-1 cursor-pointer"
+      class="h-10 w-10 cursor-pointer rounded-full border-2 border-solid border-warm p-1 pl-3 pt-2 text-accent"
       on:click={openSearch}>
       <i class="fa fa-search scale-150" />
     </div>
     <Anchor button accent on:click={createNote}>Post +</Anchor>
-    <div class="flex items-center cursor-pointer" on:click={openMenu}>
+    <div class="flex cursor-pointer items-center" on:click={openMenu}>
       <i class="fa fa-bars fa-2xl" />
       {#if $pubkey}
-        <PersonCircle class="h-12 w-12 -ml-2 border-4 !border-dark" pubkey={$pubkey} />
+        <PersonCircle class="-ml-2 h-12 w-12 border-4 !border-dark" pubkey={$pubkey} />
         {#if $hasNewNotifications || $hasNewDMs}
           <div class="absolute right-4 top-4 h-2 w-2 rounded bg-accent" />
         {/if}

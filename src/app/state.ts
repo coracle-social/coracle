@@ -26,7 +26,7 @@ import {
 
 export const menuIsOpen = writable(false)
 
-export const searchTerm = writable(null)
+export const searchTerm = writable("")
 
 export const hasNewDMs = derived(
   [hasNewNip24Messages, canUseGiftWrap],

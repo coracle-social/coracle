@@ -161,6 +161,10 @@
     zapper,
   )
 
+  $: rootId = getRootId(event)
+  $: replyId = getParentId(event)
+  $: path = router.at("notes").of(event.id, {relays: getEventHints(event)}).toString()
+
   onMount(async () => {
     const zapAddress = Tags.from(event).getValue("zap")
 
@@ -214,12 +218,6 @@
 </script>
 
 {#if ready}
-  {@const rootId = getRootId(event)}
-  {@const replyId = getParentId(event)}
-  {@const path = router
-    .at("notes")
-    .of(event.id, {relays: getEventHints(event)})
-    .toString()}
   <NoteMeta note={event} {showGroup} />
   <div class="note relative" class:py-2={!showParent && !topLevel}>
     {#if !showParent && !topLevel}

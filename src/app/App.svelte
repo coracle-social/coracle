@@ -12,7 +12,6 @@
   import {loadAppData} from "src/app/state"
   import {themeVariables, appName} from "src/partials/state"
   import Menu from "src/app/Menu.svelte"
-  import SearchAndScan from "src/app/SearchAndScan.svelte"
   import Routes from "src/app/Routes.svelte"
   import Toast from "src/app/Toast.svelte"
   import Nav from "src/app/Nav.svelte"
@@ -21,6 +20,7 @@
   import {onMount} from "svelte"
   import {memoize} from "src/util/misc"
   import About from "src/app/views/About.svelte"
+  import Search from "src/app/views/Search.svelte"
   import Bech32Entity from "src/app/views/Bech32Entity.svelte"
   import ChannelCreate from "src/app/views/ChannelCreate.svelte"
   import ChannelsDetail from "src/app/views/ChannelsDetail.svelte"
@@ -92,6 +92,7 @@
   // Routes
 
   router.register("/about", About)
+  router.register("/search", Search)
   router.register("/bech32", Bech32Entity)
 
   router.register("/channels", ChannelsList)
@@ -443,7 +444,6 @@
     <Routes />
     {#key $stateKey}
       <ForegroundButtons />
-      <SearchAndScan />
       <Nav />
       <Menu />
       <Toast />
