@@ -9,9 +9,21 @@ import type {Event, NostrEvent} from "src/engine/events/model"
 import {people} from "src/engine/people/state"
 import {displayPerson} from "src/engine/people/utils"
 import {getUserRelayUrls, getEventHints, getPubkeyHint} from "src/engine/relays/utils"
+import {env} from "src/engine/session/state"
 import {signer} from "src/engine/session/derived"
 import {projections} from "src/engine/core/projections"
 import {getUrls, getExecutor} from "./executor"
+
+export const getClientTag = () => {
+  const {CLIENT_NAME = "", CLIENT_ID} = env.get()
+  const tag = ["client", CLIENT_NAME]
+
+  if (CLIENT_ID) {
+    tag.push(CLIENT_ID)
+  }
+
+  return tag
+}
 
 export type PublisherOpts = {
   timeout?: number

@@ -38,6 +38,10 @@ window.addEventListener("beforeinstallprompt", e => {
 
 const fromCsv = s => (s || "").split(",").filter(identity)
 
+const CLIENT_ID = import.meta.env.VITE_CLIENT_ID
+
+const CLIENT_NAME = import.meta.env.VITE_CLIENT_NAME
+
 const IMGPROXY_URL = import.meta.env.VITE_IMGPROXY_URL
 
 const DUFFLEPUD_URL = import.meta.env.VITE_DUFFLEPUD_URL
@@ -66,6 +70,8 @@ const ENABLE_JUKEBOX = JSON.parse(import.meta.env.VITE_ENABLE_JUKEBOX)
 
 // Prep our env
 env.set({
+  CLIENT_ID,
+  CLIENT_NAME,
   DEFAULT_FOLLOWS,
   NIP96_URLS,
   IMGPROXY_URL,

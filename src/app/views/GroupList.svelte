@@ -5,7 +5,6 @@
   import {now} from "paravel"
   import {fuzzy, createScroller} from "src/util/misc"
   import {getModal} from "src/partials/state"
-  import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import GroupListItem from "src/app/views/GroupListItem.svelte"
