@@ -2,9 +2,9 @@
   import {randomId} from "hurdak"
   import {toggleTheme, installPrompt, installAsPWA} from "src/partials/state"
   import SliderMenu from "src/partials/SliderMenu.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
+  import MenuMobileItem from "src/app/MenuMobileItem.svelte"
   import {slowConnections, menuIsOpen} from "src/app/state"
   import {router} from "src/app/router"
   import {
@@ -43,52 +43,35 @@
 
 {#if $menuIsOpen}
   <SliderMenu onClick={closeMenu} onEscape={closeMenu}>
-    <div class="grid grid-cols-2 gap-x-8 gap-y-3 m-auto">
+    <div class="grid grid-cols-2 gap-x-8 gap-y-2 m-auto">
       {#if $installPrompt}
-        <Anchor class="p-3 flex gap-3 items-center" on:click={installAsPWA}>
+        <MenuMobileItem on:click={installAsPWA}>
           <i class="fa fa-rocket w-8" /> Install
-        </Anchor>
+        </MenuMobileItem>
       {/if}
-      <Anchor external class="p-3 flex gap-3 items-center" href="/terms.html">
+      <MenuMobileItem external href="/terms.html">
         <i class="fa fa-scale-balanced w-8" /> Terms
-      </Anchor>
-      <Anchor external class="p-3 flex gap-3 items-center" href="/privacy.html">
+      </MenuMobileItem>
+      <MenuMobileItem external href="/privacy.html">
         <i class="fa fa-eye-slash w-8" /> Privacy
-      </Anchor>
-      <Anchor class="p-3 flex gap-3 items-center" on:click={toggleTheme}>
-        <i class="fa fa-palette w-8" /> Theme
-      </Anchor>
-      <Anchor class="p-3 flex gap-3 items-center" href="/about">
+      </MenuMobileItem>
+      <MenuMobileItem href="/about">
         <i class="fa fa-info-circle w-8" /> About
-      </Anchor>
-      <div on:click|stopPropagation>
-        <Anchor class="p-3 flex gap-3 items-center" on:click={openSettings}>
-          <i class="fa fa-cog w-8" /> Settings
-        </Anchor>
-      </div>
-      <div on:click|stopPropagation>
-        <Anchor class="p-3 flex gap-3 items-center" on:click={openAccount}>
-          <i class="fa fa-user-circle w-8" /> Account
-        </Anchor>
-      </div>
-    </div>
-    <div class="h-px bg-mid my-4 m-auto" style="width: 200px;" />
-    <div class="flex flex-col gap-2 staatliches text-2xl">
-      {#if $env.FORCE_RELAYS.length === 0}
-        <MenuItem class="py-4" href="/settings/relays">
-          <div class="relative inline-block">
-            Relays
-            {#if $slowConnections.length > 0}
-              <div
-                class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
-            {/if}
-          </div>
-        </MenuItem>
-      {/if}
+      </MenuMobileItem>
+      <MenuMobileItem stopPropagation on:click={openSettings}>
+        <i class="fa fa-cog w-8" /> Settings
+      </MenuMobileItem>
+      <MenuMobileItem stopPropagation on:click={openAccount}>
+        <i class="fa fa-user-circle w-8" /> Account
+      </MenuMobileItem>
+      <div class="h-px bg-mid my-4 m-auto col-span-2" style="width: 200px;" />
       {#if $env.ENABLE_GROUPS}
-        <MenuItem disabled={!$canUseGiftWrap} class="py-4" href="/groups">Groups</MenuItem>
+        <MenuMobileItem disabled={!$canUseGiftWrap} href="/groups">
+          <i class="fa fa-circle-nodes" /> Groups
+        </MenuMobileItem>
       {/if}
-      <MenuItem class="py-4" href="/channels">
+      <MenuMobileItem href="/channels">
+        <i class="fa fa-message" />
         <div class="relative inline-block">
           Messages
           {#if $hasNewNip24Messages}
@@ -96,8 +79,9 @@
               class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
           {/if}
         </div>
-      </MenuItem>
-      <MenuItem class="py-4" href="/notifications">
+      </MenuMobileItem>
+      <MenuMobileItem href="/notifications">
+        <i class="fa fa-bell" />
         <div class="relative inline-block">
           Notifications
           {#if $hasNewNotifications}
@@ -105,29 +89,63 @@
               class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
           {/if}
         </div>
-      </MenuItem>
-      <MenuItem on:click={() => router.at("notes").push({key: randomId()})}>Feed</MenuItem>
+      </MenuMobileItem>
+      {#if $env.FORCE_RELAYS.length === 0}
+        <MenuMobileItem href="/settings/relays">
+          <i class="fa fa-server" />
+          <div class="relative inline-block">
+            Relays
+            {#if $slowConnections.length > 0}
+              <div
+                class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
+            {/if}
+          </div>
+        </MenuMobileItem>
+      {/if}
+      <MenuMobileItem on:click={() => router.at("notes").push({key: randomId()})}>
+        <i class="fa fa-rss" /> Feed
+      </MenuMobileItem>
     </div>
   </SliderMenu>
 {/if}
 
 {#if subMenu === "settings"}
   <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
-    <MenuItem class="py-4" href="/settings">Configuration</MenuItem>
-    <MenuItem class="py-4" href="/settings/data">Database</MenuItem>
-    <MenuItem class="py-4" href="/settings/content">Content</MenuItem>
-    <MenuItem class="py-4" href="/settings/keys">Keys</MenuItem>
+    <p class="staatliches text-3xl mb-8">Settings</p>
+    <div class="grid grid-cols-2 gap-x-8 gap-y-4 m-auto">
+      <MenuMobileItem on:click={toggleTheme}>
+        <i class="fa fa-palette" /> Theme
+      </MenuMobileItem>
+      <MenuMobileItem href="/settings/data">
+        <i class="fa fa-database" /> Database
+      </MenuMobileItem>
+      <MenuMobileItem href="/settings/content">
+        <i class="fa fa-volume-xmark" /> Content Settings
+      </MenuMobileItem>
+      <MenuMobileItem href="/settings">
+        <i class="fa fa-cog" /> App Settings
+      </MenuMobileItem>
+    </div>
   </SliderMenu>
 {/if}
 
 {#if subMenu === "account"}
   <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
-    <MenuItem class="py-4" href="/logout">Logout</MenuItem>
-    <div on:click|stopPropagation>
-      <MenuItem class="py-4" on:click={() => setSubMenu("accounts")}>Switch Account</MenuItem>
+    <p class="staatliches text-3xl mb-8">Account</p>
+    <div class="grid grid-cols-2 gap-x-8 gap-y-4 m-auto">
+      <MenuMobileItem href="/logout">
+        <i class="fa fa-right-to-bracket" /> Logout
+      </MenuMobileItem>
+      <MenuMobileItem stopPropagation on:click={() => setSubMenu("accounts")}>
+        <i class="fa fa-right-left" /> Switch
+      </MenuMobileItem>
+      <MenuMobileItem href="/settings/keys">
+        <i class="fa fa-key" /> Keys
+      </MenuMobileItem>
+      <MenuMobileItem href={router.at("people").of($pubkey).toString()}>
+        <i class="fa fa-user-circle" /> Profile
+      </MenuMobileItem>
     </div>
-    <MenuItem class="py-4" href="/settings/profile">Edit Profile</MenuItem>
-    <MenuItem class="py-4" href={router.at("people").of($pubkey).toString()}>My Notes</MenuItem>
   </SliderMenu>
 {/if}
 
@@ -144,7 +162,7 @@
       {/if}
     {/each}
     <MenuItem class="py-4" on:click={() => router.at("login/advanced").open()}>
-      Add Account
+      <i class="fa fa-plus" /> Add Account
     </MenuItem>
   </SliderMenu>
 {/if}
