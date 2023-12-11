@@ -30,10 +30,12 @@
   </p>
   <div class="flex gap-2">
     <div class="flex-grow">
-      <Input bind:value={npub} placeholder="npub...">
+      <Input bind:value={npub} placeholder="npub..." class="rounded-full">
         <i slot="before" class="fa fa-key" />
       </Input>
     </div>
-    <Anchor button on:click={logIn}>Log In</Anchor>
+    <Anchor circle button accent on:click={logIn}>
+      <i class="fa fa-right-to-bracket" />
+    </Anchor>
   </div>
 </Content>

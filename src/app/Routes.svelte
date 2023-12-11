@@ -30,10 +30,10 @@
 </script>
 
 {#key $stateKey}
-  <div class="p-2 lg:pt-16 pb-24 text-lightest lg:ml-60 relative" class:pointer-events-none={$menuIsOpen}>
+  <div class="lg:pt-16 pb-24 text-lightest lg:ml-60 relative" class:pointer-events-none={$menuIsOpen}>
     {#if $page}
       {#key getKey($page)}
-        <div in:fly={{y: 20}} class="flex flex-col flex-grow gap-4 max-w-xl lg:max-w-2xl m-auto">
+        <div in:fly={{y: 20}} class="p-2 flex flex-col flex-grow gap-4 max-w-xl lg:max-w-2xl m-auto">
           <svelte:component this={$page.route.component} {...getProps($page)} />
         </div>
       {/key}

@@ -38,7 +38,7 @@
 </script>
 
 {#if $nip44.isEnabled()}
-  <div class="flex justify-center items-center text-center px-4 py-3 mb-4 bg-cocoa border border-solid border-mid rounded">
+  <div class="flex justify-center text-center px-4 py-3 mb-4 bg-cocoa border border-solid border-mid rounded">
     <p>
       You are using a new version of private messaging.
       <br />
@@ -78,7 +78,7 @@
     </ForegroundButton>
   </ForegroundButtons>
 {:else}
-  <div class="flex flex-col gap-4 justify-center items-center text-center px-4 py-3 mb-4 bg-cocoa border border-solid border-mid rounded">
+  <div class="flex flex-col gap-4 justify-center items-center px-4 py-3 mb-4 bg-cocoa border border-solid border-mid rounded">
     <p>
       You are using a login method that doesn't support the new NIP 44 messaging standard.
       Please make sure your browser extension is up to date.

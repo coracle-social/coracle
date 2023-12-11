@@ -163,7 +163,7 @@
 
   $: rootId = getRootId(event)
   $: replyId = getParentId(event)
-  $: path = router.at("notes").of(event.id, {relays: getEventHints(event)}).toString()
+  $: path = event.pubkey ? router.at("notes").of(event.id, {relays: getEventHints(event)}).toString() : ""
 
   onMount(async () => {
     const zapAddress = Tags.from(event).getValue("zap")

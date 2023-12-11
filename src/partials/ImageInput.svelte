@@ -56,7 +56,7 @@
 
 <div class="flex gap-2">
   {#if icon}
-    <Input type="text" wrapperClass="flex-grow" bind:value placeholder="https://">
+    <Input type="text" wrapperClass="flex-grow" bind:value placeholder="https://" class="rounded-full">
       <i slot="before" class={`fa fa-${icon}`} />
     </Input>
   {/if}
@@ -66,7 +66,7 @@
     }}>
     <slot name="button">
       <div class="flex">
-        <Anchor button>
+        <Anchor circle button>
           <i class="fa fa-upload" />
         </Anchor>
       </div>

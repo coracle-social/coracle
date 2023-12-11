@@ -29,11 +29,13 @@
   <p>To give {appName} full access to your nostr identity, enter your private key below.</p>
   <div class="flex gap-2">
     <div class="flex-grow">
-      <Input type="password" bind:value={nsec} placeholder="nsec...">
+      <Input type="password" bind:value={nsec} placeholder="nsec..." class="rounded-full">
         <i slot="before" class="fa fa-key" />
       </Input>
     </div>
-    <Anchor button class="cy-login-submit" on:click={logIn}>Log In</Anchor>
+    <Anchor circle button accent class="cy-login-submit" on:click={logIn}>
+      <i class="fa fa-right-to-bracket" />
+    </Anchor>
   </div>
   {#if !Capacitor.isNativePlatform()}
     <p class="rounded border-2 border-solid border-warning bg-dark px-6 py-3">

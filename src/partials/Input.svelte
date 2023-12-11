@@ -12,7 +12,7 @@
   const showAfter = $$slots.after && !hideAfter
   const className = cx(
     $$props.class,
-    "rounded-full shadow-inset py-2 px-4 w-full placeholder:text-mid",
+    "rounded shadow-inset py-2 px-4 w-full placeholder:text-mid",
     "bg-white border border-solid border-lighter text-black",
     {"pl-10": showBefore, "pr-10": showAfter},
   )

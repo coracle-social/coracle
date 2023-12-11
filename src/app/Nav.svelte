@@ -10,11 +10,22 @@
   let innerWidth = 0
   let searchInput
 
-  const {page} = router
+  const {page, modal} = router
 
   const openMenu = () => menuIsOpen.set(true)
 
-  const openSearch = () => router.at("/search").open()
+  const openSearch = () => {
+    router.at("/search").open()
+
+    // Hack to keep focus
+    const interval = setInterval(() => {
+      if ($modal?.path !== '/search') {
+        clearInterval(interval)
+      } else if (document.activeElement !== searchInput) {
+        searchInput.focus()
+      }
+    }, 300)
+  }
 
   const createNote = () => {
     if (!$pubkey) {
@@ -44,7 +55,10 @@
     class="fixed left-0 right-0 top-0 flex h-16 items-center justify-end gap-8 border-b border-solid border-mid bg-dark px-4"
     on:click={openSearch}>
     <div class="flex">
-      <Input class="h-7 !rounded border-mid !bg-dark !px-2 py-px text-warm outline-none" bind:value={$searchTerm} />
+      <Input
+        class="h-7 !rounded border-mid !bg-dark !px-2 py-px text-warm outline-none"
+        bind:element={searchInput}
+        bind:value={$searchTerm} />
       <Anchor button class="z-feature -ml-2">Search</Anchor>
     </div>
     <Anchor button accent on:click={createNote}>Post +</Anchor>
