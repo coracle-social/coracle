@@ -58,7 +58,7 @@
 
 <div
   class={cx(
-    "fixed bottom-0 left-0 top-0 w-60 border-r border-solid border-mid bg-cocoa transition-colors",
+    "fixed bottom-0 left-0 top-0 w-60 bg-cocoa transition-colors",
   )}>
   <Anchor
     class="mb-4 flex h-16 items-center gap-1 px-6"
@@ -101,9 +101,9 @@
     <MenuDesktopItem disabled={!$canUseGiftWrap} path="/groups">Groups</MenuDesktopItem>
   {/if}
   <FlexColumn small class="absolute bottom-0 w-60">
-    <Anchor class={secondaryClass} href="/about">About</Anchor>
-    <Anchor class={secondaryClass} on:click={() => setSubMenu("settings")}>Settings</Anchor>
+    <MenuDesktopItem on:click={() => setSubMenu("settings")}>Settings</MenuDesktopItem>
     <div class="staatliches block flex h-8 gap-2 px-8 text-light">
+      <Anchor external class="hover:text-warm" href="/about">About</Anchor> /
       <Anchor external class="hover:text-warm" href="/terms.html">Terms</Anchor> /
       <Anchor external class="hover:text-warm" href="/privacy.html">Privacy</Anchor>
     </div>

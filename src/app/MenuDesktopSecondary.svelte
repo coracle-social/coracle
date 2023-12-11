@@ -15,8 +15,10 @@
 
 <div
   style="bottom: 4.5rem"
-  class="absolute left-0 w-60 rounded-t-xl border border-solid border-mid bg-dark overflow-hidden"
+  class="absolute left-0 w-60 pr-px"
   transition:slide|local={{duration: 300}}
   on:click={onEscape}>
-  <slot />
+  <div class="bg-dark overflow-hidden rounded-t-xl">
+    <slot />
+  </div>
 </div>

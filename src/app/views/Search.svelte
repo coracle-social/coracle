@@ -28,9 +28,9 @@
 
   const onClose = () => router.pop()
 
-  const openTopic = topic => router.at("topic").of(topic).replace()
+  const openTopic = topic => router.at("topic").of(topic).replaceModal()
 
-  const openPerson = pubkey => router.at("people").of(pubkey).replace()
+  const openPerson = pubkey => router.at("people").of(pubkey).replaceModal()
 
   const topicOptions = topics.derived(
     map((topic: Topic) => ({type: "topic", id: topic.name, topic, text: "#" + topic.name})),

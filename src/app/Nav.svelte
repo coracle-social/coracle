@@ -51,7 +51,7 @@
 
 <!-- top nav -->
 {#if innerWidth >= 1024}
-  <div class="fixed left-0 right-0 top-0 flex h-16 items-center justify-end gap-8 border-b border-solid border-mid bg-dark px-4">
+  <div class="fixed left-0 right-0 top-0 flex h-16 items-center justify-end gap-8 border-b border-solid border-cocoa bg-dark px-4">
     <div class="flex" on:click={openSearch}>
       <Input
         class="h-7 !rounded border-mid !bg-dark !px-2 py-px text-warm outline-none"

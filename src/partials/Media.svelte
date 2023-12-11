@@ -36,7 +36,7 @@
     href={onClick ? null : url}
     on:click={onClick}
     style="background-color: rgba(15, 15, 14, 0.5)"
-    class="relative flex flex-grow w-full flex-col overflow-hidden rounded-xl border border-solid border-mid">
+    class="relative flex flex-grow w-full flex-col overflow-hidden rounded-xl">
     {#if url.match(/open.spotify.com/)}
       {@const id = last(url.split("?")[0].match(/[a-z]+\/[0-9A-z]+$/))}
       {@const src = `https://open.spotify.com/embed/${id}`}
