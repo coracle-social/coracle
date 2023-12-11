@@ -8,6 +8,7 @@
 - [x] Add group calendars
 - [x] Add group marketplace
 - [x] Support cross-posting
+- [x] Limit number of replies shown on feed
 
 # 0.3.14
 

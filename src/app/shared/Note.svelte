@@ -150,6 +150,10 @@
     if (showMutedReplies) {
       visibleReplies = visibleReplies.concat(mutedReplies.splice(0))
     }
+
+    if (!showEntire) {
+      visibleReplies = visibleReplies.slice(0, 3)
+    }
   }
 
   // Split out likes
