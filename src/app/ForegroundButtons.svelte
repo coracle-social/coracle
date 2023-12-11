@@ -4,7 +4,6 @@
   import {canSign, env} from "src/engine"
   import ForegroundButton from "src/partials/ForegroundButton.svelte"
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
-  import MusicPlayer from "src/app/MusicPlayer.svelte"
   import {router} from "src/app/router"
 
   let scrollY = 0
@@ -31,15 +30,4 @@
       </ForegroundButton>
     </div>
   {/if}
-  {#if showButtons && $env.ENABLE_JUKEBOX}
-    <div transition:fade|local={{delay: 200, duration: 200}}>
-      <ForegroundButton theme="secondary" size="small" on:click={showPlayer}>
-        <i class="fa fa-music" />
-      </ForegroundButton>
-    </div>
-  {/if}
 </ForegroundButtons>
-
-{#if $env.ENABLE_JUKEBOX}
-  <MusicPlayer bind:isOpen={playerIsOpen} />
-{/if}
