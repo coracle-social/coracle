@@ -78,14 +78,14 @@
           {/if}
         </div>
       {/if}
-      <div class="absolute mt-12 h-full w-full bg-cocoa" />
       <div
         class="relative h-full w-full cursor-auto border-t border-solid border-mid bg-cocoa pb-10 pt-2"
         on:click|stopPropagation>
-        <div class="m-auto max-w-2xl py-4 flex flex-col gap-4">
+        <div class="m-auto max-w-2xl p-2 flex flex-col gap-4">
           <slot />
         </div>
       </div>
+      <div class="absolute mt-12 h-full w-full bg-cocoa" />
     </div>
   </div>
 </div>

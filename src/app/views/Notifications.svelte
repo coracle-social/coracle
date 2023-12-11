@@ -6,7 +6,6 @@
   import {noteKinds, reactionKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
-  import MobileInset from "src/partials/MobileInset.svelte"
   import GroupAlert from "src/app/shared/GroupAlert.svelte"
   import GroupRequest from "src/app/shared/GroupRequest.svelte"
   import NotificationReactions from "src/app/views/NotificationReactions.svelte"
@@ -99,10 +98,10 @@
   {#each tabNotifications as notification, i (notification.key)}
     {@const lineText = getLineText(i)}
     {#if lineText}
-      <MobileInset class="flex items-center gap-4">
+      <div class="flex items-center gap-4">
         <small class="whitespace-nowrap text-lightest">{lineText}</small>
         <div class="h-px w-full bg-mid" />
-      </MobileInset>
+      </div>
     {/if}
     {#if !notification.event}
       <NotificationMention {notification} />

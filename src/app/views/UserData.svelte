@@ -5,7 +5,6 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
-  import MobileInset from "src/partials/MobileInset.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {router} from "src/app/router"
@@ -55,35 +54,33 @@
   </Card>
 </div>
 
-<MobileInset>
-  <table>
-    <thead>
+<table>
+  <thead>
+    <tr>
+      <th />
+      <th class="px-2 py-1 text-left">Created</th>
+      <th class="px-2 py-1 text-left">Author</th>
+      <th class="py-1 pl-2 text-left">Kind</th>
+    </tr>
+  </thead>
+  <tbody>
+    {#each $sortedEvents.slice(0, limit) as event}
       <tr>
-        <th />
-        <th class="px-2 py-1 text-left">Created</th>
-        <th class="px-2 py-1 text-left">Author</th>
-        <th class="py-1 pl-2 text-left">Kind</th>
+        <td class="py-1 pr-2">
+          <Anchor
+            href={router
+              .at("notes")
+              .of(event.id, {relays: getEventHints(event)})
+              .toString()}>
+            <i class="fa fa-link text-accent" />
+          </Anchor>
+        </td>
+        <td class="px-2 py-1">
+          {formatTimestamp(event.created_at)}
+        </td>
+        <td class="px-2 py-1"><PersonBadgeSmall pubkey={event.pubkey} /></td>
+        <td class="py-1 pl-2">{event.kind}</td>
       </tr>
-    </thead>
-    <tbody>
-      {#each $sortedEvents.slice(0, limit) as event}
-        <tr>
-          <td class="py-1 pr-2">
-            <Anchor
-              href={router
-                .at("notes")
-                .of(event.id, {relays: getEventHints(event)})
-                .toString()}>
-              <i class="fa fa-link text-accent" />
-            </Anchor>
-          </td>
-          <td class="px-2 py-1">
-            {formatTimestamp(event.created_at)}
-          </td>
-          <td class="px-2 py-1"><PersonBadgeSmall pubkey={event.pubkey} /></td>
-          <td class="py-1 pl-2">{event.kind}</td>
-        </tr>
-      {/each}
-    </tbody>
-  </table>
-</MobileInset>
+    {/each}
+  </tbody>
+</table>

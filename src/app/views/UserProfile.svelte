@@ -3,7 +3,6 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import MobileInset from "src/partials/MobileInset.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Field from "src/partials/Field.svelte"
   import {pubkey, people, publishProfile} from "src/engine"
@@ -29,14 +28,14 @@
 </script>
 
 <form on:submit|preventDefault={submit}>
-  <MobileInset class="mb-4 flex flex-col items-center justify-center">
+  <div class="mb-4 flex flex-col items-center justify-center">
     <Heading>About You</Heading>
     <p>
       Give people a friendly way to recognize you. We recommend you do not use your real name or
       share your personal information. The future of the internet is
       <Anchor class="underline" external href={pseudUrl}>pseudonymous</Anchor>.
     </p>
-  </MobileInset>
+  </div>
   <div class="flex w-full flex-col gap-8">
     <Field label="Username">
       <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.name}>

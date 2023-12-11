@@ -1,6 +1,5 @@
 <script lang="ts">
   import Anchor from "src/partials/Anchor.svelte"
-  import MobileInset from "src/partials/MobileInset.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {router} from "src/app/router"
   import {relayPolicies} from "src/engine"
@@ -10,21 +9,19 @@
   document.title = "Relays"
 </script>
 
-<MobileInset class="flex flex-col gap-4">
-  <div class="flex justify-between">
-    <div class="flex items-center gap-2">
-      <i class="fa fa-server fa-lg" />
-      <h2 class="staatliches text-2xl">Your relays</h2>
-    </div>
-    <Anchor button accent on:click={browse}>
-      <i class="fa-solid fa-compass" /> Browse Relays
-    </Anchor>
+<div class="flex justify-between">
+  <div class="flex items-center gap-2">
+    <i class="fa fa-server fa-lg" />
+    <h2 class="staatliches text-2xl">Your relays</h2>
   </div>
-  <p>
-    Relays are hubs for your content and connections. At least one is required to interact with the
-    network, but you can join as many as you like.
-  </p>
-</MobileInset>
+  <Anchor button accent on:click={browse}>
+    <i class="fa-solid fa-compass" /> Browse Relays
+  </Anchor>
+</div>
+<p>
+  Relays are hubs for your content and connections. At least one is required to interact with the
+  network, but you can join as many as you like.
+</p>
 
 {#if $relayPolicies.length === 0}
   <div class="mt-8 flex items-center justify-center gap-2 text-center">

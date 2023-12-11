@@ -6,7 +6,6 @@
   import {fly} from "src/util/transition"
   import {getModal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
-  import MobileInset from "src/partials/MobileInset.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import Note from "src/app/shared/Note.svelte"
   import type {DynamicFilter} from "src/engine"
@@ -94,11 +93,9 @@
 </script>
 
 {#if !hideControls}
-  <MobileInset>
-    <FeedControls {hideReplies} {filter} {relays} {updateFilter}>
-      <slot name="controls" slot="controls" />
-    </FeedControls>
-  </MobileInset>
+  <FeedControls {hideReplies} {filter} {relays} {updateFilter}>
+    <slot name="controls" slot="controls" />
+  </FeedControls>
 {/if}
 
 {#each $notes as note, i (note.id)}
