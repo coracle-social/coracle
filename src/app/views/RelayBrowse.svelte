@@ -15,18 +15,16 @@
   }
 </script>
 
-<Content>
-  <div class="flex flex-col items-center justify-center">
-    <Heading>Browse Relays</Heading>
-    <p>
-      {appName} automatically discovers relays as you browse the network. Adding more relays will generally
-      make things quicker to load, at the expense of higher data usage.
-    </p>
-  </div>
-  <Tabs {tabs} {activeTab} {setActiveTab} />
-  {#if activeTab === "reviews"}
-    <Feed hideControls filter={{kinds: [1985], "#l": ["review/relay"]}} />
-  {:else}
-    <RelaySearch />
-  {/if}
-</Content>
+<div class="flex flex-col items-center justify-center">
+  <Heading>Browse Relays</Heading>
+  <p>
+    {appName} automatically discovers relays as you browse the network. Adding more relays will generally
+    make things quicker to load, at the expense of higher data usage.
+  </p>
+</div>
+<Tabs {tabs} {activeTab} {setActiveTab} />
+{#if activeTab === "reviews"}
+  <Feed hideControls filter={{kinds: [1985], "#l": ["review/relay"]}} />
+{:else}
+  <RelaySearch />
+{/if}

@@ -15,7 +15,7 @@
   let root, content, closing
 
   const modals = router.history.derived(filter(item => item.config.modal))
-  const isNested = virtual ? $modals.length > 0 : $modals.length > 1 && index > 0
+  const isNested = virtual ? $modals.length > 0 : ($modals.length > 1 && index > 0)
 
   const tryClose = () => {
     if (!canClose) {
@@ -88,7 +88,7 @@
       bind:this={content}>
       <div
         class="pointer-events-auto mt-12 min-h-full transition transition-all duration-500"
-        style={mini ? "margin-top: 55vh" : ""}>
+        class:mt-[55vh]={mini}>
         {#if canClose}
           <div class="pointer-events-none sticky top-0 z-popover flex w-full flex-col items-end gap-2 p-2">
             <div

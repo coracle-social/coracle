@@ -156,11 +156,8 @@
 
 {#if modal}
   <Modal
-    onEscape={modal === "success"
-      ? null
-      : () => {
-          modal = null
-        }}>
+    canClose={modal !== "success"}
+    onEscape={() => { modal = null }}>
     <Content>
       {#if modal === "success"}
         <div class="my-12 text-center">Success! Just a moment while we get things set up.</div>

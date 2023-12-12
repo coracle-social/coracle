@@ -7,7 +7,7 @@
   import {router} from "src/app/router"
   import {session, stateKey} from "src/engine"
 
-  const {page, modal, modals} = router
+  const {page, modal, modals, history} = router
 
   $: {
     if ($modal) {

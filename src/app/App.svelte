@@ -95,10 +95,17 @@
   router.register("/search", Search)
   router.register("/bech32", Bech32Entity)
 
-  router.register("/channels", ChannelsList)
-  router.register("/channels/create", ChannelCreate)
-  router.register("/channels/requests", ChannelsList)
+  router.register("/channels", ChannelsList, {
+    requireUser: true,
+  })
+  router.register("/channels/create", ChannelCreate, {
+    requireUser: true,
+  })
+  router.register("/channels/requests", ChannelsList, {
+    requireUser: true,
+  })
   router.register("/channels/:channelId", ChannelsDetail, {
+    requireUser: true,
     serializers: {
       channelId: asChannelId,
     },
@@ -288,9 +295,7 @@
   router.register("/settings/profile", UserProfile, {
     requireUser: true,
   })
-  router.register("/settings/relays", RelayList, {
-    requireUser: true,
-  })
+  router.register("/settings/relays", RelayList)
 
   router.register("/topics/:topic", TopicFeed)
 
