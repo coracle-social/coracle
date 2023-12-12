@@ -2,7 +2,7 @@
   import {Tags} from "paravel"
   import {commaFormat} from "hurdak"
   import {Naddr} from "src/util/nostr"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Carousel from "src/partials/Carousel.svelte"
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -30,7 +30,7 @@
   }
 </script>
 
-<Content size="inherit">
+<FlexColumn>
   <div class="flex flex-col gap-2">
     <div class="flex justify-between gap-2 text-xl">
       <strong>{title}</strong>
@@ -64,4 +64,4 @@
   <div class="flex justify-center">
     <Anchor button accent on:click={sendMessage}>Make an offer</Anchor>
   </div>
-</Content>
+</FlexColumn>

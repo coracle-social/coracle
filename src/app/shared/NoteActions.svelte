@@ -12,7 +12,6 @@
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
   import ColorDot from "src/partials/ColorDot.svelte"
-  import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
@@ -133,8 +132,7 @@
     toast.show("info", "Note has been re-published!")
   }
 
-  const openRelay = url =>
-    router.at('relays').of(url).open()
+  const openRelay = url => router.at("relays").of(url).open()
 
   const groupOptions = session.derived($session => {
     const options = []
@@ -297,65 +295,63 @@
 
 {#if view}
   <Modal onEscape={() => setView(null)}>
-    <Content>
-      {#if view === "info"}
-        {#if zaps.length > 0}
-          <h1 class="staatliches text-2xl">Zapped By</h1>
-          <div class="grid grid-cols-2 gap-2">
-            {#each zaps as zap}
-              <div class="flex flex-col gap-1">
-                <PersonBadge pubkey={zap.request.pubkey} />
-                <span class="ml-16 text-sm text-mid"
-                  >{formatSats(zap.invoiceAmount / 1000)} sats</span>
-              </div>
-            {/each}
-          </div>
-        {/if}
-        {#if likes.length > 0}
-          <h1 class="staatliches text-2xl">Liked By</h1>
-          <div class="grid grid-cols-2 gap-2">
-            {#each likes as like}
-              <PersonBadge pubkey={like.pubkey} />
-            {/each}
-          </div>
-        {/if}
-        {#if note.seen_on.length > 0}
-          <h1 class="staatliches text-2xl">Relays</h1>
-          <p>This note was found on {quantify(note.seen_on.length, "relay")} below.</p>
-          <div class="flex flex-col gap-2">
-            {#each note.seen_on as url}
-              <RelayCard relay={{url}} />
-            {/each}
-          </div>
-        {/if}
-        <h1 class="staatliches text-2xl">Details</h1>
-        <CopyValue label="Link" value={toNostrURI(nevent)} />
-        <CopyValue label="Event ID" encode={nip19.noteEncode} value={note.id} />
-        <CopyValue label="Event JSON" value={JSON.stringify(asNostrEvent(note))} />
-      {:else if view === "cross-post"}
-        <div class="mb-4 flex items-center justify-center">
-          <Heading>Cross-post</Heading>
-        </div>
-        <div>Select where you'd like to post to:</div>
-        <div class="flex flex-col gap-2">
-          {#if address}
-            <Card invertColors interactive on:click={() => crossPost()}>
-              <div class="flex gap-4 text-lightest">
-                <i class="fa fa-earth-asia fa-2x" />
-                <div class="flex min-w-0 flex-grow flex-col gap-4">
-                  <p class="text-2xl">Global</p>
-                  <p>Post to your main feed.</p>
-                </div>
-              </div>
-            </Card>
-          {/if}
-          {#each $groupOptions as g (g.address)}
-            <Card invertColors interactive on:click={() => crossPost(g.address)}>
-              <GroupSummary address={g.address} />
-            </Card>
+    {#if view === "info"}
+      {#if zaps.length > 0}
+        <h1 class="staatliches text-2xl">Zapped By</h1>
+        <div class="grid grid-cols-2 gap-2">
+          {#each zaps as zap}
+            <div class="flex flex-col gap-1">
+              <PersonBadge pubkey={zap.request.pubkey} />
+              <span class="ml-16 text-sm text-mid"
+                >{formatSats(zap.invoiceAmount / 1000)} sats</span>
+            </div>
           {/each}
         </div>
       {/if}
-    </Content>
+      {#if likes.length > 0}
+        <h1 class="staatliches text-2xl">Liked By</h1>
+        <div class="grid grid-cols-2 gap-2">
+          {#each likes as like}
+            <PersonBadge pubkey={like.pubkey} />
+          {/each}
+        </div>
+      {/if}
+      {#if note.seen_on.length > 0}
+        <h1 class="staatliches text-2xl">Relays</h1>
+        <p>This note was found on {quantify(note.seen_on.length, "relay")} below.</p>
+        <div class="flex flex-col gap-2">
+          {#each note.seen_on as url}
+            <RelayCard relay={{url}} />
+          {/each}
+        </div>
+      {/if}
+      <h1 class="staatliches text-2xl">Details</h1>
+      <CopyValue label="Link" value={toNostrURI(nevent)} />
+      <CopyValue label="Event ID" encode={nip19.noteEncode} value={note.id} />
+      <CopyValue label="Event JSON" value={JSON.stringify(asNostrEvent(note))} />
+    {:else if view === "cross-post"}
+      <div class="mb-4 flex items-center justify-center">
+        <Heading>Cross-post</Heading>
+      </div>
+      <div>Select where you'd like to post to:</div>
+      <div class="flex flex-col gap-2">
+        {#if address}
+          <Card invertColors interactive on:click={() => crossPost()}>
+            <div class="flex gap-4 text-lightest">
+              <i class="fa fa-earth-asia fa-2x" />
+              <div class="flex min-w-0 flex-grow flex-col gap-4">
+                <p class="text-2xl">Global</p>
+                <p>Post to your main feed.</p>
+              </div>
+            </div>
+          </Card>
+        {/if}
+        {#each $groupOptions as g (g.address)}
+          <Card invertColors interactive on:click={() => crossPost(g.address)}>
+            <GroupSummary address={g.address} />
+          </Card>
+        {/each}
+      </div>
+    {/if}
   </Modal>
 {/if}

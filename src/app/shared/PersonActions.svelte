@@ -21,7 +21,6 @@
   export let pubkey
 
   const isSelf = $session?.pubkey === pubkey
-  const npub = nip19.npubEncode(pubkey)
   const following = deriveFollowing(pubkey)
   const muted = deriveMuted(pubkey)
 
@@ -48,7 +47,7 @@
 
     if (!isSelf && $canSign) {
       actions.push({
-        onClick: () => router.at("channels").of([$session.pubkey, npub]).push(),
+        onClick: () => router.at("channels").of([$session.pubkey, pubkey]).push(),
         label: "Message",
         icon: "envelope",
       })

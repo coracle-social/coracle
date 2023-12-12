@@ -22,7 +22,7 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import type {Person} from "src/engine"
@@ -52,7 +52,7 @@
 </script>
 
 <form on:submit|preventDefault={submit} in:fly={{y: 20}}>
-  <Content>
+  <FlexColumn>
     <div class="mb-4 flex flex-col items-center justify-center">
       <Heading>{ucFirst(mode)} Group</Heading>
       <p>Create a private place where members can talk.</p>
@@ -104,5 +104,5 @@
       </FieldInline>
       <Anchor button tag="button" type="submit">Save</Anchor>
     </div>
-  </Content>
+  </FlexColumn>
 </form>

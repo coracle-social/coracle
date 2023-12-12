@@ -130,7 +130,7 @@
     {#if showBorder}
       <div class="absolute bottom-0 left-4 top-0 z-none -my-2 w-px bg-mid" />
     {/if}
-    <div class="z-feature overflow-hidden rounded-2xl border border-solid border-mid">
+    <div class="z-feature overflow-hidden rounded">
       <div class="bg-cocoa p-3 text-lightest" class:rounded-b={mentions.length === 0}>
         <Compose bind:this={compose} onSubmit={send} style="min-height: 4rem">
           <div class="flex flex-col justify-start" slot="addon">

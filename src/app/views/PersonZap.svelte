@@ -96,13 +96,10 @@
     </div>
   {:else}
     <Textarea bind:value={zap.message} placeholder="Add an optional message" />
-    <div class="flex items-center gap-2">
-      <label class="flex-grow">Custom amount:</label>
-      <Input bind:value={zap.amount}>
-        <i slot="before" class="fa fa-bolt" />
-        <span slot="after" class="-mt-1">sats</span>
-      </Input>
-      <Anchor button accent loading={zap.loading} on:click={loadZapInvoice}>Zap!</Anchor>
-    </div>
+    <Input bind:value={zap.amount}>
+      <i slot="before" class="fa fa-bolt" />
+      <span slot="after" class="-mt-1">sats</span>
+    </Input>
+    <Anchor button accent loading={zap.loading} on:click={loadZapInvoice}>Zap!</Anchor>
   {/if}
 </Content>

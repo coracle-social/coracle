@@ -2,7 +2,7 @@
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {events, user, EventKind} from "src/engine"
 
@@ -39,7 +39,7 @@
 </script>
 
 <form on:submit|preventDefault={submit}>
-  <Content>
+  <FlexColumn>
     <div class="mb-4 flex flex-col items-center justify-center">
       <Heading>Export Settings</Heading>
       <p>Select which events you'd like to export</p>
@@ -58,5 +58,5 @@
       </FieldInline>
       <Anchor button tag="button" type="submit">Export</Anchor>
     </div>
-  </Content>
+  </FlexColumn>
 </form>

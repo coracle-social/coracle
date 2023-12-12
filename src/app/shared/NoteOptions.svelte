@@ -5,7 +5,7 @@
   import Card from "src/partials/Card.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Input from "src/partials/Input.svelte"
   import Field from "src/partials/Field.svelte"
@@ -77,7 +77,7 @@
 {#if view}
   <Modal onEscape={() => setView(null)}>
     <form on:submit|preventDefault={onSubmit}>
-      <Content>
+      <FlexColumn>
         <div class="mb-4 flex items-center justify-center">
           <Heading>Note settings</Heading>
         </div>
@@ -145,7 +145,7 @@
           </FieldInline>
         {/if}
         <Anchor button tag="button" type="submit">Done</Anchor>
-      </Content>
+      </FlexColumn>
     </form>
   </Modal>
 {/if}

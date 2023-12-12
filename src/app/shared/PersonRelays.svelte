@@ -1,11 +1,11 @@
 <script lang="ts">
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
 
   export let relays
 </script>
 
-<Content>
+<FlexColumn>
   <p>
     Below are the relays this user publishes to. Join one or more to make sure you never miss their
     updates.
@@ -13,10 +13,10 @@
   {#if relays.length === 0}
     <div class="pt-8 text-center">No relays found</div>
   {:else}
-    <div class="flex flex-col gap-2">
+    <FlexColumn small>
       {#each relays as relay (relay.url)}
         <RelayCard {relay} />
       {/each}
-    </div>
+    </FlexColumn>
   {/if}
-</Content>
+</FlexColumn>

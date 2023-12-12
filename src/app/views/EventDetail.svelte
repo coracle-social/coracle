@@ -1,11 +1,11 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {defer} from "hurdak"
-  import {Tags} from 'paravel'
+  import {Tags} from "paravel"
   import {Naddr, getIdOrAddress, noteKinds} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import Modal from "src/partials/Modal.svelte"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
@@ -53,11 +53,11 @@
   <Spinner />
 {:then event}
   <div in:fly={{y: 20}}>
-    <Content>
+    <FlexColumn>
       <div class="flex gap-4">
         <EventDate {event} />
         <EventInfo {event}>
-          <OverflowMenu actions={actions} />
+          <OverflowMenu {actions} />
         </EventInfo>
       </div>
       <Feed
@@ -65,18 +65,16 @@
         hideControls
         shouldListen
         anchor={getIdOrAddress(event)}
-        filter={{kinds: noteKinds, '#a': [address]}} />
-    </Content>
+        filter={{kinds: noteKinds, "#a": [address]}} />
+    </FlexColumn>
   </div>
   {#if replyIsOpen}
     <Modal onEscape={cancelReply}>
-      <Content>
-        <div class="text-center">
-          <Heading>Leave a comment</Heading>
-          <p>On "{Tags.from(event).getValue("name")}"</p>
-        </div>
-        <NoteReply forceOpen parent={event} on:reset={cancelReply} />
-      </Content>
+      <div class="text-center">
+        <Heading>Leave a comment</Heading>
+        <p>On "{Tags.from(event).getValue("name")}"</p>
+      </div>
+      <NoteReply forceOpen parent={event} on:reset={cancelReply} />
     </Modal>
   {/if}
 {/await}

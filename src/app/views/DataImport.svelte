@@ -5,7 +5,7 @@
   import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {router} from "src/app/router"
   import type {Event} from "src/engine"
@@ -69,7 +69,7 @@
 </script>
 
 <form on:submit|preventDefault={submit}>
-  <Content>
+  <FlexColumn>
     <div class="mb-4 flex flex-col items-center justify-center">
       <Heading>Import Data</Heading>
       <p>Populate {appName}'s database with a nostr export file</p>
@@ -84,5 +84,5 @@
       </Field>
       <Anchor {loading} button tag="button" type="submit" class="text-center">Import</Anchor>
     </div>
-  </Content>
+  </FlexColumn>
 </form>

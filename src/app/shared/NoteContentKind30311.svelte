@@ -5,7 +5,7 @@
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
@@ -21,7 +21,7 @@
 
 <Anchor external href={`https://zap.stream/${naddr}`}>
   <Card interactive>
-    <Content class="relative">
+    <FlexColumn>
       {#if p}
         <PersonBadge pubkey={p} />
       {/if}
@@ -39,6 +39,6 @@
         <NoteContentLink value={{url: image, isMedia: true}} showMedia />
       {/if}
       <NoteContentTopics {note} />
-    </Content>
+    </FlexColumn>
   </Card>
 </Anchor>

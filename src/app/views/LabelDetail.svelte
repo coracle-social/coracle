@@ -6,7 +6,6 @@
   import {createScroller} from "src/util/misc"
   import {getParentId} from "src/util/nostr"
   import {getModal} from "src/partials/state"
-  import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Note from "src/app/shared/Note.svelte"
@@ -48,13 +47,11 @@
   })
 </script>
 
-<Content>
-  <Heading><i class="fa fa-tag text-2xl" /> {label}</Heading>
-  {#each ids as id, i (id)}
-    <div in:fly={{y: 20}}>
-      <Note filters={[{authors}]} note={{id}} />
-    </div>
-  {:else}
-    <Spinner />
-  {/each}
-</Content>
+<Heading><i class="fa fa-tag text-2xl" /> {label}</Heading>
+{#each ids as id, i (id)}
+  <div in:fly={{y: 20}}>
+    <Note filters={[{authors}]} note={{id}} />
+  </div>
+{:else}
+  <Spinner />
+{/each}

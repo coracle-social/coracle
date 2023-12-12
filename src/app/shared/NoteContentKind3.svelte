@@ -1,6 +1,6 @@
 <script lang="ts">
   import {Tags} from "paravel"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import NoteContentEllipsis from "src/app/shared/NoteContentEllipsis.svelte"
   import {loadPubkeys} from "src/engine"
@@ -14,7 +14,7 @@
   loadPubkeys(pubkeys)
 </script>
 
-<Content gap="gap-2" class="m-0">
+<FlexColumn small>
   <div class="mb-4 border-l-2 border-solid border-mid pl-4 text-lg">Updated follows list:</div>
   <div>
     {#each pubkeys as pubkey}
@@ -26,4 +26,4 @@
   {#if !showEntire}
     <NoteContentEllipsis />
   {/if}
-</Content>
+</FlexColumn>

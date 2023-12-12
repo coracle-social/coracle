@@ -1,7 +1,6 @@
 <script lang="ts">
   import {appName} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
-  import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"

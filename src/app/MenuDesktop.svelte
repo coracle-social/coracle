@@ -14,7 +14,6 @@
   import {
     env,
     user,
-    canUseGiftWrap,
     hasNewNip24Messages,
     hasNewNotifications,
     pubkey,
@@ -40,9 +39,6 @@
 
   const goToFeed = () => router.at("notes").push({key: randomId()})
 
-  const secondaryClass =
-    "relative staatliches h-8 block transition-all text-light hover:text-warm px-8"
-
   let subMenu, active
 
   $: {
@@ -56,10 +52,7 @@
   }
 </script>
 
-<div
-  class={cx(
-    "fixed bottom-0 left-0 top-0 w-60 bg-cocoa transition-colors",
-  )}>
+<div class={cx("fixed bottom-0 left-0 top-0 w-60 bg-cocoa transition-colors")}>
   <Anchor
     class="mb-4 flex h-16 items-center gap-1 px-6"
     external
@@ -98,12 +91,12 @@
     </div>
   </MenuDesktopItem>
   {#if $env.ENABLE_GROUPS}
-    <MenuDesktopItem disabled={!$canUseGiftWrap} path="/groups">Groups</MenuDesktopItem>
+    <MenuDesktopItem path="/groups">Groups</MenuDesktopItem>
   {/if}
   <FlexColumn small class="absolute bottom-0 w-60">
     <MenuDesktopItem on:click={() => setSubMenu("settings")}>Settings</MenuDesktopItem>
     <div class="staatliches block flex h-8 gap-2 px-8 text-light">
-      <Anchor external class="hover:text-warm" href="/about">About</Anchor> /
+      <Anchor class="hover:text-warm" href="/about">About</Anchor> /
       <Anchor external class="hover:text-warm" href="/terms.html">Terms</Anchor> /
       <Anchor external class="hover:text-warm" href="/privacy.html">Privacy</Anchor>
     </div>
@@ -124,7 +117,9 @@
       </MenuDesktopSecondary>
     {:else if subMenu === "account"}
       <MenuDesktopSecondary onEscape={closeSubMenu}>
-        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href={router.at("people").of($pubkey).toString()}>
+        <MenuItem
+          class="staatliches flex items-center gap-4 py-4 pl-8"
+          href={router.at("people").of($pubkey).toString()}>
           <i class="fa fa-user-circle" /> Profile
         </MenuItem>
         <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings/keys">
@@ -154,7 +149,7 @@
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           on:click={() => router.at("login/advanced").open()}>
-          Add Account
+          <i class="fa fa-plus" /> Add Account
         </MenuItem>
       </MenuDesktopSecondary>
     {/if}

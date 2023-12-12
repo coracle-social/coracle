@@ -1,7 +1,6 @@
 <script lang="ts">
   import Media from "src/partials/Media.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Content from "src/partials/Content.svelte"
   import Modal from "src/partials/Modal.svelte"
 
   export let links
@@ -25,10 +24,8 @@
 
 {#if showModal}
   <Modal onEscape={closeModal}>
-    <Content>
-      {#each links as url}
-        <Media {url} />
-      {/each}
-    </Content>
+    {#each links as url}
+      <Media {url} />
+    {/each}
   </Modal>
 {/if}

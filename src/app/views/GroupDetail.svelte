@@ -5,7 +5,7 @@
   import {noteKinds} from "src/util/nostr"
   import {getKey} from "src/util/router"
   import {themeBackgroundGradient} from "src/partials/state"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
@@ -137,13 +137,13 @@
 {:else if activeTab === "market"}
   <GroupMarket {group} {relays} />
 {:else if activeTab === "members"}
-  <Content size="inherit" gap="gap-4">
+  <FlexColumn>
     {#each members as pubkey (pubkey)}
       <GroupMember {address} {pubkey} />
     {:else}
       <p class="text-center py-12">No members found.</p>
     {/each}
-  </Content>
+  </FlexColumn>
 {:else if activeTab === "admin"}
   {#each $requests as request (request.id)}
     <GroupRequest {address} {request} />

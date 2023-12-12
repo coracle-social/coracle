@@ -2,7 +2,7 @@
   import Fuse from "fuse.js"
   import {identity, memoizeWith, sortBy, map} from "ramda"
   import {tryFunc} from "hurdak"
-  import {onMount, onDestroy} from "svelte"
+  import {onDestroy} from "svelte"
   import {fromNostrURI} from "paravel"
   import {throttle} from "throttle-debounce"
   import {nip05, nip19} from "nostr-tools"
@@ -10,7 +10,6 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import {isHex} from "src/util/nostr"
-  import Modal from "src/partials/Modal.svelte"
   import Input from "src/partials/Input.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import {router} from "src/app/router"
@@ -59,16 +58,19 @@
     return -score
   })
 
-  const getFuse = memoizeWith(s => s?.[0] === '#', s => {
-    const options = s?.[0] === '#' ? $topicOptions : $profileOptions
+  const getFuse = memoizeWith(
+    s => String(s?.[0] === "#"),
+    s => {
+      const options = s?.[0] === "#" ? $topicOptions : $profileOptions
 
-    return new Fuse(options as any, {
-      keys: ["text"],
-      threshold: 0.5,
-      shouldSort: false,
-      includeScore: true,
-    })
-  })
+      return new Fuse(options as any, {
+        keys: ["text"],
+        threshold: 0.5,
+        shouldSort: false,
+        includeScore: true,
+      })
+    },
+  )
 
   const search = s => {
     if (!s) {

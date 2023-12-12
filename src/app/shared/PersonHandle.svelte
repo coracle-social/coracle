@@ -5,10 +5,9 @@
 
   export let pubkey
 
-  const npub = nip19.npubEncode(pubkey)
   const person = people.key(pubkey)
 </script>
 
 <div class={cx($$props.class, "overflow-hidden overflow-ellipsis opacity-75")}>
-  {$person?.handle ? displayHandle($person.handle) : npub}
+  {$person?.handle ? displayHandle($person.handle) : nip19.npubEncode(pubkey)}
 </div>

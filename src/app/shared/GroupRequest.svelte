@@ -2,7 +2,7 @@
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import GroupName from "src/app/shared/GroupName.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
@@ -37,7 +37,7 @@
 </script>
 
 <Card interactive>
-  <Content>
+  <FlexColumn>
     <div class="flex items-center justify-between">
       <p class="text-xl">
         {#if request.kind === 25}
@@ -77,5 +77,5 @@
       <Anchor on:click={dismiss} button>Dismiss</Anchor>
       <Anchor on:click={resolve} button accent>Resolve</Anchor>
     </div>
-  </Content>
+  </FlexColumn>
 </Card>

@@ -135,55 +135,53 @@
     >.
   </p>
   <p>
-    You can also <Anchor underline on:click={skip}>skip this step</Anchor>,
-    but be aware that your profile and relays may not get properly synchronized.
+    You can also <Anchor underline on:click={skip}>skip this step</Anchor>, but be aware that your
+    profile and relays may not get properly synchronized.
   </p>
   {#if $env.FORCE_RELAYS.length > 0}
     <Spinner />
   {:else if Object.values(currentRelays).length > 0}
     <p>Currently searching:</p>
-    <Content gap="gap-4" size="inherit">
-      {#each Object.values(currentRelays) as relay}
-        <div class="h-12">
-          {#if relay}
-            <RelayCard hideActions relay={{...relay, description: null}} />
-          {/if}
-        </div>
-      {/each}
-    </Content>
+    {#each Object.values(currentRelays) as relay}
+      <div class="h-12">
+        {#if relay}
+          <RelayCard hideActions relay={{...relay, description: null}} />
+        {/if}
+      </div>
+    {/each}
   {/if}
 </Content>
 
 {#if modal}
   <Modal
     canClose={modal !== "success"}
-    onEscape={() => { modal = null }}>
-    <Content>
-      {#if modal === "success"}
-        <div class="my-12 text-center">Success! Just a moment while we get things set up.</div>
-        <Spinner delay={0} />
-      {:else if modal === "failure"}
-        <div class="my-12 text-center">
-          We didn't have any luck finding your profile data - you'll need to select your relays
-          manually to continue. You can skip this step by clicking
-          <Anchor class="underline" href="/relays">here</Anchor>, but be aware that any new relay
-          selections will replace your old ones.
-        </div>
-      {:else if modal === "custom"}
-        <div class="my-12 text-center">
-          Enter the url of a relay you've used in the past to store your profile and we'll check
-          there.
-        </div>
-      {/if}
+    onEscape={() => {
+      modal = null
+    }}>
+    {#if modal === "success"}
+      <div class="my-12 text-center">Success! Just a moment while we get things set up.</div>
+      <Spinner delay={0} />
+    {:else if modal === "failure"}
+      <div class="my-12 text-center">
+        We didn't have any luck finding your profile data - you'll need to select your relays
+        manually to continue. You can skip this step by clicking
+        <Anchor class="underline" href="/relays">here</Anchor>, but be aware that any new relay
+        selections will replace your old ones.
+      </div>
+    {:else if modal === "custom"}
+      <div class="my-12 text-center">
+        Enter the url of a relay you've used in the past to store your profile and we'll check
+        there.
+      </div>
+    {/if}
 
-      {#if ["failure", "custom"].includes(modal)}
-        <form class="flex gap-2" on:submit|preventDefault={addCustomRelay}>
-          <Input bind:value={customRelayUrl} wrapperClass="flex-grow">
-            <i slot="before" class="fa fa-search" />
-          </Input>
-          <Anchor button on:click={addCustomRelay}>Search relay</Anchor>
-        </form>
-      {/if}
-    </Content>
+    {#if ["failure", "custom"].includes(modal)}
+      <form class="flex gap-2" on:submit|preventDefault={addCustomRelay}>
+        <Input bind:value={customRelayUrl} wrapperClass="flex-grow">
+          <i slot="before" class="fa fa-search" />
+        </Input>
+        <Anchor button on:click={addCustomRelay}>Search relay</Anchor>
+      </form>
+    {/if}
   </Modal>
 {/if}

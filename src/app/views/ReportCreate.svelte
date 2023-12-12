@@ -5,7 +5,7 @@
   import {fuzzy} from "src/util/misc"
   import {toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
@@ -38,7 +38,7 @@
 </script>
 
 <form on:submit|preventDefault={submit}>
-  <Content>
+  <FlexColumn>
     <Heading class="text-center">File a Report</Heading>
     <div class="flex w-full flex-col gap-8">
       <Field label="Content Warnings">
@@ -56,5 +56,5 @@
       </Field>
       <Anchor button tag="button" type="submit">Save</Anchor>
     </div>
-  </Content>
+  </FlexColumn>
 </form>

@@ -4,7 +4,6 @@
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import Content from "src/partials/Content.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import type {Relay} from "src/engine"
   import {relays as knownRelays} from "src/engine"
@@ -30,7 +29,7 @@
 
   $: search = fuzzy(
     $knownRelays.filter(r => !joined.has(r.url)),
-    {keys: ["name", "description", "url"]}
+    {keys: ["name", "description", "url"]},
   )
 </script>
 
@@ -46,7 +45,7 @@
   <Anchor button on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
   <Anchor button accent class="flex-grow" on:click={next}>Continue</Anchor>
 </div>
-<div class="flex items-center gap-2">
+<div class="flex items-center gap-2 pt-4">
   <i class="fa fa-server fa-lg" />
   <h2 class="staatliches text-2xl">Your relays</h2>
 </div>
@@ -56,38 +55,34 @@
     <span>No relays connected</span>
   </div>
 {:else}
-  <Content gap="gap-4" size="inherit">
-    {#each relays as relay (relay.url)}
-      <RelayCard {relay}>
-        <div slot="actions">
-          {#if relays.length > 1}
-            <button class="flex items-center gap-3 text-lightest" on:click={() => removeRelay(relay)}>
-              <i class="fa fa-right-from-bracket" /> Leave
-            </button>
-          {/if}
-        </div>
-      </RelayCard>
-    {/each}
-  </Content>
+  {#each relays as relay (relay.url)}
+    <RelayCard {relay}>
+      <div slot="actions">
+        {#if relays.length > 1}
+          <button class="flex items-center gap-3 text-lightest" on:click={() => removeRelay(relay)}>
+            <i class="fa fa-right-from-bracket" /> Leave
+          </button>
+        {/if}
+      </div>
+    </RelayCard>
+  {/each}
 {/if}
-<div class="flex items-center gap-2">
+<div class="flex items-center gap-2 pt-4">
   <i class="fa fa-earth-asia fa-lg" />
   <h2 class="staatliches text-2xl">Other relays</h2>
 </div>
 <Input bind:value={q} type="text" wrapperClass="flex-grow" placeholder="Type to search">
   <i slot="before" class="fa-solid fa-search" />
 </Input>
-<Content gap="gap-4" size="inherit">
-  {#each (search(q) || []).slice(0, 50) as relay (relay.url)}
-    <RelayCard {relay}>
-      <div slot="actions">
-        <button class="flex items-center gap-3 text-lightest" on:click={() => saveRelay(relay)}>
-          <i class="fa fa-right-to-bracket" /> Join
-        </button>
-      </div>
-    </RelayCard>
-  {/each}
-</Content>
+{#each (search(q) || []).slice(0, 50) as relay (relay.url)}
+  <RelayCard {relay}>
+    <div slot="actions">
+      <button class="flex items-center gap-3 text-lightest" on:click={() => saveRelay(relay)}>
+        <i class="fa fa-right-to-bracket" /> Join
+      </button>
+    </div>
+  </RelayCard>
+{/each}
 <small class="text-center">
   Showing {Math.min($knownRelays.length - relays.length, 50)}
   of {$knownRelays.length - relays.length} known relays

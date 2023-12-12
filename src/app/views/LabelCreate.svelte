@@ -1,7 +1,7 @@
 <script lang="ts">
   import {toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
@@ -31,7 +31,7 @@
 </script>
 
 <form on:submit|preventDefault={submit}>
-  <Content>
+  <FlexColumn>
     <Heading class="text-center">Add Tags</Heading>
     <p class="text-center">
       Recommend content to people who follow you. You can find your recommendations under the
@@ -53,5 +53,5 @@
       </Field>
       <Anchor button tag="button" type="submit">Save</Anchor>
     </div>
-  </Content>
+  </FlexColumn>
 </form>

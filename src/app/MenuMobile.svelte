@@ -14,7 +14,6 @@
     user,
     canSign,
     displayPerson,
-    canUseGiftWrap,
     hasNewNip24Messages,
     hasNewNotifications,
     pubkey,
@@ -50,7 +49,10 @@
   <SliderMenu onClick={closeMenu} onEscape={closeMenu}>
     <div class="py-8">
       {#if $pubkey}
-        <Anchor stopPropagation class="flex justify-center items-center gap-2" on:click={openAccount}>
+        <Anchor
+          stopPropagation
+          class="flex items-center justify-center gap-2"
+          on:click={openAccount}>
           <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
           <div class="flex min-w-0 flex-col">
             <span>@{displayPerson($user)}</span>
@@ -63,7 +65,7 @@
         </div>
       {/if}
     </div>
-    <div class="grid grid-cols-2 gap-3 m-auto staatliches">
+    <div class="staatliches m-auto grid grid-cols-2 gap-3">
       <MenuMobileItem stopPropagation on:click={openSettings}>
         <i class="fa fa-cog" /> Settings
       </MenuMobileItem>
@@ -90,7 +92,7 @@
         </div>
       </MenuMobileItem>
       {#if $env.ENABLE_GROUPS}
-        <MenuMobileItem disabled={!$canUseGiftWrap} href="/groups">
+        <MenuMobileItem href="/groups">
           <i class="fa fa-circle-nodes" /> Groups
         </MenuMobileItem>
       {/if}
@@ -107,9 +109,9 @@
       <MenuMobileItem on:click={() => router.at("notes").push({key: randomId()})}>
         <i class="fa fa-rss" /> Feed
       </MenuMobileItem>
-      <div class="h-px bg-mid my-4 m-auto col-span-2" style="width: 200px;" />
+      <div class="col-span-2 m-auto my-4 h-px bg-mid" style="width: 200px;" />
     </div>
-    <div class="staatliches block flex h-8 gap-2 px-8 text-light justify-center">
+    <div class="staatliches block flex h-8 justify-center gap-2 px-8 text-light">
       <Anchor class="hover:text-warm" href="/about">About</Anchor> /
       <Anchor external class="hover:text-warm" href="/terms.html">Terms</Anchor> /
       <Anchor external class="hover:text-warm" href="/privacy.html">Privacy</Anchor>
@@ -119,8 +121,8 @@
 
 {#if subMenu === "settings"}
   <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
-    <p class="staatliches text-3xl mb-8 text-center">Settings</p>
-    <div class="grid grid-cols-2 gap-3 m-auto staatliches">
+    <p class="staatliches mb-8 text-center text-3xl">Settings</p>
+    <div class="staatliches m-auto grid grid-cols-2 gap-3">
       {#if $installPrompt}
         <MenuMobileItem on:click={installAsPWA}>
           <i class="fa fa-rocket w-8" /> Install
@@ -147,8 +149,8 @@
 
 {#if subMenu === "account"}
   <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
-    <p class="staatliches text-3xl mb-8 text-center">Account</p>
-    <div class="grid grid-cols-2 gap-3 m-auto staatliches mb-8">
+    <p class="staatliches mb-8 text-center text-3xl">Account</p>
+    <div class="staatliches m-auto mb-8 grid grid-cols-2 gap-3">
       <MenuMobileItem href="/settings/keys">
         <i class="fa fa-key" /> Keys
       </MenuMobileItem>
@@ -156,7 +158,7 @@
         <i class="fa fa-user-circle" /> Profile
       </MenuMobileItem>
     </div>
-    <div class="staatliches block flex h-8 gap-2 px-8 text-light justify-center">
+    <div class="staatliches block flex h-8 justify-center gap-2 px-8 text-light">
       <Anchor class="hover:text-warm" href="/logout">Logout</Anchor> /
       <Anchor class="hover:text-warm" stopPropagation on:click={() => setSubMenu("accounts")}>
         Switch Accounts
@@ -177,7 +179,9 @@
         </MenuItem>
       {/if}
     {/each}
-    <MenuItem class="py-4 text-center staatliches" on:click={() => router.at("login/advanced").open()}>
+    <MenuItem
+      class="staatliches py-4 text-center"
+      on:click={() => router.at("login/advanced").open()}>
       <i class="fa fa-plus" /> Add Account
     </MenuItem>
   </SliderMenu>

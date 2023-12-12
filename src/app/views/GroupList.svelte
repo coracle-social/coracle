@@ -11,6 +11,7 @@
   import {
     load,
     groups,
+    canUseGiftWrap,
     getUserRelayUrls,
     mergeHints,
     getGroupReqInfo,
@@ -54,7 +55,7 @@
       relays: getUserRelayUrls("read"),
       filters: [
         {kinds: [34550], authors: admins},
-        {kinds: [34550], limit: 20},
+        {kinds: [34550], limit: 100},
       ],
     })
   })
@@ -69,7 +70,7 @@
     <i class="fa fa-circle-nodes fa-lg" />
     <h2 class="staatliches text-2xl">Your groups</h2>
   </div>
-  <Anchor modal button accent href="/groups/new">
+  <Anchor modal button accent disabled={!$canUseGiftWrap} href="/groups/new">
     <i class="fa-solid fa-plus" /> Create Group
   </Anchor>
 </div>

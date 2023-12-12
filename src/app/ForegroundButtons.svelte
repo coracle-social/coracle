@@ -1,21 +1,14 @@
 <script lang="ts">
   import {fade} from "src/util/transition"
-  import {getProps} from "src/util/router"
-  import {canSign, env} from "src/engine"
   import ForegroundButton from "src/partials/ForegroundButton.svelte"
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
   import {router} from "src/app/router"
 
   let scrollY = 0
-  let playerIsOpen = false
 
   const {page} = router
 
   const scrollToTop = () => document.body.scrollIntoView({behavior: "smooth"})
-
-  const showPlayer = () => {
-    playerIsOpen = true
-  }
 
   $: showButtons = !$page?.path.match(/^\/channels|logout|settings/)
 </script>

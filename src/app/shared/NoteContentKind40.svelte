@@ -3,7 +3,7 @@
   import {nip19} from "nostr-tools"
   import {tryJson} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
 
   export let note
@@ -15,7 +15,7 @@
 </script>
 
 <Card interactive on:click={goToChat}>
-  <Content>
+  <FlexColumn>
     <div class="flex items-center gap-2">
       {#if picture}
         <ImageCircle class="h-10 w-10" src={picture} />
@@ -25,5 +25,5 @@
     {#if about}
       <p>{about}</p>
     {/if}
-  </Content>
+  </FlexColumn>
 </Card>

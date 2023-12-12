@@ -3,7 +3,6 @@
   import {quantify, defer} from "hurdak"
   import {fly} from "src/util/transition"
   import {ThreadLoader} from "src/engine"
-  import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
@@ -38,25 +37,23 @@
 {#if loading}
   <Spinner />
 {:else}
-  <Content gap="gap-4">
-    <Note note={$root} />
-    {#if showAncestors}
-      {#each $ancestors as ancestor (ancestor.id)}
-        <div in:fly={{y: 20}}>
-          <Note topLevel showParent={false} note={ancestor} />
-        </div>
-      {/each}
-    {:else if $ancestors.length > 0}
-      <Anchor
-        class="text-center text-lightest"
-        on:click={() => {
-          showAncestors = true
-        }}>
-        <i class="fa fa-up-down pr-2 text-sm" />
-        Show {quantify($ancestors.length, "other note")}
-      </Anchor>
-    {/if}
-    <Note topLevel showParent={false} note={$parent} />
-    <Note topLevel showParent={false} note={anchor} depth={2} />
-  </Content>
+  <Note note={$root} />
+  {#if showAncestors}
+    {#each $ancestors as ancestor (ancestor.id)}
+      <div in:fly={{y: 20}}>
+        <Note topLevel showParent={false} note={ancestor} />
+      </div>
+    {/each}
+  {:else if $ancestors.length > 0}
+    <Anchor
+      class="text-center text-lightest"
+      on:click={() => {
+        showAncestors = true
+      }}>
+      <i class="fa fa-up-down pr-2 text-sm" />
+      Show {quantify($ancestors.length, "other note")}
+    </Anchor>
+  {/if}
+  <Note topLevel showParent={false} note={$parent} />
+  <Note topLevel showParent={false} note={anchor} depth={2} />
 {/if}

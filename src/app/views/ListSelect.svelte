@@ -1,7 +1,7 @@
 <script lang="ts">
   import {updateIn} from "hurdak"
   import {Tags} from "paravel"
-  import Heading from "src/partials/Heading.svelte"
+  import Subheading from "src/partials/Subheading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Content from "src/partials/Content.svelte"
@@ -26,7 +26,7 @@
 
 <Content size="lg">
   <div class="flex items-center justify-between">
-    <Heading>Select a List</Heading>
+    <Subheading>Select a List</Subheading>
     <Anchor button accent on:click={() => selectlist({})}>
       <i class="fa fa-plus" /> List
     </Anchor>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {pluck} from "ramda"
-  import Content from "src/partials/Content.svelte"
   import Field from "src/partials/Field.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import {router} from "src/app/router"
@@ -12,7 +12,7 @@
 </script>
 
 <form on:submit|preventDefault={submit} class="flex justify-center py-12">
-  <Content>
+  <FlexColumn>
     <h2 class="staatliches text-center text-6xl">Start a conversation</h2>
     <div class="flex w-full flex-col gap-8 pb-56">
       <Field label="Who do you want to talk to?">
@@ -20,5 +20,5 @@
       </Field>
       <Anchor button tag="button" type="submit">Done</Anchor>
     </div>
-  </Content>
+  </FlexColumn>
 </form>

@@ -76,6 +76,7 @@ export const formatTimestampAsLocalISODate = (ts: number) => {
 }
 
 type ScrollerOpts = {
+  delay?: 1000
   threshold?: number
   reverse?: boolean
   element?: Element
@@ -83,7 +84,7 @@ type ScrollerOpts = {
 
 export const createScroller = <T>(
   loadMore: () => Promise<T>,
-  {threshold = 2000, reverse = false, element = document.body}: ScrollerOpts = {},
+  {delay = 1000, threshold = 2000, reverse = false, element = document.body}: ScrollerOpts = {},
 ) => {
   let done = false
   const check = async () => {
@@ -99,7 +100,7 @@ export const createScroller = <T>(
     }
 
     // No need to check all that often
-    await sleep(1000)
+    await sleep(delay)
 
     if (!done) {
       requestAnimationFrame(check)

@@ -4,8 +4,9 @@
   import {Naddr} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
+  import Field from "src/partials/Field.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
@@ -70,18 +71,14 @@
 </script>
 
 <form on:submit|preventDefault={submit}>
-  <Content>
+  <FlexColumn>
     <Heading class="text-center">{naddr ? "Edit" : "Add"} list</Heading>
     <div class="flex w-full flex-col gap-8">
-      <div class="flex flex-col gap-1">
-        <strong>Name</strong>
+      <Field label="Name">
         <Input bind:value={values.name} placeholder="My list" />
-        <p class="text-sm text-light">
-          Lists are identified by their name, so this has to be unique.
-        </p>
-      </div>
-      <div class="flex flex-col gap-1">
-        <strong>Topics and People</strong>
+        <p slot="info">Lists are identified by their name, so this has to be unique.</p>
+      </Field>
+      <Field label="Topics and People">
         <SearchSelect multiple {search} bind:value={values.params}>
           <div slot="item" let:item let:context>
             {#if item[0] === "p"}
@@ -95,21 +92,20 @@
             {/if}
           </div>
         </SearchSelect>
-        <p class="text-sm text-light">Type "@" to look for people, and "#" to look for topics.</p>
-      </div>
-      <div class="flex flex-col gap-1">
-        <strong>Relays</strong>
+        <p slot="info">Type "@" to look for people, and "#" to look for topics.</p>
+      </Field>
+      <Field label="Relays">
         <SearchSelect multiple search={searchRelayTags} bind:value={values.relays}>
           <div slot="item" let:item>
             {displayRelay({url: item[1]})}
           </div>
         </SearchSelect>
-        <p class="text-sm text-light">
+        <p slot="info">
           Select which relays to limit this list to. If you leave this blank, your default relays
           will be used.
         </p>
-      </div>
+      </Field>
       <Anchor button tag="button" type="submit">Save</Anchor>
     </div>
-  </Content>
+  </FlexColumn>
 </form>

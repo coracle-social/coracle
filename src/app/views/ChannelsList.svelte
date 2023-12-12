@@ -2,6 +2,7 @@
   import {filter} from "ramda"
   import {toTitle} from "hurdak"
   import Tabs from "src/partials/Tabs.svelte"
+  import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Content from "src/partials/Content.svelte"
@@ -38,14 +39,12 @@
 </script>
 
 {#if $nip44.isEnabled()}
-  <div class="flex justify-center text-center px-4 py-3 mb-4 bg-cocoa border border-solid border-mid rounded">
-    <p>
-      You are using a new version of private messaging.
-      <br />
-      If you're looking for old-style messages, you can find them
-      at <Anchor external underline href="https://nip04.coracle.social">nip04.coracle.social</Anchor>.
-    </p>
-  </div>
+  <Card>
+    You are using a new version of private messaging. If you're looking for old-style messages, you
+    can find them at <Anchor external underline href="https://nip04.coracle.social"
+      >nip04.coracle.social</Anchor
+    >.
+  </Card>
   <div class="relative">
     <Tabs tabs={["conversations", "requests"]} {activeTab} {setActiveTab}>
       <div slot="tab" let:tab class="flex gap-2">
@@ -78,14 +77,17 @@
     </ForegroundButton>
   </ForegroundButtons>
 {:else}
-  <div class="flex flex-col gap-4 justify-center items-center px-4 py-3 mb-4 bg-cocoa border border-solid border-mid rounded">
+  <Card>
     <p>
-      You are using a login method that doesn't support the new NIP 44 messaging standard.
-      Please make sure your browser extension is up to date.
+      You are using a login method that doesn't support the new NIP 44 messaging standard. Please
+      make sure your browser extension is up to date.
     </p>
     <p>
-      If you're looking for old-style messages, you can find them
-      at <Anchor external underline href="https://nip04.coracle.social">nip04.coracle.social</Anchor>.
+      If you're looking for old-style messages, you can find them at <Anchor
+        external
+        underline
+        href="https://nip04.coracle.social">nip04.coracle.social</Anchor
+      >.
     </p>
-  </div>
+  </Card>
 {/if}

@@ -2,7 +2,6 @@
   import {toTitle} from "hurdak"
   import {appName} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
-  import Content from "src/partials/Content.svelte"
 
   export let topic
 
@@ -11,12 +10,10 @@
   }
 </script>
 
-<Content>
-  {#if descriptions[topic]}
-    <Heading>{toTitle(topic)}</Heading>
-    <p>{@html descriptions[topic].replace(/\n/g, "<br /><br />")}</p>
-  {:else}
-    <Heading>No information on "{toTitle(topic)}"</Heading>
-    <p>Sorry, we couldn't find any information on "{toTitle(topic)}".</p>
-  {/if}
-</Content>
+{#if descriptions[topic]}
+  <Heading>{toTitle(topic)}</Heading>
+  <p>{@html descriptions[topic].replace(/\n/g, "<br /><br />")}</p>
+{:else}
+  <Heading>No information on "{toTitle(topic)}"</Heading>
+  <p>Sorry, we couldn't find any information on "{toTitle(topic)}".</p>
+{/if}

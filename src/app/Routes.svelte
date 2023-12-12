@@ -1,13 +1,12 @@
 <script lang="ts">
   import {reverse} from "ramda"
-  import {fly} from "src/util/transition"
   import {getProps, getKey} from "src/util/router"
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/router"
   import {session, stateKey} from "src/engine"
 
-  const {page, modal, modals, history} = router
+  const {page, modal, modals} = router
 
   $: {
     if ($modal) {
@@ -25,10 +24,12 @@
 </script>
 
 {#key $stateKey}
-  <div class="lg:pt-16 pb-24 text-lightest lg:ml-60 relative" class:pointer-events-none={$menuIsOpen}>
+  <div
+    class="relative pb-24 text-lightest lg:ml-60 lg:pt-16"
+    class:pointer-events-none={$menuIsOpen}>
     {#if $page}
       {#key getKey($page)}
-        <div in:fly={{y: 20}} class="p-4 flex flex-col flex-grow gap-4 max-w-xl lg:max-w-2xl m-auto overflow-x-hidden">
+        <div class="m-auto flex w-full max-w-2xl flex-grow flex-col gap-4 overflow-x-hidden p-4">
           <svelte:component this={$page.route.component} {...getProps($page)} />
         </div>
       {/key}
@@ -37,11 +38,7 @@
 {/key}
 
 {#each reverse($modals).filter(m => !m.config.virtual) as m, i (getKey(m) + i)}
-  <Modal
-    index={i}
-    virtual={false}
-    isOnTop={m === $modal}
-    canClose={!m.config.noEscape}>
+  <Modal index={i} virtual={false} isOnTop={m === $modal} canClose={!m.config.noEscape}>
     {#key $stateKey}
       <svelte:component this={m.route.component} {...getProps(m)} />
     {/key}

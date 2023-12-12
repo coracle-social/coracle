@@ -1,8 +1,9 @@
 <script lang="ts">
-  import {filter} from 'ramda'
+  import {filter} from "ramda"
   import {randomId} from "hurdak"
   import {onMount} from "svelte"
   import {fly, fade} from "src/util/transition"
+  import type {HistoryItem} from "src/util/router"
   import {router} from "src/app/router"
 
   export let mini = false
@@ -14,8 +15,8 @@
 
   let root, content, closing
 
-  const modals = router.history.derived(filter(item => item.config.modal))
-  const isNested = virtual ? $modals.length > 0 : ($modals.length > 1 && index > 0)
+  const modals = router.history.derived(filter((item: HistoryItem) => item.config.modal))
+  const isNested = virtual ? $modals.length > 0 : $modals.length > 1 && index > 0
 
   const tryClose = () => {
     if (!canClose) {
@@ -90,7 +91,8 @@
         class="pointer-events-auto mt-12 min-h-full transition transition-all duration-500"
         class:mt-[55vh]={mini}>
         {#if canClose}
-          <div class="pointer-events-none sticky top-0 z-popover flex w-full flex-col items-end gap-2 p-2">
+          <div
+            class="pointer-events-none sticky top-0 z-popover flex w-full flex-col items-end gap-2 p-2">
             <div
               class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
                    border border-solid border-accent-l bg-accent text-white transition-colors hover:bg-accent-l"
@@ -109,9 +111,9 @@
         {/if}
         <div class="absolute mt-12 h-full w-full bg-cocoa" />
         <div
-          class="relative h-full w-full cursor-auto border-t border-solid border-mid bg-cocoa pb-10 pt-2 rounded-t-2xl overflow-hidden"
+          class="relative h-full w-full cursor-auto overflow-hidden rounded-t-2xl border-t border-solid border-mid bg-cocoa pb-10 pt-2"
           on:click|stopPropagation>
-          <div class="m-auto max-w-2xl p-2 flex flex-col gap-4">
+          <div class="m-auto flex max-w-2xl flex-col gap-4 p-2">
             <slot />
           </div>
         </div>
