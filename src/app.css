@@ -194,3 +194,20 @@ body,
   box-decoration-break: clone;
   padding: 1px 0.2em;
 }
+
+
+.card .card, .modal .card {
+  background-color: var(--cocoa-d);
+}
+
+.card .card.interactive:hover, .modal .card.interactive:hover {
+  background-color: var(--dark);
+}
+
+.card .card .card, .modal .card .card {
+  background-color: var(--cocoa);
+}
+
+.card .card .card.interactive:hover, .modal .card .card.interactive:hover {
+  background-color: var(--dark);
+}
