@@ -1,6 +1,7 @@
 <script lang="ts">
+  import {filter} from 'ramda'
   import {randomId} from "hurdak"
-  import {onMount, onDestroy} from "svelte"
+  import {onMount} from "svelte"
   import {fly, fade} from "src/util/transition"
   import {router} from "src/app/router"
 
@@ -9,83 +10,112 @@
   export let virtual = true
   export let isOnTop = true
   export let onEscape = null
+  export let canClose = true
 
   let root, content, closing
 
-  const id = randomId()
-  const {modals} = router
+  const modals = router.history.derived(filter(item => item.config.modal))
+  const isNested = virtual ? $modals.length > 0 : $modals.length > 1 && index > 0
 
-  const escapeIfOnTop = () => {
-    if (!closing && (virtual || isOnTop)) {
-      closing = true
-      onEscape?.()
+  const tryClose = () => {
+    if (!canClose) {
+      return
     }
+
+    // Since we're popping, avoid double clicks
+    if (closing) {
+      return
+    }
+
+    // Don't close modals sitting down in the stack
+    if (!virtual && !isOnTop) {
+      return
+    }
+
+    // Don't cascade closing nested modals
+    if (root?.querySelector(".modal")) {
+      return
+    }
+
+    closing = true
+    router.pop()
   }
 
   onMount(() => {
     if (virtual) {
-      router.go("virtual", {virtual: true, mini, id})
-    }
-  })
+      const id = randomId()
 
-  onDestroy(() => {
-    if (virtual) {
-      router.remove(id)
+      router.virtual().open({id, mini})
+
+      const unsub = modals.subscribe($modals => {
+        if (!$modals.find(m => m.config.id === id)) {
+          onEscape?.()
+        }
+      })
+
+      return () => {
+        unsub()
+
+        if (!$modals.find(m => m.config.id === id)) {
+          tryClose()
+        }
+      }
     }
   })
 </script>
 
 <svelte:body
   on:keydown={e => {
-    if (e.key === "Escape" && !root.querySelector(".modal")) {
-      escapeIfOnTop?.()
+    if (e.key === "Escape") {
+      tryClose?.()
     }
   }} />
 
-<div
-  bind:this={root}
-  transition:fade
-  class="modal group fixed inset-0 z-modal"
-  class:pointer-events-none={closing}>
+<slot name="wrapper">
   <div
-    class="fixed inset-0 cursor-pointer bg-black opacity-50"
-    on:click|stopPropagation={escapeIfOnTop} />
-  <div
-    class="modal-content h-full overflow-auto"
-    class:overflow-hidden={mini}
-    class:pointer-events-none={mini}
-    class:cursor-pointer={escapeIfOnTop}
-    transition:fly={{y: 1000}}
-    bind:this={content}
-    on:click={escapeIfOnTop}>
+    bind:this={root}
+    transition:fade
+    class="modal group fixed inset-0 z-modal"
+    class:pointer-events-none={closing}>
     <div
-      class="pointer-events-auto mt-12 min-h-full transition transition-all duration-500"
-      style={mini ? "margin-top: 55vh" : ""}>
-      {#if onEscape}
-        <div class="pointer-events-none sticky top-0 z-popover flex w-full flex-col items-end gap-2 p-2">
-          <div
-            class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
-                 border border-solid border-accent-l bg-accent text-white transition-colors hover:bg-accent-l">
-            <i class="fa fa-times fa-lg cy-modal-close" />
-          </div>
-          {#if $modals.length > 1 && index > 0}
-            <div
-              on:click|stopPropagation={() => router.clearModals()}
-              class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
-                   border border-solid border-cocoa bg-mid text-lightest transition-colors hover:bg-mid">
-              <i class="fa fa-angles-down fa-lg" />
-            </div>
-          {/if}
-        </div>
-      {/if}
-      <div class="absolute mt-12 h-full w-full bg-cocoa" />
+      class="fixed inset-0 cursor-pointer bg-black opacity-50"
+      on:click|stopPropagation={tryClose} />
+    <div
+      class="modal-content h-full overflow-auto"
+      class:overflow-hidden={mini}
+      class:pointer-events-none={mini}
+      transition:fly={{y: 1000}}
+      bind:this={content}>
       <div
-        class="relative h-full w-full cursor-auto border-t border-solid border-mid bg-cocoa pb-10 pt-2"
-        on:click|stopPropagation>
-        <div class="m-auto max-w-2xl p-2 flex flex-col gap-4">
-          <slot />
+        class="pointer-events-auto mt-12 min-h-full transition transition-all duration-500"
+        style={mini ? "margin-top: 55vh" : ""}>
+        {#if canClose}
+          <div class="pointer-events-none sticky top-0 z-popover flex w-full flex-col items-end gap-2 p-2">
+            <div
+              class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
+                   border border-solid border-accent-l bg-accent text-white transition-colors hover:bg-accent-l"
+              on:click={tryClose}>
+              <i class="fa fa-times fa-lg cy-modal-close" />
+            </div>
+            {#if isNested}
+              <div
+                on:click|stopPropagation={() => router.clearModals()}
+                class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
+                     border border-solid border-cocoa bg-mid text-lightest transition-colors hover:bg-mid">
+                <i class="fa fa-angles-down fa-lg" />
+              </div>
+            {/if}
+          </div>
+        {/if}
+        <div class="absolute mt-12 h-full w-full bg-cocoa" />
+        <div
+          class="relative h-full w-full cursor-auto border-t border-solid border-mid bg-cocoa pb-10 pt-2 rounded-t-2xl overflow-hidden"
+          on:click|stopPropagation>
+          <div class="m-auto max-w-2xl p-2 flex flex-col gap-4">
+            <slot />
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+</slot>

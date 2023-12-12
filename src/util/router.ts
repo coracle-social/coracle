@@ -308,7 +308,7 @@ export class Router {
   listen() {
     return globalHistory.listen(({location, action}) => {
       const {pathname, search} = location
-      const [cur, prev] = this.nonVirtual.get()
+      const [cur, prev] = this.history.get()
       const path = search ? pathname + search : pathname
 
       // If we're going back, splice instead of push
@@ -347,9 +347,7 @@ export class Router {
       return [{path, config, route, params}, ...$history.slice(0, 100)]
     })
 
-    if (!config.virtual) {
-      globalHistory.navigate(path, {replace: config.replace, state: null})
-    }
+    globalHistory.navigate(path, {replace: config.replace, state: null})
   }
 
   pop() {
@@ -359,11 +357,7 @@ export class Router {
       return
     }
 
-    if ($history[0].config.virtual) {
-      this.history.set($history.slice(1))
-    } else {
-      window.history.back()
-    }
+    window.history.back()
   }
 
   remove(id) {
@@ -401,5 +395,9 @@ export class Router {
 
   fromCurrent() {
     return this.from(this.current.get())
+  }
+
+  virtual() {
+    return this.fromCurrent().cg({virtual: true})
   }
 }

@@ -9,11 +9,6 @@
 
   const {page, modal, modals} = router
 
-  const closeModal = async () => {
-    router.pop()
-    menuIsOpen.set(false)
-  }
-
   $: {
     if ($modal) {
       console.log("modal", $modal, getProps($modal))
@@ -46,7 +41,7 @@
     index={i}
     virtual={false}
     isOnTop={m === $modal}
-    onEscape={m.config.noEscape ? null : closeModal}>
+    canClose={!m.config.noEscape}>
     {#key $stateKey}
       <svelte:component this={m.route.component} {...getProps(m)} />
     {/key}
