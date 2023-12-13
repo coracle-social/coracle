@@ -14,7 +14,7 @@
       on:click={onEscape} />
     <div
       transition:fly|local={{y: 600, duration: 300}}
-      class="fixed bottom-0 left-0 right-0 rounded-t-2xl border border-solid border-mid bg-dark pt-8 z-modal"
+      class="fixed bottom-0 left-0 right-0 rounded-t-2xl bg-dark pt-8 z-modal"
       on:click={onClick}>
       <div class="flex flex-col justify-center gap-1 text-lg">
         <slot />

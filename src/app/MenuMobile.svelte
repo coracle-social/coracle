@@ -47,7 +47,7 @@
 
 {#if $menuIsOpen}
   <SliderMenu onClick={closeMenu} onEscape={closeMenu}>
-    <div class="py-8">
+    <div class="py-8 max-w-[236px] m-auto">
       {#if $pubkey}
         <Anchor
           stopPropagation
@@ -109,9 +109,8 @@
       <MenuMobileItem on:click={() => router.at("notes").push({key: randomId()})}>
         <i class="fa fa-rss" /> Feed
       </MenuMobileItem>
-      <div class="col-span-2 m-auto my-4 h-px bg-mid" style="width: 200px;" />
     </div>
-    <div class="staatliches block flex h-8 justify-center gap-2 px-8 text-light">
+    <div class="staatliches block flex h-8 justify-center gap-2 px-8 text-light mt-8">
       <Anchor class="hover:text-warm" href="/about">About</Anchor> /
       <Anchor external class="hover:text-warm" href="/terms.html">Terms</Anchor> /
       <Anchor external class="hover:text-warm" href="/privacy.html">Privacy</Anchor>
@@ -138,7 +137,7 @@
         <i class="fa fa-volume-xmark" /> Content
       </MenuMobileItem>
       <MenuMobileItem disabled={!$canSign} href="/settings">
-        <i class="fa fa-cog" /> App Settings
+        <i class="fa fa-sliders" /> App Settings
       </MenuMobileItem>
       <MenuMobileItem disabled={!$canSign} stopPropagation on:click={openAccount}>
         <i class="fa fa-user-circle w-8" /> Edit Profile

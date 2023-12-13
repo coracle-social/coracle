@@ -75,7 +75,7 @@
     {#if $pubkey}
       <Anchor button accent on:click={createNote}>Post +</Anchor>
     {:else}
-      <Anchor button accent href="/login/intro">Log In</Anchor>
+      <Anchor modal button accent href="/login/intro">Log In</Anchor>
     {/if}
     <div class="flex cursor-pointer items-center" on:click={openMenu}>
       <i class="fa fa-bars fa-2xl" />

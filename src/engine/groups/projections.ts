@@ -168,7 +168,6 @@ projections.addHandler(EventKind.GiftWrap, wrap => {
 
   if (sk) {
     nip59.get().withUnwrappedEvent(wrap, sk, rumor => {
-      console.log("======", rumor)
       projections.push(rumor)
     })
   }
