@@ -2,6 +2,7 @@ import {prop, defaultTo, sortBy, last, whereEq} from "ramda"
 import {ellipsize, seconds} from "hurdak"
 import {Tags} from "paravel"
 import {Naddr} from "src/util/nostr"
+import type {GroupStatus} from "src/engine/session/model"
 import {pubkey} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {getUserRelayUrls, mergeHints} from "src/engine/relays/utils"
@@ -87,7 +88,7 @@ export const deriveGroupAccess = address =>
   groups.key(address).derived($group => $group?.access || GroupAccess.Closed)
 
 export const deriveGroupStatus = address =>
-  session.derived($session => $session?.groups?.[address] || {})
+  session.derived($session => ($session?.groups?.[address] || {}) as GroupStatus)
 
 export const deriveMembershipLevel = address =>
   deriveGroupStatus(address).derived(({joined, access}) => {

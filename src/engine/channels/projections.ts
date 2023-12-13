@@ -1,20 +1,20 @@
-import {prop, uniqBy, uniq} from "ramda"
+import {prop, whereEq, uniqBy, uniq} from "ramda"
 import {Tags} from "paravel"
 import {tryJson} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
-import {EventKind} from "src/engine/events/model"
 import {sessions} from "src/engine/session/state"
+import {nip59} from "src/engine/session/derived"
 import {Signer, Nip04, getNdk} from "src/engine/session/utils"
 import {projections} from "src/engine/core/projections"
 import type {Channel} from "./model"
 import {channels} from "./state"
-import {getNip24ChannelId} from "./utils"
+import {getChannelId} from "./utils"
 
 const getSession = pubkey => sessions.get()[pubkey]
 const getSigner = session => new Signer(session, getNdk(session))
 const getNip04 = session => new Nip04(session, getNdk(session))
 
-projections.addHandler(EventKind.AppData, async e => {
+projections.addHandler(30078, async e => {
   const d = Tags.from(e).getValue("d")
   const session = getSession(e.pubkey)
 
@@ -52,33 +52,79 @@ projections.addHandler(EventKind.AppData, async e => {
   }
 })
 
-projections.addHandler(EventKind.Nip44Message, e => {
+const handleMessage = async e => {
   const tags = Tags.from(e)
-  const pubkeys = tags.type("p").values().all().concat(e.pubkey)
-  const channelId = getNip24ChannelId(pubkeys)
+  const pubkeys = uniq(tags.type("p").values().all().concat(e.pubkey)) as string[]
+  const channelId = getChannelId(pubkeys)
 
   for (const pubkey of Object.keys(sessions.get())) {
     if (!pubkeys.includes(pubkey)) {
       continue
     }
 
-    channels.key(channelId).update($channel => {
-      const updates = {
-        ...$channel,
+    const $channel =
+      channels.key(channelId).get() ||
+      ({
         id: channelId,
-        type: "nip24",
         members: pubkeys,
-        relays: uniq([...tags.relays().all(), ...($channel?.relays || [])]),
-        messages: uniqBy(prop("id"), [e, ...($channel?.messages || [])]),
+      } as Channel)
+
+    const relays = $channel?.relays || []
+    const messages = $channel?.messages || []
+
+    // If we already have the message we're done
+    if (messages.find(whereEq({id: e.id}))) {
+      return $channel
+    }
+
+    // Handle nip04
+    if (e.kind === 4) {
+      const recipient = tags.type("p").values().first()
+      const session = getSession(e.pubkey) || getSession(recipient)
+
+      if (!session) {
+        return
       }
 
-      if (e.pubkey === pubkey) {
-        updates.last_sent = Math.max(updates.last_sent || 0, e.created_at)
-      } else {
-        updates.last_received = Math.max(updates.last_received || 0, e.created_at)
+      const signer = getSigner(session)
+
+      if (!signer.canSign()) {
+        return
       }
 
-      return updates as Channel
+      const nip04 = getNip04(session)
+      const other = e.pubkey === session.pubkey ? recipient : e.pubkey
+
+      e = {...e, content: await nip04.decryptAsUser(e.content, other)}
+    }
+
+    const updates = {
+      ...$channel,
+      relays: uniq([...tags.relays().all(), ...relays]),
+      messages: uniqBy(prop("id"), [e, ...messages]),
+    }
+
+    if (e.pubkey === pubkey) {
+      updates.last_sent = Math.max(updates.last_sent || 0, e.created_at)
+    } else {
+      updates.last_received = Math.max(updates.last_received || 0, e.created_at)
+    }
+
+    channels.key(channelId).set(updates)
+  }
+}
+
+projections.addHandler(4, handleMessage)
+projections.addHandler(14, handleMessage)
+
+// Unwrap gift wraps using known keys
+
+projections.addHandler(1059, wrap => {
+  const session = getSession(Tags.from(wrap).pubkeys().first())
+
+  if (session?.privkey) {
+    nip59.get().withUnwrappedEvent(wrap, session.privkey, rumor => {
+      projections.push(rumor)
     })
   }
 })

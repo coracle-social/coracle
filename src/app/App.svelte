@@ -48,7 +48,6 @@
   import LoginPrivKey from "src/app/views/LoginPrivKey.svelte"
   import LoginPubKey from "src/app/views/LoginPubKey.svelte"
   import Logout from "src/app/views/Logout.svelte"
-  import ModalMessage from "src/app/views/ModalMessage.svelte"
   import NoteCreate from "src/app/views/NoteCreate.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import Notifications from "src/app/views/Notifications.svelte"
@@ -174,8 +173,6 @@
       url: asUrlComponent("url"),
     },
   })
-
-  router.register("/message", ModalMessage)
 
   router.register("/", Feeds, {
     serializers: {

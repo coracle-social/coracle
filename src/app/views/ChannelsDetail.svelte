@@ -2,7 +2,10 @@
   import cx from "classnames"
   import {onMount, onDestroy} from "svelte"
   import {formatTimestamp} from "src/util/misc"
+  import {appName} from "src/partials/state"
   import Channel from "src/partials/Channel.svelte"
+  import Content from "src/partials/Content.svelte"
+  import Modal from "src/partials/Modal.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -12,9 +15,10 @@
     session,
     channels,
     displayPubkey,
-    createNip24Message,
-    nip24MarkChannelRead,
-    listenForNip59Messages,
+    createMessage,
+    markChannelRead,
+    listenForMessages,
+    sortEventsDesc,
   } from "src/engine"
 
   export let channelId
@@ -22,29 +26,48 @@
 
   const channel = channels.key(channelId)
 
-  nip24MarkChannelRead(channelId)
-
-  const sendMessage = content => createNip24Message(channelId, content)
-
   const showPerson = pubkey => router.at("people").of(pubkey).open()
 
+  const sendMessage = content => {
+    const [message] = sortEventsDesc($channel.messages || [])
+
+    if (message?.kind === 4) {
+      confirmMessage = content
+    } else {
+      createMessage(channelId, content)
+    }
+  }
+
+  const cancel = () => {
+    confirmMessage = null
+  }
+
+  const confirm = () => {
+    createMessage(channelId, confirmMessage)
+    confirmMessage = null
+  }
+
+  let confirmMessage
+
   onMount(() => {
-    const sub = listenForNip59Messages()
+    markChannelRead(channelId)
+
+    const sub = listenForMessages(pubkeys)
 
     return () => sub.close()
   })
 
   onDestroy(() => {
-    nip24MarkChannelRead(channelId)
+    markChannelRead(channelId)
   })
 
   document.title = `Direct Messages`
 </script>
 
 <Channel messages={$channel.messages || []} {sendMessage}>
-  <div slot="header" class="flex h-16 items-start gap-4 overflow-hidden p-2">
+  <div slot="header" class="flex h-16 items-start gap-4 overflow-hidden p-1 px-4">
     <div class="flex items-center gap-4 pt-1">
-      <Anchor type="unstyled" class="fa fa-arrow-left cursor-pointer text-2xl" href="/channels" />
+      <Anchor class="fa fa-arrow-left cursor-pointer text-2xl" href="/channels" />
       <div class="mr-3 flex pt-1">
         {#each pubkeys as pubkey (pubkey)}
           <div class="-mr-3 inline-block">
@@ -57,7 +80,7 @@
       <div class="w-full">
         {#each pubkeys as pubkey, i (pubkey)}
           {#if i > 0}&bullet;{/if}
-          <Anchor on:click={() => showPerson(pubkey)} class="font-bold">
+          <Anchor class="hover:underline" on:click={() => showPerson(pubkey)}>
             {displayPubkey(pubkey)}
           </Anchor>
         {/each}
@@ -93,3 +116,30 @@
     </small>
   </div>
 </Channel>
+
+{#if confirmMessage}
+  <Modal>
+    <Content size="lg">
+      <p class="flex items-center gap-4 text-xl">
+        <i class="fa fa-info-circle" /> Auto-upgrade notice
+      </p>
+      <p>
+        {appName} only supports new-style DMs, but the most recent message in this conversation was sent
+        using old-style DMs.
+      </p>
+      <p>
+        You should make sure @{displayPubkey(pubkeys[0])} is using a NIP-44 compatible nostr client,
+        or you can send an old-style message using <Anchor
+          external
+          underline
+          href="https://nip04.coracle.social">nip04.coracle.social</Anchor
+        >.
+      </p>
+      <p>Would you like to continue sending this message?</p>
+      <div class="flex justify-center gap-2 py-4">
+        <Anchor button on:click={cancel}>Cancel</Anchor>
+        <Anchor button accent on:click={confirm}>Confirm</Anchor>
+      </div>
+    </Content>
+  </Modal>
+{/if}

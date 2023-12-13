@@ -4,13 +4,20 @@
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import Card from "src/partials/Card.svelte"
   import {router} from "src/app/router"
-  import {people, channels, displayPerson, loadPubkeys, hasNewMessages, session} from "src/engine"
+  import {
+    people,
+    channels,
+    displayPerson,
+    loadPubkeys,
+    channelHasNewMessages,
+    session,
+  } from "src/engine"
 
   export let channel
 
   const allPubkeys = channel.id.split(",") as string[]
-  const pubkeys = without([$session.pubkey], allPubkeys)
-  const showAlert = channels.key(channel.id).derived(hasNewMessages)
+  const pubkeys = allPubkeys.length > 1 ? without([$session.pubkey], allPubkeys) : allPubkeys
+  const showAlert = channels.key(channel.id).derived(channelHasNewMessages)
   const members = people.mapStore.derived($p => pubkeys.map(pk => $p.get(pk)))
 
   const enter = () => router.at("channels").of(allPubkeys).push()

@@ -10,14 +10,11 @@ import {
   env,
   pool,
   pubkey,
-  derived,
   session,
   loadDeletes,
   loadPubkeys,
   getUserRelayUrls,
   listenForNotifications,
-  hasNewNip24Messages,
-  canUseGiftWrap,
   getSetting,
   dufflepud,
 } from "src/engine"
@@ -27,11 +24,6 @@ import {
 export const menuIsOpen = writable(false)
 
 export const searchTerm = writable("")
-
-export const hasNewDMs = derived(
-  [hasNewNip24Messages, canUseGiftWrap],
-  ([$hasNew, $canUseGiftWrap]) => $canUseGiftWrap && $hasNew,
-)
 
 // Redact long strings, especially hex and bech32 keys which are 64 and 63
 // characters long, respectively. Put the threshold a little lower in case

@@ -6,11 +6,12 @@ module.exports = {
     extend: {},
     zIndex: {
       none: 0,
-      nav: 1,
-      feature: 2,
-      popover: 3,
-      modal: 4,
-      toast: 5,
+      feature: 1,
+      nav: 2,
+      chat: 3,
+      popover: 4,
+      modal: 5,
+      toast: 6,
     },
     screens: {
       xs: "400px",

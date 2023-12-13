@@ -9,7 +9,7 @@ import {
   decodeRelay,
   decodeEvent,
   selectHints,
-  getNip24ChannelId,
+  getChannelId,
   getPubkeyHints,
 } from "src/engine"
 
@@ -115,7 +115,7 @@ export const asFilter = {
 }
 
 export const asChannelId = {
-  encode: getNip24ChannelId,
+  encode: getChannelId,
   decode: decodeAs("pubkeys", decodeCsv),
 }
 
@@ -131,7 +131,7 @@ export const router = new Router()
 router.extend("media", encodeURIComponent)
 router.extend("labels", encodeURIComponent)
 router.extend("relays", nip19.nrelayEncode)
-router.extend("channels", getNip24ChannelId)
+router.extend("channels", getChannelId)
 router.extend("groups", asNaddr("group").encode)
 router.extend("events", asNaddr("event").encode)
 

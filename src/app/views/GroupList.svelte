@@ -71,7 +71,7 @@
     <h2 class="staatliches text-2xl">Your groups</h2>
   </div>
   <Anchor modal button accent disabled={!$canUseGiftWrap} href="/groups/new">
-    <i class="fa-solid fa-plus" /> Create Group
+    <i class="fa-solid fa-plus" /> Create
   </Anchor>
 </div>
 {#each $groupList.joined as group (group.address)}

@@ -2,6 +2,8 @@
 
 # 0.4.0
 
+- [x] Add NIP 44 encryption support
+- [x] Add NIP 24 chat support with NIP 04 backwards compatibility
 - [x] Add NIP 72 community support
 - [x] Add NIP 87 closed community support
 - [x] Add group notes

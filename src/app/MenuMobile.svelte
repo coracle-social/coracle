@@ -14,7 +14,7 @@
     user,
     canSign,
     displayPerson,
-    hasNewNip24Messages,
+    hasNewMessages,
     hasNewNotifications,
     pubkey,
     sessions,
@@ -47,7 +47,7 @@
 
 {#if $menuIsOpen}
   <SliderMenu onClick={closeMenu} onEscape={closeMenu}>
-    <div class="py-8 max-w-[236px] m-auto">
+    <div class="m-auto max-w-[236px] py-8">
       {#if $pubkey}
         <Anchor
           stopPropagation
@@ -100,7 +100,7 @@
         <i class="fa fa-message" />
         <div class="relative inline-block">
           Messages
-          {#if $hasNewNip24Messages}
+          {#if $hasNewMessages}
             <div
               class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
           {/if}
@@ -110,7 +110,7 @@
         <i class="fa fa-rss" /> Feed
       </MenuMobileItem>
     </div>
-    <div class="staatliches block flex h-8 justify-center gap-2 px-8 text-light mt-8">
+    <div class="staatliches mt-8 block flex h-8 justify-center gap-2 px-8 text-light">
       <Anchor class="hover:text-warm" href="/about">About</Anchor> /
       <Anchor external class="hover:text-warm" href="/terms.html">Terms</Anchor> /
       <Anchor external class="hover:text-warm" href="/privacy.html">Privacy</Anchor>

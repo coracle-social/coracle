@@ -76,7 +76,7 @@ export const formatTimestampAsLocalISODate = (ts: number) => {
 }
 
 type ScrollerOpts = {
-  delay?: 1000
+  delay?: number
   threshold?: number
   reverse?: boolean
   element?: Element

@@ -14,7 +14,7 @@
   import {
     env,
     user,
-    hasNewNip24Messages,
+    hasNewMessages,
     hasNewNotifications,
     pubkey,
     sessions,
@@ -84,7 +84,7 @@
   <MenuDesktopItem path="/channels">
     <div class="relative inline-block">
       Messages
-      {#if $hasNewNip24Messages}
+      {#if $hasNewMessages}
         <div
           class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
       {/if}

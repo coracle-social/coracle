@@ -5,9 +5,13 @@
   import {writable} from "svelte/store"
   import {fly} from "src/util/transition"
   import {createScroller} from "src/util/misc"
+  import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import type {Event} from "src/engine"
+  import {canUseGiftWrap} from "src/engine"
 
   export let messages: Event[]
   export let sendMessage
@@ -22,7 +26,9 @@
   let groupedMessages = []
 
   onMount(() => {
-    textarea.value = initialMessage
+    if (textarea) {
+      textarea.value = initialMessage
+    }
 
     scroller = createScroller(async () => limit.update(l => l + 10), {
       element: container,
@@ -31,7 +37,7 @@
   })
 
   onDestroy(() => {
-    scroller.stop()
+    scroller?.stop()
   })
 
   const scrollToBottom = () => container.scrollIntoView({behavior: "smooth", block: "end"})
@@ -93,53 +99,67 @@
     showNewMessages = false
   }} />
 
-<div class="fixed z-feature inset-0 flex flex-col lg:ml-60">
-  <div class="border-b border-solid border-mid lg:pr-48">
+<div class="fixed inset-0 z-chat flex flex-col bg-dark lg:ml-60">
+  <div class="bg-dark-d">
     <slot name="header" />
   </div>
-  <div class="flex flex-col flex-grow">
-    <ul
-      bind:this={container}
-      class="flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
-      {#each groupedMessages as m (m.id)}
-        <li in:fly={{y: 20}} class="grid gap-2 py-1">
-          <slot name="message" message={m} />
-        </li>
-      {/each}
-      {#await loading}
-        <Spinner>Looking for messages...</Spinner>
-      {:then}
-        <div in:fly={{y: 20}} class="py-20 text-center">End of message history</div>
-      {/await}
-    </ul>
-  </div>
-  <div
-    class="flex border-t border-solid border-mid border-cocoa bg-mid">
-    <textarea
-      rows="3"
-      autofocus
-      placeholder="Type something..."
-      bind:this={textarea}
-      on:keydown={onKeyDown}
-      class="w-full resize-none bg-mid p-2
-           text-lightest outline-0 placeholder:text-lightest" />
-    <div>
-      <ImageInput multi on:change={e => addImage(e.detail)}>
+  <ul
+    bind:this={container}
+    class="flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
+    {#each groupedMessages as m (m.id)}
+      <li in:fly={{y: 20}} class="grid gap-2 py-1">
+        <slot name="message" message={m} />
+      </li>
+    {/each}
+    {#await loading}
+      <Spinner>Looking for messages...</Spinner>
+    {:then}
+      <div in:fly={{y: 20}} class="py-20 text-center">End of message history</div>
+    {/await}
+  </ul>
+  {#if $canUseGiftWrap}
+    <div class="flex border-t border-solid border-cocoa border-mid bg-mid">
+      <textarea
+        rows="3"
+        autofocus
+        placeholder="Type something..."
+        bind:this={textarea}
+        on:keydown={onKeyDown}
+        class="w-full resize-none bg-mid p-2
+             text-lightest outline-0 placeholder:text-lightest" />
+      <div>
+        <ImageInput multi on:change={e => addImage(e.detail)}>
+          <button
+            slot="button"
+            class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-cocoa p-3
+                 py-6 text-lightest transition-all hover:bg-accent">
+            <i class="fa-solid fa-paperclip fa-lg" />
+          </button>
+        </ImageInput>
         <button
-          slot="button"
+          on:click={send}
           class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-cocoa p-3
                py-6 text-lightest transition-all hover:bg-accent">
-          <i class="fa-solid fa-paperclip fa-lg" />
+          <i class="fa-solid fa-paper-plane fa-lg" />
         </button>
-      </ImageInput>
-      <button
-        on:click={send}
-        class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-cocoa p-3
-             py-6 text-lightest transition-all hover:bg-accent">
-        <i class="fa-solid fa-paper-plane fa-lg" />
-      </button>
+      </div>
     </div>
-  </div>
+  {:else}
+    <Card>
+      <FlexColumn>
+        <p class="flex items-center gap-3 font-bold">
+          <i class="fa fa-info-circle" />
+          You are using a login method that doesn't yet support new-style DMs.
+        </p>
+        <p class="ml-7">
+          Please consider upgrading your browser extension to access this feature. You can also
+          access old-style DMs at <Anchor external underline href="https://nip04.coracle.social"
+            >nip04.coracle.social</Anchor
+          >.
+        </p>
+      </FlexColumn>
+    </Card>
+  {/if}
   {#if showNewMessages}
     <div
       class="fixed bottom-32 flex w-full cursor-pointer justify-center"
