@@ -1,20 +1,7 @@
 import "src/app.css"
 
 import {identity} from "ramda"
-import {Fetch, Storage, createMap} from "hurdak"
-
-if (Storage.hasItem("Keys.pubkey")) {
-  const pubkey = Storage.getJson("Keys.pubkey")
-  const sessions = Storage.getJson("Keys.keyState")
-
-  Storage.clear()
-
-  if (pubkey) {
-    Storage.setJson("pubkey", pubkey)
-    Storage.setJson("sessions", createMap("pubkey", sessions))
-  }
-}
-
+import {Fetch} from "hurdak"
 import Bugsnag from "@bugsnag/js"
 import {tryFetch} from "src/util/misc"
 import {env, saveRelay} from "src/engine"
