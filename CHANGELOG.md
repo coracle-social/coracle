@@ -12,6 +12,7 @@
 - [x] Support cross-posting
 - [x] Limit number of replies shown on feed
 - [x] Search results sorted by relevance weighted by WoT
+- [x] Add anonymous zaps
 
 # 0.3.14
 

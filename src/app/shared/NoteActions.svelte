@@ -15,7 +15,6 @@
   import Modal from "src/partials/Modal.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
-  import GroupLink from "src/app/shared/GroupLink.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
@@ -120,7 +119,11 @@
       .at("people")
       .of(note.pubkey, {relays: getPublishHints(note)})
       .at("zap")
-      .qp({eid: note.id, lnurl: zapper.lnurl})
+      .qp({
+        eid: note.id,
+        lnurl: zapper.lnurl,
+        anonymous: Boolean(note.wrap),
+      })
       .open()
 
   const broadcast = () => {
@@ -227,26 +230,17 @@
         {$likesCount}
       </button>
     {/if}
-    {#if $env.ENABLE_ZAPS && !note.wrap}
+    {#if $env.ENABLE_ZAPS}
       <button
-        class={cx("relative w-16 pt-1 text-left transition-all hover:pb-1 hover:pt-0 sm:w-20", {
+        class={cx("relative w-16 pt-1 text-left transition-all hover:pb-1 hover:pt-0", {
           "pointer-events-none opacity-50": disableActions || !canZap,
+          "sm:w-20": !note.wrap,
           "text-accent": zap,
         })}
         on:click={startZap}>
         <i class="fa fa-bolt cursor-pointer" />
         {formatSats($zapsTotal)}
       </button>
-    {/if}
-    {#if note.wrap}
-      <Popover triggerType="mouseenter">
-        <div slot="trigger" class="relative w-16 cursor-pointer pt-1 text-left opacity-50 sm:w-20">
-          <i class="fa fa-circle-nodes" />
-        </div>
-        <div slot="tooltip">
-          This note has been posted privately to <GroupLink {address} />.
-        </div>
-      </Popover>
     {/if}
   </div>
   <div class="flex items-center">

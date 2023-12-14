@@ -1,10 +1,15 @@
 import {Fetch} from "hurdak"
 import {createEvent} from "paravel"
+import {generatePrivateKey} from "nostr-tools"
 import {warn} from "src/util/logger"
 import {signer} from "src/engine/session/derived"
 import {getZapperForPubkey} from "./utils"
 
-export const requestZap = async (content, amount, {pubkey, relays, eid = null, lnurl = null}) => {
+export const requestZap = async (
+  content,
+  amount,
+  {pubkey, relays, eid = null, lnurl = null, anonymous = false},
+) => {
   const zapper = await getZapperForPubkey(pubkey, lnurl)
 
   if (!zapper) {
@@ -23,7 +28,14 @@ export const requestZap = async (content, amount, {pubkey, relays, eid = null, l
     tags.push(["e", eid])
   }
 
-  const zap = await signer.get().signAsUser(createEvent(9734, {content, tags}))
+  if (anonymous) {
+    tags.push(["anon"])
+  }
+
+  const template = createEvent(9734, {content, tags})
+  const zap = anonymous
+    ? await signer.get().signWithKey(template, generatePrivateKey())
+    : await signer.get().signAsUser(template)
   const zapString = encodeURI(JSON.stringify(zap))
   const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
   const res = await Fetch.fetchJson(zapper.callback + qs)

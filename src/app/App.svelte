@@ -80,6 +80,7 @@
     asPerson,
     asNaddr,
     asCsv,
+    asJson,
     asString,
     asUrlComponent,
     asFilter,
@@ -253,6 +254,7 @@
       eid: asNote,
       entity: asPerson,
       lnurl: asString("lnurl"),
+      anonymous: asJson("anonymous"),
     },
   })
 

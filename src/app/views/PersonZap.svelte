@@ -4,6 +4,8 @@
   import QRCode from "src/partials/QRCode.svelte"
   import Content from "src/partials/Content.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import FieldInline from "src/partials/FieldInline.svelte"
+  import Toggle from "src/partials/Toggle.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import {router} from "src/app/router"
@@ -21,6 +23,7 @@
   export let eid = null
   export let relays = null
   export let lnurl = null
+  export let anonymous = false
 
   let sub, unmounted
   let zap = {
@@ -41,6 +44,7 @@
       eid,
       lnurl,
       pubkey,
+      anonymous,
       relays: hints,
     })
 
@@ -100,6 +104,14 @@
       <i slot="before" class="fa fa-bolt" />
       <span slot="after" class="-mt-1">sats</span>
     </Input>
+    <FieldInline>
+      <div slot="label" class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa fa-eye-slash" /> Zap anonymously
+        </div>
+        <Toggle bind:value={anonymous} />
+      </div>
+    </FieldInline>
     <Anchor button accent loading={zap.loading} on:click={loadZapInvoice}>Zap!</Anchor>
   {/if}
 </Content>
