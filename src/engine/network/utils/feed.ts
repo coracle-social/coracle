@@ -105,7 +105,7 @@ export class FeedLoader {
     // Wait until a good number of subscriptions have completed to reduce the chance of
     // out of order notes
     this.ready = race(
-      0.2,
+      0.4,
       remoteSubs.map(s => new Promise(r => s.on("close", r))),
     )
   }
@@ -265,6 +265,10 @@ export class FeedLoader {
 
   async load(n) {
     await this.ready
+
+    if (this.remoteCursor.done()) {
+      return
+    }
 
     info(`Loading ${n} more events`, {
       filters: this.opts.filters,

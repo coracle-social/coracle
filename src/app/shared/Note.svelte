@@ -240,11 +240,11 @@
           </Anchor>
         </div>
         <div class="flex min-w-0 flex-grow flex-col gap-2">
-          <div class="flex flex-col items-start justify-between sm:flex-row">
-            <Anchor type="unstyled" class="pr-16 text-lg font-bold" on:click={showPerson}>
+          <div class="flex flex-col items-start justify-between sm:flex-row min-w-0">
+            <Anchor type="unstyled" class="mr-4 text-lg font-bold min-w-0" on:click={showPerson}>
               <PersonName pubkey={event.pubkey} />
             </Anchor>
-            <Anchor href={path} class="text-end text-sm text-lightest" type="unstyled">
+            <Anchor href={path} class="text-end text-sm text-lightest whitespace-nowrap" type="unstyled">
               {formatTimestamp(event.created_at)}
             </Anchor>
           </div>

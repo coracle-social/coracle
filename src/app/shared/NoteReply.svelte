@@ -128,7 +128,7 @@
     bind:this={container}
     on:click|stopPropagation>
     {#if showBorder}
-      <div class="absolute bottom-0 left-4 top-0 z-none -my-2 w-px bg-mid" />
+      <div class="absolute bottom-0 left-4 top-0 z-none -my-2 w-px bg-cocoa" />
     {/if}
     <div class="z-feature overflow-hidden rounded">
       <div class="bg-cocoa p-3 text-lightest" class:rounded-b={mentions.length === 0}>
@@ -145,7 +145,7 @@
       <div class="bg-cocoa p-2">
         <NoteImages bind:this={images} bind:compose includeInContent />
       </div>
-      <div class="h-px bg-cocoa group-[.modal]:bg-mid" />
+      <div class="h-px bg-cocoa" />
       <div class="flex gap-2 rounded-b bg-cocoa p-2 text-sm text-lightest">
         <div class="inline-block border-r border-solid border-mid py-2 pl-1 pr-3">
           <div class="flex cursor-pointer items-center gap-3">

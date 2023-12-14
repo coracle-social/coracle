@@ -129,6 +129,10 @@ export class MultiCursor {
     return this.cursors.map(c => c.load(limit)).filter(identity)
   }
 
+  done() {
+    return this.cursors.every(c => c.done)
+  }
+
   count() {
     return this.cursors.reduce((n, c) => n + c.buffer.length, 0)
   }

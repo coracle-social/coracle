@@ -57,9 +57,7 @@
       return () => {
         unsub()
 
-        if (!$modals.find(m => m.config.id === id)) {
-          tryClose()
-        }
+        router.remove(id)
       }
     }
   })

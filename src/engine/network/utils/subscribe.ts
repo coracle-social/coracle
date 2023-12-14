@@ -26,13 +26,8 @@ export const subscribe = (opts: SubscribeOpts) => {
     closeOnEose: Boolean(opts.timeout),
     executor: getExecutor(getUrls(relays)),
     shouldValidate: (e, url) => {
-      // Don't re-validate stuff from the cacche
+      // Don't re-validate stuff from the cache
       if (url === LOCAL_RELAY_URL) {
-        return false
-      }
-
-      // Don't bother to validate likes, they can be sybil attacked easily
-      if (e.kind === 7) {
         return false
       }
 

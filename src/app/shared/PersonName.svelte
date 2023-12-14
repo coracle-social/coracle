@@ -12,7 +12,9 @@
 </script>
 
 <div class={cx("flex gap-1", $$props.class)}>
-  <span class="cy-person-name">{displayPerson($person)}</span>
+  <span class="cy-person-name overflow-hidden text-ellipsis">
+    {displayPerson($person)}
+  </span>
   {#if $session}
     <div class="flex gap-1 font-normal">
       <Popover triggerType="mouseenter">

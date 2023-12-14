@@ -90,6 +90,8 @@
       scroller?.stop()
     }
   })
+
+  $: console.log(filter)
 </script>
 
 {#if !hideControls}

@@ -15,8 +15,12 @@
   )
 
   const setDate = d => {
-    date = d
-    value = formatDateAsLocalISODate(d).slice(0, 10)
+    try {
+      value = formatDateAsLocalISODate(d).slice(0, 10)
+      date = d
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   const init = () => {

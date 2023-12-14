@@ -335,7 +335,9 @@
   let scrollY
 
   const unsubHistory = router.history.subscribe($history => {
+    console.log(1, $history, $history[0].config.modal)
     if ($history[0].config.modal) {
+      console.log(2, document.body.style.position)
       // This is not idempotent, so don't duplicate it
       if (document.body.style.position !== "fixed") {
         scrollY = window.scrollY
@@ -344,6 +346,7 @@
         document.body.style.position = `fixed`
       }
     } else if (!isNil(scrollY)) {
+      console.log(3)
       const offset = scrollY
 
       // I don't know why this timeout is necessary
