@@ -41,7 +41,7 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
 })
 
 export const getNotificationKinds = () =>
-  without(env.get().ENABLE_ZAPS ? [] : [EventKind.Zap], [...noteKinds, ...reactionKinds, 1059])
+  without(env.get().ENABLE_ZAPS ? [] : [EventKind.Zap], [...noteKinds, ...reactionKinds, 1059, 4])
 
 export const loadNotifications = () => {
   const kinds = getNotificationKinds()
@@ -91,8 +91,8 @@ export const listenForNotifications = async () => {
   ])
 
   const filters: Filter[] = [
-    // NIP24 Messages
-    {kinds: [1059], "#p": pubkeys, limit: 1},
+    // Messages
+    {kinds: [4, 1059], "#p": pubkeys, limit: 1},
     // Mentions
     {kinds: noteKinds, "#p": pubkeys, limit: 1},
   ]
