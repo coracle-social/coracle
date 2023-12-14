@@ -314,14 +314,20 @@ export const setGroupStatus = (pubkey, address, timestamp, updates) =>
 export const resetMemberAccess = address =>
   setGroupStatus(pubkey.get(), address, now(), {access: MemberAccess.None})
 
-export const publishGroupEntryRequest = address => {
+export const publishGroupEntryRequest = (address, claim = null) => {
   setGroupStatus(pubkey.get(), address, now(), {access: MemberAccess.Requested})
+
+  const tags = [["a", address]]
+
+  if (claim) {
+    tags.push(["claim", claim])
+  }
 
   return publishToGroupAdmin(
     address,
     createEvent(25, {
       content: `${displayPubkey(pubkey.get())} would like to join the group`,
-      tags: [["a", address]],
+      tags,
     }),
   )
 }
@@ -348,11 +354,11 @@ export const leavePublicGroup = address =>
     without([address], Object.keys(filterVals(prop("joined"), session.get().groups))),
   )
 
-export const joinGroup = address => {
+export const joinGroup = (address, claim = null) => {
   if (deriveGroupAccess(address).get() === GroupAccess.Open) {
     joinPublicGroup(address)
   } else {
-    publishGroupEntryRequest(address)
+    publishGroupEntryRequest(address, claim)
   }
 }
 

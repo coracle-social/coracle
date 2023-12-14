@@ -1,4 +1,4 @@
-import {prop, nth, uniq, flatten, groupBy} from "ramda"
+import {prop, identity, nth, uniq, flatten, groupBy} from "ramda"
 import {Fetch, tryFunc, sleep} from "hurdak"
 import {now, cached, Tags} from "paravel"
 import {joinPath} from "src/util/misc"
@@ -53,7 +53,7 @@ export const uploadFileToHosts = (urls, file) =>
   Promise.all(urls.map(url => tryFunc(async () => await uploadFileToHost(url, file))))
 
 export const uploadFilesToHosts = async (urls, files) =>
-  flatten(await Promise.all(urls.map(url => uploadFilesToHost(url, files))))
+  flatten(await Promise.all(urls.map(url => uploadFilesToHost(url, files)))).filter(identity)
 
 export const compressFiles = (files, opts) =>
   Promise.all(
@@ -69,7 +69,7 @@ export const compressFiles = (files, opts) =>
 export const eventsToMeta = (events: Event[]) => {
   const tagsByHash = groupBy(
     tags => tags.type("ox").values().first(),
-    events.map(e => Tags.from(e))
+    Tags.from(events)
   )
 
   // Merge all nip94 tags together so we can supply as much imeta as possible

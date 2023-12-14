@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {Tags} from 'paravel'
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -13,6 +14,7 @@
   export let request
   export let showGroup = false
 
+  const claim = Tags.from(request).getValue("claim")
   const dismiss = () => groupRequests.key(request.id).merge({resolved: true})
 
   const resolve = () => {
@@ -73,6 +75,9 @@
         the group.
       {/if}
     </p>
+    {#if claim}
+      <p>Claim: "{claim}"</p>
+    {/if}
     <div class="flex gap-2 sm:hidden">
       <Anchor on:click={dismiss} button>Dismiss</Anchor>
       <Anchor on:click={resolve} button accent>Resolve</Anchor>

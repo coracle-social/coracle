@@ -1,4 +1,9 @@
 <script lang="ts">
+  import Modal from "src/partials/Modal.svelte"
+  import Content from "src/partials/Content.svelte"
+  import Field from "src/partials/Field.svelte"
+  import Input from "src/partials/Input.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/router"
@@ -53,6 +58,21 @@
     }
   }
 
+  let claim = null
+
+  const startJoin = () => {
+    claim = ""
+  }
+
+  const cancelJoin = () => {
+    claim = null
+  }
+
+  const confirmJoin = () => {
+    joinGroup(address, claim)
+    claim = null
+  }
+
   const clear = () => resetMemberAccess(address)
 
   const leave = () => leaveGroup(address)
@@ -81,7 +101,7 @@
     {:else if !$status.access}
       <Popover triggerType="mouseenter">
         <div slot="trigger" class="w-6 text-center">
-          <i class="fa fa-right-to-bracket cursor-pointer" on:click={join} />
+          <i class="fa fa-right-to-bracket cursor-pointer" on:click={startJoin} />
         </div>
         <div slot="tooltip">Join</div>
       </Popover>
@@ -110,3 +130,18 @@
   {/if}
   <OverflowMenu {actions} />
 </div>
+
+{#if claim !== null}
+  <Modal>
+    <Content size="lg">
+      <p>If you have an invite code, you can enter it below.</p>
+      <Field label="Invite code">
+        <Input bind:value={claim} />
+      </Field>
+      <div class="flex gap-2 justify-center">
+        <Anchor button on:click={cancelJoin}>Cancel</Anchor>
+        <Anchor button accent on:click={confirmJoin}>Request access</Anchor>
+      </div>
+    </Content>
+  </Modal>
+{/if}
