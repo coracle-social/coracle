@@ -107,9 +107,9 @@
             {/if}
           </div>
         {/if}
-        <div class="absolute mt-12 h-full w-full bg-cocoa" />
+        <div class="absolute mt-12 h-full w-full bg-swap" />
         <div
-          class="relative h-full w-full cursor-auto overflow-hidden rounded-t-2xl border-t border-solid border-mid bg-cocoa pb-10 pt-2"
+          class="relative h-full w-full cursor-auto overflow-hidden rounded-t-2xl bg-swap pb-10 pt-2"
           on:click|stopPropagation>
           <div class="m-auto flex max-w-2xl flex-col gap-4 p-2">
             <slot />

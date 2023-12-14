@@ -195,19 +195,25 @@ body,
   padding: 1px 0.2em;
 }
 
-
-.card .card, .modal .card {
-  background-color: var(--cocoa-d);
-}
-
-.card .card.interactive:hover, .modal .card.interactive:hover {
-  background-color: var(--dark);
-}
-
-.card .card .card, .modal .card .card {
+.bg-swap,
+.bg-swap .bg-swap-alt,
+.bg-swap .bg-swap .bg-swap {
   background-color: var(--cocoa);
 }
 
-.card .card .card.interactive:hover, .modal .card .card.interactive:hover {
+.bg-swap-hover:hover,
+.bg-swap .bg-swap-alt.bg-swap-hover:hover,
+.bg-swap .bg-swap .bg-swap.bg-swap-hover:hover {
+  background-color: var(--cocoa-d);
+}
+
+.bg-swap-alt,
+.bg-swap .bg-swap,
+.bg-swap .bg-swap .bg-swap-alt {
   background-color: var(--dark);
+}
+
+.bg-swap-alt.bg-swap-hover:hover,
+.bg-swap .bg-swap.bg-swap-hover:hover {
+  background-color: var(--dark-d);
 }

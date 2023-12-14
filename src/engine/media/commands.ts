@@ -69,7 +69,7 @@ export const compressFiles = (files, opts) =>
 export const eventsToMeta = (events: Event[]) => {
   const tagsByHash = groupBy(
     tags => tags.type("ox").values().first(),
-    Tags.from(events)
+    events.map(e => Tags.from(e))
   )
 
   // Merge all nip94 tags together so we can supply as much imeta as possible

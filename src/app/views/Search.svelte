@@ -121,7 +121,7 @@
       }
 
       if (isHex(entity)) {
-        router.at("people").of(entity).open()
+        router.at("people").of(entity).replaceModal()
         stopScanner()
       } else if (entity.includes("@")) {
         let profile = await nip05.queryProfile(entity)
@@ -129,13 +129,13 @@
         if (profile) {
           const {pubkey, relays} = profile
 
-          router.at("people").of(pubkey, {relays}).open()
+          router.at("people").of(pubkey, {relays}).replaceModal()
           stopScanner()
         }
       } else {
         tryFunc(() => {
           nip19.decode(entity)
-          router.at(entity).open()
+          router.at(entity).replaceModal()
           stopScanner()
         })
       }

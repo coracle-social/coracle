@@ -11,6 +11,7 @@
 - [x] Add group marketplace
 - [x] Support cross-posting
 - [x] Limit number of replies shown on feed
+- [x] Search results sorted by relevance weighted by WoT
 
 # 0.3.14
 

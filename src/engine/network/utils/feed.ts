@@ -276,15 +276,14 @@ export class FeedLoader {
     })
 
     const [subs, events] = this.remoteCursor.take(n)
-    const notes = this.discardEvents(events)
 
     this.addSubs(subs)
 
-    let ok = notes
+    let ok = this.discardEvents(events)
 
     // Skip anything out of order or missing context
     if (this.opts.shouldDefer) {
-      ok = doPipe(notes.concat(this.deferred.splice(0)), [this.deferOrphans, this.deferAncient])
+      ok = doPipe(ok.concat(this.deferred.splice(0)), [this.deferOrphans, this.deferAncient])
     }
 
     // If we have nothing load something from the cache to keep the user happy
@@ -293,7 +292,7 @@ export class FeedLoader {
 
       this.addSubs(subs)
 
-      ok = events
+      ok = this.discardEvents(events)
     }
 
     this.addToFeed(ok)

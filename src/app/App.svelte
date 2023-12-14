@@ -350,11 +350,8 @@
       const offset = scrollY
 
       // I don't know why this timeout is necessary
-      setTimeout(() => {
-        document.body.setAttribute("style", "")
-        window.scrollTo(0, offset)
-      }, 100)
-
+      document.body.setAttribute("style", "")
+      window.scrollTo(0, offset)
       scrollY = null
     }
   })

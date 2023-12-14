@@ -296,7 +296,7 @@
       <NoteImages bind:this={images} bind:compose includeInContent={type !== "listing"} />
       <div class="flex gap-2">
         <Anchor button tag="button" type="submit" class="flex-grow">Send</Anchor>
-        <ImageInput circle={false} multi hostLimit={3} on:change={e => images.addImage(e.detail)} />
+        <ImageInput circle={false} multi hostLimit={3} on:change={e => images?.addImage(e.detail)} />
       </div>
       <small
         class="flex cursor-pointer items-center justify-end gap-4"
