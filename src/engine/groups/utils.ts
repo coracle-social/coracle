@@ -102,3 +102,20 @@ export const deriveMembershipLevel = address =>
 
     return MembershipLevel.None
   })
+
+export const shouldPostPrivatelyToGroup = (address, preference) => {
+  const access = deriveGroupAccess(address).get()
+  const membershipLevel = deriveMembershipLevel(address).get()
+
+  if (membershipLevel === MembershipLevel.Private) {
+    if (access === GroupAccess.Closed) {
+      return true
+    }
+
+    if (access === GroupAccess.Hybrid) {
+      return preference
+    }
+  }
+
+  return false
+}

@@ -24,6 +24,7 @@ import {
   deriveMembershipLevel,
   deriveAdminKeyForGroup,
   deriveSharedKeyForGroup,
+  shouldPostPrivatelyToGroup,
 } from "./utils"
 
 // Key state management
@@ -197,22 +198,10 @@ export const publishToZeroOrMoreGroups = async (
     return [await Publisher.publish({relays, event})]
   }
 
-  const [wrap, nowrap] = partition(a => {
-    const access = deriveGroupAccess(a).get()
-    const membershipLevel = deriveMembershipLevel(a).get()
-
-    if (membershipLevel === MembershipLevel.Private) {
-      if (access === GroupAccess.Closed) {
-        return true
-      }
-
-      if (access === GroupAccess.Hybrid) {
-        return shouldWrap
-      }
-    }
-
-    return false
-  }, addresses)
+  const [wrap, nowrap] = partition(
+    address => shouldPostPrivatelyToGroup(address, shouldWrap),
+    addresses,
+  )
 
   const pubs = []
 

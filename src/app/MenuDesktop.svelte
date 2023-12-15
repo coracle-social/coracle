@@ -1,5 +1,4 @@
 <script lang="ts">
-  import cx from "classnames"
   import {randomId} from "hurdak"
   import {toggleTheme} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
@@ -14,9 +13,9 @@
   import {
     env,
     user,
+    pubkey,
     hasNewMessages,
     hasNewNotifications,
-    pubkey,
     sessions,
     displayPerson,
     displayPubkey,
@@ -52,7 +51,7 @@
   }
 </script>
 
-<div class={cx("fixed bottom-0 left-0 top-0 w-60 bg-cocoa transition-colors")}>
+<div class="fixed bottom-0 left-0 top-0 z-nav w-60 bg-cocoa transition-colors">
   <Anchor
     class="mb-4 flex h-16 items-center gap-1 px-6"
     external
@@ -154,7 +153,7 @@
       </MenuDesktopSecondary>
     {/if}
     <div class="cursor-pointer border-t border-solid border-mid px-7 pb-4 pt-3">
-      {#if $user}
+      {#if $pubkey}
         <Anchor class="flex items-center gap-2" on:click={() => setSubMenu("account")}>
           <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
           <div class="flex min-w-0 flex-col">

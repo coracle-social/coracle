@@ -25,7 +25,7 @@ export const follow = (type: string, value: string) => {
 }
 
 export const unfollow = (value: string) =>
-  publishPetnames(reject((t: string[]) => t[1] === value, user.get().petnames || []))
+  publishPetnames(reject((t: string[]) => t[1] === value, user.get()?.petnames || []))
 
 export const publishMutes = ($mutes: string[][]) => {
   updateStore(people.key(stateKey.get()), now(), {mutes: $mutes})
@@ -37,9 +37,9 @@ export const publishMutes = ($mutes: string[][]) => {
 
 export const mute = (type: string, pubkey: string) =>
   publishMutes([
-    ...reject((t: string[]) => t[1] === pubkey, user.get().mutes || []),
+    ...reject((t: string[]) => t[1] === pubkey, user.get()?.mutes || []),
     [type, pubkey],
   ])
 
 export const unmute = (value: string) =>
-  publishMutes(reject((t: string[]) => t[1] === value, user.get().mutes || []))
+  publishMutes(reject((t: string[]) => t[1] === value, user.get()?.mutes || []))

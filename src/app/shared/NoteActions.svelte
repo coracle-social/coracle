@@ -179,19 +179,21 @@
   $: {
     actions = []
 
-    actions.push({label: "Quote", icon: "quote-left", onClick: quote})
+    if ($canSign) {
+      actions.push({label: "Quote", icon: "quote-left", onClick: quote})
 
-    if (!note.wrap && $env.ENABLE_GROUPS && ($groupOptions.length > 0 || address)) {
-      actions.push({label: "Cross-post", icon: "shuffle", onClick: () => setView("cross-post")})
-    }
+      if (!note.wrap && $env.ENABLE_GROUPS && ($groupOptions.length > 0 || address)) {
+        actions.push({label: "Cross-post", icon: "shuffle", onClick: () => setView("cross-post")})
+      }
 
-    actions.push({label: "Tag", icon: "tag", onClick: label})
-    //actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
+      actions.push({label: "Tag", icon: "tag", onClick: label})
+      //actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
 
-    if ($muted) {
-      actions.push({label: "Unmute", icon: "microphone", onClick: unmuteNote})
-    } else {
-      actions.push({label: "Mute", icon: "microphone-slash", onClick: muteNote})
+      if ($muted) {
+        actions.push({label: "Unmute", icon: "microphone", onClick: unmuteNote})
+      } else {
+        actions.push({label: "Mute", icon: "microphone-slash", onClick: muteNote})
+      }
     }
 
     if ($env.FORCE_RELAYS.length === 0 && !note.wrap) {

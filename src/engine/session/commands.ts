@@ -2,12 +2,14 @@ import {omit, assoc} from "ramda"
 import {generatePrivateKey, getPublicKey} from "nostr-tools"
 import {appDataKeys} from "src/util/nostr"
 import {createAndPublish} from "src/engine/network/utils"
+import {people} from "src/engine/people/state"
 import type {Session} from "./model"
 import {sessions, pubkey} from "./state"
 import {canSign, nip04, session} from "./derived"
 
 const addSession = (s: Session) => {
   sessions.update(assoc(s.pubkey, s))
+  people.key(s.pubkey).update($p => ({...$p, pubkey: s.pubkey}))
   pubkey.set(s.pubkey)
 }
 
