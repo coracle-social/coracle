@@ -1,5 +1,6 @@
 import {Fetch} from "hurdak"
 import {createEvent} from "paravel"
+import * as bc from '@getalby/bitcoin-connect'
 import {generatePrivateKey} from "src/util/nostr"
 import {warn} from "src/util/logger"
 import {signer} from "src/engine/session/derived"
@@ -50,15 +51,19 @@ export const requestZap = async (
 }
 
 export async function collectInvoice(invoice) {
-  const {webln} = window as {webln?: any}
+  if (bc.isConnected()) {
+    bc.launchPaymentModal({invoice})
+  } else {
+    const {webln} = window as {webln?: any}
 
-  if (webln) {
-    await webln.enable()
+    if (webln) {
+      await webln.enable()
 
-    try {
-      webln.sendPayment(invoice)
-    } catch (e) {
-      warn(e)
+      try {
+        webln.sendPayment(invoice)
+      } catch (e) {
+        warn(e)
+      }
     }
   }
 }

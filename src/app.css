@@ -51,6 +51,10 @@
   font-weight: 400;
 }
 
+body {
+  --bc-color-brand: var(--accent);
+}
+
 .staatliches {
   font-family: Staatliches;
 }
@@ -198,3 +202,4 @@ body,
   box-decoration-break: clone;
   padding: 1px 0.2em;
 }
+

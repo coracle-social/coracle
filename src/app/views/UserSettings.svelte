@@ -1,5 +1,6 @@
 <script lang="ts">
   import {identity} from "ramda"
+  import {Button} from "@getalby/bitcoin-connect"
   import {toast, appName} from "src/partials/state"
   import Field from "src/partials/Field.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
@@ -34,6 +35,10 @@
       <Input bind:value={settings.default_zap} />
       <p slot="info">The default amount of sats to use when sending a lightning tip.</p>
     </Field>
+    <FieldInline label="Bitcoin Connect">
+      <bc-button></bc-button>
+      <p slot="info">Connect you wallet using Bitcoin Connect for One-Click Zaps!</p>
+    </FieldInline>
     <Field>
       <div slot="label" class="flex justify-between">
         <strong>Max relays per request</strong>
