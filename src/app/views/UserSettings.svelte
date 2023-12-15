@@ -11,6 +11,8 @@
   import {env, getSettings, publishSettings} from "src/engine"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {fuzzy} from "src/util/misc"
+  import {Button} from "@getalby/bitcoin-connect"
+  
 
   let settings = getSettings()
 
@@ -25,6 +27,8 @@
   document.title = "Settings"
 </script>
 
+
+
 <form on:submit|preventDefault={submit}>
   <Content>
     <div class="mb-4 flex flex-col items-center justify-center">
@@ -36,7 +40,19 @@
         <Input bind:value={settings.default_zap} />
         <p slot="info">The default amount of sats to use when sending a lightning tip.</p>
       </Field>
+      <FieldInline label="Bitcoin Connect">
+      
+       <script type="module">
+  import {launchModal} from 'https://esm.sh/@getalby/bitcoin-connect@3.0.0'; // jsdelivr.net, skypack.dev also work
+
+  
+  launchModal();
+</script>
+        
+        <bc-button style="--bc-color-brand: #fb652c" ></bc-button>
+      </FieldInline>
       <Field>
+      
         <div slot="label" class="flex justify-between">
           <strong>Max relays per request</strong>
           <div>{settings.relay_limit} relays</div>
