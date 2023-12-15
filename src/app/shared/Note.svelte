@@ -160,8 +160,11 @@
     }
   }
 
-  // Split out likes
-  $: likes = children.filter(e => e.kind === 7 && isLike(e.content))
+  // Split out likes, uniqify by pubkey since a like can be duplicated across groups
+  $: likes = uniqBy(
+    prop("pubkey"),
+    children.filter(e => e.kind === 7 && isLike(e.content)),
+  )
 
   // Split out zaps
   $: zaps = processZaps(
@@ -171,7 +174,12 @@
 
   $: rootId = getRootId(event)
   $: replyId = getParentId(event)
-  $: path = event.pubkey ? router.at("notes").of(event.id, {relays: getEventHints(event)}).toString() : ""
+  $: path = event.pubkey
+    ? router
+        .at("notes")
+        .of(event.id, {relays: getEventHints(event)})
+        .toString()
+    : ""
 
   onMount(async () => {
     const zapAddress = Tags.from(event).getValue("zap")
@@ -244,11 +252,14 @@
           </Anchor>
         </div>
         <div class="flex min-w-0 flex-grow flex-col gap-2">
-          <div class="flex flex-col items-start justify-between sm:flex-row min-w-0">
-            <Anchor type="unstyled" class="mr-4 text-lg font-bold min-w-0" on:click={showPerson}>
+          <div class="flex min-w-0 flex-col items-start justify-between sm:flex-row">
+            <Anchor type="unstyled" class="mr-4 min-w-0 text-lg font-bold" on:click={showPerson}>
               <PersonName pubkey={event.pubkey} />
             </Anchor>
-            <Anchor href={path} class="text-end text-sm text-lightest whitespace-nowrap" type="unstyled">
+            <Anchor
+              href={path}
+              class="whitespace-nowrap text-end text-sm text-lightest"
+              type="unstyled">
               {formatTimestamp(event.created_at)}
             </Anchor>
           </div>

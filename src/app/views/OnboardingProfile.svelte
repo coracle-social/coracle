@@ -20,7 +20,12 @@
   const prev = () => setStage("intro")
 
   const next = ({skipNsecWarning = false} = {}) => {
-    if (!skipNsecWarning && Object.values(profile).join(' ').match(/\bnsec1.+/)) {
+    if (
+      !skipNsecWarning &&
+      Object.values(profile)
+        .join(" ")
+        .match(/\bnsec1.+/)
+    ) {
       return nsecWarning.set(true)
     }
 
@@ -51,7 +56,7 @@
 </div>
 <div class="flex gap-2">
   <Anchor button on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
-  <Anchor button accent class="flex-grow" on:click={next}>Continue</Anchor>
+  <Anchor button accent class="flex-grow" on:click={() => next()}>Continue</Anchor>
 </div>
 
 {#if $nsecWarning}

@@ -29,7 +29,6 @@
     session,
     Publisher,
     mention,
-    signer,
     deriveMembershipLevel,
     MembershipLevel,
     publishToZeroOrMoreGroups,
@@ -84,9 +83,9 @@
       Publisher.publish({relays, event: asNostrEvent(note)})
     }
 
-    publishToZeroOrMoreGroups([address].filter(identity), template, {relays})
+    const {events} = await publishToZeroOrMoreGroups([address].filter(identity), template, {relays})
 
-    addToContext(await signer.get().signAsUser(template))
+    addToContext(events)
   }
 
   const deleteReaction = e => {

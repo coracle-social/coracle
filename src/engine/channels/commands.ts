@@ -19,14 +19,16 @@ export const createMessage = (channelId: string, content: string) => {
   }
 
   for (const pubkey of uniq(recipients.concat(user.get().pubkey))) {
+    const rumor = nip59.get().wrap(template, {
+      wrap: {
+        author: generatePrivateKey(),
+        recipient: pubkey,
+      },
+    })
+
     Publisher.publish({
       relays: getPubkeyHints(pubkey, "read"),
-      event: nip59.get().wrap(template, {
-        wrap: {
-          author: generatePrivateKey(),
-          recipient: pubkey,
-        },
-      }),
+      event: rumor.wrap,
     })
   }
 }

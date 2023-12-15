@@ -33,7 +33,11 @@ export type WrapperParams = {
 }
 
 export class Nip59 {
-  constructor(readonly session: Session, readonly nip44: Nip44, readonly signer: Signer) {}
+  constructor(
+    readonly session: Session,
+    readonly nip44: Nip44,
+    readonly signer: Signer,
+  ) {}
 
   getAuthorPubkey(sk?: string) {
     return sk ? getPublicKey(sk) : this.session.pubkey
@@ -83,7 +87,7 @@ export class Nip59 {
     const seal = this.getSeal(rumor, params)
     const wrap = this.getWrap(seal, params)
 
-    return wrap
+    return Object.assign(rumor, {wrap, seen_on: []})
   }
 
   async unwrap(wrap, sk) {

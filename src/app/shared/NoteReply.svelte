@@ -109,7 +109,7 @@
 
     const template = buildReply(parent, content, tags)
     const addresses = [getGroupAddress(parent)].filter(identity)
-    const pubs = await publishToZeroOrMoreGroups(addresses, template, opts)
+    const {pubs} = await publishToZeroOrMoreGroups(addresses, template, opts)
 
     pubs[0].on("progress", toastProgress)
 
@@ -133,11 +133,11 @@
 {#if isOpen || forceOpen}
   <div
     transition:slide|local
-    class="note-reply relative z-feature my-2 flex flex-col gap-1 bg-swap"
+    class="note-reply bg-swap relative z-feature my-2 flex flex-col gap-1"
     bind:this={container}
     on:click|stopPropagation>
     {#if showBorder}
-      <div class="absolute bottom-0 left-4 top-0 z-none -my-2 w-px bg-swap-alt" />
+      <div class="bg-swap-alt absolute bottom-0 left-4 top-0 z-none -my-2 w-px" />
     {/if}
     <div class="z-feature overflow-hidden rounded">
       <div class="p-3 text-lightest" class:rounded-b={mentions.length === 0}>

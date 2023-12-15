@@ -4,6 +4,7 @@ import {assoc, map} from "ramda"
 import {updateIn} from "hurdak"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
+import {deletes} from "src/engine/events/state"
 import {projections} from "src/engine/core/projections"
 import {getUrls, getExecutor} from "./executor"
 import {Tracker} from "./tracker"
@@ -18,6 +19,7 @@ export type SubscribeOpts = typeof SubscriptionOpts & {
 }
 
 export const subscribe = (opts: SubscribeOpts) => {
+  const $deletes = deletes.get()
   const tracker = opts.tracker || new Tracker()
   const relays = opts.skipCache ? opts.relays : opts.relays.concat(LOCAL_RELAY_URL)
   const sub = new Subscription({
@@ -36,6 +38,10 @@ export const subscribe = (opts: SubscribeOpts) => {
   })
 
   sub.on("event", e => {
+    if ($deletes.has(e.id)) {
+      return
+    }
+
     opts.onEvent?.(e)
 
     if (opts.shouldProject !== false) {
