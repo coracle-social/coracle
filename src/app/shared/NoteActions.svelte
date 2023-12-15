@@ -48,6 +48,7 @@
   export let reply
   export let showMuted
   export let showEntire
+  export let addToContext
   export let removeFromContext
   export let replies, likes, zaps
   export let zapper
@@ -85,13 +86,12 @@
 
     publishToZeroOrMoreGroups([address].filter(identity), template, {relays})
 
-    like = await signer.get().signAsUser(template)
+    addToContext(await signer.get().signAsUser(template))
   }
 
   const deleteReaction = e => {
     publishDeletionForEvent(e)
 
-    like = null
     removeFromContext(e)
   }
 
@@ -159,11 +159,9 @@
     !$canSign ||
     ($muted && !showMuted) ||
     (note.wrap && deriveMembershipLevel(address).get() !== MembershipLevel.Private)
-  $: like = like || likes.find(e => e.pubkey === $session?.pubkey)
-  $: allLikes = like ? likes.filter(n => n.id !== like?.id).concat(like) : likes
-  $: $likesCount = allLikes.length
-
-  $: zap = zap || zaps.find(e => e.request.pubkey === $session?.pubkey, zaps)
+  $: like = likes.find(e => e.pubkey === $session?.pubkey)
+  $: $likesCount = likes.length
+  $: zap = zaps.find(e => e.request.pubkey === $session?.pubkey)
 
   $: {
     const filteredZaps: {invoiceAmount: number}[] = zap

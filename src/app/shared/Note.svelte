@@ -108,6 +108,10 @@
     ctx = reject(whereEq({id: e.id}), ctx)
   }
 
+  const addToContext = e => {
+    ctx = ctx.concat(e)
+  }
+
   $: tags = Tags.from(event)
 
   $: muted = !showMuted && $isEventMuted(event, true)
@@ -280,6 +284,7 @@
               note={event}
               bind:this={actions}
               {removeFromContext}
+              {addToContext}
               {showMuted}
               {replies}
               {likes}
