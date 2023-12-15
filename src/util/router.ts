@@ -136,14 +136,13 @@ export type Route = RegisterOpts & {
 }
 
 export type RouteConfig = {
-  id?: string
+  key?: string
   mini?: boolean
   modal?: boolean
   virtual?: boolean
   noEscape?: boolean
   replace?: boolean
   context?: Record<string, any>
-  key?: string
 }
 
 export type HistoryItem = {
@@ -360,8 +359,8 @@ export class Router {
     window.history.back()
   }
 
-  remove(id) {
-    this.history.update(reject(($item: HistoryItem) => $item.config.id === id))
+  remove(key) {
+    this.history.update(reject(($item: HistoryItem) => $item.config.key === key))
   }
 
   clearModals() {

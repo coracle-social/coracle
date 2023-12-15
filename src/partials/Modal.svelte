@@ -1,22 +1,17 @@
 <script lang="ts">
-  import {filter} from "ramda"
   import {randomId} from "hurdak"
   import {onMount} from "svelte"
   import {fly, fade} from "src/util/transition"
-  import type {HistoryItem} from "src/util/router"
   import {router} from "src/app/router"
 
   export let mini = false
-  export let index = null
   export let virtual = true
-  export let isOnTop = true
   export let onEscape = null
   export let canClose = true
 
-  let root, content, closing
+  const {history} = router
 
-  const modals = router.history.derived(filter((item: HistoryItem) => item.config.modal))
-  const isNested = virtual ? $modals.length > 0 : $modals.length > 1 && index > 0
+  let root, content, closing, historyItem
 
   const tryClose = () => {
     if (!canClose) {
@@ -28,37 +23,42 @@
       return
     }
 
-    // Don't close modals sitting down in the stack
-    if (!virtual && !isOnTop) {
-      return
-    }
-
     // Don't cascade closing nested modals
-    if (root?.querySelector(".modal")) {
+    if (root.querySelector(".modal")) {
       return
     }
 
     closing = true
-    router.pop()
+    onEscape?.()
+    tryPop()
+  }
+
+  const tryPop = () => {
+    if ($history[0] === historyItem) {
+      router.pop()
+    }
   }
 
   onMount(() => {
+    // Make sure we can identify this modal by key
+    // If we're virtual, add a new one, if not update the old one
     if (virtual) {
-      const id = randomId()
+      router.virtual().open({key: randomId(), mini})
+    }
 
-      router.virtual().open({id, mini})
+    historyItem = $history[0]
 
-      const unsub = modals.subscribe($modals => {
-        if (!$modals.find(m => m.config.id === id)) {
-          onEscape?.()
-        }
-      })
-
-      return () => {
-        unsub()
-
-        router.remove(id)
+    // If history changes and removes this modal, notify the caller if virtual
+    const unsub = history.subscribe($history => {
+      if (!$history.includes(historyItem)) {
+        onEscape?.()
       }
+    })
+
+    // When unmounting, sync history via pop if virtual
+    return () => {
+      unsub()
+      tryPop()
     }
   })
 </script>
@@ -97,19 +97,17 @@
               on:click={tryClose}>
               <i class="fa fa-times fa-lg cy-modal-close" />
             </div>
-            {#if isNested}
-              <div
-                on:click|stopPropagation={() => router.clearModals()}
-                class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
-                     border border-solid border-cocoa bg-mid text-lightest transition-colors hover:bg-mid">
-                <i class="fa fa-angles-down fa-lg" />
-              </div>
-            {/if}
+            <div
+              on:click|stopPropagation={() => router.clearModals()}
+              class="clear-modals pointer-events-auto flex hidden h-10 w-10 cursor-pointer items-center justify-center
+                     rounded-full border border-solid border-cocoa bg-mid text-lightest transition-colors hover:bg-mid">
+              <i class="fa fa-angles-down fa-lg" />
+            </div>
           </div>
         {/if}
-        <div class="absolute mt-12 h-full w-full bg-swap" />
+        <div class="bg-swap absolute mt-12 h-full w-full" />
         <div
-          class="relative h-full w-full cursor-auto overflow-hidden rounded-t-2xl bg-swap pb-10 pt-2"
+          class="bg-swap relative h-full w-full cursor-auto overflow-hidden rounded-t-2xl pb-10 pt-2"
           on:click|stopPropagation>
           <div class="m-auto flex max-w-2xl flex-col gap-4 p-2">
             <slot />

@@ -38,7 +38,7 @@
 {/key}
 
 {#each reverse($modals).filter(m => !m.config.virtual) as m, i (getKey(m) + i)}
-  <Modal index={i} virtual={false} isOnTop={m === $modal} canClose={!m.config.noEscape}>
+  <Modal virtual={false} canClose={!m.config.noEscape}>
     {#key $stateKey}
       <svelte:component this={m.route.component} {...getProps(m)} />
     {/key}
