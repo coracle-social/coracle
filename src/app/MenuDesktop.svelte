@@ -93,9 +93,9 @@
     <MenuDesktopItem path="/groups">Groups</MenuDesktopItem>
   {/if}
   <FlexColumn small class="absolute bottom-0 w-60">
-    <MenuDesktopItem on:click={() => setSubMenu("settings")}>Settings</MenuDesktopItem>
+    <Anchor class="staatliches text-light hover:text-warm px-8" href="/about">About</Anchor>
+    <Anchor class="staatliches text-light hover:text-warm px-8" on:click={() => setSubMenu("settings")}>Settings</Anchor>
     <div class="staatliches block flex h-8 gap-2 px-8 text-light">
-      <Anchor class="hover:text-warm" href="/about">About</Anchor> /
       <Anchor external class="hover:text-warm" href="/terms.html">Terms</Anchor> /
       <Anchor external class="hover:text-warm" href="/privacy.html">Privacy</Anchor>
     </div>
