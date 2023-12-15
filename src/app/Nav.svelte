@@ -19,10 +19,15 @@
 
     // Hack to keep focus
     const interval = setInterval(() => {
-      if (!searchInput || $modal?.path !== "/search") {
+      const searchIsOpen = $modal?.path === '/search'
+      const searchIsFocused = document.activeElement === searchInput
+
+      if (!searchIsFocused && !searchIsOpen) {
         clearInterval(interval)
-      } else if (document.activeElement !== searchInput) {
-        searchInput.focus()
+      } else if (!searchIsFocused) {
+        searchInput?.focus()
+      } else if (!searchIsOpen) {
+        searchInput?.blur()
       }
     }, 300)
   }

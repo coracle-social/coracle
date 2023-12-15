@@ -28,6 +28,12 @@
       return
     }
 
+    // If there's another modal in the list after this one, skip if it's not already closing
+    const next = root.nextElementSibling
+    if (next?.classList.contains('modal') && !next?.classList.contains('pointer-events-none')) {
+      return
+    }
+
     closing = true
     onEscape?.()
     tryPop()
