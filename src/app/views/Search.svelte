@@ -8,6 +8,7 @@
   import {nip05, nip19} from "nostr-tools"
   import QrScanner from "qr-scanner"
   import Card from "src/partials/Card.svelte"
+  import Field from "src/partials/Field.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import {isHex} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
@@ -171,6 +172,13 @@
 
 <svelte:window bind:innerWidth />
 
+{#if innerWidth < 1024}
+  <Input autofocus bind:value={$searchTerm}>
+    <i slot="before" class="fa fa-search" />
+    <i slot="after" class="fa fa-qrcode cursor-pointer" on:click={startScanner} />
+  </Input>
+{/if}
+
 {#if scanner}
   {#await scanner}
     <Spinner>Loading your camera...</Spinner>
@@ -196,16 +204,4 @@
   {:else}
     <p class="text-center py-12">No results found.</p>
   {/each}
-{/if}
-{#if innerWidth < 1024}
-  <div
-    class="fixed bottom-0 left-0 right-0 flex items-center gap-3 border-t border-solid border-mid bg-dark px-3 py-2">
-    <div class="flex-grow">
-      <Input autofocus bind:value={$searchTerm}>
-        <i slot="before" class="fa fa-search" />
-        <i slot="after" class="fa fa-qrcode cursor-pointer" on:click={startScanner} />
-      </Input>
-    </div>
-    <i class="fa fa-times fa-2xl cursor-pointer" on:click={onClose} />
-  </div>
 {/if}
