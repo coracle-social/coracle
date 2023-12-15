@@ -4,12 +4,28 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import NsecWarning from "src/app/shared/NsecWarning.svelte"
+  import {writable} from "src/engine"
 
   export let profile
   export let setStage
 
+  const nsecWarning = writable(null)
+
+  const bypassNsecWarning = () => {
+    nsecWarning.set(null)
+    next({skipNsecWarning: true})
+  }
+
   const prev = () => setStage("intro")
-  const next = () => setStage("key")
+
+  const next = ({skipNsecWarning = false} = {}) => {
+    if (!skipNsecWarning && Object.values(profile).join(' ').match(/\bnsec1.+/)) {
+      return nsecWarning.set(true)
+    }
+
+    setStage("key")
+  }
 </script>
 
 <Heading class="text-center">Introduce Yourself</Heading>
@@ -37,3 +53,7 @@
   <Anchor button on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
   <Anchor button accent class="flex-grow" on:click={next}>Continue</Anchor>
 </div>
+
+{#if $nsecWarning}
+  <NsecWarning onAbort={() => nsecWarning.set(null)} onBypass={bypassNsecWarning} />
+{/if}

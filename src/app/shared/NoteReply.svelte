@@ -7,11 +7,13 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Compose from "src/app/shared/Compose.svelte"
+  import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import {
     Publisher,
     buildReply,
+    writable,
     publishToZeroOrMoreGroups,
     session,
     getPublishHints,
@@ -25,6 +27,8 @@
   export let forceOpen = false
 
   const dispatch = createEventDispatcher()
+
+  const nsecWarning = writable(null)
 
   let images, compose, container, options
   let isOpen = false
@@ -48,6 +52,11 @@
     )
 
     setTimeout(() => compose.write(draft))
+  }
+
+  const bypassNsecWarning = () => {
+    nsecWarning.set(null)
+    send({skipNsecWarning: true})
   }
 
   const setOpts = e => {
@@ -76,12 +85,12 @@
     mentions = without([pubkey], mentions)
   }
 
-  const send = async () => {
+  const send = async ({skipNsecWarning = false} = {}) => {
     const content = compose.parse().trim()
 
-    if (!content) {
-      return
-    }
+    if (!content) return
+
+    if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
     const tags = mentions.map(mention)
 
@@ -132,10 +141,10 @@
     {/if}
     <div class="z-feature overflow-hidden rounded">
       <div class="p-3 text-lightest" class:rounded-b={mentions.length === 0}>
-        <Compose bind:this={compose} onSubmit={send} style="min-height: 4rem">
+        <Compose bind:this={compose} onSubmit={() => send()} style="min-height: 4rem">
           <div class="flex flex-col justify-start" slot="addon">
             <button
-              on:click={send}
+              on:click={() => send()}
               class="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full transition-all hover:bg-accent">
               <i class="fa fa-paper-plane" />
             </button>
@@ -176,3 +185,7 @@
   on:change={setOpts}
   initialValues={opts}
   hideFields={parent.wrap ? ["shouldWrap", "relays"] : []} />
+
+{#if $nsecWarning}
+  <NsecWarning onAbort={() => nsecWarning.set(null)} onBypass={bypassNsecWarning} />
+{/if}

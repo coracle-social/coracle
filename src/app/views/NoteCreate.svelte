@@ -22,6 +22,7 @@
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
   import Chip from "src/partials/Chip.svelte"
+  import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NoteImages from "src/app/shared/NoteImages.svelte"
@@ -31,6 +32,7 @@
   import {
     groups,
     session,
+    writable,
     getEventHints,
     getUserRelayUrls,
     publishToZeroOrMoreGroups,
@@ -65,6 +67,8 @@
     ...initialValues,
   }
 
+  const nsecWarning = writable(null)
+
   const setOpts = e => {
     opts = {...opts, ...e.detail}
   }
@@ -87,11 +91,18 @@
     return uniqBy(prop("address"), options)
   })
 
-  const onSubmit = async () => {
+  const bypassNsecWarning = () => {
+    nsecWarning.set(null)
+    onSubmit({skipNsecWarning: true})
+  }
+
+  const onSubmit = async ({skipNsecWarning = false} = {}) => {
     const tags = []
     const content = compose.parse().trim()
 
     if (!content) return toast.show("error", "Please provide a description.")
+
+    if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
     if (type === "calendar_event") {
       if (!opts.title) {
@@ -207,7 +218,7 @@
   })
 </script>
 
-<form on:submit|preventDefault={onSubmit}>
+<form on:submit|preventDefault={() => onSubmit()}>
   <Content size="lg">
     <div class="flex gap-2">
       <span class="text-2xl font-bold">Create a</span>
@@ -314,3 +325,7 @@
   bind:this={options}
   initialValues={opts}
   groupOptions={$groupOptions} />
+
+{#if $nsecWarning}
+  <NsecWarning onAbort={() => nsecWarning.set(null)} onBypass={bypassNsecWarning} />
+{/if}

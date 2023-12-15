@@ -146,7 +146,7 @@
           {/if}
         {/each}
         <MenuItem
-          class="staatliches flex items-center gap-4 py-4 pl-8"
+          class="staatliches flex items-center justify-center gap-4 py-4"
           on:click={() => router.at("login/advanced").open()}>
           <i class="fa fa-plus" /> Add Account
         </MenuItem>

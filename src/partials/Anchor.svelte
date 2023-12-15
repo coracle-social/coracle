@@ -11,6 +11,7 @@
   export let modal = false
   export let button = false
   export let accent = false
+  export let danger = false
   export let circle = false
   export let underline = false
   export let type = null
@@ -28,6 +29,7 @@
     "opacity-50 pointer-events-none": loading || disabled,
     "bg-white text-black hover:bg-white-l border border-solid border-warm": button && !accent,
     "bg-accent text-white hover:bg-accent-l": button && accent,
+    "text-danger border border-solid !border-danger": button && danger,
     "text-xl staatliches rounded whitespace-nowrap flex justify-center items-center gap-2": button,
     "h-7 px-6": button && !circle,
     "w-10 h-10 flex justify-center items-center rounded-full": circle,
