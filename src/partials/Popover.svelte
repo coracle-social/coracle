@@ -6,6 +6,7 @@
   import {onMount} from "svelte"
   import {isMobile} from "src/util/html"
 
+  export let instance
   export let theme = "dark"
   export let triggerType = "click"
   export let placement = "top"
@@ -17,7 +18,6 @@
 
   let trigger
   let tooltip
-  let instance
 
   $: isNoOp = (isMobile && triggerType === "mouseenter") || !triggerType
 
