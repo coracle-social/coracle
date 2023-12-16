@@ -27,6 +27,10 @@
   export let showGroup = false
   export let onEvent = null
 
+  if (!filter) {
+    console.log('init!')
+  }
+
   let feed
   let notes = readable([])
   let hideReplies = writable(Storage.getJson("hideReplies"))
@@ -72,6 +76,10 @@
   const updateFilter = newFilter => {
     filter = newFilter
 
+    if (!filter) {
+      console.trace('updateFilter!')
+    }
+
     start()
   }
 
@@ -90,8 +98,6 @@
       scroller?.stop()
     }
   })
-
-  $: console.log(filter)
 </script>
 
 {#if !hideControls}
