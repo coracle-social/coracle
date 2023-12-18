@@ -1,7 +1,7 @@
 import {now} from "paravel"
 import {seconds} from "hurdak"
 import {generatePrivateKey} from "nostr-tools"
-import {getUserRelayUrls} from "src/engine/relays/utils"
+import {getUserHints} from "src/engine/relays/utils"
 import type {Event} from "src/engine/events/model"
 import {createAndPublish} from "./publish"
 import {subscribe} from "./subscribe"
@@ -24,7 +24,7 @@ export const dvmRequest = async ({
   onProgress = null,
 }: DVMRequestOpts): Promise<Event> => {
   if (!relays) {
-    relays = getUserRelayUrls()
+    relays = getUserHints()
   }
 
   if (typeof input !== "string") {

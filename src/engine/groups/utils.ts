@@ -5,7 +5,7 @@ import {Naddr} from "src/util/nostr"
 import type {GroupStatus} from "src/engine/session/model"
 import {pubkey} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
-import {getUserRelayUrls, mergeHints} from "src/engine/relays/utils"
+import {getUserRelayUrls, getGroupHints, mergeHints} from "src/engine/relays/utils"
 import {groups, groupSharedKeys, groupAdminKeys} from "./state"
 import type {Group} from "./model"
 import {MembershipLevel, GroupAccess, MemberAccess} from "./model"
@@ -57,22 +57,16 @@ export const getGroupReqInfo = (address = null) => {
   since = Math.max(0, since - seconds(7, "day"))
 
   const admins = []
+  const addresses = []
   const recipients = [pubkey.get()]
-  const relaysByGroup = []
 
   for (const key of [...$groupSharedKeys, ...$groupAdminKeys]) {
     admins.push(Naddr.fromTagValue(key.group).pubkey)
-
+    addresses.push(key.group)
     recipients.push(key.pubkey)
-
-    const group = groups.key(key.group).get()
-
-    if (group?.relays) {
-      relaysByGroup[group.address] = group.relays
-    }
   }
 
-  const relays = mergeHints([getUserRelayUrls("read"), ...Object.values(relaysByGroup)])
+  const relays = mergeHints([getUserRelayUrls("read"), ...addresses.map(getGroupHints)])
 
   return {admins, recipients, relays, since}
 }

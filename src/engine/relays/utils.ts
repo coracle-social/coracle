@@ -170,6 +170,12 @@ export const getPubkeyHints = hintSelector(function* (pubkey: string, mode: Rela
 export const getPubkeyHint = (pubkey: string): string =>
   first(getPubkeyHints(1, pubkey, "write")) || ""
 
+export const getUserHints = hintSelector(function* (mode: RelayMode) {
+  yield* getUserRelayUrls(mode)
+})
+
+export const getUserHint = (pubkey: string): string => first(getUserHints(1, "write")) || ""
+
 export const getEventHints = hintSelector(function* (event: Event) {
   yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Write)
   yield* event.seen_on.filter(isShareableRelay)
@@ -216,6 +222,12 @@ export const getGroupHints = hintSelector(function* (address: string) {
   yield* getGroupRelayUrls(address)
   yield* getPubkeyHints(Naddr.fromTagValue(address).pubkey)
 })
+
+export const getGroupPublishHints = (addresses: string[]) => {
+  const urls = mergeHints(addresses.map(getGroupHints))
+
+  return urls.length === 0 ? getUserRelayUrls("write") : urls
+}
 
 export const mergeHints = (groups: string[][], limit: number = null) => {
   const scores = {} as Record<string, any>

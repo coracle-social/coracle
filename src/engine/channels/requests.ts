@@ -4,7 +4,7 @@ import {now} from "paravel"
 import {sessions} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {loadPubkeys, subscribe} from "src/engine/network/utils"
-import {getPubkeyHints, getUserRelayUrls} from "src/engine/relays/utils"
+import {getPubkeyHints, getUserHints} from "src/engine/relays/utils"
 import {channels} from "./state"
 
 export const loadAllMessages = () => {
@@ -21,7 +21,7 @@ export const loadAllMessages = () => {
   subscribe({
     skipCache: true,
     timeout: 30_000,
-    relays: getUserRelayUrls("read"),
+    relays: getUserHints("read"),
     filters: [
       {kinds: [4], authors: [pubkey], since},
       {kinds: [4, 1059], "#p": [pubkey], since},

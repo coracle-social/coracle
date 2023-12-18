@@ -1,6 +1,6 @@
 import {createEvent} from "paravel"
-import {getIdAndAddress} from 'src/util/nostr'
-import {getUserRelayUrls} from "src/engine/relays/utils"
+import {getIdAndAddress} from "src/util/nostr"
+import {getUserHints} from "src/engine/relays/utils"
 import {createAndPublish, getReplyTags} from "src/engine/network/utils"
 
 export const publishNote = (content, tags = [], relays = null) =>
@@ -8,7 +8,7 @@ export const publishNote = (content, tags = [], relays = null) =>
 
 export const publishDeletion = (ids, relays = null) =>
   createAndPublish(5, {
-    relays: relays || getUserRelayUrls("write"),
+    relays: relays || getUserHints("write"),
     tags: ids.map(id => [id.includes(":") ? "a" : "e", id]),
   })
 

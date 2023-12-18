@@ -12,8 +12,7 @@
     load,
     groups,
     canUseGiftWrap,
-    getUserRelayUrls,
-    selectHints,
+    getUserHints,
     mergeHints,
     getGroupReqInfo,
     deriveMembershipLevel,
@@ -48,12 +47,12 @@
     updateCurrentSession(assoc("groups_last_synced", now()))
 
     load({
-      relays: mergeHints([relays, getUserRelayUrls("read")]),
+      relays: mergeHints([relays, getUserHints("read")]),
       filters: [{kinds: [1059], "#p": recipients, since}],
     })
 
     load({
-      relays: selectHints(getUserRelayUrls("read")),
+      relays: getUserHints("read"),
       filters: [
         {kinds: [34550], authors: admins},
         {kinds: [34550], limit: 100},

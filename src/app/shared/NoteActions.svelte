@@ -33,7 +33,7 @@
     MembershipLevel,
     publishToZeroOrMoreGroups,
     publishDeletionForEvent,
-    getUserRelayUrls,
+    getUserHints,
     getPublishHints,
     getSetting,
     processZap,
@@ -126,7 +126,7 @@
       .open()
 
   const broadcast = () => {
-    const relays = getUserRelayUrls("write")
+    const relays = getUserHints("write")
     const event = asNostrEvent(note)
 
     Publisher.publish({event, relays})

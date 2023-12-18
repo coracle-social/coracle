@@ -12,7 +12,7 @@ import {displayPubkey} from "src/engine/people/utils"
 import {publishCommunitiesList} from "src/engine/lists/commands"
 import {
   getPubkeyHints,
-  getUserRelayUrls,
+  getUserHints,
   getGroupHints,
   getGroupRelayUrls,
   mergeHints,
@@ -86,7 +86,7 @@ export const getGroupPublishRelays = (address, overrides = null) => {
 export const publishToGroupAdmin = async (address, template) => {
   const group = groups.key(address).get()
   const {pubkey} = Naddr.fromTagValue(address)
-  const relays = group?.relays || getUserRelayUrls("write")
+  const relays = group?.relays || getUserHints("write")
   const rumor = await nip59.get().wrap(template, {
     wrap: {
       author: generatePrivateKey(),

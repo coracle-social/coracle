@@ -8,7 +8,7 @@ import {Naddr, isAddressable, getIdAndAddress} from "src/util/nostr"
 import type {Event, NostrEvent} from "src/engine/events/model"
 import {people} from "src/engine/people/state"
 import {displayPerson} from "src/engine/people/utils"
-import {getUserRelayUrls, getEventHints, getPubkeyHint} from "src/engine/relays/utils"
+import {getUserHints, getEventHints, getPubkeyHint} from "src/engine/relays/utils"
 import {env} from "src/engine/session/state"
 import {signer} from "src/engine/session/derived"
 import {projections} from "src/engine/core/projections"
@@ -143,7 +143,7 @@ export type PublishOpts = EventOpts & {
 export const publish = async (template, {sk, relays}: PublishOpts) => {
   return Publisher.publish({
     timeout: 5000,
-    relays: relays || getUserRelayUrls("write"),
+    relays: relays || getUserHints("write"),
     event: sk
       ? await signer.get().signWithKey(template, sk)
       : await signer.get().signAsUser(template),

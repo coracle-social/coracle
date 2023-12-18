@@ -34,9 +34,9 @@
     session,
     writable,
     getEventHints,
-    getUserRelayUrls,
     publishToZeroOrMoreGroups,
     deriveMembershipLevel,
+    getGroupPublishHints,
   } from "src/engine"
 
   export let type = "note"
@@ -58,8 +58,8 @@
     summary: "",
     price: "",
     currency: currencyOptions.find(whereEq({code: "SAT"})),
+    relays: getGroupPublishHints(defaultGroups),
     groups: defaultGroups,
-    relays: getUserRelayUrls("write"),
     shouldWrap: true,
     anonymous: false,
     location: null,

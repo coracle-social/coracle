@@ -13,8 +13,8 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {mergeHints, displayRelay, getGroupRelayUrls} from "src/engine"
-  import {env, getUserRelayUrls, deriveMembershipLevel, MembershipLevel} from "src/engine"
+  import {getGroupPublishHints, displayRelay} from "src/engine"
+  import {env, deriveMembershipLevel, MembershipLevel} from "src/engine"
 
   export let groupOptions = []
   export let hideFields = []
@@ -59,11 +59,7 @@
     }
 
     if (!relaysDirty) {
-      if (values.groups.length > 0) {
-        values.relays = mergeHints(values.groups.map(getGroupRelayUrls))
-      } else {
-        values.relays = getUserRelayUrls("write")
-      }
+      values.relays = getGroupPublishHints(values.groups)
     }
   }
 

@@ -13,7 +13,7 @@
     unfollow,
     deriveMuted,
     deriveFollowing,
-    getUserRelayUrls,
+    getUserHints,
   } from "src/engine"
   import {boot} from "src/app/state"
   import {router} from "src/app/router"
@@ -32,8 +32,8 @@
     if (!isSelf && $canSign) {
       actions.push({
         onClick: $muted ? unmutePerson : mutePerson,
-        label: $muted ? 'Unmute' : 'Mute',
-        icon: $muted ? "microphone-slash" : 'microphone',
+        label: $muted ? "Unmute" : "Mute",
+        icon: $muted ? "microphone-slash" : "microphone",
       })
     }
 
@@ -87,7 +87,10 @@
   const mutePerson = () => mute("p", pubkey)
 
   const share = () =>
-    router.at('qrcode').of(nip19.nprofileEncode({pubkey, relays: getUserRelayUrls('write')})).open()
+    router
+      .at("qrcode")
+      .of(nip19.nprofileEncode({pubkey, relays: getUserHints("write")}))
+      .open()
 </script>
 
 <div class="flex items-center gap-3" on:click|stopPropagation>

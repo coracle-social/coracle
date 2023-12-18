@@ -1,6 +1,6 @@
 import {debounce} from "throttle-debounce"
 import {load} from "src/engine/network/utils"
-import {getUserRelayUrls} from "src/engine/relays/utils"
+import {getUserHints} from "src/engine/relays/utils"
 import {searchableRelays} from "src/engine/relays/derived"
 import {people} from "./state"
 
@@ -14,7 +14,7 @@ export const loadPeople = debounce(500, search => {
     })
   } else if (people.get().length < 50) {
     load({
-      relays: getUserRelayUrls("read"),
+      relays: getUserHints("read"),
       filters: [{kinds: [0], limit: 50}],
     })
   }
