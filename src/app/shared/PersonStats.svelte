@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {onDestroy} from "svelte"
   import {tweened} from "svelte/motion"
   import {numberFmt} from "src/util/misc"
   import {router} from "src/app/router"
@@ -10,18 +9,13 @@
   const followsCount = people.key(pubkey).derived($p => $p?.petnames?.length || 0)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
 
-  let sub
-  let followersCount = tweened(0, {interpolate, duration: 1000})
+  const followersCount = tweened(0, {interpolate, duration: 1000})
 
   const showFollows = () => router.at("people").of(pubkey).at("follows").open()
 
   const showFollowers = () => router.at("people").of(pubkey).at("followers").open()
 
   followersCount.set(getFollowers(pubkey).length)
-
-  onDestroy(() => {
-    sub?.close()
-  })
 </script>
 
 <div class="flex gap-8">

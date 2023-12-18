@@ -30,7 +30,7 @@
 
   const tags = list ? Tags.from(list) : Tags.from([])
 
-  let values = {
+  const values = {
     name: tags.getValue("name") || tags.getValue("d") || "",
     params: tags.type(["t", "p"]).all(),
     relays: tags.type("r").all(),

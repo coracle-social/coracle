@@ -45,11 +45,12 @@
   export let group = null
   export let initialValues = {}
 
+  const defaultGroups = quote ? Tags.from(quote).communities().all() : [group].filter(identity)
+
   let images, compose
   let charCount = 0
   let wordCount = 0
   let showPreview = false
-  let defaultGroups = quote ? Tags.from(quote).communities().all() : [group].filter(identity)
   let options
   let opts = {
     title: "",

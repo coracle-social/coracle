@@ -24,8 +24,7 @@
 
   const muteTags = new Tags($user.mutes || [])
 
-  let settings = getSettings()
-  let mutedPeople = muteTags.type("p").values().uniq().all().map(getPersonWithDefault)
+  const settings = getSettings()
 
   const searchWords = q => pluck("name", $searchTopics(q))
 
@@ -39,6 +38,8 @@
 
     toast.show("info", "Your preferences have been saved!")
   }
+
+  let mutedPeople = muteTags.type("p").values().uniq().all().map(getPersonWithDefault)
 
   onMount(() => {
     loadPubkeys(Array.from($mutes))
@@ -79,8 +80,7 @@
       </div>
       <Input type="range" bind:value={settings.min_wot_score} min={-10} max={10} />
       <p slot="info">
-        Select a minimum <Anchor underline modal href="/help/web-of-trust"
-          >web-of-trust</Anchor>
+        Select a minimum <Anchor underline modal href="/help/web-of-trust">web-of-trust</Anchor>
         score. Notes from accounts with a lower score will be automatically hidden.
       </p>
     </Field>

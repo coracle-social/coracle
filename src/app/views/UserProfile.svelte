@@ -22,7 +22,7 @@
     router.pop()
   }
 
-  let values = {...people.key($pubkey).get()?.profile}
+  const values = {...people.key($pubkey).get()?.profile}
 
   document.title = "Profile"
 </script>
@@ -69,9 +69,7 @@
     </Field>
     <Field label="About you">
       <Textarea name="about" bind:value={values.about} />
-      <div slot="info">
-        Tell the world about yourself. This will be shown on your profile page.
-      </div>
+      <div slot="info">Tell the world about yourself. This will be shown on your profile page.</div>
     </Field>
     <Field label="Profile Picture">
       <ImageInput

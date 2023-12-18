@@ -31,6 +31,7 @@ module.exports = {
     "no-useless-escape": "off",
     "no-extra-semi": "off",
     "no-async-promise-executor": "off",
+    "prefer-const": ["error", {destructuring: "all"}],
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-extra-semi": "off",
     "@typescript-eslint/ban-ts-comment": "off",

@@ -27,13 +27,10 @@
   export let showGroup = false
   export let onEvent = null
 
-  if (!filter) {
-    console.log('init!')
-  }
-
   let feed
   let notes = readable([])
-  let hideReplies = writable(Storage.getJson("hideReplies"))
+
+  const hideReplies = writable(Storage.getJson("hideReplies"))
 
   const getRelays = () => {
     let selection = relays
@@ -75,10 +72,6 @@
 
   const updateFilter = newFilter => {
     filter = newFilter
-
-    if (!filter) {
-      console.trace('updateFilter!')
-    }
 
     start()
   }

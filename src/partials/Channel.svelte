@@ -17,11 +17,12 @@
   export let sendMessage
   export let initialMessage = ""
 
+  const limit = writable(10)
+  const loading = sleep(30_000)
+
   let textarea
   let container
   let scroller
-  let limit = writable(10)
-  let loading = sleep(30_000)
   let showNewMessages = false
   let groupedMessages = []
 

@@ -13,6 +13,8 @@
 - [x] Limit number of replies shown on feed
 - [x] Search results sorted by relevance weighted by WoT
 - [x] Add anonymous zaps
+- [x] Strip hash from media urls
+- [x] Start on @daniele's redesign
 
 # 0.3.14
 

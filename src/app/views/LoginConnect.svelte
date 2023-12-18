@@ -23,20 +23,21 @@
     normalizeRelayUrl,
   } from "src/engine"
 
-  let modal = null
-  let customRelayUrl = null
-  let searching = true
-  let currentRelays = {} as Record<number, {url: string}>
-  let attemptedRelays = new Set()
-  let customRelays = []
-  let allRelays = []
-  let knownRelays = relays.derived($relays =>
+  const currentRelays = {} as Record<number, {url: string}>
+  const attemptedRelays = new Set()
+  const knownRelays = relays.derived($relays =>
     uniqBy(
       prop("url"),
       // Make sure our hardcoded urls are first, since they're more likely to find a match
       $env.DEFAULT_RELAYS.map(objOf("url")).concat(shuffle($relays)),
     ),
   )
+
+  let modal = null
+  let customRelayUrl = null
+  let searching = true
+  let customRelays = []
+  let allRelays = []
 
   $: allRelays = $knownRelays.concat(customRelays)
 

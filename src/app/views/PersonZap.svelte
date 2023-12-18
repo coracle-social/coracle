@@ -26,7 +26,8 @@
   export let anonymous = false
 
   let sub, unmounted
-  let zap = {
+
+  const zap = {
     amount: getSetting("default_zap"),
     message: "",
     invoice: null,

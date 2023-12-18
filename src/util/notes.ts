@@ -29,13 +29,13 @@ export const parseContent = (event: {content: string; tags?: string[][]}) => {
       .type("imeta")
       .map(
         pipe(
-          drop(1),
+          drop<string>(1),
           map((m: string) => {
             const parts = m.split(" ")
 
             return [parts[0], parts.slice(1).join(" ")]
-          })
-        )
+          }),
+        ),
       )
       .filter(meta => new Tags(meta).type("url").nthEq(1, url).exists())
       .flatMap(identity)
@@ -93,7 +93,7 @@ export const parseContent = (event: {content: string; tags?: string[][]}) => {
 
   const parseBech32 = () => {
     const bech32 = first(
-      text.match(/^(web\+)?(nostr:)?\/?\/?n(event|ote|profile|pub|addr)1[\d\w]+/i)
+      text.match(/^(web\+)?(nostr:)?\/?\/?n(event|ote|profile|pub|addr)1[\d\w]+/i),
     )
 
     if (bech32) {
@@ -125,7 +125,7 @@ export const parseContent = (event: {content: string; tags?: string[][]}) => {
 
   const parseUrl = () => {
     const raw: string = first(
-      text.match(/^([a-z\+:]{2,30}:\/\/)?[^<>\(\)\s]+\.[a-z]{2,6}[^\s]*[^<>"'\.!?,:\s\)\(]/gi)
+      text.match(/^([a-z\+:]{2,30}:\/\/)?[^<>\(\)\s]+\.[a-z]{2,6}[^\s]*[^<>"'\.!?,:\s\)\(]/gi),
     )
 
     // Skip url if it's just the end of a filepath
@@ -140,7 +140,7 @@ export const parseContent = (event: {content: string; tags?: string[][]}) => {
     }
 
     // Strip hash component
-    let [url, hash] = raw.split('#')
+    let [url, hash] = raw.split("#")
 
     // Skip ellipses and very short non-urls
     if (url.match(/\.\./)) {
@@ -198,7 +198,7 @@ type TruncateContentOpts = {
 
 export const truncateContent = (
   content: any[],
-  {showEntire, maxLength, showMedia = false}: TruncateContentOpts
+  {showEntire, maxLength, showMedia = false}: TruncateContentOpts,
 ) => {
   if (showEntire) {
     return content
@@ -239,5 +239,5 @@ export const truncateContent = (
 export const getLinks = (parts: any[]) =>
   pluck(
     "value",
-    parts.filter(x => x.type === LINK && x.isMedia)
+    parts.filter(x => x.type === LINK && x.isMedia),
   )

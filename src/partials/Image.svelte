@@ -19,7 +19,7 @@
 
 <script lang="ts">
   import {onMount} from "svelte"
-  import {ensurePlural} from 'hurdak'
+  import {ensurePlural} from "hurdak"
   import {imgproxy} from "src/engine"
 
   export let src
@@ -27,7 +27,7 @@
   let element
   let i = 0
   let loading = true
-  let urls = ensurePlural(src)
+  const urls = ensurePlural(src)
 
   const onError = () => {
     if (i < urls.length - 1) {
@@ -42,7 +42,12 @@
   })
 </script>
 
-<img {...$$props} class:hidden={loading} bind:this={element} on:error={onError} src={imgproxy(urls[i])} />
+<img
+  {...$$props}
+  class:hidden={loading}
+  bind:this={element}
+  on:error={onError}
+  src={imgproxy(urls[i])} />
 
 {#if loading}
   <slot name="placeholder">

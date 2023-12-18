@@ -64,12 +64,13 @@
   const displayTopics = topics => (topics.length === 1 ? topics[0] : `${topics.length} topics`)
 
   const onChange = filter => {
-    onEscape()
+    if (isOpen) {
+      router.pop()
+    }
 
     const key = getKey(router.current.get())
 
     router.fromCurrent().qp({filter}).replace({key})
-
     updateFilter(filter)
   }
 

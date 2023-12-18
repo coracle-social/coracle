@@ -8,7 +8,6 @@
   import {nip05, nip19} from "nostr-tools"
   import QrScanner from "qr-scanner"
   import Card from "src/partials/Card.svelte"
-  import Field from "src/partials/Field.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import {isHex} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
@@ -25,8 +24,6 @@
     loadPeople,
     session,
   } from "src/engine"
-
-  const onClose = () => router.pop()
 
   const openTopic = topic => router.at("topic").of(topic).replaceModal()
 
@@ -125,7 +122,7 @@
         router.at("people").of(entity).replaceModal()
         stopScanner()
       } else if (entity.includes("@")) {
-        let profile = await nip05.queryProfile(entity)
+        const profile = await nip05.queryProfile(entity)
 
         if (profile) {
           const {pubkey, relays} = profile

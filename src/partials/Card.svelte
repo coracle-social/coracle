@@ -24,10 +24,16 @@
       e.stopPropagation()
     }
 
-    const {x, y, t} = getClick(e)
-    const h = Math.sqrt(Math.pow(click.x - x, 2) + Math.pow(click.y - y, 2))
+    const newClick = getClick(e)
 
-    if (t - click.t < 1000 && h < 20) {
+    if (newClick) {
+      const {x, y, t} = newClick
+      const h = Math.sqrt(Math.pow(click.x - x, 2) + Math.pow(click.y - y, 2))
+
+      if (t - click.t < 1000 && h < 20) {
+        dispatch("click", e)
+      }
+    } else {
       dispatch("click", e)
     }
   }
@@ -37,10 +43,8 @@
   on:mousedown={startClick}
   on:touchstart={startClick}
   on:click={onClick}
-  class={cx(
-    $$props.class,
-    "bg-swap rounded bg-cocoa p-3 text-lightest",
-    {"bg-swap-hover cursor-pointer transition-all": interactive},
-  )}>
+  class={cx($$props.class, "bg-swap rounded bg-cocoa p-3 text-lightest", {
+    "bg-swap-hover cursor-pointer transition-all": interactive,
+  })}>
   <slot />
 </div>

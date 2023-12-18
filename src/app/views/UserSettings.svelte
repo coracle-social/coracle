@@ -11,7 +11,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {fuzzy} from "src/util/misc"
 
-  let settings = getSettings()
+  const settings = getSettings()
 
   const submit = () => {
     publishSettings(settings)
@@ -73,8 +73,8 @@
         <i slot="before" class="fa-solid fa-server" />
       </Input>
       <p slot="info">
-        Enter a custom url for {appName}'s helper application. Dufflepud is used for hosting
-        images and loading link previews. You can find the source code <Anchor
+        Enter a custom url for {appName}'s helper application. Dufflepud is used for hosting images
+        and loading link previews. You can find the source code <Anchor
           underline
           href="https://github.com/coracle-social/dufflepud">here</Anchor
         >.
@@ -98,8 +98,8 @@
         </Input>
         <p slot="info">
           Enter a custom proxy server for multiplexing relay connections. This can drastically
-          improve resource usage, but has some privacy trade-offs. Leave blank to connect to
-          relays directly. You can find the source code <Anchor
+          improve resource usage, but has some privacy trade-offs. Leave blank to connect to relays
+          directly. You can find the source code <Anchor
             underline
             href="https://github.com/coracle-social/multiplextr">here</Anchor
           >.

@@ -36,7 +36,6 @@
   const person = derivePerson(pubkey)
 
   let activeTab = "notes"
-  let loading = true
 
   $: ownRelays = getPubkeyRelays(pubkey)
   $: banner = imgproxy($person.profile?.banner, {w: window.innerWidth})
@@ -54,8 +53,8 @@
 </script>
 
 <div
-class="absolute left-0 h-96 w-full -mt-4"
-style={`z-index: -1;
+  class="absolute left-0 -mt-4 h-96 w-full"
+  style={`z-index: -1;
        background-size: cover;
        background-image: linear-gradient(to bottom, ${rgba}, ${rgba}, ${rgb}), url('${banner}')`} />
 
@@ -103,9 +102,7 @@ style={`z-index: -1;
 {:else if activeTab === "relays"}
   {#if ownRelays.length > 0}
     <PersonRelays relays={ownRelays} />
-  {:else if loading}
-    <Spinner />
   {:else}
-    <Content size="lg" class="text-center">Unable to show network for this person.</Content>
+    <Spinner />
   {/if}
 {/if}
