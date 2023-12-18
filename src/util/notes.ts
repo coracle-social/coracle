@@ -1,4 +1,4 @@
-import {last, map, pluck, identity} from "ramda"
+import {last, drop, pipe, map, pluck, identity} from "ramda"
 import {fromNostrURI, Tags} from "paravel"
 import {nip19} from "nostr-tools"
 import {first, switcherFn} from "hurdak"
@@ -24,18 +24,28 @@ export const parseContent = (event: {content: string; tags?: string[][]}) => {
   let text = event.content.trim() || tags.getValue("alt") || ""
   let buffer = ""
 
-  const getMeta = url =>
-    tags
+  const getMeta = (url, hash) => {
+    const meta = tags
       .type("imeta")
       .map(
-        map((m: string) => {
-          const parts = m.split(" ")
+        pipe(
+          drop(1),
+          map((m: string) => {
+            const parts = m.split(" ")
 
-          return [parts[0], parts.slice(1).join(" ")]
-        })
+            return [parts[0], parts.slice(1).join(" ")]
+          })
+        )
       )
       .filter(meta => new Tags(meta).type("url").nthEq(1, url).exists())
       .flatMap(identity)
+
+    for (const [k, v] of new URLSearchParams(hash).entries()) {
+      meta.xs.push([k, v])
+    }
+
+    return meta
+  }
 
   const parseNewline = () => {
     const newline = first(text.match(/^\n+/))
@@ -129,7 +139,8 @@ export const parseContent = (event: {content: string; tags?: string[][]}) => {
       return
     }
 
-    let url = raw
+    // Strip hash component
+    let [url, hash] = raw.split('#')
 
     // Skip ellipses and very short non-urls
     if (url.match(/\.\./)) {
@@ -140,7 +151,7 @@ export const parseContent = (event: {content: string; tags?: string[][]}) => {
       url = "https://" + url
     }
 
-    return [LINK, raw, {url, isMedia: urlIsMedia(url), meta: getMeta(url)}]
+    return [LINK, raw, {url, hash, isMedia: urlIsMedia(url), meta: getMeta(url, hash)}]
   }
 
   while (text) {
