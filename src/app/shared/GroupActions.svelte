@@ -8,6 +8,7 @@
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/router"
   import {
+    session,
     deriveAdminKeyForGroup,
     leaveGroup,
     joinGroup,
@@ -81,7 +82,7 @@
 </script>
 
 <div class="flex items-center gap-3" on:click|stopPropagation>
-  {#if !$adminKey}
+  {#if !$adminKey && $session}
     {#if $access === GroupAccess.Open}
       {#if $status.joined}
         <Popover triggerType="mouseenter">

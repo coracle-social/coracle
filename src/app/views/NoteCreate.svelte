@@ -77,7 +77,7 @@
   const groupOptions = session.derived($session => {
     const options = []
 
-    for (const address of Object.keys($session.groups || {})) {
+    for (const address of Object.keys($session?.groups || {})) {
       const group = groups.key(address).get()
 
       if (group && deriveMembershipLevel(address).get()) {

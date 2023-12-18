@@ -13,6 +13,7 @@
     groups,
     canUseGiftWrap,
     getUserRelayUrls,
+    selectHints,
     mergeHints,
     getGroupReqInfo,
     deriveMembershipLevel,
@@ -52,7 +53,7 @@
     })
 
     load({
-      relays: getUserRelayUrls("read"),
+      relays: selectHints(getUserRelayUrls("read")),
       filters: [
         {kinds: [34550], authors: admins},
         {kinds: [34550], limit: 100},
