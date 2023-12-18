@@ -81,7 +81,11 @@ export const getFollows = $person => new Set(getFollowedPubkeys($person))
 
 export const isFollowing = ($person, pubkey) => getFollowedPubkeys($person).includes(pubkey)
 
-export const getFollowers = pubkey => people.get().filter($p => isFollowing($p, pubkey))
+export const getFollowers = cached({
+  maxSize: Infinity,
+  getKey: join(":"),
+  getValue: ([pk]) => people.get().filter($p => isFollowing($p, pk)),
+})
 
 export const getNetwork = $person => {
   const pubkeys = getFollows($person)
@@ -151,9 +155,16 @@ export const primeWotCaches = pk => {
   }
 }
 
-export const getWotScore = (pk, tpk) =>
-  getFollowsWhoFollow(pk, tpk).length -
-  Math.floor(Math.pow(2, Math.log(getFollowsWhoMute(pk, tpk).length)))
+export const getWotScore = (pk, tpk) => {
+  if (!people.key(pk).exists()) {
+    return getFollowers(tpk).length
+  }
+
+  const follows = getFollowsWhoFollow(pk, tpk)
+  const mutes = getFollowsWhoMute(pk, tpk)
+
+  return follows.length - Math.floor(Math.pow(2, Math.log(mutes.length)))
+}
 
 const annotatePerson = pubkey => {
   const relays = getPubkeyHints.limit(3).getHints(pubkey, "write")

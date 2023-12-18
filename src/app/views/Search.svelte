@@ -44,6 +44,7 @@
           id: pubkey,
           type: "profile",
           text: [profile?.name, profile?.display_name, handle?.address].filter(identity).join(" "),
+          extraText: profile?.about || "",
         }
       }),
   )
@@ -62,7 +63,7 @@
       const options = s?.[0] === "#" ? $topicOptions : $profileOptions
 
       return new Fuse(options as any, {
-        keys: ["text"],
+        keys: ["text", {name: "extraText", weight: 0.2}],
         threshold: 0.5,
         shouldSort: false,
         includeScore: true,
