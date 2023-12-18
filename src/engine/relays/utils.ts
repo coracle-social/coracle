@@ -224,7 +224,7 @@ export const getGroupHints = hintSelector(function* (address: string) {
 })
 
 export const getGroupPublishHints = (addresses: string[]) => {
-  const urls = mergeHints(addresses.map(getGroupHints))
+  const urls = mergeHints(addresses.map(getGroupRelayUrls))
 
   return urls.length === 0 ? getUserRelayUrls("write") : urls
 }

@@ -23,7 +23,6 @@
   }
 
   let event
-  let relays = []
   let actions = []
   let replyIsOpen = false
   let promise: Promise<Event> = defer()
