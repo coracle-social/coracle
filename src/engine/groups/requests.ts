@@ -32,8 +32,10 @@ export const loadGroups = async (rawAddrs: string[]) => {
   const authors = naddrs.map(naddr => naddr.pubkey)
   const identifiers = naddrs.map(naddr => naddr.identifier)
 
-  return load({
-    relays: getUserHints("read"),
-    filters: [{kinds: [34550], authors, "#d": identifiers}],
-  })
+  if (naddrs.length > 0) {
+    load({
+      relays: getUserHints("read"),
+      filters: [{kinds: [34550], authors, "#d": identifiers}],
+    })
+  }
 }

@@ -14,7 +14,7 @@
   import EventInfo from "src/app/shared/EventInfo.svelte"
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import type {Event} from "src/engine"
-  import {dereferenceNote} from "src/engine"
+  import {dereferenceNote, getGroupReqInfo} from "src/engine"
 
   export let address
 
@@ -23,6 +23,7 @@
   }
 
   let event
+  let relays = []
   let actions = []
   let replyIsOpen = false
   let promise: Promise<Event> = defer()
@@ -52,6 +53,7 @@
 {#await promise}
   <Spinner />
 {:then event}
+  {@const groupAddr = Tags.from(event).communities().first()}
   <div in:fly={{y: 20}}>
     <FlexColumn>
       <div class="flex gap-4">
@@ -65,6 +67,7 @@
         hideControls
         shouldListen
         anchor={getIdOrAddress(event)}
+        relays={groupAddr ? getGroupReqInfo(groupAddr).relays : []}
         filter={{kinds: noteKinds, "#a": [address]}} />
     </FlexColumn>
   </div>

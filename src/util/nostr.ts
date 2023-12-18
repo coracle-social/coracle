@@ -90,7 +90,7 @@ export const getRootIds = e => Tags.from(e).roots().values().all()
 
 export const isReplaceable = e => between(9999, 20000, e.kind)
 
-export const isParameterizedReplaceable = e => between(39999, 40000, e.kind)
+export const isParameterizedReplaceable = e => between(29999, 40000, e.kind)
 
 export const isAddressable = e => isReplaceable(e) || isParameterizedReplaceable(e)
 
