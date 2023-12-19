@@ -30,6 +30,7 @@
   import {toastProgress} from "src/app/state"
   import {router} from "src/app/router"
   import {
+    env,
     groups,
     session,
     writable,
@@ -314,13 +315,15 @@
           circle={false}
           on:change={e => images?.addImage(e.detail)} />
       </div>
-      <small
-        class="flex cursor-pointer items-center justify-end gap-4"
-        on:click={() => options.setView("settings")}>
-        <span><i class="fa fa-circle-nodes" /> {opts.groups.length}</span>
-        <span><i class="fa fa-server" /> {opts.relays?.length}</span>
-        <span><i class="fa fa-warning" /> {opts.warning || 0}</span>
-      </small>
+      {#if !$env.FORCE_GROUP}
+        <small
+          class="flex cursor-pointer items-center justify-end gap-4"
+          on:click={() => options.setView("settings")}>
+          <span><i class="fa fa-circle-nodes" /> {opts.groups.length}</span>
+          <span><i class="fa fa-server" /> {opts.relays?.length}</span>
+          <span><i class="fa fa-warning" /> {opts.warning || 0}</span>
+        </small>
+      {/if}
     </div>
   </Content>
 </form>

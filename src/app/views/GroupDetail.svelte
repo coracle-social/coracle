@@ -8,12 +8,12 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import Calendar from "src/app/shared/Calendar.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import GroupActions from "src/app/shared/GroupActions.svelte"
   import GroupAbout from "src/app/shared/GroupAbout.svelte"
   import GroupRequest from "src/app/shared/GroupRequest.svelte"
   import GroupMember from "src/app/shared/GroupMember.svelte"
-  import GroupCalendar from "src/app/shared/GroupCalendar.svelte"
   import GroupMarket from "src/app/shared/GroupMarket.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {
@@ -133,7 +133,7 @@
     filter={{kinds: without([30402], noteKinds), "#a": [address]}}
     {relays} />
 {:else if activeTab === "calendar"}
-  <GroupCalendar {group} {relays} />
+  <Calendar filters={[{kinds: [31923], "#a": [address]}]} {relays} />
 {:else if activeTab === "market"}
   <GroupMarket {group} {relays} />
 {:else if activeTab === "members"}

@@ -34,6 +34,10 @@
     subMenu = name
   }
 
+  const openCommunity = e => {
+    setSubMenu("community")
+  }
+
   const openSettings = e => {
     setSubMenu("settings")
   }
@@ -91,11 +95,9 @@
           {/if}
         </div>
       </MenuMobileItem>
-      {#if !$env.FORCE_GROUP}
-        <MenuMobileItem href="/groups">
-          <i class="fa fa-circle-nodes" /> Groups
-        </MenuMobileItem>
-      {/if}
+      <MenuMobileItem stopPropagation on:click={openCommunity}>
+        <i class="fa fa-people-pulling" /> Community
+      </MenuMobileItem>
       <MenuMobileItem disabled={!$canSign} href="/channels">
         <i class="fa fa-message" />
         <div class="relative inline-block">
@@ -118,13 +120,32 @@
   </SliderMenu>
 {/if}
 
+{#if subMenu === "community"}
+  <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
+    <p class="staatliches mb-8 text-center text-3xl">Community</p>
+    <div class="staatliches m-auto grid grid-cols-2 gap-3">
+      <MenuMobileItem href="/calendar">
+        <i class="fa fa-calendar-days" /> Calendar
+      </MenuMobileItem>
+      <MenuMobileItem href="/market">
+        <i class="fa fa-store" /> Market
+      </MenuMobileItem>
+      {#if !$env.FORCE_GROUP}
+        <MenuMobileItem href="/groups">
+          <i class="fa fa-circle-nodes" /> Groups
+        </MenuMobileItem>
+      {/if}
+    </div>
+  </SliderMenu>
+{/if}
+
 {#if subMenu === "settings"}
   <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
     <p class="staatliches mb-8 text-center text-3xl">Settings</p>
     <div class="staatliches m-auto grid grid-cols-2 gap-3">
       {#if $installPrompt}
         <MenuMobileItem on:click={installAsPWA}>
-          <i class="fa fa-rocket w-8" /> Install
+          <i class="fa fa-rocket" /> Install
         </MenuMobileItem>
       {/if}
       <MenuMobileItem on:click={toggleTheme}>
@@ -140,7 +161,7 @@
         <i class="fa fa-sliders" /> App Settings
       </MenuMobileItem>
       <MenuMobileItem disabled={!$canSign} stopPropagation on:click={openAccount}>
-        <i class="fa fa-user-circle w-8" /> Edit Profile
+        <i class="fa fa-user-circle" /> Edit Profile
       </MenuMobileItem>
     </div>
   </SliderMenu>

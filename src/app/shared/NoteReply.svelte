@@ -11,6 +11,7 @@
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import {
+    env,
     Publisher,
     buildReply,
     writable,
@@ -161,7 +162,9 @@
             <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}>
               <i slot="button" class="fa fa-paperclip" />
             </ImageInput>
-            <i class="fa fa-cog" on:click={() => options.setView("settings")} />
+            {#if !$env.FORCE_GROUP}
+              <i class="fa fa-cog" on:click={() => options.setView("settings")} />
+            {/if}
             <i class="fa fa-at" />
           </div>
         </div>
@@ -180,11 +183,13 @@
   </div>
 {/if}
 
-<NoteOptions
-  bind:this={options}
-  on:change={setOpts}
-  initialValues={opts}
-  hideFields={parent.wrap ? ["shouldWrap", "relays"] : []} />
+{#if !$env.FORCE_GROUP}
+  <NoteOptions
+    bind:this={options}
+    on:change={setOpts}
+    initialValues={opts}
+    hideFields={parent.wrap ? ["shouldWrap", "relays"] : []} />
+{/if}
 
 {#if $nsecWarning}
   <NsecWarning onAbort={() => nsecWarning.set(null)} onBypass={bypassNsecWarning} />

@@ -5,7 +5,7 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {menuIsOpen, searchTerm} from "src/app/state"
   import {router} from "src/app/router"
-  import {pubkey, hasNewNotifications, hasNewMessages} from "src/engine"
+  import {env, pubkey, hasNewNotifications, hasNewMessages} from "src/engine"
 
   let innerWidth = 0
   let searchInput
@@ -19,7 +19,7 @@
 
     // Hack to keep focus
     const interval = setInterval(() => {
-      const searchIsOpen = $modal?.path === '/search'
+      const searchIsOpen = $modal?.path === "/search"
       const searchIsFocused = document.activeElement === searchInput
 
       if (!searchIsFocused && !searchIsOpen) {
@@ -46,6 +46,18 @@
 
     if ($page.path.startsWith("/groups") && props.address) {
       params.group = props.address
+    }
+
+    if ($page.path.startsWith("/calendar")) {
+      params.type = "calendar_event"
+    }
+
+    if ($page.path.startsWith("/market")) {
+      params.type = "listing"
+    }
+
+    if ($env.FORCE_GROUP) {
+      params.group = $env.FORCE_GROUP
     }
 
     router.at("notes/create").qp(params).open()

@@ -22,6 +22,7 @@
   import About from "src/app/views/About.svelte"
   import Search from "src/app/views/Search.svelte"
   import Bech32Entity from "src/app/views/Bech32Entity.svelte"
+  import Calendar from "src/app/views/Calendar.svelte"
   import ChannelCreate from "src/app/views/ChannelCreate.svelte"
   import ChannelsDetail from "src/app/views/ChannelsDetail.svelte"
   import ChannelsList from "src/app/views/ChannelsList.svelte"
@@ -48,6 +49,7 @@
   import LoginPrivKey from "src/app/views/LoginPrivKey.svelte"
   import LoginPubKey from "src/app/views/LoginPubKey.svelte"
   import Logout from "src/app/views/Logout.svelte"
+  import Market from "src/app/views/Market.svelte"
   import NoteCreate from "src/app/views/NoteCreate.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import Notifications from "src/app/views/Notifications.svelte"
@@ -94,6 +96,7 @@
   router.register("/about", About)
   router.register("/search", Search)
   router.register("/bech32", Bech32Entity)
+  router.register("/calendar", Calendar)
 
   router.register("/channels", ChannelsList, {
     requireUser: true,
@@ -168,6 +171,8 @@
   router.register("/login/privkey", LoginPrivKey)
   router.register("/login/pubkey", LoginPubKey)
   router.register("/logout", Logout)
+
+  router.register("/market", Market)
 
   router.register("/media/:url", MediaDetail, {
     serializers: {

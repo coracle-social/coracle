@@ -10,8 +10,8 @@
   import {router} from "src/app/router"
   import {load, pubkey} from "src/engine"
 
-  export let group
   export let relays
+  export let filters
 
   const getEventContent = ({event}) => event.title
 
@@ -36,7 +36,7 @@
 
   load({
     relays,
-    filters: [{kinds: [31923], "#a": [$group.address]}],
+    filters,
     onEvent: e => {
       events = events.concat(e)
     },
@@ -52,7 +52,7 @@
       title: meta.name,
       start: secondsToDate(meta.start),
       end: secondsToDate(meta.end),
-      backgroundColor: $themeColors[isOwn ? "accent" : "lightest"],
+      backgroundColor: $themeColors[isOwn ? "accent" : "light"],
       _ctx: e,
     }
   })
