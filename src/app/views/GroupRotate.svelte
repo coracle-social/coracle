@@ -1,9 +1,10 @@
 <script lang="ts">
   import {pluck, assoc, uniq, without} from "ramda"
-  import {quantify, difference} from "hurdak"
+  import {difference} from "hurdak"
   import {toast} from "src/partials/state"
   import Field from "src/partials/Field.svelte"
-  import Input from "src/partials/Input.svelte"
+  import FieldInline from "src/partials/FieldInline.svelte"
+  import Toggle from "src/partials/Toggle.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -31,11 +32,12 @@
   const initialMembers = uniq(without(removeMembers, [...$adminKey.members, ...addMembers]))
 
   const onSubmit = () => {
-    initSharedKey(address)
+    if (!soft) {
+      initSharedKey(address)
+    }
 
     const newMembers = pluck("pubkey", members)
     const removedMembers = Array.from(difference(new Set(initialMembers), new Set(newMembers)))
-    const gracePeriod = graceHours * 60 * 60
 
     // Update our authoritative member list
     groupAdminKeys.key($adminKey.pubkey).update(assoc("members", newMembers))
@@ -60,7 +62,7 @@
     })
 
     // Send new invites
-    publishGroupInvites(address, newMembers, $group.relays, gracePeriod)
+    publishGroupInvites(address, newMembers, $group.relays)
 
     // Send evictions
     publishGroupEvictions(address, removedMembers)
@@ -72,7 +74,7 @@
     router.pop()
   }
 
-  let graceHours = 24
+  let soft = false
   let members = people.mapStore
     .derived(m => initialMembers.map(pubkey => m.get(pubkey) || {pubkey}))
     .get()
@@ -88,11 +90,13 @@
       <PersonMultiSelect bind:value={members} />
       <div slot="info">All members will receive a fresh invitation with a new key.</div>
     </Field>
-    <Field label="Grace Period">
-      <div slot="display">{quantify(graceHours, "hour")}</div>
-      <Input type="range" bind:value={graceHours} min={0} max={72} />
-      <div slot="info">Set how long the old key will still be valid for posting to the group.</div>
-    </Field>
+    <FieldInline label="Soft Rotate">
+      <Toggle bind:value={soft} />
+      <div slot="info">
+        Share the current key with all new members instead of creating a new one. This allows new
+        members to see recent messages, and does not revoke access for removed members.
+      </div>
+    </FieldInline>
     <Anchor button tag="button" type="submit">Save</Anchor>
   </Content>
 </form>
