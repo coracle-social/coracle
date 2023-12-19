@@ -8,16 +8,12 @@
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/router"
   import type {DynamicFilter} from "src/engine"
-  import {env, session, canSign, follows, lists, userLists} from "src/engine"
+  import {session, canSign, follows, lists, userLists} from "src/engine"
 
   export let relays = []
   export let filter: DynamicFilter = {
     kinds: noteKinds,
     authors: $follows.size > 0 ? "follows" : "network",
-  }
-
-  if ($env.FORCE_GROUP) {
-    filter['#a'] = [$env.FORCE_GROUP]
   }
 
   let key = Math.random()
@@ -53,7 +49,7 @@
 </script>
 
 {#if !$session}
-  <div class="text-center py-16">
+  <div class="py-16 text-center">
     <p class="text-xl">Don't have an account?</p>
     <p>
       Click <Anchor class="underline" on:click={showLogin}>here</Anchor> to join the nostr network.
@@ -62,7 +58,7 @@
 {/if}
 
 {#key key}
-  <Feed showGroup={!$env.FORCE_GROUP} {filter} {relays}>
+  <Feed showGroup {filter} {relays}>
     <div slot="controls">
       {#if $canSign}
         {#if $userLists.length > 0}

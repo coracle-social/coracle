@@ -36,7 +36,7 @@
   import GroupInfo from "src/app/views/GroupInfo.svelte"
   import GroupRotate from "src/app/views/GroupRotate.svelte"
   import Help from "src/app/views/Help.svelte"
-  import Feeds from "src/app/views/Feeds.svelte"
+  import Home from "src/app/views/Home.svelte"
   import LabelCreate from "src/app/views/LabelCreate.svelte"
   import LabelDetail from "src/app/views/LabelDetail.svelte"
   import ListEdit from "src/app/views/ListEdit.svelte"
@@ -180,12 +180,12 @@
     },
   })
 
-  router.register("/", Feeds, {
+  router.register("/", Home, {
     serializers: {
       filter: asFilter,
     },
   })
-  router.register("/notes", Feeds, {
+  router.register("/notes", Home, {
     serializers: {
       filter: asFilter,
     },
