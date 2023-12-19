@@ -139,9 +139,7 @@
     You can also <Anchor underline on:click={skip}>skip this step</Anchor>, but be aware that your
     profile and relays may not get properly synchronized.
   </p>
-  {#if $env.FORCE_RELAYS.length > 0}
-    <Spinner />
-  {:else if Object.values(currentRelays).length > 0}
+  {#if Object.values(currentRelays).length > 0}
     <p>Currently searching:</p>
     {#each Object.values(currentRelays) as relay}
       <div class="h-12">

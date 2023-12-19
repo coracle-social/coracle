@@ -1,13 +1,12 @@
 import Bugsnag from "@bugsnag/js"
 import {writable} from "svelte/store"
-import {hash, union, sleep} from "hurdak"
+import {hash, union} from "hurdak"
 import {now} from "paravel"
 import {warn} from "src/util/logger"
 import {userKinds} from "src/util/nostr"
 import {toast} from "src/partials/state"
 import {router} from "src/app/router"
 import {
-  env,
   pool,
   pubkey,
   session,
@@ -111,17 +110,7 @@ export const loadAppData = () => {
   listenForNotifications()
 }
 
-export const boot = async () => {
-  if (env.get().FORCE_RELAYS.length > 0) {
-    router.at("message").cx({message: "Logging you in..."}).replaceModal({noEscape: true})
-
-    loadAppData(), await sleep(3000)
-
-    router.at("notes").replace()
-  } else {
-    router.at("login/connect").open({noEscape: true})
-  }
-}
+export const boot = () => router.at("login/connect").open({noEscape: true})
 
 export const toastProgress = progress => {
   const {event, succeeded, failed, timeouts, completed, pending} = progress

@@ -3,7 +3,6 @@
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {
-    env,
     loginWithPublicKey,
     session,
     mute,
@@ -57,9 +56,7 @@
       actions.push({onClick: loginAsUser, label: "Login as", icon: "right-to-bracket"})
     }
 
-    if ($env.FORCE_RELAYS.length === 0) {
-      actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
-    }
+    actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
 
     if (isSelf && $canSign) {
       actions.push({

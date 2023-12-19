@@ -37,21 +37,17 @@ const MULTIPLEXTR_URL = import.meta.env.VITE_MULTIPLEXTR_URL
 
 const NIP96_URLS = fromCsv(import.meta.env.VITE_NIP96_URLS)
 
-const FORCE_RELAYS = fromCsv(import.meta.env.VITE_FORCE_RELAYS)
+const FORCE_GROUP = import.meta.env.VITE_FORCE_GROUP
 
-const DVM_RELAYS = FORCE_RELAYS.length > 0 ? FORCE_RELAYS : fromCsv(import.meta.env.VITE_DVM_RELAYS)
+const DVM_RELAYS = fromCsv(import.meta.env.VITE_DVM_RELAYS)
 
-const SEARCH_RELAYS =
-  FORCE_RELAYS.length > 0 ? FORCE_RELAYS : ["wss://relay.nostr.band", "wss://nostr.wine"]
+const SEARCH_RELAYS = ["wss://relay.nostr.band", "wss://nostr.wine"]
 
-const DEFAULT_RELAYS =
-  FORCE_RELAYS.length > 0 ? FORCE_RELAYS : fromCsv(import.meta.env.VITE_DEFAULT_RELAYS)
+const DEFAULT_RELAYS = fromCsv(import.meta.env.VITE_DEFAULT_RELAYS)
 
 const DEFAULT_FOLLOWS = fromCsv(import.meta.env.VITE_DEFAULT_FOLLOWS)
 
 const ENABLE_ZAPS = JSON.parse(import.meta.env.VITE_ENABLE_ZAPS)
-
-const ENABLE_GROUPS = JSON.parse(import.meta.env.VITE_ENABLE_GROUPS)
 
 // Prep our env
 env.set({
@@ -62,19 +58,18 @@ env.set({
   IMGPROXY_URL,
   DUFFLEPUD_URL,
   MULTIPLEXTR_URL,
-  FORCE_RELAYS,
+  FORCE_GROUP,
   DVM_RELAYS,
   SEARCH_RELAYS,
   DEFAULT_RELAYS,
   ENABLE_ZAPS,
-  ENABLE_GROUPS,
 })
 
 // Throw some hardcoded defaults in there
 DEFAULT_RELAYS.forEach(saveRelay)
 
 // Load relays from nostr.watch via dufflepud
-if (FORCE_RELAYS.length === 0 && DUFFLEPUD_URL) {
+if (DUFFLEPUD_URL) {
   tryFetch(async () => {
     const json = await Fetch.fetchJson(DUFFLEPUD_URL + "/relay")
 

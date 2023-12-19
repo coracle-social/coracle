@@ -14,7 +14,6 @@
   import {router} from "src/app/router"
   import type {Event} from "src/engine"
   import {
-    env,
     session,
     notifications,
     otherNotifications,
@@ -23,11 +22,7 @@
     updateCurrentSession,
   } from "src/engine"
 
-  const tabs = ["Mentions & Replies", "Reactions"]
-
-  if ($env.ENABLE_GROUPS) {
-    tabs.push("Other")
-  }
+  const tabs = ["Mentions & Replies", "Reactions", "Other"]
 
   const lastSynced = $session?.notifications_last_synced || 0
 
@@ -55,10 +50,10 @@
   $: tabNotifications =
     activeTab === tabs[0]
       ? groupedNotifications.filter(
-          n => !n.event || find((e: Event) => noteKinds.includes(e.kind), n.interactions)
+          n => !n.event || find((e: Event) => noteKinds.includes(e.kind), n.interactions),
         )
       : groupedNotifications.filter(n =>
-          find((e: Event) => reactionKinds.includes(e.kind), n.interactions)
+          find((e: Event) => reactionKinds.includes(e.kind), n.interactions),
         )
 
   $: uncheckedOtherNotifications = $otherNotifications.filter(n => n.created_at > lastSynced)

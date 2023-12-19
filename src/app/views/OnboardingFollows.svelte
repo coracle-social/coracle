@@ -10,7 +10,7 @@
   export let petnames
   export let setStage
 
-  const prev = () => setStage($env.FORCE_RELAYS.length > 0 ? "follows" : "relays")
+  const prev = () => setStage($env.FORCE_GROUP ? "follows" : "relays")
   const next = () => setStage("note")
 
   const addFollow = pubkey => {
@@ -50,10 +50,7 @@
   {#each pubkeys as pubkey (pubkey)}
     <PersonSummary {pubkey}>
       <div slot="actions" class="flex items-start justify-end">
-        <Anchor
-          button
-          class="flex items-center gap-2"
-          on:click={() => removeFollow(pubkey)}>
+        <Anchor button class="flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
           <i class="fa fa-user-slash" /> Unfollow
         </Anchor>
       </div>

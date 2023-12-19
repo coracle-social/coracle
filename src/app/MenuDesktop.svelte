@@ -60,7 +60,7 @@
     <h1 class="staatliches text-3xl">Coracle</h1>
   </Anchor>
   <MenuDesktopItem path="/notes" on:click={goToFeed}>Feed</MenuDesktopItem>
-  {#if $env.FORCE_RELAYS.length === 0}
+  {#if !$env.FORCE_GROUP}
     <MenuDesktopItem path="/settings/relays">
       <div class="relative inline-block">
         Relays
@@ -89,12 +89,14 @@
       {/if}
     </div>
   </MenuDesktopItem>
-  {#if $env.ENABLE_GROUPS}
+  {#if !$env.FORCE_GROUP}
     <MenuDesktopItem path="/groups">Groups</MenuDesktopItem>
   {/if}
   <FlexColumn small class="absolute bottom-0 w-60">
-    <Anchor class="staatliches text-light hover:text-warm px-8" href="/about">About</Anchor>
-    <Anchor class="staatliches text-light hover:text-warm px-8" on:click={() => setSubMenu("settings")}>Settings</Anchor>
+    <Anchor class="staatliches px-8 text-light hover:text-warm" href="/about">About</Anchor>
+    <Anchor
+      class="staatliches px-8 text-light hover:text-warm"
+      on:click={() => setSubMenu("settings")}>Settings</Anchor>
     <div class="staatliches block flex h-8 gap-2 px-8 text-light">
       <Anchor external class="hover:text-warm" href="/terms.html">Terms</Anchor> /
       <Anchor external class="hover:text-warm" href="/privacy.html">Privacy</Anchor>

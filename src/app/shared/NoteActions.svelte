@@ -179,7 +179,7 @@
     if ($canSign) {
       actions.push({label: "Quote", icon: "quote-left", onClick: quote})
 
-      if (!note.wrap && $env.ENABLE_GROUPS && ($groupOptions.length > 0 || address)) {
+      if (!note.wrap && !$env.FORCE_GROUP && ($groupOptions.length > 0 || address)) {
         actions.push({label: "Cross-post", icon: "shuffle", onClick: () => setView("cross-post")})
       }
 
@@ -193,7 +193,7 @@
       }
     }
 
-    if ($env.FORCE_RELAYS.length === 0 && !note.wrap) {
+    if (!$env.FORCE_GROUP && !note.wrap) {
       actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
     }
 
@@ -243,43 +243,41 @@
     {/if}
   </div>
   <div class="flex items-center">
-    {#if $env.FORCE_RELAYS.length === 0}
-      <!-- Mobile version -->
-      <div
-        style="transform: scale(-1, 1)"
-        class="absolute right-0 top-0 m-3 grid grid-cols-3 gap-2 sm:hidden">
-        {#each sortBy(identity, note.seen_on) as url, i}
-          <div class={`cursor-pointer order-${3 - (i % 3)}`}>
+    <!-- Mobile version -->
+    <div
+      style="transform: scale(-1, 1)"
+      class="absolute right-0 top-0 m-3 grid grid-cols-3 gap-2 sm:hidden">
+      {#each sortBy(identity, note.seen_on) as url, i}
+        <div class={`cursor-pointer order-${3 - (i % 3)}`}>
+          <ColorDot value={url} on:click={() => openRelay(url)} />
+        </div>
+      {:else}
+        <div class="cursor-pointer order-3">
+          <ColorDot value={LOCAL_RELAY_URL} />
+        </div>
+      {/each}
+    </div>
+    <!-- Desktop version -->
+    <div
+      class={cx("hidden transition-opacity sm:flex", {
+        "opacity-0 group-hover:opacity-100": !showEntire,
+      })}>
+      {#each sortBy(identity, note.seen_on) as url, i}
+        <Popover triggerType="mouseenter" interactive={false}>
+          <div slot="trigger" class="cursor-pointer p-1">
             <ColorDot value={url} on:click={() => openRelay(url)} />
           </div>
-        {:else}
-          <div class="cursor-pointer order-3">
+          <div slot="tooltip">{displayRelay({url})}</div>
+        </Popover>
+      {:else}
+        <Popover triggerType="mouseenter" interactive={false}>
+          <div slot="trigger" class="cursor-pointer p-1">
             <ColorDot value={LOCAL_RELAY_URL} />
           </div>
-        {/each}
-      </div>
-      <!-- Desktop version -->
-      <div
-        class={cx("hidden transition-opacity sm:flex", {
-          "opacity-0 group-hover:opacity-100": !showEntire,
-        })}>
-        {#each sortBy(identity, note.seen_on) as url, i}
-          <Popover triggerType="mouseenter" interactive={false}>
-            <div slot="trigger" class="cursor-pointer p-1">
-              <ColorDot value={url} on:click={() => openRelay(url)} />
-            </div>
-            <div slot="tooltip">{displayRelay({url})}</div>
-          </Popover>
-        {:else}
-          <Popover triggerType="mouseenter" interactive={false}>
-            <div slot="trigger" class="cursor-pointer p-1">
-              <ColorDot value={LOCAL_RELAY_URL} />
-            </div>
-            <div slot="tooltip">Loaded from cache</div>
-          </Popover>
-        {/each}
-      </div>
-    {/if}
+          <div slot="tooltip">Loaded from cache</div>
+        </Popover>
+      {/each}
+    </div>
     <div class="ml-1 sm:ml-2">
       <OverflowMenu {actions} />
     </div>

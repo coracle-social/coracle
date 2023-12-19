@@ -69,7 +69,7 @@
       <MenuMobileItem stopPropagation on:click={openSettings}>
         <i class="fa fa-cog" /> Settings
       </MenuMobileItem>
-      {#if $env.FORCE_RELAYS.length === 0}
+      {#if !$env.FORCE_GROUP}
         <MenuMobileItem href="/settings/relays">
           <i class="fa fa-server" />
           <div class="relative inline-block">
@@ -91,7 +91,7 @@
           {/if}
         </div>
       </MenuMobileItem>
-      {#if $env.ENABLE_GROUPS}
+      {#if !$env.FORCE_GROUP}
         <MenuMobileItem href="/groups">
           <i class="fa fa-circle-nodes" /> Groups
         </MenuMobileItem>

@@ -4,19 +4,12 @@ import {Plex, Relays, Executor, Multi, createEvent} from "paravel"
 import {error, warn} from "src/util/logger"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {normalizeRelayUrl} from "src/engine/relays/utils"
-import {env} from "src/engine/session/state"
 import {pool} from "src/engine/network/state"
 import {getSetting} from "src/engine/session/utils"
 import {signer, canSign} from "src/engine/session/derived"
 import {LocalTarget} from "./targets"
 
 export const getUrls = (relays: string[]) => {
-  const {FORCE_RELAYS} = env.get()
-
-  if (FORCE_RELAYS?.length > 0) {
-    return FORCE_RELAYS
-  }
-
   if (relays.length === 0) {
     error(`Attempted to connect to zero urls`)
   }

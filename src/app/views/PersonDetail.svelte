@@ -18,7 +18,6 @@
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import PersonStats from "src/app/shared/PersonStats.svelte"
   import {
-    env,
     mutes,
     derivePerson,
     displayPerson,
@@ -32,7 +31,7 @@
   export let relays = []
   export let filter = {kinds: noteKinds, authors: [pubkey]}
 
-  const tabs = ["notes", "likes", $env.FORCE_RELAYS.length === 0 && "relays"].filter(identity)
+  const tabs = ["notes", "likes", "relays"].filter(identity)
   const person = derivePerson(pubkey)
 
   let activeTab = "notes"

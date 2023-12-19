@@ -12,7 +12,7 @@
 
   const nsec = nip19.nsecEncode(privkey)
   const prev = () => setStage("profile")
-  const next = () => setStage($env.FORCE_RELAYS.length > 0 ? "follows" : "relays")
+  const next = () => setStage($env.FORCE_GROUP ? "follows" : "relays")
 
   const copyKey = () => {
     copyToClipboard(nsec)

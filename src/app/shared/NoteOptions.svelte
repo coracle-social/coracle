@@ -14,7 +14,7 @@
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
   import {getGroupPublishHints, displayRelay} from "src/engine"
-  import {env, deriveMembershipLevel, MembershipLevel} from "src/engine"
+  import {deriveMembershipLevel, MembershipLevel} from "src/engine"
 
   export let groupOptions = []
   export let hideFields = []
@@ -99,7 +99,7 @@
             </div>
           </Field>
         {/if}
-        {#if !hideFields.includes("relays") && $env.FORCE_RELAYS.length === 0}
+        {#if !hideFields.includes("relays")}
           <Field icon="fa-database" label="Select which relays to publish to">
             <div>
               {#each values.relays as url}
