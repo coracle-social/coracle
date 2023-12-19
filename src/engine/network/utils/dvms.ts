@@ -36,7 +36,7 @@ export const dvmRequest = async ({
     sk: generatePrivateKey(),
     tags: tags.concat([
       ["i", input],
-      ["expiration", now() + seconds(1, "hour")],
+      ["expiration", String(now() + seconds(1, "hour"))],
     ]),
   })
 
