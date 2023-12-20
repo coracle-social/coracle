@@ -33,7 +33,6 @@
   export let mode = "create"
   export let showMembers = false
 
-  const isAlreadyPublic = values.isPublic
   const searchRelayUrls = q => pluck("url", $searchRelays(q))
 
   const submit = async () => {
@@ -96,7 +95,7 @@
         </Field>
       {/if}
       <FieldInline label="Make Public">
-        <Toggle disabled={isAlreadyPublic} bind:value={values.isPublic} />
+        <Toggle bind:value={values.isPublic} />
         <div slot="info">
           If enabled, this will generate a public listing for the group. The member list and group
           messages will not be published.

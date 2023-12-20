@@ -95,9 +95,18 @@
           {/if}
         </div>
       </MenuMobileItem>
-      <MenuMobileItem stopPropagation on:click={openCommunity}>
-        <i class="fa fa-people-pulling" /> Community
-      </MenuMobileItem>
+      {#if $env.FORCE_GROUP}
+        <MenuMobileItem href="/calendar">
+          <i class="fa fa-calendar-days" /> Calendar
+        </MenuMobileItem>
+        <MenuMobileItem href="/market">
+          <i class="fa fa-store" /> Market
+        </MenuMobileItem>
+      {:else}
+        <MenuMobileItem stopPropagation on:click={openCommunity}>
+          <i class="fa fa-people-pulling" /> Community
+        </MenuMobileItem>
+      {/if}
       <MenuMobileItem disabled={!$canSign} href="/channels">
         <i class="fa fa-message" />
         <div class="relative inline-block">

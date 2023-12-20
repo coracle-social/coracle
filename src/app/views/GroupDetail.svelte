@@ -17,6 +17,7 @@
   import GroupMarket from "src/app/shared/GroupMarket.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {
+    env,
     GroupAccess,
     MemberAccess,
     displayGroup,
@@ -73,7 +74,12 @@
   let tabs
 
   $: {
-    tabs = ["notes", "calendar", "market"]
+    tabs = ["notes"]
+
+    if (!$env.FORCE_GROUP) {
+      tabs.push("calendar")
+      tabs.push("market")
+    }
 
     if ($sharedKey) {
       tabs.push("members")

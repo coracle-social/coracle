@@ -133,13 +133,13 @@
 </div>
 
 {#if claim !== null}
-  <Modal>
+  <Modal onEscape={cancelJoin}>
     <Content size="lg">
       <p>If you have an invite code, you can enter it below.</p>
       <Field label="Invite code">
         <Input bind:value={claim} />
       </Field>
-      <div class="flex gap-2 justify-center">
+      <div class="flex justify-center gap-2">
         <Anchor button on:click={cancelJoin}>Cancel</Anchor>
         <Anchor button accent on:click={confirmJoin}>Request access</Anchor>
       </div>
