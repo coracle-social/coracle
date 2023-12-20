@@ -20,6 +20,7 @@
     publishGroupInvites,
     publishGroupEvictions,
     publishGroupMeta,
+    GroupAccess,
   } from "src/engine"
   import {router} from "src/app/router"
 
@@ -68,7 +69,9 @@
     publishGroupEvictions(address, removedMembers)
 
     // Re-publish group info
-    publishGroupMeta(address, $group)
+    if ($group.access !== GroupAccess.Open) {
+      publishGroupMeta(address, false, $group)
+    }
 
     toast.show("info", "Invites have been sent!")
     router.pop()

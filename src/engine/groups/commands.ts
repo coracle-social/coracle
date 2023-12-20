@@ -290,7 +290,7 @@ export const publishGroupInvites = async (address, pubkeys, relays, gracePeriod 
 export const publishGroupEvictions = async (address, pubkeys) =>
   publishKeyShares(address, pubkeys, createEvent(24, {tags: [["a", address]]}))
 
-export const publishGroupMeta = async (address, meta) => {
+export const publishGroupMeta = async (address, isPublic, meta) => {
   const template = createEvent(34550, {
     tags: [
       ["d", meta.id],
@@ -302,9 +302,9 @@ export const publishGroupMeta = async (address, meta) => {
     ],
   })
 
-  return meta.access === GroupAccess.Closed
-    ? publishAsGroupAdminPrivately(address, template, meta.relays)
-    : publishAsGroupAdminPublicly(address, template, meta.relays)
+  return isPublic
+    ? publishAsGroupAdminPublicly(address, template, meta.relays)
+    : publishAsGroupAdminPrivately(address, template, meta.relays)
 }
 
 // Member functions

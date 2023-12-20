@@ -8,6 +8,7 @@
     initGroup,
     publishAdminKeyShares,
     user,
+    GroupAccess,
   } from "src/engine"
   import {router} from "src/app/router"
 
@@ -16,18 +17,18 @@
     image: "",
     description: "",
     isPublic: false,
+    access: GroupAccess.Closed,
     members: [$user],
     relays: [],
   }
 
   const onSubmit = async (values: Values) => {
     const members = pluck("pubkey", values.members)
-    const access = values.isPublic ? "hybrid" : "closed"
     const {id, address} = initGroup(members, values.relays)
 
     await publishAdminKeyShares(address, [$user.pubkey], values.relays)
     await publishGroupInvites(address, members, values.relays)
-    await publishGroupMeta(address, {...values, access, id})
+    await publishGroupMeta(address, values.isPublic, {...values, id})
 
     router.at("groups").of(address).at("members").replace()
   }

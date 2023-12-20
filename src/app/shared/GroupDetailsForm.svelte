@@ -4,6 +4,7 @@
     image: string
     description: string
     isPublic: boolean
+    access: string
     relays: string[]
     members?: Person[]
   }
@@ -18,6 +19,7 @@
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
+  import SelectButton from "src/partials/SelectButton.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Input from "src/partials/Input.svelte"
@@ -26,7 +28,7 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import type {Person} from "src/engine"
-  import {searchRelays, normalizeRelayUrl} from "src/engine"
+  import {GroupAccess, searchRelays, normalizeRelayUrl} from "src/engine"
 
   export let onSubmit
   export let values: Values
@@ -94,7 +96,17 @@
           <div slot="info">All members will receive a fresh invitation with a new key.</div>
         </Field>
       {/if}
-      <FieldInline label="Make Public">
+      <Field label="Access">
+        <SelectButton
+          bind:value={values.access}
+          options={Object.values(GroupAccess)}
+          displayOption={ucFirst} />
+        <div slot="info">
+          Anyone can join and post to open groups. Hybrid and closed groups support an
+          admin-controlled member list which can post privately to the group.
+        </div>
+      </Field>
+      <FieldInline label="List Publicly">
         <Toggle bind:value={values.isPublic} />
         <div slot="info">
           If enabled, this will generate a public listing for the group. The member list and group
