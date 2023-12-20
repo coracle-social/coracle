@@ -156,6 +156,7 @@
     }
 
     if (!showEntire) {
+      hiddenReplies = hiddenReplies.concat(visibleReplies.slice(3))
       visibleReplies = visibleReplies.slice(0, 3)
     }
   }
