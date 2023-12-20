@@ -29,7 +29,7 @@
     class:pointer-events-none={$menuIsOpen}>
     {#if $page}
       {#key getKey($page)}
-        <div class="m-auto flex w-full max-w-2xl flex-grow flex-col gap-4 overflow-x-hidden p-4">
+        <div class="m-auto flex w-full max-w-2xl flex-grow flex-col gap-4 p-4">
           <svelte:component this={$page.route.component} {...getProps($page)} />
         </div>
       {/key}

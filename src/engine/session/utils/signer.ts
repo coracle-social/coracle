@@ -8,13 +8,19 @@ import type {Rumor} from "src/engine/events/model"
 import {withExtension} from "./nip07"
 
 export class Signer {
-  constructor(readonly session: Session | null, readonly ndk: NDK | null) {}
+  constructor(
+    readonly session: Session | null,
+    readonly ndk: NDK | null,
+  ) {}
 
   canSign() {
     return ["bunker", "privkey", "extension"].includes(this.session?.method)
   }
 
   prepWithKey(event: EventTemplate, sk: string) {
+    event = {...event}
+
+    // Copy the event since we're mutating it
     ;(event as UnsignedEvent).pubkey = getPublicKey(sk)
     ;(event as Rumor).id = getEventHash(event as UnsignedEvent)
 
@@ -24,6 +30,8 @@ export class Signer {
   prepAsUser(event: EventTemplate) {
     const {pubkey} = this.session
 
+    // Copy the event since we're mutating it
+    event = {...event}
     ;(event as UnsignedEvent).pubkey = pubkey
     ;(event as Rumor).id = getEventHash(event as UnsignedEvent)
 
