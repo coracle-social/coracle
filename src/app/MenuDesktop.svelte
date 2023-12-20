@@ -1,6 +1,6 @@
 <script lang="ts">
   import {randomId} from "hurdak"
-  import {toggleTheme} from "src/partials/state"
+  import {toggleTheme, appName} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -57,7 +57,7 @@
     external
     href="https://info.coracle.social">
     <img alt="App Logo" src={import.meta.env.VITE_LOGO_URL || "/images/logo.png"} class="w-10" />
-    <h1 class="staatliches text-3xl">Coracle</h1>
+    <h1 class="staatliches text-3xl">{appName}</h1>
   </Anchor>
   <MenuDesktopItem path="/notes" on:click={goToFeed}>Feed</MenuDesktopItem>
   {#if !$env.FORCE_GROUP}
