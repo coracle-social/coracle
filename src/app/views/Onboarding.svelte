@@ -1,7 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {generatePrivateKey} from "nostr-tools"
-  import {closure, sleep} from "hurdak"
+  import {sortBy, inc} from "ramda"
+  import {closure, first, sleep} from "hurdak"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
   import OnboardingKey from "src/app/views/OnboardingKey.svelte"
@@ -11,6 +12,7 @@
   import {
     env,
     user,
+    people,
     mention,
     session,
     loadPubkeys,
@@ -20,6 +22,7 @@
     publishRelays,
     loginWithPrivateKey,
     listenForNotifications,
+    getFollowedPubkeys,
   } from "src/engine"
   import {router} from "src/app/router"
 
@@ -86,9 +89,29 @@
     listenForNotifications()
   }
 
-  onMount(() => {
-    // Prime our database with some defaults
+  onMount(async () => {
+    // Prime our database with our default follows
     loadPubkeys($env.DEFAULT_FOLLOWS)
+
+    // Wait until they're likely loaded
+    await sleep(5000)
+
+    // Load the top 256 other pubkeys by web of trust
+    const pubkeys = new Map()
+
+    for (const follow of $env.DEFAULT_FOLLOWS) {
+      for (const pubkey of getFollowedPubkeys(people.key(follow).get())) {
+        pubkeys.set(pubkey, inc(pubkeys.get(pubkey) || 0))
+      }
+
+      await sleep(10)
+    }
+
+    loadPubkeys(
+      sortBy(([pk, wot]) => -wot, Array.from(pubkeys.entries()))
+        .slice(0, 256)
+        .map(first),
+    )
   })
 </script>
 

@@ -201,29 +201,29 @@ body,
 
 /* Alternating card/modal colors */
 
-.modal .modal .clear-modals {
-  display: block;
-}
-
 .bg-swap,
 .bg-swap .bg-swap-alt,
-.bg-swap .bg-swap .bg-swap {
+.bg-swap .bg-swap .bg-swap,
+.bg-swap .bg-swap .bg-swap .bg-swap-alt {
   background-color: var(--cocoa);
 }
 
 .bg-swap-hover:hover,
 .bg-swap .bg-swap-alt.bg-swap-hover:hover,
-.bg-swap .bg-swap .bg-swap.bg-swap-hover:hover {
+.bg-swap .bg-swap .bg-swap.bg-swap-hover:hover,
+.bg-swap .bg-swap .bg-swap .bg-swap-alt.bg-swap-hover:hover {
   background-color: var(--cocoa-d);
 }
 
 .bg-swap-alt,
 .bg-swap .bg-swap,
-.bg-swap .bg-swap .bg-swap-alt {
+.bg-swap .bg-swap .bg-swap-alt,
+.bg-swap .bg-swap .bg-swap .bg-swap {
   background-color: var(--dark);
 }
 
 .bg-swap-alt.bg-swap-hover:hover,
-.bg-swap .bg-swap.bg-swap-hover:hover {
+.bg-swap .bg-swap.bg-swap-hover:hover,
+.bg-swap .bg-swap. .bg-swap .bg-swap-alt.bg-swap-hover:hover {
   background-color: var(--dark-d);
 }

@@ -8,13 +8,10 @@
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/router"
   import type {DynamicFilter} from "src/engine"
-  import {session, canSign, follows, lists, userLists} from "src/engine"
+  import {session, canSign, lists, userLists} from "src/engine"
 
   export let relays = []
-  export let filter: DynamicFilter = {
-    kinds: noteKinds,
-    authors: $follows.size > 0 ? "follows" : "network",
-  }
+  export let filter: DynamicFilter = {kinds: noteKinds, authors: "follows"}
 
   let key = Math.random()
 

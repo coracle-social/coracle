@@ -35,8 +35,8 @@
 
 <Heading class="text-center">Introduce Yourself</Heading>
 <p>
-  Give other people something to go on. Remember that "privacy is the power to selectively reveal
-  oneself to the world".
+  Give other people something to go on. Your profile information is publicly available, so just
+  remember that "privacy is the power to selectively reveal oneself to the world".
 </p>
 <div class="flex flex-col gap-2">
   <div class="flex flex-col gap-1">

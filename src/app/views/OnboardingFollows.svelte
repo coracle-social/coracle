@@ -10,7 +10,7 @@
   export let petnames
   export let setStage
 
-  const prev = () => setStage($env.FORCE_GROUP ? "follows" : "relays")
+  const prev = () => setStage($env.FORCE_GROUP ? "key" : "relays")
   const next = () => setStage("note")
 
   const addFollow = pubkey => {

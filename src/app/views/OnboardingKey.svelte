@@ -16,14 +16,14 @@
 
   const copyKey = () => {
     copyToClipboard(nsec)
-    toast.show("info", "Your private key has been copied to the clipboard. Keep it secret!")
+    toast.show("info", "Your key has been copied to the clipboard. Keep it secret!")
   }
 </script>
 
-<Heading class="text-center">Generate a Key</Heading>
+<Heading class="text-center">Save Your Key</Heading>
 <p>
-  Your private key is your password, and gives you total control over your Nostr account. We've
-  generated a fresh one for you below – store it somewhere safe!
+  Your key is your password, and gives you total control over your Nostr account. We've generated a
+  fresh one for you below – store it somewhere safe!
 </p>
 <Input disabled placeholder={"•".repeat(53)} wrapperClass="flex-grow">
   <i slot="before" class="fa fa-lock" />
