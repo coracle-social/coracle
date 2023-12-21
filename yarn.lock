@@ -4998,10 +4998,10 @@ pako@~1.0.5:
   resolved "https://registry.npmjs.org/pako/-/pako-1.0.11.tgz"
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
 
-paravel@^0.4.13:
-  version "0.4.13"
-  resolved "https://registry.yarnpkg.com/paravel/-/paravel-0.4.13.tgz#d956ad65b4c646c29ad0fe7ca86ce2c717771f31"
-  integrity sha512-0tunjrsyd9vyKYHKYcbhG0yLXza7GVA80DhbywnYjFFhLCbjpnAev/Eg9wLf3b7jneAV4brPi9ZIJKLtT2Y55Q==
+paravel@^0.4.16:
+  version "0.4.16"
+  resolved "https://registry.yarnpkg.com/paravel/-/paravel-0.4.16.tgz#4a6b4786f61f79dfc9c9b0836d2136aade45af89"
+  integrity sha512-mELARdKdVDHRoKuUhSWxh16cdT4HQPqErOaMSCHT6heNE/BNXQvYQFWm4bZSX9O4dYU3zVrtI+54IkXgvAKXEA==
   dependencies:
     isomorphic-ws "^5.0.0"
     normalize-url "^8.0.0"
