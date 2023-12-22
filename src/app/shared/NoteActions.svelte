@@ -41,6 +41,7 @@
     getEventHints,
     isEventMuted,
     getReplyTags,
+    getClientTags,
   } from "src/engine"
 
   export let note: Event
@@ -77,7 +78,10 @@
 
   const react = async content => {
     const relays = getPublishHints(note)
-    const template = createEvent(7, {content, tags: getReplyTags(note)})
+    const template = createEvent(7, {
+      content,
+      tags: [...getReplyTags(note), ...getClientTags()],
+    })
 
     if (!note.wrap) {
       Publisher.publish({relays, event: asNostrEvent(note)})
@@ -96,8 +100,8 @@
 
   const crossPost = async (address = null) => {
     const relays = getPublishHints(note)
-    const tags = [getIdOrAddressTag(note, relays[0]), mention(note.pubkey)]
     const content = JSON.stringify(asNostrEvent(note))
+    const tags = [getIdOrAddressTag(note, relays[0]), mention(note.pubkey), ...getClientTags()]
 
     let template
     if (note.kind === 1) {

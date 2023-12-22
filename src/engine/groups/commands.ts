@@ -4,7 +4,7 @@ import {without, partition, prop} from "ramda"
 import {updateIn, randomId, filterVals} from "hurdak"
 import {Naddr} from "src/util/nostr"
 import {updateRecord} from "src/engine/core/commands"
-import {Publisher} from "src/engine/network/utils"
+import {Publisher, getClientTags} from "src/engine/network/utils"
 import {pubkey} from "src/engine/session/state"
 import {nip59, signer, session} from "src/engine/session/derived"
 import {updateSession} from "src/engine/session/commands"
@@ -265,6 +265,7 @@ export const publishAdminKeyShares = async (address, pubkeys, relays) => {
       ["a", address],
       ["role", "admin"],
       ["privkey", privkey],
+      ...getClientTags(),
       ...relays.map(url => ["relay", url]),
     ],
   })
@@ -280,6 +281,7 @@ export const publishGroupInvites = async (address, pubkeys, relays, gracePeriod 
       ["role", "member"],
       ["privkey", privkey],
       ["grace_period", String(gracePeriod)],
+      ...getClientTags(),
       ...relays.map(url => ["relay", url]),
     ],
   })
@@ -288,7 +290,13 @@ export const publishGroupInvites = async (address, pubkeys, relays, gracePeriod 
 }
 
 export const publishGroupEvictions = async (address, pubkeys) =>
-  publishKeyShares(address, pubkeys, createEvent(24, {tags: [["a", address]]}))
+  publishKeyShares(
+    address,
+    pubkeys,
+    createEvent(24, {
+      tags: [["a", address], ...getClientTags()],
+    }),
+  )
 
 export const publishGroupMeta = async (address, isPublic, meta) => {
   const template = createEvent(34550, {
@@ -298,6 +306,7 @@ export const publishGroupMeta = async (address, isPublic, meta) => {
       ["image", meta.image],
       ["description", meta.description],
       ["access", meta.access],
+      ...getClientTags(),
       ...meta.relays.map(url => ["relay", url]),
     ],
   })
@@ -325,7 +334,7 @@ export const resetMemberAccess = address =>
 export const publishGroupEntryRequest = (address, claim = null) => {
   setGroupStatus(pubkey.get(), address, now(), {access: MemberAccess.Requested})
 
-  const tags = [["a", address]]
+  const tags = [...getClientTags(), ["a", address]]
 
   if (claim) {
     tags.push(["claim", claim])
@@ -347,7 +356,7 @@ export const publishGroupExitRequest = address => {
     address,
     createEvent(26, {
       content: `${displayPubkey(pubkey.get())} is leaving the group`,
-      tags: [["a", address]],
+      tags: [...getClientTags(), ["a", address]],
     }),
   )
 }

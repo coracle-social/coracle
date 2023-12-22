@@ -111,6 +111,13 @@
         and to diagnose and fix bugs.
       </p>
     </FieldInline>
+    <FieldInline label="Enable client fingerprinting">
+      <Toggle bind:value={settings.enable_client_tag} />
+      <p slot="info">
+        If this is turned on, public notes you create will have a "client" tag added. This helps
+        with troubleshooting, and allows other people to find out about {appName}.
+      </p>
+    </FieldInline>
     <Anchor button tag="button" type="submit">Save</Anchor>
   </div>
 </form>

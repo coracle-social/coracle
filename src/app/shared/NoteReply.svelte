@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "paravel"
+  import {Tags, createEvent} from "paravel"
   import {createEventDispatcher} from "svelte"
   import {join, without, identity, uniq} from "ramda"
   import {getGroupAddress, asNostrEvent} from "src/util/nostr"
@@ -13,9 +13,10 @@
   import {
     env,
     Publisher,
-    buildReply,
     writable,
     publishToZeroOrMoreGroups,
+    getClientTags,
+    getReplyTags,
     session,
     getPublishHints,
     displayPubkey,
@@ -93,7 +94,7 @@
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
-    const tags = mentions.map(mention)
+    const tags = [...mentions.map(mention), ...getReplyTags(parent, true), ...getClientTags()]
 
     for (const imeta of images.getValue()) {
       tags.push(["imeta", ...imeta.all().map(join(" "))])
@@ -108,7 +109,7 @@
       Publisher.publish({relays: opts.relays, event: asNostrEvent(parent)})
     }
 
-    const template = buildReply(parent, content, tags)
+    const template = createEvent(1, {content, tags})
     const addresses = [getGroupAddress(parent)].filter(identity)
     const {pubs} = await publishToZeroOrMoreGroups(addresses, template, opts)
 

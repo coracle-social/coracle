@@ -10,11 +10,16 @@ import {people} from "src/engine/people/state"
 import {displayPerson} from "src/engine/people/utils"
 import {getUserHints, getEventHints, getPubkeyHint} from "src/engine/relays/utils"
 import {env} from "src/engine/session/state"
+import {getSetting} from "src/engine/session/utils"
 import {signer} from "src/engine/session/derived"
 import {projections} from "src/engine/core/projections"
 import {getUrls, getExecutor} from "./executor"
 
-export const getClientTag = () => {
+export const getClientTags = () => {
+  if (!getSetting("enable_client_tag")) {
+    return []
+  }
+
   const {CLIENT_NAME = "", CLIENT_ID} = env.get()
   const tag = ["client", CLIENT_NAME]
 
@@ -22,7 +27,7 @@ export const getClientTag = () => {
     tag.push(CLIENT_ID)
   }
 
-  return tag
+  return [tag]
 }
 
 export type PublisherOpts = {

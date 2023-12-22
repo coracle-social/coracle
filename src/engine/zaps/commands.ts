@@ -3,6 +3,7 @@ import {createEvent} from "paravel"
 import {generatePrivateKey} from "nostr-tools"
 import {warn} from "src/util/logger"
 import {signer} from "src/engine/session/derived"
+import {getClientTags} from "src/engine/network/utils"
 import {getZapperForPubkey} from "./utils"
 
 export const requestZap = async (
@@ -18,6 +19,7 @@ export const requestZap = async (
 
   const msats = amount * 1000
   const tags = [
+    ...getClientTags(),
     ["relays", ...relays],
     ["amount", msats.toString()],
     ["lnurl", zapper.lnurl],

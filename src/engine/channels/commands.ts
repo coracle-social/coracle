@@ -3,7 +3,7 @@ import {assoc, uniq, map} from "ramda"
 import {createMapOf} from "hurdak"
 import {now} from "paravel"
 import {appDataKeys} from "src/util/nostr"
-import {Publisher, mention} from "src/engine/network/utils"
+import {Publisher, getClientTags, mention} from "src/engine/network/utils"
 import {getPubkeyHints} from "src/engine/relays/utils"
 import {user, nip59} from "src/engine/session/derived"
 import {setAppData} from "src/engine/session/commands"
@@ -15,7 +15,7 @@ export const createMessage = (channelId: string, content: string) => {
     content,
     kind: 14,
     created_at: now(),
-    tags: recipients.map(mention),
+    tags: [...recipients.map(mention), ...getClientTags()],
   }
 
   for (const pubkey of uniq(recipients.concat(user.get().pubkey))) {

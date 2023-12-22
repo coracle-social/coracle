@@ -14,9 +14,3 @@ export const publishDeletion = (ids, relays = null) =>
 
 export const publishDeletionForEvent = (event, relays = null) =>
   publishDeletion(getIdAndAddress(event), relays)
-
-export const buildReply = (parent, content, tags = []) =>
-  createEvent(1, {content, tags: [...tags, ...getReplyTags(parent, true)]})
-
-export const buildReaction = (parent, content = "", tags = []) =>
-  createEvent(7, {content, tags: [...tags, ...getReplyTags(parent)]})

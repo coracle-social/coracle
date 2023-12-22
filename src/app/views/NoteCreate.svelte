@@ -35,6 +35,7 @@
     session,
     writable,
     getEventHints,
+    getClientTags,
     publishToZeroOrMoreGroups,
     deriveMembershipLevel,
     getGroupPublishHints,
@@ -99,7 +100,7 @@
   }
 
   const onSubmit = async ({skipNsecWarning = false} = {}) => {
-    const tags = []
+    const tags = getClientTags()
     const content = compose.parse().trim()
 
     if (!content) return toast.show("error", "Please provide a description.")
