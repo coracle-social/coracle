@@ -38,7 +38,7 @@
         <p slot="info">The default amount of sats to use when sending a lightning tip.</p>
       </Field>
       <FieldInline label="Bitcoin Connect"> 
-        <bc-button style="--bc-color-brand: #fb652c" ></bc-button>
+        <bc-button></bc-button>
         <p slot="info">Connect you wallet using Bitcoin Connect for One-Click Zaps!</p>
       </FieldInline>
       <Field>
