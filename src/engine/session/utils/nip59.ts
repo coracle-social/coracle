@@ -1,5 +1,5 @@
 import type {UnsignedEvent} from "nostr-tools"
-import {getPublicKey} from "nostr-tools"
+import {getPublicKey} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import type {Session} from "src/engine/session/model"
 import type {Signer} from "./signer"

@@ -1,6 +1,6 @@
 import {Fetch} from "hurdak"
 import {createEvent} from "paravel"
-import {generatePrivateKey} from "nostr-tools"
+import {generatePrivateKey} from "src/util/nostr"
 import {warn} from "src/util/logger"
 import {signer} from "src/engine/session/derived"
 import {getClientTags} from "src/engine/network/utils"

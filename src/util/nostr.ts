@@ -1,8 +1,26 @@
 import {Tags} from "paravel"
-import {nip19} from "nostr-tools"
+import {schnorr} from "@noble/curves/secp256k1"
+import {bytesToHex} from "@noble/hashes/utils"
+import {nip19, generateSecretKey, getEventHash, getPublicKey as getPk} from "nostr-tools"
 import {pick, is, mergeLeft, identity} from "ramda"
 import {between, avg} from "hurdak"
 import type {Filter, Event} from "src/engine"
+
+export const generatePrivateKey = () => new TextDecoder().decode(generateSecretKey())
+export const getPublicKey = (sk: string) => getPk(new TextEncoder().encode(sk))
+export const getSignature = (e, sk: string) => bytesToHex(schnorr.sign(getEventHash(e), sk))
+
+export const isKeyValid = (key: string) => {
+  // Validate the key before setting it to state by encoding it using bech32.
+  // This will error if invalid (this works whether it's a public or a private key)
+  try {
+    getPublicKey(key)
+  } catch (e) {
+    return false
+  }
+
+  return true
+}
 
 export const noteKinds = [1, 30023, 1063, 9802, 1808, 32123, 31923, 30402]
 export const personKinds = [0, 2, 3, 10000, 10002]

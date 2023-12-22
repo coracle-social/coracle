@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {generatePrivateKey} from "nostr-tools"
   import {sortBy, inc} from "ramda"
   import {closure, first, sleep} from "hurdak"
+  import {generatePrivateKey} from "src/util/nostr"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
   import OnboardingKey from "src/app/views/OnboardingKey.svelte"

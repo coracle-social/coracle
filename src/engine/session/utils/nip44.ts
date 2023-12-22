@@ -1,5 +1,5 @@
 import {join} from "ramda"
-import {v2} from "nip44/index"
+import {nip44} from "nostr-tools"
 import {cached} from "paravel"
 import {switcher, switcherFn} from "hurdak"
 import type {Session} from "src/engine/session/model"
@@ -8,7 +8,7 @@ import type {Session} from "src/engine/session/model"
 export const getSharedSecret = cached({
   maxSize: 100,
   getKey: join(":"),
-  getValue: ([sk, pk]: string[]) => v2.utils.getConversationKey(sk, pk),
+  getValue: ([sk, pk]: string[]) => nip44.v2.utils.getConversationKey(sk, pk),
 })
 
 export class Nip44 {
@@ -25,11 +25,11 @@ export class Nip44 {
   }
 
   encrypt(message: string, pk: string, sk: string) {
-    return v2.encrypt(message, getSharedSecret(sk, pk))
+    return nip44.v2.encrypt(message, getSharedSecret(sk, pk))
   }
 
   decrypt(payload: string, pk: string, sk: string) {
-    return v2.decrypt(payload, getSharedSecret(sk, pk))
+    return nip44.v2.decrypt(payload, getSharedSecret(sk, pk))
   }
 
   encryptAsUser(message: string, pk: string) {

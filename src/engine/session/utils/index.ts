@@ -1,4 +1,3 @@
-export * from "./core"
 export * from "./ndk"
 export * from "./nip04"
 export * from "./nip07"

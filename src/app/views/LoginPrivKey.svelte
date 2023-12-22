@@ -1,12 +1,12 @@
 <script lang="ts">
   import {Capacitor} from "@capacitor/core"
-  import {toHex} from "src/util/nostr"
+  import {isKeyValid, toHex} from "src/util/nostr"
   import {toast, appName} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {isKeyValid, loginWithPrivateKey} from "src/engine"
+  import {loginWithPrivateKey} from "src/engine"
   import {boot} from "src/app/state"
 
   let nsec = ""

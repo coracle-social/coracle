@@ -1,5 +1,5 @@
 import {createEvent} from "paravel"
-import {generatePrivateKey} from "nostr-tools"
+import {generatePrivateKey} from "src/util/nostr"
 import {signer} from "src/engine/session/derived"
 import {getUserHints} from "src/engine/relays/utils"
 import {Publisher} from "src/engine/network/utils"

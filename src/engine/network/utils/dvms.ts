@@ -1,6 +1,6 @@
 import {now} from "paravel"
 import {seconds} from "hurdak"
-import {generatePrivateKey} from "nostr-tools"
+import {generatePrivateKey} from "src/util/nostr"
 import {getUserHints} from "src/engine/relays/utils"
 import type {Event} from "src/engine/events/model"
 import {createAndPublish} from "./publish"

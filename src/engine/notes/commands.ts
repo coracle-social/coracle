@@ -1,7 +1,6 @@
-import {createEvent} from "paravel"
 import {getIdAndAddress} from "src/util/nostr"
 import {getUserHints} from "src/engine/relays/utils"
-import {createAndPublish, getReplyTags} from "src/engine/network/utils"
+import {createAndPublish} from "src/engine/network/utils"
 
 export const publishNote = (content, tags = [], relays = null) =>
   createAndPublish(1, {content, tags, relays})

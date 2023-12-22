@@ -1,11 +1,11 @@
 <script lang="ts">
-  import {toHex} from "src/util/nostr"
+  import {isKeyValid, toHex} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {isKeyValid, loginWithNsecBunker} from "src/engine"
+  import {loginWithNsecBunker} from "src/engine"
   import {boot} from "src/app/state"
     import { nip05 } from "nostr-tools"
 

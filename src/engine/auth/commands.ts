@@ -1,7 +1,7 @@
 import crypto from "crypto"
 import {Fetch} from "hurdak"
 import {createEvent} from "paravel"
-import {generatePrivateKey} from "nostr-tools"
+import {generatePrivateKey} from "src/util/nostr"
 import {signer} from "src/engine/session/derived"
 
 export const nip98Fetch = async (url, method, body = null) => {
