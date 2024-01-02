@@ -12,6 +12,16 @@ export const prepareNdk = ({pubkey, bunkerKey, bunkerToken, bunkerRelay}) => {
   })
 
   const nip46Signer = new NDKNip46Signer(instance, pubkey, localSigner)
+  nip46Signer.on("authUrl", (url) => {
+    const popup = window.open(url, "bunker-auth", "width=600,height=600");
+
+    if (!popup) {
+      // parse the url and add a callbackUrl with the current domain and /bunker-callback
+      const urlObj = new URL(url)
+      urlObj.searchParams.set("callbackUrl", `${window.location.origin}/bunker-callback`)
+      window.location.href = urlObj.toString()
+    }
+  })
 
   nip46Signer.token = bunkerToken
 
