@@ -127,6 +127,7 @@
         lnurl: zapper.lnurl,
         anonymous: Boolean(note.wrap),
       })
+      .cx({callback: addToContext})
       .open()
 
   const broadcast = () => {

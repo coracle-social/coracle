@@ -24,6 +24,7 @@
   export let relays = null
   export let lnurl = null
   export let anonymous = false
+  export let callback = null
 
   let sub, unmounted
 
@@ -64,6 +65,8 @@
       relays: hints,
       onEvent: event => {
         zap.confirmed = true
+
+        callback?.(event)
 
         setTimeout(() => {
           if (!unmounted) {
