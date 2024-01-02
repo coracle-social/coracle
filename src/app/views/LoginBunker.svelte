@@ -24,6 +24,9 @@
         // pass
       }
     } else if (input.match(/@/)) {
+      /**
+       * Check if this is looks like a nip05 profile.
+       */
       const profile = await nip05.queryProfile(input);
       if (profile) {
         r.pubkey = profile.pubkey;
