@@ -15,7 +15,6 @@
   export let multiple = false
   export let defaultOptions = []
 
-
   let term = multiple ? "" : getKey(value)
   let input, suggestions, popover
   let focused = false
@@ -26,14 +25,13 @@
     if (popover) {
       if (focused && term) {
         popover.show()
-
       } else {
         popover.hide()
       }
 
       const {popper, reference} = popover
 
-      popper.style.width = reference.clientWidth - 2 + 'px'
+      popper.style.width = reference.clientWidth - 2 + "px"
     }
   }
 
@@ -70,7 +68,7 @@
     if (event.key === "Enter") {
       event.preventDefault()
 
-      if (suggestions.get()) {
+      if (suggestions?.get()) {
         select(suggestions.get())
       } else if (term && termToItem) {
         create(term)
@@ -94,9 +92,9 @@
 
   const onBlur = () => {
     setTimeout(() => {
-     focused = false
+      focused = false
 
-     if (multiple) {
+      if (multiple) {
         term = ""
       }
     }, 100)
@@ -115,7 +113,11 @@
   </div>
 {/if}
 
-<Popover theme="transparent" placement="bottom-start" bind:instance={popover} opts={{maxWidth: 'none'}}>
+<Popover
+  theme="transparent"
+  placement="bottom-start"
+  bind:instance={popover}
+  opts={{maxWidth: "none"}}>
   <div slot="trigger">
     <Input
       class="cursor-text text-black outline-0"

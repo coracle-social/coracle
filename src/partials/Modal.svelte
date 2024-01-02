@@ -11,7 +11,7 @@
 
   const {history} = router
 
-  let root, content, closing, historyItem
+  let root, content, closing, historyItem, isNested
 
   const tryClose = () => {
     if (!canClose) {
@@ -52,6 +52,7 @@
       router.virtual().open({key: randomId(), mini})
     }
 
+    isNested = $history.slice(1).some(item => item.config.modal)
     historyItem = $history[0]
 
     // If history changes and removes this modal, notify the caller if virtual
@@ -105,7 +106,8 @@
             </div>
             <div
               on:click|stopPropagation={() => router.clearModals()}
-              class="clear-modals pointer-events-auto flex hidden h-10 w-10 cursor-pointer items-center justify-center
+              class:hidden={!isNested}
+              class="clear-modals pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center
                      rounded-full border border-solid border-cocoa bg-mid text-lightest transition-colors hover:bg-mid">
               <i class="fa fa-angles-down fa-lg" />
             </div>

@@ -9,7 +9,7 @@ import type {Event, NostrEvent} from "src/engine/events/model"
 import {people} from "src/engine/people/state"
 import {displayPerson} from "src/engine/people/utils"
 import {getUserHints, getEventHints, getPubkeyHint} from "src/engine/relays/utils"
-import {env} from "src/engine/session/state"
+import {env, pubkey} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
 import {signer} from "src/engine/session/derived"
 import {projections} from "src/engine/core/projections"
@@ -209,11 +209,14 @@ export const getReplyTags = (parent: Event, inherit = false) => {
   const hints = getEventHints(parent)
   const replyTags = [mention(parent.pubkey)]
   const replyTagValues = getIdAndAddress(parent)
+  const userPubkey = pubkey.get()
 
   // Inherit p-tag mentions
   if (inherit) {
     for (const pubkey of tags.type("p").values().all()) {
-      replyTags.push(mention(pubkey))
+      if (pubkey !== userPubkey) {
+        replyTags.push(mention(pubkey))
+      }
     }
   }
 

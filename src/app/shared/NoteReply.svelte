@@ -13,6 +13,7 @@
   import {
     env,
     Publisher,
+    uniqTags,
     writable,
     publishToZeroOrMoreGroups,
     getClientTags,
@@ -94,7 +95,11 @@
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
-    const tags = [...mentions.map(mention), ...getReplyTags(parent, true), ...getClientTags()]
+    const tags = uniqTags([
+      ...mentions.map(mention),
+      ...getReplyTags(parent, true),
+      ...getClientTags(),
+    ])
 
     for (const imeta of images.getValue()) {
       tags.push(["imeta", ...imeta.all().map(join(" "))])
