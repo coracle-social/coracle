@@ -1,6 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {createEventDispatcher} from "svelte"
+  import AlternatingBackground from "src/partials/AlternatingBackground.svelte"
 
   export let interactive = false
   export let stopPropagation = false
@@ -39,12 +40,8 @@
   }
 </script>
 
-<div
-  on:mousedown={startClick}
-  on:touchstart={startClick}
-  on:click={onClick}
-  class={cx($$props.class, "bg-swap rounded bg-cocoa p-3 text-lightest", {
-    "bg-swap-hover cursor-pointer transition-all": interactive,
-  })}>
-  <slot />
+<div on:mousedown={startClick} on:touchstart={startClick} on:click={onClick}>
+  <AlternatingBackground {interactive} class={cx($$props.class, "rounded p-3 text-lightest")}>
+    <slot />
+  </AlternatingBackground>
 </div>

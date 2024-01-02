@@ -16,6 +16,7 @@
   } from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
+  import AlternatingBackground from "src/partials/AlternatingBackground.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
@@ -238,11 +239,11 @@
   <NoteMeta note={event} {showGroup} />
   <div class="note relative" class:py-2={!showParent && !topLevel}>
     {#if !showParent && !topLevel}
-      <div class="absolute -left-4 h-px w-4 bg-cocoa" style="top: 27px;" />
+      <AlternatingBackground class="absolute -left-4 h-px w-4" style="top: 27px;" />
       {#if isLastReply}
-        <div class="absolute -left-4 w-px bg-cocoa" style="height: 19px;" />
+        <AlternatingBackground class="absolute -left-4 w-px" style="height: 19px;" />
       {:else}
-        <div class="absolute -left-4 h-full w-px bg-cocoa" />
+        <AlternatingBackground class="absolute -left-4 h-full w-px" />
       {/if}
     {/if}
     <div class="group relative">
@@ -355,10 +356,10 @@
             Show {quantify(hiddenReplies.length, "other reply", "more replies")}
           </button>
           {#if visibleReplies.length > 0}
-            <div class="absolute -left-4 -top-2 h-14 w-px bg-cocoa" />
+            <AlternatingBackground class="absolute -left-4 -top-2 h-14 w-px" />
           {/if}
         {:else if visibleReplies.length > 0}
-          <div class="absolute -left-4 -top-2 h-4 w-px bg-cocoa" />
+          <AlternatingBackground class="absolute -left-4 -top-2 h-4 w-px" />
         {/if}
         {#if visibleReplies.length}
           <div in:fly={{y: 20}} class="-mb-2">

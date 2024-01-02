@@ -2,6 +2,7 @@
   import {randomId} from "hurdak"
   import {onMount} from "svelte"
   import {fly, fade} from "src/util/transition"
+  import AlternatingBackground from "src/partials/AlternatingBackground.svelte"
   import {router} from "src/app/router"
 
   export let mini = false
@@ -30,7 +31,7 @@
 
     // If there's another modal in the list after this one, skip if it's not already closing
     const next = root.nextElementSibling
-    if (next?.classList.contains('modal') && !next?.classList.contains('pointer-events-none')) {
+    if (next?.classList.contains("modal") && !next?.classList.contains("pointer-events-none")) {
       return
     }
 
@@ -113,13 +114,14 @@
             </div>
           </div>
         {/if}
-        <div class="bg-swap absolute mt-12 h-full w-full" />
-        <div
-          class="bg-swap relative h-full w-full cursor-auto overflow-hidden rounded-t-2xl pb-10 pt-2"
-          on:click|stopPropagation>
-          <div class="m-auto flex max-w-2xl flex-col gap-4 p-2">
-            <slot />
-          </div>
+        <AlternatingBackground class="absolute mt-12 h-full w-full" />
+        <div on:click|stopPropagation>
+          <AlternatingBackground
+            class="relative h-full w-full cursor-auto overflow-hidden rounded-t-2xl pb-10 pt-2">
+            <div class="m-auto flex max-w-2xl flex-col gap-4 p-2">
+              <slot />
+            </div>
+          </AlternatingBackground>
         </div>
       </div>
     </div>

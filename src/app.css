@@ -198,32 +198,3 @@ body,
   box-decoration-break: clone;
   padding: 1px 0.2em;
 }
-
-/* Alternating card/modal colors */
-
-.bg-swap,
-.bg-swap .bg-swap-alt,
-.bg-swap .bg-swap .bg-swap,
-.bg-swap .bg-swap .bg-swap .bg-swap-alt {
-  background-color: var(--cocoa);
-}
-
-.bg-swap-hover:hover,
-.bg-swap .bg-swap-alt.bg-swap-hover:hover,
-.bg-swap .bg-swap .bg-swap.bg-swap-hover:hover,
-.bg-swap .bg-swap .bg-swap .bg-swap-alt.bg-swap-hover:hover {
-  background-color: var(--cocoa-d);
-}
-
-.bg-swap-alt,
-.bg-swap .bg-swap,
-.bg-swap .bg-swap .bg-swap-alt,
-.bg-swap .bg-swap .bg-swap .bg-swap {
-  background-color: var(--dark);
-}
-
-.bg-swap-alt.bg-swap-hover:hover,
-.bg-swap .bg-swap.bg-swap-hover:hover,
-.bg-swap .bg-swap. .bg-swap .bg-swap-alt.bg-swap-hover:hover {
-  background-color: var(--dark-d);
-}

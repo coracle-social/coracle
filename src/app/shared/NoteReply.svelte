@@ -5,6 +5,7 @@
   import {getGroupAddress, asNostrEvent} from "src/util/nostr"
   import {slide} from "src/util/transition"
   import ImageInput from "src/partials/ImageInput.svelte"
+  import AlternatingBackground from "src/partials/AlternatingBackground.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
@@ -33,7 +34,7 @@
 
   const nsecWarning = writable(null)
 
-  let images, compose, container, options
+  let images, compose, container, options, border
   let isOpen = false
   let mentions = []
   let draft = ""
@@ -140,13 +141,13 @@
 {#if isOpen || forceOpen}
   <div
     transition:slide|local
-    class="note-reply bg-swap relative z-feature my-2 flex flex-col gap-1"
+    class="note-reply relative z-feature my-2 flex flex-col gap-1"
     bind:this={container}
     on:click|stopPropagation>
     {#if showBorder}
-      <div class="bg-swap-alt absolute bottom-0 left-4 top-0 z-none -my-2 w-px" />
+      <AlternatingBackground class="absolute bottom-0 left-4 top-0 z-none -my-2 w-px" />
     {/if}
-    <div class="z-feature overflow-hidden rounded">
+    <AlternatingBackground class="z-feature overflow-hidden rounded">
       <div class="p-3 text-lightest" class:rounded-b={mentions.length === 0}>
         <Compose bind:this={compose} onSubmit={() => send()} style="min-height: 4rem">
           <div class="flex flex-col justify-start" slot="addon">
@@ -185,7 +186,7 @@
           <div class="-mb-2" />
         </div>
       </div>
-    </div>
+    </AlternatingBackground>
   </div>
 {/if}
 
