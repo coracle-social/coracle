@@ -19,6 +19,7 @@
     groupAdminKeys,
     publishGroupInvites,
     publishGroupEvictions,
+    publishGroupMembers,
     publishGroupMeta,
     GroupAccess,
   } from "src/engine"
@@ -30,7 +31,7 @@
 
   const group = groups.key(address)
   const adminKey = deriveAdminKeyForGroup(address)
-  const initialMembers = uniq(without(removeMembers, [...$adminKey.members, ...addMembers]))
+  const initialMembers = uniq(without(removeMembers, [...$group.members, ...addMembers]))
 
   const onSubmit = () => {
     if (!soft) {
@@ -62,11 +63,17 @@
       })
     })
 
-    // Send new invites
-    publishGroupInvites(address, newMembers, $group.relays)
+    // Add members
+    if (newMembers.length > 0) {
+      publishGroupMembers(address, "add", newMembers)
+      publishGroupInvites(address, newMembers, $group.relays)
+    }
 
-    // Send evictions
-    publishGroupEvictions(address, removedMembers)
+    // Remove members
+    if (removedMembers.length > 0) {
+      publishGroupMembers(address, "remove", removedMembers)
+      publishGroupEvictions(address, removedMembers)
+    }
 
     // Re-publish group info
     if ($group.access !== GroupAccess.Open) {

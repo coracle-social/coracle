@@ -34,7 +34,7 @@
 
   const nsecWarning = writable(null)
 
-  let images, compose, container, options, border
+  let images, compose, container, options
   let isOpen = false
   let mentions = []
   let draft = ""

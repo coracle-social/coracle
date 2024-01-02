@@ -3,7 +3,7 @@ import {without, partition, prop} from "ramda"
 import {updateIn, randomId, filterVals} from "hurdak"
 import {generatePrivateKey, getPublicKey, Naddr} from "src/util/nostr"
 import {updateRecord} from "src/engine/core/commands"
-import {Publisher, getClientTags} from "src/engine/network/utils"
+import {Publisher, getClientTags, mention} from "src/engine/network/utils"
 import {pubkey} from "src/engine/session/state"
 import {nip59, signer, session} from "src/engine/session/derived"
 import {updateSession} from "src/engine/session/commands"
@@ -84,16 +84,22 @@ export const getGroupPublishRelays = (address, overrides = null) => {
 
 export const publishToGroupAdmin = async (address, template) => {
   const group = groups.key(address).get()
-  const {pubkey} = Naddr.fromTagValue(address)
+  const naddr = Naddr.fromTagValue(address)
   const relays = group?.relays || getUserHints("write")
-  const rumor = await nip59.get().wrap(template, {
-    wrap: {
-      author: generatePrivateKey(),
-      recipient: pubkey,
-    },
-  })
+  const pubkeys = [naddr.pubkey, session.get().pubkey]
 
-  return Publisher.publish({event: rumor.wrap, relays})
+  return await Promise.all(
+    pubkeys.map(async pubkey => {
+      const rumor = await nip59.get().wrap(template, {
+        wrap: {
+          author: generatePrivateKey(),
+          recipient: pubkey,
+        },
+      })
+
+      return Publisher.publish({event: rumor.wrap, relays})
+    }),
+  )
 }
 
 export const publishAsGroupAdminPublicly = async (address, template, relays = null) => {
@@ -296,6 +302,14 @@ export const publishGroupEvictions = async (address, pubkeys) =>
       tags: [["a", address], ...getClientTags()],
     }),
   )
+
+export const publishGroupMembers = async (address, op, pubkeys) => {
+  const template = createEvent(27, {
+    tags: [["op", op], ["a", address], ...getClientTags(), ...pubkeys.map(mention)],
+  })
+
+  return publishAsGroupAdminPrivately(address, template)
+}
 
 export const publishGroupMeta = async (address, isPublic, meta) => {
   const template = createEvent(34550, {

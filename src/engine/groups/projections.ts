@@ -1,6 +1,6 @@
-import {uniq, mergeRight, assoc} from "ramda"
+import {uniq, without, mergeRight, assoc} from "ramda"
 import {Tags} from "paravel"
-import {updateIn} from "hurdak"
+import {updateIn, switcherFn} from "hurdak"
 import {getPublicKey} from "nostr-tools"
 import {Naddr, LOCAL_RELAY_URL} from "src/util/nostr"
 import {projections} from "src/engine/core/projections"
@@ -39,7 +39,6 @@ projections.addHandler(24, (e: Event) => {
       group: address,
       created_at: e.created_at,
       hints: relays,
-      members: [],
       ...$key,
     }))
 
@@ -117,6 +116,24 @@ projections.addHandler(10004, (e: Event) => {
   sessions.update(assoc(e.pubkey, $session))
 })
 
+projections.addHandler(27, (e: Event) => {
+  const tags = Tags.from(e)
+  const address = tags.communities().first()
+  const op = tags.type("op").values().first()
+  const pubkeys = tags.type("p").values().all()
+
+  groups.key(address).update(
+    updateIn("members", members =>
+      switcherFn(op, {
+        add: () => uniq(pubkeys.concat(members)),
+        remove: () => without([pubkeys], members),
+        set: () => pubkeys,
+        default: () => members,
+      }),
+    ),
+  )
+})
+
 // Membership access/exit requests
 
 const handleGroupRequest = access => (e: Event) => {
@@ -149,15 +166,9 @@ projections.addGlobalHandler((e: Event) => {
     return
   }
 
-  const sharedKey = groupSharedKeys.key(e.wrap.pubkey)
-
-  if (sharedKey.exists()) {
-    // Publish the unwrapped event to our local relay so active subscriptions get notified
+  // Publish the unwrapped event to our local relay so active subscriptions get notified
+  if (groupSharedKeys.key(e.wrap.pubkey).exists()) {
     getExecutor([LOCAL_RELAY_URL]).publish(e)
-
-    sharedKey.update(
-      updateIn("members", (members?: string[]) => uniq([...(members || []), e.pubkey])),
-    )
   }
 })
 

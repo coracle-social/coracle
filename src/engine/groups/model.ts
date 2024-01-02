@@ -28,6 +28,7 @@ export type Group = {
   name?: string
   image?: string
   description?: string
+  members?: string[]
   moderators?: string[]
   access?: GroupAccess
 }
@@ -37,7 +38,6 @@ export type GroupKey = {
   pubkey: string
   privkey: string
   created_at: number
-  members: string[]
   hints?: string[]
 }
 
