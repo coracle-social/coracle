@@ -2,7 +2,9 @@
   import {getProps} from "src/util/router"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import SearchResults from "src/app/shared/SearchResults.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
+  import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import {menuIsOpen, searchTerm} from "src/app/state"
   import {router} from "src/app/router"
   import {env, pubkey, hasNewNotifications, hasNewMessages} from "src/engine"
@@ -10,26 +12,18 @@
   let innerWidth = 0
   let searchInput
 
-  const {page, modal} = router
+  const {page} = router
 
   const openMenu = () => menuIsOpen.set(true)
 
-  const openSearch = () => {
-    router.at("/search").open()
+  const openSearch = () => router.at("/search").open()
 
-    // Hack to keep focus
-    const interval = setInterval(() => {
-      const searchIsOpen = $modal?.path === "/search"
-      const searchIsFocused = document.activeElement === searchInput
+  const onSearchBlur = () => setTimeout(() => searchTerm.set(null), 100)
 
-      if (!searchIsFocused && !searchIsOpen) {
-        clearInterval(interval)
-      } else if (!searchIsFocused) {
-        searchInput?.focus()
-      } else if (!searchIsOpen) {
-        searchInput?.blur()
-      }
-    }, 300)
+  const onSearchKeydown = e => {
+    if (e.key === "Escape") {
+      searchTerm.set(null)
+    }
   }
 
   const createNote = () => {
@@ -70,12 +64,30 @@
 {#if innerWidth >= 1024}
   <div
     class="fixed left-0 right-0 top-0 z-nav flex h-16 items-center justify-end gap-8 bg-dark-d px-4">
-    <div class="flex" on:click={openSearch}>
-      <Input
-        class="h-7 !rounded border-mid !bg-dark !px-2 py-px text-warm outline-none"
-        bind:element={searchInput}
-        bind:value={$searchTerm} />
-      <Anchor button class="z-feature -ml-2">Search</Anchor>
+    <div class="relative">
+      <div class="flex">
+        <Input
+          class="h-7 !rounded border-mid !bg-dark !px-2 py-px text-warm outline-none"
+          on:blur={onSearchBlur}
+          on:keydown={onSearchKeydown}
+          bind:element={searchInput}
+          bind:value={$searchTerm} />
+        <Anchor button class="z-feature -ml-2">Search</Anchor>
+      </div>
+      {#if $searchTerm}
+        <div
+          class="absolute right-0 top-10 max-h-[70vh] w-96 overflow-auto rounded bg-cocoa shadow-2xl">
+          <SearchResults term={$searchTerm}>
+            <div slot="result" let:result class="px-4 py-2 transition-colors hover:bg-dark">
+              {#if result.type === "topic"}
+                #{result.topic.name}
+              {:else if result.type === "profile"}
+                <PersonBadge pubkey={result.id} />
+              {/if}
+            </div>
+          </SearchResults>
+        </div>
+      {/if}
     </div>
     <Anchor button accent on:click={createNote}>Post +</Anchor>
   </div>

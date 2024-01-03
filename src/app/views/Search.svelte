@@ -1,6 +1,4 @@
 <script lang="ts">
-  import Fuse from "fuse.js"
-  import {identity, memoizeWith, sortBy, map} from "ramda"
   import {tryFunc} from "hurdak"
   import {onDestroy} from "svelte"
   import {fromNostrURI} from "paravel"
@@ -12,80 +10,9 @@
   import {isHex} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
+  import SearchResults from "src/app/shared/SearchResults.svelte"
   import {router} from "src/app/router"
   import {searchTerm} from "src/app/state"
-  import type {Topic} from "src/engine"
-  import {
-    pubkey,
-    topics,
-    peopleWithName,
-    primeWotCaches,
-    getWotScore,
-    loadPeople,
-    session,
-  } from "src/engine"
-
-  const openTopic = topic => router.at("topic").of(topic).replaceModal()
-
-  const openPerson = pubkey => router.at("people").of(pubkey).replaceModal()
-
-  const topicOptions = topics.derived(
-    map((topic: Topic) => ({type: "topic", id: topic.name, topic, text: "#" + topic.name})),
-  )
-
-  const profileOptions = peopleWithName.derived($people =>
-    $people
-      .filter(person => person.pubkey !== $session?.pubkey)
-      .map(person => {
-        const {pubkey, profile, handle} = person
-
-        return {
-          person,
-          id: pubkey,
-          type: "profile",
-          text: [profile?.name, profile?.display_name, handle?.address].filter(identity).join(" "),
-          extraText: profile?.about || "",
-        }
-      }),
-  )
-
-  const sortByWotAndScore = sortBy(({score, item}: any) => {
-    if (item.type === "profile") {
-      return (score - 1) * Math.sqrt(getWotScore($pubkey, item.person.pubkey))
-    }
-
-    return -score
-  })
-
-  const getFuse = memoizeWith(
-    s => String(s?.[0] === "#"),
-    s => {
-      const options = s?.[0] === "#" ? $topicOptions : $profileOptions
-
-      return new Fuse(options as any, {
-        keys: ["text", {name: "extraText", weight: 0.2}],
-        threshold: 0.5,
-        shouldSort: false,
-        includeScore: true,
-      })
-    },
-  )
-
-  const search = s => {
-    if (!s) {
-      return sortBy(r => -getWotScore($pubkey, r.person.pubkey), $profileOptions) as any[]
-    }
-
-    const fuse = getFuse(s)
-    const results = fuse.search(s)
-    const sorted = sortByWotAndScore(results)
-
-    return sorted.map(r => r.item) as any[]
-  }
-
-  const populateResults = throttle(300, s => {
-    results = search(s).slice(0, 30)
-  })
 
   const startScanner = () => {
     scanner = new Promise(resolve => {
@@ -144,38 +71,13 @@
     },
   )
 
-  let results = []
   let video, scanner
-  let innerWidth = 0
-
-  primeWotCaches($pubkey)
 
   onDestroy(() => {
     stopScanner()
     searchTerm.set(null)
   })
-
-  $: {
-    if ($searchTerm && !$searchTerm.startsWith("#")) {
-      loadPeople($searchTerm)
-    }
-
-    if ($searchTerm?.length > 30) {
-      tryParseEntity($searchTerm)
-    }
-
-    populateResults($searchTerm)
-  }
 </script>
-
-<svelte:window bind:innerWidth />
-
-{#if innerWidth < 1024}
-  <Input autofocus bind:value={$searchTerm}>
-    <i slot="before" class="fa fa-search" />
-    <i slot="after" class="fa fa-qrcode cursor-pointer" on:click={startScanner} />
-  </Input>
-{/if}
 
 {#if scanner}
   {#await scanner}
@@ -189,17 +91,21 @@
     <video class="m-auto rounded" bind:this={video} />
   </div>
 {:else}
-  {#each results as result (result.type + result.id)}
-    {#if result.type === "topic"}
-      <Card interactive on:click={() => openTopic(result.topic.name)}>
-        #{result.topic.name}
-      </Card>
-    {:else if result.type === "profile"}
-      <Card interactive on:click={() => openPerson(result.id)}>
-        <PersonSummary inert hideActions pubkey={result.id} />
-      </Card>
-    {/if}
-  {:else}
-    <p class="text-center py-12">No results found.</p>
-  {/each}
+  <Input autofocus bind:value={$searchTerm}>
+    <i slot="before" class="fa fa-search" />
+    <i slot="after" class="fa fa-qrcode cursor-pointer" on:click={startScanner} />
+  </Input>
+  <SearchResults replace term={$searchTerm}>
+    <div slot="result" let:result>
+      {#if result.type === "topic"}
+        <Card interactive>
+          #{result.topic.name}
+        </Card>
+      {:else if result.type === "profile"}
+        <Card interactive>
+          <PersonSummary inert hideActions pubkey={result.id} />
+        </Card>
+      {/if}
+    </div>
+  </SearchResults>
 {/if}
