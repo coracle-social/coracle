@@ -1,9 +1,8 @@
 import {uniq, whereEq, sortBy, prop, without, mergeRight, assoc} from "ramda"
 import {Tags} from "paravel"
-import {updateIn, switcherFn} from "hurdak"
+import {switcherFn} from "hurdak"
 import {Naddr, LOCAL_RELAY_URL, getPublicKey} from "src/util/nostr"
 import {projections} from "src/engine/core/projections"
-import {updateStore} from "src/engine/core/commands"
 import type {Event} from "src/engine/events/model"
 import {EventKind} from "src/engine/events/model"
 import {selectHints} from "src/engine/relays/utils"
@@ -12,7 +11,7 @@ import {nip59} from "src/engine/session/derived"
 import {getExecutor, getIdFilters, load} from "src/engine/network/utils"
 import {GroupAccess, MemberAccess} from "./model"
 import {groups, groupSharedKeys, groupAdminKeys, groupRequests, groupAlerts} from "./state"
-import {deriveAdminKeyForGroup, getRecipientKey} from "./utils"
+import {deriveAdminKeyForGroup, getRecipientKey, deriveGroupStatus} from "./utils"
 import {modifyGroupStatus, setGroupStatus} from "./commands"
 
 // Key sharing
@@ -42,6 +41,11 @@ projections.addHandler(24, (e: Event) => {
       ...$key,
     }))
 
+    // Notify the user if this isn't just a key rotation
+    if (deriveGroupStatus(address).get()?.access !== MemberAccess.Granted) {
+      groupAlerts.key(e.id).set({...e, group: address, type: "invite"})
+    }
+
     // Load the group's metadata and posts
     load({
       relays: selectHints(relays),
@@ -51,6 +55,8 @@ projections.addHandler(24, (e: Event) => {
         {kinds: [1059], authors: [pubkey]},
       ],
     })
+  } else {
+    groupAlerts.key(e.id).set({...e, group: address, type: "exit"})
   }
 
   if (relays.length > 0) {
@@ -58,12 +64,6 @@ projections.addHandler(24, (e: Event) => {
 
     groups.key(address).update($group => ({address, pubkey, id, relays, ...$group}))
   }
-
-  groupAlerts.key(e.id).set({
-    ...e,
-    group: address,
-    type: privkey ? "invite" : "exit",
-  })
 
   setGroupStatus(recipient, address, e.created_at, {
     access: privkey ? MemberAccess.Granted : MemberAccess.Revoked,

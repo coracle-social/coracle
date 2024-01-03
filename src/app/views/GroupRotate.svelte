@@ -60,22 +60,27 @@
       })
     })
 
-    console.log(addedMembers)
-
     // Add members
     if (addedMembers.size > 0) {
-      publishGroupMembers(address, "add", Array.from(addedMembers))
+      if (soft) {
+        publishGroupMembers(address, "add", Array.from(addedMembers))
+      }
+
       publishGroupInvites(address, Array.from(addedMembers), $group.relays)
     }
 
-    // Notify existing members of new shared key if needed
+    // Notify existing members of new shared key if needed, send full member list if we're rotating
     if (!soft) {
+      publishGroupMembers(address, "set", Array.from(allMembers))
       publishGroupInvites(address, Array.from(difference(allMembers, addedMembers)), $group.relays)
     }
 
     // Remove members
     if (removedMembers.size > 0) {
-      publishGroupMembers(address, "remove", Array.from(removedMembers))
+      if (soft) {
+        publishGroupMembers(address, "remove", Array.from(removedMembers))
+      }
+
       publishGroupEvictions(address, Array.from(removedMembers))
     }
 
