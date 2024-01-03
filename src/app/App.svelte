@@ -2,7 +2,7 @@
   import "@fortawesome/fontawesome-free/css/fontawesome.css"
   import "@fortawesome/fontawesome-free/css/solid.css"
 
-  import {nip19, getPublicKey, generateSecretKey} from "nostr-tools"
+  import {nip19} from "nostr-tools"
   import {pluck} from "ramda"
   import {seconds, Fetch} from "hurdak"
   import {now} from "paravel"
@@ -325,8 +325,6 @@
     bech32ToHex,
     hexToBech32,
     router,
-    getPublicKey,
-    generateSecretKey,
   }
 
   // Theme

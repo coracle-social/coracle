@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
+  import {nsecEncode} from "src/util/nostr"
   import {copyToClipboard} from "src/util/html"
   import {appName, toast} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
@@ -10,7 +10,7 @@
   export let privkey
   export let setStage
 
-  const nsec = nip19.nsecEncode(privkey)
+  const nsec = nsecEncode(privkey)
   const prev = () => setStage("profile")
   const next = () => setStage($env.FORCE_GROUP ? "follows" : "relays")
 

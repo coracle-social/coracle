@@ -41,7 +41,7 @@ const FORCE_GROUP = import.meta.env.VITE_FORCE_GROUP
 
 const DVM_RELAYS = fromCsv(import.meta.env.VITE_DVM_RELAYS)
 
-const SEARCH_RELAYS = ["wss://relay.nostr.band", "wss://nostr.wine"]
+const SEARCH_RELAYS = ["wss://relay.nostr.band", "wss://nostr.wine", "wss://search.nos.today"]
 
 const DEFAULT_RELAYS = fromCsv(import.meta.env.VITE_DEFAULT_RELAYS)
 

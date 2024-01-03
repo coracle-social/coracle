@@ -1,7 +1,7 @@
 <script>
   import {onMount} from "svelte"
   import {now} from "paravel"
-  import {whereEq, assocPath, without, uniq} from "ramda"
+  import {whereEq, assocPath, without} from "ramda"
   import {noteKinds} from "src/util/nostr"
   import {getKey} from "src/util/router"
   import {themeBackgroundGradient} from "src/partials/state"
@@ -66,10 +66,6 @@
   })
 
   $: ({rgb, rgba} = $themeBackgroundGradient)
-
-  $: members = uniq(
-    without([$group?.pubkey], ($sharedKey?.members || []).concat($adminKey?.members || [])),
-  )
 
   let tabs
 
@@ -144,7 +140,7 @@
   <GroupMarket {group} {relays} />
 {:else if activeTab === "members"}
   <FlexColumn>
-    {#each members as pubkey (pubkey)}
+    {#each $group.members || [] as pubkey (pubkey)}
       <GroupMember {address} {pubkey} />
     {:else}
       <p class="text-center py-12">No members found.</p>

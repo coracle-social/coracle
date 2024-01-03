@@ -28,9 +28,10 @@ export type Group = {
   name?: string
   image?: string
   description?: string
-  members?: string[]
   moderators?: string[]
   access?: GroupAccess
+  members?: string[]
+  recent_member_updates?: Event[]
 }
 
 export type GroupKey = {

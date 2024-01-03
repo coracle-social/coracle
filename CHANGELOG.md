@@ -15,6 +15,7 @@
 - [x] Add anonymous zaps
 - [x] Strip hash from media urls
 - [x] Start on @daniele's redesign
+- [x] Add bitcoin connect support
 
 # 0.3.14
 

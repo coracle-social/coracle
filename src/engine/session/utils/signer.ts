@@ -19,9 +19,8 @@ export class Signer {
   }
 
   prepWithKey(event: EventTemplate, sk: string) {
-    event = {...event}
-
     // Copy the event since we're mutating it
+    event = {...event}
     ;(event as UnsignedEvent).pubkey = getPublicKey(sk)
     ;(event as Rumor).id = getEventHash(event as UnsignedEvent)
 

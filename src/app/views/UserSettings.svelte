@@ -1,6 +1,6 @@
 <script lang="ts">
+  import "@getalby/bitcoin-connect"
   import {identity} from "ramda"
-  import {Button} from "@getalby/bitcoin-connect"
   import {toast, appName} from "src/partials/state"
   import Field from "src/partials/Field.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"

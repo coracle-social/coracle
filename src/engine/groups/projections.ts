@@ -1,9 +1,9 @@
-import {uniq, without, mergeRight, assoc} from "ramda"
+import {uniq, whereEq, sortBy, prop, without, mergeRight, assoc} from "ramda"
 import {Tags} from "paravel"
 import {updateIn, switcherFn} from "hurdak"
-import {getPublicKey} from "nostr-tools"
-import {Naddr, LOCAL_RELAY_URL} from "src/util/nostr"
+import {Naddr, LOCAL_RELAY_URL, getPublicKey} from "src/util/nostr"
 import {projections} from "src/engine/core/projections"
+import {updateStore} from "src/engine/core/commands"
 import type {Event} from "src/engine/events/model"
 import {EventKind} from "src/engine/events/model"
 import {selectHints} from "src/engine/relays/utils"
@@ -77,12 +77,14 @@ projections.addHandler(34550, (e: Event) => {
   const meta = tags.getDict()
   const address = Naddr.fromEvent(e).asTagValue()
   const group = groups.key(address)
+  const $group = group.get()
 
-  if (group.get()?.updated_at > e.created_at) {
+  if ($group?.updated_at > e.created_at) {
     return
   }
 
   group.set({
+    ...$group,
     address,
     id: meta.d,
     pubkey: e.pubkey,
@@ -117,21 +119,27 @@ projections.addHandler(10004, (e: Event) => {
 })
 
 projections.addHandler(27, (e: Event) => {
-  const tags = Tags.from(e)
-  const address = tags.communities().first()
-  const op = tags.type("op").values().first()
-  const pubkeys = tags.type("p").values().all()
+  const address = Tags.from(e).communities().first()
+  let {members = [], recent_member_updates = []} = groups.key(address).get() || {}
 
-  groups.key(address).update(
-    updateIn("members", members =>
-      switcherFn(op, {
+  // Only replay updates if we have something new
+  if (!recent_member_updates.find(whereEq({id: e.id}))) {
+    recent_member_updates = sortBy(prop("created_at"), recent_member_updates.concat(e)).slice(-100)
+
+    for (const event of recent_member_updates) {
+      const op = Tags.from(event).type("op").values().first()
+      const pubkeys = Tags.from(event).type("p").values().all()
+
+      members = switcherFn(op, {
         add: () => uniq(pubkeys.concat(members)),
-        remove: () => without([pubkeys], members),
+        remove: () => without(pubkeys, members),
         set: () => pubkeys,
         default: () => members,
-      }),
-    ),
-  )
+      })
+    }
+
+    groups.key(address).merge({members, recent_member_updates})
+  }
 })
 
 // Membership access/exit requests

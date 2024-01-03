@@ -327,7 +327,7 @@ export class Router {
     this.routes.push({path, component, serializers, requireUser})
   }
 
-  go(path, config: RouteConfig = {}) {
+  go(path, {replace, ...config}: RouteConfig = {}) {
     const match = pickRoute(this.routes, path)
 
     if (!match) {
@@ -338,7 +338,7 @@ export class Router {
 
     this.history.update($history => {
       // Drop one if we're replacing
-      if (config.replace) {
+      if (replace) {
         $history.splice(0, 1)
       }
 
@@ -346,7 +346,7 @@ export class Router {
       return [{path, config, route, params}, ...$history.slice(0, 100)]
     })
 
-    globalHistory.navigate(path, {replace: config.replace, state: null})
+    globalHistory.navigate(path, {replace, state: null})
   }
 
   pop() {

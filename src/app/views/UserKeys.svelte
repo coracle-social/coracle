@@ -1,7 +1,8 @@
 <script lang="ts">
   import {uniqBy, uniq, sortBy, prop} from "ramda"
-  import {nip19} from "nostr-tools"
   import {createMap} from "hurdak"
+  import {nip19} from "nostr-tools"
+  import {nsecEncode} from "src/util/nostr"
   import CopyValue from "src/partials/CopyValue.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -27,10 +28,10 @@
       sortBy(
         k => -k.created_at,
         $groupSharedKeys.filter(
-          k => deriveMembershipLevel(k.group).get() === MembershipLevel.Private
-        )
-      )
-    )
+          k => deriveMembershipLevel(k.group).get() === MembershipLevel.Private,
+        ),
+      ),
+    ),
   )
 
   $: addresses = uniq([...Object.keys(adminKeys), ...Object.keys(sharedKeys)])
@@ -57,11 +58,7 @@
   </div>
   {#if $session?.privkey}
     <div>
-      <CopyValue
-        isPassword
-        label="Private Key"
-        value={$session?.privkey}
-        encode={nip19.nsecEncode} />
+      <CopyValue isPassword label="Private Key" value={$session?.privkey} encode={nsecEncode} />
       <small class="text-lightest">
         Your private key is used to prove your identity by cryptographically signing messages. <strong
           >Do not share this with anyone.</strong>
@@ -73,11 +70,7 @@
   {/if}
   {#if $session?.bunkerKey}
     <div>
-      <CopyValue
-        isPassword
-        label="Bunker Key"
-        value={$session?.bunkerKey}
-        encode={nip19.nsecEncode} />
+      <CopyValue isPassword label="Bunker Key" value={$session?.bunkerKey} encode={nsecEncode} />
       <small class="text-lightest">
         Your bunker key is used to authorize Coracle with your nsec bunker to sign events on your
         behalf. Save this if you would like to log in elsewhere without re-authorizing.

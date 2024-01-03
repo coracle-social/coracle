@@ -6,9 +6,10 @@ import {pick, is, mergeLeft, identity} from "ramda"
 import {between, avg} from "hurdak"
 import type {Filter, Event} from "src/engine"
 
-export const generatePrivateKey = () => new TextDecoder().decode(generateSecretKey())
-export const getPublicKey = (sk: string) => getPk(new TextEncoder().encode(sk))
+export const generatePrivateKey = () => Buffer.from(generateSecretKey()).toString("hex")
+export const getPublicKey = (sk: string) => getPk(Uint8Array.from(Buffer.from(sk, "hex")))
 export const getSignature = (e, sk: string) => bytesToHex(schnorr.sign(getEventHash(e), sk))
+export const nsecEncode = (sk: string) => nip19.nsecEncode(Uint8Array.from(Buffer.from(sk, "hex")))
 
 export const isKeyValid = (key: string) => {
   // Validate the key before setting it to state by encoding it using bech32.

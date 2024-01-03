@@ -1,6 +1,5 @@
 import {omit, assoc} from "ramda"
-import {getPublicKey} from "nostr-tools"
-import {generatePrivateKey, appDataKeys} from "src/util/nostr"
+import {generatePrivateKey, getPublicKey, appDataKeys} from "src/util/nostr"
 import {createAndPublish} from "src/engine/network/utils"
 import {people} from "src/engine/people/state"
 import type {Session} from "./model"

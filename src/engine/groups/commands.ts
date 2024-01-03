@@ -36,7 +36,6 @@ export const initSharedKey = address => {
     pubkey: pubkey,
     privkey: privkey,
     created_at: now(),
-    members: [],
   }
 
   groupSharedKeys.key(pubkey).set(key)
@@ -44,7 +43,7 @@ export const initSharedKey = address => {
   return key
 }
 
-export const initGroup = (members, relays) => {
+export const initGroup = relays => {
   const id = randomId()
   const privkey = generatePrivateKey()
   const pubkey = getPublicKey(privkey)
@@ -56,7 +55,6 @@ export const initGroup = (members, relays) => {
     privkey: privkey,
     created_at: now(),
     relays,
-    members,
   }
 
   groupAdminKeys.key(pubkey).set(adminKey)

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {pluck, assoc, uniq, without} from "ramda"
+  import {pluck, without} from "ramda"
   import {difference} from "hurdak"
   import {toast} from "src/partials/state"
   import Field from "src/partials/Field.svelte"
@@ -15,8 +15,6 @@
     groups,
     groupRequests,
     initSharedKey,
-    deriveAdminKeyForGroup,
-    groupAdminKeys,
     publishGroupInvites,
     publishGroupEvictions,
     publishGroupMembers,
@@ -30,19 +28,18 @@
   export let removeMembers = []
 
   const group = groups.key(address)
-  const adminKey = deriveAdminKeyForGroup(address)
-  const initialMembers = uniq(without(removeMembers, [...$group.members, ...addMembers]))
+  const initialMembers = new Set(
+    without(removeMembers, [...($group?.members || []), ...addMembers]),
+  )
 
   const onSubmit = () => {
     if (!soft) {
       initSharedKey(address)
     }
 
-    const newMembers = pluck("pubkey", members)
-    const removedMembers = Array.from(difference(new Set(initialMembers), new Set(newMembers)))
-
-    // Update our authoritative member list
-    groupAdminKeys.key($adminKey.pubkey).update(assoc("members", newMembers))
+    const allMembers = new Set(pluck("pubkey", members))
+    const addedMembers = difference(allMembers, initialMembers)
+    const removedMembers = difference(initialMembers, allMembers)
 
     // Clear any requests
     groupRequests.update($requests => {
@@ -51,11 +48,11 @@
           return r
         }
 
-        if (r.kind === 25 && newMembers.includes(r.pubkey)) {
+        if (r.kind === 25 && allMembers.has(r.pubkey)) {
           return {...r, resolved: true}
         }
 
-        if (r.kind === 26 && !newMembers.includes(r.pubkey)) {
+        if (r.kind === 26 && !allMembers.has(r.pubkey)) {
           return {...r, resolved: true}
         }
 
@@ -63,16 +60,23 @@
       })
     })
 
+    console.log(addedMembers)
+
     // Add members
-    if (newMembers.length > 0) {
-      publishGroupMembers(address, "add", newMembers)
-      publishGroupInvites(address, newMembers, $group.relays)
+    if (addedMembers.size > 0) {
+      publishGroupMembers(address, "add", Array.from(addedMembers))
+      publishGroupInvites(address, Array.from(addedMembers), $group.relays)
+    }
+
+    // Notify existing members of new shared key if needed
+    if (!soft) {
+      publishGroupInvites(address, Array.from(difference(allMembers, addedMembers)), $group.relays)
     }
 
     // Remove members
-    if (removedMembers.length > 0) {
-      publishGroupMembers(address, "remove", removedMembers)
-      publishGroupEvictions(address, removedMembers)
+    if (removedMembers.size > 0) {
+      publishGroupMembers(address, "remove", Array.from(removedMembers))
+      publishGroupEvictions(address, Array.from(removedMembers))
     }
 
     // Re-publish group info
@@ -86,7 +90,7 @@
 
   let soft = false
   let members = people.mapStore
-    .derived(m => initialMembers.map(pubkey => m.get(pubkey) || {pubkey}))
+    .derived(m => Array.from(initialMembers).map(pubkey => m.get(pubkey) || {pubkey}))
     .get()
 </script>
 

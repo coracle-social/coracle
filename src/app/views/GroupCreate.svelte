@@ -24,7 +24,7 @@
 
   const onSubmit = async (values: Values) => {
     const members = pluck("pubkey", values.members)
-    const {id, address} = initGroup(members, values.relays)
+    const {id, address} = initGroup(values.relays)
 
     await publishAdminKeyShares(address, [$user.pubkey], values.relays)
     await publishGroupInvites(address, members, values.relays)
