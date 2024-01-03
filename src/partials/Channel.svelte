@@ -5,14 +5,13 @@
   import {writable} from "svelte/store"
   import {fly} from "src/util/transition"
   import {createScroller} from "src/util/misc"
-  import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import type {Event} from "src/engine"
-  import {canUseGiftWrap} from "src/engine"
+  import {nip44} from "src/engine"
 
+  export let pubkeys
   export let messages: Event[]
   export let sendMessage
   export let initialMessage = ""
@@ -118,7 +117,7 @@
       <div in:fly={{y: 20}} class="py-20 text-center">End of message history</div>
     {/await}
   </ul>
-  {#if $canUseGiftWrap}
+  {#if $nip44.isEnabled() || pubkeys.length < 3}
     <div class="flex border-t border-solid border-cocoa border-mid bg-mid">
       <textarea
         rows="3"
@@ -133,33 +132,26 @@
           <button
             slot="button"
             class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-cocoa p-3
-                 py-6 text-lightest transition-all hover:bg-accent">
+                 py-6 text-lightest transition-all hover:bg-accent hover:text-white">
             <i class="fa-solid fa-paperclip fa-lg" />
           </button>
         </ImageInput>
         <button
           on:click={send}
           class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-cocoa p-3
-               py-6 text-lightest transition-all hover:bg-accent">
+               py-6 text-lightest transition-all hover:bg-accent hover:text-white">
           <i class="fa-solid fa-paper-plane fa-lg" />
         </button>
       </div>
     </div>
   {:else}
-    <Card>
-      <FlexColumn>
-        <p class="flex items-center gap-3 font-bold">
-          <i class="fa fa-info-circle" />
-          You are using a login method that doesn't yet support new-style DMs.
-        </p>
-        <p class="ml-7">
-          Please consider upgrading your browser extension to access this feature. You can also
-          access old-style DMs at <Anchor external underline href="https://nip04.coracle.social"
-            >nip04.coracle.social</Anchor
-          >.
-        </p>
-      </FlexColumn>
-    </Card>
+    <FlexColumn class="bg-dark-d px-4 py-2">
+      <p class="flex items-center gap-2">
+        <i class="fa fa-info-circle p-1" />
+        You are using a login method that doesn't yet support group chats. Please consider upgrading
+        your signer to access this feature.
+      </p>
+    </FlexColumn>
   {/if}
   {#if showNewMessages}
     <div

@@ -32,6 +32,4 @@ export const nip59 = derived(
 
 export const canSign = signer.derived($signer => $signer.canSign())
 
-export const canUseGiftWrap = session.derived($session => $session?.method === "privkey")
-
 export const settings = user.derived(getSettings)

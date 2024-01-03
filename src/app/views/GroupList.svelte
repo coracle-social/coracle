@@ -11,7 +11,6 @@
   import {
     load,
     groups,
-    canUseGiftWrap,
     getUserHints,
     mergeHints,
     getGroupReqInfo,
@@ -70,7 +69,7 @@
     <i class="fa fa-circle-nodes fa-lg" />
     <h2 class="staatliches text-2xl">Your groups</h2>
   </div>
-  <Anchor modal button accent disabled={!$canUseGiftWrap} href="/groups/new">
+  <Anchor modal button accent href="/groups/new">
     <i class="fa-solid fa-plus" /> Create
   </Anchor>
 </div>

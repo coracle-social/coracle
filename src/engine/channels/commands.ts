@@ -1,14 +1,34 @@
-import {assoc, uniq, map} from "ramda"
+import {assoc, without, uniq, map} from "ramda"
 import {createMapOf} from "hurdak"
 import {now} from "paravel"
 import {generatePrivateKey, appDataKeys} from "src/util/nostr"
-import {Publisher, getClientTags, mention} from "src/engine/network/utils"
+import {Publisher, publish, getClientTags, mention} from "src/engine/network/utils"
 import {getPubkeyHints} from "src/engine/relays/utils"
-import {user, nip59} from "src/engine/session/derived"
+import {user, nip59, nip04} from "src/engine/session/derived"
 import {setAppData} from "src/engine/session/commands"
 import {channels} from "./state"
 
-export const createMessage = (channelId: string, content: string) => {
+export const sendLegacyMessage = async (channelId: string, content: string) => {
+  const recipients = without([user.get().pubkey], channelId.split(","))
+
+  if (recipients.length !== 1) {
+    throw new Error("Attempted to send legacy message to more than 1 recipient")
+  }
+
+  const [pubkey] = recipients
+  const template = {
+    kind: 4,
+    created_at: now(),
+    content: await nip04.get().encryptAsUser(content, pubkey),
+    tags: [mention(pubkey), ...getClientTags()],
+  }
+
+  return publish(template, {
+    relays: getPubkeyHints(pubkey, "read"),
+  })
+}
+
+export const sendMessage = (channelId: string, content: string) => {
   const recipients = channelId.split(",")
   const template = {
     content,

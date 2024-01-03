@@ -6,21 +6,21 @@
   import {router} from "src/app/router"
   import {
     people,
+    pubkey,
     channels,
     displayPerson,
     loadPubkeys,
     channelHasNewMessages,
-    session,
   } from "src/engine"
 
   export let channel
 
-  const allPubkeys = channel.id.split(",") as string[]
-  const pubkeys = allPubkeys.length > 1 ? without([$session.pubkey], allPubkeys) : allPubkeys
+  const pubkeys = channel.id.split(",") as string[]
+  const displayPubkeys = pubkeys.length === 1 ? pubkeys : without([$pubkey], pubkeys)
   const showAlert = channels.key(channel.id).derived(channelHasNewMessages)
-  const members = people.mapStore.derived($p => pubkeys.map(pk => $p.get(pk)))
+  const members = people.mapStore.derived($p => displayPubkeys.map(pk => $p.get(pk)))
 
-  const enter = () => router.at("channels").of(allPubkeys).push()
+  const enter = () => router.at("channels").of(pubkeys).push()
 
   loadPubkeys(pubkeys)
 </script>
@@ -28,7 +28,7 @@
 <Card interactive on:click={enter}>
   <div class="flex justify-between gap-8 px-2 py-4">
     <div class="flex gap-8">
-      <PersonCircles {pubkeys} />
+      <PersonCircles pubkeys={displayPubkeys} />
       <h2>{displayList($members.map(displayPerson))}</h2>
     </div>
     <div class="relative">

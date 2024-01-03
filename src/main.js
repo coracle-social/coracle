@@ -70,11 +70,13 @@ DEFAULT_RELAYS.forEach(saveRelay)
 
 // Load relays from nostr.watch via dufflepud
 if (DUFFLEPUD_URL) {
-  tryFetch(async () => {
-    const json = await Fetch.fetchJson(DUFFLEPUD_URL + "/relay")
+  setTimeout(() => {
+    tryFetch(async () => {
+      const json = await Fetch.fetchJson(DUFFLEPUD_URL + "/relay")
 
-    json.relays.forEach(saveRelay)
-  })
+      json.relays.forEach(saveRelay)
+    })
+  }, 3000)
 }
 
 export default new App({

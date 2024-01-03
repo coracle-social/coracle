@@ -5,6 +5,7 @@
   import {appName} from "src/partials/state"
   import Channel from "src/partials/Channel.svelte"
   import Content from "src/partials/Content.svelte"
+  import Popover from "src/partials/Popover.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
@@ -12,10 +13,12 @@
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {router} from "src/app/router"
   import {
+    nip44,
     session,
     channels,
     displayPubkey,
-    createMessage,
+    sendMessage,
+    sendLegacyMessage,
     markChannelRead,
     listenForMessages,
     sortEventsDesc,
@@ -28,13 +31,18 @@
 
   const showPerson = pubkey => router.at("people").of(pubkey).open()
 
-  const sendMessage = content => {
+  const send = content => {
+    // If we don't have nip44 support, just send a legacy message
+    if (!$nip44.isEnabled()) {
+      return sendLegacyMessage(channelId, content)
+    }
+
     const [message] = sortEventsDesc($channel.messages || [])
 
     if (message?.kind === 4) {
       confirmMessage = content
     } else {
-      createMessage(channelId, content)
+      sendMessage(channelId, content)
     }
   }
 
@@ -42,8 +50,13 @@
     confirmMessage = null
   }
 
-  const confirm = () => {
-    createMessage(channelId, confirmMessage)
+  const confirmNip04 = () => {
+    sendLegacyMessage(channelId, confirmMessage)
+    confirmMessage = null
+  }
+
+  const confirmNip44 = () => {
+    sendMessage(channelId, confirmMessage)
     confirmMessage = null
   }
 
@@ -64,14 +77,14 @@
   document.title = `Direct Messages`
 </script>
 
-<Channel messages={$channel?.messages || []} {sendMessage}>
+<Channel {pubkeys} messages={$channel?.messages || []} sendMessage={send}>
   <div slot="header" class="flex h-16 items-start gap-4 overflow-hidden p-1 px-4">
     <div class="flex items-center gap-4 pt-1">
       <Anchor class="fa fa-arrow-left cursor-pointer text-2xl" href="/channels" />
       <div class="mr-3 flex pt-1">
         {#each pubkeys as pubkey (pubkey)}
           <div class="-mr-3 inline-block">
-            <PersonCircle class="h-10 w-10" {pubkey} />
+            <PersonCircle class="h-10 w-10 border-2 border-solid border-dark-d" {pubkey} />
           </div>
         {/each}
       </div>
@@ -109,10 +122,42 @@
       {/if}
     </div>
     <small
-      class="mt-1"
+      class="mt-1 flex items-center justify-between gap-2"
       class:text-cocoa={message.pubkey === $session.pubkey}
       class:text-lightest={message.pubkey !== $session.pubkey}>
       {formatTimestamp(message.created_at)}
+      {#if message.kind === 4}
+        <Popover>
+          <i slot="trigger" class="fa fa-unlock cursor-pointer text-lighter" />
+          <p slot="tooltip">
+            This message was sent using nostr's legacy DMs, which have a number of shortcomings.
+            Read more <Anchor
+              underline
+              external
+              href="https://habla.news/u/hodlbod@coracle.social/0gmn3DDizCIesG-PCD-JK">here</Anchor
+            >.
+          </p>
+        </Popover>
+      {:else}
+        <Popover>
+          <i slot="trigger" class="fa fa-lock cursor-pointer text-lighter" />
+          <div slot="tooltip" class="flex flex-col gap-2">
+            <p>
+              This message was sent using nostr's new group chat specification, which solves several
+              problems with legacy DMs. Read more <Anchor
+                underline
+                external
+                href="https://habla.news/u/hodlbod@coracle.social/0gmn3DDizCIesG-PCD-JK"
+                >here</Anchor
+              >.
+            </p>
+            <p>
+              Note that these messages are not yet universally supported. Make sure the person
+              you're chatting with is using a compatible nostr client.
+            </p>
+          </div>
+        </Popover>
+      {/if}
     </small>
   </div>
 </Channel>
@@ -124,21 +169,16 @@
         <i class="fa fa-info-circle" /> Auto-upgrade notice
       </p>
       <p>
-        {appName} only supports new-style DMs, but the most recent message in this conversation was sent
-        using old-style DMs.
+        The most recent message in this conversation was sent using legacy DMs.
       </p>
       <p>
-        You should make sure @{displayPubkey(pubkeys[0])} is using a NIP-44 compatible nostr client,
-        or you can send an old-style message using <Anchor
-          external
-          underline
-          href="https://nip04.coracle.social">nip04.coracle.social</Anchor
-        >.
+        You should make sure @{displayPubkey(pubkeys[0])} is using a compatible nostr client,
+        or you can choose to send an old-style message instead.
       </p>
-      <p>Would you like to continue sending this message?</p>
+      <p>How would you like to send this message?</p>
       <div class="flex justify-center gap-2 py-4">
-        <Anchor button on:click={cancel}>Cancel</Anchor>
-        <Anchor button accent on:click={confirm}>Confirm</Anchor>
+        <Anchor button on:click={confirmNip04}>Send using Legacy DMs</Anchor>
+        <Anchor button accent on:click={confirmNip44}>Send using NIP 44</Anchor>
       </div>
     </Content>
   </Modal>

@@ -17,7 +17,7 @@
 
   let term = multiple ? "" : getKey(value)
   let input, suggestions, popover
-  let focused = false
+  let focused = Boolean(autofocus)
 
   $: suggestions?.setData(term ? search(term).slice(0, 10) : defaultOptions)
 

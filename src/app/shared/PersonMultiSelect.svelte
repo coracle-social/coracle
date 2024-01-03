@@ -7,11 +7,12 @@
   import {searchPeople, displayPubkey} from "src/engine"
 
   export let value
+  export let autofocus = null
 
   const showPerson = person => router.at("people").of(person.pubkey).open()
 </script>
 
-<SearchSelect multiple bind:value search={$searchPeople} getKey={prop("pubkey")}>
+<SearchSelect multiple {autofocus} bind:value search={$searchPeople} getKey={prop("pubkey")}>
   <i slot="before" class="fa fa-people-pulling" />
   <div slot="item" let:item let:context>
     <div class="-my-1">
