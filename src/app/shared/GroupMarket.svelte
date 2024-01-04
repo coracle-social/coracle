@@ -8,7 +8,7 @@
   export let relays
 
   const createListing = () =>
-    router.at('notes/create').qp({type: 'listing'}).open()
+    router.at('notes/create').qp({type: 'listing', group}).open()
 </script>
 
 <Card class="flex justify-between">
@@ -16,4 +16,4 @@
   <Anchor button accent on:click={createListing}>Create a listing</Anchor>
 </Card>
 
-<Feed hideControls {relays} filter={{kinds: [30402], '#a': [$group.address]}} />
+<Feed hideControls {relays} filter={{kinds: [30402], '#a': [group]}} />

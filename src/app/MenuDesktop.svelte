@@ -14,6 +14,7 @@
     env,
     user,
     pubkey,
+    canSign,
     hasNewMessages,
     hasNewNotifications,
     sessions,
@@ -80,7 +81,7 @@
       {/if}
     </div>
   </MenuDesktopItem>
-  <MenuDesktopItem path="/channels">
+  <MenuDesktopItem path="/channels" disabled={!$canSign}>
     <div class="relative inline-block">
       Messages
       {#if $hasNewMessages}
@@ -108,14 +109,14 @@
         <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" on:click={toggleTheme}>
           <i class="fa fa-palette" /> Toggle Theme
         </MenuItem>
-        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings">
-          <i class="fa fa-cog" /> App Settings
-        </MenuItem>
-        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings/content">
-          <i class="fa fa-volume-xmark" /> Content Settings
-        </MenuItem>
         <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings/data">
           <i class="fa fa-database" /> Database
+        </MenuItem>
+        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings" disabled={!$canSign}>
+          <i class="fa fa-cog" /> App Settings
+        </MenuItem>
+        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings/content" disabled={!$canSign}>
+          <i class="fa fa-volume-xmark" /> Content Settings
         </MenuItem>
       </MenuDesktopSecondary>
     {:else if subMenu === "account"}

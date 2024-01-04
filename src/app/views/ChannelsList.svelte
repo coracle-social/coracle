@@ -13,6 +13,7 @@
   import type {Channel} from "src/engine"
   import {
     nip44,
+    canSign,
     channels,
     hasNewMessages,
     sortChannels,
@@ -68,7 +69,7 @@
     <i class="fa fa-comments fa-lg" />
     <h2 class="staatliches text-2xl">Your conversations</h2>
   </div>
-  <Anchor modal button accent href="/channels/create">
+  <Anchor modal button accent href="/channels/create" disabled={!$canSign}>
     <i class="fa-solid fa-plus" /> Create
   </Anchor>
 </div>

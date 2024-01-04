@@ -19,6 +19,7 @@
   import Feed from "src/app/shared/Feed.svelte"
   import {
     env,
+    canSign,
     GroupAccess,
     MemberAccess,
     displayGroup,
@@ -130,16 +131,18 @@
     {/if}
   </p>
 {:else if activeTab === "notes"}
-  <NoteCreateInline group={address} />
+  {#if $canSign}
+    <NoteCreateInline group={address} />
+  {/if}
   <Feed
     shouldListen
     hideControls
     filter={{kinds: without([30402], noteKinds), "#a": [address]}}
     {relays} />
 {:else if activeTab === "calendar"}
-  <Calendar filters={[{kinds: [31923], "#a": [address]}]} {relays} />
+  <Calendar group={address} filters={[{kinds: [31923], "#a": [address]}]} {relays} />
 {:else if activeTab === "market"}
-  <GroupMarket {group} {relays} />
+  <GroupMarket group={address} {relays} />
 {:else if activeTab === "members"}
   <FlexColumn>
     {#each $group.members || [] as pubkey (pubkey)}

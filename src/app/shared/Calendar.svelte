@@ -9,25 +9,28 @@
   import {themeColors} from "src/partials/state"
   import Anchor from 'src/partials/Anchor.svelte'
   import {router} from "src/app/router"
-  import {load, pubkey} from "src/engine"
+  import {canSign, load, pubkey} from "src/engine"
 
   export let relays
   export let filters
+  export let group = null
 
   const createEvent = () =>
-    router.at("notes/create").qp({type: "calendar_event"}).open()
+    router.at("notes/create").qp({type: "calendar_event", group}).open()
 
   const getEventContent = ({event}) => event.title
 
   const onDateClick = ({date}) => {
-    date.setHours(new Date().getHours() + 1, 0, 0)
+    if ($canSign) {
+      date.setHours(new Date().getHours() + 1, 0, 0)
 
-    const initialValues = {
-      start: date,
-      end: date,
+      const initialValues = {
+        start: date,
+        end: date,
+      }
+
+      router.at("notes/create").qp({type: "calendar_event"}).cx({initialValues}).open()
     }
-
-    router.at("notes/create").qp({type: "calendar_event"}).cx({initialValues}).open()
   }
 
   const onEventClick = ({event: calendarEvent}) => {
@@ -62,13 +65,15 @@
   })
 </script>
 
-<div class="relative h-0">
-  <div class="absolute right-44 top-4">
-    <Anchor button accent style="height: 38px; width: 38px;" on:click={createEvent}>
-      <i class="fa fa-plus" />
-    </Anchor>
+{#if $canSign}
+  <div class="relative h-0">
+    <div class="absolute right-44 top-4">
+      <Anchor button accent style="height: 38px; width: 38px;" on:click={createEvent}>
+        <i class="fa fa-plus" />
+      </Anchor>
+    </div>
   </div>
-</div>
+{/if}
 
 <Calendar
   plugins={[Interaction, DayGrid]}

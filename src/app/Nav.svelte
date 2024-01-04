@@ -38,10 +38,6 @@
       params.pubkey = props.pubkey
     }
 
-    if ($page.path.startsWith("/groups") && props.address) {
-      params.group = props.address
-    }
-
     if ($env.FORCE_GROUP) {
       params.group = $env.FORCE_GROUP
     }
