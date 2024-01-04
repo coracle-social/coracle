@@ -1,4 +1,4 @@
-import {prop, defaultTo, sortBy, last, whereEq} from "ramda"
+import {prop, uniqBy, defaultTo, sortBy, last, whereEq} from "ramda"
 import {ellipsize, seconds} from "hurdak"
 import {Tags} from "paravel"
 import {Naddr} from "src/util/nostr"
@@ -113,3 +113,22 @@ export const shouldPostPrivatelyToGroup = (address, preference) => {
 
   return false
 }
+
+export const deriveGroupOptions = defaultGroups =>
+  session.derived($session => {
+    const options = []
+
+    for (const address of Object.keys($session?.groups || {})) {
+      const group = groups.key(address).get()
+
+      if (group && deriveMembershipLevel(address).get()) {
+        options.push(group)
+      }
+    }
+
+    for (const address of defaultGroups) {
+      options.push({address})
+    }
+
+    return uniqBy(prop("address"), options)
+  })

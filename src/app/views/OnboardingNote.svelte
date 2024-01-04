@@ -24,7 +24,7 @@
   lend a hand.
 </p>
 <div class="border-l-2 border-solid border-mid pl-4">
-  <Compose bind:this={compose} onSubmit={next} />
+  <Compose autofocus bind:this={compose} onSubmit={next} />
 </div>
 <div class="flex gap-2">
   <Anchor button on:click={prev}><i class="fa fa-arrow-left" /></Anchor>

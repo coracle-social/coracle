@@ -2,7 +2,6 @@
   import cx from "classnames"
   import {onMount, onDestroy} from "svelte"
   import {formatTimestamp} from "src/util/misc"
-  import {appName} from "src/partials/state"
   import Channel from "src/partials/Channel.svelte"
   import Content from "src/partials/Content.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -44,10 +43,6 @@
     } else {
       sendMessage(channelId, content)
     }
-  }
-
-  const cancel = () => {
-    confirmMessage = null
   }
 
   const confirmNip04 = () => {
@@ -168,12 +163,10 @@
       <p class="flex items-center gap-4 text-xl">
         <i class="fa fa-info-circle" /> Auto-upgrade notice
       </p>
+      <p>The most recent message in this conversation was sent using legacy DMs.</p>
       <p>
-        The most recent message in this conversation was sent using legacy DMs.
-      </p>
-      <p>
-        You should make sure @{displayPubkey(pubkeys[0])} is using a compatible nostr client,
-        or you can choose to send an old-style message instead.
+        You should make sure @{displayPubkey(pubkeys[0])} is using a compatible nostr client, or you
+        can choose to send an old-style message instead.
       </p>
       <p>How would you like to send this message?</p>
       <div class="flex justify-center gap-2 py-4">

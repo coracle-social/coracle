@@ -149,7 +149,7 @@
     {/if}
     <AlternatingBackground class="z-feature overflow-hidden rounded">
       <div class="p-3 text-lightest" class:rounded-b={mentions.length === 0}>
-        <Compose bind:this={compose} onSubmit={() => send()} style="min-height: 4rem">
+        <Compose autofocus bind:this={compose} onSubmit={() => send()} style="min-height: 4rem">
           <div class="flex flex-col justify-start" slot="addon">
             <button
               on:click={() => send()}

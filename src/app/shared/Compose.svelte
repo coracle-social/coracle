@@ -17,6 +17,8 @@
   } from "src/engine"
 
   export let onSubmit
+  export let autofocus = false
+  export let placeholder = null
 
   let contenteditable, suggestions
 
@@ -198,6 +200,8 @@
     const input = contenteditable.getInput()
 
     input.innerHTML = ""
+
+    contenteditable.onInput()
   }
 
   export const nevent = text => {
@@ -210,6 +214,8 @@
     selection.collapse(input, 1)
     selection.getRangeAt(0).insertNode(textNode)
     selection.collapse(input, 0)
+
+    contenteditable.onInput()
   }
 
   export const write = text => {
@@ -227,6 +233,7 @@
     selection.collapse(textNode, text.length)
 
     autocomplete()
+    contenteditable.onInput()
   }
 
   export const newlines = n => {
@@ -235,6 +242,8 @@
 
     selection.getRangeAt(0).insertNode(newLines)
     selection.collapse(newLines, 2)
+
+    contenteditable.onInput()
   }
 
   export const parse = () => {
@@ -252,8 +261,10 @@
   }
 </script>
 
-<div class="flex">
+<div class="flex w-full">
   <ContentEditable
+    {autofocus}
+    {placeholder}
     style={$$props.style}
     class={$$props.class}
     bind:this={contenteditable}

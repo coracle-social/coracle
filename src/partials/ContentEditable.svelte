@@ -1,7 +1,11 @@
 <script lang="ts">
   import cx from "classnames"
 
+  export let autofocus = false
+  export let placeholder = null
+
   let input = null
+  let showPlaceholder = true
 
   const stripStyle = node => {
     if (node.tagName === "IMG") {
@@ -24,7 +28,7 @@
     }
   }
 
-  const onInput = e => {
+  export const onInput = () => {
     const selection = window.getSelection()
     const {focusNode, focusOffset} = selection
 
@@ -41,6 +45,8 @@
       selection.collapse(focusNode, focusOffset)
       input.normalize()
     }
+
+    showPlaceholder = input.textContent.length === 0
   }
 
   export const getInput = () => input
@@ -78,12 +84,17 @@
   export const parse = () => parseNode(input)
 </script>
 
-<div
-  style={$$props.style || "min-height: 6rem"}
-  class={cx($$props.class, "w-full min-w-0 outline-0")}
-  autofocus
-  contenteditable
-  bind:this={input}
-  on:input={onInput}
-  on:keydown
-  on:keyup />
+<div class="w-full">
+  <div class="h-0 text-light" class:hidden={!showPlaceholder}>
+    {placeholder || ""}
+  </div>
+  <div
+    style={$$props.style || "min-height: 6rem"}
+    class={cx($$props.class, "w-full min-w-0 outline-0")}
+    {autofocus}
+    contenteditable
+    bind:this={input}
+    on:input={onInput}
+    on:keydown
+    on:keyup />
+</div>

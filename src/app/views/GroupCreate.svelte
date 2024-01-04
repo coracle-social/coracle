@@ -9,6 +9,7 @@
     initGroup,
     publishAdminKeyShares,
     user,
+    joinGroup,
     GroupAccess,
   } from "src/engine"
   import {router} from "src/app/router"

@@ -82,7 +82,7 @@
             bind:value={values.warning}
             placeholder="Why might people want to skip this post?" />
         </Field>
-        {#if groupOptions.length > 0}
+        {#if !hideFields.includes("groups") && groupOptions.length > 0}
           <Field icon="fa-circle-nodes" label="Groups">
             <div class="flex flex-col gap-2">
               {#each groupOptions as g (g.address)}

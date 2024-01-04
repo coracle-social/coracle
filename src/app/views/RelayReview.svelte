@@ -36,6 +36,7 @@
       </div>
       <Compose
         {onSubmit}
+        autofocus
         class="shadow-inset rounded bg-warm px-2 py-2 text-black"
         style="min-height: 6rem"
         bind:this={compose} />

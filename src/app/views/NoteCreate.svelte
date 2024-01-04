@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {v4 as uuid} from "uuid"
-  import {join, whereEq, identity, prop, uniqBy} from "ramda"
+  import {join, whereEq, identity} from "ramda"
   import {throttle, commaFormat, toTitle, switcherFn} from "hurdak"
   import {createEvent, now, Tags} from "paravel"
   import {asNostrEvent} from "src/util/nostr"
@@ -31,14 +31,13 @@
   import {router} from "src/app/router"
   import {
     env,
-    groups,
     session,
     writable,
     getEventHints,
     getClientTags,
     publishToZeroOrMoreGroups,
-    deriveMembershipLevel,
     getGroupPublishHints,
+    deriveGroupOptions,
   } from "src/engine"
 
   export let type = "note"
@@ -76,23 +75,7 @@
     opts = {...opts, ...e.detail}
   }
 
-  const groupOptions = session.derived($session => {
-    const options = []
-
-    for (const address of Object.keys($session?.groups || {})) {
-      const group = groups.key(address).get()
-
-      if (group && deriveMembershipLevel(address).get()) {
-        options.push(group)
-      }
-    }
-
-    for (const address of defaultGroups) {
-      options.push({address})
-    }
-
-    return uniqBy(prop("address"), options)
-  })
+  const groupOptions = deriveGroupOptions(defaultGroups)
 
   const bypassNsecWarning = () => {
     nsecWarning.set(null)
@@ -290,7 +273,7 @@
             <NoteContent note={{content: compose.parse(), tags: []}} />
           {/if}
           <div class:hidden={showPreview}>
-            <Compose on:keyup={updateCounts} bind:this={compose} {onSubmit} />
+            <Compose autofocus on:keyup={updateCounts} bind:this={compose} {onSubmit} />
           </div>
         </div>
         <div class="flex items-center justify-end gap-2 text-lighter">
@@ -321,7 +304,8 @@
           class="flex cursor-pointer items-center justify-end gap-4"
           on:click={() => options.setView("settings")}>
           <span class:text-accent={opts.groups.length > 0}>
-            <i class="fa fa-circle-nodes" /> {opts.groups.length}
+            <i class="fa fa-circle-nodes" />
+            {opts.groups.length}
           </span>
           <span><i class="fa fa-server" /> {opts.relays?.length}</span>
           <span><i class="fa fa-warning" /> {opts.warning || 0}</span>
