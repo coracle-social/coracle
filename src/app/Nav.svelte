@@ -42,14 +42,6 @@
       params.group = props.address
     }
 
-    if ($page.path.startsWith("/calendar")) {
-      params.type = "calendar_event"
-    }
-
-    if ($page.path.startsWith("/market")) {
-      params.type = "listing"
-    }
-
     if ($env.FORCE_GROUP) {
       params.group = $env.FORCE_GROUP
     }

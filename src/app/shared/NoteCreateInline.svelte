@@ -1,6 +1,7 @@
 <script lang="ts">
   import {join, identity} from "ramda"
-  import {createEvent} from "paravel"
+  import {Tags, createEvent} from "paravel"
+  import {asNostrEvent} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -17,20 +18,28 @@
   import {
     pubkey,
     writable,
+    Publisher,
+    getPublishHints,
     getClientTags,
     publishToZeroOrMoreGroups,
     getGroupPublishHints,
+    getReplyTags,
   } from "src/engine"
 
+  export let parent = null
   export let group = null
 
-  const defaultGroups = [group].filter(identity)
+  if (parent && group) {
+    throw new Error("Either parent or group is allowed, not both")
+  }
+
+  const defaultGroups = parent ? Tags.from(parent).communities().all() : [group].filter(identity)
   const defaultOpts = {
-    warning: "",
-    relays: getGroupPublishHints(defaultGroups),
+    relays: parent ? getPublishHints(parent) : getGroupPublishHints(defaultGroups),
     groups: defaultGroups,
     shouldWrap: true,
     anonymous: false,
+    warning: "",
   }
 
   let images, compose, options
@@ -56,12 +65,23 @@
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
+    if (parent) {
+      for (const tag of getReplyTags(parent, true)) {
+        tags.push(tag)
+      }
+    }
+
     for (const imeta of images.getValue()) {
       tags.push(["imeta", ...imeta.all().map(join(" "))])
     }
 
     if (opts.warning) {
       tags.push(["content-warning", opts.warning])
+    }
+
+    // Re-broadcast the note we're replying to
+    if (!parent.wrap) {
+      Publisher.publish({relays: opts.relays, event: asNostrEvent(parent)})
     }
 
     const template = createEvent(1, {content, tags})
@@ -79,13 +99,13 @@
 <form on:submit|preventDefault={() => onSubmit()}>
   <AlternatingBackground class="z-feature overflow-hidden rounded p-3">
     <div class="flex gap-4 text-lightest">
-      <PersonCircle class="w-10 h-10" pubkey={$pubkey} />
+      <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
       <div class="w-full">
         <Compose placeholder="What's up?" bind:this={compose} {onSubmit} style="min-height: 3em;" />
         <div class="p-2">
           <NoteImages bind:this={images} bind:compose includeInContent />
         </div>
-        <div class="flex justify-between items-center">
+        <div class="flex items-center justify-between">
           <div class="flex items-center justify-end gap-3">
             <i class="fa fa-cog cursor-pointer" on:click={() => options.setView("settings")} />
             <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}>
@@ -100,7 +120,7 @@
               </Popover>
             {/if}
           </div>
-          <Anchor button accent on:click={onSubmit}>Send</Anchor>
+          <Anchor button accent on:click={() => onSubmit()}>Send</Anchor>
         </div>
       </div>
     </div>

@@ -84,7 +84,7 @@
   export const parse = () => parseNode(input)
 </script>
 
-<div class="w-full">
+<div class="flex-grow min-w-0">
   <div class="h-0 text-light" class:hidden={!showPlaceholder}>
     {placeholder || ""}
   </div>

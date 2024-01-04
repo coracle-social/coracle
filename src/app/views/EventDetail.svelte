@@ -12,34 +12,14 @@
   import Feed from "src/app/shared/Feed.svelte"
   import EventDate from "src/app/shared/EventDate.svelte"
   import EventInfo from "src/app/shared/EventInfo.svelte"
-  import NoteReply from "src/app/shared/NoteReply.svelte"
+  import NoteCreateInline from "src/app/shared/NoteCreateInline.svelte"
   import type {Event} from "src/engine"
   import {dereferenceNote, getGroupReqInfo} from "src/engine"
 
   export let address
 
-  const cancelReply = () => {
-    replyIsOpen = false
-  }
-
   let event
-  let actions = []
-  let replyIsOpen = false
   let promise: Promise<Event> = defer()
-
-  $: {
-    actions = []
-
-    if (event) {
-      actions.push({
-        onClick: () => {
-          replyIsOpen = true
-        },
-        label: "Leave a comment",
-        icon: "message",
-      })
-    }
-  }
 
   onMount(() => {
     promise = dereferenceNote(Naddr.fromTagValue(address))
@@ -57,10 +37,9 @@
     <FlexColumn>
       <div class="flex gap-4">
         <EventDate {event} />
-        <EventInfo {event}>
-          <OverflowMenu {actions} />
-        </EventInfo>
+        <EventInfo {event} />
       </div>
+      <NoteCreateInline parent={event} />
       <Feed
         hideSpinner
         hideControls
@@ -70,13 +49,4 @@
         filter={{kinds: noteKinds, "#a": [address]}} />
     </FlexColumn>
   </div>
-  {#if replyIsOpen}
-    <Modal onEscape={cancelReply}>
-      <div class="text-center">
-        <Heading>Leave a comment</Heading>
-        <p>On "{Tags.from(event).getValue("name")}"</p>
-      </div>
-      <NoteReply forceOpen parent={event} on:reset={cancelReply} />
-    </Modal>
-  {/if}
 {/await}

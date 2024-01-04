@@ -7,11 +7,15 @@
   import {secondsToDate} from "src/util/misc"
   import {Naddr} from "src/util/nostr"
   import {themeColors} from "src/partials/state"
+  import Anchor from 'src/partials/Anchor.svelte'
   import {router} from "src/app/router"
   import {load, pubkey} from "src/engine"
 
   export let relays
   export let filters
+
+  const createEvent = () =>
+    router.at("notes/create").qp({type: "calendar_event"}).open()
 
   const getEventContent = ({event}) => event.title
 
@@ -57,6 +61,14 @@
     }
   })
 </script>
+
+<div class="relative h-0">
+  <div class="absolute right-44 top-4">
+    <Anchor button accent style="height: 38px; width: 38px;" on:click={createEvent}>
+      <i class="fa fa-plus" />
+    </Anchor>
+  </div>
+</div>
 
 <Calendar
   plugins={[Interaction, DayGrid]}

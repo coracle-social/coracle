@@ -203,3 +203,8 @@ body,
   padding: 1px 0.2em;
 }
 
+/* Event Calendar */
+
+.ec-day, .ec-button {
+  cursor: pointer;
+}

@@ -14,6 +14,7 @@
   export let danger = false
   export let circle = false
   export let underline = false
+  export let style = null
   export let type = null
   export let href = null
   export let tag = "a"
@@ -51,15 +52,15 @@
 </script>
 
 {#if tag === "a"}
-  <a class={className} on:click={onClick} href={externalHref || href} {target}>
+  <a {style} class={className} on:click={onClick} href={externalHref || href} {target}>
     <slot />
   </a>
 {:else if tag === "button"}
-  <button class={className} on:click={onClick} {type}>
+  <button {style} class={className} on:click={onClick} {type}>
     <slot />
   </button>
 {:else}
-  <svelte:element this={tag} class={className} on:click={onClick}>
+  <svelte:element {style} this={tag} class={className} on:click={onClick}>
     <slot />
   </svelte:element>
 {/if}
