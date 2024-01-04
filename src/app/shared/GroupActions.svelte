@@ -45,11 +45,13 @@
         icon: "edit",
       })
 
-      actions.push({
-        onClick: () => router.at("groups").of(address).at("rotate").open(),
-        label: "Rotate Keys",
-        icon: "rotate",
-      })
+      if ($group.access !== GroupAccess.Open) {
+        actions.push({
+          onClick: () => router.at("groups").of(address).at("rotate").open(),
+          label: "Membership",
+          icon: "rotate",
+        })
+      }
 
       actions.push({
         onClick: () => router.at("groups").of(address).at("info").open(),
@@ -82,7 +84,7 @@
 </script>
 
 <div class="flex items-center gap-3" on:click|stopPropagation>
-  {#if !$adminKey && $session}
+  {#if $session}
     {#if $access === GroupAccess.Open}
       {#if $status.joined}
         <Popover triggerType="mouseenter">

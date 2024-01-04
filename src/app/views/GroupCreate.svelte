@@ -3,6 +3,7 @@
   import type {Values} from "src/app/shared/GroupDetailsForm.svelte"
   import GroupDetailsForm from "src/app/shared/GroupDetailsForm.svelte"
   import {
+    nip44,
     publishGroupMeta,
     publishGroupInvites,
     initGroup,
@@ -16,8 +17,8 @@
     name: "",
     image: "",
     description: "",
-    isPublic: false,
-    access: GroupAccess.Closed,
+    isPublic: !$nip44.isEnabled(),
+    access: $nip44.isEnabled() ? GroupAccess.Closed : GroupAccess.Open,
     members: [$user],
     relays: [],
   }
@@ -27,8 +28,13 @@
     const {id, address} = initGroup(values.relays)
 
     await publishAdminKeyShares(address, [$user.pubkey], values.relays)
-    await publishGroupInvites(address, members, values.relays)
     await publishGroupMeta(address, values.isPublic, {...values, id})
+
+    if (values.access === GroupAccess.Open) {
+      joinGroup(address)
+    } else {
+      await publishGroupInvites(address, members, values.relays)
+    }
 
     router.at("groups").of(address).at("members").replace()
   }

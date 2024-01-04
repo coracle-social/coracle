@@ -7,17 +7,22 @@
   import {themeBackgroundGradient} from "src/partials/state"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Tabs from "src/partials/Tabs.svelte"
+  import Input from "src/partials/Input.svelte"
+  import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Calendar from "src/app/shared/Calendar.svelte"
+  import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import GroupActions from "src/app/shared/GroupActions.svelte"
   import GroupAbout from "src/app/shared/GroupAbout.svelte"
   import GroupRequest from "src/app/shared/GroupRequest.svelte"
   import GroupMember from "src/app/shared/GroupMember.svelte"
   import GroupMarket from "src/app/shared/GroupMarket.svelte"
+  import NoteCreate from "src/app/views/NoteCreate.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {
     env,
+    pubkey,
     GroupAccess,
     MemberAccess,
     displayGroup,
@@ -77,13 +82,13 @@
       tabs.push("market")
     }
 
-    if ($sharedKey) {
+    if ($group.access !== GroupAccess.Open && $sharedKey) {
       tabs.push("members")
     } else if (activeTab === "members") {
       activeTab = "notes"
     }
 
-    if ($adminKey) {
+    if ($group.access !== GroupAccess.Open && $adminKey) {
       tabs.push("admin")
     } else if (activeTab === "admin") {
       activeTab = "notes"

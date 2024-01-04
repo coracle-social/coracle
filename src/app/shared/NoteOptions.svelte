@@ -87,7 +87,7 @@
             <div class="flex flex-col gap-2">
               {#each groupOptions as g (g.address)}
                 <Card invertColors interactive on:click={() => setGroup(g.address)}>
-                  <GroupSummary address={g.address}>
+                  <GroupSummary hideAbout address={g.address}>
                     <div slot="actions">
                       {#if values.groups.includes(g.address)}
                         <i class="fa fa-circle-check text-accent" />

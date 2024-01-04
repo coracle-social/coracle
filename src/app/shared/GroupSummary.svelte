@@ -7,6 +7,7 @@
   import {groups, deriveMembershipLevel, MembershipLevel, GroupAccess} from "src/engine"
 
   export let address
+  export let hideAbout = false
 
   const group = groups.key(address)
   const membershipLevel = deriveMembershipLevel(address)
@@ -28,7 +29,7 @@
       </div>
       <slot name="actions" class="hidden xs:block" />
     </div>
-    {#if $group?.description}
+    {#if !hideAbout && $group?.description}
       <GroupAbout {address} />
     {/if}
   </div>

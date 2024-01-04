@@ -5,13 +5,17 @@
   export let options
   export let value
   export let onChange = null
+  export let disabled = false
   export let displayOption = identity
 </script>
 
 <div>
   <div class="inline-block">
     <div
-      class="flex cursor-pointer overflow-hidden rounded-full border border-solid border-lightest">
+      class="flex overflow-hidden rounded-full border border-solid border-lightest"
+      class:pointer-events-none={disabled}
+      class:opacity-75={disabled}
+      class:cursor-pointer={!disabled}>
       {#each options as option, i}
         <div
           class={cx("px-4 py-2 transition-all", {

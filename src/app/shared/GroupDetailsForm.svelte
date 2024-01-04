@@ -28,7 +28,7 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import type {Person} from "src/engine"
-  import {GroupAccess, searchRelays, normalizeRelayUrl} from "src/engine"
+  import {nip44, GroupAccess, searchRelays, normalizeRelayUrl} from "src/engine"
 
   export let onSubmit
   export let values: Values
@@ -90,14 +90,9 @@
           host yourself.
         </div>
       </Field>
-      {#if showMembers}
-        <Field label="Member List">
-          <PersonMultiSelect bind:value={values.members} />
-          <div slot="info">All members will receive a fresh invitation with a new key.</div>
-        </Field>
-      {/if}
       <Field label="Access">
         <SelectButton
+          disabled={!$nip44.isEnabled()}
           bind:value={values.access}
           options={Object.values(GroupAccess)}
           displayOption={ucFirst} />
@@ -106,8 +101,14 @@
           admin-controlled member list which can post privately to the group.
         </div>
       </Field>
+      {#if showMembers && values.access !== GroupAccess.Open}
+        <Field label="Member List">
+          <PersonMultiSelect bind:value={values.members} />
+          <div slot="info">All members will receive a fresh invitation with a new key.</div>
+        </Field>
+      {/if}
       <FieldInline label="List Publicly">
-        <Toggle bind:value={values.isPublic} />
+        <Toggle disabled={!$nip44.isEnabled()} bind:value={values.isPublic} />
         <div slot="info">
           If enabled, this will generate a public listing for the group. The member list and group
           messages will not be published.

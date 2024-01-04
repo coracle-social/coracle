@@ -320,7 +320,9 @@
         <small
           class="flex cursor-pointer items-center justify-end gap-4"
           on:click={() => options.setView("settings")}>
-          <span><i class="fa fa-circle-nodes" /> {opts.groups.length}</span>
+          <span class:text-accent={opts.groups.length > 0}>
+            <i class="fa fa-circle-nodes" /> {opts.groups.length}
+          </span>
           <span><i class="fa fa-server" /> {opts.relays?.length}</span>
           <span><i class="fa fa-warning" /> {opts.warning || 0}</span>
         </small>
