@@ -3,7 +3,6 @@
   import {last} from "ramda"
   import {ellipsize, Fetch} from "hurdak"
   import {Tags} from "paravel"
-  import {AudioController} from "src/util/audio"
   import Audio from "src/partials/Audio.svelte"
   import Image from "src/partials/Image.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -28,7 +27,11 @@
 </script>
 
 {#if url.match(/\.(wav|mp3|m3u8)$/)}
-  <Audio controller={new AudioController(url)} />
+  {#await import("src/util/audio")}
+    <span />
+  {:then {AudioController}}
+    <Audio controller={new AudioController(url)} />
+  {/await}
 {:else}
   <Anchor
     external
