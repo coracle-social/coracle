@@ -17,6 +17,7 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import PersonStats from "src/app/shared/PersonStats.svelte"
+  import PersonCollections from "src/app/shared/PersonCollections.svelte"
   import {
     mutes,
     derivePerson,
@@ -31,7 +32,7 @@
   export let relays = []
   export let filter = {kinds: noteKinds, authors: [pubkey]}
 
-  const tabs = ["notes", "likes", "relays"].filter(identity)
+  const tabs = ["notes", "likes", "collections", "relays"].filter(identity)
   const person = derivePerson(pubkey)
 
   let activeTab = "notes"
@@ -98,6 +99,8 @@
   <Feed showGroup {filter} />
 {:else if activeTab === "likes"}
   <Feed showGroup hideControls filter={{kinds: [7], authors: [pubkey]}} />
+{:else if activeTab === "collections"}
+  <PersonCollections {pubkey} />
 {:else if activeTab === "relays"}
   {#if ownRelays.length > 0}
     <PersonRelays relays={ownRelays} />
