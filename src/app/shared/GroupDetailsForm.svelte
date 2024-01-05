@@ -90,30 +90,33 @@
           host yourself.
         </div>
       </Field>
-      <Field label="Access">
-        <SelectButton
-          disabled={!$nip44.isEnabled()}
-          bind:value={values.access}
-          options={Object.values(GroupAccess)}
-          displayOption={ucFirst} />
-        <div slot="info">
-          Anyone can join and post to open groups. Hybrid and closed groups support an
-          admin-controlled member list which can post privately to the group.
-        </div>
-      </Field>
+      {#if $nip44.isEnabled()}
+        <Field label="Access">
+          <SelectButton
+            bind:value={values.access}
+            options={Object.values(GroupAccess)}
+            displayOption={ucFirst} />
+          <div slot="info">
+            Anyone can join and post to open groups. Hybrid and closed groups support an
+            admin-controlled member list which can post privately to the group.
+          </div>
+        </Field>
+      {/if}
       {#if showMembers && values.access !== GroupAccess.Open}
         <Field label="Member List">
           <PersonMultiSelect bind:value={values.members} />
           <div slot="info">All members will receive a fresh invitation with a new key.</div>
         </Field>
       {/if}
-      <FieldInline label="List Publicly">
-        <Toggle disabled={!$nip44.isEnabled()} bind:value={values.isPublic} />
-        <div slot="info">
-          If enabled, this will generate a public listing for the group. The member list and group
-          messages will not be published.
-        </div>
-      </FieldInline>
+      {#if values.access === GroupAccess.Closed}
+        <FieldInline label="List Publicly">
+          <Toggle bind:value={values.isPublic} />
+          <div slot="info">
+            If enabled, this will generate a public listing for the group. The member list and group
+            messages will not be published.
+          </div>
+        </FieldInline>
+      {/if}
       <Anchor button tag="button" type="submit">Save</Anchor>
     </div>
   </FlexColumn>
