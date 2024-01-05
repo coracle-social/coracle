@@ -38,7 +38,6 @@
   import Help from "src/app/views/Help.svelte"
   import Home from "src/app/views/Home.svelte"
   import LabelCreate from "src/app/views/LabelCreate.svelte"
-  import LabelDetail from "src/app/views/LabelDetail.svelte"
   import ListEdit from "src/app/views/ListEdit.svelte"
   import ListList from "src/app/views/ListList.svelte"
   import ListSelect from "src/app/views/ListSelect.svelte"
@@ -146,13 +145,6 @@
   })
 
   router.register("/help/:topic", Help)
-
-  router.register("/labels/:label", LabelDetail, {
-    serializers: {
-      label: asUrlComponent("label"),
-      relays: asCsv("relays"),
-    },
-  })
 
   router.register("/lists", ListList)
   router.register("/lists/create", ListEdit)

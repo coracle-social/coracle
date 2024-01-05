@@ -6,9 +6,8 @@
 - [x] Add NIP 24 chat support with NIP 04 backwards compatibility
 - [x] Add NIP 72 community support
 - [x] Add NIP 87 closed community support
-- [x] Add group notes
-- [x] Add group calendars
-- [x] Add group marketplace
+- [x] Add NIP 51 calendar event support
+- [x] Add NIP 99 classifieds support
 - [x] Support cross-posting
 - [x] Limit number of replies shown on feed
 - [x] Search results sorted by relevance weighted by WoT
@@ -16,6 +15,11 @@
 - [x] Strip hash from media urls
 - [x] Start on @daniele's redesign
 - [x] Add bitcoin connect support
+- [x] Remove Apps page, move NIP 89 support to note info dialog
+- [x] Publish NIP 89 client tag
+- [x] Remove Explore page, move NIP 32 support to profile collections
+- [x] Replaced `FORCE_RELAYS` env variable with `FORCE_GROUP`
+- [x] Warn when a user might be publishing their nsec
 
 # 0.3.14
 
