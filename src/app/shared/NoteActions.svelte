@@ -1,10 +1,10 @@
 <script lang="ts">
   import cx from "classnames"
   import {nip19} from "nostr-tools"
-  import {toNostrURI, createEvent} from "paravel"
+  import {toNostrURI, Tags, createEvent} from "paravel"
   import {tweened} from "svelte/motion"
-  import {identity, filter, sum, uniqBy, prop, pluck, sortBy} from "ramda"
-  import {formatSats} from "src/util/misc"
+  import {identity, last, filter, sum, uniqBy, prop, pluck, sortBy} from "ramda"
+  import {formatSats, tryJson} from "src/util/misc"
   import {LOCAL_RELAY_URL, getGroupAddress, getIdOrAddressTag, asNostrEvent} from "src/util/nostr"
   import {quantify} from "hurdak"
   import {toast} from "src/partials/state"
@@ -31,6 +31,7 @@
     session,
     Publisher,
     mention,
+    handlers,
     deriveHandlers,
     deriveMembershipLevel,
     MembershipLevel,
@@ -60,11 +61,13 @@
   const address = getGroupAddress(note)
   const nevent = nip19.neventEncode({id: note.id, relays})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
-  const handlers = deriveHandlers(note.kind).derived(filter((h: any) => h.recs.length > 1))
+  const kindHandlers = deriveHandlers(note.kind).derived(filter((h: any) => h.recs.length > 1))
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
+  const clientTag = Tags.from(note).type('client').first()
+  const handler = handlers.key(clientTag ? last(clientTag) : null)
 
   //const report = () => router.at("notes").of(note.id, {relays: getEventHints(note)}).at('report').qp({pubkey: note.pubkey}).open()
 
@@ -325,14 +328,21 @@
           {/each}
         </div>
       {/if}
-      {#if $handlers.length > 0}
+      {#if $kindHandlers.length > 0 || $handler}
         <h1 class="staatliches text-2xl">Apps</h1>
-        <p>This note can also be viewed using other nostr apps:</p>
-        <FlexColumn>
-          {#each $handlers as { address, event, recs } (address)}
-            <HandlerSummary {event} {recs} />
-          {/each}
-        </FlexColumn>
+        {#if $handler}
+          {@const meta = tryJson(() => JSON.parse($handler.event.content))}
+          <p>This note was published using {meta?.display_name || meta?.name}.</p>
+          <HandlerSummary event={$handler.event} />
+        {/if}
+        {#if $kindHandlers.length > 0}
+          <p>This note can also be viewed using other nostr apps:</p>
+          <FlexColumn>
+            {#each $kindHandlers as { address, event, recs } (address)}
+              <HandlerSummary {event} {recs} />
+            {/each}
+          </FlexColumn>
+        {/if}
       {/if}
       <h1 class="staatliches text-2xl">Details</h1>
       <CopyValue label="Link" value={toNostrURI(nevent)} />

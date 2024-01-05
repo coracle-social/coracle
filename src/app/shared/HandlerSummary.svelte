@@ -13,7 +13,7 @@
   import type {Event} from 'src/engine'
 
   export let event
-  export let recs: Event[]
+  export let recs: Event[] = []
 
   const meta = tryJson(() => JSON.parse(event.content))
 
@@ -54,6 +54,8 @@
         </Chip>
       {/if}
     </div>
-    <PeopleAction pubkeys={uniq(pluck('pubkey', recs))} actionText="recommend this app" />
+    {#if recs.length > 0}
+      <PeopleAction pubkeys={uniq(pluck('pubkey', recs))} actionText="recommend this app" />
+    {/if}
   </FlexColumn>
 </Card>
