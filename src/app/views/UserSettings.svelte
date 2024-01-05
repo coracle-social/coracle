@@ -1,5 +1,4 @@
 <script lang="ts">
-  import "@getalby/bitcoin-connect"
   import {identity} from "ramda"
   import {toast, appName} from "src/partials/state"
   import Field from "src/partials/Field.svelte"
@@ -11,6 +10,8 @@
   import {env, getSettings, publishSettings} from "src/engine"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {fuzzy} from "src/util/misc"
+
+  import("@getalby/bitcoin-connect")
 
   const settings = getSettings()
 
