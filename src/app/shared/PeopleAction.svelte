@@ -1,16 +1,12 @@
 <script lang="ts">
-  import {uniq, pluck} from "ramda"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
   import {router} from "src/app/router"
-  import type {Notification} from "src/engine"
 
-  export let notification: Notification
+  export let pubkeys
   export let actionText
-
-  const pubkeys = uniq(pluck("pubkey", notification.interactions))
 </script>
 
 {#if pubkeys.length === 1}

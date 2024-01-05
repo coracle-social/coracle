@@ -14,7 +14,6 @@
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import GroupLink from "src/app/shared/GroupLink.svelte"
   import {toastProgress} from "src/app/state"
-  import {router} from "src/app/router"
   import {
     pubkey,
     writable,

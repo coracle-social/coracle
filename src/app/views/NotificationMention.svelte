@@ -1,9 +1,9 @@
 <script lang="ts">
-  import {pluck} from "ramda"
+  import {pluck, uniq} from "ramda"
   import {formatTimestamp} from "src/util/misc"
   import {getParentId} from "src/util/nostr"
   import Note from "src/app/shared/Note.svelte"
-  import NotificationPeople from "src/app/shared/NotificationPeople.svelte"
+  import PeopleAction from "src/app/shared/PeopleAction.svelte"
   import type {Notification} from "src/engine"
 
   export let notification: Notification
@@ -14,7 +14,7 @@
 </script>
 
 <div class="flex justify-between">
-  <NotificationPeople {notification} actionText="mentioned you" />
+  <PeopleAction pubkeys={uniq(pluck("pubkey", interactions))} actionText="mentioned you" />
   <small>{formatTimestamp(timestamp)}</small>
 </div>
 

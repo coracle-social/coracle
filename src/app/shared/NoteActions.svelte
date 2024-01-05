@@ -3,12 +3,13 @@
   import {nip19} from "nostr-tools"
   import {toNostrURI, createEvent} from "paravel"
   import {tweened} from "svelte/motion"
-  import {identity, sum, uniqBy, prop, pluck, sortBy} from "ramda"
+  import {identity, filter, sum, uniqBy, prop, pluck, sortBy} from "ramda"
   import {formatSats} from "src/util/misc"
   import {LOCAL_RELAY_URL, getGroupAddress, getIdOrAddressTag, asNostrEvent} from "src/util/nostr"
   import {quantify} from "hurdak"
   import {toast} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
   import ColorDot from "src/partials/ColorDot.svelte"
@@ -16,6 +17,7 @@
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
+  import HandlerSummary from "src/app/shared/HandlerSummary.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import {router} from "src/app/router"
@@ -29,6 +31,7 @@
     session,
     Publisher,
     mention,
+    deriveHandlers,
     deriveMembershipLevel,
     MembershipLevel,
     publishToZeroOrMoreGroups,
@@ -57,6 +60,7 @@
   const address = getGroupAddress(note)
   const nevent = nip19.neventEncode({id: note.id, relays})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
+  const handlers = deriveHandlers(note.kind).derived(filter((h: any) => h.recs.length > 1))
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
@@ -320,6 +324,15 @@
             <RelayCard relay={{url}} />
           {/each}
         </div>
+      {/if}
+      {#if $handlers.length > 0}
+        <h1 class="staatliches text-2xl">Apps</h1>
+        <p>This note can also be viewed using other nostr apps:</p>
+        <FlexColumn>
+          {#each $handlers as { address, event, recs } (address)}
+            <HandlerSummary {event} {recs} />
+          {/each}
+        </FlexColumn>
       {/if}
       <h1 class="staatliches text-2xl">Details</h1>
       <CopyValue label="Link" value={toNostrURI(nevent)} />
