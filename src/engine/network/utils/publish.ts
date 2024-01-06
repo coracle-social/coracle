@@ -207,9 +207,14 @@ export const tagsFromContent = (content: string) => {
 export const getReplyTags = (parent: Event, inherit = false) => {
   const tags = Tags.from(parent)
   const hints = getEventHints(parent)
-  const replyTags = [mention(parent.pubkey)]
   const replyTagValues = getIdAndAddress(parent)
   const userPubkey = pubkey.get()
+  const replyTags = []
+
+  // Mention the parent's author
+  if (parent.pubkey !== userPubkey) {
+    replyTags.push(mention(parent.pubkey))
+  }
 
   // Inherit p-tag mentions
   if (inherit) {

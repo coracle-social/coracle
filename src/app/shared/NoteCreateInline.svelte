@@ -20,6 +20,7 @@
     Publisher,
     getPublishHints,
     getClientTags,
+    tagsFromContent,
     publishToZeroOrMoreGroups,
     getGroupPublishHints,
     getReplyTags,
@@ -57,12 +58,13 @@
   }
 
   const onSubmit = async ({skipNsecWarning = false} = {}) => {
-    const tags = getClientTags()
     const content = compose.parse().trim()
 
     if (!content) return toast.show("error", "Please provide a description.")
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
+
+    const tags = [...tagsFromContent(content), ...getClientTags()]
 
     if (parent) {
       for (const tag of getReplyTags(parent, true)) {

@@ -35,6 +35,7 @@
     writable,
     getEventHints,
     getClientTags,
+    tagsFromContent,
     publishToZeroOrMoreGroups,
     getGroupPublishHints,
     deriveGroupOptions,
@@ -83,7 +84,6 @@
   }
 
   const onSubmit = async ({skipNsecWarning = false} = {}) => {
-    const tags = getClientTags()
     const content = compose.parse().trim()
 
     if (!content) return toast.show("error", "Please provide a description.")
@@ -113,6 +113,8 @@
         return toast.show("error", "Please select a currency.")
       }
     }
+
+    const tags = [...tagsFromContent(content), ...getClientTags()]
 
     for (const imeta of images.getValue()) {
       if (type === "listing") {

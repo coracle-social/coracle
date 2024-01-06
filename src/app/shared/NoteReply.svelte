@@ -17,6 +17,7 @@
     uniqTags,
     writable,
     publishToZeroOrMoreGroups,
+    tagsFromContent,
     getClientTags,
     getReplyTags,
     session,
@@ -99,6 +100,7 @@
     const tags = uniqTags([
       ...mentions.map(mention),
       ...getReplyTags(parent, true),
+      ...tagsFromContent(content),
       ...getClientTags(),
     ])
 

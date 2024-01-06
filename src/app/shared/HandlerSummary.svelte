@@ -15,7 +15,7 @@
   export let event
   export let recs: Event[] = []
 
-  const meta = tryJson(() => JSON.parse(event.content))
+  const meta = tryJson(() => JSON.parse(event.content)) || {}
 
   const copy = text => {
     copyToClipboard(text)
