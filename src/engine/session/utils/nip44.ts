@@ -19,7 +19,6 @@ export class Nip44 {
 
     return switcher(method, {
       privkey: true,
-      extension: Boolean((window.nostr as any)?.nip44),
       default: false,
     })
   }

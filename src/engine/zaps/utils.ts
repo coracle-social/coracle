@@ -88,7 +88,7 @@ export const fetchZapper = createBatcher(3000, async (lnurls: string[]) => {
   const infoByLnurl = createMapOf("lnurl", "info", data)
 
   return lnurls.map(lnurl => {
-    const zapper = infoByLnurl[bech32ToHex(lnurl)]
+    const zapper = tryFunc(() => infoByLnurl[bech32ToHex(lnurl)])
 
     if (!zapper) {
       return null

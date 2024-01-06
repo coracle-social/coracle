@@ -8,6 +8,7 @@
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/router"
   import {
+    nip44,
     session,
     deriveAdminKeyForGroup,
     leaveGroup,
@@ -101,28 +102,28 @@
           <div slot="tooltip">Join</div>
         </Popover>
       {/if}
-    {:else if !$status.access}
+    {:else if $nip44.isEnabled() && !$status.access}
       <Popover triggerType="mouseenter">
         <div slot="trigger" class="w-6 text-center">
           <i class="fa fa-right-to-bracket cursor-pointer" on:click={startJoin} />
         </div>
         <div slot="tooltip">Join</div>
       </Popover>
-    {:else if $status.access === "requested"}
+    {:else if $nip44.isEnabled() && $status.access === "requested"}
       <Popover triggerType="mouseenter">
         <div slot="trigger" class="w-6 text-center">
           <i class="fa fa-hourglass cursor-pointer" />
         </div>
         <div slot="tooltip">Access Pending</div>
       </Popover>
-    {:else if $status.access === "granted"}
+    {:else if $nip44.isEnabled() && $status.access === "granted"}
       <Popover triggerType="mouseenter">
         <div slot="trigger" class="w-6 text-center">
           <i class="fa fa-right-from-bracket cursor-pointer" on:click={leave} />
         </div>
         <div slot="tooltip">Leave</div>
       </Popover>
-    {:else if $status.access === "revoked"}
+    {:else if $nip44.isEnabled() && $status.access === "revoked"}
       <Popover triggerType="mouseenter">
         <div slot="trigger" class="w-6 text-center">
           <i class="fa fa-times cursor-pointer" on:click={clear} />
