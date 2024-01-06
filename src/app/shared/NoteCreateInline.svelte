@@ -81,7 +81,7 @@
     }
 
     // Re-broadcast the note we're replying to
-    if (!parent.wrap) {
+    if (parent && !parent.wrap) {
       Publisher.publish({relays: opts.relays, event: asNostrEvent(parent)})
     }
 

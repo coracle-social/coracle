@@ -42,11 +42,11 @@
   let subMenu, active
 
   $: {
-    if ($page.path.startsWith("/notes")) {
+    if ($page?.path.startsWith("/notes")) {
       active = "feed"
-    } else if ($page.path.startsWith("/notifications")) {
+    } else if ($page?.path.startsWith("/notifications")) {
       active = "notifications"
-    } else if ($page.path.startsWith("/channels")) {
+    } else if ($page?.path.startsWith("/channels")) {
       active = "channels"
     }
   }
