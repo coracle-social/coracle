@@ -223,7 +223,7 @@
       class={cx("relative w-16 pt-1 text-left transition-all hover:pb-1 hover:pt-0", {
         "pointer-events-none opacity-50": disableActions,
       })}
-      on:click={reply.start}>
+      on:click={reply?.start}>
       <i class="fa fa-reply cursor-pointer" />
       {$repliesCount}
     </button>
