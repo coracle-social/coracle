@@ -11,8 +11,10 @@
 
   const autoLogIn = () =>
     withExtension(async ext => {
-      if (ext) {
-        loginWithExtension(await ext.getPublicKey())
+      const pubkey = ext && (await ext.getPublicKey())
+
+      if (pubkey) {
+        loginWithExtension(pubkey)
         boot()
       } else {
         router.at("login/privkey").replaceModal()

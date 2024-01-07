@@ -9,7 +9,7 @@
 
   const {page} = router
 
-  $: isActive = path && $page.path.startsWith(path)
+  $: isActive = path && $page?.path.startsWith(path)
 
   $: className = cx("relative staatliches h-12 block transition-all", {
     "text-2xl text-accent": isActive,

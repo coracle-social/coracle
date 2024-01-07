@@ -15,9 +15,7 @@ export class Nip44 {
   constructor(readonly session: Session) {}
 
   isEnabled() {
-    const {method} = this.session
-
-    return switcher(method, {
+    return switcher(this.session?.method, {
       privkey: true,
       default: false,
     })
