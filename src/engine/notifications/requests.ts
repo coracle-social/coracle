@@ -4,7 +4,6 @@ import {pluck, identity, max, slice, filter, without, sortBy} from "ramda"
 import {noteKinds, reactionKinds, getParentId} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import type {Filter} from "src/engine/network/model"
-import {EventKind} from "src/engine/events/model"
 import {env, sessions} from "src/engine/session/state"
 import {_events} from "src/engine/events/state"
 import {events, isEventMuted} from "src/engine/events/derived"
@@ -41,7 +40,7 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
 })
 
 export const getNotificationKinds = () =>
-  without(env.get().ENABLE_ZAPS ? [] : [EventKind.Zap], [...noteKinds, ...reactionKinds, 1059, 4])
+  without(env.get().ENABLE_ZAPS ? [] : [9735], [...noteKinds, ...reactionKinds, 1059, 4])
 
 export const loadNotifications = () => {
   const kinds = getNotificationKinds()

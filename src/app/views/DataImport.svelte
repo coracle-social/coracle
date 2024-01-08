@@ -9,9 +9,9 @@
   import Heading from "src/partials/Heading.svelte"
   import {router} from "src/app/router"
   import type {Event} from "src/engine"
-  import {_events, EventKind, projections} from "src/engine"
+  import {_events, projections} from "src/engine"
 
-  const encryptedKinds = [EventKind.GiftWrap]
+  const encryptedKinds = [1059]
 
   const setFile = e => {
     file = e.target.files[0]

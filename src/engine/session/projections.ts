@@ -3,11 +3,10 @@ import {Tags} from "paravel"
 import {appDataKeys} from "src/util/nostr"
 import {projections} from "src/engine/core/projections"
 import {updateRecord} from "src/engine/core/commands"
-import {EventKind} from "src/engine/events/model"
 import {sessions} from "./state"
 import {nip04} from "./derived"
 
-projections.addHandler(EventKind.AppData, e => {
+projections.addHandler(30078, e => {
   if (Tags.from(e).getValue("d") === appDataKeys.USER_SETTINGS) {
     sessions.updateAsync(async $sessions => {
       if ($sessions[e.pubkey]) {

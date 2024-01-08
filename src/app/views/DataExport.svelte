@@ -4,9 +4,9 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {events, user, EventKind} from "src/engine"
+  import {events, user} from "src/engine"
 
-  const encryptedKinds = [EventKind.GiftWrap]
+  const encryptedKinds = [1059]
 
   const submit = async () => {
     const jsonl = $events

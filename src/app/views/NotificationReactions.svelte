@@ -7,13 +7,12 @@
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
   import {router} from "src/app/router"
   import type {Notification} from "src/engine"
-  import {EventKind} from "src/engine"
 
   export let notification: Notification
 
   const {event: note, interactions, timestamp} = notification
-  const likes = interactions.filter(e => e.kind === EventKind.Reaction)
-  const zaps = interactions.filter(e => e.kind === EventKind.ZapRequest)
+  const likes = interactions.filter(e => e.kind === 7)
+  const zaps = interactions.filter(e => e.kind === 9734)
   const context = interactions.concat(note)
 
   const goToNote = () => router.at("notes").of(note.id, {relays: note.seen_on}).cx({context}).open()

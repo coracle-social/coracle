@@ -5,7 +5,6 @@ import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
 import {sessions} from "src/engine/session/state"
 import {nip59} from "src/engine/session/derived"
-import {EventKind} from "./model"
 import {_events, deletes, deletesLastUpdated} from "./state"
 
 projections.addGlobalHandler(
@@ -16,11 +15,11 @@ projections.addGlobalHandler(
     if (userEvents.length > 0) {
       _events.update($events => $events.concat(userEvents))
     }
-  })
+  }),
 )
 
 projections.addHandler(
-  EventKind.Delete,
+  5,
   batch(500, (chunk: Event[]) => {
     const values = Tags.from(chunk).type(["a", "e"]).values().all()
 
@@ -31,10 +30,10 @@ projections.addHandler(
 
       return $deletes
     })
-  })
+  }),
 )
 
-projections.addHandler(EventKind.GiftWrap, e => {
+projections.addHandler(1059, e => {
   const session = sessions.get()[Tags.from(e).getValue("p")]
 
   if (session?.privkey) {

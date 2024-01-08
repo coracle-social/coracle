@@ -4,7 +4,6 @@ import {switcherFn} from "hurdak"
 import {Naddr, LOCAL_RELAY_URL, getPublicKey} from "src/util/nostr"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
-import {EventKind} from "src/engine/events/model"
 import {selectHints} from "src/engine/relays/utils"
 import {sessions} from "src/engine/session/state"
 import {nip59} from "src/engine/session/derived"
@@ -182,7 +181,7 @@ projections.addGlobalHandler((e: Event) => {
 
 // Unwrap gift wraps using known keys
 
-projections.addHandler(EventKind.GiftWrap, wrap => {
+projections.addHandler(1059, wrap => {
   const sk = getRecipientKey(wrap)
 
   if (sk) {
