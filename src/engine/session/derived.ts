@@ -14,7 +14,7 @@ export const session = derived(
 
 export const user = derived(
   [stateKey, people.mapStore],
-  ([$k, $p]: [string, Map<string, Person>]) => $p.get($k),
+  ([$k, $p]: [string, Map<string, Person>]) => $p.get($k) || {pubkey: $k},
 )
 
 export const ndk = session.derived(getNdk)

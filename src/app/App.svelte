@@ -356,7 +356,7 @@
     const unsubPage = router.page.subscribe(
       memoize($page => {
         if ($page) {
-          logUsage(btoa($page.path))
+          logUsage($page.path)
         }
 
         window.scrollTo(0, 0)
@@ -365,7 +365,7 @@
 
     const unsubModal = router.modal.subscribe($modal => {
       if ($modal) {
-        logUsage(btoa($modal.path))
+        logUsage($modal.path)
       }
     })
 
