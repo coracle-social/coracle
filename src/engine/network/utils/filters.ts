@@ -165,8 +165,8 @@ export const compileFilters = (filters: DynamicFilter[], opts: CompileFiltersOpt
 export const getRelaysFromFilters = filters =>
   mergeHints(
     filters.flatMap(filter => {
-      if (filter['#a']?.some(a => a.startsWith('34550:'))) {
-        return filter['#a'].map(getGroupHints)
+      if (filter["#a"]?.some(a => a.match(/^(35834|34550):/))) {
+        return filter["#a"].map(getGroupHints)
       }
 
       if (filter.authors) {
@@ -174,5 +174,5 @@ export const getRelaysFromFilters = filters =>
       }
 
       return [getPubkeyHints(pubkey.get(), "read")]
-    })
+    }),
   )

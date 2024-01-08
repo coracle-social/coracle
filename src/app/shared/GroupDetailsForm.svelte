@@ -1,12 +1,16 @@
 <script context="module" lang="ts">
   export type Values = {
-    name: string
-    image: string
-    description: string
-    isPublic: boolean
-    access: string
+    id?: string
+    type: string
     relays: string[]
     members?: Person[]
+    list_publicly: boolean
+    meta: {
+      name: string
+      about: string
+      picture: string
+      banner: string
+    }
   }
 </script>
 
@@ -19,7 +23,6 @@
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
-  import SelectButton from "src/partials/SelectButton.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Input from "src/partials/Input.svelte"
@@ -28,12 +31,13 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import type {Person} from "src/engine"
-  import {nip44, GroupAccess, searchRelays, normalizeRelayUrl} from "src/engine"
+  import {searchRelays, normalizeRelayUrl} from "src/engine"
 
   export let onSubmit
   export let values: Values
   export let mode = "create"
   export let showMembers = false
+  export let buttonText = "Save"
 
   const searchRelayUrls = q => pluck("url", $searchRelays(q))
 
@@ -56,27 +60,50 @@
   <FlexColumn>
     <div class="mb-4 flex flex-col items-center justify-center">
       <Heading>{ucFirst(mode)} Group</Heading>
-      <p>Create a private place where members can talk.</p>
+      <p>
+        {#if values.type === "open"}
+          An open forum where anyone can participate.
+        {:else}
+          A private place where members can talk.
+        {/if}
+      </p>
     </div>
     <div class="flex w-full flex-col gap-8">
       <Field label="Name">
-        <Input bind:value={values.name}>
+        <Input bind:value={values.meta.name}>
           <i slot="before" class="fa fa-clipboard" />
         </Input>
         <div slot="info">The name of the group</div>
       </Field>
       <Field label="Picture">
         <ImageInput
-          bind:value={values.image}
+          bind:value={values.meta.picture}
           icon="image-portrait"
           maxWidth={480}
           maxHeight={480} />
         <div slot="info">A picture for the group</div>
       </Field>
-      <Field label="Description">
-        <Textarea bind:value={values.description} />
+      <Field label="Banner">
+        <ImageInput
+          bind:value={values.meta.picture}
+          icon="image"
+          maxWidth={4000}
+          maxHeight={4000} />
+        <div slot="info">A banner image for the group</div>
+      </Field>
+      <Field label="About">
+        <Textarea bind:value={values.meta.about} />
         <div slot="info">The group's decription</div>
       </Field>
+      {#if values.type === "closed"}
+        <FieldInline label="List Publicly">
+          <Toggle bind:value={values.list_publicly} />
+          <div slot="info">
+            If enabled, this will generate a public listing for the group. The member list and group
+            messages will not be published.
+          </div>
+        </FieldInline>
+      {/if}
       <Field label="Relays">
         <SearchSelect
           multiple
@@ -90,34 +117,13 @@
           host yourself.
         </div>
       </Field>
-      {#if $nip44.isEnabled()}
-        <Field label="Access">
-          <SelectButton
-            bind:value={values.access}
-            options={Object.values(GroupAccess)}
-            displayOption={ucFirst} />
-          <div slot="info">
-            Anyone can join and post to open groups. Hybrid and closed groups support an
-            admin-controlled member list which can post privately to the group.
-          </div>
-        </Field>
-      {/if}
-      {#if showMembers && values.access !== GroupAccess.Open}
+      {#if showMembers}
         <Field label="Member List">
           <PersonMultiSelect bind:value={values.members} />
           <div slot="info">All members will receive a fresh invitation with a new key.</div>
         </Field>
       {/if}
-      {#if values.access === GroupAccess.Closed}
-        <FieldInline label="List Publicly">
-          <Toggle bind:value={values.isPublic} />
-          <div slot="info">
-            If enabled, this will generate a public listing for the group. The member list and group
-            messages will not be published.
-          </div>
-        </FieldInline>
-      {/if}
-      <Anchor button tag="button" type="submit">Save</Anchor>
+      <Anchor button tag="button" type="submit">{buttonText}</Anchor>
     </div>
   </FlexColumn>
 </form>

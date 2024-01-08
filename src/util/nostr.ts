@@ -125,12 +125,6 @@ export const getIdOrAddressTag = (e, hint) => {
   return [type, value, hint]
 }
 
-export const getGroupAddress = e =>
-  Tags.from(e)
-    .type("a")
-    .values()
-    .find(a => a.startsWith("34550:"))
-
 export const isChildOf = (a, b) => {
   const {roots, replies} = Tags.from(a).getAncestors()
   const parentIds = (replies.exists() ? replies : roots).values().all()

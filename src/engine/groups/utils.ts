@@ -1,5 +1,5 @@
 import {prop, uniqBy, defaultTo, sortBy, last, whereEq} from "ramda"
-import {ellipsize, seconds} from "hurdak"
+import {ellipsize, first, seconds} from "hurdak"
 import {Tags} from "paravel"
 import {Naddr} from "src/util/nostr"
 import type {GroupStatus} from "src/engine/session/model"
@@ -7,15 +7,15 @@ import {pubkey} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {getUserRelayUrls, getGroupHints, mergeHints} from "src/engine/relays/utils"
 import {groups, groupSharedKeys, groupAdminKeys} from "./state"
+import {GroupAccess} from "./model"
 import type {Group} from "./model"
-import {MembershipLevel, GroupAccess, MemberAccess} from "./model"
 
 export const getGroupNaddr = (group: Group) =>
   Naddr.fromTagValue(group.address, group.relays).encode()
 
 export const getGroupId = (group: Group) => group.address.split(":").slice(2).join(":")
 
-export const getGroupName = (group: Group) => group.name || group.id
+export const getGroupName = (group: Group) => group.meta?.name || group.id
 
 export const displayGroup = (group: Group) => ellipsize(group ? getGroupName(group) : "No name", 60)
 
@@ -78,39 +78,19 @@ export const deriveSharedKeyForGroup = (address: string) =>
 
 export const deriveAdminKeyForGroup = (address: string) => groupAdminKeys.key(address.split(":")[1])
 
-export const deriveGroupAccess = address =>
-  groups.key(address).derived($group => $group?.access || GroupAccess.Closed)
-
 export const deriveGroupStatus = address =>
   session.derived($session => ($session?.groups?.[address] || {}) as GroupStatus)
 
-export const deriveMembershipLevel = address =>
-  deriveGroupStatus(address).derived(({joined, access}) => {
-    if (access === MemberAccess.Granted) {
-      return MembershipLevel.Private
+export const deriveIsGroupMember = address =>
+  deriveGroupStatus(address).derived(s => {
+    if (address.startsWith("34550:")) {
+      return s.joined
     }
 
-    if (joined) {
-      return MembershipLevel.Public
+    if (address.startsWith("35834:")) {
+      return s.access === GroupAccess.Granted
     }
-
-    return MembershipLevel.None
   })
-
-export const shouldPostPrivatelyToGroup = (address, preference) => {
-  const access = deriveGroupAccess(address).get()
-  const membershipLevel = deriveMembershipLevel(address).get()
-
-  if (access === GroupAccess.Closed) {
-    return true
-  }
-
-  if (membershipLevel === MembershipLevel.Private && access === GroupAccess.Hybrid) {
-    return preference
-  }
-
-  return false
-}
 
 export const deriveGroupOptions = defaultGroups =>
   session.derived($session => {
@@ -119,7 +99,7 @@ export const deriveGroupOptions = defaultGroups =>
     for (const address of Object.keys($session?.groups || {})) {
       const group = groups.key(address).get()
 
-      if (group && deriveMembershipLevel(address).get()) {
+      if (group && deriveIsGroupMember(address).get()) {
         options.push(group)
       }
     }
@@ -129,4 +109,11 @@ export const deriveGroupOptions = defaultGroups =>
     }
 
     return uniqBy(prop("address"), options)
+  })
+
+export const deriveUserCommunities = () =>
+  session.derived($session => {
+    return Object.entries($session.groups)
+      .filter(([a, s]) => s.joined && a.startsWith("34550:"))
+      .map(first)
   })

@@ -1,16 +1,14 @@
 <script lang="ts">
-  import {ucFirst} from "hurdak"
   import Chip from "src/partials/Chip.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import GroupAbout from "src/app/shared/GroupAbout.svelte"
   import GroupName from "src/app/shared/GroupName.svelte"
-  import {groups, deriveMembershipLevel, MembershipLevel, GroupAccess} from "src/engine"
+  import {groups} from "src/engine"
 
   export let address
   export let hideAbout = false
 
   const group = groups.key(address)
-  const membershipLevel = deriveMembershipLevel(address)
 </script>
 
 <div class="flex gap-4 text-lightest">
@@ -20,16 +18,18 @@
       <div class="flex items-center">
         <GroupName class="text-2xl" {address} />
         <Chip class="scale-75 border-lighter text-lighter">
-          <i
-            class="fa"
-            class:fa-lock={$membershipLevel === MembershipLevel.Private}
-            class:fa-unlock={$membershipLevel === MembershipLevel.Public} />
-          {ucFirst(String($membershipLevel || $group?.access || GroupAccess.Closed))}
+          {#if address.startsWith('34550:')}
+            <i class="fa fa-unlock" />
+            Open
+          {:else}
+            <i class="fa fa-lock" />
+            Closed
+          {/if}
         </Chip>
       </div>
       <slot name="actions" class="hidden xs:block" />
     </div>
-    {#if !hideAbout && $group?.description}
+    {#if !hideAbout && $group?.meta?.about}
       <GroupAbout {address} />
     {/if}
   </div>

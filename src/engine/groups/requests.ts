@@ -19,7 +19,7 @@ export const getStaleAddrs = (addrs: string[]) => {
 
     const group = groups.key(addr).get()
 
-    if (!group?.name) {
+    if (!group?.meta) {
       stale.add(addr)
     }
   }
@@ -35,7 +35,7 @@ export const loadGroups = async (rawAddrs: string[]) => {
   if (naddrs.length > 0) {
     load({
       relays: getUserHints("read"),
-      filters: [{kinds: [34550], authors, "#d": identifiers}],
+      filters: [{kinds: [34550, 35834], authors, "#d": identifiers}],
     })
   }
 }

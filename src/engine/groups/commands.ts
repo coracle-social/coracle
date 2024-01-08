@@ -1,6 +1,6 @@
+import {partition} from "ramda"
 import {now, createEvent} from "paravel"
-import {without, partition, prop} from "ramda"
-import {updateIn, randomId, filterVals} from "hurdak"
+import {updateIn, randomId} from "hurdak"
 import {generatePrivateKey, getPublicKey, Naddr} from "src/util/nostr"
 import {updateRecord} from "src/engine/core/commands"
 import {Publisher, getClientTags, mention} from "src/engine/network/utils"
@@ -8,7 +8,6 @@ import {pubkey} from "src/engine/session/state"
 import {nip59, signer, session} from "src/engine/session/derived"
 import {updateSession} from "src/engine/session/commands"
 import {displayPubkey} from "src/engine/people/utils"
-import {publishCommunitiesList} from "src/engine/lists/commands"
 import {
   getPubkeyHints,
   getUserHints,
@@ -16,15 +15,9 @@ import {
   getGroupRelayUrls,
   mergeHints,
 } from "src/engine/relays/utils"
-import {GroupAccess, MemberAccess, MembershipLevel} from "./model"
+import {GroupAccess} from "./model"
 import {groups, groupAdminKeys, groupSharedKeys} from "./state"
-import {
-  deriveGroupAccess,
-  deriveMembershipLevel,
-  deriveAdminKeyForGroup,
-  deriveSharedKeyForGroup,
-  shouldPostPrivatelyToGroup,
-} from "./utils"
+import {deriveAdminKeyForGroup, deriveSharedKeyForGroup, deriveIsGroupMember} from "./utils"
 
 // Key state management
 
@@ -43,12 +36,12 @@ export const initSharedKey = address => {
   return key
 }
 
-export const initGroup = relays => {
+export const initGroup = (kind, relays) => {
   const id = randomId()
   const privkey = generatePrivateKey()
   const pubkey = getPublicKey(privkey)
-  const address = `34550:${pubkey}:${id}`
-  const sharedKey = initSharedKey(address)
+  const address = `${kind}:${pubkey}:${id}`
+  const sharedKey = kind === 35834 ? initSharedKey(address) : null
   const adminKey = {
     group: address,
     pubkey: pubkey,
@@ -131,8 +124,8 @@ export const publishToGroupsPublicly = async (
   {relays = null, anonymous = false} = {},
 ) => {
   for (const address of addresses) {
-    if (deriveGroupAccess(address).get() === GroupAccess.Closed) {
-      throw new Error("Attempted to publish publicly to a closed group")
+    if (!address.startsWith("34550:")) {
+      throw new Error("Attempted to publish publicly to an invalid address", address)
     }
   }
 
@@ -161,15 +154,13 @@ export const publishToGroupsPrivately = async (
   const events = []
   for (const address of addresses) {
     const thisTemplate = updateIn("tags", (tags: string[][]) => [...tags, ["a", address]], template)
-    const {access} = groups.key(address).get()
     const sharedKey = deriveSharedKeyForGroup(address).get()
-    const membershipStatus = deriveMembershipLevel(address).get()
 
-    if (access === GroupAccess.Open) {
-      throw new Error("Attempted to publish privately to a group that does not allow it")
+    if (!address.startsWith("35834:")) {
+      throw new Error("Attempted to publish privately to an invalid address", address)
     }
 
-    if (membershipStatus !== MembershipLevel.Private) {
+    if (!deriveIsGroupMember(address).get()) {
       throw new Error("Attempted to publish privately to a group the user is not a member of")
     }
 
@@ -197,7 +188,7 @@ export const publishToGroupsPrivately = async (
 export const publishToZeroOrMoreGroups = async (
   addresses,
   template,
-  {relays, anonymous = false, shouldWrap = true},
+  {relays, anonymous = false},
 ) => {
   const pubs = []
   const events = []
@@ -210,10 +201,7 @@ export const publishToZeroOrMoreGroups = async (
     events.push(event)
     pubs.push(Publisher.publish({relays, event}))
   } else {
-    const [wrap, nowrap] = partition(
-      address => shouldPostPrivatelyToGroup(address, shouldWrap),
-      addresses,
-    )
+    const [wrap, nowrap] = partition(address => address.startsWith("35834:"), addresses)
 
     if (wrap.length > 0) {
       const result = await publishToGroupsPrivately(wrap, template, {anonymous})
@@ -309,23 +297,42 @@ export const publishGroupMembers = async (address, op, pubkeys) => {
   return publishAsGroupAdminPrivately(address, template)
 }
 
-export const publishGroupMeta = async (address, isPublic, meta) => {
+export const publishCommunityMeta = (address, id, relays, meta) => {
   const template = createEvent(34550, {
     tags: [
-      ["d", meta.id],
+      ["d", id],
       ["name", meta.name],
-      ["image", meta.image],
-      ["description", meta.description],
-      ["access", meta.access],
+      ["description", meta.about],
+      ["banner", meta.banner],
+      ["image", meta.picture],
       ...getClientTags(),
-      ...meta.relays.map(url => ["relay", url]),
+      ...relays.map(url => ["relay", url]),
     ],
   })
 
-  return isPublic
-    ? publishAsGroupAdminPublicly(address, template, meta.relays)
-    : publishAsGroupAdminPrivately(address, template, meta.relays)
+  return publishAsGroupAdminPublicly(address, template, relays)
 }
+
+export const publishGroupMeta = (address, id, relays, meta, listPublicly) => {
+  const template = createEvent(35834, {
+    tags: [
+      ["d", id],
+      ["name", meta.name],
+      ["about", meta.about],
+      ["banner", meta.banner],
+      ["picture", meta.picture],
+      ...getClientTags(),
+      ...relays.map(url => ["relay", url]),
+    ],
+  })
+
+  return listPublicly
+    ? publishAsGroupAdminPublicly(address, template, relays)
+    : publishAsGroupAdminPrivately(address, template, relays)
+}
+
+export const deleteGroupMeta = address =>
+  publishAsGroupAdminPublicly(address, createEvent(5, {tags: [["a", address]]}))
 
 // Member functions
 
@@ -339,11 +346,11 @@ export const modifyGroupStatus = (session, address, timestamp, updates) => {
 export const setGroupStatus = (pubkey, address, timestamp, updates) =>
   updateSession(pubkey, s => modifyGroupStatus(s, address, timestamp, updates))
 
-export const resetMemberAccess = address =>
-  setGroupStatus(pubkey.get(), address, now(), {access: MemberAccess.None})
+export const resetGroupAccess = address =>
+  setGroupStatus(pubkey.get(), address, now(), {access: GroupAccess.None})
 
 export const publishGroupEntryRequest = (address, claim = null) => {
-  setGroupStatus(pubkey.get(), address, now(), {access: MemberAccess.Requested})
+  setGroupStatus(pubkey.get(), address, now(), {access: GroupAccess.Requested})
 
   const tags = [...getClientTags(), ["a", address]]
 
@@ -361,7 +368,7 @@ export const publishGroupEntryRequest = (address, claim = null) => {
 }
 
 export const publishGroupExitRequest = address => {
-  setGroupStatus(pubkey.get(), address, now(), {access: MemberAccess.None})
+  setGroupStatus(pubkey.get(), address, now(), {access: GroupAccess.None})
 
   return publishToGroupAdmin(
     address,
@@ -370,30 +377,4 @@ export const publishGroupExitRequest = address => {
       tags: [...getClientTags(), ["a", address]],
     }),
   )
-}
-
-export const joinPublicGroup = address =>
-  publishCommunitiesList(
-    Object.keys(filterVals(prop("joined"), session.get().groups)).concat(address),
-  )
-
-export const leavePublicGroup = address =>
-  publishCommunitiesList(
-    without([address], Object.keys(filterVals(prop("joined"), session.get().groups))),
-  )
-
-export const joinGroup = (address, claim = null) => {
-  if (deriveGroupAccess(address).get() === GroupAccess.Open) {
-    joinPublicGroup(address)
-  } else {
-    publishGroupEntryRequest(address, claim)
-  }
-}
-
-export const leaveGroup = address => {
-  if (deriveGroupAccess(address).get() === GroupAccess.Open) {
-    leavePublicGroup(address)
-  } else {
-    publishGroupExitRequest(address)
-  }
 }

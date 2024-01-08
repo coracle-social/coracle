@@ -5,7 +5,7 @@ import {pubkey} from "src/engine/session/state"
 import {settings} from "src/engine/session/derived"
 import {getWotScore} from "src/engine/people/utils"
 import {mutes, follows} from "src/engine/people/derived"
-import {deriveMembershipLevel} from "src/engine/groups/utils"
+import {deriveIsGroupMember} from "src/engine/groups/utils"
 import type {Event} from "./model"
 import {deletes, _events} from "./state"
 
@@ -48,12 +48,15 @@ export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settin
       return false
     }
 
-    const wotAdjustment = tags
-      .communities()
+    const isGroupMember = tags
+      .groups()
       .all()
-      .some(a => deriveMembershipLevel(a).get())
-      ? 1
-      : 0
+      .some(a => deriveIsGroupMember(a).get())
+    const isCommunityMember = tags
+      .circles()
+      .all()
+      .some(a => false)
+    const wotAdjustment = isCommunityMember || isGroupMember ? 1 : 0
 
     if (!$follows.has(e.pubkey) && getWotScore($pubkey, e.pubkey) < minWot - wotAdjustment) {
       return true

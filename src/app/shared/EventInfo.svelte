@@ -10,7 +10,7 @@
   export let event
 
   const timeFmt = new Intl.DateTimeFormat("en-US", {timeStyle: "short"})
-  const groupAddrs = Tags.from(event).communities().all()
+  const groupAddrs = Tags.from(event).circles().all()
   const address = Naddr.fromEvent(event).asTagValue()
   const {name, start, end, location} = Tags.from(event).getDict()
   const startDate = secondsToDate(start)

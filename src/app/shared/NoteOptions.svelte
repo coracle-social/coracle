@@ -13,17 +13,14 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {getGroupPublishHints, displayRelay} from "src/engine"
-  import {deriveMembershipLevel, MembershipLevel} from "src/engine"
+  import {getGroupPublishHints, deriveGroupOptions, displayRelay} from "src/engine"
 
-  export let groupOptions = []
   export let hideFields = []
   export let initialValues: {
     warning: string
     groups: string[]
     relays: string[]
     anonymous: boolean
-    shouldWrap: boolean
   }
 
   let values = {...initialValues}
@@ -32,6 +29,8 @@
   let relaysDirty = false
 
   const dispatch = createEventDispatcher()
+
+  const groupOptions = deriveGroupOptions(initialValues.groups)
 
   export const setView = name => {
     view = name
@@ -82,10 +81,10 @@
             bind:value={values.warning}
             placeholder="Why might people want to skip this post?" />
         </Field>
-        {#if !hideFields.includes("groups") && groupOptions.length > 0}
+        {#if !hideFields.includes("groups") && $groupOptions.length > 0}
           <Field icon="fa-circle-nodes" label="Groups">
             <div class="flex flex-col gap-2">
-              {#each groupOptions as g (g.address)}
+              {#each $groupOptions as g (g.address)}
                 <Card invertColors interactive on:click={() => setGroup(g.address)}>
                   <GroupSummary hideAbout address={g.address}>
                     <div slot="actions">
@@ -131,15 +130,6 @@
           <Toggle bind:value={values.anonymous} />
           <p slot="info">Enable this to create an anonymous note.</p>
         </FieldInline>
-        {#if !hideFields.includes("shouldWrap") && values.groups.some(a => deriveMembershipLevel(a).get() === MembershipLevel.Private)}
-          <FieldInline icon="fa-eye-slash" label="Post privately">
-            <Toggle bind:value={values.shouldWrap} />
-            <p slot="info">
-              When available, only other members of groups you post to will be able to see your
-              post.
-            </p>
-          </FieldInline>
-        {/if}
         <Anchor button tag="button" type="submit">Done</Anchor>
       </FlexColumn>
     </form>

@@ -14,7 +14,7 @@
     getUserHints,
     mergeHints,
     getGroupReqInfo,
-    deriveMembershipLevel,
+    deriveIsGroupMember,
     updateCurrentSession,
     session,
   } from "src/engine"
@@ -26,7 +26,7 @@
   const scroller = createScroller(loadMore, {element: getModal()})
 
   const groupList = derived([groups, session], ([$groups, $session]) => {
-    const [joined, other] = partition(g => deriveMembershipLevel(g.address).get(), $groups)
+    const [joined, other] = partition(g => deriveIsGroupMember(g.address).get(), $groups)
 
     return {joined, other}
   })
@@ -53,8 +53,8 @@
     load({
       relays: getUserHints("read"),
       filters: [
-        {kinds: [34550], authors: admins},
-        {kinds: [34550], limit: 100},
+        {kinds: [34550, 35834], authors: admins},
+        {kinds: [34550, 35834], limit: 100},
       ],
     })
   })

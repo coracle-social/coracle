@@ -38,7 +38,6 @@
     tagsFromContent,
     publishToZeroOrMoreGroups,
     getGroupPublishHints,
-    deriveGroupOptions,
   } from "src/engine"
 
   export let type = "note"
@@ -47,7 +46,7 @@
   export let group = null
   export let initialValues = {}
 
-  const defaultGroups = quote ? Tags.from(quote).communities().all() : [group].filter(identity)
+  const defaultGroups = quote ? Tags.from(quote).circles().all() : [group].filter(identity)
 
   let images, compose
   let charCount = 0
@@ -62,7 +61,6 @@
     currency: currencyOptions.find(whereEq({code: "SAT"})),
     relays: getGroupPublishHints(defaultGroups),
     groups: defaultGroups,
-    shouldWrap: true,
     anonymous: false,
     location: null,
     start: null,
@@ -75,8 +73,6 @@
   const setOpts = e => {
     opts = {...opts, ...e.detail}
   }
-
-  const groupOptions = deriveGroupOptions(defaultGroups)
 
   const bypassNsecWarning = () => {
     nsecWarning.set(null)
@@ -317,11 +313,7 @@
   </Content>
 </form>
 
-<NoteOptions
-  on:change={setOpts}
-  bind:this={options}
-  initialValues={opts}
-  groupOptions={$groupOptions} />
+<NoteOptions on:change={setOpts} bind:this={options} initialValues={opts} />
 
 {#if $nsecWarning}
   <NsecWarning onAbort={() => nsecWarning.set(null)} onBypass={bypassNsecWarning} />

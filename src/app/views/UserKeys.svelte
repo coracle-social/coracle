@@ -9,13 +9,7 @@
   import Heading from "src/partials/Heading.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import GroupName from "src/app/shared/GroupName.svelte"
-  import {
-    session,
-    groupSharedKeys,
-    deriveMembershipLevel,
-    MembershipLevel,
-    groupAdminKeys,
-  } from "src/engine"
+  import {session, groupSharedKeys, deriveIsGroupMember, groupAdminKeys} from "src/engine"
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
   const keypairUrl = "https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/"
@@ -27,9 +21,7 @@
       prop("group"),
       sortBy(
         k => -k.created_at,
-        $groupSharedKeys.filter(
-          k => deriveMembershipLevel(k.group).get() === MembershipLevel.Private,
-        ),
+        $groupSharedKeys.filter(k => deriveIsGroupMember(k.group).get()),
       ),
     ),
   )

@@ -19,7 +19,6 @@
     publishGroupEvictions,
     publishGroupMembers,
     publishGroupMeta,
-    GroupAccess,
   } from "src/engine"
   import {router} from "src/app/router"
 
@@ -85,8 +84,8 @@
     }
 
     // Re-publish group info
-    if ($group.access !== GroupAccess.Open) {
-      publishGroupMeta(address, false, $group)
+    if (!$group.listing_is_public) {
+      publishGroupMeta(address, $group.id, $group.relays, $group.meta, false)
     }
 
     toast.show("info", "Invites have been sent!")

@@ -190,8 +190,8 @@ export class FeedLoader {
               const wrappedEvent = tryJson(() => JSON.parse(e.content))
 
               if (wrappedEvent && hasValidSignature(wrappedEvent)) {
-                const originalGroup = Tags.from(wrappedEvent).communities().first()
-                const repostGroup = Tags.from(e).communities().first()
+                const originalGroup = Tags.from(wrappedEvent).circles().first()
+                const repostGroup = Tags.from(e).circles().first()
 
                 // Only show cross-posts, not reposts from global to global
                 if (originalGroup !== repostGroup) {

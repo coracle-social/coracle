@@ -15,7 +15,7 @@
 {:else if type === "note"}
   <NoteDetail eid={data} {relays} />
 {:else if type === "naddr"}
-  {#if data.kind === 34550}
+  {#if [35834, 34550].includes(data.kind)}
     <GroupDetail address={Naddr.decode(entity).asTagValue()} activeTab="notes" />
   {:else}
     <NoteDetail {...data} />

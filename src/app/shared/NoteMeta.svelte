@@ -1,21 +1,21 @@
 <script lang="ts">
-  import {uniq, pluck} from 'ramda'
-  import {Tags} from 'paravel'
-  import PersonLink from 'src/app/shared/PersonLink.svelte'
-  import GroupLink from 'src/app/shared/GroupLink.svelte'
-  import type {DisplayEvent} from 'src/engine'
+  import {uniq, pluck} from "ramda"
+  import {Tags} from "paravel"
+  import PersonLink from "src/app/shared/PersonLink.svelte"
+  import GroupLink from "src/app/shared/GroupLink.svelte"
+  import type {DisplayEvent} from "src/engine"
 
   export let note: DisplayEvent
   export let showGroup
 
   const reposts = note.reposts || []
-  const repostPubkeys = uniq(pluck('pubkey', reposts))
-  const fromAddresses = Tags.from(note).communities().all()
-  const toAddresses = Tags.from(reposts).communities().all()
+  const repostPubkeys = uniq(pluck("pubkey", reposts))
+  const fromAddresses = Tags.from(note).circles().all()
+  const toAddresses = Tags.from(reposts).circles().all()
 </script>
 
 {#if repostPubkeys.length > 0}
-  <p class="flex gap-1 pb-2 text-light items-center text-sm">
+  <p class="flex items-center gap-1 pb-2 text-sm text-light">
     <i class="fa fa-rotate" />
     {#if showGroup}
       Cross-posted

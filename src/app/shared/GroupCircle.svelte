@@ -8,8 +8,8 @@
   const group = groups.key(address)
 </script>
 
-{#if $group?.image}
-  <ImageCircle src={$group.image} class={$$props.class} />
+{#if $group?.meta?.picture}
+  <ImageCircle src={$group.meta.picture} class={$$props.class} />
 {:else}
   <PlaceholderCircle pubkey={address} class={$$props.class} />
 {/if}

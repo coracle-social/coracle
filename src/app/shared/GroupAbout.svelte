@@ -10,7 +10,7 @@
 
   const group = groups.key(address)
 
-  $: about = $group?.description || ""
+  $: about = $group?.meta?.about || ""
   $: content = parseContent({content: truncate ? ellipsize(about, 140) : about})
 </script>
 

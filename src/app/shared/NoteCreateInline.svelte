@@ -33,11 +33,10 @@
     throw new Error("Either parent or group is allowed, not both")
   }
 
-  const defaultGroups = parent ? Tags.from(parent).communities().all() : [group].filter(identity)
+  const defaultGroups = parent ? Tags.from(parent).circles().all() : [group].filter(identity)
   const defaultOpts = {
     relays: parent ? getPublishHints(parent) : getGroupPublishHints(defaultGroups),
     groups: defaultGroups,
-    shouldWrap: true,
     anonymous: false,
     warning: "",
   }

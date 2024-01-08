@@ -29,7 +29,7 @@
 {#await promise}
   <Spinner />
 {:then event}
-  {@const groupAddr = Tags.from(event).communities().first()}
+  {@const groupAddr = Tags.from(event).circles().first()}
   <div in:fly={{y: 20}}>
     <FlexColumn>
       <div class="flex gap-4">

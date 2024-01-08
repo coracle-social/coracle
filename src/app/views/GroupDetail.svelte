@@ -21,18 +21,16 @@
     env,
     canSign,
     GroupAccess,
-    MemberAccess,
     displayGroup,
     session,
     subscribe,
-    joinGroup,
+    publishGroupEntryRequest,
     groupRequests,
     deriveGroup,
     getGroupReqInfo,
     deriveAdminKeyForGroup,
     deriveSharedKeyForGroup,
     deriveGroupStatus,
-    deriveGroupAccess,
     updateCurrentSession,
     loadGroups,
   } from "src/engine"
@@ -41,7 +39,6 @@
   export let address, activeTab
 
   const group = deriveGroup(address)
-  const access = deriveGroupAccess(address)
   const status = deriveGroupStatus(address)
   const sharedKey = deriveSharedKeyForGroup(address)
   const adminKey = deriveAdminKeyForGroup(address)
@@ -60,11 +57,14 @@
 
   onMount(() => {
     loadGroups([address])
+
     updateCurrentSession(assocPath(["groups", address, "last_synced"], now()))
 
-    const sub = subscribe({relays, filters: [{kinds: [1059], "#p": recipients, since}]})
+    if (address.startsWith("35834:")) {
+      const sub = subscribe({relays, filters: [{kinds: [1059], "#p": recipients, since}]})
 
-    return () => sub.close()
+      return () => sub.close()
+    }
   })
 
   $: ({rgb, rgba} = $themeBackgroundGradient)
@@ -79,13 +79,13 @@
       tabs.push("market")
     }
 
-    if ($group.access !== GroupAccess.Open && $sharedKey) {
+    if ($sharedKey) {
       tabs.push("members")
     } else if (activeTab === "members") {
       activeTab = "notes"
     }
 
-    if ($group.access !== GroupAccess.Open && $adminKey) {
+    if ($adminKey && address.startsWith("35834")) {
       tabs.push("admin")
     } else if (activeTab === "admin") {
       activeTab = "notes"
@@ -119,15 +119,16 @@
   <Tabs {tabs} {activeTab} {setActiveTab} />
 {/if}
 
-{#if $access === GroupAccess.Closed && $status.access !== MemberAccess.Granted}
+{#if address.startsWith("35834") && $status.access !== GroupAccess.Granted}
   <p class="m-auto max-w-sm py-12 text-center">
-    {#if $status.access === MemberAccess.Requested}
+    {#if $status.access === GroupAccess.Requested}
       Your access request is awaiting approval.
     {:else}
       You don't have access to this group.
     {/if}
     {#if $session && !$status.access}
-      Click <Anchor underline on:click={() => joinGroup(address)}>here</Anchor> to request entry.
+      Click <Anchor underline on:click={() => publishGroupEntryRequest(address)}>here</Anchor> to request
+      entry.
     {/if}
   </p>
 {:else if activeTab === "notes"}

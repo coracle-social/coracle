@@ -1,9 +1,9 @@
-import type {MemberAccess} from "src/engine/groups/model"
+import type {GroupAccess} from "src/engine/groups/model"
 
 export type GroupStatus = {
-  joined: boolean
+  joined: GroupAccess
   joined_updated_at: number
-  access: MemberAccess
+  access: GroupAccess
   access_updated_at: number
   last_synced: number
 }

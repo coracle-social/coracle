@@ -1,8 +1,8 @@
 <script lang="ts">
   import {Tags, createEvent} from "paravel"
   import {createEventDispatcher} from "svelte"
-  import {join, without, identity, uniq} from "ramda"
-  import {getGroupAddress, asNostrEvent} from "src/util/nostr"
+  import {join, without, uniq} from "ramda"
+  import {asNostrEvent} from "src/util/nostr"
   import {slide} from "src/util/transition"
   import ImageInput from "src/partials/ImageInput.svelte"
   import AlternatingBackground from "src/partials/AlternatingBackground.svelte"
@@ -41,9 +41,8 @@
   let draft = ""
   let opts = {
     warning: "",
-    groups: parent.wrap ? Tags.from(parent).communities().all() : [],
+    groups: parent.wrap ? Tags.from(parent).circles().all() : [],
     relays: getPublishHints(parent),
-    shouldWrap: true,
     anonymous: false,
   }
 
@@ -118,7 +117,7 @@
     }
 
     const template = createEvent(1, {content, tags})
-    const addresses = [getGroupAddress(parent)].filter(identity)
+    const addresses = Tags.from(parent).circles().all()
     const {pubs} = await publishToZeroOrMoreGroups(addresses, template, opts)
 
     pubs[0].on("progress", toastProgress)
@@ -197,7 +196,7 @@
     bind:this={options}
     on:change={setOpts}
     initialValues={opts}
-    hideFields={parent.wrap ? ["shouldWrap", "relays"] : []} />
+    hideFields={parent.wrap ? ["relays"] : []} />
 {/if}
 
 {#if $nsecWarning}

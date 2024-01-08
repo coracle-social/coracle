@@ -5,7 +5,7 @@
   import {tweened} from "svelte/motion"
   import {identity, last, filter, sum, uniqBy, prop, pluck, sortBy} from "ramda"
   import {formatSats, tryJson} from "src/util/misc"
-  import {LOCAL_RELAY_URL, getGroupAddress, getIdOrAddressTag, asNostrEvent} from "src/util/nostr"
+  import {LOCAL_RELAY_URL, getIdOrAddressTag, asNostrEvent} from "src/util/nostr"
   import {quantify} from "hurdak"
   import {toast} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
@@ -33,8 +33,7 @@
     mention,
     handlers,
     deriveHandlers,
-    deriveMembershipLevel,
-    MembershipLevel,
+    deriveIsGroupMember,
     publishToZeroOrMoreGroups,
     publishDeletionForEvent,
     getUserHints,
@@ -58,7 +57,7 @@
   export let zapper
 
   const relays = getEventHints(note)
-  const address = getGroupAddress(note)
+  const address = Tags.from(note).circles().first()
   const nevent = nip19.neventEncode({id: note.id, relays})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
   const kindHandlers = deriveHandlers(note.kind).derived(filter((h: any) => h.recs.length > 1))
@@ -66,7 +65,7 @@
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
-  const clientTag = Tags.from(note).type('client').first()
+  const clientTag = Tags.from(note).type("client").first()
   const handler = handlers.key(clientTag ? last(clientTag) : null)
 
   //const report = () => router.at("notes").of(note.id, {relays: getEventHints(note)}).at('report').qp({pubkey: note.pubkey}).open()
@@ -153,9 +152,9 @@
 
     for (const addr of Object.keys($session?.groups || {})) {
       const group = groups.key(addr).get()
-      const membershipLevel = deriveMembershipLevel(addr).get()
+      const isMember = deriveIsGroupMember(addr).get()
 
-      if (group && membershipLevel && addr !== address) {
+      if (group && isMember && addr !== address) {
         options.push(group)
       }
     }
@@ -167,9 +166,7 @@
   let actions = []
 
   $: disableActions =
-    !$canSign ||
-    ($muted && !showMuted) ||
-    (note.wrap && deriveMembershipLevel(address).get() !== MembershipLevel.Private)
+    !$canSign || ($muted && !showMuted) || (note.wrap && !deriveIsGroupMember(address).get())
   $: like = likes.find(e => e.pubkey === $session?.pubkey)
   $: $likesCount = likes.length
   $: zap = zaps.find(e => e.request.pubkey === $session?.pubkey)
