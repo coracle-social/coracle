@@ -85,7 +85,7 @@
       </Field>
       <Field label="Banner">
         <ImageInput
-          bind:value={values.meta.picture}
+          bind:value={values.meta.banner}
           icon="image"
           maxWidth={4000}
           maxHeight={4000} />
