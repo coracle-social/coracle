@@ -116,6 +116,11 @@ projections.addHandler(34550, (e: Event) => {
 
 projections.addHandler(27, (e: Event) => {
   const address = Tags.from(e).groups().first()
+
+  if (!address) {
+    return
+  }
+
   let {members = [], recent_member_updates = []} = groups.key(address).get() || {}
 
   // Only replay updates if we have something new
