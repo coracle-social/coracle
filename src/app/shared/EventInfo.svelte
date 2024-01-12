@@ -5,6 +5,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import GroupLink from "src/app/shared/GroupLink.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
+  import EventActions from "src/app/shared/EventActions.svelte"
   import {router} from "src/app/router"
 
   export let event
@@ -23,7 +24,7 @@
 <div class="flex flex-grow flex-col gap-2">
   <div class="flex justify-between">
     <Anchor class="text-2xl" href={router.at("events").of(address).toString()}>{name}</Anchor>
-    <slot />
+    <EventActions {event} />
   </div>
   <div class="flex gap-2 text-sm text-lighter">
     {#if event.wrap}

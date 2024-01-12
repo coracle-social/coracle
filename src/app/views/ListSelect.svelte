@@ -19,7 +19,7 @@
   const selectlist = list =>
     router
       .at("lists")
-      .of(list.naddr)
+      .of(list.address)
       .cx({list: modifyList(list)})
       .replaceModal()
 </script>
@@ -34,7 +34,7 @@
   <p>
     Select a list to modify. The selected {label} will be added to it as an additional filter.
   </p>
-  {#each $userLists as list (list.naddr)}
+  {#each $userLists as list (list.address)}
     {@const meta = Tags.from(list).getDict()}
     <BorderLeft on:click={() => selectlist(list)}>
       <strong>{meta.d}</strong>

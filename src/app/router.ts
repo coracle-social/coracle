@@ -133,6 +133,7 @@ router.extend("relays", nip19.nrelayEncode)
 router.extend("channels", getChannelId)
 router.extend("groups", asNaddr("group").encode)
 router.extend("events", asNaddr("event").encode)
+router.extend("lists", asNaddr("list").encode)
 
 router.extend("notes", (id, {relays = []} = {}) => {
   if (id.includes(":")) {

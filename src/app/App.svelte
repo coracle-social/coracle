@@ -154,7 +154,11 @@
       value: asString("value"),
     },
   })
-  router.register("/lists/:naddr", ListEdit)
+  router.register("/lists/:naddr", ListEdit, {
+    serializers: {
+      address: asNaddr("address"),
+    },
+  })
 
   router.register("/login/advanced", LoginAdvanced)
   router.register("/login/bunker", LoginBunker)

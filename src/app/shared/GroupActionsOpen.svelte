@@ -20,8 +20,6 @@
   const adminKey = deriveAdminKeyForGroup(address)
   const status = deriveGroupStatus(address)
 
-  console.log($status)
-
   let actions = []
 
   $: {

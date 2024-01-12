@@ -40,7 +40,7 @@ export const storage = new Storage(8, [
   new IndexedDBAdapter("events", _events, 10000, sortByPubkeyWhitelist(prop("created_at"))),
   new IndexedDBAdapter("labels", _labels, 1000, sortBy(prop("created_at"))),
   new IndexedDBAdapter("topics", topics, 1000, sortBy(prop("last_seen"))),
-  new IndexedDBAdapter("lists", _lists, 1000, sortByPubkeyWhitelist(prop("created_at"))),
+  new IndexedDBAdapter("lists", _lists, 1000, sortByPubkeyWhitelist(prop("created_at")), l => l.address),
   new IndexedDBAdapter("people", people, 5000, sortByPubkeyWhitelist(prop("last_fetched"))),
   new IndexedDBAdapter("relays", relays, 1000, sortBy(prop("count"))),
   new IndexedDBAdapter("channels", channels, 1000, sortBy(prop("last_checked"))),

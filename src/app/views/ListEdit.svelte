@@ -22,10 +22,10 @@
   } from "src/engine"
 
   export let list = null
-  export let naddr = null
+  export let address = null
 
-  if (!list && naddr) {
-    list = userLists.key(naddr).get()
+  if (!list && address) {
+    list = userLists.key(address).get()
   }
 
   const tags = list ? Tags.from(list) : Tags.from([])
@@ -55,13 +55,13 @@
       return toast.show("error", "A name is required for your list")
     }
 
-    const duplicates = $userLists.filter(l => l.name === values.name && l.naddr !== naddr)
+    const duplicates = $userLists.filter(l => l.name === values.name && l.address !== address)
 
     if (duplicates.length > 0) {
       return toast.show("error", "That name is already in use")
     }
 
-    const id = naddr ? Naddr.decode(naddr).identifier : randomId()
+    const id = address ? Naddr.fromTagValue(address).identifier : randomId()
     const {name, params, relays} = values
 
     publishBookmarksList(id, name, [...params, ...relays])
@@ -72,7 +72,7 @@
 
 <form on:submit|preventDefault={submit}>
   <FlexColumn>
-    <Heading class="text-center">{naddr ? "Edit" : "Add"} list</Heading>
+    <Heading class="text-center">{address ? "Edit" : "Add"} list</Heading>
     <div class="flex w-full flex-col gap-8">
       <Field label="Name">
         <Input bind:value={values.name} placeholder="My list" />

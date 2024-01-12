@@ -1,22 +1,22 @@
 <script lang="ts">
   import {Tags} from "paravel"
   import {whereEq} from "ramda"
+  import {onMount} from "svelte"
   import Calendar from "@event-calendar/core"
   import DayGrid from "@event-calendar/day-grid"
   import Interaction from "@event-calendar/interaction"
   import {secondsToDate} from "src/util/misc"
-  import {Naddr} from "src/util/nostr"
+  import {Naddr, LOCAL_RELAY_URL} from "src/util/nostr"
   import {themeColors} from "src/partials/state"
-  import Anchor from 'src/partials/Anchor.svelte'
+  import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/router"
-  import {canSign, load, pubkey} from "src/engine"
+  import {canSign, subscribe, pubkey} from "src/engine"
 
   export let relays
   export let filters
   export let group = null
 
-  const createEvent = () =>
-    router.at("notes/create").qp({type: "calendar_event", group}).open()
+  const createEvent = () => router.at("notes/create").qp({type: "calendar_event", group}).open()
 
   const getEventContent = ({event}) => event.title
 
@@ -41,12 +41,16 @@
 
   let events = []
 
-  load({
-    relays,
-    filters,
-    onEvent: e => {
-      events = events.concat(e)
-    },
+  onMount(() => {
+    const sub = subscribe({
+      filters,
+      relays: relays.concat(LOCAL_RELAY_URL),
+      onEvent: e => {
+        events = events.concat(e)
+      },
+    })
+
+    return () => sub.close()
   })
 
   $: calendarEvents = events.map(e => {

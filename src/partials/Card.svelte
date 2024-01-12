@@ -27,7 +27,7 @@
 
     const newClick = getClick(e)
 
-    if (newClick) {
+    if (newClick && click) {
       const {x, y, t} = newClick
       const h = Math.sqrt(Math.pow(click.x - x, 2) + Math.pow(click.y - y, 2))
 

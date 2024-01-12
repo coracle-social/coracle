@@ -46,7 +46,7 @@
       {/if}
     </div>
     <p class="min-w-0 overflow-hidden text-ellipsis">
-      {isPassword ? displayValue.replace(/./g, "•") : displayValue}
+      {isPassword ? displayValue.toString().replace(/./g, "•") : displayValue}
     </p>
   </div>
 </div>

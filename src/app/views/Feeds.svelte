@@ -19,8 +19,8 @@
 
   const showLogin = () => router.at("login/intro").open()
 
-  const loadListFeed = naddr => {
-    const list = lists.key(naddr).get()
+  const loadListFeed = address => {
+    const list = lists.key(address).get()
     const authors = Tags.from(list).pubkeys().all()
     const topics = Tags.from(list).topics().all()
     const urls = Tags.from(list).urls().all()
@@ -64,13 +64,13 @@
             <div
               slot="tooltip"
               class="flex flex-col items-start overflow-hidden rounded border border-solid border-dark bg-black">
-              {#each $userLists as list (list.naddr)}
+              {#each $userLists as list (list.address)}
                 <button
                   class={cx("w-full px-3 py-2 text-left transition-colors", {
                     "hover:bg-cocoa": $theme === "dark",
                     "hover:bg-lightest": $theme === "light",
                   })}
-                  on:click={() => loadListFeed(list.naddr)}>
+                  on:click={() => loadListFeed(list.address)}>
                   <i class="fa fa-scroll fa-sm mr-1" />
                   {list.name}
                 </button>
