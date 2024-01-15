@@ -12,8 +12,8 @@
   $: isActive = path && $page?.path.startsWith(path)
 
   $: className = cx("relative staatliches h-12 block transition-all", {
-    "text-2xl text-accent": isActive,
-    "text-lg hover:bg-accent hover:text-white": !isActive,
+    "text-3xl text-accent": isActive,
+    "text-2xl hover:bg-accent hover:text-white": !isActive,
   })
 </script>
 
