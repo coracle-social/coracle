@@ -15,7 +15,7 @@
 
 <div
   style="bottom: 4.5rem"
-  class="absolute left-0 w-60 pr-px"
+  class="absolute left-0 w-72 pr-px"
   transition:slide|local={{duration: 300}}
   on:click={onEscape}>
   <div class="bg-dark overflow-hidden rounded-t-xl">

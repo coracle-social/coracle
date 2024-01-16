@@ -52,12 +52,12 @@
   }
 </script>
 
-<div class="fixed bottom-0 left-0 top-0 z-nav w-60 bg-cocoa transition-colors">
+<div class="fixed bottom-0 left-0 top-0 z-nav w-72 bg-cocoa transition-colors">
   <Anchor
-    class="mb-4 flex h-20 items-center gap-1 px-6"
+    class="mb-4 flex mt-4 items-center gap-2 pl-6"
     external
     href="https://info.coracle.social">
-    <img alt="App Logo" src={import.meta.env.VITE_LOGO_URL || "/images/logo.png"} class="w-12 mr-0.5 " />
+    <img alt="App Logo" src={import.meta.env.VITE_LOGO_URL || "/images/logo.png"} class="w-12" />
     <h1 class="staatliches text-[2.6em] leading-none mb-[-0.2em]">{appName}</h1>
   </Anchor>
   <MenuDesktopItem path="/notes" on:click={goToFeed}>Feed</MenuDesktopItem>
@@ -95,7 +95,7 @@
   {#if !$env.FORCE_GROUP}
     <MenuDesktopItem path="/groups">Groups</MenuDesktopItem>
   {/if}
-  <FlexColumn small class="absolute bottom-0 w-60">
+  <FlexColumn small class="absolute bottom-0 w-72">
     <Anchor class="staatliches px-8 text-light hover:text-warm" href="/about">About</Anchor>
     <Anchor
       class="staatliches px-8 text-light hover:text-warm"
