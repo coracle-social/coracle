@@ -67,7 +67,7 @@
         Relays
         {#if $slowConnections.length > 0}
           <div
-            class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
+            class="absolute -right-3 top-1 h-2 w-2 rounded bg-accent" />
         {/if}
       </div>
     </MenuDesktopItem>
@@ -77,7 +77,7 @@
       Notifications
       {#if $hasNewNotifications}
         <div
-          class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
+          class="absolute -right-3 top-1 h-2 w-2 rounded bg-accent" />
       {/if}
     </div>
   </MenuDesktopItem>
@@ -86,7 +86,7 @@
       Messages
       {#if $hasNewMessages}
         <div
-          class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
+          class="absolute -right-3 top-1 h-2 w-2 rounded bg-accent" />
       {/if}
     </div>
   </MenuDesktopItem>
