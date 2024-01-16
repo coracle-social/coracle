@@ -96,13 +96,13 @@
     <MenuDesktopItem path="/groups">Groups</MenuDesktopItem>
   {/if}
   <FlexColumn small class="absolute bottom-0 w-72">
-    <Anchor class="staatliches px-8 text-light hover:text-warm" href="/about">About</Anchor>
+    <Anchor class="staatliches px-8 text-mid dark:text-cocoa-l hover:text-lighter dark:hover:text-warm" href="/about">About</Anchor>
     <Anchor
-      class="staatliches px-8 text-light hover:text-warm"
+      class="staatliches px-8 text-mid dark:text-cocoa-l hover:text-lighter dark:hover:text-warm"
       on:click={() => setSubMenu("settings")}>Settings</Anchor>
-    <div class="staatliches block flex h-8 gap-2 px-8 text-light">
-      <Anchor external class="hover:text-warm" href="/terms.html">Terms</Anchor> /
-      <Anchor external class="hover:text-warm" href="/privacy.html">Privacy</Anchor>
+    <div class="staatliches block flex h-8 gap-2 px-8 text-mid dark:text-cocoa-l">
+      <Anchor external class="hover:text-lighter dark:hover:text-warm" href="/terms.html">Terms</Anchor> /
+      <Anchor external class="hover:text-lighter dark:hover:text-warm" href="/privacy.html">Privacy</Anchor>
     </div>
     {#if subMenu === "settings"}
       <MenuDesktopSecondary onEscape={closeSubMenu}>
