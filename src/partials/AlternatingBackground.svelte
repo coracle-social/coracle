@@ -36,7 +36,7 @@
 
 <div
   {...$$props}
-  class={cx($$props.class, "bg-swap bg-dark bg-cocoa hover:bg-dark-d hover:bg-cocoa-d", {"cursor-pointer transition-colors": interactive})}
+  class={cx($$props.class, "bg-swap bg-dark bg-cocoa border-r-4 border-cocoa hover:border-r-4 hover:border-cocoa-l", {"cursor-pointer transition-colors": interactive})}
   bind:this={element}>
   <slot />
 </div>
