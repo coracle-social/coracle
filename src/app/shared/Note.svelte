@@ -351,15 +351,15 @@
     {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
       <div class="note-children relative ml-8 mt-2 flex flex-col">
         {#if hiddenReplies.length > 0}
-          <button class="ml-5 cursor-pointer py-2 text-lightest outline-0" on:click={onClick}>
+          <button class="cursor-pointer py-2 mt-2 mb-2 text-lightest outline-0 bg-gradient-to-l from-transparent to-cocoa rounded-md border-r-4 border-cocoa hover:bg-cocoa hover:border-r-4 hover:border-cocoa-l" on:click={onClick}>
             <i class="fa fa-up-down pr-2 text-sm" />
             Show {quantify(hiddenReplies.length, "other reply", "more replies")}
           </button>
           {#if visibleReplies.length > 0}
-            <AlternatingBackground class="absolute -left-4 -top-2 h-14 w-px" />
+            <AlternatingBackground class="absolute -left-4 -top-4 h-20 w-px" />
           {/if}
         {:else if visibleReplies.length > 0}
-          <AlternatingBackground class="absolute -left-4 -top-2 h-4 w-px" />
+          <AlternatingBackground class="absolute -left-4 -top-4 h-8 w-px" />
         {/if}
         {#if visibleReplies.length}
           <div in:fly={{y: 20}} class="-mb-2">
