@@ -51,7 +51,7 @@
 <!-- top nav -->
 {#if innerWidth >= 1024}
   <div
-    class="fixed left-0 right-0 top-0 z-nav flex h-16 items-center justify-end gap-8 bg-dark-d px-4">
+    class="fixed left-0 right-0 top-0 z-nav flex h-16 items-center justify-end gap-8 bg-dark-d pl-4 pr-8">
     <div class="relative">
       <div class="flex">
         <Input
