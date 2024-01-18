@@ -47,6 +47,7 @@
         <NoteContentNewline {value} />
       {:else if type === ELLIPSIS}
         {#if expandable}
+        <div class="relative top-0 left-0 right-0 bottom-0 h-24 -mt-24 bg-gradient-to-t from-cocoa to-transparent pointer-events-none"></div>
           <NoteContentEllipsis />
         {/if}
       {:else if type === TOPIC}
