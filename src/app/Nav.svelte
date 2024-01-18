@@ -55,12 +55,12 @@
     <div class="relative">
       <div class="flex">
         <Input
-          class="h-7 !rounded border-mid !bg-dark !px-2 py-px text-warm outline-none"
+          class="h-7 !rounded !border-cocoa !bg-dark !px-2 py-px text-warm outline-none"
           on:blur={onSearchBlur}
           on:keydown={onSearchKeydown}
           bind:element={searchInput}
           bind:value={$searchTerm} />
-        <Anchor button class="z-feature -ml-2">Search</Anchor>
+        <Anchor button class="z-feature -ml-2 !text-warm !bg-cocoa border-none">Search</Anchor>
       </div>
       {#if $searchTerm}
         <div
