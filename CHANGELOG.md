@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.4.1
+
+- [x] Fix pubkey display in PersonAbout
+
 # 0.4.0
 
 - [x] Add NIP 44 encryption support

@@ -9,8 +9,9 @@
   export let truncate = false
 
   const person = derivePerson(pubkey)
-  const about = $person.profile?.about || ""
-  const content = parseContent({content: truncate ? ellipsize(about, 140) : about})
+
+  $: about = $person.profile?.about || ""
+  $: content = parseContent({content: truncate ? ellipsize(about, 140) : about})
 </script>
 
 <p>
@@ -24,7 +25,7 @@
     {:else if type.startsWith("nostr:")}
       <Anchor modal class="underline" href={value.entity}>
         {#if value.pubkey}
-          {displayPerson($person)}
+          {displayPerson(derivePerson(value.pubkey).get())}
         {:else if value.id}
           event {value.id}
         {:else}
