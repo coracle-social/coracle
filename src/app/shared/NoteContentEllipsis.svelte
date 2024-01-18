@@ -2,6 +2,6 @@
   import Anchor from "src/partials/Anchor.svelte"
 </script>
 
-<div class="pointer-events-none -ml-12 mt-8 mb-4 flex justify-center">
-  <Anchor button>See more</Anchor>
+<div class="relative pointer-events-none -ml-12 -mt-4 mb-0 flex justify-center z-10">
+  <Anchor button low>See more</Anchor>
 </div>
