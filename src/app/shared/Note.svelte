@@ -240,11 +240,11 @@
   <NoteMeta note={event} {showGroup} />
   <div class="note relative" class:py-2={!showParent && !topLevel}>
     {#if !showParent && !topLevel}
-      <div class="absolute -left-4 h-px w-4 bg-cocoa" style="top: 27px;" />
+      <div class="absolute -left-4 h-[2px] w-4 bg-cocoa" style="top: 27px;" />
       {#if isLastReply}
-        <div class="absolute -left-4 w-px bg-cocoa" style="height: 19px;" />
+        <div class="absolute -left-4 w-[2px] bg-cocoa" style="height: 19px;" />
       {:else}
-        <div class="absolute -left-4 h-full w-px bg-cocoa" />
+        <div class="absolute -left-4 h-full w-[2px] bg-cocoa" />
       {/if}
     {/if}
     <div class="group relative">
@@ -293,7 +293,7 @@
             {:else}
               <NoteContent note={event} {showEntire} />
             {/if}
-            <div class="cy-note-click-target h-px" />
+            <div class="cy-note-click-target h-[2px]" />
             <NoteActions
               note={event}
               bind:this={actions}
@@ -350,17 +350,17 @@
       }} />
 
     {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
-      <div class="note-children relative ml-8 mt-2 flex flex-col">
+      <div class="note-children relative ml-4 mt-2 flex flex-col">
         {#if hiddenReplies.length > 0}
           <button class="cursor-pointer py-2 mt-2 mb-2 text-lightest outline-0 bg-gradient-to-l from-transparent to-cocoa rounded-md hover:bg-cocoa transition-colors" on:click={onClick}>
             <i class="fa fa-up-down pr-2 text-sm" />
             Show {quantify(hiddenReplies.length, "other reply", "more replies")}
           </button>
           {#if visibleReplies.length > 0}
-            <div class="absolute -left-4 -top-4 h-20 w-px bg-cocoa" />
+            <div class="absolute -left-4 -top-4 h-20 w-[2px] bg-cocoa" />
           {/if}
         {:else if visibleReplies.length > 0}
-          <div class="absolute -left-4 -top-4 h-8 w-px bg-cocoa" />
+          <div class="absolute -left-4 -top-4 h-8 w-[2px] bg-cocoa" />
         {/if}
         {#if visibleReplies.length}
           <div in:fly={{y: 20}} class="-mb-2">
