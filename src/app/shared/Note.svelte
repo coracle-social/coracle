@@ -352,7 +352,7 @@
     {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
       <div class="note-children relative ml-8 mt-2 flex flex-col">
         {#if hiddenReplies.length > 0}
-          <button class="cursor-pointer py-2 mt-2 mb-2 text-lightest outline-0 bg-gradient-to-l from-transparent to-cocoa rounded-md border-r-4 border-cocoa hover:bg-cocoa hover:border-r-4 hover:border-cocoa-l" on:click={onClick}>
+          <button class="cursor-pointer py-2 mt-2 mb-2 text-lightest outline-0 bg-gradient-to-l from-transparent to-cocoa rounded-md hover:bg-cocoa transition-colors" on:click={onClick}>
             <i class="fa fa-up-down pr-2 text-sm" />
             Show {quantify(hiddenReplies.length, "other reply", "more replies")}
           </button>
