@@ -63,19 +63,16 @@ const LIGHT_THEME = parseTheme(import.meta.env.VITE_LIGHT_THEME)
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
 
 export const theme = synced("ui/theme", prefersDark ? "dark" : "light")
+
 theme.subscribe(value => {
   if (value === "dark") {
-    document.documentElement.classList.add("dark");
+    document.documentElement.classList.add("dark")
+  } else {
+    document.documentElement.classList.remove("dark")
   }
-});
+})
 
-export const toggleTheme = () => {
-  theme.update(t => {
-    const newTheme = t === "dark" ? "light" : "dark";
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
-    return newTheme;
-  });
-};
+export const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 
 export const themeColors = theme.derived($theme => ($theme === "dark" ? DARK_THEME : LIGHT_THEME))
 

@@ -58,7 +58,7 @@
     external
     href="https://info.coracle.social">
     <img alt="App Logo" src={import.meta.env.VITE_LOGO_URL || "/images/logo.png"} class="w-12" />
-    <h1 class="staatliches text-[2.6em] leading-none mb-[-0.2em]">{appName}</h1>
+    <h1 class="staatliches text-4xl leading-none">{appName}</h1>
   </Anchor>
   <MenuDesktopItem path="/notes" on:click={goToFeed}>Feed</MenuDesktopItem>
   {#if !$env.FORCE_GROUP}
