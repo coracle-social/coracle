@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./index.html", "./src/**/*.{js,svelte}"],
+  darkMode: 'class',
   safelist: ["w-4", "h-4"],
   theme: {
     extend: {},

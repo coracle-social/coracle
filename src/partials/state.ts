@@ -64,6 +64,14 @@ const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
 
 export const theme = synced("ui/theme", prefersDark ? "dark" : "light")
 
+theme.subscribe(value => {
+  if (value === "dark") {
+    document.documentElement.classList.add("dark")
+  } else {
+    document.documentElement.classList.remove("dark")
+  }
+})
+
 export const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 
 export const themeColors = theme.derived($theme => ($theme === "dark" ? DARK_THEME : LIGHT_THEME))
