@@ -51,16 +51,16 @@
 <!-- top nav -->
 {#if innerWidth >= 1024}
   <div
-    class="fixed left-0 right-0 top-0 z-nav flex h-16 items-center justify-end gap-8 bg-dark-d px-4">
+    class="fixed left-0 right-0 top-0 z-nav flex h-16 items-center justify-end gap-8 bg-dark-d pl-4 pr-8">
     <div class="relative">
       <div class="flex">
         <Input
-          class="h-7 !rounded border-mid !bg-dark !px-2 py-px text-warm outline-none"
+          class="h-7 !rounded !border-cocoa !bg-dark !px-2 py-px text-warm outline-none"
           on:blur={onSearchBlur}
           on:keydown={onSearchKeydown}
           bind:element={searchInput}
           bind:value={$searchTerm} />
-        <Anchor button class="z-feature -ml-2">Search</Anchor>
+        <Anchor button class="z-feature -ml-2 !text-warm !bg-cocoa border-none">Search</Anchor>
       </div>
       {#if $searchTerm}
         <div
