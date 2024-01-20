@@ -240,11 +240,11 @@
   <NoteMeta note={event} {showGroup} />
   <div class="note relative" class:py-2={!showParent && !topLevel}>
     {#if !showParent && !topLevel}
-      <div class="absolute -left-4 h-[2px] w-4 bg-cocoa" style="top: 27px;" />
+      <AlternatingBackground class="absolute -left-4 h-[2px] w-4" style="top: 27px;" />
       {#if isLastReply}
-        <div class="absolute -left-4 w-[2px] bg-cocoa" style="height: 19px;" />
+        <AlternatingBackground class="absolute -left-4 w-[2px]" style="height: 19px;" />
       {:else}
-        <div class="absolute -left-4 h-full w-[2px] bg-cocoa" />
+        <AlternatingBackground class="absolute -left-4 h-full w-[2px]" />
       {/if}
     {/if}
     <div class="group relative">
@@ -357,10 +357,10 @@
             Show {quantify(hiddenReplies.length, "other reply", "more replies")}
           </button>
           {#if visibleReplies.length > 0}
-            <div class="absolute -left-4 -top-4 h-20 w-[2px] bg-cocoa" />
+            <AlternatingBackground class="absolute -left-4 -top-4 h-20 w-[2px]" />
           {/if}
         {:else if visibleReplies.length > 0}
-          <div class="absolute -left-4 -top-4 h-8 w-[2px] bg-cocoa" />
+          <AlternatingBackground class="absolute -left-4 -top-4 h-8 w-[2px]" />
         {/if}
         {#if visibleReplies.length}
           <div in:fly={{y: 20}} class="-mb-2">

@@ -26,11 +26,13 @@
   export let showEntire = false
   export let showMedia = false
   export let expandable = true
+  export let isQuote = false
 
   const fullContent = parseContent(note)
   const shortContent = truncateContent(fullContent, {maxLength, showEntire, showMedia})
   const links = getLinks(shortContent)
   const extraLinks = without(links, getLinks(fullContent))
+  const ellipsize = expandable && shortContent.find(p => p.type === ELLIPSIS)
 
   export const isNewline = i =>
     !shortContent[i] ||
@@ -40,16 +42,13 @@
   export const isStartOrEnd = i => isNewline(i - 1) || isNewline(i + 1)
 </script>
 
-<div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
-  <p>
+<div
+  class="flex flex-col gap-2 overflow-hidden text-ellipsis"
+  style={ellipsize && "mask-image: linear-gradient(0deg, transparent 0px, black 100px)"}>
+  <div>
     {#each shortContent as { type, value }, i}
       {#if type === NEWLINE}
         <NoteContentNewline {value} />
-      {:else if type === ELLIPSIS}
-        {#if expandable}
-        <div class="relative top-0 left-0 right-0 bottom-0 h-24 -mt-24 bg-gradient-to-t from-cocoa to-transparent pointer-events-none"></div>
-          <NoteContentEllipsis />
-        {/if}
       {:else if type === TOPIC}
         <NoteContentTopic {value} />
       {:else if type === INVOICE}
@@ -68,13 +67,19 @@
         </NoteContentQuote>
       {:else if type.startsWith("nostr:")}
         <NoteContentEntity {value} />
-      {:else}
+      {:else if type !== ELLIPSIS}
         {value}
       {/if}
       {" "}
     {/each}
-  </p>
+  </div>
   {#if showMedia && extraLinks.length > 0}
     <MediaSet links={extraLinks} />
   {/if}
 </div>
+
+{#if ellipsize}
+  <div class:-ml-12={!isQuote}>
+    <NoteContentEllipsis />
+  </div>
+{/if}

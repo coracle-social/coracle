@@ -21,6 +21,7 @@
   import {getSetting} from "src/engine"
 
   export let note
+  export let isQuote = false
   export let maxLength = 700
   export let showEntire = false
   export let expandable = true
@@ -74,9 +75,9 @@
 {:else if note.kind === 32123}
   <NoteContentKind32123 {note} />
 {:else}
-  <NoteContentKind1 {note} {maxLength} {showEntire} {showMedia} {expandable}>
+  <NoteContentKind1 {note} {maxLength} {showEntire} {showMedia} {expandable} {isQuote}>
     <div slot="note-content" let:quote>
-      <svelte:self note={quote} {maxLength} />
+      <svelte:self isQuote note={quote} {maxLength} />
     </div>
   </NoteContentKind1>
 {/if}

@@ -3,8 +3,9 @@
   import {onMount} from 'svelte'
 
   export let interactive = false
+  export let border = false
 
-  let element
+  let element, className
 
   onMount(() => {
     let cur = element
@@ -17,26 +18,23 @@
       cur = cur.parentElement
     }
 
-    const isAlt = count % 2 === 1
+    const isAlt = count % 2 === 0
 
-    if (isAlt) {
-      element.classList.remove("bg-cocoa")
-      element.classList.remove("hover:bg-cocoa-d")
-    } else {
-      element.classList.remove("bg-dark")
-      element.classList.remove("hover:bg-dark-d")
-    }
+    className = cx({
+      "border-r-4 border-transparent": border,
+      "cursor-pointer transition-colors": interactive,
+      "hover:border-cocoa": border && interactive && isAlt,
+      "hover:border-dark-l": border && interactive && !isAlt,
+      "bg-cocoa": isAlt,
+      "hover:bg-cocoa-d": isAlt && interactive,
+      "bg-dark": !isAlt,
+      "hover:bg-dark-d": !isAlt && interactive,
+    })
 
-    if (!interactive) {
-      element.classList.remove("hover:bg-dark-d")
-      element.classList.remove("hover:bg-cocoa-d")
-    }
+    console.log(className)
   })
 </script>
 
-<div
-  {...$$props}
-  class={cx($$props.class, "bg-swap bg-dark bg-cocoa border-r-4 border-cocoa hover:border-r-4 hover:border-cocoa-l", {"cursor-pointer transition-colors": interactive})}
-  bind:this={element}>
+<div {...$$props} class={cx($$props.class, "bg-swap", className)} bind:this={element}>
   <slot />
 </div>

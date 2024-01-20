@@ -41,7 +41,7 @@
 </script>
 
 <div on:mousedown={startClick} on:touchstart={startClick} on:click={onClick}>
-  <AlternatingBackground {interactive} class={cx($$props.class, "rounded p-3 text-lightest")}>
+  <AlternatingBackground border {interactive} class={cx($$props.class, "rounded p-3 text-lightest")}>
     <slot />
   </AlternatingBackground>
 </div>
