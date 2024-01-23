@@ -276,11 +276,11 @@
           </div>
         </div>
         <div class="flex items-center justify-end gap-2 text-lighter">
-          <small class="hidden sm:block">
+          <small>
             {commaFormat(charCount)} characters
           </small>
           <span>•</span>
-          <small class="hidden sm:block">
+          <small>
             {commaFormat(wordCount)} words
           </small>
           <span>•</span>

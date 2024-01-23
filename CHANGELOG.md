@@ -7,6 +7,7 @@
 - [x] Show date on calendar event notes
 - [x] Add edit for calendar events
 - [x] Add delete for calendar events
+- [x] Fix word count on mobile
 
 # 0.4.0
 
