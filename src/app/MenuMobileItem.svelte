@@ -1,11 +1,15 @@
 <script lang="ts">
-  import cx from 'classnames'
+  import cx from "classnames"
   import Anchor from "src/partials/Anchor.svelte"
 </script>
 
 <Anchor
   {...$$props}
-  class={cx($$props.class, "h-28 w-28 flex flex-col justify-center items-center gap-3 bg-cocoa rounded-xl")}
+  randomizeKey
+  class={cx(
+    $$props.class,
+    "flex h-28 w-28 flex-col items-center justify-center gap-3 rounded-xl bg-cocoa",
+  )}
   on:click>
   <slot />
 </Anchor>

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {randomId} from "hurdak"
   import {toggleTheme, appName} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -37,8 +36,6 @@
     )
   }
 
-  const goToFeed = () => router.at("notes").push({key: randomId()})
-
   let subMenu, active
 
   $: {
@@ -60,7 +57,7 @@
     <img alt="App Logo" src={import.meta.env.VITE_LOGO_URL || "/images/logo.png"} class="w-12" />
     <h1 class="staatliches text-4xl leading-none">{appName}</h1>
   </Anchor>
-  <MenuDesktopItem path="/notes" on:click={goToFeed}>Feed</MenuDesktopItem>
+  <MenuDesktopItem path="/notes">Feed</MenuDesktopItem>
   {#if !$env.FORCE_GROUP}
     <MenuDesktopItem path="/settings/relays">
       <div class="relative inline-block">

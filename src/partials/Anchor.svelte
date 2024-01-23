@@ -1,9 +1,11 @@
 <script lang="ts">
   import cx from "classnames"
+  import {randomId} from "hurdak"
   import {createEventDispatcher} from "svelte"
   import {router} from "src/app/router"
 
   export let stopPropagation = false
+  export let randomizeKey = false
   export let externalHref = null
   export let external = false
   export let disabled = false
@@ -29,8 +31,10 @@
   $: className = cx($$props.class, "transition-all cursor-pointer", {
     underline: underline,
     "opacity-50 pointer-events-none": loading || disabled,
-    "bg-white text-black hover:bg-white-l border border-solid border-warm": button && !accent && !low,
-    "text-base bg-cocoa text-warm hover:bg-white-l border border-solid border-cocoa-l": button && low,
+    "bg-white text-black hover:bg-white-l border border-solid border-warm":
+      button && !accent && !low,
+    "text-base bg-cocoa text-warm hover:bg-white-l border border-solid border-cocoa-l":
+      button && low,
     "bg-accent text-white hover:bg-accent-l": button && accent,
     "text-danger border border-solid !border-danger": button && danger,
     "text-xl staatliches rounded whitespace-nowrap flex justify-center items-center gap-2": button,
@@ -46,7 +50,7 @@
     if (href && !external && !e.metaKey && !e.ctrlKey) {
       e.preventDefault()
 
-      router.at(href).push({modal})
+      router.at(href).push({modal, key: randomizeKey ? randomId() : null})
     }
 
     dispatch("click", e)
@@ -62,7 +66,7 @@
     <slot />
   </button>
 {:else}
-  <svelte:element {style} this={tag} class={className} on:click={onClick}>
+  <svelte:element this={tag} {style} class={className} on:click={onClick}>
     <slot />
   </svelte:element>
 {/if}

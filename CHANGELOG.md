@@ -11,6 +11,7 @@
 - [x] Fix search results opening twice
 - [x] Fix list edit
 - [x] Expand notes inline when clicking "Show More"
+- [x] Refresh pages when navigating to the current page
 
 # 0.4.0
 

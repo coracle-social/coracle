@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {randomId} from "hurdak"
   import {toggleTheme, installPrompt, installAsPWA} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import SliderMenu from "src/partials/SliderMenu.svelte"
@@ -117,7 +116,7 @@
           {/if}
         </div>
       </MenuMobileItem>
-      <MenuMobileItem on:click={() => router.at("notes").push({key: randomId()})}>
+      <MenuMobileItem href="/notes">
         <i class="fa fa-rss" /> Feed
       </MenuMobileItem>
     </div>
