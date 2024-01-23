@@ -166,7 +166,7 @@
       value: asString("value"),
     },
   })
-  router.register("/lists/:naddr", ListEdit, {
+  router.register("/lists/:address", ListEdit, {
     serializers: {
       address: asNaddr("address"),
     },
