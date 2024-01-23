@@ -19,7 +19,7 @@
   const timeFmt = new Intl.DateTimeFormat("en-US", {timeStyle: "short"})
   const datetimeFmt = new Intl.DateTimeFormat("en-US", {dateStyle: "short", timeStyle: "short"})
   const groupAddrs = Tags.from(event).circles().all()
-  const {title, start, end, location} = Tags.from(event).getDict()
+  const {name, title, start, end, location} = Tags.from(event).getDict()
   const startDate = secondsToDate(start)
   const endDate = secondsToDate(end)
   const startDateDisplay = formatTimestampAsDate(start)
@@ -37,7 +37,7 @@
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-3">
       <Anchor class={cx("text-2xl", {"line-through": deleted})} href={detailPath}>
-        {title}
+        {title || name}
       </Anchor>
       {#if deleted}
         <Chip danger small>Deleted</Chip>

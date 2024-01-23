@@ -14,21 +14,20 @@
   import {dereferenceNote, getGroupReqInfo} from "src/engine"
 
   export let address
+  export let event = null
 
-  let event
-  let promise: Promise<Event> = defer()
+  let loading = true
 
-  onMount(() => {
-    promise = dereferenceNote(Naddr.fromTagValue(address))
-    promise.then(e => {
-      event = e
-    })
+  onMount(async () => {
+    console.log(event)
+    event = event || await dereferenceNote(Naddr.fromTagValue(address))
+    loading = false
   })
 </script>
 
-{#await promise}
+{#if loading}
   <Spinner />
-{:then event}
+{:else if event}
   {@const groupAddr = Tags.from(event).circles().first()}
   <div in:fly={{y: 20}}>
     <FlexColumn>
@@ -46,4 +45,6 @@
         filter={{kinds: noteKinds, "#a": [address]}} />
     </FlexColumn>
   </div>
-{/await}
+{:else}
+  <p class="text-center">Failed to find this event.</p>
+{/if}

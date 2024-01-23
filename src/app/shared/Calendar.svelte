@@ -75,7 +75,6 @@
         start: secondsToDate(meta.start),
         end: secondsToDate(meta.end),
         backgroundColor: $themeColors[isOwn ? "accent" : "light"],
-        nostrEvent: e,
       }
     })
 </script>

@@ -46,7 +46,7 @@ export const dereferenceNote = async ({
         timeout: 3000,
         relays: selectHints(relays),
         filters: [{kinds: [kind], authors: [pubkey], "#d": [identifier]}],
-        onEose: () => resolve(note),
+        onClose: () => resolve(note),
         onEvent: event => {
           note = note?.created_at > event.created_at ? note : event
         },
