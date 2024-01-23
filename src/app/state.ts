@@ -61,7 +61,7 @@ export const logUsage = async (path: string) => {
   // anything about them
   const $pubkey = pubkey.get()
   const ident = $pubkey ? hash($pubkey) : "unknown"
-  const name = path.replace(/(npub|nprofile|note|nevent)1[^\/]+/g, (_, m) => `<${m}>`)
+  const name = btoa(path.replace(/(npub|nprofile|note|nevent)1[^\/]+/g, (_, m) => `<${m}>`))
 
   if (getSetting("report_analytics")) {
     try {

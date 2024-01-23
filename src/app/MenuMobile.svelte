@@ -96,7 +96,7 @@
         </div>
       </MenuMobileItem>
       {#if $env.FORCE_GROUP}
-        <MenuMobileItem href="/calendar">
+        <MenuMobileItem href="/events">
           <i class="fa fa-calendar-days" /> Calendar
         </MenuMobileItem>
         <MenuMobileItem href="/market">
@@ -133,7 +133,7 @@
   <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
     <p class="staatliches mb-8 text-center text-3xl">Community</p>
     <div class="staatliches m-auto grid grid-cols-2 gap-3">
-      <MenuMobileItem href="/calendar">
+      <MenuMobileItem href="/events">
         <i class="fa fa-calendar-days" /> Calendar
       </MenuMobileItem>
       <MenuMobileItem href="/market">

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import cx from 'classnames'
-  import {onMount} from 'svelte'
+  import cx from "classnames"
+  import {onMount} from "svelte"
 
   export let interactive = false
   export let border = false
@@ -30,8 +30,6 @@
       "bg-dark": !isAlt,
       "hover:bg-dark-d": !isAlt && interactive,
     })
-
-    console.log(className)
   })
 </script>
 

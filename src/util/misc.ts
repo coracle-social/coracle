@@ -24,7 +24,7 @@ export const createLocalDate = (dateString: any) => new Date(`${dateString} ${ge
 
 export const formatTimestamp = (ts: number) => {
   const formatter = new Intl.DateTimeFormat("en-US", {
-    dateStyle: "medium",
+    dateStyle: "short",
     timeStyle: "short",
   })
 

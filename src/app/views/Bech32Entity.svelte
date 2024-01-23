@@ -6,6 +6,7 @@
   import RelayDetail from "src/app/views/RelayDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
   import GroupDetail from "src/app/views/GroupDetail.svelte"
+  import EventDetail from "src/app/views/EventDetail.svelte"
 
   export let entity, type, data, relays
 </script>
@@ -17,6 +18,8 @@
 {:else if type === "naddr"}
   {#if [35834, 34550].includes(data.kind)}
     <GroupDetail address={Naddr.decode(entity).asTagValue()} activeTab="notes" />
+  {:else if data.kind === 31923}
+    <EventDetail address={Naddr.decode(entity).asTagValue()} />
   {:else}
     <NoteDetail {...data} />
   {/if}

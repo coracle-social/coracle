@@ -2,7 +2,7 @@ import {find, pluck, whereEq} from "ramda"
 import {batch, sleep} from "hurdak"
 import {Tags} from "paravel"
 import {env} from "src/engine/session/state"
-import {loadOne, getIdFilters, dvmRequest} from "src/engine/network/utils"
+import {subscribe, loadOne, getIdFilters, dvmRequest} from "src/engine/network/utils"
 import {selectHints, mergeHints} from "src/engine/relays/utils"
 
 export const dereferenceNote = async ({
@@ -39,9 +39,18 @@ export const dereferenceNote = async ({
       return note
     }
 
-    return loadOne({
-      relays: selectHints(relays),
-      filters: [{kinds: [kind], authors: [pubkey], "#d": [identifier]}],
+    return new Promise(resolve => {
+      let note = null
+
+      subscribe({
+        timeout: 3000,
+        relays: selectHints(relays),
+        filters: [{kinds: [kind], authors: [pubkey], "#d": [identifier]}],
+        onEose: () => resolve(note),
+        onEvent: event => {
+          note = note?.created_at > event.created_at ? note : event
+        },
+      })
     })
   }
 

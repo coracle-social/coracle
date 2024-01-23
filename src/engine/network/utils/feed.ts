@@ -14,7 +14,7 @@ import {
 } from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
-import {isEventMuted} from "src/engine/events/derived"
+import {isEventMuted, isDeleted} from "src/engine/events/derived"
 import {writable} from "src/engine/core/utils"
 import type {Filter} from "../model"
 import {getIdFilters, guessFilterDelta} from "./filters"
@@ -49,6 +49,7 @@ export class FeedLoader {
   localCursor: MultiCursor
   ready: Promise<void>
   isEventMuted = isEventMuted.get()
+  isDeleted = isDeleted.get()
 
   constructor(readonly opts: FeedOpts) {
     const urls = getUrls(opts.relays)
@@ -115,6 +116,10 @@ export class FeedLoader {
     const strict = this.opts.filters.some(f => f["#a"])
 
     return events.filter(e => {
+      if (this.isDeleted(e)) {
+        return false
+      }
+
       if (this.isEventMuted(e, strict)) {
         return false
       }

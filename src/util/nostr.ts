@@ -2,7 +2,7 @@ import {Tags} from "paravel"
 import {schnorr} from "@noble/curves/secp256k1"
 import {bytesToHex} from "@noble/hashes/utils"
 import {nip19, generateSecretKey, getEventHash, getPublicKey as getPk} from "nostr-tools"
-import {pick, is, mergeLeft, identity} from "ramda"
+import {pick, reject, is, join, mergeLeft, identity} from "ramda"
 import {between, avg} from "hurdak"
 import type {Filter, Event} from "src/engine"
 
@@ -230,3 +230,71 @@ export const getContentWarning = e => {
 }
 
 export const isGiftWrap = e => [1059, 1060].includes(e.kind)
+
+export class EventBuilder {
+  template: {
+    kind?: number
+    pubkey?: string
+    created_at?: number
+    content?: string
+    tags?: string[][]
+  } = {}
+
+  static from(event) {
+    const builder = new EventBuilder()
+
+    builder.setKind(event.kind)
+    builder.setPubkey(event.pubkey)
+    builder.setCreatedAt(event.created_at)
+    builder.setContent(event.content)
+    builder.setTags(event.tags)
+
+    return builder
+  }
+
+  setKind(kind: number) {
+    this.template.kind = kind
+  }
+
+  setPubkey(pubkey: string) {
+    this.template.pubkey = pubkey
+  }
+
+  setCreatedAt(createdAt: number) {
+    this.template.created_at = createdAt
+  }
+
+  setContent(content: string) {
+    this.template.content = content
+  }
+
+  setTags(tags: string[][]) {
+    this.template.tags = tags
+  }
+
+  removeTag(k: string) {
+    this.template.tags = this.template.tags.filter(t => t[0] !== k)
+  }
+
+  addTag(k: string, v: string, ...extra: string[]) {
+    this.template.tags = this.template.tags.concat([[k, v, ...extra]])
+  }
+
+  setTag(k: string, v: string, ...extra: string[]) {
+    this.removeTag(k)
+    this.addTag(k, v, ...extra)
+  }
+
+  addImageMeta(imeta: Array<typeof Tags>) {
+    for (const tags of imeta) {
+      this.template.tags.push(["imeta", ...tags.all().map(join(" "))])
+    }
+  }
+
+  removeCircles() {
+    this.template.tags = reject(
+      t => t[0] === "a" && t[1].match(/^(34550|35834):/),
+      this.template.tags,
+    )
+  }
+}

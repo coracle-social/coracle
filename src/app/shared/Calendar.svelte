@@ -1,6 +1,6 @@
 <script lang="ts">
   import {Tags} from "paravel"
-  import {whereEq} from "ramda"
+  import {batch} from "hurdak"
   import {onMount} from "svelte"
   import Calendar from "@event-calendar/core"
   import DayGrid from "@event-calendar/day-grid"
@@ -10,7 +10,7 @@
   import {themeColors} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/router"
-  import {canSign, subscribe, pubkey} from "src/engine"
+  import {canSign, writable, getReplyFilters, load, isDeleted, subscribe, pubkey} from "src/engine"
 
   export let relays
   export let filters
@@ -33,40 +33,51 @@
     }
   }
 
-  const onEventClick = ({event: calendarEvent}) => {
-    const event = events.find(whereEq({id: calendarEvent.id}))
+  const onEventClick = ({event: calendarEvent}) => router.at("events").of(calendarEvent.id).open()
 
-    router.at("events").of(Naddr.fromEvent(event).asTagValue()).open()
-  }
-
-  let events = []
+  const events = writable(new Map())
 
   onMount(() => {
     const sub = subscribe({
       filters,
       relays: relays.concat(LOCAL_RELAY_URL),
-      onEvent: e => {
-        events = events.concat(e)
-      },
+      onEvent: batch(300, chunk => {
+        events.update($events => {
+          for (const e of chunk) {
+            const addr = Naddr.fromEvent(e).asTagValue()
+            const dup = $events.get(addr)
+
+            // Make sure we have the latest version of every event
+            $events.set(addr, dup?.created_at > e.created_at ? dup : e)
+          }
+
+          return $events
+        })
+
+        // Load deletes for these events
+        load({relays, filters: getReplyFilters(chunk, {kinds: [5]})})
+      }),
     })
 
     return () => sub.close()
   })
 
-  $: calendarEvents = events.map(e => {
-    const meta = Tags.from(e).getDict()
-    const isOwn = e.pubkey === $pubkey
+  $: calendarEvents = Array.from($events.values())
+    .filter(e => !$isDeleted(e))
+    .map(e => {
+      const meta = Tags.from(e).getDict()
+      const isOwn = e.pubkey === $pubkey
 
-    return {
-      id: e.id,
-      editable: isOwn,
-      title: meta.name,
-      start: secondsToDate(meta.start),
-      end: secondsToDate(meta.end),
-      backgroundColor: $themeColors[isOwn ? "accent" : "light"],
-      _ctx: e,
-    }
-  })
+      return {
+        editable: isOwn,
+        id: Naddr.fromEvent(e).asTagValue(),
+        title: meta.title || meta.name, // Backwards compat with a bug
+        start: secondsToDate(meta.start),
+        end: secondsToDate(meta.end),
+        backgroundColor: $themeColors[isOwn ? "accent" : "light"],
+        nostrEvent: e,
+      }
+    })
 </script>
 
 {#if $canSign}

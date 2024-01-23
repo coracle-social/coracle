@@ -10,7 +10,6 @@
   import {dateToSeconds} from "src/util/misc"
   import {toast} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
-  import Compose from "src/app/shared/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import CurrencyInput from "src/partials/CurrencyInput.svelte"
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
@@ -18,10 +17,12 @@
   import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
   import Chip from "src/partials/Chip.svelte"
+  import Compose from "src/app/shared/Compose.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
@@ -157,10 +158,10 @@
           tags: [
             ...tags,
             ["d", uuid()],
-            ["name", opts.title],
+            ["title", opts.title],
+            ["location", opts.location || ""],
             ["start", dateToSeconds(opts.start).toString()],
             ["end", dateToSeconds(opts.end).toString()],
-            ["location", opts.location || ""],
           ],
         }),
     })
@@ -219,7 +220,7 @@
         </div>
       </Popover>
     </div>
-    <div class="flex w-full flex-col gap-4">
+    <FlexColumn>
       {#if type !== "note"}
         <Field label="Title">
           <Input bind:value={opts.title} />
@@ -309,7 +310,7 @@
           <span><i class="fa fa-warning" /> {opts.warning || 0}</span>
         </small>
       {/if}
-    </div>
+    </FlexColumn>
   </Content>
 </form>
 

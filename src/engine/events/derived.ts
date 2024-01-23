@@ -1,5 +1,6 @@
-import {whereEq, groupBy, find} from "ramda"
 import {Tags} from "paravel"
+import {whereEq, groupBy, find} from "ramda"
+import {getIdAndAddress} from "src/util/nostr"
 import {derived, DerivedCollection} from "src/engine/core/utils"
 import {pubkey} from "src/engine/session/state"
 import {settings} from "src/engine/session/derived"
@@ -65,3 +66,7 @@ export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settin
     return false
   }
 })
+
+export const isDeleted = deletes.derived(
+  $d => e => Boolean(getIdAndAddress(e).find(k => $d.has(k))),
+)

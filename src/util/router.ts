@@ -304,7 +304,7 @@ export class Router {
     this.at(window.location.pathname + window.location.search).push()
     this.page.subscribe($page => {
       if (!$page) {
-        console.error('No page available')
+        console.error("No page available")
       }
     })
   }

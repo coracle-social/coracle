@@ -3,6 +3,10 @@
 # 0.4.1
 
 - [x] Fix pubkey display in PersonAbout
+- [x] Hide deleted calendar events
+- [x] Show date on calendar event notes
+- [x] Add edit for calendar events
+- [x] Add delete for calendar events
 
 # 0.4.0
 

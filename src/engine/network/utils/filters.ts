@@ -1,7 +1,6 @@
 import {omit, without, find, prop, groupBy, uniq} from "ramda"
 import {shuffle, randomId, seconds, avg} from "hurdak"
-import {Tags} from "paravel"
-import {Naddr} from "src/util/nostr"
+import {Naddr, isAddressable} from "src/util/nostr"
 import {env, pubkey} from "src/engine/session/state"
 import {follows, network} from "src/engine/people/derived"
 import {mergeHints, getGroupHints, getPubkeyHints} from "src/engine/relays/utils"
@@ -66,10 +65,8 @@ export const getReplyFilters = (events, filter) => {
   for (const event of events) {
     e.push(event.id)
 
-    if (event.kind >= 10000) {
-      const d = Tags.from(event).getValue("d") || ""
-
-      a.push([event.kind, event.pubkey, d].join(":"))
+    if (isAddressable(event)) {
+      a.push(Naddr.fromEvent(event).asTagValue())
     }
   }
 

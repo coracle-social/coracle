@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {Naddr} from 'src/util/nostr'
+  import {Naddr} from "src/util/nostr"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/router"
-  import {pubkey} from "src/engine"
+  import {pubkey, isDeleted} from "src/engine"
 
   export let event
 
@@ -13,24 +13,26 @@
   $: {
     actions = []
 
-    actions.push({
-      onClick: () => router.at("qrcode").of(naddr.encode()).open(),
-      label: "Share",
-      icon: "share-nodes",
-    })
-
-    if (event.pubkey === $pubkey) {
+    if (!$isDeleted(event)) {
       actions.push({
-        onClick: () => router.at("events").of(naddr.asTagValue()).at("edit").open(),
-        label: "Edit",
-        icon: "edit",
+        onClick: () => router.at("qrcode").of(naddr.encode()).open(),
+        label: "Share",
+        icon: "share-nodes",
       })
 
-      actions.push({
-        onClick: () => router.at("events").of(naddr.asTagValue()).at("delete").open(),
-        label: "Delete",
-        icon: "trash",
-      })
+      if (event.pubkey === $pubkey) {
+        actions.push({
+          onClick: () => router.at("events").of(naddr.asTagValue()).cx({event}).at("edit").open(),
+          label: "Edit",
+          icon: "edit",
+        })
+
+        actions.push({
+          onClick: () => router.at("events").of(naddr.asTagValue()).cx({event}).at("delete").open(),
+          label: "Delete",
+          icon: "trash",
+        })
+      }
     }
   }
 </script>

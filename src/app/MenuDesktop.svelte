@@ -54,7 +54,7 @@
 
 <div class="fixed bottom-0 left-0 top-0 z-nav w-72 bg-cocoa transition-colors">
   <Anchor
-    class="mb-4 flex mt-4 items-center gap-2 pl-6"
+    class="mb-4 mt-4 flex items-center gap-2 pl-6"
     external
     href="https://info.coracle.social">
     <img alt="App Logo" src={import.meta.env.VITE_LOGO_URL || "/images/logo.png"} class="w-12" />
@@ -66,8 +66,7 @@
       <div class="relative inline-block">
         Relays
         {#if $slowConnections.length > 0}
-          <div
-            class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
+          <div class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
         {/if}
       </div>
     </MenuDesktopItem>
@@ -76,8 +75,7 @@
     <div class="relative inline-block">
       Notifications
       {#if $hasNewNotifications}
-        <div
-          class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
+        <div class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
       {/if}
     </div>
   </MenuDesktopItem>
@@ -85,24 +83,27 @@
     <div class="relative inline-block">
       Messages
       {#if $hasNewMessages}
-        <div
-          class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
+        <div class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
       {/if}
     </div>
   </MenuDesktopItem>
-  <MenuDesktopItem path="/calendar">Calendar</MenuDesktopItem>
+  <MenuDesktopItem path="/events">Calendar</MenuDesktopItem>
   <MenuDesktopItem path="/market">Market</MenuDesktopItem>
   {#if !$env.FORCE_GROUP}
     <MenuDesktopItem path="/groups">Groups</MenuDesktopItem>
   {/if}
   <FlexColumn small class="absolute bottom-0 w-72">
-    <Anchor class="staatliches px-8 text-mid dark:text-cocoa-l hover:text-lighter dark:hover:text-warm" href="/about">About</Anchor>
     <Anchor
-      class="staatliches px-8 text-mid dark:text-cocoa-l hover:text-lighter dark:hover:text-warm"
+      class="staatliches px-8 text-mid hover:text-lighter dark:text-cocoa-l dark:hover:text-warm"
+      href="/about">About</Anchor>
+    <Anchor
+      class="staatliches px-8 text-mid hover:text-lighter dark:text-cocoa-l dark:hover:text-warm"
       on:click={() => setSubMenu("settings")}>Settings</Anchor>
     <div class="staatliches block flex h-8 gap-2 px-8 text-mid dark:text-cocoa-l">
-      <Anchor external class="hover:text-lighter dark:hover:text-warm" href="/terms.html">Terms</Anchor> /
-      <Anchor external class="hover:text-lighter dark:hover:text-warm" href="/privacy.html">Privacy</Anchor>
+      <Anchor external class="hover:text-lighter dark:hover:text-warm" href="/terms.html"
+        >Terms</Anchor> /
+      <Anchor external class="hover:text-lighter dark:hover:text-warm" href="/privacy.html"
+        >Privacy</Anchor>
     </div>
     {#if subMenu === "settings"}
       <MenuDesktopSecondary onEscape={closeSubMenu}>
@@ -112,10 +113,16 @@
         <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings/data">
           <i class="fa fa-database" /> Database
         </MenuItem>
-        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings" disabled={!$canSign}>
+        <MenuItem
+          class="staatliches flex items-center gap-4 py-4 pl-8"
+          href="/settings"
+          disabled={!$canSign}>
           <i class="fa fa-cog" /> App Settings
         </MenuItem>
-        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings/content" disabled={!$canSign}>
+        <MenuItem
+          class="staatliches flex items-center gap-4 py-4 pl-8"
+          href="/settings/content"
+          disabled={!$canSign}>
           <i class="fa fa-volume-xmark" /> Content Settings
         </MenuItem>
       </MenuDesktopSecondary>

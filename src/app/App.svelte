@@ -29,6 +29,8 @@
   import DataExport from "src/app/views/DataExport.svelte"
   import DataImport from "src/app/views/DataImport.svelte"
   import EventDetail from "src/app/views/EventDetail.svelte"
+  import EventEdit from "src/app/views/EventEdit.svelte"
+  import EventDelete from "src/app/views/EventDelete.svelte"
   import GroupList from "src/app/views/GroupList.svelte"
   import GroupDetail from "src/app/views/GroupDetail.svelte"
   import GroupCreate from "src/app/views/GroupCreate.svelte"
@@ -95,7 +97,7 @@
   router.register("/about", About)
   router.register("/search", Search)
   router.register("/bech32", Bech32Entity)
-  router.register("/calendar", Calendar)
+  router.register("/events", Calendar)
 
   router.register("/channels", ChannelsList, {
     requireUser: true,
@@ -114,6 +116,16 @@
   })
 
   router.register("/events/:address", EventDetail, {
+    serializers: {
+      address: asNaddr("address"),
+    },
+  })
+  router.register("/events/:address/edit", EventEdit, {
+    serializers: {
+      address: asNaddr("address"),
+    },
+  })
+  router.register("/events/:address/delete", EventDelete, {
     serializers: {
       address: asNaddr("address"),
     },
