@@ -43,10 +43,10 @@
         <Chip danger small>Deleted</Chip>
       {/if}
       {#if actionsInline && event.pubkey === $pubkey && !deleted}
-        <Anchor modal href={editLink} class="flex items-center">
+        <Anchor modal stopPropagation href={editLink} class="flex items-center">
           <i class="fa fa-edit text-base text-lighter" />
         </Anchor>
-        <Anchor modal href={deleteLink} class="flex items-center">
+        <Anchor modal stopPropagation href={deleteLink} class="flex items-center">
           <i class="fa fa-trash text-base text-lighter" />
         </Anchor>
       {/if}
