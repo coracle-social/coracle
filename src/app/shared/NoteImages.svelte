@@ -1,6 +1,4 @@
 <script lang="ts">
-  import {without, prop} from "ramda"
-  import {Tags} from "paravel"
   import Media from "src/partials/Media.svelte"
 
   export let compose

@@ -1,4 +1,4 @@
-import {partition, prop, uniqBy, identity, pluck, sortBy, without, any, assoc} from "ramda"
+import {partition, prop, uniqBy, identity, without, any, assoc} from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
 import {now, hasValidSignature, Tags} from "paravel"
 import {race, tryJson} from "src/util/misc"
@@ -14,6 +14,7 @@ import {
 } from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
+import {sortEventsDesc} from "src/engine/events/utils"
 import {isEventMuted, isDeleted} from "src/engine/events/derived"
 import {writable} from "src/engine/core/utils"
 import type {Filter} from "../model"
@@ -181,14 +182,15 @@ export class FeedLoader {
   // Feed building
 
   buildFeedChunk = (notes: Event[]) => {
-    const seen = new Set(pluck("id", this.notes.get()))
+    const seen = new Set(this.notes.get().map(getIdOrAddress))
     const parents = []
 
-    return sortBy(
-      (e: DisplayEvent) => -e.created_at,
+    // Sort first to make sure we get the latest version of replaceable events, then
+    // after to make sure notes replaced by their parents are in order.
+    return sortEventsDesc(
       uniqBy(
         prop("id"),
-        notes
+        sortEventsDesc(notes)
           .map((e: Event) => {
             // If we have a repost, use its contents instead
             if (repostKinds.includes(e.kind)) {
@@ -239,9 +241,11 @@ export class FeedLoader {
           .concat(parents)
           // If we've seen this note or its parent, don't add it again
           .filter(e => {
-            if (seen.has(e.id)) return false
+            if (seen.has(getIdOrAddress(e))) return false
             if (repostKinds.includes(e.kind)) return false
             if (reactionKinds.includes(e.kind)) return false
+
+            seen.add(getIdOrAddress(e))
 
             return true
           })

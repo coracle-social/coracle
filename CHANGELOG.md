@@ -16,6 +16,7 @@
 - [x] Add listing edit and delete
 - [x] Navigate to notes by address when possible
 - [x] Remove query string from imgproxy payload
+- [x] Remove duplicates by address from feeds
 
 # 0.4.0
 

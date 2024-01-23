@@ -1,23 +1,21 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {Tags, now} from "paravel"
-  import {sleep} from 'hurdak'
-  import {whereEq} from 'ramda'
+  import {sleep} from "hurdak"
+  import {whereEq} from "ramda"
   import {Naddr, EventBuilder} from "src/util/nostr"
   import {currencyOptions} from "src/util/i18n"
-  import {secondsToDate, dateToSeconds} from "src/util/misc"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
-  import DateTimeInput from "src/partials/DateTimeInput.svelte"
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
   import CurrencyInput from "src/partials/CurrencyInput.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import Compose from "src/app/shared/Compose.svelte"
-  import {router} from 'src/app/router'
+  import {router} from "src/app/router"
   import {toastProgress} from "src/app/state"
   import {dereferenceNote, publishToZeroOrMoreGroups, getUserRelayUrls} from "src/engine"
 
@@ -27,17 +25,17 @@
   const onSubmit = async () => {
     const builder = EventBuilder.from(event)
 
-    builder.setTag('title', values.title)
-    builder.setTag('summary', values.summary)
-    builder.setTag('location', values.location)
-    builder.setTag('price', values.price.toString(), values.currency.code)
+    builder.setTag("title", values.title)
+    builder.setTag("summary", values.summary)
+    builder.setTag("location", values.location)
+    builder.setTag("price", values.price.toString(), values.currency.code)
     builder.removeCircles()
     builder.setCreatedAt(now())
     builder.setContent(compose.parse())
     builder.setImages(images.getValue())
 
     const {pubs} = await publishToZeroOrMoreGroups(values.groups, builder.template, {
-      relays: getUserRelayUrls('write'),
+      relays: getUserRelayUrls("write"),
     })
 
     pubs[0].on("progress", toastProgress)
@@ -62,11 +60,12 @@
 
       values = {
         groups: tags.circles().all(),
-        title: tags.getValue('title') || "",
-        summary: tags.getValue('summary') || "",
-        location: tags.getValue('location') || "",
+        title: tags.getValue("title") || "",
+        summary: tags.getValue("summary") || "",
+        location: tags.getValue("location") || "",
         price: parseInt(price || 0),
-        currency: currencyOptions.find(whereEq({code})) || currencyOptions.find(whereEq({code: "SAT"})),
+        currency:
+          currencyOptions.find(whereEq({code})) || currencyOptions.find(whereEq({code: "SAT"})),
       }
 
       // Wait for components to mount
@@ -74,8 +73,8 @@
 
       compose.write(event.content)
 
-      for (const image of tags.type('image').values().all()) {
-        images.addImage(new Tags([['url', image]]))
+      for (const image of tags.type("image").values().all()) {
+        images.addImage(new Tags([["url", image]]))
       }
     }
   })
@@ -110,7 +109,7 @@
         <Input bind:value={values.location} />
       </Field>
       <Field label="Description">
-        <div class="rounded-xl border border-solid border-mid p-3 bg-white text-black">
+        <div class="rounded-xl border border-solid border-mid bg-white p-3 text-black">
           <Compose autofocus bind:this={compose} {onSubmit} />
         </div>
       </Field>
