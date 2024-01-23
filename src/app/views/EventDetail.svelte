@@ -34,7 +34,7 @@
     <FlexColumn>
       <div class="flex gap-4">
         <EventDate {event} />
-        <EventInfo showActions {event} />
+        <EventInfo {event} />
       </div>
       <NoteCreateInline parent={event} />
       <Feed

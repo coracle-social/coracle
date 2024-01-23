@@ -1,5 +1,6 @@
 <script lang="ts">
-  import {without} from "ramda"
+  import {without, prop} from "ramda"
+  import {Tags} from "paravel"
   import Media from "src/partials/Media.svelte"
 
   export let compose
@@ -18,21 +19,24 @@
     }
   }
 
-  export const removeImage = imeta => {
-    const content = compose.parse()
+  export const removeImage = i => {
+    if (includeInContent) {
+      const imeta = value[i]
+      const content = compose.parse()
 
-    compose.clear()
-    compose.write(content.replace(getUrl(imeta), ""))
+      compose.clear()
+      compose.write(content.replace(getUrl(imeta), ""))
+    }
 
-    value = without([imeta], value)
+    value = value.slice(0, i).concat(value.slice(i + 1))
   }
 </script>
 
 {#if value.length > 0}
   <div class="columns-2 gap-2 lg:columns-3">
-    {#each value as imeta}
+    {#each value as imeta, i (getUrl(imeta) + i)}
       <div class="pb-2">
-        <Media {imeta} url={getUrl(imeta)} onClose={() => removeImage(imeta)} />
+        <Media {imeta} url={getUrl(imeta)} onClose={() => removeImage(i)} />
       </div>
     {/each}
   </div>

@@ -33,6 +33,8 @@ export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
     return url
   }
 
+  url = url.split("?")[0]
+
   try {
     return base && url ? `${base}/x/s:${w}:${h}/${btoa(url)}` : url
   } catch (e) {

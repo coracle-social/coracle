@@ -4,4 +4,4 @@
   export let note
 </script>
 
-<EventInfo showDate event={note} />
+<EventInfo showDate actionsInline event={note} />

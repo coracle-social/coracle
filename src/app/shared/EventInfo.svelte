@@ -4,36 +4,54 @@
   import {Naddr} from "src/util/nostr"
   import {secondsToDate, formatTimestamp, formatTimestampAsDate} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
+  import Chip from "src/partials/Chip.svelte"
   import GroupLink from "src/app/shared/GroupLink.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import EventActions from "src/app/shared/EventActions.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {router} from "src/app/router"
-  import {isDeleted, getSetting} from "src/engine"
+  import {isDeleted, getSetting, pubkey} from "src/engine"
 
   export let event
   export let showDate = false
-  export let showActions = false
+  export let actionsInline = false
 
   const timeFmt = new Intl.DateTimeFormat("en-US", {timeStyle: "short"})
   const datetimeFmt = new Intl.DateTimeFormat("en-US", {dateStyle: "short", timeStyle: "short"})
   const groupAddrs = Tags.from(event).circles().all()
-  const address = Naddr.fromEvent(event).asTagValue()
-  const detailPath = router.at("events").of(address).toString()
   const {title, start, end, location} = Tags.from(event).getDict()
   const startDate = secondsToDate(start)
   const endDate = secondsToDate(end)
   const startDateDisplay = formatTimestampAsDate(start)
   const endDateDisplay = formatTimestampAsDate(end)
   const isSingleDay = startDateDisplay === endDateDisplay
+  const address = Naddr.fromEvent(event).asTagValue()
+  const detailPath = router.at("events").of(address).toString()
+  const editLink = router.at("events").of(address).at("edit").toString()
+  const deleteLink = router.at("events").of(address).at("delete").toString()
+
+  $: deleted = $isDeleted(event)
 </script>
 
 <div class="flex flex-grow flex-col gap-2">
   <div class="flex items-center justify-between">
-    <Anchor class={cx("text-2xl", {"line-through": $isDeleted(event)})} href={detailPath}>
-      {title}
-    </Anchor>
-    {#if showActions}
+    <div class="flex items-center gap-3">
+      <Anchor class={cx("text-2xl", {"line-through": deleted})} href={detailPath}>
+        {title}
+      </Anchor>
+      {#if deleted}
+        <Chip danger small>Deleted</Chip>
+      {/if}
+      {#if actionsInline && event.pubkey === $pubkey && !deleted}
+        <Anchor modal href={editLink} class="flex items-center">
+          <i class="fa fa-edit text-base text-lighter" />
+        </Anchor>
+        <Anchor modal href={deleteLink} class="flex items-center">
+          <i class="fa fa-trash text-base text-lighter" />
+        </Anchor>
+      {/if}
+    </div>
+    {#if !actionsInline}
       <EventActions {event} />
     {/if}
   </div>

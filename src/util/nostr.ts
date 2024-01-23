@@ -285,10 +285,34 @@ export class EventBuilder {
     this.addTag(k, v, ...extra)
   }
 
+  removeImages() {
+    this.template.tags = reject(t => t[0] === "image", this.template.tags)
+  }
+
+  addImages(imeta: Array<typeof Tags>) {
+    for (const tags of imeta) {
+      this.template.tags.push(["image", tags.type("url").values().first()])
+    }
+  }
+
+  setImages(imeta: Array<typeof Tags>) {
+    this.removeImages()
+    this.addImages(imeta)
+  }
+
+  removeImageMeta() {
+    this.template.tags = reject(t => t[0] === "imeta", this.template.tags)
+  }
+
   addImageMeta(imeta: Array<typeof Tags>) {
     for (const tags of imeta) {
       this.template.tags.push(["imeta", ...tags.all().map(join(" "))])
     }
+  }
+
+  setImageMeta(imeta: Array<typeof Tags>) {
+    this.removeImageMeta()
+    this.addImageMeta(imeta)
   }
 
   removeCircles() {

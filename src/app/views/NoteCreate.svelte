@@ -235,7 +235,7 @@
             <div class="col-span-2">
               <Input type="number" placeholder="0" bind:value={opts.price}>
                 <span slot="before">
-                  <CurrencySymbol code={opts.currency?.code || "USD"} />
+                  <CurrencySymbol code={opts.currency?.code || "SAT"} />
                 </span>
               </Input>
             </div>

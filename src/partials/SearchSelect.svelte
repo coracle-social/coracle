@@ -22,13 +22,11 @@
   $: suggestions?.setData(term ? search(term).slice(0, 10) : defaultOptions)
 
   $: {
-    if (popover) {
-      if (focused && term) {
-        popover.show()
-      } else {
-        popover.hide()
-      }
+    if (!focused || !term) {
+      popover?.hide()
+    }
 
+    if (popover) {
       const {popper, reference} = popover
 
       popper.style.width = reference.clientWidth - 2 + "px"
@@ -104,7 +102,7 @@
 {#if multiple}
   <div class="text-sm">
     {#each value as item}
-      <Chip class="mb-1 mr-1" theme="dark" onRemove={() => remove(item)}>
+      <Chip class="mb-1 mr-1" onRemove={() => remove(item)}>
         <slot name="item" context="value" {item}>
           {item}
         </slot>

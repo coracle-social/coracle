@@ -13,6 +13,9 @@
 - [x] Expand notes inline when clicking "Show More"
 - [x] Refresh pages when navigating to the current page
 - [x] Remove duplicate media from listings
+- [x] Add listing edit and delete
+- [x] Navigate to notes by address when possible
+- [x] Remove query string from imgproxy payload
 
 # 0.4.0
 

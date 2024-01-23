@@ -98,7 +98,7 @@
         <MenuMobileItem href="/events">
           <i class="fa fa-calendar-days" /> Calendar
         </MenuMobileItem>
-        <MenuMobileItem href="/market">
+        <MenuMobileItem href="/listings">
           <i class="fa fa-store" /> Market
         </MenuMobileItem>
       {:else}
@@ -135,7 +135,7 @@
       <MenuMobileItem href="/events">
         <i class="fa fa-calendar-days" /> Calendar
       </MenuMobileItem>
-      <MenuMobileItem href="/market">
+      <MenuMobileItem href="/listings">
         <i class="fa fa-store" /> Market
       </MenuMobileItem>
       {#if !$env.FORCE_GROUP}

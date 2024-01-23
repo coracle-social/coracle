@@ -21,6 +21,7 @@ export const decodeJson = json => tryJson(() => JSON.parse(json))
 export const encodeCsv = xs => xs.join(",")
 export const decodeCsv = x => x.split(",")
 export const encodeRelays = xs => xs.map(url => last(url.split("//"))).join(",")
+export const encodeNaddr = a => Naddr.fromTagValue(a).encode()
 
 export const encodeFilter = f =>
   Object.entries(f)
@@ -120,7 +121,7 @@ export const asChannelId = {
 }
 
 export const asNaddr = k => ({
-  encode: a => Naddr.fromTagValue(a).encode(),
+  encode: encodeNaddr,
   decode: decodeAs(k, naddr => Naddr.decode(naddr).asTagValue()),
 })
 
@@ -131,9 +132,10 @@ export const router = new Router()
 router.extend("media", encodeURIComponent)
 router.extend("relays", nip19.nrelayEncode)
 router.extend("channels", getChannelId)
-router.extend("groups", asNaddr("group").encode)
-router.extend("events", asNaddr("event").encode)
-router.extend("lists", asNaddr("list").encode)
+router.extend("groups", encodeNaddr)
+router.extend("events", encodeNaddr)
+router.extend("lists", encodeNaddr)
+router.extend("listings", encodeNaddr)
 
 router.extend("notes", (id, {relays = []} = {}) => {
   if (id.includes(":")) {

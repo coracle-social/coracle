@@ -82,7 +82,7 @@
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
       router
         .at("notes")
-        .of(event.id, {relays: getEventHints(event)})
+        .of(getIdOrAddress(event), {relays: getEventHints(event)})
         .cx({context: ctx.concat(event)})
         .open()
     }
@@ -90,18 +90,24 @@
 
   const showPerson = () => router.at("people").of(event.pubkey).open()
 
-  const goToParent = () => {
+  const goToDetail = () =>
+    router
+      .at("notes")
+      .of(getIdOrAddress(event), {relays: getEventHints(event)})
+      .cx({context: ctx.concat(event)})
+      .push()
+
+  const goToParent = () =>
     router
       .at("notes")
       .of(getParentId(event), {relays: tags.getReplyHints()})
       .cx({context: ctx.concat(event)})
       .open()
-  }
 
   const goToThread = () =>
     router
       .at("notes")
-      .of(event.id, {relays: getEventHints(event)})
+      .of(getIdOrAddress(event), {relays: getEventHints(event)})
       .at("thread")
       .cx({context: ctx.concat(event)})
       .open()
@@ -177,12 +183,6 @@
 
   $: rootId = getRootId(event)
   $: replyId = getParentId(event)
-  $: path = event.pubkey
-    ? router
-        .at("notes")
-        .of(event.id, {relays: getEventHints(event)})
-        .toString()
-    : ""
 
   onMount(async () => {
     const zapAddress = Tags.from(event).getValue("zap")
@@ -260,7 +260,7 @@
               <PersonName pubkey={event.pubkey} />
             </Anchor>
             <Anchor
-              href={path}
+              on:click={goToDetail}
               class="whitespace-nowrap text-end text-sm text-lightest"
               type="unstyled">
               {formatTimestamp(event.created_at)}
@@ -352,7 +352,9 @@
     {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
       <div class="note-children relative ml-4 mt-2 flex flex-col">
         {#if hiddenReplies.length > 0}
-          <button class="cursor-pointer py-2 mt-2 mb-2 text-lightest outline-0 bg-gradient-to-l from-transparent to-cocoa rounded-md hover:bg-cocoa transition-colors" on:click={onClick}>
+          <button
+            class="mb-2 mt-2 cursor-pointer rounded-md bg-gradient-to-l from-transparent to-cocoa py-2 text-lightest outline-0 transition-colors hover:bg-cocoa"
+            on:click={onClick}>
             <i class="fa fa-up-down pr-2 text-sm" />
             Show {quantify(hiddenReplies.length, "other reply", "more replies")}
           </button>

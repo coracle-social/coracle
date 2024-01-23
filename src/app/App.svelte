@@ -43,6 +43,8 @@
   import ListEdit from "src/app/views/ListEdit.svelte"
   import ListList from "src/app/views/ListList.svelte"
   import ListSelect from "src/app/views/ListSelect.svelte"
+  import ListingEdit from "src/app/views/ListingEdit.svelte"
+  import ListingDelete from "src/app/views/ListingDelete.svelte"
   import Login from "src/app/views/Login.svelte"
   import LoginAdvanced from "src/app/views/LoginAdvanced.svelte"
   import LoginBunker from "src/app/views/LoginBunker.svelte"
@@ -184,7 +186,19 @@
   router.register("/login/pubkey", LoginPubKey)
   router.register("/logout", Logout)
 
-  router.register("/market", Market)
+  router.register("/listings", Market)
+  router.register("/listings/:address/edit", ListingEdit, {
+    requireUser: true,
+    serializers: {
+      address: asNaddr("address"),
+    },
+  })
+  router.register("/listings/:address/delete", ListingDelete, {
+    requireUser: true,
+    serializers: {
+      address: asNaddr("address"),
+    },
+  })
 
   router.register("/media/:url", MediaDetail, {
     serializers: {
