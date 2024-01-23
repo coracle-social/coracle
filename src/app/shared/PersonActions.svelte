@@ -46,6 +46,12 @@
 
     if (!isSelf && $canSign) {
       actions.push({
+        onClick: () => router.at("notes/create").qp({pubkey}).open(),
+        label: "Mention",
+        icon: "at",
+      })
+
+      actions.push({
         onClick: () => router.at("channels").of([$session.pubkey, pubkey]).push(),
         label: "Message",
         icon: "envelope",

@@ -17,6 +17,7 @@
 - [x] Navigate to notes by address when possible
 - [x] Remove query string from imgproxy payload
 - [x] Remove duplicates by address from feeds
+- [x] Add mention action to person detail page
 
 # 0.4.0
 
