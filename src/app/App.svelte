@@ -132,8 +132,11 @@
   })
 
   router.register("/groups", GroupList)
-  router.register("/groups/new", GroupCreate)
+  router.register("/groups/new", GroupCreate, {
+    requireUser: true,
+  })
   router.register("/groups/:address/edit", GroupEdit, {
+    requireUser: true,
     serializers: {
       address: asNaddr("address"),
     },
@@ -144,6 +147,7 @@
     },
   })
   router.register("/groups/:address/rotate", GroupRotate, {
+    requireUser: true,
     serializers: {
       address: asNaddr("address"),
       addMembers: asCsv("addMembers"),

@@ -370,7 +370,7 @@ export class Router {
 
   clearModals() {
     this.history.update($history => {
-      while ($history[0].config?.modal) {
+      while ($history[0]?.config?.modal) {
         $history.splice(0, 1)
       }
 

@@ -49,7 +49,7 @@
       <p class="text-lighter">{summary}</p>
     {/if}
     <div class="h-px bg-mid" />
-    <NoteContentKind1 {note} {showEntire} />
+    <NoteContentKind1 skipMedia {note} {showEntire} />
   </div>
   {#if showMedia}
     <Carousel urls={images} />

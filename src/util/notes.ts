@@ -194,12 +194,17 @@ type TruncateContentOpts = {
   showEntire: boolean
   maxLength: number
   showMedia: boolean
+  skipMedia: boolean
 }
 
 export const truncateContent = (
   content: any[],
-  {showEntire, maxLength, showMedia = false}: TruncateContentOpts,
+  {showEntire, maxLength, showMedia = false, skipMedia = false}: TruncateContentOpts,
 ) => {
+  if (skipMedia) {
+    content = content.filter(p => !p.value.isMedia)
+  }
+
   if (showEntire) {
     return content
   }

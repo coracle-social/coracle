@@ -25,6 +25,7 @@
   export let maxLength = 700
   export let showEntire = false
   export let showMedia = false
+  export let skipMedia = false
   export let expandable = true
   export let isQuote = false
 
@@ -41,7 +42,7 @@
 
   export const isStartOrEnd = i => isNewline(i - 1) || isNewline(i + 1)
 
-  $: shortContent = truncateContent(fullContent, {maxLength, showEntire, showMedia})
+  $: shortContent = truncateContent(fullContent, {maxLength, showEntire, showMedia, skipMedia})
   $: links = getLinks(shortContent)
   $: extraLinks = without(links, getLinks(fullContent))
   $: ellipsize = expandable && shortContent.find(p => p.type === ELLIPSIS)

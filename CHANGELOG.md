@@ -12,6 +12,7 @@
 - [x] Fix list edit
 - [x] Expand notes inline when clicking "Show More"
 - [x] Refresh pages when navigating to the current page
+- [x] Remove duplicate media from listings
 
 # 0.4.0
 
