@@ -18,6 +18,7 @@
 - [x] Remove query string from imgproxy payload
 - [x] Remove duplicates by address from feeds
 - [x] Add mention action to person detail page
+- [x] Fix replies not showing right away
 
 # 0.4.0
 

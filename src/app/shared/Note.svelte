@@ -336,6 +336,7 @@
     {/if}
 
     <NoteReply
+      {addToContext}
       parent={event}
       showBorder={visibleReplies.length > 0}
       bind:this={reply}

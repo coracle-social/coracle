@@ -28,6 +28,7 @@
   import {toastProgress} from "src/app/state"
 
   export let parent
+  export let addToContext
   export let showBorder = false
   export let forceOpen = false
 
@@ -118,9 +119,11 @@
 
     const template = createEvent(1, {content, tags})
     const addresses = Tags.from(parent).circles().all()
-    const {pubs} = await publishToZeroOrMoreGroups(addresses, template, opts)
+    const {pubs, events} = await publishToZeroOrMoreGroups(addresses, template, opts)
 
     pubs[0].on("progress", toastProgress)
+
+    addToContext(events[0])
 
     clearDraft()
 
