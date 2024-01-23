@@ -70,7 +70,7 @@
               {#if result.type === "topic"}
                 #{result.topic.name}
               {:else if result.type === "profile"}
-                <PersonBadge pubkey={result.id} />
+                <PersonBadge inert pubkey={result.id} class="cursor-pointer" />
               {/if}
             </div>
           </SearchResults>
