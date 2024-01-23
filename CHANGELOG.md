@@ -9,6 +9,8 @@
 - [x] Add delete for calendar events
 - [x] Fix word count on mobile
 - [x] Fix search results opening twice
+- [x] Fix list edit
+- [x] Expand notes inline when clicking "Show More"
 
 # 0.4.0
 

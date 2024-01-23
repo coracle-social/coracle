@@ -29,10 +29,10 @@
   export let isQuote = false
 
   const fullContent = parseContent(note)
-  const shortContent = truncateContent(fullContent, {maxLength, showEntire, showMedia})
-  const links = getLinks(shortContent)
-  const extraLinks = without(links, getLinks(fullContent))
-  const ellipsize = expandable && shortContent.find(p => p.type === ELLIPSIS)
+
+  const expand = () => {
+    showEntire = true
+  }
 
   export const isNewline = i =>
     !shortContent[i] ||
@@ -40,6 +40,11 @@
     (shortContent[i].type === TEXT && shortContent[i].value.match(/^\s+$/))
 
   export const isStartOrEnd = i => isNewline(i - 1) || isNewline(i + 1)
+
+  $: shortContent = truncateContent(fullContent, {maxLength, showEntire, showMedia})
+  $: links = getLinks(shortContent)
+  $: extraLinks = without(links, getLinks(fullContent))
+  $: ellipsize = expandable && shortContent.find(p => p.type === ELLIPSIS)
 </script>
 
 <div
@@ -80,6 +85,6 @@
 
 {#if ellipsize}
   <div class:-ml-12={!isQuote}>
-    <NoteContentEllipsis />
+    <NoteContentEllipsis on:click={expand} />
   </div>
 {/if}

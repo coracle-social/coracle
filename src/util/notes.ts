@@ -207,7 +207,7 @@ export const truncateContent = (
   let length = 0
   const result: any[] = []
   const truncateAt = maxLength * 0.6
-  const mediaLength = maxLength / 3
+  const mediaLength = showMedia ? maxLength / 3 : 50
   const entityLength = 30
 
   content.every((part, i) => {
