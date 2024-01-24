@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {onMount} from 'svelte'
   import {filter} from "ramda"
   import {toTitle, Storage} from "hurdak"
   import {slide} from "src/util/transition"
@@ -41,7 +42,9 @@
 
   document.title = "Direct Messages"
 
-  loadAllMessages()
+  onMount(() => {
+    return loadAllMessages()
+  })
 </script>
 
 {#if $nip44.isEnabled() && !hideNip04Alert}
