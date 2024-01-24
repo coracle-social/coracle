@@ -6,20 +6,37 @@
   import {router} from "src/app/router"
   import {session, stateKey} from "src/engine"
 
-  const {page, modal, modals} = router
+  const {current, page, modal, modals} = router
 
   $: {
     if ($modal) {
       console.log("modal", $modal, getProps($modal))
-    } else if ($page) {
+    }
+  }
+
+  $: {
+    if ($page) {
       window.scrollTo(0, 0)
+
       console.log("page", $page, getProps($page))
     }
   }
 
   $: {
+    // Redirect if we have no user
     if (!$session && $page?.route.requireUser) {
       router.go("/", {replace: true})
+    }
+
+    const props = getProps($current)
+
+    // Redirect if we're missing required parameters.
+    // This is usually due to a malformed url.
+    for (const k of $current.route.required || []) {
+      if (!props[k]) {
+        router.go("/", {replace: true})
+        break
+      }
     }
   }
 </script>

@@ -260,27 +260,32 @@
     },
   })
   router.register("/people/:entity", PersonDetail, {
+    required: ['pubkey'],
     serializers: {
       entity: asPerson,
       filter: asFilter,
     },
   })
   router.register("/people/:entity/followers", PersonFollowers, {
+    required: ['pubkey'],
     serializers: {
       entity: asPerson,
     },
   })
   router.register("/people/:entity/follows", PersonFollows, {
+    required: ['pubkey'],
     serializers: {
       entity: asPerson,
     },
   })
   router.register("/people/:entity/info", PersonInfo, {
+    required: ['pubkey'],
     serializers: {
       entity: asPerson,
     },
   })
   router.register("/people/:entity/zap", PersonZap, {
+    required: ['pubkey'],
     serializers: {
       eid: asNote,
       entity: asPerson,

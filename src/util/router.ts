@@ -126,6 +126,7 @@ export type Serializer = {
 export type ComponentSerializers = Record<string, Serializer>
 
 export type RegisterOpts = {
+  required?: string[]
   serializers?: ComponentSerializers
   requireUser?: boolean
 }
@@ -171,7 +172,11 @@ export const decodeQueryString = ({path, route}: HistoryItem) => {
     const v = queryParams[k]
 
     if (v) {
-      Object.assign(data, serializer.decode(v))
+      try {
+        Object.assign(data, serializer.decode(v))
+      } catch (e) {
+        console.warn('Query string decoding failed', k, v, e)
+      }
     }
   }
 
@@ -185,7 +190,11 @@ export const decodeRouteParams = ({params, route}: HistoryItem) => {
     const v = params[k]
 
     if (v) {
-      Object.assign(data, serializer.decode(v))
+      try {
+        Object.assign(data, serializer.decode(v))
+      } catch (e) {
+        console.warn('Route param decoding failed', k, v, e)
+      }
     }
   }
 
@@ -327,9 +336,9 @@ export class Router {
   register = (
     path: string,
     component: Component,
-    {serializers, requireUser}: RegisterOpts = {},
+    {serializers, requireUser, required}: RegisterOpts = {},
   ) => {
-    this.routes.push({path, component, serializers, requireUser})
+    this.routes.push({path, component, required, serializers, requireUser})
   }
 
   go(path, {replace, ...config}: RouteConfig = {}) {
