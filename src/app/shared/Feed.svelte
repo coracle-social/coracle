@@ -100,7 +100,7 @@
 {/if}
 
 {#each $notes as note, i (note.id)}
-  <div in:fly={{y: 20}} class="mb-4">
+  <div in:fly={{y: 20}}>
     <Note
       depth={$hideReplies ? 0 : 2}
       context={note.replies || []}

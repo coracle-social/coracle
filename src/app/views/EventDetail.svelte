@@ -1,6 +1,5 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {defer} from "hurdak"
   import {Tags} from "paravel"
   import {Naddr, getIdOrAddress, noteKinds} from "src/util/nostr"
   import {fly} from "src/util/transition"
@@ -10,7 +9,6 @@
   import EventDate from "src/app/shared/EventDate.svelte"
   import EventInfo from "src/app/shared/EventInfo.svelte"
   import NoteCreateInline from "src/app/shared/NoteCreateInline.svelte"
-  import type {Event} from "src/engine"
   import {dereferenceNote, getGroupReqInfo} from "src/engine"
 
   export let address
@@ -19,7 +17,6 @@
   let loading = true
 
   onMount(async () => {
-    console.log(event)
     event = event || await dereferenceNote(Naddr.fromTagValue(address))
     loading = false
   })

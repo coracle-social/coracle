@@ -1,9 +1,11 @@
 <script lang="ts">
   import {find, assoc} from "ramda"
   import {onMount} from "svelte"
-  import {now} from "paravel"
+  import {now, createEvent} from "paravel"
+  import {chunk, seconds} from "hurdak"
+  import {debounce} from "throttle-debounce"
   import {createScroller, formatTimestampAsDate} from "src/util/misc"
-  import {noteKinds, reactionKinds} from "src/util/nostr"
+  import {noteKinds, generatePrivateKey, reactionKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import GroupAlert from "src/app/shared/GroupAlert.svelte"
@@ -14,12 +16,17 @@
   import {router} from "src/app/router"
   import type {Event} from "src/engine"
   import {
+    nip44,
+    nip59,
+    signer,
     session,
     notifications,
     otherNotifications,
     groupNotifications,
     loadNotifications,
+    unreadNotifications,
     updateCurrentSession,
+    publish,
   } from "src/engine"
 
   const tabs = ["Mentions & Replies", "Reactions", "Other"]
@@ -63,16 +70,40 @@
   onMount(() => {
     loadNotifications()
 
-    const unsub = throttledNotifications.subscribe(() => {
+    const unsubAll = throttledNotifications.subscribe(() => {
       updateCurrentSession(assoc("notifications_last_synced", now()))
     })
+
+    const unsubUnread = unreadNotifications.subscribe(
+      debounce(3000, async $unreadNotifications => {
+        if ($signer.canSign) {
+          for (const events of chunk(500, $unreadNotifications)) {
+            const template = createEvent(15, {
+              tags: [["expiration", now() + seconds(90, "day")], ...events.map(e => ["e", e.id])],
+            })
+
+            publish(
+              await (!$nip44.isEnabled()
+                ? $signer.signAsUser(template)
+                : $nip59.wrap(template, {
+                    wrap: {
+                      author: generatePrivateKey(),
+                      recipient: $session.pubkey,
+                    },
+                  })),
+            )
+          }
+        }
+      }),
+    )
 
     const scroller = createScroller(async () => {
       limit += 4
     })
 
     return () => {
-      unsub()
+      unsubAll()
+      unsubUnread()
       scroller.stop()
     }
   })

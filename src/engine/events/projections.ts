@@ -5,7 +5,7 @@ import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
 import {sessions} from "src/engine/session/state"
 import {getNip04, getNip44, getNip59} from "src/engine/session/utils"
-import {_events, deletes, deletesLastUpdated} from "./state"
+import {_events, deletes, seen, deletesLastUpdated, seenLastUpdated} from "./state"
 
 const getSession = pubkey => sessions.get()[pubkey]
 
@@ -31,6 +31,21 @@ projections.addHandler(
       values.forEach(v => $deletes.add(v))
 
       return $deletes
+    })
+  }),
+)
+
+projections.addHandler(
+  15,
+  batch(500, (chunk: Event[]) => {
+    const values = Tags.from(chunk).type("e").values().all()
+
+    seenLastUpdated.update(ts => max(ts, pluck("created_at", chunk).reduce(max)))
+
+    seen.update($seen => {
+      values.forEach(v => $seen.add(v))
+
+      return $seen
     })
   }),
 )

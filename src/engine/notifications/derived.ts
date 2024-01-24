@@ -1,8 +1,9 @@
-import {prop, assoc, max, sortBy} from "ramda"
+import {prop, apply, concat, assoc, max, sortBy} from "ramda"
 import {seconds} from "hurdak"
 import {now, Tags} from "paravel"
 import {reactionKinds, getParentId} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
+import {seen} from "src/engine/events/state"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {derived} from "src/engine/core/utils"
 import {groupRequests, groupAdminKeys, groupAlerts} from "src/engine/groups/state"
@@ -29,6 +30,14 @@ export const notifications = derived(
   },
 )
 
+export const unreadNotifications = derived([seen, notifications], ([$seen, $notifications]) => {
+  const since = now() - seconds(30, "day")
+
+  return $notifications.filter(
+    e => !reactionKinds.includes(e.kind) && e.created_at > since && !$seen.has(e.id),
+  )
+})
+
 export const otherNotifications = derived(
   [groupRequests, groupAlerts, groupAdminKeys],
   ([$requests, $alerts, $adminKeys]) => {
@@ -44,14 +53,25 @@ export const otherNotifications = derived(
   },
 )
 
+export const unreadOtherNotifications = derived(
+  [seen, otherNotifications],
+  ([$seen, $otherNotifications]) => {
+    const since = now() - seconds(30, "day")
+
+    return $otherNotifications.filter(e => e.created_at > since && !$seen.has(e.id))
+  },
+)
+
+export const unreadCombinedNotifications = derived(
+  [unreadNotifications, unreadOtherNotifications],
+  apply(concat),
+)
+
 export const hasNewNotifications = derived(
-  [session, notifications, otherNotifications],
-  ([$session, $notifications, $otherNotifications]) => {
-    const maxCreatedAt = $notifications
-      .filter(e => !reactionKinds.includes(e.kind))
-      .concat($otherNotifications)
-      .map(prop("created_at"))
-      .reduce(max, 0)
+  [session, unreadCombinedNotifications],
+  ([$session, $unreadCombinedNotifications]) => {
+    return $unreadCombinedNotifications.length > 0
+    const maxCreatedAt = $unreadCombinedNotifications.map(prop("created_at")).reduce(max, 0)
 
     return maxCreatedAt > ($session?.notifications_last_synced || 0)
   },

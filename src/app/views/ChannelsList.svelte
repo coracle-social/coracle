@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
+  import {onMount} from "svelte"
   import {filter} from "ramda"
   import {toTitle, Storage} from "hurdak"
   import {slide} from "src/util/transition"
@@ -33,6 +33,7 @@
 
   $: tabChannels = sortChannels(activeTab === "conversations" ? $accepted : $requests)
 
+  let cursor, unsub, interval, loading
   let hideNip04Alert = Storage.getJson("hide_nip04_alert")
 
   const hideAlert = () => {
@@ -40,11 +41,30 @@
     hideNip04Alert = true
   }
 
-  document.title = "Direct Messages"
+  const loadMessages = ({reload = false} = {}) => {
+    if (!loading) {
+      unsub?.()
+      clearInterval(interval)
+      ;[cursor, unsub] = loadAllMessages({reload})
+
+      setInterval(() => {
+        loading = !cursor.done()
+      }, 300)
+    }
+  }
 
   onMount(() => {
-    return loadAllMessages()
+    // Don't load if we just switched tabs
+    if (!router.history.get()[1]?.path.startsWith("/channels")) {
+      loadMessages()
+    }
+
+    return () => {
+      unsub?.()
+    }
   })
+
+  document.title = "Direct Messages"
 </script>
 
 {#if $nip44.isEnabled() && !hideNip04Alert}
@@ -85,15 +105,32 @@
       </div>
     </div>
   </Tabs>
-  <Popover triggerType="mouseenter" class="absolute right-5 top-1 hidden sm:block">
-    <div slot="trigger">
-      <i
-        class="fa fa-bell cursor-pointer"
-        class:text-mid={!$hasNewMessages}
-        on:click={markAllChannelsRead} />
-    </div>
-    <div slot="tooltip">Mark all as read</div>
-  </Popover>
+  <div class="absolute right-5 top-1 hidden items-center gap-6 sm:flex">
+    <Popover triggerType="mouseenter">
+      <div slot="trigger">
+        <i
+          class="fa fa-arrows-rotate cursor-pointer text-mid"
+          class:fa-spin={loading}
+          on:click={() => loadMessages({reload: true})} />
+      </div>
+      <div slot="tooltip">
+        {#if loading}
+          Loading conversations...
+        {:else}
+          Reload conversations
+        {/if}
+      </div>
+    </Popover>
+    <Popover triggerType="mouseenter">
+      <div slot="trigger">
+        <i
+          class="fa fa-bell cursor-pointer"
+          class:text-mid={!$hasNewMessages}
+          on:click={markAllChannelsRead} />
+      </div>
+      <div slot="tooltip">Mark all as read</div>
+    </Popover>
+  </div>
 </div>
 {#each tabChannels as channel (channel.id)}
   <ChannelsListItem {channel} />

@@ -52,6 +52,10 @@ export const loadPubkeys = async (
 ) => {
   const pubkeys = force ? uniq(rawPubkeys) : getStalePubkeys(rawPubkeys)
 
+  if (pubkeys.length === 0) {
+    return
+  }
+
   const getRelays = () => {
     const groups = pubkeys.map(pubkey => getPubkeyHints(pubkey, "write"))
 

@@ -145,7 +145,7 @@ export type PublishOpts = EventOpts & {
   relays?: string[]
 }
 
-export const publish = async (template, {sk, relays}: PublishOpts) => {
+export const publish = async (template, {sk, relays}: PublishOpts = {}) => {
   return Publisher.publish({
     timeout: 5000,
     relays: relays || getUserHints("write"),

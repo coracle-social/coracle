@@ -7,9 +7,9 @@ import {loadPubkeys, subscribe, MultiCursor} from "src/engine/network/utils"
 import {getPubkeyHints, mergeHints, getUserHints} from "src/engine/relays/utils"
 import {channels} from "./state"
 
-export const loadAllMessages = () => {
+export const loadAllMessages = ({reload = false} = {}) => {
   const {pubkey, nip24_messages_last_synced = 0} = session.get()
-  const since = Math.max(0, nip24_messages_last_synced - seconds(3, "day"))
+  const since = reload ? 0 : Math.max(0, nip24_messages_last_synced - seconds(6, "hour"))
 
   sessions.update(assocPath([pubkey, "nip24_messages_last_synced"], now()))
 
@@ -30,18 +30,21 @@ export const loadAllMessages = () => {
 
   setTimeout(async () => {
     while (!done) {
-      cursor.load(500)
+      cursor.take(250)
 
-      await sleep(3000)
+      await sleep(500)
 
       done = cursor.done()
     }
   })
 
-  return () => {
-    done = true
-    unsubscribePubkeys()
-  }
+  return [
+    cursor,
+    () => {
+      done = true
+      unsubscribePubkeys()
+    },
+  ]
 }
 
 export const listenForMessages = pubkeys => {

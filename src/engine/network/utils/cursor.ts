@@ -1,4 +1,4 @@
-import {mergeRight, pluck, max, identity, sortBy} from "ramda"
+import {mergeLeft, pluck, min, max, identity, sortBy} from "ramda"
 import {first} from "hurdak"
 import type {Subscription} from "paravel"
 import {now} from "paravel"
@@ -21,6 +21,7 @@ export class Cursor {
   delta: number
   since: number
   until: number
+  minSince: number
   buffer: Event[] = []
 
   loading = false
@@ -31,9 +32,13 @@ export class Cursor {
     const untils = pluck("until", opts.filters).filter(identity)
     const maxUntil = untils.length === opts.filters.length ? untils.reduce(max, 0) : now()
 
+    const sinces = pluck("since", opts.filters).filter(identity)
+    const minSince = sinces.length === opts.filters.length ? sinces.reduce(min, now()) : 0
+
     this.delta = guessFilterDelta(opts.filters)
     this.since = maxUntil - this.delta
     this.until = maxUntil
+    this.minSince = minSince
   }
 
   load(n: number) {
@@ -51,12 +56,46 @@ export class Cursor {
 
     let count = 0
 
+    const onPageComplete = () => {
+      this.loading = false
+
+      // Relays can't be relied upon to return events in descending order, do exponential
+      // windowing to ensure we get the most recent stuff on first load, but eventually find it all
+      if (count === 0) {
+        this.delta *= 10
+      }
+
+      if (this.since === this.minSince) {
+        this.done = true
+      } else {
+        this.since = Math.max(this.minSince, this.since - this.delta)
+      }
+    }
+
+    const pageFilters = filters
+      // Remove filters that don't fit our window
+      .filter(f => {
+        const filterSince = f.since || 0
+        const filterUntil = f.until || now()
+
+        return filterSince < until && filterUntil > since
+      })
+      // Modify the filters to define our window
+      .map(mergeLeft({until, limit, since}))
+
+    if (pageFilters.length === 0) {
+      onPageComplete()
+
+      return null
+    }
+
     const sub = subscribe({
       timeout: 3000,
       relays: [relay],
       skipCache: true,
       tracker: this.opts.tracker,
-      filters: filters.map(mergeRight({until, limit, since})),
+      filters: pageFilters,
+      onClose: onPageComplete,
       onEvent: (event: Event) => {
         this.until = Math.min(until, event.created_at) - 1
         this.buffer = sortEventsDesc([...this.buffer, event])
@@ -64,21 +103,6 @@ export class Cursor {
         count += 1
 
         onEvent?.(event)
-      },
-      onClose: () => {
-        this.loading = false
-
-        // Relays can't be relied upon to return events in descending order, do exponential
-        // windowing to ensure we get the most recent stuff on first load, but eventually find it all
-        if (count === 0) {
-          this.delta *= 10
-        }
-
-        if (this.since === 0) {
-          this.done = true
-        } else {
-          this.since = Math.max(0, this.since - this.delta)
-        }
       },
     })
 
@@ -105,7 +129,7 @@ export class Cursor {
 export type MultiCursorOpts = {
   relays: string[]
   filters: Filter[]
-  onEvent: (e: Event) => void
+  onEvent?: (e: Event) => void
 }
 
 export class MultiCursor {
@@ -121,7 +145,7 @@ export class MultiCursor {
           filters: opts.filters,
           onEvent: opts.onEvent,
           tracker: this.tracker,
-        })
+        }),
     )
   }
 
@@ -144,7 +168,7 @@ export class MultiCursor {
       // Find the most recent event available so that they're sorted
       const [cursor] = sortBy(
         c => -c.peek().created_at,
-        this.cursors.filter(c => c.peek())
+        this.cursors.filter(c => c.peek()),
       )
 
       if (!cursor) {

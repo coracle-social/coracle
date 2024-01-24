@@ -12,6 +12,7 @@
     if ($modal) {
       console.log("modal", $modal, getProps($modal))
     } else if ($page) {
+      window.scrollTo(0, 0)
       console.log("page", $page, getProps($page))
     }
   }

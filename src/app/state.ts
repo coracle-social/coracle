@@ -10,8 +10,10 @@ import {
   pool,
   pubkey,
   session,
+  loadSeen,
   loadDeletes,
   loadPubkeys,
+  loadGiftWrap,
   getUserRelayUrls,
   listenForNotifications,
   getSetting,
@@ -103,8 +105,14 @@ export const loadAppData = () => {
   // Make sure the user is loaded
   loadPubkeys([pubkey.get()], {force: true, kinds: userKinds})
 
+  // Load read receipts
+  loadSeen()
+
   // Load deletes
   loadDeletes()
+
+  // Load encrypted stuff
+  loadGiftWrap()
 
   // Start our listener
   listenForNotifications()

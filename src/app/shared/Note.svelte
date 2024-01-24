@@ -117,7 +117,7 @@
   }
 
   const addToContext = e => {
-    ctx = ctx.concat(e)
+    ctx = ctx.concat({seen_on: [], ...e})
   }
 
   $: tags = Tags.from(event)

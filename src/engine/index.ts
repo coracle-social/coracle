@@ -6,7 +6,7 @@ import {relays} from "./relays"
 import {groups, groupSharedKeys, groupAdminKeys, groupRequests, groupAlerts} from "./groups"
 import {_labels} from "./labels"
 import {topics} from "./topics"
-import {deletes, _events, deletesLastUpdated} from "./events"
+import {deletes, seen, _events, seenLastUpdated, deletesLastUpdated, giftWrapLastFetched} from "./events"
 import {pubkey, sessions} from "./session"
 import {channels} from "./channels"
 
@@ -29,18 +29,29 @@ export * from "./session"
 export * from "./topics"
 export * from "./zaps"
 
+const setAdapter = {
+  dump: s => Array.from(s),
+  load: a => new Set(a || []),
+}
+
 export const storage = new Storage(8, [
   new LocalStorageAdapter("pubkey", pubkey),
   new LocalStorageAdapter("sessions", sessions),
-  new LocalStorageAdapter("deletes2", deletes, {
-    dump: s => Array.from(s),
-    load: a => new Set(a || []),
-  }),
+  new LocalStorageAdapter("deletes2", deletes, setAdapter),
+  new LocalStorageAdapter("seen", seen, setAdapter),
+  new LocalStorageAdapter("seenLastUpdated", seenLastUpdated),
   new LocalStorageAdapter("deletesLastUpdated2", deletesLastUpdated),
+  new LocalStorageAdapter("giftWrapLastFetched", giftWrapLastFetched),
   new IndexedDBAdapter("events", _events, 10000, sortByPubkeyWhitelist(prop("created_at"))),
   new IndexedDBAdapter("labels", _labels, 1000, sortBy(prop("created_at"))),
   new IndexedDBAdapter("topics", topics, 1000, sortBy(prop("last_seen"))),
-  new IndexedDBAdapter("lists", _lists, 1000, sortByPubkeyWhitelist(prop("created_at")), l => l.address),
+  new IndexedDBAdapter(
+    "lists",
+    _lists,
+    1000,
+    sortByPubkeyWhitelist(prop("created_at")),
+    l => l.address,
+  ),
   new IndexedDBAdapter("people", people, 5000, sortByPubkeyWhitelist(prop("last_fetched"))),
   new IndexedDBAdapter("relays", relays, 1000, sortBy(prop("count"))),
   new IndexedDBAdapter("channels", channels, 1000, sortBy(prop("last_checked"))),

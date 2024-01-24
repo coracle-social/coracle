@@ -19,6 +19,8 @@
 - [x] Remove duplicates by address from feeds
 - [x] Add mention action to person detail page
 - [x] Fix replies not showing right away
+- [x] Scroll to top on navigate
+- [x] Support read receipts for notifications
 
 # 0.4.0
 

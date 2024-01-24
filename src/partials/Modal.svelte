@@ -53,7 +53,7 @@
       router.virtual().open({key: randomId(), mini})
     }
 
-    isNested = $history.slice(1).some(item => item.config.modal)
+    isNested = Boolean($history[1]?.config.modal)
     historyItem = $history[0]
 
     // If history changes and removes this modal, notify the caller if virtual
