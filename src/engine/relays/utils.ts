@@ -80,7 +80,7 @@ export const getGroupRelayUrls = address => {
 
   const latestKey = last(sortBy(prop("created_at"), keys.filter(whereEq({group: address}))))
 
-  if (latestKey) {
+  if (latestKey?.hints) {
     return latestKey.hints
   }
 
