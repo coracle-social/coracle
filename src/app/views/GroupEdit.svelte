@@ -4,18 +4,18 @@
   import type {Values} from "src/app/shared/GroupDetailsForm.svelte"
   import GroupDetailsForm from "src/app/shared/GroupDetailsForm.svelte"
   import {
-    groups,
     deleteGroupMeta,
     publishGroupMeta,
     publishCommunityMeta,
     getGroupId,
     getGroupName,
+    deriveGroup,
   } from "src/engine"
   import {router} from "src/app/router"
 
   export let address
 
-  const group = groups.key(address)
+  const group = deriveGroup(address)
 
   const initialValues = {
     id: getGroupId($group),
