@@ -1,7 +1,8 @@
 import {now} from "paravel"
 import {seconds} from "hurdak"
 import {generatePrivateKey} from "src/util/nostr"
-import {getUserHints} from "src/engine/relays/utils"
+import {env} from "src/engine/session/state"
+import {mergeHints, getUserHints} from "src/engine/relays/utils"
 import type {Event} from "src/engine/events/model"
 import {createAndPublish} from "./publish"
 import {subscribe} from "./subscribe"
@@ -9,6 +10,7 @@ import {subscribe} from "./subscribe"
 export type DVMRequestOpts = {
   kind: number
   input: any
+  inputOpts?: string[]
   tags?: string[][]
   relays?: string[]
   timeout?: number
@@ -18,13 +20,14 @@ export type DVMRequestOpts = {
 export const dvmRequest = async ({
   kind,
   input,
+  inputOpts = [],
   tags = [],
   timeout = 30_000,
   relays = null,
   onProgress = null,
 }: DVMRequestOpts): Promise<Event> => {
   if (!relays) {
-    relays = getUserHints()
+    relays = mergeHints([env.get().DVM_RELAYS, getUserHints()])
   }
 
   if (typeof input !== "string") {
@@ -35,7 +38,7 @@ export const dvmRequest = async ({
     relays,
     sk: generatePrivateKey(),
     tags: tags.concat([
-      ["i", input],
+      ["i", input, ...inputOpts],
       ["expiration", String(now() + seconds(1, "hour"))],
     ]),
   })

@@ -1,14 +1,12 @@
-import {prop, apply, concat, assoc, max, sortBy} from "ramda"
+import {apply, concat, assoc, max, sortBy} from "ramda"
 import {seconds} from "hurdak"
 import {now, Tags} from "paravel"
-import {reactionKinds, getParentId} from "src/util/nostr"
+import {reactionKinds, isGiftWrap, getParentId} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
-import {seen} from "src/engine/events/state"
-import {events, isEventMuted} from "src/engine/events/derived"
+import {events, seenIds, isEventMuted} from "src/engine/events/derived"
 import {derived} from "src/engine/core/utils"
 import {groupRequests, groupAdminKeys, groupAlerts} from "src/engine/groups/state"
 import {pubkey} from "src/engine/session/state"
-import {session} from "src/engine/session/derived"
 import {userEvents} from "src/engine/events/derived"
 
 export const notifications = derived(
@@ -21,7 +19,7 @@ export const notifications = derived(
     const $isEventMuted = isEventMuted.get()
 
     return $events.filter(e => {
-      if (e.pubkey === $pubkey || $isEventMuted(e)) {
+      if (e.pubkey === $pubkey || $isEventMuted(e) || isGiftWrap(e)) {
         return false
       }
 
@@ -30,13 +28,16 @@ export const notifications = derived(
   },
 )
 
-export const unreadNotifications = derived([seen, notifications], ([$seen, $notifications]) => {
-  const since = now() - seconds(30, "day")
+export const unreadNotifications = derived(
+  [seenIds, notifications],
+  ([$seenIds, $notifications]) => {
+    const since = now() - seconds(30, "day")
 
-  return $notifications.filter(
-    e => !reactionKinds.includes(e.kind) && e.created_at > since && !$seen.has(e.id),
-  )
-})
+    return $notifications.filter(
+      e => !reactionKinds.includes(e.kind) && e.created_at > since && !$seenIds.has(e.id),
+    )
+  },
+)
 
 export const otherNotifications = derived(
   [groupRequests, groupAlerts, groupAdminKeys],
@@ -54,11 +55,11 @@ export const otherNotifications = derived(
 )
 
 export const unreadOtherNotifications = derived(
-  [seen, otherNotifications],
-  ([$seen, $otherNotifications]) => {
+  [seenIds, otherNotifications],
+  ([$seenIds, $otherNotifications]) => {
     const since = now() - seconds(30, "day")
 
-    return $otherNotifications.filter(e => e.created_at > since && !$seen.has(e.id))
+    return $otherNotifications.filter(e => e.created_at > since && !$seenIds.has(e.id))
   },
 )
 
@@ -67,15 +68,7 @@ export const unreadCombinedNotifications = derived(
   apply(concat),
 )
 
-export const hasNewNotifications = derived(
-  [session, unreadCombinedNotifications],
-  ([$session, $unreadCombinedNotifications]) => {
-    return $unreadCombinedNotifications.length > 0
-    const maxCreatedAt = $unreadCombinedNotifications.map(prop("created_at")).reduce(max, 0)
-
-    return maxCreatedAt > ($session?.notifications_last_synced || 0)
-  },
-)
+export const hasNewNotifications = unreadCombinedNotifications.derived($n => $n.length > 0)
 
 export const groupNotifications = ($notifications, kinds) => {
   const $userEvents = userEvents.mapStore.get()

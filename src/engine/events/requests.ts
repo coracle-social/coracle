@@ -1,36 +1,36 @@
-import {prop} from "ramda"
-import {seconds} from 'hurdak'
-import {sessions} from "src/engine/session/state"
+import {seconds} from "hurdak"
+import {session, nip44} from "src/engine/session/derived"
 import {getUserHints} from "src/engine/relays/utils"
 import {load} from "src/engine/network/utils"
-import {deletesLastUpdated, seenLastUpdated, giftWrapLastFetched} from "./state"
 
 export const loadDeletes = () => {
-  const since = Math.max(0, deletesLastUpdated.get() - seconds(6, 'hour'))
-  const authors = Object.values(sessions.get()).map(prop("pubkey"))
+  const {pubkey, deletes_last_synced = 0} = session.get()
+  const since = Math.max(0, deletes_last_synced - seconds(6, "hour"))
 
   return load({
     relays: getUserHints("write"),
-    filters: [{kinds: [5], authors, since}],
+    filters: [{kinds: [5], authors: [pubkey], since}],
   })
 }
 
 export const loadSeen = () => {
-  const since = Math.max(0, seenLastUpdated.get() - seconds(6, 'hour'))
-  const authors = Object.values(sessions.get()).map(prop("pubkey"))
+  const {pubkey, deletes_last_synced = 0} = session.get()
+  const since = Math.max(0, deletes_last_synced - seconds(6, "hour"))
 
   return load({
     relays: getUserHints("write"),
-    filters: [{kinds: [15], authors, since}],
+    filters: [{kinds: [15], authors: [pubkey], since}],
   })
 }
 
 export const loadGiftWrap = () => {
-  const since = Math.max(0, giftWrapLastFetched.get() - seconds(6, 'hour'))
-  const authors = Object.values(sessions.get()).filter(prop('privkey')).map(prop("pubkey"))
+  if (nip44.get().isEnabled()) {
+    const {pubkey, nip59_messages_last_synced = 0} = session.get()
+    const since = Math.max(0, nip59_messages_last_synced - seconds(6, "hour"))
 
-  return load({
-    relays: getUserHints(),
-    filters: [{kinds: [1059], authors, since}],
-  })
+    return load({
+      relays: getUserHints(),
+      filters: [{kinds: [1059, 1060], authors: [pubkey], since}],
+    })
+  }
 }

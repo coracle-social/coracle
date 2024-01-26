@@ -6,7 +6,7 @@ import {relays} from "./relays"
 import {groups, groupSharedKeys, groupAdminKeys, groupRequests, groupAlerts} from "./groups"
 import {_labels} from "./labels"
 import {topics} from "./topics"
-import {deletes, seen, _events, seenLastUpdated, deletesLastUpdated, giftWrapLastFetched} from "./events"
+import {deletes, seen, _events} from "./events"
 import {pubkey, sessions} from "./session"
 import {channels} from "./channels"
 
@@ -34,14 +34,11 @@ const setAdapter = {
   load: a => new Set(a || []),
 }
 
-export const storage = new Storage(8, [
+export const storage = new Storage(9, [
   new LocalStorageAdapter("pubkey", pubkey),
   new LocalStorageAdapter("sessions", sessions),
   new LocalStorageAdapter("deletes2", deletes, setAdapter),
-  new LocalStorageAdapter("seen", seen, setAdapter),
-  new LocalStorageAdapter("seenLastUpdated", seenLastUpdated),
-  new LocalStorageAdapter("deletesLastUpdated2", deletesLastUpdated),
-  new LocalStorageAdapter("giftWrapLastFetched", giftWrapLastFetched),
+  new IndexedDBAdapter("seen2", seen, 1000, sortBy(prop("created_at"))),
   new IndexedDBAdapter("events", _events, 10000, sortByPubkeyWhitelist(prop("created_at"))),
   new IndexedDBAdapter("labels", _labels, 1000, sortBy(prop("created_at"))),
   new IndexedDBAdapter("topics", topics, 1000, sortBy(prop("last_seen"))),

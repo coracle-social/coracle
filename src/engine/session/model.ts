@@ -17,8 +17,11 @@ export type Session = {
   bunkerRelay?: string
   settings?: Record<string, any>
   settings_updated_at?: number
+  seen_last_synced?: number
   groups_last_synced?: number
+  deletes_last_synced?: number
   notifications_last_synced?: number
   nip24_messages_last_synced?: number
+  nip59_messages_last_synced?: number
   groups?: Record<string, GroupStatus>
 }

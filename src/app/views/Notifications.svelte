@@ -1,11 +1,9 @@
 <script lang="ts">
-  import {find, assoc} from "ramda"
+  import {find} from "ramda"
   import {onMount} from "svelte"
-  import {now, createEvent} from "paravel"
-  import {chunk, seconds} from "hurdak"
-  import {debounce} from "throttle-debounce"
+  import {debounce} from 'throttle-debounce'
   import {createScroller, formatTimestampAsDate} from "src/util/misc"
-  import {noteKinds, generatePrivateKey, reactionKinds} from "src/util/nostr"
+  import {noteKinds, reactionKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import GroupAlert from "src/app/shared/GroupAlert.svelte"
@@ -16,22 +14,16 @@
   import {router} from "src/app/router"
   import type {Event} from "src/engine"
   import {
-    nip44,
-    nip59,
-    signer,
-    session,
+    markAsSeen,
     notifications,
     otherNotifications,
     groupNotifications,
     loadNotifications,
     unreadNotifications,
-    updateCurrentSession,
-    publish,
+    unreadOtherNotifications,
   } from "src/engine"
 
   const tabs = ["Mentions & Replies", "Reactions", "Other"]
-
-  const lastSynced = $session?.notifications_last_synced || 0
 
   const throttledNotifications = notifications.throttle(300)
 
@@ -63,47 +55,19 @@
           find((e: Event) => reactionKinds.includes(e.kind), n.interactions),
         )
 
-  $: uncheckedOtherNotifications = $otherNotifications.filter(n => n.created_at > lastSynced)
-
   document.title = "Notifications"
 
   onMount(() => {
     loadNotifications()
 
-    const unsubAll = throttledNotifications.subscribe(() => {
-      updateCurrentSession(assoc("notifications_last_synced", now()))
-    })
-
-    const unsubUnread = unreadNotifications.subscribe(
-      debounce(3000, async $unreadNotifications => {
-        if ($signer.canSign) {
-          for (const events of chunk(500, $unreadNotifications)) {
-            const template = createEvent(15, {
-              tags: [["expiration", now() + seconds(90, "day")], ...events.map(e => ["e", e.id])],
-            })
-
-            publish(
-              await (!$nip44.isEnabled()
-                ? $signer.signAsUser(template)
-                : $nip59.wrap(template, {
-                    wrap: {
-                      author: generatePrivateKey(),
-                      recipient: $session.pubkey,
-                    },
-                  })),
-            )
-          }
-        }
-      }),
-    )
+    const unsub = unreadNotifications.subscribe(debounce(1000, markAsSeen))
 
     const scroller = createScroller(async () => {
       limit += 4
     })
 
     return () => {
-      unsubAll()
-      unsubUnread()
+      unsub()
       scroller.stop()
     }
   })
@@ -112,9 +76,9 @@
 <Tabs {tabs} {activeTab} {setActiveTab}>
   <div slot="tab" let:tab class="flex gap-2">
     <div>{tab}</div>
-    {#if tab === tabs[2] && uncheckedOtherNotifications.length > 0}
+    {#if tab === tabs[2] && $unreadOtherNotifications.length > 0}
       <div class="h-6 rounded-full bg-mid px-2">
-        {uncheckedOtherNotifications.length}
+        {$unreadOtherNotifications.length}
       </div>
     {/if}
   </div>

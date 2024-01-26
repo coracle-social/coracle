@@ -1,4 +1,4 @@
-import {partition, prop, uniqBy, identity, without, any, assoc} from "ramda"
+import {partition, prop, uniqBy, identity, without, assoc} from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
 import {now, hasValidSignature, Tags} from "paravel"
 import {race, tryJson} from "src/util/misc"
@@ -54,9 +54,10 @@ export class FeedLoader {
 
   constructor(readonly opts: FeedOpts) {
     const urls = getUrls(opts.relays)
+    const filters = ensurePlural(opts.filters)
 
     // No point in subscribing if we have an end date
-    if (opts.shouldListen && !any(prop("until"), ensurePlural(opts.filters) as any[])) {
+    if (opts.shouldListen && !filters.some(prop("until"))) {
       this.addSubs([
         subscribe({
           relays: urls,

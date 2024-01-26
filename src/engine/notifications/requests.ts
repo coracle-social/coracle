@@ -1,10 +1,12 @@
 import {now, Tags} from "paravel"
-import {seconds, batch, doPipe} from "hurdak"
-import {pluck, identity, max, slice, filter, without, sortBy} from "ramda"
+import {seconds, updateIn, batch, doPipe} from "hurdak"
+import {pluck, max, slice, filter, without, sortBy} from "ramda"
 import {noteKinds, reactionKinds, getParentId} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import type {Filter} from "src/engine/network/model"
-import {env, sessions} from "src/engine/session/state"
+import {env} from "src/engine/session/state"
+import {session} from "src/engine/session/derived"
+import {updateSession} from "src/engine/session/commands"
 import {_events} from "src/engine/events/state"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {mergeHints, getPubkeyHints, getParentHints} from "src/engine/relays/utils"
@@ -21,8 +23,20 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
   const $isEventMuted = isEventMuted.get()
   const events = chunk.filter(e => kinds.includes(e.kind) && !$isEventMuted(e))
   const eventsWithParent = chunk.filter(getParentId)
+  const pubkeys = new Set(pluck("pubkey", events))
 
-  loadPubkeys(pluck("pubkey", events))
+  for (const pubkey of pubkeys) {
+    updateSession(
+      pubkey,
+      updateIn("notifications_last_synced", t =>
+        pluck("created_at", events)
+          .concat(t || 0)
+          .reduce(max, 0),
+      ),
+    )
+  }
+
+  loadPubkeys(pubkeys)
 
   load({
     relays: mergeHints(eventsWithParent.map(getParentHints)),
@@ -42,58 +56,45 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
 export const getNotificationKinds = () =>
   without(env.get().ENABLE_ZAPS ? [] : [9735], [...noteKinds, ...reactionKinds, 1059, 1060, 4])
 
+const getEventIds = (pubkey: string) =>
+  doPipe(events.get(), [
+    filter((e: Event) => noteKinds.includes(e.kind) && e.pubkey === pubkey),
+    sortBy((e: Event) => -e.created_at),
+    slice(0, 256),
+    pluck("id"),
+  ])
+
 export const loadNotifications = () => {
   const kinds = getNotificationKinds()
-  const pubkeys = Object.keys(sessions.get())
   const cutoff = now() - seconds(30, "day")
-  const $sessions = Object.values(sessions.get())
-  const lastChecked = pluck("notifications_last_synced", $sessions).filter(identity).reduce(max, 0)
-  const since = Math.max(cutoff, lastChecked - seconds(1, "day"))
-
-  const eventIds = pluck(
-    "id",
-    sortBy(
-      e => -e.created_at,
-      events
-        .get()
-        .filter(
-          e =>
-            !reactionKinds.includes(e.kind) && e.created_at > cutoff && pubkeys.includes(e.pubkey),
-        ),
-    ).slice(0, 256),
-  )
+  const {pubkey, notifications_last_synced = 0} = session.get()
+  const since = Math.max(cutoff, notifications_last_synced - seconds(6, "hour"))
+  const eventIds = getEventIds(pubkey)
 
   const filters = [
-    {kinds, "#p": pubkeys, since},
+    {kinds, "#p": [pubkey], since},
     {kinds, "#e": eventIds, since},
-    {kinds, authors: pubkeys, since},
+    {kinds, authors: [pubkey], since},
   ]
 
   return subscribe({
     filters,
     timeout: 15000,
     skipCache: true,
-    relays: mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read"))),
+    relays: getPubkeyHints(pubkey, "read"),
     onEvent: onNotificationEvent,
   })
 }
 
 export const listenForNotifications = async () => {
-  const pubkeys = Object.keys(sessions.get())
-  const relays = mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read")))
-
-  const eventIds: string[] = doPipe(events.get(), [
-    filter((e: Event) => noteKinds.includes(e.kind)),
-    sortBy((e: Event) => -e.created_at),
-    slice(0, 256),
-    pluck("id"),
-  ])
+  const {pubkey} = session.get()
+  const eventIds = getEventIds(pubkey)
 
   const filters: Filter[] = [
     // Messages/groups
-    {kinds: [4, 1059, 1060], "#p": pubkeys, limit: 1},
+    {kinds: [4, 1059, 1060], "#p": [pubkey], limit: 1},
     // Mentions
-    {kinds: noteKinds, "#p": pubkeys, limit: 1},
+    {kinds: noteKinds, "#p": [pubkey], limit: 1},
   ]
 
   // Replies
@@ -104,9 +105,9 @@ export const listenForNotifications = async () => {
   // Only grab one event from each category/relay so we have enough to show
   // the notification badges, but load the details lazily
   subscribePersistent({
-    relays,
     filters,
     skipCache: true,
+    relays: getPubkeyHints(pubkey, "read"),
     onEvent: onNotificationEvent,
   })
 }

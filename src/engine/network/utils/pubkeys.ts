@@ -15,7 +15,7 @@ export type LoadPeopleOpts = {
 
 export const attemptedPubkeys = new Map()
 
-export const getStalePubkeys = (pubkeys: string[]) => {
+export const getStalePubkeys = (pubkeys: Iterable<string>) => {
   const stale = new Set<string>()
   const since = now() - seconds(3, "hour")
 
@@ -47,10 +47,10 @@ export const getStalePubkeys = (pubkeys: string[]) => {
 }
 
 export const loadPubkeys = async (
-  rawPubkeys: string[],
+  rawPubkeys: Iterable<string>,
   {relays, force, kinds = personKinds}: LoadPeopleOpts = {},
 ) => {
-  const pubkeys = force ? uniq(rawPubkeys) : getStalePubkeys(rawPubkeys)
+  const pubkeys = force ? uniq(Array.from(rawPubkeys)) : getStalePubkeys(rawPubkeys)
 
   if (pubkeys.length === 0) {
     return

@@ -2,7 +2,7 @@
   import {matchFilters} from "paravel"
   import {reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
-  import {quantify, batch} from "hurdak"
+  import {quantify, ensurePlural, batch} from "hurdak"
   import {Tags} from "paravel"
   import {fly} from "src/util/transition"
   import {
@@ -116,8 +116,8 @@
     ctx = reject(whereEq({id: e.id}), ctx)
   }
 
-  const addToContext = e => {
-    ctx = ctx.concat({seen_on: [], ...e})
+  const addToContext = events => {
+    ctx = ctx.concat(ensurePlural(events).map(e => ({seen_on: [], ...e})))
   }
 
   $: tags = Tags.from(event)
