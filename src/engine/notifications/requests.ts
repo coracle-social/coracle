@@ -40,7 +40,7 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
 })
 
 export const getNotificationKinds = () =>
-  without(env.get().ENABLE_ZAPS ? [] : [9735], [...noteKinds, ...reactionKinds, 1059, 4])
+  without(env.get().ENABLE_ZAPS ? [] : [9735], [...noteKinds, ...reactionKinds, 1059, 1060, 4])
 
 export const loadNotifications = () => {
   const kinds = getNotificationKinds()
@@ -90,8 +90,8 @@ export const listenForNotifications = async () => {
   ])
 
   const filters: Filter[] = [
-    // Messages
-    {kinds: [4, 1059], "#p": pubkeys, limit: 1},
+    // Messages/groups
+    {kinds: [4, 1059, 1060], "#p": pubkeys, limit: 1},
     // Mentions
     {kinds: noteKinds, "#p": pubkeys, limit: 1},
   ]

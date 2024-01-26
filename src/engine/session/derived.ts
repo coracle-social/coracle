@@ -26,10 +26,10 @@ export const nip04 = derived([session, ndk], ([$session, $ndk]) => new Nip04($se
 export const nip44 = derived([session], ([$session]) => new Nip44($session))
 
 export const nip59 = derived(
-  [session, nip44, signer],
-  ([$session, $nip44, $signer]) => new Nip59($session, $nip44, $signer),
+  [session, nip04, nip44, signer],
+  ([$session, $nip04, $nip44, $signer]) => new Nip59($session, $nip04, $nip44, $signer),
 )
 
-export const canSign = signer.derived($signer => $signer.canSign())
+export const canSign = signer.derived($signer => $signer.isEnabled())
 
 export const settings = user.derived(getSettings)

@@ -1,6 +1,7 @@
 <script lang="ts">
   import {sleep} from "hurdak"
   import {error} from "src/util/logger"
+  import {isGiftWrap} from "src/util/nostr"
   import {appName, toast} from "src/partials/state"
   import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
@@ -10,8 +11,6 @@
   import {router} from "src/app/router"
   import type {Event} from "src/engine"
   import {_events, projections} from "src/engine"
-
-  const encryptedKinds = [1059]
 
   const setFile = e => {
     file = e.target.files[0]
@@ -41,7 +40,7 @@
 
           projections.push(event)
 
-          if (!encryptedKinds.includes(event.kind)) {
+          if (!isGiftWrap(event)) {
             _events.key(event.id).set(event)
           }
         }

@@ -61,7 +61,7 @@
     updateCurrentSession(assocPath(["groups", address, "last_synced"], now()))
 
     if (address.startsWith("35834:")) {
-      const sub = subscribe({relays, filters: [{kinds: [1059], "#p": recipients, since}]})
+      const sub = subscribe({relays, filters: [{kinds: [1059, 1060], "#p": recipients, since}]})
 
       return () => sub.close()
     }

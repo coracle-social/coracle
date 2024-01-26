@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {isGiftWrap} from "src/util/nostr"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -6,13 +7,11 @@
   import Heading from "src/partials/Heading.svelte"
   import {events, user} from "src/engine"
 
-  const encryptedKinds = [1059]
-
   const submit = async () => {
     const jsonl = $events
       .filter(e => {
         if (userOnly && e.pubkey !== $user.pubkey) return false
-        if (!includeEncrypted && encryptedKinds.includes(e.kind)) return false
+        if (!includeEncrypted && isGiftWrap(e)) return false
 
         return true
       })

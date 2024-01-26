@@ -3,7 +3,6 @@
   import {displayList} from "hurdak"
   import {createLocalDate, dateToSeconds, fuzzy, formatTimestampAsDate} from "src/util/misc"
   import {noteKinds} from "src/util/nostr"
-  import {getKey} from "src/util/router"
   import Chip from "src/partials/Chip.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
@@ -68,9 +67,6 @@
       router.pop()
     }
 
-    const key = getKey(router.current.get())
-
-    router.fromCurrent().qp({filter}).replace({key})
     updateFilter(filter)
   }
 

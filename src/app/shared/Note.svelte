@@ -13,6 +13,7 @@
     getRootId,
     getParentIds,
     getRootIds,
+    isGiftWrap,
   } from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
@@ -201,7 +202,7 @@
       })
     }
 
-    if (event.kind === 1059) {
+    if (isGiftWrap(event)) {
       event = await nip59.get().unwrap(event, getRecipientKey(event))
     }
 

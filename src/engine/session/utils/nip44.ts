@@ -1,7 +1,7 @@
 import {join} from "ramda"
 import {nip44} from "nostr-tools"
 import {cached} from "paravel"
-import {switcher, switcherFn} from "hurdak"
+import {switcherFn} from "hurdak"
 import type {Session} from "src/engine/session/model"
 
 // Deriving shared secret is an expensive computation, cache it
@@ -15,10 +15,7 @@ export class Nip44 {
   constructor(readonly session: Session) {}
 
   isEnabled() {
-    return switcher(this.session?.method, {
-      privkey: true,
-      default: false,
-    })
+    return ["privkey"].includes(this.session?.method)
   }
 
   encrypt(message: string, pk: string, sk: string) {

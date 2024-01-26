@@ -9,8 +9,6 @@
   const createFeed = () => router.at("lists/create").open()
 
   const editList = list => router.at("lists").of(list.address).open()
-
-  $: console.log($userLists)
 </script>
 
 <div class="flex items-center justify-between">

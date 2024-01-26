@@ -222,3 +222,5 @@ export const getContentWarning = e => {
 
   return tags.topics().find(t => WARN_TAGS.has(t.toLowerCase()))
 }
+
+export const isGiftWrap = e => [1059, 1060].includes(e.kind)

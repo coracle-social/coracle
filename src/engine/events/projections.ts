@@ -4,8 +4,10 @@ import {Tags} from "paravel"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
 import {sessions} from "src/engine/session/state"
-import {nip59} from "src/engine/session/derived"
+import {getNip04, getNip44, getNip59} from "src/engine/session/utils"
 import {_events, deletes, deletesLastUpdated} from "./state"
+
+const getSession = pubkey => sessions.get()[pubkey]
 
 projections.addGlobalHandler(
   batch(500, (chunk: Event[]) => {
@@ -33,10 +35,30 @@ projections.addHandler(
   }),
 )
 
-projections.addHandler(1059, e => {
-  const session = sessions.get()[Tags.from(e).getValue("p")]
+projections.addHandler(1059, wrap => {
+  const session = getSession(Tags.from(wrap).pubkeys().first())
 
-  if (session?.privkey) {
-    nip59.get().withUnwrappedEvent(e, session.privkey, e => projections.push(e))
+  if (!session) {
+    return
+  }
+
+  if (getNip44(session).isEnabled()) {
+    getNip59(session).withUnwrappedEvent(wrap, session.privkey, rumor => {
+      projections.push(rumor)
+    })
+  }
+})
+
+projections.addHandler(1060, wrap => {
+  const session = getSession(Tags.from(wrap).pubkeys().first())
+
+  if (!session) {
+    return
+  }
+
+  if (getNip04(session).isEnabled()) {
+    getNip59(session).withUnwrappedEvent(wrap, session.privkey, rumor => {
+      projections.push(rumor)
+    })
   }
 })

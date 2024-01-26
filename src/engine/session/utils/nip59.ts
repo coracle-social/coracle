@@ -3,6 +3,7 @@ import {getPublicKey} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import type {Session} from "src/engine/session/model"
 import type {Signer} from "./signer"
+import type {Nip04} from "./nip04"
 import type {Nip44} from "./nip44"
 
 export const now = (drift = 0) =>
@@ -16,8 +17,8 @@ export const seal = (content, pubkey) => ({
   pubkey,
 })
 
-export const wrap = (content, pubkey, recipient) => ({
-  kind: 1059,
+export const wrap = (content, pubkey, recipient, kind = 1059) => ({
+  kind,
   created_at: now(5),
   tags: [["p", recipient]],
   content,
@@ -29,12 +30,15 @@ export type WrapperParams = {
   wrap?: {
     author: string
     recipient: string
+    kind?: 1059 | 1060
+    algo?: "nip04" | "nip44"
   }
 }
 
 export class Nip59 {
   constructor(
     readonly session: Session,
+    readonly nip04: Nip04,
     readonly nip44: Nip44,
     readonly signer: Signer,
   ) {}
@@ -51,63 +55,82 @@ export class Nip59 {
     return sk ? this.signer.signWithKey(event, sk) : this.signer.signAsUser(event)
   }
 
-  encrypt(event, pk: string, sk?: string) {
+  async encrypt(event, pk: string, sk?: string, algo = "nip44") {
     const message = JSON.stringify(event)
 
-    return sk ? this.nip44.encrypt(message, pk, sk) : this.nip44.encryptAsUser(message, pk)
+    let payload
+
+    // Temporarily support nip04
+    if (algo === "nip04" && sk) {
+      payload = await this.nip04.encrypt(message, pk, sk)
+    } else if (algo === "nip04") {
+      payload = await this.nip04.encryptAsUser(message, pk)
+    } else if (sk) {
+      payload = this.nip44.encrypt(message, pk, sk)
+    } else {
+      payload = this.nip44.encryptAsUser(message, pk)
+    }
+
+    return payload
   }
 
-  decrypt(event, sk?: string) {
+  async decrypt(event, sk?: string) {
     const {pubkey, content} = event
-    const message = sk
-      ? this.nip44.decrypt(content, pubkey, sk)
-      : this.nip44.decryptAsUser(content, pubkey)
+
+    let message
+
+    // Temporarily support nip04
+    if (sk) {
+      message =
+        (await this.nip04.decrypt(content, pubkey, sk)) || this.nip44.decrypt(content, pubkey, sk)
+    } else {
+      message =
+        (await this.nip04.decryptAsUser(content, pubkey)) ||
+        this.nip44.decryptAsUser(content, pubkey)
+    }
 
     return tryJson(() => JSON.parse(message))
   }
 
-  getSeal(rumor, {author, wrap: {recipient}}: WrapperParams) {
-    const content = this.encrypt(rumor, recipient, author)
+  async getSeal(rumor, {author, wrap: {recipient, algo}}: WrapperParams) {
+    const content = await this.encrypt(rumor, recipient, author, algo)
     const rawEvent = seal(content, rumor.pubkey)
     const signedEvent = this.sign(rawEvent, author)
 
     return signedEvent
   }
 
-  getWrap(seal, {wrap: {author, recipient}}: WrapperParams) {
-    const content = this.encrypt(seal, recipient, author)
-    const rawEvent = wrap(content, this.getAuthorPubkey(author), recipient)
+  async getWrap(seal, {wrap: {author, recipient, algo, kind}}: WrapperParams) {
+    const content = await this.encrypt(seal, recipient, author, algo)
+    const rawEvent = wrap(content, this.getAuthorPubkey(author), recipient, kind)
     const signedEvent = this.sign(rawEvent, author)
 
     return signedEvent
   }
 
-  wrap(event, params: WrapperParams) {
+  async wrap(event, params: WrapperParams) {
     const rumor = this.prep(event, params.author)
-    const seal = this.getSeal(rumor, params)
-    const wrap = this.getWrap(seal, params)
+    const seal = await this.getSeal(rumor, params)
+    const wrap = await this.getWrap(seal, params)
 
     return Object.assign(rumor, {wrap, seen_on: []})
   }
 
   async unwrap(wrap, sk) {
-    // Skip trying to parse the old version
-    if (!wrap.content.includes("ciphertext")) {
-      try {
-        const seal = await this.decrypt(wrap, sk)
+    try {
+      const seal = await this.decrypt(wrap, sk)
 
-        if (!seal) throw new Error("Failed to decrypt wrapper")
+      if (!seal) throw new Error("Failed to decrypt wrapper")
 
-        const rumor = await this.decrypt(seal, sk)
+      const rumor = await this.decrypt(seal, sk)
 
-        if (!rumor) throw new Error("Failed to decrypt seal")
+      if (!rumor) throw new Error("Failed to decrypt seal")
 
-        if (seal.pubkey === rumor.pubkey) {
-          return Object.assign(rumor, {wrap, seen_on: wrap.seen_on})
-        }
-      } catch (e) {
-        console.warn(e)
+      if (seal.pubkey === rumor.pubkey) {
+        return Object.assign(rumor, {wrap, seen_on: wrap.seen_on})
       }
+    } catch (e) {
+      console.warn(e)
     }
 
     return null

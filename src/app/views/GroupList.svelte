@@ -47,7 +47,7 @@
 
     load({
       relays: mergeHints([relays, getUserHints("read")]),
-      filters: [{kinds: [1059], "#p": recipients, since}],
+      filters: [{kinds: [1059, 1060], "#p": recipients, since}],
     })
 
     load({

@@ -28,7 +28,7 @@ export const sendLegacyMessage = async (channelId: string, content: string) => {
   })
 }
 
-export const sendMessage = (channelId: string, content: string) => {
+export const sendMessage = async (channelId: string, content: string) => {
   const recipients = channelId.split(",")
   const template = {
     content,
@@ -38,7 +38,7 @@ export const sendMessage = (channelId: string, content: string) => {
   }
 
   for (const pubkey of uniq(recipients.concat(user.get().pubkey))) {
-    const rumor = nip59.get().wrap(template, {
+    const rumor = await nip59.get().wrap(template, {
       wrap: {
         author: generatePrivateKey(),
         recipient: pubkey,

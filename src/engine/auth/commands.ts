@@ -17,7 +17,7 @@ export const nip98Fetch = async (url, method, body = null) => {
   const template = createEvent(27235, {tags})
   const $signer = signer.get()
 
-  const event = $signer.canSign()
+  const event = $signer.isEnabled()
     ? await $signer.signAsUser(template)
     : await $signer.signWithKey(template, generatePrivateKey())
 

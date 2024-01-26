@@ -3,16 +3,11 @@ import {Tags} from "paravel"
 import {tryJson} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
 import {sessions} from "src/engine/session/state"
-import {nip59} from "src/engine/session/derived"
-import {Signer, Nip04, getNdk} from "src/engine/session/utils"
+import {getSession, getNip04} from "src/engine/session/utils"
 import {projections} from "src/engine/core/projections"
 import type {Channel} from "./model"
 import {channels} from "./state"
 import {getChannelId} from "./utils"
-
-const getSession = pubkey => sessions.get()[pubkey]
-const getSigner = session => new Signer(session, getNdk(session))
-const getNip04 = session => new Nip04(session, getNdk(session))
 
 projections.addHandler(30078, async e => {
   const d = Tags.from(e).getValue("d")
@@ -22,13 +17,11 @@ projections.addHandler(30078, async e => {
     return
   }
 
-  const signer = getSigner(session)
+  const nip04 = getNip04(session)
 
-  if (!signer.canSign()) {
+  if (!nip04.isEnabled()) {
     return
   }
-
-  const nip04 = getNip04(session)
 
   if (d === appDataKeys.NIP24_LAST_CHECKED) {
     const payload = await tryJson(async () =>
@@ -86,13 +79,12 @@ const handleMessage = async e => {
         return
       }
 
-      const signer = getSigner(session)
+      const nip04 = getNip04(session)
 
-      if (!signer.canSign()) {
+      if (!nip04.isEnabled()) {
         return
       }
 
-      const nip04 = getNip04(session)
       const other = e.pubkey === session.pubkey ? recipient : e.pubkey
 
       e = {...e, content: await nip04.decryptAsUser(e.content, other)}
@@ -116,15 +108,3 @@ const handleMessage = async e => {
 
 projections.addHandler(4, handleMessage)
 projections.addHandler(14, handleMessage)
-
-// Unwrap gift wraps using known keys
-
-projections.addHandler(1059, wrap => {
-  const session = getSession(Tags.from(wrap).pubkeys().first())
-
-  if (session?.privkey) {
-    nip59.get().withUnwrappedEvent(wrap, session.privkey, rumor => {
-      projections.push(rumor)
-    })
-  }
-})

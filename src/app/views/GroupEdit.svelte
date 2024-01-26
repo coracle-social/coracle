@@ -37,9 +37,9 @@
     }
 
     if (type === "open") {
-      await prop("result", await publishCommunityMeta(address, id, relays, meta))
+      await publishCommunityMeta(address, id, relays, meta)
     } else {
-      await prop("result", await publishGroupMeta(address, id, relays, meta, list_publicly))
+      await publishGroupMeta(address, id, relays, meta, list_publicly)
     }
 
     toast.show("info", "Your group has been updated!")

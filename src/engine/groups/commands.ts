@@ -5,7 +5,7 @@ import {generatePrivateKey, getPublicKey, Naddr} from "src/util/nostr"
 import {updateRecord} from "src/engine/core/commands"
 import {Publisher, getClientTags, mention} from "src/engine/network/utils"
 import {pubkey} from "src/engine/session/state"
-import {nip59, signer, session} from "src/engine/session/derived"
+import {nip44, nip59, signer, session} from "src/engine/session/derived"
 import {updateSession} from "src/engine/session/commands"
 import {displayPubkey} from "src/engine/people/utils"
 import {
@@ -57,6 +57,31 @@ export const initGroup = (kind, relays) => {
   return {id, address, adminKey, sharedKey}
 }
 
+// Most people don't have access to nip44 yet, send nip04-encrypted fallbacks for:
+// - Access requests
+// - Key shares
+
+export const wrapWithFallback = async (template, {author = null, wrap}) => {
+  const events = []
+
+  if (nip44.get().isEnabled()) {
+    events.push(await nip59.get().wrap(template, {author, wrap}))
+  }
+
+  events.push(
+    await nip59.get().wrap(template, {
+      author,
+      wrap: {
+        ...wrap,
+        kind: 1060,
+        algo: "nip04",
+      },
+    }),
+  )
+
+  return events
+}
+
 // Utils for publishing
 
 export const getGroupPublishRelays = (address, overrides = null) => {
@@ -79,18 +104,24 @@ export const publishToGroupAdmin = async (address, template) => {
   const relays = group?.relays || getUserHints("write")
   const pubkeys = [naddr.pubkey, session.get().pubkey]
 
-  return await Promise.all(
-    pubkeys.map(async pubkey => {
-      const rumor = await nip59.get().wrap(template, {
-        wrap: {
-          author: generatePrivateKey(),
-          recipient: pubkey,
-        },
-      })
+  const pubs = []
+  const events = []
 
-      return Publisher.publish({event: rumor.wrap, relays})
-    }),
-  )
+  for (const pubkey of pubkeys) {
+    const rumors = await wrapWithFallback(template, {
+      wrap: {
+        author: generatePrivateKey(),
+        recipient: pubkey,
+      },
+    })
+
+    for (const rumor of rumors) {
+      events.push(rumor)
+      pubs.push(Publisher.publish({event: rumor.wrap, relays}))
+    }
+  }
+
+  return {pubs, events}
 }
 
 export const publishAsGroupAdminPublicly = async (address, template, relays = null) => {
@@ -104,7 +135,7 @@ export const publishAsGroupAdminPrivately = async (address, template, relays = n
   const adminKey = deriveAdminKeyForGroup(address).get()
   const sharedKey = deriveSharedKeyForGroup(address).get()
 
-  const rumor = await nip59.get().wrap(template, {
+  const rumors = await wrapWithFallback(template, {
     author: adminKey.privkey,
     wrap: {
       author: sharedKey.privkey,
@@ -112,10 +143,21 @@ export const publishAsGroupAdminPrivately = async (address, template, relays = n
     },
   })
 
-  return Publisher.publish({
-    event: rumor.wrap,
-    relays: getGroupPublishRelays(address, relays),
-  })
+  const pubs = []
+  const events = []
+
+  for (const rumor of rumors) {
+    events.push(rumor)
+
+    pubs.push(
+      Publisher.publish({
+        event: rumor.wrap,
+        relays: getGroupPublishRelays(address, relays),
+      }),
+    )
+  }
+
+  return {pubs, events}
 }
 
 export const publishToGroupsPublicly = async (
@@ -164,22 +206,24 @@ export const publishToGroupsPrivately = async (
       throw new Error("Attempted to publish privately to a group the user is not a member of")
     }
 
-    const rumor = await nip59.get().wrap(thisTemplate, {
-      author: anonymous ? generatePrivateKey() : session.get().privkey,
+    const rumors = await wrapWithFallback(thisTemplate, {
+      author: anonymous ? generatePrivateKey() : null,
       wrap: {
         author: sharedKey.privkey,
         recipient: sharedKey.pubkey,
       },
     })
 
-    events.push(rumor)
+    for (const rumor of rumors) {
+      events.push(rumor)
 
-    pubs.push(
-      Publisher.publish({
-        event: rumor.wrap,
-        relays: relays || mergeHints(addresses.map(getGroupPublishRelays)),
-      }),
-    )
+      pubs.push(
+        Publisher.publish({
+          event: rumor.wrap,
+          relays: relays || mergeHints(addresses.map(getGroupPublishRelays)),
+        }),
+      )
+    }
   }
 
   return {pubs, events}
@@ -231,22 +275,31 @@ export const publishToZeroOrMoreGroups = async (
 export const publishKeyShares = async (address, pubkeys, template) => {
   const adminKey = deriveAdminKeyForGroup(address).get()
 
-  return await Promise.all(
-    pubkeys.map(async pubkey => {
-      const rumor = await nip59.get().wrap(template, {
-        author: adminKey.privkey,
-        wrap: {
-          author: generatePrivateKey(),
-          recipient: pubkey,
-        },
-      })
+  const pubs = []
+  const events = []
 
-      return Publisher.publish({
-        event: rumor.wrap,
-        relays: getPubkeyHints(pubkey, "read"),
-      })
-    }),
-  )
+  for (const pubkey of pubkeys) {
+    const rumors = await wrapWithFallback(template, {
+      author: adminKey.privkey,
+      wrap: {
+        author: generatePrivateKey(),
+        recipient: pubkey,
+      },
+    })
+
+    for (const rumor of rumors) {
+      events.push(rumor)
+
+      pubs.push(
+        Publisher.publish({
+          event: rumor.wrap,
+          relays: getPubkeyHints(pubkey, "read"),
+        }),
+      )
+    }
+  }
+
+  return {pubs, events}
 }
 
 export const publishAdminKeyShares = async (address, pubkeys, relays) => {

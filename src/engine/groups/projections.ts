@@ -51,8 +51,8 @@ projections.addHandler(24, (e: Event) => {
       relays: selectHints(relays),
       filters: [
         ...getIdFilters([address]),
-        {kinds: [1059], "#p": [pubkey]},
-        {kinds: [1059], authors: [pubkey]},
+        {kinds: [1059, 1060], "#p": [pubkey]},
+        {kinds: [1059, 1060], authors: [pubkey]},
       ],
     })
   } else {
@@ -202,6 +202,16 @@ projections.addGlobalHandler((e: Event) => {
 // Unwrap gift wraps using known keys
 
 projections.addHandler(1059, wrap => {
+  const sk = getRecipientKey(wrap)
+
+  if (sk) {
+    nip59.get().withUnwrappedEvent(wrap, sk, rumor => {
+      projections.push(rumor)
+    })
+  }
+})
+
+projections.addHandler(1060, wrap => {
   const sk = getRecipientKey(wrap)
 
   if (sk) {

@@ -14,7 +14,7 @@ export class Signer {
     readonly ndk: NDK | null,
   ) {}
 
-  canSign() {
+  isEnabled() {
     return ["bunker", "privkey", "extension"].includes(this.session?.method)
   }
 
