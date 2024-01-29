@@ -25,6 +25,7 @@
 - [x] Add status to listings
 - [x] Fix initial message when opening conversation from a listing
 - [x] Support frequency value in `price` tag for nip 99
+- [x] Show all replies exands notes inline rather than opening the note
 
 # 0.4.0
 

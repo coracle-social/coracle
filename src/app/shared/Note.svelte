@@ -72,9 +72,8 @@
   let actions = null
   let collapsed = depth === 0
   let ctx = uniqBy(prop("id"), context)
-
-  const showEntire = anchor === getIdOrAddress(event)
-  const interactive = !anchor || !showEntire
+  let showEntire = anchor === getIdOrAddress(event)
+  let interactive = !anchor || !showEntire
 
   const onClick = e => {
     const target = (e.detail?.target || e.target) as HTMLElement
@@ -355,7 +354,9 @@
         {#if hiddenReplies.length > 0}
           <button
             class="mb-2 mt-2 cursor-pointer rounded-md bg-gradient-to-l from-transparent to-cocoa py-2 text-lightest outline-0 transition-colors hover:bg-cocoa"
-            on:click={onClick}>
+            on:click={() => {
+              showEntire = true
+            }}>
             <i class="fa fa-up-down pr-2 text-sm" />
             Show {quantify(hiddenReplies.length, "other reply", "more replies")}
           </button>
