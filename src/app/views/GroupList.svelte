@@ -35,7 +35,7 @@
   let limit = 50
 
   $: searchGroups = fuzzy($groupList.other, {
-    keys: [{name: "id", weight: 0.2}, "name", "description"],
+    keys: [{name: "id", weight: 0.2}, "meta.name", "meta.description"],
   })
 
   document.title = "Groups"
@@ -47,14 +47,14 @@
 
     load({
       relays: mergeHints([relays, getUserHints("read")]),
-      filters: [{kinds: [1059, 1060], "#p": recipients, since}],
+      filters: [{kinds: [1059], "#p": recipients, since}],
     })
 
     load({
       relays: getUserHints("read"),
       filters: [
-        {kinds: [34550, 35834], authors: admins},
-        {kinds: [34550, 35834], limit: 100},
+        {kinds: [35834], authors: admins},
+        {kinds: [35834], limit: 100},
       ],
     })
   })
