@@ -280,9 +280,14 @@ export class EventBuilder {
     this.template.tags = this.template.tags.concat([[k, v, ...extra]])
   }
 
-  setTag(k: string, v: string, ...extra: string[]) {
-    this.removeTag(k)
-    this.addTag(k, v, ...extra)
+  setTagArgs(k: string, ...args: string[]) {
+    this.template.tags = this.template.tags.map(t => {
+      if (t[0] === k) {
+        t = [t[0], ...args, ...t.slice(args.length + 1)]
+      }
+
+      return t
+    })
   }
 
   removeImages() {

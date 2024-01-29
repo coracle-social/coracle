@@ -1,3 +1,5 @@
+import {whereEq} from "ramda"
+
 export const currencyOptions = [
   {name: "Afghan afghani", symbol: "؋‎", code: "AFN"},
   {name: "Albanian lek", symbol: "Lek", code: "ALL"},
@@ -156,3 +158,8 @@ export const currencyOptions = [
   {name: "Yemeni rial", symbol: "Rl", code: "YER"},
   {name: "Zambian kwacha", symbol: "K", code: "ZMW"},
 ]
+
+export const defaultCurrencyOption = currencyOptions.find(whereEq({code: "SAT"}))
+
+export const getCurrencyOption = code =>
+  currencyOptions.find(whereEq({code})) || {name: code, symbol: "$", code}

@@ -23,10 +23,10 @@
   const onSubmit = async () => {
     const builder = EventBuilder.from(event)
 
-    builder.setTag("title", values.title)
-    builder.setTag("location", values.location)
-    builder.setTag("start", dateToSeconds(values.start).toString())
-    builder.setTag("end", dateToSeconds(values.end).toString())
+    builder.setTagArgs("title", values.title)
+    builder.setTagArgs("location", values.location)
+    builder.setTagArgs("start", dateToSeconds(values.start).toString())
+    builder.setTagArgs("end", dateToSeconds(values.end).toString())
     builder.removeCircles()
     builder.setCreatedAt(now())
     builder.setContent(compose.parse())

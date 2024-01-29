@@ -2,9 +2,8 @@
   import {onMount} from "svelte"
   import {Tags, now} from "paravel"
   import {sleep, ucFirst} from "hurdak"
-  import {whereEq} from "ramda"
   import {Naddr, EventBuilder} from "src/util/nostr"
-  import {currencyOptions} from "src/util/i18n"
+  import {getCurrencyOption} from "src/util/i18n"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -26,19 +25,14 @@
 
   const onSubmit = async () => {
     const builder = EventBuilder.from(event)
-    const priceTag = [values.price.toString(), values.currency.code]
 
-    if (values.frequency) {
-      priceTag.push(values.frequency)
-    }
+    builder.setTagArgs("title", values.title)
+    builder.setTagArgs("summary", values.summary)
+    builder.setTagArgs("location", values.location)
+    builder.setTagArgs("price", values.price.toString(), values.currency.code)
 
-    builder.setTag("title", values.title)
-    builder.setTag("summary", values.summary)
-    builder.setTag("location", values.location)
-    builder.setTag("price", ...priceTag)
-
-    if (values.status !== 'active') {
-      builder.setTag("status", values.status)
+    if (values.status !== "active") {
+      builder.setTagArgs("status", values.status)
     }
 
     builder.removeCircles()
@@ -68,9 +62,7 @@
 
     if (event) {
       const tags = Tags.from(event)
-      const [price, code, frequency] = tags.type("price").first().slice(1)
-      const defaultCurrency = currencyOptions.find(whereEq({code: "SAT"}))
-      const currency = currencyOptions.find(whereEq({code})) || defaultCurrency
+      const [price, code] = tags.type("price").first().slice(1)
 
       values = {
         groups: tags.circles().all(),
@@ -79,8 +71,7 @@
         location: tags.getValue("location") || "",
         status: tags.getValue("status") || "active",
         price: parseInt(price || 0),
-        currency,
-        frequency,
+        currency: getCurrencyOption(code),
       }
 
       // Wait for components to mount
@@ -130,7 +121,10 @@
       </Field>
       <NoteImages bind:this={images} bind:compose />
       <FieldInline label="Status">
-        <SelectButton bind:value={values.status} options={["active", "sold"]} displayOption={ucFirst} />
+        <SelectButton
+          bind:value={values.status}
+          options={["active", "sold"]}
+          displayOption={ucFirst} />
       </FieldInline>
       <div class="flex gap-2">
         <Anchor button tag="button" type="submit" class="flex-grow">Save</Anchor>
