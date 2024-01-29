@@ -1,4 +1,5 @@
-import {prop, sortBy} from "ramda"
+import {Tags} from 'paravel'
+import {prop, uniq, sortBy} from "ramda"
 import {Storage, LocalStorageAdapter, IndexedDBAdapter, sortByPubkeyWhitelist} from "./core"
 import {_lists} from "./lists"
 import {people} from "./people"
@@ -34,6 +35,15 @@ const setAdapter = {
   load: a => new Set(a || []),
 }
 
+// Nip 04 channels weren't getting members set
+const migrateChannels = channels => {
+  return channels.map(c => {
+    c.members = uniq(c.members.concat(c.messages?.flatMap(m => Tags.from(m).pubkeys().all().concat(m.pubkey))))
+
+    return c
+  })
+}
+
 export const storage = new Storage(9, [
   new LocalStorageAdapter("pubkey", pubkey),
   new LocalStorageAdapter("sessions", sessions),
@@ -51,7 +61,7 @@ export const storage = new Storage(9, [
   ),
   new IndexedDBAdapter("people", people, 5000, sortByPubkeyWhitelist(prop("last_fetched"))),
   new IndexedDBAdapter("relays", relays, 1000, sortBy(prop("count"))),
-  new IndexedDBAdapter("channels", channels, 1000, sortBy(prop("last_checked"))),
+  new IndexedDBAdapter("channels", channels, 1000, sortBy(prop("last_checked")), null, migrateChannels),
   new IndexedDBAdapter("groups", groups, 1000, sortBy(prop("count"))),
   new IndexedDBAdapter("groupAlerts", groupAlerts, 30, sortBy(prop("created_at"))),
   new IndexedDBAdapter("groupRequests", groupRequests, 100, sortBy(prop("created_at"))),

@@ -1,8 +1,9 @@
 import {nip19} from "nostr-tools"
+import {throttle} from "throttle-debounce"
 import {fromNostrURI, cached} from "paravel"
 import {uniq, join, nth, last} from "ramda"
 import {Fetch, tryFunc, createMapOf, ellipsize, switcherFn} from "hurdak"
-import {fuzzy, createBatcher, pushToKey} from "src/util/misc"
+import {createBatcher, pushToKey} from "src/util/misc"
 import {dufflepud} from "src/engine/session/utils"
 import {getPubkeyHints} from "src/engine/relays/utils"
 import type {Person, Handle} from "./model"
@@ -58,17 +59,6 @@ export const displayHandle = (handle: Handle) =>
 
 export const displayPubkey = (pubkey: string) => displayPerson(getPersonWithDefault(pubkey))
 
-export const getPeopleSearch = $people =>
-  fuzzy($people, {
-    keys: [
-      "profile.name",
-      "profile.display_name",
-      {name: "profile.nip05", weight: 0.5},
-      {name: "about", weight: 0.1},
-    ],
-    threshold: 0.3,
-  })
-
 export const getMutedPubkeys = $person => ($person?.mutes || []).map(nth(1)) as string[]
 
 export const getMutes = $person => new Set(getMutedPubkeys($person))
@@ -116,7 +106,7 @@ export const getFollowsWhoMute = cached({
     getFollowedPubkeys(people.key(pk).get()).filter(pk => isMuting(people.key(pk).get(), tpk)),
 })
 
-export const primeWotCaches = pk => {
+export const primeWotCaches = throttle(3000, pk => {
   const mutes = {}
   const follows = {}
 
@@ -153,7 +143,7 @@ export const primeWotCaches = pk => {
       getFollowsWhoFollow.cache.set(getFollowsWhoFollow.getKey([pk, person.pubkey]), [])
     }
   }
-}
+})
 
 export const getWotScore = (pk, tpk) => {
   if (!people.key(pk).exists()) {

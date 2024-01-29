@@ -19,11 +19,15 @@
   let input, suggestions, popover
   let focused = Boolean(autofocus)
 
-  $: suggestions?.setData(term ? search(term).slice(0, 10) : defaultOptions)
+  $: {
+    suggestions?.setData(term ? search(term).slice(0, 10) : defaultOptions)
+  }
 
   $: {
     if (!focused || !term) {
       popover?.hide()
+    } else {
+      popover?.show()
     }
 
     if (popover) {

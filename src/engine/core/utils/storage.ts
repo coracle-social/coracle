@@ -165,6 +165,7 @@ export class IndexedDBAdapter {
     readonly max: number,
     readonly sort?: (xs: any[]) => any[],
     readonly filter?: (x: any) => boolean,
+    readonly migrate?: (xs: any[]) => any[],
   ) {}
 
   getIndexedDBConfig() {
@@ -177,10 +178,12 @@ export class IndexedDBAdapter {
   }
 
   async initialize(storage: Storage) {
-    const {key, store, filter} = this
+    const {key, store} = this
     const data = await storage.db.getAll(key)
+    const filter = this.filter || identity
+    const migrate = this.migrate || identity
 
-    store.set(data.filter(filter || identity))
+    store.set(migrate(data.filter(filter)))
 
     store.subscribe(
       throttle(randomInt(3000, 5000), async <T>(rows: T) => {

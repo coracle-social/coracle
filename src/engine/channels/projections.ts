@@ -34,6 +34,9 @@ projections.addHandler(30078, async e => {
           const channel = $channels.get(id)
 
           $channels.set(id, {
+            relays: [],
+            members: [],
+            messages: [],
             ...channel,
             last_checked: Math.max(ts, channel?.last_checked || 0),
           })
@@ -55,12 +58,7 @@ const handleMessage = async e => {
       continue
     }
 
-    const $channel =
-      channels.key(channelId).get() ||
-      ({
-        id: channelId,
-        members: pubkeys,
-      } as Channel)
+    const $channel = channels.key(channelId).get()
 
     const relays = $channel?.relays || []
     const messages = $channel?.messages || []
@@ -90,10 +88,12 @@ const handleMessage = async e => {
       e = {...e, content: await nip04.decryptAsUser(e.content, other)}
     }
 
-    const updates = {
+    const updates: Channel = {
       ...$channel,
+      id: channelId,
       relays: uniq([...tags.relays().all(), ...relays]),
       messages: uniqBy(prop("id"), [e, ...messages]),
+      members: pubkeys,
     }
 
     if (e.pubkey === pubkey) {

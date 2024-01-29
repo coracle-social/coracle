@@ -73,7 +73,8 @@
   let collapsed = depth === 0
   let ctx = uniqBy(prop("id"), context)
   let showEntire = anchor === getIdOrAddress(event)
-  let interactive = !anchor || !showEntire
+
+  const interactive = !anchor || !showEntire
 
   const onClick = e => {
     const target = (e.detail?.target || e.target) as HTMLElement

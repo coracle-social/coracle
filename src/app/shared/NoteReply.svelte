@@ -56,7 +56,7 @@
       uniq(Tags.from(parent).type("p").values().all().concat(parent.pubkey)),
     )
 
-    setTimeout(() => compose.write(draft))
+    setTimeout(() => compose.write(draft), 10)
   }
 
   const bypassNsecWarning = () => {

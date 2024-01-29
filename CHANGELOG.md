@@ -26,6 +26,8 @@
 - [x] Fix initial message when opening conversation from a listing
 - [x] Support frequency value in `price` tag for nip 99
 - [x] Show all replies exands notes inline rather than opening the note
+- [x] Fix nip04 messages not having a members field
+- [x] Improve person search
 
 # 0.4.0
 
