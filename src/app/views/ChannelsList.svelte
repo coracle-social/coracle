@@ -14,6 +14,7 @@
   import type {Channel} from "src/engine"
   import {
     nip44,
+    pubkey,
     canSign,
     channels,
     hasNewMessages,
@@ -23,8 +24,9 @@
   } from "src/engine"
 
   const activeTab = window.location.pathname.slice(1) === "channels" ? "conversations" : "requests"
-  const accepted = channels.derived(filter((c: Channel) => Boolean(c.last_sent)))
-  const requests = channels.derived(filter((c: Channel) => c.last_received && !c.last_sent))
+  const userChannels = channels.derived(filter((c: Channel) => c.members?.includes($pubkey)))
+  const accepted = userChannels.derived(filter((c: Channel) => Boolean(c.last_sent)))
+  const requests = userChannels.derived(filter((c: Channel) => c.last_received && !c.last_sent))
   const setActiveTab = tab => {
     const path = tab === "requests" ? "channels/requests" : "channels"
 

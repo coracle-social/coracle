@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {Tags, now} from "paravel"
-  import {sleep} from "hurdak"
+  import {sleep, ucFirst} from "hurdak"
   import {whereEq} from "ramda"
   import {Naddr, EventBuilder} from "src/util/nostr"
   import {currencyOptions} from "src/util/i18n"
@@ -9,9 +9,11 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Field from "src/partials/Field.svelte"
+  import FieldInline from "src/partials/FieldInline.svelte"
   import Input from "src/partials/Input.svelte"
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
   import CurrencyInput from "src/partials/CurrencyInput.svelte"
+  import SelectButton from "src/partials/SelectButton.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import Compose from "src/app/shared/Compose.svelte"
@@ -24,11 +26,21 @@
 
   const onSubmit = async () => {
     const builder = EventBuilder.from(event)
+    const priceTag = [values.price.toString(), values.currency.code]
+
+    if (values.frequency) {
+      priceTag.push(values.frequency)
+    }
 
     builder.setTag("title", values.title)
     builder.setTag("summary", values.summary)
     builder.setTag("location", values.location)
-    builder.setTag("price", values.price.toString(), values.currency.code)
+    builder.setTag("price", ...priceTag)
+
+    if (values.status !== 'active') {
+      builder.setTag("status", values.status)
+    }
+
     builder.removeCircles()
     builder.setCreatedAt(now())
     builder.setContent(compose.parse())
@@ -56,16 +68,19 @@
 
     if (event) {
       const tags = Tags.from(event)
-      const [price, code] = tags.type("price").first().slice(1)
+      const [price, code, frequency] = tags.type("price").first().slice(1)
+      const defaultCurrency = currencyOptions.find(whereEq({code: "SAT"}))
+      const currency = currencyOptions.find(whereEq({code})) || defaultCurrency
 
       values = {
         groups: tags.circles().all(),
         title: tags.getValue("title") || "",
         summary: tags.getValue("summary") || "",
         location: tags.getValue("location") || "",
+        status: tags.getValue("status") || "active",
         price: parseInt(price || 0),
-        currency:
-          currencyOptions.find(whereEq({code})) || currencyOptions.find(whereEq({code: "SAT"})),
+        currency,
+        frequency,
       }
 
       // Wait for components to mount
@@ -114,6 +129,9 @@
         </div>
       </Field>
       <NoteImages bind:this={images} bind:compose />
+      <FieldInline label="Status">
+        <SelectButton bind:value={values.status} options={["active", "sold"]} displayOption={ucFirst} />
+      </FieldInline>
       <div class="flex gap-2">
         <Anchor button tag="button" type="submit" class="flex-grow">Save</Anchor>
         <ImageInput

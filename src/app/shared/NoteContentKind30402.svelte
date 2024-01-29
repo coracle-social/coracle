@@ -19,7 +19,7 @@
   export let showEntire = false
 
   const tags = Tags.from(note)
-  const {title, summary, location} = tags.getDict()
+  const {title, summary, location, status} = tags.getDict()
   const images = tags.type("image").values().all()
   const [price = 0, code = "SAT"] = tags.type("price").drop(1).first() || []
   const address = Naddr.fromEvent(note).asTagValue()
@@ -53,6 +53,8 @@
           </Anchor>
         {:else if deleted}
           <Chip danger small>Deleted</Chip>
+        {:else if status === "sold"}
+          <Chip danger small>Sold</Chip>
         {:else}
           <Chip small>Available</Chip>
         {/if}

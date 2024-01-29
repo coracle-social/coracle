@@ -21,6 +21,10 @@
 - [x] Fix replies not showing right away
 - [x] Scroll to top on navigate
 - [x] Support read receipts for notifications
+- [x] Fix conversations view when logged in with multiple accounts
+- [x] Add status to listings
+- [x] Fix initial message when opening conversation from a listing
+- [x] Support frequency value in `price` tag for nip 99
 
 # 0.4.0
 

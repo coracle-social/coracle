@@ -23,8 +23,9 @@
     sortEventsDesc,
   } from "src/engine"
 
-  export let channelId
   export let pubkeys
+  export let channelId
+  export let initialMessage = null
 
   const channel = channels.key(channelId)
 
@@ -72,7 +73,7 @@
   document.title = `Direct Messages`
 </script>
 
-<Channel {pubkeys} messages={$channel?.messages || []} sendMessage={send}>
+<Channel {pubkeys} messages={$channel?.messages || []} sendMessage={send} {initialMessage}>
   <div slot="header" class="flex h-16 items-start gap-4 overflow-hidden p-1 px-4">
     <div class="flex items-center gap-4 pt-1">
       <Anchor class="fa fa-arrow-left cursor-pointer text-2xl" href="/channels" />
