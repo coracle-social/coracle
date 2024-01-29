@@ -51,7 +51,13 @@ export const toHex = (data: string): string | null => {
   }
 
   try {
-    return nip19.decode(data).data as string
+    let key = nip19.decode(data).data
+
+    if (key instanceof Uint8Array) {
+      key = Buffer.from(key).toString("hex")
+    }
+
+    return key as string
   } catch (e) {
     return null
   }
