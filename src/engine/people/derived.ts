@@ -6,7 +6,7 @@ import {pubkey} from "src/engine/session/state"
 import {user} from "src/engine/session/derived"
 import type {Person} from "./model"
 import {people} from "./state"
-import {personHasName, getFollowsWhoFollow, primeWotCaches, getWotScore, getMutes, getFollows, getNetwork} from "./utils"
+import {personHasName, primeWotCaches, getWotScore, getMutes, getFollows, getNetwork} from "./utils"
 
 export const peopleWithName = people.derived(filter(personHasName))
 

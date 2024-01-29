@@ -1,7 +1,7 @@
 <script lang="ts">
-  import {find} from "ramda"
+  import {find, concat} from "ramda"
   import {onMount} from "svelte"
-  import {debounce} from 'throttle-debounce'
+  import {debounce} from "throttle-debounce"
   import {createScroller, formatTimestampAsDate} from "src/util/misc"
   import {noteKinds, reactionKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
@@ -14,6 +14,7 @@
   import {router} from "src/app/router"
   import type {Event} from "src/engine"
   import {
+    derived,
     markAsSeen,
     notifications,
     otherNotifications,
@@ -60,7 +61,9 @@
   onMount(() => {
     loadNotifications()
 
-    const unsub = unreadNotifications.subscribe(debounce(1000, markAsSeen))
+    const unsub = derived([unreadNotifications, unreadOtherNotifications], groups =>
+      groups.reduce(concat, []),
+    ).subscribe(debounce(1000, markAsSeen))
 
     const scroller = createScroller(async () => {
       limit += 4
