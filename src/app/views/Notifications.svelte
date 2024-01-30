@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {find, concat} from "ramda"
+  import {find} from "ramda"
   import {onMount} from "svelte"
-  import {debounce} from "throttle-debounce"
   import {createScroller, formatTimestampAsDate} from "src/util/misc"
   import {noteKinds, reactionKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
@@ -14,13 +13,11 @@
   import {router} from "src/app/router"
   import type {Event} from "src/engine"
   import {
-    derived,
     markAsSeen,
     notifications,
     groupNotifications,
     createNotificationGroups,
     loadNotifications,
-    unreadNotifications,
     unreadGroupNotifications,
     unreadCombinedNotifications,
   } from "src/engine"
@@ -46,7 +43,10 @@
 
   $: tabKinds = activeTab === tabs[0] ? noteKinds : reactionKinds.concat(9734)
 
-  $: groupedNotifications = createNotificationGroups($throttledNotifications, tabKinds).slice(0, limit)
+  $: groupedNotifications = createNotificationGroups($throttledNotifications, tabKinds).slice(
+    0,
+    limit,
+  )
 
   $: tabNotifications =
     activeTab === tabs[0]
@@ -62,7 +62,7 @@
   onMount(() => {
     loadNotifications()
 
-    const unsub = unreadCombinedNotifications.subscribe(debounce(1000, markAsSeen))
+    const unsub = unreadCombinedNotifications.subscribe(markAsSeen)
 
     const scroller = createScroller(async () => {
       limit += 4

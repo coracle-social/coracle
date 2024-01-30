@@ -1,9 +1,10 @@
-import {apply, concat, assoc, max, sortBy} from "ramda"
+import {assoc, max, sortBy} from "ramda"
 import {seconds} from "hurdak"
 import {now, Tags} from "paravel"
 import {reactionKinds, isGiftWrap, getParentId} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
-import {events, seenIds, isEventMuted} from "src/engine/events/derived"
+import {seenIds} from "src/engine/events/state"
+import {events, isEventMuted} from "src/engine/events/derived"
 import {derived} from "src/engine/core/utils"
 import {groupRequests, groupAdminKeys, groupAlerts} from "src/engine/groups/state"
 import {pubkey} from "src/engine/session/state"
@@ -65,7 +66,8 @@ export const unreadGroupNotifications = derived(
 
 export const unreadCombinedNotifications = derived(
   [unreadNotifications, unreadGroupNotifications],
-  apply(concat),
+  ([$unreadNotifications, $unreadGroupNotifications]) =>
+    $unreadNotifications.concat($unreadGroupNotifications),
 )
 
 export const hasNewNotifications = unreadCombinedNotifications.derived($n => $n.length > 0)

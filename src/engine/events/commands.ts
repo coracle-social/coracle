@@ -1,56 +1,81 @@
-import {chunk, seconds} from 'hurdak'
-import {createEvent, now} from 'paravel'
+import {pluck, uniq, flatten} from 'ramda'
+import {chunk, batch, seconds} from "hurdak"
+import {Tags, createEvent, now} from "paravel"
 import {generatePrivateKey} from "src/util/nostr"
-import {session, signer, nip04, nip44, nip59} from 'src/engine/session/derived'
-import {getUserRelayUrls} from 'src/engine/relays/utils'
-import {Publisher} from 'src/engine/network/utils'
+import {pubkey} from "src/engine/session/state"
+import {signer, nip04, nip44, nip59} from "src/engine/session/derived"
+import {getUserRelayUrls} from "src/engine/relays/utils"
+import {Publisher} from "src/engine/network/utils"
+import {seenIds} from "./state"
 
-export const markAsSeen = async (allEvents: Event[], {visibility = 'private'} = {}) => {
-  if (!signer.get().isEnabled()) {
-    return
-  }
+const createReadReceipt = ids =>
+  createEvent(15, {
+    tags: [["expiration", now() + seconds(90, "day")], ...ids.map(id => ["e", id])],
+  })
 
-  const pubs = []
-  const events = []
-  const {pubkey} = session.get()
-  const relays = getUserRelayUrls('write')
-
-  console.log('markAsSeen', allEvents)
-
-  for (const batch of chunk(500, allEvents)) {
-    const template = createEvent(15, {
-      tags: [["expiration", now() + seconds(90, "day")], ...batch.map(e => ["e", e.id])],
+export const markAsSeenPublicly = batch(5000, async idChunks => {
+  for (const ids of chunk(500, uniq(flatten(idChunks)))) {
+    Publisher.publish({
+      event: await signer.get().signAsUser(createReadReceipt(ids)),
+      relays: getUserRelayUrls("write"),
     })
+  }
+})
 
-    if (visibility === 'private' && nip44.get().isEnabled()) {
+export const markAsSeenPrivately = batch(5000, async idChunks => {
+  for (const ids of chunk(500, uniq(flatten(idChunks)))) {
+    const template = createReadReceipt(ids)
+    console.log(template)
+
+    if (nip44.get().isEnabled()) {
       const rumor = await nip59.get().wrap(template, {
         wrap: {
           author: generatePrivateKey(),
-          recipient: pubkey,
+          recipient: pubkey.get(),
         },
       })
 
-      events.push(rumor)
-      pubs.push(Publisher.publish({event: rumor.wrap, relays}))
-    } else if (visibility === 'private' && nip04.get().isEnabled()) {
+      Publisher.publish({
+        event: rumor.wrap,
+        relays: getUserRelayUrls("write"),
+      })
+    } else if (nip04.get().isEnabled()) {
       const rumor = await nip59.get().wrap(template, {
         wrap: {
           kind: 1060,
-          algo: 'nip04',
+          algo: "nip04",
           author: generatePrivateKey(),
-          recipient: pubkey,
+          recipient: pubkey.get(),
         },
       })
 
-      events.push(rumor)
-      pubs.push(Publisher.publish({event: rumor.wrap, relays}))
-    } else {
-      const event = await signer.get().signAsUser(template)
-
-      events.push(event)
-      pubs.push(Publisher.publish({event: event, relays}))
+      Publisher.publish({
+        event: rumor.wrap,
+        relays: getUserRelayUrls("write"),
+      })
     }
   }
+})
 
-  return {pubs, events}
+export const markAsSeen = async (events: Event[], {visibility = "private"} = {}) => {
+  if (!signer.get().isEnabled() || events.length === 0) {
+    return
+  }
+
+  const ids = pluck('id', events)
+
+  // Eagerly update seenIds to make the UX smooth
+  seenIds.update($seenIds => {
+    for (const id of ids) {
+      $seenIds.add(id)
+    }
+
+    return $seenIds
+  })
+
+  if (visibility === "private") {
+    markAsSeenPrivately(ids)
+  } else {
+    markAsSeenPublicly(ids)
+  }
 }

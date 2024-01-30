@@ -1,7 +1,8 @@
 import {Naddr} from "src/util/nostr"
-import {groups} from "src/engine/groups/state"
-import {getUserHints} from "src/engine/relays/utils"
 import {load} from "src/engine/network/utils"
+import {getUserHints} from "src/engine/relays/utils"
+import {groups} from "./state"
+import {deriveUserGroups, getGroupReqInfo} from "./utils"
 
 export const attemptedAddrs = new Map()
 
@@ -42,7 +43,7 @@ export const loadGroups = async (rawAddrs: string[]) => {
 
 export const loadGroupMessages = async (addresses: string[] = []) => {
   for (const address of addresses || deriveUserGroups().get()) {
-    const {admins, recipients, relays, since} = getGroupReqInfo()
+    const {admins, recipients, relays, since} = getGroupReqInfo(address)
     const pubkeys = [...admins, ...recipients]
 
     load({relays, filters: [{kinds: [1059, 1060], "#p": pubkeys, since}]})

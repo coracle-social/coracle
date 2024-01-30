@@ -8,7 +8,7 @@ import {getWotScore} from "src/engine/people/utils"
 import {mutes, follows} from "src/engine/people/derived"
 import {deriveIsGroupMember} from "src/engine/groups/utils"
 import type {Event} from "./model"
-import {deletes, _events, seen} from "./state"
+import {deletes, _events} from "./state"
 
 export const events = new DerivedCollection<Event>("id", [_events, deletes], ([$e, $d]) =>
   $e.filter(e => !$d.has(e.id)),
@@ -19,8 +19,6 @@ export const userEvents = new DerivedCollection<Event>("id", [events, pubkey], (
 })
 
 export const eventsByKind = events.derived(groupBy((e: Event) => String(e.kind)))
-
-export const seenIds = seen.derived($seen => new Set(Tags.from($seen).type("e").values().all()))
 
 export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settings, $pubkey]) => {
   const words = $settings.muted_words
