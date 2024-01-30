@@ -17,14 +17,15 @@
     derived,
     markAsSeen,
     notifications,
-    otherNotifications,
     groupNotifications,
+    createNotificationGroups,
     loadNotifications,
     unreadNotifications,
-    unreadOtherNotifications,
+    unreadGroupNotifications,
+    unreadCombinedNotifications,
   } from "src/engine"
 
-  const tabs = ["Mentions & Replies", "Reactions", "Other"]
+  const tabs = ["Mentions & Replies", "Reactions", "Groups"]
 
   const throttledNotifications = notifications.throttle(300)
 
@@ -45,7 +46,7 @@
 
   $: tabKinds = activeTab === tabs[0] ? noteKinds : reactionKinds.concat(9734)
 
-  $: groupedNotifications = groupNotifications($throttledNotifications, tabKinds).slice(0, limit)
+  $: groupedNotifications = createNotificationGroups($throttledNotifications, tabKinds).slice(0, limit)
 
   $: tabNotifications =
     activeTab === tabs[0]
@@ -61,9 +62,7 @@
   onMount(() => {
     loadNotifications()
 
-    const unsub = derived([unreadNotifications, unreadOtherNotifications], groups =>
-      groups.reduce(concat, []),
-    ).subscribe(debounce(1000, markAsSeen))
+    const unsub = unreadCombinedNotifications.subscribe(debounce(1000, markAsSeen))
 
     const scroller = createScroller(async () => {
       limit += 4
@@ -79,9 +78,9 @@
 <Tabs {tabs} {activeTab} {setActiveTab}>
   <div slot="tab" let:tab class="flex gap-2">
     <div>{tab}</div>
-    {#if tab === tabs[2] && $unreadOtherNotifications.length > 0}
+    {#if tab === tabs[2] && $unreadGroupNotifications.length > 0}
       <div class="h-6 rounded-full bg-mid px-2">
-        {$unreadOtherNotifications.length}
+        {$unreadGroupNotifications.length}
       </div>
     {/if}
   </div>
@@ -107,7 +106,7 @@
     <Content size="lg" class="text-center">No notifications found - check back later!</Content>
   {/each}
 {:else}
-  {#each $otherNotifications as notification, i (notification.id)}
+  {#each $groupNotifications as notification, i (notification.id)}
     {#if notification.t === "alert"}
       <GroupAlert address={notification.group} alert={notification} />
     {:else if notification.t === "request"}

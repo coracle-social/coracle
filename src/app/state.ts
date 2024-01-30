@@ -14,6 +14,7 @@ import {
   loadDeletes,
   loadPubkeys,
   loadGiftWrap,
+  loadGroupMessages,
   getUserRelayUrls,
   listenForNotifications,
   getSetting,
@@ -113,6 +114,9 @@ export const loadAppData = () => {
 
   // Load encrypted stuff
   loadGiftWrap()
+
+  // Load group stuff
+  loadGroupMessages()
 
   // Start our listener
   listenForNotifications()

@@ -39,7 +39,7 @@ export const unreadNotifications = derived(
   },
 )
 
-export const otherNotifications = derived(
+export const groupNotifications = derived(
   [groupRequests, groupAlerts, groupAdminKeys],
   ([$requests, $alerts, $adminKeys]) => {
     const adminPubkeys = new Set($adminKeys.map(k => k.pubkey))
@@ -54,23 +54,23 @@ export const otherNotifications = derived(
   },
 )
 
-export const unreadOtherNotifications = derived(
-  [seenIds, otherNotifications],
-  ([$seenIds, $otherNotifications]) => {
+export const unreadGroupNotifications = derived(
+  [seenIds, groupNotifications],
+  ([$seenIds, $groupNotifications]) => {
     const since = now() - seconds(30, "day")
 
-    return $otherNotifications.filter(e => e.created_at > since && !$seenIds.has(e.id))
+    return $groupNotifications.filter(e => e.created_at > since && !$seenIds.has(e.id))
   },
 )
 
 export const unreadCombinedNotifications = derived(
-  [unreadNotifications, unreadOtherNotifications],
+  [unreadNotifications, unreadGroupNotifications],
   apply(concat),
 )
 
 export const hasNewNotifications = unreadCombinedNotifications.derived($n => $n.length > 0)
 
-export const groupNotifications = ($notifications, kinds) => {
+export const createNotificationGroups = ($notifications, kinds) => {
   const $userEvents = userEvents.mapStore.get()
 
   // Convert zaps to zap requests

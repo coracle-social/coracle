@@ -217,7 +217,7 @@
         kinds.push(7)
       }
 
-      if ($env.ENABLE_ZAPS && !event.wrap) {
+      if ($env.ENABLE_ZAPS) {
         kinds.push(9735)
       }
 

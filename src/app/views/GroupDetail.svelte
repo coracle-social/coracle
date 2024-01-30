@@ -96,7 +96,7 @@
 </script>
 
 <div
-  class="absolute left-0 h-64 w-full"
+  class="absolute top-0 left-0 h-64 w-full"
   style={`z-index: -1;
          background-size: cover;
          background-image: linear-gradient(to bottom, ${rgba}, ${rgb}), url('${$group?.meta?.banner}')`} />

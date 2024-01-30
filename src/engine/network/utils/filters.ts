@@ -68,6 +68,10 @@ export const getReplyFilters = (events, filter) => {
     if (isAddressable(event)) {
       a.push(Naddr.fromEvent(event).asTagValue())
     }
+
+    if (event.wrap) {
+      e.push(event.wrap.id)
+    }
   }
 
   const filters = []

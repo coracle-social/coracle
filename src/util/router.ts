@@ -204,8 +204,8 @@ export const decodeRouteParams = ({params, route}: HistoryItem) => {
 export const getKey = (item: HistoryItem) => item.config.key || item.path
 
 export const getProps = (item: HistoryItem) => ({
-  ...decodeRouteParams(item),
   ...decodeQueryString(item),
+  ...decodeRouteParams(item),
   ...item.config.context,
 })
 

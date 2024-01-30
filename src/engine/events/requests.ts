@@ -1,5 +1,5 @@
 import {seconds} from "hurdak"
-import {session, nip44} from "src/engine/session/derived"
+import {session, nip44, nip04} from "src/engine/session/derived"
 import {getUserHints} from "src/engine/relays/utils"
 import {load} from "src/engine/network/utils"
 
@@ -24,7 +24,17 @@ export const loadSeen = () => {
 }
 
 export const loadGiftWrap = () => {
+  const kinds = []
+
   if (nip44.get().isEnabled()) {
+    kinds.push(1059)
+  }
+
+  if (nip04.get().isEnabled()) {
+    kinds.push(1060)
+  }
+
+  if (kinds.length > 0) {
     const {pubkey, nip59_messages_last_synced = 0} = session.get()
     const since = Math.max(0, nip59_messages_last_synced - seconds(6, "hour"))
 

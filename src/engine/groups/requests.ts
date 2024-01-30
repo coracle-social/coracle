@@ -39,3 +39,12 @@ export const loadGroups = async (rawAddrs: string[]) => {
     })
   }
 }
+
+export const loadGroupMessages = async (addresses: string[] = []) => {
+  for (const address of addresses || deriveUserGroups().get()) {
+    const {admins, recipients, relays, since} = getGroupReqInfo()
+    const pubkeys = [...admins, ...recipients]
+
+    load({relays, filters: [{kinds: [1059, 1060], "#p": pubkeys, since}]})
+  }
+}

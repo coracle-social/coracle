@@ -111,6 +111,13 @@ export const deriveGroupOptions = defaultGroups =>
     return uniqBy(prop("address"), options)
   })
 
+export const deriveUserGroups = () =>
+  session.derived($session => {
+    return Object.entries($session.groups)
+      .filter(([a, s]) => s.joined && a.startsWith("35834:"))
+      .map(first)
+  })
+
 export const deriveUserCommunities = () =>
   session.derived($session => {
     return Object.entries($session.groups)

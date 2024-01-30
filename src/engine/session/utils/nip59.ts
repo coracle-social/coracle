@@ -35,6 +35,8 @@ export type WrapperParams = {
   }
 }
 
+const seen = new Map()
+
 export class Nip59 {
   constructor(
     readonly session: Session,
@@ -130,14 +132,23 @@ export class Nip59 {
         return Object.assign(rumor, {wrap, seen_on: wrap.seen_on})
       }
     } catch (e) {
-      console.warn(e)
+      if (!e.toString().match(/version 1|Invalid nip44/)) {
+        console.warn(e)
+      }
     }
 
     return null
   }
 
   async withUnwrappedEvent(wrap, sk, cb) {
+    // Avoid decrypting the same event multiple times
+    if (seen.has(wrap.id)) {
+      return seen.get(wrap.id)
+    }
+
     const rumor = await this.unwrap(wrap, sk)
+
+    seen.set(wrap.id, rumor)
 
     if (rumor) {
       cb(rumor)
