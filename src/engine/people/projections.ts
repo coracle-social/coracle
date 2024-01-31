@@ -1,7 +1,9 @@
 import {Tags} from "paravel"
 import {tryJson} from "src/util/misc"
-import {updateStore} from "src/engine/core/commands"
+import {updateStore, updateRecord} from "src/engine/core/commands"
 import {projections} from "src/engine/core/projections"
+import {getSession} from "src/engine/session/utils"
+import {updateSession} from "src/engine/session/commands"
 import {getLnUrl, getZapper} from "src/engine/zaps/utils"
 import {people} from "./state"
 import {getHandle} from "./utils"
@@ -68,6 +70,12 @@ projections.addHandler(0, e => {
 })
 
 projections.addHandler(3, e => {
+  const session = getSession(e.pubkey)
+
+  if (session) {
+    updateSession(e.pubkey, $session => updateRecord($session, e.created_at, {kind3: e}))
+  }
+
   updateStore(people.key(e.pubkey), e.created_at, {
     petnames: Tags.from(e).type("p").all(),
   })

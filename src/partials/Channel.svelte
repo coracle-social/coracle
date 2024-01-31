@@ -123,7 +123,7 @@
   </ul>
   {#if $nip44.isEnabled() || pubkeys.length < 3}
     {#if $nip44.isEnabled()}
-      <div class="m-2 flex items-center justify-end gap-2">
+      <div class="m-2 mt-0 flex items-center justify-end gap-2">
         <Toggle scale={0.7} bind:value={useNip44} />
         <small>
           Send messages using
