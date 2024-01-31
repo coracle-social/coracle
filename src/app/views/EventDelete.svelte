@@ -1,8 +1,8 @@
 <script lang="ts">
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
-  import {router} from 'src/app/router'
-  import {publishDeletion} from 'src/engine'
+  import {router} from "src/app/router"
+  import {publishDeletion} from "src/engine"
 
   export let address
 
@@ -19,7 +19,8 @@
     <i class="fa fa-triangle-exclamation" /> Are you sure you want to delete this event?
   </p>
   <p>
-    This will send a request to the network to delete this event.
+    This will send a request to the network to delete this event. Be aware that relays may not honor
+    this request.
   </p>
   <div class="flex gap-2">
     <Anchor button on:click={onCancel}>Cancel</Anchor>

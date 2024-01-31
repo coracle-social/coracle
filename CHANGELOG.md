@@ -30,6 +30,8 @@
 - [x] Improve person search
 - [x] Fix zaps in private groups
 - [x] Improve relay selection for groups
+- [x] Fix DM compatibility UX
+- [x] Keep relays intact when publishing kind 3
 
 # 0.4.0
 

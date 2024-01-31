@@ -141,12 +141,14 @@ export class Nip59 {
   }
 
   async withUnwrappedEvent(wrap, sk, cb) {
+    let rumor = null
+
     // Avoid decrypting the same event multiple times
     if (seen.has(wrap.id)) {
-      return seen.get(wrap.id)
+      rumor = seen.get(wrap.id)
+    } else {
+      rumor = await this.unwrap(wrap, sk)
     }
-
-    const rumor = await this.unwrap(wrap, sk)
 
     seen.set(wrap.id, rumor)
 

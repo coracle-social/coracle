@@ -1,3 +1,4 @@
+import type {Event} from "src/engine/events/model"
 import type {GroupAccess} from "src/engine/groups/model"
 
 export type GroupStatus = {
@@ -15,7 +16,7 @@ export type Session = {
   bunkerKey?: string
   bunkerToken?: string
   bunkerRelay?: string
-  kind3?: string
+  kind3?: Event
   kind3_updated?: string
   settings?: Record<string, any>
   settings_updated_at?: number
