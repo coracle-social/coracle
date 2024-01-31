@@ -36,7 +36,8 @@
   } from "src/engine"
   import {router} from "src/app/router"
 
-  export let address, relays, activeTab
+  export let address, activeTab
+  export let relays = null
 
   const group = deriveGroup(address)
   const status = deriveGroupStatus(address)
@@ -46,7 +47,7 @@
     requests.filter(whereEq({group: address, resolved: false})),
   )
 
-  const {recipients, since} = getGroupReqInfo(address)
+  const info = getGroupReqInfo(address)
 
   const setActiveTab = tab =>
     router
@@ -56,12 +57,15 @@
       .push({key: getKey(router.current.get())})
 
   onMount(() => {
-    loadGroups([address], relays)
+    loadGroups([address], relays || info.relays)
 
     updateCurrentSession(assocPath(["groups", address, "last_synced"], now()))
 
     if (address.startsWith("35834:")) {
-      const sub = subscribe({relays, filters: [{kinds: [1059, 1060], "#p": recipients, since}]})
+      const sub = subscribe({
+        relays: relays || info.relays,
+        filters: [{kinds: [1059, 1060], "#p": info.recipients, since: info.since}],
+      })
 
       return () => sub.close()
     }
@@ -96,7 +100,7 @@
 </script>
 
 <div
-  class="absolute top-0 left-0 h-64 w-full"
+  class="absolute left-0 top-0 h-64 w-full"
   style={`z-index: -1;
          background-size: cover;
          background-image: linear-gradient(to bottom, ${rgba}, ${rgb}), url('${$group?.meta?.banner}')`} />

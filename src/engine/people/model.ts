@@ -4,6 +4,7 @@ import type {Zapper} from "src/engine/zaps/model"
 export type Profile = {
   name?: string
   nip05?: string
+  lud06?: string
   lud16?: string
   about?: string
   banner?: string

@@ -1,11 +1,12 @@
-import {pluck, uniq, flatten} from 'ramda'
+import {pluck, uniq, flatten} from "ramda"
 import {chunk, batch, seconds} from "hurdak"
-import {Tags, createEvent, now} from "paravel"
+import {createEvent, now} from "paravel"
 import {generatePrivateKey} from "src/util/nostr"
 import {pubkey} from "src/engine/session/state"
 import {signer, nip04, nip44, nip59} from "src/engine/session/derived"
 import {getUserRelayUrls} from "src/engine/relays/utils"
 import {Publisher} from "src/engine/network/utils"
+import type {Event} from "./model"
 import {seenIds} from "./state"
 
 const createReadReceipt = ids =>
@@ -62,7 +63,7 @@ export const markAsSeen = async (events: Event[], {visibility = "private"} = {})
     return
   }
 
-  const ids = pluck('id', events)
+  const ids = pluck("id", events)
 
   // Eagerly update seenIds to make the UX smooth
   seenIds.update($seenIds => {

@@ -7,7 +7,6 @@
   import {seconds, Fetch} from "hurdak"
   import {now} from "paravel"
   import {tryFetch, hexToBech32, bech32ToHex} from "src/util/misc"
-  import {Naddr} from 'src/util/nostr'
   import {storage, session, stateKey, relays, getSetting, dufflepud} from "src/engine"
   import * as engine from "src/engine"
   import {loadAppData} from "src/app/state"
@@ -82,7 +81,6 @@
   import {logUsage} from "src/app/state"
   import {
     router,
-    encodeNaddr,
     asChannelId,
     asPerson,
     asNaddr,

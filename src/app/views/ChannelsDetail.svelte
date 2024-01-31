@@ -31,15 +31,15 @@
 
   const showPerson = pubkey => router.at("people").of(pubkey).open()
 
-  const send = content => {
+  const send = (content, useNip44) => {
     // If we don't have nip44 support, just send a legacy message
-    if (!$nip44.isEnabled()) {
+    if (!$nip44.isEnabled() || !useNip44) {
       return sendLegacyMessage(channelId, content)
     }
 
     const [message] = sortEventsDesc($channel.messages || [])
 
-    if (message?.kind === 4) {
+    if (!message || message?.kind === 4) {
       confirmMessage = content
     } else {
       sendMessage(channelId, content)
@@ -53,6 +53,10 @@
 
   const confirmNip44 = () => {
     sendMessage(channelId, confirmMessage)
+    confirmMessage = null
+  }
+
+  const abortMessage = () => {
     confirmMessage = null
   }
 
@@ -127,11 +131,7 @@
           <i slot="trigger" class="fa fa-unlock cursor-pointer text-lighter" />
           <p slot="tooltip">
             This message was sent using nostr's legacy DMs, which have a number of shortcomings.
-            Read more <Anchor
-              underline
-              external
-              href="https://habla.news/u/hodlbod@coracle.social/0gmn3DDizCIesG-PCD-JK">here</Anchor
-            >.
+            Read more <Anchor underline modal href="/help/nip-44-dms">here</Anchor>.
           </p>
         </Popover>
       {:else}
@@ -159,18 +159,24 @@
 </Channel>
 
 {#if confirmMessage}
-  <Modal>
+  <Modal onEscape={abortMessage}>
     <Content size="lg">
       <p class="flex items-center gap-4 text-xl">
         <i class="fa fa-info-circle" /> Auto-upgrade notice
       </p>
-      <p>The most recent message in this conversation was sent using legacy DMs.</p>
+      <p>
+        This conversation has not yet been upgraded to use <Anchor
+          underline
+          modal
+          href="/help/nip-44-dms">new-style DMs</Anchor
+        >.
+      </p>
       <p>
         You should make sure @{displayPubkey(pubkeys[0])} is using a compatible nostr client, or you
         can choose to send an old-style message instead.
       </p>
       <p>How would you like to send this message?</p>
-      <div class="flex justify-center gap-2 py-4">
+      <div class="flex flex-col gap-2 py-4 sm:flex-row">
         <Anchor button on:click={confirmNip04}>Send using Legacy DMs</Anchor>
         <Anchor button accent on:click={confirmNip44}>Send using NIP 44</Anchor>
       </div>

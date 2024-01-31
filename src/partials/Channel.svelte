@@ -6,6 +6,9 @@
   import {fly} from "src/util/transition"
   import {createScroller} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
+  import Popover from "src/partials/Popover.svelte"
+  import Toggle from "src/partials/Toggle.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import type {Event} from "src/engine"
@@ -22,6 +25,7 @@
   let textarea
   let container
   let scroller
+  let useNip44 = true
   let showNewMessages = false
   let groupedMessages = []
 
@@ -63,7 +67,7 @@
     if (content) {
       textarea.value = ""
 
-      await sendMessage(content)
+      await sendMessage(content, useNip44)
 
       stickToBottom()
     }
@@ -118,6 +122,31 @@
     {/await}
   </ul>
   {#if $nip44.isEnabled() || pubkeys.length < 3}
+    {#if $nip44.isEnabled()}
+      <div class="m-2 flex items-center justify-end gap-2">
+        <Toggle scale={0.7} bind:value={useNip44} />
+        <small>
+          Send messages using
+          <Popover class="inline">
+            <span slot="trigger" class="cursor-pointer underline">NIP 44</span>
+            <div slot="tooltip" class="flex flex-col gap-2">
+              <p>
+                When enabled, Coracle will use nostr's new group chat specification, which solves
+                several problems with legacy DMs. Read more <Anchor
+                  underline
+                  modal
+                  href="/help/nip-44-dms">here</Anchor
+                >.
+              </p>
+              <p>
+                Note that these messages are not yet universally supported. Make sure the person
+                you're chatting with is using a compatible nostr client.
+              </p>
+            </div>
+          </Popover>
+        </small>
+      </div>
+    {/if}
     <div class="flex border-t border-solid border-cocoa border-mid bg-mid">
       <textarea
         rows="3"
