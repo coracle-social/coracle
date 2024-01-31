@@ -26,35 +26,18 @@ export const markAsSeenPublicly = batch(5000, async idChunks => {
 export const markAsSeenPrivately = batch(5000, async idChunks => {
   for (const ids of chunk(500, uniq(flatten(idChunks)))) {
     const template = createReadReceipt(ids)
-    console.log(template)
 
-    if (nip44.get().isEnabled()) {
-      const rumor = await nip59.get().wrap(template, {
-        wrap: {
-          author: generatePrivateKey(),
-          recipient: pubkey.get(),
-        },
-      })
+    const rumor = await nip59.get().wrap(template, {
+      wrap: {
+        author: generatePrivateKey(),
+        recipient: pubkey.get(),
+      },
+    })
 
-      Publisher.publish({
-        event: rumor.wrap,
-        relays: getUserRelayUrls("write"),
-      })
-    } else if (nip04.get().isEnabled()) {
-      const rumor = await nip59.get().wrap(template, {
-        wrap: {
-          kind: 1060,
-          algo: "nip04",
-          author: generatePrivateKey(),
-          recipient: pubkey.get(),
-        },
-      })
-
-      Publisher.publish({
-        event: rumor.wrap,
-        relays: getUserRelayUrls("write"),
-      })
-    }
+    Publisher.publish({
+      event: rumor.wrap,
+      relays: getUserRelayUrls("write"),
+    })
   }
 })
 
@@ -74,7 +57,7 @@ export const markAsSeen = async (events: Event[], {visibility = "private"} = {})
     return $seenIds
   })
 
-  if (visibility === "private") {
+  if (visibility === "private" && nip44.get().isEnabled()) {
     markAsSeenPrivately(ids)
   } else {
     markAsSeenPublicly(ids)
