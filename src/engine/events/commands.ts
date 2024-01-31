@@ -9,7 +9,7 @@ import {Publisher} from "src/engine/network/utils"
 import type {Event} from "./model"
 import {seenIds} from "./state"
 
-const getExpirationTag = () => ["expiration", now() + seconds(90, "day")]
+const getExpirationTag = () => ["expiration", String(now() + seconds(90, "day"))]
 
 const createReadReceipt = ids =>
   createEvent(15, {
