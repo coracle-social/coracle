@@ -3,15 +3,17 @@ import {chunk, batch, seconds} from "hurdak"
 import {createEvent, now} from "paravel"
 import {generatePrivateKey} from "src/util/nostr"
 import {pubkey} from "src/engine/session/state"
-import {signer, nip04, nip44, nip59} from "src/engine/session/derived"
+import {signer, nip44, nip59} from "src/engine/session/derived"
 import {getUserRelayUrls} from "src/engine/relays/utils"
 import {Publisher} from "src/engine/network/utils"
 import type {Event} from "./model"
 import {seenIds} from "./state"
 
+const getExpirationTag = () => ["expiration", now() + seconds(90, "day")]
+
 const createReadReceipt = ids =>
   createEvent(15, {
-    tags: [["expiration", now() + seconds(90, "day")], ...ids.map(id => ["e", id])],
+    tags: [getExpirationTag(), ...ids.map(id => ["e", id])],
   })
 
 export const markAsSeenPublicly = batch(5000, async idChunks => {
@@ -33,6 +35,8 @@ export const markAsSeenPrivately = batch(5000, async idChunks => {
         recipient: pubkey.get(),
       },
     })
+
+    rumor.wrap.tags.push(getExpirationTag())
 
     Publisher.publish({
       event: rumor.wrap,
