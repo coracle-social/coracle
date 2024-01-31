@@ -16,6 +16,14 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] NIP 65 relay selection and NIP 32 relay reviews
 - [x] NIP 89 app recommendations
 - [x] NIP 32 labeling and recommendations
+- [x] NIP 99 classifieds
+- [x] NIP 52 calendar events
+- [x] NIP 87 closed groups
+- [x] NIP 72 communities
+- [x] NIP 89 client tag support
+- [x] NIP 32 labeling and collections
+- [x] Private group calendars and listings
+- [x] Cross-posting between communities and main feed
 - [x] Bech32 entity search and scan
 - [x] Mention, reply, and reaction notifications
 - [x] Direct messages - NIP 04 and NIP 24
@@ -25,22 +33,21 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Thread muting, collapse thread
 - [x] Invoice, quote, mention, link, image, and video rendering
 - [x] Installable as a progressive web app
-- [x] Integrated media uploads via nostr.build
+- [x] Integrated media uploads via NIP 96
 - [x] Lightning zaps and reactions
 - [x] Feeds customizable by person, relay, and topic using NIP-51
-- [x] AUTH (NIP-42) support for paid relays
+- [x] AUTH (NIP-42) support for closed relays
 - [x] Multiplextr support for reducing bandwidth
 - [x] Profile and note metadata
 - [x] White-labeling support
 - [x] NIP 51 person lists
-- [x] Exportable copy of all user events
-- [x] NIP96 - HTTP File Storage Integration
-- [ ] Reporting and basic distributed moderation
-- [ ] Content and person recommendations
-- [ ] Private groups including administration, moderation, and membership
-- [ ] Cross-posting between groups and public nostr
-- [ ] Public and private calendar events
-- [ ] Public and private marketplaces
+- [x] Exports/imports of user events
+- [x] User profile editing
+- [x] NIP XX encrypted read receipts for notifications
+- [x] Topic and relay feeds
+- [x] Onboarding workflow
+- [x] Multi-account support
+- [x] Notifications view
 
 You can find a more complete changelog [here](./CHANGELOG.md).
 
