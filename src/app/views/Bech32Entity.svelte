@@ -17,9 +17,11 @@
   <NoteDetail eid={data} {relays} />
 {:else if type === "naddr"}
   {#if [35834, 34550].includes(data.kind)}
-    <GroupDetail address={Naddr.decode(entity).asTagValue()} activeTab="notes" />
+    {@const naddr = Naddr.decode(entity)}
+    <GroupDetail address={naddr.asTagValue()} relays={naddr.relays} activeTab="notes" />
   {:else if data.kind === 31923}
-    <EventDetail address={Naddr.decode(entity).asTagValue()} />
+    {@const naddr = Naddr.decode(entity)}
+    <EventDetail address={naddr.asTagValue()} relays={naddr.relays} />
   {:else}
     <NoteDetail {...data} />
   {/if}

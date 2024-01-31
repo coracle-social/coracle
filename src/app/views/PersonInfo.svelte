@@ -8,6 +8,8 @@
   export let nprofile
 
   const person = people.key(pubkey)
+
+  $: lightningAddress = $person.profile?.lud16 ||  $person.profile?.lud06
 </script>
 
 <h1 class="staatliches text-2xl">Details</h1>
@@ -28,6 +30,14 @@
 {:else}
   <p>
     <i class="fa-solid fa-info-circle" />
-    Nostr Address address not available.
+    No Nostr address found.
+  </p>
+{/if}
+{#if lightningAddress}
+  <CopyValue label="Lightning Address" value={lightningAddress} />
+{:else}
+  <p>
+    <i class="fa-solid fa-info-circle" />
+    No lightning address found.
   </p>
 {/if}

@@ -53,8 +53,8 @@
     load({
       relays: getUserHints("read"),
       filters: [
-        {kinds: [35834], authors: admins},
-        {kinds: [35834], limit: 100},
+        {kinds: [35834, 34550], authors: admins},
+        {kinds: [35834, 34550], limit: 500},
       ],
     })
   })

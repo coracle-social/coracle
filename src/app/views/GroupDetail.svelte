@@ -36,7 +36,7 @@
   } from "src/engine"
   import {router} from "src/app/router"
 
-  export let address, activeTab
+  export let address, relays, activeTab
 
   const group = deriveGroup(address)
   const status = deriveGroupStatus(address)
@@ -46,7 +46,7 @@
     requests.filter(whereEq({group: address, resolved: false})),
   )
 
-  const {recipients, relays, since} = getGroupReqInfo(address)
+  const {recipients, since} = getGroupReqInfo(address)
 
   const setActiveTab = tab =>
     router
@@ -56,7 +56,7 @@
       .push({key: getKey(router.current.get())})
 
   onMount(() => {
-    loadGroups([address])
+    loadGroups([address], relays)
 
     updateCurrentSession(assocPath(["groups", address, "last_synced"], now()))
 

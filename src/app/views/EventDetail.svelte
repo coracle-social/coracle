@@ -12,12 +12,13 @@
   import {dereferenceNote, getGroupReqInfo} from "src/engine"
 
   export let address
+  export let relays = []
   export let event = null
 
   let loading = true
 
   onMount(async () => {
-    event = event || await dereferenceNote(Naddr.fromTagValue(address))
+    event = event || await dereferenceNote({...Naddr.fromTagValue(address), relays})
     loading = false
   })
 </script>

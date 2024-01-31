@@ -8,7 +8,7 @@
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/router"
   import {
-    nip44,
+    signer,
     session,
     GroupAccess,
     deriveAdminKeyForGroup,
@@ -79,7 +79,7 @@
 </script>
 
 <div class="flex items-center gap-3" on:click|stopPropagation>
-  {#if $session && $nip44.isEnabled()}
+  {#if $session && $signer.isEnabled()}
     {#if !$status.access}
       <Popover triggerType="mouseenter">
         <div slot="trigger" class="w-6 text-center">

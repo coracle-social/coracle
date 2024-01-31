@@ -28,14 +28,14 @@ export const getStaleAddrs = (addrs: string[]) => {
   return Array.from(stale)
 }
 
-export const loadGroups = async (rawAddrs: string[]) => {
+export const loadGroups = async (rawAddrs: string[], relays: string[] = null) => {
   const naddrs = getStaleAddrs(rawAddrs).map(a => Naddr.fromTagValue(a))
   const authors = naddrs.map(naddr => naddr.pubkey)
   const identifiers = naddrs.map(naddr => naddr.identifier)
 
   if (naddrs.length > 0) {
     load({
-      relays: getUserHints("read"),
+      relays: relays || getUserHints("read"),
       filters: [{kinds: [34550, 35834], authors, "#d": identifiers}],
     })
   }

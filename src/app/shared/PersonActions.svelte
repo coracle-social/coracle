@@ -111,7 +111,7 @@
   {/if}
   <Popover triggerType="mouseenter">
     <div slot="trigger" class="w-6 text-center">
-      <i class="fa fa-qrcode cursor-pointer" on:click={share} />
+      <i class="fa fa-share-nodes cursor-pointer" on:click={share} />
     </div>
     <div slot="tooltip">Share</div>
   </Popover>
