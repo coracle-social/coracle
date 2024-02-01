@@ -102,16 +102,16 @@
   router.register("/events", Calendar)
 
   router.register("/channels", ChannelsList, {
-    requireUser: true,
+    requireSigner: true,
   })
   router.register("/channels/create", ChannelCreate, {
-    requireUser: true,
+    requireSigner: true,
   })
   router.register("/channels/requests", ChannelsList, {
-    requireUser: true,
+    requireSigner: true,
   })
   router.register("/channels/:channelId", ChannelsDetail, {
-    requireUser: true,
+    requireSigner: true,
     serializers: {
       channelId: asChannelId,
     },
@@ -135,10 +135,10 @@
 
   router.register("/groups", GroupList)
   router.register("/groups/new", GroupCreate, {
-    requireUser: true,
+    requireSigner: true,
   })
   router.register("/groups/:address/edit", GroupEdit, {
-    requireUser: true,
+    requireSigner: true,
     serializers: {
       address: asNaddr("address"),
     },
@@ -149,7 +149,7 @@
     },
   })
   router.register("/groups/:address/rotate", GroupRotate, {
-    requireUser: true,
+    requireSigner: true,
     serializers: {
       address: asNaddr("address"),
       addMembers: asCsv("addMembers"),
@@ -188,13 +188,13 @@
 
   router.register("/listings", Market)
   router.register("/listings/:address/edit", ListingEdit, {
-    requireUser: true,
+    requireSigner: true,
     serializers: {
       address: asNaddr("address"),
     },
   })
   router.register("/listings/:address/delete", ListingDelete, {
-    requireUser: true,
+    requireSigner: true,
     serializers: {
       address: asNaddr("address"),
     },
@@ -217,7 +217,7 @@
     },
   })
   router.register("/notes/create", NoteCreate, {
-    requireUser: true,
+    requireSigner: true,
     serializers: {
       pubkey: asPerson,
       group: asNaddr("group"),
@@ -260,32 +260,32 @@
     },
   })
   router.register("/people/:entity", PersonDetail, {
-    required: ['pubkey'],
+    required: ["pubkey"],
     serializers: {
       entity: asPerson,
       filter: asFilter,
     },
   })
   router.register("/people/:entity/followers", PersonFollowers, {
-    required: ['pubkey'],
+    required: ["pubkey"],
     serializers: {
       entity: asPerson,
     },
   })
   router.register("/people/:entity/follows", PersonFollows, {
-    required: ['pubkey'],
+    required: ["pubkey"],
     serializers: {
       entity: asPerson,
     },
   })
   router.register("/people/:entity/info", PersonInfo, {
-    required: ['pubkey'],
+    required: ["pubkey"],
     serializers: {
       entity: asPerson,
     },
   })
   router.register("/people/:entity/zap", PersonZap, {
-    required: ['pubkey'],
+    required: ["pubkey"],
     serializers: {
       eid: asNote,
       entity: asPerson,

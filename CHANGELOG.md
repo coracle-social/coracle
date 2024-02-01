@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.4.2
+
+- [x] Require signer on some routes
+
 # 0.4.1
 
 - [x] Fix pubkey display in PersonAbout

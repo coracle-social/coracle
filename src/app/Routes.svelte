@@ -4,7 +4,7 @@
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/router"
-  import {session, stateKey} from "src/engine"
+  import {session, signer, stateKey} from "src/engine"
 
   const {current, page, modal, modals} = router
 
@@ -25,6 +25,10 @@
   $: {
     // Redirect if we have no user
     if (!$session && $page?.route.requireUser) {
+      router.go("/", {replace: true})
+    }
+
+    if (!$signer.isEnabled() && $page?.route.requireSigner) {
       router.go("/", {replace: true})
     }
 
