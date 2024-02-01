@@ -1,6 +1,6 @@
 import {uniq, assoc, whereEq, sortBy, prop, without, mergeRight} from "ramda"
 import {Tags} from "paravel"
-import {switcherFn} from "hurdak"
+import {switcherFn, batch} from "hurdak"
 import {Naddr, LOCAL_RELAY_URL, getPublicKey} from "src/util/nostr"
 import {projections} from "src/engine/core/projections"
 import {updateStore} from "src/engine/core/commands"
@@ -11,7 +11,12 @@ import {nip59} from "src/engine/session/derived"
 import {getExecutor, getIdFilters, load} from "src/engine/network/utils"
 import {GroupAccess} from "./model"
 import {groups, groupSharedKeys, groupAdminKeys, groupRequests, groupAlerts} from "./state"
-import {deriveAdminKeyForGroup, getRecipientKey, deriveGroupStatus} from "./utils"
+import {
+  deriveAdminKeyForGroup,
+  getRecipientKey,
+  deriveGroupStatus,
+  getUserCommunities,
+} from "./utils"
 import {setGroupStatus, modifyGroupStatus} from "./commands"
 
 // Key sharing
@@ -188,16 +193,25 @@ projections.addHandler(26, handleGroupRequest(GroupAccess.None))
 
 // All other events are messages sent to the group
 
-projections.addGlobalHandler((e: Event) => {
-  if (!e.wrap) {
-    return
-  }
+projections.addGlobalHandler(
+  batch(300, (events: Event[]) => {
+    const userGroups = new Set(Object.values(sessions.get()).flatMap(getUserCommunities))
 
-  // Publish the unwrapped event to our local relay so active subscriptions get notified
-  if (groupSharedKeys.key(e.wrap.pubkey).exists()) {
-    getExecutor([LOCAL_RELAY_URL]).publish(e)
-  }
-})
+    for (const e of events) {
+      // Publish the unwrapped event to our local relay so active subscriptions get notified
+      if (e.wrap && groupSharedKeys.key(e.wrap.pubkey).exists()) {
+        getExecutor([LOCAL_RELAY_URL]).publish(e)
+      }
+
+      const addresses = Tags.from(e).communities().all()
+
+      // Save events with communities the user is a part of to our local db
+      if (addresses.some(a => userGroups.has(a))) {
+        getExecutor([LOCAL_RELAY_URL]).publish(e)
+      }
+    }
+  }),
+)
 
 // Unwrap gift wraps using known keys
 

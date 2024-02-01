@@ -1,7 +1,8 @@
 import {nip19} from "nostr-tools"
 import {sortBy} from "ramda"
-import {fromNostrURI} from "paravel"
+import {fromNostrURI, Tags, hasValidSignature} from "paravel"
 import {tryFunc, switcherFn} from "hurdak"
+import {tryJson} from "src/util/misc"
 import type {Event} from "./model"
 
 export const sortEventsDesc = sortBy((e: Event) => -e.created_at)
@@ -39,4 +40,22 @@ export const decodeEvent = entity => {
     note: () => annotateEvent(data),
     default: () => annotateEvent(entity),
   })
+}
+
+export const unwrapRepost = repost => {
+  const event = tryJson(() => JSON.parse(repost.content))
+
+  if (!event || !hasValidSignature(event)) {
+    return null
+  }
+
+  const originalGroup = Tags.from(event).circles().first()
+  const repostGroup = Tags.from(repost).circles().first()
+
+  // Only show cross-posts, not reposts from global to global
+  if (originalGroup === repostGroup) {
+    return null
+  }
+
+  return event
 }

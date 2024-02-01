@@ -3,6 +3,8 @@
 # 0.4.2
 
 - [x] Require signer on some routes
+- [x] Add group notes to group notifications
+- [x] Add badges to all notification page tabs
 
 # 0.4.1
 

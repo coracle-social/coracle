@@ -1,13 +1,16 @@
 import {assoc, max, sortBy} from "ramda"
 import {seconds} from "hurdak"
 import {now, Tags} from "paravel"
-import {reactionKinds, isGiftWrap, getParentId} from "src/util/nostr"
+import {reactionKinds, noteKinds, repostKinds, getParentId} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import {seenIds} from "src/engine/events/state"
+import {unwrapRepost} from "src/engine/events/utils"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {derived} from "src/engine/core/utils"
 import {groupRequests, groupAdminKeys, groupAlerts} from "src/engine/groups/state"
+import {getUserCircles} from "src/engine/groups/utils"
 import {pubkey} from "src/engine/session/state"
+import {session} from "src/engine/session/derived"
 import {userEvents} from "src/engine/events/derived"
 
 export const notifications = derived(
@@ -18,9 +21,10 @@ export const notifications = derived(
     }
 
     const $isEventMuted = isEventMuted.get()
+    const kinds = [...noteKinds, ...reactionKinds]
 
     return $events.filter(e => {
-      if (e.pubkey === $pubkey || $isEventMuted(e) || isGiftWrap(e)) {
+      if (e.pubkey === $pubkey || $isEventMuted(e) || !kinds.includes(e.kind)) {
         return false
       }
 
@@ -41,19 +45,39 @@ export const unreadNotifications = derived(
 )
 
 export const groupNotifications = derived(
-  [groupRequests, groupAlerts, groupAdminKeys],
-  ([$requests, $alerts, $adminKeys]) => {
+  [session, events, groupRequests, groupAlerts, groupAdminKeys],
+  x => x,
+)
+  .throttle(3000)
+  .derived(([$session, $events, $requests, $alerts, $adminKeys, $addresses]) => {
+    const addresses = new Set(getUserCircles($session))
     const adminPubkeys = new Set($adminKeys.map(k => k.pubkey))
+    const $isEventMuted = isEventMuted.get()
+
+    const shouldSkip = e => {
+      const circles = Tags.from(e).circles().all()
+
+      return (
+        !circles.some(a => addresses.has(a)) ||
+        !noteKinds.includes(e.kind) ||
+        e.pubkey === $session.pubkey ||
+        // Skip mentions since they're covered in normal notifications
+        Tags.from(e).pubkeys().has($session.pubkey) ||
+        $isEventMuted(e)
+      )
+    }
 
     return sortBy(
-      n => -n.created_at,
+      x => -x.created_at,
       [
         ...$requests.filter(r => !r.resolved).map(assoc("t", "request")),
         ...$alerts.filter(a => !adminPubkeys.has(a.pubkey)).map(assoc("t", "alert")),
+        ...$events
+          .map(e => (repostKinds.includes(e.kind) ? unwrapRepost(e) : e))
+          .filter(e => e && !shouldSkip(e)),
       ],
     )
-  },
-)
+  })
 
 export const unreadGroupNotifications = derived(
   [seenIds, groupNotifications],

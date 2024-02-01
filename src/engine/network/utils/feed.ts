@@ -1,7 +1,7 @@
 import {partition, prop, uniqBy, identity, without, assoc} from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
-import {now, hasValidSignature, Tags} from "paravel"
-import {race, tryJson} from "src/util/misc"
+import {now} from "paravel"
+import {race} from "src/util/misc"
 import {info} from "src/util/logger"
 import {
   LOCAL_RELAY_URL,
@@ -14,7 +14,7 @@ import {
 } from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
-import {sortEventsDesc} from "src/engine/events/utils"
+import {sortEventsDesc, unwrapRepost} from "src/engine/events/utils"
 import {isEventMuted, isDeleted} from "src/engine/events/derived"
 import {writable} from "src/engine/core/utils"
 import type {Filter} from "../model"
@@ -195,20 +195,14 @@ export class FeedLoader {
           .map((e: Event) => {
             // If we have a repost, use its contents instead
             if (repostKinds.includes(e.kind)) {
-              const wrappedEvent = tryJson(() => JSON.parse(e.content))
+              const wrappedEvent = unwrapRepost(e)
 
-              if (wrappedEvent && hasValidSignature(wrappedEvent)) {
-                const originalGroup = Tags.from(wrappedEvent).circles().first()
-                const repostGroup = Tags.from(e).circles().first()
+              if (wrappedEvent) {
+                const reposts = this.reposts.get(wrappedEvent.id) || []
 
-                // Only show cross-posts, not reposts from global to global
-                if (originalGroup !== repostGroup) {
-                  const reposts = this.reposts.get(wrappedEvent.id) || []
+                this.reposts.set(wrappedEvent.id, [...reposts, e])
 
-                  this.reposts.set(wrappedEvent.id, [...reposts, e])
-
-                  e = {...wrappedEvent, seen_on: e.seen_on}
-                }
+                e = {...wrappedEvent, seen_on: e.seen_on}
               }
             }
 

@@ -1,7 +1,7 @@
 import {now, Tags} from "paravel"
 import {seconds, updateIn, batch, doPipe} from "hurdak"
 import {pluck, max, slice, filter, without, sortBy} from "ramda"
-import {noteKinds, reactionKinds, getParentId} from "src/util/nostr"
+import {noteKinds, repostKinds, reactionKinds, getParentId} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import type {Filter} from "src/engine/network/model"
 import {env} from "src/engine/session/state"
@@ -9,6 +9,7 @@ import {session} from "src/engine/session/derived"
 import {updateSession} from "src/engine/session/commands"
 import {_events} from "src/engine/events/state"
 import {events, isEventMuted} from "src/engine/events/derived"
+import {getUserCommunities} from "src/engine/groups/utils"
 import {mergeHints, getPubkeyHints, getParentHints} from "src/engine/relays/utils"
 import {
   loadPubkeys,
@@ -87,14 +88,17 @@ export const loadNotifications = () => {
 }
 
 export const listenForNotifications = async () => {
-  const {pubkey} = session.get()
-  const eventIds = getEventIds(pubkey)
+  const $session = session.get()
+  const eventIds = getEventIds($session.pubkey)
+  const addrs = getUserCommunities($session)
 
   const filters: Filter[] = [
-    // Messages/groups
-    {kinds: [4, 1059, 1060], "#p": [pubkey], limit: 1},
     // Mentions
-    {kinds: noteKinds, "#p": [pubkey], limit: 1},
+    {kinds: noteKinds, "#p": [$session.pubkey], limit: 1},
+    // Messages/groups
+    {kinds: [4, 1059, 1060], "#p": [$session.pubkey], limit: 1},
+    // Communities
+    {kinds: [...noteKinds, ...repostKinds], "#a": addrs, limit: 1},
   ]
 
   // Replies
@@ -107,7 +111,7 @@ export const listenForNotifications = async () => {
   subscribePersistent({
     filters,
     skipCache: true,
-    relays: getPubkeyHints(pubkey, "read"),
+    relays: getPubkeyHints($session.pubkey, "read"),
     onEvent: onNotificationEvent,
   })
 }

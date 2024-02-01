@@ -245,12 +245,8 @@
     },
   })
 
-  router.register("/notifications", Notifications, {
-    requireUser: true,
-  })
-  router.register("/notifications/:activeTab", Notifications, {
-    requireUser: true,
-  })
+  router.register("/notifications", Notifications)
+  router.register("/notifications/:activeTab", Notifications)
 
   router.register("/onboarding", Onboarding)
 

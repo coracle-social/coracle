@@ -237,162 +237,164 @@
 </script>
 
 {#if ready}
-  <NoteMeta note={event} {showGroup} />
-  <div class="note relative" class:py-2={!showParent && !topLevel}>
-    {#if !showParent && !topLevel}
-      <AlternatingBackground class="absolute -left-4 h-[2px] w-4" style="top: 27px;" />
-      {#if isLastReply}
-        <AlternatingBackground class="absolute -left-4 w-[2px]" style="height: 19px;" />
-      {:else}
-        <AlternatingBackground class="absolute -left-4 h-full w-[2px]" />
+  <div>
+    <NoteMeta note={event} {showGroup} />
+    <div class="note relative" class:py-2={!showParent && !topLevel}>
+      {#if !showParent && !topLevel}
+        <AlternatingBackground class="absolute -left-4 h-[2px] w-4" style="top: 27px;" />
+        {#if isLastReply}
+          <AlternatingBackground class="absolute -left-4 w-[2px]" style="height: 19px;" />
+        {:else}
+          <AlternatingBackground class="absolute -left-4 h-full w-[2px]" />
+        {/if}
       {/if}
-    {/if}
-    <div class="group relative">
-      <Card stopPropagation class="relative flex gap-4" on:click={onClick} {interactive}>
-        <div>
-          <Anchor class="text-lg font-bold" on:click={showPerson}>
-            <PersonCircle class="h-10 w-10" pubkey={event.pubkey} />
-          </Anchor>
-        </div>
-        <div class="flex min-w-0 flex-grow flex-col gap-2">
-          <div class="flex min-w-0 flex-col items-start justify-between sm:flex-row">
-            <Anchor type="unstyled" class="mr-4 min-w-0 text-lg font-bold" on:click={showPerson}>
-              <PersonName pubkey={event.pubkey} />
-            </Anchor>
-            <Anchor
-              on:click={goToDetail}
-              class="whitespace-nowrap text-end text-sm text-lightest"
-              type="unstyled">
-              {formatTimestamp(event.created_at)}
+      <div class="group relative">
+        <Card stopPropagation class="relative flex gap-4" on:click={onClick} {interactive}>
+          <div>
+            <Anchor class="text-lg font-bold" on:click={showPerson}>
+              <PersonCircle class="h-10 w-10" pubkey={event.pubkey} />
             </Anchor>
           </div>
-          <div class="flex flex-col gap-2">
-            <div class="flex gap-2">
-              {#if replyId && !getParentIds(event).includes(anchor) && showParent}
-                <small class="text-lightest">
-                  <i class="fa fa-code-merge" />
-                  <Anchor class="underline" on:click={goToParent}>View Parent</Anchor>
-                </small>
-              {/if}
-              {#if rootId && !getRootIds(event).includes(anchor) && rootId !== replyId && showParent}
-                <small class="text-lightest">
-                  <i class="fa fa-code-pull-request" />
-                  <Anchor class="underline" on:click={goToThread}>View Thread</Anchor>
-                </small>
-              {/if}
+          <div class="flex min-w-0 flex-grow flex-col gap-2">
+            <div class="flex min-w-0 flex-col items-start justify-between sm:flex-row">
+              <Anchor type="unstyled" class="mr-4 min-w-0 text-lg font-bold" on:click={showPerson}>
+                <PersonName pubkey={event.pubkey} />
+              </Anchor>
+              <Anchor
+                on:click={goToDetail}
+                class="whitespace-nowrap text-end text-sm text-lightest"
+                type="unstyled">
+                {formatTimestamp(event.created_at)}
+              </Anchor>
             </div>
-            {#if muted}
-              <p class="border-l-2 border-solid border-mid pl-4 text-lightest">
-                You have hidden this note.
-                <Anchor
-                  underline
-                  on:click={() => {
-                    showMuted = true
-                  }}>Show</Anchor>
-              </p>
-            {:else}
-              <NoteContent note={event} {showEntire} />
-            {/if}
-            <div class="cy-note-click-target h-[2px]" />
-            <NoteActions
-              note={event}
-              bind:this={actions}
-              {removeFromContext}
-              {addToContext}
-              {showMuted}
-              {replies}
-              {likes}
-              {zaps}
-              {reply}
-              {zapper}
-              {showEntire} />
-          </div>
-        </div>
-      </Card>
-    </div>
-
-    {#if !replyIsActive && visibleReplies.length > 0 && !showEntire && depth > 0}
-      <div class="relative">
-        <div
-          class="absolute right-0 top-0 -mr-2 -mt-4 flex h-6 w-6 cursor-pointer items-center
-                 justify-center rounded-full border border-solid border-mid bg-dark text-lightest"
-          on:click={() => {
-            collapsed = !collapsed
-          }}>
-          <Popover triggerType="mouseenter">
-            <div slot="trigger">
-              {#if collapsed}
-                <i class="fa fa-xs fa-up-right-and-down-left-from-center" />
+            <div class="flex flex-col gap-2">
+              <div class="flex gap-2">
+                {#if replyId && !getParentIds(event).includes(anchor) && showParent}
+                  <small class="text-lightest">
+                    <i class="fa fa-code-merge" />
+                    <Anchor class="underline" on:click={goToParent}>View Parent</Anchor>
+                  </small>
+                {/if}
+                {#if rootId && !getRootIds(event).includes(anchor) && rootId !== replyId && showParent}
+                  <small class="text-lightest">
+                    <i class="fa fa-code-pull-request" />
+                    <Anchor class="underline" on:click={goToThread}>View Thread</Anchor>
+                  </small>
+                {/if}
+              </div>
+              {#if muted}
+                <p class="border-l-2 border-solid border-mid pl-4 text-lightest">
+                  You have hidden this note.
+                  <Anchor
+                    underline
+                    on:click={() => {
+                      showMuted = true
+                    }}>Show</Anchor>
+                </p>
               {:else}
-                <i class="fa fa-xs fa-down-left-and-up-right-to-center" />
+                <NoteContent note={event} {showEntire} />
               {/if}
+              <div class="cy-note-click-target h-[2px]" />
+              <NoteActions
+                note={event}
+                bind:this={actions}
+                {removeFromContext}
+                {addToContext}
+                {showMuted}
+                {replies}
+                {likes}
+                {zaps}
+                {reply}
+                {zapper}
+                {showEntire} />
             </div>
-            <div slot="tooltip">
-              {collapsed ? "Show replies" : "Hide replies"}
-            </div>
-          </Popover>
-        </div>
-      </div>
-    {/if}
-
-    <NoteReply
-      {addToContext}
-      parent={event}
-      showBorder={visibleReplies.length > 0}
-      bind:this={reply}
-      on:start={() => {
-        replyIsActive = true
-      }}
-      on:reset={() => {
-        replyIsActive = false
-      }}
-      on:event={e => {
-        ctx = [e.detail, ...ctx]
-      }} />
-
-    {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
-      <div class="note-children relative ml-4 mt-2 flex flex-col">
-        {#if hiddenReplies.length > 0}
-          <button
-            class="mb-2 mt-2 cursor-pointer rounded-md bg-gradient-to-l from-transparent to-cocoa py-2 text-lightest outline-0 transition-colors hover:bg-cocoa"
-            on:click={() => {
-              showEntire = true
-            }}>
-            <i class="fa fa-up-down pr-2 text-sm" />
-            Show {quantify(hiddenReplies.length, "other reply", "more replies")}
-          </button>
-          {#if visibleReplies.length > 0}
-            <AlternatingBackground class="absolute -left-4 -top-4 h-20 w-[2px]" />
-          {/if}
-        {:else if visibleReplies.length > 0}
-          <AlternatingBackground class="absolute -left-4 -top-4 h-8 w-[2px]" />
-        {/if}
-        {#if visibleReplies.length}
-          <div in:fly={{y: 20}} class="-mb-2">
-            {#each visibleReplies as r, i (r.id)}
-              <svelte:self
-                isLastReply={i === visibleReplies.length - 1}
-                showParent={false}
-                showMuted
-                note={r}
-                depth={depth - 1}
-                context={ctx}
-                {anchor} />
-            {/each}
           </div>
-        {/if}
-        {#if showEntire && mutedReplies.length > 0}
-          <button
-            class="ml-5 cursor-pointer py-2 text-lightest outline-0"
-            on:click={() => {
-              showMutedReplies = true
-            }}>
-            <i class="fa fa-up-down pr-2 text-sm" />
-            Show {quantify(mutedReplies.length, "hidden reply", "hidden replies")}
-          </button>
-        {/if}
+        </Card>
       </div>
-    {/if}
+
+      {#if !replyIsActive && visibleReplies.length > 0 && !showEntire && depth > 0}
+        <div class="relative">
+          <div
+            class="absolute right-0 top-0 -mr-2 -mt-4 flex h-6 w-6 cursor-pointer items-center
+                   justify-center rounded-full border border-solid border-mid bg-dark text-lightest"
+            on:click={() => {
+              collapsed = !collapsed
+            }}>
+            <Popover triggerType="mouseenter">
+              <div slot="trigger">
+                {#if collapsed}
+                  <i class="fa fa-xs fa-up-right-and-down-left-from-center" />
+                {:else}
+                  <i class="fa fa-xs fa-down-left-and-up-right-to-center" />
+                {/if}
+              </div>
+              <div slot="tooltip">
+                {collapsed ? "Show replies" : "Hide replies"}
+              </div>
+            </Popover>
+          </div>
+        </div>
+      {/if}
+
+      <NoteReply
+        {addToContext}
+        parent={event}
+        showBorder={visibleReplies.length > 0}
+        bind:this={reply}
+        on:start={() => {
+          replyIsActive = true
+        }}
+        on:reset={() => {
+          replyIsActive = false
+        }}
+        on:event={e => {
+          ctx = [e.detail, ...ctx]
+        }} />
+
+      {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
+        <div class="note-children relative ml-4 mt-2 flex flex-col">
+          {#if hiddenReplies.length > 0}
+            <button
+              class="mb-2 mt-2 cursor-pointer rounded-md bg-gradient-to-l from-transparent to-cocoa py-2 text-lightest outline-0 transition-colors hover:bg-cocoa"
+              on:click={() => {
+                showEntire = true
+              }}>
+              <i class="fa fa-up-down pr-2 text-sm" />
+              Show {quantify(hiddenReplies.length, "other reply", "more replies")}
+            </button>
+            {#if visibleReplies.length > 0}
+              <AlternatingBackground class="absolute -left-4 -top-4 h-20 w-[2px]" />
+            {/if}
+          {:else if visibleReplies.length > 0}
+            <AlternatingBackground class="absolute -left-4 -top-4 h-8 w-[2px]" />
+          {/if}
+          {#if visibleReplies.length}
+            <div in:fly={{y: 20}} class="-mb-2">
+              {#each visibleReplies as r, i (r.id)}
+                <svelte:self
+                  isLastReply={i === visibleReplies.length - 1}
+                  showParent={false}
+                  showMuted
+                  note={r}
+                  depth={depth - 1}
+                  context={ctx}
+                  {anchor} />
+              {/each}
+            </div>
+          {/if}
+          {#if showEntire && mutedReplies.length > 0}
+            <button
+              class="ml-5 cursor-pointer py-2 text-lightest outline-0"
+              on:click={() => {
+                showMutedReplies = true
+              }}>
+              <i class="fa fa-up-down pr-2 text-sm" />
+              Show {quantify(mutedReplies.length, "hidden reply", "hidden replies")}
+            </button>
+          {/if}
+        </div>
+      {/if}
+    </div>
   </div>
 {:else if showLoading}
   <Spinner />

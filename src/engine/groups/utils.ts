@@ -2,7 +2,7 @@ import {prop, uniqBy, defaultTo, sortBy, last, whereEq} from "ramda"
 import {ellipsize, first, seconds} from "hurdak"
 import {Tags} from "paravel"
 import {Naddr} from "src/util/nostr"
-import type {GroupStatus} from "src/engine/session/model"
+import type {GroupStatus, Session} from "src/engine/session/model"
 import {pubkey} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {getUserRelayUrls, getGroupHints, mergeHints} from "src/engine/relays/utils"
@@ -66,9 +66,19 @@ export const getGroupReqInfo = (address = null) => {
     recipients.push(key.pubkey)
   }
 
-  const relays = mergeHints([getUserRelayUrls("read"), ...addresses.map(getGroupHints)])
+  const relays = mergeHints([...addresses.map(getGroupHints), getUserRelayUrls("read")])
 
   return {admins, recipients, relays, since}
+}
+
+export const getCommunityReqInfo = (address = null) => {
+  const {groups, groups_last_synced} = session.get() || {}
+  const since = groups?.[address]?.last_synced || groups_last_synced || 0
+
+  return {
+    since: since - seconds(6, "hour"),
+    relays: mergeHints([getGroupHints(address), getUserRelayUrls("read")]),
+  }
 }
 
 export const deriveSharedKeyForGroup = (address: string) =>
@@ -78,21 +88,30 @@ export const deriveSharedKeyForGroup = (address: string) =>
 
 export const deriveAdminKeyForGroup = (address: string) => groupAdminKeys.key(address.split(":")[1])
 
+export const getGroupStatus = (session, address) =>
+  (session?.groups?.[address] || {}) as GroupStatus
+
 export const deriveGroupStatus = address =>
-  session.derived($session => ($session?.groups?.[address] || {}) as GroupStatus)
+  session.derived($session => getGroupStatus($session, address))
+
+export const getIsGroupMember = (session, address) => {
+  const status = getGroupStatus(session, address)
+
+  if (address.startsWith("34550:")) {
+    return status.joined
+  }
+
+  if (address.startsWith("35834:")) {
+    return status.access === GroupAccess.Granted
+  }
+
+  return false
+}
 
 export const deriveIsGroupMember = address =>
-  deriveGroupStatus(address).derived(s => {
-    if (address.startsWith("34550:")) {
-      return s.joined
-    }
+  session.derived($session => getIsGroupMember($session, address))
 
-    if (address.startsWith("35834:")) {
-      return s.access === GroupAccess.Granted
-    }
-  })
-
-export const deriveGroupOptions = defaultGroups =>
+export const deriveGroupOptions = (defaultGroups = []) =>
   session.derived($session => {
     const options = []
 
@@ -111,16 +130,19 @@ export const deriveGroupOptions = defaultGroups =>
     return uniqBy(prop("address"), options)
   })
 
-export const deriveUserGroups = () =>
-  session.derived($session => {
-    return Object.entries($session.groups)
-      .filter(([a, s]) => s.joined && a.startsWith("35834:"))
-      .map(first)
-  })
+export const getUserCircles = (session: Session) =>
+  Object.entries(session?.groups || {})
+    .filter(([a, s]) => deriveIsGroupMember(a).get())
+    .map<string>(first)
 
-export const deriveUserCommunities = () =>
-  session.derived($session => {
-    return Object.entries($session.groups)
-      .filter(([a, s]) => s.joined && a.startsWith("34550:"))
-      .map(first)
-  })
+export const deriveUserCircles = () => session.derived(getUserCircles)
+
+export const getUserGroups = (session: Session) =>
+  getUserCircles(session).filter(a => a.startsWith("35834:"))
+
+export const deriveUserGroups = () => session.derived(getUserGroups)
+
+export const getUserCommunities = (session: Session) =>
+  getUserCircles(session).filter(a => a.startsWith("34550:"))
+
+export const deriveUserCommunities = () => session.derived(getUserCommunities)

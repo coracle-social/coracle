@@ -22,9 +22,9 @@
           Group invitation
         {/if}
       </p>
-      <small class="text-lighter">
+      <span class="text-sm">
         {formatTimestamp(alert.created_at)}
-      </small>
+      </span>
     </div>
     <p>
       The admin of

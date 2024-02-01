@@ -57,13 +57,13 @@
       .push({key: getKey(router.current.get())})
 
   onMount(() => {
-    loadGroups([address], relays || info.relays)
+    loadGroups([address], relays)
 
     updateCurrentSession(assocPath(["groups", address, "last_synced"], now()))
 
     if (address.startsWith("35834:")) {
       const sub = subscribe({
-        relays: relays || info.relays,
+        relays,
         filters: [{kinds: [1059, 1060], "#p": info.recipients, since: info.since}],
       })
 
@@ -74,6 +74,8 @@
   $: ({rgb, rgba} = $themeBackgroundGradient)
 
   let tabs
+
+  $: relays = relays || info.relays
 
   $: {
     tabs = ["notes"]

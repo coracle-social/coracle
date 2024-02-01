@@ -47,7 +47,7 @@ export const searchPeople = derived(
       }
 
       return doPipe(fuse.search(term), [
-        sortBy((r: any) => (r.score - 1) * Math.sqrt(Math.max(0, r.item.score))),
+        sortBy((r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100)),
         map((r: any) => r.item.person),
       ])
     }

@@ -7,7 +7,7 @@ export const loadPeople = debounce(500, search => {
   if (search.length > 2) {
     load({
       relays: searchableRelays.get(),
-      filters: [{kinds: [0], search, limit: 10}],
+      filters: [{kinds: [0], search, limit: 100}],
     })
   }
 })
