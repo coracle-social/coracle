@@ -95,7 +95,7 @@
     <i slot="before" class="fa fa-search" />
     <i slot="after" class="fa fa-qrcode cursor-pointer" on:click={startScanner} />
   </Input>
-  <SearchResults replace term={$searchTerm}>
+  <SearchResults replace term={searchTerm}>
     <div slot="result" let:result>
       {#if result.type === "topic"}
         <Card interactive>

@@ -1,5 +1,4 @@
 import Bugsnag from "@bugsnag/js"
-import {writable} from "svelte/store"
 import {hash, union} from "hurdak"
 import {now} from "paravel"
 import {warn} from "src/util/logger"
@@ -10,6 +9,7 @@ import {
   pool,
   pubkey,
   session,
+  writable,
   loadSeen,
   loadDeletes,
   loadPubkeys,

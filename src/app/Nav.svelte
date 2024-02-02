@@ -60,12 +60,12 @@
           on:keydown={onSearchKeydown}
           bind:element={searchInput}
           bind:value={$searchTerm} />
-        <Anchor button class="z-feature -ml-2 !text-warm !bg-cocoa border-none">Search</Anchor>
+        <Anchor button class="z-feature -ml-2 border-none !bg-cocoa !text-warm">Search</Anchor>
       </div>
       {#if $searchTerm}
         <div
           class="absolute right-0 top-10 max-h-[70vh] w-96 overflow-auto rounded bg-cocoa shadow-2xl">
-          <SearchResults term={$searchTerm}>
+          <SearchResults term={searchTerm}>
             <div slot="result" let:result class="px-4 py-2 transition-colors hover:bg-dark">
               {#if result.type === "topic"}
                 #{result.topic.name}

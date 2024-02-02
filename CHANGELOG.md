@@ -5,6 +5,7 @@
 - [x] Require signer on some routes
 - [x] Add group notes to group notifications
 - [x] Add badges to all notification page tabs
+- [x] Use better search algorithm and show loaded profiles in global search
 
 # 0.4.1
 
