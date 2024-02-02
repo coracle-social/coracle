@@ -26,7 +26,7 @@
   const scroller = createScroller(loadMore, {element: getModal()})
 
   const groupList = derived([groups, session], ([$groups, $session]) => {
-    const [joined, other] = partition(g => deriveIsGroupMember(g.address).get(), $groups)
+    const [joined, other] = partition(g => deriveIsGroupMember(g.address, true).get(), $groups)
 
     return {joined, other}
   })

@@ -94,7 +94,7 @@ export const getGroupStatus = (session, address) =>
 export const deriveGroupStatus = address =>
   session.derived($session => getGroupStatus($session, address))
 
-export const getIsGroupMember = (session, address) => {
+export const getIsGroupMember = (session, address, includeRequests = false) => {
   const status = getGroupStatus(session, address)
 
   if (address.startsWith("34550:")) {
@@ -102,14 +102,18 @@ export const getIsGroupMember = (session, address) => {
   }
 
   if (address.startsWith("35834:")) {
+    if (includeRequests && status.access === GroupAccess.Requested) {
+      return true
+    }
+
     return status.access === GroupAccess.Granted
   }
 
   return false
 }
 
-export const deriveIsGroupMember = address =>
-  session.derived($session => getIsGroupMember($session, address))
+export const deriveIsGroupMember = (address, includeRequests = false) =>
+  session.derived($session => getIsGroupMember($session, address, includeRequests))
 
 export const deriveGroupOptions = (defaultGroups = []) =>
   session.derived($session => {
