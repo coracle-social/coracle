@@ -2,7 +2,7 @@ import {now} from "paravel"
 import {seconds} from "hurdak"
 import {Naddr, noteKinds, repostKinds} from "src/util/nostr"
 import {load} from "src/engine/network/utils"
-import {getUserHints} from "src/engine/relays/utils"
+import {selectHintsWithFallback} from "src/engine/relays/utils"
 import {updateCurrentSession} from "src/engine/session/commands"
 import {groups} from "./state"
 import {
@@ -44,7 +44,7 @@ export const loadGroups = async (rawAddrs: string[], relays: string[] = null) =>
 
   if (naddrs.length > 0) {
     load({
-      relays: relays || getUserHints("read"),
+      relays: selectHintsWithFallback(relays),
       filters: [{kinds: [34550, 35834], authors, "#d": identifiers}],
     })
   }
@@ -59,11 +59,11 @@ export const loadGroupMessages = async () => {
   }
 
   for (const address of deriveUserCommunities().get()) {
-    const info = getCommunityReqInfo(address)
+    const {relays, ...info} = getCommunityReqInfo(address)
     const kinds = [...noteKinds, ...repostKinds]
     const since = Math.max(now() - seconds(7, "day"), info.since)
 
-    load({relays: info.relays, filters: [{kinds, "#a": [address], since}]})
+    load({relays, filters: [{kinds, "#a": [address], since}]})
   }
 
   updateCurrentSession($session => {

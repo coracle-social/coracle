@@ -2,6 +2,7 @@ import "src/app.css"
 
 import {identity} from "ramda"
 import {Fetch} from "hurdak"
+import {normalizeRelayUrl} from "paravel"
 import Bugsnag from "@bugsnag/js"
 import {tryFetch} from "src/util/misc"
 import {env, saveRelay} from "src/engine"
@@ -39,11 +40,13 @@ const NIP96_URLS = fromCsv(import.meta.env.VITE_NIP96_URLS)
 
 const FORCE_GROUP = import.meta.env.VITE_FORCE_GROUP
 
-const DVM_RELAYS = fromCsv(import.meta.env.VITE_DVM_RELAYS)
+const FORCE_RELAYS = fromCsv(import.meta.env.VITE_FORCE_RELAYS).map(normalizeRelayUrl)
 
-const SEARCH_RELAYS = ["wss://relay.nostr.band", "wss://nostr.wine", "wss://search.nos.today"]
+const DVM_RELAYS = fromCsv(import.meta.env.VITE_DVM_RELAYS).map(normalizeRelayUrl)
 
-const DEFAULT_RELAYS = fromCsv(import.meta.env.VITE_DEFAULT_RELAYS)
+const SEARCH_RELAYS = fromCsv(import.meta.env.VITE_SEARCH_RELAYS).map(normalizeRelayUrl)
+
+const DEFAULT_RELAYS = fromCsv(import.meta.env.VITE_DEFAULT_RELAYS).map(normalizeRelayUrl)
 
 const DEFAULT_FOLLOWS = fromCsv(import.meta.env.VITE_DEFAULT_FOLLOWS)
 
@@ -62,6 +65,7 @@ env.set({
   DUFFLEPUD_URL,
   MULTIPLEXTR_URL,
   FORCE_GROUP,
+  FORCE_RELAYS,
   DVM_RELAYS,
   SEARCH_RELAYS,
   DEFAULT_RELAYS,

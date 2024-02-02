@@ -3,7 +3,7 @@ import {first} from "hurdak"
 import {cached, Tags} from "paravel"
 import {derived} from "src/engine/core/utils"
 import {load} from "src/engine/network/utils"
-import {getUserRelayUrls} from "src/engine/relays/utils"
+import {getUserHints} from "src/engine/relays/utils"
 import {follows} from "src/engine/people/derived"
 import {handlers, handlerRecs} from "./state"
 
@@ -14,7 +14,7 @@ export const deriveHandlers = cached({
     const $follows = follows.get()
 
     load({
-      relays: getUserRelayUrls("read"),
+      relays: getUserHints("read"),
       filters: [
         {kinds: [31989], "#d": [String(kind)], authors: Array.from($follows)},
         {kinds: [31990], "#k": [String(kind)]},

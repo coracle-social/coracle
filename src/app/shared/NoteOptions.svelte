@@ -13,7 +13,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {getGroupPublishHints, deriveGroupOptions, displayRelay} from "src/engine"
+  import {env, getGroupPublishHints, deriveGroupOptions, displayRelay} from "src/engine"
 
   export let hideFields = []
   export let initialValues: {
@@ -98,7 +98,7 @@
             </div>
           </Field>
         {/if}
-        {#if !hideFields.includes("relays")}
+        {#if !hideFields.includes("relays") && $env.FORCE_RELAYS.length === 0}
           <Field icon="fa-database" label="Select which relays to publish to">
             <div>
               {#each values.relays as url}

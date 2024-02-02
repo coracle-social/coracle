@@ -3,6 +3,7 @@ import {Tags, isShareableRelay, normalizeRelayUrl as normalize, fromNostrURI} fr
 import {sortBy, whereEq, pluck, uniq, nth, prop, last} from "ramda"
 import {chain, displayList, first} from "hurdak"
 import {fuzzy} from "src/util/misc"
+import {warn} from "src/util/logger"
 import {LOCAL_RELAY_URL, Naddr} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import {env} from "src/engine/session/state"
@@ -102,6 +103,7 @@ export const getGroupRelayUrls = address => {
 // 5) Advertise relays — write and read back your own relay list
 
 export const selectHints = (hints: Iterable<string>, limit: number = null) => {
+  const {FORCE_RELAYS} = env.get()
   const seen = new Set()
   const ok = []
   const bad = []
@@ -110,7 +112,7 @@ export const selectHints = (hints: Iterable<string>, limit: number = null) => {
     limit = getSetting("relay_limit")
   }
 
-  for (const url of chain(hints, getUserRelayUrls(RelayMode.Read), env.get().DEFAULT_RELAYS)) {
+  for (const url of FORCE_RELAYS.length > 0 ? FORCE_RELAYS : hints) {
     if (seen.has(url)) {
       continue
     }
@@ -135,8 +137,17 @@ export const selectHints = (hints: Iterable<string>, limit: number = null) => {
   }
 
   // If we don't have enough hints, use the broken ones
-  return ok.concat(bad).slice(0, limit)
+  const result = ok.concat(bad).slice(0, limit)
+
+  if (result.length === 0) {
+    warn("No results returned from selectHints")
+  }
+
+  return result
 }
+
+export const selectHintsWithFallback = (hints: Iterable<string> = null, limit = null) =>
+  selectHints(chain(hints || [], getUserRelayUrls(RelayMode.Read), env.get().DEFAULT_RELAYS), limit)
 
 export class HintSelector {
   constructor(
@@ -219,7 +230,7 @@ export const getPublishHints = hintSelector(function* (event: Event) {
   const hintGroups = pubkeys.map(pubkey => getPubkeyRelayUrls(pubkey, RelayMode.Read))
   const authorRelays = getPubkeyRelayUrls(event.pubkey, RelayMode.Write)
 
-  yield* mergeHints([...hintGroups, authorRelays, getUserRelayUrls(RelayMode.Write)])
+  yield* mergeHints([...hintGroups, authorRelays, getUserHints(RelayMode.Write)])
 })
 
 export const getInboxHints = hintSelector(function* (pubkeys: string[]) {
@@ -234,7 +245,7 @@ export const getGroupHints = hintSelector(function* (address: string) {
 export const getGroupPublishHints = (addresses: string[]) => {
   const urls = mergeHints(addresses.map(getGroupRelayUrls))
 
-  return urls.length === 0 ? getUserRelayUrls("write") : urls
+  return urls.length === 0 ? getUserHints("write") : urls
 }
 
 export const mergeHints = (groups: string[][], limit: number = null) => {

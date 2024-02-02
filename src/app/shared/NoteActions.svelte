@@ -204,7 +204,7 @@
       }
     }
 
-    if (!$env.FORCE_GROUP && !note.wrap) {
+    if (!$env.FORCE_GROUP && $env.FORCE_RELAYS.length === 0 && !note.wrap) {
       actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
     }
 
@@ -318,7 +318,7 @@
           {/each}
         </div>
       {/if}
-      {#if note.seen_on.length > 0}
+      {#if note.seen_on.length > 0 && $env.FORCE_RELAYS.length < 2}
         <h1 class="staatliches text-2xl">Relays</h1>
         <p>This note was found on {quantify(note.seen_on.length, "relay")} below.</p>
         <div class="flex flex-col gap-2">

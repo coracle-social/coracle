@@ -24,6 +24,7 @@
     displayGroup,
     session,
     subscribe,
+    loadPubkeys,
     publishGroupEntryRequest,
     groupRequests,
     deriveGroup,
@@ -76,6 +77,7 @@
   let tabs
 
   $: relays = relays || info.relays
+  $: loadPubkeys($group.members || [])
 
   $: {
     tabs = ["notes"]

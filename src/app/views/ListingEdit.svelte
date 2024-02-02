@@ -18,7 +18,7 @@
   import Compose from "src/app/shared/Compose.svelte"
   import {router} from "src/app/router"
   import {toastProgress} from "src/app/state"
-  import {dereferenceNote, publishToZeroOrMoreGroups, getUserRelayUrls} from "src/engine"
+  import {dereferenceNote, publishToZeroOrMoreGroups, getUserHints} from "src/engine"
 
   export let address
   export let event
@@ -41,7 +41,7 @@
     builder.setImages(images.getValue())
 
     const {pubs} = await publishToZeroOrMoreGroups(values.groups, builder.template, {
-      relays: getUserRelayUrls("write"),
+      relays: getUserHints("write"),
     })
 
     pubs[0].on("progress", toastProgress)

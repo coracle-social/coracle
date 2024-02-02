@@ -7,6 +7,7 @@ import logger from "src/util/logger"
 import {getSetting} from "src/engine/session/utils"
 import type {Event} from "src/engine/events/model"
 import {mergeHints} from "src/engine/relays/utils"
+import {getUrls} from "src/engine/network/utils"
 import type {Filter} from "../model"
 import {combineFilters} from "./filters"
 import {subscribe} from "./subscribe"
@@ -119,6 +120,9 @@ export const load = (request: LoadOpts) => {
 
   const result = defer()
   const tracker = new Tracker()
+
+  // Just a dumb hack to get a warning about relay urls before we lose the stack trace
+  getUrls(request.relays)
 
   execute({tracker, request, result, results: []})
 

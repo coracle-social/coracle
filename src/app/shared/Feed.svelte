@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {Storage} from "hurdak"
-  import {uniq} from 'ramda'
+  import {uniq} from "ramda"
   import {FeedLoader} from "src/engine"
   import {createScroller} from "src/util/misc"
   import {LOCAL_RELAY_URL} from "src/util/nostr"
@@ -14,6 +14,7 @@
   import {
     readable,
     writable,
+    selectHints,
     compileFilters,
     searchableRelays,
     getRelaysFromFilters,
@@ -56,7 +57,7 @@
 
     feed = new FeedLoader({
       filters: compileFilters([filter], {includeReposts: true}),
-      relays: getRelays(),
+      relays: selectHints(getRelays()),
       anchor,
       shouldListen,
       shouldDefer: true,

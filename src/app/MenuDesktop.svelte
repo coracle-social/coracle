@@ -58,7 +58,7 @@
     <h1 class="staatliches text-4xl leading-none">{appName}</h1>
   </Anchor>
   <MenuDesktopItem path="/notes">Feed</MenuDesktopItem>
-  {#if !$env.FORCE_GROUP}
+  {#if !$env.FORCE_GROUP && $env.FORCE_RELAYS.length === 0}
     <MenuDesktopItem path="/settings/relays">
       <div class="relative inline-block">
         Relays

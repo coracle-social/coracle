@@ -12,6 +12,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {router} from "src/app/router"
   import {
+    env,
     userLists,
     searchPeople,
     searchTopics,
@@ -99,17 +100,19 @@
         </SearchSelect>
         <p slot="info">Type "@" to look for people, and "#" to look for topics.</p>
       </Field>
-      <Field label="Relays">
-        <SearchSelect multiple search={searchRelayTags} bind:value={values.relays}>
-          <div slot="item" let:item>
-            {displayRelay({url: item[1]})}
-          </div>
-        </SearchSelect>
-        <p slot="info">
-          Select which relays to limit this list to. If you leave this blank, your default relays
-          will be used.
-        </p>
-      </Field>
+      {#if $env.FORCE_RELAYS.length === 0}
+        <Field label="Relays">
+          <SearchSelect multiple search={searchRelayTags} bind:value={values.relays}>
+            <div slot="item" let:item>
+              {displayRelay({url: item[1]})}
+            </div>
+          </SearchSelect>
+          <p slot="info">
+            Select which relays to limit this list to. If you leave this blank, your default relays
+            will be used.
+          </p>
+        </Field>
+      {/if}
       <Anchor button tag="button" type="submit">Save</Anchor>
     </div>
   </FlexColumn>

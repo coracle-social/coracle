@@ -1,10 +1,11 @@
-import {max, partition, equals} from "ramda"
+import {max, without, uniq, partition, equals} from "ramda"
 import {noop, pickVals} from "hurdak"
 import {Plex, Relays, Executor, Multi, createEvent} from "paravel"
 import {error, warn} from "src/util/logger"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {normalizeRelayUrl} from "src/engine/relays/utils"
 import {pool} from "src/engine/network/state"
+import {env} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
 import {signer, canSign} from "src/engine/session/derived"
 import {LocalTarget} from "./targets"
@@ -14,13 +15,20 @@ export const getUrls = (relays: string[]) => {
     error(`Attempted to connect to zero urls`)
   }
 
-  const urls = new Set(relays.map(normalizeRelayUrl))
+  const urls = uniq(relays.map(normalizeRelayUrl))
 
-  if (urls.size !== relays.length) {
+  if (urls.length !== relays.length) {
     warn(`Attempted to connect to non-unique relays`)
   }
 
-  return Array.from(urls)
+  const {FORCE_RELAYS} = env.get()
+  const nonLocalRelays = without([LOCAL_RELAY_URL], urls)
+
+  if (FORCE_RELAYS.length > 0 && nonLocalRelays.some(url => !FORCE_RELAYS.includes(url))) {
+    warn(`Attempted to connect to something other than FORCE_RELAYS`, urls)
+  }
+
+  return urls
 }
 
 export const getTarget = (urls: string[]) => {
