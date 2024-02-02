@@ -1,9 +1,11 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
-  import {createScroller} from 'src/util/misc'
-  import {getModal} from 'src/partials/state'
+  import {onMount} from "svelte"
+  import {flatten, partition} from "ramda"
+  import {createScroller} from "src/util/misc"
+  import {getModal} from "src/partials/state"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
+  import {loadPubkeys, derivePerson, personHasName} from "src/engine"
 
   export let pubkeys
 
@@ -12,6 +14,8 @@
   const loadMore = async () => {
     limit += 10
   }
+
+  const hasName = pubkey => personHasName(derivePerson(pubkey).get())
 
   onMount(() => {
     const scroller = createScroller(loadMore, {
@@ -24,10 +28,15 @@
       scroller.stop()
     }
   })
+
+  $: [withName, withoutName] = partition(hasName, pubkeys)
+  $: sorted = flatten([...withName, ...withoutName])
+  $: results = sorted.slice(0, limit)
+  $: loadPubkeys(results.filter(pubkey => !hasName(pubkey)))
 </script>
 
 <FlexColumn>
-  {#each pubkeys.slice(0, limit) as pubkey (pubkey)}
+  {#each results as pubkey (pubkey)}
     <PersonSummary {pubkey} />
   {/each}
 </FlexColumn>
