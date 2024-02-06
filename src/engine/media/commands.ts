@@ -33,7 +33,7 @@ export const uploadFileToHost = async (url, file) => {
     const {status, nip94_event} = await nip98Fetch(response.processing_url, "GET")
 
     if (status === "success") {
-      return Tags.from(nip94_event).type("url").values().first()
+      return nip94_event
     }
 
     if (now() - startTime > 60) {
