@@ -384,7 +384,7 @@ export class Router {
         $history.splice(0, 1)
       }
 
-      globalHistory.navigate($history[0].path)
+      globalHistory.navigate($history[0]?.path || "/")
 
       return $history
     })

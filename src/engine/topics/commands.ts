@@ -5,7 +5,7 @@ import {topics} from "./state"
 
 export const addTopic = (e, name) => {
   if (name) {
-    const topic = topics.key(name)
+    const topic = topics.key(name.toLowerCase())
 
     topic.merge({
       count: inc(topic.get()?.count || 0),

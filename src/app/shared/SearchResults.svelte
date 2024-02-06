@@ -1,9 +1,9 @@
 <script lang="ts">
-  import Fuse from "fuse.js"
   import {tryFunc} from "hurdak"
   import {fromNostrURI} from "paravel"
   import {throttle} from "throttle-debounce"
   import {nip05, nip19} from "nostr-tools"
+  import {fuzzy} from "src/util/misc"
   import {isHex} from "src/util/nostr"
   import {router} from "src/app/router"
   import type {Person, Topic} from "src/engine"
@@ -59,7 +59,7 @@
 
   const searchTopics = topics
     .throttle(1000)
-    .derived($topics => new Fuse($topics, {keys: ["name"], threshold: 0.5, shouldSort: true}))
+    .derived($topics => fuzzy($topics, {keys: ["name"], threshold: 0.5, shouldSort: true}))
 
   const results = derived<{type: string; id: string; person?: Person; topic?: Topic}[]>(
     [term, searchTopics, searchPeople],
@@ -76,7 +76,11 @@
     },
   )
 
-  $: loadPeople($term)
+  $: {
+    if ($term) {
+      loadPeople($term)
+    }
+  }
 
   primeWotCaches($pubkey)
 </script>

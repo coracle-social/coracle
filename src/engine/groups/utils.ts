@@ -15,7 +15,7 @@ export const getGroupNaddr = (group: Group) =>
 
 export const getGroupId = (group: Group) => group.address.split(":").slice(2).join(":")
 
-export const getGroupName = (group: Group) => group.meta?.name || group.id
+export const getGroupName = (group: Group) => group.meta?.name || group.id || ""
 
 export const displayGroup = (group: Group) => ellipsize(group ? getGroupName(group) : "No name", 60)
 
