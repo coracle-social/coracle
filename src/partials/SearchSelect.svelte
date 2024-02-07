@@ -1,4 +1,5 @@
 <script lang="ts">
+  import cx from "classnames"
   import {reject, equals, identity} from "ramda"
   import Chip from "src/partials/Chip.svelte"
   import Input from "src/partials/Input.svelte"
@@ -6,6 +7,8 @@
   import Suggestions from "src/partials/Suggestions.svelte"
 
   export let value
+  export let inputClass = ""
+  export let inputWrapperClass = ""
   export let placeholder = ""
   export let delimiters = []
   export let search = null
@@ -19,8 +22,12 @@
   let input, suggestions, popover
   let focused = Boolean(autofocus)
 
+  $: suggestions?.setData(term ? search(term).slice(0, 10) : defaultOptions)
+
   $: {
-    suggestions?.setData(term ? search(term).slice(0, 10) : defaultOptions)
+    if (term) {
+      popover?.show()
+    }
   }
 
   $: {
@@ -122,7 +129,8 @@
   opts={{maxWidth: "none"}}>
   <div slot="trigger">
     <Input
-      class="cursor-text text-black outline-0"
+      class={cx(inputClass, "cursor-text text-black outline-0")}
+      wrapperClass={inputWrapperClass}
       {autofocus}
       {placeholder}
       bind:value={term}
@@ -132,7 +140,7 @@
       on:blur={onBlur}
       hideBefore={!$$slots.before}>
       <slot slot="before" name="before" />
-      <div slot="after" on:click={() => input.focus()}>
+      <div slot="after" on:click={onFocus}>
         {#if defaultOptions.length > 0}
           <div class="cursor-pointer">
             <i class="fa fa-caret-down" />

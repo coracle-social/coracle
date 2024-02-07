@@ -178,7 +178,7 @@ export const getEventHints = hintSelector(function* (event: Event) {
   }
 
   yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Write)
-  yield* event.seen_on.filter(isShareableRelay)
+  yield* event.seen_on?.filter(isShareableRelay) || []
 })
 
 export const getEventHint = (event: Event) => first(getEventHints.limit(1).getHints(event)) || ""

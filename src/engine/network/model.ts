@@ -12,3 +12,9 @@ export type Filter = {
 export type DynamicFilter = Omit<Filter, "authors"> & {
   authors?: string[] | "follows" | "network" | "global"
 }
+
+export type NostrConnectHandler = {
+  pubkey: string
+  domain: string
+  relays: string[]
+}

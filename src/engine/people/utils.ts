@@ -9,7 +9,7 @@ import {getPubkeyHints} from "src/engine/relays/utils"
 import type {Person, Handle} from "./model"
 import {people} from "./state"
 
-export const fetchHandle = createBatcher(3000, async (handles: string[]) => {
+export const fetchHandle = createBatcher(500, async (handles: string[]) => {
   const data =
     (await tryFunc(async () => {
       const res = await Fetch.postJson(dufflepud("handle/info"), {handles: uniq(handles)})

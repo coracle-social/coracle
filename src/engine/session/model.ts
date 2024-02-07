@@ -1,5 +1,6 @@
 import type {Event} from "src/engine/events/model"
 import type {GroupAccess} from "src/engine/groups/model"
+import type {NostrConnectHandler} from "src/engine/network/model"
 
 export type GroupStatus = {
   joined: GroupAccess
@@ -16,6 +17,8 @@ export type Session = {
   bunkerKey?: string
   bunkerToken?: string
   bunkerRelay?: string
+  connectKey?: string
+  connectHandler?: NostrConnectHandler
   kind3?: Event
   kind3_updated?: string
   settings?: Record<string, any>

@@ -1,7 +1,9 @@
 import {omit, assoc} from "ramda"
 import {generatePrivateKey, getPublicKey, appDataKeys} from "src/util/nostr"
-import {createAndPublish} from "src/engine/network/utils"
+import type {NostrConnectHandler} from "src/engine/network/model"
+import {createAndPublish, NostrConnectBroker} from "src/engine/network/utils"
 import {people} from "src/engine/people/state"
+import {getHandle} from "src/engine/people/utils"
 import type {Session} from "./model"
 import {sessions, pubkey} from "./state"
 import {canSign, nip04, session} from "./derived"
@@ -21,6 +23,20 @@ export const loginWithExtension = pubkey => addSession({method: "extension", pub
 
 export const loginWithNsecBunker = (pubkey, bunkerToken, bunkerRelay) =>
   addSession({method: "bunker", pubkey, bunkerKey: generatePrivateKey(), bunkerToken, bunkerRelay})
+
+export const loginWithNostrConnect = async (username, connectHandler: NostrConnectHandler) => {
+  const connectKey = generatePrivateKey()
+  const profile = await getHandle(`${username}@${connectHandler.domain}`)
+  const broker = NostrConnectBroker.get(profile.pubkey, connectKey, connectHandler)
+
+  if (profile.pubkey) {
+    console.log(await broker.connect())
+  } else {
+    console.log(await broker.createAccount(username))
+  }
+
+  // addSession({method: "connect", pubkey, connectKey, connectHandler})
+}
 
 export const logoutPubkey = pubkey => {
   if (session.get().pubkey === pubkey) {
