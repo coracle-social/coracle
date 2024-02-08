@@ -3,10 +3,9 @@
   import {sortBy, inc} from "ramda"
   import {closure, first, sleep} from "hurdak"
   import {generatePrivateKey} from "src/util/nostr"
+  import FlexColumn from 'src/partials/FlexColumn.svelte'
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
-  import OnboardingKey from "src/app/views/OnboardingKey.svelte"
-  import OnboardingRelays from "src/app/views/OnboardingRelays.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
   import {
@@ -19,7 +18,6 @@
     publishNote,
     publishPetnames,
     publishProfile,
-    publishRelays,
     loginWithPrivateKey,
     listenForNotifications,
     getFollowedPubkeys,
@@ -115,18 +113,22 @@
   })
 </script>
 
-{#key stage}
-  {#if stage === "intro"}
-    <OnboardingIntro {setStage} />
-  {:else if stage === "profile"}
-    <OnboardingProfile {setStage} {profile} />
-  {:else if stage === "key"}
-    <OnboardingKey {setStage} {privkey} />
-  {:else if stage === "relays"}
-    <OnboardingRelays {setStage} bind:relays />
-  {:else if stage === "follows"}
-    <OnboardingFollows {setStage} bind:petnames />
-  {:else if stage === "note"}
-    <OnboardingNote {setStage} {signup} />
-  {/if}
-{/key}
+<FlexColumn class="mt-8">
+  {#key stage}
+    {#if stage === "intro"}
+      <OnboardingIntro {setStage} />
+    {:else if stage === "profile"}
+      <OnboardingProfile {setStage} {profile} />
+    {:else if stage === "follows"}
+      <OnboardingFollows {setStage} bind:petnames />
+    {:else if stage === "note"}
+      <OnboardingNote {setStage} {signup} />
+    {/if}
+  {/key}
+  <div class="flex gap-2 m-auto">
+    <div class="bg-mid rounded-full w-2 h-2" class:bg-lighter={stage === "intro"} />
+    <div class="bg-mid rounded-full w-2 h-2" class:bg-lighter={stage === "profile"} />
+    <div class="bg-mid rounded-full w-2 h-2" class:bg-lighter={stage === "follows"} />
+    <div class="bg-mid rounded-full w-2 h-2" class:bg-lighter={stage === "note"} />
+  </div>
+</FlexColumn>

@@ -1,6 +1,6 @@
 import {nip04, finalizeEvent} from 'nostr-tools'
 import {Emitter, Subscription, createEvent} from 'paravel'
-import {randomId} from "hurdak"
+import {randomId, sleep} from "hurdak"
 import {NostrConnect} from "nostr-tools/kinds"
 import {getPublicKey} from 'src/util/nostr'
 import {tryJson} from "src/util/misc"
@@ -28,7 +28,7 @@ export class NostrConnectBroker extends Emitter {
 
     this.#sub = subscribePersistent({
       relays: this.handler.relays,
-      filters: [{kinds: [NostrConnect, 24134], '#p': [getPublicKey(this.connectKey)]}],
+      filters: [{kinds: [NostrConnect], '#p': [getPublicKey(this.connectKey)]}],
       onEvent: async (e: Event) => {
         const json = await nip04.decrypt(this.connectKey, e.pubkey, e.content)
         const {id, result, error} = tryJson(() => JSON.parse(json)) || {error: "invalid-response"}
@@ -40,17 +40,18 @@ export class NostrConnectBroker extends Emitter {
     })
   }
 
-  async request(method: string, params: string[]) {
+  async request(method: string, params: string[], admin = false) {
     console.info('NostrConnect request:', method, params)
 
     const id = randomId()
-    const {relays, pubkey} = this.handler
+    const kind = admin ? 24134 : NostrConnect
+    const pubkey = admin ? this.handler.pubkey : this.pubkey
     const payload = JSON.stringify({id, method, params})
-    const content = await nip04.encrypt(this.connectKey, this.pubkey, payload)
-    const template = createEvent(NostrConnect, {content, tags: [["p", this.pubkey]]})
+    const content = await nip04.encrypt(this.connectKey, pubkey, payload)
+    const template = createEvent(NostrConnect, {content, tags: [["p", pubkey]]})
     const event = finalizeEvent(template, this.connectKey)
 
-    Publisher.publish({event, relays})
+    Publisher.publish({event, relays: this.handler.relays})
 
     return new Promise((resolve, reject) => {
       this.once(`response-${id}`, ({result, error}) => {
@@ -69,11 +70,11 @@ export class NostrConnectBroker extends Emitter {
   }
 
   connect() {
-    return this.request('connect', [this.pubkey])
+    return this.request('connect', [getPublicKey(this.connectKey)])
   }
 
   createAccount(username: string) {
-    return this.request('create_account', [username, this.handler.domain])
+    return this.request('create_account', [username, this.handler.domain], true)
   }
 
   teardown() {

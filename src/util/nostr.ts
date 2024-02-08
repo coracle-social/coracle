@@ -37,7 +37,7 @@ export const appDataKeys = {
 }
 
 export const isLike = (content: string) =>
-  ["", "+", "🤙", "👍", "❤️", "😎", "🏅", "🫂", "🤣", "😂", "💜"].includes(content)
+  ["", "+", "🤙", "👍", "❤️", "😎", "🏅", "🫂", "🤣", "😂", "💜", "🔥"].includes(content)
 
 export const channelAttrs = ["name", "about", "picture"]
 export const groupAttrs = ["name", "about", "picture"]

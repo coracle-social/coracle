@@ -10,7 +10,7 @@
   export let petnames
   export let setStage
 
-  const prev = () => setStage($env.FORCE_GROUP ? "key" : "relays")
+  const prev = () => setStage("profile")
   const next = () => setStage("note")
 
   const addFollow = pubkey => {
@@ -28,11 +28,11 @@
   $: results = reject((p: Person) => pubkeys.includes(p.pubkey), $searchPeople(q))
 </script>
 
-<Heading class="text-center">Find Your People</Heading>
-<p>
-  To get you started, we’ve added some interesting people to your follow list. You can update your
-  follows list at any time.
-</p>
+<div class="flex gap-3">
+  <p class="bg-light rounded-full w-12 h-12 -mt-2 -ml-1 flex justify-center items-center text-lg">3/4</p>
+  <p class="text-2xl font-bold">Find your people</p>
+</div>
+<p>Search for people and topics, or browse our top suggestions below.</p>
 <div class="flex gap-2">
   <Anchor button on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
   <Anchor button accent class="flex-grow" on:click={next}>Continue</Anchor>

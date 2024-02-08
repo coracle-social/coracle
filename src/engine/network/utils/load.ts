@@ -32,7 +32,7 @@ export type LoadItem = {
 
 const loadChunk = (chunk, relays, tracker) => {
   const filters = combineFilters(chunk.flatMap(getPath(["request", "filters"])))
-  const sub = subscribe({relays, filters, timeout: 15000, skipCache: true})
+  const sub = subscribe({relays, filters, timeout: 15000, skipCache: true, closeOnEose: true})
 
   const chunkResults = []
   for (const item of chunk) {

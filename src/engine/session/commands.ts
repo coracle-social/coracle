@@ -1,4 +1,5 @@
 import {omit, assoc} from "ramda"
+import {createEvent} from 'paravel'
 import {generatePrivateKey, getPublicKey, appDataKeys} from "src/util/nostr"
 import type {NostrConnectHandler} from "src/engine/network/model"
 import {createAndPublish, NostrConnectBroker} from "src/engine/network/utils"

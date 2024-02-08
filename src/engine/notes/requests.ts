@@ -44,6 +44,7 @@ export const dereferenceNote = async ({
 
       subscribe({
         timeout: 3000,
+        closeOnEose: true,
         relays: selectHints(relays),
         filters: [{kinds: [kind], authors: [pubkey], "#d": [identifier]}],
         onClose: () => resolve(note),

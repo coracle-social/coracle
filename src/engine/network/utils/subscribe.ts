@@ -1,7 +1,7 @@
 import type {SubscriptionOpts} from "paravel"
 import {Subscription, now} from "paravel"
 import {assoc, map} from "ramda"
-import {updateIn} from "hurdak"
+import {updateIn, sleep} from "hurdak"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import {deletes} from "src/engine/events/state"
@@ -25,7 +25,6 @@ export const subscribe = (opts: SubscribeOpts) => {
   const sub = new Subscription({
     ...opts,
     hasSeen: tracker.add,
-    closeOnEose: Boolean(opts.timeout),
     executor: getExecutor(getUrls(relays)),
     shouldValidate: (e, url) => {
       // Don't re-validate stuff from the cache
@@ -58,8 +57,11 @@ export const subscribe = (opts: SubscribeOpts) => {
 export const subscribePersistent = async (opts: SubscribeOpts) => {
   /* eslint no-constant-condition: 0 */
   while (true) {
-    const sub = subscribe(updateIn("filters", map(assoc("since", now())), opts))
-
-    await new Promise(resolve => sub.on("close", resolve))
+    console.log('========')
+    // If the subscription gets closed quickly due to eose, don't start flapping
+    await Promise.all([
+      sleep(30_000),
+      new Promise(resolve => subscribe(opts).on("close", resolve))
+    ])
   }
 }

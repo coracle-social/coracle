@@ -82,6 +82,7 @@ export const loadNotifications = () => {
     filters,
     timeout: 15000,
     skipCache: true,
+    closeOnEose: true,
     relays: getPubkeyHints(pubkey, "read"),
     onEvent: onNotificationEvent,
   })
@@ -94,16 +95,16 @@ export const listenForNotifications = async () => {
 
   const filters: Filter[] = [
     // Mentions
-    {kinds: noteKinds, "#p": [$session.pubkey], limit: 1},
+    {kinds: noteKinds, "#p": [$session.pubkey], limit: 1, since: now()},
     // Messages/groups
-    {kinds: [4, 1059, 1060], "#p": [$session.pubkey], limit: 1},
+    {kinds: [4, 1059, 1060], "#p": [$session.pubkey], limit: 1, since: now()},
     // Communities
-    {kinds: [...noteKinds, ...repostKinds], "#a": addrs, limit: 1},
+    {kinds: [...noteKinds, ...repostKinds], "#a": addrs, limit: 1, since: now()},
   ]
 
   // Replies
   if (eventIds.length > 0) {
-    filters.push({kinds: noteKinds, "#e": eventIds, limit: 1})
+    filters.push({kinds: noteKinds, "#e": eventIds, limit: 1, since: now()})
   }
 
   // Only grab one event from each category/relay so we have enough to show
@@ -111,6 +112,7 @@ export const listenForNotifications = async () => {
   subscribePersistent({
     filters,
     skipCache: true,
+    closeOnEose: true,
     relays: getPubkeyHints($session.pubkey, "read"),
     onEvent: onNotificationEvent,
   })

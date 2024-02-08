@@ -1,4 +1,5 @@
 <script lang="ts">
+  import cx from 'classnames'
   import {onMount} from "svelte"
   import {last, prop, objOf} from "ramda"
   import {Handlerinformation, NostrConnect} from "nostr-tools/kinds"
@@ -57,7 +58,9 @@
 
   const signUp = () => router.at("onboarding").replaceModal()
 
-  const useKeys = () => router.at("login/direct").replaceModal()
+  const usePrivateKey = () => router.at("login/privkey").replaceModal()
+
+  const usePublicKey = () => router.at("login/pubkey").replaceModal()
 
   let handlers = [
     {
@@ -133,16 +136,26 @@
     <div class="staatliches text-xl">Or</div>
     <div class="h-px flex-grow bg-mid" />
   </div>
-  <div class="relative flex justify-center gap-4">
+  <div class={cx("relative grid justify-center gap-2 xs:gap-8", getExtension() ? "grid-cols-3": "grid-cols-2")}>
     {#if getExtension()}
-      <Anchor button on:click={useExtension}>
-        <i class="fa fa-puzzle-piece" />
-        Extension
+      <Anchor button square low on:click={useExtension} class="flex-col gap-3 justify-center">
+        <div>
+          <i class="fa fa-puzzle-piece fa-xl" />
+        </div>
+        <span>Extension</span>
       </Anchor>
     {/if}
-    <Anchor button on:click={useKeys}>
-      <i class="fa fa-key" />
-      Keys
+    <Anchor button square low on:click={usePrivateKey} class="flex-col gap-3 justify-center">
+      <div>
+        <i class="fa fa-key fa-xl" />
+      </div>
+      <span>Private Key</span>
+    </Anchor>
+    <Anchor button square low on:click={usePublicKey} class="flex-col gap-3 justify-center">
+      <div>
+        <i class="fa fa-eye fa-xl" />
+      </div>
+      <span>Public Key</span>
     </Anchor>
   </div>
 </FlexColumn>

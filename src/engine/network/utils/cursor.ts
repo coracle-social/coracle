@@ -93,6 +93,7 @@ export class Cursor {
       timeout: 3000,
       relays: [relay],
       skipCache: true,
+      closeOnEose: true,
       tracker: this.opts.tracker,
       filters: pageFilters,
       onClose: onPageComplete,
