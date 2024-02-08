@@ -9,7 +9,10 @@ export class Connect {
       const {pubkey, connectKey, connectHandler} = session
 
       this.broker = NostrConnectBroker.get(pubkey, connectKey, connectHandler)
-      this.broker.connect()
+
+      if (!this.broker.connected) {
+        this.broker.connect()
+      }
     }
   }
 

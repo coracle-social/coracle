@@ -1,5 +1,5 @@
 import {nip04} from "nostr-tools"
-import {switcherFn, sleep, tryFunc} from "hurdak"
+import {switcherFn, tryFunc} from "hurdak"
 import type {Session} from "src/engine/session/model"
 import type {Connect} from "./connect"
 import {withExtension} from "./nip07"

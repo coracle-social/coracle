@@ -1,3 +1,4 @@
+import {memoize} from "src/util/misc"
 import {sessions} from "../state"
 import {Nip04} from "./nip04"
 import {Nip44} from "./nip44"
@@ -15,13 +16,14 @@ export * from "./connect"
 
 export const getSession = pubkey => sessions.get()[pubkey]
 
-export const getConnect = session => new Connect(session)
+export const getConnect = memoize(session => new Connect(session))
 
-export const getSigner = session => new Signer(session, getConnect(session))
+export const getSigner = memoize(session => new Signer(session, getConnect(session)))
 
-export const getNip44 = session => new Nip44(session, getConnect(session))
+export const getNip44 = memoize(session => new Nip44(session, getConnect(session)))
 
-export const getNip04 = session => new Nip04(session, getConnect(session))
+export const getNip04 = memoize(session => new Nip04(session, getConnect(session)))
 
-export const getNip59 = session =>
-  new Nip59(session, getNip04(session), getNip44(session), getSigner(session))
+export const getNip59 = memoize(
+  session => new Nip59(session, getNip04(session), getNip44(session), getSigner(session)),
+)

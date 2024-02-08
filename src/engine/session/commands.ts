@@ -1,5 +1,4 @@
 import {omit, assoc} from "ramda"
-import {createEvent} from "paravel"
 import {generatePrivateKey, getPublicKey, appDataKeys} from "src/util/nostr"
 import type {NostrConnectHandler} from "src/engine/network/model"
 import {createAndPublish, NostrConnectBroker} from "src/engine/network/utils"
@@ -44,7 +43,8 @@ export const loginWithNsecBunker = async (pubkey, connectToken, connectRelay) =>
 export const loginWithNostrConnect = async (username, connectHandler: NostrConnectHandler) => {
   const connectKey = generatePrivateKey()
   const {pubkey} = await fetchHandle(`${username}@${connectHandler.domain}`)
-  const broker = NostrConnectBroker.get(pubkey, connectKey, connectHandler)
+
+  let broker = NostrConnectBroker.get(pubkey, connectKey, connectHandler)
 
   // TODO: create account should return the new pubkey, we shouldn't have to call connect.
   // we're also leaking listeners because this promise never resolves. Hack a proper return
@@ -52,20 +52,21 @@ export const loginWithNostrConnect = async (username, connectHandler: NostrConne
   if (!pubkey) {
     broker.createAccount(username)
 
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       const onMouseMove = () => {
         resolve()
-        document.body.removeEventListener('mousemove', onMouseMove)
+        document.body.removeEventListener("mousemove", onMouseMove)
       }
 
       setTimeout(() => {
-        document.body.addEventListener('mousemove', onMouseMove)
+        document.body.addEventListener("mousemove", onMouseMove)
       }, 1000)
     })
 
     // Now that the account has ostensibly been created, get our new pubkey and set it to the broker
     const {pubkey} = await fetchHandle(`${username}@${connectHandler.domain}`)
-    broker.pubkey = pubkey
+
+    broker = NostrConnectBroker.get(pubkey, connectKey, connectHandler)
   }
 
   const result = await broker.connect()

@@ -2,11 +2,11 @@
   import {reject} from "ramda"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Heading from "src/partials/Heading.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import type {Person} from "src/engine"
-  import {env, mention, loadPeople, searchPeople} from "src/engine"
+  import {mention, loadPeople, searchPeople} from "src/engine"
 
+  export let relays
   export let petnames
   export let setStage
 
@@ -29,7 +29,9 @@
 </script>
 
 <div class="flex gap-3">
-  <p class="bg-light rounded-full w-12 h-12 -mt-2 -ml-1 flex justify-center items-center text-lg">3/4</p>
+  <p class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-light text-lg">
+    3/4
+  </p>
   <p class="text-2xl font-bold">Find your people</p>
 </div>
 <p>Search for people and topics, or browse our top suggestions below.</p>

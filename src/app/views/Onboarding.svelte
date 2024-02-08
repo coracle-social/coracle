@@ -3,7 +3,7 @@
   import {sortBy, inc} from "ramda"
   import {closure, first, sleep} from "hurdak"
   import {generatePrivateKey} from "src/util/nostr"
-  import FlexColumn from 'src/partials/FlexColumn.svelte'
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
@@ -18,6 +18,7 @@
     publishNote,
     publishPetnames,
     publishProfile,
+    publishRelays,
     loginWithPrivateKey,
     listenForNotifications,
     getFollowedPubkeys,
@@ -120,15 +121,15 @@
     {:else if stage === "profile"}
       <OnboardingProfile {setStage} {profile} />
     {:else if stage === "follows"}
-      <OnboardingFollows {setStage} bind:petnames />
+      <OnboardingFollows {setStage} bind:petnames bind:relays />
     {:else if stage === "note"}
       <OnboardingNote {setStage} {signup} />
     {/if}
   {/key}
-  <div class="flex gap-2 m-auto">
-    <div class="bg-mid rounded-full w-2 h-2" class:bg-lighter={stage === "intro"} />
-    <div class="bg-mid rounded-full w-2 h-2" class:bg-lighter={stage === "profile"} />
-    <div class="bg-mid rounded-full w-2 h-2" class:bg-lighter={stage === "follows"} />
-    <div class="bg-mid rounded-full w-2 h-2" class:bg-lighter={stage === "note"} />
+  <div class="m-auto flex gap-2">
+    <div class="h-2 w-2 rounded-full bg-mid" class:bg-lighter={stage === "intro"} />
+    <div class="h-2 w-2 rounded-full bg-mid" class:bg-lighter={stage === "profile"} />
+    <div class="h-2 w-2 rounded-full bg-mid" class:bg-lighter={stage === "follows"} />
+    <div class="h-2 w-2 rounded-full bg-mid" class:bg-lighter={stage === "note"} />
   </div>
 </FlexColumn>

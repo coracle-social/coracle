@@ -32,6 +32,7 @@ export const getClientTags = () => {
 
 export type PublisherOpts = {
   timeout?: number
+  silent?: boolean
   verb?: string
 }
 
@@ -62,11 +63,13 @@ export class Publisher extends EventEmitter {
     return publisher
   }
 
-  publish(relays, {timeout = 10_000, verb}: PublisherOpts = {}) {
+  publish(relays, {timeout = 10_000, verb, silent}: PublisherOpts = {}) {
     const urls = getUrls(relays)
     const executor = getExecutor(urls)
 
-    info(`Publishing to ${urls.length} relays`, this.event, urls)
+    if (!silent) {
+      info(`Publishing to ${urls.length} relays`, this.event, urls)
+    }
 
     const timeouts = new Set<string>()
     const succeeded = new Set<string>()
