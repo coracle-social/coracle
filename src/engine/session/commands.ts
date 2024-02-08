@@ -4,7 +4,7 @@ import {generatePrivateKey, getPublicKey, appDataKeys} from "src/util/nostr"
 import type {NostrConnectHandler} from "src/engine/network/model"
 import {createAndPublish, NostrConnectBroker} from "src/engine/network/utils"
 import {people} from "src/engine/people/state"
-import {getHandle} from "src/engine/people/utils"
+import {fetchHandle} from "src/engine/people/utils"
 import type {Session} from "./model"
 import {sessions, pubkey} from "./state"
 import {canSign, nip04, session} from "./derived"
@@ -43,14 +43,37 @@ export const loginWithNsecBunker = async (pubkey, connectToken, connectRelay) =>
 
 export const loginWithNostrConnect = async (username, connectHandler: NostrConnectHandler) => {
   const connectKey = generatePrivateKey()
-  const {pubkey} = await getHandle(`${username}@${connectHandler.domain}`)
+  const {pubkey} = await fetchHandle(`${username}@${connectHandler.domain}`)
   const broker = NostrConnectBroker.get(pubkey, connectKey, connectHandler)
-  const result = pubkey ? await broker.connect() : await broker.createAccount(username)
+
+  // TODO: create account should return the new pubkey, we shouldn't have to call connect.
+  // we're also leaking listeners because this promise never resolves. Hack a proper return
+  // by waiting for focus to switch to the new window, then listen for a mouse move
+  if (!pubkey) {
+    broker.createAccount(username)
+
+    await new Promise(resolve => {
+      const onMouseMove = () => {
+        resolve()
+        document.body.removeEventListener('mousemove', onMouseMove)
+      }
+
+      setTimeout(() => {
+        document.body.addEventListener('mousemove', onMouseMove)
+      }, 1000)
+    })
+
+    // Now that the account has ostensibly been created, get our new pubkey and set it to the broker
+    const {pubkey} = await fetchHandle(`${username}@${connectHandler.domain}`)
+    broker.pubkey = pubkey
+  }
+
+  const result = await broker.connect()
 
   if (result) {
     addSession({
       method: "connect",
-      pubkey,
+      pubkey: broker.pubkey,
       connectKey,
       connectHandler,
     })

@@ -1,21 +1,20 @@
 import {switcherFn} from "hurdak"
 import type {EventTemplate, UnsignedEvent} from "nostr-tools"
 import {getEventHash} from "nostr-tools"
-import type NDK from "@nostr-dev-kit/ndk"
-import {NDKEvent} from "@nostr-dev-kit/ndk"
 import {getPublicKey, getSignature} from "src/util/nostr"
 import type {Session} from "src/engine/session/model"
 import type {Rumor} from "src/engine/events/model"
+import type {Connect} from "./connect"
 import {withExtension} from "./nip07"
 
 export class Signer {
   constructor(
     readonly session: Session | null,
-    readonly ndk: NDK | null,
+    readonly connect: Connect | null,
   ) {}
 
   isEnabled() {
-    return ["bunker", "privkey", "extension"].includes(this.session?.method)
+    return ["connect", "privkey", "extension"].includes(this.session?.method)
   }
 
   prepWithKey(event: EventTemplate, sk: string) {
@@ -50,16 +49,8 @@ export class Signer {
 
     return switcherFn(method, {
       privkey: () => ({...event, sig: getSignature(event, privkey)}),
-      extension: async () => {
-        return await withExtension(ext => ext.signEvent(event))
-      },
-      bunker: async () => {
-        const ndkEvent = new NDKEvent(this.ndk, event)
-
-        await ndkEvent.sign(this.ndk.signer)
-
-        return ndkEvent.rawEvent()
-      },
+      extension: () => withExtension(ext => ext.signEvent(event)),
+      connect: () => this.connect.broker.signEvent(template),
     })
   }
 }

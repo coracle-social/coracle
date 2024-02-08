@@ -46,7 +46,6 @@
   import ListingEdit from "src/app/views/ListingEdit.svelte"
   import ListingDelete from "src/app/views/ListingDelete.svelte"
   import Login from "src/app/views/Login.svelte"
-  import LoginAdvanced from "src/app/views/LoginAdvanced.svelte"
   import LoginBunker from "src/app/views/LoginBunker.svelte"
   import LoginConnect from "src/app/views/LoginConnect.svelte"
   import LoginPrivKey from "src/app/views/LoginPrivKey.svelte"
@@ -178,7 +177,6 @@
     },
   })
 
-  router.register("/login/advanced", LoginAdvanced)
   router.register("/login/bunker", LoginBunker)
   router.register("/login/connect", LoginConnect)
   router.register("/login/intro", Login)

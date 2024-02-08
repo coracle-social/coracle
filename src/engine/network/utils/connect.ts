@@ -1,4 +1,5 @@
 import {equals, pick} from "ramda"
+import type {EventTemplate} from "nostr-tools"
 import {nip04, finalizeEvent} from "nostr-tools"
 import {Emitter, Subscription, createEvent} from "paravel"
 import {randomId, sleep} from "hurdak"
@@ -14,6 +15,7 @@ let singleton: NostrConnectBroker
 
 export class NostrConnectBroker extends Emitter {
   #sub: typeof Subscription
+  #ready = sleep(300)
 
   static get(pubkey, connectKey: string, handler: NostrConnectHandler) {
     if (
@@ -54,6 +56,9 @@ export class NostrConnectBroker extends Emitter {
   }
 
   async request(method: string, params: string[], admin = false) {
+    // nsecbunker has a race condition
+    await this.#ready
+
     console.info("NostrConnect request:", method, params)
 
     const id = randomId()
@@ -77,6 +82,14 @@ export class NostrConnectBroker extends Emitter {
     })
   }
 
+  createAccount(username: string) {
+    if (!this.handler.domain) {
+      throw new Error("Unable to create an account without a handler domain")
+    }
+
+    return this.request("create_account", [username, this.handler.domain], true)
+  }
+
   async connect(token: string = null) {
     const params = [getPublicKey(this.connectKey)]
 
@@ -89,12 +102,24 @@ export class NostrConnectBroker extends Emitter {
     return result === "ack"
   }
 
-  createAccount(username: string) {
-    if (!this.handler.domain) {
-      throw new Error("Unable to create an account without a handler domain")
-    }
+  signEvent(event: EventTemplate) {
+    return this.request("sign_event", [event])
+  }
 
-    return this.request("create_account", [username, this.handler.domain], true)
+  nip04Encrypt(pk: string, message: string) {
+    return this.request("nip04_encrypt", [pk, message])
+  }
+
+  nip04Decrypt(pk: string, message: string) {
+    return this.request("nip04_decrypt", [pk, message])
+  }
+
+  nip44Encrypt(pk: string, message: string) {
+    return this.request("nip44_encrypt", [pk, message])
+  }
+
+  nip44Decrypt(pk: string, message: string) {
+    return this.request("nip44_decrypt", [pk, message])
   }
 
   teardown() {

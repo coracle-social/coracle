@@ -150,8 +150,8 @@
     </div>
     <div
       class={cx(
-        "relative grid justify-center gap-2 xs:gap-8",
-        getExtension() ? "grid-cols-4" : "grid-cols-3",
+        "relative grid justify-center gap-2 xs:gap-5",
+        getExtension() ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3",
       )}>
       <Anchor button square low on:click={useBunker} class="flex-col justify-center gap-3">
         <div>
