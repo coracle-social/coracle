@@ -57,11 +57,7 @@ export const subscribe = (opts: SubscribeOpts) => {
 export const subscribePersistent = async (opts: SubscribeOpts) => {
   /* eslint no-constant-condition: 0 */
   while (true) {
-    console.log('========')
     // If the subscription gets closed quickly due to eose, don't start flapping
-    await Promise.all([
-      sleep(30_000),
-      new Promise(resolve => subscribe(opts).on("close", resolve))
-    ])
+    await Promise.all([sleep(30_000), new Promise(resolve => subscribe(opts).on("close", resolve))])
   }
 }

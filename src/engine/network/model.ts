@@ -14,7 +14,7 @@ export type DynamicFilter = Omit<Filter, "authors"> & {
 }
 
 export type NostrConnectHandler = {
-  pubkey: string
-  domain: string
-  relays: string[]
+  pubkey?: string
+  domain?: string
+  relays?: string[]
 }

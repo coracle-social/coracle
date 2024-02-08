@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {nip19} from "nostr-tools"
   import {isKeyValid, toHex} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
@@ -7,31 +8,39 @@
   import Heading from "src/partials/Heading.svelte"
   import {loginWithNsecBunker} from "src/engine"
   import {boot} from "src/app/state"
-    import { nip05 } from "nostr-tools"
+  import {nip05} from "nostr-tools"
 
-  let input = ""
+  let input =
+    "bunker://ede433bf99105bced8722941dc02c25663e5fcdfa6f5292976e3edd72390af2d?relay=wss://relay.nsecbunker.com"
 
-  const parse = async () => {
+  const parse = async uri => {
     const r = {pubkey: "", relay: "", token: ""}
 
-    if (input.startsWith("bunker://")) {
+    if (uri.match(/^bunker:\/\/npub1\w+@[\w\.]+$/)) {
+      const [npub, relay] = uri.slice(9).split("@")
+      const {data: pubkey} = nip19.decode(npub)
+
+      uri = `bunker://${pubkey}?relay=wss://${relay}`
+    }
+
+    if (uri.startsWith("bunker://")) {
       try {
-        const url = new URL(input)
+        const url = new URL(uri)
 
         r.pubkey = url.pathname.slice(2)
         r.relay = url.searchParams.get("relay") || ""
       } catch {
         // pass
       }
-    } else if (input.match(/@/)) {
+    } else if (uri.match(/@/)) {
       /**
        * Check if this is looks like a nip05 profile.
        */
-      const profile = await nip05.queryProfile(input);
+      const profile = await nip05.queryProfile(input)
       if (profile) {
-        r.pubkey = profile.pubkey;
+        r.pubkey = profile.pubkey
       } else {
-        toast.show("error", "Sorry, but that's an invalid public key.")
+        toast.show("error", "Sorry, it looks like that's an invalid public key.")
       }
     } else {
       const [npub, token] = input.split("#")
@@ -43,12 +52,16 @@
   }
 
   const logIn = async () => {
-    const params = await parse()
-    if (isKeyValid(params.pubkey)) {
-      loginWithNsecBunker(params.pubkey, params.token, params.relay)
+    const {pubkey, token, relay} = await parse(input)
+
+    if (!isKeyValid(pubkey)) {
+      return toast.show("error", "Sorry, but that's an invalid public key.")
+    }
+
+    const success = await loginWithNsecBunker(pubkey, token, relay)
+
+    if (success) {
       boot()
-    } else {
-        toast.show("error", "Sorry, but that's an invalid public key.")
     }
   }
 </script>

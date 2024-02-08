@@ -89,30 +89,31 @@ export const loadNotifications = () => {
 }
 
 export const listenForNotifications = async () => {
+  const since = now() - 30
   const $session = session.get()
   const eventIds = getEventIds($session.pubkey)
   const addrs = getUserCommunities($session)
 
   const filters: Filter[] = [
     // Mentions
-    {kinds: noteKinds, "#p": [$session.pubkey], limit: 1, since: now()},
+    {kinds: noteKinds, "#p": [$session.pubkey], limit: 1, since},
     // Messages/groups
-    {kinds: [4, 1059, 1060], "#p": [$session.pubkey], limit: 1, since: now()},
+    {kinds: [4, 1059, 1060], "#p": [$session.pubkey], limit: 1, since},
     // Communities
-    {kinds: [...noteKinds, ...repostKinds], "#a": addrs, limit: 1, since: now()},
+    {kinds: [...noteKinds, ...repostKinds], "#a": addrs, limit: 1, since},
   ]
 
   // Replies
   if (eventIds.length > 0) {
-    filters.push({kinds: noteKinds, "#e": eventIds, limit: 1, since: now()})
+    filters.push({kinds: noteKinds, "#e": eventIds, limit: 1, since})
   }
 
   // Only grab one event from each category/relay so we have enough to show
   // the notification badges, but load the details lazily
   subscribePersistent({
     filters,
+    timeout: 30_000,
     skipCache: true,
-    closeOnEose: true,
     relays: getPubkeyHints($session.pubkey, "read"),
     onEvent: onNotificationEvent,
   })

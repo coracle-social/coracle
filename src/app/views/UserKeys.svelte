@@ -60,15 +60,6 @@
       </small>
     </div>
   {/if}
-  {#if $session?.bunkerKey}
-    <div>
-      <CopyValue isPassword label="Bunker Key" value={$session?.bunkerKey} encode={nsecEncode} />
-      <small class="text-lightest">
-        Your bunker key is used to authorize Coracle with your nsec bunker to sign events on your
-        behalf. Save this if you would like to log in elsewhere without re-authorizing.
-      </small>
-    </div>
-  {/if}
   {#if addresses.length > 0}
     <div class="flex flex-col items-center justify-center">
       <Heading>Group Keys</Heading>

@@ -1,5 +1,5 @@
 import {omit, assoc} from "ramda"
-import {createEvent} from 'paravel'
+import {createEvent} from "paravel"
 import {generatePrivateKey, getPublicKey, appDataKeys} from "src/util/nostr"
 import type {NostrConnectHandler} from "src/engine/network/model"
 import {createAndPublish, NostrConnectBroker} from "src/engine/network/utils"
@@ -22,21 +22,41 @@ export const loginWithPublicKey = pubkey => addSession({method: "pubkey", pubkey
 
 export const loginWithExtension = pubkey => addSession({method: "extension", pubkey})
 
-export const loginWithNsecBunker = (pubkey, bunkerToken, bunkerRelay) =>
-  addSession({method: "bunker", pubkey, bunkerKey: generatePrivateKey(), bunkerToken, bunkerRelay})
+export const loginWithNsecBunker = async (pubkey, connectToken, connectRelay) => {
+  const connectKey = generatePrivateKey()
+  const connectHandler = {relays: [connectRelay]}
+  const broker = NostrConnectBroker.get(pubkey, connectKey, connectHandler)
+  const result = await broker.connect(connectToken)
+
+  if (result) {
+    addSession({
+      method: "connect",
+      pubkey,
+      connectKey,
+      connectToken,
+      connectHandler,
+    })
+  }
+
+  return result
+}
 
 export const loginWithNostrConnect = async (username, connectHandler: NostrConnectHandler) => {
   const connectKey = generatePrivateKey()
-  const profile = await getHandle(`${username}@${connectHandler.domain}`)
-  const broker = NostrConnectBroker.get(profile.pubkey, connectKey, connectHandler)
+  const {pubkey} = await getHandle(`${username}@${connectHandler.domain}`)
+  const broker = NostrConnectBroker.get(pubkey, connectKey, connectHandler)
+  const result = pubkey ? await broker.connect() : await broker.createAccount(username)
 
-  if (profile.pubkey) {
-    console.log(await broker.connect())
-  } else {
-    console.log(await broker.createAccount(username))
+  if (result) {
+    addSession({
+      method: "connect",
+      pubkey,
+      connectKey,
+      connectHandler,
+    })
   }
 
-  // addSession({method: "connect", pubkey, connectKey, connectHandler})
+  return result
 }
 
 export const logoutPubkey = pubkey => {

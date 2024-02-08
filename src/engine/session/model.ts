@@ -14,10 +14,8 @@ export type Session = {
   method: string
   pubkey: string
   privkey?: string
-  bunkerKey?: string
-  bunkerToken?: string
-  bunkerRelay?: string
   connectKey?: string
+  connectToken?: string
   connectHandler?: NostrConnectHandler
   kind3?: Event
   kind3_updated?: string

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import cx from 'classnames'
+  import cx from "classnames"
   import {onMount} from "svelte"
   import {last, prop, objOf} from "ramda"
   import {Handlerinformation, NostrConnect} from "nostr-tools/kinds"
@@ -22,6 +22,10 @@
   import {router} from "src/app/router"
   import {boot} from "src/app/state"
 
+  const signUp = () => router.at("onboarding").replaceModal()
+
+  const useBunker = () => router.at("login/bunker").replaceModal()
+
   const useExtension = () =>
     withExtension(async ext => {
       const pubkey = ext && (await ext.getPublicKey())
@@ -32,7 +36,11 @@
       }
     })
 
-  const useBunker = async () => {
+  const usePrivateKey = () => router.at("login/privkey").replaceModal()
+
+  const usePublicKey = () => router.at("login/pubkey").replaceModal()
+
+  const onSubmit = async () => {
     if (!username) {
       return toast.show("error", "Please enter a user name.")
     }
@@ -53,16 +61,19 @@
       return toast.show("error", "Sorry, we weren't able to find that provider.")
     }
 
-    loginWithNostrConnect(username, handler)
+    const success = await loginWithNostrConnect(username, handler)
+
+    if (success) {
+      boot()
+    }
   }
 
-  const signUp = () => router.at("onboarding").replaceModal()
-
-  const usePrivateKey = () => router.at("login/privkey").replaceModal()
-
-  const usePublicKey = () => router.at("login/pubkey").replaceModal()
-
   let handlers = [
+    {
+      domain: "coracle-bunker.ngrok.io",
+      relays: ["wss://relay.nsecbunker.com", "wss://relay.damus.io"],
+      pubkey: "b6e0188cf22c58a96b5cf6f29014f140697196f149a2621536b12d50abf55aa0",
+    },
     {
       domain: "highlighter.com",
       relays: ["wss://relay.nsecbunker.com", "wss://relay.damus.io"],
@@ -102,60 +113,72 @@
   document.title = "Log In"
 </script>
 
-<FlexColumn narrow large>
-  <div class="text-center">
-    <Heading>Welcome!</Heading>
-    <p class="text-lg text-lightest">
-      Don't have an account yet?
-      <Anchor underline on:click={signUp} class="ml-1 text-white">Sign up</Anchor>
-    </p>
-  </div>
-  <div class="flex">
-    <Input
-      bind:value={username}
-      class="rounded-r-none"
-      wrapperClass="flex-grow"
-      placeholder="Username">
-      <i slot="before" class="fa fa-user-astronaut" />
-    </Input>
-    <SearchSelect
-      bind:value={handler}
-      defaultOptions={handlers}
-      getKey={prop("domain")}
-      termToItem={objOf("domain")}
-      inputClass="rounded-l-none border-l-0"
-      inputWrapperClass="flex-grow"
-      search={() => handlers}>
-      <i slot="before" class="fa fa-at relative top-[2px]" />
-      <span slot="item" let:item>{item.domain}</span>
-    </SearchSelect>
-  </div>
-  <Anchor button accent on:click={useBunker}>Log In</Anchor>
-  <div class="relative flex items-center gap-4">
-    <div class="h-px flex-grow bg-mid" />
-    <div class="staatliches text-xl">Or</div>
-    <div class="h-px flex-grow bg-mid" />
-  </div>
-  <div class={cx("relative grid justify-center gap-2 xs:gap-8", getExtension() ? "grid-cols-3": "grid-cols-2")}>
-    {#if getExtension()}
-      <Anchor button square low on:click={useExtension} class="flex-col gap-3 justify-center">
+<form on:submit={onSubmit}>
+  <FlexColumn narrow large>
+    <div class="text-center">
+      <Heading>Welcome!</Heading>
+      <p class="text-lg text-lightest">
+        Don't have an account yet?
+        <Anchor underline on:click={signUp} class="ml-1 text-white">Sign up</Anchor>
+      </p>
+    </div>
+    <div class="flex">
+      <Input
+        bind:value={username}
+        class="rounded-r-none"
+        wrapperClass="flex-grow"
+        placeholder="Username">
+        <i slot="before" class="fa fa-user-astronaut" />
+      </Input>
+      <SearchSelect
+        bind:value={handler}
+        defaultOptions={handlers}
+        getKey={prop("domain")}
+        termToItem={objOf("domain")}
+        inputClass="rounded-l-none border-l-0"
+        inputWrapperClass="flex-grow"
+        search={() => handlers}>
+        <i slot="before" class="fa fa-at relative top-[2px]" />
+        <span slot="item" let:item>{item.domain}</span>
+      </SearchSelect>
+    </div>
+    <Anchor button accent on:click={onSubmit}>Log In</Anchor>
+    <div class="relative flex items-center gap-4">
+      <div class="h-px flex-grow bg-mid" />
+      <div class="staatliches text-xl">Or</div>
+      <div class="h-px flex-grow bg-mid" />
+    </div>
+    <div
+      class={cx(
+        "relative grid justify-center gap-2 xs:gap-8",
+        getExtension() ? "grid-cols-4" : "grid-cols-3",
+      )}>
+      <Anchor button square low on:click={useBunker} class="flex-col justify-center gap-3">
         <div>
-          <i class="fa fa-puzzle-piece fa-xl" />
+          <i class="fa fa-box fa-xl" />
         </div>
-        <span>Extension</span>
+        <span>Bunker URL</span>
       </Anchor>
-    {/if}
-    <Anchor button square low on:click={usePrivateKey} class="flex-col gap-3 justify-center">
-      <div>
-        <i class="fa fa-key fa-xl" />
-      </div>
-      <span>Private Key</span>
-    </Anchor>
-    <Anchor button square low on:click={usePublicKey} class="flex-col gap-3 justify-center">
-      <div>
-        <i class="fa fa-eye fa-xl" />
-      </div>
-      <span>Public Key</span>
-    </Anchor>
-  </div>
-</FlexColumn>
+      {#if getExtension()}
+        <Anchor button square low on:click={useExtension} class="flex-col justify-center gap-3">
+          <div>
+            <i class="fa fa-puzzle-piece fa-xl" />
+          </div>
+          <span>Extension</span>
+        </Anchor>
+      {/if}
+      <Anchor button square low on:click={usePrivateKey} class="flex-col justify-center gap-3">
+        <div>
+          <i class="fa fa-key fa-xl" />
+        </div>
+        <span>Private Key</span>
+      </Anchor>
+      <Anchor button square low on:click={usePublicKey} class="flex-col justify-center gap-3">
+        <div>
+          <i class="fa fa-eye fa-xl" />
+        </div>
+        <span>Public Key</span>
+      </Anchor>
+    </div>
+  </FlexColumn>
+</form>
