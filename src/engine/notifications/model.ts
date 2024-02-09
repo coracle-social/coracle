@@ -6,3 +6,7 @@ export type Notification = {
   timestamp: number
   interactions: Event[]
 }
+
+export enum OnboardingTask {
+  BackupKey = 'backup_key'
+}

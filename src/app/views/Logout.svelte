@@ -10,7 +10,7 @@
   // also apparently needs some time
   setTimeout(() => {
     window.location.href = "/notes"
-  }, 1000)
+  }, 2000)
 
   document.title = "Log Out"
 </script>

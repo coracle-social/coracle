@@ -27,7 +27,7 @@
   <Compose autofocus bind:this={compose} onSubmit={next} />
 </div>
 <div class="flex gap-2">
-  <Anchor button on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
+  <Anchor button on:click={prev}><i class="fa fa-arrow-left" /> Back</Anchor>
   <Anchor button accent class="flex-grow text-center" on:click={next}>Say Hello!</Anchor>
 </div>
 <Anchor class="text-center" on:click={skip}>

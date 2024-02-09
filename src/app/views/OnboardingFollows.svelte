@@ -2,6 +2,7 @@
   import {reject, identity} from "ramda"
   import {shuffle, quantify} from "hurdak"
   import {Tags} from "paravel"
+  import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -18,6 +19,7 @@
 
   let list
   let term = ""
+  let showList
   let showSelections
   let showPersonSearch
   let showRelaySearch
@@ -25,8 +27,13 @@
   const prev = () => setStage("profile")
   const next = () => setStage("note")
 
-  const showList = l => {
+  const openList = l => {
     list = l
+    showList = true
+  }
+
+  const closeList = l => {
+    showList = false
   }
 
   const openSelections = () => {
@@ -99,15 +106,15 @@
 </p>
 <div class="grid grid-cols-1 gap-3 overflow-auto xs:grid-cols-2 sm:grid-cols-3">
   {#each shuffledLists as list (list.address)}
-    <div
-      class="relative flex min-w-[180px] cursor-pointer flex-col gap-2 rounded-2xl bg-mid p-3 sm:aspect-square"
-      on:click={() => showList(list)}>
+    <Card
+      class="relative flex min-w-[180px] cursor-pointer flex-col gap-2 rounded-2xl sm:aspect-square"
+      on:click={() => openList(list)}>
       <p class="text-xl font-bold">{list.title}</p>
       <p class="pb-5">{list.description}</p>
       <div class="absolute bottom-1 text-lighter">
         {Tags.from(list).pubkeys().count()} people
       </div>
-    </div>
+    </Card>
   {/each}
 </div>
 <div class="flex justify-between">
@@ -125,8 +132,8 @@
     >Continue</Anchor>
 </div>
 
-{#if list}
-  <Modal onEscape={() => setTimeout(() => showList(null), 300)}>
+{#if showList}
+  <Modal onEscape={closeList}>
     <p class="text-2xl font-bold">{list.title}</p>
     <p class="pb-5 text-lg">{list.description}</p>
     {#each Tags.from(list).pubkeys().all() as pubkey (pubkey)}

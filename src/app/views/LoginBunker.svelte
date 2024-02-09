@@ -10,8 +10,7 @@
   import {boot} from "src/app/state"
   import {nip05} from "nostr-tools"
 
-  let input =
-    "bunker://ede433bf99105bced8722941dc02c25663e5fcdfa6f5292976e3edd72390af2d?relay=wss://relay.nsecbunker.com"
+  let input = ""
 
   const parse = async uri => {
     const r = {pubkey: "", relay: "", token: ""}

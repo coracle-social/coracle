@@ -47,7 +47,7 @@
     // animation from completing, and it gets stuck. This is a svelte bug
     await sleep(10)
 
-    loginWithPrivateKey(privkey)
+    loginWithPrivateKey(privkey, {onboarding_tasks_completed: []})
 
     // Do this first so we know where to publish everything else
     publishRelays(relays)

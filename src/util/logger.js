@@ -24,4 +24,4 @@ export const error = (...message) => {
   }
 }
 
-export default {info, warn, error}
+export default {info, warn, error, setLevel}

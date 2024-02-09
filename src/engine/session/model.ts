@@ -28,4 +28,5 @@ export type Session = {
   nip24_messages_last_synced?: number
   nip59_messages_last_synced?: number
   groups?: Record<string, GroupStatus>
+  onboarding_tasks_completed?: string[]
 }

@@ -1,5 +1,5 @@
 import {Tags} from "paravel"
-import {prop, uniq, sortBy} from "ramda"
+import {prop, filter, identity, uniq, sortBy} from "ramda"
 import {Storage, LocalStorageAdapter, IndexedDBAdapter, sortByPubkeyWhitelist} from "./core"
 import {_lists} from "./lists"
 import {people} from "./people"
@@ -47,9 +47,15 @@ const migrateChannels = channels => {
   })
 }
 
+// Removed support for bunker login
+const sessionsAdapter = {
+  load: filter(($s: any) => $s.method !== "bunker"),
+  dump: identity,
+}
+
 export const storage = new Storage(9, [
   new LocalStorageAdapter("pubkey", pubkey),
-  new LocalStorageAdapter("sessions", sessions),
+  new LocalStorageAdapter("sessions", sessions, sessionsAdapter),
   new LocalStorageAdapter("deletes2", deletes, setAdapter),
   new IndexedDBAdapter("seen2", seen, 1000, sortBy(prop("created_at"))),
   new IndexedDBAdapter("events", _events, 10000, sortByPubkeyWhitelist(prop("created_at"))),

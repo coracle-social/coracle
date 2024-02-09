@@ -69,11 +69,11 @@
   }
 
   let handlers = [
-    {
-      domain: "coracle-bunker.ngrok.io",
-      relays: ["wss://relay.nsecbunker.com", "wss://relay.damus.io"],
-      pubkey: "b6e0188cf22c58a96b5cf6f29014f140697196f149a2621536b12d50abf55aa0",
-    },
+    //  {
+    //    domain: "coracle-bunker.ngrok.io",
+    //    relays: ["wss://relay.nsecbunker.com", "wss://relay.damus.io"],
+    //    pubkey: "b6e0188cf22c58a96b5cf6f29014f140697196f149a2621536b12d50abf55aa0",
+    //  },
     {
       domain: "highlighter.com",
       relays: ["wss://relay.nsecbunker.com", "wss://relay.damus.io"],

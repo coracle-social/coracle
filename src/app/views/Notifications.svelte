@@ -8,12 +8,14 @@
   import Note from "src/app/shared/Note.svelte"
   import GroupAlert from "src/app/shared/GroupAlert.svelte"
   import GroupRequest from "src/app/shared/GroupRequest.svelte"
+  import OnboardingTasks from "src/app/views/OnboardingTasks.svelte"
   import NotificationReactions from "src/app/views/NotificationReactions.svelte"
   import NotificationMention from "src/app/views/NotificationMention.svelte"
   import NotificationReplies from "src/app/views/NotificationReplies.svelte"
   import {router} from "src/app/router"
   import type {Event} from "src/engine"
   import {
+    session,
     markAsSeen,
     notifications,
     groupNotifications,
@@ -118,6 +120,10 @@
     {/if}
   </div>
 </Tabs>
+
+{#if $session?.onboarding_tasks_completed}
+  <OnboardingTasks />
+{/if}
 
 {#if tabs.slice(0, 2).includes(activeTab)}
   {#each tabNotifications as notification, i (notification.key)}

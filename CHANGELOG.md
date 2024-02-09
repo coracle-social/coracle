@@ -13,6 +13,7 @@
 - [x] Migrate lists from `name` to `title`
 - [x] Add list `description`
 - [x] Skip confirm on logout
+- [x] Add initial onboarding notification to back up keys
 
 # 0.4.1
 

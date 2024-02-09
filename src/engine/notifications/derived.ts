@@ -1,4 +1,4 @@
-import {assoc, max, sortBy} from "ramda"
+import {assoc, without, max, sortBy} from "ramda"
 import {seconds} from "hurdak"
 import {now, Tags} from "paravel"
 import {reactionKinds, noteKinds, repostKinds, getParentId} from "src/util/nostr"
@@ -12,6 +12,7 @@ import {getUserCircles} from "src/engine/groups/utils"
 import {pubkey} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {userEvents} from "src/engine/events/derived"
+import {OnboardingTask} from "./model"
 
 export const notifications = derived(
   [pubkey, userEvents.mapStore.throttle(500), events.throttle(500)],
@@ -94,7 +95,20 @@ export const unreadCombinedNotifications = derived(
     $unreadNotifications.concat($unreadGroupNotifications),
 )
 
-export const hasNewNotifications = unreadCombinedNotifications.derived($n => $n.length > 0)
+export const hasNewNotifications = derived(
+  [session, unreadCombinedNotifications],
+  ([$session, $unread]) => {
+    if ($unread.length > 0) {
+      return true
+    }
+
+    if ($session?.onboarding_tasks_completed) {
+      return without($session.onboarding_tasks_completed, Object.values(OnboardingTask)).length > 0
+    }
+
+    return false
+  },
+)
 
 export const createNotificationGroups = ($notifications, kinds) => {
   const $userEvents = userEvents.mapStore.get()
