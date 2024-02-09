@@ -47,12 +47,15 @@ const DEFAULT_RELAYS = fromCsv(import.meta.env.VITE_DEFAULT_RELAYS)
 
 const DEFAULT_FOLLOWS = fromCsv(import.meta.env.VITE_DEFAULT_FOLLOWS)
 
+const ONBOARDING_LISTS = fromCsv(import.meta.env.VITE_ONBOARDING_LISTS)
+
 const ENABLE_ZAPS = JSON.parse(import.meta.env.VITE_ENABLE_ZAPS)
 
 // Prep our env
 env.set({
   CLIENT_ID,
   CLIENT_NAME,
+  ONBOARDING_LISTS,
   DEFAULT_FOLLOWS,
   NIP96_URLS,
   IMGPROXY_URL,

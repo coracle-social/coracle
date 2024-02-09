@@ -7,15 +7,18 @@ import {_lists} from "./state"
 
 const handleBookmarkList = (e: Event) => {
   const naddr = Naddr.fromEvent(e)
-  const name = Tags.from(e).getValue("name") || naddr.identifier
+  const tags = Tags.from(e)
+  const title = tags.getValue("title") || tags.getValue("name") || naddr.identifier
+  const description = tags.getValue("description") || ""
 
   // Avoid malformed lists
-  if (name) {
+  if (title) {
     _lists.key(naddr.asTagValue()).update($list => ({
       ...updateRecord($list, e.created_at, {tags: e.tags}),
       address: naddr.asTagValue(),
       pubkey: e.pubkey,
-      name,
+      description,
+      title,
     }))
   }
 }

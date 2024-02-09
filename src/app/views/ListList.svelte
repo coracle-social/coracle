@@ -29,7 +29,7 @@
       on:click|stopPropagation={() => publishDeletion([list.address])} />
     <div class="flex w-full justify-between">
       <div>
-        <strong>{list.name}</strong>
+        <strong>{list.title}</strong>
         <ListSummary {list} />
       </div>
       <Anchor class="underline" on:click={() => editList(list)}>Edit</Anchor>

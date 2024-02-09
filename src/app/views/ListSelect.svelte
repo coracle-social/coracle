@@ -1,13 +1,12 @@
 <script lang="ts">
-  import {updateIn} from "hurdak"
-  import {Tags} from "paravel"
+  import {updateIn, randomId} from "hurdak"
   import Subheading from "src/partials/Subheading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
   import {router} from "src/app/router"
-  import {userLists} from "src/engine"
+  import {pubkey, userLists} from "src/engine"
 
   export let type
   export let value
@@ -15,6 +14,8 @@
   const label = type === "p" ? "person" : "topic"
 
   const modifyList = updateIn("tags", (tags: string[][] = []) => [...tags, [type, value]])
+
+  const newList = () => ({address: `30003:${$pubkey}:${randomId()}`, tags: []})
 
   const selectlist = list =>
     router
@@ -27,7 +28,7 @@
 <Content size="lg">
   <div class="flex items-center justify-between">
     <Subheading>Select a List</Subheading>
-    <Anchor button accent on:click={() => selectlist({})}>
+    <Anchor button accent on:click={() => selectlist(newList())}>
       <i class="fa fa-plus" /> List
     </Anchor>
   </div>
@@ -35,9 +36,8 @@
     Select a list to modify. The selected {label} will be added to it as an additional filter.
   </p>
   {#each $userLists as list (list.address)}
-    {@const meta = Tags.from(list).getDict()}
     <BorderLeft on:click={() => selectlist(list)}>
-      <strong>{meta.d}</strong>
+      <strong>{list.title}</strong>
       <ListSummary {list} />
     </BorderLeft>
   {:else}

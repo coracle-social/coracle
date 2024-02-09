@@ -31,7 +31,8 @@
   const tags = list ? Tags.from(list) : Tags.from([])
 
   const values = {
-    name: tags.getValue("name") || tags.getValue("d") || "",
+    title: tags.getValue("title") || tags.getValue("name") || tags.getValue("d") || "",
+    description: tags.getValue("description") || "",
     params: tags.type(["t", "p"]).all(),
     relays: tags.type("r").all(),
   }
@@ -51,20 +52,20 @@
   const searchRelayTags = q => $searchRelays(q).map(r => ["r", r.url])
 
   const submit = () => {
-    if (!values.name) {
+    if (!values.title) {
       return toast.show("error", "A name is required for your list")
     }
 
-    const duplicates = $userLists.filter(l => l.name === values.name && l.address !== address)
+    const duplicates = $userLists.filter(l => l.title === values.title && l.address !== address)
 
     if (duplicates.length > 0) {
       return toast.show("error", "That name is already in use")
     }
 
     const id = address ? Naddr.fromTagValue(address).identifier : randomId()
-    const {name, params, relays} = values
+    const {title, description, params, relays} = values
 
-    publishBookmarksList(id, name, [...params, ...relays])
+    publishBookmarksList(id, title, description, [...params, ...relays])
     toast.show("info", "Your list has been saved!")
     router.pop()
   }
@@ -75,8 +76,12 @@
     <Heading class="text-center">{address ? "Edit" : "Add"} list</Heading>
     <div class="flex w-full flex-col gap-8">
       <Field label="Name">
-        <Input bind:value={values.name} placeholder="My list" />
+        <Input bind:value={values.title} placeholder="My list" />
         <p slot="info">Lists are identified by their name, so this has to be unique.</p>
+      </Field>
+      <Field label="Description">
+        <Input bind:value={values.description} placeholder="About my list" />
+        <p slot="info">A brief description of what is in this list.</p>
       </Field>
       <Field label="Topics and People">
         <SearchSelect multiple {search} bind:value={values.params}>

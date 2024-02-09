@@ -7,6 +7,12 @@
 - [x] Add badges to all notification page tabs
 - [x] Use better search algorithm and show loaded profiles in global search
 - [x] Improve group invite deliverability
+- [x] Add nostr connect support
+- [x] Re-work onboarding entirely
+- [x] Fix some list-related bugs
+- [x] Migrate lists from `name` to `title`
+- [x] Add list `description`
+- [x] Skip confirm on logout
 
 # 0.4.1
 

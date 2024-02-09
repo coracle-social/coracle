@@ -1,5 +1,6 @@
 export type List = {
-  name: string
+  title: string
+  description: string
   pubkey: string
   address: string
   tags: string[][]

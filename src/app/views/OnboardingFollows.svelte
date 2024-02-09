@@ -1,17 +1,41 @@
 <script lang="ts">
-  import {reject} from "ramda"
+  import {reject, identity} from "ramda"
+  import {shuffle, quantify} from "hurdak"
+  import {Tags} from "paravel"
   import Input from "src/partials/Input.svelte"
+  import Modal from "src/partials/Modal.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
+  import Subheading from "src/partials/Subheading.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
-  import type {Person} from "src/engine"
-  import {mention, loadPeople, searchPeople} from "src/engine"
+  import RelayCard from "src/app/shared/RelayCard.svelte"
+  import type {Relay} from "src/engine"
+  import {env, lists, urlToRelay, mention, loadPeople, searchPeople, searchRelays} from "src/engine"
 
   export let relays
   export let petnames
   export let setStage
 
+  let list
+  let term = ""
+  let showSelections
+  let showPersonSearch
+  let showRelaySearch
+
   const prev = () => setStage("profile")
   const next = () => setStage("note")
+
+  const showList = l => {
+    list = l
+  }
+
+  const openSelections = () => {
+    showSelections = true
+  }
+
+  const closeSelections = () => {
+    showSelections = false
+  }
 
   const addFollow = pubkey => {
     petnames = [...petnames, mention(pubkey)]
@@ -21,11 +45,45 @@
     petnames = reject(t => t[1] === pubkey, petnames)
   }
 
-  let q = ""
+  const removeRelay = url => {
+    relays = reject((r: Relay) => r.url === url, relays)
+  }
 
-  $: loadPeople(q)
+  const addRelay = url => {
+    relays = [...relays, urlToRelay(url)]
+  }
+
+  const openPersonSearch = () => {
+    showPersonSearch = true
+  }
+
+  const closePersonSearch = () => {
+    term = ""
+    showPersonSearch = false
+  }
+
+  const openRelaySearch = () => {
+    showRelaySearch = true
+  }
+
+  const closeRelaySearch = () => {
+    term = ""
+    showRelaySearch = false
+  }
+
+  const shuffledLists = shuffle($env.ONBOARDING_LISTS)
+    .map(a => lists.key(a).get())
+    .filter(identity)
+
+  $: urls = relays.map(r => r.url)
+
   $: pubkeys = petnames.map(t => t[1])
-  $: results = reject((p: Person) => pubkeys.includes(p.pubkey), $searchPeople(q))
+
+  $: {
+    if (showPersonSearch) {
+      loadPeople(term)
+    }
+  }
 </script>
 
 <div class="flex gap-3">
@@ -34,44 +92,181 @@
   </p>
   <p class="text-2xl font-bold">Find your people</p>
 </div>
-<p>Search for people and topics, or browse our top suggestions below.</p>
-<div class="flex gap-2">
-  <Anchor button on:click={prev}><i class="fa fa-arrow-left" /></Anchor>
-  <Anchor button accent class="flex-grow" on:click={next}>Continue</Anchor>
-</div>
-<div class="flex items-center gap-2">
-  <i class="fa fa-user-astronaut fa-lg" />
-  <h2 class="staatliches text-2xl">Your follows</h2>
-</div>
-{#if pubkeys.length === 0}
-  <div class="mt-8 flex items-center justify-center gap-2 text-center">
-    <i class="fa fa-triangle-exclamation" />
-    <span>No follows selected</span>
-  </div>
-{:else}
-  {#each pubkeys as pubkey (pubkey)}
-    <PersonSummary {pubkey}>
-      <div slot="actions" class="flex items-start justify-end">
-        <Anchor button class="flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
-          <i class="fa fa-user-slash" /> Unfollow
-        </Anchor>
+<p>
+  Pick a category to find some people to follow, or click <Anchor
+    underline
+    on:click={openSelections}>here</Anchor> to search for specific accounts.
+</p>
+<div class="grid grid-cols-1 gap-3 overflow-auto xs:grid-cols-2 sm:grid-cols-3">
+  {#each shuffledLists as list (list.address)}
+    <div
+      class="relative flex min-w-[180px] cursor-pointer flex-col gap-2 rounded-2xl bg-mid p-3 sm:aspect-square"
+      on:click={() => showList(list)}>
+      <p class="text-xl font-bold">{list.title}</p>
+      <p class="pb-5">{list.description}</p>
+      <div class="absolute bottom-1 text-lighter">
+        {Tags.from(list).pubkeys().count()} people
       </div>
-    </PersonSummary>
-  {/each}
-{/if}
-<div class="flex items-center gap-2">
-  <i class="fa fa-earth-asia fa-lg" />
-  <h2 class="staatliches text-2xl">Other people</h2>
-</div>
-<Input bind:value={q} type="text" wrapperClass="flex-grow" placeholder="Type to search">
-  <i slot="before" class="fa-solid fa-search" />
-</Input>
-{#each results.slice(0, 50) as profile (profile.pubkey)}
-  <PersonSummary pubkey={profile.pubkey}>
-    <div slot="actions" class="flex items-start justify-end">
-      <Anchor button accent on:click={() => addFollow(profile.pubkey)}>
-        <i class="fa fa-user-plus" /> Follow
-      </Anchor>
     </div>
-  </PersonSummary>
-{/each}
+  {/each}
+</div>
+<div class="flex justify-between">
+  <div class="flex items-center gap-2">
+    <i class="fa fa-info-circle" />
+    <span>Following {quantify(pubkeys.length, "person", "people")}</span>
+    <span>•</span>
+    <span>{quantify(relays.length, "relay")}</span>
+  </div>
+  <Anchor underline on:click={openSelections}>View selections</Anchor>
+</div>
+<div class="flex gap-2">
+  <Anchor button on:click={prev}><i class="fa fa-arrow-left" /> Back</Anchor>
+  <Anchor button accent disabled={pubkeys.length === 0} class="flex-grow" on:click={() => next()}
+    >Continue</Anchor>
+</div>
+
+{#if list}
+  <Modal onEscape={() => setTimeout(() => showList(null), 300)}>
+    <p class="text-2xl font-bold">{list.title}</p>
+    <p class="pb-5 text-lg">{list.description}</p>
+    {#each Tags.from(list).pubkeys().all() as pubkey (pubkey)}
+      <PersonSummary {pubkey}>
+        <div slot="actions" class="flex items-start justify-end">
+          {#if pubkeys.includes(pubkey)}
+            <Anchor button class="flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
+              <i class="fa fa-user-slash" /> Unfollow
+            </Anchor>
+          {:else}
+            <Anchor
+              button
+              accent
+              class="flex items-center gap-2"
+              on:click={() => addFollow(pubkey)}>
+              <i class="fa fa-user-plus" /> Follow
+            </Anchor>
+          {/if}
+        </div>
+      </PersonSummary>
+    {/each}
+  </Modal>
+{/if}
+
+{#if showSelections}
+  <Modal onEscape={closeSelections}>
+    <Subheading>People you follow</Subheading>
+    <p class="text-lg">
+      These are the people you'll be following once you finish creating your account.
+    </p>
+    <div />
+    {#if pubkeys.length === 0}
+      <div class="my-8 flex items-center justify-center gap-2 text-center">
+        <i class="fa fa-triangle-exclamation" />
+        <span>No people selected</span>
+      </div>
+    {:else}
+      {#each pubkeys as pubkey (pubkey)}
+        <PersonSummary {pubkey}>
+          <div slot="actions" class="flex items-start justify-end">
+            <Anchor button class="flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
+              <i class="fa fa-user-slash" /> Unfollow
+            </Anchor>
+          </div>
+        </PersonSummary>
+      {/each}
+    {/if}
+    <Anchor button on:click={openPersonSearch}>
+      <i class="fa fa-search" />
+      Search for more people
+    </Anchor>
+    <div />
+    <Subheading>Relays you use</Subheading>
+    <p class="text-lg">
+      Relays are where content on nostr lives. Connecting to different relays can result in a
+      different experience.
+    </p>
+    <div />
+    {#if relays.length === 0}
+      <div class="my-8 flex items-center justify-center gap-2 text-center">
+        <i class="fa fa-triangle-exclamation" />
+        <span>No relays selected</span>
+      </div>
+    {:else}
+      <FlexColumn small>
+        {#each relays as relay (relay.url)}
+          <RelayCard inert {relay}>
+            <div slot="actions">
+              <Anchor
+                button
+                class="flex items-center gap-2"
+                on:click={() => removeRelay(relay.url)}>
+                <i class="fa fa-right-from-bracket" /> Leave
+              </Anchor>
+            </div>
+          </RelayCard>
+        {/each}
+      </FlexColumn>
+    {/if}
+    <Anchor button on:click={openRelaySearch}>
+      <i class="fa fa-search" />
+      Search for more relays
+    </Anchor>
+  </Modal>
+{/if}
+
+{#if showPersonSearch}
+  <Modal onEscape={closePersonSearch}>
+    <Input bind:value={term}>
+      <i slot="before" class="fa fa-search" />
+    </Input>
+    {#each $searchPeople(term).slice(0, 30) as person (person.pubkey)}
+      <PersonSummary pubkey={person.pubkey}>
+        <div slot="actions" class="flex items-start justify-end">
+          {#if pubkeys.includes(person.pubkey)}
+            <Anchor
+              button
+              class="flex items-center gap-2"
+              on:click={() => removeFollow(person.pubkey)}>
+              <i class="fa fa-user-slash" /> Unfollow
+            </Anchor>
+          {:else}
+            <Anchor
+              button
+              accent
+              class="flex items-center gap-2"
+              on:click={() => addFollow(person.pubkey)}>
+              <i class="fa fa-user-plus" /> Follow
+            </Anchor>
+          {/if}
+        </div>
+      </PersonSummary>
+    {/each}
+  </Modal>
+{/if}
+
+{#if showRelaySearch}
+  <Modal onEscape={closeRelaySearch}>
+    <Input bind:value={term}>
+      <i slot="before" class="fa fa-search" />
+    </Input>
+    <FlexColumn small>
+      {#each $searchRelays(term).slice(0, 30) as relay (relay.url)}
+        <RelayCard inert {relay}>
+          <div slot="actions">
+            {#if urls.includes(relay.url)}
+              <Anchor
+                button
+                class="flex items-center gap-2"
+                on:click={() => removeRelay(relay.url)}>
+                <i class="fa fa-right-from-bracket" /> Leave
+              </Anchor>
+            {:else}
+              <Anchor button class="flex items-center gap-2" on:click={() => addRelay(relay.url)}>
+                <i class="fa fa-right-to-bracket" /> Join
+              </Anchor>
+            {/if}
+          </div>
+        </RelayCard>
+      {/each}
+    </FlexColumn>
+  </Modal>
+{/if}

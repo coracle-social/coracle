@@ -72,7 +72,7 @@
                   })}
                   on:click={() => loadListFeed(list.address)}>
                   <i class="fa fa-scroll fa-sm mr-1" />
-                  {list.name}
+                  {list.title}
                 </button>
               {/each}
               <button

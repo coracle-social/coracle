@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {sortBy, inc} from "ramda"
-  import {closure, first, sleep} from "hurdak"
+  import {Tags} from "paravel"
+  import {sleep} from "hurdak"
   import {generatePrivateKey} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
@@ -10,57 +10,34 @@
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
   import {
     env,
+    load,
     user,
-    people,
-    mention,
     session,
     loadPubkeys,
     publishNote,
     publishPetnames,
     publishProfile,
     publishRelays,
+    getIdFilters,
     loginWithPrivateKey,
     listenForNotifications,
-    getFollowedPubkeys,
   } from "src/engine"
   import {router} from "src/app/router"
 
   export let stage = "intro"
 
   const privkey = generatePrivateKey()
+
   const profile = {}
 
   const setStage = s => {
     stage = s
   }
 
-  let petnames = closure(() => {
-    if ($session) {
-      return []
-    }
+  let petnames = $session ? [] : user.get()?.petnames || []
 
-    const petnames = user.get()?.petnames || []
-
-    if (petnames.length === 0) {
-      for (const pubkey of $env.DEFAULT_FOLLOWS) {
-        petnames.push(mention(pubkey))
-      }
-    }
-
-    return petnames
-  })
-
-  let relays = closure(() => {
-    const relays = user.get()?.relays || []
-
-    if (relays.length === 0) {
-      for (const url of $env.DEFAULT_RELAYS) {
-        relays.push({url, read: true, write: true})
-      }
-    }
-
-    return relays
-  })
+  let relays =
+    user.get()?.relays || $env.DEFAULT_RELAYS.map(url => ({url, read: true, write: true}))
 
   const signup = async noteContent => {
     // Go to our home page
@@ -92,25 +69,13 @@
     // Prime our database with our default follows
     loadPubkeys($env.DEFAULT_FOLLOWS)
 
-    // Wait until they're likely loaded
-    await sleep(5000)
-
-    // Load the top 256 other pubkeys by web of trust
-    const pubkeys = new Map()
-
-    for (const follow of $env.DEFAULT_FOLLOWS) {
-      for (const pubkey of getFollowedPubkeys(people.key(follow).get())) {
-        pubkeys.set(pubkey, inc(pubkeys.get(pubkey) || 0))
-      }
-
-      await sleep(10)
-    }
-
-    loadPubkeys(
-      sortBy(([pk, wot]) => -wot, Array.from(pubkeys.entries()))
-        .slice(0, 256)
-        .map(first),
-    )
+    load({
+      relays: $env.DEFAULT_RELAYS,
+      filters: getIdFilters($env.ONBOARDING_LISTS),
+      onEvent: e => {
+        loadPubkeys(Tags.from(e).pubkeys().all())
+      },
+    })
   })
 </script>
 
@@ -127,9 +92,21 @@
     {/if}
   {/key}
   <div class="m-auto flex gap-2">
-    <div class="h-2 w-2 rounded-full bg-mid" class:bg-lighter={stage === "intro"} />
-    <div class="h-2 w-2 rounded-full bg-mid" class:bg-lighter={stage === "profile"} />
-    <div class="h-2 w-2 rounded-full bg-mid" class:bg-lighter={stage === "follows"} />
-    <div class="h-2 w-2 rounded-full bg-mid" class:bg-lighter={stage === "note"} />
+    <div
+      class="h-2 w-2 rounded-full"
+      class:bg-lighter={stage === "intro"}
+      class:bg-mid={stage !== "intro"} />
+    <div
+      class="h-2 w-2 rounded-full"
+      class:bg-lighter={stage === "profile"}
+      class:bg-mid={stage !== "profile"} />
+    <div
+      class="h-2 w-2 rounded-full"
+      class:bg-lighter={stage === "follows"}
+      class:bg-mid={stage !== "follows"} />
+    <div
+      class="h-2 w-2 rounded-full"
+      class:bg-lighter={stage === "note"}
+      class:bg-mid={stage !== "note"} />
   </div>
 </FlexColumn>

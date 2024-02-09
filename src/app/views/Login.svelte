@@ -101,6 +101,11 @@
         }
 
         const domain = last(content.nip05.split("@"))
+
+        if (handlers.find(h => h.domain === domain)) {
+          return
+        }
+
         const {pubkey, nip46: relays} = await getHandle(`_@${domain}`)
 
         if (pubkey === e.pubkey) {
@@ -119,7 +124,7 @@
       <Heading>Welcome!</Heading>
       <p class="text-lg text-lightest">
         Don't have an account yet?
-        <Anchor underline on:click={signUp} class="ml-1 text-white">Sign up</Anchor>
+        <Anchor underline on:click={signUp} class="ml-1 text-lightest">Sign up</Anchor>
       </p>
     </div>
     <div class="flex">

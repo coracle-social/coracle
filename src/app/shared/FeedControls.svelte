@@ -300,7 +300,11 @@
         </div>
         <div class="flex flex-col gap-1">
           <strong>Topics</strong>
-          <SearchSelect multiple search={$searchTopics} bind:value={_filter["#t"]}>
+          <SearchSelect
+            multiple
+            search={$searchTopics}
+            bind:value={_filter["#t"]}
+            termToItem={objOf("name")}>
             <div slot="item" let:item>
               <div class="-my-1">
                 #{item.name}

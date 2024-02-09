@@ -6,9 +6,9 @@ import type {List} from "./model"
 import {_lists} from "./state"
 
 export const lists = derivedCollection<List>("address", [_lists, deletes], ([$l, $d]) =>
-  $l.filter(l => !$d.has(l.address))
+  $l.filter(l => !$d.has(l.address)),
 )
 
 export const userLists = derivedCollection<List>("address", [lists, pubkey], ([$l, $pk]) =>
-  sortBy(l => l.name.toLowerCase(), $l.filter(whereEq({pubkey: $pk})))
+  sortBy((l: any) => (l.title || l.name).toLowerCase(), $l.filter(whereEq({pubkey: $pk}))),
 )
