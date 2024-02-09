@@ -7,8 +7,9 @@ import {between, avg} from "hurdak"
 import logger from "src/util/logger"
 import type {Filter, Event} from "src/engine"
 
+export const fromHex = k => Uint8Array.from(Buffer.from(k, "hex"))
+export const getPublicKey = (sk: string) => getPk(fromHex(sk))
 export const generatePrivateKey = () => Buffer.from(generateSecretKey()).toString("hex")
-export const getPublicKey = (sk: string) => getPk(Uint8Array.from(Buffer.from(sk, "hex")))
 export const getSignature = (e, sk: string) => bytesToHex(schnorr.sign(getEventHash(e), sk))
 export const nsecEncode = (sk: string) => nip19.nsecEncode(Uint8Array.from(Buffer.from(sk, "hex")))
 
