@@ -17,7 +17,7 @@
 
   const showLists = () => router.at("lists").open()
 
-  const showLogin = () => router.at("login/intro").open()
+  const showLogin = () => router.at("login").open()
 
   const loadListFeed = address => {
     const list = lists.key(address).get()

@@ -178,9 +178,9 @@
     },
   })
 
+  router.register("/login", Login)
   router.register("/login/bunker", LoginBunker)
   router.register("/login/connect", LoginConnect)
-  router.register("/login/intro", Login)
   router.register("/login/privkey", LoginPrivKey)
   router.register("/login/pubkey", LoginPubKey)
   router.register("/logout", Logout)

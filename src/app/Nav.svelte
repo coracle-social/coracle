@@ -28,7 +28,7 @@
 
   const createNote = () => {
     if (!$pubkey) {
-      return router.at("/login/intro").open()
+      return router.at("/login").open()
     }
 
     const params = {} as any
@@ -93,7 +93,7 @@
     {#if $pubkey}
       <Anchor button accent on:click={createNote}>Post +</Anchor>
     {:else}
-      <Anchor modal button accent href="/login/intro">Log In</Anchor>
+      <Anchor modal button accent href="/login">Log In</Anchor>
     {/if}
     <div class="flex cursor-pointer items-center" on:click={openMenu}>
       <i class="fa fa-bars fa-2xl" />

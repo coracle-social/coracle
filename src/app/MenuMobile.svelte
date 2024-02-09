@@ -64,7 +64,7 @@
         </Anchor>
       {:else}
         <div class="flex justify-center">
-          <Anchor button accent modal href="/login/intro">Log In</Anchor>
+          <Anchor button accent modal href="/login">Log In</Anchor>
         </div>
       {/if}
     </div>

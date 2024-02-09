@@ -171,7 +171,7 @@
           </div>
         </Anchor>
       {:else}
-        <Anchor modal button accent href="/login/intro">Log In</Anchor>
+        <Anchor modal button accent href="/login">Log In</Anchor>
       {/if}
     </div>
   </FlexColumn>
