@@ -14,7 +14,7 @@ const addSession = (s: Session) => {
   pubkey.set(s.pubkey)
 }
 
-export const loginWithPrivateKey = (privkey, ...extra) =>
+export const loginWithPrivateKey = (privkey, extra = {}) =>
   addSession({method: "privkey", pubkey: getPublicKey(privkey), privkey, ...extra})
 
 export const loginWithPublicKey = pubkey => addSession({method: "pubkey", pubkey})

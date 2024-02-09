@@ -1,6 +1,6 @@
 <script lang="ts">
   import {reject, identity} from "ramda"
-  import {shuffle, quantify} from "hurdak"
+  import {quantify} from "hurdak"
   import {Tags} from "paravel"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
@@ -78,9 +78,9 @@
     showRelaySearch = false
   }
 
-  const shuffledLists = shuffle($env.ONBOARDING_LISTS)
-    .map(a => lists.key(a).get())
-    .filter(identity)
+  const onboardingLists = lists.mapStore.derived($lists =>
+    $env.ONBOARDING_LISTS.map(a => $lists.get(a)).filter(identity),
+  )
 
   $: urls = relays.map(r => r.url)
 
@@ -105,7 +105,7 @@
     on:click={openSelections}>here</Anchor> to search for specific accounts.
 </p>
 <div class="grid grid-cols-1 gap-3 overflow-auto xs:grid-cols-2 sm:grid-cols-3">
-  {#each shuffledLists as list (list.address)}
+  {#each $onboardingLists as list (list.address)}
     <Card
       class="relative flex min-w-[180px] cursor-pointer flex-col gap-2 rounded-2xl sm:aspect-square"
       on:click={() => openList(list)}>

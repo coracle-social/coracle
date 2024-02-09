@@ -16,7 +16,7 @@ let singleton: NostrConnectBroker
 
 export class NostrConnectBroker extends Emitter {
   #sub: typeof Subscription
-  #ready = sleep(300)
+  #ready = sleep(500)
 
   static get(pubkey, connectKey: string, handler: NostrConnectHandler) {
     if (

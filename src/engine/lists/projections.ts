@@ -14,11 +14,13 @@ const handleBookmarkList = (e: Event) => {
   // Avoid malformed lists
   if (title) {
     _lists.key(naddr.asTagValue()).update($list => ({
-      ...updateRecord($list, e.created_at, {tags: e.tags}),
+      ...updateRecord($list, e.created_at, {
+        tags: e.tags,
+        description,
+        title,
+      }),
       address: naddr.asTagValue(),
       pubkey: e.pubkey,
-      description,
-      title,
     }))
   }
 }

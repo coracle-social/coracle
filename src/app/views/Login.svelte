@@ -12,7 +12,7 @@
   import Heading from "src/partials/Heading.svelte"
   import {
     load,
-    getHandle,
+    fetchHandle,
     getUserHints,
     getExtension,
     withExtension,
@@ -51,10 +51,10 @@
 
     // Fill in pubkey and relays if they entered a custom doain
     if (!handler.pubkey) {
-      const {pubkey, nip46} = await getHandle(`_@${handler.domain}`)
+      const info = await fetchHandle(`_@${handler.domain}`)
 
-      handler.pubkey = pubkey
-      handler.relays = nip46
+      handler.pubkey = info.pubkey
+      handler.relays = info.nip46 || info.relays
     }
 
     if (!handler.relays) {
@@ -106,7 +106,7 @@
           return
         }
 
-        const {pubkey, nip46: relays} = await getHandle(`_@${domain}`)
+        const {pubkey, nip46: relays} = await fetchHandle(`_@${domain}`)
 
         if (pubkey === e.pubkey) {
           handlers = handlers.concat({pubkey, domain, relays})

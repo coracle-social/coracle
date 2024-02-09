@@ -45,7 +45,11 @@ export const decodeEvent = entity => {
 export const unwrapRepost = repost => {
   const event = tryJson(() => JSON.parse(repost.content))
 
-  if (!event || !hasValidSignature(event)) {
+  try {
+    if (!event || !hasValidSignature(event)) {
+      return null
+    }
+  } catch (e) {
     return null
   }
 
