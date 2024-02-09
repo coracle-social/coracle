@@ -1,6 +1,7 @@
 import type {UnsignedEvent} from "nostr-tools"
 import {getPublicKey} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
+import logger from "src/util/logger"
 import type {Session} from "src/engine/session/model"
 import type {Signer} from "./signer"
 import type {Nip04} from "./nip04"
@@ -132,8 +133,8 @@ export class Nip59 {
         return Object.assign(rumor, {wrap, seen_on: wrap.seen_on})
       }
     } catch (e) {
-      if (!e.toString().match(/version 1|Invalid nip44/)) {
-        console.warn(e)
+      if (!e.toString().match(/version 1|Invalid nip44|Malformed/)) {
+        logger.warn(e)
       }
     }
 

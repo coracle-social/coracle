@@ -1,6 +1,7 @@
 import {prop, identity, pluck, splitAt, nth, sortBy} from "ramda"
 import {sleep, defer, chunk, randomInt, throttle} from "hurdak"
 import {Storage as LocalStorage} from "hurdak"
+import logger from "src/util/logger"
 import {sessions} from "src/engine/session/state"
 import {people} from "src/engine/people/state"
 import type {Writable, Collection} from "./store"
@@ -53,7 +54,7 @@ export class IndexedDB {
           try {
             this.db.createObjectStore(o.name, o.opts)
           } catch (e) {
-            console.warn(e)
+            logger.warn(e)
           }
         })
       }

@@ -3,6 +3,7 @@ import {throttle} from "throttle-debounce"
 import {fromNostrURI, cached} from "paravel"
 import {uniq, join, nth, last} from "ramda"
 import {Fetch, tryFunc, createMapOf, ellipsize, switcherFn} from "hurdak"
+import logger from "src/util/logger"
 import {createBatcher, pushToKey} from "src/util/misc"
 import {dufflepud} from "src/engine/session/utils"
 import {getPubkeyHints} from "src/engine/relays/utils"
@@ -48,7 +49,7 @@ export const displayPerson = ({pubkey, profile}: Person) => {
   try {
     return nip19.npubEncode(pubkey).slice(-8)
   } catch (e) {
-    console.error(e)
+    logger.error(e)
 
     return ""
   }

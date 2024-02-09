@@ -4,6 +4,7 @@ import {bytesToHex} from "@noble/hashes/utils"
 import {nip19, generateSecretKey, getEventHash, getPublicKey as getPk} from "nostr-tools"
 import {pick, reject, is, join, mergeLeft, identity} from "ramda"
 import {between, avg} from "hurdak"
+import logger from "src/util/logger"
 import type {Filter, Event} from "src/engine"
 
 export const generatePrivateKey = () => Buffer.from(generateSecretKey()).toString("hex")
@@ -177,7 +178,7 @@ export class Naddr {
     }
 
     if (type !== "naddr") {
-      console.warn(`Invalid naddr ${naddr}`)
+      logger.warn(`Invalid naddr ${naddr}`)
     }
 
     return new Naddr(data.kind, data.pubkey, data.identifier, data.relays)

@@ -1,6 +1,7 @@
 import {throttle} from "throttle-debounce"
 import {is, identity, reject, filter, map, findIndex, equals} from "ramda"
 import {ensurePlural} from "hurdak"
+import logger from "src/util/logger"
 
 type Invalidator<T> = (value?: T) => void
 type Derivable = Readable<any> | Readable<any>[]
@@ -266,9 +267,9 @@ export class Collection<T extends R> implements Readable<T[]> {
 
     for (const x of xs) {
       if (!x) {
-        console.error("Empty value passed to collection store")
+        logger.error("Empty value passed to collection store")
       } else if (!x[this.pk]) {
-        console.error(`Value with empty ${this.pk} passed to collection store`, x)
+        logger.error(`Value with empty ${this.pk} passed to collection store`, x)
       } else {
         m.set(x[this.pk], x)
       }
@@ -292,7 +293,12 @@ export class DerivedCollection<T extends R> implements Readable<T[]> {
   readonly listStore: Derived<T[]>
   readonly mapStore: Readable<M<T>>
 
-  constructor(readonly pk: string, stores: Derivable, getValue: (values: any) => T[], t = 0) {
+  constructor(
+    readonly pk: string,
+    stores: Derivable,
+    getValue: (values: any) => T[],
+    t = 0,
+  ) {
     this.listStore = new Derived(stores, getValue, t)
     this.mapStore = new Derived(this.listStore, xs => new Map(xs.map(x => [x[pk], x])))
   }
@@ -320,7 +326,7 @@ export const readable = <T>(v: T) => derived(new Writable(v), identity) as Reada
 export const derivedCollection = <T>(
   pk: string,
   stores: Derivable,
-  getValue: (values: any) => T[]
+  getValue: (values: any) => T[],
 ) => new DerivedCollection(pk, stores, getValue)
 
 export const key = <T extends R>(base: Writable<M<T>>, pk: string, key: string) =>

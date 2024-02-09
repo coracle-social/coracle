@@ -2,6 +2,7 @@ import {last, drop, pipe, map, pluck, identity} from "ramda"
 import {fromNostrURI, Tags} from "paravel"
 import {nip19} from "nostr-tools"
 import {first, switcherFn} from "hurdak"
+import logger from "src/util/logger"
 
 export const NEWLINE = "newline"
 export const ELLIPSIS = "ellipsis"
@@ -110,7 +111,7 @@ export const parseContent = (event: {content: string; tags?: string[][]}) => {
 
         return [`nostr:${type}`, bech32, {...value, entity}]
       } catch (e) {
-        console.warn(e)
+        logger.warn(e)
       }
     }
   }

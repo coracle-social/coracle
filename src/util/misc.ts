@@ -3,7 +3,7 @@ import {now, stripProto} from "paravel"
 import {pluck, fromPairs, last, identity, sum, is, equals} from "ramda"
 import {ensurePlural, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js"
-import {warn} from "src/util/logger"
+import logger from "src/util/logger"
 
 export const fuzzy = <T>(data: T[], opts = {}) => {
   const fuse = new Fuse(data, opts) as any
@@ -134,14 +134,14 @@ export const hsl = (hue: number, {saturation = 100, lightness = 50, opacity = 1}
 export const tryJson = <T>(f: () => T) =>
   tryFunc(f, (e: Error) => {
     if (!e.toString().includes("JSON")) {
-      warn(e)
+      logger.warn(e)
     }
   })
 
 export const tryFetch = <T>(f: () => T) =>
   tryFunc(f, (e: Error) => {
     if (!e.toString().includes("fetch")) {
-      warn(e)
+      logger.warn(e)
     }
   })
 
@@ -277,7 +277,7 @@ export const createBatcher = <T, U>(t, execute: (request: T[]) => U[] | Promise<
     const results = await execute(pluck("request", items))
 
     if (results.length !== items.length) {
-      console.warn("Execute must return a promise for each request", results, items)
+      logger.warn("Execute must return a promise for each request", results, items)
     }
 
     results.forEach(async (r, i) => items[i].deferred.resolve(await r))

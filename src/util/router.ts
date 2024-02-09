@@ -1,6 +1,7 @@
 import {takeWhile, find, filter, identity, mergeLeft, reject, path as getPath} from "ramda"
 import {first, filterVals, updateIn} from "hurdak"
 import type {ComponentType, SvelteComponentTyped} from "svelte"
+import logger from "src/util/logger"
 import {buildQueryString, parseQueryString} from "src/util/misc"
 import {globalHistory} from "src/util/history"
 import {writable} from "src/engine"
@@ -176,7 +177,7 @@ export const decodeQueryString = ({path, route}: HistoryItem) => {
       try {
         Object.assign(data, serializer.decode(v))
       } catch (e) {
-        console.warn("Query string decoding failed", k, v, e)
+        logger.warn("Query string decoding failed", k, v, e)
       }
     }
   }
@@ -194,7 +195,7 @@ export const decodeRouteParams = ({params, route}: HistoryItem) => {
       try {
         Object.assign(data, serializer.decode(v))
       } catch (e) {
-        console.warn("Route param decoding failed", k, v, e)
+        logger.warn("Route param decoding failed", k, v, e)
       }
     }
   }
@@ -314,7 +315,7 @@ export class Router {
     this.at(window.location.pathname + window.location.search).push()
     this.page.subscribe($page => {
       if (!$page) {
-        console.error("No page available")
+        logger.error("No page available")
       }
     })
   }
