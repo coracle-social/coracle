@@ -7,7 +7,7 @@
   import {isHex} from "src/util/nostr"
   import {router} from "src/app/router"
   import type {Person, Topic} from "src/engine"
-  import {pubkey, topics, derived, primeWotCaches, searchPeople, loadPeople} from "src/engine"
+  import {pubkey, topics, derived, searchPeople, loadPeople} from "src/engine"
 
   export let term
   export let replace = false
@@ -81,8 +81,6 @@
       loadPeople($term)
     }
   }
-
-  primeWotCaches($pubkey)
 </script>
 
 {#each $results.slice(0, 30) as result (result.type + result.id)}

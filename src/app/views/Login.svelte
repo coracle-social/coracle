@@ -96,17 +96,16 @@
       onEvent: async e => {
         const content = tryJson(() => JSON.parse(e.content))
 
-        if (!content || handlers.find(h => h.pubkey === e.pubkey)) {
+        if (!content) {
           return
         }
 
         const domain = last(content.nip05.split("@"))
+        const {pubkey, nip46: relays} = await fetchHandle(`_@${domain}`)
 
-        if (handlers.find(h => h.domain === domain)) {
+        if (handlers.some(h => h.domain === domain)) {
           return
         }
-
-        const {pubkey, nip46: relays} = await fetchHandle(`_@${domain}`)
 
         if (pubkey === e.pubkey) {
           handlers = handlers.concat({pubkey, domain, relays})
