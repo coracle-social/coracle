@@ -38,8 +38,8 @@ export const appDataKeys = {
   NIP24_LAST_CHECKED: "nostr-engine/Nip24/last_checked/v1",
 }
 
-export const isLike = (content: string) =>
-  ["", "+", "🤙", "👍", "❤️", "😎", "🏅", "🫂", "🤣", "😂", "💜", "🔥"].includes(content)
+export const isLike = (e: Event) =>
+  e.kind === 7 && ["", "+", "🤙", "👍", "❤️", "😎", "🏅", "🫂", "🤣", "😂", "💜", "🔥"].includes(e.content)
 
 export const channelAttrs = ["name", "about", "picture"]
 export const groupAttrs = ["name", "about", "picture"]

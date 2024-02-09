@@ -170,10 +170,7 @@
   }
 
   // Split out likes, uniqify by pubkey since a like can be duplicated across groups
-  $: likes = uniqBy(
-    prop("pubkey"),
-    children.filter(e => e.kind === 7 && isLike(e.content)),
-  )
+  $: likes = uniqBy(prop("pubkey"), children.filter(isLike))
 
   // Split out zaps
   $: zaps = processZaps(

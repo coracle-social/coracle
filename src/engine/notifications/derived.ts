@@ -1,7 +1,7 @@
 import {assoc, without, max, sortBy} from "ramda"
 import {seconds} from "hurdak"
 import {now, Tags} from "paravel"
-import {reactionKinds, noteKinds, repostKinds, getParentId} from "src/util/nostr"
+import {isLike, reactionKinds, noteKinds, repostKinds, getParentId} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import {seenIds} from "src/engine/events/state"
 import {unwrapRepost} from "src/engine/events/utils"
@@ -26,6 +26,10 @@ export const notifications = derived(
 
     return $events.filter(e => {
       if (e.pubkey === $pubkey || $isEventMuted(e) || !kinds.includes(e.kind)) {
+        return false
+      }
+
+      if (e.kind === 7 && !isLike(e)) {
         return false
       }
 
