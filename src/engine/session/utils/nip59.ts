@@ -84,12 +84,21 @@ export class Nip59 {
 
     // Temporarily support nip04
     if (sk) {
-      message =
-        (await this.nip04.decrypt(content, pubkey, sk)) || this.nip44.decrypt(content, pubkey, sk)
+      if (this.nip04.isEnabled()) {
+        message = await this.nip04.decrypt(content, pubkey, sk)
+      }
+
+      if (!message && this.nip44.isEnabled()) {
+        message = await this.nip44.decrypt(content, pubkey, sk)
+      }
     } else {
-      message =
-        (await this.nip04.decryptAsUser(content, pubkey)) ||
-        this.nip44.decryptAsUser(content, pubkey)
+      if (this.nip04.isEnabled()) {
+        message = await this.nip04.decryptAsUser(content, pubkey)
+      }
+
+      if (!message && this.nip44.isEnabled()) {
+        message = await this.nip44.decryptAsUser(content, pubkey)
+      }
     }
 
     return tryJson(() => JSON.parse(message))

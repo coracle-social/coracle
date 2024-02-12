@@ -8,10 +8,8 @@
   import {pubkey, nip44} from "src/engine"
 
   let profiles = []
-  let hasError = 0
 
-  const submit = () =>
-    router.at("channels").of(pubkeys).push()
+  const submit = () => router.at("channels").of(pubkeys).push()
 
   $: pubkeys = uniq(pluck("pubkey", profiles).concat($pubkey))
   $: hasError = pubkeys.length > 2 && !$nip44.isEnabled()

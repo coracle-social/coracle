@@ -343,14 +343,18 @@ export class Router {
     this.routes.push({path, component, required, serializers, requireUser, requireSigner})
   }
 
-  go(path, {replace, ...config}: RouteConfig = {}) {
+  getMatch(path) {
     const match = pickRoute(this.routes, path)
 
     if (!match) {
       throw new Error(`Failed to match ${path}`)
     }
 
-    const {route, params} = match
+    return match
+  }
+
+  go(path, {replace, ...config}: RouteConfig = {}) {
+    const {route, params} = this.getMatch(path)
 
     this.history.update($history => {
       // Drop one if we're replacing
@@ -385,7 +389,12 @@ export class Router {
         $history.splice(0, 1)
       }
 
-      globalHistory.navigate($history[0]?.path || "/")
+      // Make sure we don't completely clear history out
+      if ($history.length === 0) {
+        $history.push({path: "/", config: {}, ...this.getMatch("/")})
+      }
+
+      globalHistory.navigate($history[0].path || "/")
 
       return $history
     })

@@ -13,8 +13,6 @@ export const generatePrivateKey = () => Buffer.from(generateSecretKey()).toStrin
 export const getSignature = (e, sk: string) => bytesToHex(schnorr.sign(getEventHash(e), sk))
 export const nsecEncode = (sk: string) => nip19.nsecEncode(Uint8Array.from(Buffer.from(sk, "hex")))
 
-window.fromHex = fromHex
-
 export const isKeyValid = (key: string) => {
   // Validate the key before setting it to state by encoding it using bech32.
   // This will error if invalid (this works whether it's a public or a private key)
@@ -41,7 +39,8 @@ export const appDataKeys = {
 }
 
 export const isLike = (e: Event) =>
-  e.kind === 7 && ["", "+", "🤙", "👍", "❤️", "😎", "🏅", "🫂", "🤣", "😂", "💜", "🔥"].includes(e.content)
+  e.kind === 7 &&
+  ["", "+", "🤙", "👍", "❤️", "😎", "🏅", "🫂", "🤣", "😂", "💜", "🔥"].includes(e.content)
 
 export const channelAttrs = ["name", "about", "picture"]
 export const groupAttrs = ["name", "about", "picture"]

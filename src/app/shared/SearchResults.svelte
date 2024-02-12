@@ -7,7 +7,7 @@
   import {isHex} from "src/util/nostr"
   import {router} from "src/app/router"
   import type {Person, Topic} from "src/engine"
-  import {pubkey, topics, derived, searchPeople, loadPeople} from "src/engine"
+  import {topics, derived, searchPeople, loadPeople} from "src/engine"
 
   export let term
   export let replace = false

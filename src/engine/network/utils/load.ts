@@ -3,7 +3,7 @@ import {flatten, uniq, path as getPath} from "ramda"
 import {defer, batch} from "hurdak"
 import {pushToKey} from "src/util/misc"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
-import {info} from "src/util/logger"
+import logger from "src/util/logger"
 import {getSetting} from "src/engine/session/utils"
 import type {Event} from "src/engine/events/model"
 import {mergeHints} from "src/engine/relays/utils"
@@ -83,7 +83,7 @@ export const execute = batch(500, (items: LoadItem[]) => {
     return
   }
 
-  info(`Loading ${items.length} grouped requests`, {filters, relays})
+  logger.info(`Loading ${items.length} grouped requests`, {filters, relays})
 
   const tracker = new Tracker()
 
