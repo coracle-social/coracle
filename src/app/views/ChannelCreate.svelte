@@ -8,18 +8,13 @@
   import {pubkey, nip44} from "src/engine"
 
   let profiles = []
+  let hasError = 0
 
-  const submit = () => {
-    if (hasError) {
-      return
-    }
-
-    const pubkeys = uniq(pluck("pubkey", profiles).concat($pubkey))
-
+  const submit = () =>
     router.at("channels").of(pubkeys).push()
-  }
 
-  $: hasError = !$nip44.isEnabled() && profiles.length > 1
+  $: pubkeys = uniq(pluck("pubkey", profiles).concat($pubkey))
+  $: hasError = pubkeys.length > 2 && !$nip44.isEnabled()
 </script>
 
 <form on:submit|preventDefault={submit} class="flex justify-center py-12">
