@@ -1,8 +1,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {Storage} from "hurdak"
+  import {uniq} from 'ramda'
   import {FeedLoader} from "src/engine"
   import {createScroller} from "src/util/misc"
+  import {LOCAL_RELAY_URL} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import {getModal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
@@ -44,7 +46,7 @@
       selection = getRelaysFromFilters(compileFilters([filter]))
     }
 
-    return selection
+    return uniq(selection.concat(LOCAL_RELAY_URL))
   }
 
   const loadMore = () => feed.load(5)

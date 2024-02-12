@@ -88,7 +88,7 @@ export const getReplyFilters = (events, filter) => {
 }
 
 export const getFilterGenerality = filter => {
-  if (filter.ids || filter["#e"]) {
+  if (filter.ids || filter["#e"] || filter['#a']) {
     return 0
   }
 

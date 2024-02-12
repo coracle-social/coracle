@@ -4,7 +4,6 @@ import {now} from "paravel"
 import {race} from "src/util/misc"
 import {info} from "src/util/logger"
 import {
-  LOCAL_RELAY_URL,
   getIdOrAddress,
   getIdAndAddress,
   noteKinds,
@@ -46,8 +45,7 @@ export class FeedLoader {
   reposts = new Map<string, Event[]>()
   replies = new Map<string, Event[]>()
   deferred: Event[] = []
-  remoteCursor: MultiCursor
-  localCursor: MultiCursor
+  cursor: MultiCursor
   ready: Promise<void>
   isEventMuted = isEventMuted.get()
   isDeleted = isDeleted.get()
@@ -79,7 +77,7 @@ export class FeedLoader {
       ])
     }
 
-    this.remoteCursor = new MultiCursor({
+    this.cursor = new MultiCursor({
       relays: opts.relays,
       filters: opts.filters,
       onEvent: batch(100, events => {
@@ -89,21 +87,9 @@ export class FeedLoader {
       }),
     })
 
-    this.localCursor = new MultiCursor({
-      relays: [LOCAL_RELAY_URL],
-      filters: opts.filters,
-      onEvent: batch(100, events => {
-        if (opts.shouldLoadParents) {
-          this.loadParents(this.discardEvents(events))
-        }
-      }),
-    })
-
-    const remoteSubs = this.remoteCursor.load(50)
-    const localSubs = this.localCursor.load(50)
+    const remoteSubs = this.cursor.load(50)
 
     this.addSubs(remoteSubs)
-    this.addSubs(localSubs)
 
     // Wait until a good number of subscriptions have completed to reduce the chance of
     // out of order notes
@@ -270,7 +256,7 @@ export class FeedLoader {
   async load(n) {
     await this.ready
 
-    if (this.remoteCursor.done()) {
+    if (this.cursor.done()) {
       return
     }
 
@@ -279,7 +265,7 @@ export class FeedLoader {
       relays: this.opts.relays,
     })
 
-    const [subs, events] = this.remoteCursor.take(n)
+    const [subs, events] = this.cursor.take(n)
 
     this.addSubs(subs)
 
@@ -288,15 +274,6 @@ export class FeedLoader {
     // Skip anything out of order or missing context
     if (this.opts.shouldDefer) {
       ok = doPipe(ok.concat(this.deferred.splice(0)), [this.deferOrphans, this.deferAncient])
-    }
-
-    // If we have nothing load something from the cache to keep the user happy
-    if (ok.length === 0) {
-      const [subs, events] = this.localCursor.take(1)
-
-      this.addSubs(subs)
-
-      ok = this.discardEvents(events)
     }
 
     this.addToFeed(ok)

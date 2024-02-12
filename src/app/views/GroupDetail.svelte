@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {now} from "paravel"
   import {whereEq, assocPath, without} from "ramda"
-  import {noteKinds} from "src/util/nostr"
+  import {noteKinds, LOCAL_RELAY_URL} from "src/util/nostr"
   import {getKey} from "src/util/router"
   import {themeBackgroundGradient} from "src/partials/state"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -145,7 +145,7 @@
     shouldListen
     hideControls
     filter={{kinds: without([30402], noteKinds), "#a": [address]}}
-    {relays} />
+    relays={address.startsWith("35834:") ? [LOCAL_RELAY_URL] : relays} />
 {:else if activeTab === "calendar"}
   <Calendar group={address} filters={[{kinds: [31923], "#a": [address]}]} {relays} />
 {:else if activeTab === "market"}

@@ -17,7 +17,7 @@ export const NOSTR_NPROFILE = "nostr:nprofile"
 export const NOSTR_NADDR = "nostr:naddr"
 
 export const urlIsMedia = (url: string) =>
-  !url.match(/\.(apk|docx|xlsx|csv|dmg)/) && last(url.split("://"))?.includes("/")
+  !url.match(/\.(apk|docx|xlsx|csv|dmg)/) && last(url.replace(/\/$/, '').split("://"))?.includes("/")
 
 export const parseContent = (event: {content: string; tags?: string[][]}) => {
   const result: any[] = []

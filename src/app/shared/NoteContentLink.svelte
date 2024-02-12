@@ -12,6 +12,16 @@
     hidden = true
   }
 
+  const getUrlWithHash = () => {
+    let url = value.url
+
+    if (value.hash) {
+      url += `#${value.hash}`
+    }
+
+    return url
+  }
+
   let hidden = false
 </script>
 
@@ -33,7 +43,7 @@
     modal
     stopPropagation
     class="overflow-hidden text-ellipsis whitespace-nowrap underline"
-    href={router.at("relays").of(value.url).toString()}>
+    href={router.at("relays").of(getUrlWithHash()).toString()}>
     {displayUrl(value.url)}
   </Anchor>
 {:else}
@@ -41,7 +51,7 @@
     external
     stopPropagation
     class="overflow-hidden text-ellipsis whitespace-nowrap underline"
-    href={value.url}>
+    href={getUrlWithHash()}>
     {displayUrl(value.url)}
   </Anchor>
 {/if}
