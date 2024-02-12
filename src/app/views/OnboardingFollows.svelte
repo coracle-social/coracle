@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {reject, identity} from "ramda"
+  import {reject, uniqBy, nth, identity} from "ramda"
   import {quantify} from "hurdak"
   import {Tags} from "paravel"
   import Card from "src/partials/Card.svelte"
@@ -50,6 +50,16 @@
 
   const removeFollow = pubkey => {
     petnames = reject(t => t[1] === pubkey, petnames)
+  }
+
+  const followAll = list => {
+    petnames = uniqBy(nth(1), [...petnames, ...Tags.from(list).pubkeys().all().map(mention)])
+  }
+
+  const unfollowAll = list => {
+    const pubkeys = Tags.from(list).pubkeys().all()
+
+    petnames = petnames.filter(t => !pubkeys.includes(t[1]))
   }
 
   const removeRelay = url => {
@@ -133,10 +143,22 @@
 </div>
 
 {#if showList}
+  {@const listPubkeys = Tags.from(list).pubkeys().all()}
   <Modal onEscape={closeList}>
-    <p class="text-2xl font-bold">{list.title}</p>
+    <div class="flex items-center justify-between">
+      <p class="text-2xl font-bold">{list.title}</p>
+      {#if listPubkeys.every(pubkey => pubkeys.includes(pubkey))}
+        <Anchor button class="flex items-center gap-2" on:click={() => unfollowAll(list)}>
+          Unfollow all
+        </Anchor>
+      {:else}
+        <Anchor button class="flex items-center gap-2" on:click={() => followAll(list)}>
+          Follow all
+        </Anchor>
+      {/if}
+    </div>
     <p class="pb-5 text-lg">{list.description}</p>
-    {#each Tags.from(list).pubkeys().all() as pubkey (pubkey)}
+    {#each listPubkeys as pubkey (pubkey)}
       <PersonSummary {pubkey}>
         <div slot="actions" class="flex items-start justify-end">
           {#if pubkeys.includes(pubkey)}
