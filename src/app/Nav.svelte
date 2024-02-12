@@ -87,9 +87,9 @@
     class="fixed bottom-0 left-0 right-0 z-nav flex items-center justify-between border-t border-solid border-mid bg-dark px-4 py-2">
     <div class="w-1/3">
       <div
-        class="h-10 w-10 cursor-pointer rounded-full border-2 border-solid border-warm p-1 pl-3 pt-2 text-accent"
+        class="h-10 w-10 cursor-pointer rounded-full border-[3px] border-solid border-warm p-1 pl-2.5 pt-1.5 text-accent"
         on:click={openSearch}>
-        <i class="fa fa-search scale-150" />
+        <i class="fa fa-search scale-[140%]" />
       </div>
     </div>
     <div class="">
@@ -101,9 +101,11 @@
     </div>
     <div class="flex w-1/3 justify-end">
       <div class="flex cursor-pointer items-center" on:click={openMenu}>
-        <i class="fa fa-bars fa-2xl" />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" class="pt-1" width="36" height="36">
+          <path fill="currentColor" d="M0 88C0 74.7 10.7 64 24 64H424c13.3 0 24 10.7 24 24s-10.7 24-24 24H24C10.7 112 0 101.3 0 88zM0 248c0-13.3 10.7-24 24-24H424c13.3 0 24 10.7 24 24s-10.7 24-24 24H24c-13.3 0-24-10.7-24-24zM448 408c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24s10.7-24 24-24H424c13.3 0 24 10.7 24 24z"/>
+        </svg>
         {#if $pubkey}
-          <PersonCircle class="-ml-2 h-12 w-12 border-4 !border-dark" pubkey={$pubkey} />
+          <PersonCircle class="-ml-4 h-12 w-12 border-4 !border-dark" pubkey={$pubkey} />
           {#if $hasNewNotifications || $hasNewMessages}
             <div class="absolute right-4 top-4 h-2 w-2 rounded bg-accent" />
           {/if}
