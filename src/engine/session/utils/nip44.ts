@@ -4,6 +4,7 @@ import {cached} from "paravel"
 import {switcherFn} from "hurdak"
 import type {Session} from "src/engine/session/model"
 import type {Connect} from "./connect"
+import {withExtension} from "./nip07"
 
 // Deriving shared secret is an expensive computation, cache it
 export const getSharedSecret = cached({
@@ -19,7 +20,15 @@ export class Nip44 {
   ) {}
 
   isEnabled() {
-    return ["privkey", "connect"].includes(this.session?.method)
+    if (["privkey", "connect"].includes(this.session?.method)) {
+      return true
+    }
+
+    if (this.session?.method === "extension") {
+      return Boolean((window as any).nostr?.nip44)
+    }
+
+    return false
   }
 
   encrypt(message: string, pk: string, sk: string) {
@@ -35,6 +44,7 @@ export class Nip44 {
 
     return switcherFn(method, {
       privkey: () => this.encrypt(message, pk, privkey),
+      extension: () => withExtension(ext => ext.nip44.encrypt(pk, message)),
       connect: () => this.connect.broker.nip44Encrypt(pk, message),
     })
   }
@@ -44,6 +54,7 @@ export class Nip44 {
 
     return switcherFn(method, {
       privkey: () => this.decrypt(message, pk, privkey),
+      extension: () => withExtension(ext => ext.nip44.decrypt(pk, message)),
       connect: () => this.connect.broker.nip44Decrypt(pk, message),
     })
   }

@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.4.3
+
+- [x] Add follow all to onboarding topics
+- [x] Add FORCE_RELAYS environment variable
+- [x] Add support for extensions that implement nip44
+
 # 0.4.2
 
 - [x] Require signer on some routes

@@ -6,8 +6,8 @@ import {withExtension} from "./nip07"
 
 export class Nip04 {
   constructor(
-    readonly session: Session | null,
-    readonly connect: Connect | null,
+    readonly session: Session,
+    readonly connect: Connect,
   ) {}
 
   isEnabled() {
