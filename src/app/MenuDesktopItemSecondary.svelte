@@ -7,4 +7,3 @@
 <Anchor {...$$props} class={className} on:click>
   <slot />
 </Anchor>
-

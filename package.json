@@ -33,7 +33,7 @@
     "postcss": "^8.4.31",
     "prettier": "^3.1.0",
     "prettier-plugin-svelte": "^3.1.2",
-    "prettier-plugin-tailwindcss": "^0.5.7",
+    "prettier-plugin-tailwindcss": "^0.5.11",
     "svelte-preprocess": "^5.1.1",
     "tailwindcss": "^3.3.5",
     "typescript": "^5.3.2",

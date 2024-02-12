@@ -101,7 +101,7 @@
         }
 
         const domain = last(content.nip05.split("@"))
-        const {pubkey, nip46: relays} = await fetchHandle(`_@${domain}`) || {}
+        const {pubkey, nip46: relays} = (await fetchHandle(`_@${domain}`)) || {}
 
         if (handlers.some(h => h.domain === domain)) {
           return

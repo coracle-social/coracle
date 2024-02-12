@@ -52,7 +52,7 @@
     if (word.length > 1 && word.startsWith("@")) {
       const [followed, notFollowed] = partition(
         p => $follows.has(p.pubkey),
-        $searchPeople(word.slice(1))
+        $searchPeople(word.slice(1)),
       )
 
       results = followed.concat(notFollowed)

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import cx from 'classnames'
+  import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {people, displayHandle} from "src/engine"
 

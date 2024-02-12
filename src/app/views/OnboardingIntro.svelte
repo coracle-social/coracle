@@ -42,7 +42,8 @@
   </Anchor>
   <Anchor
     class="relative hidden aspect-[4/3] items-center justify-center overflow-hidden rounded-xl p-8 text-center sm:flex sm:w-1/2"
-    on:click={() => openMedia("https://coracle.us-southeast-1.linodeobjects.com/coracle-deep-dive.mp4")}>
+    on:click={() =>
+      openMedia("https://coracle.us-southeast-1.linodeobjects.com/coracle-deep-dive.mp4")}>
     <div
       class="absolute inset-0 opacity-75 transition-opacity hover:opacity-100"
       style="background: url('/images/sean-105m46GatAg-unsplash.png'" />

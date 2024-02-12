@@ -24,7 +24,7 @@ projections.addHandler(3, e => {
 
           return {url: normalizeRelayUrl(url), write, read}
         })
-    }) as RelayPolicy[]
+    }) as RelayPolicy[],
   )
 })
 
@@ -45,6 +45,6 @@ projections.addHandler(10002, e => {
         }
 
         return {url: normalizeRelayUrl(url), write, read}
-      })
+      }),
   )
 })

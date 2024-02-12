@@ -1,5 +1,5 @@
 import {now} from "paravel"
-import {seconds} from 'hurdak'
+import {seconds} from "hurdak"
 import {Naddr, noteKinds, repostKinds} from "src/util/nostr"
 import {load} from "src/engine/network/utils"
 import {getUserHints} from "src/engine/relays/utils"
@@ -61,7 +61,7 @@ export const loadGroupMessages = async () => {
   for (const address of deriveUserCommunities().get()) {
     const info = getCommunityReqInfo(address)
     const kinds = [...noteKinds, ...repostKinds]
-    const since = Math.max(now() - seconds(7, 'day'), info.since)
+    const since = Math.max(now() - seconds(7, "day"), info.since)
 
     load({relays: info.relays, filters: [{kinds, "#a": [address], since}]})
   }

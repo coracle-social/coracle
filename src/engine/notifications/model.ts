@@ -8,5 +8,5 @@ export type Notification = {
 }
 
 export enum OnboardingTask {
-  BackupKey = 'backup_key'
+  BackupKey = "backup_key",
 }

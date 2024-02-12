@@ -207,9 +207,7 @@
         </MenuItem>
       {/if}
     {/each}
-    <MenuItem
-      class="staatliches py-4 text-center"
-      on:click={() => router.at("login").open()}>
+    <MenuItem class="staatliches py-4 text-center" on:click={() => router.at("login").open()}>
       <i class="fa fa-plus" /> Add Account
     </MenuItem>
   </SliderMenu>

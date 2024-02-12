@@ -29,7 +29,7 @@
 {#if url.match(/\.(wav|mp3|m3u8)$/)}
   {#await import("src/util/audio")}
     <span />
-  {:then {AudioController}}
+  {:then { AudioController }}
     <Audio controller={new AudioController(url)} />
   {/await}
 {:else}
@@ -39,7 +39,7 @@
     href={onClick ? null : url}
     on:click={onClick}
     style="background-color: rgba(15, 15, 14, 0.5)"
-    class="relative flex flex-grow w-full flex-col overflow-hidden rounded-xl">
+    class="relative flex w-full flex-grow flex-col overflow-hidden rounded-xl">
     {#if url.match(/open.spotify.com/)}
       {@const id = last(url.split("?")[0].match(/[a-z]+\/[0-9A-z]+$/))}
       {@const src = `https://open.spotify.com/embed/${id}`}

@@ -18,7 +18,7 @@
       <div class="flex items-center">
         <GroupName class="text-2xl" {address} />
         <Chip class="scale-75 border-lighter text-lighter">
-          {#if address.startsWith('34550:')}
+          {#if address.startsWith("34550:")}
             <i class="fa fa-unlock" />
             Open
           {:else}

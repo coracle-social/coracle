@@ -41,7 +41,7 @@
     }
   }
 
-  const getTabKinds = tab => tab === tabs[0] ? noteKinds : reactionKinds.concat(9734)
+  const getTabKinds = tab => (tab === tabs[0] ? noteKinds : reactionKinds.concat(9734))
 
   export let activeTab = tabs[0]
 
@@ -51,10 +51,10 @@
   let unreadReactionNotifications = []
 
   $: {
-    const groupedNotifications = createNotificationGroups($throttledNotifications, getTabKinds(activeTab)).slice(
-      0,
-      limit,
-    )
+    const groupedNotifications = createNotificationGroups(
+      $throttledNotifications,
+      getTabKinds(activeTab),
+    ).slice(0, limit)
 
     tabNotifications =
       activeTab === tabs[0]
@@ -69,7 +69,9 @@
     const unreadReactionKinds = getTabKinds(tabs[1])
 
     unreadMainNotifications = $unreadNotifications.filter(e => unreadMainKinds.includes(e.kind))
-    unreadReactionNotifications = $unreadNotifications.filter(e => unreadReactionKinds.includes(e.kind))
+    unreadReactionNotifications = $unreadNotifications.filter(e =>
+      unreadReactionKinds.includes(e.kind),
+    )
   }
 
   document.title = "Notifications"

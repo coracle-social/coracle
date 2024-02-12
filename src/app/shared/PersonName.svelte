@@ -18,7 +18,7 @@
   {#if $session}
     <div class="flex gap-1 font-normal">
       <Popover triggerType="mouseenter">
-        <span slot="trigger" class="px-2 py-1 text-xs whitespace-nowrap">
+        <span slot="trigger" class="whitespace-nowrap px-2 py-1 text-xs">
           {#if $following}
             <i class="fa fa-check-circle text-accent" />
           {:else}

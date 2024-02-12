@@ -1,4 +1,4 @@
-import type {Event} from 'src/engine/events/model'
+import type {Event} from "src/engine/events/model"
 
 export type Handler = {
   address: string

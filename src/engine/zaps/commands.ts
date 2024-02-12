@@ -50,7 +50,7 @@ export const requestZap = async (
 }
 
 export async function collectInvoice(invoice) {
-  const bc = await import('@getalby/bitcoin-connect')
+  const bc = await import("@getalby/bitcoin-connect")
 
   if (bc.isConnected()) {
     bc.launchPaymentModal({invoice})

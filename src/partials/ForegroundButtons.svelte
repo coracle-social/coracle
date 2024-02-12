@@ -1,3 +1,4 @@
-<div class="fixed right-4 bottom-20 lg:bottom-8 lg:right-8 z-feature flex flex-col items-center gap-3">
+<div
+  class="fixed bottom-20 right-4 z-feature flex flex-col items-center gap-3 lg:bottom-8 lg:right-8">
   <slot />
 </div>

@@ -6,7 +6,7 @@
   import {pluck} from "ramda"
   import {seconds, Fetch} from "hurdak"
   import {now} from "paravel"
-  import logger from 'src/util/logger'
+  import logger from "src/util/logger"
   import {tryFetch, hexToBech32, bech32ToHex} from "src/util/misc"
   import {storage, session, stateKey, relays, getSetting, dufflepud} from "src/engine"
   import * as engine from "src/engine"

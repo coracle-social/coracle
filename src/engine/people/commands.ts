@@ -13,7 +13,7 @@ export const publishPetnames = ($petnames: string[][]) => {
   if (canSign.get()) {
     return createAndPublish(3, {
       content: session.get().kind3?.content || "",
-      tags: [...$petnames, ...getClientTags()]
+      tags: [...$petnames, ...getClientTags()],
     })
   }
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from 'paravel'
+  import {Tags} from "paravel"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"

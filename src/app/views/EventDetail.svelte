@@ -18,7 +18,7 @@
   let loading = true
 
   onMount(async () => {
-    event = event || await dereferenceNote({...Naddr.fromTagValue(address), relays})
+    event = event || (await dereferenceNote({...Naddr.fromTagValue(address), relays}))
     loading = false
   })
 </script>

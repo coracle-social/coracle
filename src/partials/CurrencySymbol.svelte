@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {whereEq} from 'ramda'
-  import {currencyOptions} from 'src/util/i18n'
+  import {whereEq} from "ramda"
+  import {currencyOptions} from "src/util/i18n"
 
   export let code
 </script>

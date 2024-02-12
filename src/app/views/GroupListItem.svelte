@@ -14,15 +14,15 @@
 <Card interactive on:click={enter} class="flex gap-4">
   <GroupCircle class="h-14 w-14" address={group.address} />
   <div class="flex min-w-0 flex-grow flex-col justify-start gap-1">
-    <div class="flex gap-2 justify-between">
+    <div class="flex justify-between gap-2">
       <h2 class="text-xl font-bold">
         {displayGroup(group)}
       </h2>
-      {#if group.address.startsWith('34550:')}
-        <Chip class="text-lighter text-sm"><i class="fa fa-unlock" /> Open</Chip>
+      {#if group.address.startsWith("34550:")}
+        <Chip class="text-sm text-lighter"><i class="fa fa-unlock" /> Open</Chip>
       {/if}
-      {#if group.address.startsWith('35834:')}
-        <Chip class="text-lighter text-sm"><i class="fa fa-lock" /> Closed</Chip>
+      {#if group.address.startsWith("35834:")}
+        <Chip class="text-sm text-lighter"><i class="fa fa-lock" /> Closed</Chip>
       {/if}
     </div>
     {#if group.description}

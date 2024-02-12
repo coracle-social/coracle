@@ -39,7 +39,7 @@
 
   $: ratings = mapVals(
     getAvgRating,
-    groupBy(e => normalizeRelayUrl(Tags.from(e).getValue("r")), reviews)
+    groupBy(e => normalizeRelayUrl(Tags.from(e).getValue("r")), reviews),
   )
 
   load({

@@ -84,11 +84,7 @@
         <div slot="info">A picture for the group</div>
       </Field>
       <Field label="Banner">
-        <ImageInput
-          bind:value={values.meta.banner}
-          icon="image"
-          maxWidth={4000}
-          maxHeight={4000} />
+        <ImageInput bind:value={values.meta.banner} icon="image" maxWidth={4000} maxHeight={4000} />
         <div slot="info">A banner image for the group</div>
       </Field>
       <Field label="About">

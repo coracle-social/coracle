@@ -9,7 +9,7 @@
 
   const person = people.key(pubkey)
 
-  $: lightningAddress = $person.profile?.lud16 ||  $person.profile?.lud06
+  $: lightningAddress = $person.profile?.lud16 || $person.profile?.lud06
 </script>
 
 <h1 class="staatliches text-2xl">Details</h1>

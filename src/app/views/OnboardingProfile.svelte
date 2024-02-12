@@ -34,7 +34,9 @@
 </script>
 
 <div class="flex gap-3">
-  <p class="bg-light rounded-full w-12 h-12 -mt-2 -ml-1 flex justify-center items-center text-lg">2/4</p>
+  <p class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-light text-lg">
+    2/4
+  </p>
   <p class="text-2xl font-bold">Give us something to go on!</p>
 </div>
 <p>Help people recognize you by setting up your profile.</p>

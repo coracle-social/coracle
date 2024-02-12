@@ -49,12 +49,12 @@
         style={`transform: translate(${offset}px, 0)`}
         class={cx(
           "pointer-events-auto m-2 rounded border p-3 pr-8 text-center shadow-xl sm:ml-2",
-          "max-w-xl flex-grow transition-all relative",
+          "relative max-w-xl flex-grow transition-all",
           {
             "border-mid bg-cocoa text-lightest": $toast.type === "info",
             "border-warning bg-cocoa text-lightest": $toast.type === "warning",
             "border-danger bg-cocoa text-lightest": $toast.type === "error",
-          }
+          },
         )}>
         {#if is(String, $toast.message)}
           {$toast.message}
@@ -71,7 +71,7 @@
             {/if}
           </div>
         {/if}
-        <div class="absolute right-1 top-0 p-3 cursor-pointer" on:click={() => toast.set(null)}>
+        <div class="absolute right-1 top-0 cursor-pointer p-3" on:click={() => toast.set(null)}>
           <i class="fa fa-times" />
         </div>
       </div>

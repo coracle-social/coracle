@@ -166,7 +166,9 @@
   let actions = []
 
   $: disableActions =
-    !$canSign || ($muted && !showMuted) || (note.wrap && address && !deriveIsGroupMember(address).get())
+    !$canSign ||
+    ($muted && !showMuted) ||
+    (note.wrap && address && !deriveIsGroupMember(address).get())
   $: like = likes.find(e => e.pubkey === $session?.pubkey)
   $: $likesCount = likes.length
   $: zap = zaps.find(e => e.request.pubkey === $session?.pubkey)

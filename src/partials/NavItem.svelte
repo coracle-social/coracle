@@ -13,7 +13,12 @@
     "cursor-pointer": !disabled,
     "pointer-events-none opacity-75": disabled,
   })}>
-  <Anchor class="block px-4 py-2 hover:bg-accent hover:text-white" {external} {href} {modal} on:click>
+  <Anchor
+    class="block px-4 py-2 hover:bg-accent hover:text-white"
+    {external}
+    {href}
+    {modal}
+    on:click>
     <slot />
   </Anchor>
 </li>
