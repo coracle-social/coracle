@@ -10,5 +10,6 @@
 
 <div class="flex flex-col items-center justify-center gap-4 py-20" in:fade|local={{delay}}>
   <slot />
-  <Circle2 colorOuter={accent} colorInner={dark} colorCenter={light} />
+  <img src="https://pablof7z.com/images/me.jpg" class="w-20 h-20 rounded-full fa-spin" />
+  <!-- <Circle2 colorOuter={accent} colorInner={dark} colorCenter={light} /> -->
 </div>
