@@ -3,7 +3,12 @@ import {shuffle, randomId, seconds, avg} from "hurdak"
 import {Naddr, isAddressable} from "src/util/nostr"
 import {env, pubkey} from "src/engine/session/state"
 import {follows, network} from "src/engine/people/derived"
-import {mergeHints, getGroupHints, getPubkeyHints} from "src/engine/relays/utils"
+import {
+  mergeHints,
+  selectHintsWithFallback,
+  getGroupHints,
+  getPubkeyHints,
+} from "src/engine/relays/utils"
 import type {DynamicFilter, Filter} from "../model"
 
 export const calculateFilterGroup = ({since, until, limit, search, ...filter}: Filter) => {
@@ -88,7 +93,7 @@ export const getReplyFilters = (events, filter) => {
 }
 
 export const getFilterGenerality = filter => {
-  if (filter.ids || filter["#e"] || filter['#a']) {
+  if (filter.ids || filter["#e"] || filter["#a"]) {
     return 0
   }
 
@@ -164,16 +169,18 @@ export const compileFilters = (filters: DynamicFilter[], opts: CompileFiltersOpt
 }
 
 export const getRelaysFromFilters = filters =>
-  mergeHints(
-    filters.flatMap(filter => {
-      if (filter["#a"]?.some(a => a.match(/^(35834|34550):/))) {
-        return filter["#a"].map(getGroupHints)
-      }
+  selectHintsWithFallback(
+    mergeHints(
+      filters.flatMap(filter => {
+        if (filter["#a"]?.some(a => a.match(/^(35834|34550):/))) {
+          return filter["#a"].map(getGroupHints)
+        }
 
-      if (filter.authors) {
-        return filter.authors.map(pubkey => getPubkeyHints(pubkey, "write"))
-      }
+        if (filter.authors) {
+          return filter.authors.map(pubkey => getPubkeyHints(pubkey, "write"))
+        }
 
-      return [getPubkeyHints(pubkey.get(), "read")]
-    }),
+        return [getPubkeyHints(pubkey.get(), "read")]
+      }),
+    ),
   )

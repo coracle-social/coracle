@@ -3,7 +3,7 @@ import {seconds} from "hurdak"
 import {now} from "paravel"
 import {personKinds, appDataKeys} from "src/util/nostr"
 import {people} from "src/engine/people/state"
-import {mergeHints, getPubkeyHints} from "src/engine/relays/utils"
+import {mergeHints, selectHintsWithFallback, getPubkeyHints} from "src/engine/relays/utils"
 import type {Filter} from "../model"
 import {load} from "./load"
 
@@ -63,7 +63,7 @@ export const loadPubkeys = async (
       groups.push(relays)
     }
 
-    return mergeHints(groups)
+    return selectHintsWithFallback(mergeHints(groups))
   }
 
   const getFilters = () => {

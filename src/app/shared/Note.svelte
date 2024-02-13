@@ -44,7 +44,7 @@
     getReplyFilters,
     getSetting,
     getRecipientKey,
-    selectHints,
+    selectHintsWithFallback,
     mergeHints,
     loadPubkeys,
     sortEventsDesc,
@@ -194,7 +194,7 @@
 
     if (!event.pubkey) {
       event = await loadOne({
-        relays: selectHints(relays),
+        relays: selectHintsWithFallback(relays),
         filters: getIdFilters([event.id]),
       })
     }
@@ -219,7 +219,7 @@
       }
 
       load({
-        relays: mergeHints([relays, getReplyHints(event)]),
+        relays: selectHintsWithFallback(mergeHints([relays, getReplyHints(event)])),
         filters: getReplyFilters([event], {kinds}),
         onEvent: batch(200, events => {
           ctx = uniqBy(prop("id"), ctx.concat(events))

@@ -1,5 +1,6 @@
 <script lang="ts">
   import {toNostrURI} from "paravel"
+  import {nsecEncode} from "src/util/nostr"
   import Popover from "src/partials/Popover.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import {groups, deriveAdminKeyForGroup, getGroupNaddr} from "src/engine"
@@ -11,9 +12,10 @@
 </script>
 
 <h1 class="staatliches text-2xl">Details</h1>
+<CopyValue label="Group ID" value={address} />
 <CopyValue label="Link" value={toNostrURI(getGroupNaddr($group))} />
 {#if $adminKey}
-  <CopyValue isPassword label="Admin key" value={$adminKey.privkey}>
+  <CopyValue isPassword label="Admin key" value={$adminKey.privkey} encode={nsecEncode}>
     <div slot="label" class="flex gap-2">
       <span>Admin Key</span>
       <Popover triggerType="mouseenter">

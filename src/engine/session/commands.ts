@@ -66,6 +66,10 @@ export const loginWithNostrConnect = async (username, connectHandler: NostrConne
     // Now that the account has ostensibly been created, get our new pubkey and set it to the broker
     const {pubkey} = await fetchHandle(`${username}@${connectHandler.domain}`)
 
+    if (!pubkey) {
+      return null
+    }
+
     broker = NostrConnectBroker.get(pubkey, connectKey, connectHandler)
   }
 

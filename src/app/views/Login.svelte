@@ -65,6 +65,8 @@
 
     if (success) {
       boot()
+    } else {
+      toast.show("error", "Sorry, we weren't able to log you in with that provider.")
     }
   }
 
