@@ -26,7 +26,7 @@
       try {
         const url = new URL(uri)
 
-        r.pubkey = url.pathname.slice(2)
+        r.pubkey = url.hostname || url.pathname.slice(2)
         r.relay = url.searchParams.get("relay") || ""
       } catch {
         // pass
