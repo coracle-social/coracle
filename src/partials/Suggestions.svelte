@@ -1,6 +1,5 @@
 <script lang="ts">
   import {identity} from "ramda"
-  import {fly} from "src/util/transition"
 
   export let select
   export let term = null
@@ -37,9 +36,7 @@
 </script>
 
 {#if data.length > 0 || (create && term)}
-  <div
-    class="mt-2 flex flex-col overflow-hidden rounded border border-solid border-mid"
-    in:fly={{y: 20}}>
+  <div class="mt-2 flex flex-col overflow-x-hidden overflow-y-auto rounded border border-solid border-mid max-h-[350px]">
     {#each data as item, i (getKey(item))}
       <button
         class="cursor-pointer border-l-2 border-solid px-4 py-2 text-left text-lightest hover:border-accent hover:bg-cocoa"

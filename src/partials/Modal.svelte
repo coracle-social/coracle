@@ -118,7 +118,7 @@
         <div on:click|stopPropagation>
           <AlternatingBackground
             class="relative h-full w-full cursor-auto overflow-hidden rounded-t-2xl pb-10 pt-2">
-            <div class="m-auto flex max-w-2xl flex-col gap-4 p-2">
+            <div class="m-auto flex max-w-2xl flex-col gap-4 p-2 modal-content-inner">
               <slot />
             </div>
           </AlternatingBackground>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import {reverse} from "ramda"
+  import logger from "src/util/logger"
   import {getProps, getKey} from "src/util/router"
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
@@ -10,7 +11,7 @@
 
   $: {
     if ($modal) {
-      console.log("modal", $modal, getProps($modal))
+      logger.info("modal", $modal, getProps($modal))
     }
   }
 
@@ -18,7 +19,7 @@
     if ($page) {
       window.scrollTo(0, 0)
 
-      console.log("page", $page, getProps($page))
+      logger.info("page", $page, getProps($page))
     }
   }
 
@@ -47,6 +48,7 @@
 
 {#key $stateKey}
   <div
+    id="page"
     class="relative pb-24 text-lightest lg:ml-60 lg:pt-16"
     class:pointer-events-none={$menuIsOpen}>
     {#if $page}
