@@ -138,7 +138,7 @@
 </div>
 <div class="flex gap-2">
   <Anchor button on:click={prev}><i class="fa fa-arrow-left" /> Back</Anchor>
-  <Anchor button accent disabled={pubkeys.length === 0} class="flex-grow" on:click={() => next()}
+  <Anchor button accent class="flex-grow" on:click={() => next()}
     >Continue</Anchor>
 </div>
 

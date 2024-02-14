@@ -7,7 +7,8 @@
   import {seconds, Fetch} from "hurdak"
   import {now} from "paravel"
   import logger from "src/util/logger"
-  import {tryFetch, hexToBech32, bech32ToHex} from "src/util/misc"
+  import * as misc from 'src/util/misc'
+  import * as nostr from 'src/util/nostr'
   import {storage, session, stateKey, relays, getSetting, dufflepud} from "src/engine"
   import * as engine from "src/engine"
   import {loadAppData} from "src/app/state"
@@ -354,10 +355,10 @@
   ;(window as any).g = {
     ...engine,
     nip19,
-    bech32ToHex,
-    hexToBech32,
     logger,
     router,
+    nostr,
+    misc,
   }
 
   // Theme
@@ -454,7 +455,7 @@
         .filter(r => (r.info?.last_checked || 0) < now() - seconds(7, "day"))
         .slice(0, 20)
 
-      tryFetch(async () => {
+      misc.tryFetch(async () => {
         const result = await Fetch.fetchJson(dufflepud("relay/info"), {
           method: "POST",
           body: JSON.stringify({urls: pluck("url", staleRelays)}),
