@@ -12,10 +12,10 @@
     load,
     groups,
     getUserHints,
-    mergeHints,
     getGroupReqInfo,
     deriveIsGroupMember,
     updateCurrentSession,
+    selectHintsWithFallback,
     session,
   } from "src/engine"
 
@@ -46,7 +46,7 @@
     updateCurrentSession(assoc("groups_last_synced", now()))
 
     load({
-      relays: mergeHints([relays, getUserHints("read")]),
+      relays: selectHintsWithFallback(relays),
       filters: [{kinds: [1059, 1060], "#p": recipients, since}],
     })
 
