@@ -68,7 +68,7 @@
       </div>
     </MenuDesktopItem>
   {/if}
-  <MenuDesktopItem path="/notifications">
+  <MenuDesktopItem path="/notifications" disabled={!$canSign}>
     <div class="relative inline-block">
       Notifications
       {#if $hasNewNotifications}

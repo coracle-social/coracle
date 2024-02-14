@@ -18,10 +18,11 @@ const createReadReceipt = ids =>
 
 export const markAsSeenPublicly = batch(5000, async idChunks => {
   for (const ids of chunk(500, uniq(flatten(idChunks)))) {
-    Publisher.publish({
-      event: await signer.get().signAsUser(createReadReceipt(ids)),
-      relays: getUserHints("write"),
-    })
+    const event = await signer.get().signAsUser(createReadReceipt(ids))
+
+    if (event) {
+      Publisher.publish({event, relays: getUserHints("write")})
+    }
   }
 })
 
