@@ -46,6 +46,7 @@
         class:bg-cocoa={index === i}
         class:border-transparent={index !== i}
         class:border-accent={index === i}
+        on:mousedown|preventDefault
         on:click|preventDefault={() => create(term)}>
         <i class="fa fa-plus" />Add "{term}"
       </button>
@@ -57,6 +58,7 @@
         class:bg-cocoa={index === i}
         class:border-transparent={index !== i}
         class:border-accent={index === i}
+        on:mousedown|preventDefault
         on:click|preventDefault={() => select(item)}>
         <slot name="item" {item} />
       </button>

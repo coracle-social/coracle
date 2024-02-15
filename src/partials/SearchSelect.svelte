@@ -80,13 +80,11 @@
   }
 
   const onBlur = () => {
-    setTimeout(() => {
-      focused = false
+    focused = false
 
-      if (multiple) {
-        term = ""
-      }
-    }, 100)
+    if (multiple) {
+      term = ""
+    }
   }
 </script>
 

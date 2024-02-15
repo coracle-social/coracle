@@ -293,7 +293,7 @@ export const publishKeyShares = async (address, pubkeys, template) => {
       pubs.push(
         Publisher.publish({
           event: rumor.wrap,
-          relays: getPubkeyHints(pubkey, "read"),
+          relays: mergeHints([getGroupHints(address), getPubkeyHints(pubkey, "read")]),
         }),
       )
     }
