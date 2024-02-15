@@ -60,13 +60,15 @@ export const displayHandle = (handle: Handle) =>
 
 export const displayPubkey = (pubkey: string) => displayPerson(getPersonWithDefault(pubkey))
 
-export const getMutedPubkeys = $person => ($person?.mutes || []).map(nth(1)) as string[]
+export const getMutedPubkeys = $person =>
+  ($person?.mutes || []).map(nth(1)).filter(k => k.length === 64) as string[]
 
 export const getMutes = $person => new Set(getMutedPubkeys($person))
 
 export const isMuting = ($person, pubkey) => getMutedPubkeys($person).includes(pubkey)
 
-export const getFollowedPubkeys = $person => ($person?.petnames || []).map(nth(1)) as string[]
+export const getFollowedPubkeys = $person =>
+  ($person?.petnames || []).map(nth(1)).filter(k => k.length === 64) as string[]
 
 export const getFollows = $person => new Set(getFollowedPubkeys($person))
 
