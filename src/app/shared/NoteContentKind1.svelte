@@ -59,7 +59,7 @@
         <NoteContentTopic {value} />
       {:else if type === INVOICE}
         <div on:click|stopPropagation>
-          <QRCode fullWidth onClick="copy" code={value} />
+          <QRCode copyOnClick code={value} />
         </div>
       {:else if type === LINK}
         <NoteContentLink {value} showMedia={showMedia && isStartOrEnd(i)} />

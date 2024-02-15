@@ -3,7 +3,7 @@ import {batch, sleep} from "hurdak"
 import {Tags} from "paravel"
 import {env} from "src/engine/session/state"
 import {subscribe, loadOne, getIdFilters, dvmRequest} from "src/engine/network/utils"
-import {selectHints, mergeHints} from "src/engine/relays/utils"
+import {selectHintsWithFallback, mergeHints} from "src/engine/relays/utils"
 
 export const dereferenceNote = async ({
   eid = null,
@@ -21,7 +21,7 @@ export const dereferenceNote = async ({
     }
 
     return loadOne({
-      relays: selectHints(relays),
+      relays: selectHintsWithFallback(relays),
       filters: getIdFilters([eid]),
     })
   }
@@ -45,7 +45,7 @@ export const dereferenceNote = async ({
       subscribe({
         timeout: 3000,
         closeOnEose: true,
-        relays: selectHints(relays),
+        relays: selectHintsWithFallback(relays),
         filters: [{kinds: [kind], authors: [pubkey], "#d": [identifier]}],
         onClose: () => resolve(note),
         onEvent: event => {

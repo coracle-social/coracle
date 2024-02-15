@@ -128,11 +128,7 @@
       </FieldInline>
       <div class="flex gap-2">
         <Anchor button tag="button" type="submit" class="flex-grow">Save</Anchor>
-        <ImageInput
-          multi
-          hostLimit={3}
-          circle={false}
-          on:change={e => images?.addImage(e.detail)} />
+        <ImageInput multi hostLimit={3} on:change={e => images?.addImage(e.detail)} />
       </div>
     </FlexColumn>
   </form>

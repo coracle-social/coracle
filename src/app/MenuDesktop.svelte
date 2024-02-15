@@ -147,7 +147,7 @@
         {#each Object.values($sessions) as s (s.pubkey)}
           {#if s.pubkey !== $pubkey}
             <MenuItem class="py-4" on:click={() => pubkey.set(s.pubkey)}>
-              <div class="flex items-center justify-center gap-2">
+              <div class="flex items-center gap-2">
                 <PersonCircle class="h-8 w-8 border border-solid border-warm" pubkey={s.pubkey} />
                 {displayPubkey(s.pubkey)}
               </div>
@@ -155,7 +155,7 @@
           {/if}
         {/each}
         <MenuItem
-          class="staatliches flex items-center justify-center gap-4 py-4"
+          class="staatliches flex items-center gap-4 py-4"
           on:click={() => router.at("login").open()}>
           <i class="fa fa-plus" /> Add Account
         </MenuItem>

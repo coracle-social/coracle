@@ -1,5 +1,4 @@
 <script lang="ts">
-  import cx from "classnames"
   import QRCode from "qrcode"
   import {onMount} from "svelte"
   import Input from "src/partials/Input.svelte"
@@ -8,10 +7,13 @@
   import {toast} from "src/partials/state"
 
   export let code
-  export let onClick = "navigate"
-  export let fullWidth = false
+  export let href = null
+  export let onClick = null
+  export let copyOnClick = true
 
-  let canvas
+  let canvas, wrapper
+  let scale = 0.1
+  let height = null
 
   const copy = () => {
     copyToClipboard(code)
@@ -20,24 +22,29 @@
 
   onMount(() => {
     QRCode.toCanvas(canvas, code)
+
+    const wrapperRect = wrapper.getBoundingClientRect()
+    const canvasRect = canvas.getBoundingClientRect()
+
+    scale = wrapperRect.width / (canvasRect.width * 10)
+    height = canvasRect.width * 10 * scale
   })
 </script>
 
-<div
-  class={cx("rounded-xl border border-solid border-mid bg-dark p-4", {
-    "m-auto max-w-sm": !fullWidth,
-  })}>
-  <div class="m-auto flex max-w-sm flex-col gap-4">
-    <Anchor
-      external
-      href={onClick === "navigate" ? code : null}
-      on:click={onClick === "copy" ? copy : null}>
-      <canvas class="m-auto rounded-xl" bind:this={canvas} />
+<div class="rounded-xl border border-solid border-mid bg-dark p-2">
+  <div class="m-auto flex max-w-sm flex-col gap-2">
+    <Anchor external {href} on:click={onClick || (copyOnClick ? copy : null)}>
+      <div bind:this={wrapper} style={`height: ${height}px`}>
+        <canvas
+          class="rounded-xl"
+          bind:this={canvas}
+          style={`transform-origin: top left; transform: scale(${scale}, ${scale})`} />
+      </div>
     </Anchor>
-    {#if onClick === "navigate"}
+    <slot {copy}>
       <Input value={code}>
         <button slot="after" class="fa fa-copy" on:click={copy} />
       </Input>
-    {/if}
+    </slot>
   </div>
 </div>

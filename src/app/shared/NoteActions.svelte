@@ -1,6 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {nip19} from "nostr-tools"
+  import {onMount} from "svelte"
   import {toNostrURI, Tags, createEvent} from "paravel"
   import {tweened} from "svelte/motion"
   import {identity, last, filter, sum, uniqBy, prop, pluck, sortBy} from "ramda"
@@ -37,8 +38,10 @@
     publishToZeroOrMoreGroups,
     publishDeletionForEvent,
     getUserHints,
+    getPubkeyHint,
     getPublishHints,
     getSetting,
+    loadPubkeys,
     processZap,
     displayRelay,
     getEventHints,
@@ -123,18 +126,21 @@
     setView(null)
   }
 
-  const startZap = () =>
+  const startZap = () => {
+    const zapTags = Tags.from(note).type("zap")
+    const defaultSplit = ["zap", note.pubkey, getPubkeyHint(note.pubkey), "1"]
+    const splits = zapTags.exists() ? zapTags.all() : [defaultSplit]
+
     router
-      .at("people")
-      .of(note.pubkey, {relays: getPublishHints(note)})
       .at("zap")
       .qp({
+        splits,
         eid: note.id,
-        lnurl: zapper.lnurl,
         anonymous: Boolean(note.wrap),
       })
       .cx({callback: addToContext})
       .open()
+  }
 
   const broadcast = () => {
     const relays = getUserHints("write")
@@ -214,6 +220,10 @@
       onClick: () => setView("info"),
     })
   }
+
+  onMount(() => {
+    loadPubkeys(Tags.from(note).type("zap").pubkeys().all())
+  })
 </script>
 
 <div class="flex justify-between text-lightest" on:click|stopPropagation>

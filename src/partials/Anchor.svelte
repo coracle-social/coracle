@@ -18,6 +18,8 @@
   export let danger = false
   export let circle = false
   export let underline = false
+  export let short = false
+  export let tall = false
   export let style = null
   export let type = null
   export let href = null
@@ -37,10 +39,12 @@
       button && low,
     "bg-accent text-white hover:bg-accent-l": button && accent,
     "text-danger border border-solid !border-danger": button && danger,
-    "text-xl staatliches rounded whitespace-nowrap flex justify-center items-center gap-2": button,
-    "h-7 px-6": button && !circle && !square,
-    "w-10 h-10 flex justify-center items-center rounded-full": circle,
+    "text-xl staatliches rounded whitespace-nowrap flex justify-center items-center gap-2 px-6":
+      button,
+    "aspect-square flex justify-center items-center rounded-full !p-0": circle,
     "aspect-square flex justify-center items-center": square,
+    "h-7": short,
+    "h-10": tall,
   })
 
   const onClick = e => {

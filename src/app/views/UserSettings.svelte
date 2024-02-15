@@ -11,8 +11,6 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {fuzzy} from "src/util/misc"
 
-  import("@getalby/bitcoin-connect")
-
   const settings = getSettings()
 
   const submit = () => {
@@ -36,10 +34,6 @@
       <Input bind:value={settings.default_zap} />
       <p slot="info">The default amount of sats to use when sending a lightning tip.</p>
     </Field>
-    <FieldInline label="Bitcoin Connect">
-      <bc-button></bc-button>
-      <p slot="info">Connect you wallet using Bitcoin Connect for One-Click Zaps!</p>
-    </FieldInline>
     <Field>
       <div slot="label" class="flex justify-between">
         <strong>Max relays per request</strong>

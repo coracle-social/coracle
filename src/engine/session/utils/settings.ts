@@ -16,6 +16,7 @@ export const getDefaultSettings = () => ({
   imgproxy_url: env.get().IMGPROXY_URL,
   dufflepud_url: env.get().DUFFLEPUD_URL,
   multiplextr_url: env.get().MULTIPLEXTR_URL,
+  platform_zap_split: env.get().PLATFORM_ZAP_SPLIT,
 })
 
 export const getSettings = () => {
