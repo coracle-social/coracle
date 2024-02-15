@@ -5,6 +5,8 @@
 - [x] Add follow all to onboarding topics
 - [x] Add FORCE_RELAYS environment variable
 - [x] Add support for extensions that implement nip44
+- [x] Add zap splits
+- [x] Add default platform split amount
 
 # 0.4.2
 

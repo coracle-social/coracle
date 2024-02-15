@@ -292,11 +292,7 @@
       <NoteImages bind:this={images} bind:compose includeInContent={type !== "listing"} />
       <div class="flex gap-2">
         <Anchor button tag="button" type="submit" class="flex-grow">Send</Anchor>
-        <ImageInput
-          multi
-          hostLimit={3}
-          circle={false}
-          on:change={e => images?.addImage(e.detail)} />
+        <ImageInput multi hostLimit={3} on:change={e => images?.addImage(e.detail)} />
       </div>
       {#if !$env.FORCE_GROUP}
         <small

@@ -54,6 +54,10 @@ const ONBOARDING_LISTS = fromCsv(import.meta.env.VITE_ONBOARDING_LISTS)
 
 const ENABLE_ZAPS = JSON.parse(import.meta.env.VITE_ENABLE_ZAPS)
 
+const PLATFORM_PUBKEY = import.meta.env.VITE_PLATFORM_PUBKEY
+
+const PLATFORM_ZAP_SPLIT = parseFloat(import.meta.env.VITE_PLATFORM_ZAP_SPLIT)
+
 // Prep our env
 env.set({
   CLIENT_ID,
@@ -70,6 +74,8 @@ env.set({
   SEARCH_RELAYS,
   DEFAULT_RELAYS,
   ENABLE_ZAPS,
+  PLATFORM_PUBKEY,
+  PLATFORM_ZAP_SPLIT,
 })
 
 // Throw some hardcoded defaults in there

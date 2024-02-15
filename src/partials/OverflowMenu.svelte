@@ -33,7 +33,8 @@
             class="relative z-popover flex cursor-pointer items-center text-lightest"
             on:click={onClick}>
             <span class="absolute right-0 mr-12 whitespace-nowrap">{label}</span>
-            <Anchor button circle class="text-accent"><i class={`fa fa-${icon} text-sm`} /></Anchor>
+            <Anchor tall button circle class="text-accent"
+              ><i class={`fa fa-${icon} text-sm`} /></Anchor>
           </div>
         {/each}
       </div>

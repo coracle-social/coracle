@@ -1,4 +1,4 @@
-import {Fetch} from "hurdak"
+import {Fetch, sleep} from "hurdak"
 import {createEvent} from "paravel"
 import {generatePrivateKey} from "src/util/nostr"
 import {warn} from "src/util/logger"
@@ -49,22 +49,34 @@ export const requestZap = async (
   return res?.pr
 }
 
-export async function collectInvoice(invoice) {
+export async function collectInvoiceWithWebLn(invoice) {
+  const {webln} = window as {webln?: any}
+
+  if (webln) {
+    await webln.enable()
+
+    try {
+      await webln.sendPayment(invoice)
+
+      return true
+    } catch (e) {
+      warn(e)
+    }
+  }
+}
+
+export async function collectInvoiceWithBitcoinConnect(invoice) {
   const bc = await import("@getalby/bitcoin-connect")
+
+  await sleep(300)
 
   if (bc.isConnected()) {
     bc.launchPaymentModal({invoice})
-  } else {
-    const {webln} = window as {webln?: any}
+  }
+}
 
-    if (webln) {
-      await webln.enable()
-
-      try {
-        webln.sendPayment(invoice)
-      } catch (e) {
-        warn(e)
-      }
-    }
+export async function collectInvoice(invoice) {
+  if (!(await collectInvoiceWithWebLn(invoice))) {
+    await collectInvoiceWithBitcoinConnect(invoice)
   }
 }

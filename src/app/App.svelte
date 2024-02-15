@@ -7,8 +7,8 @@
   import {seconds, Fetch} from "hurdak"
   import {now} from "paravel"
   import logger from "src/util/logger"
-  import * as misc from 'src/util/misc'
-  import * as nostr from 'src/util/nostr'
+  import * as misc from "src/util/misc"
+  import * as nostr from "src/util/nostr"
   import {storage, session, stateKey, relays, getSetting, dufflepud} from "src/engine"
   import * as engine from "src/engine"
   import {loadAppData} from "src/app/state"
@@ -63,7 +63,6 @@
   import PersonFollows from "src/app/shared/PersonFollows.svelte"
   import PersonFollowers from "src/app/shared/PersonFollowers.svelte"
   import PersonList from "src/app/shared/PersonList.svelte"
-  import PersonZap from "src/app/views/PersonZap.svelte"
   import PublishInfo from "src/app/views/PublishInfo.svelte"
   import QRCode from "src/app/views/QRCode.svelte"
   import MediaDetail from "src/app/views/MediaDetail.svelte"
@@ -79,6 +78,7 @@
   import UserKeys from "src/app/views/UserKeys.svelte"
   import UserProfile from "src/app/views/UserProfile.svelte"
   import UserSettings from "src/app/views/UserSettings.svelte"
+  import Zap from "src/app/views/Zap.svelte"
   import {logUsage} from "src/app/state"
   import {
     router,
@@ -286,15 +286,6 @@
       entity: asPerson,
     },
   })
-  router.register("/people/:entity/zap", PersonZap, {
-    required: ["pubkey"],
-    serializers: {
-      eid: asNote,
-      entity: asPerson,
-      lnurl: asString("lnurl"),
-      anonymous: asJson("anonymous"),
-    },
-  })
 
   router.register("/qrcode/:code", QRCode)
 
@@ -335,6 +326,15 @@
   router.register("/settings/relays", RelayList)
 
   router.register("/topics/:topic", TopicFeed)
+
+  router.register("/zap", Zap, {
+    required: ["splits"],
+    serializers: {
+      eid: asNote,
+      splits: asJson("splits"),
+      anonymous: asJson("anonymous"),
+    },
+  })
 
   router.register("/:entity", Bech32Entity, {
     serializers: {

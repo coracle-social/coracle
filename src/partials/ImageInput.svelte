@@ -10,7 +10,6 @@
 
   export let icon = null
   export let value = null
-  export let circle = true
   export let multi = false
   export let maxWidth = null
   export let maxHeight = null
@@ -56,12 +55,7 @@
 
 <div class="flex gap-2">
   {#if icon}
-    <Input
-      type="text"
-      wrapperClass="flex-grow"
-      bind:value
-      placeholder="https://"
-      class="rounded-full">
+    <Input type="text" wrapperClass="flex-grow" bind:value placeholder="https://">
       <i slot="before" class={`fa fa-${icon}`} />
     </Input>
   {/if}
@@ -71,7 +65,7 @@
     }}>
     <slot name="button">
       <div class="flex">
-        <Anchor {circle} button>
+        <Anchor button tall>
           <i class="fa fa-upload" />
         </Anchor>
       </div>
