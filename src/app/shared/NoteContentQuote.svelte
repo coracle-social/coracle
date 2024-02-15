@@ -3,6 +3,7 @@
   import {isShareableRelay} from "paravel"
   import {filterVals} from "hurdak"
   import {asArray} from "src/util/misc"
+  import {Naddr} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -35,7 +36,13 @@
     const noteId = value.id || quote?.id
 
     // stopPropagation wasn't working for some reason
-    if (noteId && e.detail.target.textContent !== "Show") {
+    if (e.detail.target.textContent === "Show") {
+      return
+    }
+
+    if (isGroup) {
+      router.at("groups").of(address, {relays}).at("notes").open()
+    } else if (noteId) {
       router
         .at("notes")
         .of(noteId, {relays})
@@ -47,6 +54,9 @@
   const unmute = e => {
     muted = false
   }
+
+  $: address = quote ? Naddr.fromEvent(quote).asTagValue() : ""
+  $: isGroup = address.match(/^(34550|35834):/)
 
   onMount(async () => {
     quote = await loadOne({
@@ -83,17 +93,19 @@
           <Anchor class="underline" on:click={unmute}>Show</Anchor>
         </p>
       {:else}
-        <div class="mb-4 flex items-center gap-4">
-          <PersonCircle class="h-6 w-6" pubkey={quote.pubkey} />
-          <Anchor
-            modal
-            stopPropagation
-            type="unstyled"
-            class="flex items-center gap-2"
-            href={router.at("people").of(quote.pubkey).toString()}>
-            <h2 class="text-lg">{displayPubkey(quote.pubkey)}</h2>
-          </Anchor>
-        </div>
+        {#if !isGroup}
+          <div class="mb-4 flex items-center gap-4">
+            <PersonCircle class="h-6 w-6" pubkey={quote.pubkey} />
+            <Anchor
+              modal
+              stopPropagation
+              type="unstyled"
+              class="flex items-center gap-2"
+              href={router.at("people").of(quote.pubkey).toString()}>
+              <h2 class="text-lg">{displayPubkey(quote.pubkey)}</h2>
+            </Anchor>
+          </div>
+        {/if}
         <slot name="note-content" {quote} />
       {/if}
     {:else}
