@@ -9,6 +9,7 @@
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
   import * as nostr from "src/util/nostr"
+  import * as ninvite from "src/util/invite"
   import {storage, session, stateKey, relays, getSetting, dufflepud} from "src/engine"
   import * as engine from "src/engine"
   import {loadAppData} from "src/app/state"
@@ -355,6 +356,7 @@
   ;(window as any).g = {
     ...engine,
     nip19,
+    ninvite,
     logger,
     router,
     nostr,

@@ -92,12 +92,12 @@
         <i class="fa fa-search scale-[140%]" />
       </div>
     </div>
-    <div class="">
-    {#if $pubkey}
-      <Anchor button accent on:click={createNote}>Post +</Anchor>
-    {:else}
-      <Anchor modal button accent href="/login">Log In</Anchor>
-    {/if}
+    <div>
+      {#if $pubkey}
+        <Anchor button accent on:click={createNote}>Post +</Anchor>
+      {:else}
+        <Anchor modal button accent href="/login">Log In</Anchor>
+      {/if}
     </div>
     <div class="flex w-1/3 justify-end">
       <div class="flex cursor-pointer items-center" on:click={openMenu}>
