@@ -175,7 +175,7 @@ export const getPubkeyHints = hintSelector(function* (pubkey: string, mode: Rela
 })
 
 export const getPubkeyHint = (pubkey: string): string =>
-  first(getPubkeyHints(1, pubkey, "write")) || ""
+  first(getPubkeyHints(pubkey, "write")) || ""
 
 export const getUserHints = hintSelector(function* (mode: RelayMode) {
   yield* getUserRelayUrls(mode)
@@ -241,6 +241,8 @@ export const getGroupHints = hintSelector(function* (address: string) {
   yield* getGroupRelayUrls(address)
   yield* getPubkeyHints(Naddr.fromTagValue(address).pubkey)
 })
+
+export const getGroupHint = (address: string): string => first(getGroupHints(address)) || ""
 
 export const getGroupPublishHints = (addresses: string[]) => {
   const urls = mergeHints(addresses.map(getGroupRelayUrls))

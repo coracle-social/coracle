@@ -7,7 +7,7 @@
   import {getModal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
-  import GroupListItem from "src/app/views/GroupListItem.svelte"
+  import GroupListItem from "src/app/shared/GroupListItem.svelte"
   import {
     load,
     groups,
@@ -74,7 +74,7 @@
   </Anchor>
 </div>
 {#each $groupList.joined as group (group.address)}
-  <GroupListItem {group} />
+  <GroupListItem address={group.address} />
 {:else}
   <p class="text-center py-8">You haven't yet joined any groups.</p>
 {/each}
@@ -83,5 +83,5 @@
   <i slot="before" class="fa-solid fa-search" />
 </Input>
 {#each searchGroups(q).slice(0, limit) as group (group.address)}
-  <GroupListItem {group} />
+  <GroupListItem address={group.address} />
 {/each}

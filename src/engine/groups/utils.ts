@@ -2,6 +2,7 @@ import {prop, uniqBy, defaultTo, sortBy, last, whereEq} from "ramda"
 import {ellipsize, first, seconds} from "hurdak"
 import {Tags} from "paravel"
 import {Naddr} from "src/util/nostr"
+import {fuzzy} from "src/util/misc"
 import type {GroupStatus, Session} from "src/engine/session/model"
 import {pubkey} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
@@ -24,6 +25,10 @@ export const deriveGroup = address => {
 
   return groups.key(address).derived(defaultTo({id: identifier, pubkey, address}))
 }
+
+export const getGroupSearch = $groups => fuzzy($groups, {keys: ["meta.name", "meta.about"]})
+
+export const searchGroups = groups.derived(getGroupSearch)
 
 export const getRecipientKey = wrap => {
   const pubkey = Tags.from(wrap).pubkeys().first()

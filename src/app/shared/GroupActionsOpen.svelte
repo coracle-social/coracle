@@ -8,7 +8,9 @@
     pubkey,
     publishCommunitiesList,
     getGroupNaddr,
+    getGroupHint,
     deriveGroup,
+    displayGroup,
     deriveGroupStatus,
     deriveAdminKeyForGroup,
     deriveUserCommunities,
@@ -20,6 +22,9 @@
   const adminKey = deriveAdminKeyForGroup(address)
   const status = deriveGroupStatus(address)
 
+  const createInvite = () =>
+    router.at("invites/create").qp({initialGroupAddress: address}).open()
+
   let actions = []
 
   $: {
@@ -29,6 +34,12 @@
       onClick: () => router.at("qrcode").of(getGroupNaddr($group)).open(),
       label: "Share",
       icon: "share-nodes",
+    })
+
+    actions.push({
+      onClick: createInvite,
+      label: "Invite",
+      icon: "people-pulling",
     })
 
     if ($group.pubkey === $pubkey || $adminKey) {

@@ -7,7 +7,7 @@
   import {searchPeople, displayPubkey} from "src/engine"
 
   export let value
-  export let autofocus = null
+  export let autofocus = false
 
   const showPerson = person => router.at("people").of(person.pubkey).open()
 </script>

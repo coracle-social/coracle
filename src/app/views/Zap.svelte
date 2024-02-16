@@ -94,8 +94,6 @@
       const msg = i === 0 ? message : ""
       const {zapper} = derivePerson(zap.pubkey).get()
 
-      console.log(zap)
-
       if (!zapper?.lnurl) {
         zaps[i].status = "error:zapper"
         return
@@ -104,8 +102,6 @@
       const relays = selectHintsWithFallback(
         mergeHints([[zap.relay], getPubkeyHints(zap.pubkey, "read")]),
       )
-
-      console.log(zap, relays)
 
       zaps[i].invoice = await requestZap(msg, zap.amount, {
         eid,

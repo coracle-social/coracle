@@ -4,11 +4,12 @@ import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {tryJson} from "src/util/misc"
 import {Naddr} from "src/util/nostr"
+import {ninviteDecode, ninviteEncode} from "src/util/invite"
 import {
   decodePerson,
   decodeRelay,
   decodeEvent,
-  selectHints,
+  selectHintsWithFallback,
   getChannelId,
   getPubkeyHints,
 } from "src/engine"
@@ -56,16 +57,21 @@ export const decodeFilter = s =>
 export const decodeEntity = entity => {
   entity = fromNostrURI(entity)
 
-  let type, data, relays
+  let type, data
 
   try {
     ;({type, data} = nip19.decode(entity) as {type: string; data: any})
-    relays = selectHints(data.relays || [], 3)
   } catch (e) {
     // pass
   }
 
-  return {type, data, relays}
+  try {
+    ;({type, data} = ninviteDecode(entity))
+  } catch (e) {
+    // pass
+  }
+
+  return {type, data, relays: selectHintsWithFallback(data?.relays || [], 3)}
 }
 
 // Serializers
@@ -123,6 +129,11 @@ export const asChannelId = {
 export const asNaddr = k => ({
   encode: encodeNaddr,
   decode: decodeAs(k, naddr => Naddr.decode(naddr).asTagValue()),
+})
+
+export const asInvite = k => ({
+  encode: ninviteEncode,
+  decode: decodeAs(k, ninvite => ninviteDecode(ninvite)),
 })
 
 // Router and extensions

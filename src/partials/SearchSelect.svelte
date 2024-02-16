@@ -1,5 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
+  import {onMount} from "svelte"
   import {reject, equals, identity} from "ramda"
   import Chip from "src/partials/Chip.svelte"
   import Input from "src/partials/Input.svelte"
@@ -14,15 +15,16 @@
   export let search = null
   export let termToItem = null
   export let getKey: (x: any) => any = identity
-  export let autofocus = null
+  export let displayItem = getKey
+  export let autofocus = false
   export let multiple = false
   export let defaultOptions = []
+  export let term = multiple ? "" : displayItem(value)
 
-  let term = multiple ? "" : getKey(value)
   let input, suggestions
-  let focused = false
+  let focused = autofocus
 
-  $: suggestions?.setData(term ? search(term).slice(0, 10) : defaultOptions)
+  $: suggestions?.setData?.(term ? search(term).slice(0, 10) : defaultOptions)
 
   const create = term => {
     select(termToItem(term))
@@ -38,7 +40,7 @@
       term = ""
     } else {
       value = item
-      term = getKey(item)
+      term = displayItem(item)
       focused = false
     }
   }
@@ -57,19 +59,19 @@
     if (event.key === "Enter") {
       event.preventDefault()
 
-      if (suggestions?.get()) {
+      if (suggestions?.get?.()) {
         select(suggestions.get())
       } else if (term && termToItem) {
         create(term)
       }
     }
 
-    if (suggestions?.get() && event.code === "ArrowUp") {
+    if (suggestions?.get?.() && event.code === "ArrowUp") {
       event.preventDefault()
       suggestions.prev()
     }
 
-    if (suggestions?.get() && event.code === "ArrowDown") {
+    if (suggestions?.get?.() && event.code === "ArrowDown") {
       event.preventDefault()
       suggestions.next()
     }
@@ -86,6 +88,12 @@
       term = ""
     }
   }
+
+  onMount(() => {
+    if (input === document.activeElement) {
+      onFocus()
+    }
+  })
 </script>
 
 {#if multiple}

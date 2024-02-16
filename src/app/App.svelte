@@ -42,6 +42,8 @@
   import GroupRotate from "src/app/views/GroupRotate.svelte"
   import Help from "src/app/views/Help.svelte"
   import Home from "src/app/views/Home.svelte"
+  import InviteCreate from "src/app/views/InviteCreate.svelte"
+  import InviteAccept from "src/app/views/InviteAccept.svelte"
   import LabelCreate from "src/app/views/LabelCreate.svelte"
   import ListEdit from "src/app/views/ListEdit.svelte"
   import ListList from "src/app/views/ListList.svelte"
@@ -83,6 +85,7 @@
   import {logUsage} from "src/app/state"
   import {
     router,
+    asInvite,
     asChannelId,
     asPerson,
     asNaddr,
@@ -100,7 +103,6 @@
 
   router.register("/about", About)
   router.register("/search", Search)
-  router.register("/bech32", Bech32Entity)
   router.register("/events", Calendar)
 
   router.register("/channels", ChannelsList, {
@@ -165,6 +167,17 @@
   })
 
   router.register("/help/:topic", Help)
+
+  router.register("/invites/create", InviteCreate, {
+    serializers: {
+      initialGroupAddress: asUrlComponent('initialGroupAddress'),
+    },
+  })
+  router.register("/invites/:ninvite", InviteAccept, {
+    serializers: {
+      ninvite: asInvite("invite"),
+    },
+  })
 
   router.register("/lists", ListList)
   router.register("/lists/create", ListEdit)

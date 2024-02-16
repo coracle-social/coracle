@@ -1,13 +1,10 @@
 <script lang="ts">
-  import {tryFunc} from "hurdak"
   import {onDestroy} from "svelte"
-  import {fromNostrURI} from "paravel"
   import {throttle} from "throttle-debounce"
-  import {nip05, nip19} from "nostr-tools"
   import QrScanner from "qr-scanner"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {isHex} from "src/util/nostr"
+  import {parseAnything} from "src/util/nostr"
   import Input from "src/partials/Input.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import SearchResults from "src/app/shared/SearchResults.svelte"
@@ -40,30 +37,16 @@
   const tryParseEntity = throttle(
     500,
     async entity => {
-      entity = fromNostrURI(entity)
+      const result = await parseAnything(entity)
 
-      if (entity.length < 5) {
-        return
+      if (result.type === "npub") {
+        router.at("people").of(result.data).replaceModal()
+      } else if (result) {
+        router.at(entity).replaceModal()
       }
 
-      if (isHex(entity)) {
-        router.at("people").of(entity).replaceModal()
+      if (result) {
         stopScanner()
-      } else if (entity.includes("@")) {
-        const profile = await nip05.queryProfile(entity)
-
-        if (profile) {
-          const {pubkey, relays} = profile
-
-          router.at("people").of(pubkey, {relays}).replaceModal()
-          stopScanner()
-        }
-      } else {
-        tryFunc(() => {
-          nip19.decode(entity)
-          router.at(entity).replaceModal()
-          stopScanner()
-        })
       }
     },
     {

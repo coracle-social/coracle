@@ -1,10 +1,7 @@
 <script lang="ts">
-  import {tryFunc} from "hurdak"
-  import {fromNostrURI} from "paravel"
   import {throttle} from "throttle-debounce"
-  import {nip05, nip19} from "nostr-tools"
   import {fuzzy} from "src/util/misc"
-  import {isHex} from "src/util/nostr"
+  import {parseAnything} from "src/util/nostr"
   import {router} from "src/app/router"
   import type {Person, Topic} from "src/engine"
   import {topics, derived, searchPeople, loadPeople} from "src/engine"
@@ -29,27 +26,12 @@
   const tryParseEntity = throttle(
     500,
     async entity => {
-      entity = fromNostrURI(entity)
+      const result = await parseAnything(entity)
 
-      if (entity.length < 5) {
-        return
-      }
-
-      if (isHex(entity)) {
-        router.at("people").of(entity).replaceModal()
-      } else if (entity.includes("@")) {
-        const profile = await nip05.queryProfile(entity)
-
-        if (profile) {
-          const {pubkey, relays} = profile
-
-          router.at("people").of(pubkey, {relays}).replaceModal()
-        }
-      } else {
-        tryFunc(() => {
-          nip19.decode(entity)
-          router.at(entity).replaceModal()
-        })
+      if (result.type === "npub") {
+        router.at("people").of(result.data).open()
+      } else if (result) {
+        router.at(entity).open()
       }
     },
     {

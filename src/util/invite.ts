@@ -1,5 +1,5 @@
-import {concatBytes} from '@noble/hashes/utils'
-import {bech32} from '@scure/base'
+import {concatBytes} from "@noble/hashes/utils"
+import {bech32} from "@scure/base"
 
 const Bech32MaxSize = 10000
 
@@ -7,7 +7,7 @@ function encodeBech32(prefix: string, data: Uint8Array): string {
   return bech32.encode(prefix, bech32.toWords(data), Bech32MaxSize)
 }
 
-type TLV = { [t: number]: Uint8Array[] }
+type TLV = {[t: number]: Uint8Array[]}
 
 function encodeTLV(tlv: TLV): Uint8Array {
   const entries: Uint8Array[] = []
@@ -47,49 +47,50 @@ function parseTLV(data: Uint8Array): TLV {
   return result
 }
 
-const utf8Decoder = new TextDecoder('utf-8')
+const utf8Decoder = new TextDecoder("utf-8")
 const utf8Encoder = new TextEncoder()
 
 export type InvitePointer = {
-  follows?: string[]
+  people?: string[]
   relays?: {
     url: string
     claim?: string
   }[]
   groups?: {
     address: string
+    relay: string
     claim?: string
   }[]
 }
 
 export function ninviteEncode(invite: InvitePointer): string {
   const data = encodeTLV({
-    0: (invite.follows || []).map(url => utf8Encoder.encode(url)),
-    1: (invite.relays || []).map(({url, claim = ""}) => utf8Encoder.encode([url, claim].join('|'))),
-    2: (invite.groups || []).map(({address, claim = ""}) => utf8Encoder.encode([address, claim].join('|'))),
+    0: (invite.people || []).map(url => utf8Encoder.encode(url)),
+    1: (invite.relays || []).map(({url, claim = ""}) => utf8Encoder.encode([url, claim].join("|"))),
+    2: (invite.groups || []).map(({address, claim = ""}) =>
+      utf8Encoder.encode([address, claim].join("|")),
+    ),
   })
 
-  return encodeBech32('ninvite', data)
+  return encodeBech32("ninvite", data)
 }
 
-export function ninviteDecode(ninvite: string): {type: "ninvite", data: InvitePointer} {
-  const { prefix, words } = bech32.decode(ninvite, Bech32MaxSize)
+export function ninviteDecode(ninvite: string): {type: "ninvite"; data: InvitePointer} {
+  const {prefix, words} = bech32.decode(ninvite, Bech32MaxSize)
 
-  if (prefix !== 'ninvite') {
+  if (prefix !== "ninvite") {
     throw new Error("Invalid invite string")
   }
 
   const tlv = parseTLV(new Uint8Array(bech32.fromWords(words)))
 
-  console.log(tlv)
-
   return {
-    type: 'ninvite',
+    type: "ninvite",
     data: {
-      follows: (tlv[0] || []).map(pk => utf8Decoder.decode(pk)),
-      relays: (tlv[1] || []).map(a => {
-        const t = utf8Decoder.decode(a)
-        const i = t.indexOf('|')
+      people: (tlv[0] || []).map(pk => utf8Decoder.decode(pk)),
+      relays: (tlv[1] || []).map(value => {
+        const t = utf8Decoder.decode(value)
+        const i = t.indexOf("|")
 
         return {
           url: t.slice(0, i),
@@ -97,16 +98,11 @@ export function ninviteDecode(ninvite: string): {type: "ninvite", data: InvitePo
         }
       }),
       groups: (tlv[2] || []).map(value => {
-        const t = utf8Decoder.decode(a)
-        const i = t.indexOf('|')
+        const t = utf8Decoder.decode(value)
+        const [address, relay, ...claim] = t.split("|")
 
-        return {
-          address: t.slice(0, i),
-          claim: t.slice(i + 1) || null,
-        }
+        return {address, relay, claim: claim.join("|") || null}
       }),
     },
   }
 }
-
-

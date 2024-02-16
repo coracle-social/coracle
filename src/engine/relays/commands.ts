@@ -3,6 +3,7 @@ import {now, normalizeRelayUrl, isShareableRelay} from "paravel"
 import {people} from "src/engine/people/state"
 import {canSign, stateKey} from "src/engine/session/derived"
 import {updateStore} from "src/engine/core/commands"
+import {pool} from "src/engine/network/state"
 import {createAndPublish, getClientTags} from "src/engine/network/utils"
 import type {RelayPolicy} from "./model"
 import {relays} from "./state"
@@ -57,7 +58,12 @@ export const publishRelays = ($relays: RelayPolicy[]) => {
   }
 }
 
-export const joinRelay = (url: string) => {
+export const joinRelay = (url: string, claim?: string) => {
+  // Fire off the claim to join the relay
+  if (claim) {
+    pool.get("wss://relay.damus.io").send(["CLAIM", claim])
+  }
+
   return publishRelays([
     ...reject(whereEq({url}), relayPolicies.get()),
     {url, read: true, write: true} as RelayPolicy,

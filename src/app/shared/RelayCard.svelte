@@ -9,6 +9,7 @@
   import {canSign, getSetting, displayRelay, setRelayPolicy} from "src/engine"
 
   export let relay
+  export let claim = null
   export let rating = null
   export let showStatus = false
   export let hideActions = false
@@ -43,7 +44,7 @@
     </div>
     {#if !hideActions}
       <slot name="actions">
-        <RelayCardActions {relay} />
+        <RelayCardActions {relay} {claim} />
       </slot>
     {/if}
   </div>
