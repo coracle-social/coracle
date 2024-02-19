@@ -3,6 +3,7 @@
   import GroupActionsClosed from "src/app/shared/GroupActionsClosed.svelte"
 
   export let address
+  export let claim = null
 </script>
 
 {#if address.startsWith("34550:")}
@@ -10,5 +11,5 @@
 {/if}
 
 {#if address.startsWith("35834:")}
-  <GroupActionsClosed {address} />
+  <GroupActionsClosed {address} {claim} />
 {/if}

@@ -39,6 +39,7 @@
   import GroupCreate from "src/app/views/GroupCreate.svelte"
   import GroupEdit from "src/app/views/GroupEdit.svelte"
   import GroupInfo from "src/app/views/GroupInfo.svelte"
+  import GroupShare from "src/app/views/GroupShare.svelte"
   import GroupRotate from "src/app/views/GroupRotate.svelte"
   import Help from "src/app/views/Help.svelte"
   import Home from "src/app/views/Home.svelte"
@@ -148,6 +149,11 @@
     },
   })
   router.register("/groups/:address/info", GroupInfo, {
+    serializers: {
+      address: asNaddr("address"),
+    },
+  })
+  router.register("/groups/:address/share", GroupShare, {
     serializers: {
       address: asNaddr("address"),
     },
@@ -301,7 +307,11 @@
     },
   })
 
-  router.register("/qrcode/:code", QRCode)
+  router.register("/qrcode/:code", QRCode, {
+    serializers: {
+      code: asUrlComponent('code'),
+    },
+  })
 
   router.register("/relays/browse", RelayBrowse)
   router.register("/relays/:entity", RelayDetail, {

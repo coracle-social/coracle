@@ -21,13 +21,11 @@
   } from "src/engine"
 
   export let address
+  export let claim = ""
 
   const group = deriveGroup(address)
   const adminKey = deriveAdminKeyForGroup(address)
   const status = deriveGroupStatus(address)
-
-  const createInvite = () =>
-    router.at("invites/create").qp({initialGroupAddress: address}).open()
 
   let actions = []
 
@@ -35,15 +33,9 @@
     actions = []
 
     actions.push({
-      onClick: () => router.at("qrcode").of(getGroupNaddr($group)).open(),
+      onClick: () => router.at("groups").of(address).at("share").open(),
       label: "Share",
       icon: "share-nodes",
-    })
-
-    actions.push({
-      onClick: createInvite,
-      label: "Invite",
-      icon: "people-pulling",
     })
 
     if ($adminKey) {
@@ -67,19 +59,20 @@
     }
   }
 
-  let claim = null
+  let showClaim
 
   const startJoin = () => {
-    claim = ""
+    showClaim = true
   }
 
   const cancelJoin = () => {
-    claim = null
+    showClaim = false
   }
 
   const confirmJoin = () => {
     publishGroupEntryRequest(address, claim)
-    claim = null
+    claim = ""
+    showClaim = false
   }
 
   const clear = () => resetGroupAccess(address)
@@ -122,7 +115,7 @@
   <OverflowMenu {actions} />
 </div>
 
-{#if claim !== null}
+{#if showClaim}
   <Modal onEscape={cancelJoin}>
     <Content size="lg">
       <p>If you have an invite code, you can enter it below.</p>

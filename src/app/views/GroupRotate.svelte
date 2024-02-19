@@ -60,33 +60,34 @@
     })
 
     // Add members
-    if (addedMembers.size > 0) {
-      if (soft) {
+
+    // Notify existing members of new shared key if needed, send full member list if we're rotating
+    if (soft) {
+      if (addedMembers.size > 0) {
         publishGroupMembers(address, "add", Array.from(addedMembers))
       }
 
-      publishGroupInvites(address, Array.from(addedMembers), $group.relays)
-    }
-
-    // Notify existing members of new shared key if needed, send full member list if we're rotating
-    if (!soft) {
-      publishGroupMembers(address, "set", Array.from(allMembers))
-      publishGroupInvites(address, Array.from(difference(allMembers, addedMembers)), $group.relays)
-    }
-
-    // Remove members
-    if (removedMembers.size > 0) {
-      if (soft) {
+      if (removedMembers.size > 0) {
         publishGroupMembers(address, "remove", Array.from(removedMembers))
       }
+    } else {
+      publishGroupMembers(address, "set", Array.from(allMembers))
+    }
 
+    // Regardless of soft/hard rotate, notify the people who were removed
+    if (removedMembers.size > 0) {
       publishGroupEvictions(address, Array.from(removedMembers))
     }
 
     // Re-publish group info
-    if (!$group.listing_is_public) {
+    if (!soft && !$group.listing_is_public) {
       publishGroupMeta(address, $group.id, $group.relays, $group.meta, false)
     }
+
+    // Re-send invites. This could be optimized further, but it's useful to re-send to different relays.
+    // It also handles edge cases, like if someone requested exit, then entry, soft rotate wouldn't let them
+    // know they still have access.
+    publishGroupInvites(address, allMembers, $group.relays)
 
     toast.show("info", "Invites have been sent!")
     router.pop()

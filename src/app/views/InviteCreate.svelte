@@ -134,7 +134,7 @@
       invite.groups = groups
     }
 
-    router.at("qrcode").of(ninviteEncode(invite)).open()
+    router.at("qrcode").of(window.origin + '/' + ninviteEncode(invite)).open()
   }
 
   onMount(() => {
@@ -236,4 +236,6 @@
     <i class="fa fa-plus" /> Add groups
   </Anchor>
 </div>
-<Anchor button accent on:click={onSubmit}>Create Invite Link</Anchor>
+<Anchor button accent disabled={[...people, ...relays, ...groups].length === 0} on:click={onSubmit}>
+  Create Invite Link
+</Anchor>

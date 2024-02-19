@@ -10,6 +10,8 @@
   import {env} from 'src/engine'
 
   export let invite
+
+  console.log(invite.groups)
 </script>
 
 <div class="mb-4 flex flex-col items-center justify-center">
@@ -46,7 +48,7 @@
       {#each invite.groups as group (group.address)}
         <GroupListItem modal address={group.address}>
           <div slot="actions">
-            <GroupActions address={group.address} />
+            <GroupActions address={group.address} claim={group.claim} />
           </div>
         </GroupListItem>
       {/each}

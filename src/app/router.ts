@@ -140,6 +140,7 @@ export const asInvite = k => ({
 
 export const router = new Router()
 
+router.extend("qrcode", encodeURIComponent)
 router.extend("media", encodeURIComponent)
 router.extend("relays", nip19.nrelayEncode)
 router.extend("channels", getChannelId)
