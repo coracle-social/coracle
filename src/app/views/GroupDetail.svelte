@@ -1,7 +1,7 @@
 <script>
   import {onMount} from "svelte"
   import {now} from "paravel"
-  import {whereEq, assocPath, without} from "ramda"
+  import {whereEq, uniq, assocPath, without} from "ramda"
   import {noteKinds, LOCAL_RELAY_URL} from "src/util/nostr"
   import {getKey} from "src/util/router"
   import {themeBackgroundGradient} from "src/partials/state"
@@ -76,7 +76,7 @@
 
   let tabs
 
-  $: relays = relays || info.relays
+  $: relays = uniq((relays || info.relays).concat(LOCAL_RELAY_URL))
   $: loadPubkeys($group.members || [])
 
   $: {

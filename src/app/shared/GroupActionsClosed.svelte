@@ -15,7 +15,6 @@
     publishGroupExitRequest,
     publishGroupEntryRequest,
     getGroupNaddr,
-    getGroupHint,
     deriveGroup,
     deriveGroupStatus,
     resetGroupAccess,

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {without, prop, objOf} from 'ramda'
-  import {onMount} from 'svelte'
-  import {ninviteEncode} from 'src/util/invite'
-  import type {InvitePointer} from 'src/util/invite'
+  import {without, prop, objOf} from "ramda"
+  import {onMount} from "svelte"
+  import {ninviteEncode} from "src/util/invite"
+  import type {InvitePointer} from "src/util/invite"
   import Card from "src/partials/Card.svelte"
   import Chips from "src/partials/Chips.svelte"
   import Input from "src/partials/Input.svelte"
@@ -14,8 +14,15 @@
   import GroupName from "src/app/shared/GroupName.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
-  import {router} from 'src/app/router'
-  import {env, displayRelay, searchRelays, searchGroups, displayGroup, deriveGroup, getGroupHint} from 'src/engine'
+  import {router} from "src/app/router"
+  import {
+    displayRelay,
+    searchRelays,
+    searchGroups,
+    displayGroup,
+    deriveGroup,
+    getGroupHint,
+  } from "src/engine"
 
   export let initialGroupAddress = null
 
@@ -51,8 +58,8 @@
     relayClaim = ""
     relaySelection = null
 
-    relayWrapper.querySelector('input').focus()
- }
+    relayWrapper.querySelector("input").focus()
+  }
 
   const removeRelay = i => {
     relays = relays.slice(0, i).concat(relays.slice(i + 1))
@@ -77,18 +84,17 @@
 
     groups = [...groups, newGroup]
     groupTerm = ""
-    groupSelection = ""
+    groupSelection = null
     groupClaim = ""
 
-    groupWrapper.querySelector('input').focus()
- }
+    groupWrapper.querySelector("input").focus()
+  }
 
   const removeGroup = i => {
     groups = groups.slice(0, i).concat(groups.slice(i + 1))
   }
 
-  const displayGroupFromAddress = a =>
-    displayGroup(deriveGroup(a).get())
+  const displayGroupFromAddress = a => displayGroup(deriveGroup(a).get())
 
   const displayGroupForChip = g => {
     let display = displayGroupFromAddress(g.address)
@@ -116,57 +122,67 @@
   const onSubmit = () => {
     const invite: InvitePointer = {}
 
-    if (sections.includes('people')) {
+    if (sections.includes("people")) {
       invite.people = people.map(p => p.pubkey)
     }
 
-    if (sections.includes('relays')) {
+    if (sections.includes("relays")) {
       invite.relays = relays
     }
 
-    if (sections.includes('groups')) {
+    if (sections.includes("groups")) {
       invite.groups = groups
     }
 
-    router.at('qrcode').of(ninviteEncode(invite)).open()
+    router.at("qrcode").of(ninviteEncode(invite)).open()
   }
 
   onMount(() => {
-    if (initialGroupAddress) showSection('groups')
+    if (initialGroupAddress) showSection("groups")
 
     // Not sure why, but the inputs are getting automatically focused
-    setTimeout(() => document.activeElement.blur())
+    setTimeout(() => (document.activeElement as any).blur())
   })
 </script>
 
-
 <div class="mb-4 flex flex-col items-center justify-center">
   <Heading>Create an Invite</Heading>
-  <p>Invite links allow you to help your friends onboard to nostr more easily, or get easy access to relays or groups.</p>
+  <p>
+    Invite links allow you to help your friends onboard to nostr more easily, or get easy access to
+    relays or groups.
+  </p>
 </div>
 {#each sections as section (section)}
-  {#if section === 'people'}
+  {#if section === "people"}
     <Card>
       <FlexColumn>
         <div class="flex justify-between">
           <Subheading>People</Subheading>
-          <i class="fa fa-times cursor-pointer" on:click={() => hideSection('people')} />
+          <i class="fa fa-times cursor-pointer" on:click={() => hideSection("people")} />
         </div>
         <p>Suggest people to follow - this is especially useful for new users.</p>
         <PersonMultiSelect bind:value={people} />
       </FlexColumn>
     </Card>
-  {:else if section === 'relays'}
+  {:else if section === "relays"}
     <Card>
       <FlexColumn>
         <div class="flex justify-between">
           <Subheading>Relays</Subheading>
-          <i class="fa fa-times cursor-pointer" on:click={() => hideSection('relays')} />
+          <i class="fa fa-times cursor-pointer" on:click={() => hideSection("relays")} />
         </div>
-        <p>Invite people to a private relay. Make sure the relay supports invite codes, and that the code is valid.</p>
+        <p>
+          Invite people to a private relay. Make sure the relay supports invite codes, and that the
+          code is valid.
+        </p>
         <Chips items={relays.map(displayRelayForChip)} remove={removeRelay} />
         <div class="flex gap-2" bind:this={relayWrapper}>
-          <SearchSelect bind:value={relaySelection} search={$searchRelays} getKey={prop('url')} bind:term={relayTerm} termToItem={objOf('url')}>
+          <SearchSelect
+            bind:value={relaySelection}
+            search={$searchRelays}
+            getKey={prop("url")}
+            bind:term={relayTerm}
+            termToItem={objOf("url")}>
             <i slot="before" class="fa fa-search" />
             <div slot="item" let:item>
               {displayRelay(item)}
@@ -177,19 +193,27 @@
         </div>
       </FlexColumn>
     </Card>
-  {:else if section === 'groups'}
+  {:else if section === "groups"}
     <Card>
       <FlexColumn>
         <div class="flex justify-between">
           <Subheading>Groups</Subheading>
-          <i class="fa fa-times cursor-pointer" on:click={() => hideSection('groups')} />
+          <i class="fa fa-times cursor-pointer" on:click={() => hideSection("groups")} />
         </div>
-        <p>Invite people to groups. If you're inviting someone to a closed group, make sure the invite code you use is valid.</p>
+        <p>
+          Invite people to groups. If you're inviting someone to a closed group, make sure the
+          invite code you use is valid.
+        </p>
         <Chips items={groups.map(displayGroupForChip)} remove={removeGroup} />
         <div class="flex gap-2" bind:this={groupWrapper}>
-          <SearchSelect bind:value={groupSelection} search={$searchGroups} getKey={prop('address')} displayItem={g => g ? displayGroup(g) : ""} bind:term={groupTerm}>
+          <SearchSelect
+            bind:value={groupSelection}
+            search={$searchGroups}
+            getKey={prop("address")}
+            displayItem={g => (g ? displayGroup(g) : "")}
+            bind:term={groupTerm}>
             <i slot="before" class="fa fa-search" />
-            <div slot="item" let:item class="flex gap-4 text-lightest items-center">
+            <div slot="item" let:item class="flex items-center gap-4 text-lightest">
               <GroupCircle address={item.address} class="h-5 w-5" />
               <GroupName address={item.address} />
             </div>
@@ -202,13 +226,13 @@
   {/if}
 {/each}
 <div class="flex justify-end gap-4">
-  <Anchor disabled={sections.includes('people')} on:click={() => showSection('people')}>
+  <Anchor disabled={sections.includes("people")} on:click={() => showSection("people")}>
     <i class="fa fa-plus" /> Add people
   </Anchor>
-  <Anchor disabled={sections.includes('relays')} on:click={() => showSection('relays')}>
+  <Anchor disabled={sections.includes("relays")} on:click={() => showSection("relays")}>
     <i class="fa fa-plus" /> Add relays
   </Anchor>
-  <Anchor disabled={sections.includes('groups')} on:click={() => showSection('groups')}>
+  <Anchor disabled={sections.includes("groups")} on:click={() => showSection("groups")}>
     <i class="fa fa-plus" /> Add groups
   </Anchor>
 </div>

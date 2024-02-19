@@ -7,6 +7,7 @@
 - [x] Add support for extensions that implement nip44
 - [x] Add zap splits
 - [x] Add default platform split amount
+- [x] Add invite link generation
 
 # 0.4.2
 
@@ -48,7 +49,7 @@
 - [x] Add status to listings
 - [x] Fix initial message when opening conversation from a listing
 - [x] Support frequency value in `price` tag for nip 99
-- [x] Show all replies exands notes inline rather than opening the note
+- [x] Show all replies expands notes inline rather than opening the note
 - [x] Fix nip04 messages not having a members field
 - [x] Improve person search
 - [x] Fix zaps in private groups
@@ -152,6 +153,7 @@
 - [x] Fix link overflow when media previews are off
 - [x] Speed things up by using animations more sparingly
 - [x] Fix DM view scrolling and formatting of messages with links
+
 # 0.3.10
 
 - [x] Use local relay on all requests
