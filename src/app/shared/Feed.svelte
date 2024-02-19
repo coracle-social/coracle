@@ -47,7 +47,7 @@
       selection = getRelaysFromFilters(compileFilters([filter]))
     }
 
-    return uniq(selection.concat(LOCAL_RELAY_URL))
+    return selectHints(selection).concat(LOCAL_RELAY_URL)
   }
 
   const loadMore = () => feed.load(5)
@@ -57,7 +57,7 @@
 
     feed = new FeedLoader({
       filters: compileFilters([filter], {includeReposts: true}),
-      relays: selectHints(getRelays()),
+      relays: getRelays(),
       anchor,
       shouldListen,
       shouldDefer: true,
