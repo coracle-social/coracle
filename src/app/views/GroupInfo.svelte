@@ -9,9 +9,6 @@
 
   const group = groups.key(address)
   const adminKey = deriveAdminKeyForGroup(address)
-
-  const createInvite = () =>
-    router.at("invites/create").qp({initialGroupAddress: address}).open()
 </script>
 
 <h1 class="staatliches text-2xl">Details</h1>
@@ -28,4 +25,3 @@
     </div>
   </CopyValue>
 {/if}
-<Anchor button on:click={createInvite}>Create invite link</Anchor>

@@ -176,7 +176,8 @@
 
   router.register("/invites/create", InviteCreate, {
     serializers: {
-      initialGroupAddress: asUrlComponent('initialGroupAddress'),
+      initialPubkey: asUrlComponent("initialPubkey"),
+      initialGroupAddress: asUrlComponent("initialGroupAddress"),
     },
   })
   router.register("/invites/:ninvite", InviteAccept, {
@@ -309,7 +310,7 @@
 
   router.register("/qrcode/:code", QRCode, {
     serializers: {
-      code: asUrlComponent('code'),
+      code: asUrlComponent("code"),
     },
   })
 

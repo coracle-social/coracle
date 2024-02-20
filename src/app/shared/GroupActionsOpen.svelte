@@ -7,7 +7,6 @@
     session,
     pubkey,
     publishCommunitiesList,
-    getGroupNaddr,
     deriveGroup,
     deriveGroupStatus,
     deriveAdminKeyForGroup,

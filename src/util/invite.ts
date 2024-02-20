@@ -65,7 +65,7 @@ export type InvitePointer = {
 
 export function ninviteEncode(invite: InvitePointer): string {
   const data = encodeTLV({
-    0: (invite.people || []).map(url => utf8Encoder.encode(url)),
+    0: (invite.people || []).map(pubkey => utf8Encoder.encode(pubkey)),
     1: (invite.relays || []).map(({url, claim = ""}) => utf8Encoder.encode([url, claim].join("|"))),
     2: (invite.groups || []).map(({address, relay, claim = ""}) =>
       utf8Encoder.encode([address, relay, claim].join("|")),

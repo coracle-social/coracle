@@ -14,7 +14,6 @@
     deriveAdminKeyForGroup,
     publishGroupExitRequest,
     publishGroupEntryRequest,
-    getGroupNaddr,
     deriveGroup,
     deriveGroupStatus,
     resetGroupAccess,
@@ -23,7 +22,6 @@
   export let address
   export let claim = ""
 
-  const group = deriveGroup(address)
   const adminKey = deriveAdminKeyForGroup(address)
   const status = deriveGroupStatus(address)
 

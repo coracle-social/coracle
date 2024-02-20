@@ -16,6 +16,7 @@
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import {router} from "src/app/router"
   import {
+    derivePerson,
     displayRelay,
     searchRelays,
     searchGroups,
@@ -24,6 +25,7 @@
     getGroupHint,
   } from "src/engine"
 
+  export let initialPubkey = null
   export let initialGroupAddress = null
 
   const showSection = section => {
@@ -107,7 +109,7 @@
   }
 
   let sections = []
-  let people = []
+  let people = initialPubkey ? [derivePerson(initialPubkey).get()] : []
   let relays = []
   let groups = []
   let relayTerm
@@ -134,10 +136,14 @@
       invite.groups = groups
     }
 
-    router.at("qrcode").of(window.origin + '/' + ninviteEncode(invite)).open()
+    router
+      .at("qrcode")
+      .of(window.origin + "/" + ninviteEncode(invite))
+      .open()
   }
 
   onMount(() => {
+    if (initialPubkey) showSection("people")
     if (initialGroupAddress) showSection("groups")
 
     // Not sure why, but the inputs are getting automatically focused

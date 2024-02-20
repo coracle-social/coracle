@@ -135,6 +135,11 @@
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
+          href={router.at("invites/create").qp({initialPubkey: $pubkey}).toString()}>
+          <i class="fa fa-paper-plane" /> Create Invite
+        </MenuItem>
+        <MenuItem
+          class="staatliches flex items-center gap-4 py-4 pl-8"
           on:click={() => setSubMenu("accounts")}>
           <i class="fa fa-right-left" /> Switch Account
         </MenuItem>
