@@ -151,7 +151,7 @@ export class LocalStorageAdapter {
     const {key, store, opts} = this
     const {load, dump} = opts || {load: identity, dump: identity}
 
-    if (Object.hasOwn(localStorage, key)) {
+    if (key in localStorage) {
       store.set(load(LocalStorage.getJson(key)))
     }
 
