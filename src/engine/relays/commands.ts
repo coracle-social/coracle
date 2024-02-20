@@ -61,7 +61,14 @@ export const publishRelays = ($relays: RelayPolicy[]) => {
 export const joinRelay = (url: string, claim?: string) => {
   // Fire off the claim to join the relay
   if (claim) {
-    pool.get("wss://relay.damus.io").send(["CLAIM", claim])
+    Publisher.publish({
+      relays: [url],
+      event: createEvent(28934, {
+        "tags": [
+          ["claim", claim],
+        ],
+      })
+    })
   }
 
   return publishRelays([

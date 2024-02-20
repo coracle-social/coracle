@@ -81,7 +81,7 @@ export const getRating = (event: Event) =>
 
 export const getAvgRating = (events: Event[]) => avg(events.map(getRating).filter(identity))
 
-export const isHex = x => x.match(/^[a-f0-9]{64}$/)
+export const isHex = x => x?.match(/^[a-f0-9]{64}$/)
 
 export const getParentId = (e, type = null) => {
   const {roots, replies} = Tags.from(e).getAncestors()

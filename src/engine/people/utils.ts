@@ -5,6 +5,7 @@ import {uniq, join, nth, last} from "ramda"
 import {Fetch, tryFunc, createMapOf, ellipsize, switcherFn} from "hurdak"
 import logger from "src/util/logger"
 import {createBatcher, pushToKey} from "src/util/misc"
+import {isHex} from "src/util/nostr"
 import {dufflepud} from "src/engine/session/utils"
 import {getPubkeyHints} from "src/engine/relays/utils"
 import type {Person, Handle} from "./model"
@@ -61,14 +62,14 @@ export const displayHandle = (handle: Handle) =>
 export const displayPubkey = (pubkey: string) => displayPerson(getPersonWithDefault(pubkey))
 
 export const getMutedPubkeys = $person =>
-  ($person?.mutes || []).map(nth(1)).filter(k => k?.length === 64) as string[]
+  ($person?.mutes || []).map(nth(1)).filter(isHex) as string[]
 
 export const getMutes = $person => new Set(getMutedPubkeys($person))
 
 export const isMuting = ($person, pubkey) => getMutedPubkeys($person).includes(pubkey)
 
 export const getFollowedPubkeys = $person =>
-  ($person?.petnames || []).map(nth(1)).filter(k => k?.length === 64) as string[]
+  ($person?.petnames || []).map(nth(1)).filter(isHex) as string[]
 
 export const getFollows = $person => new Set(getFollowedPubkeys($person))
 
