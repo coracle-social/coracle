@@ -5,6 +5,7 @@
   import {toNostrURI, Tags, createEvent} from "paravel"
   import {tweened} from "svelte/motion"
   import {identity, last, filter, sum, uniqBy, prop, pluck, sortBy} from "ramda"
+  import {fly} from 'src/util/transition'
   import {formatSats, tryJson} from "src/util/misc"
   import {LOCAL_RELAY_URL, getIdOrAddressTag, asNostrEvent} from "src/util/nostr"
   import {quantify} from "hurdak"
@@ -236,7 +237,9 @@
       })}
       on:click={replyCtrl?.start}>
       <Icon icon="message" accent={Boolean(reply)} />
-      <span class="-mt-px">{$repliesCount || ""}</span>
+      {#if $repliesCount > 0}
+        <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$repliesCount}</span>
+      {/if}
     </button>
     {#if $env.ENABLE_ZAPS}
       <button
@@ -245,7 +248,9 @@
         })}
         on:click={startZap}>
         <Icon icon="bolt" accent={Boolean(zap)} />
-        <span class="-mt-px">{$zapsTotal ? formatSats($zapsTotal) : ""}</span>
+        {#if $zapsTotal > 0}
+          <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{formatSats($zapsTotal)}</span>
+        {/if}
       </button>
     {/if}
     {#if getSetting("enable_reactions")}
@@ -260,7 +265,9 @@
           class={cx("cursor-pointer", {
             "fa-beat fa-beat-custom": like,
           })} />
-        <span class="-mt-px">{$likesCount || ""}</span>
+        {#if $likesCount > 0}
+          <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$likesCount}</span>
+        {/if}
       </button>
     {/if}
   </div>
