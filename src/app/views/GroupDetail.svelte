@@ -109,7 +109,7 @@
          background-size: cover;
          background-image: linear-gradient(to bottom, ${rgba}, ${rgb}), url('${$group?.meta?.banner}')`} />
 
-<div class="flex gap-4 text-lightest">
+<div class="flex gap-4 text-neutral-100">
   <GroupCircle {address} class="mt-1 h-10 w-10 sm:h-32 sm:w-32" />
   <div class="flex min-w-0 flex-grow flex-col gap-4">
     <div class="flex items-center justify-between gap-4">

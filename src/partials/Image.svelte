@@ -51,6 +51,6 @@
 
 {#if loading}
   <slot name="placeholder">
-    <div class="placeholder h-48 rounded bg-mid" />
+    <div class="placeholder h-48 rounded bg-neutral-600" />
   </slot>
 {/if}

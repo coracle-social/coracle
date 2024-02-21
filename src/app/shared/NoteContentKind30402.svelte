@@ -46,10 +46,10 @@
         </strong>
         {#if note.pubkey === $pubkey && !deleted}
           <Anchor modal stopPropagation href={editLink} class="flex items-center">
-            <i class="fa fa-edit text-base text-lighter" />
+            <i class="fa fa-edit text-base text-neutral-200" />
           </Anchor>
           <Anchor modal stopPropagation href={deleteLink} class="flex items-center">
-            <i class="fa fa-trash text-base text-lighter" />
+            <i class="fa fa-trash text-base text-neutral-200" />
           </Anchor>
         {:else if deleted}
           <Chip danger small>Deleted</Chip>
@@ -65,15 +65,15 @@
       </span>
     </div>
     {#if location}
-      <div class="flex items-center gap-2 text-sm text-light">
+      <div class="flex items-center gap-2 text-sm text-neutral-300">
         <i class="fa fa-location-dot" />
         {location}
       </div>
     {/if}
     {#if summary !== note.content}
-      <p class="text-lighter">{summary}</p>
+      <p class="text-neutral-200">{summary}</p>
     {/if}
-    <div class="h-px bg-mid" />
+    <div class="h-px bg-neutral-600" />
     <NoteContentKind1 skipMedia {note} {showEntire} />
   </div>
   {#if showMedia}

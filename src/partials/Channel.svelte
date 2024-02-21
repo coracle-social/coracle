@@ -103,8 +103,8 @@
     showNewMessages = false
   }} />
 
-<div class="fixed inset-0 z-chat flex flex-col bg-dark lg:ml-72">
-  <div class="bg-dark-d">
+<div class="fixed inset-0 z-chat flex flex-col bg-neutral-800 lg:ml-72">
+  <div class="bg-neutral-900">
     <slot name="header" />
   </div>
   <ul
@@ -147,34 +147,34 @@
         </small>
       </div>
     {/if}
-    <div class="flex border-t border-solid border-cocoa border-mid bg-mid">
+    <div class="flex border-t border-solid border-tinted-700 border-neutral-600 bg-neutral-600">
       <textarea
         rows="3"
         autofocus
         placeholder="Type something..."
         bind:this={textarea}
         on:keydown={onKeyDown}
-        class="w-full resize-none bg-mid p-2
-             text-lightest outline-0 placeholder:text-lightest" />
+        class="w-full resize-none bg-neutral-600 p-2
+             text-neutral-100 outline-0 placeholder:text-neutral-100" />
       <div>
         <ImageInput multi on:change={e => addImage(e.detail)}>
           <button
             slot="button"
-            class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-cocoa p-3
-                 py-6 text-lightest transition-all hover:bg-accent hover:text-white">
+            class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-tinted-700 p-3
+                 py-6 text-neutral-100 transition-all hover:bg-accent hover:text-white">
             <i class="fa-solid fa-paperclip fa-lg" />
           </button>
         </ImageInput>
         <button
           on:click={send}
-          class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-cocoa p-3
-               py-6 text-lightest transition-all hover:bg-accent hover:text-white">
+          class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-tinted-700 p-3
+               py-6 text-neutral-100 transition-all hover:bg-accent hover:text-white">
           <i class="fa-solid fa-paper-plane fa-lg" />
         </button>
       </div>
     </div>
   {:else}
-    <FlexColumn class="bg-dark-d px-4 py-2">
+    <FlexColumn class="bg-neutral-900 px-4 py-2">
       <p class="flex items-center gap-2">
         <i class="fa fa-info-circle p-1" />
         You are using a login method that doesn't yet support group chats. Please consider upgrading
@@ -187,7 +187,7 @@
       class="fixed bottom-32 flex w-full cursor-pointer justify-center"
       transition:fly|local={{y: 20}}
       on:click={scrollToBottom}>
-      <div class="rounded-full bg-accent px-4 py-2 text-lightest">New messages found</div>
+      <div class="rounded-full bg-accent px-4 py-2 text-neutral-100">New messages found</div>
     </div>
   {/if}
 </div>

@@ -37,7 +37,7 @@
       <Compose
         {onSubmit}
         autofocus
-        class="shadow-inset rounded bg-warm px-2 py-2 text-black"
+        class="shadow-inset rounded bg-tinted-200 px-2 py-2 text-black"
         style="min-height: 6rem"
         bind:this={compose} />
       <Anchor button tag="button" type="submit" class="flex-grow">Send</Anchor>

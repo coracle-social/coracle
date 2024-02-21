@@ -46,7 +46,7 @@
     {/each}
   {:else if $ancestors.length > 0}
     <Anchor
-      class="text-center text-lightest"
+      class="text-center text-neutral-100"
       on:click={() => {
         showAncestors = true
       }}>

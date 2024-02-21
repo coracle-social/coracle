@@ -3,6 +3,7 @@
   import {createEventDispatcher} from "svelte"
   import AltColor from "src/partials/AltColor.svelte"
 
+  export let noPad = false
   export let interactive = false
   export let stopPropagation = false
 
@@ -43,8 +44,9 @@
 <div on:mousedown={startClick} on:touchstart={startClick} on:click={onClick}>
   <AltColor
     background
-    class={cx($$props.class, "rounded px-7 py-5 text-lightest", {
-      "cursor-pointer border-r-4 border-transparent transition-colors hover:border-mid":
+    class={cx($$props.class, "rounded text-neutral-100", {
+      "px-7 py-5": !noPad,
+      "cursor-pointer border-r-4 border-transparent transition-colors hover:border-neutral-600":
         interactive,
     })}>
     <slot />

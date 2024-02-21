@@ -4,8 +4,8 @@
 
 <Anchor
   type="unstyled"
-  class="flex gap-4 border-l-2 border-solid border-mid px-4 py-2 transition-all
-         hover:border-accent hover:bg-dark hover:pl-5"
+  class="flex gap-4 border-l-2 border-solid border-neutral-600 px-4 py-2 transition-all
+         hover:border-accent hover:bg-neutral-800 hover:pl-5"
   on:click>
   <slot />
 </Anchor>

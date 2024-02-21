@@ -51,22 +51,22 @@
 <!-- top nav -->
 {#if innerWidth >= 1024}
   <div
-    class="fixed left-0 right-0 top-0 z-nav flex h-16 items-center justify-end gap-8 bg-dark-d pl-4 pr-8">
+    class="fixed left-0 right-0 top-0 z-nav flex h-16 items-center justify-end gap-8 bg-neutral-900 pl-4 pr-8">
     <div class="relative">
       <div class="flex">
         <Input
-          class="h-7 !rounded !border-cocoa !bg-dark !px-2 py-px text-warm outline-none"
+          class="h-7 !rounded !border-tinted-700 !bg-neutral-800 !px-2 py-px text-tinted-200 outline-none"
           on:blur={onSearchBlur}
           on:keydown={onSearchKeydown}
           bind:element={searchInput}
           bind:value={$searchTerm} />
-        <Anchor button class="z-feature -ml-2 border-none !bg-cocoa !text-warm">Search</Anchor>
+        <Anchor button class="z-feature -ml-2 border-none !bg-tinted-700 !text-tinted-200">Search</Anchor>
       </div>
       {#if $searchTerm}
         <div
-          class="absolute right-0 top-10 max-h-[70vh] w-96 overflow-auto rounded bg-cocoa shadow-2xl">
+          class="absolute right-0 top-10 max-h-[70vh] w-96 overflow-auto rounded bg-tinted-700 shadow-2xl">
           <SearchResults showLoading term={searchTerm}>
-            <div slot="result" let:result class="px-4 py-2 transition-colors hover:bg-dark">
+            <div slot="result" let:result class="px-4 py-2 transition-colors hover:bg-neutral-800">
               {#if result.type === "topic"}
                 #{result.topic.name}
               {:else if result.type === "profile"}
@@ -84,10 +84,10 @@
 <!-- bottom nav -->
 {#if innerWidth < 1024}
   <div
-    class="fixed bottom-0 left-0 right-0 z-nav flex items-center justify-between border-t border-solid border-mid bg-dark px-4 py-2">
+    class="fixed bottom-0 left-0 right-0 z-nav flex items-center justify-between border-t border-solid border-neutral-600 bg-neutral-800 px-4 py-2">
     <div class="w-1/3">
       <div
-        class="h-10 w-10 cursor-pointer rounded-full border-[3px] border-solid border-mid dark:border-cocoa-l p-1 pl-2.5 pt-1.5 text-accent"
+        class="h-10 w-10 cursor-pointer rounded-full border-[3px] border-solid border-neutral-600 dark:border-tinted-600 p-1 pl-2.5 pt-1.5 text-accent"
         on:click={openSearch}>
         <i class="fa fa-search scale-[140%]" />
       </div>
@@ -101,11 +101,11 @@
     </div>
     <div class="flex w-1/3 justify-end">
       <div class="flex cursor-pointer items-center" on:click={openMenu}>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" class="text-mid dark:text-cocoa-l pt-1" width="36" height="36">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" class="text-neutral-600 dark:text-tinted-600 pt-1" width="36" height="36">
           <path fill="currentColor" d="M0 88C0 74.7 10.7 64 24 64H424c13.3 0 24 10.7 24 24s-10.7 24-24 24H24C10.7 112 0 101.3 0 88zM0 248c0-13.3 10.7-24 24-24H424c13.3 0 24 10.7 24 24s-10.7 24-24 24H24c-13.3 0-24-10.7-24-24zM448 408c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24s10.7-24 24-24H424c13.3 0 24 10.7 24 24z"/>
         </svg>
         {#if $pubkey}
-          <PersonCircle class="-ml-4 h-12 w-12 border-4 !border-dark" pubkey={$pubkey} />
+          <PersonCircle class="-ml-4 h-12 w-12 border-4 !border-neutral-800" pubkey={$pubkey} />
           {#if $hasNewNotifications || $hasNewMessages}
             <div class="absolute right-4 top-4 h-2 w-2 rounded bg-accent" />
           {/if}

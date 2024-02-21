@@ -33,7 +33,7 @@
   <div on:click|stopPropagation class="flex justify-between">
     {formatTimestamp(timestamp)}
   </div>
-  <div class="break-word overflow-hidden text-lightest">
+  <div class="break-word overflow-hidden text-neutral-100">
     <NoteContent {note} />
   </div>
 </Card>

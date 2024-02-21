@@ -393,7 +393,7 @@
 
   document.head.append(style)
 
-  $: style.textContent = `:root { ${$themeVariables}; background: var(--dark); }`
+  $: style.textContent = `:root { ${$themeVariables}; background: var(--neutral-800); }`
 
   // Scroll position
 
@@ -505,7 +505,7 @@
 {#await storage.ready}
   <!-- pass -->
 {:then}
-  <div class="text-warm">
+  <div class="text-tinted-200">
     <Routes />
     {#key $stateKey}
       <ForegroundButtons />

@@ -49,7 +49,7 @@
 {#key $stateKey}
   <div
     id="page"
-    class="relative pb-24 text-lightest lg:ml-60 lg:pt-16"
+    class="relative pb-24 text-neutral-100 lg:ml-60 lg:pt-16"
     class:pointer-events-none={$menuIsOpen}>
     {#if $page}
       {#key getKey($page)}

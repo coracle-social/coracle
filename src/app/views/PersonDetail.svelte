@@ -58,7 +58,7 @@
        background-size: cover;
        background-image: linear-gradient(to bottom, ${rgba}, ${rgba}, ${rgb}), url('${banner}')`} />
 
-<div class="flex gap-4 text-lightest">
+<div class="flex gap-4 text-neutral-100">
   <PersonCircle {pubkey} class="mt-1 h-12 w-12 sm:h-32 sm:w-32" />
   <div class="flex min-w-0 flex-grow flex-col gap-4">
     <div class="flex flex-col">

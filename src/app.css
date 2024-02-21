@@ -177,14 +177,14 @@ body,
 }
 
 .long-form-content code {
-  background-color: var(--dark);
+  background-color: var(--neutral-800);
   line-height: 1.5em;
   box-decoration-break: clone;
   padding: 1px 0.2em;
 }
 
 .long-form-content blockquote {
-  border-left: 0.25rem solid var(--mid);
+  border-left: 0.25rem solid var(--neutral-600);
   padding: 1rem 0 1rem 1rem;
 }
 
@@ -207,7 +207,7 @@ body,
 /* Code blocks */
 
 .code {
-  background-color: var(--dark);
+  background-color: var(--neutral-800);
   line-height: 1.5em;
   box-decoration-break: clone;
   padding: 1px 0.2em;

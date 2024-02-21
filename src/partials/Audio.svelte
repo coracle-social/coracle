@@ -60,7 +60,7 @@
     {/if}
   </div>
   <div
-    class="flex h-2 flex-grow cursor-pointer overflow-hidden rounded-full bg-mid"
+    class="flex h-2 flex-grow cursor-pointer overflow-hidden rounded-full bg-neutral-600"
     bind:this={visualizer}
     on:click={setAudioPosition}>
     <div class="inline-block h-2 bg-accent" />

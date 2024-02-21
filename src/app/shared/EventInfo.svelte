@@ -44,10 +44,10 @@
       {/if}
       {#if actionsInline && event.pubkey === $pubkey && !deleted}
         <Anchor modal stopPropagation href={editLink} class="flex items-center">
-          <i class="fa fa-edit text-base text-lighter" />
+          <i class="fa fa-edit text-base text-neutral-200" />
         </Anchor>
         <Anchor modal stopPropagation href={deleteLink} class="flex items-center">
-          <i class="fa fa-trash text-base text-lighter" />
+          <i class="fa fa-trash text-base text-neutral-200" />
         </Anchor>
       {/if}
     </div>
@@ -55,7 +55,7 @@
       <EventActions {event} />
     {/if}
   </div>
-  <div class="flex items-center gap-2 text-sm text-lighter">
+  <div class="flex items-center gap-2 text-sm text-neutral-200">
     {#if event.wrap}
       <span>Private</span>
       <span>•</span>
@@ -76,8 +76,8 @@
       </span>
     {/if}
   </div>
-  <div class="h-px bg-mid" />
-  <div class="flex items-center gap-2 text-sm text-lighter">
+  <div class="h-px bg-neutral-600" />
+  <div class="flex items-center gap-2 text-sm text-neutral-200">
     <i class="fa fa-clock" />
     {#if showDate}
       Starts on {datetimeFmt.format(startDate)} — {isSingleDay

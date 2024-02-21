@@ -18,7 +18,7 @@
 </script>
 
 <div
-  class="flex flex-col justify-between gap-3 rounded-xl border border-l-2 border-solid border-mid bg-dark px-6 py-3 shadow"
+  class="flex flex-col justify-between gap-3 rounded-xl border border-l-2 border-solid border-neutral-600 bg-neutral-800 px-6 py-3 shadow"
   style={`border-left-color: ${hsl(stringToHue(relay.url))}`}>
   <div class="flex items-center justify-between gap-2">
     <div class="flex min-w-0 items-center gap-2 text-xl">
@@ -52,7 +52,7 @@
     <p>{relay.description}</p>
   {/if}
   {#if showControls && $canSign}
-    <div class="-mx-6 my-1 h-px bg-cocoa" />
+    <div class="-mx-6 my-1 h-px bg-tinted-700" />
     <div class="flex justify-between gap-2">
       <span>Publish to this relay?</span>
       <Toggle

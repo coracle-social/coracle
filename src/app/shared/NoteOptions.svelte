@@ -103,7 +103,7 @@
             <div>
               {#each values.relays as url}
                 <div
-                  class="mb-2 mr-1 inline-block rounded-full border border-solid border-lightest px-2 py-1">
+                  class="mb-2 mr-1 inline-block rounded-full border border-solid border-neutral-100 px-2 py-1">
                   <button
                     type="button"
                     class="fa fa-times cursor-pointer"

@@ -9,8 +9,8 @@
   export let onRemove = null
 
   const className = cx($$props.class, "inline-block rounded-full border border-solid cy-chip", {
-    "border-dark": light,
-    "border-lightest": dark,
+    "border-neutral-800": light,
+    "border-neutral-100": dark,
     "!border-danger": danger,
     "!border-warning": warning,
     "py-1 px-2": !small,

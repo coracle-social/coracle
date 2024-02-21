@@ -10,7 +10,7 @@
   import {toastProgress} from "src/app/state"
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
-  const lud16Url = "https://blog.getalby.com/create-your-lightning-address/"
+  const lud16Url = "https://blog.getalby.com/create-your-neutral-300ning-address/"
   const pseudUrl =
     "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 

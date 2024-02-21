@@ -39,13 +39,13 @@
 
 {#if data.length > 0 || (create && term)}
   <div
-    class="mt-2 flex max-h-[350px] flex-col overflow-y-auto overflow-x-hidden border border-solid border-mid">
+    class="mt-2 flex max-h-[350px] flex-col overflow-y-auto overflow-x-hidden border border-solid border-neutral-600">
     {#if create && term}
       {@const i = data.length}
       <button
-        class="flex cursor-pointer items-center gap-1 border-l-2 border-solid px-4 py-2 text-left text-lightest hover:border-accent hover:bg-cocoa"
-        class:bg-dark={index !== i}
-        class:bg-cocoa={index === i}
+        class="flex cursor-pointer items-center gap-1 border-l-2 border-solid px-4 py-2 text-left text-neutral-100 hover:border-accent hover:bg-tinted-700"
+        class:bg-neutral-800={index !== i}
+        class:bg-tinted-700={index === i}
         class:border-transparent={index !== i}
         class:border-accent={index === i}
         on:mousedown|preventDefault
@@ -55,9 +55,9 @@
     {/if}
     {#each data as item, i (getKey(item))}
       <button
-        class="cursor-pointer border-l-2 border-solid px-4 py-2 text-left text-lightest hover:border-accent hover:bg-cocoa"
-        class:bg-dark={index !== i}
-        class:bg-cocoa={index === i}
+        class="cursor-pointer border-l-2 border-solid px-4 py-2 text-left text-neutral-100 hover:border-accent hover:bg-tinted-700"
+        class:bg-neutral-800={index !== i}
+        class:bg-tinted-700={index === i}
         class:border-transparent={index !== i}
         class:border-accent={index === i}
         on:mousedown|preventDefault
@@ -68,7 +68,7 @@
   </div>
 {/if}
 {#if loading}
-  <div transition:slide|local class="flex gap-2 bg-cocoa px-4 py-2 text-lighter">
+  <div transition:slide|local class="flex gap-2 bg-tinted-700 px-4 py-2 text-neutral-200">
     <div>
       <i class="fa fa-circle-notch fa-spin" />
     </div>

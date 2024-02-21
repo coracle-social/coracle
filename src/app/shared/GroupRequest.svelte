@@ -55,7 +55,7 @@
         <Anchor on:click={resolve} button accent>Resolve</Anchor>
       </div>
     </div>
-    <p class="border-l-2 border-solid border-mid pl-2">
+    <p class="border-l-2 border-solid border-neutral-600 pl-2">
       "{request.content}"
     </p>
     <p>

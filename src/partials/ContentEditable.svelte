@@ -85,7 +85,7 @@
 </script>
 
 <div class="min-w-0 flex-grow">
-  <div class="h-0 text-light" class:hidden={!showPlaceholder}>
+  <div class="h-0 text-neutral-300" class:hidden={!showPlaceholder}>
     {placeholder || ""}
   </div>
   <div

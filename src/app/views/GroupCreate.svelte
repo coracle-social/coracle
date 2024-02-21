@@ -64,7 +64,7 @@
     <FlexColumn>
       <div class="flex items-center justify-between">
         <p class="flex items-center gap-4 text-xl">
-          <i class="fa fa-unlock text-mid" />
+          <i class="fa fa-unlock text-neutral-600" />
           <strong>Open</strong>
         </p>
         <i class="fa fa-arrow-right" />
@@ -79,7 +79,7 @@
     <FlexColumn>
       <div class="flex items-center justify-between">
         <p class="flex items-center gap-4 text-xl">
-          <i class="fa fa-lock text-mid" />
+          <i class="fa fa-lock text-neutral-600" />
           <strong>Closed</strong>
         </p>
         <i class="fa fa-arrow-right" />

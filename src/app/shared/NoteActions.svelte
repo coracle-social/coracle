@@ -217,7 +217,7 @@
   })
 </script>
 
-<div class="flex justify-between text-lightest" on:click|stopPropagation>
+<div class="flex justify-between text-neutral-100" on:click|stopPropagation>
   <div class="flex gap-8 text-sm">
     <button
       class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
@@ -262,7 +262,7 @@
   </div>
   <div class="flex scale-90 items-center gap-2">
     <div
-      class="staatliches cursor-pointer rounded bg-mid px-2 text-lightest transition-colors hover:bg-light"
+      class="staatliches cursor-pointer rounded bg-neutral-600 px-2 text-neutral-100 transition-colors hover:bg-neutral-300"
       on:click={() => setView("info")}>
       <span class="text-accent">{note.seen_on.length}</span>
       {pluralize(note.seen_on.length, "relay")}
@@ -280,7 +280,7 @@
           {#each zaps as zap}
             <div class="flex flex-col gap-1">
               <PersonBadge pubkey={zap.request.pubkey} />
-              <span class="ml-16 text-sm text-mid"
+              <span class="ml-16 text-sm text-neutral-600"
                 >{formatSats(zap.invoiceAmount / 1000)} sats</span>
             </div>
           {/each}
@@ -331,7 +331,7 @@
       <div class="flex flex-col gap-2">
         {#if address}
           <Card invertColors interactive on:click={() => crossPost()}>
-            <div class="flex gap-4 text-lightest">
+            <div class="flex gap-4 text-neutral-100">
               <i class="fa fa-earth-asia fa-2x" />
               <div class="flex min-w-0 flex-grow flex-col gap-4">
                 <p class="text-2xl">Global</p>

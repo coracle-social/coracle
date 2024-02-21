@@ -97,7 +97,7 @@
         <Input bind:value={values.location} />
       </Field>
       <Field label="Description">
-        <div class="rounded-xl border border-solid border-mid bg-white p-3 text-black">
+        <div class="rounded-xl border border-solid border-neutral-600 bg-white p-3 text-black">
           <Compose autofocus bind:this={compose} {onSubmit} />
         </div>
       </Field>

@@ -97,7 +97,7 @@
 </script>
 
 <form on:submit|preventDefault={() => onSubmit()}>
-  <AltColor background class="z-feature flex gap-4 overflow-hidden rounded p-3 text-lightest">
+  <AltColor background class="z-feature flex gap-4 overflow-hidden rounded p-3 text-neutral-100">
     <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
     <div class="w-full">
       <Compose placeholder="What's up?" bind:this={compose} {onSubmit} style="min-height: 3em;" />

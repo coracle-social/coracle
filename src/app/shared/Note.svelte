@@ -255,7 +255,7 @@
               stroke-dashoffset="54"
               stroke-dasharray="100 100"
               transform-origin="center"
-              class={isAlt ? "stroke-cocoa" : "stroke-dark"} />
+              class={isAlt ? "stroke-tinted-700" : "stroke-neutral-800"} />
           </svg>
         </AltColor>
         {#if isLastReply}
@@ -278,7 +278,7 @@
               </Anchor>
               <Anchor
                 on:click={goToDetail}
-                class="whitespace-nowrap text-end text-sm text-lightest"
+                class="whitespace-nowrap text-end text-sm text-neutral-100"
                 type="unstyled">
                 {formatTimestamp(event.created_at)}
               </Anchor>
@@ -286,20 +286,20 @@
             <div class="flex flex-col gap-2">
               <div class="flex gap-2">
                 {#if showReply}
-                  <small class="text-lightest">
+                  <small class="text-neutral-100">
                     <i class="fa fa-code-merge" />
                     <Anchor class="underline" on:click={goToParent}>View Parent</Anchor>
                   </small>
                 {/if}
                 {#if showRoot}
-                  <small class="text-lightest">
+                  <small class="text-neutral-100">
                     <i class="fa fa-code-pull-request" />
                     <Anchor class="underline" on:click={goToThread}>View Thread</Anchor>
                   </small>
                 {/if}
               </div>
               {#if muted}
-                <p class="border-l-2 border-solid border-mid pl-4 text-lightest">
+                <p class="border-l-2 border-solid border-neutral-600 pl-4 text-neutral-100">
                   You have hidden this note.
                   <Anchor
                     underline
@@ -339,7 +339,7 @@
             <Popover triggerType="mouseenter">
               <div slot="trigger">
                 <i
-                  class="fa fa-arrow-up text-lighter transition-all"
+                  class="fa fa-arrow-up text-neutral-200 transition-all"
                   class:rotate-180={collapsed} />
               </div>
               <div slot="tooltip">
@@ -372,7 +372,7 @@
           out:slide|local>
           {#if hiddenReplies.length > 0}
             <button
-              class="mb-2 mt-2 cursor-pointer rounded-md bg-gradient-to-l from-transparent to-cocoa py-2 text-lightest outline-0 transition-colors hover:bg-cocoa"
+              class="mb-2 mt-2 cursor-pointer rounded-md bg-gradient-to-l from-transparent to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
               on:click={() => {
                 showEntire = true
               }}>
@@ -401,7 +401,7 @@
           {/if}
           {#if showEntire && mutedReplies.length > 0}
             <button
-              class="ml-5 cursor-pointer py-2 text-lightest outline-0"
+              class="ml-5 cursor-pointer py-2 text-neutral-100 outline-0"
               on:click={() => {
                 showMutedReplies = true
               }}>

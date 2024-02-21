@@ -114,7 +114,7 @@
 </script>
 
 <div class="flex gap-3">
-  <p class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-light text-lg">
+  <p class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-600 text-lg">
     3/4
   </p>
   <p class="text-2xl font-bold">Find your people</p>
@@ -131,7 +131,7 @@
       on:click={() => openList(list)}>
       <p class="text-xl font-bold">{list.title}</p>
       <p class="pb-5">{list.description}</p>
-      <div class="absolute bottom-1 text-lighter">
+      <div class="absolute bottom-1 text-neutral-200">
         {Tags.from(list).pubkeys().count()} people
       </div>
     </Card>

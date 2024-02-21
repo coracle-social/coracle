@@ -120,10 +120,10 @@
         <i class="fa fa-rss" /> Feed
       </MenuMobileItem>
     </div>
-    <div class="staatliches mt-8 block flex h-8 justify-center gap-2 px-8 text-light">
-      <Anchor class="hover:text-warm" href="/about">About</Anchor> /
-      <Anchor external class="hover:text-warm" href="/terms.html">Terms</Anchor> /
-      <Anchor external class="hover:text-warm" href="/privacy.html">Privacy</Anchor>
+    <div class="staatliches mt-8 block flex h-8 justify-center gap-2 px-8 text-neutral-300">
+      <Anchor class="hover:text-tinted-200" href="/about">About</Anchor> /
+      <Anchor external class="hover:text-tinted-200" href="/terms.html">Terms</Anchor> /
+      <Anchor external class="hover:text-tinted-200" href="/privacy.html">Privacy</Anchor>
     </div>
   </SliderMenu>
 {/if}
@@ -189,9 +189,9 @@
         <i class="fa fa-paper-plane" /> Create Invite
       </MenuMobileItem>
     </div>
-    <div class="staatliches block flex h-8 justify-center gap-2 px-8 text-light">
-      <Anchor class="hover:text-warm" href="/logout">Logout</Anchor> /
-      <Anchor class="hover:text-warm" stopPropagation on:click={() => setSubMenu("accounts")}>
+    <div class="staatliches block flex h-8 justify-center gap-2 px-8 text-neutral-300">
+      <Anchor class="hover:text-tinted-200" href="/logout">Logout</Anchor> /
+      <Anchor class="hover:text-tinted-200" stopPropagation on:click={() => setSubMenu("accounts")}>
         Switch Accounts
       </Anchor>
     </div>
@@ -204,7 +204,7 @@
       {#if s.pubkey !== $pubkey}
         <MenuItem class="py-4" on:click={() => pubkey.set(s.pubkey)}>
           <div class="flex items-center justify-center gap-2">
-            <PersonCircle class="h-8 w-8 border border-solid border-warm" pubkey={s.pubkey} />
+            <PersonCircle class="h-8 w-8 border border-solid border-tinted-200" pubkey={s.pubkey} />
             {displayPubkey(s.pubkey)}
           </div>
         </MenuItem>

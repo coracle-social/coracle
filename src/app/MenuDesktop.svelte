@@ -49,7 +49,7 @@
   }
 </script>
 
-<div class="fixed bottom-0 left-0 top-0 z-nav w-72 bg-cocoa transition-colors">
+<div class="fixed bottom-0 left-0 top-0 z-nav w-72 bg-tinted-700 transition-colors">
   <Anchor
     class="mb-4 mt-4 flex items-center gap-2 pl-6"
     external
@@ -91,15 +91,15 @@
   {/if}
   <FlexColumn small class="absolute bottom-0 w-72">
     <Anchor
-      class="staatliches px-8 text-mid hover:text-lighter dark:text-cocoa-l dark:hover:text-warm"
+      class="staatliches px-8 text-neutral-500 hover:text-neutral-200 dark:text-tinted-600 dark:hover:text-tinted-200"
       href="/about">About</Anchor>
     <Anchor
-      class="staatliches px-8 text-mid hover:text-lighter dark:text-cocoa-l dark:hover:text-warm"
+      class="staatliches px-8 text-neutral-500 hover:text-neutral-200 dark:text-tinted-600 dark:hover:text-tinted-200"
       on:click={() => setSubMenu("settings")}>Settings</Anchor>
-    <div class="staatliches block flex h-8 gap-2 px-8 text-mid dark:text-cocoa-l">
-      <Anchor external class="hover:text-lighter dark:hover:text-warm" href="/terms.html"
+    <div class="staatliches block flex h-8 gap-2 px-8 text-neutral-500 dark:text-tinted-600">
+      <Anchor external class="hover:text-neutral-200 dark:hover:text-tinted-200" href="/terms.html"
         >Terms</Anchor> /
-      <Anchor external class="hover:text-lighter dark:hover:text-warm" href="/privacy.html"
+      <Anchor external class="hover:text-neutral-200 dark:hover:text-tinted-200" href="/privacy.html"
         >Privacy</Anchor>
     </div>
     {#if subMenu === "settings"}
@@ -153,7 +153,7 @@
           {#if s.pubkey !== $pubkey}
             <MenuItem class="py-4" on:click={() => pubkey.set(s.pubkey)}>
               <div class="flex items-center gap-2">
-                <PersonCircle class="h-8 w-8 border border-solid border-warm" pubkey={s.pubkey} />
+                <PersonCircle class="h-8 w-8 border border-solid border-tinted-200" pubkey={s.pubkey} />
                 {displayPubkey(s.pubkey)}
               </div>
             </MenuItem>
@@ -166,7 +166,7 @@
         </MenuItem>
       </MenuDesktopSecondary>
     {/if}
-    <div class="cursor-pointer border-t border-solid border-mid px-7 pb-4 pt-3">
+    <div class="cursor-pointer border-t border-solid border-neutral-600 px-7 pb-4 pt-3">
       {#if $pubkey}
         <Anchor class="flex items-center gap-2" on:click={() => setSubMenu("account")}>
           <PersonCircle class="h-10 w-10" pubkey={$pubkey} />

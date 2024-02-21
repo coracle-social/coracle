@@ -15,7 +15,7 @@
 </script>
 
 {#if repostPubkeys.length > 0}
-  <p class="flex items-center gap-1 pb-2 text-sm text-light">
+  <p class="flex items-center gap-1 pb-2 text-sm text-neutral-300">
     <i class="fa fa-rotate" />
     {#if showGroup}
       Cross-posted
@@ -42,7 +42,7 @@
     {/if}
   </p>
 {:else if fromAddresses.length > 0 && showGroup}
-  <p class="pb-2 text-light">
+  <p class="pb-2 text-neutral-300">
     {#if fromAddresses.length === 1}
       Posted in <GroupLink address={fromAddresses[0]} />
     {:else if fromAddresses.length > 1}

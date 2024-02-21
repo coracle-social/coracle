@@ -83,7 +83,7 @@ export const themeVariables = themeColors.derived($colors => {
 })
 
 export const themeBackgroundGradient = themeColors.derived($colors => {
-  const color = parseHex($colors["dark"])
+  const color = parseHex($colors["neutral-800"])
 
   return {
     rgba: `rgba(${color.join(", ")}, 0.5)`,

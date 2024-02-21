@@ -38,7 +38,7 @@
     </Anchor>
   </div>
   {#if !Capacitor.isNativePlatform()}
-    <p class="rounded border-2 border-solid border-warning bg-dark px-6 py-3">
+    <p class="rounded border-2 border-solid border-warning bg-neutral-800 px-6 py-3">
       Note that sharing your private key directly is not recommended, instead you should use a <Anchor
         href={nip07}
         external>compatible browser extension</Anchor> to securely store your key.

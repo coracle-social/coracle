@@ -84,7 +84,7 @@
       <div class="mr-3 flex pt-1">
         {#each pubkeys as pubkey (pubkey)}
           <div class="-mr-3 inline-block">
-            <PersonCircle class="h-10 w-10 border-2 border-solid border-dark-d" {pubkey} />
+            <PersonCircle class="h-10 w-10 border-2 border-solid border-neutral-900" {pubkey} />
           </div>
         {/each}
       </div>
@@ -107,9 +107,9 @@
     slot="message"
     let:message
     class={cx("max-w-xl rounded-2xl px-4 py-2", {
-      "ml-12 justify-self-end rounded-br-none bg-lightest text-dark":
+      "ml-12 justify-self-end rounded-br-none bg-neutral-100 text-neutral-800":
         message.pubkey === $session.pubkey,
-      "mr-12 rounded-bl-none bg-cocoa": message.pubkey !== $session.pubkey,
+      "mr-12 rounded-bl-none bg-tinted-700": message.pubkey !== $session.pubkey,
     })}>
     {#if message.showProfile && message.pubkey !== $session.pubkey}
       <Anchor class="mb-1" on:click={() => showPerson(message.pubkey)}>
@@ -123,12 +123,12 @@
     </div>
     <small
       class="mt-1 flex items-center justify-between gap-2"
-      class:text-cocoa={message.pubkey === $session.pubkey}
-      class:text-lightest={message.pubkey !== $session.pubkey}>
+      class:text-tinted-700={message.pubkey === $session.pubkey}
+      class:text-neutral-100={message.pubkey !== $session.pubkey}>
       {formatTimestamp(message.created_at)}
       {#if message.kind === 4}
         <Popover>
-          <i slot="trigger" class="fa fa-unlock cursor-pointer text-lighter" />
+          <i slot="trigger" class="fa fa-unlock cursor-pointer text-neutral-200" />
           <p slot="tooltip">
             This message was sent using nostr's legacy DMs, which have a number of shortcomings.
             Read more <Anchor underline modal href="/help/nip-44-dms">here</Anchor>.
@@ -136,7 +136,7 @@
         </Popover>
       {:else}
         <Popover>
-          <i slot="trigger" class="fa fa-lock cursor-pointer text-lighter" />
+          <i slot="trigger" class="fa fa-lock cursor-pointer text-neutral-200" />
           <div slot="tooltip" class="flex flex-col gap-2">
             <p>
               This message was sent using nostr's new group chat specification, which solves several

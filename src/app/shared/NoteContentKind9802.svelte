@@ -10,7 +10,7 @@
 </script>
 
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
-  <div class="border-l-2 border-solid border-mid pl-4">
+  <div class="border-l-2 border-solid border-neutral-600 pl-4">
     <NoteContentKind1 {note} {maxLength} {showEntire} />
   </div>
 </div>

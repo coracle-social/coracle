@@ -25,7 +25,7 @@
   on:click
   bind:this={element}
   class={cx("bg-swap", $$props.class)}
-  class:bg-cocoa={background && isAlt}
-  class:bg-dark={background && !isAlt}>
+  class:bg-tinted-700={background && isAlt}
+  class:bg-neutral-800={background && !isAlt}>
   <slot {isAlt} />
 </div>

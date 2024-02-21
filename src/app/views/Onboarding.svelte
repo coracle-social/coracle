@@ -94,19 +94,19 @@
   <div class="m-auto flex gap-2">
     <div
       class="h-2 w-2 rounded-full"
-      class:bg-lighter={stage === "intro"}
-      class:bg-mid={stage !== "intro"} />
+      class:bg-neutral-200={stage === "intro"}
+      class:bg-neutral-600={stage !== "intro"} />
     <div
       class="h-2 w-2 rounded-full"
-      class:bg-lighter={stage === "profile"}
-      class:bg-mid={stage !== "profile"} />
+      class:bg-neutral-200={stage === "profile"}
+      class:bg-neutral-600={stage !== "profile"} />
     <div
       class="h-2 w-2 rounded-full"
-      class:bg-lighter={stage === "follows"}
-      class:bg-mid={stage !== "follows"} />
+      class:bg-neutral-200={stage === "follows"}
+      class:bg-neutral-600={stage !== "follows"} />
     <div
       class="h-2 w-2 rounded-full"
-      class:bg-lighter={stage === "note"}
-      class:bg-mid={stage !== "note"} />
+      class:bg-neutral-200={stage === "note"}
+      class:bg-neutral-600={stage !== "note"} />
   </div>
 </FlexColumn>

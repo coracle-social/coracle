@@ -152,7 +152,7 @@
       <AltColor background class="absolute bottom-0 left-4 top-0 z-none -my-2 w-px" />
     {/if}
     <AltColor background class="z-feature overflow-hidden rounded">
-      <div class="p-3 text-lightest" class:rounded-b={mentions.length === 0}>
+      <div class="p-3 text-neutral-100" class:rounded-b={mentions.length === 0}>
         <Compose autofocus bind:this={compose} onSubmit={() => send()} style="min-height: 4rem">
           <div class="flex flex-col justify-start" slot="addon">
             <button
@@ -167,8 +167,8 @@
         <NoteImages bind:this={images} bind:compose includeInContent />
       </div>
       <div class="h-px" />
-      <div class="flex gap-2 rounded-b p-2 text-sm text-lightest">
-        <div class="inline-block border-r border-solid border-mid py-2 pl-1 pr-3">
+      <div class="flex gap-2 rounded-b p-2 text-sm text-neutral-100">
+        <div class="inline-block border-r border-solid border-neutral-600 py-2 pl-1 pr-3">
           <div class="flex cursor-pointer items-center gap-3">
             <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}>
               <i slot="button" class="fa fa-paperclip" />
@@ -185,7 +185,7 @@
               {displayPubkey(pubkey)}
             </Chip>
           {:else}
-            <div class="text-lightest inline-block py-2">No mentions</div>
+            <div class="text-neutral-100 inline-block py-2">No mentions</div>
           {/each}
           <div class="-mb-2" />
         </div>

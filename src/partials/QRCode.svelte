@@ -31,7 +31,7 @@
   })
 </script>
 
-<div class="rounded-xl border border-solid border-mid bg-dark p-2">
+<div class="rounded-xl border border-solid border-neutral-600 bg-neutral-800 p-2">
   <div class="m-auto flex max-w-sm flex-col gap-2">
     <Anchor external {href} on:click={onClick || (copyOnClick ? copy : null)}>
       <div bind:this={wrapper} style={`height: ${height}px`}>

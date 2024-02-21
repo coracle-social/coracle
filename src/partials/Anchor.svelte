@@ -35,9 +35,9 @@
     underline: underline,
     "opacity-50 pointer-events-none": loading || disabled,
     "bg-white text-black hover:bg-white-l": button && !accent && !low,
-    "text-base bg-cocoa text-warm hover:bg-white-l border border-solid border-cocoa-l":
+    "text-base bg-tinted-700 text-tinted-200 hover:bg-white-l border border-solid border-tinted-600":
       button && low,
-    "bg-accent text-white hover:bg-accent-l": button && accent,
+    "bg-accent text-white hover:bg-accent": button && accent,
     "text-danger border border-solid !border-danger": button && danger,
     "text-xl staatliches rounded whitespace-nowrap flex justify-center items-center gap-2 px-6":
       button,

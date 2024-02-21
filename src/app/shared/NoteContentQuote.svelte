@@ -88,7 +88,7 @@
       </div>
     {:else if quote}
       {#if muted}
-        <p class="mb-1 py-24 text-center text-mid">
+        <p class="mb-1 py-24 text-center text-neutral-600">
           You have hidden this note.
           <Anchor class="underline" on:click={unmute}>Show</Anchor>
         </p>
@@ -109,7 +109,7 @@
         <slot name="note-content" {quote} />
       {/if}
     {:else}
-      <p class="mb-1 py-24 text-center text-mid">Unable to load a preview for quoted event</p>
+      <p class="mb-1 py-24 text-center text-neutral-600">Unable to load a preview for quoted event</p>
     {/if}
   </Card>
 </div>

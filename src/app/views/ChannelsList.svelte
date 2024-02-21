@@ -102,7 +102,7 @@
   <Tabs tabs={["conversations", "requests"]} {activeTab} {setActiveTab}>
     <div slot="tab" let:tab class="flex gap-2">
       <div>{toTitle(tab)}</div>
-      <div class="h-6 rounded-full bg-mid px-2">
+      <div class="h-6 rounded-full bg-neutral-600 px-2">
         {(tab === "conversations" ? $accepted : $requests).length}
       </div>
     </div>
@@ -111,7 +111,7 @@
     <Popover triggerType="mouseenter">
       <div slot="trigger">
         <i
-          class="fa fa-arrows-rotate cursor-pointer text-mid"
+          class="fa fa-arrows-rotate cursor-pointer text-neutral-600"
           class:fa-spin={loading}
           on:click={() => loadMessages({reload: true})} />
       </div>
@@ -127,7 +127,7 @@
       <div slot="trigger">
         <i
           class="fa fa-bell cursor-pointer"
-          class:text-mid={!$hasNewMessages}
+          class:text-neutral-600={!$hasNewMessages}
           on:click={markAllChannelsRead} />
       </div>
       <div slot="tooltip">Mark all as read</div>

@@ -42,7 +42,7 @@
       {/if}
     </p>
     {#if alert.content}
-      <p class="border-l-2 border-solid border-mid pl-2">
+      <p class="border-l-2 border-solid border-neutral-600 pl-2">
         "{alert.content}"
       </p>
     {/if}

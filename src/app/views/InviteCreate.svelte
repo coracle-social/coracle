@@ -219,7 +219,7 @@
             displayItem={g => (g ? displayGroup(g) : "")}
             bind:term={groupTerm}>
             <i slot="before" class="fa fa-search" />
-            <div slot="item" let:item class="flex items-center gap-4 text-lightest">
+            <div slot="item" let:item class="flex items-center gap-4 text-neutral-100">
               <GroupCircle address={item.address} class="h-5 w-5" />
               <GroupName address={item.address} />
             </div>

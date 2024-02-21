@@ -16,7 +16,7 @@
     </div>
   </slot>
   <slot />
-  <p class="text-sm text-lighter">
+  <p class="text-sm text-neutral-200">
     <slot name="info" />
   </p>
 </div>

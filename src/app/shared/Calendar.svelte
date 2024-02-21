@@ -74,7 +74,7 @@
         title: meta.title || meta.name, // Backwards compat with a bug
         start: secondsToDate(meta.start),
         end: secondsToDate(meta.end),
-        backgroundColor: $themeColors[isOwn ? "accent" : "light"],
+        backgroundColor: $themeColors[isOwn ? "accent" : "neutral-900"],
       }
     })
 </script>

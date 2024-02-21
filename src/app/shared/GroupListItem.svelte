@@ -31,15 +31,15 @@
       </h2>
       <slot name="actions">
         {#if address.startsWith("34550:")}
-          <Chip class="text-sm text-lighter"><i class="fa fa-unlock" /> Open</Chip>
+          <Chip class="text-sm text-neutral-200"><i class="fa fa-unlock" /> Open</Chip>
         {/if}
         {#if address.startsWith("35834:")}
-          <Chip class="text-sm text-lighter"><i class="fa fa-lock" /> Closed</Chip>
+          <Chip class="text-sm text-neutral-200"><i class="fa fa-lock" /> Closed</Chip>
         {/if}
       </slot>
     </div>
     {#if $group.meta?.about}
-      <p class="text-start text-lightest">
+      <p class="text-start text-neutral-100">
         {ellipsize($group.meta.about, 300)}
       </p>
     {/if}

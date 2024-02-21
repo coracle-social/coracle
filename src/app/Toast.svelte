@@ -51,9 +51,9 @@
           "pointer-events-auto m-2 rounded border p-3 pr-8 text-center shadow-xl sm:ml-2",
           "relative max-w-xl flex-grow transition-all",
           {
-            "border-mid bg-cocoa text-lightest": $toast.type === "info",
-            "border-warning bg-cocoa text-lightest": $toast.type === "warning",
-            "border-danger bg-cocoa text-lightest": $toast.type === "error",
+            "border-neutral-600 bg-tinted-700 text-neutral-100": $toast.type === "info",
+            "border-warning bg-tinted-700 text-neutral-100": $toast.type === "warning",
+            "border-danger bg-tinted-700 text-neutral-100": $toast.type === "error",
           },
         )}>
         {#if is(String, $toast.message)}

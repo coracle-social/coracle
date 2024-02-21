@@ -10,5 +10,5 @@
 
 <div class="flex flex-col items-center justify-center gap-4 py-20" in:fade|local={{delay}}>
   <slot />
-  <Circle2 colorOuter={accent} colorInner={dark} colorCenter={light} />
+  <Circle2 colorOuter={$themeColors.accent} colorInner={$themeColors['neutral-600']} colorCenter={$themeColors['tinted-200']} />
 </div>

@@ -123,9 +123,9 @@
   <FlexColumn narrow large>
     <div class="text-center">
       <Heading>Welcome!</Heading>
-      <p class="text-lg text-lightest">
+      <p class="text-lg text-neutral-100">
         Don't have an account yet?
-        <Anchor underline on:click={signUp} class="ml-1 text-lightest">Sign up</Anchor>
+        <Anchor underline on:click={signUp} class="ml-1 text-neutral-100">Sign up</Anchor>
       </p>
     </div>
     <div class="flex">
@@ -150,9 +150,9 @@
     </div>
     <Anchor button accent on:click={onSubmit}>Log In</Anchor>
     <div class="relative flex items-center gap-4">
-      <div class="h-px flex-grow bg-mid" />
+      <div class="h-px flex-grow bg-neutral-600" />
       <div class="staatliches text-xl">Or</div>
-      <div class="h-px flex-grow bg-mid" />
+      <div class="h-px flex-grow bg-neutral-600" />
     </div>
     <div
       class={cx(

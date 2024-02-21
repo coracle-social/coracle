@@ -1,7 +1,7 @@
 <style>
   .wot-background {
     fill: transparent;
-    stroke: var(--mid);
+    stroke: var(--neutral-600);
   }
 
   .wot-highlight {

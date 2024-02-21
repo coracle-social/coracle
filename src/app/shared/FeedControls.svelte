@@ -177,7 +177,7 @@
   <div class="float-right flex justify-end">
     <div class="flex items-center gap-1 px-2">
       <Toggle scale={0.6} value={!$hideReplies} on:change={toggleReplies} />
-      <small class="text-lighter">Show replies</small>
+      <small class="text-neutral-200">Show replies</small>
     </div>
     <i class="fa fa-search cursor-pointer p-2" on:click={open} />
     <slot name="controls" />
@@ -250,7 +250,7 @@
       Found on {displayRelays(relays.map(urlToRelay), 2)}
     </Chip>
   {/if}
-  <div class="inline-block rounded-full border border-lightest" on:click={open}>
+  <div class="inline-block rounded-full border border-neutral-100" on:click={open}>
     <div class="flex h-7 w-7 items-center justify-center">
       <i class="fa fa-plus cursor-pointer" />
     </div>

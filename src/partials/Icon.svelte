@@ -5,7 +5,7 @@
   export let icon
   export let accent = false
 
-  $: color = $themeColors[accent ? "accent" : "lightest"]
+  $: color = $themeColors[accent ? "accent" : "neutral-100"]
 </script>
 
 <svg width="17" height="16" viewBox="0 0 17 16" fill="none" class={cx("inline", $$props.class)}>

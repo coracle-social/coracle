@@ -69,7 +69,7 @@
     <span />
   {/await}
   <div
-    class="m-auto rounded border border-solid border-mid bg-dark p-4"
+    class="m-auto rounded border border-solid border-neutral-600 bg-neutral-800 p-4"
     class:hidden={status !== "ready"}>
     <video class="m-auto rounded" bind:this={video} />
   </div>

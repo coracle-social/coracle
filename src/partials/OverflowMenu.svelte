@@ -15,7 +15,7 @@
     </Popover>
   {:else}
     <Popover theme="transparent">
-      <div slot="trigger" class="w-6 text-center cursor-pointer bg-dark text-white rounded hover:bg-dark-d">
+      <div slot="trigger" class="w-6 text-center cursor-pointer bg-neutral-800 text-white rounded hover:bg-neutral-900">
         <i class="fa fa-sm fa-ellipsis-v" />
       </div>
       <div
@@ -24,11 +24,11 @@
         class="relative flex flex-col gap-2"
         on:click={() => instance.hide()}>
         <div
-          class="absolute bottom-0 right-0 top-0 w-32 rounded-3xl bg-dark"
+          class="absolute bottom-0 right-0 top-0 w-32 rounded-3xl bg-neutral-800"
           style="filter: blur(15px)" />
         {#each actions as { label, icon, onClick }}
           <div
-            class="relative z-popover flex cursor-pointer items-center text-lightest"
+            class="relative z-popover flex cursor-pointer items-center text-neutral-100"
             on:click={onClick}>
             <span class="absolute right-0 mr-12 whitespace-nowrap">{label}</span>
             <Anchor tall button circle class="text-accent"

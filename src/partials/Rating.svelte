@@ -9,7 +9,7 @@
 <div class="flex gap-1">
   {#each range(0, 5) as x}
     <i
-      class={cx("fa fa-star text-mid", {
+      class={cx("fa fa-star text-neutral-600", {
         "cursor-pointer hover:text-warning hover:opacity-75": !inert,
         "text-warning": value >= x / 5,
       })}

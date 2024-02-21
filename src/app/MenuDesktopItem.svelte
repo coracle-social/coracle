@@ -13,7 +13,7 @@
 
   $: className = cx("relative staatliches h-12 block transition-all", {
     "text-3xl text-accent": isActive,
-    "text-2xl text-light hover:text-lighter hover:bg-mid dark:text-warm-d dark:hover:text-white dark:hover:bg-dark-l":
+    "text-2xl text-tinted-400 hover:text-tinted-100 hover:bg-tinted-800":
       !isActive,
   })
 </script>

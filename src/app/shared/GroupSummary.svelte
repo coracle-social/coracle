@@ -11,13 +11,13 @@
   const group = groups.key(address)
 </script>
 
-<div class="flex gap-4 text-lightest">
+<div class="flex gap-4 text-neutral-100">
   <GroupCircle {address} class="h-8 w-8" />
   <div class="flex min-w-0 flex-grow flex-col gap-4">
     <div class="flex items-center justify-between gap-4">
       <div class="flex items-center">
         <GroupName class="text-2xl" {address} />
-        <Chip class="scale-75 border-lighter text-lighter">
+        <Chip class="scale-75 border-neutral-200 text-neutral-200">
           {#if address.startsWith("34550:")}
             <i class="fa fa-unlock" />
             Open

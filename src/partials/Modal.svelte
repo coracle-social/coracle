@@ -101,7 +101,7 @@
             class="pointer-events-none sticky top-0 z-popover flex w-full flex-col items-end gap-2 p-2">
             <div
               class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
-                   border border-solid border-accent-l bg-accent text-white transition-colors hover:bg-accent-l"
+                   border border-solid border-accent bg-accent text-white transition-colors hover:bg-accent"
               on:click={tryClose}>
               <i class="fa fa-times fa-lg cy-modal-close" />
             </div>
@@ -109,7 +109,7 @@
               on:click|stopPropagation={() => router.clearModals()}
               class:hidden={!isNested}
               class="clear-modals pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center
-                     rounded-full border border-solid border-cocoa bg-mid text-lightest transition-colors hover:bg-mid">
+                     rounded-full border border-solid border-tinted-700 bg-neutral-600 text-neutral-100 transition-colors hover:bg-neutral-600">
               <i class="fa fa-angles-down fa-lg" />
             </div>
           </div>

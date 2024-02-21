@@ -43,7 +43,7 @@
   </div>
   <div>
     <CopyValue label="Public Key" value={$session?.pubkey} encode={nip19.npubEncode} />
-    <small class="text-lightest">
+    <small class="text-neutral-100">
       Your public key identifies your account. You can share this with people trying to find you on
       nostr.
     </small>
@@ -51,7 +51,7 @@
   {#if $session?.privkey}
     <div>
       <CopyValue isPassword label="Private Key" value={$session?.privkey} encode={nsecEncode} />
-      <small class="text-lightest">
+      <small class="text-neutral-100">
         Your private key is used to prove your identity by cryptographically signing messages. <strong
           >Do not share this with anyone.</strong>
         Be careful about copying this into other apps - instead, consider using a <Anchor

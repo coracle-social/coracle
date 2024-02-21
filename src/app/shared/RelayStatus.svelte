@@ -28,13 +28,13 @@
   on:mouseover={() => {
     statusHover = true
   }}
-  class="h-2 w-2 cursor-pointer rounded-full bg-mid"
-  class:bg-mid={["closed"].includes(status)}
+  class="h-2 w-2 cursor-pointer rounded-full bg-neutral-600"
+  class:bg-neutral-600={["closed"].includes(status)}
   class:bg-danger={["unauthorized", "forbidden", "error"].includes(status)}
   class:bg-warning={["slow"].includes(status)}
   class:bg-success={["ok"].includes(status)} />
 <p
-  class="hidden text-sm text-lightest transition-all sm:block"
+  class="hidden text-sm text-neutral-100 transition-all sm:block"
   class:opacity-0={!statusHover}
   class:opacity-1={statusHover}>
   {description}

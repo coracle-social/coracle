@@ -18,13 +18,18 @@
   })
 </script>
 
-<Heading class="text-center">You're all set!</Heading>
+<div class="flex gap-3">
+  <p class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-600 text-lg">
+    4/4
+  </p>
+  <p class="text-2xl font-bold">You're all set!</p>
+</div>
 <p>
   If you have any questions, just use the #asknostr hashtag — people are always happy to lend a
   hand.
 </p>
 <p>Now is a great time to introduce yourself to the Nostr network!</p>
-<div class="border-l-2 border-solid border-mid pl-4">
+<div class="border-l-2 border-solid border-neutral-600 pl-4">
   <Compose autofocus bind:this={compose} onSubmit={next} />
 </div>
 <div class="flex gap-2">
