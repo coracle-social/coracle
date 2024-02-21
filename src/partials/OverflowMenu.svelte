@@ -15,7 +15,7 @@
     </Popover>
   {:else}
     <Popover theme="transparent">
-      <div slot="trigger" class="w-6 text-center cursor-pointer bg-neutral-800 text-white rounded hover:bg-neutral-900">
+      <div slot="trigger" class="w-6 text-center cursor-pointer bg-neutral-800 text-neutral-50 rounded hover:bg-neutral-900">
         <i class="fa fa-sm fa-ellipsis-v" />
       </div>
       <div

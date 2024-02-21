@@ -43,7 +43,7 @@
 
   $: dashOffset = 100 - (Math.max(0, wotScore) / $maxWot) * 100
   $: style = `transform: rotate(${dashOffset * 1.8 - 4}deg)`
-  $: stroke = $themeColors[$following || pubkey === $session?.pubkey ? "accent" : "white"]
+  $: stroke = $themeColors[$following || pubkey === $session?.pubkey ? "accent" : "neutral-200"]
   $: personDisplay = displayPerson($person)
 </script>
 
