@@ -44,6 +44,7 @@
     getReplyFilters,
     getSetting,
     getRecipientKey,
+    getPubkeyHints,
     selectHintsWithFallback,
     mergeHints,
     loadPubkeys,
@@ -100,7 +101,7 @@
   const goToParent = () =>
     router
       .at("notes")
-      .of(getParentId(event), {relays: tags.getReplyHints()})
+      .of(getParentId(event), {relays: mergeHints([getPubkeyHints(event.pubkey, 'read'), tags.getReplyHints()])})
       .cx({context: ctx.concat(event)})
       .open()
 
