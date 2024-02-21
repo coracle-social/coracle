@@ -66,7 +66,7 @@
   let zapper, unsubZapper
   let ready = false
   let event = note
-  let reply = null
+  let replyCtrl = null
   let replyIsActive = false
   let showMutedReplies = false
   let actions = null
@@ -297,11 +297,11 @@
                 bind:this={actions}
                 {removeFromContext}
                 {addToContext}
+                {replyCtrl}
                 {showMuted}
                 {replies}
                 {likes}
                 {zaps}
-                {reply}
                 {zapper}
                 {showEntire} />
             </div>
@@ -337,7 +337,7 @@
         {addToContext}
         parent={event}
         showBorder={visibleReplies.length > 0}
-        bind:this={reply}
+        bind:this={replyCtrl}
         on:start={() => {
           replyIsActive = true
         }}

@@ -9,6 +9,7 @@
   import {LOCAL_RELAY_URL, getIdOrAddressTag, asNostrEvent} from "src/util/nostr"
   import {quantify} from "hurdak"
   import {toast} from "src/partials/state"
+  import Icon from "src/partials/Icon.svelte"
   import Popover from "src/partials/Popover.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
@@ -51,7 +52,7 @@
   } from "src/engine"
 
   export let note: Event
-  export let reply
+  export let replyCtrl
   export let showMuted
   export let showEntire
   export let addToContext
@@ -188,6 +189,7 @@
   }
 
   $: canZap = zapper && note.pubkey !== $session?.pubkey
+  $: reply = replies.find(e => e.pubkey === $session?.pubkey)
   $: $repliesCount = replies.length
 
   $: {
@@ -227,39 +229,38 @@
 </script>
 
 <div class="flex justify-between text-lightest" on:click|stopPropagation>
-  <div class="flex">
+  <div class="flex gap-8 text-sm">
     <button
-      class={cx("relative w-16 pt-1 text-left transition-all hover:pb-1 hover:pt-0", {
+      class={cx("relative pt-1 transition-all hover:pb-1 hover:pt-0 flex gap-1 items-center", {
         "pointer-events-none opacity-50": disableActions,
       })}
-      on:click={reply?.start}>
-      <i class="fa fa-reply cursor-pointer" />
-      {$repliesCount}
+      on:click={replyCtrl?.start}>
+      <Icon icon="message" accent={Boolean(reply)} />
+      <span class="-mt-px">{$repliesCount || ""}</span>
     </button>
-    {#if getSetting("enable_reactions")}
-      <button
-        class={cx("relative w-16 pt-1 text-left transition-all hover:pb-1 hover:pt-0", {
-          "pointer-events-none opacity-50": disableActions || note.pubkey === $session?.pubkey,
-          "text-accent": like,
-        })}
-        on:click={() => (like ? deleteReaction(like) : react("+"))}>
-        <i
-          class={cx("fa fa-heart cursor-pointer", {
-            "fa-beat fa-beat-custom": like,
-          })} />
-        {$likesCount}
-      </button>
-    {/if}
     {#if $env.ENABLE_ZAPS}
       <button
-        class={cx("relative w-16 pt-1 text-left transition-all hover:pb-1 hover:pt-0", {
+        class={cx("relative pt-1 transition-all hover:pb-1 hover:pt-0 flex gap-1 items-center", {
           "pointer-events-none opacity-50": disableActions || !canZap,
-          "sm:w-20": !note.wrap,
-          "text-accent": zap,
         })}
         on:click={startZap}>
-        <i class="fa fa-bolt cursor-pointer" />
-        {formatSats($zapsTotal)}
+        <Icon icon="bolt" accent={Boolean(zap)} />
+        <span class="-mt-px">{$zapsTotal ? formatSats($zapsTotal) : ""}</span>
+      </button>
+    {/if}
+    {#if getSetting("enable_reactions")}
+      <button
+        class={cx("relative pt-1 transition-all hover:pb-1 hover:pt-0 flex gap-1 items-center", {
+          "pointer-events-none opacity-50": disableActions || note.pubkey === $session?.pubkey,
+        })}
+        on:click={() => (like ? deleteReaction(like) : react("+"))}>
+        <Icon
+          icon="heart"
+          accent={Boolean(like)}
+          class={cx("cursor-pointer", {
+            "fa-beat fa-beat-custom": like,
+          })} />
+        <span class="-mt-px">{$likesCount || ""}</span>
       </button>
     {/if}
   </div>

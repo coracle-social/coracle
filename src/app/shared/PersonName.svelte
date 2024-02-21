@@ -6,7 +6,7 @@
 
   .wot-highlight {
     fill: transparent;
-    stroke-width: 1;
+    stroke-width: 1.5;
     stroke-dasharray: 100 100;
     transform-origin: center;
   }
@@ -39,7 +39,7 @@
   const wotScore = getWotScore($session?.pubkey, pubkey)
   const npubDisplay = displayNpub(pubkey)
 
-  maxWot.update(x => Math.max(x, wotScore + 10))
+  maxWot.update(x => Math.max(x, wotScore * 1.5))
 
   $: dashOffset = 100 - (Math.max(0, wotScore) / $maxWot) * 100
   $: style = `transform: rotate(${dashOffset * 1.8 - 4}deg)`
