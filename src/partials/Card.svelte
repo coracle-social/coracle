@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {createEventDispatcher} from "svelte"
-  import AlternatingBackground from "src/partials/AlternatingBackground.svelte"
+  import AltColor from "src/partials/AltColor.svelte"
 
   export let interactive = false
   export let stopPropagation = false
@@ -41,10 +41,12 @@
 </script>
 
 <div on:mousedown={startClick} on:touchstart={startClick} on:click={onClick}>
-  <AlternatingBackground
-    border
-    {interactive}
-    class={cx($$props.class, "rounded py-5 px-7 text-lightest")}>
+  <AltColor
+    background
+    class={cx($$props.class, "rounded px-7 py-5 text-lightest", {
+      "cursor-pointer border-r-4 border-transparent transition-colors hover:border-mid":
+        interactive,
+    })}>
     <slot />
-  </AlternatingBackground>
+  </AltColor>
 </div>

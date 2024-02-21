@@ -4,7 +4,7 @@
   import {onMount, onDestroy} from "svelte"
   import {quantify, ensurePlural, batch} from "hurdak"
   import {Tags} from "paravel"
-  import {fly} from "src/util/transition"
+  import {fly, slide} from "src/util/transition"
   import {
     getIdOrAddress,
     isChildOf,
@@ -17,7 +17,7 @@
   } from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
-  import AlternatingBackground from "src/partials/AlternatingBackground.svelte"
+  import AltColor from "src/partials/AltColor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
@@ -101,7 +101,9 @@
   const goToParent = () =>
     router
       .at("notes")
-      .of(getParentId(event), {relays: mergeHints([getPubkeyHints(event.pubkey, 'read'), tags.getReplyHints()])})
+      .of(getParentId(event), {
+        relays: mergeHints([getPubkeyHints(event.pubkey, "read"), tags.getReplyHints()]),
+      })
       .cx({context: ctx.concat(event)})
       .open()
 
@@ -236,16 +238,30 @@
 
 {#if ready}
   {@const showReply = replyId && !getParentIds(event).includes(anchor) && showParent}
-  {@const showRoot = rootId && !getRootIds(event).includes(anchor) && rootId !== replyId && showParent}
+  {@const showRoot =
+    rootId && !getRootIds(event).includes(anchor) && rootId !== replyId && showParent}
   <div>
     <NoteMeta note={event} {showGroup} />
     <div class="note relative" class:py-2={!showParent && !topLevel}>
       {#if !showParent && !topLevel}
-        <AlternatingBackground class="absolute -left-4 h-[2px] w-4" style="top: 27px;" />
+        <AltColor let:isAlt>
+          <svg height="36" width="36" class="absolute -left-[18px] top-2">
+            <circle
+              cx="18"
+              cy="18"
+              r="14"
+              fill="transparent"
+              stroke-width="4"
+              stroke-dashoffset="54"
+              stroke-dasharray="100 100"
+              transform-origin="center"
+              class={isAlt ? "stroke-cocoa" : "stroke-dark"} />
+          </svg>
+        </AltColor>
         {#if isLastReply}
-          <AlternatingBackground class="absolute -left-4 w-[2px]" style="height: 19px;" />
+          <AltColor background class="absolute -left-4 h-[19px] w-1" let:isAlt />
         {:else}
-          <AlternatingBackground class="absolute -left-4 h-full w-[2px]" />
+          <AltColor background class="absolute -left-4 h-full w-1" let:isAlt />
         {/if}
       {/if}
       <div class="group relative">
@@ -311,27 +327,26 @@
         </Card>
       </div>
 
-      {#if !replyIsActive && visibleReplies.length > 0 && !showEntire && depth > 0}
-        <div class="relative">
-          <div
-            class="absolute right-0 top-0 -mr-2 -mt-4 flex h-6 w-6 cursor-pointer items-center
-                   justify-center rounded-full border border-solid border-mid bg-dark text-lightest"
+      {#if !replyIsActive && (visibleReplies.length > 0 || collapsed) && !showEntire && depth > 0}
+        <div class="relative h-4">
+          <AltColor
+            background
+            class="absolute left-0 top-0 -mr-2 -mt-5 flex h-8 w-8 cursor-pointer items-center
+                   justify-center rounded-full"
             on:click={() => {
               collapsed = !collapsed
             }}>
             <Popover triggerType="mouseenter">
               <div slot="trigger">
-                {#if collapsed}
-                  <i class="fa fa-xs fa-up-right-and-down-left-from-center" />
-                {:else}
-                  <i class="fa fa-xs fa-down-left-and-up-right-to-center" />
-                {/if}
+                <i
+                  class="fa fa-arrow-up text-lighter transition-all"
+                  class:rotate-180={collapsed} />
               </div>
               <div slot="tooltip">
                 {collapsed ? "Show replies" : "Hide replies"}
               </div>
             </Popover>
-          </div>
+          </AltColor>
         </div>
       {/if}
 
@@ -351,7 +366,10 @@
         }} />
 
       {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
-        <div class="note-children relative ml-4 mt-2 flex flex-col">
+        <div
+          class="note-children relative ml-4 mt-2 flex flex-col"
+          in:fly|local={{y: 20}}
+          out:slide|local>
           {#if hiddenReplies.length > 0}
             <button
               class="mb-2 mt-2 cursor-pointer rounded-md bg-gradient-to-l from-transparent to-cocoa py-2 text-lightest outline-0 transition-colors hover:bg-cocoa"
@@ -362,10 +380,10 @@
               Show {quantify(hiddenReplies.length, "other reply", "more replies")}
             </button>
             {#if visibleReplies.length > 0}
-              <AlternatingBackground class="absolute -left-4 -top-4 h-20 w-[2px]" />
+              <AltColor background class="absolute -left-4 -top-10 h-28 w-1" />
             {/if}
           {:else if visibleReplies.length > 0}
-            <AlternatingBackground class="absolute -left-4 -top-4 h-8 w-[2px]" />
+            <AltColor background class="absolute -left-4 -top-10 h-14 w-1" />
           {/if}
           {#if visibleReplies.length}
             <div in:fly={{y: 20}} class="-mb-2">

@@ -37,7 +37,7 @@ export const getPersonWithDefault = pubkey => ({pubkey, ...people.key(pubkey).ge
 export const displayNpub = pubkey => {
   const d = nip19.npubEncode(pubkey)
 
-  return d.slice(0, 8) + "..." + d.slice(-5)
+  return d.slice(0, 8) + "…" + d.slice(-5)
 }
 
 export const displayPerson = ({pubkey, profile}: Person) => {

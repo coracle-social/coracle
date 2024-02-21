@@ -2,7 +2,7 @@
   import {randomId} from "hurdak"
   import {onMount} from "svelte"
   import {fly, fade} from "src/util/transition"
-  import AlternatingBackground from "src/partials/AlternatingBackground.svelte"
+  import AltColor from "src/partials/AltColor.svelte"
   import {router} from "src/app/router"
 
   export let mini = false
@@ -114,14 +114,15 @@
             </div>
           </div>
         {/if}
-        <AlternatingBackground class="absolute mt-12 h-full w-full" />
+        <AltColor background class="absolute mt-12 h-full w-full" />
         <div on:click|stopPropagation>
-          <AlternatingBackground
+          <AltColor
+            background
             class="relative h-full w-full cursor-auto overflow-hidden rounded-t-2xl pb-10 pt-2">
-            <div class="m-auto flex max-w-2xl flex-col gap-4 p-2 modal-content-inner">
+            <div class="modal-content-inner m-auto flex max-w-2xl flex-col gap-4 p-2">
               <slot />
             </div>
-          </AlternatingBackground>
+          </AltColor>
         </div>
       </div>
     </div>

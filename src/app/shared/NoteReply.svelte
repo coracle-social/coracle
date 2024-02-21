@@ -5,7 +5,7 @@
   import {asNostrEvent} from "src/util/nostr"
   import {slide} from "src/util/transition"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import AlternatingBackground from "src/partials/AlternatingBackground.svelte"
+  import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
@@ -149,9 +149,9 @@
     bind:this={container}
     on:click|stopPropagation>
     {#if showBorder}
-      <AlternatingBackground class="absolute bottom-0 left-4 top-0 z-none -my-2 w-px" />
+      <AltColor background class="absolute bottom-0 left-4 top-0 z-none -my-2 w-px" />
     {/if}
-    <AlternatingBackground class="z-feature overflow-hidden rounded">
+    <AltColor background class="z-feature overflow-hidden rounded">
       <div class="p-3 text-lightest" class:rounded-b={mentions.length === 0}>
         <Compose autofocus bind:this={compose} onSubmit={() => send()} style="min-height: 4rem">
           <div class="flex flex-col justify-start" slot="addon">
@@ -190,7 +190,7 @@
           <div class="-mb-2" />
         </div>
       </div>
-    </AlternatingBackground>
+    </AltColor>
   </div>
 {/if}
 

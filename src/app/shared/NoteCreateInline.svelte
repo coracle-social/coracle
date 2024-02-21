@@ -7,7 +7,7 @@
   import Popover from "src/partials/Popover.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import AlternatingBackground from "src/partials/AlternatingBackground.svelte"
+  import AltColor from "src/partials/AltColor.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
@@ -97,34 +97,32 @@
 </script>
 
 <form on:submit|preventDefault={() => onSubmit()}>
-  <AlternatingBackground class="z-feature overflow-hidden rounded p-3">
-    <div class="flex gap-4 text-lightest">
-      <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
-      <div class="w-full">
-        <Compose placeholder="What's up?" bind:this={compose} {onSubmit} style="min-height: 3em;" />
-        <div class="p-2">
-          <NoteImages bind:this={images} bind:compose includeInContent />
+  <AltColor background class="z-feature flex gap-4 overflow-hidden rounded p-3 text-lightest">
+    <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
+    <div class="w-full">
+      <Compose placeholder="What's up?" bind:this={compose} {onSubmit} style="min-height: 3em;" />
+      <div class="p-2">
+        <NoteImages bind:this={images} bind:compose includeInContent />
+      </div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center justify-end gap-3">
+          <i class="fa fa-cog cursor-pointer" on:click={() => options.setView("settings")} />
+          <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}>
+            <i slot="button" class="fa fa-paperclip cursor-pointer" />
+          </ImageInput>
+          {#if group}
+            <Popover triggerType="mouseenter">
+              <i slot="trigger" class="fa fa-circle-nodes cursor-pointer" />
+              <div slot="tooltip">
+                Posting to <GroupLink address={group} />
+              </div>
+            </Popover>
+          {/if}
         </div>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center justify-end gap-3">
-            <i class="fa fa-cog cursor-pointer" on:click={() => options.setView("settings")} />
-            <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}>
-              <i slot="button" class="fa fa-paperclip cursor-pointer" />
-            </ImageInput>
-            {#if group}
-              <Popover triggerType="mouseenter">
-                <i slot="trigger" class="fa fa-circle-nodes cursor-pointer" />
-                <div slot="tooltip">
-                  Posting to <GroupLink address={group} />
-                </div>
-              </Popover>
-            {/if}
-          </div>
-          <Anchor button accent on:click={() => onSubmit()}>Send</Anchor>
-        </div>
+        <Anchor button accent on:click={() => onSubmit()}>Send</Anchor>
       </div>
     </div>
-  </AlternatingBackground>
+  </AltColor>
 </form>
 
 <NoteOptions
