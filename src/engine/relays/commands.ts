@@ -1,10 +1,9 @@
 import {whereEq, when, reject, uniqBy, prop, inc} from "ramda"
-import {now, normalizeRelayUrl, isShareableRelay} from "paravel"
+import {now, normalizeRelayUrl, isShareableRelay, createEvent} from "paravel"
 import {people} from "src/engine/people/state"
-import {canSign, stateKey} from "src/engine/session/derived"
+import {canSign, signer, stateKey} from "src/engine/session/derived"
 import {updateStore} from "src/engine/core/commands"
-import {pool} from "src/engine/network/state"
-import {createAndPublish, getClientTags} from "src/engine/network/utils"
+import {createAndPublish, getClientTags, Publisher} from "src/engine/network/utils"
 import type {RelayPolicy} from "./model"
 import {relays} from "./state"
 import {relayPolicies} from "./derived"
@@ -58,16 +57,16 @@ export const publishRelays = ($relays: RelayPolicy[]) => {
   }
 }
 
-export const joinRelay = (url: string, claim?: string) => {
+export const joinRelay = async (url: string, claim?: string) => {
   // Fire off the claim to join the relay
   if (claim) {
     Publisher.publish({
       relays: [url],
-      event: createEvent(28934, {
-        "tags": [
-          ["claim", claim],
-        ],
-      })
+      event: await signer.get().signAsUser(
+        createEvent(28934, {
+          tags: [["claim", claim]],
+        })
+      ),
     })
   }
 

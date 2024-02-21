@@ -8,6 +8,8 @@
 - [x] Add zap splits
 - [x] Add default platform split amount
 - [x] Add invite link generation
+- [x] Use new web of trust display
+- [x] Show loading when searching profiles
 
 # 0.4.2
 

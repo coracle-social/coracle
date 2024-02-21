@@ -44,7 +44,7 @@
   <AlternatingBackground
     border
     {interactive}
-    class={cx($$props.class, "rounded p-3 text-lightest")}>
+    class={cx($$props.class, "rounded py-5 px-7 text-lightest")}>
     <slot />
   </AlternatingBackground>
 </div>

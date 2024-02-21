@@ -18,6 +18,7 @@
   export let displayItem = getKey
   export let autofocus = false
   export let multiple = false
+  export let loading = false
   export let defaultOptions = []
   export let term = multiple ? "" : displayItem(value)
 
@@ -134,6 +135,7 @@
       <Suggestions
         bind:this={suggestions}
         create={termToItem ? create : null}
+        {loading}
         {select}
         {term}
         {getKey}>

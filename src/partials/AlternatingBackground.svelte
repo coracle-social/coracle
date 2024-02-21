@@ -23,12 +23,11 @@
     className = cx({
       "border-r-4 border-transparent": border,
       "cursor-pointer transition-colors": interactive,
-      "hover:border-cocoa": border && interactive && isAlt,
-      "hover:border-dark-l": border && interactive && !isAlt,
+      "hover:border-accent": border && interactive,
       "bg-cocoa": isAlt,
-      "hover:bg-cocoa-d": isAlt && interactive,
+      //  "hover:bg-cocoa-d": isAlt && interactive && !border,
       "bg-dark": !isAlt,
-      "hover:bg-dark-d": !isAlt && interactive,
+      //  "hover:bg-dark-d": !isAlt && interactive && !border,
     })
   })
 </script>

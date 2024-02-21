@@ -1,13 +1,15 @@
 <script lang="ts">
   import {throttle} from "throttle-debounce"
+  import {slide} from "src/util/transition"
   import {fuzzy} from "src/util/misc"
   import {parseAnything} from "src/util/nostr"
   import {router} from "src/app/router"
   import type {Person, Topic} from "src/engine"
-  import {topics, derived, searchPeople, loadPeople} from "src/engine"
+  import {topics, derived, searchPeople, createPeopleLoader} from "src/engine"
 
   export let term
   export let replace = false
+  export let showLoading = false
 
   const openTopic = topic => router.at("topics").of(topic).open({replace})
 
@@ -38,6 +40,8 @@
       noTrailing: true,
     },
   )
+
+  const {loading: loadingPeople, load: loadPeople} = createPeopleLoader()
 
   const searchTopics = topics
     .throttle(1000)
@@ -72,3 +76,11 @@
 {:else}
   <p class="text-center py-12">No results found.</p>
 {/each}
+{#if showLoading && $loadingPeople}
+  <div transition:slide|local class="flex gap-2 bg-cocoa px-4 py-2 text-lighter absolute bottom-0 left-0 right-0">
+    <div>
+      <i class="fa fa-circle-notch fa-spin" />
+    </div>
+    Loading more options...
+  </div>
+{/if}

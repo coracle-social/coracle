@@ -11,7 +11,15 @@
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import type {Relay} from "src/engine"
-  import {env, lists, urlToRelay, mention, loadPeople, searchPeople, searchRelays} from "src/engine"
+  import {
+    env,
+    lists,
+    urlToRelay,
+    mention,
+    createPeopleLoader,
+    searchPeople,
+    searchRelays,
+  } from "src/engine"
 
   export let relays
   export let petnames
@@ -23,6 +31,8 @@
   let showSelections
   let showPersonSearch
   let showRelaySearch
+
+  const {load: loadPeople} = createPeopleLoader()
 
   const prev = () => setStage("profile")
   const next = () => setStage("note")
@@ -138,8 +148,7 @@
 </div>
 <div class="flex gap-2">
   <Anchor button on:click={prev}><i class="fa fa-arrow-left" /> Back</Anchor>
-  <Anchor button accent class="flex-grow" on:click={() => next()}
-    >Continue</Anchor>
+  <Anchor button accent class="flex-grow" on:click={() => next()}>Continue</Anchor>
 </div>
 
 {#if showList}

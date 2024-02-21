@@ -34,6 +34,12 @@ export const personHasName = ({profile: p}: Person) => Boolean(p?.name || p?.dis
 
 export const getPersonWithDefault = pubkey => ({pubkey, ...people.key(pubkey).get()})
 
+export const displayNpub = pubkey => {
+  const d = nip19.npubEncode(pubkey)
+
+  return d.slice(0, 8) + "..." + d.slice(-5)
+}
+
 export const displayPerson = ({pubkey, profile}: Person) => {
   if (profile) {
     const {display_name, name} = profile
@@ -48,7 +54,7 @@ export const displayPerson = ({pubkey, profile}: Person) => {
   }
 
   try {
-    return nip19.npubEncode(pubkey).slice(-8)
+    return displayNpub(pubkey)
   } catch (e) {
     logger.error(e)
 

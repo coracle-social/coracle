@@ -65,7 +65,7 @@
       {#if $searchTerm}
         <div
           class="absolute right-0 top-10 max-h-[70vh] w-96 overflow-auto rounded bg-cocoa shadow-2xl">
-          <SearchResults term={searchTerm}>
+          <SearchResults showLoading term={searchTerm}>
             <div slot="result" let:result class="px-4 py-2 transition-colors hover:bg-dark">
               {#if result.type === "topic"}
                 #{result.topic.name}

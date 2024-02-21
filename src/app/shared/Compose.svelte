@@ -1,19 +1,19 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {debounce, throttle} from "throttle-debounce"
+  import {throttle} from "throttle-debounce"
   import {createEventDispatcher} from "svelte"
   import {last, partition, whereEq} from "ramda"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
   import {
-    load,
     follows,
     derivePerson,
     displayPerson,
     searchableRelays,
     getPubkeyHints,
     searchPeople,
+    createPeopleLoader,
   } from "src/engine"
 
   export let onSubmit
@@ -23,6 +23,11 @@
   let contenteditable, suggestions
 
   const dispatch = createEventDispatcher()
+
+  const {loading: loadingPeople, load: loadPeople} = createPeopleLoader({
+    shouldLoad: (term: string) => term.startsWith("@"),
+    onEvent: () => applySearch(getInfo().word),
+  })
 
   const pubkeyEncoder = {
     encode: pubkey => {
@@ -36,16 +41,6 @@
       return nip19.decode(last(link.split(":"))).data.pubkey
     },
   }
-
-  const loadPeople = debounce(500, search => {
-    if (search.length > 2 && search.startsWith("@")) {
-      load({
-        relays: $searchableRelays,
-        filters: [{kinds: [0], search, limit: 10}],
-        onEvent: () => applySearch(getInfo().word),
-      })
-    }
-  })
 
   const applySearch = throttle(300, word => {
     let results = []
@@ -273,7 +268,10 @@
   <slot name="addon" />
 </div>
 
-<Suggestions bind:this={suggestions} select={person => autocomplete({person})}>
+<Suggestions
+  bind:this={suggestions}
+  select={person => autocomplete({person})}
+  loading={$loadingPeople}>
   <div slot="item" let:item>
     <PersonBadge inert pubkey={item.pubkey} />
   </div>

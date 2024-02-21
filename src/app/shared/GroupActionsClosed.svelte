@@ -14,7 +14,6 @@
     deriveAdminKeyForGroup,
     publishGroupExitRequest,
     publishGroupEntryRequest,
-    deriveGroup,
     deriveGroupStatus,
     resetGroupAccess,
   } from "src/engine"

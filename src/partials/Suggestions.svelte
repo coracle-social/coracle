@@ -1,9 +1,11 @@
 <script lang="ts">
   import {identity} from "ramda"
+  import {slide} from "src/util/transition"
 
   export let select
   export let term = null
   export let create = null
+  export let loading = false
   export let getKey = identity
 
   let data = []
@@ -37,7 +39,7 @@
 
 {#if data.length > 0 || (create && term)}
   <div
-    class="mt-2 flex max-h-[350px] flex-col overflow-y-auto overflow-x-hidden rounded border border-solid border-mid">
+    class="mt-2 flex max-h-[350px] flex-col overflow-y-auto overflow-x-hidden border border-solid border-mid">
     {#if create && term}
       {@const i = data.length}
       <button
@@ -63,5 +65,13 @@
         <slot name="item" {item} />
       </button>
     {/each}
+  </div>
+{/if}
+{#if loading}
+  <div transition:slide|local class="flex gap-2 bg-cocoa px-4 py-2 text-lighter">
+    <div>
+      <i class="fa fa-circle-notch fa-spin" />
+    </div>
+    Loading more options...
   </div>
 {/if}

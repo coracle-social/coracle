@@ -78,17 +78,19 @@
     <i slot="before" class="fa fa-search" />
     <i slot="after" class="fa fa-qrcode cursor-pointer" on:click={startScanner} />
   </Input>
-  <SearchResults replace term={searchTerm}>
-    <div slot="result" let:result>
-      {#if result.type === "topic"}
-        <Card interactive>
-          #{result.topic.name}
-        </Card>
-      {:else if result.type === "profile"}
-        <Card interactive>
-          <PersonSummary inert hideActions pubkey={result.id} />
-        </Card>
-      {/if}
-    </div>
-  </SearchResults>
+  <div class="relative max-h-full">
+    <SearchResults replace term={searchTerm}>
+      <div slot="result" let:result>
+        {#if result.type === "topic"}
+          <Card interactive>
+            #{result.topic.name}
+          </Card>
+        {:else if result.type === "profile"}
+          <Card interactive>
+            <PersonSummary inert hideActions pubkey={result.id} />
+          </Card>
+        {/if}
+      </div>
+    </SearchResults>
+  </div>
 {/if}
