@@ -99,19 +99,19 @@
 <div class="flex items-center gap-3" on:click|stopPropagation>
   {#if !isSelf}
     <Popover triggerType="mouseenter">
-      <div slot="trigger" class="w-6 text-center">
+      <div slot="trigger" class="w-6 text-center cursor-pointer">
         {#if $following}
-          <i class="fa fa-user-minus cursor-pointer" on:click={unfollowPerson} />
+          <i class="fa fa-user-minus" on:click={unfollowPerson} />
         {:else}
-          <i class="fa fa-user-plus cursor-pointer" on:click={followPerson} />
+          <i class="fa fa-user-plus" on:click={followPerson} />
         {/if}
       </div>
       <div slot="tooltip">{$following ? "Unfollow" : "Follow"}</div>
     </Popover>
   {/if}
   <Popover triggerType="mouseenter">
-    <div slot="trigger" class="w-6 text-center">
-      <i class="fa fa-share-nodes cursor-pointer" on:click={share} />
+    <div slot="trigger" class="w-6 text-center cursor-pointer">
+      <i class="fa fa-share-nodes" on:click={share} />
     </div>
     <div slot="tooltip">Share</div>
   </Popover>

@@ -235,6 +235,8 @@
 </script>
 
 {#if ready}
+  {@const showReply = replyId && !getParentIds(event).includes(anchor) && showParent}
+  {@const showRoot = rootId && !getRootIds(event).includes(anchor) && rootId !== replyId && showParent}
   <div>
     <NoteMeta note={event} {showGroup} />
     <div class="note relative" class:py-2={!showParent && !topLevel}>
@@ -267,13 +269,13 @@
             </div>
             <div class="flex flex-col gap-2">
               <div class="flex gap-2">
-                {#if replyId && !getParentIds(event).includes(anchor) && showParent}
+                {#if showReply}
                   <small class="text-lightest">
                     <i class="fa fa-code-merge" />
                     <Anchor class="underline" on:click={goToParent}>View Parent</Anchor>
                   </small>
                 {/if}
-                {#if rootId && !getRootIds(event).includes(anchor) && rootId !== replyId && showParent}
+                {#if showRoot}
                   <small class="text-lightest">
                     <i class="fa fa-code-pull-request" />
                     <Anchor class="underline" on:click={goToThread}>View Thread</Anchor>
@@ -303,8 +305,7 @@
                 {replies}
                 {likes}
                 {zaps}
-                {zapper}
-                {showEntire} />
+                {zapper} />
             </div>
           </div>
         </Card>

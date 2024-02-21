@@ -3,22 +3,20 @@
   import Popover from "src/partials/Popover.svelte"
 
   export let actions
-  export let size = ""
 </script>
 
 {#if actions.length > 0}
   {#if actions.length === 1}
     <Popover triggerType="mouseenter">
-      <i
-        slot="trigger"
-        class={`fa fa-${actions[0].icon} cursor-pointer`}
-        on:click={actions[0].onClick} />
+      <div slot="trigger" class="w-6 text-center cursor-pointer">
+        <i class={`fa fa-${actions[0].icon} cursor-pointer`} on:click={actions[0].onClick} />
+      </div>
       <p slot="tooltip">{actions[0].label}</p>
     </Popover>
   {:else}
     <Popover theme="transparent">
-      <div slot="trigger" class="cursor-pointer px-2">
-        <i class={`fa fa-${size} fa-ellipsis-v`} />
+      <div slot="trigger" class="w-6 text-center cursor-pointer bg-dark text-white rounded hover:bg-dark-d">
+        <i class="fa fa-sm fa-ellipsis-v" />
       </div>
       <div
         slot="tooltip"

@@ -10,7 +10,6 @@
     follows,
     derivePerson,
     displayPerson,
-    searchableRelays,
     getPubkeyHints,
     searchPeople,
     createPeopleLoader,

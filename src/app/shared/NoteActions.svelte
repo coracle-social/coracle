@@ -4,18 +4,16 @@
   import {onMount} from "svelte"
   import {toNostrURI, Tags, createEvent} from "paravel"
   import {tweened} from "svelte/motion"
-  import {identity, last, filter, sum, uniqBy, prop, pluck, sortBy} from "ramda"
-  import {fly} from 'src/util/transition'
+  import {identity, last, filter, sum, uniqBy, prop, pluck} from "ramda"
+  import {fly} from "src/util/transition"
   import {formatSats, tryJson} from "src/util/misc"
-  import {LOCAL_RELAY_URL, getIdOrAddressTag, asNostrEvent} from "src/util/nostr"
-  import {quantify} from "hurdak"
+  import {getIdOrAddressTag, asNostrEvent} from "src/util/nostr"
+  import {quantify, pluralize} from "hurdak"
   import {toast} from "src/partials/state"
   import Icon from "src/partials/Icon.svelte"
-  import Popover from "src/partials/Popover.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import ColorDot from "src/partials/ColorDot.svelte"
   import Modal from "src/partials/Modal.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
@@ -45,7 +43,6 @@
     getSetting,
     loadPubkeys,
     processZap,
-    displayRelay,
     getEventHints,
     isEventMuted,
     getReplyTags,
@@ -55,7 +52,6 @@
   export let note: Event
   export let replyCtrl
   export let showMuted
-  export let showEntire
   export let addToContext
   export let removeFromContext
   export let replies, likes, zaps
@@ -153,8 +149,6 @@
     toast.show("info", "Note has been re-published!")
   }
 
-  const openRelay = url => router.at("relays").of(url).open()
-
   const groupOptions = session.derived($session => {
     const options = []
 
@@ -216,12 +210,6 @@
     if (!$env.FORCE_GROUP && $env.FORCE_RELAYS.length === 0 && !note.wrap) {
       actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
     }
-
-    actions.push({
-      label: "Details",
-      icon: "info",
-      onClick: () => setView("info"),
-    })
   }
 
   onMount(() => {
@@ -232,7 +220,7 @@
 <div class="flex justify-between text-lightest" on:click|stopPropagation>
   <div class="flex gap-8 text-sm">
     <button
-      class={cx("relative pt-1 transition-all hover:pb-1 hover:pt-0 flex gap-1 items-center", {
+      class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
         "pointer-events-none opacity-50": disableActions,
       })}
       on:click={replyCtrl?.start}>
@@ -243,19 +231,20 @@
     </button>
     {#if $env.ENABLE_ZAPS}
       <button
-        class={cx("relative pt-1 transition-all hover:pb-1 hover:pt-0 flex gap-1 items-center", {
+        class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
           "pointer-events-none opacity-50": disableActions || !canZap,
         })}
         on:click={startZap}>
         <Icon icon="bolt" accent={Boolean(zap)} />
         {#if $zapsTotal > 0}
-          <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{formatSats($zapsTotal)}</span>
+          <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px"
+            >{formatSats($zapsTotal)}</span>
         {/if}
       </button>
     {/if}
     {#if getSetting("enable_reactions")}
       <button
-        class={cx("relative pt-1 transition-all hover:pb-1 hover:pt-0 flex gap-1 items-center", {
+        class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
           "pointer-events-none opacity-50": disableActions || note.pubkey === $session?.pubkey,
         })}
         on:click={() => (like ? deleteReaction(like) : react("+"))}>
@@ -271,45 +260,14 @@
       </button>
     {/if}
   </div>
-  <div class="flex items-center">
-    <!-- Mobile version -->
+  <div class="flex scale-90 items-center gap-2">
     <div
-      style="transform: scale(-1, 1)"
-      class="absolute right-0 top-0 m-3 grid grid-cols-3 gap-2 sm:hidden">
-      {#each sortBy(identity, note.seen_on) as url, i}
-        <div class={`cursor-pointer order-${3 - (i % 3)}`}>
-          <ColorDot value={url} on:click={() => openRelay(url)} />
-        </div>
-      {:else}
-        <div class="cursor-pointer order-3">
-          <ColorDot value={LOCAL_RELAY_URL} />
-        </div>
-      {/each}
+      class="staatliches cursor-pointer rounded bg-mid px-2 text-lightest transition-colors hover:bg-light"
+      on:click={() => setView("info")}>
+      <span class="text-accent">{note.seen_on.length}</span>
+      {pluralize(note.seen_on.length, "relay")}
     </div>
-    <!-- Desktop version -->
-    <div
-      class={cx("hidden transition-opacity sm:flex", {
-        "opacity-0 group-hover:opacity-100": !showEntire,
-      })}>
-      {#each sortBy(identity, note.seen_on) as url, i}
-        <Popover triggerType="mouseenter" interactive={false}>
-          <div slot="trigger" class="cursor-pointer p-1">
-            <ColorDot value={url} on:click={() => openRelay(url)} />
-          </div>
-          <div slot="tooltip">{displayRelay({url})}</div>
-        </Popover>
-      {:else}
-        <Popover triggerType="mouseenter" interactive={false}>
-          <div slot="trigger" class="cursor-pointer p-1">
-            <ColorDot value={LOCAL_RELAY_URL} />
-          </div>
-          <div slot="tooltip">Loaded from cache</div>
-        </Popover>
-      {/each}
-    </div>
-    <div class="ml-1 sm:ml-2">
-      <OverflowMenu {actions} />
-    </div>
+    <OverflowMenu {actions} />
   </div>
 </div>
 
