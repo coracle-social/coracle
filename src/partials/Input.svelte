@@ -20,7 +20,7 @@
     {"pl-10": showBefore, "pr-10": showAfter},
   )
 
-  const onChange = e => {
+  const onInput = e => {
     value = parse(e.target.value)
   }
 
@@ -33,7 +33,7 @@
     class={className}
     value={inputValue}
     bind:this={element}
-    on:change={onChange}
+    on:input={onInput}
     on:change
     on:blur
     on:focus
