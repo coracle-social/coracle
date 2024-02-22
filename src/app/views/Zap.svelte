@@ -5,6 +5,7 @@
     amount: number
     status: string
     invoice?: string
+    isTip?: boolean
   }
 </script>
 
@@ -57,33 +58,29 @@
 
         return s
       }),
-      (ss: any[][]) => {
-        const percent = getSetting("platform_zap_split")
-
-        // Avoid divide by zero errors
-        if (totalWeight === 0) {
-          totalWeight = 1
-        }
-
-        // Add our platform split
-        if (percent > 0) {
-          ss.push([
-            $env.PLATFORM_PUBKEY,
-            getPubkeyHint($env.PLATFORM_PUBKEY),
-            String(totalWeight * percent),
-          ])
-        }
-
-        return ss
-      },
       map(([pubkey, relay, weight]: string[]) => ({
         relay,
         pubkey,
         amount: Math.round(totalAmount * (parseFloat(weight) / totalWeight)),
         status: "pending",
-        invoice: null,
       })),
       sortBy((split: Zap) => -split.amount),
+      (zaps: Zap[]) => {
+        const percent = getSetting("platform_zap_split")
+
+        // Add our platform split on top as a "tip"
+        if (percent > 0 && totalWeight > 0) {
+          zaps.push({
+            pubkey: $env.PLATFORM_PUBKEY,
+            relay: getPubkeyHint($env.PLATFORM_PUBKEY),
+            amount: Math.round(zaps.reduce((a, z) => a + z.amount, 0) * percent),
+            status: "pending",
+            isTip: true,
+          })
+        }
+
+        return zaps
+      },
     ])
   }
 

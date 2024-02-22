@@ -20,7 +20,12 @@
   {#if zap.invoice}
     <div class="flex items-center justify-center gap-2">
       {#if zap.status === "pending"}
-        <i class="fa fa-circle-notch fa-spin" /> Paying
+        <i class="fa fa-circle-notch fa-spin" />
+        {#if zap.isTip}
+          Tipping
+        {:else}
+          Paying
+        {/if}
       {:else if zap.status === "success"}
         <i class="fa fa-check text-success" /> Paid
       {/if}
