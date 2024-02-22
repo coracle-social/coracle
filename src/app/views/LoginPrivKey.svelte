@@ -33,7 +33,7 @@
         <i slot="before" class="fa fa-key" />
       </Input>
     </div>
-    <Anchor circle button accent class="cy-login-submit" on:click={logIn}>
+    <Anchor circle button accent tall class="cy-login-submit" on:click={logIn}>
       <i class="fa fa-right-to-bracket" />
     </Anchor>
   </div>

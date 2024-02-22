@@ -34,7 +34,7 @@
         <i slot="before" class="fa fa-key" />
       </Input>
     </div>
-    <Anchor circle button accent on:click={logIn}>
+    <Anchor tall circle button accent on:click={logIn}>
       <i class="fa fa-right-to-bracket" />
     </Anchor>
   </div>
