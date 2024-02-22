@@ -210,6 +210,12 @@
     if (!$env.FORCE_GROUP && $env.FORCE_RELAYS.length === 0 && !note.wrap) {
       actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
     }
+
+    actions.push({
+      label: "Details",
+      icon: "info",
+      onClick: () => setView("info"),
+    })
   }
 
   onMount(() => {
@@ -262,7 +268,7 @@
   </div>
   <div class="flex scale-90 items-center gap-2">
     <div
-      class="staatliches cursor-pointer rounded bg-neutral-600 px-2 text-neutral-100 transition-colors hover:bg-neutral-300"
+      class="staatliches cursor-pointer rounded bg-neutral-800 dark:bg-neutral-600 px-2 text-neutral-100 transition-colors dark:hover:bg-neutral-500 hover:bg-neutral-700 hidden sm:block"
       on:click={() => setView("info")}>
       <span class="text-accent">{note.seen_on.length}</span>
       {pluralize(note.seen_on.length, "relay")}
