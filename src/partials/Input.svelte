@@ -1,5 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
+  import {identity} from 'ramda'
 
   export let initialValue: string | number = ""
   export let wrapperClass = ""
@@ -7,6 +8,8 @@
   export let element = null
   export let hideBefore = false
   export let hideAfter = false
+  export let format = identity
+  export let parse = identity
 
   const showBefore = $$slots.before && !hideBefore
   const showAfter = $$slots.after && !hideAfter
@@ -16,17 +19,24 @@
     "bg-white text-black",
     {"pl-10": showBefore, "pr-10": showAfter},
   )
+
+  const onChange = e => {
+    value = parse(e.target.value)
+  }
+
+  $: inputValue = format(value)
 </script>
 
 <div class={cx(wrapperClass, "relative")}>
   <input
     {...$$props}
     class={className}
-    bind:value
+    value={inputValue}
     bind:this={element}
+    on:change={onChange}
+    on:change
     on:blur
     on:focus
-    on:change
     on:input
     on:keydown />
   {#if showBefore}
