@@ -147,14 +147,15 @@
         </small>
       </div>
     {/if}
-    <div class="flex border-t border-solid border-tinted-700 border-neutral-600 bg-neutral-600">
+    <div
+      class="flex border-t border-solid border-neutral-600 border-tinted-700 bg-neutral-900 dark:bg-neutral-600">
       <textarea
         rows="3"
         autofocus
         placeholder="Type something..."
         bind:this={textarea}
         on:keydown={onKeyDown}
-        class="w-full resize-none bg-neutral-600 p-2
+        class="w-full resize-none bg-transparent p-2
              text-neutral-100 outline-0 placeholder:text-neutral-100" />
       <div>
         <ImageInput multi on:change={e => addImage(e.detail)}>

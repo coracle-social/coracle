@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {identity} from 'ramda'
+  import {identity} from "ramda"
 
   export let initialValue: string | number = ""
   export let wrapperClass = ""
@@ -8,8 +8,8 @@
   export let element = null
   export let hideBefore = false
   export let hideAfter = false
-  export let format = identity
-  export let parse = identity
+  export let format: (x: any) => string = identity
+  export let parse: (x: string) => any = identity
 
   const showBefore = $$slots.before && !hideBefore
   const showAfter = $$slots.after && !hideAfter

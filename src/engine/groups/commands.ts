@@ -245,7 +245,7 @@ export const publishToZeroOrMoreGroups = async (
     events.push(event)
     pubs.push(Publisher.publish({relays, event}))
   } else {
-    const [wrap, nowrap] = partition(address => address.startsWith("35834:"), addresses)
+    const [wrap, nowrap] = partition((address: string) => address.startsWith("35834:"), addresses)
 
     if (wrap.length > 0) {
       const result = await publishToGroupsPrivately(wrap, template, {anonymous})
