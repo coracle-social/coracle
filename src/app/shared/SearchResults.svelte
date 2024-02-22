@@ -31,9 +31,9 @@
       const result = await parseAnything(entity)
 
       if (result.type === "npub") {
-        router.at("people").of(result.data).open()
+        setTimeout(() => router.at("people").of(result.data).open(), 30)
       } else if (result) {
-        router.at(entity).open()
+        setTimeout(() => router.at(entity).open(), 30)
       }
     },
     {
@@ -62,25 +62,38 @@
     },
   )
 
+  // Suppress the dialog for a moment if we're pasting an entity in since we'll immediately redirect
+  let visible = false
+
   $: {
     if ($term) {
       loadPeople($term)
+
+      setTimeout(() => {
+        visible = true
+      }, 100)
+    } else {
+      visible = false
     }
   }
 </script>
 
-{#each $results.slice(0, 30) as result (result.type + result.id)}
-  <div on:click={() => onClick(result)}>
-    <slot name="result" {result} />
-  </div>
-{:else}
-  <p class="text-center py-12">No results found.</p>
-{/each}
-{#if showLoading && $loadingPeople}
-  <div transition:slide|local class="flex gap-2 bg-tinted-700 px-4 py-2 text-neutral-200 absolute bottom-0 left-0 right-0">
-    <div>
-      <i class="fa fa-circle-notch fa-spin" />
+{#if visible}
+  {#each $results.slice(0, 30) as result (result.type + result.id)}
+    <div on:click={() => onClick(result)}>
+      <slot name="result" {result} />
     </div>
-    Loading more options...
-  </div>
+  {:else}
+    <p class="text-center py-12">No results found.</p>
+  {/each}
+  {#if showLoading && $loadingPeople}
+    <div
+      transition:slide|local
+      class="absolute bottom-0 left-0 right-0 flex gap-2 bg-tinted-700 px-4 py-2 text-neutral-200">
+      <div>
+        <i class="fa fa-circle-notch fa-spin" />
+      </div>
+      Loading more options...
+    </div>
+  {/if}
 {/if}

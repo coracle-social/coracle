@@ -10,6 +10,8 @@
 - [x] Add invite link generation
 - [x] Use new web of trust display
 - [x] Show loading when searching profiles
+- [x] Apply new note styles and theme
+- [x] Redirect to onboarding from invite link if no user
 
 # 0.4.2
 

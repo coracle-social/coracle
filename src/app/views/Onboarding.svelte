@@ -25,6 +25,7 @@
   import {router} from "src/app/router"
 
   export let stage = "intro"
+  export let invite = null
 
   const privkey = generatePrivateKey()
 
@@ -41,11 +42,13 @@
 
   const signup = async noteContent => {
     // Go to our home page
-    router.at("notes").push()
+    if (!invite) {
+      router.at("notes").push()
 
-    // Make things async since the `key` change in App.svelte prevents the modal
-    // animation from completing, and it gets stuck. This is a svelte bug
-    await sleep(10)
+      // Make things async since the `key` change in App.svelte prevents the modal
+      // animation from completing, and it gets stuck. This is a svelte bug
+      await sleep(10)
+    }
 
     loginWithPrivateKey(privkey, {onboarding_tasks_completed: []})
 

@@ -180,9 +180,9 @@
       initialGroupAddress: asUrlComponent("initialGroupAddress"),
     },
   })
-  router.register("/invites/:ninvite", InviteAccept, {
+  router.register("/invites/:invite", InviteAccept, {
     serializers: {
-      ninvite: asInvite("invite"),
+      invite: asInvite("invite"),
     },
   })
 
@@ -275,7 +275,7 @@
     requireUser: true,
   })
 
-  router.register("/onboarding", Onboarding)
+  router.register("/signup", Onboarding)
 
   router.register("/people/list", PersonList, {
     serializers: {

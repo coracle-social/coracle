@@ -22,7 +22,7 @@
   import {router} from "src/app/router"
   import {boot} from "src/app/state"
 
-  const signUp = () => router.at("onboarding").replaceModal()
+  const signUp = () => router.at("signup").replaceModal()
 
   const useBunker = () => router.at("login/bunker").replaceModal()
 

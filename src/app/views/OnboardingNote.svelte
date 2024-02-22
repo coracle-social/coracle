@@ -2,7 +2,6 @@
   import {onMount} from "svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Heading from "src/partials/Heading.svelte"
 
   export let signup
   export let setStage
@@ -19,7 +18,8 @@
 </script>
 
 <div class="flex gap-3">
-  <p class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-600 text-lg">
+  <p
+    class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-600 text-lg">
     4/4
   </p>
   <p class="text-2xl font-bold">You're all set!</p>
