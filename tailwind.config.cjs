@@ -1,4 +1,55 @@
 /** @type {import('tailwindcss').Config} */
+
+const colors = {
+  black: "black",
+  white: "white",
+  transparent: "transparent",
+  accent: "var(--accent)",
+  warning: "var(--warning)",
+  success: "var(--success)",
+};
+
+const baseColors = [
+  "neutral-100",
+  "neutral-200",
+  "neutral-300",
+  "neutral-400",
+  "neutral-500",
+  "neutral-50",
+  "neutral-600",
+  "neutral-700",
+  "neutral-800",
+  "neutral-900",
+  "neutral-950",
+  "tinted-100",
+  "tinted-200",
+  "tinted-400",
+  "tinted-500",
+  "tinted-600",
+  "tinted-700",
+  "tinted-800"
+];
+
+const dynamicColors = generateVariants(baseColors);
+mergedColors = {...colors, ...dynamicColors};
+
+console.log(mergedColors)
+
+function generateVariants(baseColors) {
+  const result = {};
+
+  baseColors.forEach(baseColor => {
+    const lightKey = `${baseColor}-l`;
+    const darkKey = `${baseColor}-d`;
+
+    result[baseColor] = `var(--${baseColor})`;
+    result[lightKey] = `var(--${lightKey})`;
+    result[darkKey] = `var(--${darkKey})`;
+  });
+
+  return result;
+}
+
 module.exports = {
   content: ["./index.html", "./src/**/*.{js,svelte}"],
   darkMode: 'class',
@@ -22,33 +73,7 @@ module.exports = {
       xl: "1280px",
       "2xl": "1536px",
     },
-    colors: {
-      black: "black",
-      white: "white",
-      transparent: "transparent",
-      accent: "var(--accent)",
-      warning: "var(--warning)",
-      success: "var(--success)",
-      "neutral-100": "var(--neutral-100)",
-      "neutral-200": "var(--neutral-200)",
-      "neutral-300": "var(--neutral-300)",
-      "neutral-400": "var(--neutral-400)",
-      "neutral-500": "var(--neutral-500)",
-      "neutral-50": "var(--neutral-50)",
-      "neutral-600": "var(--neutral-600)",
-      "neutral-700": "var(--neutral-700)",
-      "neutral-800": "var(--neutral-800)",
-      "neutral-900": "var(--neutral-900)",
-      "neutral-950": "var(--neutral-950)",
-      "tinted-100": "var(--tinted-100)",
-      "tinted-200": "var(--tinted-200)",
-      "tinted-400": "var(--tinted-400)",
-      "tinted-500": "var(--tinted-500)",
-      "tinted-600": "var(--tinted-600)",
-      "tinted-700": "var(--tinted-700)",
-      "tinted-800": "var(--tinted-800)",
-    },
+    colors: mergedColors,
   },
   plugins: [],
 }
-
