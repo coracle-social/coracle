@@ -14,12 +14,16 @@
   const settings = getSettings()
 
   const submit = () => {
+    console.log(settings.platform_zap_split)
     publishSettings(settings)
 
     toast.show("info", "Your settings have been saved!")
   }
 
   const searchUploadProviders = fuzzy($env.NIP96_URLS, {keys: ["url"]})
+
+  const formatPercent = d => Math.round(d * 100)
+  const parsePercent = p => parseInt(p) / 100
 
   document.title = "Settings"
 </script>
@@ -33,6 +37,12 @@
     <Field label="Default zap amount">
       <Input bind:value={settings.default_zap} />
       <p slot="info">The default amount of sats to use when sending a lightning tip.</p>
+    </Field>
+    <Field label="Platform zap split">
+      <Input type="number" bind:value={settings.platform_zap_split} format={formatPercent} parse={parsePercent}>
+        <i slot="before" class="fa fa-percent" />
+      </Input>
+      <p slot="info">How much you'd like to tip the developer of {appName} whenever you send a zap.</p>
     </Field>
     <Field>
       <div slot="label" class="flex justify-between">
