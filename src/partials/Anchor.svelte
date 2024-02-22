@@ -44,7 +44,9 @@
     "aspect-square flex justify-center items-center rounded-full !p-0": circle,
     "aspect-square flex justify-center items-center": square,
     "h-7": short,
+    "w-7": short && circle,
     "h-10": tall,
+    "w-10": tall && circle,
   })
 
   const onClick = e => {
