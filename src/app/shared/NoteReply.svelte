@@ -143,14 +143,14 @@
 <svelte:body on:click={onBodyClick} />
 
 {#if isOpen || forceOpen}
+  {#if showBorder}
+    <AltColor background class="absolute bottom-0 -top-1 z-none -my-2 w-[3px]" />
+  {/if}
   <div
     transition:slide|local
     class="note-reply relative z-feature my-2 flex flex-col gap-1"
     bind:this={container}
     on:click|stopPropagation>
-    {#if showBorder}
-      <AltColor background class="absolute bottom-0 left-4 top-0 z-none -my-2 w-px" />
-    {/if}
     <AltColor background class="z-feature overflow-hidden rounded">
       <div class="p-3 text-neutral-100" class:rounded-b={mentions.length === 0}>
         <Compose autofocus bind:this={compose} onSubmit={() => send()} style="min-height: 4rem">
