@@ -41,7 +41,7 @@
     warning: "",
   }
 
-  let images, compose, options
+  let images, compose, options, saving
 
   let opts = {...defaultOpts}
 
@@ -57,6 +57,8 @@
   }
 
   const onSubmit = async ({skipNsecWarning = false} = {}) => {
+    saving = true
+
     const content = compose.parse().trim()
 
     if (!content) return toast.show("error", "Please provide a description.")
@@ -93,6 +95,7 @@
     opts = {...defaultOpts}
 
     compose.clear()
+    saving = false
   }
 </script>
 
@@ -119,7 +122,7 @@
             </Popover>
           {/if}
         </div>
-        <Anchor button accent on:click={() => onSubmit()}>Send</Anchor>
+        <Anchor button accent disabled={saving} on:click={() => onSubmit()}>Send</Anchor>
       </div>
     </div>
   </AltColor>
