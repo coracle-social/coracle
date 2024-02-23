@@ -63,22 +63,34 @@ export const getTarget = (urls: string[]) => {
 const seenChallenges = new Set()
 
 export const onAuth = async (url, challenge) => {
-  if (canSign.get() && !seenChallenges.has(challenge) && getSetting("auto_authenticate")) {
-    seenChallenges.add(challenge)
+  const {FORCE_GROUP, FORCE_RELAYS} = env.get()
 
-    const event = await signer.get().signAsUser(
-      createEvent(22242, {
-        tags: [
-          ["challenge", challenge],
-          ["relay", url],
-        ],
-      }),
-    )
-
-    pool.get(url).send(["AUTH", event])
-
-    return event
+  if (!canSign.get()) {
+    return
   }
+
+  if (seenChallenges.has(challenge)) {
+    return
+  }
+
+  if (!FORCE_GROUP && FORCE_RELAYS.length === 0 && !getSetting("auto_authenticate")) {
+    return
+  }
+
+  seenChallenges.add(challenge)
+
+  const event = await signer.get().signAsUser(
+    createEvent(22242, {
+      tags: [
+        ["challenge", challenge],
+        ["relay", url],
+      ],
+    }),
+  )
+
+  pool.get(url).send(["AUTH", event])
+
+  return event
 }
 
 export const getExecutor = (urls: string[]) => {
