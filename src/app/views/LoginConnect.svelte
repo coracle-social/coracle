@@ -18,9 +18,10 @@
     session,
     relays,
     pool,
-    loadPubkeys,
+    subscribe,
     getUserRelayUrls,
     normalizeRelayUrl,
+    getSimpleExecutor,
   } from "src/engine"
 
   const currentRelays = {} as Record<number, {url: string}>
@@ -41,7 +42,7 @@
 
   $: allRelays = $knownRelays.concat(customRelays)
 
-  const searchForRelays = async () => {
+  const searchForRelays = () => {
     if (!searching) {
       return
     }
@@ -60,32 +61,30 @@
       attemptedRelays.add(relay.url)
       currentRelays[i] = relay
 
-      // Kick this off but don't wait for it so we can move quickly
-      loadPubkeys([$session.pubkey], {
-        force: true,
-        relays: [relay.url],
-        kinds: userKinds,
-      })
+      subscribe({
+        timeout: 3000,
+        closeOnEose: true,
+        executor: getSimpleExecutor([relay.url]),
+        filters: [{kinds: userKinds, authors: [$session.pubkey]}],
+        onClose: async () => {
+          currentRelays[i] = null
 
-      // Wait a bit before removing the relay to smooth out the ui
-      sleep(1500).then(async () => {
-        currentRelays[i] = null
+          if (searching && getUserRelayUrls().length > 0) {
+            searching = false
+            modal = "success"
 
-        if (searching && getUserRelayUrls().length > 0) {
-          searching = false
-          modal = "success"
+            // Reload everything, it's possible we didn't get their petnames if we got a match
+            // from something like purplepag.es. This helps us avoid nuking follow lists later
+            loadAppData()
 
-          // Reload everything, it's possible we didn't get their petnames if we got a match
-          // from something like purplepag.es. This helps us avoid nuking follow lists later
-          loadAppData()
+            // Artificially wait since relays might not respond quickly
+            await sleep(3000)
 
-          // Artificially wait since relays might not respond quickly
-          await sleep(3000)
-
-          router.at("notes").push()
-        } else {
-          pool.remove(relay.url)
-        }
+            router.at("notes").push()
+          } else {
+            pool.remove(relay.url)
+          }
+        },
       })
     }
 
