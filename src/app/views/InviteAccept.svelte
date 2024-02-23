@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {updateIn} from "hurdak"
   import {normalizeRelayUrl} from "paravel"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -14,10 +15,10 @@
 
   export let invite
 
-  const relays =
-    $env.FORCE_RELAYS.length > 0
-      ? invite.relays.filter(r => $env.FORCE_RELAYS.includes(normalizeRelayUrl(r.url)))
-      : invite.relays
+  const {FORCE_RELAYS} = $env
+  const relays = invite.relays
+    .map(updateIn("url", normalizeRelayUrl))
+    .filter(r => FORCE_RELAYS.length === 0 || FORCE_RELAYS.includes(r.url))
 </script>
 
 {#if $session}
