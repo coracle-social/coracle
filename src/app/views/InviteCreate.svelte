@@ -1,8 +1,7 @@
 <script lang="ts">
   import {without, prop, objOf} from "ramda"
   import {onMount} from "svelte"
-  import {ninviteEncode} from "src/util/invite"
-  import type {InvitePointer} from "src/util/invite"
+  import {pickVals} from 'hurdak'
   import Card from "src/partials/Card.svelte"
   import Chips from "src/partials/Chips.svelte"
   import Input from "src/partials/Input.svelte"
@@ -123,23 +122,23 @@
   let groupWrapper
 
   const onSubmit = () => {
-    const invite: InvitePointer = {}
+    const invite = {}
 
     if (sections.includes("people")) {
-      invite.people = people.map(p => p.pubkey)
+      invite.people = people.map(p => p.pubkey).join(',')
     }
 
     if (sections.includes("relays")) {
-      invite.relays = relays
+      invite.relays = relays.map(r => pickVals(['url', 'claim'], r).join('|')).join(',')
     }
 
     if (sections.includes("groups")) {
-      invite.groups = groups
+      invite.groups = groups.map(g => pickVals(['address', 'relay', 'claim'], g).join('|')).join(',')
     }
 
     router
       .at("qrcode")
-      .of(window.origin + "/" + ninviteEncode(invite))
+      .of(window.origin + "/invite?" + new URLSearchParams(invite).toString())
       .open()
   }
 

@@ -9,7 +9,6 @@
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
   import * as nostr from "src/util/nostr"
-  import * as ninvite from "src/util/invite"
   import {storage, session, stateKey, relays, getSetting, dufflepud} from "src/engine"
   import * as engine from "src/engine"
   import {loadAppData} from "src/app/state"
@@ -86,7 +85,6 @@
   import {logUsage} from "src/app/state"
   import {
     router,
-    asInvite,
     asChannelId,
     asPerson,
     asNaddr,
@@ -174,15 +172,17 @@
 
   router.register("/help/:topic", Help)
 
-  router.register("/invites/create", InviteCreate, {
+  router.register("/invite", InviteAccept, {
+    serializers: {
+      people: asCsv("people"),
+      relays: asCsv("relays"),
+      groups: asCsv("groups"),
+    },
+  })
+  router.register("/invite/create", InviteCreate, {
     serializers: {
       initialPubkey: asUrlComponent("initialPubkey"),
       initialGroupAddress: asUrlComponent("initialGroupAddress"),
-    },
-  })
-  router.register("/invites/:invite", InviteAccept, {
-    serializers: {
-      invite: asInvite("invite"),
     },
   })
 
@@ -380,7 +380,6 @@
   ;(window as any).g = {
     ...engine,
     nip19,
-    ninvite,
     logger,
     router,
     nostr,

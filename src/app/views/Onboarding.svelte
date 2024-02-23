@@ -25,7 +25,7 @@
   import {router} from "src/app/router"
 
   export let stage = "intro"
-  export let invite = null
+  export let invite = false
 
   const privkey = generatePrivateKey()
 

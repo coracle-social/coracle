@@ -4,7 +4,6 @@ import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {tryJson} from "src/util/misc"
 import {Naddr} from "src/util/nostr"
-import {ninviteDecode, ninviteEncode} from "src/util/invite"
 import {
   decodePerson,
   decodeRelay,
@@ -61,12 +60,6 @@ export const decodeEntity = entity => {
 
   try {
     ;({type, data} = nip19.decode(entity) as {type: string; data: any})
-  } catch (e) {
-    // pass
-  }
-
-  try {
-    ;({type, data} = ninviteDecode(entity))
   } catch (e) {
     // pass
   }
@@ -129,11 +122,6 @@ export const asChannelId = {
 export const asNaddr = k => ({
   encode: encodeNaddr,
   decode: decodeAs(k, naddr => Naddr.decode(naddr).asTagValue()),
-})
-
-export const asInvite = k => ({
-  encode: ninviteEncode,
-  decode: decodeAs(k, ninvite => ninviteDecode(ninvite)),
 })
 
 // Router and extensions

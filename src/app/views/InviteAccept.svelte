@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {zipObj} from 'ramda'
   import {updateIn} from "hurdak"
   import {normalizeRelayUrl} from "paravel"
   import Card from "src/partials/Card.svelte"
@@ -13,12 +14,15 @@
   import Onboarding from "src/app/views/Onboarding.svelte"
   import {env, session} from "src/engine"
 
-  export let invite
+  export let people
+  export let relays
+  export let groups
 
   const {FORCE_RELAYS} = $env
-  const relays = invite.relays
-    .map(updateIn("url", normalizeRelayUrl))
+  const parsedRelays = relays
+    .map(s => updateIn("url", normalizeRelayUrl, zipObj(["url", "claim"], s.split('|'))))
     .filter(r => FORCE_RELAYS.length === 0 || FORCE_RELAYS.includes(r.url))
+  const parsedGroups = groups.map(s => zipObj(["address", "relay", "claim"], s.split('|')))
 </script>
 
 {#if $session}
@@ -29,34 +33,34 @@
       your experience on nostr.
     </p>
   </div>
-  {#if invite.people.length > 0}
+  {#if people.length > 0}
     <Card>
       <FlexColumn>
         <Subheading>People</Subheading>
         <p>Here are some people you might be interested in following.</p>
-        <PersonList pubkeys={invite.people} />
+        <PersonList pubkeys={people} />
       </FlexColumn>
     </Card>
   {/if}
-  {#if relays.length > 0}
+  {#if parsedRelays.length > 0}
     <Card>
       <FlexColumn>
         <Subheading>Relays</Subheading>
         <p>Below are a few relays that might help you connect to the people you want to reach.</p>
         <div class="grid grid-cols-1 gap-4">
-          {#each relays as relay (relay.url)}
+          {#each parsedRelays as relay (relay.url)}
             <RelayCard {relay} claim={relay.claim} />
           {/each}
         </div>
       </FlexColumn>
     </Card>
   {/if}
-  {#if invite.groups.length > 0}
+  {#if parsedGroups.length > 0}
     <Card>
       <FlexColumn>
         <Subheading>Groups</Subheading>
         <p>Here is a selection of groups you might be interested in.</p>
-        {#each invite.groups as group (group.address)}
+        {#each parsedGroups as group (group.address)}
           <GroupListItem modal address={group.address}>
             <div slot="actions">
               <GroupActions address={group.address} claim={group.claim} />
@@ -68,5 +72,5 @@
   {/if}
   <Anchor button accent href="/">Done</Anchor>
 {:else}
-  <Onboarding {invite} />
+  <Onboarding invite />
 {/if}

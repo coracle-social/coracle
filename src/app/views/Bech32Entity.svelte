@@ -7,7 +7,6 @@
   import PersonDetail from "src/app/views/PersonDetail.svelte"
   import GroupDetail from "src/app/views/GroupDetail.svelte"
   import EventDetail from "src/app/views/EventDetail.svelte"
-  import InviteAccept from "src/app/views/InviteAccept.svelte"
 
   export let entity, type, data, relays
 </script>
@@ -32,8 +31,6 @@
   <PersonDetail npub={nip19.npubEncode(data.pubkey)} pubkey={data.pubkey} {relays} />
 {:else if type === "npub"}
   <PersonDetail npub={nip19.npubEncode(data)} pubkey={data} />
-{:else if type === "ninvite"}
-  <InviteAccept invite={data} />
 {:else}
   <Content size="lg" class="text-center">
     <div>Sorry, we weren't able to find "{entity}".</div>

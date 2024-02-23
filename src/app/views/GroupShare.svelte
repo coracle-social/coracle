@@ -10,7 +10,7 @@
 
   const group = deriveGroup(address)
 
-  const createInvite = () => router.at("invites/create").qp({initialGroupAddress: address}).open()
+  const createInvite = () => router.at("invite/create").qp({initialGroupAddress: address}).open()
 </script>
 
 <Heading>Share group</Heading>

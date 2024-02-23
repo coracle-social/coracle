@@ -185,7 +185,7 @@
       <MenuMobileItem href={router.at("people").of($pubkey).toString()}>
         <i class="fa fa-user-circle" /> Profile
       </MenuMobileItem>
-      <MenuMobileItem href={router.at("invites/create").qp({initialPubkey: $pubkey}).toString()}>
+      <MenuMobileItem href={router.at("invite/create").qp({initialPubkey: $pubkey}).toString()}>
         <i class="fa fa-paper-plane" /> Create Invite
       </MenuMobileItem>
     </div>

@@ -5,7 +5,6 @@ import {nip05, nip19, generateSecretKey, getEventHash, getPublicKey as getPk} fr
 import {pick, reject, is, join, mergeLeft, identity} from "ramda"
 import {between, avg} from "hurdak"
 import logger from "src/util/logger"
-import {ninviteDecode} from "src/util/invite"
 import type {Filter, Event} from "src/engine"
 
 export const fromHex = k => Uint8Array.from(Buffer.from(k, "hex"))
@@ -345,15 +344,5 @@ export const parseAnything = async entity => {
     if (profile) {
       return {type: "npub", data: profile.pubkey}
     }
-  }
-
-  try {
-    if (entity.startsWith("ninvite1")) {
-      return ninviteDecode(entity)
-    }
-
-    return nip19.decode(entity)
-  } catch (e) {
-    // Pass
   }
 }
