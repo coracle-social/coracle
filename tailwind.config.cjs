@@ -7,7 +7,7 @@ const colors = {
   accent: "var(--accent)",
   warning: "var(--warning)",
   success: "var(--success)",
-};
+}
 
 const baseColors = [
   "neutral-100",
@@ -27,32 +27,29 @@ const baseColors = [
   "tinted-500",
   "tinted-600",
   "tinted-700",
-  "tinted-800"
-];
+  "tinted-800",
+]
 
-const dynamicColors = generateVariants(baseColors);
-mergedColors = {...colors, ...dynamicColors};
-
-console.log(mergedColors)
+const dynamicColors = generateVariants(baseColors)
 
 function generateVariants(baseColors) {
-  const result = {};
+  const result = {}
 
   baseColors.forEach(baseColor => {
-    const lightKey = `${baseColor}-l`;
-    const darkKey = `${baseColor}-d`;
+    const lightKey = `${baseColor}-l`
+    const darkKey = `${baseColor}-d`
 
-    result[baseColor] = `var(--${baseColor})`;
-    result[lightKey] = `var(--${lightKey})`;
-    result[darkKey] = `var(--${darkKey})`;
-  });
+    result[baseColor] = `var(--${baseColor})`
+    result[lightKey] = `var(--${lightKey})`
+    result[darkKey] = `var(--${darkKey})`
+  })
 
-  return result;
+  return result
 }
 
 module.exports = {
   content: ["./index.html", "./src/**/*.{js,svelte}"],
-  darkMode: 'class',
+  darkMode: "class",
   safelist: ["w-4", "h-4"],
   theme: {
     extend: {},
@@ -73,7 +70,10 @@ module.exports = {
       xl: "1280px",
       "2xl": "1536px",
     },
-    colors: mergedColors,
+    colors: {
+      ...colors,
+      ...dynamicColors,
+    },
   },
   plugins: [],
 }
