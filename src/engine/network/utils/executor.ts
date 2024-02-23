@@ -102,6 +102,15 @@ export const getExecutor = (urls: string[]) => {
   return executor
 }
 
+export const getSimpleExecutor = (urls: string[]) => {
+  const target = new Relays(urls.map(url => pool.get(url)))
+  const executor = new Executor(target)
+
+  executor.handleAuth({onAuth, onOk: noop})
+
+  return executor
+}
+
 setInterval(() => {
   const activityKeys = ["lastRequest", "lastPublish", "lastEvent"]
 
