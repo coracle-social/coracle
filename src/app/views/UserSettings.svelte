@@ -61,12 +61,14 @@
         faster, but will require more bandwidth and processing power.
       </p>
     </Field>
-    <FieldInline label="Authenticate with relays">
-      <Toggle bind:value={settings.auto_authenticate} />
-      <p slot="info">
-        Allows {appName} to authenticate with relays that have access controls automatically.
-      </p>
-    </FieldInline>
+    {#if !$env.FORCE_GROUP && $env.FORCE_RELAYS.length === 0}
+      <FieldInline label="Authenticate with relays">
+        <Toggle bind:value={settings.auto_authenticate} />
+        <p slot="info">
+          Allows {appName} to authenticate with relays that have access controls automatically.
+        </p>
+      </FieldInline>
+    {/if}
     <Field label="Upload Provider URLs">
       <p slot="info">
         Enter one or more urls for nostr media servers. You can find a full list of NIP-96
