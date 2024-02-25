@@ -242,10 +242,10 @@
     rootId && !getRootIds(event).includes(anchor) && rootId !== replyId && showParent}
   <div>
     <NoteMeta note={event} {showGroup} />
-    <div class="note relative" class:py-2={!showParent && !topLevel}>
+    <div class="note relative">
       {#if !showParent && !topLevel}
         <AltColor let:isAlt>
-          <svg height="36" width="36" class="absolute -left-[18px] top-2">
+          <svg height="36" width="36" class="absolute -left-[18px] top-1">
             <circle
               cx="18"
               cy="18"
@@ -259,12 +259,12 @@
           </svg>
         </AltColor>
         {#if isLastReply}
-          <AltColor background class="absolute -left-4 h-[19px] w-1" let:isAlt />
+          <AltColor background class="absolute -left-4 h-[20px] w-1" let:isAlt />
         {:else}
           <AltColor background class="absolute -left-4 h-full w-1" let:isAlt />
         {/if}
       {/if}
-      <div class="group relative">
+      <div class="group relative" class:pt-5={!showParent}>
         <Card stopPropagation class="relative flex gap-4" on:click={onClick} {interactive}>
           <div>
             <Anchor class="text-lg font-bold" on:click={showPerson}>
@@ -328,10 +328,10 @@
       </div>
 
       {#if !replyIsActive && (visibleReplies.length > 0 || collapsed) && !showEntire && depth > 0}
-        <div class="relative h-4">
+        <div class="relative">
           <AltColor
             background
-            class="absolute left-0 top-0 -mr-2 -mt-5 flex h-8 w-8 cursor-pointer items-center
+            class="absolute left-0 top-0 -mr-2 -mt-6 flex h-8 w-8 cursor-pointer items-center
                    justify-center rounded-full"
             on:click={() => {
               collapsed = !collapsed
@@ -367,12 +367,12 @@
 
       {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
         <div
-          class="note-children relative ml-4 mt-2 flex flex-col"
+          class="note-children relative ml-4 flex flex-col"
           in:fly|local={{y: 20}}
           out:slide|local>
           {#if hiddenReplies.length > 0}
             <button
-              class="mb-2 mt-2 cursor-pointer rounded-md bg-gradient-to-l from-transparent to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
+              class="mt-5 cursor-pointer rounded-md bg-gradient-to-l from-transparent to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
               on:click={() => {
                 showEntire = true
               }}>
@@ -386,7 +386,7 @@
             <AltColor background class="absolute -left-4 -top-10 h-14 w-1" />
           {/if}
           {#if visibleReplies.length}
-            <div in:fly={{y: 20}} class="-mb-2">
+            <div in:fly={{y: 20}}>
               {#each visibleReplies as r, i (r.id)}
                 <svelte:self
                   isLastReply={i === visibleReplies.length - 1}
