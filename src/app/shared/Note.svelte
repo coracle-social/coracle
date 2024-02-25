@@ -401,7 +401,7 @@
           {/if}
           {#if showEntire && mutedReplies.length > 0}
             <button
-              class="ml-5 cursor-pointer py-2 text-neutral-100 outline-0"
+              class="mt-5 cursor-pointer rounded-md bg-gradient-to-l from-transparent to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
               on:click={() => {
                 showMutedReplies = true
               }}>
