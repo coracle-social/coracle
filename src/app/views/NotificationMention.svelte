@@ -13,7 +13,8 @@
   const note = parentId ? {id: parentId} : interactions[0]
 </script>
 
-<div class="flex justify-between">
+<div>
+<div class="flex justify-between mb-4">
   <PeopleAction pubkeys={uniq(pluck("pubkey", interactions))} actionText="mentioned you" />
   <small>{formatTimestamp(timestamp)}</small>
 </div>
@@ -25,3 +26,4 @@
   {note}
   context={interactions}
   filters={[{ids: pluck("id", interactions)}]} />
+</div>
