@@ -339,7 +339,7 @@
             <Popover triggerType="mouseenter">
               <div slot="trigger">
                 <i
-                  class="fa fa-arrow-up text-neutral-500 transition-all"
+                  class="fa fa-arrow-up {collapsed ? 'text-tinted-100' : 'text-tinted-500'} transition-all"
                   class:rotate-180={collapsed} />
               </div>
               <div slot="tooltip">
