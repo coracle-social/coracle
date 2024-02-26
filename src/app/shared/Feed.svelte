@@ -7,7 +7,6 @@
   import {fly} from "src/util/transition"
   import {getModal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
-  import FlexColumn from "src/partials/FlexColumn.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import Note from "src/app/shared/Note.svelte"
   import type {DynamicFilter} from "src/engine"
@@ -25,7 +24,6 @@
   export let anchor = null
   export let shouldDisplay = null
   export let shouldListen = false
-  export let shouldDefer = true
   export let hideControls = false
   export let hideSpinner = false
   export let showGroup = false
@@ -60,7 +58,6 @@
       filters: compileFilters([filter], {includeReposts: true}),
       relays: getRelays(),
       anchor,
-      shouldDefer,
       shouldListen,
       shouldLoadParents: true,
       shouldHideReplies: $hideReplies,
@@ -86,7 +83,7 @@
   })
 
   onMount(() => {
-    const scroller = createScroller(loadMore, {element: getModal(), delay: 300})
+    const scroller = createScroller(loadMore, {element: getModal()})
 
     return () => {
       feed?.stop()

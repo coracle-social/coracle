@@ -1,10 +1,9 @@
-import {partition, equals, prop, uniqBy, identity, without, assoc} from "ramda"
+import {partition, prop, uniqBy, identity, without, assoc} from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
 import {now} from "paravel"
 import {race} from "src/util/misc"
 import {info} from "src/util/logger"
 import {
-  LOCAL_RELAY_URL,
   getIdOrAddress,
   getIdAndAddress,
   noteKinds,
@@ -94,14 +93,10 @@ export class FeedLoader {
 
     // Wait until a good number of subscriptions have completed to reduce the chance of
     // out of order notes
-    if (equals([LOCAL_RELAY_URL], opts.relays)) {
-      this.ready = Promise.resolve()
-    } else {
-      this.ready = race(
-        0.4,
-        remoteSubs.map(s => new Promise(r => s.on("close", r))),
-      )
-    }
+    this.ready = race(
+      0.4,
+      remoteSubs.map(s => new Promise(r => s.on("close", r))),
+    )
   }
 
   discardEvents(events) {

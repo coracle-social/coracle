@@ -146,7 +146,6 @@
   <Feed
     shouldListen
     hideControls
-    shouldDefer={!address.startsWith("35834:")}
     filter={{kinds: without([30402], noteKinds), "#a": [address]}}
     relays={address.startsWith("35834:") ? [LOCAL_RELAY_URL] : relays} />
 {:else if activeTab === "calendar"}
