@@ -54,6 +54,8 @@ const ONBOARDING_LISTS = fromCsv(import.meta.env.VITE_ONBOARDING_LISTS)
 
 const ENABLE_ZAPS = JSON.parse(import.meta.env.VITE_ENABLE_ZAPS)
 
+const ENABLE_MARKET = JSON.parse(import.meta.env.VITE_ENABLE_MARKET)
+
 const PLATFORM_PUBKEY = import.meta.env.VITE_PLATFORM_PUBKEY
 
 const PLATFORM_ZAP_SPLIT = parseFloat(import.meta.env.VITE_PLATFORM_ZAP_SPLIT)
@@ -74,6 +76,7 @@ env.set({
   SEARCH_RELAYS,
   DEFAULT_RELAYS,
   ENABLE_ZAPS,
+  ENABLE_MARKET,
   PLATFORM_PUBKEY,
   PLATFORM_ZAP_SPLIT,
 })

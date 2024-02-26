@@ -91,7 +91,7 @@
   }
 
   onMount(() => {
-    if (input === document.activeElement) {
+    if (input === document.activeElement && autofocus) {
       onFocus()
     }
   })

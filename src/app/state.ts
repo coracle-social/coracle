@@ -102,6 +102,13 @@ setInterval(() => {
 // Synchronization from events to state
 
 export const loadAppData = () => {
+  // If we have a group, load that
+  if ($env.FORCE_GROUP) {
+    loadGroups([$env.FORCE_GROUP])
+  }
+}
+
+export const loadUserData = () => {
   // Make sure the user is loaded
   loadPubkeys([pubkey.get()], {force: true, kinds: userKinds})
 

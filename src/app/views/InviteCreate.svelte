@@ -15,7 +15,6 @@
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import {router} from "src/app/router"
   import {
-    env,
     derivePerson,
     displayRelay,
     searchRelays,
@@ -237,11 +236,9 @@
   <Anchor disabled={sections.includes("people")} on:click={() => showSection("people")}>
     <i class="fa fa-plus" /> Add people
   </Anchor>
-  {#if $env.FORCE_RELAYS.length === 0}
-    <Anchor disabled={sections.includes("relays")} on:click={() => showSection("relays")}>
-      <i class="fa fa-plus" /> Add relays
-    </Anchor>
-  {/if}
+  <Anchor disabled={sections.includes("relays")} on:click={() => showSection("relays")}>
+    <i class="fa fa-plus" /> Add relays
+  </Anchor>
   <Anchor disabled={sections.includes("groups")} on:click={() => showSection("groups")}>
     <i class="fa fa-plus" /> Add groups
   </Anchor>
