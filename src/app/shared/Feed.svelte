@@ -25,6 +25,7 @@
   export let anchor = null
   export let shouldDisplay = null
   export let shouldListen = false
+  export let shouldDefer = true
   export let hideControls = false
   export let hideSpinner = false
   export let showGroup = false
@@ -59,8 +60,8 @@
       filters: compileFilters([filter], {includeReposts: true}),
       relays: getRelays(),
       anchor,
+      shouldDefer,
       shouldListen,
-      shouldDefer: true,
       shouldLoadParents: true,
       shouldHideReplies: $hideReplies,
       onEvent,
@@ -85,9 +86,7 @@
   })
 
   onMount(() => {
-    start()
-
-    const scroller = createScroller(loadMore, {element: getModal()})
+    const scroller = createScroller(loadMore, {element: getModal(), delay: 300})
 
     return () => {
       feed?.stop()
@@ -102,19 +101,17 @@
   </FeedControls>
 {/if}
 
-<FlexColumn xl>
-  {#each $notes as note, i (note.id)}
-    <div in:fly={{y: 20}}>
-      <Note
-        depth={$hideReplies ? 0 : 2}
-        context={note.replies || []}
-        filters={compileFilters([filter])}
-        {showGroup}
-        {anchor}
-        {note} />
-    </div>
-  {/each}
-</FlexColumn>
+{#each $notes as note, i (note.id)}
+  <div in:fly={{y: 20}}>
+    <Note
+      depth={$hideReplies ? 0 : 2}
+      context={note.replies || []}
+      filters={compileFilters([filter])}
+      {showGroup}
+      {anchor}
+      {note} />
+  </div>
+{/each}
 
 {#if !hideSpinner}
   <Spinner />
