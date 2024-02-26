@@ -264,7 +264,7 @@
           <AltColor background class="absolute -left-4 h-full w-1" let:isAlt />
         {/if}
       {/if}
-      <div class="group relative" class:pt-5={!showParent}>
+      <div class="group relative" class:pt-4={!showParent}>
         <Card stopPropagation class="relative flex gap-4" on:click={onClick} {interactive}>
           <div>
             <Anchor class="text-lg font-bold" on:click={showPerson}>
@@ -372,7 +372,7 @@
           out:slide|local>
           {#if hiddenReplies.length > 0}
             <button
-              class="mt-5 cursor-pointer rounded-md bg-gradient-to-l from-transparent to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
+              class="mt-4 cursor-pointer rounded-md bg-gradient-to-l from-transparent to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
               on:click={() => {
                 showEntire = true
               }}>
@@ -401,7 +401,7 @@
           {/if}
           {#if showEntire && mutedReplies.length > 0}
             <button
-              class="mt-5 cursor-pointer rounded-md bg-gradient-to-l from-transparent to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
+              class="mt-4 cursor-pointer rounded-md bg-gradient-to-l from-transparent to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
               on:click={() => {
                 showMutedReplies = true
               }}>
