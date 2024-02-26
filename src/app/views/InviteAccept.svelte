@@ -14,9 +14,9 @@
   import Onboarding from "src/app/views/Onboarding.svelte"
   import {env, session} from "src/engine"
 
-  export let people
-  export let relays
-  export let groups
+  export let people = []
+  export let relays = []
+  export let groups = []
 
   const {FORCE_RELAYS} = $env
   const parsedRelays = relays

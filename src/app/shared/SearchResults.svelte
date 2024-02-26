@@ -30,7 +30,7 @@
     async entity => {
       const result = await parseAnything(entity)
 
-      if (result.type === "npub") {
+      if (result?.type === "npub") {
         setTimeout(() => router.at("people").of(result.data).open(), 30)
       } else if (result) {
         setTimeout(() => router.at(entity).open(), 30)
