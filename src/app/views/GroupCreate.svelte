@@ -6,6 +6,7 @@
   import type {Values} from "src/app/shared/GroupDetailsForm.svelte"
   import GroupDetailsForm from "src/app/shared/GroupDetailsForm.svelte"
   import {
+    env,
     user,
     initGroup,
     publishGroupMeta,
@@ -20,7 +21,7 @@
 
   const initialValues = {
     type: null,
-    relays: [],
+    relays: $env.FORCE_RELAYS,
     members: [$user],
     list_publicly: false,
     meta: {

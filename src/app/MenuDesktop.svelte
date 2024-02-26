@@ -85,7 +85,9 @@
     </div>
   </MenuDesktopItem>
   <MenuDesktopItem path="/events">Calendar</MenuDesktopItem>
-  <MenuDesktopItem path="/listings">Market</MenuDesktopItem>
+  {#if $env.ENABLE_MARKET}
+    <MenuDesktopItem path="/listings">Market</MenuDesktopItem>
+  {/if}
   {#if !$env.FORCE_GROUP}
     <MenuDesktopItem path="/groups">Groups</MenuDesktopItem>
   {/if}

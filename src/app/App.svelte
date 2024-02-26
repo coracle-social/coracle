@@ -11,7 +11,7 @@
   import * as nostr from "src/util/nostr"
   import {storage, session, stateKey, relays, getSetting, dufflepud} from "src/engine"
   import * as engine from "src/engine"
-  import {loadAppData} from "src/app/state"
+  import {loadAppData, loadUserData} from "src/app/state"
   import {themeVariables, appName} from "src/partials/state"
   import Menu from "src/app/Menu.svelte"
   import Routes from "src/app/Routes.svelte"
@@ -464,8 +464,10 @@
   // App data boostrap and relay meta fetching
 
   storage.ready.then(() => {
+    loadAppData()
+
     if ($session) {
-      loadAppData()
+      loadUserData()
     }
 
     const interval = setInterval(async () => {

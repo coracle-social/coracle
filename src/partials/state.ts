@@ -74,13 +74,21 @@ theme.subscribe(value => {
 
 export const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 
-export const themeColors = theme.derived($theme => ($theme === "dark" ? DARK_THEME : LIGHT_THEME))
+export const themeColors = theme.derived($theme =>
+  fromPairs(
+    Object.entries($theme === "dark" ? DARK_THEME : LIGHT_THEME).flatMap(([k, v]) => [
+      [k, v],
+      [`${k}-l`, adjustBrightness(v, 10)],
+      [`${k}-d`, adjustBrightness(v, -10)],
+    ]),
+  ),
+)
 
-export const themeVariables = themeColors.derived($colors => {
-  return Object.entries($colors)
-    .map(([k, v]) => `--${k}: ${v}; --${k}-l: ${adjustBrightness(v, 10)}; --${k}-d: ${adjustBrightness(v, -10)};`)
-    .join("\n")
-})
+export const themeVariables = themeColors.derived($colors =>
+  Object.entries($colors)
+    .map(([k, v]) => `--${k}: ${v};`)
+    .join("\n"),
+)
 
 export const themeBackgroundGradient = themeColors.derived($colors => {
   const color = parseHex($colors["neutral-800"])
@@ -95,26 +103,28 @@ export const getModal = () => last(Array.from(document.querySelectorAll(".modal-
 
 function adjustBrightness(hexColor, brightnessPercent) {
   // Remove '#' if present
-  hexColor = hexColor.replace('#', '');
+  hexColor = hexColor.replace("#", "")
 
   // Convert hex to RGB
-  const r = parseInt(hexColor.substring(0, 2), 16);
-  const g = parseInt(hexColor.substring(2, 4), 16);
-  const b = parseInt(hexColor.substring(4, 6), 16);
+  const r = parseInt(hexColor.substring(0, 2), 16)
+  const g = parseInt(hexColor.substring(2, 4), 16)
+  const b = parseInt(hexColor.substring(4, 6), 16)
 
   // Adjust brightness
-  const adjust = brightnessPercent / 100; // Adjustment factor
-  const adjustedR = Math.round(r + (r * adjust));
-  const adjustedG = Math.round(g + (g * adjust));
-  const adjustedB = Math.round(b + (b * adjust));
+  const adjust = brightnessPercent / 100 // Adjustment factor
+  const adjustedR = Math.round(r + r * adjust)
+  const adjustedG = Math.round(g + g * adjust)
+  const adjustedB = Math.round(b + b * adjust)
 
   // Ensure RGB values are within [0, 255] range
-  const clamp = (value) => Math.max(0, Math.min(255, value));
+  const clamp = value => Math.max(0, Math.min(255, value))
 
   // Convert RGB back to hex
-  const adjustedHex = '#' + (clamp(adjustedR).toString(16)).padStart(2, '0') +
-                           (clamp(adjustedG).toString(16)).padStart(2, '0') +
-                           (clamp(adjustedB).toString(16)).padStart(2, '0');
+  const adjustedHex =
+    "#" +
+    clamp(adjustedR).toString(16).padStart(2, "0") +
+    clamp(adjustedG).toString(16).padStart(2, "0") +
+    clamp(adjustedB).toString(16).padStart(2, "0")
 
-  return adjustedHex;
+  return adjustedHex
 }
