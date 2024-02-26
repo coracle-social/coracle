@@ -144,7 +144,7 @@
 
 {#if isOpen || forceOpen}
   {#if showBorder}
-    <AltColor background class="absolute bottom-0 -top-1 z-none -my-2 w-[3px]" />
+    <AltColor background class="absolute bottom-0 top-4 z-none -my-2 w-[3px]" />
   {/if}
   <div
     transition:slide|local

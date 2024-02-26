@@ -53,7 +53,7 @@ export const listenForMessages = pubkeys => {
 
   return subscribe({
     skipCache: true,
-    relays: mergeHints(allPubkeys.map(k => getPubkeyHints(k, "read"))),
+    relays: mergeHints(allPubkeys.map(getPubkeyHints)),
     filters: [
       {kinds: [4], authors: allPubkeys, "#p": allPubkeys},
       {kinds: [1059], "#p": [pubkey]},

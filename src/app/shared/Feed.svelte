@@ -7,6 +7,7 @@
   import {fly} from "src/util/transition"
   import {getModal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import Note from "src/app/shared/Note.svelte"
   import type {DynamicFilter} from "src/engine"
@@ -101,17 +102,19 @@
   </FeedControls>
 {/if}
 
-{#each $notes as note, i (note.id)}
-  <div in:fly={{y: 20}}>
-    <Note
-      depth={$hideReplies ? 0 : 2}
-      context={note.replies || []}
-      filters={compileFilters([filter])}
-      {showGroup}
-      {anchor}
-      {note} />
-  </div>
-{/each}
+<FlexColumn xl>
+  {#each $notes as note, i (note.id)}
+    <div in:fly={{y: 20}}>
+      <Note
+        depth={$hideReplies ? 0 : 2}
+        context={note.replies || []}
+        filters={compileFilters([filter])}
+        {showGroup}
+        {anchor}
+        {note} />
+    </div>
+  {/each}
+</FlexColumn>
 
 {#if !hideSpinner}
   <Spinner />
