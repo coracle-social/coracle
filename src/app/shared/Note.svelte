@@ -264,7 +264,7 @@
           <AltColor background class="absolute -left-4 h-full w-1" let:isAlt />
         {/if}
       {/if}
-      <div class="group relative" class:pt-4={!showParent}>
+      <div class="group relative" class:pt-4={!showParent && !topLevel}>
         <Card stopPropagation class="relative flex gap-4" on:click={onClick} {interactive}>
           <div>
             <Anchor class="text-lg font-bold" on:click={showPerson}>
@@ -367,7 +367,7 @@
 
       {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
         <div
-          class="note-children relative ml-4 flex flex-col"
+          class="note-children relative ml-4 mt-1 flex flex-col"
           in:fly|local={{y: 20}}
           out:slide|local>
           {#if hiddenReplies.length > 0}
