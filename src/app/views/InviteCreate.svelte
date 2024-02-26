@@ -1,7 +1,7 @@
 <script lang="ts">
   import {without, prop, objOf} from "ramda"
   import {onMount} from "svelte"
-  import {pickVals} from 'hurdak'
+  import {pickVals} from "hurdak"
   import Card from "src/partials/Card.svelte"
   import Chips from "src/partials/Chips.svelte"
   import Input from "src/partials/Input.svelte"
@@ -122,18 +122,20 @@
   let groupWrapper
 
   const onSubmit = () => {
-    const invite = {}
+    const invite: any = {}
 
     if (sections.includes("people")) {
-      invite.people = people.map(p => p.pubkey).join(',')
+      invite.people = people.map(p => p.pubkey).join(",")
     }
 
     if (sections.includes("relays")) {
-      invite.relays = relays.map(r => pickVals(['url', 'claim'], r).join('|')).join(',')
+      invite.relays = relays.map(r => pickVals(["url", "claim"], r).join("|")).join(",")
     }
 
     if (sections.includes("groups")) {
-      invite.groups = groups.map(g => pickVals(['address', 'relay', 'claim'], g).join('|')).join(',')
+      invite.groups = groups
+        .map(g => pickVals(["address", "relay", "claim"], g).join("|"))
+        .join(",")
     }
 
     router

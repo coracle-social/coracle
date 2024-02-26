@@ -62,29 +62,6 @@ export const getTarget = (urls: string[]) => {
 
 const seenChallenges = new Set()
 
-export type AuthOpts = {
-  claim?: string
-  challenge?: string
-}
-
-export const sendAuth = async (url, {claim, challenge}: AuthOpts) => {
-  const tags = [["relay", url]]
-
-  if (claim) {
-    tags.push(["claim", claim])
-  }
-
-  if (challenge) {
-    tags.push(["challenge", challenge])
-  }
-
-  const event = await signer.get().signAsUser(createEvent(22242, {tags}))
-
-  pool.get(url).send(["AUTH", event])
-
-  return event
-}
-
 export const onAuth = async (url, challenge) => {
   const {FORCE_GROUP, FORCE_RELAYS} = env.get()
 
@@ -102,7 +79,18 @@ export const onAuth = async (url, challenge) => {
 
   seenChallenges.add(challenge)
 
-  return sendAuth(url, {challenge})
+  const event = await signer.get().signAsUser(
+    createEvent(22242, {
+      tags: [
+        ["relay", url],
+        ["challenge", challenge],
+      ],
+    }),
+  )
+
+  pool.get(url).send(["AUTH", event])
+
+  return event
 }
 
 export const getExecutor = (urls: string[]) => {
