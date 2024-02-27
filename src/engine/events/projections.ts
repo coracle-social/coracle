@@ -24,7 +24,7 @@ projections.addGlobalHandler(
 projections.addHandler(
   5,
   batch(500, (chunk: Event[]) => {
-    const values = Tags.from(chunk).type(["a", "e"]).values().all()
+    const tags = Tags.fromEvent(chunk).filter(tag => ["a", "e"].includes(tag.key()))
 
     for (const pubkey of new Set(pluck("pubkey", chunk))) {
       updateSession(
@@ -38,7 +38,7 @@ projections.addHandler(
     }
 
     deletes.update($deletes => {
-      values.forEach(v => $deletes.add(v))
+      tags.forEach(t => $deletes.add(t.value()))
 
       return $deletes
     })
@@ -70,7 +70,7 @@ projections.addHandler(
 )
 
 const handleWrappedEvent = getEncryption => wrap => {
-  const session = getSession(Tags.from(wrap).pubkeys().first())
+  const session = getSession(Tags.fromEvent(wrap).get("p").value())
 
   if (!session) {
     return

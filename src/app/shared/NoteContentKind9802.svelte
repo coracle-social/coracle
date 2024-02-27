@@ -6,7 +6,7 @@
 
   export let note, maxLength, showEntire, showMedia
 
-  const ref = Tags.from(note).getValue("r")
+  const ref = Tags.fromEvent(note).get("r")?.value()
 </script>
 
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">

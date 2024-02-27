@@ -58,7 +58,7 @@
   }
 
   const addImage = imeta => {
-    textarea.value += "\n" + imeta.type("url").values().first()
+    textarea.value += "\n" + imeta.get("url").value()
   }
 
   const send = async () => {

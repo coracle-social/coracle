@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "paravel"
+  import {fromPairs} from "ramda"
   import {urlIsMedia} from "src/util/notes"
   import {Naddr} from "src/util/nostr"
   import Card from "src/partials/Card.svelte"
@@ -14,9 +14,8 @@
   export let note
   export let showMedia = false
 
-  const tags = Tags.from(note)
   const naddr = Naddr.fromEvent(note, getEventHints(note)).encode()
-  const {title, summary, image, status, p} = tags.getDict() as Record<string, string>
+  const {title, summary, image, status, p} = fromPairs(note.tags) as Record<string, string>
 </script>
 
 <Anchor external href={`https://zap.stream/${naddr}`}>

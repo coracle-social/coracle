@@ -2,10 +2,10 @@ import {fromNostrURI, Tags} from "paravel"
 import {schnorr} from "@noble/curves/secp256k1"
 import {bytesToHex} from "@noble/hashes/utils"
 import {nip05, nip19, generateSecretKey, getEventHash, getPublicKey as getPk} from "nostr-tools"
-import {pick, reject, is, join, mergeLeft, identity} from "ramda"
+import {pick, reject, join, identity} from "ramda"
 import {between, avg} from "hurdak"
 import logger from "src/util/logger"
-import type {Filter, Event} from "src/engine"
+import type {Event} from "src/engine"
 
 export const fromHex = k => Uint8Array.from(Buffer.from(k, "hex"))
 export const getPublicKey = (sk: string) => getPk(fromHex(sk))
@@ -42,9 +42,6 @@ export const isLike = (e: Event) =>
   e.kind === 7 &&
   ["", "+", "🤙", "👍", "❤️", "😎", "🏅", "🫂", "🤣", "😂", "💜", "🔥"].includes(e.content)
 
-export const channelAttrs = ["name", "about", "picture"]
-export const groupAttrs = ["name", "about", "picture"]
-
 export const asNostrEvent = e =>
   pick(["content", "created_at", "id", "kind", "pubkey", "sig", "tags"], e) as Event
 
@@ -66,55 +63,18 @@ export const toHex = (data: string): string | null => {
   }
 }
 
-export const mergeFilter = (filter: Filter | Filter[], extra: Filter) =>
-  is(Array, filter) ? filter.map(mergeLeft(extra)) : {...filter, ...extra}
-
 export const getRating = (event: Event) =>
   parseInt(
-    Tags.from(event)
-      .type("rating")
-      .filter(t => t.length === 2)
-      .pluck(1)
-      .first(),
+    Tags.fromEvent(event)
+      .whereKey("rating")
+      .filter(t => t.count() === 2)
+      .first()
+      .value(),
   )
 
 export const getAvgRating = (events: Event[]) => avg(events.map(getRating).filter(identity))
 
 export const isHex = x => x?.match(/^[a-f0-9]{64}$/)
-
-export const getParentId = (e, type = null) => {
-  const {roots, replies} = Tags.from(e).getAncestors()
-
-  if (type) {
-    return replies.type(type).values().first() || roots.type(type).values().first()
-  }
-
-  return (
-    replies.type("e").values().first() ||
-    replies.type("a").values().first() ||
-    roots.type("e").values().first() ||
-    roots.type("a").values().first()
-  )
-}
-
-export const getParentIds = e => {
-  const {roots, replies} = Tags.from(e).getAncestors()
-  const tags = replies.exists() ? replies : roots
-
-  return tags.values().all()
-}
-
-export const getRootId = (e, type = null) => {
-  const {roots} = Tags.from(e).getAncestors()
-
-  if (type) {
-    return roots.type(type).values().first()
-  }
-
-  return roots.type("e").values().first() || roots.type("a").values().first()
-}
-
-export const getRootIds = e => Tags.from(e).roots().values().all()
 
 export const isReplaceable = e => between(9999, 20000, e.kind)
 
@@ -135,8 +95,8 @@ export const getIdOrAddressTag = (e, hint) => {
 }
 
 export const isChildOf = (a, b) => {
-  const {roots, replies} = Tags.from(a).getAncestors()
-  const parentIds = (replies.exists() ? replies : roots).values().all()
+  const {roots, replies} = Tags.fromEvent(a).ancestors()
+  const parentIds = (replies.exists() ? replies : roots).values().valueOf()
 
   return Boolean(getIdAndAddress(b).find(x => parentIds.includes(x)))
 }
@@ -153,7 +113,7 @@ export class Naddr {
   }
 
   static fromEvent = (e: Event, relays = []) =>
-    new Naddr(e.kind, e.pubkey, Tags.from(e).getValue("d"), relays)
+    new Naddr(e.kind, e.pubkey, Tags.fromEvent(e).get("d")?.value() || "", relays)
 
   static fromTagValue = (a, relays = []) => {
     const [kind, pubkey, identifier] = a.split(":")
@@ -222,8 +182,8 @@ const WARN_TAGS = new Set([
 ])
 
 export const getContentWarning = e => {
-  const tags = Tags.from(e)
-  const warning = tags.type("content-warning").values().first()
+  const tags = Tags.fromEvent(e)
+  const warning = tags.get("content-warning")?.value()
 
   if (warning) {
     return warning

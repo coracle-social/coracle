@@ -1,6 +1,5 @@
 <script lang="ts">
-  import {Tags} from "paravel"
-  import {whereEq} from "ramda"
+  import {whereEq, fromPairs} from "ramda"
   import Calendar from "@event-calendar/core"
   import DayGrid from "@event-calendar/day-grid"
   import Interaction from "@event-calendar/interaction"
@@ -43,7 +42,7 @@
   })
 
   $: calendarEvents = events.map(e => {
-    const meta = Tags.from(e).getDict()
+    const meta = fromPairs(e.tags)
     const isOwn = e.pubkey === $pubkey
 
     return {

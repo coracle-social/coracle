@@ -31,7 +31,7 @@ export const getGroupSearch = $groups => fuzzy($groups, {keys: ["meta.name", "me
 export const searchGroups = groups.derived(getGroupSearch)
 
 export const getRecipientKey = wrap => {
-  const pubkey = Tags.from(wrap).pubkeys().first()
+  const pubkey = Tags.fromEvent(wrap).values("p").first()
   const sharedKey = groupSharedKeys.key(pubkey).get()
 
   if (sharedKey) {

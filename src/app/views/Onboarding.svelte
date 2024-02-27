@@ -76,7 +76,7 @@
       relays: $env.DEFAULT_RELAYS,
       filters: getIdFilters($env.ONBOARDING_LISTS),
       onEvent: e => {
-        loadPubkeys(Tags.from(e).pubkeys().all())
+        loadPubkeys(Tags.fromEvent(e).values("p").valueOf())
       },
     })
   })

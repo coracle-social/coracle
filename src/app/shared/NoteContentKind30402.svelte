@@ -1,6 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {Tags} from "paravel"
+  import {fromPairs} from "ramda"
   import {commaFormat} from "hurdak"
   import {Naddr} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -18,10 +19,10 @@
   export let showMedia = false
   export let showEntire = false
 
-  const tags = Tags.from(note)
-  const {title, summary, location, status} = tags.getDict()
-  const images = tags.type("image").values().all()
-  const [price = 0, code = "SAT"] = tags.type("price").drop(1).first() || []
+  const tags = Tags.fromEvent(note)
+  const images = tags.values("image").valueOf()
+  const {title, summary, location, status} = tags.asObject()
+  const [price = 0, code = "SAT"] = tags.get("price")?.drop(1).valueOf() || []
   const address = Naddr.fromEvent(note).asTagValue()
   const editLink = router.at("listings").of(address).at("edit").toString()
   const deleteLink = router.at("listings").of(address).at("delete").toString()

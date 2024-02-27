@@ -1,7 +1,7 @@
 import {assoc, without, max, sortBy} from "ramda"
 import {seconds} from "hurdak"
 import {now, Tags} from "paravel"
-import {isLike, reactionKinds, noteKinds, repostKinds, getParentId} from "src/util/nostr"
+import {isLike, reactionKinds, noteKinds, repostKinds} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import {seenIds} from "src/engine/events/state"
 import {unwrapRepost} from "src/engine/events/utils"
@@ -33,7 +33,9 @@ export const notifications = derived(
         return false
       }
 
-      return $userEvents.get(getParentId(e, "e")) || Tags.from(e).pubkeys().has($pubkey)
+      const tags = Tags.fromEvent(e)
+
+      return $userEvents.get(tags.whereKey("e").parent()?.value()) || tags.values("p").has($pubkey)
     })
   },
 )
@@ -60,14 +62,15 @@ export const groupNotifications = derived(
     const $isEventMuted = isEventMuted.get()
 
     const shouldSkip = e => {
-      const circles = Tags.from(e).circles().all()
+      const tags = Tags.fromEvent(e)
+      const context = tags.context().valueOf()
 
       return (
-        !circles.some(a => addresses.has(a)) ||
+        !context.some(a => addresses.has(a)) ||
         !noteKinds.includes(e.kind) ||
         e.pubkey === $session.pubkey ||
         // Skip mentions since they're covered in normal notifications
-        Tags.from(e).pubkeys().has($session.pubkey) ||
+        tags.values("p").has($session.pubkey) ||
         $isEventMuted(e)
       )
     }
@@ -120,7 +123,7 @@ export const createNotificationGroups = ($notifications, kinds) => {
   // Convert zaps to zap requests
   const convertZap = e => {
     if (e.kind === 9735) {
-      return tryJson(() => JSON.parse(Tags.from(e).getDict().description as string))
+      return tryJson(() => JSON.parse(Tags.fromEvent(e).get("description")?.value()))
     }
 
     return e
@@ -130,7 +133,7 @@ export const createNotificationGroups = ($notifications, kinds) => {
 
   // Group notifications by event
   for (const ix of $notifications) {
-    const parentId = getParentId(ix, "e")
+    const parentId = Tags.fromEvent(ix).whereKey("e").parent()?.value()
     const event = $userEvents.get(parentId)
 
     if (!kinds.includes(ix.kind)) {

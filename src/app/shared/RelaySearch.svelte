@@ -2,7 +2,7 @@
   import {onDestroy} from "svelte"
   import {groupBy, filter} from "ramda"
   import {mapVals} from "hurdak"
-  import {isShareableRelay, Tags} from "paravel"
+  import {isShareableRelayUrl, Tags} from "paravel"
   import {createScroller} from "src/util/misc"
   import {getAvgRating} from "src/util/nostr"
   import {getModal} from "src/partials/state"
@@ -28,7 +28,7 @@
   let reviews = []
 
   const searchRelays = relays
-    .derived(filter((r: Relay) => !$relayPolicyUrls.includes(r.url) && isShareableRelay(r.url)))
+    .derived(filter((r: Relay) => !$relayPolicyUrls.includes(r.url) && isShareableRelayUrl(r.url)))
     .derived(getRelaySearch)
 
   const loadMore = async () => {
@@ -39,7 +39,7 @@
 
   $: ratings = mapVals(
     getAvgRating,
-    groupBy(e => normalizeRelayUrl(Tags.from(e).getValue("r")), reviews),
+    groupBy(e => normalizeRelayUrl(Tags.fromEvent(e).get("r")?.value()), reviews),
   )
 
   load({

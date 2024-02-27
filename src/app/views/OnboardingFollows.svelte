@@ -63,11 +63,14 @@
   }
 
   const followAll = list => {
-    petnames = uniqBy(nth(1), [...petnames, ...Tags.from(list).pubkeys().all().map(mention)])
+    petnames = uniqBy(nth(1), [
+      ...petnames,
+      ...Tags.fromEvent(list).values("p").valueOf().map(mention),
+    ])
   }
 
   const unfollowAll = list => {
-    const pubkeys = Tags.from(list).pubkeys().all()
+    const pubkeys = Tags.fromEvent(list).values("p").valueOf()
 
     petnames = petnames.filter(t => !pubkeys.includes(t[1]))
   }
@@ -114,7 +117,8 @@
 </script>
 
 <div class="flex gap-3">
-  <p class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-600 text-lg">
+  <p
+    class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-600 text-lg">
     3/4
   </p>
   <p class="text-2xl font-bold">Find your people</p>
@@ -132,7 +136,7 @@
       <p class="text-xl font-bold">{list.title}</p>
       <p class="pb-5">{list.description}</p>
       <div class="absolute bottom-1 text-neutral-200">
-        {Tags.from(list).pubkeys().count()} people
+        {Tags.fromEvent(list).values("p").count()} people
       </div>
     </Card>
   {/each}
@@ -152,7 +156,7 @@
 </div>
 
 {#if showList}
-  {@const listPubkeys = Tags.from(list).pubkeys().all()}
+  {@const listPubkeys = Tags.fromEvent(list).values("p").valueOf()}
   <Modal onEscape={closeList}>
     <div class="flex items-center justify-between">
       <p class="text-2xl font-bold">{list.title}</p>

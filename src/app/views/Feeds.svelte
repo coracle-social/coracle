@@ -21,9 +21,10 @@
 
   const loadListFeed = address => {
     const list = lists.key(address).get()
-    const authors = Tags.from(list).pubkeys().all()
-    const topics = Tags.from(list).topics().all()
-    const urls = Tags.from(list).urls().all()
+    const tags = Tags.fromEvent(list)
+    const authors = tags.values("p").valueOf()
+    const topics = tags.topics().valueOf()
+    const urls = tags.values("r").valueOf()
 
     if (urls.length > 0) {
       relays = urls

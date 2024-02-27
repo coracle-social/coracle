@@ -5,12 +5,12 @@
 
   export let note
 
-  const tags = Tags.from(note).type("r").all()
+  const urls = Tags.fromEvent(note).values("r").valueOf()
 </script>
 
 <FlexColumn small>
   <p>New relay selections:</p>
-  {#each tags as [_, url, mode]}
+  {#each urls as url}
     <RelayCard relay={{url}} />
   {/each}
 </FlexColumn>

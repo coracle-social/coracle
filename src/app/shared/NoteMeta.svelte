@@ -10,8 +10,8 @@
 
   const reposts = note.reposts || []
   const repostPubkeys = uniq(pluck("pubkey", reposts))
-  const fromAddresses = Tags.from(note).circles().all()
-  const toAddresses = Tags.from(reposts).circles().all()
+  const fromAddresses = Tags.fromEvent(note).context().valueOf()
+  const toAddresses = Tags.fromEvent(reposts).context().valueOf()
 </script>
 
 {#if repostPubkeys.length > 0}

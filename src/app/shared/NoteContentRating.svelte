@@ -8,13 +8,13 @@
 
   export let note, rating
 
-  const tag = Tags.from(note).type(["r", "p", "e"]).first()
+  const tag = Tags.fromEvent(note).find(t => ["r", "p", "e"].includes(t.key()))
 
   let href
   let display
 
   if (tag) {
-    const [type, value] = tag
+    const [type, value] = tag.valueOf()
     const relays = getEventHints(note)
 
     href = switcherFn(type, {

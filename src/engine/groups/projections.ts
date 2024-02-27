@@ -22,11 +22,11 @@ import {setGroupStatus, modifyGroupStatus} from "./commands"
 // Key sharing
 
 projections.addHandler(24, (e: Event) => {
-  const tags = Tags.from(e)
-  const privkey = tags.getValue("privkey")
-  const address = tags.getValue("a")
-  const recipient = Tags.from(e.wrap).getValue("p")
-  const relays = tags.type("relay").values().all()
+  const tags = Tags.fromEvent(e)
+  const privkey = tags.get("privkey").value()
+  const address = tags.get("a").value()
+  const recipient = Tags.fromEvent(e.wrap).get("p").value()
+  const relays = tags.values("relay").valueOf()
 
   if (!address) {
     return
@@ -34,7 +34,7 @@ projections.addHandler(24, (e: Event) => {
 
   if (privkey) {
     const pubkey = getPublicKey(privkey)
-    const role = tags.getValue("role")
+    const role = tags.get("role").value()
     const keys = role === "admin" ? groupAdminKeys : groupSharedKeys
 
     keys.key(pubkey).update($key => ({
@@ -80,15 +80,15 @@ projections.addHandler(24, (e: Event) => {
 // Group metadata
 
 projections.addHandler(35834, (e: Event) => {
-  const tags = Tags.from(e)
-  const meta = tags.getDict()
+  const tags = Tags.fromEvent(e)
+  const meta = tags.asObject()
   const address = Naddr.fromEvent(e).asTagValue()
   const group = groups.key(address)
 
   group.merge({address, id: meta.d, pubkey: e.pubkey})
 
   updateStore(group, e.created_at, {
-    relays: tags.type("relay").values().all(),
+    relays: tags.values("relay").valueOf(),
     listing_is_public: !e.wrap,
     meta: {
       name: meta.name,
@@ -100,15 +100,15 @@ projections.addHandler(35834, (e: Event) => {
 })
 
 projections.addHandler(34550, (e: Event) => {
-  const tags = Tags.from(e)
-  const meta = tags.getDict()
+  const tags = Tags.fromEvent(e)
+  const meta = tags.asObject()
   const address = Naddr.fromEvent(e).asTagValue()
   const group = groups.key(address)
 
   group.merge({address, id: meta.d, pubkey: e.pubkey})
 
   updateStore(group, e.created_at, {
-    relays: tags.type("relay").values().all(),
+    relays: tags.values("relay").valueOf(),
     listing_is_public: true,
     meta: {
       name: meta.name,
@@ -120,7 +120,7 @@ projections.addHandler(34550, (e: Event) => {
 })
 
 projections.addHandler(27, (e: Event) => {
-  const address = Tags.from(e).groups().first()
+  const address = Tags.fromEvent(e).groups().first()
 
   if (!address) {
     return
@@ -133,8 +133,9 @@ projections.addHandler(27, (e: Event) => {
     recent_member_updates = sortBy(prop("created_at"), recent_member_updates.concat(e)).slice(-100)
 
     for (const event of recent_member_updates) {
-      const op = Tags.from(event).type("op").values().first()
-      const pubkeys = Tags.from(event).type("p").values().all()
+      const tags = Tags.fromEvent(event)
+      const op = tags.get("op")?.value()
+      const pubkeys = tags.values("p").valueOf()
 
       members = switcherFn(op, {
         add: () => uniq(pubkeys.concat(members)),
@@ -157,7 +158,7 @@ projections.addHandler(10004, (e: Event) => {
     return
   }
 
-  const addresses = Tags.from(e).communities().all()
+  const addresses = Tags.fromEvent(e).communities().valueOf()
 
   for (const address of uniq(Object.keys($session.groups || {}).concat(addresses))) {
     $session = modifyGroupStatus($session, address, e.created_at, {
@@ -169,7 +170,7 @@ projections.addHandler(10004, (e: Event) => {
 })
 
 const handleGroupRequest = access => (e: Event) => {
-  const address = Tags.from(e).getValue("a")
+  const address = Tags.fromEvent(e).get("a").value()
   const adminKey = deriveAdminKeyForGroup(address)
 
   if (adminKey.get()) {
@@ -203,7 +204,7 @@ projections.addGlobalHandler(
         getExecutor([LOCAL_RELAY_URL]).publish(e)
       }
 
-      const addresses = Tags.from(e).communities().all()
+      const addresses = Tags.fromEvent(e).communities().valueOf()
 
       // Save events with communities the user is a part of to our local db
       if (addresses.some(a => userGroups.has(a))) {

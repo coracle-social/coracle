@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "paravel"
+  import {fromPairs} from "ramda"
   import {batch} from "hurdak"
   import {onMount} from "svelte"
   import Calendar from "@event-calendar/core"
@@ -65,7 +65,7 @@
   $: calendarEvents = Array.from($events.values())
     .filter(e => !$isDeleted(e))
     .map(e => {
-      const meta = Tags.from(e).getDict()
+      const meta = fromPairs(e)
       const isOwn = e.pubkey === $pubkey
 
       return {

@@ -47,7 +47,7 @@
   export let group = null
   export let initialValues = {}
 
-  const defaultGroups = quote ? Tags.from(quote).circles().all() : [group].filter(identity)
+  const defaultGroups = quote ? Tags.fromEvent(quote).context().valueOf() : [group].filter(identity)
 
   let images, compose
   let charCount = 0

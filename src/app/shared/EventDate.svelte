@@ -4,7 +4,7 @@
 
   export let event
 
-  const date = secondsToDate(Tags.from(event).getValue("start"))
+  const date = secondsToDate(Tags.fromEvent(event).get("start").value())
   const monthFmt = new Intl.DateTimeFormat("en-US", {month: "short"})
   const dayFmt = new Intl.DateTimeFormat("en-US", {day: "numeric"})
 </script>
