@@ -1,5 +1,6 @@
 import {nip19} from "nostr-tools"
-import {Tags, isShareableRelay, normalizeRelayUrl as normalize, fromNostrURI} from "paravel"
+import {Tags} from "paravel"
+import {isShareableRelayUrl, normalizeRelayUrl as normalize, fromNostrURI} from "paravel"
 import {sortBy, whereEq, pluck, uniq, nth, prop, last} from "ramda"
 import {chain, displayList, first} from "hurdak"
 import {fuzzy} from "src/util/misc"
@@ -120,7 +121,7 @@ export const selectHints = (hints: Iterable<string>, limit: number = null) => {
     seen.add(url)
 
     // Skip relays that just shouldn't ever be published
-    if (!isShareableRelay(url)) {
+    if (!isShareableRelayUrl(url)) {
       continue
     }
 
@@ -184,12 +185,12 @@ export const getUserHints = hintSelector(function* (mode: RelayMode) {
 export const getUserHint = (pubkey: string): string => first(getUserHints(1, "write")) || ""
 
 export const getEventHints = hintSelector(function* (event: Event) {
-  for (const address of Tags.from(event).circles().all()) {
+  for (const address of Tags.fromEvent(event).context().valueOf()) {
     yield* getGroupHints(address)
   }
 
   yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Write)
-  yield* event.seen_on?.filter(isShareableRelay) || []
+  yield* event.seen_on?.filter(isShareableRelayUrl) || []
 })
 
 export const getEventHint = (event: Event) => first(getEventHints.limit(1).getHints(event)) || ""
@@ -198,7 +199,7 @@ export const getEventHint = (event: Event) => first(getEventHints.limit(1).getHi
 // advertised would be the most reliable option, since well-behaved clients
 // will write replies there.
 export const getReplyHints = hintSelector(function* (event) {
-  for (const address of Tags.from(event).circles().all()) {
+  for (const address of Tags.fromEvent(event).context().valueOf()) {
     yield* getGroupHints(address)
   }
 
@@ -208,12 +209,12 @@ export const getReplyHints = hintSelector(function* (event) {
 // If we're looking for an event's parent, tags are the most reliable hint,
 // but we can also look at where the author of the note reads from
 export const getParentHints = hintSelector(function* (event) {
-  yield* Tags.from(event).getReplyHints()
+  yield* Tags.fromEvent(event).replies().relays().valueOf()
   yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Read)
 })
 
 export const getRootHints = hintSelector(function* (event) {
-  yield* Tags.from(event).getRootHints()
+  yield* Tags.fromEvent(event).roots().relays().valueOf()
   yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Read)
 })
 
@@ -222,11 +223,11 @@ export const getRootHints = hintSelector(function* (event) {
 // relays. Limit how many per pubkey we publish to though. We also want to advertise
 // our content to our followers, so publish to our write relays as well.
 export const getPublishHints = hintSelector(function* (event: Event) {
-  for (const address of Tags.from(event).circles().all()) {
+  for (const address of Tags.fromEvent(event).context().valueOf()) {
     yield* getGroupHints(address)
   }
 
-  const pubkeys = Tags.from(event).type("p").values().all()
+  const pubkeys = Tags.fromEvent(event).values("p").valueOf()
   const hintGroups = pubkeys.map(pubkey => getPubkeyRelayUrls(pubkey, RelayMode.Read))
   const authorRelays = getPubkeyRelayUrls(event.pubkey, RelayMode.Write)
 

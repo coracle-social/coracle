@@ -1,7 +1,7 @@
 import {now, Tags} from "paravel"
 import {seconds, updateIn, batch, doPipe} from "hurdak"
 import {pluck, max, slice, filter, without, sortBy} from "ramda"
-import {noteKinds, repostKinds, reactionKinds, getParentId} from "src/util/nostr"
+import {noteKinds, repostKinds, reactionKinds} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import type {Filter} from "src/engine/network/model"
 import {env} from "src/engine/session/state"
@@ -23,7 +23,7 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
   const kinds = getNotificationKinds()
   const $isEventMuted = isEventMuted.get()
   const events = chunk.filter(e => kinds.includes(e.kind) && !$isEventMuted(e))
-  const eventsWithParent = chunk.filter(getParentId)
+  const eventsWithParent = chunk.filter(e => Tags.from(e).parent())
   const pubkeys = new Set(pluck("pubkey", events))
 
   for (const pubkey of pubkeys) {
@@ -41,7 +41,9 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
 
   load({
     relays: mergeHints(eventsWithParent.map(getParentHints)),
-    filters: getIdFilters(eventsWithParent.flatMap(e => Tags.from(e).replies().values().all())),
+    filters: getIdFilters(
+      eventsWithParent.flatMap(e => Tags.fromEvent(e).replies().values().valueOf()),
+    ),
     onEvent: e => _events.update($events => $events.concat(e)),
   })
 

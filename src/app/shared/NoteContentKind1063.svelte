@@ -5,7 +5,7 @@
 
   export let note, showMedia
 
-  const url = Tags.from(note).getValue("url")
+  const url = Tags.fromEvent(note).get("url").value()
 </script>
 
 {#if url}

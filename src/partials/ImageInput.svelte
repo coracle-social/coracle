@@ -33,7 +33,7 @@
               maxHeight,
             })) {
               // For inputs that only want one file
-              value = tags.type("url").values().first()
+              value = tags.get("url")?.value()
 
               if (value) {
                 dispatch("change", tags)

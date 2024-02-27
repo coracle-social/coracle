@@ -1,5 +1,5 @@
 import {ensurePlural} from "hurdak"
-import {isShareableRelay} from "paravel"
+import {isShareableRelayUrl} from "paravel"
 
 export class Tracker {
   urlsByEventId = new Map()
@@ -10,7 +10,7 @@ export class Tracker {
     event.seen_on = seen || []
 
     for (const url of ensurePlural(urls)) {
-      if (!event.seen_on.includes(url) && isShareableRelay(url)) {
+      if (!event.seen_on.includes(url) && isShareableRelayUrl(url)) {
         event.seen_on.push(url)
       }
     }

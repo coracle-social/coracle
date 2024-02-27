@@ -1,5 +1,5 @@
 import {whereEq, when, reject, uniqBy, prop, inc} from "ramda"
-import {now, normalizeRelayUrl, createEvent, isShareableRelay} from "paravel"
+import {now, normalizeRelayUrl, createEvent, isShareableRelayUrl} from "paravel"
 import {people} from "src/engine/people/state"
 import {canSign, signer, stateKey} from "src/engine/session/derived"
 import {updateStore} from "src/engine/core/commands"
@@ -11,7 +11,7 @@ import {relayPolicies} from "./derived"
 export const saveRelay = (url: string) => {
   url = normalizeRelayUrl(url)
 
-  if (isShareableRelay(url)) {
+  if (isShareableRelayUrl(url)) {
     const relay = relays.key(url).get()
 
     relays.key(url).merge({
@@ -42,7 +42,7 @@ export const publishRelays = ($relays: RelayPolicy[]) => {
   if (canSign.get()) {
     return createAndPublish(10002, {
       tags: $relays
-        .filter(r => isShareableRelay(r.url))
+        .filter(r => isShareableRelayUrl(r.url))
         .map(r => {
           const t = ["r", normalizeRelayUrl(r.url)]
 

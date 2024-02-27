@@ -1,20 +1,10 @@
 <script lang="ts">
-  import {matchFilters} from "paravel"
+  import {Tags, matchFilters} from "paravel"
   import {reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, ensurePlural, batch} from "hurdak"
-  import {Tags} from "paravel"
   import {fly, slide} from "src/util/transition"
-  import {
-    getIdOrAddress,
-    isChildOf,
-    isLike,
-    getParentId,
-    getRootId,
-    getParentIds,
-    getRootIds,
-    isGiftWrap,
-  } from "src/util/nostr"
+  import {getIdOrAddress, isChildOf, isLike, isGiftWrap} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import AltColor from "src/partials/AltColor.svelte"
@@ -101,8 +91,8 @@
   const goToParent = () =>
     router
       .at("notes")
-      .of(getParentId(event), {
-        relays: mergeHints([getPubkeyHints(event.pubkey, "read"), tags.getReplyHints()]),
+      .of(reply.value(), {
+        relays: mergeHints([getPubkeyHints(event.pubkey, "read"), [reply.nth(3)]]),
       })
       .cx({context: ctx.concat(event)})
       .open()
@@ -123,7 +113,9 @@
     ctx = ctx.concat(ensurePlural(events).map(e => ({seen_on: [], ...e})))
   }
 
-  $: tags = Tags.from(event)
+  $: tags = Tags.fromEvent(event)
+  $: reply = tags.parent()
+  $: root = tags.root()
 
   $: muted = !showMuted && $isEventMuted(event, true)
 
@@ -181,11 +173,8 @@
     zapper,
   )
 
-  $: rootId = getRootId(event)
-  $: replyId = getParentId(event)
-
   onMount(async () => {
-    const zapAddress = Tags.from(event).getValue("zap")
+    const zapAddress = tags.get("zap")?.value()
 
     if (zapAddress && getLnUrl(zapAddress)) {
       zapper = await getZapper(getLnUrl(zapAddress))
@@ -237,9 +226,9 @@
 </script>
 
 {#if ready}
-  {@const showReply = replyId && !getParentIds(event).includes(anchor) && showParent}
+  {@const showReply = reply && !tags.parents().values().has(anchor) && showParent}
   {@const showRoot =
-    rootId && !getRootIds(event).includes(anchor) && rootId !== replyId && showParent}
+    root && !tags.roots().values().has(anchor) && root.value() !== reply.value() && showParent}
   <div>
     <NoteMeta note={event} {showGroup} />
     <div class="note relative">
@@ -339,7 +328,9 @@
             <Popover triggerType="mouseenter">
               <div slot="trigger">
                 <i
-                  class="fa fa-arrow-up {collapsed ? 'text-tinted-100' : 'text-tinted-500'} transition-all"
+                  class="fa fa-arrow-up transition-all"
+                  class:text-tinted-500={!collapsed}
+                  class:text-tinted-100={collapsed}
                   class:rotate-180={collapsed} />
               </div>
               <div slot="tooltip">

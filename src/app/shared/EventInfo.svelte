@@ -1,6 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {Tags} from "paravel"
+  import {fromPairs} from "ramda"
   import {Naddr} from "src/util/nostr"
   import {secondsToDate, formatTimestamp, formatTimestampAsDate, getLocale} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
@@ -18,8 +19,11 @@
 
   const timeFmt = new Intl.DateTimeFormat(getLocale(), {timeStyle: "short"})
   const datetimeFmt = new Intl.DateTimeFormat(getLocale(), {dateStyle: "short", timeStyle: "short"})
-  const groupAddrs = Tags.from(event).circles().all()
-  const {name, title, start, end, location} = Tags.from(event).getDict()
+  const tags = Tags.fromEvent(event)
+  const groupAddrs = tags.context().valueOf()
+  const {name, title, location} = fromPairs(event.tags)
+  const end = parseInt(tags.get("end").value())
+  const start = parseInt(tags.get("start").value())
   const startDate = secondsToDate(start)
   const endDate = secondsToDate(end)
   const startDateDisplay = formatTimestampAsDate(start)

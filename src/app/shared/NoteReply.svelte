@@ -34,8 +34,8 @@
   export let forceOpen = false
 
   const dispatch = createEventDispatcher()
-
   const nsecWarning = writable(null)
+  const parentTags = Tags.fromEvent(parent)
 
   let images, compose, container, options
   let isOpen = false
@@ -43,7 +43,7 @@
   let draft = ""
   let opts = {
     warning: "",
-    groups: parent.wrap ? Tags.from(parent).circles().all() : [],
+    groups: parent.wrap ? parentTags.context().valueOf() : [],
     relays: selectHintsWithFallback(getPublishHints(parent)),
     anonymous: false,
   }
@@ -54,7 +54,7 @@
     isOpen = true
     mentions = without(
       [$session.pubkey],
-      uniq(Tags.from(parent).type("p").values().all().concat(parent.pubkey)),
+      uniq(parentTags.values("p").valueOf().concat(parent.pubkey)),
     )
 
     setTimeout(() => compose.write(draft), 10)
@@ -119,7 +119,7 @@
     }
 
     const template = createEvent(1, {content, tags})
-    const addresses = Tags.from(parent).circles().all()
+    const addresses = parentTags.context().valueOf()
     const {pubs, events} = await publishToZeroOrMoreGroups(addresses, template, opts)
 
     pubs[0].on("progress", toastProgress)

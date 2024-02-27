@@ -1,7 +1,7 @@
 import {uniqBy, identity, prop, sortBy} from "ramda"
 import {batch} from "hurdak"
 import {Tags} from "paravel"
-import {getIdOrAddress, getIdAndAddress, getParentIds, getRootIds} from "src/util/nostr"
+import {getIdOrAddress, getIdAndAddress} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {writable} from "src/engine/core/utils"
@@ -10,9 +10,9 @@ import {getIdFilters} from "./filters"
 import {load} from "./load"
 
 const getAncestorIds = e => {
-  const {roots, replies, mentions} = Tags.from(e).getAncestors()
+  const {roots, replies, mentions} = Tags.fromEvent(e).ancestors()
 
-  return [...roots.values().all(), ...replies.values().all(), ...mentions.values().all()]
+  return roots.concat(replies).concat(mentions).values().valueOf()
 }
 
 export class ThreadLoader {
@@ -61,16 +61,15 @@ export class ThreadLoader {
   }
 
   addToThread(events) {
-    const parentIds = getParentIds(this.note)
-    const rootIds = getRootIds(this.note)
     const ancestors = []
+    const {roots, replies} = Tags.fromEvent(this.note).ancestors()
 
     for (const event of events) {
       const ids = getIdOrAddress(event)
 
-      if (parentIds.find(id => ids.includes(id))) {
+      if (replies.find(t => ids.includes(t.value()))) {
         this.parent.set(event)
-      } else if (rootIds.find(id => ids.includes(id))) {
+      } else if (roots.find(t => ids.includes(t.value()))) {
         this.root.set(event)
       } else {
         ancestors.push(event)

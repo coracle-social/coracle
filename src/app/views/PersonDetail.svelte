@@ -1,6 +1,6 @@
 <script lang="ts">
   import {identity} from "ramda"
-  import {stripProto} from "paravel"
+  import {stripProtocol} from "paravel"
   import {info} from "src/util/logger"
   import {ensureProto} from "src/util/misc"
   import {noteKinds} from "src/util/nostr"
@@ -76,7 +76,7 @@
         class="flex items-center gap-2 text-sm"
         href={ensureProto($person.profile.website)}>
         <i class="fa fa-link text-accent" />
-        {stripProto($person.profile.website)}
+        {stripProtocol($person.profile.website)}
       </Anchor>
     {/if}
     <div class="-ml-16 flex flex-grow flex-col gap-4 xs:ml-0">

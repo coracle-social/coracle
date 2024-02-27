@@ -1,5 +1,5 @@
 import {bech32, utf8} from "@scure/base"
-import {now, stripProto} from "paravel"
+import {now, stripProtocol} from "paravel"
 import {pluck, fromPairs, last, identity, sum, is, equals} from "ramda"
 import {ensurePlural, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js"
@@ -195,7 +195,7 @@ export const race = (p, promises) => {
 }
 
 export const displayUrl = url => {
-  return stripProto(url)
+  return stripProtocol(url)
     .replace(/^(www\.)?/i, "")
     .replace(/\/$/, "")
 }

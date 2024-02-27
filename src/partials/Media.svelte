@@ -10,7 +10,7 @@
   import {dufflepud, imgproxy} from "src/engine"
 
   export let url
-  export let imeta = new Tags([["url", url]])
+  export let imeta = Tags.from([["url", url]])
   export let onClick = null
   export let onClose = null
   export let fullSize = false
@@ -57,7 +57,7 @@
     {:else if url.match(/\.(jpe?g|png|gif|webp)$/)}
       <Image
         alt="Link preview"
-        src={imeta.type("url").values().all().map(imgproxy)}
+        src={imeta.whereKey("url").values().valueOf().map(imgproxy)}
         class={cx("object-contain object-center", {"max-h-96": !fullSize})} />
     {:else}
       {#await loadPreview()}

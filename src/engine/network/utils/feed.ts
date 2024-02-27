@@ -1,6 +1,6 @@
 import {partition, prop, uniqBy, identity, without, assoc} from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
-import {now} from "paravel"
+import {now, Tags} from "paravel"
 import {race} from "src/util/misc"
 import {info} from "src/util/logger"
 import {
@@ -9,7 +9,6 @@ import {
   noteKinds,
   reactionKinds,
   repostKinds,
-  getParentId,
 } from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
@@ -112,7 +111,7 @@ export class FeedLoader {
         return false
       }
 
-      if (this.opts.shouldHideReplies && getParentId(e)) {
+      if (this.opts.shouldHideReplies && Tags.fromEvent(e).parent()) {
         return false
       }
 
@@ -132,7 +131,7 @@ export class FeedLoader {
 
     const parentIds = notes
       .filter(e => !repostKinds.includes(e.kind) && !this.isEventMuted(e))
-      .map(e => getParentId(e))
+      .map(e => Tags.fromEvent(e).parent()?.value())
       .filter(identity)
 
     load({
@@ -194,7 +193,7 @@ export class FeedLoader {
 
             // Keep track of replies
             if (noteKinds.includes(e.kind)) {
-              const parentId = getParentId(e)
+              const parentId = Tags.fromEvent(e).parent()?.value()
               const replies = this.replies.get(parentId) || []
 
               this.replies.set(parentId, [...replies, e])
@@ -202,7 +201,7 @@ export class FeedLoader {
 
             // If we have a parent, show that instead, with replies grouped underneath
             while (true) {
-              const parentId = getParentId(e)
+              const parentId = Tags.fromEvent(e).parent()?.value()
 
               if (!parentId) {
                 break
@@ -293,11 +292,7 @@ export class FeedLoader {
     }
 
     // If something has a parent id but we haven't found the parent yet, skip it until we have it.
-    const [defer, ok] = partition(e => {
-      const parentId = getParentId(e)
-
-      return parentId && !this.parents.get(parentId)
-    }, notes)
+    const [ok, defer] = partition(e => this.parents.has(Tags.fromEvent(e).parent()?.value()), notes)
 
     setTimeout(() => this.addToFeed(defer), 1500)
 

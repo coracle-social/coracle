@@ -208,7 +208,7 @@ export const tagsFromContent = (content: string) => {
 }
 
 export const getReplyTags = (parent: Event, inherit = false) => {
-  const tags = Tags.from(parent)
+  const tags = Tags.fromEvent(parent)
   const hints = getEventHints(parent)
   const replyTagValues = getIdAndAddress(parent)
   const userPubkey = pubkey.get()
@@ -221,7 +221,7 @@ export const getReplyTags = (parent: Event, inherit = false) => {
 
   // Inherit p-tag mentions
   if (inherit) {
-    for (const pubkey of tags.type("p").values().all()) {
+    for (const pubkey of tags.values("p").valueOf()) {
       if (pubkey !== userPubkey) {
         replyTags.push(mention(pubkey))
       }
@@ -229,15 +229,15 @@ export const getReplyTags = (parent: Event, inherit = false) => {
   }
 
   // Based on NIP 10 legacy tags, order is root, mentions, reply
-  const {roots, replies, mentions} = tags.getAncestors()
+  const {roots, replies, mentions} = tags.ancestors()
 
   // Root comes first
   if (roots.exists()) {
-    for (const t of roots.all()) {
+    for (const t of roots.valueOf()) {
       replyTags.push(t.concat("root"))
     }
   } else {
-    for (const t of replies.all()) {
+    for (const t of replies.valueOf()) {
       replyTags.push(t.concat("root"))
     }
   }
@@ -247,7 +247,7 @@ export const getReplyTags = (parent: Event, inherit = false) => {
     const isRepeated = v => replyTagValues.includes(v) || replyTags.find(t => t[1] === v)
 
     // Inherit mentions
-    for (const t of mentions.all()) {
+    for (const t of mentions.valueOf()) {
       if (!isRepeated(t[1])) {
         replyTags.push(t.concat("mention"))
       }
@@ -255,7 +255,7 @@ export const getReplyTags = (parent: Event, inherit = false) => {
 
     // Inherit replies if they weren't already included
     if (roots.exists()) {
-      for (const t of replies.all()) {
+      for (const t of replies.valueOf()) {
         if (!isRepeated(t[1])) {
           replyTags.push(t.concat("mention"))
         }

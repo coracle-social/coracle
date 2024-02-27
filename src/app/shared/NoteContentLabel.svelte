@@ -5,7 +5,7 @@
   export let note
   export let type = "l"
 
-  const labels = Tags.from(note).type(type).values().all()
+  const labels = Tags.fromEvent(note).values(type).valueOf()
 </script>
 
 <div>

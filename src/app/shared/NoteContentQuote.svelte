@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {isShareableRelay} from "paravel"
+  import {isShareableRelayUrl} from "paravel"
   import {filterVals} from "hurdak"
   import {asArray} from "src/util/misc"
   import {Naddr} from "src/util/nostr"
@@ -29,7 +29,7 @@
   const {id, identifier, kind, pubkey} = value
 
   // Prioritize hints in relay selection by merging directly instead of with mergeHints
-  const hints = (value.relays || []).filter(isShareableRelay)
+  const hints = (value.relays || []).filter(isShareableRelayUrl)
   const relays = selectHints([...hints, ...getParentHints(note)])
 
   const openQuote = e => {
@@ -109,7 +109,9 @@
         <slot name="note-content" {quote} />
       {/if}
     {:else}
-      <p class="mb-1 py-24 text-center text-neutral-600">Unable to load a preview for quoted event</p>
+      <p class="mb-1 py-24 text-center text-neutral-600">
+        Unable to load a preview for quoted event
+      </p>
     {/if}
   </Card>
 </div>

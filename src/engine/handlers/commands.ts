@@ -1,5 +1,4 @@
-import {last, sortBy} from "ramda"
-import {first} from "hurdak"
+import {sortBy} from "ramda"
 import {cached, Tags} from "paravel"
 import {derived} from "src/engine/core/utils"
 import {load} from "src/engine/network/utils"
@@ -24,14 +23,16 @@ export const deriveHandlers = cached({
     return derived([handlers.mapStore, handlerRecs], ([$handlers, $recs]) => {
       const result = {}
 
-      for (const {event} of $recs.filter(r => Tags.from(r.event).getValue("d") === String(kind))) {
+      for (const {event} of $recs.filter(
+        r => Tags.fromEvent(r.event).get("d").value() === String(kind),
+      )) {
         if (!$follows.has(event.pubkey)) {
           continue
         }
 
-        const tags = Tags.from(event).type("a").all()
-        const tag = tags.find(t => last(t) === "web") || first(tags)
-        const address = tag?.[1]
+        const tags = Tags.fromEvent(event).whereKey("a")
+        const tag = tags.whereMark("web").first() || tags.first()
+        const address = tag?.value()
         const handler = $handlers.get(address)
 
         if (!handler) {

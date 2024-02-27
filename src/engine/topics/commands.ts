@@ -15,7 +15,7 @@ export const addTopic = (e, name) => {
 }
 
 export const processTopics = (e: Event) => {
-  const tagTopics = Tags.from(e).topics().all()
+  const tagTopics = Tags.fromEvent(e).topics().valueOf()
   const contentTopics = Array.from(e.content.toLowerCase().matchAll(/#(\w{2,100})/g)).map(nth(1))
 
   for (const name of tagTopics.concat(contentTopics)) {

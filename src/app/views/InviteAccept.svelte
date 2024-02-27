@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {zipObj} from 'ramda'
+  import {zipObj} from "ramda"
   import {updateIn} from "hurdak"
   import {normalizeRelayUrl} from "paravel"
   import Card from "src/partials/Card.svelte"
@@ -20,9 +20,9 @@
 
   const {FORCE_RELAYS} = $env
   const parsedRelays = relays
-    .map(s => updateIn("url", normalizeRelayUrl, zipObj(["url", "claim"], s.split('|'))))
+    .map(s => updateIn("url", normalizeRelayUrl, zipObj(["url", "claim"], s.split("|"))))
     .filter(r => FORCE_RELAYS.length === 0 || FORCE_RELAYS.includes(r.url))
-  const parsedGroups = groups.map(s => zipObj(["address", "relay", "claim"], s.split('|')))
+  const parsedGroups = groups.map(s => zipObj(["address", "relay", "claim"], s.split("|")))
 </script>
 
 {#if $session}

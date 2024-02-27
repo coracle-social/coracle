@@ -5,7 +5,7 @@
   export let value = []
   export let includeInContent = false
 
-  const getUrl = imeta => imeta.type("url").values().first()
+  const getUrl = imeta => imeta.get("url").value()
 
   export const getValue = () => value
 

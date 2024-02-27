@@ -9,8 +9,10 @@ export const deletes = new Writable(new Set<string>(), 10000)
 
 seen.subscribe($seen => {
   seenIds.update($seenIds => {
-    for (const id of new Set<string>(Tags.from($seen).type("e").values().all())) {
-      $seenIds.add(id)
+    for (const e of $seen) {
+      for (const id of Tags.fromEvent(e).values("e").uniq().valueOf()) {
+        $seenIds.add(id)
+      }
     }
 
     return $seenIds

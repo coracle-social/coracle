@@ -29,13 +29,13 @@
     list = userLists.key(address).get()
   }
 
-  const tags = list ? Tags.from(list) : Tags.from([])
+  const tags = list ? Tags.fromEvent(list) : Tags.from([])
 
   const values = {
-    title: tags.getValue("title") || tags.getValue("name") || tags.getValue("d") || "",
-    description: tags.getValue("description") || "",
-    params: tags.type(["t", "p"]).all(),
-    relays: tags.type("r").all(),
+    title: tags.get("title").value() || tags.get("name").value() || tags.get("d").value() || "",
+    description: tags.get("description").value() || "",
+    params: tags.filter(t => ["t", "p"].includes(t.key())).valueOf(),
+    relays: tags.whereValue("r").valueOf(),
   }
 
   const search = q => {

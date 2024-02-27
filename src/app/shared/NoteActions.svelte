@@ -4,7 +4,7 @@
   import {onMount} from "svelte"
   import {toNostrURI, Tags, createEvent} from "paravel"
   import {tweened} from "svelte/motion"
-  import {identity, last, filter, sum, uniqBy, prop, pluck} from "ramda"
+  import {identity, filter, sum, uniqBy, prop, pluck} from "ramda"
   import {fly} from "src/util/transition"
   import {formatSats, tryJson} from "src/util/misc"
   import {getIdOrAddressTag, asNostrEvent} from "src/util/nostr"
@@ -57,8 +57,9 @@
   export let replies, likes, zaps
   export let zapper
 
+  const tags = Tags.fromEvent(note)
   const relays = getEventHints(note)
-  const address = Tags.from(note).circles().first()
+  const address = tags.context().first()
   const nevent = nip19.neventEncode({id: note.id, relays})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
   const kindHandlers = deriveHandlers(note.kind).derived(filter((h: any) => h.recs.length > 1))
@@ -66,8 +67,7 @@
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
-  const clientTag = Tags.from(note).type("client").first()
-  const handler = handlers.key(clientTag ? last(clientTag) : null)
+  const handler = handlers.key(tags.get("client")?.mark())
 
   //const report = () => router.at("notes").of(note.id, {relays: getEventHints(note)}).at('report').qp({pubkey: note.pubkey}).open()
 
@@ -125,9 +125,9 @@
   }
 
   const startZap = () => {
-    const zapTags = Tags.from(note).type("zap")
+    const zapTags = tags.whereKey("zap")
     const defaultSplit = ["zap", note.pubkey, getPubkeyHint(note.pubkey), "1"]
-    const splits = zapTags.exists() ? zapTags.all() : [defaultSplit]
+    const splits = zapTags.exists() ? zapTags.valueOf() : [defaultSplit]
 
     router
       .at("zap")
@@ -219,7 +219,7 @@
   }
 
   onMount(() => {
-    loadPubkeys(Tags.from(note).type("zap").pubkeys().all())
+    loadPubkeys(tags.whereKey("zap").values().valueOf())
   })
 </script>
 
@@ -268,7 +268,7 @@
   </div>
   <div class="flex scale-90 items-center gap-2">
     <div
-      class="staatliches cursor-pointer rounded bg-neutral-800 dark:bg-neutral-600 px-2 text-neutral-100 transition-colors dark:hover:bg-neutral-500 hover:bg-neutral-700 hidden sm:block"
+      class="staatliches hidden cursor-pointer rounded bg-neutral-800 px-2 text-neutral-100 transition-colors hover:bg-neutral-700 dark:bg-neutral-600 dark:hover:bg-neutral-500 sm:block"
       on:click={() => setView("info")}>
       <span class="text-accent">{note.seen_on.length}</span>
       {pluralize(note.seen_on.length, "relay")}

@@ -53,14 +53,14 @@
     loading = false
 
     if (event) {
-      const tags = Tags.from(event)
+      const tags = Tags.fromEvent(event)
 
       values = {
-        groups: tags.circles().all(),
-        title: tags.getValue("title") || "",
-        location: tags.getValue("location") || "",
-        start: secondsToDate(tags.getValue("start") || now()),
-        end: secondsToDate(tags.getValue("end") || now()),
+        groups: tags.context().valueOf(),
+        title: tags.get("title").value() || "",
+        location: tags.get("location").value() || "",
+        start: secondsToDate(tags.get("start").value() || now()),
+        end: secondsToDate(tags.get("end").value() || now()),
       }
 
       // Wait for components to mount
@@ -68,8 +68,8 @@
 
       compose.write(event.content)
 
-      for (const image of tags.type("image").values().all()) {
-        images.addImage(new Tags([["url", image]]))
+      for (const url of tags.values("image").valueOf()) {
+        images.addImage(Tags.from([["url", url]]))
       }
     }
   })

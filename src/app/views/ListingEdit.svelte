@@ -61,15 +61,15 @@
     loading = false
 
     if (event) {
-      const tags = Tags.from(event)
-      const [price, code] = tags.type("price").first().slice(1)
+      const tags = Tags.fromEvent(event)
+      const [price, code] = tags.whereKey("price").first().slice(1).valueOf()
 
       values = {
-        groups: tags.circles().all(),
-        title: tags.getValue("title") || "",
-        summary: tags.getValue("summary") || "",
-        location: tags.getValue("location") || "",
-        status: tags.getValue("status") || "active",
+        groups: tags.context().valueOf(),
+        title: tags.get("title").value() || "",
+        summary: tags.get("summary").value() || "",
+        location: tags.get("location").value() || "",
+        status: tags.get("status").value() || "active",
         price: parseInt(price || 0),
         currency: getCurrencyOption(code),
       }
@@ -79,8 +79,8 @@
 
       compose.write(event.content)
 
-      for (const image of tags.type("image").values().all()) {
-        images.addImage(new Tags([["url", image]]))
+      for (const url of tags.values("image").valueOf()) {
+        images.addImage(Tags.from([["url", url]]))
       }
     }
   })
