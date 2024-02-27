@@ -6,11 +6,13 @@ import {userKinds} from "src/util/nostr"
 import {toast} from "src/partials/state"
 import {router} from "src/app/router"
 import {
+  env,
   pool,
   pubkey,
   session,
   writable,
   loadSeen,
+  loadGroups,
   loadDeletes,
   loadPubkeys,
   loadGiftWrap,
@@ -103,8 +105,8 @@ setInterval(() => {
 
 export const loadAppData = () => {
   // If we have a group, load that
-  if ($env.FORCE_GROUP) {
-    loadGroups([$env.FORCE_GROUP])
+  if (env.get().FORCE_GROUP) {
+    loadGroups([env.get().FORCE_GROUP])
   }
 }
 
