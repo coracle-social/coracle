@@ -23,7 +23,7 @@ export const urlIsMedia = (url: string) =>
 export const parseContent = (event: {content: string; tags?: string[][]}) => {
   const result: any[] = []
   const tags = Tags.from(event.tags || [])
-  let text = event.content.trim() || tags.get("alt").value() || ""
+  let text = event.content.trim() || tags.get("alt")?.value() || ""
   let buffer = ""
 
   const getMeta = (url, hash) => {

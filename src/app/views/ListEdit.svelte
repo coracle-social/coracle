@@ -32,8 +32,8 @@
   const tags = list ? Tags.fromEvent(list) : Tags.from([])
 
   const values = {
-    title: tags.get("title").value() || tags.get("name").value() || tags.get("d").value() || "",
-    description: tags.get("description").value() || "",
+    title: tags.get("title")?.value() || tags.get("name")?.value() || tags.get("d")?.value() || "",
+    description: tags.get("description")?.value() || "",
     params: tags.filter(t => ["t", "p"].includes(t.key())).valueOf(),
     relays: tags.whereValue("r").valueOf(),
   }

@@ -10,7 +10,7 @@ import {channels} from "./state"
 import {getChannelId} from "./utils"
 
 projections.addHandler(30078, async e => {
-  const d = Tags.fromEvent(e).get("d").value()
+  const d = Tags.fromEvent(e).get("d")?.value()
   const session = getSession(e.pubkey)
 
   if (!session) {
@@ -70,7 +70,7 @@ const handleMessage = async e => {
 
     // Handle nip04
     if (e.kind === 4) {
-      const recipient = tags.get("p").value()
+      const recipient = tags.get("p")?.value()
       const session = getSession(e.pubkey) || getSession(recipient)
 
       if (!session) {

@@ -106,7 +106,7 @@
     ])
 
     for (const imeta of images.getValue()) {
-      tags.push(["imeta", ...imeta.all().map(join(" "))])
+      tags.push(["imeta", ...imeta.valueOf().map(join(" "))])
     }
 
     if (opts.warning) {

@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags, now} from "paravel"
+  import {Tags, now, asEventTemplate} from "paravel"
   import {sleep} from "hurdak"
-  import {Naddr, EventBuilder} from "src/util/nostr"
+  import {Naddr} from "src/util/nostr"
   import {secondsToDate, dateToSeconds} from "src/util/misc"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -21,18 +21,22 @@
   export let event
 
   const onSubmit = async () => {
-    const builder = EventBuilder.from(event)
+    const tags = Tags.fromEvent(event)
+      .setTag("title", values.title)
+      .setTag("location", values.location)
+      .setTag("start", dateToSeconds(values.start).toString())
+      .setTag("end", dateToSeconds(values.end).toString())
+      .removeContext()
+      .setIMeta(images.getValue())
 
-    builder.setTagArgs("title", values.title)
-    builder.setTagArgs("location", values.location)
-    builder.setTagArgs("start", dateToSeconds(values.start).toString())
-    builder.setTagArgs("end", dateToSeconds(values.end).toString())
-    builder.removeCircles()
-    builder.setCreatedAt(now())
-    builder.setContent(compose.parse())
-    builder.setImageMeta(images.getValue())
+    const template = asEventTemplate({
+      ...event,
+      created_at: now(),
+      tags: tags.valueOf(),
+      content: compose.parse(),
+    })
 
-    const {pubs} = await publishToZeroOrMoreGroups(values.groups, builder.template, {
+    const {pubs} = await publishToZeroOrMoreGroups(values.groups, template, {
       relays: getUserHints("write"),
     })
 
@@ -57,10 +61,10 @@
 
       values = {
         groups: tags.context().valueOf(),
-        title: tags.get("title").value() || "",
-        location: tags.get("location").value() || "",
-        start: secondsToDate(tags.get("start").value() || now()),
-        end: secondsToDate(tags.get("end").value() || now()),
+        title: tags.get("name")?.value() || tags.get("title")?.value() || "",
+        location: tags.get("location")?.value() || "",
+        start: secondsToDate(tags.get("start")?.value() || now()),
+        end: secondsToDate(tags.get("end")?.value() || now()),
       }
 
       // Wait for components to mount

@@ -24,7 +24,7 @@ export const deriveHandlers = cached({
       const result = {}
 
       for (const {event} of $recs.filter(
-        r => Tags.fromEvent(r.event).get("d").value() === String(kind),
+        r => Tags.fromEvent(r.event).get("d")?.value() === String(kind),
       )) {
         if (!$follows.has(event.pubkey)) {
           continue
