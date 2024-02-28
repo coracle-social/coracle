@@ -1,6 +1,7 @@
+import {Address, getAddress} from "paravel"
 import {omit, without, find, prop, groupBy, uniq} from "ramda"
 import {shuffle, randomId, seconds, avg} from "hurdak"
-import {Naddr, isAddressable} from "src/util/nostr"
+import {isAddressable} from "src/util/nostr"
 import {env, pubkey} from "src/engine/session/state"
 import {follows, network} from "src/engine/people/derived"
 import {
@@ -48,7 +49,7 @@ export const getIdFilters = values => {
 
   for (const value of values) {
     if (value.includes(":")) {
-      aFilters.push(Naddr.fromTagValue(value).asFilter())
+      aFilters.push(Address.fromRaw(value).asFilter())
     } else {
       ids.push(value)
     }
@@ -71,7 +72,7 @@ export const getReplyFilters = (events, filter) => {
     e.push(event.id)
 
     if (isAddressable(event)) {
-      a.push(Naddr.fromEvent(event).asTagValue())
+      a.push(getAddress(event))
     }
 
     if (event.wrap) {

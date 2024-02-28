@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags, now, asEventTemplate} from "paravel"
+  import {inc} from "ramda"
+  import {Tags, Address, now, asEventTemplate} from "paravel"
   import {sleep} from "hurdak"
-  import {Naddr} from "src/util/nostr"
   import {secondsToDate, dateToSeconds} from "src/util/misc"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -31,9 +31,9 @@
 
     const template = asEventTemplate({
       ...event,
-      created_at: now(),
       tags: tags.valueOf(),
       content: compose.parse(),
+      created_at: inc(event.created_at),
     })
 
     const {pubs} = await publishToZeroOrMoreGroups(values.groups, template, {
@@ -51,7 +51,7 @@
 
   onMount(async () => {
     if (!event) {
-      event = await dereferenceNote(Naddr.fromTagValue(address))
+      event = await dereferenceNote(Address.fromRaw(address))
     }
 
     loading = false

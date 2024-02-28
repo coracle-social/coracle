@@ -162,7 +162,7 @@ export class MultiCursor {
     return this.cursors.reduce((n, c) => n + c.buffer.length, 0)
   }
 
-  take(n: number): [(typeof Subscription)[], Event[]] {
+  take(n: number): [Subscription[], Event[]] {
     const events = []
 
     while (events.length < n) {

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {Naddr} from 'src/util/nostr'
+  import {getAddress} from "paravel"
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
 
   export let note
 </script>
 
-<GroupSummary address={Naddr.fromEvent(note).asTagValue()} />
+<GroupSummary address={getAddress(note)} />

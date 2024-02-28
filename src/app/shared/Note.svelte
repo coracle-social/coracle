@@ -250,7 +250,7 @@
         {#if isLastReply}
           <AltColor background class="absolute -left-4 h-[20px] w-1" let:isAlt />
         {:else}
-          <AltColor background class="absolute -left-4 h-full w-1" let:isAlt />
+          <AltColor background class="absolute -bottom-2 -left-4 top-0 w-1" let:isAlt />
         {/if}
       {/if}
       <div class="group relative" class:pt-4={!showParent && !topLevel}>

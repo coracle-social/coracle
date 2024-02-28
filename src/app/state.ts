@@ -89,7 +89,7 @@ setInterval(() => {
   // and keep track of slow connections
   for (const [url, connection] of pool.data.entries()) {
     if (connection.meta.last_activity < now() - 60) {
-      connection.disconnect()
+      connection.socket.disconnect()
     } else if (connection.lastError < Date.now() - 10_000) {
       connection.clearError()
     } else if (userRelays.has(url) && connection.meta.quality < 0.3) {

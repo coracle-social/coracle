@@ -8,8 +8,8 @@ import {handlers, handlerRecs} from "./state"
 
 export const deriveHandlers = cached({
   maxSize: 10000,
-  getKey: ([kind]: [string]) => kind,
-  getValue: ([kind]: [string]) => {
+  getKey: ([kind]: [number]) => kind,
+  getValue: ([kind]: [number]) => {
     const $follows = follows.get()
 
     load({

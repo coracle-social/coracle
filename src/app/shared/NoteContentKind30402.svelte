@@ -1,9 +1,8 @@
 <script lang="ts">
   import cx from "classnames"
-  import {Tags} from "paravel"
+  import {Tags, Address, getAddress} from "paravel"
   import {fromPairs} from "ramda"
   import {commaFormat} from "hurdak"
-  import {Naddr} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Carousel from "src/partials/Carousel.svelte"
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
@@ -23,14 +22,13 @@
   const images = tags.values("image").valueOf()
   const {title, summary, location, status} = tags.asObject()
   const [price = 0, code = "SAT"] = tags.get("price")?.drop(1).valueOf() || []
-  const address = Naddr.fromEvent(note).asTagValue()
+  const address = getAddress(note)
   const editLink = router.at("listings").of(address).at("edit").toString()
   const deleteLink = router.at("listings").of(address).at("delete").toString()
 
   const sendMessage = () => {
-    const initialMessage = `Hi, I'd like to make an offer on this listing:\n${Naddr.fromEvent(
-      note,
-    ).encode()}`
+    const naddr = Address.fromEvent(note).asNaddr()
+    const initialMessage = `Hi, I'd like to make an offer on this listing:\n${naddr}`
 
     router.at("channels").of([$pubkey, note.pubkey]).cx({initialMessage}).push()
   }

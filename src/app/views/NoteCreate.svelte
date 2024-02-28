@@ -121,8 +121,6 @@
       }
     }
 
-    return
-
     if (opts.warning) {
       tags.push(["content-warning", opts.warning])
     }

@@ -23,7 +23,7 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
   const kinds = getNotificationKinds()
   const $isEventMuted = isEventMuted.get()
   const events = chunk.filter(e => kinds.includes(e.kind) && !$isEventMuted(e))
-  const eventsWithParent = chunk.filter(e => Tags.from(e).parent())
+  const eventsWithParent = chunk.filter(e => Tags.fromEvent(e).parent())
   const pubkeys = new Set(pluck("pubkey", events))
 
   for (const pubkey of pubkeys) {

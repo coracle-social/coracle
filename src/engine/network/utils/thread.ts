@@ -10,9 +10,7 @@ import {getIdFilters} from "./filters"
 import {load} from "./load"
 
 const getAncestorIds = e =>
-  Tags.merge(...Object.values(Tags.fromEvent(e).ancestors()))
-    .values()
-    .valueOf()
+  Tags.from(Object.values(Tags.fromEvent(e).ancestors()).flatMap(tags => tags.valueOf()))
 
 export class ThreadLoader {
   stopped = false

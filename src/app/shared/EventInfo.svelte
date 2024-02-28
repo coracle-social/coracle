@@ -1,8 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
-  import {Tags} from "paravel"
+  import {Tags, getAddress} from "paravel"
   import {fromPairs} from "ramda"
-  import {Naddr} from "src/util/nostr"
   import {secondsToDate, formatTimestamp, formatTimestampAsDate, getLocale} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -29,7 +28,7 @@
   const startDateDisplay = formatTimestampAsDate(start)
   const endDateDisplay = formatTimestampAsDate(end)
   const isSingleDay = startDateDisplay === endDateDisplay
-  const address = Naddr.fromEvent(event).asTagValue()
+  const address = getAddress(event)
   const detailPath = router.at("events").of(address).toString()
   const editLink = router.at("events").of(address).at("edit").toString()
   const deleteLink = router.at("events").of(address).at("delete").toString()

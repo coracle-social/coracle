@@ -47,7 +47,7 @@ export const loadAllMessages = ({reload = false} = {}) => {
   ]
 }
 
-export const listenForMessages = pubkeys => {
+export const listenForMessages = (pubkeys: string[]) => {
   const {pubkey} = session.get()
   const allPubkeys = uniq(pubkeys.concat(pubkey))
 

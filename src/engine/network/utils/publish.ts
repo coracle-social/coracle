@@ -1,10 +1,10 @@
 import EventEmitter from "events"
-import {createEvent, Tags} from "paravel"
+import {createEvent, Address, Tags} from "paravel"
 import {omit, uniqBy} from "ramda"
 import {defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"
 import {parseContent} from "src/util/notes"
-import {Naddr, isAddressable, getIdAndAddress} from "src/util/nostr"
+import {isAddressable, getIdAndAddress} from "src/util/nostr"
 import type {Event, NostrEvent} from "src/engine/events/model"
 import {people} from "src/engine/people/state"
 import {displayPerson} from "src/engine/people/utils"
@@ -268,7 +268,7 @@ export const getReplyTags = (parent: Event, inherit = false) => {
 
   // Add a-tag reply if relevant
   if (isAddressable(parent)) {
-    replyTags.push(Naddr.fromEvent(parent, hints).asTag("reply"))
+    replyTags.push(Address.fromEvent(parent, hints).asTag("reply"))
   }
 
   return replyTags
