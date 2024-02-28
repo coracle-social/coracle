@@ -53,8 +53,8 @@ export const unwrapRepost = repost => {
     return null
   }
 
-  const originalGroup = Tags.fromEvent(event).context().first()
-  const repostGroup = Tags.fromEvent(repost).context().first()
+  const originalGroup = Tags.fromEvent(event).context().values().first()
+  const repostGroup = Tags.fromEvent(repost).context().values().first()
 
   // Only show cross-posts, not reposts from global to global
   if (originalGroup === repostGroup) {

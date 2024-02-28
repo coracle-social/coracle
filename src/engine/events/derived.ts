@@ -52,8 +52,14 @@ export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settin
       return false
     }
 
-    const isGroupMember = tags.groups().some(a => deriveIsGroupMember(a).get())
-    const isCommunityMember = tags.communities().some(a => false)
+    const isGroupMember = tags
+      .groups()
+      .values()
+      .some(a => deriveIsGroupMember(a).get())
+    const isCommunityMember = tags
+      .communities()
+      .values()
+      .some(a => false)
     const wotAdjustment = isCommunityMember || isGroupMember ? 1 : 0
 
     if (!$follows.has(e.pubkey) && getWotScore($pubkey, e.pubkey) < minWot - wotAdjustment) {

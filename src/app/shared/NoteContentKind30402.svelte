@@ -1,7 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
   import {Tags, Address, getAddress} from "paravel"
-  import {fromPairs} from "ramda"
   import {commaFormat} from "hurdak"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Carousel from "src/partials/Carousel.svelte"

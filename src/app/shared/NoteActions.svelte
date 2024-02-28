@@ -59,7 +59,7 @@
 
   const tags = Tags.fromEvent(note)
   const relays = getEventHints(note)
-  const address = tags.context().first()
+  const address = tags.context().values().first()
   const nevent = nip19.neventEncode({id: note.id, relays})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
   const kindHandlers = deriveHandlers(note.kind).derived(filter((h: any) => h.recs.length > 1))

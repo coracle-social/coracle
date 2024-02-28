@@ -65,7 +65,7 @@
       const [price, code] = tags.whereKey("price").first().slice(1).valueOf()
 
       values = {
-        groups: tags.context().valueOf(),
+        groups: tags.context().values().valueOf(),
         title: tags.get("title")?.value() || "",
         summary: tags.get("summary")?.value() || "",
         location: tags.get("location")?.value() || "",

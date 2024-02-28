@@ -185,7 +185,7 @@ export const getUserHints = hintSelector(function* (mode: RelayMode) {
 export const getUserHint = (pubkey: string): string => first(getUserHints(1, "write")) || ""
 
 export const getEventHints = hintSelector(function* (event: Event) {
-  for (const address of Tags.fromEvent(event).context().valueOf()) {
+  for (const address of Tags.fromEvent(event).context().values().valueOf()) {
     yield* getGroupHints(address)
   }
 
@@ -199,7 +199,7 @@ export const getEventHint = (event: Event) => first(getEventHints.limit(1).getHi
 // advertised would be the most reliable option, since well-behaved clients
 // will write replies there.
 export const getReplyHints = hintSelector(function* (event) {
-  for (const address of Tags.fromEvent(event).context().valueOf()) {
+  for (const address of Tags.fromEvent(event).context().values().valueOf()) {
     yield* getGroupHints(address)
   }
 
@@ -223,7 +223,7 @@ export const getRootHints = hintSelector(function* (event) {
 // relays. Limit how many per pubkey we publish to though. We also want to advertise
 // our content to our followers, so publish to our write relays as well.
 export const getPublishHints = hintSelector(function* (event: Event) {
-  for (const address of Tags.fromEvent(event).context().valueOf()) {
+  for (const address of Tags.fromEvent(event).context().values().valueOf()) {
     yield* getGroupHints(address)
   }
 

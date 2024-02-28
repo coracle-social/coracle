@@ -120,7 +120,7 @@ projections.addHandler(34550, (e: Event) => {
 })
 
 projections.addHandler(27, (e: Event) => {
-  const address = Tags.fromEvent(e).groups().first()
+  const address = Tags.fromEvent(e).groups().values().first()
 
   if (!address) {
     return
@@ -158,9 +158,9 @@ projections.addHandler(10004, (e: Event) => {
     return
   }
 
-  const addresses = Tags.fromEvent(e).communities().valueOf()
+  const addresses = Tags.fromEvent(e).communities().values().valueOf()
 
-  for (const address of uniq(Object.keys($session.groups || {}).concat(addresses))) {
+  for (const address of uniq(Object.keys($session.groups().values || {}).concat(addresses))) {
     $session = modifyGroupStatus($session, address, e.created_at, {
       joined: addresses.includes(address),
     })
@@ -204,7 +204,7 @@ projections.addGlobalHandler(
         getExecutor([LOCAL_RELAY_URL]).publish(e)
       }
 
-      const addresses = Tags.fromEvent(e).communities().valueOf()
+      const addresses = Tags.fromEvent(e).communities().values().valueOf()
 
       // Save events with communities the user is a part of to our local db
       if (addresses.some(a => userGroups.has(a))) {
