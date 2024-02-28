@@ -1,11 +1,11 @@
 import {nip19} from "nostr-tools"
-import {Tags} from "paravel"
+import {Tags, Address} from "paravel"
 import {isShareableRelayUrl, normalizeRelayUrl as normalize, fromNostrURI} from "paravel"
 import {sortBy, whereEq, pluck, uniq, nth, prop, last} from "ramda"
 import {chain, displayList, first} from "hurdak"
 import {fuzzy} from "src/util/misc"
 import {warn} from "src/util/logger"
-import {LOCAL_RELAY_URL, Naddr} from "src/util/nostr"
+import {LOCAL_RELAY_URL} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import {env} from "src/engine/session/state"
 import {stateKey} from "src/engine/session/derived"
@@ -240,7 +240,7 @@ export const getInboxHints = hintSelector(function* (pubkeys: string[]) {
 
 export const getGroupHints = hintSelector(function* (address: string) {
   yield* getGroupRelayUrls(address)
-  yield* getPubkeyHints(Naddr.fromTagValue(address).pubkey)
+  yield* getPubkeyHints(Address.fromRaw(address).pubkey)
 })
 
 export const getGroupHint = (address: string): string => first(getGroupHints(address)) || ""

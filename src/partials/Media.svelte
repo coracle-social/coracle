@@ -57,7 +57,11 @@
     {:else if url.match(/\.(jpe?g|png|gif|webp)$/)}
       <Image
         alt="Link preview"
-        src={imeta.whereKey("url").values().valueOf().map(imgproxy)}
+        src={imeta
+          .whereKey("url")
+          .values()
+          .valueOf()
+          .map(url => imgproxy(url))}
         class={cx("object-contain object-center", {"max-h-96": !fullSize})} />
     {:else}
       {#await loadPreview()}

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {fromPairs} from "ramda"
+  import {Address} from "paravel"
   import {urlIsMedia} from "src/util/notes"
-  import {Naddr} from "src/util/nostr"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -14,7 +14,7 @@
   export let note
   export let showMedia = false
 
-  const naddr = Naddr.fromEvent(note, getEventHints(note)).encode()
+  const naddr = Address.fromEvent(note, getEventHints(note)).asNaddr()
   const {title, summary, image, status, p} = fromPairs(note.tags) as Record<string, string>
 </script>
 

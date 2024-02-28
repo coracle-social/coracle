@@ -9,14 +9,16 @@ import {getPublicKey} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import type {Event} from "src/engine/events/model"
 import {Publisher} from "./publish"
-import {subscribePersistent} from "./subscribe"
+import {subscribe} from "./subscribe"
 import type {NostrConnectHandler} from "../model"
 
 let singleton: NostrConnectBroker
 
 export class NostrConnectBroker extends Emitter {
-  #sub: typeof Subscription
+  #sub: Subscription
   #ready = sleep(500)
+  #closed = false
+  #connectResult: any
 
   static get(pubkey, connectKey: string, handler: NostrConnectHandler) {
     if (
@@ -38,7 +40,11 @@ export class NostrConnectBroker extends Emitter {
   ) {
     super()
 
-    this.#sub = subscribePersistent({
+    this.subscribe()
+  }
+
+  subscribe() {
+    this.#sub = subscribe({
       relays: this.handler.relays,
       filters: [
         {
@@ -57,6 +63,11 @@ export class NostrConnectBroker extends Emitter {
           window.open(error, "Coracle", "width=600,height=800,popup=yes")
         } else {
           this.emit(`response-${id}`, {result, error})
+        }
+      },
+      onClose: () => {
+        if (!this.#closed) {
+          this.subscribe()
         }
       },
     })
@@ -97,15 +108,17 @@ export class NostrConnectBroker extends Emitter {
   }
 
   async connect(token: string = null) {
-    const params = [getPublicKey(this.connectKey)]
+    if (!this.#connectResult) {
+      const params = [getPublicKey(this.connectKey)]
 
-    if (token) {
-      params.push(token)
+      if (token) {
+        params.push(token)
+      }
+
+      this.#connectResult = await this.request("connect", params)
     }
 
-    const result = await this.request("connect", params)
-
-    return result === "ack"
+    return this.#connectResult === "ack"
   }
 
   signEvent(event: EventTemplate) {
@@ -133,6 +146,7 @@ export class NostrConnectBroker extends Emitter {
   }
 
   teardown() {
-    this.sub?.close()
+    this.#closed = true
+    this.#sub?.close()
   }
 }

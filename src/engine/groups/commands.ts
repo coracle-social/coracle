@@ -1,7 +1,7 @@
 import {partition} from "ramda"
-import {now, createEvent} from "paravel"
+import {now, createEvent, Address} from "paravel"
 import {updateIn, randomId} from "hurdak"
-import {generatePrivateKey, getPublicKey, Naddr} from "src/util/nostr"
+import {generatePrivateKey, getPublicKey} from "src/util/nostr"
 import {updateRecord} from "src/engine/core/commands"
 import {Publisher, getClientTags, mention} from "src/engine/network/utils"
 import {pubkey} from "src/engine/session/state"
@@ -100,9 +100,9 @@ export const getGroupPublishRelays = (address, overrides = null) => {
 
 export const publishToGroupAdmin = async (address, template) => {
   const group = groups.key(address).get()
-  const naddr = Naddr.fromTagValue(address)
+  const addr = Address.fromRaw(address)
   const relays = group?.relays || getUserHints("write")
-  const pubkeys = [naddr.pubkey, session.get().pubkey]
+  const pubkeys = [addr.pubkey, session.get().pubkey]
 
   const pubs = []
   const events = []

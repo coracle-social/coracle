@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags} from "paravel"
-  import {Naddr, getIdOrAddress, noteKinds} from "src/util/nostr"
+  import {Tags, Address} from "paravel"
+  import {getIdOrAddress, noteKinds} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -18,7 +18,7 @@
   let loading = true
 
   onMount(async () => {
-    event = event || (await dereferenceNote({...Naddr.fromTagValue(address), relays}))
+    event = event || (await dereferenceNote(Address.fromRaw(address, relays)))
     loading = false
   })
 </script>

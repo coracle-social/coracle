@@ -2,11 +2,12 @@
   import {fromPairs} from "ramda"
   import {batch} from "hurdak"
   import {onMount} from "svelte"
+  import {getAddress} from "paravel"
   import Calendar from "@event-calendar/core"
   import DayGrid from "@event-calendar/day-grid"
   import Interaction from "@event-calendar/interaction"
   import {secondsToDate} from "src/util/misc"
-  import {Naddr, LOCAL_RELAY_URL} from "src/util/nostr"
+  import {LOCAL_RELAY_URL} from "src/util/nostr"
   import {themeColors} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/router"
@@ -44,7 +45,7 @@
       onEvent: batch(300, chunk => {
         events.update($events => {
           for (const e of chunk) {
-            const addr = Naddr.fromEvent(e).asTagValue()
+            const addr = getAddress(e)
             const dup = $events.get(addr)
 
             // Make sure we have the latest version of every event
@@ -70,7 +71,7 @@
 
       return {
         editable: isOwn,
-        id: Naddr.fromEvent(e).asTagValue(),
+        id: getAddress(e),
         title: meta.title || meta.name, // Backwards compat with a bug
         start: secondsToDate(meta.start),
         end: secondsToDate(meta.end),

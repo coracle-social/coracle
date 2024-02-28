@@ -1,9 +1,8 @@
 import {last, fromPairs, identity} from "ramda"
-import {fromNostrURI} from "paravel"
+import {Address, fromNostrURI} from "paravel"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {tryJson} from "src/util/misc"
-import {Naddr} from "src/util/nostr"
 import {
   decodePerson,
   decodeRelay,
@@ -21,7 +20,7 @@ export const decodeJson = json => tryJson(() => JSON.parse(json))
 export const encodeCsv = xs => xs.join(",")
 export const decodeCsv = x => x.split(",")
 export const encodeRelays = xs => xs.map(url => last(url.split("//"))).join(",")
-export const encodeNaddr = a => Naddr.fromTagValue(a).encode()
+export const encodeNaddr = a => Address.fromRaw(a).asNaddr()
 
 export const encodeFilter = f =>
   Object.entries(f)
@@ -121,7 +120,7 @@ export const asChannelId = {
 
 export const asNaddr = k => ({
   encode: encodeNaddr,
-  decode: decodeAs(k, naddr => Naddr.decode(naddr).asTagValue()),
+  decode: decodeAs(k, naddr => Address.fromNaddr(naddr).asRaw()),
 })
 
 // Router and extensions
@@ -139,7 +138,7 @@ router.extend("listings", encodeNaddr)
 
 router.extend("notes", (id, {relays = []} = {}) => {
   if (id.includes(":")) {
-    return Naddr.fromTagValue(id, relays).encode()
+    return Address.fromRaw(id, relays).asNaddr()
   }
 
   if (relays.length > 0) {

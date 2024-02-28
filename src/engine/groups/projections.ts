@@ -1,7 +1,7 @@
 import {uniq, assoc, whereEq, sortBy, prop, without, mergeRight} from "ramda"
-import {Tags} from "paravel"
+import {Tags, Address, getAddress} from "paravel"
 import {switcherFn, batch} from "hurdak"
-import {Naddr, LOCAL_RELAY_URL, getPublicKey} from "src/util/nostr"
+import {LOCAL_RELAY_URL, getPublicKey} from "src/util/nostr"
 import {projections} from "src/engine/core/projections"
 import {updateStore} from "src/engine/core/commands"
 import type {Event} from "src/engine/events/model"
@@ -65,7 +65,7 @@ projections.addHandler(24, (e: Event) => {
   }
 
   if (relays.length > 0) {
-    const {identifier: id, pubkey} = Naddr.fromTagValue(address)
+    const {identifier: id, pubkey} = Address.fromRaw(address)
 
     if (!groups.key(address).get()) {
       groups.key(address).set({address, pubkey, id, relays})
@@ -82,7 +82,7 @@ projections.addHandler(24, (e: Event) => {
 projections.addHandler(35834, (e: Event) => {
   const tags = Tags.fromEvent(e)
   const meta = tags.asObject()
-  const address = Naddr.fromEvent(e).asTagValue()
+  const address = getAddress(e)
   const group = groups.key(address)
 
   group.merge({address, id: meta.d, pubkey: e.pubkey})
@@ -102,7 +102,7 @@ projections.addHandler(35834, (e: Event) => {
 projections.addHandler(34550, (e: Event) => {
   const tags = Tags.fromEvent(e)
   const meta = tags.asObject()
-  const address = Naddr.fromEvent(e).asTagValue()
+  const address = getAddress(e)
   const group = groups.key(address)
 
   group.merge({address, id: meta.d, pubkey: e.pubkey})

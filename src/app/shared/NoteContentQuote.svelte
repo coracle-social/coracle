@@ -1,9 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {isShareableRelayUrl} from "paravel"
+  import {isShareableRelayUrl, getAddress} from "paravel"
   import {filterVals} from "hurdak"
   import {asArray} from "src/util/misc"
-  import {Naddr} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -55,7 +54,7 @@
     muted = false
   }
 
-  $: address = quote ? Naddr.fromEvent(quote).asTagValue() : ""
+  $: address = quote ? getAddress(quote) : ""
   $: isGroup = address.match(/^(34550|35834):/)
 
   onMount(async () => {

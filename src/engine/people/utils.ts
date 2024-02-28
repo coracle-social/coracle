@@ -116,8 +116,8 @@ export const getFollowsWhoMute = cached({
 })
 
 export const primeWotCaches = throttle(3000, pk => {
-  const mutes = {}
-  const follows = {}
+  const mutes: Record<string, string[]> = {}
+  const follows: Record<string, string[]> = {}
 
   // Get follows mutes from the current user's follows list
   for (const followPk of Array.from(getFollows(people.key(pk).get()))) {

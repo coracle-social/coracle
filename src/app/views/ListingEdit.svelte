@@ -1,9 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags, now, asEventTemplate} from "paravel"
+  import {Tags, Address, asEventTemplate} from "paravel"
   import {sleep, ucFirst} from "hurdak"
-  import {inc} from 'ramda'
-  import {Naddr} from "src/util/nostr"
+  import {inc} from "ramda"
   import {getCurrencyOption} from "src/util/i18n"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -25,7 +24,7 @@
   export let event
 
   const onSubmit = async () => {
-    let tags = Tags.fromEvent(event)
+    const tags = Tags.fromEvent(event)
       .setTag("title", values.title)
       .setTag("summary", values.summary)
       .setTag("location", values.location)
@@ -56,7 +55,7 @@
 
   onMount(async () => {
     if (!event) {
-      event = await dereferenceNote(Naddr.fromTagValue(address))
+      event = await dereferenceNote(Address.fromRaw(address))
     }
 
     loading = false
@@ -71,7 +70,7 @@
         summary: tags.get("summary")?.value() || "",
         location: tags.get("location")?.value() || "",
         status: tags.get("status")?.value() || "active",
-        price: parseInt(price || 0),
+        price: parseInt(price || "0"),
         currency: getCurrencyOption(code),
       }
 

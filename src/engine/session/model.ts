@@ -3,7 +3,7 @@ import type {GroupAccess} from "src/engine/groups/model"
 import type {NostrConnectHandler} from "src/engine/network/model"
 
 export type GroupStatus = {
-  joined: GroupAccess
+  joined: boolean
   joined_updated_at: number
   access: GroupAccess
   access_updated_at: number

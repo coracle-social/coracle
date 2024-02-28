@@ -1,10 +1,10 @@
 <script lang="ts">
+  import {getAddress} from "paravel"
   import {whereEq, fromPairs} from "ramda"
   import Calendar from "@event-calendar/core"
   import DayGrid from "@event-calendar/day-grid"
   import Interaction from "@event-calendar/interaction"
   import {secondsToDate} from "src/util/misc"
-  import {Naddr} from "src/util/nostr"
   import {themeColors} from "src/partials/state"
   import {router} from "src/app/router"
   import {load, pubkey} from "src/engine"
@@ -28,7 +28,7 @@
   const onEventClick = ({event: calendarEvent}) => {
     const event = events.find(whereEq({id: calendarEvent.id}))
 
-    router.at("events").of(Naddr.fromEvent(event).asTagValue()).open()
+    router.at("events").of(getAddress(event)).open()
   }
 
   let events = []

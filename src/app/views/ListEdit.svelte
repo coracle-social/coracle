@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {Tags} from "paravel"
+  import {Tags, Address} from "paravel"
   import {randomId} from "hurdak"
-  import {Naddr} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Field from "src/partials/Field.svelte"
@@ -63,7 +62,7 @@
       return toast.show("error", "That name is already in use")
     }
 
-    const id = address ? Naddr.fromTagValue(address).identifier : randomId()
+    const id = address ? Address.fromRaw(address).identifier : randomId()
     const {title, description, params, relays} = values
 
     publishBookmarksList(id, title, description, [...params, ...relays])

@@ -21,7 +21,7 @@
 
   const loadListFeed = address => {
     const list = lists.key(address).get()
-    const tags = Tags.fromEvent(list)
+    const tags = Tags.from(list.tags)
     const authors = tags.values("p").valueOf()
     const topics = tags.topics().valueOf()
     const urls = tags.values("r").valueOf()

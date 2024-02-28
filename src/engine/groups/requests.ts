@@ -1,6 +1,6 @@
-import {now} from "paravel"
+import {now, Address} from "paravel"
 import {seconds} from "hurdak"
-import {Naddr, noteKinds, repostKinds} from "src/util/nostr"
+import {noteKinds, repostKinds} from "src/util/nostr"
 import {load} from "src/engine/network/utils"
 import {selectHintsWithFallback} from "src/engine/relays/utils"
 import {updateCurrentSession} from "src/engine/session/commands"
@@ -16,7 +16,7 @@ import {
 export const attemptedAddrs = new Map()
 
 export const getStaleAddrs = (addrs: string[]) => {
-  const stale = new Set()
+  const stale = new Set<string>()
 
   for (const addr of addrs) {
     const attempts = attemptedAddrs.get(addr) | 0
@@ -38,11 +38,11 @@ export const getStaleAddrs = (addrs: string[]) => {
 }
 
 export const loadGroups = async (rawAddrs: string[], relays: string[] = null) => {
-  const naddrs = getStaleAddrs(rawAddrs).map(a => Naddr.fromTagValue(a))
-  const authors = naddrs.map(naddr => naddr.pubkey)
-  const identifiers = naddrs.map(naddr => naddr.identifier)
+  const addrs = getStaleAddrs(rawAddrs).map(a => Address.fromRaw(a))
+  const authors = addrs.map(addr => addr.pubkey)
+  const identifiers = addrs.map(addr => addr.identifier)
 
-  if (naddrs.length > 0) {
+  if (addrs.length > 0) {
     load({
       relays: selectHintsWithFallback(relays),
       filters: [{kinds: [34550, 35834], authors, "#d": identifiers}],
