@@ -63,7 +63,7 @@ export const groupNotifications = derived(
 
     const shouldSkip = e => {
       const tags = Tags.fromEvent(e)
-      const context = tags.context().valueOf()
+      const context = tags.context().values().valueOf()
 
       return (
         !context.some(a => addresses.has(a)) ||

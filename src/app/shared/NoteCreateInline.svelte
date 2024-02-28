@@ -34,7 +34,7 @@
   }
 
   const defaultGroups = parent
-    ? Tags.fromEvent(parent).context().valueOf()
+    ? Tags.fromEvent(parent).context().values().valueOf()
     : [group].filter(identity)
   const defaultOpts = {
     relays: parent ? getPublishHints(parent) : getGroupPublishHints(defaultGroups),

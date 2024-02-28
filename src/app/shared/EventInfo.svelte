@@ -19,7 +19,7 @@
   const timeFmt = new Intl.DateTimeFormat(getLocale(), {timeStyle: "short"})
   const datetimeFmt = new Intl.DateTimeFormat(getLocale(), {dateStyle: "short", timeStyle: "short"})
   const tags = Tags.fromEvent(event)
-  const groupAddrs = tags.context().valueOf()
+  const groupAddrs = tags.context().values().valueOf()
   const {name, title, location} = fromPairs(event.tags)
   const end = parseInt(tags.get("end")?.value())
   const start = parseInt(tags.get("start")?.value())

@@ -43,7 +43,7 @@
   let draft = ""
   let opts = {
     warning: "",
-    groups: parent.wrap ? parentTags.context().valueOf() : [],
+    groups: parent.wrap ? parentTags.context().values().valueOf() : [],
     relays: selectHintsWithFallback(getPublishHints(parent)),
     anonymous: false,
   }
@@ -119,7 +119,7 @@
     }
 
     const template = createEvent(1, {content, tags})
-    const addresses = parentTags.context().valueOf()
+    const addresses = parentTags.context().values().valueOf()
     const {pubs, events} = await publishToZeroOrMoreGroups(addresses, template, opts)
 
     pubs[0].on("progress", toastProgress)
