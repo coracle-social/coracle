@@ -115,11 +115,13 @@
 
     for (const imeta of images.getValue()) {
       if (type === "listing") {
-        tags.push(["image", imeta.type("url").values().first()])
+        tags.push(["image", imeta.get("url").value()])
       } else {
-        tags.push(["imeta", ...imeta.all().map(join(" "))])
+        tags.push(["imeta", ...imeta.valueOf().map(join(" "))])
       }
     }
+
+    return
 
     if (opts.warning) {
       tags.push(["content-warning", opts.warning])

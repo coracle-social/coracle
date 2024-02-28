@@ -23,9 +23,9 @@ import {setGroupStatus, modifyGroupStatus} from "./commands"
 
 projections.addHandler(24, (e: Event) => {
   const tags = Tags.fromEvent(e)
-  const privkey = tags.get("privkey").value()
-  const address = tags.get("a").value()
-  const recipient = Tags.fromEvent(e.wrap).get("p").value()
+  const privkey = tags.get("privkey")?.value()
+  const address = tags.get("a")?.value()
+  const recipient = Tags.fromEvent(e.wrap).get("p")?.value()
   const relays = tags.values("relay").valueOf()
 
   if (!address) {
@@ -34,7 +34,7 @@ projections.addHandler(24, (e: Event) => {
 
   if (privkey) {
     const pubkey = getPublicKey(privkey)
-    const role = tags.get("role").value()
+    const role = tags.get("role")?.value()
     const keys = role === "admin" ? groupAdminKeys : groupSharedKeys
 
     keys.key(pubkey).update($key => ({
@@ -170,7 +170,7 @@ projections.addHandler(10004, (e: Event) => {
 })
 
 const handleGroupRequest = access => (e: Event) => {
-  const address = Tags.fromEvent(e).get("a").value()
+  const address = Tags.fromEvent(e).get("a")?.value()
   const adminKey = deriveAdminKeyForGroup(address)
 
   if (adminKey.get()) {

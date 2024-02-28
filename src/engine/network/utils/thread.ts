@@ -9,11 +9,10 @@ import {selectHints} from "src/engine/relays/utils"
 import {getIdFilters} from "./filters"
 import {load} from "./load"
 
-const getAncestorIds = e => {
-  const {roots, replies, mentions} = Tags.fromEvent(e).ancestors()
-
-  return roots.concat(replies).concat(mentions).values().valueOf()
-}
+const getAncestorIds = e =>
+  Tags.merge(...Object.values(Tags.fromEvent(e).ancestors()))
+    .values()
+    .valueOf()
 
 export class ThreadLoader {
   stopped = false

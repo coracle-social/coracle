@@ -32,7 +32,7 @@ export const dereferenceNote = async ({
         return false
       }
 
-      return !identifier || Tags.fromEvent(e).get("d").value() === identifier
+      return !identifier || Tags.fromEvent(e).get("d")?.value() === identifier
     }, context)
 
     if (note) {

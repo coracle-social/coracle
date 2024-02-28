@@ -1,8 +1,9 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags, now} from "paravel"
+  import {Tags, now, asEventTemplate} from "paravel"
   import {sleep, ucFirst} from "hurdak"
-  import {Naddr, EventBuilder} from "src/util/nostr"
+  import {inc} from 'ramda'
+  import {Naddr} from "src/util/nostr"
   import {getCurrencyOption} from "src/util/i18n"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -24,23 +25,23 @@
   export let event
 
   const onSubmit = async () => {
-    const builder = EventBuilder.from(event)
+    let tags = Tags.fromEvent(event)
+      .setTag("title", values.title)
+      .setTag("summary", values.summary)
+      .setTag("location", values.location)
+      .setTag("price", values.price.toString(), values.currency.code)
+      .setTag("status", values.status)
+      .setImages(images.getValue())
+      .removeContext()
 
-    builder.setTagArgs("title", values.title)
-    builder.setTagArgs("summary", values.summary)
-    builder.setTagArgs("location", values.location)
-    builder.setTagArgs("price", values.price.toString(), values.currency.code)
+    const template = asEventTemplate({
+      ...event,
+      tags: tags.valueOf(),
+      content: compose.parse(),
+      created_at: inc(event.created_at),
+    })
 
-    if (values.status !== "active") {
-      builder.setTagArgs("status", values.status)
-    }
-
-    builder.removeCircles()
-    builder.setCreatedAt(now())
-    builder.setContent(compose.parse())
-    builder.setImages(images.getValue())
-
-    const {pubs} = await publishToZeroOrMoreGroups(values.groups, builder.template, {
+    const {pubs} = await publishToZeroOrMoreGroups(values.groups, template, {
       relays: getUserHints("write"),
     })
 
@@ -66,10 +67,10 @@
 
       values = {
         groups: tags.context().valueOf(),
-        title: tags.get("title").value() || "",
-        summary: tags.get("summary").value() || "",
-        location: tags.get("location").value() || "",
-        status: tags.get("status").value() || "active",
+        title: tags.get("title")?.value() || "",
+        summary: tags.get("summary")?.value() || "",
+        location: tags.get("location")?.value() || "",
+        status: tags.get("status")?.value() || "active",
         price: parseInt(price || 0),
         currency: getCurrencyOption(code),
       }
