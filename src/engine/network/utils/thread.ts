@@ -5,12 +5,14 @@ import {getIdOrAddress, getIdAndAddress} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {writable} from "src/engine/core/utils"
-import {selectHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import {getIdFilters} from "./filters"
 import {load} from "./load"
 
 const getAncestorIds = e =>
   Tags.from(Object.values(Tags.fromEvent(e).ancestors()).flatMap(tags => tags.valueOf()))
+    .values()
+    .valueOf()
 
 export class ThreadLoader {
   stopped = false
@@ -39,7 +41,7 @@ export class ThreadLoader {
 
     if (filteredIds.length > 0) {
       load({
-        relays: selectHints(this.relays),
+        relays: hints.FetchFromHints(this.relays).getUrls(),
         filters: getIdFilters(filteredIds),
         onEvent: batch(300, (events: Event[]) => {
           this.addToThread(events)

@@ -12,8 +12,8 @@
   import Heading from "src/partials/Heading.svelte"
   import {
     load,
+    hints,
     fetchHandle,
-    getUserHints,
     getExtension,
     withExtension,
     loginWithExtension,
@@ -88,7 +88,7 @@
 
   onMount(() => {
     load({
-      relays: getUserHints(),
+      relays: hints.Aggregate().getUrls(),
       filters: [
         {
           kinds: [Handlerinformation],

@@ -15,7 +15,7 @@
   import Compose from "src/app/shared/Compose.svelte"
   import {router} from "src/app/router"
   import {toastProgress} from "src/app/state"
-  import {dereferenceNote, publishToZeroOrMoreGroups, getUserHints} from "src/engine"
+  import {dereferenceNote, publishToZeroOrMoreGroups} from "src/engine"
 
   export let address
   export let event

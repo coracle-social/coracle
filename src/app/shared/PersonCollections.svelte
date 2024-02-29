@@ -4,7 +4,7 @@
   import Chip from "src/partials/Chip.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {load, getUserHints} from "src/engine"
+  import {load, hints} from "src/engine"
 
   export let pubkey
 
@@ -37,7 +37,7 @@
   }
 
   load({
-    relays: getUserHints("write"),
+    relays: hints.FetchFromPubkey(pubkey).getUrls(),
     filters: [{kinds: [1985], authors: [pubkey], "#L": ["#t"]}],
     onEvent: batch(300, chunk => {
       events = [...events, ...chunk]

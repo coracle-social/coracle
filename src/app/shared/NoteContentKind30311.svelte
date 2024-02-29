@@ -1,6 +1,5 @@
 <script lang="ts">
   import {fromPairs} from "ramda"
-  import {Address} from "paravel"
   import {urlIsMedia} from "src/util/notes"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"

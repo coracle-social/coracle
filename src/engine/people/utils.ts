@@ -6,7 +6,7 @@ import {Fetch, tryFunc, createMapOf, ellipsize, switcherFn} from "hurdak"
 import logger from "src/util/logger"
 import {createBatcher, pushToKey} from "src/util/misc"
 import {dufflepud} from "src/engine/session/utils"
-import {getPubkeyHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import type {Person, Handle} from "./model"
 import {people} from "./state"
 
@@ -166,13 +166,13 @@ export const getWotScore = (pk, tpk) => {
 }
 
 const annotatePerson = pubkey => {
-  const relays = getPubkeyHints.limit(3).getHints(pubkey, "write")
+  const relays = hints.FetchFromPubkey(pubkey).getUrls()
 
   return {
     pubkey,
-    relays,
     npub: nip19.npubEncode(pubkey),
     nprofile: nip19.nprofileEncode({pubkey, relays}),
+    relays,
   }
 }
 

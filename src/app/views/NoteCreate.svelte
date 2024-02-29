@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {v4 as uuid} from "uuid"
-  import {join, uniq, whereEq, identity} from "ramda"
+  import {join, whereEq, identity} from "ramda"
   import {throttle, commaFormat, toTitle, switcherFn} from "hurdak"
   import {createEvent, now, Tags} from "paravel"
   import {asNostrEvent} from "src/util/nostr"
@@ -61,7 +61,7 @@
     summary: "",
     price: "",
     currency: currencyOptions.find(whereEq({code: "SAT"})),
-    relays: hints.PrePublishEvent($session.pubkey, [], defaultGroups).getUrls(),
+    relays: hints.PublishToContexts(defaultGroups).getUrls(),
     groups: defaultGroups,
     anonymous: false,
     location: null,

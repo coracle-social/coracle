@@ -20,17 +20,7 @@
   import Textarea from "src/partials/Textarea.svelte"
   import ZapInvoice from "src/app/shared/ZapInvoice.svelte"
   import {router} from "src/app/router"
-  import {
-    env,
-    getSetting,
-    derivePerson,
-    requestZap,
-    listenForZapResponse,
-    mergeHints,
-    getPubkeyHint,
-    getPubkeyHints,
-    selectHintsWithFallback,
-  } from "src/engine"
+  import {env, hints, getSetting, derivePerson, requestZap, listenForZapResponse} from "src/engine"
 
   export let splits
   export let eid = null
@@ -72,7 +62,7 @@
         if (percent > 0 && totalWeight > 0) {
           zaps.push({
             pubkey: $env.PLATFORM_PUBKEY,
-            relay: getPubkeyHint($env.PLATFORM_PUBKEY),
+            relay: hints.FetchFromPubkey($env.PLATFORM_PUBKEY).getUrl(),
             amount: Math.round(zaps.reduce((a, z) => a + z.amount, 0) * percent),
             status: "pending",
             isTip: true,
@@ -96,9 +86,7 @@
         return
       }
 
-      const relays = selectHintsWithFallback(
-        mergeHints([[zap.relay], getPubkeyHints(zap.pubkey, "read")]),
-      )
+      const relays = hints.PublishMessage([zap.pubkey]).getUrls(null, [zap.relay])
 
       zaps[i].invoice = await requestZap(msg, zap.amount, {
         eid,

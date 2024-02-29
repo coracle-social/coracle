@@ -3,14 +3,7 @@ import {Address, fromNostrURI} from "paravel"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {tryJson} from "src/util/misc"
-import {
-  decodePerson,
-  decodeRelay,
-  decodeEvent,
-  selectHintsWithFallback,
-  getChannelId,
-  getPubkeyHints,
-} from "src/engine"
+import {decodePerson, decodeRelay, decodeEvent, getChannelId, hints} from "src/engine"
 
 // Decoders
 
@@ -63,7 +56,7 @@ export const decodeEntity = entity => {
     // pass
   }
 
-  return {type, data, relays: selectHintsWithFallback(data?.relays || [], 3)}
+  return {type, data, relays: hints.FetchFromHints(data?.relays || []).getUrls()}
 }
 
 // Serializers
@@ -150,7 +143,7 @@ router.extend("notes", (id, {relays = []} = {}) => {
 
 router.extend("people", (pubkey, {relays = []} = {}) => {
   if (relays.length < 3) {
-    relays = relays.concat(getPubkeyHints.limit(3 - relays.length).getHints(pubkey))
+    relays = relays.concat(hints.FetchFromPubkey(pubkey).getUrls(3 - relays.length))
   }
 
   return nip19.nprofileEncode({pubkey, relays})

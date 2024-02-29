@@ -5,10 +5,10 @@ import {LOCAL_RELAY_URL, getPublicKey} from "src/util/nostr"
 import {projections} from "src/engine/core/projections"
 import {updateStore} from "src/engine/core/commands"
 import type {Event} from "src/engine/events/model"
-import {selectHints} from "src/engine/relays/utils"
 import {sessions} from "src/engine/session/state"
 import {nip59} from "src/engine/session/derived"
 import {getExecutor, getIdFilters, load} from "src/engine/network/utils"
+import {hints} from "src/engine/relays/utils"
 import {GroupAccess} from "./model"
 import {groups, groupSharedKeys, groupAdminKeys, groupRequests, groupAlerts} from "./state"
 import {
@@ -53,7 +53,7 @@ projections.addHandler(24, (e: Event) => {
 
     // Load the group's metadata and posts
     load({
-      relays: selectHints(relays),
+      relays: hints.FetchFromHints(relays).getUrls(),
       filters: [
         ...getIdFilters([address]),
         {kinds: [1059, 1060], "#p": [pubkey]},

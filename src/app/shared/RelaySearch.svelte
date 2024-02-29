@@ -11,9 +11,8 @@
   import type {Relay} from "src/engine"
   import {
     load,
-    session,
     relays,
-    getPubkeyHints,
+    hints,
     getRelaySearch,
     relayPolicyUrls,
     normalizeRelayUrl,
@@ -43,7 +42,7 @@
   )
 
   load({
-    relays: getPubkeyHints($session?.pubkey, "read"),
+    relays: hints.Aggregate().getUrls(),
     filters: [{limit: 1000, kinds: [1986], "#l": ["review/relay"]}],
     onEvent: event => {
       reviews = reviews.concat(event)
