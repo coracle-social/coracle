@@ -1,4 +1,4 @@
-import {now, Tags} from "paravel"
+import {now, Tags, RelayMode, useMaximalFallbacks} from "paravel"
 import {seconds, updateIn, batch, doPipe} from "hurdak"
 import {pluck, max, slice, filter, without, sortBy} from "ramda"
 import {noteKinds, repostKinds, reactionKinds} from "src/util/nostr"
@@ -10,7 +10,7 @@ import {updateSession} from "src/engine/session/commands"
 import {_events} from "src/engine/events/state"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {getUserCommunities} from "src/engine/groups/utils"
-import {mergeHints, getPubkeyHints, getParentHints} from "src/engine/relays/utils"
+import {hints, getPubkeyHints} from "src/engine/relays/utils"
 import {
   loadPubkeys,
   load,
@@ -40,7 +40,12 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
   loadPubkeys(pubkeys)
 
   load({
-    relays: mergeHints(eventsWithParent.map(getParentHints)),
+    relays: hints
+      .merge({
+        fallbackPolicy: useMaximalFallbacks(RelayMode.Inbox),
+        scenarios: eventsWithParent.map(hints.FetchEventParent),
+      })
+      .getUrls(),
     filters: getIdFilters(
       eventsWithParent.flatMap(e => Tags.fromEvent(e).replies().values().valueOf()),
     ),

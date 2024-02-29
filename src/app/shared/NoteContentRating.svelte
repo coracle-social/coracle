@@ -4,7 +4,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Rating from "src/partials/Rating.svelte"
   import {router} from "src/app/router"
-  import {displayRelay, displayPubkey, getEventHints} from "src/engine"
+  import {displayRelay, displayPubkey, hints} from "src/engine"
 
   export let note, rating
 
@@ -15,7 +15,7 @@
 
   if (tag) {
     const [type, value] = tag.valueOf()
-    const relays = getEventHints(note)
+    const relays = hints.FetchEvent(note).getUrls(3)
 
     href = switcherFn(type, {
       r: () => router.at("relays").of(value).toString(),

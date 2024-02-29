@@ -8,7 +8,7 @@ import {isAddressable, getIdAndAddress} from "src/util/nostr"
 import type {Event, NostrEvent} from "src/engine/events/model"
 import {people} from "src/engine/people/state"
 import {displayPerson} from "src/engine/people/utils"
-import {hints, getUserHints, getEventHints, getPubkeyHint} from "src/engine/relays/utils"
+import {hints, getUserHints, getPubkeyHint} from "src/engine/relays/utils"
 import {env, pubkey} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
 import {signer} from "src/engine/session/derived"
@@ -209,21 +209,20 @@ export const tagsFromContent = (content: string) => {
 
 export const getReplyTags = (parent: Event, inherit = false) => {
   const tags = Tags.fromEvent(parent)
-  const hints = getEventHints(parent)
   const replyTagValues = getIdAndAddress(parent)
   const userPubkey = pubkey.get()
   const replyTags = []
 
   // Mention the parent's author
   if (parent.pubkey !== userPubkey) {
-    replyTags.push(mention(parent.pubkey))
+    replyTags.push(hints.tagPubkey(parent.pubkey))
   }
 
   // Inherit p-tag mentions
   if (inherit) {
     for (const pubkey of tags.values("p").valueOf()) {
       if (pubkey !== userPubkey) {
-        replyTags.push(mention(pubkey))
+        replyTags.push(hints.tagPubkey(pubkey))
       }
     }
   }
@@ -263,12 +262,9 @@ export const getReplyTags = (parent: Event, inherit = false) => {
     }
   }
 
-  // Add e-tag reply
-  replyTags.push(["e", parent.id, hints[0], "reply"])
-
-  // Add a-tag reply if relevant
-  if (isAddressable(parent)) {
-    replyTags.push(Address.fromEvent(parent, hints).asTag("reply"))
+  // Add a/e-tags to the parent event
+  for (const tag of hints.tagEvent(parent, "reply").valueOf()) {
+    replyTags.push(tag)
   }
 
   return replyTags

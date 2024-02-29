@@ -22,14 +22,13 @@
     env,
     load,
     nip59,
+    hints,
     people,
     loadOne,
     getLnUrl,
     getZapper,
     processZaps,
-    getReplyHints,
     isEventMuted,
-    getEventHints,
     getIdFilters,
     getReplyFilters,
     getSetting,
@@ -73,7 +72,7 @@
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
       router
         .at("notes")
-        .of(getIdOrAddress(event), {relays: getEventHints(event)})
+        .of(getIdOrAddress(event), {relays: hints.FetchEvent(event).getUrls(3)})
         .cx({context: ctx.concat(event)})
         .open()
     }
@@ -84,7 +83,7 @@
   const goToDetail = () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: getEventHints(event)})
+      .of(getIdOrAddress(event), {relays: hints.FetchEvent(event).getUrls(3)})
       .cx({context: ctx.concat(event)})
       .push()
 
@@ -100,7 +99,7 @@
   const goToThread = () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: getEventHints(event)})
+      .of(getIdOrAddress(event), {relays: hints.FetchEvent(event).getUrls(3)})
       .at("thread")
       .cx({context: ctx.concat(event)})
       .open()
@@ -211,7 +210,7 @@
       }
 
       load({
-        relays: selectHintsWithFallback(mergeHints([relays, getReplyHints(event)])),
+        relays: hints.FetchEventChildren(event).getUrls(),
         filters: getReplyFilters([event], {kinds}),
         onEvent: batch(200, events => {
           ctx = uniqBy(prop("id"), ctx.concat(events))

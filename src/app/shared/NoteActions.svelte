@@ -43,7 +43,6 @@
     getSetting,
     loadPubkeys,
     processZap,
-    getEventHints,
     isEventMuted,
     getReplyTags,
     getClientTags,
@@ -58,7 +57,7 @@
   export let zapper
 
   const tags = Tags.fromEvent(note)
-  const relays = getEventHints(note)
+  const relays = hints.FetchEvent(note).getUrls(e)
   const address = tags.context().values().first()
   const nevent = nip19.neventEncode({id: note.id, relays})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
@@ -69,7 +68,7 @@
   const repliesCount = tweened(0, {interpolate})
   const handler = handlers.key(tags.get("client")?.mark())
 
-  //const report = () => router.at("notes").of(note.id, {relays: getEventHints(note)}).at('report').qp({pubkey: note.pubkey}).open()
+  //const report = () => router.at("notes").of(note.id, {relays: hints.FetchEvent(note).getUrls(3)}).at('report').qp({pubkey: note.pubkey}).open()
 
   const setView = v => {
     view = v
@@ -144,8 +143,8 @@
   }
 
   const broadcast = () => {
-    const relays = getUserHints("write")
     const event = asNostrEvent(note)
+    const relays = hints.getUserOutboxRelays()
 
     Publisher.publish({event, relays})
 

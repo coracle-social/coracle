@@ -182,6 +182,8 @@ export const hintSelector = (generateHints: (...args: any[]) => Iterable<string>
   return getHints as typeof getHints & {limit: typeof selector.limit}
 }
 
+//
+
 export const getPubkeyHints = hintSelector(function* (pubkey: string, mode: RelayMode) {
   yield* getPubkeyRelayUrls(pubkey, mode)
 })
@@ -191,42 +193,6 @@ export const getPubkeyHint = (pubkey: string): string =>
 
 export const getUserHints = hintSelector(function* (mode: RelayMode) {
   yield* getUserRelayUrls(mode)
-})
-
-export const getUserHint = (pubkey: string): string => first(getUserHints(1, "write")) || ""
-
-export const getEventHints = hintSelector(function* (event: Event) {
-  for (const address of Tags.fromEvent(event).context().values().valueOf()) {
-    yield* getGroupHints(address)
-  }
-
-  yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Write)
-  yield* event.seen_on?.filter(isShareableRelayUrl) || []
-})
-
-export const getEventHint = (event: Event) => first(getEventHints.limit(1).getHints(event)) || ""
-
-// If we're looking for an event's children, the read relays the author has
-// advertised would be the most reliable option, since well-behaved clients
-// will write replies there.
-export const getReplyHints = hintSelector(function* (event) {
-  for (const address of Tags.fromEvent(event).context().values().valueOf()) {
-    yield* getGroupHints(address)
-  }
-
-  yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Read)
-})
-
-// If we're looking for an event's parent, tags are the most reliable hint,
-// but we can also look at where the author of the note reads from
-export const getParentHints = hintSelector(function* (event) {
-  yield* Tags.fromEvent(event).replies().relays().valueOf()
-  yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Read)
-})
-
-export const getRootHints = hintSelector(function* (event) {
-  yield* Tags.fromEvent(event).roots().relays().valueOf()
-  yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Read)
 })
 
 export const getGroupHints = hintSelector(function* (address: string) {

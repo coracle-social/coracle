@@ -1,5 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import {uniq} from "ramda"
   import {isShareableRelayUrl, getAddress} from "paravel"
   import {filterVals} from "hurdak"
   import {asArray} from "src/util/misc"
@@ -8,15 +9,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {router} from "src/app/router"
-  import {
-    loadOne,
-    loadPubkeys,
-    displayPubkey,
-    isEventMuted,
-    getParentHints,
-    getIdFilters,
-    selectHints,
-  } from "src/engine"
+  import {hints, loadOne, loadPubkeys, displayPubkey, isEventMuted, getIdFilters} from "src/engine"
 
   export let note
   export let value
@@ -28,8 +21,10 @@
   const {id, identifier, kind, pubkey} = value
 
   // Prioritize hints in relay selection by merging directly instead of with mergeHints
-  const hints = (value.relays || []).filter(isShareableRelayUrl)
-  const relays = selectHints([...hints, ...getParentHints(note)])
+  const relays = uniq([
+    ...(value.relays || []).filter(isShareableRelayUrl),
+    ...hints.FetchEventParent(note).getUrls(),
+  ])
 
   const openQuote = e => {
     const noteId = value.id || quote?.id

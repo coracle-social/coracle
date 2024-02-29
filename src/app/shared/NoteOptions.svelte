@@ -18,12 +18,12 @@
   export let hideFields = []
   export let initialValues: {
     warning: string
-    groups: string[]
-    relays: string[]
     anonymous: boolean
+    groups?: string[]
+    relays?: string[]
   }
 
-  let values = {...initialValues}
+  let values = {groups: [], relays: [], ...initialValues}
   let view = null
   let relaySearch = ""
   let relaysDirty = false
@@ -35,7 +35,7 @@
   export const setView = name => {
     view = name
     relaySearch = ""
-    values = {...initialValues}
+    values = {groups: [], relays: [], ...initialValues}
   }
 
   const addRelay = url => {

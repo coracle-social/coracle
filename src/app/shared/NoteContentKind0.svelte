@@ -5,7 +5,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import {router} from "src/app/router"
-  import {imgproxy, getEventHints} from "src/engine"
+  import {imgproxy, hints} from "src/engine"
 
   export let note
 
@@ -19,7 +19,7 @@
     router
       .at("people")
       .of(pubkey)
-      .cx({relays: getEventHints(note)})
+      .cx({relays: hints.FetchEvent(note).getUrls(3)})
       .open()
 </script>
 
