@@ -17,6 +17,7 @@
     uniqTags,
     writable,
     publishToZeroOrMoreGroups,
+    selectHintsWithFallback,
     tagsFromContent,
     getClientTags,
     getReplyTags,
@@ -43,7 +44,7 @@
   let opts = {
     warning: "",
     groups: parent.wrap ? Tags.from(parent).circles().all() : [],
-    relays: getPublishHints(parent),
+    relays: selectHintsWithFallback(getPublishHints(parent)),
     anonymous: false,
   }
 
