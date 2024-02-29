@@ -1,18 +1,17 @@
 import EventEmitter from "events"
-import {createEvent, Address, Tags} from "paravel"
+import {createEvent, Tags} from "paravel"
 import {omit, uniqBy} from "ramda"
 import {defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"
 import {parseContent} from "src/util/notes"
-import {isAddressable, getIdAndAddress} from "src/util/nostr"
+import {getIdAndAddress} from "src/util/nostr"
 import type {Event, NostrEvent} from "src/engine/events/model"
-import {people} from "src/engine/people/state"
-import {displayPerson} from "src/engine/people/utils"
-import {hints, getUserHints, getPubkeyHint} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import {env, pubkey} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
 import {signer} from "src/engine/session/derived"
 import {projections} from "src/engine/core/projections"
+import {displayPubkey} from "src/engine/people/utils"
 import {getUrls, getExecutor} from "./executor"
 
 export const getClientTags = () => {
@@ -151,7 +150,7 @@ export type PublishOpts = EventOpts & {
 export const publish = async (template, {sk, relays}: PublishOpts = {}) => {
   return Publisher.publish({
     timeout: 5000,
-    relays: relays || getUserHints("write"),
+    relays: relays || hints.Broadcast().getUrls(),
     event: sk
       ? await signer.get().signWithKey(template, sk)
       : await signer.get().signAsUser(template),
@@ -174,18 +173,8 @@ export const uniqTags = uniqBy((t: string[]) =>
   t[0] === "param" ? t.join(":") : t.slice(0, 2).join(":"),
 )
 
-export const getPubkeyPetname = (pubkey: string) => {
-  const person = people.key(pubkey).get()
-
-  return person ? displayPerson(person) : ""
-}
-
-export const mention = (pubkey: string): string[] => {
-  const hint = getPubkeyHint(pubkey)
-  const petname = getPubkeyPetname(pubkey)
-
-  return ["p", pubkey, hint, petname]
-}
+export const mention = (pubkey: string) =>
+  hints.tagPubkey(pubkey).append(displayPubkey(pubkey)).valueOf()
 
 export const tagsFromContent = (content: string) => {
   const tags = []
@@ -215,14 +204,14 @@ export const getReplyTags = (parent: Event, inherit = false) => {
 
   // Mention the parent's author
   if (parent.pubkey !== userPubkey) {
-    replyTags.push(hints.tagPubkey(parent.pubkey))
+    replyTags.push(hints.tagPubkey(parent.pubkey).valueOf())
   }
 
   // Inherit p-tag mentions
   if (inherit) {
     for (const pubkey of tags.values("p").valueOf()) {
       if (pubkey !== userPubkey) {
-        replyTags.push(hints.tagPubkey(pubkey))
+        replyTags.push(hints.tagPubkey(pubkey).valueOf())
       }
     }
   }

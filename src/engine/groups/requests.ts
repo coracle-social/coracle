@@ -2,7 +2,7 @@ import {now, Address} from "paravel"
 import {seconds} from "hurdak"
 import {noteKinds, repostKinds} from "src/util/nostr"
 import {load} from "src/engine/network/utils"
-import {selectHintsWithFallback} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import {updateCurrentSession} from "src/engine/session/commands"
 import {groups} from "./state"
 import {
@@ -37,14 +37,14 @@ export const getStaleAddrs = (addrs: string[]) => {
   return Array.from(stale)
 }
 
-export const loadGroups = async (rawAddrs: string[], relays: string[] = null) => {
+export const loadGroups = async (rawAddrs: string[], relays: string[] = []) => {
   const addrs = getStaleAddrs(rawAddrs).map(a => Address.fromRaw(a))
   const authors = addrs.map(addr => addr.pubkey)
   const identifiers = addrs.map(addr => addr.identifier)
 
   if (addrs.length > 0) {
     load({
-      relays: selectHintsWithFallback(relays),
+      relays: hints.FetchFromHints(relays).getUrls(),
       filters: [{kinds: [34550, 35834], authors, "#d": identifiers}],
     })
   }

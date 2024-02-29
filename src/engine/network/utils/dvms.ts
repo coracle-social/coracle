@@ -2,7 +2,7 @@ import {now} from "paravel"
 import {seconds} from "hurdak"
 import {generatePrivateKey} from "src/util/nostr"
 import {env} from "src/engine/session/state"
-import {mergeHints, getUserHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import type {Event} from "src/engine/events/model"
 import {createAndPublish} from "./publish"
 import {subscribe} from "./subscribe"
@@ -27,7 +27,7 @@ export const dvmRequest = async ({
   onProgress = null,
 }: DVMRequestOpts): Promise<Event> => {
   if (!relays) {
-    relays = mergeHints([env.get().DVM_RELAYS, getUserHints()])
+    relays = hints.Broadcast().getUrls(null, env.get().DVM_RELAYS)
   }
 
   if (typeof input !== "string") {

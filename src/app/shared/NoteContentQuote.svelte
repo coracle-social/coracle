@@ -20,7 +20,7 @@
 
   const {id, identifier, kind, pubkey} = value
 
-  // Prioritize hints in relay selection by merging directly instead of with mergeHints
+  // Prioritize hints in relay selection by merging directly
   const relays = uniq([
     ...(value.relays || []).filter(isShareableRelayUrl),
     ...hints.FetchEventParent(note).getUrls(),

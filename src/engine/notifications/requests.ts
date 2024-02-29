@@ -10,7 +10,7 @@ import {updateSession} from "src/engine/session/commands"
 import {_events} from "src/engine/events/state"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {getUserCommunities} from "src/engine/groups/utils"
-import {hints, getPubkeyHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import {
   loadPubkeys,
   load,
@@ -90,7 +90,7 @@ export const loadNotifications = () => {
     timeout: 15000,
     skipCache: true,
     closeOnEose: true,
-    relays: getPubkeyHints(pubkey, "read"),
+    relays: hints.Aggregate().getUrls(),
     onEvent: onNotificationEvent,
   })
 }
@@ -121,7 +121,7 @@ export const listenForNotifications = async () => {
     filters,
     timeout: 30_000,
     skipCache: true,
-    relays: getPubkeyHints($session.pubkey, "read"),
+    relays: hints.Aggregate().getUrls(),
     onEvent: onNotificationEvent,
   })
 }

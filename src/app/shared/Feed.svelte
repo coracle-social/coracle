@@ -12,9 +12,9 @@
   import Note from "src/app/shared/Note.svelte"
   import type {DynamicFilter} from "src/engine"
   import {
+    hints,
     readable,
     writable,
-    selectHints,
     compileFilters,
     searchableRelays,
     getRelaysFromFilters,
@@ -47,7 +47,7 @@
       selection = getRelaysFromFilters(compileFilters([filter]))
     }
 
-    return selectHints(selection).concat(LOCAL_RELAY_URL)
+    return hints.FetchFromHints(selection).getUrls().concat(LOCAL_RELAY_URL)
   }
 
   const loadMore = () => feed.load(5)

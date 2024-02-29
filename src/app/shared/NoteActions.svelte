@@ -38,8 +38,6 @@
     deriveIsGroupMember,
     publishToZeroOrMoreGroups,
     publishDeletionForEvent,
-    getUserHints,
-    getPubkeyHint,
     getSetting,
     loadPubkeys,
     processZap,
@@ -57,7 +55,7 @@
   export let zapper
 
   const tags = Tags.fromEvent(note)
-  const relays = hints.FetchEvent(note).getUrls(e)
+  const relays = hints.FetchEvent(note).getUrls(3)
   const address = tags.context().values().first()
   const nevent = nip19.neventEncode({id: note.id, relays})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
@@ -106,11 +104,7 @@
 
   const crossPost = async (address = null) => {
     const content = JSON.stringify(asNostrEvent(note))
-    const tags = [
-      hints.tagEvent(note).valueOf(),
-      hints.tagPubkey(note.pubkey).valueOf(),
-      ...getClientTags(),
-    ]
+    const tags = [hints.tagEvent(note).valueOf(), mention(note.pubkey), ...getClientTags()]
 
     let template
     if (note.kind === 1) {
@@ -128,7 +122,7 @@
 
   const startZap = () => {
     const zapTags = tags.whereKey("zap")
-    const defaultSplit = ["zap", note.pubkey, getPubkeyHint(note.pubkey), "1"]
+    const defaultSplit = hints.tagPubkey(note.pubkey).setKey("zap").append("1").valueOf()
     const splits = zapTags.exists() ? zapTags.valueOf() : [defaultSplit]
 
     router
@@ -143,10 +137,10 @@
   }
 
   const broadcast = () => {
-    const event = asNostrEvent(note)
-    const relays = hints.getUserOutboxRelays()
-
-    Publisher.publish({event, relays})
+    Publisher.publish({
+      event: asNostrEvent(note),
+      relays: hints.Broadcast().getUrls(),
+    })
 
     toast.show("info", "Note has been re-published!")
   }

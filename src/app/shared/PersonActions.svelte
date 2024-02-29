@@ -6,13 +6,13 @@
     loginWithPublicKey,
     session,
     mute,
+    hints,
     unmute,
     canSign,
     follow,
     unfollow,
     deriveMuted,
     deriveFollowing,
-    getUserHints,
   } from "src/engine"
   import {boot} from "src/app/state"
   import {router} from "src/app/router"
@@ -92,14 +92,14 @@
   const share = () =>
     router
       .at("qrcode")
-      .of(nip19.nprofileEncode({pubkey, relays: getUserHints("write")}))
+      .of(nip19.nprofileEncode({pubkey, relays: hints.FetchFromPubkey(pubkey).getUrls()}))
       .open()
 </script>
 
 <div class="flex items-center gap-3" on:click|stopPropagation>
   {#if !isSelf}
     <Popover triggerType="mouseenter">
-      <div slot="trigger" class="w-6 text-center cursor-pointer">
+      <div slot="trigger" class="w-6 cursor-pointer text-center">
         {#if $following}
           <i class="fa fa-user-minus" on:click={unfollowPerson} />
         {:else}
@@ -110,7 +110,7 @@
     </Popover>
   {/if}
   <Popover triggerType="mouseenter">
-    <div slot="trigger" class="w-6 text-center cursor-pointer">
+    <div slot="trigger" class="w-6 cursor-pointer text-center">
       <i class="fa fa-share-nodes" on:click={share} />
     </div>
     <div slot="tooltip">Share</div>

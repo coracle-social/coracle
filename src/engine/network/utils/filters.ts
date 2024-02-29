@@ -2,9 +2,9 @@ import {Address, getAddress, isContextAddress, useMaximalFallbacks, RelayMode} f
 import {omit, without, find, prop, groupBy, uniq} from "ramda"
 import {shuffle, randomId, seconds, avg} from "hurdak"
 import {isAddressable} from "src/util/nostr"
-import {env, pubkey} from "src/engine/session/state"
+import {env} from "src/engine/session/state"
 import {follows, network} from "src/engine/people/derived"
-import {hints, mergeHints, selectHintsWithFallback, getPubkeyHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import type {DynamicFilter, Filter} from "../model"
 
 export const calculateFilterGroup = ({since, until, limit, search, ...filter}: Filter) => {
@@ -169,15 +169,15 @@ export const getRelaysFromFilters = filters =>
     .merge({
       fallbackPolicy: useMaximalFallbacks(RelayMode.Inbox),
       scenarios: filters.flatMap(filter => {
-        if (filter["#a"]?.some(a => isContextAddress(a))) {
-          return filter["#a"].filter(a => isContextAddress(a)).map(a => hints.FetchFromContext(a))
+        if (filter["#a"]?.some(isContextAddress)) {
+          return filter["#a"].filter(isContextAddress).map(hints.FetchFromContext)
         }
 
         if (filter.authors) {
-          return filter.authors.map(pubkey => hints.FetchFromOutbox(pubkey))
+          return filter.authors.map(hints.FetchFromPubkey)
         }
 
-        return [hints.FetchFromInbox(pubkey.get())]
+        return [hints.Aggregate()]
       }),
     })
     .getUrls()

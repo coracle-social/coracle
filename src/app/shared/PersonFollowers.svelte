@@ -6,7 +6,7 @@
   import {getModal} from "src/partials/state"
   import PersonList from "src/app/shared/PersonList.svelte"
   import type {Event} from "src/engine"
-  import {subscribe, loadPubkeys, getPubkeyHints} from "src/engine"
+  import {subscribe, loadPubkeys, hints} from "src/engine"
 
   export let pubkey
 
@@ -20,7 +20,7 @@
   onMount(() => {
     const scroller = createScroller(loadMore, {element: getModal()})
     const sub = subscribe({
-      relays: getPubkeyHints(pubkey, "read"),
+      relays: hints.FetchFromPubkey(pubkey).getUrls(),
       filters: [{kinds: [3], "#p": [pubkey]}],
       onEvent: batch(500, (events: Event[]) => {
         const newPubkeys = pluck("pubkey", events)

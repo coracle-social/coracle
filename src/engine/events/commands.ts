@@ -4,7 +4,7 @@ import {createEvent, now} from "paravel"
 import {generatePrivateKey} from "src/util/nostr"
 import {pubkey} from "src/engine/session/state"
 import {signer, nip44, nip59} from "src/engine/session/derived"
-import {getUserHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import {Publisher} from "src/engine/network/utils"
 import type {Event} from "./model"
 import {seenIds} from "./state"
@@ -21,7 +21,7 @@ export const markAsSeenPublicly = batch(5000, async idChunks => {
     const event = await signer.get().signAsUser(createReadReceipt(ids))
 
     if (event) {
-      Publisher.publish({event, relays: getUserHints("write")})
+      Publisher.publish({event, relays: hints.NoteToSelf().getUrls()})
     }
   }
 })
@@ -41,7 +41,7 @@ export const markAsSeenPrivately = batch(5000, async idChunks => {
 
     Publisher.publish({
       event: rumor.wrap,
-      relays: getUserHints("write"),
+      relays: hints.NoteToSelf().getUrls(),
     })
   }
 })

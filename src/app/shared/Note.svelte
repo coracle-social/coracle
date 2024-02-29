@@ -33,9 +33,6 @@
     getReplyFilters,
     getSetting,
     getRecipientKey,
-    getPubkeyHints,
-    selectHintsWithFallback,
-    mergeHints,
     loadPubkeys,
     sortEventsDesc,
   } from "src/engine"
@@ -90,9 +87,7 @@
   const goToParent = () =>
     router
       .at("notes")
-      .of(reply.value(), {
-        relays: mergeHints([getPubkeyHints(event.pubkey, "read"), [reply.nth(3)]]),
-      })
+      .of(reply.value(), {relays: hints.FetchEventParent(event).getUrls(3)})
       .cx({context: ctx.concat(event)})
       .open()
 
@@ -185,7 +180,7 @@
 
     if (!event.pubkey) {
       event = await loadOne({
-        relays: selectHintsWithFallback(relays),
+        relays: hints.FetchFromHints(relays).getUrls(),
         filters: getIdFilters([event.id]),
       })
     }

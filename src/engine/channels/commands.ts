@@ -3,7 +3,7 @@ import {createMapOf} from "hurdak"
 import {now, createEvent} from "paravel"
 import {generatePrivateKey, appDataKeys} from "src/util/nostr"
 import {Publisher, getClientTags, mention} from "src/engine/network/utils"
-import {getPubkeyHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import {user, signer, nip59, nip04} from "src/engine/session/derived"
 import {setAppData} from "src/engine/session/commands"
 import {channels} from "./state"
@@ -23,7 +23,7 @@ export const sendLegacyMessage = async (channelId: string, content: string) => {
 
   return Publisher.publish({
     event: await signer.get().signAsUser(template),
-    relays: getPubkeyHints(pubkey, "read"),
+    relays: hints.PublishMessage(recipients).getUrls(),
   })
 }
 
@@ -45,8 +45,8 @@ export const sendMessage = async (channelId: string, content: string) => {
     })
 
     Publisher.publish({
-      relays: getPubkeyHints(pubkey, "read"),
       event: rumor.wrap,
+      relays: hints.PublishMessage(recipients).getUrls(),
     })
   }
 }

@@ -1,5 +1,5 @@
 import {partition} from "ramda"
-import {now, createEvent, RelayMode, Address, useMaximalFallbacks} from "paravel"
+import {now, createEvent, Address} from "paravel"
 import {updateIn, randomId} from "hurdak"
 import {generatePrivateKey, getPublicKey} from "src/util/nostr"
 import {updateRecord} from "src/engine/core/commands"

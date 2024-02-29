@@ -3,7 +3,7 @@ import {seconds} from "hurdak"
 import {now} from "paravel"
 import {personKinds, appDataKeys} from "src/util/nostr"
 import {people} from "src/engine/people/state"
-import {mergeHints, selectHintsWithFallback, getPubkeyHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import type {Filter} from "../model"
 import {load} from "./load"
 
@@ -56,32 +56,18 @@ export const loadPubkeys = async (
     return
   }
 
-  const getRelays = () => {
-    const groups = pubkeys.map(pubkey => getPubkeyHints(pubkey, "write"))
+  const filters = [] as Filter[]
 
-    if (relays) {
-      groups.push(relays)
-    }
+  filters.push({kinds: without([30078], kinds), authors: pubkeys})
 
-    return selectHintsWithFallback(mergeHints(groups))
-  }
-
-  const getFilters = () => {
-    const filter = [] as Filter[]
-
-    filter.push({kinds: without([30078], kinds), authors: pubkeys})
-
-    // Add a separate filter for app data so we're not pulling down other people's stuff,
-    // or obsolete events of our own.
-    if (kinds.includes(30078)) {
-      filter.push({kinds: [30078], authors: pubkeys, "#d": Object.values(appDataKeys)})
-    }
-
-    return filter
+  // Add a separate filters for app data so we're not pulling down other people's stuff,
+  // or obsolete events of our own.
+  if (kinds.includes(30078)) {
+    filters.push({kinds: [30078], authors: pubkeys, "#d": Object.values(appDataKeys)})
   }
 
   return load({
-    relays: getRelays(),
-    filters: getFilters(),
+    filters,
+    relays: hints.FetchFromPubkeys(pubkeys).getUrls(null, relays),
   })
 }

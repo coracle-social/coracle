@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {without, uniq} from "ramda"
+  import {without} from "ramda"
   import {createEventDispatcher} from "svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
@@ -58,8 +58,7 @@
     }
 
     if (!relaysDirty) {
-      values.relays = hints.PrePublishEvent($session.pubkey, [], values.groups).getUrls()
-      console.log(values.relays)
+      values.relays = hints.PublishToContexts(values.groups).getUrls()
     }
   }
 

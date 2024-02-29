@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {join, uniq, identity} from "ramda"
+  import {join, identity} from "ramda"
   import {Tags, createEvent} from "paravel"
   import {asNostrEvent} from "src/util/nostr"
   import {toast} from "src/partials/state"
@@ -15,7 +15,6 @@
   import GroupLink from "src/app/shared/GroupLink.svelte"
   import {toastProgress} from "src/app/state"
   import {
-    hints,
     pubkey,
     writable,
     Publisher,

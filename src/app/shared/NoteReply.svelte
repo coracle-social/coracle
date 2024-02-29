@@ -17,7 +17,6 @@
     uniqTags,
     writable,
     publishToZeroOrMoreGroups,
-    selectHintsWithFallback,
     tagsFromContent,
     getClientTags,
     getReplyTags,
