@@ -1,11 +1,11 @@
 import {prop, uniqBy, defaultTo, sortBy, last, whereEq} from "ramda"
 import {ellipsize, first, seconds} from "hurdak"
-import {Tags, Address} from "paravel"
+import {Tags, Address, useMaximalFallbacks, RelayMode} from "paravel"
 import {fuzzy} from "src/util/misc"
 import type {GroupStatus, Session} from "src/engine/session/model"
 import {pubkey} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
-import {getUserHints, getGroupHints, mergeHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import {groups, groupSharedKeys, groupAdminKeys} from "./state"
 import {GroupAccess} from "./model"
 import type {Group} from "./model"
@@ -70,7 +70,12 @@ export const getGroupReqInfo = (address = null) => {
     recipients.push(key.pubkey)
   }
 
-  const relays = mergeHints([...addresses.map(getGroupHints), getUserHints("read")])
+  const relays = hints
+    .merge({
+      fallbackPolicy: useMaximalFallbacks(RelayMode.Inbox),
+      scenarios: addresses.map(a => hints.FetchFromContext(a)),
+    })
+    .getUrls()
 
   return {admins, recipients, relays, since}
 }
@@ -81,7 +86,7 @@ export const getCommunityReqInfo = (address = null) => {
 
   return {
     since: since - seconds(6, "hour"),
-    relays: mergeHints([getGroupHints(address), getUserHints("read")]),
+    relays: hints.FetchFromContext(address).getUrls(),
   }
 }
 

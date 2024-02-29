@@ -85,13 +85,6 @@ export const getIdOrAddress = e => (isAddressable(e) ? getAddress(e) : e.id)
 
 export const getIdAndAddress = e => (isAddressable(e) ? [e.id, getAddress(e)] : [e.id])
 
-export const getIdOrAddressTag = (e, hint) => {
-  const value = getIdOrAddress(e)
-  const type = value.includes(":") ? "a" : "e"
-
-  return [type, value, hint]
-}
-
 export const isChildOf = (a, b) => {
   const {roots, replies} = Tags.fromEvent(a).ancestors()
   const parentIds = (replies.exists() ? replies : roots).values().valueOf()

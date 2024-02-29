@@ -7,7 +7,7 @@
   import {identity, filter, sum, uniqBy, prop, pluck} from "ramda"
   import {fly} from "src/util/transition"
   import {formatSats, tryJson} from "src/util/misc"
-  import {getIdOrAddressTag, asNostrEvent} from "src/util/nostr"
+  import {asNostrEvent} from "src/util/nostr"
   import {quantify, pluralize} from "hurdak"
   import {toast} from "src/partials/state"
   import Icon from "src/partials/Icon.svelte"
@@ -33,13 +33,13 @@
     Publisher,
     mention,
     handlers,
+    hints,
     deriveHandlers,
     deriveIsGroupMember,
     publishToZeroOrMoreGroups,
     publishDeletionForEvent,
     getUserHints,
     getPubkeyHint,
-    getPublishHints,
     getSetting,
     loadPubkeys,
     processZap,
@@ -84,17 +84,17 @@
   const muteNote = () => mute("e", note.id)
 
   const react = async content => {
-    const relays = getPublishHints(note)
-    const template = createEvent(7, {
-      content,
-      tags: [...getReplyTags(note), ...getClientTags()],
-    })
-
     if (!note.wrap) {
-      Publisher.publish({relays, event: asNostrEvent(note)})
+      Publisher.publish({event: asNostrEvent(note)})
     }
 
-    const {events} = await publishToZeroOrMoreGroups([address].filter(identity), template, {relays})
+    const {events} = await publishToZeroOrMoreGroups(
+      tags.context().values().valueOf(),
+      createEvent(7, {
+        content,
+        tags: [...getReplyTags(note), ...getClientTags()],
+      }),
+    )
 
     addToContext(events)
   }
@@ -106,18 +106,21 @@
   }
 
   const crossPost = async (address = null) => {
-    const relays = getPublishHints(note)
     const content = JSON.stringify(asNostrEvent(note))
-    const tags = [getIdOrAddressTag(note, relays[0]), mention(note.pubkey), ...getClientTags()]
+    const tags = [
+      hints.tagEvent(note).valueOf(),
+      hints.tagPubkey(note.pubkey).valueOf(),
+      ...getClientTags(),
+    ]
 
     let template
     if (note.kind === 1) {
       template = createEvent(6, {content, tags})
     } else {
-      template = createEvent(16, {content, tags: [...tags, ["k", note.kind]]})
+      template = createEvent(16, {content, tags: [...tags, ["k", String(note.kind)]]})
     }
 
-    publishToZeroOrMoreGroups([address].filter(identity), template, {relays})
+    publishToZeroOrMoreGroups([address].filter(identity), template)
 
     toast.show("info", "Note has been cross-posted!")
 

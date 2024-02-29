@@ -8,7 +8,7 @@ import {isAddressable, getIdAndAddress} from "src/util/nostr"
 import type {Event, NostrEvent} from "src/engine/events/model"
 import {people} from "src/engine/people/state"
 import {displayPerson} from "src/engine/people/utils"
-import {getUserHints, getEventHints, getPubkeyHint} from "src/engine/relays/utils"
+import {hints, getUserHints, getEventHints, getPubkeyHint} from "src/engine/relays/utils"
 import {env, pubkey} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
 import {signer} from "src/engine/session/derived"
@@ -38,7 +38,7 @@ export type PublisherOpts = {
 
 export type StaticPublisherOpts = PublisherOpts & {
   event: NostrEvent
-  relays: string[]
+  relays?: string[]
 }
 
 export class Publisher extends EventEmitter {
@@ -58,7 +58,7 @@ export class Publisher extends EventEmitter {
   static publish({event, relays, ...opts}: StaticPublisherOpts) {
     const publisher = new Publisher(event)
 
-    publisher.publish(relays, opts)
+    publisher.publish(relays || hints.PublishEvent(event).getUrls(), opts)
 
     return publisher
   }

@@ -22,7 +22,6 @@
     getClientTags,
     getReplyTags,
     session,
-    getPublishHints,
     displayPubkey,
     mention,
   } from "src/engine"
@@ -41,12 +40,7 @@
   let isOpen = false
   let mentions = []
   let draft = ""
-  let opts = {
-    warning: "",
-    groups: parent.wrap ? parentTags.context().values().valueOf() : [],
-    relays: selectHintsWithFallback(getPublishHints(parent)),
-    anonymous: false,
-  }
+  let opts = {warning: "", anonymous: false}
 
   export const start = () => {
     dispatch("start")
@@ -115,7 +109,7 @@
 
     // Re-broadcast the note we're replying to
     if (!parent.wrap) {
-      Publisher.publish({relays: opts.relays, event: asNostrEvent(parent)})
+      Publisher.publish({event: asNostrEvent(parent)})
     }
 
     const template = createEvent(1, {content, tags})
@@ -202,7 +196,7 @@
     bind:this={options}
     on:change={setOpts}
     initialValues={opts}
-    hideFields={parent.wrap ? ["relays"] : []} />
+    hideFields={["groups", "relays"]} />
 {/if}
 
 {#if $nsecWarning}
