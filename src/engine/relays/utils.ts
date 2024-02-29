@@ -229,26 +229,6 @@ export const getRootHints = hintSelector(function* (event) {
   yield* getPubkeyRelayUrls(event.pubkey, RelayMode.Read)
 })
 
-// If we're replying or reacting to an event, we want the author to know, as well as
-// anyone else who is tagged in the original event or the reply. Get everyone's read
-// relays. Limit how many per pubkey we publish to though. We also want to advertise
-// our content to our followers, so publish to our write relays as well.
-export const getPublishHints = hintSelector(function* (event: Event) {
-  for (const address of Tags.fromEvent(event).context().values().valueOf()) {
-    yield* getGroupHints(address)
-  }
-
-  const pubkeys = Tags.fromEvent(event).values("p").valueOf()
-  const hintGroups = pubkeys.map(pubkey => getPubkeyRelayUrls(pubkey, RelayMode.Read))
-  const authorRelays = getPubkeyRelayUrls(event.pubkey, RelayMode.Write)
-
-  yield* mergeHints([...hintGroups, authorRelays, getUserHints(RelayMode.Write)])
-})
-
-export const getInboxHints = hintSelector(function* (pubkeys: string[]) {
-  yield* mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read")))
-})
-
 export const getGroupHints = hintSelector(function* (address: string) {
   yield* getGroupRelayUrls(address)
   yield* getPubkeyHints(Address.fromRaw(address).pubkey)

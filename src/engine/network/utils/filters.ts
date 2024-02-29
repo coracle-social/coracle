@@ -1,4 +1,4 @@
-import {Address, getAddress, useMaximalFallbacks, RelayMode} from "paravel"
+import {Address, getAddress, isContextAddress, useMaximalFallbacks, RelayMode} from "paravel"
 import {omit, without, find, prop, groupBy, uniq} from "ramda"
 import {shuffle, randomId, seconds, avg} from "hurdak"
 import {isAddressable} from "src/util/nostr"
@@ -166,21 +166,18 @@ export const compileFilters = (filters: DynamicFilter[], opts: CompileFiltersOpt
 
 export const getRelaysFromFilters = filters =>
   hints
-    .scenario({
+    .merge({
       fallbackPolicy: useMaximalFallbacks(RelayMode.Inbox),
-      getGroups: () =>
-        filters.flatMap(filter => {
-          if (filter["#a"]?.some(a => isContextAddress(a))) {
-            return filter["#a"]
-              .filter(a => isContextAddress(a))
-              .map(a => hints.FetchFromContext(a).getUrls())
-          }
+      scenarios: filters.flatMap(filter => {
+        if (filter["#a"]?.some(a => isContextAddress(a))) {
+          return filter["#a"].filter(a => isContextAddress(a)).map(a => hints.FetchFromContext(a))
+        }
 
-          if (filter.authors) {
-            return filter.authors.map(pubkey => hints.FetchFromOutbox(pubkey).getUrls())
-          }
+        if (filter.authors) {
+          return filter.authors.map(pubkey => hints.FetchFromOutbox(pubkey))
+        }
 
-          return [hints.FetchFromInbox(pubkey.get()).getUrls()]
-        }),
+        return [hints.FetchFromInbox(pubkey.get())]
+      }),
     })
     .getUrls()

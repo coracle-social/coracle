@@ -19,7 +19,6 @@
     pubkey,
     writable,
     Publisher,
-    getPublishHints,
     getClientTags,
     tagsFromContent,
     publishToZeroOrMoreGroups,
@@ -36,14 +35,8 @@
   const defaultGroups = parent
     ? Tags.fromEvent(parent).context().values().valueOf()
     : [group].filter(identity)
-  const defaultOpts = {
-    relays: parent
-      ? getPublishHints(parent)
-      : uniq(defaultGroups.flatMap(a => hints.PublishToContext(a).getUrls())),
-    groups: defaultGroups,
-    anonymous: false,
-    warning: "",
-  }
+
+  const defaultOpts = {anonymous: false, warning: ""}
 
   let images, compose, options, saving
 
@@ -87,12 +80,12 @@
 
     // Re-broadcast the note we're replying to
     if (parent && !parent.wrap) {
-      Publisher.publish({relays: opts.relays, event: asNostrEvent(parent)})
+      Publisher.publish({event: asNostrEvent(parent)})
     }
 
     const template = createEvent(1, {content, tags})
 
-    const {pubs} = await publishToZeroOrMoreGroups(opts.groups, template, opts)
+    const {pubs} = await publishToZeroOrMoreGroups(defaultGroups, template, opts)
 
     pubs[0].on("progress", toastProgress)
 

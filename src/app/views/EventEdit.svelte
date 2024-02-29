@@ -36,9 +36,7 @@
       created_at: inc(event.created_at),
     })
 
-    const {pubs} = await publishToZeroOrMoreGroups(values.groups, template, {
-      relays: getUserHints("write"),
-    })
+    const {pubs} = await publishToZeroOrMoreGroups(values.groups, template)
 
     pubs[0].on("progress", toastProgress)
 
