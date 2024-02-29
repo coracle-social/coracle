@@ -35,7 +35,6 @@
     hints,
     session,
     writable,
-    getEventHints,
     getClientTags,
     tagsFromContent,
     publishToZeroOrMoreGroups,
@@ -198,7 +197,7 @@
     }
 
     if (quote) {
-      const nevent = nip19.neventEncode({id: quote.id, relays: getEventHints(quote)})
+      const nevent = nip19.neventEncode({id: quote.id, relays: hints.FetchEvent(quote).getUrls(3)})
 
       compose.nevent("nostr:" + nevent)
     }

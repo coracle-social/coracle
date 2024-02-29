@@ -9,12 +9,12 @@
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import {getEventHints} from "src/engine"
+  import {hints} from "src/engine"
 
   export let note
   export let showMedia = false
 
-  const naddr = Address.fromEvent(note, getEventHints(note)).asNaddr()
+  const naddr = hints.getNaddr(note)
   const {title, summary, image, status, p} = fromPairs(note.tags) as Record<string, string>
 </script>
 

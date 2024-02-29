@@ -8,7 +8,7 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {router} from "src/app/router"
-  import {events, getEventHints, sortEventsDesc} from "src/engine"
+  import {events, hints, sortEventsDesc} from "src/engine"
 
   const sortedEvents = events.derived(sortEventsDesc)
 
@@ -70,7 +70,7 @@
           <Anchor
             href={router
               .at("notes")
-              .of(event.id, {relays: getEventHints(event)})
+              .of(event.id, {relays: hints.FetchEvent(event).getUrls(3)})
               .toString()}>
             <i class="fa fa-link text-accent" />
           </Anchor>
