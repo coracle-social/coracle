@@ -26,8 +26,8 @@
       .setTag("location", values.location)
       .setTag("start", dateToSeconds(values.start).toString())
       .setTag("end", dateToSeconds(values.end).toString())
-      .removeContext()
       .setIMeta(images.getValue())
+      .removeContext()
 
     const template = asEventTemplate({
       ...event,

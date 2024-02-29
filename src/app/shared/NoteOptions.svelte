@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {without} from "ramda"
+  import {without, uniq} from "ramda"
   import {createEventDispatcher} from "svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
@@ -13,7 +13,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {env, getGroupPublishHints, deriveGroupOptions, displayRelay} from "src/engine"
+  import {env, hints, session, deriveGroupOptions, displayRelay} from "src/engine"
 
   export let hideFields = []
   export let initialValues: {
@@ -58,7 +58,8 @@
     }
 
     if (!relaysDirty) {
-      values.relays = getGroupPublishHints(values.groups)
+      values.relays = hints.PrePublishEvent($session.pubkey, [], values.groups).getUrls()
+      console.log(values.relays)
     }
   }
 

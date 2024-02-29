@@ -1,7 +1,7 @@
 import {nip19} from "nostr-tools"
-import {Tags, Address} from "paravel"
+import {Tags, Router, Address} from "paravel"
 import {isShareableRelayUrl, normalizeRelayUrl as normalize, fromNostrURI} from "paravel"
-import {sortBy, whereEq, pluck, uniq, nth, prop, last} from "ramda"
+import {sortBy, always, whereEq, pluck, uniq, nth, prop, last} from "ramda"
 import {chain, displayList, first} from "hurdak"
 import {fuzzy} from "src/util/misc"
 import {warn} from "src/util/logger"
@@ -88,6 +88,17 @@ export const getGroupRelayUrls = address => {
 
   return []
 }
+
+export const hints = new Router({
+  getUserPubkey: () => stateKey.get(),
+  getGroupRelays: getGroupRelayUrls,
+  getCommunityRelays: getGroupRelayUrls,
+  getPubkeyInboxRelays: pubkey => getPubkeyRelayUrls(pubkey, "read"),
+  getPubkeyOutboxRelays: pubkey => getPubkeyRelayUrls(pubkey, "write"),
+  getFallbackInboxRelays: () => env.get().DEFAULT_RELAYS,
+  getFallbackOutboxRelays: () => env.get().DEFAULT_RELAYS,
+  getDefaultLimit: () => getSetting("relay_limit"),
+})
 
 // Smart relay selection
 //
@@ -242,14 +253,6 @@ export const getGroupHints = hintSelector(function* (address: string) {
   yield* getGroupRelayUrls(address)
   yield* getPubkeyHints(Address.fromRaw(address).pubkey)
 })
-
-export const getGroupHint = (address: string): string => first(getGroupHints(address)) || ""
-
-export const getGroupPublishHints = (addresses: string[]) => {
-  const urls = mergeHints(addresses.map(getGroupRelayUrls))
-
-  return urls.length === 0 ? getUserHints("write") : urls
-}
 
 export const mergeHints = (groups: string[][], limit: number = null) => {
   const scores = {} as Record<string, any>

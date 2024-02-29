@@ -1,15 +1,10 @@
-import {Address, getAddress} from "paravel"
+import {Address, getAddress, useMaximalFallbacks, RelayMode} from "paravel"
 import {omit, without, find, prop, groupBy, uniq} from "ramda"
 import {shuffle, randomId, seconds, avg} from "hurdak"
 import {isAddressable} from "src/util/nostr"
 import {env, pubkey} from "src/engine/session/state"
 import {follows, network} from "src/engine/people/derived"
-import {
-  mergeHints,
-  selectHintsWithFallback,
-  getGroupHints,
-  getPubkeyHints,
-} from "src/engine/relays/utils"
+import {hints, mergeHints, selectHintsWithFallback, getPubkeyHints} from "src/engine/relays/utils"
 import type {DynamicFilter, Filter} from "../model"
 
 export const calculateFilterGroup = ({since, until, limit, search, ...filter}: Filter) => {
@@ -170,18 +165,22 @@ export const compileFilters = (filters: DynamicFilter[], opts: CompileFiltersOpt
 }
 
 export const getRelaysFromFilters = filters =>
-  selectHintsWithFallback(
-    mergeHints(
-      filters.flatMap(filter => {
-        if (filter["#a"]?.some(a => a.match(/^(35834|34550):/))) {
-          return filter["#a"].map(getGroupHints)
-        }
+  hints
+    .scenario({
+      fallbackPolicy: useMaximalFallbacks(RelayMode.Inbox),
+      getGroups: () =>
+        filters.flatMap(filter => {
+          if (filter["#a"]?.some(a => isContextAddress(a))) {
+            return filter["#a"]
+              .filter(a => isContextAddress(a))
+              .map(a => hints.FetchFromContext(a).getUrls())
+          }
 
-        if (filter.authors) {
-          return filter.authors.map(pubkey => getPubkeyHints(pubkey, "write"))
-        }
+          if (filter.authors) {
+            return filter.authors.map(pubkey => hints.FetchFromOutbox(pubkey).getUrls())
+          }
 
-        return [getPubkeyHints(pubkey.get(), "read")]
-      }),
-    ),
-  )
+          return [hints.FetchFromInbox(pubkey.get()).getUrls()]
+        }),
+    })
+    .getUrls()
