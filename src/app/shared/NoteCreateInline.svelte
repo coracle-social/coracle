@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {join, identity} from "ramda"
+  import {join, uniq, identity} from "ramda"
   import {Tags, createEvent} from "paravel"
   import {asNostrEvent} from "src/util/nostr"
   import {toast} from "src/partials/state"
@@ -15,6 +15,7 @@
   import GroupLink from "src/app/shared/GroupLink.svelte"
   import {toastProgress} from "src/app/state"
   import {
+    hints,
     pubkey,
     writable,
     Publisher,
@@ -22,7 +23,6 @@
     getClientTags,
     tagsFromContent,
     publishToZeroOrMoreGroups,
-    getGroupPublishHints,
     getReplyTags,
   } from "src/engine"
 
@@ -37,7 +37,9 @@
     ? Tags.fromEvent(parent).context().values().valueOf()
     : [group].filter(identity)
   const defaultOpts = {
-    relays: parent ? getPublishHints(parent) : getGroupPublishHints(defaultGroups),
+    relays: parent
+      ? getPublishHints(parent)
+      : uniq(defaultGroups.flatMap(a => hints.PublishToContext(a).getUrls())),
     groups: defaultGroups,
     anonymous: false,
     warning: "",

@@ -15,13 +15,13 @@
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import {router} from "src/app/router"
   import {
+    hints,
     derivePerson,
     displayRelay,
     searchRelays,
     searchGroups,
     displayGroup,
     deriveGroup,
-    getGroupHint,
   } from "src/engine"
 
   export let initialPubkey = null
@@ -79,7 +79,7 @@
   const addGroup = e => {
     const newGroup = {
       address: groupSelection.address,
-      relay: getGroupHint(groupSelection.address),
+      relay: hints.FetchFromContext(groupSelection.address).getUrl(),
       claim: groupClaim,
     }
 

@@ -27,7 +27,7 @@ export const parseContent = (event: {content: string; tags?: string[][]}) => {
   let buffer = ""
 
   const getMeta = (url, hash) => {
-    const meta = tags.imeta(url)
+    const meta = tags.imeta(url) || Tags.from([])
 
     for (const [k, v] of new URLSearchParams(hash).entries()) {
       meta.addTag(k, v)

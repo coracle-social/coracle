@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {v4 as uuid} from "uuid"
-  import {join, whereEq, identity} from "ramda"
+  import {join, uniq, whereEq, identity} from "ramda"
   import {throttle, commaFormat, toTitle, switcherFn} from "hurdak"
   import {createEvent, now, Tags} from "paravel"
   import {asNostrEvent} from "src/util/nostr"
@@ -32,13 +32,13 @@
   import {router} from "src/app/router"
   import {
     env,
+    hints,
     session,
     writable,
     getEventHints,
     getClientTags,
     tagsFromContent,
     publishToZeroOrMoreGroups,
-    getGroupPublishHints,
   } from "src/engine"
 
   export let type = "note"
@@ -62,7 +62,7 @@
     summary: "",
     price: "",
     currency: currencyOptions.find(whereEq({code: "SAT"})),
-    relays: getGroupPublishHints(defaultGroups),
+    relays: hints.PrePublishEvent($session.pubkey, [], defaultGroups).getUrls(),
     groups: defaultGroups,
     anonymous: false,
     location: null,
