@@ -19,7 +19,7 @@ export const loadAllMessages = ({reload = false} = {}) => {
   })
 
   const cursor = new MultiCursor({
-    relays: hints.FetchAllMessages().getUrls(),
+    relays: hints.AllMessages().getUrls(),
     filters: [
       {kinds: [4], authors: [pubkey], since},
       {kinds: [4, 1059], "#p": [pubkey], since},
@@ -53,7 +53,7 @@ export const listenForMessages = (pubkeys: string[]) => {
 
   return subscribe({
     skipCache: true,
-    relays: hints.FetchMessages(pubkeys).getUrls(),
+    relays: hints.Messages(pubkeys).getUrls(),
     filters: [
       {kinds: [4], authors: allPubkeys, "#p": allPubkeys},
       {kinds: [1059], "#p": [pubkey]},

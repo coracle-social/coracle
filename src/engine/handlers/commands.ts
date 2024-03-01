@@ -13,7 +13,7 @@ export const deriveHandlers = cached({
     const $follows = follows.get()
 
     load({
-      relays: hints.Aggregate().getUrls(),
+      relays: hints.Inbox().getUrls(),
       filters: [
         {kinds: [31989], "#d": [String(kind)], authors: Array.from($follows)},
         {kinds: [31990], "#k": [String(kind)]},

@@ -68,6 +68,6 @@ export const loadPubkeys = async (
 
   return load({
     filters,
-    relays: hints.FetchFromPubkeys(pubkeys).getUrls(null, relays),
+    relays: hints.merge([hints.scenario([relays]), hints.FromPubkeys(pubkeys)]).getUrls(),
   })
 }

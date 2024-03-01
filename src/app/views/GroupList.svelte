@@ -50,7 +50,7 @@
     })
 
     load({
-      relays: hints.Aggregate().getUrls(),
+      relays: hints.User().getUrls(),
       filters: [
         {kinds: [35834, 34550], authors: admins},
         {kinds: [35834, 34550], limit: 500},

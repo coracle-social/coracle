@@ -15,7 +15,7 @@
 
   if (tag) {
     const [type, value] = tag.valueOf()
-    const relays = hints.FetchEvent(note).getUrls(3)
+    const relays = hints.Event(note).limit(3).getUrls()
 
     href = switcherFn(type, {
       r: () => router.at("relays").of(value).toString(),

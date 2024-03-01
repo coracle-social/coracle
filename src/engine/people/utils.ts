@@ -166,7 +166,7 @@ export const getWotScore = (pk, tpk) => {
 }
 
 const annotatePerson = pubkey => {
-  const relays = hints.FetchFromPubkey(pubkey).getUrls()
+  const relays = hints.FromPubkeys([pubkey]).getUrls()
 
   return {
     pubkey,

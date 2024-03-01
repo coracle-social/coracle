@@ -55,8 +55,8 @@
   export let zapper
 
   const tags = Tags.fromEvent(note)
-  const relays = hints.FetchEvent(note).getUrls(3)
   const address = tags.context().values().first()
+  const relays = hints.Event(note).limit(3).getUrls()
   const nevent = nip19.neventEncode({id: note.id, relays})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
   const kindHandlers = deriveHandlers(note.kind).derived(filter((h: any) => h.recs.length > 1))
@@ -66,7 +66,7 @@
   const repliesCount = tweened(0, {interpolate})
   const handler = handlers.key(tags.get("client")?.mark())
 
-  //const report = () => router.at("notes").of(note.id, {relays: hints.FetchEvent(note).getUrls(3)}).at('report').qp({pubkey: note.pubkey}).open()
+  //const report = () => router.at("notes").of(note.id, {relays: hints.Event(note).getUrls(3)}).at('report').qp({pubkey: note.pubkey}).open()
 
   const setView = v => {
     view = v
@@ -139,7 +139,7 @@
   const broadcast = () => {
     Publisher.publish({
       event: asNostrEvent(note),
-      relays: hints.Broadcast().getUrls(),
+      relays: hints.Outbox().getUrls(),
     })
 
     toast.show("info", "Note has been re-published!")

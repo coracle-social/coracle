@@ -69,7 +69,7 @@
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
       router
         .at("notes")
-        .of(getIdOrAddress(event), {relays: hints.FetchEvent(event).getUrls(3)})
+        .of(getIdOrAddress(event), {relays: hints.Event(event).limit(3).getUrls()})
         .cx({context: ctx.concat(event)})
         .open()
     }
@@ -80,21 +80,21 @@
   const goToDetail = () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: hints.FetchEvent(event).getUrls(3)})
+      .of(getIdOrAddress(event), {relays: hints.Event(event).limit(3).getUrls()})
       .cx({context: ctx.concat(event)})
       .push()
 
   const goToParent = () =>
     router
       .at("notes")
-      .of(reply.value(), {relays: hints.FetchEventParent(event).getUrls(3)})
+      .of(reply.value(), {relays: hints.EventParent(event).limit(3).getUrls()})
       .cx({context: ctx.concat(event)})
       .open()
 
   const goToThread = () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: hints.FetchEvent(event).getUrls(3)})
+      .of(getIdOrAddress(event), {relays: hints.Event(event).limit(3).getUrls()})
       .at("thread")
       .cx({context: ctx.concat(event)})
       .open()
@@ -180,7 +180,7 @@
 
     if (!event.pubkey) {
       event = await loadOne({
-        relays: hints.FetchFromHints(relays).getUrls(),
+        relays: hints.scenario([relays]).getUrls(),
         filters: getIdFilters([event.id]),
       })
     }
@@ -205,7 +205,7 @@
       }
 
       load({
-        relays: hints.FetchEventChildren(event).getUrls(),
+        relays: hints.EventChildren(event).getUrls(),
         filters: getReplyFilters([event], {kinds}),
         onEvent: batch(200, events => {
           ctx = uniqBy(prop("id"), ctx.concat(events))

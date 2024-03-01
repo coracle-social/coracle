@@ -13,7 +13,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {env, hints, session, deriveGroupOptions, displayRelay} from "src/engine"
+  import {env, hints, deriveGroupOptions, displayRelay} from "src/engine"
 
   export let hideFields = []
   export let initialValues: {
@@ -58,7 +58,7 @@
     }
 
     if (!relaysDirty) {
-      values.relays = hints.PublishToContexts(values.groups).getUrls()
+      values.relays = hints.WithinMultipleContexts(values.groups).getUrls()
     }
   }
 

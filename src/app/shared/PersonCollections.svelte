@@ -37,7 +37,7 @@
   }
 
   load({
-    relays: hints.FetchFromPubkey(pubkey).getUrls(),
+    relays: hints.FromPubkeys([pubkey]).getUrls(),
     filters: [{kinds: [1985], authors: [pubkey], "#L": ["#t"]}],
     onEvent: batch(300, chunk => {
       events = [...events, ...chunk]
