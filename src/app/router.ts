@@ -13,7 +13,7 @@ export const decodeJson = json => tryJson(() => JSON.parse(json))
 export const encodeCsv = xs => xs.join(",")
 export const decodeCsv = x => x.split(",")
 export const encodeRelays = xs => xs.map(url => last(url.split("//"))).join(",")
-export const encodeNaddr = a => Address.fromRaw(a).asNaddr()
+export const encodeNaddr = a => Address.fromRaw(a, []).asNaddr()
 
 export const encodeFilter = f =>
   Object.entries(f)

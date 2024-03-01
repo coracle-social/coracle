@@ -1,11 +1,14 @@
-import {Tags, Address} from "paravel"
+import {Tags} from "paravel"
 import {updateRecord} from "src/engine/core/commands"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
 import {_lists} from "./state"
 
-const handleBookmarkList = (e: Event) => {
-  const addr = Address.fromEvent(e)
+const handleBookmarkList = async (e: Event) => {
+  // TODO: Evil hack; there is a circular dependency somewhere
+  const {hints} = await import("src/engine/relays/utils")
+
+  const addr = hints.address(e)
   const {title, name, description} = Tags.fromEvent(e).asObject()
   const realTitle = title || name || addr.identifier
 

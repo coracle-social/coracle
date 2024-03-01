@@ -62,7 +62,7 @@
       return toast.show("error", "That name is already in use")
     }
 
-    const id = address ? Address.fromRaw(address).identifier : randomId()
+    const id = address ? Address.getIdentifier(address) : randomId()
     const {title, description, params, relays} = values
 
     publishBookmarksList(id, title, description, [...params, ...relays])

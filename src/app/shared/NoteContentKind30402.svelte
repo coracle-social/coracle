@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {Tags, Address, getAddress} from "paravel"
+  import {Tags, getAddress} from "paravel"
   import {commaFormat} from "hurdak"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Carousel from "src/partials/Carousel.svelte"
@@ -11,7 +11,7 @@
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {router} from "src/app/router"
-  import {pubkey, isDeleted} from "src/engine"
+  import {hints, pubkey, isDeleted} from "src/engine"
 
   export let note
   export let showMedia = false
@@ -26,7 +26,7 @@
   const deleteLink = router.at("listings").of(address).at("delete").toString()
 
   const sendMessage = () => {
-    const naddr = Address.fromEvent(note).asNaddr()
+    const naddr = hints.address(note).asNaddr()
     const initialMessage = `Hi, I'd like to make an offer on this listing:\n${naddr}`
 
     router.at("channels").of([$pubkey, note.pubkey]).cx({initialMessage}).push()

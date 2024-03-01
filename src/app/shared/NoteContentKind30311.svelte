@@ -13,7 +13,7 @@
   export let note
   export let showMedia = false
 
-  const naddr = hints.getNaddr(note)
+  const naddr = hints.address(note).asNaddr()
   const {title, summary, image, status, p} = fromPairs(note.tags) as Record<string, string>
 </script>
 

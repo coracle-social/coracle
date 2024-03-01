@@ -1,12 +1,11 @@
 <script lang="ts">
-  import {Address} from "paravel"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/router"
-  import {pubkey, isDeleted} from "src/engine"
+  import {pubkey, isDeleted, hints} from "src/engine"
 
   export let event
 
-  const addr = Address.fromEvent(event)
+  const address = hints.address(event)
 
   let actions = []
 
@@ -15,20 +14,20 @@
 
     if (!$isDeleted(event)) {
       actions.push({
-        onClick: () => router.at("qrcode").of(addr.asNaddr()).open(),
+        onClick: () => router.at("qrcode").of(address.asNaddr()).open(),
         label: "Share",
         icon: "share-nodes",
       })
 
       if (event.pubkey === $pubkey) {
         actions.push({
-          onClick: () => router.at("events").of(addr.asRaw()).cx({event}).at("edit").open(),
+          onClick: () => router.at("events").of(address.asRaw()).cx({event}).at("edit").open(),
           label: "Edit",
           icon: "edit",
         })
 
         actions.push({
-          onClick: () => router.at("events").of(addr.asRaw()).cx({event}).at("delete").open(),
+          onClick: () => router.at("events").of(address.asRaw()).cx({event}).at("delete").open(),
           label: "Delete",
           icon: "trash",
         })

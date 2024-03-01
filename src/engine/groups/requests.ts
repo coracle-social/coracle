@@ -38,9 +38,9 @@ export const getStaleAddrs = (addrs: string[]) => {
 }
 
 export const loadGroups = async (rawAddrs: string[], relays: string[] = []) => {
-  const addrs = getStaleAddrs(rawAddrs).map(a => Address.fromRaw(a))
-  const authors = addrs.map(addr => addr.pubkey)
-  const identifiers = addrs.map(addr => addr.identifier)
+  const addrs = getStaleAddrs(rawAddrs)
+  const authors = addrs.map(a => Address.getPubkey(a))
+  const identifiers = addrs.map(a => Address.getIdentifier(a))
 
   if (addrs.length > 0) {
     load({

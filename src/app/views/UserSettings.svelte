@@ -14,7 +14,6 @@
   const settings = getSettings()
 
   const submit = () => {
-    console.log(settings.platform_zap_split)
     publishSettings(settings)
 
     toast.show("info", "Your settings have been saved!")

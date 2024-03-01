@@ -53,7 +53,7 @@
 
   onMount(async () => {
     if (!event) {
-      event = await dereferenceNote(Address.fromRaw(address))
+      event = await dereferenceNote(Address.fromRaw(address, []))
     }
 
     loading = false
