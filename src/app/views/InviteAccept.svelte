@@ -18,10 +18,10 @@
   export let relays = []
   export let groups = []
 
-  const {FORCE_RELAYS} = $env
+  const {PLATFORM_RELAYS} = $env
   const parsedRelays = relays
     .map(s => updateIn("url", normalizeRelayUrl, zipObj(["url", "claim"], s.split("|"))))
-    .filter(r => FORCE_RELAYS.length === 0 || FORCE_RELAYS.includes(r.url))
+    .filter(r => PLATFORM_RELAYS.length === 0 || PLATFORM_RELAYS.includes(r.url))
   const parsedGroups = groups.map(s => zipObj(["address", "relay", "claim"], s.split("|")))
 </script>
 

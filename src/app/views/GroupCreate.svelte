@@ -21,7 +21,7 @@
 
   const initialValues = {
     type: null,
-    relays: $env.FORCE_RELAYS,
+    relays: $env.PLATFORM_RELAYS,
     members: [$user],
     list_publicly: false,
     meta: {

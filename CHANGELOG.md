@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.4.4
+
+- [x] Format time and date based on browser regional settings
+- [x] Rename `FORCE_RELAYS` to `PLATFORM_RELAYS`
+
 # 0.4.3
 
 - [x] Add follow all to onboarding topics
