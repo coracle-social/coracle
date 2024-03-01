@@ -11,12 +11,12 @@ import {Tracker} from "./tracker"
 export type SubscribeOpts = Omit<SubscriptionOpts, "executor"> & {
   relays?: string[]
   tracker?: Tracker
+  executor?: Executor
   skipCache?: boolean
   shouldProject?: boolean
   onEvent?: (e: Event) => void
   onEose?: (url: string) => void
   onClose?: (events: Event[]) => void
-  executor?: Executor
 }
 
 const getExecutorFromOpts = (opts: SubscribeOpts) => {

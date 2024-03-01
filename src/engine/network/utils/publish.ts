@@ -150,7 +150,7 @@ export type PublishOpts = EventOpts & {
 export const publish = async (template, {sk, relays}: PublishOpts = {}) => {
   return Publisher.publish({
     timeout: 5000,
-    relays: relays || hints.Broadcast().getUrls(),
+    relays: relays || hints.Outbox().getUrls(),
     event: sk
       ? await signer.get().signWithKey(template, sk)
       : await signer.get().signAsUser(template),

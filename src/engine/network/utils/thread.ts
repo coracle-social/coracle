@@ -41,7 +41,7 @@ export class ThreadLoader {
 
     if (filteredIds.length > 0) {
       load({
-        relays: hints.FetchFromHints(this.relays).getUrls(),
+        relays: hints.scenario([this.relays]).getUrls(),
         filters: getIdFilters(filteredIds),
         onEvent: batch(300, (events: Event[]) => {
           this.addToThread(events)

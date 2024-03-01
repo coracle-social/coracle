@@ -21,7 +21,7 @@ export const dereferenceNote = async ({
     }
 
     return loadOne({
-      relays: hints.FetchFromHints(relays).getUrls(),
+      relays: hints.scenario([relays]).getUrls(),
       filters: getIdFilters([eid]),
     })
   }
@@ -45,7 +45,7 @@ export const dereferenceNote = async ({
       subscribe({
         timeout: 3000,
         closeOnEose: true,
-        relays: hints.FetchFromHints(relays).getUrls(),
+        relays: hints.scenario([relays]).getUrls(),
         filters: [{kinds: [kind], authors: [pubkey], "#d": [identifier]}],
         onClose: () => resolve(note),
         onEvent: event => {
@@ -67,7 +67,7 @@ type LoadReactionsRequest = {
 
 const executeLoadReactions = batch(500, async (requests: LoadReactionsRequest[]) => {
   const ids = pluck("id", requests)
-  const relays = hints.FetchFromHints(...pluck("relays", requests)).getUrls()
+  const relays = hints.scenario(pluck("relays", requests)).getUrls()
 
   let data = {}
 

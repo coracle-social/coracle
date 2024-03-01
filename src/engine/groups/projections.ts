@@ -53,7 +53,7 @@ projections.addHandler(24, (e: Event) => {
 
     // Load the group's metadata and posts
     load({
-      relays: hints.FetchFromHints(relays).getUrls(),
+      relays: hints.scenario([relays]).getUrls(),
       filters: [
         ...getIdFilters([address]),
         {kinds: [1059, 1060], "#p": [pubkey]},
@@ -160,7 +160,7 @@ projections.addHandler(10004, (e: Event) => {
 
   const addresses = Tags.fromEvent(e).communities().values().valueOf()
 
-  for (const address of uniq(Object.keys($session.groups.values || {}).concat(addresses))) {
+  for (const address of uniq(Object.keys($session.groups?.values || {}).concat(addresses))) {
     $session = modifyGroupStatus($session, address, e.created_at, {
       joined: addresses.includes(address),
     })

@@ -90,11 +90,7 @@ export const execute = batch(500, (items: LoadItem[]) => {
 
   // If we're using multiplexer, let it do its thing
   if (getSetting("multiplextr_url")) {
-    loadChunk(
-      items,
-      hints.FetchFromHints(items.map(getPath(["request", "relays"]))).getUrls(),
-      tracker,
-    )
+    loadChunk(items, hints.scenario(items.map(getPath(["request", "relays"]))).getUrls(), tracker)
   } else {
     const itemsByRelay = {}
     for (const item of items) {

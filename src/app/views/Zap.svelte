@@ -62,7 +62,7 @@
         if (percent > 0 && totalWeight > 0) {
           zaps.push({
             pubkey: $env.PLATFORM_PUBKEY,
-            relay: hints.FetchFromPubkey($env.PLATFORM_PUBKEY).getUrl(),
+            relay: hints.FromPubkeys([$env.PLATFORM_PUBKEY]).getUrl(),
             amount: Math.round(zaps.reduce((a, z) => a + z.amount, 0) * percent),
             status: "pending",
             isTip: true,
@@ -86,7 +86,9 @@
         return
       }
 
-      const relays = hints.PublishMessage([zap.pubkey]).getUrls(null, [zap.relay])
+      const relays = hints
+        .merge([hints.PublishMessage(zap.pubkey), hints.scenario([[zap.relay]])])
+        .getUrls()
 
       zaps[i].invoice = await requestZap(msg, zap.amount, {
         eid,

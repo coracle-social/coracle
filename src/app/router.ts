@@ -56,7 +56,7 @@ export const decodeEntity = entity => {
     // pass
   }
 
-  return {type, data, relays: hints.FetchFromHints(data?.relays || []).getUrls()}
+  return {type, data, relays: hints.scenario([data?.relays || []]).getUrls()}
 }
 
 // Serializers
@@ -143,7 +143,12 @@ router.extend("notes", (id, {relays = []} = {}) => {
 
 router.extend("people", (pubkey, {relays = []} = {}) => {
   if (relays.length < 3) {
-    relays = relays.concat(hints.FetchFromPubkey(pubkey).getUrls(3 - relays.length))
+    relays = relays.concat(
+      hints
+        .FromPubkeys([pubkey])
+        .limit(3 - relays.length)
+        .getUrls(),
+    )
   }
 
   return nip19.nprofileEncode({pubkey, relays})

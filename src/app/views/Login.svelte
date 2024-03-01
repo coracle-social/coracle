@@ -88,7 +88,7 @@
 
   onMount(() => {
     load({
-      relays: hints.Aggregate().getUrls(),
+      relays: hints.Inbox().getUrls(),
       filters: [
         {
           kinds: [Handlerinformation],

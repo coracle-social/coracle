@@ -1,8 +1,8 @@
 import {nip19} from "nostr-tools"
 import {Router} from "paravel"
-import {normalizeRelayUrl as normalize, fromNostrURI} from "paravel"
+import {normalizeRelayUrl as normalize, ConnectionStatus, fromNostrURI} from "paravel"
 import {sortBy, whereEq, pluck, uniq, prop, last} from "ramda"
-import {displayList} from "hurdak"
+import {displayList, switcher} from "hurdak"
 import {fuzzy} from "src/util/misc"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {env} from "src/engine/session/state"
@@ -36,9 +36,6 @@ export const decodeRelay = entity => {
     return {url: entity}
   }
 }
-
-export const relayIsLowQuality = (url: string) =>
-  pool.get(url, {autoConnect: false})?.meta?.quality < 0.6
 
 export const displayRelay = ({url}: Relay) => last(url.split("://")).replace(/\/$/, "")
 
@@ -90,9 +87,20 @@ export const hints = new Router({
   getUserPubkey: () => stateKey.get(),
   getGroupRelays: getGroupRelayUrls,
   getCommunityRelays: getGroupRelayUrls,
-  getPubkeyInboxRelays: pubkey => getPubkeyRelayUrls(pubkey, "read"),
-  getPubkeyOutboxRelays: pubkey => getPubkeyRelayUrls(pubkey, "write"),
-  getFallbackInboxRelays: () => env.get().DEFAULT_RELAYS,
-  getFallbackOutboxRelays: () => env.get().DEFAULT_RELAYS,
-  getDefaultLimit: () => getSetting("relay_limit"),
+  getPubkeyRelays: getPubkeyRelayUrls,
+  getDefaultRelays: () => env.get().DEFAULT_RELAYS,
+  getDefaultLimit: () => parseInt(getSetting("relay_limit")),
+  getRelayQuality: (url: string) => {
+    const connection = pool.get(url, {autoConnect: false})
+
+    return switcher(connection?.meta.getStatus(), {
+      [ConnectionStatus.Unauthorized]: 0.5,
+      [ConnectionStatus.Forbidden]: 0,
+      [ConnectionStatus.Error]: 0,
+      [ConnectionStatus.Closed]: 0.6,
+      [ConnectionStatus.Slow]: 0.5,
+      [ConnectionStatus.Ok]: 1,
+      default: 0.5,
+    })
+  },
 })

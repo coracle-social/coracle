@@ -27,7 +27,7 @@ export const dvmRequest = async ({
   onProgress = null,
 }: DVMRequestOpts): Promise<Event> => {
   if (!relays) {
-    relays = hints.Broadcast().getUrls(null, env.get().DVM_RELAYS)
+    relays = hints.merge([hints.Outbox(), hints.scenario([env.get().DVM_RELAYS])]).getUrls()
   }
 
   if (typeof input !== "string") {

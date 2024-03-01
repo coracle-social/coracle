@@ -11,7 +11,12 @@ import {displayPubkey} from "src/engine/people/utils"
 import {hints} from "src/engine/relays/utils"
 import {GroupAccess} from "./model"
 import {groups, groupAdminKeys, groupSharedKeys} from "./state"
-import {deriveGroup, deriveAdminKeyForGroup, deriveSharedKeyForGroup, deriveIsGroupMember} from "./utils"
+import {
+  deriveGroup,
+  deriveAdminKeyForGroup,
+  deriveSharedKeyForGroup,
+  deriveIsGroupMember,
+} from "./utils"
 
 // Key state management
 
@@ -80,7 +85,7 @@ export const wrapWithFallback = async (template, {author = null, wrap}) => {
 
 export const publishToGroupAdmin = async (address, template) => {
   const addr = Address.fromRaw(address)
-  const relays = hints.PublishToContext(address).getUrls()
+  const relays = hints.WithinContext(address).getUrls()
   const pubkeys = [addr.pubkey, session.get().pubkey]
 
   const pubs = []
@@ -104,7 +109,7 @@ export const publishToGroupAdmin = async (address, template) => {
 }
 
 export const publishAsGroupAdminPublicly = async (address, template) => {
-  const relays = hints.PublishToContext(address).getUrls()
+  const relays = hints.WithinContext(address).getUrls()
   const adminKey = deriveAdminKeyForGroup(address).get()
   const event = await signer.get().signWithKey(template, adminKey.privkey)
 
@@ -112,7 +117,7 @@ export const publishAsGroupAdminPublicly = async (address, template) => {
 }
 
 export const publishAsGroupAdminPrivately = async (address, template) => {
-  const relays = hints.PublishToContext(address).getUrls()
+  const relays = hints.WithinContext(address).getUrls()
   const adminKey = deriveAdminKeyForGroup(address).get()
   const sharedKey = deriveSharedKeyForGroup(address).get()
 
@@ -160,7 +165,7 @@ export const publishToGroupsPrivately = async (addresses, template, {anonymous =
   const pubs = []
   const events = []
   for (const address of addresses) {
-    const relays = hints.PublishToContext(address).getUrls()
+    const relays = hints.WithinContext(address).getUrls()
     const thisTemplate = updateIn("tags", (tags: string[][]) => [...tags, ["a", address]], template)
     const sharedKey = deriveSharedKeyForGroup(address).get()
 
@@ -229,7 +234,7 @@ export const publishToZeroOrMoreGroups = async (addresses, template, {anonymous 
 // Admin functions
 
 export const publishKeyShares = async (address, pubkeys, template) => {
-  const relays = hints.PublishToContext(address).getUrls()
+  const relays = hints.WithinContext(address).getUrls()
   const adminKey = deriveAdminKeyForGroup(address).get()
 
   const pubs = []

@@ -79,7 +79,7 @@
   const addGroup = e => {
     const newGroup = {
       address: groupSelection.address,
-      relay: hints.FetchFromContext(groupSelection.address).getUrl(),
+      relay: hints.WithinContext(groupSelection.address).getUrl(),
       claim: groupClaim,
     }
 

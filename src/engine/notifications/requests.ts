@@ -1,4 +1,4 @@
-import {now, Tags, RelayMode, useMaximalFallbacks} from "paravel"
+import {now, Tags} from "paravel"
 import {seconds, updateIn, batch, doPipe} from "hurdak"
 import {pluck, max, slice, filter, without, sortBy} from "ramda"
 import {noteKinds, repostKinds, reactionKinds} from "src/util/nostr"
@@ -40,12 +40,7 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
   loadPubkeys(pubkeys)
 
   load({
-    relays: hints
-      .merge({
-        fallbackPolicy: useMaximalFallbacks(RelayMode.Inbox),
-        scenarios: eventsWithParent.map(hints.FetchEventParent),
-      })
-      .getUrls(),
+    relays: hints.merge(eventsWithParent.map(hints.EventParent)).getUrls(),
     filters: getIdFilters(
       eventsWithParent.flatMap(e => Tags.fromEvent(e).replies().values().valueOf()),
     ),
@@ -90,7 +85,7 @@ export const loadNotifications = () => {
     timeout: 15000,
     skipCache: true,
     closeOnEose: true,
-    relays: hints.Aggregate().getUrls(),
+    relays: hints.Inbox().getUrls(),
     onEvent: onNotificationEvent,
   })
 }
@@ -121,7 +116,7 @@ export const listenForNotifications = async () => {
     filters,
     timeout: 30_000,
     skipCache: true,
-    relays: hints.Aggregate().getUrls(),
+    relays: hints.Inbox().getUrls(),
     onEvent: onNotificationEvent,
   })
 }

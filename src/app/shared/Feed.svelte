@@ -47,7 +47,7 @@
       selection = getRelaysFromFilters(compileFilters([filter]))
     }
 
-    return hints.FetchFromHints(selection).getUrls().concat(LOCAL_RELAY_URL)
+    return hints.scenario([selection]).getUrls().concat(LOCAL_RELAY_URL)
   }
 
   const loadMore = () => feed.load(5)

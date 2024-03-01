@@ -1,6 +1,6 @@
 import Bugsnag from "@bugsnag/js"
 import {hash, union} from "hurdak"
-import {now} from "paravel"
+import {ConnectionStatus} from "paravel"
 import {warn} from "src/util/logger"
 import {userKinds} from "src/util/nostr"
 import {toast} from "src/partials/state"
@@ -88,11 +88,15 @@ setInterval(() => {
   // Prune connections we haven't used in a while, clear errors periodically,
   // and keep track of slow connections
   for (const [url, connection] of pool.data.entries()) {
-    if (connection.meta.last_activity < now() - 60) {
-      connection.socket.disconnect()
-    } else if (connection.lastError < Date.now() - 10_000) {
-      connection.clearError()
-    } else if (userRelays.has(url) && connection.meta.quality < 0.3) {
+    const {lastPublish, lastRequest, lastFault} = connection.meta
+    const lastActivity = Math.max(lastPublish, lastRequest)
+    const status = connection.meta.getStatus()
+
+    if (lastActivity < Date.now() - 60_000) {
+      connection.disconnect()
+    } else if (lastFault < Date.now() - 10_000) {
+      connection.disconnect()
+    } else if (userRelays.has(url) && status === ConnectionStatus.Slow) {
       $slowConnections.push(url)
     }
   }

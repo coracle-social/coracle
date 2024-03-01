@@ -23,7 +23,7 @@ export const sendLegacyMessage = async (channelId: string, content: string) => {
 
   return Publisher.publish({
     event: await signer.get().signAsUser(template),
-    relays: hints.PublishMessage(recipients).getUrls(),
+    relays: hints.PublishMessage(pubkey).getUrls(),
   })
 }
 
@@ -46,7 +46,7 @@ export const sendMessage = async (channelId: string, content: string) => {
 
     Publisher.publish({
       event: rumor.wrap,
-      relays: hints.PublishMessage(recipients).getUrls(),
+      relays: hints.merge(recipients.map(hints.PublishMessage)).getUrls(),
     })
   }
 }

@@ -20,7 +20,7 @@
   onMount(() => {
     const scroller = createScroller(loadMore, {element: getModal()})
     const sub = subscribe({
-      relays: hints.FetchFromPubkey(pubkey).getUrls(),
+      relays: hints.FromPubkeys([pubkey]).getUrls(),
       filters: [{kinds: [3], "#p": [pubkey]}],
       onEvent: batch(500, (events: Event[]) => {
         const newPubkeys = pluck("pubkey", events)

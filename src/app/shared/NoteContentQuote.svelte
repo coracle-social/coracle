@@ -1,6 +1,5 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {uniq} from "ramda"
   import {isShareableRelayUrl, getAddress} from "paravel"
   import {filterVals} from "hurdak"
   import {asArray} from "src/util/misc"
@@ -20,11 +19,12 @@
 
   const {id, identifier, kind, pubkey} = value
 
-  // Prioritize hints in relay selection by merging directly
-  const relays = uniq([
-    ...(value.relays || []).filter(isShareableRelayUrl),
-    ...hints.FetchEventParent(note).getUrls(),
-  ])
+  const relays = hints
+    .merge([
+      hints.scenario([(value.relays || []).filter(isShareableRelayUrl)]),
+      hints.EventParent(note),
+    ])
+    .getUrls()
 
   const openQuote = e => {
     const noteId = value.id || quote?.id

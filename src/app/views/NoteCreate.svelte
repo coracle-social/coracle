@@ -61,7 +61,7 @@
     summary: "",
     price: "",
     currency: currencyOptions.find(whereEq({code: "SAT"})),
-    relays: hints.PublishToContexts(defaultGroups).getUrls(),
+    relays: hints.WithinMultipleContexts(defaultGroups).getUrls(),
     groups: defaultGroups,
     anonymous: false,
     location: null,
@@ -197,7 +197,10 @@
     }
 
     if (quote) {
-      const nevent = nip19.neventEncode({id: quote.id, relays: hints.FetchEvent(quote).getUrls(3)})
+      const nevent = nip19.neventEncode({
+        id: quote.id,
+        relays: hints.Event(quote).limit(3).getUrls(),
+      })
 
       compose.nevent("nostr:" + nevent)
     }
