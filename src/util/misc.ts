@@ -22,8 +22,10 @@ export const getTimeZone = () => new Date().toString().match(/GMT[^\s]+/)
 
 export const createLocalDate = (dateString: any) => new Date(`${dateString} ${getTimeZone()}`)
 
+export const getLocale = () => (new Intl.DateTimeFormat()).resolvedOptions().locale
+
 export const formatTimestamp = (ts: number) => {
-  const formatter = new Intl.DateTimeFormat("en-US", {
+  const formatter = new Intl.DateTimeFormat(getLocale(), {
     dateStyle: "short",
     timeStyle: "short",
   })
@@ -32,7 +34,7 @@ export const formatTimestamp = (ts: number) => {
 }
 
 export const formatTimestampAsDate = (ts: number) => {
-  const formatter = new Intl.DateTimeFormat("en-US", {
+  const formatter = new Intl.DateTimeFormat(getLocale(), {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -57,7 +59,8 @@ export const formatTimestampRelative = (ts: number) => {
     delta = Math.round(delta / seconds(1, "day"))
   }
 
-  const formatter = new Intl.RelativeTimeFormat("en-US", {
+  const locale = (new Intl.RelativeTimeFormat()).resolvedOptions().locale
+  const formatter = new Intl.RelativeTimeFormat(locale, {
     numeric: "auto",
   })
 
