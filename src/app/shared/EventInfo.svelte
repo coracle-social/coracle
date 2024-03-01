@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {Tags} from "paravel"
   import {Naddr} from "src/util/nostr"
-  import {secondsToDate, formatTimestamp, formatTimestampAsDate} from "src/util/misc"
+  import {secondsToDate, formatTimestamp, formatTimestampAsDate, getLocale} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Chip from "src/partials/Chip.svelte"
   import GroupLink from "src/app/shared/GroupLink.svelte"
@@ -16,8 +16,8 @@
   export let showDate = false
   export let actionsInline = false
 
-  const timeFmt = new Intl.DateTimeFormat("en-US", {timeStyle: "short"})
-  const datetimeFmt = new Intl.DateTimeFormat("en-US", {dateStyle: "short", timeStyle: "short"})
+  const timeFmt = new Intl.DateTimeFormat(getLocale(), {timeStyle: "short"})
+  const datetimeFmt = new Intl.DateTimeFormat(getLocale(), {dateStyle: "short", timeStyle: "short"})
   const groupAddrs = Tags.from(event).circles().all()
   const {name, title, start, end, location} = Tags.from(event).getDict()
   const startDate = secondsToDate(start)
