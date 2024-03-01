@@ -306,7 +306,7 @@
             <i class="fa fa-circle-nodes" />
             {opts.groups.length}
           </span>
-          {#if $env.FORCE_RELAYS.length === 0}
+          {#if $env.PLATFORM_RELAYS.length === 0}
             <span><i class="fa fa-server" /> {opts.relays?.length}</span>
           {/if}
           <span><i class="fa fa-warning" /> {opts.warning || 0}</span>

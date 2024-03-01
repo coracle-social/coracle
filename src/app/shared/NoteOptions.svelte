@@ -98,7 +98,7 @@
             </div>
           </Field>
         {/if}
-        {#if !hideFields.includes("relays") && $env.FORCE_RELAYS.length === 0}
+        {#if !hideFields.includes("relays") && $env.PLATFORM_RELAYS.length === 0}
           <Field icon="fa-database" label="Select which relays to publish to">
             <div>
               {#each values.relays as url}

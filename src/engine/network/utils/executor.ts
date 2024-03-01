@@ -21,11 +21,11 @@ export const getUrls = (relays: string[]) => {
     warn(`Attempted to connect to non-unique relays`)
   }
 
-  const {FORCE_RELAYS} = env.get()
+  const {PLATFORM_RELAYS} = env.get()
   const nonLocalRelays = without([LOCAL_RELAY_URL], urls)
 
-  if (FORCE_RELAYS.length > 0 && nonLocalRelays.some(url => !FORCE_RELAYS.includes(url))) {
-    warn(`Attempted to connect to something other than FORCE_RELAYS`, urls)
+  if (PLATFORM_RELAYS.length > 0 && nonLocalRelays.some(url => !PLATFORM_RELAYS.includes(url))) {
+    warn(`Attempted to connect to something other than PLATFORM_RELAYS`, urls)
   }
 
   return urls
@@ -63,7 +63,7 @@ export const getTarget = (urls: string[]) => {
 const seenChallenges = new Set()
 
 export const onAuth = async (url, challenge) => {
-  const {FORCE_GROUP, FORCE_RELAYS} = env.get()
+  const {FORCE_GROUP, PLATFORM_RELAYS} = env.get()
 
   if (!canSign.get()) {
     return
@@ -73,7 +73,7 @@ export const onAuth = async (url, challenge) => {
     return
   }
 
-  if (!FORCE_GROUP && FORCE_RELAYS.length === 0 && !getSetting("auto_authenticate")) {
+  if (!FORCE_GROUP && PLATFORM_RELAYS.length === 0 && !getSetting("auto_authenticate")) {
     return
   }
 

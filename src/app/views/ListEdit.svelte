@@ -99,7 +99,7 @@
         </SearchSelect>
         <p slot="info">Type "@" to look for people, and "#" to look for topics.</p>
       </Field>
-      {#if $env.FORCE_RELAYS.length === 0}
+      {#if $env.PLATFORM_RELAYS.length === 0}
         <Field label="Relays">
           <SearchSelect multiple search={searchRelayTags} bind:value={values.relays}>
             <div slot="item" let:item>

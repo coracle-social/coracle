@@ -40,7 +40,7 @@ const NIP96_URLS = fromCsv(import.meta.env.VITE_NIP96_URLS)
 
 const FORCE_GROUP = import.meta.env.VITE_FORCE_GROUP
 
-const FORCE_RELAYS = fromCsv(import.meta.env.VITE_FORCE_RELAYS).map(normalizeRelayUrl)
+const PLATFORM_RELAYS = fromCsv(import.meta.env.VITE_PLATFORM_RELAYS).map(normalizeRelayUrl)
 
 const DVM_RELAYS = fromCsv(import.meta.env.VITE_DVM_RELAYS).map(normalizeRelayUrl)
 
@@ -71,7 +71,7 @@ env.set({
   DUFFLEPUD_URL,
   MULTIPLEXTR_URL,
   FORCE_GROUP,
-  FORCE_RELAYS,
+  PLATFORM_RELAYS,
   DVM_RELAYS,
   SEARCH_RELAYS,
   DEFAULT_RELAYS,
