@@ -20,9 +20,10 @@ export const getGroupName = (group: Group) => group.meta?.name || group.id || ""
 export const displayGroup = (group: Group) => ellipsize(group ? getGroupName(group) : "No name", 60)
 
 export const deriveGroup = address => {
-  const {identifier, pubkey} = Address.fromRaw(address)
+  const pubkey = Address.getPubkey(address)
+  const id = Address.getIdentifier(address)
 
-  return groups.key(address).derived(defaultTo({id: identifier, pubkey, address}))
+  return groups.key(address).derived(defaultTo({id, pubkey, address}))
 }
 
 export const getGroupSearch = $groups => fuzzy($groups, {keys: ["meta.name", "meta.about"]})
@@ -65,7 +66,7 @@ export const getGroupReqInfo = (address = null) => {
   const recipients = [pubkey.get()]
 
   for (const key of [...$groupSharedKeys, ...$groupAdminKeys]) {
-    admins.push(Address.fromRaw(key.group).pubkey)
+    admins.push(Address.getPubkey(key.group))
     addresses.push(key.group)
     recipients.push(key.pubkey)
   }

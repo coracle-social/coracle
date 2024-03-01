@@ -84,9 +84,8 @@ export const wrapWithFallback = async (template, {author = null, wrap}) => {
 // Utils for publishing
 
 export const publishToGroupAdmin = async (address, template) => {
-  const addr = Address.fromRaw(address)
   const relays = hints.WithinContext(address).getUrls()
-  const pubkeys = [addr.pubkey, session.get().pubkey]
+  const pubkeys = [Address.getPubkey(address), session.get().pubkey]
 
   const pubs = []
   const events = []

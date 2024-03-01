@@ -16,11 +16,11 @@
 {:else if type === "note"}
   <NoteDetail eid={data} {relays} />
 {:else if type === "naddr"}
-  {@const naddr = Address.fromNaddr(entity)}
+  {@const address = Address.fromNaddr(entity)}
   {#if [35834, 34550].includes(data.kind)}
-    <GroupDetail address={naddr.asRaw()} relays={naddr.relays} activeTab="notes" />
+    <GroupDetail address={address.asRaw()} relays={address.relays} activeTab="notes" />
   {:else if data.kind === 31923}
-    <EventDetail address={naddr.asRaw()} relays={naddr.relays} />
+    <EventDetail address={address.asRaw()} relays={address.relays} />
   {:else}
     <NoteDetail {...data} />
   {/if}

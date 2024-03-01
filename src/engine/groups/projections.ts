@@ -65,7 +65,8 @@ projections.addHandler(24, (e: Event) => {
   }
 
   if (relays.length > 0) {
-    const {identifier: id, pubkey} = Address.fromRaw(address)
+    const pubkey = Address.getPubkey(address)
+    const id = Address.getIdentifier(address)
 
     if (!groups.key(address).get()) {
       groups.key(address).set({address, pubkey, id, relays})

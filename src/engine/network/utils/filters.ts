@@ -44,7 +44,7 @@ export const getIdFilters = values => {
 
   for (const value of values) {
     if (value.includes(":")) {
-      aFilters.push(Address.fromRaw(value).asFilter())
+      aFilters.push(Address.fromRaw(value, []).asFilter())
     } else {
       ids.push(value)
     }
