@@ -32,7 +32,7 @@ projections.addHandler(
     for (const pubkey of new Set(pluck("pubkey", chunk))) {
       updateSession(
         pubkey,
-        updateIn("deletes_last_synced", t =>
+        updateIn("deletes_last_synced", (t: number) =>
           pluck("created_at", chunk)
             .concat(t || 0)
             .reduce(max, 0),
@@ -54,7 +54,7 @@ projections.addHandler(
     for (const pubkey of new Set(pluck("pubkey", chunk))) {
       updateSession(
         pubkey,
-        updateIn("seen_last_synced", t =>
+        updateIn("seen_last_synced", (t: number) =>
           pluck("created_at", chunk)
             .concat(t || 0)
             .reduce(max, 0),

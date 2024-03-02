@@ -1,6 +1,6 @@
 import {partition} from "ramda"
 import {now, createEvent, Address} from "paravel"
-import {updateIn, randomId} from "hurdak"
+import {randomId} from "hurdak"
 import {generatePrivateKey, getPublicKey} from "src/util/nostr"
 import {updateRecord} from "src/engine/core/commands"
 import {Publisher, getClientTags, mention} from "src/engine/network/utils"
@@ -81,6 +81,11 @@ export const wrapWithFallback = async (template, {author = null, wrap}) => {
   return events
 }
 
+const addATags = (template, addresses) => ({
+  ...template,
+  tags: [...template.tags, ...addresses.map(a => ["a", a])],
+})
+
 // Utils for publishing
 
 export const publishToGroupAdmin = async (address, template) => {
@@ -147,11 +152,7 @@ export const publishToGroupsPublicly = async (addresses, template, {anonymous = 
     }
   }
 
-  template = updateIn(
-    "tags",
-    (tags: string[][]) => [...tags, ...addresses.map(a => ["a", a])],
-    template,
-  )
+  template = addATags(template, addresses)
 
   const event = anonymous
     ? await signer.get().signWithKey(template, generatePrivateKey())
@@ -165,7 +166,7 @@ export const publishToGroupsPrivately = async (addresses, template, {anonymous =
   const events = []
   for (const address of addresses) {
     const relays = hints.WithinContext(address).getUrls()
-    const thisTemplate = updateIn("tags", (tags: string[][]) => [...tags, ["a", address]], template)
+    const thisTemplate = addATags(template, [address])
     const sharedKey = deriveSharedKeyForGroup(address).get()
 
     if (!address.startsWith("35834:")) {
