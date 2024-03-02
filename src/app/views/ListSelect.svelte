@@ -1,5 +1,7 @@
 <script lang="ts">
-  import {updateIn, randomId} from "hurdak"
+  import {append} from "ramda"
+  import {randomId} from "hurdak"
+  import {updateIn} from "src/util/misc"
   import Subheading from "src/partials/Subheading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import BorderLeft from "src/partials/BorderLeft.svelte"
@@ -13,7 +15,7 @@
 
   const label = type === "p" ? "person" : "topic"
 
-  const modifyList = updateIn("tags", (tags: string[][] = []) => [...tags, [type, value]])
+  const modifyList = updateIn("tags", append([type, value]))
 
   const newList = () => ({address: `30003:${$pubkey}:${randomId()}`, tags: []})
 

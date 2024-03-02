@@ -113,7 +113,7 @@ export const hints = new Router({
       return userRelays
     }
 
-    return DEFAULT_RELAYS
+    return env.get().DEFAULT_RELAYS
   },
   getDefaultLimit: () => parseInt(getSetting("relay_limit")),
   getRelayQuality: (url: string) => {

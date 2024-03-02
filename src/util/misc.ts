@@ -319,3 +319,7 @@ export const joinPath = (...parts) => {
 
   return path.slice(0, -1)
 }
+
+export const updateIn =
+  <T>(k: string, f: (x: T) => T) =>
+  x => ({...x, [k]: f(x[k])})

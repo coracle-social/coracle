@@ -1,12 +1,11 @@
 <script lang="ts">
   import cx from "classnames"
-  import {identity} from "ramda"
 
   export let options
   export let value
   export let onChange = null
   export let disabled = false
-  export let displayOption = identity
+  export let displayOption = x => x
 </script>
 
 <div>

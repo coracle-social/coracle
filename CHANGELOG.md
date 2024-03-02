@@ -6,6 +6,7 @@
 - [x] Rename `FORCE_RELAYS` to `PLATFORM_RELAYS`
 - [x] Stop reading kind 3 relays
 - [x] Publish q tags
+- [x] Add sugggested relays based on follows
 
 # 0.4.3
 

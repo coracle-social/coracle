@@ -12,7 +12,6 @@
   import Note from "src/app/shared/Note.svelte"
   import type {DynamicFilter} from "src/engine"
   import {
-    env,
     hints,
     readable,
     writable,
