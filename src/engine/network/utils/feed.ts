@@ -1,4 +1,4 @@
-import {partition, prop, uniqBy, identity, without, assoc} from "ramda"
+import {partition, concat, prop, uniqBy, identity, without, assoc} from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
 import {now, Tags} from "paravel"
 import {race} from "src/util/misc"
@@ -268,14 +268,13 @@ export class FeedLoader {
 
     this.addSubs(subs)
 
-    let ok = this.discardEvents(events)
-
-    // Skip anything out of order or missing context
-    if (this.opts.shouldDefer) {
-      ok = doPipe(ok.concat(this.deferred.splice(0)), [this.deferOrphans, this.deferAncient])
-    }
-
-    this.addToFeed(ok)
+    this.addToFeed(
+      doPipe(this.discardEvents(events), [
+        concat(this.deferred.splice(0)),
+        this.deferOrphans,
+        this.deferAncient,
+      ]),
+    )
   }
 
   loadBuffer() {
