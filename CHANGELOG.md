@@ -4,6 +4,8 @@
 
 - [x] Format time and date based on browser regional settings
 - [x] Rename `FORCE_RELAYS` to `PLATFORM_RELAYS`
+- [x] Stop reading kind 3 relays
+- [x] Publish q tags
 
 # 0.4.3
 
