@@ -1,6 +1,7 @@
 import {max, pluck} from "ramda"
-import {batch, updateIn} from "hurdak"
+import {batch} from "hurdak"
 import {Tags} from "paravel"
+import {updateIn} from "src/util/misc"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
 import {sessions} from "src/engine/session/state"

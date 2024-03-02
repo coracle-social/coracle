@@ -28,6 +28,7 @@
         </div>
       {:else}
         <Anchor
+          modal
           href={router.at("relays").of(relay.url).toString()}
           class="overflow-hidden text-ellipsis whitespace-nowrap">
           {displayRelay(relay)}

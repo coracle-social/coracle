@@ -116,7 +116,7 @@ setInterval(() => {
 
   for (const [url, con] of pool.data.entries()) {
     // @ts-ignore
-    const lastActivity = pickVals(activityKeys, con.meta).reduce(max)
+    const lastActivity: number = pickVals(activityKeys, con.meta).reduce(max)
 
     // If our connection hasn't been used in a while, close it and reopen
     if (lastActivity && lastActivity < Date.now() - 60_000) {

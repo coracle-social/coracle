@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {isShareableRelayUrl, getAddress} from "paravel"
+  import {getAddress} from "paravel"
   import {filterVals} from "hurdak"
   import {asArray} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
@@ -21,7 +21,7 @@
 
   const relays = hints
     .merge([
-      hints.scenario([(value.relays || []).filter(isShareableRelayUrl)]),
+      hints.scenario([(value.relays || [])]),
       hints.EventParent(note),
     ])
     .getUrls()

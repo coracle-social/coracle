@@ -173,7 +173,7 @@ export const getRelaysFromFilters = filters =>
         }
 
         if (filter.authors) {
-          return hints.FromPubkeys(filter.authors)
+          return hints.FromPubkeys(shuffle(filter.authors))
         }
 
         return hints.Inbox()

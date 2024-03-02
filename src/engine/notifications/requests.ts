@@ -1,6 +1,7 @@
 import {now, Tags} from "paravel"
-import {seconds, updateIn, batch, doPipe} from "hurdak"
+import {seconds, batch, doPipe} from "hurdak"
 import {pluck, max, slice, filter, without, sortBy} from "ramda"
+import {updateIn} from "src/util/misc"
 import {noteKinds, repostKinds, reactionKinds} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import type {Filter} from "src/engine/network/model"

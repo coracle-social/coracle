@@ -1,7 +1,7 @@
 <script lang="ts">
   import {zipObj} from "ramda"
-  import {updateIn} from "hurdak"
   import {normalizeRelayUrl} from "paravel"
+  import {updateIn} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -20,7 +20,8 @@
 
   const {PLATFORM_RELAYS} = $env
   const parsedRelays = relays
-    .map(s => updateIn("url", normalizeRelayUrl, zipObj(["url", "claim"], s.split("|"))))
+    .map(s => zipObj(["url", "claim"], s.split("|")))
+    .map(updateIn("url", normalizeRelayUrl))
     .filter(r => PLATFORM_RELAYS.length === 0 || PLATFORM_RELAYS.includes(r.url))
   const parsedGroups = groups.map(s => zipObj(["address", "relay", "claim"], s.split("|")))
 </script>

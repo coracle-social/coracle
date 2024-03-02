@@ -9,6 +9,7 @@ import {
   env,
   pool,
   pubkey,
+  follows,
   session,
   writable,
   loadSeen,
@@ -115,8 +116,9 @@ export const loadAppData = () => {
 }
 
 export const loadUserData = () => {
-  // Make sure the user is loaded
+  // Make sure the user and their follows are loaded
   loadPubkeys([pubkey.get()], {force: true, kinds: userKinds})
+    .then(() => loadPubkeys(follows.get()))
 
   // Load read receipts
   loadSeen()

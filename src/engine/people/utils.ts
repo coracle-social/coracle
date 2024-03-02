@@ -91,7 +91,7 @@ export const getNetwork = $person => {
   const network = new Set<string>()
 
   for (const follow of pubkeys) {
-    for (const [_, pubkey] of people.key(follow).get()?.petnames || []) {
+    for (const pubkey of getFollowedPubkeys(follow)) {
       if (!pubkeys.has(pubkey)) {
         network.add(pubkey)
       }
