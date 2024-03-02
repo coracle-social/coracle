@@ -61,7 +61,6 @@
     summary: "",
     price: "",
     currency: currencyOptions.find(whereEq({code: "SAT"})),
-    relays: hints.WithinMultipleContexts(defaultGroups).getUrls(),
     groups: defaultGroups,
     anonymous: false,
     location: null,
@@ -132,8 +131,8 @@
       // Re-broadcast the note we're quoting
       if (!opts.groups.length) {
         Publisher.publish({
-          relays: opts.relays,
           event: asNostrEvent(quote),
+          relays: hints.Outbox().getUrls(),
         })
       }
     }
@@ -306,9 +305,6 @@
             <i class="fa fa-circle-nodes" />
             {opts.groups.length}
           </span>
-          {#if $env.PLATFORM_RELAYS.length === 0}
-            <span><i class="fa fa-server" /> {opts.relays?.length}</span>
-          {/if}
           <span><i class="fa fa-warning" /> {opts.warning || 0}</span>
         </small>
       {/if}
