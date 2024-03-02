@@ -195,7 +195,7 @@
     bind:this={options}
     on:change={setOpts}
     initialValues={opts}
-    hideFields={["groups", "relays"]} />
+    hideFields={["groups"]} />
 {/if}
 
 {#if $nsecWarning}

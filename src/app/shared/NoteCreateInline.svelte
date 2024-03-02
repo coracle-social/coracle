@@ -124,11 +124,7 @@
   </AltColor>
 </form>
 
-<NoteOptions
-  on:change={setOpts}
-  bind:this={options}
-  initialValues={opts}
-  hideFields={["relays", "groups"]} />
+<NoteOptions on:change={setOpts} bind:this={options} initialValues={opts} hideFields={["groups"]} />
 
 {#if $nsecWarning}
   <NsecWarning onAbort={() => nsecWarning.set(null)} onBypass={bypassNsecWarning} />

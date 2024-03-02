@@ -10,23 +10,18 @@
   import Input from "src/partials/Input.svelte"
   import Field from "src/partials/Field.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import RelayCard from "src/app/shared/RelayCard.svelte"
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
-  import RelaySearch from "src/app/shared/RelaySearch.svelte"
-  import {env, hints, deriveGroupOptions, displayRelay} from "src/engine"
+  import {deriveGroupOptions} from "src/engine"
 
   export let hideFields = []
   export let initialValues: {
     warning: string
     anonymous: boolean
     groups?: string[]
-    relays?: string[]
   }
 
-  let values = {groups: [], relays: [], ...initialValues}
+  let values = {groups: [], ...initialValues}
   let view = null
-  let relaySearch = ""
-  let relaysDirty = false
 
   const dispatch = createEventDispatcher()
 
@@ -34,20 +29,7 @@
 
   export const setView = name => {
     view = name
-    relaySearch = ""
-    values = {groups: [], relays: [], ...initialValues}
-  }
-
-  const addRelay = url => {
-    relaySearch = ""
-
-    values.relays = values.relays.concat(url)
-    relaysDirty = true
-  }
-
-  const removeRelay = url => {
-    values.relays = without([url], values.relays)
-    relaysDirty = true
+    values = {groups: [], ...initialValues}
   }
 
   const setGroup = address => {
@@ -55,10 +37,6 @@
       values.groups = without([address], values.groups)
     } else {
       values.groups = values.groups.concat(address)
-    }
-
-    if (!relaysDirty) {
-      values.relays = hints.WithinMultipleContexts(values.groups).getUrls()
     }
   }
 
@@ -96,34 +74,6 @@
                 </Card>
               {/each}
             </div>
-          </Field>
-        {/if}
-        {#if !hideFields.includes("relays") && $env.PLATFORM_RELAYS.length === 0}
-          <Field icon="fa-database" label="Select which relays to publish to">
-            <div>
-              {#each values.relays as url}
-                <div
-                  class="mb-2 mr-1 inline-block rounded-full border border-solid border-neutral-100 px-2 py-1">
-                  <button
-                    type="button"
-                    class="fa fa-times cursor-pointer"
-                    on:click={() => removeRelay(url)} />
-                  {displayRelay({url})}
-                </div>
-              {/each}
-            </div>
-            <RelaySearch bind:q={relaySearch} limit={3} hideIfEmpty>
-              <div slot="item" let:relay>
-                <RelayCard {relay}>
-                  <button
-                    slot="actions"
-                    class="underline"
-                    on:click|preventDefault={() => addRelay(relay.url)}>
-                    Add relay
-                  </button>
-                </RelayCard>
-              </div>
-            </RelaySearch>
           </Field>
         {/if}
         <FieldInline icon="fa-user-secret" label="Post anonymously">
