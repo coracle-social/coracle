@@ -12,10 +12,12 @@
   import Note from "src/app/shared/Note.svelte"
   import type {DynamicFilter} from "src/engine"
   import {
+    env,
     hints,
     readable,
     writable,
     compileFilters,
+    forcePlatformRelays,
     searchableRelays,
     getRelaysFromFilters,
   } from "src/engine"
@@ -47,7 +49,7 @@
       selection = getRelaysFromFilters(compileFilters([filter]))
     }
 
-    return hints.scenario([selection]).getUrls().concat(LOCAL_RELAY_URL)
+    return forcePlatformRelays(hints.scenario([selection]).getUrls()).concat(LOCAL_RELAY_URL)
   }
 
   const loadMore = () => feed.load(5)

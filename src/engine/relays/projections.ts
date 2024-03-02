@@ -1,9 +1,7 @@
 import {Tags} from "paravel"
 import {normalizeRelayUrl, isShareableRelayUrl} from "paravel"
-import {tryJson} from "src/util/misc"
 import {warn} from "src/util/logger"
 import {projections} from "src/engine/core/projections"
-import type {RelayPolicy} from "./model"
 import {RelayMode} from "./model"
 import {saveRelay, saveRelayPolicy} from "./commands"
 

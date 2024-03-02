@@ -35,6 +35,7 @@
     getRecipientKey,
     loadPubkeys,
     sortEventsDesc,
+    forcePlatformRelays,
   } from "src/engine"
 
   export let note
@@ -205,7 +206,7 @@
       }
 
       load({
-        relays: hints.EventChildren(event).getUrls(),
+        relays: forcePlatformRelays(hints.EventChildren(event).getUrls()),
         filters: getReplyFilters([event], {kinds}),
         onEvent: batch(200, events => {
           ctx = uniqBy(prop("id"), ctx.concat(events))

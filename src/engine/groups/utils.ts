@@ -1,5 +1,5 @@
 import {prop, uniqBy, defaultTo, sortBy, last, whereEq} from "ramda"
-import {ellipsize, first, seconds} from "hurdak"
+import {ellipsize, seconds} from "hurdak"
 import {Tags, Address} from "paravel"
 import {fuzzy} from "src/util/misc"
 import type {GroupStatus, Session} from "src/engine/session/model"
@@ -142,7 +142,7 @@ export const deriveGroupOptions = (defaultGroups = []) =>
 export const getUserCircles = (session: Session) =>
   Object.entries(session?.groups || {})
     .filter(([a, s]) => deriveIsGroupMember(a).get())
-    .map<string>(first)
+    .map(([a, s]) => a)
 
 export const deriveUserCircles = () => session.derived(getUserCircles)
 

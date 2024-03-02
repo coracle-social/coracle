@@ -29,7 +29,7 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
   for (const pubkey of pubkeys) {
     updateSession(
       pubkey,
-      updateIn("notifications_last_synced", t =>
+      updateIn("notifications_last_synced", (t: number) =>
         pluck("created_at", events)
           .concat(t || 0)
           .reduce(max, 0),

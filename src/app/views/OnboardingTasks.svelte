@@ -7,7 +7,9 @@
   import {session, OnboardingTask, updateCurrentSession} from "src/engine"
 
   const hideTask = task =>
-    updateCurrentSession(updateIn("onboarding_tasks_completed", tasks => [...tasks, task]))
+    updateCurrentSession(
+      updateIn("onboarding_tasks_completed", (tasks: string[]) => [...tasks, task]),
+    )
 </script>
 
 {#if !$session.onboarding_tasks_completed.includes(OnboardingTask.BackupKey)}
