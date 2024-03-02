@@ -185,7 +185,7 @@ export const tagsFromContent = (content: string) => {
     }
 
     if (type.match(/nostr:(note|nevent)/)) {
-      tags.push(["e", value.id, value.relays?.[0] || "", "mention"])
+      tags.push(["q", value.id, value.relays?.[0] || ""])
     }
 
     if (type.match(/nostr:(nprofile|npub)/)) {
