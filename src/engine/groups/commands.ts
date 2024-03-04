@@ -234,13 +234,17 @@ export const publishToZeroOrMoreGroups = async (addresses, template, {anonymous 
 // Admin functions
 
 export const publishKeyShares = async (address, pubkeys, template) => {
-  const relays = hints.WithinContext(address).getUrls()
   const adminKey = deriveAdminKeyForGroup(address).get()
 
   const pubs = []
   const events = []
 
   for (const pubkey of pubkeys) {
+    const relays = hints
+      .merge([hints.ForPubkeys([pubkey]), hints.WithinContext(address)])
+      .policy(hints.addNoFallbacks)
+      .getUrls()
+
     const rumors = await wrapWithFallback(template, {
       author: adminKey.privkey,
       wrap: {
