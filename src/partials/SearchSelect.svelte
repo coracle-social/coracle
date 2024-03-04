@@ -8,6 +8,7 @@
   import Suggestions from "src/partials/Suggestions.svelte"
 
   export let value
+  export let onChange = null
   export let inputClass = ""
   export let inputWrapperClass = ""
   export let placeholder = ""
@@ -20,12 +21,17 @@
   export let multiple = false
   export let loading = false
   export let defaultOptions = []
-  export let term = multiple ? "" : displayItem(value)
+  export let term = multiple ? "" : displayItem(value) || ""
 
   let input, suggestions
   let focused = autofocus
 
   $: suggestions?.setData?.(term ? search(term).slice(0, 10) : defaultOptions)
+
+  export const clear = () => {
+    value = multiple ? [] : null
+    term = multiple ? "" : displayItem(value) || ""
+  }
 
   const create = term => {
     select(termToItem(term))
@@ -44,9 +50,13 @@
       term = displayItem(item)
       focused = false
     }
+
+    onChange?.(value)
   }
 
   const onKeyDown = event => {
+    onFocus()
+
     if (term && termToItem && delimiters.includes(event.key)) {
       event.preventDefault()
       create(term)
