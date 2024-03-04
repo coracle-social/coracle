@@ -41,7 +41,7 @@
           style={`transform-origin: top left; transform: scale(${scale}, ${scale})`} />
       </div>
     </Anchor>
-    <slot {copy}>
+    <slot name="below" {copy}>
       <Input value={code}>
         <button slot="after" class="fa fa-copy" on:click={copy} />
       </Input>

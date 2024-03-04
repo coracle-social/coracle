@@ -32,7 +32,7 @@
       {zap.amount} sats to {displayPubkey(zap.pubkey)}
     </div>
     <QRCode code={zap.invoice} onClick={collect}>
-      <div let:copy class="flex gap-1">
+      <div slot="below" let:copy class="flex gap-1">
         <Input value={zap.invoice} wrapperClass="flex-grow">
           <button slot="after" class="fa fa-copy" on:click={copy} />
         </Input>
