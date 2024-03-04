@@ -1,23 +1,30 @@
 <script lang="ts">
-  import {comparator, pluck} from 'ramda'
-  import {shuffle, displayList} from 'hurdak'
-  import {pushToKey} from 'src/util/misc'
+  import {comparator, pluck} from "ramda"
+  import {shuffle, displayList} from "hurdak"
+  import {pushToKey} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {router} from "src/app/router"
-  import {follows, people, personHasName, displayPubkey, relayPolicies, getPubkeyRelayUrls} from 'src/engine'
+  import {
+    follows,
+    people,
+    personHasName,
+    displayPubkey,
+    relayPolicies,
+    getPubkeyRelayUrls,
+  } from "src/engine"
 
   const browse = () => router.at("relays/browse").open()
 
-  const pubkeysByUrl = {}
-  const ownRelays = new Set(pluck('url', $relayPolicies))
+  const pubkeysByUrl: Record<string, string[]> = {}
+  const ownRelays = new Set(pluck("url", $relayPolicies))
 
   for (const pubkey of $follows) {
     if (!personHasName(people.key(pubkey).get())) {
       continue
     }
 
-    for (const url of getPubkeyRelayUrls(pubkey, 'write')) {
+    for (const url of getPubkeyRelayUrls(pubkey, "write")) {
       if (!ownRelays.has(url)) {
         pushToKey(pubkeysByUrl, url, pubkey)
       }
@@ -66,11 +73,11 @@
     <h2 class="staatliches text-2xl">Other relays</h2>
   </div>
   <p>
-    Below are relays used by people in your network. Adding these may improve your
-    ability to load profiles and content.
+    Below are relays used by people in your network. Adding these may improve your ability to load
+    profiles and content.
   </p>
   <div class="grid grid-cols-1 gap-4">
-    {#each otherRelays.slice(offset, offset + 20) as {url, pubkeys} (url)}
+    {#each otherRelays.slice(offset, offset + 20) as { url, pubkeys } (url)}
       {@const pubkeyDisplay = displayList(shuffle(pubkeys).map(displayPubkey))}
       <RelayCard relay={{url, description: `Used by ${pubkeyDisplay}`}} />
     {/each}
