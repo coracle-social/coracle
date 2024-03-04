@@ -12,17 +12,15 @@
   import GroupActions from "src/app/shared/GroupActions.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import Onboarding from "src/app/views/Onboarding.svelte"
-  import {env, session} from "src/engine"
+  import {session} from "src/engine"
 
   export let people = []
   export let relays = []
   export let groups = []
 
-  const {PLATFORM_RELAYS} = $env
   const parsedRelays = relays
     .map(s => zipObj(["url", "claim"], s.split("|")))
     .map(updateIn("url", normalizeRelayUrl))
-    .filter(r => PLATFORM_RELAYS.length === 0 || PLATFORM_RELAYS.includes(r.url))
   const parsedGroups = groups.map(s => zipObj(["address", "relay", "claim"], s.split("|")))
 </script>
 
