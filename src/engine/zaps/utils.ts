@@ -1,6 +1,6 @@
 import {cached, Tags} from "paravel"
 import {identity, pick, uniq} from "ramda"
-import {Fetch, tryFunc, createMapOf} from "hurdak"
+import {Fetch, tryFunc, sleep, createMapOf} from "hurdak"
 import {tryJson, hexToBech32, bech32ToHex, createBatcher} from "src/util/misc"
 import {people} from "src/engine/people/state"
 import {dufflepud} from "src/engine/session/utils"
@@ -163,4 +163,20 @@ export const processZaps = (zaps: Event[], zapper) => {
   }
 
   return zaps.map(e => processZap(e, zapper)).filter(identity)
+}
+
+export const getLightningImplementation = async () => {
+  const {webln} = window as {webln?: any}
+
+  if (webln) {
+    return "webln"
+  }
+
+  const [bc] = await Promise.all([import("@getalby/bitcoin-connect"), sleep(300)])
+
+  if (bc?.isConnected()) {
+    return "bc"
+  }
+
+  return null
 }

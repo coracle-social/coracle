@@ -3,7 +3,6 @@
   import {onMount} from "svelte"
   import {pickVals} from "hurdak"
   import Card from "src/partials/Card.svelte"
-  import Chips from "src/partials/Chips.svelte"
   import Input from "src/partials/Input.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"

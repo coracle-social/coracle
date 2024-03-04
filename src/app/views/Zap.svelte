@@ -4,15 +4,17 @@
     pubkey: string
     amount: number
     status: string
+    relays?: string[]
     invoice?: string
     isTip?: boolean
   }
 </script>
 
 <script lang="ts">
-  import {sortBy, uniqBy, whereEq, filter, map, reject} from "ramda"
+  import {sortBy, uniqBy, uniq, whereEq, filter, map, reject} from "ramda"
   import {doPipe} from "hurdak"
   import {onDestroy} from "svelte"
+  import {now, Tags} from "paravel"
   import Anchor from "src/partials/Anchor.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
@@ -20,15 +22,14 @@
   import Textarea from "src/partials/Textarea.svelte"
   import ZapInvoice from "src/app/shared/ZapInvoice.svelte"
   import {router} from "src/app/router"
-  import {env, hints, getSetting, derivePerson, requestZap, listenForZapResponse} from "src/engine"
+  import {env, subscribe, hints, getSetting, derivePerson, requestZap} from "src/engine"
 
   export let splits
   export let eid = null
   export let anonymous = false
   export let callback = null
 
-  const subs = []
-
+  let sub
   let closing = false
   let stage = "message"
   let message = ""
@@ -90,6 +91,7 @@
         .merge([hints.PublishMessage(zap.pubkey), hints.scenario([[zap.relay]])])
         .getUrls()
 
+      zaps[i].relays = relays
       zaps[i].invoice = await requestZap(msg, zap.amount, {
         eid,
         relays,
@@ -97,17 +99,27 @@
         lnurl: zapper.lnurl,
         pubkey: zap.pubkey,
       })
+    })
 
-      const sub = await listenForZapResponse(zap.pubkey, zapper.lnurl, {
-        relays,
-        onEvent: event => {
-          zaps[i].status = "success"
-          callback?.(event)
-          sub.close()
-        },
-      })
+    const successfulZaps = zaps.filter(z => !z.status.startsWith("error"))
+    const allRelays = uniq(successfulZaps.flatMap(z => z.relays))
+    const authors = successfulZaps.map(z => derivePerson(z.pubkey).get().zapper.nostrPubkey)
+    const mentions = successfulZaps.map(z => z.pubkey)
 
-      subs.push(sub)
+    sub = subscribe({
+      relays: allRelays,
+      filters: [{kinds: [9735], authors, "#p": mentions, since: now() - 30}],
+      onEvent: e => {
+        zaps = zaps.map(z => {
+          if (z.invoice === Tags.fromEvent(e).get("bolt11")?.value()) {
+            z.status = "success"
+          }
+
+          return z
+        })
+
+        callback?.(e)
+      },
     })
   }
 
@@ -128,9 +140,7 @@
   }
 
   onDestroy(() => {
-    for (const sub of subs) {
-      sub.close()
-    }
+    sub?.close()
   })
 </script>
 
