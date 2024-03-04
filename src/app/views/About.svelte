@@ -11,6 +11,7 @@
   const nprofile =
     "nprofile1qqsf03c2gsmx5ef4c9zmxvlew04gdh7u94afnknp33qvv3c94kvwxgspz4mhxue69uhhyetvv9ujuerpd46hxtnfduhsz9rhwden5te0wfjkcctev93xcefwdaexwtcpzdmhxue69uhhqatjwpkx2urpvuhx2ue0vamm57"
   const hodlbodPubkey = "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322"
+  const splits = [["zap", $env.PLATFORM_PUBKEY, "", "1"]]
 
   loadPubkeys([$env.PLATFORM_PUBKEY])
 
@@ -33,7 +34,7 @@
           All funds donated will be used to support server costs and development.
         </p>
         <div class="flex justify-center">
-          <Anchor modal button accent href={router.at("zap").qp({splits: []}).toString()}>
+          <Anchor modal button accent href={router.at("zap").qp({splits}).toString()}>
             Zap the developer
           </Anchor>
         </div>
