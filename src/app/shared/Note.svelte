@@ -223,7 +223,7 @@
 {#if ready}
   {@const showReply = reply && !tags.parents().values().has(anchor) && showParent}
   {@const showRoot =
-    root && !tags.roots().values().has(anchor) && root.value() !== reply.value() && showParent}
+    root && !tags.roots().values().has(anchor) && root.value() !== reply?.value() && showParent}
   <div>
     <NoteMeta note={event} {showGroup} />
     <div class="note relative">
