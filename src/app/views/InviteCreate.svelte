@@ -40,55 +40,32 @@
 
     if (section === "relays") {
       relays = []
-      relayTerm = ""
-      relayClaim = ""
-      relaySelection = null
     }
 
     if (section === "groups") {
       groups = []
-      groupTerm = ""
-      groupClaim = ""
-      groupSelection = null
     }
   }
 
-  const addRelay = e => {
-    relays = [...relays, {url: relaySelection.url, claim: relayClaim}]
-    relayTerm = ""
-    relayClaim = ""
-    relaySelection = null
-
-    relayWrapper.querySelector("input").focus()
+  const addRelay = url => {
+    relayInput.clear()
+    relays = [...relays, {url, claim: ""}]
   }
 
   const removeRelay = i => {
     relays = relays.slice(0, i).concat(relays.slice(i + 1))
   }
 
-  const displayRelayForChip = g => {
-    let display = displayRelay(g)
-
-    if (g.claim) {
-      display += ` (invite code: ${g.claim})`
-    }
-
-    return display
-  }
-
-  const addGroup = e => {
-    const newGroup = {
-      address: groupSelection.address,
-      relay: hints.WithinContext(groupSelection.address).getUrl(),
-      claim: groupClaim,
-    }
-
-    groups = [...groups, newGroup]
-    groupTerm = ""
-    groupSelection = null
-    groupClaim = ""
-
-    groupWrapper.querySelector("input").focus()
+  const addGroup = address => {
+    groupInput.clear()
+    groups = [
+      ...groups,
+      {
+        address: address,
+        relay: hints.WithinContext(address).getUrl(),
+        claim: "",
+      },
+    ]
   }
 
   const removeGroup = i => {
@@ -97,28 +74,11 @@
 
   const displayGroupFromAddress = a => displayGroup(deriveGroup(a).get())
 
-  const displayGroupForChip = g => {
-    let display = displayGroupFromAddress(g.address)
-
-    if (g.claim) {
-      display += ` (invite code: ${g.claim})`
-    }
-
-    return display
-  }
-
+  let relayInput, groupInput
   let sections = []
-  let people = initialPubkey ? [derivePerson(initialPubkey).get()] : []
+  let people = []
   let relays = []
   let groups = []
-  let relayTerm
-  let relaySelection
-  let relayClaim
-  let relayWrapper
-  let groupTerm = initialGroupAddress ? displayGroupFromAddress(initialGroupAddress) : ""
-  let groupSelection = initialGroupAddress ? deriveGroup(initialGroupAddress).get() : null
-  let groupClaim
-  let groupWrapper
 
   const onSubmit = () => {
     const invite: any = {}
@@ -144,8 +104,19 @@
   }
 
   onMount(() => {
-    if (initialPubkey) showSection("people")
-    if (initialGroupAddress) showSection("groups")
+    if (initialPubkey) {
+      showSection("people")
+      people = people.concat(derivePerson(initialPubkey).get())
+    }
+
+    if (initialGroupAddress) {
+      showSection("groups")
+      groups = groups.concat({
+        address: initialGroupAddress,
+        relay: hints.WithinContext(initialGroupAddress).getUrl(),
+        claim: "",
+      })
+    }
 
     // Not sure why, but the inputs are getting automatically focused
     setTimeout(() => (document.activeElement as any).blur())
@@ -179,25 +150,32 @@
           <i class="fa fa-times cursor-pointer" on:click={() => hideSection("relays")} />
         </div>
         <p>
-          Invite people to a private relay. Make sure the relay supports invite codes, and that the
-          code is valid.
+          Invite people to use specific relays. An invite code can optionally be provided to grant
+          access to private relays.
         </p>
-        <Chips items={relays.map(displayRelayForChip)} remove={removeRelay} />
-        <div class="flex gap-2" bind:this={relayWrapper}>
-          <SearchSelect
-            bind:value={relaySelection}
-            search={$searchRelays}
-            getKey={prop("url")}
-            bind:term={relayTerm}
-            termToItem={objOf("url")}>
-            <i slot="before" class="fa fa-search" />
-            <div slot="item" let:item>
-              {displayRelay(item)}
+        {#each relays as relay, i (relay.url + i)}
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <span class="cursor-pointer p-2" on:click={() => removeRelay(i)}>
+                <i class="fa fa-times" />
+              </span>
+              <span>{displayRelay(relay)}</span>
             </div>
-          </SearchSelect>
-          <Input bind:value={relayClaim} placeholder="Claim (optional)" />
-          <Anchor button on:click={addRelay} disabled={!relaySelection}>Add Relay</Anchor>
-        </div>
+            <Input bind:value={relay.claim} placeholder="Claim (optional)" />
+          </div>
+        {/each}
+        <SearchSelect
+          value={null}
+          bind:this={relayInput}
+          search={$searchRelays}
+          getKey={prop("url")}
+          termToItem={objOf("url")}
+          onChange={r => addRelay(r.url)}>
+          <i slot="before" class="fa fa-search" />
+          <div slot="item" let:item>
+            {displayRelay(item)}
+          </div>
+        </SearchSelect>
       </FlexColumn>
     </Card>
   {:else if section === "groups"}
@@ -211,23 +189,30 @@
           Invite people to groups. If you're inviting someone to a closed group, make sure the
           invite code you use is valid.
         </p>
-        <Chips items={groups.map(displayGroupForChip)} remove={removeGroup} />
-        <div class="flex gap-2" bind:this={groupWrapper}>
-          <SearchSelect
-            bind:value={groupSelection}
-            search={$searchGroups}
-            getKey={prop("address")}
-            displayItem={g => (g ? displayGroup(g) : "")}
-            bind:term={groupTerm}>
-            <i slot="before" class="fa fa-search" />
-            <div slot="item" let:item class="flex items-center gap-4 text-neutral-100">
-              <GroupCircle address={item.address} class="h-5 w-5" />
-              <GroupName address={item.address} />
+        {#each groups as group, i (group.address + i)}
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <span class="cursor-pointer p-2" on:click={() => removeGroup(i)}>
+                <i class="fa fa-times" />
+              </span>
+              <span>{displayGroupFromAddress(group.address)}</span>
             </div>
-          </SearchSelect>
-          <Input bind:value={groupClaim} placeholder="Claim (optional)" />
-          <Anchor button on:click={addGroup} disabled={!groupSelection}>Add Group</Anchor>
-        </div>
+            <Input bind:value={group.claim} placeholder="Invite code (optional)" />
+          </div>
+        {/each}
+        <SearchSelect
+          value={null}
+          bind:this={groupInput}
+          search={$searchGroups}
+          getKey={prop("address")}
+          displayItem={g => (g ? displayGroup(g) : "")}
+          onChange={g => addGroup(g.address)}>
+          <i slot="before" class="fa fa-search" />
+          <div slot="item" let:item class="flex items-center gap-4 text-neutral-100">
+            <GroupCircle address={item.address} class="h-5 w-5" />
+            <GroupName address={item.address} />
+          </div>
+        </SearchSelect>
       </FlexColumn>
     </Card>
   {/if}

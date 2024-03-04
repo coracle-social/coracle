@@ -7,6 +7,7 @@
 - [x] Stop reading kind 3 relays
 - [x] Publish q tags
 - [x] Add sugggested relays based on follows
+- [x] Improve invite creation
 
 # 0.4.3
 
