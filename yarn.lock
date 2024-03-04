@@ -4153,10 +4153,9 @@ human-signals@^1.1.1:
   resolved "https://registry.npmjs.org/human-signals/-/human-signals-1.1.1.tgz"
   integrity sha512-SEQu7vl8KjNL2eoGBLF3+wAjpsNfA9XMlXAYj/3EdaNfAlxKthD1xjEQfGOUhllCGGJVNY34bRr6lPINhNjyZw==
 
-hurdak@^0.2.7:
+"hurdak@https://github.com/staab/hurdak.git#7a831e62c837a271a62ecb219a6dae1d86b1023":
   version "0.2.7"
-  resolved "https://registry.yarnpkg.com/hurdak/-/hurdak-0.2.7.tgz#30734f044de4389d0e27bcce538a6942fe451ab8"
-  integrity sha512-kg9bLB478F0569lodRPBQMqmAk6ED0uky6FCA6MLIhsHkWe6o28kc86F0mjD+agnkuCl6EKmaLzy76RJjt8DPA==
+  resolved "https://github.com/staab/hurdak.git#7a831e62c837a271a62ecb219a6dae1d86b1023e"
   dependencies:
     ramda "^0.29.1"
 

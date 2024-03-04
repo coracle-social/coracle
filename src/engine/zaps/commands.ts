@@ -1,10 +1,10 @@
-import {Fetch, sleep} from "hurdak"
+import {Fetch, sleep, switcherFn} from "hurdak"
 import {createEvent} from "paravel"
 import {generatePrivateKey} from "src/util/nostr"
 import {warn} from "src/util/logger"
 import {signer} from "src/engine/session/derived"
 import {getClientTags} from "src/engine/network/utils"
-import {getZapperForPubkey} from "./utils"
+import {getLightningImplementation, getZapperForPubkey} from "./utils"
 
 export const requestZap = async (
   content,
@@ -75,8 +75,8 @@ export async function collectInvoiceWithBitcoinConnect(invoice) {
   }
 }
 
-export async function collectInvoice(invoice) {
-  if (!(await collectInvoiceWithWebLn(invoice))) {
-    await collectInvoiceWithBitcoinConnect(invoice)
-  }
-}
+export const collectInvoice = async invoice =>
+  switcherFn(await getLightningImplementation(), {
+    webln: () => collectInvoiceWithWebLn(invoice),
+    bc: () => collectInvoiceWithBitcoinConnect(invoice),
+  })
