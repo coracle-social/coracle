@@ -276,6 +276,7 @@ export const publishAdminKeyShares = async (address, pubkeys) => {
 
 export const publishGroupInvites = async (address, pubkeys, gracePeriod = 0) => {
   const {relays} = deriveGroup(address).get()
+  const adminKey = deriveAdminKeyForGroup(address).get()
   const {privkey} = deriveSharedKeyForGroup(address).get()
   const template = createEvent(24, {
     tags: [
@@ -288,7 +289,7 @@ export const publishGroupInvites = async (address, pubkeys, gracePeriod = 0) => 
     ],
   })
 
-  return publishKeyShares(address, pubkeys, template)
+  return publishKeyShares(address, pubkeys.concat(adminKey.pubkey), template)
 }
 
 export const publishGroupEvictions = async (address, pubkeys) =>
