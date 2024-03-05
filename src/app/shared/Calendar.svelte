@@ -66,7 +66,7 @@
   $: calendarEvents = Array.from($events.values())
     .filter(e => !$isDeleted(e))
     .map(e => {
-      const meta = fromPairs(e)
+      const meta = fromPairs(e.tags)
       const isOwn = e.pubkey === $pubkey
 
       return {
@@ -75,7 +75,7 @@
         title: meta.title || meta.name, // Backwards compat with a bug
         start: secondsToDate(meta.start),
         end: secondsToDate(meta.end),
-        backgroundColor: $themeColors[isOwn ? "accent" : "neutral-900"],
+        backgroundColor: $themeColors[isOwn ? "accent" : "neutral-100"],
       }
     })
 </script>
@@ -100,6 +100,7 @@
     eventContent: getEventContent,
     eventStartEditable: false,
     eventDragMinDistance: 10000,
+    eventTextColor: $themeColors['neutral-900'],
     longPressDelay: 10000,
     buttonText: {
       today: "Today",

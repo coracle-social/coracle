@@ -15,6 +15,7 @@
   import GroupLink from "src/app/shared/GroupLink.svelte"
   import {toastProgress} from "src/app/state"
   import {
+    env,
     pubkey,
     writable,
     Publisher,
@@ -31,9 +32,11 @@
     throw new Error("Either parent or group is allowed, not both")
   }
 
-  const defaultGroups = parent
-    ? Tags.fromEvent(parent).context().values().valueOf()
-    : [group].filter(identity)
+  const defaultGroups = $env.FORCE_GROUP
+    ? [$env.FORCE_GROUP]
+    : parent
+      ? Tags.fromEvent(parent).context().values().valueOf()
+      : [group].filter(identity)
 
   const defaultOpts = {anonymous: false, warning: ""}
 

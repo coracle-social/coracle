@@ -4,9 +4,9 @@ import {omit, uniqBy} from "ramda"
 import {defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"
 import {parseContent} from "src/util/notes"
-import {getIdAndAddress} from "src/util/nostr"
+import {getIdAndAddress, generatePrivateKey} from "src/util/nostr"
 import type {Event, NostrEvent} from "src/engine/events/model"
-import {hints} from "src/engine/relays/utils"
+import {hints, forcePlatformRelays} from "src/engine/relays/utils"
 import {env, pubkey} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
 import {signer} from "src/engine/session/derived"
@@ -57,7 +57,7 @@ export class Publisher extends EventEmitter {
   static publish({event, relays, ...opts}: StaticPublisherOpts) {
     const publisher = new Publisher(event)
 
-    publisher.publish(relays || hints.PublishEvent(event).getUrls(), opts)
+    publisher.publish(relays || forcePlatformRelays(hints.PublishEvent(event).getUrls()), opts)
 
     return publisher
   }
@@ -142,20 +142,25 @@ export type EventOpts = {
   tags?: string[][]
 }
 
+export const sign = (template, opts: {anonymous?: boolean; sk?: string}) => {
+  if (opts.anonymous) {
+    return signer.get().signWithKey(template, generatePrivateKey())
+  }
+
+  if (opts.sk) {
+    return signer.get().signWithKey(template, opts.sk)
+  }
+
+  return signer.get().signAsUser(template)
+}
+
 export type PublishOpts = EventOpts & {
   sk?: string
   relays?: string[]
 }
 
-export const publish = async (template, {sk, relays}: PublishOpts = {}) => {
-  return Publisher.publish({
-    timeout: 5000,
-    relays: relays || hints.Outbox().getUrls(),
-    event: sk
-      ? await signer.get().signWithKey(template, sk)
-      : await signer.get().signAsUser(template),
-  })
-}
+export const publish = async (template, {sk, relays}: PublishOpts = {}) =>
+  Publisher.publish({timeout: 5000, relays, event: await sign(template, {sk})})
 
 export const createAndPublish = async (
   kind: number,

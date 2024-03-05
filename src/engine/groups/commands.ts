@@ -3,9 +3,9 @@ import {now, createEvent, Address} from "paravel"
 import {randomId} from "hurdak"
 import {generatePrivateKey, getPublicKey} from "src/util/nostr"
 import {updateRecord} from "src/engine/core/commands"
-import {Publisher, getClientTags, mention} from "src/engine/network/utils"
+import {Publisher, getClientTags, sign, mention} from "src/engine/network/utils"
 import {pubkey} from "src/engine/session/state"
-import {nip44, nip59, signer, session} from "src/engine/session/derived"
+import {nip44, nip59, session} from "src/engine/session/derived"
 import {updateSession} from "src/engine/session/commands"
 import {displayPubkey} from "src/engine/people/utils"
 import {hints} from "src/engine/relays/utils"
@@ -115,7 +115,7 @@ export const publishToGroupAdmin = async (address, template) => {
 export const publishAsGroupAdminPublicly = async (address, template) => {
   const relays = hints.WithinContext(address).getUrls()
   const adminKey = deriveAdminKeyForGroup(address).get()
-  const event = await signer.get().signWithKey(template, adminKey.privkey)
+  const event = await sign(template, {sk: adminKey.privkey})
 
   return Publisher.publish({event, relays})
 }
@@ -152,13 +152,9 @@ export const publishToGroupsPublicly = async (addresses, template, {anonymous = 
     }
   }
 
-  template = addATags(template, addresses)
-
-  const event = anonymous
-    ? await signer.get().signWithKey(template, generatePrivateKey())
-    : await signer.get().signAsUser(template)
-
-  return Publisher.publish({event})
+  return Publisher.publish({
+    event: await sign(addATags(template, addresses), {anonymous}),
+  })
 }
 
 export const publishToGroupsPrivately = async (addresses, template, {anonymous = false} = {}) => {
@@ -199,9 +195,7 @@ export const publishToZeroOrMoreGroups = async (addresses, template, {anonymous 
   const events = []
 
   if (addresses.length === 0) {
-    const event = anonymous
-      ? await signer.get().signWithKey(template, generatePrivateKey())
-      : await signer.get().signAsUser(template)
+    const event = await sign(template, {anonymous})
 
     events.push(event)
     pubs.push(Publisher.publish({event}))
