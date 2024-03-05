@@ -263,12 +263,14 @@
     {/if}
   </div>
   <div class="flex scale-90 items-center gap-2">
-    <div
-      class="staatliches hidden cursor-pointer rounded bg-neutral-800 px-2 text-neutral-100 transition-colors hover:bg-neutral-700 dark:bg-neutral-600 dark:hover:bg-neutral-500 sm:block"
-      on:click={() => setView("info")}>
-      <span class="text-accent">{note.seen_on.length}</span>
-      {pluralize(note.seen_on.length, "relay")}
-    </div>
+    {#if note.seen_on.length > 0}
+      <div
+        class="staatliches hidden cursor-pointer rounded bg-neutral-800 px-2 text-neutral-100 transition-colors hover:bg-neutral-700 dark:bg-neutral-600 dark:hover:bg-neutral-500 sm:block"
+        on:click={() => setView("info")}>
+        <span class="text-accent">{note.seen_on.length}</span>
+        {pluralize(note.seen_on.length, "relay")}
+      </div>
+    {/if}
     <OverflowMenu {actions} />
   </div>
 </div>

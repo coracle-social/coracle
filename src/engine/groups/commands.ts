@@ -293,7 +293,7 @@ export const publishGroupInvites = async (address, pubkeys, gracePeriod = 0) => 
     ],
   })
 
-  return publishKeyShares(address, pubkeys.concat(adminKey.pubkey), template)
+  return publishKeyShares(address, [...pubkeys, adminKey.pubkey], template)
 }
 
 export const publishGroupEvictions = async (address, pubkeys) =>
