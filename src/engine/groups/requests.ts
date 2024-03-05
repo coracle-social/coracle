@@ -44,7 +44,10 @@ export const loadGroups = async (rawAddrs: string[], relays: string[] = []) => {
 
   if (addrs.length > 0) {
     load({
-      relays: hints.scenario([relays]).getUrls(),
+      relays: hints.merge([
+        hints.scenario([relays]),
+        hints.WithinMultipleContexts(addrs),
+      ]).getUrls(),
       filters: [{kinds: [34550, 35834], authors, "#d": identifiers}],
     })
   }
