@@ -46,9 +46,11 @@
   export let group = null
   export let initialValues = {}
 
-  const defaultGroups = quote
-    ? Tags.fromEvent(quote).context().values().valueOf()
-    : [group].filter(identity)
+  const defaultGroups = $env.FORCE_GROUP
+    ? [$env.FORCE_GROUP]
+    : quote
+      ? Tags.fromEvent(quote).context().values().valueOf()
+      : [group].filter(identity)
 
   let images, compose
   let charCount = 0

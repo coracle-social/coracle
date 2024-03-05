@@ -1,7 +1,6 @@
 <script>
   import {onMount} from "svelte"
-  import {now} from "paravel"
-  import {whereEq, uniq, assocPath, without} from "ramda"
+  import {whereEq, uniq, without} from "ramda"
   import {noteKinds, LOCAL_RELAY_URL} from "src/util/nostr"
   import {getKey} from "src/util/router"
   import {themeBackgroundGradient} from "src/partials/state"
@@ -23,7 +22,6 @@
     GroupAccess,
     displayGroup,
     session,
-    subscribe,
     loadPubkeys,
     publishGroupEntryRequest,
     groupRequests,
@@ -32,8 +30,8 @@
     deriveAdminKeyForGroup,
     deriveSharedKeyForGroup,
     deriveGroupStatus,
-    updateCurrentSession,
     loadGroups,
+    loadGroupMessages,
   } from "src/engine"
   import {router} from "src/app/router"
 
@@ -59,17 +57,7 @@
 
   onMount(() => {
     loadGroups([address], relays)
-
-    updateCurrentSession(assocPath(["groups", address, "last_synced"], now()))
-
-    if (address.startsWith("35834:")) {
-      const sub = subscribe({
-        relays,
-        filters: [{kinds: [1059, 1060], "#p": info.recipients, since: info.since}],
-      })
-
-      return () => sub.close()
-    }
+    loadGroupMessages([address], relays)
   })
 
   $: ({rgb, rgba} = $themeBackgroundGradient)

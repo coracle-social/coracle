@@ -1,17 +1,12 @@
-import {now, Address} from "paravel"
+import {now, Address, isGroupAddress} from "paravel"
 import {seconds} from "hurdak"
+import {partition} from "ramda"
 import {noteKinds, repostKinds} from "src/util/nostr"
 import {load} from "src/engine/network/utils"
 import {hints} from "src/engine/relays/utils"
 import {updateCurrentSession} from "src/engine/session/commands"
 import {groups} from "./state"
-import {
-  deriveUserCircles,
-  deriveUserGroups,
-  deriveUserCommunities,
-  getGroupReqInfo,
-  getCommunityReqInfo,
-} from "./utils"
+import {deriveUserCircles, getGroupReqInfo, getCommunityReqInfo} from "./utils"
 
 export const attemptedAddrs = new Map()
 
@@ -44,24 +39,26 @@ export const loadGroups = async (rawAddrs: string[], relays: string[] = []) => {
 
   if (addrs.length > 0) {
     load({
-      relays: hints.merge([
-        hints.scenario([relays]),
-        hints.WithinMultipleContexts(addrs),
-      ]).getUrls(),
+      relays: hints
+        .merge([hints.scenario([relays]), hints.WithinMultipleContexts(addrs)])
+        .getUrls(),
       filters: [{kinds: [34550, 35834], authors, "#d": identifiers}],
     })
   }
 }
 
-export const loadGroupMessages = async () => {
-  for (const address of deriveUserGroups().get()) {
+export const loadGroupMessages = async (addresses = null) => {
+  const addrs = addresses || deriveUserCircles().get()
+  const [groupAddrs, communityAddrs] = partition(isGroupAddress, addrs)
+
+  for (const address of groupAddrs) {
     const {admins, recipients, relays, since} = getGroupReqInfo(address)
     const pubkeys = [...admins, ...recipients]
 
     load({relays, filters: [{kinds: [1059, 1060], "#p": pubkeys, since}]})
   }
 
-  for (const address of deriveUserCommunities().get()) {
+  for (const address of communityAddrs) {
     const {relays, ...info} = getCommunityReqInfo(address)
     const kinds = [...noteKinds, ...repostKinds]
     const since = Math.max(now() - seconds(7, "day"), info.since)
@@ -70,7 +67,7 @@ export const loadGroupMessages = async () => {
   }
 
   updateCurrentSession($session => {
-    for (const address of deriveUserCircles().get()) {
+    for (const address of addrs) {
       $session.groups[address].last_synced = now()
     }
 

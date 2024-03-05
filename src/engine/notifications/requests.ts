@@ -102,9 +102,12 @@ export const listenForNotifications = async () => {
     {kinds: noteKinds, "#p": [$session.pubkey], limit: 1, since},
     // Messages/groups
     {kinds: [4, 1059, 1060], "#p": [$session.pubkey], limit: 1, since},
-    // Communities
-    {kinds: [...noteKinds, ...repostKinds], "#a": addrs, limit: 1, since},
   ]
+
+  // Communities
+  if (addrs.length > 0) {
+    filters.push({kinds: [...noteKinds, ...repostKinds], "#a": addrs, limit: 1, since})
+  }
 
   // Replies
   if (eventIds.length > 0) {

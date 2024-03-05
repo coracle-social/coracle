@@ -323,3 +323,5 @@ export const joinPath = (...parts) => {
 export const updateIn =
   <T>(k: string, f: (x: T) => T) =>
   x => ({...x, [k]: f(x[k])})
+
+export const pickVals = <T>(ks: string[], x: Record<string, T>) => ks.map(k => x[k])

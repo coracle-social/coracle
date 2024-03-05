@@ -1,7 +1,7 @@
 <script lang="ts">
   import {without, prop, objOf} from "ramda"
   import {onMount} from "svelte"
-  import {pickVals} from "hurdak"
+  import {pickVals} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
   import Heading from "src/partials/Heading.svelte"
