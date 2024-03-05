@@ -1,5 +1,5 @@
 import {partition} from "ramda"
-import {now, createEvent, Address} from "paravel"
+import {now, createEvent, decodeAddress} from "paravel"
 import {randomId} from "hurdak"
 import {generatePrivateKey, getPublicKey} from "src/util/nostr"
 import {updateRecord} from "src/engine/core/commands"
@@ -90,7 +90,7 @@ const addATags = (template, addresses) => ({
 
 export const publishToGroupAdmin = async (address, template) => {
   const relays = hints.WithinContext(address).getUrls()
-  const pubkeys = [Address.getPubkey(address), session.get().pubkey]
+  const pubkeys = [decodeAddress(address).pubkey, session.get().pubkey]
 
   const pubs = []
   const events = []

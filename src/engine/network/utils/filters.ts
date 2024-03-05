@@ -1,4 +1,4 @@
-import {Address, getAddress, isContextAddress} from "paravel"
+import {decodeAddress, addressToFilter, getAddress, isContextAddress} from "paravel"
 import {omit, without, find, prop, groupBy, uniq} from "ramda"
 import {shuffle, randomId, seconds, avg} from "hurdak"
 import {isAddressable} from "src/util/nostr"
@@ -44,7 +44,7 @@ export const getIdFilters = values => {
 
   for (const value of values) {
     if (value.includes(":")) {
-      aFilters.push(Address.fromRaw(value, []).asFilter())
+      aFilters.push(addressToFilter(decodeAddress(value)))
     } else {
       ids.push(value)
     }

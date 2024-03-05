@@ -1,4 +1,4 @@
-import {now, Address, isGroupAddress} from "paravel"
+import {now, decodeAddress, isGroupAddress} from "paravel"
 import {seconds} from "hurdak"
 import {partition} from "ramda"
 import {noteKinds, repostKinds} from "src/util/nostr"
@@ -34,8 +34,8 @@ export const getStaleAddrs = (addrs: string[]) => {
 
 export const loadGroups = async (rawAddrs: string[], relays: string[] = []) => {
   const addrs = getStaleAddrs(rawAddrs)
-  const authors = addrs.map(a => Address.getPubkey(a))
-  const identifiers = addrs.map(a => Address.getIdentifier(a))
+  const authors = addrs.map(a => decodeAddress(a).pubkey)
+  const identifiers = addrs.map(a => decodeAddress(a).identifier)
 
   if (addrs.length > 0) {
     load({
@@ -49,7 +49,7 @@ export const loadGroups = async (rawAddrs: string[], relays: string[] = []) => {
 
 export const loadGroupMessages = async (addresses = null) => {
   const addrs = addresses || deriveUserCircles().get()
-  const [groupAddrs, communityAddrs] = partition(isGroupAddress, addrs)
+  const [groupAddrs, communityAddrs] = partition(a => isGroupAddress(decodeAddress(a)), addrs)
 
   for (const address of groupAddrs) {
     const {admins, recipients, relays, since} = getGroupReqInfo(address)

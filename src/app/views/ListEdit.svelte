@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags, Address} from "paravel"
+  import {Tags, decodeAddress} from "paravel"
   import {randomId} from "hurdak"
   import {toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
@@ -62,7 +62,7 @@
       return toast.show("error", "That name is already in use")
     }
 
-    const id = address ? Address.getIdentifier(address) : randomId()
+    const id = address ? decodeAddress(address).identifier : randomId()
     const {title, description, params, relays} = values
 
     publishBookmarksList(id, title, description, [...params, ...relays])
