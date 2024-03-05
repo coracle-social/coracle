@@ -1,5 +1,5 @@
 import {uniq, assoc, whereEq, sortBy, prop, without, mergeRight} from "ramda"
-import {Tags, Address, getAddress} from "paravel"
+import {Tags, decodeAddress, getAddress} from "paravel"
 import {switcherFn, batch} from "hurdak"
 import {LOCAL_RELAY_URL, getPublicKey} from "src/util/nostr"
 import {projections} from "src/engine/core/projections"
@@ -65,11 +65,10 @@ projections.addHandler(24, (e: Event) => {
   }
 
   if (relays.length > 0) {
-    const pubkey = Address.getPubkey(address)
-    const id = Address.getIdentifier(address)
+    const {pubkey, identifier} = decodeAddress(address)
 
     if (!groups.key(address).get()) {
-      groups.key(address).set({address, pubkey, id, relays})
+      groups.key(address).set({address, pubkey, id: identifier, relays})
     }
   }
 

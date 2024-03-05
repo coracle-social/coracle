@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {inc} from "ramda"
-  import {Tags, Address, now, asEventTemplate} from "paravel"
+  import {Tags, decodeAddress, now, asEventTemplate} from "paravel"
   import {sleep} from "hurdak"
   import {secondsToDate, dateToSeconds} from "src/util/misc"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -49,7 +49,7 @@
 
   onMount(async () => {
     if (!event) {
-      event = await dereferenceNote(Address.fromRaw(address, []))
+      event = await dereferenceNote(decodeAddress(address, []))
     }
 
     loading = false

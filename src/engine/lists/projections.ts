@@ -1,4 +1,4 @@
-import {Tags} from "paravel"
+import {Tags, encodeAddress} from "paravel"
 import {updateRecord} from "src/engine/core/commands"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
@@ -14,13 +14,13 @@ const handleBookmarkList = async (e: Event) => {
 
   // Avoid malformed lists
   if (realTitle) {
-    _lists.key(addr.asRaw()).update($list => ({
+    _lists.key(encodeAddress(addr)).update($list => ({
       ...updateRecord($list, e.created_at, {
         title: realTitle,
         tags: e.tags,
         description,
       }),
-      address: addr.asRaw(),
+      address: encodeAddress(addr),
       pubkey: e.pubkey,
     }))
   }

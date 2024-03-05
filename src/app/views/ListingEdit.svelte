@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags, Address, asEventTemplate} from "paravel"
+  import {Tags, decodeAddress, asEventTemplate} from "paravel"
   import {sleep, ucFirst} from "hurdak"
   import {inc} from "ramda"
   import {getCurrencyOption} from "src/util/i18n"
@@ -53,7 +53,7 @@
 
   onMount(async () => {
     if (!event) {
-      event = await dereferenceNote(Address.fromRaw(address, []))
+      event = await dereferenceNote(decodeAddress(address, []))
     }
 
     loading = false

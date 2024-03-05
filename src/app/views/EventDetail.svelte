@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags, Address} from "paravel"
+  import {Tags, decodeAddress} from "paravel"
   import {getIdOrAddress, noteKinds} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -18,7 +18,7 @@
   let loading = true
 
   onMount(async () => {
-    event = event || (await dereferenceNote(Address.fromRaw(address, relays)))
+    event = event || (await dereferenceNote(decodeAddress(address, relays)))
     loading = false
   })
 </script>

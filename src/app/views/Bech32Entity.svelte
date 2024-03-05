@@ -1,6 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {Address} from "paravel"
+  import {addressFromNaddr, encodeAddress} from "paravel"
   import Content from "src/partials/Content.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
@@ -16,11 +16,11 @@
 {:else if type === "note"}
   <NoteDetail eid={data} {relays} />
 {:else if type === "naddr"}
-  {@const address = Address.fromNaddr(entity)}
+  {@const address = addressFromNaddr(entity)}
   {#if [35834, 34550].includes(data.kind)}
-    <GroupDetail address={address.asRaw()} relays={address.relays} activeTab="notes" />
+    <GroupDetail address={encodeAddress(address)} relays={address.relays} activeTab="notes" />
   {:else if data.kind === 31923}
-    <EventDetail address={address.asRaw()} relays={address.relays} />
+    <EventDetail address={encodeAddress(address)} relays={address.relays} />
   {:else}
     <NoteDetail {...data} />
   {/if}

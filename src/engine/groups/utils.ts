@@ -1,6 +1,6 @@
 import {prop, uniqBy, defaultTo, sortBy, last, whereEq} from "ramda"
 import {ellipsize, seconds} from "hurdak"
-import {Tags, Address} from "paravel"
+import {Tags, decodeAddress, addressToNaddr} from "paravel"
 import {fuzzy} from "src/util/misc"
 import type {GroupStatus, Session} from "src/engine/session/model"
 import {pubkey} from "src/engine/session/state"
@@ -11,7 +11,7 @@ import {GroupAccess} from "./model"
 import type {Group} from "./model"
 
 export const getGroupNaddr = (group: Group) =>
-  Address.fromRaw(group.address, group.relays).asNaddr()
+  addressToNaddr(decodeAddress(group.address, group.relays))
 
 export const getGroupId = (group: Group) => group.address.split(":").slice(2).join(":")
 
@@ -20,8 +20,7 @@ export const getGroupName = (group: Group) => group.meta?.name || group.id || ""
 export const displayGroup = (group: Group) => ellipsize(group ? getGroupName(group) : "No name", 60)
 
 export const deriveGroup = address => {
-  const pubkey = Address.getPubkey(address)
-  const id = Address.getIdentifier(address)
+  const {pubkey, identifier: id} = decodeAddress(address)
 
   return groups.key(address).derived(defaultTo({id, pubkey, address}))
 }
@@ -66,7 +65,9 @@ export const getGroupReqInfo = (address = null) => {
   const recipients = [pubkey.get()]
 
   for (const key of [...$groupSharedKeys, ...$groupAdminKeys]) {
-    admins.push(Address.getPubkey(key.group))
+    const address = decodeAddress(key.group)
+
+    admins.push(address.pubkey)
     addresses.push(key.group)
     recipients.push(key.pubkey)
   }
