@@ -1,15 +1,9 @@
 import {partition, concat, prop, uniqBy, identity, without, assoc} from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
-import {now, Tags} from "paravel"
+import {now, Tags, getIdOrAddress, getIdAndAddress} from "paravel"
 import {race} from "src/util/misc"
 import {info} from "src/util/logger"
-import {
-  getIdOrAddress,
-  getIdAndAddress,
-  noteKinds,
-  reactionKinds,
-  repostKinds,
-} from "src/util/nostr"
+import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {sortEventsDesc, unwrapRepost} from "src/engine/events/utils"

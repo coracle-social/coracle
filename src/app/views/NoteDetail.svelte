@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {defer} from "hurdak"
+  import {getIdOrAddress} from "paravel"
   import {isMobile} from "src/util/html"
-  import {getIdOrAddress} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"

@@ -1,6 +1,5 @@
-import {Tags} from "paravel"
+import {Tags, getIdAndAddress} from "paravel"
 import {whereEq, groupBy, find} from "ramda"
-import {getIdAndAddress} from "src/util/nostr"
 import {derived, DerivedCollection} from "src/engine/core/utils"
 import {pubkey} from "src/engine/session/state"
 import {settings} from "src/engine/session/derived"

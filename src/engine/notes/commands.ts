@@ -1,4 +1,4 @@
-import {getIdAndAddress} from "src/util/nostr"
+import {getIdAndAddress} from "paravel"
 import {hints} from "src/engine/relays/utils"
 import {createAndPublish} from "src/engine/network/utils"
 

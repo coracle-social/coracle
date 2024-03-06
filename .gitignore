@@ -30,3 +30,11 @@ ssl
 scratch.md
 psql-tmux.json
 sandbox.sql
+
+# Generated on build
+public/icons
+public/images/apple-touch-icon-180x180.png
+public/images/favicon.ico
+public/images/maskable-icon-512x512.png
+public/images/pwa-*
+

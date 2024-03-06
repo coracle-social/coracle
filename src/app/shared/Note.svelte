@@ -1,10 +1,10 @@
 <script lang="ts">
-  import {Tags, matchFilters} from "paravel"
+  import {isChildOf, getIdOrAddress, Tags, matchFilters} from "paravel"
   import {reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, ensurePlural, batch} from "hurdak"
   import {fly, slide} from "src/util/transition"
-  import {getIdOrAddress, isChildOf, isLike, isGiftWrap} from "src/util/nostr"
+  import {isLike, isGiftWrap} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import AltColor from "src/partials/AltColor.svelte"

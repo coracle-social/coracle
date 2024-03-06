@@ -1,7 +1,6 @@
-import {decodeAddress, addressToFilter, getAddress, isContextAddress} from "paravel"
+import {decodeAddress, isReplaceable, addressToFilter, getAddress, isContextAddress} from "paravel"
 import {omit, without, find, prop, groupBy, uniq} from "ramda"
 import {shuffle, randomId, seconds, avg} from "hurdak"
-import {isAddressable} from "src/util/nostr"
 import {env} from "src/engine/session/state"
 import {follows, network} from "src/engine/people/derived"
 import {hints} from "src/engine/relays/utils"
@@ -66,7 +65,7 @@ export const getReplyFilters = (events, filter) => {
   for (const event of events) {
     e.push(event.id)
 
-    if (isAddressable(event)) {
+    if (isReplaceable(event)) {
       a.push(getAddress(event))
     }
 

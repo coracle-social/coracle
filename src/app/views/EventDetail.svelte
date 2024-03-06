@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {decodeAddress} from "paravel"
-  import {getIdOrAddress, noteKinds} from "src/util/nostr"
+  import {getIdOrAddress, decodeAddress} from "paravel"
+  import {noteKinds} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Spinner from "src/partials/Spinner.svelte"

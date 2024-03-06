@@ -54,8 +54,8 @@
     class="mb-4 mt-4 flex items-center gap-2 pl-6"
     external
     href="https://info.coracle.social">
-    <img alt="App Logo" src={import.meta.env.VITE_LOGO_URL || "/images/logo.png"} class="w-12" />
-    <h1 class="staatliches -mb-[0.1em] leading-none" style={`font-size: ${appName.length / 5}em`}>
+    <img alt="App Logo" src={import.meta.env.VITE_APP_LOGO} class="w-12" />
+    <h1 class="staatliches -mb-[0.1em] leading-none" style={`font-size: ${appName.length / 3}em`}>
       {appName}
     </h1>
   </Anchor>

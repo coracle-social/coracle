@@ -1,9 +1,9 @@
-import {fromNostrURI, getAddress, Tags} from "paravel"
+import {fromNostrURI, Tags} from "paravel"
 import {schnorr} from "@noble/curves/secp256k1"
 import {bytesToHex} from "@noble/hashes/utils"
 import {nip05, nip19, generateSecretKey, getEventHash, getPublicKey as getPk} from "nostr-tools"
 import {identity} from "ramda"
-import {between, avg} from "hurdak"
+import {avg} from "hurdak"
 import type {Event} from "src/engine"
 
 export const fromHex = k => Uint8Array.from(Buffer.from(k, "hex"))
@@ -72,23 +72,6 @@ export const getRating = (event: Event) =>
 export const getAvgRating = (events: Event[]) => avg(events.map(getRating).filter(identity))
 
 export const isHex = x => x?.length === 64 && x?.match(/^[a-f0-9]{64}$/)
-
-export const isReplaceable = e => between(9999, 20000, e.kind)
-
-export const isParameterizedReplaceable = e => between(29999, 40000, e.kind)
-
-export const isAddressable = e => isReplaceable(e) || isParameterizedReplaceable(e)
-
-export const getIdOrAddress = e => (isAddressable(e) ? getAddress(e) : e.id)
-
-export const getIdAndAddress = e => (isAddressable(e) ? [e.id, getAddress(e)] : [e.id])
-
-export const isChildOf = (a, b) => {
-  const {roots, replies} = Tags.fromEvent(a).ancestors()
-  const parentIds = (replies.exists() ? replies : roots).values().valueOf()
-
-  return Boolean(getIdAndAddress(b).find(x => parentIds.includes(x)))
-}
 
 const WARN_TAGS = new Set([
   "nsfw",

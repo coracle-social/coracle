@@ -2,8 +2,6 @@
 
 Coracle is a web client for the Nostr protocol focused on pushing the boundaries of what's unique about nostr, including relay selection and management, web-of-trust based moderation and content recommendations, and privacy protection. Check it out at [coracle.social](https://coracle.social).
 
-[Dufflepud](https://github.com/coracle-social/dufflepud) is a companion server which you can self-host. It helps Coracle with things like link previews and image uploads.
-
 If you like Coracle and want to support its development, you can donate sats via [Geyser](https://geyser.fund/project/coracle).
 
 # Features
@@ -56,5 +54,36 @@ You can find a more complete changelog [here](./CHANGELOG.md).
 - Clone the project repository: `git clone https://github.com/coracle-social/coracle.git`
 - Navigate to the project directory: `cd coracle`
 - Install dependencies: `yarn`
-- Customize configuration in `.env` (optional)
+- Customize configuration in `.env` (optional, see below)
 - Start the development server: `yarn dev`
+
+# Customization
+
+Coracle is intended to be fully white-labeled by groups of various kinds. The following environment variables can be set in `.env.local` to customize Coracle's appearance and behavior:
+
+- `VITE_DARK_THEME` and `VITE_LIGHT_THEME` are comma-separate lists of key/value pairs defining theme colors.
+- `VITE_DVM_RELAYS` is a comma-separated list of relays to use when making requests against DVMs.
+- `VITE_SEARCH_RELAYS` is a comma-separated list of relays to use when using NIP 50 search.
+- `VITE_DEFAULT_RELAYS` is a comma-separated list of relays to use as defaults/fallbacks.
+- `VITE_DEFAULT_FOLLOWS` is a comma-separated list of hex pubkeys to fetch content from when the user isn't following anyone.
+- `VITE_ONBOARDING_LISTS` is a comma-separated list of `kind:30003` person lists to populate onboarding with.
+- `VITE_NIP96_URLS` is a comma-separated list of default upload providers.
+- `VITE_IMGPROXY_URL` is an [imgproxy](https://imgproxy.net) instance url for protecting user privacy and reducing bandwidth use.
+- `VITE_DUFFLEPUD_URL` is a [Dufflepud](https://github.com/coracle-social/dufflepud) instance url, which helps Coracle with things like link previews and image uploads.
+- `VITE_PLATFORM_ZAP_SPLIT` is a decimal between 0 and 1 defining the default zap split percent.
+- `VITE_PLATFORM_PUBKEY` is the pubkey of the platform owner. This gets zapped when using the platform zap split.
+- `VITE_FORCE_GROUP` is an optional `kind:34550` or `kind:35834` address. If provided, the home page of Coracle will be the home page for the group, and most views will be filtered down to the group's scope.
+- `VITE_PLATFORM_RELAYS` is an optional comma-separated list of relay urls to use for feeds. If provided, most UI components related to relay selection will be hidden from the user.
+- `VITE_ENABLE_ZAPS` can be set to `false` to disable zaps.
+- `VITE_APP_NAME` is the app's name.
+- `VITE_APP_URL` is the app's url. Used to generate open graph meta tags.
+- `VITE_APP_LOGO` is the path for the app's logo relative to the `public` directory, starting with a trailing slash. Used to generate favicons and manifest.
+- `VITE_APP_DESCRIPTION` is the app's description.
+- `VITE_CLIENT_NAME` is the client's name. Only change this if you have forked Coracle.
+- `VITE_CLIENT_ID` is the client's NIP 89 handler id. Only change this if you have forked Coracle.
+- `VITE_BUGSNAG_API_KEY` is your [bugsnag](https://www.bugsnag.com/) api key.
+- `VITE_BUILD_HASH` can be set during build to indicate the software version on the about page.
+- `VITE_LOG_LEVEL` can be set to `info`, `warn`, or `error`. This controls how much shows up in the console.
+- `VITE_ENABLE_MARKET` can be set to `false` to disable the marketplace tab.
+
+See `.env` for default values.
