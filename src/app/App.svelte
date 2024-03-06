@@ -5,7 +5,7 @@
   import {nip19} from "nostr-tools"
   import {pluck} from "ramda"
   import {seconds, Fetch} from "hurdak"
-  import {now} from "paravel"
+  import {now, normalizeRelayUrl} from "paravel"
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
   import * as nostr from "src/util/nostr"
@@ -491,7 +491,9 @@
           },
         })
 
-        for (const {url, info} of result.data) {
+        for (const {url: rawUrl, info} of result.data) {
+          const url = normalizeRelayUrl(rawUrl)
+
           relays.key(url).merge({...info, url, last_checked: now()})
         }
       })
