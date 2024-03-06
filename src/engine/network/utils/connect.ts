@@ -14,6 +14,9 @@ import type {NostrConnectHandler} from "../model"
 
 let singleton: NostrConnectBroker
 
+// FIXME set the full list of requested perms
+const Perms = "nip04_encrypt,nip04_decrypt,sign_event:0,sign_event:1,sign_event:4,sign_event:6,sign_event:7"
+
 export class NostrConnectBroker extends Emitter {
   #sub: typeof Subscription
   #ready = sleep(500)
@@ -54,7 +57,7 @@ export class NostrConnectBroker extends Emitter {
         logger.info("NostrConnect response:", {id, result, error})
 
         if (result === "auth_url") {
-          window.open(error, "Coracle", "width=600,height=800,popup=yes")
+          this.emit(`auth-${id}`, error)
         } else {
           this.emit(`response-${id}`, {result, error})
         }
@@ -77,6 +80,10 @@ export class NostrConnectBroker extends Emitter {
 
     Publisher.publish({event, relays: this.handler.relays, silent: true})
 
+    this.once(`auth-${id}`, (auth_url) => {
+      window.open(auth_url, "Coracle", "width=600,height=800,popup=yes")
+    })
+
     return new Promise((resolve, reject) => {
       this.once(`response-${id}`, ({result, error}) => {
         if (error) {
@@ -93,15 +100,11 @@ export class NostrConnectBroker extends Emitter {
       throw new Error("Unable to create an account without a handler domain")
     }
 
-    return this.request("create_account", [username, this.handler.domain], true)
+    return this.request("create_account", [username, this.handler.domain, "", Perms], true)
   }
 
   async connect(token: string = null) {
-    const params = [getPublicKey(this.connectKey)]
-
-    if (token) {
-      params.push(token)
-    }
+    const params = [getPublicKey(this.connectKey), token || "", Perms]
 
     const result = await this.request("connect", params)
 

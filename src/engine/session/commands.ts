@@ -46,25 +46,8 @@ export const loginWithNostrConnect = async (username, connectHandler: NostrConne
 
   let broker = NostrConnectBroker.get(pubkey, connectKey, connectHandler)
 
-  // TODO: create account should return the new pubkey, we shouldn't have to call connect.
-  // we're also leaking listeners because this promise never resolves. Hack a proper return
-  // by waiting for focus to switch to the new window, then listen for a mouse move
   if (!pubkey) {
-    broker.createAccount(username)
-
-    await new Promise<void>(resolve => {
-      const onMouseMove = () => {
-        resolve()
-        document.body.removeEventListener("mousemove", onMouseMove)
-      }
-
-      setTimeout(() => {
-        document.body.addEventListener("mousemove", onMouseMove)
-      }, 1000)
-    })
-
-    // Now that the account has ostensibly been created, get our new pubkey and set it to the broker
-    const {pubkey} = await fetchHandle(`${username}@${connectHandler.domain}`)
+    const pubkey = await broker.createAccount(username)
 
     if (!pubkey) {
       return null
