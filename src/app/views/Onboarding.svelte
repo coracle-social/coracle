@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags} from "paravel"
+  import {Tags, decodeAddress} from "paravel"
   import {sleep} from "hurdak"
   import {generatePrivateKey} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -12,6 +12,7 @@
     env,
     load,
     user,
+    hints,
     session,
     loadPubkeys,
     publishNote,
@@ -69,11 +70,15 @@
   }
 
   onMount(async () => {
-    // Prime our database with our default follows
-    loadPubkeys($env.DEFAULT_FOLLOWS)
+    const {DEFAULT_FOLLOWS, ONBOARDING_LISTS} = $env
+    const listOwners = ONBOARDING_LISTS.map(a => decodeAddress(a).pubkey)
 
+    // Prime our database with our default follows and list owners
+    loadPubkeys([...DEFAULT_FOLLOWS, ...listOwners])
+
+    // Load our onboarding lists
     load({
-      relays: $env.DEFAULT_RELAYS,
+      relays: hints.FromPubkeys(listOwners).getUrls(),
       filters: getIdFilters($env.ONBOARDING_LISTS),
       onEvent: e => {
         loadPubkeys(Tags.fromEvent(e).values("p").valueOf())
@@ -98,18 +103,18 @@
     <div
       class="h-2 w-2 rounded-full"
       class:bg-neutral-200={stage === "intro"}
-      class:bg-neutral-600={stage !== "intro"} />
+      class:bg-neutral-700={stage !== "intro"} />
     <div
       class="h-2 w-2 rounded-full"
       class:bg-neutral-200={stage === "profile"}
-      class:bg-neutral-600={stage !== "profile"} />
+      class:bg-neutral-700={stage !== "profile"} />
     <div
       class="h-2 w-2 rounded-full"
       class:bg-neutral-200={stage === "follows"}
-      class:bg-neutral-600={stage !== "follows"} />
+      class:bg-neutral-700={stage !== "follows"} />
     <div
       class="h-2 w-2 rounded-full"
       class:bg-neutral-200={stage === "note"}
-      class:bg-neutral-600={stage !== "note"} />
+      class:bg-neutral-700={stage !== "note"} />
   </div>
 </FlexColumn>

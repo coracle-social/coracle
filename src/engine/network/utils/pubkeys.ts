@@ -1,3 +1,4 @@
+import type {Event} from "nostr-tools"
 import {without, uniq} from "ramda"
 import {seconds} from "hurdak"
 import {now} from "paravel"
@@ -11,6 +12,7 @@ export type LoadPeopleOpts = {
   relays?: string[]
   kinds?: number[]
   force?: boolean
+  onEvent?: (e: Event) => void
 }
 
 export const attemptedPubkeys = new Map()
@@ -48,7 +50,7 @@ export const getStalePubkeys = (pubkeys: Iterable<string>) => {
 
 export const loadPubkeys = async (
   rawPubkeys: Iterable<string>,
-  {relays, force, kinds = personKinds}: LoadPeopleOpts = {},
+  {relays, force, onEvent, kinds = personKinds}: LoadPeopleOpts = {},
 ) => {
   const pubkeys = force ? uniq(Array.from(rawPubkeys)) : getStalePubkeys(rawPubkeys)
 
@@ -68,6 +70,7 @@ export const loadPubkeys = async (
 
   return load({
     filters,
+    onEvent,
     relays: hints.merge([hints.scenario([relays]), hints.FromPubkeys(pubkeys)]).getUrls(),
   })
 }

@@ -4,6 +4,7 @@ import {partition} from "ramda"
 import {noteKinds, giftWrapKinds, repostKinds} from "src/util/nostr"
 import {load} from "src/engine/network/utils"
 import {hints} from "src/engine/relays/utils"
+import {env} from "src/engine/session/state"
 import {updateCurrentSession} from "src/engine/session/commands"
 import {groups} from "./state"
 import {deriveUserCircles, getGroupReqInfo, getCommunityReqInfo} from "./utils"
@@ -40,7 +41,11 @@ export const loadGroups = async (rawAddrs: string[], relays: string[] = []) => {
   if (addrs.length > 0) {
     load({
       relays: hints
-        .merge([hints.scenario([relays]), hints.WithinMultipleContexts(addrs)])
+        .merge([
+          hints.scenario([relays]),
+          hints.WithinMultipleContexts(addrs),
+          hints.scenario([env.get().PLATFORM_RELAYS]),
+        ])
         .getUrls(),
       filters: [{kinds: [34550, 35834], authors, "#d": identifiers}],
     })

@@ -3,7 +3,7 @@ import {ellipsize, seconds} from "hurdak"
 import {Tags, decodeAddress, addressToNaddr} from "paravel"
 import {fuzzy} from "src/util/misc"
 import type {GroupStatus, Session} from "src/engine/session/model"
-import {pubkey} from "src/engine/session/state"
+import {env, pubkey} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {hints} from "src/engine/relays/utils"
 import {groups, groupSharedKeys, groupAdminKeys} from "./state"
@@ -72,7 +72,9 @@ export const getGroupReqInfo = (address = null) => {
     recipients.push(key.pubkey)
   }
 
-  const relays = hints.merge(addresses.map(hints.WithinContext)).getUrls()
+  const relays = hints
+    .merge([hints.WithinMultipleContexts(addresses), hints.scenario([env.get().PLATFORM_RELAYS])])
+    .getUrls()
 
   return {admins, recipients, relays, since}
 }

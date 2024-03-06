@@ -118,7 +118,7 @@
 
 <div class="flex gap-3">
   <p
-    class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-600 text-lg">
+    class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-700 text-lg">
     3/4
   </p>
   <p class="text-2xl font-bold">Find your people</p>
