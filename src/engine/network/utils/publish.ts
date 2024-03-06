@@ -227,11 +227,11 @@ export const getReplyTags = (parent: Event, inherit = false) => {
   // Root comes first
   if (roots.exists()) {
     for (const t of roots.valueOf()) {
-      replyTags.push(t.concat("root"))
+      replyTags.push(t.slice(0, 2).concat([hints.EventRoot(parent).getUrl(), "root"]))
     }
   } else {
     for (const t of replies.valueOf()) {
-      replyTags.push(t.concat("root"))
+      replyTags.push(t.slice(0, 2).concat([hints.Event(parent).getUrl(), "reply"]))
     }
   }
 
@@ -242,7 +242,7 @@ export const getReplyTags = (parent: Event, inherit = false) => {
     // Inherit mentions
     for (const t of mentions.valueOf()) {
       if (!isRepeated(t[1])) {
-        replyTags.push(t.concat("mention"))
+        replyTags.push(t.slice(0, 3).concat("mention"))
       }
     }
 
@@ -250,7 +250,7 @@ export const getReplyTags = (parent: Event, inherit = false) => {
     if (roots.exists()) {
       for (const t of replies.valueOf()) {
         if (!isRepeated(t[1])) {
-          replyTags.push(t.concat("mention"))
+          replyTags.push(t.slice(0, 3).concat("mention"))
         }
       }
     }
