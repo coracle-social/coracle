@@ -95,8 +95,6 @@ setInterval(() => {
 
     if (lastActivity < Date.now() - 60_000) {
       connection.disconnect()
-    } else if (lastFault < Date.now() - 10_000) {
-      connection.disconnect()
     } else if (userRelays.has(url) && status === ConnectionStatus.Slow) {
       $slowConnections.push(url)
     }

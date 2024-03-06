@@ -26,7 +26,6 @@
 {#if loading}
   <Spinner />
 {:else if event}
-  {@const groupAddr = Tags.fromEvent(event).context().values().first()}
   <div in:fly={{y: 20}}>
     <FlexColumn>
       <div class="flex gap-4">
@@ -39,7 +38,6 @@
         hideControls
         shouldListen
         anchor={getIdOrAddress(event)}
-        relays={groupAddr ? getGroupReqInfo(groupAddr).relays : []}
         filter={{kinds: noteKinds, "#a": [address]}} />
     </FlexColumn>
   </div>
