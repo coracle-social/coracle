@@ -6,7 +6,7 @@ import {Fetch, tryFunc, createMapOf, ellipsize, switcherFn} from "hurdak"
 import logger from "src/util/logger"
 import {createBatcher, pushToKey} from "src/util/misc"
 import {dufflepud} from "src/engine/session/utils"
-import {getPubkeyHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import type {Person, Handle} from "./model"
 import {people} from "./state"
 
@@ -91,7 +91,7 @@ export const getNetwork = $person => {
   const network = new Set<string>()
 
   for (const follow of pubkeys) {
-    for (const [_, pubkey] of people.key(follow).get()?.petnames || []) {
+    for (const pubkey of getFollowedPubkeys(follow)) {
       if (!pubkeys.has(pubkey)) {
         network.add(pubkey)
       }
@@ -116,8 +116,8 @@ export const getFollowsWhoMute = cached({
 })
 
 export const primeWotCaches = throttle(3000, pk => {
-  const mutes = {}
-  const follows = {}
+  const mutes: Record<string, string[]> = {}
+  const follows: Record<string, string[]> = {}
 
   // Get follows mutes from the current user's follows list
   for (const followPk of Array.from(getFollows(people.key(pk).get()))) {
@@ -166,13 +166,13 @@ export const getWotScore = (pk, tpk) => {
 }
 
 const annotatePerson = pubkey => {
-  const relays = getPubkeyHints.limit(3).getHints(pubkey, "write")
+  const relays = hints.FromPubkeys([pubkey]).getUrls()
 
   return {
     pubkey,
-    relays,
     npub: nip19.npubEncode(pubkey),
     nprofile: nip19.nprofileEncode({pubkey, relays}),
+    relays,
   }
 }
 

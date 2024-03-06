@@ -1,8 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
-  import {Tags} from "paravel"
+  import {Tags, addressToNaddr} from "paravel"
   import {commaFormat} from "hurdak"
-  import {Naddr} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Carousel from "src/partials/Carousel.svelte"
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
@@ -12,24 +11,23 @@
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {router} from "src/app/router"
-  import {pubkey, isDeleted} from "src/engine"
+  import {hints, pubkey, isDeleted} from "src/engine"
 
   export let note
   export let showMedia = false
   export let showEntire = false
 
-  const tags = Tags.from(note)
-  const {title, summary, location, status} = tags.getDict()
-  const images = tags.type("image").values().all()
-  const [price = 0, code = "SAT"] = tags.type("price").drop(1).first() || []
-  const address = Naddr.fromEvent(note).asTagValue()
+  const tags = Tags.fromEvent(note)
+  const images = tags.values("image").valueOf()
+  const {title, summary, location, status} = tags.asObject()
+  const [price = 0, code = "SAT"] = tags.get("price")?.drop(1).valueOf() || []
+  const address = hints.address(note)
   const editLink = router.at("listings").of(address).at("edit").toString()
   const deleteLink = router.at("listings").of(address).at("delete").toString()
 
   const sendMessage = () => {
-    const initialMessage = `Hi, I'd like to make an offer on this listing:\n${Naddr.fromEvent(
-      note,
-    ).encode()}`
+    const naddr = addressToNaddr(address)
+    const initialMessage = `Hi, I'd like to make an offer on this listing:\n${naddr}`
 
     router.at("channels").of([$pubkey, note.pubkey]).cx({initialMessage}).push()
   }

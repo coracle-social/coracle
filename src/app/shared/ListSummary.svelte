@@ -5,9 +5,10 @@
 
   export let list
 
-  const topics = Tags.from(list).topics().all()
-  const authors = Tags.from(list).pubkeys().all()
-  const relays = Tags.from(list).urls().all()
+  const tags = Tags.fromEvent(list)
+  const topics = tags.topics().valueOf()
+  const authors = tags.values("p").valueOf()
+  const relays = tags.values("r").valueOf()
 
   const summary = [
     topics.length > 0 && quantify(topics.length, "topic"),

@@ -1,4 +1,4 @@
-import {prop, identity, nth, uniq, flatten, groupBy} from "ramda"
+import {prop, identity, flatten, groupBy} from "ramda"
 import {Fetch, tryFunc, sleep} from "hurdak"
 import {now, cached, Tags} from "paravel"
 import {joinPath} from "src/util/misc"
@@ -67,14 +67,11 @@ export const compressFiles = (files, opts) =>
   )
 
 export const eventsToMeta = (events: Event[]) => {
-  const tagsByHash = groupBy(
-    tags => tags.type("ox").values().first(),
-    events.map(e => Tags.from(e)),
-  )
+  const tagsByHash = groupBy((tags: Tags) => tags.get("ox").value(), events.map(Tags.fromEvent))
 
   // Merge all nip94 tags together so we can supply as much imeta as possible
   return Object.values(tagsByHash).map(groupedTags => {
-    return new Tags(uniq(groupedTags.flatMap(tags => tags.filter(nth(1)).all())))
+    return Tags.from(groupedTags.flatMap(tags => tags.valueOf())).uniq()
   })
 }
 

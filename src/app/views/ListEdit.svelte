@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {Tags} from "paravel"
+  import {Tags, decodeAddress} from "paravel"
   import {randomId} from "hurdak"
-  import {Naddr} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Field from "src/partials/Field.svelte"
@@ -29,13 +28,13 @@
     list = userLists.key(address).get()
   }
 
-  const tags = list ? Tags.from(list) : Tags.from([])
+  const tags = list ? Tags.fromEvent(list) : Tags.from([])
 
   const values = {
-    title: tags.getValue("title") || tags.getValue("name") || tags.getValue("d") || "",
-    description: tags.getValue("description") || "",
-    params: tags.type(["t", "p"]).all(),
-    relays: tags.type("r").all(),
+    title: tags.get("title")?.value() || tags.get("name")?.value() || tags.get("d")?.value() || "",
+    description: tags.get("description")?.value() || "",
+    params: tags.filter(t => ["t", "p"].includes(t.key())).valueOf(),
+    relays: tags.whereValue("r").valueOf(),
   }
 
   const search = q => {
@@ -63,7 +62,7 @@
       return toast.show("error", "That name is already in use")
     }
 
-    const id = address ? Naddr.fromTagValue(address).identifier : randomId()
+    const id = address ? decodeAddress(address).identifier : randomId()
     const {title, description, params, relays} = values
 
     publishBookmarksList(id, title, description, [...params, ...relays])
@@ -100,7 +99,7 @@
         </SearchSelect>
         <p slot="info">Type "@" to look for people, and "#" to look for topics.</p>
       </Field>
-      {#if $env.FORCE_RELAYS.length === 0}
+      {#if $env.PLATFORM_RELAYS.length === 0}
         <Field label="Relays">
           <SearchSelect multiple search={searchRelayTags} bind:value={values.relays}>
             <div slot="item" let:item>

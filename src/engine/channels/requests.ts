@@ -4,7 +4,7 @@ import {now} from "paravel"
 import {sessions} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {loadPubkeys, subscribe, MultiCursor} from "src/engine/network/utils"
-import {getPubkeyHints, mergeHints, getUserHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import {channels} from "./state"
 
 export const loadAllMessages = ({reload = false} = {}) => {
@@ -19,7 +19,7 @@ export const loadAllMessages = ({reload = false} = {}) => {
   })
 
   const cursor = new MultiCursor({
-    relays: getUserHints(),
+    relays: hints.AllMessages().getUrls(),
     filters: [
       {kinds: [4], authors: [pubkey], since},
       {kinds: [4, 1059], "#p": [pubkey], since},
@@ -47,13 +47,13 @@ export const loadAllMessages = ({reload = false} = {}) => {
   ]
 }
 
-export const listenForMessages = pubkeys => {
+export const listenForMessages = (pubkeys: string[]) => {
   const {pubkey} = session.get()
   const allPubkeys = uniq(pubkeys.concat(pubkey))
 
   return subscribe({
     skipCache: true,
-    relays: mergeHints(allPubkeys.map(getPubkeyHints)),
+    relays: hints.Messages(pubkeys).getUrls(),
     filters: [
       {kinds: [4], authors: allPubkeys, "#p": allPubkeys},
       {kinds: [1059], "#p": [pubkey]},

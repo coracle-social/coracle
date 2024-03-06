@@ -39,7 +39,8 @@ const setAdapter = {
 const migrateChannels = channels => {
   return channels.map(c => {
     const members = c.members || []
-    const pubkeys = c.messages?.flatMap(e => Tags.from(e).pubkeys().all().concat(e.pubkey)) || []
+    const pubkeys =
+      c.messages?.flatMap(e => Tags.fromEvent(e).values("p").valueOf().concat(e.pubkey)) || []
 
     c.members = uniq([...members, ...pubkeys])
 

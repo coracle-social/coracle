@@ -3,7 +3,7 @@ import {batch, sleep} from "hurdak"
 import {Tags} from "paravel"
 import {env} from "src/engine/session/state"
 import {subscribe, loadOne, getIdFilters, dvmRequest} from "src/engine/network/utils"
-import {selectHintsWithFallback, mergeHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 
 export const dereferenceNote = async ({
   eid = null,
@@ -21,7 +21,7 @@ export const dereferenceNote = async ({
     }
 
     return loadOne({
-      relays: selectHintsWithFallback(relays),
+      relays: hints.scenario([relays]).getUrls(),
       filters: getIdFilters([eid]),
     })
   }
@@ -32,7 +32,7 @@ export const dereferenceNote = async ({
         return false
       }
 
-      return !identifier || Tags.from(e).getValue("d") === identifier
+      return !identifier || Tags.fromEvent(e).get("d")?.value() === identifier
     }, context)
 
     if (note) {
@@ -45,7 +45,7 @@ export const dereferenceNote = async ({
       subscribe({
         timeout: 3000,
         closeOnEose: true,
-        relays: selectHintsWithFallback(relays),
+        relays: hints.scenario([relays]).getUrls(),
         filters: [{kinds: [kind], authors: [pubkey], "#d": [identifier]}],
         onClose: () => resolve(note),
         onEvent: event => {
@@ -67,7 +67,7 @@ type LoadReactionsRequest = {
 
 const executeLoadReactions = batch(500, async (requests: LoadReactionsRequest[]) => {
   const ids = pluck("id", requests)
-  const relays = mergeHints(pluck("relays", requests))
+  const relays = hints.scenario(pluck("relays", requests)).getUrls()
 
   let data = {}
 

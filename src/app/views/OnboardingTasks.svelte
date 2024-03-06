@@ -1,5 +1,6 @@
 <script lang="ts">
-  import {updateIn} from "hurdak"
+  import {append} from "ramda"
+  import {updateIn} from "src/util/misc"
   import {slide} from "src/util/transition"
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -7,7 +8,7 @@
   import {session, OnboardingTask, updateCurrentSession} from "src/engine"
 
   const hideTask = task =>
-    updateCurrentSession(updateIn("onboarding_tasks_completed", tasks => [...tasks, task]))
+    updateCurrentSession(updateIn("onboarding_tasks_completed", append(task)))
 </script>
 
 {#if !$session.onboarding_tasks_completed.includes(OnboardingTask.BackupKey)}

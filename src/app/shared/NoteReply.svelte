@@ -17,12 +17,10 @@
     uniqTags,
     writable,
     publishToZeroOrMoreGroups,
-    selectHintsWithFallback,
     tagsFromContent,
     getClientTags,
     getReplyTags,
     session,
-    getPublishHints,
     displayPubkey,
     mention,
   } from "src/engine"
@@ -34,19 +32,14 @@
   export let forceOpen = false
 
   const dispatch = createEventDispatcher()
-
   const nsecWarning = writable(null)
+  const parentTags = Tags.fromEvent(parent)
 
   let images, compose, container, options
   let isOpen = false
   let mentions = []
   let draft = ""
-  let opts = {
-    warning: "",
-    groups: parent.wrap ? Tags.from(parent).circles().all() : [],
-    relays: selectHintsWithFallback(getPublishHints(parent)),
-    anonymous: false,
-  }
+  let opts = {warning: "", anonymous: false}
 
   export const start = () => {
     dispatch("start")
@@ -54,7 +47,7 @@
     isOpen = true
     mentions = without(
       [$session.pubkey],
-      uniq(Tags.from(parent).type("p").values().all().concat(parent.pubkey)),
+      uniq(parentTags.values("p").valueOf().concat(parent.pubkey)),
     )
 
     setTimeout(() => compose.write(draft), 10)
@@ -106,7 +99,7 @@
     ])
 
     for (const imeta of images.getValue()) {
-      tags.push(["imeta", ...imeta.all().map(join(" "))])
+      tags.push(["imeta", ...imeta.valueOf().map(join(" "))])
     }
 
     if (opts.warning) {
@@ -115,11 +108,11 @@
 
     // Re-broadcast the note we're replying to
     if (!parent.wrap) {
-      Publisher.publish({relays: opts.relays, event: asNostrEvent(parent)})
+      Publisher.publish({event: asNostrEvent(parent)})
     }
 
     const template = createEvent(1, {content, tags})
-    const addresses = Tags.from(parent).circles().all()
+    const addresses = parentTags.context().values().valueOf()
     const {pubs, events} = await publishToZeroOrMoreGroups(addresses, template, opts)
 
     pubs[0].on("progress", toastProgress)
@@ -144,54 +137,56 @@
 <svelte:body on:click={onBodyClick} />
 
 {#if isOpen || forceOpen}
-  {#if showBorder}
-    <AltColor background class="absolute bottom-0 top-4 z-none -my-2 w-[3px]" />
-  {/if}
-  <div
-    transition:slide|local
-    class="note-reply relative z-feature my-2 flex flex-col gap-1"
-    bind:this={container}
-    on:click|stopPropagation>
-    <AltColor background class="z-feature overflow-hidden rounded">
-      <div class="p-3 text-neutral-100" class:rounded-b={mentions.length === 0}>
-        <Compose autofocus bind:this={compose} onSubmit={() => send()} style="min-height: 4rem">
-          <div class="flex flex-col justify-start" slot="addon">
-            <button
-              on:click={() => send()}
-              class="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full transition-all hover:bg-accent">
-              <i class="fa fa-paper-plane" />
-            </button>
+  <div class="relative">
+    {#if showBorder}
+      <AltColor background class="absolute -top-4 z-none h-5 w-1" />
+    {/if}
+    <div
+      transition:slide|local
+      class="note-reply relative z-feature my-2 flex flex-col gap-1"
+      bind:this={container}
+      on:click|stopPropagation>
+      <AltColor background class="z-feature overflow-hidden rounded">
+        <div class="p-3 text-neutral-100" class:rounded-b={mentions.length === 0}>
+          <Compose autofocus bind:this={compose} onSubmit={() => send()} style="min-height: 4rem">
+            <div class="flex flex-col justify-start" slot="addon">
+              <button
+                on:click={() => send()}
+                class="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full transition-all hover:bg-accent">
+                <i class="fa fa-paper-plane" />
+              </button>
+            </div>
+          </Compose>
+        </div>
+        <div class="p-2">
+          <NoteImages bind:this={images} bind:compose includeInContent />
+        </div>
+        <div class="h-px" />
+        <div class="flex gap-2 rounded-b p-2 text-sm text-neutral-100">
+          <div class="inline-block border-r border-solid border-neutral-600 py-2 pl-1 pr-3">
+            <div class="flex cursor-pointer items-center gap-3">
+              <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}>
+                <i slot="button" class="fa fa-paperclip" />
+              </ImageInput>
+              {#if !$env.FORCE_GROUP}
+                <i class="fa fa-cog" on:click={() => options.setView("settings")} />
+              {/if}
+              <i class="fa fa-at" />
+            </div>
           </div>
-        </Compose>
-      </div>
-      <div class="p-2">
-        <NoteImages bind:this={images} bind:compose includeInContent />
-      </div>
-      <div class="h-px" />
-      <div class="flex gap-2 rounded-b p-2 text-sm text-neutral-100">
-        <div class="inline-block border-r border-solid border-neutral-600 py-2 pl-1 pr-3">
-          <div class="flex cursor-pointer items-center gap-3">
-            <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}>
-              <i slot="button" class="fa fa-paperclip" />
-            </ImageInput>
-            {#if !$env.FORCE_GROUP}
-              <i class="fa fa-cog" on:click={() => options.setView("settings")} />
-            {/if}
-            <i class="fa fa-at" />
+          <div on:click|stopPropagation>
+            {#each mentions as pubkey}
+              <Chip class="mb-1 mr-1" onRemove={() => removeMention(pubkey)}>
+                {displayPubkey(pubkey)}
+              </Chip>
+            {:else}
+              <div class="text-neutral-100 inline-block py-2">No mentions</div>
+            {/each}
+            <div class="-mb-2" />
           </div>
         </div>
-        <div on:click|stopPropagation>
-          {#each mentions as pubkey}
-            <Chip class="mb-1 mr-1" onRemove={() => removeMention(pubkey)}>
-              {displayPubkey(pubkey)}
-            </Chip>
-          {:else}
-            <div class="text-neutral-100 inline-block py-2">No mentions</div>
-          {/each}
-          <div class="-mb-2" />
-        </div>
-      </div>
-    </AltColor>
+      </AltColor>
+    </div>
   </div>
 {/if}
 
@@ -200,7 +195,7 @@
     bind:this={options}
     on:change={setOpts}
     initialValues={opts}
-    hideFields={parent.wrap ? ["relays"] : []} />
+    hideFields={["groups"]} />
 {/if}
 
 {#if $nsecWarning}

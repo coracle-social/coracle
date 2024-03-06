@@ -14,7 +14,7 @@
   export let request
   export let showGroup = false
 
-  const claim = Tags.from(request).getValue("claim")
+  const claim = Tags.fromEvent(request).get("claim")?.value()
   const dismiss = () => groupRequests.key(request.id).merge({resolved: true})
 
   const resolve = () => {

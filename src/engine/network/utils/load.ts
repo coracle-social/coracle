@@ -6,7 +6,7 @@ import {LOCAL_RELAY_URL} from "src/util/nostr"
 import logger from "src/util/logger"
 import {getSetting} from "src/engine/session/utils"
 import type {Event} from "src/engine/events/model"
-import {mergeHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import {getUrls} from "src/engine/network/utils"
 import type {Filter} from "../model"
 import {combineFilters} from "./filters"
@@ -90,9 +90,7 @@ export const execute = batch(500, (items: LoadItem[]) => {
 
   // If we're using multiplexer, let it do its thing
   if (getSetting("multiplextr_url")) {
-    const relays = mergeHints(items.map(getPath(["request", "relays"])))
-
-    loadChunk(items, relays, tracker)
+    loadChunk(items, hints.scenario(items.map(getPath(["request", "relays"]))).getUrls(), tracker)
   } else {
     const itemsByRelay = {}
     for (const item of items) {

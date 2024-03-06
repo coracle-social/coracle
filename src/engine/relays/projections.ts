@@ -1,8 +1,7 @@
-import {normalizeRelayUrl, isShareableRelay, Tags} from "paravel"
-import {tryJson} from "src/util/misc"
+import {Tags} from "paravel"
+import {normalizeRelayUrl, isShareableRelayUrl} from "paravel"
 import {warn} from "src/util/logger"
 import {projections} from "src/engine/core/projections"
-import type {RelayPolicy} from "./model"
 import {RelayMode} from "./model"
 import {saveRelay, saveRelayPolicy} from "./commands"
 
@@ -10,33 +9,13 @@ projections.addHandler(2, e => {
   saveRelay(normalizeRelayUrl(e.content))
 })
 
-projections.addHandler(3, e => {
-  saveRelayPolicy(
-    e,
-    tryJson<RelayPolicy[]>(() => {
-      return Object.entries(JSON.parse(e.content || ""))
-        .filter(([url]) => isShareableRelay(url))
-        .map(([url, conditions]) => {
-          // @ts-ignore
-          const write = ![false, "!"].includes(conditions.write)
-          // @ts-ignore
-          const read = ![false, "!"].includes(conditions.read)
-
-          return {url: normalizeRelayUrl(url), write, read}
-        })
-    }) as RelayPolicy[],
-  )
-})
-
 projections.addHandler(10002, e => {
   saveRelayPolicy(
     e,
-    Tags.from(e)
-      .type(["r", "relay"])
-      .drop(1)
-      .all()
-      .filter(([url]: [string]) => isShareableRelay(url))
-      .map(([url, mode]: [string, string]) => {
+    Tags.fromEvent(e)
+      .filter(t => ["r", "relay"].includes(t.key()) && isShareableRelayUrl(t.value()))
+      .mapTo(t => {
+        const [url, mode] = t.drop(1).valueOf()
         const write = !mode || mode === RelayMode.Write
         const read = !mode || mode === RelayMode.Read
 
@@ -45,6 +24,7 @@ projections.addHandler(10002, e => {
         }
 
         return {url: normalizeRelayUrl(url), write, read}
-      }),
+      })
+      .valueOf(),
   )
 })

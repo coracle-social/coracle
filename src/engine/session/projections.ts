@@ -7,7 +7,7 @@ import {sessions} from "./state"
 import {nip04} from "./derived"
 
 projections.addHandler(30078, e => {
-  if (Tags.from(e).getValue("d") === appDataKeys.USER_SETTINGS) {
+  if (Tags.fromEvent(e).get("d")?.value() === appDataKeys.USER_SETTINGS) {
     sessions.updateAsync(async $sessions => {
       if ($sessions[e.pubkey]) {
         await tryFunc(async () => {

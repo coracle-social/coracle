@@ -7,14 +7,16 @@
   import {fly} from "src/util/transition"
   import {getModal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import Note from "src/app/shared/Note.svelte"
   import type {DynamicFilter} from "src/engine"
   import {
+    hints,
     readable,
     writable,
-    selectHints,
     compileFilters,
+    forcePlatformRelays,
     searchableRelays,
     getRelaysFromFilters,
   } from "src/engine"
@@ -35,18 +37,16 @@
   const hideReplies = writable(Storage.getJson("hideReplies"))
 
   const getRelays = () => {
-    let selection = relays
+    if (relays.length > 0) {
+      return relays
+    }
 
     // If we have a search term we need to use only relays that support search
-    if (selection.length === 0 && filter.search) {
-      selection = $searchableRelays
-    }
+    const selection = filter.search
+      ? $searchableRelays
+      : getRelaysFromFilters(compileFilters([filter]))
 
-    if (selection.length === 0) {
-      selection = getRelaysFromFilters(compileFilters([filter]))
-    }
-
-    return selectHints(selection).concat(LOCAL_RELAY_URL)
+    return forcePlatformRelays(hints.scenario([selection]).getUrls()).concat(LOCAL_RELAY_URL)
   }
 
   const loadMore = () => feed.load(5)
@@ -98,17 +98,19 @@
   </FeedControls>
 {/if}
 
-{#each $notes as note, i (note.id)}
-  <div in:fly={{y: 20}}>
-    <Note
-      depth={$hideReplies ? 0 : 2}
-      context={note.replies || []}
-      filters={compileFilters([filter])}
-      {showGroup}
-      {anchor}
-      {note} />
-  </div>
-{/each}
+<FlexColumn xl>
+  {#each $notes as note, i (note.id)}
+    <div in:fly={{y: 20}}>
+      <Note
+        depth={$hideReplies ? 0 : 2}
+        context={note.replies || []}
+        filters={compileFilters([filter])}
+        {showGroup}
+        {anchor}
+        {note} />
+    </div>
+  {/each}
+</FlexColumn>
 
 {#if !hideSpinner}
   <Spinner />

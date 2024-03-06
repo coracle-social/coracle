@@ -1,10 +1,10 @@
 <script lang="ts">
-  import {Tags} from "paravel"
+  import {fromPairs} from "ramda"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
 
   export let note, showMedia
 
-  const {name, description, image} = Tags.from(note).getDict()
+  const {name, description, image} = fromPairs(note.tags)
 </script>
 
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">

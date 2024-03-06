@@ -1,18 +1,17 @@
 import {prop, uniqBy, defaultTo, sortBy, last, whereEq} from "ramda"
-import {ellipsize, first, seconds} from "hurdak"
-import {Tags} from "paravel"
-import {Naddr} from "src/util/nostr"
+import {ellipsize, seconds} from "hurdak"
+import {Tags, decodeAddress, addressToNaddr} from "paravel"
 import {fuzzy} from "src/util/misc"
 import type {GroupStatus, Session} from "src/engine/session/model"
 import {pubkey} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
-import {getUserHints, getGroupHints, mergeHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import {groups, groupSharedKeys, groupAdminKeys} from "./state"
 import {GroupAccess} from "./model"
 import type {Group} from "./model"
 
 export const getGroupNaddr = (group: Group) =>
-  Naddr.fromTagValue(group.address, group.relays).encode()
+  addressToNaddr(decodeAddress(group.address, group.relays))
 
 export const getGroupId = (group: Group) => group.address.split(":").slice(2).join(":")
 
@@ -21,9 +20,9 @@ export const getGroupName = (group: Group) => group.meta?.name || group.id || ""
 export const displayGroup = (group: Group) => ellipsize(group ? getGroupName(group) : "No name", 60)
 
 export const deriveGroup = address => {
-  const {identifier, pubkey} = Naddr.fromTagValue(address)
+  const {pubkey, identifier: id} = decodeAddress(address)
 
-  return groups.key(address).derived(defaultTo({id: identifier, pubkey, address}))
+  return groups.key(address).derived(defaultTo({id, pubkey, address}))
 }
 
 export const getGroupSearch = $groups => fuzzy($groups, {keys: ["meta.name", "meta.about"]})
@@ -31,7 +30,7 @@ export const getGroupSearch = $groups => fuzzy($groups, {keys: ["meta.name", "me
 export const searchGroups = groups.derived(getGroupSearch)
 
 export const getRecipientKey = wrap => {
-  const pubkey = Tags.from(wrap).pubkeys().first()
+  const pubkey = Tags.fromEvent(wrap).values("p").first()
   const sharedKey = groupSharedKeys.key(pubkey).get()
 
   if (sharedKey) {
@@ -66,12 +65,14 @@ export const getGroupReqInfo = (address = null) => {
   const recipients = [pubkey.get()]
 
   for (const key of [...$groupSharedKeys, ...$groupAdminKeys]) {
-    admins.push(Naddr.fromTagValue(key.group).pubkey)
+    const address = decodeAddress(key.group)
+
+    admins.push(address.pubkey)
     addresses.push(key.group)
     recipients.push(key.pubkey)
   }
 
-  const relays = mergeHints([...addresses.map(getGroupHints), getUserHints("read")])
+  const relays = hints.merge(addresses.map(hints.WithinContext)).getUrls()
 
   return {admins, recipients, relays, since}
 }
@@ -82,7 +83,7 @@ export const getCommunityReqInfo = (address = null) => {
 
   return {
     since: since - seconds(6, "hour"),
-    relays: mergeHints([getGroupHints(address), getUserHints("read")]),
+    relays: hints.WithinContext(address).getUrls(),
   }
 }
 
@@ -142,7 +143,7 @@ export const deriveGroupOptions = (defaultGroups = []) =>
 export const getUserCircles = (session: Session) =>
   Object.entries(session?.groups || {})
     .filter(([a, s]) => deriveIsGroupMember(a).get())
-    .map<string>(first)
+    .map(([a, s]) => a)
 
 export const deriveUserCircles = () => session.derived(getUserCircles)
 

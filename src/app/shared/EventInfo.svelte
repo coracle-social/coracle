@@ -1,8 +1,8 @@
 <script lang="ts">
   import cx from "classnames"
-  import {Tags} from "paravel"
-  import {Naddr} from "src/util/nostr"
-  import {secondsToDate, formatTimestamp, formatTimestampAsDate, getLocale} from "src/util/misc"
+  import {Tags, getAddress} from "paravel"
+  import {fromPairs} from "ramda"
+  import {secondsToDate, formatTimestamp, formatTimestampAsDate} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Chip from "src/partials/Chip.svelte"
   import GroupLink from "src/app/shared/GroupLink.svelte"
@@ -16,16 +16,19 @@
   export let showDate = false
   export let actionsInline = false
 
-  const timeFmt = new Intl.DateTimeFormat(getLocale(), {timeStyle: "short"})
-  const datetimeFmt = new Intl.DateTimeFormat(getLocale(), {dateStyle: "short", timeStyle: "short"})
-  const groupAddrs = Tags.from(event).circles().all()
-  const {name, title, start, end, location} = Tags.from(event).getDict()
+  const timeFmt = new Intl.DateTimeFormat("en-US", {timeStyle: "short"})
+  const datetimeFmt = new Intl.DateTimeFormat("en-US", {dateStyle: "short", timeStyle: "short"})
+  const tags = Tags.fromEvent(event)
+  const groupAddrs = tags.context().values().valueOf()
+  const {name, title, location} = fromPairs(event.tags)
+  const end = parseInt(tags.get("end")?.value())
+  const start = parseInt(tags.get("start")?.value())
   const startDate = secondsToDate(start)
   const endDate = secondsToDate(end)
   const startDateDisplay = formatTimestampAsDate(start)
   const endDateDisplay = formatTimestampAsDate(end)
   const isSingleDay = startDateDisplay === endDateDisplay
-  const address = Naddr.fromEvent(event).asTagValue()
+  const address = getAddress(event)
   const detailPath = router.at("events").of(address).toString()
   const editLink = router.at("events").of(address).at("edit").toString()
   const deleteLink = router.at("events").of(address).at("delete").toString()

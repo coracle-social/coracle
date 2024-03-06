@@ -7,10 +7,10 @@
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
   import {
+    hints,
     follows,
     derivePerson,
     displayPerson,
-    getPubkeyHints,
     searchPeople,
     createPeopleLoader,
   } from "src/engine"
@@ -30,7 +30,7 @@
 
   const pubkeyEncoder = {
     encode: pubkey => {
-      const relays = getPubkeyHints.limit(3).getHints(pubkey, "write")
+      const relays = hints.FromPubkeys([pubkey]).limit(3).getUrls()
       const nprofile = nip19.nprofileEncode({pubkey, relays})
 
       return "nostr:" + nprofile

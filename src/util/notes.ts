@@ -1,4 +1,4 @@
-import {last, drop, pipe, map, pluck, identity} from "ramda"
+import {last, pluck, identity} from "ramda"
 import {fromNostrURI, Tags} from "paravel"
 import {nip19} from "nostr-tools"
 import {first, switcherFn} from "hurdak"
@@ -17,32 +17,20 @@ export const NOSTR_NPROFILE = "nostr:nprofile"
 export const NOSTR_NADDR = "nostr:naddr"
 
 export const urlIsMedia = (url: string) =>
-  !url.match(/\.(apk|docx|xlsx|csv|dmg)/) && last(url.replace(/\/$/, '').split("://"))?.includes("/")
+  !url.match(/\.(apk|docx|xlsx|csv|dmg)/) &&
+  last(url.replace(/\/$/, "").split("://"))?.includes("/")
 
 export const parseContent = (event: {content: string; tags?: string[][]}) => {
   const result: any[] = []
-  const tags = new Tags(event.tags || [])
-  let text = event.content.trim() || tags.getValue("alt") || ""
+  const tags = Tags.from(event.tags || [])
+  let text = event.content.trim() || tags.get("alt")?.value() || ""
   let buffer = ""
 
   const getMeta = (url, hash) => {
-    const meta = tags
-      .type("imeta")
-      .map(
-        pipe(
-          drop<string>(1),
-          map((m: string) => {
-            const parts = m.split(" ")
-
-            return [parts[0], parts.slice(1).join(" ")]
-          }),
-        ),
-      )
-      .filter(meta => new Tags(meta).type("url").nthEq(1, url).exists())
-      .flatMap(identity)
+    const meta = tags.imeta(url) || Tags.from([])
 
     for (const [k, v] of new URLSearchParams(hash).entries()) {
-      meta.xs.push([k, v])
+      meta.addTag(k, v)
     }
 
     return meta

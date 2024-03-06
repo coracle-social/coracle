@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags, now} from "paravel"
+  import {Tags, decodeAddress, asEventTemplate} from "paravel"
   import {sleep, ucFirst} from "hurdak"
-  import {Naddr, EventBuilder} from "src/util/nostr"
+  import {inc} from "ramda"
   import {getCurrencyOption} from "src/util/i18n"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -18,31 +18,29 @@
   import Compose from "src/app/shared/Compose.svelte"
   import {router} from "src/app/router"
   import {toastProgress} from "src/app/state"
-  import {dereferenceNote, publishToZeroOrMoreGroups, getUserHints} from "src/engine"
+  import {dereferenceNote, publishToZeroOrMoreGroups} from "src/engine"
 
   export let address
   export let event
 
   const onSubmit = async () => {
-    const builder = EventBuilder.from(event)
+    const tags = Tags.fromEvent(event)
+      .setTag("title", values.title)
+      .setTag("summary", values.summary)
+      .setTag("location", values.location)
+      .setTag("price", values.price.toString(), values.currency.code)
+      .setTag("status", values.status)
+      .setImages(images.getValue())
+      .removeContext()
 
-    builder.setTagArgs("title", values.title)
-    builder.setTagArgs("summary", values.summary)
-    builder.setTagArgs("location", values.location)
-    builder.setTagArgs("price", values.price.toString(), values.currency.code)
-
-    if (values.status !== "active") {
-      builder.setTagArgs("status", values.status)
-    }
-
-    builder.removeCircles()
-    builder.setCreatedAt(now())
-    builder.setContent(compose.parse())
-    builder.setImages(images.getValue())
-
-    const {pubs} = await publishToZeroOrMoreGroups(values.groups, builder.template, {
-      relays: getUserHints("write"),
+    const template = asEventTemplate({
+      ...event,
+      tags: tags.valueOf(),
+      content: compose.parse(),
+      created_at: inc(event.created_at),
     })
+
+    const {pubs} = await publishToZeroOrMoreGroups(values.groups, template)
 
     pubs[0].on("progress", toastProgress)
 
@@ -55,22 +53,22 @@
 
   onMount(async () => {
     if (!event) {
-      event = await dereferenceNote(Naddr.fromTagValue(address))
+      event = await dereferenceNote(decodeAddress(address, []))
     }
 
     loading = false
 
     if (event) {
-      const tags = Tags.from(event)
-      const [price, code] = tags.type("price").first().slice(1)
+      const tags = Tags.fromEvent(event)
+      const [price, code] = tags.whereKey("price").first().slice(1).valueOf()
 
       values = {
-        groups: tags.circles().all(),
-        title: tags.getValue("title") || "",
-        summary: tags.getValue("summary") || "",
-        location: tags.getValue("location") || "",
-        status: tags.getValue("status") || "active",
-        price: parseInt(price || 0),
+        groups: tags.context().values().valueOf(),
+        title: tags.get("title")?.value() || "",
+        summary: tags.get("summary")?.value() || "",
+        location: tags.get("location")?.value() || "",
+        status: tags.get("status")?.value() || "active",
+        price: parseInt(price || "0"),
         currency: getCurrencyOption(code),
       }
 
@@ -79,8 +77,8 @@
 
       compose.write(event.content)
 
-      for (const image of tags.type("image").values().all()) {
-        images.addImage(new Tags([["url", image]]))
+      for (const url of tags.values("image").valueOf()) {
+        images.addImage(Tags.from([["url", url]]))
       }
     }
   })

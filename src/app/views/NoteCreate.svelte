@@ -32,13 +32,12 @@
   import {router} from "src/app/router"
   import {
     env,
+    hints,
     session,
     writable,
-    getEventHints,
     getClientTags,
     tagsFromContent,
     publishToZeroOrMoreGroups,
-    getGroupPublishHints,
   } from "src/engine"
 
   export let type = "note"
@@ -47,7 +46,11 @@
   export let group = null
   export let initialValues = {}
 
-  const defaultGroups = quote ? Tags.from(quote).circles().all() : [group].filter(identity)
+  const defaultGroups = $env.FORCE_GROUP
+    ? [$env.FORCE_GROUP]
+    : quote
+      ? Tags.fromEvent(quote).context().values().valueOf()
+      : [group].filter(identity)
 
   let images, compose
   let charCount = 0
@@ -60,7 +63,6 @@
     summary: "",
     price: "",
     currency: currencyOptions.find(whereEq({code: "SAT"})),
-    relays: getGroupPublishHints(defaultGroups),
     groups: defaultGroups,
     anonymous: false,
     location: null,
@@ -115,9 +117,9 @@
 
     for (const imeta of images.getValue()) {
       if (type === "listing") {
-        tags.push(["image", imeta.type("url").values().first()])
+        tags.push(["image", imeta.get("url").value()])
       } else {
-        tags.push(["imeta", ...imeta.all().map(join(" "))])
+        tags.push(["imeta", ...imeta.valueOf().map(join(" "))])
       }
     }
 
@@ -131,8 +133,8 @@
       // Re-broadcast the note we're quoting
       if (!opts.groups.length) {
         Publisher.publish({
-          relays: opts.relays,
           event: asNostrEvent(quote),
+          relays: hints.Outbox().getUrls(),
         })
       }
     }
@@ -196,7 +198,10 @@
     }
 
     if (quote) {
-      const nevent = nip19.neventEncode({id: quote.id, relays: getEventHints(quote)})
+      const nevent = nip19.neventEncode({
+        id: quote.id,
+        relays: hints.Event(quote).limit(3).getUrls(),
+      })
 
       compose.nevent("nostr:" + nevent)
     }
@@ -302,9 +307,6 @@
             <i class="fa fa-circle-nodes" />
             {opts.groups.length}
           </span>
-          {#if $env.FORCE_RELAYS.length === 0}
-            <span><i class="fa fa-server" /> {opts.relays?.length}</span>
-          {/if}
           <span><i class="fa fa-warning" /> {opts.warning || 0}</span>
         </small>
       {/if}

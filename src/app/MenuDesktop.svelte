@@ -58,7 +58,7 @@
     <h1 class="staatliches text-[2.6em] leading-none -mb-[0.1em]">{appName}</h1>
   </Anchor>
   <MenuDesktopItem path="/notes">Feed</MenuDesktopItem>
-  {#if !$env.FORCE_GROUP && $env.FORCE_RELAYS.length === 0}
+  {#if !$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0}
     <MenuDesktopItem path="/settings/relays">
       <div class="relative inline-block">
         Relays
@@ -85,7 +85,9 @@
     </div>
   </MenuDesktopItem>
   <MenuDesktopItem path="/events">Calendar</MenuDesktopItem>
-  <MenuDesktopItem path="/listings">Market</MenuDesktopItem>
+  {#if $env.ENABLE_MARKET}
+    <MenuDesktopItem path="/listings">Market</MenuDesktopItem>
+  {/if}
   {#if !$env.FORCE_GROUP}
     <MenuDesktopItem path="/groups">Groups</MenuDesktopItem>
   {/if}

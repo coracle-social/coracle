@@ -27,16 +27,19 @@ export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settin
   const regex =
     words.length > 0 ? new RegExp(`\\b(${words.map(w => w.toLowerCase()).join("|")})\\b`) : null
 
-  return (e: Event, strict = false) => {
+  return (e: Partial<Event>, strict = false) => {
     if (!$pubkey || e.pubkey === $pubkey) {
       return false
     }
 
-    const tags = Tags.from(e)
-    const {roots, replies} = tags.getAncestors()
+    const tags = Tags.from(e.tags || [])
+    const {roots, replies} = tags.ancestors()
 
     if (
-      find(t => $mutes.has(t), [e.id, e.pubkey, ...roots.values().all(), ...replies.values().all()])
+      find(
+        t => $mutes.has(t),
+        [e.id, e.pubkey, ...roots.values().valueOf(), ...replies.values().valueOf()],
+      )
     ) {
       return true
     }
@@ -51,11 +54,11 @@ export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settin
 
     const isGroupMember = tags
       .groups()
-      .all()
+      .values()
       .some(a => deriveIsGroupMember(a).get())
     const isCommunityMember = tags
-      .circles()
-      .all()
+      .communities()
+      .values()
       .some(a => false)
     const wotAdjustment = isCommunityMember || isGroupMember ? 1 : 0
 

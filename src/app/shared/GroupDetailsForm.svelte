@@ -31,7 +31,7 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import type {Person} from "src/engine"
-  import {searchRelays, normalizeRelayUrl} from "src/engine"
+  import {env, searchRelays, normalizeRelayUrl} from "src/engine"
 
   export let onSubmit
   export let values: Values
@@ -100,19 +100,21 @@
           </div>
         </FieldInline>
       {/if}
-      <Field label="Relays">
-        <SearchSelect
-          multiple
-          search={searchRelayUrls}
-          bind:value={values.relays}
-          termToItem={normalizeRelayUrl}>
-          <i slot="before" class="fa fa-clipboard" />
-        </SearchSelect>
-        <div slot="info">
-          Which relays members should publish notes to. For additional privacy, select relays you
-          host yourself.
-        </div>
-      </Field>
+      {#if $env.PLATFORM_RELAYS.length === 0}
+        <Field label="Relays">
+          <SearchSelect
+            multiple
+            search={searchRelayUrls}
+            bind:value={values.relays}
+            termToItem={normalizeRelayUrl}>
+            <i slot="before" class="fa fa-clipboard" />
+          </SearchSelect>
+          <div slot="info">
+            Which relays members should publish notes to. For additional privacy, select relays you
+            host yourself.
+          </div>
+        </Field>
+      {/if}
       {#if showMembers}
         <Field label="Member List">
           <PersonMultiSelect bind:value={values.members} />

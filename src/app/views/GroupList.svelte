@@ -10,12 +10,11 @@
   import GroupListItem from "src/app/shared/GroupListItem.svelte"
   import {
     load,
+    hints,
     groups,
-    getUserHints,
     getGroupReqInfo,
     deriveIsGroupMember,
     updateCurrentSession,
-    selectHintsWithFallback,
     session,
   } from "src/engine"
 
@@ -46,12 +45,12 @@
     updateCurrentSession(assoc("groups_last_synced", now()))
 
     load({
-      relays: selectHintsWithFallback(relays),
+      relays,
       filters: [{kinds: [1059, 1060], "#p": recipients, since}],
     })
 
     load({
-      relays: getUserHints("read"),
+      relays: hints.User().getUrls(),
       filters: [
         {kinds: [35834, 34550], authors: admins},
         {kinds: [35834, 34550], limit: 500},

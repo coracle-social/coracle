@@ -1,6 +1,6 @@
 import {seconds} from "hurdak"
 import {session, nip44, nip04} from "src/engine/session/derived"
-import {getUserHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import {load} from "src/engine/network/utils"
 
 export const loadDeletes = () => {
@@ -8,7 +8,7 @@ export const loadDeletes = () => {
   const since = Math.max(0, deletes_last_synced - seconds(6, "hour"))
 
   return load({
-    relays: getUserHints("write"),
+    relays: hints.User().getUrls(),
     filters: [{kinds: [5], authors: [pubkey], since}],
   })
 }
@@ -18,7 +18,7 @@ export const loadSeen = () => {
   const since = Math.max(0, deletes_last_synced - seconds(6, "hour"))
 
   return load({
-    relays: getUserHints("write"),
+    relays: hints.Outbox().getUrls(),
     filters: [{kinds: [15], authors: [pubkey], since}],
   })
 }
@@ -39,7 +39,7 @@ export const loadGiftWrap = () => {
     const since = Math.max(0, nip59_messages_last_synced - seconds(6, "hour"))
 
     return load({
-      relays: getUserHints(),
+      relays: hints.AllMessages().getUrls(),
       filters: [{kinds: [1059, 1060], authors: [pubkey], since}],
     })
   }

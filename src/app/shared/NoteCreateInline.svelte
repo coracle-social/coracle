@@ -15,14 +15,13 @@
   import GroupLink from "src/app/shared/GroupLink.svelte"
   import {toastProgress} from "src/app/state"
   import {
+    env,
     pubkey,
     writable,
     Publisher,
-    getPublishHints,
     getClientTags,
     tagsFromContent,
     publishToZeroOrMoreGroups,
-    getGroupPublishHints,
     getReplyTags,
   } from "src/engine"
 
@@ -33,13 +32,13 @@
     throw new Error("Either parent or group is allowed, not both")
   }
 
-  const defaultGroups = parent ? Tags.from(parent).circles().all() : [group].filter(identity)
-  const defaultOpts = {
-    relays: parent ? getPublishHints(parent) : getGroupPublishHints(defaultGroups),
-    groups: defaultGroups,
-    anonymous: false,
-    warning: "",
-  }
+  const defaultGroups = $env.FORCE_GROUP
+    ? [$env.FORCE_GROUP]
+    : parent
+      ? Tags.fromEvent(parent).context().values().valueOf()
+      : [group].filter(identity)
+
+  const defaultOpts = {anonymous: false, warning: ""}
 
   let images, compose, options, saving
 
@@ -74,7 +73,7 @@
     }
 
     for (const imeta of images.getValue()) {
-      tags.push(["imeta", ...imeta.all().map(join(" "))])
+      tags.push(["imeta", ...imeta.valueOf().map(join(" "))])
     }
 
     if (opts.warning) {
@@ -83,12 +82,12 @@
 
     // Re-broadcast the note we're replying to
     if (parent && !parent.wrap) {
-      Publisher.publish({relays: opts.relays, event: asNostrEvent(parent)})
+      Publisher.publish({event: asNostrEvent(parent)})
     }
 
     const template = createEvent(1, {content, tags})
 
-    const {pubs} = await publishToZeroOrMoreGroups(opts.groups, template, opts)
+    const {pubs} = await publishToZeroOrMoreGroups(defaultGroups, template, opts)
 
     pubs[0].on("progress", toastProgress)
 
@@ -128,11 +127,7 @@
   </AltColor>
 </form>
 
-<NoteOptions
-  on:change={setOpts}
-  bind:this={options}
-  initialValues={opts}
-  hideFields={["relays", "groups"]} />
+<NoteOptions on:change={setOpts} bind:this={options} initialValues={opts} hideFields={["groups"]} />
 
 {#if $nsecWarning}
   <NsecWarning onAbort={() => nsecWarning.set(null)} onBypass={bypassNsecWarning} />

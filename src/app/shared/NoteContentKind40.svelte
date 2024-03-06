@@ -9,7 +9,9 @@
   export let note
 
   const {name, picture, about} = tryJson(() => JSON.parse(note.content))
-  const noteId = nip19.noteEncode(note.kind === 40 ? note.id : Tags.from(note).getValue("e"))
+  const noteId = nip19.noteEncode(
+    note.kind === 40 ? note.id : Tags.fromEvent(note).get("e")?.value(),
+  )
 
   const goToChat = () => window.open(`https://chat.coracle.social/chat/${noteId}`)
 </script>

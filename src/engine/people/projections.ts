@@ -77,12 +77,14 @@ projections.addHandler(3, e => {
   }
 
   updateStore(people.key(e.pubkey), e.created_at, {
-    petnames: Tags.from(e).type("p").all(),
+    petnames: Tags.fromEvent(e).whereKey("p").valueOf(),
   })
 })
 
 projections.addHandler(10000, e => {
   updateStore(people.key(e.pubkey), e.created_at, {
-    mutes: Tags.from(e).type(["e", "p"]).all(),
+    mutes: Tags.fromEvent(e)
+      .filter(t => ["e", "p"].includes(t.key()))
+      .valueOf(),
   })
 })

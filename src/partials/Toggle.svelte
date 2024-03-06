@@ -1,6 +1,7 @@
 <script lang="ts">
   import Switch from "svelte-switch"
   import {createEventDispatcher} from "svelte"
+  import {themeColors} from "src/partials/state"
 
   export let value
   export let disabled = false
@@ -18,9 +19,9 @@
   {disabled}
   checked={value}
   on:change={onChange}
-  onColor="#ccc"
-  offColor="#ccc"
-  onHandleColor="#EB5E28"
+  onColor={$themeColors['neutral-300']}
+  offColor={$themeColors['neutral-300']}
+  onHandleColor={$themeColors.accent}
   handleDiameter={Math.round(20 * scale)}
   unCheckedIcon={false}
   boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"

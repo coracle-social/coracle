@@ -1,12 +1,13 @@
 <script lang="ts">
-  import {Tags} from "paravel"
+  import {fromPairs} from "ramda"
   import {batch} from "hurdak"
   import {onMount} from "svelte"
+  import {getAddress} from "paravel"
   import Calendar from "@event-calendar/core"
   import DayGrid from "@event-calendar/day-grid"
   import Interaction from "@event-calendar/interaction"
   import {secondsToDate} from "src/util/misc"
-  import {Naddr, LOCAL_RELAY_URL} from "src/util/nostr"
+  import {LOCAL_RELAY_URL} from "src/util/nostr"
   import {themeColors} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/router"
@@ -44,7 +45,7 @@
       onEvent: batch(300, chunk => {
         events.update($events => {
           for (const e of chunk) {
-            const addr = Naddr.fromEvent(e).asTagValue()
+            const addr = getAddress(e)
             const dup = $events.get(addr)
 
             // Make sure we have the latest version of every event
@@ -65,16 +66,16 @@
   $: calendarEvents = Array.from($events.values())
     .filter(e => !$isDeleted(e))
     .map(e => {
-      const meta = Tags.from(e).getDict()
+      const meta = fromPairs(e.tags)
       const isOwn = e.pubkey === $pubkey
 
       return {
         editable: isOwn,
-        id: Naddr.fromEvent(e).asTagValue(),
+        id: getAddress(e),
         title: meta.title || meta.name, // Backwards compat with a bug
         start: secondsToDate(meta.start),
         end: secondsToDate(meta.end),
-        backgroundColor: $themeColors[isOwn ? "accent" : "neutral-900"],
+        backgroundColor: $themeColors[isOwn ? "accent" : "neutral-100"],
       }
     })
 </script>
@@ -99,6 +100,7 @@
     eventContent: getEventContent,
     eventStartEditable: false,
     eventDragMinDistance: 10000,
+    eventTextColor: $themeColors['neutral-900'],
     longPressDelay: 10000,
     buttonText: {
       today: "Today",

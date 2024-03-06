@@ -1,7 +1,6 @@
 import {cached, Tags} from "paravel"
-
 import {identity, pick, uniq} from "ramda"
-import {Fetch, tryFunc, createMapOf} from "hurdak"
+import {Fetch, tryFunc, sleep, createMapOf} from "hurdak"
 import {tryJson, hexToBech32, bech32ToHex, createBatcher} from "src/util/misc"
 import {people} from "src/engine/people/state"
 import {dufflepud} from "src/engine/session/utils"
@@ -120,10 +119,7 @@ export const processZap = (event, zapper) => {
     return null
   }
 
-  const zapMeta = Tags.from(event).getDict() as {
-    bolt11: string
-    description: string
-  }
+  const zapMeta = Tags.fromEvent(event).asObject()
 
   const zap = tryJson(() => ({
     ...event,
@@ -141,10 +137,7 @@ export const processZap = (event, zapper) => {
   }
 
   const {invoiceAmount, request} = zap
-  const reqMeta = Tags.from(request).getDict() as {
-    amount?: string
-    lnurl?: string
-  }
+  const reqMeta = Tags.fromEvent(request).asObject()
 
   // Verify that the zapper actually sent the requested amount (if it was supplied)
   if (reqMeta.amount && parseInt(reqMeta.amount) !== invoiceAmount) {
@@ -170,4 +163,20 @@ export const processZaps = (zaps: Event[], zapper) => {
   }
 
   return zaps.map(e => processZap(e, zapper)).filter(identity)
+}
+
+export const getLightningImplementation = async () => {
+  const {webln} = window as {webln?: any}
+
+  if (webln) {
+    return "webln"
+  }
+
+  const [bc] = await Promise.all([import("@getalby/bitcoin-connect"), sleep(300)])
+
+  if (bc?.isConnected()) {
+    return "bc"
+  }
+
+  return null
 }

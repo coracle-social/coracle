@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {isShareableRelay} from "paravel"
+  import {isShareableRelayUrl} from "paravel"
   import {displayUrl} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Media from "src/partials/Media.svelte"
@@ -38,7 +38,7 @@
     href={router.at("media").of(value.url).toString()}>
     {displayUrl(value.url)}
   </Anchor>
-{:else if isShareableRelay(value.url)}
+{:else if isShareableRelayUrl(value.url)}
   <Anchor
     modal
     stopPropagation

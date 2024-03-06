@@ -4,10 +4,10 @@
   import {onMount} from "svelte"
   import {toNostrURI, Tags, createEvent} from "paravel"
   import {tweened} from "svelte/motion"
-  import {identity, last, filter, sum, uniqBy, prop, pluck} from "ramda"
+  import {identity, filter, sum, uniqBy, prop, pluck} from "ramda"
   import {fly} from "src/util/transition"
   import {formatSats, tryJson} from "src/util/misc"
-  import {getIdOrAddressTag, asNostrEvent} from "src/util/nostr"
+  import {asNostrEvent} from "src/util/nostr"
   import {quantify, pluralize} from "hurdak"
   import {toast} from "src/partials/state"
   import Icon from "src/partials/Icon.svelte"
@@ -33,17 +33,14 @@
     Publisher,
     mention,
     handlers,
+    hints,
     deriveHandlers,
     deriveIsGroupMember,
     publishToZeroOrMoreGroups,
     publishDeletionForEvent,
-    getUserHints,
-    getPubkeyHint,
-    getPublishHints,
     getSetting,
     loadPubkeys,
     processZap,
-    getEventHints,
     isEventMuted,
     getReplyTags,
     getClientTags,
@@ -57,8 +54,9 @@
   export let replies, likes, zaps
   export let zapper
 
-  const relays = getEventHints(note)
-  const address = Tags.from(note).circles().first()
+  const tags = Tags.fromEvent(note)
+  const address = tags.context().values().first()
+  const relays = hints.Event(note).limit(3).getUrls()
   const nevent = nip19.neventEncode({id: note.id, relays})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
   const kindHandlers = deriveHandlers(note.kind).derived(filter((h: any) => h.recs.length > 1))
@@ -66,10 +64,9 @@
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
-  const clientTag = Tags.from(note).type("client").first()
-  const handler = handlers.key(clientTag ? last(clientTag) : null)
+  const handler = handlers.key(tags.get("client")?.mark())
 
-  //const report = () => router.at("notes").of(note.id, {relays: getEventHints(note)}).at('report').qp({pubkey: note.pubkey}).open()
+  //const report = () => router.at("notes").of(note.id, {relays: hints.Event(note).getUrls(3)}).at('report').qp({pubkey: note.pubkey}).open()
 
   const setView = v => {
     view = v
@@ -84,17 +81,17 @@
   const muteNote = () => mute("e", note.id)
 
   const react = async content => {
-    const relays = getPublishHints(note)
-    const template = createEvent(7, {
-      content,
-      tags: [...getReplyTags(note), ...getClientTags()],
-    })
-
     if (!note.wrap) {
-      Publisher.publish({relays, event: asNostrEvent(note)})
+      Publisher.publish({event: asNostrEvent(note)})
     }
 
-    const {events} = await publishToZeroOrMoreGroups([address].filter(identity), template, {relays})
+    const {events} = await publishToZeroOrMoreGroups(
+      tags.context().values().valueOf(),
+      createEvent(7, {
+        content,
+        tags: [...getReplyTags(note), ...getClientTags()],
+      }),
+    )
 
     addToContext(events)
   }
@@ -106,18 +103,17 @@
   }
 
   const crossPost = async (address = null) => {
-    const relays = getPublishHints(note)
     const content = JSON.stringify(asNostrEvent(note))
-    const tags = [getIdOrAddressTag(note, relays[0]), mention(note.pubkey), ...getClientTags()]
+    const tags = [hints.tagEvent(note).valueOf(), mention(note.pubkey), ...getClientTags()]
 
     let template
     if (note.kind === 1) {
       template = createEvent(6, {content, tags})
     } else {
-      template = createEvent(16, {content, tags: [...tags, ["k", note.kind]]})
+      template = createEvent(16, {content, tags: [...tags, ["k", String(note.kind)]]})
     }
 
-    publishToZeroOrMoreGroups([address].filter(identity), template, {relays})
+    publishToZeroOrMoreGroups([address].filter(identity), template)
 
     toast.show("info", "Note has been cross-posted!")
 
@@ -125,9 +121,9 @@
   }
 
   const startZap = () => {
-    const zapTags = Tags.from(note).type("zap")
-    const defaultSplit = ["zap", note.pubkey, getPubkeyHint(note.pubkey), "1"]
-    const splits = zapTags.exists() ? zapTags.all() : [defaultSplit]
+    const zapTags = tags.whereKey("zap")
+    const defaultSplit = hints.tagPubkey(note.pubkey).setKey("zap").append("1").valueOf()
+    const splits = zapTags.exists() ? zapTags.valueOf() : [defaultSplit]
 
     router
       .at("zap")
@@ -141,10 +137,10 @@
   }
 
   const broadcast = () => {
-    const relays = getUserHints("write")
-    const event = asNostrEvent(note)
-
-    Publisher.publish({event, relays})
+    Publisher.publish({
+      event: asNostrEvent(note),
+      relays: hints.Outbox().getUrls(),
+    })
 
     toast.show("info", "Note has been re-published!")
   }
@@ -207,7 +203,7 @@
       }
     }
 
-    if (!$env.FORCE_GROUP && $env.FORCE_RELAYS.length === 0 && !note.wrap) {
+    if (!$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0 && !note.wrap) {
       actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
     }
 
@@ -219,7 +215,7 @@
   }
 
   onMount(() => {
-    loadPubkeys(Tags.from(note).type("zap").pubkeys().all())
+    loadPubkeys(tags.whereKey("zap").values().valueOf())
   })
 </script>
 
@@ -267,12 +263,14 @@
     {/if}
   </div>
   <div class="flex scale-90 items-center gap-2">
-    <div
-      class="staatliches cursor-pointer rounded bg-neutral-800 dark:bg-neutral-600 px-2 text-neutral-100 transition-colors dark:hover:bg-neutral-500 hover:bg-neutral-700 hidden sm:block"
-      on:click={() => setView("info")}>
-      <span class="text-accent">{note.seen_on.length}</span>
-      {pluralize(note.seen_on.length, "relay")}
-    </div>
+    {#if note.seen_on.length > 0}
+      <div
+        class="staatliches hidden cursor-pointer rounded bg-neutral-800 px-2 text-neutral-100 transition-colors hover:bg-neutral-700 dark:bg-neutral-600 dark:hover:bg-neutral-500 sm:block"
+        on:click={() => setView("info")}>
+        <span class="text-accent">{note.seen_on.length}</span>
+        {pluralize(note.seen_on.length, "relay")}
+      </div>
+    {/if}
     <OverflowMenu {actions} />
   </div>
 </div>
@@ -300,7 +298,7 @@
           {/each}
         </div>
       {/if}
-      {#if note.seen_on.length > 0 && $env.FORCE_RELAYS.length < 2}
+      {#if note.seen_on.length > 0 && $env.PLATFORM_RELAYS.length < 2}
         <h1 class="staatliches text-2xl">Relays</h1>
         <p>This note was found on {quantify(note.seen_on.length, "relay")} below.</p>
         <div class="flex flex-col gap-2">

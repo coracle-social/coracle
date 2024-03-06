@@ -10,7 +10,7 @@ import {channels} from "./state"
 import {getChannelId} from "./utils"
 
 projections.addHandler(30078, async e => {
-  const d = Tags.from(e).getValue("d")
+  const d = Tags.fromEvent(e).get("d")?.value()
   const session = getSession(e.pubkey)
 
   if (!session) {
@@ -49,8 +49,8 @@ projections.addHandler(30078, async e => {
 })
 
 const handleMessage = async e => {
-  const tags = Tags.from(e)
-  const pubkeys = uniq(tags.type("p").values().all().concat(e.pubkey)) as string[]
+  const tags = Tags.fromEvent(e)
+  const pubkeys = uniq(tags.values("p").valueOf().concat(e.pubkey)) as string[]
   const channelId = getChannelId(pubkeys)
 
   for (const pubkey of Object.keys(sessions.get())) {
@@ -70,7 +70,7 @@ const handleMessage = async e => {
 
     // Handle nip04
     if (e.kind === 4) {
-      const recipient = tags.type("p").values().first()
+      const recipient = tags.get("p")?.value()
       const session = getSession(e.pubkey) || getSession(recipient)
 
       if (!session) {
@@ -91,7 +91,7 @@ const handleMessage = async e => {
     const updates: Channel = {
       ...$channel,
       id: channelId,
-      relays: uniq([...tags.relays().all(), ...relays]),
+      relays: uniq([...tags.relays().valueOf(), ...relays]),
       messages: uniqBy(prop("id"), [e, ...messages]),
       members: pubkeys,
     }

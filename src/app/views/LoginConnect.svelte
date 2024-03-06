@@ -12,7 +12,7 @@
   import Modal from "src/partials/Modal.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {router} from "src/app/router"
-  import {loadAppData} from "src/app/state"
+  import {loadUserData} from "src/app/state"
   import {
     env,
     session,
@@ -75,7 +75,7 @@
 
             // Reload everything, it's possible we didn't get their petnames if we got a match
             // from something like purplepag.es. This helps us avoid nuking follow lists later
-            loadAppData()
+            loadUserData()
 
             // Artificially wait since relays might not respond quickly
             await sleep(3000)

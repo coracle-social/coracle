@@ -1,16 +1,19 @@
 import Bugsnag from "@bugsnag/js"
 import {hash, union} from "hurdak"
-import {now} from "paravel"
+import {ConnectionStatus} from "paravel"
 import {warn} from "src/util/logger"
 import {userKinds} from "src/util/nostr"
 import {toast} from "src/partials/state"
 import {router} from "src/app/router"
 import {
+  env,
   pool,
   pubkey,
+  follows,
   session,
   writable,
   loadSeen,
+  loadGroups,
   loadDeletes,
   loadPubkeys,
   loadGiftWrap,
@@ -86,11 +89,13 @@ setInterval(() => {
   // Prune connections we haven't used in a while, clear errors periodically,
   // and keep track of slow connections
   for (const [url, connection] of pool.data.entries()) {
-    if (connection.meta.last_activity < now() - 60) {
+    const {lastPublish, lastRequest, lastFault} = connection.meta
+    const lastActivity = Math.max(lastPublish, lastRequest)
+    const status = connection.meta.getStatus()
+
+    if (lastActivity < Date.now() - 60_000) {
       connection.disconnect()
-    } else if (connection.lastError < Date.now() - 10_000) {
-      connection.clearError()
-    } else if (userRelays.has(url) && connection.meta.quality < 0.3) {
+    } else if (userRelays.has(url) && status === ConnectionStatus.Slow) {
       $slowConnections.push(url)
     }
   }
@@ -102,8 +107,16 @@ setInterval(() => {
 // Synchronization from events to state
 
 export const loadAppData = () => {
-  // Make sure the user is loaded
+  // If we have a group, load that
+  if (env.get().FORCE_GROUP) {
+    loadGroups([env.get().FORCE_GROUP])
+  }
+}
+
+export const loadUserData = () => {
+  // Make sure the user and their follows are loaded
   loadPubkeys([pubkey.get()], {force: true, kinds: userKinds})
+    .then(() => loadPubkeys(follows.get()))
 
   // Load read receipts
   loadSeen()

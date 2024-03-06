@@ -8,15 +8,15 @@ import {projections} from "src/engine/core/projections"
 import {getUrls, getExecutor} from "./executor"
 import {Tracker} from "./tracker"
 
-export type SubscribeOpts = typeof SubscriptionOpts & {
+export type SubscribeOpts = Omit<SubscriptionOpts, "executor"> & {
   relays?: string[]
   tracker?: Tracker
+  executor?: Executor
   skipCache?: boolean
   shouldProject?: boolean
   onEvent?: (e: Event) => void
   onEose?: (url: string) => void
   onClose?: (events: Event[]) => void
-  executor?: typeof Executor
 }
 
 const getExecutorFromOpts = (opts: SubscribeOpts) => {

@@ -22,7 +22,7 @@
     publishMutes,
   } from "src/engine"
 
-  const muteTags = new Tags($user.mutes || [])
+  const muteTags = Tags.from($user.mutes || [])
 
   const settings = getSettings()
 
@@ -30,7 +30,7 @@
 
   const submit = () => {
     const pubkeyMutes = mutedPeople.map(p => ["p", p.pubkey])
-    const otherMutes = muteTags.reject(t => t[0] === "p").all()
+    const otherMutes = muteTags.reject(t => t.key() === "p").valueOf()
     const allMutes = [...pubkeyMutes, ...otherMutes]
 
     publishSettings(settings)
@@ -39,7 +39,7 @@
     toast.show("info", "Your preferences have been saved!")
   }
 
-  let mutedPeople = muteTags.type("p").values().uniq().all().map(getPersonWithDefault)
+  let mutedPeople = muteTags.values("p").uniq().valueOf().map(getPersonWithDefault)
 
   onMount(() => {
     loadPubkeys(Array.from($mutes))

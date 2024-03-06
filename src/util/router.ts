@@ -1,8 +1,8 @@
 import {takeWhile, find, filter, identity, mergeLeft, reject, path as getPath} from "ramda"
-import {first, filterVals, updateIn} from "hurdak"
+import {first, filterVals} from "hurdak"
 import type {ComponentType, SvelteComponentTyped} from "svelte"
 import logger from "src/util/logger"
-import {buildQueryString, parseQueryString} from "src/util/misc"
+import {buildQueryString, parseQueryString, updateIn} from "src/util/misc"
 import {globalHistory} from "src/util/history"
 import {writable} from "src/engine"
 
@@ -263,9 +263,9 @@ class RouterExtension {
     return this.clone({queryParams: data})
   }
 
-  cx = context => this.clone(updateIn("context", mergeLeft(context), this.params))
+  cx = context => this.clone(updateIn("context", mergeLeft(context))(this.params))
 
-  cg = config => this.clone(updateIn("config", mergeLeft(config), this.params))
+  cg = config => this.clone(updateIn("config", mergeLeft(config))(this.params))
 
   toString = () => {
     let path = this.path

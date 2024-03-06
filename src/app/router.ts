@@ -1,17 +1,9 @@
 import {last, fromPairs, identity} from "ramda"
-import {fromNostrURI} from "paravel"
+import {encodeAddress, decodeAddress, addressFromNaddr, addressToNaddr, fromNostrURI} from "paravel"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {tryJson} from "src/util/misc"
-import {Naddr} from "src/util/nostr"
-import {
-  decodePerson,
-  decodeRelay,
-  decodeEvent,
-  selectHintsWithFallback,
-  getChannelId,
-  getPubkeyHints,
-} from "src/engine"
+import {decodePerson, decodeRelay, decodeEvent, getChannelId, hints} from "src/engine"
 
 // Decoders
 
@@ -21,7 +13,7 @@ export const decodeJson = json => tryJson(() => JSON.parse(json))
 export const encodeCsv = xs => xs.join(",")
 export const decodeCsv = x => x.split(",")
 export const encodeRelays = xs => xs.map(url => last(url.split("//"))).join(",")
-export const encodeNaddr = a => Naddr.fromTagValue(a).encode()
+export const encodeNaddr = a => addressToNaddr(decodeAddress(a, []))
 
 export const encodeFilter = f =>
   Object.entries(f)
@@ -64,7 +56,7 @@ export const decodeEntity = entity => {
     // pass
   }
 
-  return {type, data, relays: selectHintsWithFallback(data?.relays || [], 3)}
+  return {type, data, relays: hints.scenario([data?.relays || []]).getUrls()}
 }
 
 // Serializers
@@ -121,7 +113,7 @@ export const asChannelId = {
 
 export const asNaddr = k => ({
   encode: encodeNaddr,
-  decode: decodeAs(k, naddr => Naddr.decode(naddr).asTagValue()),
+  decode: decodeAs(k, naddr => encodeAddress(addressFromNaddr(naddr))),
 })
 
 // Router and extensions
@@ -139,7 +131,7 @@ router.extend("listings", encodeNaddr)
 
 router.extend("notes", (id, {relays = []} = {}) => {
   if (id.includes(":")) {
-    return Naddr.fromTagValue(id, relays).encode()
+    return addressToNaddr(decodeAddress(id, relays))
   }
 
   if (relays.length > 0) {
@@ -151,7 +143,12 @@ router.extend("notes", (id, {relays = []} = {}) => {
 
 router.extend("people", (pubkey, {relays = []} = {}) => {
   if (relays.length < 3) {
-    relays = relays.concat(getPubkeyHints.limit(3 - relays.length).getHints(pubkey))
+    relays = relays.concat(
+      hints
+        .FromPubkeys([pubkey])
+        .limit(3 - relays.length)
+        .getUrls(),
+    )
   }
 
   return nip19.nprofileEncode({pubkey, relays})

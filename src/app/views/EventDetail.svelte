@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags} from "paravel"
-  import {Naddr, getIdOrAddress, noteKinds} from "src/util/nostr"
+  import {Tags, decodeAddress} from "paravel"
+  import {getIdOrAddress, noteKinds} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -18,7 +18,7 @@
   let loading = true
 
   onMount(async () => {
-    event = event || (await dereferenceNote({...Naddr.fromTagValue(address), relays}))
+    event = event || (await dereferenceNote(decodeAddress(address, relays)))
     loading = false
   })
 </script>
@@ -26,7 +26,6 @@
 {#if loading}
   <Spinner />
 {:else if event}
-  {@const groupAddr = Tags.from(event).circles().first()}
   <div in:fly={{y: 20}}>
     <FlexColumn>
       <div class="flex gap-4">
@@ -39,7 +38,6 @@
         hideControls
         shouldListen
         anchor={getIdOrAddress(event)}
-        relays={groupAddr ? getGroupReqInfo(groupAddr).relays : []}
         filter={{kinds: noteKinds, "#a": [address]}} />
     </FlexColumn>
   </div>

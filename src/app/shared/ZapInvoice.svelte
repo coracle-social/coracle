@@ -3,7 +3,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
-  import {collectInvoice, displayPubkey} from "src/engine"
+  import {collectInvoice, getLightningImplementation, displayPubkey} from "src/engine"
 
   export let zap
 
@@ -32,21 +32,25 @@
       {zap.amount} sats to {displayPubkey(zap.pubkey)}
     </div>
     <QRCode code={zap.invoice} onClick={collect}>
-      <div let:copy class="flex gap-1">
+      <div slot="below" let:copy class="flex gap-1">
         <Input value={zap.invoice} wrapperClass="flex-grow">
           <button slot="after" class="fa fa-copy" on:click={copy} />
         </Input>
-        {#if zap.status === "pending"}
-          <Anchor tall button accent on:click={collect} disabled={attemptingToPay} class="w-24">
-            {#if attemptingToPay}
-              <i class="fa fa-circle-notch fa-spin" />
-            {:else}
-              Pay
-            {/if}
-          </Anchor>
-        {:else}
-          <Anchor tall button accent disabled>Paid!</Anchor>
-        {/if}
+        {#await getLightningImplementation()}
+          <!-- pass -->
+        {:then impl}
+          {#if zap.status === "pending"}
+            <Anchor tall button accent on:click={collect} disabled={attemptingToPay} class="w-24">
+              {#if attemptingToPay}
+                <i class="fa fa-circle-notch fa-spin" />
+              {:else}
+                Pay
+              {/if}
+            </Anchor>
+          {:else}
+            <Anchor tall button accent disabled>Paid!</Anchor>
+          {/if}
+        {/await}
       </div>
     </QRCode>
   {:else if zap.status === "error:zapper"}

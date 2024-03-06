@@ -1,5 +1,14 @@
 # Changelog
 
+# 0.4.4
+
+- [x] Format time and date based on browser regional settings
+- [x] Rename `FORCE_RELAYS` to `PLATFORM_RELAYS`
+- [x] Stop reading kind 3 relays
+- [x] Publish q tags
+- [x] Add sugggested relays based on follows
+- [x] Improve invite creation
+
 # 0.4.3
 
 - [x] Add follow all to onboarding topics

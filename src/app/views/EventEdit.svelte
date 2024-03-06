@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags, now} from "paravel"
+  import {inc} from "ramda"
+  import {Tags, decodeAddress, now, asEventTemplate} from "paravel"
   import {sleep} from "hurdak"
-  import {Naddr, EventBuilder} from "src/util/nostr"
   import {secondsToDate, dateToSeconds} from "src/util/misc"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -15,26 +15,28 @@
   import Compose from "src/app/shared/Compose.svelte"
   import {router} from "src/app/router"
   import {toastProgress} from "src/app/state"
-  import {dereferenceNote, publishToZeroOrMoreGroups, getUserHints} from "src/engine"
+  import {dereferenceNote, publishToZeroOrMoreGroups} from "src/engine"
 
   export let address
   export let event
 
   const onSubmit = async () => {
-    const builder = EventBuilder.from(event)
+    const tags = Tags.fromEvent(event)
+      .setTag("title", values.title)
+      .setTag("location", values.location)
+      .setTag("start", dateToSeconds(values.start).toString())
+      .setTag("end", dateToSeconds(values.end).toString())
+      .setIMeta(images.getValue())
+      .removeContext()
 
-    builder.setTagArgs("title", values.title)
-    builder.setTagArgs("location", values.location)
-    builder.setTagArgs("start", dateToSeconds(values.start).toString())
-    builder.setTagArgs("end", dateToSeconds(values.end).toString())
-    builder.removeCircles()
-    builder.setCreatedAt(now())
-    builder.setContent(compose.parse())
-    builder.setImageMeta(images.getValue())
-
-    const {pubs} = await publishToZeroOrMoreGroups(values.groups, builder.template, {
-      relays: getUserHints("write"),
+    const template = asEventTemplate({
+      ...event,
+      tags: tags.valueOf(),
+      content: compose.parse(),
+      created_at: inc(event.created_at),
     })
+
+    const {pubs} = await publishToZeroOrMoreGroups(values.groups, template)
 
     pubs[0].on("progress", toastProgress)
 
@@ -47,20 +49,20 @@
 
   onMount(async () => {
     if (!event) {
-      event = await dereferenceNote(Naddr.fromTagValue(address))
+      event = await dereferenceNote(decodeAddress(address, []))
     }
 
     loading = false
 
     if (event) {
-      const tags = Tags.from(event)
+      const tags = Tags.fromEvent(event)
 
       values = {
-        groups: tags.circles().all(),
-        title: tags.getValue("title") || "",
-        location: tags.getValue("location") || "",
-        start: secondsToDate(tags.getValue("start") || now()),
-        end: secondsToDate(tags.getValue("end") || now()),
+        groups: tags.context().values().valueOf(),
+        title: tags.get("name")?.value() || tags.get("title")?.value() || "",
+        location: tags.get("location")?.value() || "",
+        start: secondsToDate(tags.get("start")?.value() || now()),
+        end: secondsToDate(tags.get("end")?.value() || now()),
       }
 
       // Wait for components to mount
@@ -68,8 +70,8 @@
 
       compose.write(event.content)
 
-      for (const image of tags.type("image").values().all()) {
-        images.addImage(new Tags([["url", image]]))
+      for (const url of tags.values("image").valueOf()) {
+        images.addImage(Tags.from([["url", url]]))
       }
     }
   })

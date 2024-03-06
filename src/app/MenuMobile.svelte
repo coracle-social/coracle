@@ -72,7 +72,7 @@
       <MenuMobileItem stopPropagation on:click={openSettings}>
         <i class="fa fa-cog" /> Settings
       </MenuMobileItem>
-      {#if !$env.FORCE_GROUP && $env.FORCE_RELAYS.length === 0}
+      {#if !$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0}
         <MenuMobileItem href="/settings/relays">
           <i class="fa fa-server" />
           <div class="relative inline-block">
@@ -98,9 +98,11 @@
         <MenuMobileItem href="/events">
           <i class="fa fa-calendar-days" /> Calendar
         </MenuMobileItem>
-        <MenuMobileItem href="/listings">
-          <i class="fa fa-store" /> Market
-        </MenuMobileItem>
+        {#if $env.ENABLE_MARKET}
+          <MenuMobileItem href="/listings">
+            <i class="fa fa-store" /> Market
+          </MenuMobileItem>
+        {/if}
       {:else}
         <MenuMobileItem stopPropagation on:click={openCommunity}>
           <i class="fa fa-people-pulling" /> Community
@@ -135,9 +137,11 @@
       <MenuMobileItem href="/events">
         <i class="fa fa-calendar-days" /> Calendar
       </MenuMobileItem>
-      <MenuMobileItem href="/listings">
-        <i class="fa fa-store" /> Market
-      </MenuMobileItem>
+      {#if $env.ENABLE_MARKET}
+        <MenuMobileItem href="/listings">
+          <i class="fa fa-store" /> Market
+        </MenuMobileItem>
+      {/if}
       {#if !$env.FORCE_GROUP}
         <MenuMobileItem href="/groups">
           <i class="fa fa-circle-nodes" /> Groups

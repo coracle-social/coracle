@@ -1,7 +1,8 @@
 import {now, Tags} from "paravel"
-import {seconds, updateIn, batch, doPipe} from "hurdak"
+import {seconds, batch, doPipe} from "hurdak"
 import {pluck, max, slice, filter, without, sortBy} from "ramda"
-import {noteKinds, repostKinds, reactionKinds, getParentId} from "src/util/nostr"
+import {updateIn} from "src/util/misc"
+import {noteKinds, repostKinds, reactionKinds} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import type {Filter} from "src/engine/network/model"
 import {env} from "src/engine/session/state"
@@ -10,7 +11,7 @@ import {updateSession} from "src/engine/session/commands"
 import {_events} from "src/engine/events/state"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {getUserCommunities} from "src/engine/groups/utils"
-import {mergeHints, getPubkeyHints, getParentHints} from "src/engine/relays/utils"
+import {hints} from "src/engine/relays/utils"
 import {
   loadPubkeys,
   load,
@@ -23,13 +24,13 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
   const kinds = getNotificationKinds()
   const $isEventMuted = isEventMuted.get()
   const events = chunk.filter(e => kinds.includes(e.kind) && !$isEventMuted(e))
-  const eventsWithParent = chunk.filter(getParentId)
+  const eventsWithParent = chunk.filter(e => Tags.fromEvent(e).parent())
   const pubkeys = new Set(pluck("pubkey", events))
 
   for (const pubkey of pubkeys) {
     updateSession(
       pubkey,
-      updateIn("notifications_last_synced", t =>
+      updateIn("notifications_last_synced", (t: number) =>
         pluck("created_at", events)
           .concat(t || 0)
           .reduce(max, 0),
@@ -40,8 +41,10 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
   loadPubkeys(pubkeys)
 
   load({
-    relays: mergeHints(eventsWithParent.map(getParentHints)),
-    filters: getIdFilters(eventsWithParent.flatMap(e => Tags.from(e).replies().values().all())),
+    relays: hints.merge(eventsWithParent.map(hints.EventParent)).getUrls(),
+    filters: getIdFilters(
+      eventsWithParent.flatMap(e => Tags.fromEvent(e).replies().values().valueOf()),
+    ),
     onEvent: e => _events.update($events => $events.concat(e)),
   })
 
@@ -83,7 +86,7 @@ export const loadNotifications = () => {
     timeout: 15000,
     skipCache: true,
     closeOnEose: true,
-    relays: getPubkeyHints(pubkey, "read"),
+    relays: hints.Inbox().getUrls(),
     onEvent: onNotificationEvent,
   })
 }
@@ -99,9 +102,12 @@ export const listenForNotifications = async () => {
     {kinds: noteKinds, "#p": [$session.pubkey], limit: 1, since},
     // Messages/groups
     {kinds: [4, 1059, 1060], "#p": [$session.pubkey], limit: 1, since},
-    // Communities
-    {kinds: [...noteKinds, ...repostKinds], "#a": addrs, limit: 1, since},
   ]
+
+  // Communities
+  if (addrs.length > 0) {
+    filters.push({kinds: [...noteKinds, ...repostKinds], "#a": addrs, limit: 1, since})
+  }
 
   // Replies
   if (eventIds.length > 0) {
@@ -114,7 +120,7 @@ export const listenForNotifications = async () => {
     filters,
     timeout: 30_000,
     skipCache: true,
-    relays: getPubkeyHints($session.pubkey, "read"),
+    relays: hints.Inbox().getUrls(),
     onEvent: onNotificationEvent,
   })
 }

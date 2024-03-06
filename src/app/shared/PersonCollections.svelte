@@ -1,11 +1,10 @@
 <script lang="ts">
-  import {nth, last} from "ramda"
-  import {batch, first} from "hurdak"
+  import {batch} from "hurdak"
   import {Tags} from "paravel"
   import Chip from "src/partials/Chip.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {load, getUserHints} from "src/engine"
+  import {load, hints} from "src/engine"
 
   export let pubkey
 
@@ -21,14 +20,8 @@
     collections = {}
 
     for (const e of events) {
-      const tags = Tags.from(e)
-      const topic = first(
-        tags
-          .type("l")
-          .all()
-          .filter(t => last(t) === "#t")
-          .map(nth(1)),
-      )
+      const tags = Tags.fromEvent(e)
+      const topic = tags.whereKey("l").whereMark("#t").values().first()
 
       if (!topic) {
         continue
@@ -37,14 +30,14 @@
       collections[topic] = collections[topic] || {ids: []}
       collections[topic].updated_at = Math.max(collections[topic].updated_at || 0, e.created_at)
 
-      for (const id of tags.type("e").values().all()) {
+      for (const id of tags.values("e").valueOf()) {
         collections[topic].ids.push(id)
       }
     }
   }
 
   load({
-    relays: getUserHints("write"),
+    relays: hints.FromPubkeys([pubkey]).getUrls(),
     filters: [{kinds: [1985], authors: [pubkey], "#L": ["#t"]}],
     onEvent: batch(300, chunk => {
       events = [...events, ...chunk]

@@ -1,6 +1,7 @@
 import {max, pluck} from "ramda"
-import {batch, updateIn} from "hurdak"
+import {batch} from "hurdak"
 import {Tags} from "paravel"
+import {updateIn} from "src/util/misc"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
 import {sessions} from "src/engine/session/state"
@@ -24,12 +25,15 @@ projections.addGlobalHandler(
 projections.addHandler(
   5,
   batch(500, (chunk: Event[]) => {
-    const values = Tags.from(chunk).type(["a", "e"]).values().all()
+    const ids = Tags.from(chunk.flatMap(e => e.tags))
+      .filter(tag => ["a", "e"].includes(tag.key()))
+      .values()
+      .valueOf()
 
     for (const pubkey of new Set(pluck("pubkey", chunk))) {
       updateSession(
         pubkey,
-        updateIn("deletes_last_synced", t =>
+        updateIn("deletes_last_synced", (t: number) =>
           pluck("created_at", chunk)
             .concat(t || 0)
             .reduce(max, 0),
@@ -38,7 +42,7 @@ projections.addHandler(
     }
 
     deletes.update($deletes => {
-      values.forEach(v => $deletes.add(v))
+      ids.forEach(id => $deletes.add(id))
 
       return $deletes
     })
@@ -51,7 +55,7 @@ projections.addHandler(
     for (const pubkey of new Set(pluck("pubkey", chunk))) {
       updateSession(
         pubkey,
-        updateIn("seen_last_synced", t =>
+        updateIn("seen_last_synced", (t: number) =>
           pluck("created_at", chunk)
             .concat(t || 0)
             .reduce(max, 0),
@@ -70,7 +74,7 @@ projections.addHandler(
 )
 
 const handleWrappedEvent = getEncryption => wrap => {
-  const session = getSession(Tags.from(wrap).pubkeys().first())
+  const session = getSession(Tags.fromEvent(wrap).get("p")?.value())
 
   if (!session) {
     return

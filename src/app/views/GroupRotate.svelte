@@ -87,7 +87,7 @@
     // Re-send invites. This could be optimized further, but it's useful to re-send to different relays.
     // It also handles edge cases, like if someone requested exit, then entry, soft rotate wouldn't let them
     // know they still have access.
-    publishGroupInvites(address, allMembers, $group.relays)
+    publishGroupInvites(address, allMembers)
 
     toast.show("info", "Invites have been sent!")
     router.pop()

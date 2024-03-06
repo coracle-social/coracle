@@ -1,4 +1,3 @@
-export * from "./count"
 export * from "./cursor"
 export * from "./dvms"
 export * from "./executor"

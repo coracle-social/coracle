@@ -8,6 +8,8 @@
     compileFilters,
     getPubkeysWithDefaults,
     getRelaysFromFilters,
+    forcePlatformRelays,
+    loadGroupMessages,
   } from "src/engine"
 
   const filter: DynamicFilter = {kinds: [31923]}
@@ -19,7 +21,11 @@
   }
 
   const filters = compileFilters([filter])
-  const relays = getRelaysFromFilters(filters)
+  const relays = forcePlatformRelays(getRelaysFromFilters(filters))
+
+  if ($env.FORCE_GROUP) {
+    loadGroupMessages([$env.FORCE_GROUP])
+  }
 </script>
 
 <Calendar {filters} {relays} />

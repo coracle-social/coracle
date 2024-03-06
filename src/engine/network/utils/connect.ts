@@ -9,7 +9,7 @@ import {getPublicKey} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import type {Event} from "src/engine/events/model"
 import {Publisher} from "./publish"
-import {subscribePersistent} from "./subscribe"
+import {subscribe} from "./subscribe"
 import type {NostrConnectHandler} from "../model"
 
 let singleton: NostrConnectBroker
@@ -18,8 +18,10 @@ let singleton: NostrConnectBroker
 const Perms = "nip04_encrypt,nip04_decrypt,sign_event:0,sign_event:1,sign_event:4,sign_event:6,sign_event:7"
 
 export class NostrConnectBroker extends Emitter {
-  #sub: typeof Subscription
+  #sub: Subscription
   #ready = sleep(500)
+  #closed = false
+  #connectResult: any
 
   static get(pubkey, connectKey: string, handler: NostrConnectHandler) {
     if (
@@ -41,7 +43,11 @@ export class NostrConnectBroker extends Emitter {
   ) {
     super()
 
-    this.#sub = subscribePersistent({
+    this.subscribe()
+  }
+
+  subscribe() {
+    this.#sub = subscribe({
       relays: this.handler.relays,
       filters: [
         {
@@ -60,6 +66,11 @@ export class NostrConnectBroker extends Emitter {
           this.emit(`auth-${id}`, error)
         } else {
           this.emit(`response-${id}`, {result, error})
+        }
+      },
+      onClose: () => {
+        if (!this.#closed) {
+          this.subscribe()
         }
       },
     })
@@ -104,11 +115,13 @@ export class NostrConnectBroker extends Emitter {
   }
 
   async connect(token: string = null) {
-    const params = [getPublicKey(this.connectKey), token || "", Perms]
+    if (!this.#connectResult) {
+      const params = [getPublicKey(this.connectKey), token || "", Perms]
 
-    const result = await this.request("connect", params)
+      this.#connectResult = await this.request("connect", params)
+    }
 
-    return result === "ack"
+    return this.#connectResult === "ack"
   }
 
   signEvent(event: EventTemplate) {
@@ -136,6 +149,7 @@ export class NostrConnectBroker extends Emitter {
   }
 
   teardown() {
-    this.sub?.close()
+    this.#closed = true
+    this.#sub?.close()
   }
 }
