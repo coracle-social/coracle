@@ -2,7 +2,7 @@ import {now, Tags} from "paravel"
 import {seconds, batch, doPipe} from "hurdak"
 import {pluck, max, slice, filter, without, sortBy} from "ramda"
 import {updateIn} from "src/util/misc"
-import {noteKinds, repostKinds, reactionKinds} from "src/util/nostr"
+import {noteKinds, giftWrapKinds, repostKinds, reactionKinds} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import type {Filter} from "src/engine/network/model"
 import {env} from "src/engine/session/state"
@@ -58,7 +58,12 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
 })
 
 export const getNotificationKinds = () =>
-  without(env.get().ENABLE_ZAPS ? [] : [9735], [...noteKinds, ...reactionKinds, 1059, 1060, 4])
+  without(env.get().ENABLE_ZAPS ? [] : [9735], [
+    ...noteKinds,
+    ...reactionKinds,
+    ...giftWrapKinds,
+    4,
+  ])
 
 const getEventIds = (pubkey: string) =>
   doPipe(events.get(), [
@@ -86,7 +91,7 @@ export const loadNotifications = () => {
     timeout: 15000,
     skipCache: true,
     closeOnEose: true,
-    relays: hints.Inbox().getUrls(),
+    relays: hints.ReadRelays().getUrls(),
     onEvent: onNotificationEvent,
   })
 }
@@ -101,7 +106,7 @@ export const listenForNotifications = async () => {
     // Mentions
     {kinds: noteKinds, "#p": [$session.pubkey], limit: 1, since},
     // Messages/groups
-    {kinds: [4, 1059, 1060], "#p": [$session.pubkey], limit: 1, since},
+    {kinds: [4, ...giftWrapKinds], "#p": [$session.pubkey], limit: 1, since},
   ]
 
   // Communities
@@ -120,7 +125,7 @@ export const listenForNotifications = async () => {
     filters,
     timeout: 30_000,
     skipCache: true,
-    relays: hints.Inbox().getUrls(),
+    relays: hints.ReadRelays().getUrls(),
     onEvent: onNotificationEvent,
   })
 }

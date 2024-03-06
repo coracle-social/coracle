@@ -24,6 +24,7 @@
   export let relays = []
   export let filter: DynamicFilter = {}
   export let anchor = null
+  export let skipCache = false
   export let shouldDisplay = null
   export let shouldListen = false
   export let hideControls = false
@@ -46,7 +47,13 @@
       ? $searchableRelays
       : getRelaysFromFilters(compileFilters([filter]))
 
-    return forcePlatformRelays(hints.scenario([selection]).getUrls()).concat(LOCAL_RELAY_URL)
+    const result = forcePlatformRelays(hints.scenario([selection]).getUrls())
+
+    if (!skipCache) {
+      result.push(LOCAL_RELAY_URL)
+    }
+
+    return result
   }
 
   const loadMore = () => feed.load(5)

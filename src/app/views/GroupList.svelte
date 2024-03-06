@@ -4,6 +4,7 @@
   import {partition, assoc} from "ramda"
   import {now} from "paravel"
   import {fuzzy, createScroller} from "src/util/misc"
+  import {giftWrapKinds} from "src/util/nostr"
   import {getModal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
@@ -46,7 +47,7 @@
 
     load({
       relays,
-      filters: [{kinds: [1059, 1060], "#p": recipients, since}],
+      filters: [{kinds: giftWrapKinds, "#p": recipients, since}],
     })
 
     load({

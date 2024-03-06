@@ -1,5 +1,5 @@
 import {nip19} from "nostr-tools"
-import {Router, RelayMode} from "paravel"
+import {Router} from "paravel"
 import {normalizeRelayUrl as normalize, ConnectionStatus, fromNostrURI} from "paravel"
 import {sortBy, whereEq, pluck, uniq, prop, last} from "ramda"
 import {displayList, switcher} from "hurdak"
@@ -87,7 +87,7 @@ export const forcePlatformRelays = relays => {
   const {PLATFORM_RELAYS} = env.get()
 
   if (PLATFORM_RELAYS.length > 0) {
-    return PLATFORM_RELAYS
+    return Array.from(PLATFORM_RELAYS)
   }
 
   return relays
@@ -97,17 +97,8 @@ export const hints = new Router({
   getUserPubkey: () => stateKey.get(),
   getGroupRelays: getGroupRelayUrls,
   getCommunityRelays: getGroupRelayUrls,
-  getPubkeyRelays: (pubkey: string, mode: RelayMode = null) =>
-    getPubkeyRelayUrls(
-      pubkey,
-      switcher(mode, {
-        [RelayMode.Inbox]: "read",
-        [RelayMode.Outbox]: "write",
-        default: null,
-      }),
-    ),
-  getDefaultRelays: () =>
-    getUserRelayUrls().concat(env.get().DEFAULT_RELAYS),
+  getPubkeyRelays: getPubkeyRelayUrls,
+  getDefaultRelays: () => getUserRelayUrls().concat(env.get().DEFAULT_RELAYS),
   getDefaultLimit: () => parseInt(getSetting("relay_limit")),
   getRelayQuality: (url: string) => {
     const connection = pool.get(url, {autoConnect: false})

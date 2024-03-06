@@ -80,25 +80,13 @@
     loadGroupMessages()
     loadNotifications()
 
-    const unsubUnreadNotifications = unreadNotifications.subscribe(events => {
-      if (activeTab !== "Groups") {
-        markAsSeen(events)
-      }
-    })
-
-    const unsubUnreadGroupNotifications = unreadGroupNotifications.subscribe(events => {
-      if (activeTab === "Groups") {
-        markAsSeen(events)
-      }
-    })
-
     const scroller = createScroller(async () => {
       limit += 4
     })
 
     return () => {
-      unsubUnreadNotifications()
-      unsubUnreadGroupNotifications()
+      markAsSeen($unreadNotifications)
+      markAsSeen($unreadGroupNotifications)
       scroller.stop()
     }
   })
@@ -108,15 +96,15 @@
   <div slot="tab" let:tab class="flex gap-2">
     <div>{tab}</div>
     {#if tab === tabs[0] && unreadMainNotifications.length > 0}
-      <div class="h-6 rounded-full bg-neutral-600 px-2">
+      <div class="h-6 rounded-full bg-neutral-700 px-2">
         {unreadMainNotifications.length}
       </div>
     {:else if tab === tabs[1] && unreadReactionNotifications.length > 0}
-      <div class="h-6 rounded-full bg-neutral-600 px-2">
+      <div class="h-6 rounded-full bg-neutral-700 px-2">
         {unreadReactionNotifications.length}
       </div>
     {:else if tab === tabs[2] && $unreadGroupNotifications.length > 0}
-      <div class="h-6 rounded-full bg-neutral-600 px-2">
+      <div class="h-6 rounded-full bg-neutral-700 px-2">
         {$unreadGroupNotifications.length}
       </div>
     {/if}

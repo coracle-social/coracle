@@ -1,4 +1,4 @@
-import {prop, uniqBy, defaultTo, sortBy, last, whereEq} from "ramda"
+import {identity, prop, uniqBy, defaultTo, sortBy, last, whereEq} from "ramda"
 import {ellipsize, seconds} from "hurdak"
 import {Tags, decodeAddress, addressToNaddr} from "paravel"
 import {fuzzy} from "src/util/misc"
@@ -62,7 +62,7 @@ export const getGroupReqInfo = (address = null) => {
 
   const admins = []
   const addresses = []
-  const recipients = [pubkey.get()]
+  const recipients = [pubkey.get()].filter(identity)
 
   for (const key of [...$groupSharedKeys, ...$groupAdminKeys]) {
     const address = decodeAddress(key.group)

@@ -1,7 +1,7 @@
 import {uniq, assoc, whereEq, sortBy, prop, without, mergeRight} from "ramda"
 import {Tags, decodeAddress, getAddress} from "paravel"
 import {switcherFn, batch} from "hurdak"
-import {LOCAL_RELAY_URL, getPublicKey} from "src/util/nostr"
+import {LOCAL_RELAY_URL, giftWrapKinds, getPublicKey} from "src/util/nostr"
 import {projections} from "src/engine/core/projections"
 import {updateStore} from "src/engine/core/commands"
 import type {Event} from "src/engine/events/model"
@@ -56,8 +56,8 @@ projections.addHandler(24, (e: Event) => {
       relays: hints.scenario([relays]).getUrls(),
       filters: [
         ...getIdFilters([address]),
-        {kinds: [1059, 1060], "#p": [pubkey]},
-        {kinds: [1059, 1060], authors: [pubkey]},
+        {kinds: giftWrapKinds, "#p": [pubkey]},
+        {kinds: giftWrapKinds, authors: [pubkey]},
       ],
     })
   } else {

@@ -55,7 +55,9 @@
     external
     href="https://info.coracle.social">
     <img alt="App Logo" src={import.meta.env.VITE_LOGO_URL || "/images/logo.png"} class="w-12" />
-    <h1 class="staatliches text-[2.6em] leading-none -mb-[0.1em]">{appName}</h1>
+    <h1 class="staatliches -mb-[0.1em] leading-none" style={`font-size: ${appName.length / 5}em`}>
+      {appName}
+    </h1>
   </Anchor>
   <MenuDesktopItem path="/notes">Feed</MenuDesktopItem>
   {#if !$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0}
@@ -101,8 +103,10 @@
     <div class="staatliches block flex h-8 gap-2 px-8 text-neutral-500 dark:text-tinted-600">
       <Anchor external class="hover:text-neutral-200 dark:hover:text-tinted-200" href="/terms.html"
         >Terms</Anchor> /
-      <Anchor external class="hover:text-neutral-200 dark:hover:text-tinted-200" href="/privacy.html"
-        >Privacy</Anchor>
+      <Anchor
+        external
+        class="hover:text-neutral-200 dark:hover:text-tinted-200"
+        href="/privacy.html">Privacy</Anchor>
     </div>
     {#if subMenu === "settings"}
       <MenuDesktopSecondary onEscape={closeSubMenu}>
@@ -155,7 +159,9 @@
           {#if s.pubkey !== $pubkey}
             <MenuItem class="py-4" on:click={() => pubkey.set(s.pubkey)}>
               <div class="flex items-center gap-2">
-                <PersonCircle class="h-8 w-8 border border-solid border-tinted-200" pubkey={s.pubkey} />
+                <PersonCircle
+                  class="h-8 w-8 border border-solid border-tinted-200"
+                  pubkey={s.pubkey} />
                 {displayPubkey(s.pubkey)}
               </div>
             </MenuItem>

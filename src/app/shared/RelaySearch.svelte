@@ -42,7 +42,7 @@
   )
 
   load({
-    relays: hints.Inbox().getUrls(),
+    relays: hints.ReadRelays().getUrls(),
     filters: [{limit: 1000, kinds: [1986], "#l": ["review/relay"]}],
     onEvent: event => {
       reviews = reviews.concat(event)

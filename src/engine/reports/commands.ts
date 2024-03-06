@@ -7,6 +7,6 @@ import {Publisher} from "src/engine/network/utils"
 // Use an ephemeral private key for user privacy
 export const publishReport = async (content = "", tags = []) =>
   Publisher.publish({
-    relays: hints.Outbox().getUrls(),
+    relays: hints.WriteRelays().getUrls(),
     event: await signer.get().signWithKey(createEvent(1984, {content, tags}), generatePrivateKey()),
   })

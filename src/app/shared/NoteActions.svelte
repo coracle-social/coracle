@@ -138,7 +138,7 @@
   const broadcast = () => {
     Publisher.publish({
       event: note,
-      relays: hints.Outbox().getUrls(),
+      relays: hints.WriteRelays().getUrls(),
     })
 
     toast.show("info", "Note has been re-published!")

@@ -7,8 +7,6 @@
     follows,
     compileFilters,
     getPubkeysWithDefaults,
-    getRelaysFromFilters,
-    forcePlatformRelays,
     loadGroupMessages,
   } from "src/engine"
 
@@ -21,11 +19,10 @@
   }
 
   const filters = compileFilters([filter])
-  const relays = forcePlatformRelays(getRelaysFromFilters(filters))
 
   if ($env.FORCE_GROUP) {
     loadGroupMessages([$env.FORCE_GROUP])
   }
 </script>
 
-<Calendar {filters} {relays} />
+<Calendar {filters} />

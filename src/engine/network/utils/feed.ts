@@ -293,7 +293,7 @@ export class FeedLoader {
     // If something has a parent id but we haven't found the parent yet, skip it until we have it.
     const [ok, defer] = partition(e => this.parents.has(Tags.fromEvent(e).parent()?.value()), notes)
 
-    setTimeout(() => this.addToFeed(defer), 1500)
+    setTimeout(() => this.addToFeed(defer), 3000)
 
     return ok
   }
@@ -305,7 +305,7 @@ export class FeedLoader {
     const since = now() - guessFilterDelta(this.opts.filters)
     const [defer, ok] = partition(e => e.created_at < since, notes)
 
-    setTimeout(() => this.addToFeed(defer), 4000)
+    setTimeout(() => this.addToFeed(defer), 5000)
 
     return ok
   }

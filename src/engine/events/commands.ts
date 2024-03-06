@@ -21,7 +21,7 @@ export const markAsSeenPublicly = batch(5000, async idChunks => {
     const event = await signer.get().signAsUser(createReadReceipt(ids))
 
     if (event) {
-      Publisher.publish({event, relays: hints.Outbox().getUrls()})
+      Publisher.publish({event, relays: hints.WriteRelays().getUrls()})
     }
   }
 })
@@ -41,7 +41,7 @@ export const markAsSeenPrivately = batch(5000, async idChunks => {
 
     Publisher.publish({
       event: rumor.wrap,
-      relays: hints.Outbox().getUrls(),
+      relays: hints.WriteRelays().getUrls(),
     })
   }
 })

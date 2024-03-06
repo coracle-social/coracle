@@ -5,8 +5,8 @@
   import {router} from "src/app/router"
 
   export let group
-  export let relays
 
+  const filter = group ? {kinds: [30402], "#a": [group]} : {kinds: [30402]}
   const createListing = () => router.at("notes/create").qp({type: "listing", group}).open()
 </script>
 
@@ -15,4 +15,4 @@
   <Anchor button accent on:click={createListing}>Create a listing</Anchor>
 </Card>
 
-<Feed hideControls {relays} filter={{kinds: [30402], "#a": [group]}} />
+<Feed hideControls {filter} />

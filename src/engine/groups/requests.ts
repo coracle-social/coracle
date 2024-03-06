@@ -1,7 +1,7 @@
 import {now, decodeAddress, isGroupAddress} from "paravel"
 import {seconds} from "hurdak"
 import {partition} from "ramda"
-import {noteKinds, repostKinds} from "src/util/nostr"
+import {noteKinds, giftWrapKinds, repostKinds} from "src/util/nostr"
 import {load} from "src/engine/network/utils"
 import {hints} from "src/engine/relays/utils"
 import {updateCurrentSession} from "src/engine/session/commands"
@@ -55,7 +55,9 @@ export const loadGroupMessages = async (addresses = null) => {
     const {admins, recipients, relays, since} = getGroupReqInfo(address)
     const pubkeys = [...admins, ...recipients]
 
-    load({relays, filters: [{kinds: [1059, 1060], "#p": pubkeys, since}]})
+    if (pubkeys.length > 0) {
+      load({relays, filters: [{kinds: giftWrapKinds, "#p": pubkeys, since}]})
+    }
   }
 
   for (const address of communityAddrs) {
@@ -68,7 +70,9 @@ export const loadGroupMessages = async (addresses = null) => {
 
   updateCurrentSession($session => {
     for (const address of addrs) {
-      $session.groups[address].last_synced = now()
+      if ($session.groups?.[address]) {
+        $session.groups[address].last_synced = now()
+      }
     }
 
     return $session

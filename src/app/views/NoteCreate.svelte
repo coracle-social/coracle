@@ -133,7 +133,7 @@
       if (!opts.groups.length) {
         Publisher.publish({
           event: quote,
-          relays: hints.Outbox().getUrls(),
+          relays: hints.WriteRelays().getUrls(),
         })
       }
     }

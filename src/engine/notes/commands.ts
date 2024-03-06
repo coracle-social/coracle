@@ -7,7 +7,7 @@ export const publishNote = (content, tags = [], relays = null) =>
 
 export const publishDeletion = ids =>
   createAndPublish(5, {
-    relays: hints.Outbox().getUrls(),
+    relays: hints.WriteRelays().getUrls(),
     tags: ids.map(id => [id.includes(":") ? "a" : "e", id]),
   })
 

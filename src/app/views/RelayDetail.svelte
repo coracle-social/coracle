@@ -56,5 +56,5 @@
       "#r": [$relay.url],
     }} />
 {:else}
-  <Feed {shouldDisplay} relays={[$relay.url]} {filter} />
+  <Feed skipCache {shouldDisplay} relays={[$relay.url]} {filter} />
 {/if}

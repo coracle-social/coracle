@@ -11,9 +11,19 @@
   import {themeColors} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/router"
-  import {canSign, writable, getReplyFilters, load, isDeleted, subscribe, pubkey} from "src/engine"
+  import {
+    hints,
+    canSign,
+    getRelaysFromFilters,
+    writable,
+    getReplyFilters,
+    forcePlatformRelays,
+    load,
+    isDeleted,
+    subscribe,
+    pubkey,
+  } from "src/engine"
 
-  export let relays
   export let filters
   export let group = null
 
@@ -41,7 +51,7 @@
   onMount(() => {
     const sub = subscribe({
       filters,
-      relays: relays.concat(LOCAL_RELAY_URL),
+      relays: forcePlatformRelays(getRelaysFromFilters(filters)).concat(LOCAL_RELAY_URL),
       onEvent: batch(300, chunk => {
         events.update($events => {
           for (const e of chunk) {
@@ -56,7 +66,10 @@
         })
 
         // Load deletes for these events
-        load({relays, filters: getReplyFilters(chunk, {kinds: [5]})})
+        load({
+          relays: hints.merge(chunk.map(e => hints.EventChildren(e))).getUrls(),
+          filters: getReplyFilters(chunk, {kinds: [5]}),
+        })
       }),
     })
 
@@ -100,7 +113,7 @@
     eventContent: getEventContent,
     eventStartEditable: false,
     eventDragMinDistance: 10000,
-    eventTextColor: $themeColors['neutral-900'],
+    eventTextColor: $themeColors["neutral-900"],
     longPressDelay: 10000,
     buttonText: {
       today: "Today",

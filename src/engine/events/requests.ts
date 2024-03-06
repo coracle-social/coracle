@@ -1,4 +1,5 @@
 import {seconds} from "hurdak"
+import {giftWrapKinds} from "src/util/nostr"
 import {session, nip44, nip04} from "src/engine/session/derived"
 import {hints} from "src/engine/relays/utils"
 import {load} from "src/engine/network/utils"
@@ -18,7 +19,7 @@ export const loadSeen = () => {
   const since = Math.max(0, deletes_last_synced - seconds(6, "hour"))
 
   return load({
-    relays: hints.Outbox().getUrls(),
+    relays: hints.WriteRelays().getUrls(),
     filters: [{kinds: [15], authors: [pubkey], since}],
   })
 }
@@ -40,7 +41,7 @@ export const loadGiftWrap = () => {
 
     return load({
       relays: hints.AllMessages().getUrls(),
-      filters: [{kinds: [1059, 1060], authors: [pubkey], since}],
+      filters: [{kinds: giftWrapKinds, authors: [pubkey], since}],
     })
   }
 }

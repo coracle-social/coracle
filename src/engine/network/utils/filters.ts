@@ -176,7 +176,7 @@ export const getRelaysFromFilters = filters =>
           return hints.FromPubkeys(shuffle(filter.authors))
         }
 
-        return hints.Inbox()
+        return hints.ReadRelays()
       }),
     )
     .getUrls()

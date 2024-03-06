@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {Tags, addressToNaddr} from "paravel"
+  import {Tags, encodeAddress, addressToNaddr} from "paravel"
   import {commaFormat} from "hurdak"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Carousel from "src/partials/Carousel.svelte"
@@ -22,8 +22,8 @@
   const {title, summary, location, status} = tags.asObject()
   const [price = 0, code = "SAT"] = tags.get("price")?.drop(1).valueOf() || []
   const address = hints.address(note)
-  const editLink = router.at("listings").of(address).at("edit").toString()
-  const deleteLink = router.at("listings").of(address).at("delete").toString()
+  const editLink = router.at("listings").of(encodeAddress(address)).at("edit").toString()
+  const deleteLink = router.at("listings").of(encodeAddress(address)).at("delete").toString()
 
   const sendMessage = () => {
     const naddr = addressToNaddr(address)

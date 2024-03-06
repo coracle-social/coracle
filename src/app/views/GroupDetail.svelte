@@ -1,7 +1,7 @@
 <script>
   import {onMount} from "svelte"
-  import {whereEq, uniq, without} from "ramda"
-  import {noteKinds, LOCAL_RELAY_URL} from "src/util/nostr"
+  import {whereEq, without} from "ramda"
+  import {noteKinds} from "src/util/nostr"
   import {getKey} from "src/util/router"
   import {themeBackgroundGradient} from "src/partials/state"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -26,7 +26,6 @@
     publishGroupEntryRequest,
     groupRequests,
     deriveGroup,
-    getGroupReqInfo,
     deriveAdminKeyForGroup,
     deriveSharedKeyForGroup,
     deriveGroupStatus,
@@ -46,8 +45,6 @@
     requests.filter(whereEq({group: address, resolved: false})),
   )
 
-  const info = getGroupReqInfo(address)
-
   const setActiveTab = tab =>
     router
       .at("groups")
@@ -64,7 +61,6 @@
 
   let tabs
 
-  $: relays = uniq((relays || info.relays).concat(LOCAL_RELAY_URL))
   $: loadPubkeys($group.members || [])
 
   $: {
@@ -131,15 +127,11 @@
   {#if $canSign}
     <NoteCreateInline group={address} />
   {/if}
-  <Feed
-    shouldListen
-    hideControls
-    filter={{kinds: without([30402], noteKinds), "#a": [address]}}
-    relays={address.startsWith("35834:") ? [LOCAL_RELAY_URL] : relays} />
+  <Feed shouldListen hideControls filter={{kinds: without([30402], noteKinds), "#a": [address]}} />
 {:else if activeTab === "calendar"}
-  <Calendar group={address} filters={[{kinds: [31923], "#a": [address]}]} {relays} />
+  <Calendar group={address} filters={[{kinds: [31923], "#a": [address]}]} />
 {:else if activeTab === "market"}
-  <GroupMarket group={address} {relays} />
+  <GroupMarket group={address} />
 {:else if activeTab === "members"}
   <FlexColumn>
     {#each $group.members || [] as pubkey (pubkey)}
