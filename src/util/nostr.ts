@@ -2,7 +2,7 @@ import {fromNostrURI, getAddress, Tags} from "paravel"
 import {schnorr} from "@noble/curves/secp256k1"
 import {bytesToHex} from "@noble/hashes/utils"
 import {nip05, nip19, generateSecretKey, getEventHash, getPublicKey as getPk} from "nostr-tools"
-import {pick, identity} from "ramda"
+import {identity} from "ramda"
 import {between, avg} from "hurdak"
 import type {Event} from "src/engine"
 
@@ -41,9 +41,6 @@ export const isLike = (e: Event) =>
   e.kind === 7 &&
   ["", "+", "🤙", "👍", "❤️", "😎", "🏅", "🫂", "🤣", "😂", "💜", "🔥"].includes(e.content)
 
-export const asNostrEvent = e =>
-  pick(["content", "created_at", "id", "kind", "pubkey", "sig", "tags"], e) as Event
-
 export const toHex = (data: string): string | null => {
   if (data.match(/[a-zA-Z0-9]{64}/)) {
     return data
@@ -73,7 +70,7 @@ export const getRating = (event: Event) =>
 
 export const getAvgRating = (events: Event[]) => avg(events.map(getRating).filter(identity))
 
-export const isHex = x => x?.match(/^[a-f0-9]{64}$/)
+export const isHex = x => x?.length === 64 && x?.match(/^[a-f0-9]{64}$/)
 
 export const isReplaceable = e => between(9999, 20000, e.kind)
 

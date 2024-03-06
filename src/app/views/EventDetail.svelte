@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags, decodeAddress} from "paravel"
+  import {decodeAddress} from "paravel"
   import {getIdOrAddress, noteKinds} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -9,7 +9,7 @@
   import EventDate from "src/app/shared/EventDate.svelte"
   import EventInfo from "src/app/shared/EventInfo.svelte"
   import NoteCreateInline from "src/app/shared/NoteCreateInline.svelte"
-  import {dereferenceNote, getGroupReqInfo} from "src/engine"
+  import {dereferenceNote} from "src/engine"
 
   export let address
   export let relays = []

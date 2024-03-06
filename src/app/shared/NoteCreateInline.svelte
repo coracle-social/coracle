@@ -1,7 +1,6 @@
 <script lang="ts">
   import {join, identity} from "ramda"
   import {Tags, createEvent} from "paravel"
-  import {asNostrEvent} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -82,7 +81,7 @@
 
     // Re-broadcast the note we're replying to
     if (parent && !parent.wrap) {
-      Publisher.publish({event: asNostrEvent(parent)})
+      Publisher.publish({event: parent})
     }
 
     const template = createEvent(1, {content, tags})

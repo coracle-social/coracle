@@ -5,7 +5,6 @@
   import {join, whereEq, identity} from "ramda"
   import {throttle, commaFormat, toTitle, switcherFn} from "hurdak"
   import {createEvent, now, Tags} from "paravel"
-  import {asNostrEvent} from "src/util/nostr"
   import {currencyOptions} from "src/util/i18n"
   import {dateToSeconds} from "src/util/misc"
   import {toast} from "src/partials/state"
@@ -133,7 +132,7 @@
       // Re-broadcast the note we're quoting
       if (!opts.groups.length) {
         Publisher.publish({
-          event: asNostrEvent(quote),
+          event: quote,
           relays: hints.Outbox().getUrls(),
         })
       }

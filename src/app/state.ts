@@ -89,7 +89,7 @@ setInterval(() => {
   // Prune connections we haven't used in a while, clear errors periodically,
   // and keep track of slow connections
   for (const [url, connection] of pool.data.entries()) {
-    const {lastPublish, lastRequest, lastFault} = connection.meta
+    const {lastPublish, lastRequest} = connection.meta
     const lastActivity = Math.max(lastPublish, lastRequest)
     const status = connection.meta.getStatus()
 
@@ -115,8 +115,9 @@ export const loadAppData = () => {
 
 export const loadUserData = () => {
   // Make sure the user and their follows are loaded
-  loadPubkeys([pubkey.get()], {force: true, kinds: userKinds})
-    .then(() => loadPubkeys(follows.get()))
+  loadPubkeys([pubkey.get()], {force: true, kinds: userKinds}).then(() =>
+    loadPubkeys(follows.get()),
+  )
 
   // Load read receipts
   loadSeen()

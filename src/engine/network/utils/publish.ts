@@ -1,5 +1,5 @@
 import EventEmitter from "events"
-import {createEvent, Tags} from "paravel"
+import {createEvent, asEvent, Tags} from "paravel"
 import {omit, uniqBy} from "ramda"
 import {defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"
@@ -51,7 +51,7 @@ export class Publisher extends EventEmitter {
       throw new Error("Can't publish unwrapped events")
     }
 
-    this.event = {...event, seen_on: []}
+    this.event = {...asEvent(event), seen_on: []}
   }
 
   static publish({event, relays, ...opts}: StaticPublisherOpts) {

@@ -95,7 +95,7 @@
   const goToThread = () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: console.log(event, hints.EventRoot(event))||hints.EventRoot(event).limit(3).getUrls()})
+      .of(getIdOrAddress(event), {relays: hints.EventRoot(event).limit(3).getUrls()})
       .at("thread")
       .cx({context: ctx.concat(event)})
       .open()

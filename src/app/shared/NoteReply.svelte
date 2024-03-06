@@ -2,7 +2,6 @@
   import {Tags, createEvent} from "paravel"
   import {createEventDispatcher} from "svelte"
   import {join, without, uniq} from "ramda"
-  import {asNostrEvent} from "src/util/nostr"
   import {slide} from "src/util/transition"
   import ImageInput from "src/partials/ImageInput.svelte"
   import AltColor from "src/partials/AltColor.svelte"
@@ -108,7 +107,7 @@
 
     // Re-broadcast the note we're replying to
     if (!parent.wrap) {
-      Publisher.publish({event: asNostrEvent(parent)})
+      Publisher.publish({event: parent})
     }
 
     const template = createEvent(1, {content, tags})

@@ -2,12 +2,11 @@
   import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {onMount} from "svelte"
-  import {toNostrURI, Tags, createEvent} from "paravel"
+  import {toNostrURI, asEvent, Tags, createEvent} from "paravel"
   import {tweened} from "svelte/motion"
   import {identity, filter, sum, uniqBy, prop, pluck} from "ramda"
   import {fly} from "src/util/transition"
   import {formatSats, tryJson} from "src/util/misc"
-  import {asNostrEvent} from "src/util/nostr"
   import {quantify, pluralize} from "hurdak"
   import {toast} from "src/partials/state"
   import Icon from "src/partials/Icon.svelte"
@@ -82,7 +81,7 @@
 
   const react = async content => {
     if (!note.wrap) {
-      Publisher.publish({event: asNostrEvent(note)})
+      Publisher.publish({event: note})
     }
 
     const {events} = await publishToZeroOrMoreGroups(
@@ -103,7 +102,7 @@
   }
 
   const crossPost = async (address = null) => {
-    const content = JSON.stringify(asNostrEvent(note))
+    const content = JSON.stringify(asEvent(note))
     const tags = [hints.tagEvent(note).valueOf(), mention(note.pubkey), ...getClientTags()]
 
     let template
@@ -138,7 +137,7 @@
 
   const broadcast = () => {
     Publisher.publish({
-      event: asNostrEvent(note),
+      event: note,
       relays: hints.Outbox().getUrls(),
     })
 
@@ -326,7 +325,7 @@
       <h1 class="staatliches text-2xl">Details</h1>
       <CopyValue label="Link" value={toNostrURI(nevent)} />
       <CopyValue label="Event ID" encode={nip19.noteEncode} value={note.id} />
-      <CopyValue label="Event JSON" value={JSON.stringify(asNostrEvent(note))} />
+      <CopyValue label="Event JSON" value={JSON.stringify(asEvent(note))} />
     {:else if view === "cross-post"}
       <div class="mb-4 flex items-center justify-center">
         <Heading>Cross-post</Heading>
