@@ -37,16 +37,14 @@
   const hideReplies = writable(Storage.getJson("hideReplies"))
 
   const getRelays = () => {
-    let selection = relays
+    if (relays.length > 0) {
+      return relays
+    }
 
     // If we have a search term we need to use only relays that support search
-    if (selection.length === 0 && filter.search) {
-      selection = $searchableRelays
-    }
-
-    if (selection.length === 0) {
-      selection = getRelaysFromFilters(compileFilters([filter]))
-    }
+    const selection = filter.search
+      ? $searchableRelays
+      : getRelaysFromFilters(compileFilters([filter]))
 
     return forcePlatformRelays(hints.scenario([selection]).getUrls()).concat(LOCAL_RELAY_URL)
   }
