@@ -108,10 +108,7 @@ export default defineConfig(async () => {
           short_name: process.env.VITE_APP_NAME,
           description: process.env.VITE_APP_DESCRIPTION,
           theme_color: accentColor,
-          protocol_handlers: [
-            {protocol: "web+nostr", url: "/%s"},
-            {protocol: "nostr", url: "/%s"},
-          ],
+          protocol_handlers: [{protocol: "web+nostr", url: "/%s"}],
           icons: [
             {src: "images/pwa-64x64.png", sizes: "64x64", type: "image/png"},
             {src: "images/pwa-192x192.png", sizes: "192x192", type: "image/png"},
