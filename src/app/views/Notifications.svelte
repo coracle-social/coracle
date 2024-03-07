@@ -16,6 +16,7 @@
   import type {Event} from "src/engine"
   import {
     session,
+    settings,
     markAsSeen,
     notifications,
     groupNotifications,
@@ -26,7 +27,7 @@
     unreadGroupNotifications,
   } from "src/engine"
 
-  const tabs = ["Mentions & Replies", "Reactions", "Groups"]
+  const allTabs = ["Mentions & Replies", "Reactions", "Groups"]
 
   const throttledNotifications = notifications.throttle(300)
 
@@ -41,11 +42,12 @@
     }
   }
 
-  const getTabKinds = tab => (tab === tabs[0] ? noteKinds : reactionKinds.concat(9734))
+  const getTabKinds = tab => (tab === allTabs[0] ? noteKinds : reactionKinds.concat(9734))
 
-  export let activeTab = tabs[0]
+  export let activeTab = allTabs[0]
 
   let limit = 4
+  let innerWidth = 0
   let tabNotifications = []
   let unreadMainNotifications = []
   let unreadReactionNotifications = []
@@ -57,7 +59,7 @@
     ).slice(0, limit)
 
     tabNotifications =
-      activeTab === tabs[0]
+      activeTab === allTabs[0]
         ? groupedNotifications.filter(
             n => !n.event || find((e: Event) => noteKinds.includes(e.kind), n.interactions),
           )
@@ -65,14 +67,19 @@
             find((e: Event) => reactionKinds.includes(e.kind), n.interactions),
           )
 
-    const unreadMainKinds = getTabKinds(tabs[0])
-    const unreadReactionKinds = getTabKinds(tabs[1])
+    const unreadMainKinds = getTabKinds(allTabs[0])
+    const unreadReactionKinds = getTabKinds(allTabs[1])
 
     unreadMainNotifications = $unreadNotifications.filter(e => unreadMainKinds.includes(e.kind))
     unreadReactionNotifications = $unreadNotifications.filter(e =>
       unreadReactionKinds.includes(e.kind),
     )
   }
+
+  $: displayTabs =
+    innerWidth <= 640 || !$settings.enable_reactions
+      ? [allTabs[0], allTabs[2]]
+      : allTabs
 
   document.title = "Notifications"
 
@@ -104,18 +111,20 @@
   })
 </script>
 
-<Tabs {tabs} {activeTab} {setActiveTab}>
+<svelte:window bind:innerWidth />
+
+<Tabs tabs={displayTabs} {activeTab} {setActiveTab}>
   <div slot="tab" let:tab class="flex gap-2">
     <div>{tab}</div>
-    {#if tab === tabs[0] && unreadMainNotifications.length > 0}
+    {#if tab === allTabs[0] && unreadMainNotifications.length > 0}
       <div class="h-6 rounded-full bg-neutral-700 px-2">
         {unreadMainNotifications.length}
       </div>
-    {:else if tab === tabs[1] && unreadReactionNotifications.length > 0}
+    {:else if tab === allTabs[1] && unreadReactionNotifications.length > 0}
       <div class="h-6 rounded-full bg-neutral-700 px-2">
         {unreadReactionNotifications.length}
       </div>
-    {:else if tab === tabs[2] && $unreadGroupNotifications.length > 0}
+    {:else if tab === allTabs[2] && $unreadGroupNotifications.length > 0}
       <div class="h-6 rounded-full bg-neutral-700 px-2">
         {$unreadGroupNotifications.length}
       </div>
@@ -127,7 +136,7 @@
   <OnboardingTasks />
 {/if}
 
-{#if tabs.slice(0, 2).includes(activeTab)}
+{#if allTabs.slice(0, 2).includes(activeTab)}
   {#each tabNotifications as notification, i (notification.key)}
     {@const lineText = getLineText(i)}
     {#if lineText}
@@ -138,7 +147,7 @@
     {/if}
     {#if !notification.event}
       <NotificationMention {notification} />
-    {:else if activeTab === tabs[0]}
+    {:else if activeTab === allTabs[0]}
       <NotificationReplies {notification} />
     {:else}
       <NotificationReactions {notification} />
