@@ -53,9 +53,14 @@
     class="relative pb-24 text-neutral-100 lg:ml-60 lg:pt-16"
     class:pointer-events-none={$menuIsOpen}>
     {#if $page}
+      {@const promise = $page.route.component}
       {#key getKey($page)}
         <div class="m-auto flex w-full max-w-2xl flex-grow flex-col gap-4 p-4">
-          <svelte:component this={$page.route.component} {...getProps($page)} />
+          {#await promise}
+            <!-- pass -->
+          {:then component}
+            <svelte:component this={component.default || component} {...getProps($page)} />
+          {/await}
         </div>
       {/key}
     {/if}
@@ -63,9 +68,14 @@
 {/key}
 
 {#each reverse($modals).filter(m => !m.config.virtual) as m, i (getKey(m) + i)}
+  {@const promise = m.route.component}
   <Modal virtual={false} canClose={!m.config.noEscape}>
     {#key $stateKey}
-      <svelte:component this={m.route.component} {...getProps(m)} />
+      {#await promise}
+        <!-- pass -->
+      {:then component}
+        <svelte:component this={component.default || component} {...getProps(m)} />
+      {/await}
     {/key}
   </Modal>
 {/each}

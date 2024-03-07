@@ -9,6 +9,7 @@
 - [x] Add sugggested relays based on follows
 - [x] Improve invite creation
 - [x] Added docker image (@kornpow)
+- [x] Code split by route
 
 # 0.4.3
 

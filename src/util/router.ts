@@ -1,6 +1,5 @@
 import {takeWhile, find, filter, identity, mergeLeft, reject, path as getPath} from "ramda"
 import {first, filterVals} from "hurdak"
-import type {ComponentType, SvelteComponentTyped} from "svelte"
 import logger from "src/util/logger"
 import {buildQueryString, parseQueryString, updateIn} from "src/util/misc"
 import {globalHistory} from "src/util/history"
@@ -117,8 +116,6 @@ const pickRoute = (routes, uri) => {
   return match || default_ || null
 }
 
-export type Component = ComponentType<SvelteComponentTyped>
-
 export type Serializer = {
   encode: (v: any) => string
   decode: (v: string) => any
@@ -135,7 +132,7 @@ export type RegisterOpts = {
 
 export type Route = RegisterOpts & {
   path: string
-  component: Component
+  component: any
 }
 
 export type RouteConfig = {
@@ -337,7 +334,7 @@ export class Router {
 
   register = (
     path: string,
-    component: Component,
+    component: any,
     {serializers, requireUser, requireSigner, required}: RegisterOpts = {},
   ) => {
     this.routes.push({path, component, required, serializers, requireUser, requireSigner})
