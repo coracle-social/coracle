@@ -5,6 +5,7 @@
   import {toast, appName} from "src/partials/state"
   import Input from "src/partials/Input.svelte"
   import Field from "src/partials/Field.svelte"
+  import Footer from "src/partials/Footer.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -96,6 +97,8 @@
         termToItem={identity} />
       <p slot="info">Notes containing these words will be hidden by default.</p>
     </Field>
-    <Anchor button tag="button" type="submit">Save</Anchor>
   </div>
+  <Footer>
+    <Anchor grow button tag="button" type="submit">Save</Anchor>
+  </Footer>
 </form>

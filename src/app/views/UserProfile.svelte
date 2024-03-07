@@ -3,6 +3,7 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import Footer from "src/partials/Footer.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Field from "src/partials/Field.svelte"
   import {pubkey, people, publishProfile} from "src/engine"
@@ -27,7 +28,7 @@
   document.title = "Profile"
 </script>
 
-<form on:submit|preventDefault={submit}>
+<form on:submit|preventDefault={submit} class="relative">
   <div class="mb-4 flex flex-col items-center justify-center">
     <Heading>About You</Heading>
     <p>
@@ -83,6 +84,8 @@
       <ImageInput bind:value={values.banner} icon="panorama" />
       <div slot="info">In most clients, this image will be shown on your profile page.</div>
     </Field>
-    <Anchor button tag="button" type="submit">Save</Anchor>
   </div>
+  <Footer>
+    <Anchor grow button tag="button" type="submit">Save</Anchor>
+  </Footer>
 </form>

@@ -118,7 +118,7 @@
         <div on:click|stopPropagation>
           <AltColor
             background
-            class="relative h-full w-full cursor-auto overflow-hidden rounded-t-2xl pb-10 pt-2">
+            class="relative h-full w-full cursor-auto overflow-hidden rounded-t-2xl pb-20 pt-2">
             <div class="modal-content-inner m-auto flex max-w-2xl flex-col gap-4 p-2">
               <slot />
             </div>

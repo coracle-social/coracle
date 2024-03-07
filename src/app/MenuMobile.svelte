@@ -172,9 +172,6 @@
       <MenuMobileItem disabled={!$canSign} href="/settings">
         <i class="fa fa-sliders" /> App Settings
       </MenuMobileItem>
-      <MenuMobileItem disabled={!$canSign} stopPropagation on:click={openAccount}>
-        <i class="fa fa-user-circle" /> Edit Profile
-      </MenuMobileItem>
     </div>
   </SliderMenu>
 {/if}

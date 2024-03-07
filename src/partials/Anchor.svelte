@@ -20,6 +20,7 @@
   export let underline = false
   export let short = false
   export let tall = false
+  export let grow = false
   export let style = null
   export let type = null
   export let href = null
@@ -47,6 +48,7 @@
     "w-7": short && circle,
     "h-10": tall,
     "w-10": tall && circle,
+    "flex-grow": grow,
   })
 
   const onClick = e => {

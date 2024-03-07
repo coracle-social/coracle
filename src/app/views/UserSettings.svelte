@@ -2,6 +2,7 @@
   import {identity} from "ramda"
   import {toast, appName} from "src/partials/state"
   import Field from "src/partials/Field.svelte"
+  import Footer from "src/partials/Footer.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Input from "src/partials/Input.svelte"
@@ -135,6 +136,8 @@
         with troubleshooting, and allows other people to find out about {appName}.
       </p>
     </FieldInline>
-    <Anchor button tag="button" type="submit">Save</Anchor>
   </div>
+  <Footer>
+    <Anchor grow button tag="button" type="submit">Save</Anchor>
+  </Footer>
 </form>
