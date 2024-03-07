@@ -3,7 +3,7 @@ import {seconds} from "hurdak"
 import {now, Tags} from "paravel"
 import {isLike, reactionKinds, noteKinds, repostKinds} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
-import {seenIds} from "src/engine/events/state"
+import {isSeen} from "src/engine/events/derived"
 import {unwrapRepost} from "src/engine/events/utils"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {derived} from "src/engine/core/utils"
@@ -40,16 +40,13 @@ export const notifications = derived(
   },
 )
 
-export const unreadNotifications = derived(
-  [seenIds, notifications],
-  ([$seenIds, $notifications]) => {
-    const since = now() - seconds(30, "day")
+export const unreadNotifications = derived([isSeen, notifications], ([$isSeen, $notifications]) => {
+  const since = now() - seconds(30, "day")
 
-    return $notifications.filter(
-      e => !reactionKinds.includes(e.kind) && e.created_at > since && !$seenIds.has(e.id),
-    )
-  },
-)
+  return $notifications.filter(
+    e => !reactionKinds.includes(e.kind) && e.created_at > since && !$isSeen(e),
+  )
+})
 
 export const groupNotifications = derived(
   [session, events, groupRequests, groupAlerts, groupAdminKeys],
@@ -88,11 +85,11 @@ export const groupNotifications = derived(
   })
 
 export const unreadGroupNotifications = derived(
-  [seenIds, groupNotifications],
-  ([$seenIds, $groupNotifications]) => {
+  [isSeen, groupNotifications],
+  ([$isSeen, $groupNotifications]) => {
     const since = now() - seconds(30, "day")
 
-    return $groupNotifications.filter(e => e.created_at > since && !$seenIds.has(e.id))
+    return $groupNotifications.filter(e => e.created_at > since && !$isSeen(e))
   },
 )
 

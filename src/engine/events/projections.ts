@@ -65,7 +65,9 @@ projections.addHandler(
 
     seen.mapStore.update($m => {
       for (const e of chunk) {
-        $m.set(e.id, e)
+        for (const id of Tags.fromEvent(e).values("e").valueOf()) {
+          $m.set(id, {id, published: e.created_at})
+        }
       }
 
       return $m

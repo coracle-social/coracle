@@ -80,13 +80,25 @@
     loadGroupMessages()
     loadNotifications()
 
+    const unsubUnreadNotifications = unreadNotifications.subscribe(events => {
+      if (activeTab !== "Groups") {
+        markAsSeen(events)
+      }
+    })
+
+    const unsubUnreadGroupNotifications = unreadGroupNotifications.subscribe(events => {
+      if (activeTab === "Groups") {
+        markAsSeen(events)
+      }
+    })
+
     const scroller = createScroller(async () => {
       limit += 4
     })
 
     return () => {
-      markAsSeen($unreadNotifications)
-      markAsSeen($unreadGroupNotifications)
+      unsubUnreadNotifications()
+      unsubUnreadGroupNotifications()
       scroller.stop()
     }
   })

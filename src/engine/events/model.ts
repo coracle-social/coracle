@@ -11,3 +11,8 @@ export type Event = Omit<NostrToolsEvent, "kind"> & {
 export type Rumor = UnsignedEvent & {
   id: string
 }
+
+export type ReadReceipt = {
+  id: string
+  published?: number
+}

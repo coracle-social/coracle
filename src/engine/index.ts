@@ -54,11 +54,11 @@ const sessionsAdapter = {
   dump: identity,
 }
 
-export const storage = new Storage(9, [
+export const storage = new Storage(10, [
   new LocalStorageAdapter("pubkey", pubkey),
   new LocalStorageAdapter("sessions", sessions, sessionsAdapter),
   new LocalStorageAdapter("deletes2", deletes, setAdapter),
-  new IndexedDBAdapter("seen2", seen, 1000, sortBy(prop("created_at"))),
+  new IndexedDBAdapter("seen3", seen, 10000, sortBy(prop("created_at"))),
   new IndexedDBAdapter("events", _events, 10000, sortByPubkeyWhitelist(prop("created_at"))),
   new IndexedDBAdapter("labels", _labels, 1000, sortBy(prop("created_at"))),
   new IndexedDBAdapter("topics", topics, 1000, sortBy(prop("last_seen"))),
