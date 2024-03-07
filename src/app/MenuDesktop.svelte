@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {toggleTheme, appName} from "src/partials/state"
+  import {toggleTheme, theme, appName} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -51,13 +51,16 @@
 
 <div class="fixed bottom-0 left-0 top-0 z-nav w-72 bg-tinted-700 transition-colors">
   <Anchor
-    class="mb-4 mt-4 flex items-center gap-2 pl-6"
     external
+    class="mb-4 mt-4 flex items-center gap-2 px-6"
     href="https://info.coracle.social">
-    <img alt="App Logo" src={import.meta.env.VITE_APP_LOGO} class="w-12" />
-    <h1 class="staatliches -mb-[0.1em] leading-none" style={`font-size: ${appName.length / 3}em`}>
-      {appName}
-    </h1>
+    <img
+      alt="App Logo"
+      src={
+        $theme === "dark"
+          ? import.meta.env.VITE_APP_WORDMARK_DARK
+          : import.meta.env.VITE_APP_WORDMARK_LIGHT
+      } />
   </Anchor>
   <MenuDesktopItem path="/notes">Feed</MenuDesktopItem>
   {#if !$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0}
