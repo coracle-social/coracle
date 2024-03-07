@@ -231,7 +231,7 @@ export const getReplyTags = (parent: Event, inherit = false) => {
     }
   } else {
     for (const t of replies.valueOf()) {
-      replyTags.push(t.slice(0, 2).concat([hints.Event(parent).getUrl(), "reply"]))
+      replyTags.push(t.slice(0, 2).concat([hints.Event(parent).getUrl(), "root"]))
     }
   }
 
