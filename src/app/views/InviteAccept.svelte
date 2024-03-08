@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {zipObj} from "ramda"
+  import {zipObj, pluck} from "ramda"
   import {normalizeRelayUrl} from "paravel"
   import {updateIn} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
@@ -12,7 +12,7 @@
   import GroupActions from "src/app/shared/GroupActions.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import Onboarding from "src/app/views/Onboarding.svelte"
-  import {session} from "src/engine"
+  import {session, loadGroups} from "src/engine"
 
   export let people = []
   export let relays = []
@@ -22,6 +22,8 @@
     .map(s => zipObj(["url", "claim"], s.split("|")))
     .map(updateIn("url", normalizeRelayUrl))
   const parsedGroups = groups.map(s => zipObj(["address", "relay", "claim"], s.split("|")))
+
+  loadGroups(pluck("address", parsedGroups) as string[], pluck("relay", parsedGroups))
 </script>
 
 {#if $session}

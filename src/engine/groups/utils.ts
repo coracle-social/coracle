@@ -5,7 +5,7 @@ import {fuzzy} from "src/util/misc"
 import type {GroupStatus, Session} from "src/engine/session/model"
 import {env, pubkey} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
-import {hints} from "src/engine/relays/utils"
+import {forcePlatformRelays, hints} from "src/engine/relays/utils"
 import {groups, groupSharedKeys, groupAdminKeys} from "./state"
 import {GroupAccess} from "./model"
 import type {Group} from "./model"
@@ -72,9 +72,7 @@ export const getGroupReqInfo = (address = null) => {
     recipients.push(key.pubkey)
   }
 
-  const relays = hints
-    .merge([hints.WithinMultipleContexts(addresses), hints.scenario([env.get().PLATFORM_RELAYS])])
-    .getUrls()
+  const relays = forcePlatformRelays(hints.WithinMultipleContexts(addresses).getUrls())
 
   return {admins, recipients, relays, since}
 }
@@ -85,7 +83,7 @@ export const getCommunityReqInfo = (address = null) => {
 
   return {
     since: since - seconds(6, "hour"),
-    relays: hints.WithinContext(address).getUrls(),
+    relays: forcePlatformRelays(hints.WithinContext(address).getUrls()),
   }
 }
 

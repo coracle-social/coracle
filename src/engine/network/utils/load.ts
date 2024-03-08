@@ -119,9 +119,6 @@ export const load = (request: LoadOpts) => {
   const result = defer()
   const tracker = new Tracker()
 
-  // Just a dumb hack to get a warning about relay urls before we lose the stack trace
-  getUrls(request.relays)
-
   execute({tracker, request, result, results: []})
 
   return result
