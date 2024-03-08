@@ -16,6 +16,7 @@
     getGroupReqInfo,
     deriveIsGroupMember,
     updateCurrentSession,
+    forcePlatformRelays,
     session,
   } from "src/engine"
 
@@ -51,7 +52,7 @@
     })
 
     load({
-      relays: hints.User().getUrls(),
+      relays: forcePlatformRelays(hints.User().getUrls()),
       filters: [
         {kinds: [35834, 34550], authors: admins},
         {kinds: [35834, 34550], limit: 500},

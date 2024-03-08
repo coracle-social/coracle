@@ -17,7 +17,9 @@
 <p>
   {#each content as { type, value }}
     {#if type === "newline"}
-      {" "}
+      {#each value as line}
+        <br />
+      {/each}
     {:else if type === "link"}
       <Anchor class="underline" external href={value.url}>
         {displayUrl(value.url)}

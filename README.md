@@ -77,7 +77,8 @@ Coracle is intended to be fully white-labeled by groups of various kinds. The fo
 - `VITE_ENABLE_ZAPS` can be set to `false` to disable zaps.
 - `VITE_APP_NAME` is the app's name.
 - `VITE_APP_URL` is the app's url. Used to generate open graph meta tags.
-- `VITE_APP_LOGO` is the path for the app's logo relative to the `public` directory, starting with a trailing slash. Used to generate favicons and manifest.
+- `VITE_APP_LOGO` is the path for the app's logo relative to the `public` directory, starting with a leading slash. Used to generate favicons and manifest.
+- `VITE_APP_WORDMARK_DARK` and `VITE_APP_WORDMARK_LIGHT` are paths for the app's wordmark relative to the `public` directory, starting with a leading slash.
 - `VITE_APP_DESCRIPTION` is the app's description.
 - `VITE_CLIENT_NAME` is the client's name. Only change this if you have forked Coracle.
 - `VITE_CLIENT_ID` is the client's NIP 89 handler id. Only change this if you have forked Coracle.
