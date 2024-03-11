@@ -23,7 +23,7 @@
     .map(updateIn("url", normalizeRelayUrl))
   const parsedGroups = groups.map(s => zipObj(["address", "relay", "claim"], s.split("|")))
 
-  loadGroups(pluck("address", parsedGroups) as string[], pluck("relay", parsedGroups))
+  loadGroups(pluck("address", parsedGroups) as string[], pluck("relay", parsedGroups) as string[])
 </script>
 
 {#if $session}
