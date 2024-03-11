@@ -43,12 +43,12 @@ export const displayPerson = ({pubkey, profile}: Person) => {
   if (profile) {
     const {display_name, name} = profile
 
-    if (display_name) {
-      return ellipsize(display_name, 60)
-    }
-
     if (name) {
       return ellipsize(name, 60)
+    }
+
+    if (display_name) {
+      return ellipsize(display_name, 60)
     }
   }
 

@@ -38,7 +38,7 @@
   </div>
   <div class="flex w-full flex-col gap-8">
     <Field label="Username">
-      <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.display_name}>
+      <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.name}>
         <i slot="before" class="fa-solid fa-user-astronaut" />
       </Input>
       <div slot="info">In most clients, this image will be shown on your profile page.</div>
