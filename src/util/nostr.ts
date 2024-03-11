@@ -113,4 +113,10 @@ export const parseAnything = async entity => {
       return {type: "npub", data: profile.pubkey}
     }
   }
+
+  try {
+    return nip19.decode(entity)
+  } catch (e) {
+    return null
+  }
 }
