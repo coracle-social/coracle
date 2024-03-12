@@ -2,12 +2,12 @@
   import {nip19} from "nostr-tools"
   import CopyValue from "src/partials/CopyValue.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {displayHandle, people} from "src/engine"
+  import {displayHandle, derivePerson} from "src/engine"
 
   export let pubkey
   export let nprofile
 
-  const person = people.key(pubkey)
+  const person = derivePerson(pubkey)
 
   $: lightningAddress = $person.profile?.lud16 || $person.profile?.lud06
 </script>
