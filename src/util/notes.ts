@@ -84,7 +84,7 @@ export const parseContent = (event: {content: string; tags?: string[][]}) => {
   }
 
   const parseTopic = () => {
-    const topic: string = first(text.match(/^#[\w\u00E0-\u00FC]+/i))
+    const topic: string = first(text.match(/^#[^\s!\"#$%&'()*+,-.\/:;<=>?@[\\\]^_`{|}~]+/i))
 
     // Skip numeric topics
     if (topic && !topic.match(/^#\d+$/)) {
