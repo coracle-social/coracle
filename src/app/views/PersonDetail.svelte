@@ -96,7 +96,7 @@
 {#if $mutes.has(pubkey)}
   <Content size="lg" class="text-center">You have muted this person.</Content>
 {:else if activeTab === "notes"}
-  <Feed showGroup {filter} />
+  <Feed showGroup skipPlatform {filter} />
 {:else if activeTab === "likes"}
   <Feed showGroup hideControls filter={{kinds: [7], authors: [pubkey]}} />
 {:else if activeTab === "collections"}

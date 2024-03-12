@@ -53,7 +53,6 @@
           {
             "border-neutral-600 bg-tinted-700 text-neutral-100": $toast.type === "info",
             "border-warning bg-tinted-700 text-neutral-100": $toast.type === "warning",
-            "border-danger bg-tinted-700 text-neutral-100": $toast.type === "error",
           },
         )}>
         {#if is(String, $toast.message)}

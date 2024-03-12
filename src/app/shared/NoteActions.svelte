@@ -103,7 +103,7 @@
 
   const crossPost = async (address = null) => {
     const content = JSON.stringify(asEvent(note))
-    const tags = [hints.tagEvent(note).valueOf(), mention(note.pubkey), ...getClientTags()]
+    const tags = [...hints.tagEvent(note).valueOf(), mention(note.pubkey), ...getClientTags()]
 
     let template
     if (note.kind === 1) {

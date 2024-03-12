@@ -11,6 +11,8 @@
 - [x] Added docker image (@kornpow)
 - [x] Code split by route
 - [x] Add fixed footer for settings forms
+- [x] Add claim query param to group detail
+- [x] Add admin key import
 
 # 0.4.3
 

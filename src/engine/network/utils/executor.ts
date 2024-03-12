@@ -21,13 +21,6 @@ export const getUrls = (relays: string[]) => {
     warn(`Attempted to connect to non-unique relays`)
   }
 
-  const {PLATFORM_RELAYS} = env.get()
-  const nonLocalRelays = without([LOCAL_RELAY_URL], urls)
-
-  if (PLATFORM_RELAYS.length > 0 && nonLocalRelays.some(url => !PLATFORM_RELAYS.includes(url))) {
-    warn(`Attempted to connect to something other than PLATFORM_RELAYS`, urls)
-  }
-
   return urls
 }
 

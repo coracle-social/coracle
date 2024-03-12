@@ -25,6 +25,7 @@
   export let filter: DynamicFilter = {}
   export let anchor = null
   export let skipCache = false
+  export let skipPlatform = false
   export let shouldDisplay = null
   export let shouldListen = false
   export let hideControls = false
@@ -43,11 +44,13 @@
     }
 
     // If we have a search term we need to use only relays that support search
-    const selection = filter.search
-      ? $searchableRelays
-      : getRelaysFromFilters(compileFilters([filter]))
+    let result = filter.search ? $searchableRelays : getRelaysFromFilters(compileFilters([filter]))
 
-    const result = forcePlatformRelays(hints.scenario([selection]).getUrls())
+    result = hints.scenario([result]).getUrls()
+
+    if (!skipPlatform) {
+      result = forcePlatformRelays(result)
+    }
 
     if (!skipCache) {
       result.push(LOCAL_RELAY_URL)
