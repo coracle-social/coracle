@@ -34,8 +34,10 @@
   } from "src/engine"
   import {router} from "src/app/router"
 
-  export let address, activeTab
+  export let address
   export let relays = null
+  export let activeTab = "notes"
+  export let claim = ""
 
   const group = deriveGroup(address)
   const status = deriveGroupStatus(address)
@@ -100,7 +102,7 @@
       <Anchor on:click={() => setActiveTab("notes")} class="text-2xl"
         >{displayGroup($group)}</Anchor>
       <div class="hidden xs:block">
-        <GroupActions {address} />
+        <GroupActions {address} {claim} />
       </div>
     </div>
     <GroupAbout {address} />

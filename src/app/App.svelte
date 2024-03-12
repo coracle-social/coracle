@@ -106,6 +106,13 @@
   router.register("/groups/:address/:activeTab", import("src/app/views/GroupDetail.svelte"), {
     serializers: {
       address: asNaddr("address"),
+      claim: asString('claim'),
+    },
+  })
+  router.register("/groups/:address", import("src/app/views/GroupDetail.svelte"), {
+    serializers: {
+      address: asNaddr("address"),
+      claim: asString('claim'),
     },
   })
 
