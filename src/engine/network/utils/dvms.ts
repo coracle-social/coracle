@@ -15,6 +15,7 @@ export type DVMRequestOpts = {
   relays?: string[]
   timeout?: number
   onProgress?: (e: Event) => void
+  privateKey?: string
 }
 
 export const dvmRequest = async ({
@@ -25,6 +26,7 @@ export const dvmRequest = async ({
   timeout = 30_000,
   relays = null,
   onProgress = null,
+  privateKey = null,
 }: DVMRequestOpts): Promise<Event> => {
   if (!relays) {
     relays = hints.merge([hints.WriteRelays(), hints.scenario([env.get().DVM_RELAYS])]).getUrls()
@@ -36,7 +38,7 @@ export const dvmRequest = async ({
 
   createAndPublish(kind, {
     relays,
-    sk: generatePrivateKey(),
+    sk: privateKey,
     tags: tags.concat([
       ["i", input, ...inputOpts],
       ["expiration", String(now() + seconds(1, "hour"))],
