@@ -19,7 +19,7 @@
       loginWithPrivateKey(privkey)
       boot()
     } else {
-      toast.show("error", "Sorry, but that's an invalid private key.")
+      toast.show("warning", "Sorry, but that's an invalid private key.")
     }
   }
 </script>

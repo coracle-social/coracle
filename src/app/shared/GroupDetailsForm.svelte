@@ -43,7 +43,7 @@
 
   const submit = async () => {
     if (values.relays.length < 1) {
-      toast.show("error", "At least one relay is required.")
+      toast.show("warning", "At least one relay is required.")
 
       return
     }

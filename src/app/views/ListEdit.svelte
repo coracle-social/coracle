@@ -53,13 +53,13 @@
 
   const submit = () => {
     if (!values.title) {
-      return toast.show("error", "A name is required for your list")
+      return toast.show("warning", "A name is required for your list")
     }
 
     const duplicates = $userLists.filter(l => l.title === values.title && l.address !== address)
 
     if (duplicates.length > 0) {
-      return toast.show("error", "That name is already in use")
+      return toast.show("warning", "That name is already in use")
     }
 
     const id = address ? decodeAddress(address).identifier : randomId()

@@ -59,7 +59,7 @@
 
     const content = compose.parse().trim()
 
-    if (!content) return toast.show("error", "Please provide a description.")
+    if (!content) return toast.show("warning", "Please provide a description.")
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 

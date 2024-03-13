@@ -1,7 +1,7 @@
 <script lang="ts">
   import {uniqBy, uniq, sortBy, prop} from "ramda"
   import {createMap} from "hurdak"
-  import {getAddress} from 'paravel'
+  import {getAddress} from "paravel"
   import {nip19} from "nostr-tools"
   import {nsecEncode, giftWrapKinds, isKeyValid, getPublicKey, toHex} from "src/util/nostr"
   import {toast} from "src/partials/state"
@@ -41,7 +41,7 @@
     const privkey = nsec.startsWith("nsec") ? toHex(nsec) : nsec
 
     if (!isKeyValid(privkey)) {
-      toast.show("error", "Sorry, but that's an invalid private key.")
+      toast.show("warning", "Sorry, but that's an invalid private key.")
       return
     }
 
@@ -55,7 +55,7 @@
       relays: hints.User().getUrls(),
       filters: [
         {kinds: [35834], authors: [pubkey], limit: 1},
-        {kinds: giftWrapKinds, '#p': [pubkey], limit: 500},
+        {kinds: giftWrapKinds, "#p": [pubkey], limit: 500},
       ],
       onEvent: async event => {
         if (giftWrapKinds.includes(event.kind)) {
@@ -83,7 +83,7 @@
         } else {
           toast.show("warning", "Sorry, we weren't able to find any events created with that key.")
         }
-      }
+      },
     })
   }
 

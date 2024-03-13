@@ -108,7 +108,6 @@ export class Publisher extends EventEmitter {
       attemptToResolve()
     }, timeout)
 
-    console.log("PUBLISH", this.event)
     const sub = executor.publish(omit(["seen_on"], this.event), {
       verb,
       onOk: (url: string, eventId: string, ok: boolean) => {
@@ -210,14 +209,14 @@ export const getReplyTags = (parent: Event, inherit = false) => {
 
   // Mention the parent's author
   if (parent.pubkey !== userPubkey) {
-    replyTags.push(hints.tagPubkey(parent.pubkey).valueOf())
+    replyTags.push(mention(parent.pubkey))
   }
 
   // Inherit p-tag mentions
   if (inherit) {
     for (const pubkey of tags.values("p").valueOf()) {
       if (pubkey !== userPubkey) {
-        replyTags.push(hints.tagPubkey(pubkey).valueOf())
+        replyTags.push(mention(pubkey))
       }
     }
   }

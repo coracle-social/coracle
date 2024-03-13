@@ -17,7 +17,7 @@
       loginWithPublicKey(pubkey)
       boot()
     } else {
-      toast.show("error", "Sorry, but that's an invalid public key.")
+      toast.show("warning", "Sorry, but that's an invalid public key.")
     }
   }
 </script>

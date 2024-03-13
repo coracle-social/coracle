@@ -42,11 +42,11 @@
 
   const onSubmit = async () => {
     if (!username) {
-      return toast.show("error", "Please enter a user name.")
+      return toast.show("warning", "Please enter a user name.")
     }
 
     if (!handler) {
-      return toast.show("error", "Please select a login provider.")
+      return toast.show("warning", "Please select a login provider.")
     }
 
     // Fill in pubkey and relays if they entered a custom doain
@@ -58,7 +58,7 @@
     }
 
     if (!handler.relays) {
-      return toast.show("error", "Sorry, we weren't able to find that provider.")
+      return toast.show("warning", "Sorry, we weren't able to find that provider.")
     }
 
     const success = await loginWithNostrConnect(username, handler)
@@ -66,7 +66,7 @@
     if (success) {
       boot()
     } else {
-      toast.show("error", "Sorry, we weren't able to log you in with that provider.")
+      toast.show("warning", "Sorry, we weren't able to log you in with that provider.")
     }
   }
 

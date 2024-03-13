@@ -6,17 +6,14 @@
   import Heading from "src/partials/Heading.svelte"
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import {router} from "src/app/router"
-  import {deriveGroup, getGroupNaddr} from "src/engine"
 
   export let address
-
-  const group = deriveGroup(address)
 
   const createInvite = () => router.at("invite/create").qp({initialGroupAddress: address}).open()
 
   let claim
 
-  $: link = window.origin + router.at('groups').of(address).qp({claim}).toString()
+  $: link = window.origin + router.at("groups").of(address).qp({claim}).toString()
 </script>
 
 <Heading>Share group</Heading>

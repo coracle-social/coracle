@@ -39,7 +39,7 @@
       if (profile) {
         r.pubkey = profile.pubkey
       } else {
-        toast.show("error", "Sorry, it looks like that's an invalid public key.")
+        toast.show("warning", "Sorry, it looks like that's an invalid public key.")
       }
     } else {
       const [npub, token] = input.split("#")
@@ -54,7 +54,7 @@
     const {pubkey, token, relay} = await parse(input)
 
     if (!isKeyValid(pubkey)) {
-      return toast.show("error", "Sorry, but that's an invalid public key.")
+      return toast.show("warning", "Sorry, but that's an invalid public key.")
     }
 
     const success = await loginWithNsecBunker(pubkey, token, relay)

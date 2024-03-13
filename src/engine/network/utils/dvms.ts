@@ -1,6 +1,5 @@
 import {now} from "paravel"
 import {seconds} from "hurdak"
-import {generatePrivateKey} from "src/util/nostr"
 import {env} from "src/engine/session/state"
 import {hints} from "src/engine/relays/utils"
 import type {Event} from "src/engine/events/model"

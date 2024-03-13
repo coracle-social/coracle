@@ -1,4 +1,4 @@
-import {max, without, uniq, partition, equals} from "ramda"
+import {max, uniq, partition, equals} from "ramda"
 import {noop, pickVals} from "hurdak"
 import {Plex, Relays, Executor, Multi, createEvent} from "paravel"
 import {error, warn} from "src/util/logger"

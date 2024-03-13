@@ -84,31 +84,31 @@
   const onSubmit = async ({skipNsecWarning = false} = {}) => {
     const content = compose.parse().trim()
 
-    if (!content) return toast.show("error", "Please provide a description.")
+    if (!content) return toast.show("warning", "Please provide a description.")
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
     if (type === "calendar_event") {
       if (!opts.title) {
-        return toast.show("error", "Please name your event.")
+        return toast.show("warning", "Please name your event.")
       }
 
       if (!opts.start || !opts.end) {
-        return toast.show("error", "Please provide a start and end date and time.")
+        return toast.show("warning", "Please provide a start and end date and time.")
       }
     }
 
     if (type === "listing") {
       if (!opts.title) {
-        return toast.show("error", "Please name your listing.")
+        return toast.show("warning", "Please name your listing.")
       }
 
       if (isNaN(parseFloat(opts.price))) {
-        return toast.show("error", "Please provide a valid price.")
+        return toast.show("warning", "Please provide a valid price.")
       }
 
       if (!opts.currency) {
-        return toast.show("error", "Please select a currency.")
+        return toast.show("warning", "Please select a currency.")
       }
     }
 

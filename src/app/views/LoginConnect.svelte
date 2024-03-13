@@ -101,7 +101,7 @@
     const url = normalizeRelayUrl(customRelayUrl)
 
     if (!url) {
-      return toast.show("error", "That isn't a valid relay url")
+      return toast.show("warning", "That isn't a valid relay url")
     }
 
     customRelays = [{url: customRelayUrl}].concat(customRelays)

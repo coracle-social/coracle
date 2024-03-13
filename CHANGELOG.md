@@ -13,6 +13,7 @@
 - [x] Add fixed footer for settings forms
 - [x] Add claim query param to group detail
 - [x] Add admin key import
+- [x] Improve hashtag regex (@zen)
 
 # 0.4.3
 

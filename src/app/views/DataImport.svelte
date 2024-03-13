@@ -18,7 +18,7 @@
 
   const submit = () => {
     if (!file) {
-      toast.show("error", "Please select a file to import.")
+      toast.show("warning", "Please select a file to import.")
 
       return
     }
@@ -55,7 +55,7 @@
       } catch (e) {
         error(e)
 
-        toast.show("error", "Something went wrong!")
+        toast.show("warning", "Something went wrong!")
       }
 
       loading = false
