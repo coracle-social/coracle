@@ -9,6 +9,7 @@ export const ELLIPSIS = "ellipsis"
 export const TEXT = "text"
 export const TOPIC = "topic"
 export const LINK = "link"
+export const CASHU = "cashu"
 export const INVOICE = "invoice"
 export const NOSTR_NOTE = "nostr:note"
 export const NOSTR_NEVENT = "nostr:nevent"
@@ -105,10 +106,18 @@ export const parseContent = (event: {content: string; tags?: string[][]}) => {
   }
 
   const parseInvoice = () => {
-    const invoice = first(text.match(/^ln(bc|url)[\d\w]{50,1000}/i))
+    const invoice = first(text.match(/^ln(lnbc|lnurl)[\d\w]{50,1000}/i))
 
     if (invoice) {
       return [INVOICE, invoice, invoice]
+    }
+  }
+
+  const parseCashu = () => {
+    const cashu = first(text.match(/^(cashu)[\d\w]{50,5000}/i))
+
+    if (cashu) {
+      return [CASHU, cashu, cashu]
     }
   }
 
@@ -150,6 +159,7 @@ export const parseContent = (event: {content: string; tags?: string[][]}) => {
       parseTopic() ||
       parseBech32() ||
       parseUrl() ||
+      parseCashu() ||
       parseInvoice()
 
     if (part) {
@@ -207,6 +217,7 @@ export const truncateContent = (
   content.every((part, i) => {
     length += switcherFn(part.type, {
       [LINK]: () => (part.value.isMedia ? mediaLength : entityLength),
+      [CASHU]: () => mediaLength,
       [INVOICE]: () => mediaLength,
       [NOSTR_NOTE]: () => mediaLength,
       [NOSTR_NEVENT]: () => mediaLength,

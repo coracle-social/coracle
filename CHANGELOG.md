@@ -14,6 +14,8 @@
 - [x] Add claim query param to group detail
 - [x] Add admin key import
 - [x] Improve hashtag regex (@zen)
+- [x] Add rendering support for cashu tokens
+
 
 # 0.4.3
 

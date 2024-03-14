@@ -5,6 +5,7 @@
     getLinks,
     truncateContent,
     LINK,
+    CASHU,
     INVOICE,
     NEWLINE,
     ELLIPSIS,
@@ -57,6 +58,10 @@
         <NoteContentNewline {value} />
       {:else if type === TOPIC}
         <NoteContentTopic {value} />
+      {:else if type === CASHU}
+        <div on:click|stopPropagation>
+          <QRCode copyOnClick code={value} />
+        </div>
       {:else if type === INVOICE}
         <div on:click|stopPropagation>
           <QRCode copyOnClick code={value} />
