@@ -3,6 +3,7 @@
   import {slide} from "src/util/transition"
   import {fuzzy} from "src/util/misc"
   import {parseAnything} from "src/util/nostr"
+  import FlexColumn from 'src/partials/FlexColumn.svelte'
   import {router} from "src/app/router"
   import type {Person, Topic} from "src/engine"
   import {topics, derived, searchPeople, createPeopleLoader} from "src/engine"
@@ -79,13 +80,15 @@
 </script>
 
 {#if visible}
-  {#each $results.slice(0, 30) as result (result.type + result.id)}
-    <div on:click={() => onClick(result)}>
-      <slot name="result" {result} />
-    </div>
-  {:else}
-    <p class="text-center py-12">No results found.</p>
-  {/each}
+  <FlexColumn>
+    {#each $results.slice(0, 30) as result (result.type + result.id)}
+      <div on:click={() => onClick(result)}>
+        <slot name="result" {result} />
+      </div>
+    {:else}
+      <p class="text-center py-12">No results found.</p>
+    {/each}
+  </FlexColumn>
   {#if showLoading && $loadingPeople}
     <div
       transition:slide|local

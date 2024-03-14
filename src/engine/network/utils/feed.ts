@@ -21,7 +21,6 @@ export type FeedOpts = {
   filters: Filter[]
   onEvent?: (e: Event) => void
   anchor?: string
-  shouldDefer?: boolean
   shouldListen?: boolean
   shouldBuffer?: boolean
   shouldHideReplies?: boolean
@@ -290,7 +289,11 @@ export class FeedLoader {
     }
 
     // If something has a parent id but we haven't found the parent yet, skip it until we have it.
-    const [ok, defer] = partition(e => this.parents.has(Tags.fromEvent(e).parent()?.value()), notes)
+    const [ok, defer] = partition(e => {
+      const parent = Tags.fromEvent(e).parent()
+
+      return !parent || this.parents.has(parent.value())
+    }, notes)
 
     setTimeout(() => this.addToFeed(defer), 3000)
 
@@ -302,7 +305,7 @@ export class FeedLoader {
     // them after we have more timely data. They still might be relevant, but order will still
     // be maintained since everything before the cutoff will be deferred the same way.
     const since = now() - guessFilterDelta(this.opts.filters)
-    const [defer, ok] = partition(e => e.created_at < since, notes)
+    const [ok, defer] = partition(e => e.created_at > since, notes)
 
     setTimeout(() => this.addToFeed(defer), 5000)
 
