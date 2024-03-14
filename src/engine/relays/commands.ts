@@ -1,7 +1,7 @@
 import {whereEq, when, reject, uniqBy, prop, inc} from "ramda"
 import {now, normalizeRelayUrl, createEvent, isShareableRelayUrl} from "paravel"
 import {people} from "src/engine/people/state"
-import {canSign, signer, stateKey} from "src/engine/session/derived"
+import {session, canSign, signer, stateKey} from "src/engine/session/derived"
 import {updateStore} from "src/engine/core/commands"
 import {createAndPublish, getClientTags, Publisher} from "src/engine/network/utils"
 import type {RelayPolicy} from "./model"
@@ -60,8 +60,8 @@ export const publishRelays = ($relays: RelayPolicy[]) => {
 export const joinRelay = async (url: string, claim?: string) => {
   url = normalizeRelayUrl(url)
 
-  if (claim) {
-    Publisher.publish({
+  if (claim && canSign.get()) {
+    const pub = Publisher.publish({
       relays: [url],
       event: await signer.get().signAsUser(
         createEvent(28934, {
@@ -69,6 +69,13 @@ export const joinRelay = async (url: string, claim?: string) => {
         }),
       ),
     })
+
+    await pub.result
+  }
+
+  // Re-publish user meta to the new relay
+  if (canSign.get() && session.get().kind3) {
+    Publisher.publish({event: session.get().kind3, relays: [url]})
   }
 
   return publishRelays([

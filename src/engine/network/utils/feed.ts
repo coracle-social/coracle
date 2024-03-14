@@ -7,7 +7,7 @@ import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {sortEventsDesc, unwrapRepost} from "src/engine/events/utils"
-import {isEventMuted, isDeleted, isSeen} from "src/engine/events/derived"
+import {isEventMuted, isDeleted} from "src/engine/events/derived"
 import {writable} from "src/engine/core/utils"
 import type {Filter} from "../model"
 import {getIdFilters, guessFilterDelta} from "./filters"
@@ -41,7 +41,6 @@ export class FeedLoader {
   ready: Promise<void>
   isEventMuted = isEventMuted.get()
   isDeleted = isDeleted.get()
-  isSeen = isSeen.get()
 
   constructor(readonly opts: FeedOpts) {
     const urls = getUrls(opts.relays)
@@ -97,10 +96,6 @@ export class FeedLoader {
     const strict = this.opts.filters.some(f => f["#a"])
 
     return events.filter(e => {
-      if (this.isSeen(e)) {
-        return false
-      }
-
       if (this.isDeleted(e)) {
         return false
       }

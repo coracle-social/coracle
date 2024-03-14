@@ -98,7 +98,11 @@ export const hints = new Router({
   getGroupRelays: getGroupRelayUrls,
   getCommunityRelays: getGroupRelayUrls,
   getPubkeyRelays: getPubkeyRelayUrls,
-  getDefaultRelays: () => getUserRelayUrls().concat(env.get().DEFAULT_RELAYS),
+  getDefaultRelays: () => [
+    ...getUserRelayUrls(),
+    ...env.get().PLATFORM_RELAYS,
+    ...env.get().DEFAULT_RELAYS,
+  ],
   getDefaultLimit: () => parseInt(getSetting("relay_limit")),
   getRelayQuality: (url: string) => {
     const connection = pool.get(url, {autoConnect: false})

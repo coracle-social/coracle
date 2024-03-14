@@ -30,7 +30,10 @@
     uniqBy(
       prop("url"),
       // Make sure our hardcoded urls are first, since they're more likely to find a match
-      $env.DEFAULT_RELAYS.map(objOf("url")).concat(shuffle($relays)),
+      [
+        ...$env.PLATFORM_RELAYS,
+        ...$env.DEFAULT_RELAYS,
+      ].map(objOf("url")).concat(shuffle($relays)),
     ),
   )
 
