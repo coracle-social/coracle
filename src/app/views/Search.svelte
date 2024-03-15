@@ -20,6 +20,7 @@
 
         await scanner.start()
 
+        ready = true
         resolve(scanner)
       }, 1000)
     })
@@ -54,7 +55,7 @@
     },
   )
 
-  let video, scanner
+  let video, scanner, ready
 
   onDestroy(() => {
     stopScanner()
@@ -70,7 +71,7 @@
   {/await}
   <div
     class="m-auto rounded border border-solid border-neutral-600 bg-neutral-800 p-4"
-    class:hidden={status !== "ready"}>
+    class:hidden={!ready}>
     <video class="m-auto rounded" bind:this={video} />
   </div>
 {:else}
