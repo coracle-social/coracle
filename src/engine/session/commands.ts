@@ -42,7 +42,7 @@ export const loginWithNsecBunker = async (pubkey, connectToken, connectRelay) =>
 
 export const loginWithNostrConnect = async (username, connectHandler: NostrConnectHandler) => {
   const connectKey = generatePrivateKey()
-  const {pubkey} = await fetchHandle(`${username}@${connectHandler.domain}`)
+  const {pubkey} = (await fetchHandle(`${username}@${connectHandler.domain}`)) || {}
 
   let broker = NostrConnectBroker.get(pubkey, connectKey, connectHandler)
 

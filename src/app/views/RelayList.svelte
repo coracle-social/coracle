@@ -7,7 +7,7 @@
   import {router} from "src/app/router"
   import {
     follows,
-    people,
+    derivePerson,
     personHasName,
     displayPubkey,
     relayPolicies,
@@ -20,7 +20,7 @@
   const ownRelays = new Set(pluck("url", $relayPolicies))
 
   for (const pubkey of $follows) {
-    if (!personHasName(people.key(pubkey).get())) {
+    if (!personHasName(derivePerson(pubkey).get())) {
       continue
     }
 
