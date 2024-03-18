@@ -101,9 +101,7 @@
     <div class="flex items-center justify-between gap-4">
       <Anchor on:click={() => setActiveTab("notes")} class="text-2xl"
         >{displayGroup($group)}</Anchor>
-      <div class="hidden xs:block">
-        <GroupActions {address} {claim} />
-      </div>
+      <GroupActions {address} {claim} />
     </div>
     <GroupAbout {address} />
   </div>
