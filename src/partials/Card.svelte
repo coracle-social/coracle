@@ -11,11 +11,17 @@
 
   const dispatch = createEventDispatcher()
 
-  const getClick = e => ({
-    x: e.x || e.touches[0].clientX,
-    y: e.y || e.touches[0].clientY,
-    t: Date.now(),
-  })
+  const getClick = e => {
+    if (!e.touches) {
+      return null
+    }
+
+    return {
+      x: e.x || e.touches[0].clientX,
+      y: e.y || e.touches[0].clientY,
+      t: Date.now(),
+    }
+  }
 
   const startClick = e => {
     click = getClick(e)

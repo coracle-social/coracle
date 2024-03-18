@@ -22,7 +22,7 @@ export const getStalePubkeys = (pubkeys: Iterable<string>) => {
   const since = now() - seconds(3, "hour")
 
   for (const pubkey of pubkeys) {
-    if (!pubkey.match(/^[0-f]{64}$/)) {
+    if (!pubkey?.match(/^[0-f]{64}$/)) {
       continue
     }
 

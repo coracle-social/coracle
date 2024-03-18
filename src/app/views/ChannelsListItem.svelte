@@ -18,7 +18,7 @@
   const pubkeys = channel.id.split(",") as string[]
   const displayPubkeys = pubkeys.length === 1 ? pubkeys : without([$pubkey], pubkeys)
   const showAlert = channels.key(channel.id).derived(channelHasNewMessages)
-  const members = people.mapStore.derived($p => displayPubkeys.map(pk => $p.get(pk)))
+  const members = people.mapStore.derived($p => displayPubkeys.map(pk => $p.get(pk) || {pubkey: pk}))
 
   const enter = () => router.at("channels").of(pubkeys).push()
 
