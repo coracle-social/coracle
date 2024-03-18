@@ -1,7 +1,7 @@
 import {join} from "ramda"
 import {nip44} from "nostr-tools"
 import {cached} from "paravel"
-import {switcherFn} from "hurdak"
+import {switcherFn, tryFunc} from "hurdak"
 import type {Session} from "src/engine/session/model"
 import type {Connect} from "./connect"
 import {withExtension} from "./nip07"
@@ -36,7 +36,7 @@ export class Nip44 {
   }
 
   decrypt(payload: string, pk: string, sk: string) {
-    return nip44.v2.decrypt(payload, getSharedSecret(sk, pk))
+    return tryFunc(() => nip44.v2.decrypt(payload, getSharedSecret(sk, pk)))
   }
 
   encryptAsUser(message: string, pk: string) {

@@ -37,8 +37,6 @@ export const saveRelayPolicy = (e, relays: RelayPolicy[]) => {
 }
 
 export const publishRelays = ($relays: RelayPolicy[]) => {
-  updateStore(people.key(stateKey.get()), now(), {relays: $relays})
-
   if (canSign.get()) {
     return createAndPublish(10002, {
       tags: $relays
@@ -54,6 +52,8 @@ export const publishRelays = ($relays: RelayPolicy[]) => {
         })
         .concat(getClientTags()),
     })
+  } else {
+    updateStore(people.key(stateKey.get()), now(), {relays: $relays})
   }
 }
 
