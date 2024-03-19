@@ -29,7 +29,15 @@
   $: suggestions?.setData?.(term ? search(term).slice(0, 10) : defaultOptions)
 
   export const clear = () => {
+    clearValue()
+    clearTerm()
+  }
+
+  export const clearValue = () => {
     value = multiple ? [] : null
+  }
+
+  export const clearTerm = () => {
     term = multiple ? "" : displayItem(value) || ""
   }
 
