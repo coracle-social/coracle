@@ -95,10 +95,11 @@ export class NostrConnectBroker extends Emitter {
       window.open(auth_url, "Coracle", "width=600,height=800,popup=yes")
     })
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.once(`response-${id}`, ({result, error}) => {
         if (error) {
-          reject(error)
+          logger.error(error)
+          resolve(undefined)
         } else {
           resolve(result)
         }
