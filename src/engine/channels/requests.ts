@@ -32,7 +32,7 @@ export const loadAllMessages = ({reload = false} = {}) => {
     while (!done) {
       cursor.take(250)
 
-      await sleep(500)
+      await sleep(2000)
 
       done = cursor.done()
     }
