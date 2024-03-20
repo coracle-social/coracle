@@ -25,7 +25,7 @@
     actions = []
 
     actions.push({
-      onClick: () => router.at("groups").of(address).at("share").open(),
+      onClick: () => router.at("invite/create").qp({initialGroupAddress: address}).open(),
       label: "Share",
       icon: "share-nodes",
     })

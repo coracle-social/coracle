@@ -90,11 +90,6 @@
       address: asNaddr("address"),
     },
   })
-  router.register("/groups/:address/share", import("src/app/views/GroupShare.svelte"), {
-    serializers: {
-      address: asNaddr("address"),
-    },
-  })
   router.register("/groups/:address/rotate", import("src/app/views/GroupRotate.svelte"), {
     requireSigner: true,
     serializers: {
@@ -106,13 +101,13 @@
   router.register("/groups/:address/:activeTab", import("src/app/views/GroupDetail.svelte"), {
     serializers: {
       address: asNaddr("address"),
-      claim: asString('claim'),
+      claim: asString("claim"),
     },
   })
   router.register("/groups/:address", import("src/app/views/GroupDetail.svelte"), {
     serializers: {
       address: asNaddr("address"),
-      claim: asString('claim'),
+      claim: asString("claim"),
     },
   })
 
