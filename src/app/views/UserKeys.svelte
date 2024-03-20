@@ -1,33 +1,17 @@
 <script lang="ts">
   import {uniqBy, uniq, sortBy, prop} from "ramda"
   import {createMap} from "hurdak"
-  import {getAddress} from "paravel"
   import {nip19} from "nostr-tools"
-  import {nsecEncode, giftWrapKinds, isKeyValid, getPublicKey, toHex} from "src/util/nostr"
-  import {toast} from "src/partials/state"
+  import {nsecEncode} from "src/util/nostr"
   import CopyValue from "src/partials/CopyValue.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Field from "src/partials/Field.svelte"
-  import Input from "src/partials/Input.svelte"
-  import Modal from "src/partials/Modal.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Heading from "src/partials/Heading.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import GroupName from "src/app/shared/GroupName.svelte"
-  import {
-    nip59,
-    session,
-    hints,
-    groupSharedKeys,
-    deriveIsGroupMember,
-    groupAdminKeys,
-    subscribe,
-  } from "src/engine"
+  import {session, groupSharedKeys, deriveIsGroupMember, groupAdminKeys} from "src/engine"
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
   const keypairUrl = "https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/"
-
-  let nsec = null
 
   $: adminKeys = createMap("group", $groupAdminKeys)
   $: sharedKeys = createMap(
@@ -83,8 +67,8 @@
     <h2 class="staatliches text-2xl">Group keys</h2>
   </div>
   <p>
-    These keys are used for accessing or managing closed groups. Save these to make sure you
-    don't lose access to your groups.
+    These keys are used for accessing or managing closed groups. Save these to make sure you don't
+    lose access to your groups.
   </p>
   {#each addresses as address (address)}
     {@const sharedKey = sharedKeys[address]}

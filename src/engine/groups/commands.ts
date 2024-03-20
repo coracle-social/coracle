@@ -1,6 +1,6 @@
 import {partition} from "ramda"
 import {now, createEvent, decodeAddress} from "paravel"
-import {randomId} from "hurdak"
+import {randomId, seconds} from "hurdak"
 import {generatePrivateKey, getPublicKey} from "src/util/nostr"
 import {updateRecord} from "src/engine/core/commands"
 import {Publisher, getClientTags, sign, mention} from "src/engine/network/utils"
@@ -98,6 +98,7 @@ export const publishToGroupAdmin = async (address, template) => {
   for (const pubkey of pubkeys) {
     const rumors = await wrapWithFallback(template, {
       wrap: {
+        tags: [["expiration", String(now() + seconds(30, "day"))]],
         author: generatePrivateKey(),
         recipient: pubkey,
       },

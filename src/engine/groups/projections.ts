@@ -32,6 +32,8 @@ projections.addHandler(24, (e: Event) => {
     return
   }
 
+  const status = deriveGroupStatus(address).get()
+
   if (privkey) {
     const pubkey = getPublicKey(privkey)
     const role = tags.get("role")?.value()
@@ -47,7 +49,7 @@ projections.addHandler(24, (e: Event) => {
     }))
 
     // Notify the user if this isn't just a key rotation
-    if (deriveGroupStatus(address).get()?.access !== GroupAccess.Granted) {
+    if (status?.access !== GroupAccess.Granted) {
       groupAlerts.key(e.id).set({...e, group: address, type: "invite"})
     }
 
@@ -60,7 +62,7 @@ projections.addHandler(24, (e: Event) => {
         {kinds: giftWrapKinds, authors: [pubkey]},
       ],
     })
-  } else {
+  } else if ([GroupAccess.Granted, GroupAccess.Requested].includes(status?.access)) {
     groupAlerts.key(e.id).set({...e, group: address, type: "exit"})
   }
 
@@ -173,7 +175,8 @@ const handleGroupRequest = access => (e: Event) => {
   const address = Tags.fromEvent(e).get("a")?.value()
   const adminKey = deriveAdminKeyForGroup(address)
 
-  if (adminKey.get()) {
+  // Don't bother the admin with old requests
+  if (adminKey.get() && e.created_at) {
     groupRequests.key(e.id).update(
       mergeRight({
         ...e,

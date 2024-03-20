@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {zipObj, pluck} from "ramda"
-  import {normalizeRelayUrl} from "paravel"
+  import {zipObj, uniq, pluck} from "ramda"
+  import {normalizeRelayUrl, decodeAddress} from "paravel"
   import {updateIn} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -12,7 +12,7 @@
   import GroupActions from "src/app/shared/GroupActions.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import Onboarding from "src/app/views/Onboarding.svelte"
-  import {session, loadGroups} from "src/engine"
+  import {session, loadGroups, groups as allGroups} from "src/engine"
 
   export let people = []
   export let relays = []
@@ -21,9 +21,34 @@
   const parsedRelays = relays
     .map(s => zipObj(["url", "claim"], s.split("|")))
     .map(updateIn("url", normalizeRelayUrl))
-  const parsedGroups = groups.map(s => zipObj(["address", "relay", "claim"], s.split("|")))
+  const parsedGroups = groups.map(s => zipObj(["address", "relay", "claim"], s.split("|"))) as {
+    address: string
+    relay: string
+    claim: string
+  }[]
 
   loadGroups(pluck("address", parsedGroups) as string[], pluck("relay", parsedGroups) as string[])
+
+  // Add relay hints to groups so we can use them deep in the call stack
+  for (const {address, relay} of parsedGroups) {
+    const group = allGroups.key(address)
+
+    if (relay) {
+      const addr = decodeAddress(address)
+
+      group.update($g => {
+        const {relays = []} = $g
+
+        return {
+          ...$g,
+          address,
+          id: addr.identifier,
+          pubkey: addr.pubkey,
+          relays: uniq([...relays, relay]),
+        }
+      })
+    }
+  }
 </script>
 
 {#if $session}
