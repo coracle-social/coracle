@@ -18,10 +18,10 @@ export const seal = (content, pubkey) => ({
   pubkey,
 })
 
-export const wrap = (content, pubkey, recipient, kind = 1059) => ({
+export const wrap = (content, pubkey, recipient, kind = 1059, tags = []) => ({
   kind,
   created_at: now(5),
-  tags: [["p", recipient]],
+  tags: tags.concat([["p", recipient]]),
   content,
   pubkey,
 })
@@ -33,6 +33,7 @@ export type WrapperParams = {
     recipient: string
     kind?: 1059 | 1060
     algo?: "nip04" | "nip44"
+    tags?: string[][]
   }
 }
 
@@ -112,9 +113,9 @@ export class Nip59 {
     return signedEvent
   }
 
-  async getWrap(seal, {wrap: {author, recipient, algo, kind}}: WrapperParams) {
+  async getWrap(seal, {wrap: {author, recipient, algo, kind, tags = []}}: WrapperParams) {
     const content = await this.encrypt(seal, recipient, author, algo)
-    const rawEvent = wrap(content, this.getAuthorPubkey(author), recipient, kind)
+    const rawEvent = wrap(content, this.getAuthorPubkey(author), recipient, kind, tags)
     const signedEvent = this.sign(rawEvent, author)
 
     return signedEvent

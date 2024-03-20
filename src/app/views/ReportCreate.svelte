@@ -20,7 +20,7 @@
   const submit = () => {
     const tags = [
       ["p", pubkey],
-      ["expiration", now() + seconds(7, "day")],
+      ["expiration", String(now() + seconds(7, "day"))],
     ]
 
     if (flags.length > 0) {

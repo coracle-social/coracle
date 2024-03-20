@@ -50,9 +50,6 @@ export const loadAllMessages = ({reload = false} = {}) => {
 export const listenForMessages = (pubkeys: string[]) => {
   const {pubkey} = session.get()
   const allPubkeys = uniq(pubkeys.concat(pubkey))
-  console.log(hints.getUserRelays())
-  console.log(hints.options.getPubkeyRelays(pubkeys[0]))
-  console.log(hints.Messages(pubkeys).limit(100).getUrls())
 
   return subscribe({
     skipCache: true,

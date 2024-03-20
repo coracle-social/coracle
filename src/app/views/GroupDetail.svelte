@@ -1,7 +1,7 @@
 <script>
   import {onMount} from "svelte"
   import {whereEq, without} from "ramda"
-  import {randomId} from "hurdak"
+  import {randomId, ucFirst} from "hurdak"
   import {noteKinds} from "src/util/nostr"
   import {getKey} from "src/util/router"
   import {themeBackgroundGradient} from "src/partials/state"
@@ -120,7 +120,16 @@
 </div>
 
 {#if tabs.length > 1}
-  <Tabs {tabs} {activeTab} {setActiveTab} />
+  <Tabs {tabs} {activeTab} {setActiveTab}>
+    <div slot="tab" let:tab class="flex gap-2">
+      <div>{ucFirst(tab)}</div>
+      {#if tab === "admin" && $requests.length > 0}
+        <div class="h-6 rounded-full bg-neutral-700 px-2">
+          {$requests.length}
+        </div>
+      {/if}
+    </div>
+  </Tabs>
 {/if}
 
 {#if address.startsWith("35834") && $status.access !== GroupAccess.Granted}
