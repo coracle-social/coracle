@@ -360,31 +360,37 @@ export const resetGroupAccess = address =>
   setGroupStatus(pubkey.get(), address, now(), {access: GroupAccess.None})
 
 export const publishGroupEntryRequest = (address, claim = null) => {
-  setGroupStatus(pubkey.get(), address, now(), {access: GroupAccess.Requested})
+  if (deriveAdminKeyForGroup(address).get()) {
+    publishGroupInvites(address, [session.get().pubkey])
+  } else {
+    setGroupStatus(pubkey.get(), address, now(), {access: GroupAccess.Requested})
 
-  const tags = [...getClientTags(), ["a", address]]
+    const tags = [...getClientTags(), ["a", address]]
 
-  if (claim) {
-    tags.push(["claim", claim])
+    if (claim) {
+      tags.push(["claim", claim])
+    }
+
+    publishToGroupAdmin(
+      address,
+      createEvent(25, {
+        content: `${displayPubkey(pubkey.get())} would like to join the group`,
+        tags,
+      }),
+    )
   }
-
-  return publishToGroupAdmin(
-    address,
-    createEvent(25, {
-      content: `${displayPubkey(pubkey.get())} would like to join the group`,
-      tags,
-    }),
-  )
 }
 
 export const publishGroupExitRequest = address => {
   setGroupStatus(pubkey.get(), address, now(), {access: GroupAccess.None})
 
-  return publishToGroupAdmin(
-    address,
-    createEvent(26, {
-      content: `${displayPubkey(pubkey.get())} is leaving the group`,
-      tags: [...getClientTags(), ["a", address]],
-    }),
-  )
+  if (!deriveAdminKeyForGroup(address).get()) {
+    publishToGroupAdmin(
+      address,
+      createEvent(26, {
+        content: `${displayPubkey(pubkey.get())} is leaving the group`,
+        tags: [...getClientTags(), ["a", address]],
+      }),
+    )
+  }
 }

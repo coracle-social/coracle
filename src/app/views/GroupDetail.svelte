@@ -1,6 +1,7 @@
 <script>
   import {onMount} from "svelte"
   import {whereEq, without} from "ramda"
+  import {randomId} from "hurdak"
   import {noteKinds} from "src/util/nostr"
   import {getKey} from "src/util/router"
   import {themeBackgroundGradient} from "src/partials/state"
@@ -28,6 +29,7 @@
     deriveGroup,
     deriveAdminKeyForGroup,
     deriveSharedKeyForGroup,
+    deriveIsGroupMember,
     deriveGroupStatus,
     loadGroups,
     loadGroupMessages,
@@ -41,6 +43,7 @@
 
   const group = deriveGroup(address)
   const status = deriveGroupStatus(address)
+  const isGroupMember = deriveIsGroupMember(address)
   const sharedKey = deriveSharedKeyForGroup(address)
   const adminKey = deriveAdminKeyForGroup(address)
   const requests = groupRequests.derived(requests =>
@@ -54,16 +57,23 @@
       .at(tab)
       .push({key: getKey(router.current.get())})
 
-  onMount(() => {
+  const loadGroupData = () => {
     loadGroups([address], relays)
     loadGroupMessages([address], relays)
-  })
+    loadPubkeys($group.members || [])
+  }
 
-  $: ({rgb, rgba} = $themeBackgroundGradient)
+  onMount(loadGroupData)
 
   let tabs
+  let key = randomId()
 
-  $: loadPubkeys($group.members || [])
+  $: {
+    if ($isGroupMember) {
+      loadGroupData()
+      key = randomId()
+    }
+  }
 
   $: {
     tabs = ["notes"]
@@ -85,6 +95,8 @@
       activeTab = "notes"
     }
   }
+
+  $: ({rgb, rgba} = $themeBackgroundGradient)
 
   document.title = $group?.name || "Group Detail"
 </script>
@@ -127,7 +139,13 @@
   {#if $canSign}
     <NoteCreateInline group={address} />
   {/if}
-  <Feed shouldListen hideControls filter={{kinds: without([30402], noteKinds), "#a": [address]}} />
+  {#key key}
+    <Feed
+      eager
+      shouldListen
+      hideControls
+      filter={{kinds: without([30402], noteKinds), "#a": [address]}} />
+  {/key}
 {:else if activeTab === "calendar"}
   <Calendar group={address} filters={[{kinds: [31923], "#a": [address]}]} />
 {:else if activeTab === "market"}

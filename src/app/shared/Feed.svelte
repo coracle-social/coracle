@@ -24,6 +24,7 @@
   export let relays = []
   export let filter: DynamicFilter = {}
   export let anchor = null
+  export let eager = false
   export let skipCache = false
   export let skipPlatform = false
   export let shouldDisplay = null
@@ -69,6 +70,7 @@
       relays: getRelays(),
       anchor,
       shouldListen,
+      shouldDefer: !eager,
       shouldLoadParents: true,
       shouldHideReplies: $hideReplies,
       onEvent,

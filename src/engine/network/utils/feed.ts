@@ -21,6 +21,7 @@ export type FeedOpts = {
   filters: Filter[]
   onEvent?: (e: Event) => void
   anchor?: string
+  shouldDefer?: boolean
   shouldListen?: boolean
   shouldBuffer?: boolean
   shouldHideReplies?: boolean
@@ -279,7 +280,7 @@ export class FeedLoader {
   }
 
   deferOrphans = (notes: Event[]) => {
-    if (!this.opts.shouldLoadParents) {
+    if (!this.opts.shouldLoadParents || this.opts.shouldDefer === false) {
       return notes
     }
 
@@ -296,6 +297,10 @@ export class FeedLoader {
   }
 
   deferAncient = (notes: Event[]) => {
+    if (this.opts.shouldDefer === false) {
+      return notes
+    }
+
     // Sometimes relays send very old data very quickly. Pop these off the queue and re-add
     // them after we have more timely data. They still might be relevant, but order will still
     // be maintained since everything before the cutoff will be deferred the same way.
