@@ -4,6 +4,7 @@
 
 - [x] Accept npubs in people input
 - [x] Skip notifying admin when the person joining/leaving groups is the admin
+- [x] Remove group share modal, skip straight to create invite link
 
 # 0.4.4
 
