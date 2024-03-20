@@ -93,7 +93,7 @@
     router.pop()
   }
 
-  let soft = false
+  let soft = true
   let members = people.mapStore
     .derived(m => Array.from(initialMembers).map(pubkey => m.get(pubkey) || {pubkey}))
     .get()
@@ -101,7 +101,7 @@
 
 <form on:submit|preventDefault={onSubmit}>
   <Content size="lg">
-    <Heading class="text-center">Rotate Keys</Heading>
+    <Heading class="text-center">Update Members</Heading>
     <p class="text-center">
       Rotate keys periodically to change group membership and increase security.
     </p>
