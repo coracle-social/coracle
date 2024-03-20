@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.4.5
+
+- [x] Accept npubs in people input
+- [x] Skip notifying admin when the person joining/leaving groups is the admin
+
 # 0.4.4
 
 - [x] Format time and date based on browser regional settings
