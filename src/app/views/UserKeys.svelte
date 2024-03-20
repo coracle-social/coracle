@@ -29,64 +29,6 @@
 
   let nsec = null
 
-  const startImport = () => {
-    nsec = ""
-  }
-
-  const cancelImport = () => {
-    nsec = null
-  }
-
-  const finishImport = async () => {
-    const privkey = nsec.startsWith("nsec") ? toHex(nsec) : nsec
-
-    if (!isKeyValid(privkey)) {
-      toast.show("warning", "Sorry, but that's an invalid private key.")
-      return
-    }
-
-    const pubkey = getPublicKey(privkey)
-
-    let found
-
-    // Look for group definition events by this pubkey so we can associate the key with the group
-    const sub = subscribe({
-      timeout: 3000,
-      relays: hints.User().getUrls(),
-      filters: [
-        {kinds: [35834], authors: [pubkey], limit: 1},
-        {kinds: giftWrapKinds, "#p": [pubkey], limit: 500},
-      ],
-      onEvent: async event => {
-        if (giftWrapKinds.includes(event.kind)) {
-          event = await $nip59.unwrap(event, privkey)
-        }
-
-        if (event.kind !== 35834 || event.pubkey !== pubkey) {
-          return
-        }
-
-        found = event
-        sub.close()
-        groupAdminKeys.key(pubkey).set({
-          group: getAddress(event),
-          pubkey,
-          privkey,
-          created_at: event.created_at,
-          hints: hints.Event(event).getUrls(),
-        })
-      },
-      onClose: () => {
-        if (found) {
-          nsec = null
-          toast.show("info", "Successfully imported admin key!")
-        } else {
-          toast.show("warning", "Sorry, we weren't able to find any events created with that key.")
-        }
-      },
-    })
-  }
-
   $: adminKeys = createMap("group", $groupAdminKeys)
   $: sharedKeys = createMap(
     "group",
@@ -136,53 +78,32 @@
       </div>
     {/if}
   </FlexColumn>
-  {#if addresses.length > 0}
-    <FlexColumn>
-      <div class="flex justify-between">
-        <div class="flex items-center gap-2">
-          <i class="fa fa-server fa-lg" />
-          <h2 class="staatliches text-2xl">Group keys</h2>
-        </div>
-        <Anchor button on:click={startImport}>
-          <i class="fa fa-upload" /> Import Key
-        </Anchor>
+  <div class="flex items-center gap-2">
+    <i class="fa fa-server fa-lg" />
+    <h2 class="staatliches text-2xl">Group keys</h2>
+  </div>
+  <p>
+    These keys are used for accessing or managing closed groups. Save these to make sure you
+    don't lose access to your groups.
+  </p>
+  {#each addresses as address (address)}
+    {@const sharedKey = sharedKeys[address]}
+    {@const adminKey = adminKeys[address]}
+    <div class="flex flex-col gap-4">
+      <div class="flex items-center gap-2">
+        <GroupCircle class="h-4 w-4" {address} />
+        <GroupName class="font-bold" {address} />
       </div>
-      <p>
-        These keys are used for accessing or managing closed groups. Save these to make sure you
-        don't lose access to your groups.
-      </p>
-      {#each addresses as address (address)}
-        {@const sharedKey = sharedKeys[address]}
-        {@const adminKey = adminKeys[address]}
-        <div class="flex flex-col gap-4">
-          <div class="flex items-center gap-2">
-            <GroupCircle class="h-4 w-4" {address} />
-            <GroupName class="font-bold" {address} />
-          </div>
-          <div class="ml-6 flex flex-col gap-4">
-            {#if sharedKey}
-              <CopyValue isPassword label="Access key" value={sharedKey.privkey} />
-            {/if}
-            {#if adminKey}
-              <CopyValue isPassword label="Admin key" value={adminKey.privkey} />
-            {/if}
-          </div>
-        </div>
-      {/each}
-    </FlexColumn>
-  {/if}
+      <div class="ml-6 flex flex-col gap-4">
+        {#if sharedKey}
+          <CopyValue isPassword label="Access key" value={sharedKey.privkey} />
+        {/if}
+        {#if adminKey}
+          <CopyValue isPassword label="Admin key" value={adminKey.privkey} />
+        {/if}
+      </div>
+    </div>
+  {:else}
+    <p class="text-center">No group keys found</p>
+  {/each}
 </FlexColumn>
-
-{#if nsec !== null}
-  <Modal onEscape={cancelImport}>
-    <Heading class="text-center">Import group key</Heading>
-    <p>
-      Share group administration using a dedicated private key. These keys are still valuable, so
-      keep them safe!
-    </p>
-    <Field label="Private key">
-      <Input type="password" bind:value={nsec} placeholder="nsec..." />
-    </Field>
-    <Anchor button accent on:click={finishImport}>Import key</Anchor>
-  </Modal>
-{/if}

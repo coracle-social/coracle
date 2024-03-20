@@ -90,6 +90,11 @@
       address: asNaddr("address"),
     },
   })
+  router.register("/groups/:address/invite-admin", import("src/app/views/GroupInviteAdmin.svelte"), {
+    serializers: {
+      address: asNaddr("address"),
+    },
+  })
   router.register("/groups/:address/rotate", import("src/app/views/GroupRotate.svelte"), {
     requireSigner: true,
     serializers: {
