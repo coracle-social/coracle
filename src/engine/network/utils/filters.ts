@@ -175,7 +175,8 @@ export const getRelaysFromFilters = filters =>
           return hints.FromPubkeys(shuffle(filter.authors))
         }
 
-        return hints.ReadRelays()
+        return hints.ReadRelays().policy(hints.addMinimalFallbacks)
       }),
     )
+    .policy(hints.addNoFallbacks)
     .getUrls()
