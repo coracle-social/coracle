@@ -6,6 +6,7 @@
 - [x] Skip notifying admin when the person joining/leaving groups is the admin
 - [x] Remove group share modal, skip straight to create invite link
 - [x] Rank groups by WoT
+- [x] Fix subtle navigation bugs
 
 # 0.4.4
 

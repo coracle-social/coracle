@@ -345,7 +345,7 @@
   let scrollY
 
   const unsubHistory = router.history.subscribe($history => {
-    if ($history[0].config.modal) {
+    if ($history[0].modal) {
       // This is not idempotent, so don't duplicate it
       if (document.body.style.position !== "fixed") {
         scrollY = window.scrollY

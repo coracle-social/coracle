@@ -1,5 +1,5 @@
-import {takeWhile, find, filter, identity, mergeLeft, reject, path as getPath} from "ramda"
-import {first, filterVals} from "hurdak"
+import {takeWhile, pick, find, filter, identity, mergeLeft, reject, prop} from "ramda"
+import {first, randomId, filterVals} from "hurdak"
 import logger from "src/util/logger"
 import {buildQueryString, parseQueryString, updateIn} from "src/util/misc"
 import {globalHistory} from "src/util/history"
@@ -135,7 +135,8 @@ export type Route = RegisterOpts & {
   component: any
 }
 
-export type RouteConfig = {
+export type HistoryItem = {
+  path: string
   key?: string
   mini?: boolean
   modal?: boolean
@@ -143,11 +144,6 @@ export type RouteConfig = {
   noEscape?: boolean
   replace?: boolean
   context?: Record<string, any>
-}
-
-export type HistoryItem = {
-  path: string
-  config: RouteConfig
 }
 
 export const asPath = (...parts: string[]) => {
@@ -230,15 +226,15 @@ class RouterExtension {
     return path
   }
 
-  go = (newConfig = {}) => {
-    const config = filterVals(identity, {
-      ...this.config,
-      ...newConfig,
-      context: this.context,
-    })
-
-    this.router.go(this.toString(), config)
-  }
+  go = (newConfig = {}) =>
+    this.router.go(
+      filterVals(identity, {
+        ...this.config,
+        ...newConfig,
+        context: this.context,
+        path: this.toString(),
+      })
+    )
 
   push = (config = {}) => this.go(config)
 
@@ -253,11 +249,11 @@ export class Router {
   routes: Route[] = []
   extensions: Record<string, RouterExtension> = {}
   history = writable<HistoryItem[]>([])
-  nonVirtual = this.history.derived(reject(getPath(["config", "virtual"])))
-  pages = this.nonVirtual.derived(filter((h: HistoryItem) => !h.config.modal))
-  page = this.nonVirtual.derived(find((h: HistoryItem) => !h.config.modal))
-  modals = this.nonVirtual.derived(takeWhile((h: HistoryItem) => h.config.modal))
-  modal = this.nonVirtual.derived(find((h: HistoryItem) => h.config.modal))
+  nonVirtual = this.history.derived(reject(prop('virtual')))
+  pages = this.nonVirtual.derived(filter((h: HistoryItem) => !h.modal))
+  page = this.nonVirtual.derived(find((h: HistoryItem) => !h.modal))
+  modals = this.nonVirtual.derived(takeWhile((h: HistoryItem) => h.modal))
+  modal = this.nonVirtual.derived(find((h: HistoryItem) => h.modal))
   current = this.nonVirtual.derived(history => history[0])
 
   init() {
@@ -271,14 +267,17 @@ export class Router {
 
   listen() {
     return globalHistory.listen(({location, action}) => {
+      const {state, pathname, search} = location
+      const path = pathname + search
       const [cur, prev] = this.history.get()
-      const key = this.getKey(location.state)
+      const key = this.getKey({path: pathname, ...state})
 
-      // If we're going back, splice instead of push
-      if (action === "POP" && prev && key === this.getKey(prev)) {
-        this.history.update($history => $history.slice(1))
-      } else if (key !== this.getKey(cur)) {
-        this.go(location.pathname + location.search)
+      if (action === "POP") {
+        if (prev && path === prev.path && key !== this.getKey(cur)) {
+          this.history.update($history => $history.slice(1))
+        } else if (path !== cur.path) {
+          this.go({path})
+        }
       }
     })
   }
@@ -301,20 +300,26 @@ export class Router {
     return match
   }
 
-  go(path, {replace, ...config}: RouteConfig = {}) {
-    const state = {path, config}
+  go({replace, ...state}: HistoryItem = {}) {
+    if (!state.path) {
+      throw new Error("router.go called without a path")
+    }
+
+    if (!state.key) {
+      state.key = randomId()
+    }
 
     this.history.update($history => {
       // Drop one if we're replacing
       if (replace) {
-        $history.splice(0, 1)
+        $history = $history.slice(1)
       }
 
       // Keep our history at 100 entries
       return [state, ...$history.slice(0, 100)]
     })
 
-    globalHistory.navigate(path, {replace, state})
+    globalHistory.navigate(state.path, {replace, state: {key: state.key}})
   }
 
   pop() {
@@ -328,18 +333,18 @@ export class Router {
   }
 
   remove(key) {
-    this.history.update(reject(($item: HistoryItem) => $item.config.key === key))
+    this.history.update(reject(($item: HistoryItem) => $item.key === key))
   }
 
   clearModals() {
     this.history.update($history => {
-      while ($history[0]?.config?.modal) {
+      while ($history[0]?.modal) {
         $history.splice(0, 1)
       }
 
       // Make sure we don't completely clear history out
       if ($history.length === 0) {
-        $history.push({path: "/", config: {}, ...this.getMatch("/")})
+        $history.push({path: "/"})
       }
 
       globalHistory.navigate($history[0].path || "/")
@@ -362,7 +367,7 @@ export class Router {
     const path = first(historyItem.path.split("?"))
     const params = this.decodeQueryString(historyItem.path)
 
-    return this.at(path).qp(params).cg(historyItem.config)
+    return this.at(path).qp(params).cg(historyItem)
   }
 
   fromCurrent() {
@@ -415,11 +420,11 @@ export class Router {
     return data
   }
 
-  getKey = (item: HistoryItem) => item.config.key || item.path
+  getKey = (item: HistoryItem) => item.key || item.path
 
   getProps = (item: HistoryItem) => ({
     ...this.decodeQueryString(item.path),
     ...this.decodeRouteParams(item.path),
-    ...item.config.context,
+    ...item.context,
   })
 }

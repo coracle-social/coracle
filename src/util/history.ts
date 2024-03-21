@@ -38,7 +38,6 @@ const createHistory = source => {
       to,
       {state = {}, replace = false, preserveScroll = false, blurActiveElement = true} = {},
     ) {
-      state = {...state, key: Date.now() + ""}
       // try...catch iOS Safari limits to 100 pushState calls
       try {
         if (replace) source.history.replaceState(state, "", to)

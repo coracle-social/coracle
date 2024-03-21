@@ -73,7 +73,7 @@
         <i class="fa fa-cog" /> Settings
       </MenuMobileItem>
       {#if !$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0}
-        <MenuMobileItem href="/settings/relays">
+        <MenuMobileItem href="/settings/relays" on:click={closeMenu}>
           <i class="fa fa-server" />
           <div class="relative inline-block">
             Relays
@@ -84,7 +84,7 @@
           </div>
         </MenuMobileItem>
       {/if}
-      <MenuMobileItem disabled={!$pubkey} href="/notifications">
+      <MenuMobileItem disabled={!$pubkey} href="/notifications" on:click={closeMenu}>
         <i class="fa fa-bell" />
         <div class="relative inline-block">
           Notifications
@@ -95,11 +95,11 @@
         </div>
       </MenuMobileItem>
       {#if $env.FORCE_GROUP}
-        <MenuMobileItem href="/events">
+        <MenuMobileItem href="/events" on:click={closeMenu}>
           <i class="fa fa-calendar-days" /> Calendar
         </MenuMobileItem>
         {#if $env.ENABLE_MARKET}
-          <MenuMobileItem href="/listings">
+          <MenuMobileItem href="/listings" on:click={closeMenu}>
             <i class="fa fa-store" /> Market
           </MenuMobileItem>
         {/if}
@@ -108,7 +108,7 @@
           <i class="fa fa-people-pulling" /> Community
         </MenuMobileItem>
       {/if}
-      <MenuMobileItem disabled={!$canSign} href="/channels">
+      <MenuMobileItem disabled={!$canSign} href="/channels" on:click={closeMenu}>
         <i class="fa fa-message" />
         <div class="relative inline-block">
           Messages
@@ -118,7 +118,7 @@
           {/if}
         </div>
       </MenuMobileItem>
-      <MenuMobileItem href="/notes">
+      <MenuMobileItem href="/notes" on:click={closeMenu}>
         <i class="fa fa-rss" /> Feed
       </MenuMobileItem>
     </div>
@@ -134,16 +134,16 @@
   <SliderMenu onEscape={closeSubMenu}>
     <p class="staatliches mb-8 text-center text-3xl">Community</p>
     <div class="staatliches m-auto grid grid-cols-2 gap-3">
-      <MenuMobileItem href="/events">
+      <MenuMobileItem href="/events" on:click={closeMenu}>
         <i class="fa fa-calendar-days" /> Calendar
       </MenuMobileItem>
       {#if $env.ENABLE_MARKET}
-        <MenuMobileItem href="/listings">
+        <MenuMobileItem href="/listings" on:click={closeMenu}>
           <i class="fa fa-store" /> Market
         </MenuMobileItem>
       {/if}
       {#if !$env.FORCE_GROUP}
-        <MenuMobileItem href="/groups">
+        <MenuMobileItem href="/groups" on:click={closeMenu}>
           <i class="fa fa-circle-nodes" /> Groups
         </MenuMobileItem>
       {/if}
@@ -156,20 +156,20 @@
     <p class="staatliches mb-8 text-center text-3xl">Settings</p>
     <div class="staatliches m-auto grid grid-cols-2 gap-3">
       {#if $installPrompt}
-        <MenuMobileItem on:click={installAsPWA}>
+        <MenuMobileItem on:click={installAsPWA} on:click={closeMenu}>
           <i class="fa fa-rocket" /> Install
         </MenuMobileItem>
       {/if}
-      <MenuMobileItem on:click={toggleTheme}>
+      <MenuMobileItem on:click={toggleTheme} on:click={closeMenu}>
         <i class="fa fa-palette" /> Theme
       </MenuMobileItem>
-      <MenuMobileItem disabled={!$pubkey} href="/settings/data">
+      <MenuMobileItem disabled={!$pubkey} href="/settings/data" on:click={closeMenu}>
         <i class="fa fa-database" /> Database
       </MenuMobileItem>
-      <MenuMobileItem disabled={!$canSign} href="/settings/content">
+      <MenuMobileItem disabled={!$canSign} href="/settings/content" on:click={closeMenu}>
         <i class="fa fa-volume-xmark" /> Content
       </MenuMobileItem>
-      <MenuMobileItem disabled={!$canSign} href="/settings">
+      <MenuMobileItem disabled={!$canSign} href="/settings" on:click={closeMenu}>
         <i class="fa fa-sliders" /> App Settings
       </MenuMobileItem>
     </div>
@@ -180,13 +180,13 @@
   <SliderMenu onEscape={closeSubMenu}>
     <p class="staatliches mb-8 text-center text-3xl">Account</p>
     <div class="staatliches m-auto mb-8 grid grid-cols-2 gap-3">
-      <MenuMobileItem href="/settings/keys">
+      <MenuMobileItem href="/settings/keys" on:click={closeMenu}>
         <i class="fa fa-key" /> Keys
       </MenuMobileItem>
-      <MenuMobileItem href={router.at("people").of($pubkey).toString()}>
+      <MenuMobileItem href={router.at("people").of($pubkey).toString()} on:click={closeMenu}>
         <i class="fa fa-user-circle" /> Profile
       </MenuMobileItem>
-      <MenuMobileItem href={router.at("invite/create").qp({initialPubkey: $pubkey}).toString()}>
+      <MenuMobileItem href={router.at("invite/create").qp({initialPubkey: $pubkey}).toString()} on:click={closeMenu}>
         <i class="fa fa-paper-plane" /> Create Invite
       </MenuMobileItem>
     </div>
