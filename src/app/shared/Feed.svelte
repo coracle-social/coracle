@@ -45,9 +45,9 @@
     }
 
     // If we have a search term we need to use only relays that support search
-    let result = filter.search ? $searchableRelays : getRelaysFromFilters(compileFilters([filter]))
-
-    result = hints.scenario([result]).getUrls()
+    let result = filter.search
+      ? hints.scenario([$searchableRelays]).getUrls()
+      : getRelaysFromFilters(compileFilters([filter]))
 
     if (!skipPlatform) {
       result = forcePlatformRelays(result)

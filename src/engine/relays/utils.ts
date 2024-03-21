@@ -99,7 +99,6 @@ export const hints = new Router({
   getCommunityRelays: getGroupRelayUrls,
   getPubkeyRelays: getPubkeyRelayUrls,
   getDefaultRelays: () => [
-    ...getUserRelayUrls(),
     ...env.get().PLATFORM_RELAYS,
     ...env.get().DEFAULT_RELAYS,
   ],
