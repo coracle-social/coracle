@@ -3,7 +3,6 @@
   import {whereEq, without} from "ramda"
   import {randomId, ucFirst} from "hurdak"
   import {noteKinds} from "src/util/nostr"
-  import {getKey} from "src/util/router"
   import {themeBackgroundGradient} from "src/partials/state"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -55,7 +54,7 @@
       .at("groups")
       .of(address)
       .at(tab)
-      .push({key: getKey(router.current.get())})
+      .push({key: router.getKey(router.current.get())})
 
   const loadGroupData = () => {
     loadGroups([address], relays)

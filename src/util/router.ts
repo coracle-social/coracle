@@ -147,9 +147,7 @@ export type RouteConfig = {
 
 export type HistoryItem = {
   path: string
-  params: Record<string, any>
   config: RouteConfig
-  route: Route
 }
 
 export const asPath = (...parts: string[]) => {
@@ -161,52 +159,6 @@ export const asPath = (...parts: string[]) => {
 
   return path
 }
-
-export const decodeQueryString = ({path, route}: HistoryItem) => {
-  const queryParams = parseQueryString(path)
-
-  const data = {}
-
-  for (const [k, serializer] of Object.entries(route.serializers || {})) {
-    const v = queryParams[k]
-
-    if (v) {
-      try {
-        Object.assign(data, serializer.decode(v))
-      } catch (e) {
-        logger.warn("Query string decoding failed", k, v, e)
-      }
-    }
-  }
-
-  return data
-}
-
-export const decodeRouteParams = ({params, route}: HistoryItem) => {
-  const data = {...params}
-
-  for (const [k, serializer] of Object.entries(route.serializers || {})) {
-    const v = params[k]
-
-    if (v) {
-      try {
-        Object.assign(data, serializer.decode(v))
-      } catch (e) {
-        logger.warn("Route param decoding failed", k, v, e)
-      }
-    }
-  }
-
-  return data
-}
-
-export const getKey = (item: HistoryItem) => item.config.key || item.path
-
-export const getProps = (item: HistoryItem) => ({
-  ...decodeQueryString(item),
-  ...decodeRouteParams(item),
-  ...item.config.context,
-})
 
 type RouterExtensionParams = {
   path: string
@@ -319,15 +271,14 @@ export class Router {
 
   listen() {
     return globalHistory.listen(({location, action}) => {
-      const {pathname, search} = location
       const [cur, prev] = this.history.get()
-      const path = search ? pathname + search : pathname
+      const key = this.getKey(location.state)
 
       // If we're going back, splice instead of push
-      if (action === "POP" && path === prev?.path) {
+      if (action === "POP" && prev && key === this.getKey(prev)) {
         this.history.update($history => $history.slice(1))
-      } else if (path !== cur.path) {
-        this.go(path)
+      } else if (key !== this.getKey(cur)) {
+        this.go(location.pathname + location.search)
       }
     })
   }
@@ -340,7 +291,7 @@ export class Router {
     this.routes.push({path, component, required, serializers, requireUser, requireSigner})
   }
 
-  getMatch(path) {
+  getMatch(path): {route: Route; params: Record<string, any>} {
     const match = pickRoute(this.routes, path)
 
     if (!match) {
@@ -351,7 +302,7 @@ export class Router {
   }
 
   go(path, {replace, ...config}: RouteConfig = {}) {
-    const {route, params} = this.getMatch(path)
+    const state = {path, config}
 
     this.history.update($history => {
       // Drop one if we're replacing
@@ -360,10 +311,10 @@ export class Router {
       }
 
       // Keep our history at 100 entries
-      return [{path, config, route, params}, ...$history.slice(0, 100)]
+      return [state, ...$history.slice(0, 100)]
     })
 
-    globalHistory.navigate(path, {replace, state: null})
+    globalHistory.navigate(path, {replace, state})
   }
 
   pop() {
@@ -409,7 +360,7 @@ export class Router {
 
   from(historyItem) {
     const path = first(historyItem.path.split("?"))
-    const params = decodeQueryString(historyItem)
+    const params = this.decodeQueryString(historyItem.path)
 
     return this.at(path).qp(params).cg(historyItem.config)
   }
@@ -421,4 +372,54 @@ export class Router {
   virtual() {
     return this.fromCurrent().cg({virtual: true})
   }
+
+  // Props etc
+
+  decodeQueryString = (path: string) => {
+    const {route} = this.getMatch(path)
+    const queryParams = parseQueryString(path)
+
+    const data = {}
+
+    for (const [k, serializer] of Object.entries(route.serializers || {})) {
+      const v = queryParams[k]
+
+      if (v) {
+        try {
+          Object.assign(data, serializer.decode(v))
+        } catch (e) {
+          logger.warn("Query string decoding failed", k, v, e)
+        }
+      }
+    }
+
+    return data
+  }
+
+  decodeRouteParams = (path: string) => {
+    const {route, params} = this.getMatch(path)
+    const data = {...params}
+
+    for (const [k, serializer] of Object.entries(route.serializers || {})) {
+      const v = params[k]
+
+      if (v) {
+        try {
+          Object.assign(data, serializer.decode(v))
+        } catch (e) {
+          logger.warn("Route param decoding failed", k, v, e)
+        }
+      }
+    }
+
+    return data
+  }
+
+  getKey = (item: HistoryItem) => item.config.key || item.path
+
+  getProps = (item: HistoryItem) => ({
+    ...this.decodeQueryString(item.path),
+    ...this.decodeRouteParams(item.path),
+    ...item.config.context,
+  })
 }

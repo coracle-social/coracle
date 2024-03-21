@@ -16,12 +16,8 @@
   let root, content, closing, historyItem, isNested
 
   const tryClose = () => {
-    if (!canClose) {
-      return
-    }
-
     // Since we're popping, avoid double clicks
-    if (closing) {
+    if (!canClose || closing) {
       return
     }
 
@@ -56,8 +52,8 @@
       router.virtual().open({key, mini})
     }
 
-    isNested = Boolean($history[1]?.config.modal)
     historyItem = $history[0]
+    isNested = Boolean($history[1]?.config.modal)
 
     // If history changes and removes this modal, notify the caller if virtual
     const unsub = history.subscribe($history => {
@@ -82,53 +78,51 @@
     }
   }} />
 
-<slot name="wrapper">
-  <div
-    bind:this={root}
-    transition:fade
-    class="modal group fixed inset-0 z-modal"
-    class:pointer-events-none={closing}>
-    <div
-      class="fixed inset-0 cursor-pointer bg-black opacity-50"
-      on:click|stopPropagation={tryClose} />
-    <div
-      class="modal-content h-full overflow-auto"
-      class:overflow-hidden={mini}
-      class:pointer-events-none={mini}
-      transition:fly={{y: 1000}}
-      bind:this={content}>
+<div bind:this={root} class="modal group">
+  <slot name="wrapper">
+    <div transition:fade class="fixed inset-0 z-modal" class:pointer-events-none={closing}>
       <div
-        class="pointer-events-auto mt-12 min-h-full transition transition-all duration-500"
-        class:mt-[55vh]={mini}>
-        {#if canClose}
-          <div
-            class="pointer-events-none sticky top-0 z-popover flex w-full flex-col items-end gap-2 p-2">
+        class="fixed inset-0 cursor-pointer bg-black opacity-50"
+        on:click|stopPropagation={tryClose} />
+      <div
+        class="modal-content h-full overflow-auto"
+        class:overflow-hidden={mini}
+        class:pointer-events-none={mini}
+        transition:fly={{y: 1000}}
+        bind:this={content}>
+        <div
+          class="pointer-events-auto mt-12 min-h-full transition transition-all duration-500"
+          class:mt-[55vh]={mini}>
+          {#if canClose}
             <div
-              class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
-                   border border-solid border-accent bg-accent text-white transition-colors hover:bg-accent"
-              on:click={tryClose}>
-              <i class="fa fa-times fa-lg cy-modal-close" />
+              class="pointer-events-none sticky top-0 z-popover flex w-full flex-col items-end gap-2 p-2">
+              <div
+                class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
+                     border border-solid border-accent bg-accent text-white transition-colors hover:bg-accent"
+                on:click={tryClose}>
+                <i class="fa fa-times fa-lg cy-modal-close" />
+              </div>
+              <div
+                on:click|stopPropagation={() => router.clearModals()}
+                class:hidden={!isNested || !canCloseAll}
+                class="clear-modals pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center
+                       rounded-full border border-solid border-tinted-700 bg-neutral-600 text-neutral-100 transition-colors hover:bg-neutral-600">
+                <i class="fa fa-angles-down fa-lg" />
+              </div>
             </div>
-            <div
-              on:click|stopPropagation={() => router.clearModals()}
-              class:hidden={!isNested || !canCloseAll}
-              class="clear-modals pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center
-                     rounded-full border border-solid border-tinted-700 bg-neutral-600 text-neutral-100 transition-colors hover:bg-neutral-600">
-              <i class="fa fa-angles-down fa-lg" />
-            </div>
+          {/if}
+          <AltColor background class="absolute mt-12 h-full w-full" />
+          <div on:click|stopPropagation>
+            <AltColor
+              background
+              class="relative h-full w-full cursor-auto overflow-hidden rounded-t-2xl pb-20 pt-2">
+              <div class="modal-content-inner m-auto flex max-w-2xl flex-col gap-4 p-2">
+                <slot />
+              </div>
+            </AltColor>
           </div>
-        {/if}
-        <AltColor background class="absolute mt-12 h-full w-full" />
-        <div on:click|stopPropagation>
-          <AltColor
-            background
-            class="relative h-full w-full cursor-auto overflow-hidden rounded-t-2xl pb-20 pt-2">
-            <div class="modal-content-inner m-auto flex max-w-2xl flex-col gap-4 p-2">
-              <slot />
-            </div>
-          </AltColor>
         </div>
       </div>
     </div>
-  </div>
-</slot>
+  </slot>
+</div>
