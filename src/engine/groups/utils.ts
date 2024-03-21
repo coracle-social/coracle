@@ -1,11 +1,13 @@
-import {identity, prop, uniqBy, defaultTo, sortBy, last, whereEq} from "ramda"
-import {ellipsize, seconds} from "hurdak"
+import Fuse from "fuse.js"
+import {identity, prop, uniqBy, map, defaultTo, sortBy, last, whereEq} from "ramda"
+import {ellipsize, doPipe, seconds} from "hurdak"
 import {Tags, decodeAddress, addressToNaddr} from "paravel"
 import {fuzzy} from "src/util/misc"
 import type {GroupStatus, Session} from "src/engine/session/model"
 import {pubkey} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {forcePlatformRelays, hints} from "src/engine/relays/utils"
+import {derivePerson, follows} from "src/engine/people/derived"
 import {groups, groupSharedKeys, groupAdminKeys} from "./state"
 import {GroupAccess} from "./model"
 import type {Group} from "./model"
@@ -27,7 +29,35 @@ export const deriveGroup = address => {
 
 export const getGroupSearch = $groups => fuzzy($groups, {keys: ["meta.name", "meta.about"]})
 
-export const searchGroups = groups.derived(getGroupSearch)
+export const getWotGroupMembers = address =>
+  Array.from(follows.get()).filter(
+    pk =>
+      derivePerson(pk)
+        .get()
+        .communities?.some(t => t[1] === address),
+  )
+
+export const searchGroups = groups.throttle(300).derived($groups => {
+  const options = $groups.map(group => ({group, score: getWotGroupMembers(group.address).length}))
+
+  const fuse = new Fuse(options, {
+    keys: [{name: "id", weight: 0.2}, "meta.name", "meta.about"],
+    threshold: 0.3,
+    shouldSort: false,
+    includeScore: true,
+  })
+
+  return (term: string) => {
+    if (!term) {
+      return sortBy(item => -item.score, options).map(item => item.group)
+    }
+
+    return doPipe(fuse.search(term), [
+      sortBy((r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100)),
+      map((r: any) => r.item.group),
+    ])
+  }
+})
 
 export const getRecipientKey = wrap => {
   const pubkey = Tags.fromEvent(wrap).values("p").first()

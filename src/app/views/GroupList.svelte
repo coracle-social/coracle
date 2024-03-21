@@ -1,9 +1,8 @@
 <script>
   import {onMount, onDestroy} from "svelte"
-  import {derived} from "svelte/store"
-  import {partition, assoc} from "ramda"
+  import {filter, assoc} from "ramda"
   import {now} from "paravel"
-  import {fuzzy, createScroller} from "src/util/misc"
+  import {createScroller} from "src/util/misc"
   import {giftWrapKinds} from "src/util/nostr"
   import {getModal} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
@@ -17,27 +16,25 @@
     deriveIsGroupMember,
     updateCurrentSession,
     forcePlatformRelays,
-    session,
+    searchGroups,
   } from "src/engine"
 
   const loadMore = async () => {
-    limit += 50
+    limit += 20
   }
 
   const scroller = createScroller(loadMore, {element: getModal()})
 
-  const groupList = derived([groups, session], ([$groups, $session]) => {
-    const [joined, other] = partition(g => deriveIsGroupMember(g.address, true).get(), $groups)
+  const userIsMember = g => deriveIsGroupMember(g.address, true).get()
 
-    return {joined, other}
-  })
+  const userGroups = groups.derived(filter(userIsMember))
 
   let q = ""
-  let limit = 50
+  let limit = 20
 
-  $: searchGroups = fuzzy($groupList.other, {
-    keys: [{name: "id", weight: 0.2}, "meta.name", "meta.description"],
-  })
+  $: otherGroups = $searchGroups(q)
+    .filter(g => !userIsMember(g))
+    .slice(0, limit)
 
   document.title = "Groups"
 
@@ -74,7 +71,7 @@
     <i class="fa-solid fa-plus" /> Create
   </Anchor>
 </div>
-{#each $groupList.joined as group (group.address)}
+{#each $userGroups as group (group.address)}
   <GroupListItem address={group.address} />
 {:else}
   <p class="text-center py-8">You haven't yet joined any groups.</p>
@@ -83,6 +80,6 @@
 <Input bind:value={q} type="text" wrapperClass="flex-grow" placeholder="Search groups">
   <i slot="before" class="fa-solid fa-search" />
 </Input>
-{#each searchGroups(q).slice(0, limit) as group (group.address)}
+{#each otherGroups as group (group.address)}
   <GroupListItem address={group.address} />
 {/each}

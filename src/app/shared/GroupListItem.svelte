@@ -3,13 +3,15 @@
   import Chip from "src/partials/Chip.svelte"
   import Card from "src/partials/Card.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
+  import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import {router} from "src/app/router"
-  import {displayGroup, deriveGroup} from "src/engine"
+  import {displayGroup, deriveGroup, getWotGroupMembers} from "src/engine"
 
   export let address
   export let modal = false
 
   const group = deriveGroup(address)
+  const members = getWotGroupMembers(address)
 
   const enter = () => {
     const route = router.at("groups").of(address).at("notes")
@@ -42,6 +44,10 @@
       <p class="text-start text-neutral-100">
         {ellipsize($group.meta.about, 300)}
       </p>
+    {/if}
+    {#if members.length > 0}
+      <p class="mt-4 text-lg text-neutral-300">Members:</p>
+      <PersonCircles pubkeys={members.slice(0, 20)} />
     {/if}
   </div>
 </Card>

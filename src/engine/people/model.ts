@@ -30,6 +30,8 @@ export type Person = {
   mutes?: string[][]
   relays_updated_at?: number
   relays?: RelayPolicy[]
+  communities_updated_at?: number
+  communities?: string[][]
   handle_updated_at?: number
   handle?: Handle
   zapper_updated_at?: number

@@ -5,6 +5,7 @@
 - [x] Accept npubs in people input
 - [x] Skip notifying admin when the person joining/leaving groups is the admin
 - [x] Remove group share modal, skip straight to create invite link
+- [x] Rank groups by WoT
 
 # 0.4.4
 
