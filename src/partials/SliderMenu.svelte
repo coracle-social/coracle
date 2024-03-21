@@ -3,7 +3,6 @@
   import {fade, fly} from "src/util/transition"
 
   export let onEscape
-  export let onClick
 </script>
 
 <Modal {onEscape}>
@@ -15,7 +14,7 @@
     <div
       transition:fly|local={{y: 600, duration: 300}}
       class="fixed bottom-0 left-0 right-0 z-modal rounded-t-2xl bg-neutral-800 pt-8"
-      on:click={onClick}>
+      on:click={onEscape}>
       <div class="flex flex-col justify-center gap-1 text-lg">
         <slot />
       </div>

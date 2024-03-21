@@ -157,7 +157,7 @@
 
 {#if showList}
   {@const listPubkeys = Tags.fromEvent(list).values("p").valueOf()}
-  <Modal onEscape={closeList}>
+  <Modal onEscape={closeList} canCloseAll={false}>
     <div class="flex items-center justify-between">
       <p class="text-2xl font-bold">{list.title}</p>
       {#if listPubkeys.every(pubkey => pubkeys.includes(pubkey))}
@@ -194,7 +194,7 @@
 {/if}
 
 {#if showSelections}
-  <Modal onEscape={closeSelections}>
+  <Modal onEscape={closeSelections} canCloseAll={false}>
     <Subheading>People you follow</Subheading>
     <p class="text-lg">
       These are the people you'll be following once you finish creating your account.
@@ -256,7 +256,7 @@
 {/if}
 
 {#if showPersonSearch}
-  <Modal onEscape={closePersonSearch}>
+  <Modal onEscape={closePersonSearch} canCloseAll={false}>
     <Input bind:value={term}>
       <i slot="before" class="fa fa-search" />
     </Input>
