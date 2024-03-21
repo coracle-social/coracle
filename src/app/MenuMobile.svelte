@@ -49,7 +49,7 @@
 </script>
 
 {#if $menuIsOpen}
-  <SliderMenu onClick={closeMenu} onEscape={closeMenu}>
+  <SliderMenu onEscape={closeMenu}>
     <div class="m-auto max-w-[236px] py-8">
       {#if $pubkey}
         <Anchor
@@ -131,7 +131,7 @@
 {/if}
 
 {#if subMenu === "community"}
-  <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
+  <SliderMenu onEscape={closeSubMenu}>
     <p class="staatliches mb-8 text-center text-3xl">Community</p>
     <div class="staatliches m-auto grid grid-cols-2 gap-3">
       <MenuMobileItem href="/events">
@@ -152,7 +152,7 @@
 {/if}
 
 {#if subMenu === "settings"}
-  <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
+  <SliderMenu onEscape={closeSubMenu}>
     <p class="staatliches mb-8 text-center text-3xl">Settings</p>
     <div class="staatliches m-auto grid grid-cols-2 gap-3">
       {#if $installPrompt}
@@ -177,7 +177,7 @@
 {/if}
 
 {#if subMenu === "account"}
-  <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
+  <SliderMenu onEscape={closeSubMenu}>
     <p class="staatliches mb-8 text-center text-3xl">Account</p>
     <div class="staatliches m-auto mb-8 grid grid-cols-2 gap-3">
       <MenuMobileItem href="/settings/keys">
@@ -200,7 +200,7 @@
 {/if}
 
 {#if subMenu === "accounts"}
-  <SliderMenu onClick={closeMenu} onEscape={closeSubMenu}>
+  <SliderMenu onEscape={closeSubMenu}>
     {#each Object.values($sessions) as s (s.pubkey)}
       {#if s.pubkey !== $pubkey}
         <MenuItem class="py-4" on:click={() => pubkey.set(s.pubkey)}>

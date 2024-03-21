@@ -9,6 +9,8 @@
 
   const {current, page, modal, modals} = router
 
+  let prevPage = ""
+
   $: {
     if ($modal) {
       logger.info("modal", $modal, getProps($modal))
@@ -17,9 +19,12 @@
 
   $: {
     if ($page) {
-      window.scrollTo(0, 0)
-
       logger.info("page", $page, getProps($page))
+
+      if ($page.path !== prevPage?.path) {
+        window.scrollTo(0, 0)
+        prevPage = $page
+      }
     }
   }
 

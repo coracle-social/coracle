@@ -9,6 +9,7 @@
   export let virtual = true
   export let onEscape = null
   export let canClose = true
+  export let canCloseAll = true
 
   const {history} = router
 
@@ -47,10 +48,12 @@
   }
 
   onMount(() => {
+    const key = randomId()
+
     // Make sure we can identify this modal by key
     // If we're virtual, add a new one, if not update the old one
     if (virtual) {
-      router.virtual().open({key: randomId(), mini})
+      router.virtual().open({key, mini})
     }
 
     isNested = Boolean($history[1]?.config.modal)
@@ -67,6 +70,7 @@
     return () => {
       unsub()
       tryPop()
+      router.remove(key)
     }
   })
 </script>
@@ -107,7 +111,7 @@
             </div>
             <div
               on:click|stopPropagation={() => router.clearModals()}
-              class:hidden={!isNested}
+              class:hidden={!isNested || !canCloseAll}
               class="clear-modals pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center
                      rounded-full border border-solid border-tinted-700 bg-neutral-600 text-neutral-100 transition-colors hover:bg-neutral-600">
               <i class="fa fa-angles-down fa-lg" />
