@@ -25,7 +25,7 @@ export const isKeyValid = (key: string) => {
 }
 
 export const noteKinds = [1, 30023, 9802, 1808, 32123, 31923, 30402]
-export const personKinds = [0, 2, 3, 10000, 10002]
+export const personKinds = [0, 2, 3, 10000, 10002, 10004]
 export const reactionKinds = [7, 9735]
 export const repostKinds = [6, 16]
 export const giftWrapKinds = [1059, 1060]

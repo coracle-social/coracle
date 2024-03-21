@@ -88,3 +88,9 @@ projections.addHandler(10000, e => {
       .valueOf(),
   })
 })
+
+projections.addHandler(10004, e => {
+  updateStore(people.key(e.pubkey), e.created_at, {
+    communities: Tags.fromEvent(e).whereKey("a").valueOf(),
+  })
+})

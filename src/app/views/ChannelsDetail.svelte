@@ -7,7 +7,7 @@
   import Popover from "src/partials/Popover.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import PersonCircle from "src/app/shared/PersonCircle.svelte"
+  import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {router} from "src/app/router"
@@ -81,13 +81,7 @@
   <div slot="header" class="flex h-16 items-start gap-4 overflow-hidden p-1 px-4">
     <div class="flex items-center gap-4 pt-1">
       <Anchor class="fa fa-arrow-left cursor-pointer text-2xl" href="/channels" />
-      <div class="mr-3 flex pt-1">
-        {#each pubkeys as pubkey (pubkey)}
-          <div class="-mr-3 inline-block">
-            <PersonCircle class="h-10 w-10 border-2 border-solid border-neutral-900" {pubkey} />
-          </div>
-        {/each}
-      </div>
+      <PersonCircles {pubkeys} />
     </div>
     <div class="flex h-12 w-full flex-col overflow-hidden pt-1">
       <div class="w-full">
