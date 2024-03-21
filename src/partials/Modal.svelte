@@ -53,7 +53,7 @@
     }
 
     historyItem = $history[0]
-    isNested = Boolean($history[1]?.config.modal)
+    isNested = Boolean($history[1]?.modal)
 
     // If history changes and removes this modal, notify the caller if virtual
     const unsub = history.subscribe($history => {

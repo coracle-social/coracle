@@ -30,12 +30,12 @@
   $: {
     // Redirect if we have no user
     if (!$session && $page && router.getMatch($page.path).route.requireUser) {
-      router.go("/", {replace: true})
+      router.go({path: "/", replace: true})
     }
 
     // Redirect if we need a signer
     if (!$signer.isEnabled() && $page && router.getMatch($page.path).route.requireSigner) {
-      router.go("/", {replace: true})
+      router.go({path: "/", replace: true})
     }
 
     const props = router.getProps($current)
@@ -44,7 +44,7 @@
     // This is usually due to a malformed url.
     for (const k of router.getMatch($current.path).route.required || []) {
       if (!props[k]) {
-        router.go("/", {replace: true})
+        router.go({path: "/", replace: true})
         break
       }
     }
@@ -71,9 +71,9 @@
   </div>
 {/key}
 
-{#each reverse($modals).filter(m => !m.config.virtual) as m, i (router.getKey(m) + i)}
+{#each reverse($modals).filter(m => !m.virtual) as m, i (router.getKey(m) + i)}
   {@const promise = router.getMatch(m.path).route.component}
-  <Modal virtual={false} canClose={!m.config.noEscape}>
+  <Modal virtual={false} canClose={!m.noEscape}>
     {#key $stateKey}
       {#await promise}
         <!-- pass -->
