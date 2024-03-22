@@ -12,6 +12,7 @@ import {groups, groupSharedKeys} from "src/engine/groups/state"
 import {pool} from "src/engine/network/state"
 import {getSetting} from "src/engine/session/utils"
 import type {Relay} from "./model"
+import {relays} from './state'
 
 export const normalizeRelayUrl = (url: string) => {
   if (url === LOCAL_RELAY_URL) {
@@ -111,9 +112,20 @@ export const hints = new Router({
   getDefaultRelays: () => [...env.get().PLATFORM_RELAYS, ...env.get().DEFAULT_RELAYS],
   getDefaultLimit: () => parseInt(getSetting("relay_limit")),
   getRelayQuality: (url: string) => {
+    const oneMinute = 60 * 1000
+    const oneDay = 24 * 60 * oneMinute
     const connection = pool.get(url, {autoConnect: false})
 
-    return switcher(connection?.meta.getStatus(), {
+    // If we haven't connected, consult our relay record and see if there has
+    // been a recent fault. If there has been, penalize the relay.
+    if (!connection) {
+      const lastFault = relays.key(url).get()?.last_fault || 0
+      const timeSinceFault = Date.now() - oneMinute - lastFault
+
+      return Math.max(0, Math.min(0.5, timeSinceFault / oneDay))
+    }
+
+    return switcher(connection.meta.getStatus(), {
       [ConnectionStatus.Unauthorized]: 0.5,
       [ConnectionStatus.Forbidden]: 0,
       [ConnectionStatus.Error]: 0,
