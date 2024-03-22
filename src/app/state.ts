@@ -8,6 +8,7 @@ import {router} from "src/app/router"
 import {
   env,
   pool,
+  relays,
   pubkey,
   follows,
   session,
@@ -78,9 +79,11 @@ setInterval(() => {
   // Prune connections we haven't used in a while, clear errors periodically,
   // and keep track of slow connections
   for (const [url, connection] of pool.data.entries()) {
-    const {lastPublish, lastRequest} = connection.meta
+    const {lastPublish, lastRequest, lastFault} = connection.meta
     const lastActivity = Math.max(lastPublish, lastRequest)
     const status = connection.meta.getStatus()
+
+    relays.key(url).merge({last_fault: lastFault})
 
     if (lastActivity < Date.now() - 60_000) {
       connection.disconnect()
