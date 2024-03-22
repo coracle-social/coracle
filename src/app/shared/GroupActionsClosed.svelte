@@ -43,17 +43,23 @@
       })
 
       actions.push({
+        onClick: () => router.at("groups").of(address).at("delete").open(),
+        label: "Delete",
+        icon: "trash",
+      })
+
+      actions.push({
         onClick: () => router.at("groups").of(address).at("rotate").open(),
         label: "Membership",
         icon: "rotate",
       })
-
-      actions.push({
-        onClick: () => router.at("groups").of(address).at("info").open(),
-        label: "Details",
-        icon: "info",
-      })
     }
+
+    actions.push({
+      onClick: () => router.at("groups").of(address).at("info").open(),
+      label: "Details",
+      icon: "info",
+    })
   }
 
   let showClaim

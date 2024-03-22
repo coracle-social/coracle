@@ -38,11 +38,17 @@
       })
 
       actions.push({
-        onClick: () => router.at("groups").of(address).at("info").open(),
-        label: "Details",
-        icon: "info",
+        onClick: () => router.at("groups").of(address).at("delete").open(),
+        label: "Delete",
+        icon: "trash",
       })
     }
+
+    actions.push({
+      onClick: () => router.at("groups").of(address).at("info").open(),
+      label: "Details",
+      icon: "info",
+    })
   }
 
   const join = () => publishCommunitiesList(deriveUserCommunities().get().concat(address))
