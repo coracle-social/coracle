@@ -12,6 +12,7 @@
     load,
     hints,
     groups,
+    deletes,
     getGroupReqInfo,
     deriveIsGroupMember,
     updateCurrentSession,
@@ -27,7 +28,7 @@
 
   const userIsMember = g => deriveIsGroupMember(g.address, true).get()
 
-  const userGroups = groups.derived(filter(userIsMember))
+  const userGroups = groups.derived(filter(g => !$deletes.has(g.address) && userIsMember(g)))
 
   let q = ""
   let limit = 20

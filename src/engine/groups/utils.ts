@@ -6,6 +6,7 @@ import {fuzzy} from "src/util/misc"
 import type {GroupStatus, Session} from "src/engine/session/model"
 import {pubkey} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
+import {deletes} from "src/engine/events/state"
 import {forcePlatformRelays, hints} from "src/engine/relays/utils"
 import {derivePerson, follows} from "src/engine/people/derived"
 import {groups, groupSharedKeys, groupAdminKeys} from "./state"
@@ -38,7 +39,10 @@ export const getWotGroupMembers = address =>
   )
 
 export const searchGroups = groups.throttle(300).derived($groups => {
-  const options = $groups.map(group => ({group, score: getWotGroupMembers(group.address).length}))
+  const $deletes = deletes.get()
+  const options = $groups
+    .filter(group => !$deletes.has(group.address))
+    .map(group => ({group, score: getWotGroupMembers(group.address).length}))
 
   const fuse = new Fuse(options, {
     keys: [{name: "id", weight: 0.2}, "meta.name", "meta.about"],

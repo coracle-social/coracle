@@ -85,16 +85,26 @@
       address: asNaddr("address"),
     },
   })
+  router.register("/groups/:address/delete", import("src/app/views/GroupDelete.svelte"), {
+    requireSigner: true,
+    serializers: {
+      address: asNaddr("address"),
+    },
+  })
   router.register("/groups/:address/info", import("src/app/views/GroupInfo.svelte"), {
     serializers: {
       address: asNaddr("address"),
     },
   })
-  router.register("/groups/:address/invite-admin", import("src/app/views/GroupInviteAdmin.svelte"), {
-    serializers: {
-      address: asNaddr("address"),
+  router.register(
+    "/groups/:address/invite-admin",
+    import("src/app/views/GroupInviteAdmin.svelte"),
+    {
+      serializers: {
+        address: asNaddr("address"),
+      },
     },
-  })
+  )
   router.register("/groups/:address/rotate", import("src/app/views/GroupRotate.svelte"), {
     requireSigner: true,
     serializers: {

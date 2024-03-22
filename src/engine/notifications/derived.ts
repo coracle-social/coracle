@@ -4,6 +4,7 @@ import {now, Tags} from "paravel"
 import {isLike, reactionKinds, noteKinds, repostKinds} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import {isSeen} from "src/engine/events/derived"
+import {deletes} from "src/engine/events/state"
 import {unwrapRepost} from "src/engine/events/utils"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {derived} from "src/engine/core/utils"
@@ -49,11 +50,11 @@ export const unreadNotifications = derived([isSeen, notifications], ([$isSeen, $
 })
 
 export const groupNotifications = derived(
-  [session, events, groupRequests, groupAlerts, groupAdminKeys],
+  [session, events, deletes, groupRequests, groupAlerts, groupAdminKeys],
   x => x,
 )
   .throttle(3000)
-  .derived(([$session, $events, $requests, $alerts, $adminKeys, $addresses]) => {
+  .derived(([$session, $events, $deletes, $requests, $alerts, $adminKeys, $addresses]) => {
     const addresses = new Set(getUserCircles($session))
     const adminPubkeys = new Set($adminKeys.map(k => k.pubkey))
     const $isEventMuted = isEventMuted.get()
@@ -64,6 +65,7 @@ export const groupNotifications = derived(
 
       return (
         !context.some(a => addresses.has(a)) ||
+        context.some(a => $deletes.has(a)) ||
         !noteKinds.includes(e.kind) ||
         e.pubkey === $session.pubkey ||
         // Skip mentions since they're covered in normal notifications
@@ -75,8 +77,8 @@ export const groupNotifications = derived(
     return sortBy(
       x => -x.created_at,
       [
-        ...$requests.filter(r => !r.resolved).map(assoc("t", "request")),
-        ...$alerts.filter(a => !adminPubkeys.has(a.pubkey)).map(assoc("t", "alert")),
+        ...$requests.filter(r => !r.resolved && !$deletes.has(r.group)).map(assoc("t", "request")),
+        ...$alerts.filter(a => !adminPubkeys.has(a.pubkey) && !$deletes.has(a.group)).map(assoc("t", "alert")),
         ...$events
           .map(e => (repostKinds.includes(e.kind) ? unwrapRepost(e) : e))
           .filter(e => e && !shouldSkip(e)),
