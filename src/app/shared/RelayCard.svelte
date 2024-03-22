@@ -1,8 +1,11 @@
 <script lang="ts">
-  import {stringToHue, hsl} from "src/util/misc"
+  import {isNil} from "ramda"
+  import {quantify} from "hurdak"
+  import {stringToHue, displayUrl, hsl} from "src/util/misc"
   import Toggle from "src/partials/Toggle.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import Popover from "src/partials/Popover.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
   import {router} from "src/app/router"
@@ -51,6 +54,26 @@
   </div>
   {#if relay.description}
     <p>{relay.description}</p>
+  {/if}
+  {#if !isNil(relay.count)}
+    <span class="flex items-center gap-1 text-sm text-neutral-400">
+      {#if relay.contact}
+        <Anchor external underline href={relay.contact}>{displayUrl(relay.contact)}</Anchor>
+        &bull;
+      {/if}
+      {#if relay.supported_nips}
+        <Popover>
+          <span slot="trigger" class="cursor-pointer underline">
+            {relay.supported_nips.length} NIPs
+          </span>
+          <span slot="tooltip">
+            NIPs supported: {relay.supported_nips.join(", ")}
+          </span>
+        </Popover>
+        &bull;
+      {/if}
+      Seen {quantify(relay.count || 0, "time")}
+    </span>
   {/if}
   {#if showControls && $canSign}
     <div class="-mx-6 my-1 h-px bg-tinted-700" />

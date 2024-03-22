@@ -42,7 +42,17 @@ export const displayRelay = ({url}: Relay) => last(url.split("://")).replace(/\/
 export const displayRelays = (relays: Relay[], max = 3) =>
   displayList(relays.map(displayRelay), "and", max)
 
-export const getRelaySearch = $relays => fuzzy($relays, {keys: ["url", "name", "description"]})
+export const getRelaySearch = ($relays: Relay[]) => {
+  const search = fuzzy($relays, {keys: ["url", "name", "description"]})
+
+  return term => {
+    if (!term) {
+      return sortBy(r => -r.count || 0, $relays)
+    }
+
+    return search(term)
+  }
+}
 
 export const getSearchableRelays = ($relays: Relay[]) => {
   const urls = pluck(
@@ -98,10 +108,7 @@ export const hints = new Router({
   getGroupRelays: getGroupRelayUrls,
   getCommunityRelays: getGroupRelayUrls,
   getPubkeyRelays: getPubkeyRelayUrls,
-  getDefaultRelays: () => [
-    ...env.get().PLATFORM_RELAYS,
-    ...env.get().DEFAULT_RELAYS,
-  ],
+  getDefaultRelays: () => [...env.get().PLATFORM_RELAYS, ...env.get().DEFAULT_RELAYS],
   getDefaultLimit: () => parseInt(getSetting("relay_limit")),
   getRelayQuality: (url: string) => {
     const connection = pool.get(url, {autoConnect: false})
