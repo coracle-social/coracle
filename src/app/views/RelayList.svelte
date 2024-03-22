@@ -7,6 +7,7 @@
   import {router} from "src/app/router"
   import {
     follows,
+    deriveRelay,
     derivePerson,
     personHasName,
     displayPubkey,
@@ -32,7 +33,7 @@
   }
 
   const otherRelays = Object.entries(pubkeysByUrl)
-    .map(([url, pubkeys]) => ({url, pubkeys}))
+    .map(([url, pubkeys]) => ({...deriveRelay(url).get(), pubkeys}))
     .sort(comparator((a, b) => a.pubkeys.length > b.pubkeys.length))
 
   // Drop the top 10 most popular relays to avoid network centralization
@@ -77,9 +78,9 @@
     profiles and content.
   </p>
   <div class="grid grid-cols-1 gap-4">
-    {#each otherRelays.slice(offset, offset + 20) as { url, pubkeys } (url)}
-      {@const pubkeyDisplay = displayList(shuffle(pubkeys).map(displayPubkey))}
-      <RelayCard relay={{url, description: `Used by ${pubkeyDisplay}`}} />
+    {#each otherRelays.slice(offset, offset + 20) as relay (relay.url)}
+      {@const pubkeyDisplay = displayList(shuffle(relay.pubkeys).map(displayPubkey))}
+      <RelayCard relay={{...relay, description: `Used by ${pubkeyDisplay}`}} />
     {/each}
   </div>
 {/if}

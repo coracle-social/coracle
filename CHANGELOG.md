@@ -7,6 +7,7 @@
 - [x] Remove group share modal, skip straight to create invite link
 - [x] Rank groups by WoT
 - [x] Fix subtle navigation bugs
+- [x] Show a little more metadata on relay card
 
 # 0.4.4
 

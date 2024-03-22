@@ -1,4 +1,4 @@
-import {takeWhile, pick, find, filter, identity, mergeLeft, reject, prop} from "ramda"
+import {takeWhile, find, filter, identity, mergeLeft, reject} from "ramda"
 import {first, randomId, filterVals} from "hurdak"
 import logger from "src/util/logger"
 import {buildQueryString, parseQueryString, updateIn} from "src/util/misc"
@@ -233,7 +233,7 @@ class RouterExtension {
         ...newConfig,
         context: this.context,
         path: this.toString(),
-      })
+      }),
     )
 
   push = (config = {}) => this.go(config)
@@ -249,7 +249,7 @@ export class Router {
   routes: Route[] = []
   extensions: Record<string, RouterExtension> = {}
   history = writable<HistoryItem[]>([])
-  nonVirtual = this.history.derived(reject(prop('virtual')))
+  nonVirtual = this.history.derived(reject((h: HistoryItem) => h.virtual))
   pages = this.nonVirtual.derived(filter((h: HistoryItem) => !h.modal))
   page = this.nonVirtual.derived(find((h: HistoryItem) => !h.modal))
   modals = this.nonVirtual.derived(takeWhile((h: HistoryItem) => h.modal))
@@ -300,7 +300,7 @@ export class Router {
     return match
   }
 
-  go({replace, ...state}: HistoryItem = {}) {
+  go({replace, ...state}: HistoryItem) {
     if (!state.path) {
       throw new Error("router.go called without a path")
     }
