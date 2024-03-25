@@ -1,6 +1,6 @@
 import Bugsnag from "@bugsnag/js"
 import {hash, union} from "hurdak"
-import {ConnectionStatus} from "paravel"
+import {ConnectionStatus} from "@coracle.social/network"
 import {warn} from "src/util/logger"
 import {userKinds} from "src/util/nostr"
 import {toast} from "src/partials/state"

@@ -1,4 +1,5 @@
-import {now, decodeAddress, isGroupAddress} from "paravel"
+import {now} from "@coracle.social/lib"
+import {decodeAddress, isGroupAddress} from "@coracle.social/util"
 import {seconds} from "hurdak"
 import {partition} from "ramda"
 import {noteKinds, giftWrapKinds, repostKinds} from "src/util/nostr"
@@ -47,7 +48,7 @@ export const loadGroups = async (rawAddrs: string[], relays: string[] = []) => {
   }
 }
 
-export const loadGroupMessages = async (addresses = null) => {
+export const loadGroupMessages = async (addresses?: string[]) => {
   const addrs = addresses || deriveUserCircles().get()
   const [groupAddrs, communityAddrs] = partition(a => isGroupAddress(decodeAddress(a)), addrs)
 

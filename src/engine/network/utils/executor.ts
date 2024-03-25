@@ -1,6 +1,7 @@
 import {max, uniq, partition, equals} from "ramda"
 import {noop, pickVals} from "hurdak"
-import {Plex, Relays, Executor, Multi, createEvent} from "paravel"
+import {createEvent} from "@coracle.social/util"
+import {Plex, Relays, Executor, Multi} from "@coracle.social/network"
 import {error, warn} from "src/util/logger"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {normalizeRelayUrl} from "src/engine/relays/utils"

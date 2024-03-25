@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "paravel"
+  import {Tags} from "@coracle.social/util"
   import {urlIsMedia} from "src/util/notes"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
 

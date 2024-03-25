@@ -21,8 +21,6 @@
     displayPubkey,
   } from "src/engine"
 
-  const {page} = router
-
   const closeSubMenu = () => {
     subMenu = null
   }
@@ -36,17 +34,7 @@
     )
   }
 
-  let subMenu, active
-
-  $: {
-    if ($page?.path.startsWith("/notes")) {
-      active = "feed"
-    } else if ($page?.path.startsWith("/notifications")) {
-      active = "notifications"
-    } else if ($page?.path.startsWith("/channels")) {
-      active = "channels"
-    }
-  }
+  let subMenu
 </script>
 
 <div class="fixed bottom-0 left-0 top-0 z-nav w-72 bg-tinted-700 transition-colors">

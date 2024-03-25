@@ -1,6 +1,7 @@
 import {nip19} from "nostr-tools"
 import {throttle} from "throttle-debounce"
-import {fromNostrURI, cached} from "paravel"
+import {cached} from "@coracle.social/lib"
+import {fromNostrURI} from "@coracle.social/util"
 import {uniq, join, nth, last} from "ramda"
 import {Fetch, tryFunc, createMapOf, ellipsize, switcherFn} from "hurdak"
 import logger from "src/util/logger"

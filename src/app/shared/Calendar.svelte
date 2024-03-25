@@ -2,7 +2,7 @@
   import {fromPairs} from "ramda"
   import {batch} from "hurdak"
   import {onMount} from "svelte"
-  import {getAddress} from "paravel"
+  import {getAddress} from "@coracle.social/util"
   import Calendar from "@event-calendar/core"
   import DayGrid from "@event-calendar/day-grid"
   import Interaction from "@event-calendar/interaction"

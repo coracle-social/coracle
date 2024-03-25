@@ -1,5 +1,5 @@
 import {last, pluck, identity} from "ramda"
-import {fromNostrURI, Tags} from "paravel"
+import {fromNostrURI, Tags} from "@coracle.social/util"
 import {nip19} from "nostr-tools"
 import {first, switcherFn} from "hurdak"
 import logger from "src/util/logger"

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "paravel"
+  import {Tags} from "@coracle.social/util"
   import {secondsToDate, getLocale} from "src/util/misc"
 
   export let event

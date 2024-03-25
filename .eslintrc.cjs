@@ -4,14 +4,21 @@ module.exports = {
     browser: true,
     es2021: true,
   },
-  plugins: ["svelte3", "@typescript-eslint"],
+  plugins: ["@typescript-eslint"],
   overrides: [
     {
       files: ["*.svelte"],
-      processor: "svelte3/svelte3",
+      parser: "svelte-eslint-parser",
+      parserOptions: {
+        parser: "@typescript-eslint/parser",
+      },
     },
   ],
-  extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+  extends: [
+    "eslint:recommended",
+    "plugin:svelte/recommended",
+    "plugin:@typescript-eslint/recommended",
+  ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: "latest",
@@ -32,6 +39,8 @@ module.exports = {
     "no-extra-semi": "off",
     "no-async-promise-executor": "off",
     "prefer-const": ["error", {destructuring: "all"}],
+    "svelte/valid-compile": "off",
+    "svelte/no-at-html-tags": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-extra-semi": "off",
     "@typescript-eslint/ban-ts-comment": "off",

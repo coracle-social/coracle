@@ -1,6 +1,7 @@
 import {uniq, prop} from "ramda"
 import {sleep} from "hurdak"
-import {Emitter, matchFilters} from "paravel"
+import {Emitter} from "@coracle.social/lib"
+import {matchFilters} from "@coracle.social/util"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {_events} from "src/engine/events/state"
 import {events, eventsByKind} from "src/engine/events/derived"

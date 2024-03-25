@@ -1,5 +1,11 @@
 import {last, fromPairs, identity} from "ramda"
-import {encodeAddress, decodeAddress, addressFromNaddr, addressToNaddr, fromNostrURI} from "paravel"
+import {
+  encodeAddress,
+  decodeAddress,
+  addressFromNaddr,
+  addressToNaddr,
+  fromNostrURI,
+} from "@coracle.social/util"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {tryJson} from "src/util/misc"

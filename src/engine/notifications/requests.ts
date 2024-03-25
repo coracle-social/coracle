@@ -1,4 +1,5 @@
-import {now, Tags} from "paravel"
+import {now} from "@coracle.social/lib"
+import {Tags} from "@coracle.social/util"
 import {seconds, batch, doPipe} from "hurdak"
 import {pluck, max, slice, filter, without, sortBy} from "ramda"
 import {updateIn} from "src/util/misc"

@@ -1,6 +1,6 @@
 import {assocPath, uniq} from "ramda"
 import {seconds, sleep} from "hurdak"
-import {now} from "paravel"
+import {now} from "@coracle.social/lib"
 import {sessions} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {loadPubkeys, subscribe, MultiCursor} from "src/engine/network/utils"

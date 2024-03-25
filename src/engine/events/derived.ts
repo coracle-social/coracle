@@ -1,4 +1,4 @@
-import {Tags, getIdAndAddress} from "paravel"
+import {Tags, getIdAndAddress} from "@coracle.social/util"
 import {whereEq, groupBy, find} from "ramda"
 import {derived, DerivedCollection} from "src/engine/core/utils"
 import {pubkey} from "src/engine/session/state"

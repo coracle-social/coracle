@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {last} from "ramda"
   import {ellipsize, Fetch} from "hurdak"
-  import {Tags} from "paravel"
+  import {Tags} from "@coracle.social/util"
   import Audio from "src/partials/Audio.svelte"
   import Image from "src/partials/Image.svelte"
   import Anchor from "src/partials/Anchor.svelte"

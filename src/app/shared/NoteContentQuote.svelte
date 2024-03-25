@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {getAddress} from "paravel"
+  import {getAddress} from "@coracle.social/util"
   import {filterVals} from "hurdak"
   import {asArray} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
@@ -20,10 +20,7 @@
   const {id, identifier, kind, pubkey} = value
 
   const relays = hints
-    .merge([
-      hints.scenario([(value.relays || [])]),
-      hints.EventParent(note),
-    ])
+    .merge([hints.scenario([value.relays || []]), hints.EventParent(note)])
     .getUrls()
 
   const openQuote = e => {

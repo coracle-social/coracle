@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "paravel"
+  import {Tags} from "@coracle.social/util"
   import {onMount} from "svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"

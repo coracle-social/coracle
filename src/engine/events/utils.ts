@@ -1,6 +1,6 @@
 import {nip19} from "nostr-tools"
 import {sortBy} from "ramda"
-import {fromNostrURI, Tags, hasValidSignature} from "paravel"
+import {fromNostrURI, Tags, hasValidSignature} from "@coracle.social/util"
 import {tryFunc, switcherFn} from "hurdak"
 import {tryJson} from "src/util/misc"
 import type {Event} from "./model"

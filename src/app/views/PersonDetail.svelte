@@ -1,6 +1,6 @@
 <script lang="ts">
   import {identity} from "ramda"
-  import {stripProtocol} from "paravel"
+  import {stripProtocol} from "@coracle.social/lib"
   import {info} from "src/util/logger"
   import {ensureProto} from "src/util/misc"
   import {noteKinds} from "src/util/nostr"

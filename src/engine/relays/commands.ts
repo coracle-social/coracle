@@ -1,5 +1,6 @@
 import {whereEq, when, reject, uniqBy, prop, inc} from "ramda"
-import {now, normalizeRelayUrl, createEvent, isShareableRelayUrl} from "paravel"
+import {now} from "@coracle.social/lib"
+import {normalizeRelayUrl, createEvent, isShareableRelayUrl} from "@coracle.social/util"
 import {people} from "src/engine/people/state"
 import {session, canSign, signer, stateKey} from "src/engine/session/derived"
 import {updateStore} from "src/engine/core/commands"

@@ -18,12 +18,12 @@
   const urls = $settings.nip96_urls.slice(0, hostLimit)
   const dispatch = createEventDispatcher()
 
-  let input, listener, loading
+  let input, loading
   let isOpen = false
 
   $: {
     if (input) {
-      listener = listenForFile(input, async inputFiles => {
+      listenForFile(input, async inputFiles => {
         if (inputFiles) {
           loading = true
 

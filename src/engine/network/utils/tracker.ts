@@ -1,5 +1,5 @@
 import {ensurePlural} from "hurdak"
-import {isShareableRelayUrl} from "paravel"
+import {isShareableRelayUrl} from "@coracle.social/util"
 
 export class Tracker {
   urlsByEventId = new Map()

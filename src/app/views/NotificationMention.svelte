@@ -1,6 +1,6 @@
 <script lang="ts">
   import {pluck, uniq} from "ramda"
-  import {Tags} from "paravel"
+  import {Tags} from "@coracle.social/util"
   import {formatTimestamp} from "src/util/misc"
   import Note from "src/app/shared/Note.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"

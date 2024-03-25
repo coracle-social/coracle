@@ -5,7 +5,7 @@
   import {nip19} from "nostr-tools"
   import {fromPairs} from "ramda"
   import {switcherFn} from "hurdak"
-  import {fromNostrURI, Tags} from "paravel"
+  import {fromNostrURI, Tags} from "@coracle.social/util"
   import {warn} from "src/util/logger"
   import {urlIsMedia} from "src/util/notes"
   import Chip from "src/partials/Chip.svelte"

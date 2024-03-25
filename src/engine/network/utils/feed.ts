@@ -1,6 +1,7 @@
 import {partition, concat, prop, uniqBy, identity, without, assoc} from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
-import {now, Tags, getIdOrAddress, getIdAndAddress} from "paravel"
+import {now} from "@coracle.social/lib"
+import {Tags, getIdOrAddress, getIdAndAddress} from "@coracle.social/util"
 import {race} from "src/util/misc"
 import {info} from "src/util/logger"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"

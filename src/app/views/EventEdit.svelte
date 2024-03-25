@@ -1,7 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {inc} from "ramda"
-  import {Tags, decodeAddress, now, asEventTemplate} from "paravel"
+  import {now} from "@coracle.social/lib"
+  import {Tags, decodeAddress, asEventTemplate} from "@coracle.social/util"
   import {sleep} from "hurdak"
   import {secondsToDate, dateToSeconds} from "src/util/misc"
   import FlexColumn from "src/partials/FlexColumn.svelte"

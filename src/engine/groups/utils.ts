@@ -1,7 +1,7 @@
 import Fuse from "fuse.js"
 import {identity, prop, uniqBy, map, defaultTo, sortBy, last, whereEq} from "ramda"
 import {ellipsize, doPipe, seconds} from "hurdak"
-import {Tags, decodeAddress, addressToNaddr} from "paravel"
+import {Tags, decodeAddress, addressToNaddr} from "@coracle.social/util"
 import {fuzzy} from "src/util/misc"
 import type {GroupStatus, Session} from "src/engine/session/model"
 import {pubkey} from "src/engine/session/state"
@@ -31,11 +31,10 @@ export const deriveGroup = address => {
 export const getGroupSearch = $groups => fuzzy($groups, {keys: ["meta.name", "meta.about"]})
 
 export const getWotGroupMembers = address =>
-  Array.from(follows.get()).filter(
-    pk =>
-      derivePerson(pk)
-        .get()
-        .communities?.some(t => t[1] === address),
+  Array.from(follows.get()).filter(pk =>
+    derivePerson(pk)
+      .get()
+      .communities?.some(t => t[1] === address),
   )
 
 export const searchGroups = groups.throttle(300).derived($groups => {

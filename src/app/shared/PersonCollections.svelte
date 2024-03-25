@@ -1,6 +1,6 @@
 <script lang="ts">
   import {batch} from "hurdak"
-  import {Tags} from "paravel"
+  import {Tags} from "@coracle.social/util"
   import Chip from "src/partials/Chip.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import Note from "src/app/shared/Note.svelte"

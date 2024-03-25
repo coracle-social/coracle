@@ -1,5 +1,5 @@
 import EventEmitter from "events"
-import {createEvent, getIdAndAddress, asEvent, Tags} from "paravel"
+import {createEvent, getIdAndAddress, asEvent, Tags} from "@coracle.social/util"
 import {omit, uniqBy} from "ramda"
 import {defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"

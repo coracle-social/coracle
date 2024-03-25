@@ -1,6 +1,6 @@
 <script lang="ts">
   import {switcherFn} from "hurdak"
-  import {Tags} from "paravel"
+  import {Tags} from "@coracle.social/util"
   import Anchor from "src/partials/Anchor.svelte"
   import Rating from "src/partials/Rating.svelte"
   import {router} from "src/app/router"

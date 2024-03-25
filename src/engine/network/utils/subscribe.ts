@@ -1,5 +1,5 @@
-import type {SubscriptionOpts, Executor} from "paravel"
-import {Subscription} from "paravel"
+import type {SubscriptionOpts, Executor} from "@coracle.social/network"
+import {Subscription} from "@coracle.social/network"
 import {sleep} from "hurdak"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"

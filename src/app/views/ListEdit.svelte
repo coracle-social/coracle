@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags, decodeAddress} from "paravel"
+  import {Tags, decodeAddress} from "@coracle.social/util"
   import {randomId} from "hurdak"
   import {toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {reject, uniqBy, nth, identity} from "ramda"
   import {quantify} from "hurdak"
-  import {Tags} from "paravel"
+  import {Tags} from "@coracle.social/util"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"

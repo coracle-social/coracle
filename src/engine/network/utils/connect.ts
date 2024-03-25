@@ -1,7 +1,9 @@
 import {equals} from "ramda"
 import type {EventTemplate} from "nostr-tools"
 import {nip04, finalizeEvent} from "nostr-tools"
-import {Emitter, now, Subscription, createEvent} from "paravel"
+import {Emitter, now} from "@coracle.social/lib"
+import {createEvent} from "@coracle.social/util"
+import {Subscription} from "@coracle.social/network"
 import {randomId, sleep} from "hurdak"
 import {NostrConnect} from "nostr-tools/kinds"
 import logger from "src/util/logger"
@@ -15,7 +17,8 @@ import type {NostrConnectHandler} from "../model"
 let singleton: NostrConnectBroker
 
 // FIXME set the full list of requested perms
-const Perms = "nip04_encrypt,nip04_decrypt,sign_event:0,sign_event:1,sign_event:4,sign_event:6,sign_event:7"
+const Perms =
+  "nip04_encrypt,nip04_decrypt,sign_event:0,sign_event:1,sign_event:4,sign_event:6,sign_event:7"
 
 export class NostrConnectBroker extends Emitter {
   #sub: Subscription
@@ -91,11 +94,11 @@ export class NostrConnectBroker extends Emitter {
 
     Publisher.publish({event, relays: this.handler.relays, silent: true})
 
-    this.once(`auth-${id}`, (auth_url) => {
+    this.once(`auth-${id}`, auth_url => {
       window.open(auth_url, "Coracle", "width=600,height=800,popup=yes")
     })
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       this.once(`response-${id}`, ({result, error}) => {
         if (error) {
           logger.error(error)

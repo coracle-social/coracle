@@ -1,4 +1,4 @@
-import {Tags} from "paravel"
+import {Tags} from "@coracle.social/util"
 import {tryJson} from "src/util/misc"
 import {updateStore, updateRecord} from "src/engine/core/commands"
 import {projections} from "src/engine/core/projections"

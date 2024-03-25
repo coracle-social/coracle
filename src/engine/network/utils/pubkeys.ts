@@ -1,7 +1,7 @@
 import type {Event} from "nostr-tools"
 import {without, uniq} from "ramda"
 import {seconds} from "hurdak"
-import {now} from "paravel"
+import {now} from "@coracle.social/lib"
 import {personKinds, appDataKeys} from "src/util/nostr"
 import {people} from "src/engine/people/state"
 import {hints} from "src/engine/relays/utils"

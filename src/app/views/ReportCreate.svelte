@@ -1,7 +1,7 @@
 <script lang="ts">
   import {identity} from "ramda"
   import {seconds} from "hurdak"
-  import {now} from "paravel"
+  import {now} from "@coracle.social/lib"
   import {fuzzy} from "src/util/misc"
   import {toast} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
