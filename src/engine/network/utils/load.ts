@@ -1,4 +1,4 @@
-import {matchFilters} from "paravel"
+import {matchFilters} from "@coracle.social/util"
 import {flatten, uniq, path as getPath} from "ramda"
 import {defer, batch} from "hurdak"
 import {pushToKey} from "src/util/misc"

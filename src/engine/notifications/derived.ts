@@ -1,6 +1,7 @@
 import {assoc, without, max, sortBy} from "ramda"
 import {seconds} from "hurdak"
-import {now, Tags} from "paravel"
+import {now} from "@coracle.social/lib"
+import {Tags} from "@coracle.social/util"
 import {isLike, reactionKinds, noteKinds, repostKinds} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import {isSeen} from "src/engine/events/derived"
@@ -78,7 +79,9 @@ export const groupNotifications = derived(
       x => -x.created_at,
       [
         ...$requests.filter(r => !r.resolved && !$deletes.has(r.group)).map(assoc("t", "request")),
-        ...$alerts.filter(a => !adminPubkeys.has(a.pubkey) && !$deletes.has(a.group)).map(assoc("t", "alert")),
+        ...$alerts
+          .filter(a => !adminPubkeys.has(a.pubkey) && !$deletes.has(a.group))
+          .map(assoc("t", "alert")),
         ...$events
           .map(e => (repostKinds.includes(e.kind) ? unwrapRepost(e) : e))
           .filter(e => e && !shouldSkip(e)),

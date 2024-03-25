@@ -1,5 +1,5 @@
 import {nth, inc} from "ramda"
-import {Tags} from "paravel"
+import {Tags} from "@coracle.social/util"
 import type {Event} from "src/engine/events/model"
 import {topics} from "./state"
 

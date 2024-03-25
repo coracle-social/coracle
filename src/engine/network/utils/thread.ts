@@ -1,6 +1,6 @@
 import {uniqBy, identity, prop, sortBy} from "ramda"
 import {batch} from "hurdak"
-import {Tags, getIdOrAddress, getIdAndAddress} from "paravel"
+import {Tags, getIdOrAddress, getIdAndAddress} from "@coracle.social/util"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {writable} from "src/engine/core/utils"

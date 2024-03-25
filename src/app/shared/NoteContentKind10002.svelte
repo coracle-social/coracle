@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "paravel"
+  import {Tags} from "@coracle.social/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
 

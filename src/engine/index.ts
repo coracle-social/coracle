@@ -1,4 +1,4 @@
-import {Tags} from "paravel"
+import {Tags} from "@coracle.social/util"
 import {prop, filter, identity, uniq, sortBy} from "ramda"
 import {Storage, LocalStorageAdapter, IndexedDBAdapter, sortByPubkeyWhitelist} from "./core"
 import {_lists} from "./lists"

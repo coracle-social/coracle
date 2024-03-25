@@ -2,15 +2,10 @@
   import {fade} from "src/util/transition"
   import ForegroundButton from "src/partials/ForegroundButton.svelte"
   import ForegroundButtons from "src/partials/ForegroundButtons.svelte"
-  import {router} from "src/app/router"
 
   let scrollY = 0
 
-  const {page} = router
-
   const scrollToTop = () => document.body.scrollIntoView({behavior: "smooth"})
-
-  $: showButtons = !$page?.path.match(/^\/channels|logout|settings/)
 </script>
 
 <svelte:window bind:scrollY />

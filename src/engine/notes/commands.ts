@@ -1,4 +1,4 @@
-import {getIdAndAddress} from "paravel"
+import {getIdAndAddress} from "@coracle.social/util"
 import {hints} from "src/engine/relays/utils"
 import {createAndPublish} from "src/engine/network/utils"
 

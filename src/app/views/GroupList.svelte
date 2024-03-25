@@ -1,7 +1,7 @@
 <script>
   import {onMount, onDestroy} from "svelte"
   import {filter, assoc} from "ramda"
-  import {now} from "paravel"
+  import {now} from "@coracle.social/lib"
   import {createScroller} from "src/util/misc"
   import {giftWrapKinds} from "src/util/nostr"
   import {getModal} from "src/partials/state"

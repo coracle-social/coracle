@@ -1,6 +1,6 @@
 <script lang="ts">
   import {last} from "ramda"
-  import {normalizeRelayUrl} from 'paravel'
+  import {normalizeRelayUrl} from "@coracle.social/util"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {canSign, relays, relayPolicyUrls, joinRelay, leaveRelay, deriveHasRelay} from "src/engine"
   import {router} from "src/app/router"

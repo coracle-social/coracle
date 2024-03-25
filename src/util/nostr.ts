@@ -1,4 +1,4 @@
-import {fromNostrURI, Tags} from "paravel"
+import {fromNostrURI, Tags} from "@coracle.social/util"
 import {schnorr} from "@noble/curves/secp256k1"
 import {bytesToHex} from "@noble/hashes/utils"
 import {nip05, nip19, generateSecretKey, getEventHash, getPublicKey as getPk} from "nostr-tools"

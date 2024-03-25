@@ -1,6 +1,6 @@
 import crypto from "crypto"
 import {Fetch} from "hurdak"
-import {createEvent} from "paravel"
+import {createEvent} from "@coracle.social/util"
 import {generatePrivateKey} from "src/util/nostr"
 import {signer} from "src/engine/session/derived"
 

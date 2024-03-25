@@ -1,5 +1,5 @@
 import {tryFunc} from "hurdak"
-import {Tags} from "paravel"
+import {Tags} from "@coracle.social/util"
 import {appDataKeys} from "src/util/nostr"
 import {projections} from "src/engine/core/projections"
 import {updateRecord} from "src/engine/core/commands"

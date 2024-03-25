@@ -1,6 +1,6 @@
 import {max, pluck} from "ramda"
 import {batch} from "hurdak"
-import {Tags} from "paravel"
+import {Tags} from "@coracle.social/util"
 import {updateIn} from "src/util/misc"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"

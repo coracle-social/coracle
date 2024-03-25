@@ -1,4 +1,10 @@
-import {decodeAddress, isReplaceable, addressToFilter, getAddress, isContextAddress} from "paravel"
+import {
+  decodeAddress,
+  isReplaceable,
+  addressToFilter,
+  getAddress,
+  isContextAddress,
+} from "@coracle.social/util"
 import {omit, without, find, prop, groupBy, uniq} from "ramda"
 import {shuffle, randomId, seconds, avg} from "hurdak"
 import {env} from "src/engine/session/state"

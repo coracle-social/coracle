@@ -1,6 +1,7 @@
 import {prop, identity, flatten, groupBy} from "ramda"
 import {Fetch, tryFunc, sleep} from "hurdak"
-import {now, cached, Tags} from "paravel"
+import {now, cached} from "@coracle.social/lib"
+import {Tags} from "@coracle.social/util"
 import {joinPath} from "src/util/misc"
 import type {Event} from "src/engine/events/model"
 import {nip98Fetch} from "src/engine/auth/commands"

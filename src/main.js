@@ -2,7 +2,7 @@ import "src/app.css"
 
 import {identity} from "ramda"
 import {Fetch} from "hurdak"
-import {normalizeRelayUrl} from "paravel"
+import {normalizeRelayUrl} from "@coracle.social/util"
 import Bugsnag from "@bugsnag/js"
 import {tryFetch} from "src/util/misc"
 import {env, saveRelay} from "src/engine"

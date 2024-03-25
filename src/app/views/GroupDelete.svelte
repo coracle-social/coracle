@@ -1,10 +1,10 @@
 <script lang="ts">
-  import {createEvent} from "paravel"
-  import {toast} from 'src/partials/state'
+  import {createEvent} from "@coracle.social/util"
+  import {toast} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import {groups, Publisher, signer, hints, deriveAdminKeyForGroup, displayGroup} from "src/engine"
-  import {router} from 'src/app/router'
+  import {router} from "src/app/router"
 
   export let address
 
@@ -31,8 +31,8 @@
 <Subheading>Delete Group</Subheading>
 <p>Are you sure you want to delete {displayGroup($group)}?</p>
 <p>
-  This will only hide this group from supporting clients.
-  Messages sent to the group may not be deleted from relays.
+  This will only hide this group from supporting clients. Messages sent to the group may not be
+  deleted from relays.
 </p>
 <div class="flex gap-2">
   <Anchor button on:click={abort}>Abort</Anchor>

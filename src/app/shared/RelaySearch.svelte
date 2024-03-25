@@ -2,7 +2,7 @@
   import {onDestroy} from "svelte"
   import {groupBy, filter} from "ramda"
   import {mapVals} from "hurdak"
-  import {isShareableRelayUrl, Tags} from "paravel"
+  import {isShareableRelayUrl, Tags} from "@coracle.social/util"
   import {createScroller} from "src/util/misc"
   import {getAvgRating} from "src/util/nostr"
   import {getModal} from "src/partials/state"

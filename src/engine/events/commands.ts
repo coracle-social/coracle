@@ -1,6 +1,7 @@
 import {pluck} from "ramda"
 import {chunk, seconds} from "hurdak"
-import {createEvent, now} from "paravel"
+import {now} from "@coracle.social/lib"
+import {createEvent} from "@coracle.social/util"
 import {generatePrivateKey} from "src/util/nostr"
 import {pubkey} from "src/engine/session/state"
 import {signer, nip44, nip59} from "src/engine/session/derived"

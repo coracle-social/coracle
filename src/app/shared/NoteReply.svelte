@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags, createEvent} from "paravel"
+  import {Tags, createEvent} from "@coracle.social/util"
   import {createEventDispatcher} from "svelte"
   import {join, without, uniq} from "ramda"
   import {slide} from "src/util/transition"

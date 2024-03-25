@@ -1,4 +1,4 @@
-import {now} from "paravel"
+import {now} from "@coracle.social/lib"
 import {seconds} from "hurdak"
 import {env} from "src/engine/session/state"
 import {hints} from "src/engine/relays/utils"

@@ -1,6 +1,7 @@
 import {assoc, without, uniq, map} from "ramda"
 import {createMapOf} from "hurdak"
-import {now, createEvent} from "paravel"
+import {now} from "@coracle.social/lib"
+import {createEvent} from "@coracle.social/util"
 import {generatePrivateKey, appDataKeys} from "src/util/nostr"
 import {Publisher, getClientTags, mention} from "src/engine/network/utils"
 import {hints} from "src/engine/relays/utils"

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {isChildOf, getIdOrAddress, Tags, matchFilters} from "paravel"
+  import {isChildOf, getIdOrAddress, Tags, matchFilters} from "@coracle.social/util"
   import {reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, ensurePlural, batch} from "hurdak"

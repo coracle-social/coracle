@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {Tags} from "paravel"
+  import {Tags} from "@coracle.social/util"
   import {noteKinds} from "src/util/nostr"
   import {theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"

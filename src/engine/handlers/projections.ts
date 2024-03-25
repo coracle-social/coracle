@@ -1,4 +1,4 @@
-import {getAddress} from "paravel"
+import {getAddress} from "@coracle.social/util"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
 import {handlers, handlerRecs} from "./state"

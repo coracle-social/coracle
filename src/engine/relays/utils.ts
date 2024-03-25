@@ -1,6 +1,7 @@
 import {nip19} from "nostr-tools"
-import {Router} from "paravel"
-import {normalizeRelayUrl as normalize, ConnectionStatus, fromNostrURI} from "paravel"
+import {Router} from "@coracle.social/util"
+import {normalizeRelayUrl as normalize, fromNostrURI} from "@coracle.social/util"
+import {ConnectionStatus} from "@coracle.social/network"
 import {sortBy, whereEq, pluck, uniq, prop, last} from "ramda"
 import {displayList, switcher} from "hurdak"
 import {fuzzy} from "src/util/misc"
@@ -12,7 +13,7 @@ import {groups, groupSharedKeys} from "src/engine/groups/state"
 import {pool} from "src/engine/network/state"
 import {getSetting} from "src/engine/session/utils"
 import type {Relay} from "./model"
-import {relays} from './state'
+import {relays} from "./state"
 
 export const normalizeRelayUrl = (url: string) => {
   if (url === LOCAL_RELAY_URL) {

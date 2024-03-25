@@ -1,4 +1,5 @@
-import {cached, Tags} from "paravel"
+import {cached} from "@coracle.social/lib"
+import {Tags} from "@coracle.social/util"
 import {identity, pick, uniq} from "ramda"
 import {Fetch, tryFunc, sleep, createMapOf} from "hurdak"
 import {tryJson, hexToBech32, bech32ToHex, createBatcher} from "src/util/misc"

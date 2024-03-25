@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {defer} from "hurdak"
-  import {getIdOrAddress} from "paravel"
+  import {getIdOrAddress} from "@coracle.social/util"
   import {isMobile} from "src/util/html"
   import {fly} from "src/util/transition"
   import Spinner from "src/partials/Spinner.svelte"

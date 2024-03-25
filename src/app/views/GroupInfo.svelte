@@ -1,12 +1,12 @@
 <script lang="ts">
-  import {toNostrURI} from "paravel"
+  import {toNostrURI} from "@coracle.social/util"
   import {nsecEncode} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import {groups, deriveAdminKeyForGroup, getGroupNaddr} from "src/engine"
-  import {router} from 'src/app/router'
+  import {router} from "src/app/router"
 
   export let address
 
@@ -15,7 +15,7 @@
 
   const shareAdminKey = () => {
     popover?.hide()
-    router.at('groups').of(address).at('invite-admin').open()
+    router.at("groups").of(address).at("invite-admin").open()
   }
 
   let popover
@@ -32,14 +32,10 @@
         <i slot="trigger" class="fa fa-info-circle cursor-pointer" />
         <div slot="tooltip">
           <FlexColumn>
-            <p>
-              This is your group administration password. Keep it secret!
-            </p>
+            <p>This is your group administration password. Keep it secret!</p>
             <p>
               Click
-              <Anchor modal underline on:click={shareAdminKey}>
-                here
-              </Anchor>
+              <Anchor modal underline on:click={shareAdminKey}>here</Anchor>
               to share this key with another user. This will give them
               <b>complete</b> control over this group.
             </p>

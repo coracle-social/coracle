@@ -1,6 +1,6 @@
 <script lang="ts">
   import {join, identity} from "ramda"
-  import {Tags, createEvent} from "paravel"
+  import {Tags, createEvent} from "@coracle.social/util"
   import {toast} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"

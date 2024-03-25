@@ -1,4 +1,4 @@
-import {Tags} from "paravel"
+import {Tags} from "@coracle.social/util"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
 import {addTopic, processTopics} from "./commands"

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {fromPairs} from "ramda"
-  import {addressToNaddr} from "paravel"
+  import {addressToNaddr} from "@coracle.social/util"
   import {urlIsMedia} from "src/util/notes"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
