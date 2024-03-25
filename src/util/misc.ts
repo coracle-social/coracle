@@ -1,4 +1,3 @@
-import {bech32, utf8} from "@scure/base"
 import {now, stripProtocol} from "@coracle.social/lib"
 import {pluck, fromPairs, last, identity, sum, is, equals} from "ramda"
 import {ensurePlural, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
@@ -147,12 +146,6 @@ export const tryFetch = <T>(f: () => T) =>
       logger.warn(e)
     }
   })
-
-export const hexToBech32 = (prefix: string, url: string) =>
-  bech32.encode(prefix, bech32.toWords(utf8.decode(url)), false)
-
-export const bech32ToHex = (b32: string) =>
-  utf8.encode(bech32.fromWords(bech32.decode(b32, false).words))
 
 export const numberFmt = new Intl.NumberFormat()
 

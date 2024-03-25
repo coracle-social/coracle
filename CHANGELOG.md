@@ -9,6 +9,7 @@
 - [x] Fix subtle navigation bugs
 - [x] Show a little more metadata on relay card
 - [x] Make groups deletable
+- [x] Use new utility libraries
 
 # 0.4.4
 

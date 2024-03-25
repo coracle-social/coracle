@@ -1,7 +1,14 @@
 import {partition, concat, prop, uniqBy, identity, without, assoc} from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
 import {now} from "@coracle.social/lib"
-import {Tags, getIdOrAddress, getIdAndAddress} from "@coracle.social/util"
+import type {Filter} from "@coracle.social/util"
+import {
+  Tags,
+  getIdOrAddress,
+  getIdAndAddress,
+  getIdFilters,
+  guessFilterDelta,
+} from "@coracle.social/util"
 import {race} from "src/util/misc"
 import {info} from "src/util/logger"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
@@ -10,8 +17,6 @@ import type {Event} from "src/engine/events/model"
 import {sortEventsDesc, unwrapRepost} from "src/engine/events/utils"
 import {isEventMuted, isDeleted} from "src/engine/events/derived"
 import {writable} from "src/engine/core/utils"
-import type {Filter} from "../model"
-import {getIdFilters, guessFilterDelta} from "./filters"
 import {getUrls} from "./executor"
 import {subscribe} from "./subscribe"
 import {MultiCursor} from "./cursor"

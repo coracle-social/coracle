@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {getAddress} from "@coracle.social/util"
+  import {getAddress, getIdFilters} from "@coracle.social/util"
   import {filterVals} from "hurdak"
   import {asArray} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
@@ -8,7 +8,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {router} from "src/app/router"
-  import {hints, loadOne, loadPubkeys, displayPubkey, isEventMuted, getIdFilters} from "src/engine"
+  import {hints, loadOne, loadPubkeys, displayPubkey, isEventMuted} from "src/engine"
 
   export let note
   export let value

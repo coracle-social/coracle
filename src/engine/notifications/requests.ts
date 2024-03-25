@@ -1,11 +1,11 @@
 import {now} from "@coracle.social/lib"
-import {Tags} from "@coracle.social/util"
+import type {Filter} from "@coracle.social/util"
+import {Tags, getIdFilters} from "@coracle.social/util"
 import {seconds, batch, doPipe} from "hurdak"
 import {pluck, max, slice, filter, without, sortBy} from "ramda"
 import {updateIn} from "src/util/misc"
 import {noteKinds, giftWrapKinds, repostKinds, reactionKinds} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
-import type {Filter} from "src/engine/network/model"
 import {env} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {updateSession} from "src/engine/session/commands"
@@ -13,13 +13,7 @@ import {_events} from "src/engine/events/state"
 import {events, isEventMuted} from "src/engine/events/derived"
 import {getUserCommunities} from "src/engine/groups/utils"
 import {hints} from "src/engine/relays/utils"
-import {
-  loadPubkeys,
-  load,
-  subscribe,
-  subscribePersistent,
-  getIdFilters,
-} from "src/engine/network/utils"
+import {loadPubkeys, load, subscribe, subscribePersistent} from "src/engine/network/utils"
 
 const onNotificationEvent = batch(300, (chunk: Event[]) => {
   const kinds = getNotificationKinds()

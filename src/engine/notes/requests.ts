@@ -1,8 +1,8 @@
 import {find, pluck, whereEq} from "ramda"
 import {batch, sleep} from "hurdak"
-import {Tags} from "@coracle.social/util"
+import {getIdFilters, Tags} from "@coracle.social/util"
 import {env} from "src/engine/session/state"
-import {subscribe, loadOne, getIdFilters, dvmRequest} from "src/engine/network/utils"
+import {subscribe, loadOne, dvmRequest} from "src/engine/network/utils"
 import {hints} from "src/engine/relays/utils"
 
 export const dereferenceNote = async ({

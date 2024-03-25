@@ -1,6 +1,15 @@
 <script lang="ts">
-  import {isChildOf, getIdOrAddress, Tags, matchFilters} from "@coracle.social/util"
-  import {reject, whereEq, uniqBy, prop} from "ramda"
+  import {
+    isChildOf,
+    getIdFilters,
+    getReplyFilters,
+    getIdOrAddress,
+    Tags,
+    getLnUrl,
+    matchFilters,
+    zapFromEvent,
+  } from "@coracle.social/util"
+  import {identity, reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, ensurePlural, batch} from "hurdak"
   import {fly, slide} from "src/util/transition"
@@ -25,12 +34,8 @@
     hints,
     people,
     loadOne,
-    getLnUrl,
     getZapper,
-    processZaps,
     isEventMuted,
-    getIdFilters,
-    getReplyFilters,
     getSetting,
     getRecipientKey,
     loadPubkeys,
@@ -163,10 +168,10 @@
   $: likes = uniqBy(prop("pubkey"), children.filter(isLike))
 
   // Split out zaps
-  $: zaps = processZaps(
-    children.filter(e => e.kind === 9735),
-    zapper,
-  )
+  $: zaps = children
+    .filter(e => e.kind === 9735)
+    .map(e => zapper ? zapFromEvent(e, zapper) : null)
+    .filter(identity)
 
   onMount(async () => {
     const zapAddress = tags.get("zap")?.value()

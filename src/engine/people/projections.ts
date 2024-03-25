@@ -1,10 +1,10 @@
-import {Tags} from "@coracle.social/util"
+import {Tags, getLnUrl} from "@coracle.social/util"
 import {tryJson} from "src/util/misc"
 import {updateStore, updateRecord} from "src/engine/core/commands"
 import {projections} from "src/engine/core/projections"
 import {getSession} from "src/engine/session/utils"
 import {updateSession} from "src/engine/session/commands"
-import {getLnUrl, getZapper} from "src/engine/zaps/utils"
+import {getZapper} from "src/engine/zaps/utils"
 import {people} from "./state"
 import {getHandle} from "./utils"
 
