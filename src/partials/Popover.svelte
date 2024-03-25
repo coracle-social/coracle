@@ -60,7 +60,7 @@
       onHidden: () => {
         const [tooltipContents] = instance.popper.querySelector(".tippy-content").children
 
-        tooltip.appendChild(tooltipContents)
+        tooltip?.appendChild(tooltipContents)
       },
     })
 

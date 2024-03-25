@@ -23,7 +23,11 @@
 {#await promise}
   <Spinner />
 {:then note}
-  <div in:fly={{y: 20}}>
-    <Note showGroup showLoading anchor={getIdOrAddress(note)} {note} {depth} {relays} {context} />
-  </div>
+  {#if note}
+    <div in:fly={{y: 20}}>
+      <Note showGroup showLoading anchor={getIdOrAddress(note)} {note} {depth} {relays} {context} />
+    </div>
+  {:else}
+    <p class="text-center">Failed to load note.</p>
+  {/if}
 {/await}

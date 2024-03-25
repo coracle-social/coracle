@@ -73,8 +73,9 @@
       </Popover>
       <Popover triggerType="mouseenter">
         <div slot="trigger">
-          <Anchor external href="https://info.coracle.social"
-            ><i class="fa fa-earth-americas" /></Anchor>
+          <Anchor external href="https://coracle.tools">
+            <i class="fa fa-earth-americas" />
+          </Anchor>
         </div>
         <div slot="tooltip">Website</div>
       </Popover>
