@@ -1,11 +1,10 @@
 import {uniqBy, identity, prop, sortBy} from "ramda"
 import {batch} from "hurdak"
-import {Tags, getIdOrAddress, getIdAndAddress} from "@coracle.social/util"
+import {Tags, getIdOrAddress, getIdFilters, getIdAndAddress} from "@coracle.social/util"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {writable} from "src/engine/core/utils"
 import {hints} from "src/engine/relays/utils"
-import {getIdFilters} from "./filters"
 import {load} from "./load"
 
 const getAncestorIds = e =>

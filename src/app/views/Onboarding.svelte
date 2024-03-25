@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags, decodeAddress} from "@coracle.social/util"
+  import {Tags, decodeAddress, getIdFilters} from "@coracle.social/util"
   import {sleep} from "hurdak"
   import {generatePrivateKey} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -19,7 +19,6 @@
     publishPetnames,
     publishProfile,
     publishRelays,
-    getIdFilters,
     loginWithPrivateKey,
     listenForNotifications,
   } from "src/engine"

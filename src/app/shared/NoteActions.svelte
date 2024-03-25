@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {onMount} from "svelte"
-  import {toNostrURI, asEvent, Tags, createEvent} from "@coracle.social/util"
+  import {toNostrURI, zapFromEvent, asEvent, Tags, createEvent} from "@coracle.social/util"
   import {tweened} from "svelte/motion"
   import {identity, filter, sum, uniqBy, prop, pluck} from "ramda"
   import {fly} from "src/util/transition"
@@ -39,7 +39,6 @@
     publishDeletionForEvent,
     getSetting,
     loadPubkeys,
-    processZap,
     isEventMuted,
     getReplyTags,
     getClientTags,
@@ -171,8 +170,8 @@
   $: zap = zaps.find(e => e.request.pubkey === $session?.pubkey)
 
   $: {
-    const filteredZaps: {invoiceAmount: number}[] = zap
-      ? zaps.filter(n => n.id !== zap?.id).concat(processZap(zap, zapper))
+    const filteredZaps: {invoiceAmount: number}[] = zap && zapper
+      ? zaps.filter(n => n.id !== zap?.id).concat(zapFromEvent(zap, zapper))
       : zaps
 
     $zapsTotal = sum(pluck("invoiceAmount", filteredZaps)) / 1000
