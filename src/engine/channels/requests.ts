@@ -19,7 +19,7 @@ export const loadAllMessages = ({reload = false} = {}) => {
   })
 
   const cursor = new MultiCursor({
-    relays: hints.AllMessages().getUrls(),
+    relays: hints.User().getUrls(),
     filters: [
       {kinds: [4], authors: [pubkey], since},
       {kinds: [4, 1059], "#p": [pubkey], since},

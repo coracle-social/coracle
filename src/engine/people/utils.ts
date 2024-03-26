@@ -92,7 +92,7 @@ export const getNetwork = $person => {
   const network = new Set<string>()
 
   for (const follow of pubkeys) {
-    for (const pubkey of getFollowedPubkeys(follow)) {
+    for (const pubkey of getFollowedPubkeys(people.key(follow).get())) {
       if (!pubkeys.has(pubkey)) {
         network.add(pubkey)
       }

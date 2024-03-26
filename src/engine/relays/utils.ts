@@ -1,17 +1,18 @@
 import {nip19} from "nostr-tools"
+import {shuffle} from "@coracle.social/lib"
 import {Router} from "@coracle.social/util"
 import {normalizeRelayUrl as normalize, fromNostrURI} from "@coracle.social/util"
 import {ConnectionStatus} from "@coracle.social/network"
 import {sortBy, whereEq, pluck, uniq, prop, last} from "ramda"
-import {displayList, switcher} from "hurdak"
-import {fuzzy} from "src/util/misc"
+import {displayList, chunk, switcher} from "hurdak"
+import {fuzzy, pushToKey} from "src/util/misc"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {env} from "src/engine/session/state"
+import {getSetting} from "src/engine/session/utils"
 import {stateKey} from "src/engine/session/derived"
 import {people} from "src/engine/people/state"
 import {groups, groupSharedKeys} from "src/engine/groups/state"
 import {pool} from "src/engine/network/state"
-import {getSetting} from "src/engine/session/utils"
 import type {Relay} from "./model"
 import {relays} from "./state"
 
@@ -137,3 +138,22 @@ export const hints = new Router({
     })
   },
 })
+
+export const getPubkeyRelayChunks = (pubkeys: string[]) => {
+  const relayLimit = getSetting('relay_limit')
+  const pubkeysByRelay = new Map()
+
+  for (const pubkeyChunk of chunk(relayLimit, shuffle(pubkeys))) {
+    for (const relay of hints.FromPubkeys(pubkeyChunk).getUrls()) {
+      for (const pubkey of pubkeyChunk) {
+        if (pubkeysByRelay.get(relay)?.length === 256) {
+          break
+        }
+
+        pushToKey(pubkeysByRelay, relay, pubkey)
+      }
+    }
+  }
+
+  return shuffle(Array.from(pubkeysByRelay.entries())).slice(0, relayLimit)
+}
