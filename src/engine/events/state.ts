@@ -1,4 +1,4 @@
-import {Collection, Writable} from "src/engine/core/utils"
+import {Collection, Writable} from "@coracle.social/lib"
 import type {Event, ReadReceipt} from "./model"
 
 export const _events = new Collection<Event>("id", 1000)

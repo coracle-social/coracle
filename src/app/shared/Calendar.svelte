@@ -2,6 +2,7 @@
   import {fromPairs} from "ramda"
   import {batch} from "hurdak"
   import {onMount} from "svelte"
+  import {writable} from "@coracle.social/lib"
   import {getAddress, getReplyFilters} from "@coracle.social/util"
   import Calendar from "@event-calendar/core"
   import DayGrid from "@event-calendar/day-grid"
@@ -15,7 +16,6 @@
     hints,
     canSign,
     getRelaysFromFilters,
-    writable,
     forcePlatformRelays,
     load,
     isDeleted,

@@ -1,12 +1,13 @@
 <script lang="ts">
   import {throttle} from "throttle-debounce"
+  import {derived} from "@coracle.social/lib"
   import {slide} from "src/util/transition"
   import {fuzzy} from "src/util/misc"
   import {parseAnything} from "src/util/nostr"
-  import FlexColumn from 'src/partials/FlexColumn.svelte'
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import {router} from "src/app/router"
   import type {Person, Topic} from "src/engine"
-  import {topics, derived, searchPeople, createPeopleLoader} from "src/engine"
+  import {topics, searchPeople, createPeopleLoader} from "src/engine"
 
   export let term
   export let replace = false

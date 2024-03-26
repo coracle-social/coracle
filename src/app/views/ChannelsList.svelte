@@ -2,6 +2,7 @@
   import {onMount} from "svelte"
   import {filter} from "ramda"
   import {toTitle, Storage} from "hurdak"
+  import {readable} from "@coracle.social/lib"
   import {slide} from "src/util/transition"
   import Tabs from "src/partials/Tabs.svelte"
   import Card from "src/partials/Card.svelte"
@@ -15,7 +16,6 @@
   import {
     nip44,
     pubkey,
-    readable,
     canSign,
     channels,
     hasNewMessages,

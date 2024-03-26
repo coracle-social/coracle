@@ -1,5 +1,5 @@
 import {none, any, filter} from "ramda"
-import {derived} from "src/engine/core/utils"
+import {derived} from "@coracle.social/lib"
 import {pubkey} from "src/engine/session/state"
 import {mutes} from "src/engine/people/derived"
 import type {Channel} from "./model"

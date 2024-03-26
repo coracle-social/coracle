@@ -1,7 +1,7 @@
 import Fuse from "fuse.js"
 import {doPipe} from "hurdak"
 import {defaultTo, map, filter, sortBy} from "ramda"
-import {derived} from "src/engine/core/utils"
+import {derived} from "@coracle.social/lib"
 import {pubkey} from "src/engine/session/state"
 import {user} from "src/engine/session/derived"
 import type {Person} from "./model"

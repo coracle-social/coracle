@@ -1,9 +1,9 @@
 import {takeWhile, find, filter, identity, mergeLeft, reject} from "ramda"
 import {first, randomId, filterVals} from "hurdak"
+import {writable} from "@coracle.social/lib"
 import logger from "src/util/logger"
 import {buildQueryString, parseQueryString, updateIn} from "src/util/misc"
 import {globalHistory} from "src/util/history"
-import {writable} from "src/engine"
 
 // Adapted from https://github.com/EmilTholin/svelte-routing/blob/master/src/utils.js
 

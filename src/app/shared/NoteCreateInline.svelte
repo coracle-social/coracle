@@ -1,5 +1,6 @@
 <script lang="ts">
   import {join, identity} from "ramda"
+  import {writable} from "@coracle.social/lib"
   import {Tags, createEvent} from "@coracle.social/util"
   import {toast} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
@@ -16,7 +17,6 @@
   import {
     env,
     pubkey,
-    writable,
     Publisher,
     getClientTags,
     tagsFromContent,

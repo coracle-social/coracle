@@ -1,9 +1,9 @@
 import {debounce} from "throttle-debounce"
 import {prop, last, fromPairs} from "ramda"
 import {randomId, Storage} from "hurdak"
+import type {Writable} from "@coracle.social/lib"
+import {writable} from "@coracle.social/lib"
 import {parseHex} from "src/util/html"
-import type {Writable} from "src/engine"
-import {writable} from "src/engine"
 
 export const synced = (key: string, defaultValue: any) => {
   const store = writable(Storage.getJson(key) || defaultValue)

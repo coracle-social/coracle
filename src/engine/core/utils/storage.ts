@@ -1,11 +1,11 @@
 import {prop, identity, pluck, splitAt, nth, sortBy} from "ramda"
 import {sleep, defer, chunk, randomInt, throttle} from "hurdak"
 import {Storage as LocalStorage} from "hurdak"
+import {writable} from "@coracle.social/lib"
+import type {Writable, Collection} from "@coracle.social/lib"
 import logger from "src/util/logger"
 import {sessions} from "src/engine/session/state"
 import {people} from "src/engine/people/state"
-import type {Writable, Collection} from "./store"
-import {writable} from "./store"
 
 type Store = {
   name: string

@@ -1,5 +1,5 @@
 import {whereEq, sortBy} from "ramda"
-import {derivedCollection} from "src/engine/core/utils"
+import {derivedCollection} from "@coracle.social/lib"
 import {pubkey} from "src/engine/session/state"
 import {deletes} from "src/engine/events/state"
 import type {List} from "./model"

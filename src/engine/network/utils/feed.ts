@@ -1,6 +1,6 @@
 import {partition, concat, prop, uniqBy, identity, without, assoc} from "ramda"
 import {ensurePlural, doPipe, batch} from "hurdak"
-import {now} from "@coracle.social/lib"
+import {now, writable} from "@coracle.social/lib"
 import type {Filter} from "@coracle.social/util"
 import {
   Tags,
@@ -16,7 +16,6 @@ import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {sortEventsDesc, unwrapRepost} from "src/engine/events/utils"
 import {isEventMuted, isDeleted} from "src/engine/events/derived"
-import {writable} from "src/engine/core/utils"
 import {getUrls} from "./executor"
 import {subscribe} from "./subscribe"
 import {MultiCursor} from "./cursor"
