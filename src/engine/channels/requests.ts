@@ -1,5 +1,5 @@
 import {assocPath, uniq} from "ramda"
-import {seconds, sleep} from "hurdak"
+import {seconds} from "hurdak"
 import {now} from "@coracle.social/lib"
 import {sessions} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
@@ -26,25 +26,9 @@ export const loadAllMessages = ({reload = false} = {}) => {
     ],
   })
 
-  let done = false
-
-  setTimeout(async () => {
-    while (!done) {
-      cursor.take(250)
-
-      await sleep(2000)
-
-      done = cursor.done()
-    }
+  return cursor.loadAll({
+    onComplete: unsubscribePubkeys,
   })
-
-  return [
-    cursor,
-    () => {
-      done = true
-      unsubscribePubkeys()
-    },
-  ]
 }
 
 export const listenForMessages = (pubkeys: string[]) => {

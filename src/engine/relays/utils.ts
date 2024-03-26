@@ -15,13 +15,13 @@ import {getSetting} from "src/engine/session/utils"
 import type {Relay} from "./model"
 import {relays} from "./state"
 
-export const normalizeRelayUrl = (url: string) => {
+export const normalizeRelayUrl = (url: string, opts = {}) => {
   if (url === LOCAL_RELAY_URL) {
     return url
   }
 
   try {
-    return normalize(url)
+    return normalize(url, opts)
   } catch (e) {
     return url
   }

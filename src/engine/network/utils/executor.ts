@@ -16,7 +16,7 @@ export const getUrls = (relays: string[]) => {
     error(`Attempted to connect to zero urls`)
   }
 
-  const urls = uniq(relays.map(normalizeRelayUrl))
+  const urls = uniq(relays.map(url => normalizeRelayUrl(url, {allowInsecure: true})))
 
   if (urls.length !== relays.length) {
     warn(`Attempted to connect to non-unique relays`)

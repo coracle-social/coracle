@@ -1,11 +1,12 @@
 import {mergeLeft, pluck, min, max, identity, sortBy} from "ramda"
-import {first} from "hurdak"
+import {first, sleep} from "hurdak"
 import {now} from "@coracle.social/lib"
 import type {Filter} from "@coracle.social/util"
 import {guessFilterDelta} from "@coracle.social/util"
 import type {Subscription} from "@coracle.social/network"
 import type {Event} from "src/engine/events/model"
 import {sortEventsDesc} from "src/engine/events/utils"
+import {writable} from "src/engine/core/utils"
 import {getUrls} from "./executor"
 import {subscribe} from "./subscribe"
 import {Tracker} from "./tracker"
@@ -183,5 +184,27 @@ export class MultiCursor {
     const subs = this.load(n * this.bufferFactor)
 
     return [subs, events]
+  }
+
+  loadAll = ({onComplete = null} = {}) => {
+    const loading = writable(true)
+    const stop = () => {
+      loading.set(false)
+      onComplete?.()
+    }
+
+    setTimeout(async () => {
+      while (loading.get()) {
+        this.take(250)
+
+        await sleep(2000)
+
+        if (this.done()) {
+          stop()
+        }
+      }
+    })
+
+    return {stop, loading}
   }
 }

@@ -1,8 +1,10 @@
 import {seconds} from "hurdak"
+import type {Event} from "nostr-tools"
+import {Worker} from "@coracle.social/lib"
 import {giftWrapKinds} from "src/util/nostr"
 import {session, nip44, nip04} from "src/engine/session/derived"
 import {hints} from "src/engine/relays/utils"
-import {load} from "src/engine/network/utils"
+import {load, MultiCursor, Publisher} from "src/engine/network/utils"
 
 export const loadDeletes = () => {
   const {pubkey, deletes_last_synced = 0} = session.get()
@@ -44,4 +46,18 @@ export const loadGiftWrap = () => {
       filters: [{kinds: giftWrapKinds, authors: [pubkey], since}],
     })
   }
+}
+
+export const sync = (fromUrl, toUrl, filters) => {
+  const worker = new Worker<Event>()
+
+  worker.addGlobalHandler(event => Publisher.publish({event, relays: [toUrl]}))
+
+  const cursor = new MultiCursor({
+    filters,
+    relays: [fromUrl],
+    onEvent: worker.push,
+  })
+
+  cursor.loadAll()
 }
