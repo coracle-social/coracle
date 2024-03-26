@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {Storage} from "hurdak"
+  import {writable, readable} from "@coracle.social/lib"
   import {FeedLoader} from "src/engine"
   import {createScroller} from "src/util/misc"
   import {LOCAL_RELAY_URL} from "src/util/nostr"
@@ -13,8 +14,6 @@
   import type {DynamicFilter} from "src/engine"
   import {
     hints,
-    readable,
-    writable,
     compileFilters,
     forcePlatformRelays,
     searchableRelays,

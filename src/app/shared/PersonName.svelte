@@ -13,7 +13,7 @@
 </style>
 
 <script context="module">
-  import {writable} from "src/engine"
+  import {writable} from "@coracle.social/lib"
 
   const maxWot = writable(10)
 </script>

@@ -1,4 +1,4 @@
-import {collection} from "src/engine/core/utils"
+import {collection} from "@coracle.social/lib"
 import type {Handler, HandlerRec} from "./model"
 
 export const handlers = collection<Handler>("address")

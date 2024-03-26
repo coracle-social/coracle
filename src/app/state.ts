@@ -1,5 +1,6 @@
 import Bugsnag from "@bugsnag/js"
 import {hash, union} from "hurdak"
+import {writable} from "@coracle.social/lib"
 import {ConnectionStatus} from "@coracle.social/network"
 import {warn} from "src/util/logger"
 import {userKinds} from "src/util/nostr"
@@ -12,7 +13,6 @@ import {
   pubkey,
   follows,
   session,
-  writable,
   loadSeen,
   loadGroups,
   loadDeletes,

@@ -1,11 +1,11 @@
 <script lang="ts">
+  import {writable} from "@coracle.social/lib"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
-  import {writable} from "src/engine"
 
   export let profile
   export let setStage
@@ -34,7 +34,8 @@
 </script>
 
 <div class="flex gap-3">
-  <p class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-700 text-lg">
+  <p
+    class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-700 text-lg">
     2/4
   </p>
   <p class="text-2xl font-bold">Give us something to go on!</p>

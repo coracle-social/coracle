@@ -4,7 +4,7 @@
   import {v4 as uuid} from "uuid"
   import {join, whereEq, identity} from "ramda"
   import {throttle, commaFormat, toTitle, switcherFn} from "hurdak"
-  import {now} from "@coracle.social/lib"
+  import {now, writable} from "@coracle.social/lib"
   import {createEvent, Tags} from "@coracle.social/util"
   import {currencyOptions} from "src/util/i18n"
   import {dateToSeconds} from "src/util/misc"
@@ -34,7 +34,6 @@
     env,
     hints,
     session,
-    writable,
     getClientTags,
     tagsFromContent,
     publishToZeroOrMoreGroups,

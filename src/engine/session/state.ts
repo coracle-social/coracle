@@ -1,4 +1,4 @@
-import {writable} from "src/engine/core/utils"
+import {writable} from "@coracle.social/lib"
 import type {Session} from "./model"
 
 export const env = writable<Record<string, any>>({})

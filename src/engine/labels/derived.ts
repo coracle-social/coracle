@@ -1,5 +1,5 @@
 import {whereEq} from "ramda"
-import {derivedCollection} from "src/engine/core/utils"
+import {derivedCollection} from "@coracle.social/lib"
 import {deletes} from "src/engine/events/state"
 import {pubkey} from "src/engine/session/state"
 import type {Event} from "src/engine/events/model"

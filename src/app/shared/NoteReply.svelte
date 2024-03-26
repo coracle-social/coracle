@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {writable} from "@coracle.social/lib"
   import {Tags, createEvent} from "@coracle.social/util"
   import {createEventDispatcher} from "svelte"
   import {join, without, uniq} from "ramda"
@@ -14,7 +15,6 @@
     env,
     Publisher,
     uniqTags,
-    writable,
     publishToZeroOrMoreGroups,
     tagsFromContent,
     getClientTags,

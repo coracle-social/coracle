@@ -1,6 +1,6 @@
 import {Tags, getIdAndAddress} from "@coracle.social/util"
 import {whereEq, groupBy, find} from "ramda"
-import {derived, DerivedCollection} from "src/engine/core/utils"
+import {derived, DerivedCollection} from "@coracle.social/lib"
 import {pubkey} from "src/engine/session/state"
 import {settings} from "src/engine/session/derived"
 import {getWotScore} from "src/engine/people/utils"
