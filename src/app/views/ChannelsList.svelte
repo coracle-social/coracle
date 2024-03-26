@@ -15,6 +15,7 @@
   import {
     nip44,
     pubkey,
+    readable,
     canSign,
     channels,
     hasNewMessages,
@@ -35,7 +36,8 @@
 
   $: tabChannels = sortChannels(activeTab === "conversations" ? $accepted : $requests)
 
-  let cursor, unsub, interval, loading
+  let loader
+  let loading = readable(false)
   let hideNip04Alert = Storage.getJson("hide_nip04_alert")
 
   const hideAlert = () => {
@@ -44,15 +46,9 @@
   }
 
   const loadMessages = ({reload = false} = {}) => {
-    if (!loading) {
-      unsub?.()
-      clearInterval(interval)
-      ;[cursor, unsub] = loadAllMessages({reload})
-
-      setInterval(() => {
-        loading = !cursor.done()
-      }, 300)
-    }
+    loader?.stop()
+    loader = loadAllMessages({reload})
+    loading = loader.loading
   }
 
   onMount(() => {
@@ -62,7 +58,7 @@
     }
 
     return () => {
-      unsub?.()
+      loader?.stop()
     }
   })
 
@@ -112,11 +108,11 @@
       <div slot="trigger">
         <i
           class="fa fa-arrows-rotate cursor-pointer text-neutral-600"
-          class:fa-spin={loading}
+          class:fa-spin={$loading}
           on:click={() => loadMessages({reload: true})} />
       </div>
       <div slot="tooltip">
-        {#if loading}
+        {#if $loading}
           Loading conversations...
         {:else}
           Reload conversations
