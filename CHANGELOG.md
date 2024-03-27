@@ -10,6 +10,7 @@
 - [x] Show a little more metadata on relay card
 - [x] Make groups deletable
 - [x] Use new utility libraries
+- [x] Fix network filter
 
 # 0.4.4
 

@@ -168,15 +168,7 @@
   $: like = likes.find(e => e.pubkey === $session?.pubkey)
   $: $likesCount = likes.length
   $: zap = zaps.find(e => e.request.pubkey === $session?.pubkey)
-
-  $: {
-    const filteredZaps: {invoiceAmount: number}[] = zap && zapper
-      ? zaps.filter(n => n.id !== zap?.id).concat(zapFromEvent(zap, zapper))
-      : zaps
-
-    $zapsTotal = sum(pluck("invoiceAmount", filteredZaps)) / 1000
-  }
-
+  $: $zapsTotal = sum(pluck("invoiceAmount", zaps)) / 1000
   $: canZap = zapper && note.pubkey !== $session?.pubkey
   $: reply = replies.find(e => e.pubkey === $session?.pubkey)
   $: $repliesCount = replies.length

@@ -5,7 +5,6 @@
     env,
     pubkey,
     follows,
-    compileFilters,
     getPubkeysWithDefaults,
     loadGroupMessages,
   } from "src/engine"
@@ -18,11 +17,9 @@
     filter.authors = getPubkeysWithDefaults($follows).concat($pubkey)
   }
 
-  const filters = compileFilters([filter])
-
   if ($env.FORCE_GROUP) {
     loadGroupMessages([$env.FORCE_GROUP])
   }
 </script>
 
-<Calendar {filters} />
+<Calendar filters={[filter]} />
