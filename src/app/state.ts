@@ -1,14 +1,13 @@
 import Bugsnag from "@bugsnag/js"
 import {hash, union} from "hurdak"
 import {writable} from "@coracle.social/lib"
-import {ConnectionStatus} from "@coracle.social/network"
+import {ConnectionStatus, NetworkContext} from "@coracle.social/network"
 import {warn} from "src/util/logger"
 import {userKinds} from "src/util/nostr"
 import {toast} from "src/partials/state"
 import {router} from "src/app/router"
 import {
   env,
-  pool,
   relays,
   pubkey,
   follows,
@@ -78,7 +77,7 @@ setInterval(() => {
 
   // Prune connections we haven't used in a while, clear errors periodically,
   // and keep track of slow connections
-  for (const [url, connection] of pool.data.entries()) {
+  for (const [url, connection] of NetworkContext.pool.data.entries()) {
     const {lastPublish, lastRequest, lastFault} = connection.meta
     const lastActivity = Math.max(lastPublish, lastRequest)
     const status = connection.meta.getStatus()

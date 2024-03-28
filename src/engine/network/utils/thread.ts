@@ -5,7 +5,7 @@ import {Tags, getIdOrAddress, getIdFilters, getIdAndAddress} from "@coracle.soci
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {hints} from "src/engine/relays/utils"
-import {load} from "./load"
+import {load} from "./executor"
 
 const getAncestorIds = e =>
   Tags.from(Object.values(Tags.fromEvent(e).ancestors()).flatMap(tags => tags.valueOf()))

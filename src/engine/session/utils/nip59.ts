@@ -126,7 +126,7 @@ export class Nip59 {
     const seal = await this.getSeal(rumor, params)
     const wrap = await this.getWrap(seal, params)
 
-    return Object.assign(rumor, {wrap, seen_on: []})
+    return Object.assign(rumor, {wrap})
   }
 
   async unwrap(wrap, sk) {
@@ -140,7 +140,7 @@ export class Nip59 {
       if (!rumor) throw new Error("Failed to decrypt seal")
 
       if (seal.pubkey === rumor.pubkey) {
-        return Object.assign(rumor, {wrap, seen_on: wrap.seen_on})
+        return Object.assign(rumor, {wrap})
       }
     } catch (e) {
       if (!e.toString().match(/version 1|Invalid nip44|Malformed/)) {

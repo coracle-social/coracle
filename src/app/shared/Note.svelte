@@ -11,7 +11,7 @@
   } from "@coracle.social/util"
   import {identity, reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
-  import {quantify, ensurePlural, batch} from "hurdak"
+  import {quantify, batch} from "hurdak"
   import {fly, slide} from "src/util/transition"
   import {isLike, isGiftWrap} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
@@ -110,7 +110,7 @@
   }
 
   const addToContext = events => {
-    ctx = ctx.concat(ensurePlural(events).map(e => ({seen_on: [], ...e})))
+    ctx = ctx.concat(events)
   }
 
   $: tags = Tags.fromEvent(event)
@@ -170,7 +170,7 @@
   // Split out zaps
   $: zaps = children
     .filter(e => e.kind === 9735)
-    .map(e => zapper ? zapFromEvent(e, zapper) : null)
+    .map(e => (zapper ? zapFromEvent(e, zapper) : null))
     .filter(identity)
 
   onMount(async () => {
@@ -185,9 +185,12 @@
     }
 
     if (!event.pubkey) {
-      event = await loadOne({
+      await loadOne({
         relays: hints.scenario([relays]).getUrls(),
         filters: getIdFilters([event.id]),
+        onEvent: e => {
+          event = e
+        },
       })
     }
 

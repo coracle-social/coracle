@@ -2,7 +2,7 @@ import {nip19} from "nostr-tools"
 import {shuffle} from "@coracle.social/lib"
 import {Router} from "@coracle.social/util"
 import {normalizeRelayUrl as normalize, fromNostrURI} from "@coracle.social/util"
-import {ConnectionStatus} from "@coracle.social/network"
+import {ConnectionStatus, NetworkContext} from "@coracle.social/network"
 import {sortBy, whereEq, pluck, uniq, prop, last} from "ramda"
 import {displayList, chunk, switcher} from "hurdak"
 import {fuzzy, pushToKey} from "src/util/misc"
@@ -12,7 +12,6 @@ import {getSetting} from "src/engine/session/utils"
 import {stateKey} from "src/engine/session/derived"
 import {people} from "src/engine/people/state"
 import {groups, groupSharedKeys} from "src/engine/groups/state"
-import {pool} from "src/engine/network/state"
 import type {Relay} from "./model"
 import {relays} from "./state"
 
@@ -116,7 +115,7 @@ export const hints = new Router({
   getRelayQuality: (url: string) => {
     const oneMinute = 60 * 1000
     const oneDay = 24 * 60 * oneMinute
-    const connection = pool.get(url, {autoConnect: false})
+    const connection = NetworkContext.pool.get(url, {autoConnect: false})
 
     // If we haven't connected, consult our relay record and see if there has
     // been a recent fault. If there has been, penalize the relay.
@@ -140,7 +139,7 @@ export const hints = new Router({
 })
 
 export const getPubkeyRelayChunks = (pubkeys: string[]) => {
-  const relayLimit = getSetting('relay_limit')
+  const relayLimit = getSetting("relay_limit")
   const pubkeysByRelay = new Map()
 
   for (const pubkeyChunk of chunk(relayLimit, shuffle(pubkeys))) {

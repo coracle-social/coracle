@@ -7,6 +7,7 @@ import type {Event} from "src/engine/events/model"
 import {sessions} from "src/engine/session/state"
 import {updateSession} from "src/engine/session/commands"
 import {getNip04, getNip44, getNip59} from "src/engine/session/utils"
+import {tracker} from "src/engine/network/utils"
 import {_events, deletes, seen} from "./state"
 
 const getSession = pubkey => sessions.get()[pubkey]
@@ -84,6 +85,7 @@ const handleWrappedEvent = getEncryption => wrap => {
 
   if (getEncryption(session).isEnabled()) {
     getNip59(session).withUnwrappedEvent(wrap, session.privkey, rumor => {
+      tracker.copy(wrap.id, rumor.id)
       projections.push(rumor)
     })
   }

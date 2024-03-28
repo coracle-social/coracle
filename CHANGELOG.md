@@ -11,6 +11,7 @@
 - [x] Make groups deletable
 - [x] Use new utility libraries
 - [x] Fix network filter
+- [x] Refactor subscribe/load
 
 # 0.4.4
 

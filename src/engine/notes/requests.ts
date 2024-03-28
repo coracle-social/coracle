@@ -1,8 +1,9 @@
+import type {Event} from "nostr-tools"
 import {find, pluck, whereEq} from "ramda"
 import {batch, sleep} from "hurdak"
 import {getIdFilters, Tags} from "@coracle.social/util"
 import {env} from "src/engine/session/state"
-import {subscribe, loadOne, dvmRequest} from "src/engine/network/utils"
+import {loadOne, dvmRequest} from "src/engine/network/utils"
 import {hints} from "src/engine/relays/utils"
 
 export const dereferenceNote = async ({
@@ -39,19 +40,11 @@ export const dereferenceNote = async ({
       return note
     }
 
-    return new Promise(resolve => {
-      let note = null
-
-      subscribe({
-        timeout: 3000,
-        closeOnEose: true,
-        relays: hints.scenario([relays]).getUrls(),
-        filters: [{kinds: [kind], authors: [pubkey], "#d": [identifier]}],
-        onClose: () => resolve(note),
-        onEvent: event => {
-          note = note?.created_at > event.created_at ? note : event
-        },
-      })
+    return loadOne({
+      relays: hints.scenario([relays]).getUrls(),
+      filters: [{kinds: [kind], authors: [pubkey], "#d": [identifier]}],
+    }).then((event: Event) => {
+      return note?.created_at > event.created_at ? note : event
     })
   }
 

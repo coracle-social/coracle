@@ -16,10 +16,8 @@ import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {sortEventsDesc, unwrapRepost} from "src/engine/events/utils"
 import {isEventMuted, isDeleted} from "src/engine/events/derived"
-import {getUrls} from "./executor"
-import {subscribe} from "./subscribe"
+import {getUrls, tracker, load, subscribe} from "./executor"
 import {MultiCursor} from "./cursor"
-import {load} from "./load"
 
 export type FeedOpts = {
   relays: string[]
@@ -93,7 +91,7 @@ export class FeedLoader {
     // out of order notes
     this.ready = race(
       0.4,
-      remoteSubs.map(s => new Promise(r => s.on("close", r))),
+      remoteSubs.map(s => new Promise(r => s.emitter.on("complete", r))),
     )
   }
 
@@ -133,15 +131,17 @@ export class FeedLoader {
       .map(e => Tags.fromEvent(e).parent()?.value())
       .filter(identity)
 
-    load({
-      relays: this.opts.relays,
-      filters: getIdFilters(parentIds),
-      onEvent: batch(100, events => {
-        for (const e of this.discardEvents(events)) {
-          this.parents.set(e.id, e)
-        }
-      }),
-    })
+    if (parentIds.length > 0) {
+      load({
+        relays: this.opts.relays,
+        filters: getIdFilters(parentIds),
+        onEvent: batch(100, events => {
+          for (const e of this.discardEvents(events)) {
+            this.parents.set(e.id, e)
+          }
+        }),
+      })
+    }
   }
 
   // Control
@@ -150,7 +150,7 @@ export class FeedLoader {
     for (const sub of ensurePlural(subs)) {
       this.subs.push(sub)
 
-      sub.on("close", () => {
+      sub.emitter.on("complete", () => {
         this.subs = without([sub], this.subs)
       })
     }
@@ -186,7 +186,9 @@ export class FeedLoader {
 
                 this.reposts.set(wrappedEvent.id, [...reposts, e])
 
-                e = {...wrappedEvent, seen_on: e.seen_on}
+                tracker.copy(e.id, wrappedEvent.id)
+
+                e = wrappedEvent
               }
             }
 

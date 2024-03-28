@@ -4,7 +4,7 @@ import {env} from "src/engine/session/state"
 import {hints} from "src/engine/relays/utils"
 import type {Event} from "src/engine/events/model"
 import {createAndPublish} from "./publish"
-import {subscribe} from "./subscribe"
+import {subscribe} from "./executor"
 
 export type DVMRequestOpts = {
   kind: number
@@ -62,7 +62,7 @@ export const dvmRequest = async ({
           sub.close()
         }
       },
-      onClose: () => {
+      onComplete: () => {
         resolve(null)
       },
     })

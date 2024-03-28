@@ -1,15 +1,26 @@
 import {max, uniq, partition, equals} from "ramda"
-import {noop, pickVals} from "hurdak"
+import {sleep, pickVals} from "hurdak"
+import type {Event} from "nostr-tools"
 import {createEvent} from "@coracle.social/util"
-import {Plex, Relays, Executor, Multi} from "@coracle.social/network"
+import {
+  Plex,
+  Relays,
+  Executor,
+  Multi,
+  NetworkContext,
+  Tracker,
+  subscribe as baseSubscribe,
+} from "@coracle.social/network"
+import type {SubscribeRequest} from "@coracle.social/network"
 import {error, warn} from "src/util/logger"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {normalizeRelayUrl} from "src/engine/relays/utils"
-import {pool} from "src/engine/network/state"
 import {env} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
 import {signer, canSign} from "src/engine/session/derived"
 import {LocalTarget} from "./targets"
+
+export const tracker = new Tracker()
 
 export const getUrls = (relays: string[]) => {
   if (relays.length === 0) {
@@ -25,7 +36,7 @@ export const getUrls = (relays: string[]) => {
   return urls
 }
 
-export const getTarget = (urls: string[]) => {
+export const getExecutor = (urls: string[]) => {
   const muxUrl = getSetting("multiplextr_url")
   const [localUrls, remoteUrls] = partition(equals(LOCAL_RELAY_URL), urls)
 
@@ -35,8 +46,8 @@ export const getTarget = (urls: string[]) => {
   // AUTH with a single relay.
   let target
 
-  if (muxUrl && (remoteUrls.length > 1 || pool.has(muxUrl))) {
-    const connection = pool.get(muxUrl)
+  if (muxUrl && (remoteUrls.length > 1 || NetworkContext.pool.has(muxUrl))) {
+    const connection = NetworkContext.pool.get(muxUrl)
 
     if (connection.socket.isHealthy()) {
       target = new Plex(remoteUrls, connection)
@@ -44,14 +55,14 @@ export const getTarget = (urls: string[]) => {
   }
 
   if (!target) {
-    target = new Relays(remoteUrls.map(url => pool.get(url)))
+    target = new Relays(remoteUrls.map(url => NetworkContext.pool.get(url)))
   }
 
   if (localUrls.length > 0) {
     target = new Multi([target, new LocalTarget()])
   }
 
-  return target
+  return new Executor(target)
 }
 
 const seenChallenges = new Set()
@@ -82,39 +93,74 @@ export const onAuth = async (url, challenge) => {
     }),
   )
 
-  pool.get(url).send(["AUTH", event])
+  NetworkContext.pool.get(url).send(["AUTH", event])
 
   return event
 }
 
-export const getExecutor = (urls: string[]) => {
-  const target = getTarget(urls)
-  const executor = new Executor(target)
-
-  executor.handleAuth({onAuth, onOk: noop})
-
-  return executor
+export type MySubscribeRequest = SubscribeRequest & {
+  onEvent?: (event: Event) => void
+  onComplete?: () => void
+  skipCache?: boolean
 }
 
-export const getSimpleExecutor = (urls: string[]) => {
-  const target = new Relays(urls.map(url => pool.get(url)))
-  const executor = new Executor(target)
+export const subscribe = (request: MySubscribeRequest) => {
+  if (!request.skipCache) {
+    request.relays.push(LOCAL_RELAY_URL)
+  }
 
-  executor.handleAuth({onAuth, onOk: noop})
+  const sub = baseSubscribe(request)
 
-  return executor
+  if (request.onEvent) {
+    sub.emitter.on("event", (url: string, event: Event) => request.onEvent(event))
+  }
+
+  if (request.onComplete) {
+    sub.emitter.on("complete", request.onComplete)
+  }
+
+  return sub
 }
+
+export const subscribePersistent = async (request: MySubscribeRequest) => {
+  /* eslint no-constant-condition: 0 */
+  while (true) {
+    // If the subscription gets closed quickly due to eose, don't start flapping
+    await Promise.all([
+      sleep(30_000),
+      new Promise(resolve => subscribe(request).emitter.on("close", resolve)),
+    ])
+  }
+}
+
+export const LOAD_OPTS = {timeout: 3000, closeOnEose: true}
+
+export const load = (request: MySubscribeRequest) => subscribe({...request, ...LOAD_OPTS}).result
+
+export const loadOne = (request: MySubscribeRequest) =>
+  new Promise<Event | null>(resolve => {
+    const sub = subscribe({...request, ...LOAD_OPTS})
+
+    sub.emitter.on("event", (url: string, event: Event) => {
+      resolve(event)
+      sub.close()
+    })
+
+    sub.emitter.on("complete", () => {
+      resolve(null)
+    })
+  })
 
 setInterval(() => {
   const activityKeys = ["lastRequest", "lastPublish", "lastEvent"]
 
-  for (const [url, con] of pool.data.entries()) {
+  for (const [url, con] of NetworkContext.pool.data.entries()) {
     // @ts-ignore
     const lastActivity: number = pickVals(activityKeys, con.meta).reduce(max)
 
     // If our connection hasn't been used in a while, close it and reopen
     if (lastActivity && lastActivity < Date.now() - 60_000) {
-      pool.remove(url)
+      NetworkContext.pool.remove(url)
     }
   }
 }, 10_000)

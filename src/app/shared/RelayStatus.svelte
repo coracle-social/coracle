@@ -1,7 +1,7 @@
 <script lang="ts">
   import {poll} from "hurdak"
   import {onMount} from "svelte"
-  import {pool} from "src/engine"
+  import {NetworkContext} from "@coracle.social/network"
 
   export let relay
 
@@ -11,7 +11,7 @@
 
   onMount(() => {
     return poll(3000, () => {
-      const cxn = pool.get(relay.url, {autoConnect: false})
+      const cxn = NetworkContext.pool.get(relay.url, {autoConnect: false})
 
       if (cxn) {
         description = cxn.meta.getDescription()

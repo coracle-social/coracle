@@ -2,6 +2,7 @@
   import {isNil, prop, uniqBy, objOf, find, all} from "ramda"
   import {sleep, shuffle} from "hurdak"
   import {onDestroy, onMount} from "svelte"
+  import {NetworkContext} from "@coracle.social/network"
   import {userKinds} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
@@ -13,16 +14,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {router} from "src/app/router"
   import {loadUserData} from "src/app/state"
-  import {
-    env,
-    session,
-    relays,
-    pool,
-    subscribe,
-    getUserRelayUrls,
-    normalizeRelayUrl,
-    getSimpleExecutor,
-  } from "src/engine"
+  import {env, session, relays, subscribe, getUserRelayUrls, normalizeRelayUrl} from "src/engine"
 
   const currentRelays = {} as Record<number, {url: string}>
   const attemptedRelays = new Set()
@@ -30,10 +22,7 @@
     uniqBy(
       prop("url"),
       // Make sure our hardcoded urls are first, since they're more likely to find a match
-      [
-        ...$env.PLATFORM_RELAYS,
-        ...$env.DEFAULT_RELAYS,
-      ].map(objOf("url")).concat(shuffle($relays)),
+      [...$env.PLATFORM_RELAYS, ...$env.DEFAULT_RELAYS].map(objOf("url")).concat(shuffle($relays)),
     ),
   )
 
@@ -67,9 +56,9 @@
       subscribe({
         timeout: 3000,
         closeOnEose: true,
-        executor: getSimpleExecutor([relay.url]),
+        relays: [relay.url],
         filters: [{kinds: userKinds, authors: [$session.pubkey]}],
-        onClose: async () => {
+        onComplete: async () => {
           currentRelays[i] = null
 
           if (searching && getUserRelayUrls().length > 0) {
@@ -85,7 +74,7 @@
 
             router.at("notes").push()
           } else {
-            pool.remove(relay.url)
+            NetworkContext.pool.remove(relay.url)
           }
         },
       })

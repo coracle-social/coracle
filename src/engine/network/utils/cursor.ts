@@ -6,15 +6,12 @@ import {guessFilterDelta} from "@coracle.social/util"
 import type {Subscription} from "@coracle.social/network"
 import type {Event} from "src/engine/events/model"
 import {sortEventsDesc} from "src/engine/events/utils"
-import {getUrls} from "./executor"
-import {subscribe} from "./subscribe"
-import {Tracker} from "./tracker"
+import {getUrls, subscribe, LOAD_OPTS} from "./executor"
 
 export type CursorOpts = {
   relay: string
   filters: Filter[]
   onEvent?: (e: Event) => void
-  tracker?: Tracker
 }
 
 export class Cursor {
@@ -90,13 +87,12 @@ export class Cursor {
     }
 
     const sub = subscribe({
-      timeout: 3000,
+      ...LOAD_OPTS,
       relays: [relay],
       skipCache: true,
-      closeOnEose: true,
-      tracker: this.opts.tracker,
+      immediate: true,
       filters: pageFilters,
-      onClose: onPageComplete,
+      onComplete: onPageComplete,
       onEvent: (event: Event) => {
         this.until = Math.min(until, event.created_at) - 1
         this.buffer = sortEventsDesc([...this.buffer, event])
@@ -135,7 +131,6 @@ export type MultiCursorOpts = {
 
 export class MultiCursor {
   bufferFactor = 4
-  tracker = new Tracker()
   cursors: Cursor[]
 
   constructor(readonly opts: MultiCursorOpts) {
@@ -145,7 +140,6 @@ export class MultiCursor {
           relay: url,
           filters: opts.filters,
           onEvent: opts.onEvent,
-          tracker: this.tracker,
         }),
     )
   }

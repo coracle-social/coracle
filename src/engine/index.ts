@@ -1,15 +1,25 @@
-import {Tags} from "@coracle.social/util"
+import type {Event} from "nostr-tools"
+import {Tags, hasValidSignature} from "@coracle.social/util"
+import {NetworkContext} from "@coracle.social/network"
 import {prop, filter, identity, uniq, sortBy} from "ramda"
-import {Storage, LocalStorageAdapter, IndexedDBAdapter, sortByPubkeyWhitelist} from "./core"
+import {LOCAL_RELAY_URL} from "src/util/nostr"
+import {
+  Storage,
+  projections,
+  LocalStorageAdapter,
+  IndexedDBAdapter,
+  sortByPubkeyWhitelist,
+} from "./core"
 import {_lists} from "./lists"
 import {people} from "./people"
 import {relays} from "./relays"
 import {groups, groupSharedKeys, groupAdminKeys, groupRequests, groupAlerts} from "./groups"
 import {_labels} from "./labels"
 import {topics} from "./topics"
-import {deletes, seen, _events} from "./events"
+import {deletes, seen, _events, isDeleted} from "./events"
 import {pubkey, sessions} from "./session"
 import {channels} from "./channels"
+import {onAuth, getExecutor, tracker} from "./network"
 
 export * from "./core"
 export * from "./auth"
@@ -29,6 +39,18 @@ export * from "./reports"
 export * from "./session"
 export * from "./topics"
 export * from "./zaps"
+
+Object.assign(NetworkContext, {
+  onAuth,
+  getExecutor,
+  onEvent: (url: string, event: Event) => {
+    tracker.track(event.id, url)
+    projections.push(event)
+  },
+  isDeleted: (url: string, event: Event) => isDeleted.get()(event),
+  hasValidSignature: (url: string, event: Event) =>
+    url === LOCAL_RELAY_URL ? true : hasValidSignature(event),
+})
 
 const setAdapter = {
   dump: s => Array.from(s),

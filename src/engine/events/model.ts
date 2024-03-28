@@ -1,15 +1,9 @@
-import type {Event as NostrToolsEvent, UnsignedEvent} from "nostr-tools"
+import type {Event as NostrToolsEvent} from "nostr-tools"
 
 export type NostrEvent = NostrToolsEvent
 
-export type Event = Omit<NostrToolsEvent, "kind"> & {
-  kind: number
-  seen_on: string[]
+export type Event = NostrEvent & {
   wrap?: Event
-}
-
-export type Rumor = UnsignedEvent & {
-  id: string
 }
 
 export type ReadReceipt = {

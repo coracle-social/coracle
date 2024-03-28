@@ -5,12 +5,15 @@
   import Note from "src/app/shared/Note.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
   import type {Notification} from "src/engine"
+  import {hints} from "src/engine"
 
   export let notification: Notification
 
   const {timestamp, interactions} = notification
   const parent = Tags.fromEvent(interactions[0]).whereKey("e").parent()
   const note = parent ? {id: parent.value()} : interactions[0]
+  const pubkeys = pluck('pubkey', interactions)
+  const scenario = parent ? hints.ForPubkeys(pubkeys) : hints.FromPubkeys(pubkeys)
 </script>
 
 <div>
@@ -24,5 +27,6 @@
     depth={1}
     {note}
     context={interactions}
+    relays={scenario.getUrls()}
     filters={[{ids: pluck("id", interactions)}]} />
 </div>

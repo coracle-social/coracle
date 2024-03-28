@@ -36,8 +36,6 @@
         const newEvents = jsonl.split("\n").map(l => JSON.parse(l)) as Event[]
 
         for (const event of newEvents) {
-          event.seen_on = event.seen_on || []
-
           projections.push(event)
 
           if (!isGiftWrap(event)) {

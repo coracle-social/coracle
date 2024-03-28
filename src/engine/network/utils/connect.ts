@@ -3,7 +3,7 @@ import type {EventTemplate} from "nostr-tools"
 import {nip04, finalizeEvent} from "nostr-tools"
 import {Emitter, now} from "@coracle.social/lib"
 import {createEvent} from "@coracle.social/util"
-import {Subscription} from "@coracle.social/network"
+import type {Subscription} from "@coracle.social/network"
 import {randomId, sleep} from "hurdak"
 import {NostrConnect} from "nostr-tools/kinds"
 import logger from "src/util/logger"
@@ -11,7 +11,7 @@ import {getPublicKey} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import type {Event} from "src/engine/events/model"
 import {Publisher} from "./publish"
-import {subscribe} from "./subscribe"
+import {subscribe} from "./executor"
 import type {NostrConnectHandler} from "../model"
 
 let singleton: NostrConnectBroker
@@ -71,7 +71,7 @@ export class NostrConnectBroker extends Emitter {
           this.emit(`response-${id}`, {result, error})
         }
       },
-      onClose: () => {
+      onComplete: () => {
         if (!this.#closed) {
           this.subscribe()
         }

@@ -7,6 +7,7 @@
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
   import {router} from "src/app/router"
   import type {Notification} from "src/engine"
+  import {tracker} from "src/engine"
 
   export let notification: Notification
 
@@ -15,7 +16,12 @@
   const zaps = interactions.filter(e => e.kind === 9734)
   const context = interactions.concat(note)
 
-  const goToNote = () => router.at("notes").of(note.id, {relays: note.seen_on}).cx({context}).open()
+  const goToNote = () =>
+    router
+      .at("notes")
+      .of(note.id, {relays: tracker.getRelays(note.id)})
+      .cx({context})
+      .open()
 
   const actionText = closure(() => {
     if (likes.length === 0) return "zapped"

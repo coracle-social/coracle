@@ -29,7 +29,7 @@ export const createPeopleLoader = ({
           onEvent,
           relays: searchableRelays.get(),
           filters: [{kinds: [0], search: term, limit: 100}],
-          onClose: async () => {
+          onComplete: async () => {
             await sleep(Math.min(1000, Date.now() - now))
 
             loading.set(false)

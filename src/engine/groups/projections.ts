@@ -7,7 +7,7 @@ import {updateStore} from "src/engine/core/commands"
 import type {Event} from "src/engine/events/model"
 import {sessions} from "src/engine/session/state"
 import {nip59} from "src/engine/session/derived"
-import {getExecutor, load} from "src/engine/network/utils"
+import {getExecutor, tracker, load} from "src/engine/network/utils"
 import {hints} from "src/engine/relays/utils"
 import {GroupAccess} from "./model"
 import {groups, groupSharedKeys, groupAdminKeys, groupRequests, groupAlerts} from "./state"
@@ -224,6 +224,7 @@ projections.addHandler(1059, wrap => {
 
   if (sk) {
     nip59.get().withUnwrappedEvent(wrap, sk, rumor => {
+      tracker.copy(wrap.id, rumor.id)
       projections.push(rumor)
     })
   }
@@ -234,6 +235,7 @@ projections.addHandler(1060, wrap => {
 
   if (sk) {
     nip59.get().withUnwrappedEvent(wrap, sk, rumor => {
+      tracker.copy(wrap.id, rumor.id)
       projections.push(rumor)
     })
   }

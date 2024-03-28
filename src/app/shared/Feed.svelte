@@ -26,7 +26,6 @@
   export let eager = false
   export let skipCache = false
   export let skipPlatform = false
-  export let shouldDisplay = null
   export let shouldListen = false
   export let hideControls = false
   export let hideSpinner = false
@@ -76,10 +75,6 @@
     })
 
     notes = feed.notes
-
-    if (shouldDisplay) {
-      notes = notes.derived(xs => xs.filter(shouldDisplay))
-    }
   }
 
   const updateFilter = newFilter => {

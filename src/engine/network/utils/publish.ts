@@ -1,6 +1,6 @@
 import EventEmitter from "events"
 import {createEvent, getIdAndAddress, asEvent, Tags} from "@coracle.social/util"
-import {omit, uniqBy} from "ramda"
+import {uniqBy} from "ramda"
 import {defer, union, difference} from "hurdak"
 import {info} from "src/util/logger"
 import {parseContent} from "src/util/notes"
@@ -51,7 +51,7 @@ export class Publisher extends EventEmitter {
       throw new Error("Can't publish unwrapped events")
     }
 
-    this.event = {...asEvent(event), seen_on: []}
+    this.event = asEvent(event)
   }
 
   static publish({event, relays, ...opts}: StaticPublisherOpts) {
@@ -108,11 +108,9 @@ export class Publisher extends EventEmitter {
       attemptToResolve()
     }, timeout)
 
-    const sub = executor.publish(omit(["seen_on"], this.event), {
+    const sub = executor.publish(this.event, {
       verb,
       onOk: (url: string, eventId: string, ok: boolean) => {
-        this.event.seen_on.push(url)
-
         if (ok) {
           succeeded.add(url)
           failed.delete(url)

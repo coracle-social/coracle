@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {onMount} from "svelte"
-  import {toNostrURI, zapFromEvent, asEvent, Tags, createEvent} from "@coracle.social/util"
+  import {toNostrURI, asEvent, Tags, createEvent} from "@coracle.social/util"
   import {tweened} from "svelte/motion"
   import {identity, filter, sum, uniqBy, prop, pluck} from "ramda"
   import {fly} from "src/util/transition"
@@ -32,6 +32,7 @@
     Publisher,
     mention,
     handlers,
+    tracker,
     hints,
     deriveHandlers,
     deriveIsGroupMember,
@@ -63,6 +64,7 @@
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
   const handler = handlers.key(tags.get("client")?.mark())
+  const seenOn = tracker.data.derived(m => m.get(note.id))
 
   //const report = () => router.at("notes").of(note.id, {relays: hints.Event(note).getUrls(3)}).at('report').qp({pubkey: note.pubkey}).open()
 
@@ -253,12 +255,12 @@
     {/if}
   </div>
   <div class="flex scale-90 items-center gap-2">
-    {#if note.seen_on.length > 0}
+    {#if $seenOn}
       <div
         class="staatliches hidden cursor-pointer rounded bg-neutral-800 px-2 text-neutral-100 transition-colors hover:bg-neutral-700 dark:bg-neutral-600 dark:hover:bg-neutral-500 sm:block"
         on:click={() => setView("info")}>
-        <span class="text-accent">{note.seen_on.length}</span>
-        {pluralize(note.seen_on.length, "relay")}
+        <span class="text-accent">{$seenOn.size}</span>
+        {pluralize($seenOn.size, "relay")}
       </div>
     {/if}
     <OverflowMenu {actions} />
@@ -288,11 +290,11 @@
           {/each}
         </div>
       {/if}
-      {#if note.seen_on.length > 0 && $env.PLATFORM_RELAYS.length < 2}
+      {#if $seenOn && $env.PLATFORM_RELAYS.length < 2}
         <h1 class="staatliches text-2xl">Relays</h1>
-        <p>This note was found on {quantify(note.seen_on.length, "relay")} below.</p>
+        <p>This note was found on {quantify($seenOn.size, "relay")} below.</p>
         <div class="flex flex-col gap-2">
-          {#each note.seen_on as url}
+          {#each $seenOn as url}
             <RelayCard relay={{url}} />
           {/each}
         </div>

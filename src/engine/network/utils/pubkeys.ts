@@ -6,7 +6,7 @@ import type {Filter} from "@coracle.social/util"
 import {personKinds, appDataKeys} from "src/util/nostr"
 import {people} from "src/engine/people/state"
 import {hints} from "src/engine/relays/utils"
-import {load} from "./load"
+import {load} from "./executor"
 
 export type LoadPeopleOpts = {
   relays?: string[]
