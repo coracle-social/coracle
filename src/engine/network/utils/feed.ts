@@ -1,5 +1,5 @@
 import {partition, concat, prop, uniqBy, identity, without, assoc} from "ramda"
-import {ensurePlural, doPipe, batch} from "hurdak"
+import {doPipe, batch} from "hurdak"
 import {now, writable} from "@coracle.social/lib"
 import type {Filter} from "@coracle.social/util"
 import {
@@ -24,6 +24,7 @@ export type FeedOpts = {
   filters: Filter[]
   onEvent?: (e: Event) => void
   anchor?: string
+  skipCache?: boolean
   shouldDefer?: boolean
   shouldListen?: boolean
   shouldBuffer?: boolean
@@ -47,15 +48,13 @@ export class FeedLoader {
   isDeleted = isDeleted.get()
 
   constructor(readonly opts: FeedOpts) {
-    const urls = getUrls(opts.relays)
-    const filters = ensurePlural(opts.filters)
-
     // No point in subscribing if we have an end date
     if (opts.shouldListen && !filters.some(prop("until"))) {
       this.addSubs([
         subscribe({
-          relays: urls,
+          relays: opts.relays,
           filters: opts.filters.map(assoc("since", this.since)),
+          skipCache: opts.skipCache,
           onEvent: batch(300, (events: Event[]) => {
             events = this.discardEvents(events)
 
@@ -73,9 +72,10 @@ export class FeedLoader {
       ])
     }
 
+
     this.cursor = new MultiCursor({
-      relays: opts.relays,
       filters: opts.filters,
+      relays: opts.skipCache ? opts.relays : opts.relays.concat(LOCAL_RELAY_URL),
       onEvent: batch(100, events => {
         if (opts.shouldLoadParents) {
           this.loadParents(this.discardEvents(events))
@@ -83,9 +83,7 @@ export class FeedLoader {
       }),
     })
 
-    const remoteSubs = this.cursor.load(50)
-
-    this.addSubs(remoteSubs)
+    const remoteSubs = this.addSubs(this.cursor.load(50))
 
     // Wait until a good number of subscriptions have completed to reduce the chance of
     // out of order notes
@@ -147,13 +145,15 @@ export class FeedLoader {
   // Control
 
   addSubs(subs) {
-    for (const sub of ensurePlural(subs)) {
+    for (const sub of subs) {
       this.subs.push(sub)
 
       sub.emitter.on("complete", () => {
         this.subs = without([sub], this.subs)
       })
     }
+
+    return subs
   }
 
   stop() {

@@ -8,7 +8,6 @@
   import DayGrid from "@event-calendar/day-grid"
   import Interaction from "@event-calendar/interaction"
   import {secondsToDate} from "src/util/misc"
-  import {LOCAL_RELAY_URL} from "src/util/nostr"
   import {themeColors} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/router"
@@ -50,7 +49,7 @@
   onMount(() => {
     const sub = subscribe({
       filters,
-      relays: forcePlatformRelays(getRelaysFromFilters(filters)).concat(LOCAL_RELAY_URL),
+      relays: forcePlatformRelays(getRelaysFromFilters(filters)),
       onEvent: batch(300, chunk => {
         events.update($events => {
           for (const e of chunk) {

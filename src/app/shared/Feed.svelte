@@ -4,7 +4,6 @@
   import {writable, readable} from "@coracle.social/lib"
   import {FeedLoader} from "src/engine"
   import {createScroller} from "src/util/misc"
-  import {LOCAL_RELAY_URL} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import {getModal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
@@ -51,9 +50,6 @@
       result = forcePlatformRelays(result)
     }
 
-    if (!skipCache) {
-      result.push(LOCAL_RELAY_URL)
-    }
 
     return result
   }
@@ -67,6 +63,7 @@
       filters: compileFilters([filter], {includeReposts: true}),
       relays: getRelays(),
       anchor,
+      skipCache,
       shouldListen,
       shouldDefer: !eager,
       shouldLoadParents: true,
