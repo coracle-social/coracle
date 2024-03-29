@@ -10,7 +10,7 @@ import {
 } from "@coracle.social/util"
 import {race} from "src/util/misc"
 import {info} from "src/util/logger"
-import {LOCAL_RELAY_URL, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {sortEventsDesc, unwrapRepost} from "src/engine/events/utils"
@@ -56,7 +56,7 @@ export class FeedLoader {
       skipPlatform: opts.skipPlatform,
     }).map(([relay, filters]): RelayFilters => [relay, addRepostFilters(filters)])
 
-    if (false && !opts.skipCache) {
+    if (!opts.skipCache) {
       relayFilters.push([LOCAL_RELAY_URL, addRepostFilters(filters)])
     }
 

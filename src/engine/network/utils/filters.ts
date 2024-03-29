@@ -7,7 +7,7 @@ import {pushToKey} from "src/util/misc"
 import {env} from "src/engine/session/state"
 import {user} from "src/engine/session/derived"
 import {getFollowedPubkeys, getNetwork} from "src/engine/people/utils"
-import {hints, getPubkeyRelayUrls} from "src/engine/relays/utils"
+import {hints, getPubkeyRelayUrls, getUserRelayUrls} from "src/engine/relays/utils"
 import {searchableRelays} from "src/engine/relays/derived"
 
 export enum FilterScope {
@@ -126,7 +126,6 @@ export type RelayPubkeys = [string, string[]]
 
 export const getRelayPubkeys = (pubkeys: string[]) => {
   const threshold = 3
-  const fallback = first(shuffle(env.get().DEFAULT_RELAYS))
   const pubkeysByRelay = new Map<string, string[]>()
 
   for (const pubkey of pubkeys) {
@@ -134,17 +133,13 @@ export const getRelayPubkeys = (pubkeys: string[]) => {
       relay => hints.options.getRelayQuality(relay) > 0,
     )
 
-    if (relays.length < threshold) {
-      pushToKey(pubkeysByRelay, fallback, pubkey)
-    }
-
     for (const relay of relays) {
       pushToKey(pubkeysByRelay, relay, pubkey)
     }
   }
 
   const seen = new Map<string, number>()
-  const result: RelayPubkeys[] = []
+  const result = new Map<string, string[]>()
   const sortKey = ([url, pubkeys]) => -pubkeys.length * hints.options.getRelayQuality(url)
   for (const [relay] of sortBy(sortKey, Array.from(pubkeysByRelay))) {
     const pubkeys = []
@@ -158,9 +153,22 @@ export const getRelayPubkeys = (pubkeys: string[]) => {
     }
 
     if (pubkeys.length > 0) {
-      result.push([relay, pubkeys])
+      result.set(relay, pubkeys)
     }
   }
 
-  return result
+  const fallbacks = env.get().DEFAULT_RELAYS.concat(getUserRelayUrls("write"))
+
+  for (const pubkey of pubkeys) {
+    const timesSeen = seen.get(pubkey) || 0
+    const fallbacksNeeded = threshold - timesSeen
+
+    if (fallbacksNeeded > 0) {
+      for (const relay of fallbacks.slice(0, fallbacksNeeded)) {
+        pushToKey(result, relay, pubkey)
+      }
+    }
+  }
+
+  return Array.from(result)
 }

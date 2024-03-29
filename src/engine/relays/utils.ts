@@ -137,22 +137,3 @@ export const hints = new Router({
     })
   },
 })
-
-export const getPubkeyRelayChunks = (pubkeys: string[]) => {
-  const relayLimit = getSetting("relay_limit")
-  const pubkeysByRelay = new Map()
-
-  for (const pubkeyChunk of chunk(relayLimit, shuffle(pubkeys))) {
-    for (const relay of hints.FromPubkeys(pubkeyChunk).getUrls()) {
-      for (const pubkey of pubkeyChunk) {
-        if (pubkeysByRelay.get(relay)?.length === 256) {
-          break
-        }
-
-        pushToKey(pubkeysByRelay, relay, pubkey)
-      }
-    }
-  }
-
-  return shuffle(Array.from(pubkeysByRelay.entries())).slice(0, relayLimit)
-}

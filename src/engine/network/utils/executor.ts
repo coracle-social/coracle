@@ -106,7 +106,7 @@ export type MySubscribeRequest = SubscribeRequest & {
 
 export const subscribe = (request: MySubscribeRequest) => {
   if (!request.skipCache) {
-    request.relays.push(LOCAL_RELAY_URL)
+    request.relays = request.relays.concat(LOCAL_RELAY_URL)
   }
 
   const sub = baseSubscribe(request)
