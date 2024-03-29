@@ -1,7 +1,6 @@
 import {partition, concat, prop, uniqBy, identity, without, assoc} from "ramda"
 import {doPipe, batch} from "hurdak"
 import {now, writable} from "@coracle.social/lib"
-import type {Filter} from "@coracle.social/util"
 import {
   Tags,
   getIdOrAddress,
@@ -16,15 +15,18 @@ import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {sortEventsDesc, unwrapRepost} from "src/engine/events/utils"
 import {isEventMuted, isDeleted} from "src/engine/events/derived"
-import {getUrls, tracker, load, subscribe} from "./executor"
+import type {DynamicFilter, RelayFilters} from "src/engine/network/utils"
+import {compileFilters, addRepostFilters, getRelayFilters} from "src/engine/network/utils"
+import {tracker, load, subscribe} from "./executor"
 import {MultiCursor} from "./cursor"
 
 export type FeedOpts = {
   relays: string[]
-  filters: Filter[]
+  filters: DynamicFilter[]
   onEvent?: (e: Event) => void
   anchor?: string
   skipCache?: boolean
+  skipPlatform?: boolean
   shouldDefer?: boolean
   shouldListen?: boolean
   shouldBuffer?: boolean
@@ -48,34 +50,44 @@ export class FeedLoader {
   isDeleted = isDeleted.get()
 
   constructor(readonly opts: FeedOpts) {
-    // No point in subscribing if we have an end date
-    if (opts.shouldListen && !filters.some(prop("until"))) {
-      this.addSubs([
-        subscribe({
-          relays: opts.relays,
-          filters: opts.filters.map(assoc("since", this.since)),
-          skipCache: opts.skipCache,
-          onEvent: batch(300, (events: Event[]) => {
-            events = this.discardEvents(events)
+    const filters = compileFilters(opts.filters)
+    const relayFilters = getRelayFilters(filters, {
+      forceRelays: opts.relays,
+      skipPlatform: opts.skipPlatform,
+    }).map(([relay, filters]): RelayFilters => [relay, addRepostFilters(filters)])
 
-            if (opts.shouldLoadParents) {
-              this.loadParents(events)
-            }
-
-            if (opts.shouldBuffer) {
-              this.buffer.update($buffer => $buffer.concat(events))
-            } else {
-              this.addToFeed(events, {prepend: true})
-            }
-          }),
-        }),
-      ])
+    if (false && !opts.skipCache) {
+      relayFilters.push([LOCAL_RELAY_URL, addRepostFilters(filters)])
     }
 
+    // No point in subscribing if we have an end date
+    if (opts.shouldListen && !opts.filters.every(prop("until"))) {
+      this.addSubs(
+        relayFilters.map(([relay, filters]) =>
+          subscribe({
+            relays: [relay],
+            skipCache: true,
+            filters: filters.map(assoc("since", this.since)),
+            onEvent: batch(300, (events: Event[]) => {
+              events = this.discardEvents(events)
+
+              if (opts.shouldLoadParents) {
+                this.loadParents(events)
+              }
+
+              if (opts.shouldBuffer) {
+                this.buffer.update($buffer => $buffer.concat(events))
+              } else {
+                this.addToFeed(events, {prepend: true})
+              }
+            }),
+          }),
+        ),
+      )
+    }
 
     this.cursor = new MultiCursor({
-      filters: opts.filters,
-      relays: opts.skipCache ? opts.relays : opts.relays.concat(LOCAL_RELAY_URL),
+      relayFilters,
       onEvent: batch(100, events => {
         if (opts.shouldLoadParents) {
           this.loadParents(this.discardEvents(events))

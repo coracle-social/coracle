@@ -1,12 +1,14 @@
-import {mergeLeft, pluck, min, max, identity, sortBy} from "ramda"
+import {mergeLeft, nth, pluck, min, max, identity, sortBy} from "ramda"
 import {first, sleep} from "hurdak"
 import {now, writable} from "@coracle.social/lib"
 import type {Filter} from "@coracle.social/util"
-import {guessFilterDelta} from "@coracle.social/util"
+import {guessFilterDelta, combineFilters} from "@coracle.social/util"
 import type {Subscription} from "@coracle.social/network"
+import {LOCAL_RELAY_URL} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
 import {sortEventsDesc} from "src/engine/events/utils"
-import {getUrls, subscribe, LOAD_OPTS} from "./executor"
+import type {RelayFilters} from "src/engine/network/utils"
+import {subscribe, LOAD_OPTS} from "./executor"
 
 export type CursorOpts = {
   relay: string
@@ -89,8 +91,8 @@ export class Cursor {
     const sub = subscribe({
       ...LOAD_OPTS,
       relays: [relay],
-      skipCache: true,
       immediate: true,
+      skipCache: true,
       filters: pageFilters,
       onComplete: onPageComplete,
       onEvent: (event: Event) => {
@@ -124,8 +126,7 @@ export class Cursor {
 }
 
 export type MultiCursorOpts = {
-  relays: string[]
-  filters: Filter[]
+  relayFilters: RelayFilters[]
   onEvent?: (e: Event) => void
 }
 
@@ -134,13 +135,8 @@ export class MultiCursor {
   cursors: Cursor[]
 
   constructor(readonly opts: MultiCursorOpts) {
-    this.cursors = getUrls(opts.relays).map(
-      url =>
-        new Cursor({
-          relay: url,
-          filters: opts.filters,
-          onEvent: opts.onEvent,
-        }),
+    this.cursors = opts.relayFilters.map(
+      ([relay, filters]) => new Cursor({relay, filters, onEvent: opts.onEvent}),
     )
   }
 

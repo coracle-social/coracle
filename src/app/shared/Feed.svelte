@@ -11,13 +11,7 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import Note from "src/app/shared/Note.svelte"
   import type {DynamicFilter} from "src/engine"
-  import {
-    hints,
-    compileFilters,
-    forcePlatformRelays,
-    searchableRelays,
-    getRelaysFromFilters,
-  } from "src/engine"
+  import {compileFilters} from "src/engine"
 
   export let relays = []
   export let filter: DynamicFilter = {}
@@ -36,34 +30,17 @@
 
   const hideReplies = writable(Storage.getJson("hideReplies"))
 
-  const getRelays = () => {
-    if (relays.length > 0) {
-      return relays
-    }
-
-    // If we have a search term we need to use only relays that support search
-    let result = filter.search
-      ? hints.scenario([$searchableRelays]).getUrls()
-      : getRelaysFromFilters(compileFilters([filter]))
-
-    if (!skipPlatform) {
-      result = forcePlatformRelays(result)
-    }
-
-
-    return result
-  }
-
   const loadMore = () => feed.load(5)
 
   const start = () => {
     feed?.stop()
 
     feed = new FeedLoader({
-      filters: compileFilters([filter], {includeReposts: true}),
-      relays: getRelays(),
+      filters: [filter],
+      relays,
       anchor,
       skipCache,
+      skipPlatform,
       shouldListen,
       shouldDefer: !eager,
       shouldLoadParents: true,
@@ -80,7 +57,7 @@
     start()
   }
 
-  hideReplies.subscribe($hideReplies => {
+  const unsubHideReplies = hideReplies.subscribe($hideReplies => {
     start()
     Storage.setJson("hideReplies", $hideReplies)
   })
@@ -89,8 +66,9 @@
     const scroller = createScroller(loadMore, {element: getModal()})
 
     return () => {
-      feed?.stop()
+      unsubHideReplies()
       scroller?.stop()
+      feed?.stop()
     }
   })
 </script>

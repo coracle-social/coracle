@@ -4,14 +4,14 @@
   import Feed from "src/app/shared/Feed.svelte"
   import type {DynamicFilter} from "src/engine"
   import {router} from "src/app/router"
-  import {env, canSign, pubkey, follows, loadGroupMessages, getPubkeysWithDefaults} from "src/engine"
+  import {env, canSign, loadGroupMessages, FilterScope} from "src/engine"
 
   const filter: DynamicFilter = {kinds: [30402]}
 
   if ($env.FORCE_GROUP) {
     filter["#a"] = [$env.FORCE_GROUP]
   } else {
-    filter.authors = getPubkeysWithDefaults($follows).concat($pubkey)
+    filter.scope = FilterScope.FollowsAndSelf
   }
 
   const createListing = () => router.at("notes/create").qp({type: "listing"}).open()
@@ -28,4 +28,4 @@
   </Card>
 {/if}
 
-<Feed hideControls={$env.FORCE_GROUP} {filter} />
+<Feed hideControls={Boolean($env.FORCE_GROUP)} {filter} />

@@ -18,12 +18,15 @@ export const loadAllMessages = ({reload = false} = {}) => {
     loadPubkeys($channels.flatMap(c => c.members || []))
   })
 
+  const relays = hints.User().getUrls()
+
+  const filters = [
+    {kinds: [4], authors: [pubkey], since},
+    {kinds: [4, 1059], "#p": [pubkey], since},
+  ]
+
   const cursor = new MultiCursor({
-    relays: hints.User().getUrls(),
-    filters: [
-      {kinds: [4], authors: [pubkey], since},
-      {kinds: [4, 1059], "#p": [pubkey], since},
-    ],
+    relayFilters: relays.map(relay => [relay, filters]),
   })
 
   return cursor.loadAll({

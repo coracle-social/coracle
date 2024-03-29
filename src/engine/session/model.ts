@@ -30,3 +30,23 @@ export type Session = {
   groups?: Record<string, GroupStatus>
   onboarding_tasks_completed?: string[]
 }
+
+export type Env = {
+  CLIENT_ID: string
+  CLIENT_NAME: string
+  DEFAULT_FOLLOWS: string[]
+  DEFAULT_RELAYS: string[]
+  DUFFLEPUD_URL: string
+  DVM_RELAYS: string[]
+  ENABLE_MARKET: boolean
+  ENABLE_ZAPS: boolean
+  FORCE_GROUP: string
+  IMGPROXY_URL: string
+  MULTIPLEXTR_URL: string
+  NIP96_URLS: string[]
+  ONBOARDING_LISTS: string[]
+  PLATFORM_PUBKEY: string
+  PLATFORM_RELAYS: string[]
+  PLATFORM_ZAP_SPLIT: number
+  SEARCH_RELAYS: string[]
+}

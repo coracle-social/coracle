@@ -54,8 +54,7 @@ export const sync = (fromUrl, toUrl, filters) => {
   worker.addGlobalHandler(event => Publisher.publish({event, relays: [toUrl]}))
 
   const cursor = new MultiCursor({
-    filters,
-    relays: [fromUrl],
+    relayFilters: [[fromUrl, filters]],
     onEvent: worker.push,
   })
 

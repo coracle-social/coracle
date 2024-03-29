@@ -2,6 +2,7 @@
   import {fromPairs} from "ramda"
   import {batch} from "hurdak"
   import {onMount} from "svelte"
+  import type {Event} from "nostr-tools"
   import {writable} from "@coracle.social/lib"
   import {getAddress, getReplyFilters} from "@coracle.social/util"
   import Calendar from "@event-calendar/core"
@@ -14,11 +15,11 @@
   import {
     hints,
     canSign,
-    getRelaysFromFilters,
-    forcePlatformRelays,
+    getRelayFilters,
     load,
     isDeleted,
     subscribe,
+    compileFilters,
     pubkey,
   } from "src/engine"
 
@@ -46,32 +47,32 @@
 
   const events = writable(new Map())
 
-  onMount(() => {
-    const sub = subscribe({
-      filters,
-      relays: forcePlatformRelays(getRelaysFromFilters(filters)),
-      onEvent: batch(300, chunk => {
-        events.update($events => {
-          for (const e of chunk) {
-            const addr = getAddress(e)
-            const dup = $events.get(addr)
+  const onEvent = batch(300, (chunk: Event[]) => {
+    events.update($events => {
+      for (const e of chunk) {
+        const addr = getAddress(e)
+        const dup = $events.get(addr)
 
-            // Make sure we have the latest version of every event
-            $events.set(addr, dup?.created_at > e.created_at ? dup : e)
-          }
+        // Make sure we have the latest version of every event
+        $events.set(addr, dup?.created_at > e.created_at ? dup : e)
+      }
 
-          return $events
-        })
-
-        // Load deletes for these events
-        load({
-          relays: hints.merge(chunk.map(e => hints.EventChildren(e))).getUrls(),
-          filters: getReplyFilters(chunk, {kinds: [5]}),
-        })
-      }),
+      return $events
     })
 
-    return () => sub.close()
+    // Load deletes for these events
+    load({
+      relays: hints.merge(chunk.map(e => hints.EventChildren(e))).getUrls(),
+      filters: getReplyFilters(chunk, {kinds: [5]}),
+    })
+  })
+
+  onMount(() => {
+    const subs = getRelayFilters(compileFilters(filters)).map(([relay, filters]) =>
+      subscribe({relays: [relay], filters, onEvent}),
+    )
+
+    return () => subs.map(sub => sub.close())
   })
 
   $: calendarEvents = Array.from($events.values())
