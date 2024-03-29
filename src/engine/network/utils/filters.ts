@@ -125,8 +125,8 @@ export const getRelayFilters = (
 export type RelayPubkeys = [string, string[]]
 
 export const getRelayPubkeys = (pubkeys: string[]) => {
+  const threshold = 3
   const fallback = first(shuffle(env.get().DEFAULT_RELAYS))
-  const relaysByPubkey = new Map<string, string[]>()
   const pubkeysByRelay = new Map<string, string[]>()
 
   for (const pubkey of pubkeys) {
@@ -134,14 +134,12 @@ export const getRelayPubkeys = (pubkeys: string[]) => {
       relay => hints.options.getRelayQuality(relay) > 0,
     )
 
-    if (relays.length === 0) {
-      pushToKey(relaysByPubkey, pubkey, fallback)
+    if (relays.length < threshold) {
       pushToKey(pubkeysByRelay, fallback, pubkey)
-    } else {
-      for (const relay of relays) {
-        pushToKey(relaysByPubkey, pubkey, relay)
-        pushToKey(pubkeysByRelay, relay, pubkey)
-      }
+    }
+
+    for (const relay of relays) {
+      pushToKey(pubkeysByRelay, relay, pubkey)
     }
   }
 
@@ -153,7 +151,7 @@ export const getRelayPubkeys = (pubkeys: string[]) => {
     for (const pubkey of pubkeysByRelay.get(relay)) {
       const timesSeen = seen.get(pubkey) || 0
 
-      if (timesSeen < 2) {
+      if (timesSeen < threshold) {
         seen.set(pubkey, timesSeen + 1)
         pubkeys.push(pubkey)
       }

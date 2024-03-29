@@ -10,7 +10,7 @@ import {
 } from "@coracle.social/util"
 import {race} from "src/util/misc"
 import {info} from "src/util/logger"
-import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {LOCAL_RELAY_URL, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {sortEventsDesc, unwrapRepost} from "src/engine/events/utils"
