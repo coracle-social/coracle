@@ -20,7 +20,7 @@
   const {id, identifier, kind, pubkey} = value
 
   const relays = hints
-    .merge([hints.scenario([value.relays || []]), hints.EventParent(note)])
+    .merge([hints.idScenario([note.id], value.relays || []), hints.EventAncestors(note)])
     .getUrls()
 
   const openQuote = e => {

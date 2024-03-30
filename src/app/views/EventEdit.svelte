@@ -32,7 +32,7 @@
 
     const template = asEventTemplate({
       ...event,
-      tags: tags.valueOf(),
+      tags: tags.unwrap(),
       content: compose.parse(),
       created_at: inc(event.created_at),
     })
@@ -72,7 +72,7 @@
       compose.write(event.content)
 
       for (const url of tags.values("image").valueOf()) {
-        images.addImage(Tags.from([["url", url]]))
+        images.addImage(Tags.wrap([["url", url]]))
       }
     }
   })

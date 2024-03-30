@@ -224,11 +224,11 @@ export const getReplyTags = (parent: Event, inherit = false) => {
 
   // Root comes first
   if (roots.exists()) {
-    for (const t of roots.valueOf()) {
-      replyTags.push(t.slice(0, 2).concat([hints.EventRoot(parent).getUrl(), "root"]))
+    for (const t of roots.unwrap()) {
+      replyTags.push(t.slice(0, 2).concat([hints.EventAncestors(parent).getUrl(), "root"]))
     }
   } else {
-    for (const t of replies.valueOf()) {
+    for (const t of replies.unwrap()) {
       replyTags.push(t.slice(0, 2).concat([hints.Event(parent).getUrl(), "root"]))
     }
   }
@@ -238,7 +238,7 @@ export const getReplyTags = (parent: Event, inherit = false) => {
     const isRepeated = v => replyTagValues.includes(v) || replyTags.find(t => t[1] === v)
 
     // Inherit mentions
-    for (const t of mentions.valueOf()) {
+    for (const t of mentions.unwrap()) {
       if (!isRepeated(t[1])) {
         replyTags.push(t.slice(0, 3).concat("mention"))
       }
@@ -246,7 +246,7 @@ export const getReplyTags = (parent: Event, inherit = false) => {
 
     // Inherit replies if they weren't already included
     if (roots.exists()) {
-      for (const t of replies.valueOf()) {
+      for (const t of replies.unwrap()) {
         if (!isRepeated(t[1])) {
           replyTags.push(t.slice(0, 3).concat("mention"))
         }
@@ -255,7 +255,7 @@ export const getReplyTags = (parent: Event, inherit = false) => {
   }
 
   // Add a/e-tags to the parent event
-  for (const tag of hints.tagEvent(parent, "reply").valueOf()) {
+  for (const tag of hints.tagEvent(parent, "reply").unwrap()) {
     replyTags.push(tag)
   }
 

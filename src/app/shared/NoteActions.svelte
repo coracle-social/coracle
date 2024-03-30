@@ -104,7 +104,7 @@
 
   const crossPost = async (address = null) => {
     const content = JSON.stringify(asEvent(note))
-    const tags = [...hints.tagEvent(note).valueOf(), mention(note.pubkey), ...getClientTags()]
+    const tags = [...hints.tagEvent(note).unwrap(), mention(note.pubkey), ...getClientTags()]
 
     let template
     if (note.kind === 1) {
@@ -123,7 +123,7 @@
   const startZap = () => {
     const zapTags = tags.whereKey("zap")
     const defaultSplit = hints.tagPubkey(note.pubkey).setKey("zap").append("1").valueOf()
-    const splits = zapTags.exists() ? zapTags.valueOf() : [defaultSplit]
+    const splits = zapTags.exists() ? zapTags.unwrap() : [defaultSplit]
 
     router
       .at("zap")

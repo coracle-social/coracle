@@ -72,7 +72,7 @@
     }
 
     for (const imeta of images.getValue()) {
-      tags.push(["imeta", ...imeta.valueOf().map(join(" "))])
+      tags.push(["imeta", ...imeta.unwrap().map(join(" "))])
     }
 
     if (opts.warning) {

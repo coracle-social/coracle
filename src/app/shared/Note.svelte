@@ -93,14 +93,14 @@
   const goToParent = () =>
     router
       .at("notes")
-      .of(reply.value(), {relays: hints.EventParent(event).limit(3).getUrls()})
+      .of(reply.value(), {relays: hints.EventAncestors(event).limit(3).getUrls()})
       .cx({context: ctx.concat(event)})
       .open()
 
   const goToThread = () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: hints.EventRoot(event).limit(3).getUrls()})
+      .of(getIdOrAddress(event), {relays: hints.EventAncestors(event).limit(3).getUrls()})
       .at("thread")
       .cx({context: ctx.concat(event)})
       .open()
@@ -186,7 +186,7 @@
 
     if (!event.pubkey) {
       await loadOne({
-        relays: hints.scenario([relays]).getUrls(),
+        relays: hints.pubkeyScenario(event.pubkey, relays).getUrls(),
         filters: getIdFilters([event.id]),
         onEvent: e => {
           event = e

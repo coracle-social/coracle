@@ -1,15 +1,16 @@
 import {identity} from "ramda"
 import {writable} from "@coracle.social/lib"
 import {normalizeRelayUrl} from "@coracle.social/util"
-import type {Session, Env} from "./model"
+import type {Session} from "./model"
 
 const fromCsv = s => (s || "").split(",").filter(identity)
 
-export const env = writable<Env>({
+export const env = writable({
   CLIENT_ID: import.meta.env.VITE_CLIENT_ID,
   CLIENT_NAME: import.meta.env.VITE_CLIENT_NAME,
   DEFAULT_FOLLOWS: fromCsv(import.meta.env.VITE_DEFAULT_FOLLOWS),
   DEFAULT_RELAYS: fromCsv(import.meta.env.VITE_DEFAULT_RELAYS).map(normalizeRelayUrl),
+  INDEXER_RELAYS: fromCsv(import.meta.env.VITE_INDEXER_RELAYS).map(normalizeRelayUrl),
   DUFFLEPUD_URL: import.meta.env.VITE_DUFFLEPUD_URL,
   DVM_RELAYS: fromCsv(import.meta.env.VITE_DVM_RELAYS).map(normalizeRelayUrl),
   ENABLE_MARKET: JSON.parse(import.meta.env.VITE_ENABLE_MARKET),

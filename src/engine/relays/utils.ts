@@ -1,11 +1,10 @@
 import {nip19} from "nostr-tools"
-import {shuffle} from "@coracle.social/lib"
 import {Router} from "@coracle.social/util"
 import {normalizeRelayUrl as normalize, fromNostrURI} from "@coracle.social/util"
 import {ConnectionStatus, NetworkContext} from "@coracle.social/network"
 import {sortBy, whereEq, pluck, uniq, prop, last} from "ramda"
-import {displayList, chunk, switcher} from "hurdak"
-import {fuzzy, pushToKey} from "src/util/misc"
+import {displayList, switcher} from "hurdak"
+import {fuzzy} from "src/util/misc"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {env} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
@@ -105,13 +104,17 @@ export const forcePlatformRelays = relays => {
   return relays
 }
 
+export const useRelaysWithFallbacks = relays =>
+  relays.length > 0 ? relays : env.get().DEFAULT_RELAYS
+
 export const hints = new Router({
   getUserPubkey: () => stateKey.get(),
   getGroupRelays: getGroupRelayUrls,
   getCommunityRelays: getGroupRelayUrls,
   getPubkeyRelays: getPubkeyRelayUrls,
-  getDefaultRelays: () => [...env.get().PLATFORM_RELAYS, ...env.get().DEFAULT_RELAYS],
-  getDefaultLimit: () => parseInt(getSetting("relay_limit")),
+  getStaticRelays: () => [...env.get().PLATFORM_RELAYS, ...env.get().DEFAULT_RELAYS],
+  getIndexerRelays: () => env.get().INDEXER_RELAYS,
+  getRedundancy: () => parseInt(getSetting("relay_redundancy")),
   getRelayQuality: (url: string) => {
     const oneMinute = 60 * 1000
     const oneDay = 24 * 60 * oneMinute

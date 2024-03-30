@@ -10,7 +10,7 @@ import {
 } from "@coracle.social/util"
 import {race} from "src/util/misc"
 import {info} from "src/util/logger"
-import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {LOCAL_RELAY_URL, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {sortEventsDesc, unwrapRepost} from "src/engine/events/utils"
@@ -97,11 +97,11 @@ export class FeedLoader {
 
     const remoteSubs = this.addSubs(this.cursor.load(50))
 
-    // Wait until a good number of subscriptions have completed to reduce the chance of
+    // Wait until at least one subscription has completed to reduce the chance of
     // out of order notes
     this.ready = race(
-      0.4,
-      remoteSubs.map(s => new Promise(r => s.emitter.on("complete", r))),
+      Math.min(2, remoteSubs.length),
+      remoteSubs.map(s => new Promise(r => s.emitter.on("event", r))),
     )
   }
 

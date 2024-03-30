@@ -77,7 +77,7 @@ projections.addHandler(3, e => {
   }
 
   updateStore(people.key(e.pubkey), e.created_at, {
-    petnames: Tags.fromEvent(e).whereKey("p").valueOf(),
+    petnames: Tags.fromEvent(e).whereKey("p").unwrap(),
   })
 })
 
@@ -85,12 +85,12 @@ projections.addHandler(10000, e => {
   updateStore(people.key(e.pubkey), e.created_at, {
     mutes: Tags.fromEvent(e)
       .filter(t => ["e", "p"].includes(t.key()))
-      .valueOf(),
+      .unwrap(),
   })
 })
 
 projections.addHandler(10004, e => {
   updateStore(people.key(e.pubkey), e.created_at, {
-    communities: Tags.fromEvent(e).whereKey("a").valueOf(),
+    communities: Tags.fromEvent(e).whereKey("a").unwrap(),
   })
 })

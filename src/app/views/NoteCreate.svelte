@@ -118,7 +118,7 @@
       if (type === "listing") {
         tags.push(["image", imeta.get("url").value()])
       } else {
-        tags.push(["imeta", ...imeta.valueOf().map(join(" "))])
+        tags.push(["imeta", ...imeta.unwrap().map(join(" "))])
       }
     }
 

@@ -14,7 +14,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {router} from "src/app/router"
   import {loadUserData} from "src/app/state"
-  import {env, session, relays, subscribe, getUserRelayUrls, normalizeRelayUrl} from "src/engine"
+  import {env, loadPubkeys, session, relays, getUserRelayUrls, normalizeRelayUrl} from "src/engine"
 
   const currentRelays = {} as Record<number, {url: string}>
   const attemptedRelays = new Set()
@@ -53,30 +53,28 @@
       attemptedRelays.add(relay.url)
       currentRelays[i] = relay
 
-      subscribe({
-        timeout: 3000,
-        closeOnEose: true,
+      loadPubkeys([$session.pubkey], {
+        force: true,
+        kinds: userKinds,
         relays: [relay.url],
-        filters: [{kinds: userKinds, authors: [$session.pubkey]}],
-        onComplete: async () => {
-          currentRelays[i] = null
+      }).then(async () => {
+        currentRelays[i] = null
 
-          if (searching && getUserRelayUrls().length > 0) {
-            searching = false
-            modal = "success"
+        if (searching && getUserRelayUrls().length > 0) {
+          searching = false
+          modal = "success"
 
-            // Reload everything, it's possible we didn't get their petnames if we got a match
-            // from something like purplepag.es. This helps us avoid nuking follow lists later
-            loadUserData()
+          // Reload everything, it's possible we didn't get their petnames if we got a match
+          // from something like purplepag.es. This helps us avoid nuking follow lists later
+          loadUserData()
 
-            // Artificially wait since relays might not respond quickly
-            await sleep(3000)
+          // Artificially wait since relays might not respond quickly
+          await sleep(3000)
 
-            router.at("notes").push()
-          } else {
-            NetworkContext.pool.remove(relay.url)
-          }
-        },
+          router.at("notes").push()
+        } else {
+          NetworkContext.pool.remove(relay.url)
+        }
       })
     }
 

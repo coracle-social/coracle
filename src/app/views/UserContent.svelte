@@ -23,7 +23,7 @@
     publishMutes,
   } from "src/engine"
 
-  const muteTags = Tags.from($user.mutes || [])
+  const muteTags = Tags.wrap($user.mutes || [])
 
   const settings = getSettings()
 
@@ -31,7 +31,7 @@
 
   const submit = () => {
     const pubkeyMutes = mutedPeople.map(p => ["p", p.pubkey])
-    const otherMutes = muteTags.reject(t => t.key() === "p").valueOf()
+    const otherMutes = muteTags.reject(t => t.key() === "p").unwrap()
     const allMutes = [...pubkeyMutes, ...otherMutes]
 
     publishSettings(settings)

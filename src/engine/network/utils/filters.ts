@@ -1,4 +1,4 @@
-import {shuffle, first} from "@coracle.social/lib"
+import {shuffle} from "@coracle.social/lib"
 import type {Filter} from "@coracle.social/util"
 import {isContextAddress, decodeAddress} from "@coracle.social/util"
 import {without, sortBy} from "ramda"
@@ -7,7 +7,12 @@ import {pushToKey} from "src/util/misc"
 import {env} from "src/engine/session/state"
 import {user} from "src/engine/session/derived"
 import {getFollowedPubkeys, getNetwork} from "src/engine/people/utils"
-import {hints, getPubkeyRelayUrls, getUserRelayUrls} from "src/engine/relays/utils"
+import {
+  hints,
+  useRelaysWithFallbacks,
+  getPubkeyRelayUrls,
+  getUserRelayUrls,
+} from "src/engine/relays/utils"
 import {searchableRelays} from "src/engine/relays/derived"
 
 export enum FilterScope {
@@ -97,7 +102,7 @@ export const getRelayFilters = (
 
   for (const filter of filters) {
     if (filter.search) {
-      for (const relay of hints.scenario([searchableRelays.get()]).getUrls()) {
+      for (const relay of useRelaysWithFallbacks(searchableRelays.get())) {
         pushToKey(filterRelays, relay, filter)
       }
     } else {

@@ -4,11 +4,11 @@ import {writable} from "@coracle.social/lib"
 import {Tags, getIdOrAddress, getIdFilters, getIdAndAddress} from "@coracle.social/util"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
-import {hints} from "src/engine/relays/utils"
+import {useRelaysWithFallbacks} from "src/engine/relays/utils"
 import {load} from "./executor"
 
 const getAncestorIds = e =>
-  Tags.from(Object.values(Tags.fromEvent(e).ancestors()).flatMap(tags => tags.valueOf()))
+  Tags.wrap(Object.values(Tags.fromEvent(e).ancestors()).flatMap(tags => tags.unwrap()))
     .values()
     .valueOf()
 
@@ -39,7 +39,7 @@ export class ThreadLoader {
 
     if (filteredIds.length > 0) {
       load({
-        relays: hints.scenario([this.relays]).getUrls(),
+        relays: useRelaysWithFallbacks(this.relays),
         filters: getIdFilters(filteredIds),
         onEvent: batch(300, (events: Event[]) => {
           this.addToThread(events)

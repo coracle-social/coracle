@@ -21,13 +21,14 @@ export type Handle = {
 
 export type Person = {
   pubkey: string
-  last_fetched?: number
+  profile_fetched_at?: number
   profile_updated_at?: number
   profile?: Profile
   petnames_updated_at?: number
   petnames?: string[][]
   mutes_updated_at?: number
   mutes?: string[][]
+  relays_fetched_at?: number
   relays_updated_at?: number
   relays?: RelayPolicy[]
   communities_updated_at?: number

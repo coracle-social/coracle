@@ -26,7 +26,7 @@ projections.addGlobalHandler(
 projections.addHandler(
   5,
   batch(500, (chunk: Event[]) => {
-    const ids = Tags.from(chunk.flatMap(e => e.tags))
+    const ids = Tags.wrap(chunk.flatMap(e => e.tags))
       .filter(tag => ["a", "e"].includes(tag.key()))
       .values()
       .valueOf()

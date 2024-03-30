@@ -33,8 +33,8 @@
   const values = {
     title: tags.get("title")?.value() || tags.get("name")?.value() || tags.get("d")?.value() || "",
     description: tags.get("description")?.value() || "",
-    params: tags.filter(t => ["t", "p"].includes(t.key())).valueOf(),
-    relays: tags.whereValue("r").valueOf(),
+    params: tags.filter(t => ["t", "p"].includes(t.key())).unwrap(),
+    relays: tags.whereValue("r").unwrap(),
   }
 
   const search = q => {

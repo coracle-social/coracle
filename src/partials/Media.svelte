@@ -10,7 +10,7 @@
   import {dufflepud, imgproxy} from "src/engine"
 
   export let url
-  export let imeta = Tags.from([["url", url]])
+  export let imeta = Tags.wrap([["url", url]])
   export let onClick = null
   export let onClose = null
   export let fullSize = false

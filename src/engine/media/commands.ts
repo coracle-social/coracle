@@ -72,7 +72,7 @@ export const eventsToMeta = (events: Event[]) => {
 
   // Merge all nip94 tags together so we can supply as much imeta as possible
   return Object.values(tagsByHash).map(groupedTags => {
-    return Tags.from(groupedTags.flatMap(tags => tags.valueOf())).uniq()
+    return Tags.wrap(groupedTags.flatMap(tags => tags.unwrap())).uniq()
   })
 }
 

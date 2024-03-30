@@ -2,7 +2,7 @@ import {now} from "@coracle.social/lib"
 import type {Filter} from "@coracle.social/util"
 import {Tags, getIdFilters} from "@coracle.social/util"
 import {seconds, batch, doPipe} from "hurdak"
-import {pluck, max, slice, filter, without, sortBy} from "ramda"
+import {pluck, uniq, max, slice, filter, without, sortBy} from "ramda"
 import {updateIn} from "src/util/misc"
 import {noteKinds, giftWrapKinds, repostKinds, reactionKinds} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
@@ -20,7 +20,7 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
   const $isEventMuted = isEventMuted.get()
   const events = chunk.filter(e => kinds.includes(e.kind) && !$isEventMuted(e))
   const eventsWithParent = chunk.filter(e => Tags.fromEvent(e).parent())
-  const pubkeys = new Set(pluck("pubkey", events))
+  const pubkeys = uniq(pluck("pubkey", events))
 
   for (const pubkey of pubkeys) {
     updateSession(
@@ -36,7 +36,7 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
   loadPubkeys(pubkeys)
 
   load({
-    relays: hints.merge(eventsWithParent.map(hints.EventParent)).getUrls(),
+    relays: hints.merge(eventsWithParent.map(hints.EventAncestors)).getUrls(),
     filters: getIdFilters(
       eventsWithParent.flatMap(e => Tags.fromEvent(e).replies().values().valueOf()),
     ),

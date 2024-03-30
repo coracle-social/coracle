@@ -8,7 +8,7 @@ import type {Event} from "src/engine/events/model"
 import {sessions} from "src/engine/session/state"
 import {nip59} from "src/engine/session/derived"
 import {getExecutor, tracker, load} from "src/engine/network/utils"
-import {hints} from "src/engine/relays/utils"
+import {useRelaysWithFallbacks} from "src/engine/relays/utils"
 import {GroupAccess} from "./model"
 import {groups, groupSharedKeys, groupAdminKeys, groupRequests, groupAlerts} from "./state"
 import {
@@ -55,7 +55,7 @@ projections.addHandler(24, (e: Event) => {
 
     // Load the group's metadata and posts
     load({
-      relays: hints.scenario([relays]).getUrls(),
+      relays: useRelaysWithFallbacks(relays),
       filters: [
         ...getIdFilters([address]),
         {kinds: giftWrapKinds, "#p": [pubkey]},

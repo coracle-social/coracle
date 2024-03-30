@@ -31,7 +31,7 @@ export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settin
       return false
     }
 
-    const tags = Tags.from(e.tags || [])
+    const tags = Tags.wrap(e.tags || [])
     const {roots, replies} = tags.ancestors()
 
     if (

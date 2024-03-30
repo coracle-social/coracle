@@ -3,6 +3,7 @@ import {env, pubkey, sessions} from "src/engine/session/state"
 
 export const getDefaultSettings = () => ({
   relay_limit: 10,
+  relay_redundancy: 3,
   default_zap: 21,
   show_media: true,
   muted_words: [],

@@ -10,7 +10,6 @@ import {
   env,
   relays,
   pubkey,
-  follows,
   session,
   loadSeen,
   loadGroups,
@@ -106,9 +105,10 @@ export const loadAppData = () => {
 
 export const loadUserData = () => {
   // Make sure the user and their follows are loaded
-  loadPubkeys([pubkey.get()], {force: true, kinds: userKinds}).then(() =>
-    loadPubkeys(follows.get()),
-  )
+  loadPubkeys([pubkey.get()], {
+    force: true,
+    kinds: userKinds,
+  })
 
   // Load read receipts
   loadSeen()

@@ -89,7 +89,10 @@
       }
 
       const relays = hints
-        .merge([hints.PublishMessage(zap.pubkey), hints.scenario([[zap.relay]])])
+        .merge([
+          hints.PublishMessage(zap.pubkey),
+          hints.scenario([hints.pubkeySelection(zap.pubkey, [zap.relay])]),
+        ])
         .getUrls()
 
       zaps[i].relays = relays

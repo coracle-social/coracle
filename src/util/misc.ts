@@ -15,7 +15,7 @@ export const fuzzy = <T>(data: T[], opts = {}) => {
 
 export const secondsToDate = ts => new Date(parseInt(ts) * 1000)
 
-export const dateToSeconds = date => Math.round(date.valueOf() / 1000)
+export const dateToSeconds = date => Math.round(date.unwrap() / 1000)
 
 export const getTimeZone = () => new Date().toString().match(/GMT[^\s]+/)
 
@@ -170,8 +170,7 @@ export const pushToKey = <T>(m: Record<string, T[]> | Map<string, T[]>, k: strin
   return m
 }
 
-export const race = (p, promises) => {
-  const threshold = Math.ceil(promises.length * p)
+export const race = (threshold, promises) => {
   let count = 0
 
   return new Promise<void>((resolve, reject) => {
