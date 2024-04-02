@@ -15,6 +15,7 @@ import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {sortEventsDesc, unwrapRepost} from "src/engine/events/utils"
 import {isEventMuted, isDeleted} from "src/engine/events/derived"
+import {hints} from "src/engine/relays/utils"
 import type {DynamicFilter, RelayFilters} from "src/engine/network/utils"
 import {compileFilters, addRepostFilters, getRelayFilters} from "src/engine/network/utils"
 import {tracker, load, subscribe} from "./executor"
@@ -88,7 +89,7 @@ export class FeedLoader {
 
     this.cursor = new MultiCursor({
       relayFilters,
-      onEvent: batch(100, events => {
+      onEvent: batch(300, events => {
         if (opts.shouldLoadParents) {
           this.loadParents(this.discardEvents(events))
         }
@@ -136,15 +137,40 @@ export class FeedLoader {
       this.parents.set(e.id, e)
     }
 
-    const parentIds = notes
-      .filter(e => !repostKinds.includes(e.kind) && !this.isEventMuted(e))
-      .map(e => Tags.fromEvent(e).parent()?.value())
-      .filter(identity)
+    const parentIds = new Set<string>()
+    const notesWithParent = notes.filter(e => {
+      if (repostKinds.includes(e.kind)) {
+        return false
+      }
 
-    if (parentIds.length > 0) {
+      if (this.isEventMuted(e)) {
+        return false
+      }
+
+      const parentId = Tags.fromEvent(e).parent()?.value()
+
+      if (!parentId) {
+        return false
+      }
+
+      parentIds.add(parentId)
+
+      return true
+    })
+
+    if (parentIds.size === 0) {
+      return
+    }
+
+    const scenario =
+      this.opts.relays.length > 0
+        ? hints.product(Array.from(parentIds), this.opts.relays)
+        : hints.merge(notesWithParent.map(hints.EventAncestors))
+
+    for (const {relay, values} of scenario.getSelections()) {
       load({
-        relays: this.opts.relays,
-        filters: getIdFilters(parentIds),
+        relays: [relay],
+        filters: getIdFilters(values),
         onEvent: batch(100, events => {
           for (const e of this.discardEvents(events)) {
             this.parents.set(e.id, e)

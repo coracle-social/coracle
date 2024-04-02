@@ -64,8 +64,9 @@
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
   const handler = handlers.key(tags.get("client")?.mark())
-  const seenOn = tracker.data
-    .derived(m => Array.from(m.get(note.id)).filter(url => url !== LOCAL_RELAY_URL))
+  const seenOn = tracker.data.derived(m =>
+    Array.from(m.get(note.id) || []).filter(url => url !== LOCAL_RELAY_URL),
+  )
 
   //const report = () => router.at("notes").of(note.id, {relays: hints.Event(note).getUrls(3)}).at('report').qp({pubkey: note.pubkey}).open()
 

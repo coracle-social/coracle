@@ -62,13 +62,11 @@ export const loadPubkeyProfiles = (rawPubkeys: string[], opts: LoadPubkeyOpts = 
     }),
   )
 
-  for (const {relay, tags} of hints.FromPubkeys(pubkeys).getSelections()) {
-    const authors = tags.whereKey("p").values().valueOf()
-
+  for (const {relay, values} of hints.FromPubkeys(pubkeys).getSelections()) {
     promises.push(
       load({
         relays: [relay],
-        filters: filters.map(assoc("authors", authors)),
+        filters: filters.map(assoc("authors", Array.from(values))),
       }),
     )
   }
@@ -92,13 +90,11 @@ export const loadPubkeyRelays = (rawPubkeys: string[], opts: LoadPubkeyOpts = {}
     }),
   )
 
-  for (const {relay, tags} of hints.FromPubkeys(pubkeys).getSelections()) {
-    const authors = tags.whereKey("p").values().valueOf()
-
+  for (const {relay, values} of hints.FromPubkeys(pubkeys).getSelections()) {
     promises.push(
       load({
         relays: [relay],
-        filters: [{kinds: [10002], authors}],
+        filters: [{kinds: [10002], authors: Array.from(values)}],
         onEvent: e => loadPubkeyProfiles([e.pubkey]),
       }),
     )

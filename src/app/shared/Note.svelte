@@ -41,6 +41,7 @@
     loadPubkeys,
     sortEventsDesc,
     forcePlatformRelays,
+    useRelaysWithFallbacks,
   } from "src/engine"
 
   export let note
@@ -186,7 +187,7 @@
 
     if (!event.pubkey) {
       await loadOne({
-        relays: hints.idScenario([event.id], relays).getUrls(),
+        relays: useRelaysWithFallbacks(relays),
         filters: getIdFilters([event.id]),
         onEvent: e => {
           event = e
