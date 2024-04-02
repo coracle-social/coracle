@@ -92,7 +92,7 @@
   const share = () =>
     router
       .at("qrcode")
-      .of(nip19.nprofileEncode({pubkey, relays: hints.FromPubkeys([pubkey]).limit(3).getUrls()}))
+      .of(nip19.nprofileEncode({pubkey, relays: hints.FromPubkeys([pubkey]).getUrls()}))
       .open()
 </script>
 

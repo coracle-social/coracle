@@ -19,7 +19,7 @@
     router
       .at("people")
       .of(pubkey)
-      .cx({relays: hints.Event(note).limit(3).getUrls()})
+      .cx({relays: hints.Event(note).getUrls()})
       .open()
 </script>
 

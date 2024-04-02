@@ -70,7 +70,7 @@
           <Anchor
             href={router
               .at("notes")
-              .of(event.id, {relays: hints.Event(event).limit(3).getUrls()})
+              .of(event.id, {relays: hints.Event(event).getUrls()})
               .toString()}>
             <i class="fa fa-link text-accent" />
           </Anchor>

@@ -199,7 +199,7 @@
     if (quote) {
       const nevent = nip19.neventEncode({
         id: quote.id,
-        relays: hints.Event(quote).limit(3).getUrls(),
+        relays: hints.Event(quote).getUrls(),
       })
 
       compose.nevent("nostr:" + nevent)

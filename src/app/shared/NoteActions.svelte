@@ -7,6 +7,7 @@
   import {identity, filter, sum, uniqBy, prop, pluck} from "ramda"
   import {fly} from "src/util/transition"
   import {formatSats, tryJson} from "src/util/misc"
+  import {LOCAL_RELAY_URL} from "src/util/nostr"
   import {quantify, pluralize} from "hurdak"
   import {toast} from "src/partials/state"
   import Icon from "src/partials/Icon.svelte"
@@ -55,8 +56,7 @@
 
   const tags = Tags.fromEvent(note)
   const address = tags.context().values().first()
-  const relays = hints.Event(note).limit(3).getUrls()
-  const nevent = nip19.neventEncode({id: note.id, relays})
+  const nevent = nip19.neventEncode({id: note.id, relays: hints.Event(note).getUrls()})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
   const kindHandlers = deriveHandlers(note.kind).derived(filter((h: any) => h.recs.length > 1))
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
@@ -64,7 +64,8 @@
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
   const handler = handlers.key(tags.get("client")?.mark())
-  const seenOn = tracker.data.derived(m => m.get(note.id))
+  const seenOn = tracker.data
+    .derived(m => Array.from(m.get(note.id)).filter(url => url !== LOCAL_RELAY_URL))
 
   //const report = () => router.at("notes").of(note.id, {relays: hints.Event(note).getUrls(3)}).at('report').qp({pubkey: note.pubkey}).open()
 
@@ -72,9 +73,9 @@
     view = v
   }
 
-  const label = () => router.at("notes").of(note.id, {relays}).at("label").open()
+  const label = () => router.at("notes").of(note.id).at("label").open()
 
-  const quote = () => router.at("notes/create").cx({quote: note, relays}).open()
+  const quote = () => router.at("notes/create").cx({quote: note}).open()
 
   const unmuteNote = () => unmute(note.id)
 
@@ -259,8 +260,8 @@
       <div
         class="staatliches hidden cursor-pointer rounded bg-neutral-800 px-2 text-neutral-100 transition-colors hover:bg-neutral-700 dark:bg-neutral-600 dark:hover:bg-neutral-500 sm:block"
         on:click={() => setView("info")}>
-        <span class="text-accent">{$seenOn.size}</span>
-        {pluralize($seenOn.size, "relay")}
+        <span class="text-accent">{$seenOn.length}</span>
+        {pluralize($seenOn.length, "relay")}
       </div>
     {/if}
     <OverflowMenu {actions} />
@@ -292,7 +293,7 @@
       {/if}
       {#if $seenOn && $env.PLATFORM_RELAYS.length < 2}
         <h1 class="staatliches text-2xl">Relays</h1>
-        <p>This note was found on {quantify($seenOn.size, "relay")} below.</p>
+        <p>This note was found on {quantify($seenOn.length, "relay")} below.</p>
         <div class="flex flex-col gap-2">
           {#each $seenOn as url}
             <RelayCard relay={{url}} />

@@ -30,7 +30,7 @@
 
   const pubkeyEncoder = {
     encode: pubkey => {
-      const relays = hints.FromPubkeys([pubkey]).limit(3).getUrls()
+      const relays = hints.FromPubkeys([pubkey]).getUrls()
       const nprofile = nip19.nprofileEncode({pubkey, relays})
 
       return "nostr:" + nprofile
