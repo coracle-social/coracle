@@ -5,8 +5,9 @@
   import {nip19} from "nostr-tools"
   import {pluck} from "ramda"
   import {seconds, Fetch} from "hurdak"
-  import {now} from "@coracle.social/lib"
-  import {normalizeRelayUrl} from "@coracle.social/util"
+  import * as lib from "@coracle.social/lib"
+  import * as util from "@coracle.social/util"
+  import * as network from "@coracle.social/network"
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
   import * as nostr from "src/util/nostr"
@@ -341,6 +342,9 @@
     router,
     nostr,
     misc,
+    network,
+    util,
+    lib,
   }
 
   // Theme
@@ -436,7 +440,7 @@
       // few so we're not asking for too much data at once
       const staleRelays = relays
         .get()
-        .filter(r => (r.info?.last_checked || 0) < now() - seconds(7, "day"))
+        .filter(r => (r.info?.last_checked || 0) < lib.now() - seconds(7, "day"))
         .slice(0, 20)
 
       misc.tryFetch(async () => {
@@ -449,9 +453,9 @@
         })
 
         for (const {url: rawUrl, info} of result.data) {
-          const url = normalizeRelayUrl(rawUrl)
+          const url = util.normalizeRelayUrl(rawUrl)
 
-          relays.key(url).merge({...info, url, last_checked: now()})
+          relays.key(url).merge({...info, url, last_checked: lib.now()})
         }
       })
     }, 30_000)

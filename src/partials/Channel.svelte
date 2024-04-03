@@ -44,6 +44,10 @@
     scroller?.stop()
   })
 
+  export const setMessage = message => {
+    textarea.value = message
+  }
+
   const scrollToBottom = () => container.scrollIntoView({behavior: "smooth", block: "end"})
 
   const stickToBottom = async () => {

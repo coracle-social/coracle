@@ -1,4 +1,5 @@
 import Bugsnag from "@bugsnag/js"
+import {uniq} from "ramda"
 import {hash, union} from "hurdak"
 import {writable} from "@coracle.social/lib"
 import {ConnectionStatus, NetworkContext} from "@coracle.social/network"
@@ -81,7 +82,11 @@ setInterval(() => {
     const lastActivity = Math.max(lastPublish, lastRequest)
     const status = connection.meta.getStatus()
 
-    relays.key(url).merge({last_fault: lastFault})
+    if (lastFault) {
+      relays
+        .key(url)
+        .update($r => ({...$r, faults: uniq(($r.faults || []).concat(lastFault)).slice(-10)}))
+    }
 
     if (lastActivity < Date.now() - 60_000) {
       connection.disconnect()

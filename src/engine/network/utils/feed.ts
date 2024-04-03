@@ -1,4 +1,4 @@
-import {partition, concat, prop, uniqBy, identity, without, assoc} from "ramda"
+import {partition, concat, prop, uniqBy, without, assoc} from "ramda"
 import {doPipe, batch} from "hurdak"
 import {now, writable} from "@coracle.social/lib"
 import {
@@ -15,9 +15,9 @@ import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {sortEventsDesc, unwrapRepost} from "src/engine/events/utils"
 import {isEventMuted, isDeleted} from "src/engine/events/derived"
-import {hints} from "src/engine/relays/utils"
-import type {DynamicFilter, RelayFilters} from "src/engine/network/utils"
-import {compileFilters, addRepostFilters, getRelayFilters} from "src/engine/network/utils"
+import {hints, forcePlatformRelaySelections, forceRelaySelections} from "src/engine/relays/utils"
+import type {DynamicFilter} from "src/engine/network/utils"
+import {compileFilters, addRepostFilters, getFilterSelections} from "src/engine/network/utils"
 import {tracker, load, subscribe} from "./executor"
 import {MultiCursor} from "./cursor"
 
@@ -51,20 +51,23 @@ export class FeedLoader {
   isDeleted = isDeleted.get()
 
   constructor(readonly opts: FeedOpts) {
-    const filters = compileFilters(opts.filters)
-    const relayFilters = getRelayFilters(filters, {
-      forceRelays: opts.relays,
-      skipPlatform: opts.skipPlatform,
-    }).map(([relay, filters]): RelayFilters => [relay, addRepostFilters(filters)])
+    const filters = addRepostFilters(compileFilters(opts.filters))
+
+    let relaySelections = getFilterSelections(filters)
+    if (!opts.skipPlatform) {
+      relaySelections = forcePlatformRelaySelections(relaySelections)
+    } else {
+      relaySelections = forceRelaySelections(relaySelections, opts.relays)
+    }
 
     if (!opts.skipCache) {
-      relayFilters.push([LOCAL_RELAY_URL, addRepostFilters(filters)])
+      relaySelections.push({relay: LOCAL_RELAY_URL, filters})
     }
 
     // No point in subscribing if we have an end date
     if (opts.shouldListen && !opts.filters.every(prop("until"))) {
       this.addSubs(
-        relayFilters.map(([relay, filters]) =>
+        relaySelections.map(({relay, filters}) =>
           subscribe({
             relays: [relay],
             skipCache: true,
@@ -88,7 +91,7 @@ export class FeedLoader {
     }
 
     this.cursor = new MultiCursor({
-      relayFilters,
+      relaySelections,
       onEvent: batch(300, events => {
         if (opts.shouldLoadParents) {
           this.loadParents(this.discardEvents(events))
@@ -165,7 +168,7 @@ export class FeedLoader {
     const scenario =
       this.opts.relays.length > 0
         ? hints.product(Array.from(parentIds), this.opts.relays)
-        : hints.merge(notesWithParent.map(hints.EventAncestors))
+        : hints.merge(notesWithParent.map(hints.EventParents)).redundancy(10)
 
     for (const {relay, values} of scenario.getSelections()) {
       load({

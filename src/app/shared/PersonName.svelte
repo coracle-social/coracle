@@ -41,7 +41,7 @@
 
   maxWot.update(x => Math.max(x, wotScore * 1.5))
 
-  $: dashOffset = 100 - (Math.max(0, wotScore) / $maxWot) * 100
+  $: dashOffset = 100 - (Math.max($maxWot / 20, wotScore) / $maxWot) * 100
   $: style = `transform: rotate(${dashOffset * 1.8 - 50}deg)`
   $: stroke = $themeColors[$following || pubkey === $session?.pubkey ? "accent" : "neutral-200"]
   $: personDisplay = displayPerson($person)

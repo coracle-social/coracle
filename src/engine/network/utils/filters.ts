@@ -1,19 +1,13 @@
-import {shuffle} from "@coracle.social/lib"
-import type {Filter} from "@coracle.social/util"
-import {isContextAddress, decodeAddress} from "@coracle.social/util"
-import {without, sortBy} from "ramda"
+import {shuffle, splitAt} from "@coracle.social/lib"
+import type {Filter, RouterScenario} from "@coracle.social/util"
+import {isContextAddress, mergeFilters, getFilterId, decodeAddress} from "@coracle.social/util"
+import {without, sortBy, prop} from "ramda"
 import {switcherFn} from "hurdak"
-import {pushToKey} from "src/util/misc"
 import {env} from "src/engine/session/state"
 import {user} from "src/engine/session/derived"
+import {getSetting} from "src/engine/session/utils"
 import {getFollowedPubkeys, getNetwork} from "src/engine/people/utils"
-import {
-  hints,
-  useRelaysWithFallbacks,
-  getPubkeyRelayUrls,
-  getUserRelayUrls,
-} from "src/engine/relays/utils"
-import {searchableRelays} from "src/engine/relays/derived"
+import {hints} from "src/engine/relays/utils"
 
 export enum FilterScope {
   Follows = "follows",
@@ -82,98 +76,74 @@ export const addRepostFilters = (filters: Filter[]) =>
     return filterChunk
   })
 
-export type RelayFilters = [string, Filter[]]
+export type RelayFilters = {
+  relay: string
+  filters: Filter[]
+}
 
-export const getRelayFilters = (
-  filters: Filter[],
-  {skipPlatform = false, forceRelays = []} = {},
-): RelayFilters[] => {
-  const {PLATFORM_RELAYS} = env.get()
-
-  if (PLATFORM_RELAYS.length > 0 && !skipPlatform) {
-    return PLATFORM_RELAYS.map(relay => [relay, filters])
-  }
-
-  if (forceRelays.length > 0) {
-    return forceRelays.map(relay => [relay, filters])
-  }
-
-  const filterRelays = new Map<string, Filter[]>()
+export const getFilterSelections = (filters: Filter[]): RelayFilters[] => {
+  const scenarios: RouterScenario[] = []
+  const filtersById = new Map<string, Filter>()
 
   for (const filter of filters) {
     if (filter.search) {
-      for (const relay of useRelaysWithFallbacks(searchableRelays.get())) {
-        pushToKey(filterRelays, relay, filter)
-      }
+      const id = getFilterId(filter)
+
+      filtersById.set(id, filter)
+      scenarios.push(hints.product([id], hints.options.getSearchRelays()))
     } else {
       const contexts = filter["#a"]?.filter(a => isContextAddress(decodeAddress(a)))
 
       if (contexts?.length > 0) {
-        for (const relay of hints.WithinMultipleContexts(contexts).getUrls()) {
-          pushToKey(filterRelays, relay, filter)
+        for (const {relay, values} of hints
+          .WithinMultipleContexts(contexts)
+          .policy(hints.addNoFallbacks)
+          .getSelections()) {
+          const contextFilter = {...filter, "#a": Array.from(values)}
+          const id = getFilterId(contextFilter)
+
+          filtersById.set(id, contextFilter)
+          scenarios.push(hints.product([id], [relay]))
         }
       } else if (filter.authors) {
-        for (const [relay, authors] of getRelayPubkeys(filter.authors)) {
-          pushToKey(filterRelays, relay, {...filter, authors})
+        for (const {relay, values} of hints
+          .FromPubkeys(filter.authors)
+          .policy(hints.addNoFallbacks)
+          .getSelections()) {
+          const authorsFilter = {...filter, authors: Array.from(values)}
+          const id = getFilterId(authorsFilter)
+
+          filtersById.set(id, authorsFilter)
+          scenarios.push(hints.product([id], [relay]))
         }
       } else {
-        for (const relay of hints.ReadRelays().policy(hints.addMinimalFallbacks).getUrls()) {
-          pushToKey(filterRelays, relay, filter)
-        }
+        const id = getFilterId(filter)
+
+        filtersById.set(id, filter)
+        scenarios.push(
+          hints.product([id], hints.ReadRelays().policy(hints.addNoFallbacks).getUrls()),
+        )
       }
     }
   }
 
-  return Array.from(filterRelays.entries())
-}
+  const selections = sortBy(
+    ({filters}) => -filters[0].authors?.length,
+    hints
+      .merge(scenarios)
+      .getSelections()
+      .map(({values, relay}) => ({
+        filters: values.map((id: string) => filtersById.get(id) as Filter),
+        relay,
+      })),
+  )
 
-export type RelayPubkeys = [string, string[]]
+  // Pubkey-based selections can get really big. Use the most popular relays for the long tail
+  const [keep, discard] = splitAt(getSetting("relay_limit"), selections)
 
-export const getRelayPubkeys = (pubkeys: string[]) => {
-  const threshold = 3
-  const pubkeysByRelay = new Map<string, string[]>()
-
-  for (const pubkey of pubkeys) {
-    const relays = getPubkeyRelayUrls(pubkey, "write").filter(
-      relay => hints.options.getRelayQuality(relay) > 0,
-    )
-
-    for (const relay of relays) {
-      pushToKey(pubkeysByRelay, relay, pubkey)
-    }
+  for (const target of keep.slice(0, getSetting("relay_redundancy"))) {
+    target.filters = mergeFilters(discard.concat(target).flatMap(prop("filters")))
   }
 
-  const seen = new Map<string, number>()
-  const result = new Map<string, string[]>()
-  const sortKey = ([url, pubkeys]) => -pubkeys.length * hints.options.getRelayQuality(url)
-  for (const [relay] of sortBy(sortKey, Array.from(pubkeysByRelay))) {
-    const pubkeys = []
-    for (const pubkey of pubkeysByRelay.get(relay)) {
-      const timesSeen = seen.get(pubkey) || 0
-
-      if (timesSeen < threshold) {
-        seen.set(pubkey, timesSeen + 1)
-        pubkeys.push(pubkey)
-      }
-    }
-
-    if (pubkeys.length > 0) {
-      result.set(relay, pubkeys)
-    }
-  }
-
-  const fallbacks = env.get().DEFAULT_RELAYS.concat(getUserRelayUrls("write"))
-
-  for (const pubkey of pubkeys) {
-    const timesSeen = seen.get(pubkey) || 0
-    const fallbacksNeeded = threshold - timesSeen
-
-    if (fallbacksNeeded > 0) {
-      for (const relay of fallbacks.slice(0, fallbacksNeeded)) {
-        pushToKey(result, relay, pubkey)
-      }
-    }
-  }
-
-  return Array.from(result)
+  return keep
 }

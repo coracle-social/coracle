@@ -12,7 +12,7 @@ import {getSetting} from "src/engine/session/utils"
 import {signer} from "src/engine/session/derived"
 import {projections} from "src/engine/core/projections"
 import {displayPubkey} from "src/engine/people/utils"
-import {getUrls, getExecutor} from "./executor"
+import {getExecutor} from "./executor"
 
 export const getClientTags = () => {
   if (!getSetting("enable_client_tag")) {
@@ -63,11 +63,10 @@ export class Publisher extends EventEmitter {
   }
 
   publish(relays, {timeout = 10_000, verb, silent}: PublisherOpts = {}) {
-    const urls = getUrls(relays)
-    const executor = getExecutor(urls)
+    const executor = getExecutor(relays)
 
     if (!silent) {
-      info(`Publishing to ${urls.length} relays`, this.event, urls)
+      info(`Publishing to ${relays.length} relays`, this.event, relays)
     }
 
     const timeouts = new Set<string>()
@@ -75,7 +74,7 @@ export class Publisher extends EventEmitter {
     const failed = new Set<string>()
 
     const getProgress = () => {
-      const attempted = new Set(urls)
+      const attempted = new Set(relays)
       const completed = union(timeouts, succeeded, failed)
       const pending = difference(attempted, completed)
 
@@ -99,7 +98,7 @@ export class Publisher extends EventEmitter {
     projections.push({...this.event})
 
     setTimeout(() => {
-      for (const url of urls) {
+      for (const url of relays) {
         if (!succeeded.has(url) && !failed.has(url)) {
           timeouts.add(url)
         }
@@ -225,11 +224,11 @@ export const getReplyTags = (parent: Event, inherit = false) => {
   // Root comes first
   if (roots.exists()) {
     for (const t of roots.unwrap()) {
-      replyTags.push(t.slice(0, 2).concat([hints.EventAncestors(parent).getUrl(), "root"]))
+      replyTags.push(t.slice(0, 2).concat([hints.EventRoots(parent).getUrl(), "root"]))
     }
   } else {
     for (const t of replies.unwrap()) {
-      replyTags.push(t.slice(0, 2).concat([hints.Event(parent).getUrl(), "root"]))
+      replyTags.push(t.slice(0, 2).concat([hints.EventParents(parent).getUrl(), "root"]))
     }
   }
 

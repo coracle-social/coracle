@@ -12,8 +12,8 @@ export type RelayInfo = {
 export type Relay = {
   url: string
   count?: number
+  faults?: number[]
   first_seen?: number
-  last_fault?: number
   info?: RelayInfo
 }
 

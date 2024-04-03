@@ -26,7 +26,7 @@ export const loadAllMessages = ({reload = false} = {}) => {
   ]
 
   const cursor = new MultiCursor({
-    relayFilters: relays.map(relay => [relay, filters]),
+    relaySelections: relays.map(relay => ({relay, filters})),
   })
 
   return cursor.loadAll({

@@ -36,7 +36,7 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
   loadPubkeys(pubkeys)
 
   load({
-    relays: hints.merge(eventsWithParent.map(hints.EventAncestors)).getUrls(),
+    relays: hints.merge(eventsWithParent.map(hints.EventParents)).getUrls(),
     filters: getIdFilters(
       eventsWithParent.flatMap(e => Tags.fromEvent(e).replies().values().valueOf()),
     ),

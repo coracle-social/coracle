@@ -57,7 +57,7 @@ export const loadPubkeyProfiles = (rawPubkeys: string[], opts: LoadPubkeyOpts = 
 
   promises.push(
     load({
-      relays: env.get().INDEXER_RELAYS.concat(opts.relays || []),
+      relays: hints.Indexers(opts.relays || []).getUrls(),
       filters: filters.map(assoc("authors", pubkeys)),
     }),
   )
@@ -66,7 +66,7 @@ export const loadPubkeyProfiles = (rawPubkeys: string[], opts: LoadPubkeyOpts = 
     promises.push(
       load({
         relays: [relay],
-        filters: filters.map(assoc("authors", Array.from(values))),
+        filters: filters.map(assoc("authors", values)),
       }),
     )
   }
@@ -85,7 +85,7 @@ export const loadPubkeyRelays = (rawPubkeys: string[], opts: LoadPubkeyOpts = {}
   promises.push(
     load({
       filters: [{kinds: [10002], authors: pubkeys}],
-      relays: env.get().INDEXER_RELAYS.concat(opts.relays || []),
+      relays: hints.Indexers(opts.relays || []).getUrls(),
       onEvent: e => loadPubkeyProfiles([e.pubkey]),
     }),
   )
@@ -94,7 +94,7 @@ export const loadPubkeyRelays = (rawPubkeys: string[], opts: LoadPubkeyOpts = {}
     promises.push(
       load({
         relays: [relay],
-        filters: [{kinds: [10002], authors: Array.from(values)}],
+        filters: [{kinds: [10002], authors: values}],
         onEvent: e => loadPubkeyProfiles([e.pubkey]),
       }),
     )

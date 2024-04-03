@@ -22,20 +22,6 @@ import {LocalTarget} from "./targets"
 
 export const tracker = new Tracker()
 
-export const getUrls = (relays: string[]) => {
-  if (relays.length === 0) {
-    error(`Attempted to connect to zero urls`)
-  }
-
-  const urls = uniq(relays.map(url => normalizeRelayUrl(url, {allowInsecure: true})))
-
-  if (urls.length !== relays.length) {
-    warn(`Attempted to connect to non-unique relays`)
-  }
-
-  return urls
-}
-
 export const getExecutor = (urls: string[]) => {
   const muxUrl = getSetting("multiplextr_url")
   const [localUrls, remoteUrls] = partition(equals(LOCAL_RELAY_URL), urls)

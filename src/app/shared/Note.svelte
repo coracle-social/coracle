@@ -94,14 +94,14 @@
   const goToParent = () =>
     router
       .at("notes")
-      .of(reply.value(), {relays: hints.EventAncestors(event).getUrls()})
+      .of(reply.value(), {relays: hints.EventParents(event).getUrls()})
       .cx({context: ctx.concat(event)})
       .open()
 
   const goToThread = () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: hints.EventAncestors(event).getUrls()})
+      .of(getIdOrAddress(event), {relays: hints.EventRoots(event).getUrls()})
       .at("thread")
       .cx({context: ctx.concat(event)})
       .open()

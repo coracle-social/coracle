@@ -1,6 +1,13 @@
 import {nip19} from "nostr-tools"
-import {Router} from "@coracle.social/util"
-import {normalizeRelayUrl as normalize, fromNostrURI} from "@coracle.social/util"
+import {pushToMapKey} from "@coracle.social/lib"
+import {
+  Router,
+  normalizeRelayUrl as normalize,
+  getFilterId,
+  fromNostrURI,
+  mergeFilters,
+} from "@coracle.social/util"
+import type {Filter} from "@coracle.social/util"
 import {ConnectionStatus, NetworkContext} from "@coracle.social/network"
 import {sortBy, whereEq, pluck, uniq, prop, last} from "ramda"
 import {displayList, switcher} from "hurdak"
@@ -9,6 +16,7 @@ import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {env} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
 import {stateKey} from "src/engine/session/derived"
+import type {RelayFilters} from "src/engine/network/utils"
 import {people} from "src/engine/people/state"
 import {groups, groupSharedKeys} from "src/engine/groups/state"
 import type {Relay} from "./model"
@@ -94,15 +102,39 @@ export const getGroupRelayUrls = address => {
   return []
 }
 
-export const forcePlatformRelays = relays => {
-  const {PLATFORM_RELAYS} = env.get()
+export const forceRelays = (relays: string[], forceRelays: string[]) =>
+  forceRelays.length > 0 ? forceRelays : relays
 
-  if (PLATFORM_RELAYS.length > 0) {
-    return Array.from(PLATFORM_RELAYS)
+export const forcePlatformRelays = (relays: string[]) =>
+  forceRelays(relays, Array.from(env.get().PLATFORM_RELAYS))
+
+export const forceRelaySelections = (selections: RelayFilters[], forceRelays: string[]) => {
+  if (forceRelays.length === 0) {
+    return selections
   }
 
-  return relays
+  const filtersById = new Map<string, Filter>()
+  const newSelections = new Map<string, string[]>()
+
+  for (const {relay, filters} of selections) {
+    for (const forceRelay of forceRelays) {
+      for (const filter of filters) {
+        const id = getFilterId(filter)
+
+        filtersById.set(id, filter)
+        pushToMapKey(newSelections, forceRelay, id)
+      }
+    }
+  }
+
+  return hints.relaySelectionsFromMap(newSelections).map(({values, relay}) => ({
+    relay,
+    filters: mergeFilters(values.map(id => filtersById.get(id))),
+  }))
 }
+
+export const forcePlatformRelaySelections = (selections: RelayFilters[]) =>
+  forceRelaySelections(selections, Array.from(env.get().PLATFORM_RELAYS))
 
 export const useRelaysWithFallbacks = relays =>
   relays.length > 0 ? relays : env.get().DEFAULT_RELAYS
@@ -114,19 +146,36 @@ export const hints = new Router({
   getPubkeyRelays: getPubkeyRelayUrls,
   getStaticRelays: () => [...env.get().PLATFORM_RELAYS, ...env.get().DEFAULT_RELAYS],
   getIndexerRelays: () => env.get().INDEXER_RELAYS,
+  getSearchRelays: () => env.get().SEARCH_RELAYS,
+  getLimit: () => parseInt(getSetting("relay_limit")),
   getRedundancy: () => parseInt(getSetting("relay_redundancy")),
   getRelayQuality: (url: string) => {
     const oneMinute = 60 * 1000
-    const oneDay = 24 * 60 * oneMinute
+    const oneHour = 60 * oneMinute
+    const oneDay = 24 * oneHour
+    const oneWeek = 7 * oneDay
     const connection = NetworkContext.pool.get(url, {autoConnect: false})
 
     // If we haven't connected, consult our relay record and see if there has
-    // been a recent fault. If there has been, penalize the relay.
+    // been a recent fault. If there has been, penalize the relay. If there have been several,
+    // don't use the relay.
     if (!connection) {
-      const lastFault = relays.key(url).get()?.last_fault || 0
-      const timeSinceFault = Date.now() - oneMinute - lastFault
+      const faults = relays.key(url).get()?.faults || []
+      const lastFault = last(faults) || 0
 
-      return Math.max(0, Math.min(0.5, timeSinceFault / oneDay))
+      if (faults.filter(n => n > Date.now() - oneHour).length > 2) {
+        return 0
+      }
+
+      if (faults.filter(n => n > Date.now() - oneDay).length > 5) {
+        return 0
+      }
+
+      if (faults.filter(n => n > Date.now() - oneWeek).length > 10) {
+        return 0
+      }
+
+      return Math.max(0, Math.min(0.5, (Date.now() - oneMinute - lastFault) / oneDay))
     }
 
     return switcher(connection.meta.getStatus(), {

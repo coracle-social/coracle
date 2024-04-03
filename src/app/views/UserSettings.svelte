@@ -25,6 +25,8 @@
   const formatPercent = d => String(Math.round(d * 100))
   const parsePercent = p => parseInt(p) / 100
 
+  $: settings.relay_redundancy = Math.round(Math.log10(settings.relay_limit) * 4)
+
   document.title = "Settings"
 </script>
 
@@ -55,7 +57,7 @@
         <strong>Max relays per request</strong>
         <div>{settings.relay_limit} relays</div>
       </div>
-      <Input type="range" bind:value={settings.relay_limit} min={1} max={50} />
+      <Input type="range" bind:value={settings.relay_limit} min={1} max={30} parse={parseInt} />
       <p slot="info">
         This controls how many relays to max out at when loading feeds and event context. More is
         faster, but will require more bandwidth and processing power.

@@ -14,13 +14,14 @@
   import {router} from "src/app/router"
   import {
     hints,
-    canSign,
-    getRelayFilters,
     load,
+    pubkey,
+    canSign,
     isDeleted,
     subscribe,
     compileFilters,
-    pubkey,
+    getFilterSelections,
+    forcePlatformRelaySelections,
   } from "src/engine"
 
   export let filters
@@ -68,7 +69,8 @@
   })
 
   onMount(() => {
-    const subs = getRelayFilters(compileFilters(filters)).map(([relay, filters]) =>
+    const selections = getFilterSelections(compileFilters(filters))
+    const subs = forcePlatformRelaySelections(selections).map(({relay, filters}) =>
       subscribe({relays: [relay], filters, onEvent}),
     )
 

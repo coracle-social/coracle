@@ -125,7 +125,7 @@ export class Cursor {
 }
 
 export type MultiCursorOpts = {
-  relayFilters: RelayFilters[]
+  relaySelections: RelayFilters[]
   onEvent?: (e: Event) => void
 }
 
@@ -134,8 +134,8 @@ export class MultiCursor {
   cursors: Cursor[]
 
   constructor(readonly opts: MultiCursorOpts) {
-    this.cursors = opts.relayFilters.map(
-      ([relay, filters]) => new Cursor({relay, filters, onEvent: opts.onEvent}),
+    this.cursors = opts.relaySelections.map(
+      ({relay, filters}) => new Cursor({relay, filters, onEvent: opts.onEvent}),
     )
   }
 
