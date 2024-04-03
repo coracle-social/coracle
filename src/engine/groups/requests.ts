@@ -39,7 +39,7 @@ export const loadGroups = async (rawAddrs: string[], relays: string[] = []) => {
   const identifiers = addrs.map(a => decodeAddress(a).identifier)
 
   if (addrs.length > 0) {
-    load({
+    return load({
       relays: forcePlatformRelays(
         hints.merge([hints.product(addrs, relays), hints.WithinMultipleContexts(addrs)]).getUrls(),
       ),
@@ -48,7 +48,8 @@ export const loadGroups = async (rawAddrs: string[], relays: string[] = []) => {
   }
 }
 
-export const loadGroupMessages = async (addresses?: string[]) => {
+export const loadGroupMessages = (addresses?: string[]) => {
+  const promises = []
   const addrs = addresses || deriveUserCircles().get()
   const [groupAddrs, communityAddrs] = partition(a => isGroupAddress(decodeAddress(a)), addrs)
 
@@ -57,7 +58,9 @@ export const loadGroupMessages = async (addresses?: string[]) => {
     const pubkeys = [...admins, ...recipients]
 
     if (pubkeys.length > 0) {
-      load({relays, filters: [{kinds: giftWrapKinds, "#p": pubkeys, since}]})
+      promises.push(
+        load({relays, filters: [{kinds: giftWrapKinds, "#p": pubkeys, since}]})
+      )
     }
   }
 
@@ -66,7 +69,9 @@ export const loadGroupMessages = async (addresses?: string[]) => {
     const kinds = [...noteKinds, ...repostKinds]
     const since = Math.max(now() - seconds(7, "day"), info.since)
 
-    load({relays, filters: [{kinds, "#a": [address], since}]})
+    promises.push(
+      load({relays, filters: [{kinds, "#a": [address], since}]})
+    )
   }
 
   updateCurrentSession($session => {
@@ -78,4 +83,6 @@ export const loadGroupMessages = async (addresses?: string[]) => {
 
     return $session
   })
+
+  return Promise.all(promises)
 }

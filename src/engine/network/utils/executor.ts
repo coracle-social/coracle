@@ -145,7 +145,7 @@ setInterval(() => {
     const lastActivity: number = pickVals(activityKeys, con.meta).reduce(max)
 
     // If our connection hasn't been used in a while, close it and reopen
-    if (lastActivity && lastActivity < Date.now() - 60_000) {
+    if (lastActivity && lastActivity < Date.now() - 30_000) {
       NetworkContext.pool.remove(url)
     }
   }

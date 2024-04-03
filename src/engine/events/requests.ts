@@ -42,6 +42,7 @@ export const loadGiftWrap = () => {
     const since = Math.max(0, nip59_messages_last_synced - seconds(6, "hour"))
 
     return load({
+      skipCache: true,
       relays: hints.User().getUrls(),
       filters: [{kinds: giftWrapKinds, authors: [pubkey], since}],
     })

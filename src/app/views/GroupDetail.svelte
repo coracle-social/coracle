@@ -1,21 +1,20 @@
-<script>
+<script lang="ts">
   import {onMount} from "svelte"
   import {whereEq, without} from "ramda"
   import {randomId, ucFirst} from "hurdak"
   import {noteKinds} from "src/util/nostr"
   import {themeBackgroundGradient} from "src/partials/state"
-  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Calendar from "src/app/shared/Calendar.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import GroupActions from "src/app/shared/GroupActions.svelte"
   import GroupAbout from "src/app/shared/GroupAbout.svelte"
-  import GroupRequest from "src/app/shared/GroupRequest.svelte"
-  import GroupMember from "src/app/shared/GroupMember.svelte"
+  import GroupNotes from "src/app/shared/GroupNotes.svelte"
+  import GroupCalendar from "src/app/shared/GroupCalendar.svelte"
   import GroupMarket from "src/app/shared/GroupMarket.svelte"
-  import NoteCreateInline from "src/app/shared/NoteCreateInline.svelte"
-  import Feed from "src/app/shared/Feed.svelte"
+  import GroupMembers from "src/app/shared/GroupMembers.svelte"
+  import GroupAdmin from "src/app/shared/GroupAdmin.svelte"
+  import GroupRestrictAccess from "src/app/shared/GroupRestrictAccess.svelte"
   import {
     env,
     canSign,
@@ -56,21 +55,16 @@
       .at(tab)
       .push({key: router.getKey(router.current.get())})
 
-  const loadGroupData = () => {
-    loadGroups([address], relays)
-    loadGroupMessages([address], relays)
-    loadPubkeys($group.members || [])
-  }
-
-  onMount(loadGroupData)
+  onMount(() => loadGroups([address], relays))
 
   let tabs
   let key = randomId()
 
   $: {
-    if ($isGroupMember) {
-      loadGroupData()
+    if ($group && $isGroupMember) {
       key = randomId()
+      loadGroupMessages([address])
+      loadPubkeys($group.members || [])
     }
   }
 
@@ -97,7 +91,7 @@
 
   $: ({rgb, rgba} = $themeBackgroundGradient)
 
-  document.title = $group?.name || "Group Detail"
+  document.title = $group?.meta?.name || "Group Detail"
 </script>
 
 <div
@@ -131,45 +125,18 @@
   </Tabs>
 {/if}
 
-{#if address.startsWith("35834") && $status.access !== GroupAccess.Granted}
-  <p class="m-auto max-w-sm py-12 text-center">
-    {#if $status.access === GroupAccess.Requested}
-      Your access request is awaiting approval.
-    {:else}
-      You don't have access to this group.
-    {/if}
-    {#if $session && !$status.access}
-      Click <Anchor underline on:click={() => publishGroupEntryRequest(address)}>here</Anchor> to request
-      entry.
-    {/if}
-  </p>
-{:else if activeTab === "notes"}
-  {#if $canSign}
-    <NoteCreateInline group={address} />
+{#key key}
+  {#if address.startsWith("35834") && $status.access !== GroupAccess.Granted}
+    <GroupRestrictAccess {address} />
+  {:else if activeTab === "notes"}
+    <GroupNotes {address} />
+  {:else if activeTab === "calendar"}
+    <GroupCalendar {address} />
+  {:else if activeTab === "market"}
+    <GroupMarket {address} />
+  {:else if activeTab === "members"}
+    <GroupMembers {address} />
+  {:else if activeTab === "admin"}
+    <GroupAdmin {address} />
   {/if}
-  {#key key}
-    <Feed
-      eager
-      shouldListen
-      hideControls
-      filter={{kinds: without([30402], noteKinds), "#a": [address]}} />
-  {/key}
-{:else if activeTab === "calendar"}
-  <Calendar group={address} filters={[{kinds: [31923], "#a": [address]}]} />
-{:else if activeTab === "market"}
-  <GroupMarket group={address} />
-{:else if activeTab === "members"}
-  <FlexColumn>
-    {#each $group.members || [] as pubkey (pubkey)}
-      <GroupMember {address} {pubkey} />
-    {:else}
-      <p class="text-center py-12">No members found.</p>
-    {/each}
-  </FlexColumn>
-{:else if activeTab === "admin"}
-  {#each $requests as request (request.id)}
-    <GroupRequest {address} {request} />
-  {:else}
-    <p class="text-center py-12">No action items found.</p>
-  {/each}
-{/if}
+{/key}

@@ -173,6 +173,10 @@ export const pushToKey = <T>(m: Record<string, T[]> | Map<string, T[]>, k: strin
 export const race = (threshold, promises) => {
   let count = 0
 
+  if (threshold === 0) {
+    return Promise.resolve()
+  }
+
   return new Promise<void>((resolve, reject) => {
     promises.forEach(p => {
       p.then(() => {

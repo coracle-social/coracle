@@ -4,10 +4,9 @@
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/router"
 
-  export let group
+  export let address
 
-  const filter = group ? {kinds: [30402], "#a": [group]} : {kinds: [30402]}
-  const createListing = () => router.at("notes/create").qp({type: "listing", group}).open()
+  const createListing = () => router.at("notes/create").qp({type: "listing", group: address}).open()
 </script>
 
 <Card class="flex justify-between">
@@ -15,4 +14,4 @@
   <Anchor button accent on:click={createListing}>Create a listing</Anchor>
 </Card>
 
-<Feed hideControls {filter} />
+<Feed hideControls filter={{kinds: [30402], "#a": [address]}} />

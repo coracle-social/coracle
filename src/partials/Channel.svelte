@@ -126,31 +126,6 @@
     {/await}
   </ul>
   {#if $nip44.isEnabled() || pubkeys.length < 3}
-    {#if $nip44.isEnabled()}
-      <div class="m-2 mt-0 flex items-center justify-end gap-2">
-        <Toggle scale={0.7} bind:value={useNip44} />
-        <small>
-          Send messages using
-          <Popover class="inline">
-            <span slot="trigger" class="cursor-pointer underline">NIP 44</span>
-            <div slot="tooltip" class="flex flex-col gap-2">
-              <p>
-                When enabled, Coracle will use nostr's new group chat specification, which solves
-                several problems with legacy DMs. Read more <Anchor
-                  underline
-                  modal
-                  href="/help/nip-44-dms">here</Anchor
-                >.
-              </p>
-              <p>
-                Note that these messages are not yet universally supported. Make sure the person
-                you're chatting with is using a compatible nostr client.
-              </p>
-            </div>
-          </Popover>
-        </small>
-      </div>
-    {/if}
     <div
       class="flex border-t border-solid border-neutral-600 border-tinted-700 bg-neutral-900 dark:bg-neutral-600">
       <textarea
@@ -177,6 +152,31 @@
           <i class="fa-solid fa-paper-plane fa-lg" />
         </button>
       </div>
+      {#if $nip44.isEnabled()}
+        <div class="fixed bottom-0 right-12 p-2 flex items-center justify-end gap-2">
+          <Toggle scale={0.7} bind:value={useNip44} />
+          <small>
+            Send messages using
+            <Popover class="inline">
+              <span slot="trigger" class="cursor-pointer underline">NIP 44</span>
+              <div slot="tooltip" class="flex flex-col gap-2">
+                <p>
+                  When enabled, Coracle will use nostr's new group chat specification, which solves
+                  several problems with legacy DMs. Read more <Anchor
+                    underline
+                    modal
+                    href="/help/nip-44-dms">here</Anchor
+                  >.
+                </p>
+                <p>
+                  Note that these messages are not yet universally supported. Make sure the person
+                  you're chatting with is using a compatible nostr client.
+                </p>
+              </div>
+            </Popover>
+          </small>
+        </div>
+      {/if}
     </div>
   {:else}
     <FlexColumn class="bg-neutral-900 px-4 py-2">

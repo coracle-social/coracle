@@ -10,13 +10,14 @@ import {setAppData} from "src/engine/session/commands"
 import {channels} from "./state"
 
 export const sendLegacyMessage = async (channelId: string, content: string) => {
-  const recipients = without([user.get().pubkey], channelId.split(","))
+  const $pubkey = user.get().pubkey
+  const recipients = without([$pubkey], channelId.split(","))
 
   if (recipients.length > 1) {
     throw new Error("Attempted to send legacy message to more than 1 recipient")
   }
 
-  const [pubkey] = recipients
+  const pubkey = recipients[0] || $pubkey
   const template = createEvent(4, {
     content: await nip04.get().encryptAsUser(content, pubkey),
     tags: [mention(pubkey), ...getClientTags()],

@@ -18,6 +18,7 @@
   export let anchor = null
   export let eager = false
   export let skipCache = false
+  export let skipNetwork = false
   export let skipPlatform = false
   export let shouldListen = false
   export let hideControls = false
@@ -40,6 +41,7 @@
       relays,
       anchor,
       skipCache,
+      skipNetwork,
       skipPlatform,
       shouldListen,
       shouldDefer: !eager,

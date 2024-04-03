@@ -1,5 +1,5 @@
 import {shuffle, splitAt} from "@coracle.social/lib"
-import type {Filter, RouterScenario} from "@coracle.social/util"
+import type {Filter, RouterScenario, RouterScenarioOptions} from "@coracle.social/util"
 import {isContextAddress, mergeFilters, getFilterId, decodeAddress} from "@coracle.social/util"
 import {without, sortBy, prop} from "ramda"
 import {switcherFn} from "hurdak"
@@ -81,7 +81,10 @@ export type RelayFilters = {
   filters: Filter[]
 }
 
-export const getFilterSelections = (filters: Filter[]): RelayFilters[] => {
+export const getFilterSelections = (
+  filters: Filter[],
+  options: RouterScenarioOptions = {},
+): RelayFilters[] => {
   const scenarios: RouterScenario[] = []
   const filtersById = new Map<string, Filter>()
 
@@ -131,6 +134,7 @@ export const getFilterSelections = (filters: Filter[]): RelayFilters[] => {
     ({filters}) => -filters[0].authors?.length,
     hints
       .merge(scenarios)
+      .clone(options)
       .getSelections()
       .map(({values, relay}) => ({
         filters: values.map((id: string) => filtersById.get(id) as Filter),

@@ -78,7 +78,7 @@
     }
   }} />
 
-<div bind:this={root} class="modal group">
+<div bind:this={root} class="modal group absolute">
   <slot name="wrapper">
     <div transition:fade class="fixed inset-0 z-modal" class:pointer-events-none={closing}>
       <div

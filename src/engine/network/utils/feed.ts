@@ -27,6 +27,7 @@ export type FeedOpts = {
   onEvent?: (e: Event) => void
   anchor?: string
   skipCache?: boolean
+  skipNetwork?: boolean
   skipPlatform?: boolean
   shouldDefer?: boolean
   shouldListen?: boolean
@@ -53,11 +54,16 @@ export class FeedLoader {
   constructor(readonly opts: FeedOpts) {
     const filters = addRepostFilters(compileFilters(opts.filters))
 
-    let relaySelections = getFilterSelections(filters)
-    if (!opts.skipPlatform) {
-      relaySelections = forcePlatformRelaySelections(relaySelections)
-    } else {
-      relaySelections = forceRelaySelections(relaySelections, opts.relays)
+    let relaySelections = []
+
+    if (!opts.skipNetwork) {
+      relaySelections = getFilterSelections(filters)
+
+      if (!opts.skipPlatform) {
+        relaySelections = forcePlatformRelaySelections(relaySelections)
+      } else {
+        relaySelections = forceRelaySelections(relaySelections, opts.relays)
+      }
     }
 
     if (!opts.skipCache) {
@@ -99,14 +105,21 @@ export class FeedLoader {
       }),
     })
 
-    const remoteSubs = this.addSubs(this.cursor.load(50))
+    const subs = this.addSubs(this.cursor.load(50))
 
     // Wait until at least one subscription has completed to reduce the chance of
     // out of order notes
-    this.ready = race(
-      Math.min(2, remoteSubs.length),
-      remoteSubs.map(s => new Promise(r => s.emitter.on("event", r))),
-    )
+    if (subs.length === 1) {
+      this.ready = Promise.resolve()
+    } else {
+      this.ready = race(
+        Math.min(2, subs.length),
+        subs.map(s => new Promise(r => {
+          s.emitter.on("event", r)
+          s.emitter.on("complete", r)
+        })),
+      )
+    }
   }
 
   discardEvents(events) {
@@ -168,7 +181,7 @@ export class FeedLoader {
     const scenario =
       this.opts.relays.length > 0
         ? hints.product(Array.from(parentIds), this.opts.relays)
-        : hints.merge(notesWithParent.map(hints.EventParents)).redundancy(10)
+        : hints.merge(notesWithParent.map(hints.EventParents))
 
     for (const {relay, values} of scenario.getSelections()) {
       load({
