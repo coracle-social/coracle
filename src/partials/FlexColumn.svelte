@@ -6,7 +6,7 @@
   export let large = false
   export let narrow = false
 
-  const className = cx("flex flex-col m-auto min-w-0 w-full", $$props.class, {
+  const className = cx("flex flex-col overflow-hidden text-ellipsis m-auto min-w-0 w-full", $$props.class, {
     "gap-2": small,
     "gap-4": !small && !large && !xl,
     "gap-6": large,

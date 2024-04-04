@@ -1,44 +1,128 @@
 <script lang="ts">
-  import {mergeLeft, comparator, sortBy, uniqBy, prop, pluck} from "ramda"
-  import {shuffle, displayList} from "hurdak"
-  import {pushToKey} from "src/util/misc"
+  import {onDestroy} from "svelte"
+  import {mergeLeft, groupBy, sortBy, uniqBy, prop, drop} from "ramda"
+  import {displayList} from "hurdak"
+  import {derived} from "@coracle.social/lib"
+  import {Tags, isShareableRelayUrl, normalizeRelayUrl} from "@coracle.social/util"
+  import {pushToKey, createScroller} from "src/util/misc"
+  import {getModal, toast} from "src/partials/state"
+  import Tabs from "src/partials/Tabs.svelte"
+  import Modal from "src/partials/Modal.svelte"
+  import Input from "src/partials/Input.svelte"
+  import Subheading from "src/partials/Subheading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {router} from "src/app/router"
+  import Note from "src/app/shared/Note.svelte"
+  import type {Relay} from "src/engine"
   import {
+    load,
+    hints,
+    relays,
     follows,
     deriveRelay,
     derivePerson,
     personHasName,
     displayPubkey,
     relayPolicies,
+    relayPolicyUrls,
+    getRelaySearch,
     getPubkeyRelayUrls,
+    sortEventsDesc,
+    joinRelay,
+    broadcastUserData,
   } from "src/engine"
 
-  const browse = () => router.at("relays/browse").open()
+  const tabs = ["search", "reviews"]
 
-  const pubkeysByUrl: Record<string, string[]> = {}
-  const ownRelays = new Set(pluck("url", $relayPolicies))
+  const pubkeysByUrl = (() => {
+    const m = new Map<string, string[]>()
 
-  for (const pubkey of $follows) {
-    if (!personHasName(derivePerson(pubkey).get())) {
-      continue
+    for (const pubkey of $follows) {
+      if (!personHasName(derivePerson(pubkey).get())) {
+        continue
+      }
+
+      for (const url of getPubkeyRelayUrls(pubkey, "write")) {
+        pushToKey(m, url, pubkey)
+      }
     }
 
-    for (const url of getPubkeyRelayUrls(pubkey, "write")) {
-      if (!ownRelays.has(url)) {
-        pushToKey(pubkeysByUrl, url, pubkey)
+    return m
+  })()
+
+  const searchRelays = derived([relays, relayPolicyUrls], ([$relays, $relayPolicyUrls]) => {
+    const annotate = (r: Relay): Relay => {
+      const pubkeys = pubkeysByUrl.get(r.url) || []
+      const description =
+        pubkeys.length > 0
+          ? "Used by " + displayList(pubkeys.map(pubkey => displayPubkey(pubkey)))
+          : r.info?.description
+
+      return {...r, info: {...r.info, description}}
+    }
+
+    const allRelays = sortBy(
+      (r: Relay) => -r.count,
+      $relays.filter((r: Relay) => !$relayPolicyUrls.includes(r.url)).map(annotate),
+    )
+
+    const search = getRelaySearch(allRelays)
+
+    return (term: string): Relay[] => {
+      if (!term) {
+        const result = sortBy(
+          (r: Relay) => -(pubkeysByUrl.get(r.url)?.length || 0),
+          Array.from(pubkeysByUrl.keys()).map(url => annotate(deriveRelay(url).get())),
+        )
+
+        // Drop the top 10 most popular relays to avoid network centralization
+        return uniqBy(
+          prop("url"),
+          drop(Math.min(10, Math.max(0, result.length - 10)), result).concat(allRelays),
+        )
       }
+
+      return search(term)
+    }
+  })
+
+  const setActiveTab = tab => {
+    activeTab = tab
+  }
+
+  const loadMore = async () => {
+    limit += 20
+  }
+
+  const scroller = createScroller(loadMore, {element: getModal()})
+
+  const addCustomRelay = () => {
+    modal = "add_relay"
+  }
+
+  const confirmAddCustomRelay = () => {
+    const url = normalizeRelayUrl(customRelay)
+
+    if (!isShareableRelayUrl(url)) {
+      toast.show('warning', "Please provide a valid relay url")
+    } else {
+      joinRelay(url)
+      broadcastUserData([url])
+      closeModal()
     }
   }
 
-  const otherRelays = Object.entries(pubkeysByUrl)
-    .map(([url, pubkeys]) => ({...deriveRelay(url).get(), pubkeys}))
-    .sort(comparator((a, b) => a.pubkeys.length > b.pubkeys.length))
+  const closeModal = () => {
+    customRelay = ""
+    modal = null
+  }
 
-  // Drop the top 10 most popular relays to avoid network centralization
-  const offset = Math.min(10, Math.max(0, otherRelays.length - 10))
-
+  let q = ""
+  let limit = 20
+  let modal = null
+  let reviews = []
+  let activeTab = "search"
+  let customRelay = ""
   let currentRelayPolicies = $relayPolicies
 
   $: currentRelayPolicies = sortBy(
@@ -49,6 +133,28 @@
     ),
   )
 
+  $: ratings = groupBy(e => {
+    try {
+      return normalizeRelayUrl(Tags.fromEvent(e).get("r")?.value())
+    } catch (e) {
+      return ""
+    }
+  }, reviews)
+
+  load({
+    relays: hints.ReadRelays().getUrls(),
+    filters: [{kinds: [1985, 1986], "#l": ["review/relay"]}],
+    onEvent: event => {
+      if (isShareableRelayUrl(Tags.fromEvent(event).get("r")?.value())) {
+        reviews = sortEventsDesc(reviews.concat(event))
+      }
+    },
+  })
+
+  onDestroy(() => {
+    scroller.stop()
+  })
+
   document.title = "Relays"
 </script>
 
@@ -57,8 +163,8 @@
     <i class="fa fa-server fa-lg" />
     <h2 class="staatliches text-2xl">Your relays</h2>
   </div>
-  <Anchor button accent on:click={browse}>
-    <i class="fa-solid fa-compass" /> Browse Relays
+  <Anchor button accent on:click={addCustomRelay}>
+    <i class="fa-solid fa-compass" /> Add Relay
   </Anchor>
 </div>
 <p>
@@ -74,23 +180,42 @@
 {/if}
 <div class="grid grid-cols-1 gap-4">
   {#each currentRelayPolicies as policy (policy.url)}
-    <RelayCard showStatus showControls relay={policy} />
+    <RelayCard showStatus showControls relay={policy} ratings={ratings[policy.url]} />
   {/each}
 </div>
+<div class="flex items-center gap-2">
+  <i class="fa fa-circle-nodes fa-lg" />
+  <h2 class="staatliches text-2xl">Other relays</h2>
+</div>
+<p>
+  Below are relays used by people in your network. Adding these may improve your ability to load
+  profiles and content.
+</p>
+<Tabs {tabs} {activeTab} {setActiveTab} />
+{#if activeTab === "reviews"}
+  {#each reviews.slice(0, limit) as review (review.id)}
+    <Note note={review} />
+  {/each}
+{:else}
+  <Input
+    bind:value={q}
+    type="text"
+    wrapperClass="flex-grow"
+    placeholder="Search relays or add a custom url">
+    <i slot="before" class="fa-solid fa-search" />
+  </Input>
+  {#each $searchRelays(q).slice(0, limit) as relay (relay.url)}
+    <RelayCard {relay} ratings={ratings[relay.url]} />
+  {/each}
+{/if}
 
-{#if otherRelays.length > 0}
-  <div class="flex items-center gap-2">
-    <i class="fa fa-circle-nodes fa-lg" />
-    <h2 class="staatliches text-2xl">Other relays</h2>
-  </div>
-  <p>
-    Below are relays used by people in your network. Adding these may improve your ability to load
-    profiles and content.
-  </p>
-  <div class="grid grid-cols-1 gap-4">
-    {#each otherRelays.slice(offset, offset + 20) as relay (relay.url)}
-      {@const pubkeyDisplay = displayList(shuffle(relay.pubkeys).map(displayPubkey))}
-      <RelayCard relay={{...relay, description: `Used by ${pubkeyDisplay}`}} />
-    {/each}
-  </div>
+{#if modal}
+<Modal onEscape={closeModal}>
+  <Subheading>Add a relay</Subheading>
+  <p>Enter a relay url below to add it to your relay selections.</p>
+  <Input bind:value={customRelay} placeholder="wss://...">
+    <i slot="before" class="fa fa-server" />
+  </Input>
+  <Anchor button accent on:click={confirmAddCustomRelay}>Add Relay</Anchor>
+</Modal>
 {/if}

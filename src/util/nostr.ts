@@ -4,6 +4,7 @@ import {bytesToHex} from "@noble/hashes/utils"
 import {nip05, nip19, generateSecretKey, getEventHash, getPublicKey as getPk} from "nostr-tools"
 import {identity} from "ramda"
 import {avg} from "hurdak"
+import {tryJson} from "src/util/misc"
 import type {Event} from "src/engine"
 
 export const fromHex = k => Uint8Array.from(Buffer.from(k, "hex"))
@@ -60,14 +61,25 @@ export const toHex = (data: string): string | null => {
   }
 }
 
-export const getRating = (event: Event) =>
-  parseInt(
-    Tags.fromEvent(event)
-      .whereKey("rating")
-      .filter(t => t.count() === 2)
-      .first()
-      .value(),
-  )
+export const getRating = (event: Event) => {
+  if (event.kind === 1985) {
+    return tryJson(() => {
+      const json = JSON.parse(
+        Tags.fromEvent(event).whereKey("l").whereValue("review/relay").first()?.last(),
+      )
+
+      return json?.quality
+    })
+  } else {
+    return parseInt(
+      Tags.fromEvent(event)
+        .whereKey("rating")
+        .filter(t => t.count() === 2)
+        .first()
+        ?.value(),
+    )
+  }
+}
 
 export const getAvgRating = (events: Event[]) => avg(events.map(getRating).filter(identity))
 

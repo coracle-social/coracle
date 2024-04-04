@@ -134,7 +134,7 @@
         placeholder="Type something..."
         bind:this={textarea}
         on:keydown={onKeyDown}
-        class="w-full resize-none bg-transparent p-2
+        class="mb-8 w-full resize-none bg-transparent p-2
              text-neutral-100 outline-0 placeholder:text-neutral-100" />
       <div>
         <ImageInput multi on:change={e => addImage(e.detail)}>
@@ -153,7 +153,7 @@
         </button>
       </div>
       {#if $nip44.isEnabled()}
-        <div class="fixed bottom-0 right-12 p-2 flex items-center justify-end gap-2">
+        <div class="fixed bottom-0 right-12 flex items-center justify-end gap-2 p-2">
           <Toggle scale={0.7} bind:value={useNip44} />
           <small>
             Send messages using

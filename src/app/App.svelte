@@ -272,7 +272,6 @@
     },
   })
 
-  router.register("/relays/browse", import("src/app/views/RelayBrowse.svelte"))
   router.register("/relays/:entity", import("src/app/views/RelayDetail.svelte"), {
     serializers: {
       entity: asRelay,

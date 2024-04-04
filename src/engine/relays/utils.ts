@@ -54,7 +54,7 @@ export const displayRelay = ({url}: Relay) => last(url.split("://")).replace(/\/
 export const displayRelays = (relays: Relay[], max = 3) =>
   displayList(relays.map(displayRelay), "and", max)
 
-export const getRelaySearch = ($relays: Relay[]) => {
+export const getRelaySearch = ($relays: Relay[]): ((term: string) => Relay[]) => {
   const search = fuzzy($relays, {keys: ["url", "name", "description"]})
 
   return term => {

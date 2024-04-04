@@ -38,12 +38,12 @@ export const saveRelayPolicy = (e, relays: RelayPolicy[]) => {
   }
 }
 
-export const publishRelays = ($relays: RelayPolicy[]) => {
+export const publishRelays = async ($relays: RelayPolicy[]) => {
   updateStore(people.key(stateKey.get()), now(), {relays: $relays})
 
   if (canSign.get()) {
     const relays = withIndexers(forcePlatformRelays(hints.WriteRelays().getUrls()))
-    const event = signer.get().signAsUser(
+    const event = await signer.get().signAsUser(
       createEvent(10002, {
         tags: $relays
           .filter(r => isShareableRelayUrl(r.url))

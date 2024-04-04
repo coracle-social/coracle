@@ -23,6 +23,7 @@
   export let shouldListen = false
   export let hideControls = false
   export let hideSpinner = false
+  export let includeReposts = false
   export let showGroup = false
   export let onEvent = null
 
@@ -47,6 +48,7 @@
       shouldDefer: !eager,
       shouldLoadParents: true,
       shouldHideReplies: $hideReplies,
+      includeReposts: includeReposts,
       onEvent,
     })
 

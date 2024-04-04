@@ -34,6 +34,7 @@ export type FeedOpts = {
   shouldBuffer?: boolean
   shouldHideReplies?: boolean
   shouldLoadParents?: boolean
+  includeReposts?: boolean
 }
 
 export class FeedLoader {
@@ -52,7 +53,11 @@ export class FeedLoader {
   isDeleted = isDeleted.get()
 
   constructor(readonly opts: FeedOpts) {
-    const filters = addRepostFilters(compileFilters(opts.filters))
+    let filters = compileFilters(opts.filters)
+
+    if (opts.includeReposts) {
+      filters = addRepostFilters(filters)
+    }
 
     let relaySelections = []
 
@@ -114,10 +119,13 @@ export class FeedLoader {
     } else {
       this.ready = race(
         Math.min(2, subs.length),
-        subs.map(s => new Promise(r => {
-          s.emitter.on("event", r)
-          s.emitter.on("complete", r)
-        })),
+        subs.map(
+          s =>
+            new Promise(r => {
+              s.emitter.on("event", r)
+              s.emitter.on("complete", r)
+            }),
+        ),
       )
     }
   }

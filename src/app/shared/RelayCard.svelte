@@ -3,6 +3,7 @@
   import {isNil} from "ramda"
   import {quantify} from "hurdak"
   import {stringToHue, displayUrl, hsl} from "src/util/misc"
+  import {getAvgRating} from "src/util/nostr"
   import Chip from "src/partials/Chip.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -14,8 +15,9 @@
 
   export let relay
   export let claim = null
-  export let rating = null
+  export let ratings = null
   export let showStatus = false
+  export let hideRatingsCount = false
   export let hideActions = false
   export let showControls = false
   export let inert = false
@@ -46,9 +48,12 @@
       {#if showStatus && !getSetting("multiplextr_url")}
         <RelayStatus {relay} />
       {/if}
-      {#if rating}
-        <div class="px-4 text-sm">
-          <Rating inert value={rating} />
+      {#if !showStatus && ratings?.length > 0}
+        <div class="flex items-center gap-1 px-4 text-sm">
+          <Rating inert value={getAvgRating(ratings)} />
+          {#if !hideRatingsCount}
+            <span class="text-neutral-400">({ratings.length} reviews)</span>
+          {/if}
         </div>
       {/if}
     </div>
@@ -58,9 +63,11 @@
       </slot>
     {/if}
   </div>
-  {#if relay.description}
-    <p>{relay.description}</p>
-  {/if}
+  <slot name="description">
+    {#if relay.info?.description}
+      <p>{relay.info.description}</p>
+    {/if}
+  </slot>
   {#if !isNil(relay.count)}
     <span class="flex items-center gap-1 text-sm text-neutral-400">
       {#if relay.contact}

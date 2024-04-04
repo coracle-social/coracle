@@ -35,13 +35,16 @@ const onNotificationEvent = batch(300, (chunk: Event[]) => {
 
   loadPubkeys(pubkeys)
 
-  load({
-    relays: hints.merge(eventsWithParent.map(hints.EventParents)).getUrls(),
-    filters: getIdFilters(
-      eventsWithParent.flatMap(e => Tags.fromEvent(e).replies().values().valueOf()),
-    ),
-    onEvent: e => _events.update($events => $events.concat(e)),
-  })
+  if (eventsWithParent.length > 0) {
+    const relays = hints.merge(eventsWithParent.map(hints.EventParents)).getUrls()
+    const ids = eventsWithParent.flatMap(e => Tags.fromEvent(e).replies().values().valueOf())
+
+    load({
+      relays,
+      filters: getIdFilters(ids),
+      onEvent: e => _events.update($events => $events.concat(e)),
+    })
+  }
 
   _events.mapStore.update($m => {
     for (const e of events) {
