@@ -1,7 +1,7 @@
 import {omit, assoc} from "ramda"
 import {generatePrivateKey, getPublicKey, appDataKeys} from "src/util/nostr"
 import type {NostrConnectHandler} from "src/engine/network/model"
-import {createAndPublish, NostrConnectBroker} from "src/engine/network/utils"
+import {Publisher, createAndPublish, NostrConnectBroker} from "src/engine/network/utils"
 import {people} from "src/engine/people/state"
 import {fetchHandle} from "src/engine/people/utils"
 import type {Session} from "./model"
@@ -107,5 +107,21 @@ export const updateCurrentSession = f => {
 
   if ($pubkey) {
     updateSession($pubkey, f)
+  }
+}
+
+export const broadcastUserData = (relays: string[]) => {
+  const {kind0, kind3, kind10002} = session.get() || {}
+
+  if (kind0) {
+    Publisher.publish({event: kind0, relays})
+  }
+
+  if (kind3) {
+    Publisher.publish({event: kind3, relays})
+  }
+
+  if (kind10002) {
+    Publisher.publish({event: kind10002, relays})
   }
 }

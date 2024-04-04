@@ -13,6 +13,9 @@
 - [x] Fix network filter
 - [x] Refactor subscribe/load
 - [x] Switch to chips for relay controls for more granularity
+- [x] Fix group search
+- [x] Join invite relays in background during onboarding
+- [x] Republish user profile data when joining a new relay
 
 # 0.4.4
 

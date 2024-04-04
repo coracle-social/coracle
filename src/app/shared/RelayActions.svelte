@@ -2,7 +2,15 @@
   import {last} from "ramda"
   import {normalizeRelayUrl} from "@coracle.social/util"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {canSign, relays, relayPolicyUrls, joinRelay, leaveRelay, deriveHasRelay} from "src/engine"
+  import {
+    canSign,
+    relays,
+    relayPolicyUrls,
+    joinRelay,
+    leaveRelay,
+    deriveHasRelay,
+    broadcastUserData,
+  } from "src/engine"
   import {router} from "src/app/router"
 
   export let relay
@@ -18,7 +26,10 @@
 
     if (!$joined) {
       actions.push({
-        onClick: () => joinRelay(url),
+        onClick: () => {
+          joinRelay(url)
+          broadcastUserData([url])
+        },
         label: "Join",
         icon: "right-to-bracket",
       })

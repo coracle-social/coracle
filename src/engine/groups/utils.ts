@@ -44,7 +44,7 @@ export const searchGroups = groups.throttle(300).derived($groups => {
     .map(group => ({group, score: getWotGroupMembers(group.address).length}))
 
   const fuse = new Fuse(options, {
-    keys: [{name: "id", weight: 0.2}, "meta.name", "meta.about"],
+    keys: [{name: "group.id", weight: 0.2}, "group.meta.name", "group.meta.about"],
     threshold: 0.3,
     shouldSort: false,
     includeScore: true,

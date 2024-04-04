@@ -204,8 +204,8 @@
           bind:this={groupInput}
           search={$searchGroups}
           getKey={prop("address")}
-          displayItem={g => (g ? displayGroup(g) : "")}
-          onChange={g => addGroup(g.address)}>
+          onChange={g => addGroup(g.address)}
+          displayItem={g => (g ? displayGroup(g) : "")}>
           <i slot="before" class="fa fa-search" />
           <div slot="item" let:item class="flex items-center gap-4 text-neutral-100">
             <GroupCircle address={item.address} class="h-5 w-5" />

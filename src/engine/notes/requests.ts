@@ -2,7 +2,7 @@ import type {Event} from "nostr-tools"
 import {find, whereEq} from "ramda"
 import {getIdFilters, Tags} from "@coracle.social/util"
 import {loadOne} from "src/engine/network/utils"
-import {useRelaysWithFallbacks} from "src/engine/relays/utils"
+import {withFallbacks} from "src/engine/relays/utils"
 
 export const dereferenceNote = async ({
   eid = null,
@@ -20,7 +20,7 @@ export const dereferenceNote = async ({
     }
 
     return loadOne({
-      relays: useRelaysWithFallbacks(relays),
+      relays: withFallbacks(relays),
       filters: getIdFilters([eid]),
     })
   }
@@ -39,7 +39,7 @@ export const dereferenceNote = async ({
     }
 
     return loadOne({
-      relays: useRelaysWithFallbacks(relays),
+      relays: withFallbacks(relays),
       filters: [{kinds: [kind], authors: [pubkey], "#d": [identifier]}],
     }).then((event: Event) => {
       return note?.created_at > event.created_at ? note : event

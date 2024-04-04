@@ -1,20 +1,37 @@
 import {reject} from "ramda"
 import {now} from "@coracle.social/lib"
-import {stateKey, user, canSign, session} from "src/engine/session/derived"
+import {createEvent} from "@coracle.social/util"
+import {stateKey, user, canSign, session, signer} from "src/engine/session/derived"
 import {updateStore} from "src/engine/core/commands"
-import {createAndPublish, getClientTags, mention} from "src/engine/network/utils"
+import {Publisher, createAndPublish, getClientTags, mention} from "src/engine/network/utils"
+import {hints, forcePlatformRelays, withIndexers} from "src/engine/relays/utils"
 import {people} from "./state"
 
-export const publishProfile = profile => createAndPublish(0, {content: JSON.stringify(profile)})
+export const publishProfile = async profile => {
+  const relays = withIndexers(forcePlatformRelays(hints.WriteRelays().getUrls()))
+  const event = await signer.get().signAsUser(
+    createEvent(0, {
+      content: JSON.stringify(profile),
+      tags: getClientTags(),
+    }),
+  )
 
-export const publishPetnames = ($petnames: string[][]) => {
-  updateStore(people.key(stateKey.get()), now(), {petnames: $petnames})
+  return Publisher.publish({event, relays})
+}
+
+export const publishPetnames = async (petnames: string[][]) => {
+  updateStore(people.key(stateKey.get()), now(), {petnames})
 
   if (canSign.get()) {
-    return createAndPublish(3, {
-      content: session.get().kind3?.content || "",
-      tags: [...$petnames, ...getClientTags()],
-    })
+    const relays = withIndexers(forcePlatformRelays(hints.WriteRelays().getUrls()))
+    const event = await signer.get().signAsUser(
+      createEvent(3, {
+        content: session.get().kind3?.content || "",
+        tags: [...petnames, ...getClientTags()],
+      }),
+    )
+
+    return Publisher.publish({event, relays})
   }
 }
 

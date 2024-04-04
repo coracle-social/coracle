@@ -86,13 +86,13 @@
     <div>
       <Chip
         pad
-        class={cx("cursor-pointer", {"opacity-75": !relay.read})}
+        class={cx("cursor-pointer transition-opacity", {"opacity-50": !relay.read})}
         on:click={policySetter("read")}>
         <i class="fa fa-book-open text-neutral-300" /> Read
       </Chip>
       <Chip
         pad
-        class={cx("cursor-pointer", {"opacity-75": !relay.write})}
+        class={cx("cursor-pointer transition-opacity", {"opacity-50": !relay.write})}
         on:click={policySetter("write")}>
         <i class="fa fa-feather text-neutral-300" /> Write
       </Chip>

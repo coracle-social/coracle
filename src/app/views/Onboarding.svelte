@@ -19,13 +19,15 @@
     publishPetnames,
     publishProfile,
     publishRelays,
+    urlToRelayPolicy,
+    requestRelayAccess,
     loginWithPrivateKey,
     listenForNotifications,
   } from "src/engine"
   import {router} from "src/app/router"
 
   export let stage = "intro"
-  export let invite = false
+  export let invite = null
 
   const privkey = generatePrivateKey()
 
@@ -37,11 +39,10 @@
 
   let petnames = $session ? [] : user.get()?.petnames || []
 
-  let relays =
-    user.get()?.relays || $env.DEFAULT_RELAYS.map(url => ({url, read: true, write: true}))
+  let relays = user.get()?.relays || $env.DEFAULT_RELAYS.map(urlToRelayPolicy)
 
   const signup = async noteContent => {
-    // Go to our home page
+    // Go to our home page if we don't have an invite to finish up
     if (!invite) {
       router.at("notes").push()
 
@@ -51,6 +52,14 @@
     }
 
     loginWithPrivateKey(privkey, {onboarding_tasks_completed: []})
+
+    // Immediately request access to any relays with a claim so that when we save our
+    // profile information it doesn't get rejected
+    for (const {url, claim} of invite?.relays || []) {
+      if (claim) {
+        await requestRelayAccess(url, claim, privkey)
+      }
+    }
 
     // Do this first so we know where to publish everything else
     publishRelays(relays)

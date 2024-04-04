@@ -19,7 +19,7 @@ import {stateKey} from "src/engine/session/derived"
 import type {RelayFilters} from "src/engine/network/utils"
 import {people} from "src/engine/people/state"
 import {groups, groupSharedKeys} from "src/engine/groups/state"
-import type {Relay} from "./model"
+import type {Relay, RelayPolicy} from "./model"
 import {relays} from "./state"
 
 export const normalizeRelayUrl = (url: string, opts = {}) => {
@@ -35,6 +35,9 @@ export const normalizeRelayUrl = (url: string, opts = {}) => {
 }
 
 export const urlToRelay = url => ({url: normalizeRelayUrl(url)}) as Relay
+
+export const urlToRelayPolicy = url =>
+  ({...urlToRelay(url), read: true, write: true}) as RelayPolicy
 
 export const decodeRelay = entity => {
   entity = fromNostrURI(entity)
@@ -136,8 +139,10 @@ export const forceRelaySelections = (selections: RelayFilters[], forceRelays: st
 export const forcePlatformRelaySelections = (selections: RelayFilters[]) =>
   forceRelaySelections(selections, Array.from(env.get().PLATFORM_RELAYS))
 
-export const useRelaysWithFallbacks = relays =>
+export const withFallbacks = (relays: string[]) =>
   relays.length > 0 ? relays : env.get().DEFAULT_RELAYS
+
+export const withIndexers = (relays: string[]) => uniq(relays.concat(env.get().INDEXER_RELAYS))
 
 export const hints = new Router({
   getUserPubkey: () => stateKey.get(),

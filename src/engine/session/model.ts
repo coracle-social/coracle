@@ -17,8 +17,12 @@ export type Session = {
   connectKey?: string
   connectToken?: string
   connectHandler?: NostrConnectHandler
+  kind0?: Event
+  kind0_updated?: string
   kind3?: Event
   kind3_updated?: string
+  kind10002?: Event
+  kind10002_updated?: string
   settings?: Record<string, any>
   settings_updated_at?: number
   seen_last_synced?: number

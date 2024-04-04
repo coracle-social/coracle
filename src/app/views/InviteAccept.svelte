@@ -21,6 +21,7 @@
   const parsedRelays = relays
     .map(s => zipObj(["url", "claim"], s.split("|")))
     .map(updateIn("url", normalizeRelayUrl))
+
   const parsedGroups = groups.map(s => zipObj(["address", "relay", "claim"], s.split("|"))) as {
     address: string
     relay: string
@@ -98,5 +99,5 @@
   {/if}
   <Anchor button accent href="/">Done</Anchor>
 {:else}
-  <Onboarding invite />
+  <Onboarding invite={{people, relays: parsedRelays, groups: parsedGroups}} />
 {/if}

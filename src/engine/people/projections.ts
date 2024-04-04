@@ -58,6 +58,12 @@ const updateZapper = async (e, {lud16, lud06}) => {
 
 projections.addHandler(0, e => {
   tryJson(async () => {
+    const session = getSession(e.pubkey)
+
+    if (session) {
+      updateSession(e.pubkey, $session => updateRecord($session, e.created_at, {kind0: e}))
+    }
+
     const content = JSON.parse(e.content)
 
     updateStore(people.key(e.pubkey), e.created_at, {
@@ -87,6 +93,14 @@ projections.addHandler(10000, e => {
       .filter(t => ["e", "p"].includes(t.key()))
       .unwrap(),
   })
+})
+
+projections.addHandler(10002, e => {
+  const session = getSession(e.pubkey)
+
+  if (session) {
+    updateSession(e.pubkey, $session => updateRecord($session, e.created_at, {kind10002: e}))
+  }
 })
 
 projections.addHandler(10004, e => {
