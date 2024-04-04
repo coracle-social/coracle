@@ -1,8 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {whereEq, without} from "ramda"
+  import {whereEq} from "ramda"
   import {randomId, ucFirst} from "hurdak"
-  import {noteKinds} from "src/util/nostr"
   import {themeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -17,12 +16,9 @@
   import GroupRestrictAccess from "src/app/shared/GroupRestrictAccess.svelte"
   import {
     env,
-    canSign,
     GroupAccess,
     displayGroup,
-    session,
     loadPubkeys,
-    publishGroupEntryRequest,
     groupRequests,
     deriveGroup,
     deriveAdminKeyForGroup,

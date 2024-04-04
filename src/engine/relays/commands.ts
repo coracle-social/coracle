@@ -1,6 +1,6 @@
-import {whereEq, when, reject, uniqBy, prop, inc} from "ramda"
+import {whereEq, reject, uniqBy, prop, inc} from "ramda"
 import {now} from "@coracle.social/lib"
-import {normalizeRelayUrl, createEvent, isShareableRelayUrl} from "@coracle.social/util"
+import {Tag, normalizeRelayUrl, createEvent, isShareableRelayUrl} from "@coracle.social/util"
 import {people} from "src/engine/people/state"
 import {session, canSign, signer, stateKey} from "src/engine/session/derived"
 import {updateStore} from "src/engine/core/commands"
@@ -38,18 +38,19 @@ export const saveRelayPolicy = (e, relays: RelayPolicy[]) => {
 }
 
 export const publishRelays = ($relays: RelayPolicy[]) => {
+  console.log($relays)
   if (canSign.get()) {
     return createAndPublish(10002, {
       tags: $relays
         .filter(r => isShareableRelayUrl(r.url))
-        .map(r => {
-          const t = ["r", normalizeRelayUrl(r.url)]
+        .flatMap(r => {
+          const tag = Tag.from(["r", normalizeRelayUrl(r.url)])
 
-          if (!r.write) {
-            t.push("read")
-          }
+          if (r.read && r.write) return [tag.valueOf()]
+          if (r.write) return [tag.append("write").valueOf()]
+          if (r.read) return [tag.append("read").valueOf()]
 
-          return t
+          return []
         })
         .concat(getClientTags()),
     })
@@ -89,4 +90,9 @@ export const leaveRelay = (url: string) =>
   publishRelays(reject(whereEq({url}), relayPolicies.get()))
 
 export const setRelayPolicy = (url: string, policy: Partial<RelayPolicy>) =>
-  publishRelays(relayPolicies.get().map(when(whereEq({url}), p => ({...p, ...policy}))))
+  publishRelays(
+    relayPolicies
+      .get()
+      .filter(p => p.url !== url)
+      .concat({url, read: false, write: false, ...policy}),
+  )

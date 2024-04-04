@@ -116,7 +116,7 @@ export const forceRelaySelections = (selections: RelayFilters[], forceRelays: st
   const filtersById = new Map<string, Filter>()
   const newSelections = new Map<string, string[]>()
 
-  for (const {relay, filters} of selections) {
+  for (const {filters} of selections) {
     for (const forceRelay of forceRelays) {
       for (const filter of filters) {
         const id = getFilterId(filter)

@@ -1,8 +1,9 @@
 <script lang="ts">
+  import cx from "classnames"
   import {isNil} from "ramda"
   import {quantify} from "hurdak"
   import {stringToHue, displayUrl, hsl} from "src/util/misc"
-  import Toggle from "src/partials/Toggle.svelte"
+  import Chip from "src/partials/Chip.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -18,6 +19,11 @@
   export let hideActions = false
   export let showControls = false
   export let inert = false
+
+  const policySetter = mode => () => {
+    relay = {...relay, [mode]: !relay[mode]}
+    setRelayPolicy(relay.url, relay)
+  }
 </script>
 
 <div
@@ -77,11 +83,19 @@
   {/if}
   {#if showControls && $canSign}
     <div class="-mx-6 my-1 h-px bg-tinted-700" />
-    <div class="flex justify-between gap-2">
-      <span>Publish to this relay?</span>
-      <Toggle
-        value={relay.write}
-        on:change={() => setRelayPolicy(relay.url, {write: !relay.write})} />
+    <div>
+      <Chip
+        pad
+        class={cx("cursor-pointer", {"opacity-75": !relay.read})}
+        on:click={policySetter("read")}>
+        <i class="fa fa-book-open text-neutral-300" /> Read
+      </Chip>
+      <Chip
+        pad
+        class={cx("cursor-pointer", {"opacity-75": !relay.write})}
+        on:click={policySetter("write")}>
+        <i class="fa fa-feather text-neutral-300" /> Write
+      </Chip>
     </div>
   {/if}
 </div>

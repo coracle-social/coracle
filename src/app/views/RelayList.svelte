@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {comparator, pluck} from "ramda"
+  import {mergeLeft, comparator, sortBy, uniqBy, prop, pluck} from "ramda"
   import {shuffle, displayList} from "hurdak"
   import {pushToKey} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
@@ -39,6 +39,16 @@
   // Drop the top 10 most popular relays to avoid network centralization
   const offset = Math.min(10, Math.max(0, otherRelays.length - 10))
 
+  let currentRelayPolicies = $relayPolicies
+
+  $: currentRelayPolicies = sortBy(
+    prop("url"),
+    uniqBy(
+      prop("url"),
+      $relayPolicies.concat(currentRelayPolicies.map(mergeLeft({read: false, write: false}))),
+    ),
+  )
+
   document.title = "Relays"
 </script>
 
@@ -56,14 +66,14 @@
   network, but you can join as many as you like.
 </p>
 
-{#if $relayPolicies.length === 0}
+{#if currentRelayPolicies.length === 0}
   <div class="mt-8 flex items-center justify-center gap-2 text-center">
     <i class="fa fa-triangle-exclamation" />
     No relays connected
   </div>
 {/if}
 <div class="grid grid-cols-1 gap-4">
-  {#each $relayPolicies as policy (policy.url)}
+  {#each currentRelayPolicies as policy (policy.url)}
     <RelayCard showStatus showControls relay={policy} />
   {/each}
 </div>

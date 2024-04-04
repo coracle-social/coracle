@@ -12,6 +12,7 @@
 - [x] Use new utility libraries
 - [x] Fix network filter
 - [x] Refactor subscribe/load
+- [x] Switch to chips for relay controls for more granularity
 
 # 0.4.4
 

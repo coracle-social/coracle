@@ -1,12 +1,10 @@
-<script>
+<script lang="ts">
   import Anchor from "src/partials/Anchor.svelte"
-  import NoteCreateInline from "src/app/shared/NoteCreateInline.svelte"
   import {session, publishGroupEntryRequest, GroupAccess, deriveGroupStatus} from "src/engine"
 
   export let address
 
   const status = deriveGroupStatus(address)
-
 </script>
 
 <p class="m-auto max-w-sm py-12 text-center">

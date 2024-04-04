@@ -1,4 +1,4 @@
-import {max, uniq, partition, equals} from "ramda"
+import {max, partition, equals} from "ramda"
 import {sleep, pickVals} from "hurdak"
 import type {Event} from "nostr-tools"
 import {createEvent} from "@coracle.social/util"
@@ -12,9 +12,7 @@ import {
   subscribe as baseSubscribe,
 } from "@coracle.social/network"
 import type {SubscribeRequest} from "@coracle.social/network"
-import {error, warn} from "src/util/logger"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
-import {normalizeRelayUrl} from "src/engine/relays/utils"
 import {env} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
 import {signer, canSign} from "src/engine/session/derived"

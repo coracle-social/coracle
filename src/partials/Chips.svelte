@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Chip from 'src/partials/Chip.svelte'
+  import Chip from "src/partials/Chip.svelte"
 
   export let items
   export let remove
@@ -7,7 +7,7 @@
 
 <div class="text-sm">
   {#each items as item, i}
-    <Chip class="mb-1 mr-1" onRemove={() => remove(i)}>
+    <Chip pad onRemove={() => remove(i)}>
       <slot name="item" context="value" {item}>
         {item}
       </slot>
