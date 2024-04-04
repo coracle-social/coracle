@@ -20,6 +20,7 @@
     publishProfile,
     publishRelays,
     urlToRelayPolicy,
+    tagsFromContent,
     requestRelayAccess,
     loginWithPrivateKey,
     listenForNotifications,
@@ -57,7 +58,9 @@
     // profile information it doesn't get rejected
     for (const {url, claim} of invite?.relays || []) {
       if (claim) {
-        await requestRelayAccess(url, claim, privkey)
+        const pub = await requestRelayAccess(url, claim, privkey)
+
+        await pub.result
       }
     }
 
@@ -70,7 +73,7 @@
 
     // Publish our welcome note
     if (noteContent) {
-      publishNote(noteContent)
+      publishNote(noteContent, tagsFromContent(noteContent))
     }
 
     // Start our notifications listener

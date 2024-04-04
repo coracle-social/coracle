@@ -44,8 +44,9 @@ Object.assign(NetworkContext, {
   onAuth,
   getExecutor,
   onEvent: (url: string, event: Event) => {
-    tracker.track(event.id, url)
-    projections.push(event)
+    if (!tracker.track(event.id, url)) {
+      projections.push(event)
+    }
   },
   isDeleted: (url: string, event: Event) => isDeleted.get()(event),
   hasValidSignature: (url: string, event: Event) =>

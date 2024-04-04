@@ -1,14 +1,20 @@
 import {getIdAndAddress} from "@coracle.social/util"
-import {hints} from "src/engine/relays/utils"
+import {hints, forcePlatformRelays} from "src/engine/relays/utils"
 import {createAndPublish} from "src/engine/network/utils"
 
-export const publishNote = (content, tags = [], relays = null) =>
-  createAndPublish(1, {content, tags, relays})
+export const publishNote = (content, tags = []) =>
+  createAndPublish({
+    kind: 1,
+    content,
+    tags,
+    relays: forcePlatformRelays(hints.WriteRelays().getUrls()),
+  })
 
 export const publishDeletion = ids =>
-  createAndPublish(5, {
-    relays: hints.WriteRelays().getUrls(),
+  createAndPublish({
+    kind: 5,
     tags: ids.map(id => [id.includes(":") ? "a" : "e", id]),
+    relays: forcePlatformRelays(hints.WriteRelays().getUrls()),
   })
 
 export const publishDeletionForEvent = event => publishDeletion(getIdAndAddress(event))

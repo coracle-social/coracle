@@ -4,12 +4,12 @@ import {createEvent, decodeAddress} from "@coracle.social/util"
 import {randomId, seconds} from "hurdak"
 import {generatePrivateKey, getPublicKey} from "src/util/nostr"
 import {updateRecord} from "src/engine/core/commands"
-import {Publisher, getClientTags, sign, mention} from "src/engine/network/utils"
-import {pubkey} from "src/engine/session/state"
+import {publish, getClientTags, sign, mention} from "src/engine/network/utils"
+import {pubkey, env} from "src/engine/session/state"
 import {nip44, nip59, session} from "src/engine/session/derived"
 import {updateSession} from "src/engine/session/commands"
 import {displayPubkey} from "src/engine/people/utils"
-import {hints} from "src/engine/relays/utils"
+import {hints, forcePlatformRelays} from "src/engine/relays/utils"
 import {GroupAccess} from "./model"
 import {groups, groupAdminKeys, groupSharedKeys} from "./state"
 import {
@@ -90,11 +90,10 @@ const addATags = (template, addresses) => ({
 // Utils for publishing
 
 export const publishToGroupAdmin = async (address, template) => {
-  const relays = hints.WithinContext(address).getUrls()
+  const relays = forcePlatformRelays(hints.WithinContext(address).getUrls())
   const pubkeys = [decodeAddress(address).pubkey, session.get().pubkey]
 
   const pubs = []
-  const events = []
 
   for (const pubkey of pubkeys) {
     const rumors = await wrapWithFallback(template, {
@@ -106,24 +105,23 @@ export const publishToGroupAdmin = async (address, template) => {
     })
 
     for (const rumor of rumors) {
-      events.push(rumor)
-      pubs.push(Publisher.publish({event: rumor.wrap, relays}))
+      pubs.push(publish({event: rumor.wrap, relays}))
     }
   }
 
-  return {pubs, events}
+  return pubs
 }
 
 export const publishAsGroupAdminPublicly = async (address, template) => {
-  const relays = hints.WithinContext(address).getUrls()
+  const relays = forcePlatformRelays(hints.WithinContext(address).getUrls())
   const adminKey = deriveAdminKeyForGroup(address).get()
   const event = await sign(template, {sk: adminKey.privkey})
 
-  return Publisher.publish({event, relays})
+  return publish({event, relays})
 }
 
 export const publishAsGroupAdminPrivately = async (address, template) => {
-  const relays = hints.WithinContext(address).getUrls()
+  const relays = forcePlatformRelays(hints.WithinContext(address).getUrls())
   const adminKey = deriveAdminKeyForGroup(address).get()
   const sharedKey = deriveSharedKeyForGroup(address).get()
 
@@ -136,15 +134,12 @@ export const publishAsGroupAdminPrivately = async (address, template) => {
   })
 
   const pubs = []
-  const events = []
 
   for (const rumor of rumors) {
-    events.push(rumor)
-
-    pubs.push(Publisher.publish({event: rumor.wrap, relays}))
+    pubs.push(publish({event: rumor.wrap, relays}))
   }
 
-  return {pubs, events}
+  return pubs
 }
 
 export const publishToGroupsPublicly = async (addresses, template, {anonymous = false} = {}) => {
@@ -154,16 +149,16 @@ export const publishToGroupsPublicly = async (addresses, template, {anonymous = 
     }
   }
 
-  return Publisher.publish({
-    event: await sign(addATags(template, addresses), {anonymous}),
-  })
+  const event = await sign(addATags(template, addresses), {anonymous})
+  const relays = forcePlatformRelays(hints.PublishEvent(event).getUrls())
+
+  return publish({event, relays})
 }
 
 export const publishToGroupsPrivately = async (addresses, template, {anonymous = false} = {}) => {
   const pubs = []
-  const events = []
   for (const address of addresses) {
-    const relays = hints.WithinContext(address).getUrls()
+    const relays = forcePlatformRelays(hints.WithinContext(address).getUrls())
     const thisTemplate = addATags(template, [address])
     const sharedKey = deriveSharedKeyForGroup(address).get()
 
@@ -184,47 +179,36 @@ export const publishToGroupsPrivately = async (addresses, template, {anonymous =
     })
 
     for (const rumor of rumors) {
-      events.push(rumor)
-      pubs.push(Publisher.publish({event: rumor.wrap, relays}))
+      pubs.push(publish({event: rumor.wrap, relays}))
     }
   }
 
-  return {pubs, events}
+  return pubs
 }
 
 export const publishToZeroOrMoreGroups = async (addresses, template, {anonymous = false} = {}) => {
   const pubs = []
-  const events = []
 
   if (addresses.length === 0) {
     const event = await sign(template, {anonymous})
+    const relays = forcePlatformRelays(hints.PublishEvent(event).getUrls())
 
-    events.push(event)
-    pubs.push(Publisher.publish({event}))
+    pubs.push(publish({event, relays}))
   } else {
     const [wrap, nowrap] = partition((address: string) => address.startsWith("35834:"), addresses)
 
     if (wrap.length > 0) {
-      const result = await publishToGroupsPrivately(wrap, template, {anonymous})
-
-      for (const pub of result.pubs) {
+      for (const pub of await publishToGroupsPrivately(wrap, template, {anonymous})) {
         pubs.push(pub)
-      }
-
-      for (const event of result.events) {
-        events.push(event)
       }
     }
 
     if (nowrap.length > 0) {
-      const pub = await publishToGroupsPublicly(nowrap, template, {anonymous})
-
-      pubs.push(pub)
-      events.push(pub.event)
+      pubs.push(await publishToGroupsPublicly(nowrap, template, {anonymous}))
     }
   }
 
-  return {pubs, events}
+  return pubs
 }
 
 // Admin functions
@@ -233,11 +217,14 @@ export const publishKeyShares = async (address, pubkeys, template) => {
   const adminKey = deriveAdminKeyForGroup(address).get()
 
   const pubs = []
-  const events = []
 
   for (const pubkey of pubkeys) {
     const relays = hints
-      .merge([hints.ForPubkeys([pubkey]), hints.WithinContext(address)])
+      .merge([
+        hints.ForPubkeys([pubkey]),
+        hints.WithinContext(address),
+        hints.fromRelays(env.get().PLATFORM_RELAYS),
+      ])
       .policy(hints.addNoFallbacks)
       .getUrls()
 
@@ -250,12 +237,11 @@ export const publishKeyShares = async (address, pubkeys, template) => {
     })
 
     for (const rumor of rumors) {
-      events.push(rumor)
-      pubs.push(Publisher.publish({event: rumor.wrap, relays}))
+      pubs.push(publish({event: rumor.wrap, relays}))
     }
   }
 
-  return {pubs, events}
+  return pubs
 }
 
 export const publishAdminKeyShares = async (address, pubkeys) => {

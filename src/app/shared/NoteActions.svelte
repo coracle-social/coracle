@@ -30,7 +30,7 @@
     groups,
     canSign,
     session,
-    Publisher,
+    publish,
     mention,
     handlers,
     tracker,
@@ -39,6 +39,7 @@
     deriveIsGroupMember,
     publishToZeroOrMoreGroups,
     publishDeletionForEvent,
+    forcePlatformRelays,
     getSetting,
     loadPubkeys,
     isEventMuted,
@@ -84,10 +85,10 @@
 
   const react = async content => {
     if (!note.wrap) {
-      Publisher.publish({event: note})
+      publish({event: note, relays: forcePlatformRelays(hints.PublishEvent(note).getUrls())})
     }
 
-    const {events} = await publishToZeroOrMoreGroups(
+    const pubs = await publishToZeroOrMoreGroups(
       tags.context().values().valueOf(),
       createEvent(7, {
         content,
@@ -95,12 +96,13 @@
       }),
     )
 
-    addToContext(events)
+    for (const pub of pubs) {
+      addToContext(pub.request.event)
+    }
   }
 
   const deleteReaction = e => {
     publishDeletionForEvent(e)
-
     removeFromContext(e)
   }
 
@@ -139,11 +141,7 @@
   }
 
   const broadcast = () => {
-    Publisher.publish({
-      event: note,
-      relays: hints.WriteRelays().getUrls(),
-    })
-
+    publish({event: note, relays: forcePlatformRelays(hints.WriteRelays().getUrls())})
     toast.show("info", "Note has been re-published!")
   }
 

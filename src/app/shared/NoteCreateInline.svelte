@@ -13,13 +13,14 @@
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import GroupLink from "src/app/shared/GroupLink.svelte"
-  import {toastProgress} from "src/app/state"
   import {
     env,
+    hints,
     pubkey,
-    Publisher,
+    publish,
     getClientTags,
     tagsFromContent,
+    forcePlatformRelays,
     publishToZeroOrMoreGroups,
     getReplyTags,
   } from "src/engine"
@@ -81,17 +82,16 @@
 
     // Re-broadcast the note we're replying to
     if (parent && !parent.wrap) {
-      Publisher.publish({event: parent})
+      publish({
+        event: parent,
+        relays: forcePlatformRelays(hints.PublishEvent(parent).getUrls()),
+      })
     }
 
     const template = createEvent(1, {content, tags})
 
-    const {pubs} = await publishToZeroOrMoreGroups(defaultGroups, template, opts)
-
-    pubs[0].on("progress", toastProgress)
-
+    publishToZeroOrMoreGroups(defaultGroups, template, opts)
     opts = {...defaultOpts}
-
     compose.clear()
     saving = false
   }

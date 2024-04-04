@@ -10,8 +10,7 @@ import logger from "src/util/logger"
 import {getPublicKey} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import type {Event} from "src/engine/events/model"
-import {Publisher} from "./publish"
-import {subscribe} from "./executor"
+import {subscribe, publish} from "./executor"
 import type {NostrConnectHandler} from "../model"
 
 let singleton: NostrConnectBroker
@@ -92,7 +91,7 @@ export class NostrConnectBroker extends Emitter {
 
     logger.info("NostrConnect request:", {id, method, params})
 
-    Publisher.publish({event, relays: this.handler.relays, silent: true})
+    publish({event, relays: this.handler.relays})
 
     this.once(`auth-${id}`, auth_url => {
       window.open(auth_url, "Coracle", "width=600,height=800,popup=yes")

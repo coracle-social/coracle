@@ -13,9 +13,11 @@
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import {
     env,
-    Publisher,
+    hints,
+    publish,
     uniqTags,
     publishToZeroOrMoreGroups,
+    forcePlatformRelays,
     tagsFromContent,
     getClientTags,
     getReplyTags,
@@ -23,7 +25,6 @@
     displayPubkey,
     mention,
   } from "src/engine"
-  import {toastProgress} from "src/app/state"
 
   export let parent
   export let addToContext
@@ -107,19 +108,15 @@
 
     // Re-broadcast the note we're replying to
     if (!parent.wrap) {
-      Publisher.publish({event: parent})
+      publish({event: parent, relays: forcePlatformRelays(hints.PublishEvent(parent).getUrls())})
     }
 
     const template = createEvent(1, {content, tags})
     const addresses = parentTags.context().values().valueOf()
-    const {pubs, events} = await publishToZeroOrMoreGroups(addresses, template, opts)
+    const pubs = await publishToZeroOrMoreGroups(addresses, template, opts)
 
-    pubs[0].on("progress", toastProgress)
-
-    addToContext(events[0])
-
+    addToContext(pubs[0].request.event)
     clearDraft()
-
     reset()
   }
 

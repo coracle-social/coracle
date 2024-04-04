@@ -17,7 +17,6 @@
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import {router} from "src/app/router"
-  import {toastProgress} from "src/app/state"
   import {dereferenceNote, publishToZeroOrMoreGroups} from "src/engine"
 
   export let address
@@ -40,10 +39,7 @@
       created_at: inc(event.created_at),
     })
 
-    const {pubs} = await publishToZeroOrMoreGroups(values.groups, template)
-
-    pubs[0].on("progress", toastProgress)
-
+    publishToZeroOrMoreGroups(values.groups, template)
     router.pop()
   }
 

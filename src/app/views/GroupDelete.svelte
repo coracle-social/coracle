@@ -1,9 +1,8 @@
 <script lang="ts">
-  import {createEvent} from "@coracle.social/util"
   import {toast} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Subheading from "src/partials/Subheading.svelte"
-  import {groups, Publisher, signer, hints, deriveAdminKeyForGroup, displayGroup} from "src/engine"
+  import {groups, createAndPublish, hints, deriveAdminKeyForGroup, displayGroup} from "src/engine"
   import {router} from "src/app/router"
 
   export let address
@@ -14,11 +13,13 @@
   const abort = () => router.pop()
 
   const confirm = () => {
-    const relays = hints.WithinContext(address).getUrls()
-    const template = createEvent(5, {tags: [["a", address]]})
-    const event = signer.get().signWithKey(template, $adminKey.privkey)
+    createAndPublish({
+      kind: 5,
+      tags: [["a", address]],
+      relays: hints.WithinContext(address).getUrls(),
+      sk: $adminKey.privkey,
+    })
 
-    Publisher.publish({relays, event})
     toast.show("info", "Group deleted!")
     router.pop()
   }

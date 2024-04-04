@@ -6,7 +6,7 @@ import {generatePrivateKey} from "src/util/nostr"
 import {pubkey} from "src/engine/session/state"
 import {signer, nip44, nip59} from "src/engine/session/derived"
 import {hints} from "src/engine/relays/utils"
-import {Publisher} from "src/engine/network/utils"
+import {publish} from "src/engine/network/utils"
 import type {Event} from "./model"
 import {seen} from "./state"
 
@@ -48,12 +48,12 @@ export const markAsSeen = async (events: Event[]) => {
 
         rumor.wrap.tags.push(expirationTag)
 
-        Publisher.publish({
+        publish({
           event: rumor.wrap,
           relays: hints.WriteRelays().getUrls(),
         })
       } else {
-        Publisher.publish({
+        publish({
           event: await signer.get().signAsUser(template),
           relays: hints.WriteRelays().getUrls(),
         })

@@ -3,8 +3,7 @@ import {seconds} from "hurdak"
 import {env} from "src/engine/session/state"
 import {hints} from "src/engine/relays/utils"
 import type {Event} from "src/engine/events/model"
-import {createAndPublish} from "./publish"
-import {subscribe} from "./executor"
+import {subscribe, createAndPublish} from "./executor"
 
 export type DVMRequestOpts = {
   kind: number
@@ -35,7 +34,8 @@ export const dvmRequest = async ({
     input = JSON.stringify(input)
   }
 
-  createAndPublish(kind, {
+  createAndPublish({
+    kind,
     relays,
     sk: privateKey,
     tags: tags.concat([

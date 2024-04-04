@@ -1,11 +1,10 @@
 import Bugsnag from "@bugsnag/js"
 import {uniq} from "ramda"
-import {hash, union} from "hurdak"
+import {hash} from "hurdak"
 import {writable} from "@coracle.social/lib"
 import {ConnectionStatus, NetworkContext} from "@coracle.social/network"
 import {warn} from "src/util/logger"
 import {userKinds} from "src/util/nostr"
-import {toast} from "src/partials/state"
 import {router} from "src/app/router"
 import {
   env,
@@ -129,40 +128,3 @@ export const loadUserData = () => {
 }
 
 export const boot = () => router.at("login/connect").open({noEscape: true})
-
-export const toastProgress = progress => {
-  const {event, succeeded, failed, timeouts, completed, pending} = progress
-  const relays = Array.from(union(completed, pending))
-
-  let message = `Published to ${succeeded.size}/${relays.length} relays`
-
-  const extra = []
-  if (failed.size > 0) {
-    extra.push(`${failed.size} failed`)
-  }
-
-  if (timeouts.size > 0) {
-    extra.push(`${timeouts.size} timed out`)
-  }
-
-  if (pending.size > 0) {
-    extra.push(`${pending.size} pending`)
-  }
-
-  if (extra.length > 0) {
-    message += ` (${extra.join(", ")})`
-  }
-
-  const payload = pending.size
-    ? message
-    : {
-        text: message,
-        link: {
-          text: "Details",
-          onClick: () =>
-            router.at("notes").of(event.id, {relays}).at("status").cx({event, progress}).open(),
-        },
-      }
-
-  toast.show("info", payload, pending.size ? null : 8)
-}

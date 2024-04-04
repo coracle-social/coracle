@@ -1,11 +1,10 @@
 import {assoc, without, uniq, map} from "ramda"
 import {createMapOf} from "hurdak"
 import {now} from "@coracle.social/lib"
-import {createEvent} from "@coracle.social/util"
 import {generatePrivateKey, appDataKeys} from "src/util/nostr"
-import {Publisher, getClientTags, mention} from "src/engine/network/utils"
+import {createAndPublish, publish, getClientTags, mention} from "src/engine/network/utils"
 import {hints} from "src/engine/relays/utils"
-import {user, signer, nip59, nip04} from "src/engine/session/derived"
+import {user, nip59, nip04} from "src/engine/session/derived"
 import {setAppData} from "src/engine/session/commands"
 import {channels} from "./state"
 
@@ -18,13 +17,11 @@ export const sendLegacyMessage = async (channelId: string, content: string) => {
   }
 
   const pubkey = recipients[0] || $pubkey
-  const template = createEvent(4, {
-    content: await nip04.get().encryptAsUser(content, pubkey),
-    tags: [mention(pubkey), ...getClientTags()],
-  })
 
-  return Publisher.publish({
-    event: await signer.get().signAsUser(template),
+  return createAndPublish({
+    kind: 4,
+    tags: [mention(pubkey), ...getClientTags()],
+    content: await nip04.get().encryptAsUser(content, pubkey),
     relays: hints.PublishMessage(pubkey).getUrls(),
   })
 }
@@ -46,7 +43,7 @@ export const sendMessage = async (channelId: string, content: string) => {
       },
     })
 
-    Publisher.publish({
+    publish({
       event: rumor.wrap,
       relays: hints.merge(recipients.map(hints.PublishMessage)).getUrls(),
     })

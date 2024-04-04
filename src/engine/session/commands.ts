@@ -1,9 +1,10 @@
 import {omit, assoc} from "ramda"
 import {generatePrivateKey, getPublicKey, appDataKeys} from "src/util/nostr"
 import type {NostrConnectHandler} from "src/engine/network/model"
-import {Publisher, createAndPublish, NostrConnectBroker} from "src/engine/network/utils"
+import {publish, createAndPublish, NostrConnectBroker} from "src/engine/network/utils"
 import {people} from "src/engine/people/state"
 import {fetchHandle} from "src/engine/people/utils"
+import {hints} from "src/engine/relays/utils"
 import type {Session} from "./model"
 import {sessions, pubkey} from "./state"
 import {canSign, nip04, session} from "./derived"
@@ -86,10 +87,13 @@ export const logout = () => {
 export const setAppData = async (d: string, data: any) => {
   if (canSign.get()) {
     const {pubkey} = session.get()
-    const json = JSON.stringify(data)
-    const content = await nip04.get().encryptAsUser(json, pubkey)
 
-    return createAndPublish(30078, {content, tags: [["d", d]]})
+    return createAndPublish({
+      kind: 30078,
+      tags: [["d", d]],
+      content: await nip04.get().encryptAsUser(JSON.stringify(data), pubkey),
+      relays: hints.WriteRelays().getUrls(),
+    })
   }
 }
 
@@ -114,14 +118,14 @@ export const broadcastUserData = (relays: string[]) => {
   const {kind0, kind3, kind10002} = session.get() || {}
 
   if (kind0) {
-    Publisher.publish({event: kind0, relays})
+    publish({event: kind0, relays})
   }
 
   if (kind3) {
-    Publisher.publish({event: kind3, relays})
+    publish({event: kind3, relays})
   }
 
   if (kind10002) {
-    Publisher.publish({event: kind10002, relays})
+    publish({event: kind10002, relays})
   }
 }

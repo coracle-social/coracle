@@ -1,37 +1,29 @@
 import {reject} from "ramda"
 import {now} from "@coracle.social/lib"
-import {createEvent} from "@coracle.social/util"
-import {stateKey, user, canSign, session, signer} from "src/engine/session/derived"
+import {stateKey, user, canSign, session} from "src/engine/session/derived"
 import {updateStore} from "src/engine/core/commands"
-import {Publisher, createAndPublish, getClientTags, mention} from "src/engine/network/utils"
+import {createAndPublish, getClientTags, mention} from "src/engine/network/utils"
 import {hints, forcePlatformRelays, withIndexers} from "src/engine/relays/utils"
 import {people} from "./state"
 
-export const publishProfile = async profile => {
-  const relays = withIndexers(forcePlatformRelays(hints.WriteRelays().getUrls()))
-  const event = await signer.get().signAsUser(
-    createEvent(0, {
-      content: JSON.stringify(profile),
-      tags: getClientTags(),
-    }),
-  )
+export const publishProfile = profile =>
+  createAndPublish({
+    kind: 0,
+    tags: getClientTags(),
+    content: JSON.stringify(profile),
+    relays: forcePlatformRelays(withIndexers(hints.WriteRelays().getUrls())),
+  })
 
-  return Publisher.publish({event, relays})
-}
-
-export const publishPetnames = async (petnames: string[][]) => {
+export const publishPetnames = (petnames: string[][]) => {
   updateStore(people.key(stateKey.get()), now(), {petnames})
 
   if (canSign.get()) {
-    const relays = withIndexers(forcePlatformRelays(hints.WriteRelays().getUrls()))
-    const event = await signer.get().signAsUser(
-      createEvent(3, {
-        content: session.get().kind3?.content || "",
-        tags: [...petnames, ...getClientTags()],
-      }),
-    )
-
-    return Publisher.publish({event, relays})
+    createAndPublish({
+      kind: 3,
+      tags: [...petnames, ...getClientTags()],
+      content: session.get().kind3?.content || "",
+      relays: forcePlatformRelays(withIndexers(hints.WriteRelays().getUrls())),
+    })
   }
 }
 
@@ -51,8 +43,10 @@ export const publishMutes = ($mutes: string[][]) => {
   updateStore(people.key(stateKey.get()), now(), {mutes: $mutes})
 
   if (canSign.get()) {
-    return createAndPublish(10000, {
+    return createAndPublish({
+      kind: 10000,
       tags: [...$mutes.map(t => t.slice(0, 2)), ...getClientTags()],
+      relays: forcePlatformRelays(hints.WriteRelays().getUrls()),
     })
   }
 }

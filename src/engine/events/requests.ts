@@ -4,7 +4,7 @@ import {Worker} from "@coracle.social/lib"
 import {giftWrapKinds} from "src/util/nostr"
 import {session, nip44, nip04} from "src/engine/session/derived"
 import {hints} from "src/engine/relays/utils"
-import {load, MultiCursor, Publisher} from "src/engine/network/utils"
+import {load, MultiCursor, publish} from "src/engine/network/utils"
 
 export const loadDeletes = () => {
   const {pubkey, deletes_last_synced = 0} = session.get()
@@ -52,7 +52,7 @@ export const loadGiftWrap = () => {
 export const sync = (fromUrl, toUrl, filters) => {
   const worker = new Worker<Event>()
 
-  worker.addGlobalHandler(event => Publisher.publish({event, relays: [toUrl]}))
+  worker.addGlobalHandler(event => publish({event, relays: [toUrl]}))
 
   const cursor = new MultiCursor({
     relaySelections: [{relay: fromUrl, filters}],

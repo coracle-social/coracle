@@ -27,8 +27,7 @@
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NoteImages from "src/app/shared/NoteImages.svelte"
-  import {Publisher, mention} from "src/engine"
-  import {toastProgress} from "src/app/state"
+  import {publish, mention} from "src/engine"
   import {router} from "src/app/router"
   import {
     env,
@@ -131,10 +130,7 @@
 
       // Re-broadcast the note we're quoting
       if (!opts.groups.length) {
-        Publisher.publish({
-          event: quote,
-          relays: hints.WriteRelays().getUrls(),
-        })
+        publish({event: quote, relays: hints.WriteRelays().getUrls()})
       }
     }
 
@@ -167,10 +163,7 @@
         }),
     })
 
-    const {pubs} = await publishToZeroOrMoreGroups(opts.groups, template, opts)
-
-    pubs[0].on("progress", toastProgress)
-
+    publishToZeroOrMoreGroups(opts.groups, template, opts)
     router.clearModals()
   }
 

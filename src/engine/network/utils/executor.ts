@@ -1,6 +1,7 @@
 import {max, partition, equals} from "ramda"
 import {sleep, pickVals} from "hurdak"
 import type {Event} from "nostr-tools"
+import {writable} from "@coracle.social/lib"
 import {createEvent} from "@coracle.social/util"
 import {
   Plex,
@@ -9,10 +10,11 @@ import {
   Multi,
   NetworkContext,
   Tracker,
+  publish as basePublish,
   subscribe as baseSubscribe,
 } from "@coracle.social/network"
-import type {SubscribeRequest} from "@coracle.social/network"
-import {LOCAL_RELAY_URL} from "src/util/nostr"
+import type {PublishRequest, SubscribeRequest} from "@coracle.social/network"
+import {LOCAL_RELAY_URL, generatePrivateKey} from "src/util/nostr"
 import {env} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
 import {signer, canSign} from "src/engine/session/derived"
@@ -134,6 +136,66 @@ export const loadOne = (request: MySubscribeRequest) =>
       resolve(null)
     })
   })
+
+export const publishQueue = writable([])
+
+export const publish = (request: PublishRequest) => {
+  const pub = basePublish(request)
+
+  // Make sure the event gets into projections asap
+  NetworkContext.onEvent(LOCAL_RELAY_URL, request.event)
+
+  // Listen to updates and update our publish queue
+  pub.emitter.on("*", () =>
+    publishQueue.update($q =>
+      $q
+        .slice(-100)
+        .filter(p => p.id !== pub.id)
+        .concat(pub),
+    ),
+  )
+
+  return pub
+}
+
+export const sign = (template, opts: {anonymous?: boolean; sk?: string}) => {
+  if (opts.anonymous) {
+    return signer.get().signWithKey(template, generatePrivateKey())
+  }
+
+  if (opts.sk) {
+    return signer.get().signWithKey(template, opts.sk)
+  }
+
+  return signer.get().signAsUser(template)
+}
+
+export type CreateAndPublishOpts = {
+  kind: number
+  relays: string[]
+  tags?: string[][]
+  content?: string
+  anonymous?: boolean
+  sk?: string
+  timeout?: number
+  verb?: "EVENT" | "AUTH"
+}
+
+export const createAndPublish = async ({
+  kind,
+  relays,
+  tags = [],
+  content = "",
+  anonymous,
+  sk,
+  timeout,
+  verb,
+}: CreateAndPublishOpts) => {
+  const template = createEvent(kind, {content, tags})
+  const event = await sign(template, {anonymous, sk})
+
+  return publish({event, relays, timeout, verb})
+}
 
 setInterval(() => {
   const activityKeys = ["lastRequest", "lastPublish", "lastEvent"]

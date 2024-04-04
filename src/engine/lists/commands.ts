@@ -1,9 +1,11 @@
 import {pubkey} from "src/engine/session/state"
 import {createAndPublish, getClientTags} from "src/engine/network/utils"
+import {forcePlatformRelays, hints} from "src/engine/relays/utils"
 import {publishDeletion} from "src/engine/notes/commands"
 
 export const publishBookmarksList = (id, title, description, tags) => {
-  createAndPublish(30003, {
+  createAndPublish({
+    kind: 30003,
     tags: [
       ["d", id],
       ["name", title],
@@ -12,6 +14,7 @@ export const publishBookmarksList = (id, title, description, tags) => {
       ...getClientTags(),
       ...tags,
     ],
+    relays: forcePlatformRelays(hints.WriteRelays().getUrls()),
   })
 
   // migrate away from kind 30001
@@ -19,6 +22,8 @@ export const publishBookmarksList = (id, title, description, tags) => {
 }
 
 export const publishCommunitiesList = addresses =>
-  createAndPublish(10004, {
+  createAndPublish({
+    kind: 10004,
     tags: [...addresses.map(a => ["a", a]), ...getClientTags()],
+    relays: forcePlatformRelays(hints.WriteRelays().getUrls()),
   })

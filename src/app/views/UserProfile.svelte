@@ -8,18 +8,14 @@
   import Field from "src/partials/Field.svelte"
   import {pubkey, people, publishProfile} from "src/engine"
   import {router} from "src/app/router"
-  import {toastProgress} from "src/app/state"
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
   const lud16Url = "https://blog.getalby.com/create-your-neutral-300ning-address/"
   const pseudUrl =
     "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
-  const submit = async () => {
-    const pub = await publishProfile(values)
-
-    pub.on("progress", toastProgress)
-
+  const submit = () => {
+    publishProfile(values)
     router.pop()
   }
 
