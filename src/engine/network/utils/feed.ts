@@ -1,5 +1,5 @@
-import {partition, concat, prop, uniqBy, without, assoc} from "ramda"
-import {doPipe, batch} from "hurdak"
+import {partition, prop, uniqBy, without, assoc} from "ramda"
+import {batch} from "hurdak"
 import {now, writable} from "@coracle.social/lib"
 import {
   Tags,
@@ -38,7 +38,6 @@ export type FeedOpts = {
 }
 
 export class FeedLoader {
-  since = now()
   stopped = false
   subs: Array<{close: () => void}> = []
   buffer = writable<Event[]>([])
@@ -46,7 +45,6 @@ export class FeedLoader {
   parents = new Map<string, DisplayEvent>()
   reposts = new Map<string, Event[]>()
   replies = new Map<string, Event[]>()
-  deferred: Event[] = []
   cursor: MultiCursor
   ready: Promise<void>
   isEventMuted = isEventMuted.get()
@@ -63,11 +61,10 @@ export class FeedLoader {
 
     if (!opts.skipNetwork) {
       relaySelections = getFilterSelections(filters)
+      relaySelections = forceRelaySelections(relaySelections, opts.relays)
 
       if (!opts.skipPlatform) {
         relaySelections = forcePlatformRelaySelections(relaySelections)
-      } else {
-        relaySelections = forceRelaySelections(relaySelections, opts.relays)
       }
     }
 
@@ -82,7 +79,7 @@ export class FeedLoader {
           subscribe({
             relays: [relay],
             skipCache: true,
-            filters: filters.map(assoc("since", this.since)),
+            filters: filters.map(assoc("since", now())),
             onEvent: batch(300, (events: Event[]) => {
               events = this.discardEvents(events)
 
@@ -330,14 +327,7 @@ export class FeedLoader {
     const [subs, events] = this.cursor.take(n)
 
     this.addSubs(subs)
-
-    this.addToFeed(
-      doPipe(this.discardEvents(events), [
-        concat(this.deferred.splice(0)),
-        this.deferOrphans,
-        this.deferAncient,
-      ]),
-    )
+    this.addToFeed(this.deferOrphans(this.discardEvents(events)))
   }
 
   loadBuffer() {

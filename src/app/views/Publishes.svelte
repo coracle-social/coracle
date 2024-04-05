@@ -1,6 +1,6 @@
 <script lang="ts">
   import {pluralize, seconds} from "hurdak"
-  import {now} from "@coracle.social/lib"
+  import {now, sortBy} from "@coracle.social/lib"
   import {PublishStatus} from "@coracle.social/network"
   import Square from "src/partials/Square.svelte"
   import AltColor from "src/partials/AltColor.svelte"
@@ -51,6 +51,6 @@
     </Square>
   </AltColor>
 </div>
-{#each recent.toReversed() as pub (pub.id)}
+{#each sortBy(p => -p.created_at, recent) as pub (pub.id)}
   <PublishCard {pub} />
 {/each}

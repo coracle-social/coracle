@@ -35,7 +35,7 @@
   <Card>
     <FlexColumn>
       <div class="flex justify-between">
-        <span>Kind {pub.request.event.kind}, published at {formatTimestamp(pub.created_at)}</span>
+        <span>Kind {pub.request.event.kind}, published {formatTimestamp(pub.created_at)}</span>
         <Anchor
           underline
           modal

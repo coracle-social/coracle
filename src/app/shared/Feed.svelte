@@ -32,7 +32,7 @@
 
   const hideReplies = writable(Storage.getJson("hideReplies"))
 
-  const loadMore = () => feed.load(5)
+  const loadMore = () => feed.load(30)
 
   const start = () => {
     feed?.stop()

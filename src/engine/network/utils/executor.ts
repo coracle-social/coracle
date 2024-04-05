@@ -143,13 +143,11 @@ export const publish = (request: PublishRequest) => {
   // Make sure the event gets into projections asap
   NetworkContext.onEvent(LOCAL_RELAY_URL, request.event)
 
-  const pubInfo = omit(["emitter", "result"], pub)
-
-  publishes.key(pubInfo.id).set(pubInfo)
-
   // Listen to updates and update our publish queue
   if (isGiftWrap(request.event) || request.event.pubkey === pubkey.get()) {
-    pub.emitter.on("*", () => publishes.key(pubInfo.id).set(pubInfo))
+    const pubInfo = omit(["emitter", "result"], pub)
+
+    pub.emitter.on("*", (t) => publishes.key(pubInfo.id).set(pubInfo))
   }
 
   return pub
