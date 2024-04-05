@@ -16,7 +16,7 @@ import {relays} from "./relays"
 import {groups, groupSharedKeys, groupAdminKeys, groupRequests, groupAlerts} from "./groups"
 import {_labels} from "./labels"
 import {topics} from "./topics"
-import {deletes, seen, _events, isDeleted} from "./events"
+import {deletes, seen, _events, isDeleted, publishes} from "./events"
 import {pubkey, sessions} from "./session"
 import {channels} from "./channels"
 import {onAuth, getExecutor, tracker} from "./network"
@@ -77,12 +77,13 @@ const sessionsAdapter = {
   dump: identity,
 }
 
-export const storage = new Storage(10, [
+export const storage = new Storage(11, [
   new LocalStorageAdapter("pubkey", pubkey),
   new LocalStorageAdapter("sessions", sessions, sessionsAdapter),
   new LocalStorageAdapter("deletes2", deletes, setAdapter),
   new IndexedDBAdapter("seen3", seen, 10000, sortBy(prop("created_at"))),
   new IndexedDBAdapter("events", _events, 10000, sortByPubkeyWhitelist(prop("created_at"))),
+  new IndexedDBAdapter("publishes", publishes, 100, sortByPubkeyWhitelist(prop("created_at"))),
   new IndexedDBAdapter("labels", _labels, 1000, sortBy(prop("created_at"))),
   new IndexedDBAdapter("topics", topics, 1000, sortBy(prop("last_seen"))),
   new IndexedDBAdapter(

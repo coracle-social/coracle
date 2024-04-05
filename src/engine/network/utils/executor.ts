@@ -1,7 +1,6 @@
-import {max, partition, equals} from "ramda"
+import {max, omit, partition, equals} from "ramda"
 import {sleep, pickVals} from "hurdak"
 import type {Event} from "nostr-tools"
-import {writable} from "@coracle.social/lib"
 import {createEvent} from "@coracle.social/util"
 import {
   Plex,
@@ -14,10 +13,11 @@ import {
   subscribe as baseSubscribe,
 } from "@coracle.social/network"
 import type {PublishRequest, SubscribeRequest} from "@coracle.social/network"
-import {LOCAL_RELAY_URL, generatePrivateKey} from "src/util/nostr"
-import {env} from "src/engine/session/state"
+import {LOCAL_RELAY_URL, isGiftWrap, generatePrivateKey} from "src/util/nostr"
+import {env, pubkey} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
 import {signer, canSign} from "src/engine/session/derived"
+import {publishes} from "src/engine/events/state"
 import {LocalTarget} from "./targets"
 
 export const tracker = new Tracker()
@@ -137,23 +137,20 @@ export const loadOne = (request: MySubscribeRequest) =>
     })
   })
 
-export const publishQueue = writable([])
-
 export const publish = (request: PublishRequest) => {
   const pub = basePublish(request)
 
   // Make sure the event gets into projections asap
   NetworkContext.onEvent(LOCAL_RELAY_URL, request.event)
 
+  const pubInfo = omit(["emitter", "result"], pub)
+
+  publishes.key(pubInfo.id).set(pubInfo)
+
   // Listen to updates and update our publish queue
-  pub.emitter.on("*", () =>
-    publishQueue.update($q =>
-      $q
-        .slice(-100)
-        .filter(p => p.id !== pub.id)
-        .concat(pub),
-    ),
-  )
+  if (isGiftWrap(request.event) || request.event.pubkey === pubkey.get()) {
+    pub.emitter.on("*", () => publishes.key(pubInfo.id).set(pubInfo))
+  }
 
   return pub
 }

@@ -16,6 +16,7 @@
 - [x] Fix group search
 - [x] Join invite relays in background during onboarding
 - [x] Republish user profile data when joining a new relay
+- [x] Create new note publish dialog
 
 # 0.4.4
 

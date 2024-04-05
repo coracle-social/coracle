@@ -1,4 +1,7 @@
 <script lang="ts">
+  import {now} from "@coracle.social/lib"
+  import {PublishStatus} from "@coracle.social/network"
+  import {quantify, seconds} from "hurdak"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import SearchResults from "src/app/shared/SearchResults.svelte"
@@ -6,12 +9,33 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import {menuIsOpen, searchTerm} from "src/app/state"
   import {router} from "src/app/router"
-  import {env, pubkey, hasNewNotifications, hasNewMessages} from "src/engine"
+  import {env, pubkey, hasNewNotifications, hasNewMessages, publishes} from "src/engine"
 
   let innerWidth = 0
   let searchInput
 
   const {page} = router
+
+  const hud = publishes.derived($publishes => {
+    const pending = []
+    const failure = []
+
+    for (const {created_at, request, status} of $publishes) {
+      if (created_at < now() - seconds(5, "minute")) {
+        continue
+      }
+
+      const statuses = new Set(Array.from(status.values()))
+
+      if (statuses.has(PublishStatus.Pending)) {
+        pending.push(request.event)
+      } else if (statuses.has(PublishStatus.Failure) || statuses.has(PublishStatus.Timeout)) {
+        failure.push(request.event)
+      }
+    }
+
+    return {pending, failure}
+  })
 
   const openMenu = () => menuIsOpen.set(true)
 
@@ -51,6 +75,19 @@
 {#if innerWidth >= 1024}
   <div
     class="fixed left-0 right-0 top-0 z-nav flex h-16 items-center justify-end gap-8 bg-neutral-900 pl-4 pr-8">
+    <div class="absolute left-72 flex items-center gap-2 px-4 text-sm text-neutral-500">
+      {#if $hud.pending.length > 0}
+        <i class="fa fa-circle-notch fa-spin" />
+        Sending {quantify($hud.pending.length, "note")}.
+      {:else if $hud.failure.length > 0}
+        <i class="fa fa-triangle-exclamation" />
+        Failed to publish {quantify($hud.failure.length, "note")}.
+      {:else}
+        <i class="fa fa-check" />
+        Up to date.
+      {/if}
+      <Anchor underline modal href="/publishes">Details</Anchor>
+    </div>
     <div class="relative">
       <div class="flex">
         <Input
