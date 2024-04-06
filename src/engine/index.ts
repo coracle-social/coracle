@@ -3,13 +3,7 @@ import {Tags, hasValidSignature} from "@coracle.social/util"
 import {NetworkContext} from "@coracle.social/network"
 import {prop, filter, identity, uniq, sortBy} from "ramda"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
-import {
-  Storage,
-  projections,
-  LocalStorageAdapter,
-  IndexedDBAdapter,
-  sortByPubkeyWhitelist,
-} from "./core"
+import {Storage, LocalStorageAdapter, IndexedDBAdapter, sortByPubkeyWhitelist} from "./core"
 import {_lists} from "./lists"
 import {people} from "./people"
 import {relays} from "./relays"
@@ -43,11 +37,7 @@ export * from "./zaps"
 Object.assign(NetworkContext, {
   onAuth,
   getExecutor,
-  onEvent: (url: string, event: Event) => {
-    if (!tracker.track(event.id, url)) {
-      projections.push(event)
-    }
-  },
+  onEvent: (url: string, event: Event) => tracker.track(event.id, url),
   isDeleted: (url: string, event: Event) => isDeleted.get()(event),
   hasValidSignature: (url: string, event: Event) =>
     url === LOCAL_RELAY_URL ? true : hasValidSignature(event),

@@ -100,7 +100,7 @@ export const getFilterSelections = (
       if (contexts?.length > 0) {
         for (const {relay, values} of hints
           .WithinMultipleContexts(contexts)
-          .policy(hints.addNoFallbacks)
+          .policy(hints.addMinimalFallbacks)
           .getSelections()) {
           const contextFilter = {...filter, "#a": Array.from(values)}
           const id = getFilterId(contextFilter)
@@ -111,7 +111,7 @@ export const getFilterSelections = (
       } else if (filter.authors) {
         for (const {relay, values} of hints
           .FromPubkeys(filter.authors)
-          .policy(hints.addNoFallbacks)
+          .policy(hints.addMinimalFallbacks)
           .getSelections()) {
           const authorsFilter = {...filter, authors: Array.from(values)}
           const id = getFilterId(authorsFilter)
@@ -124,7 +124,7 @@ export const getFilterSelections = (
 
         filtersById.set(id, filter)
         scenarios.push(
-          hints.product([id], hints.ReadRelays().policy(hints.addNoFallbacks).getUrls()),
+          hints.product([id], hints.ReadRelays().policy(hints.addMinimalFallbacks).getUrls()),
         )
       }
     }

@@ -7,7 +7,7 @@ import {people} from "src/engine/people/state"
 import {hints} from "src/engine/relays/utils"
 import {load} from "./executor"
 
-export const getValidPubkeys = (pubkeys: string[], tsKey: string, force = false) => {
+export const getValidPubkeys = (pubkeys: string[], key: string, force = false) => {
   const result = new Set<string>()
 
   for (const pubkey of pubkeys) {
@@ -17,12 +17,15 @@ export const getValidPubkeys = (pubkeys: string[], tsKey: string, force = false)
 
     const person = people.key(pubkey)
     const $person = person.get()
+    const tskey = `${key}_fetched_at`
 
-    if (!force && $person && $person[tsKey] > now() - seconds(1, "hour")) {
+    // Only delay long enough to avoid multiple concurrent requests if we don't yet
+    // have the data we need
+    if (!force && $person?.[tskey] > now() - ($person?.[key] ? seconds(1, "hour") : 3)) {
       continue
     }
 
-    person.merge({[tsKey]: now()})
+    person.merge({[tskey]: now()})
 
     result.add(pubkey)
   }
@@ -40,7 +43,7 @@ export const loadPubkeyProfiles = (rawPubkeys: string[], opts: LoadPubkeyOpts = 
   const promises = []
   const filters = [] as Filter[]
   const kinds = without([10002], opts.kinds || personKinds)
-  const pubkeys = getValidPubkeys(rawPubkeys, "profile_fetched_at", opts.force)
+  const pubkeys = getValidPubkeys(rawPubkeys, "profile", opts.force)
 
   if (pubkeys.length === 0) {
     return
@@ -56,6 +59,7 @@ export const loadPubkeyProfiles = (rawPubkeys: string[], opts: LoadPubkeyOpts = 
 
   promises.push(
     load({
+      skipCache: true,
       relays: hints.Indexers(opts.relays || []).getUrls(),
       filters: filters.map(assoc("authors", pubkeys)),
     }),
@@ -64,6 +68,7 @@ export const loadPubkeyProfiles = (rawPubkeys: string[], opts: LoadPubkeyOpts = 
   for (const {relay, values} of hints.FromPubkeys(pubkeys).getSelections()) {
     promises.push(
       load({
+        skipCache: true,
         relays: [relay],
         filters: filters.map(assoc("authors", values)),
       }),
@@ -75,7 +80,7 @@ export const loadPubkeyProfiles = (rawPubkeys: string[], opts: LoadPubkeyOpts = 
 
 export const loadPubkeyRelays = (rawPubkeys: string[], opts: LoadPubkeyOpts = {}) => {
   const promises = []
-  const pubkeys = getValidPubkeys(rawPubkeys, "relays_fetched_at", opts.force)
+  const pubkeys = getValidPubkeys(rawPubkeys, "relays", opts.force)
 
   if (pubkeys.length === 0) {
     return
@@ -83,6 +88,7 @@ export const loadPubkeyRelays = (rawPubkeys: string[], opts: LoadPubkeyOpts = {}
 
   promises.push(
     load({
+      skipCache: true,
       filters: [{kinds: [10002], authors: pubkeys}],
       relays: hints.Indexers(opts.relays || []).getUrls(),
       onEvent: e => loadPubkeyProfiles([e.pubkey]),
@@ -92,6 +98,7 @@ export const loadPubkeyRelays = (rawPubkeys: string[], opts: LoadPubkeyOpts = {}
   for (const {relay, values} of hints.FromPubkeys(pubkeys).getSelections()) {
     promises.push(
       load({
+        skipCache: true,
         relays: [relay],
         filters: [{kinds: [10002], authors: values}],
         onEvent: e => loadPubkeyProfiles([e.pubkey]),

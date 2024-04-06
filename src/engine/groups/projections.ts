@@ -1,4 +1,4 @@
-import {uniq, assoc, whereEq, sortBy, prop, without, mergeRight} from "ramda"
+import {uniq, always, whereEq, sortBy, prop, without, mergeRight} from "ramda"
 import {Tags, getIdFilters, decodeAddress, getAddress} from "@coracle.social/util"
 import {switcherFn, batch} from "hurdak"
 import {LOCAL_RELAY_URL, giftWrapKinds, getPublicKey} from "src/util/nostr"
@@ -6,7 +6,9 @@ import {projections} from "src/engine/core/projections"
 import {updateStore} from "src/engine/core/commands"
 import type {Event} from "src/engine/events/model"
 import {sessions} from "src/engine/session/state"
+import {getSession} from "src/engine/session/utils"
 import {nip59} from "src/engine/session/derived"
+import {updateSession} from "src/engine/session/commands"
 import {getExecutor, tracker, load} from "src/engine/network/utils"
 import {withFallbacks} from "src/engine/relays/utils"
 import {GroupAccess} from "./model"
@@ -154,21 +156,21 @@ projections.addHandler(27, (e: Event) => {
 // Membership access/exit requests
 
 projections.addHandler(10004, (e: Event) => {
-  let $session = sessions.get()[e.pubkey]
+  let session = getSession(e.pubkey)
 
-  if (!$session) {
+  if (!session) {
     return
   }
 
   const addresses = Tags.fromEvent(e).communities().values().valueOf()
 
-  for (const address of uniq(Object.keys($session.groups?.values || {}).concat(addresses))) {
-    $session = modifyGroupStatus($session, address, e.created_at, {
+  for (const address of uniq(Object.keys(session.groups?.values || {}).concat(addresses))) {
+    session = modifyGroupStatus(session, address, e.created_at, {
       joined: addresses.includes(address),
     })
   }
 
-  sessions.update(assoc(e.pubkey, $session))
+  updateSession(e.pubkey, always(session))
 })
 
 const handleGroupRequest = access => (e: Event) => {
@@ -186,7 +188,7 @@ const handleGroupRequest = access => (e: Event) => {
     )
   }
 
-  if (sessions.get()[e.pubkey]) {
+  if (getSession(e.pubkey)) {
     setGroupStatus(e.pubkey, address, e.created_at, {access})
   }
 }

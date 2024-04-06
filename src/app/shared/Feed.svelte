@@ -10,6 +10,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import Note from "src/app/shared/Note.svelte"
+  import {router} from 'src/app/router'
   import type {DynamicFilter} from "src/engine"
   import {compileFilters} from "src/engine"
 
@@ -32,7 +33,7 @@
 
   const hideReplies = writable(Storage.getJson("hideReplies"))
 
-  const loadMore = () => feed.load(30)
+  const loadMore = () => feed.load(20)
 
   const start = () => {
     feed?.stop()
@@ -67,7 +68,9 @@
   })
 
   onMount(() => {
-    const scroller = createScroller(loadMore, {element: getModal()})
+    const {modal} = router.current.get()
+    const element = modal ? getModal() : document.body
+    const scroller = createScroller(loadMore, {element})
 
     return () => {
       unsubHideReplies()

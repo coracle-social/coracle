@@ -1,175 +1,117 @@
 <script lang="ts">
-  import {isNil, prop, uniqBy, objOf, find, all} from "ramda"
-  import {sleep, shuffle} from "hurdak"
-  import {onDestroy, onMount} from "svelte"
-  import {NetworkContext} from "@coracle.social/network"
-  import {userKinds} from "src/util/nostr"
+  import {sleep} from "hurdak"
+  import {normalizeRelayUrl, isShareableRelayUrl} from '@coracle.social/util'
+  import {userKinds, LOCAL_RELAY_URL} from "src/util/nostr"
   import {toast} from "src/partials/state"
+  import Modal from "src/partials/Modal.svelte"
+  import Field from "src/partials/Field.svelte"
+  import Input from "src/partials/Input.svelte"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import Input from "src/partials/Input.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import Subheading from "src/partials/Subheading.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Modal from "src/partials/Modal.svelte"
-  import RelayCard from "src/app/shared/RelayCard.svelte"
   import {router} from "src/app/router"
   import {loadUserData} from "src/app/state"
-  import {env, loadPubkeys, session, relays, getUserRelayUrls, normalizeRelayUrl} from "src/engine"
+  import {env, loadPubkeys, session} from "src/engine"
 
-  const currentRelays = {} as Record<number, {url: string}>
-  const attemptedRelays = new Set()
-  const knownRelays = relays.derived($relays =>
-    uniqBy(
-      prop("url"),
-      // Make sure our hardcoded urls are first, since they're more likely to find a match
-      [...$env.PLATFORM_RELAYS, ...$env.DEFAULT_RELAYS].map(objOf("url")).concat(shuffle($relays)),
-    ),
-  )
+  const skip = () => router.at("notes").push()
 
-  let modal = null
-  let customRelayUrl = null
-  let searching = true
-  let customRelays = []
-  let allRelays = []
+  const searchRelays = async relays => {
+    failed = false
 
-  $: allRelays = $knownRelays.concat(customRelays)
+    await loadPubkeys([$session.pubkey], {force: true, kinds: userKinds})
 
-  const searchForRelays = () => {
-    if (!searching) {
-      return
+    if (!found) {
+      failed = true
     }
-
-    for (let i = 0; i < 8; i++) {
-      if (currentRelays[i]) {
-        continue
-      }
-
-      const relay = find(r => !attemptedRelays.has(r.url), allRelays)
-
-      if (!relay) {
-        break
-      }
-
-      attemptedRelays.add(relay.url)
-      currentRelays[i] = relay
-
-      loadPubkeys([$session.pubkey], {
-        force: true,
-        kinds: userKinds,
-        relays: [relay.url],
-      }).then(async () => {
-        currentRelays[i] = null
-
-        if (searching && getUserRelayUrls().length > 0) {
-          searching = false
-          modal = "success"
-
-          // Reload everything, it's possible we didn't get their petnames if we got a match
-          // from something like purplepag.es. This helps us avoid nuking follow lists later
-          loadUserData()
-
-          // Artificially wait since relays might not respond quickly
-          await sleep(3000)
-
-          router.at("notes").push()
-        } else {
-          NetworkContext.pool.remove(relay.url)
-        }
-      })
-    }
-
-    // Wait for our relay list to load initially, then terminate when we've tried everything
-    if (allRelays.length > 0 && all(isNil, Object.values(currentRelays)) && isNil(customRelayUrl)) {
-      modal = "failure"
-      customRelayUrl = ""
-    }
-
-    setTimeout(searchForRelays, 300)
   }
 
-  const addCustomRelay = () => {
-    const url = normalizeRelayUrl(customRelayUrl)
+  const confirmCustomRelay = () => {
+    const url = normalizeRelayUrl(customRelay)
 
-    if (!url) {
-      return toast.show("warning", "That isn't a valid relay url")
+    if (isShareableRelayUrl(url)) {
+      searchRelays([url])
+      customRelay = ""
+      closeModal()
+    } else {
+      toast.show('warning', "Please enter a valid relay url")
     }
+  }
 
-    customRelays = [{url: customRelayUrl}].concat(customRelays)
-    customRelayUrl = null
+  const tryDefaultRelays = () => {
+    // Pull out all the stops to try to find the user's profile
+    searchRelays([LOCAL_RELAY_URL, ...env.get().DEFAULT_RELAYS, ...env.get().PLATFORM_RELAYS])
+  }
+
+  const openModal = m => {
+    modal = m
+  }
+
+  const closeModal = () => {
     modal = null
   }
 
-  const skip = () => {
-    router.at("notes").push()
+  let found, failed, modal
+  let customRelay = ""
+
+  tryDefaultRelays()
+
+  $: {
+    if (!found && $session.kind0 && ($session.kind3 || $session.kind10002)) {
+      found = true
+
+      // Reload everything, it's possible we didn't get their petnames if we got a match
+      // from something like purplepag.es. This helps us avoid nuking follow lists later
+      loadUserData()
+
+      // Give them a second to see the loading screen
+      sleep(3000).then(() => router.at("notes").push())
+    }
   }
 
-  onMount(() => {
-    searchForRelays()
-  })
-
-  onDestroy(() => {
-    searching = false
-  })
 </script>
 
 <Content size="lg">
-  <Heading class="text-center">Connect to Nostr</Heading>
-  <p>
-    We're searching for your profile on the network. If you'd like to select your relays manually
-    instead, click <Anchor
-      underline
-      on:click={() => {
-        customRelayUrl = ""
-        modal = "custom"
-      }}>here</Anchor
-    >.
-  </p>
-  <p>
-    You can also <Anchor underline on:click={skip}>skip this step</Anchor>, but be aware that your
-    profile and relays may not get properly synchronized.
-  </p>
-  {#if Object.values(currentRelays).length > 0}
-    <p>Currently searching:</p>
-    {#each Object.values(currentRelays) as relay}
-      <div class="h-12">
-        {#if relay}
-          <RelayCard hideActions relay={{...relay, description: null}} />
-        {/if}
-      </div>
-    {/each}
+  {#if found}
+    <p class="text-2xl">Success! Logging you in...</p>
+  {:else if failed}
+    <p class="text-2xl">We're having a hard time finding your profile.</p>
+  {:else}
+    <p class="text-2xl">We're searching for your profile on the network.</p>
+    <p>
+      If you'd like to select your relays manually
+      instead, click <Anchor underline on:click={() => openModal('custom_relay')}>here</Anchor>.
+    </p>
   {/if}
+  {#if !found}
+    <p>
+      You can also <Anchor underline on:click={skip}>skip this step</Anchor>, but be aware that your
+      profile and relays may not get properly synchronized.
+    </p>
+  {/if}
+  {#if failed}
+    <div class="flex gap-2 justify-end">
+      <Anchor button on:click={tryDefaultRelays}>Try again</Anchor>
+      <Anchor button accent on:click={() => openModal('custom_relay')}>Select relays manually</Anchor>
+    </div>
+  {/if}
+  <Spinner />
 </Content>
 
-{#if modal}
-  <Modal
-    canClose={modal !== "success"}
-    onEscape={() => {
-      modal = null
-    }}>
-    {#if modal === "success"}
-      <div class="my-12 text-center">Success! Just a moment while we get things set up.</div>
-      <Spinner delay={0} />
-    {:else if modal === "failure"}
-      <div class="my-12 text-center">
-        We didn't have any luck finding your profile data - you'll need to select your relays
-        manually to continue. You can skip this step by clicking
-        <Anchor class="underline" href="/relays">here</Anchor>, but be aware that any new relay
-        selections will replace your old ones.
+{#if !found && modal === "custom_relay"}
+  <Modal>
+    <Content size="lg">
+      <Subheading>Use a custom relay</Subheading>
+      <p>If you know which relay your profile is on, you can enter it below.</p>
+      <Field label="Relay">
+        <Input bind:value={customRelay} />
+      </Field>
+      <div class="flex justify-center gap-2">
+        <Anchor button on:click={closeModal}>Cancel</Anchor>
+        <Anchor button accent on:click={confirmCustomRelay}>Search relay</Anchor>
       </div>
-    {:else if modal === "custom"}
-      <div class="my-12 text-center">
-        Enter the url of a relay you've used in the past to store your profile and we'll check
-        there.
-      </div>
-    {/if}
-
-    {#if ["failure", "custom"].includes(modal)}
-      <form class="flex gap-2" on:submit|preventDefault={addCustomRelay}>
-        <Input bind:value={customRelayUrl} wrapperClass="flex-grow">
-          <i slot="before" class="fa fa-search" />
-        </Input>
-        <Anchor button on:click={addCustomRelay}>Search relay</Anchor>
-      </form>
-    {/if}
+    </Content>
   </Modal>
 {/if}

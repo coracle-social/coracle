@@ -86,7 +86,7 @@ type ScrollerOpts = {
 
 export const createScroller = <T>(
   loadMore: () => Promise<T>,
-  {delay = 300, threshold = 3000, reverse = false, element = document.body}: ScrollerOpts = {},
+  {delay = 1000, threshold = 2000, reverse = false, element = document.body}: ScrollerOpts = {},
 ) => {
   let done = false
   const check = async () => {

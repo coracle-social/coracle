@@ -14,6 +14,7 @@ import {
 } from "@coracle.social/network"
 import type {PublishRequest, SubscribeRequest} from "@coracle.social/network"
 import {LOCAL_RELAY_URL, isGiftWrap, generatePrivateKey} from "src/util/nostr"
+import {projections} from "src/engine/core"
 import {env, pubkey} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
 import {signer, canSign} from "src/engine/session/derived"
@@ -97,9 +98,10 @@ export const subscribe = (request: MySubscribeRequest) => {
 
   const sub = baseSubscribe(request)
 
-  if (request.onEvent) {
-    sub.emitter.on("event", (url: string, event: Event) => request.onEvent(event))
-  }
+  sub.emitter.on("event", (url: string, event: Event) => {
+    projections.push(event)
+    request.onEvent?.(event)
+  })
 
   if (request.onComplete) {
     sub.emitter.on("complete", request.onComplete)
@@ -141,13 +143,13 @@ export const publish = (request: PublishRequest) => {
   const pub = basePublish(request)
 
   // Make sure the event gets into projections asap
-  NetworkContext.onEvent(LOCAL_RELAY_URL, request.event)
+  projections.push(request.event)
 
   // Listen to updates and update our publish queue
   if (isGiftWrap(request.event) || request.event.pubkey === pubkey.get()) {
     const pubInfo = omit(["emitter", "result"], pub)
 
-    pub.emitter.on("*", (t) => publishes.key(pubInfo.id).set(pubInfo))
+    pub.emitter.on("*", t => publishes.key(pubInfo.id).set(pubInfo))
   }
 
   return pub
