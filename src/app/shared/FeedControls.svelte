@@ -120,8 +120,6 @@
       newFilter.scope = _filter.scope
     }
 
-    console.log(newFilter)
-
     onChange(newFilter)
   }
 

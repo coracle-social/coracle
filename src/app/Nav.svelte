@@ -9,7 +9,7 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import {menuIsOpen, searchTerm} from "src/app/state"
   import {router} from "src/app/router"
-  import {env, pubkey, hasNewNotifications, hasNewMessages, publishes} from "src/engine"
+  import {env, pubkey, canSign, hasNewNotifications, hasNewMessages, publishes} from "src/engine"
 
   let innerWidth = 0
   let searchInput
@@ -114,7 +114,11 @@
         </div>
       {/if}
     </div>
-    <Anchor button accent on:click={createNote}>Post +</Anchor>
+    {#if $canSign}
+      <Anchor button accent on:click={createNote}>Post +</Anchor>
+    {:else}
+      <Anchor modal button accent href="/login">Log In</Anchor>
+    {/if}
   </div>
 {/if}
 
@@ -130,7 +134,7 @@
       </div>
     </div>
     <div>
-      {#if $pubkey}
+      {#if $canSign}
         <Anchor button accent on:click={createNote}>Post +</Anchor>
       {:else}
         <Anchor modal button accent href="/login">Log In</Anchor>
@@ -149,7 +153,7 @@
             fill="currentColor"
             d="M0 88C0 74.7 10.7 64 24 64H424c13.3 0 24 10.7 24 24s-10.7 24-24 24H24C10.7 112 0 101.3 0 88zM0 248c0-13.3 10.7-24 24-24H424c13.3 0 24 10.7 24 24s-10.7 24-24 24H24c-13.3 0-24-10.7-24-24zM448 408c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24s10.7-24 24-24H424c13.3 0 24 10.7 24 24z" />
         </svg>
-        {#if $pubkey}
+        {#if $canSign}
           <PersonCircle
             class="-ml-4 h-11 w-11 border-4 border-white dark:border-black"
             pubkey={$pubkey} />

@@ -97,14 +97,8 @@ export const unreadGroupNotifications = derived(
   },
 )
 
-export const unreadCombinedNotifications = derived(
-  [unreadNotifications, unreadGroupNotifications],
-  ([$unreadNotifications, $unreadGroupNotifications]) =>
-    $unreadNotifications.concat($unreadGroupNotifications),
-)
-
 export const hasNewNotifications = derived(
-  [session, unreadCombinedNotifications],
+  [session, unreadNotifications],
   ([$session, $unread]) => {
     if ($unread.length > 0) {
       return true

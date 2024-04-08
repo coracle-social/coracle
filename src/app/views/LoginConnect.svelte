@@ -1,6 +1,6 @@
 <script lang="ts">
   import {sleep} from "hurdak"
-  import {normalizeRelayUrl, isShareableRelayUrl} from '@coracle.social/util'
+  import {normalizeRelayUrl, isShareableRelayUrl} from "@coracle.social/util"
   import {userKinds, LOCAL_RELAY_URL} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Modal from "src/partials/Modal.svelte"
@@ -13,6 +13,8 @@
   import {router} from "src/app/router"
   import {loadUserData} from "src/app/state"
   import {env, loadPubkeys, session} from "src/engine"
+
+  const t = Date.now()
 
   const skip = () => router.at("notes").push()
 
@@ -34,7 +36,7 @@
       customRelay = ""
       closeModal()
     } else {
-      toast.show('warning', "Please enter a valid relay url")
+      toast.show("warning", "Please enter a valid relay url")
     }
   }
 
@@ -58,17 +60,21 @@
 
   $: {
     if (!found && $session.kind0 && ($session.kind3 || $session.kind10002)) {
-      found = true
-
       // Reload everything, it's possible we didn't get their petnames if we got a match
       // from something like purplepag.es. This helps us avoid nuking follow lists later
       loadUserData()
 
-      // Give them a second to see the loading screen
-      sleep(3000).then(() => router.at("notes").push())
+      // Show a success message once they've had time to read the intro message
+      sleep(Math.max(0, 2500 - (Date.now() - t))).then(() => {
+        found = true
+      })
+
+      // Give them a couple seconds to see the loading screen
+      sleep(Math.max(0, 5000 - (Date.now() - t))).then(() => {
+        router.at("notes").push()
+      })
     }
   }
-
 </script>
 
 <Content size="lg">
@@ -79,8 +85,10 @@
   {:else}
     <p class="text-2xl">We're searching for your profile on the network.</p>
     <p>
-      If you'd like to select your relays manually
-      instead, click <Anchor underline on:click={() => openModal('custom_relay')}>here</Anchor>.
+      If you'd like to select your relays manually instead, click <Anchor
+        underline
+        on:click={() => openModal("custom_relay")}>here</Anchor
+      >.
     </p>
   {/if}
   {#if !found}
@@ -90,9 +98,10 @@
     </p>
   {/if}
   {#if failed}
-    <div class="flex gap-2 justify-end">
+    <div class="flex justify-end gap-2">
       <Anchor button on:click={tryDefaultRelays}>Try again</Anchor>
-      <Anchor button accent on:click={() => openModal('custom_relay')}>Select relays manually</Anchor>
+      <Anchor button accent on:click={() => openModal("custom_relay")}
+        >Select relays manually</Anchor>
     </div>
   {/if}
   <Spinner />

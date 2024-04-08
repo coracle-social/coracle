@@ -1,5 +1,5 @@
 import {debounce} from "throttle-debounce"
-import {prop, last, fromPairs} from "ramda"
+import {prop, fromPairs} from "ramda"
 import {randomId, Storage} from "hurdak"
 import type {Writable} from "@coracle.social/lib"
 import {writable} from "@coracle.social/lib"

@@ -57,8 +57,6 @@ export class FeedLoader {
       filters = addRepostFilters(filters)
     }
 
-    console.log(filters)
-
     let relaySelections = []
 
     if (!opts.skipNetwork) {

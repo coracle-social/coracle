@@ -186,12 +186,14 @@
       <MenuMobileItem href={router.at("people").of($pubkey).toString()} on:click={closeMenu}>
         <i class="fa fa-user-circle" /> Profile
       </MenuMobileItem>
-      <MenuMobileItem href={router.at("invite/create").qp({initialPubkey: $pubkey}).toString()} on:click={closeMenu}>
+      <MenuMobileItem
+        href={router.at("invite/create").qp({initialPubkey: $pubkey}).toString()}
+        on:click={closeMenu}>
         <i class="fa fa-paper-plane" /> Create Invite
       </MenuMobileItem>
     </div>
     <div class="staatliches block flex h-8 justify-center gap-2 px-8 text-neutral-300">
-      <Anchor class="hover:text-tinted-200" href="/logout">Logout</Anchor> /
+      <Anchor class="hover:text-tinted-200" href="/logout" on:click={closeMenu}>Logout</Anchor> /
       <Anchor class="hover:text-tinted-200" stopPropagation on:click={() => setSubMenu("accounts")}>
         Switch Accounts
       </Anchor>
