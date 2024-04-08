@@ -5,12 +5,10 @@
   import {FeedLoader} from "src/engine"
   import {createScroller} from "src/util/misc"
   import {fly} from "src/util/transition"
-  import {getModal} from "src/partials/state"
   import Spinner from "src/partials/Spinner.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {router} from 'src/app/router'
   import type {DynamicFilter} from "src/engine"
   import {compileFilters} from "src/engine"
 
@@ -28,7 +26,7 @@
   export let showGroup = false
   export let onEvent = null
 
-  let feed
+  let feed, element
   let notes = readable([])
 
   const hideReplies = writable(Storage.getJson("hideReplies"))
@@ -68,8 +66,6 @@
   })
 
   onMount(() => {
-    const {modal} = router.current.get()
-    const element = modal ? getModal() : document.body
     const scroller = createScroller(loadMore, {element})
 
     return () => {
@@ -86,7 +82,7 @@
   </FeedControls>
 {/if}
 
-<FlexColumn xl>
+<FlexColumn xl bind:element>
   {#each $notes as note, i (note.id)}
     <div in:fly={{y: 20}}>
       <Note

@@ -1,13 +1,14 @@
 <script lang="ts">
-  import {onDestroy} from "svelte"
+  import {onMount} from "svelte"
   import {mergeLeft, groupBy, sortBy, uniqBy, prop, drop} from "ramda"
   import {displayList} from "hurdak"
   import {derived} from "@coracle.social/lib"
   import {Tags, isShareableRelayUrl, normalizeRelayUrl} from "@coracle.social/util"
   import {pushToKey, createScroller} from "src/util/misc"
-  import {getModal, toast} from "src/partials/state"
+  import {toast} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Modal from "src/partials/Modal.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Input from "src/partials/Input.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -94,8 +95,6 @@
     limit += 20
   }
 
-  const scroller = createScroller(loadMore, {element: getModal()})
-
   const addCustomRelay = () => {
     modal = "add_relay"
   }
@@ -104,7 +103,7 @@
     const url = normalizeRelayUrl(customRelay)
 
     if (!isShareableRelayUrl(url)) {
-      toast.show('warning', "Please provide a valid relay url")
+      toast.show("warning", "Please provide a valid relay url")
     } else {
       joinRelay(url)
       broadcastUserData([url])
@@ -120,6 +119,7 @@
   let q = ""
   let limit = 20
   let modal = null
+  let element = null
   let reviews = []
   let activeTab = "search"
   let customRelay = ""
@@ -151,71 +151,74 @@
     },
   })
 
-  onDestroy(() => {
-    scroller.stop()
+  onMount(() => {
+    const scroller = createScroller(loadMore, {element})
+
+    return () => scroller.stop()
   })
 
   document.title = "Relays"
 </script>
 
-<div class="flex justify-between">
+<FlexColumn bind:element>
+  <div class="flex justify-between">
+    <div class="flex items-center gap-2">
+      <i class="fa fa-server fa-lg" />
+      <h2 class="staatliches text-2xl">Your relays</h2>
+    </div>
+    <Anchor button accent on:click={addCustomRelay}>
+      <i class="fa-solid fa-compass" /> Add Relay
+    </Anchor>
+  </div>
+  <p>
+    Relays are hubs for your content and connections. At least one is required to interact with the
+    network, but you can join as many as you like.
+  </p>
+  {#if currentRelayPolicies.length === 0}
+    <div class="mt-8 flex items-center justify-center gap-2 text-center">
+      <i class="fa fa-triangle-exclamation" />
+      No relays connected
+    </div>
+  {/if}
+  <div class="grid grid-cols-1 gap-4">
+    {#each currentRelayPolicies as policy (policy.url)}
+      <RelayCard showStatus showControls relay={policy} ratings={ratings[policy.url]} />
+    {/each}
+  </div>
   <div class="flex items-center gap-2">
-    <i class="fa fa-server fa-lg" />
-    <h2 class="staatliches text-2xl">Your relays</h2>
+    <i class="fa fa-circle-nodes fa-lg" />
+    <h2 class="staatliches text-2xl">Other relays</h2>
   </div>
-  <Anchor button accent on:click={addCustomRelay}>
-    <i class="fa-solid fa-compass" /> Add Relay
-  </Anchor>
-</div>
-<p>
-  Relays are hubs for your content and connections. At least one is required to interact with the
-  network, but you can join as many as you like.
-</p>
-
-{#if currentRelayPolicies.length === 0}
-  <div class="mt-8 flex items-center justify-center gap-2 text-center">
-    <i class="fa fa-triangle-exclamation" />
-    No relays connected
-  </div>
-{/if}
-<div class="grid grid-cols-1 gap-4">
-  {#each currentRelayPolicies as policy (policy.url)}
-    <RelayCard showStatus showControls relay={policy} ratings={ratings[policy.url]} />
-  {/each}
-</div>
-<div class="flex items-center gap-2">
-  <i class="fa fa-circle-nodes fa-lg" />
-  <h2 class="staatliches text-2xl">Other relays</h2>
-</div>
-<p>
-  Below are relays used by people in your network. Adding these may improve your ability to load
-  profiles and content.
-</p>
-<Tabs {tabs} {activeTab} {setActiveTab} />
-{#if activeTab === "reviews"}
-  {#each reviews.slice(0, limit) as review (review.id)}
-    <Note note={review} />
-  {/each}
-{:else}
-  <Input
-    bind:value={q}
-    type="text"
-    wrapperClass="flex-grow"
-    placeholder="Search relays or add a custom url">
-    <i slot="before" class="fa-solid fa-search" />
-  </Input>
-  {#each $searchRelays(q).slice(0, limit) as relay (relay.url)}
-    <RelayCard {relay} ratings={ratings[relay.url]} />
-  {/each}
-{/if}
+  <p>
+    Below are relays used by people in your network. Adding these may improve your ability to load
+    profiles and content.
+  </p>
+  <Tabs {tabs} {activeTab} {setActiveTab} />
+  {#if activeTab === "reviews"}
+    {#each reviews.slice(0, limit) as review (review.id)}
+      <Note note={review} />
+    {/each}
+  {:else}
+    <Input
+      bind:value={q}
+      type="text"
+      wrapperClass="flex-grow"
+      placeholder="Search relays or add a custom url">
+      <i slot="before" class="fa-solid fa-search" />
+    </Input>
+    {#each $searchRelays(q).slice(0, limit) as relay (relay.url)}
+      <RelayCard {relay} ratings={ratings[relay.url]} />
+    {/each}
+  {/if}
+</FlexColumn>
 
 {#if modal}
-<Modal onEscape={closeModal}>
-  <Subheading>Add a relay</Subheading>
-  <p>Enter a relay url below to add it to your relay selections.</p>
-  <Input bind:value={customRelay} placeholder="wss://...">
-    <i slot="before" class="fa fa-server" />
-  </Input>
-  <Anchor button accent on:click={confirmAddCustomRelay}>Add Relay</Anchor>
-</Modal>
+  <Modal onEscape={closeModal}>
+    <Subheading>Add a relay</Subheading>
+    <p>Enter a relay url below to add it to your relay selections.</p>
+    <Input bind:value={customRelay} placeholder="wss://...">
+      <i slot="before" class="fa fa-server" />
+    </Input>
+    <Anchor button accent on:click={confirmAddCustomRelay}>Add Relay</Anchor>
+  </Modal>
 {/if}

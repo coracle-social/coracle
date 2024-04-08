@@ -99,8 +99,6 @@ export const themeBackgroundGradient = themeColors.derived($colors => {
   }
 })
 
-export const getModal = () => last(Array.from(document.querySelectorAll(".modal-content")))
-
 function adjustBrightness(hexColor, brightnessPercent) {
   // Remove '#' if present
   hexColor = hexColor.replace("#", "")

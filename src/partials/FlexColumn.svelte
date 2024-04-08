@@ -5,6 +5,7 @@
   export let small = false
   export let large = false
   export let narrow = false
+  export let element = null
 
   const className = cx("flex flex-col m-auto min-w-0 w-full", $$props.class, {
     "gap-2": small,
@@ -15,6 +16,6 @@
   })
 </script>
 
-<div {...$$props} class={className}>
+<div {...$$props} bind:this={element} class={className}>
   <slot />
 </div>

@@ -1,8 +1,7 @@
 <script lang="ts">
-  import {onDestroy, onMount} from "svelte"
+  import {onMount} from "svelte"
   import {sleep} from "hurdak"
   import {prop, max, reverse, pluck, sortBy, last} from "ramda"
-  import {writable} from "svelte/store"
   import {fly} from "src/util/transition"
   import {createScroller} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
@@ -19,40 +18,44 @@
   export let sendMessage
   export let initialMessage = ""
 
-  const limit = writable(10)
   const loading = sleep(30_000)
 
-  let textarea
-  let container
-  let scroller
+  const startScroller = () => {
+    scroller?.stop()
+    scroller = createScroller(loadMore, {element, reverse: true})
+  }
+
+  const loadMore = () => {
+    limit += 10
+  }
+
+  let textarea, element, scroller
+  let limit = 10
   let useNip44 = true
   let showNewMessages = false
   let groupedMessages = []
 
   onMount(() => {
+    startScroller()
+
     if (textarea) {
       textarea.value = initialMessage
     }
 
-    scroller = createScroller(async () => limit.update(l => l + 10), {
-      element: container,
-      reverse: true,
-    })
-  })
-
-  onDestroy(() => {
-    scroller?.stop()
+    return () => {
+      scroller?.stop()
+    }
   })
 
   export const setMessage = message => {
     textarea.value = message
   }
 
-  const scrollToBottom = () => container.scrollIntoView({behavior: "smooth", block: "end"})
+  const scrollToBottom = () => element.scrollIntoView({behavior: "smooth", block: "end"})
 
   const stickToBottom = async () => {
     const lastMessage = pluck("created_at", groupedMessages).reduce(max, 0)
-    const shouldStick = container?.scrollTop > -200
+    const shouldStick = element?.scrollTop > -200
 
     if (shouldStick) {
       scrollToBottom()
@@ -98,7 +101,7 @@
 
     setTimeout(stickToBottom, 100)
 
-    groupedMessages = result.slice(0, $limit) as (Event & {showProfile: boolean})[]
+    groupedMessages = result.slice(0, limit) as (Event & {showProfile: boolean})[]
   }
 </script>
 
@@ -112,7 +115,7 @@
     <slot name="header" />
   </div>
   <ul
-    bind:this={container}
+    bind:this={element}
     class="flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
     {#each groupedMessages as m (m.id)}
       <li in:fly={{y: 20}} class="grid gap-2 py-1">

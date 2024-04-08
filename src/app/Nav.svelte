@@ -84,7 +84,7 @@
         Failed to publish {quantify($hud.failure.length, "note")}.
       {:else}
         <i class="fa fa-check" />
-        Up to date.
+        No recent notes.
       {/if}
       <Anchor underline modal href="/publishes">Details</Anchor>
     </div>

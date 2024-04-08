@@ -5,6 +5,7 @@
   import {noteKinds, reactionKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Note from "src/app/shared/Note.svelte"
   import GroupAlert from "src/app/shared/GroupAlert.svelte"
   import GroupRequest from "src/app/shared/GroupRequest.svelte"
@@ -33,6 +34,10 @@
 
   const setActiveTab = tab => router.at("notifications").at(tab).push()
 
+  const loadMore = () => {
+    limit += 4
+  }
+
   const getLineText = i => {
     const cur = tabNotifications[i]
     const prev = tabNotifications[i - 1]
@@ -48,6 +53,7 @@
 
   let limit = 4
   let innerWidth = 0
+  let element = null
   let tabNotifications = []
   let unreadMainNotifications = []
   let unreadReactionNotifications = []
@@ -77,9 +83,7 @@
   }
 
   $: displayTabs =
-    innerWidth <= 640 || !$settings.enable_reactions
-      ? [allTabs[0], allTabs[2]]
-      : allTabs
+    innerWidth <= 640 || !$settings.enable_reactions ? [allTabs[0], allTabs[2]] : allTabs
 
   document.title = "Notifications"
 
@@ -99,9 +103,7 @@
       }
     })
 
-    const scroller = createScroller(async () => {
-      limit += 4
-    })
+    const scroller = createScroller(loadMore, {element})
 
     return () => {
       unsubUnreadNotifications()
@@ -136,35 +138,37 @@
   <OnboardingTasks />
 {/if}
 
-{#if allTabs.slice(0, 2).includes(activeTab)}
-  {#each tabNotifications as notification, i (notification.key)}
-    {@const lineText = getLineText(i)}
-    {#if lineText}
-      <div class="flex items-center gap-4">
-        <small class="whitespace-nowrap text-neutral-100">{lineText}</small>
-        <div class="h-px w-full bg-neutral-600" />
-      </div>
-    {/if}
-    {#if !notification.event}
-      <NotificationMention {notification} />
-    {:else if activeTab === allTabs[0]}
-      <NotificationReplies {notification} />
+<FlexColumn bind:element>
+  {#if allTabs.slice(0, 2).includes(activeTab)}
+    {#each tabNotifications as notification, i (notification.key)}
+      {@const lineText = getLineText(i)}
+      {#if lineText}
+        <div class="flex items-center gap-4">
+          <small class="whitespace-nowrap text-neutral-100">{lineText}</small>
+          <div class="h-px w-full bg-neutral-600" />
+        </div>
+      {/if}
+      {#if !notification.event}
+        <NotificationMention {notification} />
+      {:else if activeTab === allTabs[0]}
+        <NotificationReplies {notification} />
+      {:else}
+        <NotificationReactions {notification} />
+      {/if}
     {:else}
-      <NotificationReactions {notification} />
-    {/if}
+      <Content size="lg" class="text-center">No notifications found - check back later!</Content>
+    {/each}
   {:else}
-    <Content size="lg" class="text-center">No notifications found - check back later!</Content>
-  {/each}
-{:else}
-  {#each $groupNotifications.slice(0, limit) as notification, i (notification.id)}
-    {#if notification.t === "alert"}
-      <GroupAlert address={notification.group} alert={notification} />
-    {:else if notification.t === "request"}
-      <GroupRequest showGroup address={notification.group} request={notification} />
+    {#each $groupNotifications.slice(0, limit) as notification, i (notification.id)}
+      {#if notification.t === "alert"}
+        <GroupAlert address={notification.group} alert={notification} />
+      {:else if notification.t === "request"}
+        <GroupRequest showGroup address={notification.group} request={notification} />
+      {:else}
+        <Note showGroup note={notification} />
+      {/if}
     {:else}
-      <Note showGroup note={notification} />
-    {/if}
-  {:else}
-    <Content size="lg" class="text-center">No notifications found - check back later!</Content>
-  {/each}
-{/if}
+      <Content size="lg" class="text-center">No notifications found - check back later!</Content>
+    {/each}
+  {/if}
+</FlexColumn>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {commaFormat} from "hurdak"
-  import {onDestroy} from "svelte"
+  import {onMount} from "svelte"
   import {createScroller, formatTimestamp} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -12,16 +12,19 @@
 
   const sortedEvents = events.derived(sortEventsDesc)
 
-  const scroller = createScroller(async () => {
+  const loadMore = () => {
     limit += 50
-  })
+  }
 
+  let element
   let limit = 50
 
   document.title = "Data"
 
-  onDestroy(() => {
-    scroller.stop()
+  onMount(() => {
+    const scroller = createScroller(loadMore, {element})
+
+    return () => scroller.stop()
   })
 </script>
 
@@ -54,7 +57,7 @@
   </Card>
 </div>
 
-<table>
+<table bind:this={element}>
   <thead>
     <tr>
       <th />

@@ -114,11 +114,13 @@
       newFilter["#p"] = pluck("pubkey", _filter["#p"])
     }
 
-    if (_filter.authors.length > 0) {
+    if (_filter.authors?.length > 0) {
       newFilter.authors = pluck("pubkey", _filter.authors) as string[]
     } else {
       newFilter.scope = _filter.scope
     }
+
+    console.log(newFilter)
 
     onChange(newFilter)
   }

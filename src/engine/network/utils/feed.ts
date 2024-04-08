@@ -10,7 +10,7 @@ import {
 } from "@coracle.social/util"
 import {race} from "src/util/misc"
 import {info} from "src/util/logger"
-import {LOCAL_RELAY_URL, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {LOCAL_RELAY_URL, reactionKinds, repostKinds} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine/notes/model"
 import type {Event} from "src/engine/events/model"
 import {sortEventsDesc, unwrapRepost} from "src/engine/events/utils"
@@ -53,9 +53,11 @@ export class FeedLoader {
   constructor(readonly opts: FeedOpts) {
     let filters = compileFilters(opts.filters)
 
-    if (opts.includeReposts) {
+    if (opts.includeReposts && !opts.filters.some(f => f.authors?.length > 0)) {
       filters = addRepostFilters(filters)
     }
+
+    console.log(filters)
 
     let relaySelections = []
 
@@ -251,12 +253,9 @@ export class FeedLoader {
               }
             }
 
-            // Keep track of replies
-            if (noteKinds.includes(e.kind)) {
-              const parentId = Tags.fromEvent(e).parent()?.value()
-              const replies = this.replies.get(parentId) || []
-
-              this.replies.set(parentId, [...replies, e])
+            // Only replace parents for kind 1 replies
+            if (e.kind !== 1) {
+              return e
             }
 
             // If we have a parent, show that instead, with replies grouped underneath
@@ -265,6 +264,12 @@ export class FeedLoader {
 
               if (!parentId) {
                 break
+              }
+
+              // Keep track of replies
+              const replies = this.replies.get(parentId) || []
+              if (!replies.some(r => r.id === e.id)) {
+                this.replies.set(parentId, [...replies, e])
               }
 
               const parent = this.parents.get(parentId)
