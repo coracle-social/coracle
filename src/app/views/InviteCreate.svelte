@@ -8,6 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
+  import ListItem from "src/partials/ListItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import GroupName from "src/app/shared/GroupName.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
@@ -52,7 +53,7 @@
   }
 
   const removeRelay = i => {
-    relays = relays.slice(0, i).concat(relays.slice(i + 1))
+    relays = relays.toSpliced(i, 1)
   }
 
   const addGroup = address => {
@@ -68,7 +69,7 @@
   }
 
   const removeGroup = i => {
-    groups = groups.slice(0, i).concat(groups.slice(i + 1))
+    groups = groups.toSpliced(i, 1)
   }
 
   const displayGroupFromAddress = a => displayGroup(deriveGroup(a).get())
@@ -153,15 +154,12 @@
           access to private relays.
         </p>
         {#each relays as relay, i (relay.url + i)}
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-              <span class="cursor-pointer p-2" on:click={() => removeRelay(i)}>
-                <i class="fa fa-times" />
-              </span>
-              <span>{displayRelay(relay)}</span>
-            </div>
-            <Input bind:value={relay.claim} placeholder="Claim (optional)" />
-          </div>
+          <ListItem on:remove={() => removeRelay(i)}>
+            <span slot="label">{displayRelay(relay)}</span>
+            <span slot="data">
+              <Input bind:value={relay.claim} placeholder="Claim (optional)" />
+            </span>
+          </ListItem>
         {/each}
         <SearchSelect
           value={null}
@@ -189,15 +187,12 @@
           invite code you use is valid.
         </p>
         {#each groups as group, i (group.address + i)}
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-              <span class="cursor-pointer p-2" on:click={() => removeGroup(i)}>
-                <i class="fa fa-times" />
-              </span>
-              <span>{displayGroupFromAddress(group.address)}</span>
-            </div>
-            <Input bind:value={group.claim} placeholder="Invite code (optional)" />
-          </div>
+          <ListItem on:remove={() => removeGroup(i)}>
+            <span slot="label">{displayGroupFromAddress(group.address)}</span>
+            <span slot="data">
+              <Input bind:value={group.claim} placeholder="Invite code (optional)" />
+            </span>
+          </ListItem>
         {/each}
         <SearchSelect
           value={null}

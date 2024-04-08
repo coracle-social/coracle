@@ -92,6 +92,7 @@ projections.addHandler(35834, (e: Event) => {
   group.merge({address, id: meta.d, pubkey: e.pubkey})
 
   updateStore(group, e.created_at, {
+    feeds: tags.whereKey("feed").unwrap(),
     relays: tags.values("relay").valueOf(),
     listing_is_public: !e.wrap,
     meta: {
@@ -112,6 +113,7 @@ projections.addHandler(34550, (e: Event) => {
   group.merge({address, id: meta.d, pubkey: e.pubkey})
 
   updateStore(group, e.created_at, {
+    feeds: tags.whereKey("feed").unwrap(),
     relays: tags.values("relay").valueOf(),
     listing_is_public: true,
     meta: {

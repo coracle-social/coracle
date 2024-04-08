@@ -20,6 +20,7 @@
   const initialValues = {
     id: getGroupId($group),
     type: address.startsWith("34550:") ? "open" : "closed",
+    feeds: $group.feeds || [],
     relays: $group.relays || [],
     list_publicly: $group.listing_is_public,
     meta: {
@@ -30,16 +31,16 @@
     },
   }
 
-  const onSubmit = async ({id, type, list_publicly, relays, meta}: Values) => {
+  const onSubmit = async ({id, type, list_publicly, feeds, relays, meta}: Values) => {
     // If we're switching group listing visibility, delete the old listing
     if ($group.listing_is_public && !list_publicly) {
       await prop("result", await deleteGroupMeta($group.address))
     }
 
     if (type === "open") {
-      await publishCommunityMeta(address, id, relays, meta)
+      await publishCommunityMeta(address, id, feeds, relays, meta)
     } else {
-      await publishGroupMeta(address, id, relays, meta, list_publicly)
+      await publishGroupMeta(address, id, feeds, relays, meta, list_publicly)
     }
 
     toast.show("info", "Your group has been updated!")

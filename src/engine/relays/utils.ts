@@ -168,19 +168,19 @@ export const hints = new Router({
       const faults = relays.key(url).get()?.faults || []
       const lastFault = last(faults) || 0
 
-      if (faults.filter(n => n > Date.now() - oneHour).length > 2) {
+      if (faults.filter(n => n > Date.now() - oneHour).length > 10) {
         return 0
       }
 
-      if (faults.filter(n => n > Date.now() - oneDay).length > 5) {
+      if (faults.filter(n => n > Date.now() - oneDay).length > 50) {
         return 0
       }
 
-      if (faults.filter(n => n > Date.now() - oneWeek).length > 10) {
+      if (faults.filter(n => n > Date.now() - oneWeek).length > 100) {
         return 0
       }
 
-      return Math.max(0, Math.min(0.5, (Date.now() - oneMinute - lastFault) / oneDay))
+      return Math.max(0, Math.min(0.5, (Date.now() - oneMinute - lastFault) / oneHour))
     }
 
     return switcher(connection.meta.getStatus(), {

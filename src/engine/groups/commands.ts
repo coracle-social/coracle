@@ -295,7 +295,7 @@ export const publishGroupMembers = async (address, op, pubkeys) => {
   return publishAsGroupAdminPrivately(address, template)
 }
 
-export const publishCommunityMeta = (address, id, relays, meta) => {
+export const publishCommunityMeta = (address, id, feeds, relays, meta) => {
   const template = createEvent(34550, {
     tags: [
       ["d", id],
@@ -304,14 +304,15 @@ export const publishCommunityMeta = (address, id, relays, meta) => {
       ["banner", meta.banner],
       ["image", meta.picture],
       ...getClientTags(),
-      ...relays.map(url => ["relay", url]),
+      ...(feeds || []),
+      ...(relays || []).map(url => ["relay", url]),
     ],
   })
 
   return publishAsGroupAdminPublicly(address, template)
 }
 
-export const publishGroupMeta = (address, id, relays, meta, listPublicly) => {
+export const publishGroupMeta = (address, id, feeds, relays, meta, listPublicly) => {
   const template = createEvent(35834, {
     tags: [
       ["d", id],
@@ -320,7 +321,8 @@ export const publishGroupMeta = (address, id, relays, meta, listPublicly) => {
       ["banner", meta.banner],
       ["picture", meta.picture],
       ...getClientTags(),
-      ...relays.map(url => ["relay", url]),
+      ...(feeds || []),
+      ...(relays || []).map(url => ["relay", url]),
     ],
   })
 

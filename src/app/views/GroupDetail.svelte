@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {whereEq} from "ramda"
-  import {randomId, ucFirst} from "hurdak"
+  import {ucFirst} from "hurdak"
   import {themeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -54,11 +54,11 @@
   onMount(() => loadGroups([address], relays))
 
   let tabs
-  let key = randomId()
+
+  $: key = $group && $isGroupMember
 
   $: {
     if ($group && $isGroupMember) {
-      key = randomId()
       loadGroupMessages([address])
       loadPubkeys($group.members || [])
     }

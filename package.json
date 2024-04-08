@@ -49,9 +49,9 @@
   },
   "dependencies": {
     "@bugsnag/js": "^7.22.2",
-    "@coracle.social/lib": "^0.0.4",
+    "@coracle.social/lib": "^0.0.5",
     "@coracle.social/network": "^0.0.6",
-    "@coracle.social/util": "^0.0.6",
+    "@coracle.social/util": "^0.0.7",
     "@event-calendar/core": "^2.4.1",
     "@event-calendar/day-grid": "^2.4.1",
     "@event-calendar/interaction": "^2.4.1",

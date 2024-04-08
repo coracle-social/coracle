@@ -7,7 +7,7 @@
   import Popover2 from "src/partials/Popover2.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
 
-  export let value
+  export let value = null
   export let onChange = null
   export let inputClass = ""
   export let inputWrapperClass = ""
@@ -21,7 +21,7 @@
   export let multiple = false
   export let loading = false
   export let defaultOptions = []
-  export let term = multiple ? "" : displayItem(value) || ""
+  export let term = multiple || !value ? "" : displayItem(value) || ""
 
   let input, suggestions
   let focused = autofocus
@@ -38,7 +38,7 @@
   }
 
   export const clearTerm = () => {
-    term = multiple ? "" : displayItem(value) || ""
+    term = multiple || !value ? "" : displayItem(value) || ""
   }
 
   const create = term => {

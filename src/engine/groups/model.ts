@@ -20,6 +20,8 @@ export type Group = {
   address: string
   meta?: GroupMeta
   meta_updated_at?: number
+  feeds?: string[][]
+  feeds_updated_at?: number
   relays?: string[]
   relays_updated_at?: number
   members?: string[]

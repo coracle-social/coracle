@@ -21,6 +21,7 @@
 
   const initialValues = {
     type: null,
+    feeds: [],
     relays: $env.PLATFORM_RELAYS,
     members: [$user],
     list_publicly: false,
@@ -36,7 +37,7 @@
     initialValues.type = type
   }
 
-  const onSubmit = async ({type, relays, members, list_publicly, meta}: Values) => {
+  const onSubmit = async ({type, feeds, relays, members, list_publicly, meta}: Values) => {
     const kind = type === "open" ? 34550 : 35834
     const memberPubkeys = pluck("pubkey", members)
     const {id, address} = initGroup(kind, relays)
@@ -44,10 +45,10 @@
     await publishAdminKeyShares(address, [$user.pubkey])
 
     if (type === "open") {
-      await publishCommunityMeta(address, id, relays, meta)
+      await publishCommunityMeta(address, id, feeds, relays, meta)
       await publishCommunitiesList(deriveUserCommunities().get().concat(address))
     } else {
-      await publishGroupMeta(address, id, relays, meta, list_publicly)
+      await publishGroupMeta(address, id, feeds, relays, meta, list_publicly)
       await publishGroupMembers(address, "set", memberPubkeys)
       await publishGroupInvites(address, memberPubkeys)
     }

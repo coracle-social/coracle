@@ -81,7 +81,7 @@
 
     // Re-publish group info
     if (!soft && !$group.listing_is_public) {
-      publishGroupMeta(address, $group.id, $group.relays, $group.meta, false)
+      publishGroupMeta(address, $group.id, $group.feeds, $group.relays, $group.meta, false)
     }
 
     // Re-send invites. This could be optimized further, but it's useful to re-send to different relays.

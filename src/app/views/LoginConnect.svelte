@@ -53,24 +53,26 @@
     modal = null
   }
 
-  let found, failed, modal
+  let found, showFound, failed, modal
   let customRelay = ""
 
   tryDefaultRelays()
 
   $: {
     if (!found && $session.kind0 && ($session.kind3 || $session.kind10002)) {
+      found = true
+
       // Reload everything, it's possible we didn't get their petnames if we got a match
       // from something like purplepag.es. This helps us avoid nuking follow lists later
       loadUserData()
 
       // Show a success message once they've had time to read the intro message
-      sleep(Math.max(0, 2500 - (Date.now() - t))).then(() => {
-        found = true
-      })
+      sleep(Math.max(0, 2500 - (Date.now() - t))).then(async () => {
+        showFound = true
 
-      // Give them a couple seconds to see the loading screen
-      sleep(Math.max(0, 5000 - (Date.now() - t))).then(() => {
+        // Give them a couple seconds to see the loading screen
+        await sleep(2500)
+
         router.at("notes").push()
       })
     }
@@ -78,7 +80,7 @@
 </script>
 
 <Content size="lg">
-  {#if found}
+  {#if showFound}
     <p class="text-2xl">Success! Logging you in...</p>
   {:else if failed}
     <p class="text-2xl">We're having a hard time finding your profile.</p>
@@ -91,7 +93,7 @@
       >.
     </p>
   {/if}
-  {#if !found}
+  {#if !showFound}
     <p>
       You can also <Anchor underline on:click={skip}>skip this step</Anchor>, but be aware that your
       profile and relays may not get properly synchronized.
@@ -107,7 +109,7 @@
   <Spinner />
 </Content>
 
-{#if !found && modal === "custom_relay"}
+{#if !showFound && modal === "custom_relay"}
   <Modal>
     <Content size="lg">
       <Subheading>Use a custom relay</Subheading>

@@ -202,7 +202,7 @@
 {/if}
 
 {#if subMenu === "accounts"}
-  <SliderMenu onEscape={closeSubMenu}>
+  <SliderMenu onEscape={closeMenu}>
     {#each Object.values($sessions) as s (s.pubkey)}
       {#if s.pubkey !== $pubkey}
         <MenuItem class="py-4" on:click={() => pubkey.set(s.pubkey)}>

@@ -2,6 +2,7 @@
   export type Values = {
     id?: string
     type: string
+    feeds: string[][]
     relays: string[]
     members?: Person[]
     list_publicly: boolean
@@ -15,23 +16,26 @@
 </script>
 
 <script lang="ts">
-  import {pluck} from "ramda"
+  import {pluck, join, uniqBy} from "ramda"
   import {ucFirst} from "hurdak"
   import {fly} from "src/util/transition"
+  import {parseAnything} from "src/util/nostr"
   import {toast} from "src/partials/state"
   import Field from "src/partials/Field.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
+  import ListItem from "src/partials/ListItem.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import type {Person} from "src/engine"
-  import {env, searchRelays, normalizeRelayUrl} from "src/engine"
+  import {env, searchRelays, normalizeRelayUrl, searchPeople, displayPubkey} from "src/engine"
 
   export let onSubmit
   export let values: Values
@@ -40,6 +44,29 @@
   export let buttonText = "Save"
 
   const searchRelayUrls = q => pluck("url", $searchRelays(q))
+
+  const toggleAdvanced = () => {
+    showAdvanced = !showAdvanced
+  }
+
+  const addFeed = pubkey => {
+    values.feeds = uniqBy(join(":"), values.feeds.concat([["feed", "Custom Feed", pubkey]]))
+    feedsInput.clear()
+  }
+
+  const searchFeeds = term => {
+    parseAnything(term).then(result => {
+      if (result?.type === "npub") {
+        addFeed(result.data)
+      }
+    })
+
+    return $searchPeople(term).map(p => p.pubkey)
+  }
+
+  const removeFeed = i => {
+    values.feeds = values.feeds.toSpliced(i, 1)
+  }
 
   const submit = async () => {
     if (values.relays.length < 1) {
@@ -53,7 +80,8 @@
     toast.show("info", "Your group has been saved!")
   }
 
-  document.title = "Create Group"
+  let feedsInput
+  let showAdvanced = false
 </script>
 
 <form on:submit|preventDefault={submit} in:fly={{y: 20}}>
@@ -120,6 +148,43 @@
           <PersonMultiSelect bind:value={values.members} />
           <div slot="info">All members will receive a fresh invitation with a new key.</div>
         </Field>
+      {/if}
+      {#if showAdvanced}
+        <Anchor on:click={toggleAdvanced} class="flex items-center gap-2">
+          <i class="fa fa-caret-down" />
+          <span>Hide Advanced Settings</span>
+        </Anchor>
+        <Field label="Custom Feeds">
+          {#each values.feeds as [_, label, pubkey], i (pubkey)}
+            <ListItem on:remove={() => removeFeed(i)}>
+              <span slot="label">{displayPubkey(pubkey)}</span>
+              <span slot="data">
+                <Input bind:value={label} />
+              </span>
+            </ListItem>
+          {/each}
+          <SearchSelect
+            bind:this={feedsInput}
+            search={searchFeeds}
+            onChange={addFeed}
+            displayItem={displayPubkey}>
+            <i slot="before" class="fa fa-scroll" />
+            <span slot="item" let:item>
+              <PersonBadge inert pubkey={item} />
+            </span>
+          </SearchSelect>
+          <div slot="info">
+            Add custom feeds to your group using special-purpose DVMs that are configured to respond
+            to
+            <Anchor href="https://www.data-vending-machines.org/kinds/5300/" external
+              >kind 5300</Anchor> events.
+          </div>
+        </Field>
+      {:else}
+        <Anchor on:click={toggleAdvanced} class="flex items-center gap-2">
+          <i class="fa fa-caret-right" />
+          <span>Show Advanced Settings</span>
+        </Anchor>
       {/if}
       <Anchor button tag="button" type="submit">{buttonText}</Anchor>
     </div>
