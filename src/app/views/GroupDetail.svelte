@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {onMount} from "svelte"
   import {whereEq} from "ramda"
   import {ucFirst} from "hurdak"
   import {themeBackgroundGradient} from "src/partials/state"
@@ -51,7 +50,7 @@
       .at(tab)
       .push({key: router.getKey(router.current.get())})
 
-  onMount(() => loadGroups([address], relays))
+  loadGroups([address], relays || [])
 
   let tabs
 

@@ -81,7 +81,7 @@
 
 <Content size="lg">
   {#if showFound}
-    <p class="text-2xl">Success! Logging you in...</p>
+    <p class="text-2xl text-center">Success! Logging you in...</p>
   {:else if failed}
     <p class="text-2xl">We're having a hard time finding your profile.</p>
   {:else}

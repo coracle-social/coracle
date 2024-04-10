@@ -5,6 +5,7 @@ import {partition} from "ramda"
 import {noteKinds, giftWrapKinds, repostKinds} from "src/util/nostr"
 import {load} from "src/engine/network/utils"
 import {forcePlatformRelays, hints} from "src/engine/relays/utils"
+import {pubkey} from "src/engine/session/state"
 import {updateCurrentSession} from "src/engine/session/commands"
 import {groups} from "./state"
 import {deriveUserCircles, getGroupReqInfo, getCommunityReqInfo} from "./utils"
@@ -55,12 +56,10 @@ export const loadGroupMessages = (addresses?: string[]) => {
 
   for (const address of groupAddrs) {
     const {admins, recipients, relays, since} = getGroupReqInfo(address)
-    const pubkeys = [...admins, ...recipients]
+    const pubkeys = [pubkey.get(), ...admins, ...recipients]
 
     if (pubkeys.length > 0) {
-      promises.push(
-        load({relays, filters: [{kinds: giftWrapKinds, "#p": pubkeys, since}]})
-      )
+      promises.push(load({relays, filters: [{kinds: giftWrapKinds, "#p": pubkeys, since}]}))
     }
   }
 
@@ -69,9 +68,7 @@ export const loadGroupMessages = (addresses?: string[]) => {
     const kinds = [...noteKinds, ...repostKinds]
     const since = Math.max(now() - seconds(7, "day"), info.since)
 
-    promises.push(
-      load({relays, filters: [{kinds, "#a": [address], since}]})
-    )
+    promises.push(load({relays, filters: [{kinds, "#a": [address], since}]}))
   }
 
   updateCurrentSession($session => {

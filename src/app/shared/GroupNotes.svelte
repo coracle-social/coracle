@@ -68,7 +68,7 @@
 </script>
 
 <FlexColumn large>
-  {#if $group.feeds.length > 0}
+  {#if $group.feeds?.length > 0}
     <Popover
       class="inline-block"
       placement="bottom-end"

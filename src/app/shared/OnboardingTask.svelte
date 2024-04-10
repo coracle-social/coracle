@@ -1,10 +1,8 @@
-
 <script lang="ts">
   import {append} from "ramda"
   import {updateIn} from "src/util/misc"
   import {slide} from "src/util/transition"
   import Card from "src/partials/Card.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import {session, updateCurrentSession} from "src/engine"
 

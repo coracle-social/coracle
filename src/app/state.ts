@@ -16,6 +16,7 @@ import {
   loadDeletes,
   loadPubkeys,
   loadGiftWrap,
+  loadAllMessages,
   getUserRelayUrls,
   listenForNotifications,
   getSetting,
@@ -107,9 +108,9 @@ export const loadAppData = () => {
   }
 }
 
-export const loadUserData = () => {
+export const loadUserData = async () => {
   // Make sure the user and their follows are loaded
-  loadPubkeys([pubkey.get()], {
+  await loadPubkeys([pubkey.get()], {
     force: true,
     kinds: userKinds,
   })
@@ -120,8 +121,11 @@ export const loadUserData = () => {
   // Load deletes
   loadDeletes()
 
-  // Load encrypted stuff
+  // Load settings etc
   loadGiftWrap()
+
+  // Load messages
+  loadAllMessages()
 
   // Start our listener
   listenForNotifications()
