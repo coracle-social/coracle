@@ -1,17 +1,17 @@
 <script lang="ts">
   import cx from "classnames"
   import {Tags} from "@coracle.social/util"
+  import {Scope, filter} from "@coracle.social/feeds"
   import {noteKinds} from "src/util/nostr"
   import {theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/router"
-  import type {DynamicFilter} from "src/engine"
-  import {session, canSign, lists, userLists, FilterScope} from "src/engine"
+  import {session, canSign, lists, userLists} from "src/engine"
 
   export let relays = []
-  export let filter: DynamicFilter = {kinds: noteKinds, scope: FilterScope.Follows}
+  export let feed = filter({kinds: noteKinds, scopes: [Scope.Follows]})
 
   let key = Math.random()
 
@@ -30,14 +30,12 @@
       relays = urls
     }
 
-    filter = {kinds: noteKinds} as DynamicFilter
-
     if (authors.length > 0) {
-      filter = {...filter, authors}
-    }
-
-    if (topics.length > 0) {
-      filter = {...filter, "#t": topics}
+      feed = filter({kinds: noteKinds, authors})
+    } else if (topics.length > 0) {
+      feed = filter({kinds: noteKinds, "#t": topics})
+    } else {
+      feed = filter({kinds: noteKinds, scopes: [Scope.Follows]})
     }
 
     key = Math.random()
@@ -56,7 +54,7 @@
 {/if}
 
 {#key key}
-  <Feed skipCache includeReposts showGroup {filter} {relays}>
+  <Feed skipCache includeReposts showGroup {feed} {relays}>
     <div slot="controls">
       {#if $canSign}
         {#if $userLists.length > 0}

@@ -12,12 +12,6 @@
   }
 </style>
 
-<script context="module">
-  import {writable} from "@coracle.social/lib"
-
-  const maxWot = writable(10)
-</script>
-
 <script lang="ts">
   import cx from "classnames"
   import {themeColors} from "src/partials/state"
@@ -29,6 +23,7 @@
     displayPerson,
     displayNpub,
     session,
+    maxWot,
     getWotScore,
   } from "src/engine"
 
@@ -39,9 +34,8 @@
   const wotScore = getWotScore($session?.pubkey, pubkey)
   const npubDisplay = displayNpub(pubkey)
 
-  maxWot.update(x => Math.max(x, wotScore * 1.5))
-
-  $: dashOffset = 100 - (Math.max($maxWot / 20, wotScore) / $maxWot) * 100
+  $: superMaxWot = $maxWot * 1.5
+  $: dashOffset = 100 - (Math.max(superMaxWot / 20, wotScore) / superMaxWot) * 100
   $: style = `transform: rotate(${dashOffset * 1.8 - 50}deg)`
   $: stroke = $themeColors[$following || pubkey === $session?.pubkey ? "accent" : "neutral-200"]
   $: personDisplay = displayPerson($person)

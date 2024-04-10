@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {filter} from "@coracle.social/feeds"
   import Feed from "src/app/shared/Feed.svelte"
   import Heading from "src/partials/Heading.svelte"
   import TopicActions from "src/app/shared/TopicActions.svelte"
@@ -12,4 +13,4 @@
     <TopicActions {topic} />
   </div>
 </div>
-<Feed filter={{kinds: [1], "#t": [topic]}} />
+<Feed feed={filter({kinds: [1], "#t": [topic]})} />

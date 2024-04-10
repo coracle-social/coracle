@@ -1,12 +1,12 @@
 import {nip19} from "nostr-tools"
 import {throttle} from "throttle-debounce"
-import {cached} from "@coracle.social/lib"
+import {cached, writable} from "@coracle.social/lib"
 import {fromNostrURI} from "@coracle.social/util"
 import {uniq, join, nth, last} from "ramda"
 import {Fetch, tryFunc, createMapOf, ellipsize, switcherFn} from "hurdak"
 import logger from "src/util/logger"
 import {createBatcher, pushToKey} from "src/util/misc"
-import {dufflepud} from "src/engine/session/utils"
+import {dufflepud, getSetting} from "src/engine/session/utils"
 import {hints} from "src/engine/relays/utils"
 import type {Person, Handle} from "./model"
 import {people} from "./state"
@@ -155,6 +155,10 @@ export const primeWotCaches = throttle(3000, pk => {
   }
 })
 
+export const maxWot = writable(10)
+
+export const getMinWot = () => getSetting("min_wot_score") / maxWot.get()
+
 export const getWotScore = (pk, tpk) => {
   if (!people.key(pk).exists()) {
     return getFollowers(tpk).length
@@ -162,8 +166,11 @@ export const getWotScore = (pk, tpk) => {
 
   const follows = getFollowsWhoFollow(pk, tpk)
   const mutes = getFollowsWhoMute(pk, tpk)
+  const score = follows.length - Math.floor(Math.pow(2, Math.log(mutes.length)))
 
-  return follows.length - Math.floor(Math.pow(2, Math.log(mutes.length)))
+  maxWot.update(maxScore => Math.max(maxScore, score))
+
+  return score
 }
 
 const annotatePerson = pubkey => {

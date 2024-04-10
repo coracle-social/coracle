@@ -1,6 +1,7 @@
 <script lang="ts">
   import {identity} from "ramda"
   import {stripProtocol} from "@coracle.social/lib"
+  import {filter} from "@coracle.social/feeds"
   import {info} from "src/util/logger"
   import {ensureProto} from "src/util/misc"
   import {noteKinds} from "src/util/nostr"
@@ -30,7 +31,7 @@
   export let npub
   export let pubkey
   export let relays = []
-  export let filter = {kinds: noteKinds, authors: [pubkey]}
+  export let feed = filter({kinds: noteKinds, authors: [pubkey]})
 
   const tabs = ["notes", "likes", "collections", "relays"].filter(identity)
   const person = derivePerson(pubkey)
@@ -96,9 +97,9 @@
 {#if $mutes.has(pubkey)}
   <Content size="lg" class="text-center">You have muted this person.</Content>
 {:else if activeTab === "notes"}
-  <Feed showGroup skipPlatform {filter} />
+  <Feed showGroup skipPlatform {feed} />
 {:else if activeTab === "likes"}
-  <Feed showGroup hideControls filter={{kinds: [7], authors: [pubkey]}} />
+  <Feed showGroup hideControls feed={filter({kinds: [7], authors: [pubkey]})} />
 {:else if activeTab === "collections"}
   <PersonCollections {pubkey} />
 {:else if activeTab === "relays"}

@@ -17,7 +17,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import {router} from "src/app/router"
-  import type {DynamicFilter, Topic, Person} from "src/engine"
+  import type {Topic, Person} from "src/engine"
   import {
     follows,
     displayRelays,
@@ -25,7 +25,6 @@
     searchTopics,
     derivePerson,
     displayPubkey,
-    FilterScope,
   } from "src/engine"
 
   export let filter

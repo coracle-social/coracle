@@ -1,19 +1,15 @@
 <script lang="ts">
+  import {Scope, filter} from "@coracle.social/feeds"
   import Calendar from "src/app/shared/Calendar.svelte"
-  import type {DynamicFilter} from "src/engine"
-  import {env, FilterScope, loadGroupMessages} from "src/engine"
+  import {env, loadGroupMessages} from "src/engine"
 
-  const filter: DynamicFilter = {kinds: [31923]}
-
-  if ($env.FORCE_GROUP) {
-    filter["#a"] = [$env.FORCE_GROUP]
-  } else {
-    filter.scope = FilterScope.FollowsAndSelf
-  }
+  const feed = $env.FORCE_GROUP
+    ? filter({kinds: [31923], "#a": [$env.FORCE_GROUP]})
+    : filter({kinds: [31923], scopes: [Scope.Self, Scope.Follows]})
 
   if ($env.FORCE_GROUP) {
     loadGroupMessages([$env.FORCE_GROUP])
   }
 </script>
 
-<Calendar filters={[filter]} />
+<Calendar {feed} />

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {fromPairs} from "ramda"
   import {batch} from "hurdak"
-  import {onMount} from "svelte"
+  import {onMount, onDestroy} from "svelte"
   import type {Event} from "nostr-tools"
   import {writable} from "@coracle.social/lib"
   import {getAddress, getReplyFilters} from "@coracle.social/util"
@@ -11,7 +11,6 @@
   import {secondsToDate} from "src/util/misc"
   import {themeColors} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
-  import {router} from "src/app/router"
   import {
     hints,
     load,
@@ -19,12 +18,13 @@
     canSign,
     isDeleted,
     subscribe,
-    compileFilters,
     getFilterSelections,
     forcePlatformRelaySelections,
   } from "src/engine"
+  import {router} from "src/app/router"
+  import {feedCompiler} from "src/app/util"
 
-  export let filters
+  export let feed
   export let group = null
 
   const createEvent = () => router.at("notes/create").qp({type: "calendar_event", group}).open()
@@ -68,14 +68,17 @@
     })
   })
 
-  onMount(() => {
-    const selections = getFilterSelections(compileFilters(filters))
+  let subs = []
+
+  onMount(async () => {
+    const {filters} = await feedCompiler.compile(feed)
+    const selections = getFilterSelections(filters)
     const subs = forcePlatformRelaySelections(selections).map(({relay, filters}) =>
       subscribe({relays: [relay], filters, onEvent}),
     )
-
-    return () => subs.map(sub => sub.close())
   })
+
+  onDestroy(() => subs.map(sub => sub.close()))
 
   $: calendarEvents = Array.from($events.values())
     .filter(e => !$isDeleted(e))

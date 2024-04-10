@@ -1,6 +1,7 @@
 import {partition, prop, uniqBy, without, assoc} from "ramda"
 import {batch} from "hurdak"
 import {now, writable} from "@coracle.social/lib"
+import type {Filter} from "@coracle.social/util"
 import {
   Tags,
   getIdOrAddress,
@@ -8,22 +9,94 @@ import {
   getIdFilters,
   guessFilterDelta,
 } from "@coracle.social/util"
+import type {Feed} from "@coracle.social/feeds"
+import {FeedCompiler, Scope} from "@coracle.social/feeds"
 import {race} from "src/util/misc"
+import {generatePrivateKey} from "src/util/nostr"
 import {info} from "src/util/logger"
 import {LOCAL_RELAY_URL, reactionKinds, repostKinds} from "src/util/nostr"
-import type {DisplayEvent} from "src/engine/notes/model"
-import type {Event} from "src/engine/events/model"
-import {sortEventsDesc, unwrapRepost} from "src/engine/events/utils"
-import {isEventMuted, isDeleted} from "src/engine/events/derived"
-import {hints, forcePlatformRelaySelections, forceRelaySelections} from "src/engine/relays/utils"
-import type {DynamicFilter} from "src/engine/network/utils"
-import {compileFilters, addRepostFilters, getFilterSelections} from "src/engine/network/utils"
-import {tracker, load, subscribe} from "./executor"
-import {MultiCursor} from "./cursor"
+import type {DisplayEvent, Event} from "src/engine"
+import {
+  sortEventsDesc,
+  unwrapRepost,
+  isEventMuted,
+  isDeleted,
+  hints,
+  forcePlatformRelaySelections,
+  forceRelaySelections,
+  addRepostFilters,
+  getFilterSelections,
+  tracker,
+  load,
+  subscribe,
+  MultiCursor,
+  dvmRequest,
+  getFollowedPubkeys,
+  getFollowers,
+  maxWot,
+  people,
+  getWotScore,
+  user,
+} from "src/engine"
+
+export const feedCompiler = new FeedCompiler({
+  requestDvm: async ({request, onEvent}) => {
+    const event = await dvmRequest({
+      ...request,
+      timeout: 3000,
+      sk: generatePrivateKey(),
+    })
+
+    if (event) {
+      onEvent(event)
+    }
+  },
+  request: async ({relays, filters, onEvent}) => {
+    if (relays.length > 0) {
+      await load({filters, relays, onEvent})
+    } else {
+      await Promise.all(
+        getFilterSelections(filters).map(({relay, filters}) =>
+          load({filters, relays: [relay], onEvent}),
+        ),
+      )
+    }
+  },
+  getPubkeysForScope: (scope: string) => {
+    const $user = user.get()
+
+    switch (scope) {
+      case Scope.Self:
+        return $user ? [$user.pubkey] : []
+      case Scope.Follows:
+        return getFollowedPubkeys($user)
+      case Scope.Followers:
+        return Array.from(getFollowers($user.pubkey).map(p => p.pubkey))
+      default:
+        throw new Error(`Invalid scope ${scope}`)
+    }
+  },
+  getPubkeysForWotRange: (min, max) => {
+    const pubkeys = []
+    const $user = user.get()
+    const thresholdMin = maxWot.get() * min
+    const thresholdMax = maxWot.get() * max
+
+    for (const person of people.get()) {
+      const score = getWotScore($user.pubkey, person.pubkey)
+
+      if (score >= thresholdMin && score <= thresholdMax) {
+        pubkeys.push(person.pubkey)
+      }
+    }
+
+    return pubkeys
+  },
+})
 
 export type FeedOpts = {
+  feed: Feed
   relays: string[]
-  filters: DynamicFilter[]
   onEvent?: (e: Event) => void
   anchor?: string
   skipCache?: boolean
@@ -39,6 +112,7 @@ export type FeedOpts = {
 
 export class FeedLoader {
   stopped = false
+  config: Promise<{filters: Filter[]}>
   subs: Array<{close: () => void}> = []
   buffer = writable<Event[]>([])
   notes = writable<DisplayEvent[]>([])
@@ -46,48 +120,53 @@ export class FeedLoader {
   reposts = new Map<string, Event[]>()
   replies = new Map<string, Event[]>()
   cursor: MultiCursor
-  ready: Promise<void>
   isEventMuted = isEventMuted.get()
   isDeleted = isDeleted.get()
 
   constructor(readonly opts: FeedOpts) {
-    let filters = compileFilters(opts.filters)
+    this.config = this.start()
+  }
 
-    if (opts.includeReposts && !opts.filters.some(f => f.authors?.length > 0)) {
-      filters = addRepostFilters(filters)
-    }
+  async start() {
+    const requestItem = await feedCompiler.compile(this.opts.feed)
+    const filters =
+      this.opts.includeReposts && !requestItem.filters.some(f => f.authors?.length > 0)
+        ? addRepostFilters(requestItem.filters)
+        : requestItem.filters
 
     let relaySelections = []
 
-    if (!opts.skipNetwork) {
+    if (requestItem.relays.length > 0) {
+      relaySelections = requestItem.relays.map(relay => ({relay, filters}))
+    } else if (!this.opts.skipNetwork) {
       relaySelections = getFilterSelections(filters)
-      relaySelections = forceRelaySelections(relaySelections, opts.relays)
+      relaySelections = forceRelaySelections(relaySelections, this.opts.relays)
 
-      if (!opts.skipPlatform) {
+      if (!this.opts.skipPlatform) {
         relaySelections = forcePlatformRelaySelections(relaySelections)
       }
     }
 
-    if (!opts.skipCache) {
+    if (!this.opts.skipCache && requestItem.relays.length === 0) {
       relaySelections.push({relay: LOCAL_RELAY_URL, filters})
     }
 
     // No point in subscribing if we have an end date
-    if (opts.shouldListen && !opts.filters.every(prop("until"))) {
+    if (this.opts.shouldListen && !filters.every(prop("until"))) {
       this.addSubs(
         relaySelections.map(({relay, filters}) =>
           subscribe({
             relays: [relay],
             skipCache: true,
             filters: filters.map(assoc("since", now())),
-            onEvent: batch(300, (events: Event[]) => {
-              events = this.discardEvents(events)
+            onEvent: batch(300, async (events: Event[]) => {
+              events = await this.discardEvents(events)
 
-              if (opts.shouldLoadParents) {
+              if (this.opts.shouldLoadParents) {
                 this.loadParents(events)
               }
 
-              if (opts.shouldBuffer) {
+              if (this.opts.shouldBuffer) {
                 this.buffer.update($buffer => $buffer.concat(events))
               } else {
                 this.addToFeed(events, {prepend: true})
@@ -100,9 +179,9 @@ export class FeedLoader {
 
     this.cursor = new MultiCursor({
       relaySelections,
-      onEvent: batch(300, events => {
-        if (opts.shouldLoadParents) {
-          this.loadParents(this.discardEvents(events))
+      onEvent: batch(300, async events => {
+        if (this.opts.shouldLoadParents) {
+          this.loadParents(await this.discardEvents(events))
         }
       }),
     })
@@ -111,10 +190,8 @@ export class FeedLoader {
 
     // Wait until at least one subscription has completed to reduce the chance of
     // out of order notes
-    if (subs.length === 1) {
-      this.ready = Promise.resolve()
-    } else {
-      this.ready = race(
+    if (subs.length > 1) {
+      await race(
         Math.min(2, subs.length),
         subs.map(
           s =>
@@ -125,11 +202,14 @@ export class FeedLoader {
         ),
       )
     }
+
+    return {filters}
   }
 
-  discardEvents(events) {
+  async discardEvents(events) {
     // Be more tolerant when looking at communities
-    const strict = this.opts.filters.some(f => f["#a"])
+    const {filters} = await this.config
+    const strict = filters.some(f => f["#a"])
 
     return events.filter(e => {
       if (this.isDeleted(e)) {
@@ -192,8 +272,8 @@ export class FeedLoader {
       load({
         relays: [relay],
         filters: getIdFilters(values),
-        onEvent: batch(100, events => {
-          for (const e of this.discardEvents(events)) {
+        onEvent: batch(100, async events => {
+          for (const e of await this.discardEvents(events)) {
             this.parents.set(e.id, e)
           }
         }),
@@ -316,21 +396,16 @@ export class FeedLoader {
   // Loading
 
   async load(n) {
-    await this.ready
+    await this.config
 
     if (this.cursor.done()) {
       return
     }
 
-    info(`Loading ${n} more events`, {
-      filters: this.opts.filters,
-      relays: this.opts.relays,
-    })
-
     const [subs, events] = this.cursor.take(n)
 
     this.addSubs(subs)
-    this.addToFeed(this.deferOrphans(this.discardEvents(events)))
+    this.addToFeed(this.deferOrphans(await this.discardEvents(events)))
   }
 
   loadBuffer() {
@@ -358,7 +433,9 @@ export class FeedLoader {
     return ok
   }
 
-  deferAncient = (notes: Event[]) => {
+  deferAncient = async (notes: Event[]) => {
+    const {filters} = await this.config
+
     if (this.opts.shouldDefer === false) {
       return notes
     }
@@ -366,7 +443,7 @@ export class FeedLoader {
     // Sometimes relays send very old data very quickly. Pop these off the queue and re-add
     // them after we have more timely data. They still might be relevant, but order will still
     // be maintained since everything before the cutoff will be deferred the same way.
-    const since = now() - guessFilterDelta(this.opts.filters)
+    const since = now() - guessFilterDelta(filters)
     const [ok, defer] = partition(e => e.created_at > since, notes)
 
     setTimeout(() => this.addToFeed(defer), 5000)

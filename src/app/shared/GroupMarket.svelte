@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {filter} from "@coracle.social/feeds"
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
@@ -14,4 +15,4 @@
   <Anchor button accent on:click={createListing}>Create a listing</Anchor>
 </Card>
 
-<Feed hideControls filter={{kinds: [30402], "#a": [address]}} />
+<Feed hideControls feed={filter({kinds: [30402], "#a": [address]})} />

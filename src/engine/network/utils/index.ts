@@ -1,7 +1,6 @@
 export * from "./cursor"
 export * from "./dvms"
 export * from "./executor"
-export * from "./feed"
 export * from "./filters"
 export * from "./pubkeys"
 export * from "./publish"

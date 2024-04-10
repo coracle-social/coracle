@@ -15,7 +15,7 @@ export type DVMRequestOpts = {
   timeout?: number
   onPublish?: (pub: Publish) => void
   onProgress?: (e: Event) => void
-  privateKey?: string
+  sk?: string
 }
 
 export const dvmRequest = async ({
@@ -27,25 +27,22 @@ export const dvmRequest = async ({
   relays = null,
   onPublish = null,
   onProgress = null,
-  privateKey = null,
+  sk = null,
 }: DVMRequestOpts): Promise<Event> => {
   if (!relays) {
-    relays = hints.merge([hints.WriteRelays(), hints.scenario([env.get().DVM_RELAYS])]).getUrls()
+    relays = hints.merge([hints.WriteRelays(), hints.fromRelays(env.get().DVM_RELAYS)]).getUrls()
   }
 
   if (typeof input !== "string") {
     input = JSON.stringify(input)
   }
 
-  const pub = await createAndPublish({
-    kind,
-    relays,
-    sk: privateKey,
-    tags: tags.concat([
-      ["i", input, ...inputOpts],
-      ["expiration", String(now() + seconds(1, "hour"))],
-    ]),
-  })
+  tags = tags.concat([
+    ["i", input, ...inputOpts],
+    ["expiration", String(now() + seconds(1, "hour"))],
+  ])
+
+  const pub = await createAndPublish({kind, relays, sk, tags})
 
   onPublish?.(pub)
 

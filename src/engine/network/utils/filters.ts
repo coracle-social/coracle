@@ -9,52 +9,6 @@ import {getSetting} from "src/engine/session/utils"
 import {getFollowedPubkeys, getNetwork} from "src/engine/people/utils"
 import {hints} from "src/engine/relays/utils"
 
-export enum FilterScope {
-  Follows = "follows",
-  Network = "network",
-  FollowsAndNetwork = "follows-and-network",
-  FollowsAndSelf = "follows-and-self",
-  Custom = "custom",
-  Global = "global",
-}
-
-export type DynamicFilter = Filter & {
-  scope?: FilterScope
-}
-
-export const compileFilters = (filters: DynamicFilter[]) =>
-  filters
-    // Dereference authors
-    .map(({scope, ...filter}) => {
-      if (filter.authors || !scope || [FilterScope.Global, FilterScope.Custom].includes(scope)) {
-        return filter
-      }
-
-      const $user = user.get()
-
-      let pubkeys = switcherFn(scope, {
-        [FilterScope.Follows]: () => shuffle(getFollowedPubkeys($user)),
-        [FilterScope.Network]: () => shuffle(getNetwork($user)),
-        [FilterScope.FollowsAndNetwork]: () =>
-          shuffle([...getFollowedPubkeys($user), ...getNetwork($user)]),
-        [FilterScope.FollowsAndSelf]: () => {
-          const result = shuffle(getFollowedPubkeys($user))
-
-          if ($user) {
-            result.push($user.pubkey)
-          }
-
-          return result
-        },
-      })
-
-      if (pubkeys.length === 0) {
-        pubkeys = env.get().DEFAULT_FOLLOWS
-      }
-
-      return {...filter, authors: pubkeys.slice(0, 1000)}
-    }) as Filter[]
-
 export const addRepostFilters = (filters: Filter[]) =>
   filters.flatMap(original => {
     const filterChunk = [original]

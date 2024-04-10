@@ -1,16 +1,16 @@
 <script lang="ts">
   import {batch} from "hurdak"
+  import {Scope, filter} from "@coracle.social/feeds"
   import {getAvgRating, noteKinds} from "src/util/nostr"
   import Feed from "src/app/shared/Feed.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Rating from "src/partials/Rating.svelte"
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
   import RelayActions from "src/app/shared/RelayActions.svelte"
-  import type {DynamicFilter} from "src/engine"
-  import {deriveRelay, normalizeRelayUrl, displayRelay, FilterScope} from "src/engine"
+  import {deriveRelay, normalizeRelayUrl, displayRelay, getMinWot} from "src/engine"
 
   export let url
-  export let filter: DynamicFilter = {kinds: noteKinds, scope: FilterScope.FollowsAndNetwork}
+  export let feed = filter({kinds: noteKinds, min_wot: getMinWot()})
 
   let reviews = []
   let activeTab = "notes"
@@ -48,11 +48,11 @@
 {#if activeTab === "reviews"}
   <Feed
     onEvent={onReview}
-    filter={{
+    feed={filter({
       kinds: [1986],
       "#l": ["review/relay"],
       "#r": [$relay.url],
-    }} />
+    })} />
 {:else}
-  <Feed skipCache relays={[$relay.url]} {filter} />
+  <Feed skipCache relays={[$relay.url]} {feed} />
 {/if}

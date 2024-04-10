@@ -1,18 +1,14 @@
 <script lang="ts">
+  import {Scope, filter} from "@coracle.social/feeds"
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
-  import type {DynamicFilter} from "src/engine"
   import {router} from "src/app/router"
-  import {env, canSign, loadGroupMessages, FilterScope} from "src/engine"
+  import {env, canSign, loadGroupMessages} from "src/engine"
 
-  const filter: DynamicFilter = {kinds: [30402]}
-
-  if ($env.FORCE_GROUP) {
-    filter["#a"] = [$env.FORCE_GROUP]
-  } else {
-    filter.scope = FilterScope.FollowsAndSelf
-  }
+  const feed = $env.FORCE_GROUP
+    ? filter({kinds: [30402], "#a": [$env.FORCE_GROUP]})
+    : filter({kinds: [30402], scopes: [Scope.Self, Scope.Follows]})
 
   const createListing = () => router.at("notes/create").qp({type: "listing"}).open()
 
@@ -28,4 +24,4 @@
   </Card>
 {/if}
 
-<Feed hideControls={Boolean($env.FORCE_GROUP)} {filter} />
+<Feed hideControls={Boolean($env.FORCE_GROUP)} {feed} />
