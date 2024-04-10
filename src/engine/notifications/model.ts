@@ -9,4 +9,5 @@ export type Notification = {
 
 export enum OnboardingTask {
   BackupKey = "backup_key",
+  SetupWallet = "setup_wallet",
 }
