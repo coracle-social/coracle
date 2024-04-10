@@ -10,7 +10,7 @@
   const tags = Tags.fromEvent(note)
   const imeta = tags.whereKey("imeta").first()
   const categories = tags.values("c").valueOf()
-  const {cover, media, subject, title} = fromPairs(note.tags)
+  const {cover, subject, title} = fromPairs(note.tags)
 </script>
 
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
