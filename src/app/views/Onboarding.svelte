@@ -43,8 +43,13 @@
   let relays = user.get()?.relays || $env.DEFAULT_RELAYS.map(urlToRelayPolicy)
 
   const signup = async noteContent => {
+    const hasInvite =
+      invite?.groups.length > 0 ||
+      invite?.people.length > 0 ||
+      (invite?.relays.length > 0 && env.get().PLATFORM_RELAYS.length === 0)
+
     // Go to our home page if we don't have an invite to finish up
-    if (!invite) {
+    if (!hasInvite) {
       router.at("notes").push()
 
       // Make things async since the `key` change in App.svelte prevents the modal
@@ -85,10 +90,10 @@
     const listOwners = ONBOARDING_LISTS.map(a => decodeAddress(a).pubkey)
 
     // Prime our database with our default follows and list owners
-    loadPubkeys([...DEFAULT_FOLLOWS, ...listOwners])
+    await loadPubkeys([...DEFAULT_FOLLOWS, ...listOwners])
 
     // Load our onboarding lists
-    load({
+    await load({
       relays: hints.FromPubkeys(listOwners).getUrls(),
       filters: getIdFilters($env.ONBOARDING_LISTS),
       onEvent: e => {
