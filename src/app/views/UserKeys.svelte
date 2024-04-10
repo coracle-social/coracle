@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {uniqBy, uniq, sortBy, prop} from "ramda"
+  import {uniqBy, pluck, uniq, sortBy, prop} from "ramda"
   import {createMap} from "hurdak"
   import {nip19} from "nostr-tools"
   import {getAddress} from "@coracle.social/util"
@@ -8,6 +8,7 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
+  import SearchSelect from "src/partials/SearchSelect.svelte"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -19,16 +20,19 @@
     session,
     hints,
     groupSharedKeys,
+    searchRelays,
     deriveIsGroupMember,
     groupAdminKeys,
     subscribe,
     LOAD_OPTS,
+    displayRelay,
   } from "src/engine"
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
   const keypairUrl = "https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/"
 
   let nsec = null
+  let relays = []
   let importing = false
 
   const startImport = () => {
@@ -57,7 +61,7 @@
     // Look for group definition events by this pubkey so we can associate the key with the group
     const sub = subscribe({
       ...LOAD_OPTS,
-      relays: hints.User().getUrls(),
+      relays: hints.User().getUrls().concat(pluck('url', relays)),
       filters: [
         {kinds: [35834], authors: [pubkey], limit: 1},
         {kinds: giftWrapKinds, "#p": [pubkey], limit: 500},
@@ -189,6 +193,9 @@
     </p>
     <Field label="Private key">
       <Input type="password" bind:value={nsec} placeholder="nsec..." />
+    </Field>
+    <Field label="Relays to search">
+      <SearchSelect multiple getKey={displayRelay} search={$searchRelays} bind:value={relays} placeholder="wss://..." />
     </Field>
     <Anchor button accent loading={importing} on:click={finishImport}>Import key</Anchor>
   </Modal>

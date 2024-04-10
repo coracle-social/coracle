@@ -120,7 +120,7 @@
     {#each value as item}
       <Chip class="mb-1 mr-1" onRemove={() => remove(item)}>
         <slot name="item" context="value" {item}>
-          {item}
+          {displayItem(item)}
         </slot>
       </Chip>
     {/each}
@@ -159,7 +159,7 @@
         {getKey}>
         <div slot="item" let:item>
           <slot name="item" context="option" {item}>
-            {item}
+            {displayItem(item)}
           </slot>
         </div>
       </Suggestions>
