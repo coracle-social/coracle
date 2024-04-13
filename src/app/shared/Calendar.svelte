@@ -22,7 +22,7 @@
     forcePlatformRelaySelections,
   } from "src/engine"
   import {router} from "src/app/router"
-  import {feedCompiler} from "src/app/util"
+  import {feedLoader} from "src/app/util"
 
   export let feed
   export let group = null
@@ -71,9 +71,10 @@
   let subs = []
 
   onMount(async () => {
-    const {filters} = await feedCompiler.compile(feed)
+    const {filters} = await feedLoader.compiler.compile(feed)
     const selections = getFilterSelections(filters)
-    const subs = forcePlatformRelaySelections(selections).map(({relay, filters}) =>
+
+    subs = forcePlatformRelaySelections(selections).map(({relay, filters}) =>
       subscribe({relays: [relay], filters, onEvent}),
     )
   })

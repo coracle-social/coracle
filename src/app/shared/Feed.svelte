@@ -11,7 +11,6 @@
   import {FeedLoader} from "src/app/util"
 
   export let feed: Feed
-  export let relays = []
   export let anchor = null
   export let eager = false
   export let skipCache = false
@@ -25,18 +24,22 @@
   export let onEvent = null
 
   let loader, element
+  let limit = 0
   let notes = readable([])
 
   const hideReplies = writable(Storage.getJson("hideReplies"))
 
-  const loadMore = () => loader.load(20)
+  const loadMore = () => {
+    limit += 5
+
+    if ($notes.length < limit) {
+      loader.load(20)
+    }
+  }
 
   const start = () => {
-    loader?.stop()
-
     loader = new FeedLoader({
       feed,
-      relays,
       anchor,
       skipCache,
       skipNetwork,
@@ -52,12 +55,6 @@
     notes = loader.notes
   }
 
-  const updateFilter = newFilter => {
-    filter = newFilter
-
-    start()
-  }
-
   const unsubHideReplies = hideReplies.subscribe($hideReplies => {
     start()
     Storage.setJson("hideReplies", $hideReplies)
@@ -69,27 +66,16 @@
     return () => {
       unsubHideReplies()
       scroller?.stop()
-      loader?.stop()
     }
   })
 </script>
 
 <FlexColumn xl bind:element>
-  {#await loader.config}
-    <!-- pass -->
-  {:then { filters }}
-    {#each $notes as note, i (note.id)}
-      <div in:fly={{y: 20}}>
-        <Note
-          depth={$hideReplies ? 0 : 2}
-          context={note.replies || []}
-          {filters}
-          {showGroup}
-          {anchor}
-          {note} />
-      </div>
-    {/each}
-  {/await}
+  {#each $notes.slice(0, limit) as note, i (note.id)}
+    <div in:fly={{y: 20}}>
+      <Note depth={$hideReplies ? 0 : 2} context={note.replies || []} {showGroup} {anchor} {note} />
+    </div>
+  {/each}
 </FlexColumn>
 
 {#if !hideSpinner}

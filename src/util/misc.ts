@@ -85,7 +85,7 @@ type ScrollerOpts = {
 }
 
 export const createScroller = (
-  loadMore: () => any,
+  loadMore: () => Promise<void>,
   {delay = 1000, threshold = 2000, reverse = false, element}: ScrollerOpts = {},
 ) => {
   let done = false

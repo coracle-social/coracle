@@ -25,7 +25,7 @@
     scroller = createScroller(loadMore, {element, reverse: true})
   }
 
-  const loadMore = () => {
+  const loadMore = async () => {
     limit += 10
   }
 

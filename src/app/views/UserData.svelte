@@ -12,7 +12,7 @@
 
   const sortedEvents = events.derived(sortEventsDesc)
 
-  const loadMore = () => {
+  const loadMore = async () => {
     limit += 50
   }
 

@@ -1,12 +1,8 @@
-import {shuffle, splitAt} from "@coracle.social/lib"
+import {splitAt} from "@coracle.social/lib"
 import type {Filter, RouterScenario, RouterScenarioOptions} from "@coracle.social/util"
 import {isContextAddress, mergeFilters, getFilterId, decodeAddress} from "@coracle.social/util"
 import {without, sortBy, prop} from "ramda"
-import {switcherFn} from "hurdak"
-import {env} from "src/engine/session/state"
-import {user} from "src/engine/session/derived"
 import {getSetting} from "src/engine/session/utils"
-import {getFollowedPubkeys, getNetwork} from "src/engine/people/utils"
 import {hints} from "src/engine/relays/utils"
 
 export const addRepostFilters = (filters: Filter[]) =>

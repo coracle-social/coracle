@@ -34,7 +34,7 @@
 
   const setActiveTab = tab => router.at("notifications").at(tab).push()
 
-  const loadMore = () => {
+  const loadMore = async () => {
     limit += 4
   }
 
