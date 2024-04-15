@@ -16,7 +16,7 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import Compose from "src/app/shared/Compose.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {dereferenceNote, publishToZeroOrMoreGroups} from "src/engine"
 
   export let address

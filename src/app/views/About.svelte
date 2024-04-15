@@ -4,7 +4,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {loadPubkeys, env} from "src/engine"
 
   const hash = import.meta.env.VITE_BUILD_HASH

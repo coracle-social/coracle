@@ -13,7 +13,7 @@
   import GroupName from "src/app/shared/GroupName.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {
     hints,
     derivePerson,

@@ -5,7 +5,7 @@ import {writable} from "@coracle.social/lib"
 import {ConnectionStatus, NetworkContext} from "@coracle.social/network"
 import {warn} from "src/util/logger"
 import {userKinds} from "src/util/nostr"
-import {router} from "src/app/router"
+import {router} from "src/app/util/router"
 import {
   env,
   relays,

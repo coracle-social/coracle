@@ -10,7 +10,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {loadUserData} from "src/app/state"
   import {env, loadPubkeys, session} from "src/engine"
 

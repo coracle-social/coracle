@@ -3,7 +3,7 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let pubkeys
   export let actionText

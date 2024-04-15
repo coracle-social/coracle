@@ -7,7 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import type {PublishInfo} from "src/engine"
   import {publish} from "src/engine"
 

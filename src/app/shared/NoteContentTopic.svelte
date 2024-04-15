@@ -1,6 +1,6 @@
 <script lang="ts">
   import Anchor from "src/partials/Anchor.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let value
 </script>

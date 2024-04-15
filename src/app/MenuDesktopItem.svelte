@@ -3,7 +3,7 @@
   import {elasticOut} from "svelte/easing"
   import {fly} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let path = null
 

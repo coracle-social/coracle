@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import type {Event} from "src/engine"
   import {_events, projections} from "src/engine"
 

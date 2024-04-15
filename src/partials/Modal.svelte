@@ -3,7 +3,7 @@
   import {onMount} from "svelte"
   import {fly, fade} from "src/util/transition"
   import AltColor from "src/partials/AltColor.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let mini = false
   export let virtual = true

@@ -5,7 +5,7 @@
   import Card from "src/partials/Card.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import type {Notification} from "src/engine"
   import {tracker} from "src/engine"
 

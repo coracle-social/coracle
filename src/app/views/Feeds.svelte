@@ -7,7 +7,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Feed from "src/app/shared/Feed.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {session, canSign, lists, userLists} from "src/engine"
 
   export let relays = []

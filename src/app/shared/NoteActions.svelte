@@ -21,7 +21,7 @@
   import HandlerSummary from "src/app/shared/HandlerSummary.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import type {Event} from "src/engine"
   import {
     env,

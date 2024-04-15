@@ -11,7 +11,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Content from "src/partials/Content.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import type {Channel} from "src/engine"
   import {
     nip44,

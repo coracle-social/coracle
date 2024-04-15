@@ -4,7 +4,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {searchPeople, displayPubkey, derivePerson} from "src/engine"
 
   export let value

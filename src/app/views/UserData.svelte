@@ -7,7 +7,7 @@
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {events, hints, sortEventsDesc} from "src/engine"
 
   const sortedEvents = events.derived(sortEventsDesc)

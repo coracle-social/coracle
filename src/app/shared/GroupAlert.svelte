@@ -6,7 +6,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import GroupName from "src/app/shared/GroupName.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let address
   export let alert

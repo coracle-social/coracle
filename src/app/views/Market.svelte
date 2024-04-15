@@ -3,7 +3,7 @@
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {env, canSign, loadGroupMessages} from "src/engine"
 
   const feed = $env.FORCE_GROUP

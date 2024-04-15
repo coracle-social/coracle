@@ -6,7 +6,7 @@
   import Interaction from "@event-calendar/interaction"
   import {secondsToDate} from "src/util/misc"
   import {themeColors} from "src/partials/state"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {load, pubkey} from "src/engine"
 
   export let group

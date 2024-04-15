@@ -8,7 +8,7 @@
   import MenuDesktopItem from "src/app/MenuDesktopItem.svelte"
   import MenuDesktopSecondary from "src/app/MenuDesktopSecondary.svelte"
   import {slowConnections} from "src/app/state"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {
     env,
     user,

@@ -4,7 +4,7 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let pubkey
   export let inert = false

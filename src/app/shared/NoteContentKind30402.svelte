@@ -10,7 +10,7 @@
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {hints, pubkey, isDeleted} from "src/engine"
 
   export let note

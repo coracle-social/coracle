@@ -13,7 +13,7 @@
   import NotificationReactions from "src/app/views/NotificationReactions.svelte"
   import NotificationMention from "src/app/views/NotificationMention.svelte"
   import NotificationReplies from "src/app/views/NotificationReplies.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import type {Event} from "src/engine"
   import {
     session,

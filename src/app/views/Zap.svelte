@@ -22,7 +22,7 @@
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import ZapInvoice from "src/app/shared/ZapInvoice.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {env, subscribe, hints, getSetting, derivePerson, requestZap} from "src/engine"
 
   export let splits

@@ -22,7 +22,7 @@
     getFilterSelections,
     forcePlatformRelaySelections,
   } from "src/engine"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let feed
   export let group = null

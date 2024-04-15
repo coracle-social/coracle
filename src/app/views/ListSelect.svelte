@@ -7,7 +7,7 @@
   import BorderLeft from "src/partials/BorderLeft.svelte"
   import Content from "src/partials/Content.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {pubkey, userLists} from "src/engine"
 
   export let type

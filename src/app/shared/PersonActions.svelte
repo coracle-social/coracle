@@ -15,7 +15,7 @@
     deriveFollowing,
   } from "src/engine"
   import {boot} from "src/app/state"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let pubkey
 

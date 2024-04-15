@@ -11,7 +11,7 @@
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {displayPubkey} from "src/engine"
 
   export let note, showEntire

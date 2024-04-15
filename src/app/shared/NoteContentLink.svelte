@@ -3,7 +3,7 @@
   import {displayUrl} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Media from "src/partials/Media.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let value
   export let showMedia = false

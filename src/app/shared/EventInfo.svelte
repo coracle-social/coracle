@@ -9,7 +9,7 @@
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import EventActions from "src/app/shared/EventActions.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {isDeleted, getSetting, pubkey} from "src/engine"
 
   export let event

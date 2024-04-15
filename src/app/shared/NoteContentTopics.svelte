@@ -2,7 +2,7 @@
   import {Tags} from "@coracle.social/util"
   import Anchor from "src/partials/Anchor.svelte"
   import Chip from "src/partials/Chip.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let note
 </script>

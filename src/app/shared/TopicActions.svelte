@@ -1,6 +1,6 @@
 <script lang="ts">
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {canSign} from "src/engine"
 
   export let topic

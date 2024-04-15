@@ -8,7 +8,7 @@
   import GroupName from "src/app/shared/GroupName.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {groupRequests, loadPubkeys} from "src/engine"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let address
   export let request

@@ -4,7 +4,7 @@
   import Card from "src/partials/Card.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {displayGroup, deriveGroup, getWotGroupMembers} from "src/engine"
 
   export let address

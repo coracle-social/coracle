@@ -8,7 +8,7 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import {menuIsOpen, searchTerm} from "src/app/state"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {env, pubkey, canSign, hasNewNotifications, hasNewMessages, publishes} from "src/engine"
 
   let innerWidth = 0

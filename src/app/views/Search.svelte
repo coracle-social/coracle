@@ -8,7 +8,7 @@
   import Input from "src/partials/Input.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import SearchResults from "src/app/shared/SearchResults.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {searchTerm} from "src/app/state"
 
   const startScanner = () => {

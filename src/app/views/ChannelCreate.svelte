@@ -4,7 +4,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {pubkey, nip44} from "src/engine"
 
   let profiles = []

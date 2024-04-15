@@ -7,7 +7,7 @@
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import MenuMobileItem from "src/app/MenuMobileItem.svelte"
   import {slowConnections, menuIsOpen} from "src/app/state"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {
     env,
     user,

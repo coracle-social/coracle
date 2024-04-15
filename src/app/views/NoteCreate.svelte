@@ -28,7 +28,7 @@
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import {publish, mention} from "src/engine"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {
     env,
     hints,

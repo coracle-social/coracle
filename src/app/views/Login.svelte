@@ -19,7 +19,7 @@
     loginWithExtension,
     loginWithNostrConnect,
   } from "src/engine"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
 
   const signUp = () => router.at("signup").replaceModal()

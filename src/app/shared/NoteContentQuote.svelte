@@ -7,7 +7,7 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {hints, loadOne, loadPubkeys, displayPubkey, isEventMuted} from "src/engine"
 
   export let note

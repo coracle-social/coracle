@@ -1,7 +1,7 @@
 <script lang="ts">
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {publishDeletion} from "src/engine"
 
   export let address

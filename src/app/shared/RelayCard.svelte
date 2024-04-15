@@ -10,7 +10,7 @@
   import Popover from "src/partials/Popover.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {canSign, getSetting, displayRelay, setRelayPolicy} from "src/engine"
 
   export let relay

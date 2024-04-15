@@ -7,7 +7,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Field from "src/partials/Field.svelte"
   import {pubkey, people, publishProfile} from "src/engine"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
   const lud16Url = "https://blog.getalby.com/create-your-neutral-300ning-address/"

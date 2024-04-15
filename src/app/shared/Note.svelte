@@ -26,7 +26,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {
     env,
     load,

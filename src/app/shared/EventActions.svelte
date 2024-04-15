@@ -1,7 +1,7 @@
 <script lang="ts">
   import {encodeAddress, addressToNaddr} from "@coracle.social/util"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {pubkey, isDeleted, hints} from "src/engine"
 
   export let event

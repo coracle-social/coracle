@@ -8,7 +8,7 @@
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import {publishAdminKeyShares} from "src/engine"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let address
 

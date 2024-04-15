@@ -3,7 +3,7 @@
   import {toast} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import Toggle from "src/partials/Toggle.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let value
   export let label

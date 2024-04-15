@@ -6,7 +6,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {
     signer,
     session,

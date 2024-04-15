@@ -5,7 +5,7 @@
   import {fuzzy} from "src/util/misc"
   import {parseAnything} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import type {Person, Topic} from "src/engine"
   import {topics, searchPeople, createPeopleLoader} from "src/engine"
 

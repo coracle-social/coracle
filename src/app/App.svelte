@@ -37,7 +37,7 @@
     asNote,
     asRelay,
     asEntity,
-  } from "src/app/router"
+  } from "src/app/util/router"
 
   // Routes
 

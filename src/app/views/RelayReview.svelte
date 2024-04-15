@@ -4,7 +4,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {publishReview} from "src/engine"
 
   export let url

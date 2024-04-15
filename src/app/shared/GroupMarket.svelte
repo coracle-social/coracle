@@ -3,7 +3,7 @@
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let address
 

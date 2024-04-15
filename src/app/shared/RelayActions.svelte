@@ -11,7 +11,7 @@
     deriveHasRelay,
     broadcastUserData,
   } from "src/engine"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let relay
 

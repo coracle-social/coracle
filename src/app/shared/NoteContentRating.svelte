@@ -3,7 +3,7 @@
   import {Tags} from "@coracle.social/util"
   import Anchor from "src/partials/Anchor.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {displayRelay, displayPubkey, hints} from "src/engine"
 
   export let note, rating

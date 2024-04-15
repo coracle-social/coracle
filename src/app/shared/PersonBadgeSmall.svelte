@@ -2,7 +2,7 @@
   import cx from "classnames"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {derivePerson, displayPerson} from "src/engine"
 
   export let pubkey

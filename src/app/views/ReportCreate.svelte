@@ -9,7 +9,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {publishReport} from "src/engine"
 
   export let eid

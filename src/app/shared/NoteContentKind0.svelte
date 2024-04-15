@@ -4,7 +4,7 @@
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {imgproxy, hints} from "src/engine"
 
   export let note

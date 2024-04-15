@@ -3,7 +3,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ListSummary from "src/app/shared/ListSummary.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {userLists, publishDeletion} from "src/engine"
 
   const createFeed = () => router.at("lists/create").open()

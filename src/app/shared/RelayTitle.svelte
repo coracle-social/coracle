@@ -3,7 +3,7 @@
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {getSetting, displayRelay} from "src/engine"
 
   export let relay

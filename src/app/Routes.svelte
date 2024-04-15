@@ -3,7 +3,7 @@
   import logger from "src/util/logger"
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {session, signer, stateKey} from "src/engine"
 
   const {current, page, modal, modals} = router

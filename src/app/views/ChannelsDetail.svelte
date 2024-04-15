@@ -10,7 +10,7 @@
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {
     nip44,
     session,

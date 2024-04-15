@@ -6,7 +6,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import {groups, deriveAdminKeyForGroup, getGroupNaddr} from "src/engine"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
 
   export let address
 

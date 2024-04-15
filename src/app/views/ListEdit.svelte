@@ -9,7 +9,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
-  import {router} from "src/app/router"
+  import {router} from "src/app/util/router"
   import {
     env,
     userLists,
