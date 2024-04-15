@@ -4,7 +4,7 @@
   import {nip19} from "nostr-tools"
   import {getAddress} from "@coracle.social/util"
   import {nsecEncode, giftWrapKinds, isKeyValid, getPublicKey, toHex} from "src/util/nostr"
-  import {toast} from "src/partials/state"
+  import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
@@ -49,7 +49,7 @@
     const privkey = nsec.startsWith("nsec") ? toHex(nsec) : nsec
 
     if (!isKeyValid(privkey)) {
-      toast.show("warning", "Sorry, but that's an invalid private key.")
+      showWarning("Sorry, but that's an invalid private key.")
       importing = false
       return
     }
@@ -61,7 +61,7 @@
     // Look for group definition events by this pubkey so we can associate the key with the group
     const sub = subscribe({
       ...LOAD_OPTS,
-      relays: hints.User().getUrls().concat(pluck('url', relays)),
+      relays: hints.User().getUrls().concat(pluck("url", relays)),
       filters: [
         {kinds: [35834], authors: [pubkey], limit: 1},
         {kinds: giftWrapKinds, "#p": [pubkey], limit: 500},
@@ -90,9 +90,9 @@
 
         if (found) {
           nsec = null
-          toast.show("info", "Successfully imported admin key!")
+          showInfo("Successfully imported admin key!")
         } else {
-          toast.show("warning", "Sorry, we weren't able to find any events created with that key.")
+          showWarning("Sorry, we weren't able to find any events created with that key.")
         }
       },
     })
@@ -195,7 +195,12 @@
       <Input type="password" bind:value={nsec} placeholder="nsec..." />
     </Field>
     <Field label="Relays to search">
-      <SearchSelect multiple getKey={displayRelay} search={$searchRelays} bind:value={relays} placeholder="wss://..." />
+      <SearchSelect
+        multiple
+        getKey={displayRelay}
+        search={$searchRelays}
+        bind:value={relays}
+        placeholder="wss://..." />
     </Field>
     <Anchor button accent loading={importing} on:click={finishImport}>Import key</Anchor>
   </Modal>

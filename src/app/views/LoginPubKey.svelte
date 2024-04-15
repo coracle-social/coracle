@@ -4,7 +4,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {toast} from "src/partials/state"
+  import {showWarning} from "src/partials/Toast.svelte"
   import {loginWithPublicKey} from "src/engine"
   import {boot} from "src/app/state"
 
@@ -17,7 +17,7 @@
       loginWithPublicKey(pubkey)
       boot()
     } else {
-      toast.show("warning", "Sorry, but that's an invalid public key.")
+      showWarning("Sorry, but that's an invalid public key.")
     }
   }
 </script>

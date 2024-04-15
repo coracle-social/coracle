@@ -9,7 +9,7 @@
   import {formatSats, tryJson} from "src/util/misc"
   import {LOCAL_RELAY_URL} from "src/util/nostr"
   import {quantify, pluralize} from "hurdak"
-  import {toast} from "src/partials/state"
+  import {showInfo} from "src/partials/Toast.svelte"
   import Icon from "src/partials/Icon.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
@@ -119,7 +119,7 @@
 
     publishToZeroOrMoreGroups([address].filter(identity), template)
 
-    toast.show("info", "Note has been cross-posted!")
+    showInfo("Note has been cross-posted!")
 
     setView(null)
   }
@@ -142,7 +142,7 @@
 
   const broadcast = () => {
     publish({event: note, relays: forcePlatformRelays(hints.WriteRelays().getUrls())})
-    toast.show("info", "Note has been re-published!")
+    showInfo("Note has been re-published!")
   }
 
   const groupOptions = session.derived($session => {

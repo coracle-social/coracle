@@ -2,7 +2,8 @@
   import {sleep} from "hurdak"
   import {error} from "src/util/logger"
   import {isGiftWrap} from "src/util/nostr"
-  import {appName, toast} from "src/partials/state"
+  import {appName} from "src/partials/state"
+  import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -18,14 +19,14 @@
 
   const submit = () => {
     if (!file) {
-      toast.show("warning", "Please select a file to import.")
+      showWarning("Please select a file to import.")
 
       return
     }
 
     loading = true
 
-    toast.show("info", "Processing your import...", 60_000)
+    showInfo("Processing your import...", {timeout: 60_000})
 
     const reader = new FileReader()
 
@@ -47,13 +48,13 @@
           await sleep(100)
         }
 
-        toast.show("info", "Import complete!")
+        showInfo("Import complete!")
 
         setTimeout(() => router.clearModals(), 2000)
       } catch (e) {
         error(e)
 
-        toast.show("warning", "Something went wrong!")
+        showWarning("Something went wrong!")
       }
 
       loading = false

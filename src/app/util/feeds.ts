@@ -11,8 +11,7 @@ import {
   decodeAddress,
 } from "@coracle.social/util"
 import type {Feed, Loader} from "@coracle.social/feeds"
-import {FeedLoader as CoreFeedLoader, FeedType, Scope} from "@coracle.social/feeds"
-import {generatePrivateKey} from "src/util/nostr"
+import {FeedLoader as CoreFeedLoader, FeedType} from "@coracle.social/feeds"
 import {LOCAL_RELAY_URL, reactionKinds, repostKinds} from "src/util/nostr"
 import type {DisplayEvent, Event} from "src/engine"
 import {
@@ -21,7 +20,6 @@ import {
   unwrapRepost,
   isEventMuted,
   isDeleted,
-  primeWotCaches,
   hints,
   forcePlatformRelays,
   forcePlatformRelaySelections,
@@ -29,13 +27,6 @@ import {
   getFilterSelections,
   tracker,
   load,
-  dvmRequest,
-  getFollowedPubkeys,
-  getFollowers,
-  maxWot,
-  people,
-  getWotScore,
-  user,
 } from "src/engine"
 
 export type FeedOpts = {

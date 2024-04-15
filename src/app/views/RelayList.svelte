@@ -5,7 +5,7 @@
   import {derived} from "@coracle.social/lib"
   import {Tags, isShareableRelayUrl, normalizeRelayUrl} from "@coracle.social/util"
   import {pushToKey, createScroller} from "src/util/misc"
-  import {toast} from "src/partials/state"
+  import {showWarning} from "src/partials/Toast.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Modal from "src/partials/Modal.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -103,7 +103,7 @@
     const url = normalizeRelayUrl(customRelay)
 
     if (!isShareableRelayUrl(url)) {
-      toast.show("warning", "Please provide a valid relay url")
+      showWarning("Please provide a valid relay url")
     } else {
       joinRelay(url)
       broadcastUserData([url])

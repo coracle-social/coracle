@@ -2,7 +2,7 @@
   import {join, identity} from "ramda"
   import {writable} from "@coracle.social/lib"
   import {Tags, createEvent} from "@coracle.social/util"
-  import {toast} from "src/partials/state"
+  import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Compose from "src/app/shared/Compose.svelte"
@@ -60,7 +60,7 @@
 
     const content = compose.parse().trim()
 
-    if (!content) return toast.show("warning", "Please provide a description.")
+    if (!content) return showWarning("Please provide a description.")
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
@@ -89,8 +89,9 @@
     }
 
     const template = createEvent(1, {content, tags})
+    const pubs = publishToZeroOrMoreGroups(defaultGroups, template, opts)
 
-    publishToZeroOrMoreGroups(defaultGroups, template, opts)
+    showPublishInfo(pubs[0])
     opts = {...defaultOpts}
     compose.clear()
     saving = false

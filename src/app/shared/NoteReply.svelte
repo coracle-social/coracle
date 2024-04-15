@@ -4,6 +4,7 @@
   import {createEventDispatcher} from "svelte"
   import {join, without, uniq} from "ramda"
   import {slide} from "src/util/transition"
+  import {showPublishInfo} from "src/partials/Toast.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -116,6 +117,7 @@
     const pubs = await publishToZeroOrMoreGroups(addresses, template, opts)
 
     addToContext(pubs[0].request.event)
+    showPublishInfo(pubs[0])
     clearDraft()
     reset()
   }

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {copyToClipboard} from "src/util/html"
-  import {toast} from "src/partials/state"
+  import {showInfo} from "src/partials/Toast.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import {router} from "src/app/util/router"
@@ -16,7 +16,7 @@
 
   const copy = () => {
     copyToClipboard(displayValue)
-    toast.show("info", `${label || "Contents"} copied to clipboard!`)
+    showInfo(`${label || "Contents"} copied to clipboard!`)
   }
 
   const share = () => router.at("qrcode").at(displayValue).open()

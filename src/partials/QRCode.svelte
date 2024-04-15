@@ -3,8 +3,8 @@
   import {onMount} from "svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import {showInfo} from "src/partials/Toast.svelte"
   import {copyToClipboard} from "src/util/html"
-  import {toast} from "src/partials/state"
 
   export let code
   export let href = null
@@ -17,7 +17,7 @@
 
   const copy = () => {
     copyToClipboard(code)
-    toast.show("info", "Copied to clipboard!")
+    showInfo("Copied to clipboard!")
   }
 
   onMount(() => {

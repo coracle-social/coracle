@@ -2,7 +2,8 @@
   import {onMount} from "svelte"
   import {pluck, identity} from "ramda"
   import {Tags} from "@coracle.social/util"
-  import {toast, appName} from "src/partials/state"
+  import {appName} from "src/partials/state"
+  import {showInfo} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
   import Field from "src/partials/Field.svelte"
   import Footer from "src/partials/Footer.svelte"
@@ -37,7 +38,7 @@
     publishSettings(settings)
     publishMutes(allMutes)
 
-    toast.show("info", "Your preferences have been saved!")
+    showInfo("Your preferences have been saved!")
   }
 
   let mutedPeople = muteTags.values("p").uniq().valueOf().map(getPersonWithDefault)

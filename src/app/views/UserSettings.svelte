@@ -1,6 +1,7 @@
 <script lang="ts">
   import {identity} from "ramda"
-  import {toast, appName} from "src/partials/state"
+  import {appName} from "src/partials/state"
+  import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import Footer from "src/partials/Footer.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
@@ -17,7 +18,7 @@
   const submit = () => {
     publishSettings(settings)
 
-    toast.show("info", "Your settings have been saved!")
+    showInfo("Your settings have been saved!")
   }
 
   const searchUploadProviders = fuzzy($env.NIP96_URLS, {keys: ["url"]})

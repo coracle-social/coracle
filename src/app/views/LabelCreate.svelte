@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {toast} from "src/partials/state"
+  import {showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -23,7 +23,7 @@
 
     publishLabel(tags)
 
-    toast.show("info", "Your tag has been saved!")
+    showInfo("Your tag has been saved!")
     router.pop()
   }
 

@@ -8,7 +8,7 @@
   import {createEvent, Tags} from "@coracle.social/util"
   import {currencyOptions} from "src/util/i18n"
   import {dateToSeconds} from "src/util/misc"
-  import {toast} from "src/partials/state"
+  import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import CurrencyInput from "src/partials/CurrencyInput.svelte"
@@ -83,31 +83,31 @@
   const onSubmit = async ({skipNsecWarning = false} = {}) => {
     const content = compose.parse().trim()
 
-    if (!content) return toast.show("warning", "Please provide a description.")
+    if (!content) return showWarning("Please provide a description.")
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
     if (type === "calendar_event") {
       if (!opts.title) {
-        return toast.show("warning", "Please name your event.")
+        return showWarning("Please name your event.")
       }
 
       if (!opts.start || !opts.end) {
-        return toast.show("warning", "Please provide a start and end date and time.")
+        return showWarning("Please provide a start and end date and time.")
       }
     }
 
     if (type === "listing") {
       if (!opts.title) {
-        return toast.show("warning", "Please name your listing.")
+        return showWarning("Please name your listing.")
       }
 
       if (isNaN(parseFloat(opts.price))) {
-        return toast.show("warning", "Please provide a valid price.")
+        return showWarning("Please provide a valid price.")
       }
 
       if (!opts.currency) {
-        return toast.show("warning", "Please select a currency.")
+        return showWarning("Please select a currency.")
       }
     }
 
@@ -163,7 +163,9 @@
         }),
     })
 
-    publishToZeroOrMoreGroups(opts.groups, template, opts)
+    const pubs = publishToZeroOrMoreGroups(opts.groups, template, opts)
+
+    showPublishInfo(pubs[0])
     router.clearModals()
   }
 

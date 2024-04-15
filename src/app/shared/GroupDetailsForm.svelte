@@ -20,7 +20,7 @@
   import {ucFirst} from "hurdak"
   import {fly} from "src/util/transition"
   import {parseAnything} from "src/util/nostr"
-  import {toast} from "src/partials/state"
+  import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
@@ -70,14 +70,14 @@
 
   const submit = async () => {
     if (values.relays.length < 1) {
-      toast.show("warning", "At least one relay is required.")
+      showWarning("At least one relay is required.")
 
       return
     }
 
     await onSubmit(values)
 
-    toast.show("info", "Your group has been saved!")
+    showInfo("Your group has been saved!")
   }
 
   let feedsInput

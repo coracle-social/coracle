@@ -1,7 +1,8 @@
 <script lang="ts">
   import {Capacitor} from "@capacitor/core"
   import {isKeyValid, toHex} from "src/util/nostr"
-  import {toast, appName} from "src/partials/state"
+  import {appName} from "src/partials/state"
+  import {showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
@@ -19,7 +20,7 @@
       loginWithPrivateKey(privkey)
       boot()
     } else {
-      toast.show("warning", "Sorry, but that's an invalid private key.")
+      showWarning("Sorry, but that's an invalid private key.")
     }
   }
 </script>

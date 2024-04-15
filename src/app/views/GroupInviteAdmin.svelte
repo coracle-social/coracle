@@ -1,6 +1,6 @@
 <script lang="ts">
   import {pluck} from "ramda"
-  import {toast} from "src/partials/state"
+  import {showInfo} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -22,7 +22,7 @@
 
   const confirm = () => {
     publishAdminKeyShares(address, pluck("pubkey", people))
-    toast.show("info", "Key shares sent!")
+    showInfo("Key shares sent!")
     router.clearModals()
   }
 

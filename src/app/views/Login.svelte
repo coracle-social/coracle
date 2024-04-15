@@ -4,7 +4,7 @@
   import {last, prop, objOf} from "ramda"
   import {Handlerinformation, NostrConnect} from "nostr-tools/kinds"
   import {tryJson} from "src/util/misc"
-  import {toast} from "src/partials/state"
+  import {showWarning} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
@@ -42,11 +42,11 @@
 
   const onSubmit = async () => {
     if (!username) {
-      return toast.show("warning", "Please enter a user name.")
+      return showWarning("Please enter a user name.")
     }
 
     if (!handler) {
-      return toast.show("warning", "Please select a login provider.")
+      return showWarning("Please select a login provider.")
     }
 
     // Fill in pubkey and relays if they entered a custom doain
@@ -58,7 +58,7 @@
     }
 
     if (!handler.relays) {
-      return toast.show("warning", "Sorry, we weren't able to find that provider.")
+      return showWarning("Sorry, we weren't able to find that provider.")
     }
 
     const success = await loginWithNostrConnect(username, handler)
@@ -66,7 +66,7 @@
     if (success) {
       boot()
     } else {
-      toast.show("warning", "Sorry, we weren't able to log you in with that provider.")
+      showWarning("Sorry, we weren't able to log you in with that provider.")
     }
   }
 

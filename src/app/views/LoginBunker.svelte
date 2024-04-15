@@ -1,7 +1,7 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
   import {isKeyValid, toHex} from "src/util/nostr"
-  import {toast} from "src/partials/state"
+  import {showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
@@ -40,7 +40,7 @@
       if (profile) {
         r.pubkey = profile.pubkey
       } else {
-        toast.show("warning", "Sorry, it looks like that's an invalid public key.")
+        showWarning("Sorry, it looks like that's an invalid public key.")
       }
     } else {
       const [npub, token] = input.split("#")
@@ -55,7 +55,7 @@
     const {pubkey, token, relay} = await parse(input)
 
     if (!isKeyValid(pubkey)) {
-      return toast.show("warning", "Sorry, but that's an invalid public key.")
+      return showWarning("Sorry, but that's an invalid public key.")
     }
 
     const success = await loginWithNsecBunker(pubkey, token, relay)

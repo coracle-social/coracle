@@ -1,6 +1,6 @@
 <script lang="ts">
   import {prop} from "ramda"
-  import {toast} from "src/partials/state"
+  import {showInfo} from "src/partials/Toast.svelte"
   import type {Values} from "src/app/shared/GroupDetailsForm.svelte"
   import GroupDetailsForm from "src/app/shared/GroupDetailsForm.svelte"
   import {
@@ -43,7 +43,7 @@
       await publishGroupMeta(address, id, feeds, relays, meta, list_publicly)
     }
 
-    toast.show("info", "Your group has been updated!")
+    showInfo("Your group has been updated!")
     router.pop()
   }
 </script>

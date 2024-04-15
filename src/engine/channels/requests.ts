@@ -5,11 +5,11 @@ import {relayFeed, filterFeed} from "@coracle.social/feeds"
 import {sessions} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {loadPubkeys, subscribe} from "src/engine/network/utils"
-import {feedLoader} from "src/engine/events/requests"
+import {loadAll} from "src/engine/events/requests"
 import {hints} from "src/engine/relays/utils"
 import {channels} from "./state"
 
-export const loadAllMessages = async ({reload = false} = {}) => {
+export const loadAllMessages = ({reload = false} = {}) => {
   const {pubkey, nip24_messages_last_synced = 0} = session.get()
   const since = reload ? 0 : Math.max(0, nip24_messages_last_synced - seconds(6, "hour"))
 
@@ -20,24 +20,18 @@ export const loadAllMessages = async ({reload = false} = {}) => {
     loadPubkeys($channels.flatMap(c => c.members || []))
   })
 
-  const feed = relayFeed(
-    hints.User().getUrls(),
-    filterFeed({kinds: [4], authors: [pubkey], since}, {kinds: [4, 1059], "#p": [pubkey], since}),
+  const loader = loadAll(
+    relayFeed(
+      hints.User().getUrls(),
+      filterFeed({kinds: [4], authors: [pubkey], since}, {kinds: [4, 1059], "#p": [pubkey], since}),
+    ),
   )
 
-  let exhausted = false
-
-  const load = await feedLoader.getLoader(feed, {
-    onExhausted: () => {
-      exhausted = true
-    },
+  loader.promise.then(() => {
+    unsubscribePubkeys()
   })
 
-  while (!exhausted) {
-    await load(100)
-  }
-
-  unsubscribePubkeys()
+  return loader
 }
 
 export const listenForMessages = (pubkeys: string[]) => {

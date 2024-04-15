@@ -1,7 +1,7 @@
 <script lang="ts">
   import {Tags, decodeAddress} from "@coracle.social/util"
   import {randomId} from "hurdak"
-  import {toast} from "src/partials/state"
+  import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Field from "src/partials/Field.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
@@ -53,20 +53,20 @@
 
   const submit = () => {
     if (!values.title) {
-      return toast.show("warning", "A name is required for your list")
+      return showWarning("A name is required for your list")
     }
 
     const duplicates = $userLists.filter(l => l.title === values.title && l.address !== address)
 
     if (duplicates.length > 0) {
-      return toast.show("warning", "That name is already in use")
+      return showWarning("That name is already in use")
     }
 
     const id = address ? decodeAddress(address).identifier : randomId()
     const {title, description, params, relays} = values
 
     publishBookmarksList(id, title, description, [...params, ...relays])
-    toast.show("info", "Your list has been saved!")
+    showInfo("Your list has been saved!")
     router.pop()
   }
 </script>

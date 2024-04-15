@@ -3,7 +3,7 @@
   import {seconds} from "hurdak"
   import {now} from "@coracle.social/lib"
   import {fuzzy} from "src/util/misc"
-  import {toast} from "src/partials/state"
+  import {showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -30,7 +30,7 @@
     }
 
     publishReport("", tags)
-    toast.show("info", "Your report has been sent!")
+    showInfo("Your report has been sent!")
     router.pop()
   }
 

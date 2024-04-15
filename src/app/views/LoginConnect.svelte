@@ -2,7 +2,7 @@
   import {sleep} from "hurdak"
   import {normalizeRelayUrl, isShareableRelayUrl} from "@coracle.social/util"
   import {userKinds, LOCAL_RELAY_URL} from "src/util/nostr"
-  import {toast} from "src/partials/state"
+  import {showWarning} from "src/partials/Toast.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
@@ -36,7 +36,7 @@
       customRelay = ""
       closeModal()
     } else {
-      toast.show("warning", "Please enter a valid relay url")
+      showWarning("Please enter a valid relay url")
     }
   }
 
@@ -81,7 +81,7 @@
 
 <Content size="lg">
   {#if showFound}
-    <p class="text-2xl text-center">Success! Logging you in...</p>
+    <p class="text-center text-2xl">Success! Logging you in...</p>
   {:else if failed}
     <p class="text-2xl">We're having a hard time finding your profile.</p>
   {:else}

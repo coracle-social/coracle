@@ -1,6 +1,7 @@
 import {seconds} from "hurdak"
-import {Worker} from "@coracle.social/lib"
-import type {Event} from "@coracle.social/util"
+import {Worker, writable} from "@coracle.social/lib"
+import type {Event, Rumor} from "@coracle.social/util"
+import type {LoadOpts} from "@coracle.social/feeds"
 import {FeedLoader, Scope, relayFeed, filterFeed} from "@coracle.social/feeds"
 import {giftWrapKinds, generatePrivateKey} from "src/util/nostr"
 import {user, session, nip44, nip04} from "src/engine/session/derived"
@@ -58,7 +59,7 @@ export const loadGiftWrap = () => {
   }
 }
 
-export const feedLoader = new FeedLoader({
+export const feedLoader = new FeedLoader<Event | Rumor>({
   request: async ({relays, filters, onEvent}) => {
     if (relays.length > 0) {
       await load({filters, relays, onEvent})
@@ -112,23 +113,36 @@ export const feedLoader = new FeedLoader({
   },
 })
 
-export const sync = async (fromUrl, toUrl, filters) => {
+export const loadAll = (feed, opts: LoadOpts<Event | Rumor> = {}) => {
+  const loading = writable(true)
+
+  const stop = () => loading.set(false)
+
+  const promise = new Promise<void>(async resolve => {
+    const load = await feedLoader.getLoader(feed, {
+      onEvent: opts.onEvent,
+      onExhausted: () => {
+        opts.onExhausted?.()
+        stop()
+      },
+    })
+
+    while (loading.get()) {
+      await load(100)
+    }
+
+    resolve()
+  })
+
+  return {promise, loading, stop}
+}
+
+export const sync = (fromUrl, toUrl, filters) => {
   const worker = new Worker<Event>()
 
   worker.addGlobalHandler(event => publish({event, relays: [toUrl]}))
 
-  const feed = relayFeed([fromUrl], filterFeed(...filters))
-
-  let exhausted = false
-
-  const load = await feedLoader.getLoader(feed, {
-    onEvent: worker.push,
-    onExhausted: () => {
-      exhausted = true
-    },
+  return loadAll(relayFeed([fromUrl], filterFeed(...filters)), {
+    onEvent: e => worker.push(e as Event),
   })
-
-  while (!exhausted) {
-    await load(100)
-  }
 }

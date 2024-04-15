@@ -2,7 +2,7 @@
   import {uniq, pluck} from "ramda"
   import {copyToClipboard} from "src/util/html"
   import {tryJson, displayDomain} from "src/util/misc"
-  import {toast} from "src/partials/state"
+  import {showInfo} from "src/partials/Toast.svelte"
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -19,7 +19,7 @@
 
   const copy = text => {
     copyToClipboard(text)
-    toast.show("info", "Copied to clipboard!")
+    showInfo("Copied to clipboard!")
   }
 </script>
 

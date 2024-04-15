@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {toast} from "src/partials/state"
+  import {showInfo} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import {groups, createAndPublish, hints, deriveAdminKeyForGroup, displayGroup} from "src/engine"
@@ -20,7 +20,7 @@
       sk: $adminKey.privkey,
     })
 
-    toast.show("info", "Group deleted!")
+    showInfo("Group deleted!")
     router.pop()
   }
 

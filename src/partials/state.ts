@@ -1,7 +1,6 @@
 import {debounce} from "throttle-debounce"
-import {prop, fromPairs} from "ramda"
-import {randomId, Storage} from "hurdak"
-import type {Writable} from "@coracle.social/lib"
+import {fromPairs} from "ramda"
+import {Storage} from "hurdak"
 import {writable} from "@coracle.social/lib"
 import {parseHex} from "src/util/html"
 
@@ -27,28 +26,6 @@ export const installAsPWA = () => {
   installPrompt.get().userChoice.then(result => {
     installPrompt.set(null)
   })
-}
-
-// Toast
-
-export interface Toast<T> extends Writable<T> {
-  show(type: string, message: any, timeout?: number): void
-}
-
-export const toast = writable(null) as Toast<any>
-
-toast.show = (type, message, timeout = 5) => {
-  const id = randomId()
-
-  toast.set({id, type, message})
-
-  if (timeout) {
-    setTimeout(() => {
-      if (prop("id", toast.get()) === id) {
-        toast.set(null)
-      }
-    }, timeout * 1000)
-  }
 }
 
 // Themes

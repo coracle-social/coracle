@@ -1,8 +1,32 @@
+<script context="module" lang="ts">
+  import {randomId} from "hurdak"
+  import {writable} from "@coracle.social/lib"
+
+  export const toast = writable(null)
+
+  export const showToast = ({id = randomId(), type = "text", theme = "info", timeout = 5, ...opts}) => {
+    toast.set({id, type, theme, ...opts})
+
+    if (timeout) {
+      setTimeout(() => {
+        if (toast.get()?.id === id) {
+          toast.set(null)
+        }
+      }, timeout * 1000)
+    }
+  }
+
+  export const showInfo = (message, opts = {}) => showToast({message, ...opts})
+
+  export const showWarning = (message, opts = {}) => showToast({message, theme: "warning", ...opts})
+
+  export const showPublishInfo = (pub, opts = {}) => showToast({pub, type: "publish", ...opts})
+</script>
+
 <script lang="ts">
   import cx from "classnames"
-  import {is} from "ramda"
   import {fly} from "src/util/transition"
-  import {toast} from "src/partials/state"
+  import Anchor from 'src/partials/Anchor.svelte'
 
   let touchStart = 0
   let startOffset = 0
@@ -51,24 +75,18 @@
           "pointer-events-auto m-2 rounded border p-3 pr-8 text-center shadow-xl sm:ml-2",
           "relative max-w-xl flex-grow transition-all",
           {
-            "border-neutral-600 bg-tinted-700 text-neutral-100": $toast.type === "info",
-            "border-warning bg-tinted-700 text-neutral-100": $toast.type === "warning",
+            "border-neutral-600 bg-tinted-700 text-neutral-100": $toast.theme === "info",
+            "border-warning bg-tinted-700 text-neutral-100": $toast.theme === "warning",
           },
         )}>
-        {#if is(String, $toast.message)}
+        {#if $toast.type === "text"}
           {$toast.message}
-        {:else}
-          <div>
-            {$toast.message.text}
-            {#if $toast.message.link}
-              <a
-                class="ml-1 cursor-pointer underline"
-                href={$toast.message.link.href}
-                on:click={$toast.message.link.onClick}>
-                {$toast.message.link.text}
-              </a>
-            {/if}
-          </div>
+        {:else if $toast.type === "publish"}
+          {@const {status, request} = $toast.pub}
+          {@const total = request.relays.length}
+          {@const pending = Array.from(status.values()).filter(s => s === "pending").length}
+          Published to {total - pending}/{total} relays.
+          <Anchor modal underline href="/publishes">View details</Anchor>
         {/if}
         <div class="absolute right-1 top-0 cursor-pointer p-3" on:click={() => toast.set(null)}>
           <i class="fa fa-times" />

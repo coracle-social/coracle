@@ -1,7 +1,7 @@
 <script lang="ts">
   import {pluck, without} from "ramda"
   import {difference} from "hurdak"
-  import {toast} from "src/partials/state"
+  import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
@@ -89,7 +89,7 @@
     // know they still have access.
     publishGroupInvites(address, allMembers)
 
-    toast.show("info", "Invites have been sent!")
+    showInfo("Invites have been sent!")
     router.pop()
   }
 

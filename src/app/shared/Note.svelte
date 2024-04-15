@@ -67,6 +67,7 @@
   let collapsed = depth === 0
   let ctx = uniqBy(prop("id"), context)
   let showEntire = anchor === getIdOrAddress(event)
+  let showHiddenReplies = showEntire
 
   const interactive = !anchor || !showEntire
 
@@ -138,7 +139,7 @@
         mutedReplies.push(e)
       } else if (collapsed) {
         hiddenReplies.push(e)
-      } else if (!showEntire && filters && !matchFilters(filters, e)) {
+      } else if (!showHiddenReplies && filters && !matchFilters(filters, e)) {
         hiddenReplies.push(e)
       } else {
         visibleReplies.push(e)
@@ -150,7 +151,7 @@
       hiddenReplies.splice(0)
     }
 
-    if (!showEntire && visibleReplies.length === 0) {
+    if (!showHiddenReplies && visibleReplies.length === 0) {
       mutedReplies.splice(0)
       hiddenReplies.splice(0)
     }
@@ -159,7 +160,7 @@
       visibleReplies = visibleReplies.concat(mutedReplies.splice(0))
     }
 
-    if (!showEntire) {
+    if (!showHiddenReplies) {
       hiddenReplies = hiddenReplies.concat(visibleReplies.slice(3))
       visibleReplies = visibleReplies.slice(0, 3)
     }
@@ -369,7 +370,7 @@
             <button
               class="mt-4 cursor-pointer rounded-md bg-gradient-to-l from-transparent via-tinted-700 to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
               on:click={() => {
-                showEntire = true
+                showHiddenReplies = true
               }}>
               <i class="fa fa-up-down pr-2 text-sm" />
               Show {quantify(hiddenReplies.length, "other reply", "more replies")}
@@ -381,20 +382,22 @@
             <AltColor background class="absolute -left-4 -top-10 h-14 w-1" />
           {/if}
           {#if visibleReplies.length}
-            <div in:fly={{y: 20}}>
-              {#each visibleReplies as r, i (r.id)}
-                <svelte:self
-                  isLastReply={i === visibleReplies.length - 1}
-                  showParent={false}
-                  showMuted
-                  note={r}
-                  depth={depth - 1}
-                  context={ctx}
-                  {anchor} />
-              {/each}
-            </div>
+            {#key showHiddenReplies}
+              <div in:fly={{y: 20}}>
+                {#each visibleReplies as r, i (r.id)}
+                  <svelte:self
+                    isLastReply={i === visibleReplies.length - 1}
+                    showParent={false}
+                    showMuted
+                    note={r}
+                    depth={depth - 1}
+                    context={ctx}
+                    {anchor} />
+                {/each}
+              </div>
+            {/key}
           {/if}
-          {#if showEntire && mutedReplies.length > 0}
+          {#if showHiddenReplies && mutedReplies.length > 0}
             <button
               class="mt-4 cursor-pointer rounded-md bg-gradient-to-l from-transparent via-tinted-700 to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
               on:click={() => {
