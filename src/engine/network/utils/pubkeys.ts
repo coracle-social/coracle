@@ -1,11 +1,13 @@
 import {without, assoc} from "ramda"
 import {seconds} from "hurdak"
-import {now} from "@coracle.social/lib"
+import {now, inc} from "@coracle.social/lib"
 import type {Filter} from "@coracle.social/util"
 import {personKinds, appDataKeys} from "src/util/nostr"
 import {people} from "src/engine/people/state"
 import {hints} from "src/engine/relays/utils"
 import {load} from "./executor"
+
+const attempts = new Map<string, number>()
 
 export const getValidPubkeys = (pubkeys: string[], key: string, force = false) => {
   const result = new Set<string>()
@@ -18,15 +20,27 @@ export const getValidPubkeys = (pubkeys: string[], key: string, force = false) =
     const person = people.key(pubkey)
     const $person = person.get()
     const tskey = `${key}_fetched_at`
+    const ts = $person?.[tskey]
 
-    // Only delay long enough to avoid multiple concurrent requests if we don't yet
-    // have the data we need
-    if (!force && $person?.[tskey] > now() - ($person?.[key] ? seconds(1, "hour") : 3)) {
-      continue
+    if (!force) {
+      // Avoid multiple concurrent requests
+      if (ts > now() - 5) {
+        continue
+      }
+
+      // If we've tried a few times, slow down with duplicate requests
+      if (attempts.get(pubkey) > 3 && ts > now() - seconds(5, "minute")) {
+        continue
+      }
+
+      // If we have something to show the user, and we checked recently, leave it alone
+      if ($person?.[key] && ts > now() - seconds(1, "hour")) {
+        continue
+      }
     }
 
+    attempts.set(pubkey, inc(attempts.get(pubkey)))
     person.merge({[tskey]: now()})
-
     result.add(pubkey)
   }
 
