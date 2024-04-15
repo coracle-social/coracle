@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {getEventHash} from 'nostr-tools'
   import {nthEq, first} from "@coracle.social/lib"
   import {PublishStatus} from "@coracle.social/network"
   import {formatTimestamp} from "src/util/misc"
@@ -14,6 +15,9 @@
   export let pub: PublishInfo
 
   const retry = (url: string) => publish({relays: [url], event: pub.request.event})
+
+  const open = () =>
+    router.at("notes").of(pub.request.event.id).cx({context: [pub.request.event]}).open()
 
   const expand = () => {
     expanded = true
@@ -36,13 +40,7 @@
     <FlexColumn>
       <div class="flex justify-between">
         <span>Kind {pub.request.event.kind}, published {formatTimestamp(pub.created_at)}</span>
-        <Anchor
-          underline
-          modal
-          class="text-sm"
-          href={router.at("notes").of(pub.request.event.id).toString()}>
-          View Note
-        </Anchor>
+        <Anchor underline modal class="text-sm" on:click={open}>View Note</Anchor>
       </div>
       <div class="flex justify-between text-sm">
         <div class="hidden gap-4 sm:flex">

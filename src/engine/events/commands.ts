@@ -43,10 +43,9 @@ export const markAsSeen = async (events: Event[]) => {
           wrap: {
             author: generatePrivateKey(),
             recipient: pubkey.get(),
+            tags: [expirationTag],
           },
         })
-
-        rumor.wrap.tags.push(expirationTag)
 
         publish({
           event: rumor.wrap,
