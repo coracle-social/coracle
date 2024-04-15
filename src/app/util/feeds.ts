@@ -99,7 +99,7 @@ export const feedLoader = new CoreFeedLoader({
 })
 
 export type FeedOpts = {
-  feed: Feed
+  feed?: Feed
   anchor?: string
   skipCache?: boolean
   skipNetwork?: boolean
@@ -117,13 +117,20 @@ export class FeedLoader {
   done = false
   loader: Promise<Loader>
   notes = writable<DisplayEvent[]>([])
+  buffer = writable<DisplayEvent[]>([])
   parents = new Map<string, DisplayEvent>()
   reposts = new Map<string, Event[]>()
   replies = new Map<string, Event[]>()
   isEventMuted = isEventMuted.get()
   isDeleted = isDeleted.get()
 
-  constructor(readonly opts: FeedOpts) {
+  constructor(readonly opts: FeedOpts) {}
+
+  // Public api
+
+  start = (opts: Partial<FeedOpts>) => {
+    Object.assign(this.opts, opts)
+
     // Use a custom feed loader so we can intercept the filters
     const feedLoader = new CoreFeedLoader({
       requestDvm,
@@ -160,7 +167,7 @@ export class FeedLoader {
       },
     })
 
-    this.loader = feedLoader.getLoader(opts.feed, {
+    this.loader = feedLoader.getLoader(this.opts.feed, {
       onEvent: batch(300, async events => {
         const keep = await this.discardEvents(events)
 
@@ -176,9 +183,10 @@ export class FeedLoader {
         this.done = true
       },
     })
-  }
 
-  // Public api
+    // Rebuild the feed based on our buffer
+    this.notes.set(this.buildFeedChunk(this.buffer.get()))
+  }
 
   subscribe = f => this.notes.subscribe(f)
 
@@ -282,13 +290,9 @@ export class FeedLoader {
 
   // Feed building
 
-  addToFeed = (notes: Event[], {prepend = false} = {}) => {
-    this.notes.update($notes => {
-      const chunk = this.buildFeedChunk(notes)
-      const combined = prepend ? [...chunk, ...$notes] : [...$notes, ...chunk]
-
-      return uniqBy(prop("id"), combined)
-    })
+  addToFeed = (notes: Event[]) => {
+    this.buffer.update($buffer => uniqBy(prop("id"), $buffer.concat(notes)))
+    this.notes.update($notes => uniqBy(prop("id"), [...$notes, ...this.buildFeedChunk(notes)]))
   }
 
   buildFeedChunk = (notes: Event[]) => {

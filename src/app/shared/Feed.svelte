@@ -1,13 +1,13 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {Storage} from "hurdak"
-  import {writable, readable} from "@coracle.social/lib"
   import type {Feed} from "@coracle.social/feeds"
   import {createScroller} from "src/util/misc"
   import {fly} from "src/util/transition"
   import Spinner from "src/partials/Spinner.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Note from "src/app/shared/Note.svelte"
+  import FeedControls from "src/app/shared/FeedControls.svelte"
   import {FeedLoader} from "src/app/util"
 
   export let feed: Feed
@@ -23,57 +23,62 @@
   export let showGroup = false
   export let onEvent = null
 
-  let loader, element
+  let element
   let limit = 0
-  let notes = readable([])
+  let opts = {
+    feed,
+    anchor,
+    onEvent,
+    skipCache,
+    skipNetwork,
+    skipPlatform,
+    shouldListen,
+    shouldDefer: !eager,
+    shouldLoadParents: true,
+    includeReposts: includeReposts,
+    shouldHideReplies: Storage.getJson("hideReplies"),
+  }
 
-  const hideReplies = writable(Storage.getJson("hideReplies"))
+  const {notes, start, load} = new FeedLoader(opts)
 
-  const loadMore = () => {
+  const loadMore = async () => {
     limit += 5
 
     if ($notes.length < limit) {
-      loader.load(20)
+      await load(20)
     }
   }
 
-  const start = () => {
-    loader = new FeedLoader({
-      feed,
-      anchor,
-      skipCache,
-      skipNetwork,
-      skipPlatform,
-      shouldListen,
-      shouldDefer: !eager,
-      shouldLoadParents: true,
-      shouldHideReplies: $hideReplies,
-      includeReposts: includeReposts,
-      onEvent,
-    })
-
-    notes = loader.notes
+  const update = opts => {
+    limit = 0
+    start(opts)
   }
 
-  const unsubHideReplies = hideReplies.subscribe($hideReplies => {
-    start()
-    Storage.setJson("hideReplies", $hideReplies)
-  })
+  $: {
+    update(opts)
+    Storage.setJson("hideReplies", opts.shouldHideReplies)
+  }
 
   onMount(() => {
     const scroller = createScroller(loadMore, {element})
 
-    return () => {
-      unsubHideReplies()
-      scroller?.stop()
-    }
+    return () => scroller.stop()
   })
 </script>
+
+{#if !hideControls}
+  <FeedControls bind:value={opts} />
+{/if}
 
 <FlexColumn xl bind:element>
   {#each $notes.slice(0, limit) as note, i (note.id)}
     <div in:fly={{y: 20}}>
-      <Note depth={$hideReplies ? 0 : 2} context={note.replies || []} {showGroup} {anchor} {note} />
+      <Note
+        depth={opts.shouldHideReplies ? 0 : 2}
+        context={note.replies || []}
+        {showGroup}
+        {anchor}
+        {note} />
     </div>
   {/each}
 </FlexColumn>

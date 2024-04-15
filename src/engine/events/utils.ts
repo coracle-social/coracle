@@ -1,5 +1,6 @@
 import {nip19} from "nostr-tools"
 import {sortBy} from "ramda"
+import {fuzzy} from "src/util/misc"
 import {fromNostrURI, Tags, hasValidSignature} from "@coracle.social/util"
 import {tryFunc, switcherFn} from "hurdak"
 import {tryJson} from "src/util/misc"
@@ -63,3 +64,23 @@ export const unwrapRepost = repost => {
 
   return event
 }
+
+export const kinds = [
+  {kind: 0, label: "Profile data"},
+  {kind: 3, label: "Contacts list"},
+  {kind: 7, label: "Reaction"},
+  {kind: 1, label: "Text note"},
+  {kind: 1808, label: "Remix"},
+  {kind: 32123, label: "Song"},
+  {kind: 1985, label: "Label"},
+  {kind: 1986, label: "Review"},
+  {kind: 1063, label: "Image data"},
+  {kind: 9735, label: "Reaction"},
+  {kind: 9802, label: "Highlights"},
+  {kind: 10002, label: "Relay selections"},
+  {kind: 30023, label: "Long form content"},
+  {kind: 31923, label: "Calendar Event"},
+  {kind: 30402, label: "Classified Listing"},
+]
+
+export const searchKinds = fuzzy(kinds, {keys: ["kind", "label"]})
