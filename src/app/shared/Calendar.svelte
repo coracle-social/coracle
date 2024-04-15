@@ -18,11 +18,11 @@
     canSign,
     isDeleted,
     subscribe,
+    feedLoader,
     getFilterSelections,
     forcePlatformRelaySelections,
   } from "src/engine"
   import {router} from "src/app/router"
-  import {feedLoader} from "src/app/util"
 
   export let feed
   export let group = null

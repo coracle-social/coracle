@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {Tags} from "@coracle.social/util"
-  import {Scope, filter, usingRelays} from "@coracle.social/feeds"
+  import {Scope, filterFeed, relayFeed} from "@coracle.social/feeds"
   import {noteKinds} from "src/util/nostr"
   import {theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
@@ -11,10 +11,10 @@
   import {session, canSign, lists, userLists} from "src/engine"
 
   export let relays = []
-  export let feed = filter({kinds: noteKinds, scopes: [Scope.Follows]})
+  export let feed = filterFeed({kinds: noteKinds, scopes: [Scope.Follows]})
 
   if (relays.length > 0) {
-    feed = usingRelays(relays, feed)
+    feed = relayFeed(relays, feed)
   }
 
   let key = Math.random()
@@ -31,15 +31,15 @@
     const urls = tags.values("r").valueOf()
 
     if (authors.length > 0) {
-      feed = filter({kinds: noteKinds, authors})
+      feed = filterFeed({kinds: noteKinds, authors})
     } else if (topics.length > 0) {
-      feed = filter({kinds: noteKinds, "#t": topics})
+      feed = filterFeed({kinds: noteKinds, "#t": topics})
     } else {
-      feed = filter({kinds: noteKinds, scopes: [Scope.Follows]})
+      feed = filterFeed({kinds: noteKinds, scopes: [Scope.Follows]})
     }
 
     if (urls.length > 0) {
-      feed = usingRelays(urls, feed)
+      feed = relayFeed(urls, feed)
     }
 
     key = Math.random()

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {without, last} from "ramda"
   import {Tag, Tags, decodeAddress, isGroupAddress, getIdFilters} from "@coracle.social/util"
-  import {filter} from "@coracle.social/feeds"
+  import {filterFeed} from "@coracle.social/feeds"
   import {noteKinds, generatePrivateKey} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -100,7 +100,7 @@
       shouldListen
       hideControls
       skipNetwork={isGroupAddress(decodeAddress(address))}
-      feed={filter({kinds: without([30402], noteKinds), "#a": [address]})} />
+      feed={filterFeed({kinds: without([30402], noteKinds), "#a": [address]})} />
   {:else}
     {#each feedEvents as event}
       <div in:fly={{y: 20}}>

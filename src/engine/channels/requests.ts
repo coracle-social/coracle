@@ -1,13 +1,15 @@
 import {assocPath, uniq} from "ramda"
 import {seconds} from "hurdak"
 import {now} from "@coracle.social/lib"
+import {relayFeed, filterFeed} from "@coracle.social/feeds"
 import {sessions} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
-import {loadPubkeys, subscribe, MultiCursor} from "src/engine/network/utils"
+import {loadPubkeys, subscribe} from "src/engine/network/utils"
+import {feedLoader} from "src/engine/events/requests"
 import {hints} from "src/engine/relays/utils"
 import {channels} from "./state"
 
-export const loadAllMessages = ({reload = false} = {}) => {
+export const loadAllMessages = async ({reload = false} = {}) => {
   const {pubkey, nip24_messages_last_synced = 0} = session.get()
   const since = reload ? 0 : Math.max(0, nip24_messages_last_synced - seconds(6, "hour"))
 
@@ -18,20 +20,24 @@ export const loadAllMessages = ({reload = false} = {}) => {
     loadPubkeys($channels.flatMap(c => c.members || []))
   })
 
-  const relays = hints.User().getUrls()
+  const feed = relayFeed(
+    hints.User().getUrls(),
+    filterFeed({kinds: [4], authors: [pubkey], since}, {kinds: [4, 1059], "#p": [pubkey], since}),
+  )
 
-  const filters = [
-    {kinds: [4], authors: [pubkey], since},
-    {kinds: [4, 1059], "#p": [pubkey], since},
-  ]
+  let exhausted = false
 
-  const cursor = new MultiCursor({
-    relaySelections: relays.map(relay => ({relay, filters})),
+  const load = await feedLoader.getLoader(feed, {
+    onExhausted: () => {
+      exhausted = true
+    },
   })
 
-  return cursor.loadAll({
-    onComplete: unsubscribePubkeys,
-  })
+  while (!exhausted) {
+    await load(100)
+  }
+
+  unsubscribePubkeys()
 }
 
 export const listenForMessages = (pubkeys: string[]) => {

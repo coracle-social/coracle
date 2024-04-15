@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {writable} from '@coracle.social/lib'
+  import {writable} from "@coracle.social/lib"
   import Chip from "src/partials/Chip.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -7,11 +7,6 @@
   export let value
 
   const isOpen = writable(false)
-
-  const displayPeople = pubkeys =>
-    pubkeys.length === 1 ? displayPubkey(pubkeys[0]) : `${pubkeys.length} people`
-
-  const displayTopics = topics => (topics.length === 1 ? topics[0] : `${topics.length} topics`)
 
   const toggleReplies = () => {
     value = {...value, shouldHideReplies: !value.shouldHideReplies}
@@ -35,7 +30,9 @@
   </div>
   <div class="mb-2 mr-2 inline-block py-1">Showing notes:</div>
   <Chip class="mb-2 mr-2 inline-block">From TBD</Chip>
-  <div class="inline-block rounded-full border border-neutral-100" on:click={() => isOpen.set(true)}>
+  <div
+    class="inline-block rounded-full border border-neutral-100"
+    on:click={() => isOpen.set(true)}>
     <div class="flex h-7 w-7 items-center justify-center">
       <i class="fa fa-plus cursor-pointer" />
     </div>
@@ -43,6 +40,5 @@
 </div>
 
 {#if $isOpen}
-  <Modal onEscape={() => isOpen.set(false)}>
-  </Modal>
+  <Modal onEscape={() => isOpen.set(false)}></Modal>
 {/if}

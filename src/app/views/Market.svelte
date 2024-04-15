@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Scope, filter} from "@coracle.social/feeds"
+  import {Scope, filterFeed} from "@coracle.social/feeds"
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
@@ -7,8 +7,8 @@
   import {env, canSign, loadGroupMessages} from "src/engine"
 
   const feed = $env.FORCE_GROUP
-    ? filter({kinds: [30402], "#a": [$env.FORCE_GROUP]})
-    : filter({kinds: [30402], scopes: [Scope.Self, Scope.Follows]})
+    ? filterFeed({kinds: [30402], "#a": [$env.FORCE_GROUP]})
+    : filterFeed({kinds: [30402], scopes: [Scope.Self, Scope.Follows]})
 
   const createListing = () => router.at("notes/create").qp({type: "listing"}).open()
 

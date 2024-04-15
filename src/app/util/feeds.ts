@@ -1,6 +1,7 @@
 import {partition, prop, uniqBy} from "ramda"
 import {batch} from "hurdak"
 import {writable} from "@coracle.social/lib"
+import type {Rumor} from "@coracle.social/util"
 import {
   Tags,
   getIdOrAddress,
@@ -15,6 +16,7 @@ import {generatePrivateKey} from "src/util/nostr"
 import {LOCAL_RELAY_URL, reactionKinds, repostKinds} from "src/util/nostr"
 import type {DisplayEvent, Event} from "src/engine"
 import {
+  feedLoader as baseFeedLoader,
   sortEventsDesc,
   unwrapRepost,
   isEventMuted,
@@ -36,68 +38,6 @@ import {
   user,
 } from "src/engine"
 
-const requestDvm = async ({kind, tags = [], onEvent}) => {
-  const sk = generatePrivateKey()
-  const event = await dvmRequest({kind, tags, sk, timeout: 3000})
-
-  if (event) {
-    onEvent(event)
-  }
-}
-
-const request = async ({relays, filters, onEvent}) => {
-  if (relays.length > 0) {
-    await load({filters, relays, onEvent})
-  } else {
-    await Promise.all(
-      getFilterSelections(filters).map(({relay, filters}) =>
-        load({filters, relays: [relay], onEvent}),
-      ),
-    )
-  }
-}
-
-const getPubkeysForScope = (scope: string) => {
-  const $user = user.get()
-
-  switch (scope) {
-    case Scope.Self:
-      return $user ? [$user.pubkey] : []
-    case Scope.Follows:
-      return getFollowedPubkeys($user)
-    case Scope.Followers:
-      return Array.from(getFollowers($user.pubkey).map(p => p.pubkey))
-    default:
-      throw new Error(`Invalid scope ${scope}`)
-  }
-}
-
-const getPubkeysForWotRange = (min, max) => {
-  const pubkeys = []
-  const $user = user.get()
-  const thresholdMin = maxWot.get() * min
-  const thresholdMax = maxWot.get() * max
-
-  primeWotCaches($user.pubkey)
-
-  for (const person of people.get()) {
-    const score = getWotScore($user.pubkey, person.pubkey)
-
-    if (score >= thresholdMin && score <= thresholdMax) {
-      pubkeys.push(person.pubkey)
-    }
-  }
-
-  return pubkeys
-}
-
-export const feedLoader = new CoreFeedLoader({
-  request,
-  requestDvm,
-  getPubkeysForScope,
-  getPubkeysForWotRange,
-})
-
 export type FeedOpts = {
   feed?: Feed
   anchor?: string
@@ -116,6 +56,7 @@ export type FeedOpts = {
 export class FeedLoader {
   done = false
   loader: Promise<Loader>
+  feedLoader: CoreFeedLoader<Rumor>
   notes = writable<DisplayEvent[]>([])
   buffer = writable<DisplayEvent[]>([])
   parents = new Map<string, DisplayEvent>()
@@ -132,10 +73,8 @@ export class FeedLoader {
     Object.assign(this.opts, opts)
 
     // Use a custom feed loader so we can intercept the filters
-    const feedLoader = new CoreFeedLoader({
-      requestDvm,
-      getPubkeysForScope,
-      getPubkeysForWotRange,
+    this.feedLoader = new CoreFeedLoader({
+      ...baseFeedLoader.options,
       request: async ({relays, filters, onEvent}) => {
         if (this.opts.includeReposts && !filters.some(f => f.authors?.length > 0)) {
           filters = addRepostFilters(filters)
@@ -167,7 +106,7 @@ export class FeedLoader {
       },
     })
 
-    this.loader = feedLoader.getLoader(this.opts.feed, {
+    this.loader = this.feedLoader.getLoader(this.opts.feed, {
       onEvent: batch(300, async events => {
         const keep = await this.discardEvents(events)
 
@@ -198,7 +137,7 @@ export class FeedLoader {
     let strict = false
 
     // Be more tolerant when looking at communities
-    feedLoader.compiler.walk(this.opts.feed, ([type, ...feed]) => {
+    this.feedLoader.compiler.walk(this.opts.feed, ([type, ...feed]) => {
       if (type === FeedType.Filter) {
         strict = feed.some(f => f["#a"]?.find(a => isContextAddress(decodeAddress(a))))
       }

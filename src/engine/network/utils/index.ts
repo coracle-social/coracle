@@ -1,4 +1,3 @@
-export * from "./cursor"
 export * from "./dvms"
 export * from "./executor"
 export * from "./filters"
