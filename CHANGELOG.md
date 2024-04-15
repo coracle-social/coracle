@@ -18,6 +18,7 @@
 - [x] Republish user profile data when joining a new relay
 - [x] Create new note publish status dialog
 - [x] Add wallet setup onboarding item
+- [x] Remember theme after logging out
 
 # 0.4.4
 

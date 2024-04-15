@@ -1,9 +1,10 @@
-import {seconds} from "hurdak"
+import {seconds, switcherFn} from "hurdak"
 import {Worker, writable} from "@coracle.social/lib"
 import type {Event, Rumor} from "@coracle.social/util"
 import type {LoadOpts} from "@coracle.social/feeds"
 import {FeedLoader, Scope, relayFeed, filterFeed} from "@coracle.social/feeds"
 import {giftWrapKinds, generatePrivateKey} from "src/util/nostr"
+import {env} from "src/engine/session/state"
 import {user, session, nip44, nip04} from "src/engine/session/derived"
 import {people} from "src/engine/people/state"
 import {
@@ -82,16 +83,13 @@ export const feedLoader = new FeedLoader<Event | Rumor>({
   getPubkeysForScope: (scope: string) => {
     const $user = user.get()
 
-    switch (scope) {
-      case Scope.Self:
-        return $user ? [$user.pubkey] : []
-      case Scope.Follows:
-        return getFollowedPubkeys($user)
-      case Scope.Followers:
-        return Array.from(getFollowers($user.pubkey).map(p => p.pubkey))
-      default:
-        throw new Error(`Invalid scope ${scope}`)
-    }
+    const pubkeys = switcherFn(scope, {
+      [Scope.Self]: () => $user ? [$user.pubkey] : [],
+      [Scope.Follows]: () => getFollowedPubkeys($user),
+      [Scope.Followers]: () => Array.from(getFollowers($user.pubkey).map(p => p.pubkey)),
+    })
+
+    return pubkeys.length === 0 ? env.get().DEFAULT_FOLLOWS : pubkeys
   },
   getPubkeysForWotRange: (min, max) => {
     const pubkeys = []

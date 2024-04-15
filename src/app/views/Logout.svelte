@@ -1,13 +1,18 @@
 <script lang="ts">
   import {fly} from "src/util/transition"
+  import {theme} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
   import {storage} from "src/engine"
 
   storage.clear()
 
-  // do a hard refresh so everything gets totally cleared.
-  // Give them a moment to see the state transition. IndexedDB
-  // also apparently needs some time
+  // After our state has been cleared, set the theme again
+  setTimeout(() => {
+    theme.set($theme)
+  }, 1000)
+
+  // Do a hard refresh so everything gets totally cleared. Give them a moment to see the state
+  // transition. IndexedDB also apparently needs some time
   setTimeout(() => {
     window.location.href = "/notes"
   }, 2000)
