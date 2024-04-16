@@ -66,9 +66,9 @@
   let actions = null
   let collapsed = depth === 0
   let ctx = uniqBy(prop("id"), context)
-  let showEntire = anchor === getIdOrAddress(event)
-  let showHiddenReplies = showEntire
+  let showHiddenReplies = anchor === getIdOrAddress(event)
 
+  const showEntire = showHiddenReplies
   const interactive = !anchor || !showEntire
 
   const onClick = e => {

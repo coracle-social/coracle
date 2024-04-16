@@ -49,7 +49,9 @@ export const decodeRelay = entity => {
   }
 }
 
-export const displayRelay = ({url}: Relay) => last(url.split("://")).replace(/\/$/, "")
+export const displayRelayUrl = url => last(url.split("://")).replace(/\/$/, "")
+
+export const displayRelay = ({url}: Relay) => displayRelayUrl(url)
 
 export const displayRelays = (relays: Relay[], max = 3) =>
   displayList(relays.map(displayRelay), "and", max)

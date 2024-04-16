@@ -5,6 +5,8 @@ import {getRelaySearch, getSearchableRelays} from "./utils"
 
 export const searchRelays = relays.derived(getRelaySearch)
 
+export const searchRelayUrls = searchRelays.derived(search => term => pluck('url', search(term)))
+
 export const searchableRelays = relays.derived(getSearchableRelays)
 
 export const relayPolicies = user.derived($user => $user?.relays || [])

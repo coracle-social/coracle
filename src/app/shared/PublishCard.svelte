@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {getEventHash} from 'nostr-tools'
   import {nthEq, first} from "@coracle.social/lib"
   import {PublishStatus} from "@coracle.social/network"
   import {formatTimestamp} from "src/util/misc"
