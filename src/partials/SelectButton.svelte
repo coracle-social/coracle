@@ -1,10 +1,12 @@
 <script lang="ts">
   import cx from "classnames"
+  import {without} from 'ramda'
 
   export let options
   export let value
   export let onChange = null
   export let disabled = false
+  export let multiple = false
   export let displayOption = x => x
 </script>
 
@@ -19,10 +21,15 @@
         <div
           class={cx("px-4 py-2 transition-all", {
             "border-l border-solid border-neutral-100": i > 0,
-            "bg-accent text-white": value === option,
+            "bg-accent text-white": multiple ? value.includes(option) : value === option,
           })}
           on:click={() => {
-            value = option
+            if (multiple) {
+              value = value.includes(option) ? without([option], value) : [...value, option]
+            } else {
+              value = option
+            }
+
             onChange?.(value)
           }}>
           {displayOption(option)}

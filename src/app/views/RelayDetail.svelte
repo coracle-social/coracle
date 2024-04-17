@@ -1,7 +1,7 @@
 <script lang="ts">
   import {batch} from "hurdak"
   import {filterFeed, relayFeed} from "@coracle.social/feeds"
-  import {getAvgRating, noteKinds} from "src/util/nostr"
+  import {getAvgRating} from "src/util/nostr"
   import Feed from "src/app/shared/Feed.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Rating from "src/partials/Rating.svelte"
@@ -10,7 +10,7 @@
   import {deriveRelay, normalizeRelayUrl, displayRelay, getMinWot} from "src/engine"
 
   export let url
-  export let feed = filterFeed({kinds: noteKinds, min_wot: getMinWot()})
+  export let feed = filterFeed({min_wot: getMinWot()})
 
   let reviews = []
   let activeTab = "notes"

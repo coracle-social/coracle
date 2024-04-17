@@ -13,4 +13,4 @@
     <TopicActions {topic} />
   </div>
 </div>
-<Feed feed={filterFeed({kinds: [1], "#t": [topic]})} />
+<Feed feed={filterFeed({"#t": [topic]})} />

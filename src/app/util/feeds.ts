@@ -12,7 +12,7 @@ import {
 } from "@coracle.social/util"
 import type {Feed, Loader} from "@coracle.social/feeds"
 import {FeedLoader as CoreFeedLoader, FeedType} from "@coracle.social/feeds"
-import {LOCAL_RELAY_URL, reactionKinds, repostKinds} from "src/util/nostr"
+import {LOCAL_RELAY_URL, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import type {DisplayEvent, Event} from "src/engine"
 import {
   feedLoader as baseFeedLoader,
@@ -67,12 +67,17 @@ export class FeedLoader {
     this.feedLoader = new CoreFeedLoader({
       ...baseFeedLoader.options,
       request: async ({relays, filters, onEvent}) => {
+        // Default to note kinds
+        filters = filters.map(filter => ({kinds: noteKinds, ...filter}))
+
+        // Add reposts if we don't have any authors specified
         if (this.opts.includeReposts && !filters.some(f => f.authors?.length > 0)) {
           filters = addRepostFilters(filters)
         }
 
         const promises = []
 
+        // Use relays specified in feeds
         if (relays.length > 0) {
           promises.push(load({filters, relays, onEvent}))
         } else {

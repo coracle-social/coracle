@@ -4,7 +4,6 @@
   import {filterFeed} from "@coracle.social/feeds"
   import {info} from "src/util/logger"
   import {ensureProto} from "src/util/misc"
-  import {noteKinds} from "src/util/nostr"
   import {themeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -31,7 +30,7 @@
   export let npub
   export let pubkey
   export let relays = []
-  export let feed = filterFeed({kinds: noteKinds, authors: [pubkey]})
+  export let feed = filterFeed({authors: [pubkey]})
 
   const tabs = ["notes", "likes", "collections", "relays"].filter(identity)
   const person = derivePerson(pubkey)

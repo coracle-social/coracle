@@ -2,7 +2,6 @@
   import {onMount} from "svelte"
   import {getIdOrAddress, decodeAddress} from "@coracle.social/util"
   import {filterFeed} from "@coracle.social/feeds"
-  import {noteKinds} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -39,7 +38,7 @@
         hideControls
         shouldListen
         anchor={getIdOrAddress(event)}
-        feed={filterFeed({kinds: noteKinds, "#a": [address]})} />
+        feed={filterFeed({"#a": [address]})} />
     </FlexColumn>
   </div>
 {:else}

@@ -2,7 +2,6 @@
   import cx from "classnames"
   import {Tags} from "@coracle.social/util"
   import {Scope, filterFeed, relayFeed} from "@coracle.social/feeds"
-  import {noteKinds} from "src/util/nostr"
   import {theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -11,7 +10,7 @@
   import {session, canSign, lists, userLists} from "src/engine"
 
   export let relays = []
-  export let feed = filterFeed({kinds: noteKinds, scopes: [Scope.Follows]})
+  export let feed = filterFeed({scopes: [Scope.Follows]})
 
   if (relays.length > 0) {
     feed = relayFeed(relays, feed)
@@ -31,11 +30,11 @@
     const urls = tags.values("r").valueOf()
 
     if (authors.length > 0) {
-      feed = filterFeed({kinds: noteKinds, authors})
+      feed = filterFeed({authors})
     } else if (topics.length > 0) {
-      feed = filterFeed({kinds: noteKinds, "#t": topics})
+      feed = filterFeed({"#t": topics})
     } else {
-      feed = filterFeed({kinds: noteKinds, scopes: [Scope.Follows]})
+      feed = filterFeed({scopes: [Scope.Follows]})
     }
 
     if (urls.length > 0) {

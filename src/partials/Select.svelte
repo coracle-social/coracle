@@ -1,13 +1,9 @@
 <script lang="ts">
   import cx from "classnames"
-  import {createEventDispatcher} from 'svelte'
 
-  export let wrapperClass = ""
   export let value
-
-  const dispatch = createEventDispatcher()
-
-  const onChange = e => dispatch('change', e.target.value)
+  export let onChange = null
+  export let wrapperClass = ""
 
   const className = cx(
     $$props.class,
@@ -17,7 +13,7 @@
 </script>
 
 <div class={cx(wrapperClass, "relative")}>
-  <select {...$$props} class={className} bind:value on:change={onChange}>
+  <select {...$$props} class={className} bind:value on:change={() => onChange(value)}>
     <slot />
   </select>
   <div class="absolute left-0 top-0 flex gap-2 px-3 pt-3 text-tinted-700">

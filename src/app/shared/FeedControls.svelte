@@ -18,7 +18,13 @@
 
   export let value
 
-  const isOpen = writable(false)
+  const openModal = () => {
+    isOpen = true
+  }
+
+  const closeModal = () => {
+    isOpen = false
+  }
 
   const toggleReplies = () => {
     value = {...value, shouldHideReplies: !value.shouldHideReplies}
@@ -32,14 +38,26 @@
     feed = [feed[0], omit(keys, feed[1])] as Feed
   }
 
+  const setFeed = f => {
+    feed = f
+  }
+
   const saveFeed = () => {
     value = {...value, feed}
+  }
+
+  const setAndSaveFeed = f => {
+    setFeed(f)
+    saveFeed()
+    closeModal()
   }
 
   const displayPeople = pubkeys =>
     pubkeys.length === 1 ? displayPubkey(pubkeys[0]) : `${pubkeys.length} people`
 
   const displayTopics = topics => (topics.length === 1 ? topics[0] : `${topics.length} topics`)
+
+  let isOpen = false
 
   $: feed = value.feed
   $: feedType = feed[0]
@@ -54,7 +72,7 @@
       <Toggle scale={0.6} value={!value.shouldHideReplies} on:change={toggleReplies} />
       <small class="text-neutral-200">Show replies</small>
     </div>
-    <i class="fa fa-search cursor-pointer p-2" on:click={() => isOpen.set(true)} />
+    <i class="fa fa-search cursor-pointer p-2" on:click={openModal} />
     <slot name="controls" />
   </div>
   <div class="mb-2 mr-2 inline-block py-1">Showing notes:</div>
@@ -116,7 +134,7 @@
               <MenuItem on:click={() => setPart({scopes: [Scope.Global]})}>
                 <i class="fa fa-earth-americas mr-2" /> Global
               </MenuItem>
-              <MenuItem on:click={() => isOpen.set(true)}>
+              <MenuItem on:click={openModal}>
                 <i class="fa fa-cog mr-2" /> Custom
               </MenuItem>
             </Menu>
@@ -157,16 +175,16 @@
   {/if}
   <div
     class="inline-block rounded-full border border-neutral-100"
-    on:click={() => isOpen.set(true)}>
+    on:click={openModal}>
     <div class="flex h-7 w-7 items-center justify-center">
       <i class="fa fa-plus cursor-pointer" />
     </div>
   </div>
 </div>
 
-{#if $isOpen}
-  <Modal onEscape={() => isOpen.set(false)}>
+{#if isOpen}
+  <Modal onEscape={closeModal}>
     <Subheading>Customize Feed</Subheading>
-    <FeedForm {feed} />
+    <FeedForm {feed} onCancel={closeModal} onChange={setAndSaveFeed} />
   </Modal>
 {/if}
