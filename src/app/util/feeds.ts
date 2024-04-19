@@ -37,7 +37,6 @@ export type FeedOpts = {
   skipPlatform?: boolean
   shouldDefer?: boolean
   shouldListen?: boolean
-  shouldBuffer?: boolean
   shouldHideReplies?: boolean
   shouldLoadParents?: boolean
   includeReposts?: boolean
@@ -49,7 +48,6 @@ export class FeedLoader {
   loader: Promise<Loader>
   feedLoader: CoreFeedLoader<Rumor>
   notes = writable<DisplayEvent[]>([])
-  buffer = writable<DisplayEvent[]>([])
   parents = new Map<string, DisplayEvent>()
   reposts = new Map<string, Event[]>()
   replies = new Map<string, Event[]>()
@@ -62,6 +60,8 @@ export class FeedLoader {
 
   start = (opts: Partial<FeedOpts>) => {
     Object.assign(this.opts, opts)
+
+    console.log(">> start")
 
     // Use a custom feed loader so we can intercept the filters
     this.feedLoader = new CoreFeedLoader({
@@ -119,8 +119,8 @@ export class FeedLoader {
       },
     })
 
-    // Rebuild the feed based on our buffer
-    this.notes.set(this.buildFeedChunk(this.buffer.get()))
+    // Clear everything out
+    this.notes.set([])
   }
 
   subscribe = f => this.notes.subscribe(f)
@@ -226,7 +226,6 @@ export class FeedLoader {
   // Feed building
 
   addToFeed = (notes: Event[]) => {
-    this.buffer.update($buffer => uniqBy(prop("id"), $buffer.concat(notes)))
     this.notes.update($notes => uniqBy(prop("id"), [...$notes, ...this.buildFeedChunk(notes)]))
   }
 

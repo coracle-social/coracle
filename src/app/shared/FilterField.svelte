@@ -1,7 +1,5 @@
 <script lang="ts">
   import {omit, without} from "ramda"
-  import Field from "src/partials/Field.svelte"
-  import Input from "src/partials/Input.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
@@ -15,32 +13,33 @@
 
   export let filter
   export let onChange
+  export let onRemove
 
   const removeSection = section => {
     sections = without([section], sections)
 
     if (section === "kinds") {
-      filter = omit(['kinds'], filter)
+      filter = omit(["kinds"], filter)
     }
 
     if (section === "search") {
-      filter = omit(['search'], filter)
+      filter = omit(["search"], filter)
     }
 
     if (section === "topics") {
-      filter = omit(['#t'], filter)
+      filter = omit(["#t"], filter)
     }
 
     if (section === "authors") {
-      filter = omit(['authors', 'scopes'], filter)
+      filter = omit(["authors", "scopes"], filter)
     }
 
     if (section === "mentions") {
-      filter = omit(['#p'], filter)
+      filter = omit(["#p"], filter)
     }
 
     if (section === "timeframe") {
-      filter = omit(['since', 'until', 'since_ago', 'until_ago'], filter)
+      filter = omit(["since", "until", "since_ago", "until_ago"], filter)
     }
 
     onChange(filter)
@@ -62,7 +61,7 @@
   }
 </script>
 
-<FlexColumn>
+<FlexColumn class="relative">
   {#each sections as section}
     <div class="relative">
       {#if section === "kinds"}
@@ -75,8 +74,6 @@
         <FilterAuthorsField {filter} {onChange} onRemove={() => removeSection("authors")} />
       {:else if section === "mentions"}
         <FilterMentionsField {filter} {onChange} onRemove={() => removeSection("mentions")} />
-      {:else if section === "topics"}
-        <FilterTopicsField {filter} {onChange} onRemove={() => removeSection("topics")} />
       {:else if section === "timeframe"}
         <FilterTimeframeField {filter} {onChange} onRemove={() => removeSection("timeframe")} />
       {/if}
@@ -85,7 +82,7 @@
   <div>
     <Popover theme="transparent" opts={{hideOnClick: true}} class="inline">
       <span slot="trigger" class="cursor-pointer">
-        <i class="fa fa-plus" /> Add filter
+        <i class="fa fa-plus" /> Add selection
       </span>
       <div slot="tooltip">
         <Menu>
@@ -110,5 +107,10 @@
         </Menu>
       </div>
     </Popover>
+  </div>
+  <div
+    class="absolute -right-4 -top-2 flex h-4 w-4 cursor-pointer items-center justify-center"
+    on:click={onRemove}>
+    <i class="fa fa-times fa-lg" />
   </div>
 </FlexColumn>

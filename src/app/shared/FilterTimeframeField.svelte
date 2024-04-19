@@ -1,10 +1,6 @@
 <script lang="ts">
-  import {prop} from "ramda"
-  import {Scope} from '@coracle.social/feeds'
-  import {fuzzy} from 'src/util/misc'
   import Field from "src/partials/Field.svelte"
   import DateInput from "src/partials/DateInput.svelte"
-  import {searchPubkeys, displayPubkey} from 'src/engine'
 
   export let filter
   export let onChange

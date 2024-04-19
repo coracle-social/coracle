@@ -57,7 +57,7 @@
 {/if}
 
 {#key key}
-  <Feed skipCache includeReposts showGroup {feed}>
+  <Feed skipCache showGroup {feed}>
     <div slot="controls">
       {#if $canSign}
         {#if $userLists.length > 0}

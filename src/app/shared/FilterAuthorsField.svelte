@@ -1,8 +1,7 @@
 <script lang="ts">
   import {ucFirst} from 'hurdak'
-  import {omit, without, prop, last} from "ramda"
+  import {omit, without, last} from "ramda"
   import {Scope} from '@coracle.social/feeds'
-  import {fuzzy} from 'src/util/misc'
   import Field from "src/partials/Field.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"

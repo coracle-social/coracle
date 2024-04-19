@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {omit} from 'ramda'
   import Field from 'src/partials/Field.svelte'
   import Input from 'src/partials/Input.svelte'
 

@@ -1,7 +1,4 @@
 <script lang="ts">
-  import {prop} from "ramda"
-  import {Scope} from '@coracle.social/feeds'
-  import {fuzzy} from 'src/util/misc'
   import Field from "src/partials/Field.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"

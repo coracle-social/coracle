@@ -7,13 +7,8 @@ import {giftWrapKinds, generatePrivateKey} from "src/util/nostr"
 import {env} from "src/engine/session/state"
 import {user, session, nip44, nip04} from "src/engine/session/derived"
 import {people} from "src/engine/people/state"
-import {
-  maxWot,
-  getWotScore,
-  primeWotCaches,
-  getFollowers,
-  getFollowedPubkeys,
-} from "src/engine/people/utils"
+import {maxWot, getWotScore, primeWotCaches, getFollowers} from "src/engine/people/utils"
+import {follows, network} from "src/engine/people/derived"
 import {hints} from "src/engine/relays/utils"
 import {load, publish, dvmRequest, getFilterSelections} from "src/engine/network/utils"
 
@@ -84,8 +79,9 @@ export const feedLoader = new FeedLoader<Event | Rumor>({
     const $user = user.get()
 
     const pubkeys = switcherFn(scope, {
-      [Scope.Self]: () => $user ? [$user.pubkey] : [],
-      [Scope.Follows]: () => getFollowedPubkeys($user),
+      [Scope.Self]: () => ($user ? [$user.pubkey] : []),
+      [Scope.Follows]: () => Array.from(follows.get()),
+      [Scope.Network]: () => Array.from(network.get()),
       [Scope.Followers]: () => Array.from(getFollowers($user.pubkey).map(p => p.pubkey)),
     })
 

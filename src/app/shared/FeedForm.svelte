@@ -1,6 +1,8 @@
 <script lang="ts">
-  import {quantify, switcherFn} from 'hurdak'
+  import {assocPath} from "ramda"
+  import {quantify, switcherFn, updatePath} from "hurdak"
   import {inc} from "@coracle.social/lib"
+  import {getFilterId} from "@coracle.social/util"
   import {FeedType, hasSubFeeds, getSubFeeds} from "@coracle.social/feeds"
   import Card from "src/partials/Card.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -9,7 +11,6 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Field from "src/partials/Field.svelte"
-  import FieldInline from "src/partials/FieldInline.svelte"
   import Select from "src/partials/Select.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FilterField from "src/app/shared/FilterField.svelte"
@@ -19,39 +20,48 @@
   export let onChange
   export let onCancel
 
-  const addFeed = feedType => {
-    feed = [...feed, [feedType]]
+  const pushCursor = i => {
+    cursor = [...cursor, i]
   }
 
-  const onTypeChange = type => {
-    feed = [type]
+  const popCursor = i => {
+    cursor = cursor.slice(-1)
   }
 
-  const onRelayChange = urls => {
-    feed[1] = urls
+  const setAtCursor = (v, p = []) => {
+    feed = assocPath(cursor.concat(p), v, feed)
   }
 
-  const onFilterChange = (filter, i) => {
-    feed[i] = filter
+  const updateAtCursor = (f, p = []) => {
+    feed = updatePath(cursor.concat(p), f, feed)
   }
+
+  const addFeed = feedType => setAtCursor([...current, [feedType]])
+
+  const onTypeChange = type => setAtCursor([type])
+
+  const onRelayChange = urls => setAtCursor(urls, [1])
 
   const displayFeed = ([type, ...feed]) =>
     switcherFn(type, {
-      [FeedType.Filter]: () => quantify(feed.length, 'filter'),
-      [FeedType.List]: () => quantify(feed.length, 'list'),
-      [FeedType.LOL]: () => quantify(feed.length, 'list') + ' of lists',
-      [FeedType.DVM]: () => quantify(feed.length, 'DVM'),
-      [FeedType.Relay]: () => quantify(feed.slice(1).length, 'feed') + ' on ' + quantify(feed[0].length, 'relays'),
-      [FeedType.Union]: () => 'union of ' + quantify(feed.length, 'feed'),
-      [FeedType.Intersection]: () => 'union of ' + quantify(feed.length, 'feed'),
-      [FeedType.Difference]: () => 'union of ' + quantify(feed.length, 'feed'),
-      [FeedType.SymmetricDifference]: () => 'union of ' + quantify(feed.length, 'feed'),
+      [FeedType.Filter]: () => quantify(feed.length, "filter"),
+      [FeedType.List]: () => quantify(feed.length, "list"),
+      [FeedType.LOL]: () => quantify(feed.length, "list") + " of lists",
+      [FeedType.DVM]: () => quantify(feed.length, "DVM"),
+      [FeedType.Relay]: () =>
+        quantify(feed.slice(1).length, "feed") + " on " + quantify(feed[0].length, "relays"),
+      [FeedType.Union]: () => "union of " + quantify(feed.length, "feed"),
+      [FeedType.Intersection]: () => "union of " + quantify(feed.length, "feed"),
+      [FeedType.Difference]: () => "union of " + quantify(feed.length, "feed"),
+      [FeedType.SymmetricDifference]: () => "union of " + quantify(feed.length, "feed"),
     })
 
-  $: feedType = feed[0]
-  $: subFeeds = getSubFeeds(feed)
+  let cursor = []
 
-  $: console.log(feedType, feed)
+  $: console.log(feed)
+  $: current = cursor.reduce((f, i) => f[i], feed)
+  $: subFeeds = getSubFeeds(current)
+  $: feedType = current[0]
 </script>
 
 <FlexColumn class="pb-32">
@@ -84,19 +94,28 @@
       <p slot="info">Select which relays you'd like to limit loading feeds from.</p>
       <p></p></Field>
   {:else if feedType === FeedType.Filter}
-    {#each feed.slice(1) as filter, i}
+    {#each current.slice(1) as filter, filterIdx (getFilterId(filter) + filterIdx)}
+      {@const feedIdx = inc(filterIdx)}
       <Card>
-        <FilterField {filter} onChange={filter => onFilterChange(filter, inc(i))} />
+        <FilterField
+          {filter}
+          onChange={filter => setAtCursor(filter, [feedIdx])}
+          onRemove={() => updateAtCursor(feed => feed.toSpliced(feedIdx, 1))} />
       </Card>
+      {#if feedIdx < current.length - 1}
+        <p class="staatliches text-center">— OR —</p>
+      {/if}
     {/each}
-  {:else if feedType === FeedType.List}
-  {:else if feedType === FeedType.LOL}
-  {:else if feedType === FeedType.DVM}
-  {/if}
-  {#each subFeeds as subFeed, i}
-    <Card class="flex justify-between items-center">
+    <div class="flex">
+      <Anchor button on:click={() => setAtCursor([...current, {}])}>
+        <i class="fa fa-plus" /> Add filter
+      </Anchor>
+    </div>
+  {:else if feedType === FeedType.List}{:else if feedType === FeedType.LOL}{:else if feedType === FeedType.DVM}{/if}
+  {#each subFeeds as subFeed, i (displayFeed(subFeed) + i)}
+    <Card class="flex items-center justify-between">
       <span class="text-lg">{displayFeed(subFeed)}</span>
-      <Anchor class="flex gap-2 items-center" on:click={() => setCursor(subFeed)}>
+      <Anchor class="flex items-center gap-2" on:click={() => pushCursor(feed.indexOf(subFeed))}>
         <i class="fa fa-edit" /> Edit
       </Anchor>
     </Card>
@@ -104,7 +123,7 @@
       <p class="staatliches text-center">— OR —</p>
     {/if}
   {/each}
-  <div class="flex justify-end items-center gap-3">
+  <div class="flex items-center justify-end gap-3">
     {#if hasSubFeeds(feed)}
       <Popover theme="transparent" opts={{hideOnClick: true}}>
         <span slot="trigger" class="cursor-pointer">

@@ -1,11 +1,9 @@
 <script lang="ts">
   import {omit} from "ramda"
-  import {quantify, displayList} from "hurdak"
-  import {writable} from "@coracle.social/lib"
+  import {quantify, pluralize, displayList} from "hurdak"
   import type {DynamicFilter, Feed} from "@coracle.social/feeds"
   import {FeedType, Scope, getSubFeeds} from "@coracle.social/feeds"
   import {formatTimestampAsDate} from "src/util/misc"
-  import Card from "src/partials/Card.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import Menu from "src/partials/Menu.svelte"
@@ -31,24 +29,16 @@
   }
 
   const setPart = (filter: DynamicFilter) => {
-    feed = [feed[0], {...feed[1], ...filter}] as Feed
+    saveFeed([feed[0], {...feed[1], ...filter}] as Feed)
   }
 
   const removeParts = (keys: string[]) => {
-    feed = [feed[0], omit(keys, feed[1])] as Feed
+    saveFeed([feed[0], omit(keys, feed[1])] as Feed)
   }
 
-  const setFeed = f => {
+  const saveFeed = f => {
     feed = f
-  }
-
-  const saveFeed = () => {
     value = {...value, feed}
-  }
-
-  const setAndSaveFeed = f => {
-    setFeed(f)
-    saveFeed()
     closeModal()
   }
 
@@ -100,7 +90,7 @@
   {:else if feedType === FeedType.Filter}
     {#if feed.length > 2}
       <Chip class="mb-2 mr-2 inline-block">
-        From {quantify(feed.slice(1), "filter")}
+        From {quantify(feed.slice(1).length, "filter")}
       </Chip>
     {:else}
       {#await feedLoader.compiler.compile(feed)}
@@ -118,7 +108,7 @@
               {:else if filter.authors}
                 From {quantify(filter.authors.length, "author")}
               {:else}
-                From {Scope.Global}
+                From global
               {/if}
               <i class="fa fa-caret-down p-1" />
             </Chip>
@@ -131,7 +121,7 @@
               <MenuItem on:click={() => setPart({scopes: [Scope.Network]})}>
                 <i class="fa fa-share-nodes mr-2" /> Network
               </MenuItem>
-              <MenuItem on:click={() => setPart({scopes: [Scope.Global]})}>
+              <MenuItem on:click={() => removeParts(["scopes"])}>
                 <i class="fa fa-earth-americas mr-2" /> Global
               </MenuItem>
               <MenuItem on:click={openModal}>
@@ -140,6 +130,12 @@
             </Menu>
           </div>
         </Popover>
+        {#if filter.kinds?.length > 0}
+          <Chip class="mb-2 mr-2 inline-block" onRemove={() => removeParts(["kinds"])}>
+            {pluralize(filter.kinds.length, "Kind")}
+            {displayList(filter.kinds)}
+          </Chip>
+        {/if}
         {#if filter["#p"]?.length > 0}
           <Chip class="mb-2 mr-2 inline-block" onRemove={() => removeParts(["#p"])}>
             Mentioning {displayPeople(filter["#p"])}
@@ -173,9 +169,7 @@
       {/await}
     {/if}
   {/if}
-  <div
-    class="inline-block rounded-full border border-neutral-100"
-    on:click={openModal}>
+  <div class="inline-block rounded-full border border-neutral-100" on:click={openModal}>
     <div class="flex h-7 w-7 items-center justify-center">
       <i class="fa fa-plus cursor-pointer" />
     </div>
@@ -185,6 +179,6 @@
 {#if isOpen}
   <Modal onEscape={closeModal}>
     <Subheading>Customize Feed</Subheading>
-    <FeedForm {feed} onCancel={closeModal} onChange={setAndSaveFeed} />
+    <FeedForm {feed} onCancel={closeModal} onChange={saveFeed} />
   </Modal>
 {/if}

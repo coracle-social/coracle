@@ -33,9 +33,9 @@
     skipNetwork,
     skipPlatform,
     shouldListen,
+    includeReposts,
     shouldDefer: !eager,
     shouldLoadParents: true,
-    includeReposts: includeReposts,
     shouldHideReplies: Storage.getJson("hideReplies"),
   }
 
