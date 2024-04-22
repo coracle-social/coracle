@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {filterFeed} from "@coracle.social/feeds"
+  import {filterFeed} from "@welshman/feeds"
   import Calendar from "src/app/shared/Calendar.svelte"
 
   export let address

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "@coracle.social/util"
+  import {Tags} from "@welshman/util"
   import {secondsToDate, getLocale} from "src/util/misc"
 
   export let event

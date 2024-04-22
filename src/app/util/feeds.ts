@@ -1,7 +1,7 @@
 import {partition, prop, uniqBy} from "ramda"
 import {batch} from "hurdak"
-import {writable} from "@coracle.social/lib"
-import type {Rumor} from "@coracle.social/util"
+import {writable} from "@welshman/lib"
+import type {Rumor} from "@welshman/util"
 import {
   Tags,
   getIdOrAddress,
@@ -9,9 +9,9 @@ import {
   getIdFilters,
   isContextAddress,
   decodeAddress,
-} from "@coracle.social/util"
-import type {Feed, Loader} from "@coracle.social/feeds"
-import {FeedLoader as CoreFeedLoader, FeedType} from "@coracle.social/feeds"
+} from "@welshman/util"
+import type {Feed, Loader} from "@welshman/feeds"
+import {FeedLoader as CoreFeedLoader, FeedType} from "@welshman/feeds"
 import {LOCAL_RELAY_URL, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import type {DisplayEvent, Event} from "src/engine"
 import {

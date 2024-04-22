@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {getAddress} from "@coracle.social/util"
+  import {getAddress} from "@welshman/util"
   import {whereEq, fromPairs} from "ramda"
   import Calendar from "@event-calendar/core"
   import DayGrid from "@event-calendar/day-grid"

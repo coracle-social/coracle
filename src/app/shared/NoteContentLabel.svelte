@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "@coracle.social/util"
+  import {Tags} from "@welshman/util"
   import Chip from "src/partials/Chip.svelte"
 
   export let note

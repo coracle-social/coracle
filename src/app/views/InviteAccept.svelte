@@ -1,6 +1,6 @@
 <script lang="ts">
   import {zipObj, uniq, pluck} from "ramda"
-  import {normalizeRelayUrl, decodeAddress} from "@coracle.social/util"
+  import {normalizeRelayUrl, decodeAddress} from "@welshman/util"
   import {updateIn} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"

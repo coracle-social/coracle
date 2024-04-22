@@ -1,5 +1,5 @@
 import {prop, whereEq, uniqBy, uniq} from "ramda"
-import {Tags} from "@coracle.social/util"
+import {Tags} from "@welshman/util"
 import {tryJson} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
 import {sessions} from "src/engine/session/state"

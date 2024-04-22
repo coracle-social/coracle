@@ -1,7 +1,7 @@
 <script lang="ts">
   import {without, last} from "ramda"
-  import {Tag, Tags, decodeAddress, isGroupAddress, getIdFilters} from "@coracle.social/util"
-  import {filterFeed} from "@coracle.social/feeds"
+  import {Tag, Tags, decodeAddress, isGroupAddress, getIdFilters} from "@welshman/util"
+  import {filterFeed} from "@welshman/feeds"
   import {noteKinds, generatePrivateKey} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"

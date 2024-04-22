@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags, decodeAddress, asEventTemplate} from "@coracle.social/util"
+  import {Tags, decodeAddress, asEventTemplate} from "@welshman/util"
   import {sleep, ucFirst} from "hurdak"
   import {inc} from "ramda"
   import {getCurrencyOption} from "src/util/i18n"

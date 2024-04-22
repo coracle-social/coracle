@@ -1,6 +1,6 @@
 import {whereEq, reject, uniqBy, prop, inc} from "ramda"
-import {now} from "@coracle.social/lib"
-import {Tag, normalizeRelayUrl, isShareableRelayUrl} from "@coracle.social/util"
+import {now} from "@welshman/lib"
+import {Tag, normalizeRelayUrl, isShareableRelayUrl} from "@welshman/util"
 import {people} from "src/engine/people/state"
 import {session, canSign, stateKey} from "src/engine/session/derived"
 import {updateStore} from "src/engine/core/commands"

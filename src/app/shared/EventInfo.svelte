@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {Tags, getAddress} from "@coracle.social/util"
+  import {Tags, getAddress} from "@welshman/util"
   import {fromPairs} from "ramda"
   import {secondsToDate, formatTimestamp, formatTimestampAsDate, getLocale} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"

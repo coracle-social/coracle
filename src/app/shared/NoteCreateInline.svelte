@@ -1,7 +1,7 @@
 <script lang="ts">
   import {join, identity} from "ramda"
-  import {writable} from "@coracle.social/lib"
-  import {Tags, createEvent} from "@coracle.social/util"
+  import {writable} from "@welshman/lib"
+  import {Tags, createEvent} from "@welshman/util"
   import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"

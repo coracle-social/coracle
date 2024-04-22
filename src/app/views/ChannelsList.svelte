@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {filter} from "ramda"
   import {toTitle, Storage} from "hurdak"
-  import {readable} from "@coracle.social/lib"
+  import {readable} from "@welshman/lib"
   import {slide} from "src/util/transition"
   import Tabs from "src/partials/Tabs.svelte"
   import Card from "src/partials/Card.svelte"

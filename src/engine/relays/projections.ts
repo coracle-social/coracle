@@ -1,5 +1,5 @@
-import {Tags} from "@coracle.social/util"
-import {normalizeRelayUrl, isShareableRelayUrl} from "@coracle.social/util"
+import {Tags} from "@welshman/util"
+import {normalizeRelayUrl, isShareableRelayUrl} from "@welshman/util"
 import {warn} from "src/util/logger"
 import {projections} from "src/engine/core/projections"
 import {RelayMode} from "./model"

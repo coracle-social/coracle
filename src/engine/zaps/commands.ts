@@ -1,5 +1,5 @@
 import {Fetch, sleep, switcherFn} from "hurdak"
-import {createEvent} from "@coracle.social/util"
+import {createEvent} from "@welshman/util"
 import {generatePrivateKey} from "src/util/nostr"
 import {warn} from "src/util/logger"
 import {signer} from "src/engine/session/derived"

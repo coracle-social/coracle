@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Scope, filterFeed} from "@coracle.social/feeds"
+  import {Scope, filterFeed} from "@welshman/feeds"
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"

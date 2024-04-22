@@ -8,7 +8,7 @@
     getLnUrl,
     matchFilters,
     zapFromEvent,
-  } from "@coracle.social/util"
+  } from "@welshman/util"
   import {identity, reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, batch} from "hurdak"

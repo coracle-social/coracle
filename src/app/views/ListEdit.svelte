@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags, decodeAddress} from "@coracle.social/util"
+  import {Tags, decodeAddress} from "@welshman/util"
   import {randomId} from "hurdak"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"

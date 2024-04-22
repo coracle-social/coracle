@@ -1,4 +1,4 @@
-import {collection} from "@coracle.social/lib"
+import {collection} from "@welshman/lib"
 import type {Channel} from "./model"
 
 export const channels = collection<Channel>("id")

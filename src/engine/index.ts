@@ -1,6 +1,6 @@
 import type {Event} from "nostr-tools"
-import {Tags, hasValidSignature} from "@coracle.social/util"
-import {NetworkContext} from "@coracle.social/network"
+import {Tags, hasValidSignature} from "@welshman/util"
+import {NetworkContext} from "@welshman/net"
 import {prop, filter, identity, uniq, sortBy} from "ramda"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {Storage, LocalStorageAdapter, IndexedDBAdapter, sortByPubkeyWhitelist} from "./core"

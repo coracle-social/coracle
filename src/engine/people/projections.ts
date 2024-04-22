@@ -1,4 +1,4 @@
-import {Tags, getLnUrl} from "@coracle.social/util"
+import {Tags, getLnUrl} from "@welshman/util"
 import {tryJson} from "src/util/misc"
 import {updateStore, updateRecord} from "src/engine/core/commands"
 import {projections} from "src/engine/core/projections"

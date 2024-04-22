@@ -1,5 +1,5 @@
 import {uniq, always, whereEq, sortBy, prop, without, mergeRight} from "ramda"
-import {Tags, getIdFilters, decodeAddress, getAddress} from "@coracle.social/util"
+import {Tags, getIdFilters, decodeAddress, getAddress} from "@welshman/util"
 import {switcherFn, batch} from "hurdak"
 import {LOCAL_RELAY_URL, giftWrapKinds, getPublicKey} from "src/util/nostr"
 import {projections} from "src/engine/core/projections"

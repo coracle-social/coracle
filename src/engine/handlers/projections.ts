@@ -1,4 +1,4 @@
-import {getAddress} from "@coracle.social/util"
+import {getAddress} from "@welshman/util"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"
 import {handlers, handlerRecs} from "./state"

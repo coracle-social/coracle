@@ -1,6 +1,6 @@
 <script lang="ts">
   import {uniq, pluck} from "ramda"
-  import {Tags} from "@coracle.social/util"
+  import {Tags} from "@welshman/util"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import GroupLink from "src/app/shared/GroupLink.svelte"
   import type {DisplayEvent} from "src/engine"

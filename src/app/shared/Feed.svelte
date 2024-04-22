@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {Storage} from "hurdak"
-  import type {Feed} from "@coracle.social/feeds"
+  import type {Feed} from "@welshman/feeds"
   import {createScroller} from "src/util/misc"
   import {fly} from "src/util/transition"
   import Spinner from "src/partials/Spinner.svelte"

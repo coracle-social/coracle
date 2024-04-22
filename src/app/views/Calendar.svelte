@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Scope, filterFeed} from "@coracle.social/feeds"
+  import {Scope, filterFeed} from "@welshman/feeds"
   import Calendar from "src/app/shared/Calendar.svelte"
   import {env, loadGroupMessages} from "src/engine"
 

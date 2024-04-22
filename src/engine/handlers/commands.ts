@@ -1,6 +1,6 @@
 import {sortBy} from "ramda"
-import {cached, derived} from "@coracle.social/lib"
-import {Tags} from "@coracle.social/util"
+import {cached, derived} from "@welshman/lib"
+import {Tags} from "@welshman/util"
 import {load} from "src/engine/network/utils"
 import {hints} from "src/engine/relays/utils"
 import {follows} from "src/engine/people/derived"

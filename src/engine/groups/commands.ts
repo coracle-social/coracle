@@ -1,6 +1,6 @@
 import {partition} from "ramda"
-import {now} from "@coracle.social/lib"
-import {createEvent, decodeAddress} from "@coracle.social/util"
+import {now} from "@welshman/lib"
+import {createEvent, decodeAddress} from "@welshman/util"
 import {randomId, seconds} from "hurdak"
 import {generatePrivateKey, getPublicKey} from "src/util/nostr"
 import {updateRecord} from "src/engine/core/commands"

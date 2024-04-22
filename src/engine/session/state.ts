@@ -1,6 +1,6 @@
 import {identity} from "ramda"
-import {writable} from "@coracle.social/lib"
-import {normalizeRelayUrl} from "@coracle.social/util"
+import {writable} from "@welshman/lib"
+import {normalizeRelayUrl} from "@welshman/util"
 import type {Session} from "./model"
 
 const fromCsv = s => (s || "").split(",").filter(identity)

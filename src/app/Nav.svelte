@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {now} from "@coracle.social/lib"
-  import {PublishStatus} from "@coracle.social/network"
+  import {now} from "@welshman/lib"
+  import {PublishStatus} from "@welshman/net"
   import {quantify, seconds} from "hurdak"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"

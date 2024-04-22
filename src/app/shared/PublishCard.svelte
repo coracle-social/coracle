@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {nthEq, first} from "@coracle.social/lib"
-  import {PublishStatus} from "@coracle.social/network"
+  import {nthEq, first} from "@welshman/lib"
+  import {PublishStatus} from "@welshman/net"
   import {formatTimestamp} from "src/util/misc"
   import {slide, fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"

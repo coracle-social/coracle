@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {getIdOrAddress, decodeAddress} from "@coracle.social/util"
-  import {filterFeed} from "@coracle.social/feeds"
+  import {getIdOrAddress, decodeAddress} from "@welshman/util"
+  import {filterFeed} from "@welshman/feeds"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Spinner from "src/partials/Spinner.svelte"

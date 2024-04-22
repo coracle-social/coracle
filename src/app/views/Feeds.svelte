@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
-  import {Tags} from "@coracle.social/util"
-  import {Scope, filterFeed, relayFeed} from "@coracle.social/feeds"
+  import {Tags} from "@welshman/util"
+  import {Scope, filterFeed, relayFeed} from "@welshman/feeds"
   import {theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"

@@ -1,4 +1,4 @@
-import {getIdAndAddress, Tags} from "@coracle.social/util"
+import {getIdAndAddress, Tags} from "@welshman/util"
 import {uniqBy} from "ramda"
 import {parseContent} from "src/util/notes"
 import type {Event} from "src/engine/events/model"

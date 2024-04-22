@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {Tags, encodeAddress, addressToNaddr} from "@coracle.social/util"
+  import {Tags, encodeAddress, addressToNaddr} from "@welshman/util"
   import {commaFormat} from "hurdak"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Carousel from "src/partials/Carousel.svelte"

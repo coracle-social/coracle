@@ -1,7 +1,7 @@
 import {debounce} from "throttle-debounce"
 import {always} from "ramda"
 import {noop, sleep} from "hurdak"
-import {writable} from "@coracle.social/lib"
+import {writable} from "@welshman/lib"
 import {load} from "src/engine/network/utils"
 import {searchableRelays} from "src/engine/relays/derived"
 import type {Event} from "src/engine/events/model"

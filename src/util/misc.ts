@@ -1,4 +1,4 @@
-import {now, stripProtocol} from "@coracle.social/lib"
+import {now, stripProtocol} from "@welshman/lib"
 import {pluck, fromPairs, last, identity, sum, is, equals} from "ramda"
 import {ensurePlural, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js"

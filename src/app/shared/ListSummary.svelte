@@ -1,7 +1,7 @@
 <script lang="ts">
   import {identity} from "ramda"
   import {quantify} from "hurdak"
-  import {Tags} from "@coracle.social/util"
+  import {Tags} from "@welshman/util"
 
   export let list
 

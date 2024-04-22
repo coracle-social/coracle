@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "@coracle.social/util"
+  import {Tags} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContentLabel from "src/app/shared/NoteContentLabel.svelte"

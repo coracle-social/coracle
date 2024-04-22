@@ -1,8 +1,8 @@
 <script lang="ts">
   import {omit} from "ramda"
   import {quantify, pluralize, displayList} from "hurdak"
-  import type {DynamicFilter, Feed} from "@coracle.social/feeds"
-  import {FeedType, Scope, getSubFeeds} from "@coracle.social/feeds"
+  import type {DynamicFilter, Feed} from "@welshman/feeds"
+  import {FeedType, Scope, getSubFeeds} from "@welshman/feeds"
   import {formatTimestampAsDate} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import Subheading from "src/partials/Subheading.svelte"

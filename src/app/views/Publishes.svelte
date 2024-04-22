@@ -1,7 +1,7 @@
 <script lang="ts">
   import {pluralize, seconds} from "hurdak"
-  import {now, sortBy} from "@coracle.social/lib"
-  import {PublishStatus} from "@coracle.social/network"
+  import {now, sortBy} from "@welshman/lib"
+  import {PublishStatus} from "@welshman/net"
   import Square from "src/partials/Square.svelte"
   import AltColor from "src/partials/AltColor.svelte"
   import Subheading from "src/partials/Subheading.svelte"

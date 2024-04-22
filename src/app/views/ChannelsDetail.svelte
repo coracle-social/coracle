@@ -146,7 +146,7 @@
               problems with legacy DMs. Read more <Anchor
                 underline
                 external
-                href="https://habla.news/u/hodlbod@coracle.social/0gmn3DDizCIesG-PCD-JK"
+                href="https://habla.news/u/hodlbod@welshman/0gmn3DDizCIesG-PCD-JK"
                 >here</Anchor
               >.
             </p>

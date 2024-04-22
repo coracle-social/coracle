@@ -1,7 +1,7 @@
 <script lang="ts">
   import {identity} from "ramda"
-  import {stripProtocol} from "@coracle.social/lib"
-  import {filterFeed} from "@coracle.social/feeds"
+  import {stripProtocol} from "@welshman/lib"
+  import {filterFeed} from "@welshman/feeds"
   import {info} from "src/util/logger"
   import {ensureProto} from "src/util/misc"
   import {themeBackgroundGradient} from "src/partials/state"

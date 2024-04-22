@@ -1,7 +1,7 @@
 import {switcherFn} from "hurdak"
 import type {EventTemplate, UnsignedEvent} from "nostr-tools"
 import {getEventHash} from "nostr-tools"
-import type {Rumor} from "@coracle.social/util"
+import type {Rumor} from "@welshman/util"
 import {getPublicKey, getSignature} from "src/util/nostr"
 import type {Session} from "src/engine/session/model"
 import type {Connect} from "./connect"

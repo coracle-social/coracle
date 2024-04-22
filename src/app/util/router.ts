@@ -5,7 +5,7 @@ import {
   addressFromNaddr,
   addressToNaddr,
   fromNostrURI,
-} from "@coracle.social/util"
+} from "@welshman/util"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {tryJson} from "src/util/misc"

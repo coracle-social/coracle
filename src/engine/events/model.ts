@@ -1,5 +1,5 @@
 import type {Event as NostrToolsEvent} from "nostr-tools"
-import type {Publish} from "@coracle.social/network"
+import type {Publish} from "@welshman/net"
 
 export type NostrEvent = NostrToolsEvent
 

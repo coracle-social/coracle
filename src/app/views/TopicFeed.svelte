@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {filterFeed} from "@coracle.social/feeds"
+  import {filterFeed} from "@welshman/feeds"
   import Feed from "src/app/shared/Feed.svelte"
   import Heading from "src/partials/Heading.svelte"
   import TopicActions from "src/app/shared/TopicActions.svelte"

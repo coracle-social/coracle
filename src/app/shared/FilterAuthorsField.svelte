@@ -1,7 +1,7 @@
 <script lang="ts">
   import {ucFirst} from 'hurdak'
   import {omit, without, last} from "ramda"
-  import {Scope} from '@coracle.social/feeds'
+  import {Scope} from '@welshman/feeds'
   import Field from "src/partials/Field.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"

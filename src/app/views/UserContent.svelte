@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {pluck, identity} from "ramda"
-  import {Tags} from "@coracle.social/util"
+  import {Tags} from "@welshman/util"
   import {appName} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"

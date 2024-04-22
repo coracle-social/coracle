@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
   import {randomId} from "hurdak"
-  import {writable} from "@coracle.social/lib"
+  import {writable} from "@welshman/lib"
 
   export const toast = writable(null)
 

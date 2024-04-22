@@ -1,5 +1,5 @@
 import {reject} from "ramda"
-import {now} from "@coracle.social/lib"
+import {now} from "@welshman/lib"
 import {stateKey, user, canSign, session} from "src/engine/session/derived"
 import {updateStore} from "src/engine/core/commands"
 import {createAndPublish, getClientTags, mention} from "src/engine/network/utils"

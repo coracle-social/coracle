@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "@coracle.social/util"
+  import {Tags} from "@welshman/util"
   import {nip19} from "nostr-tools"
   import {tryJson} from "src/util/misc"
   import Card from "src/partials/Card.svelte"

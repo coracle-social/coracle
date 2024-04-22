@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {getAddress} from "@coracle.social/util"
+  import {getAddress} from "@welshman/util"
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
 
   export let note

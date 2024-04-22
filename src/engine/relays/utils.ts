@@ -1,14 +1,14 @@
 import {nip19} from "nostr-tools"
-import {pushToMapKey} from "@coracle.social/lib"
+import {pushToMapKey} from "@welshman/lib"
 import {
   Router,
   normalizeRelayUrl as normalize,
   getFilterId,
   fromNostrURI,
   mergeFilters,
-} from "@coracle.social/util"
-import type {Filter} from "@coracle.social/util"
-import {ConnectionStatus, NetworkContext} from "@coracle.social/network"
+} from "@welshman/util"
+import type {Filter} from "@welshman/util"
+import {ConnectionStatus, NetworkContext} from "@welshman/net"
 import {sortBy, whereEq, pluck, uniq, prop, last} from "ramda"
 import {displayList, switcher} from "hurdak"
 import {fuzzy} from "src/util/misc"

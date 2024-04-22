@@ -1,6 +1,6 @@
 import type {Event} from "nostr-tools"
 import {find, whereEq} from "ramda"
-import {getIdFilters, Tags} from "@coracle.social/util"
+import {getIdFilters, Tags} from "@welshman/util"
 import {loadOne} from "src/engine/network/utils"
 import {withFallbacks} from "src/engine/relays/utils"
 

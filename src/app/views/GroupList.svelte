@@ -1,7 +1,7 @@
 <script>
   import {onMount} from "svelte"
   import {filter, assoc} from "ramda"
-  import {now} from "@coracle.social/lib"
+  import {now} from "@welshman/lib"
   import {createScroller} from "src/util/misc"
   import {giftWrapKinds} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"

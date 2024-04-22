@@ -1,4 +1,4 @@
-import {derived} from "@coracle.social/lib"
+import {derived} from "@welshman/lib"
 import type {Person} from "src/engine/people/model"
 import {people} from "src/engine/people/state"
 import type {Session} from "./model"

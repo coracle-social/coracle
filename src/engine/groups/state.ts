@@ -1,4 +1,4 @@
-import {collection} from "@coracle.social/lib"
+import {collection} from "@welshman/lib"
 import type {Group, GroupKey, GroupRequest, GroupAlert} from "./model"
 
 export const groups = collection<Group>("address")

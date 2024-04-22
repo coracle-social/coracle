@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {onMount} from "svelte"
-  import {toNostrURI, asEvent, Tags, createEvent} from "@coracle.social/util"
+  import {toNostrURI, asEvent, Tags, createEvent} from "@welshman/util"
   import {tweened} from "svelte/motion"
   import {identity, filter, sum, uniqBy, prop, pluck} from "ramda"
   import {fly} from "src/util/transition"

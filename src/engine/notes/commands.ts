@@ -1,4 +1,4 @@
-import {getIdAndAddress} from "@coracle.social/util"
+import {getIdAndAddress} from "@welshman/util"
 import {hints, forcePlatformRelays} from "src/engine/relays/utils"
 import {createAndPublish} from "src/engine/network/utils"
 

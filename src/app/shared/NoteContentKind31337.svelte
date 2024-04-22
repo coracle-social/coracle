@@ -1,6 +1,6 @@
 <script lang="ts">
   import {fromPairs} from "ramda"
-  import {Tags} from '@coracle.social/util'
+  import {Tags} from '@welshman/util'
   import Chips from "src/partials/Chips.svelte"
   import Media from "src/partials/Media.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"

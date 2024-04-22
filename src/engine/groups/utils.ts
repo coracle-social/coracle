@@ -1,7 +1,7 @@
 import Fuse from "fuse.js"
 import {identity, prop, uniqBy, map, defaultTo, sortBy, last, whereEq} from "ramda"
 import {ellipsize, doPipe, seconds} from "hurdak"
-import {Tags, decodeAddress, addressToNaddr} from "@coracle.social/util"
+import {Tags, decodeAddress, addressToNaddr} from "@welshman/util"
 import {fuzzy} from "src/util/misc"
 import type {GroupStatus, Session} from "src/engine/session/model"
 import {pubkey} from "src/engine/session/state"

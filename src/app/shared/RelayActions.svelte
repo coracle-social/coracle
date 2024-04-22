@@ -1,6 +1,6 @@
 <script lang="ts">
   import {last} from "ramda"
-  import {normalizeRelayUrl} from "@coracle.social/util"
+  import {normalizeRelayUrl} from "@welshman/util"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {
     canSign,

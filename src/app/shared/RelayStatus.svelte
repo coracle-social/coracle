@@ -1,7 +1,7 @@
 <script lang="ts">
   import {poll} from "hurdak"
   import {onMount} from "svelte"
-  import {NetworkContext} from "@coracle.social/network"
+  import {NetworkContext} from "@welshman/net"
 
   export let relay
 

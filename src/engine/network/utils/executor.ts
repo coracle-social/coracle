@@ -1,7 +1,7 @@
 import {max, omit, partition, equals} from "ramda"
 import {sleep, pickVals} from "hurdak"
 import type {Event} from "nostr-tools"
-import {createEvent} from "@coracle.social/util"
+import {createEvent} from "@welshman/util"
 import {
   Plex,
   Relays,
@@ -11,8 +11,8 @@ import {
   Tracker,
   publish as basePublish,
   subscribe as baseSubscribe,
-} from "@coracle.social/network"
-import type {PublishRequest, SubscribeRequest} from "@coracle.social/network"
+} from "@welshman/net"
+import type {PublishRequest, SubscribeRequest} from "@welshman/net"
 import {LOCAL_RELAY_URL, isGiftWrap, generatePrivateKey} from "src/util/nostr"
 import {projections} from "src/engine/core"
 import {env, pubkey} from "src/engine/session/state"

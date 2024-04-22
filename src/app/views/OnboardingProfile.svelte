@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {writable} from "@coracle.social/lib"
+  import {writable} from "@welshman/lib"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"

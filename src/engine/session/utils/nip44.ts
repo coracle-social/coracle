@@ -1,6 +1,6 @@
 import {join} from "ramda"
 import {nip44} from "nostr-tools"
-import {cached} from "@coracle.social/lib"
+import {cached} from "@welshman/lib"
 import {switcherFn, tryFunc} from "hurdak"
 import type {Session} from "src/engine/session/model"
 import type {Connect} from "./connect"

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {throttle} from "throttle-debounce"
-  import {derived} from "@coracle.social/lib"
+  import {derived} from "@welshman/lib"
   import {slide} from "src/util/transition"
   import {fuzzy} from "src/util/misc"
   import {parseAnything} from "src/util/nostr"

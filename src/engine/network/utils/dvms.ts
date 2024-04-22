@@ -1,5 +1,5 @@
-import {now} from "@coracle.social/lib"
-import type {Publish} from "@coracle.social/network"
+import {now} from "@welshman/lib"
+import type {Publish} from "@welshman/net"
 import {seconds} from "hurdak"
 import {env} from "src/engine/session/state"
 import {hints} from "src/engine/relays/utils"

@@ -1,6 +1,6 @@
 import {assoc, without, uniq, map} from "ramda"
 import {createMapOf} from "hurdak"
-import {now} from "@coracle.social/lib"
+import {now} from "@welshman/lib"
 import {generatePrivateKey, appDataKeys} from "src/util/nostr"
 import {createAndPublish, publish, getClientTags, mention} from "src/engine/network/utils"
 import {hints} from "src/engine/relays/utils"

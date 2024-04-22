@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {writable} from "@coracle.social/lib"
-  import {Tags, createEvent} from "@coracle.social/util"
+  import {writable} from "@welshman/lib"
+  import {Tags, createEvent} from "@welshman/util"
   import {createEventDispatcher} from "svelte"
   import {join, without, uniq} from "ramda"
   import {slide} from "src/util/transition"

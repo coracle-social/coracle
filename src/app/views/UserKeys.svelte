@@ -2,7 +2,7 @@
   import {uniqBy, pluck, uniq, sortBy, prop} from "ramda"
   import {createMap} from "hurdak"
   import {nip19} from "nostr-tools"
-  import {getAddress} from "@coracle.social/util"
+  import {getAddress} from "@welshman/util"
   import {nsecEncode, giftWrapKinds, isKeyValid, getPublicKey, toHex} from "src/util/nostr"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"

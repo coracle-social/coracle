@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {inc} from "ramda"
-  import {now} from "@coracle.social/lib"
-  import {Tags, decodeAddress, asEventTemplate} from "@coracle.social/util"
+  import {now} from "@welshman/lib"
+  import {Tags, decodeAddress, asEventTemplate} from "@welshman/util"
   import {sleep} from "hurdak"
   import {secondsToDate, dateToSeconds} from "src/util/misc"
   import FlexColumn from "src/partials/FlexColumn.svelte"

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {toNostrURI} from "@coracle.social/util"
+  import {toNostrURI} from "@welshman/util"
   import {nsecEncode} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"

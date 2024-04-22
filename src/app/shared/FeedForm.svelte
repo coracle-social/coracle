@@ -1,9 +1,9 @@
 <script lang="ts">
   import {assocPath} from "ramda"
   import {quantify, switcherFn, updatePath} from "hurdak"
-  import {inc} from "@coracle.social/lib"
-  import {getFilterId} from "@coracle.social/util"
-  import {FeedType, hasSubFeeds, getSubFeeds} from "@coracle.social/feeds"
+  import {inc} from "@welshman/lib"
+  import {getFilterId} from "@welshman/util"
+  import {FeedType, hasSubFeeds, getSubFeeds} from "@welshman/feeds"
   import Card from "src/partials/Card.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Menu from "src/partials/Menu.svelte"

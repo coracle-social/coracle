@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {getAddress, getIdFilters} from "@coracle.social/util"
+  import {getAddress, getIdFilters} from "@welshman/util"
   import {filterVals} from "hurdak"
   import {asArray} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"

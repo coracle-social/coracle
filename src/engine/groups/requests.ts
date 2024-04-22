@@ -1,5 +1,5 @@
-import {now} from "@coracle.social/lib"
-import {decodeAddress, isGroupAddress} from "@coracle.social/util"
+import {now} from "@welshman/lib"
+import {decodeAddress, isGroupAddress} from "@welshman/util"
 import {seconds} from "hurdak"
 import {partition} from "ramda"
 import {noteKinds, giftWrapKinds, repostKinds} from "src/util/nostr"

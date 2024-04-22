@@ -1,4 +1,4 @@
-import {Tags, encodeAddress} from "@coracle.social/util"
+import {Tags, encodeAddress} from "@welshman/util"
 import {updateRecord} from "src/engine/core/commands"
 import {projections} from "src/engine/core/projections"
 import type {Event} from "src/engine/events/model"

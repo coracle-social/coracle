@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {isShareableRelayUrl} from "@coracle.social/util"
+  import {isShareableRelayUrl} from "@welshman/util"
   import {displayUrl} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Media from "src/partials/Media.svelte"

@@ -1,4 +1,4 @@
-import type {Zapper} from "@coracle.social/util"
+import type {Zapper} from "@welshman/util"
 import type {RelayPolicy} from "src/engine/relays/model"
 
 export type Profile = {

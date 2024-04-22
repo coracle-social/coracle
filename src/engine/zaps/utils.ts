@@ -1,5 +1,5 @@
-import {cached, bech32ToHex} from "@coracle.social/lib"
-import type {Zapper} from "@coracle.social/util"
+import {cached, bech32ToHex} from "@welshman/lib"
+import type {Zapper} from "@welshman/util"
 import {pick, uniq} from "ramda"
 import {Fetch, tryFunc, sleep, createMapOf} from "hurdak"
 import {createBatcher} from "src/util/misc"

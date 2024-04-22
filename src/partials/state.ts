@@ -1,7 +1,7 @@
 import {debounce} from "throttle-debounce"
 import {fromPairs} from "ramda"
 import {Storage} from "hurdak"
-import {writable} from "@coracle.social/lib"
+import {writable} from "@welshman/lib"
 import {parseHex} from "src/util/html"
 
 export const synced = (key: string, defaultValue: any) => {
