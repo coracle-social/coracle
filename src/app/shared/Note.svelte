@@ -13,7 +13,7 @@
   import {onMount, onDestroy} from "svelte"
   import {quantify, batch} from "hurdak"
   import {fly, slide} from "src/util/transition"
-  import {isLike, isGiftWrap} from "src/util/nostr"
+  import {replyKinds, isLike, isGiftWrap} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import AltColor from "src/partials/AltColor.svelte"
@@ -125,7 +125,7 @@
   $: children = ctx.filter(e => isChildOf(e, event))
 
   // Sort our replies
-  $: replies = sortEventsDesc(children.filter(e => e.kind === 1))
+  $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
 
   let mutedReplies, hiddenReplies, visibleReplies
 

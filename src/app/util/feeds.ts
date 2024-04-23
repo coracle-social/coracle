@@ -54,13 +54,7 @@ export class FeedLoader {
   isEventMuted = isEventMuted.get()
   isDeleted = isDeleted.get()
 
-  constructor(readonly opts: FeedOpts) {}
-
-  // Public api
-
-  start = (opts: Partial<FeedOpts>) => {
-    Object.assign(this.opts, opts)
-
+  constructor(readonly opts: FeedOpts) {
     // Use a custom feed loader so we can intercept the filters
     this.feedLoader = new CoreFeedLoader({
       ...baseFeedLoader.options,
@@ -99,6 +93,12 @@ export class FeedLoader {
         await Promise.all(promises)
       },
     })
+  }
+
+  // Public api
+
+  start = (opts: Partial<FeedOpts>) => {
+    Object.assign(this.opts, opts)
 
     this.loader = this.feedLoader.getLoader(this.opts.feed, {
       onEvent: batch(300, async events => {
@@ -161,7 +161,9 @@ export class FeedLoader {
   loadParents = notes => {
     // Add notes to parents too since they might match
     for (const e of notes) {
-      this.parents.set(e.id, e)
+      for (const k of getIdAndAddress(e)) {
+        this.parents.set(k, e)
+      }
     }
 
     const parentIds = new Set<string>()
@@ -174,13 +176,15 @@ export class FeedLoader {
         return false
       }
 
-      const parentId = Tags.fromEvent(e).parent()?.value()
+      const ids = Tags.fromEvent(e).parents().values().valueOf()
 
-      if (!parentId) {
+      if (ids.length === 0 || ids.some(k => this.parents.has(k))) {
         return false
       }
 
-      parentIds.add(parentId)
+      for (const id of ids) {
+        parentIds.add(id)
+      }
 
       return true
     })
@@ -197,7 +201,9 @@ export class FeedLoader {
         relays: this.opts.skipPlatform ? [relay] : forcePlatformRelays([relay]),
         onEvent: batch(100, async events => {
           for (const e of await this.discardEvents(events)) {
-            this.parents.set(e.id, e)
+            for (const k of getIdAndAddress(e)) {
+              this.parents.set(k, e)
+            }
           }
         }),
       })
@@ -211,9 +217,9 @@ export class FeedLoader {
 
     // If something has a parent id but we haven't found the parent yet, skip it until we have it.
     const [ok, defer] = partition(e => {
-      const parent = Tags.fromEvent(e).parent()
+      const parents = Tags.fromEvent(e).parents().values().valueOf()
 
-      return !parent || this.parents.has(parent.value())
+      return parents.length === 0 || parents.some(k => this.parents.has(k))
     }, notes)
 
     setTimeout(() => this.addToFeed(defer), 3000)
@@ -253,32 +259,29 @@ export class FeedLoader {
               }
             }
 
-            // Only replace parents for kind 1 replies or reactions
-            if (!reactionKinds.concat(1).includes(e.kind)) {
-              return e
-            }
-
             // If we have a parent, show that instead, with replies grouped underneath
             while (true) {
-              const parentId = Tags.fromEvent(e).parent()?.value()
+              const parentIds = Tags.fromEvent(e).parents().values().valueOf()
+
+              if (parentIds.length === 0) {
+                break
+              }
+
+              // Keep track of replies
+              for (const parentId of parentIds) {
+                const replies = this.replies.get(parentId) || []
+                if (!replies.some(r => r.id === e.id)) {
+                  this.replies.set(parentId, [...replies, e])
+                }
+              }
+
+              const parentId = parentIds.find(id => this.parents.get(id))
 
               if (!parentId) {
                 break
               }
 
-              // Keep track of replies
-              const replies = this.replies.get(parentId) || []
-              if (!replies.some(r => r.id === e.id)) {
-                this.replies.set(parentId, [...replies, e])
-              }
-
-              const parent = this.parents.get(parentId)
-
-              if (!parent) {
-                break
-              }
-
-              e = parent
+              e = this.parents.get(parentId)
             }
 
             return e
