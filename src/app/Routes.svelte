@@ -27,21 +27,24 @@
     }
   }
 
+  // Redirect if we have no user
   $: {
-    // Redirect if we have no user
     if (!$session && $page && router.getMatch($page.path).route.requireUser) {
       router.go({path: "/", replace: true})
     }
+  }
 
-    // Redirect if we need a signer
+  // Redirect if we need a signer
+  $: {
     if (!$signer.isEnabled() && $page && router.getMatch($page.path).route.requireSigner) {
       router.go({path: "/", replace: true})
     }
+  }
 
+  // Redirect if we're missing required parameters. This is usually due to a malformed url.
+  $: {
     const props = router.getProps($current)
 
-    // Redirect if we're missing required parameters.
-    // This is usually due to a malformed url.
     for (const k of router.getMatch($current.path).route.required || []) {
       if (!props[k]) {
         router.go({path: "/", replace: true})

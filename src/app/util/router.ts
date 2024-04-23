@@ -62,7 +62,7 @@ export const decodeEntity = entity => {
     // pass
   }
 
-  return {type, data, relays: hints.scenario([data?.relays || []]).getUrls()}
+  return {type, data, relays: hints.fromRelays(data?.relays || []).getUrls()}
 }
 
 // Serializers

@@ -61,8 +61,6 @@ export class FeedLoader {
   start = (opts: Partial<FeedOpts>) => {
     Object.assign(this.opts, opts)
 
-    console.log(">> start")
-
     // Use a custom feed loader so we can intercept the filters
     this.feedLoader = new CoreFeedLoader({
       ...baseFeedLoader.options,

@@ -52,8 +52,6 @@
   $: feed = value.feed
   $: feedType = feed[0]
   $: subFeeds = getSubFeeds(feed)
-
-  $: console.log(feed)
 </script>
 
 <div class="-mb-2">
