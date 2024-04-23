@@ -28,6 +28,7 @@
 
         r.pubkey = url.hostname || url.pathname.slice(2)
         r.relay = url.searchParams.get("relay") || ""
+        r.token = url.searchParams.get("secret") || ""
       } catch {
         // pass
       }
