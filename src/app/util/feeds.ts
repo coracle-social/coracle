@@ -10,6 +10,7 @@ import {
   isContextAddress,
   decodeAddress,
 } from "@welshman/util"
+import {Tracker} from "@welshman/net"
 import type {Feed, Loader} from "@welshman/feeds"
 import {FeedLoader as CoreFeedLoader, FeedType} from "@welshman/feeds"
 import {LOCAL_RELAY_URL, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
@@ -68,13 +69,14 @@ export class FeedLoader {
         }
 
         const promises = []
+        const tracker = new Tracker()
 
         // Use relays specified in feeds
         if (relays.length > 0) {
-          promises.push(load({filters, relays, onEvent}))
+          promises.push(load({filters, relays, tracker, onEvent}))
         } else {
           if (!this.opts.skipCache) {
-            promises.push(load({filters, relays: [LOCAL_RELAY_URL], onEvent}))
+            promises.push(load({filters, relays: [LOCAL_RELAY_URL], tracker, onEvent}))
           }
 
           if (!this.opts.skipNetwork) {
@@ -85,7 +87,7 @@ export class FeedLoader {
             }
 
             for (const {relay, filters} of selections) {
-              promises.push(load({filters, relays: [relay], onEvent}))
+              promises.push(load({filters, relays: [relay], tracker, onEvent}))
             }
           }
         }

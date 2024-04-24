@@ -12,7 +12,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import Modal from "src/partials/Modal.svelte"
   import FeedForm from "src/app/shared/FeedForm.svelte"
-  import {feedLoader, displayPubkey} from "src/engine"
+  import {feedLoader, displayRelayUrl, displayPubkey} from "src/engine"
 
   export let value
 
@@ -71,19 +71,15 @@
   {/if}
   {#if feedType === FeedType.Relay}
     <Chip class="mb-2 mr-2 inline-block">
-      On {quantify(feed[1], "relay")}
+      On {feed[1].length === 1 ? displayRelayUrl(feed[1][0]) : `${feed[1].length} relays`}
     </Chip>
   {:else if feedType === FeedType.List}
     <Chip class="mb-2 mr-2 inline-block">
-      From {quantify(feed.slice(1), "list")}
-    </Chip>
-  {:else if feedType === FeedType.LOL}
-    <Chip class="mb-2 mr-2 inline-block">
-      From {quantify(feed.slice(1), "list")} of lists
+      From {quantify(feed.slice(1).length, "list")}
     </Chip>
   {:else if feedType === FeedType.DVM}
     <Chip class="mb-2 mr-2 inline-block">
-      From {quantify(feed.slice(1), "DVM")}
+      From {quantify(feed.slice(1).length, "DVM")}
     </Chip>
   {:else if feedType === FeedType.Filter}
     {#if feed.length > 2}

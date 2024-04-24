@@ -40,9 +40,7 @@
   <Note note={$root} />
   {#if showAncestors}
     {#each $ancestors as ancestor (ancestor.id)}
-      <div in:fly={{y: 20}}>
-        <Note topLevel showParent={false} note={ancestor} />
-      </div>
+      <Note topLevel showParent={false} note={ancestor} />
     {/each}
   {:else if $ancestors.length > 0}
     <Anchor

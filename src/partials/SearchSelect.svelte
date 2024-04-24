@@ -35,6 +35,7 @@
 
   export const clearValue = () => {
     value = multiple ? [] : null
+    onChange?.(value)
   }
 
   export const clearTerm = () => {
@@ -47,6 +48,7 @@
 
   const remove = item => {
     value = multiple ? reject(equals(item), value) : null
+    onChange?.(value)
   }
 
   const select = item => {

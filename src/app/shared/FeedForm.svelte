@@ -14,7 +14,7 @@
   import Select from "src/partials/Select.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FilterField from "src/app/shared/FilterField.svelte"
-  import {searchRelayUrls, displayRelayUrl} from "src/engine"
+  import {searchRelayUrls, searchListAddrs, displayListByAddress, displayRelayUrl} from "src/engine"
 
   export let feed
   export let onChange
@@ -40,13 +40,10 @@
 
   const onTypeChange = type => setAtCursor([type])
 
-  const onRelayChange = urls => setAtCursor(urls, [1])
-
   const displayFeed = ([type, ...feed]) =>
     switcherFn(type, {
       [FeedType.Filter]: () => quantify(feed.length, "filter"),
       [FeedType.List]: () => quantify(feed.length, "list"),
-      [FeedType.LOL]: () => quantify(feed.length, "list") + " of lists",
       [FeedType.DVM]: () => quantify(feed.length, "DVM"),
       [FeedType.Relay]: () =>
         quantify(feed.slice(1).length, "feed") + " on " + quantify(feed[0].length, "relays"),
@@ -68,8 +65,7 @@
   <Field label="Feed Type">
     <Select value={feedType} onChange={onTypeChange}>
       <option value={FeedType.Filter}>Standard</option>
-      <option value={FeedType.List}>List</option>
-      <option value={FeedType.LOL}>List of lists</option>
+      <option value={FeedType.List}>From lists</option>
       <option value={FeedType.DVM}>Data vending machine</option>
       <option value={FeedType.Relay}>Relays</option>
       <option value={FeedType.Union}>Union</option>
@@ -88,11 +84,11 @@
         multiple
         value={feed[1] || []}
         search={$searchRelayUrls}
-        onChange={onRelayChange}>
+        onChange={urls => setAtCursor(urls, [1])}>
         <span slot="item" let:item>{displayRelayUrl(item)}</span>
       </SearchSelect>
       <p slot="info">Select which relays you'd like to limit loading feeds from.</p>
-      <p></p></Field>
+    </Field>
   {:else if feedType === FeedType.Filter}
     {#each current.slice(1) as filter, filterIdx ([current.length, filterIdx].join(':'))}
       {@const feedIdx = inc(filterIdx)}
@@ -111,7 +107,19 @@
         <i class="fa fa-plus" /> Add filter
       </Anchor>
     </div>
-  {:else if feedType === FeedType.List}{:else if feedType === FeedType.LOL}{:else if feedType === FeedType.DVM}{/if}
+  {:else if feedType === FeedType.List}
+    <Field label="List Selections">
+      <SearchSelect
+        multiple
+        value={feed.slice(1)}
+        search={$searchListAddrs}
+        onChange={addrs => setAtCursor([FeedType.List, ...addrs])}>
+        <span slot="item" let:item>{displayListByAddress(item)}</span>
+      </SearchSelect>
+      <p slot="info">Select which lists you'd like to view.</p>
+    </Field>
+  {:else if feedType === FeedType.DVM}
+  {/if}
   {#each subFeeds as subFeed, i (displayFeed(subFeed) + i)}
     <Card class="flex items-center justify-between">
       <span class="text-lg">{displayFeed(subFeed)}</span>
@@ -133,7 +141,6 @@
           <Menu>
             <MenuItem on:click={() => addFeed(FeedType.Filter)}>Standard Feed</MenuItem>
             <MenuItem on:click={() => addFeed(FeedType.List)}>List Feed</MenuItem>
-            <MenuItem on:click={() => addFeed(FeedType.LOL)}>Lists of Lists</MenuItem>
             <MenuItem on:click={() => addFeed(FeedType.DVM)}>DVM Feed</MenuItem>
           </Menu>
         </div>
