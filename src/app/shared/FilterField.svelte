@@ -1,5 +1,13 @@
+<script context="module" lang="ts">
+  import {LRUCache} from '@welshman/lib'
+
+  // Keep track of filter part order, even when we re-render
+  const sectionsByFilter = new LRUCache(30)
+</script>
+
 <script lang="ts">
   import {omit, without} from "ramda"
+  import {onDestroy} from 'svelte'
   import Popover from "src/partials/Popover.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
@@ -14,6 +22,21 @@
   export let filter
   export let onChange
   export let onRemove
+
+  const getSections = () => {
+    const sections = []
+
+    if (filter.kinds) sections.push("kinds")
+    if (filter.search) sections.push("search")
+    if (filter["#t"]) sections.push("topics")
+    if (filter.authors || filter.scopes) sections.push("authors")
+    if (filter["#p"]) sections.push("mentions")
+    if (filter.since || filter.until || filter.since_ago || filter.until_ago) {
+      sections.push("timeframe")
+    }
+
+    return sections
+  }
 
   const removeSection = section => {
     sections = without([section], sections)
@@ -49,16 +72,9 @@
     sections = [...sections, section]
   }
 
-  let sections = []
+  let sections = sectionsByFilter.get(filter) || getSections()
 
-  if (filter.kinds) sections.push("kinds")
-  if (filter.search) sections.push("search")
-  if (filter["#t"]) sections.push("topics")
-  if (filter.authors || filter.scopes) sections.push("authors")
-  if (filter["#p"]) sections.push("mentions")
-  if (filter.since || filter.until || filter.since_ago || filter.until_ago) {
-    sections.push("timeframe")
-  }
+  $: sectionsByFilter.set(filter, sections)
 </script>
 
 <FlexColumn class="relative">

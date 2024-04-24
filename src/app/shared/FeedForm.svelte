@@ -94,7 +94,7 @@
       <p slot="info">Select which relays you'd like to limit loading feeds from.</p>
       <p></p></Field>
   {:else if feedType === FeedType.Filter}
-    {#each current.slice(1) as filter, filterIdx (getFilterId(filter) + filterIdx)}
+    {#each current.slice(1) as filter, filterIdx ([current.length, filterIdx].join(':'))}
       {@const feedIdx = inc(filterIdx)}
       <Card>
         <FilterField
