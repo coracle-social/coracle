@@ -88,21 +88,11 @@ export const createScroller = (
   loadMore: () => Promise<void>,
   {delay = 1000, threshold = 2000, reverse = false, element}: ScrollerOpts = {},
 ) => {
-  const getScrollElement = () => {
-    let e = element
-
-    while (e.parentElement && e.scrollTop === 0) {
-      e = e.parentElement
-    }
-
-    return e
-  }
-
   let done = false
   const check = async () => {
     // While we have empty space, fill it
     const {scrollY, innerHeight} = window
-    const {scrollHeight, scrollTop} = getScrollElement()
+    const {scrollHeight, scrollTop} = element
     const offset = Math.abs(scrollTop || scrollY)
     const shouldLoad = offset + innerHeight + threshold > scrollHeight
 

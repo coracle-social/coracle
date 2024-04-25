@@ -2,7 +2,6 @@
   import {assocPath} from "ramda"
   import {quantify, switcherFn, updatePath} from "hurdak"
   import {inc} from "@welshman/lib"
-  import {getFilterId} from "@welshman/util"
   import {FeedType, hasSubFeeds, getSubFeeds} from "@welshman/feeds"
   import Card from "src/partials/Card.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -14,6 +13,7 @@
   import Select from "src/partials/Select.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FilterField from "src/app/shared/FilterField.svelte"
+  import DVMField from "src/app/shared/DVMField.svelte"
   import {searchRelayUrls, searchListAddrs, displayListByAddress, displayRelayUrl} from "src/engine"
 
   export let feed
@@ -90,7 +90,7 @@
       <p slot="info">Select which relays you'd like to limit loading feeds from.</p>
     </Field>
   {:else if feedType === FeedType.Filter}
-    {#each current.slice(1) as filter, filterIdx ([current.length, filterIdx].join(':'))}
+    {#each current.slice(1) as filter, filterIdx ([current.length, filterIdx].join(":"))}
       {@const feedIdx = inc(filterIdx)}
       <Card>
         <FilterField
@@ -119,6 +119,23 @@
       <p slot="info">Select which lists you'd like to view.</p>
     </Field>
   {:else if feedType === FeedType.DVM}
+    {#each current.slice(1) as item, itemIdx ([current.length, itemIdx].join(":"))}
+      {@const feedIdx = inc(itemIdx)}
+      <Card>
+        <DVMField
+          dvmItem={item}
+          onChange={item => setAtCursor(item, [feedIdx])}
+          onRemove={() => updateAtCursor(feed => feed.toSpliced(feedIdx, 1))} />
+      </Card>
+      {#if feedIdx < current.length - 1}
+        <p class="staatliches text-center">— OR —</p>
+      {/if}
+    {/each}
+    <div class="flex">
+      <Anchor button on:click={() => setAtCursor([...current, {kind: 5300, tags: [], relays: []}])}>
+        <i class="fa fa-plus" /> Add DVM
+      </Anchor>
+    </div>
   {/if}
   {#each subFeeds as subFeed, i (displayFeed(subFeed) + i)}
     <Card class="flex items-center justify-between">

@@ -1,7 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {quantify, defer} from "hurdak"
-  import {fly} from "src/util/transition"
   import {ThreadLoader} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"

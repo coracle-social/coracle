@@ -1,13 +1,13 @@
 <script context="module" lang="ts">
-  import {LRUCache} from '@welshman/lib'
+  import {LRUCache} from "@welshman/lib"
+  import type {Filter} from "@welshman/util"
 
   // Keep track of filter part order, even when we re-render
-  const sectionsByFilter = new LRUCache(30)
+  const sectionsByFilter = new LRUCache<Filter, string[]>(30)
 </script>
 
 <script lang="ts">
   import {omit, without} from "ramda"
-  import {onDestroy} from 'svelte'
   import Popover from "src/partials/Popover.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
@@ -24,7 +24,7 @@
   export let onRemove
 
   const getSections = () => {
-    const sections = []
+    const sections: string[] = []
 
     if (filter.kinds) sections.push("kinds")
     if (filter.search) sections.push("search")
@@ -72,7 +72,7 @@
     sections = [...sections, section]
   }
 
-  let sections = sectionsByFilter.get(filter) || getSections()
+  let sections: string[] = sectionsByFilter.get(filter) || getSections()
 
   $: sectionsByFilter.set(filter, sections)
 </script>

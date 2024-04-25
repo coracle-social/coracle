@@ -67,9 +67,9 @@ export const feedLoader = new FeedLoader<Event | Rumor>({
       )
     }
   },
-  requestDvm: async ({kind, tags = [], onEvent}) => {
+  requestDvm: async ({kind, tags = [], relays = [], onEvent}) => {
     const sk = generatePrivateKey()
-    const event = await dvmRequest({kind, tags, sk, timeout: 3000})
+    const event = await dvmRequest({kind, tags, relays, sk, timeout: 3000})
 
     if (event) {
       onEvent(event)

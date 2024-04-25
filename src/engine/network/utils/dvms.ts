@@ -24,12 +24,12 @@ export const dvmRequest = async ({
   inputOpts = [],
   tags = [],
   timeout = 30_000,
-  relays = null,
+  relays = [],
   onPublish = null,
   onProgress = null,
   sk = null,
 }: DVMRequestOpts): Promise<Event> => {
-  if (!relays) {
+  if (relays.length === 0) {
     relays = hints.merge([hints.WriteRelays(), hints.fromRelays(env.get().DVM_RELAYS)]).getUrls()
   }
 
