@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {pluck} from "ramda"
+  import {pluck, identity} from "ramda"
   import {fuzzy} from "src/util/misc"
   import Field from "src/partials/Field.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
@@ -39,13 +39,19 @@
   const searchKindItems = fuzzy(kinds, {keys: ["kind", "label"]})
 
   const searchKinds = term => pluck("kind", searchKindItems(term))
+
+  const displayKind = kind => {
+    const option = kinds.find(k => k.kind === kind)
+
+    return option ? `${option.label} (kind ${kind})` : `Kind ${kind}`
+  }
 </script>
 
 <Field>
   <span slot="label" class="flex cursor-pointer items-center gap-2" on:click={onRemove}>
     <i class="fa fa-trash fa-sm" /> Kinds
   </span>
-  <SearchSelect multiple search={searchKinds} value={filter.kinds || []} onChange={change}>
-    <div slot="item" let:item>{kinds.find(k => k.kind === item)?.label} (kind {item})</div>
+  <SearchSelect multiple search={searchKinds} value={filter.kinds || []} onChange={change} termToItem={identity}>
+    <div slot="item" let:item>{displayKind(item)}</div>
   </SearchSelect>
 </Field>

@@ -50,7 +50,7 @@
         class:border-accent={index === i}
         on:mousedown|preventDefault
         on:click|preventDefault={() => create(term)}>
-        <i class="fa fa-plus" />Add "{term}"
+        <i class="fa fa-plus" />Use "{term}"
       </button>
     {/if}
     {#each data as item, i (getKey(item))}

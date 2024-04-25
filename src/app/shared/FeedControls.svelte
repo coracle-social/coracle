@@ -1,8 +1,10 @@
 <script lang="ts">
   import {omit} from "ramda"
   import {quantify, pluralize, displayList} from "hurdak"
+  import {isNil, clamp} from "@welshman/lib"
   import type {DynamicFilter, Feed} from "@welshman/feeds"
   import {FeedType, Scope, getSubFeeds} from "@welshman/feeds"
+  import {slide} from 'src/util/transition'
   import {formatTimestampAsDate} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -24,6 +26,14 @@
     isOpen = false
   }
 
+  const showSearch = () => {
+    search = search || ""
+  }
+
+  const hideSearch = () => {
+    search = null
+  }
+
   const toggleReplies = () => {
     value = {...value, shouldHideReplies: !value.shouldHideReplies}
   }
@@ -36,9 +46,23 @@
     saveFeed([feed[0], omit(keys, feed[1])] as Feed)
   }
 
+  const onSearchBlur = () => {
+    if (search === feed[1]?.search) {
+      return
+    }
+
+    if (search) {
+      setPart({search})
+    } else {
+      removeParts(['search'])
+      hideSearch()
+    }
+  }
+
   const saveFeed = f => {
     feed = f
     value = {...value, feed}
+    search = feed[1]?.search
     closeModal()
   }
 
@@ -48,6 +72,7 @@
   const displayTopics = topics => (topics.length === 1 ? topics[0] : `${topics.length} topics`)
 
   let isOpen = false
+  let search = value.feed[1]?.search
 
   $: feed = value.feed
   $: feedType = feed[0]
@@ -60,7 +85,7 @@
       <Toggle scale={0.6} value={!value.shouldHideReplies} on:change={toggleReplies} />
       <small class="text-neutral-200">Show replies</small>
     </div>
-    <i class="fa fa-search cursor-pointer p-2" on:click={openModal} />
+    <i class="fa fa-sliders cursor-pointer p-2" on:click={openModal} />
     <slot name="controls" />
   </div>
   <div class="mb-2 mr-2 inline-block py-1">Showing notes:</div>
@@ -140,11 +165,6 @@
             Related to {displayTopics(filter["#t"])}
           </Chip>
         {/if}
-        {#if filter.search}
-          <Chip class="mb-2 mr-2 inline-block" onRemove={() => removeParts(["search"])}>
-            Matching {filter.search}
-          </Chip>
-        {/if}
         {#if filter.since && filter.until}
           {@const since = formatTimestampAsDate(filter.since)}
           {@const until = formatTimestampAsDate(filter.until)}
@@ -162,17 +182,27 @@
         {/if}
       {/await}
     {/if}
+    <Chip class="cursor-pointer" on:click={showSearch}>
+      <div class="flex h-6 items-center justify-center">
+        <i class="fa fa-search" />
+      </div>
+      {#if !isNil(search)}
+        <div transition:slide={{axis: "x", duration: 200}} class="pr-1">
+          <input
+            autofocus
+            size={clamp([5, 15], search.length)}
+            class="bg-transparent outline-none"
+            bind:value={search}
+            on:blur={onSearchBlur} />
+        </div>
+      {/if}
+    </Chip>
   {/if}
-  <div class="inline-block rounded-full border border-neutral-100" on:click={openModal}>
-    <div class="flex h-7 w-7 items-center justify-center">
-      <i class="fa fa-plus cursor-pointer" />
-    </div>
-  </div>
 </div>
 
 {#if isOpen}
   <Modal onEscape={closeModal}>
-    <Subheading>Customize Feed</Subheading>
+    <Subheading>Create a custom Feed</Subheading>
     <FeedForm {feed} onCancel={closeModal} onChange={saveFeed} />
   </Modal>
 {/if}

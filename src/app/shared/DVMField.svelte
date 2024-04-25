@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {pluck} from "ramda"
+  import {pluck, identity} from "ramda"
   import {append, randomId} from "@welshman/lib"
   import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
@@ -7,7 +7,7 @@
   import Field from "src/partials/Field.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import {searchRelayUrls, displayRelayUrl} from "src/engine"
+  import {searchRelayUrls, normalizeRelayUrl, displayRelayUrl} from "src/engine"
 
   export let dvmItem
   export let onChange
@@ -35,13 +35,19 @@
 
   const searchKinds = term => pluck("kind", searchKindItems(term.toString()))
 
+  const displayKind = kind => {
+    const option = kinds.find(k => k.kind === kind)
+
+    return option ? `${option.label} (kind ${kind})` : `Kind ${kind}`
+  }
+
   let key = randomId()
 </script>
 
 <FlexColumn class="relative">
   <Field label="Kind">
-    <SearchSelect search={searchKinds} value={dvmItem.kind} onChange={setKind}>
-      <div slot="item" let:item>{kinds.find(k => k.kind === item)?.label} (kind {item})</div>
+    <SearchSelect search={searchKinds} value={dvmItem.kind} onChange={setKind} termToItem={identity}>
+      <div slot="item" let:item>{displayKind(item)}</div>
     </SearchSelect>
   </Field>
   <Field label="Relays">
@@ -49,6 +55,7 @@
       multiple
       value={dvmItem.relays}
       search={$searchRelayUrls}
+      termToItem={normalizeRelayUrl}
       onChange={relays => onChange({...dvmItem, relays})}>
       <span slot="item" let:item>{displayRelayUrl(item)}</span>
     </SearchSelect>
