@@ -4,9 +4,11 @@
   import {DateInput} from "date-picker-svelte"
   import {createLocalDate, formatDateAsLocalISODate} from "src/util/misc"
 
+  export let onChange = null
   export let initialValue = null
   export let value = initialValue
 
+  let prev = value
   let date = value ? createLocalDate(value) : new Date()
 
   const className = cx(
@@ -22,6 +24,12 @@
     } catch (e) {
       logger.error(e)
     }
+
+    if (prev !== value) {
+      onChange?.(value)
+    }
+
+    prev = value
   }
 
   const init = () => {

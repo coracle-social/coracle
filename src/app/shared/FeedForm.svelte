@@ -25,7 +25,7 @@
   }
 
   const popCursor = i => {
-    cursor = cursor.slice(-1)
+    cursor = cursor.slice(0, -1)
   }
 
   const setAtCursor = (v, p = []) => {
@@ -38,7 +38,23 @@
 
   const addFeed = feedType => setAtCursor([...current, [feedType]])
 
-  const onTypeChange = type => setAtCursor([type])
+  const removeFeed = i => setAtCursor(current.toSpliced(i, 1))
+
+  const onTypeChange = type => {
+    if (hasSubFeeds([type])) {
+      if (hasSubFeeds(current)) {
+        setAtCursor([type, ...current.slice(1)])
+      } else {
+        setAtCursor([type, current])
+      }
+    } else if (type === FeedType.Filter) {
+      setAtCursor([type, {}])
+    } else if (type === FeedType.DVM) {
+      setAtCursor([type, {kind: 5300, tags: [], relays: []}])
+    } else {
+      setAtCursor([type])
+    }
+  }
 
   const displayFeed = ([type, ...feed]) =>
     switcherFn(type, {
@@ -55,7 +71,7 @@
 
   let cursor = []
 
-  $: console.log(feed)
+  $: console.log(JSON.stringify(feed, null, 2))
   $: current = cursor.reduce((f, i) => f[i], feed)
   $: subFeeds = getSubFeeds(current)
   $: feedType = current[0]
@@ -64,7 +80,7 @@
 <FlexColumn class="pb-32">
   <Field label="Feed Type">
     <Select value={feedType} onChange={onTypeChange}>
-      <option value={FeedType.Filter}>Standard</option>
+      <option value={FeedType.Filter}>Using filters</option>
       <option value={FeedType.List}>From lists</option>
       <option value={FeedType.DVM}>Data vending machine</option>
       <option value={FeedType.Relay}>Relays</option>
@@ -77,7 +93,7 @@
       Select which feed type you'd like to use. In addition to some basic feed types, nostr also
       supports combinations of sub-feeds using set operators for advanced use cases.
     </p>
-    <p></p></Field>
+  </Field>
   {#if feedType === FeedType.Relay}
     <Field label="Relay Selections">
       <SearchSelect
@@ -111,7 +127,7 @@
     <Field label="List Selections">
       <SearchSelect
         multiple
-        value={feed.slice(1)}
+        value={current.slice(1)}
         search={$searchListAddrs}
         onChange={addrs => setAtCursor([FeedType.List, ...addrs])}>
         <span slot="item" let:item>{displayListByAddress(item)}</span>
@@ -139,21 +155,36 @@
   {/if}
   {#each subFeeds as subFeed, i (displayFeed(subFeed) + i)}
     <Card class="flex items-center justify-between">
-      <span class="text-lg">{displayFeed(subFeed)}</span>
+      <div class="flex items-center gap-3">
+        <Anchor on:click={() => removeFeed(feed.indexOf(subFeed))}>
+          <i class="fa fa-trash fa-sm" />
+        </Anchor>
+        <span class="text-lg">{displayFeed(subFeed)}</span>
+      </div>
       <Anchor class="flex items-center gap-2" on:click={() => pushCursor(feed.indexOf(subFeed))}>
         <i class="fa fa-edit" /> Edit
       </Anchor>
     </Card>
     {#if i < subFeeds.length - 1}
-      <p class="staatliches text-center">— OR —</p>
+      <p class="staatliches text-center">
+        {#if feedType === FeedType.Union}
+          — OR —
+        {:else if feedType === FeedType.Intersection}
+          — AND —
+        {:else if feedType === FeedType.Difference}
+          — WITHOUT —
+        {:else if feedType === FeedType.SymmetricDifference}
+          — XOR —
+        {/if}
+      </p>
     {/if}
   {/each}
-  <div class="flex items-center justify-end gap-3">
-    {#if hasSubFeeds(feed)}
-      <Popover theme="transparent" opts={{hideOnClick: true}}>
-        <span slot="trigger" class="cursor-pointer">
-          <i class="fa fa-plus" /> Add feed
-        </span>
+  {#if hasSubFeeds(current)}
+    <div class="inline-block">
+      <Popover theme="transparent" opts={{hideOnClick: true}} class="inline-block">
+        <div slot="trigger">
+          <Anchor button><i class="fa fa-plus" /> Add Feed</Anchor>
+        </div>
         <div slot="tooltip">
           <Menu>
             <MenuItem on:click={() => addFeed(FeedType.Filter)}>Standard Feed</MenuItem>
@@ -162,8 +193,14 @@
           </Menu>
         </div>
       </Popover>
+    </div>
+  {/if}
+  <div class="flex items-center justify-end gap-3">
+    {#if current === feed}
+      <Anchor button on:click={onCancel}>Cancel</Anchor>
+      <Anchor button accent on:click={() => onChange(feed)}>Save</Anchor>
+    {:else}
+      <Anchor button on:click={popCursor}>Done</Anchor>
     {/if}
-    <Anchor button on:click={() => onCancel()}>Cancel</Anchor>
-    <Anchor button accent on:click={() => onChange(feed)}>Save</Anchor>
   </div>
 </FlexColumn>
