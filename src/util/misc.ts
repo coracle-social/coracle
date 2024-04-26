@@ -321,3 +321,18 @@ export const updateIn =
   x => ({...x, [k]: f(x[k])})
 
 export const pickVals = <T>(ks: string[], x: Record<string, T>) => ks.map(k => x[k])
+
+export const getStringWidth = (text: string) => {
+  const span = document.createElement("span")
+
+  span.style = "height: 0px"
+  span.textContent = text
+
+  document.body.appendChild(span)
+
+  const {width} = span.getBoundingClientRect()
+
+  span.remove()
+
+  return width
+}

@@ -5,7 +5,7 @@
   import type {DynamicFilter, Feed} from "@welshman/feeds"
   import {FeedType, Scope, getSubFeeds} from "@welshman/feeds"
   import {slide} from 'src/util/transition'
-  import {formatTimestampAsDate} from "src/util/misc"
+  import {formatTimestampAsDate, getStringWidth} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import Menu from "src/partials/Menu.svelte"
@@ -28,6 +28,7 @@
 
   const showSearch = () => {
     search = search || ""
+    searchFocused = true
   }
 
   const hideSearch = () => {
@@ -46,16 +47,27 @@
     saveFeed([feed[0], omit(keys, feed[1])] as Feed)
   }
 
+  const onSearchFocus = () => {
+    searchFocused = true
+  }
+
   const onSearchBlur = () => {
-    if (search === feed[1]?.search) {
+    const text = search.trim()
+
+    searchFocused = false
+
+    if (!text) {
+      hideSearch()
+    }
+
+    if (text === (feed[1]?.search || "")) {
       return
     }
 
-    if (search) {
-      setPart({search})
+    if (text) {
+      setPart({search: text})
     } else {
       removeParts(['search'])
-      hideSearch()
     }
   }
 
@@ -73,6 +85,7 @@
 
   let isOpen = false
   let search = value.feed[1]?.search
+  let searchFocused = false
 
   $: feed = value.feed
   $: feedType = feed[0]
@@ -187,14 +200,17 @@
         <i class="fa fa-search" />
       </div>
       {#if !isNil(search)}
-        <div transition:slide={{axis: "x", duration: 200}} class="pr-1">
-          <input
-            autofocus
-            size={clamp([5, 15], search.length)}
-            class="bg-transparent outline-none"
-            bind:value={search}
-            on:blur={onSearchBlur} />
-        </div>
+        {@const min = searchFocused ? 60 : 0}
+        {@const width = getStringWidth(search)}
+        <input
+          autofocus
+          class="bg-transparent outline-none"
+          class:transition-all={width < min || !searchFocused}
+          style={`width: ${clamp([min, 150], width) + 10}px`}
+          transition:slide|local={{axis: "x", duration: 200}}
+          bind:value={search}
+          on:focus={onSearchFocus}
+          on:blur={onSearchBlur} />
       {/if}
     </Chip>
   {/if}
