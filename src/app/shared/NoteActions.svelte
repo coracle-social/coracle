@@ -218,7 +218,7 @@
         "pointer-events-none opacity-50": disableActions,
       })}
       on:click={replyCtrl?.start}>
-      <Icon icon="message" accent={Boolean(reply)} />
+      <Icon icon="message" accent={reply ? 'accent' : 'neutral-100'} />
       {#if $repliesCount > 0}
         <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$repliesCount}</span>
       {/if}
@@ -229,7 +229,7 @@
           "pointer-events-none opacity-50": disableActions || !canZap,
         })}
         on:click={startZap}>
-        <Icon icon="bolt" accent={Boolean(zap)} />
+        <Icon icon="bolt" accent={zap ? 'accent' : 'neutral-100'} />
         {#if $zapsTotal > 0}
           <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px"
             >{formatSats($zapsTotal)}</span>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {Storage} from "hurdak"
+  import {prop} from 'ramda'
   import type {Feed} from "@welshman/feeds"
   import {createScroller} from "src/util/misc"
   import {fly} from "src/util/transition"
@@ -24,6 +25,7 @@
   export let onEvent = null
 
   let element
+  let filters = [{ids: []}]
   let limit = 0
   let opts = {
     feed,
@@ -39,7 +41,7 @@
     shouldHideReplies: Storage.getJson("hideReplies"),
   }
 
-  const {notes, start, load} = new FeedLoader(opts)
+  const {notes, start, load, feedLoader} = new FeedLoader(opts)
 
   const loadMore = async () => {
     limit += 5
@@ -49,9 +51,12 @@
     }
   }
 
-  const update = opts => {
+  const update = async opts => {
     limit = 0
     start(opts)
+    filters = feedLoader.compiler.canCompile(opts.feed)
+      ? prop('filters', await feedLoader.compiler.compile(opts.feed))
+      : [{ids: []}]
   }
 
   $: {
@@ -77,6 +82,7 @@
         depth={opts.shouldHideReplies ? 0 : 2}
         context={note.replies || []}
         {showGroup}
+        {filters}
         {anchor}
         {note} />
     </div>

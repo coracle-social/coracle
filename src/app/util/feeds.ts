@@ -56,6 +56,8 @@ export class FeedLoader {
   isDeleted = isDeleted.get()
 
   constructor(readonly opts: FeedOpts) {
+    window.feed = this
+
     // Use a custom feed loader so we can intercept the filters
     this.feedLoader = new CoreFeedLoader({
       ...baseFeedLoader.options,

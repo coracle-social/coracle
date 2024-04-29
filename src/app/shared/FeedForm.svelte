@@ -3,6 +3,8 @@
   import {quantify, switcherFn, updatePath} from "hurdak"
   import {inc} from "@welshman/lib"
   import {FeedType, hasSubFeeds, getSubFeeds} from "@welshman/feeds"
+  import Icon from "src/partials/Icon.svelte"
+  import SelectTiles from "src/partials/SelectTiles.svelte"
   import Card from "src/partials/Card.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Menu from "src/partials/Menu.svelte"
@@ -78,27 +80,37 @@
 </script>
 
 <FlexColumn class="pb-32">
-  <Field label="Feed Type">
-    <Select value={feedType} onChange={onTypeChange}>
-      <option value={FeedType.Filter}>Using filters</option>
-      <option value={FeedType.List}>From lists</option>
-      <option value={FeedType.DVM}>Data vending machine</option>
-      <option value={FeedType.Relay}>Relays</option>
-      <option value={FeedType.Union}>Union</option>
-      <option value={FeedType.Intersection}>Intersection</option>
-      <option value={FeedType.Difference}>Difference</option>
-      <option value={FeedType.SymmetricDifference}>Symmetric Difference</option>
-    </Select>
-    <p slot="info">
-      Select which feed type you'd like to use. In addition to some basic feed types, nostr also
-      supports combinations of sub-feeds using set operators for advanced use cases.
-    </p>
-  </Field>
+  <Card>
+    <Field label="Choose a feed type">
+      <SelectTiles
+        options={[FeedType.Filter, FeedType.Relay, FeedType.DVM, "advanced"]}
+        onChange={onTypeChange}
+        value={feedType}>
+        <div slot="item" class="flex flex-col items-center" let:option let:active>
+          {#if option === FeedType.Filter}
+            <Icon icon="people-nearby" class="w-12 h-12" color={active ? "accent" : "tinted-800"} />
+            <span class="text-2xl staatliches">Standard</span>
+          {:else if option === FeedType.Relay}
+            <Icon icon="server" class="w-12 h-12" color={active ? "accent" : "tinted-800"} />
+            <span class="text-2xl staatliches">Relays</span>
+          {:else if option === FeedType.DVM}
+            <Icon icon="network" class="w-12 h-12" color={active ? "accent" : "tinted-800"} />
+            <span class="text-2xl staatliches">DVMs</span>
+          {:else}
+            <span class="w-12 h-12 flex items-center justify-center">
+              <i class="fa fa-2xl fa-gears" />
+            </span>
+            <span class="text-2xl staatliches">Advanced</span>
+          {/if}
+        </div>
+      </SelectTiles>
+    </Field>
+  </Card>
   {#if feedType === FeedType.Relay}
     <Field label="Relay Selections">
       <SearchSelect
         multiple
-        value={feed[1] || []}
+        value={current[1] || []}
         search={$searchRelayUrls}
         onChange={urls => setAtCursor(urls, [1])}>
         <span slot="item" let:item>{displayRelayUrl(item)}</span>
@@ -156,12 +168,12 @@
   {#each subFeeds as subFeed, i (displayFeed(subFeed) + i)}
     <Card class="flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <Anchor on:click={() => removeFeed(feed.indexOf(subFeed))}>
+        <Anchor on:click={() => removeFeed(current.indexOf(subFeed))}>
           <i class="fa fa-trash fa-sm" />
         </Anchor>
         <span class="text-lg">{displayFeed(subFeed)}</span>
       </div>
-      <Anchor class="flex items-center gap-2" on:click={() => pushCursor(feed.indexOf(subFeed))}>
+      <Anchor class="flex items-center gap-2" on:click={() => pushCursor(current.indexOf(subFeed))}>
         <i class="fa fa-edit" /> Edit
       </Anchor>
     </Card>

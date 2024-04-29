@@ -5,7 +5,7 @@ import {
   normalizeRelayUrl as normalize,
   getFilterId,
   fromNostrURI,
-  mergeFilters,
+  unionFilters,
 } from "@welshman/util"
 import type {Filter} from "@welshman/util"
 import {ConnectionStatus, NetworkContext} from "@welshman/net"
@@ -134,7 +134,7 @@ export const forceRelaySelections = (selections: RelayFilters[], forceRelays: st
 
   return hints.relaySelectionsFromMap(newSelections).map(({values, relay}) => ({
     relay,
-    filters: mergeFilters(values.map(id => filtersById.get(id))),
+    filters: unionFilters(values.map(id => filtersById.get(id))),
   }))
 }
 

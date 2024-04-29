@@ -6,6 +6,7 @@
   import {FeedType, Scope, getSubFeeds} from "@welshman/feeds"
   import {slide} from 'src/util/transition'
   import {formatTimestampAsDate, getStringWidth} from "src/util/misc"
+  import Card from "src/partials/Card.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import Menu from "src/partials/Menu.svelte"
@@ -218,7 +219,7 @@
 
 {#if isOpen}
   <Modal onEscape={closeModal}>
-    <Subheading>Create a custom Feed</Subheading>
+    <Subheading class="ml-6">Create a custom Feed</Subheading>
     <FeedForm {feed} onCancel={closeModal} onChange={saveFeed} />
   </Modal>
 {/if}

@@ -1,6 +1,6 @@
 import {splitAt} from "@welshman/lib"
 import type {Filter, RouterScenario, RouterScenarioOptions} from "@welshman/util"
-import {isContextAddress, mergeFilters, getFilterId, decodeAddress} from "@welshman/util"
+import {isContextAddress, unionFilters, getFilterId, decodeAddress} from "@welshman/util"
 import {without, sortBy, prop} from "ramda"
 import {getSetting} from "src/engine/session/utils"
 import {hints} from "src/engine/relays/utils"
@@ -96,7 +96,7 @@ export const getFilterSelections = (
   const [keep, discard] = splitAt(getSetting("relay_limit"), selections)
 
   for (const target of keep.slice(0, getSetting("relay_redundancy"))) {
-    target.filters = mergeFilters(discard.concat(target).flatMap(prop("filters")))
+    target.filters = unionFilters(discard.concat(target).flatMap(prop("filters")))
   }
 
   return keep

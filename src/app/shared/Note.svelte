@@ -392,6 +392,7 @@
                     note={r}
                     depth={depth - 1}
                     context={ctx}
+                    {filters}
                     {anchor} />
                 {/each}
               </div>
