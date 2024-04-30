@@ -4,7 +4,7 @@
   import {isNil, clamp} from "@welshman/lib"
   import type {DynamicFilter, Feed} from "@welshman/feeds"
   import {FeedType, Scope, getSubFeeds} from "@welshman/feeds"
-  import {slide} from 'src/util/transition'
+  import {slide} from "src/util/transition"
   import {formatTimestampAsDate, getStringWidth} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -68,7 +68,7 @@
     if (text) {
       setPart({search: text})
     } else {
-      removeParts(['search'])
+      removeParts(["search"])
     }
   }
 
@@ -128,7 +128,7 @@
     {:else}
       {#await feedLoader.compiler.compile(feed)}
         <!-- pass -->
-      {:then { filters: [filter] }}
+      {:then [{ filters: [filter] }]}
         <Popover
           class="inline-block"
           placement="bottom-end"
@@ -217,7 +217,7 @@
   {/if}
 </div>
 
-{#if isOpen}
+{#if true || isOpen}
   <Modal onEscape={closeModal}>
     <Subheading class="ml-6">Create a custom Feed</Subheading>
     <FeedForm {feed} onCancel={closeModal} onChange={saveFeed} />

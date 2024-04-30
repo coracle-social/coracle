@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Scope, filterFeed} from "@welshman/feeds"
+  import {Scope, feedFromFilter, intersectionFeed, kindFeed, scopeFeed} from "@welshman/feeds"
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
@@ -7,8 +7,8 @@
   import {env, canSign, loadGroupMessages} from "src/engine"
 
   const feed = $env.FORCE_GROUP
-    ? filterFeed({kinds: [30402], "#a": [$env.FORCE_GROUP]})
-    : filterFeed({kinds: [30402], scopes: [Scope.Self, Scope.Follows]})
+    ? feedFromFilter({kinds: [30402], "#a": [$env.FORCE_GROUP]})
+    : intersectionFeed(kindFeed(30402), scopeFeed(Scope.Self, Scope.Follows))
 
   const createListing = () => router.at("notes/create").qp({type: "listing"}).open()
 

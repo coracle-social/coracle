@@ -16,45 +16,43 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FilterField from "src/app/shared/FilterField.svelte"
   import DVMField from "src/app/shared/DVMField.svelte"
+  import FeedFormRelay from "src/app/shared/FeedFormRelay.svelte"
   import {searchRelayUrls, searchListAddrs, displayListByAddress, displayRelayUrl} from "src/engine"
 
   export let feed
   export let onChange
   export let onCancel
 
-  const pushCursor = i => {
-    cursor = [...cursor, i]
+  const controller = {
+    pushCursor: i => {
+      cursor = [...cursor, i]
+    },
+    popCursor: i => {
+      cursor = cursor.slice(0, -1)
+    },
+    setAtCursor: (v, p = []) => {
+      feed = assocPath(cursor.concat(p), v, feed)
+    },
+    updateAtCursor: (f, p = []) => {
+      feed = updatePath(cursor.concat(p), f, feed)
+    },
+    addFeed: feedType => controller.setAtCursor([...current, [feedType]]),
+    removeFeed: i => controller.setAtCursor(current.toSpliced(i, 1)),
   }
-
-  const popCursor = i => {
-    cursor = cursor.slice(0, -1)
-  }
-
-  const setAtCursor = (v, p = []) => {
-    feed = assocPath(cursor.concat(p), v, feed)
-  }
-
-  const updateAtCursor = (f, p = []) => {
-    feed = updatePath(cursor.concat(p), f, feed)
-  }
-
-  const addFeed = feedType => setAtCursor([...current, [feedType]])
-
-  const removeFeed = i => setAtCursor(current.toSpliced(i, 1))
 
   const onTypeChange = type => {
     if (hasSubFeeds([type])) {
       if (hasSubFeeds(current)) {
-        setAtCursor([type, ...current.slice(1)])
+        controller.setAtCursor([type, ...current.slice(1)])
       } else {
-        setAtCursor([type, current])
+        controller.setAtCursor([type, current])
       }
     } else if (type === FeedType.Filter) {
-      setAtCursor([type, {}])
+      controller.setAtCursor([type, {}])
     } else if (type === FeedType.DVM) {
-      setAtCursor([type, {kind: 5300, tags: [], relays: []}])
+      controller.setAtCursor([type, {kind: 5300, tags: [], relays: []}])
     } else {
-      setAtCursor([type])
+      controller.setAtCursor([type])
     }
   }
 
@@ -88,50 +86,52 @@
         value={feedType}>
         <div slot="item" class="flex flex-col items-center" let:option let:active>
           {#if option === FeedType.Filter}
-            <Icon icon="people-nearby" class="w-12 h-12" color={active ? "accent" : "tinted-800"} />
-            <span class="text-2xl staatliches">Standard</span>
+            <Icon icon="people-nearby" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
+            <span class="staatliches text-2xl">Standard</span>
           {:else if option === FeedType.Relay}
-            <Icon icon="server" class="w-12 h-12" color={active ? "accent" : "tinted-800"} />
-            <span class="text-2xl staatliches">Relays</span>
+            <Icon icon="server" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
+            <span class="staatliches text-2xl">Relays</span>
           {:else if option === FeedType.DVM}
-            <Icon icon="network" class="w-12 h-12" color={active ? "accent" : "tinted-800"} />
-            <span class="text-2xl staatliches">DVMs</span>
+            <Icon icon="network" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
+            <span class="staatliches text-2xl">DVMs</span>
           {:else}
-            <span class="w-12 h-12 flex items-center justify-center">
+            <span class="flex h-12 w-12 items-center justify-center">
               <i class="fa fa-2xl fa-gears" />
             </span>
-            <span class="text-2xl staatliches">Advanced</span>
+            <span class="staatliches text-2xl">Advanced</span>
           {/if}
         </div>
       </SelectTiles>
     </Field>
   </Card>
   {#if feedType === FeedType.Relay}
-    <Field label="Relay Selections">
+    <FeedFormRelay feed={current} {controller} />
+    <Field label="Which relays would you like to use?">
       <SearchSelect
         multiple
         value={current[1] || []}
         search={$searchRelayUrls}
-        onChange={urls => setAtCursor(urls, [1])}>
+        onChange={urls => controller.setAtCursor(urls, [1])}>
         <span slot="item" let:item>{displayRelayUrl(item)}</span>
       </SearchSelect>
       <p slot="info">Select which relays you'd like to limit loading feeds from.</p>
     </Field>
   {:else if feedType === FeedType.Filter}
+    <FeedFormForRelayFeed feed={current} {controller} />
     {#each current.slice(1) as filter, filterIdx ([current.length, filterIdx].join(":"))}
       {@const feedIdx = inc(filterIdx)}
       <Card>
         <FilterField
           {filter}
-          onChange={filter => setAtCursor(filter, [feedIdx])}
-          onRemove={() => updateAtCursor(feed => feed.toSpliced(feedIdx, 1))} />
+          onChange={filter => controller.setAtCursor(filter, [feedIdx])}
+          onRemove={() => controller.updateAtCursor(feed => feed.toSpliced(feedIdx, 1))} />
       </Card>
       {#if feedIdx < current.length - 1}
         <p class="staatliches text-center">— OR —</p>
       {/if}
     {/each}
     <div class="flex">
-      <Anchor button on:click={() => setAtCursor([...current, {}])}>
+      <Anchor button on:click={() => controller.setAtCursor([...current, {}])}>
         <i class="fa fa-plus" /> Add filter
       </Anchor>
     </div>
@@ -141,7 +141,7 @@
         multiple
         value={current.slice(1)}
         search={$searchListAddrs}
-        onChange={addrs => setAtCursor([FeedType.List, ...addrs])}>
+        onChange={addrs => controller.setAtCursor([FeedType.List, ...addrs])}>
         <span slot="item" let:item>{displayListByAddress(item)}</span>
       </SearchSelect>
       <p slot="info">Select which lists you'd like to view.</p>
@@ -152,15 +152,17 @@
       <Card>
         <DVMField
           dvmItem={item}
-          onChange={item => setAtCursor(item, [feedIdx])}
-          onRemove={() => updateAtCursor(feed => feed.toSpliced(feedIdx, 1))} />
+          onChange={item => controller.setAtCursor(item, [feedIdx])}
+          onRemove={() => controller.updateAtCursor(feed => feed.toSpliced(feedIdx, 1))} />
       </Card>
       {#if feedIdx < current.length - 1}
         <p class="staatliches text-center">— OR —</p>
       {/if}
     {/each}
     <div class="flex">
-      <Anchor button on:click={() => setAtCursor([...current, {kind: 5300, tags: [], relays: []}])}>
+      <Anchor
+        button
+        on:click={() => controller.setAtCursor([...current, {kind: 5300, tags: [], relays: []}])}>
         <i class="fa fa-plus" /> Add DVM
       </Anchor>
     </div>
@@ -168,12 +170,14 @@
   {#each subFeeds as subFeed, i (displayFeed(subFeed) + i)}
     <Card class="flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <Anchor on:click={() => removeFeed(current.indexOf(subFeed))}>
+        <Anchor on:click={() => controller.removeFeed(current.indexOf(subFeed))}>
           <i class="fa fa-trash fa-sm" />
         </Anchor>
         <span class="text-lg">{displayFeed(subFeed)}</span>
       </div>
-      <Anchor class="flex items-center gap-2" on:click={() => pushCursor(current.indexOf(subFeed))}>
+      <Anchor
+        class="flex items-center gap-2"
+        on:click={() => controller.pushCursor(current.indexOf(subFeed))}>
         <i class="fa fa-edit" /> Edit
       </Anchor>
     </Card>
@@ -199,9 +203,9 @@
         </div>
         <div slot="tooltip">
           <Menu>
-            <MenuItem on:click={() => addFeed(FeedType.Filter)}>Standard Feed</MenuItem>
-            <MenuItem on:click={() => addFeed(FeedType.List)}>List Feed</MenuItem>
-            <MenuItem on:click={() => addFeed(FeedType.DVM)}>DVM Feed</MenuItem>
+            <MenuItem on:click={() => controller.addFeed(FeedType.Filter)}>Standard Feed</MenuItem>
+            <MenuItem on:click={() => controller.addFeed(FeedType.List)}>List Feed</MenuItem>
+            <MenuItem on:click={() => controller.addFeed(FeedType.DVM)}>DVM Feed</MenuItem>
           </Menu>
         </div>
       </Popover>
@@ -212,7 +216,7 @@
       <Anchor button on:click={onCancel}>Cancel</Anchor>
       <Anchor button accent on:click={() => onChange(feed)}>Save</Anchor>
     {:else}
-      <Anchor button on:click={popCursor}>Done</Anchor>
+      <Anchor button on:click={controller.popCursor}>Done</Anchor>
     {/if}
   </div>
 </FlexColumn>

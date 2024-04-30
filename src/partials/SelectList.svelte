@@ -1,9 +1,9 @@
 <script lang="ts">
   import cx from "classnames"
-  import {without} from 'ramda'
+  import {without} from "ramda"
 
-  export let options
-  export let value
+  export let value = null
+  export let options = []
   export let onChange = null
   export let disabled = false
   export let multiple = false
@@ -26,7 +26,11 @@
   class:cursor-pointer={!disabled}>
   {#each options as option, i}
     <div on:click={() => onClick(option)}>
-      <slot name="item" {i} {option} active={multiple ? value.includes(option) : value === option} />
+      <slot
+        name="item"
+        {i}
+        {option}
+        active={multiple ? value.includes(option) : value === option} />
     </div>
   {/each}
 </div>

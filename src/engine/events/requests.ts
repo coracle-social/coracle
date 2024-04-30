@@ -2,7 +2,14 @@ import {seconds, switcherFn} from "hurdak"
 import {Worker, writable} from "@welshman/lib"
 import type {Event, Rumor} from "@welshman/util"
 import type {LoadOpts} from "@welshman/feeds"
-import {FeedLoader, Scope, relayFeed, filterFeed} from "@welshman/feeds"
+import {
+  FeedLoader,
+  Scope,
+  relayFeed,
+  intersectionFeed,
+  unionFeed,
+  feedFromFilter,
+} from "@welshman/feeds"
 import {giftWrapKinds, generatePrivateKey} from "src/util/nostr"
 import {env} from "src/engine/session/state"
 import {user, session, nip44, nip04} from "src/engine/session/derived"
@@ -136,7 +143,9 @@ export const sync = (fromUrl, toUrl, filters) => {
 
   worker.addGlobalHandler(event => publish({event, relays: [toUrl]}))
 
-  return loadAll(relayFeed([fromUrl], filterFeed(...filters)), {
+  const feed = intersectionFeed(relayFeed(fromUrl), unionFeed(...filters.map(feedFromFilter)))
+
+  return loadAll(feed, {
     onEvent: e => worker.push(e as Event),
   })
 }

@@ -71,7 +71,7 @@
   let subs = []
 
   onMount(async () => {
-    const {filters} = await feedLoader.compiler.compile(feed)
+    const [{filters}] = await feedLoader.compiler.compile(feed)
     const selections = getFilterSelections(filters)
 
     subs = forcePlatformRelaySelections(selections).map(({relay, filters}) =>

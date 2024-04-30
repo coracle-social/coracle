@@ -325,7 +325,7 @@ export const pickVals = <T>(ks: string[], x: Record<string, T>) => ks.map(k => x
 export const getStringWidth = (text: string) => {
   const span = document.createElement("span")
 
-  span.style = "height: 0px"
+  span.setAttribute("style", "height: 0px")
   span.textContent = text
 
   document.body.appendChild(span)

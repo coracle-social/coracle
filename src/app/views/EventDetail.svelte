@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {getIdOrAddress, decodeAddress} from "@welshman/util"
-  import {filterFeed} from "@welshman/feeds"
+  import {feedFromFilter} from "@welshman/feeds"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -38,7 +38,7 @@
         hideControls
         shouldListen
         anchor={getIdOrAddress(event)}
-        feed={filterFeed({"#a": [address]})} />
+        feed={feedFromFilter({"#a": [address]})} />
     </FlexColumn>
   </div>
 {:else}

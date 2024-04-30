@@ -1,7 +1,7 @@
 <script lang="ts">
   import {without, last} from "ramda"
   import {Tag, Tags, decodeAddress, isGroupAddress, getIdFilters} from "@welshman/util"
-  import {filterFeed} from "@welshman/feeds"
+  import {feedFromFilter} from "@welshman/feeds"
   import {noteKinds, generatePrivateKey} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -100,7 +100,7 @@
       shouldListen
       hideControls
       skipNetwork={isGroupAddress(decodeAddress(address))}
-      feed={filterFeed({kinds: without([30402], noteKinds), "#a": [address]})} />
+      feed={feedFromFilter({kinds: without([30402], noteKinds), "#a": [address]})} />
   {:else}
     {#each feedEvents as event}
       <div in:fly={{y: 20}}>

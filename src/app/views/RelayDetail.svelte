@@ -1,6 +1,7 @@
 <script lang="ts">
   import {batch} from "hurdak"
-  import {filterFeed, relayFeed} from "@welshman/feeds"
+  import {wotFeed, relayFeed, intersectionFeed, feedFromFilter} from "@welshman/feeds"
+  import type {Feed as TFeed} from "@welshman/feeds"
   import {getAvgRating} from "src/util/nostr"
   import Feed from "src/app/shared/Feed.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -10,13 +11,13 @@
   import {deriveRelay, normalizeRelayUrl, displayRelay, getMinWot} from "src/engine"
 
   export let url
-  export let feed = filterFeed({min_wot: getMinWot()})
+  export let feed: TFeed = wotFeed({min: getMinWot()})
 
   let reviews = []
   let activeTab = "notes"
 
   $: url = normalizeRelayUrl(url)
-  $: feed = relayFeed([url], feed)
+  $: feed = intersectionFeed(relayFeed(url), feed)
   $: rating = getAvgRating(reviews)
 
   const relay = deriveRelay(url)
@@ -48,7 +49,7 @@
 {#if activeTab === "reviews"}
   <Feed
     onEvent={onReview}
-    feed={filterFeed({
+    feed={feedFromFilter({
       kinds: [1986],
       "#l": ["review/relay"],
       "#r": [$relay.url],

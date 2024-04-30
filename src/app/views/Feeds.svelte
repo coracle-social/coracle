@@ -1,7 +1,8 @@
 <script lang="ts">
   import cx from "classnames"
   import {Tags} from "@welshman/util"
-  import {Scope, filterFeed, relayFeed} from "@welshman/feeds"
+  import {Scope, authorFeed, tagFeed, scopeFeed, relayFeed, intersectionFeed} from "@welshman/feeds"
+  import type {Feed as TFeed} from "@welshman/feeds"
   import {theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -10,10 +11,10 @@
   import {session, canSign, lists, userLists} from "src/engine"
 
   export let relays = []
-  export let feed = filterFeed({scopes: [Scope.Follows]})
+  export let feed: TFeed = scopeFeed(Scope.Follows)
 
   if (relays.length > 0) {
-    feed = relayFeed(relays, feed)
+    feed = intersectionFeed(relayFeed(...relays), feed)
   }
 
   let key = Math.random()
@@ -30,15 +31,15 @@
     const urls = tags.values("r").valueOf()
 
     if (authors.length > 0) {
-      feed = filterFeed({authors})
+      feed = authorFeed(...authors)
     } else if (topics.length > 0) {
-      feed = filterFeed({"#t": topics})
+      feed = tagFeed("#t", ...topics)
     } else {
-      feed = filterFeed({scopes: [Scope.Follows]})
+      feed = scopeFeed(Scope.Follows)
     }
 
     if (urls.length > 0) {
-      feed = relayFeed(urls, feed)
+      feed = intersectionFeed(relayFeed(...urls), feed)
     }
 
     key = Math.random()

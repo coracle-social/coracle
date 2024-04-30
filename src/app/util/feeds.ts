@@ -56,6 +56,7 @@ export class FeedLoader {
   isDeleted = isDeleted.get()
 
   constructor(readonly opts: FeedOpts) {
+    // @ts-ignore
     window.feed = this
 
     // Use a custom feed loader so we can intercept the filters
@@ -63,7 +64,7 @@ export class FeedLoader {
       ...baseFeedLoader.options,
       request: async ({relays, filters, onEvent}) => {
         // Default to note kinds
-        filters = filters.map(filter => ({kinds: noteKinds, ...filter}))
+        filters = filters?.map(filter => ({kinds: noteKinds, ...filter})) || []
 
         // Add reposts if we don't have any authors specified
         if (this.opts.includeReposts && !filters.some(f => f.authors?.length > 0)) {
@@ -74,7 +75,7 @@ export class FeedLoader {
         const tracker = new Tracker()
 
         // Use relays specified in feeds
-        if (relays.length > 0) {
+        if (relays?.length > 0) {
           promises.push(load({filters, relays, tracker, onEvent}))
         } else {
           if (!this.opts.skipCache) {
@@ -132,12 +133,12 @@ export class FeedLoader {
   // Event selection, deferral, and parent loading
 
   discardEvents = async events => {
-    let strict = false
+    let strict = true
 
     // Be more tolerant when looking at communities
-    this.feedLoader.compiler.walk(this.opts.feed, ([type, ...feed]) => {
-      if (type === FeedType.Filter) {
-        strict = feed.some(f => f["#a"]?.find(a => isContextAddress(decodeAddress(a))))
+    this.feedLoader.compiler.walk(this.opts.feed, ([type, key, ...feed]) => {
+      if (type === FeedType.Tag && key === "#a") {
+        strict = strict && !feed.some(a => isContextAddress(decodeAddress(a)))
       }
     })
 

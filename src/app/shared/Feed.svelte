@@ -1,7 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {Storage} from "hurdak"
-  import {prop} from 'ramda'
+  import {prop} from "ramda"
+  import type {Filter} from "@welshman/util"
   import type {Feed} from "@welshman/feeds"
   import {createScroller} from "src/util/misc"
   import {fly} from "src/util/transition"
@@ -25,7 +26,7 @@
   export let onEvent = null
 
   let element
-  let filters = [{ids: []}]
+  let filters: Filter[] = [{ids: []}]
   let limit = 0
   let opts = {
     feed,
@@ -54,9 +55,14 @@
   const update = async opts => {
     limit = 0
     start(opts)
-    filters = feedLoader.compiler.canCompile(opts.feed)
-      ? prop('filters', await feedLoader.compiler.compile(opts.feed))
-      : [{ids: []}]
+
+    if (feedLoader.compiler.canCompile(opts.feed)) {
+      const requests = await feedLoader.compiler.compile(opts.feed)
+
+      filters = requests.flatMap(r => r.filters)
+    } else {
+      filters = [{ids: []}]
+    }
   }
 
   $: {
