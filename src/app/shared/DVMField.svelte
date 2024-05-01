@@ -11,7 +11,6 @@
 
   export let dvmItem
   export let onChange
-  export let onRemove
 
   const removeTag = i => {
     onChange({...dvmItem, tags: dvmItem.tags.toSpliced(i, 1)})
@@ -29,6 +28,7 @@
     {label: "Content discovery", kind: 5300},
     {label: "Person discovery", kind: 5301},
     {label: "Content search", kind: 5302},
+    {label: "Person Search", kind: 5303},
   ]
 
   const searchKindItems = fuzzy(kinds, {keys: ["kind", "label"]})
@@ -46,14 +46,18 @@
 
 <FlexColumn class="relative">
   <Field label="Kind">
-    <SearchSelect search={searchKinds} value={dvmItem.kind} onChange={setKind} termToItem={identity}>
+    <SearchSelect
+      search={searchKinds}
+      value={dvmItem.kind}
+      onChange={setKind}
+      termToItem={identity}>
       <div slot="item" let:item>{displayKind(item)}</div>
     </SearchSelect>
   </Field>
   <Field label="Relays">
     <SearchSelect
       multiple
-      value={dvmItem.relays}
+      value={dvmItem.relays || []}
       search={$searchRelayUrls}
       termToItem={normalizeRelayUrl}
       onChange={relays => onChange({...dvmItem, relays})}>
@@ -61,17 +65,17 @@
     </SearchSelect>
     <p slot="info">Select which relays requests to this DVM should be sent to.</p>
   </Field>
-  {#each dvmItem.tags as [type, value], i (i + key)}
-    <div class="flex gap-2 items-center justify-between">
+  {#each dvmItem.tags || [] as [type, value], i (i + key)}
+    <div class="flex items-center justify-between gap-2">
       <i class="fa fa-trash cursor-pointer" on:click={() => removeTag(i)} />
-      <div class="flex gap-2 items-center justify-end">
-        <div class="flex gap-3 items-center">
+      <div class="flex items-center justify-end gap-2">
+        <div class="flex items-center gap-3">
           <label>Type</label>
           <Input bind:value={type} on:change={() => onChange(dvmItem)} />
         </div>
-        <div class="flex gap-3 items-center">
+        <div class="flex items-center gap-3">
           <label>Value</label>
-          <Input bind:value={value} on:change={() => onChange(dvmItem)} />
+          <Input bind:value on:change={() => onChange(dvmItem)} />
         </div>
       </div>
     </div>
@@ -79,7 +83,4 @@
   <Anchor on:click={addTag} class="cursor-pointer">
     <i class="fa fa-plus" /> Add tag
   </Anchor>
-  <div class="absolute -right-4 -top-2 flex h-4 w-4 cursor-pointer items-center justify-center" on:click={onRemove}>
-    <i class="fa fa-times fa-lg" />
-  </div>
 </FlexColumn>

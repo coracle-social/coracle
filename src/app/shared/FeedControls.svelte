@@ -1,30 +1,41 @@
 <script lang="ts">
-  import {omit} from "ramda"
   import {quantify, pluralize, displayList} from "hurdak"
   import {isNil, clamp} from "@welshman/lib"
-  import type {DynamicFilter, Feed} from "@welshman/feeds"
-  import {FeedType, Scope, getSubFeeds} from "@welshman/feeds"
+  import {Tags} from "@welshman/util"
+  import {
+    FeedType,
+    isScopeFeed,
+    isSearchFeed,
+    isAuthorFeed,
+    isCreatedAtFeed,
+    makeSearchFeed,
+    makeScopeFeed,
+    makeIntersectionFeed,
+    Scope,
+    hasSubFeeds,
+    getFeedArgs,
+    feedsFromTags,
+  } from "@welshman/feeds"
   import {slide} from "src/util/transition"
   import {formatTimestampAsDate, getStringWidth} from "src/util/misc"
-  import Card from "src/partials/Card.svelte"
   import Popover from "src/partials/Popover.svelte"
-  import Subheading from "src/partials/Subheading.svelte"
+  import Popover2 from "src/partials/Popover2.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Toggle from "src/partials/Toggle.svelte"
-  import Modal from "src/partials/Modal.svelte"
-  import FeedForm from "src/app/shared/FeedForm.svelte"
-  import {feedLoader, displayRelayUrl, displayPubkey} from "src/engine"
+  import {router} from "src/app/util"
+  import {displayRelayUrl, displayPubkey, displayList as displayList2, userLists} from "src/engine"
 
   export let value
 
-  const openModal = () => {
-    isOpen = true
+  const openListMenu = () => {
+    listMenuIsOpen = true
   }
 
-  const closeModal = () => {
-    isOpen = false
+  const closeListMenu = () => {
+    listMenuIsOpen = false
   }
 
   const showSearch = () => {
@@ -40,12 +51,22 @@
     value = {...value, shouldHideReplies: !value.shouldHideReplies}
   }
 
-  const setPart = (filter: DynamicFilter) => {
-    saveFeed([feed[0], {...feed[1], ...filter}] as Feed)
+  const getSearch = feed => getFeedArgs(feed)?.find(isSearchFeed)?.[1] as string | null
+
+  const saveFeed = feed => {
+    value = {...value, feed}
+    search = getSearch(feed)
+    closeListMenu()
   }
 
-  const removeParts = (keys: string[]) => {
-    saveFeed([feed[0], omit(keys, feed[1])] as Feed)
+  const setFeed = thisFeed => {
+    const idx = feed.findIndex(f => f[0] === thisFeed[0])
+
+    saveFeed(idx >= 0 ? feed.toSpliced(idx, 1, thisFeed) : [...feed, ...thisFeed])
+  }
+
+  const removeFeed = thisFeed => {
+    saveFeed(feed.filter(f => f !== thisFeed))
   }
 
   const onSearchFocus = () => {
@@ -66,31 +87,26 @@
     }
 
     if (text) {
-      setPart({search: text})
+      setFeed(makeSearchFeed(text))
     } else {
-      removeParts(["search"])
+      removeFeed(subFeeds.find(isSearchFeed))
     }
   }
 
-  const saveFeed = f => {
-    feed = f
-    value = {...value, feed}
-    search = feed[1]?.search
-    closeModal()
-  }
+  const loadList = list => saveFeed(makeIntersectionFeed(...feedsFromTags(Tags.fromEvent(list))))
 
   const displayPeople = pubkeys =>
     pubkeys.length === 1 ? displayPubkey(pubkeys[0]) : `${pubkeys.length} people`
 
   const displayTopics = topics => (topics.length === 1 ? topics[0] : `${topics.length} topics`)
 
-  let isOpen = false
-  let search = value.feed[1]?.search
+  let listMenuIsOpen = false
   let searchFocused = false
+  let search = getSearch(value.feed)
 
-  $: feed = value.feed
-  $: feedType = feed[0]
-  $: subFeeds = getSubFeeds(feed)
+  $: feed = hasSubFeeds(value.feed) ? value.feed : [FeedType.Intersection, value.feed]
+  $: subFeeds = getFeedArgs(feed)
+  $: currentScopeFeed = subFeeds.find(f => isScopeFeed(f) || isAuthorFeed(f))
 </script>
 
 <div class="-mb-2">
@@ -99,103 +115,105 @@
       <Toggle scale={0.6} value={!value.shouldHideReplies} on:change={toggleReplies} />
       <small class="text-neutral-200">Show replies</small>
     </div>
-    <i class="fa fa-sliders cursor-pointer p-2" on:click={openModal} />
-    <slot name="controls" />
+    <div class="relative lg:hidden">
+      <i class="fa fa-sliders cursor-pointer p-2" on:click={openListMenu} />
+      {#if listMenuIsOpen}
+        <Popover2 absolute hideOnClick onClose={closeListMenu} class="right-0 top-8 w-60">
+          <Menu>
+            <MenuItem inert class="flex items-center justify-between bg-neutral-800 shadow">
+              <span class="staatliches text-lg">Your Lists & Feeds</span>
+              <Anchor modal href={router.at("feeds").toString()}>
+                <i class="fa fa-cog" />
+              </Anchor>
+            </MenuItem>
+            <div class="max-h-96 overflow-auto">
+              {#each $userLists as list}
+                <MenuItem on:click={() => loadList(list)}>{displayList2(list)}</MenuItem>
+              {/each}
+            </div>
+          </Menu>
+        </Popover2>
+      {/if}
+    </div>
   </div>
   <div class="mb-2 mr-2 inline-block py-1">Showing notes:</div>
-  {#if subFeeds.length > 0}
+  {#if feed[0] !== FeedType.Intersection}
     <Chip class="mb-2 mr-2 inline-block">
       Custom feed ({quantify(subFeeds.length, "selection")})
     </Chip>
-  {/if}
-  {#if feedType === FeedType.Relay}
-    <Chip class="mb-2 mr-2 inline-block">
-      On {feed[1].length === 1 ? displayRelayUrl(feed[1][0]) : `${feed[1].length} relays`}
-    </Chip>
-  {:else if feedType === FeedType.List}
-    <Chip class="mb-2 mr-2 inline-block">
-      From {quantify(feed.slice(1).length, "list")}
-    </Chip>
-  {:else if feedType === FeedType.DVM}
-    <Chip class="mb-2 mr-2 inline-block">
-      From {quantify(feed.slice(1).length, "DVM")}
-    </Chip>
-  {:else if feedType === FeedType.Filter}
-    {#if feed.length > 2}
-      <Chip class="mb-2 mr-2 inline-block">
-        From {quantify(feed.slice(1).length, "filter")}
-      </Chip>
-    {:else}
-      {#await feedLoader.compiler.compile(feed)}
-        <!-- pass -->
-      {:then [{ filters: [filter] }]}
-        <Popover
-          class="inline-block"
-          placement="bottom-end"
-          theme="transparent"
-          opts={{hideOnClick: true}}>
-          <div slot="trigger" class="cursor-pointer">
-            <Chip class="mb-2 mr-2 inline-block">
-              {#if feed[1].scopes}
-                From {displayList(feed[1].scopes)}
-              {:else if filter.authors}
-                From {quantify(filter.authors.length, "author")}
-              {:else}
-                From global
+  {:else}
+    <Popover
+      class="inline-block"
+      placement="bottom-end"
+      theme="transparent"
+      opts={{hideOnClick: true}}>
+      <div slot="trigger" class="cursor-pointer">
+        <Chip class="mb-2 mr-2 inline-block">
+          {#if currentScopeFeed && isScopeFeed(currentScopeFeed)}
+            From {displayList(getFeedArgs(currentScopeFeed))}
+          {:else if currentScopeFeed && isAuthorFeed(currentScopeFeed)}
+            From {quantify(getFeedArgs(currentScopeFeed).length, "author")}
+          {:else}
+            From global
+          {/if}
+          <i class="fa fa-caret-down p-1" />
+        </Chip>
+      </div>
+      <div slot="tooltip">
+        <Menu>
+          <MenuItem on:click={() => setFeed(makeScopeFeed(Scope.Follows))}>
+            <i class="fa fa-user-plus mr-2" /> Follows
+          </MenuItem>
+          <MenuItem on:click={() => setFeed(makeScopeFeed(Scope.Network))}>
+            <i class="fa fa-share-nodes mr-2" /> Network
+          </MenuItem>
+          <MenuItem on:click={() => removeFeed(currentScopeFeed)}>
+            <i class="fa fa-earth-americas mr-2" /> Global
+          </MenuItem>
+        </Menu>
+      </div>
+    </Popover>
+    {#each subFeeds as subFeed}
+      {@const feedType = subFeed[0]}
+      {#if ![FeedType.Search, FeedType.Scope, FeedType.Author].includes(feedType)}
+        <Chip class="mb-2 mr-2 inline-block" onRemove={() => removeFeed(subFeed)}>
+          {#if feedType === FeedType.Relay}
+            On {subFeed.length === 2 ? displayRelayUrl(subFeed[1]) : `${subFeed.length - 1} relays`}
+          {:else if feedType === FeedType.List}
+            From {quantify(getFeedArgs(subFeed).length, "list")}
+          {:else if feedType === FeedType.Address || feedType === FeedType.ID}
+            {quantify(getFeedArgs(subFeed).length, "event")}
+          {:else if feedType === FeedType.DVM}
+            From {quantify(getFeedArgs(subFeed).length, "DVM")}
+          {:else if feedType === FeedType.Kind}
+            {@const kinds = getFeedArgs(subFeed)}
+            {pluralize(kinds.length, "Kind")}
+            {displayList(kinds)}
+          {:else if feedType === FeedType.Tag}
+            {@const [key, values] = getFeedArgs(subFeed)}
+            {#if key === "#p"}
+              Mentioning {displayPeople(values)}
+            {:else if key === "#t"}
+              Related to {displayTopics(values)}
+            {:else if key === "#e" || key === "#a"}
+              Tagging {pluralize(values.length, "event")}
+            {:else}
+              {pluralize(values.length, "other tag")}
+            {/if}
+          {:else if isCreatedAtFeed(subFeed)}
+            {#each getFeedArgs(subFeed) as { since, until, relative }}
+              {#if since && until}
+                Between {formatTimestampAsDate(since)} and {formatTimestampAsDate(until)}
+              {:else if since}
+                From {formatTimestampAsDate(since)}
+              {:else if until}
+                Through {formatTimestampAsDate(until)}
               {/if}
-              <i class="fa fa-caret-down p-1" />
-            </Chip>
-          </div>
-          <div slot="tooltip">
-            <Menu>
-              <MenuItem on:click={() => setPart({scopes: [Scope.Follows]})}>
-                <i class="fa fa-user-plus mr-2" /> Follows
-              </MenuItem>
-              <MenuItem on:click={() => setPart({scopes: [Scope.Network]})}>
-                <i class="fa fa-share-nodes mr-2" /> Network
-              </MenuItem>
-              <MenuItem on:click={() => removeParts(["scopes"])}>
-                <i class="fa fa-earth-americas mr-2" /> Global
-              </MenuItem>
-              <MenuItem on:click={openModal}>
-                <i class="fa fa-cog mr-2" /> Custom
-              </MenuItem>
-            </Menu>
-          </div>
-        </Popover>
-        {#if filter.kinds?.length > 0}
-          <Chip class="mb-2 mr-2 inline-block" onRemove={() => removeParts(["kinds"])}>
-            {pluralize(filter.kinds.length, "Kind")}
-            {displayList(filter.kinds)}
-          </Chip>
-        {/if}
-        {#if filter["#p"]?.length > 0}
-          <Chip class="mb-2 mr-2 inline-block" onRemove={() => removeParts(["#p"])}>
-            Mentioning {displayPeople(filter["#p"])}
-          </Chip>
-        {/if}
-        {#if filter["#t"]?.length > 0}
-          <Chip class="mb-2 mr-2 inline-block" onRemove={() => removeParts(["#t"])}>
-            Related to {displayTopics(filter["#t"])}
-          </Chip>
-        {/if}
-        {#if filter.since && filter.until}
-          {@const since = formatTimestampAsDate(filter.since)}
-          {@const until = formatTimestampAsDate(filter.until)}
-          <Chip class="mb-2 mr-2 inline-block" onRemove={() => removeParts(["since", "until"])}>
-            Between {since} and {until}
-          </Chip>
-        {:else if filter.since}
-          <Chip class="mb-2 mr-2 inline-block" onRemove={() => removeParts(["since"])}>
-            From {formatTimestampAsDate(filter.since)}
-          </Chip>
-        {:else if filter.until}
-          <Chip class="mb-2 mr-2 inline-block" onRemove={() => removeParts(["until"])}>
-            Through {formatTimestampAsDate(filter.until)}
-          </Chip>
-        {/if}
-      {/await}
-    {/if}
+            {/each}
+          {/if}
+        </Chip>
+      {/if}
+    {/each}
     <Chip class="cursor-pointer" on:click={showSearch}>
       <div class="flex h-6 items-center justify-center">
         <i class="fa fa-search" />
@@ -216,10 +234,3 @@
     </Chip>
   {/if}
 </div>
-
-{#if true || isOpen}
-  <Modal onEscape={closeModal}>
-    <Subheading class="ml-6">Create a custom Feed</Subheading>
-    <FeedForm {feed} onCancel={closeModal} onChange={saveFeed} />
-  </Modal>
-{/if}

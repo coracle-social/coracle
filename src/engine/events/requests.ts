@@ -5,9 +5,9 @@ import type {LoadOpts} from "@welshman/feeds"
 import {
   FeedLoader,
   Scope,
-  relayFeed,
-  intersectionFeed,
-  unionFeed,
+  makeRelayFeed,
+  makeIntersectionFeed,
+  makeUnionFeed,
   feedFromFilter,
 } from "@welshman/feeds"
 import {giftWrapKinds, generatePrivateKey} from "src/util/nostr"
@@ -74,7 +74,7 @@ export const feedLoader = new FeedLoader<Event | Rumor>({
       )
     }
   },
-  requestDvm: async ({kind, tags = [], relays = [], onEvent}) => {
+  requestDVM: async ({kind, tags = [], relays = [], onEvent}) => {
     const sk = generatePrivateKey()
     const event = await dvmRequest({kind, tags, relays, sk, timeout: 3000})
 
@@ -94,7 +94,7 @@ export const feedLoader = new FeedLoader<Event | Rumor>({
 
     return pubkeys.length === 0 ? env.get().DEFAULT_FOLLOWS : pubkeys
   },
-  getPubkeysForWotRange: (min, max) => {
+  getPubkeysForWOTRange: (min, max) => {
     const pubkeys = []
     const $user = user.get()
     const thresholdMin = maxWot.get() * min
@@ -143,7 +143,10 @@ export const sync = (fromUrl, toUrl, filters) => {
 
   worker.addGlobalHandler(event => publish({event, relays: [toUrl]}))
 
-  const feed = intersectionFeed(relayFeed(fromUrl), unionFeed(...filters.map(feedFromFilter)))
+  const feed = makeIntersectionFeed(
+    makeRelayFeed(fromUrl),
+    makeUnionFeed(...filters.map(feedFromFilter)),
+  )
 
   return loadAll(feed, {
     onEvent: e => worker.push(e as Event),

@@ -1,7 +1,14 @@
 <script lang="ts">
   import cx from "classnames"
   import {Tags} from "@welshman/util"
-  import {Scope, authorFeed, tagFeed, scopeFeed, relayFeed, intersectionFeed} from "@welshman/feeds"
+  import {
+    Scope,
+    makeAuthorFeed,
+    makeTagFeed,
+    makeScopeFeed,
+    makeRelayFeed,
+    makeIntersectionFeed,
+  } from "@welshman/feeds"
   import type {Feed as TFeed} from "@welshman/feeds"
   import {theme} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
@@ -11,10 +18,10 @@
   import {session, canSign, lists, userLists} from "src/engine"
 
   export let relays = []
-  export let feed: TFeed = scopeFeed(Scope.Follows)
+  export let feed: TFeed = makeScopeFeed(Scope.Follows)
 
   if (relays.length > 0) {
-    feed = intersectionFeed(relayFeed(...relays), feed)
+    feed = makeIntersectionFeed(makeRelayFeed(...relays), feed)
   }
 
   let key = Math.random()
@@ -31,15 +38,15 @@
     const urls = tags.values("r").valueOf()
 
     if (authors.length > 0) {
-      feed = authorFeed(...authors)
+      feed = makeAuthorFeed(...authors)
     } else if (topics.length > 0) {
-      feed = tagFeed("#t", ...topics)
+      feed = makeTagFeed("#t", ...topics)
     } else {
-      feed = scopeFeed(Scope.Follows)
+      feed = makeScopeFeed(Scope.Follows)
     }
 
     if (urls.length > 0) {
-      feed = intersectionFeed(relayFeed(...urls), feed)
+      feed = makeIntersectionFeed(makeRelayFeed(...urls), feed)
     }
 
     key = Math.random()

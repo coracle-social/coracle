@@ -1,5 +1,4 @@
 <script lang="ts">
-  import cx from "classnames"
   import {without} from "ramda"
 
   export let value = null

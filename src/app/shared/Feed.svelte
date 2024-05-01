@@ -1,7 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {Storage} from "hurdak"
-  import {prop} from "ramda"
   import type {Filter} from "@welshman/util"
   import type {Feed} from "@welshman/feeds"
   import {createScroller} from "src/util/misc"
@@ -59,7 +58,7 @@
     if (feedLoader.compiler.canCompile(opts.feed)) {
       const requests = await feedLoader.compiler.compile(opts.feed)
 
-      filters = requests.flatMap(r => r.filters)
+      filters = requests.flatMap(r => r.filters || [])
     } else {
       filters = [{ids: []}]
     }

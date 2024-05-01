@@ -13,4 +13,14 @@
   )
 </script>
 
-<textarea {...$$props} class={className} bind:this={element} bind:value on:keydown on:keypress />
+<textarea
+  {...$$props}
+  class={className}
+  bind:this={element}
+  bind:value
+  on:keydown
+  on:keypress
+  on:change
+  on:input
+  on:blur
+  on:focus />

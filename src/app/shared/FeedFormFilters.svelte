@@ -1,0 +1,135 @@
+<script lang="ts">
+  import {toTitle} from "hurdak"
+  import {
+    getFeedArgs,
+    isCreatedAtFeed,
+    isAuthorFeed,
+    isKindFeed,
+    isDVMFeed,
+    isTagFeed,
+    isScopeFeed,
+    isRelayFeed,
+    makeTagFeed,
+    makeAuthorFeed,
+    makeRelayFeed,
+    makeKindFeed,
+    makeCreatedAtFeed,
+    makeDVMFeed,
+  } from "@welshman/feeds"
+  import Card from "src/partials/Card.svelte"
+  import Menu from "src/partials/Menu.svelte"
+  import MenuItem from "src/partials/MenuItem.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
+  import Popover2 from "src/partials/Popover2.svelte"
+  import FeedFormSectionPeople from "src/app/shared/FeedFormSectionPeople.svelte"
+  import FeedFormSectionRelays from "src/app/shared/FeedFormSectionRelays.svelte"
+  import FeedFormSectionTopics from "src/app/shared/FeedFormSectionTopics.svelte"
+  import FeedFormSectionMentions from "src/app/shared/FeedFormSectionMentions.svelte"
+  import FeedFormSectionKinds from "src/app/shared/FeedFormSectionKinds.svelte"
+  import FeedFormSectionCreatedAt from "src/app/shared/FeedFormSectionCreatedAt.svelte"
+  import FeedFormSectionDVM from "src/app/shared/FeedFormSectionDVM.svelte"
+
+  export let feed
+  export let onChange
+
+  const addFeed = newFeed => onChange([...feed, newFeed])
+
+  const onSubFeedChange = (i, newFeed) => onChange(feed.toSpliced(i, 1, newFeed))
+
+  const onSubFeedRemove = i => onChange(feed.toSpliced(i, 1))
+
+  const isTopicFeed = f => isTagFeed(f) && f[1] === "#t"
+
+  const isMentionFeed = f => isTagFeed(f) && f[1] === "#p"
+
+  const isPeopleFeed = f => isAuthorFeed(f) || isScopeFeed(f)
+
+  const openMenu = () => {
+    menuIsOpen = true
+  }
+
+  const closeMenu = () => {
+    menuIsOpen = false
+  }
+
+  let menuIsOpen = false
+
+  $: subFeeds = getFeedArgs(feed)
+  $: hasTopics = subFeeds.some(isTopicFeed)
+  $: hasMentions = subFeeds.some(isMentionFeed)
+  $: hasPeople = subFeeds.some(isPeopleFeed)
+  $: hasRelays = subFeeds.some(isRelayFeed)
+  $: hasKinds = subFeeds.some(isKindFeed)
+  $: hasCreatedAt = subFeeds.some(isCreatedAtFeed)
+  $: hasDVM = subFeeds.some(isDVMFeed)
+</script>
+
+{#key feed.length}
+  {#each subFeeds as subFeed, i}
+    {@const change = f => onSubFeedChange(i + 1, f)}
+    <Card class="relative">
+      {#if isPeopleFeed(subFeed)}
+        <FeedFormSectionPeople feed={subFeed} onChange={change} />
+      {:else if isRelayFeed(subFeed)}
+        <FeedFormSectionRelays feed={subFeed} onChange={change} />
+      {:else if isTopicFeed(subFeed)}
+        <FeedFormSectionTopics feed={subFeed} onChange={change} />
+      {:else if isMentionFeed(subFeed)}
+        <FeedFormSectionMentions feed={subFeed} onChange={change} />
+      {:else if isKindFeed(subFeed)}
+        <FeedFormSectionKinds feed={subFeed} onChange={change} />
+      {:else if isCreatedAtFeed(subFeed)}
+        <FeedFormSectionCreatedAt feed={subFeed} onChange={change} />
+      {:else if isDVMFeed(subFeed)}
+        <FeedFormSectionDVM feed={subFeed} onChange={change} />
+      {:else}
+        No support for editing {toTitle(subFeed[0])} filters. Click "Advanced" to edit manually.
+      {/if}
+      {#if i > 0}
+        <div
+          class="absolute right-2 top-2 h-4 w-4 cursor-pointer"
+          on:click={() => onSubFeedRemove(i + 1)}>
+          <i class="fa fa-times" />
+        </div>
+      {/if}
+    </Card>
+  {/each}
+{/key}
+
+{#if !hasTopics || !hasMentions || !hasPeople || !hasRelays || !hasKinds || !hasCreatedAt || !hasDVM}
+  <div>
+    {#if menuIsOpen}
+      <Popover2 hideOnClick onClose={closeMenu} position="top">
+        <Menu class="relative top-2 m-auto w-48">
+          {#if !hasTopics}
+            <MenuItem on:click={() => addFeed(makeTagFeed("#t"))}>Topics</MenuItem>
+          {/if}
+          {#if !hasMentions}
+            <MenuItem on:click={() => addFeed(makeTagFeed("#p"))}>Mentions</MenuItem>
+          {/if}
+          {#if !hasPeople}
+            <MenuItem on:click={() => addFeed(makeAuthorFeed())}>Authors</MenuItem>
+          {/if}
+          {#if !hasRelays}
+            <MenuItem on:click={() => addFeed(makeRelayFeed())}>Relays</MenuItem>
+          {/if}
+          {#if !hasKinds}
+            <MenuItem on:click={() => addFeed(makeKindFeed())}>Kinds</MenuItem>
+          {/if}
+          {#if !hasCreatedAt}
+            <MenuItem on:click={() => addFeed(makeCreatedAtFeed())}>Date range</MenuItem>
+          {/if}
+          {#if !hasDVM}
+            <MenuItem on:click={() => addFeed(makeDVMFeed({kind: 5300}))}
+              >Data vending machine</MenuItem>
+          {/if}
+        </Menu>
+      </Popover2>
+    {/if}
+    <Anchor
+      class="flex items-center justify-center rounded-lg border border-dashed border-neutral-500 p-4 text-neutral-300"
+      on:click={openMenu}>
+      <span class="staatliches underline">Add a filter</span>
+    </Anchor>
+  </div>
+{/if}

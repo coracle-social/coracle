@@ -1,6 +1,13 @@
 <script lang="ts">
+  import cx from "classnames"
   import {onMount} from "svelte"
   import {fly} from "src/util/transition"
+
+  export let onClose = null
+  export let hideOnClick = false
+  export let position = "bottom"
+  export let absolute = false
+  export let fixed = false
 
   let popover
 
@@ -36,9 +43,23 @@
   })
 </script>
 
-<div class="relative">
+<svelte:window
+  on:mouseup={e => {
+    if (hideOnClick || !popover.contains(e.target)) {
+      setTimeout(onClose)
+    }
+  }}
+  on:keydown={e => {
+    if (e.key === "Escape") {
+      setTimeout(onClose)
+    }
+  }} />
+
+<div class={cx($$props.class, {absolute, fixed})}>
   <div
     class="absolute left-0 right-0 top-0 z-popover"
+    class:top-0={position === "bottom"}
+    class:bottom-0={position === "top"}
     bind:this={popover}
     transition:fly|local={{y: 20, duration: 200}}>
     <slot />

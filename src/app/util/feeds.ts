@@ -56,9 +56,6 @@ export class FeedLoader {
   isDeleted = isDeleted.get()
 
   constructor(readonly opts: FeedOpts) {
-    // @ts-ignore
-    window.feed = this
-
     // Use a custom feed loader so we can intercept the filters
     this.feedLoader = new CoreFeedLoader({
       ...baseFeedLoader.options,
@@ -171,7 +168,6 @@ export class FeedLoader {
       }
     }
 
-    const parentIds = new Set<string>()
     const notesWithParent = notes.filter(e => {
       if (repostKinds.includes(e.kind)) {
         return false
@@ -187,16 +183,8 @@ export class FeedLoader {
         return false
       }
 
-      for (const id of ids) {
-        parentIds.add(id)
-      }
-
       return true
     })
-
-    if (parentIds.size === 0) {
-      return
-    }
 
     const selections = hints.merge(notesWithParent.map(hints.EventParents)).getSelections()
 

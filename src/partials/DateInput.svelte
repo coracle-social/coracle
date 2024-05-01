@@ -8,28 +8,30 @@
   export let initialValue = null
   export let value = initialValue
 
-  let prev = value
-  let date = value ? createLocalDate(value) : new Date()
-
   const className = cx(
     $$props.class,
     "rounded-full shadow-inset py-2 px-4 w-full placeholder:text-neutral-400",
     "bg-white border border-solid border-neutral-200 text-black pl-10",
   )
 
+  const toDate = v => (v ? createLocalDate(v) : null)
+
+  const setValue = newValue => {
+    if (value === newValue) {
+      return
+    }
+
+    value = newValue
+    date = toDate(value)
+    onChange?.(value)
+  }
+
   const setDate = d => {
     try {
-      value = formatDateAsLocalISODate(d).slice(0, 10)
-      date = d
+      setValue(formatDateAsLocalISODate(d).slice(0, 10))
     } catch (e) {
       logger.error(e)
     }
-
-    if (prev !== value) {
-      onChange?.(value)
-    }
-
-    prev = value
   }
 
   const init = () => {
@@ -38,11 +40,11 @@
     }
   }
 
-  const clear = () => {
-    value = null
-  }
+  const clear = () => setValue(null)
 
-  $: value && setDate(date)
+  let date = toDate(value)
+
+  $: date ? setDate(date) : setValue(null)
 </script>
 
 <div class={cx(className, "relative")}>

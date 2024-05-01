@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {tagFeed} from "@welshman/feeds"
+  import {makeTagFeed} from "@welshman/feeds"
   import Feed from "src/app/shared/Feed.svelte"
   import Heading from "src/partials/Heading.svelte"
   import TopicActions from "src/app/shared/TopicActions.svelte"
@@ -13,4 +13,4 @@
     <TopicActions {topic} />
   </div>
 </div>
-<Feed feed={tagFeed("#t", topic)} />
+<Feed feed={makeTagFeed("#t", topic)} />

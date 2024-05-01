@@ -1,7 +1,7 @@
 import {assocPath, uniq} from "ramda"
 import {seconds} from "hurdak"
 import {now} from "@welshman/lib"
-import {relayFeed, feedFromFilter, unionFeed, intersectionFeed} from "@welshman/feeds"
+import {makeRelayFeed, feedFromFilter, makeUnionFeed, makeIntersectionFeed} from "@welshman/feeds"
 import {sessions} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {loadPubkeys, subscribe} from "src/engine/network/utils"
@@ -21,9 +21,9 @@ export const loadAllMessages = ({reload = false} = {}) => {
   })
 
   const loader = loadAll(
-    intersectionFeed(
-      relayFeed(...hints.User().getUrls()),
-      unionFeed(
+    makeIntersectionFeed(
+      makeRelayFeed(...hints.User().getUrls()),
+      makeUnionFeed(
         feedFromFilter({kinds: [4], authors: [pubkey], since}),
         feedFromFilter({kinds: [4, 1059], "#p": [pubkey], since}),
       ),

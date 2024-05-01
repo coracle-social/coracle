@@ -1,5 +1,5 @@
 import {nip19} from "nostr-tools"
-import {pushToMapKey} from "@welshman/lib"
+import {pushToMapKey, clamp} from "@welshman/lib"
 import {
   Router,
   normalizeRelayUrl as normalize,
@@ -161,13 +161,13 @@ export const hints = new Router({
     const oneHour = 60 * oneMinute
     const oneDay = 24 * oneHour
     const oneWeek = 7 * oneDay
+    const {count = 0, faults = []} = relays.key(url).get() || {}
     const connection = NetworkContext.pool.get(url, {autoConnect: false})
 
     // If we haven't connected, consult our relay record and see if there has
     // been a recent fault. If there has been, penalize the relay. If there have been several,
     // don't use the relay.
     if (!connection) {
-      const faults = relays.key(url).get()?.faults || []
       const lastFault = last(faults) || 0
 
       if (faults.filter(n => n > Date.now() - oneHour).length > 10) {
@@ -192,7 +192,7 @@ export const hints = new Router({
       [ConnectionStatus.Closed]: 0.6,
       [ConnectionStatus.Slow]: 0.5,
       [ConnectionStatus.Ok]: 1,
-      default: 0.5,
+      default: clamp([0.5, 1], count / 1000),
     })
   },
 })
