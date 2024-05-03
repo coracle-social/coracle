@@ -144,21 +144,7 @@
     },
   })
 
-  //  router.register("/feeds", import("src/app/views/FeedList.svelte"))
-  //  router.register("/feeds/create", import("src/app/views/FeedForm.svelte"))
-  //  router.register("/feeds/select", import("src/app/views/FeedSelect.svelte"), {
-  //    serializers: {
-  //      type: asString("type"),
-  //      value: asString("value"),
-  //    },
-  //  })
-  //  router.register("/feeds/:address", import("src/app/views/FeedEdit.svelte"), {
-  //    serializers: {
-  //      address: asNaddr("address"),
-  //    },
-  //  })
-
-  router.register("/lists", import("src/app/views/ListList.svelte"))
+  router.register("/feeds", import("src/app/views/FeedList.svelte"))
   router.register("/lists/create", import("src/app/views/ListEdit.svelte"))
   router.register("/lists/select", import("src/app/views/ListSelect.svelte"), {
     serializers: {

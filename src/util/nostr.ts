@@ -1,4 +1,4 @@
-import {fromNostrURI, Tags} from "@welshman/util"
+import {fromNostrURI, Kind, Tags} from "@welshman/util"
 import {schnorr} from "@noble/curves/secp256k1"
 import {bytesToHex} from "@noble/hashes/utils"
 import {nip05, nip19, generateSecretKey, getEventHash, getPublicKey as getPk} from "nostr-tools"
@@ -25,13 +25,39 @@ export const isKeyValid = (key: string) => {
   return true
 }
 
-export const noteKinds = [1, 30023, 9802, 1808, 31337, 31923, 30402]
-export const replyKinds = [1, 9802, 1808, 31337]
-export const reactionKinds = [7, 9735]
-export const repostKinds = [6, 16]
-export const giftWrapKinds = [1059, 1060]
-export const personKinds = [0, 2, 3, 10000, 10002, 10004]
-export const userKinds = [...personKinds, 30001, 30003, 30078, 10004]
+export const noteKinds = [
+  Kind.Note,
+  Kind.LongFormArticle,
+  Kind.Highlight,
+  Kind.Remix,
+  Kind.Audio,
+  Kind.CalendarEventTime,
+  Kind.ClassifiedListing,
+]
+
+export const replyKinds = [Kind.Note, Kind.Highlight, Kind.Remix, Kind.Audio]
+
+export const reactionKinds = [Kind.Reaction, Kind.ZapResponse]
+export const repostKinds = [Kind.Repost, Kind.GenericRepost]
+export const giftWrapKinds = [Kind.GiftWrap, 1060]
+
+export const personKinds = [
+  Kind.Profile,
+  Kind.Relay,
+  Kind.ListFollows,
+  Kind.UserListMutes,
+  Kind.UserListRelays,
+  Kind.UserListCommunities,
+]
+
+export const userKinds = [
+  ...personKinds,
+  Kind.Feed,
+  Kind.ListGeneric,
+  Kind.ListBookmarks,
+  Kind.Application,
+  Kind.UserListCommunities,
+]
 
 export const LOCAL_RELAY_URL = "local://coracle.relay"
 

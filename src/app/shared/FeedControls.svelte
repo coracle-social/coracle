@@ -1,13 +1,12 @@
 <script lang="ts">
-  import {quantify, pluralize, displayList} from "hurdak"
-  import {isNil, clamp} from "@welshman/lib"
-  import {Tags} from "@welshman/util"
+  import {quantify, displayList} from "hurdak"
+  import {isNil, randomId, clamp} from "@welshman/lib"
+  import {Tags, Kind, getAddress} from "@welshman/util"
   import {
     FeedType,
     isScopeFeed,
     isSearchFeed,
     isAuthorFeed,
-    isCreatedAtFeed,
     makeSearchFeed,
     makeScopeFeed,
     makeIntersectionFeed,
@@ -17,7 +16,7 @@
     feedsFromTags,
   } from "@welshman/feeds"
   import {slide} from "src/util/transition"
-  import {formatTimestampAsDate, getStringWidth} from "src/util/misc"
+  import {getStringWidth} from "src/util/misc"
   import Modal from "src/partials/Modal.svelte"
   import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
@@ -29,8 +28,9 @@
   import Chip from "src/partials/Chip.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
+  import FeedSummary from "src/app/shared/FeedSummary.svelte"
   import {router} from "src/app/util"
-  import {hints, createAndPublish, displayRelayUrl, displayPubkey, displayList as displayList2, userLists} from "src/engine"
+  import {hints, createAndPublish, displayList as displayList2, userLists} from "src/engine"
 
   export let value
 
@@ -95,15 +95,18 @@
     setFeed(feed.filter(f => f !== subFeed))
   }
 
-  const saveFeed = async (feed) => {
+  const saveFeed = async feed => {
     const pub = await createAndPublish({
-      kind: FEED,
+      kind: Kind.Feed,
       content: JSON.stringify(feed),
-      tags: [["d", randomId()], ["name", name]],
+      tags: [
+        ["d", randomId()],
+        ["name", name],
+      ],
       relays: hints.WriteRelays().getUrls(),
     })
 
-    address = getAddress(pub.event)
+    address = getAddress(pub.request.event)
     setFeed(feed)
   }
 
@@ -129,12 +132,7 @@
 
   const loadList = list => setFeed(makeIntersectionFeed(...feedsFromTags(Tags.fromEvent(list))))
 
-  const displayPeople = pubkeys =>
-    pubkeys.length === 1 ? displayPubkey(pubkeys[0]) : `${pubkeys.length} people`
-
-  const displayTopics = topics => (topics.length === 1 ? topics[0] : `${topics.length} topics`)
-
-  const normalize = feed => hasSubFeeds(feed) ? feed : [FeedType.Intersection, feed]
+  const normalize = feed => (hasSubFeeds(feed) ? feed : makeIntersectionFeed(feed))
 
   let address = null
   let formIsOpen = false
@@ -151,13 +149,15 @@
 </script>
 
 <div class="-mb-2">
-  <div class="float-right flex justify-end items-center h-8">
+  <div class="float-right flex h-8 items-center justify-end">
     <div class="flex items-center gap-1 px-2">
       <Toggle scale={0.6} value={!value.shouldHideReplies} on:change={toggleReplies} />
       <small class="text-neutral-200">Show replies</small>
     </div>
     <div class="relative lg:hidden">
-      <div class="w-6 text-center cursor-pointer bg-neutral-700 text-neutral-50 rounded transition-colors hover:bg-neutral-600" on:click={openListMenu}>
+      <div
+        class="w-6 cursor-pointer rounded bg-neutral-700 text-center text-neutral-50 transition-colors hover:bg-neutral-600"
+        on:click={openListMenu}>
         <i class="fa fa-sm fa-ellipsis-v" />
       </div>
       {#if listMenuIsOpen}
@@ -222,52 +222,16 @@
       </div>
     </Popover>
     {#each subFeeds as subFeed}
-      {@const feedType = subFeed[0]}
-      {#if ![FeedType.Search, FeedType.Scope, FeedType.Author].includes(feedType)}
-        <Chip class="mb-2 mr-2 inline-block" onRemove={() => removeSubFeed(subFeed)}>
-          {#if feedType === FeedType.Relay}
-            On {subFeed.length === 2 ? displayRelayUrl(subFeed[1]) : `${subFeed.length - 1} relays`}
-          {:else if feedType === FeedType.List}
-            From {quantify(getFeedArgs(subFeed).length, "list")}
-          {:else if feedType === FeedType.Address || feedType === FeedType.ID}
-            {quantify(getFeedArgs(subFeed).length, "event")}
-          {:else if feedType === FeedType.DVM}
-            From {quantify(getFeedArgs(subFeed).length, "DVM")}
-          {:else if feedType === FeedType.Kind}
-            {@const kinds = getFeedArgs(subFeed)}
-            {pluralize(kinds.length, "Kind")}
-            {displayList(kinds)}
-          {:else if feedType === FeedType.Tag}
-            {@const [key, ...values] = getFeedArgs(subFeed)}
-            {#if key === "#p"}
-              Mentioning {displayPeople(values)}
-            {:else if key === "#t"}
-              Related to {displayTopics(values)}
-            {:else if key === "#e" || key === "#a"}
-              Tagging {pluralize(values.length, "event")}
-            {:else}
-              {pluralize(values.length, "other tag")}
-            {/if}
-          {:else if isCreatedAtFeed(subFeed)}
-            {#each getFeedArgs(subFeed) as { since, until, relative }}
-              {#if since && until}
-                Between {formatTimestampAsDate(since)} and {formatTimestampAsDate(until)}
-              {:else if since}
-                From {formatTimestampAsDate(since)}
-              {:else if until}
-                Through {formatTimestampAsDate(until)}
-              {/if}
-            {/each}
-          {/if}
-        </Chip>
+      {#if ![FeedType.Search, FeedType.Scope, FeedType.Author].includes(subFeed[0])}
+        <FeedSummary feed={subFeed} />
       {/if}
     {/each}
     <Chip class="cursor-pointer">
       <div class="flex items-center">
-        <div class="flex w-6 h-6 items-center justify-center" on:click={openForm}>
+        <div class="flex h-6 w-6 items-center justify-center" on:click={openForm}>
           <i class="fa fa-plus" />
         </div>
-        <div class="flex w-6 h-6 items-center justify-center" on:click={showSearch}>
+        <div class="flex h-6 w-6 items-center justify-center" on:click={showSearch}>
           <i class="fa fa-search" />
         </div>
         {#if !isNil(search)}
@@ -275,7 +239,7 @@
           {@const width = getStringWidth(search)}
           <input
             autofocus
-            class="bg-transparent outline-none pl-1"
+            class="bg-transparent pl-1 outline-none"
             class:transition-all={width < min || !searchFocused}
             style={`width: ${clamp([min, 150], width) + 10}px`}
             transition:slide|local={{axis: "x", duration: 200}}

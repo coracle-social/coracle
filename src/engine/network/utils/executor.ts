@@ -1,7 +1,8 @@
-import {max, prop, omit, partition, equals} from "ramda"
+import {max, filter, prop, omit, partition, equals} from "ramda"
 import {sleep, pickVals} from "hurdak"
 import {Worker} from "@welshman/lib"
-import {createEvent, FEED, Relay} from "@welshman/util"
+import type {Rumor} from "@welshman/util"
+import {createEvent, Kind, Relay} from "@welshman/util"
 import {
   Plex,
   Relays,
@@ -30,10 +31,14 @@ export const projections = new Worker<Event>({
 })
 
 projections.addGlobalHandler(event => {
-  if (event.kind === FEED) {
+  if (event.kind === Kind.Feed) {
     relay.put(event)
   }
 })
+
+export const feeds = relay.cursor([{kinds: [Kind.Feed]}]).throttle(300)
+
+export const userFeeds = feeds.derived(filter((e: Rumor) => e.pubkey === pubkey.get()))
 
 export const getExecutor = (urls: string[]) => {
   const muxUrl = getSetting("multiplextr_url")
