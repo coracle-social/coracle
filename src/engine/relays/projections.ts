@@ -1,7 +1,7 @@
 import {Tags} from "@welshman/util"
 import {normalizeRelayUrl, isShareableRelayUrl} from "@welshman/util"
 import {warn} from "src/util/logger"
-import {projections} from "src/engine/core/projections"
+import {projections} from "src/engine/network"
 import {RelayMode} from "./model"
 import {saveRelay, saveRelayPolicy} from "./commands"
 

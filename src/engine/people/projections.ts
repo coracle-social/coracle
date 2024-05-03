@@ -1,7 +1,7 @@
 import {Tags, getLnUrl} from "@welshman/util"
 import {tryJson} from "src/util/misc"
 import {updateStore, updateRecord} from "src/engine/core/commands"
-import {projections} from "src/engine/core/projections"
+import {projections} from "src/engine/network"
 import {getSession} from "src/engine/session/utils"
 import {updateSession} from "src/engine/session/commands"
 import {getZapper} from "src/engine/zaps/utils"

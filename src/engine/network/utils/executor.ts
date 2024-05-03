@@ -1,7 +1,7 @@
-import {max, omit, partition, equals} from "ramda"
+import {max, prop, omit, partition, equals} from "ramda"
 import {sleep, pickVals} from "hurdak"
-import type {Event} from "nostr-tools"
-import {createEvent} from "@welshman/util"
+import {Worker} from "@welshman/lib"
+import {createEvent, FEED, Relay} from "@welshman/util"
 import {
   Plex,
   Relays,
@@ -14,14 +14,26 @@ import {
 } from "@welshman/net"
 import type {PublishRequest, SubscribeRequest} from "@welshman/net"
 import {LOCAL_RELAY_URL, isGiftWrap, generatePrivateKey} from "src/util/nostr"
-import {projections} from "src/engine/core"
 import {env, pubkey} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
 import {signer, canSign} from "src/engine/session/derived"
+import type {Event} from "src/engine/events/model"
 import {publishes} from "src/engine/events/state"
 import {LocalTarget} from "./targets"
 
+export const relay = new Relay()
+
 export const tracker = new Tracker()
+
+export const projections = new Worker<Event>({
+  getKey: prop("kind"),
+})
+
+projections.addGlobalHandler(event => {
+  if (event.kind === FEED) {
+    relay.put(event)
+  }
+})
 
 export const getExecutor = (urls: string[]) => {
   const muxUrl = getSetting("multiplextr_url")
@@ -99,7 +111,10 @@ export const subscribe = (request: MySubscribeRequest) => {
   const sub = baseSubscribe(request)
 
   sub.emitter.on("event", (url: string, event: Event) => {
-    projections.push(event)
+    if (!relay.has(event.id)) {
+      projections.push(event)
+    }
+
     request.onEvent?.(event)
   })
 

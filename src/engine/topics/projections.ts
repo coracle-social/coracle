@@ -1,5 +1,5 @@
 import {Tags} from "@welshman/util"
-import {projections} from "src/engine/core/projections"
+import {projections} from "src/engine/network"
 import type {Event} from "src/engine/events/model"
 import {addTopic, processTopics} from "./commands"
 

@@ -1,4 +1,4 @@
-import {projections} from "src/engine/core/projections"
+import {projections} from "src/engine/network"
 import {_labels} from "./state"
 
 projections.addHandler(1985, e => {
