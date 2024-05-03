@@ -151,20 +151,22 @@
     </div>
   </Input>
   {#if focused}
-    <Popover2>
-      <Suggestions
-        bind:this={suggestions}
-        create={termToItem ? create : null}
-        {loading}
-        {select}
-        {term}
-        {getKey}>
-        <div slot="item" let:item>
-          <slot name="item" context="option" {item}>
-            {displayItem(item)}
-          </slot>
-        </div>
-      </Suggestions>
-    </Popover2>
+    <div class="relative">
+      <Popover2>
+        <Suggestions
+          bind:this={suggestions}
+          create={termToItem ? create : null}
+          {loading}
+          {select}
+          {term}
+          {getKey}>
+          <div slot="item" let:item>
+            <slot name="item" context="option" {item}>
+              {displayItem(item)}
+            </slot>
+          </div>
+        </Suggestions>
+      </Popover2>
+    </div>
   {/if}
 </div>

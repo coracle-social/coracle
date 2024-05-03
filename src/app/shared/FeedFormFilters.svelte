@@ -97,10 +97,10 @@
 {/key}
 
 {#if !hasTopics || !hasMentions || !hasPeople || !hasRelays || !hasKinds || !hasCreatedAt || !hasDVM}
-  <div>
+  <div class="relative">
     {#if menuIsOpen}
       <Popover2 hideOnClick onClose={closeMenu} position="top">
-        <Menu class="relative top-2 m-auto w-48">
+        <Menu class="relative -top-12 m-auto w-48">
           {#if !hasTopics}
             <MenuItem on:click={() => addFeed(makeTagFeed("#t"))}>Topics</MenuItem>
           {/if}

@@ -14,7 +14,6 @@
 
   export let feed
   export let onChange
-  export let onCancel
 
   enum FormType {
     Advanced = "advanced",
@@ -62,10 +61,13 @@
     }
 
     formType = newFormType
+
+    onChange(feed)
   }
 
   const onFeedChange = newFeed => {
     feed = newFeed
+    onChange(feed)
   }
 
   let formType = inferFormType(feed)
@@ -73,7 +75,7 @@
   $: console.log(JSON.stringify(normalize(feed), null, 2))
 </script>
 
-<FlexColumn class="pb-32">
+<FlexColumn>
   <Card>
     <Field label="Choose a feed type">
       <SelectTiles
@@ -114,8 +116,4 @@
   {:else if formType === FormType.Advanced}
     <FeedFormAdvanced {feed} onChange={onFeedChange} />
   {/if}
-  <div class="flex items-center justify-between gap-3">
-    <Anchor button on:click={onCancel}>Discard</Anchor>
-    <Anchor button accent on:click={() => onChange(feed)}>Save feed</Anchor>
-  </div>
 </FlexColumn>
