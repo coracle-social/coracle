@@ -35,7 +35,6 @@
       <NoteCreateInline parent={event} />
       <Feed
         hideSpinner
-        hideControls
         shouldListen
         anchor={getIdOrAddress(event)}
         feed={feedFromFilter({"#a": [address]})} />

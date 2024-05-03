@@ -98,7 +98,7 @@
 {:else if activeTab === "notes"}
   <Feed showGroup skipPlatform {feed} />
 {:else if activeTab === "likes"}
-  <Feed showGroup hideControls feed={feedFromFilter({kinds: [7], authors: [pubkey]})} />
+  <Feed showGroup feed={feedFromFilter({kinds: [7], authors: [pubkey]})} />
 {:else if activeTab === "collections"}
   <PersonCollections {pubkey} />
 {:else if activeTab === "relays"}

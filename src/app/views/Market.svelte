@@ -30,4 +30,4 @@
   </Card>
 {/if}
 
-<Feed hideControls={Boolean($env.FORCE_GROUP)} {feed} />
+<Feed {feed} />

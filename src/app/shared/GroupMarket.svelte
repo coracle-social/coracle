@@ -15,4 +15,4 @@
   <Anchor button accent on:click={createListing}>Create a listing</Anchor>
 </Card>
 
-<Feed hideControls feed={feedFromFilter({kinds: [30402], "#a": [address]})} />
+<Feed feed={feedFromFilter({kinds: [30402], "#a": [address]})} />

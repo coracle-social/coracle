@@ -18,7 +18,7 @@
   export let skipNetwork = false
   export let skipPlatform = false
   export let shouldListen = false
-  export let hideControls = false
+  export let showControls = false
   export let hideSpinner = false
   export let includeReposts = false
   export let showGroup = false
@@ -76,7 +76,7 @@
   })
 </script>
 
-{#if !hideControls}
+{#if showControls}
   <FeedControls bind:value={opts} />
 {/if}
 

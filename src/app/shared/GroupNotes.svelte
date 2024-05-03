@@ -98,7 +98,6 @@
     <Feed
       eager
       shouldListen
-      hideControls
       skipNetwork={isGroupAddress(decodeAddress(address))}
       feed={feedFromFilter({kinds: without([30402], noteKinds), "#a": [address]})} />
   {:else}
