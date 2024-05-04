@@ -18,6 +18,7 @@
   import {slide} from "src/util/transition"
   import {getStringWidth} from "src/util/misc"
   import Modal from "src/partials/Modal.svelte"
+  import Subheading from "src/partials/Subheading.svelte"
   import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -83,6 +84,7 @@
     search = getSearch(feed)
     closeListMenu()
     closeForm()
+    closeName()
   }
 
   const setSubFeed = subFeed => {
@@ -254,6 +256,11 @@
 
 {#if formIsOpen}
   <Modal onEscape={closeForm}>
+    {#if address}
+      <Subheading>Edit {name}</Subheading>
+    {:else}
+      <Subheading>Customize your feed</Subheading>
+    {/if}
     <FeedField feed={draftFeed} onChange={onDraftFeedChange} />
     <div class="flex justify-between gap-2">
       <Anchor button on:click={closeForm}>Discard</Anchor>

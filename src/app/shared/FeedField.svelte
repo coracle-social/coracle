@@ -13,7 +13,7 @@
   import FeedFormAdvanced from "src/app/shared/FeedFormAdvanced.svelte"
 
   export let feed
-  export let onChange
+  export let onChange = null
 
   enum FormType {
     Advanced = "advanced",
@@ -62,12 +62,12 @@
 
     formType = newFormType
 
-    onChange(feed)
+    onChange?.(feed)
   }
 
   const onFeedChange = newFeed => {
     feed = newFeed
-    onChange(feed)
+    onChange?.(feed)
   }
 
   let formType = inferFormType(feed)

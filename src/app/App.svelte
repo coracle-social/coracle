@@ -145,6 +145,13 @@
   })
 
   router.register("/feeds", import("src/app/views/FeedList.svelte"))
+  router.register("/feeds/create", import("src/app/views/FeedForm.svelte"))
+  router.register("/feeds/:address", import("src/app/views/FeedForm.svelte"), {
+    serializers: {
+      address: asNaddr("address"),
+    },
+  })
+
   router.register("/lists/create", import("src/app/views/ListEdit.svelte"))
   router.register("/lists/select", import("src/app/views/ListSelect.svelte"), {
     serializers: {

@@ -1,8 +1,8 @@
 import {max, filter, prop, omit, partition, equals} from "ramda"
 import {sleep, pickVals} from "hurdak"
-import {Worker} from "@welshman/lib"
+import {Worker, derived} from "@welshman/lib"
 import type {Rumor} from "@welshman/util"
-import {createEvent, Kind, Relay} from "@welshman/util"
+import {createEvent, Kind, Relay, Repository} from "@welshman/util"
 import {
   Plex,
   Relays,
@@ -22,7 +22,9 @@ import type {Event} from "src/engine/events/model"
 import {publishes} from "src/engine/events/state"
 import {LocalTarget} from "./targets"
 
-export const relay = new Relay()
+export const repository = new Repository()
+
+export const relay = new Relay(repository)
 
 export const tracker = new Tracker()
 
@@ -32,13 +34,19 @@ export const projections = new Worker<Event>({
 
 projections.addGlobalHandler(event => {
   if (event.kind === Kind.Feed) {
-    relay.put(event)
+    repository.publish(event)
   }
 })
 
-export const feeds = relay.cursor([{kinds: [Kind.Feed]}]).throttle(300)
+export const allEvents = repository.throttle(300)
 
-export const userFeeds = feeds.derived(filter((e: Rumor) => e.pubkey === pubkey.get()))
+export const deriveEvents = filter => allEvents.derived(r => Array.from(r.query([filter])))
+
+export const feeds = deriveEvents({kinds: [Kind.Feed]})
+
+export const userFeeds = derived([feeds, pubkey], ([$feeds, $pubkey]) =>
+  $feeds.filter((e: Rumor) => e.pubkey === pubkey.get()),
+)
 
 export const getExecutor = (urls: string[]) => {
   const muxUrl = getSetting("multiplextr_url")
@@ -116,7 +124,7 @@ export const subscribe = (request: MySubscribeRequest) => {
   const sub = baseSubscribe(request)
 
   sub.emitter.on("event", (url: string, event: Event) => {
-    if (!relay.has(event.id)) {
+    if (!repository.getEvent(event.id)) {
       projections.push(event)
     }
 

@@ -1,11 +1,12 @@
 <script type="ts">
-  import {getAddress} from '@welshman/util'
-  import {tryJson} from 'src/util/misc'
-  import Heading from "src/partials/Heading.svelte"
+  import {getAddress} from "@welshman/util"
+  import Subheading from "src/partials/Subheading.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import Card from "src/partials/Card.svelte"
   import FeedSummary from "src/app/shared/FeedSummary.svelte"
   import {router} from "src/app/util/router"
-  import {getFeedTitle} from "src/domain"
+  import {feedFromEvent} from "src/domain"
   import {userFeeds, publishDeletion} from "src/engine"
 
   const createFeed = () => router.at("feeds/create").open()
@@ -14,26 +15,35 @@
 </script>
 
 <div class="flex items-center justify-between">
-  <Heading>Your Feeds</Heading>
+  <Subheading>Your Feeds</Subheading>
   <Anchor button accent on:click={createFeed}>
     <i class="fa fa-plus" /> Feed
   </Anchor>
 </div>
 {#each $userFeeds as event (getAddress(event))}
   {@const address = getAddress(event)}
-  {@const feed = tryJson(() => JSON.parse(event.content))}
-  <div class="flex justify-start gap-3">
-    <i
-      class="fa fa-sm fa-trash cursor-pointer py-3"
-      on:click|stopPropagation={() => publishDeletion([address])} />
-    <div class="flex w-full justify-between">
-      <div>
-        <strong>{getFeedTitle(event)}</strong>
-        <FeedSummary {feed} />
+  {@const feed = feedFromEvent(event)}
+  <Card>
+    <FlexColumn>
+      <div class="flex justify-between items-center">
+        <span class="staatliches flex items-center gap-3 text-xl">
+          <i class="fa fa-rss" />
+          {#if feed.name}
+            {feed.name}
+          {:else}
+            <span class="text-neutral-500">No name</span>
+          {/if}
+        </span>
+        <Anchor on:click={() => editFeed(address)}>
+          <i class="fa fa-edit" /> Edit
+        </Anchor>
       </div>
-      <Anchor class="underline" on:click={() => editFeed(address)}>Edit</Anchor>
-    </div>
-  </div>
+      {#if feed.description}
+        <p>{feed.description}</p>
+      {/if}
+      <FeedSummary feed={feed.data} />
+    </FlexColumn>
+  </Card>
 {:else}
   <p class="text-center py-12">You don't have any feeds yet.</p>
 {/each}
