@@ -3,6 +3,7 @@ import {uniq} from "ramda"
 import {hash} from "hurdak"
 import {writable} from "@welshman/lib"
 import {ConnectionStatus, NetworkContext} from "@welshman/net"
+import type {Feed} from "@welshman/feeds"
 import {warn} from "src/util/logger"
 import {userKinds} from "src/util/nostr"
 import {router} from "src/app/util/router"
@@ -28,6 +29,8 @@ import {
 export const menuIsOpen = writable(false)
 
 export const searchTerm = writable("")
+
+export const feed = writable<Feed>(null)
 
 // Redact long strings, especially hex and bech32 keys which are 64 and 63
 // characters long, respectively. Put the threshold a little lower in case

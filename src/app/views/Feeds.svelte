@@ -1,17 +1,18 @@
 <script lang="ts">
   import {Scope, makeScopeFeed, makeRelayFeed, makeIntersectionFeed} from "@welshman/feeds"
-  import type {Feed as TFeed} from "@welshman/feeds"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/util/router"
+  import {feed} from 'src/app/state'
   import {session} from "src/engine"
 
   export let relays = []
-  export let feed: TFeed = makeScopeFeed(Scope.Follows)
 
-  if (relays.length > 0) {
-    feed = makeIntersectionFeed(makeRelayFeed(...relays), feed)
-  }
+  feed.set(
+    relays.length > 0
+      ? makeIntersectionFeed(makeRelayFeed(...relays), makeScopeFeed(Scope.Follows))
+      : makeScopeFeed(Scope.Follows)
+  )
 
   const showLogin = () => router.at("login").open()
 
@@ -27,4 +28,4 @@
   </div>
 {/if}
 
-<Feed skipCache showControls showGroup {feed} />
+<Feed skipCache showControls showGroup bind:feed={$feed} />

@@ -3,28 +3,26 @@
   import {elasticOut} from "svelte/easing"
   import {fly} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
-  import {router} from "src/app/util/router"
 
   export let path = null
+  export let isAlt = false
+  export let isActive = false
 
-  const {page} = router
-
-  $: isActive = path && $page?.path.startsWith(path)
-
-  $: className = cx("relative staatliches h-12 block transition-all", {
+  $: className = cx("relative staatliches h-12 block transition-all", $$props.class, {
     "text-3xl text-accent": isActive,
-    "text-2xl text-tinted-400 hover:text-tinted-100 hover:bg-tinted-800":
-      !isActive,
+    "text-2xl text-tinted-400 hover:text-tinted-100": !isActive,
+    "hover:bg-tinted-800": !isActive && !isAlt,
+    "hover:bg-tinted-700": !isActive && isAlt,
   })
 </script>
 
 <Anchor {...$$props} randomizeKey class={className} href={path} on:click>
-  <div class="absolute left-8 flex gap-5 whitespace-nowrap pt-2" class:-right-6={isActive}>
+  <div class="absolute left-6 flex gap-5 whitespace-nowrap pt-2" class:-right-6={isActive}>
     <slot />
     {#if isActive}
       <div
         in:fly|local={{x: 50, duration: 1000, easing: elasticOut}}
-        class="relative top-4 h-px w-full bg-accent" />
+        class="relative top-4 h-px w-full bg-accent mr-3" />
     {/if}
   </div>
 </Anchor>

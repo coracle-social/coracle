@@ -1,4 +1,7 @@
 <script lang="ts">
+  import cx from 'classnames'
+  import {equals} from 'ramda'
+  import {fly} from 'src/util/transition'
   import {toggleTheme, theme} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -7,8 +10,9 @@
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import MenuDesktopItem from "src/app/MenuDesktopItem.svelte"
   import MenuDesktopSecondary from "src/app/MenuDesktopSecondary.svelte"
-  import {slowConnections} from "src/app/state"
+  import {feed, slowConnections} from "src/app/state"
   import {router} from "src/app/util/router"
+  import {feedFromEvent} from 'src/domain'
   import {
     env,
     user,
@@ -19,7 +23,10 @@
     sessions,
     displayPerson,
     displayPubkey,
+    userFeeds,
   } from "src/engine"
+
+  const {page} = router
 
   const closeSubMenu = () => {
     subMenu = null
@@ -35,9 +42,27 @@
   }
 
   let subMenu
+
+  $: isFeedPage = $page.path === "/notes"
 </script>
 
-<div class="fixed bottom-0 left-0 top-0 z-nav w-72 bg-tinted-700 transition-colors">
+{#if isFeedPage && $userFeeds.length > 0}
+  <div in:fly={{x: -100, duration: 200}} class="fixed bottom-0 left-72 top-0 w-60 bg-tinted-700 transition-colors text-lg pt-[5.75rem]">
+    {#each $userFeeds as event}
+      {@const thisFeed = feedFromEvent(event)}
+      <MenuDesktopItem isActive={equals(thisFeed.data, $feed)} on:click={() => feed.set(thisFeed.data)}>
+        {thisFeed.name}
+      </MenuDesktopItem>
+    {/each}
+    <div class="absolute bottom-0 w-full px-7 py-4 h-20 staatliches">
+      <Anchor href="/feeds">Manage Feeds</Anchor>
+    </div>
+  </div>
+{/if}
+
+<div
+  class="fixed bottom-0 left-0 top-0 z-nav w-72 bg-tinted-700 transition-colors"
+  class:bg-tinted-800={isFeedPage}>
   <Anchor external class="mb-4 mt-4 flex items-center gap-2 px-6" href="https://coracle.tools">
     <img
       alt="App Logo"
@@ -45,9 +70,9 @@
         ? import.meta.env.VITE_APP_WORDMARK_DARK
         : import.meta.env.VITE_APP_WORDMARK_LIGHT} />
   </Anchor>
-  <MenuDesktopItem path="/notes">Feed</MenuDesktopItem>
+  <MenuDesktopItem path="/notes" isActive={$page.path.startsWith("/notes")} isAlt={isFeedPage}>Feed</MenuDesktopItem>
   {#if !$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0}
-    <MenuDesktopItem path="/settings/relays">
+    <MenuDesktopItem path="/settings/relays" isActive={$page.path.startsWith("/settings/relays")} isAlt={isFeedPage}>
       <div class="relative inline-block">
         Relays
         {#if $slowConnections.length > 0}
@@ -56,7 +81,7 @@
       </div>
     </MenuDesktopItem>
   {/if}
-  <MenuDesktopItem path="/notifications" disabled={!$canSign}>
+  <MenuDesktopItem path="/notifications" disabled={!$canSign} isActive={$page.path.startsWith("/notifications")} isAlt={isFeedPage}>
     <div class="relative inline-block">
       Notifications
       {#if $hasNewNotifications}
@@ -64,7 +89,7 @@
       {/if}
     </div>
   </MenuDesktopItem>
-  <MenuDesktopItem path="/channels" disabled={!$canSign}>
+  <MenuDesktopItem path="/channels" disabled={!$canSign} isActive={$page.path.startsWith("/channels")} isAlt={isFeedPage}>
     <div class="relative inline-block">
       Messages
       {#if $hasNewMessages}
@@ -72,12 +97,12 @@
       {/if}
     </div>
   </MenuDesktopItem>
-  <MenuDesktopItem path="/events">Calendar</MenuDesktopItem>
+  <MenuDesktopItem path="/events" isActive={$page.path.startsWith("/events")} isAlt={isFeedPage}>Calendar</MenuDesktopItem>
   {#if $env.ENABLE_MARKET}
-    <MenuDesktopItem path="/listings">Market</MenuDesktopItem>
+    <MenuDesktopItem path="/listings" isActive={$page.path.startsWith("/listings")} isAlt={isFeedPage}>Market</MenuDesktopItem>
   {/if}
   {#if !$env.FORCE_GROUP}
-    <MenuDesktopItem path="/groups">Groups</MenuDesktopItem>
+    <MenuDesktopItem path="/groups" isActive={$page.path.startsWith("/groups")} isAlt={isFeedPage}>Groups</MenuDesktopItem>
   {/if}
   <FlexColumn small class="absolute bottom-0 w-72">
     <Anchor
@@ -160,7 +185,7 @@
         </MenuItem>
       </MenuDesktopSecondary>
     {/if}
-    <div class="cursor-pointer border-t border-solid border-neutral-600 px-7 pb-4 pt-3">
+    <div class="cursor-pointer border-t border-solid border-neutral-600 px-7 py-4 h-20">
       {#if $pubkey}
         <Anchor class="flex items-center gap-2" on:click={() => setSubMenu("account")}>
           <PersonCircle class="h-10 w-10" pubkey={$pubkey} />

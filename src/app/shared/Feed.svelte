@@ -53,6 +53,7 @@
 
   const update = async opts => {
     limit = 0
+    feed = opts.feed
     start(opts)
 
     if (feedLoader.compiler.canCompile(opts.feed)) {

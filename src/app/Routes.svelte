@@ -1,4 +1,5 @@
 <script lang="ts">
+  import cx from 'classnames'
   import {reverse} from "ramda"
   import logger from "src/util/logger"
   import Modal from "src/partials/Modal.svelte"
@@ -57,8 +58,11 @@
 {#key $stateKey}
   <div
     id="page"
-    class="relative pb-32 text-neutral-100 lg:ml-60 lg:pt-16"
-    class:pointer-events-none={$menuIsOpen}>
+    class={cx("relative pb-32 text-neutral-100 lg:pt-16", {
+      'lg:ml-60': $page?.path !== "/notes",
+      'lg:ml-[33rem]': $page?.path === "/notes",
+      'pointer-events-none': $menuIsOpen,
+    })}>
     {#if $page}
       {@const promise = router.getMatch($page.path).route.component}
       {#key router.getKey($page)}
