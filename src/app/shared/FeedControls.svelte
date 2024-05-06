@@ -220,6 +220,9 @@
           <MenuItem on:click={() => removeSubFeed(currentScopeFeed)}>
             <i class="fa fa-earth-americas mr-2" /> Global
           </MenuItem>
+          <MenuItem on:click={openForm}>
+            <i class="fa fa-cog mr-2" /> Customize
+          </MenuItem>
         </Menu>
       </div>
     </Popover>
@@ -230,10 +233,7 @@
     {/each}
     <Chip class="cursor-pointer">
       <div class="flex items-center">
-        <div class="flex h-6 w-6 items-center justify-center" on:click={openForm}>
-          <i class="fa fa-plus" />
-        </div>
-        <div class="flex h-6 w-6 items-center justify-center" on:click={showSearch}>
+        <div class="flex h-6 w-4 items-center justify-center" on:click={showSearch}>
           <i class="fa fa-search" />
         </div>
         {#if !isNil(search)}
