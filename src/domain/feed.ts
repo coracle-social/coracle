@@ -1,7 +1,7 @@
 import {fromPairs, randomId} from "@welshman/lib"
-import {Kind, Tags} from "@welshman/util"
+import {Kind, Tags, decodeAddress} from "@welshman/util"
 import type {Rumor} from "@welshman/util"
-import {makeIntersectionFeed, hasSubFeeds} from "@welshman/feeds"
+import {makeIntersectionFeed, feedFromTags, hasSubFeeds} from "@welshman/feeds"
 import type {Feed as IFeed} from "@welshman/feeds"
 import {tryJson} from "src/util/misc"
 
@@ -17,6 +17,16 @@ export type Feed = {
 export const normalizeFeedDefinition = feed =>
   hasSubFeeds(feed) ? feed : makeIntersectionFeed(feed)
 
+// Compatibility with the old way we did custom feeds
+export const listAsFeed = list =>
+  initFeed({
+    name: list.title,
+    list: list.address,
+    description: list.description,
+    definition: feedFromTags(Tags.fromEvent(list)),
+    identifier: decodeAddress(list.address).identifier,
+  })
+
 export const initFeed = (feed: Partial<Feed> = {}): Feed => ({
   name: "",
   description: "",
@@ -25,11 +35,15 @@ export const initFeed = (feed: Partial<Feed> = {}): Feed => ({
   ...feed,
 })
 
-export const readFeed = (event: Rumor): Feed => {
+export const readFeed = (event: Rumor) => {
+  if (!event) {
+    return null
+  }
+
   const {d: identifier, name = "", description = "", feed = ""} = fromPairs(event.tags)
   const definition = tryJson(() => JSON.parse(feed)) || makeIntersectionFeed()
 
-  return {name, identifier, description, definition, event}
+  return {name, identifier, description, definition, event} as Feed
 }
 
 export const createFeed = ({identifier, definition, name, description}: Feed) => ({
@@ -50,3 +64,5 @@ export const editFeed = (feed: Feed) => ({
     .setTag("feed", JSON.stringify(feed.definition))
     .unwrap(),
 })
+
+export const displayFeed = (feed: Feed) => (feed.name ? feed.name : "[no name]")

@@ -2,7 +2,6 @@
   import {omit} from "ramda"
   import {FeedType} from "@welshman/feeds"
   import {createLocalDate, dateToSeconds, formatTimestampAsDate} from "src/util/misc"
-  import Field from "src/partials/Field.svelte"
   import DateInput from "src/partials/DateInput.svelte"
 
   export let feed
@@ -25,15 +24,14 @@
   }
 </script>
 
-<Field label="What time range would you like to consider?">
-  <div class="grid grid-cols-2 gap-2">
-    <DateInput
-      placeholder="Since"
-      value={feed[1]?.since ? formatTimestampAsDate(feed[1]?.since) : null}
-      onChange={changeSince} />
-    <DateInput
-      placeholder="Until"
-      value={feed[1]?.until ? formatTimestampAsDate(feed[1]?.until) : null}
-      onChange={changeUntil} />
-  </div>
-</Field>
+<span class="staatliches text-lg">What time range would you like to consider?</span>
+<div class="grid grid-cols-2 gap-2">
+  <DateInput
+    placeholder="Since"
+    value={feed[1]?.since ? formatTimestampAsDate(feed[1]?.since) : null}
+    onChange={changeSince} />
+  <DateInput
+    placeholder="Until"
+    value={feed[1]?.until ? formatTimestampAsDate(feed[1]?.until) : null}
+    onChange={changeUntil} />
+</div>

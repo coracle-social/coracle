@@ -14,7 +14,7 @@
   import MenuDesktopSecondary from "src/app/MenuDesktopSecondary.svelte"
   import {feed, slowConnections} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {readFeed, normalizeFeedDefinition} from "src/domain"
+  import {readFeed, displayFeed, normalizeFeedDefinition} from "src/domain"
   import {
     env,
     user,
@@ -60,13 +60,13 @@
     in:fly={{x: -100, duration: 200}}
     class="fixed bottom-0 left-72 top-0 w-60 bg-tinted-700 pt-24 transition-colors">
     <MenuDesktopItem
-      class="!h-10 !text-lg"
+      small
       isActive={equals(followsFeed, normalizedFeed)}
       on:click={() => loadFeed(followsFeed)}>
       Follows
     </MenuDesktopItem>
     <MenuDesktopItem
-      class="!h-10 !text-lg"
+      small
       isActive={equals(networkFeed, normalizedFeed)}
       on:click={() => loadFeed(networkFeed)}>
       Network
@@ -74,16 +74,16 @@
     {#each $userFeeds as event}
       {@const thisFeed = readFeed(event)}
       <MenuDesktopItem
-        class="!h-10 !text-lg"
+        small
         isActive={equals(thisFeed.definition, normalizedFeed)}
         on:click={() => loadFeed(thisFeed.definition)}>
-        {thisFeed.name}
+        {displayFeed(thisFeed)}
       </MenuDesktopItem>
     {/each}
     {#each $userLists as list}
       {@const definition = feedFromTags(Tags.fromEvent(list))}
       <MenuDesktopItem
-        class="!h-10 !text-lg"
+        small
         isActive={equals(definition, normalizedFeed)}
         on:click={() => loadFeed(definition)}>
         {displayList(list)}

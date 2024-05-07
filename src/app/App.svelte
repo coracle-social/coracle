@@ -145,8 +145,8 @@
   })
 
   router.register("/feeds", import("src/app/views/FeedList.svelte"))
-  router.register("/feeds/create", import("src/app/views/FeedForm.svelte"))
-  router.register("/feeds/:address", import("src/app/views/FeedForm.svelte"), {
+  router.register("/feeds/create", import("src/app/views/FeedCreate.svelte"))
+  router.register("/feeds/:address", import("src/app/views/FeedEdit.svelte"), {
     serializers: {
       address: asNaddr("address"),
     },

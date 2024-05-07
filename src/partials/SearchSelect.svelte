@@ -2,7 +2,6 @@
   import cx from "classnames"
   import {onMount} from "svelte"
   import {reject, equals, identity} from "ramda"
-  import Chip from "src/partials/Chip.svelte"
   import Input from "src/partials/Input.svelte"
   import Popover2 from "src/partials/Popover2.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
@@ -120,11 +119,14 @@
 {#if multiple}
   <div class="text-sm">
     {#each value as item}
-      <Chip class="mb-1 mr-1" onRemove={() => remove(item)}>
+      <div class="px-3 h-7 rounded-full mr-1 mb-1 bg-neutral-900 text-neutral-400 inline-flex items-center">
+        <div class="h-7 w-5 cursor-pointer flex items-center" on:click={() => remove(item)}>
+          <i class="fa fa-times" />
+        </div>
         <slot name="item" context="value" {item}>
           {displayItem(item)}
         </slot>
-      </Chip>
+      </div>
     {/each}
   </div>
 {/if}

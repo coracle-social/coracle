@@ -2,7 +2,6 @@
   import {pluck} from "ramda"
   import {FeedType} from "@welshman/feeds"
   import {fuzzy} from "src/util/misc"
-  import Field from "src/partials/Field.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
 
   export let feed
@@ -47,8 +46,7 @@
   }
 </script>
 
-<Field label="What kind of content do you want to see?">
-  <SearchSelect multiple search={searchKinds} value={feed.slice(1)} onChange={onKindsChange}>
-    <div slot="item" let:item>{displayKind(item)}</div>
-  </SearchSelect>
-</Field>
+<span class="staatliches text-lg">What kind of content do you want to see?</span>
+<SearchSelect multiple search={searchKinds} value={feed.slice(1)} onChange={onKindsChange}>
+  <div slot="item" let:item>{displayKind(item)}</div>
+</SearchSelect>

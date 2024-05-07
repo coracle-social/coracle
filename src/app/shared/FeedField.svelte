@@ -1,20 +1,31 @@
 <script lang="ts">
-  import {FeedType, makeIntersectionFeed, hasSubFeeds, getFeedArgs} from "@welshman/feeds"
+  import {identity, partition} from "@welshman/lib"
+  import {
+    FeedType,
+    makeIntersectionFeed,
+    hasSubFeeds,
+    getFeedArgs,
+    isAuthorFeed,
+    isScopeFeed,
+    isTagFeed,
+    isRelayFeed,
+    isDVMFeed,
+    makeDVMFeed,
+    makeScopeFeed,
+    makeTagFeed,
+    makeRelayFeed,
+    Scope,
+  } from "@welshman/feeds"
   import Icon from "src/partials/Icon.svelte"
   import SelectTiles from "src/partials/SelectTiles.svelte"
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Field from "src/partials/Field.svelte"
-  import FeedFormPeople from "src/app/shared/FeedFormPeople.svelte"
-  import FeedFormTopics from "src/app/shared/FeedFormTopics.svelte"
-  import FeedFormRelays from "src/app/shared/FeedFormRelays.svelte"
-  import FeedFormDVMs from "src/app/shared/FeedFormDVMs.svelte"
   import FeedFormAdvanced from "src/app/shared/FeedFormAdvanced.svelte"
+  import FeedFormFilters from "src/app/shared/FeedFormFilters.svelte"
 
   export let feed
   export let onChange = null
-  export let hideType = false
 
   enum FormType {
     Advanced = "advanced",
@@ -26,8 +37,24 @@
 
   const normalize = feed => (isNormalized(feed) ? feed : [FeedType.Intersection, feed])
 
+  const isPeopleFeed = f => isAuthorFeed(f) || isScopeFeed(f)
+
+  const isTopicsFeed = f => isTagFeed(f) && f[1] === "#t"
+
   const isNormalized = feed =>
     feed[0] === FeedType.Intersection && getFeedArgs(feed).every(f => !hasSubFeeds(f))
+
+  const removeSubFeed = condition => {
+    feed = [feed[0], ...feed.slice(1).filter(f => !condition(f))]
+  }
+
+  const prependDefaultSubFeed = (condition, subFeed) => {
+    if (!getFeedArgs(feed).some(condition)) {
+      feed = feed.toSpliced(1, 0, subFeed)
+    }
+
+    feed = [feed[0], ...partition(condition, feed.slice(1)).flatMap(identity)]
+  }
 
   const inferFormType = feed => {
     for (const subFeed of getFeedArgs(normalize(feed))) {
@@ -61,7 +88,29 @@
       feed = makeIntersectionFeed()
     }
 
+    // Remove filters directly related to the previous type
+    if (formType === FormType.People) {
+      removeSubFeed(isPeopleFeed)
+    } else if (formType === FormType.Topics) {
+      removeSubFeed(isTopicsFeed)
+    } else if (formType === FormType.Relays) {
+      removeSubFeed(isRelayFeed)
+    } else if (formType === FormType.DVMs) {
+      removeSubFeed(isDVMFeed)
+    }
+
     formType = newFormType
+
+    // Add a default filter depending on the new form type
+    if (formType === FormType.People) {
+      prependDefaultSubFeed(isPeopleFeed, makeScopeFeed(Scope.Follows))
+    } else if (formType === FormType.Topics) {
+      prependDefaultSubFeed(isTopicsFeed, makeTagFeed("#t"))
+    } else if (formType === FormType.Relays) {
+      prependDefaultSubFeed(isRelayFeed, makeRelayFeed())
+    } else if (formType === FormType.DVMs) {
+      prependDefaultSubFeed(isDVMFeed, makeDVMFeed({kind: 5300}))
+    }
 
     onChange?.(feed)
   }
@@ -71,56 +120,60 @@
     onChange?.(feed)
   }
 
+  let innerWidth = 0
   let formType = inferFormType(feed)
+
+  $: formTypeOptions = innerWidth < 640
+    ? [FormType.People, FormType.Topics, FormType.Relays, FormType.DVMs]
+    : [FormType.People, FormType.Topics, FormType.Relays, FormType.DVMs, FormType.Advanced]
 
   $: console.log(JSON.stringify(normalize(feed), null, 2))
 </script>
 
+<svelte:window bind:innerWidth />
+
 <FlexColumn>
-  {#if !hideType}
-    <Card>
-      <Field label="Choose a feed type">
-        <SelectTiles
-          options={[FormType.People, FormType.Topics, FormType.Relays, FormType.DVMs]}
-          onChange={onFormTypeChange}
-          value={formType}>
-          <div slot="item" class="flex flex-col items-center" let:option let:active>
-            {#if option === FormType.People}
-              <Icon
-                icon="people-nearby"
-                class="h-12 w-12"
-                color={active ? "accent" : "tinted-800"} />
-              <span class="staatliches text-2xl">People</span>
-            {:else if option === FormType.Topics}
-              <span class="flex h-12 w-12 items-center justify-center" class:text-accent={active}>
-                <i class="fa fa-2xl fa-tags" />
-              </span>
-              <span class="staatliches text-2xl">Topics</span>
-            {:else if option === FormType.Relays}
-              <Icon icon="server" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
-              <span class="staatliches text-2xl">Relays</span>
-            {:else if option === FormType.DVMs}
-              <Icon icon="network" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
-              <span class="staatliches text-2xl">DVMs</span>
-            {/if}
-          </div>
-        </SelectTiles>
-      </Field>
-      <div class="flex justify-end">
-        <Anchor underline on:click={() => onFormTypeChange(FormType.Advanced)}
-          >Advanced mode</Anchor>
-      </div>
-    </Card>
-  {/if}
-  {#if formType === FormType.People}
-    <FeedFormPeople feed={normalize(feed)} onChange={onFeedChange} />
-  {:else if formType === FormType.Topics}
-    <FeedFormTopics feed={normalize(feed)} onChange={onFeedChange} />
-  {:else if formType === FormType.Relays}
-    <FeedFormRelays feed={normalize(feed)} onChange={onFeedChange} />
-  {:else if formType === FormType.DVMs}
-    <FeedFormDVMs feed={normalize(feed)} onChange={onFeedChange} />
-  {:else if formType === FormType.Advanced}
-    <FeedFormAdvanced {feed} onChange={onFeedChange} />
-  {/if}
+  <Card class="-mb-8">
+    <FlexColumn small>
+      <span class="staatliches text-lg">Choose a feed type</span>
+      <SelectTiles
+        class="grid-cols-2 sm:grid-cols-5"
+        options={formTypeOptions}
+        onChange={onFormTypeChange}
+        value={formType}>
+        <div slot="item" class="flex flex-col items-center" let:option let:active>
+          {#if option === FormType.People}
+            <Icon
+              icon="people-nearby"
+              class="h-12 w-12"
+              color={active ? "accent" : "tinted-800"} />
+            <span class="staatliches text-2xl">People</span>
+          {:else if option === FormType.Topics}
+            <span class="flex h-12 w-12 items-center justify-center" class:text-accent={active}>
+              <i class="fa fa-2xl fa-tags" />
+            </span>
+            <span class="staatliches text-2xl">Topics</span>
+          {:else if option === FormType.Relays}
+            <Icon icon="server" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
+            <span class="staatliches text-2xl">Relays</span>
+          {:else if option === FormType.DVMs}
+            <Icon icon="network" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
+            <span class="staatliches text-2xl">DVMs</span>
+          {:else if option === FormType.Advanced}
+            <span class="flex h-12 w-12 items-center justify-center" class:text-accent={active}>
+              <i class="fa fa-2xl fa-cogs" />
+            </span>
+            <span class="staatliches text-2xl">Advanced</span>
+          {/if}
+        </div>
+      </SelectTiles>
+    </FlexColumn>
+  </Card>
+  <FlexColumn>
+    {#if formType === FormType.Advanced}
+      <FeedFormAdvanced {feed} onChange={onFeedChange} />
+    {:else}
+      <FeedFormFilters {feed} onChange={onFeedChange} />
+    {/if}
+  </FlexColumn>
 </FlexColumn>

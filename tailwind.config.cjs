@@ -6,6 +6,7 @@ const colors = {
   transparent: "transparent",
   accent: "var(--accent)",
   warning: "var(--warning)",
+  danger: "var(--danger)",
   success: "var(--success)",
 }
 

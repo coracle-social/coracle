@@ -10,7 +10,7 @@
     })
 </script>
 
-<SelectList {...$$props} class="grid grid-cols-{$$props.options.length} justify-between gap-4">
+<SelectList {...$$props} class={cx("grid justify-between gap-4", $$props.class)}>
   <div slot="item" let:i let:active let:option>
     <Tile class={getClass(active)}>
       <slot name="item" {option} {active} />

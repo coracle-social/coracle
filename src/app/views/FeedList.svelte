@@ -1,13 +1,11 @@
 <script type="ts">
   import {getAddress} from "@welshman/util"
+  import {fly} from "src/util/transition"
   import Subheading from "src/partials/Subheading.svelte"
-  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Card from "src/partials/Card.svelte"
-  import FeedSummary from "src/app/shared/FeedSummary.svelte"
+  import FeedCard from "src/app/shared/FeedCard.svelte"
   import {router} from "src/app/util/router"
-  import {readFeed} from "src/domain"
-  import {userFeeds} from "src/engine"
+  import {userFeeds, userLists} from "src/engine"
 
   const createFeed = () => router.at("feeds/create").open()
 
@@ -22,28 +20,27 @@
 </div>
 {#each $userFeeds as event (getAddress(event))}
   {@const address = getAddress(event)}
-  {@const {name, description, definition} = readFeed(event)}
-  <Card>
-    <FlexColumn>
-      <div class="flex items-center justify-between">
-        <span class="staatliches flex items-center gap-3 text-xl">
-          <i class="fa fa-rss" />
-          {#if name}
-            {name}
-          {:else}
-            <span class="text-neutral-500">No name</span>
-          {/if}
-        </span>
+  <div in:fly={{y: 20}}>
+    <FeedCard {address}>
+      <div slot="controls">
         <Anchor on:click={() => editFeed(address)}>
           <i class="fa fa-edit" /> Edit
         </Anchor>
       </div>
-      {#if description}
-        <p>{description}</p>
-      {/if}
-      <FeedSummary feed={definition} />
-    </FlexColumn>
-  </Card>
-{:else}
-  <p class="text-center py-12">You don't have any feeds yet.</p>
+    </FeedCard>
+  </div>
 {/each}
+{#each $userLists as list}
+  <div in:fly={{y: 20}}>
+    <FeedCard address={list.address}>
+      <div slot="controls">
+        <Anchor on:click={() => editFeed(list.address)}>
+          <i class="fa fa-edit" /> Edit
+        </Anchor>
+      </div>
+    </FeedCard>
+  </div>
+{/each}
+{#if $userFeeds.length === 0 && $userLists.length === 0}
+  <p class="py-12 text-center">No feeds found.</p>
+{/if}

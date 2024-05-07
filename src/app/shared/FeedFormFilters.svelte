@@ -19,6 +19,7 @@
   import Card from "src/partials/Card.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover2 from "src/partials/Popover2.svelte"
   import FeedFormSectionPeople from "src/app/shared/FeedFormSectionPeople.svelte"
@@ -68,23 +69,25 @@
   {#each subFeeds as subFeed, i}
     {@const change = f => onSubFeedChange(i + 1, f)}
     <Card class="relative">
-      {#if isPeopleFeed(subFeed)}
-        <FeedFormSectionPeople feed={subFeed} onChange={change} />
-      {:else if isRelayFeed(subFeed)}
-        <FeedFormSectionRelays feed={subFeed} onChange={change} />
-      {:else if isTopicFeed(subFeed)}
-        <FeedFormSectionTopics feed={subFeed} onChange={change} />
-      {:else if isMentionFeed(subFeed)}
-        <FeedFormSectionMentions feed={subFeed} onChange={change} />
-      {:else if isKindFeed(subFeed)}
-        <FeedFormSectionKinds feed={subFeed} onChange={change} />
-      {:else if isCreatedAtFeed(subFeed)}
-        <FeedFormSectionCreatedAt feed={subFeed} onChange={change} />
-      {:else if isDVMFeed(subFeed)}
-        <FeedFormSectionDVM feed={subFeed} onChange={change} />
-      {:else}
-        No support for editing {toTitle(subFeed[0])} filters. Click "Advanced" to edit manually.
-      {/if}
+      <FlexColumn small>
+        {#if isPeopleFeed(subFeed)}
+          <FeedFormSectionPeople feed={subFeed} onChange={change} />
+        {:else if isRelayFeed(subFeed)}
+          <FeedFormSectionRelays feed={subFeed} onChange={change} />
+        {:else if isTopicFeed(subFeed)}
+          <FeedFormSectionTopics feed={subFeed} onChange={change} />
+        {:else if isMentionFeed(subFeed)}
+          <FeedFormSectionMentions feed={subFeed} onChange={change} />
+        {:else if isKindFeed(subFeed)}
+          <FeedFormSectionKinds feed={subFeed} onChange={change} />
+        {:else if isCreatedAtFeed(subFeed)}
+          <FeedFormSectionCreatedAt feed={subFeed} onChange={change} />
+        {:else if isDVMFeed(subFeed)}
+          <FeedFormSectionDVM feed={subFeed} onChange={change} />
+        {:else}
+          No support for editing {toTitle(subFeed[0])} filters. Click "Advanced" to edit manually.
+        {/if}
+      </FlexColumn>
       {#if i > 0}
         <div
           class="absolute right-2 top-2 h-4 w-4 cursor-pointer"

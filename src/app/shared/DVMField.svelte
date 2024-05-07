@@ -63,7 +63,6 @@
       onChange={relays => onChange({...dvmItem, relays})}>
       <span slot="item" let:item>{displayRelayUrl(item)}</span>
     </SearchSelect>
-    <p slot="info">Select which relays requests to this DVM should be sent to.</p>
   </Field>
   {#each dvmItem.tags || [] as [type, value], i (i + key)}
     <div class="flex items-center justify-between gap-2">

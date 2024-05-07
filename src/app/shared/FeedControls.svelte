@@ -1,32 +1,21 @@
 <script lang="ts">
   import {debounce} from "throttle-debounce"
-  import {Tags, decodeAddress} from "@welshman/util"
-  import {
-    isScopeFeed,
-    isSearchFeed,
-    makeSearchFeed,
-    Scope,
-    getFeedArgs,
-    feedFromTags,
-  } from "@welshman/feeds"
+  import {isScopeFeed, isSearchFeed, makeSearchFeed, Scope, getFeedArgs} from "@welshman/feeds"
   import Modal from "src/partials/Modal.svelte"
-  import Textarea from "src/partials/Textarea.svelte"
   import Subheading from "src/partials/Subheading.svelte"
-  import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
   import Select from "src/partials/Select.svelte"
   import Popover2 from "src/partials/Popover2.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
-  import FeedField from "src/app/shared/FeedField.svelte"
+  import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
-  import {normalizeFeedDefinition, readFeed, initFeed, editFeed, createFeed} from "src/domain"
+  import {normalizeFeedDefinition, readFeed, initFeed, listAsFeed, displayFeed} from "src/domain"
   import {
-    hints,
     repository,
-    createAndPublish,
     displayList as displayList2,
+    publishDeletion,
     userLists,
     userFeeds,
   } from "src/engine"
@@ -50,30 +39,17 @@
     formIsOpen = false
   }
 
-  const openName = () => {
-    nameIsOpen = true
-  }
-
-  const closeName = () => {
-    nameIsOpen = false
-  }
-
   const toggleReplies = () => {
     opts = {...opts, shouldHideReplies: !opts.shouldHideReplies}
   }
 
   const getSearch = definition => (getFeedArgs(definition)?.find(isSearchFeed)?.[1] as string) || ""
 
-  const onDraftFeedChange = definition => {
-    feed.definition = definition
-  }
-
   const setFeedDefinition = definition => {
     opts = {...opts, feed: definition}
     search = getSearch(definition)
     closeListMenu()
     closeForm()
-    closeName()
   }
 
   const setSubFeed = subFeed => {
@@ -94,23 +70,16 @@
   }
 
   const setList = list => {
-    feed = initFeed({
-      name: list.title,
-      list: list.address,
-      description: list.description,
-      definition: feedFromTags(Tags.fromEvent(list)),
-      identifier: decodeAddress(list.address).identifier,
-    })
-
+    feed = listAsFeed(list)
     setFeedDefinition(feed.definition)
   }
 
-  const saveFeed = async () => {
-    const relays = hints.WriteRelays().getUrls()
-    const template = feed.event ? editFeed(feed) : createFeed(feed)
-    const pub = await createAndPublish({...template, relays})
+  const saveFeed = event => {
+    if (feed.list) {
+      publishDeletion([feed.list])
+    }
 
-    setFeed(pub.request.event)
+    setFeed(event)
   }
 
   const onSearchBlur = debounce(500, () => {
@@ -124,7 +93,6 @@
   })
 
   let formIsOpen = false
-  let nameIsOpen = false
   let listMenuIsOpen = false
   let feed = address
     ? readFeed(repository.getEvent(address))
@@ -144,7 +112,10 @@
   </Select>
   <div class="flex flex-grow items-center justify-end gap-2">
     <div class="flex">
-      <Input class="hidden h-7 bg-neutral-900 xs:block" on:input={onSearchBlur} bind:value={search}>
+      <Input
+        class="hidden h-7 rounded-r-none bg-neutral-900 xs:block"
+        on:input={onSearchBlur}
+        bind:value={search}>
         <div slot="after" class="hidden text-white xs:block">
           <i class="fa fa-search" />
         </div>
@@ -177,7 +148,9 @@
               </MenuItem>
               <div class="max-h-96 overflow-auto">
                 {#each $userFeeds as event}
-                  <MenuItem on:click={() => setFeed(event)}>{readFeed(event).name}</MenuItem>
+                  <MenuItem on:click={() => setFeed(event)}>
+                    {displayFeed(readFeed(event))}
+                  </MenuItem>
                 {/each}
                 {#each $userLists as list}
                   <MenuItem on:click={() => setList(list)}>{displayList2(list)}</MenuItem>
@@ -193,33 +166,14 @@
 
 {#if formIsOpen}
   <Modal onEscape={closeForm}>
-    {#if event}
-      <Subheading>Edit {feed.name}</Subheading>
-    {:else}
-      <Subheading>Customize your feed</Subheading>
-    {/if}
-    <FeedField feed={feed.definition} onChange={onDraftFeedChange} />
-    <div class="flex justify-between gap-2">
-      <Anchor button on:click={closeForm}>Discard</Anchor>
-      <div class="flex gap-2">
-        <Anchor button on:click={openName}>Save Feed</Anchor>
-        <Anchor button accent on:click={() => setFeedDefinition(feed.definition)}>Done</Anchor>
+    <FeedForm hideType {feed} onSave={saveFeed}>
+      <div slot="controls" class="flex justify-between gap-2" let:save>
+        <Anchor button on:click={closeForm}>Discard</Anchor>
+        <div class="flex gap-2">
+          <Anchor button on:click={save}>Save Feed</Anchor>
+          <Anchor button accent on:click={() => setFeedDefinition(feed.definition)}>Done</Anchor>
+        </div>
       </div>
-    </div>
-  </Modal>
-{/if}
-
-{#if nameIsOpen}
-  <Modal onEscape={closeName}>
-    <Field label="What would you like to name this feed?">
-      <Input bind:value={feed.name} />
-    </Field>
-    <Field label="How would you describe this feed?">
-      <Textarea bind:value={feed.description} />
-    </Field>
-    <div class="flex justify-between gap-2">
-      <Anchor button on:click={closeName}>Cancel</Anchor>
-      <Anchor button accent on:click={saveFeed}>Save</Anchor>
-    </div>
+    </FeedForm>
   </Modal>
 {/if}

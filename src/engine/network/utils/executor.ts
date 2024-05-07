@@ -1,7 +1,6 @@
 import {max, prop, omit, partition, equals} from "ramda"
 import {sleep, pickVals} from "hurdak"
-import {Worker, derived} from "@welshman/lib"
-import type {Rumor} from "@welshman/util"
+import {Worker} from "@welshman/lib"
 import {createEvent, Kind, Relay, Repository} from "@welshman/util"
 import {
   Plex,
@@ -14,6 +13,7 @@ import {
   subscribe as baseSubscribe,
 } from "@welshman/net"
 import type {PublishRequest, SubscribeRequest} from "@welshman/net"
+import logger from "src/util/logger"
 import {LOCAL_RELAY_URL, isGiftWrap, generatePrivateKey} from "src/util/nostr"
 import {env, pubkey} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
@@ -22,7 +22,7 @@ import type {Event} from "src/engine/events/model"
 import {publishes} from "src/engine/events/state"
 import {LocalTarget} from "./targets"
 
-export const repository = new Repository()
+export const repository = new Repository({throttle: 300})
 
 export const relay = new Relay(repository)
 
@@ -33,20 +33,20 @@ export const projections = new Worker<Event>({
 })
 
 projections.addGlobalHandler(event => {
-  if (event.kind === Kind.Feed) {
+  const kinds = [
+    Kind.Delete,
+    Kind.Feed,
+    Kind.ListBookmarks,
+  ]
+
+  if (kinds.includes(event.kind)) {
     repository.publish(event)
   }
 })
 
-export const allEvents = repository.throttle(300)
+export const feeds = repository.filter(() => [{kinds: [Kind.Feed]}])
 
-export const deriveEvents = filter => allEvents.derived(r => Array.from(r.query([filter])))
-
-export const feeds = deriveEvents({kinds: [Kind.Feed]})
-
-export const userFeeds = derived([feeds, pubkey], ([$feeds, $pubkey]) =>
-  $feeds.filter((e: Rumor) => e.pubkey === pubkey.get()),
-)
+export const userFeeds = repository.filter(() => [{kinds: [Kind.Feed], authors: [pubkey.get()]}])
 
 export const getExecutor = (urls: string[]) => {
   const muxUrl = getSetting("multiplextr_url")
@@ -169,6 +169,8 @@ export const loadOne = (request: MySubscribeRequest) =>
 
 export const publish = (request: PublishRequest) => {
   const pub = basePublish(request)
+
+  logger.info(`Publishing event`, request)
 
   // Make sure the event gets into projections asap
   projections.push(request.event)
