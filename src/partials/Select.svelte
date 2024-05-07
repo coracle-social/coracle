@@ -5,11 +5,10 @@
   export let onChange = null
   export let wrapperClass = ""
 
-  const className = cx(
-    $$props.class,
-    "rounded text-neutral-100 shadow-inset py-2 px-4 pr-10 text-black w-full text-tinted-700",
-    {"pl-10": $$slots.before, "pr-10": $$slots.after},
-  )
+  const className = cx($$props.class, "rounded shadow-inset px-4 w-full cursor-pointer", {
+    "pl-10": $$slots.before,
+    "pr-10": $$slots.after,
+  })
 </script>
 
 <div class={cx(wrapperClass, "relative")}>

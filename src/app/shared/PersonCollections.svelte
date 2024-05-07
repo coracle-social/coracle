@@ -21,7 +21,11 @@
 
     for (const e of events) {
       const tags = Tags.fromEvent(e)
-      const topic = tags.whereKey("l").whereMark("#t").values().first()
+      const topic = tags
+        .whereKey("l")
+        .filter(t => t.last() === "#t")
+        .values()
+        .first()
 
       if (!topic) {
         continue

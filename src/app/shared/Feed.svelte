@@ -12,6 +12,7 @@
   import {FeedLoader} from "src/app/util"
 
   export let feed: Feed
+  export let address = null
   export let anchor = null
   export let eager = false
   export let skipCache = false
@@ -78,7 +79,7 @@
 </script>
 
 {#if showControls}
-  <FeedControls bind:value={opts} />
+  <FeedControls {address} bind:opts />
 {/if}
 
 <FlexColumn xl bind:element>

@@ -17,12 +17,12 @@
 </script>
 
 <Anchor {...$$props} randomizeKey class={className} href={path} on:click>
-  <div class="absolute left-6 flex gap-5 whitespace-nowrap pt-2" class:-right-6={isActive}>
+  <div class="absolute left-6 flex gap-5 whitespace-nowrap pt-2" class:-right-3={isActive}>
     <slot />
     {#if isActive}
       <div
         in:fly|local={{x: 50, duration: 1000, easing: elasticOut}}
-        class="relative top-4 h-px w-full bg-accent mr-3" />
+        class="relative top-4 h-px w-full bg-accent" />
     {/if}
   </div>
 </Anchor>

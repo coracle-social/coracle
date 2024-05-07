@@ -15,8 +15,7 @@
   const showAfter = $$slots.after && !hideAfter
   const className = cx(
     $$props.class,
-    "rounded shadow-inset py-2 px-4 w-full placeholder:text-neutral-400",
-    "bg-white text-black",
+    "outline-none rounded shadow-inset py-2 px-4 w-full placeholder:text-neutral-400 text-neutral-900",
     {"pl-10": showBefore, "pr-10": showAfter},
   )
 
@@ -40,7 +39,7 @@
     on:input
     on:keydown />
   {#if showBefore}
-    <div class="absolute left-0 top-0 flex gap-2 px-4 pt-2 text-black opacity-75">
+    <div class="absolute left-0 top-0 flex items-center gap-2 px-4 text-black opacity-75">
       <div>
         <slot name="before" />
       </div>
@@ -48,7 +47,7 @@
   {/if}
   {#if showAfter}
     <div
-      class="absolute right-0 top-0 m-px flex gap-2 rounded-full px-4 pt-2 text-black opacity-75">
+      class="absolute right-0 top-0 m-px flex items-center gap-2 rounded-full px-4 text-black opacity-75">
       <div>
         <slot name="after" />
       </div>

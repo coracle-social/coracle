@@ -14,6 +14,7 @@
 
   export let feed
   export let onChange = null
+  export let hideType = false
 
   enum FormType {
     Advanced = "advanced",
@@ -76,35 +77,41 @@
 </script>
 
 <FlexColumn>
-  <Card>
-    <Field label="Choose a feed type">
-      <SelectTiles
-        options={[FormType.People, FormType.Topics, FormType.Relays, FormType.DVMs]}
-        onChange={onFormTypeChange}
-        value={formType}>
-        <div slot="item" class="flex flex-col items-center" let:option let:active>
-          {#if option === FormType.People}
-            <Icon icon="people-nearby" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
-            <span class="staatliches text-2xl">People</span>
-          {:else if option === FormType.Topics}
-            <span class="flex h-12 w-12 items-center justify-center" class:text-accent={active}>
-              <i class="fa fa-2xl fa-tags" />
-            </span>
-            <span class="staatliches text-2xl">Topics</span>
-          {:else if option === FormType.Relays}
-            <Icon icon="server" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
-            <span class="staatliches text-2xl">Relays</span>
-          {:else if option === FormType.DVMs}
-            <Icon icon="network" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
-            <span class="staatliches text-2xl">DVMs</span>
-          {/if}
-        </div>
-      </SelectTiles>
-    </Field>
-    <div class="flex justify-end">
-      <Anchor underline on:click={() => onFormTypeChange(FormType.Advanced)}>Advanced mode</Anchor>
-    </div>
-  </Card>
+  {#if !hideType}
+    <Card>
+      <Field label="Choose a feed type">
+        <SelectTiles
+          options={[FormType.People, FormType.Topics, FormType.Relays, FormType.DVMs]}
+          onChange={onFormTypeChange}
+          value={formType}>
+          <div slot="item" class="flex flex-col items-center" let:option let:active>
+            {#if option === FormType.People}
+              <Icon
+                icon="people-nearby"
+                class="h-12 w-12"
+                color={active ? "accent" : "tinted-800"} />
+              <span class="staatliches text-2xl">People</span>
+            {:else if option === FormType.Topics}
+              <span class="flex h-12 w-12 items-center justify-center" class:text-accent={active}>
+                <i class="fa fa-2xl fa-tags" />
+              </span>
+              <span class="staatliches text-2xl">Topics</span>
+            {:else if option === FormType.Relays}
+              <Icon icon="server" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
+              <span class="staatliches text-2xl">Relays</span>
+            {:else if option === FormType.DVMs}
+              <Icon icon="network" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
+              <span class="staatliches text-2xl">DVMs</span>
+            {/if}
+          </div>
+        </SelectTiles>
+      </Field>
+      <div class="flex justify-end">
+        <Anchor underline on:click={() => onFormTypeChange(FormType.Advanced)}
+          >Advanced mode</Anchor>
+      </div>
+    </Card>
+  {/if}
   {#if formType === FormType.People}
     <FeedFormPeople feed={normalize(feed)} onChange={onFeedChange} />
   {:else if formType === FormType.Topics}

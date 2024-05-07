@@ -1,4 +1,4 @@
-import {max, filter, prop, omit, partition, equals} from "ramda"
+import {max, prop, omit, partition, equals} from "ramda"
 import {sleep, pickVals} from "hurdak"
 import {Worker, derived} from "@welshman/lib"
 import type {Rumor} from "@welshman/util"

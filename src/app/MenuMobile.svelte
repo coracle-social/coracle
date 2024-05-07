@@ -119,7 +119,7 @@
         </div>
       </MenuMobileItem>
       <MenuMobileItem href="/notes" on:click={closeMenu}>
-        <i class="fa fa-rss" /> Feed
+        <i class="fa fa-rss" /> Feeds
       </MenuMobileItem>
     </div>
     <div class="staatliches mt-8 block flex h-8 justify-center gap-2 px-8 text-neutral-300">

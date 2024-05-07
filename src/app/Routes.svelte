@@ -1,5 +1,5 @@
 <script lang="ts">
-  import cx from 'classnames'
+  import cx from "classnames"
   import {reverse} from "ramda"
   import logger from "src/util/logger"
   import Modal from "src/partials/Modal.svelte"
@@ -10,6 +10,8 @@
   const {current, page, modal, modals} = router
 
   let prevPage
+
+  $: isFeedPage = $page.path.match(/^\/(notes)?$/)
 
   $: {
     if ($modal) {
@@ -59,9 +61,9 @@
   <div
     id="page"
     class={cx("relative pb-32 text-neutral-100 lg:pt-16", {
-      'lg:ml-60': $page?.path !== "/notes",
-      'lg:ml-[33rem]': $page?.path === "/notes",
-      'pointer-events-none': $menuIsOpen,
+      "lg:ml-60": !isFeedPage,
+      "lg:ml-[33rem]": isFeedPage,
+      "pointer-events-none": $menuIsOpen,
     })}>
     {#if $page}
       {@const promise = router.getMatch($page.path).route.component}

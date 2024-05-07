@@ -18,7 +18,8 @@ export const publishBookmarksList = (id, title, description, tags) => {
   })
 
   // migrate away from kind 30001
-  publishDeletion([`30001:${pubkey.get()}:${name}`])
+  publishDeletion([`30001:${pubkey.get()}:${id}`])
+  publishDeletion([`30001:${pubkey.get()}:${title}`])
 }
 
 export const publishCommunitiesList = addresses =>

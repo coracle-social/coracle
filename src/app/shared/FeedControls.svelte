@@ -1,39 +1,38 @@
 <script lang="ts">
-  import {quantify, displayList} from "hurdak"
-  import {isNil, randomId, clamp} from "@welshman/lib"
-  import {Tags, Kind, getAddress} from "@welshman/util"
+  import {debounce} from "throttle-debounce"
+  import {Tags, decodeAddress} from "@welshman/util"
   import {
-    FeedType,
     isScopeFeed,
     isSearchFeed,
-    isAuthorFeed,
     makeSearchFeed,
-    makeScopeFeed,
-    makeIntersectionFeed,
     Scope,
-    hasSubFeeds,
     getFeedArgs,
-    feedsFromTags,
+    feedFromTags,
   } from "@welshman/feeds"
-  import {slide} from "src/util/transition"
-  import {getStringWidth} from "src/util/misc"
   import Modal from "src/partials/Modal.svelte"
+  import Textarea from "src/partials/Textarea.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
-  import Popover from "src/partials/Popover.svelte"
+  import Select from "src/partials/Select.svelte"
   import Popover2 from "src/partials/Popover2.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
-  import Chip from "src/partials/Chip.svelte"
-  import Toggle from "src/partials/Toggle.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
-  import FeedSummary from "src/app/shared/FeedSummary.svelte"
   import {router} from "src/app/util"
-  import {hints, createAndPublish, displayList as displayList2, userLists} from "src/engine"
+  import {normalizeFeedDefinition, readFeed, initFeed, editFeed, createFeed} from "src/domain"
+  import {
+    hints,
+    repository,
+    createAndPublish,
+    displayList as displayList2,
+    userLists,
+    userFeeds,
+  } from "src/engine"
 
-  export let value
+  export let opts
+  export let address = null
 
   const openListMenu = () => {
     listMenuIsOpen = true
@@ -59,214 +58,152 @@
     nameIsOpen = false
   }
 
-  const showSearch = () => {
-    search = search || ""
-    searchFocused = true
-  }
-
-  const hideSearch = () => {
-    search = null
-  }
-
   const toggleReplies = () => {
-    value = {...value, shouldHideReplies: !value.shouldHideReplies}
+    opts = {...opts, shouldHideReplies: !opts.shouldHideReplies}
   }
 
-  const getSearch = feed => getFeedArgs(feed)?.find(isSearchFeed)?.[1] as string | null
+  const getSearch = definition => (getFeedArgs(definition)?.find(isSearchFeed)?.[1] as string) || ""
 
-  const onDraftFeedChange = feed => {
-    draftFeed = feed
+  const onDraftFeedChange = definition => {
+    feed.definition = definition
   }
 
-  const setFeed = feed => {
-    draftFeed = feed
-    value = {...value, feed}
-    search = getSearch(feed)
+  const setFeedDefinition = definition => {
+    opts = {...opts, feed: definition}
+    search = getSearch(definition)
     closeListMenu()
     closeForm()
     closeName()
   }
 
   const setSubFeed = subFeed => {
-    const idx = feed.findIndex(f => f[0] === subFeed[0])
+    const idx = feed.definition.findIndex(f => f[0] === subFeed[0])
 
-    setFeed(idx >= 0 ? feed.toSpliced(idx, 1, subFeed) : [...feed, subFeed])
+    setFeedDefinition(
+      idx >= 0 ? feed.definition.toSpliced(idx, 1, subFeed) : [...feed.definition, subFeed],
+    )
   }
 
   const removeSubFeed = subFeed => {
-    setFeed(feed.filter(f => f !== subFeed))
+    setFeedDefinition(feed.definition.filter(f => f !== subFeed))
   }
 
-  const saveFeed = async feed => {
-    const pub = await createAndPublish({
-      kind: Kind.Feed,
-      content: JSON.stringify(feed),
-      tags: [
-        ["d", randomId()],
-        ["name", name],
-      ],
-      relays: hints.WriteRelays().getUrls(),
+  const setFeed = event => {
+    feed = readFeed(event)
+    setFeedDefinition(feed.definition)
+  }
+
+  const setList = list => {
+    feed = initFeed({
+      name: list.title,
+      list: list.address,
+      description: list.description,
+      definition: feedFromTags(Tags.fromEvent(list)),
+      identifier: decodeAddress(list.address).identifier,
     })
 
-    address = getAddress(pub.request.event)
-    setFeed(feed)
+    setFeedDefinition(feed.definition)
   }
 
-  const onSearchFocus = () => {
-    searchFocused = true
+  const saveFeed = async () => {
+    const relays = hints.WriteRelays().getUrls()
+    const template = feed.event ? editFeed(feed) : createFeed(feed)
+    const pub = await createAndPublish({...template, relays})
+
+    setFeed(pub.request.event)
   }
 
-  const onSearchBlur = () => {
+  const onSearchBlur = debounce(500, () => {
     const text = search.trim()
-
-    searchFocused = false
-
-    if (!text) {
-      hideSearch()
-    }
 
     if (text) {
       setSubFeed(makeSearchFeed(text))
     } else {
       removeSubFeed(subFeeds.find(isSearchFeed))
     }
-  }
+  })
 
-  const loadList = list => setFeed(makeIntersectionFeed(...feedsFromTags(Tags.fromEvent(list))))
-
-  const normalize = feed => (hasSubFeeds(feed) ? feed : makeIntersectionFeed(feed))
-
-  let address = null
   let formIsOpen = false
   let nameIsOpen = false
   let listMenuIsOpen = false
-  let searchFocused = false
-  let name = ""
-  let search = getSearch(value.feed)
-  let draftFeed = normalize(value.feed)
+  let feed = address
+    ? readFeed(repository.getEvent(address))
+    : initFeed({definition: normalizeFeedDefinition(opts.feed)})
+  let search = getSearch(feed.definition)
 
-  $: feed = normalize(value.feed)
-  $: subFeeds = getFeedArgs(feed)
-  $: currentScopeFeed = subFeeds.find(f => isScopeFeed(f) || isAuthorFeed(f))
+  $: subFeeds = getFeedArgs(feed.definition as any)
 </script>
 
-<div class="-mb-2">
-  <div class="float-right flex h-8 items-center justify-end">
-    <div class="flex items-center gap-1 px-2">
-      <Toggle scale={0.6} value={!value.shouldHideReplies} on:change={toggleReplies} />
-      <small class="text-neutral-200">Show replies</small>
-    </div>
-    <div class="relative lg:hidden">
-      <div
-        class="w-6 cursor-pointer rounded bg-neutral-700 text-center text-neutral-50 transition-colors hover:bg-neutral-600"
-        on:click={openListMenu}>
-        <i class="fa fa-sm fa-ellipsis-v" />
-      </div>
-      {#if listMenuIsOpen}
-        <Popover2 absolute hideOnClick onClose={closeListMenu} class="right-0 top-8 w-60">
-          <Menu>
-            <MenuItem inert class="flex items-center justify-between bg-neutral-800 shadow">
-              <span class="staatliches text-lg">Your Feeds</span>
-              <Anchor href={router.at("feeds").toString()}>
-                <i class="fa fa-cog" />
-              </Anchor>
-            </MenuItem>
-            <div class="max-h-96 overflow-auto">
-              {#each $userLists as list}
-                <MenuItem on:click={() => loadList(list)}>{displayList2(list)}</MenuItem>
-              {/each}
-            </div>
-          </Menu>
-        </Popover2>
-      {/if}
-    </div>
-  </div>
-  <div class="mb-2 mr-2 inline-block py-1">Showing notes:</div>
-  {#if feed[0] !== FeedType.Intersection}
-    <Chip class="mb-2 mr-2 inline-block">
-      Custom feed ({quantify(subFeeds.length, "selection")})
-    </Chip>
-    <Chip class="cursor-pointer" on:click={openForm}>
-      <div class="flex h-6 items-center justify-center">
-        <i class="fa fa-cog" />
-      </div>
-    </Chip>
-  {:else}
-    <Popover
-      class="inline-block"
-      placement="bottom-end"
-      theme="transparent"
-      opts={{hideOnClick: true}}>
-      <div slot="trigger" class="cursor-pointer">
-        <Chip class="mb-2 mr-2 inline-block">
-          {#if currentScopeFeed && isScopeFeed(currentScopeFeed)}
-            From {displayList(getFeedArgs(currentScopeFeed))}
-          {:else if currentScopeFeed && isAuthorFeed(currentScopeFeed)}
-            From {quantify(getFeedArgs(currentScopeFeed).length, "author")}
-          {:else}
-            From global
-          {/if}
-          <i class="fa fa-caret-down p-1" />
-        </Chip>
-      </div>
-      <div slot="tooltip">
-        <Menu>
-          <MenuItem on:click={() => setSubFeed(makeScopeFeed(Scope.Follows))}>
-            <i class="fa fa-user-plus mr-2" /> Follows
-          </MenuItem>
-          <MenuItem on:click={() => setSubFeed(makeScopeFeed(Scope.Network))}>
-            <i class="fa fa-share-nodes mr-2" /> Network
-          </MenuItem>
-          <MenuItem on:click={() => removeSubFeed(currentScopeFeed)}>
-            <i class="fa fa-earth-americas mr-2" /> Global
-          </MenuItem>
-          <MenuItem on:click={openForm}>
-            <i class="fa fa-cog mr-2" /> Customize
-          </MenuItem>
-        </Menu>
-      </div>
-    </Popover>
-    {#each subFeeds as subFeed}
-      {#if ![FeedType.Search, FeedType.Scope, FeedType.Author].includes(subFeed[0])}
-        <FeedSummary feed={subFeed} />
-      {/if}
-    {/each}
-    <Chip class="cursor-pointer">
-      <div class="flex items-center">
-        <div class="flex h-6 w-4 items-center justify-center" on:click={showSearch}>
+<div class="flex justify-between">
+  <Select
+    value={subFeeds.find(isScopeFeed)?.[1] || null}
+    class="hidden h-7 bg-tinted-700 text-neutral-200 sm:block">
+    <option value={Scope.Follows}>Follows</option>
+    <option value={Scope.Network}>Network</option>
+    <option value={null}>Global</option>
+  </Select>
+  <div class="flex flex-grow items-center justify-end gap-2">
+    <div class="flex">
+      <Input class="hidden h-7 bg-neutral-900 xs:block" on:input={onSearchBlur} bind:value={search}>
+        <div slot="after" class="hidden text-white xs:block">
           <i class="fa fa-search" />
         </div>
-        {#if !isNil(search)}
-          {@const min = searchFocused ? 60 : 0}
-          {@const width = getStringWidth(search)}
-          <input
-            autofocus
-            class="bg-transparent pl-1 outline-none"
-            class:transition-all={width < min || !searchFocused}
-            style={`width: ${clamp([min, 150], width) + 10}px`}
-            transition:slide|local={{axis: "x", duration: 200}}
-            bind:value={search}
-            on:focus={onSearchFocus}
-            on:blur={onSearchBlur} />
+      </Input>
+      <Anchor button low class="h-7 border-none xs:rounded-l-none" on:click={openForm}>
+        Filters ({feed.definition.length - 1})
+      </Anchor>
+    </div>
+    <div class="float-right flex h-8 items-center justify-end gap-2">
+      {#if opts.shouldHideReplies}
+        <Anchor button low class="h-7 border-none opacity-50" on:click={toggleReplies}
+          >Replies</Anchor>
+      {:else}
+        <Anchor button accent class="h-7 border-none" on:click={toggleReplies}>Replies</Anchor>
+      {/if}
+      <div class="relative lg:hidden">
+        <div
+          class="flex h-7 w-6 cursor-pointer items-center justify-center rounded bg-neutral-700 text-center text-neutral-50 transition-colors hover:bg-neutral-600"
+          on:click={openListMenu}>
+          <i class="fa fa-sm fa-ellipsis-v" />
+        </div>
+        {#if listMenuIsOpen}
+          <Popover2 absolute hideOnClick onClose={closeListMenu} class="right-0 top-8 w-60">
+            <Menu>
+              <MenuItem inert class="flex items-center justify-between bg-neutral-800 shadow">
+                <span class="staatliches text-lg">Your Feeds</span>
+                <Anchor href={router.at("feeds").toString()}>
+                  <i class="fa fa-cog" />
+                </Anchor>
+              </MenuItem>
+              <div class="max-h-96 overflow-auto">
+                {#each $userFeeds as event}
+                  <MenuItem on:click={() => setFeed(event)}>{readFeed(event).name}</MenuItem>
+                {/each}
+                {#each $userLists as list}
+                  <MenuItem on:click={() => setList(list)}>{displayList2(list)}</MenuItem>
+                {/each}
+              </div>
+            </Menu>
+          </Popover2>
         {/if}
       </div>
-    </Chip>
-  {/if}
+    </div>
+  </div>
 </div>
 
 {#if formIsOpen}
   <Modal onEscape={closeForm}>
-    {#if address}
-      <Subheading>Edit {name}</Subheading>
+    {#if event}
+      <Subheading>Edit {feed.name}</Subheading>
     {:else}
       <Subheading>Customize your feed</Subheading>
     {/if}
-    <FeedField feed={draftFeed} onChange={onDraftFeedChange} />
+    <FeedField feed={feed.definition} onChange={onDraftFeedChange} />
     <div class="flex justify-between gap-2">
       <Anchor button on:click={closeForm}>Discard</Anchor>
       <div class="flex gap-2">
         <Anchor button on:click={openName}>Save Feed</Anchor>
-        <Anchor button accent on:click={() => setFeed(draftFeed)}>Done</Anchor>
+        <Anchor button accent on:click={() => setFeedDefinition(feed.definition)}>Done</Anchor>
       </div>
     </div>
   </Modal>
@@ -275,11 +212,14 @@
 {#if nameIsOpen}
   <Modal onEscape={closeName}>
     <Field label="What would you like to name this feed?">
-      <Input bind:value={name} />
+      <Input bind:value={feed.name} />
+    </Field>
+    <Field label="How would you describe this feed?">
+      <Textarea bind:value={feed.description} />
     </Field>
     <div class="flex justify-between gap-2">
       <Anchor button on:click={closeName}>Cancel</Anchor>
-      <Anchor button accent on:click={() => saveFeed(draftFeed)}>Save</Anchor>
+      <Anchor button accent on:click={saveFeed}>Save</Anchor>
     </div>
   </Modal>
 {/if}

@@ -31,7 +31,7 @@ export const deriveHandlers = cached({
         }
 
         const tags = Tags.fromEvent(event).whereKey("a")
-        const tag = tags.whereMark("web").first() || tags.first()
+        const tag = tags.filter(t => t.last() === "web").first() || tags.first()
         const address = tag?.value()
         const handler = $handlers.get(address)
 

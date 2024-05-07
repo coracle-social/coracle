@@ -3,16 +3,14 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/util/router"
-  import {feed} from 'src/app/state'
+  import {feed as feedStore} from "src/app/state"
   import {session} from "src/engine"
 
+  export let address = null
+  export let feed = makeScopeFeed(Scope.Follows)
   export let relays = []
 
-  feed.set(
-    relays.length > 0
-      ? makeIntersectionFeed(makeRelayFeed(...relays), makeScopeFeed(Scope.Follows))
-      : makeScopeFeed(Scope.Follows)
-  )
+  feedStore.set(relays.length > 0 ? makeIntersectionFeed(makeRelayFeed(...relays), feed) : feed)
 
   const showLogin = () => router.at("login").open()
 
@@ -28,4 +26,4 @@
   </div>
 {/if}
 
-<Feed skipCache showControls showGroup bind:feed={$feed} />
+<Feed skipCache showControls showGroup bind:feed={$feedStore} {address} />

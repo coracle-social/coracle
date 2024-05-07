@@ -6,8 +6,8 @@
   import Card from "src/partials/Card.svelte"
   import FeedSummary from "src/app/shared/FeedSummary.svelte"
   import {router} from "src/app/util/router"
-  import {feedFromEvent} from "src/domain"
-  import {userFeeds, publishDeletion} from "src/engine"
+  import {readFeed} from "src/domain"
+  import {userFeeds} from "src/engine"
 
   const createFeed = () => router.at("feeds/create").open()
 
@@ -22,14 +22,14 @@
 </div>
 {#each $userFeeds as event (getAddress(event))}
   {@const address = getAddress(event)}
-  {@const feed = feedFromEvent(event)}
+  {@const {name, description, definition} = readFeed(event)}
   <Card>
     <FlexColumn>
-      <div class="flex justify-between items-center">
+      <div class="flex items-center justify-between">
         <span class="staatliches flex items-center gap-3 text-xl">
           <i class="fa fa-rss" />
-          {#if feed.name}
-            {feed.name}
+          {#if name}
+            {name}
           {:else}
             <span class="text-neutral-500">No name</span>
           {/if}
@@ -38,10 +38,10 @@
           <i class="fa fa-edit" /> Edit
         </Anchor>
       </div>
-      {#if feed.description}
-        <p>{feed.description}</p>
+      {#if description}
+        <p>{description}</p>
       {/if}
-      <FeedSummary feed={feed.data} />
+      <FeedSummary feed={definition} />
     </FlexColumn>
   </Card>
 {:else}

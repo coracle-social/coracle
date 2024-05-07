@@ -64,7 +64,7 @@
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
-  const handler = handlers.key(tags.get("client")?.mark())
+  const handler = handlers.key(tags.get("client")?.nth(2))
   const seenOn = tracker.data.derived(m =>
     Array.from(m.get(note.id) || []).filter(url => url !== LOCAL_RELAY_URL),
   )
@@ -218,7 +218,7 @@
         "pointer-events-none opacity-50": disableActions,
       })}
       on:click={replyCtrl?.start}>
-      <Icon icon="message" color={reply ? 'accent' : 'neutral-100'} />
+      <Icon icon="message" color={reply ? "accent" : "neutral-100"} />
       {#if $repliesCount > 0}
         <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$repliesCount}</span>
       {/if}
@@ -229,7 +229,7 @@
           "pointer-events-none opacity-50": disableActions || !canZap,
         })}
         on:click={startZap}>
-        <Icon icon="bolt" color={zap ? 'accent' : 'neutral-100'} />
+        <Icon icon="bolt" color={zap ? "accent" : "neutral-100"} />
         {#if $zapsTotal > 0}
           <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px"
             >{formatSats($zapsTotal)}</span>
@@ -244,7 +244,7 @@
         on:click={() => (like ? deleteReaction(like) : react("+"))}>
         <Icon
           icon="heart"
-          color={like ? 'accent' : 'neutral-100'}
+          color={like ? "accent" : "neutral-100"}
           class={cx("cursor-pointer", {
             "fa-beat fa-beat-custom": like,
           })} />

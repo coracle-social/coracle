@@ -1,7 +1,9 @@
 <script lang="ts">
-  import cx from 'classnames'
-  import {equals} from 'ramda'
-  import {fly} from 'src/util/transition'
+  import {equals} from "ramda"
+  import {randomId} from "@welshman/lib"
+  import {Tags} from "@welshman/util"
+  import {makeScopeFeed, Scope, feedFromTags} from "@welshman/feeds"
+  import {fly} from "src/util/transition"
   import {toggleTheme, theme} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -12,7 +14,7 @@
   import MenuDesktopSecondary from "src/app/MenuDesktopSecondary.svelte"
   import {feed, slowConnections} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {feedFromEvent} from 'src/domain'
+  import {readFeed, normalizeFeedDefinition} from "src/domain"
   import {
     env,
     user,
@@ -23,10 +25,14 @@
     sessions,
     displayPerson,
     displayPubkey,
+    displayList,
+    userLists,
     userFeeds,
   } from "src/engine"
 
   const {page} = router
+  const followsFeed = normalizeFeedDefinition(makeScopeFeed(Scope.Follows))
+  const networkFeed = normalizeFeedDefinition(makeScopeFeed(Scope.Network))
 
   const closeSubMenu = () => {
     subMenu = null
@@ -41,20 +47,50 @@
     )
   }
 
+  const loadFeed = feed => router.at("notes").cx({feed}).push({key: randomId()})
+
   let subMenu
 
-  $: isFeedPage = $page.path === "/notes"
+  $: isFeedPage = Boolean($page.path.match(/^\/(notes)?$/))
+  $: normalizedFeed = $feed ? normalizeFeedDefinition($feed) : null
 </script>
 
-{#if isFeedPage && $userFeeds.length > 0}
-  <div in:fly={{x: -100, duration: 200}} class="fixed bottom-0 left-72 top-0 w-60 bg-tinted-700 transition-colors text-lg pt-[5.75rem]">
+{#if isFeedPage}
+  <div
+    in:fly={{x: -100, duration: 200}}
+    class="fixed bottom-0 left-72 top-0 w-60 bg-tinted-700 pt-24 transition-colors">
+    <MenuDesktopItem
+      class="!h-10 !text-lg"
+      isActive={equals(followsFeed, normalizedFeed)}
+      on:click={() => loadFeed(followsFeed)}>
+      Follows
+    </MenuDesktopItem>
+    <MenuDesktopItem
+      class="!h-10 !text-lg"
+      isActive={equals(networkFeed, normalizedFeed)}
+      on:click={() => loadFeed(networkFeed)}>
+      Network
+    </MenuDesktopItem>
     {#each $userFeeds as event}
-      {@const thisFeed = feedFromEvent(event)}
-      <MenuDesktopItem isActive={equals(thisFeed.data, $feed)} on:click={() => feed.set(thisFeed.data)}>
+      {@const thisFeed = readFeed(event)}
+      <MenuDesktopItem
+        class="!h-10 !text-lg"
+        isActive={equals(thisFeed.definition, normalizedFeed)}
+        on:click={() => loadFeed(thisFeed.definition)}>
         {thisFeed.name}
       </MenuDesktopItem>
     {/each}
-    <div class="absolute bottom-0 w-full px-7 py-4 h-20 staatliches">
+    {#each $userLists as list}
+      {@const definition = feedFromTags(Tags.fromEvent(list))}
+      <MenuDesktopItem
+        class="!h-10 !text-lg"
+        isActive={equals(definition, normalizedFeed)}
+        on:click={() => loadFeed(definition)}>
+        {displayList(list)}
+      </MenuDesktopItem>
+    {/each}
+    <div
+      class="staatliches absolute bottom-0 h-20 w-full px-6 py-4 text-tinted-500 hover:text-tinted-100">
       <Anchor href="/feeds">Manage Feeds</Anchor>
     </div>
   </div>
@@ -70,9 +106,12 @@
         ? import.meta.env.VITE_APP_WORDMARK_DARK
         : import.meta.env.VITE_APP_WORDMARK_LIGHT} />
   </Anchor>
-  <MenuDesktopItem path="/notes" isActive={$page.path.startsWith("/notes")} isAlt={isFeedPage}>Feed</MenuDesktopItem>
+  <MenuDesktopItem path="/notes" isActive={isFeedPage} isAlt={isFeedPage}>Feeds</MenuDesktopItem>
   {#if !$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0}
-    <MenuDesktopItem path="/settings/relays" isActive={$page.path.startsWith("/settings/relays")} isAlt={isFeedPage}>
+    <MenuDesktopItem
+      path="/settings/relays"
+      isActive={$page.path.startsWith("/settings/relays")}
+      isAlt={isFeedPage}>
       <div class="relative inline-block">
         Relays
         {#if $slowConnections.length > 0}
@@ -81,7 +120,11 @@
       </div>
     </MenuDesktopItem>
   {/if}
-  <MenuDesktopItem path="/notifications" disabled={!$canSign} isActive={$page.path.startsWith("/notifications")} isAlt={isFeedPage}>
+  <MenuDesktopItem
+    path="/notifications"
+    disabled={!$canSign}
+    isActive={$page.path.startsWith("/notifications")}
+    isAlt={isFeedPage}>
     <div class="relative inline-block">
       Notifications
       {#if $hasNewNotifications}
@@ -89,7 +132,11 @@
       {/if}
     </div>
   </MenuDesktopItem>
-  <MenuDesktopItem path="/channels" disabled={!$canSign} isActive={$page.path.startsWith("/channels")} isAlt={isFeedPage}>
+  <MenuDesktopItem
+    path="/channels"
+    disabled={!$canSign}
+    isActive={$page.path.startsWith("/channels")}
+    isAlt={isFeedPage}>
     <div class="relative inline-block">
       Messages
       {#if $hasNewMessages}
@@ -97,12 +144,17 @@
       {/if}
     </div>
   </MenuDesktopItem>
-  <MenuDesktopItem path="/events" isActive={$page.path.startsWith("/events")} isAlt={isFeedPage}>Calendar</MenuDesktopItem>
+  <MenuDesktopItem path="/events" isActive={$page.path.startsWith("/events")} isAlt={isFeedPage}
+    >Calendar</MenuDesktopItem>
   {#if $env.ENABLE_MARKET}
-    <MenuDesktopItem path="/listings" isActive={$page.path.startsWith("/listings")} isAlt={isFeedPage}>Market</MenuDesktopItem>
+    <MenuDesktopItem
+      path="/listings"
+      isActive={$page.path.startsWith("/listings")}
+      isAlt={isFeedPage}>Market</MenuDesktopItem>
   {/if}
   {#if !$env.FORCE_GROUP}
-    <MenuDesktopItem path="/groups" isActive={$page.path.startsWith("/groups")} isAlt={isFeedPage}>Groups</MenuDesktopItem>
+    <MenuDesktopItem path="/groups" isActive={$page.path.startsWith("/groups")} isAlt={isFeedPage}
+      >Groups</MenuDesktopItem>
   {/if}
   <FlexColumn small class="absolute bottom-0 w-72">
     <Anchor
@@ -185,7 +237,7 @@
         </MenuItem>
       </MenuDesktopSecondary>
     {/if}
-    <div class="cursor-pointer border-t border-solid border-neutral-600 px-7 py-4 h-20">
+    <div class="h-20 cursor-pointer border-t border-solid border-neutral-600 px-7 py-4">
       {#if $pubkey}
         <Anchor class="flex items-center gap-2" on:click={() => setSubMenu("account")}>
           <PersonCircle class="h-10 w-10" pubkey={$pubkey} />

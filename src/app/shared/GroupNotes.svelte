@@ -38,7 +38,7 @@
       Tags.fromEvent(result)
         .filterByKey(["e", "a"])
         .rejectByValue([pub.request.event.id])
-        .mapTo(t => hints.selection(t.value(), [t.mark()]))
+        .mapTo(t => hints.selection(t.value(), [t.nth(2)]))
         .valueOf(),
     )
 
