@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags, decodeAddress, getIdFilters} from "@welshman/util"
+  import {Tags, getAddress, decodeAddress, getIdFilters} from "@welshman/util"
   import {sleep} from "hurdak"
   import {generatePrivateKey} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -37,6 +37,8 @@
   const setStage = s => {
     stage = s
   }
+
+  let onboardingLists = []
 
   let petnames = $session ? [] : user.get()?.petnames || []
 
@@ -90,13 +92,17 @@
     const listOwners = ONBOARDING_LISTS.map(a => decodeAddress(a).pubkey)
 
     // Prime our database with our default follows and list owners
-    await loadPubkeys([...DEFAULT_FOLLOWS, ...listOwners])
+    loadPubkeys([...DEFAULT_FOLLOWS, ...listOwners])
 
     // Load our onboarding lists
-    await load({
+    load({
       relays: hints.FromPubkeys(listOwners).getUrls(),
       filters: getIdFilters($env.ONBOARDING_LISTS),
       onEvent: e => {
+        if (!onboardingLists.find(l => getAddress(l) === getAddress(e))) {
+          onboardingLists = onboardingLists.concat(e)
+        }
+
         loadPubkeys(Tags.fromEvent(e).values("p").valueOf())
       },
     })
@@ -110,7 +116,7 @@
     {:else if stage === "profile"}
       <OnboardingProfile {setStage} {profile} />
     {:else if stage === "follows"}
-      <OnboardingFollows {setStage} bind:petnames bind:relays />
+      <OnboardingFollows {setStage} {onboardingLists} bind:petnames bind:relays />
     {:else if stage === "note"}
       <OnboardingNote {setStage} {signup} />
     {/if}

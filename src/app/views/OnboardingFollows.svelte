@@ -1,7 +1,8 @@
 <script lang="ts">
-  import {reject, uniqBy, nth, identity} from "ramda"
+  import {reject, uniqBy, nth} from "ramda"
   import {quantify} from "hurdak"
-  import {Tags} from "@welshman/util"
+  import {fromPairs, identity} from "@welshman/lib"
+  import {Tags, getAddress} from "@welshman/util"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -13,7 +14,6 @@
   import type {Relay} from "src/engine"
   import {
     env,
-    lists,
     urlToRelay,
     mention,
     createPeopleLoader,
@@ -24,8 +24,9 @@
   export let relays
   export let petnames
   export let setStage
+  export let onboardingLists
 
-  let list
+  let listEvent
   let term = ""
   let showList
   let showSelections
@@ -37,8 +38,8 @@
   const prev = () => setStage("profile")
   const next = () => setStage("note")
 
-  const openList = l => {
-    list = l
+  const openList = event => {
+    listEvent = event
     showList = true
   }
 
@@ -62,15 +63,15 @@
     petnames = reject(t => t[1] === pubkey, petnames)
   }
 
-  const followAll = list => {
+  const followAll = listEvent => {
     petnames = uniqBy(nth(1), [
       ...petnames,
-      ...Tags.fromEvent(list).values("p").valueOf().map(mention),
+      ...Tags.fromEvent(listEvent).values("p").valueOf().map(mention),
     ])
   }
 
-  const unfollowAll = list => {
-    const pubkeys = Tags.fromEvent(list).values("p").valueOf()
+  const unfollowAll = listEvent => {
+    const pubkeys = Tags.fromEvent(listEvent).values("p").valueOf()
 
     petnames = petnames.filter(t => !pubkeys.includes(t[1]))
   }
@@ -101,10 +102,6 @@
     showRelaySearch = false
   }
 
-  const onboardingLists = lists.mapStore.derived($lists =>
-    $env.ONBOARDING_LISTS.map(a => $lists.get(a)).filter(identity),
-  )
-
   $: urls = relays.map(r => r.url)
 
   $: pubkeys = petnames.map(t => t[1])
@@ -129,14 +126,15 @@
     on:click={openSelections}>here</Anchor> to search for specific accounts.
 </p>
 <div class="grid grid-cols-1 gap-3 overflow-auto xs:grid-cols-2 sm:grid-cols-3">
-  {#each $onboardingLists as list (list.address)}
+  {#each onboardingLists as event (getAddress(event))}
+    {@const {title = "", description = ""} = fromPairs(event.tags)}
     <Card
       class="relative flex min-w-[180px] cursor-pointer flex-col gap-2 rounded-2xl sm:aspect-square"
-      on:click={() => openList(list)}>
-      <p class="text-xl font-bold">{list.title}</p>
-      <p class="pb-5">{list.description}</p>
+      on:click={() => openList(event)}>
+      <p class="text-xl font-bold">{title}</p>
+      <p class="pb-5">{description}</p>
       <div class="absolute bottom-1 text-neutral-200">
-        {Tags.fromEvent(list).values("p").count()} people
+        {Tags.fromEvent(event).values("p").count()} people
       </div>
     </Card>
   {/each}
@@ -156,21 +154,22 @@
 </div>
 
 {#if showList}
-  {@const listPubkeys = Tags.fromEvent(list).values("p").valueOf()}
+  {@const {title, description} = fromPairs(listEvent.tags)}
+  {@const listPubkeys = Tags.fromEvent(listEvent).values("p").valueOf()}
   <Modal onEscape={closeList} canCloseAll={false}>
     <div class="flex items-center justify-between">
-      <p class="text-2xl font-bold">{list.title}</p>
+      <p class="text-2xl font-bold">{title}</p>
       {#if listPubkeys.every(pubkey => pubkeys.includes(pubkey))}
-        <Anchor button class="flex items-center gap-2" on:click={() => unfollowAll(list)}>
+        <Anchor button class="flex items-center gap-2" on:click={() => unfollowAll(listEvent)}>
           Unfollow all
         </Anchor>
       {:else}
-        <Anchor button class="flex items-center gap-2" on:click={() => followAll(list)}>
+        <Anchor button class="flex items-center gap-2" on:click={() => followAll(listEvent)}>
           Follow all
         </Anchor>
       {/if}
     </div>
-    <p class="pb-5 text-lg">{list.description}</p>
+    <p class="pb-5 text-lg">{description}</p>
     {#each listPubkeys as pubkey (pubkey)}
       <PersonSummary {pubkey}>
         <div slot="actions" class="flex items-start justify-end">

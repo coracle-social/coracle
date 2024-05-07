@@ -39,7 +39,7 @@
     on:input
     on:keydown />
   {#if showBefore}
-    <div class="absolute left-0 top-0 flex items-center gap-2 px-4 text-black opacity-75">
+    <div class="absolute left-0 top-2 flex items-center gap-2 px-4 text-black opacity-75">
       <div>
         <slot name="before" />
       </div>
@@ -47,7 +47,7 @@
   {/if}
   {#if showAfter}
     <div
-      class="absolute right-0 top-0 m-px flex items-center gap-2 rounded-full px-4 text-black opacity-75">
+      class="absolute right-0 top-2 m-px flex items-center gap-2 rounded-full px-4 text-black opacity-75">
       <div>
         <slot name="after" />
       </div>
