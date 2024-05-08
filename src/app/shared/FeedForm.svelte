@@ -8,9 +8,8 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
-  import {router} from "src/app/util"
   import {initFeed, createFeed, editFeed, displayFeed} from "src/domain"
-  import {publishDeletionForEvent, hints, createAndPublish} from "src/engine"
+  import {publishDeletion, publishDeletionForEvent, hints, createAndPublish} from "src/engine"
 
   export let feed
   export let onSave
@@ -29,11 +28,22 @@
   }
 
   const confirmDelete = () => {
-    if (feed.event) {
-      publishDeletionForEvent(feed.event)
-    }
+    publishDeletionForEvent(feed.event)
+    onSave()
+  }
 
-    router.at("feeds").push()
+  const openListDelete = () => {
+    listDeleteIsOpen = true
+  }
+
+  const closeListDelete = () => {
+    listDeleteIsOpen = false
+    onSave()
+  }
+
+  const confirmListDelete = () => {
+    publishDeletion([feed.list])
+    onSave()
   }
 
   const openSave = () => {
@@ -50,18 +60,24 @@
     const pub = await createAndPublish({...template, relays})
 
     showInfo("Your feed has been saved!")
-    onSave(pub.request.event)
+
+    if (feed.list) {
+      openListDelete()
+    } else {
+      onSave(pub.request.event)
+    }
   }
 
   let saveIsOpen = false
   let deleteIsOpen = false
+  let listDeleteIsOpen = false
 
   $: isEdit = feed.event || feed.list
 </script>
 
 <FeedField bind:feed={feed.definition} />
 {#if isEdit}
-  <Card class="flex flex-col sm:flex-row justify-between">
+  <Card class="flex flex-col justify-between sm:flex-row">
     <p>You are currently editing your {displayFeed(feed)} feed.</p>
     <Anchor underline on:click={switchToCreate} class="text-neutral-400">
       Create a new feed instead
@@ -91,6 +107,19 @@
     <div class="flex justify-between gap-2">
       <Anchor button on:click={closeDelete}>Cancel</Anchor>
       <Anchor button danger on:click={confirmDelete}>Confirm</Anchor>
+    </div>
+  </Modal>
+{/if}
+{#if listDeleteIsOpen}
+  <Modal onEscape={closeListDelete}>
+    <Subheading>Format changed</Subheading>
+    <p>
+      This feed was using an old format. We have created a new version of the feed for you. Would
+      you like to delete the old version?
+    </p>
+    <div class="flex justify-between">
+      <Anchor button on:click={closeListDelete}>Keep it</Anchor>
+      <Anchor button accent on:click={confirmListDelete}>Delete it</Anchor>
     </div>
   </Modal>
 {/if}

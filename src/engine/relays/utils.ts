@@ -151,7 +151,7 @@ export const hints = new Router({
   getGroupRelays: getGroupRelayUrls,
   getCommunityRelays: getGroupRelayUrls,
   getPubkeyRelays: getPubkeyRelayUrls,
-  getStaticRelays: () => [...env.get().PLATFORM_RELAYS, ...env.get().DEFAULT_RELAYS],
+  getFallbackRelays: () => [...env.get().PLATFORM_RELAYS, ...env.get().DEFAULT_RELAYS],
   getIndexerRelays: () => env.get().INDEXER_RELAYS,
   getSearchRelays: () => env.get().SEARCH_RELAYS,
   getLimit: () => parseInt(getSetting("relay_limit")),

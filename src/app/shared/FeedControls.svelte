@@ -166,7 +166,7 @@
 
 {#if formIsOpen}
   <Modal onEscape={closeForm}>
-    <FeedForm hideType {feed} onSave={saveFeed}>
+    <FeedForm {feed} onSave={saveFeed}>
       <div slot="controls" class="flex justify-between gap-2" let:save>
         <Anchor button on:click={closeForm}>Discard</Anchor>
         <div class="flex gap-2">
