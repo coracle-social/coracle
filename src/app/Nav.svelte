@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {equals} from 'ramda'
   import {now} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
   import {quantify, seconds} from "hurdak"
@@ -18,6 +19,7 @@
 
   const hud = publishes.derived($publishes => {
     const pending = []
+    const success = []
     const failure = []
 
     for (const {created_at, request, status} of $publishes) {
@@ -25,16 +27,18 @@
         continue
       }
 
-      const statuses = new Set(Array.from(status.values()))
+      const statuses = Array.from(status.values())
 
-      if (statuses.has(PublishStatus.Pending)) {
+      if (statuses.includes(PublishStatus.Pending)) {
         pending.push(request.event)
-      } else if (statuses.has(PublishStatus.Failure) || statuses.has(PublishStatus.Timeout)) {
+      } else if (statuses.includes(PublishStatus.Success)) {
+        success.push(request.event)
+      } else {
         failure.push(request.event)
       }
     }
 
-    return {pending, failure}
+    return {pending, success, failure}
   })
 
   const openMenu = () => menuIsOpen.set(true)
@@ -82,6 +86,9 @@
       {:else if $hud.failure.length > 0}
         <i class="fa fa-triangle-exclamation" />
         Failed to publish {quantify($hud.failure.length, "note")}.
+      {:else if $hud.success.length > 0}
+        <i class="fa fa-check" />
+        Successfully published {quantify($hud.success.length, "note")}.
       {:else}
         <i class="fa fa-check" />
         No recent notes.

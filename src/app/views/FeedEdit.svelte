@@ -1,6 +1,5 @@
 <script lang="ts">
   import {Kind} from "@welshman/util"
-  import Modal from "src/partials/Modal.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"

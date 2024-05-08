@@ -1,7 +1,7 @@
 <script lang="ts">
   import {reject, uniqBy, nth} from "ramda"
   import {quantify} from "hurdak"
-  import {fromPairs, identity} from "@welshman/lib"
+  import {fromPairs} from "@welshman/lib"
   import {Tags, getAddress} from "@welshman/util"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
@@ -12,14 +12,7 @@
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import type {Relay} from "src/engine"
-  import {
-    env,
-    urlToRelay,
-    mention,
-    createPeopleLoader,
-    searchPeople,
-    searchRelays,
-  } from "src/engine"
+  import {urlToRelay, mention, createPeopleLoader, searchPeople, searchRelays} from "src/engine"
 
   export let relays
   export let petnames

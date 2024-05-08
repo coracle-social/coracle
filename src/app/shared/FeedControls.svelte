@@ -2,7 +2,6 @@
   import {debounce} from "throttle-debounce"
   import {isScopeFeed, isSearchFeed, makeSearchFeed, Scope, getFeedArgs} from "@welshman/feeds"
   import Modal from "src/partials/Modal.svelte"
-  import Subheading from "src/partials/Subheading.svelte"
   import Input from "src/partials/Input.svelte"
   import Select from "src/partials/Select.svelte"
   import Popover2 from "src/partials/Popover2.svelte"

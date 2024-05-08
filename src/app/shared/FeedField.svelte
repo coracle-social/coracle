@@ -19,7 +19,6 @@
   import Icon from "src/partials/Icon.svelte"
   import SelectTiles from "src/partials/SelectTiles.svelte"
   import Card from "src/partials/Card.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import FeedFormAdvanced from "src/app/shared/FeedFormAdvanced.svelte"
   import FeedFormFilters from "src/app/shared/FeedFormFilters.svelte"
@@ -123,9 +122,10 @@
   let innerWidth = 0
   let formType = inferFormType(feed)
 
-  $: formTypeOptions = innerWidth < 640
-    ? [FormType.People, FormType.Topics, FormType.Relays, FormType.DVMs]
-    : [FormType.People, FormType.Topics, FormType.Relays, FormType.DVMs, FormType.Advanced]
+  $: formTypeOptions =
+    innerWidth < 640
+      ? [FormType.People, FormType.Topics, FormType.Relays, FormType.DVMs]
+      : [FormType.People, FormType.Topics, FormType.Relays, FormType.DVMs, FormType.Advanced]
 
   $: console.log(JSON.stringify(normalize(feed), null, 2))
 </script>
@@ -143,10 +143,7 @@
         value={formType}>
         <div slot="item" class="flex flex-col items-center" let:option let:active>
           {#if option === FormType.People}
-            <Icon
-              icon="people-nearby"
-              class="h-12 w-12"
-              color={active ? "accent" : "tinted-800"} />
+            <Icon icon="people-nearby" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
             <span class="staatliches text-2xl">People</span>
           {:else if option === FormType.Topics}
             <span class="flex h-12 w-12 items-center justify-center" class:text-accent={active}>
