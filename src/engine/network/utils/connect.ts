@@ -117,7 +117,7 @@ export class NostrConnectBroker extends Emitter {
 
   async connect(token: string = null) {
     if (!this.#connectResult) {
-      const params = [getPublicKey(this.connectKey), token || "", Perms]
+      const params = [this.pubkey, token || "", Perms]
 
       this.#connectResult = await this.request("connect", params)
     }
