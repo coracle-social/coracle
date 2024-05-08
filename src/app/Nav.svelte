@@ -97,7 +97,8 @@
     <div class="relative">
       <div class="flex">
         <Input
-          class="border-tinted-700 bg-neutral-800 py-px text-tinted-200 outline-none"
+          dark
+          class="border-tinted-700 !bg-neutral-800 py-px outline-none"
           on:blur={onSearchBlur}
           on:keydown={onSearchKeydown}
           bind:element={searchInput}

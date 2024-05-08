@@ -40,7 +40,7 @@
           <!-- pass -->
         {:then impl}
           {#if zap.status === "pending"}
-            <Anchor tall button accent on:click={collect} disabled={attemptingToPay} class="w-24">
+            <Anchor button accent on:click={collect} disabled={attemptingToPay} class="w-24">
               {#if attemptingToPay}
                 <i class="fa fa-circle-notch fa-spin" />
               {:else}
@@ -48,7 +48,7 @@
               {/if}
             </Anchor>
           {:else}
-            <Anchor tall button accent disabled>Paid!</Anchor>
+            <Anchor button accent disabled>Paid!</Anchor>
           {/if}
         {/await}
       </div>

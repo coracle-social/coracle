@@ -13,10 +13,6 @@
 
   const showBefore = $$slots.before && !hideBefore
   const showAfter = $$slots.after && !hideAfter
-  const className = cx(
-    "outline-none px-3 w-full placeholder:text-neutral-400 h-7 bg-transparent",
-    {"pl-10": showBefore, "pr-10": showAfter},
-  )
 
   const onInput = e => {
     value = parse(e.target.value)
@@ -32,7 +28,10 @@
   })}>
   <input
     {...$$props}
-    class={className}
+    class={cx(
+    "outline-none px-3 w-full placeholder:text-neutral-400 h-7 bg-transparent pb-px",
+    {"pl-10": showBefore, "pr-10": showAfter},
+  )}
     value={inputValue}
     bind:this={element}
     on:input={onInput}
