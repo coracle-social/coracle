@@ -59,23 +59,12 @@ setTimeout(() => {
   })
 })
 
-const sessionId = Math.random().toString().slice(2)
-
 export const logUsage = async (path: string) => {
-  // Hash the user's pubkey so we can identify unique users without knowing
-  // anything about them
-  const $pubkey = pubkey.get()
-  const ident = $pubkey ? hash($pubkey) : "unknown"
-  const name = btoa(path.replace(/(npub|nprofile|note|nevent)1[^\/]+/g, (_, m) => `<${m}>`))
-
   if (getSetting("report_analytics")) {
-    try {
-      await fetch(dufflepud(`usage/${ident}/${sessionId}/${name}`), {method: "post"})
-    } catch (e) {
-      if (!e.toString().includes("Failed to fetch")) {
-        warn(e)
-      }
-    }
+    const {location, plausible} = window
+    const pathname = path.replace(/(npub|nprofile|note|nevent)1[^\/]+/g, (_, m) => `<${m}>`)
+
+    plausible("pageview", {u: location.origin + pathname})
   }
 }
 
