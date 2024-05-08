@@ -16,9 +16,14 @@
 - [x] Fix group search
 - [x] Join invite relays in background during onboarding
 - [x] Republish user profile data when joining a new relay
-- [x] Create new note publish status dialog
+- [x] Create new note publish status HUD
 - [x] Add wallet setup onboarding item
 - [x] Remember theme after logging out
+- [x] Collapse apps in note details modal
+- [x] Add custom feeds
+- [x] Introduce new in-memory relay
+- [x] Re-work feed controls
+- [x] Re-work utility library
 
 # 0.4.4
 

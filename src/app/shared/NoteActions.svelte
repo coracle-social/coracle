@@ -11,6 +11,7 @@
   import {quantify, pluralize} from "hurdak"
   import {showInfo} from "src/partials/Toast.svelte"
   import Icon from "src/partials/Icon.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -73,6 +74,14 @@
 
   const setView = v => {
     view = v
+  }
+
+  const showHandlers = () => {
+    handlersShown = true
+  }
+
+  const hideHandlers = () => {
+    handlersShown = false
   }
 
   const label = () => router.at("notes").of(note.id).at("label").open()
@@ -162,6 +171,7 @@
 
   let view
   let actions = []
+  let handlersShown = false
 
   $: disableActions =
     !$canSign ||
@@ -307,12 +317,23 @@
           <HandlerSummary event={$handler.event} />
         {/if}
         {#if $kindHandlers.length > 0}
-          <p>This note can also be viewed using other nostr apps:</p>
-          <FlexColumn>
-            {#each $kindHandlers as { address, event, recs } (address)}
-              <HandlerSummary {event} {recs} />
-            {/each}
-          </FlexColumn>
+          <div class="flex justify-between">
+            <p>This note can also be viewed using {quantify($kindHandlers.length, 'other nostr app')}.</p>
+            {#if handlersShown}
+              <Anchor underline on:click={hideHandlers}>Hide apps</Anchor>
+            {:else}
+              <Anchor underline on:click={showHandlers}>Show apps</Anchor>
+            {/if}
+          </div>
+          {#if handlersShown}
+            <div in:fly={{y: 20}}>
+              <FlexColumn>
+                {#each $kindHandlers as { address, event, recs } (address)}
+                  <HandlerSummary {event} {recs} />
+                {/each}
+              </FlexColumn>
+            </div>
+          {/if}
         {/if}
       {/if}
       <h1 class="staatliches text-2xl">Details</h1>
