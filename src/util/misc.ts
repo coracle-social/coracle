@@ -88,6 +88,8 @@ export const createScroller = (
   loadMore: () => Promise<void>,
   {delay = 1000, threshold = 2000, reverse = false, element}: ScrollerOpts = {},
 ) => {
+  element = element.closest('.modal-content') || element
+
   let done = false
   const check = async () => {
     // While we have empty space, fill it
