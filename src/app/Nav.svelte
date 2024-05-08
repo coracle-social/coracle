@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {equals} from 'ramda'
   import {now} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
   import {quantify, seconds} from "hurdak"
@@ -98,7 +97,7 @@
     <div class="relative">
       <div class="flex">
         <Input
-          class="h-7 !rounded !border-tinted-700 !bg-neutral-800 !px-2 py-px text-tinted-200 outline-none"
+          class="border-tinted-700 bg-neutral-800 py-px text-tinted-200 outline-none"
           on:blur={onSearchBlur}
           on:keydown={onSearchKeydown}
           bind:element={searchInput}

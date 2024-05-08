@@ -52,9 +52,10 @@
     }
   }
 
-  const update = async opts => {
+  const onChange = async opts => {
     limit = 0
     feed = opts.feed
+    Storage.setJson("hideReplies", opts.shouldHideReplies)
     start(opts)
 
     if (feedLoader.compiler.canCompile(opts.feed)) {
@@ -66,10 +67,7 @@
     }
   }
 
-  $: {
-    update(opts)
-    Storage.setJson("hideReplies", opts.shouldHideReplies)
-  }
+  onChange(opts)
 
   onMount(() => {
     const scroller = createScroller(loadMore, {element})
@@ -79,7 +77,7 @@
 </script>
 
 {#if showControls}
-  <FeedControls {address} bind:opts />
+  <FeedControls {opts} {address} {onChange} />
 {/if}
 
 <FlexColumn xl bind:element>

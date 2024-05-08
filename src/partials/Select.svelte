@@ -3,15 +3,18 @@
 
   export let value
   export let onChange = null
-  export let wrapperClass = ""
+  export let dark = false
 
-  const className = cx($$props.class, "rounded shadow-inset px-4 w-full cursor-pointer", {
+  const className = cx("px-3 w-full bg-transparent h-7", {
     "pl-10": $$slots.before,
     "pr-10": $$slots.after,
   })
 </script>
 
-<div class={cx(wrapperClass, "relative")}>
+<div class={cx($$props.class, "rounded relative shadow-inset cursor-pointer h-7", {
+    "bg-neutral-900 text-neutral-100": dark,
+    "bg-neutral-100 text-neutral-900": !dark,
+  })}>
   <select {...$$props} class={className} bind:value on:change={() => onChange(value)}>
     <slot />
   </select>

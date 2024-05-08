@@ -33,7 +33,7 @@
     </div>
     <QRCode code={zap.invoice} onClick={collect}>
       <div slot="below" let:copy class="flex gap-1">
-        <Input value={zap.invoice} wrapperClass="flex-grow">
+        <Input value={zap.invoice} class="flex-grow">
           <button slot="after" class="fa fa-copy" on:click={copy} />
         </Input>
         {#await getLightningImplementation()}

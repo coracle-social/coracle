@@ -42,7 +42,7 @@
 </div>
 <p>Help people recognize you by setting up your profile.</p>
 <Field label="Your Name">
-  <Input type="text" name="name" wrapperClass="flex-grow" bind:value={profile.name}>
+  <Input type="text" name="name" class="flex-grow" bind:value={profile.name}>
     <i slot="before" class="fa-solid fa-user-astronaut" />
   </Input>
 </Field>

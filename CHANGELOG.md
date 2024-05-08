@@ -24,6 +24,7 @@
 - [x] Introduce new in-memory relay
 - [x] Re-work feed controls
 - [x] Re-work utility library
+- [x] Make buttons, chips, and inputs sleeker
 
 # 0.4.4
 

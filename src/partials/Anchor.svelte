@@ -18,7 +18,6 @@
   export let danger = false
   export let circle = false
   export let underline = false
-  export let short = false
   export let tall = false
   export let grow = false
   export let style = null
@@ -44,10 +43,10 @@
       button,
     "aspect-square flex justify-center items-center rounded-full !p-0": circle,
     "aspect-square flex justify-center items-center": square,
-    "h-7": short,
-    "w-7": short && circle,
-    "h-10": tall,
-    "w-10": tall && circle,
+    "h-7": button && !tall,
+    "w-7": button && !tall && circle,
+    "h-10": button && tall,
+    "w-10": button && tall && circle,
     "flex-grow": grow,
   })
 

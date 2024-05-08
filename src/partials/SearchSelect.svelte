@@ -9,7 +9,6 @@
   export let value = null
   export let onChange = null
   export let inputClass = ""
-  export let inputWrapperClass = ""
   export let placeholder = ""
   export let delimiters = []
   export let search = null
@@ -134,7 +133,6 @@
 <div>
   <Input
     class={cx(inputClass, "cursor-text text-black outline-0")}
-    wrapperClass={inputWrapperClass}
     {autofocus}
     {placeholder}
     bind:value={term}

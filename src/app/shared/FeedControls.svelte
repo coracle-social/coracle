@@ -20,6 +20,7 @@
   } from "src/engine"
 
   export let opts
+  export let onChange
   export let address = null
 
   const openListMenu = () => {
@@ -39,13 +40,13 @@
   }
 
   const toggleReplies = () => {
-    opts = {...opts, shouldHideReplies: !opts.shouldHideReplies}
+    onChange({...opts, shouldHideReplies: !opts.shouldHideReplies})
   }
 
   const getSearch = definition => (getFeedArgs(definition)?.find(isSearchFeed)?.[1] as string) || ""
 
   const setFeedDefinition = definition => {
-    opts = {...opts, feed: definition}
+    onChange({...opts, feed: definition})
     search = getSearch(definition)
     closeListMenu()
     closeForm()
@@ -103,8 +104,9 @@
 
 <div class="flex justify-between">
   <Select
+    dark
     value={subFeeds.find(isScopeFeed)?.[1] || null}
-    class="hidden h-7 bg-tinted-700 text-neutral-200 sm:block">
+    class="hidden bg-tinted-700 sm:block">
     <option value={Scope.Follows}>Follows</option>
     <option value={Scope.Network}>Network</option>
     <option value={null}>Global</option>
@@ -112,27 +114,28 @@
   <div class="flex flex-grow items-center justify-end gap-2">
     <div class="flex">
       <Input
-        class="hidden h-7 rounded-r-none bg-neutral-900 xs:block"
+        dark
+        class="hidden rounded-r-none xs:block"
         on:input={onSearchBlur}
         bind:value={search}>
         <div slot="after" class="hidden text-white xs:block">
           <i class="fa fa-search" />
         </div>
       </Input>
-      <Anchor button low class="h-7 border-none xs:rounded-l-none" on:click={openForm}>
+      <Anchor button low class="border-none xs:rounded-l-none" on:click={openForm}>
         Filters ({feed.definition.length - 1})
       </Anchor>
     </div>
     <div class="float-right flex h-8 items-center justify-end gap-2">
       {#if opts.shouldHideReplies}
-        <Anchor button low class="h-7 border-none opacity-50" on:click={toggleReplies}
+        <Anchor button low class="border-none opacity-50" on:click={toggleReplies}
           >Replies</Anchor>
       {:else}
-        <Anchor button accent class="h-7 border-none" on:click={toggleReplies}>Replies</Anchor>
+        <Anchor button accent class="border-none" on:click={toggleReplies}>Replies</Anchor>
       {/if}
       <div class="relative lg:hidden">
         <div
-          class="flex h-7 w-6 cursor-pointer items-center justify-center rounded bg-neutral-700 text-center text-neutral-50 transition-colors hover:bg-neutral-600"
+          class="flex h-8 w-6 cursor-pointer items-center justify-center rounded bg-neutral-700 text-center text-neutral-50 transition-colors hover:bg-neutral-600"
           on:click={openListMenu}>
           <i class="fa fa-sm fa-ellipsis-v" />
         </div>

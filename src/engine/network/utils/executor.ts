@@ -33,11 +33,7 @@ export const projections = new Worker<Event>({
 })
 
 projections.addGlobalHandler(event => {
-  const kinds = [
-    Kind.Delete,
-    Kind.Feed,
-    Kind.ListBookmarks,
-  ]
+  const kinds = [Kind.Delete, Kind.Feed, Kind.ListBookmarks]
 
   if (kinds.includes(event.kind)) {
     repository.publish(event)
@@ -221,7 +217,7 @@ export const createAndPublish = async ({
   const template = createEvent(kind, {content, tags})
   const event = await sign(template, {anonymous, sk})
 
-  return publish({event, relays, timeout, verb})
+  return publish({event, relays, verb, signal: AbortSignal.timeout(timeout)})
 }
 
 setInterval(() => {

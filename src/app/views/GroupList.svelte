@@ -77,7 +77,7 @@
     <p class="text-center py-8">You haven't yet joined any groups.</p>
   {/each}
   <div class="mb-2 border-b border-solid border-neutral-600 pt-2" />
-  <Input bind:value={q} type="text" wrapperClass="flex-grow" placeholder="Search groups">
+  <Input bind:value={q} type="text" class="flex-grow" placeholder="Search groups">
     <i slot="before" class="fa-solid fa-search" />
   </Input>
   {#each otherGroups as group (group.address)}

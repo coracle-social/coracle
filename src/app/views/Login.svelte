@@ -136,8 +136,7 @@
     <div class="flex">
       <Input
         bind:value={username}
-        class="rounded-r-none"
-        wrapperClass="flex-grow"
+        class="flex-grow rounded-r-none"
         placeholder="Username">
         <i slot="before" class="fa fa-user-astronaut" />
       </Input>
@@ -146,8 +145,7 @@
         defaultOptions={handlers}
         getKey={prop("domain")}
         termToItem={objOf("domain")}
-        inputClass="rounded-l-none border-l-0"
-        inputWrapperClass="flex-grow"
+        inputClass="rounded-l-none border-l-0 flex-grow"
         search={() => handlers}>
         <i slot="before" class="fa fa-at relative top-[2px]" />
         <span slot="item" let:item>{item.domain}</span>

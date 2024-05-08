@@ -202,7 +202,7 @@
     <Input
       bind:value={q}
       type="text"
-      wrapperClass="flex-grow"
+      class="flex-grow"
       placeholder="Search relays or add a custom url">
       <i slot="before" class="fa-solid fa-search" />
     </Input>

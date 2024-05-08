@@ -48,6 +48,7 @@ export class FeedLoader {
   done = false
   loader: Promise<Loader>
   feedLoader: CoreFeedLoader<Rumor>
+  controller = new AbortController()
   notes = writable<DisplayEvent[]>([])
   parents = new Map<string, DisplayEvent>()
   reposts = new Map<string, Event[]>()
@@ -60,6 +61,8 @@ export class FeedLoader {
     this.feedLoader = new CoreFeedLoader({
       ...baseFeedLoader.options,
       request: async ({relays, filters, onEvent}) => {
+        const signal = this.controller.signal
+
         // Default to note kinds
         filters = filters?.map(filter => ({kinds: noteKinds, ...filter})) || []
 
@@ -73,10 +76,10 @@ export class FeedLoader {
 
         // Use relays specified in feeds
         if (relays?.length > 0) {
-          promises.push(load({filters, relays, tracker, onEvent}))
+          promises.push(load({filters, relays, tracker, onEvent, signal}))
         } else {
           if (!this.opts.skipCache) {
-            promises.push(load({filters, relays: [LOCAL_RELAY_URL], tracker, onEvent}))
+            promises.push(load({filters, relays: [LOCAL_RELAY_URL], tracker, onEvent, signal}))
           }
 
           if (!this.opts.skipNetwork) {
@@ -87,7 +90,7 @@ export class FeedLoader {
             }
 
             for (const {relay, filters} of selections) {
-              promises.push(load({filters, relays: [relay], tracker, onEvent}))
+              promises.push(load({filters, relays: [relay], tracker, onEvent, signal}))
             }
           }
         }
@@ -100,11 +103,17 @@ export class FeedLoader {
   // Public api
 
   start = (opts: Partial<FeedOpts>) => {
+    const controller = new AbortController()
+
     Object.assign(this.opts, opts)
 
     this.loader = this.feedLoader.getLoader(this.opts.feed, {
       onEvent: batch(300, async events => {
-        const keep = await this.discardEvents(events)
+        if (controller.signal.aborted) {
+          return
+        }
+
+        const keep = this.discardEvents(events)
 
         if (this.opts.shouldLoadParents) {
           this.loadParents(keep)
@@ -121,6 +130,8 @@ export class FeedLoader {
 
     // Clear everything out
     this.notes.set([])
+    this.controller.abort()
+    this.controller = controller
   }
 
   subscribe = f => this.notes.subscribe(f)
@@ -129,7 +140,7 @@ export class FeedLoader {
 
   // Event selection, deferral, and parent loading
 
-  discardEvents = async events => {
+  discardEvents = events => {
     let strict = true
 
     // Be more tolerant when looking at communities
@@ -186,14 +197,20 @@ export class FeedLoader {
       return true
     })
 
+    const {signal} = this.controller
     const selections = hints.merge(notesWithParent.map(hints.EventParents)).getSelections()
 
     for (const {relay, values} of selections) {
       load({
         filters: getIdFilters(values),
+        signal: this.controller.signal,
         relays: this.opts.skipPlatform ? [relay] : forcePlatformRelays([relay]),
         onEvent: batch(100, async events => {
-          for (const e of await this.discardEvents(events)) {
+          if (signal.aborted) {
+            return
+          }
+
+          for (const e of this.discardEvents(events)) {
             for (const k of getIdAndAddress(e)) {
               this.parents.set(k, e)
             }
@@ -215,7 +232,13 @@ export class FeedLoader {
       return parents.length === 0 || parents.some(k => this.parents.has(k))
     }, notes)
 
-    setTimeout(() => this.addToFeed(defer), 3000)
+    const {signal} = this.controller
+
+    setTimeout(() => {
+      if (!signal.aborted) {
+        this.addToFeed(defer)
+      }
+    }, 3000)
 
     return ok
   }

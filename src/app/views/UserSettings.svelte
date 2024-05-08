@@ -38,7 +38,9 @@
   </div>
   <div class="flex w-full flex-col gap-8">
     <Field label="Default zap amount">
-      <Input bind:value={settings.default_zap} />
+      <Input bind:value={settings.default_zap}>
+        <i slot="before" class="fa fa-bolt" />
+      </Input>
       <p slot="info">The default amount of sats to use when sending a lightning tip.</p>
     </Field>
     <Field label="Platform zap split">
@@ -58,7 +60,7 @@
         <strong>Max relays per request</strong>
         <div>{settings.relay_limit} relays</div>
       </div>
-      <Input type="range" bind:value={settings.relay_limit} min={1} max={30} parse={parseInt} />
+      <Input type="range" class="bg-transparent" bind:value={settings.relay_limit} min={1} max={30} parse={parseInt} />
       <p slot="info">
         This controls how many relays to max out at when loading feeds and event context. More is
         faster, but will require more bandwidth and processing power.

@@ -35,13 +35,13 @@
   </div>
   <div class="flex w-full flex-col gap-8">
     <Field label="Username">
-      <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.name}>
+      <Input type="text" name="name" class="flex-grow" bind:value={values.name}>
         <i slot="before" class="fa-solid fa-user-astronaut" />
       </Input>
       <div slot="info">In most clients, this image will be shown on your profile page.</div>
     </Field>
     <Field label="NIP-05 Identifier">
-      <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.nip05}>
+      <Input type="text" name="name" class="flex-grow" bind:value={values.nip05}>
         <i slot="before" class="fa-solid fa-user-check" />
       </Input>
       <div slot="info">
@@ -50,7 +50,7 @@
       </div>
     </Field>
     <Field label="Lightning address">
-      <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.lud16}>
+      <Input type="text" name="name" class="flex-grow" bind:value={values.lud16}>
         <i slot="before" class="fa-solid fa-bolt" />
       </Input>
       <div slot="info">
@@ -59,7 +59,7 @@
       </div>
     </Field>
     <Field label="Website">
-      <Input type="text" name="name" wrapperClass="flex-grow" bind:value={values.website}>
+      <Input type="text" name="name" class="flex-grow" bind:value={values.website}>
         <i slot="before" class="fa-solid fa-link" />
       </Input>
       <div slot="info">Enter any url where people can find out more about you.</div>

@@ -55,7 +55,7 @@
 
 <div class="flex gap-2">
   {#if icon}
-    <Input type="text" wrapperClass="flex-grow" bind:value placeholder="https://">
+    <Input type="text" class="flex-grow" bind:value placeholder="https://">
       <i slot="before" class={`fa fa-${icon}`} />
     </Input>
   {/if}
