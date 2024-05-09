@@ -62,7 +62,7 @@ setTimeout(() => {
 export const logUsage = async (path: string) => {
   if (getSetting("report_analytics")) {
     const {location, plausible} = window
-    const pathname = path.replace(/(npub|nprofile|note|nevent)1[^\/]+/g, (_, m) => `<${m}>`)
+    const pathname = path.replace(/(npub|nprofile|note|nevent|naddr)1[^\/]+/g, (_, m) => `<${m}>`)
 
     plausible("pageview", {u: location.origin + pathname})
   }
