@@ -7,10 +7,11 @@ import type {Event} from "src/engine/events/model"
 import {withFallbacks} from "src/engine/relays/utils"
 import {load} from "./executor"
 
-const getAncestorIds = e =>
-  Tags.wrap(Object.values(Tags.fromEvent(e).ancestors()).flatMap(tags => tags.unwrap()))
-    .values()
-    .valueOf()
+const getAncestorIds = e => {
+  const {roots, replies} = Tags.fromEvent(e).ancestors()
+
+  return [...roots.values().valueOf(), ...replies.values().valueOf()]
+}
 
 export class ThreadLoader {
   stopped = false
