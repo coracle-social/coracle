@@ -33,7 +33,6 @@
     asJson,
     asString,
     asUrlComponent,
-    asFilter,
     asNote,
     asRelay,
     asEntity,
@@ -194,16 +193,8 @@
     },
   })
 
-  router.register("/", import("src/app/views/Home.svelte"), {
-    serializers: {
-      filter: asFilter,
-    },
-  })
-  router.register("/notes", import("src/app/views/Home.svelte"), {
-    serializers: {
-      filter: asFilter,
-    },
-  })
+  router.register("/", import("src/app/views/Home.svelte"))
+  router.register("/notes", import("src/app/views/Home.svelte"))
   router.register("/notes/create", import("src/app/views/NoteCreate.svelte"), {
     requireSigner: true,
     serializers: {
@@ -246,7 +237,6 @@
     required: ["pubkey"],
     serializers: {
       entity: asPerson,
-      filter: asFilter,
     },
   })
   router.register("/people/:entity/followers", import("src/app/views/PersonFollowers.svelte"), {
@@ -279,7 +269,6 @@
   router.register("/relays/:entity", import("src/app/views/RelayDetail.svelte"), {
     serializers: {
       entity: asRelay,
-      filter: asFilter,
     },
   })
   router.register("/relays/:entity/review", import("src/app/views/RelayReview.svelte"), {
@@ -325,13 +314,11 @@
   router.register("/:entity", import("src/app/views/Bech32Entity.svelte"), {
     serializers: {
       entity: asEntity,
-      filter: asFilter,
     },
   })
   router.register("/:entity/*", import("src/app/views/Bech32Entity.svelte"), {
     serializers: {
       entity: asEntity,
-      filter: asFilter,
     },
   })
 

@@ -1,4 +1,4 @@
-import {last, fromPairs, identity} from "ramda"
+import {last, identity} from "ramda"
 import {
   encodeAddress,
   decodeAddress,
@@ -20,36 +20,6 @@ export const encodeCsv = xs => xs.join(",")
 export const decodeCsv = x => x.split(",")
 export const encodeRelays = xs => xs.map(url => last(url.split("//"))).join(",")
 export const encodeNaddr = a => addressToNaddr(decodeAddress(a, []))
-
-export const encodeFilter = f =>
-  Object.entries(f)
-    .map(([k, v]) => [k, Array.isArray(v) ? encodeCsv(v) : v].join(":"))
-    .join("|")
-
-export const decodeFilter = s =>
-  fromPairs(
-    s.split("|").map(p => {
-      const [k, v] = p.split(":")
-
-      if (k === "search") {
-        return [k, v]
-      }
-
-      if (["since", "until", "limit"].includes(k)) {
-        return [k, parseInt(v)]
-      }
-
-      if (k === "kinds") {
-        return [k, v.split(",").map(k => parseInt(k))]
-      }
-
-      if (k === "authors" && v.length < 64) {
-        return [k, v]
-      }
-
-      return [k, v.split(",")]
-    }),
-  )
 
 export const decodeEntity = entity => {
   entity = fromNostrURI(entity)
@@ -105,11 +75,6 @@ export const asPerson = {
 export const asRelay = {
   encode: nip19.nrelayEncode,
   decode: decodeRelay,
-}
-
-export const asFilter = {
-  encode: encodeFilter,
-  decode: decodeAs("filter", decodeFilter),
 }
 
 export const asChannelId = {
