@@ -19,7 +19,7 @@ export const normalizeFeedDefinition = feed =>
 
 // Compatibility with the old way we did custom feeds
 export const listAsFeed = list =>
-  initFeed({
+  makeFeed({
     name: list.title,
     list: list.address,
     description: list.description,
@@ -27,7 +27,7 @@ export const listAsFeed = list =>
     identifier: decodeAddress(list.address).identifier,
   })
 
-export const initFeed = (feed: Partial<Feed> = {}): Feed => ({
+export const makeFeed = (feed: Partial<Feed> = {}): Feed => ({
   name: "",
   description: "",
   identifier: randomId(),

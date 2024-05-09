@@ -8,14 +8,14 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
-  import {initFeed, createFeed, editFeed, displayFeed} from "src/domain"
+  import {makeFeed, createFeed, editFeed, displayFeed} from "src/domain"
   import {publishDeletion, publishDeletionForEvent, hints, createAndPublish} from "src/engine"
 
   export let feed
   export let onSave
 
   const switchToCreate = () => {
-    feed = initFeed({definition: feed.definition})
+    feed = makeFeed({definition: feed.definition})
     saveIsOpen = true
   }
 

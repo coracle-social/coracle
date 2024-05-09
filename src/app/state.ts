@@ -2,9 +2,9 @@ import Bugsnag from "@bugsnag/js"
 import {uniq} from "ramda"
 import {writable} from "@welshman/lib"
 import {ConnectionStatus, NetworkContext} from "@welshman/net"
-import type {Feed} from "@welshman/feeds"
 import {userKinds} from "src/util/nostr"
 import {router} from "src/app/util/router"
+import type {Feed} from "src/domain"
 import {
   env,
   relays,

@@ -3,6 +3,7 @@
   import Feed from "src/app/shared/Feed.svelte"
   import Heading from "src/partials/Heading.svelte"
   import TopicActions from "src/app/shared/TopicActions.svelte"
+  import {makeFeed} from "src/domain"
 
   export let topic
 </script>
@@ -13,4 +14,4 @@
     <TopicActions {topic} />
   </div>
 </div>
-<Feed feed={makeTagFeed("#t", topic)} />
+<Feed feed={makeFeed({definition: makeTagFeed("#t", topic)})} />

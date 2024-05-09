@@ -9,11 +9,14 @@
   import EventDate from "src/app/shared/EventDate.svelte"
   import EventInfo from "src/app/shared/EventInfo.svelte"
   import NoteCreateInline from "src/app/shared/NoteCreateInline.svelte"
+  import {makeFeed} from "src/domain"
   import {dereferenceNote} from "src/engine"
 
   export let address
   export let relays = []
   export let event = null
+
+  const feed = makeFeed({definition: feedFromFilter({"#a": [address]})})
 
   let loading = true
 
@@ -33,11 +36,7 @@
         <EventInfo {event} />
       </div>
       <NoteCreateInline parent={event} />
-      <Feed
-        hideSpinner
-        shouldListen
-        anchor={getIdOrAddress(event)}
-        feed={feedFromFilter({"#a": [address]})} />
+      <Feed {feed} hideSpinner shouldListen anchor={getIdOrAddress(event)} />
     </FlexColumn>
   </div>
 {:else}

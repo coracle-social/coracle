@@ -1,7 +1,6 @@
 <script lang="ts">
   import {batch} from "hurdak"
   import {makeWOTFeed, makeRelayFeed, makeIntersectionFeed, feedFromFilter} from "@welshman/feeds"
-  import type {Feed as TFeed} from "@welshman/feeds"
   import {getAvgRating} from "src/util/nostr"
   import Feed from "src/app/shared/Feed.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -9,19 +8,25 @@
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
   import RelayActions from "src/app/shared/RelayActions.svelte"
   import {deriveRelay, normalizeRelayUrl, displayRelay, getMinWot} from "src/engine"
+  import {makeFeed} from "src/domain"
 
   export let url
-  export let feed: TFeed = makeWOTFeed({min: getMinWot()})
-
-  let reviews = []
-  let activeTab = "notes"
-
-  $: url = normalizeRelayUrl(url)
-  $: feed = makeIntersectionFeed(makeRelayFeed(url), feed)
-  $: rating = getAvgRating(reviews)
 
   const relay = deriveRelay(url)
   const tabs = ["notes", "reviews"]
+
+  const notesFeed = makeFeed({
+    definition: makeIntersectionFeed(makeRelayFeed(url), makeWOTFeed({min: getMinWot()})),
+  })
+
+  const reviewsFeed = makeFeed({
+    definition: feedFromFilter({
+      kinds: [1986],
+      "#l": ["review/relay"],
+      "#r": [url],
+    }),
+  })
+
   const setActiveTab = tab => {
     activeTab = tab
   }
@@ -29,6 +34,12 @@
   const onReview = batch(1000, chunk => {
     reviews = reviews.concat(chunk)
   })
+
+  let reviews = []
+  let activeTab = "notes"
+
+  $: url = normalizeRelayUrl(url)
+  $: rating = getAvgRating(reviews)
 
   document.title = displayRelay($relay)
 </script>
@@ -47,13 +58,7 @@
 {/if}
 <Tabs {tabs} {activeTab} {setActiveTab} />
 {#if activeTab === "reviews"}
-  <Feed
-    onEvent={onReview}
-    feed={feedFromFilter({
-      kinds: [1986],
-      "#l": ["review/relay"],
-      "#r": [$relay.url],
-    })} />
+  <Feed onEvent={onReview} feed={reviewsFeed} />
 {:else}
-  <Feed skipCache {feed} />
+  <Feed skipCache feed={notesFeed} />
 {/if}

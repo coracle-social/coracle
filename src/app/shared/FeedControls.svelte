@@ -10,18 +10,13 @@
   import MenuItem from "src/partials/MenuItem.svelte"
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
-  import {normalizeFeedDefinition, readFeed, initFeed, listAsFeed, displayFeed} from "src/domain"
-  import {
-    repository,
-    displayList as displayList2,
-    publishDeletion,
-    userLists,
-    userFeeds,
-  } from "src/engine"
+  import {normalizeFeedDefinition, readFeed, listAsFeed, displayFeed} from "src/domain"
+  import {displayList as displayList2, publishDeletion, userLists, userFeeds} from "src/engine"
 
-  export let opts
-  export let onChange
-  export let address = null
+  export let feed
+  export let updateFeed
+
+  feed.definition = normalizeFeedDefinition(feed.definition)
 
   const openListMenu = () => {
     listMenuIsOpen = true
@@ -39,14 +34,10 @@
     formIsOpen = false
   }
 
-  const toggleReplies = () => {
-    onChange({...opts, shouldHideReplies: !opts.shouldHideReplies})
-  }
-
   const getSearch = definition => (getFeedArgs(definition)?.find(isSearchFeed)?.[1] as string) || ""
 
   const setFeedDefinition = definition => {
-    onChange({...opts, feed: definition})
+    updateFeed(definition)
     search = getSearch(definition)
     closeListMenu()
     closeForm()
@@ -94,9 +85,6 @@
 
   let formIsOpen = false
   let listMenuIsOpen = false
-  let feed = address
-    ? readFeed(repository.getEvent(address))
-    : initFeed({definition: normalizeFeedDefinition(opts.feed)})
   let search = getSearch(feed.definition)
 
   $: subFeeds = getFeedArgs(feed.definition as any)
@@ -127,15 +115,10 @@
       </Anchor>
     </div>
     <div class="float-right flex h-8 items-center justify-end gap-2">
-      {#if opts.shouldHideReplies}
-        <Anchor button low class="border-none opacity-50" on:click={toggleReplies}
-          >Replies</Anchor>
-      {:else}
-        <Anchor button accent class="border-none" on:click={toggleReplies}>Replies</Anchor>
-      {/if}
+      <slot name="controls" />
       <div class="relative lg:hidden">
         <div
-          class="flex h-8 w-6 cursor-pointer items-center justify-center rounded bg-neutral-700 text-center text-neutral-50 transition-colors hover:bg-neutral-600"
+          class="flex h-7 w-6 cursor-pointer items-center justify-center rounded bg-neutral-700 text-center text-neutral-50 transition-colors hover:bg-neutral-600"
           on:click={openListMenu}>
           <i class="fa fa-sm fa-ellipsis-v" />
         </div>

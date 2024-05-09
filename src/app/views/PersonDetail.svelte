@@ -18,6 +18,7 @@
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import PersonStats from "src/app/shared/PersonStats.svelte"
   import PersonCollections from "src/app/shared/PersonCollections.svelte"
+  import {makeFeed} from "src/domain"
   import {
     mutes,
     derivePerson,
@@ -30,10 +31,11 @@
   export let npub
   export let pubkey
   export let relays = []
-  export let feed = feedFromFilter({authors: [pubkey]})
 
-  const tabs = ["notes", "likes", "collections", "relays"].filter(identity)
   const person = derivePerson(pubkey)
+  const tabs = ["notes", "likes", "collections", "relays"].filter(identity)
+  const notesFeed = makeFeed({definition: feedFromFilter({authors: [pubkey]})})
+  const likesFeed = makeFeed({definition: feedFromFilter({kinds: [7], authors: [pubkey]})})
 
   let activeTab = "notes"
 
@@ -96,9 +98,9 @@
 {#if $mutes.has(pubkey)}
   <Content size="lg" class="text-center">You have muted this person.</Content>
 {:else if activeTab === "notes"}
-  <Feed showGroup skipPlatform {feed} />
+  <Feed showGroup skipPlatform feed={notesFeed} />
 {:else if activeTab === "likes"}
-  <Feed showGroup feed={feedFromFilter({kinds: [7], authors: [pubkey]})} />
+  <Feed showGroup feed={likesFeed} />
 {:else if activeTab === "collections"}
   <PersonCollections {pubkey} />
 {:else if activeTab === "relays"}

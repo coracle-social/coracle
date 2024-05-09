@@ -57,7 +57,7 @@ export class FeedLoader {
   isDeleted = isDeleted.get()
 
   constructor(readonly opts: FeedOpts) {
-    // Use a custom feed loader so we can intercept the filters
+    // Use a custom feed loader so we can intercept the filters and infer relays
     this.feedLoader = new CoreFeedLoader({
       ...baseFeedLoader.options,
       request: async ({relays, filters, onEvent}) => {
@@ -71,13 +71,13 @@ export class FeedLoader {
           filters = addRepostFilters(filters)
         }
 
-        const promises = []
-        const tracker = new Tracker()
-
         // Use relays specified in feeds
         if (relays?.length > 0) {
-          promises.push(load({filters, relays, tracker, onEvent, signal}))
+          await load({filters, relays, tracker, onEvent, signal})
         } else {
+          const promises = []
+          const tracker = new Tracker()
+
           if (!this.opts.skipCache) {
             promises.push(load({filters, relays: [LOCAL_RELAY_URL], tracker, onEvent, signal}))
           }
@@ -93,23 +93,19 @@ export class FeedLoader {
               promises.push(load({filters, relays: [relay], tracker, onEvent, signal}))
             }
           }
-        }
 
-        await Promise.all(promises)
+          await Promise.all(promises)
+        }
       },
     })
   }
 
   // Public api
 
-  start = (opts: Partial<FeedOpts>) => {
-    const controller = new AbortController()
-
-    Object.assign(this.opts, opts)
-
+  start = () => {
     this.loader = this.feedLoader.getLoader(this.opts.feed, {
       onEvent: batch(300, async events => {
-        if (controller.signal.aborted) {
+        if (this.controller.signal.aborted) {
           return
         }
 
@@ -127,11 +123,10 @@ export class FeedLoader {
         this.done = true
       },
     })
+  }
 
-    // Clear everything out
-    this.notes.set([])
+  stop = () => {
     this.controller.abort()
-    this.controller = controller
   }
 
   subscribe = f => this.notes.subscribe(f)
