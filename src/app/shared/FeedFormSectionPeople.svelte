@@ -1,7 +1,13 @@
 <script lang="ts">
   import {toTitle} from "hurdak"
   import {without} from "ramda"
-  import {FeedType, Scope, isScopeFeed, isAuthorFeed} from "@welshman/feeds"
+  import {
+    Scope,
+    isScopeFeed,
+    isAuthorFeed,
+    makeAuthorFeed,
+    makeScopeFeed,
+  } from "@welshman/feeds"
   import Anchor from "src/partials/Anchor.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
@@ -16,16 +22,16 @@
 
   const onScopeChange = scopes => {
     if (isScopeFeed(feed) && scopes.includes("custom")) {
-      onChange([FeedType.Author])
+      onChange(makeAuthorFeed())
     } else {
-      onChange([FeedType.Scope, ...without(["custom"], scopes)])
+      onChange(makeScopeFeed(...(without(["custom"], scopes) as Scope[])))
     }
   }
 
   $: scopes = isScopeFeed(feed) ? feed.slice(1) : ["custom"]
 </script>
 
-<span class="staatliches text-lg">Which authors would you like to see?</span>
+<span>Which authors would you like to see?</span>
 <SelectButton
   multiple
   value={scopes}
@@ -38,7 +44,7 @@
     multiple
     value={feed.slice(1)}
     search={$searchPubkeys}
-    onChange={pubkeys => onChange([FeedType.Author, ...pubkeys])}>
+    onChange={pubkeys => onChange(makeAuthorFeed(...pubkeys))}>
     <span slot="item" let:item let:context>
       {#if context === "value"}
         <Anchor modal href={router.at("people").of(item).toString()}>

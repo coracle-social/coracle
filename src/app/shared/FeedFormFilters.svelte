@@ -9,11 +9,13 @@
     isTagFeed,
     isScopeFeed,
     isRelayFeed,
+    isListFeed,
     makeTagFeed,
     makeAuthorFeed,
     makeRelayFeed,
     makeKindFeed,
     makeCreatedAtFeed,
+    makeListFeed,
     makeDVMFeed,
   } from "@welshman/feeds"
   import Card from "src/partials/Card.svelte"
@@ -28,6 +30,7 @@
   import FeedFormSectionMentions from "src/app/shared/FeedFormSectionMentions.svelte"
   import FeedFormSectionKinds from "src/app/shared/FeedFormSectionKinds.svelte"
   import FeedFormSectionCreatedAt from "src/app/shared/FeedFormSectionCreatedAt.svelte"
+  import FeedFormSectionList from "src/app/shared/FeedFormSectionList.svelte"
   import FeedFormSectionDVM from "src/app/shared/FeedFormSectionDVM.svelte"
 
   export let feed
@@ -62,6 +65,7 @@
   $: hasRelays = subFeeds.some(isRelayFeed)
   $: hasKinds = subFeeds.some(isKindFeed)
   $: hasCreatedAt = subFeeds.some(isCreatedAtFeed)
+  $: hasList = subFeeds.some(isListFeed)
   $: hasDVM = subFeeds.some(isDVMFeed)
 </script>
 
@@ -82,6 +86,8 @@
           <FeedFormSectionKinds feed={subFeed} onChange={change} />
         {:else if isCreatedAtFeed(subFeed)}
           <FeedFormSectionCreatedAt feed={subFeed} onChange={change} />
+        {:else if isListFeed(subFeed)}
+          <FeedFormSectionList feed={subFeed} onChange={change} />
         {:else if isDVMFeed(subFeed)}
           <FeedFormSectionDVM feed={subFeed} onChange={change} />
         {:else}
@@ -99,7 +105,7 @@
   {/each}
 {/key}
 
-{#if !hasTopics || !hasMentions || !hasPeople || !hasRelays || !hasKinds || !hasCreatedAt || !hasDVM}
+{#if !hasTopics || !hasMentions || !hasPeople || !hasRelays || !hasKinds || !hasCreatedAt || !hasDVM || !hasList}
   <div class="relative">
     {#if menuIsOpen}
       <Popover2 hideOnClick onClose={closeMenu} position="top">
@@ -121,6 +127,9 @@
           {/if}
           {#if !hasCreatedAt}
             <MenuItem on:click={() => addFeed(makeCreatedAtFeed())}>Date range</MenuItem>
+          {/if}
+          {#if !hasList}
+            <MenuItem on:click={() => addFeed(makeListFeed())}>From a list</MenuItem>
           {/if}
           {#if !hasDVM}
             <MenuItem on:click={() => addFeed(makeDVMFeed({kind: 5300}))}

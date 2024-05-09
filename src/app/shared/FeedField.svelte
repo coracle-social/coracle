@@ -9,7 +9,9 @@
     isScopeFeed,
     isTagFeed,
     isRelayFeed,
+    isListFeed,
     isDVMFeed,
+    makeListFeed,
     makeDVMFeed,
     makeScopeFeed,
     makeTagFeed,
@@ -29,6 +31,7 @@
   enum FormType {
     Advanced = "advanced",
     DVMs = "dvms",
+    Lists = "lists",
     People = "people",
     Relays = "relays",
     Topics = "topics",
@@ -69,6 +72,10 @@
         return FormType.Relays
       }
 
+      if (subFeed[0] === FeedType.List) {
+        return FormType.Lists
+      }
+
       if (subFeed[0] === FeedType.DVM) {
         return FormType.DVMs
       }
@@ -94,6 +101,8 @@
       removeSubFeed(isTopicsFeed)
     } else if (formType === FormType.Relays) {
       removeSubFeed(isRelayFeed)
+    } else if (formType === FormType.Lists) {
+      removeSubFeed(isListFeed)
     } else if (formType === FormType.DVMs) {
       removeSubFeed(isDVMFeed)
     }
@@ -107,6 +116,8 @@
       prependDefaultSubFeed(isTopicsFeed, makeTagFeed("#t"))
     } else if (formType === FormType.Relays) {
       prependDefaultSubFeed(isRelayFeed, makeRelayFeed())
+    } else if (formType === FormType.Lists) {
+      prependDefaultSubFeed(isListFeed, makeListFeed())
     } else if (formType === FormType.DVMs) {
       prependDefaultSubFeed(isDVMFeed, makeDVMFeed({kind: 5300}))
     }
@@ -119,25 +130,26 @@
     onChange?.(feed)
   }
 
-  let innerWidth = 0
   let formType = inferFormType(feed)
 
-  $: formTypeOptions =
-    innerWidth < 640
-      ? [FormType.People, FormType.Topics, FormType.Relays, FormType.DVMs]
-      : [FormType.People, FormType.Topics, FormType.Relays, FormType.DVMs, FormType.Advanced]
+  $: formTypeOptions = [
+    FormType.People,
+    FormType.Topics,
+    FormType.Relays,
+    FormType.Lists,
+    FormType.DVMs,
+    FormType.Advanced,
+  ]
 
   $: console.log(JSON.stringify(normalize(feed), null, 2))
 </script>
-
-<svelte:window bind:innerWidth />
 
 <FlexColumn>
   <Card class="-mb-8">
     <FlexColumn small>
       <span class="staatliches text-lg">Choose a feed type</span>
       <SelectTiles
-        class="grid-cols-2 sm:grid-cols-5"
+        class="grid-cols-2 xs:grid-cols-3 2xl:grid-cols-6"
         options={formTypeOptions}
         onChange={onFormTypeChange}
         value={formType}>
@@ -153,6 +165,11 @@
           {:else if option === FormType.Relays}
             <Icon icon="server" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
             <span class="staatliches text-2xl">Relays</span>
+          {:else if option === FormType.Lists}
+            <span class="flex h-12 w-12 items-center justify-center" class:text-accent={active}>
+              <i class="fa fa-2xl fa-bars-staggered" />
+            </span>
+            <span class="staatliches text-2xl">Lists</span>
           {:else if option === FormType.DVMs}
             <Icon icon="network" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
             <span class="staatliches text-2xl">DVMs</span>
