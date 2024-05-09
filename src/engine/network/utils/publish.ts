@@ -90,7 +90,8 @@ export const getReplyTags = (parent: Event, inherit = false) => {
   }
 
   // Add a/e-tags for the parent event
-  for (const t of hints.tagEvent(parent, "reply").valueOf()) {
+  const mark = replies.exists() ? "reply" : "root"
+  for (const t of hints.tagEvent(parent, mark).valueOf()) {
     replyTags.push(t.valueOf())
   }
 
