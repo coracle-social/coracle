@@ -22,16 +22,17 @@
 </script>
 
 <div
-  class={cx($$props.class, "shadow-inset relative rounded h-7 overflow-hidden", {
+  class={cx($$props.class, "shadow-inset relative h-7 overflow-hidden rounded", {
+    "!bg-transparent": $$props.type === "range",
     "bg-neutral-900 text-neutral-100": dark,
     "bg-white dark:text-neutral-900": !dark,
   })}>
   <input
     {...$$props}
-    class={cx(
-    "outline-none px-3 w-full placeholder:text-neutral-400 h-7 bg-transparent pb-px",
-    {"pl-10": showBefore, "pr-10": showAfter},
-  )}
+    class={cx("h-7 w-full bg-transparent px-3 pb-px outline-none placeholder:text-neutral-400", {
+      "pl-10": showBefore,
+      "pr-10": showAfter,
+    })}
     value={inputValue}
     bind:this={element}
     on:input={onInput}
@@ -41,14 +42,15 @@
     on:input
     on:keydown />
   {#if showBefore}
-    <div class="absolute left-0 top-0 flex items-center gap-2 px-3 opacity-75 h-7">
+    <div class="absolute left-0 top-0 flex h-7 items-center gap-2 px-3 opacity-75">
       <div>
         <slot name="before" />
       </div>
     </div>
   {/if}
   {#if showAfter}
-    <div class="absolute right-0 top-0 m-px flex items-center gap-2 rounded-full px-3 opacity-75 h-7">
+    <div
+      class="absolute right-0 top-0 m-px flex h-7 items-center gap-2 rounded-full px-3 opacity-75">
       <div>
         <slot name="after" />
       </div>

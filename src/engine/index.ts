@@ -13,7 +13,7 @@ import {topics} from "./topics"
 import {deletes, seen, _events, isDeleted, publishes} from "./events"
 import {pubkey, sessions} from "./session"
 import {channels} from "./channels"
-import {onAuth, getExecutor, tracker} from "./network"
+import {onAuth, getExecutor, tracker, repository} from "./network"
 
 export * from "./core"
 export * from "./auth"
@@ -48,6 +48,12 @@ const setAdapter = {
   load: a => new Set(a || []),
 }
 
+const repositoryStore = {
+  get: () => repository.get(),
+  set: data => repository.load(data),
+  subscribe: () => repository.derived(r => r.dump()),
+}
+
 // Nip 04 channels weren't getting members set
 const migrateChannels = channels => {
   return channels.map(c => {
@@ -67,35 +73,56 @@ const sessionsAdapter = {
   dump: identity,
 }
 
-export const storage = new Storage(11, [
+export const storage = new Storage(12, [
   new LocalStorageAdapter("pubkey", pubkey),
   new LocalStorageAdapter("sessions", sessions, sessionsAdapter),
   new LocalStorageAdapter("deletes2", deletes, setAdapter),
-  new IndexedDBAdapter("seen3", seen, 10000, sortBy(prop("created_at"))),
-  new IndexedDBAdapter("events", _events, 10000, sortByPubkeyWhitelist(prop("created_at"))),
-  new IndexedDBAdapter("publishes", publishes, 100, sortByPubkeyWhitelist(prop("created_at"))),
-  new IndexedDBAdapter("labels", _labels, 1000, sortBy(prop("created_at"))),
-  new IndexedDBAdapter("topics", topics, 1000, sortBy(prop("last_seen"))),
+  new IndexedDBAdapter("seen3", "id", seen, 10000, sortBy(prop("created_at"))),
+  new IndexedDBAdapter("events", "id", _events, 10000, sortByPubkeyWhitelist(prop("created_at"))),
+  new IndexedDBAdapter(
+    "publishes",
+    "id",
+    publishes,
+    100,
+    sortByPubkeyWhitelist(prop("created_at")),
+  ),
+  new IndexedDBAdapter("labels", "id", _labels, 1000, sortBy(prop("created_at"))),
+  new IndexedDBAdapter("topics", "name", topics, 1000, sortBy(prop("last_seen"))),
   new IndexedDBAdapter(
     "lists",
+    "naddr",
     _lists,
     1000,
     sortByPubkeyWhitelist(prop("created_at")),
     l => l.address,
   ),
-  new IndexedDBAdapter("people", people, 5000, sortByPubkeyWhitelist(prop("last_fetched"))),
-  new IndexedDBAdapter("relays", relays, 1000, sortBy(prop("count"))),
+  new IndexedDBAdapter(
+    "people",
+    "pubkey",
+    people,
+    5000,
+    sortByPubkeyWhitelist(prop("last_fetched")),
+  ),
+  new IndexedDBAdapter("relays", "url", relays, 1000, sortBy(prop("count"))),
   new IndexedDBAdapter(
     "channels",
+    "id",
     channels,
     1000,
     sortBy(prop("last_checked")),
     null,
     migrateChannels,
   ),
-  new IndexedDBAdapter("groups", groups, 1000, sortBy(prop("count"))),
-  new IndexedDBAdapter("groupAlerts", groupAlerts, 30, sortBy(prop("created_at"))),
-  new IndexedDBAdapter("groupRequests", groupRequests, 100, sortBy(prop("created_at"))),
-  new IndexedDBAdapter("groupSharedKeys", groupSharedKeys, 1000, sortBy(prop("created_at"))),
-  new IndexedDBAdapter("groupAdminKeys", groupAdminKeys, 1000),
+  new IndexedDBAdapter("groups", "address", groups, 1000, sortBy(prop("count"))),
+  new IndexedDBAdapter("groupAlerts", "id", groupAlerts, 30, sortBy(prop("created_at"))),
+  new IndexedDBAdapter("groupRequests", "id", groupRequests, 100, sortBy(prop("created_at"))),
+  new IndexedDBAdapter(
+    "groupSharedKeys",
+    "pubkey",
+    groupSharedKeys,
+    1000,
+    sortBy(prop("created_at")),
+  ),
+  new IndexedDBAdapter("groupAdminKeys", "pubkey", groupAdminKeys, 1000),
+  new IndexedDBAdapter("repository", "id", repositoryStore as any, 10000),
 ])

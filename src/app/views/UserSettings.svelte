@@ -60,7 +60,7 @@
         <strong>Max relays per request</strong>
         <div>{settings.relay_limit} relays</div>
       </div>
-      <Input type="range" class="!bg-transparent" bind:value={settings.relay_limit} min={1} max={30} parse={parseInt} />
+      <Input type="range" bind:value={settings.relay_limit} min={1} max={30} parse={parseInt} />
       <p slot="info">
         This controls how many relays to max out at when loading feeds and event context. More is
         faster, but will require more bandwidth and processing power.

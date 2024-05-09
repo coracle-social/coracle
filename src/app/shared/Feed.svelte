@@ -28,7 +28,8 @@
   let element
   let filters: Filter[] = [{ids: []}]
   let limit = 0
-  let opts = {
+
+  const {notes, start, load, feedLoader, opts} = new FeedLoader({
     feed,
     anchor,
     onEvent,
@@ -40,9 +41,7 @@
     shouldDefer: !eager,
     shouldLoadParents: true,
     shouldHideReplies: Storage.getJson("hideReplies"),
-  }
-
-  const {notes, start, load, feedLoader} = new FeedLoader(opts)
+  })
 
   const loadMore = async () => {
     limit += 5
@@ -52,14 +51,14 @@
     }
   }
 
-  const onChange = async opts => {
+  const onChange = async newOpts => {
     limit = 0
-    feed = opts.feed
-    Storage.setJson("hideReplies", opts.shouldHideReplies)
-    start(opts)
+    feed = newOpts.feed
+    Storage.setJson("hideReplies", newOpts.shouldHideReplies)
+    start(newOpts)
 
-    if (feedLoader.compiler.canCompile(opts.feed)) {
-      const requests = await feedLoader.compiler.compile(opts.feed)
+    if (feedLoader.compiler.canCompile(newOpts.feed)) {
+      const requests = await feedLoader.compiler.compile(newOpts.feed)
 
       filters = requests.flatMap(r => r.filters || [])
     } else {
@@ -67,7 +66,7 @@
     }
   }
 
-  onChange(opts)
+  start({})
 
   onMount(() => {
     const scroller = createScroller(loadMore, {element})

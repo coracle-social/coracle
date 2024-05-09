@@ -1,10 +1,8 @@
 import Bugsnag from "@bugsnag/js"
 import {uniq} from "ramda"
-import {hash} from "hurdak"
 import {writable} from "@welshman/lib"
 import {ConnectionStatus, NetworkContext} from "@welshman/net"
 import type {Feed} from "@welshman/feeds"
-import {warn} from "src/util/logger"
 import {userKinds} from "src/util/nostr"
 import {router} from "src/app/util/router"
 import {
@@ -21,7 +19,6 @@ import {
   getUserRelayUrls,
   listenForNotifications,
   getSetting,
-  dufflepud,
 } from "src/engine"
 
 // Global state
@@ -64,7 +61,7 @@ setTimeout(() => {
 
 export const logUsage = async (path: string) => {
   if (getSetting("report_analytics")) {
-    const {location, plausible} = window
+    const {location, plausible} = window as any
     const pathname = path.replace(/(npub|nprofile|note|nevent|naddr)1[^\/]+/g, (_, m) => `<${m}>`)
 
     plausible("pageview", {u: location.origin + pathname})

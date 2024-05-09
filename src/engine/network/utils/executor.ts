@@ -217,7 +217,7 @@ export const createAndPublish = async ({
   const template = createEvent(kind, {content, tags})
   const event = await sign(template, {anonymous, sk})
 
-  return publish({event, relays, verb, signal: AbortSignal.timeout(timeout)})
+  return publish({event, relays, verb, timeout})
 }
 
 setInterval(() => {

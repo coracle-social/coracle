@@ -2,7 +2,7 @@ import {prop, identity, pluck, splitAt, nth, sortBy} from "ramda"
 import {sleep, defer, chunk, randomInt, throttle} from "hurdak"
 import {Storage as LocalStorage} from "hurdak"
 import {writable} from "@welshman/lib"
-import type {Writable, Collection} from "@welshman/lib"
+import type {IWritable} from "@welshman/lib"
 import logger from "src/util/logger"
 import {sessions} from "src/engine/session/state"
 import {people} from "src/engine/people/state"
@@ -143,7 +143,7 @@ export type LocalStorageAdapterOpts = {
 export class LocalStorageAdapter {
   constructor(
     readonly key: string,
-    readonly store: Writable<any>,
+    readonly store: IWritable<any>,
     readonly opts?: LocalStorageAdapterOpts,
   ) {}
 
@@ -162,7 +162,8 @@ export class LocalStorageAdapter {
 export class IndexedDBAdapter {
   constructor(
     readonly key: string,
-    readonly store: Collection<any>,
+    readonly keyPath: string,
+    readonly store: IWritable<any>,
     readonly max: number,
     readonly sort?: (xs: any[]) => any[],
     readonly filter?: (x: any) => boolean,
@@ -173,13 +174,13 @@ export class IndexedDBAdapter {
     return {
       name: this.key,
       opts: {
-        keyPath: this.store.pk,
+        keyPath: this.keyPath,
       },
     }
   }
 
   async initialize(storage: Storage) {
-    const {key, store} = this
+    const {key, keyPath, store} = this
     const data = await storage.db.getAll(key)
     const filter = this.filter || identity
     const migrate = this.migrate || identity
@@ -193,7 +194,7 @@ export class IndexedDBAdapter {
         }
 
         // Do it in small steps to avoid clogging stuff up
-        for (const records of chunk(100, (rows as any[]).filter(prop(store.pk)))) {
+        for (const records of chunk(100, (rows as any[]).filter(prop(keyPath)))) {
           await storage.db.bulkPut(key, records)
           await sleep(50)
 
@@ -206,7 +207,7 @@ export class IndexedDBAdapter {
   }
 
   prune(storage) {
-    const {store, key, max, sort} = this
+    const {store, key, keyPath, max, sort} = this
     const data = store.get()
 
     if (data.length < max * 1.1 || storage.dead.get()) {
@@ -217,7 +218,10 @@ export class IndexedDBAdapter {
 
     store.set(keep)
 
-    storage.db.bulkDelete(key, pluck(store.pk, discard))
+    storage.db.bulkDelete(
+      key,
+      discard.map(x => x[keyPath]),
+    )
   }
 }
 
