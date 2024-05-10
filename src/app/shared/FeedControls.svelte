@@ -90,14 +90,6 @@
     closeForm()
   }
 
-  const onScopeChange = scope => {
-    if (scope) {
-      setSubFeed(makeScopeFeed(scope))
-    } else {
-      removeSubFeed(subFeeds.find(isScopeFeed))
-    }
-  }
-
   const onSearchBlur = debounce(500, () => {
     const text = search.trim()
 
@@ -116,64 +108,53 @@
   $: subFeeds = getFeedArgs(feed.definition as any)
 </script>
 
-<div class="flex justify-between">
-  <Select
-    dark
-    value={subFeeds.find(isScopeFeed)?.[1] || null}
-    onChange={onScopeChange}
-    class="hidden bg-tinted-700 sm:block">
-    <option value={Scope.Follows}>Follows</option>
-    <option value={Scope.Network}>Network</option>
-    <option value={null}>Global</option>
-  </Select>
-  <div class="flex flex-grow items-center justify-end gap-2">
-    <div class="flex">
-      <Input
-        dark
-        class="hidden rounded-r-none xs:block"
-        on:input={onSearchBlur}
-        bind:value={search}>
-        <div slot="after" class="hidden text-white xs:block">
-          <i class="fa fa-search" />
-        </div>
-      </Input>
-      <Anchor button low class="border-none xs:rounded-l-none" on:click={openForm}>
-        Filters ({feed.definition.length - 1})
-      </Anchor>
-    </div>
-    <div class="float-right flex h-8 items-center justify-end gap-2">
-      <slot name="controls" />
-      <div class="relative lg:hidden">
-        <div
-          class="flex h-7 w-6 cursor-pointer items-center justify-center rounded bg-neutral-700 text-center text-neutral-50 transition-colors hover:bg-neutral-600"
-          on:click={openListMenu}>
-          <i class="fa fa-sm fa-ellipsis-v" />
-        </div>
-        {#if listMenuIsOpen}
-          <Popover2 absolute hideOnClick onClose={closeListMenu} class="right-0 top-8 w-60">
-            <Menu>
-              <MenuItem inert class="flex items-center justify-between bg-neutral-800 shadow">
-                <span class="staatliches text-lg">Your Feeds</span>
-                <Anchor href={router.at("feeds").toString()}>
-                  <i class="fa fa-cog" />
-                </Anchor>
-              </MenuItem>
-              <div class="max-h-96 overflow-auto">
-                <MenuItem on:click={() => setFeed(followsFeed)}>Follows</MenuItem>
-                <MenuItem on:click={() => setFeed(networkFeed)}>Network</MenuItem>
-                {#each $userFeeds as event}
-                  <MenuItem on:click={() => setFeed(readFeed(event))}>
-                    {displayFeed(readFeed(event))}
-                  </MenuItem>
-                {/each}
-                {#each $userLists as list}
-                  <MenuItem on:click={() => setList(list)}>{displayList2(list)}</MenuItem>
-                {/each}
-              </div>
-            </Menu>
-          </Popover2>
-        {/if}
+<div class="flex flex-grow items-center justify-end gap-2">
+  <div class="flex">
+    <Input
+      dark
+      class="hidden rounded-r-none xs:block"
+      on:input={onSearchBlur}
+      bind:value={search}>
+      <div slot="after" class="hidden text-white xs:block">
+        <i class="fa fa-search" />
       </div>
+    </Input>
+    <Anchor button low class="border-none xs:rounded-l-none" on:click={openForm}>
+      Filters ({feed.definition.length - 1})
+    </Anchor>
+  </div>
+  <div class="float-right flex h-8 items-center justify-end gap-2">
+    <slot name="controls" />
+    <div class="relative lg:hidden">
+      <div
+        class="flex h-7 w-6 cursor-pointer items-center justify-center rounded bg-neutral-700 text-center text-neutral-50 transition-colors hover:bg-neutral-600"
+        on:click={openListMenu}>
+        <i class="fa fa-sm fa-ellipsis-v" />
+      </div>
+      {#if listMenuIsOpen}
+        <Popover2 absolute hideOnClick onClose={closeListMenu} class="right-0 top-8 w-60">
+          <Menu>
+            <MenuItem inert class="flex items-center justify-between bg-neutral-800 shadow">
+              <span class="staatliches text-lg">Your Feeds</span>
+              <Anchor href={router.at("feeds").toString()}>
+                <i class="fa fa-cog" />
+              </Anchor>
+            </MenuItem>
+            <div class="max-h-96 overflow-auto">
+              <MenuItem on:click={() => setFeed(followsFeed)}>Follows</MenuItem>
+              <MenuItem on:click={() => setFeed(networkFeed)}>Network</MenuItem>
+              {#each $userFeeds as event}
+                <MenuItem on:click={() => setFeed(readFeed(event))}>
+                  {displayFeed(readFeed(event))}
+                </MenuItem>
+              {/each}
+              {#each $userLists as list}
+                <MenuItem on:click={() => setList(list)}>{displayList2(list)}</MenuItem>
+              {/each}
+            </div>
+          </Menu>
+        </Popover2>
+      {/if}
     </div>
   </div>
 </div>
