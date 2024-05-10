@@ -114,7 +114,7 @@ export const parseContent = (event: {content: string; tags?: string[][]}) => {
   }
 
   const parseCashu = () => {
-    const cashu = first(text.match(/^(cashu)[\d\w]{50,5000}/i))
+    const cashu = first(text.match(/^(cashu)[\d\w=]{50,5000}/i))
 
     if (cashu) {
       return [CASHU, cashu, cashu]
