@@ -1,6 +1,6 @@
-import type {Event} from "nostr-tools"
 import {find, whereEq} from "ramda"
 import {getIdFilters, Tags} from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import {loadOne} from "src/engine/network/utils"
 import {withFallbacks} from "src/engine/relays/utils"
 
@@ -41,7 +41,7 @@ export const dereferenceNote = async ({
     return loadOne({
       relays: withFallbacks(relays),
       filters: [{kinds: [kind], authors: [pubkey], "#d": [identifier]}],
-    }).then((event: Event) => {
+    }).then((event: TrustedEvent) => {
       return note?.created_at > event.created_at ? note : event
     })
   }

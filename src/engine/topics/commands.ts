@@ -1,6 +1,6 @@
 import {nth, inc} from "ramda"
 import {Tags} from "@welshman/util"
-import type {Event} from "src/engine/events/model"
+import type {TrustedEvent} from "@welshman/util"
 import {topics} from "./state"
 
 export const addTopic = (e, name) => {
@@ -14,7 +14,7 @@ export const addTopic = (e, name) => {
   }
 }
 
-export const processTopics = (e: Event) => {
+export const processTopics = (e: TrustedEvent) => {
   const tagTopics = Tags.fromEvent(e).topics().valueOf()
   const contentTopics = Array.from(e.content.toLowerCase().matchAll(/#(\w{2,100})/g)).map(nth(1))
 

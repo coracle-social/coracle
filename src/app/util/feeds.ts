@@ -1,7 +1,7 @@
 import {partition, prop, uniqBy} from "ramda"
 import {batch} from "hurdak"
 import {writable} from "@welshman/lib"
-import type {Rumor} from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
   getIdOrAddress,
@@ -14,7 +14,7 @@ import {Tracker} from "@welshman/net"
 import type {Feed, Loader} from "@welshman/feeds"
 import {FeedLoader as CoreFeedLoader, FeedType} from "@welshman/feeds"
 import {LOCAL_RELAY_URL, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
-import type {DisplayEvent, Event} from "src/engine"
+import type {DisplayEvent} from "src/engine"
 import {
   feedLoader as baseFeedLoader,
   sortEventsDesc,
@@ -41,18 +41,18 @@ export type FeedOpts = {
   shouldHideReplies?: boolean
   shouldLoadParents?: boolean
   includeReposts?: boolean
-  onEvent?: (e: Event) => void
+  onEvent?: (e: TrustedEvent) => void
 }
 
 export class FeedLoader {
   done = false
   loader: Promise<Loader>
-  feedLoader: CoreFeedLoader<Rumor>
+  feedLoader: CoreFeedLoader<TrustedEvent>
   controller = new AbortController()
   notes = writable<DisplayEvent[]>([])
   parents = new Map<string, DisplayEvent>()
-  reposts = new Map<string, Event[]>()
-  replies = new Map<string, Event[]>()
+  reposts = new Map<string, TrustedEvent[]>()
+  replies = new Map<string, TrustedEvent[]>()
   isEventMuted = isEventMuted.get()
   isDeleted = isDeleted.get()
 
@@ -215,7 +215,7 @@ export class FeedLoader {
     }
   }
 
-  deferOrphans = (notes: Event[]) => {
+  deferOrphans = (notes: TrustedEvent[]) => {
     if (!this.opts.shouldLoadParents || this.opts.shouldDefer === false) {
       return notes
     }
@@ -240,11 +240,11 @@ export class FeedLoader {
 
   // Feed building
 
-  addToFeed = (notes: Event[]) => {
+  addToFeed = (notes: TrustedEvent[]) => {
     this.notes.update($notes => uniqBy(prop("id"), [...$notes, ...this.buildFeedChunk(notes)]))
   }
 
-  buildFeedChunk = (notes: Event[]) => {
+  buildFeedChunk = (notes: TrustedEvent[]) => {
     const seen = new Set(this.notes.get().map(getIdOrAddress))
     const parents = []
 
@@ -254,7 +254,7 @@ export class FeedLoader {
       uniqBy(
         prop("id"),
         sortEventsDesc(notes)
-          .map((e: Event) => {
+          .map((e: TrustedEvent) => {
             // If we have a repost, use its contents instead
             if (repostKinds.includes(e.kind)) {
               const wrappedEvent = unwrapRepost(e)

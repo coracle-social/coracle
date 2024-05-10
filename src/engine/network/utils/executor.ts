@@ -9,6 +9,7 @@ import {
   Relay,
   Repository,
 } from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import {
   Plex,
   Relays,
@@ -25,7 +26,6 @@ import {LOCAL_RELAY_URL, isGiftWrap, generatePrivateKey} from "src/util/nostr"
 import {env, pubkey} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
 import {signer, canSign} from "src/engine/session/derived"
-import type {Event} from "src/engine/events/model"
 import {publishes} from "src/engine/events/state"
 import {LocalTarget} from "./targets"
 import {LIST_KINDS, ListSearch, readFeed, readList} from "src/domain"
@@ -36,7 +36,7 @@ export const relay = new Relay(repository)
 
 export const tracker = new Tracker()
 
-export const projections = new Worker<Event>({
+export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),
 })
 
@@ -133,7 +133,7 @@ export const onAuth = async (url, challenge) => {
 }
 
 export type MySubscribeRequest = SubscribeRequest & {
-  onEvent?: (event: Event) => void
+  onEvent?: (event: TrustedEvent) => void
   onComplete?: () => void
   skipCache?: boolean
 }
@@ -145,7 +145,7 @@ export const subscribe = (request: MySubscribeRequest) => {
 
   const sub = baseSubscribe(request)
 
-  sub.emitter.on("event", (url: string, event: Event) => {
+  sub.emitter.on("event", (url: string, event: TrustedEvent) => {
     if (!repository.getEvent(event.id)) {
       projections.push(event)
     }
@@ -176,10 +176,10 @@ export const LOAD_OPTS = {timeout: 3000, closeOnEose: true}
 export const load = (request: MySubscribeRequest) => subscribe({...request, ...LOAD_OPTS}).result
 
 export const loadOne = (request: MySubscribeRequest) =>
-  new Promise<Event | null>(resolve => {
+  new Promise<TrustedEvent | null>(resolve => {
     const sub = subscribe({...request, ...LOAD_OPTS})
 
-    sub.emitter.on("event", (url: string, event: Event) => {
+    sub.emitter.on("event", (url: string, event: TrustedEvent) => {
       resolve(event)
       sub.close()
     })

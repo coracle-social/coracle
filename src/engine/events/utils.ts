@@ -1,12 +1,12 @@
 import {nip19} from "nostr-tools"
 import {sortBy} from "ramda"
 import {fuzzy} from "src/util/misc"
+import type {TrustedEvent} from "@welshman/util"
 import {fromNostrURI, Tags, hasValidSignature} from "@welshman/util"
 import {tryFunc, switcherFn} from "hurdak"
 import {tryJson} from "src/util/misc"
-import type {Event} from "./model"
 
-export const sortEventsDesc = sortBy((e: Event) => -e.created_at)
+export const sortEventsDesc = sortBy((e: TrustedEvent) => -e.created_at)
 
 const annotateEvent = eid => ({
   eid,

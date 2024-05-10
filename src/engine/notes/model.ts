@@ -1,6 +1,6 @@
-import type {Event} from "src/engine/events/model"
+import type {TrustedEvent} from "@welshman/util"
 
-export type DisplayEvent = Event & {
+export type DisplayEvent = TrustedEvent & {
   replies?: DisplayEvent[]
-  reposts?: Event[]
+  reposts?: TrustedEvent[]
 }

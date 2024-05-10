@@ -1,10 +1,10 @@
 import {uniq, always, whereEq, sortBy, prop, without, mergeRight} from "ramda"
 import {Tags, getIdFilters, decodeAddress, getAddress} from "@welshman/util"
+import type {SignedEvent, TrustedEvent} from "@welshman/util"
 import {switcherFn, batch} from "hurdak"
 import {LOCAL_RELAY_URL, giftWrapKinds, getPublicKey} from "src/util/nostr"
 import {projections} from "src/engine/network"
 import {updateStore} from "src/engine/core/commands"
-import type {Event} from "src/engine/events/model"
 import {sessions} from "src/engine/session/state"
 import {getSession} from "src/engine/session/utils"
 import {nip59} from "src/engine/session/derived"
@@ -23,7 +23,7 @@ import {setGroupStatus, modifyGroupStatus} from "./commands"
 
 // Key sharing
 
-projections.addHandler(24, (e: Event) => {
+projections.addHandler(24, (e: TrustedEvent) => {
   const tags = Tags.fromEvent(e)
   const privkey = tags.get("privkey")?.value()
   const address = tags.get("a")?.value()
@@ -83,7 +83,7 @@ projections.addHandler(24, (e: Event) => {
 
 // Group metadata
 
-projections.addHandler(35834, (e: Event) => {
+projections.addHandler(35834, (e: TrustedEvent) => {
   const tags = Tags.fromEvent(e)
   const meta = tags.asObject()
   const address = getAddress(e)
@@ -104,7 +104,7 @@ projections.addHandler(35834, (e: Event) => {
   })
 })
 
-projections.addHandler(34550, (e: Event) => {
+projections.addHandler(34550, (e: TrustedEvent) => {
   const tags = Tags.fromEvent(e)
   const meta = tags.asObject()
   const address = getAddress(e)
@@ -125,7 +125,7 @@ projections.addHandler(34550, (e: Event) => {
   })
 })
 
-projections.addHandler(27, (e: Event) => {
+projections.addHandler(27, (e: TrustedEvent) => {
   const address = Tags.fromEvent(e).groups().values().first()
 
   if (!address) {
@@ -157,7 +157,7 @@ projections.addHandler(27, (e: Event) => {
 
 // Membership access/exit requests
 
-projections.addHandler(10004, (e: Event) => {
+projections.addHandler(10004, (e: TrustedEvent) => {
   let session = getSession(e.pubkey)
 
   if (!session) {
@@ -175,7 +175,7 @@ projections.addHandler(10004, (e: Event) => {
   updateSession(e.pubkey, always(session))
 })
 
-const handleGroupRequest = access => (e: Event) => {
+const handleGroupRequest = access => (e: TrustedEvent) => {
   const address = Tags.fromEvent(e).get("a")?.value()
   const adminKey = deriveAdminKeyForGroup(address)
 
@@ -202,20 +202,20 @@ projections.addHandler(26, handleGroupRequest(GroupAccess.None))
 // All other events are messages sent to the group
 
 projections.addGlobalHandler(
-  batch(300, (events: Event[]) => {
+  batch(300, (events: TrustedEvent[]) => {
     const userGroups = new Set(Object.values(sessions.get()).flatMap(getUserCommunities))
 
     for (const e of events) {
       // Publish the unwrapped event to our local relay so active subscriptions get notified
       if (e.wrap && groupSharedKeys.key(e.wrap.pubkey).exists()) {
-        getExecutor([LOCAL_RELAY_URL]).publish(e)
+        getExecutor([LOCAL_RELAY_URL]).publish(e as SignedEvent)
       }
 
       const addresses = Tags.fromEvent(e).communities().values().valueOf()
 
       // Save events with communities the user is a part of to our local db
       if (addresses.some(a => userGroups.has(a))) {
-        getExecutor([LOCAL_RELAY_URL]).publish(e)
+        getExecutor([LOCAL_RELAY_URL]).publish(e as SignedEvent)
       }
     }
   }),

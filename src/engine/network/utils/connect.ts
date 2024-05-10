@@ -3,13 +3,13 @@ import type {EventTemplate} from "nostr-tools"
 import {nip04, finalizeEvent} from "nostr-tools"
 import {Emitter, now} from "@welshman/lib"
 import {createEvent} from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import type {Subscription} from "@welshman/net"
 import {randomId, sleep} from "hurdak"
 import {NostrConnect} from "nostr-tools/kinds"
 import logger from "src/util/logger"
 import {getPublicKey} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
-import type {Event} from "src/engine/events/model"
 import {subscribe, publish} from "./executor"
 import type {NostrConnectHandler} from "../model"
 
@@ -58,7 +58,7 @@ export class NostrConnectBroker extends Emitter {
           "#p": [getPublicKey(this.connectKey)],
         },
       ],
-      onEvent: async (e: Event) => {
+      onEvent: async (e: TrustedEvent) => {
         const json = await nip04.decrypt(this.connectKey, e.pubkey, e.content)
         const {id, result, error} = tryJson(() => JSON.parse(json)) || {error: "invalid-response"}
 

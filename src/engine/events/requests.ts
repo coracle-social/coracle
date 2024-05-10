@@ -1,6 +1,7 @@
 import {seconds, switcherFn} from "hurdak"
 import {Worker, writable} from "@welshman/lib"
-import type {Event, Rumor} from "@welshman/util"
+import type {TrustedEvent, SignedEvent} from "@welshman/util"
+import {isSignedEvent} from "@welshman/util"
 import type {LoadOpts} from "@welshman/feeds"
 import {
   FeedLoader,
@@ -62,7 +63,7 @@ export const loadGiftWrap = () => {
   }
 }
 
-export const feedLoader = new FeedLoader<Event | Rumor>({
+export const feedLoader = new FeedLoader<TrustedEvent>({
   request: async ({relays, filters, onEvent}) => {
     if (relays.length > 0) {
       await load({filters, relays, onEvent})
@@ -114,7 +115,7 @@ export const feedLoader = new FeedLoader<Event | Rumor>({
   },
 })
 
-export const loadAll = (feed, opts: LoadOpts<Event | Rumor> = {}) => {
+export const loadAll = (feed, opts: LoadOpts<TrustedEvent> = {}) => {
   const loading = writable(true)
 
   const stop = () => loading.set(false)
@@ -139,7 +140,7 @@ export const loadAll = (feed, opts: LoadOpts<Event | Rumor> = {}) => {
 }
 
 export const sync = (fromUrl, toUrl, filters) => {
-  const worker = new Worker<Event>()
+  const worker = new Worker<SignedEvent>()
 
   worker.addGlobalHandler(event => publish({event, relays: [toUrl]}))
 
@@ -149,6 +150,10 @@ export const sync = (fromUrl, toUrl, filters) => {
   )
 
   return loadAll(feed, {
-    onEvent: e => worker.push(e as Event),
+    onEvent: e => {
+      if (isSignedEvent(e)) {
+        worker.push(e)
+      }
+    },
   })
 }

@@ -18,13 +18,13 @@ import {
   ZAP_RESPONSE,
   Tags,
 } from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import {schnorr} from "@noble/curves/secp256k1"
 import {bytesToHex} from "@noble/hashes/utils"
 import {nip05, nip19, generateSecretKey, getEventHash, getPublicKey as getPk} from "nostr-tools"
 import {identity} from "ramda"
 import {avg} from "hurdak"
 import {tryJson} from "src/util/misc"
-import type {Event} from "src/engine"
 import {LIST_KINDS} from "src/domain"
 
 export const fromHex = k => Uint8Array.from(Buffer.from(k, "hex"))
@@ -61,7 +61,7 @@ export const appDataKeys = {
   NIP24_LAST_CHECKED: "nostr-engine/Nip24/last_checked/v1",
 }
 
-export const isLike = (e: Event) =>
+export const isLike = (e: TrustedEvent) =>
   e.kind === 7 &&
   ["", "+", "🤙", "👍", "❤️", "😎", "🏅", "🫂", "🤣", "😂", "💜", "🔥"].includes(e.content)
 
@@ -83,7 +83,7 @@ export const toHex = (data: string): string | null => {
   }
 }
 
-export const getRating = (event: Event) => {
+export const getRating = (event: TrustedEvent) => {
   if (event.kind === 1985) {
     return tryJson(() => {
       const json = JSON.parse(
@@ -103,7 +103,7 @@ export const getRating = (event: Event) => {
   }
 }
 
-export const getAvgRating = (events: Event[]) => avg(events.map(getRating).filter(identity))
+export const getAvgRating = (events: TrustedEvent[]) => avg(events.map(getRating).filter(identity))
 
 export const isHex = x => x?.length === 64 && x?.match(/^[a-f0-9]{64}$/)
 

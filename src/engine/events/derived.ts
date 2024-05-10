@@ -1,4 +1,5 @@
 import {Tags, getIdAndAddress} from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import {whereEq, groupBy, find} from "ramda"
 import {derived, DerivedCollection} from "@welshman/lib"
 import {pubkey} from "src/engine/session/state"
@@ -6,18 +7,21 @@ import {settings} from "src/engine/session/derived"
 import {getWotScore} from "src/engine/people/utils"
 import {mutes, follows} from "src/engine/people/derived"
 import {deriveIsGroupMember} from "src/engine/groups/utils"
-import type {Event} from "./model"
 import {deletes, seen, _events} from "./state"
 
-export const events = new DerivedCollection<Event>("id", [_events, deletes], ([$e, $d]) =>
+export const events = new DerivedCollection<TrustedEvent>("id", [_events, deletes], ([$e, $d]) =>
   $e.filter(e => !$d.has(e.id)),
 )
 
-export const userEvents = new DerivedCollection<Event>("id", [events, pubkey], ([$e, $pk]) => {
-  return $pk ? $e.filter(whereEq({pubkey: $pk})) : []
-})
+export const userEvents = new DerivedCollection<TrustedEvent>(
+  "id",
+  [events, pubkey],
+  ([$e, $pk]) => {
+    return $pk ? $e.filter(whereEq({pubkey: $pk})) : []
+  },
+)
 
-export const eventsByKind = events.derived(groupBy((e: Event) => String(e.kind)))
+export const eventsByKind = events.derived(groupBy((e: TrustedEvent) => String(e.kind)))
 
 export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settings, $pubkey]) => {
   const words = $settings.muted_words
@@ -26,7 +30,7 @@ export const isEventMuted = derived([mutes, settings, pubkey], ([$mutes, $settin
   const regex =
     words.length > 0 ? new RegExp(`\\b(${words.map(w => w.toLowerCase()).join("|")})\\b`) : null
 
-  return (e: Partial<Event>, strict = false) => {
+  return (e: Partial<TrustedEvent>, strict = false) => {
     if (!$pubkey || e.pubkey === $pubkey) {
       return false
     }

@@ -1,10 +1,10 @@
-import type {Event} from "src/engine/events/model"
+import type {TrustedEvent} from "@welshman/util"
 
 export type Notification = {
   key: string
-  event: Event
+  event: TrustedEvent
   timestamp: number
-  interactions: Event[]
+  interactions: TrustedEvent[]
 }
 
 export enum OnboardingTask {

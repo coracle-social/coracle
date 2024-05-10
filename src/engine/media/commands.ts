@@ -1,9 +1,9 @@
 import {prop, identity, flatten, groupBy} from "ramda"
 import {Fetch, tryFunc, sleep} from "hurdak"
 import {now, cached} from "@welshman/lib"
+import type {TrustedEvent} from "@welshman/util"
 import {Tags} from "@welshman/util"
 import {joinPath} from "src/util/misc"
-import type {Event} from "src/engine/events/model"
 import {nip98Fetch} from "src/engine/auth/commands"
 import {stripExifData, blobToFile} from "src/util/html"
 
@@ -67,7 +67,7 @@ export const compressFiles = (files, opts) =>
     }),
   )
 
-export const eventsToMeta = (events: Event[]) => {
+export const eventsToMeta = (events: TrustedEvent[]) => {
   const tagsByHash = groupBy((tags: Tags) => tags.get("ox").value(), events.map(Tags.fromEvent))
 
   // Merge all nip94 tags together so we can supply as much imeta as possible

@@ -1,5 +1,6 @@
 <script lang="ts">
   import {uniq, pluck} from "ramda"
+  import type {TrustedEvent} from "@welshman/util"
   import {copyToClipboard} from "src/util/html"
   import {tryJson, displayDomain} from "src/util/misc"
   import {showInfo} from "src/partials/Toast.svelte"
@@ -10,10 +11,9 @@
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
-  import type {Event} from "src/engine"
 
   export let event
-  export let recs: Event[] = []
+  export let recs: TrustedEvent[] = []
 
   const meta = tryJson(() => JSON.parse(event.content)) || {}
 

@@ -2,7 +2,15 @@
   import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {onMount} from "svelte"
-  import {toNostrURI, asEvent, Tags, createEvent} from "@welshman/util"
+  import type {TrustedEvent, SignedEvent} from "@welshman/util"
+  import {
+    toNostrURI,
+    asHashedEvent,
+    asSignedEvent,
+    isSignedEvent,
+    Tags,
+    createEvent,
+  } from "@welshman/util"
   import {tweened} from "svelte/motion"
   import {identity, filter, sum, uniqBy, prop, pluck} from "ramda"
   import {fly} from "src/util/transition"
@@ -23,7 +31,6 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import {router} from "src/app/util/router"
-  import type {Event} from "src/engine"
   import {
     env,
     mute,
@@ -48,7 +55,7 @@
     getClientTags,
   } from "src/engine"
 
-  export let note: Event
+  export let note: TrustedEvent
   export let replyCtrl
   export let showMuted
   export let addToContext
@@ -93,7 +100,7 @@
   const muteNote = () => mute("e", note.id)
 
   const react = async content => {
-    if (!note.wrap) {
+    if (isSignedEvent(note)) {
       publish({event: note, relays: forcePlatformRelays(hints.PublishEvent(note).getUrls())})
     }
 
@@ -116,7 +123,7 @@
   }
 
   const crossPost = async (address = null) => {
-    const content = JSON.stringify(asEvent(note))
+    const content = JSON.stringify(note as SignedEvent)
     const tags = [...hints.tagEvent(note).unwrap(), mention(note.pubkey), ...getClientTags()]
 
     let template
@@ -150,7 +157,11 @@
   }
 
   const broadcast = () => {
-    publish({event: note, relays: forcePlatformRelays(hints.WriteRelays().getUrls())})
+    publish({
+      event: asSignedEvent(note as SignedEvent),
+      relays: forcePlatformRelays(hints.WriteRelays().getUrls()),
+    })
+
     showInfo("Note has been re-published!")
   }
 
@@ -191,7 +202,7 @@
     if ($canSign) {
       actions.push({label: "Quote", icon: "quote-left", onClick: quote})
 
-      if (!note.wrap && !$env.FORCE_GROUP && ($groupOptions.length > 0 || address)) {
+      if (isSignedEvent(note) && !$env.FORCE_GROUP && ($groupOptions.length > 0 || address)) {
         actions.push({label: "Cross-post", icon: "shuffle", onClick: () => setView("cross-post")})
       }
 
@@ -205,7 +216,7 @@
       }
     }
 
-    if (!$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0 && !note.wrap) {
+    if (!$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0 && isSignedEvent(note)) {
       actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
     }
 
@@ -318,7 +329,12 @@
         {/if}
         {#if $kindHandlers.length > 0}
           <div class="flex justify-between">
-            <p>This note can also be viewed using {quantify($kindHandlers.length, 'other nostr app')}.</p>
+            <p>
+              This note can also be viewed using {quantify(
+                $kindHandlers.length,
+                "other nostr app",
+              )}.
+            </p>
             {#if handlersShown}
               <Anchor underline on:click={hideHandlers}>Hide apps</Anchor>
             {:else}
@@ -339,7 +355,7 @@
       <h1 class="staatliches text-2xl">Details</h1>
       <CopyValue label="Link" value={toNostrURI(nevent)} />
       <CopyValue label="Event ID" encode={nip19.noteEncode} value={note.id} />
-      <CopyValue label="Event JSON" value={JSON.stringify(asEvent(note))} />
+      <CopyValue label="Event JSON" value={JSON.stringify(asHashedEvent(note))} />
     {:else if view === "cross-post"}
       <div class="mb-4 flex items-center justify-center">
         <Heading>Cross-post</Heading>

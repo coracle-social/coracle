@@ -1,9 +1,9 @@
 import {max, pluck} from "ramda"
 import {batch} from "hurdak"
 import {Tags} from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import {updateIn} from "src/util/misc"
 import {projections} from "src/engine/network"
-import type {Event} from "src/engine/events/model"
 import {sessions} from "src/engine/session/state"
 import {updateSession} from "src/engine/session/commands"
 import {getNip04, getNip44, getNip59} from "src/engine/session/utils"
@@ -13,7 +13,7 @@ import {_events, deletes, seen} from "./state"
 const getSession = pubkey => sessions.get()[pubkey]
 
 projections.addGlobalHandler(
-  batch(500, (chunk: Event[]) => {
+  batch(500, (chunk: TrustedEvent[]) => {
     const $sessions = sessions.get()
     const userEvents = chunk.filter(e => $sessions[e.pubkey] && !e.wrap)
 
@@ -25,7 +25,7 @@ projections.addGlobalHandler(
 
 projections.addHandler(
   5,
-  batch(500, (chunk: Event[]) => {
+  batch(500, (chunk: TrustedEvent[]) => {
     const ids = Tags.wrap(chunk.flatMap(e => e.tags))
       .filter(tag => ["a", "e"].includes(tag.key()))
       .values()
@@ -52,7 +52,7 @@ projections.addHandler(
 
 projections.addHandler(
   15,
-  batch(500, (chunk: Event[]) => {
+  batch(500, (chunk: TrustedEvent[]) => {
     for (const pubkey of new Set(pluck("pubkey", chunk))) {
       updateSession(
         pubkey,

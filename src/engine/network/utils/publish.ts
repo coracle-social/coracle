@@ -1,7 +1,7 @@
 import {getIdAndAddress, Tags} from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import {uniqBy} from "ramda"
 import {parseContent} from "src/util/notes"
-import type {Event} from "src/engine/events/model"
 import {hints} from "src/engine/relays/utils"
 import {env, pubkey} from "src/engine/session/state"
 import {getSetting} from "src/engine/session/utils"
@@ -34,7 +34,7 @@ export const tagsFromContent = (content: string) => {
   return tags
 }
 
-export const getReplyTags = (parent: Event, inherit = false) => {
+export const getReplyTags = (parent: TrustedEvent, inherit = false) => {
   const tags = Tags.fromEvent(parent)
   const replyTagValues = getIdAndAddress(parent)
   const userPubkey = pubkey.get()

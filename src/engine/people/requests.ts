@@ -2,13 +2,13 @@ import {debounce} from "throttle-debounce"
 import {always} from "ramda"
 import {noop, sleep} from "hurdak"
 import {writable} from "@welshman/lib"
+import type {TrustedEvent} from "@welshman/util"
 import {load} from "src/engine/network/utils"
 import {searchableRelays} from "src/engine/relays/derived"
-import type {Event} from "src/engine/events/model"
 
 type PeopleLoaderOpts = {
   shouldLoad?: (term: string) => boolean
-  onEvent?: (e: Event) => void
+  onEvent?: (e: TrustedEvent) => void
 }
 
 export const createPeopleLoader = ({

@@ -1,4 +1,4 @@
-import type {Event} from "src/engine/events/model"
+import type {TrustedEvent} from "@welshman/util"
 
 export enum GroupAccess {
   None = null,
@@ -25,7 +25,7 @@ export type Group = {
   relays?: string[]
   relays_updated_at?: number
   members?: string[]
-  recent_member_updates?: Event[]
+  recent_member_updates?: TrustedEvent[]
   listing_is_public?: boolean
   listing_is_public_updated?: boolean
 }
@@ -38,12 +38,12 @@ export type GroupKey = {
   hints?: string[]
 }
 
-export type GroupRequest = Event & {
+export type GroupRequest = TrustedEvent & {
   group: string
   resolved: boolean
 }
 
-export type GroupAlert = Event & {
+export type GroupAlert = TrustedEvent & {
   group: string
   type: "exit" | "invite"
 }

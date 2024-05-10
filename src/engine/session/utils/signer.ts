@@ -1,7 +1,7 @@
 import {switcherFn} from "hurdak"
 import type {EventTemplate, UnsignedEvent} from "nostr-tools"
 import {getEventHash} from "nostr-tools"
-import type {Rumor} from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import {getPublicKey, getSignature} from "src/util/nostr"
 import type {Session} from "src/engine/session/model"
 import type {Connect} from "./connect"
@@ -21,9 +21,9 @@ export class Signer {
     // Copy the event since we're mutating it
     event = {...event}
     ;(event as UnsignedEvent).pubkey = getPublicKey(sk)
-    ;(event as Rumor).id = getEventHash(event as UnsignedEvent)
+    ;(event as TrustedEvent).id = getEventHash(event as UnsignedEvent)
 
-    return event as Rumor
+    return event as TrustedEvent
   }
 
   prepAsUser(event: EventTemplate) {
@@ -32,9 +32,9 @@ export class Signer {
     // Copy the event since we're mutating it
     event = {...event}
     ;(event as UnsignedEvent).pubkey = pubkey
-    ;(event as Rumor).id = getEventHash(event as UnsignedEvent)
+    ;(event as TrustedEvent).id = getEventHash(event as UnsignedEvent)
 
-    return event as Rumor
+    return event as TrustedEvent
   }
 
   signWithKey(template: EventTemplate, sk: string) {

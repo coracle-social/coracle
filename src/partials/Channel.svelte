@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {sleep} from "hurdak"
+  import type {TrustedEvent} from "@welshman/util"
   import {prop, max, reverse, pluck, sortBy, last} from "ramda"
   import {fly} from "src/util/transition"
   import {createScroller} from "src/util/misc"
@@ -10,11 +11,10 @@
   import Toggle from "src/partials/Toggle.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import type {Event} from "src/engine"
   import {nip44} from "src/engine"
 
   export let pubkeys
-  export let messages: Event[]
+  export let messages: TrustedEvent[]
   export let sendMessage
   export let initialMessage = ""
 
@@ -101,7 +101,7 @@
 
     setTimeout(stickToBottom, 100)
 
-    groupedMessages = result.slice(0, limit) as (Event & {showProfile: boolean})[]
+    groupedMessages = result.slice(0, limit) as (TrustedEvent & {showProfile: boolean})[]
   }
 </script>
 

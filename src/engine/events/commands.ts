@@ -1,16 +1,16 @@
 import {pluck} from "ramda"
 import {chunk, seconds} from "hurdak"
 import {now} from "@welshman/lib"
+import type {TrustedEvent} from "@welshman/util"
 import {createEvent} from "@welshman/util"
 import {generatePrivateKey} from "src/util/nostr"
 import {pubkey} from "src/engine/session/state"
 import {signer, nip44, nip59} from "src/engine/session/derived"
 import {hints} from "src/engine/relays/utils"
 import {publish} from "src/engine/network/utils"
-import type {Event} from "./model"
 import {seen} from "./state"
 
-export const markAsSeen = async (events: Event[]) => {
+export const markAsSeen = async (events: TrustedEvent[]) => {
   if (!signer.get().isEnabled() || events.length === 0) {
     return
   }

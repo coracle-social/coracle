@@ -1,11 +1,10 @@
 import {now} from "@welshman/lib"
-import type {Filter} from "@welshman/util"
+import type {Filter, TrustedEvent} from "@welshman/util"
 import {Tags, getIdFilters} from "@welshman/util"
 import {seconds, batch, doPipe} from "hurdak"
 import {pluck, uniq, max, slice, filter, without, sortBy} from "ramda"
 import {updateIn} from "src/util/misc"
 import {noteKinds, giftWrapKinds, repostKinds, reactionKinds} from "src/util/nostr"
-import type {Event} from "src/engine/events/model"
 import {env} from "src/engine/session/state"
 import {session} from "src/engine/session/derived"
 import {updateSession} from "src/engine/session/commands"
@@ -15,7 +14,7 @@ import {getUserCommunities} from "src/engine/groups/utils"
 import {hints} from "src/engine/relays/utils"
 import {loadPubkeys, load, subscribe, subscribePersistent} from "src/engine/network/utils"
 
-const onNotificationEvent = batch(300, (chunk: Event[]) => {
+const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
   const kinds = getNotificationKinds()
   const $isEventMuted = isEventMuted.get()
   const events = chunk.filter(e => kinds.includes(e.kind) && !$isEventMuted(e))
@@ -65,8 +64,8 @@ export const getNotificationKinds = () =>
 
 const getEventIds = (pubkey: string) =>
   doPipe(events.get(), [
-    filter((e: Event) => noteKinds.includes(e.kind) && e.pubkey === pubkey),
-    sortBy((e: Event) => -e.created_at),
+    filter((e: TrustedEvent) => noteKinds.includes(e.kind) && e.pubkey === pubkey),
+    sortBy((e: TrustedEvent) => -e.created_at),
     slice(0, 256),
     pluck("id"),
   ])

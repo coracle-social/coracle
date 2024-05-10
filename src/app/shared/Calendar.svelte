@@ -2,9 +2,9 @@
   import {fromPairs} from "ramda"
   import {batch} from "hurdak"
   import {onMount, onDestroy} from "svelte"
-  import type {Event} from "nostr-tools"
   import {writable} from "@welshman/lib"
   import {getAddress, getReplyFilters} from "@welshman/util"
+  import type {TrustedEvent} from "@welshman/util"
   import Calendar from "@event-calendar/core"
   import DayGrid from "@event-calendar/day-grid"
   import Interaction from "@event-calendar/interaction"
@@ -48,7 +48,7 @@
 
   const events = writable(new Map())
 
-  const onEvent = batch(300, (chunk: Event[]) => {
+  const onEvent = batch(300, (chunk: TrustedEvent[]) => {
     events.update($events => {
       for (const e of chunk) {
         const addr = getAddress(e)

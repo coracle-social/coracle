@@ -2,8 +2,8 @@ import {uniqBy, identity, prop, sortBy} from "ramda"
 import {batch} from "hurdak"
 import {writable} from "@welshman/lib"
 import {Tags, getIdOrAddress, getIdFilters, getIdAndAddress} from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import type {DisplayEvent} from "src/engine/notes/model"
-import type {Event} from "src/engine/events/model"
 import {withFallbacks} from "src/engine/relays/utils"
 import {load} from "./executor"
 
@@ -20,7 +20,7 @@ export class ThreadLoader {
   root = writable<DisplayEvent>(null)
 
   constructor(
-    readonly note: Event,
+    readonly note: TrustedEvent,
     readonly relays: string[],
   ) {
     this.loadNotes(getAncestorIds(note))
@@ -42,7 +42,7 @@ export class ThreadLoader {
       load({
         relays: withFallbacks(this.relays),
         filters: getIdFilters(filteredIds),
-        onEvent: batch(300, (events: Event[]) => {
+        onEvent: batch(300, (events: TrustedEvent[]) => {
           this.addToThread(events)
           this.loadNotes(events.flatMap(getAncestorIds))
         }),

@@ -1,6 +1,7 @@
 <script lang="ts">
   import {find} from "ramda"
   import {onMount} from "svelte"
+  import type {TrustedEvent} from "@welshman/util"
   import {createScroller, formatTimestampAsDate} from "src/util/misc"
   import {noteKinds, reactionKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
@@ -14,7 +15,6 @@
   import NotificationMention from "src/app/views/NotificationMention.svelte"
   import NotificationReplies from "src/app/views/NotificationReplies.svelte"
   import {router} from "src/app/util/router"
-  import type {Event} from "src/engine"
   import {
     session,
     settings,
@@ -67,10 +67,10 @@
     tabNotifications =
       activeTab === allTabs[0]
         ? groupedNotifications.filter(
-            n => !n.event || find((e: Event) => noteKinds.includes(e.kind), n.interactions),
+            n => !n.event || find((e: TrustedEvent) => noteKinds.includes(e.kind), n.interactions),
           )
         : groupedNotifications.filter(n =>
-            find((e: Event) => reactionKinds.includes(e.kind), n.interactions),
+            find((e: TrustedEvent) => reactionKinds.includes(e.kind), n.interactions),
           )
 
     const unreadMainKinds = getTabKinds(allTabs[0])

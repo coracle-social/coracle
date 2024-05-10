@@ -1,5 +1,5 @@
-import {fromPairs, randomId} from '@welshman/lib'
-import type {Rumor} from '@welshman/util'
+import {fromPairs, randomId} from "@welshman/lib"
+import type {TrustedEvent} from "@welshman/util"
 import {
   FOLLOWS,
   NAMED_PEOPLE,
@@ -23,8 +23,8 @@ import {
   TOPICS,
   getAddress,
   Tags,
-} from '@welshman/util'
-import {SearchHelper} from 'src/util/misc'
+} from "@welshman/util"
+import {SearchHelper} from "src/util/misc"
 
 export const LIST_KINDS = [
   FOLLOWS,
@@ -49,11 +49,7 @@ export const LIST_KINDS = [
   TOPICS,
 ]
 
-export const EDITABLE_LIST_KINDS = [
-  NAMED_PEOPLE,
-  NAMED_RELAYS,
-  NAMED_TOPICS,
-]
+export const EDITABLE_LIST_KINDS = [NAMED_PEOPLE, NAMED_RELAYS, NAMED_TOPICS]
 
 export type List = {
   kind: number
@@ -61,7 +57,7 @@ export type List = {
   description: string
   identifier: string
   tags: string[][]
-  event?: Rumor
+  event?: TrustedEvent
 }
 
 export const makeList = (list: Partial<List> = {}): List => ({
@@ -73,7 +69,7 @@ export const makeList = (list: Partial<List> = {}): List => ({
   ...list,
 })
 
-export const readList = (event: Rumor) => {
+export const readList = (event: TrustedEvent) => {
   const {d: identifier, title = "", description = ""} = fromPairs(event.tags)
 
   return {kind: event.kind, title, description, identifier, tags: event.tags, event} as List
@@ -96,5 +92,6 @@ export const displayList = (list?: List) => list?.title || "[no name]"
 export class ListSearch extends SearchHelper<List, string> {
   config = {keys: ["title", "description"]}
   getValue = (option: List) => getAddress(option.event)
-  display = (address: string) => displayList(this.options.find(list => this.getValue(list) === address))
+  display = (address: string) =>
+    displayList(this.options.find(list => this.getValue(list) === address))
 }

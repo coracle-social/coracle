@@ -1,9 +1,9 @@
 import {now} from "@welshman/lib"
 import type {Publish} from "@welshman/net"
+import type {TrustedEvent} from "@welshman/util"
 import {seconds} from "hurdak"
 import {env} from "src/engine/session/state"
 import {hints} from "src/engine/relays/utils"
-import type {Event} from "src/engine/events/model"
 import {subscribe, createAndPublish} from "./executor"
 
 export type DVMRequestOpts = {
@@ -14,7 +14,7 @@ export type DVMRequestOpts = {
   relays?: string[]
   timeout?: number
   onPublish?: (pub: Publish) => void
-  onProgress?: (e: Event) => void
+  onProgress?: (e: TrustedEvent) => void
   sk?: string
 }
 
@@ -28,7 +28,7 @@ export const dvmRequest = async ({
   onPublish = null,
   onProgress = null,
   sk = null,
-}: DVMRequestOpts): Promise<Event> => {
+}: DVMRequestOpts): Promise<TrustedEvent> => {
   if (relays.length === 0) {
     relays = hints.merge([hints.WriteRelays(), hints.fromRelays(env.get().DVM_RELAYS)]).getUrls()
   }
@@ -62,7 +62,7 @@ export const dvmRequest = async ({
           "#e": [pub.request.event.id],
         },
       ],
-      onEvent: (e: Event) => {
+      onEvent: (e: TrustedEvent) => {
         if (e.kind === 7000) {
           onProgress?.(e)
         } else {

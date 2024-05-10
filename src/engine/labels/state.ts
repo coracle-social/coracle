@@ -1,4 +1,4 @@
 import {collection} from "@welshman/lib"
-import type {Event} from "src/engine/events/model"
+import type {TrustedEvent} from "@welshman/util"
 
-export const _labels = collection<Event>("id")
+export const _labels = collection<TrustedEvent>("id")

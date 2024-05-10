@@ -1,11 +1,11 @@
-import type {Event} from "src/engine/events/model"
+import type {TrustedEvent} from "@welshman/util"
 
 export type Handler = {
   address: string
-  event: Event
+  event: TrustedEvent
 }
 
 export type HandlerRec = {
   address: string
-  event: Event
+  event: TrustedEvent
 }

@@ -1,6 +1,6 @@
 import {fromPairs, randomId} from "@welshman/lib"
 import {FEED, Tags, getAddress} from "@welshman/util"
-import type {Rumor} from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import {makeIntersectionFeed, hasSubFeeds} from "@welshman/feeds"
 import type {Feed as IFeed} from "@welshman/feeds"
 import {SearchHelper} from "src/util/misc"
@@ -12,7 +12,7 @@ export type Feed = {
   identifier: string
   description: string
   definition: IFeed
-  event?: Rumor
+  event?: TrustedEvent
   list?: List
 }
 
@@ -27,7 +27,7 @@ export const makeFeed = (feed: Partial<Feed> = {}): Feed => ({
   ...feed,
 })
 
-export const readFeed = (event: Rumor) => {
+export const readFeed = (event: TrustedEvent) => {
   const {d: identifier, title = "", description = "", feed = ""} = fromPairs(event.tags)
   const definition = tryJson(() => JSON.parse(feed)) || makeIntersectionFeed()
 

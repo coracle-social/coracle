@@ -1,4 +1,4 @@
-import type {Event} from "src/engine/events/model"
+import type {SignedEvent} from "@welshman/util"
 import type {GroupAccess} from "src/engine/groups/model"
 import type {NostrConnectHandler} from "src/engine/network/model"
 
@@ -17,11 +17,11 @@ export type Session = {
   connectKey?: string
   connectToken?: string
   connectHandler?: NostrConnectHandler
-  kind0?: Event
+  kind0?: SignedEvent
   kind0_updated?: string
-  kind3?: Event
+  kind3?: SignedEvent
   kind3_updated?: string
-  kind10002?: Event
+  kind10002?: SignedEvent
   kind10002_updated?: string
   settings?: Record<string, any>
   settings_updated_at?: number
