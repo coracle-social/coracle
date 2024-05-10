@@ -1,10 +1,12 @@
 import Bugsnag from "@bugsnag/js"
 import {uniq} from "ramda"
 import {writable} from "@welshman/lib"
+import {makeScopeFeed, Scope} from "@welshman/feeds"
 import {ConnectionStatus, NetworkContext} from "@welshman/net"
 import {userKinds} from "src/util/nostr"
 import {router} from "src/app/util/router"
 import type {Feed} from "src/domain"
+import {makeFeed} from "src/domain"
 import {
   env,
   relays,
@@ -27,7 +29,11 @@ export const menuIsOpen = writable(false)
 
 export const searchTerm = writable("")
 
-export const feed = writable<Feed>(null)
+export const feed = writable<Feed>(
+  makeFeed({
+    definition: makeScopeFeed(Scope.Follows),
+  }),
+)
 
 // Redact long strings, especially hex and bech32 keys which are 64 and 63
 // characters long, respectively. Put the threshold a little lower in case

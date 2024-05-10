@@ -176,6 +176,10 @@ body,
   text-decoration: underline;
 }
 
+
+.long-form-content em {
+  font-family: sans-serif;
+}
 .long-form-content code {
   background-color: var(--neutral-800);
   line-height: 1.5em;
@@ -218,4 +222,10 @@ body,
 .ec-day,
 .ec-button {
   cursor: pointer;
+}
+
+/* Switches */
+
+.react-switch-bg {
+  border: 1px solid var(--neutral-600);
 }

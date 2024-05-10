@@ -1,8 +1,8 @@
 import {fuzzy} from "src/util/misc"
 import type {List} from "./model"
-import {_lists} from './state'
+import {_lists} from "./state"
 
-export const displayList = (list: List) => list?.title || ""
+export const displayList = (list: List) => list?.title || "[no name]"
 
 export const displayListByAddress = (address: string) => displayList(_lists.key(address).get())
 

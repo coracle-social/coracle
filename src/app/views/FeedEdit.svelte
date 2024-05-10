@@ -12,19 +12,11 @@
     ? listAsFeed(lists.key(address).get())
     : readFeed(repository.getEvent(address))
 
-  const exit = () => router.pop()
+  const exit = () => router.clearModals()
 </script>
 
 {#if feed}
-  <FeedForm {feed} onSave={exit}>
-    <div slot="controls" let:remove let:save class="flex justify-between">
-      <Anchor button on:click={exit}>Cancel</Anchor>
-      <div class="flex gap-2">
-        <Anchor button on:click={remove}>Delete</Anchor>
-        <Anchor button accent on:click={save}>Save</Anchor>
-      </div>
-    </div>
-  </FeedForm>
+  <FeedForm showDelete showSave {feed} {exit} />
 {:else}
   <p class="text-center">Sorry, we weren't able to find that feed.</p>
 {/if}

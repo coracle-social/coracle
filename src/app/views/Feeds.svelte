@@ -3,15 +3,9 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/util/router"
-  import {feed as feedStore} from "src/app/state"
+  import {feed} from "src/app/state"
   import {makeFeed} from "src/domain"
   import {session} from "src/engine"
-
-  feedStore.set(
-    makeFeed({
-      definition: makeScopeFeed(Scope.Follows),
-    }),
-  )
 
   const showLogin = () => router.at("login").open()
 
@@ -27,4 +21,4 @@
   </div>
 {/if}
 
-<Feed skipCache showControls showGroup bind:feed={$feedStore} />
+<Feed skipCache showControls showGroup bind:feed={$feed} />

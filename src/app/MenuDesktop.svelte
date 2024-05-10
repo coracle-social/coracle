@@ -14,7 +14,7 @@
   import MenuDesktopSecondary from "src/app/MenuDesktopSecondary.svelte"
   import {feed, slowConnections} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {readFeed, displayFeed, normalizeFeedDefinition} from "src/domain"
+  import {readFeed, listAsFeed, makeFeed, displayFeed, normalizeFeedDefinition} from "src/domain"
   import {
     env,
     user,
@@ -31,8 +31,8 @@
   } from "src/engine"
 
   const {page} = router
-  const followsFeed = normalizeFeedDefinition(makeScopeFeed(Scope.Follows))
-  const networkFeed = normalizeFeedDefinition(makeScopeFeed(Scope.Network))
+  const followsFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Follows))})
+  const networkFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Network))})
 
   const closeSubMenu = () => {
     subMenu = null
@@ -47,12 +47,15 @@
     )
   }
 
-  const loadFeed = feed => router.at("notes").cx({feed}).push({key: randomId()})
+  const loadFeed = newFeed => {
+    feed.set(newFeed)
+    router.at("notes").push({key: randomId()})
+  }
 
   let subMenu
 
   $: isFeedPage = Boolean($page.path.match(/^\/(notes)?$/))
-  $: normalizedFeed = $feed ? normalizeFeedDefinition($feed) : null
+  $: normalizedFeedDefinition = $feed ? normalizeFeedDefinition($feed.definition) : null
 </script>
 
 {#if isFeedPage}
@@ -61,13 +64,13 @@
     class="fixed bottom-0 left-72 top-0 w-60 bg-tinted-700 pt-24 transition-colors">
     <MenuDesktopItem
       small
-      isActive={equals(followsFeed, normalizedFeed)}
+      isActive={equals(followsFeed.definition, normalizedFeedDefinition)}
       on:click={() => loadFeed(followsFeed)}>
       Follows
     </MenuDesktopItem>
     <MenuDesktopItem
       small
-      isActive={equals(networkFeed, normalizedFeed)}
+      isActive={equals(networkFeed.definition, normalizedFeedDefinition)}
       on:click={() => loadFeed(networkFeed)}>
       Network
     </MenuDesktopItem>
@@ -75,17 +78,17 @@
       {@const thisFeed = readFeed(event)}
       <MenuDesktopItem
         small
-        isActive={equals(thisFeed.definition, normalizedFeed)}
-        on:click={() => loadFeed(thisFeed.definition)}>
+        isActive={equals(thisFeed.definition, normalizedFeedDefinition)}
+        on:click={() => loadFeed(thisFeed)}>
         {displayFeed(thisFeed)}
       </MenuDesktopItem>
     {/each}
     {#each $userLists as list}
-      {@const definition = feedFromTags(Tags.fromEvent(list))}
+      {@const listFeed = listAsFeed(list)}
       <MenuDesktopItem
         small
-        isActive={equals(definition, normalizedFeed)}
-        on:click={() => loadFeed(definition)}>
+        isActive={equals(listFeed.definition, normalizedFeedDefinition)}
+        on:click={() => loadFeed(listFeed)}>
         {displayList(list)}
       </MenuDesktopItem>
     {/each}

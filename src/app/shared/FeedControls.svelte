@@ -1,6 +1,13 @@
 <script lang="ts">
   import {debounce} from "throttle-debounce"
-  import {isScopeFeed, isSearchFeed, makeSearchFeed, Scope, getFeedArgs} from "@welshman/feeds"
+  import {
+    isScopeFeed,
+    isSearchFeed,
+    makeSearchFeed,
+    makeScopeFeed,
+    Scope,
+    getFeedArgs,
+  } from "@welshman/feeds"
   import Modal from "src/partials/Modal.svelte"
   import Input from "src/partials/Input.svelte"
   import Select from "src/partials/Select.svelte"
@@ -10,13 +17,16 @@
   import MenuItem from "src/partials/MenuItem.svelte"
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
-  import {normalizeFeedDefinition, readFeed, listAsFeed, displayFeed} from "src/domain"
+  import {normalizeFeedDefinition, readFeed, makeFeed, listAsFeed, displayFeed} from "src/domain"
   import {displayList as displayList2, publishDeletion, userLists, userFeeds} from "src/engine"
 
   export let feed
   export let updateFeed
 
   feed.definition = normalizeFeedDefinition(feed.definition)
+
+  const followsFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Follows))})
+  const networkFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Network))})
 
   const openListMenu = () => {
     listMenuIsOpen = true
@@ -27,20 +37,23 @@
   }
 
   const openForm = () => {
+    savePoint = {...feed}
     formIsOpen = true
   }
 
   const closeForm = () => {
+    feed = savePoint
     formIsOpen = false
   }
 
   const getSearch = definition => (getFeedArgs(definition)?.find(isSearchFeed)?.[1] as string) || ""
 
   const setFeedDefinition = definition => {
-    updateFeed(definition)
+    feed.definition = definition
     search = getSearch(definition)
+    formIsOpen = false
     closeListMenu()
-    closeForm()
+    updateFeed(feed)
   }
 
   const setSubFeed = subFeed => {
@@ -55,8 +68,8 @@
     setFeedDefinition(feed.definition.filter(f => f !== subFeed))
   }
 
-  const setFeed = event => {
-    feed = readFeed(event)
+  const setFeed = newFeed => {
+    feed = newFeed
     setFeedDefinition(feed.definition)
   }
 
@@ -65,12 +78,24 @@
     setFeedDefinition(feed.definition)
   }
 
-  const saveFeed = event => {
-    if (feed.list) {
-      publishDeletion([feed.list])
+  const exitForm = event => {
+    if (event) {
+      if (feed.list) {
+        publishDeletion([feed.list])
+      }
+
+      setFeed(readFeed(event))
     }
 
-    setFeed(event)
+    closeForm()
+  }
+
+  const onScopeChange = scope => {
+    if (scope) {
+      setSubFeed(makeScopeFeed(scope))
+    } else {
+      removeSubFeed(subFeeds.find(isScopeFeed))
+    }
   }
 
   const onSearchBlur = debounce(500, () => {
@@ -83,6 +108,7 @@
     }
   })
 
+  let savePoint
   let formIsOpen = false
   let listMenuIsOpen = false
   let search = getSearch(feed.definition)
@@ -94,6 +120,7 @@
   <Select
     dark
     value={subFeeds.find(isScopeFeed)?.[1] || null}
+    onChange={onScopeChange}
     class="hidden bg-tinted-700 sm:block">
     <option value={Scope.Follows}>Follows</option>
     <option value={Scope.Network}>Network</option>
@@ -132,8 +159,10 @@
                 </Anchor>
               </MenuItem>
               <div class="max-h-96 overflow-auto">
+                <MenuItem on:click={() => setFeed(followsFeed)}>Follows</MenuItem>
+                <MenuItem on:click={() => setFeed(networkFeed)}>Network</MenuItem>
                 {#each $userFeeds as event}
-                  <MenuItem on:click={() => setFeed(event)}>
+                  <MenuItem on:click={() => setFeed(readFeed(event))}>
                     {displayFeed(readFeed(event))}
                   </MenuItem>
                 {/each}
@@ -151,14 +180,6 @@
 
 {#if formIsOpen}
   <Modal onEscape={closeForm}>
-    <FeedForm {feed} onSave={saveFeed}>
-      <div slot="controls" class="flex justify-between gap-2" let:save>
-        <Anchor button on:click={closeForm}>Discard</Anchor>
-        <div class="flex gap-2">
-          <Anchor button on:click={save}>Save Feed</Anchor>
-          <Anchor button accent on:click={() => setFeedDefinition(feed.definition)}>Done</Anchor>
-        </div>
-      </div>
-    </FeedForm>
+    <FeedForm {feed} exit={exitForm} apply={() => setFeedDefinition(feed.definition)} />
   </Modal>
 {/if}

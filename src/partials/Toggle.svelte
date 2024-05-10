@@ -20,7 +20,7 @@
   checked={value}
   on:change={onChange}
   onColor={$themeColors.accent}
-  offColor={$themeColors["neutral-300"]}
+  offColor={$themeColors["tinted-800"]}
   handleDiameter={Math.round(20 * scale)}
   unCheckedIcon={false}
   boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"

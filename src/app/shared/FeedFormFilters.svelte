@@ -107,7 +107,7 @@
             No support for editing {toTitle(subFeed[0])} filters. Click "Advanced" to edit manually.
           {/if}
         </FlexColumn>
-        {#if isPeopleFeed(subFeed) || isRelayFeed(subFeed) || isTopicFeed(subFeed) || isMentionFeed(subFeed)}
+        {#if isAuthorFeed(subFeed) || isRelayFeed(subFeed) || isTopicFeed(subFeed) || isMentionFeed(subFeed)}
           <div class="flex items-center gap-8">
             <div class="flex items-center gap-2">
               <Toggle value={saveAsList.includes(idx)} on:change={() => toggleSaveAsList(idx)} />

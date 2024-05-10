@@ -7,12 +7,7 @@
 
   const feed = makeFeed({definition: makeIntersectionFeed(makeScopeFeed(Scope.Follows))})
 
-  const exit = () => router.pop()
+  const exit = () => router.clearModals()
 </script>
 
-<FeedForm {feed} onSave={exit}>
-  <div slot="controls" let:save class="flex justify-between">
-    <Anchor button on:click={exit}>Cancel</Anchor>
-    <Anchor button accent on:click={save}>Save</Anchor>
-  </div>
-</FeedForm>
+<FeedForm showSave {feed} {exit} />

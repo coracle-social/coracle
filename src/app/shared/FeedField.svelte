@@ -137,7 +137,6 @@
     FormType.Relays,
     FormType.Lists,
     FormType.DVMs,
-    FormType.Advanced,
   ]
 
   $: console.log(JSON.stringify(normalize(feed), null, 2))
@@ -148,7 +147,7 @@
     <FlexColumn small>
       <span class="staatliches text-lg">Choose a feed type</span>
       <SelectTiles
-        class="grid-cols-2 xs:grid-cols-3 2xl:grid-cols-6"
+        class="grid-cols-2 xs:grid-cols-3 md:grid-cols-5"
         options={formTypeOptions}
         onChange={onFormTypeChange}
         value={formType}>
@@ -172,14 +171,14 @@
           {:else if option === FormType.DVMs}
             <Icon icon="network" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
             <span class="staatliches text-2xl">DVMs</span>
-          {:else if option === FormType.Advanced}
-            <span class="flex h-12 w-12 items-center justify-center" class:text-accent={active}>
-              <i class="fa fa-2xl fa-cogs" />
-            </span>
-            <span class="staatliches text-2xl">Advanced</span>
           {/if}
         </div>
       </SelectTiles>
+      <div
+        class="flex cursor-pointer items-center justify-end gap-2 text-neutral-500"
+        on:click={() => onFormTypeChange(FormType.Advanced)}>
+        <span class="staatliches underline">Advanced Mode</span>
+      </div>
     </FlexColumn>
   </Card>
   <FlexColumn>
