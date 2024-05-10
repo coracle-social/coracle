@@ -1,4 +1,23 @@
-import {fromNostrURI, Kind, Tags} from "@welshman/util"
+import {
+  fromNostrURI,
+  APPLICATION,
+  AUDIO,
+  CLASSIFIED,
+  EVENT_TIME,
+  FEED,
+  GENERIC_REPOST,
+  HIGHLIGHT,
+  LONG_FORM,
+  NOTE,
+  PROFILE,
+  REACTION,
+  REMIX,
+  REPOST,
+  WRAP,
+  WRAP_NIP04,
+  ZAP_RESPONSE,
+  Tags,
+} from "@welshman/util"
 import {schnorr} from "@noble/curves/secp256k1"
 import {bytesToHex} from "@noble/hashes/utils"
 import {nip05, nip19, generateSecretKey, getEventHash, getPublicKey as getPk} from "nostr-tools"
@@ -6,6 +25,7 @@ import {identity} from "ramda"
 import {avg} from "hurdak"
 import {tryJson} from "src/util/misc"
 import type {Event} from "src/engine"
+import {LIST_KINDS} from "src/domain"
 
 export const fromHex = k => Uint8Array.from(Buffer.from(k, "hex"))
 export const getPublicKey = (sk: string) => getPk(fromHex(sk))
@@ -25,39 +45,14 @@ export const isKeyValid = (key: string) => {
   return true
 }
 
-export const noteKinds = [
-  Kind.Note,
-  Kind.LongFormArticle,
-  Kind.Highlight,
-  Kind.Remix,
-  Kind.Audio,
-  Kind.CalendarEventTime,
-  Kind.ClassifiedListing,
-]
+export const noteKinds = [NOTE, LONG_FORM, HIGHLIGHT, REMIX, AUDIO, EVENT_TIME, CLASSIFIED]
 
-export const replyKinds = [Kind.Note, Kind.Highlight, Kind.Remix, Kind.Audio]
-
-export const reactionKinds = [Kind.Reaction, Kind.ZapResponse]
-export const repostKinds = [Kind.Repost, Kind.GenericRepost]
-export const giftWrapKinds = [Kind.GiftWrap, 1060]
-
-export const personKinds = [
-  Kind.Profile,
-  Kind.Relay,
-  Kind.ListFollows,
-  Kind.UserListMutes,
-  Kind.UserListRelays,
-  Kind.UserListCommunities,
-]
-
-export const userKinds = [
-  ...personKinds,
-  Kind.Feed,
-  Kind.ListGeneric,
-  Kind.ListBookmarks,
-  Kind.Application,
-  Kind.UserListCommunities,
-]
+export const replyKinds = [NOTE, HIGHLIGHT, REMIX, AUDIO]
+export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
+export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
+export const giftWrapKinds = [WRAP, WRAP_NIP04] as number[]
+export const personKinds = [...LIST_KINDS, PROFILE] as number[]
+export const userKinds = [...personKinds, FEED, APPLICATION] as number[]
 
 export const LOCAL_RELAY_URL = "local://coracle.relay"
 

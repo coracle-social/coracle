@@ -4,7 +4,6 @@ import {NetworkContext} from "@welshman/net"
 import {prop, filter, identity, uniq, sortBy} from "ramda"
 import {LOCAL_RELAY_URL} from "src/util/nostr"
 import {Storage, LocalStorageAdapter, IndexedDBAdapter, sortByPubkeyWhitelist} from "./core"
-import {_lists} from "./lists"
 import {people} from "./people"
 import {relays} from "./relays"
 import {groups, groupSharedKeys, groupAdminKeys, groupRequests, groupAlerts} from "./groups"
@@ -22,7 +21,6 @@ export * from "./events"
 export * from "./groups"
 export * from "./handlers"
 export * from "./labels"
-export * from "./lists"
 export * from "./media"
 export * from "./network"
 export * from "./notes"
@@ -88,14 +86,6 @@ export const storage = new Storage(12, [
   ),
   new IndexedDBAdapter("labels", "id", _labels, 1000, sortBy(prop("created_at"))),
   new IndexedDBAdapter("topics", "name", topics, 1000, sortBy(prop("last_seen"))),
-  new IndexedDBAdapter(
-    "lists",
-    "naddr",
-    _lists,
-    1000,
-    sortByPubkeyWhitelist(prop("created_at")),
-    l => l.address,
-  ),
   new IndexedDBAdapter(
     "people",
     "pubkey",

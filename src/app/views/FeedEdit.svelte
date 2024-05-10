@@ -1,22 +1,22 @@
 <script lang="ts">
-  import {Kind} from "@welshman/util"
-  import Anchor from "src/partials/Anchor.svelte"
+  import {DEPRECATED_NAMED_GENERIC} from "@welshman/util"
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
-  import {readFeed, listAsFeed} from "src/domain"
-  import {repository, lists} from "src/engine"
+  import {readFeed, mapListToFeed, readList} from "src/domain"
+  import {repository} from "src/engine"
 
   export let address
 
-  const feed = address.startsWith(Kind.ListBookmarks)
-    ? listAsFeed(lists.key(address).get())
-    : readFeed(repository.getEvent(address))
+  const event = repository.getEvent(address)
 
   const exit = () => router.clearModals()
+
+  const getFeed = () =>
+    address.startsWith(DEPRECATED_NAMED_GENERIC) ? mapListToFeed(readList(event)) : readFeed(event)
 </script>
 
-{#if feed}
-  <FeedForm showDelete showSave {feed} {exit} />
+{#if event}
+  <FeedForm showDelete showSave feed={getFeed()} {exit} />
 {:else}
   <p class="text-center">Sorry, we weren't able to find that feed.</p>
 {/if}

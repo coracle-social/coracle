@@ -4,7 +4,7 @@ import {createEvent, decodeAddress} from "@welshman/util"
 import {randomId, seconds} from "hurdak"
 import {generatePrivateKey, getPublicKey} from "src/util/nostr"
 import {updateRecord} from "src/engine/core/commands"
-import {publish, getClientTags, sign, mention} from "src/engine/network/utils"
+import {publish, createAndPublish, getClientTags, sign, mention} from "src/engine/network/utils"
 import {pubkey, env} from "src/engine/session/state"
 import {nip44, nip59, session} from "src/engine/session/derived"
 import {updateSession} from "src/engine/session/commands"
@@ -384,3 +384,10 @@ export const publishGroupExitRequest = address => {
     )
   }
 }
+
+export const publishCommunitiesList = addresses =>
+  createAndPublish({
+    kind: 10004,
+    tags: [...addresses.map(a => ["a", a]), ...getClientTags()],
+    relays: forcePlatformRelays(hints.WriteRelays().getUrls()),
+  })

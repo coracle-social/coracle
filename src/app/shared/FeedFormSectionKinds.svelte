@@ -1,15 +1,14 @@
 <script lang="ts">
-  import {pluck} from "ramda"
   import {FeedType} from "@welshman/feeds"
-  import {fuzzy} from "src/util/misc"
   import SearchSelect from "src/partials/SearchSelect.svelte"
+  import {KindSearch} from "src/domain"
 
   export let feed
   export let onChange
 
   const onKindsChange = kinds => onChange([FeedType.Kind, ...kinds])
 
-  const kinds = [
+  const helper = new KindSearch([
     {label: "Note", kind: 1},
     {label: "Profile", kind: 0},
     {label: "Reaction", kind: 7},
@@ -33,20 +32,10 @@
     {label: "Group definition", kind: 35834},
     {label: "Image", kind: 1063},
     {label: "Relay selections", kind: 10002},
-  ]
-
-  const searchKindItems = fuzzy(kinds, {keys: ["kind", "label"]})
-
-  const searchKinds = term => pluck("kind", searchKindItems(term)).filter(k => !feed.includes(k))
-
-  const displayKind = kind => {
-    const option = kinds.find(k => k.kind === kind)
-
-    return option ? `${option.label} (kind ${kind})` : `Kind ${kind}`
-  }
+  ])
 </script>
 
 <span class="staatliches text-lg">What kind of content do you want to see?</span>
-<SearchSelect multiple search={searchKinds} value={feed.slice(1)} onChange={onKindsChange}>
-  <div slot="item" let:item>{displayKind(item)}</div>
+<SearchSelect multiple search={helper.search} value={feed.slice(1)} onChange={onKindsChange}>
+  <div slot="item" let:item>{helper.display(item)}</div>
 </SearchSelect>

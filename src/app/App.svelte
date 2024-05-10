@@ -151,16 +151,16 @@
     },
   })
 
-  router.register("/lists/create", import("src/app/views/ListEdit.svelte"))
+  router.register("/lists/create", import("src/app/views/ListCreate.svelte"))
+  router.register("/lists/:address", import("src/app/views/ListEdit.svelte"), {
+    serializers: {
+      address: asNaddr("address"),
+    },
+  })
   router.register("/lists/select", import("src/app/views/ListSelect.svelte"), {
     serializers: {
       type: asString("type"),
       value: asString("value"),
-    },
-  })
-  router.register("/lists/:address", import("src/app/views/ListEdit.svelte"), {
-    serializers: {
-      address: asNaddr("address"),
     },
   })
 

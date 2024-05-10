@@ -1,8 +1,7 @@
 <script lang="ts">
   import {equals} from "ramda"
   import {randomId} from "@welshman/lib"
-  import {Tags} from "@welshman/util"
-  import {makeScopeFeed, Scope, feedFromTags} from "@welshman/feeds"
+  import {makeScopeFeed, Scope} from "@welshman/feeds"
   import {fly} from "src/util/transition"
   import {toggleTheme, theme} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
@@ -12,9 +11,17 @@
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import MenuDesktopItem from "src/app/MenuDesktopItem.svelte"
   import MenuDesktopSecondary from "src/app/MenuDesktopSecondary.svelte"
-  import {feed, slowConnections} from "src/app/state"
+  import {globalFeed, slowConnections} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {readFeed, listAsFeed, makeFeed, displayFeed, normalizeFeedDefinition} from "src/domain"
+  import {
+    readFeed,
+    displayList,
+    readList,
+    mapListToFeed,
+    makeFeed,
+    displayFeed,
+    normalizeFeedDefinition,
+  } from "src/domain"
   import {
     env,
     user,
@@ -25,8 +32,7 @@
     sessions,
     displayPerson,
     displayPubkey,
-    displayList,
-    userLists,
+    userListFeeds,
     userFeeds,
   } from "src/engine"
 
@@ -48,14 +54,14 @@
   }
 
   const loadFeed = newFeed => {
-    feed.set(newFeed)
+    globalFeed.set(newFeed)
     router.at("notes").push({key: randomId()})
   }
 
   let subMenu
 
   $: isFeedPage = Boolean($page.path.match(/^\/(notes)?$/))
-  $: normalizedFeedDefinition = $feed ? normalizeFeedDefinition($feed.definition) : null
+  $: normalizedFeedDefinition = $globalFeed ? normalizeFeedDefinition($globalFeed.definition) : null
 </script>
 
 {#if isFeedPage}
@@ -83,8 +89,9 @@
         {displayFeed(thisFeed)}
       </MenuDesktopItem>
     {/each}
-    {#each $userLists as list}
-      {@const listFeed = listAsFeed(list)}
+    {#each $userListFeeds as event}
+      {@const list = readList(event)}
+      {@const listFeed = mapListToFeed(list)}
       <MenuDesktopItem
         small
         isActive={equals(listFeed.definition, normalizedFeedDefinition)}
@@ -92,10 +99,14 @@
         {displayList(list)}
       </MenuDesktopItem>
     {/each}
-    <div
-      class="staatliches absolute bottom-0 h-20 w-full px-6 py-4 text-tinted-500 hover:text-tinted-100">
-      <Anchor href="/feeds">Manage Feeds</Anchor>
-    </div>
+    <FlexColumn
+      small
+      class="staatliches absolute bottom-24 flex w-full flex-col text-neutral-400 dark:text-tinted-500 ">
+      <Anchor class="px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/feeds"
+        >Manage Feeds</Anchor>
+      <Anchor class="px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/lists"
+        >Manage Lists</Anchor>
+    </FlexColumn>
   </div>
 {/if}
 

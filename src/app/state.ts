@@ -29,7 +29,7 @@ export const menuIsOpen = writable(false)
 
 export const searchTerm = writable("")
 
-export const feed = writable<Feed>(
+export const globalFeed = writable<Feed>(
   makeFeed({
     definition: makeScopeFeed(Scope.Follows),
   }),

@@ -1,24 +1,24 @@
 <script lang="ts">
   import {debounce} from "throttle-debounce"
-  import {
-    isScopeFeed,
-    isSearchFeed,
-    makeSearchFeed,
-    makeScopeFeed,
-    Scope,
-    getFeedArgs,
-  } from "@welshman/feeds"
+  import {isSearchFeed, makeSearchFeed, makeScopeFeed, Scope, getFeedArgs} from "@welshman/feeds"
   import Modal from "src/partials/Modal.svelte"
   import Input from "src/partials/Input.svelte"
-  import Select from "src/partials/Select.svelte"
   import Popover2 from "src/partials/Popover2.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
-  import {normalizeFeedDefinition, readFeed, makeFeed, listAsFeed, displayFeed} from "src/domain"
-  import {displayList as displayList2, publishDeletion, userLists, userFeeds} from "src/engine"
+  import {
+    normalizeFeedDefinition,
+    displayList,
+    readList,
+    readFeed,
+    makeFeed,
+    mapListToFeed,
+    displayFeed,
+  } from "src/domain"
+  import {userListFeeds, publishDeletion, userFeeds} from "src/engine"
 
   export let feed
   export let updateFeed
@@ -73,11 +73,6 @@
     setFeedDefinition(feed.definition)
   }
 
-  const setList = list => {
-    feed = listAsFeed(list)
-    setFeedDefinition(feed.definition)
-  }
-
   const exitForm = event => {
     if (event) {
       if (feed.list) {
@@ -110,11 +105,7 @@
 
 <div class="flex flex-grow items-center justify-end gap-2">
   <div class="flex">
-    <Input
-      dark
-      class="hidden rounded-r-none xs:block"
-      on:input={onSearchBlur}
-      bind:value={search}>
+    <Input dark class="hidden rounded-r-none xs:block" on:input={onSearchBlur} bind:value={search}>
       <div slot="after" class="hidden text-white xs:block">
         <i class="fa fa-search" />
       </div>
@@ -144,12 +135,16 @@
               <MenuItem on:click={() => setFeed(followsFeed)}>Follows</MenuItem>
               <MenuItem on:click={() => setFeed(networkFeed)}>Network</MenuItem>
               {#each $userFeeds as event}
-                <MenuItem on:click={() => setFeed(readFeed(event))}>
-                  {displayFeed(readFeed(event))}
+                {@const feed = readFeed(event)}
+                <MenuItem on:click={() => setFeed(feed)}>
+                  {displayFeed(feed)}
                 </MenuItem>
               {/each}
-              {#each $userLists as list}
-                <MenuItem on:click={() => setList(list)}>{displayList2(list)}</MenuItem>
+              {#each $userListFeeds as event}
+                {@const list = readList(event)}
+                <MenuItem on:click={() => setFeed(mapListToFeed(list))}>
+                  {displayList(list)}
+                </MenuItem>
               {/each}
             </div>
           </Menu>

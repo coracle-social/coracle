@@ -1,7 +1,14 @@
 import {max, prop, omit, partition, equals} from "ramda"
 import {sleep, pickVals} from "hurdak"
-import {Worker} from "@welshman/lib"
-import {createEvent, Kind, Relay, Repository} from "@welshman/util"
+import {Worker, derived} from "@welshman/lib"
+import {
+  createEvent,
+  DEPRECATED_NAMED_GENERIC,
+  DELETE,
+  FEED,
+  Relay,
+  Repository,
+} from "@welshman/util"
 import {
   Plex,
   Relays,
@@ -21,6 +28,7 @@ import {signer, canSign} from "src/engine/session/derived"
 import type {Event} from "src/engine/events/model"
 import {publishes} from "src/engine/events/state"
 import {LocalTarget} from "./targets"
+import {LIST_KINDS, ListSearch, readFeed, readList} from "src/domain"
 
 export const repository = new Repository({throttle: 300})
 
@@ -33,16 +41,34 @@ export const projections = new Worker<Event>({
 })
 
 projections.addGlobalHandler(event => {
-  const kinds = [Kind.Delete, Kind.Feed, Kind.ListBookmarks]
+  const kinds = [DELETE, FEED, ...LIST_KINDS]
 
   if (kinds.includes(event.kind)) {
     repository.publish(event)
   }
 })
 
-export const feeds = repository.filter(() => [{kinds: [Kind.Feed]}])
+export const feeds = repository
+  .filter(() => [{kinds: [FEED]}])
+  .derived($feeds => $feeds.map(readFeed))
 
-export const userFeeds = repository.filter(() => [{kinds: [Kind.Feed], authors: [pubkey.get()]}])
+export const userFeeds = derived([feeds, pubkey], ([$feeds, $pubkey]) =>
+  $feeds.filter(feed => feed.event.pubkey === $pubkey),
+)
+
+export const lists2 = repository
+  .filter(() => [{kinds: LIST_KINDS}])
+  .derived($lists => $lists.map(readList))
+
+export const userLists = derived([lists2, pubkey], ([$lists, $pubkey]) =>
+  $lists.filter(list => list.event.pubkey === $pubkey),
+)
+
+export const userListFeeds = repository.filter(() => [
+  {kinds: [DEPRECATED_NAMED_GENERIC], authors: [pubkey.get()]},
+])
+
+export const listSearch = lists2.derived($lists => new ListSearch($lists))
 
 export const getExecutor = (urls: string[]) => {
   const muxUrl = getSetting("multiplextr_url")

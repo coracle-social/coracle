@@ -88,7 +88,7 @@ export const createScroller = (
   loadMore: () => Promise<void>,
   {delay = 1000, threshold = 2000, reverse = false, element}: ScrollerOpts = {},
 ) => {
-  element = element.closest('.modal-content') || element
+  element = element.closest(".modal-content") || element
 
   let done = false
   const check = async () => {
@@ -337,4 +337,19 @@ export const getStringWidth = (text: string) => {
   span.remove()
 
   return width
+}
+
+export class SearchHelper<T, V> {
+  config: any
+  fuzzy: (term: string) => T[]
+
+  constructor(readonly options: T[]) {
+    this.fuzzy = fuzzy(options, this.config)
+  }
+
+  getValue = (option: T): V => option as unknown as V
+
+  display = (value: V) => String(value)
+
+  search = (term: string) => this.fuzzy(term).map(this.getValue)
 }

@@ -5,7 +5,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FeedCard from "src/app/shared/FeedCard.svelte"
   import {router} from "src/app/util/router"
-  import {userFeeds, userLists} from "src/engine"
+  import {userFeeds, userListFeeds} from "src/engine"
+
 
   const createFeed = () => router.at("feeds/create").open()
 
@@ -30,17 +31,18 @@
     </FeedCard>
   </div>
 {/each}
-{#each $userLists as list}
+{#each $userListFeeds as event (getAddress(event))}
+  {@const address = getAddress(event)}
   <div in:fly={{y: 20}}>
-    <FeedCard address={list.address}>
+    <FeedCard {address}>
       <div slot="controls">
-        <Anchor on:click={() => editFeed(list.address)}>
+        <Anchor on:click={() => editFeed(address)}>
           <i class="fa fa-edit" /> Edit
         </Anchor>
       </div>
     </FeedCard>
   </div>
 {/each}
-{#if $userFeeds.length === 0 && $userLists.length === 0}
+{#if $userFeeds.length === 0 && $userListFeeds.length === 0}
   <p class="py-12 text-center">No feeds found.</p>
 {/if}

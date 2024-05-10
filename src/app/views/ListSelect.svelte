@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {append} from "ramda"
-  import {randomId} from "hurdak"
+  import {append, randomId} from "@welshman/lib"
+  import {getAddress} from "@welshman/util"
   import {updateIn} from "src/util/misc"
   import Subheading from "src/partials/Subheading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -9,22 +9,18 @@
   import ListSummary from "src/app/shared/ListSummary.svelte"
   import {router} from "src/app/util/router"
   import {pubkey, userLists} from "src/engine"
+  import {readList} from "src/domain"
 
   export let type
   export let value
 
   const label = type === "p" ? "person" : "topic"
 
-  const modifyList = updateIn("tags", append([type, value]))
+  const modifyList = updateIn("tags", tags => append([type, value], tags))
 
   const newList = () => ({address: `30003:${$pubkey}:${randomId()}`, tags: []})
 
-  const selectlist = list =>
-    router
-      .at("lists")
-      .of(list.address)
-      .cx({list: modifyList(list)})
-      .replaceModal()
+  const selectlist = list => router.at("lists").of(getAddress(list.event)).replaceModal()
 </script>
 
 <Content size="lg">
@@ -37,7 +33,8 @@
   <p>
     Select a list to modify. The selected {label} will be added to it as an additional filter.
   </p>
-  {#each $userLists as list (list.address)}
+  {#each $userLists as event (getAddress(event))}
+    {@const list = readList(event)}
     <BorderLeft on:click={() => selectlist(list)}>
       <strong>{list.title}</strong>
       <ListSummary {list} />

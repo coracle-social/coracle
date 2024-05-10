@@ -1,34 +1,26 @@
 import {fromPairs, randomId} from "@welshman/lib"
-import {Kind, Tags, decodeAddress} from "@welshman/util"
+import {FEED, Tags, getAddress} from "@welshman/util"
 import type {Rumor} from "@welshman/util"
-import {makeIntersectionFeed, feedFromTags, hasSubFeeds} from "@welshman/feeds"
+import {makeIntersectionFeed, hasSubFeeds} from "@welshman/feeds"
 import type {Feed as IFeed} from "@welshman/feeds"
+import {SearchHelper} from "src/util/misc"
 import {tryJson} from "src/util/misc"
+import type {List} from "./list"
 
 export type Feed = {
-  name: string
+  title: string
   identifier: string
   description: string
   definition: IFeed
   event?: Rumor
-  list?: string
+  list?: List
 }
 
 export const normalizeFeedDefinition = feed =>
   hasSubFeeds(feed) ? feed : makeIntersectionFeed(feed)
 
-// Compatibility with the old way we did custom feeds
-export const listAsFeed = list =>
-  makeFeed({
-    name: list.title,
-    list: list.address,
-    description: list.description,
-    definition: feedFromTags(Tags.fromEvent(list)),
-    identifier: decodeAddress(list.address).identifier,
-  })
-
 export const makeFeed = (feed: Partial<Feed> = {}): Feed => ({
-  name: "",
+  title: "",
   description: "",
   identifier: randomId(),
   definition: makeIntersectionFeed(),
@@ -36,33 +28,36 @@ export const makeFeed = (feed: Partial<Feed> = {}): Feed => ({
 })
 
 export const readFeed = (event: Rumor) => {
-  if (!event) {
-    return null
-  }
-
-  const {d: identifier, name = "", description = "", feed = ""} = fromPairs(event.tags)
+  const {d: identifier, title = "", description = "", feed = ""} = fromPairs(event.tags)
   const definition = tryJson(() => JSON.parse(feed)) || makeIntersectionFeed()
 
-  return {name, identifier, description, definition, event} as Feed
+  return {title, identifier, description, definition, event} as Feed
 }
 
-export const createFeed = ({identifier, definition, name, description}: Feed) => ({
-  kind: Kind.Feed,
+export const createFeed = ({identifier, definition, title, description}: Feed) => ({
+  kind: FEED,
   content: description,
   tags: [
     ["d", identifier],
-    ["name", name],
+    ["title", title],
     ["feed", JSON.stringify(definition)],
   ],
 })
 
 export const editFeed = (feed: Feed) => ({
-  kind: Kind.Feed,
+  kind: FEED,
   content: feed.description,
   tags: Tags.fromEvent(feed.event)
-    .setTag("name", feed.name)
+    .setTag("title", feed.title)
     .setTag("feed", JSON.stringify(feed.definition))
     .unwrap(),
 })
 
-export const displayFeed = (feed: Feed) => (feed.name ? feed.name : "[no name]")
+export const displayFeed = (feed?: Feed) => feed?.title || "[no name]"
+
+export class FeedSearch extends SearchHelper<Feed, string> {
+  config = {keys: ["title", "description"]}
+  getValue = (option: Feed) => getAddress(option.event)
+  display = (address: string) =>
+    displayFeed(this.options.find(feed => this.getValue(feed) === address))
+}

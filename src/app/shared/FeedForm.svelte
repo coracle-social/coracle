@@ -1,6 +1,6 @@
 <script lang="ts">
   import {quantify} from "hurdak"
-  import {Kind, getAddress} from "@welshman/util"
+  import {NAMED_PEOPLE, NAMED_RELAYS, NAMED_TOPICS, getAddress} from "@welshman/util"
   import {isAuthorFeed, isTagFeed, isRelayFeed, makeListFeed} from "@welshman/feeds"
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
@@ -80,21 +80,21 @@
     const relays = hints.WriteRelays().getUrls()
 
     // Create our lists
-    let addresses: string[] = []
+    const addresses: string[] = []
     await Promise.all(
       saveAsList.map(async i => {
         const subFeed = draft.definition[i]
 
         let template
         if (isAuthorFeed(subFeed)) {
-          template = {kind: Kind.ListPeople, tags: subFeed.slice(1).map(mention)}
+          template = {kind: NAMED_PEOPLE, tags: subFeed.slice(1).map(mention)}
         } else if (isMentionFeed(subFeed)) {
-          template = {kind: Kind.ListPeople, tags: subFeed.slice(2).map(mention)}
+          template = {kind: NAMED_PEOPLE, tags: subFeed.slice(2).map(mention)}
         } else if (isRelayFeed(subFeed)) {
-          template = {kind: Kind.ListRelays, tags: subFeed.slice(1).map(url => ["r", url])}
+          template = {kind: NAMED_RELAYS, tags: subFeed.slice(1).map(url => ["r", url])}
         } else if (isTopicFeed(subFeed)) {
           template = {
-            kind: Kind.ListInterests,
+            kind: NAMED_TOPICS,
             tags: subFeed.slice(1).map(topic => ["t", topic]),
           }
         }

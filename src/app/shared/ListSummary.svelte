@@ -5,7 +5,7 @@
 
   export let list
 
-  const tags = Tags.fromEvent(list)
+  const tags = Tags.from(list.tags)
   const topics = tags.topics().valueOf()
   const authors = tags.values("p").valueOf()
   const relays = tags.values("r").valueOf()

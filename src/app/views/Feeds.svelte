@@ -1,10 +1,8 @@
 <script lang="ts">
-  import {Scope, makeScopeFeed} from "@welshman/feeds"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/util/router"
-  import {feed} from "src/app/state"
-  import {makeFeed} from "src/domain"
+  import {globalFeed} from "src/app/state"
   import {session} from "src/engine"
 
   const showLogin = () => router.at("login").open()
@@ -21,4 +19,4 @@
   </div>
 {/if}
 
-<Feed skipCache showControls showGroup bind:feed={$feed} />
+<Feed skipCache showControls showGroup bind:feed={$globalFeed} />

@@ -1,13 +1,13 @@
 <script lang="ts">
-  import {pluck, identity} from "ramda"
+  import {identity} from "ramda"
   import {append, randomId} from "@welshman/lib"
-  import {fuzzy} from "src/util/misc"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import {searchRelayUrls, normalizeRelayUrl, displayRelayUrl} from "src/engine"
+  import {KindSearch} from "src/domain"
 
   export let dvmItem
   export let onChange
@@ -24,22 +24,12 @@
 
   const setKind = kind => onChange({...dvmItem, kind: parseInt(kind)})
 
-  const kinds = [
+  const helper = new KindSearch([
     {label: "Content discovery", kind: 5300},
     {label: "Person discovery", kind: 5301},
     {label: "Content search", kind: 5302},
     {label: "Person Search", kind: 5303},
-  ]
-
-  const searchKindItems = fuzzy(kinds, {keys: ["kind", "label"]})
-
-  const searchKinds = term => pluck("kind", searchKindItems(term.toString()))
-
-  const displayKind = kind => {
-    const option = kinds.find(k => k.kind === kind)
-
-    return option ? `${option.label} (kind ${kind})` : `Kind ${kind}`
-  }
+  ])
 
   let key = randomId()
 </script>
@@ -47,11 +37,11 @@
 <FlexColumn class="relative">
   <Field label="Kind">
     <SearchSelect
-      search={searchKinds}
+      search={helper.search}
       value={dvmItem.kind}
       onChange={setKind}
       termToItem={identity}>
-      <div slot="item" let:item>{displayKind(item)}</div>
+      <div slot="item" let:item>{helper.display(item)}</div>
     </SearchSelect>
   </Field>
   <Field label="Relays">
