@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {quantify} from 'hurdak'
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -71,11 +72,12 @@
   let saveIsOpen = false
   let deleteIsOpen = false
   let listDeleteIsOpen = false
+  let saveAsList = []
 
   $: isEdit = feed.event || feed.list
 </script>
 
-<FeedField bind:feed={feed.definition} />
+<FeedField bind:feed={feed.definition} bind:saveAsList />
 {#if isEdit}
   <Card class="flex flex-col justify-between sm:flex-row">
     <p>You are currently editing your {displayFeed(feed)} feed.</p>
@@ -91,6 +93,12 @@
     <Field label="Feed Description">
       <Textarea bind:value={feed.description} />
     </Field>
+    {#if saveAsList}
+      <p class="text-neutral-500">
+        {quantify(saveAsList.length, 'new list')} will be created based on
+        the filters you've selected.
+      </p>
+    {/if}
     <div class="flex justify-between gap-2">
       <Anchor button on:click={closeSave}>Cancel</Anchor>
       <Anchor button accent on:click={saveFeed}>Save</Anchor>

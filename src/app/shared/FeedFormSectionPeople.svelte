@@ -1,13 +1,7 @@
 <script lang="ts">
   import {toTitle} from "hurdak"
   import {without} from "ramda"
-  import {
-    Scope,
-    isScopeFeed,
-    isAuthorFeed,
-    makeAuthorFeed,
-    makeScopeFeed,
-  } from "@welshman/feeds"
+  import {Scope, isScopeFeed, isAuthorFeed, makeAuthorFeed, makeScopeFeed} from "@welshman/feeds"
   import Anchor from "src/partials/Anchor.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
@@ -39,7 +33,6 @@
   options={scopeOptions}
   onChange={onScopeChange} />
 {#if isAuthorFeed(feed)}
-  <div class="h-px bg-neutral-900" />
   <SearchSelect
     multiple
     value={feed.slice(1)}

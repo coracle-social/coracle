@@ -19,9 +19,8 @@
   {disabled}
   checked={value}
   on:change={onChange}
-  onColor={$themeColors['neutral-300']}
-  offColor={$themeColors['neutral-300']}
-  onHandleColor={$themeColors.accent}
+  onColor={$themeColors.accent}
+  offColor={$themeColors["neutral-300"]}
   handleDiameter={Math.round(20 * scale)}
   unCheckedIcon={false}
   boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"

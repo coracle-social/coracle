@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {without} from "ramda"
   import {toTitle} from "hurdak"
   import {
     getFeedArgs,
@@ -19,6 +20,8 @@
     makeDVMFeed,
   } from "@welshman/feeds"
   import Card from "src/partials/Card.svelte"
+  import Toggle from "src/partials/Toggle.svelte"
+  import Input from "src/partials/Input.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -35,12 +38,20 @@
 
   export let feed
   export let onChange
+  export let saveAsList: number[]
 
   const addFeed = newFeed => onChange([...feed, newFeed])
 
   const onSubFeedChange = (i, newFeed) => onChange(feed.toSpliced(i, 1, newFeed))
 
-  const onSubFeedRemove = i => onChange(feed.toSpliced(i, 1))
+  const onSubFeedRemove = i => {
+    onChange(feed.toSpliced(i, 1))
+    saveAsList = without([i], saveAsList).map(j => (j > i ? j - 1 : j))
+  }
+
+  const toggleSaveAsList = i => {
+    saveAsList = saveAsList.includes(i) ? without([i], saveAsList) : saveAsList.concat(i)
+  }
 
   const isTopicFeed = f => isTagFeed(f) && f[1] === "#t"
 
@@ -71,33 +82,45 @@
 
 {#key feed.length}
   {#each subFeeds as subFeed, i}
-    {@const change = f => onSubFeedChange(i + 1, f)}
+    {@const idx = i + 1}
+    {@const change = f => onSubFeedChange(idx, f)}
     <Card class="relative">
-      <FlexColumn small>
-        {#if isPeopleFeed(subFeed)}
-          <FeedFormSectionPeople feed={subFeed} onChange={change} />
-        {:else if isRelayFeed(subFeed)}
-          <FeedFormSectionRelays feed={subFeed} onChange={change} />
-        {:else if isTopicFeed(subFeed)}
-          <FeedFormSectionTopics feed={subFeed} onChange={change} />
-        {:else if isMentionFeed(subFeed)}
-          <FeedFormSectionMentions feed={subFeed} onChange={change} />
-        {:else if isKindFeed(subFeed)}
-          <FeedFormSectionKinds feed={subFeed} onChange={change} />
-        {:else if isCreatedAtFeed(subFeed)}
-          <FeedFormSectionCreatedAt feed={subFeed} onChange={change} />
-        {:else if isListFeed(subFeed)}
-          <FeedFormSectionList feed={subFeed} onChange={change} />
-        {:else if isDVMFeed(subFeed)}
-          <FeedFormSectionDVM feed={subFeed} onChange={change} />
-        {:else}
-          No support for editing {toTitle(subFeed[0])} filters. Click "Advanced" to edit manually.
+      <FlexColumn>
+        <FlexColumn small>
+          {#if isPeopleFeed(subFeed)}
+            <FeedFormSectionPeople feed={subFeed} onChange={change} />
+          {:else if isRelayFeed(subFeed)}
+            <FeedFormSectionRelays feed={subFeed} onChange={change} />
+          {:else if isTopicFeed(subFeed)}
+            <FeedFormSectionTopics feed={subFeed} onChange={change} />
+          {:else if isMentionFeed(subFeed)}
+            <FeedFormSectionMentions feed={subFeed} onChange={change} />
+          {:else if isKindFeed(subFeed)}
+            <FeedFormSectionKinds feed={subFeed} onChange={change} />
+          {:else if isCreatedAtFeed(subFeed)}
+            <FeedFormSectionCreatedAt feed={subFeed} onChange={change} />
+          {:else if isListFeed(subFeed)}
+            <FeedFormSectionList feed={subFeed} onChange={change} />
+          {:else if isDVMFeed(subFeed)}
+            <FeedFormSectionDVM feed={subFeed} onChange={change} />
+          {:else}
+            No support for editing {toTitle(subFeed[0])} filters. Click "Advanced" to edit manually.
+          {/if}
+        </FlexColumn>
+        {#if isPeopleFeed(subFeed) || isRelayFeed(subFeed) || isTopicFeed(subFeed) || isMentionFeed(subFeed)}
+          <div class="flex items-center gap-8">
+            <div class="flex items-center gap-2">
+              <Toggle value={saveAsList.includes(idx)} on:change={() => toggleSaveAsList(idx)} />
+              <p class="staatliches">Save as list</p>
+            </div>
+            <Input class="flex-grow" />
+          </div>
         {/if}
       </FlexColumn>
       {#if i > 0}
         <div
           class="absolute right-2 top-2 h-4 w-4 cursor-pointer"
-          on:click={() => onSubFeedRemove(i + 1)}>
+          on:click={() => onSubFeedRemove(idx)}>
           <i class="fa fa-times" />
         </div>
       {/if}

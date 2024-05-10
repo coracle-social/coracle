@@ -26,7 +26,7 @@
   import FeedFormFilters from "src/app/shared/FeedFormFilters.svelte"
 
   export let feed
-  export let onChange = null
+  export let saveAsList
 
   enum FormType {
     Advanced = "advanced",
@@ -95,16 +95,18 @@
     }
 
     // Remove filters directly related to the previous type
-    if (formType === FormType.People) {
-      removeSubFeed(isPeopleFeed)
-    } else if (formType === FormType.Topics) {
-      removeSubFeed(isTopicsFeed)
-    } else if (formType === FormType.Relays) {
-      removeSubFeed(isRelayFeed)
-    } else if (formType === FormType.Lists) {
-      removeSubFeed(isListFeed)
-    } else if (formType === FormType.DVMs) {
-      removeSubFeed(isDVMFeed)
+    if (newFormType !== FormType.Advanced) {
+      if (formType === FormType.People) {
+        removeSubFeed(isPeopleFeed)
+      } else if (formType === FormType.Topics) {
+        removeSubFeed(isTopicsFeed)
+      } else if (formType === FormType.Relays) {
+        removeSubFeed(isRelayFeed)
+      } else if (formType === FormType.Lists) {
+        removeSubFeed(isListFeed)
+      } else if (formType === FormType.DVMs) {
+        removeSubFeed(isDVMFeed)
+      }
     }
 
     formType = newFormType
@@ -121,13 +123,10 @@
     } else if (formType === FormType.DVMs) {
       prependDefaultSubFeed(isDVMFeed, makeDVMFeed({kind: 5300}))
     }
-
-    onChange?.(feed)
   }
 
   const onFeedChange = newFeed => {
     feed = newFeed
-    onChange?.(feed)
   }
 
   let formType = inferFormType(feed)
@@ -187,7 +186,7 @@
     {#if formType === FormType.Advanced}
       <FeedFormAdvanced {feed} onChange={onFeedChange} />
     {:else}
-      <FeedFormFilters {feed} onChange={onFeedChange} />
+      <FeedFormFilters {feed} onChange={onFeedChange} bind:saveAsList />
     {/if}
   </FlexColumn>
 </FlexColumn>
