@@ -2213,12 +2213,6 @@ const setAdapter = {
   load: a => new Set(a || []),
 }
 
-const repositoryStore = {
-  get: () => repository.get(),
-  set: data => repository.load(data),
-  subscribe: () => repository.derived(r => r.dump()),
-}
-
 // Removed support for bunker login
 const sessionsAdapter = {
   load: filter(($s: any) => $s.method !== "bunker"),
@@ -2260,5 +2254,5 @@ export const storage = new Storage(12, [
     sortBy(prop("created_at")),
   ),
   new IndexedDBAdapter("groupAdminKeys", "pubkey", groupAdminKeys, 1000),
-  new IndexedDBAdapter("repository", "id", repositoryStore as any, 10000),
+  new IndexedDBAdapter("repository", "id", repository, 10000),
 ])

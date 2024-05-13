@@ -80,17 +80,15 @@
       on:click={() => loadFeed(networkFeed)}>
       Network
     </MenuDesktopItem>
-    {#each $userFeeds as event}
-      {@const thisFeed = readFeed(event)}
+    {#each $userFeeds as feed}
       <MenuDesktopItem
         small
-        isActive={equals(thisFeed.definition, normalizedFeedDefinition)}
-        on:click={() => loadFeed(thisFeed)}>
-        {displayFeed(thisFeed)}
+        isActive={equals(feed.definition, normalizedFeedDefinition)}
+        on:click={() => loadFeed(feed)}>
+        {displayFeed(feed)}
       </MenuDesktopItem>
     {/each}
-    {#each $userListFeeds as event}
-      {@const list = readList(event)}
+    {#each $userListFeeds as list}
       {@const listFeed = mapListToFeed(list)}
       <MenuDesktopItem
         small

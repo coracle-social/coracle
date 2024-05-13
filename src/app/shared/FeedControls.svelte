@@ -134,14 +134,12 @@
             <div class="max-h-96 overflow-auto">
               <MenuItem on:click={() => setFeed(followsFeed)}>Follows</MenuItem>
               <MenuItem on:click={() => setFeed(networkFeed)}>Network</MenuItem>
-              {#each $userFeeds as event}
-                {@const feed = readFeed(event)}
+              {#each $userFeeds as feed}
                 <MenuItem on:click={() => setFeed(feed)}>
                   {displayFeed(feed)}
                 </MenuItem>
               {/each}
-              {#each $userListFeeds as event}
-                {@const list = readList(event)}
+              {#each $userListFeeds as list}
                 <MenuItem on:click={() => setFeed(mapListToFeed(list))}>
                   {displayList(list)}
                 </MenuItem>
