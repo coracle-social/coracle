@@ -1,15 +1,70 @@
 import {debounce} from "throttle-debounce"
-import {batch, doPipe, noop, seconds, sleep, switcherFn} from "hurdak"
+import {batch, noop, seconds, sleep, switcherFn} from "hurdak"
 import type {LoadOpts} from "@welshman/feeds"
-import {FeedLoader, Scope, feedFromFilter, makeIntersectionFeed, makeRelayFeed, makeUnionFeed} from "@welshman/feeds"
+import {
+  FeedLoader,
+  Scope,
+  feedFromFilter,
+  makeIntersectionFeed,
+  makeRelayFeed,
+  makeUnionFeed,
+} from "@welshman/feeds"
 import {Worker, now, writable} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
-import {Tags, decodeAddress, getIdFilters, isGroupAddress, isSignedEvent} from "@welshman/util"
+import {
+  Tags,
+  decodeAddress,
+  getIdFilters,
+  isGroupAddress,
+  isSignedEvent,
+  HANDLER_INFORMATION,
+  HANDLER_RECOMMENDATION,
+} from "@welshman/util"
 import {updateIn} from "src/util/misc"
-import {generatePrivateKey, giftWrapKinds, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
-import {always, assocPath, filter, find, max, partition, pluck, slice, sortBy, uniq, whereEq, without} from "ramda"
-import {_events, deriveUserCircles, getGroupReqInfo, getCommunityReqInfo, channels, groups, dvmRequest, env, events, follows, forcePlatformRelays, getFilterSelections, getFollowers, getUserCommunities, getWotScore, hints, isEventMuted, load, loadOne, loadPubkeys, maxWot, network, nip04, nip44, people, primeWotCaches, pubkey, publish, searchableRelays, session, sessions, subscribe, subscribePersistent, user, withFallbacks} from "src/engine/state"
-import {updateCurrentSession, updateSession} from 'src/engine/commands'
+import {
+  generatePrivateKey,
+  giftWrapKinds,
+  noteKinds,
+  reactionKinds,
+  repostKinds,
+} from "src/util/nostr"
+import {always, assocPath, find, max, partition, pluck, uniq, whereEq, without} from "ramda"
+import {
+  deriveUserCircles,
+  getGroupReqInfo,
+  getCommunityReqInfo,
+  channels,
+  groups,
+  dvmRequest,
+  env,
+  follows,
+  forcePlatformRelays,
+  getFilterSelections,
+  getFollowers,
+  getUserCommunities,
+  getWotScore,
+  hints,
+  isEventMuted,
+  load,
+  loadOne,
+  loadPubkeys,
+  maxWot,
+  network,
+  nip04,
+  nip44,
+  people,
+  primeWotCaches,
+  pubkey,
+  publish,
+  searchableRelays,
+  session,
+  sessions,
+  subscribe,
+  subscribePersistent,
+  user,
+  withFallbacks,
+} from "src/engine/state"
+import {updateCurrentSession, updateSession} from "src/engine/commands"
 
 export const attemptedAddrs = new Map()
 
@@ -326,20 +381,8 @@ const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
     const relays = hints.merge(eventsWithParent.map(hints.EventParents)).getUrls()
     const ids = eventsWithParent.flatMap(e => Tags.fromEvent(e).replies().values().valueOf())
 
-    load({
-      relays,
-      filters: getIdFilters(ids),
-      onEvent: e => _events.update($events => $events.concat(e)),
-    })
+    load({relays, filters: getIdFilters(ids)})
   }
-
-  _events.mapStore.update($m => {
-    for (const e of events) {
-      $m.set(e.id, e)
-    }
-
-    return $m
-  })
 })
 
 export const getNotificationKinds = () =>
@@ -350,24 +393,14 @@ export const getNotificationKinds = () =>
     4,
   ])
 
-const getEventIds = (pubkey: string) =>
-  doPipe(events.get(), [
-    filter((e: TrustedEvent) => noteKinds.includes(e.kind) && e.pubkey === pubkey),
-    sortBy((e: TrustedEvent) => -e.created_at),
-    slice(0, 256),
-    pluck("id"),
-  ])
-
 export const loadNotifications = () => {
   const kinds = getNotificationKinds()
   const cutoff = now() - seconds(30, "day")
   const {pubkey, notifications_last_synced = 0} = session.get()
   const since = Math.max(cutoff, notifications_last_synced - seconds(6, "hour"))
-  const eventIds = getEventIds(pubkey)
 
   const filters = [
     {kinds, "#p": [pubkey], since},
-    {kinds, "#e": eventIds, since},
     {kinds, authors: [pubkey], since},
   ]
 
@@ -384,7 +417,6 @@ export const loadNotifications = () => {
 export const listenForNotifications = async () => {
   const since = now() - 30
   const $session = session.get()
-  const eventIds = getEventIds($session.pubkey)
   const addrs = getUserCommunities($session)
 
   const filters: Filter[] = [
@@ -397,11 +429,6 @@ export const listenForNotifications = async () => {
   // Communities
   if (addrs.length > 0) {
     filters.push({kinds: [...noteKinds, ...repostKinds], "#a": addrs, limit: 1, since})
-  }
-
-  // Replies
-  if (eventIds.length > 0) {
-    filters.push({kinds: noteKinds, "#e": eventIds, limit: 1, since})
   }
 
   // Only grab one event from each category/relay so we have enough to show
@@ -453,6 +480,18 @@ export const listenForMessages = (pubkeys: string[]) => {
     filters: [
       {kinds: [4], authors: allPubkeys, "#p": allPubkeys},
       {kinds: [1059], "#p": [pubkey]},
+    ],
+  })
+}
+
+export const loadHandlers = () => {
+  const $follows = follows.get()
+
+  load({
+    relays: hints.ReadRelays().getUrls(),
+    filters: [
+      {kinds: [HANDLER_RECOMMENDATION], authors: Array.from($follows)},
+      {kinds: [HANDLER_INFORMATION]},
     ],
   })
 }

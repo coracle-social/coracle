@@ -46,7 +46,6 @@ import {
   cached,
   clamp,
   Derived,
-  DerivedCollection,
   identity,
   last,
   nth,
@@ -55,14 +54,13 @@ import {
   uniq,
   uniqBy,
   writable,
-  groupBy,
   now,
   inc,
 } from "@welshman/lib"
 import type {IWritable} from "@welshman/lib"
 import {
-  DELETE,
-  DEPRECATED_NAMED_GENERIC,
+  NAMED_BOOKMARKS,
+  HANDLER_RECOMMENDATION,
   FEED,
   decodeAddress,
   Repository,
@@ -100,7 +98,7 @@ import {
   subscribe as baseSubscribe,
 } from "@welshman/net"
 import type {Publish, PublishRequest, SubscribeRequest} from "@welshman/net"
-import {fuzzy, createBatcher, pushToKey, tryJson} from "src/util/misc"
+import {fuzzy, createBatcher, pushToKey, tryJson, fromCsv} from "src/util/misc"
 import {parseContent} from "src/util/notes"
 import {
   LOCAL_RELAY_URL,
@@ -114,7 +112,7 @@ import {
   reactionKinds,
 } from "src/util/nostr"
 import logger from "src/util/logger"
-import {LIST_KINDS, ListSearch, readFeed, readList} from "src/domain"
+import {LIST_KINDS, ListSearch, readFeed, readList, mapListToFeed} from "src/domain"
 import type {
   Channel,
   DisplayEvent,
@@ -124,8 +122,6 @@ import type {
   GroupRequest,
   GroupStatus,
   Handle,
-  Handler,
-  HandlerRec,
   Person,
   PublishInfo,
   ReadReceipt,
@@ -138,8 +134,6 @@ import {GroupAccess, OnboardingTask} from "src/engine/model"
 import {getNip04, getNip44, getNip59, getSigner, getConnect, unwrapRepost} from "src/engine/utils"
 
 // Base state
-
-const fromCsv = s => (s || "").split(",").filter(identity)
 
 export const env = new Writable({
   CLIENT_ID: import.meta.env.VITE_CLIENT_ID,
@@ -165,19 +159,14 @@ export const env = new Writable({
 export const pubkey = new Writable<string | null>(null)
 export const sessions = new Writable<Record<string, Session>>({})
 export const relays = new Collection<Relay>("url")
-export const _labels = new Collection<TrustedEvent>("id")
 export const groups = new Collection<Group>("address")
 export const groupAdminKeys = new Collection<GroupKey>("pubkey")
 export const groupSharedKeys = new Collection<GroupKey>("pubkey")
 export const groupRequests = new Collection<GroupRequest>("id")
 export const groupAlerts = new Collection<GroupAlert>("id")
 export const people = new Collection<Person>("pubkey")
-export const _events = new Collection<TrustedEvent>("id", 1000)
 export const seen = new Collection<ReadReceipt>("id", 1000)
-export const deletes = new Writable(new Set<string>(), 10000)
 export const publishes = new Collection<PublishInfo>("id", 1000)
-export const handlers = new Collection<Handler>("address")
-export const handlerRecs = new Collection<HandlerRec>("address")
 export const topics = new Collection<Topic>("name")
 export const channels = new Collection<Channel>("id")
 
@@ -187,13 +176,7 @@ export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),
 })
 
-projections.addGlobalHandler(event => {
-  const kinds = [DELETE, FEED, ...LIST_KINDS]
-
-  if (kinds.includes(event.kind)) {
-    repository.publish(event)
-  }
-})
+projections.addGlobalHandler(repository.publish.bind(repository))
 
 // Session and settings
 
@@ -253,17 +236,11 @@ export const user = new Derived(
 )
 
 export const connect = session.derived(getConnect)
-
 export const signer = session.derived(getSigner)
-
 export const nip04 = session.derived(getNip04)
-
 export const nip44 = session.derived(getNip44)
-
 export const nip59 = session.derived(getNip59)
-
 export const canSign = signer.derived($signer => $signer.isEnabled())
-
 export const settings = user.derived(getSettings)
 
 // People
@@ -514,22 +491,6 @@ export const searchPubkeys = searchPeople.derived(search => term => pluck("pubke
 
 // Events
 
-export const events = new DerivedCollection<TrustedEvent>("id", [_events, deletes], ([$e, $d]) =>
-  $e.filter(e => !$d.has(e.id)),
-)
-
-export const userEvents = new DerivedCollection<TrustedEvent>(
-  "id",
-  [events, pubkey],
-  ([$e, $pk]) => {
-    return $pk ? $e.filter(whereEq({pubkey: $pk})) : []
-  },
-)
-
-export const eventsByKind = events.derived($events =>
-  groupBy((e: TrustedEvent) => String(e.kind), $events),
-)
-
 export const isEventMuted = new Derived(
   [mutes, settings, pubkey],
   ([$mutes, $settings, $pubkey]) => {
@@ -583,21 +544,7 @@ export const isEventMuted = new Derived(
   },
 )
 
-export const isDeleted = deletes.derived(
-  $d => e => Boolean(getIdAndAddress(e).find(k => $d.has(k))),
-)
-
 export const isSeen = seen.mapStore.derived($m => e => $m.has(e.id))
-
-// Labels
-
-export const labels = new DerivedCollection<TrustedEvent>("id", [_labels, deletes], ([$l, $d]) =>
-  $l.filter(l => !$d.has(l.id)),
-)
-
-export const userLabels = new DerivedCollection<TrustedEvent>("id", [labels, pubkey], ([$l, $pk]) =>
-  $l.filter(whereEq({pubkey: $pk})),
-)
 
 // Channels
 
@@ -646,9 +593,8 @@ export const getWotGroupMembers = address =>
   )
 
 export const searchGroups = groups.throttle(300).derived($groups => {
-  const $deletes = deletes.get()
   const options = $groups
-    .filter(group => !$deletes.has(group.address))
+    .filter(group => !repository.deletes.has(group.address))
     .map(group => ({group, score: getWotGroupMembers(group.address).length}))
 
   const fuse = new Fuse(options, {
@@ -801,31 +747,19 @@ export const deriveUserCommunities = () => session.derived(getUserCommunities)
 
 // Notifications
 
-export const notifications = new Derived(
-  [pubkey, userEvents.mapStore.throttle(500), events.throttle(500)],
-  ([$pubkey, $userEvents, $events]) => {
-    if (!$pubkey) {
-      return []
-    }
+export const notifications = repository.derived($events => {
+  const $pubkey = pubkey.get()
+  const $isEventMuted = isEventMuted.get()
+  const kinds = [...noteKinds, ...reactionKinds]
 
-    const $isEventMuted = isEventMuted.get()
-    const kinds = [...noteKinds, ...reactionKinds]
-
-    return $events.filter(e => {
-      if (e.pubkey === $pubkey || $isEventMuted(e) || !kinds.includes(e.kind)) {
-        return false
-      }
-
-      if (e.kind === 7 && !isLike(e)) {
-        return false
-      }
-
-      const tags = Tags.fromEvent(e)
-
-      return $userEvents.get(tags.whereKey("e").parent()?.value()) || tags.values("p").has($pubkey)
-    })
-  },
-)
+  return Array.from(repository.query([{"#p": [$pubkey]}])).filter(
+    e =>
+      kinds.includes(e.kind) &&
+      e.pubkey !== $pubkey &&
+      !$isEventMuted(e) &&
+      (e.kind !== 7 || isLike(e)),
+  )
+})
 
 export const unreadNotifications = new Derived(
   [isSeen, notifications],
@@ -839,11 +773,11 @@ export const unreadNotifications = new Derived(
 )
 
 export const groupNotifications = new Derived(
-  [session, events, deletes, groupRequests, groupAlerts, groupAdminKeys],
+  [session, repository, groupRequests, groupAlerts, groupAdminKeys],
   x => x,
 )
   .throttle(3000)
-  .derived(([$session, $events, $deletes, $requests, $alerts, $adminKeys, $addresses]) => {
+  .derived(([$session, $events, $requests, $alerts, $adminKeys, $addresses]) => {
     const addresses = new Set(getUserCircles($session))
     const adminPubkeys = new Set($adminKeys.map(k => k.pubkey))
     const $isEventMuted = isEventMuted.get()
@@ -854,7 +788,7 @@ export const groupNotifications = new Derived(
 
       return (
         !context.some(a => addresses.has(a)) ||
-        context.some(a => $deletes.has(a)) ||
+        context.some(a => repository.deletes.has(a)) ||
         !noteKinds.includes(e.kind) ||
         e.pubkey === $session.pubkey ||
         // Skip mentions since they're covered in normal notifications
@@ -866,9 +800,11 @@ export const groupNotifications = new Derived(
     return sortBy(
       x => -x.created_at,
       [
-        ...$requests.filter(r => !r.resolved && !$deletes.has(r.group)).map(assoc("t", "request")),
+        ...$requests
+          .filter(r => !r.resolved && !repository.deletes.has(r.group))
+          .map(assoc("t", "request")),
         ...$alerts
-          .filter(a => !adminPubkeys.has(a.pubkey) && !$deletes.has(a.group))
+          .filter(a => !adminPubkeys.has(a.pubkey) && !repository.deletes.has(a.group))
           .map(assoc("t", "alert")),
         ...$events
           .map(e => (repostKinds.includes(e.kind) ? unwrapRepost(e) : e))
@@ -902,8 +838,6 @@ export const hasNewNotifications = new Derived(
 )
 
 export const createNotificationGroups = ($notifications, kinds) => {
-  const $userEvents = userEvents.mapStore.get()
-
   // Convert zaps to zap requests
   const convertZap = e => {
     if (e.kind === 9735) {
@@ -917,12 +851,12 @@ export const createNotificationGroups = ($notifications, kinds) => {
 
   // Group notifications by event
   for (const ix of $notifications) {
-    const parentId = Tags.fromEvent(ix).whereKey("e").parent()?.value()
-    const event = $userEvents.get(parentId)
-
     if (!kinds.includes(ix.kind)) {
       continue
     }
+
+    const parentId = Tags.fromEvent(ix).whereKey("e").parent()?.value()
+    const event = repository.getEvent(parentId)
 
     if (reactionKinds.includes(ix.kind) && !event) {
       continue
@@ -1150,29 +1084,65 @@ export const searchTopics = topics.derived(getTopicSearch)
 
 export const searchTopicNames = searchTopics.derived(search => term => pluck("name", search(term)))
 
-// Feeds and lists
+// Feeds, lists, labels
 
 export const feeds = repository
   .filter(() => [{kinds: [FEED]}])
-  .derived($feeds => $feeds.map(readFeed))
+  .derived($events => $events.map(readFeed))
 
 export const userFeeds = new Derived([feeds, pubkey], ([$feeds, $pubkey]) =>
   $feeds.filter(feed => feed.event.pubkey === $pubkey),
 )
 
-export const lists2 = repository
+export const lists = repository
   .filter(() => [{kinds: LIST_KINDS}])
-  .derived($lists => $lists.map(readList))
+  .derived($events => $events.map(readList))
 
-export const userLists = new Derived([lists2, pubkey], ([$lists, $pubkey]) =>
+export const userLists = new Derived([lists, pubkey], ([$lists, $pubkey]) =>
   $lists.filter(list => list.event.pubkey === $pubkey),
 )
 
-export const userListFeeds = repository.filter(() => [
-  {kinds: [DEPRECATED_NAMED_GENERIC], authors: [pubkey.get()]},
-])
+export const userListFeeds = repository
+  .filter(() => [{kinds: [NAMED_BOOKMARKS], authors: [pubkey.get()]}])
+  .derived($events => $events.map($e => mapListToFeed(readList($e))))
 
-export const listSearch = lists2.derived($lists => new ListSearch($lists))
+export const listSearch = lists.derived($lists => new ListSearch($lists))
+
+// Handlers
+
+export const deriveHandlersForKind = cached({
+  maxSize: 100,
+  getKey: ([kind]: [number]) => kind,
+  getValue: ([kind]: [number]) => {
+    return repository
+      .filter(() => [{kinds: [HANDLER_RECOMMENDATION]}])
+      .derived($recs => {
+        const result = {}
+
+        for (const event of $recs) {
+          const tags = Tags.fromEvent(event)
+
+          if (tags.get("d")?.value() !== String(kind)) {
+            continue
+          }
+
+          const aTags = tags.whereKey("a")
+          const tag = aTags.filter(t => t.last() === "web").first() || aTags.first()
+          const address = tag?.value()
+          const handler = repository.getEvent(address)
+
+          if (!handler) {
+            continue
+          }
+
+          result[address] = result[address] || {...handler, recs: []}
+          result[address].recs.push(event)
+        }
+
+        return sortBy((h: any) => -h.recs.length, Object.values(result))
+      })
+  },
+})
 
 // Zaps
 
@@ -1528,7 +1498,7 @@ Object.assign(NetworkContext, {
   onAuth,
   getExecutor,
   onEvent: (url: string, event: SignedEvent) => tracker.track(event.id, url),
-  isDeleted: (url: string, event: SignedEvent) => isDeleted.get()(event),
+  isDeleted: (url: string, event: SignedEvent) => repository.isDeleted(event),
   hasValidSignature: (url: string, event: SignedEvent) =>
     url === LOCAL_RELAY_URL ? true : hasValidSignature(event),
 })
@@ -2208,11 +2178,6 @@ const sortByPubkeyWhitelist = (fallback: (x: any) => number) => (rows: Record<st
   }, rows)
 }
 
-const setAdapter = {
-  dump: s => Array.from(s),
-  load: a => new Set(a || []),
-}
-
 // Removed support for bunker login
 const sessionsAdapter = {
   load: filter(($s: any) => $s.method !== "bunker"),
@@ -2222,9 +2187,7 @@ const sessionsAdapter = {
 export const storage = new Storage(12, [
   new LocalStorageAdapter("pubkey", pubkey),
   new LocalStorageAdapter("sessions", sessions, sessionsAdapter),
-  new LocalStorageAdapter("deletes2", deletes, setAdapter),
   new IndexedDBAdapter("seen3", "id", seen, 10000, sortBy(prop("created_at"))),
-  new IndexedDBAdapter("events", "id", _events, 10000, sortByPubkeyWhitelist(prop("created_at"))),
   new IndexedDBAdapter(
     "publishes",
     "id",
@@ -2232,7 +2195,6 @@ export const storage = new Storage(12, [
     100,
     sortByPubkeyWhitelist(prop("created_at")),
   ),
-  new IndexedDBAdapter("labels", "id", _labels, 1000, sortBy(prop("created_at"))),
   new IndexedDBAdapter("topics", "name", topics, 1000, sortBy(prop("last_seen"))),
   new IndexedDBAdapter(
     "people",

@@ -13,15 +13,7 @@
   import MenuDesktopSecondary from "src/app/MenuDesktopSecondary.svelte"
   import {globalFeed, slowConnections} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {
-    readFeed,
-    displayList,
-    readList,
-    mapListToFeed,
-    makeFeed,
-    displayFeed,
-    normalizeFeedDefinition,
-  } from "src/domain"
+  import {makeFeed, displayFeed, normalizeFeedDefinition} from "src/domain"
   import {
     env,
     user,
@@ -80,7 +72,7 @@
       on:click={() => loadFeed(networkFeed)}>
       Network
     </MenuDesktopItem>
-    {#each $userFeeds as feed}
+    {#each $userFeeds.concat($userListFeeds) as feed}
       <MenuDesktopItem
         small
         isActive={equals(feed.definition, normalizedFeedDefinition)}
@@ -88,18 +80,9 @@
         {displayFeed(feed)}
       </MenuDesktopItem>
     {/each}
-    {#each $userListFeeds as list}
-      {@const listFeed = mapListToFeed(list)}
-      <MenuDesktopItem
-        small
-        isActive={equals(listFeed.definition, normalizedFeedDefinition)}
-        on:click={() => loadFeed(listFeed)}>
-        {displayList(list)}
-      </MenuDesktopItem>
-    {/each}
     <FlexColumn
       small
-      class="staatliches absolute bottom-24 flex w-full flex-col text-neutral-400 dark:text-tinted-500 ">
+      class="staatliches absolute bottom-24 flex w-full flex-col text-neutral-400 dark:text-tinted-500">
       <Anchor class="px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/feeds"
         >Manage Feeds</Anchor>
       <Anchor class="px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/lists"

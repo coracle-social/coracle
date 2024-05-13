@@ -10,7 +10,7 @@
   import EventActions from "src/app/shared/EventActions.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {router} from "src/app/util/router"
-  import {isDeleted, getSetting, pubkey} from "src/engine"
+  import {repository, getSetting, pubkey} from "src/engine"
 
   export let event
   export let showDate = false
@@ -32,8 +32,7 @@
   const detailPath = router.at("events").of(address).toString()
   const editLink = router.at("events").of(address).at("edit").toString()
   const deleteLink = router.at("events").of(address).at("delete").toString()
-
-  $: deleted = $isDeleted(event)
+  const deleted = repository.watchEvent(event.id).derived(() => repository.isDeleted(event))
 </script>
 
 <div class="flex flex-grow flex-col gap-2">

@@ -40,10 +40,10 @@
     session,
     publish,
     mention,
-    handlers,
     tracker,
     hints,
-    deriveHandlers,
+    repository,
+    deriveHandlersForKind,
     deriveIsGroupMember,
     publishToZeroOrMoreGroups,
     publishDeletionForEvent,
@@ -67,12 +67,15 @@
   const address = tags.context().values().first()
   const nevent = nip19.neventEncode({id: note.id, relays: hints.Event(note).getUrls()})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
-  const kindHandlers = deriveHandlers(note.kind).derived(filter((h: any) => h.recs.length > 1))
+  const kindHandlers = deriveHandlersForKind(note.kind).derived(
+    filter((h: any) => h.recs.length > 1),
+  )
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
-  const handler = handlers.key(tags.get("client")?.nth(2))
+  const handlerId = tags.get("client")?.nth(2)
+  const handler = handlerId ? repository.getEvent(handlerId) : null
   const seenOn = tracker.data.derived(m =>
     Array.from(m.get(note.id) || []).filter(url => url !== LOCAL_RELAY_URL),
   )
@@ -317,12 +320,12 @@
           {/each}
         </div>
       {/if}
-      {#if $kindHandlers.length > 0 || $handler}
+      {#if $kindHandlers.length > 0 || handler}
         <h1 class="staatliches text-2xl">Apps</h1>
-        {#if $handler}
-          {@const meta = tryJson(() => JSON.parse($handler.event.content))}
+        {#if handler}
+          {@const meta = tryJson(() => JSON.parse(handler.content))}
           <p>This note was published using {meta?.display_name || meta?.name}.</p>
-          <HandlerSummary event={$handler.event} />
+          <HandlerSummary event={handler} />
         {/if}
         {#if $kindHandlers.length > 0}
           <div class="flex justify-between">

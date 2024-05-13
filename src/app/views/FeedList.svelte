@@ -7,7 +7,6 @@
   import {router} from "src/app/util/router"
   import {userFeeds, userListFeeds} from "src/engine"
 
-
   const createFeed = () => router.at("feeds/create").open()
 
   const editFeed = address => router.at("feeds").of(address).open()
@@ -19,8 +18,8 @@
     <i class="fa fa-plus" /> Feed
   </Anchor>
 </div>
-{#each $userFeeds as event (getAddress(event))}
-  {@const address = getAddress(event)}
+{#each $userFeeds as feed (feed.identifier)}
+  {@const address = getAddress(feed.event)}
   <div in:fly={{y: 20}}>
     <FeedCard {address}>
       <div slot="controls">
@@ -31,8 +30,8 @@
     </FeedCard>
   </div>
 {/each}
-{#each $userListFeeds as event (getAddress(event))}
-  {@const address = getAddress(event)}
+{#each $userListFeeds as feed (feed.identifier)}
+  {@const address = getAddress(feed.list.event)}
   <div in:fly={{y: 20}}>
     <FeedCard {address}>
       <div slot="controls">

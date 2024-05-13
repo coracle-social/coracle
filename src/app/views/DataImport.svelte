@@ -2,7 +2,6 @@
   import {sleep} from "hurdak"
   import type {TrustedEvent} from "@welshman/util"
   import {error} from "src/util/logger"
-  import {isGiftWrap} from "src/util/nostr"
   import {appName} from "src/partials/state"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
@@ -11,7 +10,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {router} from "src/app/util/router"
-  import {_events, projections} from "src/engine"
+  import {projections} from "src/engine"
 
   const setFile = e => {
     file = e.target.files[0]
@@ -38,10 +37,6 @@
 
         for (const event of newEvents) {
           projections.push(event)
-
-          if (!isGiftWrap(event)) {
-            _events.key(event.id).set(event)
-          }
         }
 
         while (projections.buffer.length > 0) {

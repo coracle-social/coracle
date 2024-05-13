@@ -8,9 +8,9 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {router} from "src/app/util/router"
-  import {events, hints, sortEventsDesc} from "src/engine"
+  import {repository, hints, sortEventsDesc} from "src/engine"
 
-  const sortedEvents = events.derived(sortEventsDesc)
+  const sortedEvents = repository.derived(sortEventsDesc)
 
   const loadMore = async () => {
     limit += 50
@@ -38,7 +38,7 @@
     <FlexColumn class="py-6 text-center">
       <h3 class="text-xl sm:h-12">Export Database</h3>
       <p class="sm:h-24">
-        Click below to download a backup of all {commaFormat($events.length)}
+        Click below to download a backup of all {commaFormat($sortedEvents.length)}
         events in your database.
       </p>
       <div class="flex justify-center">

@@ -1,5 +1,5 @@
 <script type="ts">
-  import {DEPRECATED_NAMED_GENERIC} from "@welshman/util"
+  import {NAMED_BOOKMARKS} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -12,7 +12,7 @@
   export let address
 
   const event = repository.getEvent(address)
-  const feed = address.startsWith(DEPRECATED_NAMED_GENERIC)
+  const feed = address.startsWith(NAMED_BOOKMARKS)
     ? mapListToFeed(readList(event))
     : readFeed(event)
 

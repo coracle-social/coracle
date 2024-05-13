@@ -3,7 +3,6 @@ import {batch, switcherFn, tryFunc} from "hurdak"
 import {
   addTopic,
   modifyGroupStatus,
-  processTopics,
   saveRelay,
   saveRelayPolicy,
   setGroupStatus,
@@ -19,6 +18,7 @@ import {
   getUserCommunities,
   nip04,
 } from "src/engine/state"
+import {nth} from "@welshman/lib"
 import type {SignedEvent, TrustedEvent} from "@welshman/util"
 import {
   Tags,
@@ -36,10 +36,7 @@ import {appDataKeys} from "src/util/nostr"
 import {getNip04, getNip44, getNip59} from "src/engine/utils"
 import {updateSession} from "src/engine/commands"
 import {
-  _events,
-  _labels,
   channels,
-  deletes,
   getExecutor,
   getSession,
   getZapper,
@@ -48,8 +45,6 @@ import {
   groupRequests,
   groupSharedKeys,
   groups,
-  handlerRecs,
-  handlers,
   load,
   nip59,
   people,
@@ -84,10 +79,6 @@ projections.addHandler(10002, e => {
       })
       .valueOf(),
   )
-})
-
-projections.addHandler(1985, e => {
-  _labels.key(e.id).set(e)
 })
 
 // Key sharing
@@ -415,44 +406,6 @@ projections.addHandler(10004, e => {
   })
 })
 
-projections.addGlobalHandler(
-  batch(500, (chunk: TrustedEvent[]) => {
-    const $sessions = sessions.get()
-    const userEvents = chunk.filter(e => $sessions[e.pubkey] && !e.wrap)
-
-    if (userEvents.length > 0) {
-      _events.update($events => $events.concat(userEvents))
-    }
-  }),
-)
-
-projections.addHandler(
-  5,
-  batch(500, (chunk: TrustedEvent[]) => {
-    const ids = Tags.wrap(chunk.flatMap(e => e.tags))
-      .filter(tag => ["a", "e"].includes(tag.key()))
-      .values()
-      .valueOf()
-
-    for (const pubkey of new Set(pluck("pubkey", chunk))) {
-      updateSession(
-        pubkey,
-        updateIn("deletes_last_synced", (t: number) =>
-          pluck("created_at", chunk)
-            .concat(t || 0)
-            .reduce(max, 0),
-        ),
-      )
-    }
-
-    deletes.update($deletes => {
-      ids.forEach(id => $deletes.add(id))
-
-      return $deletes
-    })
-  }),
-)
-
 projections.addHandler(
   15,
   batch(500, (chunk: TrustedEvent[]) => {
@@ -497,19 +450,14 @@ const handleWrappedEvent = getEncryption => wrap => {
 projections.addHandler(1059, handleWrappedEvent(getNip44))
 projections.addHandler(1060, handleWrappedEvent(getNip04))
 
-projections.addHandler(31989, (event: TrustedEvent) => {
-  const address = getAddress(event)
+projections.addHandler(1, (e: TrustedEvent) => {
+  const tagTopics = Tags.fromEvent(e).topics().valueOf()
+  const contentTopics = Array.from(e.content.toLowerCase().matchAll(/#(\w{2,100})/g)).map(nth(1))
 
-  handlerRecs.key(address).set({address, event})
+  for (const name of tagTopics.concat(contentTopics)) {
+    addTopic(e, name)
+  }
 })
-
-projections.addHandler(31990, (event: TrustedEvent) => {
-  const address = getAddress(event)
-
-  handlers.key(address).set({address, event})
-})
-
-projections.addHandler(1, processTopics)
 
 projections.addHandler(1985, (e: TrustedEvent) => {
   for (const name of Tags.fromEvent(e)

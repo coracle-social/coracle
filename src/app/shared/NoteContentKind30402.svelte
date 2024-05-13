@@ -11,7 +11,7 @@
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {router} from "src/app/util/router"
-  import {hints, pubkey, isDeleted} from "src/engine"
+  import {hints, pubkey, repository} from "src/engine"
 
   export let note
   export let showMedia = false
@@ -24,6 +24,7 @@
   const address = hints.address(note)
   const editLink = router.at("listings").of(encodeAddress(address)).at("edit").toString()
   const deleteLink = router.at("listings").of(encodeAddress(address)).at("delete").toString()
+  const deleted = repository.watchEvent(note).derived(() => repository.isDeleted(note))
 
   const sendMessage = () => {
     const naddr = addressToNaddr(address)
@@ -31,8 +32,6 @@
 
     router.at("channels").of([$pubkey, note.pubkey]).cx({initialMessage}).push()
   }
-
-  $: deleted = $isDeleted(note)
 </script>
 
 <FlexColumn>

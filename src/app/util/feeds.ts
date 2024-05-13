@@ -20,7 +20,7 @@ import {
   sortEventsDesc,
   unwrapRepost,
   isEventMuted,
-  isDeleted,
+  repository,
   hints,
   forcePlatformRelays,
   forcePlatformRelaySelections,
@@ -54,7 +54,6 @@ export class FeedLoader {
   reposts = new Map<string, TrustedEvent[]>()
   replies = new Map<string, TrustedEvent[]>()
   isEventMuted = isEventMuted.get()
-  isDeleted = isDeleted.get()
 
   constructor(readonly opts: FeedOpts) {
     // Use a custom feed loader so we can intercept the filters and infer relays
@@ -146,7 +145,7 @@ export class FeedLoader {
     })
 
     return events.filter(e => {
-      if (this.isDeleted(e)) {
+      if (repository.isDeleted(e)) {
         return false
       }
 

@@ -1,5 +1,5 @@
 import crypto from "crypto"
-import {cached, now, derived} from "@welshman/lib"
+import {cached, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tag,
@@ -18,13 +18,11 @@ import {
   identity,
   inc,
   map,
-  nth,
   omit,
   partition,
   pluck,
   prop,
   reject,
-  sortBy,
   uniq,
   uniqBy,
   whereEq,
@@ -49,7 +47,6 @@ import {
   displayPubkey,
   env,
   fetchHandle,
-  follows,
   forcePlatformRelays,
   getClientTags,
   getLightningImplementation,
@@ -57,10 +54,7 @@ import {
   groupAdminKeys,
   groupSharedKeys,
   groups,
-  handlerRecs,
-  handlers,
   hints,
-  load,
   mention,
   nip04,
   nip44,
@@ -886,48 +880,6 @@ export const markAsSeen = async (events: TrustedEvent[]) => {
   }
 }
 
-export const deriveHandlers = cached({
-  maxSize: 10000,
-  getKey: ([kind]: [number]) => kind,
-  getValue: ([kind]: [number]) => {
-    const $follows = follows.get()
-
-    load({
-      relays: hints.ReadRelays().getUrls(),
-      filters: [
-        {kinds: [31989], "#d": [String(kind)], authors: Array.from($follows)},
-        {kinds: [31990], "#k": [String(kind)]},
-      ],
-    })
-
-    return derived([handlers.mapStore, handlerRecs], ([$handlers, $recs]) => {
-      const result = {}
-
-      for (const {event} of $recs.filter(
-        r => Tags.fromEvent(r.event).get("d")?.value() === String(kind),
-      )) {
-        if (!$follows.has(event.pubkey)) {
-          continue
-        }
-
-        const tags = Tags.fromEvent(event).whereKey("a")
-        const tag = tags.filter(t => t.last() === "web").first() || tags.first()
-        const address = tag?.value()
-        const handler = $handlers.get(address)
-
-        if (!handler) {
-          continue
-        }
-
-        result[address] = result[address] || {...handler, recs: []}
-        result[address].recs.push(event)
-      }
-
-      return sortBy((h: any) => -h.recs.length, Object.values(result))
-    })
-  },
-})
-
 export const addTopic = (e, name) => {
   if (name) {
     const topic = topics.key(name.toLowerCase())
@@ -936,15 +888,6 @@ export const addTopic = (e, name) => {
       count: inc(topic.get()?.count || 0),
       last_seen: e.created_at,
     })
-  }
-}
-
-export const processTopics = (e: TrustedEvent) => {
-  const tagTopics = Tags.fromEvent(e).topics().valueOf()
-  const contentTopics = Array.from(e.content.toLowerCase().matchAll(/#(\w{2,100})/g)).map(nth(1))
-
-  for (const name of tagTopics.concat(contentTopics)) {
-    addTopic(e, name)
   }
 }
 

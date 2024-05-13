@@ -134,16 +134,6 @@ export type ReadReceipt = {
 
 export type PublishInfo = Omit<Publish, "emitter" | "result">
 
-export type Handler = {
-  address: string
-  event: TrustedEvent
-}
-
-export type HandlerRec = {
-  address: string
-  event: TrustedEvent
-}
-
 export type Notification = {
   key: string
   event: TrustedEvent

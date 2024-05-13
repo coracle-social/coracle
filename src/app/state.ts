@@ -15,6 +15,7 @@ import {
   loadSeen,
   loadGroups,
   loadDeletes,
+  loadHandlers,
   loadPubkeys,
   loadGiftWrap,
   loadAllMessages,
@@ -126,6 +127,9 @@ export const loadUserData = async () => {
 
   // Load deletes
   loadDeletes()
+
+  // Load handlers
+  loadHandlers()
 
   // Load settings etc
   loadGiftWrap()

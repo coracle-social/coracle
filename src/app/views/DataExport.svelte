@@ -5,16 +5,12 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {events, user} from "src/engine"
+  import {repository, user} from "src/engine"
 
   const submit = async () => {
-    const jsonl = $events
-      .filter(e => {
-        if (userOnly && e.pubkey !== $user.pubkey) return false
-        if (!includeEncrypted && isGiftWrap(e)) return false
-
-        return true
-      })
+    const events = Array.from(repository.query([userOnly ? {authors: [$user.pubkey]} : {}]))
+    const jsonl = events
+      .filter(e => includeEncrypted || !isGiftWrap(e))
       // Important: re-wrap encrypted messages
       .map(e => JSON.stringify(e.wrap || e))
       .join("\n")

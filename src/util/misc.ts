@@ -353,3 +353,5 @@ export class SearchHelper<T, V> {
 
   search = (term: string) => this.fuzzy(term).map(this.getValue)
 }
+
+export const fromCsv = s => (s || "").split(",").filter(identity)

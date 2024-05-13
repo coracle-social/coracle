@@ -9,15 +9,7 @@
   import MenuItem from "src/partials/MenuItem.svelte"
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
-  import {
-    normalizeFeedDefinition,
-    displayList,
-    readList,
-    readFeed,
-    makeFeed,
-    mapListToFeed,
-    displayFeed,
-  } from "src/domain"
+  import {normalizeFeedDefinition, displayList, readFeed, makeFeed, displayFeed} from "src/domain"
   import {userListFeeds, publishDeletion, userFeeds} from "src/engine"
 
   export let feed
@@ -139,9 +131,9 @@
                   {displayFeed(feed)}
                 </MenuItem>
               {/each}
-              {#each $userListFeeds as list}
-                <MenuItem on:click={() => setFeed(mapListToFeed(list))}>
-                  {displayList(list)}
+              {#each $userListFeeds as feed}
+                <MenuItem on:click={() => setFeed(feed)}>
+                  {displayList(feed.list)}
                 </MenuItem>
               {/each}
             </div>

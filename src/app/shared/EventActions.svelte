@@ -2,7 +2,7 @@
   import {encodeAddress, addressToNaddr} from "@welshman/util"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/util/router"
-  import {pubkey, isDeleted, hints} from "src/engine"
+  import {pubkey, repository, hints} from "src/engine"
 
   export let event
 
@@ -13,7 +13,7 @@
   $: {
     actions = []
 
-    if (!$isDeleted(event)) {
+    if (!repository.isDeleted(event)) {
       actions.push({
         onClick: () => router.at("qrcode").of(addressToNaddr(address)).open(),
         label: "Share",

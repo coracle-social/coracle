@@ -16,7 +16,7 @@
     load,
     pubkey,
     canSign,
-    isDeleted,
+    repository,
     subscribe,
     feedLoader,
     getFilterSelections,
@@ -82,7 +82,7 @@
   onDestroy(() => subs.map(sub => sub.close()))
 
   $: calendarEvents = Array.from($events.values())
-    .filter(e => !$isDeleted(e))
+    .filter(e => !repository.isDeleted(e))
     .map(e => {
       const meta = fromPairs(e.tags)
       const isOwn = e.pubkey === $pubkey
