@@ -70,7 +70,14 @@ export const makeList = (list: Partial<List> = {}): List => ({
 export const readList = (event: TrustedEvent) => {
   const {d: identifier, title = "", description = ""} = fromPairs(event.tags)
 
-  return {kind: event.kind, title, description, identifier, tags: event.tags, event} as List
+  return {
+    kind: event.kind,
+    title: title || identifier,
+    description,
+    identifier,
+    tags: event.tags,
+    event,
+  } as List
 }
 
 export const createList = ({kind, title, description, identifier, tags}: List) => ({

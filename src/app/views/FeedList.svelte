@@ -18,7 +18,7 @@
     <i class="fa fa-plus" /> Feed
   </Anchor>
 </div>
-{#each $userFeeds as feed (feed.identifier)}
+{#each $userFeeds as feed}
   {@const address = getAddress(feed.event)}
   <div in:fly={{y: 20}}>
     <FeedCard {address}>
@@ -30,7 +30,7 @@
     </FeedCard>
   </div>
 {/each}
-{#each $userListFeeds as feed (feed.identifier)}
+{#each $userListFeeds as feed}
   {@const address = getAddress(feed.list.event)}
   <div in:fly={{y: 20}}>
     <FeedCard {address}>
