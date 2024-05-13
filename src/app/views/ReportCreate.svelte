@@ -10,7 +10,7 @@
   import Field from "src/partials/Field.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {router} from "src/app/util/router"
-  import {publishReport} from "src/engine"
+  import {createAndPublish, hints} from "src/engine"
 
   export let eid
   export let pubkey
@@ -29,7 +29,7 @@
       }
     }
 
-    publishReport("", tags)
+    createAndPublish({kind: 1984, tags, relays: hints.WriteRelays().getUrls()})
     showInfo("Your report has been sent!")
     router.pop()
   }

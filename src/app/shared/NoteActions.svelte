@@ -77,8 +77,6 @@
     Array.from(m.get(note.id) || []).filter(url => url !== LOCAL_RELAY_URL),
   )
 
-  //const report = () => router.at("notes").of(note.id, {relays: hints.Event(note).getUrls(3)}).at('report').qp({pubkey: note.pubkey}).open()
-
   const setView = v => {
     view = v
   }
@@ -207,7 +205,6 @@
       }
 
       actions.push({label: "Tag", icon: "tag", onClick: label})
-      //actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
 
       if ($muted) {
         actions.push({label: "Unmute", icon: "microphone", onClick: unmuteNote})
