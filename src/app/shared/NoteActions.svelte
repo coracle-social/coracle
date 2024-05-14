@@ -4,6 +4,7 @@
   import {onMount} from "svelte"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {
+    LOCAL_RELAY_URL,
     toNostrURI,
     asHashedEvent,
     asSignedEvent,
@@ -15,7 +16,6 @@
   import {identity, filter, sum, uniqBy, prop, pluck} from "ramda"
   import {fly} from "src/util/transition"
   import {formatSats, tryJson} from "src/util/misc"
-  import {LOCAL_RELAY_URL} from "src/util/nostr"
   import {quantify, pluralize} from "hurdak"
   import {showInfo} from "src/partials/Toast.svelte"
   import Icon from "src/partials/Icon.svelte"

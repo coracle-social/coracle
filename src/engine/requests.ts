@@ -112,7 +112,7 @@ export const loadGroupMessages = (addresses?: string[]) => {
 
   for (const address of groupAddrs) {
     const {admins, recipients, relays, since} = getGroupReqInfo(address)
-    const pubkeys = [pubkey.get(), ...admins, ...recipients]
+    const pubkeys = uniq([pubkey.get(), ...admins, ...recipients])
 
     if (pubkeys.length > 0) {
       promises.push(load({relays, filters: [{kinds: giftWrapKinds, "#p": pubkeys, since}]}))

@@ -85,7 +85,7 @@ export class Nip59 {
 
     // Temporarily support nip04
     if (sk) {
-      if (this.nip04.isEnabled()) {
+      if (this.nip04.isEnabled() && content.includes("?iv=")) {
         message = await this.nip04.decrypt(content, pubkey, sk)
       }
 
@@ -93,7 +93,7 @@ export class Nip59 {
         message = await this.nip44.decrypt(content, pubkey, sk)
       }
     } else {
-      if (this.nip04.isEnabled()) {
+      if (this.nip04.isEnabled() && content.includes("?iv=")) {
         message = await this.nip04.decryptAsUser(content, pubkey)
       }
 

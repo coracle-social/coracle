@@ -3,7 +3,6 @@ import {batch, switcherFn, tryFunc} from "hurdak"
 import {
   addTopic,
   modifyGroupStatus,
-  saveRelay,
   saveRelayPolicy,
   setGroupStatus,
   updateRecord,
@@ -15,11 +14,10 @@ import {
   getChannelId,
   getHandle,
   getRecipientKey,
-  getUserCommunities,
   nip04,
 } from "src/engine/state"
 import {nth} from "@welshman/lib"
-import type {SignedEvent, TrustedEvent} from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
   decodeAddress,
@@ -31,13 +29,13 @@ import {
 } from "@welshman/util"
 import {warn} from "src/util/logger"
 import {tryJson, updateIn} from "src/util/misc"
-import {LOCAL_RELAY_URL, giftWrapKinds, getPublicKey} from "src/util/nostr"
+import {isGiftWrap, giftWrapKinds, getPublicKey} from "src/util/nostr"
 import {appDataKeys} from "src/util/nostr"
 import {getNip04, getNip44, getNip59} from "src/engine/utils"
 import {updateSession, setSession} from "src/engine/commands"
 import {
+  repository,
   channels,
-  getExecutor,
   getSession,
   getZapper,
   groupAdminKeys,
@@ -57,9 +55,24 @@ import {
 import type {Channel} from "src/engine/model"
 import {GroupAccess, RelayMode} from "src/engine/model"
 
-projections.addHandler(2, e => {
-  saveRelay(normalizeRelayUrl(e.content))
+// Save all events, including wrapped, to our repository
+
+projections.addGlobalHandler(e => {
+  if (isGiftWrap(e)) {
+    const sk = getRecipientKey(e)
+
+    if (sk) {
+      nip59.get().withUnwrappedEvent(e, sk, rumor => {
+        tracker.copy(e.id, rumor.id)
+        projections.push(rumor)
+      })
+    }
+  } else {
+    repository.publish(e)
+  }
 })
+
+// Relay selections
 
 projections.addHandler(10002, e => {
   saveRelayPolicy(
@@ -258,52 +271,6 @@ const handleGroupRequest = access => (e: TrustedEvent) => {
 projections.addHandler(25, handleGroupRequest(GroupAccess.Requested))
 
 projections.addHandler(26, handleGroupRequest(GroupAccess.None))
-
-// All other events are messages sent to the group
-
-projections.addGlobalHandler(
-  batch(300, (events: TrustedEvent[]) => {
-    const userGroups = new Set(Object.values(sessions.get()).flatMap(getUserCommunities))
-
-    for (const e of events) {
-      // Publish the unwrapped event to our local relay so active subscriptions get notified
-      if (e.wrap && groupSharedKeys.key(e.wrap.pubkey).exists()) {
-        getExecutor([LOCAL_RELAY_URL]).publish(e as SignedEvent)
-      }
-
-      const addresses = Tags.fromEvent(e).communities().values().valueOf()
-
-      // Save events with communities the user is a part of to our local db
-      if (addresses.some(a => userGroups.has(a))) {
-        getExecutor([LOCAL_RELAY_URL]).publish(e as SignedEvent)
-      }
-    }
-  }),
-)
-
-// Unwrap gift wraps using known keys
-
-projections.addHandler(1059, wrap => {
-  const sk = getRecipientKey(wrap)
-
-  if (sk) {
-    nip59.get().withUnwrappedEvent(wrap, sk, rumor => {
-      tracker.copy(wrap.id, rumor.id)
-      projections.push(rumor)
-    })
-  }
-})
-
-projections.addHandler(1060, wrap => {
-  const sk = getRecipientKey(wrap)
-
-  if (sk) {
-    nip59.get().withUnwrappedEvent(wrap, sk, rumor => {
-      tracker.copy(wrap.id, rumor.id)
-      projections.push(rumor)
-    })
-  }
-})
 
 const updateHandle = async (e, {nip05}) => {
   if (!nip05) {

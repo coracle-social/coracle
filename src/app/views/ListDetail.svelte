@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Anchor from "src/partials/Anchor.svelte"
   import ListCard from "src/app/shared/ListCard.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {repository} from "src/engine"
@@ -11,7 +10,7 @@
 
 {#if event}
   <ListCard {address}>
-    <div slot="controls"  class="flex gap-2">
+    <div slot="controls" class="flex gap-2">
       Created by
       <PersonBadgeSmall inert pubkey={event.pubkey} />
     </div>

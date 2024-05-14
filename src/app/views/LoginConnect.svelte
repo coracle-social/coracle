@@ -1,7 +1,7 @@
 <script lang="ts">
   import {sleep} from "hurdak"
-  import {normalizeRelayUrl, isShareableRelayUrl} from "@welshman/util"
-  import {userKinds, LOCAL_RELAY_URL} from "src/util/nostr"
+  import {LOCAL_RELAY_URL, normalizeRelayUrl, isShareableRelayUrl} from "@welshman/util"
+  import {userKinds} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Field from "src/partials/Field.svelte"

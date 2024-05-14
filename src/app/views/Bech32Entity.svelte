@@ -1,6 +1,5 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {addressFromNaddr, encodeAddress} from "@welshman/util"
   import Content from "src/partials/Content.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"

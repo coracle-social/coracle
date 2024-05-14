@@ -155,18 +155,12 @@
   {/if}
   <FlexColumn small class="absolute bottom-0 w-72">
     <Anchor
-      class="staatliches px-8 text-neutral-500 hover:text-neutral-200 dark:text-tinted-600 dark:hover:text-tinted-200"
-      href="/about">About</Anchor>
-    <Anchor
-      class="staatliches px-8 text-neutral-500 hover:text-neutral-200 dark:text-tinted-600 dark:hover:text-tinted-200"
+      class="staatliches px-8 text-tinted-400 hover:text-tinted-100"
       on:click={() => setSubMenu("settings")}>Settings</Anchor>
-    <div class="staatliches block flex h-8 gap-2 px-8 text-neutral-500 dark:text-tinted-600">
-      <Anchor external class="hover:text-neutral-200 dark:hover:text-tinted-200" href="/terms.html"
-        >Terms</Anchor> /
-      <Anchor
-        external
-        class="hover:text-neutral-200 dark:hover:text-tinted-200"
-        href="/privacy.html">Privacy</Anchor>
+    <div class="staatliches block flex h-8 gap-2 px-8 text-tinted-500">
+      <Anchor external class="hover:text-tinted-100" href="/about">About</Anchor> /
+      <Anchor external class="hover:text-tinted-100" href="/terms.html">Terms</Anchor> /
+      <Anchor external class="hover:text-tinted-100" href="/privacy.html">Privacy</Anchor>
     </div>
     {#if subMenu === "settings"}
       <MenuDesktopSecondary onEscape={closeSubMenu}>

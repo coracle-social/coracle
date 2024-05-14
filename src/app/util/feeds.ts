@@ -9,11 +9,12 @@ import {
   getIdFilters,
   isContextAddress,
   decodeAddress,
+  LOCAL_RELAY_URL,
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
 import type {Feed, Loader} from "@welshman/feeds"
 import {FeedLoader as CoreFeedLoader, FeedType} from "@welshman/feeds"
-import {LOCAL_RELAY_URL, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import type {DisplayEvent} from "src/engine"
 import {
   feedLoader as baseFeedLoader,
@@ -60,6 +61,7 @@ export class FeedLoader {
     this.feedLoader = new CoreFeedLoader({
       ...baseFeedLoader.options,
       request: async ({relays, filters, onEvent}) => {
+        const tracker = new Tracker()
         const signal = this.controller.signal
 
         // Default to note kinds
@@ -75,7 +77,6 @@ export class FeedLoader {
           await load({filters, relays, tracker, onEvent, signal})
         } else {
           const promises = []
-          const tracker = new Tracker()
 
           if (!this.opts.skipCache) {
             promises.push(load({filters, relays: [LOCAL_RELAY_URL], tracker, onEvent, signal}))

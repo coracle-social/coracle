@@ -76,6 +76,7 @@ import {
   getIdOrAddress,
   getIdFilters,
   hasValidSignature,
+  LOCAL_RELAY_URL,
 } from "@welshman/util"
 import type {
   Filter,
@@ -101,7 +102,6 @@ import type {Publish, PublishRequest, SubscribeRequest} from "@welshman/net"
 import {fuzzy, createBatcher, pushToKey, tryJson, fromCsv} from "src/util/misc"
 import {parseContent} from "src/util/notes"
 import {
-  LOCAL_RELAY_URL,
   appDataKeys,
   generatePrivateKey,
   isLike,
@@ -175,8 +175,6 @@ export const repository = new Repository({throttle: 300})
 export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),
 })
-
-projections.addGlobalHandler(repository.publish.bind(repository))
 
 // Session and settings
 
@@ -1379,7 +1377,7 @@ export type MySubscribeRequest = SubscribeRequest & {
 
 export const subscribe = (request: MySubscribeRequest) => {
   if (!request.skipCache) {
-    request.relays = request.relays.concat(LOCAL_RELAY_URL)
+    request.relays = uniq(request.relays.concat(LOCAL_RELAY_URL))
   }
 
   const sub = baseSubscribe(request)
@@ -1506,8 +1504,13 @@ Object.assign(NetworkContext, {
   getExecutor,
   onEvent: (url: string, event: SignedEvent) => tracker.track(event.id, url),
   isDeleted: (url: string, event: SignedEvent) => repository.isDeleted(event),
-  hasValidSignature: (url: string, event: SignedEvent) =>
-    url === LOCAL_RELAY_URL ? true : hasValidSignature(event),
+  hasValidSignature: (url: string, event: SignedEvent) => {
+    if (url === LOCAL_RELAY_URL) {
+      return true
+    }
+
+    return hasValidSignature(event)
+  },
 })
 
 // Pubkeys
