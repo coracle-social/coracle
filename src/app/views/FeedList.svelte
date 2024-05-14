@@ -1,4 +1,4 @@
-<script type="ts">
+<script lang="ts">
   import {getAddress} from "@welshman/util"
   import {fly} from "src/util/transition"
   import Subheading from "src/partials/Subheading.svelte"

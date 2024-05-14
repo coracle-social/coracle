@@ -1,7 +1,9 @@
 <script lang="ts">
   import {makeListFeed} from "@welshman/feeds"
+  import Anchor from "src/partials/Anchor.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
-  import {listSearch} from "src/engine"
+  import {listSearch, displayPubkey, repository} from "src/engine"
+  import {router} from 'src/app/util'
 
   export let feed
   export let onChange
@@ -13,7 +15,13 @@
 
 <span>Which lists would you like to use?</span>
 <SearchSelect multiple value={addresses} search={$listSearch.search} onChange={onAddressesChange}>
-  <span slot="item" let:item>
-    {$listSearch.display(item)}
+  <span slot="item" let:item let:context>
+    {#if context === "option"}
+      {$listSearch.display(item)} by {displayPubkey(repository.getEvent(item).pubkey)}
+    {:else}
+      <Anchor modal href={router.at("lists").of(item).toString()}>
+        {$listSearch.display(item)} by {displayPubkey(repository.getEvent(item).pubkey)}
+      </Anchor>
+    {/if}
   </span>
 </SearchSelect>

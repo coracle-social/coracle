@@ -6,6 +6,7 @@
   import {tryJson} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import Tile from "src/partials/Tile.svelte"
   import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -134,10 +135,7 @@
       </p>
     </div>
     <div class="flex">
-      <Input
-        bind:value={username}
-        class="flex-grow rounded-r-none"
-        placeholder="Username">
+      <Input bind:value={username} class="flex-grow rounded-r-none" placeholder="Username">
         <i slot="before" class="fa fa-user-astronaut" />
       </Input>
       <SearchSelect
@@ -162,32 +160,32 @@
         "relative grid justify-center gap-2 xs:gap-5",
         getExtension() ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3",
       )}>
-      <Anchor button square low on:click={useBunker} class="flex-col justify-center gap-3">
+      <Tile class="cursor-pointer bg-tinted-800" on:click={useBunker}>
         <div>
           <i class="fa fa-box fa-xl" />
         </div>
         <span>Bunker URL</span>
-      </Anchor>
+      </Tile>
       {#if getExtension()}
-        <Anchor button square low on:click={useExtension} class="flex-col justify-center gap-3">
+        <Tile class="cursor-pointer bg-tinted-800" on:click={useExtension}>
           <div>
             <i class="fa fa-puzzle-piece fa-xl" />
           </div>
           <span>Extension</span>
-        </Anchor>
+        </Tile>
       {/if}
-      <Anchor button square low on:click={usePrivateKey} class="flex-col justify-center gap-3">
+      <Tile class="cursor-pointer bg-tinted-800" on:click={usePrivateKey}>
         <div>
           <i class="fa fa-key fa-xl" />
         </div>
         <span>Private Key</span>
-      </Anchor>
-      <Anchor button square low on:click={usePublicKey} class="flex-col justify-center gap-3">
+      </Tile>
+      <Tile class="cursor-pointer bg-tinted-800" on:click={usePublicKey}>
         <div>
           <i class="fa fa-eye fa-xl" />
         </div>
         <span>Public Key</span>
-      </Anchor>
+      </Tile>
     </div>
   </FlexColumn>
 </form>

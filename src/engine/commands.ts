@@ -1044,6 +1044,16 @@ export const publishSettings = async (updates: Record<string, any>) => {
   })
 }
 
+export const setSession = (k, data) => sessions.update($s => ($s[k] ? {...$s, [k]: data} : $s))
+
+export const setCurrentSession = data => {
+  const $pubkey = pubkey.get()
+
+  if ($pubkey) {
+    setSession($pubkey, data)
+  }
+}
+
 export const updateSession = (k, f) => sessions.update($s => ($s[k] ? {...$s, [k]: f($s[k])} : $s))
 
 export const updateCurrentSession = f => {

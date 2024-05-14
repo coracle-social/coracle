@@ -112,7 +112,7 @@ import {
   reactionKinds,
 } from "src/util/nostr"
 import logger from "src/util/logger"
-import {LIST_KINDS, ListSearch, readFeed, readList, mapListToFeed} from "src/domain"
+import {EDITABLE_LIST_KINDS, ListSearch, readFeed, readList, mapListToFeed} from "src/domain"
 import type {
   Channel,
   DisplayEvent,
@@ -181,6 +181,8 @@ projections.addGlobalHandler(repository.publish.bind(repository))
 // Session and settings
 
 export const getSession = pubkey => sessions.get()[pubkey]
+
+export const getCurrentSession = () => sessions.get()[pubkey.get()]
 
 export const getDefaultSettings = () => ({
   relay_limit: 10,
@@ -856,7 +858,7 @@ export const createNotificationGroups = ($notifications, kinds) => {
     }
 
     const parentId = Tags.fromEvent(ix).whereKey("e").parent()?.value()
-    const event = repository.getEvent(parentId)
+    const event = parentId ? repository.getEvent(parentId) : null
 
     if (reactionKinds.includes(ix.kind) && !event) {
       continue
@@ -1088,15 +1090,15 @@ export const searchTopicNames = searchTopics.derived(search => term => pluck("na
 
 export const feeds = repository
   .filter(() => [{kinds: [FEED]}])
-  .derived($events => $events.map(readFeed))
+  .derived($events => sortBy(prop("title"), $events.filter(e => e.tags.length > 1).map(readFeed)))
 
 export const userFeeds = new Derived([feeds, pubkey], ([$feeds, $pubkey]) =>
   $feeds.filter(feed => feed.event.pubkey === $pubkey),
 )
 
 export const lists = repository
-  .filter(() => [{kinds: LIST_KINDS}])
-  .derived($events => $events.map(readList))
+  .filter(() => [{kinds: EDITABLE_LIST_KINDS}])
+  .derived($events => sortBy(prop("title"), $events.filter(e => e.tags.length > 1).map(readList)))
 
 export const userLists = new Derived([lists, pubkey], ([$lists, $pubkey]) =>
   $lists.filter(list => list.event.pubkey === $pubkey),
@@ -1104,7 +1106,12 @@ export const userLists = new Derived([lists, pubkey], ([$lists, $pubkey]) =>
 
 export const userListFeeds = repository
   .filter(() => [{kinds: [NAMED_BOOKMARKS], authors: [pubkey.get()]}])
-  .derived($events => $events.map($e => mapListToFeed(readList($e))))
+  .derived($events =>
+    sortBy(
+      prop("title"),
+      $events.filter(e => e.tags.length > 1).map($e => mapListToFeed(readList($e))),
+    ),
+  )
 
 export const listSearch = lists.derived($lists => new ListSearch($lists))
 

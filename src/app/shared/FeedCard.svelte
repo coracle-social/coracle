@@ -1,4 +1,4 @@
-<script type="ts">
+<script lang="ts">
   import {NAMED_BOOKMARKS} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"

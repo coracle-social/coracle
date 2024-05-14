@@ -13,6 +13,7 @@
   import * as nostr from "src/util/nostr"
   import {storage, session, stateKey, relays, getSetting, dufflepud} from "src/engine"
   import * as engine from "src/engine"
+  import * as domain from "src/domain"
   import {loadAppData, loadUserData} from "src/app/state"
   import {themeVariables, appName} from "src/partials/state"
   import Toast from "src/partials/Toast.svelte"
@@ -151,8 +152,14 @@
     },
   })
 
+  router.register("/lists", import("src/app/views/ListList.svelte"))
   router.register("/lists/create", import("src/app/views/ListCreate.svelte"))
-  router.register("/lists/:address", import("src/app/views/ListEdit.svelte"), {
+  router.register("/lists/:address", import("src/app/views/ListDetail.svelte"), {
+    serializers: {
+      address: asNaddr("address"),
+    },
+  })
+  router.register("/lists/:address/edit", import("src/app/views/ListEdit.svelte"), {
     serializers: {
       address: asNaddr("address"),
     },
@@ -326,6 +333,7 @@
 
   // Globals
   ;(window as any).g = {
+    ...domain,
     ...engine,
     nip19,
     logger,

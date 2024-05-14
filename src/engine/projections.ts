@@ -34,7 +34,7 @@ import {tryJson, updateIn} from "src/util/misc"
 import {LOCAL_RELAY_URL, giftWrapKinds, getPublicKey} from "src/util/nostr"
 import {appDataKeys} from "src/util/nostr"
 import {getNip04, getNip44, getNip59} from "src/engine/utils"
-import {updateSession} from "src/engine/commands"
+import {updateSession, setSession} from "src/engine/commands"
 import {
   channels,
   getExecutor,
@@ -569,18 +569,18 @@ const handleMessage = async e => {
 projections.addHandler(4, handleMessage)
 projections.addHandler(14, handleMessage)
 
-projections.addHandler(30078, e => {
+projections.addHandler(30078, async e => {
   if (Tags.fromEvent(e).get("d")?.value() === appDataKeys.USER_SETTINGS) {
-    sessions.updateAsync(async $sessions => {
-      if ($sessions[e.pubkey]) {
-        await tryFunc(async () => {
-          $sessions[e.pubkey] = updateRecord($sessions[e.pubkey], e.created_at, {
-            settings: JSON.parse(await nip04.get().decryptAsUser(e.content, e.pubkey)),
-          })
-        })
-      }
+    const session = getSession(e.pubkey)
 
-      return $sessions
-    })
+    if (session) {
+      const settings = await tryFunc(async () =>
+        JSON.parse(await nip04.get().decryptAsUser(e.content, e.pubkey)),
+      )
+
+      if (settings) {
+        setSession(e.pubkey, updateRecord(session, e.created_at, {settings}))
+      }
+    }
   }
 })

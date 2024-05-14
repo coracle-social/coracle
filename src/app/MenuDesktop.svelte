@@ -53,6 +53,7 @@
   let subMenu
 
   $: isFeedPage = Boolean($page.path.match(/^\/(notes)?$/))
+  $: isListPage = Boolean($page.path.match(/^\/(lists)?$/))
   $: normalizedFeedDefinition = $globalFeed ? normalizeFeedDefinition($globalFeed.definition) : null
 </script>
 
@@ -101,7 +102,8 @@
         ? import.meta.env.VITE_APP_WORDMARK_DARK
         : import.meta.env.VITE_APP_WORDMARK_LIGHT} />
   </Anchor>
-  <MenuDesktopItem path="/notes" isActive={isFeedPage} isAlt={isFeedPage}>Feeds</MenuDesktopItem>
+  <MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage} isAlt={isFeedPage}
+    >Feeds</MenuDesktopItem>
   {#if !$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0}
     <MenuDesktopItem
       path="/settings/relays"

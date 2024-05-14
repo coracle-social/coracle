@@ -6,6 +6,7 @@ import {
   EVENT_TIME,
   FEED,
   GENERIC_REPOST,
+  NAMED_BOOKMARKS,
   HIGHLIGHT,
   LONG_FORM,
   NOTE,
@@ -46,13 +47,12 @@ export const isKeyValid = (key: string) => {
 }
 
 export const noteKinds = [NOTE, LONG_FORM, HIGHLIGHT, REMIX, AUDIO, EVENT_TIME, CLASSIFIED]
-
 export const replyKinds = [NOTE, HIGHLIGHT, REMIX, AUDIO]
 export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
 export const giftWrapKinds = [WRAP, WRAP_NIP04] as number[]
-export const personKinds = [...LIST_KINDS, PROFILE] as number[]
-export const userKinds = [...personKinds, FEED, APPLICATION] as number[]
+export const personKinds = [...LIST_KINDS, NAMED_BOOKMARKS, FEED, PROFILE] as number[]
+export const userKinds = [...personKinds, APPLICATION] as number[]
 
 export const LOCAL_RELAY_URL = "local://coracle.relay"
 

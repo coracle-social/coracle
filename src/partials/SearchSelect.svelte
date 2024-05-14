@@ -24,7 +24,7 @@
   let input, suggestions
   let focused = autofocus
 
-  $: suggestions?.setData?.(term ? search(term).slice(0, 10) : defaultOptions)
+  $: suggestions?.setData?.(term ? search(String(term)).slice(0, 10) : defaultOptions)
 
   export const clear = () => {
     clearValue()
@@ -118,8 +118,9 @@
 {#if multiple}
   <div class="text-sm">
     {#each value as item}
-      <div class="px-3 h-7 rounded-full mr-1 mb-1 bg-neutral-900 text-neutral-400 inline-flex items-center">
-        <div class="h-7 w-5 cursor-pointer flex items-center" on:click={() => remove(item)}>
+      <div
+        class="mb-1 mr-1 inline-flex h-7 items-center rounded-full bg-neutral-900 px-3 text-neutral-400">
+        <div class="flex h-7 w-5 cursor-pointer items-center" on:click={() => remove(item)}>
           <i class="fa fa-times" />
         </div>
         <slot name="item" context="value" {item}>

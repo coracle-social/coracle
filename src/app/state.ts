@@ -2,13 +2,14 @@ import Bugsnag from "@bugsnag/js"
 import {uniq} from "ramda"
 import {writable} from "@welshman/lib"
 import {makeScopeFeed, Scope} from "@welshman/feeds"
-import {ConnectionStatus, NetworkContext} from "@welshman/net"
+import {NetworkContext} from "@welshman/net"
 import {userKinds} from "src/util/nostr"
 import {router} from "src/app/util/router"
 import type {Feed} from "src/domain"
 import {makeFeed} from "src/domain"
 import {
   env,
+  hints,
   relays,
   pubkey,
   session,
@@ -78,16 +79,12 @@ export const logUsage = async (path: string) => {
 export const slowConnections = writable([])
 
 setInterval(() => {
-  // Only notify about relays the user is actually subscribed to
-  const userRelays = new Set(getUserRelayUrls())
-  const $slowConnections = []
+  slowConnections.set(getUserRelayUrls().filter(url => hints.options.getRelayQuality(url) <= 0.5))
 
-  // Prune connections we haven't used in a while, clear errors periodically,
-  // and keep track of slow connections
+  // Prune connections we haven't used in a while. Clear errors periodically
   for (const [url, connection] of NetworkContext.pool.data.entries()) {
     const {lastPublish, lastRequest, lastFault} = connection.meta
     const lastActivity = Math.max(lastPublish, lastRequest)
-    const status = connection.meta.getStatus()
 
     if (lastFault) {
       relays
@@ -97,14 +94,9 @@ setInterval(() => {
 
     if (lastActivity < Date.now() - 60_000) {
       connection.disconnect()
-    } else if (userRelays.has(url) && status === ConnectionStatus.Slow) {
-      $slowConnections.push(url)
     }
   }
-
-  // Alert the user to any heinously slow connections
-  slowConnections.set($slowConnections)
-}, 10_000)
+}, 5_000)
 
 // Synchronization from events to state
 

@@ -20,7 +20,7 @@
     searchTopicNames,
     createAndPublish,
   } from "src/engine"
-  import {KindSearch, createList, editList} from 'src/domain'
+  import {KindSearch, createList, editList} from "src/domain"
 
   export let list
   export let exit
@@ -70,47 +70,48 @@
       <p slot="info">A brief description of what is in this list.</p>
     </Field>
     <Field label="List type">
-      <SearchSelect multiple search={kindsHelper.search} value={list.kind} onChange={onKindChange}>
+      <SearchSelect search={kindsHelper.search} value={list.kind} onChange={onKindChange}>
         <div slot="item" let:item>{kindsHelper.display(item)}</div>
       </SearchSelect>
     </Field>
-    {#if list.kind === NAMED_PEOPLE}
-      <SearchSelect
-        multiple
-        value={Tags.from(list.tags).whereKey("p").values().valueOf()}
-        search={$searchPubkeys}
-        onChange={onPubkeysChange}>
-        <span slot="item" let:item let:context>
-          {#if context === "value"}
-            <Anchor modal href={router.at("people").of(item).toString()}>
-              {displayPubkey(item)}
-            </Anchor>
-          {:else}
-            <PersonBadge inert pubkey={item} />
-          {/if}
-        </span>
-      </SearchSelect>
-    {:else if list.kind === NAMED_RELAYS}
-      <SearchSelect
-        multiple
-        value={Tags.from(list.tags).whereKey("r").values().valueOf()}
-        search={$searchRelayUrls}
-        termToItem={identity}
-        onChange={onRelaysChange}>
-        <span slot="item" let:item>{displayRelayUrl(item)}</span>
-      </SearchSelect>
-    {:else if list.kind === NAMED_TOPICS}
-      <SearchSelect
-        multiple
-        value={Tags.from(list.tags).whereKey("t").values().valueOf()}
-        search={$searchTopicNames}
-        termToItem={identity}
-        onChange={onTopicsChange}>
-        <span slot="item" let:item>#{item}</span>
-      </SearchSelect>
-    {:else}
-      <p>Sorry, editing kind ${list.kind} lists isn't currently supported.
-    {/if}
+    <Field label="List contents">
+      {#if list.kind === NAMED_PEOPLE}
+        <SearchSelect
+          multiple
+          value={Tags.wrap(list.tags).whereKey("p").values().valueOf()}
+          search={$searchPubkeys}
+          onChange={onPubkeysChange}>
+          <span slot="item" let:item let:context>
+            {#if context === "value"}
+              <Anchor modal href={router.at("people").of(item).toString()}>
+                {displayPubkey(item)}
+              </Anchor>
+            {:else}
+              <PersonBadge inert pubkey={item} />
+            {/if}
+          </span>
+        </SearchSelect>
+      {:else if list.kind === NAMED_RELAYS}
+        <SearchSelect
+          multiple
+          value={Tags.wrap(list.tags).whereKey("r").values().valueOf()}
+          search={$searchRelayUrls}
+          termToItem={identity}
+          onChange={onRelaysChange}>
+          <span slot="item" let:item>{displayRelayUrl(item)}</span>
+        </SearchSelect>
+      {:else if list.kind === NAMED_TOPICS}
+        <SearchSelect
+          multiple
+          value={Tags.wrap(list.tags).whereKey("t").values().valueOf()}
+          search={$searchTopicNames}
+          termToItem={identity}
+          onChange={onTopicsChange}>
+          <span slot="item" let:item>#{item}</span>
+        </SearchSelect>
+      {:else}
+        <p>Sorry, editing kind ${list.kind} lists isn't currently supported.</p>{/if}
+    </Field>
     <div class="flex justify-between">
       <Anchor button on:click={exit}>Discard</Anchor>
       <Anchor button accent tag="button" type="submit">Save</Anchor>

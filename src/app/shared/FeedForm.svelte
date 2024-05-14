@@ -13,13 +13,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
   import {makeFeed, createFeed, editFeed, displayFeed} from "src/domain"
-  import {
-    publishDeletion,
-    publishDeletionForEvent,
-    createAndPublish,
-    mention,
-    hints,
-  } from "src/engine"
+  import {publishDeletionForEvent, createAndPublish, mention, hints} from "src/engine"
 
   export let feed
   export let exit
@@ -58,7 +52,7 @@
   }
 
   const confirmDelete = () => {
-    publishDeletionForEvent(feed.event)
+    publishDeletionForEvent(feed.event || feed.list.event)
     exit()
   }
 
@@ -68,11 +62,6 @@
 
   const closeListDelete = () => {
     listDeleteIsOpen = false
-    exit()
-  }
-
-  const confirmListDelete = () => {
-    publishDeletion([feed.list])
     exit()
   }
 
@@ -162,7 +151,7 @@
   <Card class="relative">
     <FlexColumn>
       <Field label="Feed Name">
-        <Input bind:value={draft.name} />
+        <Input bind:value={draft.title} />
       </Field>
       <Field label="Feed Description">
         <Textarea bind:value={draft.description} />
@@ -219,7 +208,7 @@
     </p>
     <div class="flex justify-between">
       <Anchor button on:click={closeListDelete}>Keep it</Anchor>
-      <Anchor button accent on:click={confirmListDelete}>Delete it</Anchor>
+      <Anchor button accent on:click={confirmDelete}>Delete it</Anchor>
     </div>
   </Modal>
 {/if}
