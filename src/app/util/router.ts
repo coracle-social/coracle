@@ -24,6 +24,11 @@ export const encodeNaddr = a => addressToNaddr(decodeAddress(a, []))
 export const decodeEntity = entity => {
   entity = fromNostrURI(entity)
 
+  // Interpret addresses as naddrs
+  if (entity.match(/^\d+:\w+:.*$/)) {
+    entity = encodeNaddr(entity)
+  }
+
   let type, data
 
   try {

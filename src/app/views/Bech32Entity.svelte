@@ -9,6 +9,8 @@
   import EventDetail from "src/app/views/EventDetail.svelte"
 
   export let entity, type, data, relays
+
+  console.log(entity, type, data, relays)
 </script>
 
 {#if type === "nevent"}
@@ -16,11 +18,10 @@
 {:else if type === "note"}
   <NoteDetail eid={data} {relays} />
 {:else if type === "naddr"}
-  {@const address = addressFromNaddr(entity)}
   {#if [35834, 34550].includes(data.kind)}
-    <GroupDetail address={encodeAddress(address)} relays={address.relays} activeTab="notes" />
+    <GroupDetail address={data} relays={data.relays} activeTab="notes" />
   {:else if data.kind === 31923}
-    <EventDetail address={encodeAddress(address)} relays={address.relays} />
+    <EventDetail address={data} relays={data.relays} />
   {:else}
     <NoteDetail {...data} />
   {/if}

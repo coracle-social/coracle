@@ -29,7 +29,7 @@
   <FlexColumn>
     <div class="flex items-center justify-between">
       <span class="staatliches flex items-center gap-3 text-xl">
-        <i class="fa fa-rss" />
+        <i class="fa fa-list" />
         <Anchor on:click={loadFeed} class={list.title ? "" : "text-neutral-400"}>
           {displayList(list)}
         </Anchor>
@@ -41,7 +41,7 @@
     {/if}
     <div class="flex items-center justify-between">
       {quantify(tags.filterByKey(tagTypes).count(), 'item')}
-      <CopyValueSimple value={address} class="text-neutral-400" />
+      <CopyValueSimple label="List address" value={address} class="text-neutral-400" />
     </div>
   </FlexColumn>
 </Card>

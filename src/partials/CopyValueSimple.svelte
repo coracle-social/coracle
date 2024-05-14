@@ -7,11 +7,11 @@
   import {router} from "src/app/util/router"
 
   export let value
-  export let hideValue = false
+  export let label = "Contents"
 
   const copy = () => {
     copyToClipboard(value)
-    showInfo('Contents copied to clipboard!')
+    showInfo(`${label} copied to clipboard!`)
   }
 
   const share = () => router.at("qrcode").at(value).open()

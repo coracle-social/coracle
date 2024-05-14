@@ -3,7 +3,7 @@
   import {writable} from "@welshman/lib"
   import type {Filter} from "@welshman/util"
   import {createScroller} from "src/util/misc"
-  import {fly} from "src/util/transition"
+  import {fly, fade} from "src/util/transition"
   import {synced} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -45,6 +45,7 @@
     })
 
     limit = 0
+    done = loader.done
     notes = loader.notes
     loader.start()
 
@@ -75,7 +76,7 @@
     }
   }
 
-  let element, loader, notes
+  let element, loader, notes, done
   let filters: Filter[] = [{ids: []}]
   let limit = 0
 
@@ -114,6 +115,8 @@
   {/each}
 </FlexColumn>
 
-{#if !hideSpinner}
-  <Spinner />
+{#if !hideSpinner && !$done}
+  <div out:fade|local>
+    <Spinner />
+  </div>
 {/if}

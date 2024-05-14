@@ -45,7 +45,7 @@ export type FeedOpts = {
 }
 
 export class FeedLoader {
-  done = false
+  done = writable(false)
   loader: Promise<Loader>
   feedLoader: CoreFeedLoader<TrustedEvent>
   controller = new AbortController()
@@ -119,7 +119,7 @@ export class FeedLoader {
         this.addToFeed(ok)
       }),
       onExhausted: () => {
-        this.done = true
+        this.done.set(true)
       },
     })
   }
