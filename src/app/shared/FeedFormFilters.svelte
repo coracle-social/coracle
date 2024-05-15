@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {without} from "ramda"
   import {toTitle} from "hurdak"
   import {
     getFeedArgs,
@@ -7,8 +6,6 @@
     isAuthorFeed,
     isKindFeed,
     isDVMFeed,
-    isTagFeed,
-    isScopeFeed,
     isRelayFeed,
     isListFeed,
     makeTagFeed,
@@ -20,8 +17,6 @@
     makeDVMFeed,
   } from "@welshman/feeds"
   import Card from "src/partials/Card.svelte"
-  import Toggle from "src/partials/Toggle.svelte"
-  import Input from "src/partials/Input.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -96,7 +91,7 @@
           {/if}
         </FlexColumn>
         {#if isAuthorFeed(subFeed) || isRelayFeed(subFeed) || isTopicFeed(subFeed) || isMentionFeed(subFeed)}
-          <FeedFormSaveAsList feed={subFeed} />
+          <FeedFormSaveAsList feed={subFeed} onChange={change} />
         {/if}
       </FlexColumn>
       {#if i > 0}

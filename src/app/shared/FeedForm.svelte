@@ -1,7 +1,4 @@
 <script lang="ts">
-  import {quantify} from "hurdak"
-  import {NAMED_PEOPLE, NAMED_RELAYS, NAMED_TOPICS, getAddress} from "@welshman/util"
-  import {isAuthorFeed, isTagFeed, isRelayFeed, makeListFeed} from "@welshman/feeds"
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -12,8 +9,8 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
-  import {makeFeed, createFeed, editFeed, displayFeed, isTopicFeed, isMentionFeed} from "src/domain"
-  import {publishDeletionForEvent, createAndPublish, mention, hints} from "src/engine"
+  import {makeFeed, createFeed, editFeed, displayFeed} from "src/domain"
+  import {publishDeletionForEvent, createAndPublish, hints} from "src/engine"
 
   export let feed
   export let exit
@@ -64,6 +61,7 @@
   const saveFeed = async () => {
     const relays = hints.WriteRelays().getUrls()
     const template = draft.event ? editFeed(draft) : createFeed(draft)
+    console.log(draft, template)
     const pub = await createAndPublish({...template, relays})
 
     showInfo("Your feed has been saved!")
@@ -126,10 +124,10 @@
 
 <div class="flex justify-between gap-2">
   <Anchor button on:click={() => exit()}>Discard</Anchor>
+  {#if showDelete}
+    <Anchor button on:click={openDelete}>Delete</Anchor>
+  {/if}
   <div class="flex gap-2">
-    {#if showDelete}
-      <Anchor button on:click={openDelete}>Delete</Anchor>
-    {/if}
     {#if saveIsOpen && apply}
       <Anchor button accent on:click={saveFeed}>Save and apply</Anchor>
     {:else if saveIsOpen}

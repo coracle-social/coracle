@@ -113,6 +113,7 @@ import {
   reactionKinds,
 } from "src/util/nostr"
 import logger from "src/util/logger"
+import type {Feed, List} from "src/domain"
 import {EDITABLE_LIST_KINDS, ListSearch, readFeed, readList, mapListToFeed} from "src/domain"
 import type {
   Channel,
@@ -1087,34 +1088,42 @@ export const searchTopics = topics.derived(getTopicSearch)
 
 export const searchTopicNames = searchTopics.derived(search => term => pluck("name", search(term)))
 
-// Feeds, lists, labels
+// Feeds, lists
 
-export const feeds = repository
-  .filter(() => [{kinds: [FEED]}])
-  .derived($events => sortBy(prop("title"), $events.filter(e => e.tags.length > 1).map(readFeed)))
+export const feeds = repository.filter([{kinds: [FEED]}]).derived($events => $events.map(readFeed))
 
-export const userFeeds = new Derived([feeds, pubkey], ([$feeds, $pubkey]) =>
-  $feeds.filter(feed => feed.event.pubkey === $pubkey),
+export const userFeeds = new Derived([feeds, pubkey], ([$feeds, $pubkey]: [Feed[], string]) =>
+  sortBy(
+    prop("title"),
+    $feeds.filter(feed => feed.event.pubkey === $pubkey),
+  ),
 )
 
 export const lists = repository
-  .filter(() => [{kinds: EDITABLE_LIST_KINDS}])
-  .derived($events => sortBy(prop("title"), $events.filter(e => e.tags.length > 1).map(readList)))
+  .filter([{kinds: EDITABLE_LIST_KINDS}])
+  .derived($events => $events.filter(e => e.tags.length > 1).map(readList))
 
-export const userLists = new Derived([lists, pubkey], ([$lists, $pubkey]) =>
-  $lists.filter(list => list.event.pubkey === $pubkey),
+export const userLists = new Derived([lists, pubkey], ([$lists, $pubkey]: [List[], string]) =>
+  sortBy(
+    prop("title"),
+    $lists.filter(list => list.event.pubkey === $pubkey),
+  ),
 )
 
-export const userListFeeds = repository
-  .filter(() => [{kinds: [NAMED_BOOKMARKS], authors: [pubkey.get()]}])
-  .derived($events =>
+export const listSearch = lists.derived($lists => new ListSearch($lists))
+
+export const listFeeds = repository
+  .filter([{kinds: [NAMED_BOOKMARKS]}])
+  .derived($events => $events.filter(e => e.tags.length > 1).map($e => mapListToFeed(readList($e))))
+
+export const userListFeeds = new Derived(
+  [listFeeds, pubkey],
+  ([$listFeeds, $pubkey]: [Feed[], string]) =>
     sortBy(
       prop("title"),
-      $events.filter(e => e.tags.length > 1).map($e => mapListToFeed(readList($e))),
+      $listFeeds.filter(feed => feed.list.event.pubkey === $pubkey),
     ),
-  )
-
-export const listSearch = lists.derived($lists => new ListSearch($lists))
+)
 
 // Handlers
 
@@ -1122,33 +1131,31 @@ export const deriveHandlersForKind = cached({
   maxSize: 100,
   getKey: ([kind]: [number]) => kind,
   getValue: ([kind]: [number]) => {
-    return repository
-      .filter(() => [{kinds: [HANDLER_RECOMMENDATION]}])
-      .derived($recs => {
-        const result = {}
+    return repository.filter([{kinds: [HANDLER_RECOMMENDATION]}]).derived($recs => {
+      const result = {}
 
-        for (const event of $recs) {
-          const tags = Tags.fromEvent(event)
+      for (const event of $recs) {
+        const tags = Tags.fromEvent(event)
 
-          if (tags.get("d")?.value() !== String(kind)) {
-            continue
-          }
-
-          const aTags = tags.whereKey("a")
-          const tag = aTags.filter(t => t.last() === "web").first() || aTags.first()
-          const address = tag?.value()
-          const handler = repository.getEvent(address)
-
-          if (!handler) {
-            continue
-          }
-
-          result[address] = result[address] || {...handler, recs: []}
-          result[address].recs.push(event)
+        if (tags.get("d")?.value() !== String(kind)) {
+          continue
         }
 
-        return sortBy((h: any) => -h.recs.length, Object.values(result))
-      })
+        const aTags = tags.whereKey("a")
+        const tag = aTags.filter(t => t.last() === "web").first() || aTags.first()
+        const address = tag?.value()
+        const handler = repository.getEvent(address)
+
+        if (!handler) {
+          continue
+        }
+
+        result[address] = result[address] || {...handler, recs: []}
+        result[address].recs.push(event)
+      }
+
+      return sortBy((h: any) => -h.recs.length, Object.values(result))
+    })
   },
 })
 

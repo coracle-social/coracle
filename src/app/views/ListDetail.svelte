@@ -1,18 +1,26 @@
 <script lang="ts">
+  import Anchor from "src/partials/Anchor.svelte"
   import ListCard from "src/app/shared/ListCard.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
-  import {repository} from "src/engine"
+  import {repository, pubkey} from "src/engine"
+  import {router} from "src/app/util"
 
   export let address
 
-  const event = repository.getEvent(address)
+  const event = repository.watchEvent(address)
 </script>
 
-{#if event}
+{#if $event}
   <ListCard {address}>
     <div slot="controls" class="flex gap-2">
-      Created by
-      <PersonBadgeSmall inert pubkey={event.pubkey} />
+      {#if $event.pubkey === $pubkey}
+        <Anchor modal href={router.at("lists").of(address).at("edit").toString()}>
+          <i class="fa fa-edit" /> Edit
+        </Anchor>
+      {:else}
+        Created by
+        <PersonBadgeSmall inert pubkey={$event.pubkey} />
+      {/if}
     </div>
   </ListCard>
 {:else}

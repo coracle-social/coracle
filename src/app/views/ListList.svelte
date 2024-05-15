@@ -8,8 +8,6 @@
   import {userLists} from "src/engine"
 
   const createList = () => router.at("lists/create").open()
-
-  const editList = address => router.at("lists").of(address).at('edit').open()
 </script>
 
 <div class="flex items-center justify-between">
@@ -23,7 +21,7 @@
   <div in:fly={{y: 20}}>
     <ListCard {address}>
       <div slot="controls">
-        <Anchor on:click={() => editList(address)}>
+        <Anchor modal href={router.at("lists").of(address).at("edit").toString()}>
           <i class="fa fa-edit" /> Edit
         </Anchor>
       </div>

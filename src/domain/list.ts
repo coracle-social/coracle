@@ -82,14 +82,20 @@ export const readList = (event: TrustedEvent) => {
 
 export const createList = ({kind, title, description, identifier, tags}: List) => ({
   kind,
-  content: description,
-  tags: Tags.wrap(tags).setTag("d", identifier).setTag("title", title).unwrap(),
+  tags: Tags.wrap(tags)
+    .setTag("d", identifier)
+    .setTag("title", title)
+    .setTag("description", description)
+    .unwrap(),
 })
 
 export const editList = ({kind, title, description, identifier, tags}: List) => ({
   kind: kind,
-  content: description,
-  tags: Tags.wrap(tags).setTag("d", identifier).setTag("title", title).unwrap(),
+  tags: Tags.wrap(tags)
+    .setTag("d", identifier)
+    .setTag("title", title)
+    .setTag("description", description)
+    .unwrap(),
 })
 
 export const displayList = (list?: List) => {

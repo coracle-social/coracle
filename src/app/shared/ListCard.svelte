@@ -5,6 +5,7 @@
   import {defaultTagFeedMappings} from '@welshman/feeds'
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
+  import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
   import {readList, displayList, mapListToFeed} from "src/domain"
@@ -16,6 +17,7 @@
 
   const tagTypes = defaultTagFeedMappings.map(first) as string[]
   const event = repository.getEvent(address)
+  const deleted = repository.isDeleted(event)
   const tags = Tags.fromEvent(event)
   const list = readList(event)
 
@@ -30,9 +32,16 @@
     <div class="flex items-center justify-between">
       <span class="staatliches flex items-center gap-3 text-xl">
         <i class="fa fa-list" />
-        <Anchor on:click={loadFeed} class={list.title ? "" : "text-neutral-400"}>
-          {displayList(list)}
-        </Anchor>
+        <span
+          class:text-neutral-400={!list.title}
+          class:line-through={deleted}>
+          <Anchor on:click={loadFeed}>
+            {displayList(list)}
+          </Anchor>
+        </span>
+        {#if deleted}
+          <Chip danger small>Deleted</Chip>
+        {/if}
       </span>
       <slot name="controls" />
     </div>

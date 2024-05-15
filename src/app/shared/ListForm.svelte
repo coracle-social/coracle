@@ -3,6 +3,8 @@
   import {Tags, NAMED_PEOPLE, NAMED_RELAYS, NAMED_TOPICS} from "@welshman/util"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
+  import Modal from "src/partials/Modal.svelte"
+  import Subheading from "src/partials/Subheading.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -18,12 +20,27 @@
     searchRelayUrls,
     searchTopicNames,
     createAndPublish,
+    publishDeletionForEvent,
   } from "src/engine"
-  import {KindSearch, createList, editList} from "src/domain"
+  import {KindSearch, createList, displayList, editList} from "src/domain"
 
   export let list
   export let exit
   export let hide = []
+  export let showDelete = false
+
+  const openDelete = () => {
+    deleteIsOpen = true
+  }
+
+  const closeDelete = () => {
+    deleteIsOpen = false
+  }
+
+  const confirmDelete = () => {
+    publishDeletionForEvent(list.event)
+    exit()
+  }
 
   const submit = async () => {
     const relays = hints.WriteRelays().getUrls()
@@ -56,6 +73,8 @@
   const onTopicsChange = topics => {
     list.tags = topics.map(topic => ["t", topic])
   }
+
+  let deleteIsOpen = false
 </script>
 
 <form on:submit|preventDefault={submit}>
@@ -117,7 +136,23 @@
     {/if}
     <div class="flex justify-between">
       <Anchor button on:click={exit}>Discard</Anchor>
+      {#if showDelete}
+        <Anchor button on:click={openDelete}>Delete</Anchor>
+      {/if}
       <Anchor button accent tag="button" type="submit">Save</Anchor>
     </div>
   </FlexColumn>
 </form>
+
+{#if deleteIsOpen}
+  <Modal onEscape={closeDelete}>
+    <Subheading>Confirm deletion</Subheading>
+    <p>
+      Are you sure you want to delete your {displayList(list)} list?
+    </p>
+    <div class="flex justify-between gap-2">
+      <Anchor button on:click={closeDelete}>Cancel</Anchor>
+      <Anchor button danger on:click={confirmDelete}>Confirm</Anchor>
+    </div>
+  </Modal>
+{/if}

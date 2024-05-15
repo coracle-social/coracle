@@ -42,19 +42,19 @@ export const readFeed = (event: TrustedEvent) => {
 
 export const createFeed = ({identifier, definition, title, description}: Feed) => ({
   kind: FEED,
-  content: description,
   tags: [
     ["d", identifier],
     ["title", title],
+    ["description", description],
     ["feed", JSON.stringify(definition)],
   ],
 })
 
 export const editFeed = (feed: Feed) => ({
   kind: FEED,
-  content: feed.description,
   tags: Tags.fromEvent(feed.event)
     .setTag("title", feed.title)
+    .setTag("description", feed.description)
     .setTag("feed", JSON.stringify(feed.definition))
     .unwrap(),
 })

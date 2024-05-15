@@ -18,7 +18,7 @@
 
   const newList = () => ({address: `30003:${$pubkey}:${randomId()}`, tags: []})
 
-  const selectlist = list => router.at("lists").of(getAddress(list.event)).at('edit').replaceModal()
+  const selectlist = list => router.at("lists").of(getAddress(list.event)).at("edit").replaceModal()
 </script>
 
 <Content size="lg">
@@ -31,8 +31,8 @@
   <p>
     Select a list to modify. The selected {label} will be added to it as an additional filter.
   </p>
-  {#each $userLists as event (getAddress(event))}
-    <ListCard address={getAddress(event)} />
+  {#each $userLists as list (getAddress(list.event))}
+    <ListCard address={getAddress(list.event)} />
   {:else}
     <p class="text-center py-12">You don't have any custom lists yet.</p>
   {/each}
