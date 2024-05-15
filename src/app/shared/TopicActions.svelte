@@ -14,7 +14,7 @@
       actions.push({
         onClick: () => router.at("lists/select").qp({type: "t", value: topic}).open(),
         label: "Add to list",
-        icon: "scroll",
+        icon: "list",
       })
     }
   }

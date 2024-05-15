@@ -1094,7 +1094,7 @@ export const feeds = repository.filter([{kinds: [FEED]}]).derived($events => $ev
 
 export const userFeeds = new Derived([feeds, pubkey], ([$feeds, $pubkey]: [Feed[], string]) =>
   sortBy(
-    prop("title"),
+    f => f.title.toLowerCase(),
     $feeds.filter(feed => feed.event.pubkey === $pubkey),
   ),
 )
@@ -1105,7 +1105,7 @@ export const lists = repository
 
 export const userLists = new Derived([lists, pubkey], ([$lists, $pubkey]: [List[], string]) =>
   sortBy(
-    prop("title"),
+    l => l.title.toLowerCase(),
     $lists.filter(list => list.event.pubkey === $pubkey),
   ),
 )
@@ -1120,7 +1120,7 @@ export const userListFeeds = new Derived(
   [listFeeds, pubkey],
   ([$listFeeds, $pubkey]: [Feed[], string]) =>
     sortBy(
-      prop("title"),
+      l => l.title.toLowerCase(),
       $listFeeds.filter(feed => feed.list.event.pubkey === $pubkey),
     ),
 )

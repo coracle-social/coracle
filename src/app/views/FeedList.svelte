@@ -43,5 +43,5 @@
   </div>
 {/each}
 {#if $userFeeds.length === 0 && $userListFeeds.length === 0}
-  <p class="py-12 text-center">No feeds found.</p>
+  <p class="py-12 text-center">You don't have any lists yet.</p>
 {/if}

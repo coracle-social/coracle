@@ -168,7 +168,7 @@
             search={searchFeeds}
             onChange={addFeed}
             displayItem={displayPubkey}>
-            <i slot="before" class="fa fa-scroll" />
+            <i slot="before" class="fa fa-rss" />
             <span slot="item" let:item>
               <PersonBadge inert pubkey={item} />
             </span>

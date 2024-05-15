@@ -16,7 +16,7 @@
     <i class="fa fa-plus" /> List
   </Anchor>
 </div>
-{#each $userLists as list}
+{#each $userLists as list (getAddress(list.event))}
   {@const address = getAddress(list.event)}
   <div in:fly={{y: 20}}>
     <ListCard {address}>
@@ -29,5 +29,5 @@
   </div>
 {/each}
 {#if $userLists.length === 0}
-  <p class="py-12 text-center">No lists found.</p>
+  <p class="py-12 text-center">You don't have any lists yet.</p>
 {/if}

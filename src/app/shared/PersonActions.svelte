@@ -40,7 +40,7 @@
       actions.push({
         onClick: () => router.at("lists/select").qp({type: "p", value: pubkey}).open(),
         label: "Add to list",
-        icon: "scroll",
+        icon: "list",
       })
     }
 

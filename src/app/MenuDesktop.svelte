@@ -1,7 +1,9 @@
 <script lang="ts">
   import {equals} from "ramda"
-  import {randomId} from "@welshman/lib"
+  import {seconds} from "hurdak"
+  import {randomId, now} from "@welshman/lib"
   import {makeScopeFeed, Scope} from "@welshman/feeds"
+  import {PublishStatus} from "@welshman/net"
   import {fly} from "src/util/transition"
   import {toggleTheme, theme} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
@@ -26,11 +28,36 @@
     displayPubkey,
     userListFeeds,
     userFeeds,
+    publishes,
   } from "src/engine"
 
   const {page} = router
   const followsFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Follows))})
   const networkFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Network))})
+
+  const hud = publishes.derived($publishes => {
+    const pending = []
+    const success = []
+    const failure = []
+
+    for (const {created_at, request, status} of $publishes) {
+      if (created_at < now() - seconds(5, "minute")) {
+        continue
+      }
+
+      const statuses = Array.from(status.values())
+
+      if (statuses.includes(PublishStatus.Success)) {
+        success.push(request.event)
+      } else if (statuses.includes(PublishStatus.Pending)) {
+        pending.push(request.event)
+      } else {
+        failure.push(request.event)
+      }
+    }
+
+    return {pending, success, failure}
+  })
 
   const closeSubMenu = () => {
     subMenu = null
@@ -228,18 +255,39 @@
         </MenuItem>
       </MenuDesktopSecondary>
     {/if}
-    <div class="h-20 cursor-pointer border-t border-solid border-neutral-600 px-7 py-4">
-      {#if $pubkey}
-        <Anchor class="flex items-center gap-2" on:click={() => setSubMenu("account")}>
-          <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
-          <div class="flex min-w-0 flex-col">
-            <span>@{displayPerson($user)}</span>
-            <PersonHandle class="text-sm" pubkey={$pubkey} />
-          </div>
-        </Anchor>
-      {:else}
-        <Anchor modal button accent href="/login">Log In</Anchor>
-      {/if}
+    <div>
+      <Anchor
+        modal
+        href="/publishes"
+        class="flex h-12 cursor-pointer items-center justify-between border-t border-solid border-neutral-600 pl-7 pr-12">
+        <div class="flex items-center gap-1" class:text-tinted-500={$hud.pending.length === 0}>
+          <i class="fa fa-hourglass" />
+          {$hud.pending.length}
+        </div>
+        <div class="flex items-center gap-1" class:text-tinted-500={$hud.success.length === 0}>
+          <i class="fa fa-cloud-arrow-up" />
+          {$hud.success.length}
+        </div>
+        <div class="flex items-center gap-1"
+          class:text-accent={$hud.failure.length > 0}
+          class:text-tinted-500={$hud.failure.length === 0}>
+          <i class="fa fa-triangle-exclamation" />
+          {$hud.failure.length}
+        </div>
+      </Anchor>
+      <div class="h-20 cursor-pointer border-t border-solid border-neutral-600 px-7 py-4">
+        {#if $pubkey}
+          <Anchor class="flex items-center gap-2" on:click={() => setSubMenu("account")}>
+            <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
+            <div class="flex min-w-0 flex-col">
+              <span>@{displayPerson($user)}</span>
+              <PersonHandle class="text-sm" pubkey={$pubkey} />
+            </div>
+          </Anchor>
+        {:else}
+          <Anchor modal button accent href="/login">Log In</Anchor>
+        {/if}
+      </div>
     </div>
   </FlexColumn>
 </div>

@@ -1,39 +1,55 @@
 <script lang="ts">
-  import {append, randomId} from "@welshman/lib"
-  import {getAddress} from "@welshman/util"
-  import {updateIn} from "src/util/misc"
+  import {first} from "@welshman/lib"
+  import {getAddress, Tags} from "@welshman/util"
+  import {defaultTagFeedMappings} from "@welshman/feeds"
+  import {quantify} from "hurdak"
   import Subheading from "src/partials/Subheading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Content from "src/partials/Content.svelte"
-  import ListCard from "src/app/shared/ListCard.svelte"
+  import Card from "src/partials/Card.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import {router} from "src/app/util/router"
-  import {pubkey, userLists} from "src/engine"
+  import {userLists} from "src/engine"
+  import {displayList} from "src/domain"
 
   export let type
   export let value
 
-  const label = type === "p" ? "person" : "topic"
+  const tags = [[type, value]]
 
-  const modifyList = updateIn("tags", tags => append([type, value], tags))
+  const tagTypes = defaultTagFeedMappings.map(first) as string[]
 
-  const newList = () => ({address: `30003:${$pubkey}:${randomId()}`, tags: []})
+  const createList = () => router.at("lists/create").cx({tags}).replaceModal()
 
-  const selectlist = list => router.at("lists").of(getAddress(list.event)).at("edit").replaceModal()
+  const selectList = list =>
+    router.at("lists").of(getAddress(list.event)).at("edit").cx({tags}).replaceModal()
 </script>
 
-<Content size="lg">
+<FlexColumn>
   <div class="flex items-center justify-between">
     <Subheading>Select a List</Subheading>
-    <Anchor button accent on:click={() => selectlist(newList())}>
+    <Anchor button accent on:click={createList}>
       <i class="fa fa-plus" /> List
     </Anchor>
   </div>
-  <p>
-    Select a list to modify. The selected {label} will be added to it as an additional filter.
-  </p>
+  <p>Select a list to add your selection to.</p>
   {#each $userLists as list (getAddress(list.event))}
-    <ListCard address={getAddress(list.event)} />
+    <Card interactive on:click={() => selectList(list)}>
+      <FlexColumn>
+        <div class="flex items-center justify-between">
+          <span class="staatliches flex items-center gap-3 text-xl">
+            <i class="fa fa-list" />
+            <span class:text-neutral-400={!list.title}>
+              {displayList(list)}
+            </span>
+          </span>
+        </div>
+        {#if list.description}
+          <p>{list.description}</p>
+        {/if}
+        {quantify(Tags.wrap(list.tags).filterByKey(tagTypes).count(), "item")}
+      </FlexColumn>
+    </Card>
   {:else}
-    <p class="text-center py-12">You don't have any custom lists yet.</p>
+    <p class="text-center py-12">You don't have any lists yet.</p>
   {/each}
-</Content>
+</FlexColumn>

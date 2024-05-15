@@ -15,7 +15,11 @@
   const share = () => router.at("qrcode").at(value).open()
 </script>
 
-<div class={cx($$props.class, "flex items-center gap-2")}>
-  <i class="fa-solid fa-copy cursor-pointer" on:click={copy} />
-  <i class="fa-solid fa-qrcode cursor-pointer" on:click={share} />
+<div class={cx($$props.class, "flex items-center gap-1")}>
+  <div class="cursor-pointer px-1 text-neutral-400 transition-colors hover:text-neutral-100">
+    <i class="fa-solid fa-copy" on:click={copy} />
+  </div>
+  <div class="cursor-pointer px-1 text-neutral-400 transition-colors hover:text-neutral-100">
+    <i class="fa-solid fa-qrcode" on:click={share} />
+  </div>
 </div>

@@ -122,7 +122,7 @@
         <i class="fa fa-rss" /> Feeds
       </MenuMobileItem>
     </div>
-    <div class="staatliches mt-8 block flex h-8 justify-center gap-2 px-8 text-neutral-300">
+    <div class="staatliches mt-8 block flex h-8 justify-center gap-2 px-8 text-tinted-400">
       <Anchor class="hover:text-tinted-200" href="/about">About</Anchor> /
       <Anchor external class="hover:text-tinted-200" href="/terms.html">Terms</Anchor> /
       <Anchor external class="hover:text-tinted-200" href="/privacy.html">Privacy</Anchor>
@@ -192,7 +192,7 @@
         <i class="fa fa-paper-plane" /> Create Invite
       </MenuMobileItem>
     </div>
-    <div class="staatliches block flex h-8 justify-center gap-2 px-8 text-neutral-300">
+    <div class="staatliches block flex h-8 justify-center gap-2 px-8 text-tinted-400">
       <Anchor class="hover:text-tinted-200" href="/logout" on:click={closeMenu}>Logout</Anchor> /
       <Anchor class="hover:text-tinted-200" stopPropagation on:click={() => setSubMenu("accounts")}>
         Switch Accounts

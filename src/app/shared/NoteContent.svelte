@@ -16,13 +16,14 @@
   import NoteContentKind30311 from "src/app/shared/NoteContentKind30311.svelte"
   import NoteContentKind30402 from "src/app/shared/NoteContentKind30402.svelte"
   import NoteContentKind31337 from "src/app/shared/NoteContentKind31337.svelte"
+  import NoteContentKind31890 from "src/app/shared/NoteContentKind31890.svelte"
   import NoteContentKind31923 from "src/app/shared/NoteContentKind31923.svelte"
   import NoteContentKind32123 from "src/app/shared/NoteContentKind32123.svelte"
   import NoteContentKind34550 from "src/app/shared/NoteContentKind34550.svelte"
   import NoteContentKind35834 from "src/app/shared/NoteContentKind35834.svelte"
   import NoteContentKindList from "src/app/shared/NoteContentKindList.svelte"
   import {getSetting} from "src/engine"
-  import {LIST_KINDS} from 'src/domain'
+  import {LIST_KINDS} from "src/domain"
 
   export let note
   export let isQuote = false
@@ -74,6 +75,8 @@
   <NoteContentKind30402 {note} {showEntire} {showMedia} />
 {:else if note.kind === 31337}
   <NoteContentKind31337 {note} {showMedia} />
+{:else if note.kind === 31890}
+  <NoteContentKind31890 {note} />
 {:else if note.kind === 31923}
   <NoteContentKind31923 {note} />
 {:else if note.kind === 32123}

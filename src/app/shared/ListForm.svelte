@@ -45,6 +45,7 @@
   const submit = async () => {
     const relays = hints.WriteRelays().getUrls()
     const template = list.event ? editList(list) : createList(list)
+    console.log(template)
     const pub = await createAndPublish({...template, relays})
 
     showInfo("Your list has been saved!")

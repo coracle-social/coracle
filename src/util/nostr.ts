@@ -18,6 +18,8 @@ import {
   WRAP_NIP04,
   ZAP_RESPONSE,
   Tags,
+  decodeAddress,
+  addressToNaddr,
 } from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {schnorr} from "@noble/curves/secp256k1"
@@ -144,6 +146,11 @@ export const parseAnything = async entity => {
     if (profile) {
       return {type: "npub", data: profile.pubkey}
     }
+  }
+
+  // Interpret addresses as naddrs
+  if (entity.match(/^\d+:\w+:.*$/)) {
+    entity = addressToNaddr(decodeAddress(entity))
   }
 
   try {

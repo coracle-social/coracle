@@ -13,8 +13,10 @@
 
   $: recent = $publishes.filter(p => p.created_at > now() - seconds(24, "hour"))
   $: relays = new Set(recent.flatMap(({request}) => request.relays))
-  $: pending = recent.filter(p => hasStatus(p, [PublishStatus.Pending]))
   $: success = recent.filter(p => hasStatus(p, [PublishStatus.Success]))
+  $: pending = recent.filter(
+    p => hasStatus(p, [PublishStatus.Pending]) && !hasStatus(p, [PublishStatus.Success]),
+  )
 </script>
 
 <Subheading>Published Events</Subheading>
