@@ -62,7 +62,7 @@ import {
   NAMED_BOOKMARKS,
   HANDLER_RECOMMENDATION,
   FEED,
-  decodeAddress,
+  Address,
   Repository,
   Relay as LocalRelay,
   Router,
@@ -584,7 +584,7 @@ export const hasNewMessages = unreadChannels.derived(any((c: Channel) => Boolean
 // Groups
 
 export const deriveGroup = address => {
-  const {pubkey, identifier: id} = decodeAddress(address)
+  const {pubkey, identifier: id} = Address.from(address)
 
   return groups.key(address).derived(defaultTo({id, pubkey, address}))
 }
@@ -657,9 +657,9 @@ export const getGroupReqInfo = (address = null) => {
   const recipients = [pubkey.get()].filter(identity)
 
   for (const key of [...$groupSharedKeys, ...$groupAdminKeys]) {
-    const address = decodeAddress(key.group)
+    const {pubkey} = Address.from(key.group)
 
-    admins.push(address.pubkey)
+    admins.push(pubkey)
     addresses.push(key.group)
     recipients.push(key.pubkey)
   }
@@ -1260,7 +1260,7 @@ export const getFilterSelections = (
       filtersById.set(id, filter)
       scenarios.push(hints.product([id], hints.options.getSearchRelays()))
     } else {
-      const contexts = filter["#a"]?.filter(a => isContextAddress(decodeAddress(a)))
+      const contexts = filter["#a"]?.filter(isContextAddress)
 
       if (contexts?.length > 0) {
         for (const {relay, values} of hints

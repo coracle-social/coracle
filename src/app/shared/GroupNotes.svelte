@@ -1,6 +1,6 @@
 <script lang="ts">
   import {without} from "ramda"
-  import {decodeAddress, isGroupAddress} from "@welshman/util"
+  import {isGroupAddress} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import {noteKinds} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -51,5 +51,5 @@
   {#if $canSign}
     <NoteCreateInline group={address} />
   {/if}
-  <Feed eager {feed} shouldListen skipNetwork={isGroupAddress(decodeAddress(address))} />
+  <Feed eager {feed} shouldListen skipNetwork={isGroupAddress(address)} />
 </FlexColumn>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {isGroupAddress, decodeAddress} from "@welshman/util"
+  import {isGroupAddress} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -21,4 +21,4 @@
   <Anchor button accent on:click={createListing}>Create a listing</Anchor>
 </Card>
 
-<Feed {feed} skipNetwork={isGroupAddress(decodeAddress(address))} />
+<Feed {feed} skipNetwork={isGroupAddress(address)} />

@@ -8,13 +8,13 @@ import {
   getIdAndAddress,
   getIdFilters,
   isContextAddress,
-  decodeAddress,
   LOCAL_RELAY_URL,
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
 import type {Feed, Loader} from "@welshman/feeds"
-import {FeedLoader as CoreFeedLoader, FeedType} from "@welshman/feeds"
+import {FeedLoader as CoreFeedLoader} from "@welshman/feeds"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {isAddressFeed} from "src/domain"
 import type {DisplayEvent} from "src/engine"
 import {
   feedLoader as baseFeedLoader,
@@ -161,9 +161,11 @@ export class FeedLoader {
     let strict = true
 
     // Be more tolerant when looking at communities
-    this.feedLoader.compiler.walk(this.opts.feed, ([type, key, ...feed]) => {
-      if (type === FeedType.Tag && key === "#a") {
-        strict = strict && !feed.some(a => isContextAddress(decodeAddress(a)))
+    this.feedLoader.compiler.walk(this.opts.feed, feed => {
+      if (isAddressFeed(feed)) {
+        const addresses = feed.slice(2) as string[]
+
+        strict = strict && !addresses.some(isContextAddress)
       }
     })
 

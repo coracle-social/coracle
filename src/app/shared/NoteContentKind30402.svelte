@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {Tags, encodeAddress, addressToNaddr} from "@welshman/util"
+  import {Tags, Address} from "@welshman/util"
   import {commaFormat} from "hurdak"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Carousel from "src/partials/Carousel.svelte"
@@ -21,13 +21,13 @@
   const images = tags.values("image").valueOf()
   const {title, summary, location, status} = tags.asObject()
   const [price = 0, code = "SAT"] = tags.get("price")?.drop(1).valueOf() || []
-  const address = hints.address(note)
-  const editLink = router.at("listings").of(encodeAddress(address)).at("edit").toString()
-  const deleteLink = router.at("listings").of(encodeAddress(address)).at("delete").toString()
+  const address = Address.fromEvent(note, hints.Event(note).redundancy(3).getUrls())
+  const editLink = router.at("listings").of(address.toString()).at("edit").toString()
+  const deleteLink = router.at("listings").of(address.toString()).at("delete").toString()
   const deleted = repository.watchEvent(note).derived(() => repository.isDeleted(note))
 
   const sendMessage = () => {
-    const naddr = addressToNaddr(address)
+    const naddr = address.toNaddr()
     const initialMessage = `Hi, I'd like to make an offer on this listing:\n${naddr}`
 
     router.at("channels").of([$pubkey, note.pubkey]).cx({initialMessage}).push()

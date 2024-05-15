@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags, decodeAddress, asEventTemplate} from "@welshman/util"
+  import {Tags, Address, asEventTemplate} from "@welshman/util"
   import {sleep, ucFirst} from "hurdak"
   import {inc} from "ramda"
   import {getCurrencyOption} from "src/util/i18n"
@@ -49,7 +49,7 @@
 
   onMount(async () => {
     if (!event) {
-      event = await dereferenceNote(decodeAddress(address, []))
+      event = await dereferenceNote(Address.from(address))
     }
 
     loading = false

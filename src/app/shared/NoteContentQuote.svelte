@@ -17,10 +17,14 @@
   let muted = false
   let loading = true
 
-  const {id, identifier, kind, pubkey} = value
+  const {id, identifier, kind, pubkey, relays: relayHints = []} = value
 
   const relays = hints
-    .merge([hints.fromRelays(value.relays || []), hints.EventMentions(note)])
+    .merge([
+      hints.fromRelays(relayHints),
+      hints.EventMentions(note),
+      hints.ForPubkeys([note.pubkey]),
+    ])
     .getUrls()
 
   const openQuote = e => {

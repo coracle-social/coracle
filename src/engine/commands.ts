@@ -5,7 +5,7 @@ import {
   Tag,
   Tags,
   createEvent,
-  decodeAddress,
+  Address,
   getIdAndAddress,
   isShareableRelayUrl,
   normalizeRelayUrl,
@@ -455,7 +455,7 @@ const addATags = (template, addresses) => ({
 
 export const publishToGroupAdmin = async (address, template) => {
   const relays = forcePlatformRelays(hints.WithinContext(address).getUrls())
-  const pubkeys = [decodeAddress(address).pubkey, session.get().pubkey]
+  const pubkeys = [Address.from(address).pubkey, session.get().pubkey]
 
   const pubs = []
 

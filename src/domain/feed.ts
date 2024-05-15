@@ -72,4 +72,6 @@ export const isTopicFeed = f => isTagFeed(f) && f[1] === "#t"
 
 export const isMentionFeed = f => isTagFeed(f) && f[1] === "#p"
 
+export const isAddressFeed = f => isTagFeed(f) && f[1] === "#a"
+
 export const isPeopleFeed = f => isAuthorFeed(f) || isScopeFeed(f)

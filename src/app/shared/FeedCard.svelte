@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {NAMED_BOOKMARKS, addressToNaddr, decodeAddress} from "@welshman/util"
+  import {NAMED_BOOKMARKS, Address} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -38,9 +38,7 @@
         {/if}
       </span>
       <slot name="controls">
-        <Anchor on:click={loadFeed}>
-          Load feed
-        </Anchor>
+        <Anchor on:click={loadFeed}>Load feed</Anchor>
       </slot>
     </div>
     {#if feed.description}
@@ -49,7 +47,7 @@
     <div class="flex items-start justify-between">
       <FeedSummary feed={feed.definition} />
       <div class="py-2">
-        <CopyValueSimple label="Feed address" value={addressToNaddr(decodeAddress(address))} />
+        <CopyValueSimple label="Feed address" value={Address.from(address).toNaddr()} />
       </div>
     </div>
   </FlexColumn>

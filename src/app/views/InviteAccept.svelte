@@ -1,6 +1,6 @@
 <script lang="ts">
   import {zipObj, uniq, pluck} from "ramda"
-  import {normalizeRelayUrl, decodeAddress} from "@welshman/util"
+  import {normalizeRelayUrl, Address} from "@welshman/util"
   import {updateIn} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -35,7 +35,7 @@
     const group = allGroups.key(address)
 
     if (relay) {
-      const addr = decodeAddress(address)
+      const {identifier, pubkey} = Address.from(address)
 
       group.update($g => {
         const {relays = []} = $g
@@ -43,8 +43,8 @@
         return {
           ...$g,
           address,
-          id: addr.identifier,
-          pubkey: addr.pubkey,
+          id: identifier,
+          pubkey: pubkey,
           relays: uniq([...relays, relay]),
         }
       })

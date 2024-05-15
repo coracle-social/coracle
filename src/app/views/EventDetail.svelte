@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {getIdOrAddress, decodeAddress} from "@welshman/util"
+  import {getIdOrAddress, Address} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -21,7 +21,7 @@
   let loading = true
 
   onMount(async () => {
-    event = event || (await dereferenceNote(decodeAddress(address, relays)))
+    event = event || (await dereferenceNote(Address.from(address, relays)))
     loading = false
   })
 </script>

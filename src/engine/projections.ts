@@ -20,7 +20,7 @@ import {nth} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
-  decodeAddress,
+  Address,
   getAddress,
   getIdFilters,
   getLnUrl,
@@ -77,7 +77,7 @@ projections.addGlobalHandler((event: TrustedEvent) => {
       if (canDecrypt) {
         getNip59(session).withUnwrappedEvent(event, session.privkey, rumor => {
           tracker.copy(event.id, rumor.id)
-          relay.send('EVENT', rumor)
+          relay.send("EVENT", rumor)
         })
       }
     }
@@ -87,7 +87,7 @@ projections.addGlobalHandler((event: TrustedEvent) => {
     if (sk) {
       nip59.get().withUnwrappedEvent(event, sk, rumor => {
         tracker.copy(event.id, rumor.id)
-        relay.send('EVENT', rumor)
+        relay.send("EVENT", rumor)
       })
     }
   }
@@ -164,7 +164,7 @@ projections.addHandler(24, (e: TrustedEvent) => {
   }
 
   if (relays.length > 0) {
-    const {pubkey, identifier} = decodeAddress(address)
+    const {pubkey, identifier} = Address.from(address)
 
     if (!groups.key(address).get()) {
       groups.key(address).set({address, pubkey, id: identifier, relays})

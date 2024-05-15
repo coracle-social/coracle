@@ -1,11 +1,5 @@
 import {last, identity} from "ramda"
-import {
-  encodeAddress,
-  decodeAddress,
-  addressFromNaddr,
-  addressToNaddr,
-  fromNostrURI,
-} from "@welshman/util"
+import {Address, fromNostrURI} from "@welshman/util"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {tryJson} from "src/util/misc"
@@ -19,7 +13,7 @@ export const decodeJson = json => tryJson(() => JSON.parse(json))
 export const encodeCsv = xs => xs.join(",")
 export const decodeCsv = x => x.split(",")
 export const encodeRelays = xs => xs.map(url => last(url.split("//"))).join(",")
-export const encodeNaddr = a => addressToNaddr(decodeAddress(a, []))
+export const encodeNaddr = a => Address.from(a).toNaddr()
 
 export const decodeEntity = entity => {
   entity = fromNostrURI(entity)
@@ -89,7 +83,7 @@ export const asChannelId = {
 
 export const asNaddr = k => ({
   encode: encodeNaddr,
-  decode: decodeAs(k, naddr => encodeAddress(addressFromNaddr(naddr))),
+  decode: decodeAs(k, naddr => Address.fromNaddr(naddr).toString()),
 })
 
 // Router and extensions
@@ -106,8 +100,8 @@ router.extend("lists", encodeNaddr)
 router.extend("listings", encodeNaddr)
 
 router.extend("notes", (id, {relays = []} = {}) => {
-  if (id.includes(":")) {
-    return addressToNaddr(decodeAddress(id, relays))
+  if (Address.isAddress(id)) {
+    return Address.from(id, relays).toNaddr()
   }
 
   if (relays.length > 0) {

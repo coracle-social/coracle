@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags, getAddress, decodeAddress, getIdFilters} from "@welshman/util"
+  import {Tags, getAddress, Address, getIdFilters} from "@welshman/util"
   import {sleep} from "hurdak"
   import {generatePrivateKey} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -89,7 +89,7 @@
 
   onMount(async () => {
     const {DEFAULT_FOLLOWS, ONBOARDING_LISTS} = $env
-    const listOwners = ONBOARDING_LISTS.map(a => decodeAddress(a).pubkey)
+    const listOwners = ONBOARDING_LISTS.map(a => Address.from(a).pubkey)
 
     // Prime our database with our default follows and list owners
     loadPubkeys([...DEFAULT_FOLLOWS, ...listOwners])

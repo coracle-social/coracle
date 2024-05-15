@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {inc} from "ramda"
   import {now} from "@welshman/lib"
-  import {Tags, decodeAddress, asEventTemplate} from "@welshman/util"
+  import {Tags, Address, asEventTemplate} from "@welshman/util"
   import {sleep} from "hurdak"
   import {secondsToDate, dateToSeconds} from "src/util/misc"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -46,7 +46,7 @@
 
   onMount(async () => {
     if (!event) {
-      event = await dereferenceNote(decodeAddress(address, []))
+      event = await dereferenceNote(Address.from(address))
     }
 
     loading = false

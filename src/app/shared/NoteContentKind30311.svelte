@@ -1,6 +1,6 @@
 <script lang="ts">
   import {fromPairs} from "ramda"
-  import {addressToNaddr} from "@welshman/util"
+  import {Address} from "@welshman/util"
   import {urlIsMedia} from "src/util/notes"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -14,11 +14,11 @@
   export let note
   export let showMedia = false
 
-  const naddr = addressToNaddr(hints.address(note))
+  const address = Address.fromEvent(note, hints.Event(note).redundancy(3).getUrls())
   const {title, summary, image, status, p} = fromPairs(note.tags) as Record<string, string>
 </script>
 
-<Anchor external href={`https://zap.stream/${naddr}`}>
+<Anchor external href={`https://zap.stream/${address.toNaddr()}`}>
   <Card interactive>
     <FlexColumn>
       {#if p}

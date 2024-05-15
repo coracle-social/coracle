@@ -1,7 +1,7 @@
 <script lang="ts">
   import {quantify} from "hurdak"
   import {first} from "@welshman/lib"
-  import {Tags, addressToNaddr, decodeAddress} from "@welshman/util"
+  import {Tags, Address} from "@welshman/util"
   import {defaultTagFeedMappings} from "@welshman/feeds"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
@@ -43,10 +43,8 @@
         {/if}
       </span>
       <slot name="controls">
-        <Anchor on:click={loadFeed}>
-          Load as feed
-        </Anchor>
-    </div>
+        <Anchor on:click={loadFeed}>Load as feed</Anchor>
+      </slot>
     </div>
     {#if list.description}
       <p>{list.description}</p>
@@ -55,7 +53,7 @@
       {quantify(tags.filterByKey(tagTypes).count(), "item")}
       <CopyValueSimple
         label="List address"
-        value={addressToNaddr(decodeAddress(address))}
+        value={Address.from(address).toNaddr()}
         class="text-neutral-400" />
     </div>
   </FlexColumn>

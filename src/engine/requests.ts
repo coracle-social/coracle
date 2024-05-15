@@ -13,7 +13,7 @@ import {Worker, now, writable} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
-  decodeAddress,
+  Address,
   getIdFilters,
   isGroupAddress,
   isSignedEvent,
@@ -92,8 +92,8 @@ export const getStaleAddrs = (addrs: string[]) => {
 
 export const loadGroups = async (rawAddrs: string[], explicitRelays: string[] = []) => {
   const addrs = getStaleAddrs(rawAddrs)
-  const authors = addrs.map(a => decodeAddress(a).pubkey)
-  const identifiers = addrs.map(a => decodeAddress(a).identifier)
+  const authors = addrs.map(a => Address.from(a).pubkey)
+  const identifiers = addrs.map(a => Address.from(a).identifier)
 
   if (addrs.length > 0) {
     const filters = [{kinds: [34550, 35834], authors, "#d": identifiers}]
@@ -110,7 +110,7 @@ export const loadGroups = async (rawAddrs: string[], explicitRelays: string[] = 
 export const loadGroupMessages = (addresses?: string[]) => {
   const promises = []
   const addrs = addresses || deriveUserCircles().get()
-  const [groupAddrs, communityAddrs] = partition(a => isGroupAddress(decodeAddress(a)), addrs)
+  const [groupAddrs, communityAddrs] = partition(isGroupAddress, addrs)
 
   for (const address of groupAddrs) {
     const {admins, recipients, relays, since} = getGroupReqInfo(address)
