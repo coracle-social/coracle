@@ -1,55 +1,77 @@
 <script lang="ts">
-  import {without} from "ramda"
-  import {isGroupAddress} from "@welshman/util"
+  import {ucFirst} from "hurdak"
+  import {remove} from "@welshman/lib"
+  import {isGroupAddress, getAddress, getIdFilters, Address} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import {noteKinds} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Menu from "src/partials/Menu.svelte"
-  import MenuItem from "src/partials/MenuItem.svelte"
-  import Chip from "src/partials/Chip.svelte"
-  import Popover from "src/partials/Popover.svelte"
+  import Tabs from "src/partials/Tabs.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import NoteCreateInline from "src/app/shared/NoteCreateInline.svelte"
-  import {makeFeed} from "src/domain"
-  import {canSign, deriveGroup} from "src/engine"
+  import {makeFeed, readFeed} from "src/domain"
+  import {hints, repository, canSign, deriveGroup, load} from "src/engine"
 
   export let address
 
   const group = deriveGroup(address)
 
-  const feed = makeFeed({
-    definition: feedFromFilter({
-      kinds: without([30402], noteKinds),
-      "#a": [address],
-    }),
-  })
+  const mainFeed = feedFromFilter({kinds: remove(30402, noteKinds), "#a": [address]})
+
+  const setActiveTab = tab => {
+    activeTab = tab
+    feed = feeds.find(f => f.name === activeTab).feed
+  }
+
+  let activeTab = "feed"
+  let tabs = ["feed"]
+  let feeds = [{name: "feed", feed: makeFeed({definition: mainFeed})}]
+  let feed = makeFeed({definition: mainFeed})
+
+  for (const feed of $group.feeds || []) {
+    const [address, relay = "", name = ""] = feed.slice(1)
+
+    if (!Address.isAddress(address)) {
+      continue
+    }
+
+    const event = repository.getEvent(address)
+
+    if (event) {
+      feeds = feeds.concat({name, feed: readFeed(event)})
+      tabs = tabs.concat(name)
+    } else {
+      const relays = hints
+        .merge([hints.fromRelays([relay]), hints.FromPubkeys([Address.from(address).pubkey])])
+        .getUrls()
+
+      load({
+        relays,
+        filters: getIdFilters([address]),
+        onEvent: e => {
+          if (feeds.find(f => getAddress(e) === address)) {
+            return
+          }
+
+          feeds = feeds.concat({name, feed: readFeed(e)})
+          tabs = tabs.concat(name)
+        },
+      })
+    }
+  }
 </script>
 
 <FlexColumn large>
-  {#if $group.feeds?.length > 0}
-    <Popover
-      class="inline-block"
-      placement="bottom-end"
-      theme="transparent"
-      opts={{hideOnClick: true}}>
-      <div slot="trigger" class="flex cursor-pointer justify-end">
-        <Chip class="mb-2 mr-2 inline-block">
-          Viewing: {feed ? feed[1] : "Notes"}
-          <i class="fa fa-caret-down p-1" />
-        </Chip>
-      </div>
-      <div slot="tooltip">
-        <Menu>
-          <MenuItem>Notes</MenuItem>
-          {#each $group.feeds as feed (feed.join(":"))}
-            <MenuItem>{feed[1]}</MenuItem>
-          {/each}
-        </Menu>
-      </div>
-    </Popover>
-  {/if}
   {#if $canSign}
     <NoteCreateInline group={address} />
   {/if}
-  <Feed eager {feed} shouldListen skipNetwork={isGroupAddress(address)} />
+  {#if tabs.length > 1}
+    <Tabs {tabs} {activeTab} {setActiveTab}>
+      <div slot="tab" let:tab class="flex gap-2">
+        <div>{ucFirst(tab)}</div>
+      </div>
+    </Tabs>
+  {/if}
+  {#key feed}
+    <Feed eager {feed} shouldListen skipNetwork={isGroupAddress(address)} />
+  {/key}
 </FlexColumn>

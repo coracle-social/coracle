@@ -18,8 +18,8 @@
 <script lang="ts">
   import {pluck, join, uniqBy} from "ramda"
   import {ucFirst} from "hurdak"
+  import {Address} from "@welshman/util"
   import {fly} from "src/util/transition"
-  import {parseAnything} from "src/util/nostr"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
@@ -32,10 +32,9 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
   import type {Person} from "src/engine"
-  import {env, searchRelays, normalizeRelayUrl, searchPeople, displayPubkey} from "src/engine"
+  import {env, hints, searchRelays, feedSearch, normalizeRelayUrl} from "src/engine"
 
   export let onSubmit
   export let values: Values
@@ -49,19 +48,14 @@
     showAdvanced = !showAdvanced
   }
 
-  const addFeed = pubkey => {
-    values.feeds = uniqBy(join(":"), values.feeds.concat([["feed", "Custom Feed", pubkey]]))
-    feedsInput.clear()
-  }
+  const addFeed = address => {
+    if (address) {
+      const relayHint = hints.FromPubkeys([Address.from(address).pubkey]).getUrl()
+      const feedTag = ["feed", address, relayHint, "Custom Feed"]
 
-  const searchFeeds = term => {
-    parseAnything(term).then(result => {
-      if (result?.type === "npub") {
-        addFeed(result.data)
-      }
-    })
-
-    return $searchPeople(term).map(p => p.pubkey)
+      values.feeds = uniqBy(join(":"), values.feeds.concat([feedTag]))
+      feedsInput.clear()
+    }
   }
 
   const removeFeed = i => {
@@ -155,22 +149,22 @@
           <span>Hide Advanced Settings</span>
         </Anchor>
         <Field label="Custom Feeds">
-          {#each values.feeds as [_, label, pubkey], i (pubkey)}
+          {#each values.feeds as [_, address, hint, label], i (address)}
             <ListItem on:remove={() => removeFeed(i)}>
-              <span slot="label">{displayPubkey(pubkey)}</span>
+              <span slot="label">{$feedSearch.display(address)}</span>
               <span slot="data">
                 <Input bind:value={label} />
               </span>
             </ListItem>
           {/each}
           <SearchSelect
-            bind:this={feedsInput}
-            search={searchFeeds}
             onChange={addFeed}
-            displayItem={displayPubkey}>
+            search={$feedSearch.search}
+            bind:this={feedsInput}
+            displayItem={$feedSearch.display}>
             <i slot="before" class="fa fa-rss" />
             <span slot="item" let:item>
-              <PersonBadge inert pubkey={item} />
+              {$feedSearch.display(item)}
             </span>
           </SearchSelect>
           <div slot="info">

@@ -114,7 +114,14 @@ import {
 } from "src/util/nostr"
 import logger from "src/util/logger"
 import type {Feed, List} from "src/domain"
-import {EDITABLE_LIST_KINDS, ListSearch, readFeed, readList, mapListToFeed} from "src/domain"
+import {
+  EDITABLE_LIST_KINDS,
+  ListSearch,
+  FeedSearch,
+  readFeed,
+  readList,
+  mapListToFeed,
+} from "src/domain"
 import type {
   Channel,
   DisplayEvent,
@@ -1098,6 +1105,8 @@ export const userFeeds = new Derived([feeds, pubkey], ([$feeds, $pubkey]: [Feed[
     $feeds.filter(feed => feed.event.pubkey === $pubkey),
   ),
 )
+
+export const feedSearch = feeds.derived($feeds => new FeedSearch($feeds))
 
 export const lists = repository
   .filter([{kinds: EDITABLE_LIST_KINDS}])

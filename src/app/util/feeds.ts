@@ -104,7 +104,6 @@ export class FeedLoader {
     })
 
     if (opts.shouldListen && this.feedLoader.compiler.canCompile(opts.feed)) {
-      console.log("listen")
       this.feedLoader.compiler.compile(opts.feed).then(requests => {
         const tracker = new Tracker()
         const signal = this.controller.signal
