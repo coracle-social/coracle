@@ -35,29 +35,17 @@
   import FeedFormSectionCreatedAt from "src/app/shared/FeedFormSectionCreatedAt.svelte"
   import FeedFormSectionList from "src/app/shared/FeedFormSectionList.svelte"
   import FeedFormSectionDVM from "src/app/shared/FeedFormSectionDVM.svelte"
+  import FeedFormSaveAsList from "src/app/shared/FeedFormSaveAsList.svelte"
+  import {isTopicFeed, isPeopleFeed, isMentionFeed} from "src/domain"
 
   export let feed
   export let onChange
-  export let saveAsList: number[]
 
   const addFeed = newFeed => onChange([...feed, newFeed])
 
   const onSubFeedChange = (i, newFeed) => onChange(feed.toSpliced(i, 1, newFeed))
 
-  const onSubFeedRemove = i => {
-    onChange(feed.toSpliced(i, 1))
-    saveAsList = without([i], saveAsList).map(j => (j > i ? j - 1 : j))
-  }
-
-  const toggleSaveAsList = i => {
-    saveAsList = saveAsList.includes(i) ? without([i], saveAsList) : saveAsList.concat(i)
-  }
-
-  const isTopicFeed = f => isTagFeed(f) && f[1] === "#t"
-
-  const isMentionFeed = f => isTagFeed(f) && f[1] === "#p"
-
-  const isPeopleFeed = f => isAuthorFeed(f) || isScopeFeed(f)
+  const onSubFeedRemove = i => onChange(feed.toSpliced(i, 1))
 
   const openMenu = () => {
     menuIsOpen = true
@@ -108,13 +96,7 @@
           {/if}
         </FlexColumn>
         {#if isAuthorFeed(subFeed) || isRelayFeed(subFeed) || isTopicFeed(subFeed) || isMentionFeed(subFeed)}
-          <div class="flex items-center gap-8">
-            <div class="flex items-center gap-2">
-              <Toggle value={saveAsList.includes(idx)} on:change={() => toggleSaveAsList(idx)} />
-              <p class="staatliches">Save as list</p>
-            </div>
-            <Input class="flex-grow" />
-          </div>
+          <FeedFormSaveAsList feed={subFeed} />
         {/if}
       </FlexColumn>
       {#if i > 0}

@@ -64,7 +64,7 @@ import {
   FEED,
   decodeAddress,
   Repository,
-  Relay,
+  Relay as LocalRelay,
   Router,
   Tags,
   createEvent,
@@ -173,7 +173,7 @@ export const channels = new Collection<Channel>("id")
 
 export const repository = new Repository({throttle: 300})
 
-export const relay = new Relay(repository)
+export const relay = new LocalRelay(repository)
 
 export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),

@@ -1,7 +1,13 @@
 import {fromPairs, randomId} from "@welshman/lib"
 import {FEED, Tags, getAddress} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
-import {makeIntersectionFeed, hasSubFeeds} from "@welshman/feeds"
+import {
+  makeIntersectionFeed,
+  hasSubFeeds,
+  isTagFeed,
+  isAuthorFeed,
+  isScopeFeed,
+} from "@welshman/feeds"
 import type {Feed as IFeed} from "@welshman/feeds"
 import {SearchHelper} from "src/util/misc"
 import {tryJson} from "src/util/misc"
@@ -61,3 +67,9 @@ export class FeedSearch extends SearchHelper<Feed, string> {
   display = (address: string) =>
     displayFeed(this.options.find(feed => this.getValue(feed) === address))
 }
+
+export const isTopicFeed = f => isTagFeed(f) && f[1] === "#t"
+
+export const isMentionFeed = f => isTagFeed(f) && f[1] === "#p"
+
+export const isPeopleFeed = f => isAuthorFeed(f) || isScopeFeed(f)

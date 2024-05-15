@@ -90,7 +90,7 @@ export const getStaleAddrs = (addrs: string[]) => {
   return Array.from(stale)
 }
 
-export const loadGroups = async (rawAddrs: string[], relays: string[] = []) => {
+export const loadGroups = async (rawAddrs: string[], explicitRelays: string[] = []) => {
   const addrs = getStaleAddrs(rawAddrs)
   const authors = addrs.map(a => decodeAddress(a).pubkey)
   const identifiers = addrs.map(a => decodeAddress(a).identifier)
@@ -98,7 +98,9 @@ export const loadGroups = async (rawAddrs: string[], relays: string[] = []) => {
   if (addrs.length > 0) {
     const filters = [{kinds: [34550, 35834], authors, "#d": identifiers}]
     const relays = forcePlatformRelays(
-      hints.merge([hints.product(addrs, relays), hints.WithinMultipleContexts(addrs)]).getUrls(),
+      hints
+        .merge([hints.product(addrs, explicitRelays), hints.WithinMultipleContexts(addrs)])
+        .getUrls(),
     )
 
     return load({relays, filters, skipCache: true})

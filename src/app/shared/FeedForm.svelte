@@ -12,7 +12,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
-  import {makeFeed, createFeed, editFeed, displayFeed} from "src/domain"
+  import {makeFeed, createFeed, editFeed, displayFeed, isTopicFeed, isMentionFeed} from "src/domain"
   import {publishDeletionForEvent, createAndPublish, mention, hints} from "src/engine"
 
   export let feed
@@ -20,10 +20,6 @@
   export let apply = null
   export let showSave = false
   export let showDelete = false
-
-  const isTopicFeed = f => isTagFeed(f) && f[1] === "#t"
-
-  const isMentionFeed = f => isTagFeed(f) && f[1] === "#p"
 
   const openSave = () => {
     saveIsOpen = true
@@ -67,42 +63,6 @@
 
   const saveFeed = async () => {
     const relays = hints.WriteRelays().getUrls()
-
-    // Create our lists
-    const addresses: string[] = []
-    await Promise.all(
-      saveAsList.map(async i => {
-        const subFeed = draft.definition[i]
-
-        let template
-        if (isAuthorFeed(subFeed)) {
-          template = {kind: NAMED_PEOPLE, tags: subFeed.slice(1).map(mention)}
-        } else if (isMentionFeed(subFeed)) {
-          template = {kind: NAMED_PEOPLE, tags: subFeed.slice(2).map(mention)}
-        } else if (isRelayFeed(subFeed)) {
-          template = {kind: NAMED_RELAYS, tags: subFeed.slice(1).map(url => ["r", url])}
-        } else if (isTopicFeed(subFeed)) {
-          template = {
-            kind: NAMED_TOPICS,
-            tags: subFeed.slice(1).map(topic => ["t", topic]),
-          }
-        }
-
-        if (template) {
-          const pub = await createAndPublish({...template, relays})
-
-          addresses.push(getAddress(pub.request.event))
-        }
-      }),
-    )
-
-    // Swap out various filters and use the new lists instead
-    if (addresses.length > 0) {
-      draft.definition = draft.definition
-        .filter((f, i) => !saveAsList.includes(i))
-        .concat([makeListFeed({addresses})])
-    }
-
     const template = draft.event ? editFeed(draft) : createFeed(draft)
     const pub = await createAndPublish({...template, relays})
 
@@ -119,12 +79,11 @@
   let deleteIsOpen = false
   let saveIsOpen = showSave
   let listDeleteIsOpen = false
-  let saveAsList = []
 
   $: draft = shouldClone ? makeFeed({definition: feed.definition}) : feed
 </script>
 
-<FeedField bind:feed={feed.definition} bind:saveAsList />
+<FeedField bind:feed={feed.definition} />
 
 {#if !saveIsOpen}
   <Card class="flex flex-col justify-between sm:flex-row">
@@ -156,11 +115,6 @@
       <Field label="Feed Description">
         <Textarea bind:value={draft.description} />
       </Field>
-      {#if saveAsList.length > 0}
-        <p class="text-neutral-500">
-          {quantify(saveAsList.length, "new list")} will be created based on the filters you've selected.
-        </p>
-      {/if}
     </FlexColumn>
     {#if !showSave}
       <div class="absolute right-2 top-2 h-4 w-4 cursor-pointer" on:click={closeSave}>

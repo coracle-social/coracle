@@ -26,7 +26,6 @@
   import FeedFormFilters from "src/app/shared/FeedFormFilters.svelte"
 
   export let feed
-  export let saveAsList
 
   enum FormType {
     Advanced = "advanced",
@@ -185,7 +184,7 @@
     {#if formType === FormType.Advanced}
       <FeedFormAdvanced {feed} onChange={onFeedChange} />
     {:else}
-      <FeedFormFilters {feed} onChange={onFeedChange} bind:saveAsList />
+      <FeedFormFilters {feed} onChange={onFeedChange} />
     {/if}
   </FlexColumn>
 </FlexColumn>

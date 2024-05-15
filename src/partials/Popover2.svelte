@@ -34,6 +34,8 @@
   }
 
   onMount(() => {
+    adjustHeight()
+
     const interval = setInterval(adjustHeight, 300)
 
     return () => {

@@ -58,22 +58,6 @@ export class FeedLoader {
   isEventMuted = isEventMuted.get()
 
   constructor(readonly opts: FeedOpts) {
-    const onEvent = cb => batch(300, async events => {
-      if (this.controller.signal.aborted) {
-        return
-      }
-
-      const keep = this.discardEvents(events)
-
-      if (this.opts.shouldLoadParents) {
-        this.loadParents(keep)
-      }
-
-      const ok = this.deferOrphans(keep)
-
-      cb(ok)
-    })
-
     function* getRequestItems({relays, filters}) {
       // Default to note kinds
       filters = filters?.map(filter => ({kinds: noteKinds, ...filter})) || []
@@ -107,26 +91,28 @@ export class FeedLoader {
     // Use a custom feed loader so we can intercept the filters and infer relays
     this.feedLoader = new CoreFeedLoader({
       ...baseFeedLoader.options,
-      request: async ({relays, filters}) => {
+      request: async ({relays, filters, onEvent}) => {
         const tracker = new Tracker()
         const signal = this.controller.signal
 
         await Promise.all(
           Array.from(getRequestItems({relays, filters})).map(opts =>
-            load({...opts, onEvent: onEvent(this.appendToFeed), tracker, signal}),
+            load({...opts, onEvent, tracker, signal}),
           ),
         )
       },
     })
 
     if (opts.shouldListen && this.feedLoader.compiler.canCompile(opts.feed)) {
+      console.log("listen")
       this.feedLoader.compiler.compile(opts.feed).then(requests => {
         const tracker = new Tracker()
         const signal = this.controller.signal
+        const onEvent = this.onEvent(this.prependToFeed)
 
         for (const {relays, filters} of requests) {
           for (const opts of Array.from(getRequestItems({relays, filters}))) {
-            subscribe({...opts, onEvent: onEvent(this.prependToFeed), tracker, signal})
+            subscribe({...opts, onEvent, tracker, signal})
           }
         }
       })
@@ -137,6 +123,7 @@ export class FeedLoader {
 
   start = () => {
     this.loader = this.feedLoader.getLoader(this.opts.feed, {
+      onEvent: this.onEvent(this.appendToFeed),
       onExhausted: () => {
         this.done.set(true)
       },
@@ -152,6 +139,23 @@ export class FeedLoader {
   load = (limit: number) => this.loader.then(loader => loader(limit))
 
   // Event selection, deferral, and parent loading
+
+  onEvent = cb =>
+    batch(300, async events => {
+      if (this.controller.signal.aborted) {
+        return
+      }
+
+      const keep = this.discardEvents(events)
+
+      if (this.opts.shouldLoadParents) {
+        this.loadParents(keep)
+      }
+
+      const ok = this.deferOrphans(keep)
+
+      cb(ok)
+    })
 
   discardEvents = events => {
     let strict = true

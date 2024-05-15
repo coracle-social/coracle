@@ -2,7 +2,6 @@
   import {identity} from "@welshman/lib"
   import {Tags, NAMED_PEOPLE, NAMED_RELAYS, NAMED_TOPICS} from "@welshman/util"
   import {showInfo} from "src/partials/Toast.svelte"
-  import Subheading from "src/partials/Subheading.svelte"
   import Field from "src/partials/Field.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -24,6 +23,7 @@
 
   export let list
   export let exit
+  export let hide = []
 
   const submit = async () => {
     const relays = hints.WriteRelays().getUrls()
@@ -60,7 +60,6 @@
 
 <form on:submit|preventDefault={submit}>
   <FlexColumn>
-    <Subheading class="text-center">Manage list</Subheading>
     <Field label="Name">
       <Input bind:value={list.title} placeholder="My list" />
       <p slot="info">Lists are identified by their name, so this has to be unique.</p>
@@ -69,49 +68,53 @@
       <Input bind:value={list.description} placeholder="About my list" />
       <p slot="info">A brief description of what is in this list.</p>
     </Field>
-    <Field label="List type">
-      <SearchSelect search={kindsHelper.search} value={list.kind} onChange={onKindChange}>
-        <div slot="item" let:item>{kindsHelper.display(item)}</div>
-      </SearchSelect>
-    </Field>
-    <Field label="List contents">
-      {#if list.kind === NAMED_PEOPLE}
-        <SearchSelect
-          multiple
-          value={Tags.wrap(list.tags).whereKey("p").values().valueOf()}
-          search={$searchPubkeys}
-          onChange={onPubkeysChange}>
-          <span slot="item" let:item let:context>
-            {#if context === "value"}
-              <Anchor modal href={router.at("people").of(item).toString()}>
-                {displayPubkey(item)}
-              </Anchor>
-            {:else}
-              <PersonBadge inert pubkey={item} />
-            {/if}
-          </span>
+    {#if !hide.includes("type")}
+      <Field label="List type">
+        <SearchSelect search={kindsHelper.search} value={list.kind} onChange={onKindChange}>
+          <div slot="item" let:item>{kindsHelper.display(item)}</div>
         </SearchSelect>
-      {:else if list.kind === NAMED_RELAYS}
-        <SearchSelect
-          multiple
-          value={Tags.wrap(list.tags).whereKey("r").values().valueOf()}
-          search={$searchRelayUrls}
-          termToItem={identity}
-          onChange={onRelaysChange}>
-          <span slot="item" let:item>{displayRelayUrl(item)}</span>
-        </SearchSelect>
-      {:else if list.kind === NAMED_TOPICS}
-        <SearchSelect
-          multiple
-          value={Tags.wrap(list.tags).whereKey("t").values().valueOf()}
-          search={$searchTopicNames}
-          termToItem={identity}
-          onChange={onTopicsChange}>
-          <span slot="item" let:item>#{item}</span>
-        </SearchSelect>
-      {:else}
-        <p>Sorry, editing kind ${list.kind} lists isn't currently supported.</p>{/if}
-    </Field>
+      </Field>
+    {/if}
+    {#if !hide.includes("tags")}
+      <Field label="List contents">
+        {#if list.kind === NAMED_PEOPLE}
+          <SearchSelect
+            multiple
+            value={Tags.wrap(list.tags).whereKey("p").values().valueOf()}
+            search={$searchPubkeys}
+            onChange={onPubkeysChange}>
+            <span slot="item" let:item let:context>
+              {#if context === "value"}
+                <Anchor modal href={router.at("people").of(item).toString()}>
+                  {displayPubkey(item)}
+                </Anchor>
+              {:else}
+                <PersonBadge inert pubkey={item} />
+              {/if}
+            </span>
+          </SearchSelect>
+        {:else if list.kind === NAMED_RELAYS}
+          <SearchSelect
+            multiple
+            value={Tags.wrap(list.tags).whereKey("r").values().valueOf()}
+            search={$searchRelayUrls}
+            termToItem={identity}
+            onChange={onRelaysChange}>
+            <span slot="item" let:item>{displayRelayUrl(item)}</span>
+          </SearchSelect>
+        {:else if list.kind === NAMED_TOPICS}
+          <SearchSelect
+            multiple
+            value={Tags.wrap(list.tags).whereKey("t").values().valueOf()}
+            search={$searchTopicNames}
+            termToItem={identity}
+            onChange={onTopicsChange}>
+            <span slot="item" let:item>#{item}</span>
+          </SearchSelect>
+        {:else}
+          <p>Sorry, editing kind ${list.kind} lists isn't currently supported.</p>{/if}
+      </Field>
+    {/if}
     <div class="flex justify-between">
       <Anchor button on:click={exit}>Discard</Anchor>
       <Anchor button accent tag="button" type="submit">Save</Anchor>
