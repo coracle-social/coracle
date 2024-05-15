@@ -34,6 +34,7 @@ import {appDataKeys} from "src/util/nostr"
 import {getNip04, getNip44, getNip59} from "src/engine/utils"
 import {updateSession, setSession} from "src/engine/commands"
 import {
+  relay,
   repository,
   channels,
   getSession,
@@ -55,20 +56,40 @@ import {
 import type {Channel} from "src/engine/model"
 import {GroupAccess, RelayMode} from "src/engine/model"
 
-// Save all events, including wrapped, to our repository
+// Synchronize repository with projections. All events should be published to the
+// repository, and when accepted, be propagated to projections. This avoids processing
+// the same event multiple times, since repository deduplicates
 
-projections.addGlobalHandler(e => {
-  if (isGiftWrap(e)) {
-    const sk = getRecipientKey(e)
+repository.on("event", (event: TrustedEvent) => projections.push(event))
+
+// Unwrap gift wraps and send them back to our local relay. They'll then get pushed
+// back onto projections if they haven't been seen before
+
+projections.addGlobalHandler((event: TrustedEvent) => {
+  if (isGiftWrap(event)) {
+    const session = getSession(Tags.fromEvent(event).get("p")?.value())
+
+    if (session) {
+      const canDecrypt =
+        (event.kind === 1059 && getNip44(session).isEnabled()) ||
+        (event.kind === 1060 && getNip04(session).isEnabled())
+
+      if (canDecrypt) {
+        getNip59(session).withUnwrappedEvent(event, session.privkey, rumor => {
+          tracker.copy(event.id, rumor.id)
+          relay.send('EVENT', rumor)
+        })
+      }
+    }
+
+    const sk = getRecipientKey(event)
 
     if (sk) {
-      nip59.get().withUnwrappedEvent(e, sk, rumor => {
-        tracker.copy(e.id, rumor.id)
-        projections.push(rumor)
+      nip59.get().withUnwrappedEvent(event, sk, rumor => {
+        tracker.copy(event.id, rumor.id)
+        relay.send('EVENT', rumor)
       })
     }
-  } else {
-    repository.publish(e)
   }
 })
 
@@ -130,6 +151,7 @@ projections.addHandler(24, (e: TrustedEvent) => {
 
     // Load the group's metadata and posts
     load({
+      skipCache: true,
       relays: withFallbacks(relays),
       filters: [
         ...getIdFilters([address]),
@@ -398,24 +420,6 @@ projections.addHandler(
     })
   }),
 )
-
-const handleWrappedEvent = getEncryption => wrap => {
-  const session = getSession(Tags.fromEvent(wrap).get("p")?.value())
-
-  if (!session) {
-    return
-  }
-
-  if (getEncryption(session).isEnabled()) {
-    getNip59(session).withUnwrappedEvent(wrap, session.privkey, rumor => {
-      tracker.copy(wrap.id, rumor.id)
-      projections.push(rumor)
-    })
-  }
-}
-
-projections.addHandler(1059, handleWrappedEvent(getNip44))
-projections.addHandler(1060, handleWrappedEvent(getNip04))
 
 projections.addHandler(1, (e: TrustedEvent) => {
   const tagTopics = Tags.fromEvent(e).topics().valueOf()

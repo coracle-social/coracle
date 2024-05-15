@@ -8,8 +8,6 @@
   import EventDetail from "src/app/views/EventDetail.svelte"
 
   export let entity, type, data, relays
-
-  console.log(entity, type, data, relays)
 </script>
 
 {#if type === "nevent"}

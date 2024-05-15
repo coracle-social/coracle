@@ -10,7 +10,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {router} from "src/app/util/router"
-  import {projections} from "src/engine"
+  import {repository, projections} from "src/engine"
 
   const setFile = e => {
     file = e.target.files[0]
@@ -36,7 +36,7 @@
         const newEvents = jsonl.split("\n").map(l => JSON.parse(l)) as TrustedEvent[]
 
         for (const event of newEvents) {
-          projections.push(event)
+          repository.publish(event)
         }
 
         while (projections.buffer.length > 0) {

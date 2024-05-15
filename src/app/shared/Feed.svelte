@@ -85,7 +85,10 @@
   onMount(() => {
     const scroller = createScroller(loadMore, {element})
 
-    return () => scroller.stop()
+    return () => {
+      loader.stop()
+      scroller.stop()
+    }
   })
 </script>
 

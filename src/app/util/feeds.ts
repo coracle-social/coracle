@@ -27,6 +27,7 @@ import {
   forcePlatformRelaySelections,
   addRepostFilters,
   getFilterSelections,
+  subscribe,
   tracker,
   load,
 } from "src/engine"
@@ -57,68 +58,85 @@ export class FeedLoader {
   isEventMuted = isEventMuted.get()
 
   constructor(readonly opts: FeedOpts) {
+    const onEvent = cb => batch(300, async events => {
+      if (this.controller.signal.aborted) {
+        return
+      }
+
+      const keep = this.discardEvents(events)
+
+      if (this.opts.shouldLoadParents) {
+        this.loadParents(keep)
+      }
+
+      const ok = this.deferOrphans(keep)
+
+      cb(ok)
+    })
+
+    function* getRequestItems({relays, filters}) {
+      // Default to note kinds
+      filters = filters?.map(filter => ({kinds: noteKinds, ...filter})) || []
+
+      // Add reposts if we don't have any authors specified
+      if (opts.includeReposts && !filters.some(f => f.authors?.length > 0)) {
+        filters = addRepostFilters(filters)
+      }
+
+      // Use relays specified in feeds
+      if (relays?.length > 0) {
+        yield {filters, relays}
+      } else {
+        if (!opts.skipCache) {
+          yield {filters, relays: [LOCAL_RELAY_URL]}
+        }
+
+        if (!opts.skipNetwork) {
+          let selections = getFilterSelections(filters)
+
+          if (!opts.skipPlatform) {
+            selections = forcePlatformRelaySelections(selections)
+          }
+
+          for (const {relay, filters} of selections) {
+            yield {filters, relays: [relay]}
+          }
+        }
+      }
+    }
     // Use a custom feed loader so we can intercept the filters and infer relays
     this.feedLoader = new CoreFeedLoader({
       ...baseFeedLoader.options,
-      request: async ({relays, filters, onEvent}) => {
+      request: async ({relays, filters}) => {
         const tracker = new Tracker()
         const signal = this.controller.signal
 
-        // Default to note kinds
-        filters = filters?.map(filter => ({kinds: noteKinds, ...filter})) || []
-
-        // Add reposts if we don't have any authors specified
-        if (this.opts.includeReposts && !filters.some(f => f.authors?.length > 0)) {
-          filters = addRepostFilters(filters)
-        }
-
-        // Use relays specified in feeds
-        if (relays?.length > 0) {
-          await load({filters, relays, tracker, onEvent, signal})
-        } else {
-          const promises = []
-
-          if (!this.opts.skipCache) {
-            promises.push(load({filters, relays: [LOCAL_RELAY_URL], tracker, onEvent, signal}))
-          }
-
-          if (!this.opts.skipNetwork) {
-            let selections = getFilterSelections(filters)
-
-            if (!this.opts.skipPlatform) {
-              selections = forcePlatformRelaySelections(selections)
-            }
-
-            for (const {relay, filters} of selections) {
-              promises.push(load({filters, relays: [relay], tracker, onEvent, signal}))
-            }
-          }
-
-          await Promise.all(promises)
-        }
+        await Promise.all(
+          Array.from(getRequestItems({relays, filters})).map(opts =>
+            load({...opts, onEvent: onEvent(this.appendToFeed), tracker, signal}),
+          ),
+        )
       },
     })
+
+    if (opts.shouldListen && this.feedLoader.compiler.canCompile(opts.feed)) {
+      this.feedLoader.compiler.compile(opts.feed).then(requests => {
+        const tracker = new Tracker()
+        const signal = this.controller.signal
+
+        for (const {relays, filters} of requests) {
+          for (const opts of Array.from(getRequestItems({relays, filters}))) {
+            subscribe({...opts, onEvent: onEvent(this.prependToFeed), tracker, signal})
+          }
+        }
+      })
+    }
   }
 
   // Public api
 
   start = () => {
     this.loader = this.feedLoader.getLoader(this.opts.feed, {
-      onEvent: batch(300, async events => {
-        if (this.controller.signal.aborted) {
-          return
-        }
-
-        const keep = this.discardEvents(events)
-
-        if (this.opts.shouldLoadParents) {
-          this.loadParents(keep)
-        }
-
-        const ok = this.deferOrphans(keep)
-
-        this.addToFeed(ok)
-      }),
       onExhausted: () => {
         this.done.set(true)
       },
@@ -231,7 +249,7 @@ export class FeedLoader {
 
     setTimeout(() => {
       if (!signal.aborted) {
-        this.addToFeed(defer)
+        this.appendToFeed(defer)
       }
     }, 3000)
 
@@ -240,8 +258,12 @@ export class FeedLoader {
 
   // Feed building
 
-  addToFeed = (notes: TrustedEvent[]) => {
+  appendToFeed = (notes: TrustedEvent[]) => {
     this.notes.update($notes => uniqBy(prop("id"), [...$notes, ...this.buildFeedChunk(notes)]))
+  }
+
+  prependToFeed = (notes: TrustedEvent[]) => {
+    this.notes.update($notes => uniqBy(prop("id"), [...this.buildFeedChunk(notes), ...$notes]))
   }
 
   buildFeedChunk = (notes: TrustedEvent[]) => {

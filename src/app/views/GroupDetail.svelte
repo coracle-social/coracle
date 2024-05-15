@@ -57,7 +57,7 @@
   $: key = $group && $isGroupMember
 
   $: {
-    if ($group && $isGroupMember) {
+    if (key) {
       loadGroupMessages([address])
       loadPubkeys($group.members || [])
     }

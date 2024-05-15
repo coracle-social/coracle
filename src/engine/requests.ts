@@ -96,12 +96,12 @@ export const loadGroups = async (rawAddrs: string[], relays: string[] = []) => {
   const identifiers = addrs.map(a => decodeAddress(a).identifier)
 
   if (addrs.length > 0) {
-    return load({
-      relays: forcePlatformRelays(
-        hints.merge([hints.product(addrs, relays), hints.WithinMultipleContexts(addrs)]).getUrls(),
-      ),
-      filters: [{kinds: [34550, 35834], authors, "#d": identifiers}],
-    })
+    const filters = [{kinds: [34550, 35834], authors, "#d": identifiers}]
+    const relays = forcePlatformRelays(
+      hints.merge([hints.product(addrs, relays), hints.WithinMultipleContexts(addrs)]).getUrls(),
+    )
+
+    return load({relays, filters, skipCache: true})
   }
 }
 
@@ -113,9 +113,10 @@ export const loadGroupMessages = (addresses?: string[]) => {
   for (const address of groupAddrs) {
     const {admins, recipients, relays, since} = getGroupReqInfo(address)
     const pubkeys = uniq([pubkey.get(), ...admins, ...recipients])
+    const filters = [{kinds: giftWrapKinds, "#p": pubkeys, since}]
 
     if (pubkeys.length > 0) {
-      promises.push(load({relays, filters: [{kinds: giftWrapKinds, "#p": pubkeys, since}]}))
+      promises.push(load({relays, filters, skipCache: true}))
     }
   }
 
@@ -123,8 +124,9 @@ export const loadGroupMessages = (addresses?: string[]) => {
     const {relays, ...info} = getCommunityReqInfo(address)
     const kinds = [...noteKinds, ...repostKinds]
     const since = Math.max(now() - seconds(7, "day"), info.since)
+    const filters = [{kinds, "#a": [address], since}]
 
-    promises.push(load({relays, filters: [{kinds, "#a": [address], since}]}))
+    promises.push(load({relays, filters, skipCache: true}))
   }
 
   updateCurrentSession($session => {
@@ -206,6 +208,7 @@ export const createPeopleLoader = ({
 
         load({
           onEvent,
+          skipCache: true,
           relays: searchableRelays.get(),
           filters: [{kinds: [0], search: term, limit: 100}],
           onComplete: async () => {
@@ -224,6 +227,7 @@ export const loadDeletes = () => {
   const since = Math.max(0, deletes_last_synced - seconds(6, "hour"))
 
   return load({
+    skipCache: true,
     relays: hints.User().getUrls(),
     filters: [{kinds: [5], authors: [pubkey], since}],
   })
@@ -234,6 +238,7 @@ export const loadSeen = () => {
   const since = Math.max(0, deletes_last_synced - seconds(6, "hour"))
 
   return load({
+    skipCache: true,
     relays: hints.WriteRelays().getUrls(),
     filters: [{kinds: [15], authors: [pubkey], since}],
   })
@@ -265,7 +270,7 @@ export const loadGiftWrap = () => {
 export const feedLoader = new FeedLoader<TrustedEvent>({
   request: async ({relays, filters, onEvent}) => {
     if (relays.length > 0) {
-      await load({filters, relays, onEvent})
+      await load({filters, relays, onEvent, skipCache: true})
     } else {
       await Promise.all(
         getFilterSelections(filters).map(({relay, filters}) =>
@@ -381,7 +386,7 @@ const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
     const relays = hints.merge(eventsWithParent.map(hints.EventParents)).getUrls()
     const ids = eventsWithParent.flatMap(e => Tags.fromEvent(e).replies().values().valueOf())
 
-    load({relays, filters: getIdFilters(ids)})
+    load({relays, filters: getIdFilters(ids), skipCache: true})
   }
 })
 
@@ -488,6 +493,7 @@ export const loadHandlers = () => {
   const $follows = follows.get()
 
   load({
+    skipCache: true,
     relays: hints.ReadRelays().getUrls(),
     filters: [
       {kinds: [HANDLER_RECOMMENDATION], authors: Array.from($follows)},

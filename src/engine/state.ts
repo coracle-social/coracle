@@ -64,6 +64,7 @@ import {
   FEED,
   decodeAddress,
   Repository,
+  Relay,
   Router,
   Tags,
   createEvent,
@@ -171,6 +172,8 @@ export const topics = new Collection<Topic>("name")
 export const channels = new Collection<Channel>("id")
 
 export const repository = new Repository({throttle: 300})
+
+export const relay = new Relay(repository)
 
 export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),
@@ -1330,7 +1333,7 @@ export const getExecutor = (urls: string[]) => {
   }
 
   if (localUrls.length > 0) {
-    target = new Multi([target, new Local(repository)])
+    target = new Multi([target, new Local(relay)])
   }
 
   return new Executor(target)
@@ -1383,10 +1386,7 @@ export const subscribe = (request: MySubscribeRequest) => {
   const sub = baseSubscribe(request)
 
   sub.emitter.on("event", (url: string, event: TrustedEvent) => {
-    if (!repository.getEvent(event.id)) {
-      projections.push(event)
-    }
-
+    repository.publish(event)
     request.onEvent?.(event)
   })
 
@@ -1427,12 +1427,13 @@ export const loadOne = (request: MySubscribeRequest) =>
   })
 
 export const publish = (request: PublishRequest) => {
-  const pub = basePublish(request)
+  // Make sure it gets published to our repository as well. We do it via our local
+  // relay rather than directly so that listening subscriptions get notified.
+  request.relays = uniq(request.relays.concat(LOCAL_RELAY_URL))
 
   logger.info(`Publishing event`, request)
 
-  // Make sure the event gets into projections asap
-  projections.push(request.event)
+  const pub = basePublish(request)
 
   // Listen to updates and update our publish queue
   if (isGiftWrap(request.event) || request.event.pubkey === pubkey.get()) {

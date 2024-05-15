@@ -89,7 +89,7 @@
     }
 
     const template = createEvent(1, {content, tags})
-    const pubs = publishToZeroOrMoreGroups(defaultGroups, template, opts)
+    const pubs = await publishToZeroOrMoreGroups(defaultGroups, template, opts)
 
     showPublishInfo(pubs[0])
     opts = {...defaultOpts}
